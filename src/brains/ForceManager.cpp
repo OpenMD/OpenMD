@@ -47,6 +47,7 @@
  * @version 1.0
  */
 
+
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #define __OPENMD_C
@@ -62,26 +63,252 @@ using namespace std;
 namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : info_(info) {
-
+    forceField_ = info_->getForceField();
     fDecomp_ = new ForceMatrixDecomposition(info_);
   }
-  
-  void ForceManager::calcForces() {
+
+  /**
+   * setupCutoffs
+   *
+   * Sets the values of cutoffRadius, cutoffMethod, and cutoffPolicy
+   *
+   * cutoffRadius : realType
+   *  If the cutoffRadius was explicitly set, use that value.
+   *  If the cutoffRadius was not explicitly set:
+   *      Are there electrostatic atoms?  Use 12.0 Angstroms.
+   *      No electrostatic atoms?  Poll the atom types present in the
+   *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
+   *      Use the maximum suggested value that was found.
+   *
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, SHIFTED_POTENTIAL)
+   *      If cutoffMethod was explicitly set, use that choice.
+   *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
+   *
+   * cutoffPolicy : (one of MIX, MAX, TRADITIONAL)
+   *      If cutoffPolicy was explicitly set, use that choice.
+   *      If cutoffPolicy was not explicitly set, use TRADITIONAL
+   */
+  void ForceManager::setupCutoffs() {
     
+    Globals* simParams_ = info_->getSimParams();
+    ForceFieldOptions& forceFieldOptions_ = forceField_->getForceFieldOptions();
+    
+    if (simParams_->haveCutoffRadius()) {
+      rCut_ = simParams_->getCutoffRadius();
+    } else {      
+      if (info_->usesElectrostaticAtoms()) {
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs: No value was set for the cutoffRadius.\n"
+                "\tOpenMD will use a default value of 12.0 angstroms"
+                "\tfor the cutoffRadius.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
+        rCut_ = 12.0;
+      } else {
+        RealType thisCut;
+        set<AtomType*>::iterator i;
+        set<AtomType*> atomTypes;
+        atomTypes = info_->getSimulatedAtomTypes();        
+        for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+          thisCut = interactionMan_->getSuggestedCutoffRadius((*i));
+          rCut_ = max(thisCut, rCut_);
+        }
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs: No value was set for the cutoffRadius.\n"
+                "\tOpenMD will use %lf angstroms.\n",
+                rCut_);
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
+      }             
+    }
+
+    map<string, CutoffMethod> stringToCutoffMethod;
+    stringToCutoffMethod["HARD"] = HARD;
+    stringToCutoffMethod["SWITCHED"] = SWITCHED;
+    stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
+    stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
+  
+    if (simParams_->haveCutoffMethod()) {
+      string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
+      map<string, CutoffMethod>::iterator i;
+      i = stringToCutoffMethod.find(cutMeth);
+      if (i == stringToCutoffMethod.end()) {
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs: Could not find chosen cutoffMethod %s\n"
+                "\tShould be one of: "
+                "HARD, SWITCHED, SHIFTED_POTENTIAL, or SHIFTED_FORCE\n",
+                cutMeth.c_str());
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      } else {
+        cutoffMethod_ = i->second;
+      }
+    } else {
+      sprintf(painCave.errMsg,
+              "ForceManager::setupCutoffs: No value was set for the cutoffMethod.\n"
+              "\tOpenMD will use SHIFTED_FORCE.\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+      cutoffMethod_ = SHIFTED_FORCE;        
+    }
+
+    map<string, CutoffPolicy> stringToCutoffPolicy;
+    stringToCutoffPolicy["MIX"] = MIX;
+    stringToCutoffPolicy["MAX"] = MAX;
+    stringToCutoffPolicy["TRADITIONAL"] = TRADITIONAL;    
+
+    std::string cutPolicy;
+    if (forceFieldOptions_.haveCutoffPolicy()){
+      cutPolicy = forceFieldOptions_.getCutoffPolicy();
+    }else if (simParams_->haveCutoffPolicy()) {
+      cutPolicy = simParams_->getCutoffPolicy();
+    }
+
+    if (!cutPolicy.empty()){
+      toUpper(cutPolicy);
+      map<string, CutoffPolicy>::iterator i;
+      i = stringToCutoffPolicy.find(cutPolicy);
+
+      if (i == stringToCutoffPolicy.end()) {
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs: Could not find chosen cutoffPolicy %s\n"
+                "\tShould be one of: "
+                "MIX, MAX, or TRADITIONAL\n",
+                cutPolicy.c_str());
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      } else {
+        cutoffPolicy_ = i->second;
+      }
+    } else {
+      sprintf(painCave.errMsg,
+              "ForceManager::setupCutoffs: No value was set for the cutoffPolicy.\n"
+              "\tOpenMD will use TRADITIONAL.\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+      cutoffPolicy_ = TRADITIONAL;        
+    }
+  }
+
+  /**
+   * setupSwitching
+   *
+   * Sets the values of switchingRadius and 
+   *  If the switchingRadius was explicitly set, use that value (but check it)
+   *  If the switchingRadius was not explicitly set: use 0.85 * cutoffRadius_
+   */
+  void ForceManager::setupSwitching() {
+    Globals* simParams_ = info_->getSimParams();
+    
+    if (simParams_->haveSwitchingRadius()) {
+      rSwitch_ = simParams_->getSwitchingRadius();
+      if (rSwitch_ > rCut_) {        
+        sprintf(painCave.errMsg,
+                "ForceManager::setupSwitching: switchingRadius (%f) is larger than cutoffRadius(%f)\n",
+                rSwitch_, rCut_);
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
+    } else {      
+      rSwitch_ = 0.85 * rCut_;
+      sprintf(painCave.errMsg,
+              "ForceManager::setupSwitching: No value was set for the switchingRadius.\n"
+              "\tOpenMD will use a default value of 85 percent of the cutoffRadius.\n"
+              "\tswitchingRadius = %f. for this simulation\n", rSwitch_);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+    }           
+    
+    if (simParams_->haveSwitchingFunctionType()) {
+      string funcType = simParams_->getSwitchingFunctionType();
+      toUpper(funcType);
+      if (funcType == "CUBIC") {
+        sft_ = cubic;
+      } else {
+        if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
+          sft_ = fifth_order_poly;
+        } else {
+          // throw error        
+          sprintf( painCave.errMsg,
+                   "ForceManager::setupSwitching : Unknown switchingFunctionType. (Input file specified %s .)\n"
+                   "\tswitchingFunctionType must be one of: "
+                   "\"cubic\" or \"fifth_order_polynomial\".", 
+                   funcType.c_str() );
+          painCave.isFatal = 1;
+          painCave.severity = OPENMD_ERROR;
+          simError();
+        }           
+      }
+    }
+    switcher_->setSwitchType(sft_);
+    switcher_->setSwitch(rSwitch_, rCut_);
+  }
+  
+  void ForceManager::initialize() {
+
     if (!info_->isTopologyDone()) {
       info_->update();
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
-      swfun_ = interactionMan_->getSwitchingFunction();
-      info_->prepareTopology();
-      fDecomp_->distributeInitialData();
+
+      // We want to delay the cutoffs until after the interaction
+      // manager has set up the atom-atom interactions so that we can
+      // query them for suggested cutoff values
+
+      setupCutoffs();
+      setupSwitching();
+
+      info_->prepareTopology();      
     }
+
+    ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     
+    // Force fields can set options on how to scale van der Waals and electrostatic
+    // interactions for atoms connected via bonds, bends and torsions
+    // in this case the topological distance between atoms is:
+    // 0 = topologically unconnected
+    // 1 = bonded together 
+    // 2 = connected via a bend
+    // 3 = connected via a torsion
+    
+    vdwScale_.reserve(4);
+    fill(vdwScale_.begin(), vdwScale_.end(), 0.0);
+
+    electrostaticScale_.reserve(4);
+    fill(electrostaticScale_.begin(), electrostaticScale_.end(), 0.0);
+
+    vdwScale_[0] = 1.0;
+    vdwScale_[1] = fopts.getvdw12scale();
+    vdwScale_[2] = fopts.getvdw13scale();
+    vdwScale_[3] = fopts.getvdw14scale();
+    
+    electrostaticScale_[0] = 1.0;
+    electrostaticScale_[1] = fopts.getelectrostatic12scale();
+    electrostaticScale_[2] = fopts.getelectrostatic13scale();
+    electrostaticScale_[3] = fopts.getelectrostatic14scale();    
+    
+    fDecomp_->distributeInitialData();
+ 
+    initialized_ = true;
+
+  }
+
+  void ForceManager::calcForces() {
+    
+    if (!initialized_) initialize();
+
     preCalculation();   
     shortRangeInteractions();
     longRangeInteractions();
-    postCalculation();
-    
+    postCalculation();    
   }
   
   void ForceManager::preCalculation() {
@@ -270,7 +497,7 @@ namespace OpenMD {
     RealType rgrpsq, rgrp;
     RealType vij;
     Vector3d fij, fg;
-    pair<int, int> gtypes;
+    tuple3<RealType, RealType, RealType> cuts;
     RealType rCutSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
@@ -304,22 +531,25 @@ namespace OpenMD {
         
         cg1 = (*it).first;
         cg2 = (*it).second;
+        
+        cuts = fDecomp_->getGroupCutoffs(cg1, cg2);
 
-        gtypes = fDecomp_->getGroupTypes(cg1, cg2);
         d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
         curSnapshot->wrapVector(d_grp);        
         rgrpsq = d_grp.lengthSquare();
-        rCutSq = groupCutoffMap[gtypes].first;
+
+        rCutSq = cuts.second;
 
         if (rgrpsq < rCutSq) {
-          *(idat.rcut) = groupCutoffMap[gtypes].second;
+          *(idat.rcut) = cuts.first;
           if (iLoop == PAIR_LOOP) {
             vij *= 0.0;
             fij = V3Zero;
           }
           
-          in_switching_region = swfun_->getSwitch(rgrpsq, *(idat.sw), dswdr, 
-                                                  rgrp);               
+          in_switching_region = switcher_->getSwitch(rgrpsq, *(idat.sw), dswdr, 
+                                                     rgrp); 
+              
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 

@@ -66,7 +66,7 @@ namespace OpenMD {
   
   void VelocityVerletIntegrator::initialize(){
     
-    forceMan_->init();
+    forceMan_->initialize();
     
     // remove center of mass drift velocity (in case we passed in a
     // configuration that was drifting)

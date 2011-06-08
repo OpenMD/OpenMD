@@ -68,7 +68,7 @@ namespace OpenMD {
     vector<pair<int, int> >  buildNeighborList();
 
     // group bookkeeping
-    pair<int, int> getGroupTypes(int cg1, int cg2);
+    groupCutoffs getGroupCutoffs(int cg1, int cg2);
 
     // Group->atom bookkeeping
     vector<int> getAtomsInGroupRow(int cg1);
@@ -96,6 +96,8 @@ namespace OpenMD {
     InteractionData fillSkipData(int atom1, int atom2);
 
   private: 
+    void createGtypeCutoffMap();
+
     int nLocal_;
     int nGroups_;
     vector<int> identsLocal;
@@ -105,6 +107,8 @@ namespace OpenMD {
     vector<vector<int> > skipsForLocalAtom;
     vector<vector<int> > toposForLocalAtom;
     vector<vector<int> > topoDistLocal;
+    vector<RealType> groupCutoff;
+    vector<int> groupToGtype;
 
 #ifdef IS_MPI    
     DataStorage atomRowData;
@@ -150,6 +154,11 @@ namespace OpenMD {
 
     vector<int> cgRowToGlobal;
     vector<int> cgColToGlobal;
+
+    vector<RealType> groupCutoffRow;
+    vector<RealType> groupCutoffCol;
+    vector<int> groupColToGtype;
+    vector<int> groupRowToGtype;
 
     vector<vector<int> > cellListRow_;
     vector<vector<int> > cellListCol_;

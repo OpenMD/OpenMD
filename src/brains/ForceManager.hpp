@@ -52,6 +52,8 @@
 
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
+#include "nonbonded/Cutoffs.hpp"
+#include "nonbonded/SwitchingFunction.hpp"
 #include "nonbonded/InteractionManager.hpp"
 #include "parallel/ForceDecomposition.hpp"
 
@@ -62,41 +64,55 @@ using namespace std;
 namespace OpenMD {
   /**
    * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range
-   * interactions and long range interactions.
+   * ForceManager is responsible for calculating both the short range
+   * (bonded) interactions and long range (non-bonded) interactions.
    *
-   * @note the reason we delay some of the setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so
-   * why bother?
+   * @note the reason we delay some of the setup is that
+   * initialization must wait until after the force field has been
+   * parsed so that the atom types are known.
    */
   class ForceManager {
 
   public:
-    
     ForceManager(SimInfo * info);                          
     virtual ~ForceManager() {}
     virtual void calcForces();
-    virtual void init() {};
+    void initialize();
 
-  protected:
+  protected: 
+    bool initialized_; 
 
+    virtual void setupCutoffs();
+    virtual void setupSwitching();
     virtual void preCalculation();        
     virtual void shortRangeInteractions();
     virtual void longRangeInteractions();
     virtual void postCalculation();
- 
-    SimInfo * info_;        
+
+    SimInfo* info_;        
+    ForceField* forceField_;
+    InteractionManager* interactionMan_;
+    ForceDecomposition* fDecomp_;
+    SwitchingFunction* switcher_;
+
+    SwitchingFunctionType sft_;/**< Type of switching function in use */
+
+
+    RealType rCut_;            /**< cutoff radius for non-bonded interactions */
+    RealType rSwitch_;         /**< inner radius of switching function */
+    CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
+    CutoffPolicy cutoffPolicy_;/**< Cutoff Policy for non-bonded interactions */
+
     map<Bend*, BendDataSet> bendDataSets;
     map<Torsion*, TorsionDataSet> torsionDataSets;
     map<Inversion*, InversionDataSet> inversionDataSets;
+    vector<pair<int, int> > neighborList;
+
+    vector<RealType> vdwScale_;
+    vector<RealType> electrostaticScale_;
+
     Mat3x3d tau;
 
-    InteractionManager* interactionMan_;
-    ForceDecomposition* fDecomp_;
-    SwitchingFunction* swfun_;
-    vector<pair<int, int> > neighborList;
-    map< pair<int, int>, pair<RealType, RealType> > groupCutoffMap;    
   };
-  
 } 
 #endif //BRAINS_FORCEMANAGER_HPP

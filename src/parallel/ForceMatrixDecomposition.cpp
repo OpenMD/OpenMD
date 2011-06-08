@@ -225,9 +225,178 @@ namespace OpenMD {
           nTopos++;
         }
       }      
-    }
+    }    
+
   }
    
+  void ForceMatrixDecomposition::createGtypeCutoffMap() {
+
+    RealType tol = 1e-6;
+    RealType rc;
+    int atid;
+    set<AtomType*> atypes = info_->getSimulatedAtomTypes();
+    vector<RealType> atypeCutoff;
+    atypeCutoff.reserve( atypes.size() );
+
+    for (set<AtomType*>::iterator at = atypes.begin(); at != atypes.end(); ++at){
+      rc = interactionMan_->getSuggestedCutoffRadius(*at);
+      atid = (*at)->getIdent();
+      atypeCutoff[atid] = rc;
+    }
+
+    vector<RealType> gTypeCutoffs;
+
+    // first we do a single loop over the cutoff groups to find the
+    // largest cutoff for any atypes present in this group.
+#ifdef IS_MPI
+    vector<RealType> groupCutoffRow(nGroupsInRow_, 0.0);
+    for (int cg1 = 0; cg1 < nGroupsInRow_; cg1++) {
+      vector<int> atomListRow = getAtomsInGroupRow(cg1);
+      for (vector<int>::iterator ia = atomListRow.begin(); 
+           ia != atomListRow.end(); ++ia) {            
+        int atom1 = (*ia);
+        atid = identsRow[atom1];
+        if (atypeCutoff[atid] > groupCutoffRow[cg1]) {
+          groupCutoffRow[cg1] = atypeCutoff[atid];
+        }
+      }
+
+      bool gTypeFound = false;
+      for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
+        if (abs(groupCutoffRow[cg1] - gTypeCutoffs[gt]) < tol) {
+          groupRowToGtype[cg1] = gt;
+          gTypeFound = true;
+        } 
+      }
+      if (!gTypeFound) {
+        gTypeCutoffs.push_back( groupCutoffRow[cg1] );
+        groupRowToGtype[cg1] = gTypeCutoffs.size() - 1;
+      }
+      
+    }
+    vector<RealType> groupCutoffCol(nGroupsInCol_, 0.0);
+    for (int cg2 = 0; cg2 < nGroupsInCol_; cg2++) {
+      vector<int> atomListCol = getAtomsInGroupColumn(cg2);
+      for (vector<int>::iterator jb = atomListCol.begin(); 
+           jb != atomListCol.end(); ++jb) {            
+        int atom2 = (*jb);
+        atid = identsCol[atom2];
+        if (atypeCutoff[atid] > groupCutoffCol[cg2]) {
+          groupCutoffCol[cg2] = atypeCutoff[atid];
+        }
+      }
+      bool gTypeFound = false;
+      for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
+        if (abs(groupCutoffCol[cg2] - gTypeCutoffs[gt]) < tol) {
+          groupColToGtype[cg2] = gt;
+          gTypeFound = true;
+        } 
+      }
+      if (!gTypeFound) {
+        gTypeCutoffs.push_back( groupCutoffCol[cg2] );
+        groupColToGtype[cg2] = gTypeCutoffs.size() - 1;
+      }
+    }
+#else
+    vector<RealType> groupCutoff(nGroups_, 0.0);
+    for (int cg1 = 0; cg1 < nGroups_; cg1++) {
+      groupCutoff[cg1] = 0.0;
+      vector<int> atomList = getAtomsInGroupRow(cg1);
+      for (vector<int>::iterator ia = atomList.begin(); 
+           ia != atomList.end(); ++ia) {            
+        int atom1 = (*ia);
+        atid = identsLocal[atom1];
+        if (atypeCutoff[atid] > groupCutoff[cg1]) {
+          groupCutoff[cg1] = atypeCutoff[atid];
+        }
+      }
+
+      bool gTypeFound = false;
+      for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
+        if (abs(groupCutoff[cg1] - gTypeCutoffs[gt]) < tol) {
+          groupToGtype[cg1] = gt;
+          gTypeFound = true;
+        } 
+      }
+      if (!gTypeFound) {
+        gTypeCutoffs.push_back( groupCutoff[cg1] );
+        groupToGtype[cg1] = gTypeCutoffs.size() - 1;
+      }      
+    }
+#endif
+
+    // Now we find the maximum group cutoff value present in the simulation
+
+    vector<RealType>::iterator groupMaxLoc = max_element(gTypeCutoffs.begin(), gTypeCutoffs.end());
+    RealType groupMax = *groupMaxLoc;
+
+#ifdef IS_MPI
+    MPI::COMM_WORLD.Allreduce(&groupMax, &groupMax, 1, MPI::REALTYPE, MPI::MAX);
+#endif
+    
+    RealType tradRcut = groupMax;
+
+    for (int i = 0; i < gTypeCutoffs.size();  i++) {
+      for (int j = 0; j < gTypeCutoffs.size();  j++) {
+        
+        RealType thisRcut;
+        switch(cutoffPolicy_) {
+        case TRADITIONAL:
+          thisRcut = tradRcut;
+        case MIX:
+          thisRcut = 0.5 * (gTypeCutoffs[i] + gTypeCutoffs[j]);
+        case MAX:
+          thisRcut = max(gTypeCutoffs[i], gTypeCutoffs[j]);
+        default:
+          sprintf(painCave.errMsg,
+                  "ForceMatrixDecomposition::createGtypeCutoffMap " 
+                  "hit an unknown cutoff policy!\n");
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal = 1;
+          simError();               
+        }
+
+        pair<int,int> key = make_pair(i,j);
+        gTypeCutoffMap[key].first = thisRcut;
+
+        if (thisRcut > largestRcut_) largestRcut_ = thisRcut;
+
+        gTypeCutoffMap[key].second = thisRcut*thisRcut;
+        
+        gTypeCutoffMap[key].third = pow(thisRcut + skinThickness_, 2);
+
+        // sanity check
+        
+        if (userChoseCutoff_) {
+          if (abs(gTypeCutoffMap[key].first - userCutoff_) > 0.0001) {
+            sprintf(painCave.errMsg,
+                    "ForceMatrixDecomposition::createGtypeCutoffMap " 
+                    "user-specified rCut does not match computed group Cutoff\n");
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal = 1;
+            simError();            
+          }
+        }
+      }
+    }
+  }
+
+
+  groupCutoffs ForceMatrixDecomposition::getGroupCutoffs(int cg1, int cg2) {
+    int i, j;
+
+#ifdef IS_MPI
+    i = groupRowToGtype[cg1];
+    j = groupColToGtype[cg2];
+#else
+    i = groupToGtype[cg1];
+    j = groupToGtype[cg2];
+#endif
+    
+    return gTypeCutoffMap[make_pair(i,j)];
+  }
+
+
   void ForceMatrixDecomposition::zeroWorkArrays() {
 
     for (int j = 0; j < N_INTERACTION_FAMILIES; j++) {
@@ -765,6 +934,7 @@ namespace OpenMD {
   vector<pair<int, int> > ForceMatrixDecomposition::buildNeighborList() {
       
     vector<pair<int, int> > neighborList;
+    groupCutoffs cuts;
 #ifdef IS_MPI
     cellListRow_.clear();
     cellListCol_.clear();
@@ -772,10 +942,7 @@ namespace OpenMD {
     cellList_.clear();
 #endif
 
-    // dangerous to not do error checking.
-    RealType rCut_;
- 
-    RealType rList_ = (rCut_ + skinThickness_);
+    RealType rList_ = (largestRcut_ + skinThickness_);
     RealType rl2 = rList_ * rList_;
     Snapshot* snap_ = sman_->getCurrentSnapshot();
     Mat3x3d Hmat = snap_->getHmat();
@@ -898,7 +1065,8 @@ namespace OpenMD {
                 if (m2 != m1 || cgColToGlobal[(*j2)] < cgRowToGlobal[(*j1)]) {
                   dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
                   snap_->wrapVector(dr);
-                  if (dr.lengthSquare() < rl2) {
+                  cuts = getGroupCutoffs( (*j1), (*j2) );
+                  if (dr.lengthSquare() < cuts.third) {
                     neighborList.push_back(make_pair((*j1), (*j2)));
                   }
                 }
@@ -917,7 +1085,8 @@ namespace OpenMD {
                 if (m2 != m1 || (*j2) < (*j1)) {
                   dr = snap_->cgData.position[(*j2)] - snap_->cgData.position[(*j1)];
                   snap_->wrapVector(dr);
-                  if (dr.lengthSquare() < rl2) {
+                  cuts = getGroupCutoffs( (*j1), (*j2) );
+                  if (dr.lengthSquare() < cuts.third) {
                     neighborList.push_back(make_pair((*j1), (*j2)));
                   }
                 }

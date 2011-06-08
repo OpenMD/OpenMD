@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,69 +39,24 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef NONBONDED_INTERACTIONMANAGER_HPP
-#define NONBONDED_INTERACTIONMANAGER_HPP
-
-#include "brains/SimInfo.hpp"
-#include "types/AtomType.hpp"
-#include "nonbonded/LJ.hpp"
-#include "nonbonded/GB.hpp"
-#include "nonbonded/Sticky.hpp"
-#include "nonbonded/EAM.hpp"
-#include "nonbonded/SC.hpp"
-#include "nonbonded/Morse.hpp"
-#include "nonbonded/Electrostatic.hpp"
-#include "nonbonded/MAW.hpp"
-#include "nonbonded/SwitchingFunction.hpp"
-
-using namespace std;
+#ifndef NONBONDED_CUTOFFS_HPP
+#define NONBONDED_CUTOFFS_HPP
 
 namespace OpenMD {
 
-  /**
-   * @class InteractionManager InteractionManager is responsible for
-   * keeping track of the non-bonded interactions (C++)
-   */
-  class InteractionManager {
-
-  public:
-    InteractionManager();
-    ~InteractionManager();
-    void setSimInfo(SimInfo* info) {info_ = info;} 
-    void initialize();
-
-    // Fortran support routines
-
-    void doPrePair(InteractionData idat);
-    void doPreForce(SelfData sdat);
-    void doPair(InteractionData idat);    
-    void doSkipCorrection(InteractionData idat);
-    void doSelfCorrection(SelfData sdat);
-    RealType getSuggestedCutoffRadius(int *atid1);   
-    RealType getSuggestedCutoffRadius(AtomType *atype);
-    
-  private:
-    bool initialized_; 
-
-    void setupElectrostatics();
-
-    SimInfo* info_;
-    LJ* lj_;
-    GB* gb_;
-    Sticky* sticky_;
-    EAM* eam_;
-    SC* sc_;
-    Morse* morse_;
-    Electrostatic* electrostatic_;
-    MAW* maw_;
-    
-    map<int, AtomType*> typeMap_;
-    /**
-     * Each pair of atom types can have multiple interactions, so the 
-     * natural data structures are a map between the pair, and a set
-     * of non-bonded interactions.
-     */
-    map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;    
+  enum CutoffMethod {
+    HARD,
+    SWITCHED,
+    SHIFTED_POTENTIAL,
+    SHIFTED_FORCE
   };
+
+  enum CutoffPolicy {
+    MIX,
+    MAX,
+    TRADITIONAL
+  };
+
 }
+
 #endif

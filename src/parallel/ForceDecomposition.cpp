@@ -51,6 +51,7 @@ namespace OpenMD {
     sman_ = info_->getSnapshotManager();
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
+    userChoseCutoff_ = false;
 
     Globals* simParams_ = info_->getSimParams();    
   

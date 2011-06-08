@@ -45,10 +45,15 @@
 #include "brains/SimInfo.hpp"
 #include "brains/SnapshotManager.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "nonbonded/Cutoffs.hpp"
+#include "nonbonded/InteractionManager.hpp"
+#include "utils/Tuple.hpp"
 
 using namespace std;
 namespace OpenMD {
   
+  typedef tuple3<RealType, RealType, RealType> groupCutoffs;
+
   /**
    * @class ForceDecomposition 
    *
@@ -101,8 +106,12 @@ namespace OpenMD {
     virtual bool checkNeighborList();
     virtual vector<pair<int, int> >  buildNeighborList() = 0;
 
+    // how to handle cutoffs:
+    void setCutoffPolicy(CutoffPolicy cp) {cutoffPolicy_ = cp;}
+    void setUserCutoff(RealType rcut) {userCutoff_ = rcut; userChoseCutoff_ = true; }
+
     // group bookkeeping
-    virtual pair<int, int> getGroupTypes(int cg1, int cg2) = 0;
+    virtual groupCutoffs getGroupCutoffs(int cg1, int cg2) = 0;
 
     // Group->atom bookkeeping
     virtual vector<int> getAtomsInGroupRow(int cg1) = 0; 
@@ -135,8 +144,11 @@ namespace OpenMD {
     SnapshotManager* sman_;    
     Snapshot* snap_;
     ForceField* ff_;
+    InteractionManager* interactionMan_;
+
     int storageLayout_;
     RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
+    RealType largestRcut_;
 
     map<pair<int, int>, int> topoDist; //< topoDist gives the
                                        //topological distance between
@@ -160,11 +172,18 @@ namespace OpenMD {
                                        //method to fill this.
 
     vector<vector<int> > groupList_;
+
     vector<Vector3i> cellOffsets_;
     Vector3i nCells_;
     vector<vector<int> > cellList_;
     vector<Vector3d> saved_CG_positions_;
     potVec longRangePot_;
+
+    bool userChoseCutoff_;
+    RealType userCutoff_;
+    CutoffPolicy cutoffPolicy_;
+
+    map<pair<int, int>, tuple3<RealType, RealType, RealType> > gTypeCutoffMap;
 
   };    
 }
