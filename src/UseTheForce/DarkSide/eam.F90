@@ -133,6 +133,7 @@ contains
        allocate(EAMList%EAMParams(nEAMTypes))
        nAtypes = getSize(atypes)
        allocate(EAMList%atidToEAMType(nAtypes))
+       EAMList%atidToEAMType = -1
     end if
 
     EAMList%currentAddition = EAMList%currentAddition + 1
@@ -271,13 +272,20 @@ contains
     !! Calculate F(rho) and derivative 
     do atom = 1, nlocal
        atid1 = atid(atom)
-       me = eamList%atidToEAMtype(atid1)
-
-       call lookupEAMSpline1d(EAMList%EAMParams(me)%F, rho(atom), &
-            u, u1)
+       me = EAMList%atidtoEAMtype(atid1)
+       ! me is set to -1 for non EAM atoms.
+       ! Punt if we are a non-EAM atom type.
+       if (me == -1) then
+          frho(atom) = 0.0_dp
+          dfrhodrho(atom) = 0.0_dp
+       else          
+          
+          call lookupEAMSpline1d(EAMList%EAMParams(me)%F, rho(atom), &
+               u, u1)
        
-       frho(atom) = u
-       dfrhodrho(atom) = u1
+          frho(atom) = u
+          dfrhodrho(atom) = u1
+       endif
        pot = pot + u
        particle_pot(atom) = particle_pot(atom) + u
 
