@@ -64,8 +64,8 @@ namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : info_(info) {
     forceField_ = info_->getForceField();
-    fDecomp_ = new ForceMatrixDecomposition(info_);
     interactionMan_ = new InteractionManager();
+    fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
   }
 
   /**
@@ -122,7 +122,8 @@ namespace OpenMD {
         painCave.isFatal = 0;
         painCave.severity = OPENMD_INFO;
         simError();
-      }             
+      }
+      fDecomp_->setUserCutoff(rCut_);
     }
 
     map<string, CutoffMethod> stringToCutoffMethod;
@@ -195,6 +196,7 @@ namespace OpenMD {
       simError();
       cutoffPolicy_ = TRADITIONAL;        
     }
+    fDecomp_->setCutoffPolicy(cutoffPolicy_);
   }
 
   /**
@@ -473,7 +475,6 @@ namespace OpenMD {
   }
   
   void ForceManager::longRangeInteractions() {
-
     // some of this initial stuff will go away:
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
@@ -484,23 +485,16 @@ namespace OpenMD {
     RealType* A = config->getArrayPointer(DataStorage::dslAmat);
     RealType* electroFrame = config->getArrayPointer(DataStorage::dslElectroFrame);
     RealType* particlePot = config->getArrayPointer(DataStorage::dslParticlePot);
-    RealType* rc;    
 
-    if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
-      rc = cgConfig->getArrayPointer(DataStorage::dslPosition);
-    } else {
-      // center of mass of the group is the same as position of the atom  
-      // if cutoff group does not exist
-      rc = pos;
-    }
-    
     // new stuff starts here:
+    
     fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
- 
-    int cg1, cg2, atom1, atom2;
-    Vector3d d_grp, dag;
-    RealType rgrpsq, rgrp;
+    
+    int cg1, cg2, atom1, atom2, topoDist;
+    Vector3d d_grp, dag, d;
+    RealType rgrpsq, rgrp, r2, r;
+    RealType electroMult, vdwMult;
     RealType vij;
     Vector3d fij, fg;
     tuple3<RealType, RealType, RealType> cuts;
@@ -514,6 +508,7 @@ namespace OpenMD {
     potVec pot(0.0);
     potVec longRangePotential(0.0);
     RealType lrPot;
+    RealType vpair;
 
     int loopStart, loopEnd;
 
@@ -523,18 +518,19 @@ namespace OpenMD {
     } else {
       loopStart = PAIR_LOOP;
     }
+    
 
-    for (int iLoop = loopStart; iLoop < loopEnd; iLoop++) {
-      
+    for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
+    
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
         if (update_nlist) 
           neighborList = fDecomp_->buildNeighborList();
-      }
-
+      }      
+        
       for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
              it != neighborList.end(); ++it) {
-        
+                
         cg1 = (*it).first;
         cg2 = (*it).second;
         
@@ -547,14 +543,16 @@ namespace OpenMD {
         rCutSq = cuts.second;
 
         if (rgrpsq < rCutSq) {
-          *(idat.rcut) = cuts.first;
+          idat.rcut = &cuts.first;
           if (iLoop == PAIR_LOOP) {
             vij *= 0.0;
             fij = V3Zero;
           }
           
-          in_switching_region = switcher_->getSwitch(rgrpsq, *(idat.sw), dswdr, 
+          in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
                                                      rgrp); 
+
+          idat.sw = &sw;
               
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
@@ -567,27 +565,44 @@ namespace OpenMD {
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
               
+              cerr << "doing atoms " << atom1 << " " << atom2 << "\n";
               if (!fDecomp_->skipAtomPair(atom1, atom2)) {
                 
-                pot *= 0.0;
+                vpair = 0.0;
 
+                cerr << "filling idat atoms " << atom1 << " " << atom2 << "\n";
                 idat = fDecomp_->fillInteractionData(atom1, atom2);
-                *(idat.pot) = pot;
+                cerr << "done with idat\n";
+                
+                topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
+                vdwMult = vdwScale_[topoDist];
+                electroMult = electrostaticScale_[topoDist];
+
+                idat.vdwMult = &vdwMult;
+                idat.electroMult = &electroMult;
+                idat.pot = &pot;
+                idat.vpair = &vpair;
 
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                  *(idat.d) = d_grp;
-                  *(idat.r2) = rgrpsq;
+                  idat.d = &d_grp;
+                  idat.r2 = &rgrpsq;
                 } else {
-                  *(idat.d) = fDecomp_->getInteratomicVector(atom1, atom2);
-                  curSnapshot->wrapVector( *(idat.d) );
-                  *(idat.r2) = idat.d->lengthSquare();
+                  d = fDecomp_->getInteratomicVector(atom1, atom2);
+                  curSnapshot->wrapVector( d );
+                  r2 = d.lengthSquare();
+                  idat.d = &d;
+                  idat.r2 = &r2;
                 }
                 
-                *(idat.rij) = sqrt( *(idat.r2) );
+                cerr << "d = " << d << "\n";
+                cerr << "r2 = " << r2 << "\n";
+                r = sqrt( r2 );
+                idat.rij = &r;
                
                 if (iLoop == PREPAIR_LOOP) {
                   interactionMan_->doPrePair(idat);
                 } else {
+                  cerr << "doing doPair " << atom1 << " " << atom2 << " " << r << "\n";
                   interactionMan_->doPair(idat);
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
                   vij += *(idat.vpair);
@@ -674,7 +689,7 @@ namespace OpenMD {
       
       for (int atom1 = 0; atom1 < fDecomp_->getNAtomsInRow(); atom1++) {
 
-        vector<int> skipList = fDecomp_->getSkipsForRowAtom( atom1 );
+        vector<int> skipList = fDecomp_->getSkipsForAtom( atom1 );
         
         for (vector<int>::iterator jb = skipList.begin(); 
              jb != skipList.end(); ++jb) {         

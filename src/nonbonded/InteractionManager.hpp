@@ -81,7 +81,7 @@ namespace OpenMD {
     RealType getSuggestedCutoffRadius(AtomType *atype);
     
   private:
-    bool initialized_; 
+    bool initialized_;
 
     void setupElectrostatics();
 

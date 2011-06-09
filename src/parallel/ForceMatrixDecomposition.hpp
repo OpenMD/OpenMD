@@ -55,7 +55,7 @@ namespace OpenMD {
   
   class ForceMatrixDecomposition : public ForceDecomposition {
   public:
-    ForceMatrixDecomposition(SimInfo* info) : ForceDecomposition(info) {};
+    ForceMatrixDecomposition(SimInfo* info, InteractionManager* iMan) : ForceDecomposition(info, iMan) {};
 
     void distributeInitialData();
     void zeroWorkArrays();
@@ -84,8 +84,8 @@ namespace OpenMD {
        
     // atom bookkeeping
     int getNAtomsInRow();
-    vector<int> getSkipsForRowAtom(int atom1);
-    int getTopoDistance(int atom1, int atom2);
+    int getTopologicalDistance(int atom1, int atom2);
+    vector<int> getSkipsForAtom(int atom1); 
     bool skipAtomPair(int atom1, int atom2);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);
@@ -104,9 +104,6 @@ namespace OpenMD {
     vector<int> AtomLocalToGlobal;
     vector<int> cgLocalToGlobal;
     vector<RealType> massFactorsLocal;
-    vector<vector<int> > skipsForLocalAtom;
-    vector<vector<int> > toposForLocalAtom;
-    vector<vector<int> > topoDistLocal;
     vector<RealType> groupCutoff;
     vector<int> groupToGtype;
 
@@ -168,10 +165,6 @@ namespace OpenMD {
 
     vector<RealType> massFactorsRow;
     vector<RealType> massFactorsCol;
-
-    vector<vector<int> > skipsForRowAtom;
-    vector<vector<int> > toposForRowAtom;
-    vector<vector<int> > topoDistRow;
 #endif
 
   };

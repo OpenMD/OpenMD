@@ -59,6 +59,7 @@ namespace OpenMD {
     nLocal_ = snap_->getNumberOfAtoms();
 
     nGroups_ = info_->getNLocalCutoffGroups();
+    cerr << "in dId, nGroups = " << nGroups_ << "\n";
     // gather the information for atomtype IDs (atids):
     identsLocal = info_->getIdentArray();
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
@@ -141,43 +142,40 @@ namespace OpenMD {
       }      
     }
 
-    skipsForRowAtom.clear();
-    skipsForRowAtom.resize(nAtomsInRow_);
+    skipsForAtom.clear();
+    skipsForAtom.resize(nAtomsInRow_);
+    toposForAtom.clear();
+    toposForAtom.resize(nAtomsInRow_);
+    topoDist.clear();
+    topoDist.resize(nAtomsInRow_);
     for (int i = 0; i < nAtomsInRow_; i++) {
       int iglob = AtomRowToGlobal[i];
-      for (int j = 0; j < nAtomsInCol_; j++) {
-        int jglob = AtomColToGlobal[j];        
-        if (excludes.hasPair(iglob, jglob)) 
-          skipsForRowAtom[i].push_back(j);       
-      }      
-    }
 
-    toposForRowAtom.clear();
-    toposForRowAtom.resize(nAtomsInRow_);
-    for (int i = 0; i < nAtomsInRow_; i++) {
-      int iglob = AtomRowToGlobal[i];
-      int nTopos = 0;
       for (int j = 0; j < nAtomsInCol_; j++) {
-        int jglob = AtomColToGlobal[j];        
+        int jglob = AtomColToGlobal[j];
+
+        if (excludes.hasPair(iglob, jglob)) 
+          skipsForAtom[i].push_back(j);       
+        
         if (oneTwo.hasPair(iglob, jglob)) {
-          toposForRowAtom[i].push_back(j);
-          topoDistRow[i][nTopos] = 1;
-          nTopos++;
-        }
-        if (oneThree.hasPair(iglob, jglob)) {
-          toposForRowAtom[i].push_back(j);
-          topoDistRow[i][nTopos] = 2;
-          nTopos++;
-        }
-        if (oneFour.hasPair(iglob, jglob)) {
-          toposForRowAtom[i].push_back(j);
-          topoDistRow[i][nTopos] = 3;
-          nTopos++;
+          toposForAtom[i].push_back(j);
+          topoDist[i].push_back(1);
+        } else {
+          if (oneThree.hasPair(iglob, jglob)) {
+            toposForAtom[i].push_back(j);
+            topoDist[i].push_back(2);
+          } else {
+            if (oneFour.hasPair(iglob, jglob)) {
+              toposForAtom[i].push_back(j);
+              topoDist[i].push_back(3);
+            }
+          }
         }
       }      
     }
 
 #endif
+
     groupList_.clear();
     groupList_.resize(nGroups_);
     for (int i = 0; i < nGroups_; i++) {
@@ -186,47 +184,44 @@ namespace OpenMD {
         int aid = AtomLocalToGlobal[j];
         if (globalGroupMembership[aid] == gid) {
           groupList_[i].push_back(j);
-
         }
       }      
     }
 
-    skipsForLocalAtom.clear();
-    skipsForLocalAtom.resize(nLocal_);
+    skipsForAtom.clear();
+    skipsForAtom.resize(nLocal_);
+    toposForAtom.clear();
+    toposForAtom.resize(nLocal_);
+    topoDist.clear();
+    topoDist.resize(nLocal_);
 
     for (int i = 0; i < nLocal_; i++) {
       int iglob = AtomLocalToGlobal[i];
+
       for (int j = 0; j < nLocal_; j++) {
-        int jglob = AtomLocalToGlobal[j];        
+        int jglob = AtomLocalToGlobal[j];
+
         if (excludes.hasPair(iglob, jglob)) 
-          skipsForLocalAtom[i].push_back(j);       
+          skipsForAtom[i].push_back(j);              
+        
+        if (oneTwo.hasPair(iglob, jglob)) {
+          toposForAtom[i].push_back(j);
+          topoDist[i].push_back(1);
+        } else {
+          if (oneThree.hasPair(iglob, jglob)) {
+            toposForAtom[i].push_back(j);
+            topoDist[i].push_back(2);
+          } else {
+            if (oneFour.hasPair(iglob, jglob)) {
+              toposForAtom[i].push_back(j);
+              topoDist[i].push_back(3);
+            }
+          }
+        }
       }      
     }
-    toposForLocalAtom.clear();
-    toposForLocalAtom.resize(nLocal_);
-    for (int i = 0; i < nLocal_; i++) {
-      int iglob = AtomLocalToGlobal[i];
-      int nTopos = 0;
-      for (int j = 0; j < nLocal_; j++) {
-        int jglob = AtomLocalToGlobal[j];        
-        if (oneTwo.hasPair(iglob, jglob)) {
-          toposForLocalAtom[i].push_back(j);
-          topoDistLocal[i][nTopos] = 1;
-          nTopos++;
-        }
-        if (oneThree.hasPair(iglob, jglob)) {
-          toposForLocalAtom[i].push_back(j);
-          topoDistLocal[i][nTopos] = 2;
-          nTopos++;
-        }
-        if (oneFour.hasPair(iglob, jglob)) {
-          toposForLocalAtom[i].push_back(j);
-          topoDistLocal[i][nTopos] = 3;
-          nTopos++;
-        }
-      }      
-    }    
-
+    
+    createGtypeCutoffMap();
   }
    
   void ForceMatrixDecomposition::createGtypeCutoffMap() {
@@ -238,7 +233,8 @@ namespace OpenMD {
     vector<RealType> atypeCutoff;
     atypeCutoff.resize( atypes.size() );
 
-    for (set<AtomType*>::iterator at = atypes.begin(); at != atypes.end(); ++at){
+    for (set<AtomType*>::iterator at = atypes.begin(); 
+         at != atypes.end(); ++at){
       rc = interactionMan_->getSuggestedCutoffRadius(*at);
       atid = (*at)->getIdent();
       atypeCutoff[atid] = rc;
@@ -250,6 +246,7 @@ namespace OpenMD {
     // largest cutoff for any atypes present in this group.
 #ifdef IS_MPI
     vector<RealType> groupCutoffRow(nGroupsInRow_, 0.0);
+    groupRowToGtype.resize(nGroupsInRow_);
     for (int cg1 = 0; cg1 < nGroupsInRow_; cg1++) {
       vector<int> atomListRow = getAtomsInGroupRow(cg1);
       for (vector<int>::iterator ia = atomListRow.begin(); 
@@ -275,6 +272,7 @@ namespace OpenMD {
       
     }
     vector<RealType> groupCutoffCol(nGroupsInCol_, 0.0);
+    groupColToGtype.resize(nGroupsInCol_);
     for (int cg2 = 0; cg2 < nGroupsInCol_; cg2++) {
       vector<int> atomListCol = getAtomsInGroupColumn(cg2);
       for (vector<int>::iterator jb = atomListCol.begin(); 
@@ -298,10 +296,16 @@ namespace OpenMD {
       }
     }
 #else
+
     vector<RealType> groupCutoff(nGroups_, 0.0);
+    groupToGtype.resize(nGroups_);
+
+    cerr << "nGroups = " << nGroups_ << "\n";
     for (int cg1 = 0; cg1 < nGroups_; cg1++) {
+
       groupCutoff[cg1] = 0.0;
       vector<int> atomList = getAtomsInGroupRow(cg1);
+
       for (vector<int>::iterator ia = atomList.begin(); 
            ia != atomList.end(); ++ia) {            
         int atom1 = (*ia);
@@ -325,10 +329,10 @@ namespace OpenMD {
     }
 #endif
 
+    cerr << "gTypeCutoffs.size() = " << gTypeCutoffs.size() << "\n";
     // Now we find the maximum group cutoff value present in the simulation
 
-    vector<RealType>::iterator groupMaxLoc = max_element(gTypeCutoffs.begin(), gTypeCutoffs.end());
-    RealType groupMax = *groupMaxLoc;
+    RealType groupMax = *max_element(gTypeCutoffs.begin(), gTypeCutoffs.end());
 
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(&groupMax, &groupMax, 1, MPI::REALTYPE, MPI::MAX);
@@ -337,23 +341,26 @@ namespace OpenMD {
     RealType tradRcut = groupMax;
 
     for (int i = 0; i < gTypeCutoffs.size();  i++) {
-      for (int j = 0; j < gTypeCutoffs.size();  j++) {
-        
+      for (int j = 0; j < gTypeCutoffs.size();  j++) {       
         RealType thisRcut;
         switch(cutoffPolicy_) {
         case TRADITIONAL:
           thisRcut = tradRcut;
+          break;
         case MIX:
           thisRcut = 0.5 * (gTypeCutoffs[i] + gTypeCutoffs[j]);
+          break;
         case MAX:
           thisRcut = max(gTypeCutoffs[i], gTypeCutoffs[j]);
+          break;
         default:
           sprintf(painCave.errMsg,
                   "ForceMatrixDecomposition::createGtypeCutoffMap " 
                   "hit an unknown cutoff policy!\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
-          simError();               
+          simError();
+          break;
         }
 
         pair<int,int> key = make_pair(i,j);
@@ -383,19 +390,24 @@ namespace OpenMD {
 
 
   groupCutoffs ForceMatrixDecomposition::getGroupCutoffs(int cg1, int cg2) {
-    int i, j;
-
+    int i, j;   
 #ifdef IS_MPI
     i = groupRowToGtype[cg1];
     j = groupColToGtype[cg2];
 #else
     i = groupToGtype[cg1];
     j = groupToGtype[cg2];
-#endif
-    
+#endif    
     return gTypeCutoffMap[make_pair(i,j)];
   }
 
+  int ForceMatrixDecomposition::getTopologicalDistance(int atom1, int atom2) {
+    for (int j = 0; j < toposForAtom[atom1].size(); j++) {
+      if (toposForAtom[atom1][j] == atom2) 
+        return topoDist[atom1][j];
+    }
+    return 0;
+  }
 
   void ForceMatrixDecomposition::zeroWorkArrays() {
 
@@ -705,12 +717,8 @@ namespace OpenMD {
     return d;    
   }
 
-  vector<int> ForceMatrixDecomposition::getSkipsForRowAtom(int atom1) {
-#ifdef IS_MPI
-    return skipsForRowAtom[atom1];
-#else
-    return skipsForLocalAtom[atom1];
-#endif
+  vector<int> ForceMatrixDecomposition::getSkipsForAtom(int atom1) {
+    return skipsForAtom[atom1];
   }
 
   /**
@@ -743,34 +751,13 @@ namespace OpenMD {
     unique_id_2 = atom2;
 #endif
     
-#ifdef IS_MPI
-    for (vector<int>::iterator i = skipsForRowAtom[atom1].begin();
-         i != skipsForRowAtom[atom1].end(); ++i) {
+    for (vector<int>::iterator i = skipsForAtom[atom1].begin();
+         i != skipsForAtom[atom1].end(); ++i) {
       if ( (*i) == unique_id_2 ) return true;
     }    
-#else
-    for (vector<int>::iterator i = skipsForLocalAtom[atom1].begin();
-         i != skipsForLocalAtom[atom1].end(); ++i) {
-      if ( (*i) == unique_id_2 ) return true;
-    }    
-#endif
+
   }
 
-  int ForceMatrixDecomposition::getTopoDistance(int atom1, int atom2) {
-    
-#ifdef IS_MPI
-    for (int i = 0; i < toposForRowAtom[atom1].size(); i++) {
-      if ( toposForRowAtom[atom1][i] == atom2 ) return topoDistRow[atom1][i];
-    }
-#else
-    for (int i = 0; i < toposForLocalAtom[atom1].size(); i++) {
-      if ( toposForLocalAtom[atom1][i] == atom2 ) return topoDistLocal[atom1][i];
-    }
-#endif
-
-    // zero is default for unconnected (i.e. normal) pair interactions
-    return 0;
-  }
 
   void ForceMatrixDecomposition::addForceToAtomRow(int atom1, Vector3d fg){
 #ifdef IS_MPI
@@ -958,6 +945,14 @@ namespace OpenMD {
     Vector3d rs, scaled, dr;
     Vector3i whichCell;
     int cellIndex;
+    int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
+
+#ifdef IS_MPI
+    cellListRow_.resize(nCtot);
+    cellListCol_.resize(nCtot);
+#else
+    cellList_.resize(nCtot);
+#endif
 
 #ifdef IS_MPI
     for (int i = 0; i < nGroupsInRow_; i++) {

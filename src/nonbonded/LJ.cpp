@@ -263,6 +263,8 @@ namespace OpenMD {
      
       ros = *(idat.rij) * sigmai;
       
+      cerr << "ros = " << ros << "\n";
+      
       getLJfunc(ros, myPot, myDeriv);
       
       if (shiftedPot_) {
@@ -278,6 +280,10 @@ namespace OpenMD {
         myDerivC = 0.0;        
       }
 
+      cerr << "myPot =  " << myPot << "\n";
+      cerr << "myPotC =  " << myPotC << "\n";
+      cerr << "epsilon =  " << epsilon << "\n";
+      cerr << "vdwm =  " << *(idat.vdwMult) << "\n";
       RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
       *(idat.vpair) += pot_temp;
       

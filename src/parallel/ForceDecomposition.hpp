@@ -91,7 +91,7 @@ namespace OpenMD {
   class ForceDecomposition {
   public:
 
-    ForceDecomposition(SimInfo* info);
+    ForceDecomposition(SimInfo* info, InteractionManager* iMan);
     virtual ~ForceDecomposition() {}
     
     virtual void distributeInitialData() = 0;
@@ -128,10 +128,11 @@ namespace OpenMD {
        
     // atom bookkeeping
     virtual int getNAtomsInRow() = 0;
-    virtual vector<int> getSkipsForRowAtom(int atom1) = 0;
+    virtual vector<int> getSkipsForAtom(int atom1) = 0;
     virtual bool skipAtomPair(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
+    virtual int getTopologicalDistance(int atom1, int atom2) = 0;
 
     // filling interaction blocks with pointers
     virtual InteractionData fillInteractionData(int atom1, int atom2) = 0;
@@ -150,26 +151,18 @@ namespace OpenMD {
     RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
     RealType largestRcut_;
 
-    map<pair<int, int>, int> topoDist; //< topoDist gives the
-                                       //topological distance between
-                                       //two atomic sites.  This
-                                       //declaration is agnostic
-                                       //regarding the parallel
-                                       //decomposition.  The two
-                                       //indices could be local or row
-                                       //& column.  It will be up to
-                                       //the specific decomposition
-                                       //method to fill this.
-    map<pair<int, int>, bool> exclude; //< exclude is the set of pairs
-                                       //to leave out of non-bonded
-                                       //force evaluations.  This
-                                       //declaration is agnostic
-                                       //regarding the parallel
-                                       //decomposition.  The two
-                                       //indices could be local or row
-                                       //& column.  It will be up to
-                                       //the specific decomposition
-                                       //method to fill this.
+    /** 
+     * The topological distance between two atomic sites is handled
+     * via two vector structures for speed.  These structures agnostic
+     * regarding the parallel decomposition.  The index for
+     * toposForAtom could be local or row, while the values could be
+     * local or column.  It will be up to the specific decomposition
+     * method to fill these.
+     */
+    vector<vector<int> > toposForAtom; 
+    vector<vector<int> > topoDist;
+                                       
+    vector<vector<int> > skipsForAtom;
 
     vector<vector<int> > groupList_;
 
