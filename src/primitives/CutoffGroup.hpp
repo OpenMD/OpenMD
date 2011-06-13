@@ -108,12 +108,7 @@ namespace OpenMD {
       totalMass = getMass();
       
       if (cutoffAtomList.size() == 1) {
-        std::cerr << "YO!\n";
-        std::cerr << "atipos = " << beginAtom(i)->getPos() << "\n";
-        std::cerr << "lI = " << localIndex_ << "\n";
-
         data.position[localIndex_] = beginAtom(i)->getPos();
-        std::cerr << "YOYO!\n";
       } else {
         data.position[localIndex_] = V3Zero;
 	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {

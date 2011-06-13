@@ -475,19 +475,32 @@ namespace OpenMD {
   }
   
   void ForceManager::longRangeInteractions() {
-    // some of this initial stuff will go away:
+
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
-    RealType* frc = config->getArrayPointer(DataStorage::dslForce);
-    RealType* pos = config->getArrayPointer(DataStorage::dslPosition);
-    RealType* trq = config->getArrayPointer(DataStorage::dslTorque);
-    RealType* A = config->getArrayPointer(DataStorage::dslAmat);
-    RealType* electroFrame = config->getArrayPointer(DataStorage::dslElectroFrame);
-    RealType* particlePot = config->getArrayPointer(DataStorage::dslParticlePot);
 
-    // new stuff starts here:
-    
+    //calculate the center of mass of cutoff group
+
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::CutoffGroupIterator ci;
+    CutoffGroup* cg;
+
+    if(info_->getNCutoffGroups() > 0){      
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+        for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
+            cg = mol->nextCutoffGroup(ci)) {
+          cg->updateCOM();
+        }
+      }      
+    } else {
+      // center of mass of the group is the same as position of the atom  
+      // if cutoff group does not exist
+      cgConfig->position = config->position;
+    }
+
     fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
     
@@ -496,7 +509,7 @@ namespace OpenMD {
     RealType rgrpsq, rgrp, r2, r;
     RealType electroMult, vdwMult;
     RealType vij;
-    Vector3d fij, fg;
+    Vector3d fij, fg, f1;
     tuple3<RealType, RealType, RealType> cuts;
     RealType rCutSq;
     bool in_switching_region;
@@ -512,6 +525,13 @@ namespace OpenMD {
 
     int loopStart, loopEnd;
 
+    idat.vdwMult = &vdwMult;
+    idat.electroMult = &electroMult;
+    idat.pot = &pot;
+    idat.vpair = &vpair;
+    idat.f1 = &f1;
+    idat.sw = &sw;
+
     loopEnd = PAIR_LOOP;
     if (info_->requiresPrepair() ) {
       loopStart = PREPAIR_LOOP;
@@ -519,7 +539,6 @@ namespace OpenMD {
       loopStart = PAIR_LOOP;
     }
     
-
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
     
       if (iLoop == loopStart) {
@@ -551,8 +570,6 @@ namespace OpenMD {
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
                                                      rgrp); 
-
-          idat.sw = &sw;
               
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
@@ -565,23 +582,16 @@ namespace OpenMD {
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
               
-              cerr << "doing atoms " << atom1 << " " << atom2 << "\n";
               if (!fDecomp_->skipAtomPair(atom1, atom2)) {
                 
                 vpair = 0.0;
+                f1 = V3Zero;
 
-                cerr << "filling idat atoms " << atom1 << " " << atom2 << "\n";
-                idat = fDecomp_->fillInteractionData(atom1, atom2);
-                cerr << "done with idat\n";
+                fDecomp_->fillInteractionData(idat, atom1, atom2);
                 
                 topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
                 vdwMult = vdwScale_[topoDist];
                 electroMult = electrostaticScale_[topoDist];
-
-                idat.vdwMult = &vdwMult;
-                idat.electroMult = &electroMult;
-                idat.pot = &pot;
-                idat.vpair = &vpair;
 
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                   idat.d = &d_grp;
@@ -594,20 +604,17 @@ namespace OpenMD {
                   idat.r2 = &r2;
                 }
                 
-                cerr << "d = " << d << "\n";
-                cerr << "r2 = " << r2 << "\n";
-                r = sqrt( r2 );
+                r = sqrt( *(idat.r2) );
                 idat.rij = &r;
                
                 if (iLoop == PREPAIR_LOOP) {
                   interactionMan_->doPrePair(idat);
                 } else {
-                  cerr << "doing doPair " << atom1 << " " << atom2 << " " << r << "\n";
                   interactionMan_->doPair(idat);
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
-                  vij += *(idat.vpair);
-                  fij += *(idat.f1);
-                  tau -= outProduct( *(idat.d), *(idat.f1));
+                  vij += vpair;
+                  fij += f1;
+                  tau -= outProduct( *(idat.d), f1);
                 }
               }
             }
@@ -673,7 +680,7 @@ namespace OpenMD {
           fDecomp_->collectIntermediateData();
 
           for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
-            sdat = fDecomp_->fillSelfData(atom1);
+            fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
 
@@ -695,7 +702,7 @@ namespace OpenMD {
              jb != skipList.end(); ++jb) {         
      
           atom2 = (*jb);
-          idat = fDecomp_->fillSkipData(atom1, atom2);
+          fDecomp_->fillSkipData(idat, atom1, atom2);
           interactionMan_->doSkipCorrection(idat);
 
         }
@@ -705,7 +712,7 @@ namespace OpenMD {
     if (info_->requiresSelfCorrection()) {
 
       for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {          
-        sdat = fDecomp_->fillSelfData(atom1);
+        fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
       }
 

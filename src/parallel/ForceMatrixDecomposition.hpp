@@ -91,9 +91,9 @@ namespace OpenMD {
     void addForceToAtomColumn(int atom2, Vector3d fg);
 
     // filling interaction blocks with pointers
-    InteractionData fillInteractionData(int atom1, int atom2);
+    void fillInteractionData(InteractionData idat, int atom1, int atom2);
     void unpackInteractionData(InteractionData idat, int atom1, int atom2);
-    InteractionData fillSkipData(int atom1, int atom2);
+    void fillSkipData(InteractionData idat, int atom1, int atom2);
 
   private: 
     void createGtypeCutoffMap();
@@ -103,7 +103,6 @@ namespace OpenMD {
     vector<int> identsLocal;
     vector<int> AtomLocalToGlobal;
     vector<int> cgLocalToGlobal;
-    vector<RealType> massFactorsLocal;
     vector<RealType> groupCutoff;
     vector<int> groupToGtype;
 

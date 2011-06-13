@@ -608,7 +608,6 @@ namespace OpenMD{
     PairList getOneFourInteractions() { return oneFourInteractions_; }
 
   private:
-
                
     /// lists to handle atoms needing special treatment in the non-bonded interactions
     PairList excludedInteractions_;  /**< atoms excluded from interacting with each other */

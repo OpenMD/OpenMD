@@ -87,8 +87,8 @@ namespace OpenMD {
     cellOffsets_.push_back( Vector3i(1, -1,1) );
   }
 
-  SelfData ForceDecomposition::fillSelfData(int atom1) {
-    SelfData sdat;
+  void ForceDecomposition::fillSelfData(SelfData sdat, int atom1) {
+    
     // Still Missing atype, skippedCharge, potVec pot,
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);
@@ -113,8 +113,6 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslParticlePot) {
       sdat.particlePot = &(snap_->atomData.particlePot[atom1]);
     }
-
-    return sdat;    
   }
 
   bool ForceDecomposition::checkNeighborList() {

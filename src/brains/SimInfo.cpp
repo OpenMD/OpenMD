@@ -838,9 +838,16 @@ namespace OpenMD {
     Atom* atom;
     RealType totalMass;
 
-    //to avoid memory reallocation, reserve enough space for massFactors_
+    /**
+     * The mass factor is the relative mass of an atom to the total
+     * mass of the cutoff group it belongs to.  By default, all atoms
+     * are their own cutoff groups, and therefore have mass factors of
+     * 1.  We need some special handling for massless atoms, which
+     * will be treated as carrying the entire mass of the cutoff
+     * group.
+     */
     massFactors_.clear();
-    massFactors_.reserve(getNCutoffGroups());
+    massFactors_.resize(getNAtoms(), 1.0);
     
     for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
       for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
@@ -849,10 +856,10 @@ namespace OpenMD {
 	totalMass = cg->getMass();
 	for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
 	  // Check for massless groups - set mfact to 1 if true
-	  if (totalMass != 0)
-	    massFactors_.push_back(atom->getMass()/totalMass);
+	  if (totalMass != 0) 
+            massFactors_[atom->getLocalIndex()] = atom->getMass()/totalMass;
 	  else
-	    massFactors_.push_back( 1.0 );
+	    massFactors_[atom->getLocalIndex()] = 1.0;
 	}
       }       
     }
@@ -879,14 +886,6 @@ namespace OpenMD {
     int* oneThreeList = oneThreeInteractions_.getPairList();
     int* oneFourList = oneFourInteractions_.getPairList();
 
-    //setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray_[0], 
-    //               &nExclude, excludeList, 
-    //               &nOneTwo, oneTwoList,
-    //               &nOneThree, oneThreeList,
-    //               &nOneFour, oneFourList,
-    //               &molMembershipArray[0], &mfact[0], &nCutoffGroups_, 
-    //               &fortranGlobalGroupMembership[0], &isError); 
-    
     topologyDone_ = true;
   }
 

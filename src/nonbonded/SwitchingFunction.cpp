@@ -143,8 +143,8 @@ namespace OpenMD {
     return;
   }
 
-  bool SwitchingFunction::getSwitch(const RealType &r2, RealType &sw, RealType &dswdr, 
-                                    RealType &r) {
+  bool SwitchingFunction::getSwitch(const RealType &r2, RealType &sw, 
+                                    RealType &dswdr, RealType &r) {
 
     sw = 1.0;
     dswdr = 0.0;

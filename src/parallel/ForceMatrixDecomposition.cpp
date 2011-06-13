@@ -65,7 +65,7 @@ namespace OpenMD {
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
-    vector<RealType> massFactorsLocal = info_->getMassFactors();
+    massFactors = info_->getMassFactors();
     PairList excludes = info_->getExcludedInteractions();
     PairList oneTwo = info_->getOneTwoInteractions();
     PairList oneThree = info_->getOneThreeInteractions();
@@ -117,8 +117,8 @@ namespace OpenMD {
     cgCommIntRow->gather(cgLocalToGlobal, cgRowToGlobal);
     cgCommIntColumn->gather(cgLocalToGlobal, cgColToGlobal);
 
-    AtomCommRealRow->gather(massFactorsLocal, massFactorsRow);
-    AtomCommRealColumn->gather(massFactorsLocal, massFactorsCol);
+    AtomCommRealRow->gather(massFactors, massFactorsRow);
+    AtomCommRealColumn->gather(massFactors, massFactorsCol);
 
     groupListRow_.clear();
     groupListRow_.resize(nGroupsInRow_);
@@ -691,7 +691,7 @@ namespace OpenMD {
 #ifdef IS_MPI
     return massFactorsRow[atom1];
 #else
-    return massFactorsLocal[atom1];
+    return massFactors[atom1];
 #endif
   }
 
@@ -699,7 +699,7 @@ namespace OpenMD {
 #ifdef IS_MPI
     return massFactorsCol[atom2];
 #else
-    return massFactorsLocal[atom2];
+    return massFactors[atom2];
 #endif
 
   }
@@ -776,14 +776,12 @@ namespace OpenMD {
   }
 
     // filling interaction blocks with pointers
-  InteractionData ForceMatrixDecomposition::fillInteractionData(int atom1, int atom2) {    
-    InteractionData idat;
-
+  void ForceMatrixDecomposition::fillInteractionData(InteractionData idat, 
+                                                     int atom1, int atom2) {    
 #ifdef IS_MPI
     
     idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
                              ff_->getAtomType(identsCol[atom2]) );
-
     
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(atomRowData.aMat[atom1]);
@@ -861,7 +859,6 @@ namespace OpenMD {
     }
 
 #endif
-    return idat;
   }
 
   
@@ -882,9 +879,8 @@ namespace OpenMD {
   }
 
 
-  InteractionData ForceMatrixDecomposition::fillSkipData(int atom1, int atom2){
-
-    InteractionData idat;
+  void ForceMatrixDecomposition::fillSkipData(InteractionData idat,
+                                              int atom1, int atom2) {
 #ifdef IS_MPI
     idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
                              ff_->getAtomType(identsCol[atom2]) );
@@ -947,22 +943,27 @@ namespace OpenMD {
     int cellIndex;
     int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
 
+    cerr << "flag1\n";
 #ifdef IS_MPI
     cellListRow_.resize(nCtot);
     cellListCol_.resize(nCtot);
 #else
     cellList_.resize(nCtot);
 #endif
-
+    cerr << "flag2\n";
 #ifdef IS_MPI
     for (int i = 0; i < nGroupsInRow_; i++) {
       rs = cgRowData.position[i];
+
       // scaled positions relative to the box vectors
       scaled = invHmat * rs;
+
       // wrap the vector back into the unit box by subtracting integer box 
       // numbers
-      for (int j = 0; j < 3; j++) 
+      for (int j = 0; j < 3; j++) {
         scaled[j] -= roundMe(scaled[j]);
+        scaled[j] += 0.5;
+      }
      
       // find xyz-indices of cell that cutoffGroup is in.
       whichCell.x() = nCells_.x() * scaled.x();
@@ -971,18 +972,23 @@ namespace OpenMD {
 
       // find single index of this cell:
       cellIndex = Vlinear(whichCell, nCells_);
+
       // add this cutoff group to the list of groups in this cell;
       cellListRow_[cellIndex].push_back(i);
     }
 
     for (int i = 0; i < nGroupsInCol_; i++) {
       rs = cgColData.position[i];
+
       // scaled positions relative to the box vectors
       scaled = invHmat * rs;
+
       // wrap the vector back into the unit box by subtracting integer box 
       // numbers
-      for (int j = 0; j < 3; j++) 
+      for (int j = 0; j < 3; j++) {
         scaled[j] -= roundMe(scaled[j]);
+        scaled[j] += 0.5;
+      }
 
       // find xyz-indices of cell that cutoffGroup is in.
       whichCell.x() = nCells_.x() * scaled.x();
@@ -991,18 +997,23 @@ namespace OpenMD {
 
       // find single index of this cell:
       cellIndex = Vlinear(whichCell, nCells_);
+
       // add this cutoff group to the list of groups in this cell;
       cellListCol_[cellIndex].push_back(i);
     }
 #else
     for (int i = 0; i < nGroups_; i++) {
       rs = snap_->cgData.position[i];
+
       // scaled positions relative to the box vectors
       scaled = invHmat * rs;
+
       // wrap the vector back into the unit box by subtracting integer box 
       // numbers
-      for (int j = 0; j < 3; j++) 
+      for (int j = 0; j < 3; j++) {
         scaled[j] -= roundMe(scaled[j]);
+        scaled[j] += 0.5;
+      }
 
       // find xyz-indices of cell that cutoffGroup is in.
       whichCell.x() = nCells_.x() * scaled.x();
@@ -1010,7 +1021,8 @@ namespace OpenMD {
       whichCell.z() = nCells_.z() * scaled.z();
 
       // find single index of this cell:
-      cellIndex = Vlinear(whichCell, nCells_);
+      cellIndex = Vlinear(whichCell, nCells_);      
+
       // add this cutoff group to the list of groups in this cell;
       cellList_[cellIndex].push_back(i);
     }
@@ -1068,11 +1080,12 @@ namespace OpenMD {
               }
             }
 #else
+
             for (vector<int>::iterator j1 = cellList_[m1].begin(); 
                  j1 != cellList_[m1].end(); ++j1) {
               for (vector<int>::iterator j2 = cellList_[m2].begin(); 
                    j2 != cellList_[m2].end(); ++j2) {
-                               
+
                 // Always do this if we're in different cells or if
                 // we're in the same cell and the global index of the
                 // j2 cutoff group is less than the j1 cutoff group
@@ -1092,13 +1105,13 @@ namespace OpenMD {
         }
       }
     }
-
+    
     // save the local cutoff group positions for the check that is
     // done on each loop:
     saved_CG_positions_.clear();
     for (int i = 0; i < nGroups_; i++)
       saved_CG_positions_.push_back(snap_->cgData.position[i]);
-
+    
     return neighborList;
   }
 } //end namespace OpenMD
