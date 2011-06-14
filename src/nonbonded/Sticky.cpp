@@ -343,7 +343,7 @@ namespace OpenMD {
         }
         
         *(idat.vpair) += 0.5*(v0*s*w + v0p*sp*wp);
-        idat.pot[HYDROGENBONDING_FAMILY] += 0.5*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
+        (*(idat.pot))[HYDROGENBONDING_FAMILY] += 0.5*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
         
         // do the torques first since they are easy:
         // remember that these are still in the body-fixed axes

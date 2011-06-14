@@ -221,7 +221,7 @@ namespace OpenMD {
       
       RealType pot_temp = *(idat.vdwMult) * Vmorse * Vang;
       *(idat.vpair) += pot_temp;
-      idat.pot[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+      (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
            
       Vector3d dVmorsedr = (myDeriv - myDerivC) * Vector3d(x, y, z) /  *(idat.rij) ;
       

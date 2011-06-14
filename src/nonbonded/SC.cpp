@@ -382,7 +382,7 @@ namespace OpenMD {
       *(idat.particlePot1) -= data1.c * data1.epsilon * 
         sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
       
-      idat.pot[METALLIC_FAMILY] += pot_temp;
+      (*(idat.pot))[METALLIC_FAMILY] += pot_temp;
     }
       
     return;    

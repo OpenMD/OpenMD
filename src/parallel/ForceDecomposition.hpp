@@ -135,10 +135,10 @@ namespace OpenMD {
     virtual int getTopologicalDistance(int atom1, int atom2) = 0;
 
     // filling interaction blocks with pointers
-    virtual void fillInteractionData(InteractionData idat, int atom1, int atom2) = 0;
-    virtual void unpackInteractionData(InteractionData idat, int atom1, int atom2) = 0;
-    virtual void fillSkipData(InteractionData idat, int atom1, int atom2) = 0;
-    virtual void fillSelfData(SelfData sdat, int atom1);
+    virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
+    virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
+    virtual void fillSkipData(InteractionData &idat, int atom1, int atom2) = 0;
+    virtual void fillSelfData(SelfData &sdat, int atom1);
     
   protected:
     SimInfo* info_;   

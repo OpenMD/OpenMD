@@ -776,7 +776,7 @@ namespace OpenMD {
   }
 
     // filling interaction blocks with pointers
-  void ForceMatrixDecomposition::fillInteractionData(InteractionData idat, 
+  void ForceMatrixDecomposition::fillInteractionData(InteractionData &idat, 
                                                      int atom1, int atom2) {    
 #ifdef IS_MPI
     
@@ -862,7 +862,7 @@ namespace OpenMD {
   }
 
   
-  void ForceMatrixDecomposition::unpackInteractionData(InteractionData idat, int atom1, int atom2) {    
+  void ForceMatrixDecomposition::unpackInteractionData(InteractionData &idat, int atom1, int atom2) {    
 #ifdef IS_MPI
     pot_row[atom1] += 0.5 *  *(idat.pot);
     pot_col[atom2] += 0.5 *  *(idat.pot);
@@ -879,7 +879,7 @@ namespace OpenMD {
   }
 
 
-  void ForceMatrixDecomposition::fillSkipData(InteractionData idat,
+  void ForceMatrixDecomposition::fillSkipData(InteractionData &idat,
                                               int atom1, int atom2) {
 #ifdef IS_MPI
     idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
@@ -943,14 +943,13 @@ namespace OpenMD {
     int cellIndex;
     int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
 
-    cerr << "flag1\n";
 #ifdef IS_MPI
     cellListRow_.resize(nCtot);
     cellListCol_.resize(nCtot);
 #else
     cellList_.resize(nCtot);
 #endif
-    cerr << "flag2\n";
+
 #ifdef IS_MPI
     for (int i = 0; i < nGroupsInRow_; i++) {
       rs = cgRowData.position[i];

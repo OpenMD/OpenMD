@@ -909,7 +909,7 @@ namespace OpenMD {
       }
     }
 
-    idat.pot[ELECTROSTATIC_FAMILY] += epot;
+    (*(idat.pot))[ELECTROSTATIC_FAMILY] += epot;
     *(idat.f1) += dVdr;
 
     if (i_is_Dipole || i_is_Quadrupole) 
@@ -1020,7 +1020,7 @@ namespace OpenMD {
       }
       
       // accumulate the forces and torques resulting from the self term
-      idat.pot[ELECTROSTATIC_FAMILY] += myPot;
+      (*(idat.pot))[ELECTROSTATIC_FAMILY] += myPot;
       *(idat.f1) += dVdr;
       
       if (i_is_Dipole) 

@@ -56,12 +56,12 @@ namespace OpenMD {
    * being applied to any given pair of atom types.
    */
   enum InteractionFamily {
-    NO_FAMILY,             /**< No family defined */
-    VANDERWAALS_FAMILY,    /**< Long-range dispersion and short-range pauli repulsion */
-    ELECTROSTATIC_FAMILY,  /**< Coulombic and point-multipole interactions */
-    METALLIC_FAMILY,       /**< Transition metal interactions involving electron density */
-    HYDROGENBONDING_FAMILY,/**< Short-range directional interactions */
-    N_INTERACTION_FAMILIES
+    NO_FAMILY = 0,             /**< No family defined */
+    VANDERWAALS_FAMILY = 1,    /**< Long-range dispersion and short-range pauli repulsion */
+    ELECTROSTATIC_FAMILY = 2,  /**< Coulombic and point-multipole interactions */
+    METALLIC_FAMILY = 3,       /**< Transition metal interactions involving electron density */
+    HYDROGENBONDING_FAMILY = 4,/**< Short-range directional interactions */
+    N_INTERACTION_FAMILIES = 5
   };
 
   typedef Vector<RealType, N_INTERACTION_FAMILIES> potVec;

@@ -482,7 +482,7 @@ namespace OpenMD {
       *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
         - *(idat.frho1);
 
-      idat.pot[METALLIC_FAMILY] += phab;
+      (*(idat.pot))[METALLIC_FAMILY] += phab;
 
       *(idat.vpair) += phab;
     }

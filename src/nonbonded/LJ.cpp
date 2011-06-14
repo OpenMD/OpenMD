@@ -261,9 +261,7 @@ namespace OpenMD {
       RealType myDeriv = 0.0;
       RealType myDerivC = 0.0;
      
-      ros = *(idat.rij) * sigmai;
-      
-      cerr << "ros = " << ros << "\n";
+      ros = *(idat.rij) * sigmai;     
       
       getLJfunc(ros, myPot, myDeriv);
       
@@ -280,19 +278,12 @@ namespace OpenMD {
         myDerivC = 0.0;        
       }
 
-      cerr << "myPot =  " << myPot << "\n";
-      cerr << "myPotC =  " << myPotC << "\n";
-      cerr << "myDerivC = " << myDerivC << "\n";
-      cerr << "epsilon =  " << epsilon << "\n";
-      cerr << "vdwm =  " << *(idat.vdwMult) << "\n";
-      cerr << "sw = " << *(idat.sw) << "\n";
       RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
       *(idat.vpair) += pot_temp;
       
       RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
-                                                                myDerivC)*sigmai;
-      
-      (idat.pot)[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+                                                                myDerivC)*sigmai;      
+      (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
       *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
     }
     return;

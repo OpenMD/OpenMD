@@ -359,7 +359,7 @@ namespace OpenMD {
     Vector3d rxu2 = cross(*(idat.d), ul2);
     Vector3d uxu = cross(ul1, ul2);
     
-    idat.pot[VANDERWAALS_FAMILY] += U *  *(idat.sw);
+    (*(idat.pot))[VANDERWAALS_FAMILY] += U *  *(idat.sw);
     *(idat.f1) += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
     *(idat.t1) += dUda * rxu1 - dUdg * uxu;
     *(idat.t2) += dUdb * rxu2 - dUdg * uxu;

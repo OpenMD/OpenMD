@@ -87,7 +87,7 @@ namespace OpenMD {
     cellOffsets_.push_back( Vector3i(1, -1,1) );
   }
 
-  void ForceDecomposition::fillSelfData(SelfData sdat, int atom1) {
+  void ForceDecomposition::fillSelfData(SelfData &sdat, int atom1) {
     
     // Still Missing atype, skippedCharge, potVec pot,
     if (storageLayout_ & DataStorage::dslElectroFrame) {
@@ -122,7 +122,10 @@ namespace OpenMD {
     // if we have changed the group identities or haven't set up the
     // saved positions we automatically will need a neighbor list update:
 
-    if ( saved_CG_positions_.size() != nGroups ) return true;
+    if ( saved_CG_positions_.size() != nGroups ) {
+      cerr << "build because size\n";
+      return true;
+    }
 
     RealType dispmax = 0.0;
     Vector3d disp;    
@@ -140,6 +143,11 @@ namespace OpenMD {
     // a conservative test of list skin crossings
     dispmax = 2.0 * sqrt (3.0 * dispmax * dispmax);
 
-    return (dispmax > skinThickness_);    
+
+    if (dispmax > skinThickness_) {
+      cerr << "build because movement\n";
+      return (dispmax > skinThickness_);   
+    }
+    return false;
   }
 }
