@@ -51,8 +51,7 @@ using namespace std;
 
 namespace OpenMD {
 
-  Morse::Morse() : name_("Morse"), initialized_(false), forceField_(NULL), 
-                   shiftedPot_(false), shiftedFrc_(false) {}
+  Morse::Morse() : name_("Morse"), initialized_(false), forceField_(NULL) {}
   
   void Morse::initialize() {    
 
@@ -171,7 +170,7 @@ namespace OpenMD {
       RealType expfncC = 0.0;
       RealType expfnc2C = 0.0;
       
-      if (Morse::shiftedPot_ || Morse::shiftedFrc_) {
+      if (idat.shiftedPot || idat.shiftedForce) {
         exptC     = -beta*( *(idat.rcut) - Re);
         expfncC   = exp(exptC);
         expfnc2C  = expfncC*expfncC;
@@ -184,10 +183,10 @@ namespace OpenMD {
         myPot  = De * (expfnc2  - 2.0 * expfnc);
         myDeriv   = 2.0 * De * beta * (expfnc - expfnc2);
         
-        if (Morse::shiftedPot_) {
+        if (idat.shiftedPot) {
           myPotC = De * (expfnc2C - 2.0 * expfncC);
           myDerivC = 0.0;
-        } else if (Morse::shiftedFrc_) {
+        } else if (idat.shiftedForce) {
           myPotC = De * (expfnc2C - 2.0 * expfncC);
           myDerivC  = 2.0 * De * beta * (expfnc2C - expfnc2C);
           myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut) );
@@ -203,10 +202,10 @@ namespace OpenMD {
         myPot  = De * expfnc2;
         myDeriv  = -2.0 * De * beta * expfnc2;
         
-        if (Morse::shiftedPot_) {
+        if (idat.shiftedPot) {
           myPotC = De * expfnc2C;
           myDerivC = 0.0;
-        } else if (Morse::shiftedFrc_) {
+        } else if (idat.shiftedForce) {
           myPotC = De * expfnc2C;
           myDerivC = -2.0 * De * beta * expfnc2C;
           myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut));

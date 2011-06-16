@@ -68,7 +68,7 @@ namespace OpenMD {
     RealType getEpsilon(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
+    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);    
             
   private:
     void initialize();
@@ -82,8 +82,6 @@ namespace OpenMD {
 
     map<int, AtomType*> LJMap;
     map<pair<AtomType*, AtomType*>, LJInteractionData> MixingMap;
-    bool shiftedPot_;
-    bool shiftedFrc_;
     ForceField* forceField_;
     string name_;
   };

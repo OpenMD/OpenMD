@@ -50,8 +50,7 @@ using namespace std;
 
 namespace OpenMD {
 
-  MAW::MAW() : name_("MAW"), initialized_(false), forceField_(NULL), 
-                   shiftedPot_(false), shiftedFrc_(false) {}
+  MAW::MAW() : name_("MAW"), initialized_(false), forceField_(NULL) {}
   
   void MAW::initialize() {    
 
@@ -172,16 +171,16 @@ namespace OpenMD {
       myPot  = D_e * (expfnc2  - 2.0 * expfnc);
       myDeriv   = 2.0 * D_e * beta * (expfnc - expfnc2);
       
-      if (MAW::shiftedPot_ || MAW::shiftedFrc_) {
+      if (idat.shiftedPot || idat.shiftedForce) {
         exptC     = -beta*( *(idat.rcut)  - R_e);
         expfncC   = exp(exptC);
         expfnc2C  = expfncC*expfncC;
       }
       
-      if (MAW::shiftedPot_) {
+      if (idat.shiftedPot) {
         myPotC = D_e * (expfnc2C - 2.0 * expfncC);
         myDerivC = 0.0;
-      } else if (MAW::shiftedFrc_) {
+      } else if (idat.shiftedForce) {
         myPotC = D_e * (expfnc2C - 2.0 * expfncC);
         myDerivC  = 2.0 * D_e * beta * (expfnc2C - expfnc2C);
         myPotC += myDerivC * ( *(idat.rij)  -  *(idat.rcut) );

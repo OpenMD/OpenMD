@@ -48,8 +48,7 @@
 
 namespace OpenMD {
 
-  LJ::LJ() : name_("LJ"), initialized_(false), shiftedPot_(false), 
-             shiftedFrc_(false), forceField_(NULL) {}
+  LJ::LJ() : name_("LJ"), initialized_(false), forceField_(NULL) {}
 
   LJParam LJ::getLJParam(AtomType* atomType) {
     
@@ -265,11 +264,11 @@ namespace OpenMD {
       
       getLJfunc(ros, myPot, myDeriv);
       
-      if (shiftedPot_) {
+      if (idat.shiftedPot) {
         rcos = *(idat.rcut) * sigmai;
         getLJfunc(rcos, myPotC, myDerivC);
         myDerivC = 0.0;
-      } else if (LJ::shiftedFrc_) {
+      } else if (idat.shiftedForce) {
         rcos = *(idat.rcut) * sigmai;
         getLJfunc(rcos, myPotC, myDerivC);
         myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
@@ -283,6 +282,7 @@ namespace OpenMD {
       
       RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
                                                                 myDerivC)*sigmai;      
+
       (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
       *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
     }

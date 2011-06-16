@@ -94,13 +94,13 @@ namespace OpenMD {
     void fillInteractionData(InteractionData &idat, int atom1, int atom2);
     void unpackInteractionData(InteractionData &idat, int atom1, int atom2);
     void fillSkipData(InteractionData &idat, int atom1, int atom2);
+    void unpackSkipData(InteractionData &idat, int atom1, int atom2);
 
   private: 
     void createGtypeCutoffMap();
 
     int nLocal_;
     int nGroups_;
-    vector<int> identsLocal;
     vector<int> AtomLocalToGlobal;
     vector<int> cgLocalToGlobal;
     vector<RealType> groupCutoff;
@@ -137,7 +137,6 @@ namespace OpenMD {
     // work arrays for assembling potential energy
     vector<potVec> pot_row;
     vector<potVec> pot_col;
-    potVec pot_local;
 
     vector<int> identsRow;
     vector<int> identsCol;

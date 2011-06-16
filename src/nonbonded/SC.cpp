@@ -329,7 +329,7 @@ namespace OpenMD {
     *(sdat.frho) = u;
     *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
 
-    sdat.pot[METALLIC_FAMILY] += u;
+    (*(sdat.pot))[METALLIC_FAMILY] += u;
     *(sdat.particlePot) += u;
     
     return;

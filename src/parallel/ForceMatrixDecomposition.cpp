@@ -61,7 +61,7 @@ namespace OpenMD {
     nGroups_ = info_->getNLocalCutoffGroups();
     cerr << "in dId, nGroups = " << nGroups_ << "\n";
     // gather the information for atomtype IDs (atids):
-    identsLocal = info_->getIdentArray();
+    idents = info_->getIdentArray();
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
@@ -108,8 +108,8 @@ namespace OpenMD {
     identsRow.resize(nAtomsInRow_);
     identsCol.resize(nAtomsInCol_);
     
-    AtomCommIntRow->gather(identsLocal, identsRow);
-    AtomCommIntColumn->gather(identsLocal, identsCol);
+    AtomCommIntRow->gather(idents, identsRow);
+    AtomCommIntColumn->gather(idents, identsCol);
     
     AtomCommIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
     AtomCommIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
@@ -232,12 +232,15 @@ namespace OpenMD {
     set<AtomType*> atypes = info_->getSimulatedAtomTypes();
     vector<RealType> atypeCutoff;
     atypeCutoff.resize( atypes.size() );
-
+      
     for (set<AtomType*>::iterator at = atypes.begin(); 
          at != atypes.end(); ++at){
-      rc = interactionMan_->getSuggestedCutoffRadius(*at);
       atid = (*at)->getIdent();
-      atypeCutoff[atid] = rc;
+
+      if (userChoseCutoff_)
+        atypeCutoff[atid] = userCutoff_;
+      else
+        atypeCutoff[atid] = interactionMan_->getSuggestedCutoffRadius(*at);
     }
 
     vector<RealType> gTypeCutoffs;
@@ -309,7 +312,7 @@ namespace OpenMD {
       for (vector<int>::iterator ia = atomList.begin(); 
            ia != atomList.end(); ++ia) {            
         int atom1 = (*ia);
-        atid = identsLocal[atom1];
+        atid = idents[atom1];
         if (atypeCutoff[atid] > groupCutoff[cg1]) {
           groupCutoff[cg1] = atypeCutoff[atid];
         }
@@ -378,7 +381,7 @@ namespace OpenMD {
           if (abs(gTypeCutoffMap[key].first - userCutoff_) > 0.0001) {
             sprintf(painCave.errMsg,
                     "ForceMatrixDecomposition::createGtypeCutoffMap " 
-                    "user-specified rCut does not match computed group Cutoff\n");
+                    "user-specified rCut (%lf) does not match computed group Cutoff\n", userCutoff_);
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();            
@@ -410,10 +413,8 @@ namespace OpenMD {
   }
 
   void ForceMatrixDecomposition::zeroWorkArrays() {
-
-    for (int j = 0; j < N_INTERACTION_FAMILIES; j++) {
-      longRangePot_[j] = 0.0;
-    }
+    pairwisePot = 0.0;
+    embeddingPot = 0.0;
 
 #ifdef IS_MPI
     if (storageLayout_ & DataStorage::dslForce) {
@@ -430,9 +431,7 @@ namespace OpenMD {
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
 
     fill(pot_col.begin(), pot_col.end(), 
-         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
-    
-    pot_local = Vector<RealType, N_INTERACTION_FAMILIES>(0.0);
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));   
 
     if (storageLayout_ & DataStorage::dslParticlePot) {    
       fill(atomRowData.particlePot.begin(), atomRowData.particlePot.end(), 0.0);
@@ -606,7 +605,7 @@ namespace OpenMD {
     AtomCommPotRow->scatter(pot_row, pot_temp);
 
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
-      pot_local += pot_temp[ii];
+      pairwisePot += pot_temp[ii];
     
     fill(pot_temp.begin(), pot_temp.end(), 
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
@@ -614,9 +613,9 @@ namespace OpenMD {
     AtomCommPotColumn->scatter(pot_col, pot_temp);    
     
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
-      pot_local += pot_temp[ii];
-    
+      pairwisePot += pot_temp[ii];    
 #endif
+
   }
 
   int ForceMatrixDecomposition::getNAtomsInRow() {   
@@ -754,8 +753,9 @@ namespace OpenMD {
     for (vector<int>::iterator i = skipsForAtom[atom1].begin();
          i != skipsForAtom[atom1].end(); ++i) {
       if ( (*i) == unique_id_2 ) return true;
-    }    
+    }
 
+    return false;
   }
 
 
@@ -820,8 +820,8 @@ namespace OpenMD {
 
 #else
 
-    idat.atypes = make_pair( ff_->getAtomType(identsLocal[atom1]), 
-                             ff_->getAtomType(identsLocal[atom2]) );
+    idat.atypes = make_pair( ff_->getAtomType(idents[atom1]), 
+                             ff_->getAtomType(idents[atom2]) );
 
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);
@@ -838,7 +838,7 @@ namespace OpenMD {
       idat.t2 = &(snap_->atomData.torque[atom2]);
     }
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (storageLayout_ & DataStorage::dslDensity) {     
       idat.rho1 = &(snap_->atomData.density[atom1]);
       idat.rho2 = &(snap_->atomData.density[atom2]);
     }
@@ -870,8 +870,8 @@ namespace OpenMD {
     atomRowData.force[atom1] += *(idat.f1);
     atomColData.force[atom2] -= *(idat.f1);
 #else
-    longRangePot_ += *(idat.pot);
-    
+    pairwisePot += *(idat.pot);
+
     snap_->atomData.force[atom1] += *(idat.f1);
     snap_->atomData.force[atom2] -= *(idat.f1);
 #endif
@@ -881,6 +881,7 @@ namespace OpenMD {
 
   void ForceMatrixDecomposition::fillSkipData(InteractionData &idat,
                                               int atom1, int atom2) {
+    // Still Missing:: skippedCharge fill must be added to DataStorage
 #ifdef IS_MPI
     idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
                              ff_->getAtomType(identsCol[atom2]) );
@@ -894,8 +895,8 @@ namespace OpenMD {
       idat.t2 = &(atomColData.torque[atom2]);
     }
 #else
-    idat.atypes = make_pair( ff_->getAtomType(identsLocal[atom1]), 
-                             ff_->getAtomType(identsLocal[atom2]) );
+    idat.atypes = make_pair( ff_->getAtomType(idents[atom1]), 
+                             ff_->getAtomType(idents[atom2]) );
 
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       idat.eFrame1 = &(snap_->atomData.electroFrame[atom1]);
@@ -907,6 +908,18 @@ namespace OpenMD {
     }
 #endif    
   }
+
+
+  void ForceMatrixDecomposition::unpackSkipData(InteractionData &idat, int atom1, int atom2) {    
+#ifdef IS_MPI
+    pot_row[atom1] += 0.5 *  *(idat.pot);
+    pot_col[atom2] += 0.5 *  *(idat.pot);
+#else
+    pairwisePot += *(idat.pot);   
+#endif
+
+  }
+
 
   /*
    * buildNeighborList
@@ -1110,7 +1123,7 @@ namespace OpenMD {
     saved_CG_positions_.clear();
     for (int i = 0; i < nGroups_; i++)
       saved_CG_positions_.push_back(snap_->cgData.position[i]);
-    
+   
     return neighborList;
   }
 } //end namespace OpenMD

@@ -241,24 +241,26 @@ namespace OpenMD {
     }
     
     
-    // make sure every pair of atom types in this simulation has a
-    // non-bonded interaction:
+    // Make sure every pair of atom types in this simulation has a
+    // non-bonded interaction.  If not, just inform the user.
 
     set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
     set<AtomType*>::iterator it, jt;
+
     for (it = simTypes.begin(); it != simTypes.end(); ++it) {
       atype1 = (*it);
-      for (jt = simTypes.begin(); jt != simTypes.end(); ++jt) {
+      for (jt = it; jt != simTypes.end(); ++jt) {
         atype2 = (*jt);
         key = make_pair(atype1, atype2);
         
         if (interactions_[key].size() == 0) {
           sprintf( painCave.errMsg,
-                   "InteractionManager unable to find an appropriate non-bonded\n"
-                   "\tinteraction for atom types %s - %s\n",
+                   "InteractionManager could not find a matching non-bonded\n"
+                   "\tinteraction for atom types %s - %s\n"
+                   "\tProceeding without this interaction.\n",
                    atype1->getName().c_str(), atype2->getName().c_str());
           painCave.severity = OPENMD_INFO;
-          painCave.isFatal = 1;
+          painCave.isFatal = 0;
           simError();
         }
       }

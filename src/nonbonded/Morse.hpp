@@ -76,8 +76,6 @@ namespace OpenMD {
     void initialize();
     bool initialized_;
     map<pair<AtomType*, AtomType*>, MorseInteractionData> MixingMap;
-    bool shiftedPot_;
-    bool shiftedFrc_;
     ForceField* forceField_;    
     map<string, MorseInteractionType> stringToEnumMap_;
     string name_;

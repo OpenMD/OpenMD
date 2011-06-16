@@ -100,7 +100,8 @@ namespace OpenMD {
     virtual void collectIntermediateData() = 0;
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
-    virtual potVec getLongRangePotential() { return longRangePot_; }
+    virtual potVec* getEmbeddingPotential() { return &embeddingPot; }
+    virtual potVec* getPairwisePotential() { return &pairwisePot; }
 
     // neighbor list routines
     virtual bool checkNeighborList();
@@ -137,7 +138,9 @@ namespace OpenMD {
     // filling interaction blocks with pointers
     virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
     virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
+
     virtual void fillSkipData(InteractionData &idat, int atom1, int atom2) = 0;
+    virtual void unpackSkipData(InteractionData &idat, int atom1, int atom2) = 0;
     virtual void fillSelfData(SelfData &sdat, int atom1);
     
   protected:
@@ -150,6 +153,10 @@ namespace OpenMD {
     int storageLayout_;
     RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
     RealType largestRcut_;
+
+    vector<int> idents;
+    potVec pairwisePot;
+    potVec embeddingPot;
 
     /** 
      * The topological distance between two atomic sites is handled
@@ -169,7 +176,6 @@ namespace OpenMD {
     Vector3i nCells_;
     vector<vector<int> > cellList_;
     vector<Vector3d> saved_CG_positions_;
-    potVec longRangePot_;
 
     bool userChoseCutoff_;
     RealType userCutoff_;

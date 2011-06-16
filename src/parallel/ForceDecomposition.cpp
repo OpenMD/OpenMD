@@ -88,8 +88,10 @@ namespace OpenMD {
   }
 
   void ForceDecomposition::fillSelfData(SelfData &sdat, int atom1) {
-    
-    // Still Missing atype, skippedCharge, potVec pot,
+
+    sdat.atype = ff_->getAtomType(idents[atom1]);
+        
+    // Still Missing skippedCharge
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);
     }
@@ -147,6 +149,8 @@ namespace OpenMD {
     if (dispmax > skinThickness_) {
       cerr << "build because movement\n";
       return (dispmax > skinThickness_);   
+    } else {
+      cerr << "not rebuilding\n";
     }
     return false;
   }

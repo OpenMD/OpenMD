@@ -79,6 +79,8 @@ namespace OpenMD {
     RealType* rij;            /**< interatomic separation */
     RealType* r2;             /**< square of rij */
     RealType* rcut;           /**< cutoff radius for this interaction */
+    bool shiftedPot;          /**< shift the potential up inside the cutoff? */
+    bool shiftedForce;        /**< shifted forces smoothly inside the cutoff? */
     RealType* sw;             /**< switching function value at rij */
     int* topoDist;            /**< topological distance between atoms */
     RealType* vdwMult;        /**< multiplier for van der Waals interactions */

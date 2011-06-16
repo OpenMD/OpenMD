@@ -72,8 +72,6 @@ namespace OpenMD {
     void initialize();
     bool initialized_;
     map<pair<AtomType*, AtomType*>, MAWInteractionData> MixingMap;
-    bool shiftedPot_;
-    bool shiftedFrc_;
     ForceField* forceField_;    
     string name_;
     

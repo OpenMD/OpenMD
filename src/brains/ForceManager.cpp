@@ -59,6 +59,10 @@
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
 
+#include <cstdio>
+#include <iostream>
+#include <iomanip>
+
 using namespace std;
 namespace OpenMD {
   
@@ -123,8 +127,9 @@ namespace OpenMD {
         painCave.severity = OPENMD_INFO;
         simError();
       }
-      fDecomp_->setUserCutoff(rCut_);
     }
+
+    fDecomp_->setUserCutoff(rCut_);
 
     map<string, CutoffMethod> stringToCutoffMethod;
     stringToCutoffMethod["HARD"] = HARD;
@@ -518,27 +523,30 @@ namespace OpenMD {
     InteractionData idat;
     SelfData sdat;
     RealType mf;
-    potVec pot(0.0);
-    potVec longRangePotential(0.0);
     RealType lrPot;
     RealType vpair;
+    potVec longRangePotential(0.0);
+    potVec workPot(0.0);
 
     int loopStart, loopEnd;
 
     idat.vdwMult = &vdwMult;
     idat.electroMult = &electroMult;
-    idat.pot = &pot;
+    idat.pot = &workPot;
+    sdat.pot = fDecomp_->getEmbeddingPotential();
     idat.vpair = &vpair;
     idat.f1 = &f1;
     idat.sw = &sw;
-
+    idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
+    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE) ? true : false;
+    
     loopEnd = PAIR_LOOP;
     if (info_->requiresPrepair() ) {
       loopStart = PREPAIR_LOOP;
     } else {
       loopStart = PAIR_LOOP;
     }
-    
+   
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
     
       if (iLoop == loopStart) {
@@ -581,10 +589,10 @@ namespace OpenMD {
             for (vector<int>::iterator jb = atomListColumn.begin(); 
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
-              
+            
               if (!fDecomp_->skipAtomPair(atom1, atom2)) {
-                
                 vpair = 0.0;
+                workPot = 0.0;
                 f1 = V3Zero;
 
                 fDecomp_->fillInteractionData(idat, atom1, atom2);
@@ -683,7 +691,8 @@ namespace OpenMD {
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
-
+          
+          
           fDecomp_->distributeIntermediateData();        
         }
       }
@@ -704,6 +713,7 @@ namespace OpenMD {
           atom2 = (*jb);
           fDecomp_->fillSkipData(idat, atom1, atom2);
           interactionMan_->doSkipCorrection(idat);
+          fDecomp_->unpackSkipData(idat, atom1, atom2);
 
         }
       }
@@ -718,7 +728,9 @@ namespace OpenMD {
 
     }
 
-    longRangePotential = fDecomp_->getLongRangePotential();
+    longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
+      *(fDecomp_->getPairwisePotential());
+
     lrPot = longRangePotential.sum();
 
     //store the tau and long range potential    

@@ -759,7 +759,7 @@ namespace OpenMD {
       if ( simParams_->getAccumulateBoxDipole() ) {
 	calcBoxDipole_ = true;       
       }
-
+    
     set<AtomType*>::iterator i;
     set<AtomType*> atomTypes;
     atomTypes = getSimulatedAtomTypes();    
@@ -772,18 +772,28 @@ namespace OpenMD {
       usesMetallic |= (*i)->isMetal();
       usesDirectional |= (*i)->isDirectional();
     }
-
+    
 #ifdef IS_MPI    
     int temp;
     temp = usesDirectional;
     MPI_Allreduce(&temp, &usesDirectionalAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
-
+    
     temp = usesMetallic;
     MPI_Allreduce(&temp, &usesMetallicAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
-
+    
     temp = usesElectrostatic;
     MPI_Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
+#else
+
+    usesDirectionalAtoms_ = usesDirectional;
+    usesMetallicAtoms_ = usesMetallic;
+    usesElectrostaticAtoms_ = usesElectrostatic;
+
 #endif
+    
+    requiresPrepair_ = usesMetallicAtoms_ ? true : false; 
+    requiresSkipCorrection_ = usesElectrostaticAtoms_ ? true : false;
+    requiresSelfCorrection_ = usesElectrostaticAtoms_ ? true : false;    
   }
 
 
