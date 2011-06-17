@@ -67,6 +67,7 @@ namespace OpenMD {
     eam_->setForceField(forceField_);
     sc_->setForceField(forceField_);
     morse_->setForceField(forceField_);
+    electrostatic_->setSimInfo(info_);
     electrostatic_->setForceField(forceField_);
     maw_->setForceField(forceField_);
 
@@ -267,6 +268,14 @@ namespace OpenMD {
     }
 
     initialized_ = true;
+  }
+
+  void InteractionManager::setCutoffRadius(RealType rcut) {
+    electrostatic_->setCutoffRadius(rcut);
+  }
+
+  void InteractionManager::setSwitchingRadius(RealType rswitch) {
+    electrostatic_->setSwitchingRadius(rswitch);
   }
   
   void InteractionManager::doPrePair(InteractionData idat){

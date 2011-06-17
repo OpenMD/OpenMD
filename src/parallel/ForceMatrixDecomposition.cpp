@@ -66,6 +66,7 @@ namespace OpenMD {
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
     massFactors = info_->getMassFactors();
+
     PairList excludes = info_->getExcludedInteractions();
     PairList oneTwo = info_->getOneTwoInteractions();
     PairList oneThree = info_->getOneThreeInteractions();
@@ -690,6 +691,7 @@ namespace OpenMD {
 #ifdef IS_MPI
     return massFactorsRow[atom1];
 #else
+    cerr << "mfs = " << massFactors.size() << " atom1 = " << atom1 << "\n";
     return massFactors[atom1];
 #endif
   }
@@ -881,7 +883,6 @@ namespace OpenMD {
 
   void ForceMatrixDecomposition::fillSkipData(InteractionData &idat,
                                               int atom1, int atom2) {
-    // Still Missing:: skippedCharge fill must be added to DataStorage
 #ifdef IS_MPI
     idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
                              ff_->getAtomType(identsCol[atom2]) );
@@ -890,9 +891,15 @@ namespace OpenMD {
       idat.eFrame1 = &(atomRowData.electroFrame[atom1]);
       idat.eFrame2 = &(atomColData.electroFrame[atom2]);
     }
+
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(atomRowData.torque[atom1]);
       idat.t2 = &(atomColData.torque[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      idat.skippedCharge1 = &(atomRowData.skippedCharge[atom1]);
+      idat.skippedCharge2 = &(atomColData.skippedCharge[atom2]);
     }
 #else
     idat.atypes = make_pair( ff_->getAtomType(idents[atom1]), 
@@ -902,9 +909,15 @@ namespace OpenMD {
       idat.eFrame1 = &(snap_->atomData.electroFrame[atom1]);
       idat.eFrame2 = &(snap_->atomData.electroFrame[atom2]);
     }
+
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(snap_->atomData.torque[atom1]);
       idat.t2 = &(snap_->atomData.torque[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      idat.skippedCharge1 = &(snap_->atomData.skippedCharge[atom1]);
+      idat.skippedCharge2 = &(snap_->atomData.skippedCharge[atom2]);
     }
 #endif    
   }

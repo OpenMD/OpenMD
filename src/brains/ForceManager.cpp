@@ -130,6 +130,7 @@ namespace OpenMD {
     }
 
     fDecomp_->setUserCutoff(rCut_);
+    interactionMan_->setCutoffRadius(rCut_);
 
     map<string, CutoffMethod> stringToCutoffMethod;
     stringToCutoffMethod["HARD"] = HARD;
@@ -263,6 +264,7 @@ namespace OpenMD {
     }
     switcher_->setSwitchType(sft_);
     switcher_->setSwitch(rSwitch_, rCut_);
+    interactionMan_->setSwitchingRadius(rSwitch_);
   }
   
   void ForceManager::initialize() {

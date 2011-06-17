@@ -77,6 +77,8 @@ namespace OpenMD {
     void doPair(InteractionData idat);    
     void doSkipCorrection(InteractionData idat);
     void doSelfCorrection(SelfData sdat);
+    void setCutoffRadius(RealType rCut);
+    void setSwitchingRadius(RealType rSwitch);
     RealType getSuggestedCutoffRadius(int *atid1);   
     RealType getSuggestedCutoffRadius(AtomType *atype);
     

@@ -52,11 +52,11 @@
 namespace OpenMD {
   
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
-                                  forceField_(NULL) {}
+                                  forceField_(NULL), info_(NULL) {}
   
   void Electrostatic::initialize() { 
 
-    Globals* simParams_;
+    Globals* simParams_ = info_->getSimParams();
 
     summationMap_["HARD"]               = esm_HARD;
     summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;
@@ -407,12 +407,14 @@ namespace OpenMD {
     return;
   }
   
-  void Electrostatic::setElectrostaticCutoffRadius( RealType theECR, 
-                                                    RealType theRSW ) {
-    cutoffRadius_ = theECR;
+  void Electrostatic::setCutoffRadius( RealType rCut ) {
+    cutoffRadius_ = rCut;
     rrf_ = cutoffRadius_;
-    rt_ = theRSW;
     haveCutoffRadius_ = true;
+  }
+
+  void Electrostatic::setSwitchingRadius( RealType rSwitch ) {
+    rt_ = rSwitch;
   }
   void Electrostatic::setElectrostaticSummationMethod( ElectrostaticSummationMethod esm ) {
     summationMethod_ = esm;

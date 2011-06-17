@@ -126,6 +126,11 @@ namespace OpenMD {
       //error
       std::cerr << "size does not match"<< std::endl;        
     }
+
+    if (storageLayout_ & dslSkippedCharge && skippedCharge.size() != size_) {
+      //error
+      std::cerr << "size does not match"<< std::endl;        
+    }
     
     return size_;
 
@@ -185,6 +190,10 @@ namespace OpenMD {
       internalResize(electricField, newSize);
     }
 
+    if (storageLayout_ & dslSkippedCharge) {
+      internalResize(skippedCharge, newSize);
+    }
+
     size_ = newSize;
   }
 
@@ -239,6 +248,10 @@ namespace OpenMD {
 
     if (storageLayout_ & dslElectricField) {
       electricField.reserve(size);
+    }
+
+    if (storageLayout_ & dslSkippedCharge) {
+      skippedCharge.reserve(size);
     }
 
   }
@@ -298,6 +311,10 @@ namespace OpenMD {
 
     if (storageLayout_ & dslElectricField) {
       internalCopy(electricField, source, num, target);
+    }
+
+    if (storageLayout_ & dslSkippedCharge) {
+      internalCopy(skippedCharge, source, num, target);
     }
   }
 
@@ -363,6 +380,10 @@ namespace OpenMD {
 
     case dslElectricField:
       return internalGetArrayPointer(electricField);
+      break;
+
+    case dslSkippedCharge:
+      return internalGetArrayPointer(skippedCharge);
       break;
            
     default:
@@ -472,6 +493,9 @@ namespace OpenMD {
     }
     if (layout & dslElectricField) {
       bytes += sizeof(Vector3d);
+    }
+    if (layout & dslSkippedCharge) {
+      bytes += sizeof(RealType);
     }
 
     return bytes;

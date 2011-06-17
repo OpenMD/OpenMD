@@ -47,6 +47,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
+#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
 
@@ -82,14 +83,15 @@ namespace OpenMD {
   public:    
     Electrostatic();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimInfo(SimInfo* info) {info_ = info;};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual void calcSkipCorrection(InteractionData &idat);
     virtual void calcSelfCorrection(SelfData &sdat);
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
-
-    void setElectrostaticCutoffRadius( RealType theECR, RealType theRSW );
+    void setCutoffRadius( RealType rCut );
+    void setSwitchingRadius( RealType rSwitch );
     void setElectrostaticSummationMethod( ElectrostaticSummationMethod esm );
     void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
     void setDampingAlpha( RealType alpha );
@@ -105,6 +107,7 @@ namespace OpenMD {
     bool haveElectroSpline_;
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
+    SimInfo* info_;
     ForceField* forceField_;
     RealType cutoffRadius_;
     RealType cutoffRadius2_;

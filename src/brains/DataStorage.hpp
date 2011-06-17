@@ -58,7 +58,7 @@ namespace OpenMD {
    * @class DataStorage
    * @warning do not try to insert element into (or ease element from) private member data 
    * of DataStorage directly.
-   * @todo DataStorage may need refactoring. Every std::vector can inherit from the same base class
+   * @todo DataStorage may need refactoring. Every vector can inherit from the same base class
    * which will make it easy to maintain
    */
   class DataStorage {
@@ -77,12 +77,12 @@ namespace OpenMD {
       dslDensity = 512,
       dslFunctional = 1024,
       dslFunctionalDerivative = 2048,
-      dslElectricField = 4096
+      dslElectricField = 4096,
+      dslSkippedCharge = 8192
     };
 
-
     DataStorage();
-    DataStorage(int size, int storageLayout = 8191);
+    DataStorage(int size, int storageLayout = 16383);
     /** return the size of this DataStorage. */
     int getSize();
     /**
@@ -94,7 +94,7 @@ namespace OpenMD {
      * Reallocates memory manually. 
      *
      * The main reason for using reserve() is efficiency if you know
-     * the capacity to which your std::vector must eventually grow,
+     * the capacity to which your vector must eventually grow,
      * then it is usually more efficient to allocate that memory all
      * at once.
      */
@@ -102,9 +102,9 @@ namespace OpenMD {
     /**
      * Copies data inside DataStorage class.
      *
-     * Copy function actually call std::copy for every std::vector in
-     * DataStorage class.  One Precondition of std::copy is that
-     * target is not within the range [soruce, soruce + num]
+     * Copy function actually call copy for every vector in
+     * DataStorage class.  One Precondition of copy is that
+     * target is not within the range [source, soruce + num]
      *
      * @param souce 
      * @param num number of element to be moved
@@ -121,9 +121,8 @@ namespace OpenMD {
     std::vector<Vector3d> position;        /** position array */
     std::vector<Vector3d> velocity;        /** velocity array */
     std::vector<RotMat3x3d> aMat;          /** rotation matrix array */
-    std::vector<Vector3d> angularMomentum; /** angular momentum array
-                                               (body-fixed) */
-    std::vector<Mat3x3d> electroFrame;     /** the lab frame unit vector array*/
+    std::vector<Vector3d> angularMomentum; /** angular momentum array (body-fixed) */
+    std::vector<Mat3x3d> electroFrame;     /** the lab frame unit std::vector array*/
     std::vector<RealType> zAngle;          /** z-angle array */        
     std::vector<Vector3d> force;           /** force array */
     std::vector<Vector3d> torque;          /** torque array */
@@ -132,6 +131,7 @@ namespace OpenMD {
     std::vector<RealType> functional;      /** density functional */
     std::vector<RealType> functionalDerivative; /** derivative of functional */
     std::vector<Vector3d> electricField;   /** local electric field */
+    std::vector<RealType> skippedCharge;   /** charge skipped during normal pairwise calculation */
 
     static int getBytesPerStuntDouble(int layout);
 
