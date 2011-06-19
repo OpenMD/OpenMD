@@ -127,6 +127,7 @@ struct gengetopt_args_info
   const char *rho_r_help; /**< @brief rho of R help description.  */
   const char *angle_r_help; /**< @brief angle of R help description.  */
   const char *hullvol_help; /**< @brief hull volume of nanoparticle help description.  */
+  const char *rodlength_help; /**< @brief length of nanorod help description.  */
   const char *tet_param_help; /**< @brief tetrahedrality order parameter help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
@@ -175,6 +176,7 @@ struct gengetopt_args_info
   unsigned int rho_r_given ;	/**< @brief Whether rho_r was given.  */
   unsigned int angle_r_given ;	/**< @brief Whether angle_r was given.  */
   unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
+  unsigned int rodlength_given ;	/**< @brief Whether rodlength was given.  */
   unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */

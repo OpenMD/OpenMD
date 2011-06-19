@@ -25,7 +25,9 @@ Source    = \
 	BondAngleDistribution.cpp \
 	pAngle.cpp \
 	ObjectCount.cpp \
-	NanoVolume.cpp
+	NanoVolume.cpp  \
+	NanoLength.cpp
+
 BuiltParallelExe = 0
 
 RmiSource =

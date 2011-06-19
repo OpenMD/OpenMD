@@ -79,6 +79,7 @@ const char *gengetopt_args_info_help[] = {
   "      --rho_r                   rho of R",
   "      --angle_r                 angle of R",
   "      --hullvol                 hull volume of nanoparticle",
+  "      --rodlength               length of nanorod",
   "  -Q, --tet_param               tetrahedrality order parameter",
     0
 };
@@ -153,6 +154,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->rho_r_given = 0 ;
   args_info->angle_r_given = 0 ;
   args_info->hullvol_given = 0 ;
+  args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
@@ -252,7 +254,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->rho_r_help = gengetopt_args_info_help[44] ;
   args_info->angle_r_help = gengetopt_args_info_help[45] ;
   args_info->hullvol_help = gengetopt_args_info_help[46] ;
-  args_info->tet_param_help = gengetopt_args_info_help[47] ;
+  args_info->rodlength_help = gengetopt_args_info_help[47] ;
+  args_info->tet_param_help = gengetopt_args_info_help[48] ;
   
 }
 
@@ -493,6 +496,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "angle_r", 0, 0 );
   if (args_info->hullvol_given)
     write_into_file(outfile, "hullvol", 0, 0 );
+  if (args_info->rodlength_given)
+    write_into_file(outfile, "rodlength", 0, 0 );
   if (args_info->tet_param_given)
     write_into_file(outfile, "tet_param", 0, 0 );
   
@@ -570,6 +575,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->rho_r_given = 0 ;
   args_info->angle_r_given = 0 ;
   args_info->hullvol_given = 0 ;
+  args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
@@ -862,6 +868,7 @@ cmdline_parser_internal (
         { "rho_r",	0, NULL, 0 },
         { "angle_r",	0, NULL, 0 },
         { "hullvol",	0, NULL, 0 },
+        { "rodlength",	0, NULL, 0 },
         { "tet_param",	0, NULL, 'Q' },
         { 0,  0, 0, 0 }
       };
@@ -1551,6 +1558,23 @@ cmdline_parser_internal (
                 &(local_args_info.hullvol_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "hullvol", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* length of nanorod.  */
+          else if (strcmp (long_options[option_index].name, "rodlength") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->rodlength_given),
+                &(local_args_info.rodlength_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "rodlength", '-',
                 additional_error))
               goto failure;
           

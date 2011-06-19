@@ -69,6 +69,7 @@
 #include "applications/staticProps/pAngle.hpp"
 #include "applications/staticProps/BondAngleDistribution.hpp"
 #include "applications/staticProps/NanoVolume.hpp"
+#include "applications/staticProps/NanoLength.hpp"
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
 #include "applications/staticProps/Hxy.hpp"
 #endif
@@ -328,6 +329,8 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.hullvol_given) {
     analyser = new NanoVolume(info, dumpFileName, sele1);
+  } else if (args_info.rodlength_given) {
+    analyser = new NanoLength(info, dumpFileName, sele1);
   } else if (args_info.angle_r_given) {
     analyser = new AngleR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg);
   }
