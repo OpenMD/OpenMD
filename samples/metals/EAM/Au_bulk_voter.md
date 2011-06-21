@@ -18,7 +18,6 @@ ensemble = "NVE";
 dt = 4.0;
 runTime = 3e3;
 
-
 sampleTime = 200.0;
 statusTime = 4.0;
 seed = 985456376;

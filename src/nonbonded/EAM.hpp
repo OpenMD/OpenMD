@@ -80,6 +80,8 @@ namespace OpenMD {
     void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*,AtomType*> atypes);
+    void setCutoffRadius( RealType rCut );
+
 
   private:
     void initialize();  
@@ -91,6 +93,7 @@ namespace OpenMD {
     CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
     
     bool initialized_;
+    bool haveCutoffRadius_;
     std::map<int, AtomType*> EAMlist;
     std::map<AtomType*, EAMAtomData> EAMMap;
     std::map<std::pair<AtomType*, AtomType*>, EAMInteractionData> MixingMap;

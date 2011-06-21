@@ -51,7 +51,7 @@
 namespace OpenMD {
 
   EAM::EAM() : name_("EAM"), initialized_(false), forceField_(NULL), 
-               mixMeth_(eamJohnson), eamRcut_(0.0) {}
+               mixMeth_(eamJohnson), eamRcut_(0.0), haveCutoffRadius_(false) {}
   
   EAMParam EAM::getEAMParam(AtomType* atomType) {
     
@@ -193,6 +193,11 @@ namespace OpenMD {
     CubicSpline* cs = new CubicSpline();
     cs->addPoints(rvals, phivals);
     return cs;
+  }
+
+  void EAM::setCutoffRadius( RealType rCut ) {
+    eamRcut_ = rCut;
+    haveCutoffRadius_ = true;
   }
 
   void EAM::initialize() { 
@@ -353,19 +358,23 @@ namespace OpenMD {
     
     EAMAtomData data1 = EAMMap[idat.atypes.first];
     EAMAtomData data2 = EAMMap[idat.atypes.second];
-
-    if ( *(idat.rij) < data1.rcut) 
+    
+    if (haveCutoffRadius_) 
+      if ( *(idat.rij) > eamRcut_) return;
+    
+    if ( *(idat.rij) < data1.rcut) {
       *(idat.rho1) += data1.rho->getValueAt( *(idat.rij));
-
-
-    if ( *(idat.rij) < data2.rcut) 
-      *(idat.rho2) += data2.rho->getValueAt( *(idat.rij));
-
-    return;
+      
+      
+      if ( *(idat.rij) < data2.rcut) 
+        *(idat.rho2) += data2.rho->getValueAt( *(idat.rij));
+      
+      return;
+    }
   }
-
+  
   void EAM::calcFunctional(SelfData &sdat) {
-
+    
     if (!initialized_) initialize();
 
     EAMAtomData data1 = EAMMap[ sdat.atype ];
@@ -375,7 +384,7 @@ namespace OpenMD {
     *(sdat.frho) = result.first;
     *(sdat.dfrhodrho) = result.second;
 
-    sdat.pot[METALLIC_FAMILY] += result.first;
+    (*(sdat.pot))[METALLIC_FAMILY] += result.first;
     *(sdat.particlePot) += result.first;
 
     return;
@@ -386,107 +395,110 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
 
+
+
+    if (haveCutoffRadius_) 
+      if ( *(idat.rij) > eamRcut_) return;
+   
     pair<RealType, RealType> res;
     
-    if ( *(idat.rij) < eamRcut_) {
-
-      EAMAtomData data1 = EAMMap[idat.atypes.first];
-      EAMAtomData data2 = EAMMap[idat.atypes.second];
-
-      // get type-specific cutoff radii
-
-      RealType rci = data1.rcut;
-      RealType rcj = data2.rcut;
+    
+    EAMAtomData data1 = EAMMap[idat.atypes.first];
+    EAMAtomData data2 = EAMMap[idat.atypes.second];
+    
+    // get type-specific cutoff radii
+    
+    RealType rci = data1.rcut;
+    RealType rcj = data2.rcut;
+    
+    RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
+    RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
+    RealType phab(0.0), dvpdr(0.0);
+    RealType drhoidr, drhojdr, dudr;
+    
+    if ( *(idat.rij) < rci) {
+      res = data1.rho->getValueAndDerivativeAt( *(idat.rij));
+      rha = res.first;
+      drha = res.second;
       
-      RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
-      RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
-      RealType phab(0.0), dvpdr(0.0);
-      RealType drhoidr, drhojdr, dudr;
+      res = MixingMap[make_pair(idat.atypes.first, idat.atypes.first)].phi->getValueAndDerivativeAt( *(idat.rij) );
+      pha = res.first;
+      dpha = res.second;
+    }
+    
+    if ( *(idat.rij) < rcj) {
+      res = data2.rho->getValueAndDerivativeAt( *(idat.rij) );
+      rhb = res.first;
+      drhb = res.second;
       
-      if ( *(idat.rij) < rci) {
-        res = data1.rho->getValueAndDerivativeAt( *(idat.rij));
-        rha = res.first;
-        drha = res.second;
-
-        res = MixingMap[make_pair(idat.atypes.first, idat.atypes.first)].phi->getValueAndDerivativeAt( *(idat.rij) );
-        pha = res.first;
-        dpha = res.second;
-      }
-
-      if ( *(idat.rij) < rcj) {
-        res = data2.rho->getValueAndDerivativeAt( *(idat.rij) );
-        rhb = res.first;
-        drhb = res.second;
-
-        res = MixingMap[make_pair(idat.atypes.second, idat.atypes.second)].phi->getValueAndDerivativeAt( *(idat.rij) );
-        phb = res.first;
-        dphb = res.second;
-      }
-
-      switch(mixMeth_) {
-      case eamJohnson:
-       
-        if ( *(idat.rij) < rci) {
-          phab = phab + 0.5 * (rhb / rha) * pha;
-          dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
-                               pha*((drhb/rha) - (rhb*drha/rha/rha)));
-        }
-          
-          
-
-        if ( *(idat.rij) < rcj) {
-          phab = phab + 0.5 * (rha / rhb) * phb;
-          dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
-                                 phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
-        }
-
-        break;
-
-      case eamDaw:
-        res = MixingMap[idat.atypes].phi->getValueAndDerivativeAt( *(idat.rij));
-        phab = res.first;
-        dvpdr = res.second;
-
-        break;
-      case eamUnknown:
-      default:
-
-        sprintf(painCave.errMsg,
-                "EAM::calcForce hit a mixing method it doesn't know about!\n"
-                );
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();        
-          
-      }
-      
-      drhoidr = drha;
-      drhojdr = drhb;
-
-      dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr; 
-
-      *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
-        
-      // particlePot is the difference between the full potential and
-      // the full potential without the presence of a particular
-      // particle (atom1).
-      //
-      // This reduces the density at other particle locations, so we
-      // need to recompute the density at atom2 assuming atom1 didn't
-      // contribute.  This then requires recomputing the density
-      // functional for atom2 as well.
-
-      *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha ) 
-        - *(idat.frho2);
-
-      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
-        - *(idat.frho1);
-
-      (*(idat.pot))[METALLIC_FAMILY] += phab;
-
-      *(idat.vpair) += phab;
+      res = MixingMap[make_pair(idat.atypes.second, idat.atypes.second)].phi->getValueAndDerivativeAt( *(idat.rij) );
+      phb = res.first;
+      dphb = res.second;
     }
 
+    switch(mixMeth_) {
+    case eamJohnson:
+      
+      if ( *(idat.rij) < rci) {
+        phab = phab + 0.5 * (rhb / rha) * pha;
+        dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
+                             pha*((drhb/rha) - (rhb*drha/rha/rha)));
+      }
+      
+      
+      
+      if ( *(idat.rij) < rcj) {
+        phab = phab + 0.5 * (rha / rhb) * phb;
+        dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
+                               phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+      }
+      
+      break;
+      
+    case eamDaw:
+      res = MixingMap[idat.atypes].phi->getValueAndDerivativeAt( *(idat.rij));
+      phab = res.first;
+      dvpdr = res.second;
+      
+      break;
+    case eamUnknown:
+    default:
+      
+      sprintf(painCave.errMsg,
+              "EAM::calcForce hit a mixing method it doesn't know about!\n"
+              );
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();        
+      
+    }
+    
+    drhoidr = drha;
+    drhojdr = drhb;
+    
+    dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr; 
+    
+    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+        
+    // particlePot is the difference between the full potential and
+    // the full potential without the presence of a particular
+    // particle (atom1).
+    //
+    // This reduces the density at other particle locations, so we
+    // need to recompute the density at atom2 assuming atom1 didn't
+    // contribute.  This then requires recomputing the density
+    // functional for atom2 as well.
+    
+    *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha ) 
+      - *(idat.frho2);
+    
+    *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
+      - *(idat.frho1);
+    
+    (*(idat.pot))[METALLIC_FAMILY] += phab;
+    
+    *(idat.vpair) += phab;
+  
     return;
     
   }

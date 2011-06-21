@@ -272,6 +272,7 @@ namespace OpenMD {
 
   void InteractionManager::setCutoffRadius(RealType rcut) {
     electrostatic_->setCutoffRadius(rcut);
+    eam_->setCutoffRadius(rcut);
   }
 
   void InteractionManager::setSwitchingRadius(RealType rswitch) {
@@ -326,7 +327,7 @@ namespace OpenMD {
   void InteractionManager::doSkipCorrection(InteractionData idat){
 
     if (!initialized_) initialize();  
-    
+
     set<NonBondedInteraction*>::iterator it;
 
     for (it = interactions_[ idat.atypes ].begin(); 

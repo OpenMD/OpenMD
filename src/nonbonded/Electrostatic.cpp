@@ -52,7 +52,10 @@
 namespace OpenMD {
   
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
-                                  forceField_(NULL), info_(NULL) {}
+                                  forceField_(NULL), info_(NULL), haveCutoffRadius_(false),
+                                  haveDampingAlpha_(false), haveDielectric_(false),
+                                  haveElectroSpline_(false)
+ {}
   
   void Electrostatic::initialize() { 
 
@@ -97,10 +100,6 @@ namespace OpenMD {
     screeningMethod_ = UNDAMPED;
     dielectric_ = 1.0;
     one_third_ = 1.0 / 3.0;
-    haveCutoffRadius_ = false;
-    haveDampingAlpha_ = false;
-    haveDielectric_ = false;  
-    haveElectroSpline_ = false;
   
     // check the summation method:
     if (simParams_->haveElectrostaticSummationMethod()) {
@@ -1036,11 +1035,10 @@ namespace OpenMD {
     RealType mu1, preVal, chg1, self;
     
     if (!initialized_) initialize();
-    
+
     ElectrostaticAtomData data = ElectrostaticMap[sdat.atype];
    
     // logicals
-
     bool i_is_Charge = data.is_Charge;
     bool i_is_Dipole = data.is_Dipole;
 
@@ -1048,7 +1046,7 @@ namespace OpenMD {
       if (i_is_Dipole) {
         mu1 = data.dipole_moment;          
         preVal = pre22_ * preRF2_ * mu1 * mu1;
-        sdat.pot[2] -= 0.5 * preVal;
+        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal;
         
         // The self-correction term adds into the reaction field vector
         Vector3d uz_i = sdat.eFrame->getColumn(2);
@@ -1065,7 +1063,7 @@ namespace OpenMD {
         } else {         
           self = - 0.5 * rcuti_ * chg1 * (chg1 +  *(sdat.skippedCharge)) * pre11_;
         }
-        sdat.pot[ELECTROSTATIC_FAMILY] += self;
+        (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
       }
     }
   }

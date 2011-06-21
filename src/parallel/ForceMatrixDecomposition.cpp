@@ -59,12 +59,12 @@ namespace OpenMD {
     nLocal_ = snap_->getNumberOfAtoms();
 
     nGroups_ = info_->getNLocalCutoffGroups();
-    cerr << "in dId, nGroups = " << nGroups_ << "\n";
     // gather the information for atomtype IDs (atids):
     idents = info_->getIdentArray();
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
+
     massFactors = info_->getMassFactors();
 
     PairList excludes = info_->getExcludedInteractions();
@@ -226,7 +226,7 @@ namespace OpenMD {
   }
    
   void ForceMatrixDecomposition::createGtypeCutoffMap() {
-
+    
     RealType tol = 1e-6;
     RealType rc;
     int atid;
@@ -304,7 +304,6 @@ namespace OpenMD {
     vector<RealType> groupCutoff(nGroups_, 0.0);
     groupToGtype.resize(nGroups_);
 
-    cerr << "nGroups = " << nGroups_ << "\n";
     for (int cg1 = 0; cg1 < nGroups_; cg1++) {
 
       groupCutoff[cg1] = 0.0;
@@ -333,7 +332,6 @@ namespace OpenMD {
     }
 #endif
 
-    cerr << "gTypeCutoffs.size() = " << gTypeCutoffs.size() << "\n";
     // Now we find the maximum group cutoff value present in the simulation
 
     RealType groupMax = *max_element(gTypeCutoffs.begin(), gTypeCutoffs.end());
@@ -456,6 +454,11 @@ namespace OpenMD {
            atomColData.functionalDerivative.end(), 0.0);
     }
 
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {      
+      fill(atomRowData.skippedCharge.begin(), atomRowData.skippedCharge.end(), 0.0);
+      fill(atomColData.skippedCharge.begin(), atomColData.skippedCharge.end(), 0.0);
+    }
+
 #else
     
     if (storageLayout_ & DataStorage::dslParticlePot) {      
@@ -474,6 +477,10 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {      
       fill(snap_->atomData.functionalDerivative.begin(), 
            snap_->atomData.functionalDerivative.end(), 0.0);
+    }
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {      
+      fill(snap_->atomData.skippedCharge.begin(), 
+           snap_->atomData.skippedCharge.end(), 0.0);
     }
 #endif
     
@@ -691,7 +698,6 @@ namespace OpenMD {
 #ifdef IS_MPI
     return massFactorsRow[atom1];
 #else
-    cerr << "mfs = " << massFactors.size() << " atom1 = " << atom1 << "\n";
     return massFactors[atom1];
 #endif
   }
@@ -877,7 +883,7 @@ namespace OpenMD {
     snap_->atomData.force[atom1] += *(idat.f1);
     snap_->atomData.force[atom2] -= *(idat.f1);
 #endif
-
+    
   }
 
 
