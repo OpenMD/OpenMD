@@ -242,7 +242,7 @@ namespace OpenMD {
   void LJ::calcForce(InteractionData &idat) {
     
     if (!initialized_) initialize();
-    
+
     map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
     it = MixingMap.find( idat.atypes );
     

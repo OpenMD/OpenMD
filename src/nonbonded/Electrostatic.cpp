@@ -34,7 +34,7 @@
  * work.  Good starting points are:
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
@@ -52,13 +52,15 @@
 namespace OpenMD {
   
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
-                                  forceField_(NULL), info_(NULL), haveCutoffRadius_(false),
-                                  haveDampingAlpha_(false), haveDielectric_(false),
+                                  forceField_(NULL), info_(NULL), 
+                                  haveCutoffRadius_(false),
+                                  haveDampingAlpha_(false), 
+                                  haveDielectric_(false),
                                   haveElectroSpline_(false)
- {}
+  {}
   
   void Electrostatic::initialize() { 
-
+    
     Globals* simParams_ = info_->getSimParams();
 
     summationMap_["HARD"]               = esm_HARD;
@@ -444,12 +446,13 @@ namespace OpenMD {
     RealType ct_i, ct_j, ct_ij, a1;
     RealType riji, ri, ri2, ri3, ri4;
     RealType pref, vterm, epot, dudr;
+    RealType vpair(0.0);
     RealType scale, sc2;
     RealType pot_term, preVal, rfVal;
     RealType c2ri, c3ri, c4rij, cti3, ctj3, ctidotj;
     RealType preSw, preSwSc;
     RealType c1, c2, c3, c4;
-    RealType erfcVal, derfcVal;
+    RealType erfcVal(1.0), derfcVal(0.0);
     RealType BigR;
 
     Vector3d Q_i, Q_j;
@@ -459,6 +462,12 @@ namespace OpenMD {
     Vector3d dudux_j, duduy_j, duduz_j;
     Vector3d rhatdot2, rhatc4;
     Vector3d dVdr;
+
+    // variables for indirect (reaction field) interactions for excluded pairs:
+    RealType indirect_Pot(0.0);
+    RealType indirect_vpair(0.0);
+    Vector3d indirect_dVdr(V3Zero);
+    Vector3d indirect_duduz_i(V3Zero), indirect_duduz_j(V3Zero);
 
     pair<RealType, RealType> res;
     
@@ -484,8 +493,12 @@ namespace OpenMD {
     bool j_is_SplitDipole = data2.is_SplitDipole;
     bool j_is_Quadrupole = data2.is_Quadrupole;
     
-    if (i_is_Charge) 
+    if (i_is_Charge) {
       q_i = data1.charge;
+      if (idat.excluded) {
+        *(idat.skippedCharge2) += q_i;
+      }
+    }
 
     if (i_is_Dipole) {
       mu_i = data1.dipole_moment;
@@ -518,8 +531,13 @@ namespace OpenMD {
       duduz_i = V3Zero;
     }
 
-    if (j_is_Charge) 
+    if (j_is_Charge) {
       q_j = data2.charge;
+      if (idat.excluded) {
+        *(idat.skippedCharge1) += q_j;
+      }
+    }
+
 
     if (j_is_Dipole) {
       mu_j = data2.dipole_moment;
@@ -581,21 +599,30 @@ namespace OpenMD {
           dudr  =  *(idat.sw)  * preVal * (c2c_ - c2);
 
         } else if (summationMethod_ == esm_REACTION_FIELD) {
-          rfVal =  *(idat.electroMult) * preRF_ *  *(idat.rij)  *  *(idat.rij) ;
+          rfVal = preRF_ *  *(idat.rij)  *  *(idat.rij);
+
           vterm = preVal * ( riji + rfVal );             
           dudr  =  *(idat.sw)  * preVal * ( 2.0 * rfVal - riji ) * riji;
+          
+          // if this is an excluded pair, there are still indirect
+          // interactions via the reaction field we must worry about:
 
+          if (idat.excluded) {
+            indirect_vpair += preVal * rfVal;
+            indirect_Pot += *(idat.sw) * preVal * rfVal;
+            indirect_dVdr += *(idat.sw)  * preVal * 2.0 * rfVal  * riji * rhat;
+          }
+          
         } else {
-          vterm = preVal * riji * erfcVal;             
 
+          vterm = preVal * riji * erfcVal;           
           dudr  = -  *(idat.sw)  * preVal * c2;
 
         }
- 
-        *(idat.vpair) += vterm;
-        epot +=  *(idat.sw)  * vterm;
 
-        dVdr += dudr * rhat;       
+        vpair += vterm;
+        epot +=  *(idat.sw)  * vterm;
+        dVdr += dudr * rhat;                 
       }
 
       if (j_is_Dipole) {
@@ -608,12 +635,23 @@ namespace OpenMD {
           ri3 = ri2 * riji;
     
           vterm = - pref * ct_j * ( ri2 - preRF2_ *  *(idat.rij)  );
-          *(idat.vpair) += vterm;
+          vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
 
           dVdr +=  -preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
           duduz_j += -preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );   
 
+          // Even if we excluded this pair from direct interactions,
+          // we still have the reaction-field-mediated charge-dipole
+          // interaction:
+
+          if (idat.excluded) {
+            indirect_vpair += pref * ct_j * preRF2_ * *(idat.rij);
+            indirect_Pot += preSw * ct_j * preRF2_ * *(idat.rij);
+            indirect_dVdr += preSw * preRF2_ * uz_j;
+            indirect_duduz_j += preSw * rhat * preRF2_ *  *(idat.rij); 
+          }
+                       
         } else {
           // determine the inverse r used if we have split dipoles
           if (j_is_SplitDipole) {
@@ -646,7 +684,7 @@ namespace OpenMD {
           // calculate the potential
           pot_term =  scale * c2;
           vterm = -pref * ct_j * pot_term;
-          *(idat.vpair) += vterm;
+          vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
              
           // calculate derivatives for forces and torques
@@ -693,7 +731,7 @@ namespace OpenMD {
                      qyy_j * (cy2*c3 - c2ri) + 
                      qzz_j * (cz2*c3 - c2ri) );
         vterm = pref * pot_term;
-        *(idat.vpair) += vterm;
+        vpair += vterm;
         epot +=  *(idat.sw)  * vterm;
                 
         // calculate derivatives for the forces and torques
@@ -721,12 +759,23 @@ namespace OpenMD {
           ri3 = ri2 * riji;
 
           vterm = pref * ct_i * ( ri2 - preRF2_ *  *(idat.rij)  );
-          *(idat.vpair) += vterm;
+          vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
           
           dVdr += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);
           
           duduz_i += preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );
+
+          // Even if we excluded this pair from direct interactions,
+          // we still have the reaction-field-mediated charge-dipole
+          // interaction:
+
+          if (idat.excluded) {
+            indirect_vpair += -pref * ct_i * preRF2_ * *(idat.rij);
+            indirect_Pot += -preSw * ct_i * preRF2_ * *(idat.rij);
+            indirect_dVdr += -preSw * preRF2_ * uz_i;
+            indirect_duduz_i += -preSw * rhat * preRF2_ *  *(idat.rij); 
+          }
              
         } else {
           
@@ -761,7 +810,7 @@ namespace OpenMD {
           // calculate the potential
           pot_term = c2 * scale;
           vterm = pref * ct_i * pot_term;
-          *(idat.vpair) += vterm;
+          vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
 
           // calculate derivatives for the forces and torques
@@ -784,7 +833,7 @@ namespace OpenMD {
 
           vterm = pref * ( ri3 * (ct_ij - 3.0 * ct_i * ct_j) -
                            preRF2_ * ct_ij );
-          *(idat.vpair) += vterm;
+          vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
              
           a1 = 5.0 * ct_i * ct_j - ct_ij;
@@ -793,6 +842,13 @@ namespace OpenMD {
 
           duduz_i += preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
           duduz_j += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_*uz_i);
+
+          if (idat.excluded) {
+            indirect_vpair +=  - pref * preRF2_ * ct_ij;
+            indirect_Pot +=    - preSw * preRF2_ * ct_ij;
+            indirect_duduz_i += -preSw * preRF2_ * uz_j;
+            indirect_duduz_j += -preSw * preRF2_ * uz_i;
+          }
 
         } else {
           
@@ -843,7 +899,7 @@ namespace OpenMD {
           // calculate the potential 
           pot_term = (ct_ij * c2ri - ctidotj * c3);
           vterm = pref * pot_term;
-          *(idat.vpair) += vterm;
+          vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
 
           // calculate derivatives for the forces and torques
@@ -895,7 +951,7 @@ namespace OpenMD {
                      qzz_i * (cz2 * c3 - c2ri) );
         
         vterm = pref * pot_term;
-        *(idat.vpair) += vterm;
+        vpair += vterm;
         epot +=  *(idat.sw)  * vterm;
 
         // calculate the derivatives for the forces and torques
@@ -910,22 +966,40 @@ namespace OpenMD {
       }
     }
 
-    (*(idat.pot))[ELECTROSTATIC_FAMILY] += epot;
-    *(idat.f1) += dVdr;
 
-    if (i_is_Dipole || i_is_Quadrupole) 
-      *(idat.t1) -= cross(uz_i, duduz_i);
-    if (i_is_Quadrupole) {
-      *(idat.t1) -= cross(ux_i, dudux_i);
-      *(idat.t1) -= cross(uy_i, duduy_i);
+    if (!idat.excluded) {
+      *(idat.vpair) += vpair;
+      (*(idat.pot))[ELECTROSTATIC_FAMILY] += epot;
+      *(idat.f1) += dVdr;
+      
+      if (i_is_Dipole || i_is_Quadrupole) 
+        *(idat.t1) -= cross(uz_i, duduz_i);
+      if (i_is_Quadrupole) {
+        *(idat.t1) -= cross(ux_i, dudux_i);
+        *(idat.t1) -= cross(uy_i, duduy_i);
+      }
+      
+      if (j_is_Dipole || j_is_Quadrupole) 
+        *(idat.t2) -= cross(uz_j, duduz_j);
+      if (j_is_Quadrupole) {
+        *(idat.t2) -= cross(uz_j, dudux_j);
+        *(idat.t2) -= cross(uz_j, duduy_j);
+      }
+
+    } else {
+
+      // only accumulate the forces and torques resulting from the
+      // indirect reaction field terms.
+      *(idat.vpair) += indirect_vpair;
+      (*(idat.pot))[ELECTROSTATIC_FAMILY] += indirect_Pot;
+      *(idat.f1) += indirect_dVdr;
+      
+      if (i_is_Dipole) 
+        *(idat.t1) -= cross(uz_i, indirect_duduz_i);
+      if (j_is_Dipole) 
+        *(idat.t2) -= cross(uz_j, indirect_duduz_j);
     }
-    
-    if (j_is_Dipole || j_is_Quadrupole) 
-      *(idat.t2) -= cross(uz_j, duduz_j);
-    if (j_is_Quadrupole) {
-      *(idat.t2) -= cross(uz_j, dudux_j);
-      *(idat.t2) -= cross(uz_j, duduy_j);
-    }
+
 
     return;
   }  
@@ -946,15 +1020,15 @@ namespace OpenMD {
     bool j_is_Dipole = data2.is_Dipole;
 
     RealType q_i, q_j;
-    
-    // The skippedCharge computation is needed by the real-space cutoff methods 
-    // (i.e. shifted force and shifted potential)
 
+    // The skippedCharge computation is needed by the real-space
+    // cutoff methods (i.e. shifted force and shifted potential)
+       
     if (i_is_Charge) {
       q_i = data1.charge;
       *(idat.skippedCharge2) += q_i;
     }
-
+    
     if (j_is_Charge) {
       q_j = data2.charge;
       *(idat.skippedCharge1) += q_j;

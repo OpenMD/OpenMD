@@ -271,6 +271,7 @@ namespace OpenMD {
   }
 
   void InteractionManager::setCutoffRadius(RealType rcut) {
+    
     electrostatic_->setCutoffRadius(rcut);
     eam_->setCutoffRadius(rcut);
   }
@@ -283,6 +284,9 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
 	 
+    // excluded interaction, so just return
+    if (idat.excluded) return;
+
     set<NonBondedInteraction*>::iterator it;
 
     for (it = interactions_[ idat.atypes ].begin(); 
@@ -314,26 +318,17 @@ namespace OpenMD {
   void InteractionManager::doPair(InteractionData idat){
     
     if (!initialized_) initialize();
-   
-    set<NonBondedInteraction*>::iterator it;
-
-    for (it = interactions_[ idat.atypes ].begin(); 
-         it != interactions_[ idat.atypes ].end(); ++it)
-      (*it)->calcForce(idat);
-    
-    return;    
-  }
-
-  void InteractionManager::doSkipCorrection(InteractionData idat){
-
-    if (!initialized_) initialize();  
 
     set<NonBondedInteraction*>::iterator it;
 
     for (it = interactions_[ idat.atypes ].begin(); 
-         it != interactions_[ idat.atypes ].end(); ++it){
-      if ((*it)->getFamily() == ELECTROSTATIC_FAMILY) {
-        dynamic_cast<ElectrostaticInteraction*>(*it)->calcSkipCorrection(idat);
+         it != interactions_[ idat.atypes ].end(); ++it) {
+
+      // electrostatics still has to worry about indirect
+      // contributions from excluded pairs of atoms:
+
+      if (!idat.excluded || (*it)->getFamily() == ELECTROSTATIC_FAMILY) {
+        (*it)->calcForce(idat);
       }
     }
     

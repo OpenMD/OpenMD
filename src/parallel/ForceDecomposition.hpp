@@ -129,18 +129,18 @@ namespace OpenMD {
        
     // atom bookkeeping
     virtual int getNAtomsInRow() = 0;
-    virtual vector<int> getSkipsForAtom(int atom1) = 0;
+    virtual vector<int> getExcludesForAtom(int atom1) = 0;
     virtual bool skipAtomPair(int atom1, int atom2) = 0;
+    virtual bool excludeAtomPair(int atom1, int atom2) = 0;
+    virtual int getTopologicalDistance(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
-    virtual int getTopologicalDistance(int atom1, int atom2) = 0;
+
 
     // filling interaction blocks with pointers
     virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
     virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
 
-    virtual void fillSkipData(InteractionData &idat, int atom1, int atom2) = 0;
-    virtual void unpackSkipData(InteractionData &idat, int atom1, int atom2) = 0;
     virtual void fillSelfData(SelfData &sdat, int atom1);
     
   protected:
@@ -168,7 +168,7 @@ namespace OpenMD {
      */
     vector<vector<int> > toposForAtom; 
     vector<vector<int> > topoDist;                                       
-    vector<vector<int> > skipsForAtom;
+    vector<vector<int> > excludesForAtom;
     vector<vector<int> > groupList_;
     vector<RealType> massFactors;
 

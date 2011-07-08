@@ -54,12 +54,19 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
-      DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(electrostatic12scale, "electrostatic-12-scale", 0.0)
-      DefineOptionalParameterWithDefaultValue(electrostatic13scale, "electrostatic-13-scale", 0.0)
-      DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0)
+      DefineOptionalParameter(vdw12scale, "vdW-12-scale");
+      DefineOptionalParameter(vdw13scale, "vdW-13-scale");
+      DefineOptionalParameter(vdw14scale, "vdW-14-scale");
+      DefineOptionalParameter(electrostatic12scale, "electrostatic-12-scale");
+      DefineOptionalParameter(electrostatic13scale, "electrostatic-13-scale");
+      DefineOptionalParameter(electrostatic14scale, "electrostatic-14-scale");
+
+      // DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(electrostatic12scale, "electrostatic-12-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(electrostatic13scale, "electrostatic-13-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
       DefineOptionalParameterWithDefaultValue(EAMMixingMethod, "EAMMixingMethod", "Johnson");

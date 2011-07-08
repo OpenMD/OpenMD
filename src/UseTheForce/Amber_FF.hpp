@@ -62,7 +62,7 @@ namespace OpenMD {
   public:
     Amber_FF();
     virtual void parse(const std::string& filename);
-    ~Amber_FF();
+    ~Amber_FF() {};
 
   private:
     SectionParserManager spMan_;

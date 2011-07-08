@@ -102,6 +102,4 @@ namespace OpenMD {
     
   }
 
-  Amber_FF::~Amber_FF(){
-  }
 } //end namespace OpenMD

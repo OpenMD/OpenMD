@@ -85,16 +85,15 @@ namespace OpenMD {
     // atom bookkeeping
     int getNAtomsInRow();
     int getTopologicalDistance(int atom1, int atom2);
-    vector<int> getSkipsForAtom(int atom1); 
+    vector<int> getExcludesForAtom(int atom1); 
     bool skipAtomPair(int atom1, int atom2);
+    bool excludeAtomPair(int atom1, int atom2);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);
 
     // filling interaction blocks with pointers
     void fillInteractionData(InteractionData &idat, int atom1, int atom2);
     void unpackInteractionData(InteractionData &idat, int atom1, int atom2);
-    void fillSkipData(InteractionData &idat, int atom1, int atom2);
-    void unpackSkipData(InteractionData &idat, int atom1, int atom2);
 
   private: 
     void createGtypeCutoffMap();

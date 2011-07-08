@@ -239,13 +239,15 @@ namespace OpenMD {
       mixer.eps0 = sqrt(e1 * e2);
       
       RealType er = sqrt(er1 * er2);
-      RealType ermu = pow(er,(1.0 / mu_));
+      RealType ermu = pow(er, (1.0 / mu_));
       RealType xp = (1.0 - ermu) / (1.0 + ermu);
       RealType ap2 = 1.0 / (1.0 + ermu);
       
       mixer.xp2 = xp * xp;
       mixer.xpap2 = xp * ap2;
       mixer.xpapi2 = xp / ap2;
+
+      cerr << "mixer" << er1 << " " << er2 << " " << mu_ << " " << ermu << " " << xp <<" " << ap2 << "\n";
 
       // only add this pairing if at least one of the atoms is a Gay-Berne atom
 
@@ -306,6 +308,9 @@ namespace OpenMD {
     else
       g = dot(ul1, ul2);
 
+    cerr << "in GB, d = " << *(idat.d) << "\n";
+    cerr << "abg = " << a << " " << b << " " << g <<"\n";
+
     RealType au = a / *(idat.rij);
     RealType bu = b / *(idat.rij);
     
@@ -315,11 +320,15 @@ namespace OpenMD {
     
     RealType H  = (xa2 * au2 + xai2 * bu2 - 2.0*x2*au*bu*g)  / (1.0 - x2*g2);
     RealType Hp = (xpap2*au2 + xpapi2*bu2 - 2.0*xp2*au*bu*g) / (1.0 - xp2*g2);
+    cerr << "xa2, xai2 " << xa2 << " " << xai2 << "\n";
+    cerr << "xpap2, xpapi2 " << xpap2 << " " << xpapi2 << "\n";
+    cerr << "H Hp = " << H <<  " " << Hp << "\n";
 
     RealType sigma = sigma0 / sqrt(1.0 - H);
     RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
     RealType e2 = 1.0 - Hp;
     RealType eps = eps0 * pow(e1,nu_) * pow(e2,mu_);
+    cerr << "eps = " << eps0 << " " << e1 << " " << nu_ << " " << e2 << " " << mu_ << "\n";
     RealType BigR = dw*sigma0 / (*(idat.rij) - sigma + dw*sigma0);
     
     RealType R3 = BigR*BigR*BigR;
@@ -329,6 +338,8 @@ namespace OpenMD {
     RealType R13 = R6*R7;
 
     RealType U = *(idat.vdwMult) * 4.0 * eps * (R12 - R6);
+
+    cerr << "R12, R6, eps = " << R12 << " " << R6 << " " << eps << " " <<  *(idat.vdwMult) << "\n";
 
     RealType s3 = sigma*sigma*sigma;
     RealType s03 = sigma0*sigma0*sigma0;
@@ -352,12 +363,19 @@ namespace OpenMD {
       + 8.0 * eps * mu_ * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / 
       (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
       (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
-    
+
+    cerr << pref1 << " " << pref2 << " " << dUdr <<" " << dUda << " " << dUdb << dUdg << "\n";
 
     Vector3d rhat = *(idat.d) / *(idat.rij);   
     Vector3d rxu1 = cross(*(idat.d), ul1);
     Vector3d rxu2 = cross(*(idat.d), ul2);
     Vector3d uxu = cross(ul1, ul2);
+
+    cerr << "U = " << U << "\n";
+    cerr << "f1 = " << dUdr * rhat + dUda * ul1 + dUdb * ul2 << "\n";
+    cerr << "t1 = " << dUda * rxu1 - dUdg * uxu << "\n";
+    cerr << "t2 = " << dUdb * rxu2 - dUdg * uxu << "\n";
+
     
     (*(idat.pot))[VANDERWAALS_FAMILY] += U *  *(idat.sw);
     *(idat.f1) += dUdr * rhat + dUda * ul1 + dUdb * ul2;    

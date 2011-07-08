@@ -83,6 +83,7 @@ namespace OpenMD {
     bool shiftedForce;        /**< shifted forces smoothly inside the cutoff? */
     RealType* sw;             /**< switching function value at rij */
     int* topoDist;            /**< topological distance between atoms */
+    bool excluded;            /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
     RealType* vdwMult;        /**< multiplier for van der Waals interactions */
     RealType* electroMult;    /**< multiplier for electrostatic interactions */
     potVec* pot;              /**< total potential */
@@ -102,8 +103,8 @@ namespace OpenMD {
     RealType* frho2;          /**< density functional at second atom */
     RealType* dfrho1;         /**< derivative of functional for atom 1 */
     RealType* dfrho2;         /**< derivative of functional for atom 2 */
-    RealType* skippedCharge1; /**< charge skipped in pairwise interaction loop */
-    RealType* skippedCharge2; /**< charge skipped in pairwise interaction loop */
+    RealType* skippedCharge1; /**< charge skipped on atom1 in pairwise interaction loop with atom2 */
+    RealType* skippedCharge2; /**< charge skipped on atom2 in pairwise interaction loop with atom1 */
   };
   
   /** 
@@ -160,7 +161,6 @@ namespace OpenMD {
   public:
     ElectrostaticInteraction() : NonBondedInteraction() { }
     virtual ~ElectrostaticInteraction() {}
-    virtual void calcSkipCorrection(InteractionData &idat) = 0;
     virtual void calcSelfCorrection(SelfData &sdat) = 0;
     virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}    
   };    

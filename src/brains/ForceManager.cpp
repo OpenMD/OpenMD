@@ -75,7 +75,8 @@ namespace OpenMD {
   /**
    * setupCutoffs
    *
-   * Sets the values of cutoffRadius, cutoffMethod, and cutoffPolicy
+   * Sets the values of cutoffRadius, switchingRadius, cutoffMethod,
+   * and cutoffPolicy
    *
    * cutoffRadius : realType
    *  If the cutoffRadius was explicitly set, use that value.
@@ -92,6 +93,15 @@ namespace OpenMD {
    * cutoffPolicy : (one of MIX, MAX, TRADITIONAL)
    *      If cutoffPolicy was explicitly set, use that choice.
    *      If cutoffPolicy was not explicitly set, use TRADITIONAL
+   *
+   * switchingRadius : realType
+   *  If the cutoffMethod was set to SWITCHED:
+   *      If the switchingRadius was explicitly set, use that value
+   *          (but do a sanity check first).
+   *      If the switchingRadius was not explicitly set: use 0.85 *
+   *      cutoffRadius_
+   *  If the cutoffMethod was not set to SWITCHED:
+   *      Set switchingRadius equal to cutoffRadius for safety.
    */
   void ForceManager::setupCutoffs() {
     
@@ -202,42 +212,56 @@ namespace OpenMD {
       simError();
       cutoffPolicy_ = TRADITIONAL;        
     }
+
     fDecomp_->setCutoffPolicy(cutoffPolicy_);
-  }
-
-  /**
-   * setupSwitching
-   *
-   * Sets the values of switchingRadius and 
-   *  If the switchingRadius was explicitly set, use that value (but check it)
-   *  If the switchingRadius was not explicitly set: use 0.85 * cutoffRadius_
-   */
-  void ForceManager::setupSwitching() {
-    Globals* simParams_ = info_->getSimParams();
-
+        
     // create the switching function object:
+
     switcher_ = new SwitchingFunction();
-    
-    if (simParams_->haveSwitchingRadius()) {
-      rSwitch_ = simParams_->getSwitchingRadius();
-      if (rSwitch_ > rCut_) {        
+   
+    if (cutoffMethod_ == SWITCHED) {
+      if (simParams_->haveSwitchingRadius()) {
+        rSwitch_ = simParams_->getSwitchingRadius();
+        if (rSwitch_ > rCut_) {        
+          sprintf(painCave.errMsg,
+                  "ForceManager::setupCutoffs: switchingRadius (%f) is larger "
+                  "than the cutoffRadius(%f)\n", rSwitch_, rCut_);
+          painCave.isFatal = 1;
+          painCave.severity = OPENMD_ERROR;
+          simError();
+        }
+      } else {      
+        rSwitch_ = 0.85 * rCut_;
         sprintf(painCave.errMsg,
-                "ForceManager::setupSwitching: switchingRadius (%f) is larger "
-                "than the cutoffRadius(%f)\n", rSwitch_, rCut_);
-        painCave.isFatal = 1;
-        painCave.severity = OPENMD_ERROR;
+                "ForceManager::setupCutoffs: No value was set for the switchingRadius.\n"
+                "\tOpenMD will use a default value of 85 percent of the cutoffRadius.\n"
+                "\tswitchingRadius = %f. for this simulation\n", rSwitch_);
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_WARNING;
         simError();
       }
-    } else {      
-      rSwitch_ = 0.85 * rCut_;
-      sprintf(painCave.errMsg,
-              "ForceManager::setupSwitching: No value was set for the switchingRadius.\n"
-              "\tOpenMD will use a default value of 85 percent of the cutoffRadius.\n"
-              "\tswitchingRadius = %f. for this simulation\n", rSwitch_);
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_WARNING;
-      simError();
-    }           
+    } else {
+      if (simParams_->haveSwitchingRadius()) {
+        map<string, CutoffMethod>::const_iterator it;
+        string theMeth;
+        for (it = stringToCutoffMethod.begin(); 
+             it != stringToCutoffMethod.end(); ++it) {
+          if (it->second == cutoffMethod_) {
+            theMeth = it->first;
+            break;
+          }
+        }
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs: the cutoffMethod (%s)\n"
+                "\tis not set to SWITCHED, so switchingRadius value\n"
+                "\twill be ignored for this simulation\n", theMeth.c_str());
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_WARNING;
+        simError();
+      }
+
+      rSwitch_ = rCut_;
+    }
     
     // Default to cubic switching function.
     sft_ = cubic;
@@ -279,7 +303,6 @@ namespace OpenMD {
       // query them for suggested cutoff values
 
       setupCutoffs();
-      setupSwitching();
 
       info_->prepareTopology();      
     }
@@ -574,7 +597,7 @@ namespace OpenMD {
         if (rgrpsq < rCutSq) {
           idat.rcut = &cuts.first;
           if (iLoop == PAIR_LOOP) {
-            vij *= 0.0;
+            vij = 0.0;
             fij = V3Zero;
           }
           
@@ -634,7 +657,6 @@ namespace OpenMD {
             if (in_switching_region) {
               swderiv = vij * dswdr / rgrp;
               fg = swderiv * d_grp;
-
               fij += fg;
 
               if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
@@ -702,25 +724,7 @@ namespace OpenMD {
     }
     
     fDecomp_->collectData();
-    
-    if ( info_->requiresSkipCorrection() ) {
-      
-      for (int atom1 = 0; atom1 < fDecomp_->getNAtomsInRow(); atom1++) {
-
-        vector<int> skipList = fDecomp_->getSkipsForAtom( atom1 );
         
-        for (vector<int>::iterator jb = skipList.begin(); 
-             jb != skipList.end(); ++jb) {         
-     
-          atom2 = (*jb);
-          fDecomp_->fillSkipData(idat, atom1, atom2);
-          interactionMan_->doSkipCorrection(idat);
-          fDecomp_->unpackSkipData(idat, atom1, atom2);
-
-        }
-      }
-    }
-    
     if (info_->requiresSelfCorrection()) {
 
       for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {          

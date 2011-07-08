@@ -128,10 +128,7 @@ namespace OpenMD {
     // if we have changed the group identities or haven't set up the
     // saved positions we automatically will need a neighbor list update:
 
-    if ( saved_CG_positions_.size() != nGroups ) {
-      cerr << "build because size\n";
-      return true;
-    }
+    if ( saved_CG_positions_.size() != nGroups ) return true;
 
     RealType dispmax = 0.0;
     Vector3d disp;    
@@ -150,12 +147,9 @@ namespace OpenMD {
     dispmax = 2.0 * sqrt (3.0 * dispmax * dispmax);
 
 
-    if (dispmax > skinThickness_) {
-      cerr << "build because movement\n";
+    if (dispmax > skinThickness_) 
       return (dispmax > skinThickness_);   
-    } else {
-      cerr << "not rebuilding\n";
-    }
+
     return false;
   }
 }

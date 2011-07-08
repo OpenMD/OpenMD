@@ -859,7 +859,6 @@ namespace OpenMD {
     massFactors_.clear();
     massFactors_.resize(getNAtoms(), 1.0);
     
-    cerr << "mfs in si = " << massFactors_.size() << "\n";
     for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
       for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
            cg = mol->nextCutoffGroup(ci)) {

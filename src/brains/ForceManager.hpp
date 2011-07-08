@@ -83,7 +83,6 @@ namespace OpenMD {
     bool initialized_; 
 
     virtual void setupCutoffs();
-    virtual void setupSwitching();
     virtual void preCalculation();        
     virtual void shortRangeInteractions();
     virtual void longRangeInteractions();
