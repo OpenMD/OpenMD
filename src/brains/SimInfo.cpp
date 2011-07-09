@@ -694,17 +694,18 @@ namespace OpenMD {
     Atom* atom;
     set<AtomType*> atomTypes;
     
-    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {      
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+      for(atom = mol->beginAtom(ai); atom != NULL;
+          atom = mol->nextAtom(ai)) {
 	atomTypes.insert(atom->getAtomType());
       }      
     }    
-
+    
 #ifdef IS_MPI
 
     // loop over the found atom types on this processor, and add their
     // numerical idents to a vector:
-
+    
     vector<int> foundTypes;
     set<AtomType*>::iterator i;
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) 
@@ -713,41 +714,50 @@ namespace OpenMD {
     // count_local holds the number of found types on this processor
     int count_local = foundTypes.size();
 
-    // count holds the total number of found types on all processors
-    // (some will be redundant with the ones found locally):
-    int count;
-    MPI::COMM_WORLD.Allreduce(&count_local, &count, 1, MPI::INT, MPI::SUM);
-
-    // create a vector to hold the globally found types, and resize it:
-    vector<int> ftGlobal;
-    ftGlobal.resize(count);
-    vector<int> counts;
-
     int nproc = MPI::COMM_WORLD.Get_size();
-    counts.resize(nproc);
-    vector<int> disps;
-    disps.resize(nproc);
 
-    // now spray out the foundTypes to all the other processors:
+    // we need arrays to hold the counts and displacement vectors for
+    // all processors
+    vector<int> counts(nproc, 0);
+    vector<int> disps(nproc, 0);
+
+    // fill the counts array
+    MPI::COMM_WORLD.Allgather(&count_local, 1, MPI::INT, &counts[0],
+                              1, MPI::INT);
+  
+    // use the processor counts to compute the displacement array
+    disps[0] = 0;    
+    int totalCount = counts[0];
+    for (int iproc = 1; iproc < nproc; iproc++) {
+      disps[iproc] = disps[iproc-1] + counts[iproc-1];
+      totalCount += counts[iproc];
+    }
+
+    // we need a (possibly redundant) set of all found types:
+    vector<int> ftGlobal(totalCount);
     
+    // now spray out the foundTypes to all the other processors:    
     MPI::COMM_WORLD.Allgatherv(&foundTypes[0], count_local, MPI::INT, 
-                               &ftGlobal[0], &counts[0], &disps[0], MPI::INT);
+                               &ftGlobal[0], &counts[0], &disps[0], 
+                               MPI::INT);
+
+    vector<int>::iterator j;
 
     // foundIdents is a stl set, so inserting an already found ident
     // will have no effect.
     set<int> foundIdents;
-    vector<int>::iterator j;
+
     for (j = ftGlobal.begin(); j != ftGlobal.end(); ++j)
       foundIdents.insert((*j));
     
     // now iterate over the foundIdents and get the actual atom types 
     // that correspond to these:
     set<int>::iterator it;
-    for (it = foundIdents.begin(); it != foundIdents.end(); ++it)
+    for (it = foundIdents.begin(); it != foundIdents.end(); ++it) 
       atomTypes.insert( forceField_->getAtomType((*it)) );
  
 #endif
-    
+
     return atomTypes;        
   }
 

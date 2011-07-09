@@ -146,7 +146,6 @@ namespace OpenMD{
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
         displacements[i] = displacements[i-1] + counts[i-1];
-        size_ += counts[i-1];
       }
 
       size_ = 0;
@@ -157,7 +156,6 @@ namespace OpenMD{
 
     
     void gather(vector<T>& v1, vector<T>& v2) {
-      
       myComm.Allgatherv(&v1[0], 
                         planSize_, 
                         MPITraits<T>::Type(), 

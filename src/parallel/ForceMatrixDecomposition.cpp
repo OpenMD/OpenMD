@@ -112,6 +112,10 @@ namespace OpenMD {
     AtomCommIntRow->gather(idents, identsRow);
     AtomCommIntColumn->gather(idents, identsCol);
     
+    vector<int>::iterator it;
+    for (it = AtomLocalToGlobal.begin(); it != AtomLocalToGlobal.end(); ++it) {
+      cerr << "my AtomLocalToGlobal = " << (*it) << "\n";
+    }
     AtomCommIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
     AtomCommIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
     
