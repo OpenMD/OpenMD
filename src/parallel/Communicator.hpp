@@ -136,8 +136,8 @@ namespace OpenMD{
          
       int nCommProcs = myComm.Get_size();
 
-      counts.reserve(nCommProcs);
-      displacements.reserve(nCommProcs);
+      counts.resize(nCommProcs, 0);
+      displacements.resize(nCommProcs, 0);
 
       planSize_ = MPITraits<T>::Length() * nObjects; 
 
@@ -156,6 +156,10 @@ namespace OpenMD{
 
     
     void gather(vector<T>& v1, vector<T>& v2) {
+
+      // an assert would be helpful here to make sure the vectors are the
+      // correct geometry
+      
       myComm.Allgatherv(&v1[0], 
                         planSize_, 
                         MPITraits<T>::Type(), 
@@ -168,6 +172,8 @@ namespace OpenMD{
     
     
     void scatter(vector<T>& v1, vector<T>& v2) {
+      // an assert would be helpful here to make sure the vectors are the
+      // correct geometry
       
       myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
                             MPITraits<T>::Type(), MPI::SUM);

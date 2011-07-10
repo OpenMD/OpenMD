@@ -112,10 +112,16 @@ namespace OpenMD {
     AtomCommIntRow->gather(idents, identsRow);
     AtomCommIntColumn->gather(idents, identsCol);
     
-    vector<int>::iterator it;
-    for (it = AtomLocalToGlobal.begin(); it != AtomLocalToGlobal.end(); ++it) {
-      cerr << "my AtomLocalToGlobal = " << (*it) << "\n";
-    }
+    // allocate memory for the parallel objects
+    AtomRowToGlobal.resize(nAtomsInRow_);
+    AtomColToGlobal.resize(nAtomsInCol_);
+    cgRowToGlobal.resize(nGroupsInRow_);
+    cgColToGlobal.resize(nGroupsInCol_);
+    massFactorsRow.resize(nAtomsInRow_);
+    massFactorsCol.resize(nAtomsInCol_);
+    pot_row.resize(nAtomsInRow_);
+    pot_col.resize(nAtomsInCol_);
+
     AtomCommIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
     AtomCommIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
     
