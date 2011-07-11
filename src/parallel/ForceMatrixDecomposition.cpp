@@ -341,10 +341,12 @@ namespace OpenMD {
 
     // Now we find the maximum group cutoff value present in the simulation
 
-    RealType groupMax = *max_element(gTypeCutoffs.begin(), gTypeCutoffs.end());
+    RealType groupMax = *max_element(gTypeCutoffs.begin(), 
+                                     gTypeCutoffs.end());
 
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&groupMax, &groupMax, 1, MPI::REALTYPE, MPI::MAX);
+    MPI::COMM_WORLD.Allreduce(&groupMax, &groupMax, 1, MPI::REALTYPE, 
+                              MPI::MAX);
 #endif
     
     RealType tradRcut = groupMax;
@@ -440,8 +442,10 @@ namespace OpenMD {
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));   
 
     if (storageLayout_ & DataStorage::dslParticlePot) {    
-      fill(atomRowData.particlePot.begin(), atomRowData.particlePot.end(), 0.0);
-      fill(atomColData.particlePot.begin(), atomColData.particlePot.end(), 0.0);
+      fill(atomRowData.particlePot.begin(), atomRowData.particlePot.end(),
+           0.0);
+      fill(atomColData.particlePot.begin(), atomColData.particlePot.end(),
+           0.0);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {      
@@ -450,8 +454,10 @@ namespace OpenMD {
     }
 
     if (storageLayout_ & DataStorage::dslFunctional) {   
-      fill(atomRowData.functional.begin(), atomRowData.functional.end(), 0.0);
-      fill(atomColData.functional.begin(), atomColData.functional.end(), 0.0);
+      fill(atomRowData.functional.begin(), atomRowData.functional.end(),
+           0.0);
+      fill(atomColData.functional.begin(), atomColData.functional.end(),
+           0.0);
     }
 
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {      
@@ -468,8 +474,9 @@ namespace OpenMD {
            atomColData.skippedCharge.end(), 0.0);
     }
 
-#else
-    
+#endif
+    // even in parallel, we need to zero out the local arrays:
+
     if (storageLayout_ & DataStorage::dslParticlePot) {      
       fill(snap_->atomData.particlePot.begin(), 
            snap_->atomData.particlePot.end(), 0.0);
@@ -491,7 +498,6 @@ namespace OpenMD {
       fill(snap_->atomData.skippedCharge.begin(), 
            snap_->atomData.skippedCharge.end(), 0.0);
     }
-#endif
     
   }
 
@@ -528,6 +534,7 @@ namespace OpenMD {
       AtomCommMatrixColumn->gather(snap_->atomData.electroFrame, 
                                    atomColData.electroFrame);
     }
+
 #endif      
   }
   
@@ -594,8 +601,7 @@ namespace OpenMD {
     AtomCommVectorColumn->scatter(atomColData.force, frc_tmp);
     for (int i = 0; i < n; i++)
       snap_->atomData.force[i] += frc_tmp[i];
-    
-    
+        
     if (storageLayout_ & DataStorage::dslTorque) {
 
       int nt = snap_->atomData.torque.size();
@@ -619,7 +625,7 @@ namespace OpenMD {
 
       AtomCommRealRow->scatter(atomRowData.skippedCharge, skch_tmp);
       for (int i = 0; i < ns; i++) {
-        snap_->atomData.skippedCharge[i] = skch_tmp[i];
+        snap_->atomData.skippedCharge[i] += skch_tmp[i];
         skch_tmp[i] = 0.0;
       }
       

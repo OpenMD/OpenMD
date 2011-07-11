@@ -92,22 +92,24 @@ int simError( void ) {
   }
   
 #ifdef IS_MPI
-  if ( painCave.isEventLoop ) {
-    sprintf( nodeMsg, " (reported by MPI node %d)", worldRank);
-    strncat(errorMsg, nodeMsg, strlen(nodeMsg));
-  }
+  if (worldRank == 0) {
+    if ( painCave.isEventLoop ) {
+      sprintf( nodeMsg, " (reported by MPI node %d)", worldRank);
+      strncat(errorMsg, nodeMsg, strlen(nodeMsg));
+    }
 #endif
-
-  strcat(errorMsg, ":\n\t");
-
-  strncat(errorMsg, painCave.errMsg, strlen(painCave.errMsg));
-
-  strcat(errorMsg, "\n");
-  fprintf(stderr, errorMsg);
-
+    
+    strcat(errorMsg, ":\n\t");
+    
+    strncat(errorMsg, painCave.errMsg, strlen(painCave.errMsg));
+    
+    strcat(errorMsg, "\n");
+    fprintf(stderr, errorMsg);
+    
 #ifdef IS_MPI
-  if (painCave.isEventLoop) 
-    return 1;
+    if (painCave.isEventLoop) 
+      return 1;
+  }
 #endif   
 
   if (painCave.isFatal) {

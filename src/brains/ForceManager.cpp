@@ -86,7 +86,8 @@ namespace OpenMD {
    *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
    *      Use the maximum suggested value that was found.
    *
-   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, SHIFTED_POTENTIAL)
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, 
+   *                        or SHIFTED_POTENTIAL)
    *      If cutoffMethod was explicitly set, use that choice.
    *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
    *
@@ -294,6 +295,7 @@ namespace OpenMD {
   void ForceManager::initialize() {
 
     if (!info_->isTopologyDone()) {
+
       info_->update();
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
@@ -301,7 +303,6 @@ namespace OpenMD {
       // We want to delay the cutoffs until after the interaction
       // manager has set up the atom-atom interactions so that we can
       // query them for suggested cutoff values
-
       setupCutoffs();
 
       info_->prepareTopology();      
@@ -309,9 +310,10 @@ namespace OpenMD {
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     
-    // Force fields can set options on how to scale van der Waals and electrostatic
-    // interactions for atoms connected via bonds, bends and torsions
-    // in this case the topological distance between atoms is:
+    // Force fields can set options on how to scale van der Waals and
+    // electrostatic interactions for atoms connected via bonds, bends
+    // and torsions in this case the topological distance between
+    // atoms is:
     // 0 = topologically unconnected
     // 1 = bonded together 
     // 2 = connected via a bend
@@ -363,16 +365,17 @@ namespace OpenMD {
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+      for(atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {
 	atom->zeroForcesAndTorques();
       }
-          
+      
       //change the positions of atoms which belong to the rigidbodies
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
 	rb->zeroForcesAndTorques();
       }        
-
+      
       if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
             cg = mol->nextCutoffGroup(ci)) {
@@ -381,9 +384,9 @@ namespace OpenMD {
         }
       }      
     }
-   
+    
     // Zero out the stress tensor
-    tau *= 0.0;
+    tau = Mat3x3d(0.0);
     
   }
   
@@ -435,7 +438,8 @@ namespace OpenMD {
           dataSet.prev.angle = dataSet.curr.angle = angle;
           dataSet.prev.potential = dataSet.curr.potential = currBendPot;
           dataSet.deltaV = 0.0;
-          bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend, dataSet));
+          bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend, 
+                                                                  dataSet));
         }else {
           i->second.prev.angle = i->second.curr.angle;
           i->second.prev.potential = i->second.curr.potential;
@@ -708,16 +712,17 @@ namespace OpenMD {
       }
 
       if (iLoop == PREPAIR_LOOP) {
-        if (info_->requiresPrepair()) {            
+        if (info_->requiresPrepair()) {
+
           fDecomp_->collectIntermediateData();
 
           for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
-          
-          
-          fDecomp_->distributeIntermediateData();        
+
+          fDecomp_->distributeIntermediateData();
+
         }
       }
 
