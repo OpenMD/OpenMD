@@ -113,21 +113,29 @@ namespace OpenMD {
     AtomCommIntColumn->gather(idents, identsCol);
     
     // allocate memory for the parallel objects
-    AtomRowToGlobal.resize(nAtomsInRow_);
-    AtomColToGlobal.resize(nAtomsInCol_);
-    cgRowToGlobal.resize(nGroupsInRow_);
-    cgColToGlobal.resize(nGroupsInCol_);
-    massFactorsRow.resize(nAtomsInRow_);
-    massFactorsCol.resize(nAtomsInCol_);
+    atypesRow.resize(nAtomsInRow_);
+    atypesCol.resize(nAtomsInCol_);
+
+    for (int i = 0; i < nAtomsInRow_; i++) 
+      atypesRow[i] = ff_->getAtomType(identsRow[i]);
+    for (int i = 0; i < nAtomsInCol_; i++) 
+      atypesCol[i] = ff_->getAtomType(identsCol[i]);         
+
     pot_row.resize(nAtomsInRow_);
     pot_col.resize(nAtomsInCol_);
 
+    AtomRowToGlobal.resize(nAtomsInRow_);
+    AtomColToGlobal.resize(nAtomsInCol_);
     AtomCommIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
     AtomCommIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
     
+    cgRowToGlobal.resize(nGroupsInRow_);
+    cgColToGlobal.resize(nGroupsInCol_);
     cgCommIntRow->gather(cgLocalToGlobal, cgRowToGlobal);
     cgCommIntColumn->gather(cgLocalToGlobal, cgColToGlobal);
 
+    massFactorsRow.resize(nAtomsInRow_);
+    massFactorsCol.resize(nAtomsInCol_);
     AtomCommRealRow->gather(massFactors, massFactorsRow);
     AtomCommRealColumn->gather(massFactors, massFactorsCol);
 
@@ -186,6 +194,12 @@ namespace OpenMD {
     }
 
 #endif
+
+    // allocate memory for the parallel objects
+    atypesLocal.resize(nLocal_);
+
+    for (int i = 0; i < nLocal_; i++) 
+      atypesLocal[i] = ff_->getAtomType(idents[i]);
 
     groupList_.clear();
     groupList_.resize(nGroups_);
@@ -836,9 +850,9 @@ namespace OpenMD {
     idat.excluded = excludeAtomPair(atom1, atom2);
    
 #ifdef IS_MPI
-    
-    idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
-                             ff_->getAtomType(identsCol[atom2]) );
+    idat.atypes = make_pair( atypesRow[atom1], atypesCol[atom2]);
+    //idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
+    //                         ff_->getAtomType(identsCol[atom2]) );
     
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(atomRowData.aMat[atom1]);
@@ -882,8 +896,9 @@ namespace OpenMD {
 
 #else
 
-    idat.atypes = make_pair( ff_->getAtomType(idents[atom1]), 
-                             ff_->getAtomType(idents[atom2]) );
+    idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
+    //idat.atypes = make_pair( ff_->getAtomType(idents[atom1]), 
+    //                         ff_->getAtomType(idents[atom2]) );
 
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);

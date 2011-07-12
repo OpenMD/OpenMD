@@ -171,6 +171,7 @@ namespace OpenMD {
     vector<vector<int> > excludesForAtom;
     vector<vector<int> > groupList_;
     vector<RealType> massFactors;
+    vector<AtomType*> atypesLocal;
 
     vector<Vector3i> cellOffsets_;
     Vector3i nCells_;

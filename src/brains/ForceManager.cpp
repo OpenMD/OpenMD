@@ -386,7 +386,7 @@ namespace OpenMD {
     }
     
     // Zero out the stress tensor
-    tau = Mat3x3d(0.0);
+    tau *= 0.0;
     
   }
   

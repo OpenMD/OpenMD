@@ -89,7 +89,7 @@ namespace OpenMD {
 
   void ForceDecomposition::fillSelfData(SelfData &sdat, int atom1) {
 
-    sdat.atype = ff_->getAtomType(idents[atom1]);
+    sdat.atype = atypesLocal[atom1];
         
     // Still Missing skippedCharge
     if (storageLayout_ & DataStorage::dslElectroFrame) {
