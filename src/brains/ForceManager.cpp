@@ -651,6 +651,7 @@ namespace OpenMD {
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
                   vij += vpair;
                   fij += f1;
+                  cerr << "ats = " << atom1 << " " << atom2 << "d = " << *(idat.d) << " f1 = " << f1 << "\n";
                   tau -= outProduct( *(idat.d), f1);
                 }
               }

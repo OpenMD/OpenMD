@@ -253,9 +253,11 @@ namespace OpenMD {
   void ForceMatrixDecomposition::createGtypeCutoffMap() {
     
     RealType tol = 1e-6;
+    largestRcut_ = 0.0;
     RealType rc;
     int atid;
     set<AtomType*> atypes = info_->getSimulatedAtomTypes();
+    
     map<int, RealType> atypeCutoff;
       
     for (set<AtomType*>::iterator at = atypes.begin(); 
@@ -263,10 +265,10 @@ namespace OpenMD {
       atid = (*at)->getIdent();
       if (userChoseCutoff_) 
         atypeCutoff[atid] = userCutoff_;
-      else 
+      else
         atypeCutoff[atid] = interactionMan_->getSuggestedCutoffRadius(*at);
     }
-
+    
     vector<RealType> gTypeCutoffs;
     // first we do a single loop over the cutoff groups to find the
     // largest cutoff for any atypes present in this group.
@@ -326,19 +328,16 @@ namespace OpenMD {
     vector<RealType> groupCutoff(nGroups_, 0.0);
     groupToGtype.resize(nGroups_);
     for (int cg1 = 0; cg1 < nGroups_; cg1++) {
-
       groupCutoff[cg1] = 0.0;
       vector<int> atomList = getAtomsInGroupRow(cg1);
-
       for (vector<int>::iterator ia = atomList.begin(); 
            ia != atomList.end(); ++ia) {            
         int atom1 = (*ia);
         atid = idents[atom1];
-        if (atypeCutoff[atid] > groupCutoff[cg1]) {
+        if (atypeCutoff[atid] > groupCutoff[cg1]) 
           groupCutoff[cg1] = atypeCutoff[atid];
-        }
       }
-
+      
       bool gTypeFound = false;
       for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
         if (abs(groupCutoff[cg1] - gTypeCutoffs[gt]) < tol) {
@@ -346,7 +345,7 @@ namespace OpenMD {
           gTypeFound = true;
         } 
       }
-      if (!gTypeFound) {
+      if (!gTypeFound) {      
         gTypeCutoffs.push_back( groupCutoff[cg1] );
         groupToGtype[cg1] = gTypeCutoffs.size() - 1;
       }      
@@ -390,13 +389,9 @@ namespace OpenMD {
 
         pair<int,int> key = make_pair(i,j);
         gTypeCutoffMap[key].first = thisRcut;
-
         if (thisRcut > largestRcut_) largestRcut_ = thisRcut;
-
         gTypeCutoffMap[key].second = thisRcut*thisRcut;
-        
         gTypeCutoffMap[key].third = pow(thisRcut + skinThickness_, 2);
-
         // sanity check
         
         if (userChoseCutoff_) {
