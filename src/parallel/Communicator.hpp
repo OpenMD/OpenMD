@@ -103,15 +103,15 @@ namespace OpenMD{
   };
   
   
-  template<communicatorType D, typename T>
+  template<communicatorType D>
   class Communicator { 
   public: 
     
-    Communicator<D, T>(int nObjects) {
+    Communicator<D>() {
       
       int nProc = MPI::COMM_WORLD.Get_size();
       int myRank = MPI::COMM_WORLD.Get_rank();
-
+      
       int nColumnsMax = (int) sqrt(RealType(nProc));
 
       int nColumns;
@@ -123,6 +123,7 @@ namespace OpenMD{
       rowIndex_ = myRank / nColumns;      
       columnIndex_ = myRank % nColumns;
 
+      cerr << "rowIndex = " << rowIndex_ << "\t colIndex = " << columnIndex_ << "\n";
       switch(D) {
       case Row :
         myComm = MPI::COMM_WORLD.Split(rowIndex_, 0);
@@ -133,16 +134,33 @@ namespace OpenMD{
       case Global:
         myComm = MPI::COMM_WORLD.Split(myRank, 0);
       }
-         
-      int nCommProcs = myComm.Get_size();
 
+    }
+    
+    MPI::Intracomm getComm() { return myComm; }
+    
+  private:
+    int rowIndex_;
+    int columnIndex_;
+    MPI::Intracomm myComm;
+  };
+  
+
+  template<typename T>
+  class Plan {
+  public:
+    
+    Plan<T>(MPI::Intracomm comm, int nObjects) {
+      myComm = comm;
+      int nCommProcs = myComm.Get_size();
+      
       counts.resize(nCommProcs, 0);
       displacements.resize(nCommProcs, 0);
-
+      
       planSize_ = MPITraits<T>::Length() * nObjects; 
-
+      
       myComm.Allgather(&planSize_, 1, MPI::INT, &counts[0], 1, MPI::INT);
-
+      
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
         displacements[i] = displacements[i-1] + counts[i-1];
@@ -156,7 +174,7 @@ namespace OpenMD{
 
     
     void gather(vector<T>& v1, vector<T>& v2) {
-
+      
       // an assert would be helpful here to make sure the vectors are the
       // correct geometry
       
@@ -167,14 +185,12 @@ namespace OpenMD{
                         &counts[0], 
                         &displacements[0], 
                         MPITraits<T>::Type());      
-    }
-    
-    
+    }       
     
     void scatter(vector<T>& v1, vector<T>& v2) {
       // an assert would be helpful here to make sure the vectors are the
       // correct geometry
-      
+            
       myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
                             MPITraits<T>::Type(), MPI::SUM);
     }
@@ -185,8 +201,6 @@ namespace OpenMD{
     
   private:
     int planSize_;     ///< how many are on local proc
-    int rowIndex_;
-    int columnIndex_;
     int size_;
     vector<int> counts;
     vector<int> displacements;

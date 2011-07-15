@@ -47,11 +47,33 @@
 using namespace std;
 namespace OpenMD {
 
+  ForceMatrixDecomposition::ForceMatrixDecomposition(SimInfo* info, InteractionManager* iMan) : ForceDecomposition(info, iMan) {
+
+    // In a parallel computation, row and colum scans must visit all
+    // surrounding cells (not just the 14 upper triangular blocks that
+    // are used when the processor can see all pairs)
+#ifdef IS_MPI
+    cellOffsets_.push_back( Vector3i(-1, 0, 0) );
+    cellOffsets_.push_back( Vector3i(-1,-1, 0) );
+    cellOffsets_.push_back( Vector3i( 0,-1, 0) );
+    cellOffsets_.push_back( Vector3i( 1,-1, 0) );
+    cellOffsets_.push_back( Vector3i( 0, 0,-1) );
+    cellOffsets_.push_back( Vector3i(-1, 0, 1) );
+    cellOffsets_.push_back( Vector3i(-1,-1,-1) );
+    cellOffsets_.push_back( Vector3i( 0,-1,-1) );
+    cellOffsets_.push_back( Vector3i( 1,-1,-1) );
+    cellOffsets_.push_back( Vector3i( 1, 0,-1) );
+    cellOffsets_.push_back( Vector3i( 1, 1,-1) );
+    cellOffsets_.push_back( Vector3i( 0, 1,-1) );
+    cellOffsets_.push_back( Vector3i(-1, 1,-1) );
+#endif    
+  }
+
+
   /**
    * distributeInitialData is essentially a copy of the older fortran 
    * SimulationSetup
    */
-  
   void ForceMatrixDecomposition::distributeInitialData() {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
@@ -74,27 +96,30 @@ namespace OpenMD {
 
 #ifdef IS_MPI
  
-    AtomCommIntRow = new Communicator<Row,int>(nLocal_);
-    AtomCommRealRow = new Communicator<Row,RealType>(nLocal_);
-    AtomCommVectorRow = new Communicator<Row,Vector3d>(nLocal_);
-    AtomCommMatrixRow = new Communicator<Row,Mat3x3d>(nLocal_);
-    AtomCommPotRow = new Communicator<Row,potVec>(nLocal_);
+    MPI::Intracomm row = rowComm.getComm();
+    MPI::Intracomm col = colComm.getComm();
 
-    AtomCommIntColumn = new Communicator<Column,int>(nLocal_);
-    AtomCommRealColumn = new Communicator<Column,RealType>(nLocal_);
-    AtomCommVectorColumn = new Communicator<Column,Vector3d>(nLocal_);
-    AtomCommMatrixColumn = new Communicator<Column,Mat3x3d>(nLocal_);
-    AtomCommPotColumn = new Communicator<Column,potVec>(nLocal_);
+    AtomPlanIntRow = new Plan<int>(row, nLocal_);
+    AtomPlanRealRow = new Plan<RealType>(row, nLocal_);
+    AtomPlanVectorRow = new Plan<Vector3d>(row, nLocal_);
+    AtomPlanMatrixRow = new Plan<Mat3x3d>(row, nLocal_);
+    AtomPlanPotRow = new Plan<potVec>(row, nLocal_);
 
-    cgCommIntRow = new Communicator<Row,int>(nGroups_);
-    cgCommVectorRow = new Communicator<Row,Vector3d>(nGroups_);
-    cgCommIntColumn = new Communicator<Column,int>(nGroups_);
-    cgCommVectorColumn = new Communicator<Column,Vector3d>(nGroups_);
+    AtomPlanIntColumn = new Plan<int>(col, nLocal_);
+    AtomPlanRealColumn = new Plan<RealType>(col, nLocal_);
+    AtomPlanVectorColumn = new Plan<Vector3d>(col, nLocal_);
+    AtomPlanMatrixColumn = new Plan<Mat3x3d>(col, nLocal_);
+    AtomPlanPotColumn = new Plan<potVec>(col, nLocal_);
 
-    nAtomsInRow_ = AtomCommIntRow->getSize();
-    nAtomsInCol_ = AtomCommIntColumn->getSize();
-    nGroupsInRow_ = cgCommIntRow->getSize();
-    nGroupsInCol_ = cgCommIntColumn->getSize();
+    cgPlanIntRow = new Plan<int>(row, nGroups_);
+    cgPlanVectorRow = new Plan<Vector3d>(row, nGroups_);
+    cgPlanIntColumn = new Plan<int>(col, nGroups_);
+    cgPlanVectorColumn = new Plan<Vector3d>(col, nGroups_);
+
+    nAtomsInRow_ = AtomPlanIntRow->getSize();
+    nAtomsInCol_ = AtomPlanIntColumn->getSize();
+    nGroupsInRow_ = cgPlanIntRow->getSize();
+    nGroupsInCol_ = cgPlanIntColumn->getSize();
 
     // Modify the data storage objects with the correct layouts and sizes:
     atomRowData.resize(nAtomsInRow_);
@@ -109,8 +134,8 @@ namespace OpenMD {
     identsRow.resize(nAtomsInRow_);
     identsCol.resize(nAtomsInCol_);
     
-    AtomCommIntRow->gather(idents, identsRow);
-    AtomCommIntColumn->gather(idents, identsCol);
+    AtomPlanIntRow->gather(idents, identsRow);
+    AtomPlanIntColumn->gather(idents, identsCol);
     
     // allocate memory for the parallel objects
     atypesRow.resize(nAtomsInRow_);
@@ -126,18 +151,45 @@ namespace OpenMD {
 
     AtomRowToGlobal.resize(nAtomsInRow_);
     AtomColToGlobal.resize(nAtomsInCol_);
-    AtomCommIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
-    AtomCommIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
-    
+    AtomPlanIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
+    AtomPlanIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
+
+    cerr << "Atoms in Local:\n";
+    for (int i = 0; i < AtomLocalToGlobal.size(); i++) {
+      cerr << "i =\t" << i << "\t localAt =\t" << AtomLocalToGlobal[i] << "\n";
+    }
+    cerr << "Atoms in Row:\n";
+    for (int i = 0; i < AtomRowToGlobal.size(); i++) {
+      cerr << "i =\t" << i << "\t rowAt =\t" << AtomRowToGlobal[i] << "\n";
+    }
+    cerr << "Atoms in Col:\n";
+    for (int i = 0; i < AtomColToGlobal.size(); i++) {
+      cerr << "i =\t" << i << "\t colAt =\t" << AtomColToGlobal[i] << "\n";
+    }
+
     cgRowToGlobal.resize(nGroupsInRow_);
     cgColToGlobal.resize(nGroupsInCol_);
-    cgCommIntRow->gather(cgLocalToGlobal, cgRowToGlobal);
-    cgCommIntColumn->gather(cgLocalToGlobal, cgColToGlobal);
+    cgPlanIntRow->gather(cgLocalToGlobal, cgRowToGlobal);
+    cgPlanIntColumn->gather(cgLocalToGlobal, cgColToGlobal);
+
+    cerr << "Gruops in Local:\n";
+    for (int i = 0; i < cgLocalToGlobal.size(); i++) {
+      cerr << "i =\t" << i << "\t localCG =\t" << cgLocalToGlobal[i] << "\n";
+    }
+    cerr << "Groups in Row:\n";
+    for (int i = 0; i < cgRowToGlobal.size(); i++) {
+      cerr << "i =\t" << i << "\t rowCG =\t" << cgRowToGlobal[i] << "\n";
+    }
+    cerr << "Groups in Col:\n";
+    for (int i = 0; i < cgColToGlobal.size(); i++) {
+      cerr << "i =\t" << i << "\t colCG =\t" << cgColToGlobal[i] << "\n";
+    }
+
 
     massFactorsRow.resize(nAtomsInRow_);
     massFactorsCol.resize(nAtomsInCol_);
-    AtomCommRealRow->gather(massFactors, massFactorsRow);
-    AtomCommRealColumn->gather(massFactors, massFactorsCol);
+    AtomPlanRealRow->gather(massFactors, massFactorsRow);
+    AtomPlanRealColumn->gather(massFactors, massFactorsCol);
 
     groupListRow_.clear();
     groupListRow_.resize(nGroupsInRow_);
@@ -517,30 +569,46 @@ namespace OpenMD {
 #ifdef IS_MPI
     
     // gather up the atomic positions
-    AtomCommVectorRow->gather(snap_->atomData.position, 
+    AtomPlanVectorRow->gather(snap_->atomData.position, 
                               atomRowData.position);
-    AtomCommVectorColumn->gather(snap_->atomData.position, 
+    AtomPlanVectorColumn->gather(snap_->atomData.position, 
                                  atomColData.position);
     
     // gather up the cutoff group positions
-    cgCommVectorRow->gather(snap_->cgData.position, 
+
+    cerr  << "before gather\n";
+    for (int i = 0; i < snap_->cgData.position.size(); i++) {
+      cerr << "cgpos = " << snap_->cgData.position[i] << "\n";
+    }
+
+    cgPlanVectorRow->gather(snap_->cgData.position, 
                             cgRowData.position);
-    cgCommVectorColumn->gather(snap_->cgData.position, 
+
+    cerr  << "after gather\n";
+    for (int i = 0; i < cgRowData.position.size(); i++) {
+      cerr << "cgRpos = " << cgRowData.position[i] << "\n";
+    }
+
+    cgPlanVectorColumn->gather(snap_->cgData.position, 
                                cgColData.position);
+    for (int i = 0; i < cgColData.position.size(); i++) {
+      cerr << "cgCpos = " << cgColData.position[i] << "\n";
+    }
+
     
     // if needed, gather the atomic rotation matrices
     if (storageLayout_ & DataStorage::dslAmat) {
-      AtomCommMatrixRow->gather(snap_->atomData.aMat, 
+      AtomPlanMatrixRow->gather(snap_->atomData.aMat, 
                                 atomRowData.aMat);
-      AtomCommMatrixColumn->gather(snap_->atomData.aMat, 
+      AtomPlanMatrixColumn->gather(snap_->atomData.aMat, 
                                    atomColData.aMat);
     }
     
     // if needed, gather the atomic eletrostatic frames
     if (storageLayout_ & DataStorage::dslElectroFrame) {
-      AtomCommMatrixRow->gather(snap_->atomData.electroFrame, 
+      AtomPlanMatrixRow->gather(snap_->atomData.electroFrame, 
                                 atomRowData.electroFrame);
-      AtomCommMatrixColumn->gather(snap_->atomData.electroFrame, 
+      AtomPlanMatrixColumn->gather(snap_->atomData.electroFrame, 
                                    atomColData.electroFrame);
     }
 
@@ -557,12 +625,12 @@ namespace OpenMD {
     
     if (storageLayout_ & DataStorage::dslDensity) {
       
-      AtomCommRealRow->scatter(atomRowData.density, 
+      AtomPlanRealRow->scatter(atomRowData.density, 
                                snap_->atomData.density);
       
       int n = snap_->atomData.density.size();
       vector<RealType> rho_tmp(n, 0.0);
-      AtomCommRealColumn->scatter(atomColData.density, rho_tmp);
+      AtomPlanRealColumn->scatter(atomColData.density, rho_tmp);
       for (int i = 0; i < n; i++)
         snap_->atomData.density[i] += rho_tmp[i];
     }
@@ -578,16 +646,16 @@ namespace OpenMD {
     storageLayout_ = sman_->getStorageLayout();
 #ifdef IS_MPI
     if (storageLayout_ & DataStorage::dslFunctional) {
-      AtomCommRealRow->gather(snap_->atomData.functional, 
+      AtomPlanRealRow->gather(snap_->atomData.functional, 
                               atomRowData.functional);
-      AtomCommRealColumn->gather(snap_->atomData.functional, 
+      AtomPlanRealColumn->gather(snap_->atomData.functional, 
                                  atomColData.functional);
     }
     
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      AtomCommRealRow->gather(snap_->atomData.functionalDerivative, 
+      AtomPlanRealRow->gather(snap_->atomData.functionalDerivative, 
                               atomRowData.functionalDerivative);
-      AtomCommRealColumn->gather(snap_->atomData.functionalDerivative, 
+      AtomPlanRealColumn->gather(snap_->atomData.functionalDerivative, 
                                  atomColData.functionalDerivative);
     }
 #endif
@@ -601,28 +669,29 @@ namespace OpenMD {
     int n = snap_->atomData.force.size();
     vector<Vector3d> frc_tmp(n, V3Zero);
     
-    AtomCommVectorRow->scatter(atomRowData.force, frc_tmp);
+    AtomPlanVectorRow->scatter(atomRowData.force, frc_tmp);
     for (int i = 0; i < n; i++) {
       snap_->atomData.force[i] += frc_tmp[i];
       frc_tmp[i] = 0.0;
     }
     
-    AtomCommVectorColumn->scatter(atomColData.force, frc_tmp);
-    for (int i = 0; i < n; i++)
+    AtomPlanVectorColumn->scatter(atomColData.force, frc_tmp);
+    for (int i = 0; i < n; i++) {
       snap_->atomData.force[i] += frc_tmp[i];
+    }
         
     if (storageLayout_ & DataStorage::dslTorque) {
 
       int nt = snap_->atomData.torque.size();
       vector<Vector3d> trq_tmp(nt, V3Zero);
 
-      AtomCommVectorRow->scatter(atomRowData.torque, trq_tmp);
+      AtomPlanVectorRow->scatter(atomRowData.torque, trq_tmp);
       for (int i = 0; i < nt; i++) {
         snap_->atomData.torque[i] += trq_tmp[i];
         trq_tmp[i] = 0.0;
       }
       
-      AtomCommVectorColumn->scatter(atomColData.torque, trq_tmp);
+      AtomPlanVectorColumn->scatter(atomColData.torque, trq_tmp);
       for (int i = 0; i < nt; i++)
         snap_->atomData.torque[i] += trq_tmp[i];
     }
@@ -632,13 +701,13 @@ namespace OpenMD {
       int ns = snap_->atomData.skippedCharge.size();
       vector<RealType> skch_tmp(ns, 0.0);
 
-      AtomCommRealRow->scatter(atomRowData.skippedCharge, skch_tmp);
+      AtomPlanRealRow->scatter(atomRowData.skippedCharge, skch_tmp);
       for (int i = 0; i < ns; i++) {
         snap_->atomData.skippedCharge[i] += skch_tmp[i];
         skch_tmp[i] = 0.0;
       }
       
-      AtomCommRealColumn->scatter(atomColData.skippedCharge, skch_tmp);
+      AtomPlanRealColumn->scatter(atomColData.skippedCharge, skch_tmp);
       for (int i = 0; i < ns; i++)
         snap_->atomData.skippedCharge[i] += skch_tmp[i];
     }
@@ -650,7 +719,7 @@ namespace OpenMD {
 
     // scatter/gather pot_row into the members of my column
           
-    AtomCommPotRow->scatter(pot_row, pot_temp);
+    AtomPlanPotRow->scatter(pot_row, pot_temp);
 
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];
@@ -658,12 +727,13 @@ namespace OpenMD {
     fill(pot_temp.begin(), pot_temp.end(), 
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
       
-    AtomCommPotColumn->scatter(pot_col, pot_temp);    
+    AtomPlanPotColumn->scatter(pot_col, pot_temp);    
     
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];    
 #endif
 
+    cerr << "pairwisePot = " <<  pairwisePot << "\n";
   }
 
   int ForceMatrixDecomposition::getNAtomsInRow() {   
@@ -698,8 +768,12 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     d = cgColData.position[cg2] - cgRowData.position[cg1];
+    cerr << "cg1 = " << cg1 << "\tcg1p = " << cgRowData.position[cg1] << "\n";
+    cerr << "cg2 = " << cg2 << "\tcg2p = " << cgColData.position[cg2] << "\n";
 #else
     d = snap_->cgData.position[cg2] - snap_->cgData.position[cg1];
+    cerr << "cg1 = " << cg1 << "\tcg1p = " << snap_->cgData.position[cg1] << "\n";
+    cerr << "cg2 = " << cg2 << "\tcg2p = " << snap_->cgData.position[cg2] << "\n";
 #endif
     
     snap_->wrapVector(d);
@@ -774,12 +848,15 @@ namespace OpenMD {
    */
   bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2) {
     int unique_id_1, unique_id_2;
+    
 
+    cerr << "sap with atom1, atom2 =\t" << atom1 << "\t" << atom2 << "\n";
 #ifdef IS_MPI
     // in MPI, we have to look up the unique IDs for each atom
     unique_id_1 = AtomRowToGlobal[atom1];
     unique_id_2 = AtomColToGlobal[atom2];
 
+    cerr << "sap with uid1, uid2 =\t" << unique_id_1 << "\t" << unique_id_2 << "\n";
     // this situation should only arise in MPI simulations
     if (unique_id_1 == unique_id_2) return true;
     
@@ -804,7 +881,6 @@ namespace OpenMD {
    */
   bool ForceMatrixDecomposition::excludeAtomPair(int atom1, int atom2) {
     int unique_id_2;
-    
 #ifdef IS_MPI
     // in MPI, we have to look up the unique IDs for the row atom.
     unique_id_2 = AtomColToGlobal[atom2];
@@ -1031,7 +1107,6 @@ namespace OpenMD {
         // add this cutoff group to the list of groups in this cell;
         cellListRow_[cellIndex].push_back(i);
       }
-      
       for (int i = 0; i < nGroupsInCol_; i++) {
         rs = cgColData.position[i];
         
@@ -1076,7 +1151,7 @@ namespace OpenMD {
         whichCell.z() = nCells_.z() * scaled.z();
         
         // find single index of this cell:
-        cellIndex = Vlinear(whichCell, nCells_);      
+        cellIndex = Vlinear(whichCell, nCells_);
         
         // add this cutoff group to the list of groups in this cell;
         cellList_[cellIndex].push_back(i);
@@ -1120,18 +1195,14 @@ namespace OpenMD {
                 for (vector<int>::iterator j2 = cellListCol_[m2].begin(); 
                      j2 != cellListCol_[m2].end(); ++j2) {
                   
-                  // Always do this if we're in different cells or if
-                  // we're in the same cell and the global index of the
-                  // j2 cutoff group is less than the j1 cutoff group
-                  
-                  if (m2 != m1 || cgColToGlobal[(*j2)] < cgRowToGlobal[(*j1)]) {
-                    dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
-                    snap_->wrapVector(dr);
-                    cuts = getGroupCutoffs( (*j1), (*j2) );
-                    if (dr.lengthSquare() < cuts.third) {
-                      neighborList.push_back(make_pair((*j1), (*j2)));
-                    }
-                  }
+                  // In parallel, we need to visit *all* pairs of row &
+                  // column indicies and will truncate later on.
+                  dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
+                  snap_->wrapVector(dr);
+                  cuts = getGroupCutoffs( (*j1), (*j2) );
+                  if (dr.lengthSquare() < cuts.third) {
+                    neighborList.push_back(make_pair((*j1), (*j2)));
+                  }                  
                 }
               }
 #else

@@ -526,12 +526,15 @@ namespace OpenMD {
            mol = info_->nextMolecule(mi)) {
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
             cg = mol->nextCutoffGroup(ci)) {
+          cerr << "branch1\n";
+          cerr << "globind = " << cg->getGlobalIndex() << "\n";
           cg->updateCOM();
         }
       }      
     } else {
       // center of mass of the group is the same as position of the atom  
       // if cutoff group does not exist
+      cerr << "branch2\n";
       cgConfig->position = config->position;
     }
 
@@ -618,7 +621,7 @@ namespace OpenMD {
             for (vector<int>::iterator jb = atomListColumn.begin(); 
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
-            
+
               if (!fDecomp_->skipAtomPair(atom1, atom2)) {
                 vpair = 0.0;
                 workPot = 0.0;
@@ -633,14 +636,17 @@ namespace OpenMD {
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                   idat.d = &d_grp;
                   idat.r2 = &rgrpsq;
+                  cerr << "dgrp = " << d_grp << "\n";
                 } else {
                   d = fDecomp_->getInteratomicVector(atom1, atom2);
                   curSnapshot->wrapVector( d );
                   r2 = d.lengthSquare();
+                  cerr << "datm = " << d<< "\n";
                   idat.d = &d;
                   idat.r2 = &r2;
                 }
                 
+                cerr << "idat.d = " << *(idat.d) << "\n";
                 r = sqrt( *(idat.r2) );
                 idat.rij = &r;
                
@@ -649,9 +655,10 @@ namespace OpenMD {
                 } else {
                   interactionMan_->doPair(idat);
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
+
+                  cerr << "d = " << *(idat.d) << "\tv=" << vpair << "\tf=" << f1 << "\n";
                   vij += vpair;
                   fij += f1;
-                  cerr << "ats = " << atom1 << " " << atom2 << "d = " << *(idat.d) << " f1 = " << f1 << "\n";
                   tau -= outProduct( *(idat.d), f1);
                 }
               }

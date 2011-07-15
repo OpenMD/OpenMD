@@ -708,7 +708,7 @@ namespace OpenMD {
     }
     
     //fill globalGroupMembership
-    std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), 0);
+    std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), -1);
     for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {        
       for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
         
@@ -727,8 +727,13 @@ namespace OpenMD {
     // docs said we could.
     std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
     MPI_Allreduce(&globalGroupMembership[0], &tmpGroupMembership[0], nGlobalAtoms,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+                  MPI_INT, MPI_MAX, MPI_COMM_WORLD);
     info->setGlobalGroupMembership(tmpGroupMembership);
+
+    cerr << "ggm:\n";
+    for (int i = 0; i < tmpGroupMembership.size(); i++) 
+      cerr << "i = " << i << "\t ggm(i) = " << tmpGroupMembership[i] << "\n";
+
 #else
     info->setGlobalGroupMembership(globalGroupMembership);
 #endif
