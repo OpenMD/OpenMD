@@ -43,8 +43,8 @@
 
 
 namespace OpenMD {
-  RadialRCorrFunc::RadialRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition){
+  RadialRCorrFunc::RadialRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition, memSize){
 
       setCorrFuncType("RadialRCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".r_rcorr");

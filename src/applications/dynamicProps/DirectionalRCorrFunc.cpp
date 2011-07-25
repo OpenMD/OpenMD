@@ -42,8 +42,8 @@
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 
 namespace OpenMD {
-  DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition){
+  DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition, memSize){
 
       setCorrFuncType("DirectionalRCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".drcorr");

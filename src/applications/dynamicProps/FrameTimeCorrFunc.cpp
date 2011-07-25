@@ -43,10 +43,12 @@
 
 namespace OpenMD {
 
-  FrameTimeCorrFunc::FrameTimeCorrFunc(SimInfo * info, const std::string & filename, 
+  FrameTimeCorrFunc::FrameTimeCorrFunc(SimInfo * info, 
+                                       const std::string & filename, 
                                        const std :: string & sele1, 
-                                       const std :: string & sele2, int storageLayout) 
-    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout){
+                                       const std :: string & sele2, 
+                                       int storageLayout, long long int memSize)
+    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize){
     }
 
   void FrameTimeCorrFunc::correlateFrames(int frame1, int frame2) {

@@ -172,7 +172,7 @@ std::string containerToString(const ContainerType& cont) {
     oss << ")";
     return oss.str();
 }  
-
   
+  unsigned long long memparse (char *ptr,  char **retptr);
 }  
 #endif

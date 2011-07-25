@@ -347,7 +347,7 @@ contains
     fx = dudr * drdx
     fy = dudr * drdy
     fz = dudr * drdz
-    
+
     pot = pot + sw*pot_temp
 
     f1(1) = f1(1) + fx

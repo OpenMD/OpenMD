@@ -1114,7 +1114,6 @@ contains
                       if (in_switching_region) then
                          swderiv = vij*dswdr/rgrp
                          fg = swderiv*d_grp
- 
                          fij(1) = fij(1) + fg(1)
                          fij(2) = fij(2) + fg(2)
                          fij(3) = fij(3) + fg(3)

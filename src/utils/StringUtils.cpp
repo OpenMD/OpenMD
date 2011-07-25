@@ -246,4 +246,36 @@ size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
     return pos - str1.begin();
 }
 
+  /**
+   *	memparse - parse a string with mem suffixes into a number
+   *	@ptr: Where parse begins
+   *	@retptr: (output) Pointer to next char after parse completes
+   *
+   *	Parses a string into a number.  The number stored at @ptr is
+   *	potentially suffixed with %K (for kilobytes, or 1024 bytes),
+   *	%M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
+   *	1073741824).  If the number is suffixed with K, M, or G, then
+   *	the return value is the number multiplied by one kilobyte, one
+   *	megabyte, or one gigabyte, respectively.
+   */  
+  unsigned long long memparse (char *ptr,  char **retptr) {
+    unsigned long long ret = strtoull (ptr, retptr, 0);
+    
+    switch (**retptr) {
+    case 'G':
+    case 'g':
+      ret <<= 10;
+    case 'M':
+    case 'm':
+      ret <<= 10;
+    case 'K':
+    case 'k':
+      ret <<= 10;
+      (*retptr)++;
+    default:
+      break;
+    }
+    return ret;
+  }
+
 }

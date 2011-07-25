@@ -499,12 +499,11 @@ namespace OpenMD {
         int bestScore = foundNBI[0].first;
         std::vector<std::string> theKeys = foundNBI[0].second;
         
-        NonBondedInteractionType* bestType = nonBondedInteractionTypeCont_.find(theKeys);
-        
+        NonBondedInteractionType* bestType = nonBondedInteractionTypeCont_.find(theKeys);        
         return bestType;
       } else {
         //if no exact match found, try wild card match
-        return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);      
+        return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);
       }
     }
   }

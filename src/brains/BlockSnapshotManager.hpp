@@ -57,7 +57,7 @@ namespace OpenMD {
   class BlockSnapshotManager : public SnapshotManager{
 
   public:
-    BlockSnapshotManager(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
+    BlockSnapshotManager(SimInfo* info, const std::string& filename, int storageLayout, long long int memSize, int blockCapacity = 2);
     ~BlockSnapshotManager();
         
     virtual Snapshot* getSnapshot(int id);
@@ -109,6 +109,7 @@ namespace OpenMD {
         
     SimInfo* info_;
     int blockCapacity_;
+    long long int memSize_;
 
     std::vector<Snapshot*> snapshots_;
     std::vector<SnapshotBlock> blocks_;        

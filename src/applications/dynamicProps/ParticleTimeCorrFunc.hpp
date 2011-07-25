@@ -48,7 +48,8 @@ namespace OpenMD {
   class ParticleTimeCorrFunc : public TimeCorrFunc {
   public:
     ParticleTimeCorrFunc(SimInfo* info, const std::string& filename, 
-			 const std::string& sele1, const std::string& sele2, int storageLayout);
+			 const std::string& sele1, const std::string& sele2,
+                         int storageLayout, long long int memSize);
         
   private:        
     virtual void correlateFrames(int frame1, int frame2);

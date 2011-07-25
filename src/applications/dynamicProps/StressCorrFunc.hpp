@@ -47,7 +47,7 @@ namespace OpenMD {
 
   class StressCorrFunc : public FrameTimeCorrFunc {
   public:
-    StressCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
+    StressCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
         
   private:
     virtual void correlateFrames(int frame1, int frame2);

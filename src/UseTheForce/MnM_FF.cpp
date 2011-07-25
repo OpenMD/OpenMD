@@ -192,14 +192,14 @@ namespace OpenMD {
           
             /* if we found a match (even a partial match), punt to the
                interaction to poke our info down to fortran. */
-            if (nbit != NULL)	nbit->tellFortran(atid1, atid2);
-          }			
-        }
+            if (nbit != NULL) nbit->tellFortran(atid1, atid2);
+          }
+        }			
       }
     }
-  
+    
     delete ffStream;
-  
+    
   }
   
   

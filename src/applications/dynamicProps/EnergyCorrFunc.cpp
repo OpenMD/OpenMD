@@ -62,13 +62,15 @@ namespace OpenMD {
   // recalculate pressures and actions on the fly:
   EnergyCorrFunc::EnergyCorrFunc(SimInfo* info, const std::string& filename, 
 				 const std::string& sele1, 
-				 const std::string& sele2)
+				 const std::string& sele2,
+                                 long long int memSize)
     : FrameTimeCorrFunc(info, filename, sele1, sele2, 
 			DataStorage::dslPosition | 
 			DataStorage::dslVelocity |
 			DataStorage::dslForce |
 			DataStorage::dslTorque |			
-			DataStorage::dslParticlePot			){
+			DataStorage::dslParticlePot,
+			memSize){
 
       setCorrFuncType("EnergyCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".moment");

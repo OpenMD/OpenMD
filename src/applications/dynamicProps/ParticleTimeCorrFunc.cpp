@@ -43,15 +43,19 @@
 
 namespace OpenMD {
 
-  ParticleTimeCorrFunc::ParticleTimeCorrFunc(SimInfo * info, const std::string & filename, 
-					     const std :: string & sele1, const std :: string & sele2, int storageLayout) 
-    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout){
-
-
-      nSelected_ =   seleMan1_.getSelectionCount();  
-      assert(  nSelected_ == seleMan2_.getSelectionCount());
-    }
-
+  ParticleTimeCorrFunc::ParticleTimeCorrFunc(SimInfo * info, 
+                                             const std::string & filename, 
+					     const std::string & sele1, 
+                                             const std::string & sele2, 
+                                             int storageLayout, 
+                                             long long int memSize) 
+    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize){
+    
+    
+    nSelected_ =   seleMan1_.getSelectionCount();  
+    assert(  nSelected_ == seleMan2_.getSelectionCount());
+  }
+  
   void ParticleTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);

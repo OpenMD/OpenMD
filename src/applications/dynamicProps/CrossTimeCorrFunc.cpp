@@ -43,14 +43,17 @@
 
 namespace OpenMD {
 
-  CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo * info, const  std::string & filename,
-				       const std :: string & sele1, const std :: string & sele2, int storageLayout) 
-    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout) {
+  CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo* info, 
+                                       const std::string & filename,
+				       const std::string & sele1, 
+                                       const std::string & sele2, 
+                                       int storageLayout, long long int memSize)
+    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize) {
     
-      nSelected1_ = seleMan1_.getSelectionCount();  
-      nSelected2_ = seleMan2_.getSelectionCount();  
-      nSelectedPairs_ = nSelected1_ * nSelected2_;
-    }
+    nSelected1_ = seleMan1_.getSelectionCount();  
+    nSelected2_ = seleMan2_.getSelectionCount();  
+    nSelectedPairs_ = nSelected1_ * nSelected2_;
+  }
 
   void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);

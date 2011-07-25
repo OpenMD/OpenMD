@@ -11,6 +11,7 @@ option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string  typestr="selection script"      no
 option  "order"         -       "Lengendre Polynomial Order"  int  no
+option  "memory"        m       "Available memory (defaults to 2G)" string  typestr="memory specification" default="2G" no
 defgroup "dynamicProps" groupdesc=" an option of this group is required" yes
 groupoption "rcorr"     r       "rmsd" group="dynamicProps"
 groupoption "vcorr" 	v	"velocity correlation function" group="dynamicProps"
