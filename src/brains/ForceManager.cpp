@@ -368,6 +368,7 @@ namespace OpenMD {
       for(atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {
 	atom->zeroForcesAndTorques();
+        cerr << "apos = " << atom->getPos() << "\n";
       }
       
       //change the positions of atoms which belong to the rigidbodies
@@ -381,6 +382,7 @@ namespace OpenMD {
             cg = mol->nextCutoffGroup(ci)) {
           //calculate the center of mass of cutoff group
           cg->updateCOM();
+          cerr << "cgpos = " << cg->getPos() << "\n";
         }
       }      
     }

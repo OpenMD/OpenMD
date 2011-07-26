@@ -589,6 +589,11 @@ namespace OpenMD {
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
     }
     
+    cerr << "molToProcMap:\n";
+    for (int i = 0; i < molToProcMap.size(); i++) {
+      cerr << "m = " << i << " mtpr[m] = " << molToProcMap[i] <<"\n";
+    }
+
     info->setMolToProcMap(molToProcMap);
     sprintf(checkPointMsg,
             "Successfully divided the molecules among the processors.\n");
@@ -793,7 +798,13 @@ namespace OpenMD {
         globalIO++;
       }
     }
-    
+    cerr << "ioi2io:\n";
+    for (int i = 0; i < IOIndexToIntegrableObject.size(); i++) {
+      if (IOIndexToIntegrableObject[i] != NULL) {
+        cerr << "i = " << i << "globalIOindex = " << IOIndexToIntegrableObject[i]->getGlobalIntegrableObjectIndex() << "\n";
+      }
+    }
+      
     info->setIOIndexToIntegrableObject(IOIndexToIntegrableObject);
     
   }
