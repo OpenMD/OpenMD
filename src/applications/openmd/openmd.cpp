@@ -56,8 +56,6 @@
 #include "minimizers/MinimizerFactory.hpp"
 #include "minimizers/Minimizer.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
-#include "utils/Report.hpp"
-#include "utils/Exception.hpp"
 
 using namespace OpenMD;
 

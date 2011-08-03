@@ -721,6 +721,17 @@ namespace OpenMD {
   }
   
   void MoleculeStamp::checkCutoffGroups() {
+    std::vector<AtomStamp*>::iterator ai;
+    std::vector<int>::iterator fai;
+
+    //add all atoms into freeAtoms_ set
+    for(ai = atomStamps_.begin(); ai != atomStamps_.end(); ++ai) {
+      freeAtoms_.push_back( (*ai)->getIndex() );
+      std::cerr << "freeAtoms = " << *(freeAtoms_.end()) << "\n";
+    }
+
+
+
     for(int i = 0; i < getNCutoffGroups(); ++i) {
       CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
       std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
@@ -733,6 +744,15 @@ namespace OpenMD {
         oss << "Error in Molecule " << getName() << ": cutoffGroup" << 
           " is out of range\n"; 
         throw OpenMDException(oss.str());
+      }
+
+      for(fai = cutoffGroupAtoms.begin(); fai != cutoffGroupAtoms.end(); 
+          ++fai) {
+        //erase the atoms belonging to cutoff groups from freeAtoms vector        
+        for (std::vector<int>::iterator j = freeAtoms_.begin(); 
+             j != freeAtoms_.end(); ++j) {
+          if ( (*j) == (*fai) ) freeAtoms_.erase(j);
+        }
       }
     }    
   }

@@ -614,8 +614,10 @@ namespace OpenMD {
 #endif
         
         stampId = info->getMoleculeStampId(i);
-        Molecule * mol = molCreator.createMolecule(info->getForceField(), info->getMoleculeStamp(stampId),
-                                                   stampId, i, info->getLocalIndexManager());
+        Molecule * mol = molCreator.createMolecule(info->getForceField(), 
+                                                   info->getMoleculeStamp(stampId),
+                                                   stampId, i, 
+                                                   info->getLocalIndexManager());
         
         info->addMolecule(mol);
         
@@ -642,78 +644,54 @@ namespace OpenMD {
     int beginRigidBodyIndex;
     int beginCutoffGroupIndex;
     int nGlobalAtoms = info->getNGlobalAtoms();
+    
+    beginAtomIndex = 0;
+    beginRigidBodyIndex = 0;
+    beginCutoffGroupIndex = 0;
 
-    /**@todo fixme */
-#ifndef IS_MPI
-    
-    beginAtomIndex = 0;
-    beginRigidBodyIndex = 0;
-    beginCutoffGroupIndex = 0;
-    
-#else
-    
-    int nproc;
-    int myNode;
-    
-    myNode = worldRank;
-    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
-    
-    std::vector < int > tmpAtomsInProc(nproc, 0);
-    std::vector < int > tmpRigidBodiesInProc(nproc, 0);
-    std::vector < int > tmpCutoffGroupsInProc(nproc, 0);
-    std::vector < int > NumAtomsInProc(nproc, 0);
-    std::vector < int > NumRigidBodiesInProc(nproc, 0);
-    std::vector < int > NumCutoffGroupsInProc(nproc, 0);
-    
-    tmpAtomsInProc[myNode] = info->getNAtoms();
-    tmpRigidBodiesInProc[myNode] = info->getNRigidBodies();
-    tmpCutoffGroupsInProc[myNode] = info->getNCutoffGroups();
-    
-    //do MPI_ALLREDUCE to exchange the total number of atoms, rigidbodies and cutoff groups
-    MPI_Allreduce(&tmpAtomsInProc[0], &NumAtomsInProc[0], nproc, MPI_INT,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&tmpRigidBodiesInProc[0], &NumRigidBodiesInProc[0], nproc,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&tmpCutoffGroupsInProc[0], &NumCutoffGroupsInProc[0], nproc,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    
-    beginAtomIndex = 0;
-    beginRigidBodyIndex = 0;
-    beginCutoffGroupIndex = 0;
-    
-    for(int i = 0; i < myNode; i++) {
-      beginAtomIndex += NumAtomsInProc[i];
-      beginRigidBodyIndex += NumRigidBodiesInProc[i];
-      beginCutoffGroupIndex += NumCutoffGroupsInProc[i];
-    }
-    
-#endif
-    
-    //rigidbody's index begins right after atom's
-    beginRigidBodyIndex += info->getNGlobalAtoms();
-    
-    for(mol = info->beginMolecule(mi); mol != NULL;
-        mol = info->nextMolecule(mi)) {
+    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
       
-      //local index(index in DataStorge) of atom is important
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-        atom->setGlobalIndex(beginAtomIndex++);
+#ifdef IS_MPI      
+      if (info->getMolToProc(i) == worldRank) {
+#endif        
+        // stuff to do if I own this molecule
+        mol = info->getMoleculeByGlobalIndex(i);
+
+        //local index(index in DataStorge) of atom is important
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+          atom->setGlobalIndex(beginAtomIndex++);
+        }
+        
+        for(rb = mol->beginRigidBody(ri); rb != NULL;
+            rb = mol->nextRigidBody(ri)) {
+          rb->setGlobalIndex(beginRigidBodyIndex++);
+        }
+        
+        //local index of cutoff group is trivial, it only depends on
+        //the order of travesing
+        for(cg = mol->beginCutoffGroup(ci); cg != NULL;
+            cg = mol->nextCutoffGroup(ci)) {
+          cg->setGlobalIndex(beginCutoffGroupIndex++);
+        }        
+        
+#ifdef IS_MPI        
+      }  else {
+
+        // stuff to do if I don't own this molecule
+        
+        int stampId = info->getMoleculeStampId(i);
+        MoleculeStamp* stamp = info->getMoleculeStamp(stampId);
+
+        beginAtomIndex += stamp->getNAtoms();
+        beginRigidBodyIndex += stamp->getNRigidBodies();
+        beginCutoffGroupIndex += stamp->getNCutoffGroups() + stamp->getNFreeAtoms();
       }
-      
-      for(rb = mol->beginRigidBody(ri); rb != NULL;
-          rb = mol->nextRigidBody(ri)) {
-        rb->setGlobalIndex(beginRigidBodyIndex++);
-      }
-      
-      //local index of cutoff group is trivial, it only depends on the order of travesing
-      for(cg = mol->beginCutoffGroup(ci); cg != NULL;
-          cg = mol->nextCutoffGroup(ci)) {
-        cg->setGlobalIndex(beginCutoffGroupIndex++);
-      }
-    }
-    
+#endif          
+
+    } //end for(int i=0)  
+
     //fill globalGroupMembership
-    std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), -1);
+    std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), 0);
     for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {        
       for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
         
@@ -732,7 +710,7 @@ namespace OpenMD {
     // docs said we could.
     std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
     MPI_Allreduce(&globalGroupMembership[0], &tmpGroupMembership[0], nGlobalAtoms,
-                  MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     info->setGlobalGroupMembership(tmpGroupMembership);
 
     cerr << "ggm:\n";

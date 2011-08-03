@@ -3,10 +3,6 @@ Package = utils
 MySource    = \
 	PropertyMap.cpp \
 	simError.c \
-	FileLocation.cpp \
-	SystemUtilities.cpp \
-	Exception.cpp \
-	Report.cpp \
 	StringUtils.cpp \
         StringTokenizer.cpp \
 	Utility.cpp \

@@ -51,7 +51,6 @@
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
-#include "math/Wigner3jm_interface.h"
 
 namespace OpenMD {
 

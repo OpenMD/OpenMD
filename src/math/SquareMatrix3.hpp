@@ -417,7 +417,7 @@ namespace OpenMD {
     Vector3<Real> v_maxI, v_k, v_j;
 
     // diagonalize using Jacobi
-    jacobi(a, w, v);
+    SquareMatrix3<Real>::jacobi(a, w, v);
     // if all the eigenvalues are the same, return identity matrix
     if (w[0] == w[1] && w[0] == w[2] ) {
       v = SquareMatrix3<Real>::identity();

@@ -49,7 +49,9 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "math/Wigner3jm.hpp"
 
+using namespace MATPACK;
 namespace OpenMD {
 
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
@@ -85,16 +87,16 @@ namespace OpenMD {
     deltaW_ = (MaxW_ - MinW_) / nbins;
 
     // Make arrays for Wigner3jm
-    double* THRCOF = new double[2*lMax_+1];
+    RealType* THRCOF = new RealType[2*lMax_+1];
     // Variables for Wigner routine
-    double lPass, m1Pass, m2m, m2M;
+    RealType lPass, m1Pass, m2m, m2M;
     int error, mSize;
     mSize = 2*lMax_+1;
 
     for (int l = 0; l <= lMax_; l++) {
-      lPass = (double)l;
+      lPass = (RealType)l;
       for (int m1 = -l; m1 <= l; m1++) {
-        m1Pass = (double)m1;
+        m1Pass = (RealType)m1;
 
         std::pair<int,int> lm = std::make_pair(l, m1);
         
@@ -104,9 +106,9 @@ namespace OpenMD {
         }
 
         // Get Wigner coefficients
-        Wigner3jm(&lPass, &lPass, &lPass, 
-                  &m1Pass, &m2m, &m2M, 
-                  THRCOF, &mSize, &error);
+        Wigner3jm(lPass, lPass, lPass, 
+                  m1Pass, m2m, m2M, 
+                  THRCOF, mSize, error);
         
         m2Min[lm] = (int)floor(m2m);
         m2Max[lm] = (int)floor(m2M);

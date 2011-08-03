@@ -76,6 +76,7 @@ namespace OpenMD {
     int  getNRigidBodies() { return rigidBodyStamps_.size(); }
     int  getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
     int getNIntegrable() { return nintegrable_;}
+    int getNFreeAtoms() { return freeAtoms_.size(); }
     virtual void validate();
     
     AtomStamp* getAtomStamp(int index) { return atomStamps_[index]; }
@@ -128,6 +129,7 @@ namespace OpenMD {
     }
     
     std::vector<AtomStamp*> atomStamps_;
+    std::vector<int> freeAtoms_;
     std::vector<BondStamp*> bondStamps_;
     std::vector<BendStamp*> bendStamps_;
     std::vector<TorsionStamp*> torsionStamps_;

@@ -10,7 +10,7 @@ MySource    = \
 	LegendrePolynomial.cpp \
 	RMSD.cpp \
 	CubicSpline.cpp \
-	Wigner3jm.F90 
+	Wigner3jm.cpp 
 
 Modules= \
 
