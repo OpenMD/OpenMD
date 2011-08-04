@@ -38,7 +38,6 @@ IS_UNIX=1
 #packages containing libraries
 PackageLibs = \
 	utils \
-	debug \
 	visitors \
 	math \
 	types \
@@ -55,8 +54,8 @@ PackageLibs = \
 	restraints \
 	lattice \
 	hydrodynamics \
-        antlr \
-        mdParser
+    antlr \
+    mdParser
 
 #packages containing applications
 Applications = \
@@ -89,7 +88,7 @@ Samples = \
 	samples/minimizer \
 	samples/thermoIntegration/liquid \
 	samples/thermoIntegration/solid \
-        samples/water/dimer \
+    samples/water/dimer \
 	samples/water/spce \
 	samples/water/ssd \
 	samples/water/ssde \
@@ -131,7 +130,6 @@ InstallBinDir   = $(OpenMDHome)/bin
 InstallDocDir   = $(OpenMDHome)/doc
 SvnDeclare     :=-DSVN_REV="$(shell svnversion -n . | sed -e "s/.*://" -e "s/\([0-9]*\).*/\1/" | grep "[0-9]")"
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
-F90Declare      = -D__FORTRAN90
 UseSingle       = @USE_SINGLE_PRECISION@
 ifeq "$(UseSingle)" "yes"
 SingleDeclare   = -DSINGLE_PRECISION
@@ -141,18 +139,12 @@ endif
 ParallelDeclare = -DIS_MPI
 SinglePrecision = -DSINGLE_PRECISION
 UseMPI          = @USE_MPI@
-ModuleCase      = @F90_MODULE_NAMES@
-ModSuffix       = @MOD@
 LinkOptions = \
 	@LDFLAGS@ \
-	@FCLIBS@ \
 	@CXXFLAGS@ 
-
-
 
 ParallelLinkOptions = \
 	@LDFLAGS@ \
-	@FCLIBS@ \
 	@CXXFLAGS@
 
 #---------------------------------------------------------------------------
@@ -259,70 +251,6 @@ DerivedCFiles          = $(YaccFiles:%.y=    %.c) \
 
 OtherTargetFiles       = $(OtherSourceFiles:%=$(PackageTargetDir)/%)
 
-###########################################################################
-#
-# Figure out the names of the module files based on some work done by
-# configure.  The tr function below is from John Graham-Cumming
-# (http://www.jgc.org). 
-#
-# The tr function.   Has three arguments:
-#
-# $1   The list of characters to translate from
-# $2   The list of characters to translate to
-# $3   The text to translate
-#
-# For example, $(call tr,A B C,1 2 3,CAPITAL) becomes 21PIT1L.
-
-tr = $(eval __t := $3)                                                    \
-     $(foreach c,                                                         \
-         $(join $(addsuffix :,$1),$2),                                    \
-         $(eval __t :=                                                    \
-             $(subst $(word 1,$(subst :, ,$c)),$(word 2,$(subst :, ,$c)), \
-                 $(__t))))$(__t)
-
-# Common character classes for use with the tr function.  Each of
-# these is actually a variable declaration and must be wrapped with
-# $() or ${} to be used.
-
-[A-Z] := A B C D E F G H I J K L M N O P Q R S T U V W X Y Z #
-[a-z] := a b c d e f g h i j k l m n o p q r s t u v w x y z #
-[0-9] := 0 1 2 3 4 5 6 7 8 9 #
-[A-F] := A B C D E F #
-
-# Figure out whether we have $(eval) or not (GNU Make 3.80 and above)
-# if we do not then we need to use the shell version of tr, and not the
-# faster tr function above:
-
-__have_eval := $(false)
-__ignore := $(eval __have_eval := $(true))
-
-ifndef __have_eval
-  uc = $(shell echo $1 | tr "a-z" "A-Z")
-  lc = $(shell echo $1 | tr "A-Z" "a-z")
-else
-  uc = $(call tr,$([a-z]),$([A-Z]),$1)
-  lc = $(call tr,$([A-Z]),$([a-z]),$1)
-endif
-
-# OK, now we can actually use these functions to figure out the names
-# of the module files:
-
-ifneq "$(words $(Modules))" "0"
-ifeq "$(ModuleCase)" "UPPER"
-  MODULES = $(call uc,$(Modules))
-else
-  ifeq "$(ModuleCase)" "lower"
-    MODULES = $(call lc,$(Modules))
-  else
-    MODULES = $(Modules)
-  endif
-endif
-  ModuleFiles = $(MODULES:%= $(PackageTargetDir)/%.$(ModSuffix))
-  ParallelModuleFiles = $(MODULES:%= $(PackageParallelTargetDir)/%.$(ModSuffix))
-endif
-#
-###########################################################################
-
 ThirdPartyJarsTmp = $(patsubst %,$(LibDir)/%,$(JavaLibraries))
 ThirdPartyJars    = $(subst $(Space),$(X),$(ThirdPartyJarsTmp))
 
@@ -412,13 +340,6 @@ COptions               = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) @CFLAGS@
 CParallelOptions       = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CFLAGS@
 CppOptions             = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@
 CppParallelOptions     = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@
-ifeq "$(UseSingle)" "yes"
-FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @PREPDEFFLAG@$(SingleDeclare) @FCFLAGS_SRCEXT@
-FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(SingleDeclare) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
-else
-FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @FCFLAGS_SRCEXT@
-FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
-endif
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
@@ -552,55 +473,6 @@ ifeq "$(UseMPI)" "yes"
 else
 %.o : %.cpp $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-endif
-
-# .f -> .o
-$(PackageTargetDir)/%.o : %.f $(MainMakefile)
-	$(FortranCompiler) $(FortranOptions) -c $< -o $@
-
-$(PackageParallelTargetDir)/%.o : %.f $(MainMakefile)
-	$(FortranCompiler) $(FortranParallelOptions) -c $< -o $@
-
-ifeq "$(UseMPI)" "yes"
-%.o : %.f $(MainMakefile)
-	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
-else
-%.o : %.f $(MainMakefile)
-	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-endif
-
-# .F90 -> .o
-$(PackageTargetDir)/%.o : %.F90 $(MainMakefile)
-	$(FortranCompiler) $(FortranOptions) $(IncludePath) -c $< -o $@
-	if test -n "`ls *.$(ModSuffix)`"; then \
-	  $(Move) `ls *.$(ModSuffix)` $(PackageTargetDir);\
-	fi
-
-$(PackageParallelTargetDir)/%.o : %.F90 $(MainMakefile)
-	$(FortranCompiler) $(FortranParallelOptions) $(IncludePath) -c $< -o $@
-	if test -n "`ls *.$(ModSuffix)`"; then \
-	  $(Move) "`ls *.$(ModSuffix)`" $(PackageParallelTargetDir);\
-	fi
-
-ifeq "$(UseMPI)" "yes"
-%.o : %.F90 $(MainMakefile)
-	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-	if test -n "`ls *.$(ModSuffix)`"; then\
-          $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
-        fi
-
-	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
-	if test -n "`ls *.$(ModSuffix)`"; then\
-	  $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
-	fi
-
-else
-%.o : %.F90 $(MainMakefile)
-	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-	if test -n "`ls *.$(ModSuffix)`"; then\
-          $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
-        fi
 endif
 
 
@@ -843,19 +715,6 @@ ifneq "$(words $(CFiles))" "0"
 	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) -MM $(CFiles) $(DerivedCFiles)  >> Make.ctemp
 	@cat Make.ctemp  >> $(DependencyFile)
 	@$(Delete) Make.ctemp
-  endif
-
-endif
-
-ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' $(F90Declare) -MM -mc $(ModuleCase) -ms $(ModSuffix) $(F90Files) > Make.ftemp
-	@cat Make.ftemp >> $(DependencyFile)
-	@$(Delete) Make.ftemp
-
-  ifeq "$(UseMPI)" "yes"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) $(F90Declare) -MM -mc $(ModuleCase) -ms $(ModSuffix)  $(F90Files) >> Make.ftemp
-	@cat Make.ftemp >> $(DependencyFile)
-	@$(Delete) Make.ftemp
   endif
 
 endif
