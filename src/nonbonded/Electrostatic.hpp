@@ -86,7 +86,6 @@ namespace OpenMD {
     void setSimInfo(SimInfo* info) {info_ = info;};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
-    virtual void calcSkipCorrection(InteractionData &idat);
     virtual void calcSelfCorrection(SelfData &sdat);
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);

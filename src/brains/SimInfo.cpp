@@ -819,7 +819,6 @@ namespace OpenMD {
       
       for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	GlobalAtomIndices[atom->getLocalIndex()] = atom->getGlobalIndex();
-        cerr << "LI = " << atom->getLocalIndex() << "GAI = " << GlobalAtomIndices[atom->getLocalIndex()] << "\n";
       }
     }
     return GlobalAtomIndices;
@@ -841,7 +840,6 @@ namespace OpenMD {
       for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
            cg = mol->nextCutoffGroup(ci)) {
 	GlobalGroupIndices.push_back(cg->getGlobalIndex());
-        cerr << "LI, GGI = " << GlobalGroupIndices.size() << " " << cg->getGlobalIndex() << "\n";
       }        
     }
     return GlobalGroupIndices;

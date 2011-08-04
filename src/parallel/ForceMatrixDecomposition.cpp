@@ -154,37 +154,10 @@ namespace OpenMD {
     AtomPlanIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
     AtomPlanIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
 
-    cerr << "Atoms in Local:\n";
-    for (int i = 0; i < AtomLocalToGlobal.size(); i++) {
-      cerr << "i =\t" << i << "\t localAt =\t" << AtomLocalToGlobal[i] << "\n";
-    }
-    cerr << "Atoms in Row:\n";
-    for (int i = 0; i < AtomRowToGlobal.size(); i++) {
-      cerr << "i =\t" << i << "\t rowAt =\t" << AtomRowToGlobal[i] << "\n";
-    }
-    cerr << "Atoms in Col:\n";
-    for (int i = 0; i < AtomColToGlobal.size(); i++) {
-      cerr << "i =\t" << i << "\t colAt =\t" << AtomColToGlobal[i] << "\n";
-    }
-
     cgRowToGlobal.resize(nGroupsInRow_);
     cgColToGlobal.resize(nGroupsInCol_);
     cgPlanIntRow->gather(cgLocalToGlobal, cgRowToGlobal);
     cgPlanIntColumn->gather(cgLocalToGlobal, cgColToGlobal);
-
-    cerr << "Gruops in Local:\n";
-    for (int i = 0; i < cgLocalToGlobal.size(); i++) {
-      cerr << "i =\t" << i << "\t localCG =\t" << cgLocalToGlobal[i] << "\n";
-    }
-    cerr << "Groups in Row:\n";
-    for (int i = 0; i < cgRowToGlobal.size(); i++) {
-      cerr << "i =\t" << i << "\t rowCG =\t" << cgRowToGlobal[i] << "\n";
-    }
-    cerr << "Groups in Col:\n";
-    for (int i = 0; i < cgColToGlobal.size(); i++) {
-      cerr << "i =\t" << i << "\t colCG =\t" << cgColToGlobal[i] << "\n";
-    }
-
 
     massFactorsRow.resize(nAtomsInRow_);
     massFactorsCol.resize(nAtomsInCol_);
@@ -576,24 +549,11 @@ namespace OpenMD {
     
     // gather up the cutoff group positions
 
-    cerr  << "before gather\n";
-    for (int i = 0; i < snap_->cgData.position.size(); i++) {
-      cerr << "cgpos = " << snap_->cgData.position[i] << "\n";
-    }
-
     cgPlanVectorRow->gather(snap_->cgData.position, 
                             cgRowData.position);
 
-    cerr  << "after gather\n";
-    for (int i = 0; i < cgRowData.position.size(); i++) {
-      cerr << "cgRpos = " << cgRowData.position[i] << "\n";
-    }
-
     cgPlanVectorColumn->gather(snap_->cgData.position, 
                                cgColData.position);
-    for (int i = 0; i < cgColData.position.size(); i++) {
-      cerr << "cgCpos = " << cgColData.position[i] << "\n";
-    }
 
     
     // if needed, gather the atomic rotation matrices
@@ -731,9 +691,16 @@ namespace OpenMD {
     
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];    
+    
+    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+      RealType ploc1 = pairwisePot[ii];
+      RealType ploc2 = 0.0;
+      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      pairwisePot[ii] = ploc2;
+    }
+
 #endif
 
-    cerr << "pairwisePot = " <<  pairwisePot << "\n";
   }
 
   int ForceMatrixDecomposition::getNAtomsInRow() {   
@@ -768,12 +735,8 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     d = cgColData.position[cg2] - cgRowData.position[cg1];
-    cerr << "cg1 = " << cg1 << "\tcg1p = " << cgRowData.position[cg1] << "\n";
-    cerr << "cg2 = " << cg2 << "\tcg2p = " << cgColData.position[cg2] << "\n";
 #else
     d = snap_->cgData.position[cg2] - snap_->cgData.position[cg1];
-    cerr << "cg1 = " << cg1 << "\tcg1p = " << snap_->cgData.position[cg1] << "\n";
-    cerr << "cg2 = " << cg2 << "\tcg2p = " << snap_->cgData.position[cg2] << "\n";
 #endif
     
     snap_->wrapVector(d);
@@ -849,14 +812,11 @@ namespace OpenMD {
   bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2) {
     int unique_id_1, unique_id_2;
     
-
-    cerr << "sap with atom1, atom2 =\t" << atom1 << "\t" << atom2 << "\n";
 #ifdef IS_MPI
     // in MPI, we have to look up the unique IDs for each atom
     unique_id_1 = AtomRowToGlobal[atom1];
     unique_id_2 = AtomColToGlobal[atom2];
 
-    cerr << "sap with uid1, uid2 =\t" << unique_id_1 << "\t" << unique_id_2 << "\n";
     // this situation should only arise in MPI simulations
     if (unique_id_1 == unique_id_2) return true;
     

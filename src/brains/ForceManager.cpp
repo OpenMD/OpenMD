@@ -368,7 +368,6 @@ namespace OpenMD {
       for(atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {
 	atom->zeroForcesAndTorques();
-        cerr << "apos = " << atom->getPos() << "\n";
       }
       
       //change the positions of atoms which belong to the rigidbodies
@@ -382,7 +381,6 @@ namespace OpenMD {
             cg = mol->nextCutoffGroup(ci)) {
           //calculate the center of mass of cutoff group
           cg->updateCOM();
-          cerr << "cgpos = " << cg->getPos() << "\n";
         }
       }      
     }
@@ -528,15 +526,12 @@ namespace OpenMD {
            mol = info_->nextMolecule(mi)) {
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
             cg = mol->nextCutoffGroup(ci)) {
-          cerr << "branch1\n";
-          cerr << "globind = " << cg->getGlobalIndex() << "\n";
           cg->updateCOM();
         }
       }      
     } else {
       // center of mass of the group is the same as position of the atom  
       // if cutoff group does not exist
-      cerr << "branch2\n";
       cgConfig->position = config->position;
     }
 
@@ -638,17 +633,14 @@ namespace OpenMD {
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                   idat.d = &d_grp;
                   idat.r2 = &rgrpsq;
-                  cerr << "dgrp = " << d_grp << "\n";
                 } else {
                   d = fDecomp_->getInteratomicVector(atom1, atom2);
                   curSnapshot->wrapVector( d );
                   r2 = d.lengthSquare();
-                  cerr << "datm = " << d<< "\n";
                   idat.d = &d;
                   idat.r2 = &r2;
                 }
-                
-                cerr << "idat.d = " << *(idat.d) << "\n";
+               
                 r = sqrt( *(idat.r2) );
                 idat.rij = &r;
                
@@ -658,7 +650,6 @@ namespace OpenMD {
                   interactionMan_->doPair(idat);
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
 
-                  cerr << "d = " << *(idat.d) << "\tv=" << vpair << "\tf=" << f1 << "\n";
                   vij += vpair;
                   fij += f1;
                   tau -= outProduct( *(idat.d), f1);

@@ -264,7 +264,7 @@ namespace OpenMD {
         for (int l = 0; l <= lMax_; l++) {
           q2[l] = 0.0;
           for (int m = -l; m <= l; m++){
-            q[std::make_pair(l,m)] /= (RealType)nBonds;            
+            q[std::make_pair(l,m)] /= (RealType)nBonds; 
             q2[l] += norm(q[std::make_pair(l,m)]);
           }
           q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));

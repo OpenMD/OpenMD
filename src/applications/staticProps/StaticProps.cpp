@@ -171,7 +171,6 @@ int main(int argc, char* argv[]){
 
     //parse md file and set up the system
     SimCreator creator;
-    std::cout << "dumpFile = " << dumpFileName << "\n";
     SimInfo* info = creator.createSim(dumpFileName);
 
     RealType maxLen;

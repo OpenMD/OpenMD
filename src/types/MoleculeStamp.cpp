@@ -727,10 +727,7 @@ namespace OpenMD {
     //add all atoms into freeAtoms_ set
     for(ai = atomStamps_.begin(); ai != atomStamps_.end(); ++ai) {
       freeAtoms_.push_back( (*ai)->getIndex() );
-      std::cerr << "freeAtoms = " << *(freeAtoms_.end()) << "\n";
     }
-
-
 
     for(int i = 0; i < getNCutoffGroups(); ++i) {
       CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);

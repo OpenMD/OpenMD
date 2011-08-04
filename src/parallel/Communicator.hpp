@@ -123,7 +123,6 @@ namespace OpenMD{
       rowIndex_ = myRank / nColumns;      
       columnIndex_ = myRank % nColumns;
 
-      cerr << "rowIndex = " << rowIndex_ << "\t colIndex = " << columnIndex_ << "\n";
       switch(D) {
       case Row :
         myComm = MPI::COMM_WORLD.Split(rowIndex_, 0);
