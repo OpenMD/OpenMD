@@ -58,11 +58,9 @@ fi
 
 AC_PROG_CXX([$CXX icpc pathCC pgCC c++ xlc++ xlC g++ CC])
 AC_PROG_CC([$CC icc pathcc pgcc cc xlc gcc])
-AC_PROG_FC([$FC ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
 
 save_CXX=$CXX
 save_CC=$CC
-save_FC=$FC
 save_LIBS=$LIBS
 
 AC_LANG([C++])
@@ -78,20 +76,12 @@ AX_MPI([USE_MPI="yes"],
        AC_MSG_WARN([No suitable C MPI implementation found. openmd_MPI will not be built.])])
 ])
 AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
-AC_LANG([Fortran])
-AX_MPI([USE_MPI="yes"],
-       [USE_MPI="no"
-       AC_MSG_WARN([No suitable Fortran MPI implementation found. openmd_MPI will not be built.])])
-])
-AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
         CXX=$MPICXX
         CC=$MPICC
-        FC=$MPIFC
         LIBS="$MPILIBS $LIBS"
 ],[
         CXX=$save_CXX
         CC=$save_CC
-        FC=$save_FC
         LIBS=$save_LIBS
 ]
 )
@@ -148,36 +138,6 @@ else
    fi
 fi
 
-AC_LANG_PUSH(Fortran)
-AC_FC_SRCEXT(F90)
-dnl Check the flag for Fortran90 preprocessing
-ACX_PROG_F90_PREPFLAG
-dnl Check to see if a flag is required for preprocessing defines
-ACX_PROG_F90_PREPDEFFLAG
-AC_FC_WRAPPERS
-AC_SUBST(FC_FUNC)
-AC_SUBST(FC_FUNC_)
-AC_FC_LIBRARY_LDFLAGS
-dnl Fortran 90 module suffix
-AC_CHECK_MODSUFFIX
-dnl Fortran 90 module path specifier
-AC_CHECK_MODDIRFLAG
-AC_F90_MODULE_NAMES
-pat=`echo $ac_cv_f90_module_names | sed 's/.*\(%.*%\).*/\1/'`
-F90_MODULE_NAMES=empty
-case $pat in
-       %MODULE%)
-          F90_MODULE_NAMES=UPPER ;;
-       %Module%)
-          F90_MODULE_NAMES=Mixed ;;
-       %module%)
-          F90_MODULE_NAMES=lower ;;
-       *)
-          F90_MODULE_NAMES=unknown ;;
-esac
-AC_SUBST(F90_MODULE_NAMES)
-AC_LANG_POP
-
 AC_LANG_C
 
 dnl Checks for libraries.
@@ -221,7 +181,6 @@ case $debug in
   1) 
      ;;
   *) 
-   ACX_PROG_FC_MAXOPT
    ACX_PROG_CC_MAXOPT
    ACX_PROG_CXX_MAXOPT
      ;;
@@ -239,10 +198,7 @@ AC_SUBST(SUBDIRS)
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(CPPFLAGS)
-AC_SUBST(FCFLAGS)
 AC_SUBST(LDFLAGS)
-AC_SUBST(PREPDEFFLAG)
-AC_SUBST(F90_MODULE_NAMES)
 AC_CONFIG_FILES([make/Makefile src/utils/Makefile src/math/Makefile src/integrators/Makefile src/applications/atom2md/Makefile scripts/filepp], [chmod 0755 scripts/*])
 
 AC_OUTPUT
