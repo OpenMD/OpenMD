@@ -4,6 +4,7 @@ ForcefieldFiles = \
         CLAYFF.frc \
         DUFF2.frc \
         EAM.frc \
+	EADM.frc \
         EAM.u3.frc \
         EAM.u6.frc \
         EAM.VC.frc \

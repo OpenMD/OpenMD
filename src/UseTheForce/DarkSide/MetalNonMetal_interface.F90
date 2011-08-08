@@ -8,7 +8,6 @@ subroutine addMNMInteraction(myInteraction)
 #include "UseTheForce/DarkSide/fMnMInteractions.h"    
 
   type(MNMType), intent(inout) :: myInteraction
-
   call module_addInteraction(myInteraction)
 
 end subroutine addMNMInteraction

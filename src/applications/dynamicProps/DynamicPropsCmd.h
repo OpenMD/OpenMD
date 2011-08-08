@@ -61,6 +61,7 @@ struct gengetopt_args_info
   const char *vcorr_help; /**< @brief velocity correlation function help description.  */
   const char *dcorr_help; /**< @brief dipole correlation function help description.  */
   const char *lcorr_help; /**< @brief Lengendre correlation function help description.  */
+  const char *sdcorr_help; /**< @brief System dipole correlation function help description.  */
   const char *r_rcorr_help; /**< @brief Radial rmsd help description.  */
   const char *thetacorr_help; /**< @brief Angular rmsd help description.  */
   const char *drcorr_help; /**< @brief Directional rmsd for particles with unit vectors help description.  */
@@ -79,14 +80,13 @@ struct gengetopt_args_info
   unsigned int vcorr_given ;	/**< @brief Whether vcorr was given.  */
   unsigned int dcorr_given ;	/**< @brief Whether dcorr was given.  */
   unsigned int lcorr_given ;	/**< @brief Whether lcorr was given.  */
+  unsigned int sdcorr_given ;	/**< @brief Whether sdcorr was given.  */
   unsigned int r_rcorr_given ;	/**< @brief Whether r_rcorr was given.  */
   unsigned int thetacorr_given ;	/**< @brief Whether thetacorr was given.  */
   unsigned int drcorr_given ;	/**< @brief Whether drcorr was given.  */
   unsigned int helfandEcorr_given ;	/**< @brief Whether helfandEcorr was given.  */
   unsigned int stresscorr_given ;	/**< @brief Whether stresscorr was given.  */
 
-  char **inputs ; /**< @brief unamed options (options without names) */
-  unsigned inputs_num ; /**< @brief unamed options number */
   int dynamicProps_group_counter; /**< @brief Counter for group dynamicProps */
 } ;
 

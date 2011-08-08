@@ -105,9 +105,14 @@ namespace OpenMD {
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
     bool output3DTemp_;
-    int nBins_;
+    int nBins_; /**< The number of bins to divide the simulation box into.  */
+    /*!
+      The middle bin for the RNEMD method. midBin_ = nBins_/2;
+      Depending on the setting of the flux, this box should contain the minimum energy (temperature)
+      within the simulation. 
+    */
     int midBin_;
-    int rnemdLogWidth_;
+    int rnemdLogWidth_; /**< Number of elements to print out in logs */
     RealType zShift_;
     RealType exchangeTime_;
     RealType targetFlux_;

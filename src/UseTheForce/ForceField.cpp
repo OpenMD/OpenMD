@@ -440,6 +440,7 @@ namespace OpenMD {
   }
   
   NonBondedInteractionType* ForceField::getNonBondedInteractionType(const std::string &at1, const std::string &at2) {
+
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -502,7 +503,7 @@ namespace OpenMD {
         NonBondedInteractionType* bestType = nonBondedInteractionTypeCont_.find(theKeys);        
         return bestType;
       } else {
-        //if no exact match found, try wild card match
+	 //if no exact match found, try wild card match
         return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);
       }
     }

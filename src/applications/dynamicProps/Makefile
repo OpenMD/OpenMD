@@ -15,7 +15,8 @@ Source    = \
 	    ThetaCorrFunc.cpp \
 	    EnergyCorrFunc.cpp \
             DirectionalRCorrFunc.cpp \
-            StressCorrFunc.cpp
+            StressCorrFunc.cpp \
+	    SystemDipoleCorrFunc.cpp
 
 BuiltParallelExe = 0
 

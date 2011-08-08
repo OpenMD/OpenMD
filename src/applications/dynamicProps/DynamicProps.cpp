@@ -59,6 +59,7 @@
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
 #include "applications/dynamicProps/StressCorrFunc.hpp"
+#include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 
 
 using namespace OpenMD;
@@ -123,7 +124,9 @@ int main(int argc, char* argv[]){
 
 
   TimeCorrFunc* corrFunc;
-  if (args_info.dcorr_given){
+  if(args_info.sdcorr_given){
+    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.dcorr_given){
     corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.rcorr_given) {
     corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2, memSize);

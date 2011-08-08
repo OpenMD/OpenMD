@@ -304,4 +304,118 @@ namespace OpenMD {
     
   }
 
+
+
+ Vector3d Thermo::getBoxDipole() {
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    SimInfo::MoleculeIterator miter;
+    std::vector<Atom*>::iterator aiter;
+    Molecule* mol;
+    Atom* atom;
+    RealType charge;
+    RealType moment(0.0);
+    Vector3d ri(0.0);
+    Vector3d dipoleVector(0.0);
+    Vector3d nPos(0.0);
+    Vector3d pPos(0.0);
+    RealType nChg(0.0);
+    RealType pChg(0.0);
+    int nCount = 0;
+    int pCount = 0;
+
+    RealType chargeToC = 1.60217733e-19;
+    RealType angstromToM = 1.0e-10;    RealType debyeToCm = 3.33564095198e-30;
+
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter)) {
+
+      for (atom = mol->beginAtom(aiter); atom != NULL;
+           atom = mol->nextAtom(aiter)) {
+
+        if (atom->isCharge() ) {
+          charge = 0.0;
+          GenericData* data = atom->getAtomType()->getPropertyByName("Charge");
+          if (data != NULL) {
+
+            charge = (dynamic_cast<DoubleGenericData*>(data))->getData();
+            charge *= chargeToC;
+
+            ri = atom->getPos();
+            currSnapshot->wrapVector(ri);
+            ri *= angstromToM;
+
+            if (charge < 0.0) {
+              nPos += ri;
+              nChg -= charge;
+              nCount++;
+            } else if (charge > 0.0) {
+              pPos += ri;
+              pChg += charge;
+              pCount++;
+            }
+          }
+        }
+
+        if (atom->isDipole() ) {
+          Vector3d u_i = atom->getElectroFrame().getColumn(2);
+          GenericData* data = dynamic_cast<DirectionalAtomType*>(atom->getAtomType())->getPropertyByName("Dipole");
+          if (data != NULL) {
+            moment = (dynamic_cast<DoubleGenericData*>(data))->getData();
+
+            moment *= debyeToCm;
+            dipoleVector += u_i * moment;
+          }
+        }
+      }
+    }
+
+
+#ifdef IS_MPI
+    RealType pChg_global, nChg_global;
+    int pCount_global, nCount_global;
+    Vector3d pPos_global, nPos_global, dipVec_global;
+
+    MPI_Allreduce(&pChg, &pChg_global, 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    pChg = pChg_global;
+    MPI_Allreduce(&nChg, &nChg_global, 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    nChg = nChg_global;
+    MPI_Allreduce(&pCount, &pCount_global, 1, MPI_INTEGER, MPI_SUM,
+                  MPI_COMM_WORLD);
+    pCount = pCount_global;
+    MPI_Allreduce(&nCount, &nCount_global, 1, MPI_INTEGER, MPI_SUM,
+                  MPI_COMM_WORLD);
+    nCount = nCount_global;
+    MPI_Allreduce(pPos.getArrayPointer(), pPos_global.getArrayPointer(), 3,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    pPos = pPos_global;
+    MPI_Allreduce(nPos.getArrayPointer(), nPos_global.getArrayPointer(), 3,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    nPos = nPos_global;
+    MPI_Allreduce(dipoleVector.getArrayPointer(),
+                  dipVec_global.getArrayPointer(), 3,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    dipoleVector = dipVec_global;
+#endif //is_mpi
+
+    // first load the accumulated dipole moment (if dipoles were present)
+    Vector3d boxDipole = dipoleVector;
+    // now include the dipole moment due to charges
+    // use the lesser of the positive and negative charge totals
+    RealType chg_value = nChg <= pChg ? nChg : pChg;
+
+    // find the average positions
+    if (pCount > 0 && nCount > 0 ) {
+      pPos /= pCount;
+      nPos /= nCount;
+    }
+
+    // dipole is from the negative to the positive (physics notation)
+    boxDipole += (pPos - nPos) * chg_value;
+
+    return boxDipole;
+  }
+
+
 } //end namespace OpenMD

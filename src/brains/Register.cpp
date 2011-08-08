@@ -64,6 +64,7 @@
 #include "minimizers/SDMinimizer.hpp"
 #include "UseTheForce/DUFF.hpp"
 #include "UseTheForce/EAM_FF.hpp"
+#include "UseTheForce/EADM_FF.hpp"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "UseTheForce/SHAPES_FF.hpp"
@@ -86,6 +87,7 @@ namespace OpenMD {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
     //in theory, EAM can also be merged
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
+    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EADM_FF>("EADM"));
     //heck, that worked...  let's try merging SHAPES
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
     //Well if EAM worked... then Sutton-Chen should work like a CHARMM(Hopefully not).
