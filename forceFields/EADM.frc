@@ -1,0 +1,109 @@
+! This is the forcefield file for the Embedded Atom Method Force Field (EAM_FF).
+!
+! There is only a section for AtomTypes which defines mass and the name
+! of the file which contains the rho(r), phi(r) and F[rho] functions.
+
+begin BaseAtomTypes
+Au	196.97
+Ag	107.87
+Cu	63.550
+Ni	58.710
+Pd	106.40
+Pt	195.09
+Al      26.98
+Na+	100000000.00
+Cl-	100000000.00
+end BaseAtomTypes
+
+begin EAMAtomTypes
+Au	Au.u3.funcfl
+Ag	Ag.u3.funcfl
+Cu	Cu.u3.funcfl
+Ni	Ni.u3.funcfl
+Pd	Pd.u3.funcfl
+Pt	Pt.u3.funcfl
+end EAMAtomTypes
+
+
+begin ChargeAtomTypes
+Na+ 1.0
+Cl- -1.0
+end ChargeAtomTypes
+
+//begin LennardJonesAtomTypes
+//Cl-	0.100  4.445
+//Na+	0.118	2.579
+//end LennardJonesAtomTypes
+
+
+// Metal non-metal interactions.
+// Format: Metal Atom Type, Non-Metal Atom Type, Interaction Type, Interaction Parameters
+// Where interaction type can be: MAW, LennardJones or ShiftedMorse or RepulsiveMorse
+
+// begin MetalNonMetalInteractions
+//LennardJones
+// sigma epsilon
+//Au CH3 LennardJones 3.54 0.2146
+//Au CH2 LennardJones 3.54 0.1749
+//Au SH   LennardJones   2.40 8.465
+//Au S   LennardJones    2.40 8.465
+//MINE
+//Au Na+ LennardJones ? ?
+//Au Cl- LennardJones ? ?
+
+
+//Shifted Morse
+// r0 D0 beta0
+//Au      O_SPCE  ShiftedMorse    3.70 0.0424 0.769
+
+//Repulsive Morse
+// r0 D0 beta0
+//Au      H_SPCE  RepulsiveMorse  -1.00 0.00850 0.769
+
+//end MetalNonMetalInteractions
+
+
+
+
+
+
+begin DirectionalAtomTypes
+//Name	I_xx  I_yy  I_zz (units are amu * Angstrom^2)
+Au	0.37     0.37	    0.0
+end DirectionalAtomTypes
+
+begin MultipoleAtomTypes
+// OpenMD currently only supports charge-charge, charge-dipole,
+// dipole-dipole, and charge-quadrupole interactions.
+// Dipoles may be either traditional point-dipoles or split-dipoles.
+// possible formats for a multipolar atom type are:
+//
+// Point-dipoles:
+// name d phi theta psi dipole_moment
+//
+// Split-dipoles:
+// name s phi theta psi dipole_moment splitdipole_distance
+//
+// Point-Quadrupoles:
+// name q phi theta psi Qxx Qyy Qzz
+//
+// Atoms with both dipole and quadrupole moments:
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+//
+// Atoms with both split dipoles and quadrupole moments:
+// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+//
+// Euler angles are given in zxz convention in units of degrees.
+//
+// Charges are given in units of electrons.
+//
+// Dipoles are given in units of Debyes.
+//
+// Split dipole distances are given in units of Angstroms.
+//
+// Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an esu centi-barn)
+//
+//name identifiers  phi theta psi dipoleMoment Q_xx Q_yy Q_zz
+Au  d	0.0   0.0   0.0	  1.0   
+end MultipoleAtomTypes
+
