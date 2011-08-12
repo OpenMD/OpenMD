@@ -302,7 +302,7 @@ namespace OpenMD {
     for (int i=0; i<LR_POT_TYPES;i++){
       lrPot += longRangePotential[i]; //Quick hack
     }
-    
+   
     // grab the simulation box dipole moment if specified
     if (info_->getCalcBoxDipole()){
       getAccumulatedBoxDipole(totalDipole.getArrayPointer());

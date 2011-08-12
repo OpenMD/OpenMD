@@ -164,7 +164,7 @@ namespace OpenMD {
                 
                 if (gayBerneData != NULL) {  
                   GayBerneParam gayBerneParam = gayBerneData->getData();
-                  currShape = new Ellipsoid(V3Zero, 
+                  currShape = new Ellipsoid(V3Zero,
                                             gayBerneParam.GB_l / 2.0, 
                                             gayBerneParam.GB_d / 2.0, 
                                             Mat3x3d::identity());
@@ -226,8 +226,8 @@ namespace OpenMD {
 	    simError();
 	  }
 
-
           HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
+
           std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
           if (iter != hydroPropMap.end()) 
             hydroProps_.push_back(iter->second);
@@ -323,6 +323,7 @@ namespace OpenMD {
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
             Vector3d randomForceLab = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
+
             integrableObject->addFrc(randomForceLab);            
             integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
 

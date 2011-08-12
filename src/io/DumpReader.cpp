@@ -466,6 +466,13 @@ namespace OpenMD {
            integrableObject->setTrq(torque);          
            break;
         }
+        case 'u' : {
+
+           RealType particlePot;
+           particlePot = tokenizer.nextTokenAsDouble(); 
+           integrableObject->setParticlePot(particlePot);          
+           break;
+        }
         default: {
                sprintf(painCave.errMsg, 
                        "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 

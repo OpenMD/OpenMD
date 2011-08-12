@@ -103,7 +103,7 @@ int simError( void ) {
   strncat(errorMsg, painCave.errMsg, strlen(painCave.errMsg));
 
   strcat(errorMsg, "\n");
-  fprintf(stderr, errorMsg);
+  fprintf(stderr, "%s", errorMsg);
 
 #ifdef IS_MPI
   if (painCave.isEventLoop) 

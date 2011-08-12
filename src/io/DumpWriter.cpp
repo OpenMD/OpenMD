@@ -60,6 +60,7 @@ namespace OpenMD {
     Globals* simParams = info->getSimParams();
     needCompression_ = simParams->getCompressDumpFile();
     needForceVector_ = simParams->getOutputForceVector();
+    needParticlePot_ = simParams->getOutputParticlePotential();
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -99,6 +100,7 @@ namespace OpenMD {
 
     needCompression_ = simParams->getCompressDumpFile();
     needForceVector_ = simParams->getOutputForceVector();
+    needParticlePot_ = simParams->getOutputParticlePotential();
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -138,6 +140,7 @@ namespace OpenMD {
     
     needCompression_ = simParams->getCompressDumpFile();
     needForceVector_ = simParams->getOutputForceVector();
+    needParticlePot_ = simParams->getOutputParticlePotential();
     
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -464,6 +467,22 @@ namespace OpenMD {
                 trq[0], trq[1], trq[2]);
         line += tempBuffer;
       }      
+    }
+    if (needParticlePot_) {
+      type += "u";
+      RealType particlePot;
+
+      particlePot = integrableObject->getParticlePot();
+
+      if (isinf(particlePot) || isnan(particlePot)) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the particle "
+                 " potential for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e", particlePot);
+      line += tempBuffer;
     }
     
     sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());

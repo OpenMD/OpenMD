@@ -93,6 +93,7 @@ namespace OpenMD {
     std::string eorFilename_;
     bool needCompression_;
     bool needForceVector_;
+    bool needParticlePot_;
     bool createDumpFile_;
   };
 

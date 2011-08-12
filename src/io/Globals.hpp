@@ -116,6 +116,7 @@ namespace OpenMD {
     DeclareParameter(SwitchingFunctionType, std::string);
     DeclareParameter(CompressDumpFile, bool);
     DeclareParameter(OutputForceVector, bool);
+    DeclareParameter(OutputParticlePotential, bool);
     DeclareParameter(SkinThickness, RealType);
     DeclareParameter(StatFileFormat, std::string);    
     DeclareParameter(HydroPropFile, std::string);

@@ -1267,6 +1267,7 @@ contains
     do i = 1,LR_POT_TYPES
        particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
     enddo
+
     
     pot_Temp = 0.0_DP 
     
@@ -1662,6 +1663,12 @@ contains
     pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + p_elect
     pot(HB_POT) = pot(HB_POT) + p_hb
     pot(METALLIC_POT) = pot(METALLIC_POT) + p_met
+    
+    ! only done for single processor.  In Parallel, the particle_pot
+    ! is constructed from the row and column potentials.
+
+    particle_pot(i) = particle_pot(i) + vpair*sw
+    particle_pot(j) = particle_pot(j) + vpair*sw
 
     do idx = 1, 3
        f(idx,i) = f(idx,i) + f1(idx)
@@ -1695,10 +1702,6 @@ contains
        
     endif
 
-
-!!$
-!!$    particle_pot(i) = particle_pot(i) + vpair*sw
-!!$    particle_pot(j) = particle_pot(j) + vpair*sw
 
   end subroutine do_pair
 

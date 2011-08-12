@@ -7,6 +7,7 @@
 
 #include "antlr/config.hpp"
 #include "antlr/InputBuffer.hpp"
+#include <iostream>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {

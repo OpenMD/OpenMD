@@ -107,7 +107,7 @@ namespace OpenMD {
         Wigner3jm(&lPass, &lPass, &lPass, 
                   &m1Pass, &m2m, &m2M, 
                   THRCOF, &mSize, &error);
-        
+       
         m2Min[lm] = (int)floor(m2m);
         m2Max[lm] = (int)floor(m2M);
         
@@ -250,6 +250,7 @@ namespace OpenMD {
                   for(int m = -l; m <= l; m++){
                     sphericalHarmonic.setM(m);
                     q[std::make_pair(l,m)] += sphericalHarmonic.getValueAt(costheta, phi);
+
                   }
                 }
                 nBonds++;
@@ -263,6 +264,7 @@ namespace OpenMD {
           q2[l] = 0.0;
           for (int m = -l; m <= l; m++){
             q[std::make_pair(l,m)] /= (RealType)nBonds;            
+
             q2[l] += norm(q[std::make_pair(l,m)]);
           }
           q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
