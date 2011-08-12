@@ -582,8 +582,8 @@ namespace OpenMD {
         bool update_nlist = fDecomp_->checkNeighborList();
         if (update_nlist) 
           neighborList = fDecomp_->buildNeighborList();
-      }      
-        
+      }             
+
       for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
              it != neighborList.end(); ++it) {
                 

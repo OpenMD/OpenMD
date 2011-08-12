@@ -53,19 +53,34 @@ namespace OpenMD {
     // surrounding cells (not just the 14 upper triangular blocks that
     // are used when the processor can see all pairs)
 #ifdef IS_MPI
-    cellOffsets_.push_back( Vector3i(-1, 0, 0) );
+    cellOffsets_.clear();
+    cellOffsets_.push_back( Vector3i(-1,-1,-1) );
+    cellOffsets_.push_back( Vector3i( 0,-1,-1) );
+    cellOffsets_.push_back( Vector3i( 1,-1,-1) );                          
+    cellOffsets_.push_back( Vector3i(-1, 0,-1) );
+    cellOffsets_.push_back( Vector3i( 0, 0,-1) );
+    cellOffsets_.push_back( Vector3i( 1, 0,-1) );
+    cellOffsets_.push_back( Vector3i(-1, 1,-1) );
+    cellOffsets_.push_back( Vector3i( 0, 1,-1) );      
+    cellOffsets_.push_back( Vector3i( 1, 1,-1) );
     cellOffsets_.push_back( Vector3i(-1,-1, 0) );
     cellOffsets_.push_back( Vector3i( 0,-1, 0) );
     cellOffsets_.push_back( Vector3i( 1,-1, 0) );
-    cellOffsets_.push_back( Vector3i( 0, 0,-1) );
+    cellOffsets_.push_back( Vector3i(-1, 0, 0) );       
+    cellOffsets_.push_back( Vector3i( 0, 0, 0) );
+    cellOffsets_.push_back( Vector3i( 1, 0, 0) );
+    cellOffsets_.push_back( Vector3i(-1, 1, 0) );
+    cellOffsets_.push_back( Vector3i( 0, 1, 0) );
+    cellOffsets_.push_back( Vector3i( 1, 1, 0) );
+    cellOffsets_.push_back( Vector3i(-1,-1, 1) );
+    cellOffsets_.push_back( Vector3i( 0,-1, 1) );
+    cellOffsets_.push_back( Vector3i( 1,-1, 1) );
     cellOffsets_.push_back( Vector3i(-1, 0, 1) );
-    cellOffsets_.push_back( Vector3i(-1,-1,-1) );
-    cellOffsets_.push_back( Vector3i( 0,-1,-1) );
-    cellOffsets_.push_back( Vector3i( 1,-1,-1) );
-    cellOffsets_.push_back( Vector3i( 1, 0,-1) );
-    cellOffsets_.push_back( Vector3i( 1, 1,-1) );
-    cellOffsets_.push_back( Vector3i( 0, 1,-1) );
-    cellOffsets_.push_back( Vector3i(-1, 1,-1) );
+    cellOffsets_.push_back( Vector3i( 0, 0, 1) );
+    cellOffsets_.push_back( Vector3i( 1, 0, 1) );
+    cellOffsets_.push_back( Vector3i(-1, 1, 1) );
+    cellOffsets_.push_back( Vector3i( 0, 1, 1) );
+    cellOffsets_.push_back( Vector3i( 1, 1, 1) );
 #endif    
   }
 
@@ -1091,6 +1106,7 @@ namespace OpenMD {
         // add this cutoff group to the list of groups in this cell;
         cellListCol_[cellIndex].push_back(i);
       }
+     
 #else
       for (int i = 0; i < nGroups_; i++) {
         rs = snap_->cgData.position[i];
@@ -1116,6 +1132,7 @@ namespace OpenMD {
         // add this cutoff group to the list of groups in this cell;
         cellList_[cellIndex].push_back(i);
       }
+
 #endif
 
       for (int m1z = 0; m1z < nCells_.z(); m1z++) {
@@ -1128,7 +1145,8 @@ namespace OpenMD {
                  os != cellOffsets_.end(); ++os) {
               
               Vector3i m2v = m1v + (*os);
-              
+             
+
               if (m2v.x() >= nCells_.x()) {
                 m2v.x() = 0;           
               } else if (m2v.x() < 0) {
@@ -1146,7 +1164,7 @@ namespace OpenMD {
               } else if (m2v.z() < 0) {
                 m2v.z() = nCells_.z() - 1; 
               }
-              
+
               int m2 = Vlinear (m2v, nCells_);
               
 #ifdef IS_MPI
@@ -1155,8 +1173,9 @@ namespace OpenMD {
                 for (vector<int>::iterator j2 = cellListCol_[m2].begin(); 
                      j2 != cellListCol_[m2].end(); ++j2) {
                   
-                  // In parallel, we need to visit *all* pairs of row &
-                  // column indicies and will truncate later on.
+                  // In parallel, we need to visit *all* pairs of row
+                  // & column indicies and will divide labor in the
+                  // force evaluation later.
                   dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
                   snap_->wrapVector(dr);
                   cuts = getGroupCutoffs( (*j1), (*j2) );

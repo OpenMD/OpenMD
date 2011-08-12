@@ -149,9 +149,11 @@ namespace OpenMD {
     vector<int> AtomRowToGlobal;
     vector<int> AtomColToGlobal;
 
+public:
     vector<int> cgRowToGlobal;
     vector<int> cgColToGlobal;
 
+private:
     vector<RealType> groupCutoffRow;
     vector<RealType> groupCutoffCol;
     vector<int> groupColToGtype;
