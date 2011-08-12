@@ -1264,8 +1264,10 @@ contains
             + pot_Temp(1:LR_POT_TYPES,i)
     enddo
     
+    ! factor of two is because the total potential terms are divided by 2 in parallel 
+    ! due to row/ column scatter
     do i = 1,LR_POT_TYPES
-       particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
+       particle_pot(1:nlocal) = particle_pot(1:nlocal) + 2.0 * pot_Temp(i,1:nlocal)
     enddo
 
     
@@ -1279,9 +1281,11 @@ contains
        pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES)&
             + pot_Temp(1:LR_POT_TYPES,i)
     enddo
-    
+   
+    ! factor of two is because the total potential terms are divided by 2 in parallel 
+    ! due to row/ column scatter
     do i = 1,LR_POT_TYPES
-       particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
+       particle_pot(1:nlocal) = particle_pot(1:nlocal) + 2.0 * pot_Temp(i,1:nlocal)
     enddo
     
     ppot_Temp = 0.0_DP
