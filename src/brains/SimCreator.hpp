@@ -84,7 +84,7 @@ namespace OpenMD {
      * @param mdfile
      * @return simParams
      */
-    Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int metaDataStartingLine);
+    Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int mdFileVersion, int metaDataStartingLine);
 
 
     /** create the molecules belong to current processor*/

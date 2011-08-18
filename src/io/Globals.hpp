@@ -144,6 +144,7 @@ namespace OpenMD {
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
+    DeclareAlterableParameter(MDfileVersion, int);
     
   public:
     bool addComponent(Component* comp);
@@ -161,8 +162,6 @@ namespace OpenMD {
     int getNRestraintStamps() {return restraints_.size();}
     std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
     RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}    
-
-    //std::string getRestraint_file(){
     
     virtual void validate();
   private:

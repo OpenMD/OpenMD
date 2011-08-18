@@ -81,7 +81,7 @@
 
 namespace OpenMD {
   
-  Globals* SimCreator::parseFile(std::istream& rawMetaDataStream, const std::string& filename, int startOfMetaDataBlock ){
+  Globals* SimCreator::parseFile(std::istream& rawMetaDataStream, const std::string& filename, int mdFileVersion, int startOfMetaDataBlock ){
     Globals* simParams = NULL;
     try {
 
@@ -92,8 +92,8 @@ namespace OpenMD {
       const int masterNode = 0;
       int commStatus;
       if (worldRank == masterNode) {
-#endif 
-                
+        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+#endif                 
         SimplePreprocessor preprocessor;
         preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
                 
@@ -106,6 +106,9 @@ namespace OpenMD {
             
                 
       } else {
+
+        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+
         //get stream size
         commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
 
@@ -229,6 +232,7 @@ namespace OpenMD {
       simError();
     }
 
+    simParams->setMDfileVersion(mdFileVersion);
     return simParams;
   }
   
@@ -243,6 +247,7 @@ namespace OpenMD {
     int metaDataBlockEnd = -1;
     int i;
     int mdOffset;
+    int mdFileVersion;
 
 #ifdef IS_MPI            
     const int masterNode = 0;
@@ -276,7 +281,27 @@ namespace OpenMD {
         painCave.isFatal = 1; 
         simError(); 
       }
+      
+      // found the correct opening string, now try to get the file
+      // format version number.
 
+      StringTokenizer tokenizer(line, "=<> \t\n\r");
+      std::string fileType = tokenizer.nextToken();
+      toUpper(fileType);
+
+      mdFileVersion = 0;
+
+      if (fileType == "OPENMD") {
+        while (tokenizer.hasMoreTokens()) {
+          std::string token(tokenizer.nextToken());
+          toUpper(token);
+          if (token == "VERSION") {
+            mdFileVersion = tokenizer.nextTokenAsInt();
+            break;
+          }
+        }
+      }
+            
       //scan through the input stream and find MetaData tag        
       while(mdFile_.getline(buffer, bufferSize)) {
         ++lineNo;
@@ -332,7 +357,8 @@ namespace OpenMD {
     std::stringstream rawMetaDataStream(mdRawData);
 
     //parse meta-data file
-    Globals* simParams = parseFile(rawMetaDataStream, mdFileName, metaDataBlockStart+1);
+    Globals* simParams = parseFile(rawMetaDataStream, mdFileName, mdFileVersion,
+                                   metaDataBlockStart + 1);
     
     //create the force field
     ForceField * ff = ForceFieldFactory::getInstance()->createForceField(simParams->getForceField());

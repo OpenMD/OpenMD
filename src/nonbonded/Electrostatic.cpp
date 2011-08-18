@@ -249,7 +249,12 @@ namespace OpenMD {
       preRF2_ = 2.0 * preRF_;
     }
     
-    RealType dx = cutoffRadius_ / RealType(np_ - 1);
+    // Add a 2 angstrom safety window to deal with cutoffGroups that
+    // have charged atoms longer than the cutoffRadius away from each
+    // other.  Splining may not be the best choice here.  Direct calls
+    // to erfc might be preferrable.
+
+    RealType dx = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
     RealType rval;
     vector<RealType> rvals;
     vector<RealType> yvals;

@@ -745,13 +745,13 @@ namespace OpenMD {
 
       for(fai = cutoffGroupAtoms.begin(); fai != cutoffGroupAtoms.end(); 
           ++fai) {
-        //erase the atoms belonging to cutoff groups from freeAtoms vector        
-        for (std::vector<int>::iterator j = freeAtoms_.begin(); 
-             j != freeAtoms_.end(); ++j) {
-          if ( (*j) == (*fai) ) freeAtoms_.erase(j);
-        }
+
+        // erase the atoms belonging to cutoff groups from freeAtoms_ vector        
+        freeAtoms_.erase(std::remove(freeAtoms_.begin(),
+                                     freeAtoms_.end(), (*fai)), 
+                         freeAtoms_.end());
       }
-    }    
+    }  
   }
 
   void MoleculeStamp::checkFragments() {

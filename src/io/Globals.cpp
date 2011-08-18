@@ -219,7 +219,7 @@ void Globals::validate() {
     }
   }
 }
-  
+
 bool Globals::addComponent(Component* comp) {
     components_.push_back(comp);
     return true;

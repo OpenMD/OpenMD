@@ -235,6 +235,14 @@ public:                                                      \
 bool have##NAME() { return !NAME.empty();}  \
 TYPE get##NAME() { return NAME.getData();}
 
+#define DeclareAlterableParameter(NAME, TYPE)         \
+private:                                                   \
+Parameter<TYPE> NAME;                                     \
+public:                                                      \
+bool have##NAME() { return !NAME.empty();}  \
+TYPE get##NAME() { return NAME.getData();}  \
+bool set##NAME(TYPE s) { return NAME.setData(s);}  \
+
 
 
 #define DefineParameter(NAME,KEYWORD)                              \

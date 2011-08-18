@@ -108,7 +108,14 @@ namespace OpenMD {
     
     Globals* simParams_ = info_->getSimParams();
     ForceFieldOptions& forceFieldOptions_ = forceField_->getForceFieldOptions();
+    int mdFileVersion;
     
+    if (simParams_->haveMDfileVersion()) 
+      mdFileVersion = simParams_->getMDfileVersion();
+    else
+      mdFileVersion = 0;
+   
+
     if (simParams_->haveCutoffRadius()) {
       rCut_ = simParams_->getCutoffRadius();
     } else {      
@@ -593,9 +600,9 @@ namespace OpenMD {
         cuts = fDecomp_->getGroupCutoffs(cg1, cg2);
 
         d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
+
         curSnapshot->wrapVector(d_grp);        
         rgrpsq = d_grp.lengthSquare();
-
         rCutSq = cuts.second;
 
         if (rgrpsq < rCutSq) {
@@ -610,6 +617,7 @@ namespace OpenMD {
               
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
+                       
 
           for (vector<int>::iterator ia = atomListRow.begin(); 
                ia != atomListRow.end(); ++ia) {            
@@ -705,7 +713,7 @@ namespace OpenMD {
                 }
               }
             }
-            //if (!SIM_uses_AtomicVirial) {
+            //if (!info_->usesAtomicVirial()) {
             //  tau -= outProduct(d_grp, fij);
             //}
           }
@@ -726,7 +734,6 @@ namespace OpenMD {
 
         }
       }
-
     }
     
     fDecomp_->collectData();

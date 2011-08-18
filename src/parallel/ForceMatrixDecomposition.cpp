@@ -233,6 +233,40 @@ namespace OpenMD {
       }      
     }
 
+#else
+    excludesForAtom.clear();
+    excludesForAtom.resize(nLocal_);
+    toposForAtom.clear();
+    toposForAtom.resize(nLocal_);
+    topoDist.clear();
+    topoDist.resize(nLocal_);
+
+    for (int i = 0; i < nLocal_; i++) {
+      int iglob = AtomLocalToGlobal[i];
+
+      for (int j = 0; j < nLocal_; j++) {
+        int jglob = AtomLocalToGlobal[j];
+
+        if (excludes->hasPair(iglob, jglob))           
+          excludesForAtom[i].push_back(j);              
+        
+        
+        if (oneTwo->hasPair(iglob, jglob)) {
+          toposForAtom[i].push_back(j);
+          topoDist[i].push_back(1);
+        } else {
+          if (oneThree->hasPair(iglob, jglob)) {
+            toposForAtom[i].push_back(j);
+            topoDist[i].push_back(2);
+          } else {
+            if (oneFour->hasPair(iglob, jglob)) {
+              toposForAtom[i].push_back(j);
+              topoDist[i].push_back(3);
+            }
+          }
+        }
+      }      
+    }
 #endif
 
     // allocate memory for the parallel objects
@@ -253,39 +287,7 @@ namespace OpenMD {
       }      
     }
 
-    excludesForAtom.clear();
-    excludesForAtom.resize(nLocal_);
-    toposForAtom.clear();
-    toposForAtom.resize(nLocal_);
-    topoDist.clear();
-    topoDist.resize(nLocal_);
 
-    for (int i = 0; i < nLocal_; i++) {
-      int iglob = AtomLocalToGlobal[i];
-
-      for (int j = 0; j < nLocal_; j++) {
-        int jglob = AtomLocalToGlobal[j];
-
-        if (excludes->hasPair(iglob, jglob)) 
-          excludesForAtom[i].push_back(j);              
-        
-        if (oneTwo->hasPair(iglob, jglob)) {
-          toposForAtom[i].push_back(j);
-          topoDist[i].push_back(1);
-        } else {
-          if (oneThree->hasPair(iglob, jglob)) {
-            toposForAtom[i].push_back(j);
-            topoDist[i].push_back(2);
-          } else {
-            if (oneFour->hasPair(iglob, jglob)) {
-              toposForAtom[i].push_back(j);
-              topoDist[i].push_back(3);
-            }
-          }
-        }
-      }      
-    }
-    
     createGtypeCutoffMap();
 
   }
@@ -683,8 +685,9 @@ namespace OpenMD {
       }
       
       AtomPlanRealColumn->scatter(atomColData.skippedCharge, skch_tmp);
-      for (int i = 0; i < ns; i++)
+      for (int i = 0; i < ns; i++) 
         snap_->atomData.skippedCharge[i] += skch_tmp[i];
+            
     }
     
     nLocal_ = snap_->getNumberOfAtoms();
@@ -712,6 +715,13 @@ namespace OpenMD {
       RealType ploc2 = 0.0;
       MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
       pairwisePot[ii] = ploc2;
+    }
+
+    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+      RealType ploc1 = embeddingPot[ii];
+      RealType ploc2 = 0.0;
+      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      embeddingPot[ii] = ploc2;
     }
 
 #endif
@@ -855,18 +865,13 @@ namespace OpenMD {
    * field) must still be handled for these pairs.
    */
   bool ForceMatrixDecomposition::excludeAtomPair(int atom1, int atom2) {
-    int unique_id_2;
-#ifdef IS_MPI
-    // in MPI, we have to look up the unique IDs for the row atom.
-    unique_id_2 = AtomColToGlobal[atom2];
-#else
-    // in the normal loop, the atom numbers are unique
-    unique_id_2 = atom2;
-#endif
+
+    // excludesForAtom was constructed to use row/column indices in the MPI
+    // version, and to use local IDs in the non-MPI version:
     
     for (vector<int>::iterator i = excludesForAtom[atom1].begin();
          i != excludesForAtom[atom1].end(); ++i) {
-      if ( (*i) == unique_id_2 ) return true;
+      if ( (*i) == atom2 )  return true;
     }
 
     return false;
