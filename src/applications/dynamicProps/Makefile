@@ -13,6 +13,7 @@ Source    = \
             LegendreCorrFunc.cpp \
 	    RadialRCorrFunc.cpp \
 	    ThetaCorrFunc.cpp \
+	    MomentumCorrFunc.cpp \
 	    EnergyCorrFunc.cpp \
             DirectionalRCorrFunc.cpp \
             StressCorrFunc.cpp \

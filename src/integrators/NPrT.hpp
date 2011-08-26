@@ -55,7 +55,7 @@ namespace OpenMD {
 
   /**
    * @class NPrT
-   * Constant normal pressure and lateral surface area integrator
+   * Constant normal pressure and lateral surface tension integrator
    * @note Ikeguchi M.,J. Comput Chem, 25:529-542, 2004
    */
   class NPrT : public NPT{

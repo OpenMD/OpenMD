@@ -271,6 +271,20 @@ namespace OpenMD {
     }
 
     /**
+     * Sets the elements of this vector to the multiplication of
+     * elements of two other vectors.  Not to be confused with scalar
+     * multiplication (mul) or dot products.
+     *
+     * (*this.data_[i] =  v1.data_[i] * v2.data_[i]).
+     * @param v1 the first vector            
+     * @param v2 the second vector
+     */
+    inline void Vmul( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2) {
+      for (unsigned int i = 0; i < Dim; i++)
+	this->data_[i] = v1.data_[i] * v2.data_[i];
+    }
+
+    /**
      * Sets the value of this vector to the scalar division of itself  (*this /= s ).
      * @param s the scalar value
      */             
@@ -288,6 +302,21 @@ namespace OpenMD {
       for (unsigned int i = 0; i < Dim; i++)
 	this->data_[i] = v1.data_[i] / s;
     }
+
+    /**
+     * Sets the elements of this vector to the division of
+     * elements of two other vectors.  Not to be confused with scalar
+     * division (div)
+     *
+     * (*this.data_[i] =  v1.data_[i] / v2.data_[i]).
+     * @param v1 the first vector            
+     * @param v2 the second vector
+     */
+    inline void Vdiv( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2) {
+      for (unsigned int i = 0; i < Dim; i++)
+	this->data_[i] = v1.data_[i] / v2.data_[i];
+    }
+
 
     /** @see #add */
     inline Vector<Real, Dim>& operator +=( const Vector<Real, Dim>& v1 ) {
@@ -322,6 +351,18 @@ namespace OpenMD {
       tmp = 0;
       for (unsigned int i = 0; i < Dim; i++)
 	tmp += this->data_[i];
+      return tmp;  
+    }
+
+    /**
+     * Returns the product of all elements of this vector.
+     * @return the product of all elements of this vector
+     */
+    inline Real componentProduct() {
+      Real tmp;
+      tmp = 1;
+      for (unsigned int i = 0; i < Dim; i++)
+	tmp *= this->data_[i];
       return tmp;  
     }
             
@@ -457,6 +498,30 @@ namespace OpenMD {
 
     return tmp;
   }
+
+
+  
+
+  /**
+   * Returns the wide dot product of three Vectors.  Compare with
+   * Rapaport's VWDot function.
+   *
+   * @param v1 first vector
+   * @param v2 second vector
+   * @param v3 third vector
+   * @return the wide dot product of v1, v2, and v3.
+   */
+  template<typename Real, unsigned int Dim>    
+  inline Real dot( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2, const Vector<Real, Dim>& v3 ) {
+    Real tmp;
+    tmp = 0;
+
+    for (unsigned int i = 0; i < Dim; i++)
+      tmp += v1[i] * v2[i] * v3[i];
+
+    return tmp;
+  }
+
 
   /**
    * Returns the distance between  two Vectors

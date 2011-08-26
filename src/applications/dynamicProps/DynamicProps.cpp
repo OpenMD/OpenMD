@@ -60,6 +60,7 @@
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
+#include "applications/dynamicProps/MomentumCorrFunc.hpp"
 
 
 using namespace OpenMD;
@@ -142,6 +143,8 @@ int main(int argc, char* argv[]){
     corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.stresscorr_given){
     corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.momentum_given){
+    corrFunc = new MomentumCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.lcorr_given) {
     int order;
     if (args_info.order_given)

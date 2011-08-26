@@ -38,61 +38,42 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
- 
-/**
- * @file NgammaT.hpp
- * @author gezelter
- * @date 11/19/2004
- * @time 4:27pm
- * @version 1.0
- */
 
-#ifndef INTEGRATORS_NGAMMAT_HPP
-#define INTEGRATORS_NGAMMAT_HPP
+ /* Uses the Helfand-moment method for calculating thermal
+  * conductivity using the relation kappa = (N,V)lim(t)->inf 1/(2*k_B*T^2*V*t) <[G_K(t)-G_K(0)]^2>
+  * where G_K is the Helfand moment for thermal conductivity definded as
+  * G_K(t) = sum_{a=1}{^N} x_a(E_a-<E_a>) and E_a is defined to be
+  *	E_a = p_2^2/(2*m)+1/2 sum_{b.ne.a} u(r_ab) where p is momentum and u is pot energy for the 
+  * particle pair a-b. This routine calculates E_a, <E_a> and does the correlation
+  * <[G_K(t)-G_K(0)]^2>.
+  * See Viscardy et al. JCP 126, 184513 (2007)
+  */
 
-#include "integrators/NPT.hpp"
+
+#ifndef APPLICATIONS_DYNAMICPROPS_MOMENTUMCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_MOMENTUMCORRFUNC_HPP
+
+#include "applications/dynamicProps/FrameTimeCorrFunc.hpp"
+
 namespace OpenMD {
 
-  /**
-   * @class NgammaT
-   * Constant lateral surface tension integrator
-   * @note Ikeguchi M., J. Comput Chem, 25:529-542, 2004
-   */
-  class NgammaT : public NPT{
+  class MomentumCorrFunc : public FrameTimeCorrFunc {
   public:
-
-    NgammaT ( SimInfo* info);
-  protected:
-
-    Mat3x3d eta;
-
-  private:
-
-    virtual void evolveEtaA();
-    virtual void evolveEtaB();
-
-    virtual bool etaConverged();
-
-    virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
-    virtual void getVelScaleB(Vector3d& sc, int index );
-    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,  int index, Vector3d& sc);
-
-    virtual void calcVelScale();
+    MomentumCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
         
-    virtual void scaleSimBox();
-    virtual RealType calcConservedQuantity();
+  private:
+    virtual void correlateFrames(int frame1, int frame2);
+    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
+    virtual void writeCorrelate();
 
-    virtual void loadEta();
-    virtual void saveEta();
-            
-    Mat3x3d oldEta;
-    Mat3x3d prevEta;
-    Mat3x3d vScale;
-    RealType surfaceTension;
+  protected:
+    virtual void preCorrelate();
+    virtual void postCorrelate();
+    std::vector<Mat3x3d> histogram_;
+    
   };
 
+}
+#endif //MOMENTUMCORRFUNC
 
-}//end namespace OpenMD
-
-#endif
 

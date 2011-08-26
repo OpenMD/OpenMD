@@ -1531,7 +1531,7 @@ contains
             vpair, fpair, p_elect, eFrame(:,i), eFrame(:,j), f1, t(:,i), t(:,j))
 #endif
     endif
-    
+
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
 #ifdef IS_MPI
        call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &

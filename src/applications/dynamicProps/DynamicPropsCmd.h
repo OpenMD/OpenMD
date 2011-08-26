@@ -66,6 +66,7 @@ struct gengetopt_args_info
   const char *thetacorr_help; /**< @brief Angular rmsd help description.  */
   const char *drcorr_help; /**< @brief Directional rmsd for particles with unit vectors help description.  */
   const char *helfandEcorr_help; /**< @brief Helfand moment for thermal conductvity help description.  */
+  const char *momentum_help; /**< @brief Helfand momentum for viscosity help description.  */
   const char *stresscorr_help; /**< @brief Stress tensor correlation function help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
@@ -85,8 +86,11 @@ struct gengetopt_args_info
   unsigned int thetacorr_given ;	/**< @brief Whether thetacorr was given.  */
   unsigned int drcorr_given ;	/**< @brief Whether drcorr was given.  */
   unsigned int helfandEcorr_given ;	/**< @brief Whether helfandEcorr was given.  */
+  unsigned int momentum_given ;	/**< @brief Whether momentum was given.  */
   unsigned int stresscorr_given ;	/**< @brief Whether stresscorr was given.  */
 
+  char **inputs ; /**< @brief unamed options (options without names) */
+  unsigned inputs_num ; /**< @brief unamed options number */
   int dynamicProps_group_counter; /**< @brief Counter for group dynamicProps */
 } ;
 
