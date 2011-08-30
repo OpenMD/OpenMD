@@ -247,9 +247,8 @@ namespace OpenMD {
       for (int j = 0; j < nLocal_; j++) {
         int jglob = AtomLocalToGlobal[j];
 
-        if (excludes->hasPair(iglob, jglob))           
+        if (excludes->hasPair(iglob, jglob)) 
           excludesForAtom[i].push_back(j);              
-        
         
         if (oneTwo->hasPair(iglob, jglob)) {
           toposForAtom[i].push_back(j);
@@ -836,22 +835,27 @@ namespace OpenMD {
    */
   bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2) {
     int unique_id_1, unique_id_2;
-    
+        
 #ifdef IS_MPI
     // in MPI, we have to look up the unique IDs for each atom
     unique_id_1 = AtomRowToGlobal[atom1];
     unique_id_2 = AtomColToGlobal[atom2];
+#else
+    unique_id_1 = AtomLocalToGlobal[atom1];
+    unique_id_2 = AtomLocalToGlobal[atom2];
+#endif   
 
-    // this situation should only arise in MPI simulations
     if (unique_id_1 == unique_id_2) return true;
-    
+
+#ifdef IS_MPI
     // this prevents us from doing the pair on multiple processors
     if (unique_id_1 < unique_id_2) {
       if ((unique_id_1 + unique_id_2) % 2 == 0) return true;
     } else {
-      if ((unique_id_1 + unique_id_2) % 2 == 1) return true; 
+      if ((unique_id_1 + unique_id_2) % 2 == 1) return true;
     }
 #endif
+    
     return false;
   }
 
@@ -871,7 +875,7 @@ namespace OpenMD {
     
     for (vector<int>::iterator i = excludesForAtom[atom1].begin();
          i != excludesForAtom[atom1].end(); ++i) {
-      if ( (*i) == atom2 )  return true;
+      if ( (*i) == atom2 ) return true;
     }
 
     return false;
@@ -1190,17 +1194,24 @@ namespace OpenMD {
                 }
               }
 #else
-              
               for (vector<int>::iterator j1 = cellList_[m1].begin(); 
                    j1 != cellList_[m1].end(); ++j1) {
                 for (vector<int>::iterator j2 = cellList_[m2].begin(); 
                      j2 != cellList_[m2].end(); ++j2) {
-                  
+     
                   // Always do this if we're in different cells or if
-                  // we're in the same cell and the global index of the
-                  // j2 cutoff group is less than the j1 cutoff group
-                  
-                  if (m2 != m1 || (*j2) < (*j1)) {
+                  // we're in the same cell and the global index of
+                  // the j2 cutoff group is greater than or equal to
+                  // the j1 cutoff group.  Note that Rappaport's code
+                  // has a "less than" conditional here, but that
+                  // deals with atom-by-atom computation.  OpenMD
+                  // allows atoms within a single cutoff group to
+                  // interact with each other.
+
+
+
+                  if (m2 != m1 || (*j2) >= (*j1) ) {
+
                     dr = snap_->cgData.position[(*j2)] - snap_->cgData.position[(*j1)];
                     snap_->wrapVector(dr);
                     cuts = getGroupCutoffs( (*j1), (*j2) );
@@ -1219,7 +1230,7 @@ namespace OpenMD {
       // branch to do all cutoff group pairs
 #ifdef IS_MPI
       for (int j1 = 0; j1 < nGroupsInRow_; j1++) {
-        for (int j2 = 0; j2 < nGroupsInCol_; j2++) {       
+        for (int j2 = 0; j2 < nGroupsInCol_; j2++) {    
           dr = cgColData.position[j2] - cgRowData.position[j1];
           snap_->wrapVector(dr);
           cuts = getGroupCutoffs( j1, j2 );
@@ -1227,18 +1238,20 @@ namespace OpenMD {
             neighborList.push_back(make_pair(j1, j2));
           }
         }
-      }
+      }      
 #else
-      for (int j1 = 0; j1 < nGroups_ - 1; j1++) {
-        for (int j2 = j1 + 1; j2 < nGroups_; j2++) {
+      // include all groups here.
+      for (int j1 = 0; j1 < nGroups_; j1++) {
+        // include self group interactions j2 == j1
+        for (int j2 = j1; j2 < nGroups_; j2++) {
           dr = snap_->cgData.position[j2] - snap_->cgData.position[j1];
           snap_->wrapVector(dr);
           cuts = getGroupCutoffs( j1, j2 );
           if (dr.lengthSquare() < cuts.third) {
             neighborList.push_back(make_pair(j1, j2));
           }
-        }
-      }        
+        }    
+      }
 #endif
     }
       

@@ -192,7 +192,7 @@ void Globals::validate() {
   CheckParameter(ForceFieldFileName, isNotEmpty());
   CheckParameter(CutoffMethod, isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE"));
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
-  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
+  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
   CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
   CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
   CheckParameter(OrthoBoxTolerance, isPositive());  

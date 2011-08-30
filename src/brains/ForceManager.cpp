@@ -115,7 +115,6 @@ namespace OpenMD {
     else
       mdFileVersion = 0;
    
-
     if (simParams_->haveCutoffRadius()) {
       rCut_ = simParams_->getCutoffRadius();
     } else {      
@@ -173,13 +172,82 @@ namespace OpenMD {
         cutoffMethod_ = i->second;
       }
     } else {
-      sprintf(painCave.errMsg,
-              "ForceManager::setupCutoffs: No value was set for the cutoffMethod.\n"
-              "\tOpenMD will use SHIFTED_FORCE.\n");
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();
-      cutoffMethod_ = SHIFTED_FORCE;        
+      if (mdFileVersion > 1) {
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs: No value was set for the cutoffMethod.\n"
+                "\tOpenMD will use SHIFTED_FORCE.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
+        cutoffMethod_ = SHIFTED_FORCE;        
+      } else {
+        // handle the case where the old file version was in play
+        // (there should be no cutoffMethod, so we have to deduce it
+        // from other data).        
+
+        sprintf(painCave.errMsg,
+                "ForceManager::setupCutoffs : DEPRECATED FILE FORMAT!\n"
+                "\tOpenMD found a file which does not set a cutoffMethod.\n"
+                "\tOpenMD will attempt to deduce a cutoffMethod using the\n"
+                "\tbehavior of the older (version 1) code.  To remove this\n"
+                "\twarning, add an explicit cutoffMethod and change the top\n"
+                "\tof the file so that it begins with <OpenMD version=2>\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_WARNING;
+        simError();            
+                
+        // The old file version tethered the shifting behavior to the
+        // electrostaticSummationMethod keyword.
+        
+        if (simParams_->haveElectrostaticSummationMethod()) {
+          std::string myMethod = simParams_->getElectrostaticSummationMethod();
+          toUpper(myMethod);
+        
+          if (myMethod == "SHIFTED_POTENTIAL") {
+            cutoffMethod_ = SHIFTED_POTENTIAL;
+          } else if (myMethod == "SHIFTED_FORCE") {
+            cutoffMethod_ = SHIFTED_FORCE;
+          }
+        
+          if (simParams_->haveSwitchingRadius()) 
+            rSwitch_ = simParams_->getSwitchingRadius();
+
+          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
+            if (simParams_->haveSwitchingRadius()){
+              sprintf(painCave.errMsg,
+                      "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
+                      "\tA value was set for the switchingRadius\n"
+                      "\teven though the electrostaticSummationMethod was\n"
+                      "\tset to %s\n", myMethod.c_str());
+              painCave.severity = OPENMD_WARNING;
+              painCave.isFatal = 1;
+              simError();            
+            } 
+          }
+          if (abs(rCut_ - rSwitch_) < 0.0001) {
+            if (cutoffMethod_ == SHIFTED_FORCE) {              
+              sprintf(painCave.errMsg,
+                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n" 
+                      "\tcutoffRadius and switchingRadius are set to the\n"
+                      "\tsame value.  OpenMD will use shifted force\n"
+                      "\tpotentials instead of switching functions.\n");
+              painCave.isFatal = 0;
+              painCave.severity = OPENMD_WARNING;
+              simError();            
+            } else {
+              cutoffMethod_ = SHIFTED_POTENTIAL;
+              sprintf(painCave.errMsg,
+                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n" 
+                      "\tcutoffRadius and switchingRadius are set to the\n"
+                      "\tsame value.  OpenMD will use shifted potentials\n"
+                      "\tinstead of switching functions.\n");
+              painCave.isFatal = 0;
+              painCave.severity = OPENMD_WARNING;
+              simError();            
+            }
+          }
+        }
+      }
     }
 
     map<string, CutoffPolicy> stringToCutoffPolicy;
@@ -298,6 +366,9 @@ namespace OpenMD {
     switcher_->setSwitch(rSwitch_, rCut_);
     interactionMan_->setSwitchingRadius(rSwitch_);
   }
+
+
+
   
   void ForceManager::initialize() {
 
@@ -614,10 +685,9 @@ namespace OpenMD {
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
                                                      rgrp); 
-              
+          
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
-                       
 
           for (vector<int>::iterator ia = atomListRow.begin(); 
                ia != atomListRow.end(); ++ia) {            
@@ -657,7 +727,6 @@ namespace OpenMD {
                 } else {
                   interactionMan_->doPair(idat);
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
-
                   vij += vpair;
                   fij += f1;
                   tau -= outProduct( *(idat.d), f1);
@@ -684,7 +753,6 @@ namespace OpenMD {
                 // presence in switching region
                 fg = swderiv * d_grp * mf;
                 fDecomp_->addForceToAtomRow(atom1, fg);
-
                 if (atomListRow.size() > 1) {
                   if (info_->usesAtomicVirial()) {
                     // find the distance between the atom

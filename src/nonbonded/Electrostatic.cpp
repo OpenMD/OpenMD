@@ -64,6 +64,7 @@ namespace OpenMD {
     Globals* simParams_ = info_->getSimParams();
 
     summationMap_["HARD"]               = esm_HARD;
+    summationMap_["NONE"]               = esm_HARD;
     summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;
     summationMap_["SHIFTED_POTENTIAL"]  = esm_SHIFTED_POTENTIAL; 
     summationMap_["SHIFTED_FORCE"]      = esm_SHIFTED_FORCE;     
@@ -116,7 +117,7 @@ namespace OpenMD {
         sprintf( painCave.errMsg,
                  "Electrostatic::initialize: Unknown electrostaticSummationMethod.\n"
                  "\t(Input file specified %s .)\n"
-                 "\telectrostaticSummationMethod must be one of: \"none\",\n"
+                 "\telectrostaticSummationMethod must be one of: \"hard\",\n"
                  "\t\"shifted_potential\", \"shifted_force\", or \n"
                  "\t\"reaction_field\".\n", myMethod.c_str() );
         painCave.isFatal = 1;
@@ -583,9 +584,13 @@ namespace OpenMD {
       if (j_is_Charge) {
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          erfcVal = res.first;
-          derfcVal = res.second;
+          //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+          //erfcVal = res.first;
+          //derfcVal = res.second;
+
+          erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+          derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
+
           c1 = erfcVal * riji;
           c2 = (-derfcVal + c1) * riji;
         } else {
@@ -672,9 +677,11 @@ namespace OpenMD {
 
           if (screeningMethod_ == DAMPED) {
             // assemble the damping variables
-            res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-            erfcVal = res.first;
-            derfcVal = res.second;
+            //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+            //erfcVal = res.first;
+            //derfcVal = res.second;
+            erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+            derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
             c1 = erfcVal * ri;
             c2 = (-derfcVal + c1) * ri;
             c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * ri;
@@ -709,9 +716,11 @@ namespace OpenMD {
           
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          erfcVal = res.first;
-          derfcVal = res.second;
+          //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+          //erfcVal = res.first;
+          //derfcVal = res.second;
+          erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+          derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
           c1 = erfcVal * riji;
           c2 = (-derfcVal + c1) * riji;
           c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * riji;
@@ -798,9 +807,11 @@ namespace OpenMD {
             
           if (screeningMethod_ == DAMPED) {
             // assemble the damping variables
-            res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-            erfcVal = res.first;
-            derfcVal = res.second;
+            //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+            //erfcVal = res.first;
+            //derfcVal = res.second;
+            erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+            derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
             c1 = erfcVal * ri;
             c2 = (-derfcVal + c1) * ri;
             c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * ri;
@@ -877,9 +888,11 @@ namespace OpenMD {
           }
           if (screeningMethod_ == DAMPED) {
             // assemble damping variables
-            res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-            erfcVal = res.first;
-            derfcVal = res.second;
+            //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+            //erfcVal = res.first;
+            //derfcVal = res.second;
+            erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+            derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
             c1 = erfcVal * ri;
             c2 = (-derfcVal + c1) * ri;
             c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * ri;
@@ -928,9 +941,11 @@ namespace OpenMD {
 
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          erfcVal = res.first;
-          derfcVal = res.second;
+          //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+          //erfcVal = res.first;
+          //derfcVal = res.second;
+          erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+          derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
           c1 = erfcVal * riji;
           c2 = (-derfcVal + c1) * riji;
           c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * riji;
@@ -995,6 +1010,7 @@ namespace OpenMD {
 
       // only accumulate the forces and torques resulting from the
       // indirect reaction field terms.
+
       *(idat.vpair) += indirect_vpair;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += indirect_Pot;
       *(idat.f1) += indirect_dVdr;
