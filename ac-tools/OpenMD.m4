@@ -956,7 +956,7 @@ if test "$qhull_dir" != "no"; then
      else
        AC_MSG_WARN([Sorry, $qhull_dir does not exist, checking usual places])
        QHULL_HOME=/usr/local
-       if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"; then
+       if test ! -f "${QHULL_HOME}/include/qhull/libqhull.h"; then
           QHULL_HOME=/usr
        fi
      fi
@@ -974,20 +974,27 @@ if test "$qhull_dir" != "no"; then
         LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
         CXXFLAGS="$CXXFLAGS -I${QHULL_HOME}/include"
         CPPFLAGS="$CPPFLAGS -I${QHULL_HOME}/include"
-        AC_CHECK_HEADER(qhull/qhull.h, [qhull_cv_qhull_h=yes], [qhull_cv_qhull_h=no])
-        AC_CHECK_LIB(qhull, qh_qhull, [qhull_cv_libqhull=yes], [qhull_cv_libqhull=no])
+        AC_CHECK_HEADER(qhull/libqhull.h, [qhull_cv_libqhull_h=yes], [qhull_cv_libqhull_h=no])
+        AC_CHECK_LIB(qhull, qh_qhull, [qhull_cv_libqhull=yes], [qhull_cv_libqhull=no]) 
+	AC_CHECK_LIB(qhull6, qh_qhull, [qhull_cv_libqhull6=yes], [qhull_cv_libqhull6=no])
         LDFLAGS="$QHULL_OLD_LDFLAGS"
         CXXFLAGS="$QHULL_OLD_CXXFLAGS"
         CPPFLAGS="$QHULL_OLD_CPPFLAGS"
         AC_LANG_RESTORE
 
-        if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
-           AC_DEFINE(HAVE_QHULL_H, 1, [have qhull.h])
-           AC_DEFINE(HAVE_QHULL, 1, [have libqhull.a])
+        if test "$qhull_cv_libqhull_h" = "yes" -a "$qhull_cv_libqhull" = "yes" -o "$qhull_cv_libqhull6" = "yes"; then
+           AC_DEFINE(HAVE_LIBQHULL_H, 1, [have libqhull.h])
+	   if test "$qhull_cv_libqhull" = "yes"; then
+           	AC_DEFINE(HAVE_QHULL, 1, [have libqhull.a])
+           	QHULL="-lqhull"
+           fi
+	   if test "$qhull_cv_libqhull6" = "yes"; then
+           	AC_DEFINE(HAVE_QHULL, 1, [have libqhull6.a])
+           	QHULL="-lqhull6"
+           fi
            USE_QHULL=yes                
            QHULL_INC_DIR="${QHULL_HOME}/include"
            QHULL_LIB_DIR="${QHULL_HOME}/lib"
-           QHULL="-lqhull"
            AC_MSG_RESULT([Working qhull found, will proceed.])
         else
 	   AC_MSG_WARN([])
