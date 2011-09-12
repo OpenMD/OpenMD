@@ -39,43 +39,43 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef IO_METALNONMETALINTERACTIONSSECTIONPARSER_HPP
-#define IO_METALNONMETALINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
+#define TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
+
+#include "types/NonBondedInteractionType.hpp"
 
 namespace OpenMD {
-
   /**
-   * @class MetalNonMetalInteractionsSectionParser MetalNonMetalInteractionsSectionParser.hpp "io/MetalNonMetalInteractionsSectionParser.hpp"
+   * @class RepulsivePowerInteractionType 
+   *
+   * RepulsivePowerInteractionType is one of the basic interaction types.
+   * Formula is V = epsilon* (sigma/R)^n
    */
-  class MetalNonMetalInteractionsSectionParser : public SectionParser {
+  class RepulsivePowerInteractionType : public NonBondedInteractionType {
+    
   public:
-    MetalNonMetalInteractionsSectionParser(ForceFieldOptions& options);
-            
+    
+    RepulsivePowerInteractionType(RealType mySigma, RealType myEpsilon, int myNrep) {
+      sigma = mySigma;
+      epsilon = myEpsilon;
+      nRep = myNrep;
+    }
+    
+    virtual void tellFortran(int atid1, int atid2) {
+      mnmit.MNMInteractionType = MNM_REPULSIVEPOWER;
+      mnmit.metal_atid = atid1;
+      mnmit.nonmetal_atid = atid2;
+      mnmit.sigma = sigma;
+      mnmit.epsilon = epsilon;     
+      mnmit.nRep = nRep;
+      addMNMInteraction(&mnmit);
+    }
+    
+    
   private:
-
-    enum MetalNonMetalInteractionTypeEnum{
-      MAW,
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      RepulsivePower,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    MetalNonMetalInteractionTypeEnum getMetalNonMetalInteractionTypeEnum(const std::string& str);  
-
-    std::map<std::string, MetalNonMetalInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
+    RealType sigma;
+    RealType epsilon;   
+    int nRep;
   };
-
-
-} //namespace OpenMD
-
-#endif //IO_METALNONMETALINTERACTIONSSECTIONPARSER_HPP
-
-
+}
+#endif

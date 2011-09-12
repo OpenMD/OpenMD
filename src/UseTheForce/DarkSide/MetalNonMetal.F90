@@ -82,6 +82,7 @@ module MetalNonMetal
      real(kind=dp) :: sigma
      real(kind=dp) :: epsilon
      real(kind=dp) :: rCut = 0.0_dp
+     integer       :: nRep
      logical       :: rCutWasSet = .false.
      logical       :: shiftedPot = .false.
      logical       :: shiftedFrc = .false.
@@ -134,6 +135,9 @@ contains
     select case (interaction_type)    
     case (MNM_LENNARDJONES)
        call calc_mnm_lennardjones(D, Rij, R2, Rcut, Sw, &
+            vdwMult, Vpair, Fpair, Pot, f1, interaction_id)
+    case (MNM_REPULSIVEPOWER)
+       call calc_mnm_repulsivepower(D, Rij, R2, Rcut, Sw, &
             vdwMult, Vpair, Fpair, Pot, f1, interaction_id)
     case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
        call calc_mnm_morse(D, Rij, R2, Rcut, Sw, vdwMult, &
@@ -208,6 +212,71 @@ contains
 
     return
   end subroutine calc_mnm_lennardjones
+
+
+  subroutine calc_mnm_repulsivepower(D, Rij, R2, Rcut, Sw, &
+       vdwMult,Vpair, Fpair, Pot, f1, interaction_id)
+    
+    real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
+    real( kind = dp ) :: pot, sw, vpair
+    real( kind = dp ), intent(inout), dimension(3) :: f1
+    real( kind = dp ), intent(in), dimension(3) :: d
+    real( kind = dp ), intent(inout), dimension(3) :: fpair
+    integer, intent(in) :: interaction_id
+
+    ! local Variables
+    real( kind = dp ) :: drdx, drdy, drdz
+    real( kind = dp ) :: fx, fy, fz
+    real( kind = dp ) :: myPot, myPotC, myDeriv, myDerivC, ros, rcos
+    real( kind = dp ) :: pot_temp, dudr
+    real( kind = dp ) :: sigmai
+    real( kind = dp ) :: epsilon
+    logical :: isSoftCore, shiftedPot, shiftedFrc
+    integer :: id1, id2, localError, n
+
+    sigmai     = 1.0_dp / MnM_Map%interactions(interaction_id)%sigma
+    epsilon    = MnM_Map%interactions(interaction_id)%epsilon
+    n          = MnM_Map%interactions(interaction_id)%nRep
+    shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
+    shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc
+
+    ros = rij * sigmai
+
+    call getNRepulsionFunc(ros, n, myPot, myDeriv)
+    
+    if (shiftedPot) then
+       rcos = rcut * sigmai
+       call getNRepulsionFunc(rcos, n, myPotC, myDerivC) 
+       myDerivC = 0.0_dp
+    elseif (shiftedFrc) then
+       rcos = rcut * sigmai
+       call getNRepulsionFunc(rcos, n, myPotC, myDerivC)
+       myPotC = myPotC + myDerivC * (rij - rcut) * sigmai
+    else
+       myPotC = 0.0_dp
+       myDerivC = 0.0_dp
+    endif    
+
+    pot_temp = vdwMult * epsilon * (myPot - myPotC)
+    vpair = vpair + pot_temp
+    dudr = sw * vdwMult * epsilon * (myDeriv - myDerivC) * sigmai
+
+    drdx = d(1) / rij
+    drdy = d(2) / rij
+    drdz = d(3) / rij
+
+    fx = dudr * drdx
+    fy = dudr * drdy
+    fz = dudr * drdz
+    
+    pot = pot + sw*pot_temp
+    f1(1) = f1(1) + fx 
+    f1(2) = f1(2) + fy
+    f1(3) = f1(3) + fz
+
+    return
+  end subroutine calc_mnm_repulsivepower
+
 
   subroutine calc_mnm_morse(D, Rij, R2, Rcut, Sw, vdwMult, &
        Vpair, Fpair, Pot, f1, interaction_id, interaction_type)
@@ -578,6 +647,10 @@ contains
     case (MNM_LENNARDJONES)
        nt%sigma = myInteraction%sigma
        nt%epsilon = myInteraction%epsilon
+    case (MNM_REPULSIVEPOWER)
+       nt%sigma = myInteraction%sigma
+       nt%epsilon = myInteraction%epsilon
+       nt%nRep = myInteraction%nRep
     case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
        nt%R0 = myInteraction%R0
        nt%D0 = myInteraction%D0
@@ -755,4 +828,22 @@ contains
     
     return
   end subroutine getSoftFunc
+
+  subroutine getNRepulsionFunc(r, n, myPot, myDeriv)
+    
+    real(kind=dp), intent(in) :: r
+    integer, intent(in) :: n
+    real(kind=dp), intent(inout) :: myPot, myDeriv
+    real(kind=dp) :: ri, rin, rin1
+    
+    ri = 1.0_DP / r   
+
+    rin = ri**n
+    rin1 = rin * ri
+
+    myPot = rin
+    myDeriv = -n * rin1
+    
+    return
+  end subroutine getNRepulsionFunc
 end module MetalNonMetal
