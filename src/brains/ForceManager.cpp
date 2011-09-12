@@ -317,25 +317,28 @@ namespace OpenMD {
         simError();
       }
     } else {
-      if (simParams_->haveSwitchingRadius()) {
-        map<string, CutoffMethod>::const_iterator it;
-        string theMeth;
-        for (it = stringToCutoffMethod.begin(); 
-             it != stringToCutoffMethod.end(); ++it) {
-          if (it->second == cutoffMethod_) {
-            theMeth = it->first;
-            break;
+      if (mdFileVersion > 1) {
+        // throw an error if we define a switching radius and don't need one.
+        // older file versions should not do this.
+        if (simParams_->haveSwitchingRadius()) {
+          map<string, CutoffMethod>::const_iterator it;
+          string theMeth;
+          for (it = stringToCutoffMethod.begin(); 
+               it != stringToCutoffMethod.end(); ++it) {
+            if (it->second == cutoffMethod_) {
+              theMeth = it->first;
+              break;
+            }
           }
+          sprintf(painCave.errMsg,
+                  "ForceManager::setupCutoffs: the cutoffMethod (%s)\n"
+                  "\tis not set to SWITCHED, so switchingRadius value\n"
+                  "\twill be ignored for this simulation\n", theMeth.c_str());
+          painCave.isFatal = 0;
+          painCave.severity = OPENMD_WARNING;
+          simError();
         }
-        sprintf(painCave.errMsg,
-                "ForceManager::setupCutoffs: the cutoffMethod (%s)\n"
-                "\tis not set to SWITCHED, so switchingRadius value\n"
-                "\twill be ignored for this simulation\n", theMeth.c_str());
-        painCave.isFatal = 0;
-        painCave.severity = OPENMD_WARNING;
-        simError();
       }
-
       rSwitch_ = rCut_;
     }
     

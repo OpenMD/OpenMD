@@ -11,7 +11,7 @@ component{
 
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
+cutoffMethod = "switched";
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
@@ -22,7 +22,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 5e4;
+runTime = 1e4;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

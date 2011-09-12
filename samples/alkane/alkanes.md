@@ -137,6 +137,7 @@ molecule{
   torsion{
     members( 0, 1, 2, 3 );
   }
+
 }
 
 molecule{

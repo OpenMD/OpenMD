@@ -17,10 +17,11 @@ forceFieldFileName = "SuttonChen.QSC.frc";
 
 ensemble = "NVE";
 dt = 4.0;
-runTime = 3e4;
+runTime = 1000;
+statusTime = 4;
+sampleTime = 100;
 
 thermalTime = 400.0;
-sampleTime = 500.0;
 seed = 985456376;
 
 tempSet="true";

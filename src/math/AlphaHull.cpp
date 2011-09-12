@@ -68,7 +68,7 @@ using namespace OpenMD;
 #ifdef HAVE_QHULL
 extern "C"
 {
-#include <qhull/qhull.h>
+#include <qhull/libqhull.h>
 #include <qhull/mem.h>
 #include <qhull/qset.h>
 #include <qhull/geom.h>

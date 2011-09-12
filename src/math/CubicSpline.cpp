@@ -42,6 +42,7 @@
 #include "math/CubicSpline.hpp"
 #include "utils/simError.h"
 #include <cmath>
+#include <cstdio>
 #include <algorithm>
 
 using namespace OpenMD;
