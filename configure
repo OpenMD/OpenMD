@@ -752,18 +752,12 @@ CPPFLAGS
 CCC
 CC
 CFLAGS
-LDFLAGS
-LIBS
-CPPFLAGS
 FC
 FCFLAGS
-LDFLAGS
-LIBS
 MPICXX
 MPICC
 MPIFC
 CPP
-CPPFLAGS
 CXXCPP'
 
 
@@ -7952,7 +7946,7 @@ if test "$qhull_dir" != "no"; then
        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&5
 $as_echo "$as_me: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&2;}
        QHULL_HOME=/usr/local
-       if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"; then
+       if test ! -f "${QHULL_HOME}/include/qhull/libqhull.h"; then
           QHULL_HOME=/usr
        fi
      fi
@@ -7976,11 +7970,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
         LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
         CXXFLAGS="$CXXFLAGS -I${QHULL_HOME}/include"
         CPPFLAGS="$CPPFLAGS -I${QHULL_HOME}/include"
-        ac_fn_cxx_check_header_mongrel "$LINENO" "qhull/qhull.h" "ac_cv_header_qhull_qhull_h" "$ac_includes_default"
-if test "x$ac_cv_header_qhull_qhull_h" = xyes; then :
-  qhull_cv_qhull_h=yes
+        ac_fn_cxx_check_header_mongrel "$LINENO" "qhull/libqhull.h" "ac_cv_header_qhull_libqhull_h" "$ac_includes_default"
+if test "x$ac_cv_header_qhull_libqhull_h" = xyes; then :
+  qhull_cv_libqhull_h=yes
 else
-  qhull_cv_qhull_h=no
+  qhull_cv_libqhull_h=no
 fi
 
 
@@ -8034,6 +8028,56 @@ else
   qhull_cv_libqhull=no
 fi
 
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for qh_qhull in -lqhull6" >&5
+$as_echo_n "checking for qh_qhull in -lqhull6... " >&6; }
+if ${ac_cv_lib_qhull6_qh_qhull+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lqhull6  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char qh_qhull ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return qh_qhull ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_qhull6_qh_qhull=yes
+else
+  ac_cv_lib_qhull6_qh_qhull=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_qhull6_qh_qhull" >&5
+$as_echo "$ac_cv_lib_qhull6_qh_qhull" >&6; }
+if test "x$ac_cv_lib_qhull6_qh_qhull" = xyes; then :
+  qhull_cv_libqhull6=yes
+else
+  qhull_cv_libqhull6=no
+fi
+
         LDFLAGS="$QHULL_OLD_LDFLAGS"
         CXXFLAGS="$QHULL_OLD_CXXFLAGS"
         CPPFLAGS="$QHULL_OLD_CPPFLAGS"
@@ -8044,17 +8088,25 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-        if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
+        if test "$qhull_cv_libqhull_h" = "yes" -a "$qhull_cv_libqhull" = "yes" -o "$qhull_cv_libqhull6" = "yes"; then
 
-$as_echo "#define HAVE_QHULL_H 1" >>confdefs.h
+$as_echo "#define HAVE_LIBQHULL_H 1" >>confdefs.h
 
+	   if test "$qhull_cv_libqhull" = "yes"; then
 
 $as_echo "#define HAVE_QHULL 1" >>confdefs.h
 
+           	QHULL="-lqhull"
+           fi
+	   if test "$qhull_cv_libqhull6" = "yes"; then
+
+$as_echo "#define HAVE_QHULL 1" >>confdefs.h
+
+           	QHULL="-lqhull6"
+           fi
            USE_QHULL=yes
            QHULL_INC_DIR="${QHULL_HOME}/include"
            QHULL_LIB_DIR="${QHULL_HOME}/lib"
-           QHULL="-lqhull"
            { $as_echo "$as_me:${as_lineno-$LINENO}: result: Working qhull found, will proceed." >&5
 $as_echo "Working qhull found, will proceed." >&6; }
         else
