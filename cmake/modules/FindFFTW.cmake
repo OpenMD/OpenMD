@@ -1,43 +1,70 @@
-# FFTW_INCLUDE_DIR = fftw3.h
-# FFTW_LIBRARIES = libfftw3.a
-# FFTW_FOUND = true if FFTW3 is found
-
-IF(FFTW_INCLUDE_DIRS)
-  FIND_PATH(FFTW_INCLUDE_DIR fftw3.h  ${FFTW_INCLUDE_DIRS})
-  FIND_LIBRARY(FFTW_LIBRARY fftw3 ${FFTW_LIBRARY_DIRS})
-ELSE(FFTW_INCLUDE_DIRS)
-  #  SET(TRIAL_PATHS
-  #    $ENV{FFTW_HOME}/include
-  #    /usr/include
-  #    /usr/local/include
-  #    /opt/include
-  #    /usr/apps/include
-  #  )
-  #
-  #  SET(TRIAL_LIBRARY_PATHS
-  #    $ENV{FFTW_HOME}/lib
-  #    /usr/lib 
-  #    /usr/local/lib
-  #    /opt/lib
-  #    /sw/lib
-  #    )
-  #
-  #  FIND_PATH(FFTW_INCLUDE_DIR fftw3.h ${TRIAL_PATHS})
-  #  FIND_LIBRARY(FFTW_LIBRARY fftw3 ${TRIAL_LIBRARY_PATHS})
-  FIND_PATH(FFTW_INCLUDE_DIR fftw3.h ${QMC_INCLUDE_PATHS})
-  FIND_LIBRARY(FFTW_LIBRARIES fftw3 ${QMC_LIBRARY_PATHS}) 
-
-ENDIF(FFTW_INCLUDE_DIRS)
-
-SET(FFTW_FOUND FALSE)
-IF(FFTW_INCLUDE_DIR AND FFTW_LIBRARIES)
-  MESSAGE(STATUS "FFTW_INCLUDE_DIR=${FFTW_INCLUDE_DIR}")
-  MESSAGE(STATUS "FFTW_LIBRARIES=${FFTW_LIBRARIES}")
-  SET(FFTW_FOUND TRUE)
-ENDIF()
-
-MARK_AS_ADVANCED(
-   FFTW_INCLUDE_DIR
-   FFTW_LIBRARIES
-   FFTW_FOUND
-)
+## FFTW can be compiled and subsequently linked against
+## various data types.
+## There is a single set of include files, and then muttiple libraries,
+## One for each type.  I.e. libfftw.a-->double, libfftwf.a-->float
+ 
+## The following logic belongs in the individual package
+mark_as_advanced(USE_FFTWD)
+option(USE_FFTWD "Use double precision FFTW if found" ON)
+## mark_as_advanced(USE_FFTWF)
+## option(USE_FFTWF "Use single precision FFTW if found" ON)
+ 
+if(USE_FFTWD OR USE_FFTWF)
+ 
+ set(FFTW_INC_SEARCHPATH
+   /sw/include
+   /usr/include
+   /usr/local/include
+   /usr/include/fftw
+   /usr/local/include/fftw
+   /opt/local/include
+ )
+ 
+ find_path(FFTW_INCLUDE_PATH fftw3.h ${FFTW_INC_SEARCHPATH})
+ 
+ if(FFTW_INCLUDE_PATH)
+   set(FFTW_INCLUDE ${FFTW_INCLUDE_PATH})
+ endif(FFTW_INCLUDE_PATH)
+ 
+ if(FFTW_INCLUDE)
+   include_directories( ${FFTW_INCLUDE})
+ endif(FFTW_INCLUDE)
+ 
+ get_filename_component(FFTW_INSTALL_BASE_PATH ${FFTW_INCLUDE_PATH} PATH)
+ 
+ set(FFTW_LIB_SEARCHPATH
+   ${FFTW_INSTALL_BASE_PATH}/lib
+   /usr/lib/fftw
+   /usr/local/lib/fftw
+   /opt/local/lib
+ )
+ 
+ if(USE_FFTWD)
+   mark_as_advanced(FFTWD_LIB)
+   find_library(FFTWD_LIB fftw3 ${FFTW_LIB_SEARCHPATH}) #Double Precision Lib
+   find_library(FFTWD_THREADS_LIB fftw3_threads ${FFTW_LIB_SEARCHPATH}) #Double Precision Lib only if compiled with threads support
+ 
+   if(FFTWD_LIB)
+     set(FFTWD_FOUND 1)
+     get_filename_component(FFTW_LIBDIR ${FFTWD_LIB} PATH)
+     if(FFTWD_THREADS_LIB)
+       set(FFTWD_LIB ${FFTWD_LIB} ${FFTWD_THREADS_LIB} )
+     endif(FFTWD_THREADS_LIB)
+   endif(FFTWD_LIB)
+ endif(USE_FFTWD)
+ 
+ if(USE_FFTWF)
+   mark_as_advanced(FFTWF_LIB)
+   find_library(FFTWF_LIB fftw3f ${FFTW_LIB_SEARCHPATH}) #Single Precision Lib
+   find_library(FFTWF_THREADS_LIB fftw3f_threads ${FFTW_LIB_SEARCHPATH}) #Single Precision Lib only if compiled with threads support
+ 
+   if(FFTWF_LIB)
+     set(FFTWF_FOUND 1)
+     get_filename_component(FFTW_LIBDIR ${FFTWF_LIB} PATH)
+     if(FFTWF_THREADS_LIB)
+       set(FFTWF_LIB ${FFTWF_LIB} ${FFTWF_THREADS_LIB} )
+     endif(FFTWF_THREADS_LIB)
+   endif(FFTWF_LIB)
+ endif(USE_FFTWF)
+ 
+endif(USE_FFTWD OR USE_FFTWF)

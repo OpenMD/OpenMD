@@ -12,19 +12,7 @@ set (VERSION_TINY "0")
 # cmake modules that are needed to build oopse
 set (CMAKE_MODULE_PATH ${OpenMD_SOURCE_DIR}/cmake/modules)
 
-
-enable_language( Fortran C  CXX)
-
-
-
-# Figure out compiler stuff. We need to know which c, c++ and fortran
-#  compiler we are using as well as the name magling stuff.
-INCLUDE(FortranCInterface)
-FortranCInterface_VERIFY(CXX)
-FortranCInterface_HEADER( ${PROJECT_SOURCE_DIR}/src/config_f.h
-                            MACRO_NAMESPACE "FC_"
-                            SYMBOL_NAMESPACE "FC_")
-
+enable_language(CXX  C)
 
 
 # Optional libraries: If we can find these, we will build with them
@@ -106,8 +94,6 @@ check_include_file ("sys/param.h" HAVE_SYS_PARAM_H)
 check_include_file ("sys/sysmp.h" HAVE_SYS_SYSMP_H)
 check_include_file ("sys/systemcfg.h" HAVE_SYS_SYSTEMCFG_H)
 check_include_file ("sys/table.h" HAVE_SYS_TABLE_H)
-
-
 
 find_path (HAVE_SYS_STAT_H stat.h
   PATHS ${include_locations}
