@@ -169,6 +169,10 @@ Au	O_SPCE	ShiftedMorse	3.70 0.0424 0.769
 //Repulsive Morse
 // r0 D0 beta0
 Au	H_SPCE	RepulsiveMorse	-1.00 0.00850 0.769
+
+//Repulsive Power
+Au      ON      RepulsivePower   3.47005  0.186208   11
+Au      NO      RepulsivePower   3.53955  0.168629   11
 end NonBondedInteractions
 
 
