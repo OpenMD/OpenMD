@@ -39,41 +39,32 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
+#define TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
+
+#include "types/NonBondedInteractionType.hpp"
 
 namespace OpenMD {
-
-  class NonBondedInteractionsSectionParser : public SectionParser {
-  public:
-    NonBondedInteractionsSectionParser(ForceFieldOptions& options);
-            
-  private:
-
-    enum NonBondedInteractionTypeEnum{
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      MAW,
-      Buckingham,
-      RepulsivePower,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
+  /**
+   * @class RepulsivePowerInteractionType 
+   *
+   * RepulsivePowerInteractionType is one of the basic interaction types.
+   * \f[ V =  \epsilon \left( \sigma/r \right)^{n}\f]
+   */
+  class RepulsivePowerInteractionType : public NonBondedInteractionType {
     
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
+  public:
+    
+    RepulsivePowerInteractionType(RealType mySigma, RealType myEpsilon, int myNrep) {
+      sigma = mySigma;
+      epsilon = myEpsilon;
+      nRep = myNrep;
+    }
+    
+  private:
+    RealType sigma;
+    RealType epsilon;    
+    int nRep;
   };
-
-
-} //namespace OpenMD
-
+}
 #endif
-
-

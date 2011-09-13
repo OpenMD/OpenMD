@@ -8,6 +8,7 @@ Source    = LJ.cpp \
 	SC.cpp \
 	Electrostatic.cpp \
 	MAW.cpp \
+	RepulsivePower.cpp \
 	SwitchingFunction.cpp \
 	InteractionManager.cpp
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,41 +39,45 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef NONBONDED_REPULSIVEPOWER_HPP
+#define NONBONDED_REPULSIVEPOWER_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "types/AtomType.hpp"
+#include "UseTheForce/ForceField.hpp"
+#include "math/Vector3.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  class NonBondedInteractionsSectionParser : public SectionParser {
-  public:
-    NonBondedInteractionsSectionParser(ForceFieldOptions& options);
-            
-  private:
-
-    enum NonBondedInteractionTypeEnum{
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      MAW,
-      Buckingham,
-      RepulsivePower,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
-    
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
+  struct RPInteractionData {
+    RealType sigma;
+    RealType epsilon;
+    RealType sigmai;
+    int nRep;
   };
 
+  class RepulsivePower : public VanDerWaalsInteraction {
+    
+  public:    
+    RepulsivePower();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon, int nRep);
+    virtual void calcForce(InteractionData &idat);
+    virtual string getName() {return name_;}
+    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
+    
+  private:
+    void initialize();
+    void getNRepulsionFunc(const RealType r, int n, RealType &pot, RealType &deriv);
 
-} //namespace OpenMD
+    bool initialized_;
+    map<pair<AtomType*, AtomType*>, RPInteractionData> MixingMap;
+    ForceField* forceField_;    
+    string name_;
 
+  };
+}
+
+                               
 #endif
-
-

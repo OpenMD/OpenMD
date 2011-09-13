@@ -59,6 +59,7 @@ namespace OpenMD {
     int is_MAW;
     int is_EAM;
     int is_SC;
+    int is_RepulsivePower;
   } NonBondedInteractionTypeProperties;
 
   /**
@@ -84,6 +85,8 @@ namespace OpenMD {
     bool isSC();
     void setSC();
     bool isMetal();
+    void setRepulsivePower();
+    bool isRepulsivePower();
     
     void setAtomTypes(std::pair<AtomType*, AtomType*> ats);
     std::pair<AtomType*, AtomType*> getAtomTypes();
@@ -168,6 +171,13 @@ namespace OpenMD {
   };
   
   typedef SimpleTypeData<MAWParam> MAWData;
+
+  struct RepulsivePowerParam {
+    RealType epsilon;
+    RealType sigma;
+    int nRep;
+  };
+  typedef SimpleTypeData<RepulsivePowerParam> RepulsivePowerData;
 
 } //end namespace OpenMD
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP

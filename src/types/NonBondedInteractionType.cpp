@@ -124,4 +124,13 @@ namespace OpenMD {
   bool NonBondedInteractionType::isMetal() {
     return isSC() || isEAM();
   }  
+
+  bool NonBondedInteractionType::isRepulsivePower() {
+    return nbitp.is_RepulsivePower;
+  }
+  
+  void NonBondedInteractionType::setRepulsivePower() {
+    nbitp.is_RepulsivePower = 1;
+  }
+
 }
