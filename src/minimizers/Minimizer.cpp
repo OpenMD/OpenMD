@@ -45,6 +45,9 @@
 #include "io/StatWriter.hpp"
 #include "minimizers/Minimizer.hpp"
 #include "primitives/Molecule.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 namespace OpenMD {
   RealType dotProduct(const std::vector<RealType>& v1, const std::vector<RealType>& v2) {
     if (v1.size() != v2.size()) {

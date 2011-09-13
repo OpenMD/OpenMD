@@ -52,6 +52,7 @@
 #ifndef IS_MPI
 #include "math/SeqRandNumGen.hpp"
 #else
+#include <mpi.h>
 #include "math/ParallelRandNumGen.hpp"
 #endif
 

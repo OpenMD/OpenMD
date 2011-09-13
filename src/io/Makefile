@@ -31,14 +31,16 @@ Source    = \
 	gzstream.cpp\
 	ParamConstraint.cpp \
 	OptionSectionParser.cpp \
-	ForceFieldOptions.cpp
+	ForceFieldOptions.cpp \
+	ifstrstream.cpp
 
 ParallelSource = \
 	DumpReader.cpp \
 	DumpWriter.cpp \
 	RestReader.cpp \
 	StatWriter.cpp \
-	ZConsWriter.cpp
+	ZConsWriter.cpp \
+	ifstrstream.cpp
 
 RmiSource =
 

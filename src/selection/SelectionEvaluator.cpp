@@ -45,7 +45,7 @@
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
 #include "primitives/Molecule.hpp"
-#include "io/basic_ifstrstream.hpp"
+#include "io/ifstrstream.hpp"
 
 namespace OpenMD {
 

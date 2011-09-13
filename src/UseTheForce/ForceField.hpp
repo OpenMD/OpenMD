@@ -55,7 +55,7 @@
 #include <utility>
 #include <vector>
 
-#include "io/basic_ifstrstream.hpp"
+#include "io/ifstrstream.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "utils/TypeContainer.hpp"
 #include "utils/Tuple.hpp"

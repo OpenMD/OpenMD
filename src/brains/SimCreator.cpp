@@ -76,6 +76,7 @@
 #include "antlr/NoViableAltException.hpp"
 
 #ifdef IS_MPI
+#include "mpi.h"
 #include "math/ParallelRandNumGen.hpp"
 #endif
 

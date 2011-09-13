@@ -45,6 +45,10 @@
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
 #include "utils/StringUtils.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
   ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(info), infiniteTime(1e31) {
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();

@@ -44,6 +44,9 @@
 #include "minimizers/CGFamilyMinimizer.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Utility.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace OpenMD {
 

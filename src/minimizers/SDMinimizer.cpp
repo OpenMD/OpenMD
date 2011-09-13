@@ -41,6 +41,10 @@
  
 #include "minimizers/SDMinimizer.hpp"
 #include "utils/Utility.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 
 namespace OpenMD {
   SDMinimizer::SDMinimizer(SimInfo* info) : Minimizer(info) {

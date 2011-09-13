@@ -46,6 +46,9 @@
 #include "math/AlphaHull.hpp"
 #include "math/Triangle.hpp"
 #include "math/CholeskyDecomposition.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace OpenMD {
 

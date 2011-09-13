@@ -40,6 +40,10 @@
  */
  
 #include "minimizers/PRCG.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
 	
   void PRCGMinimizer::init(){
