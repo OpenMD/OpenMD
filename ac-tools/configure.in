@@ -1,6 +1,6 @@
 dnl **** Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.59)
-AC_INIT(OpenMD, 1.0, gezelter@nd.edu, openmd)
+AC_PREREQ(2.68)
+AC_INIT(OpenMD, 2.0, gezelter@nd.edu)
 AC_CONFIG_AUX_DIR(ac-tools)
 AC_CONFIG_SRCDIR([src/applications/openmd/openmd.cpp])
 AC_CONFIG_HEADER([src/config.h])
@@ -105,75 +105,26 @@ if test "$AR" = "NONE"; then
   AC_CACHE_SAVE
   exit 1
 fi
-AC_PATH_PROG(PS, ps)
-AC_CACHE_CHECK([for POSIX or BSD ps syntax], ac_cv_prog_ps_syntax, [
-	if $PS ax -o rss > /dev/null 2>&1; then
-		ac_cv_prog_ps_ax=yes
-	else
-		ac_cv_prog_ps_ax=no
-	fi
-	if $PS -ef -o rss > /dev/null 2>&1; then
-		ac_cv_prog_ps_ef=yes
-	else
-		ac_cv_prog_ps_ef=no
-	fi
-	if test "$ac_cv_prog_ps_ax" = yes; then
-		ac_cv_prog_ps_syntax=BSD
-        else
-		if test "$ac_cv_prog_ps_ef" = yes; then
-			ac_cv_prog_ps_syntax=POSIX
-		else
-			AC_MSG_ERROR(Could not determine ps syntax)
-		fi
-	fi
-])
-AC_DEFINE_UNQUOTED(PSCOMMAND, $PS, [Path to ps program])
-if test "$ac_cv_prog_ps_syntax" = BSD; then
-  AC_DEFINE(PSTYPE_IS_BSD, 1, [ps uses BSD-style arguments])
-else
-   if test "$ac_cv_prog_ps_syntax" = POSIX; then
-       AC_DEFINE(PSTYPE_IS_POSIX, 1, [ps uses POSIX-style arguments])
-   else
-       AC_MSG_ERROR(Unknown ps syntax type!)
-   fi
-fi
-
-AC_LANG_C
 
 dnl Checks for libraries.
-AC_CHECK_LIB(m, asin, , exit)
 ACX_CHECK_ZLIB
 ACX_CHECK_FFTW
 ACX_CHECK_QHULL
 ACX_CHECK_OPENBABEL
 
 # Checks for header files.
-AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h limits.h machine/hal_sysinfo.h stdlib.h string.h strings.h sys/param.h sys/pstat.h sys/sysctl.h sys/sysinfo.h sys/sysmp.h sys/systemcfg.h sys/table.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([limits.h stdlib.h string.h sys/ioctl.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
-AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
 
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([floor getpagesize gettimeofday memset pow pstat_getdynamic pstat_getstatic select sqrt strcasecmp strchr strdup stricmp strncasecmp strnicmp strstr strtol sysmp getsysinfo sysctl table])
-
-# special check for _system_configuration because AIX <4.3.2 do not
-# contain the `physmem' member.
-AC_MSG_CHECKING([for external symbol _system_configuration])
-AC_TRY_COMPILE([#include <sys/systemcfg.h>],
-               [double x = _system_configuration.physmem;],
-  [AC_MSG_RESULT([yes])
-  AC_DEFINE(HAVE__SYSTEM_CONFIGURATION, 1,
-            [Define if you have the _system_configuration variable.])],
-  [AC_MSG_RESULT([no])])
+AC_CHECK_FUNCS([atexit floor pow select sqrt strcasecmp strchr strdup strncasecmp strstr strtol strtoull])
 
 dnl check for strong optimization options
 
