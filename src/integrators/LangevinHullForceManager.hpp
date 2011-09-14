@@ -39,8 +39,8 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef INTEGRATOR_SMIPDFORCEMANAGER_HPP
-#define INTEGRATOR_SMIPDFORCEMANAGER_HPP
+#ifndef INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
+#define INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
 
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
@@ -53,16 +53,16 @@
 namespace OpenMD {
    
   /**
-   * @class SMIDForceManager
-   * Force manager for Surface Mesh Implicit Pressure Dynamics
+   * @class LangevinHullForceManager
+   * Force manager for NPT Langevin Hull Dynamics
    * applying friction and random forces as well as torques. 
    * Stochasitc force is determined by area of surface triangles 
    * on the convex hull. See: Kohanoff et al. CHEMPHYSCHEM 2005, 6, 1848-1852.
    */
-  class SMIPDForceManager : public ForceManager{
+  class LangevinHullForceManager : public ForceManager{
     
   public:
-    SMIPDForceManager(SimInfo * info);
+    LangevinHullForceManager(SimInfo * info);
     
   protected:
     virtual void postCalculation();
@@ -97,5 +97,5 @@ namespace OpenMD {
   };
   
 } //end namespace OpenMD
-#endif //SIMPD_FORCEMANAGER
+#endif //LANGEVINHULL_FORCEMANAGER
 

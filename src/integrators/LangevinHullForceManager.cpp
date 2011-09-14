@@ -40,7 +40,7 @@
  */
 #include <fstream> 
 #include <iostream>
-#include "integrators/SMIPDForceManager.hpp"
+#include "integrators/LangevinHullForceManager.hpp"
 #include "utils/PhysicalConstants.hpp"
 #include "math/ConvexHull.hpp"
 #include "math/AlphaHull.hpp"
@@ -52,7 +52,7 @@
 
 namespace OpenMD {
 
-  SMIPDForceManager::SMIPDForceManager(SimInfo* info) : ForceManager(info) {
+  LangevinHullForceManager::LangevinHullForceManager(SimInfo* info) : ForceManager(info) {
     
     simParams = info->getSimParams();
     veloMunge = new Velocitizer(info);
@@ -69,7 +69,7 @@ namespace OpenMD {
     
     std::map<std::string, HullTypeEnum>::iterator iter;
     iter = stringToEnumMap_.find(ht);
-    hullType_ = (iter == stringToEnumMap_.end()) ? SMIPDForceManager::hullUnknown : iter->second;
+    hullType_ = (iter == stringToEnumMap_.end()) ? LangevinHullForceManager::hullUnknown : iter->second;
     if (hullType_ == hullUnknown) {
       std::cerr << "WARNING! Hull Type Unknown!\n";
     }
@@ -90,7 +90,7 @@ namespace OpenMD {
     
     if (!simParams->haveTargetTemp()) {
       sprintf(painCave.errMsg, 
-              "SMIPDynamics error: You can't use the SMIPD integrator\n"
+              "LangevinHullDynamics error: You can't use the Langevin Hull integrator\n"
 	      "\twithout a targetTemp (K)!\n");      
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
@@ -101,7 +101,7 @@ namespace OpenMD {
     
     if (!simParams->haveTargetPressure()) {
       sprintf(painCave.errMsg, 
-              "SMIPDynamics error: You can't use the SMIPD integrator\n"
+              "LangevinHullDynamics error: You can't use the Langevin Hull integrator\n"
 	      "\twithout a targetPressure (atm)!\n");      
       painCave.isFatal = 1;
       simError();
@@ -113,7 +113,7 @@ namespace OpenMD {
    
     if (simParams->getUsePeriodicBoundaryConditions()) {
       sprintf(painCave.errMsg, 
-              "SMIPDynamics error: You can't use the SMIPD integrator\n"
+              "LangevinHullDynamics error: You can't use the Langevin Hull integrator\n"
               "\twith periodic boundary conditions!\n");    
       painCave.isFatal = 1;
       simError();
@@ -121,7 +121,7 @@ namespace OpenMD {
     
     if (!simParams->haveViscosity()) {
       sprintf(painCave.errMsg, 
-              "SMIPDynamics error: You can't use the SMIPD integrator\n"
+              "LangevinHullDynamics error: You can't use the Langevin Hull integrator\n"
 	      "\twithout a viscosity!\n");
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
@@ -151,7 +151,7 @@ namespace OpenMD {
     }   
   }  
    
-  void SMIPDForceManager::postCalculation(){
+  void LangevinHullForceManager::postCalculation(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -214,7 +214,7 @@ namespace OpenMD {
   }
   
   
-  std::vector<Vector3d> SMIPDForceManager::genTriangleForces(int nTriangles, 
+  std::vector<Vector3d> LangevinHullForceManager::genTriangleForces(int nTriangles, 
                                                              RealType variance)
   {
     

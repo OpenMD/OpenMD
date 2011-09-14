@@ -55,6 +55,7 @@
 #include "selection/SelectionManager.hpp"
 #include <iostream>
 
+using namespace std;
 namespace OpenMD {
 
   /**
@@ -76,9 +77,10 @@ namespace OpenMD {
       exchangeTime_ = exchangeTime;
     }
     void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
-    RealType get_RNEMD_exchange_total() { return exchangeSum_; }
+    void set_RNEMD_logWidth(int logWidth) { rnemdLogWidth_ = logWidth; }
     void set_RNEMD_exchange_total(RealType et) { exchangeSum_ = et; }
     void set_RNEMD_target_flux(RealType targetFlux) {targetFlux_ = targetFlux;}
+    RealType get_RNEMD_exchange_total() { return exchangeSum_; }
 
   private:
 
@@ -96,27 +98,34 @@ namespace OpenMD {
     
     SimInfo* info_;
     RandNumGen* randNumGen_;
-    std::map<std::string, RNEMDTypeEnum> stringToEnumMap_;
+    map<string, RNEMDTypeEnum> stringToEnumMap_;
     RNEMDTypeEnum rnemdType_;
-    std::string rnemdObjectSelection_;
+    string rnemdObjectSelection_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
-    int nBins_;
+    bool output3DTemp_;
+    int nBins_; /**< The number of bins to divide the simulation box into.  */
+    /*!
+      The middle bin for the RNEMD method. midBin_ = nBins_/2;
+      Depending on the setting of the flux, this box should contain the minimum energy (temperature)
+      within the simulation. 
+    */
     int midBin_;
-    int rnemdLogWidth_;
+    int rnemdLogWidth_; /**< Number of elements to print out in logs */
+    RealType zShift_;
     RealType exchangeTime_;
     RealType targetFlux_;
     RealType exchangeSum_;
     int failTrialCount_;
     int failRootCount_;
-    std::ofstream rnemdLog_;
+    ofstream rnemdLog_;
     // keeps track of what's being averaged
-    std::vector<RealType> valueHist_;
-    std::vector<int> valueCount_;
+    vector<RealType> valueHist_;
+    vector<int> valueCount_, xyzTempCount_;
     // keeps track of the number of degrees of freedom being averaged
-    std::vector<RealType> xTempHist_, yTempHist_, zTempHist_;
-    std::ofstream xTempLog_, yTempLog_, zTempLog_;
+    vector<RealType> xTempHist_, yTempHist_, zTempHist_;
+    ofstream xTempLog_, yTempLog_, zTempLog_;
   };
 
 }

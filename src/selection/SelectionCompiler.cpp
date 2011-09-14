@@ -572,6 +572,7 @@ namespace OpenMD {
       // fall into the code and below and just add the token
     case Token::all:
     case Token::none:
+    case Token::hull:
       return addTokenToPostfix(tokenNext());
     case Token::leftparen:
       tokenNext();

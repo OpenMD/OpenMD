@@ -119,6 +119,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
+  DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);
@@ -131,6 +132,8 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_exchangeType, "RNEMD_exchangeType", "KineticScale");
   DefineOptionalParameterWithDefaultValue(RNEMD_targetFlux, "RNEMD_targetFlux", 0.0);
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
+  DefineOptionalParameterWithDefaultValue(RNEMD_binShift, "RNEMD_binShift", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputDimensionalTemperature, "RNEMD_outputDimensionalTemperature", false);
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
@@ -160,7 +163,7 @@ void Globals::validate() {
 
   CheckParameter(ForceField, isNotEmpty());
   CheckParameter(TargetTemp, isPositive());
-  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT") || isEqualIgnoreCase("SMIPD"));
+  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPTsz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT") || isEqualIgnoreCase("LANGEVINHULL") || isEqualIgnoreCase("LHULL") || isEqualIgnoreCase("SMIPD"));
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
   CheckParameter(FinalConfig, isNotEmpty());
@@ -206,7 +209,6 @@ void Globals::validate() {
   CheckParameter(RNEMD_exchangeTime, isPositive());
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
   CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale"));
-  CheckParameter(RNEMD_targetFlux, isNonNegative());
   CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
   CheckParameter(Alpha, isPositive()); 
 

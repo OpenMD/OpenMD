@@ -13,6 +13,7 @@ MySource    = \
 	NPTi.cpp \
 	NPTf.cpp \
 	NPTxyz.cpp \
+	NPTsz.cpp \
 	NPAT.cpp \
 	NPrT.cpp \
 	NgammaT.cpp \
@@ -22,7 +23,7 @@ MySource    = \
 USE_QHULL = @USE_QHULL@
 
 ifeq "$(USE_QHULL)" "yes"
-	Source  = $(MySource) SMIPDForceManager.cpp SMIPDynamics.cpp
+	Source  = $(MySource) LangevinHullForceManager.cpp LangevinHullDynamics.cpp
 else
 	Source = $(MySource) 
 endif

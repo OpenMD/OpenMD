@@ -41,6 +41,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #ifdef IS_MPI

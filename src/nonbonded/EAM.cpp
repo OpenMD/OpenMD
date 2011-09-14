@@ -362,15 +362,14 @@ namespace OpenMD {
     if (haveCutoffRadius_) 
       if ( *(idat.rij) > eamRcut_) return;
     
-    if ( *(idat.rij) < data1.rcut) {
+    if ( *(idat.rij) < data1.rcut) 
       *(idat.rho1) += data1.rho->getValueAt( *(idat.rij));
+    
       
-      
-      if ( *(idat.rij) < data2.rcut) 
-        *(idat.rho2) += data2.rho->getValueAt( *(idat.rij));
-      
-      return;
-    }
+    if ( *(idat.rij) < data2.rcut) 
+      *(idat.rho2) += data2.rho->getValueAt( *(idat.rij));
+    
+    return;  
   }
   
   void EAM::calcFunctional(SelfData &sdat) {
@@ -395,13 +394,10 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
 
-
-
     if (haveCutoffRadius_) 
       if ( *(idat.rij) > eamRcut_) return;
    
     pair<RealType, RealType> res;
-    
     
     EAMAtomData data1 = EAMMap[idat.atypes.first];
     EAMAtomData data2 = EAMMap[idat.atypes.second];

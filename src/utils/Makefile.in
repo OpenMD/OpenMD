@@ -11,9 +11,7 @@ MySource    = \
 	MoLocator.cpp \
 	wildcards.cpp \
 	ElementsTable.cpp \
-	ProgressBar.cpp \
-	residentMem.c\
-	physmem.c
+	ProgressBar.cpp
 
 LibObjs = @LIBOBJS@
 

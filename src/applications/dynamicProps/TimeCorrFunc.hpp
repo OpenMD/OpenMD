@@ -61,7 +61,8 @@ namespace OpenMD {
   class TimeCorrFunc {
   public:
     TimeCorrFunc(SimInfo* info, const std::string& filename, 
-		 const std::string& sele1, const std::string& sele2, int storageLayout);
+		 const std::string& sele1, const std::string& sele2,
+                 int storageLayout, long long int memSize);
         
     void doCorrelate();
 
@@ -97,10 +98,11 @@ namespace OpenMD {
     int nTimeBins_;
     std::vector<RealType> histogram_;
     std::vector<int> count_;
-     std::vector<RealType> time_;
+    std::vector<RealType> time_;
         
     SimInfo* info_;
     int storageLayout_;
+    long long int memSize_;
     std::string dumpFilename_;        
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;          

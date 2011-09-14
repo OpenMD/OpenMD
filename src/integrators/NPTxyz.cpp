@@ -62,6 +62,10 @@ namespace OpenMD {
     
   RealType NPTxyz::calcConservedQuantity(){
 
+    chi= currentSnapshot_->getChi();
+    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    loadEta();
+
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
     // orientational degrees of freedom:

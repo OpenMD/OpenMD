@@ -62,13 +62,15 @@ namespace OpenMD {
   // recalculate pressures and actions on the fly:
   EnergyCorrFunc::EnergyCorrFunc(SimInfo* info, const std::string& filename, 
 				 const std::string& sele1, 
-				 const std::string& sele2)
+				 const std::string& sele2,
+                                 long long int memSize)
     : FrameTimeCorrFunc(info, filename, sele1, sele2, 
 			DataStorage::dslPosition | 
 			DataStorage::dslVelocity |
 			DataStorage::dslForce |
 			DataStorage::dslTorque |			
-			DataStorage::dslParticlePot			){
+			DataStorage::dslParticlePot,
+			memSize){
 
       setCorrFuncType("EnergyCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".moment");
@@ -77,6 +79,22 @@ namespace OpenMD {
     }
 
   void EnergyCorrFunc::correlateFrames(int frame1, int frame2) {
+    SimInfo::MoleculeIterator mi1;
+    SimInfo::MoleculeIterator mi2;
+    Molecule::IntegrableObjectIterator mj1;
+    Molecule::IntegrableObjectIterator mj2;
+    Molecule* mol1;
+    Molecule* mol2;
+    Molecule::AtomIterator ai1;
+    Molecule::AtomIterator ai2;
+    Atom* atom1;
+    Atom* atom2;
+    std::vector<RealType> particleEnergies1;
+    std::vector<RealType> particleEnergies2;
+    std::vector<Vector3d> atomPositions1;
+    std::vector<Vector3d> atomPositions2;
+    int thisAtom1, thisAtom2;
+
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot1 && snapshot2);
@@ -86,22 +104,64 @@ namespace OpenMD {
        
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
 
-    Vector3d G_t_frame1 = G_t_[frame1];
-    Vector3d G_t_frame2 = G_t_[frame2];
-    
-    
-    RealType diff_x = G_t_frame1.x()-G_t_frame2.x();
-    RealType diff_x_sq = diff_x * diff_x;
-    
-    RealType diff_y = G_t_frame1.y()-G_t_frame2.y();
-    RealType diff_y_sq = diff_y * diff_y;
-    
-    RealType diff_z = G_t_frame1.z()-G_t_frame2.z();
-    RealType diff_z_sq = diff_z*diff_z;    
-    
-    histogram_[timeBin][0] += diff_x_sq;
-    histogram_[timeBin][1] += diff_y_sq;
-    histogram_[timeBin][2] += diff_z_sq;
+    // now do the correlation
+
+    particleEnergies1 = E_a_[frame1];
+    particleEnergies2 = E_a_[frame2];
+
+    updateFrame(frame1);       
+    atomPositions1.clear();
+    for (mol1 = info_->beginMolecule(mi1); mol1 != NULL; 
+         mol1 = info_->nextMolecule(mi1)) {
+      for(atom1 = mol1->beginAtom(ai1); atom1 != NULL; 
+          atom1 = mol1->nextAtom(ai1)) {        
+        atomPositions1.push_back(atom1->getPos(frame1));
+      }
+    }
+    updateFrame(frame2);       
+    atomPositions2.clear();
+    for (mol2 = info_->beginMolecule(mi2); mol2 != NULL; 
+         mol2 = info_->nextMolecule(mi2)) {
+      for(atom2 = mol2->beginAtom(ai2); atom2 != NULL; 
+          atom2 = mol2->nextAtom(ai2)) {        
+        atomPositions2.push_back(atom2->getPos(frame2));
+      }
+    }
+
+    thisAtom1 = 0;
+
+    for (mol1 = info_->beginMolecule(mi1); mol1 != NULL; 
+         mol1 = info_->nextMolecule(mi1)) {
+      for(atom1 = mol1->beginAtom(ai1); atom1 != NULL; 
+          atom1 = mol1->nextAtom(ai1)) {
+        
+        Vector3d r1 = atomPositions1[thisAtom1];
+        RealType energy1 = particleEnergies1[thisAtom1] - AvgE_a_[thisAtom1];
+
+        thisAtom2 = 0;
+
+        for (mol2 = info_->beginMolecule(mi2); mol2 != NULL; 
+             mol2 = info_->nextMolecule(mi2)) {
+          for(atom2 = mol2->beginAtom(ai2); atom2 != NULL; 
+              atom2 = mol2->nextAtom(ai2)) {
+            
+            Vector3d r2 = atomPositions2[thisAtom2];
+            RealType energy2 = particleEnergies2[thisAtom2] - AvgE_a_[thisAtom2];
+
+            Vector3d deltaPos = (r2-r1);            
+            RealType Eprod = energy2*energy1;
+            
+            histogram_[timeBin][0] += deltaPos.x()*deltaPos.x() * Eprod;
+            histogram_[timeBin][1] += deltaPos.y()*deltaPos.y() * Eprod;
+            histogram_[timeBin][2] += deltaPos.z()*deltaPos.z() * Eprod;
+                                           
+            thisAtom2++;                    
+          }
+        }
+        
+        thisAtom1++;
+      } 
+    }
     
     count_[timeBin]++;
     
@@ -130,8 +190,6 @@ namespace OpenMD {
 
     // We'll need the force manager to compute forces for the average pressure
     ForceManager* forceMan = new ForceManager(info_);
-
-    forceMan->initialize();
 
     // We'll need thermo to compute the pressures from the virial
     Thermo* thermo =  new Thermo(info_);
@@ -169,10 +227,10 @@ namespace OpenMD {
              mol = info_->nextMolecule(mi)) {
           for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
             RealType mass = atom->getMass();
-            Vector3d vel = atom->getVel();
+            Vector3d vel = atom->getVel(j);
             RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
                                        vel[2]*vel[2]) / PhysicalConstants::energyConvert;
-            RealType potential =  atom->getParticlePot();
+            RealType potential =  atom->getParticlePot(j);
             RealType eatom = (kinetic + potential)/2.0;
             particleEnergies.push_back(eatom);
             if(firsttime)
@@ -197,49 +255,8 @@ namespace OpenMD {
       AvgE_a_[i] /= nframes;
     }
     
-    int frame = 0;
-    
-    // Do it again to compute G^(kappa)(t) for x,y,z
-    for (int i = 0; i < nblocks; ++i) {
-      bsMan_->loadBlock(i);
-      assert(bsMan_->isBlockActive(i));      
-      SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
-      for (int j = block1.first; j < block1.second; ++j) {
-
-	// go snapshot-by-snapshot through this block:
-        Snapshot* snap = bsMan_->getSnapshot(j);
-        
-        // update the positions and velocities of the atoms belonging
-        // to rigid bodies:
-        
-        updateFrame(j);        
-
-        // this needs to be updated to the frame value:
-        particleEnergies = E_a_[j];
-        
-        int thisAtom = 0;
-        Vector3d G_t;
-        
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-          for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-                        
-            Vector3d pos = atom->getPos();
-
-            G_t[0] += pos.x()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-            G_t[1] += pos.y()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-            G_t[2] += pos.z()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-            
-            thisAtom++;                    
-          }
-        }
-
-        G_t_.push_back(G_t);
-        //std::cerr <<"Frame: " << j <<"\t" << G_t << std::endl;
-      } 
-      bsMan_->unloadBlock(i);
-    }
-  }   
+  }
+  
 
 
   void EnergyCorrFunc::writeCorrelate() {

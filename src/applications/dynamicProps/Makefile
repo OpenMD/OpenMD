@@ -13,8 +13,11 @@ Source    = \
             LegendreCorrFunc.cpp \
 	    RadialRCorrFunc.cpp \
 	    ThetaCorrFunc.cpp \
+	    MomentumCorrFunc.cpp \
 	    EnergyCorrFunc.cpp \
-            DirectionalRCorrFunc.cpp
+            DirectionalRCorrFunc.cpp \
+	    StressCorrFunc.cpp \
+	    SystemDipoleCorrFunc.cpp 
 
 BuiltParallelExe = 0
 

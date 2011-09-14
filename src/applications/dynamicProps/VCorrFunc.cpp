@@ -42,8 +42,8 @@
 #include "applications/dynamicProps/VCorrFunc.hpp"
 
 namespace OpenMD {
-  VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslVelocity){
+  VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslVelocity, memSize){
 
       setCorrFuncType("Velocity Correlation Function");
       setOutputName(getPrefix(dumpFilename_) + ".vcorr");

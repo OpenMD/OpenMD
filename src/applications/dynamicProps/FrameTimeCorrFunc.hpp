@@ -48,7 +48,8 @@ namespace OpenMD {
   class FrameTimeCorrFunc : public TimeCorrFunc {
   public:
     FrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
-		      const std::string& sele1, const std::string& sele2, int storageLayout);
+		      const std::string& sele1, const std::string& sele2, 
+                      int storageLayout, long long int memSize);
   private:        
     virtual void correlateFrames(int frame1, int frame2);
     virtual RealType calcCorrVal(int frame1, int frame2) = 0;

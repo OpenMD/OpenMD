@@ -57,9 +57,9 @@ namespace OpenMD {
       ShiftedMorse,
       LennardJones,
       RepulsiveMorse,
+      RepulsivePower,
       MAW,
       Buckingham,
-      RepulsivePower,
       Unknown
     };
             

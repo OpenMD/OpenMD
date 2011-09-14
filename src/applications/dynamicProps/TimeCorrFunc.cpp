@@ -47,10 +47,11 @@ namespace OpenMD {
 
   TimeCorrFunc::TimeCorrFunc(SimInfo* info, const string& filename, 
 			     const string& sele1, const string& sele2,
-                             int storageLayout)
-    : info_(info), storageLayout_(storageLayout), dumpFilename_(filename), 
-      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), 
-      evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+                             int storageLayout, long long int memSize)
+    : info_(info), storageLayout_(storageLayout), memSize_(memSize),
+      dumpFilename_(filename), selectionScript1_(sele1), 
+      selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
+      seleMan1_(info), seleMan2_(info) {
     
     int nAtoms = info->getNGlobalAtoms();
     int nRigidBodies = info->getNGlobalRigidBodies();
@@ -82,7 +83,7 @@ namespace OpenMD {
       storageLayout_ |= DataStorage::dslElectroFrame;
     }
     
-    bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_);
+    bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, memSize_);
     info_->setSnapshotManager(bsMan_);
     
     evaluator1_.loadScriptString(selectionScript1_);

@@ -102,24 +102,24 @@ namespace OpenMD {
     const static int endofline         = 9;
     const static int endofstatement    = 10;
 
-    const static int command           = (1 <<  8);
-    const static int expressionCommand = (1 <<  9); // expression command
-    const static int expression        = (1 << 10); /// expression term
+    const static int command           = (1 <<  11);
+    const static int expressionCommand = (1 <<  12); // expression command
+    const static int expression        = (1 << 13); /// expression term
 
     // generally, the minus sign is used to denote atom ranges
     // this property is used for the few commands which allow negative integers
-    const static int negnums      = (1 << 11);
+    const static int negnums      = (1 << 14);
 
     //expression involves coordinates which will change every frame, such as withins
-    const static int dynamic        = (1 << 12);
+    const static int dynamic        = (1 << 15);
 
     // every property is also valid in an expression context
-    const static int atomproperty      = (1 << 12) | expression | negnums;
+    const static int atomproperty      = (1 << 16) | expression | negnums;
     // every predefined is also valid in an expression context
-    const static int comparator        = (1 << 13) | expression;
-    const static int predefinedset     = (1 << 14) | expression;
-    const  static int embeddedExpression= (1 << 15); // embedded expression
-    const static int index = (1 << 16) | expression;
+    const static int comparator        = (1 << 17) | expression;
+    const static int predefinedset     = (1 << 18) | expression;
+    const  static int embeddedExpression= (1 << 19); // embedded expression
+    const static int index = (1 << 20) | expression;
     // rasmol commands
     const static int define       = command | expressionCommand |1;
     const static int select       = command |expressionCommand |2 ;
@@ -153,13 +153,14 @@ namespace OpenMD {
     const static int x            = atomproperty | dynamic | 2;
     const static int y            = atomproperty | dynamic | 3;
     const static int z            = atomproperty | dynamic | 4;
+    const static int r            = atomproperty | dynamic | 5;
         
-    const static int opGT         = comparator |  0;
-    const static int opGE         = comparator |  1;
-    const static int opLE         = comparator |  2;
-    const static int opLT         = comparator |  3;
-    const static int opEQ         = comparator |  4;
-    const static int opNE         = comparator |  5;
+    const static int opGT         = comparator |  dynamic | 0;
+    const static int opGE         = comparator |  dynamic | 1;
+    const static int opLE         = comparator |  dynamic | 2;
+    const static int opLT         = comparator |  dynamic | 3;
+    const static int opEQ         = comparator |  dynamic | 4;
+    const static int opNE         = comparator |  dynamic | 5;
  
     static Token tokenExpressionBegin;
     static Token tokenExpressionEnd;

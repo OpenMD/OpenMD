@@ -18,11 +18,16 @@ Source    = \
 	Hxy.cpp \
         RippleOP.cpp \
 	BondOrderParameter.cpp \
+	TetrahedralityParam.cpp \
 	BOPofR.cpp \
 	RhoR.cpp \
+	AngleR.cpp \
 	BondAngleDistribution.cpp \
 	pAngle.cpp \
-	NanoVolume.cpp
+	ObjectCount.cpp \
+	NanoVolume.cpp \
+	NanoLength.cpp
+
 BuiltParallelExe = 0
 
 RmiSource =

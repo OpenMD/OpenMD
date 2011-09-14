@@ -49,12 +49,13 @@
 #include "integrators/NPTi.hpp"
 #include "integrators/NPTf.hpp"
 #include "integrators/NPTxyz.hpp"
+#include "integrators/NPTsz.hpp"
 #include "integrators/NPAT.hpp"
 #include "integrators/NPrT.hpp"
 #include "integrators/NgammaT.hpp"
 #include "integrators/LangevinDynamics.hpp"
 #if defined(HAVE_QHULL)
-#include "integrators/SMIPDynamics.hpp"
+#include "integrators/LangevinHullDynamics.hpp"
 #endif
 
 #include "minimizers/MinimizerFactory.hpp"
@@ -63,6 +64,7 @@
 #include "minimizers/SDMinimizer.hpp"
 #include "UseTheForce/DUFF.hpp"
 #include "UseTheForce/EAM_FF.hpp"
+#include "UseTheForce/EADM_FF.hpp"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "UseTheForce/SHAPES_FF.hpp"
@@ -85,6 +87,7 @@ namespace OpenMD {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
     //in theory, EAM can also be merged
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
+    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EADM_FF>("EADM"));
     //heck, that worked...  let's try merging SHAPES
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
     //Well if EAM worked... then Sutton-Chen should work like a CHARMM(Hopefully not).
@@ -110,7 +113,9 @@ namespace OpenMD {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LD"));
 #if defined(HAVE_QHULL)
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<SMIPDynamics>("SMIPD"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
 #endif
   }
 

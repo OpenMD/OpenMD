@@ -46,6 +46,7 @@
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
+#include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
 #include "applications/dynamicProps/DynamicPropsCmd.h"
@@ -57,6 +58,10 @@
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
+#include "applications/dynamicProps/StressCorrFunc.hpp"
+#include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
+#include "applications/dynamicProps/MomentumCorrFunc.hpp"
+
 
 
 using namespace OpenMD;
@@ -106,26 +111,41 @@ int main(int argc, char* argv[]){
     }
   }
 
+  // use the memory string to figure out how much memory we can use:
+  char *end;
+  long long int memSize = memparse(args_info.memory_arg, &end);
+  sprintf( painCave.errMsg,
+           "Amount of memory being used: %llu bytes\n", memSize);
+  painCave.severity = OPENMD_INFO;
+  painCave.isFatal = 0;
+  simError();     
+
   //parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
 
   TimeCorrFunc* corrFunc;
-  if (args_info.dcorr_given){
-    corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
+  if(args_info.sdcorr_given){
+    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.dcorr_given){
+    corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.rcorr_given) {
-    corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
+    corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.r_rcorr_given) {
-    corrFunc = new RadialRCorrFunc(info, dumpFileName, sele1, sele2);
+    corrFunc = new RadialRCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.thetacorr_given) {
-    corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2);
+    corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.drcorr_given) {
-    corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2);
+    corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.vcorr_given) {
-    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
+    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
   } else if (args_info.helfandEcorr_given){
-    corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2);  
+    corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.stresscorr_given){
+    corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.momentum_given){
+    corrFunc = new MomentumCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.lcorr_given) {
     int order;
     if (args_info.order_given)
@@ -138,7 +158,7 @@ int main(int argc, char* argv[]){
       simError();
     }
         
-    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order); 
+    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order, memSize); 
   }
 
   if (args_info.output_given) {

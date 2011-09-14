@@ -5,6 +5,7 @@ Source    = \
         ForceFieldFactory.cpp \
         DUFF.cpp \
 	EAM_FF.cpp \
+	EADM_FF.cpp \
 	SHAPES_FF.cpp \
 	SC_FF.cpp \
 	MnM_FF.cpp \

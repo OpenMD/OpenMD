@@ -217,33 +217,65 @@ namespace OpenMD {
   std::string getSuffix(const std::string& str) {
     return str.substr(0, str.find('.'));
   }
-
-bool isInteger(const std::string& str) {
-
+  
+  bool isInteger(const std::string& str) {
+    
     bool result = false;
-
+    
     std::string::const_iterator i = str.begin();    
     if (i != str.end() && (*i == '+' || *i == '-' || std::isdigit(*i) )) {
-        ++i;        
-        while (i != str.end() && std::isdigit(*i))
-            ++i;
-        if (i == str.end())
-            result = true;
+      ++i;        
+      while (i != str.end() && std::isdigit(*i))
+        ++i;
+      if (i == str.end())
+        result = true;
     }
     
     return result;
-}
+  }
 
-bool CaseInsensitiveEquals(const char ch1, const char ch2) {
-  return std::toupper((unsigned char)ch1) == std::toupper((unsigned char)ch2);
-}
-
-size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
-  std::string::const_iterator pos = std::search(str1.begin(), str1.end(), str2.begin(), str2.end(), CaseInsensitiveEquals);
-  if (pos == str1.end())
-    return std::string::npos;
-  else
-    return pos - str1.begin();
-}
-
+  bool CaseInsensitiveEquals(const char ch1, const char ch2) {
+    return std::toupper((unsigned char)ch1) == std::toupper((unsigned char)ch2);
+  }
+  
+  size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
+    std::string::const_iterator pos = std::search(str1.begin(), str1.end(), str2.begin(), str2.end(), CaseInsensitiveEquals);
+    if (pos == str1.end())
+      return std::string::npos;
+    else
+      return pos - str1.begin();
+  }
+  
+  /**
+   *    memparse - parse a string with mem suffixes into a number
+   *    @ptr: Where parse begins
+   *    @retptr: (output) Pointer to next char after parse completes
+   *
+   *    Parses a string into a number.  The number stored at @ptr is
+   *    potentially suffixed with %K (for kilobytes, or 1024 bytes),
+   *    %M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
+   *    1073741824).  If the number is suffixed with K, M, or G, then
+   *    the return value is the number multiplied by one kilobyte, one
+   *    megabyte, or one gigabyte, respectively.
+   */  
+  unsigned long long memparse (char *ptr,  char **retptr) {
+    unsigned long long ret = strtoull (ptr, retptr, 0);
+    
+    switch (**retptr) {
+    case 'G':
+    case 'g':
+      ret <<= 10;
+    case 'M':
+    case 'm':
+      ret <<= 10;
+    case 'K':
+    case 'k':
+      ret <<= 10;
+      (*retptr)++;
+    default:
+      break;
+    }
+    return ret;
+  }
+  
 }

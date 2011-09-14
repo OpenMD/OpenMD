@@ -40,33 +40,37 @@
  */
 #include <algorithm>
 #include "brains/BlockSnapshotManager.hpp"
-#include "utils/residentMem.h"
-#include "utils/physmem.h"
+//#include "utils/residentMem.h"
+//#include "utils/physmem.h"
 #include "utils/Algorithm.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 
 namespace OpenMD {
-  BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& filename, 
-					     int storageLayout, int blockCapacity) 
-    : SnapshotManager(storageLayout), info_(info), blockCapacity_(blockCapacity), 
-      activeBlocks_(blockCapacity_, -1), activeRefCount_(blockCapacity_, 0) {
+  BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, 
+                                             const std::string& filename, 
+					     int storageLayout,
+                                             long long int memSize,
+                                             int blockCapacity) 
+    : SnapshotManager(storageLayout), info_(info), memSize_(memSize), 
+      blockCapacity_(blockCapacity), activeBlocks_(blockCapacity_, -1), 
+      activeRefCount_(blockCapacity_, 0) {
 
       nAtoms_ = info->getNGlobalAtoms();
       nRigidBodies_ = info->getNGlobalRigidBodies();
       nCutoffGroups_ = info->getNCutoffGroups();
 
-      RealType physMem = physmem_total();
-      RealType rssMem = residentMem();
-      RealType avaliablePhysMem = physMem - rssMem;
-
+      // eliminate suspect calls to figure out free memory:
+      // RealType physMem = physmem_total();
+      // RealType rssMem = residentMem();
+      // RealType avaliablePhysMem = physMem - rssMem;
     
       int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
-
       int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
 
       // total number of frames that can fit in memory
-      RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
+      //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
+      RealType frameCapacity = memSize_ / bytesPerFrame;
 
       // number of frames in each block given the need to hold multiple blocks 
       // in memory at the same time:
@@ -89,9 +93,10 @@ namespace OpenMD {
       std::cout << "-----------------------------------------------------"<<std::endl;
       std::cout << "BlockSnapshotManager memory report:" << std::endl;
       std::cout << "\n";
-      std::cout << "  Physical Memory available:\t" << (unsigned long)physMem <<  " bytes" <<std::endl;
-      std::cout << "     Resident Memory in use:\t" << (unsigned long)rssMem << " bytes" <<std::endl;
-      std::cout << "Memory available for OpenMD:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
+      // std::cout << "  Physical Memory available:\t" << (unsigned long)physMem <<  " bytes" <<std::endl;
+      //std::cout << "     Resident Memory in use:\t" << (unsigned long)rssMem << " bytes" <<std::endl;
+      //std::cout << "Memory available for OpenMD:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
+      std::cout << "Memory requested for OpenMD:\t" << (unsigned long)memSize_ << " bytes" <<std::endl;
       std::cout << "      Bytes per StuntDouble:\t" << (unsigned long)bytesPerStuntDouble <<std::endl;
       std::cout << "            Bytes per Frame:\t" << (unsigned long)bytesPerFrame <<std::endl;
       std::cout << "             Frame Capacity:\t" << (unsigned long)frameCapacity <<std::endl;

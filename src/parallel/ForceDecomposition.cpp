@@ -92,8 +92,7 @@ namespace OpenMD {
     sdat.atype = atypesLocal[atom1];
 
     sdat.pot = &embeddingPot;
-        
-    // Still Missing skippedCharge
+
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);
     }

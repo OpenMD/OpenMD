@@ -44,19 +44,36 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-
-  P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : StaticAnalyser(info, filename),
-      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info){
-
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
+                                     const string& sele1)
+    : StaticAnalyser(info, filename), doVect_(true),
+      selectionScript1_(sele1), evaluator1_(info), 
+      evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+    
     setOutputName(getPrefix(filename) + ".p2");
-        
+    
+    evaluator1_.loadScriptString(sele1);
+    
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+  }
+
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
+                                     const string& sele1, const string& sele2)
+    : StaticAnalyser(info, filename), doVect_(false),
+      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), 
+      evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+    
+    setOutputName(getPrefix(filename) + ".p2");
+    
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);
-
+    
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }else {
@@ -66,7 +83,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();  
     }
-
+    
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }else {
@@ -76,16 +93,16 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();  
     }
-
+    
     if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
       sprintf( painCave.errMsg,
                "The number of selected Stuntdoubles are not the same in --sele1 and sele2\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();  
-
+      
     }
-
+    
     int i;
     int j;
     StuntDouble* sd1;
@@ -94,10 +111,8 @@ namespace OpenMD {
          sd1 != NULL && sd2 != NULL;
          sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
-      sdPairs_.push_back(std::make_pair(sd1, sd2));
-    }
-
-    
+      sdPairs_.push_back(make_pair(sd1, sd2));
+    } 
   }
 
   void P2OrderParameter::process() {
@@ -105,6 +120,8 @@ namespace OpenMD {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
+    StuntDouble* sd;
+    int i, ii;
   
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -112,30 +129,54 @@ namespace OpenMD {
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+             rb = mol->nextRigidBody(rbIter)) {
           rb->updateAtoms();
-        }
-        
+        }        
       }      
 
       Mat3x3d orderTensor(0.0);
-      for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-        Vector3d vec = j->first->getPos() - j->second->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(vec);
-        vec.normalize();
-        orderTensor +=outProduct(vec, vec);
+
+      if (doVect_) {
+        
+        if  (evaluator1_.isDynamic()) 
+          seleMan1_.setSelectionSet(evaluator1_.evaluate());
+        
+        for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
+             sd = seleMan1_.nextSelected(ii)) {
+          if (sd->isDirectional()) {
+            Vector3d vec = sd->getA().getColumn(2);
+            vec.normalize();
+            orderTensor += outProduct(vec, vec);
+          }
+        }
+  
+        orderTensor /= seleMan1_.getSelectionCount();
+
+      } else {
+            
+        for (vector<pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); 
+             j != sdPairs_.end(); ++j) {
+          Vector3d vec = j->first->getPos() - j->second->getPos();
+          if (usePeriodicBoundaryConditions_)
+            currentSnapshot_->wrapVector(vec);
+          vec.normalize();
+          orderTensor +=outProduct(vec, vec);
+        }
+      
+        orderTensor /= sdPairs_.size();
       }
       
-      orderTensor /= sdPairs_.size();
+
       orderTensor -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
       
       Vector3d eigenvalues;
       Mat3x3d eigenvectors;    
+
       Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
       
       int which;
@@ -155,15 +196,28 @@ namespace OpenMD {
       }   
 
       RealType angle = 0.0;
-      for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-        Vector3d vec = j->first->getPos() - j->second->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(vec);
-        vec.normalize();
-
-        angle += acos(dot(vec, director)) ;
+      
+      if (doVect_) {
+        for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
+             sd = seleMan1_.nextSelected(ii)) {
+          if (sd->isDirectional()) {
+            Vector3d vec = sd->getA().getColumn(2);
+            vec.normalize();
+            angle += acos(dot(vec, director));
+          }
+        }
+        angle = angle/(seleMan1_.getSelectionCount()*NumericConstant::PI)*180.0;
+        
+      } else {
+        for (vector<pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
+          Vector3d vec = j->first->getPos() - j->second->getPos();
+          if (usePeriodicBoundaryConditions_)
+            currentSnapshot_->wrapVector(vec);
+          vec.normalize();          
+          angle += acos(dot(vec, director)) ;
+        }
+        angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
       }
-      angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
 
       OrderParam param;
       param.p2 = p2;
@@ -173,20 +227,22 @@ namespace OpenMD {
       orderParams_.push_back(param);       
     
     }
-
+    
     writeP2();
-  
+    
   }
 
   void P2OrderParameter::writeP2() {
 
-    std::ofstream os(getOutputFileName().c_str());
+    ofstream os(getOutputFileName().c_str());
     os << "#radial distribution function\n";
     os<< "#selection1: (" << selectionScript1_ << ")\t";
-    os << "selection2: (" << selectionScript2_ << ")\n";
+    if (!doVect_) {
+      os << "selection2: (" << selectionScript2_ << ")\n";
+    }
     os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";    
 
-    for (std::size_t i = 0; i < orderParams_.size(); ++i) {
+    for (size_t i = 0; i < orderParams_.size(); ++i) {
       os <<  orderParams_[i].p2 << "\t"
          <<  orderParams_[i].director[0] << "\t"
          <<  orderParams_[i].director[1] << "\t"

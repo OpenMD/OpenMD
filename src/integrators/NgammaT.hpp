@@ -55,8 +55,8 @@ namespace OpenMD {
 
   /**
    * @class NgammaT
-   * Constant lateral surface area integrator
-   * @note Ikeguchi M.,J. Comput Chem, 25:529-542, 2004
+   * Constant lateral surface tension integrator
+   * @note Ikeguchi M., J. Comput Chem, 25:529-542, 2004
    */
   class NgammaT : public NPT{
   public:

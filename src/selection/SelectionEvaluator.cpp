@@ -278,6 +278,9 @@ namespace OpenMD {
     case Token::z:
       propertyValue = sd->getPos().z();
       break;
+    case Token::r:
+      propertyValue = sd->getPos().length();
+      break;
     default:
       unrecognizedAtomProperty(property);
     }

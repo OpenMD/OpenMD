@@ -7,26 +7,11 @@
 /* Is defined if OpenMD should be compiled with single precision arithmetic. */
 #undef SINGLE_PRECISION
 
-/* define if fstream::open() accepts third parameter. */
-#undef FSTREAM_OPEN_PROT
-
 /* Is defined if the qhull library is available. */
 #undef HAVE_QHULL
 
-/* Define to 1 if the system has the type `clock_t'. */
-#undef HAVE_CLOCK_T
-
-/* Define to 1 if you have the <cmath> header file. */
-#undef HAVE_CMATH
-
 /* Define to 1 if you have the <conio.h> header file. */
 #undef HAVE_CONIO_H
-
-/* Define to 1 if you have the <ctype.h> header file. */
-#undef HAVE_CTYPE_H
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
 
 /* define if fftw3.h exists */
 #undef HAVE_FFTW3_H
@@ -37,154 +22,20 @@
 /* define if dfftw.h exists */
 #undef HAVE_DFFTW_H
 
-/* Define to 1 if you have the `floor' function. */
-#undef HAVE_FLOOR
-
-/* Define to 1 if you have the `getpagesize' function. */
-#undef HAVE_GETPAGESIZE
-
-/* Define to 1 if you have the `getsysinfo' function. */
-#undef HAVE_GETSYSINFO
-
-/* Define to 1 if you have the `gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
-
-/* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* Define to 1 if you have the <libintl.h> header file. */
-#undef HAVE_LIBINTL_H
-
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
-
-/* Define to 1 if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
-
-/* Define to 1 if you have the <machine/hal_sysinfo.h> header file. */
-#undef HAVE_MACHINE_HAL_SYSINFO_H
-
-/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
-   to 0 otherwise. */
-#undef HAVE_MALLOC
-
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
-
-/* Define to 1 if you have the `pow' function. */
-#undef HAVE_POW
-
-/* Define to 1 if you have the `pstat_getdynamic' function. */
-#undef HAVE_PSTAT_GETDYNAMIC
-
-/* Define to 1 if you have the `pstat_getstatic' function. */
-#undef HAVE_PSTAT_GETSTATIC
-
-/* Define to 1 if your system has a GNU libc compatible `realloc' function,
-   and to 0 otherwise. */
-#undef HAVE_REALLOC
-
-/* Define to 1 if you have the `select' function. */
-#undef HAVE_SELECT
-
-/* Define to 1 if you have the `sqrt' function. */
-#undef HAVE_SQRT
-
-/* Define to 1 if stdbool.h conforms to C99. */
-#undef HAVE_STDBOOL_H
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
 
 /* Define to 1 if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
 
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
-
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
-
 /* Define to 1 if you have the `stricmp' function. */
 #undef HAVE_STRICMP
-
-/* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
-
-/* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
 
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
 
 /* Define to 1 if you have the `strnicmp' function. */
 #undef HAVE_STRNICMP
-
-/* Define to 1 if you have the `strstr' function. */
-#undef HAVE_STRSTR
-
-/* Define to 1 if you have the `strtol' function. */
-#undef HAVE_STRTOL
-
-/* Define to 1 if you have the `sysctl' function. */
-#undef HAVE_SYSCTL
-
-/* Define to 1 if you have the `sysmp' function. */
-#undef HAVE_SYSMP
-
-/* Define to 1 if you have the <sys/param.h> header file. */
-#undef HAVE_SYS_PARAM_H
-
-/* Define to 1 if you have the <sys/pstat.h> header file. */
-#undef HAVE_SYS_PSTAT_H
-
-/* Define to 1 if you have the <sys/select.h> header file. */
-#undef HAVE_SYS_SELECT_H
-
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#undef HAVE_SYS_SOCKET_H
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/sysctl.h> header file. */
-#undef HAVE_SYS_SYSCTL_H
-
-/* Define to 1 if you have the <sys/sysinfo.h> header file. */
-#undef HAVE_SYS_SYSINFO_H
-
-/* Define to 1 if you have the <sys/sysmp.h> header file. */
-#undef HAVE_SYS_SYSMP_H
-
-/* Define to 1 if you have the <sys/systemcfg.h> header file. */
-#undef HAVE_SYS_SYSTEMCFG_H
-
-/* Define to 1 if you have the <sys/table.h> header file. */
-#undef HAVE_SYS_TABLE_H
-
-/* Define to 1 if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
-
-/* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the `table' function. */
-#undef HAVE_TABLE
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
-
-/* Define to 1 if the system has the type `_Bool'. */
-#undef HAVE__BOOL
-
-/* Define if you have the _system_configuration variable. */
-#undef HAVE__SYSTEM_CONFIGURATION
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -200,30 +51,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* Path to ps program */
-#undef PSCOMMAND
-
-/* ps uses BSD-style arguments */
-#undef PSTYPE_IS_BSD
-
-/* ps uses POSIX-style arguments */
-#undef PSTYPE_IS_POSIX
-
-/* Define to the type of arg 1 for `select'. */
-#undef SELECT_TYPE_ARG1
-
-/* Define to the type of args 2, 3 and 4 for `select'. */
-#undef SELECT_TYPE_ARG234
-
-/* Define to the type of arg 5 for `select'. */
-#undef SELECT_TYPE_ARG5
-
-/* Define to 1 if you have the ANSI C header files. */
-#undef STDC_HEADERS
-
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#undef TIME_WITH_SYS_TIME
 
 /* needed by DEC/Compaq/HP cxx to activate ANSI standard iostream. */
 #undef __USE_STD_IOSTREAM
