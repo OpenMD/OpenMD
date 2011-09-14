@@ -26,41 +26,26 @@ available in the "samples" directory.
 
 What you need to compile and use OpenMD:
 
- 1) Good C, C++ and Fortran95 compilers.  We've built and tested OpenMD
+ 1) Good C++ and C compilers.  We've built and tested OpenMD
     on the following architecture & compiler combinations:
 
-    Architecture                CC     CXX     F90     Notes
-    -------------------------   ----   -----   -----   ----------------------
-    ix86-pc-linux-gnu           icc    icpc    ifort	(Intel v. 10)
-    i686-apple-darwin10.0.0     gcc    g++     gfortran	(GNU v.4.3)
-    i686-apple-darwin10.0.0     icc    icpc    ifort	(Intel v. 11)
-    x86_64-unknown-linux-gnu    gcc    g++     pathf95	(Pathscale 3.2)
-
-    OpenMD uses features of the Fortran 95 language. The fortran
-    portions of our code will not compile if your compiler does not
-    support these particular features. Some (but not all) Fortran 90
-    compilers do support these features.
-
-    Compilers that are known to fail on OpenMD: g77, older versions of
-    gfortran, older Portland Group compilers (pgf77, pgf90).
-
-    Compilers that are known to work on OpenMD: Intel's ifort,
-    Pathscale's pathf95, IBM's xlf95, Portland-F¢s pgf95 (version 6 or-A
-    higher), Sun's f95. There may be others that work also.
+    Architecture                CC     CXX     Notes
+    -------------------------   ----   -----   ----------------------
+    ix86-pc-linux-gnu           icc    icpc    (Intel v. 10)
+    i386-apple-darwin11.1.0     gcc    g++     (GNU v.4.3)
+    i386-apple-darwin11.1.0     icc    icpc    (Intel v. 12)
+    x86_64-unknown-linux-gnu    gcc    g++     (Pathscale 3.2)
 
  2) GNU make (also known as gmake).  Regular make won't work.  
     Really.  We've tried.  Don't bother with regular make.  
     Seriously.  You need GNU make.  Did we mention that you 
     need GNU make?
 
- 3) Perl.  Compilation dependencies in Fortran95 are somewhat
-    complicated, so the build process uses a perl script called
-    filepp to do this job.  You need perl for filepp, so you
-    need perl to build OpenMD.
+ 3) Perl.
 
  4) MPI-2 is optional for the single processor version of OpenMD, but
     is required if you want OpenMD to run in parallel. We like
-    OpenMPI. Other implementations of MPI-2 might work, but we haven-F¢t-A
+    OpenMPI. Other implementations of MPI-2 might work, but we haven't
     tried.   You can get Open MPI here: http://www.open-mpi.org/
 
 INSTRUCTIONS
