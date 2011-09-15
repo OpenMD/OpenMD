@@ -162,7 +162,6 @@ namespace OpenMD {
 
     // We'll need the force manager to compute forces for the average pressure
     ForceManager* forceMan = new ForceManager(info_);
-    forceMan->init();
 
     // We'll need thermo to compute the pressures from the virial
     Thermo* thermo =  new Thermo(info_);
@@ -190,7 +189,7 @@ namespace OpenMD {
         updateFrame(j);
 
 	// do the forces:
-	forceMan->calcForces(true, true);
+	forceMan->calcForces();
 	// call thermo to get the pressure and volume.
         pSum += thermo->getPressure();
         vSum += thermo->getVolume();

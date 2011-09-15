@@ -11,8 +11,7 @@ component{
 
 ensemble = NVE;
 forceField = "Amber";
-cutoffMethod = "shifted_potential";
-electrostaticSummationMethod = "hard";
+electrostaticSummationMethod = "none";
 electrostaticScreeningMethod = "undamped";
 dampingAlpha = 0.25;
 cutoffRadius = 9.0;
@@ -31,7 +30,7 @@ useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 100;
+sampleTime = 1000;
 statusTime = 2;
   </MetaData>
   <Snapshot>

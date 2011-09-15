@@ -1,60 +1,219 @@
-set(BRAINSSOURCE ../src/brains/PairList.cpp ../src/brains/SimInfo.cpp ../src/brains/DataStorage.cpp ../src/brains/SimSnapshotManager.cpp ../src/brains/Snapshot.cpp ../src/brains/Stats.cpp ../src/brains/Thermo.cpp ../src/brains/ForceManager.cpp ../src/brains/MoleculeCreator.cpp ../src/brains/SimCreator.cpp ../src/brains/Register.cpp ../src/brains/BlockSnapshotManager.cpp)
-
-set(NONBONDEDSOURCE ../src/nonbonded/EAM.cpp
-../src/nonbonded/InteractionManager.cpp ../src/nonbonded/Morse.cpp
+set(SOURCE
+../src/antlr/ANTLRUtil.cpp
+../src/antlr/ASTFactory.cpp
+../src/antlr/ASTNULLType.cpp
+../src/antlr/ASTRefCount.cpp
+../src/antlr/BaseAST.cpp
+../src/antlr/BitSet.cpp
+../src/antlr/CharBuffer.cpp
+../src/antlr/CharScanner.cpp
+../src/antlr/CommonAST.cpp
+../src/antlr/CommonASTWithHiddenTokens.cpp
+../src/antlr/CommonHiddenStreamToken.cpp
+../src/antlr/CommonToken.cpp
+../src/antlr/InputBuffer.cpp
+../src/antlr/LLkParser.cpp
+../src/antlr/MismatchedCharException.cpp
+../src/antlr/MismatchedTokenException.cpp
+../src/antlr/NoViableAltException.cpp
+../src/antlr/NoViableAltForCharException.cpp
+../src/antlr/Parser.cpp
+../src/antlr/RecognitionException.cpp
+../src/antlr/String.cpp
+../src/antlr/Token.cpp
+../src/antlr/TokenBuffer.cpp
+../src/antlr/TokenRefCount.cpp
+../src/antlr/TokenStreamBasicFilter.cpp
+../src/antlr/TokenStreamHiddenTokenFilter.cpp
+../src/antlr/TokenStreamRewriteEngine.cpp
+../src/antlr/TokenStreamSelector.cpp
+../src/antlr/TreeParser.cpp
+../src/brains/BlockSnapshotManager.cpp
+../src/brains/DataStorage.cpp
+../src/brains/ForceManager.cpp
+../src/brains/MoleculeCreator.cpp
+../src/brains/PairList.cpp
+../src/brains/Register.cpp
+../src/brains/SimCreator.cpp
+../src/brains/SimInfo.cpp
+../src/brains/SimSnapshotManager.cpp
+../src/brains/Snapshot.cpp
+../src/brains/Stats.cpp
+../src/brains/Thermo.cpp
+../src/constraints/Rattle.cpp
+../src/constraints/ZconstraintForceManager.cpp
+../src/hydrodynamics/Ellipsoid.cpp
+../src/hydrodynamics/HydroProp.cpp
+../src/hydrodynamics/Sphere.cpp
+../src/integrators/DLM.cpp
+../src/integrators/Integrator.cpp
+../src/integrators/IntegratorFactory.cpp
+../src/integrators/LangevinDynamics.cpp
+../src/integrators/LDForceManager.cpp
+../src/integrators/NgammaT.cpp
+../src/integrators/NPAT.cpp
+../src/integrators/NPrT.cpp
+../src/integrators/NPT.cpp
+../src/integrators/NPTf.cpp
+../src/integrators/NPTi.cpp
+../src/integrators/NPTsz.cpp
+../src/integrators/NPTxyz.cpp
+../src/integrators/NVE.cpp
+../src/integrators/NVT.cpp
+../src/integrators/RNEMD.cpp
+../src/integrators/Velocitizer.cpp
+../src/integrators/VelocityVerletIntegrator.cpp
+../src/io/AtomTypesSectionParser.cpp
+../src/io/BaseAtomTypesSectionParser.cpp
+../src/io/BendTypesSectionParser.cpp
+../src/io/BondTypesSectionParser.cpp
+../src/io/ChargeAtomTypesSectionParser.cpp
+../src/io/DirectionalAtomTypesSectionParser.cpp
+../src/io/DumpReader.cpp
+../src/io/DumpWriter.cpp
+../src/io/EAMAtomTypesSectionParser.cpp
+../src/io/ForceFieldOptions.cpp
+../src/io/GayBerneAtomTypesSectionParser.cpp
+../src/io/Globals.cpp
+../src/io/gzstream.cpp
+../src/io/ifstrstream.cpp
+../src/io/InversionTypesSectionParser.cpp
+../src/io/LennardJonesAtomTypesSectionParser.cpp
+../src/io/MultipoleAtomTypesSectionParser.cpp
+../src/io/NonBondedInteractionsSectionParser.cpp
+../src/io/OptionSectionParser.cpp
+../src/io/ParamConstraint.cpp
+../src/io/RestReader.cpp
+../src/io/RestWriter.cpp
+../src/io/SCAtomTypesSectionParser.cpp
+../src/io/SectionParser.cpp
+../src/io/SectionParserManager.cpp
+../src/io/ShapeAtomTypesSectionParser.cpp
+../src/io/StatWriter.cpp
+../src/io/StickyAtomTypesSectionParser.cpp
+../src/io/StickyPowerAtomTypesSectionParser.cpp
+../src/io/TorsionTypesSectionParser.cpp
+../src/io/ZConsReader.cpp
+../src/io/ZConsWriter.cpp
+../src/lattice/CubicLattice.cpp
+../src/lattice/FCCLattice.cpp
+../src/lattice/Lattice.cpp
+../src/lattice/LatticeFactory.cpp
+../src/lattice/shapedLattice.cpp
+../src/math/ChebyshevT.cpp
+../src/math/ChebyshevU.cpp
+../src/math/CubicSpline.cpp
+../src/math/LegendrePolynomial.cpp
+../src/math/ParallelRandNumGen.cpp
+../src/math/RealSphericalHarmonic.cpp
+../src/math/RMSD.cpp
+../src/math/SeqRandNumGen.cpp
+../src/math/SphericalHarmonic.cpp
+../src/math/Wigner3jm.cpp
+../src/mdParser/FilenameObserver.cpp
+../src/mdParser/MDLexer.cpp
+../src/mdParser/MDParser.cpp
+../src/mdParser/MDTreeParser.cpp
+../src/minimizers/CGFamilyMinimizer.cpp
+../src/minimizers/Minimizer.cpp
+../src/minimizers/MinimizerFactory.cpp
+../src/minimizers/MinimizerParameterSet.cpp
+../src/minimizers/PRCG.cpp
+../src/minimizers/SDMinimizer.cpp
+../src/nonbonded/EAM.cpp
 ../src/nonbonded/Electrostatic.cpp
-../src/nonbonded/LJ.cpp ../src/nonbonded/RepulsivePower.cpp
-../src/nonbonded/Sticky.cpp ../src/nonbonded/GB.cpp
-../src/nonbonded/MAW.cpp ../src/nonbonded/SC.cpp
-../src/nonbonded/SwitchingFunction.cpp )
-
-set(PARALLELSOURCE ../src/parallel/ForceDecomposition.cpp
-../src/parallel/ForceMatrixDecomposition.cpp )
-
-set(USETHEFORCESOURCE  ../src/UseTheForce/ForceField.cpp ../src/UseTheForce/ForceFieldFactory.cpp ../src/UseTheForce/DUFF.cpp ../src/UseTheForce/EAM_FF.cpp ../src/UseTheForce/SHAPES_FF.cpp ../src/UseTheForce/SC_FF.cpp ../src/UseTheForce/MnM_FF.cpp ../src/UseTheForce/Amber_FF.cpp ../src/UseTheForce/CLAYFF.cpp)
-
-
-set(UTILSSOURCE  ../src/utils/PropertyMap.cpp ../src/utils/simError.c ../src/utils/StringUtils.cpp ../src/utils/StringTokenizer.cpp ../src/utils/Utility.cpp ../src/utils/Trim.cpp ../src/utils/OpenMDBitSet.cpp ../src/utils/MoLocator.cpp ../src/utils/wildcards.cpp ../src/utils/ElementsTable.cpp ../src/utils/ProgressBar.cpp ../src/utils/residentMem.c ../src/utils/physmem.c)
-
-set(MATHSOURCE ../src/math/ParallelRandNumGen.cpp
-../src/math/SeqRandNumGen.cpp ../src/math/RealSphericalHarmonic.cpp
-../src/math/SphericalHarmonic.cpp ../src/math/ChebyshevT.cpp
-../src/math/ChebyshevU.cpp ../src/math/LegendrePolynomial.cpp
-../src/math/RMSD.cpp ../src/math/CubicSpline.cpp
-../src/math/Wigner3jm.cpp )
-
-set(ANTLRSOURCE ../src/antlr/ANTLRUtil.cpp    ../src/antlr/ASTFactory.cpp ../src/antlr/ASTNULLType.cpp ../src/antlr/ASTRefCount.cpp ../src/antlr/BaseAST.cpp ../src/antlr/BitSet.cpp ../src/antlr/CharBuffer.cpp ../src/antlr/CharScanner.cpp ../src/antlr/CommonAST.cpp ../src/antlr/CommonASTWithHiddenTokens.cpp ../src/antlr/CommonHiddenStreamToken.cpp ../src/antlr/CommonToken.cpp ../src/antlr/InputBuffer.cpp ../src/antlr/LLkParser.cpp ../src/antlr/MismatchedCharException.cpp ../src/antlr/MismatchedTokenException.cpp ../src/antlr/NoViableAltException.cpp ../src/antlr/NoViableAltForCharException.cpp ../src/antlr/Parser.cpp ../src/antlr/RecognitionException.cpp ../src/antlr/String.cpp ../src/antlr/TokenBuffer.cpp ../src/antlr/Token.cpp ../src/antlr/TokenRefCount.cpp ../src/antlr/TokenStreamBasicFilter.cpp ../src/antlr/TokenStreamHiddenTokenFilter.cpp ../src/antlr/TokenStreamRewriteEngine.cpp ../src/antlr/TokenStreamSelector.cpp ../src/antlr/TreeParser.cpp)
-
-set(CONSTRAINTSOURCE ../src/constraints/Rattle.cpp ../src/constraints/ZconstraintForceManager.cpp)
-
-set(HYDRODYNAMICSSOURCE ../src/hydrodynamics/HydroProp.cpp ../src/hydrodynamics/Sphere.cpp ../src/hydrodynamics/Ellipsoid.cpp)
-
-set(INTEGRATORSOURCE ../src/integrators/Integrator.cpp ../src/integrators/IntegratorFactory.cpp ../src/integrators/Velocitizer.cpp ../src/integrators/RNEMD.cpp ../src/integrators/VelocityVerletIntegrator.cpp ../src/integrators/DLM.cpp ../src/integrators/NVE.cpp ../src/integrators/NVT.cpp ../src/integrators/NPT.cpp ../src/integrators/NPTi.cpp ../src/integrators/NPTf.cpp ../src/integrators/NPTxyz.cpp ../src/integrators/NPAT.cpp ../src/integrators/NPrT.cpp ../src/integrators/NgammaT.cpp ../src/integrators/LDForceManager.cpp ../src/integrators/LangevinDynamics.cpp ../src/integrators/)
-
-set(IOSOURCE ../src/io/ifstrstream.cpp ../src/io/AtomTypesSectionParser.cpp ../src/io/BaseAtomTypesSectionParser.cpp ../src/io/DirectionalAtomTypesSectionParser.cpp ../src/io/SectionParser.cpp ../src/io/EAMAtomTypesSectionParser.cpp ../src/io/SectionParserManager.cpp ../src/io/ChargeAtomTypesSectionParser.cpp ../src/io/MultipoleAtomTypesSectionParser.cpp ../src/io/StickyAtomTypesSectionParser.cpp ../src/io/GayBerneAtomTypesSectionParser.cpp ../src/io/TorsionTypesSectionParser.cpp ../src/io/InversionTypesSectionParser.cpp ../src/io/StickyPowerAtomTypesSectionParser.cpp ../src/io/ShapeAtomTypesSectionParser.cpp ../src/io/LennardJonesAtomTypesSectionParser.cpp ../src/io/SCAtomTypesSectionParser.cpp ../src/io/NonBondedInteractionsSectionParser.cpp ../src/io/BondTypesSectionParser.cpp ../src/io/BendTypesSectionParser.cpp ../src/io/Globals.cpp ../src/io/DumpReader.cpp ../src/io/DumpWriter.cpp ../src/io/StatWriter.cpp ../src/io/ZConsReader.cpp ../src/io/ZConsWriter.cpp ../src/io/RestReader.cpp ../src/io/RestWriter.cpp ../src/io/gzstream.cpp ../src/io/ParamConstraint.cpp ../src/io/OptionSectionParser.cpp ../src/io/ForceFieldOptions.cpp)
-
-set(LATTICESOURCE ../src/lattice/Lattice.cpp ../src/lattice/CubicLattice.cpp ../src/lattice/FCCLattice.cpp ../src/lattice/LatticeFactory.cpp ../src/lattice/shapedLattice.cpp)
-
-set(MDPARSERSOURCE ../src/mdParser/FilenameObserver.cpp ../src/mdParser/MDParser.cpp ../src/mdParser/MDLexer.cpp ../src/mdParser/MDTreeParser.cpp)
-
-set(MINIMIZERSOURCE ../src/minimizers/MinimizerParameterSet.cpp ../src/minimizers/Minimizer.cpp ../src/minimizers/MinimizerFactory.cpp ../src/minimizers/CGFamilyMinimizer.cpp ../src/minimizers/PRCG.cpp ../src/minimizers/SDMinimizer.cpp)
-
-set(PRIMITIVESOURCE   ../src/primitives/StuntDouble.cpp ../src/primitives/Atom.cpp ../src/primitives/DirectionalAtom.cpp ../src/primitives/RigidBody.cpp ../src/primitives/Molecule.cpp ../src/primitives/Bend.cpp ../src/primitives/GhostBend.cpp ../src/primitives/Torsion.cpp ../src/primitives/Inversion.cpp ../src/primitives/GhostTorsion.cpp ../src/primitives/UreyBradleyBend.cpp )
-
-
-set(RESTRAINTSOURCE  ../src/restraints/ObjectRestraint.cpp ../src/restraints/MolecularRestraint.cpp ../src/restraints/RestraintForceManager.cpp ../src/restraints/ThermoIntegrationForceManager.cpp)
-
-set(SELECTIONSOURCE   ../src/selection/SelectionToken.cpp ../src/selection/TokenMap.cpp ../src/selection/SelectionCompiler.cpp ../src/selection/SelectionEvaluator.cpp ../src/selection/NameFinder.cpp ../src/selection/DistanceFinder.cpp  ../src/selection/HullFinder.cpp ../src/selection/IndexFinder.cpp ../src/selection/SelectionManager.cpp)
-
-set(TYPESSOURCE  ../src/types/AtomStamp.cpp ../src/types/AtomType.cpp ../src/types/BendStamp.cpp  ../src/types/BondStamp.cpp ../src/types/Component.cpp ../src/types/CutoffGroupStamp.cpp ../src/types/MoleculeStamp.cpp ../src/types/RigidBodyStamp.cpp ../src/types/TorsionStamp.cpp ../src/types/InversionStamp.cpp ../src/types/ZconsStamp.cpp ../src/types/RestraintStamp.cpp ../src/types/AtomType.cpp ../src/types/DirectionalAtomType.cpp ../src/types/ShapeAtomType.cpp ../src/types/CharmmTorsionType.cpp ../src/types/ImproperCosineInversionType.cpp ../src/types/NonBondedInteractionType.cpp ../src/types/FragmentStamp.cpp)
-
-set(VISITORSOURCE ../src/visitors/AtomVisitor.cpp ../src/visitors/ReplacementVisitor.cpp ../src/visitors/CompositeVisitor.cpp ../src/visitors/OtherVisitor.cpp ../src/visitors/RigidBodyVisitor.cpp ../src/visitors/ZconsVisitor.cpp ../src/visitors/LipidTransVisitor.cpp ../src/visitors/AtomNameVisitor.cpp)
+../src/nonbonded/GB.cpp
+../src/nonbonded/InteractionManager.cpp
+../src/nonbonded/LJ.cpp
+../src/nonbonded/MAW.cpp
+../src/nonbonded/Morse.cpp
+../src/nonbonded/RepulsivePower.cpp
+../src/nonbonded/SC.cpp
+../src/nonbonded/Sticky.cpp
+../src/nonbonded/SwitchingFunction.cpp
+../src/parallel/ForceDecomposition.cpp
+../src/parallel/ForceMatrixDecomposition.cpp
+../src/primitives/Atom.cpp
+../src/primitives/Bend.cpp
+../src/primitives/DirectionalAtom.cpp
+../src/primitives/GhostBend.cpp
+../src/primitives/GhostTorsion.cpp
+../src/primitives/Inversion.cpp
+../src/primitives/Molecule.cpp
+../src/primitives/RigidBody.cpp
+../src/primitives/StuntDouble.cpp
+../src/primitives/Torsion.cpp
+../src/primitives/UreyBradleyBend.cpp
+../src/restraints/MolecularRestraint.cpp
+../src/restraints/ObjectRestraint.cpp
+../src/restraints/RestraintForceManager.cpp
+../src/restraints/ThermoIntegrationForceManager.cpp
+../src/selection/DistanceFinder.cpp
+../src/selection/HullFinder.cpp
+../src/selection/IndexFinder.cpp
+../src/selection/NameFinder.cpp
+../src/selection/SelectionCompiler.cpp
+../src/selection/SelectionEvaluator.cpp
+../src/selection/SelectionManager.cpp
+../src/selection/SelectionToken.cpp
+../src/selection/TokenMap.cpp
+../src/types/AtomStamp.cpp
+../src/types/AtomType.cpp
+../src/types/BendStamp.cpp
+../src/types/BondStamp.cpp
+../src/types/CharmmTorsionType.cpp
+../src/types/Component.cpp
+../src/types/CutoffGroupStamp.cpp
+../src/types/DirectionalAtomType.cpp
+../src/types/FragmentStamp.cpp
+../src/types/ImproperCosineInversionType.cpp
+../src/types/InversionStamp.cpp
+../src/types/MoleculeStamp.cpp
+../src/types/NonBondedInteractionType.cpp
+../src/types/RestraintStamp.cpp
+../src/types/RigidBodyStamp.cpp
+../src/types/ShapeAtomType.cpp
+../src/types/TorsionStamp.cpp
+../src/types/ZconsStamp.cpp
+../src/UseTheForce/Amber_FF.cpp
+../src/UseTheForce/CLAYFF.cpp
+../src/UseTheForce/DUFF.cpp
+../src/UseTheForce/EADM_FF.cpp
+../src/UseTheForce/EAM_FF.cpp
+../src/UseTheForce/ForceField.cpp
+../src/UseTheForce/ForceFieldFactory.cpp
+../src/UseTheForce/MnM_FF.cpp
+../src/UseTheForce/SC_FF.cpp
+../src/UseTheForce/SHAPES_FF.cpp
+../src/utils/ElementsTable.cpp
+../src/utils/MoLocator.cpp
+../src/utils/OpenMDBitSet.cpp
+../src/utils/ProgressBar.cpp
+../src/utils/PropertyMap.cpp
+../src/utils/StringTokenizer.cpp
+../src/utils/StringUtils.cpp
+../src/utils/Trim.cpp
+../src/utils/Utility.cpp
+../src/utils/wildcards.cpp
+../src/visitors/AtomNameVisitor.cpp
+../src/visitors/AtomVisitor.cpp
+../src/visitors/CompositeVisitor.cpp
+../src/visitors/LipidTransVisitor.cpp
+../src/visitors/OtherVisitor.cpp
+../src/visitors/ReplacementVisitor.cpp
+../src/visitors/RigidBodyVisitor.cpp
+../src/visitors/ZconsVisitor.cpp
+../src/utils/simError.c
+)
 
 IF(QHULL_FOUND)
-  set(QHULLSRC ../src/integrators/SMIPDForceManager.cpp ../src/integrators/SMIPDynamics.cpp ../src/math/ConvexHull.cpp ../src/math/AlphaHull.cpp ../src/math/Triangle.cpp)
+set(QHULLSRC 
+../src/integrators/LangevinHullForceManager.cpp 
+../src/integrators/LangevinHullDynamics.cpp 
+../src/math/ConvexHull.cpp 
+../src/math/AlphaHull.cpp 
+../src/math/Triangle.cpp
+)
 ENDIF(QHULL_FOUND)
 
-add_library(openmd SHARED ${UTILSSOURCE} ${MATHSOURCE} ${ANTLRSOURCE}
-${DEBUGSOURCE} ${CONSTRAINTSOURCE} ${HYDRODYNAMICSSOURCE}
-${INTEGRATORSOURCE} ${BRAINSSOURCE} ${IOSOURCE} ${USETHEFORCESOURCE}
-${DARKSIDESOURCE} ${NONBONDEDSOURCE} ${PARALLELSOURCE} ${LATTICESOURCE} ${LATTICESOURCE} ${MDPARSERSOURCE} ${PRIMITIVESOURCE} ${MINIMIZERSOURCE} ${PROFILINGSOURCE} ${RESTRAINTSOURCE} ${SELECTIONSOURCE} ${TYPESSOURCE} ${VISITORSOURCE} ${QHULLSRC} )
+add_library(openmd SHARED ${SOURCE} ${QHULLSRC} )

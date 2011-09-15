@@ -75,7 +75,6 @@
 #endif
 #include "applications/staticProps/RhoR.hpp"
 #include "applications/staticProps/AngleR.hpp"
-#include "applications/staticProps/RhoAngleR.hpp"
 #include "applications/staticProps/TetrahedralityParam.hpp"
 
 using namespace OpenMD;

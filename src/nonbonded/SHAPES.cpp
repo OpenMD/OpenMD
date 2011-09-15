@@ -85,22 +85,23 @@ namespace OpenMD {
     // add it to the map:
     AtomTypeProperties atp = atomType->getATP();    
 
-    pair<map<int,ShapeAtomType*>::iterator, bool> ret;
-    ret = shapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, atomType));
-    if (ret.second == false) {
-      sprintf( painCave.errmsg,
-               "SHAPES already had a previous entry with ident %d\n",
-               atp.ident);
-      painCave.severity = OPENMD_INFO;
-      painCave.isFatal = 0;
-      simError();         
-    }   
-    
-    ShapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, sAtomType) );
-    
-  } else if (atomType->isLennardJones()) {
-      d1 = getLJSigma(atomType) / sqrt(2.0);
-      e1 = getLJEpsilon(atomType);
+    if (atomType->isShape() ) {
+      pair<map<int,ShapeAtomType*>::iterator, bool> ret;
+      ret = ShapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, atomType));
+      if (ret.second == false) {
+        sprintf( painCave.errMsg,
+                 "SHAPES already had a previous entry with ident %d\n",
+                 atp.ident);
+        painCave.severity = OPENMD_INFO;
+        painCave.isFatal = 0;
+        simError();         
+      }   
+      
+      ShapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, static_cast<ShapeAtomType*>(atomType)) );
+      
+    } else if (atomType->isLennardJones()) {
+      RealType d1 = getLJSigma(atomType) / sqrt(2.0);
+      RealType e1 = getLJEpsilon(atomType);
     } else {
       sprintf( painCave.errMsg,
                "SHAPES::addType was passed an atomType (%s) that does not\n"
