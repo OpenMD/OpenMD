@@ -30,18 +30,13 @@ set(SOURCE
 ../src/antlr/TreeParser.cpp
 ../src/brains/BlockSnapshotManager.cpp
 ../src/brains/DataStorage.cpp
-../src/brains/ForceManager.cpp
 ../src/brains/MoleculeCreator.cpp
 ../src/brains/PairList.cpp
 ../src/brains/Register.cpp
-../src/brains/SimCreator.cpp
-../src/brains/SimInfo.cpp
 ../src/brains/SimSnapshotManager.cpp
 ../src/brains/Snapshot.cpp
 ../src/brains/Stats.cpp
-../src/brains/Thermo.cpp
 ../src/constraints/Rattle.cpp
-../src/constraints/ZconstraintForceManager.cpp
 ../src/hydrodynamics/Ellipsoid.cpp
 ../src/hydrodynamics/HydroProp.cpp
 ../src/hydrodynamics/Sphere.cpp
@@ -60,8 +55,6 @@ set(SOURCE
 ../src/integrators/NPTxyz.cpp
 ../src/integrators/NVE.cpp
 ../src/integrators/NVT.cpp
-../src/integrators/RNEMD.cpp
-../src/integrators/Velocitizer.cpp
 ../src/integrators/VelocityVerletIntegrator.cpp
 ../src/io/AtomTypesSectionParser.cpp
 ../src/io/BaseAtomTypesSectionParser.cpp
@@ -69,32 +62,25 @@ set(SOURCE
 ../src/io/BondTypesSectionParser.cpp
 ../src/io/ChargeAtomTypesSectionParser.cpp
 ../src/io/DirectionalAtomTypesSectionParser.cpp
-../src/io/DumpReader.cpp
-../src/io/DumpWriter.cpp
 ../src/io/EAMAtomTypesSectionParser.cpp
 ../src/io/ForceFieldOptions.cpp
 ../src/io/GayBerneAtomTypesSectionParser.cpp
 ../src/io/Globals.cpp
 ../src/io/gzstream.cpp
-../src/io/ifstrstream.cpp
 ../src/io/InversionTypesSectionParser.cpp
 ../src/io/LennardJonesAtomTypesSectionParser.cpp
 ../src/io/MultipoleAtomTypesSectionParser.cpp
 ../src/io/NonBondedInteractionsSectionParser.cpp
 ../src/io/OptionSectionParser.cpp
 ../src/io/ParamConstraint.cpp
-../src/io/RestReader.cpp
-../src/io/RestWriter.cpp
 ../src/io/SCAtomTypesSectionParser.cpp
 ../src/io/SectionParser.cpp
 ../src/io/SectionParserManager.cpp
 ../src/io/ShapeAtomTypesSectionParser.cpp
-../src/io/StatWriter.cpp
 ../src/io/StickyAtomTypesSectionParser.cpp
 ../src/io/StickyPowerAtomTypesSectionParser.cpp
 ../src/io/TorsionTypesSectionParser.cpp
 ../src/io/ZConsReader.cpp
-../src/io/ZConsWriter.cpp
 ../src/lattice/CubicLattice.cpp
 ../src/lattice/FCCLattice.cpp
 ../src/lattice/Lattice.cpp
@@ -104,7 +90,6 @@ set(SOURCE
 ../src/math/ChebyshevU.cpp
 ../src/math/CubicSpline.cpp
 ../src/math/LegendrePolynomial.cpp
-../src/math/ParallelRandNumGen.cpp
 ../src/math/RealSphericalHarmonic.cpp
 ../src/math/RMSD.cpp
 ../src/math/SeqRandNumGen.cpp
@@ -114,12 +99,8 @@ set(SOURCE
 ../src/mdParser/MDLexer.cpp
 ../src/mdParser/MDParser.cpp
 ../src/mdParser/MDTreeParser.cpp
-../src/minimizers/CGFamilyMinimizer.cpp
-../src/minimizers/Minimizer.cpp
 ../src/minimizers/MinimizerFactory.cpp
 ../src/minimizers/MinimizerParameterSet.cpp
-../src/minimizers/PRCG.cpp
-../src/minimizers/SDMinimizer.cpp
 ../src/nonbonded/EAM.cpp
 ../src/nonbonded/Electrostatic.cpp
 ../src/nonbonded/GB.cpp
@@ -131,8 +112,6 @@ set(SOURCE
 ../src/nonbonded/SC.cpp
 ../src/nonbonded/Sticky.cpp
 ../src/nonbonded/SwitchingFunction.cpp
-../src/parallel/ForceDecomposition.cpp
-../src/parallel/ForceMatrixDecomposition.cpp
 ../src/primitives/Atom.cpp
 ../src/primitives/Bend.cpp
 ../src/primitives/DirectionalAtom.cpp
@@ -146,8 +125,6 @@ set(SOURCE
 ../src/primitives/UreyBradleyBend.cpp
 ../src/restraints/MolecularRestraint.cpp
 ../src/restraints/ObjectRestraint.cpp
-../src/restraints/RestraintForceManager.cpp
-../src/restraints/ThermoIntegrationForceManager.cpp
 ../src/selection/DistanceFinder.cpp
 ../src/selection/HullFinder.cpp
 ../src/selection/IndexFinder.cpp
@@ -188,7 +165,6 @@ set(SOURCE
 ../src/utils/ElementsTable.cpp
 ../src/utils/MoLocator.cpp
 ../src/utils/OpenMDBitSet.cpp
-../src/utils/ProgressBar.cpp
 ../src/utils/PropertyMap.cpp
 ../src/utils/StringTokenizer.cpp
 ../src/utils/StringUtils.cpp
@@ -203,17 +179,56 @@ set(SOURCE
 ../src/visitors/ReplacementVisitor.cpp
 ../src/visitors/RigidBodyVisitor.cpp
 ../src/visitors/ZconsVisitor.cpp
+)
+
+set( PARALLEL_SOURCE
+../src/brains/ForceManager.cpp
+../src/brains/SimCreator.cpp
+../src/brains/SimInfo.cpp
+../src/brains/Thermo.cpp
+../src/constraints/ZconstraintForceManager.cpp
+../src/integrators/RNEMD.cpp
+../src/integrators/Velocitizer.cpp
+../src/io/DumpReader.cpp
+../src/io/DumpWriter.cpp
+../src/io/RestReader.cpp
+../src/io/RestWriter.cpp
+../src/io/StatWriter.cpp
+../src/io/ZConsWriter.cpp
+../src/io/ifstrstream.cpp
+../src/math/ParallelRandNumGen.cpp
+../src/minimizers/CGFamilyMinimizer.cpp
+../src/minimizers/Minimizer.cpp
+../src/minimizers/PRCG.cpp
+../src/minimizers/SDMinimizer.cpp
+../src/parallel/ForceDecomposition.cpp
+../src/parallel/ForceMatrixDecomposition.cpp
+../src/restraints/RestraintForceManager.cpp
+../src/restraints/ThermoIntegrationForceManager.cpp
+../src/utils/ProgressBar.cpp
 ../src/utils/simError.c
 )
 
 IF(QHULL_FOUND)
-set(QHULLSRC 
-../src/integrators/LangevinHullForceManager.cpp 
+set(QHULL_SOURCE 
 ../src/integrators/LangevinHullDynamics.cpp 
+../src/math/Triangle.cpp
+)
+set(QHULL_PARALLEL_SOURCE 
+../src/integrators/LangevinHullForceManager.cpp 
 ../src/math/ConvexHull.cpp 
 ../src/math/AlphaHull.cpp 
-../src/math/Triangle.cpp
 )
 ENDIF(QHULL_FOUND)
 
-add_library(openmd SHARED ${SOURCE} ${QHULLSRC} )
+add_library(openmd_core STATIC ${SOURCE} ${QHULL_SOURCE} )
+add_library(openmd_single STATIC ${PARALLEL_SOURCE} ${QHULL_PARALLEL_SOURCE} )
+
+IF(MPI_FOUND)
+add_library(openmd_parallel STATIC ${PARALLEL_SOURCE} ${QHULL_PARALLEL_SOURCE} )
+set_target_properties(openmd_parallel PROPERTIES
+COMPILE_DEFINITIONS IS_MPI
+)
+ENDIF(MPI_FOUND)
+
+

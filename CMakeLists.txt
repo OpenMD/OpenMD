@@ -15,6 +15,25 @@ set (CMAKE_MODULE_PATH ${OpenMD_SOURCE_DIR}/cmake/modules)
 enable_language(CXX  C)
 
 
+if ( APPLE )
+set(MPI_COMPILER /opt/local/lib/openmpi/bin/mpic++)
+set(MPI_LIBRARY "MPI_LIBRARY-NOTFOUND" )
+endif( APPLE )
+FIND_PACKAGE(MPI)
+IF ( MPI_FOUND )
+  SET(CMAKE_REQUIRED_INCLUDES "${MPI_INCLUDE_PATH};${CMAKE_REQUIRED_INCLUDES}")
+  INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
+ENDIF()
+
+FIND_PACKAGE(Subversion)
+IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
+  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+  MESSAGE("Current revision is ${Project_WC_REVISION}")
+  Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
+  SET(SVN_REV ${Project_WC_REVISION})
+  ADD_DEFINITIONS( -DSVN_REV=${Project_WC_REVISION} )
+ENDIF()
+
 # Optional libraries: If we can find these, we will build with them
 # Look for OpenBabel libraries
 find_package(OpenBabel2)
@@ -33,20 +52,6 @@ IF(QHULL_FOUND)
   LINK_LIBRARIES(${QHULL_LIBRARIES})
 ENDIF(QHULL_FOUND)
 
-#Figure out MPI stuff
-find_package(MPI)
-if(MPI_FOUND)
-SET(IS_MPI 1)
-#add_definitions(-DIS_MPI)
-endif(MPI_FOUND)
-
-#Add subversion Information
-find_package(Subversion)
-if(Subversion_FOUND)
-  Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
-  set(SUBVERSION_REVISION ${ER_WC_REVISION})
-endif(Subversion_FOUND)
-set(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
 
 # zlib stuff
 find_package(ZLIB)
@@ -73,54 +78,31 @@ CHECK_INCLUDE_FILE(fftw3.h HAVE_FFTW3_H)
 CHECK_INCLUDE_FILE(fftw.h HAVE_FFWT_H)
 CHECK_INCLUDE_FILE(dfftw.h HAVE_DFFTW_H)
 CHECK_INCLUDE_FILE(cmath.h HAVE_CMATH_H)
-check_include_file (errno.h HAVE_ERRNO_H)
-check_include_file (inttypes.h HAVE_INTTYPES_H)
-check_include_file (limits.h HAVE_LIMITS_H)
-check_include_file (math.h HAVE_MATH_H)
-check_include_file (memory.h HAVE_MEMORY_H)
-check_include_file (stdint.h HAVE_STDINT_H)
-check_include_file (stdio.h HAVE_STDIO_H)
-check_include_file (stdlib.h HAVE_STDLIB_H)
-check_include_file (strings.h HAVE_STRINGS_H)
-check_include_file (string.h HAVE_STRING_H)
-check_include_file ("sys/param.h" HAVE_SYS_PARAM_H)
-check_include_file ("sys/pstat.h" HAVE_SYS_PSTAT_H)
-check_include_file ("sys/select.h" HAVE_SYS_SELECT_H)
-check_include_file ("sys/socket.h" HAVE_SYS_SOCKET_H)
-check_include_file ("sys/stat.h" HAVE_SYS_STAT_H)
-check_include_file ("sys/sysctl.h" HAVE_SYS_SYSCTL_H)
-check_include_file ("sys/sysinfo.h" HAVE_SYS_SYSINFO_H)
-check_include_file ("sys/param.h" HAVE_SYS_PARAM_H)
-check_include_file ("sys/sysmp.h" HAVE_SYS_SYSMP_H)
-check_include_file ("sys/systemcfg.h" HAVE_SYS_SYSTEMCFG_H)
-check_include_file ("sys/table.h" HAVE_SYS_TABLE_H)
-
-find_path (HAVE_SYS_STAT_H stat.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES sys
-)
-
-find_path (HAVE_SYS_TYPES_H types.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES sys
-)
-find_path (HAVE_UNISTD_H unistd.h ${include_locations})
+check_include_file(limits.h HAVE_LIMITS_H)
+check_include_file(stdlib.h HAVE_STDLIB_H)
+check_include_file(string.h HAVE_STRING_H)
+check_include_file("sys/ioctl.h" HAVE_SYS_IOCTL_H)
+check_include_file(unistd.h HAVE_UNISTD_H)
 
 #symbol checks
 include(CheckSymbolExists)
 
-
 #function checks
 include(CheckFunctionExists)
+check_function_exists(atexit HAVE_ATEXIT)
 check_function_exists(floor HAVE_FLOOR)
-check_function_exists (memset HAVE_MEMSET)
-check_function_exists (pow HAVE_POW)
-check_function_exists (sqrt HAVE_SQRT)
-check_function_exists (strchr HAVE_STRCHR)
-check_function_exists (strstr HAVE_STRSTR)
-check_function_exists (sysmp HAVE_SYSMP)
-check_function_exists (table HAVE_TABLE)
-
+check_function_exists(pow HAVE_POW)
+check_function_exists(select HAVE_SELECT)
+check_function_exists(sqrt HAVE_SQRT)
+check_function_exists(strcasecmp HAVE_STRCASECMP)
+check_function_exists(strchr HAVE_STRCHR)
+check_function_exists(strdup HAVE_STRDUP)
+check_function_exists(strncasecmp HAVE_STRNCASECMP)
+check_function_exists(strstr HAVE_STRSTR)
+check_function_exists(strtol HAVE_STRTOL)
+check_function_exists(strtoull HAVE_STRTOULL)
+check_function_exists(sysmp HAVE_SYSMP)
+check_function_exists(table HAVE_TABLE)
 
 
 include(CMakePrintSystemInformation)
@@ -134,26 +116,13 @@ include_directories (${PROJECT_SOURCE_DIR}/src)
 #CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 
-
 #Add executables for build
-set (PROGRAMS openmd Dump2XYZ simpleBuilder StaticProps DynamicProps
+set (PROGRAMS openmd openmd_MPI Dump2XYZ simpleBuilder StaticProps DynamicProps
 randomBuilder nanoparticleBuilder thermalizer atom2md Hydro)
 # Example of how to set core libraries
 #set(CORELIBS ${GLUT_LIBRARY} ${OPENGL_LIBRARY} m)
 
-#foreach(program ${PROGRAMS})
-#  add_executable(${program} ${program}.cpp)
-#  target_link_libraries(${program} ${CORELIBS})
-#endforeach(program)
-
-#add_subdirectory(src/lattice)
-#add_subdirectory(src/brains)
-#add_subdirectory(src/UseTheForce)
-
-
 #Add subirectories for build
 
-
-#add_subdirectory(src)
 add_subdirectory(lib)
 add_subdirectory(bin)

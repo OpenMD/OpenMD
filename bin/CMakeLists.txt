@@ -1,5 +1,13 @@
-add_executable(OpenMD ../src/applications/openmd/openmd.cpp)
-target_link_libraries(OpenMD openmd)
+add_executable(openmd ../src/applications/openmd/openmd.cpp)
+target_link_libraries(openmd openmd_core openmd_single)
+
+if (MPI_FOUND)
+add_executable(openmd_MPI ../src/applications/openmd/openmd.cpp)
+set_target_properties(openmd_MPI PROPERTIES
+COMPILE_DEFINITIONS IS_MPI
+)
+target_link_libraries(openmd_MPI openmd_core openmd_parallel)
+ENDIF (MPI_FOUND)
 
 set (DUMP2XYZSOURCE 
 ../src/applications/dump2Xyz/Dump2XYZ.cpp
@@ -91,21 +99,21 @@ set(THERMALIZERSOURCE
 )
 
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE})
-target_link_libraries(Dump2XYZ openmd)
+target_link_libraries(Dump2XYZ openmd_core openmd_single)
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE})
-target_link_libraries(DynamicProps openmd)
+target_link_libraries(DynamicProps openmd_core openmd_single)
 add_executable(Hydro ${HYDROSOURCE})
-target_link_libraries(Hydro openmd)
+target_link_libraries(Hydro openmd_core openmd_single)
 add_executable(StaticProps ${STATICPROPSSOURCE})
-target_link_libraries(StaticProps openmd)
+target_link_libraries(StaticProps openmd_core openmd_single)
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE})
-target_link_libraries(nanoparticleBuilder openmd)
+target_link_libraries(nanoparticleBuilder openmd_core openmd_single)
 add_executable(randomBuilder ${RANDOMBUILDERSOURCE})
-target_link_libraries(randomBuilder openmd)
+target_link_libraries(randomBuilder openmd_core openmd_single)
 add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE})
-target_link_libraries(simpleBuilder openmd)
+target_link_libraries(simpleBuilder openmd_core openmd_single)
 add_executable(thermalizer ${THERMALIZERSOURCE})
-target_link_libraries(thermalizer openmd)
+target_link_libraries(thermalizer openmd_core openmd_single)
 
 if (OPENBABEL2_FOUND)
 set (ATOM2MDSOURCE 
@@ -113,5 +121,5 @@ set (ATOM2MDSOURCE
 ../src/applications/atom2md/openmdformat.cpp
 )
   add_executable(atom2md ${ATOM2MDSOURCE})
-  target_link_libraries(atom2md openmd ${OPENBABEL2_LIBRARIES})
+  target_link_libraries(atom2md openmd_core openmd_single ${OPENBABEL2_LIBRARIES})
 ENDIF (OPENBABEL2_FOUND)
