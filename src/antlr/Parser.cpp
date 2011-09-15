@@ -5,9 +5,9 @@
  * $Id$
  */
 
-#include <iostream>
-
 #include "antlr/Parser.hpp"
+
+#include <iostream>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {

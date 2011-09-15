@@ -13,6 +13,7 @@
 #include <antlr/ASTArray.hpp>
 #include <antlr/ASTPair.hpp>
 
+#include <istream>
 #include <utility>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

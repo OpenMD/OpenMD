@@ -8,10 +8,11 @@
  * $Id$
  */
 
+#include <antlr/config.hpp>
+
 #include <iostream>
 #include <exception>
 
-#include <antlr/config.hpp>
 #include <antlr/BitSet.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include <antlr/RecognitionException.hpp>

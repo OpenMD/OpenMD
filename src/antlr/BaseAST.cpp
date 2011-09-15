@@ -5,9 +5,10 @@
  * $Id$
  */
 
+#include "antlr/config.hpp"
+
 #include <iostream>
 
-#include "antlr/config.hpp"
 #include "antlr/AST.hpp"
 #include "antlr/BaseAST.hpp"
 
@@ -15,8 +16,6 @@ ANTLR_USING_NAMESPACE(std)
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
-
-const char* const BaseAST::TYPE_NAME = "BaseAST";
 
 size_t BaseAST::getNumberOfChildren() const
 {
@@ -271,7 +270,8 @@ void BaseAST::toStream( ANTLR_USE_NAMESPACE(std)ostream& out ) const
 // this is nasty, but it makes the code generation easier
 ANTLR_API RefAST nullAST;
 
-#if defined(_MSC_VER) && !defined(__ICL) // Microsoft Visual C++
+#if defined(_MSC_VER) && !defined(__ICL) 
+// Microsoft Visual C++
 extern ANTLR_API AST* const nullASTptr = 0;
 #else
 ANTLR_API AST* const nullASTptr = 0;

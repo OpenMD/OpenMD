@@ -4,10 +4,11 @@
  *
  * $Id$
  */
+#include "antlr/config.hpp"
+
 #include <cstdlib>
 #include <iostream>
 
-#include "antlr/config.hpp"
 #include "antlr/CommonAST.hpp"
 #include "antlr/ANTLRUtil.hpp"
 

@@ -11,7 +11,6 @@
 #include <antlr/config.hpp>
 
 #include <map>
-#include <cstdio>
 
 #ifdef HAS_NOT_CCTYPE_H
 #include <ctype.h>
@@ -41,15 +40,9 @@ class ANTLR_API CharScanner;
 
 ANTLR_C_USING(tolower)
 
-#if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP) && !defined(stricmp)
-#define strcasecmp stricmp
-#endif
-#if !defined(HAVE_STRNCASECMP) && defined(HAVE_STRNICMP) && !defined(strnicmp)
-#define strncasecmp strnicmp
-#endif
-
-
-#if !defined(HAVE_STRCASECMP) && !defined(HAVE_STRICMP)
+#ifdef ANTLR_REALLY_NO_STRCASECMP
+// Apparently, neither strcasecmp nor stricmp is standard, and Codewarrior
+// on the mac has neither...
 inline int strcasecmp(const char *s1, const char *s2)
 {
 	while (true)
@@ -61,6 +54,12 @@ inline int strcasecmp(const char *s1, const char *s2)
 		if (c1 == 0) return 0;
 	}
 }
+#else
+#ifdef NO_STRCASECMP
+ANTLR_C_USING(stricmp)
+#else
+ANTLR_C_USING(strcasecmp)
+#endif
 #endif
 
 /** Functor for the literals map
@@ -120,6 +119,15 @@ public:
 	virtual void commit()
 	{
 		inputState->getInput().commit();
+	}
+
+	/** called by the generated lexer to do error recovery, override to
+	 * customize the behaviour.
+	 */
+	virtual void recover(const RecognitionException& ex, const BitSet& tokenSet)
+	{
+		consume();
+		consumeUntil(tokenSet);
 	}
 
 	virtual void consume()

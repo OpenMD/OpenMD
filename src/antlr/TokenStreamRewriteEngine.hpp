@@ -27,61 +27,67 @@ namespace antlr {
 #endif
 
 /** This token stream tracks the *entire* token stream coming from
- *  a lexer, but does not pass on the whitespace (or whatever else
- *  you want to discard) to the parser.
+ *	 a lexer, but does not pass on the whitespace (or whatever else
+ *	 you want to discard) to the parser.
  *
- *  This class can then be asked for the ith token in the input stream.
- *  Useful for dumping out the input stream exactly after doing some
- *  augmentation or other manipulations.  Tokens are index from 0..n-1
+ *	 This class can then be asked for the ith token in the input stream.
+ *	 Useful for dumping out the input stream exactly after doing some
+ *	 augmentation or other manipulations.	Tokens are index from 0..n-1
  *
- *  You can insert stuff, replace, and delete chunks.  Note that the
- *  operations are done lazily--only if you convert the buffer to a
- *  String.  This is very efficient because you are not moving data around
- *  all the time.  As the buffer of tokens is converted to strings, the
- *  toString() method(s) check to see if there is an operation at the
- *  current index.  If so, the operation is done and then normal String
- *  rendering continues on the buffer.  This is like having multiple Turing
- *  machine instruction streams (programs) operating on a single input tape. :)
+ *	 You can insert stuff, replace, and delete chunks.	 Note that the
+ *	 operations are done lazily--only if you convert the buffer to a
+ *	 String.	 This is very efficient because you are not moving data around
+ *	 all the time.	 As the buffer of tokens is converted to strings, the
+ *	 toString() method(s) check to see if there is an operation at the
+ *	 current index.  If so, the operation is done and then normal String
+ *	 rendering continues on the buffer.	 This is like having multiple Turing
+ *	 machine instruction streams (programs) operating on a single input tape. :)
  *
- *  Since the operations are done lazily at toString-time, operations do not
- *  screw up the token index values.  That is, an insert operation at token
- *  index i does not change the index values for tokens i+1..n-1.
+ *	 Since the operations are done lazily at toString-time, operations do not
+ *	 screw up the token index values.  That is, an insert operation at token
+ *	 index i does not change the index values for tokens i+1..n-1.
  *
- *  Because operations never actually alter the buffer, you may always get
- *  the original token stream back without undoing anything.  Since
- *  the instructions are queued up, you can easily simulate transactions and
- *  roll back any changes if there is an error just by removing instructions.
- *  For example,
+ *	 Because operations never actually alter the buffer, you may always get
+ *	 the original token stream back without undoing anything.  Since
+ *	 the instructions are queued up, you can easily simulate transactions and
+ *	 roll back any changes if there is an error just by removing instructions.
+ *	 For example,
  *
- * 		TokenStreamRewriteEngine rewriteEngine =
- * 			new TokenStreamRewriteEngine(lexer);
- *      JavaRecognizer parser = new JavaRecognizer(rewriteEngine);
- *      ...
- *      rewriteEngine.insertAfter("pass1", t, "foobar");}
- * 		rewriteEngine.insertAfter("pass2", u, "start");}
- * 		System.out.println(rewriteEngine.toString("pass1"));
- * 		System.out.println(rewriteEngine.toString("pass2"));
+ *			TokenStreamRewriteEngine rewriteEngine =
+ *				new TokenStreamRewriteEngine(lexer);
+ *		  JavaRecognizer parser = new JavaRecognizer(rewriteEngine);
+ *		  ...
+ *		  rewriteEngine.insertAfter("pass1", t, "foobar");}
+ *			rewriteEngine.insertAfter("pass2", u, "start");}
+ *			System.out.println(rewriteEngine.toString("pass1"));
+ *			System.out.println(rewriteEngine.toString("pass2"));
  *
- *  You can also have multiple "instruction streams" and get multiple
- *  rewrites from a single pass over the input.  Just name the instruction
- *  streams and use that name again when printing the buffer.  This could be
- *  useful for generating a C file and also its header file--all from the
- *  same buffer.
+ *	 You can also have multiple "instruction streams" and get multiple
+ *	 rewrites from a single pass over the input.	 Just name the instruction
+ *	 streams and use that name again when printing the buffer.	This could be
+ *	 useful for generating a C file and also its header file--all from the
+ *	 same buffer.
  *
- *  If you don't use named rewrite streams, a "default" stream is used.
+ *	 If you don't use named rewrite streams, a "default" stream is used.
  *
- *  Terence Parr, parrt@cs.usfca.edu
- *  University of San Francisco
- *  February 2004
+ *	 Terence Parr, parrt@cs.usfca.edu
+ *	 University of San Francisco
+ *	 February 2004
  */
 class TokenStreamRewriteEngine : public TokenStream
 {
 public:
 	typedef ANTLR_USE_NAMESPACE(std)vector<antlr::RefTokenWithIndex> token_list;
-
-	static const size_t MIN_TOKEN_INDEX = 0;
 	static const char* DEFAULT_PROGRAM_NAME;
-	static const int PROGRAM_INIT_SIZE = 100;
+#ifndef NO_STATIC_CONSTS
+	static const size_t MIN_TOKEN_INDEX;
+	static const int PROGRAM_INIT_SIZE;
+#else
+	enum {
+		MIN_TOKEN_INDEX = 0,
+		PROGRAM_INIT_SIZE = 100
+	};
+#endif
 
 	struct tokenToStream {
 		tokenToStream( ANTLR_USE_NAMESPACE(std)ostream& o ) : out(o) {}
@@ -102,7 +108,7 @@ public:
 		{
 		}
 		/** Execute the rewrite operation by possibly adding to the buffer.
-		 *  Return the index of the next token to operate on.
+		 *	 Return the index of the next token to operate on.
 		 */
 		virtual size_t execute( ANTLR_USE_NAMESPACE(std)ostream& /* out */ ) {
 			return index;
@@ -191,8 +197,8 @@ public:
 	}
 
 	/** Rollback the instruction stream for a program so that
-	 *  the indicated instruction (via instructionIndex) is no
-	 *  longer in the stream.  UNTESTED!
+	 *	 the indicated instruction (via instructionIndex) is no
+	 *	 longer in the stream.	UNTESTED!
 	 */
 	void rollback(const ANTLR_USE_NAMESPACE(std)string& programName,
 					  size_t instructionIndex );
@@ -224,7 +230,7 @@ public:
 	}
 
 	void insertAfter( const ANTLR_USE_NAMESPACE(std)string& programName,
-						   size_t index,
+							size_t index,
 							const ANTLR_USE_NAMESPACE(std)string& text )
 	{
 		// to insert after, just insert before next index (even if past end)
@@ -347,19 +353,19 @@ public:
 								  size_t start, size_t end ) const;
 
 	void toStream( ANTLR_USE_NAMESPACE(std)ostream& out ) const {
-		return toStream( out, MIN_TOKEN_INDEX, getTokenStreamSize());
+		toStream( out, MIN_TOKEN_INDEX, getTokenStreamSize());
 	}
 
 	void toStream( ANTLR_USE_NAMESPACE(std)ostream& out,
 						const ANTLR_USE_NAMESPACE(std)string& programName ) const
 	{
-		return toStream( out, programName, MIN_TOKEN_INDEX, getTokenStreamSize());
+		toStream( out, programName, MIN_TOKEN_INDEX, getTokenStreamSize());
 	}
 
 	void toStream( ANTLR_USE_NAMESPACE(std)ostream& out,
 						size_t start, size_t end ) const
 	{
-		return toStream(out, DEFAULT_PROGRAM_NAME, start, end);
+		toStream(out, DEFAULT_PROGRAM_NAME, start, end);
 	}
 
 	void toStream( ANTLR_USE_NAMESPACE(std)ostream& out,
@@ -367,7 +373,7 @@ public:
 						size_t firstToken, size_t lastToken ) const;
 
 	void toDebugStream( ANTLR_USE_NAMESPACE(std)ostream& out ) const {
-		return toDebugStream( out, MIN_TOKEN_INDEX, getTokenStreamSize());
+		toDebugStream( out, MIN_TOKEN_INDEX, getTokenStreamSize());
 	}
 
 	void toDebugStream( ANTLR_USE_NAMESPACE(std)ostream& out,
@@ -399,7 +405,7 @@ public:
 
 protected:
 	/** If op.index > lastRewriteTokenIndexes, just add to the end.
-	 *  Otherwise, do linear */
+	 *	 Otherwise, do linear */
 	void addToSortedRewriteList(RewriteOperation* op) {
 		addToSortedRewriteList(DEFAULT_PROGRAM_NAME, op);
 	}

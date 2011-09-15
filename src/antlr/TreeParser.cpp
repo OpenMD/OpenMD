@@ -5,8 +5,6 @@
  * $Id$
  */
 
-#include <iostream>
-
 #include "antlr/TreeParser.hpp"
 #include "antlr/ASTNULLType.hpp"
 
