@@ -82,7 +82,7 @@ namespace OpenMD {
   public:
     SSDAtomVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "SSDAtomVisitor";
-
+      
       /// these are the atom names we can replace with a fixed structure
       addReplacedAtomName("SSD");
       addReplacedAtomName("SSD_E");
@@ -90,7 +90,7 @@ namespace OpenMD {
       addReplacedAtomName("SSD1");
       addReplacedAtomName("TAP");
       addReplacedAtomName("TRED");
-
+      
       // this is the reference structure we'll use for the replacement:
       addSite("H", Vector3d(0.0, -0.75695, 0.5206));
       addSite("H", Vector3d(0.0,  0.75695, 0.5206));
@@ -98,7 +98,7 @@ namespace OpenMD {
       addSite("X", Vector3d(0.0,  0.0,     0.0   ), Vector3d(0,0,1));
     }
   };
-
+  
   class GBtailVisitor : public ReplacementVisitor{
   public:
     GBtailVisitor(SimInfo* info) : ReplacementVisitor(info) {
@@ -106,12 +106,12 @@ namespace OpenMD {
       
       
       /// these are the atom names we can replace with a fixed structure
-        addReplacedAtomName("GBtail");
-        
-        // this is the reference structure we'll use for the replacement:
-        addSite("C", Vector3d(0.0, 0.0, 9.0));
-        addSite("C", Vector3d(0.0, 0.0, 0.0));
-        addSite("C", Vector3d(0.0, 0.0, -9.0));
+      addReplacedAtomName("GBtail");
+      
+      // this is the reference structure we'll use for the replacement:
+      addSite("C", Vector3d(0.0, 0.0, 9.0));
+      addSite("C", Vector3d(0.0, 0.0, 0.0));
+      addSite("C", Vector3d(0.0, 0.0, -9.0));
     }
   };  
   
@@ -121,15 +121,13 @@ namespace OpenMD {
       visitorName = "GBheadVisitor";
       
       /// these are the atom names we can replace with a fixed structure
-        addReplacedAtomName("GBhead");
-        
-        // this is the reference structure we'll use for the replacement:
-        addSite("N", Vector3d(0.0, 0.0, 3.5));
-        addSite("C", Vector3d(0.0, 0.0, 0.0));
-        addSite("P", Vector3d(0.0, 0.0, -3.5));
+      addReplacedAtomName("GBhead");
+      
+      // this is the reference structure we'll use for the replacement:
+      addSite("N", Vector3d(0.0, 0.0, 3.5));
+      addSite("C", Vector3d(0.0, 0.0, 0.0));
+      addSite("P", Vector3d(0.0, 0.0, -3.5));
     }
-  };  
-
-  
+  };      
 }//namespace OpenMD
 #endif
