@@ -1,12 +1,12 @@
 add_executable(openmd ../src/applications/openmd/openmd.cpp)
-target_link_libraries(openmd openmd_core openmd_single)
+target_link_libraries(openmd openmd_single openmd_core)
 
 if (MPI_FOUND)
 add_executable(openmd_MPI ../src/applications/openmd/openmd.cpp)
 set_target_properties(openmd_MPI PROPERTIES
 COMPILE_DEFINITIONS IS_MPI
 )
-target_link_libraries(openmd_MPI openmd_core openmd_parallel)
+target_link_libraries(openmd_MPI openmd_parallel openmd_core)
 ENDIF (MPI_FOUND)
 
 set (DUMP2XYZSOURCE 
@@ -99,21 +99,21 @@ set(THERMALIZERSOURCE
 )
 
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE})
-target_link_libraries(Dump2XYZ openmd_core openmd_single)
+target_link_libraries(Dump2XYZ openmd_single openmd_core )
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE})
-target_link_libraries(DynamicProps openmd_core openmd_single)
+target_link_libraries(DynamicProps openmd_single openmd_core )
 add_executable(Hydro ${HYDROSOURCE})
-target_link_libraries(Hydro openmd_core openmd_single)
+target_link_libraries(Hydro openmd_single openmd_core )
 add_executable(StaticProps ${STATICPROPSSOURCE})
-target_link_libraries(StaticProps openmd_core openmd_single)
+target_link_libraries(StaticProps openmd_single openmd_core )
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE})
-target_link_libraries(nanoparticleBuilder openmd_core openmd_single)
+target_link_libraries(nanoparticleBuilder openmd_single openmd_core )
 add_executable(randomBuilder ${RANDOMBUILDERSOURCE})
-target_link_libraries(randomBuilder openmd_core openmd_single)
+target_link_libraries(randomBuilder openmd_single openmd_core )
 add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE})
-target_link_libraries(simpleBuilder openmd_core openmd_single)
+target_link_libraries(simpleBuilder openmd_single openmd_core )
 add_executable(thermalizer ${THERMALIZERSOURCE})
-target_link_libraries(thermalizer openmd_core openmd_single)
+target_link_libraries(thermalizer openmd_single openmd_core )
 
 if (OPENBABEL2_FOUND)
 set (ATOM2MDSOURCE 
@@ -121,5 +121,5 @@ set (ATOM2MDSOURCE
 ../src/applications/atom2md/openmdformat.cpp
 )
   add_executable(atom2md ${ATOM2MDSOURCE})
-  target_link_libraries(atom2md openmd_core openmd_single ${OPENBABEL2_LIBRARIES})
+  target_link_libraries(atom2md openmd_single openmd_core  ${OPENBABEL2_LIBRARIES})
 ENDIF (OPENBABEL2_FOUND)
