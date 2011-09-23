@@ -100,6 +100,9 @@ namespace OpenMD {
       TAGGED_PAIR_DISTANCE,
       RNEMD_EXCHANGE_TOTAL,
       SHADOWH,
+      THERMAL_HELFANDMOMENT_X,
+      THERMAL_HELFANDMOMENT_Y,
+      THERMAL_HELFANDMOMENT_Z,
       ENDINDEX  //internal use
     };
 

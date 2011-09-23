@@ -72,7 +72,9 @@ namespace OpenMD {
 
     // accumulate and return the simulation box dipole moment in C*m
     Vector3d getBoxDipole(); 
-
+    // accumulate and return helfand thermal momoment
+    Vector3d getThermalHelfand();
+    
     void saveStat();
     
   private:

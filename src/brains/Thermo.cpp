@@ -237,7 +237,10 @@ namespace OpenMD {
     stat[Stats::PRESSURE_TENSOR_ZX] = tensor(2, 0);      
     stat[Stats::PRESSURE_TENSOR_ZY] = tensor(2, 1);      
     stat[Stats::PRESSURE_TENSOR_ZZ] = tensor(2, 2);      
-
+    Vector3d GKappa_t = getThermalHelfand();
+    stat[Stats::THERMAL_HELFANDMOMENT_X] = GKappa_t.x();
+    stat[Stats::THERMAL_HELFANDMOMENT_Y] = GKappa_t.y();
+    stat[Stats::THERMAL_HELFANDMOMENT_Z] = GKappa_t.z();
 
     Globals* simParams = info_->getSimParams();
 
@@ -416,6 +419,72 @@ namespace OpenMD {
 
     return boxDipole;
   }
+
+ Vector3d Thermo::getThermalHelfand() {
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    SimInfo::MoleculeIterator miter;
+    std::vector<Atom*>::iterator aiter;
+    Molecule* mol;
+    Atom* atom;
+    RealType mass;
+    Vector3d velocity;
+    Vector3d x_a;
+    RealType kinetic;
+    RealType potential;
+    RealType eatom;
+    RealType AvgE_a_ = 0;
+    Vector3d GKappa_t = V3Zero;
+    Vector3d ThermalHelfandMoment;
+    
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter)) {
+
+      for (atom = mol->beginAtom(aiter); atom != NULL;
+           atom = mol->nextAtom(aiter)) {
+
+        mass = atom->getMass();
+        velocity = atom->getVel();
+        kinetic = mass * (velocity[0]*velocity[0] + velocity[1]*velocity[1] + 
+                                   velocity[2]*velocity[2]) / PhysicalConstants::energyConvert;
+        potential =  atom->getParticlePot();
+        eatom += (kinetic + potential)/2.0;
+      }
+    }
+
+   int natoms = info_->getNGlobalAtoms();
+#ifdef IS_MPI
+    
+    MPI_Allreduce(&eatom, &AvgE_a_, 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
+#else    
+    AvgE_a_ = eatom;
+#endif
+    AvgE_a_ = AvgE_a_/RealType(natoms);
+    
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter)) {
+      
+      for (atom = mol->beginAtom(aiter); atom != NULL;
+           atom = mol->nextAtom(aiter)) {
+        
+        /* We think that x_a is relative to the total box and should be a wrapped coordinate */
+        x_a = atom->getPos();
+        currSnapshot->wrapVector(x_a);
+        potential =  atom->getParticlePot();
+
+        GKappa_t += x_a*(potential-AvgE_a_);
+        }
+      }
+#ifdef IS_MPI
+     MPI_Allreduce(GKappa_t.getArrayPointer(), ThermalHelfandMoment.getArrayPointer(), 3,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+#else    
+     ThermalHelfandMoment = GKappa_t;
+#endif  
+     return ThermalHelfandMoment;
+     
+ }
+
 
 
 } //end namespace OpenMD
