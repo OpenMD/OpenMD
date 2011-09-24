@@ -36,22 +36,34 @@ What you need to compile and use OpenMD:
     i386-apple-darwin11.1.0     icc    icpc    (Intel v. 12)
     x86_64-unknown-linux-gnu    gcc    g++     (Pathscale 3.2)
 
- 2) GNU make (also known as gmake).  Regular make won't work.  
-    Really.  We've tried.  Don't bother with regular make.  
-    Seriously.  You need GNU make.  Did we mention that you 
-    need GNU make?
+ 2) CMake, a cross-platform build system which is available at
+    http://www.cmake.org     Most Linux and some Unix distributions
+    provide CMake as a standard package. If not, please download it,
+    and make sure you get a recent version. Mac OS X users can either
+    download the CMake installer or install it from the command line
+    using macports.
 
- 3) Perl.
-
- 4) MPI-2 is optional for the single processor version of OpenMD, but
+ 3) MPI-2 is optional for the single processor version of OpenMD, but
     is required if you want OpenMD to run in parallel. We like
     OpenMPI. Other implementations of MPI-2 might work, but we haven't
-    tried.   You can get Open MPI here: http://www.open-mpi.org/
+    tested them.  You can get Open MPI here: http://www.open-mpi.org/
+
+ 4) Other optional (but quite useful) libraries that will unlock some
+    features of OpenMD:
+
+      Open Babel:  http://openbabel.org
+      Qhull:       http://www.qhull.org
+      FFTW:        http://www.fftw.org
+
+ 5) Some of the utility scripts depend on Python and Perl.  These
+    interpreters are common installations on most flavors of Unix and
+    Mac OS X.
+
 
 INSTRUCTIONS
 
  1) Get, build, and test the required pieces above.
- 2) ./configure  
+ 2) cmake .
  3) make
  4) make install
 
