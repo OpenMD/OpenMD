@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYTHON_EXECUTABLE@
 """Dump File Converter
 
 Converts old-style OOPSE md and dump files into new OpenMD style

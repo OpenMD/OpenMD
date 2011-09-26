@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!@PERL_EXECUTABLE@
 
 # program that builds water boxes
 

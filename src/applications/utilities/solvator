@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!@PERL_EXECUTABLE@
 
 # program that reads in a water box and solute xyz (or pdb), merges the two systems, and
 # deletes overlapping molecules
