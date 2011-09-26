@@ -3,7 +3,6 @@
 cmake_minimum_required (VERSION 2.6)
 project(OpenMD)
 
-
 # OpenMD version number.
 set (VERSION_MAJOR "2")
 set (VERSION_MINOR "0")
@@ -11,8 +10,31 @@ set (VERSION_TINY "0")
 
 # cmake modules that are needed to build oopse
 SET(CMAKE_MODULE_PATH ${OpenMD_SOURCE_DIR}/cmake/modules)
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  SET(CMAKE_INSTALL_PREFIX
+    "/usr/local/openmd" CACHE PATH "OpenMD install prefix" FORCE
+    )
+ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+# ---------- Setup output Directories -------------------------
+SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY
+  ${PROJECT_BINARY_DIR}/lib
+  CACHE PATH
+  "Single directory for all shared libraries"
+  )
+# --------- Setup the Executable output Directory -------------
+SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY
+  ${PROJECT_BINARY_DIR}/bin
+  CACHE PATH
+  "Single directory for all Executables."
+  )
+# --------- Setup the static library directory -------------
+SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+  ${PROJECT_BINARY_DIR}/lib
+  CACHE PATH
+  "Single directory for all static libraries."
+  )
+
 
 enable_language(CXX  C)
 
@@ -390,6 +412,12 @@ set_target_properties(openmd_MPI PROPERTIES
 COMPILE_DEFINITIONS IS_MPI
 )
 target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel openmd_core)
+  INSTALL(TARGETS 
+        openmd_parallel openmd_MPI
+  RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+  LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ 
+  ARCHIVE DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ 
+)
 ENDIF (MPI_FOUND)
 
 set (DUMP2XYZSOURCE 
@@ -505,6 +533,8 @@ src/applications/atom2md/openmdformat.cpp
 )
   add_executable(atom2md ${ATOM2MDSOURCE})
   target_link_libraries(atom2md openmd_single openmd_core openmd_single openmd_core ${OPENBABEL2_LIBRARIES})
+  INSTALL(TARGETS atom2md RUNTIME DESTINATION bin
+          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 ENDIF (OPENBABEL2_FOUND)
 
 
@@ -522,9 +552,13 @@ src/applications/utilities/waterRotator
 
 IF(PYTHON_EXECUTABLE)
    foreach(PY_FILE ${PY_FILES})
-      configure_file(${PY_FILE} "${EXECUTABLE_OUTPUT_PATH}"/${PY_FILE} @ONLY)
+      GET_FILENAME_COMPONENT(filename "${PY_FILE}" NAME)
+      CONFIGURE_FILE(${PY_FILE} 
+                     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}" @ONLY)
+      INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}"
+              DESTINATION bin 
+              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
    endforeach(PY_FILE)
-#INSTALL(FILES ${PY_FILES} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 ENDIF(PYTHON_EXECUTABLE)
 
 set(PERL_FILES
@@ -534,7 +568,39 @@ src/applications/utilities/waterBoxer
 
 IF(PERL_FOUND)
    foreach(PERL_FILE ${PERL_FILES})
-      configure_file(${PERL_FILE} "${EXECUTABLE_OUTPUT_PATH}"/${PERL_FILE} @ONLY)
+      GET_FILENAME_COMPONENT(filename "${PERL_FILE}" NAME)
+      configure_file(${PERL_FILE} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}" @ONLY)
+      INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}"
+              DESTINATION bin 
+              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
    endforeach(PERL_FILE)
-#INSTALL(FILES ${PERL_FILES} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 ENDIF(PERL_FOUND)
+
+INSTALL(FILES AUTHORS LICENSE README DESTINATION . 
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+INSTALL(TARGETS 
+        openmd_core 
+        openmd_single
+        openmd
+        Dump2XYZ 
+        simpleBuilder 
+        StaticProps 
+        DynamicProps
+        randomBuilder 
+        nanoparticleBuilder 
+        thermalizer 
+        Hydro
+  RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+  LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ 
+  ARCHIVE DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ 
+)
+
+install(DIRECTORY forceFields/   
+        DESTINATION forceFields 
+        PATTERN ".svn" EXCLUDE 
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+install(DIRECTORY samples/       
+        DESTINATION samples 
+        PATTERN ".svn" EXCLUDE 
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
