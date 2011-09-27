@@ -55,6 +55,11 @@ IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
   SET(SVN_REV ${Project_WC_REVISION})
   ADD_DEFINITIONS( -DSVN_REV=${Project_WC_REVISION} )
+  SET(GENERATELOGS "${PROJECT_SOURCE_DIR}/doc/svn2cl")
+  ADD_CUSTOM_TARGET(ChangeLog
+     COMMAND ${GENERATELOGS} "--group-by-day" "--include-rev"
+     "--linelen=78" "--output=${PROJECT_BINARY_DIR}/ChangeLog" "${PROJECT_SOURCE_DIR}"
+  )
 ENDIF()
 
 # Optional libraries: If we can find these, we will build with them
@@ -584,7 +589,7 @@ IF(PERL_FOUND)
    endforeach(PERL_FILE)
 ENDIF(PERL_FOUND)
 
-INSTALL(FILES AUTHORS LICENSE README DESTINATION . 
+INSTALL(FILES AUTHORS LICENSE README INSTALL DESTINATION . 
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 INSTALL(TARGETS 
         openmd_core 
