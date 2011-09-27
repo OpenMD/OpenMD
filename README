@@ -54,6 +54,7 @@ What you need to compile and use OpenMD:
       Open Babel:  http://openbabel.org
       Qhull:       http://www.qhull.org
       FFTW:        http://www.fftw.org
+      Doxygen:     http://www.doxygen.org
 
  5) Some of the utility scripts depend on Python and Perl.  These
     interpreters are common installations on most flavors of Unix and
@@ -63,8 +64,10 @@ What you need to compile and use OpenMD:
 INSTRUCTIONS
 
  1) Get, build, and test the required pieces above.
- 2) cmake .
- 3) make
- 4) make install
+ 2) mkdir build
+ 3) cd build
+ 4) cmake ..
+ 5) make
+ 6) sudo make install
 
 That's it.

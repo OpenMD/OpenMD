@@ -75,7 +75,6 @@ IF(QHULL_FOUND)
   LINK_LIBRARIES(${QHULL_LIBRARIES})
 ENDIF(QHULL_FOUND)
 
-
 # zlib stuff
 find_package(ZLIB)
 if(ZLIB_FOUND)
@@ -94,6 +93,16 @@ IF(FFTW_FOUND)
   LINK_LIBRARIES(${FFTW_LIBRARIES})
 ENDIF(FFTW_FOUND)
 
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in" "${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile" @ONLY)
+  add_custom_target(doc
+    ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doc"
+    COMMENT "Generating API documentation with Doxygen" VERBATIM
+  )
+endif(DOXYGEN_FOUND)
 
 #include checks
 include(CheckIncludeFile)
@@ -603,4 +612,9 @@ install(DIRECTORY samples/
         DESTINATION samples 
         DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         PATTERN ".svn" EXCLUDE
+	PATTERN "*.dump" EXCLUDE
+	PATTERN "*.stat" EXCLUDE
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
+        DESTINATION doc
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
