@@ -40,6 +40,7 @@
  */
 
 #include <algorithm> 
+#include <stdlib.h>
 #include "utils/StringUtils.hpp"
 
 namespace OpenMD {
