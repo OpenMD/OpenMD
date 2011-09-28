@@ -41,6 +41,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <cstdio>
 
 #include "nonbonded/SwitchingFunction.hpp"
 #include "utils/simError.h"
