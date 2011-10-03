@@ -1,8 +1,7 @@
 Compiling OpenMD
 
   OpenMD is written in C++. Compiling is the process of turning this
-  C++ into instructions that the computer’s processor can understand,
-  machine code.
+  C++ into instructions that the computer’s processor can understand.
 
 Requirements
 

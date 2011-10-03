@@ -161,11 +161,9 @@ SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation locations")
 
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/config.h.cmake"
-  "${PROJECT_SOURCE_DIR}/src/config.h"
-  )
-include_directories (${PROJECT_SOURCE_DIR}/src)
-
-#CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+  "${PROJECT_BINARY_DIR}/config.h"
+)
+include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/src")
 
 
 #Add executables for build
@@ -434,7 +432,7 @@ ENDIF (MPI_FOUND)
 
 set (DUMP2XYZSOURCE 
 src/applications/dump2Xyz/Dump2XYZ.cpp
-src/applications/dump2Xyz/Dump2XYZCmd.c
+src/applications/dump2Xyz/Dump2XYZCmd.cpp
 )
 
 set (DYNAMICPROPSSOURCE 
@@ -455,7 +453,7 @@ src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
 src/applications/dynamicProps/ThetaCorrFunc.cpp
 src/applications/dynamicProps/TimeCorrFunc.cpp
 src/applications/dynamicProps/VCorrFunc.cpp
-src/applications/dynamicProps/DynamicPropsCmd.c
+src/applications/dynamicProps/DynamicPropsCmd.cpp
 )
 
 set (HYDROSOURCE 
@@ -468,7 +466,7 @@ src/applications/hydrodynamics/HydrodynamicsModel.cpp
 src/applications/hydrodynamics/HydrodynamicsModelFactory.cpp
 src/applications/hydrodynamics/RoughShell.cpp
 src/applications/hydrodynamics/ShapeBuilder.cpp
-src/applications/hydrodynamics/HydroCmd.c
+src/applications/hydrodynamics/HydroCmd.cpp
 )
 
 set (STATICPROPSSOURCE 
@@ -497,28 +495,28 @@ src/applications/staticProps/SCDOrderParameter.cpp
 src/applications/staticProps/StaticProps.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TwoDGofR.cpp
-src/applications/staticProps/StaticPropsCmd.c
+src/applications/staticProps/StaticPropsCmd.cpp
 )
 
 set (NANOPARTICLEBUILDERSOURCE 
 src/applications/nanoparticleBuilder/nanoparticleBuilder.cpp
 src/applications/nanoparticleBuilder/shapedLatticeSpherical.cpp
-src/applications/nanoparticleBuilder/nanoparticleBuilderCmd.c
+src/applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
 )
 
 set (RANDOMBUILDERSOURCE
 src/applications/randomBuilder/randomBuilder.cpp
-src/applications/randomBuilder/randomBuilderCmd.c
+src/applications/randomBuilder/randomBuilderCmd.cpp
 )
 
 set(SIMPLEBUILDERSOURCE 
 src/applications/simpleBuilder/simpleBuilder.cpp
-src/applications/simpleBuilder/simpleBuilderCmd.c
+src/applications/simpleBuilder/simpleBuilderCmd.cpp
 )
 
 set(THERMALIZERSOURCE 
 src/applications/thermalizer/thermalizer.cpp
-src/applications/thermalizer/thermalizerCmd.c 
+src/applications/thermalizer/thermalizerCmd.cpp
 )
 
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE})
