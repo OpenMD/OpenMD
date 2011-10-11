@@ -59,7 +59,18 @@ namespace OpenMD {
       sigma = mySigma;
       epsilon = myEpsilon;
       nRep = myNrep;
+      setRepulsivePower();
     }
+    RealType getSigma() {
+      return sigma;
+    }
+    RealType getEpsilon() {
+      return epsilon;
+    }
+    int getNrep() {
+      return nRep;
+    }
+
     
   private:
     RealType sigma;

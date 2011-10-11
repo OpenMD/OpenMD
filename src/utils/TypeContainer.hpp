@@ -216,6 +216,10 @@ namespace OpenMD {
       ++i;
       return i  != data_.end() ? (i->second).second : NULL;
     }
+
+    KeyType getKeys(MapTypeIterator& i) {
+      return i->first;
+    }
             
   private:
     int index_;

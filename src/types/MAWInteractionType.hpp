@@ -75,6 +75,7 @@ namespace OpenMD {
       r_e = myR0;
       ca1 = myCa1;
       cb1 = myCb1;
+      setMAW();
     }
     
   private:    

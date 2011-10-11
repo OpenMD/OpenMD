@@ -52,6 +52,7 @@
 #include "nonbonded/Morse.hpp"
 #include "nonbonded/Electrostatic.hpp"
 #include "nonbonded/MAW.hpp"
+#include "nonbonded/RepulsivePower.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 
 using namespace std;
@@ -95,6 +96,7 @@ namespace OpenMD {
     SC* sc_;
     Morse* morse_;
     Electrostatic* electrostatic_;
+    RepulsivePower* repulsivePower_;
     MAW* maw_;
     
     map<int, AtomType*> typeMap_;

@@ -54,12 +54,12 @@
 namespace OpenMD {
 
   typedef  struct{
-    int is_LennardJones;
-    int is_Morse;
-    int is_MAW;
-    int is_EAM;
-    int is_SC;
-    int is_RepulsivePower;
+    bool is_LennardJones;
+    bool is_Morse;
+    bool is_MAW;
+    bool is_EAM;
+    bool is_SC;
+    bool is_RepulsivePower;
   } NonBondedInteractionTypeProperties;
 
   /**
@@ -71,9 +71,9 @@ namespace OpenMD {
    */
   class NonBondedInteractionType {
   public:
-    NonBondedInteractionType() { }
+    NonBondedInteractionType();
     virtual ~NonBondedInteractionType() { } ;
-    
+   
     void setLennardJones();    
     bool isLennardJones();
     void setMorse();    

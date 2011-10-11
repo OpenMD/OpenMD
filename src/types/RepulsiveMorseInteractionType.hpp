@@ -62,6 +62,7 @@ namespace OpenMD {
       D0 = myD0;
       beta0 = myBeta0;
       r0 = myR0;
+      setMorse();
     }
     
   private:   

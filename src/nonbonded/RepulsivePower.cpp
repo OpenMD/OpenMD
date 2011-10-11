@@ -45,7 +45,7 @@
 #include <cmath>
 #include "nonbonded/RepulsivePower.hpp"
 #include "utils/simError.h"
-#include "types/NonBondedInteractionType.hpp"
+#include "types/RepulsivePowerInteractionType.hpp"
 
 using namespace std;
 
@@ -58,46 +58,37 @@ namespace OpenMD {
 
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
+    ForceField::NonBondedInteractionTypeContainer::KeyType keys;
     NonBondedInteractionType* nbt;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
       
       if (nbt->isRepulsivePower()) {
-        
-        pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
-        
-        GenericData* data = nbt->getPropertyByName("RepulsivePower");
-        if (data == NULL) {
-          sprintf( painCave.errMsg, "RepulsivePower::initialize could not\n"
-                   "\tfind RepulsivePower parameters for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError(); 
-        }
-        
-        RepulsivePowerData* rpData = dynamic_cast<RepulsivePowerData*>(data);
-        if (rpData == NULL) {
+        keys = nbiTypes->getKeys(j);
+        AtomType* at1 = forceField_->getAtomType(keys[0]);
+        AtomType* at2 = forceField_->getAtomType(keys[1]);
+
+
+        RepulsivePowerInteractionType* rpit = dynamic_cast<RepulsivePowerInteractionType*>(nbt);
+
+        if (rpit == NULL) {
           sprintf( painCave.errMsg,
-                   "RepulsivePower::initialize could not convert GenericData\n"
-                   "\tto RepulsivePowerData for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
+                   "RepulsivePower::initialize could not convert NonBondedInteractionType\n"
+                   "\tto RepulsivePowerInteractionType for %s - %s interaction.\n", 
+                   at1->getName().c_str(),
+                   at2->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();          
         }
+
         
-        RepulsivePowerParam rpParam = rpData->getData();
+        RealType sigma = rpit->getSigma();
+        RealType epsilon = rpit->getEpsilon();
+        int nRep = rpit->getNrep();
 
-        RealType sigma = rpParam.sigma;
-        RealType epsilon = rpParam.epsilon;
-        int nRep = rpParam.nRep;
-
-        addExplicitInteraction(atypes.first, atypes.second, 
-                               sigma, epsilon, nRep);
+        addExplicitInteraction(at1, at2, sigma, epsilon, nRep);
       }
     }
     initialized_ = true;

@@ -51,6 +51,7 @@ namespace OpenMD {
     gb_ = new GB();
     sticky_ = new Sticky();
     morse_ = new Morse();
+    repulsivePower_ = new RepulsivePower();
     eam_ = new EAM();
     sc_ = new SC();
     electrostatic_ = new Electrostatic();
@@ -70,6 +71,7 @@ namespace OpenMD {
     electrostatic_->setSimInfo(info_);
     electrostatic_->setForceField(forceField_);
     maw_->setForceField(forceField_);
+    repulsivePower_->setForceField(forceField_);
 
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     ForceField::AtomTypeContainer::MapTypeIterator i1, i2;
@@ -178,6 +180,30 @@ namespace OpenMD {
             interactions_[key].insert(morse_);
             vdwExplicit = true;
           }
+
+          if (nbiType->isRepulsivePower()) {
+            if (vdwExplicit) {
+              sprintf( painCave.errMsg,
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
+              painCave.severity = OPENMD_ERROR;
+              painCave.isFatal = 1;
+              simError();
+            }
+            // We found an explicit RepulsivePower interaction.  
+            // override all other vdw entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[key].begin(); 
+                 it != interactions_[key].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
+            }
+            interactions_[key].insert(repulsivePower_);
+            vdwExplicit = true;
+          }
+          
           
           if (nbiType->isEAM()) {
             // We found an explicit EAM interaction.  

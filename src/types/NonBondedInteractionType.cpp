@@ -49,6 +49,16 @@
 
 namespace OpenMD {
 
+  NonBondedInteractionType::NonBondedInteractionType() { 
+    nbitp.is_LennardJones = false;
+    nbitp.is_Morse = false;
+    nbitp.is_MAW = false;
+    nbitp.is_EAM = false;
+    nbitp.is_SC = false;
+    nbitp.is_RepulsivePower = false;
+    atomTypes_.first = NULL;
+    atomTypes_.second = NULL;
+  }
   void NonBondedInteractionType::setAtomTypes(std::pair<AtomType*, AtomType*> ats) { 
     atomTypes_=ats; 
   }
@@ -82,7 +92,7 @@ namespace OpenMD {
   }  
   
   void NonBondedInteractionType::setLennardJones() {
-    nbitp.is_LennardJones = 1;
+    nbitp.is_LennardJones = true;
   }
   
   bool NonBondedInteractionType::isLennardJones() {
@@ -90,7 +100,7 @@ namespace OpenMD {
   }
 
   void NonBondedInteractionType::setMorse() {
-    nbitp.is_Morse = 1;
+    nbitp.is_Morse = true;
   }
   
   bool NonBondedInteractionType::isMorse() {
@@ -98,7 +108,7 @@ namespace OpenMD {
   }
   
   void NonBondedInteractionType::setEAM() {
-    nbitp.is_EAM = 1;
+    nbitp.is_EAM = true;
   }
   
   bool NonBondedInteractionType::isEAM() {
@@ -110,7 +120,7 @@ namespace OpenMD {
   }
   
   void NonBondedInteractionType::setSC() {
-    nbitp.is_SC = 1;
+    nbitp.is_SC = true;
   }
 
   bool NonBondedInteractionType::isMAW() {
@@ -118,7 +128,7 @@ namespace OpenMD {
   }
   
   void NonBondedInteractionType::setMAW() {
-    nbitp.is_MAW = 1;
+    nbitp.is_MAW = true;
   }
   
   bool NonBondedInteractionType::isMetal() {
@@ -130,7 +140,7 @@ namespace OpenMD {
   }
   
   void NonBondedInteractionType::setRepulsivePower() {
-    nbitp.is_RepulsivePower = 1;
+    nbitp.is_RepulsivePower = true;
   }
 
 }

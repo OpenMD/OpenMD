@@ -57,6 +57,7 @@ namespace OpenMD {
   public:
     
     LennardJonesInteractionType(RealType mySigma, RealType myEpsilon) {
+      setLennardJones();
       sigma = mySigma;
       epsilon = myEpsilon;
     }
