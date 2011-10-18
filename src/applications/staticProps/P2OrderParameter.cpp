@@ -196,6 +196,7 @@ namespace OpenMD {
       }   
 
       RealType angle = 0.0;
+      RealType p4 = 0.0;
       
       if (doVect_) {
         for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
@@ -203,26 +204,32 @@ namespace OpenMD {
           if (sd->isDirectional()) {
             Vector3d vec = sd->getA().getColumn(2);
             vec.normalize();
-            angle += acos(dot(vec, director));
+            RealType myDot = dot(vec, director);
+            angle += acos(myDot);
+            p4 += (35.0 * pow(myDot, 4) - 30.0 * pow(myDot, 2) + 3.0) / 8.0;
           }
         }
         angle = angle/(seleMan1_.getSelectionCount()*NumericConstant::PI)*180.0;
-        
+        p4 /= (seleMan1_.getSelectionCount());
       } else {
         for (vector<pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(vec);
           vec.normalize();          
-          angle += acos(dot(vec, director)) ;
+          RealType myDot = dot(vec, director);
+          angle += acos(myDot);
+          p4 += (35.0 * pow(myDot, 4) - 30.0 * pow(myDot, 2) + 3.0) / 8.0;
         }
         angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
+        p4 /= (seleMan1_.getSelectionCount());
       }
 
       OrderParam param;
       param.p2 = p2;
       param.director = director;
       param.angle = angle;
+      param.p4 = p4;
 
       orderParams_.push_back(param);       
     
@@ -240,14 +247,15 @@ namespace OpenMD {
     if (!doVect_) {
       os << "selection2: (" << selectionScript2_ << ")\n";
     }
-    os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";    
+    os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\t<p4>\n";    
 
     for (size_t i = 0; i < orderParams_.size(); ++i) {
       os <<  orderParams_[i].p2 << "\t"
          <<  orderParams_[i].director[0] << "\t"
          <<  orderParams_[i].director[1] << "\t"
          <<  orderParams_[i].director[2] << "\t"
-         <<  orderParams_[i].angle << "\n";
+         <<  orderParams_[i].angle << "\t"
+         <<  orderParams_[i].p4 << "\n";
 
     }
 

@@ -61,6 +61,7 @@ namespace OpenMD {
       RealType p2;
       Vector3d director;
       RealType angle;
+      RealType p4;
     };
             
     void writeP2();
