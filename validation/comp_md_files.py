@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import comp_md
 
 #print comp_md.validate_md_time("/Users/snjoroge/Documents/openmd/development/samples/alkane/butane.md", "/Users/snjoroge/Documents/openmd/development/samples/alkane/butane.md")

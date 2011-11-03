@@ -3,6 +3,7 @@ import math
 import logging
 import os
 import subprocess
+import logging
 
 fraw_list = []#List of all .md files found (even the includes).
 fmd_list = []#List of all config .md files that can be run (not the includes).
@@ -12,6 +13,9 @@ dir_cwd = ""#Current working directory.
 dir_openmd = ""#Absolute path for openmd
 dir_base = ""#Directory where the script is run from.
 
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
+
 """
 Function sets up the dir_base and dir_openmd. If an openmd executable is not
 found, script exits. Function looks for the openmd in the relative location
@@ -20,13 +24,14 @@ found, script exits. Function looks for the openmd in the relative location
 """
 def setupDirectories():
 	global dir_base, dir_openmd, dir_cwd
+	logger = logging.getLogger("tcpserver")
 	dir_base = os.getcwd()
 	if(os.path.isfile("../build/bin/openmd")):
 		os.chdir("../build/bin/")
 		dir_openmd = os.getcwd()
 		os.chdir(dir_base)
 	else:
-		print "OpenMD executable not found."
+		logger.error("OpenMD : %s", "openmd executable not found at the expected location. Script Will Quit...")
 		sys.exit()
 	
 	
@@ -45,7 +50,8 @@ def validate_md_time(sample_file, validate_file):
   validate_status_time = 0
   validate_sample_time = 0
   validate_run_time = 0
-  
+  logger = logging.getLogger("tcpserver")
+
   samplefh = open(sample_file, "r")
   validatefh = open(validate_file, "r")
   
@@ -86,21 +92,16 @@ def validate_md_time(sample_file, validate_file):
   if (sample_status_time > 0) or (validate_status_time > 0):
     if sample_status_time == validate_status_time:
       return True
-    else:
-      return False
 
   if (sample_sample_time > 0) or (validate_sample_time > 0):
     if sample_sample_time == validate_sample_time:
       return True
-    else:
-      return False
 
   if (sample_run_time > 0) or (validate_run_time > 0):
     if sample_run_time == validate_run_time:
       return True
-    else:
-      return False
 
+  logger.warning("MD File: %s", "Sample/Validation times do not match.")
   return False
   
 """
@@ -143,6 +144,7 @@ Function compares two files.
 @return boolean
 """
 def compare(fExpected, fNew, epsilon = 0.00001, ignore_sign=False):
+	logger = logging.getLogger("tcpserver")
 	fone = open(fExpected, 'r')
 	ftwo = open(fNew, 'r')
 
@@ -162,7 +164,7 @@ def compare(fExpected, fNew, epsilon = 0.00001, ignore_sign=False):
 
 		if lenone != lentwo:
 			diffs = diffs + 1
-			print "Line " + str(i) + " do not match in the files."
+			logger.warning("Line: %d - %s", i, "no mach")
 			return True
 		else:
 			for j in range(lenone):
@@ -219,32 +221,36 @@ Function runs OpenMD on the files the compares them with the already run files (
 @author Samuel Njoroge
 """
 def runMdFiles():
+	logger = logging.getLogger("tcpserver")
 	global dir_base, dir_openmd, dir_cwd
 	output = []
 	for x in range(0, len(fmd_list)):
 		#subprocess.call(["export FORCE_PARAM_PATH=/Users/snjoroge/Documents/openmd/development/forceFields"])
 		if "argon" in fmd_list[x]:
-			print "Switching to Directory: " + os.path.dirname(fmd_list[x])
+			logger.debug("Switching to Directory: %s", os.path.dirname(fmd_list[x]))
 			os.chdir(os.path.dirname(fmd_list[x]))
-			print "Running file: " + fmd_list[x]
+			logger.debug("Running: %s", fmd_list[x])
 			output = subprocess.call([dir_openmd + "/openmd", fmd_list[x]])
 			if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat")):
 				#print "Renaming File: " + fmd_base_list[x] + ".stat - " + fmd_base_list[x] + "_v.stat"
 				#subprocess.call(["cp", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat"])
-				print "Comparing: " + fmd_base_list[x] + ".stat <=> " + fmd_base_list[x] + "_v.stat"
+				logger.debug("Comparing: %s", "Comparing: " + fmd_base_list[x] + ".stat <=> " + fmd_base_list[x] + "_v.stat")
 				if(compare(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat")):
-					print "Files Do not match."
+					logger.warning("Files: %s", "Files do not match.")
 				else:
-					print "Files match."
+					logger.debug("Files Match")
 		os.chdir(dir_base)
 
 def cleanUp():
-	print "delete all files generated so not to commit"
+	print "Delete all files generated."
 	for x in range(0, len(fmd_list)):
-		print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor"
-		os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor")
-		print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat"
-		os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat")
-		print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump"
-		os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump")
+		if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor")):
+			print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor"
+			os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor")
+		if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat")):
+			print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat"
+			os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat")
+		if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump")):
+			print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump"
+			os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump")
 	
