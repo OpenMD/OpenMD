@@ -27,13 +27,9 @@ def setupDirectories():
 	logger = logging.getLogger("tcpserver")
 	dir_base = os.getcwd()
 	if(os.path.isfile("../build/bin/openmd")):
-		os.chdir("../build/bin/")
-		dir_openmd = os.getcwd()
-		os.chdir(dir_base)
+		dir_openmd = os.path.abspath("../build/bin/openmd")
 	elif(os.path.isfile("../bin/openmd")):
-		os.chdir("../bin/")
-		dir_openmd = os.getcwd()
-		os.chdir(dir_base)	
+		dir_openmd = os.path.abspath("../bin/openmd")
 	else:
 		logger.error("OpenMD : %s", "openmd executable not found at the expected location. Script Will Quit...")
 		sys.exit()
@@ -142,8 +138,8 @@ def absDiff(one, two, ignore_sign = False):
 """
 Function compares two files.
 @author Samuel Njoroge and ().
-@param string fExpected - name of the expected file.
-@param string fNew - name of the new test file.
+@param string fExpected - name of the validation file.
+@param string fNew - name of the file to validate.
 @param float epsilon - Precision of the comparison of the files.
 @param boolean ignore_sign - if sign will be a factor in comparing the digits.
 @return boolean
@@ -230,20 +226,32 @@ def runMdFiles():
 	global dir_base, dir_openmd, dir_cwd
 	output = []
 	for x in range(0, len(fmd_list)):
-		#subprocess.call(["export FORCE_PARAM_PATH=/Users/snjoroge/Documents/openmd/development/forceFields"])
 		if "argon" in fmd_list[x]:
 			logger.debug("Switching to Directory: %s", os.path.dirname(fmd_list[x]))
 			os.chdir(os.path.dirname(fmd_list[x]))
 			logger.debug("Running: %s", fmd_list[x])
 			output = subprocess.call([dir_openmd + "/openmd", fmd_list[x]])
-			if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat")):
+			if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat") and os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat")):
 				#print "Renaming File: " + fmd_base_list[x] + ".stat - " + fmd_base_list[x] + "_v.stat"
 				#subprocess.call(["cp", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat"])
 				logger.debug("Comparing: %s", "Comparing: " + fmd_base_list[x] + ".stat <=> " + fmd_base_list[x] + "_v.stat")
 				if(compare(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat")):
-					logger.warning("Files: %s", "Files do not match.")
+					logger.warning("Files: Files do not match.")
 				else:
 					logger.debug("Files Match")
+			else:
+				logger.warning("Stat Files: one of the files was not found: %s \n %s", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat")
+				
+			if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor") and os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.eor")):
+				#print "Renaming File: " + fmd_base_list[x] + ".stat - " + fmd_base_list[x] + "_v.stat"
+				#subprocess.call(["cp", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".stat", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.stat"])
+				logger.debug("Comparing: %s", "Comparing: " + fmd_base_list[x] + ".eor <=> " + fmd_base_list[x] + "_v.eor")
+				if(compare(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.eor")):
+					logger.warning("Files: Files do not match.")
+				else:
+					logger.debug("Files Match")
+			else:
+				logger.warning("Eor Files: one of the files was not found: %s \n %s", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".eor", os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + "_v.eor")
 		os.chdir(dir_base)
 
 def cleanUp():
@@ -258,4 +266,95 @@ def cleanUp():
 		if(os.path.exists(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump")):
 			print "DELETE:" + os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump"
 			os.remove(os.path.dirname(fmd_list[x]) + "/" + fmd_base_list[x] + ".dump")
+
+"""
+Function compares .eor files. It compares sections <StuntDoubles> for position and section <FrameData> for time.
+@author Samuel Njoroge and Dr. Charles Vardeman
+@param string file_validate - name of the validation file.
+@param string file_validate - name of the file to validate.
+@param float epsilon - Precision of the comparison of the files.
+@param boolean ignore_sign - if sign will be a factor in comparing the digits.
+@return boolean
+"""
+def compareEor(file_validate, file_new, epsilon = 0.00001, ignore_sign=False):
+	logger = logging.getLogger("tcpserver")
+	handlerv = open(file_validate, 'r')#Validate file handler.
+	handlern = open(file_new, 'r')#New file handler.
+	
+	#Variables.
+	indexv = indexn = 0
+	xv = xn = 0.0
+	yv = yn = 0.0
+	zv = zn = 0.0
+	
+	#Read first line.
+	linev = handlerv.readline()
+	linen = handlern.readline()
+	
+	while linev:
+		if '<StuntDoubles>' in linev:
+			linev = handlerv.readline()
+			linen = handlern.readline()
+			while 2:
+				Lv = linev.split()
+				Ln = linen.split()
+				
+				#If any of these fail, then the files do not match line by line.
+				try:
+					indexv = int(Lv[0])
+					indexn = int(Ln[0])
+					xv = float(Lv[2])
+					yv = float(Lv[3])
+					zv = float(Lv[4])
+					xn = float(Ln[2])
+					yn = float(Ln[3])
+					zn = float(Ln[4])
+				except:
+					logger.warning("Format: files do not follow the same format \n '%s' \n '%s'", linev.strip(), linen.strip())
+					return True
+				
+				if indexv != indexn:
+					logger.warning("Indexes do not match: %d | %d", indexv, indexn)
+					
+				fediff = absDiff(xv, xn, ignore_sign)
+				if fediff > epsilon:
+					logger.warning("Line: position x on index %d do not match", indexv)
+					return True
+				
+				fediff = absDiff(yv, yn, ignore_sign)
+				if fediff > epsilon:
+					logger.warning("Line: position y on index %d do not match", indexv)
+					return True
+				
+				fediff = absDiff(zv, zn, ignore_sign)
+				if fediff > epsilon:
+					logger.warning("Line: position z on index %d do not match", indexv)
+					return True
+				
+				linev = handlerv.readline()
+				linen = handlern.readline()
+				
+				if '</StuntDoubles>' in linev:
+					break
+		elif '<FrameData>' in linev:
+	
+			linev = handlerv.readline()
+			linen = handlern.readline()
+			
+			while 1:
+				if 'Time' in linev:
+					Ltv = linev.split(':')
+					Ltn = linen.split(':')
+					
+					if int(Ltv[1]) != int(Ltn[1]):
+						logger.warning("Time: FrameData time does not match.")
+						return True
+				elif '</FrameData>' in linev:
+					break
+				linev = handlerv.readline()
+				linen = handlern.readline()
+			
+		linev = handlerv.readline()
+		linen = handlern.readline()
+	return False
 	
