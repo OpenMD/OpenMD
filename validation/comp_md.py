@@ -30,10 +30,15 @@ def setupDirectories():
 		os.chdir("../build/bin/")
 		dir_openmd = os.getcwd()
 		os.chdir(dir_base)
+	elif(os.path.isfile("../bin/openmd")):
+		os.chdir("../bin/")
+		dir_openmd = os.getcwd()
+		os.chdir(dir_base)	
 	else:
 		logger.error("OpenMD : %s", "openmd executable not found at the expected location. Script Will Quit...")
 		sys.exit()
-	
+	forcefld_path = os.path.abspath("../forceFields")
+	os.environ["FORCE_PARAM_PATH"] = forcefld_path
 	
 """
 Function checks if the sample_file and validate_file (.md files) have the same
