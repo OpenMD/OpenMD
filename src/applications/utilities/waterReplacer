@@ -1,0 +1,277 @@
+#!/usr/bin/env python
+"""Water Replacer
+
+Finds atomistic waters in an xyz file and generates a meta-data file
+with center of mass and orientational coordinates for rigid body
+waters.
+
+Usage: waterReplacer
+
+Options:
+  -h, --help              show this help
+  -x,                     use the specified input (.xyz) file
+  -o, --output-file=...   use specified output (.md) file
+
+
+Example:
+   waterReplacer -x basal.xyz -o basal.md
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1646 $"
+__date__ = "$Date: 2011-09-26 09:30:00 -0400 (Mon, 26 Sep 2011) $"
+__copyright__ = "Copyright (c) 2011 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+import random
+import numpy
+
+_haveXYZFileName = 0
+_haveOutputFileName = 0
+
+atypes = []
+positions = []
+metaData = []
+frameData = []
+WaterPos = []
+WaterQuats = []
+indices = []
+Hmat = []
+BoxInv = []
+H = []
+Eliminate = []
+
+#Hmat = zeros([3,3],Float)
+#BoxInv = zeros([3],Float)
+
+def usage():
+    print __doc__
+
+def readFile(XYZFileName):
+    print "reading XYZ file"
+
+    XYZFile = open(XYZFileName, 'r')        
+    # Find number of atoms first
+    line = XYZFile.readline()
+    L = line.split()
+    nAtoms = int(L[0])
+    # skip comment line
+    line = XYZFile.readline()
+    for i in range(nAtoms):
+        line = XYZFile.readline()
+        L = line.split()
+        myIndex = i
+        indices.append(myIndex)
+        atomType = L[0]
+        atypes.append(atomType)
+        x = float(L[1])
+        y = float(L[2])
+        z = float(L[3])
+        positions.append([x, y, z])
+    XYZFile.close()
+
+def findWaters():
+    print "finding water molecules"
+    # simpler since we only have to find H atoms within a few
+    # angstroms of each water:
+
+    hCovRad = 0.32
+    oCovRad = 0.73
+    covTol = 0.45
+    OHbond = hCovRad + oCovRad + covTol
+    Hmass = 1.0079
+    Omass = 15.9994
+    # initialize H array to an error condition
+    H.append(-1)
+    H.append(-1)
+    
+    for i in range(len(indices)):
+        if (atypes[i] == "O"):
+            nH = 0
+            H[0] = -1
+            H[1] = -1
+            COM = [0.0, 0.0, 0.0]
+            opos = positions[i]
+            for j in range(len(indices)):
+                if (atypes[j] == "H"):
+                    hpos = positions[j]
+                    dx = opos[0] - hpos[0]
+                    dy = opos[1] - hpos[1]
+                    dz = opos[2] - hpos[2]
+                    dist = math.sqrt(dx*dx + dy*dy + dz*dz)
+                    if (dist < OHbond):
+                        if (nH >= 2):
+                            print "oxygen %d had too many hydrogens" % (i)
+                            sys.exit(1)
+                        H[nH] = j
+                        nH = nH + 1
+            if (nH != 2):
+                print "oxygen %d had %d hydrogens, skipping" % (i, nH)
+            if (nH == 2):
+                Xcom = Omass * opos[0] + Hmass*(positions[H[0]][0] + positions[H[1]][0])
+                Ycom = Omass * opos[1] + Hmass*(positions[H[0]][1] + positions[H[1]][1])
+                Zcom = Omass * opos[2] + Hmass*(positions[H[0]][2] + positions[H[1]][2])
+                
+                totalMass = Omass + 2.0*Hmass
+                Xcom = Xcom / totalMass
+                Ycom = Ycom / totalMass
+                Zcom = Zcom / totalMass
+                COM = [Xcom, Ycom, Zcom]
+                WaterPos.append(COM)
+                bisector = [0.0, 0.0, 0.0]
+                ux = [0.0, 0.0, 0.0]
+                uy = [0.0, 0.0, 0.0]
+                uz = [0.0, 0.0, 0.0]
+                RotMat = numpy.zeros((3,3), numpy.float)
+
+                for j in range(3):
+                    bisector[j] = 0.5*(positions[H[0]][j] + positions[H[1]][j])
+                    uz[j] = bisector[j] - opos[j]
+                    uy[j] = positions[H[0]][j] - positions[H[1]][j]
+                    
+                uz = normalize(uz)
+                uy = normalize(uy)
+                ux = cross(uy, uz)
+                ux = normalize(ux)
+
+                q = [0.0, 0.0, 0.0, 0.0]
+
+                # RotMat to Quat code is out of OpenMD's SquareMatrix3.hpp code:
+
+                RotMat[0] = ux
+                RotMat[1] = uy
+                RotMat[2] = uz
+
+                t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
+        
+                if( t > 1e-6 ):
+                    s = 0.5 / math.sqrt( t )
+                    q[0] = 0.25 / s
+                    q[1] = (RotMat[1][2] - RotMat[2][1]) * s
+                    q[2] = (RotMat[2][0] - RotMat[0][2]) * s
+                    q[3] = (RotMat[0][1] - RotMat[1][0]) * s
+                else:
+                    ad1 = RotMat[0][0]
+                    ad2 = RotMat[1][1]
+                    ad3 = RotMat[2][2]
+
+                    if( ad1 >= ad2 and ad1 >= ad3 ):
+                        s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
+                        q[0] = (RotMat[1][2] - RotMat[2][1]) * s
+                        q[1] = 0.25 / s
+                        q[2] = (RotMat[0][1] + RotMat[1][0]) * s
+                        q[3] = (RotMat[0][2] + RotMat[2][0]) * s
+                    elif ( ad2 >= ad1 and ad2 >= ad3 ):
+                        s = 0.5 / math.sqrt( 1.0 + RotMat[1][1] - RotMat[0][0] - RotMat[2][2] )
+                        q[0] = (RotMat[2][0] - RotMat[0][2] ) * s
+                        q[1] = (RotMat[0][1] + RotMat[1][0]) * s
+                        q[2] = 0.25 / s
+                        q[3] = (RotMat[1][2] + RotMat[2][1]) * s
+                    else:
+                        s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
+                        q[0] = (RotMat[0][1] - RotMat[1][0]) * s
+                        q[1] = (RotMat[0][2] + RotMat[2][0]) * s
+                        q[2] = (RotMat[1][2] + RotMat[2][1]) * s
+                        q[3] = 0.25 / s
+
+                WaterQuats.append(q)
+                Eliminate.append(i)
+                Eliminate.append(H[0])
+                Eliminate.append(H[1])
+
+
+def writeFile(outputFileName):
+    outputFile = open(outputFileName, 'w')
+
+    outputFile.write("<OpenMD version=1>\n");
+    
+    for metaline in metaData:
+        outputFile.write(metaline)
+
+    outputFile.write("  <Snapshot>\n")
+
+    for frameline in frameData:
+        outputFile.write(frameline)
+        
+    outputFile.write("    <StuntDoubles>\n")
+
+    sdFormat = 'pvqj'
+
+    index = 0
+    for i in range(len(WaterPos)):
+        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, WaterPos[i][0], WaterPos[i][1], WaterPos[i][2], 0.0, 0.0, 0.0, WaterQuats[i][0], WaterQuats[i][1], WaterQuats[i][2], WaterQuats[i][3], 0.0, 0.0, 0.0))
+        index = index + 1
+
+
+    sdFormat = 'pv'
+    for i in range(len(indices)):
+        if  i not in Eliminate:
+            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e \n" % (index, sdFormat, positions[i][0], positions[i][1], positions[i][2], 0.0, 0.0, 0.0))
+
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OpenMD>\n")
+    outputFile.close()
+
+def dot(L1, L2):
+    myDot = 0.0
+    for i in range(len(L1)):
+        myDot = myDot + L1[i]*L2[i]
+    return myDot
+
+def normalize(L1):
+    L2 = []
+    myLength = math.sqrt(dot(L1, L1))
+    for i in range(len(L1)):
+        L2.append(L1[i] / myLength)
+    return L2
+
+def cross(L1, L2):
+    # don't call this with anything other than length 3 lists please
+    # or you'll be sorry
+    L3 = [0.0, 0.0, 0.0]
+    L3[0] = L1[1]*L2[2] - L1[2]*L2[1] 
+    L3[1] = L1[2]*L2[0] - L1[0]*L2[2]
+    L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
+    return L3
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hx:o:", ["help", "xyz-file=", "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-x", "--xyz-file"): 
+            xyzFileName = arg
+            global _haveXYZFileName
+            _haveXYZFileName = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            global _haveOutputFileName
+            _haveOutputFileName = 1
+    if (_haveXYZFileName != 1):
+        usage() 
+        print "No XYZ file was specified"
+        sys.exit()
+    if (_haveOutputFileName != 1):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+    readFile(xyzFileName)
+    findWaters()
+    writeFile(outputFileName)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
