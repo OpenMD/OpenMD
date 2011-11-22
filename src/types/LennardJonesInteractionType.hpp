@@ -61,7 +61,15 @@ namespace OpenMD {
       sigma = mySigma;
       epsilon = myEpsilon;
     }
+
+    RealType getSigma() {
+      return sigma;
+    }
     
+    RealType getEpsilon() {
+      return epsilon;
+    }
+
   private:
     RealType sigma;
     RealType epsilon;    

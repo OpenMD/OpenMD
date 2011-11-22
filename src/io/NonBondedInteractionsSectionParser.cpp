@@ -41,10 +41,9 @@
  
 #include "io/NonBondedInteractionsSectionParser.hpp"
 #include "types/AtomType.hpp"
-#include "types/ShiftedMorseInteractionType.hpp"
+#include "types/MorseInteractionType.hpp"
 #include "types/MAWInteractionType.hpp"
 #include "types/LennardJonesInteractionType.hpp"
-#include "types/RepulsiveMorseInteractionType.hpp"
 #include "types/RepulsivePowerInteractionType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
@@ -109,7 +108,7 @@ namespace OpenMD {
         RealType r0 = tokenizer.nextTokenAsDouble();
         RealType D0 = tokenizer.nextTokenAsDouble();
         RealType beta0 = tokenizer.nextTokenAsDouble();
-        interactionType = new ShiftedMorseInteractionType(D0, beta0, r0);
+        interactionType = new MorseInteractionType(D0, beta0, r0, mtShifted);
       }
       break;
       
@@ -123,7 +122,7 @@ namespace OpenMD {
         RealType r0 = tokenizer.nextTokenAsDouble();
         RealType D0 = tokenizer.nextTokenAsDouble();
         RealType beta0 = tokenizer.nextTokenAsDouble();
-        interactionType = new RepulsiveMorseInteractionType(D0, beta0, r0);
+        interactionType = new MorseInteractionType(D0, beta0, r0, mtRepulsive);
       }
       break;
       

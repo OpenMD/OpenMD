@@ -44,22 +44,18 @@
 
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
+#include "types/MorseInteractionType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/Vector3.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  enum MorseInteractionType {
-    shiftedMorse,
-    repulsiveMorse,
-  };
-
   struct MorseInteractionData {
     RealType De;
     RealType Re;
     RealType beta;
-    MorseInteractionType interactionType;
+    MorseType variant;
   };
 
   class Morse : public VanDerWaalsInteraction {
@@ -67,7 +63,7 @@ namespace OpenMD {
   public:    
     Morse();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType Re, RealType beta, MorseInteractionType mit);
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType Re, RealType beta, MorseType mt);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
@@ -77,7 +73,6 @@ namespace OpenMD {
     bool initialized_;
     map<pair<AtomType*, AtomType*>, MorseInteractionData> MixingMap;
     ForceField* forceField_;    
-    map<string, MorseInteractionType> stringToEnumMap_;
     string name_;
 
   };

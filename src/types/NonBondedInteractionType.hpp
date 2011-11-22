@@ -153,32 +153,6 @@ namespace OpenMD {
 
   typedef SimpleTypeData<EAMMixingParam> EAMMixingData;
 
-  struct MorseParam {
-    RealType De;
-    RealType Re;
-    RealType beta;
-    std::string interactionType;
-  };
-  
-  typedef SimpleTypeData<MorseParam> MorseData;
-
-  struct MAWParam {
-    RealType De;
-    RealType Re;
-    RealType beta;
-    RealType ca1;
-    RealType cb1;
-  };
-  
-  typedef SimpleTypeData<MAWParam> MAWData;
-
-  struct RepulsivePowerParam {
-    RealType epsilon;
-    RealType sigma;
-    int nRep;
-  };
-  typedef SimpleTypeData<RepulsivePowerParam> RepulsivePowerData;
-
 } //end namespace OpenMD
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP
 

@@ -45,7 +45,7 @@
 #include <cmath>
 #include "nonbonded/Morse.hpp"
 #include "utils/simError.h"
-#include "types/NonBondedInteractionType.hpp"
+#include "types/MorseInteractionType.hpp"
 
 using namespace std;
 
@@ -55,67 +55,38 @@ namespace OpenMD {
   
   void Morse::initialize() {    
 
-    stringToEnumMap_["shiftedMorse"] = shiftedMorse;
-    stringToEnumMap_["repulsiveMorse"] = repulsiveMorse;
-
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     NonBondedInteractionType* nbt;
+    ForceField::NonBondedInteractionTypeContainer::KeyType keys;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
       
       if (nbt->isMorse()) {
-        
-        pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
-        
-        GenericData* data = nbt->getPropertyByName("Morse");
-        if (data == NULL) {
-          sprintf( painCave.errMsg, "Morse::initialize could not find\n"
-                   "\tMorse parameters for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError(); 
-        }
-        
-        MorseData* morseData = dynamic_cast<MorseData*>(data);
-        if (morseData == NULL) {
+        keys = nbiTypes->getKeys(j);
+        AtomType* at1 = forceField_->getAtomType(keys[0]);
+        AtomType* at2 = forceField_->getAtomType(keys[1]);
+
+        MorseInteractionType* mit = dynamic_cast<MorseInteractionType*>(nbt);
+
+        if (mit == NULL) {
           sprintf( painCave.errMsg,
-                   "Morse::initialize could not convert GenericData to\n"
-                   "\tMorseData for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
+                   "Morse::initialize could not convert NonBondedInteractionType\n"
+                   "\tto MorseInteractionType for %s - %s interaction.\n", 
+                   at1->getName().c_str(),
+                   at2->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();          
         }
         
-        MorseParam morseParam = morseData->getData();
-
-        RealType De = morseParam.De;
-        RealType Re = morseParam.Re;
-        RealType beta = morseParam.beta;
-        string interactionType = morseParam.interactionType;
-
-        toUpper(interactionType);
-        map<string, MorseInteractionType>::iterator i;
-        i = stringToEnumMap_.find(interactionType);
-        if (i != stringToEnumMap_.end()) { 
-          addExplicitInteraction(atypes.first, atypes.second, 
-                                 De, Re, beta, i->second );
-        } else {
-          sprintf( painCave.errMsg,
-                   "Morse::initialize found unknown Morse interaction type\n"
-                   "\t(%s) for %s - %s interaction.\n", 
-                   morseParam.interactionType.c_str(),
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
+        RealType De = mit->getD();
+        RealType Re = mit->getR();
+        RealType beta = mit->getBeta();
+   
+        MorseType variant = mit->getInteractionType();
+        addExplicitInteraction(at1, at2, De, Re, beta, variant );
       }
     }  
     initialized_ = true;
@@ -123,13 +94,13 @@ namespace OpenMD {
       
   void Morse::addExplicitInteraction(AtomType* atype1, AtomType* atype2, 
                                      RealType De, RealType Re, RealType beta, 
-                                     MorseInteractionType mit) {
+                                     MorseType mt) {
 
     MorseInteractionData mixer;
     mixer.De = De;
     mixer.Re = Re;
     mixer.beta = beta;
-    mixer.interactionType = mit;
+    mixer.variant = mt;
 
     pair<AtomType*, AtomType*> key1, key2;
     key1 = make_pair(atype1, atype2);
@@ -158,7 +129,7 @@ namespace OpenMD {
       RealType De = mixer.De;
       RealType Re = mixer.Re;
       RealType beta = mixer.beta;
-      MorseInteractionType interactionType = mixer.interactionType;
+      MorseType variant = mixer.variant;
       
       // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
       
@@ -177,8 +148,8 @@ namespace OpenMD {
       }
       
       
-      switch(interactionType) {
-      case shiftedMorse : {
+      switch(variant) {
+      case mtShifted : {
         
         myPot  = De * (expfnc2  - 2.0 * expfnc);
         myDeriv   = 2.0 * De * beta * (expfnc - expfnc2);
@@ -197,7 +168,7 @@ namespace OpenMD {
         
         break;
       }
-      case repulsiveMorse : {
+      case mtRepulsive : {
         
         myPot  = De * expfnc2;
         myDeriv  = -2.0 * De * beta * expfnc2;
@@ -214,6 +185,10 @@ namespace OpenMD {
           myDerivC = 0.0;
         }
         
+        break;
+      }
+      case mtUnknown: {
+        // don't know what to do so don't do anything
         break;
       }
       }

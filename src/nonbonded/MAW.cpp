@@ -57,45 +57,36 @@ namespace OpenMD {
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     NonBondedInteractionType* nbt;
+    ForceField::NonBondedInteractionTypeContainer::KeyType keys;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
       
       if (nbt->isMAW()) {
-        pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
-        
-        GenericData* data = nbt->getPropertyByName("MAW");
-        if (data == NULL) {
-          sprintf( painCave.errMsg, "MAW::initialize could not find\n"
-                   "\tMAW parameters for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError(); 
-        }
-        
-        MAWData* mawData = dynamic_cast<MAWData*>(data);
-        if (mawData == NULL) {
+        keys = nbiTypes->getKeys(j);
+        AtomType* at1 = forceField_->getAtomType(keys[0]);
+        AtomType* at2 = forceField_->getAtomType(keys[1]);
+
+        MAWInteractionType* mit = dynamic_cast<MAWInteractionType*>(nbt);
+
+        if (mit == NULL) {
           sprintf( painCave.errMsg,
-                   "MAW::initialize could not convert GenericData to\n"
-                   "\tMAWData for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
+                   "MAW::initialize could not convert NonBondedInteractionType\n"
+                   "\tto MAWInteractionType for %s - %s interaction.\n", 
+                   at1->getName().c_str(),
+                   at2->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();          
         }
         
-        MAWParam mawParam = mawData->getData();
-
-        RealType De = mawParam.De;
-        RealType beta = mawParam.beta;
-        RealType Re = mawParam.Re;
-        RealType ca1 = mawParam.ca1;
-        RealType cb1 = mawParam.cb1;
+        RealType De = mit->getD();
+        RealType beta = mit->getBeta();
+        RealType Re = mit->getR();
+        RealType ca1 = mit->getCA1();
+        RealType cb1 = mit->getCB1();
         
-        addExplicitInteraction(atypes.first, atypes.second, 
+        addExplicitInteraction(at1, at2, 
                                De, beta, Re, ca1, cb1);
       }
     }  

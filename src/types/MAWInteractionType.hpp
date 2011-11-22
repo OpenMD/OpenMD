@@ -77,7 +77,26 @@ namespace OpenMD {
       cb1 = myCb1;
       setMAW();
     }
+    RealType getD() {
+      return D_e;
+    }
     
+    RealType getBeta() {
+      return beta;
+    }
+
+    RealType getR() {
+      return r_e;
+    }
+
+    RealType getCA1() {
+      return ca1;
+    }
+
+    RealType getCB1() {
+      return cb1;
+    }
+
   private:    
     RealType D_e;
     RealType beta;

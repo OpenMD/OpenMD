@@ -39,36 +39,67 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef TYPES_REPULSIVEMORSEINTERACTIONTYPE_HPP
-#define TYPES_REPULSIVEMORSEINTERACTIONTYPE_HPP
+#ifndef TYPES_MORSEINTERACTIONTYPE_HPP
+#define TYPES_MORSEINTERACTIONTYPE_HPP
 
 #include "types/NonBondedInteractionType.hpp"
 
 namespace OpenMD {
   /**
-   * @class RepulsiveMorseInteractionType 
+   * @class MorseInteractionType 
    *
-   * RepulsiveMorseInteractionType is one of the basic
-   * Metal-to-NonMetal interaction types.
+   * MorseInteractionType is one of the basic non-bonded interactions
+   *
+   * RepulsiveMorse:
    *
    * \f[ V = D_0 \exp(-2 * \beta_0 (r-r_0)) \f]
+   *
+   * ShiftedMorse:
+   *
+   * \f[ V = D_0 \exp(-\beta_0 (r - r_0)) * (\exp(-\beta_0 (r - r_0)) - 2) \f]
    */
-  class RepulsiveMorseInteractionType : public NonBondedInteractionType {
+
+  enum MorseType{
+    mtShifted,
+    mtRepulsive,
+    mtUnknown
+  };
+  
+  class MorseInteractionType : public NonBondedInteractionType {
     
   public:
     
-    RepulsiveMorseInteractionType(RealType myD0, RealType myBeta0, 
-				  RealType myR0) {
+    MorseInteractionType(RealType myD0, RealType myBeta0, RealType myR0, 
+                         MorseType myType) {
       D0 = myD0;
       beta0 = myBeta0;
       r0 = myR0;
+      interactionType = myType;
       setMorse();
     }
+
+    RealType getD() {
+      return D0;
+    }
     
+    RealType getBeta() {
+      return beta0;
+    }
+
+    RealType getR() {
+      return r0;
+    }
+    
+    MorseType getInteractionType() {
+      return interactionType;
+    }
+
   private:   
     RealType D0;
     RealType beta0;
-    RealType r0;    
+    RealType r0;
+    MorseType interactionType;
+
   };
 }
 #endif
