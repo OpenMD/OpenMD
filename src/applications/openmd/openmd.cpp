@@ -35,8 +35,9 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2010).                        
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifdef IS_MPI
@@ -86,30 +87,31 @@ int main(int argc,char* argv[]){
   if( worldRank == 0 ){
 #endif
     std::cerr << 
-      "  +-----------------------------------------------------------------------+\n"<<
-      "  |    ____                    __  ___ ____                               |\n"<<
-      "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics |\n"<<
-      "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).    |\n"<<
-      "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                               |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2011 by the  |\n"<<
-      "  |     /_/                                   University of Notre Dame.   |\n"<<
-      "  |                                                                       |\n"<<
+      "  +--------------------------------------------------------------------------+\n"<<
+      "  |    ____                    __  ___ ____                                  |\n"<<
+      "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
+      "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
+      "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2011 by the     |\n"<<
+      "  |     /_/                                   University of Notre Dame.      |\n"<<
+      "  |                                                                          |\n"<<
       "  |        version " << 
       OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << revision << 
-      "     http://www.openmd.net       |\n"<<
-      "  |                                                                       |\n"<<
-      "  | OpenMD is an OpenScience project.  All source code is available for   |\n"<<
-      "  | any use whatsoever under a BSD-style license.                         |\n"<<
-      "  |                                                                       |\n"<<
-      "  | Support OpenScience!  If you use OpenMD or its source code in your    |\n"<<
-      "  | research, please cite the appropriate papers when you publish your    |\n"<<
-      "  | work.  Good starting points are:                                      |\n"<<
-      "  |                                                                       |\n"<<
-      "  | [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).              |\n"<<
-      "  | [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).           |\n"<<
-      "  | [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          |\n"<<
-      "  | [4]  Vardeman & Gezelter, in progress (2010).                         |\n"<<
-      "  +-----------------------------------------------------------------------+\n"<<
+      "     http://www.openmd.net          |\n"<<
+      "  |                                                                          |\n"<<
+      "  | OpenMD is an OpenScience project.  All source code is available for any  |\n"<<
+      "  | use whatsoever under a BSD-style license.                                |\n"<<
+      "  |                                                                          |\n"<<
+      "  | Support OpenScience!  If you use OpenMD or its source code in your       |\n"<<
+      "  | research, please cite the appropriate papers when you publish your work  |\n"<<
+      "  | Good starting points are:                                                |\n"<<
+      "  |                                                                          |\n"<<
+      "  | [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).                  |\n"<<
+      "  | [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).               |\n"<<
+      "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).               |\n"<<
+      "  | [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).                |\n"<<
+      "  | [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |\n"<<
+      "  +--------------------------------------------------------------------------+\n"<<
       "\n";
     
     if( argc < 2 ){
