@@ -32,13 +32,13 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).
+ * [4]  Vardeman & Gezelter, in progress (2009).
  */
- 
+
 #include <math.h>
 #include <iostream>
 
@@ -57,7 +57,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator miter;
     std::vector<StuntDouble*>::iterator iiter;
     Molecule* mol;
-    StuntDouble* integrableObject;    
+    StuntDouble* integrableObject;
     Vector3d vel;
     Vector3d angMom;
     Mat3x3d I;
@@ -67,34 +67,34 @@ namespace OpenMD {
     RealType mass;
     RealType kinetic = 0.0;
     RealType kinetic_global = 0.0;
-    
-    for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
-	   integrableObject = mol->nextIntegrableObject(iiter)) {
-        
-	mass = integrableObject->getMass();
-	vel = integrableObject->getVel();
-        
-	kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
-        
-	if (integrableObject->isDirectional()) {
-	  angMom = integrableObject->getJ();
-	  I = integrableObject->getI();
 
-	  if (integrableObject->isLinear()) {
-	    i = integrableObject->linearAxis();
-	    j = (i + 1) % 3;
-	    k = (i + 2) % 3;
-	    kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
-	  } else {                        
-	    kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1) 
-	      + angMom[2]*angMom[2]/I(2, 2);
-	  }
-	}
-            
+    for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
+      for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL;
+     integrableObject = mol->nextIntegrableObject(iiter)) {
+
+  mass = integrableObject->getMass();
+  vel = integrableObject->getVel();
+
+  kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
+
+  if (integrableObject->isDirectional()) {
+    angMom = integrableObject->getJ();
+    I = integrableObject->getI();
+
+    if (integrableObject->isLinear()) {
+      i = integrableObject->linearAxis();
+      j = (i + 1) % 3;
+      k = (i + 2) % 3;
+      kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+    } else {
+      kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1)
+        + angMom[2]*angMom[2]/I(2, 2);
+    }
+  }
+
       }
     }
-    
+
 #ifdef IS_MPI
 
     MPI_Allreduce(&kinetic, &kinetic_global, 1, MPI_REALTYPE, MPI_SUM,
@@ -138,12 +138,12 @@ namespace OpenMD {
   }
 
   RealType Thermo::getTemperature() {
-    
+
     RealType temperature = ( 2.0 * this->getKinetic() ) / (info_->getNdf()* PhysicalConstants::kb );
     return temperature;
   }
 
-  RealType Thermo::getVolume() { 
+  RealType Thermo::getVolume() {
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     return curSnapshot->getVolume();
   }
@@ -167,7 +167,7 @@ namespace OpenMD {
 
     // Relies on the calculation of the full molecular pressure tensor
 
-	  
+
     Mat3x3d tensor;
     RealType pressure;
 
@@ -189,17 +189,17 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     std::vector<StuntDouble*>::iterator j;
     Molecule* mol;
-    StuntDouble* integrableObject;    
+    StuntDouble* integrableObject;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
-	   integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+     integrableObject = mol->nextIntegrableObject(j)) {
 
-	RealType mass = integrableObject->getMass();
-	Vector3d vcom = integrableObject->getVel();
-	p_local += mass * outProduct(vcom, vcom);         
+  RealType mass = integrableObject->getMass();
+  Vector3d vcom = integrableObject->getVel();
+  p_local += mass * outProduct(vcom, vcom);
       }
     }
-    
+
 #ifdef IS_MPI
     MPI_Allreduce(p_local.getArrayPointer(), p_global.getArrayPointer(), 9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #else
@@ -211,7 +211,7 @@ namespace OpenMD {
     Mat3x3d tau = curSnapshot->statData.getTau();
 
     pressureTensor =  (p_global + PhysicalConstants::energyConvert* tau)/volume;
-    
+
     return pressureTensor;
   }
 
@@ -219,24 +219,24 @@ namespace OpenMD {
   void Thermo::saveStat(){
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     Stats& stat = currSnapshot->statData;
-    
+
     stat[Stats::KINETIC_ENERGY] = getKinetic();
     stat[Stats::POTENTIAL_ENERGY] = getPotential();
     stat[Stats::TOTAL_ENERGY] = stat[Stats::KINETIC_ENERGY]  + stat[Stats::POTENTIAL_ENERGY] ;
     stat[Stats::TEMPERATURE] = getTemperature();
     stat[Stats::PRESSURE] = getPressure();
-    stat[Stats::VOLUME] = getVolume();      
+    stat[Stats::VOLUME] = getVolume();
 
     Mat3x3d tensor =getPressureTensor();
-    stat[Stats::PRESSURE_TENSOR_XX] = tensor(0, 0);      
-    stat[Stats::PRESSURE_TENSOR_XY] = tensor(0, 1);      
-    stat[Stats::PRESSURE_TENSOR_XZ] = tensor(0, 2);      
-    stat[Stats::PRESSURE_TENSOR_YX] = tensor(1, 0);      
-    stat[Stats::PRESSURE_TENSOR_YY] = tensor(1, 1);      
-    stat[Stats::PRESSURE_TENSOR_YZ] = tensor(1, 2);      
-    stat[Stats::PRESSURE_TENSOR_ZX] = tensor(2, 0);      
-    stat[Stats::PRESSURE_TENSOR_ZY] = tensor(2, 1);      
-    stat[Stats::PRESSURE_TENSOR_ZZ] = tensor(2, 2);      
+    stat[Stats::PRESSURE_TENSOR_XX] = tensor(0, 0);
+    stat[Stats::PRESSURE_TENSOR_XY] = tensor(0, 1);
+    stat[Stats::PRESSURE_TENSOR_XZ] = tensor(0, 2);
+    stat[Stats::PRESSURE_TENSOR_YX] = tensor(1, 0);
+    stat[Stats::PRESSURE_TENSOR_YY] = tensor(1, 1);
+    stat[Stats::PRESSURE_TENSOR_YZ] = tensor(1, 2);
+    stat[Stats::PRESSURE_TENSOR_ZX] = tensor(2, 0);
+    stat[Stats::PRESSURE_TENSOR_ZY] = tensor(2, 1);
+    stat[Stats::PRESSURE_TENSOR_ZZ] = tensor(2, 2);
     Vector3d GKappa_t = getThermalHelfand();
     stat[Stats::THERMAL_HELFANDMOMENT_X] = GKappa_t.x();
     stat[Stats::THERMAL_HELFANDMOMENT_Y] = GKappa_t.y();
@@ -244,18 +244,18 @@ namespace OpenMD {
 
     Globals* simParams = info_->getSimParams();
 
-    if (simParams->haveTaggedAtomPair() && 
+    if (simParams->haveTaggedAtomPair() &&
         simParams->havePrintTaggedPairDistance()) {
       if ( simParams->getPrintTaggedPairDistance()) {
-        
+
         std::pair<int, int> tap = simParams->getTaggedAtomPair();
         Vector3d pos1, pos2, rab;
 
-#ifdef IS_MPI        
+#ifdef IS_MPI
         std::cerr << "tap = " << tap.first << "  " << tap.second << std::endl;
 
-	int mol1 = info_->getGlobalMolMembership(tap.first);
-	int mol2 = info_->getGlobalMolMembership(tap.second);
+  int mol1 = info_->getGlobalMolMembership(tap.first);
+  int mol2 = info_->getGlobalMolMembership(tap.second);
         std::cerr << "mols = " << mol1 << " " << mol2 << std::endl;
 
         int proc1 = info_->getMolToProc(mol1);
@@ -263,14 +263,14 @@ namespace OpenMD {
 
         std::cerr << " procs = " << proc1 << " " <<proc2 <<std::endl;
 
-	RealType data[3];
+  RealType data[3];
         if (proc1 == worldRank) {
           StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
           std::cerr << " on proc " << proc1 << ", sd1 has global index= " << sd1->getGlobalIndex() << std::endl;
           pos1 = sd1->getPos();
           data[0] = pos1.x();
           data[1] = pos1.y();
-          data[2] = pos1.z();          
+          data[2] = pos1.z();
           MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
         } else {
           MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
@@ -284,7 +284,7 @@ namespace OpenMD {
           pos2 = sd2->getPos();
           data[0] = pos2.x();
           data[1] = pos2.y();
-          data[2] = pos2.z();          
+          data[2] = pos2.z();
           MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
         } else {
           MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
@@ -295,16 +295,16 @@ namespace OpenMD {
         StuntDouble* at2 = info_->getIOIndexToIntegrableObject(tap.second);
         pos1 = at1->getPos();
         pos2 = at2->getPos();
-#endif        
+#endif
         rab = pos2 - pos1;
         currSnapshot->wrapVector(rab);
         stat[Stats::TAGGED_PAIR_DISTANCE] =  rab.length();
       }
     }
-      
+
     /**@todo need refactorying*/
     //Conserved Quantity is set by integrator and time is set by setTime
-    
+
   }
 
 
@@ -435,7 +435,7 @@ namespace OpenMD {
     RealType AvgE_a_ = 0;
     Vector3d GKappa_t = V3Zero;
     Vector3d ThermalHelfandMoment;
-    
+
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
 
@@ -444,7 +444,7 @@ namespace OpenMD {
 
         mass = atom->getMass();
         velocity = atom->getVel();
-        kinetic = mass * (velocity[0]*velocity[0] + velocity[1]*velocity[1] + 
+        kinetic = mass * (velocity[0]*velocity[0] + velocity[1]*velocity[1] +
                                    velocity[2]*velocity[2]) / PhysicalConstants::energyConvert;
         potential =  atom->getParticlePot();
         eatom += (kinetic + potential)/2.0;
@@ -453,36 +453,39 @@ namespace OpenMD {
 
    int natoms = info_->getNGlobalAtoms();
 #ifdef IS_MPI
-    
+
     MPI_Allreduce(&eatom, &AvgE_a_, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
-#else    
+#else
     AvgE_a_ = eatom;
 #endif
     AvgE_a_ = AvgE_a_/RealType(natoms);
-    
+
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
-      
+
       for (atom = mol->beginAtom(aiter); atom != NULL;
            atom = mol->nextAtom(aiter)) {
-        
+
         /* We think that x_a is relative to the total box and should be a wrapped coordinate */
         x_a = atom->getPos();
         currSnapshot->wrapVector(x_a);
         potential =  atom->getParticlePot();
-
-        GKappa_t += x_a*(potential-AvgE_a_);
+        velocity = atom->getVel();
+        kinetic = mass * (velocity[0]*velocity[0] + velocity[1]*velocity[1] +
+                           velocity[2]*velocity[2]) / PhysicalConstants::energyConvert;
+        eatom += (kinetic + potential)/2.0
+        GKappa_t += x_a*(eatom-AvgE_a_);
         }
       }
 #ifdef IS_MPI
      MPI_Allreduce(GKappa_t.getArrayPointer(), ThermalHelfandMoment.getArrayPointer(), 3,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-#else    
+#else
      ThermalHelfandMoment = GKappa_t;
-#endif  
+#endif
      return ThermalHelfandMoment;
-     
+
  }
 
 
