@@ -474,7 +474,7 @@ namespace OpenMD {
         velocity = atom->getVel();
         kinetic = mass * (velocity[0]*velocity[0] + velocity[1]*velocity[1] +
                            velocity[2]*velocity[2]) / PhysicalConstants::energyConvert;
-        eatom += (kinetic + potential)/2.0
+        eatom += (kinetic + potential)/2.0;
         GKappa_t += x_a*(eatom-AvgE_a_);
         }
       }
