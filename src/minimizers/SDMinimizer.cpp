@@ -91,7 +91,7 @@ namespace OpenMD {
 
     // test function tolerance test
     fTol = paramSet->getFTol();
-    relativeFTol = fTol * std::max(1.0, fabs(curF)); // relative tolerance
+    relativeFTol = fTol * std::max(RealType(1.0), fabs(curF)); // relative tolerance
     deltaF = prevF - curF;
 
     if (fabs(deltaF) <= relativeFTol) {
@@ -105,7 +105,7 @@ namespace OpenMD {
 
     //gradient tolerance test
     gTol = paramSet->getGTol();
-    relativeGTol = gTol * std::max(1.0, fabs(curF));
+    relativeGTol = gTol * std::max(RealType(1.0), fabs(curF));
 
 #ifndef IS_MPI
 

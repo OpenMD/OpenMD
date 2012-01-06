@@ -1,70 +1,71 @@
-## FFTW can be compiled and subsequently linked against
-## various data types.
-## There is a single set of include files, and then muttiple libraries,
-## One for each type.  I.e. libfftw.a-->double, libfftwf.a-->float
- 
-## The following logic belongs in the individual package
-mark_as_advanced(USE_FFTWD)
-option(USE_FFTWD "Use double precision FFTW if found" ON)
-## mark_as_advanced(USE_FFTWF)
-## option(USE_FFTWF "Use single precision FFTW if found" ON)
- 
-if(USE_FFTWD OR USE_FFTWF)
- 
- set(FFTW_INC_SEARCHPATH
-   /sw/include
-   /usr/include
-   /usr/local/include
-   /usr/include/fftw
-   /usr/local/include/fftw
-   /opt/local/include
- )
- 
- find_path(FFTW_INCLUDE_PATH fftw3.h ${FFTW_INC_SEARCHPATH})
- 
- if(FFTW_INCLUDE_PATH)
-   set(FFTW_INCLUDE ${FFTW_INCLUDE_PATH})
- endif(FFTW_INCLUDE_PATH)
- 
- if(FFTW_INCLUDE)
-   include_directories( ${FFTW_INCLUDE})
- endif(FFTW_INCLUDE)
- 
- get_filename_component(FFTW_INSTALL_BASE_PATH ${FFTW_INCLUDE_PATH} PATH)
- 
- set(FFTW_LIB_SEARCHPATH
-   ${FFTW_INSTALL_BASE_PATH}/lib
-   /usr/lib/fftw
-   /usr/local/lib/fftw
-   /opt/local/lib
- )
- 
- if(USE_FFTWD)
-   mark_as_advanced(FFTWD_LIB)
-   find_library(FFTWD_LIB fftw3 ${FFTW_LIB_SEARCHPATH}) #Double Precision Lib
-   find_library(FFTWD_THREADS_LIB fftw3_threads ${FFTW_LIB_SEARCHPATH}) #Double Precision Lib only if compiled with threads support
- 
-   if(FFTWD_LIB)
-     set(FFTWD_FOUND 1)
-     get_filename_component(FFTW_LIBDIR ${FFTWD_LIB} PATH)
-     if(FFTWD_THREADS_LIB)
-       set(FFTWD_LIB ${FFTWD_LIB} ${FFTWD_THREADS_LIB} )
-     endif(FFTWD_THREADS_LIB)
-   endif(FFTWD_LIB)
- endif(USE_FFTWD)
- 
- if(USE_FFTWF)
-   mark_as_advanced(FFTWF_LIB)
-   find_library(FFTWF_LIB fftw3f ${FFTW_LIB_SEARCHPATH}) #Single Precision Lib
-   find_library(FFTWF_THREADS_LIB fftw3f_threads ${FFTW_LIB_SEARCHPATH}) #Single Precision Lib only if compiled with threads support
- 
-   if(FFTWF_LIB)
-     set(FFTWF_FOUND 1)
-     get_filename_component(FFTW_LIBDIR ${FFTWF_LIB} PATH)
-     if(FFTWF_THREADS_LIB)
-       set(FFTWF_LIB ${FFTWF_LIB} ${FFTWF_THREADS_LIB} )
-     endif(FFTWF_THREADS_LIB)
-   endif(FFTWF_LIB)
- endif(USE_FFTWF)
- 
-endif(USE_FFTWD OR USE_FFTWF)
+# - Find FFTW
+# Find the native FFTW includes and library
+# This module defines
+#  FFTW_INCLUDE_DIR, where to find fftw3.h, etc.
+#  FFTW_LIBRARIES, the libraries needed to use FFTW.
+#  FFTW_FOUND, If false, do not try to use FFTW.
+# also defined, but not for general use are
+#  FFTW_LIBRARY, where to find the FFTW library.
+
+FIND_PATH(FFTW_INCLUDE_DIR fftw3.h
+/usr/local/include
+/usr/include
+/opt/local/lib
+)
+
+SET(FFTW_NAMES ${FFTW_NAMES} fftw3 fftw3f fftw3-3)
+FIND_LIBRARY(FFTW_LIBRARY
+  NAMES ${FFTW_NAMES}
+  PATHS /usr/lib /usr/local/lib /opt/local/lib
+  )
+
+# Find threads part of FFTW
+
+SET(FFTW_THREADS_NAMES ${FFTW_THREADS_NAMES} fftw3f_threads fftw3_threads fftw3-3_threads)
+FIND_LIBRARY(FFTW_THREADS_LIBRARY
+  NAMES ${FFTW_THREADS_NAMES}
+  PATHS /usr/lib /usr/local/lib /opt/local/lib
+  )
+
+IF (FFTW_THREADS_LIBRARY AND FFTW_INCLUDE_DIR)
+    SET(FFTW_THREADS_LIBRARIES ${FFTW_THREADS_LIBRARY})
+    SET(FFTW_THREADS_FOUND "YES")
+ELSE (FFTW_THREADS_LIBRARY AND FFTW_INCLUDE_DIR)
+  SET(FFTW_THREADS_FOUND "NO")
+ENDIF (FFTW_THREADS_LIBRARY AND FFTW_INCLUDE_DIR)
+
+
+IF (FFTW_THREADS_FOUND)
+   IF (NOT FFTW_THREADS_FIND_QUIETLY)
+      MESSAGE(STATUS "Found FFTW threads: ${FFTW_THREADS_LIBRARIES}")
+   ENDIF (NOT FFTW_THREADS_FIND_QUIETLY)
+ELSE (FFTW_THREADS_FOUND)
+   IF (FFTW_THREADS_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find FFTW threads library")
+   ENDIF (FFTW_THREADS_FIND_REQUIRED)
+ENDIF (FFTW_THREADS_FOUND)
+
+
+IF (FFTW_LIBRARY AND FFTW_INCLUDE_DIR)
+    SET(FFTW_LIBRARIES ${FFTW_LIBRARY})
+    SET(FFTW_FOUND "YES")
+ELSE (FFTW_LIBRARY AND FFTW_INCLUDE_DIR)
+  SET(FFTW_FOUND "NO")
+ENDIF (FFTW_LIBRARY AND FFTW_INCLUDE_DIR)
+
+
+IF (FFTW_FOUND)
+   IF (NOT FFTW_FIND_QUIETLY)
+      MESSAGE(STATUS "Found FFTW: ${FFTW_LIBRARIES}")
+   ENDIF (NOT FFTW_FIND_QUIETLY)
+ELSE (FFTW_FOUND)
+   IF (FFTW_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find FFTW library")
+   ENDIF (FFTW_FIND_REQUIRED)
+ENDIF (FFTW_FOUND)
+
+SET (ON_UNIX ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" OR
+             ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+IF (${ON_UNIX})
+   SET (FFTW_EXECUTABLE_LIBRARIES fftw3f fftw3f_threads)
+ENDIF (${ON_UNIX})

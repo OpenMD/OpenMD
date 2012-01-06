@@ -274,7 +274,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
     face.addVertices(p[0], p[1], p[2]);
     face.setFacetMass(faceMass);
-    face.setFacetVelocity(faceVel/3.0);
+    face.setFacetVelocity(faceVel / RealType(3.0));
     /*
     RealType comparea = face.computeArea();
     realT calcarea = qh_facetarea (facet);

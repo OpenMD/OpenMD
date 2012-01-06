@@ -461,6 +461,7 @@ namespace OpenMD {
     RealType c1, c2, c3, c4;
     RealType erfcVal(1.0), derfcVal(0.0);
     RealType BigR;
+    RealType two(2.0), three(3.0);
 
     Vector3d Q_i, Q_j;
     Vector3d ux_i, uy_i, uz_i;
@@ -621,7 +622,7 @@ namespace OpenMD {
           if (idat.excluded) {
             indirect_vpair += preVal * rfVal;
             indirect_Pot += *(idat.sw) * preVal * rfVal;
-            indirect_dVdr += *(idat.sw)  * preVal * 2.0 * rfVal  * riji * rhat;
+            indirect_dVdr += *(idat.sw)  * preVal * two * rfVal  * riji * rhat;
           }
           
         } else {
@@ -649,7 +650,7 @@ namespace OpenMD {
           vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
 
-          dVdr +=  -preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
+          dVdr +=  -preSw * (ri3 * (uz_j - three * ct_j * rhat) - preRF2_*uz_j);
           duduz_j += -preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );   
 
           // Even if we excluded this pair from direct interactions,
@@ -738,7 +739,7 @@ namespace OpenMD {
         c2ri = c2 * riji;
         c3ri = c3 * riji;
         c4rij = c4 *  *(idat.rij) ;
-        rhatdot2 = 2.0 * rhat * c3;
+        rhatdot2 = two * rhat * c3;
         rhatc4 = rhat * c4rij;
 
         // calculate the potential
@@ -751,9 +752,9 @@ namespace OpenMD {
                 
         // calculate derivatives for the forces and torques
 
-        dVdr += -preSw * ( qxx_j* (cx2*rhatc4 - (2.0*cx_j*ux_j + rhat)*c3ri) +
-                           qyy_j* (cy2*rhatc4 - (2.0*cy_j*uy_j + rhat)*c3ri) +
-                           qzz_j* (cz2*rhatc4 - (2.0*cz_j*uz_j + rhat)*c3ri));
+        dVdr += -preSw * ( qxx_j* (cx2*rhatc4 - (two*cx_j*ux_j + rhat)*c3ri) +
+                           qyy_j* (cy2*rhatc4 - (two*cy_j*uy_j + rhat)*c3ri) +
+                           qzz_j* (cz2*rhatc4 - (two*cz_j*uz_j + rhat)*c3ri));
                            
         dudux_j += preSw * qxx_j * cx_j * rhatdot2;
         duduy_j += preSw * qyy_j * cy_j * rhatdot2;
@@ -777,7 +778,7 @@ namespace OpenMD {
           vpair += vterm;
           epot +=  *(idat.sw)  * vterm;
           
-          dVdr += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);
+          dVdr += preSw * (ri3 * (uz_i - three * ct_i * rhat) - preRF2_ * uz_i);
           
           duduz_i += preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );
 
@@ -855,10 +856,10 @@ namespace OpenMD {
              
           a1 = 5.0 * ct_i * ct_j - ct_ij;
              
-          dVdr += preSw * 3.0 * ri4 * (a1 * rhat - ct_i * uz_j - ct_j * uz_i);
+          dVdr += preSw * three * ri4 * (a1 * rhat - ct_i * uz_j - ct_j * uz_i);
 
-          duduz_i += preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
-          duduz_j += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_*uz_i);
+          duduz_i += preSw * (ri3 * (uz_j - three * ct_j * rhat) - preRF2_*uz_j);
+          duduz_j += preSw * (ri3 * (uz_i - three * ct_i * rhat) - preRF2_*uz_i);
 
           if (idat.excluded) {
             indirect_vpair +=  - pref * preRF2_ * ct_ij;
@@ -963,7 +964,7 @@ namespace OpenMD {
         c2ri = c2 * riji;
         c3ri = c3 * riji;
         c4rij = c4 *  *(idat.rij) ;
-        rhatdot2 = 2.0 * rhat * c3;
+        rhatdot2 = two * rhat * c3;
         rhatc4 = rhat * c4rij;
 
         // calculate the potential
@@ -977,9 +978,9 @@ namespace OpenMD {
 
         // calculate the derivatives for the forces and torques
 
-        dVdr += -preSw * (qxx_i* (cx2*rhatc4 - (2.0*cx_i*ux_i + rhat)*c3ri) +
-                          qyy_i* (cy2*rhatc4 - (2.0*cy_i*uy_i + rhat)*c3ri) +
-                          qzz_i* (cz2*rhatc4 - (2.0*cz_i*uz_i + rhat)*c3ri));
+        dVdr += -preSw * (qxx_i* (cx2*rhatc4 - (two*cx_i*ux_i + rhat)*c3ri) +
+                          qyy_i* (cy2*rhatc4 - (two*cy_i*uy_i + rhat)*c3ri) +
+                          qzz_i* (cz2*rhatc4 - (two*cz_i*uz_i + rhat)*c3ri));
 
         dudux_i += preSw * qxx_i * cx_i *  rhatdot2;
         duduy_i += preSw * qyy_i * cy_i *  rhatdot2;

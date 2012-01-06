@@ -1194,7 +1194,7 @@ namespace OpenMD {
     
     det = intTensor.determinant();
     sysconstants = geomCnst/(RealType)nGlobalIntegrableObjects_;
-    volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,3.0/2.0)*sqrt(det);
+    volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,geomCnst)*sqrt(det);
     return;
   }
 
@@ -1210,7 +1210,7 @@ namespace OpenMD {
     
     detI = intTensor.determinant();
     sysconstants = geomCnst/(RealType)nGlobalIntegrableObjects_;
-    volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,3.0/2.0)*sqrt(detI);
+    volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,geomCnst)*sqrt(detI);
     return;
   }
 /*

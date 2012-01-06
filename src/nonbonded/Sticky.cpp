@@ -331,26 +331,26 @@ namespace OpenMD {
           // sticky power has no w' function:
           w = frac1 * wi * wi2 + frac2*wi + frac1*wj*wj2 + frac2*wj + v0p; 
           wp = 0.0;
-          dwi = frac1*3.0*wi2*dwi + frac2*dwi;
-          dwj = frac1*3.0*wj2*dwi + frac2*dwi;
+          dwi = frac1*RealType(3.0)*wi2*dwi + frac2*dwi;
+          dwj = frac1*RealType(3.0)*wj2*dwi + frac2*dwi;
           dwip = V3Zero;
           dwjp = V3Zero;
-          dwidu = frac1*3.0*wi2*dwidu + frac2*dwidu;
-          dwidu = frac1*3.0*wj2*dwjdu + frac2*dwjdu;
+          dwidu = frac1*RealType(3.0)*wi2*dwidu + frac2*dwidu;
+          dwidu = frac1*RealType(3.0)*wj2*dwjdu + frac2*dwjdu;
           dwipdu = V3Zero;
           dwjpdu = V3Zero;
           sp = 0.0;
           dspdr = 0.0;
         }
         
-        *(idat.vpair) += 0.5*(v0*s*w + v0p*sp*wp);
-        (*(idat.pot))[HYDROGENBONDING_FAMILY] += 0.5*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
+        *(idat.vpair) += RealType(0.5)*(v0*s*w + v0p*sp*wp);
+        (*(idat.pot))[HYDROGENBONDING_FAMILY] += RealType(0.5)*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
         
         // do the torques first since they are easy:
         // remember that these are still in the body-fixed axes
         
-        Vector3d ti = 0.5* *(idat.sw) *(v0*s*dwidu + v0p*sp*dwipdu);
-        Vector3d tj = 0.5* *(idat.sw) *(v0*s*dwjdu + v0p*sp*dwjpdu);
+        Vector3d ti = RealType(0.5)* *(idat.sw) *(v0*s*dwidu + v0p*sp*dwipdu);
+        Vector3d tj = RealType(0.5)* *(idat.sw) *(v0*s*dwjdu + v0p*sp*dwjpdu);
         
         // go back to lab frame using transpose of rotation matrix:
         
@@ -369,8 +369,8 @@ namespace OpenMD {
         
         // now assemble these with the radial-only terms:
         
-        *(idat.f1) += 0.5 * ((v0*dsdr*w + v0p*dspdr*wp) * *(idat.d) / 
-                             *(idat.rij)  + fii - fjj);
+        *(idat.f1) += RealType(0.5) * ((v0*dsdr*w + v0p*dspdr*wp) * *(idat.d) / 
+                                       *(idat.rij)  + fii - fjj);
         
       }
     }

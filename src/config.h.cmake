@@ -13,35 +13,23 @@
 /* Is defined if the qhull library is available. */
 #cmakedefine HAVE_QHULL
 
-/* Define to 1 if you have the <conio.h> header file. */
+/* have <conio.h> */
 #cmakedefine HAVE_CONIO_H 1
 
+/* have symbol strncasecmp */
+#cmakedefine HAVE_STRNCASECMP 1
+
 /* define if fftw3.h exists */
-#cmakedefine HAVE_FFTW3_H
-
-/* define if fftw.h exists */
-#cmakedefine HAVE_FFTW_H
-
-/* define if dfftw.h exists */
-#cmakedefine HAVE_DFFTW_H
+#cmakedefine HAVE_FFTW3_H 1 
 
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ 1
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#cmakedefine HAVE_STRCASECMP 1
-
-/* Define to 1 if you have the `stricmp' function. */
-#cmakedefine HAVE_STRICMP 1
 
 /* Define to the one symbol short name of this package. */
 #cmakedefine PACKAGE_TARNAME
 
 /* Define to the version of this package. */
 #cmakedefine PACKAGE_VERSION
-
-/* needed by DEC/Compaq/HP cxx to activate ANSI standard iostream. */
-#cmakedefine __USE_STD_IOSTREAM
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #cmakedefine const

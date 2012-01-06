@@ -284,7 +284,7 @@ namespace OpenMD {
             }
           }
           
-          w_hat[l] = w[l] / pow(q2[l], 1.5);
+          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
         }
 
         collectHistogram(q_l, w_hat);
@@ -329,7 +329,7 @@ namespace OpenMD {
         }
       }
       
-      W_hat[l] = W[l] / pow(Q2[l], 1.5);
+      W_hat[l] = W[l] / pow(Q2[l], RealType(1.5));
     }
     
     writeOrderParameter(Q, W_hat);    

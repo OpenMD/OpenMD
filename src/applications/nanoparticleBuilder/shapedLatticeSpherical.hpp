@@ -55,10 +55,10 @@ namespace OpenMD{
    */
   class shapedLatticeSpherical: public shapedLattice{
   public:
-    shapedLatticeSpherical(double latticeConstant, std::string latticeType, double radius);
+    shapedLatticeSpherical(RealType latticeConstant, std::string latticeType, RealType radius);
     virtual bool isInterior(Vector3d point);
   private:
-    double sphereRadius_;
+    RealType sphereRadius_;
   };
 }
 

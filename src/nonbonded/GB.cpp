@@ -240,7 +240,7 @@ namespace OpenMD {
       mixer.eps0 = sqrt(e1 * e2);
       
       RealType er = sqrt(er1 * er2);
-      RealType ermu = pow(er, (1.0 / mu_));
+      RealType ermu = pow(er, (RealType(1.0) / mu_));
       RealType xp = (1.0 - ermu) / (1.0 + ermu);
       RealType ap2 = 1.0 / (1.0 + ermu);
       
@@ -398,18 +398,18 @@ namespace OpenMD {
       RealType d1 = gb1.GB_d;
       RealType l1 = gb1.GB_l;
       // sigma is actually sqrt(2)*l  for prolate ellipsoids 
-      cut = max(cut, 2.5 * sqrt(2.0) * max(d1, l1));
+      cut = max(cut, RealType(2.5) * sqrt(RealType(2.0)) * max(d1, l1));
     } else if (atypes.first->isLennardJones()) {
-      cut = max(cut, 2.5 * getLJSigma(atypes.first));
+      cut = max(cut, RealType(2.5) * getLJSigma(atypes.first));
     }
 
     if (atypes.second->isGayBerne()) {
       GayBerneParam gb2 = getGayBerneParam(atypes.second);
       RealType d2 = gb2.GB_d;
       RealType l2 = gb2.GB_l;
-      cut = max(cut, 2.5 * sqrt(2.0) * max(d2, l2));
+      cut = max(cut, RealType(2.5) * sqrt(RealType(2.0)) * max(d2, l2));
     } else if (atypes.second->isLennardJones()) {
-      cut = max(cut, 2.5 * getLJSigma(atypes.second));
+      cut = max(cut, RealType(2.5) * getLJSigma(atypes.second));
     }
    
     return cut;

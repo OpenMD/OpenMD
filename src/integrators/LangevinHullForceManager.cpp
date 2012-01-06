@@ -200,7 +200,7 @@ namespace OpenMD {
       // Apply triangle force to stuntdouble vertices
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 	if ((*vertex) != NULL){
-	  Vector3d vertexForce = langevinForce / 3.0;
+	  Vector3d vertexForce = langevinForce / RealType(3.0);
 	  (*vertex)->addFrc(vertexForce);	   
 	}  
       }

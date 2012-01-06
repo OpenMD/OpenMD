@@ -358,7 +358,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       facetlist.push_back(virtexlist);
       face.addVertices(p[0],p[1],p[2]);
       face.setFacetMass(faceMass);
-      face.setFacetVelocity(faceVel/3.0);
+      face.setFacetVelocity(faceVel / RealType(3.0));
       
       RealType area = face.getArea();
       area_ += area;

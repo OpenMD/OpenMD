@@ -1,15 +1,26 @@
 # Top level cmake script for OpenMD. 
-
-cmake_minimum_required (VERSION 2.6)
 project(OpenMD)
+# project(OpenMD CXX)
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+include(CheckCXXCompilerFlag)
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
 set (VERSION_MINOR "0")
 set (VERSION_TINY "0")  
 
-# cmake modules that are needed to build oopse
-SET(CMAKE_MODULE_PATH ${OpenMD_SOURCE_DIR}/cmake/modules)
+# Should 
+option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
+
+
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
     "/usr/local/openmd" CACHE PATH "OpenMD install prefix" FORCE
@@ -35,9 +46,6 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   "Single directory for all static libraries."
   )
 
-
-enable_language(CXX  C)
-
 if ( APPLE )
 set(MPI_COMPILER /opt/local/lib/openmpi/bin/mpic++)
 set(MPI_LIBRARY "MPI_LIBRARY-NOTFOUND" )
@@ -62,6 +70,15 @@ IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
   )
 ENDIF()
 
+
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+include(CheckSymbolExists)
+include(CheckLibraryExists)
+include(CheckTypeSize)
+include(CheckCSourceCompiles)
+check_include_file(conio.h      HAVE_CONIO_H)
+check_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 # Optional libraries: If we can find these, we will build with them
 # Look for OpenBabel libraries
 find_package(OpenBabel2)
@@ -90,10 +107,10 @@ if(ZLIB_FOUND)
 endif(ZLIB_FOUND)
 
 #FFTW
-INCLUDE(${CMAKE_MODULE_PATH}/FindFFTW.cmake)
+FIND_PACKAGE(FFTW)
 IF(FFTW_FOUND)
   SET(HAVE_LIBFFTW 1)
-  SET(HAVE_FFTW3_H)
+  SET(HAVE_FFTW3_H 1)
   INCLUDE_DIRECTORIES(${FFTW_INCLUDE_DIR})
   LINK_LIBRARIES(${FFTW_LIBRARIES})
 ENDIF(FFTW_FOUND)
@@ -108,39 +125,6 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
 endif(DOXYGEN_FOUND)
-
-#include checks
-include(CheckIncludeFile)
-CHECK_INCLUDE_FILE(fftw3.h HAVE_FFTW3_H)
-CHECK_INCLUDE_FILE(fftw.h HAVE_FFWT_H)
-CHECK_INCLUDE_FILE(dfftw.h HAVE_DFFTW_H)
-CHECK_INCLUDE_FILE(cmath.h HAVE_CMATH_H)
-check_include_file(limits.h HAVE_LIMITS_H)
-check_include_file(stdlib.h HAVE_STDLIB_H)
-check_include_file(string.h HAVE_STRING_H)
-check_include_file("sys/ioctl.h" HAVE_SYS_IOCTL_H)
-check_include_file(unistd.h HAVE_UNISTD_H)
-
-#symbol checks
-include(CheckSymbolExists)
-
-#function checks
-include(CheckFunctionExists)
-check_function_exists(atexit HAVE_ATEXIT)
-check_function_exists(floor HAVE_FLOOR)
-check_function_exists(pow HAVE_POW)
-check_function_exists(select HAVE_SELECT)
-check_function_exists(sqrt HAVE_SQRT)
-check_function_exists(strcasecmp HAVE_STRCASECMP)
-check_function_exists(strchr HAVE_STRCHR)
-check_function_exists(strdup HAVE_STRDUP)
-check_function_exists(strncasecmp HAVE_STRNCASECMP)
-check_function_exists(strstr HAVE_STRSTR)
-check_function_exists(strtol HAVE_STRTOL)
-check_function_exists(strtoull HAVE_STRTOULL)
-check_function_exists(sysmp HAVE_SYSMP)
-check_function_exists(table HAVE_TABLE)
-
 
 FIND_PACKAGE(Perl)
 IF(PERL_FOUND)
@@ -157,7 +141,6 @@ ELSE(PYTHON_EXECUTABLE)
 ENDIF(PYTHON_EXECUTABLE)
 
 SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation locations")
-
 
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/config.h.cmake"
@@ -388,7 +371,7 @@ src/parallel/ForceMatrixDecomposition.cpp
 src/restraints/RestraintForceManager.cpp
 src/restraints/ThermoIntegrationForceManager.cpp
 src/utils/ProgressBar.cpp
-src/utils/simError.c
+src/utils/simError.cpp
 )
 
 IF(QHULL_FOUND)
@@ -558,6 +541,7 @@ src/applications/utilities/mdSplit
 src/applications/utilities/principalAxisCalculator
 src/applications/utilities/stat2visco
 src/applications/utilities/waterRotator
+src/applications/utilities/waterReplacer
 )
 
 IF(PYTHON_EXECUTABLE)

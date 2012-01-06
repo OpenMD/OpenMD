@@ -1001,8 +1001,8 @@ namespace OpenMD {
   
   void ForceMatrixDecomposition::unpackInteractionData(InteractionData &idat, int atom1, int atom2) {    
 #ifdef IS_MPI
-    pot_row[atom1] += 0.5 *  *(idat.pot);
-    pot_col[atom2] += 0.5 *  *(idat.pot);
+    pot_row[atom1] += RealType(0.5) *  *(idat.pot);
+    pot_col[atom2] += RealType(0.5) *  *(idat.pot);
 
     atomRowData.force[atom1] += *(idat.f1);
     atomColData.force[atom2] -= *(idat.f1);

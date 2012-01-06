@@ -302,7 +302,7 @@ namespace OpenMD {
             }
           }
           
-          w_hat[l] = w[l] / pow(q2[l], 1.5);
+          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
         }
 
         collectHistogram(q_l, w_hat, distCOM);

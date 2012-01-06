@@ -152,7 +152,7 @@ namespace OpenMD {
     }
 
     // add the volume correction
-    Xiorr += (6.0 * viscosity * volume) * I;    
+    Xiorr += (RealType(6.0) * viscosity * volume) * I;    
     
     Xiott *= PhysicalConstants::viscoConvert;
     Xiotr *= PhysicalConstants::viscoConvert;
@@ -324,7 +324,7 @@ namespace OpenMD {
       }
     }
     // add the volume correction here:
-    Xirr += (6.0 * viscosity * volume) * I;    
+    Xirr += (RealType(6.0) * viscosity * volume) * I;    
     
     Xitt *= PhysicalConstants::viscoConvert;
     Xitr *= PhysicalConstants::viscoConvert;

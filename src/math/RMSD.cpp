@@ -72,12 +72,12 @@ RealType RMSD::calculate_rmsd(std::vector<Vector3d> mov,
   stmp.getSubVector(0,s);
   wtmp.getSubMatrix(0,0,w);
     
-  int is_reflection = (v.determinant() * w.determinant()) < 0.0;
+  int is_reflection = (v.determinant() * w.determinant()) < RealType(0.0);
   if (is_reflection)
     s(2) = -s(2);
 
   RealType rmsd_sq = (E0 - 2.0 * s.sum() )/ (RealType)n_vec;
-  rmsd_sq = max(rmsd_sq,0.0);
+  rmsd_sq = max(rmsd_sq, RealType(0.0));
   RealType rmsd = sqrt(rmsd_sq);
   return rmsd;
 }

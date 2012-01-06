@@ -400,7 +400,7 @@ int main(int argc,char *argv[])
       clog << messageSummary << endl;
     }
 
-#ifdef _DEBUG
+#ifdef DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
   getch();
@@ -451,7 +451,7 @@ void usage()
        << " [-i<input-type>] <name> [-o<output-type>] <name>" << endl;
   cout << "Try  -H option for more information." << endl;
  
-#ifdef _DEBUG
+#ifdef DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
   getch();
