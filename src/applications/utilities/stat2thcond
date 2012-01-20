@@ -1,0 +1,260 @@
+#!/usr/bin/env python
+"""Heat Flux Correlation function
+
+Computes the correlation function of the heat flux vector
+that has been stored in a stat file.   These can be used to compute
+the thermal conductivity.
+
+Usage: stat2thcond
+
+Options:
+  -h, --help              show this help
+  -f, --stat-file=...     use specified stat file
+  -o, --output-file=...   use specified output (.pcorr) file
+  -e, --einstein          use Einstein relation (based on Hess 2002 paper)
+
+The Einstein relation option will compute: V*<(\int_0^t (S(t')-<S>)dt')^2>/2kT^2,
+which will grow approximately linearly in time.  The long-time slope of this
+function will be the viscosity.
+
+Example:
+   stat2thcond -f ring5.stat -o ring5.pcorr
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1665 $"
+__date__ = "$Date: 2011-12-08 15:25:26 -0400 (Thu, 9 December 2011) $"
+
+__copyright__ = "Copyright (c) 2007 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+
+def usage():
+    print __doc__
+
+def readStatFile(statFileName):
+
+    global time
+    global temperature
+    global pressure
+    global volume
+    global Sx
+    global Sy
+    global Sz
+    time = []
+    temperature = []
+    pressure = []
+    volume = []
+    Sx = []
+    Sy = []
+    Sz = []
+
+    statFile = open(statFileName, 'r')
+    line = statFile.readline()
+
+    print "reading File"
+    pressSum = 0.0
+    volSum = 0.0
+    tempSum = 0.0
+    line = statFile.readline()
+    while 1:
+        L = line.split()
+        time.append(float(L[0]))
+        temperature.append(float(L[4]))
+        #
+        # OpenMD prints out pressure in units of atm.
+        #
+        pressure.append(float(L[5]))
+        volume.append(float(L[6]))
+        #
+        # OpenMD prints out heatflux in units of kcal / (mol s Ang^2).
+        #
+        Sx.append(float(L[8]))
+        Sy.append(float(L[9]))
+        Sz.append(float(L[10]))
+
+        line = statFile.readline()
+        if not line: break
+
+    statFile.close()
+
+def computeAverages():
+
+    global tempAve
+    global pressAve
+    global volAve
+    global pvAve
+
+    print "computing Averages"
+
+    tempSum = 0.0
+    pressSum = 0.0
+    volSum = 0.0
+    pvSum = 0.0
+
+    temp2Sum = 0.0
+    press2Sum = 0.0
+    vol2Sum = 0.0
+    pv2Sum = 0.0
+
+    # converts amu*fs^-2*Ang^-1 -> atm
+    pressureConvert = 1.63882576e8
+
+    for i in range(len(time)):
+        tempSum = tempSum + temperature[i]
+        pressSum = pressSum + pressure[i]
+        volSum = volSum + volume[i]
+        # in units of amu Ang^2 fs^-1
+        pvTerm = pressure[i]*volume[i] / pressureConvert
+        pvSum = pvSum + pvTerm
+        temp2Sum = temp2Sum + math.pow(temperature[i],2)
+        press2Sum = press2Sum + math.pow(pressure[i],2)
+        vol2Sum = vol2Sum + math.pow(volume[i],2)
+        pv2Sum = pv2Sum + math.pow(pvTerm,2)
+
+    tempAve = tempSum / float(len(time))
+    pressAve = pressSum / float(len(time))
+    volAve = volSum / float(len(time))
+    pvAve = pvSum / float(len(time))
+
+    tempSdev = math.sqrt(temp2Sum / float(len(time)) - math.pow(tempAve,2))
+    pressSdev = math.sqrt(press2Sum / float(len(time)) - math.pow(pressAve,2))
+    if (vol2Sum / float(len(time)) < math.pow(volAve,2)):
+        volSdev = 0.0
+    else:
+        volSdev = math.sqrt(vol2Sum / float(len(time)) - math.pow(volAve,2))
+    pvSdev = math.sqrt(pv2Sum / float(len(time)) - math.pow(pvAve,2))
+
+    print "   Average pressure = %f +/- %f (atm)" % (pressAve, pressSdev)
+    print "     Average volume = %f +/- %f (Angst^3)" % (volAve, volSdev)
+    print "Average temperature = %f +/- %f (K)" % (tempAve, tempSdev)
+    print " Average PV product = %f +/- %f (amu Angst^2 fs^-1)" % (pvAve, pvSdev)
+
+def computeCorrelations(outputFileName):
+
+    # converts amu*fs^-2*Ang^-1 -> atm
+    pressureConvert = 1.63882576e8
+
+    # converts Ang^-3 * kcal/mol * Ang / fs to m^-3 * J/mol * m /s (= W / mol m^2)
+    heatfluxConvert = 4.187e38
+
+    # converts fs to s
+    dtConvert = 1e-15
+
+    # Boltzmann's constant amu*Ang^2*fs^-2/K
+    kB = 8.31451e-7
+
+    # converts Ang^3 / (amu*Ang^2*fs^-2/K * K^2)  ->  m s^2 / (kg K^2)
+    thcondConvert = 6.0224e-14
+
+    preV = thcondConvert * volAve / (kB * tempAve * tempAve)
+
+
+    if doEinstein:
+        print "computing Einstein-style Correlation Function"
+
+        # Precompute sum variables to aid integration.
+        # The integral from t0 -> t0 + t  can be easily obtained
+        # from the precomputed sum variables:  sum[t0+t] - sum[t0-1]
+        for i in range(1, len(time)):
+
+        xSum = []
+        xSum.append(Sx[0])
+        ySum = []
+        ySum.append(Sy[0])
+        zSum = []
+        zSum.append(Sz[0])
+        for i in range(1, len(time)):
+            xSum.append(xSum[i-1] + Sx[i])
+            ySum.append(ySum[i-1] + Sy[i])
+            zSum.append(zSum[i-1] + Sz[i])
+
+        dt = time[1] - time[0]
+
+        eXcorr = []
+        eYcorr = []
+        eZcorr = []
+
+        # i corresponds to the total duration of the integral
+        for i in range(len(time)):
+
+            xIntSum = 0.0
+            yIntSum = 0.0
+            zIntSum = 0.0
+            # j corresponds to the starting point of the integral
+            for j in range(len(time) - i):
+                if (j == 0):
+
+                    xInt = dt*xSum[j+i]
+                    yInt = dt*ySum[j+i]
+                    zInt = dt*zSum[j+i]
+                else:
+                    xInt = dt*(xSum[j+i] - xSum[j-1])
+                    yInt = dt*(ySum[j+i] - ySum[j-1])
+                    zInt = dt*(zSum[j+i] - zSum[j-1])
+
+                xIntSum = xIntSum + xInt*xInt
+                yIntSum = yIntSum + yInt*yInt
+                zIntSum = zIntSum + zInt*zInt
+
+            eXcorr.append(xIntSum / float(len(time)-i))
+            eYcorr.append(yIntSum / float(len(time)-i))
+            eZcorr.append(zIntSum / float(len(time)-i))
+
+
+    outputFile = open(outputFileName, 'w')
+    for i in range(len(time)):
+
+        if doEinstein:
+            outputFile.write("%f\t%13e\n" % (time[i], 0.5 * preV * heatfluxConvert * heatfluxConvert * dtConvert * dtConvert * (eXcorr[i] + eYcorr[i] + eZcorr[i]))
+    outputFile.close()
+
+def main(argv):
+    global doEinstein
+    global haveStatFileName
+    global haveOutputFileName
+
+    haveStatFileName = False
+    haveOutputFileName = False
+    doEinstein = False
+
+    try:
+        opts, args = getopt.getopt(argv, "hgesf:o:", ["help", "einstein", "stat-file=", "output-file="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-e", "--einstein"):
+            doEinstein = True
+        elif opt in ("-f", "--stat-file"):
+            statFileName = arg
+            haveStatFileName = True
+        elif opt in ("-o", "--output-file"):
+            outputFileName = arg
+            haveOutputFileName = True
+    if (not haveStatFileName):
+        usage()
+        print "No stat file was specified"
+        sys.exit()
+    if (not haveOutputFileName):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+
+    readStatFile(statFileName);
+    computeAverages();
+    computeCorrelations(outputFileName);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
