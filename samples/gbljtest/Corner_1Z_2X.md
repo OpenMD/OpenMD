@@ -1,7 +1,7 @@
 <OpenMD version=1>
   <MetaData>
  
-#include "DPPCbuild.md"
+#include "TestAtom.md"
  
 component{
   type = "TEST";
@@ -13,7 +13,7 @@ component{
 // ensemble = NPTxyz;
 ensemble = NgT;
 forceField = "DUFF";
-forceFieldFileName = "Lipid.frc";
+forceFieldFileName = "Field.frc";
 cutoffRadius = 35.0;
 switchingRadius =32.0;
  
