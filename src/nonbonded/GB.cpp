@@ -223,32 +223,44 @@ namespace OpenMD {
         dw2 = 1.0;
       } 
                        
-      GBInteractionData mixer;        
+      GBInteractionData mixer1, mixer2;     
       
       //  Cleaver paper uses sqrt of squares to get sigma0 for
       //  mixed interactions.
             
-      mixer.sigma0 = sqrt(d1*d1 + d2*d2);
-      mixer.xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2);
-      mixer.xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1);
-      mixer.x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) /
+      mixer1.sigma0 = sqrt(d1*d1 + d2*d2);
+      mixer1.xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2);
+      mixer1.xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1);
+      mixer1.x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) /
         ((l2*l2 + d1*d1) * (l1*l1 + d2*d2));
+
+      mixer2.sigma0 = mixer1.sigma0;
+      // xa2 and xai2 for j-i pairs are reversed from the same i-j pairing.
+      // Swapping the particles reverses the anisotropy parameters:
+      mixer2.xa2 = mixer1.xai2;
+      mixer2.xai2 = mixer1.xa2;
+      mixer2.x2 = mixer1.x2;
  
       // assumed LB mixing rules for now:
 
-      mixer.dw = 0.5 * (dw1 + dw2);
-      mixer.eps0 = sqrt(e1 * e2);
+      mixer1.dw = 0.5 * (dw1 + dw2);
+      mixer1.eps0 = sqrt(e1 * e2);
+
+      mixer2.dw = mixer1.dw;
+      mixer2.eps0 = mixer1.eps0;
       
       RealType er = sqrt(er1 * er2);
       RealType ermu = pow(er, (RealType(1.0) / mu_));
       RealType xp = (1.0 - ermu) / (1.0 + ermu);
       RealType ap2 = 1.0 / (1.0 + ermu);
       
-      mixer.xp2 = xp * xp;
-      mixer.xpap2 = xp * ap2;
-      mixer.xpapi2 = xp / ap2;
+      mixer1.xp2 = xp * xp;
+      mixer1.xpap2 = xp * ap2;
+      mixer1.xpapi2 = xp / ap2;
 
-      cerr << "mixer" << er1 << " " << er2 << " " << mu_ << " " << ermu << " " << xp <<" " << ap2 << "\n";
+      mixer2.xp2 = mixer1.xp2;
+      mixer2.xpap2 = mixer1.xpap2;
+      mixer2.xpapi2 = mixer1.xpapi2;
 
       // only add this pairing if at least one of the atoms is a Gay-Berne atom
 
@@ -258,9 +270,9 @@ namespace OpenMD {
         key1 = make_pair(atomType, atype2);
         key2 = make_pair(atype2, atomType);
         
-        MixingMap[key1] = mixer;
+        MixingMap[key1] = mixer1;
         if (key2 != key1) {
-          MixingMap[key2] = mixer;
+          MixingMap[key2] = mixer2;
         }
       }
     }      
@@ -309,9 +321,6 @@ namespace OpenMD {
     else
       g = dot(ul1, ul2);
 
-    cerr << "in GB, d = " << *(idat.d) << "\n";
-    cerr << "abg = " << a << " " << b << " " << g <<"\n";
-
     RealType au = a / *(idat.rij);
     RealType bu = b / *(idat.rij);
     
@@ -321,15 +330,11 @@ namespace OpenMD {
     
     RealType H  = (xa2 * au2 + xai2 * bu2 - 2.0*x2*au*bu*g)  / (1.0 - x2*g2);
     RealType Hp = (xpap2*au2 + xpapi2*bu2 - 2.0*xp2*au*bu*g) / (1.0 - xp2*g2);
-    cerr << "xa2, xai2 " << xa2 << " " << xai2 << "\n";
-    cerr << "xpap2, xpapi2 " << xpap2 << " " << xpapi2 << "\n";
-    cerr << "H Hp = " << H <<  " " << Hp << "\n";
 
     RealType sigma = sigma0 / sqrt(1.0 - H);
     RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
     RealType e2 = 1.0 - Hp;
     RealType eps = eps0 * pow(e1,nu_) * pow(e2,mu_);
-    cerr << "eps = " << eps0 << " " << e1 << " " << nu_ << " " << e2 << " " << mu_ << "\n";
     RealType BigR = dw*sigma0 / (*(idat.rij) - sigma + dw*sigma0);
     
     RealType R3 = BigR*BigR*BigR;
@@ -339,8 +344,6 @@ namespace OpenMD {
     RealType R13 = R6*R7;
 
     RealType U = *(idat.vdwMult) * 4.0 * eps * (R12 - R6);
-
-    cerr << "R12, R6, eps = " << R12 << " " << R6 << " " << eps << " " <<  *(idat.vdwMult) << "\n";
 
     RealType s3 = sigma*sigma*sigma;
     RealType s03 = sigma0*sigma0*sigma0;
@@ -365,23 +368,15 @@ namespace OpenMD {
       (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
       (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
 
-    cerr << pref1 << " " << pref2 << " " << dUdr <<" " << dUda << " " << dUdb << dUdg << "\n";
-
     Vector3d rhat = *(idat.d) / *(idat.rij);   
     Vector3d rxu1 = cross(*(idat.d), ul1);
     Vector3d rxu2 = cross(*(idat.d), ul2);
     Vector3d uxu = cross(ul1, ul2);
 
-    cerr << "U = " << U << "\n";
-    cerr << "f1 = " << dUdr * rhat + dUda * ul1 + dUdb * ul2 << "\n";
-    cerr << "t1 = " << dUda * rxu1 - dUdg * uxu << "\n";
-    cerr << "t2 = " << dUdb * rxu2 - dUdg * uxu << "\n";
-
-    
     (*(idat.pot))[VANDERWAALS_FAMILY] += U *  *(idat.sw);
     *(idat.f1) += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
     *(idat.t1) += dUda * rxu1 - dUdg * uxu;
-    *(idat.t2) += dUdb * rxu2 - dUdg * uxu;
+    *(idat.t2) += dUdb * rxu2 + dUdg * uxu;
     *(idat.vpair) += U * *(idat.sw);
 
     return;
