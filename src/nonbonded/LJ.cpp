@@ -46,6 +46,7 @@
 #include <cmath>
 #include "nonbonded/LJ.hpp"
 #include "utils/simError.h"
+#include "types/LennardJonesInteractionType.hpp"
 
 namespace OpenMD {
 
@@ -124,51 +125,40 @@ namespace OpenMD {
 
     for (at = atomTypes->beginType(i); at != NULL; 
          at = atomTypes->nextType(i)) {
-      
-      if (at->isLennardJones())
-        addType(at);
+      if (at->isLennardJones()){
+	 addType(at);
+      }
     }
-
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     NonBondedInteractionType* nbt;
+    ForceField::NonBondedInteractionTypeContainer::KeyType keys;
+
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
-      
+
       if (nbt->isLennardJones()) {
-        
-        pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
-        
-        GenericData* data = nbt->getPropertyByName("LennardJones");
-        if (data == NULL) {
-          sprintf( painCave.errMsg, "LJ::rebuildMixingMap could not find\n"
-               "\tLennard-Jones parameters for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError(); 
-        }
-    
-        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-        if (ljData == NULL) {
+        keys = nbiTypes->getKeys(j);
+        AtomType* at1 = forceField_->getAtomType(keys[0]);
+        AtomType* at2 = forceField_->getAtomType(keys[1]);
+
+        LennardJonesInteractionType* ljit = dynamic_cast<LennardJonesInteractionType*>(nbt);
+
+        if (ljit == NULL) {
           sprintf( painCave.errMsg,
-                   "LJ::rebuildMixingMap could not convert GenericData to\n"
-                   "\tLJParam for %s - %s interaction.\n", 
-                   atypes.first->getName().c_str(),
-                   atypes.second->getName().c_str());
+                   "LJ::initialize could not convert NonBondedInteractionType\n"
+                   "\tto LennardJonesInteractionType for %s - %s interaction.\n", 
+                   at1->getName().c_str(),
+                   at2->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();          
         }
-        
-        LJParam ljParam = ljData->getData();
 
-        RealType sigma = ljParam.sigma;
-        RealType epsilon = ljParam.epsilon;
-
-        addExplicitInteraction(atypes.first, atypes.second, sigma, epsilon);
+        RealType sigma = ljit->getSigma();
+        RealType epsilon = ljit->getEpsilon();
+        addExplicitInteraction(at1, at2, sigma, epsilon);
       }
     }  
     initialized_ = true;
@@ -220,10 +210,6 @@ namespace OpenMD {
   
   void LJ::addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon){
     
-    // in case these weren't already in the map
-    addType(atype1);
-    addType(atype2);
-
     LJInteractionData mixer;
     mixer.sigma = sigma;
     mixer.epsilon = epsilon;
@@ -241,9 +227,7 @@ namespace OpenMD {
   }
  
   void LJ::calcForce(InteractionData &idat) {
-    
     if (!initialized_) initialize();
-
     map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
     it = MixingMap.find( idat.atypes );
     
