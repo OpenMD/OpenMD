@@ -424,20 +424,20 @@ contains
 !!$    
 
     pot = pot + U*sw
-    
-    f1(1) = f1(1) + fx
-    f1(2) = f1(2) + fy
-    f1(3) = f1(3) + fz
 
-    t1(1) = t1(1) + dUda*rxu1(1) - dUdg*uxu(1)
-    t1(2) = t1(2) + dUda*rxu1(2) - dUdg*uxu(2)
-    t1(3) = t1(3) + dUda*rxu1(3) - dUdg*uxu(3)
-                                                    
-    t2(1) = t2(1) + dUdb*rxu2(1) + dUdg*uxu(1)
-    t2(2) = t2(2) + dUdb*rxu2(2) + dUdg*uxu(2)
-    t2(3) = t2(3) + dUdb*rxu2(3) + dUdg*uxu(3)
-       
-    vpair = vpair + U*sw
+    f1(1) = f1(1) + fx*sw
+    f1(2) = f1(2) + fy*sw
+    f1(3) = f1(3) + fz*sw
+
+    t1(1) = t1(1) + (dUda*rxu1(1) - dUdg*uxu(1))*sw
+    t1(2) = t1(2) + (dUda*rxu1(2) - dUdg*uxu(2))*sw
+    t1(3) = t1(3) + (dUda*rxu1(3) - dUdg*uxu(3))*sw
+
+    t2(1) = t2(1) + (dUdb*rxu2(1) + dUdg*uxu(1))*sw
+    t2(2) = t2(2) + (dUdb*rxu2(2) + dUdg*uxu(2))*sw
+    t2(3) = t2(3) + (dUdb*rxu2(3) + dUdg*uxu(3))*sw
+
+    vpair = vpair + U
     
     return
   end subroutine do_gb_pair
