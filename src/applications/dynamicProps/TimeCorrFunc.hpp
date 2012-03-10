@@ -64,7 +64,8 @@ namespace OpenMD {
     TimeCorrFunc(SimInfo* info, const std::string& filename, 
 		 const std::string& sele1, const std::string& sele2,
                  int storageLayout, long long int memSize);
-        
+    
+    virtual ~TimeCorrFunc(){ }    
     void doCorrelate();
 
 

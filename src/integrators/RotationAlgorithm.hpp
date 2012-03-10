@@ -54,6 +54,7 @@ namespace OpenMD {
    */
   class RotationAlgorithm {
   public:
+    virtual ~RotationAlgorithm(){ }
     void rotate(StuntDouble* sd, Vector3d& ji,  RealType dt) {
       doRotate(sd, ji, dt);
     }

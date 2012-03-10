@@ -255,7 +255,7 @@ namespace OpenMD{
        return rotation angle from -PI to PI 
     */
     inline Real get_rotation_angle() const{
-      if( w < (Real)0.0 )
+      if( w() < (Real)0.0 )
         return 2.0*atan2(-sqrt( x()*x() + y()*y() + z()*z() ), -w() );
       else
         return 2.0*atan2( sqrt( x()*x() + y()*y() + z()*z() ),  w() );
@@ -313,15 +313,15 @@ namespace OpenMD{
                                c.z());
 
       this->normalize();    // if "from" or "to" not unit, normalize quat
-      w += 1.0f;            // reducing angle to halfangle
-      if( w <= 1e-6 ) {     // angle close to PI
+      w() += 1.0f;            // reducing angle to halfangle
+      if( w() <= 1e-6 ) {     // angle close to PI
         if( ( from.z()*from.z() ) > ( from.x()*from.x() ) ) {
-          this->data_[0] =  w;    
+          this->data_[0] =  w();    
           this->data_[1] =  0.0;       //cross(from , Vector3d(1,0,0))
           this->data_[2] =  from.z();
           this->data_[3] = -from.y();
         } else {
-          this->data_[0] =  w;
+          this->data_[0] =  w();
           this->data_[1] =  from.y();  //cross(from, Vector3d(0,0,1))
           this->data_[2] = -from.x();
           this->data_[3] =  0.0;
