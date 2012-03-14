@@ -7,8 +7,8 @@
 
 begin Options
       Name                   "DUFF"
-      GayBerneMu              2.0
-      GayBerneNu              1.0
+      GayBerneMu             2.0
+      GayBerneNu             1.0
 end Options
 
 begin BaseAtomTypes    
@@ -94,19 +94,15 @@ GBlinear	86.477	86.477	0
 GBC6H6		88.781	88.781	177.561
 GBCH3OH		4.056	20.258	20.999
 GBH2O		1.777	0.581	1.196
-GBAr		1.777	0.581	1.196
-GBKr		1.777	0.581	1.196
 PDIP		10.0	10.0	0
 end DirectionalAtomTypes                    
 
 begin GayBerneAtomTypes
-//Name		d   	l	    eps		    eps_ratio	dw
-GBPaper		3.35    10.05	0.774729 	0.2 		1.0
-GBlinear	2.8104  9.993	0.774729 	0.150814	1.0
-GBC6H6		4.65	2.03	0.540		3.67		0.6
-GBCH3OH		2.55	3.18	0.542		1.03		1.0
-GBAr		3.41	3.41	0.2381		1.0	    	1.0
-GBKr		3.83	3.83	0.3259		1.0		1.0
+//Name		d   	l	Ex		Es		Ee	  dw
+GBPaper		3.35    10.05	0.774729 	0.774729	0.154945  1.0
+GBlinear	2.8104  9.993	0.774729 	0.774729 	0.116839  1.0
+GBC6H6		4.65	2.03	0.540		0.540		1.9818    0.6
+GBCH3OH		2.55	3.18	0.542		0.542		0.55826   1.0
 end GayBerneAtomTypes                 	
 
 begin LennardJonesAtomTypes
