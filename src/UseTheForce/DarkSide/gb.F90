@@ -39,6 +39,39 @@
 !! [4]  Vardeman & Gezelter, in progress (2009).
 !!
 
+!! gayberne is the Gay-Berne interaction for ellipsoidal particles.  The original 
+!! paper (for identical uniaxial particles) is:
+!!    J. G. Gay and B. J. Berne, J. Chem. Phys., 74, 3316-3319 (1981).
+!! A more-general GB potential for dissimilar uniaxial particles:
+!!    D. J. Cleaver, C. M. Care, M. P. Allen and M. P. Neal, Phys. Rev. E, 
+!!    54, 559-567 (1996).
+!! Further parameterizations can be found in:
+!!    A. P. J. Emerson, G. R. Luckhurst and S. G. Whatling, Mol. Phys., 
+!!    82, 113-124 (1994).
+!! And a nice force expression:
+!!    G. R. Luckhurst and R. A. Stephens, Liq. Cryst. 8, 451-464 (1990).
+!! Even clearer force and torque expressions:
+!!    P. A. Golubkov and P. Y. Ren, J. Chem. Phys., 125, 64103 (2006).
+!! New expressions for cross interactions of strength parameters:
+!!    J. Wu, X. Zhen, H. Shen, G. Li, and P. Ren, J. Chem. Phys., 
+!!    135, 155104 (2011).
+!!
+!! In this version of the GB interaction, each uniaxial ellipsoidal type 
+!! is described using a set of 6 parameters:
+!!  d:  range parameter for side-by-side (S) and cross (X) configurations
+!!  l:  range parameter for end-to-end (E) configuration
+!!  epsilon_X:  well-depth parameter for cross (X) configuration
+!!  epsilon_S:  well-depth parameter for side-by-side (S) configuration
+!!  epsilon_E:  well depth parameter for end-to-end (E) configuration
+!!  dw: "softness" of the potential
+!! 
+!! Additionally, there are two "universal" paramters to govern the overall 
+!! importance of the purely orientational (nu) and the mixed
+!! orientational / translational (mu) parts of strength of the interactions. 
+!! These parameters have default or "canonical" values, but may be changed
+!! as a force field option:
+!! nu_: purely orientational part : defaults to 1
+!! mu_: mixed orientational / translational part : defaults to 2
 
 module gayberne
   use force_globals
@@ -74,8 +107,9 @@ module gayberne
      integer          :: atid
      real(kind = dp ) :: d
      real(kind = dp ) :: l
-     real(kind = dp ) :: eps
-     real(kind = dp ) :: eps_ratio 
+     real(kind = dp ) :: epsX
+     real(kind = dp ) :: epsS
+     real(kind = dp ) :: epsE
      real(kind = dp ) :: dw
      logical          :: isLJ
   end type GBtype
@@ -105,10 +139,10 @@ module gayberne
   
 contains
   
-  subroutine newGBtype(c_ident, d, l, eps, eps_ratio, dw, status)
+  subroutine newGBtype(c_ident, d, l, epsX, epsS, epsE, dw, status)
     
     integer, intent(in) :: c_ident
-    real( kind = dp ), intent(in) :: d, l, eps, eps_ratio, dw
+    real( kind = dp ), intent(in) :: d, l, epsX, epsS, epsE, dw
     integer, intent(out) :: status
     
     integer :: nGBTypes, nLJTypes, ntypes, myATID
@@ -142,8 +176,9 @@ contains
     GBMap%GBtypes(current)%atid      = myATID
     GBMap%GBtypes(current)%d         = d
     GBMap%GBtypes(current)%l         = l
-    GBMap%GBtypes(current)%eps       = eps
-    GBMap%GBtypes(current)%eps_ratio = eps_ratio
+    GBMap%GBtypes(current)%epsX      = epsX
+    GBMap%GBtypes(current)%epsS      = epsS
+    GBMap%GBtypes(current)%epsE      = epsE
     GBMap%GBtypes(current)%dw        = dw
     GBMap%GBtypes(current)%isLJ      = .false.
     
@@ -186,8 +221,9 @@ contains
           GBMap%GBtypes(current)%isLJ      = .true.          
           GBMap%GBtypes(current)%d         = getSigma(myATID) / sqrt(2.0_dp)
           GBMap%GBtypes(current)%l         = GBMap%GBtypes(current)%d
-          GBMap%GBtypes(current)%eps       = getEpsilon(myATID)
-          GBMap%GBtypes(current)%eps_ratio = 1.0_dp
+          GBMap%GBtypes(current)%epsX      = getEpsilon(myATID)
+          GBMap%GBtypes(current)%epsS      = GBMap%GBtypes(current)%epsX
+          GBMap%GBtypes(current)%epsE      = GBMap%GBtypes(current)%epsX
           GBMap%GBtypes(current)%dw        = 1.0_dp
           
        endif
@@ -201,9 +237,9 @@ contains
 
   subroutine createGBMixingMap()
     integer :: nGBtypes, i, j
-    real (kind = dp) :: d1, l1, e1, er1, dw1
-    real (kind = dp) :: d2, l2, e2, er2, dw2
-    real (kind = dp) :: er, ermu, xp, ap2
+    real (kind = dp) :: d1, l1, eX1, eS1, eE1, dw1
+    real (kind = dp) :: d2, l2, eX2, eS2, eE2, dw2
+    real (kind = dp) :: xp, ap2, mi
 
     if (GBMap%currentGBtype == 0) then
        call handleError("GB", "No members in GBMap")
@@ -220,16 +256,18 @@ contains
 
        d1 = GBMap%GBtypes(i)%d
        l1 = GBMap%GBtypes(i)%l
-       e1 = GBMap%GBtypes(i)%eps
-       er1 = GBMap%GBtypes(i)%eps_ratio
+       eX1 = GBMap%GBtypes(i)%epsX
+       eS1 = GBMap%GBtypes(i)%epsS
+       eE1 = GBMap%GBtypes(i)%epsE
        dw1 = GBMap%GBtypes(i)%dw
 
        do j = 1, nGBtypes
 
           d2 = GBMap%GBtypes(j)%d
           l2 = GBMap%GBtypes(j)%l
-          e2 = GBMap%GBtypes(j)%eps
-          er2 = GBMap%GBtypes(j)%eps_ratio
+          eX2 = GBMap%GBtypes(j)%epsX
+          eS2 = GBMap%GBtypes(j)%epsS
+          eE2 = GBMap%GBtypes(j)%epsE
           dw2 = GBMap%GBtypes(j)%dw
 
 !  Cleaver paper uses sqrt of squares to get sigma0 for
@@ -244,16 +282,18 @@ contains
           ! assumed LB mixing rules for now:
 
           GBMixingMap(i,j)%dw = 0.5_dp * (dw1 + dw2)
-          GBMixingMap(i,j)%eps0 = sqrt(e1 * e2)
+          GBMixingMap(i,j)%eps0 = sqrt(eX1 * eX2)
 
-          er = sqrt(er1 * er2)
-          ermu = er**(1.0_dp / mu)
-          xp = (1.0_dp - ermu) / (1.0_dp + ermu)
-          ap2 = 1.0_dp / (1.0_dp + ermu)
+          mi = 1.0 / mu
+      
+          GBMixingMap(i,j)%xpap2  = ((eS1**mi) - (eE1**mi)) / &
+               ((eS1**mi) + (eE2**mi))
+          GBMixingMap(i,j)%xpapi2 = ((eS2**mi) - (eE2**mi)) / &
+               ((eS2**mi) + (eE1**mi))
+          GBMixingMap(i,j)%xp2    = ((eS1**mi) - (eE1**mi)) * &
+               ((eS2**mi) - (eE2**mi)) / &
+               ((eS2**mi) + (eE1**mi)) / ((eS1**mi) + (eE2**mi))
 
-          GBMixingMap(i,j)%xp2 = xp*xp
-          GBMixingMap(i,j)%xpap2 = xp*ap2
-          GBMixingMap(i,j)%xpapi2 = xp/ap2
        enddo
     enddo
     haveMixingMap = .true.
@@ -325,6 +365,18 @@ contains
     xpap2  = GBMixingMap(gbt1, gbt2)%xpap2 
     xpapi2 = GBMixingMap(gbt1, gbt2)%xpapi2
     
+!!$    write(*,*) 'atypes = ',atid1, atid2
+!!$    write(*,*) 'sigma0 = ',sigma0 
+!!$    write(*,*) 'dw     = ',dw 
+!!$    write(*,*) 'eps0   = ',eps0   
+!!$    write(*,*) 'x2     = ',x2     
+!!$    write(*,*) 'xa2    = ',xa2    
+!!$    write(*,*) 'xai2   = ',xai2   
+!!$    write(*,*) 'xp2    = ',xp2    
+!!$    write(*,*) 'xpap2  = ',xpap2  
+!!$    write(*,*) 'xpapi2 = ',xpapi2 
+
+
     ul1(1) = A1(7)
     ul1(2) = A1(8)
     ul1(3) = A1(9)
@@ -333,6 +385,9 @@ contains
     ul2(2) = A2(8)
     ul2(3) = A2(9)
     
+!!$    write(*,*) 'ul1 = ', ul1(1), ul1(2), ul1(3)
+!!$    write(*,*) 'ul2 = ', ul2(1), ul2(2), ul2(3)
+
     if (i_is_LJ) then
        a = 0.0_dp
        ul1 = 0.0_dp
@@ -363,6 +418,12 @@ contains
     H  = (xa2 * au2 + xai2 * bu2 - 2.0_dp*x2*au*bu*g)  / (1.0_dp - x2*g2)
     Hp = (xpap2*au2 + xpapi2*bu2 - 2.0_dp*xp2*au*bu*g) / (1.0_dp - xp2*g2)
 
+!!$    write(*,*) 'au2 = ',au2
+!!$    write(*,*) 'bu2 = ',bu2
+!!$    write(*,*) 'g2 = ',g2
+!!$    write(*,*) 'H = ',H
+!!$    write(*,*) 'Hp = ',Hp
+
     sigma = sigma0 / sqrt(1.0_dp - H)
     e1 = 1.0_dp / sqrt(1.0_dp - x2*g2)
     e2 = 1.0_dp - Hp
@@ -379,6 +440,19 @@ contains
 
     s3 = sigma*sigma*sigma
     s03 = sigma0*sigma0*sigma0
+
+!!$    write(*,*) 'vdwMult = ', vdwMult
+!!$    write(*,*) 'eps = ', eps
+!!$    write(*,*) 'mu = ', mu
+!!$    write(*,*) 'R12 = ', R12
+!!$    write(*,*) 'R6 = ', R6 
+!!$    write(*,*) 'R13 = ', R13
+!!$    write(*,*) 'R7 = ', R7 
+!!$    write(*,*) 'e2 = ', e2 
+!!$    write(*,*) 'rij = ', r
+!!$    write(*,*) 's3 = ', s3 
+!!$    write(*,*) 's03 = ', s03 
+!!$    write(*,*) 'dw = ', dw 
 
     pref1 = - vdwMult * 8.0_dp * eps * mu * (R12 - R6) / (e2 * r)
 
@@ -397,6 +471,8 @@ contains
          (1.0_dp - xp2 * g2) / e2 &
          + 8.0_dp * eps * s3 * (3.0_dp * R7 - 6.0_dp * R13) * &  
          (x2 * au * bu - H * x2 * g) / (1.0_dp - x2 * g2) / (dw * s03)
+!!$    write(*,*) 'pref = ',pref1 ,  pref2
+!!$    write(*,*) 'dU = ',dUdr ,  dUda, dUdb ,  dUdg
 
             
     rhat = d / r
@@ -408,20 +484,6 @@ contains
     rxu1 = cross_product(d, ul1)
     rxu2 = cross_product(d, ul2)    
     uxu = cross_product(ul1, ul2)
-    
-!!$    write(*,*) 'pref = ' , pref1, pref2
-!!$    write(*,*) 'rxu1 = ' , rxu1(1), rxu1(2), rxu1(3)
-!!$    write(*,*) 'rxu2 = ' , rxu2(1), rxu2(2), rxu2(3)
-!!$    write(*,*) 'uxu = ' , uxu(1), uxu(2), uxu(3)
-!!$    write(*,*) 'dUda = ', dUda, dudb, dudg, dudr
-!!$    write(*,*) 'H = ', H,hp,sigma, e1, e2, BigR
-!!$    write(*,*) 'chi = ', xa2, xai2, x2 
-!!$    write(*,*) 'chip = ', xpap2, xpapi2, xp2
-!!$    write(*,*) 'eps = ', eps0, e1, e2, eps
-!!$    write(*,*) 'U =', U, pref1, pref2
-!!$    write(*,*) 'f =', fx, fy, fz
-!!$    write(*,*) 'au =', au, bu, g
-!!$    
 
     pot = pot + U*sw
 
@@ -432,13 +494,22 @@ contains
     t1(1) = t1(1) + (dUda*rxu1(1) - dUdg*uxu(1))*sw
     t1(2) = t1(2) + (dUda*rxu1(2) - dUdg*uxu(2))*sw
     t1(3) = t1(3) + (dUda*rxu1(3) - dUdg*uxu(3))*sw
-
+                                                   
     t2(1) = t2(1) + (dUdb*rxu2(1) + dUdg*uxu(1))*sw
     t2(2) = t2(2) + (dUdb*rxu2(2) + dUdg*uxu(2))*sw
     t2(3) = t2(3) + (dUdb*rxu2(3) + dUdg*uxu(3))*sw
 
     vpair = vpair + U
-    
+
+!!$    write(*,*) 'f1 term = ', fx*sw, fy*sw, fz*sw
+!!$    write(*,*) 't1 term = ', (dUda*rxu1(1) - dUdg*uxu(1))*sw, &
+!!$         (dUda*rxu1(2) - dUdg*uxu(2))*sw, &
+!!$         (dUda*rxu1(3) - dUdg*uxu(3))*sw                              
+!!$    write(*,*) 't2 term = ', (dUdb*rxu2(1) + dUdg*uxu(1))*sw, &
+!!$         (dUdb*rxu2(2) + dUdg*uxu(2))*sw, &
+!!$         (dUdb*rxu2(3) + dUdg*uxu(3))*sw
+!!$    write(*,*) 'vp term = ', U
+
     return
   end subroutine do_gb_pair
   

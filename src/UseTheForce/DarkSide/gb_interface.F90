@@ -1,12 +1,12 @@
-subroutine newGBtype(c_ident, d, l, eps, eps_ratio, dw, status)
+subroutine newGBtype(c_ident, d, l, epsX, epsS, epsE, dw, status)
   
   use definitions, ONLY : dp
   use gayberne, ONLY : module_newGBtype => newGBtype
 
   integer, intent(inout) :: c_ident, status
-  real( kind = dp ), intent(inout) :: d, l, eps, eps_ratio, dw
+  real( kind = dp ), intent(inout) :: d, l, epsX, epsS, epsE, dw
 
-  call module_newGBtype(c_ident, d, l, eps, eps_ratio, dw, status)
+  call module_newGBtype(c_ident, d, l, epsX, epsS, epsE, dw, status)
   
   return
 end subroutine newGBtype

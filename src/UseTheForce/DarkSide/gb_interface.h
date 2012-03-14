@@ -54,8 +54,9 @@ extern "C"{
   void newGayBerneType( int* ident,
                         RealType* GB_d,
                         RealType* GB_l,
-                        RealType* GB_eps,
-                        RealType* GB_eps_ratio,
+                        RealType* GB_eps_X,
+                        RealType* GB_eps_S,
+                        RealType* GB_eps_E,
                         RealType* GB_dw,
                         int* status);
 

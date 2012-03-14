@@ -256,8 +256,9 @@ namespace OpenMD {
           newGayBerneType(&atp.ident, 
                           &gayBerneParam.GB_d, 
                           &gayBerneParam.GB_l, 
-                          &gayBerneParam.GB_eps,
-                          &gayBerneParam.GB_eps_ratio, 
+                          &gayBerneParam.GB_eps_X,
+                          &gayBerneParam.GB_eps_S, 
+                          &gayBerneParam.GB_eps_E, 
                           &gayBerneParam.GB_dw, 
                           &isError);
           

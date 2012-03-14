@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "io/GayBerneAtomTypesSectionParser.hpp"
@@ -47,56 +48,54 @@
 
 
 namespace OpenMD {
-
+  
   GayBerneAtomTypesSectionParser::GayBerneAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("GayBerneAtomTypes");
-}
-
-void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  }
+  
+  void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
-    //in AtomTypeSection, a line at least contains 6 tokens
-    //atomTypeName and 5 different gayBerne parameters
-    if (nTokens < 1)  {
-        sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();                      
+    //in GayBerneAtomTypesSection, a line at least contains 7 tokens
+    //atomTypeName   d    l    eps_X  eps_S   eps_E   dw
+    if (nTokens < 7)  {
+      sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser: Not enough tokens at line %d\n"
+              "\tPlease note that GB atoms now require separate specification of epsilon\n"
+              "\tvalues for cross (X), Side-by-Side (S), and End-to-End (E) for each\n"
+              "\tellipsoid type.\n",
+              lineNo);
+      painCave.isFatal = 1;
+      simError();            
     } else {
-
-        std::string atomTypeName = tokenizer.nextToken();    
-        AtomType* atomType = ff.getAtomType(atomTypeName);
-        if (atomType != NULL) {
-            DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-            
-            if (dAtomType != NULL) {
-                GayBerneParam gayBerne;
-                gayBerne.GB_d = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_l = tokenizer.nextTokenAsDouble();  
-                gayBerne.GB_eps = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_eps_ratio = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_dw = tokenizer.nextTokenAsDouble();
-                
-                dAtomType->addProperty(new GayBerneParamGenericData("GayBerne", gayBerne));
-                dAtomType->setGayBerne();
-            } else {
-                sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                        lineNo);
-                painCave.isFatal = 1;
-                simError();            
-                std::cerr << "GayBerneAtomTypesSectionParser Warning:" << std::endl;
-            }
+      
+      std::string atomTypeName = tokenizer.nextToken();    
+      AtomType* atomType = ff.getAtomType(atomTypeName);
+      if (atomType != NULL) {
+        DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);        
+        if (dAtomType != NULL) {
+          GayBerneParam gayBerne;
+          gayBerne.GB_d = tokenizer.nextTokenAsDouble();
+          gayBerne.GB_l = tokenizer.nextTokenAsDouble();  
+          gayBerne.GB_eps_X = tokenizer.nextTokenAsDouble();
+          gayBerne.GB_eps_S = tokenizer.nextTokenAsDouble();
+          gayBerne.GB_eps_E = tokenizer.nextTokenAsDouble();
+          gayBerne.GB_dw = tokenizer.nextTokenAsDouble();          
+          dAtomType->addProperty(new GayBerneParamGenericData("GayBerne", gayBerne));
+          dAtomType->setGayBerne();
         } else {
-            sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser Error: Can not find matched AtomType %s\n",
-                    atomTypeName.c_str());
-            painCave.isFatal = 1;
-            simError();    
-        
+          sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser: Can not find matching DirectionalAtomType %s\n"
+                  "\tfor this GayBerne atom type\n",
+                  atomTypeName.c_str());
+          painCave.isFatal = 1;
+          simError();                   
         }
-                       
+      } else {
+        sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser: Can not find matching AtomType %s\n"
+                "\tfor this GayBerne atom type\n",
+                atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();         
+      }                       
     }    
-
-
-}
-
+  }  
 } //end namespace OpenMD

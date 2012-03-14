@@ -1097,6 +1097,10 @@ contains
                             ! particle_pot will be accumulated from row & column
                             ! arrays later
 #else
+!!$                            write(*,*) 'atoms = ', atom1, atom2
+!!$                            write(*,*) 'pos1 = ', q(1,atom1), q(2,atom1), q(3,atom1)
+!!$                            write(*,*) 'pos2 = ', q(1,atom2), q(2,atom2), q(3,atom2)
+
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  eFrame, A, f, t, pot, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
