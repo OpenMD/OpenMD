@@ -49,9 +49,6 @@
 #include "io/ForceFieldOptions.hpp"
 namespace OpenMD {
   
-  /**
-   * @class GayBerneAtomTypesSectionParser GayBerneAtomTypesSectionParser.hpp "io/GayBerneAtomTypesSectionParser.hpp"
-   */
   class GayBerneAtomTypesSectionParser : public SectionParser {
   public:
     GayBerneAtomTypesSectionParser(ForceFieldOptions& options);

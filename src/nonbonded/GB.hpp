@@ -78,8 +78,9 @@ namespace OpenMD {
     GayBerneParam  getGayBerneParam(AtomType* atomType);
     RealType getD(AtomType* atomType);
     RealType getL(AtomType* atomType);
-    RealType getEps(AtomType* atomType);
-    RealType getEpsRatio(AtomType* atomType);
+    RealType getEpsX(AtomType* atomType);
+    RealType getEpsS(AtomType* atomType);
+    RealType getEpsE(AtomType* atomType);
     RealType getDw(AtomType* atomType);
     LJParam  getLJParam(AtomType* atomType);
     RealType getLJSigma(AtomType* atomType);

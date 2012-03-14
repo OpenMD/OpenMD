@@ -50,6 +50,42 @@
 using namespace std;
 namespace OpenMD {
 
+  /* GB is the Gay-Berne interaction for ellipsoidal particles.  The original 
+   * paper (for identical uniaxial particles) is:
+   *    J. G. Gay and B. J. Berne, J. Chem. Phys., 74, 3316-3319 (1981).
+   * A more-general GB potential for dissimilar uniaxial particles:
+   *    D. J. Cleaver, C. M. Care, M. P. Allen and M. P. Neal, Phys. Rev. E, 
+   *    54, 559-567 (1996).
+   * Further parameterizations can be found in:
+   *    A. P. J. Emerson, G. R. Luckhurst and S. G. Whatling, Mol. Phys., 
+   *    82, 113-124 (1994).
+   * And a nice force expression:
+   *    G. R. Luckhurst and R. A. Stephens, Liq. Cryst. 8, 451-464 (1990).
+   * Even clearer force and torque expressions:
+   *    P. A. Golubkov and P. Y. Ren, J. Chem. Phys., 125, 64103 (2006).
+   * New expressions for cross interactions of strength parameters:
+   *    J. Wu, X. Zhen, H. Shen, G. Li, and P. Ren, J. Chem. Phys., 
+   *    135, 155104 (2011).
+   *
+   * In this version of the GB interaction, each uniaxial ellipsoidal type 
+   * is described using a set of 6 parameters:
+   *  d:  range parameter for side-by-side (S) and cross (X) configurations
+   *  l:  range parameter for end-to-end (E) configuration
+   *  epsilon_X:  well-depth parameter for cross (X) configuration
+   *  epsilon_S:  well-depth parameter for side-by-side (S) configuration
+   *  epsilon_E:  well depth parameter for end-to-end (E) configuration
+   *  dw: "softness" of the potential
+   * 
+   * Additionally, there are two "universal" paramters to govern the overall 
+   * importance of the purely orientational (nu) and the mixed
+   * orientational / translational (mu) parts of strength of the interactions. 
+   * These parameters have default or "canonical" values, but may be changed
+   * as a force field option:
+   * nu_: purely orientational part : defaults to 1
+   * mu_: mixed orientational / translational part : defaults to 2
+   */
+
+
   GB::GB() : name_("GB"), initialized_(false), mu_(2.0), nu_(1.0), forceField_(NULL) {}
   
   GayBerneParam GB::getGayBerneParam(AtomType* atomType) {
@@ -173,20 +209,22 @@ namespace OpenMD {
       simError();         
     }
     
-    RealType d1, l1, e1, er1, dw1;
+    RealType d1, l1, eX1, eS1, eE1, dw1;
     
     if (atomType->isGayBerne()) {
       GayBerneParam gb1 = getGayBerneParam(atomType);
       d1 = gb1.GB_d;
       l1 = gb1.GB_l;
-      e1 = gb1.GB_eps;
-      er1 = gb1.GB_eps_ratio;
+      eX1 = gb1.GB_eps_X;
+      eS1 = gb1.GB_eps_S;
+      eE1 = gb1.GB_eps_E;
       dw1 = gb1.GB_dw;
     } else if (atomType->isLennardJones()) {
       d1 = getLJSigma(atomType) / sqrt(2.0);
-      e1 = getLJEpsilon(atomType);
       l1 = d1;
-      er1 = 1.0;
+      eX1 = getLJEpsilon(atomType);
+      eS1 = eX1;
+      eE1 = eX1;
       dw1 = 1.0;      
     } else {
       sprintf( painCave.errMsg,
@@ -206,20 +244,22 @@ namespace OpenMD {
       
       AtomType* atype2 = (*it).second;
       
-      RealType d2, l2, e2, er2, dw2;
+      RealType d2, l2, eX2, eS2, eE2, dw2;
       
       if (atype2->isGayBerne()) {
         GayBerneParam gb2 = getGayBerneParam(atype2);
         d2 = gb2.GB_d;
         l2 = gb2.GB_l;
-        e2 = gb2.GB_eps;
-        er2 = gb2.GB_eps_ratio;
+        eX2 = gb2.GB_eps_X;
+        eS2 = gb2.GB_eps_S;
+        eE2 = gb2.GB_eps_E;
         dw2 = gb2.GB_dw;
       } else if (atype2->isLennardJones()) {
         d2 = getLJSigma(atype2) / sqrt(2.0);
-        e2 = getLJEpsilon(atype2);
         l2 = d2;
-        er2 = 1.0;
+        eX2 = getLJEpsilon(atype2);
+        eS2 = eX2;
+        eE2 = eX2;
         dw2 = 1.0;
       } 
                        
@@ -244,23 +284,23 @@ namespace OpenMD {
       // assumed LB mixing rules for now:
 
       mixer1.dw = 0.5 * (dw1 + dw2);
-      mixer1.eps0 = sqrt(e1 * e2);
+      mixer1.eps0 = sqrt(eX1 * eX2);
 
       mixer2.dw = mixer1.dw;
       mixer2.eps0 = mixer1.eps0;
-      
-      RealType er = sqrt(er1 * er2);
-      RealType ermu = pow(er, (RealType(1.0) / mu_));
-      RealType xp = (1.0 - ermu) / (1.0 + ermu);
-      RealType ap2 = 1.0 / (1.0 + ermu);
-      
-      mixer1.xp2 = xp * xp;
-      mixer1.xpap2 = xp * ap2;
-      mixer1.xpapi2 = xp / ap2;
 
+      RealType mi = RealType(1.0)/mu_;
+      
+      mixer1.xpap2  = (pow(eS1, mi) - pow(eE1, mi)) / (pow(eS1, mi) + pow(eE2, mi));
+      mixer1.xpapi2 = (pow(eS2, mi) - pow(eE2, mi)) / (pow(eS2, mi) + pow(eE1, mi));
+      mixer1.xp2    = (pow(eS1, mi) - pow(eE1, mi)) * (pow(eS2, mi) - pow(eE2, mi))  / 
+        (pow(eS2, mi) + pow(eE1, mi)) / (pow(eS1, mi) + pow(eE2, mi)) ;
+
+      // xpap2 and xpapi2 for j-i pairs are reversed from the same i-j pairing.
+      // Swapping the particles reverses the anisotropy parameters:
+      mixer2.xpap2 = mixer1.xpapi2;
+      mixer2.xpapi2 = mixer1.xpap2;
       mixer2.xp2 = mixer1.xp2;
-      mixer2.xpap2 = mixer1.xpap2;
-      mixer2.xpapi2 = mixer1.xpapi2;
 
       // only add this pairing if at least one of the atoms is a Gay-Berne atom
 
@@ -294,8 +334,22 @@ namespace OpenMD {
     RealType xpap2  = mixer.xpap2; 
     RealType xpapi2 = mixer.xpapi2;
 
+    // cerr << "atypes = " << idat.atypes.first->getName() << " " << idat.atypes.second->getName() << "\n";
+    // cerr << "sigma0 = " <<mixer.sigma0 <<"\n";
+    // cerr << "dw     = " <<mixer.dw <<"\n";
+    // cerr << "eps0   = " <<mixer.eps0 <<"\n";  
+    // cerr << "x2     = " <<mixer.x2 <<"\n";    
+    // cerr << "xa2    = " <<mixer.xa2 <<"\n";   
+    // cerr << "xai2   = " <<mixer.xai2 <<"\n";  
+    // cerr << "xp2    = " <<mixer.xp2 <<"\n";   
+    // cerr << "xpap2  = " <<mixer.xpap2 <<"\n"; 
+    // cerr << "xpapi2 = " <<mixer.xpapi2 <<"\n";
+
     Vector3d ul1 = idat.A1->getRow(2);
     Vector3d ul2 = idat.A2->getRow(2);
+
+    // cerr << "ul1 = " <<ul1<<"\n";
+    // cerr << "ul2 = " <<ul2<<"\n";
 
     RealType a, b, g;
 
@@ -327,9 +381,15 @@ namespace OpenMD {
     RealType au2 = au * au;
     RealType bu2 = bu * bu;
     RealType g2 = g * g;
-    
+
     RealType H  = (xa2 * au2 + xai2 * bu2 - 2.0*x2*au*bu*g)  / (1.0 - x2*g2);
     RealType Hp = (xpap2*au2 + xpapi2*bu2 - 2.0*xp2*au*bu*g) / (1.0 - xp2*g2);
+
+    // cerr << "au2 = " << au2 << "\n";
+    // cerr << "bu2 = " << bu2 << "\n";
+    // cerr << "g2 = " << g2 << "\n";
+    // cerr << "H = " << H << "\n";
+    // cerr << "Hp = " << Hp << "\n";
 
     RealType sigma = sigma0 / sqrt(1.0 - H);
     RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
@@ -347,6 +407,19 @@ namespace OpenMD {
 
     RealType s3 = sigma*sigma*sigma;
     RealType s03 = sigma0*sigma0*sigma0;
+
+    // cerr << "vdwMult = " << *(idat.vdwMult) << "\n";
+    // cerr << "eps = " << eps <<"\n";
+    // cerr << "mu = " << mu_ << "\n";
+    // cerr << "R12 = " << R12 << "\n";
+    // cerr << "R6 = " << R6 << "\n";
+    // cerr << "R13 = " << R13 << "\n";
+    // cerr << "R7 = " << R7 << "\n";
+    // cerr << "e2 = " << e2 << "\n";
+    // cerr << "rij = " << *(idat.rij) << "\n";
+    // cerr << "s3 = " << s3 << "\n";
+    // cerr << "s03 = " << s03 << "\n";
+    // cerr << "dw = " << dw << "\n";
 
     RealType pref1 = - *(idat.vdwMult) * 8.0 * eps * mu_ * (R12 - R6) / 
       (e2 * *(idat.rij));
@@ -368,6 +441,9 @@ namespace OpenMD {
       (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
       (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
 
+    // cerr << "pref = " << pref1 << " " << pref2 << "\n";
+    // cerr << "dU = " << dUdr << " " << dUda <<" " << dUdb << " " << dUdg << "\n";
+
     Vector3d rhat = *(idat.d) / *(idat.rij);   
     Vector3d rxu1 = cross(*(idat.d), ul1);
     Vector3d rxu2 = cross(*(idat.d), ul2);
@@ -378,6 +454,11 @@ namespace OpenMD {
     *(idat.t1) += (dUda * rxu1 - dUdg * uxu) * *(idat.sw);
     *(idat.t2) += (dUdb * rxu2 + dUdg * uxu) * *(idat.sw);
     *(idat.vpair) += U;
+
+    // cerr << "f1 term = " <<  (dUdr * rhat + dUda * ul1 + dUdb * ul2) * *(idat.sw) << "\n";
+    // cerr << "t1 term = " << (dUda * rxu1 - dUdg * uxu) * *(idat.sw) << "\n";
+    // cerr << "t2 term = " << (dUdb * rxu2 + dUdg * uxu) * *(idat.sw) << "\n";
+    // cerr << "vp term = " << U << "\n";
 
     return;
 
