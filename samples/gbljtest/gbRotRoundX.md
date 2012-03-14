@@ -18,6 +18,7 @@ component{
 ensemble = NVE;
 forceField = "DUFF";
 
+cutoffMethod = "switched";
 cutoffRadius = 20.0;
 switchingRadius = 18.0;
 dt = 1.0;

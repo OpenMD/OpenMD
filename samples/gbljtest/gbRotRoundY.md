@@ -20,10 +20,11 @@ targetTemp = 1;
 tauThermostat = 1000;
 forceField = "DUFF";
 
+cutoffMethod = "switched";
 cutoffRadius = 20.0;
 switchingRadius = 18.0;
 dt = 1;
-runTime = 100000;
+runTime = 10000;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
