@@ -101,7 +101,7 @@ namespace OpenMD {
     StuntDouble* sd3;
     
     for (sd1 = seleMan1_.beginSelected(i), sd3 = seleMan3_.beginSelected(j); 
-	 sd1 != NULL, sd3 != NULL;
+	 sd1 != NULL || sd3 != NULL;
 	 sd1 = seleMan1_.nextSelected(i), sd3 = seleMan3_.nextSelected(j)) {
 
       Vector3d r3 =sd3->getPos();
