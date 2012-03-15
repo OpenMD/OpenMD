@@ -1,8 +1,6 @@
 # Top level cmake script for OpenMD. 
-project(OpenMD)
-# project(OpenMD CXX)
-
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+project(OpenMD CXX)
+cmake_minimum_required(VERSION 2.8.5)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
@@ -10,16 +8,32 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+find_package(MPI)
+if (NOT MPI_CXX_FOUND)
+message(STATUS "========== OpenMD Parallel Information ==========")
+message(STATUS )
+message(STATUS "No MPI compiler found. Perhaps you want to set one explicitly?")
+message(STATUS "To override the default compiler, set the environment variable")
+message(STATUS "     export CXX=/full/path/to/mpic++")
+message(STATUS "in bash or ksh or sh.  In csh or tcsh, use:")
+message(STATUS "     setenv CXX /full/path/to/mpic++")
+message(STATUS "before running the cmake command.")
+message(STATUS )
+message(STATUS "=================================================")
+endif()
+IF ( MPI_CXX_FOUND )
+  INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+ENDIF()
+
 include(CheckCXXCompilerFlag)
+include(CheckIncludeFileCXX)
+include(CheckCXXSymbolExists)
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
 set (VERSION_MINOR "0")
 set (VERSION_TINY "0")  
-
-# Should 
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
-
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
@@ -46,20 +60,10 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   "Single directory for all static libraries."
   )
 
-if ( APPLE )
-set(MPI_COMPILER /opt/local/lib/openmpi/bin/mpic++)
-set(MPI_LIBRARY "MPI_LIBRARY-NOTFOUND" )
-endif( APPLE )
-FIND_PACKAGE(MPI)
-IF ( MPI_FOUND )
-  SET(CMAKE_REQUIRED_INCLUDES "${MPI_INCLUDE_PATH};${CMAKE_REQUIRED_INCLUDES}")
-  INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
-ENDIF()
-
 FIND_PACKAGE(Subversion)
 IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  MESSAGE("Current revision is ${Project_WC_REVISION}")
+  MESSAGE(STATUS "Current revision is ${Project_WC_REVISION}")
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
   SET(SVN_REV ${Project_WC_REVISION})
   ADD_DEFINITIONS( -DSVN_REV=${Project_WC_REVISION} )
@@ -70,27 +74,20 @@ IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
   )
 ENDIF()
 
+check_include_file_cxx(conio.h      HAVE_CONIO_H)
+check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 
-include(CheckIncludeFile)
-include(CheckIncludeFileCXX)
-include(CheckSymbolExists)
-include(CheckLibraryExists)
-include(CheckTypeSize)
-include(CheckCSourceCompiles)
-check_include_file(conio.h      HAVE_CONIO_H)
-check_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 # Optional libraries: If we can find these, we will build with them
 # Look for OpenBabel libraries
 find_package(OpenBabel2)
 IF(OPENBABEL2_FOUND)
   SET(USE_OPENBABEL)
   include_directories(${OPENBABEL2_INCLUDE_DIR})
-  message(STATUS "Openbabel libs: " ${OPENBABEL2_LIBRARIES})
-#  TARGET_LINK_LIBRARIES(${OPENBABEL2_LIBRARIES})
+  # link libraries are added only for targets that need them.
 ENDIF(OPENBABEL2_FOUND)
 
 #Look for QHULL Libraries
-find_package(QHULL)
+find_package(Qhull)
 IF(QHULL_FOUND)
   SET(HAVE_QHULL 1)
   include_directories(${QHULL_INCLUDE_DIR})
@@ -107,13 +104,19 @@ if(ZLIB_FOUND)
 endif(ZLIB_FOUND)
 
 #FFTW
-FIND_PACKAGE(FFTW)
-IF(FFTW_FOUND)
+IF(SINGLE_PRECISION)
+  find_package(FFTW3 COMPONENTS single)
+else()
+  find_package(FFTW3 COMPONENTS double)
+endif(SINGLE_PRECISION)
+if (FFTW3_FOUND)
+  include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${FFTW3_INCLUDE_DIR})
   SET(HAVE_LIBFFTW 1)
   SET(HAVE_FFTW3_H 1)
-  INCLUDE_DIRECTORIES(${FFTW_INCLUDE_DIR})
-  LINK_LIBRARIES(${FFTW_LIBRARIES})
-ENDIF(FFTW_FOUND)
+  INCLUDE_DIRECTORIES(${FFTW3_INCLUDE_DIR})
+  LINK_LIBRARIES(${FFTW3_LIBRARIES})
+endif (FFTW3_FOUND)
+
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -147,7 +150,6 @@ configure_file (
   "${PROJECT_BINARY_DIR}/config.h"
 )
 include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/src")
-
 
 #Add executables for build
 set (PROGRAMS 
@@ -605,3 +607,30 @@ install(DIRECTORY samples/
 INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
         DESTINATION doc
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
+message( STATUS)
+message( STATUS "========== OpenMD Build Information ==========")
+message( STATUS "Current revision ........... = ${SVN_REV}")
+message( STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
+message( STATUS "==============================================")
+message( STATUS "CMAKE_BUILD_TYPE ........... = ${CMAKE_BUILD_TYPE}")
+message( STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
+message( STATUS "CMAKE_CXX_COMPILER ......... = ${CMAKE_CXX_COMPILER}")
+message( STATUS "MPI_CXX_COMPILER ........... = ${MPI_CXX_COMPILER}")
+message( STATUS "MPI_CXX_INCLUDE_PATH ....... = ${MPI_CXX_INCLUDE_PATH}")
+message( STATUS "MPI_CXX_LIBRARIES .......... = ${MPI_CXX_LIBRARIES}")
+message( STATUS "Build as SINGLE_PRECISION .. = ${SINGLE_PRECISION}")
+message( STATUS "OPENBABEL2_INCLUDE_DIR ..... = ${OPENBABEL2_INCLUDE_DIR}")
+message( STATUS "OPENBABEL2_LIBRARIES ....... = ${OPENBABEL2_LIBRARIES}")
+message( STATUS "QHULL_INCLUDE_DIR .......... = ${QHULL_INCLUDE_DIR}")
+message( STATUS "QHULL_LIBRARIES ............ = ${QHULL_LIBRARIES}")
+message( STATUS "ZLIB_INCLUDE_DIR ........... = ${ZLIB_INCLUDE_DIR}")
+message( STATUS "ZLIB_LIBRARIES ............. = ${ZLIB_LIBRARIES}")
+message( STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
+message( STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
+message( STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
+message( STATUS "PERL_EXECUTABLE ............ = ${PERL}")
+message( STATUS "PYTHON_EXECUTABLE .......... = ${PYTHON}")
+message( STATUS "To override these options, add -D{OPTION_NAME}=... to the cmake command")
+message(STATUS)
+message(STATUS "To build and install OpenMD, enter \"make\" and \"make install\"")
