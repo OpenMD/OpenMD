@@ -92,7 +92,7 @@ int main(int argc,char* argv[]){
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
       "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
       "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2011 by the     |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2012 by the     |\n"<<
       "  |     /_/                                   University of Notre Dame.      |\n"<<
       "  |                                                                          |\n"<<
       "  |        version " << 
@@ -111,6 +111,7 @@ int main(int argc,char* argv[]){
       "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).               |\n"<<
       "  | [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).                |\n"<<
       "  | [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |\n"<<
+      "  | [6] Kuang & Gezelter, Mol. Phys., in press (2012).                       |\n"<<
       "  +--------------------------------------------------------------------------+\n"<<
       "\n";
     
