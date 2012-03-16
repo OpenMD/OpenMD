@@ -42,6 +42,7 @@
 #include <cmath>
 #include "integrators/RNEMD.hpp"
 #include "math/Vector3.hpp"
+#include "math/Vector.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Polynomial.hpp"
 #include "primitives/Molecule.hpp"
@@ -71,12 +72,16 @@ namespace OpenMD {
 
     stringToEnumMap_["KineticSwap"] = rnemdKineticSwap;
     stringToEnumMap_["KineticScale"] = rnemdKineticScale;
+    stringToEnumMap_["KineticScaleVAM"] = rnemdKineticScaleVAM;
+    stringToEnumMap_["KineticScaleAM"] = rnemdKineticScaleAM;
     stringToEnumMap_["PxScale"] = rnemdPxScale;
     stringToEnumMap_["PyScale"] = rnemdPyScale;
     stringToEnumMap_["PzScale"] = rnemdPzScale;
     stringToEnumMap_["Px"] = rnemdPx;
     stringToEnumMap_["Py"] = rnemdPy;
     stringToEnumMap_["Pz"] = rnemdPz;
+    stringToEnumMap_["ShiftScaleV"] = rnemdShiftScaleV;
+    stringToEnumMap_["ShiftScaleVAM"] = rnemdShiftScaleVAM;
     stringToEnumMap_["Unknown"] = rnemdUnknown;
 
     rnemdObjectSelection_ = simParams->getRNEMD_objectSelection();
@@ -120,46 +125,67 @@ namespace OpenMD {
       simError();
     }
     
+    outputTemp_ = false;
+    if (simParams->haveRNEMD_outputTemperature()) {
+      outputTemp_ = simParams->getRNEMD_outputTemperature();
+    } else if ((rnemdType_ == rnemdKineticSwap) ||
+	       (rnemdType_ == rnemdKineticScale) ||
+	       (rnemdType_ == rnemdKineticScaleVAM) ||
+	       (rnemdType_ == rnemdKineticScaleAM)) {
+      outputTemp_ = true;
+    }
+    outputVx_ = false;
+    if (simParams->haveRNEMD_outputVx()) {
+      outputVx_ = simParams->getRNEMD_outputVx();
+    } else if ((rnemdType_ == rnemdPx) || (rnemdType_ == rnemdPxScale)) {
+      outputVx_ = true;
+    }
+    outputVy_ = false;
+    if (simParams->haveRNEMD_outputVy()) {
+      outputVy_ = simParams->getRNEMD_outputVy();
+    } else if ((rnemdType_ == rnemdPy) || (rnemdType_ == rnemdPyScale)) {
+      outputVy_ = true;
+    }
     output3DTemp_ = false;
-    if (simParams->haveRNEMD_outputDimensionalTemperature()) {
-      output3DTemp_ = simParams->getRNEMD_outputDimensionalTemperature();
+    if (simParams->haveRNEMD_outputXyzTemperature()) {
+      output3DTemp_ = simParams->getRNEMD_outputXyzTemperature();
+    }
+    outputRotTemp_ = false;
+    if (simParams->haveRNEMD_outputRotTemperature()) {
+      outputRotTemp_ = simParams->getRNEMD_outputRotTemperature();
     }
 
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
 
+      //may have rnemdWriter separately
       string rnemdFileName;
-      switch(rnemdType_) {
-      case rnemdKineticSwap :
-      case rnemdKineticScale :
-        rnemdFileName = "temperature.log";
-        break;
-      case rnemdPx :
-      case rnemdPxScale :
-      case rnemdPy :
-      case rnemdPyScale :
-        rnemdFileName = "momemtum.log";
-        break;
-      case rnemdPz :
-      case rnemdPzScale :
-      case rnemdUnknown :
-      default :
-        rnemdFileName = "rnemd.log";
-        break;
-      }
-      rnemdLog_.open(rnemdFileName.c_str());
 
-      string xTempFileName;
-      string yTempFileName;
-      string zTempFileName;
+      if (outputTemp_) {
+        rnemdFileName = "temperature.log";
+      	tempLog_.open(rnemdFileName.c_str());
+      }
+      if (outputVx_) {
+        rnemdFileName = "velocityX.log";
+      	vxzLog_.open(rnemdFileName.c_str());
+      }
+      if (outputVy_) {
+        rnemdFileName = "velocityY.log";
+      	vyzLog_.open(rnemdFileName.c_str());
+      }
+
       if (output3DTemp_) {
-	xTempFileName = "temperatureX.log";
-	yTempFileName = "temperatureY.log";
-	zTempFileName = "temperatureZ.log";
-	xTempLog_.open(xTempFileName.c_str());
-	yTempLog_.open(yTempFileName.c_str());
-	zTempLog_.open(zTempFileName.c_str());
+	rnemdFileName = "temperatureX.log";
+	xTempLog_.open(rnemdFileName.c_str());
+	rnemdFileName = "temperatureY.log";
+	yTempLog_.open(rnemdFileName.c_str());
+	rnemdFileName = "temperatureZ.log";
+	zTempLog_.open(rnemdFileName.c_str());
+      }
+      if (outputRotTemp_) {
+        rnemdFileName = "temperatureR.log";
+      	rotTempLog_.open(rnemdFileName.c_str());
       }
 
 #ifdef IS_MPI
@@ -178,26 +204,34 @@ namespace OpenMD {
     } else {
       zShift_ = 0.0;
     }
-    //cerr << "we have zShift_ = " << zShift_ << "\n";
-    //shift slabs by half slab width, might be useful in heterogeneous systems
-    //set to 0.0 if not using it; can NOT be used in status output yet
+    //cerr << "I shift slabs by " << zShift_ << " Lz\n";
+    //shift slabs by half slab width, maybe useful in heterogeneous systems
+    //set to 0.0 if not using it; N/A in status output yet
     if (simParams->haveRNEMD_logWidth()) {
       set_RNEMD_logWidth(simParams->getRNEMD_logWidth());
-      /*arbitary rnemdLogWidth_ no checking
-        if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
+      /*arbitary rnemdLogWidth_, no checking;
+      if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
         cerr << "WARNING! RNEMD_logWidth has abnormal value!\n";
         cerr << "Automaically set back to default.\n";
         rnemdLogWidth_ = nBins_;
-	}*/
+      }*/
     } else {
       set_RNEMD_logWidth(nBins_);
     }
-    valueHist_.resize(rnemdLogWidth_, 0.0);
-    valueCount_.resize(rnemdLogWidth_, 0);
+    tempHist_.resize(rnemdLogWidth_, 0.0);
+    tempCount_.resize(rnemdLogWidth_, 0);
+    pxzHist_.resize(rnemdLogWidth_, 0.0);
+    //vxzCount_.resize(rnemdLogWidth_, 0);
+    pyzHist_.resize(rnemdLogWidth_, 0.0);
+    //vyzCount_.resize(rnemdLogWidth_, 0);
+
+    mHist_.resize(rnemdLogWidth_, 0.0);
     xTempHist_.resize(rnemdLogWidth_, 0.0);
     yTempHist_.resize(rnemdLogWidth_, 0.0);
     zTempHist_.resize(rnemdLogWidth_, 0.0);
     xyzTempCount_.resize(rnemdLogWidth_, 0);
+    rotTempHist_.resize(rnemdLogWidth_, 0.0);
+    rotTempCount_.resize(rnemdLogWidth_, 0);
 
     set_RNEMD_exchange_total(0.0);
     if (simParams->haveRNEMD_targetFlux()) {
@@ -205,6 +239,32 @@ namespace OpenMD {
     } else {
       set_RNEMD_target_flux(0.0);
     }
+    if (simParams->haveRNEMD_targetJzKE()) {
+      set_RNEMD_target_JzKE(simParams->getRNEMD_targetJzKE());
+    } else {
+      set_RNEMD_target_JzKE(0.0);
+    }
+    if (simParams->haveRNEMD_targetJzpx()) {
+      set_RNEMD_target_jzpx(simParams->getRNEMD_targetJzpx());
+    } else {
+      set_RNEMD_target_jzpx(0.0);
+    }
+    jzp_.x() = targetJzpx_;
+    njzp_.x() = -targetJzpx_;
+    if (simParams->haveRNEMD_targetJzpy()) {
+      set_RNEMD_target_jzpy(simParams->getRNEMD_targetJzpy());
+    } else {
+      set_RNEMD_target_jzpy(0.0);
+    }
+    jzp_.y() = targetJzpy_;
+    njzp_.y() = -targetJzpy_;
+    if (simParams->haveRNEMD_targetJzpz()) {
+      set_RNEMD_target_jzpz(simParams->getRNEMD_targetJzpz());
+    } else {
+      set_RNEMD_target_jzpz(0.0);
+    }
+    jzp_.z() = targetJzpz_;
+    njzp_.z() = -targetJzpz_;
 
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
@@ -237,8 +297,12 @@ namespace OpenMD {
       painCave.severity = OPENMD_INFO;
       simError();
 
-      rnemdLog_.close();
-      if (rnemdType_ == rnemdKineticScale || rnemdType_ == rnemdPxScale || rnemdType_ == rnemdPyScale) {
+      if (outputTemp_) tempLog_.close();
+      if (outputVx_)   vxzLog_.close();
+      if (outputVy_)   vyzLog_.close();
+
+      if (rnemdType_ == rnemdKineticScale || rnemdType_ == rnemdPxScale ||
+	  rnemdType_ == rnemdPyScale) {
         sprintf(painCave.errMsg, 
                 "RNEMD: total root-checking warnings: %d\n",
                 failRootCount_);
@@ -251,6 +315,8 @@ namespace OpenMD {
         yTempLog_.close();
         zTempLog_.close();
       }
+      if (outputRotTemp_) rotTempLog_.close();
+
 #ifdef IS_MPI
     }
 #endif
@@ -303,28 +369,26 @@ namespace OpenMD {
         switch(rnemdType_) {
         case rnemdKineticSwap :
           
-          value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
-                          vel[2]*vel[2]);
-	  /*
-            if (sd->isDirectional()) {
+          value = mass * vel.lengthSquare();
+	  
+	  if (sd->isDirectional()) {
             Vector3d angMom = sd->getJ();
             Mat3x3d I = sd->getI();
             
             if (sd->isLinear()) {
-            int i = sd->linearAxis();
-            int j = (i + 1) % 3;
-            int k = (i + 2) % 3;
-            value += angMom[j] * angMom[j] / I(j, j) + 
-            angMom[k] * angMom[k] / I(k, k);
+	      int i = sd->linearAxis();
+	      int j = (i + 1) % 3;
+	      int k = (i + 2) % 3;
+	      value += angMom[j] * angMom[j] / I(j, j) + 
+		angMom[k] * angMom[k] / I(k, k);
             } else {                        
-            value += angMom[0]*angMom[0]/I(0, 0) 
-            + angMom[1]*angMom[1]/I(1, 1) 
-            + angMom[2]*angMom[2]/I(2, 2);
+	      value += angMom[0]*angMom[0]/I(0, 0) 
+		+ angMom[1]*angMom[1]/I(1, 1) 
+		+ angMom[2]*angMom[2]/I(2, 2);
             }
-            } no exchange of angular momenta
-	  */
+	  } //angular momenta exchange enabled
+          //energyConvert temporarily disabled
           //make exchangeSum_ comparable between swap & scale
-          //temporarily without using energyConvert
           //value = value * 0.5 / PhysicalConstants::energyConvert;
           value *= 0.5;
           break;
@@ -380,49 +444,49 @@ namespace OpenMD {
     MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 1, MPI::BOOL, MPI::LOR);
     // Even if we didn't find a maximum, did someone else?
     MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 1, MPI::BOOL, MPI::LOR);
-    struct {
-      RealType val;
-      int rank;
-    } max_vals, min_vals;
+#endif
+
+    if (max_found && min_found) {
+
+#ifdef IS_MPI
+      struct {
+	RealType val;
+	int rank;
+      } max_vals, min_vals;
     
-    if (min_found) {
-      if (my_min_found) 
+      if (my_min_found) {
         min_vals.val = min_val;
-      else 
+      } else {
         min_vals.val = HONKING_LARGE_VALUE;
-      
+      }
       min_vals.rank = worldRank;    
       
       // Who had the minimum?
       MPI::COMM_WORLD.Allreduce(&min_vals, &min_vals, 
                                 1, MPI::REALTYPE_INT, MPI::MINLOC);
       min_val = min_vals.val;
-    }
       
-    if (max_found) {
-      if (my_max_found) 
+      if (my_max_found) {
         max_vals.val = max_val;
-      else 
+      } else {
         max_vals.val = -HONKING_LARGE_VALUE;
-      
+      }
       max_vals.rank = worldRank;    
       
       // Who had the maximum?
       MPI::COMM_WORLD.Allreduce(&max_vals, &max_vals, 
                                 1, MPI::REALTYPE_INT, MPI::MAXLOC);
       max_val = max_vals.val;
-    }
 #endif
-
-    if (max_found && min_found) {
+      
       if (min_val < max_val) {
-
+	
 #ifdef IS_MPI       
         if (max_vals.rank == worldRank && min_vals.rank == worldRank) {
           // I have both maximum and minimum, so proceed like a single
           // processor version:
 #endif
-          // objects to be swapped: velocity ONLY
+
           Vector3d min_vel = min_sd->getVel();
           Vector3d max_vel = max_sd->getVel();
           RealType temp_vel;
@@ -431,14 +495,13 @@ namespace OpenMD {
           case rnemdKineticSwap :
             min_sd->setVel(max_vel);
             max_sd->setVel(min_vel);
-	    /*
-              if (min_sd->isDirectional() && max_sd->isDirectional()) {
+	    if (min_sd->isDirectional() && max_sd->isDirectional()) {
               Vector3d min_angMom = min_sd->getJ();
               Vector3d max_angMom = max_sd->getJ();
               min_sd->setJ(max_angMom);
               max_sd->setJ(min_angMom);
-              } no angular momentum exchange
-	    */
+	    }//angular momenta exchange enabled
+	    //assumes same rigid body identity
             break;
           case rnemdPx :
             temp_vel = min_vel.x();
@@ -464,6 +527,7 @@ namespace OpenMD {
           default :
             break;
           }
+
 #ifdef IS_MPI
           // the rest of the cases only apply in parallel simulations:
         } else if (max_vals.rank == worldRank) {
@@ -482,8 +546,7 @@ namespace OpenMD {
           switch(rnemdType_) {
           case rnemdKineticSwap :
             max_sd->setVel(min_vel);
-            //no angular momentum exchange for now
-            /*
+            //angular momenta exchange enabled
             if (max_sd->isDirectional()) {
               Vector3d min_angMom;
               Vector3d max_angMom = max_sd->getJ();
@@ -496,8 +559,7 @@ namespace OpenMD {
                                        status);
               
               max_sd->setJ(min_angMom);
-             }
-             */            
+	    }
             break;
           case rnemdPx :
             max_vel.x() = min_vel.x();
@@ -530,8 +592,7 @@ namespace OpenMD {
           switch(rnemdType_) {
           case rnemdKineticSwap :
             min_sd->setVel(max_vel);
-            // no angular momentum exchange for now
-            /*
+            //angular momenta exchange enabled
             if (min_sd->isDirectional()) {
               Vector3d min_angMom = min_sd->getJ();
               Vector3d max_angMom;
@@ -545,7 +606,6 @@ namespace OpenMD {
               
               min_sd->setJ(max_angMom);
             }
-	    */
             break;
           case rnemdPx :
             min_vel.x() = max_vel.x();
@@ -575,8 +635,8 @@ namespace OpenMD {
       }
     } else {
       sprintf(painCave.errMsg, 
-              "RNEMD: exchange NOT performed because at least one\n"
-              "\tof the two slabs is empty\n");
+              "RNEMD: exchange NOT performed because selected object\n"
+	      "\tnot present in at least one of the two slabs.\n");
       painCave.isFatal = 0;
       painCave.severity = OPENMD_INFO;
       simError();        
@@ -604,12 +664,14 @@ namespace OpenMD {
     RealType Khx = 0.0;
     RealType Khy = 0.0;
     RealType Khz = 0.0;
+    RealType Khw = 0.0;
     RealType Pcx = 0.0;
     RealType Pcy = 0.0;
     RealType Pcz = 0.0;
     RealType Kcx = 0.0;
     RealType Kcy = 0.0;
     RealType Kcz = 0.0;
+    RealType Kcw = 0.0;
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
@@ -642,6 +704,23 @@ namespace OpenMD {
           Khx += mass * vel.x() * vel.x();
           Khy += mass * vel.y() * vel.y();
           Khz += mass * vel.z() * vel.z();
+	  //if (rnemdType_ == rnemdKineticScaleVAM) {
+	  if (sd->isDirectional()) {
+	    Vector3d angMom = sd->getJ();
+	    Mat3x3d I = sd->getI();
+	    if (sd->isLinear()) {
+	      int i = sd->linearAxis();
+	      int j = (i + 1) % 3;
+	      int k = (i + 2) % 3;
+	      Khw += angMom[j] * angMom[j] / I(j, j) +
+		angMom[k] * angMom[k] / I(k, k);
+	    } else {
+	      Khw += angMom[0]*angMom[0]/I(0, 0)
+		+ angMom[1]*angMom[1]/I(1, 1)
+		+ angMom[2]*angMom[2]/I(2, 2);
+	    }
+	  }
+	  //}
         } else { //midBin_
           coldBin.push_back(sd);
           Pcx += mass * vel.x();
@@ -650,16 +729,41 @@ namespace OpenMD {
           Kcx += mass * vel.x() * vel.x();
           Kcy += mass * vel.y() * vel.y();
           Kcz += mass * vel.z() * vel.z();
+	  //if (rnemdType_ == rnemdKineticScaleVAM) {
+	  if (sd->isDirectional()) {
+	    Vector3d angMom = sd->getJ();
+	    Mat3x3d I = sd->getI();
+	    if (sd->isLinear()) {
+	      int i = sd->linearAxis();
+	      int j = (i + 1) % 3;
+	      int k = (i + 2) % 3;
+	      Kcw += angMom[j] * angMom[j] / I(j, j) +
+		angMom[k] * angMom[k] / I(k, k);
+	    } else {
+	      Kcw += angMom[0]*angMom[0]/I(0, 0)
+		+ angMom[1]*angMom[1]/I(1, 1)
+		+ angMom[2]*angMom[2]/I(2, 2);
+	    }
+	  }
+	  //}
 	}
       }
     }
-
+    
     Khx *= 0.5;
     Khy *= 0.5;
     Khz *= 0.5;
+    Khw *= 0.5;
     Kcx *= 0.5;
     Kcy *= 0.5;
     Kcz *= 0.5;
+    Kcw *= 0.5;
+
+    std::cerr << "Khx= " << Khx << "\tKhy= " << Khy << "\tKhz= " << Khz
+	      << "\tKhw= " << Khw << "\tKcx= " << Kcx << "\tKcy= " << Kcy
+	      << "\tKcz= " << Kcz << "\tKcw= " << Kcw << "\n";
+    std::cerr << "Phx= " << Phx << "\tPhy= " << Phy << "\tPhz= " << Phz
+	      << "\tPcx= " << Pcx << "\tPcy= " << Pcy << "\tPcz= " <<Pcz<<"\n";
 
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Phx, 1, MPI::REALTYPE, MPI::SUM);
@@ -672,251 +776,513 @@ namespace OpenMD {
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khx, 1, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khy, 1, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khz, 1, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khw, 1, MPI::REALTYPE, MPI::SUM);
+
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcx, 1, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcy, 1, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcz, 1, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcw, 1, MPI::REALTYPE, MPI::SUM);
 #endif
 
-    //use coldBin coeff's
+    //solve coldBin coeff's first
     RealType px = Pcx / Phx;
     RealType py = Pcy / Phy;
     RealType pz = Pcz / Phz;
+    RealType c, x, y, z;
+    bool successfulScale = false;
+    if ((rnemdType_ == rnemdKineticScaleVAM) ||
+	(rnemdType_ == rnemdKineticScaleAM)) {
+      //may need sanity check Khw & Kcw > 0
 
-    RealType a000, a110, c0, a001, a111, b01, b11, c1, c;
-    switch(rnemdType_) {
-    case rnemdKineticScale :
-      // used hotBin coeff's & only scale x & y dimensions
-      /*
-      RealType px = Phx / Pcx;
-      RealType py = Phy / Pcy;
-      a110 = Khy;
-      c0 = - Khx - Khy - targetFlux_;
-      a000 = Khx;
-      a111 = Kcy * py * py;
-      b11 = -2.0 * Kcy * py * (1.0 + py);
-      c1 = Kcy * py * (2.0 + py) + Kcx * px * ( 2.0 + px) + targetFlux_;
-      b01 = -2.0 * Kcx * px * (1.0 + px);
-      a001 = Kcx * px * px;
-      */
-      //scale all three dimensions, let c_x = c_y
-      a000 = Kcx + Kcy;
-      a110 = Kcz;
-      c0 = targetFlux_ - Kcx - Kcy - Kcz;
-      a001 = Khx * px * px + Khy * py * py;
-      a111 = Khz * pz * pz;
-      b01 = -2.0 * (Khx * px * (1.0 + px) + Khy * py * (1.0 + py));
-      b11 = -2.0 * Khz * pz * (1.0 + pz);
-      c1 = Khx * px * (2.0 + px) + Khy * py * (2.0 + py)
-        + Khz * pz * (2.0 + pz) - targetFlux_;
-      break;
-    case rnemdPxScale :
-      c = 1 - targetFlux_ / Pcx;
-      a000 = Kcy;
-      a110 = Kcz;
-      c0 = Kcx * c * c - Kcx - Kcy - Kcz;
-      a001 = py * py * Khy;
-      a111 = pz * pz * Khz;
-      b01 = -2.0 * Khy * py * (1.0 + py);
-      b11 = -2.0 * Khz * pz * (1.0 + pz);
-      c1 = Khy * py * (2.0 + py) + Khz * pz * (2.0 + pz)
-        + Khx * (fastpow(c * px - px - 1.0, 2) - 1.0);
-      break;
-    case rnemdPyScale :
-      c = 1 - targetFlux_ / Pcy;
-      a000 = Kcx;
-      a110 = Kcz;
-      c0 = Kcy * c * c - Kcx - Kcy - Kcz;
-      a001 = px * px * Khx;
-      a111 = pz * pz * Khz;
-      b01 = -2.0 * Khx * px * (1.0 + px);
-      b11 = -2.0 * Khz * pz * (1.0 + pz);
-      c1 = Khx * px * (2.0 + px) + Khz * pz * (2.0 + pz)
-        + Khy * (fastpow(c * py - py - 1.0, 2) - 1.0);
-      break;
-    case rnemdPzScale ://we don't really do this, do we?
-      c = 1 - targetFlux_ / Pcz;
-      a000 = Kcx;
-      a110 = Kcy;
-      c0 = Kcz * c * c - Kcx - Kcy - Kcz;
-      a001 = px * px * Khx;
-      a111 = py * py * Khy;
-      b01 = -2.0 * Khx * px * (1.0 + px);
-      b11 = -2.0 * Khy * py * (1.0 + py);
-      c1 = Khx * px * (2.0 + px) + Khy * py * (2.0 + py)
-        + Khz * (fastpow(c * pz - pz - 1.0, 2) - 1.0);
-      break;      
-    default :
-      break;
-    }
+      if (rnemdType_ == rnemdKineticScaleVAM) {
+	c = 1.0 - targetFlux_ / (Kcx + Kcy + Kcz + Kcw);
+      } else {
+	c = 1.0 - targetFlux_ / Kcw;
+      }
 
-    RealType v1 = a000 * a111 - a001 * a110;
-    RealType v2 = a000 * b01;
-    RealType v3 = a000 * b11;
-    RealType v4 = a000 * c1 - a001 * c0;
-    RealType v8 = a110 * b01;
-    RealType v10 = - b01 * c0;
-
-    RealType u0 = v2 * v10 - v4 * v4;
-    RealType u1 = -2.0 * v3 * v4;
-    RealType u2 = -v2 * v8 - v3 * v3 - 2.0 * v1 * v4;
-    RealType u3 = -2.0 * v1 * v3;
-    RealType u4 = - v1 * v1;
-    //rescale coefficients
-    RealType maxAbs = fabs(u0);
-    if (maxAbs < fabs(u1)) maxAbs = fabs(u1);
-    if (maxAbs < fabs(u2)) maxAbs = fabs(u2);
-    if (maxAbs < fabs(u3)) maxAbs = fabs(u3);
-    if (maxAbs < fabs(u4)) maxAbs = fabs(u4);
-    u0 /= maxAbs;
-    u1 /= maxAbs;
-    u2 /= maxAbs;
-    u3 /= maxAbs;
-    u4 /= maxAbs;
-    //max_element(start, end) is also available.
-    Polynomial<RealType> poly; //same as DoublePolynomial poly;
-    poly.setCoefficient(4, u4);
-    poly.setCoefficient(3, u3);
-    poly.setCoefficient(2, u2);
-    poly.setCoefficient(1, u1);
-    poly.setCoefficient(0, u0);
-    vector<RealType> realRoots = poly.FindRealRoots();
-
-    vector<RealType>::iterator ri;
-    RealType r1, r2, alpha0;
-    vector<pair<RealType,RealType> > rps;
-    for (ri = realRoots.begin(); ri !=realRoots.end(); ri++) {
-      r2 = *ri;
-      //check if FindRealRoots() give the right answer
-      if ( fabs(u0 + r2 * (u1 + r2 * (u2 + r2 * (u3 + r2 * u4)))) > 1e-6 ) {
-        sprintf(painCave.errMsg, 
-                "RNEMD Warning: polynomial solve seems to have an error!");
-        painCave.isFatal = 0;
-        simError();
-        failRootCount_++;
+      if ((c > 0.81) && (c < 1.21)) {//restrict scaling coefficients
+	c = sqrt(c);
+	std::cerr << "cold slab scaling coefficient: " << c << endl;
+	//now convert to hotBin coefficient
+	RealType w = 0.0;
+	if (rnemdType_ ==  rnemdKineticScaleVAM) {
+	  x = 1.0 + px * (1.0 - c);
+	  y = 1.0 + py * (1.0 - c);
+	  z = 1.0 + pz * (1.0 - c);
+	  /* more complicated way
+	     w = 1.0 + (Kcw - Kcw * c * c - (c * c * (Kcx + Kcy + Kcz
+	     + Khx * px * px + Khy * py * py + Khz * pz * pz)
+	     - 2.0 * c * (Khx * px * (1.0 + px) + Khy * py * (1.0 + py)
+	     + Khz * pz * (1.0 + pz)) + Khx * px * (2.0 + px)
+	     + Khy * py * (2.0 + py) + Khz * pz * (2.0 + pz)
+	     - Kcx - Kcy - Kcz)) / Khw; the following is simpler
+	  */
+	  if ((fabs(x - 1.0) < 0.1) && (fabs(y - 1.0) < 0.1) &&
+	      (fabs(z - 1.0) < 0.1)) {
+	    w = 1.0 + (targetFlux_ + Khx * (1.0 - x * x) + Khy * (1.0 - y * y)
+		       + Khz * (1.0 - z * z)) / Khw;
+	  }//no need to calculate w if x, y or z is out of range
+	} else {
+	  w = 1.0 + targetFlux_ / Khw;
+	}
+	if ((w > 0.81) && (w < 1.21)) {//restrict scaling coefficients
+	  //if w is in the right range, so should be x, y, z.
+	  vector<StuntDouble*>::iterator sdi;
+	  Vector3d vel;
+	  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
+	    if (rnemdType_ == rnemdKineticScaleVAM) {
+	      vel = (*sdi)->getVel() * c;
+	      //vel.x() *= c;
+	      //vel.y() *= c;
+	      //vel.z() *= c;
+	      (*sdi)->setVel(vel);
+	    }
+	    if ((*sdi)->isDirectional()) {
+	      Vector3d angMom = (*sdi)->getJ() * c;
+	      //angMom[0] *= c;
+	      //angMom[1] *= c;
+	      //angMom[2] *= c;
+	      (*sdi)->setJ(angMom);
+	    }
+	  }
+	  w = sqrt(w);
+	  std::cerr << "xh= " << x << "\tyh= " << y << "\tzh= " << z
+		    << "\twh= " << w << endl;
+	  for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
+	    if (rnemdType_ == rnemdKineticScaleVAM) {
+	      vel = (*sdi)->getVel();
+	      vel.x() *= x;
+	      vel.y() *= y;
+	      vel.z() *= z;
+	      (*sdi)->setVel(vel);
+	    }
+	    if ((*sdi)->isDirectional()) {
+	      Vector3d angMom = (*sdi)->getJ() * w;
+	      //angMom[0] *= w;
+	      //angMom[1] *= w;
+	      //angMom[2] *= w;
+	      (*sdi)->setJ(angMom);
+	    }
+	  }
+	  successfulScale = true;
+	  exchangeSum_ += targetFlux_;
+	}
       }
-      //might not be useful w/o rescaling coefficients
-      alpha0 = -c0 - a110 * r2 * r2;
-      if (alpha0 >= 0.0) {
-        r1 = sqrt(alpha0 / a000);
-        if (fabs(c1 + r1 * (b01 + r1 * a001) + r2 * (b11 + r2 * a111)) < 1e-6)
-          { rps.push_back(make_pair(r1, r2)); }
-        if (r1 > 1e-6) { //r1 non-negative
-          r1 = -r1;
-          if (fabs(c1 + r1 * (b01 + r1 * a001) + r2 * (b11 + r2 * a111)) <1e-6)
-            { rps.push_back(make_pair(r1, r2)); }
-        }
-      }
-    }
-    // Consider combining together the solving pair part w/ the searching
-    // best solution part so that we don't need the pairs vector
-    if (!rps.empty()) {
-      RealType smallestDiff = HONKING_LARGE_VALUE;
-      RealType diff;
-      pair<RealType,RealType> bestPair = make_pair(1.0, 1.0);
-      vector<pair<RealType,RealType> >::iterator rpi;
-      for (rpi = rps.begin(); rpi != rps.end(); rpi++) {
-        r1 = (*rpi).first;
-        r2 = (*rpi).second;
-        switch(rnemdType_) {
-        case rnemdKineticScale :
-          diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
-            + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcx, 2)
-            + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcy, 2);
-          break;
-        case rnemdPxScale :
-          diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
-            + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcy, 2);
-          break;
-        case rnemdPyScale :
-          diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
-            + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcx, 2);
-          break;
-        case rnemdPzScale :
-	  diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
-	    + fastpow(r1 * r1 / r2 / r2 - Kcy/Kcx, 2);
-        default :
-          break;
-        }
-        if (diff < smallestDiff) {
-          smallestDiff = diff;
-          bestPair = *rpi;
-        }
-      }
-#ifdef IS_MPI
-      if (worldRank == 0) {
-#endif
-        sprintf(painCave.errMsg, 
-                "RNEMD: roots r1= %lf\tr2 = %lf\n",
-                bestPair.first, bestPair.second);
-        painCave.isFatal = 0;
-        painCave.severity = OPENMD_INFO;
-        simError();
-#ifdef IS_MPI
-      }
-#endif
-      
-      RealType x, y, z;
+    } else {
+      RealType a000, a110, c0, a001, a111, b01, b11, c1;
       switch(rnemdType_) {
       case rnemdKineticScale :
-        x = bestPair.first;
-        y = bestPair.first;
-        z = bestPair.second;
-        break;
+	/* used hotBin coeff's & only scale x & y dimensions
+	   RealType px = Phx / Pcx;
+	   RealType py = Phy / Pcy;
+	   a110 = Khy;
+	   c0 = - Khx - Khy - targetFlux_;
+	   a000 = Khx;
+	   a111 = Kcy * py * py;
+	   b11 = -2.0 * Kcy * py * (1.0 + py);
+	   c1 = Kcy * py * (2.0 + py) + Kcx * px * ( 2.0 + px) + targetFlux_;
+	   b01 = -2.0 * Kcx * px * (1.0 + px);
+	   a001 = Kcx * px * px;
+	*/
+	//scale all three dimensions, let c_x = c_y
+	a000 = Kcx + Kcy;
+	a110 = Kcz;
+	c0 = targetFlux_ - Kcx - Kcy - Kcz;
+	a001 = Khx * px * px + Khy * py * py;
+	a111 = Khz * pz * pz;
+	b01 = -2.0 * (Khx * px * (1.0 + px) + Khy * py * (1.0 + py));
+	b11 = -2.0 * Khz * pz * (1.0 + pz);
+	c1 = Khx * px * (2.0 + px) + Khy * py * (2.0 + py)
+	  + Khz * pz * (2.0 + pz) - targetFlux_;
+	break;
       case rnemdPxScale :
-        x = c;
-        y = bestPair.first;
-        z = bestPair.second;
-        break;
+	c = 1 - targetFlux_ / Pcx;
+	a000 = Kcy;
+	a110 = Kcz;
+	c0 = Kcx * c * c - Kcx - Kcy - Kcz;
+	a001 = py * py * Khy;
+	a111 = pz * pz * Khz;
+	b01 = -2.0 * Khy * py * (1.0 + py);
+	b11 = -2.0 * Khz * pz * (1.0 + pz);
+	c1 = Khy * py * (2.0 + py) + Khz * pz * (2.0 + pz)
+	  + Khx * (fastpow(c * px - px - 1.0, 2) - 1.0);
+	break;
       case rnemdPyScale :
-        x = bestPair.first;
-        y = c;
-        z = bestPair.second;
-        break;
-      case rnemdPzScale :
-        x = bestPair.first;
-        y = bestPair.second;
-        z = c;
-        break;          
+	c = 1 - targetFlux_ / Pcy;
+	a000 = Kcx;
+	a110 = Kcz;
+	c0 = Kcy * c * c - Kcx - Kcy - Kcz;
+	a001 = px * px * Khx;
+	a111 = pz * pz * Khz;
+	b01 = -2.0 * Khx * px * (1.0 + px);
+	b11 = -2.0 * Khz * pz * (1.0 + pz);
+	c1 = Khx * px * (2.0 + px) + Khz * pz * (2.0 + pz)
+	  + Khy * (fastpow(c * py - py - 1.0, 2) - 1.0);
+	break;
+      case rnemdPzScale ://we don't really do this, do we?
+	c = 1 - targetFlux_ / Pcz;
+	a000 = Kcx;
+	a110 = Kcy;
+	c0 = Kcz * c * c - Kcx - Kcy - Kcz;
+	a001 = px * px * Khx;
+	a111 = py * py * Khy;
+	b01 = -2.0 * Khx * px * (1.0 + px);
+	b11 = -2.0 * Khy * py * (1.0 + py);
+	c1 = Khx * px * (2.0 + px) + Khy * py * (2.0 + py)
+	  + Khz * (fastpow(c * pz - pz - 1.0, 2) - 1.0);
+	break;
       default :
-        break;
+	break;
       }
-      vector<StuntDouble*>::iterator sdi;
-      Vector3d vel;
-      for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
-        vel = (*sdi)->getVel();
-        vel.x() *= x;
-        vel.y() *= y;
-        vel.z() *= z;
-        (*sdi)->setVel(vel);
+      
+      RealType v1 = a000 * a111 - a001 * a110;
+      RealType v2 = a000 * b01;
+      RealType v3 = a000 * b11;
+      RealType v4 = a000 * c1 - a001 * c0;
+      RealType v8 = a110 * b01;
+      RealType v10 = - b01 * c0;
+      
+      RealType u0 = v2 * v10 - v4 * v4;
+      RealType u1 = -2.0 * v3 * v4;
+      RealType u2 = -v2 * v8 - v3 * v3 - 2.0 * v1 * v4;
+      RealType u3 = -2.0 * v1 * v3;
+      RealType u4 = - v1 * v1;
+      //rescale coefficients
+      RealType maxAbs = fabs(u0);
+      if (maxAbs < fabs(u1)) maxAbs = fabs(u1);
+      if (maxAbs < fabs(u2)) maxAbs = fabs(u2);
+      if (maxAbs < fabs(u3)) maxAbs = fabs(u3);
+      if (maxAbs < fabs(u4)) maxAbs = fabs(u4);
+      u0 /= maxAbs;
+      u1 /= maxAbs;
+      u2 /= maxAbs;
+      u3 /= maxAbs;
+      u4 /= maxAbs;
+      //max_element(start, end) is also available.
+      Polynomial<RealType> poly; //same as DoublePolynomial poly;
+      poly.setCoefficient(4, u4);
+      poly.setCoefficient(3, u3);
+      poly.setCoefficient(2, u2);
+      poly.setCoefficient(1, u1);
+      poly.setCoefficient(0, u0);
+      vector<RealType> realRoots = poly.FindRealRoots();
+      
+      vector<RealType>::iterator ri;
+      RealType r1, r2, alpha0;
+      vector<pair<RealType,RealType> > rps;
+      for (ri = realRoots.begin(); ri !=realRoots.end(); ri++) {
+	r2 = *ri;
+	//check if FindRealRoots() give the right answer
+	if ( fabs(u0 + r2 * (u1 + r2 * (u2 + r2 * (u3 + r2 * u4)))) > 1e-6 ) {
+	  sprintf(painCave.errMsg, 
+		  "RNEMD Warning: polynomial solve seems to have an error!");
+	  painCave.isFatal = 0;
+	  simError();
+	  failRootCount_++;
+	}
+	//might not be useful w/o rescaling coefficients
+	alpha0 = -c0 - a110 * r2 * r2;
+	if (alpha0 >= 0.0) {
+	  r1 = sqrt(alpha0 / a000);
+	  if (fabs(c1 + r1 * (b01 + r1 * a001) + r2 * (b11 + r2 * a111))
+	      < 1e-6)
+	    { rps.push_back(make_pair(r1, r2)); }
+	  if (r1 > 1e-6) { //r1 non-negative
+	    r1 = -r1;
+	    if (fabs(c1 + r1 * (b01 + r1 * a001) + r2 * (b11 + r2 * a111))
+		< 1e-6)
+	      { rps.push_back(make_pair(r1, r2)); }
+	  }
+	}
       }
-      //convert to hotBin coefficient
-      x = 1.0 + px * (1.0 - x);
-      y = 1.0 + py * (1.0 - y);
-      z = 1.0 + pz * (1.0 - z);
-      for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
-        vel = (*sdi)->getVel();
-        vel.x() *= x;
-        vel.y() *= y;
-        vel.z() *= z;
-        (*sdi)->setVel(vel);
+      // Consider combining together the solving pair part w/ the searching
+      // best solution part so that we don't need the pairs vector
+      if (!rps.empty()) {
+	RealType smallestDiff = HONKING_LARGE_VALUE;
+	RealType diff;
+	pair<RealType,RealType> bestPair = make_pair(1.0, 1.0);
+	vector<pair<RealType,RealType> >::iterator rpi;
+	for (rpi = rps.begin(); rpi != rps.end(); rpi++) {
+	  r1 = (*rpi).first;
+	  r2 = (*rpi).second;
+	  switch(rnemdType_) {
+	  case rnemdKineticScale :
+	    diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
+	      + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcx, 2)
+	      + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcy, 2);
+	    break;
+	  case rnemdPxScale :
+	    diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
+	      + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcy, 2);
+	    break;
+	  case rnemdPyScale :
+	    diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
+	      + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcx, 2);
+	    break;
+	  case rnemdPzScale :
+	    diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
+	      + fastpow(r1 * r1 / r2 / r2 - Kcy/Kcx, 2);
+	  default :
+	    break;
+	  }
+	  if (diff < smallestDiff) {
+	    smallestDiff = diff;
+	    bestPair = *rpi;
+	  }
+	}
+#ifdef IS_MPI
+	if (worldRank == 0) {
+#endif
+	  sprintf(painCave.errMsg, 
+		  "RNEMD: roots r1= %lf\tr2 = %lf\n",
+		  bestPair.first, bestPair.second);
+	  painCave.isFatal = 0;
+	  painCave.severity = OPENMD_INFO;
+	  simError();
+#ifdef IS_MPI
+	}
+#endif
+	
+	switch(rnemdType_) {
+	case rnemdKineticScale :
+	  x = bestPair.first;
+	  y = bestPair.first;
+	  z = bestPair.second;
+	  break;
+	case rnemdPxScale :
+	  x = c;
+	  y = bestPair.first;
+	  z = bestPair.second;
+	  break;
+	case rnemdPyScale :
+	  x = bestPair.first;
+	  y = c;
+	  z = bestPair.second;
+	  break;
+	case rnemdPzScale :
+	  x = bestPair.first;
+	  y = bestPair.second;
+	  z = c;
+	  break;          
+	default :
+	  break;
+	}
+	vector<StuntDouble*>::iterator sdi;
+	Vector3d vel;
+	for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
+	  vel = (*sdi)->getVel();
+	  vel.x() *= x;
+	  vel.y() *= y;
+	  vel.z() *= z;
+	  (*sdi)->setVel(vel);
+	}
+	//convert to hotBin coefficient
+	x = 1.0 + px * (1.0 - x);
+	y = 1.0 + py * (1.0 - y);
+	z = 1.0 + pz * (1.0 - z);
+	for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
+	  vel = (*sdi)->getVel();
+	  vel.x() *= x;
+	  vel.y() *= y;
+	  vel.z() *= z;
+	  (*sdi)->setVel(vel);
+	}
+	successfulScale = true;
+	exchangeSum_ += targetFlux_;
       }
-      exchangeSum_ += targetFlux_;
-      //we may want to check whether the exchange has been successful
-    } else {
+    }
+    if (successfulScale != true) {
       sprintf(painCave.errMsg, 
-              "RNEMD: exchange NOT performed!\n");
+	      "RNEMD: exchange NOT performed!\n");
       painCave.isFatal = 0;
       painCave.severity = OPENMD_INFO;
       simError();        
       failTrialCount_++;
     }
+  }
 
+  void RNEMD::doShiftScale() {
+
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Mat3x3d hmat = currentSnap_->getHmat();
+
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+
+    int selei;
+    StuntDouble* sd;
+    int idx;
+
+    vector<StuntDouble*> hotBin, coldBin;
+
+    Vector3d Ph(V3Zero);
+    RealType Mh = 0.0;
+    RealType Kh = 0.0;
+    Vector3d Pc(V3Zero);
+    RealType Mc = 0.0;
+    RealType Kc = 0.0;
+
+    for (sd = seleMan_.beginSelected(selei); sd != NULL; 
+         sd = seleMan_.nextSelected(selei)) {
+
+      idx = sd->getLocalIndex();
+
+      Vector3d pos = sd->getPos();
+
+      // wrap the stuntdouble's position back into the box:
+
+      if (usePeriodicBoundaryConditions_)
+        currentSnap_->wrapVector(pos);
+
+      // which bin is this stuntdouble in?
+      // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
+
+      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + zShift_ + 0.5)) % nBins_;
+
+      // if we're in bin 0 or the middleBin
+      if (binNo == 0 || binNo == midBin_) {
+        
+        RealType mass = sd->getMass();
+        Vector3d vel = sd->getVel();
+       
+        if (binNo == 0) {
+          hotBin.push_back(sd);
+	  //std::cerr << "before, velocity = " << vel << endl;
+	  Ph += mass * vel;
+	  //std::cerr << "after, velocity = " << vel << endl;
+	  Mh += mass;
+	  Kh += mass * vel.lengthSquare();
+	  if (rnemdType_ == rnemdShiftScaleVAM) {
+	    if (sd->isDirectional()) {
+	      Vector3d angMom = sd->getJ();
+	      Mat3x3d I = sd->getI();
+	      if (sd->isLinear()) {
+		int i = sd->linearAxis();
+		int j = (i + 1) % 3;
+		int k = (i + 2) % 3;
+		Kh += angMom[j] * angMom[j] / I(j, j) +
+		  angMom[k] * angMom[k] / I(k, k);
+	      } else {
+		Kh += angMom[0] * angMom[0] / I(0, 0) +
+		  angMom[1] * angMom[1] / I(1, 1) +
+		  angMom[2] * angMom[2] / I(2, 2);
+	      }
+	    }
+	  }
+        } else { //midBin_
+          coldBin.push_back(sd);
+	  Pc += mass * vel;
+	  Mc += mass;
+	  Kc += mass * vel.lengthSquare();
+	  if (rnemdType_ == rnemdShiftScaleVAM) {
+	    if (sd->isDirectional()) {
+	      Vector3d angMom = sd->getJ();
+	      Mat3x3d I = sd->getI();
+	      if (sd->isLinear()) {
+		int i = sd->linearAxis();
+		int j = (i + 1) % 3;
+		int k = (i + 2) % 3;
+		Kc += angMom[j] * angMom[j] / I(j, j) +
+		  angMom[k] * angMom[k] / I(k, k);
+	      } else {
+		Kc += angMom[0] * angMom[0] / I(0, 0) +
+		  angMom[1] * angMom[1] / I(1, 1) +
+		  angMom[2] * angMom[2] / I(2, 2);
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+    Kh *= 0.5;
+    Kc *= 0.5;
+
+    std::cerr << "Mh= " << Mh << "\tKh= " << Kh << "\tMc= " << Mc
+	      << "\tKc= " << Kc << endl;
+    std::cerr << "Ph= " << Ph << "\tPc= " << Pc << endl;
+
+#ifdef IS_MPI
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Ph[0], 3, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Pc[0], 3, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Mh, 1, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kh, 1, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Mc, 1, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kc, 1, MPI::REALTYPE, MPI::SUM);
+#endif
+
+    bool successfulExchange = false;
+    if ((Mh > 0.0) && (Mc > 0.0)) {//both slabs are not empty
+      Vector3d vc = Pc / Mc;
+      Vector3d ac = njzp_ / Mc + vc;
+      RealType cNumerator = Kc - targetJzKE_ - 0.5 * Mc * ac.lengthSquare();
+      if (cNumerator > 0.0) {
+	RealType cDenominator = Kc - 0.5 * Mc * vc.lengthSquare();
+	if (cDenominator > 0.0) {
+	  RealType c = sqrt(cNumerator / cDenominator);
+	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
+	    Vector3d vh = Ph / Mh;
+	    Vector3d ah = jzp_ / Mh + vh;
+	    RealType hNumerator = Kh + targetJzKE_
+	      - 0.5 * Mh * ah.lengthSquare();
+	    if (hNumerator > 0.0) {
+	      RealType hDenominator = Kh - 0.5 * Mh * vh.lengthSquare();
+	      if (hDenominator > 0.0) {
+		RealType h = sqrt(hNumerator / hDenominator);
+		if ((h > 0.9) && (h < 1.1)) {
+		  std::cerr << "cold slab scaling coefficient: " << c << "\n";
+		  std::cerr << "hot slab scaling coefficient: " << h << "\n";
+		  vector<StuntDouble*>::iterator sdi;
+		  Vector3d vel;
+		  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
+		    //vel = (*sdi)->getVel();
+		    vel = ((*sdi)->getVel() - vc) * c + ac;
+		    (*sdi)->setVel(vel);
+		    if (rnemdType_ == rnemdShiftScaleVAM) {
+		      if ((*sdi)->isDirectional()) {
+			Vector3d angMom = (*sdi)->getJ() * c;
+			(*sdi)->setJ(angMom);
+		      }
+		    }
+		  }
+		  for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
+		    //vel = (*sdi)->getVel();
+		    vel = ((*sdi)->getVel() - vh) * h + ah;
+		    (*sdi)->setVel(vel);
+		    if (rnemdType_ == rnemdShiftScaleVAM) {
+		      if ((*sdi)->isDirectional()) {
+			Vector3d angMom = (*sdi)->getJ() * h;
+			(*sdi)->setJ(angMom);
+		      }
+		    }
+		  }
+		  successfulExchange = true;
+		  exchangeSum_ += targetFlux_;
+		  // this is a redundant variable for doShiftScale() so that
+		  // RNEMD can output one exchange quantity needed in a job.
+		  // need a better way to do this.
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    if (successfulExchange != true) {
+      sprintf(painCave.errMsg, 
+	      "RNEMD: exchange NOT performed!\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();        
+      failTrialCount_++;
+    }
   }
 
   void RNEMD::doRNEMD() {
 
     switch(rnemdType_) {
     case rnemdKineticScale :
+    case rnemdKineticScaleVAM :
+    case rnemdKineticScaleAM :
     case rnemdPxScale :
     case rnemdPyScale :
     case rnemdPzScale :
@@ -927,6 +1293,10 @@ namespace OpenMD {
     case rnemdPy :
     case rnemdPz :
       doSwap();
+      break;
+    case rnemdShiftScaleV :
+    case rnemdShiftScaleVAM :
+      doShiftScale();
       break;
     case rnemdUnknown :
     default :
@@ -976,92 +1346,98 @@ namespace OpenMD {
       
       int binNo = int(rnemdLogWidth_ * (pos.z() / hmat(2,2) + 0.5)) %
 	rnemdLogWidth_;
-      // no symmetrization allowed due to arbitary rnemdLogWidth_ value
+      // no symmetrization allowed due to arbitary rnemdLogWidth_
       /*
       if (rnemdLogWidth_ == midBin_ + 1)
         if (binNo > midBin_)
           binNo = nBins_ - binNo;
       */
       RealType mass = sd->getMass();
+      mHist_[binNo] += mass;
       Vector3d vel = sd->getVel();
       RealType value;
-      RealType xVal, yVal, zVal;
+      //RealType xVal, yVal, zVal;
 
-      switch(rnemdType_) {
-      case rnemdKineticSwap :
-      case rnemdKineticScale :
-	
-	value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
-	
-        valueCount_[binNo] += 3;
+      if (outputTemp_) {
+	value = mass * vel.lengthSquare();
+        tempCount_[binNo] += 3;
 	if (sd->isDirectional()) {
 	  Vector3d angMom = sd->getJ();
 	  Mat3x3d I = sd->getI();
-          
 	  if (sd->isLinear()) {
 	    int i = sd->linearAxis();
 	    int j = (i + 1) % 3;
 	    int k = (i + 2) % 3;
 	    value += angMom[j] * angMom[j] / I(j, j) + 
 	      angMom[k] * angMom[k] / I(k, k);
-            
-            valueCount_[binNo] +=2;
-            
+            tempCount_[binNo] +=2;
 	  } else {
-	    value += angMom[0]*angMom[0]/I(0, 0) 
-	      + angMom[1]*angMom[1]/I(1, 1) 
-	      + angMom[2]*angMom[2]/I(2, 2);
-            valueCount_[binNo] +=3;
+	    value += angMom[0] * angMom[0] / I(0, 0) +
+	      angMom[1]*angMom[1]/I(1, 1) +
+	      angMom[2]*angMom[2]/I(2, 2);
+            tempCount_[binNo] +=3;
 	  }
 	}
-	value = value / PhysicalConstants::energyConvert / PhysicalConstants::kb;
-        
-	break;
-      case rnemdPx :
-      case rnemdPxScale :
-	value = mass * vel[0];
-        valueCount_[binNo]++;
-	break;
-      case rnemdPy :
-      case rnemdPyScale :
-	value = mass * vel[1];
-        valueCount_[binNo]++;
-	break;
-      case rnemdPz :
-      case rnemdPzScale :
-	value = pos.z(); //temporarily for homogeneous systems ONLY
-        valueCount_[binNo]++;
-	break;
-      case rnemdUnknown : 
-      default :
-	value = 1.0;
-	valueCount_[binNo]++;
-	break;
+	value = value / PhysicalConstants::energyConvert
+	  / PhysicalConstants::kb;//may move to getStatus()
+	tempHist_[binNo] += value;
       }
-      valueHist_[binNo] += value;
+      if (outputVx_) {
+	value = mass * vel[0];
+        //vxzCount_[binNo]++;
+	pxzHist_[binNo] += value;
+      }
+      if (outputVy_) {
+	value = mass * vel[1];
+        //vyzCount_[binNo]++;
+	pyzHist_[binNo] += value;
+      }
 
       if (output3DTemp_) {
-	xVal = mass * vel.x() * vel.x() / PhysicalConstants::energyConvert
+	value = mass * vel.x() * vel.x();
+	xTempHist_[binNo] += value;
+	value = mass * vel.y() * vel.y() / PhysicalConstants::energyConvert
 	  / PhysicalConstants::kb;
-	yVal = mass * vel.y() * vel.y() / PhysicalConstants::energyConvert
+	yTempHist_[binNo] += value;
+	value = mass * vel.z() * vel.z() / PhysicalConstants::energyConvert
 	  / PhysicalConstants::kb;
-	zVal = mass * vel.z() * vel.z() / PhysicalConstants::energyConvert
-	  / PhysicalConstants::kb;
-	xTempHist_[binNo] += xVal;
-	yTempHist_[binNo] += yVal;
-	zTempHist_[binNo] += zVal;
+	zTempHist_[binNo] += value;
 	xyzTempCount_[binNo]++;
       }
+      if (outputRotTemp_) {
+	if (sd->isDirectional()) {
+	  Vector3d angMom = sd->getJ();
+	  Mat3x3d I = sd->getI();
+	  if (sd->isLinear()) {
+	    int i = sd->linearAxis();
+	    int j = (i + 1) % 3;
+	    int k = (i + 2) % 3;
+	    value = angMom[j] * angMom[j] / I(j, j) + 
+	      angMom[k] * angMom[k] / I(k, k);
+            rotTempCount_[binNo] +=2;
+	  } else {
+	    value = angMom[0] * angMom[0] / I(0, 0) +
+	      angMom[1] * angMom[1] / I(1, 1) +
+	      angMom[2] * angMom[2] / I(2, 2);
+            rotTempCount_[binNo] +=3;
+	  }
+	}
+	value = value / PhysicalConstants::energyConvert
+	  / PhysicalConstants::kb;//may move to getStatus()
+	rotTempHist_[binNo] += value;
+      }
+
     }
   }
 
   void RNEMD::getStarted() {
     collectData();
-    /* now should be able to output profile in step 0, but might not be useful
-       Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-       Stats& stat = currentSnap_->statData;
-       stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
+    /*now can output profile in step 0, but might not be useful;
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Stats& stat = currentSnap_->statData;
+    stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
     */
+    //may output a header for the log file here
     getStatus();
   }
 
@@ -1080,10 +1456,26 @@ namespace OpenMD {
     // all processors have the same number of bins, and STL vectors pack their 
     // arrays, so in theory, this should be safe:
 
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &valueHist_[0],
-                              rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &valueCount_[0],
-                              rnemdLogWidth_, MPI::INT, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &mHist_[0],
+			      rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+    if (outputTemp_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &tempHist_[0],
+				rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &tempCount_[0],
+				rnemdLogWidth_, MPI::INT, MPI::SUM);
+    }
+    if (outputVx_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pxzHist_[0],
+				rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      //MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &vxzCount_[0],
+      //			rnemdLogWidth_, MPI::INT, MPI::SUM);
+    }
+    if (outputVy_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pyzHist_[0],
+				rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      //MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &vyzCount_[0],
+      //			rnemdLogWidth_, MPI::INT, MPI::SUM);
+    }
     if (output3DTemp_) {
       MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &xTempHist_[0],
                                 rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
@@ -1094,39 +1486,93 @@ namespace OpenMD {
       MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &xyzTempCount_[0],
                                 rnemdLogWidth_, MPI::INT, MPI::SUM);
     }
+    if (outputRotTemp_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &rotTempHist_[0],
+				rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &rotTempCount_[0],
+				rnemdLogWidth_, MPI::INT, MPI::SUM);
+    }
+
     // If we're the root node, should we print out the results
     int worldRank = MPI::COMM_WORLD.Get_rank();
     if (worldRank == 0) {
 #endif
-      rnemdLog_ << time;
-      for (j = 0; j < rnemdLogWidth_; j++) {
-        rnemdLog_ << "\t" << valueHist_[j] / (RealType)valueCount_[j];
+
+      if (outputTemp_) {
+	tempLog_ << time;
+	for (j = 0; j < rnemdLogWidth_; j++) {
+	  tempLog_ << "\t" << tempHist_[j] / (RealType)tempCount_[j];
+	}
+	tempLog_ << endl;
       }
-      rnemdLog_ << "\n";
+      if (outputVx_) {
+	vxzLog_ << time;
+	for (j = 0; j < rnemdLogWidth_; j++) {
+	  vxzLog_ << "\t" << pxzHist_[j] / mHist_[j];
+	}
+	vxzLog_ << endl;
+      }
+      if (outputVy_) {
+	vyzLog_ << time;
+	for (j = 0; j < rnemdLogWidth_; j++) {
+	  vyzLog_ << "\t" << pyzHist_[j] / mHist_[j];
+	}
+	vyzLog_ << endl;
+      }
+
       if (output3DTemp_) {
-        xTempLog_ << time;      
+	RealType temp;
+        xTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
-          xTempLog_ << "\t" << xTempHist_[j] / (RealType)xyzTempCount_[j];
+	  if (outputVx_)
+	    xTempHist_[j] -= pxzHist_[j] * pxzHist_[j] / mHist_[j];
+	  temp = xTempHist_[j] / (RealType)xyzTempCount_[j]
+	    / PhysicalConstants::energyConvert / PhysicalConstants::kb;
+	  xTempLog_ << "\t" << temp;
         }
-        xTempLog_ << "\n";
+        xTempLog_ << endl;
         yTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
           yTempLog_ << "\t" << yTempHist_[j] / (RealType)xyzTempCount_[j];
         }
-        yTempLog_ << "\n";
+        yTempLog_ << endl;
         zTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
           zTempLog_ << "\t" << zTempHist_[j] / (RealType)xyzTempCount_[j];
         }
-        zTempLog_ << "\n";
+        zTempLog_ << endl;
       }
+      if (outputRotTemp_) {
+	rotTempLog_ << time;
+	for (j = 0; j < rnemdLogWidth_; j++) {
+	  rotTempLog_ << "\t" << rotTempHist_[j] / (RealType)rotTempCount_[j];
+	}
+	rotTempLog_ << endl;
+      }
+
 #ifdef IS_MPI
     }
 #endif
+
     for (j = 0; j < rnemdLogWidth_; j++) {
-      valueCount_[j] = 0;
-      valueHist_[j] = 0.0;
+      mHist_[j] = 0.0;
     }
+    if (outputTemp_)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+	tempCount_[j] = 0;
+	tempHist_[j] = 0.0;
+      }
+    if (outputVx_)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+	//pxzCount_[j] = 0;
+	pxzHist_[j] = 0.0;
+      }
+    if (outputVy_)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+	//pyzCount_[j] = 0;
+	pyzHist_[j] = 0.0;
+      }
+
     if (output3DTemp_)
       for (j = 0; j < rnemdLogWidth_; j++) {
         xTempHist_[j] = 0.0;
@@ -1134,5 +1580,11 @@ namespace OpenMD {
         zTempHist_[j] = 0.0;
 	xyzTempCount_[j] = 0;
       }
+    if (outputRotTemp_)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+	rotTempCount_[j] = 0;
+	rotTempHist_[j] = 0.0;
+      }
   }
 }
+

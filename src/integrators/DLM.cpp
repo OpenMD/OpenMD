@@ -108,7 +108,7 @@ namespace OpenMD {
     RotMat3x3d rot = RotMat3x3d::identity(); // initalize rot as a unit matrix
 
     // use a small angle aproximation for sin and cosine
-
+    /*
     angleSqr = angle * angle;
     angleSqrOver4 = angleSqr / 4.0;
     top = 1.0 - angleSqrOver4;
@@ -116,10 +116,11 @@ namespace OpenMD {
 
     cosAngle = top / bottom;
     sinAngle = angle / bottom;
-
+    */
     // or don't use the small angle approximation:
-    //cosAngle = cos(angle);
-    //sinAngle = sin(angle);
+    cosAngle = cos(angle);
+    sinAngle = sin(angle);
+
     rot(axes1, axes1) = cosAngle;
     rot(axes2, axes2) = cosAngle;
 
