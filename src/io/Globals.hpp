@@ -140,8 +140,16 @@ namespace OpenMD {
     DeclareParameter(RNEMD_exchangeType, std::string);
     DeclareParameter(RNEMD_objectSelection, std::string);
     DeclareParameter(RNEMD_targetFlux, RealType);
+    DeclareParameter(RNEMD_targetJzKE, RealType);
+    DeclareParameter(RNEMD_targetJzpx, RealType);
+    DeclareParameter(RNEMD_targetJzpy, RealType);
+    DeclareParameter(RNEMD_targetJzpz, RealType);
     DeclareParameter(RNEMD_binShift, bool);
-    DeclareParameter(RNEMD_outputDimensionalTemperature, bool);
+    DeclareParameter(RNEMD_outputTemperature, bool);
+    DeclareParameter(RNEMD_outputVx, bool);
+    DeclareParameter(RNEMD_outputVy, bool);
+    DeclareParameter(RNEMD_outputXyzTemperature, bool);
+    DeclareParameter(RNEMD_outputRotTemperature, bool);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);
