@@ -159,6 +159,34 @@ struct ParameterTraits<std::pair<int, int> >{
   static std::string getParamType() { return "std::pair<int, int>";}    
 };
 
+//OpenMD's internal Vector3d
+template<>                     
+struct ParameterTraits<OpenMD::Vector3d >{
+  typedef OpenMD::Vector3d  RepType;
+  template<typename T> static bool    convert(T, RepType&){return false;} 
+  template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+  static bool convert(RepType v, RepType& r)            {r=v; return true;}
+  static bool convert(std::string v, RepType& r) { 
+    OpenMD::StringTokenizer tokenizer(v," ();,\t\n\r");
+    if (tokenizer.countTokens() == 3) {
+      RealType v1 = tokenizer.nextTokenAsDouble();
+      RealType v2 = tokenizer.nextTokenAsDouble();
+      RealType v3 = tokenizer.nextTokenAsDouble();
+      r = OpenMD::Vector3d(v1, v2, v3);
+      return true;
+    } else {
+      sprintf(painCave.errMsg, 
+              "ParameterManager Error: "
+              "Incorrect number of tokens to make a Vector3!\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();    
+    }
+    return false;
+  }
+  static std::string getParamType() { return "OpenMD::Vector3d";}    
+};
+
 
 class ParameterBase {
 public:    
@@ -176,6 +204,7 @@ public:
   virtual bool setData(unsigned long int) = 0;
   virtual bool setData(RealType) = 0;
   virtual bool setData(std::pair<int, int>) = 0;
+  virtual bool setData(OpenMD::Vector3d) = 0;
   virtual std::string getParamType() = 0;
 protected:
   std::string keyword_;
@@ -209,6 +238,9 @@ public:
 
   virtual bool setData(std::pair<int, int> pval) {
     return internalSetData<std::pair<int, int> >(pval);
+  }
+  virtual bool setData(OpenMD::Vector3d pval) {
+    return internalSetData<OpenMD::Vector3d >(pval);
   }
   
   virtual std::string getParamType() { return ParameterTraits<ParamType>::getParamType();}
