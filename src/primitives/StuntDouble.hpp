@@ -929,63 +929,6 @@ namespace OpenMD{
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).zAngle[localIndex_] += angle;
     }       
 
-  /**
-     * Returns the previous electric field of this stuntDouble
-     * @return the electric field of this stuntDouble
-     */    
-    Vector3d getPrevEField() {
-      return ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_];
-    }
-       
-    /**
-     * Returns the current electric field of this stuntDouble
-     * @return the electric field of this stuntDouble
-     */    
-    Vector3d getEField() {
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_];
-    }
-
-    /**
-     * Returns the electric field of this stuntDouble in specified snapshot 
-     * @return the electric field of this stuntDouble
-     * @param snapshotNo
-     */    
-    Vector3d getEField(int snapshotNo) {
-      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_];
-    }
-
-    /**
-     * Sets  the previous electric field of this stuntDouble
-     * @param electricField  new electric field 
-     * @see #getEField
-     */         
-    void setPrevEField(const Vector3d& electricField) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] = electricField;
-    }
-       
-    /**
-     * Sets  the current electric field of this stuntDouble
-     * @param electricField  new electric field 
-     */         
-    void setEField(const Vector3d& electricField) {
-      DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
-      data.electricField[localIndex_] = electricField;
-      //((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] = electricField;
-    }
-
-    /**
-     * Sets  the electric field of this stuntDouble in specified snapshot
-     * @param electricField electric field to be set 
-     * @param snapshotNo 
-     * @see #getEField
-     */         
-    void setEField(const Vector3d& electricField, int snapshotNo) {
-
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] = electricField;
-
-    }
-
-
     /** Set the force of this stuntDouble to zero */
     void zeroForcesAndTorques(); 
     /**
