@@ -970,13 +970,15 @@ O_TIP4P-Ew              OW
 O_TIP5P                 OW
 O_TIP5P-E               OW
 O_SPCE                  OW       
-O_SPC                   OW 
+O_SPC                   OW
+O_POL3			OW 
 H_TIP3P                 HW
 H_TIP4P                 HW
 H_TIP4P-Ew              HW
 H_TIP5P                 HW
 H_SPCE                  HW
 H_SPC                   HW
+H_POL3			HW
 EP_TIP4P                EP
 EP_TIP4P-Ew             EP 
 EP_TIP5P                EP
@@ -1909,6 +1911,8 @@ H_SPC           0.42
 EP_TIP4P        -1.040
 EP_TIP4P-Ew     -1.04844
 EP_TIP5P        -0.241
+O_POL3		-0.7300
+H_POL3		0.3650
 Li+                     1.000
 Na+                     1.000
 K+                      1.000

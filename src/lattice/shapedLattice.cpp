@@ -35,12 +35,13 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4]  Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
  *  sphericalLattice.cpp
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
+ *  Edited by Kelsey M. Stocker on 23 Feb 2012.
  *  @author  Charles F. Vardeman II
  *  @version $Id$
  *
@@ -80,6 +81,8 @@ namespace OpenMD{
     endNx_ = (int) ceil(0.5*dimension_[0]/latticeConstant_);
     endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
     endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);  
+    std::cerr << "begin = " << beginNx_ << " " << beginNy_ << " " << beginNz_ << "\n";
+    std::cerr << "end = " << endNx_ << " " << endNy_ << " " << endNz_ << "\n";
     sitesComputed_ = false;  
   }
 

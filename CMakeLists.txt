@@ -498,6 +498,18 @@ src/applications/nanoparticleBuilder/shapedLatticeSpherical.cpp
 src/applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
 )
 
+set (NANORODBUILDERSOURCE 
+src/applications/nanoparticleBuilder/nanorodBuilder.cpp
+src/applications/nanoparticleBuilder/shapedLatticeRod.cpp
+src/applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
+)
+
+set (NANOROD_PENTBUILDERSOURCE 
+src/applications/nanoparticleBuilder/nanorod_pentBuilder.cpp
+src/applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
+src/applications/nanoparticleBuilder/shapedLatticePentRod.cpp
+)
+
 set (RANDOMBUILDERSOURCE
 src/applications/randomBuilder/randomBuilder.cpp
 src/applications/randomBuilder/randomBuilderCmd.cpp
@@ -523,6 +535,10 @@ add_executable(StaticProps ${STATICPROPSSOURCE})
 target_link_libraries(StaticProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE})
 target_link_libraries(nanoparticleBuilder openmd_single openmd_core openmd_single openmd_core)
+add_executable(nanorodBuilder ${NANORODBUILDERSOURCE})
+target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single openmd_core)
+add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE})
+target_link_libraries(nanorod_pentBuilder openmd_single openmd_core openmd_single openmd_core)
 add_executable(randomBuilder ${RANDOMBUILDERSOURCE})
 target_link_libraries(randomBuilder openmd_single openmd_core openmd_single openmd_core)
 add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE})

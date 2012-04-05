@@ -474,6 +474,7 @@ namespace OpenMD {
     waterTypeList.insert("TIP5P-E_RB_0");
     waterTypeList.insert("SPCE_RB_0");
     waterTypeList.insert("SPC_RB_0");
+    waterTypeList.insert("POL3_RB_0");
   }
 
   void WaterTypeVisitor::visit(RigidBody *rb) {

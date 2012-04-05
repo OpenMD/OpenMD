@@ -1,4 +1,5 @@
-/* Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
+/*
+ * Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -36,63 +37,34 @@
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4]  Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *
- *  sphericalLattice.hpp
- *
- *  Created by Charles F. Vardeman II on 17 Feb 2006.
- *  Edited by Kelsey M. Stocker on 23 Feb 2012.
- *  @author  Charles F. Vardeman II
- *  @version $Id$
+ * [4]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
+ *  Created by Kelsey M. Stocker on 2/9/12.
+ *  @author  Kelsey M. Stocker 
+ *  @version $Id: shapedLatticeRod.hpp 1668 2012-01-06 19:03:05Z gezelter $
  *
  */
+#ifndef NANOPARTICLEBUILDER_SHAPEDLATTICEROD_HPP
+#define NANOPARTICLEBUILDER_SHAPEDLATTICEROD_HPP 
 
-#ifndef LATTICE_SHAPEDLATTICE_HPP
-#define LATTICE_SHAPEDLATTICE_HPP 
-
+#include "lattice/shapedLattice.hpp"
 #include "math/Vector3.hpp"
-#include "lattice/LatticeFactory.hpp"
-#include "lattice/Lattice.hpp"
-#include "brains/Register.hpp"
-
+#include <cmath>
 namespace OpenMD{
-  
   /**
-   * Returns a vector of vector3 position on a lattice truncated 
-   * 
+   * Implements a spherically-capped rod-shaped lattice
+   *
    */
-   
-  class shapedLattice{
+  class shapedLatticeRod: public shapedLattice{
   public:
-    shapedLattice(RealType latticeConstant, std::string latticeType);
-    virtual ~shapedLattice(){};
-    /**
-     * setGridDimension:  
-     * 
-     */
-    void setGridDimension(Vector3d dimension);
-    void setOrigin(Vector3d origin);
-    virtual bool isInterior(Vector3d point) =0;
-    std::vector<Vector3d> getSites();
-    std::vector<Vector3d> getOrientations();
-  protected:
-    void findSites();
-    Vector3d dimension_;
-    Vector3d origin_;  
+    shapedLatticeRod(RealType latticeConstant, std::string latticeType, RealType radius, RealType length);
+    virtual bool isInterior(Vector3d point);
   private:
-    bool sitesComputed_;
-    std::vector<Vector3d> sites_;
-    std::vector<Vector3d> orientations_;
-    Lattice *simpleLattice_;
-    RealType latticeConstant_;
-    std::string latticeType_;
-    int beginNx_;
-    int beginNy_;
-    int beginNz_;
-    int endNx_;
-    int endNy_;
-    int endNz_;
-    
+    RealType rodRadius_, rodLength_;
   };
 }
-#endif /* LATTICE_SHAPEDLATTICE_HPP */
+
+#endif /* NANOPARTICLEBUILDER_SHAPEDLATTICEROD_HPP */
+
+
+
+

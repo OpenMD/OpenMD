@@ -981,13 +981,15 @@ O_TIP4P-Ew		OW
 O_TIP5P			OW
 O_TIP5P-E		OW
 O_SPCE			OW       
-O_SPC          		OW 
+O_SPC          		OW
+O_POL3			OW 
 H_TIP3P        		HW
 H_TIP4P       		HW
 H_TIP4P-Ew    		HW
 H_TIP5P       		HW
 H_SPCE        		HW
 H_SPC         		HW
+H_POL3			HW
 EP_TIP4P        	EP
 EP_TIP4P-Ew    		EP 
 EP_TIP5P        	EP
@@ -1898,19 +1900,21 @@ D3P-O3'                 -0.6553
 D3P-P                   0.9000
 D3P-OP                  -0.8200
 TIP3P-O                -0.834
-TIP3P-H                 0.417
-O_TIP3P		-0.834
-O_SPCE          -0.8476
-O_SPC           -0.82
-H_TIP3P         0.417
-H_TIP4P         0.520
-H_TIP4P-Ew      0.52422
-H_TIP5P         0.241
-H_SPCE          0.4238
-H_SPC           0.42
-EP_TIP4P        -1.040
-EP_TIP4P-Ew     -1.04844
-EP_TIP5P        -0.241
+TIP3P-H		       0.417
+O_TIP3P			-0.834
+O_SPCE			-0.8476
+O_SPC			-0.82
+O_POL3			-0.7300
+H_TIP3P			0.417
+H_TIP4P			0.520
+H_TIP4P-Ew		0.52422
+H_TIP5P			0.241
+H_SPCE			0.4238
+H_SPC			0.42
+H_POL3			0.3650
+EP_TIP4P		-1.040
+EP_TIP4P-Ew		-1.04844
+EP_TIP5P		-0.241
 Li+                     1.000
 Na+                     1.000
 K+                      1.000
@@ -1954,6 +1958,7 @@ O_TIP5P         0.16            3.12
 O_TIP5P-E       0.178           3.097   
 O_SPCE          0.15532         3.16549
 O_SPC           0.15532         3.16549
+O_POL3		0.156		1.7980
 OH		0.210400	3.066473
 OS		0.170000	3.000012
 O		0.210000	2.959922
