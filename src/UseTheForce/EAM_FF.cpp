@@ -44,6 +44,11 @@
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
+#include "io/LennardJonesAtomTypesSectionParser.hpp"
+#include "io/BondTypesSectionParser.hpp"
+#include "io/ChargeAtomTypesSectionParser.hpp"
+#include "io/MultipoleAtomTypesSectionParser.hpp"
+#include "io/NonBondedInteractionsSectionParser.hpp"
 #include "io/EAMAtomTypesSectionParser.hpp"
 #include "io/OptionSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
@@ -60,6 +65,11 @@ namespace OpenMD {
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
     spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
+    spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new NonBondedInteractionsSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
   }
 
