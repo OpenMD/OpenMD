@@ -149,7 +149,7 @@ struct ParameterTraits<std::pair<int, int> >{
     } else {
       sprintf(painCave.errMsg, 
               "ParameterManager Error: "
-              "Not enough tokens to make pair!\n");
+              "Incorrect number of tokens to make a pair!\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();    

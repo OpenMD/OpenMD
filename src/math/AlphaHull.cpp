@@ -58,25 +58,14 @@
 #include <utility>
 #include "math/AlphaHull.hpp"
 #include "utils/simError.h"
-
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+#include "math/qhull.hpp"
 
 using namespace OpenMD;
 
 #ifdef HAVE_QHULL
-extern "C"
-{
-#include <qhull/libqhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
-}
 double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim);
 
 AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), options_("qhull d QJ Tcv Pp") {

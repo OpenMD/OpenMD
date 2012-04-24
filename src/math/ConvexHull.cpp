@@ -62,20 +62,10 @@
 #include <mpi.h>
 #endif
 
-using namespace OpenMD;
+#include "math/qhull.hpp"
 
 #ifdef HAVE_QHULL
-extern "C"
-{
-#include <qhull/libqhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
-}
+using namespace OpenMD;
 
 ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp") {
 }

@@ -1,4 +1,4 @@
-/* config.h.  Generated from config.h.cmake by cmake  */
+/* config.h.  Generated from config.h.cmake by CMake for @PROJECT_NAME@  */
 
 #define OPENMD_VERSION_MAJOR "${VERSION_MAJOR}"
 #define OPENMD_VERSION_MINOR "${VERSION_MINOR}"
@@ -11,7 +11,12 @@
 #cmakedefine SINGLE_PRECISION
 
 /* Is defined if the qhull library is available. */
-#cmakedefine HAVE_QHULL
+
+#cmakedefine HAVE_QHULL 1
+#cmakedefine HAVE_QHULL_2011 1
+#ifdef DISABLE_QHULL
+#undef HAVE_QHULL
+#endif
 
 /* have <conio.h> */
 #cmakedefine HAVE_CONIO_H 1

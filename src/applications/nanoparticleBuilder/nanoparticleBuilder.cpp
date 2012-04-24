@@ -127,6 +127,8 @@ int main(int argc, char *argv []) {
   /* Build a lattice and get lattice points for this lattice constant */
   vector<Vector3d> sites = nanoParticle.getSites();
   vector<Vector3d> orientations = nanoParticle.getOrientations();
+
+
   std::vector<int> vacancyTargets;
   vector<bool> isVacancy;
   
