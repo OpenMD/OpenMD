@@ -85,7 +85,7 @@ IF(OPENBABEL2_FOUND)
   include_directories(${OPENBABEL2_INCLUDE_DIR})
   # link libraries are added only for targets that need them.
 ELSE(OPENBABEL2_FOUND)
-  MESSAGE(STATUS, "No OpenBabel found - will not build atom2md")
+  MESSAGE(STATUS "No OpenBabel found - will not build atom2md")
 ENDIF(OPENBABEL2_FOUND)
 
 #Look for QHULL Libraries
@@ -95,7 +95,7 @@ IF(QHULL_FOUND)
   include_directories(${QHULL_INCLUDE_DIR})
   LINK_LIBRARIES(${QHULL_LIBRARIES})
 ELSE(QHULL_FOUND)
-  MESSAGE(STATUS, "No Qhull found - will be missing some features")
+  MESSAGE(STATUS "No Qhull found - will be missing some features")
 ENDIF(QHULL_FOUND)
 
 # zlib stuff
@@ -106,7 +106,7 @@ if(ZLIB_FOUND)
   include_directories(${ZLIB_INCLUDE_DIR})
   LINK_LIBRARIES(${ZLIB_LIBRARIES})
 ELSE(ZLIB_FOUND)
-  MESSAGE(STATUS, "No zlib found - will be missing compressed dump files")
+  MESSAGE(STATUS "No zlib found - will be missing compressed dump files")
 endif(ZLIB_FOUND)
 
 #FFTW3
@@ -122,7 +122,7 @@ if (FFTW3_FOUND)
   INCLUDE_DIRECTORIES(${FFTW3_INCLUDE_DIR})
   LINK_LIBRARIES(${FFTW3_LIBRARIES})
 ELSE(FFTW3_FOUND)
-  MESSAGE(STATUS, "No fftw3 found - will be missing some analysis modules")
+  MESSAGE(STATUS "No fftw3 found - will be missing some analysis modules")
 endif (FFTW3_FOUND)
 
 
