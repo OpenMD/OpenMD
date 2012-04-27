@@ -64,18 +64,20 @@
 
 using namespace OpenMD;
 
+using namespace std;
 int main(int argc, char* argv[]){
   
   //register force fields
   registerForceFields();
   
   gengetopt_args_info args_info;
-  std::string dumpFileName;
-  std::string xyzFileName;
-  bool printVel;
-  bool printFrc;
-  bool printVec;
-  bool printChrg;
+  string dumpFileName;
+  string xyzFileName;
+
+  bool printVel(false);
+  bool printFrc(false);
+  bool printVec(false);
+  bool printChrg(false);
   
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
@@ -86,7 +88,7 @@ int main(int argc, char* argv[]){
   if (args_info.input_given){
     dumpFileName = args_info.input_arg;
   } else {
-    std::cerr << "Does not have input file name" << std::endl;
+    cerr << "Does not have input file name" << endl;
     exit(1);
   }
   
@@ -139,7 +141,7 @@ int main(int argc, char* argv[]){
   if (args_info.basetype_flag) {
     AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
     compositeVisitor->addVisitor(atomNameVisitor, 550);    
-    std::cout << compositeVisitor->toString();
+    cout << compositeVisitor->toString();
   }
   
   //create ZconsVisitor
@@ -181,8 +183,8 @@ int main(int argc, char* argv[]){
                                                        args_info.refsele_arg),
                                  250); 
   } else if (args_info.refsele_given || args_info.originsele_given) {
-    std::cerr << "Both of --refsele and --originsele should appear by pair" 
-              << std::endl;
+    cerr << "Both of --refsele and --originsele should appear by pair" 
+              << endl;
     exit(1);
   }
   
@@ -221,7 +223,7 @@ int main(int argc, char* argv[]){
   DumpReader* dumpReader = new DumpReader(info, dumpFileName);
   int nframes = dumpReader->getNFrames();
   
-  std::ofstream xyzStream(xyzFileName.c_str());
+  ofstream xyzStream(xyzFileName.c_str());
   
   SimInfo::MoleculeIterator miter;
   Molecule::IntegrableObjectIterator  iiter;

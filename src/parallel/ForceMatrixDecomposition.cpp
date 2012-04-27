@@ -537,19 +537,21 @@ namespace OpenMD {
       fill(snap_->atomData.density.begin(), 
            snap_->atomData.density.end(), 0.0);
     }
+
     if (storageLayout_ & DataStorage::dslFunctional) {
       fill(snap_->atomData.functional.begin(), 
            snap_->atomData.functional.end(), 0.0);
     }
+
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {      
       fill(snap_->atomData.functionalDerivative.begin(), 
            snap_->atomData.functionalDerivative.end(), 0.0);
     }
+
     if (storageLayout_ & DataStorage::dslSkippedCharge) {      
       fill(snap_->atomData.skippedCharge.begin(), 
            snap_->atomData.skippedCharge.end(), 0.0);
     }
-    
   }
 
 
