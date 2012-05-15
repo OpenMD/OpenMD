@@ -204,6 +204,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   } //qh_new_qhull
 
 #endif
+
   intPoint = qh interior_point;
   RealType calcvol = 0.0;
   FORALLfacets {  

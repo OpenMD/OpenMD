@@ -16,5 +16,7 @@ typedef  struct{
   int is_Shape;
   int is_FLARB;
   int is_SC;
+  int is_Polarizable;
+  int is_Fluctuating;
 } AtomTypeProperties;
 #endif 

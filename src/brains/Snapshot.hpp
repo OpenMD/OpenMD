@@ -78,7 +78,7 @@ namespace OpenMD{
                                   chi_(0.0), 
                                   integralOfChiDt_(0.0), 
                                   eta_(0.0), id_(-1), hasCOM_(false), 
-                                  hasVolume_(false), volume_(0.0) {
+                                  volume_(0.0), hasVolume_(false) {
 
     }
 
@@ -89,8 +89,8 @@ namespace OpenMD{
                                   currentTime_(0), orthoTolerance_(1e-6), 
                                   orthoRhombic_(0), chi_(0.0), 
                                   integralOfChiDt_(0.0), eta_(0.0), id_(-1), 
-                                  hasCOM_(false), hasVolume_(false),
-                                  volume_(0.0)  {
+                                  hasCOM_(false), volume_(0.0),
+                                  hasVolume_(false) {
     }
     
     /** Returns the id of this Snapshot */
