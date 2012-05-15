@@ -209,7 +209,7 @@ namespace OpenMD {
 
     RealType volume = this->getVolume();
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    Mat3x3d tau = curSnapshot->statData.getTau();
+    Mat3x3d tau = curSnapshot->getTau();
 
     pressureTensor =  (p_global + PhysicalConstants::energyConvert* tau)/volume;
     

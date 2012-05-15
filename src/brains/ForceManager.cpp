@@ -854,7 +854,7 @@ namespace OpenMD {
     MPI_Allreduce(tmpTau.getArrayPointer(), tau.getArrayPointer(), 
                   9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
-    curSnapshot->statData.setTau(tau);
+    curSnapshot->setTau(tau);
   }
 
 } //end namespace OpenMD

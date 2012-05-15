@@ -201,6 +201,14 @@ namespace OpenMD{
       eta_ = eta;
     }
 
+    Mat3x3d getTau() {
+      return tau_;
+    }
+        
+    void setTau(const Mat3x3d& tau) {
+      tau_ = tau;
+    }
+
     bool hasCOM() {
       return hasCOM_;
     }
@@ -235,7 +243,7 @@ namespace OpenMD{
     int id_; /**< identification number of the snapshot */
     bool hasCOM_;
     bool hasVolume_;
-            
+    Mat3x3d tau_;
   };
 
   typedef DataStorage (Snapshot::*DataStoragePointer); 

@@ -125,14 +125,6 @@ namespace OpenMD {
       return units_[index];
     }
 
-    Mat3x3d getTau() {
-      return tau_;
-    }
-        
-    void setTau(const Mat3x3d& tau) {
-      tau_ = tau;
-    }
-
     typedef std::map<std::string, Stats::StatsIndex> StatsMapType;
     static  StatsMapType statsMap;
   
@@ -142,7 +134,6 @@ namespace OpenMD {
     RealType data_[ENDINDEX - BEGININDEX];
     static std::string title_[ENDINDEX - BEGININDEX];
     static std::string units_[ENDINDEX - BEGININDEX];
-    Mat3x3d tau_;
   };
 
 
