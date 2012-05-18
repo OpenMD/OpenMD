@@ -76,6 +76,14 @@
 #include "antlr/NoViableAltForCharException.hpp"
 #include "antlr/NoViableAltException.hpp"
 
+#include "types/DirectionalAdapter.hpp"
+#include "types/MultipoleAdapter.hpp"
+#include "types/EAMAdapter.hpp"
+#include "types/SuttonChenAdapter.hpp"
+#include "types/PolarizableAdapter.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
+
 #ifdef IS_MPI
 #include "mpi.h"
 #include "math/ParallelRandNumGen.hpp"
@@ -414,9 +422,15 @@ namespace OpenMD {
     //create the molecules
     createMolecules(info);
     
+    //find the storage layout
+
+    int storageLayout = computeStorageLayout(info);
+
+    cerr << "computed Storage Layout = " << storageLayout << "\n";
+
     //allocate memory for DataStorage(circular reference, need to
     //break it)
-    info->setSnapshotManager(new SimSnapshotManager(info));
+    info->setSnapshotManager(new SimSnapshotManager(info, storageLayout));
     
     //set the global index of atoms, rigidbodies and cutoffgroups
     //(only need to be set once, the global index will never change
@@ -653,6 +667,87 @@ namespace OpenMD {
     } //end for(int i=0)   
   }
     
+  int SimCreator::computeStorageLayout(SimInfo* info) {
+
+    int nRigidBodies = info->getNGlobalRigidBodies();
+    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
+    set<AtomType*>::iterator i;
+    bool hasDirectionalAtoms = false;
+    bool hasFixedCharge = false;
+    bool hasMultipoles = false;    
+    bool hasPolarizable = false;    
+    bool hasFluctuatingCharge = false;    
+    bool hasMetallic = false;
+    int storageLayout = 0;
+    storageLayout |= DataStorage::dslPosition;
+    storageLayout |= DataStorage::dslVelocity;
+    storageLayout |= DataStorage::dslForce;
+
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+
+      DirectionalAdapter da = DirectionalAdapter( (*i) );
+      MultipoleAdapter ma = MultipoleAdapter( (*i) );
+      EAMAdapter ea = EAMAdapter( (*i) );
+      SuttonChenAdapter sca = SuttonChenAdapter( (*i) );
+      PolarizableAdapter pa = PolarizableAdapter( (*i) );
+      FixedChargeAdapter fca = FixedChargeAdapter( (*i) );
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter( (*i) );
+
+      if (da.isDirectional()){
+        hasDirectionalAtoms = true;
+      }
+      if (ma.isMultipole()){
+        hasMultipoles = true;
+      }
+      if (ea.isEAM() || sca.isSuttonChen()){
+        hasMetallic = true;
+      }
+      if ( fca.isFixedCharge() ){
+        hasFixedCharge = true;
+      }
+      if ( fqa.isFluctuatingCharge() ){
+        hasFluctuatingCharge = true;
+      }
+      if ( pa.isPolarizable() ){
+        hasPolarizable = true;
+      }
+    }
+    
+    if (nRigidBodies > 0 || hasDirectionalAtoms) {
+      storageLayout |= DataStorage::dslAmat;
+      if(storageLayout & DataStorage::dslVelocity) {
+        storageLayout |= DataStorage::dslAngularMomentum;
+      }
+      if (storageLayout & DataStorage::dslForce) {
+        storageLayout |= DataStorage::dslTorque;
+      }
+    }
+    if (hasMultipoles) {
+      storageLayout |= DataStorage::dslElectroFrame;
+    }
+    if (hasFixedCharge || hasFluctuatingCharge) {
+      storageLayout |= DataStorage::dslSkippedCharge;
+    }
+    if (hasMetallic) {
+      storageLayout |= DataStorage::dslDensity;
+      storageLayout |= DataStorage::dslFunctional;
+      storageLayout |= DataStorage::dslFunctionalDerivative;
+    }
+    if (hasPolarizable) {
+      storageLayout |= DataStorage::dslElectricField;
+    }
+    if (hasFluctuatingCharge){
+      storageLayout |= DataStorage::dslFlucQPosition;
+      if(storageLayout & DataStorage::dslVelocity) {
+        storageLayout |= DataStorage::dslFlucQVelocity;
+      }
+      if (storageLayout & DataStorage::dslForce) {
+        storageLayout |= DataStorage::dslFlucQForce;
+      }
+    }
+    return storageLayout;
+  }
+
   void SimCreator::setGlobalIndex(SimInfo *info) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;

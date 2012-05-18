@@ -42,7 +42,7 @@
  
 #include "io/DirectionalAtomTypesSectionParser.hpp"
 #include "UseTheForce/ForceField.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/DirectionalAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
@@ -69,7 +69,6 @@ namespace OpenMD {
 
       std::string atomTypeName = tokenizer.nextToken();    
       AtomType* atomType = ff.getAtomType(atomTypeName);
-      DirectionalAtomType* dAtomType;
 
       if (atomType == NULL) {
         sprintf(painCave.errMsg,
@@ -79,32 +78,16 @@ namespace OpenMD {
                 atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();
-      } else {       
-
-        dAtomType = new DirectionalAtomType();
-        dAtomType->copyAllData(atomType);
-        // now notify all of those atom types who had the original atom
-        // type as a base (i.e. our ZIGs) that they've got a new base
-        // type in town.  What you say !!  For great justice:
-        std::vector<AtomType*> ayz = atomType->allYourZIG();
-        std::vector<AtomType*>::iterator z;        
-        for (z=ayz.begin(); z!=ayz.end(); ++z) {
-          (*z)->useBase(dAtomType);
-        }
-        ff.replaceAtomType(atomTypeName, dAtomType);                 
-      }
+      } 
       
-      RealType Ixx = tokenizer.nextTokenAsDouble();
-      RealType Iyy = tokenizer.nextTokenAsDouble();
-      RealType Izz = tokenizer.nextTokenAsDouble();            
-      Mat3x3d inertialMat;
-      inertialMat(0, 0) = Ixx;
-      inertialMat(1, 1) = Iyy;
-      inertialMat(2, 2) = Izz;        
-      dAtomType->setI(inertialMat);            
-                       
+      DirectionalAdapter da = DirectionalAdapter(atomType);
+      Mat3x3d I;
+
+      I(0,0) = tokenizer.nextTokenAsDouble();
+      I(1,1) = tokenizer.nextTokenAsDouble();
+      I(2,2) = tokenizer.nextTokenAsDouble();
+
+      da.makeDirectional(I);
     }    
-
   }
-
 } //end namespace OpenMD

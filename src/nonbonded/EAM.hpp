@@ -44,7 +44,7 @@
 #define NONBONDED_EAM_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "types/AtomType.hpp"
+#include "types/EAMAdapter.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/Vector3.hpp"
 #include "math/CubicSpline.hpp"
@@ -86,11 +86,6 @@ namespace OpenMD {
 
   private:
     void initialize();  
-    EAMParam getEAMParam(AtomType* atomType);
-    CubicSpline* getZ(AtomType* atomType);
-    CubicSpline* getRho(AtomType* atomType);
-    CubicSpline* getF(AtomType* atomType);
-    RealType getRcut(AtomType* atomType);
     CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
     
     bool initialized_;

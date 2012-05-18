@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,39 +40,37 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_FLUCTUATINGATOMTYPE_HPP
-#define TYPES_FLUCTUATINGATOMTYPE_HPP
+#ifndef TYPES_LENNARDJONESADAPTER_HPP
+#define TYPES_LENNARDJONESADAPTER_HPP
 
+#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
 
+using namespace std;
 namespace OpenMD {
- 
-  /**
-   * @class FluctuatingAtomType 
-   *
-   * FluctuatingAtomTypes have some components that are handled by
-   * atom types (i.e. the electronic hardness of the atom itself).
-   */
-  class FluctuatingAtomType : public AtomType {
-    
-  public:
-    
-    FluctuatingAtomType();
 
-    void copyAllData(AtomType* at);
+  string const LJtypeID = "LJ";
 
-    virtual ~FluctuatingAtomType() { } ;
-
-    
-    void setElectronegativity(RealType chi) {chi_ = chi;}
-    void setHardness(RealType Jii) {Jii_ = Jii;}
-    
-    
-  private:
-    
-    
-
+  struct LJAtypeParameters{
+    RealType sigma;
+    RealType epsilon;
+    bool isSoft;
   };
-  
+  typedef SimpleTypeData<LJAtypeParameters*> LJAtypeData;   
+
+  class LennardJonesAdapter {
+  public:
+    LennardJonesAdapter(AtomType* AT) { at_ = AT; };
+
+    void makeLennardJones(RealType sigma, RealType epsilon, bool isSoft);
+    
+    bool isLennardJones();
+    RealType getSigma();
+    RealType getEpsilon();
+    bool isSoft();
+  private:
+    AtomType* at_;
+    LJAtypeParameters* getLJParam();    
+  };
 }
 #endif

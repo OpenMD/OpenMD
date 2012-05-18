@@ -62,9 +62,14 @@ namespace OpenMD {
   }
 
   void StuntDouble::zeroForcesAndTorques() {    
-    setFrc(V3Zero);
-    setTrq(V3Zero);
-    setParticlePot(0.0);
+    int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
+
+    if (sl & DataStorage::dslForce) 
+      setFrc(V3Zero);
+    if (sl & DataStorage::dslTorque) 
+      setTrq(V3Zero);
+    if (sl & DataStorage::dslParticlePot) 
+      setParticlePot(0.0);
   }
   void StuntDouble::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  

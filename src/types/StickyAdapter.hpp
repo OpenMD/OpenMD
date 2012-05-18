@@ -39,20 +39,49 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+ 
+#ifndef TYPES_STICKYADAPTER_HPP
+#define TYPES_STICKYADAPTER_HPP
 
-#include <cstdio> 
-#include "types/PolarizableAtomType.hpp"
-#include "utils/simError.h"
+#include "utils/GenericData.hpp"
+#include "types/AtomType.hpp"
+
+using namespace std;
 namespace OpenMD {
+
+  string const StickyTypeID = "Sticky";
+
+  struct StickyAtypeParameters {
+    RealType w0;
+    RealType v0;
+    RealType v0p;
+    RealType rl;
+    RealType ru;
+    RealType rlp;
+    RealType rup;
+    bool isPower;
+  };
+  typedef SimpleTypeData<StickyAtypeParameters*> StickyAtypeData;   
   
-  PolarizableAtomType::PolarizableAtomType() : AtomType() { 
-    myResponsibilities_["is_Polarizable"] = true; 
-    atp.is_Polarizable = 1; 
-  }   
-  
-  void PolarizableAtomType::copyAllData(AtomType* at) {
-    AtomType::copyAllData(at);
-    myResponsibilities_["is_Polarizable"] = true; 
-    atp.is_Polarizable = 1; 
-  }
-} //end namespace OpenMD
+  class StickyAdapter {
+  public:
+    StickyAdapter(AtomType* AT) { at_ = AT; };
+
+    void makeSticky(RealType w0, RealType v0, RealType v0p, RealType rl, RealType ru, RealType rlp, RealType rup, bool isPower);
+    
+    bool isSticky();
+    bool isStickyPower();
+    RealType getW0();
+    RealType getV0();
+    RealType getV0p();
+    RealType getRl();
+    RealType getRu();
+    RealType getRlp();
+    RealType getRup();
+
+  private:
+    AtomType* at_;
+    StickyAtypeParameters*  getStickyParam();
+  };
+}
+#endif

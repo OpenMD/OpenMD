@@ -94,10 +94,6 @@ namespace OpenMD{
     bool isDipole()  { 
       return atomType_->isDipole(); 
     }
-
-    bool isQudrapole()  { 
-      return atomType_->isQuadrupole(); 
-    }
     
     bool isMultipole()  { 
       return atomType_->isMultipole(); 

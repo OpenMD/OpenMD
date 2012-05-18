@@ -45,13 +45,10 @@
 #define IO_CHARGEATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/AtomType.hpp"
 #include "io/ForceFieldOptions.hpp"
 namespace OpenMD {
 
-  /**
-   * @class ChargeAtomTypesSectionParser ChargeAtomTypesSectionParser.hpp "io/ChargeAtomTypesSectionParser.hpp"
-   */
   class ChargeAtomTypesSectionParser : public SectionParser {
   public:
     ChargeAtomTypesSectionParser(ForceFieldOptions& options);
@@ -60,10 +57,7 @@ namespace OpenMD {
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
-
-
-} //namespace OpenMD
-
-#endif //IO_DIRECTIONALATOMTYPESECTIONPARSER_HPP
+}
+#endif
 
 

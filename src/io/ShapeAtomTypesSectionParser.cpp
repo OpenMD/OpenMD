@@ -45,7 +45,7 @@
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "types/AtomType.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/DirectionalAdapter.hpp"
 #include "types/ShapeAtomType.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
@@ -67,27 +67,16 @@ namespace OpenMD {
       std::string shapeFile = tokenizer.nextToken();
        
       AtomType* atomType = ff.getAtomType(shapeTypeName);
-      ShapeAtomType* sAtomType;
-      if (atomType == NULL){
-        sAtomType = new ShapeAtomType();
+      if (atomType == NULL) {
+        atomType = new AtomType();
         int ident = ff.getNAtomType() + 1;
-        sAtomType->setIdent(ident); 
-        sAtomType->setName(shapeTypeName);
-        ff.addAtomType(shapeTypeName, sAtomType);
-      } else {
-        sAtomType = dynamic_cast<ShapeAtomType*>(atomType);
-        if (sAtomType == NULL) {
-          sprintf(painCave.errMsg,
-                  "ShapeAtomTypesSectionParser:: Can't cast to ShapeAtomType");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        }
-      }
+        atomType->setIdent(ident); 
+        atomType->setName(shapeTypeName);
+        ff.addAtomType(shapeTypeName, atomType);
+      } 
       
-      sAtomType->setShape();   
-      parseShapeFile(ff, shapeFile, sAtomType);                                                    
-  
+      parseShapeFile(ff, shapeFile, atomType);
+
     } else {
       sprintf(painCave.errMsg, 
               "ShapesAtomTypesSectionParser Error: "
@@ -101,7 +90,7 @@ namespace OpenMD {
   
   void ShapeAtomTypesSectionParser::parseShapeFile(ForceField& ff,
                                                    std::string& shapeFileName, 
-                                                   ShapeAtomType* st) {
+                                                   AtomType* at) {
     
     const int bufferSize = 65535;
     char buffer[bufferSize];
@@ -151,6 +140,9 @@ namespace OpenMD {
     }
     
     
+
+    ShapeAtomType* st = new ShapeAtomType();
+    
     // first parse the info. in the ShapeInfo section
     findBegin(shapeStream, "ShapeInfo");
     shapeStream.getline(buffer, bufferSize);
@@ -174,11 +166,13 @@ namespace OpenMD {
             simError();  
           } else {
             junk = tokenInfo.nextTokenAsInt();
-            st->setMass( tokenInfo.nextTokenAsDouble() );
-            momInert(0,0) = tokenInfo.nextTokenAsDouble();
-            momInert(1,1) = tokenInfo.nextTokenAsDouble();
-            momInert(2,2) = tokenInfo.nextTokenAsDouble();
-            st->setI(momInert);
+            at->setMass( tokenInfo.nextTokenAsDouble() );
+            DirectionalAdapter da = DirectionalAdapter(at);
+            Mat3x3d I;
+            I(0,0) = tokenInfo.nextTokenAsDouble();
+            I(1,1) = tokenInfo.nextTokenAsDouble();
+            I(2,2) = tokenInfo.nextTokenAsDouble();
+            da.makeDirectional(I);
           }
         }
       }
@@ -316,7 +310,7 @@ namespace OpenMD {
     
     // pass strength functions to ShapeType
     st->setStrengthFuncs(functionVector);
-        
+    at->addProperty(new ShapeAtypeData("Shape", st));     
   //  delete shapeStream;
   }
 } //end namespace OpenMD

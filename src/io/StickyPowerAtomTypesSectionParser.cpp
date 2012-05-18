@@ -41,10 +41,10 @@
  */
 
 #include "io/StickyPowerAtomTypesSectionParser.hpp"
-#include "types/AtomType.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/StickyAdapter.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
+using namespace std;
 namespace OpenMD {
   
   StickyPowerAtomTypesSectionParser::StickyPowerAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
@@ -52,7 +52,7 @@ namespace OpenMD {
   }
   
   void StickyPowerAtomTypesSectionParser::parseLine(ForceField& ff,
-                                               const std::string& line, 
+                                               const string& line, 
                                                int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
@@ -68,48 +68,33 @@ namespace OpenMD {
       simError();                      
     } else {
       
-      std::string atomTypeName = tokenizer.nextToken();    
+      string atomTypeName = tokenizer.nextToken();    
       AtomType* atomType = ff.getAtomType(atomTypeName);
       
       if (atomType != NULL) {
-        DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
+        StickyAdapter sa = StickyAdapter(atomType);
+
+        RealType w0 = tokenizer.nextTokenAsDouble();
+        RealType v0 = tokenizer.nextTokenAsDouble();
+        RealType v0p = tokenizer.nextTokenAsDouble();
+        RealType rl = tokenizer.nextTokenAsDouble();
+        RealType ru = tokenizer.nextTokenAsDouble();
+        RealType rlp = tokenizer.nextTokenAsDouble();
+        RealType rup = tokenizer.nextTokenAsDouble();   
+        bool isPower = true;
+
+        sa.makeSticky(w0, v0, v0p, rl, ru, rlp, rup, isPower);
         
-        if (dAtomType != NULL) {
-          StickyParam sticky; 
-          sticky.w0 = tokenizer.nextTokenAsDouble();
-          sticky.v0 = tokenizer.nextTokenAsDouble();
-          sticky.v0p = tokenizer.nextTokenAsDouble();
-          sticky.rl = tokenizer.nextTokenAsDouble();
-          sticky.ru = tokenizer.nextTokenAsDouble();
-          sticky.rlp = tokenizer.nextTokenAsDouble();
-          sticky.rup = tokenizer.nextTokenAsDouble();   
-          
-          dAtomType->addProperty(new StickyParamGenericData("Sticky", sticky));
-          dAtomType->setStickyPower();
-        } else {
-          sprintf(painCave.errMsg, 
-                  "StickyPowerAtomTypesSectionParser Error: Not enough tokens "
-                  "at line %d\n",
-                  lineNo);
-          painCave.isFatal = 1;
-          simError();            
-          std::cerr << "StickyPowerAtomTypesSectionParser Warning:" 
-            << std::endl;
-        }
       } else {
         sprintf(painCave.errMsg, 
-                "StickyPowerAtomTypesSectionParser Error: Can not find matched "
-                "AtomType %s\n",
+                "StickyPowerAtomTypesSectionParser Error: Can not find "
+                "matching AtomType %s\n",
                 atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();    
-        
       }
-      
     }    
-    
   }
-    
 } //end namespace OpenMD
 
 

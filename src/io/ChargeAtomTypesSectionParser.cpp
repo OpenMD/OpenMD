@@ -41,6 +41,7 @@
  */
  
 #include "io/ChargeAtomTypesSectionParser.hpp"
+#include "types/FixedChargeAdapter.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
@@ -65,23 +66,17 @@ namespace OpenMD {
         
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType != NULL) {
+        FixedChargeAdapter fca =  FixedChargeAdapter(atomType);
 	RealType charge = tokenizer.nextTokenAsDouble();
-
-	atomType->addProperty(new DoubleGenericData("Charge", charge));
-	atomType->setIsCharge();
+        fca.makeFixedCharge(charge);
       } else {
-
-	sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Can not find matched AtomType at line %d\n",
+	sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Can not find matching AtomType at line %d\n",
 		lineNo);
 	painCave.isFatal = 1;
 	simError();
-      }
-                       
+      }                  
     }
-
   }
-
-
 } //end namespace OpenMD
 
 

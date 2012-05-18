@@ -44,7 +44,7 @@
 #define IO_EAMATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/AtomType.hpp"
+#include "types/EAMAdapter.hpp"
 #include "io/ForceFieldOptions.hpp"
 
 namespace OpenMD {
@@ -58,7 +58,7 @@ namespace OpenMD {
             
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    void parseEAMParamFile(ForceField& ff, AtomType* atomType, const std::string& potentialParamFile, int iden);
+    void parseEAMParamFile(ForceField& ff, EAMAdapter ea, const std::string& potentialParamFile, int iden);
     void parseEAMArray(std::istream& input, std::vector<RealType>& array, int num);
     ForceFieldOptions& options_;
   };

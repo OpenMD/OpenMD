@@ -40,37 +40,42 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_POLARIZABLEATOMTYPE_HPP
-#define TYPES_POLARIZABLEATOMTYPE_HPP
+#ifndef TYPES_SUTTONCHENADAPTER_HPP
+#define TYPES_SUTTONCHENADAPTER_HPP
 
-#include "types/DirectionalAtomType.hpp"
+#include "utils/GenericData.hpp"
+#include "types/AtomType.hpp"
 
+using namespace std;
 namespace OpenMD {
- 
-  /**
-   * @class PolarizableAtomType 
-   *
-   * Polarizability has some components that are handled by atom types
-   * (i.e. the polarizability of the atom itself) and some that are
-   * handled as force field parameters (i.e. the screening functions
-   * and screening parameters).  This class handles only the immutable
-   * polarizability properties of the atom type itself.
-   */
 
-  class PolarizableAtomType : public DirectionalAtomType {
-    
+  string const SCtypeID = "SC";
+
+  struct SCAtypeParameters {
+    RealType c;
+    RealType m;
+    RealType n;
+    RealType alpha;
+    RealType epsilon;
+  };
+  typedef SimpleTypeData<SCAtypeParameters*> SCAtypeData;   
+  
+  class SuttonChenAdapter {
   public:
+    SuttonChenAdapter(AtomType* AT) { at_ = AT; };
+
+    void makeSuttonChen(RealType c, RealType m, RealType n, RealType alpha, RealType epsilon);
     
-    PolarizableAtomType();
-    virtual ~PolarizableAtomType() { } ;
-    
-    void copyAllData(AtomType* at);
-    void setPolarizability(RealType alpha) { alpha_ = alpha; }
-    RealType getPolarizability() { return alpha_; }
+    bool isSuttonChen();
+    RealType getC();
+    RealType getM();
+    RealType getN();
+    RealType getAlpha();
+    RealType getEpsilon();
 
   private:
-    
-    RealType alpha_;
+    AtomType* at_;
+    SCAtypeParameters*  getSuttonChenParam();
   };
 }
 #endif

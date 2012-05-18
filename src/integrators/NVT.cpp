@@ -182,12 +182,14 @@ namespace OpenMD {
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
 	   integrableObject = mol->nextIntegrableObject(j)) {
-	oldVel_[index] = integrableObject->getVel();
-	oldJi_[index] = integrableObject->getJ();                
 
+	oldVel_[index] = integrableObject->getVel();
+        
+        if (integrableObject->isDirectional()) 
+          oldJi_[index] = integrableObject->getJ();                
+        
 	++index;    
-      }
-           
+      }           
     }
 
     // do the iteration:

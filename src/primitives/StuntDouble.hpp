@@ -929,6 +929,249 @@ namespace OpenMD{
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).zAngle[localIndex_] += angle;
     }       
 
+
+    /**
+     * Returns the previous fluctuating charge of this stuntDouble
+     * @return the fluctuating charge of this stuntDouble
+     */    
+    RealType getPrevFlucQPos() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_];
+    }
+       
+    /**
+     * Returns the current fluctuating charge of this stuntDouble
+     * @return the fluctuating charge of this stuntDouble
+     */    
+    RealType getFlucQPos() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQPos[localIndex_];
+    }
+
+    /**
+     * Returns the fluctuating charge of this stuntDouble in specified snapshot
+     * @return the fluctuating charge of this stuntDouble
+     * @param snapshotNo
+     */    
+    RealType getFlucQPos(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_];
+    }
+
+    /**
+     * Sets  the previous fluctuating charge of this stuntDouble
+     * @param charge  new fluctuating charge 
+     * @see #getflucQPos
+     */         
+    void setPrevFlucQPos(RealType charge) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_] = charge;
+    }
+       
+    /**
+     * Sets  the current fluctuating charge of this stuntDouble
+     * @param charge  new fluctuating charge 
+     */         
+    void setFlucQPos(RealType charge) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQPos[localIndex_] = charge;
+    }
+
+    /**
+     * Sets  the fluctuating charge of this stuntDouble in specified snapshot
+     * @param charge fluctuating charge to be set 
+     * @param snapshotNo 
+     * @see #getflucQPos
+     */         
+    void setFlucQPos(RealType charge, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] = charge;
+    }
+
+    /**
+     * Adds fluctuating charge into the previous fluctuating charge of this stuntDouble
+     * @param charge  new fluctuating charge 
+     * @see #getflucQPos
+     */         
+    void addPrevFlucQPos(RealType charge) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_] += charge;
+    }
+       
+    /**
+     * Adds fluctuating charge into the current fluctuating charge of this stuntDouble
+     * @param charge  new fluctuating charge 
+     */         
+    void addFlucQPos(RealType charge) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQPos[localIndex_] += charge;
+    }
+
+    /**
+     * Adds fluctuating charge into the fluctuating charge of this stuntDouble in specified snapshot
+     * @param value fluctuating charge to be add 
+     * @param snapshotNo 
+     * @see #getflucQPos
+     */         
+    void addflucQPos(RealType charge, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] += charge;
+    }       
+
+
+    /**
+     * Returns the previous charge velocity of this stuntDouble
+     * @return the charge velocity of this stuntDouble
+     */    
+    RealType getPrevFlucQVel() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_];
+    }
+       
+    /**
+     * Returns the current charge velocity of this stuntDouble
+     * @return the charge velocity of this stuntDouble
+     */    
+    RealType getFlucQVel() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQVel[localIndex_];
+    }
+
+    /**
+     * Returns the charge velocity of this stuntDouble in specified snapshot
+     * @return the charge velocity of this stuntDouble
+     * @param snapshotNo
+     */    
+    RealType getFlucQVel(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_];
+    }
+
+    /**
+     * Sets  the previous charge velocity of this stuntDouble
+     * @param cvel  new charge velocity 
+     * @see #getflucQVel
+     */         
+    void setPrevFlucQVel(RealType cvel) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_] = cvel;
+    }
+       
+    /**
+     * Sets  the current charge velocity of this stuntDouble
+     * @param cvel  new charge velocity 
+     */         
+    void setFlucQVel(RealType cvel) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQVel[localIndex_] = cvel;
+    }
+
+    /**
+     * Sets  the charge velocity of this stuntDouble in specified snapshot
+     * @param cvel charge velocity to be set 
+     * @param snapshotNo 
+     * @see #getflucQVel
+     */         
+    void setFlucQVel(RealType cvel, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] = cvel;
+    }
+
+    /**
+     * Adds charge velocity into the previous charge velocity of this stuntDouble
+     * @param cvel  new charge velocity 
+     * @see #getflucQVel
+     */         
+    void addPrevFlucQVel(RealType cvel) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_] += cvel;
+    }
+       
+    /**
+     * Adds charge velocity into the current charge velocity of this stuntDouble
+     * @param cvel  new charge velocity 
+     */         
+    void addFlucQVel(RealType cvel) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQVel[localIndex_] += cvel;
+    }
+
+    /**
+     * Adds charge velocity into the charge velocity of this stuntDouble in specified snapshot
+     * @param value charge velocity to be add 
+     * @param snapshotNo 
+     * @see #getflucQVel
+     */         
+    void addflucQVel(RealType cvel, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] += cvel;
+    }       
+
+
+    /**
+     * Returns the previous charge force of this stuntDouble
+     * @return the charge force of this stuntDouble
+     */    
+    RealType getPrevFlucQFrc() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_];
+    }
+       
+    /**
+     * Returns the current charge force of this stuntDouble
+     * @return the charge force of this stuntDouble
+     */    
+    RealType getFlucQFrc() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQFrc[localIndex_];
+    }
+
+    /**
+     * Returns the charge force of this stuntDouble in specified snapshot
+     * @return the charge force of this stuntDouble
+     * @param snapshotNo
+     */    
+    RealType getFlucQFrc(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_];
+    }
+
+    /**
+     * Sets  the previous charge force of this stuntDouble
+     * @param cfrc  new charge force 
+     * @see #getflucQFrc
+     */         
+    void setPrevFlucQFrc(RealType cfrc) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_] = cfrc;
+    }
+       
+    /**
+     * Sets  the current charge force of this stuntDouble
+     * @param cfrc  new charge force 
+     */         
+    void setFlucQFrc(RealType cfrc) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQFrc[localIndex_] = cfrc;
+    }
+
+    /**
+     * Sets  the charge force of this stuntDouble in specified snapshot
+     * @param cfrc charge force to be set 
+     * @param snapshotNo 
+     * @see #getflucQFrc
+     */         
+    void setFlucQFrc(RealType cfrc, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] = cfrc;
+    }
+
+    /**
+     * Adds charge force into the previous charge force of this stuntDouble
+     * @param cfrc  new charge force 
+     * @see #getflucQFrc
+     */         
+    void addPrevFlucQFrc(RealType cfrc) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_] += cfrc;
+    }
+       
+    /**
+     * Adds charge force into the current charge force of this stuntDouble
+     * @param cfrc  new charge force 
+     */         
+    void addFlucQFrc(RealType cfrc) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQFrc[localIndex_] += cfrc;
+    }
+
+    /**
+     * Adds charge force into the charge force of this stuntDouble in specified snapshot
+     * @param value charge force to be add 
+     * @param snapshotNo 
+     * @see #getflucQFrc
+     */         
+    void addflucQFrc(RealType cfrc, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] += cfrc;
+    }       
+
+
+
+
     /** Set the force of this stuntDouble to zero */
     void zeroForcesAndTorques(); 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,68 +40,18 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_DIRECTIONALATOMTYPE_HPP
-#define TYPES_DIRECTIONALATOMTYPE_HPP
+#ifndef TYPES_GAYBERNEADAPTER_HPP
+#define TYPES_GAYBERNEADAPTER_HPP
 
+#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
-#include "math/SquareMatrix3.hpp"
 
+using namespace std;
 namespace OpenMD {
- 
-  /**
-   * @class DirectionalAtomType 
-   *
-   * DirectionalAtomType is what OpenMD looks to for unchanging data
-   * about a directional atoms. 
-   */
-  class DirectionalAtomType : public AtomType {
-    
-  public:
-    
-    DirectionalAtomType();
 
-    void copyAllData(AtomType* at);
+  string const GBtypeID = "GB";
 
-    virtual ~DirectionalAtomType() { } ;
-
-    Mat3x3d getI() {return I;}
-    
-    void    setI(Mat3x3d theI) {I = theI;}
-    
-    RotMat3x3d getElectroBodyFrame() {
-      return electroBodyFrame_;
-    }
-    
-    void setElectroBodyFrame(const RotMat3x3d& electroBodyFrame) {
-      electroBodyFrame_ =electroBodyFrame;
-    }
-    
-    void setDipole();
-    void setSplitDipole();
-    void setQuadrupole();
-    void setGayBerne();
-    void setSticky();
-    void setStickyPower();
-    void setShape();   
-    
-  private:
-    
-    Mat3x3d I;
-    RotMat3x3d electroBodyFrame_;
-  };
-  
-  
-  struct StickyParam {
-    RealType w0;
-    RealType v0;
-    RealType v0p;
-    RealType rl;
-    RealType ru;
-    RealType rlp;
-    RealType rup;
-  };
-  
-  struct GayBerneParam{
+  struct GBAtypeParameters{
     RealType GB_d;
     RealType GB_l;
     RealType GB_eps_X;
@@ -109,12 +59,25 @@ namespace OpenMD {
     RealType GB_eps_E;
     RealType GB_dw;
   };
+  typedef SimpleTypeData<GBAtypeParameters*> GBAtypeData; 
   
-  typedef SimpleTypeData<StickyParam> StickyParamGenericData;
-  
-  typedef SimpleTypeData<GayBerneParam> GayBerneParamGenericData;
-  
-  typedef SimpleTypeData<Vector3d> Vector3dGenericData;
-  
+  class GayBerneAdapter {
+  public:
+    GayBerneAdapter(AtomType* AT) { at_ = AT; };
+
+    void makeGayBerne(RealType d, RealType l, RealType eps_X, RealType eps_S, RealType eps_E, RealType dw);
+    
+    bool isGayBerne();
+    RealType getD();
+    RealType getL();
+    RealType getEpsX();
+    RealType getEpsS();
+    RealType getEpsE();
+    RealType getDw();
+
+  private:
+    AtomType* at_;
+    GBAtypeParameters*  getGayBerneParam();
+  };
 }
 #endif

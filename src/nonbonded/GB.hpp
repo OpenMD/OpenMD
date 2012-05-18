@@ -44,7 +44,6 @@
 #define NONBONDED_GB_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "types/DirectionalAtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 
@@ -75,16 +74,6 @@ namespace OpenMD {
     
   private:
     void initialize();
-    GayBerneParam  getGayBerneParam(AtomType* atomType);
-    RealType getD(AtomType* atomType);
-    RealType getL(AtomType* atomType);
-    RealType getEpsX(AtomType* atomType);
-    RealType getEpsS(AtomType* atomType);
-    RealType getEpsE(AtomType* atomType);
-    RealType getDw(AtomType* atomType);
-    LJParam  getLJParam(AtomType* atomType);
-    RealType getLJSigma(AtomType* atomType);
-    RealType getLJEpsilon(AtomType* atomType);
 
     bool initialized_;
     string name_;

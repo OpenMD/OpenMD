@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,58 +39,37 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+ 
+#ifndef TYPES_DIRECTIONALADAPTER_HPP
+#define TYPES_DIRECTIONALADAPTER_HPP
 
-#include <cstdio> 
-#include "types/DirectionalAtomType.hpp"
-#include "utils/simError.h"
+#include "utils/GenericData.hpp"
+#include "types/AtomType.hpp"
+#include "math/SquareMatrix3.hpp"
+
+using namespace std;
 namespace OpenMD {
+
+  string const DirectionalTypeID = "Directional";
+
+  struct DirectionalAtypeParameters {
+    Mat3x3d I;
+  };
+  typedef SimpleTypeData<DirectionalAtypeParameters*> DirectionalAtypeData;   
   
-  DirectionalAtomType::DirectionalAtomType() : AtomType() { 
-    myResponsibilities_["is_Directional"] = true; 
-    atp.is_Directional = 1; 
+  class DirectionalAdapter {
+  public:
+    DirectionalAdapter(AtomType* AT) { at_ = AT; };
 
-    myResponsibilities_["Dipole"] = false;
-    myResponsibilities_["SplitDipole"] = false;
-    myResponsibilities_["Quadrupole"] = false;
-    myResponsibilities_["GayBerne"] = false;
-    myResponsibilities_["Sticky"] = false;
-    myResponsibilities_["StickyPower"] = false;
-    myResponsibilities_["Shape"] = false;
+    void makeDirectional(Mat3x3d I);
+    
+    bool isDirectional();
 
-  }   
-  
-  void DirectionalAtomType::copyAllData(AtomType* at) {
-    AtomType::copyAllData(at);
-    myResponsibilities_["is_Directional"] = true; 
-    atp.is_Directional = 1; 
-  }
+    Mat3x3d getI();
 
-  void DirectionalAtomType::setDipole() { 
-    myResponsibilities_["is_Dipole"] = true;
-    atp.is_Dipole = 1; 
-  }
-  void DirectionalAtomType::setSplitDipole() { 
-    myResponsibilities_["is_SplitDipole"] = true;
-    atp.is_SplitDipole = 1; 
-  }
-  void DirectionalAtomType::setQuadrupole() { 
-    myResponsibilities_["is_Quadrupole"] = true;
-    atp.is_Quadrupole = 1; 
-  }
-  void DirectionalAtomType::setGayBerne() { 
-    myResponsibilities_["is_GayBerne"] = true;
-    atp.is_GayBerne = 1; 
-  }
-  void DirectionalAtomType::setSticky() { 
-    myResponsibilities_["is_Sticky"] = true;
-    atp.is_Sticky = 1; 
-  }
-  void DirectionalAtomType::setStickyPower() { 
-    myResponsibilities_["is_StickyPower"] = true;
-    atp.is_StickyPower = 1; 
-  }
-  void DirectionalAtomType::setShape() { 
-    myResponsibilities_["is_Shape"] = true;
-    atp.is_Shape = 1; 
-  }
-} //end namespace OpenMD
+  private:
+    AtomType* at_;
+    DirectionalAtypeParameters*  getDirectionalParam();
+  };
+}
+#endif

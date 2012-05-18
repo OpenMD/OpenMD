@@ -51,6 +51,7 @@
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
+#include "types/MultipoleAdapter.hpp"
 
 namespace OpenMD {
 
@@ -364,15 +365,12 @@ namespace OpenMD {
           }
         }
         
-        if (atom->isDipole() ) {
+        MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
+        if (ma.isDipole() ) {
           Vector3d u_i = atom->getElectroFrame().getColumn(2);
-          GenericData* data = dynamic_cast<DirectionalAtomType*>(atom->getAtomType())->getPropertyByName("Dipole");
-          if (data != NULL) {
-            moment = (dynamic_cast<DoubleGenericData*>(data))->getData();
-            
-            moment *= debyeToCm;
-            dipoleVector += u_i * moment;
-          }
+          moment = ma.getDipoleMoment();
+          moment *= debyeToCm;
+          dipoleVector += u_i * moment;
         }
       }
     }

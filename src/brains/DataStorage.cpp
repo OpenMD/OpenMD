@@ -49,7 +49,7 @@
  */
 
 #include "brains/DataStorage.hpp"
-
+using namespace std;
 namespace OpenMD {
 
   DataStorage::DataStorage() : size_(0), storageLayout_(0){
@@ -65,72 +65,87 @@ namespace OpenMD {
 
     if (storageLayout_ & dslPosition && position.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;
+      cerr << "size does not match"<< endl;
     }
 
     if (storageLayout_ & dslVelocity && velocity.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslAmat && aMat.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslAngularMomentum && angularMomentum.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslElectroFrame && electroFrame.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslZAngle && zAngle.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslForce && force.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslTorque && torque.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslParticlePot && particlePot.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslDensity && density.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslFunctional && functional.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslFunctionalDerivative && functionalDerivative.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslElectricField && electricField.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslSkippedCharge && skippedCharge.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFlucQPosition && flucQPos.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFlucQVelocity && flucQVel.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFlucQForce && flucQFrc.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
     }
     
     return size_;
@@ -195,6 +210,18 @@ namespace OpenMD {
       internalResize(skippedCharge, newSize);
     }
 
+    if (storageLayout_ & dslFlucQPosition) {
+      internalResize(flucQPos, newSize);
+    }
+
+    if (storageLayout_ & dslFlucQVelocity) {
+      internalResize(flucQVel, newSize);
+    }
+
+    if (storageLayout_ & dslFlucQForce) {
+      internalResize(flucQFrc, newSize);
+    }
+
     size_ = newSize;
   }
 
@@ -255,6 +282,17 @@ namespace OpenMD {
       skippedCharge.reserve(size);
     }
 
+    if (storageLayout_ & dslFlucQPosition) {
+      flucQPos.reserve(size);
+    }
+
+    if (storageLayout_ & dslFlucQVelocity) {
+      flucQVel.reserve(size);
+    }
+
+    if (storageLayout_ & dslFlucQForce) {
+      flucQFrc.reserve(size);
+    }
   }
 
   void DataStorage::copy(int source, int num, int target) {
@@ -316,6 +354,17 @@ namespace OpenMD {
 
     if (storageLayout_ & dslSkippedCharge) {
       internalCopy(skippedCharge, source, num, target);
+    }
+
+    if (storageLayout_ & dslFlucQPosition) {
+      internalCopy(flucQPos, source, num, target);
+    }
+
+    if (storageLayout_ & dslFlucQVelocity) {
+      internalCopy(flucQVel, source, num, target);
+    }
+    if (storageLayout_ & dslFlucQForce) {
+      internalCopy(flucQFrc, source, num, target);
     }
   }
 
@@ -385,6 +434,18 @@ namespace OpenMD {
 
     case dslSkippedCharge:
       return internalGetArrayPointer(skippedCharge);
+      break;
+
+    case dslFlucQPosition:
+      return internalGetArrayPointer(flucQPos);
+      break;
+
+    case dslFlucQVelocity:
+      return internalGetArrayPointer(flucQVel);
+      break;
+           
+    case dslFlucQForce:
+      return internalGetArrayPointer(flucQFrc);
       break;
            
     default:
@@ -496,6 +557,15 @@ namespace OpenMD {
       bytes += sizeof(Vector3d);
     }
     if (layout & dslSkippedCharge) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFlucQPosition) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFlucQVelocity) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFlucQForce) {
       bytes += sizeof(RealType);
     }
 

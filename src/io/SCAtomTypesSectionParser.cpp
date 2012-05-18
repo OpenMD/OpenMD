@@ -45,7 +45,7 @@
  */
 
 #include "io/SCAtomTypesSectionParser.hpp"
-#include "types/AtomType.hpp"
+#include "types/SuttonChenAdapter.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
@@ -71,30 +71,25 @@ namespace OpenMD {
       AtomType* atomType = ff.getAtomType(atomTypeName);
       
       if (atomType != NULL) {
-        SCParam scParam;                        
-        scParam.epsilon = tokenizer.nextTokenAsDouble();
-        scParam.c = tokenizer.nextTokenAsDouble();
-        scParam.m = tokenizer.nextTokenAsDouble();
-        scParam.n = tokenizer.nextTokenAsDouble();
-        scParam.alpha = tokenizer.nextTokenAsDouble();
-        
-       
-	scParam.epsilon *= options_.getMetallicEnergyUnitScaling();
-	scParam.alpha   *= options_.getDistanceUnitScaling();
-  
+        SuttonChenAdapter sca = SuttonChenAdapter(atomType);
 
-        atomType->addProperty(new SCParamGenericData("SC", scParam));
-        atomType->setSC();
-      }else {
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        RealType c = tokenizer.nextTokenAsDouble();
+        RealType m = tokenizer.nextTokenAsDouble();
+        RealType n = tokenizer.nextTokenAsDouble();
+        RealType alpha = tokenizer.nextTokenAsDouble();
+
+	epsilon *= options_.getMetallicEnergyUnitScaling();
+	alpha   *= options_.getDistanceUnitScaling();
+
+        sca.makeSuttonChen(c, m, n, alpha, epsilon);
+
+      } else {
         sprintf(painCave.errMsg, "SCAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();    
-      }
-      
-    }    
-    
-    
-  }
-  
+      }      
+    }        
+  }  
 } //end namespace OpenMD
 

@@ -119,6 +119,17 @@ namespace OpenMD{
     std::vector<GenericData*> getProperties();
 
     /**
+     * Checks if property is in this PropertyMap
+     *
+     * @param propName name of property
+     *
+     * @return boolean
+     *
+     * @see #getProperties, #getPropertyByName
+     */      
+    bool hasProperty(const std::string& propName);
+
+    /**
      * Returns property 
      *
      * @param propName name of property

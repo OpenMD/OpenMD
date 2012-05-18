@@ -54,96 +54,11 @@ namespace OpenMD {
   EAM::EAM() : name_("EAM"), initialized_(false), forceField_(NULL), 
                mixMeth_(eamJohnson), eamRcut_(0.0), haveCutoffRadius_(false) {}
   
-  EAMParam EAM::getEAMParam(AtomType* atomType) {
-    
-    // Do sanity checking on the AtomType we were passed before
-    // building any data structures:
-    if (!atomType->isEAM()) {
-      sprintf( painCave.errMsg,
-               "EAM::getEAMParam was passed an atomType (%s) that does not\n"
-               "\tappear to be an embedded atom method (EAM) atom.\n",
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    GenericData* data = atomType->getPropertyByName("EAM");
-    if (data == NULL) {
-      sprintf( painCave.errMsg, "EAM::getEAMParam could not find EAM\n"
-               "\tparameters for atomType %s.\n", 
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
-    if (eamData == NULL) {
-      sprintf( painCave.errMsg,
-               "EAM::getEAMParam could not convert GenericData to EAMParam for\n"
-               "\tatom type %s\n", atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return eamData->getData();
-  }
-
-  CubicSpline* EAM::getZ(AtomType* atomType) {    
-    EAMParam eamParam = getEAMParam(atomType);
-    int nr = eamParam.nr;
-    RealType dr = eamParam.dr;
-    vector<RealType> rvals;
-    
-    for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
-      
-    CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rvals, eamParam.Z);
-    return cs;
-  }
-
-  RealType EAM::getRcut(AtomType* atomType) {    
-    EAMParam eamParam = getEAMParam(atomType);
-    return eamParam.rcut;
-  }
-
-  CubicSpline* EAM::getRho(AtomType* atomType) {    
-    EAMParam eamParam = getEAMParam(atomType);
-    int nr = eamParam.nr;
-    RealType dr = eamParam.dr;
-    vector<RealType> rvals;
-    
-    for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
-      
-    CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rvals, eamParam.rho);
-    return cs;
-  }
-
-  CubicSpline* EAM::getF(AtomType* atomType) {    
-    EAMParam eamParam = getEAMParam(atomType);
-    int nrho = eamParam.nrho;
-    RealType drho = eamParam.drho;
-    vector<RealType> rhovals;
-    vector<RealType> scaledF;
-    
-    for (int i = 0; i < nrho; i++) {
-      rhovals.push_back(RealType(i) * drho);
-      scaledF.push_back( eamParam.F[i] * 23.06054 );
-    }
-      
-    CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rhovals, scaledF);
-    return cs;
-  }
-  
-  CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {    
-    EAMParam eamParam1 = getEAMParam(atomType1);
-    EAMParam eamParam2 = getEAMParam(atomType2);
-    CubicSpline* z1 = getZ(atomType1);
-    CubicSpline* z2 = getZ(atomType2);
+  CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {   
+    EAMAdapter ea1 = EAMAdapter(atomType1);
+    EAMAdapter ea2 = EAMAdapter(atomType2);
+    CubicSpline* z1 = ea1.getZ();
+    CubicSpline* z2 = ea2.getZ();
 
     // make the r grid:
 
@@ -151,15 +66,15 @@ namespace OpenMD {
     // we need phi out to the largest value we'll encounter in the radial space;
     
     RealType rmax = 0.0;
-    rmax = max(rmax, eamParam1.rcut);
-    rmax = max(rmax, eamParam1.nr * eamParam1.dr);
+    rmax = max(rmax, ea1.getRcut());
+    rmax = max(rmax, ea1.getNr() * ea1.getDr());
 
-    rmax = max(rmax, eamParam2.rcut);
-    rmax = max(rmax, eamParam2.nr * eamParam2.dr);
+    rmax = max(rmax, ea2.getRcut());
+    rmax = max(rmax, ea2.getNr() * ea2.getDr());
 
     // use the smallest dr (finest grid) to build our grid:
 
-    RealType dr = min(eamParam1.dr, eamParam2.dr); 
+    RealType dr = min(ea1.getDr(), ea2.getDr()); 
 
     int nr = int(rmax/dr + 0.5);
 
@@ -183,8 +98,8 @@ namespace OpenMD {
       // means that our phi grid goes out beyond the cutoff of the
       // pair potential
 
-      zi = r <= eamParam1.rcut ? z1->getValueAt(r) : 0.0;
-      zj = r <= eamParam2.rcut ? z2->getValueAt(r) : 0.0;
+      zi = r <= ea1.getRcut() ? z1->getValueAt(r) : 0.0;
+      zj = r <= ea2.getRcut() ? z2->getValueAt(r) : 0.0;
 
       phi = 331.999296 * (zi * zj) / r;
 
@@ -278,22 +193,22 @@ namespace OpenMD {
 
   void EAM::addType(AtomType* atomType){
 
+    EAMAdapter ea = EAMAdapter(atomType);
     EAMAtomData eamAtomData;
-    
-    eamAtomData.rho = getRho(atomType);
-    eamAtomData.F = getF(atomType);
-    eamAtomData.Z = getZ(atomType);
-    eamAtomData.rcut = getRcut(atomType);
+
+    eamAtomData.rho = ea.getRho();
+    eamAtomData.F = ea.getF();
+    eamAtomData.Z = ea.getZ();
+    eamAtomData.rcut = ea.getRcut();
 
     // add it to the map:
-    AtomTypeProperties atp = atomType->getATP();    
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = EAMlist.insert( pair<int, AtomType*>(atp.ident, atomType) );
+    ret = EAMlist.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "EAM already had a previous entry with ident %d\n",
-               atp.ident);
+               atomType->getIdent());
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         

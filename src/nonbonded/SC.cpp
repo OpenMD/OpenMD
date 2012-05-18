@@ -54,78 +54,27 @@ namespace OpenMD {
   SC::SC() : name_("SC"), initialized_(false), forceField_(NULL), 
              scRcut_(0.0), np_(3000) {}
   
-  SCParam SC::getSCParam(AtomType* atomType) {
-    
-    // Do sanity checking on the AtomType we were passed before
-    // building any data structures:
-    if (!atomType->isSC()) {
-      sprintf( painCave.errMsg,
-               "SC::getSCParam was passed an atomType (%s) that does not\n"
-               "\tappear to be a Sutton-Chen (SC) atom.\n",
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    GenericData* data = atomType->getPropertyByName("SC");
-    if (data == NULL) {
-      sprintf( painCave.errMsg, "SC::getSCParam could not find SC\n"
-               "\tparameters for atomType %s.\n", 
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    SCParamGenericData* scData = dynamic_cast<SCParamGenericData*>(data);
-    if (scData == NULL) {
-      sprintf( painCave.errMsg,
-               "SC::getSCParam could not convert GenericData to SCParamGenericData\n"
-               "\tfor atom type %s\n", atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return scData->getData();
-  }
-
-  RealType SC::getC(AtomType* atomType) {    
-    SCParam scParam = getSCParam(atomType);
-    return scParam.c;
-  }
-
-  RealType SC::getM(AtomType* atomType) {    
-    SCParam scParam = getSCParam(atomType);
-    return scParam.m;
-  }
-
   RealType SC::getM(AtomType* atomType1, AtomType* atomType2) {    
-    RealType m1 = getM(atomType1);
-    RealType m2 = getM(atomType2);
+    SuttonChenAdapter sca1 = SuttonChenAdapter(atomType1);
+    SuttonChenAdapter sca2 = SuttonChenAdapter(atomType2);
+    RealType m1 = sca1.getM();
+    RealType m2 = sca2.getM();
     return 0.5 * (m1 + m2);
   }
 
-  RealType SC::getN(AtomType* atomType) {    
-    SCParam scParam = getSCParam(atomType);
-    return scParam.n;
-  }
-
   RealType SC::getN(AtomType* atomType1, AtomType* atomType2) {    
-    RealType n1 = getN(atomType1);
-    RealType n2 = getN(atomType2);
+    SuttonChenAdapter sca1 = SuttonChenAdapter(atomType1);
+    SuttonChenAdapter sca2 = SuttonChenAdapter(atomType2);
+    RealType n1 = sca1.getN();
+    RealType n2 = sca2.getN();
     return 0.5 * (n1 + n2);
   }
 
-  RealType SC::getAlpha(AtomType* atomType) {    
-    SCParam scParam = getSCParam(atomType);
-    return scParam.alpha;
-  }
-
   RealType SC::getAlpha(AtomType* atomType1, AtomType* atomType2) {    
-    RealType alpha1 = getAlpha(atomType1);
-    RealType alpha2 = getAlpha(atomType2);
+    SuttonChenAdapter sca1 = SuttonChenAdapter(atomType1);
+    SuttonChenAdapter sca2 = SuttonChenAdapter(atomType2);
+    RealType alpha1 = sca1.getAlpha();
+    RealType alpha2 = sca2.getAlpha();
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     std::string DistanceMix = fopts.getDistanceMixingRule();
@@ -137,14 +86,11 @@ namespace OpenMD {
       return 0.5 * (alpha1 + alpha2);
   }
 
-  RealType SC::getEpsilon(AtomType* atomType) {    
-    SCParam scParam = getSCParam(atomType);
-    return scParam.epsilon;
-  }
-
-  RealType SC::getEpsilon(AtomType* atomType1, AtomType* atomType2) {    
-    RealType epsilon1 = getEpsilon(atomType1);
-    RealType epsilon2 = getEpsilon(atomType2);
+  RealType SC::getEpsilon(AtomType* atomType1, AtomType* atomType2) {   
+    SuttonChenAdapter sca1 = SuttonChenAdapter(atomType1);
+    SuttonChenAdapter sca2 = SuttonChenAdapter(atomType2);
+    RealType epsilon1 = sca1.getEpsilon();
+    RealType epsilon2 = sca2.getEpsilon();
     return sqrt(epsilon1 * epsilon2);
   }
 
@@ -156,7 +102,8 @@ namespace OpenMD {
 
     for (at = atomTypes->beginType(i); at != NULL; 
          at = atomTypes->nextType(i)) {
-      if (at->isSC())
+      SuttonChenAdapter sca = SuttonChenAdapter(at);
+      if (sca.isSuttonChen())
         addType(at);
     }    
     initialized_ = true;
@@ -166,24 +113,24 @@ namespace OpenMD {
 
   void SC::addType(AtomType* atomType){
 
+    SuttonChenAdapter sca = SuttonChenAdapter(atomType);
     SCAtomData scAtomData;
     
-    scAtomData.c = getC(atomType);
-    scAtomData.m = getM(atomType);
-    scAtomData.n = getN(atomType);
-    scAtomData.alpha = getAlpha(atomType);
-    scAtomData.epsilon = getEpsilon(atomType);
+    scAtomData.c = sca.getC();
+    scAtomData.m = sca.getM();
+    scAtomData.n = sca.getN();
+    scAtomData.alpha = sca.getAlpha();
+    scAtomData.epsilon = sca.getEpsilon();
     scAtomData.rCut = 2.0 * scAtomData.alpha;
 
     // add it to the map:
-    AtomTypeProperties atp = atomType->getATP();    
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = SClist.insert( pair<int, AtomType*>(atp.ident, atomType) );
+    ret = SClist.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "SC already had a previous entry with ident %d\n",
-               atp.ident);
+               atomType->getIdent() );
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         

@@ -44,7 +44,7 @@
 #define NONBONDED_STICKY_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/StickyAdapter.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
@@ -78,8 +78,6 @@ namespace OpenMD {
     
   private:
     void initialize();
-    StickyParam  getStickyParam(AtomType* atomType);
-
     bool initialized_;
     map<int, AtomType*> StickyMap;
     map<pair<AtomType*, AtomType*>, StickyInteractionData> MixingMap;

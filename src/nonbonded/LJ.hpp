@@ -44,7 +44,6 @@
 #define NONBONDED_LJ_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/Vector3.hpp"
 
@@ -65,15 +64,12 @@ namespace OpenMD {
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon);
-    RealType getSigma(AtomType* atomType);
-    RealType getEpsilon(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);    
             
   private:
     void initialize();
-    LJParam  getLJParam(AtomType* atomType);
     RealType getSigma(AtomType* atomType1, AtomType* atomType2);
     RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
     

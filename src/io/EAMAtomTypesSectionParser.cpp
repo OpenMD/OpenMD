@@ -42,26 +42,31 @@
  
 #include "io/EAMAtomTypesSectionParser.hpp"
 #include "types/AtomType.hpp"
+#include "types/EAMAdapter.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
+
+using namespace std;
 namespace OpenMD {
 
   EAMAtomTypesSectionParser::EAMAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("EAMAtomTypes");
   }
 
-  void EAMAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void EAMAtomTypesSectionParser::parseLine(ForceField& ff,
+                                            const string& line, int lineNo){
 
     StringTokenizer tokenizer(line);
 
     if (tokenizer.countTokens() >= 2) {
-      std::string atomTypeName = tokenizer.nextToken();
-      std::string potentialParamFile = tokenizer.nextToken();
+      string atomTypeName = tokenizer.nextToken();
+      string potentialParamFile = tokenizer.nextToken();
 
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-      if (atomType != NULL) {
-	atomType->setEAM();                            
-	parseEAMParamFile(ff, atomType, potentialParamFile, atomType->getIdent());                                                    
+      AtomType* atomType = ff.getAtomType(atomTypeName);      
+      if (atomType != NULL) {        
+
+        EAMAdapter ea = EAMAdapter(atomType);
+        parseEAMParamFile(ff, ea, potentialParamFile, atomType->getIdent());                                                    
       } else {
 	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Can not find AtomType [%s]\n",
                 atomTypeName.c_str());
@@ -78,23 +83,36 @@ namespace OpenMD {
             
   }
 
-  void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, AtomType* atomType, 
-						    const std::string& potentialParamFile, int ident) {
+  void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, 
+                                                    EAMAdapter ea, 
+						    const string& potentialParamFile, 
+                                                    int ident) {
 
     ifstrstream* ppfStream = ff.openForceFieldFile(potentialParamFile);
     const int bufferSize = 65535;
     char buffer[bufferSize];
-    std::string line;
+    string line;
 
-    //skip first line
+    // skip first line
     ppfStream->getline(buffer, bufferSize);
 
-
-    //The Second line contains atomic number, atomic mass, a lattice constant and lattic type
+    // The second line contains atomic number, atomic mass, a lattice
+    // constant and lattice type
     int junk;
     RealType mass;
     RealType latticeConstant; 
-    std::string lattice;
+    string lattice;
+
+    // The third line is nrho, drho, nr, dr and rcut 
+    int nrho;
+    RealType drho;
+    int nr;
+    RealType dr;
+    RealType rcut;
+    vector<RealType> F;
+    vector<RealType> Z;
+    vector<RealType> rho;
+      
     if (ppfStream->getline(buffer, bufferSize)) {       
       StringTokenizer tokenizer1(buffer);
         
@@ -109,40 +127,38 @@ namespace OpenMD {
 	simError();  
       }
     }
-    
-    // The third line is nrho, drho, nr, dr and rcut
-    EAMParam eamParam;
-    eamParam.latticeConstant = latticeConstant;
+  
     
     if (ppfStream->getline(buffer, bufferSize)) {
       StringTokenizer tokenizer2(buffer);
-
+      
       if (tokenizer2.countTokens() >= 5){
-	eamParam.nrho = tokenizer2.nextTokenAsInt();
-	eamParam.drho = tokenizer2.nextTokenAsDouble();
-	eamParam.nr = tokenizer2.nextTokenAsInt();
-	eamParam.dr = tokenizer2.nextTokenAsDouble();
-	eamParam.rcut = tokenizer2.nextTokenAsDouble();
+	nrho = tokenizer2.nextTokenAsInt();
+	drho = tokenizer2.nextTokenAsDouble();
+        nr = tokenizer2.nextTokenAsInt();
+	dr = tokenizer2.nextTokenAsDouble();
+	rcut = tokenizer2.nextTokenAsDouble();
       }else {
-
+        
 	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
 	painCave.isFatal = 1;
 	simError();            
-
+        
       }
     } 
     
-    parseEAMArray(*ppfStream, eamParam.F,   eamParam.nrho);    
-    parseEAMArray(*ppfStream, eamParam.Z,   eamParam.nr);
-    parseEAMArray(*ppfStream, eamParam.rho, eamParam.nr);
+    parseEAMArray(*ppfStream, F,   nrho);    
+    parseEAMArray(*ppfStream, Z,   nr);
+    parseEAMArray(*ppfStream, rho, nr);
     
-    atomType->addProperty(new EAMParamGenericData("EAM", eamParam));
+    ea.makeEAM(latticeConstant, nrho, drho, nr, dr, rcut, Z, rho, F);
 
     delete ppfStream;
   }
 
-  void EAMAtomTypesSectionParser::parseEAMArray(std::istream& input, 
-						std::vector<RealType>& array, int num) {
+  void EAMAtomTypesSectionParser::parseEAMArray(istream& input, 
+						vector<RealType>& array, 
+                                                int num) {
     
     const int dataPerLine = 5;
     if (num % dataPerLine != 0) {
@@ -153,7 +169,7 @@ namespace OpenMD {
     
     const int bufferSize = 65535;
     char buffer[bufferSize];
-    std::string line;
+    string line;
     int lineCount = 0;
 
     while(lineCount < nlinesToRead && input.getline(buffer, bufferSize) ){

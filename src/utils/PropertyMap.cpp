@@ -108,6 +108,17 @@ namespace OpenMD {
     return properties;
   }
 
+  bool PropertyMap::hasProperty(const std::string& propName){
+    std::map<std::string, GenericData*>::iterator iter;
+
+    iter = propMap_.find(propName);
+
+    if (iter != propMap_.end())
+      return true;
+    else
+      return false;
+  }
+
   GenericData* PropertyMap::getPropertyByName(const std::string& propName){
     std::map<std::string, GenericData*>::iterator iter;
 

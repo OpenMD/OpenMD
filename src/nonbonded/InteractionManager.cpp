@@ -85,14 +85,13 @@ namespace OpenMD {
          atype1 = atomTypes->nextType(i1)) {
       
       // add it to the map:
-      AtomTypeProperties atp = atype1->getATP();    
       
       pair<map<int,AtomType*>::iterator,bool> ret;    
-      ret = typeMap_.insert( pair<int, AtomType*>(atp.ident, atype1) );
+      ret = typeMap_.insert( pair<int, AtomType*>(atype1->getIdent(), atype1) );
       if (ret.second == false) {
         sprintf( painCave.errMsg,
                  "InteractionManager already had a previous entry with ident %d\n",
-                 atp.ident);
+                 atype1->getIdent());
         painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;
         simError();                 

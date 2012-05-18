@@ -105,12 +105,12 @@ namespace OpenMD {
     if (at->isEAM()) {
       GenericData* data = at->getPropertyByName("EAM");
       if (data != NULL) {
-	EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
+	EAMAtypeData* eamData = dynamic_cast<EAMAtypeData*>(data);
 
 	if (eamData != NULL) {
 
-	  EAMParam& eamParam = eamData->getData();
-	  rcut =  eamParam.rcut;
+	  EAMAtypeParameters* eamParam = eamData->getData();
+	  rcut =  eamParam->rcut;
 	} else {
 	  sprintf( painCave.errMsg,
 		   "Can not cast GenericData to EAMParam\n");

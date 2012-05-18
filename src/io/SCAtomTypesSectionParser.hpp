@@ -48,7 +48,6 @@
 #define IO_SCATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/AtomType.hpp"
 #include "io/ForceFieldOptions.hpp"
 
 namespace OpenMD {

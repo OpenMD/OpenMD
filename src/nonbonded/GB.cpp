@@ -46,6 +46,8 @@
 #include <cmath>
 #include "nonbonded/GB.hpp"
 #include "utils/simError.h"
+#include "types/LennardJonesAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -87,91 +89,7 @@ namespace OpenMD {
 
 
   GB::GB() : name_("GB"), initialized_(false), mu_(2.0), nu_(1.0), forceField_(NULL) {}
-  
-  GayBerneParam GB::getGayBerneParam(AtomType* atomType) {
     
-    // Do sanity checking on the AtomType we were passed before
-    // building any data structures:
-    if (!atomType->isGayBerne()) {
-      sprintf( painCave.errMsg,
-               "GB::getGayBerneParam was passed an atomType (%s) that does\n"
-               "\tnot appear to be a Gay-Berne atom.\n",
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    DirectionalAtomType* daType = dynamic_cast<DirectionalAtomType*>(atomType);
-    GenericData* data = daType->getPropertyByName("GayBerne");
-    if (data == NULL) {
-      sprintf( painCave.errMsg, "GB::getGayBerneParam could not find\n"
-               "\tGay-Berne parameters for atomType %s.\n", 
-               daType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    GayBerneParamGenericData* gbData = dynamic_cast<GayBerneParamGenericData*>(data);
-    if (gbData == NULL) {
-      sprintf( painCave.errMsg,
-               "GB::getGayBerneParam could not convert GenericData to\n"
-               "\tGayBerneParamGenericData for atom type %s\n", 
-               daType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return gbData->getData();
-  }
-
-  LJParam GB::getLJParam(AtomType* atomType) {
-    
-    // Do sanity checking on the AtomType we were passed before
-    // building any data structures:
-    if (!atomType->isLennardJones()) {
-      sprintf( painCave.errMsg,
-               "GB::getLJParam was passed an atomType (%s) that does not\n"
-               "\tappear to be a Lennard-Jones atom.\n",
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    GenericData* data = atomType->getPropertyByName("LennardJones");
-    if (data == NULL) {
-      sprintf( painCave.errMsg, "GB::getLJParam could not find Lennard-Jones\n"
-               "\tparameters for atomType %s.\n", atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-    if (ljData == NULL) {
-      sprintf( painCave.errMsg,
-               "GB::getLJParam could not convert GenericData to LJParam for\n"
-               "\tatom type %s\n", atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return ljData->getData();
-  }
-  
-  RealType GB::getLJEpsilon(AtomType* atomType) {    
-    LJParam ljParam = getLJParam(atomType);
-    return ljParam.epsilon;
-  }
-  RealType GB::getLJSigma(AtomType* atomType) {    
-    LJParam ljParam = getLJParam(atomType);
-    return ljParam.sigma;
-  }
-  
   void GB::initialize() {    
     
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
@@ -187,7 +105,10 @@ namespace OpenMD {
     for (at = atomTypes->beginType(i); at != NULL;
          at = atomTypes->nextType(i)) {
       
-      if (at->isGayBerne() || at->isLennardJones())
+      LennardJonesAdapter lja = LennardJonesAdapter(at);
+      GayBerneAdapter gba = GayBerneAdapter(at);
+
+      if (gba.isGayBerne() || lja.isLennardJones())
         addType(at);
     }
    
@@ -196,33 +117,33 @@ namespace OpenMD {
       
   void GB::addType(AtomType* atomType){
     // add it to the map:
-    AtomTypeProperties atp = atomType->getATP();    
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = GBMap.insert( pair<int, AtomType*>(atp.ident, atomType) );
+    ret = GBMap.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "GB already had a previous entry with ident %d\n",
-               atp.ident);
+               atomType->getIdent() );
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
     }
     
     RealType d1, l1, eX1, eS1, eE1, dw1;
-    
-    if (atomType->isGayBerne()) {
-      GayBerneParam gb1 = getGayBerneParam(atomType);
-      d1 = gb1.GB_d;
-      l1 = gb1.GB_l;
-      eX1 = gb1.GB_eps_X;
-      eS1 = gb1.GB_eps_S;
-      eE1 = gb1.GB_eps_E;
-      dw1 = gb1.GB_dw;
-    } else if (atomType->isLennardJones()) {
-      d1 = getLJSigma(atomType) / sqrt(2.0);
+        
+    LennardJonesAdapter lja1 = LennardJonesAdapter(atomType);
+    GayBerneAdapter gba1 = GayBerneAdapter(atomType);
+    if (gba1.isGayBerne()) {
+      d1 = gba1.getD();
+      l1 = gba1.getL();
+      eX1 = gba1.getEpsX();
+      eS1 = gba1.getEpsS();
+      eE1 = gba1.getEpsE();
+      dw1 = gba1.getDw();
+    } else if (lja1.isLennardJones()) {
+      d1 = lja1.getSigma() / sqrt(2.0);
       l1 = d1;
-      eX1 = getLJEpsilon(atomType);
+      eX1 = lja1.getEpsilon();
       eS1 = eX1;
       eE1 = eX1;
       dw1 = 1.0;      
@@ -243,21 +164,21 @@ namespace OpenMD {
     for( it = GBMap.begin(); it != GBMap.end(); ++it) {
       
       AtomType* atype2 = (*it).second;
-      
+      LennardJonesAdapter lja2 = LennardJonesAdapter(atype2);
+      GayBerneAdapter gba2 = GayBerneAdapter(atype2);
       RealType d2, l2, eX2, eS2, eE2, dw2;
       
-      if (atype2->isGayBerne()) {
-        GayBerneParam gb2 = getGayBerneParam(atype2);
-        d2 = gb2.GB_d;
-        l2 = gb2.GB_l;
-        eX2 = gb2.GB_eps_X;
-        eS2 = gb2.GB_eps_S;
-        eE2 = gb2.GB_eps_E;
-        dw2 = gb2.GB_dw;
-      } else if (atype2->isLennardJones()) {
-        d2 = getLJSigma(atype2) / sqrt(2.0);
+      if (gba2.isGayBerne()) {
+        d2 = gba2.getD();
+        l2 = gba2.getL();
+        eX2 = gba2.getEpsX();
+        eS2 = gba2.getEpsS();
+        eE2 = gba2.getEpsE();
+        dw2 = gba2.getDw();
+      } else if (lja2.isLennardJones()) {
+        d2 = lja2.getSigma() / sqrt(2.0);
         l2 = d2;
-        eX2 = getLJEpsilon(atype2);
+        eX2 = lja2.getEpsilon();
         eS2 = eX2;
         eE2 = eX2;
         dw2 = 1.0;
@@ -304,7 +225,7 @@ namespace OpenMD {
 
       // only add this pairing if at least one of the atoms is a Gay-Berne atom
 
-      if (atomType->isGayBerne() || atype2->isGayBerne()) {
+      if (gba1.isGayBerne() || gba2.isGayBerne()) {
 
         pair<AtomType*, AtomType*> key1, key2;
         key1 = make_pair(atomType, atype2);
@@ -353,6 +274,8 @@ namespace OpenMD {
 
     RealType a, b, g;
 
+    // This is not good.  We should store this in the mixing map, and not
+    // query atom types in calc force.
     bool i_is_LJ = idat.atypes.first->isLennardJones();
     bool j_is_LJ = idat.atypes.second->isLennardJones();
     
@@ -469,23 +392,26 @@ namespace OpenMD {
 
     RealType cut = 0.0;
 
-    if (atypes.first->isGayBerne()) {
-      GayBerneParam gb1 = getGayBerneParam(atypes.first);
-      RealType d1 = gb1.GB_d;
-      RealType l1 = gb1.GB_l;
+    LennardJonesAdapter lja1 = LennardJonesAdapter(atypes.first);
+    GayBerneAdapter gba1 = GayBerneAdapter(atypes.first);
+    LennardJonesAdapter lja2 = LennardJonesAdapter(atypes.second);
+    GayBerneAdapter gba2 = GayBerneAdapter(atypes.second);
+
+    if (gba1.isGayBerne()) {
+      RealType d1 = gba1.getD();
+      RealType l1 = gba1.getL();
       // sigma is actually sqrt(2)*l  for prolate ellipsoids 
       cut = max(cut, RealType(2.5) * sqrt(RealType(2.0)) * max(d1, l1));
-    } else if (atypes.first->isLennardJones()) {
-      cut = max(cut, RealType(2.5) * getLJSigma(atypes.first));
+    } else if (lja1.isLennardJones()) {
+      cut = max(cut, RealType(2.5) * lja1.getSigma());
     }
 
-    if (atypes.second->isGayBerne()) {
-      GayBerneParam gb2 = getGayBerneParam(atypes.second);
-      RealType d2 = gb2.GB_d;
-      RealType l2 = gb2.GB_l;
+    if (gba2.isGayBerne()) {
+      RealType d2 = gba2.getD();
+      RealType l2 = gba2.getL();
       cut = max(cut, RealType(2.5) * sqrt(RealType(2.0)) * max(d2, l2));
-    } else if (atypes.second->isLennardJones()) {
-      cut = max(cut, RealType(2.5) * getLJSigma(atypes.second));
+    } else if (lja2.isLennardJones()) {
+      cut = max(cut, RealType(2.5) * lja2.getSigma());
     }
    
     return cut;

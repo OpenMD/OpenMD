@@ -46,6 +46,7 @@
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/CubicSpline.hpp"
+#include "types/SuttonChenAdapter.hpp"
 
 namespace OpenMD {
 
@@ -85,12 +86,6 @@ namespace OpenMD {
    
   private:
     void initialize();
-    SCParam getSCParam(AtomType* atomType);
-    RealType getC(AtomType* atomType);
-    RealType getM(AtomType* atomType);
-    RealType getN(AtomType* atomType);
-    RealType getAlpha(AtomType* atomType);
-    RealType getEpsilon(AtomType* atomType);
     RealType getAlpha(AtomType* atomType1, AtomType* atomType2);
     RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
     RealType getM(AtomType* atomType1, AtomType* atomType2);

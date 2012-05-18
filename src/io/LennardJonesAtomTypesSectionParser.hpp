@@ -45,11 +45,9 @@
 
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
+
 namespace OpenMD {
 
-  /**
-   * @class LennardJonesAtomTypesSectionParser LennardJonesAtomTypesSectionParser.hpp "io/LennardJonesAtomTypesSectionParser.hpp"
-   */
   class LennardJonesAtomTypesSectionParser : public SectionParser {
   public:
     LennardJonesAtomTypesSectionParser(ForceFieldOptions& options);

@@ -47,7 +47,8 @@
 #include "nonbonded/Electrostatic.hpp"
 #include "utils/simError.h"
 #include "types/NonBondedInteractionType.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "io/Globals.hpp"
 
 namespace OpenMD {
@@ -280,132 +281,42 @@ namespace OpenMD {
     electrostaticAtomData.is_SplitDipole = false;
     electrostaticAtomData.is_Quadrupole = false;
 
-    if (atomType->isCharge()) {
-      GenericData* data = atomType->getPropertyByName("Charge");
+    FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 
-      if (data == NULL) {
-        sprintf( painCave.errMsg, "Electrostatic::addType could not find "
-                 "Charge\n"
-                 "\tparameters for atomType %s.\n",
-                 atomType->getName().c_str());
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();                  
-      }
-      
-      DoubleGenericData* doubleData = dynamic_cast<DoubleGenericData*>(data);
-      if (doubleData == NULL) {
-        sprintf( painCave.errMsg,
-                 "Electrostatic::addType could not convert GenericData to "
-                 "Charge for\n"
-                 "\tatom type %s\n", atomType->getName().c_str());
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
+    if (fca.isFixedCharge()) {
       electrostaticAtomData.is_Charge = true;
-      electrostaticAtomData.charge = doubleData->getData();          
+      electrostaticAtomData.charge = fca.getCharge();
     }
 
-    if (atomType->isDirectional()) {
-      DirectionalAtomType* daType = dynamic_cast<DirectionalAtomType*>(atomType);
-      
-      if (daType->isDipole()) {
-        GenericData* data = daType->getPropertyByName("Dipole");
-        
-        if (data == NULL) {
-          sprintf( painCave.errMsg, 
-                   "Electrostatic::addType could not find Dipole\n"
-                   "\tparameters for atomType %s.\n",
-                   daType->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();                  
-        }
-      
-        DoubleGenericData* doubleData = dynamic_cast<DoubleGenericData*>(data);
-        if (doubleData == NULL) {
-          sprintf( painCave.errMsg,
-                   "Electrostatic::addType could not convert GenericData to "
-                   "Dipole Moment\n"
-                   "\tfor atom type %s\n", daType->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
+    MultipoleAdapter ma = MultipoleAdapter(atomType);
+    if (ma.isMultipole()) {
+      if (ma.isDipole()) {
         electrostaticAtomData.is_Dipole = true;
-        electrostaticAtomData.dipole_moment = doubleData->getData();
+        electrostaticAtomData.dipole_moment = ma.getDipoleMoment();
       }
-
-      if (daType->isSplitDipole()) {
-        GenericData* data = daType->getPropertyByName("SplitDipoleDistance");
-        
-        if (data == NULL) {
-          sprintf(painCave.errMsg, 
-                  "Electrostatic::addType could not find SplitDipoleDistance\n"
-                  "\tparameter for atomType %s.\n",
-                  daType->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();                  
-        }
-      
-        DoubleGenericData* doubleData = dynamic_cast<DoubleGenericData*>(data);
-        if (doubleData == NULL) {
-          sprintf( painCave.errMsg,
-                   "Electrostatic::addType could not convert GenericData to "
-                   "SplitDipoleDistance for\n"
-                   "\tatom type %s\n", daType->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
+      if (ma.isSplitDipole()) {
         electrostaticAtomData.is_SplitDipole = true;
-        electrostaticAtomData.split_dipole_distance = doubleData->getData();
+        electrostaticAtomData.split_dipole_distance = ma.getSplitDipoleDistance();
       }
-
-      if (daType->isQuadrupole()) {
-        GenericData* data = daType->getPropertyByName("QuadrupoleMoments");
-        
-        if (data == NULL) {
-          sprintf( painCave.errMsg, 
-                   "Electrostatic::addType could not find QuadrupoleMoments\n"
-                   "\tparameter for atomType %s.\n",
-                   daType->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();                  
-        }
-        
+      if (ma.isQuadrupole()) {
         // Quadrupoles in OpenMD are set as the diagonal elements
         // of the diagonalized traceless quadrupole moment tensor.
         // The column vectors of the unitary matrix that diagonalizes 
         // the quadrupole moment tensor become the eFrame (or the
         // electrostatic version of the body-fixed frame.
-
-        Vector3dGenericData* v3dData = dynamic_cast<Vector3dGenericData*>(data);
-        if (v3dData == NULL) {
-          sprintf( painCave.errMsg,
-                   "Electrostatic::addType could not convert GenericData to "
-                   "Quadrupole Moments for\n"
-                   "\tatom type %s\n", daType->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
         electrostaticAtomData.is_Quadrupole = true;
-        electrostaticAtomData.quadrupole_moments = v3dData->getData();
+        electrostaticAtomData.quadrupole_moments = ma.getQuadrupoleMoments();
       }
     }
     
-    AtomTypeProperties atp = atomType->getATP();    
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = ElectrostaticList.insert( pair<int,AtomType*>(atp.ident, atomType) );
+    ret = ElectrostaticList.insert( pair<int,AtomType*>(atomType->getIdent(),
+                                                        atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "Electrostatic already had a previous entry with ident %d\n",
-               atp.ident);
+               atomType->getIdent() );
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         

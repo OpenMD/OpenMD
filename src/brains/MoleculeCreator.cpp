@@ -55,7 +55,7 @@
 #include "brains/MoleculeCreator.hpp"
 #include "primitives/GhostBend.hpp"
 #include "primitives/GhostTorsion.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/AtomType.hpp"
 #include "types/FixedBondType.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
@@ -202,18 +202,8 @@ namespace OpenMD {
     
     //below code still have some kind of hard-coding smell
     if (atomType->isDirectional()){
-     
-      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-        
-      if (dAtomType == NULL) {
-	sprintf(painCave.errMsg, "Can not cast AtomType to DirectionalAtomType");
-
-	painCave.isFatal = 1;
-	simError();
-      }
-
       DirectionalAtom* dAtom;
-      dAtom = new DirectionalAtom(dAtomType);
+      dAtom = new DirectionalAtom(atomType);
       atom = dAtom;    
     }
     else{

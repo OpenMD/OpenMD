@@ -52,6 +52,8 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
 #include "utils/Tuple.hpp"
+#include "types/LennardJonesAdapter.hpp"
+
 namespace OpenMD {
 
   ForceField::ForceField() { 
@@ -635,34 +637,11 @@ namespace OpenMD {
   }
   
   RealType ForceField::getRcutFromAtomType(AtomType* at) {
-    /**@todo */
-    GenericData* data;
     RealType rcut = 0.0;
     
-    if (at->isLennardJones()) {
-      data = at->getPropertyByName("LennardJones");
-      if (data != NULL) {
-	LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-	
-	if (ljData != NULL) {
-	  LJParam ljParam = ljData->getData();
-	  
-	  //by default use 2.5*sigma as cutoff radius
-	  rcut = 2.5 * ljParam.sigma;
-          
-	} else {
-	  sprintf( painCave.errMsg,
-		   "Can not cast GenericData to LJParam\n");
-	  painCave.severity = OPENMD_ERROR;
-	  painCave.isFatal = 1;
-	  simError();          
-	}            
-      } else {
-	sprintf( painCave.errMsg, "Can not find Parameters for LennardJones\n");
-	painCave.severity = OPENMD_ERROR;
-	painCave.isFatal = 1;
-	simError();          
-      }
+    LennardJonesAdapter lja = LennardJonesAdapter(at);
+    if (lja.isLennardJones()) {
+      rcut = 2.5 * lja.getSigma();
     }
     return rcut;    
   }

@@ -44,8 +44,8 @@
 #define IO_SHAPEATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/AtomType.hpp"
 #include "types/ShapeAtomType.hpp"
+#include "types/AtomType.hpp"
 
 namespace OpenMD {
   
@@ -61,8 +61,7 @@ namespace OpenMD {
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-    void parseShapeFile(ForceField& ff, std::string& shapeFileName, 
-                        ShapeAtomType* st);
+    void parseShapeFile(ForceField& ff, std::string& shapeFileName, AtomType* at);
     ForceFieldOptions& options_;
   };
   

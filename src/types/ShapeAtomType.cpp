@@ -41,12 +41,12 @@
  */
 
 #include "types/ShapeAtomType.hpp"
-#include <cstdio>
 
+using namespace std;
 namespace OpenMD {
   
   ShapeAtomType::~ShapeAtomType() {
-    std::vector<RealSphericalHarmonic*>::iterator iter;
+    vector<RealSphericalHarmonic*>::iterator iter;
     for (iter = contactFuncs.begin(); iter != contactFuncs.end(); ++iter) 
       delete (*iter);
     for (iter = rangeFuncs.begin(); iter != rangeFuncs.end(); ++iter) 
@@ -60,7 +60,7 @@ namespace OpenMD {
   
   RealType ShapeAtomType::getContactValueAt(RealType costheta, RealType phi) {
     
-    std::vector<RealSphericalHarmonic*>::iterator contactIter;
+    vector<RealSphericalHarmonic*>::iterator contactIter;
     RealType contactVal;
     
     contactVal = 0.0;
@@ -74,7 +74,7 @@ namespace OpenMD {
   
   RealType ShapeAtomType::getRangeValueAt(RealType costheta, RealType phi) {
     
-    std::vector<RealSphericalHarmonic*>::iterator rangeIter;
+    vector<RealSphericalHarmonic*>::iterator rangeIter;
     RealType rangeVal;
     
     rangeVal = 0.0;
@@ -88,7 +88,7 @@ namespace OpenMD {
   
   RealType ShapeAtomType::getStrengthValueAt(RealType costheta, RealType phi) {
     
-    std::vector<RealSphericalHarmonic*>::iterator strengthIter;
+    vector<RealSphericalHarmonic*>::iterator strengthIter;
     RealType strengthVal;
     
     strengthVal = 0.0;

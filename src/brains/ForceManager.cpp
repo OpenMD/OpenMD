@@ -201,7 +201,7 @@ namespace OpenMD {
         // electrostaticSummationMethod keyword.
         
         if (simParams_->haveElectrostaticSummationMethod()) {
-          std::string myMethod = simParams_->getElectrostaticSummationMethod();
+          string myMethod = simParams_->getElectrostaticSummationMethod();
           toUpper(myMethod);
         
           if (myMethod == "SHIFTED_POTENTIAL") {
@@ -256,7 +256,7 @@ namespace OpenMD {
     stringToCutoffPolicy["MAX"] = MAX;
     stringToCutoffPolicy["TRADITIONAL"] = TRADITIONAL;    
 
-    std::string cutPolicy;
+    string cutPolicy;
     if (forceFieldOptions_.haveCutoffPolicy()){
       cutPolicy = forceFieldOptions_.getCutoffPolicy();
     }else if (simParams_->haveCutoffPolicy()) {

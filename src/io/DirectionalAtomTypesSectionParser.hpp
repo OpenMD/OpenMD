@@ -47,20 +47,14 @@
 #include "io/ForceFieldOptions.hpp"
 namespace OpenMD {
 
-  /**
-   * @class DirectionalAtomTypesSectionParser DirectionalAtomTypesSectionParser.hpp "io/DirectionalAtomTypesSectionParser.hpp"
-   */
   class DirectionalAtomTypesSectionParser : public SectionParser {
   public:
     DirectionalAtomTypesSectionParser(ForceFieldOptions& options);
-            
+    
   private:
     void virtual parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
-            
+    ForceFieldOptions& options_;            
+
   };
-
-
-} //namespace OpenMD
-
-#endif //IO_DIRECTIONALATOMTYPESECTIONPARSER_HPP
+}
+#endif

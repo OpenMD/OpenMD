@@ -48,10 +48,7 @@
 #include "config.h"
 #include "utils/PropertyMap.hpp"
 
-
-
-#define __OPENMD_C
-#include "types/AtomTypeProperties.h"
+using namespace std;
 
 namespace OpenMD {
   /**
@@ -70,50 +67,13 @@ namespace OpenMD {
     virtual void useBase(AtomType* base);
     virtual void copyAllData(AtomType* orig);   
     void setMass(RealType m);
-    RealType getMass();
-
-    AtomTypeProperties getATP() { return atp; }
-        
+    RealType getMass();        
     void setIdent(int id);    
-    int getIdent();
-    
-    void setName(const std::string&name);
-    std::string getName();
-    
-    void setLennardJones();    
-    bool isLennardJones();
-    
-    bool isElectrostatic(); 
-    
-    void setEAM();
-    bool isEAM();
-
-    void setIsCharge();
-    bool isCharge();
-
-    bool isDirectional();
-
-    bool isDipole();
-    bool isSplitDipole();
-    bool isQuadrupole();
-    bool isMultipole();
-
-    bool isGayBerne();
-
-    bool isSticky();
-    bool isStickyPower();
-
-    bool isShape();
-
-    bool isSC();
-    void setSC();
-    bool isMetal();
-    
-    bool isFLARB();
-    void setFLARB(); 
-
-    std::vector<AtomType*> allYourBase();
-    std::vector<AtomType*> allYourZIG() {return everyZIG;}
+    int getIdent();    
+    void setName(const string&name);
+    string getName();
+    vector<AtomType*> allYourBase();
+    vector<AtomType*> allYourZIG() {return everyZIG;}
     void addZig(AtomType* at) {everyZIG.push_back(at);}
 
     //below functions are just forward functions
@@ -127,7 +87,7 @@ namespace OpenMD {
      * Removes property from PropertyMap by name
      * @param propName the name of property to be removed
      */
-    void removeProperty(const std::string& propName);
+    void removeProperty(const string& propName);
 
     /**
      * clear all of the properties
@@ -138,13 +98,20 @@ namespace OpenMD {
      * Returns all names of properties
      * @return all names of properties
      */
-    std::vector<std::string> getPropertyNames();
+    vector<string> getPropertyNames();
 
     /**
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
      */      
-    std::vector<GenericData*> getProperties();
+    vector<GenericData*> getProperties();
+
+    /**
+     * Checks if property is in this PropertyMap 
+     * @param propName name of property
+     * @return boolean
+     */      
+    bool hasProperty(const string& propName);
 
     /**
      * Returns property 
@@ -152,17 +119,31 @@ namespace OpenMD {
      * @return a pointer point to property with propName. If no
      * property named propName exists, return NULL
      */      
-    GenericData* getPropertyByName(const std::string& propName);
+    GenericData* getPropertyByName(const string& propName);
+
+    bool isLennardJones();
+    bool isElectrostatic();
+    bool isEAM();
+    bool isCharge();
+    bool isDirectional();
+    bool isDipole();
+    bool isMultipole();
+    bool isGayBerne();
+    bool isSticky();
+    bool isStickyPower();
+    bool isShape();
+    bool isSC();
+    bool isMetal();
 
   protected:
-    AtomTypeProperties atp;
+    int ident_;
     RealType mass_;
-    std::string name_;
+    string name_;
     bool hasBase_; // All your base are belong to us
     AtomType* base_;
-    std::vector< AtomType*> everyZIG;  // list of atom types which use us as a base
-    std::map< std::string, bool> myResponsibilities_;
-    std::map< std::string, RealType> myValues_;
+    vector< AtomType*> everyZIG;  // list of atom types which use us as a base
+    map< string, bool> myResponsibilities_;
+    map< string, RealType> myValues_;
 
   private:
     //prevent copy construction and copy assignment, since property
@@ -172,37 +153,7 @@ namespace OpenMD {
     AtomType(const AtomType&);
     AtomType& operator=(const AtomType& atomType);
     PropertyMap properties_;
-  };
-  
-  struct LJParam {
-    RealType epsilon;
-    RealType sigma;
-    int soft_pot;
-  };
-  typedef SimpleTypeData<LJParam> LJParamGenericData;
-  
-  struct EAMParam {
-    RealType latticeConstant;         
-    int nrho;
-    RealType drho;
-    int nr;
-    RealType dr;
-    RealType rcut;
-    std::vector<RealType> Z;   // Z(r) 
-    std::vector<RealType> rho; // rho(r)
-    std::vector<RealType> F;   // F[rho] 
-  };
-  
-  typedef SimpleTypeData<EAMParam> EAMParamGenericData;
-  
-  struct SCParam {
-    RealType c;
-    RealType m;
-    RealType n;
-    RealType alpha;
-    RealType epsilon;
-  };
-  typedef SimpleTypeData<SCParam> SCParamGenericData;   
+  };  
 }
 
 #endif

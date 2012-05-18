@@ -47,6 +47,8 @@
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "utils/ElementsTable.hpp"
+#include "types/LennardJonesAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
 
 namespace OpenMD {
 
@@ -157,47 +159,15 @@ namespace OpenMD {
           if (integrableObject->isAtom()){
             Atom* atom = static_cast<Atom*>(integrableObject);
             AtomType* atomType = atom->getAtomType();
-            if (atomType->isGayBerne()) {
-              DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);              
-              GenericData* data = dAtomType->getPropertyByName("GayBerne");
-              if (data != NULL) {
-                GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
-                
-                if (gayBerneData != NULL) {  
-                  GayBerneParam gayBerneParam = gayBerneData->getData();
-                  currShape = new Ellipsoid(V3Zero, 
-                                            gayBerneParam.GB_l / 2.0, 
-                                            gayBerneParam.GB_d / 2.0, 
-                                            Mat3x3d::identity());
-                } else {
-                  sprintf( painCave.errMsg,
-                           "Can not cast GenericData to GayBerneParam\n");
-                  painCave.severity = OPENMD_ERROR;
-                  painCave.isFatal = 1;
-                  simError();   
-                }
-              } else {
-                sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
-                painCave.severity = OPENMD_ERROR;
-                painCave.isFatal = 1;
-                simError();    
-              }
+            GayBerneAdapter gba = GayBerneAdapter(atomType);
+            if (gba.isGayBerne()) {
+              currShape = new Ellipsoid(V3Zero, gba.getL() / 2.0,
+                                        gba.getD() / 2.0,
+                                        Mat3x3d::identity());
             } else {
-              if (atomType->isLennardJones()){
-                GenericData* data = atomType->getPropertyByName("LennardJones");
-                if (data != NULL) {
-                  LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-                  if (ljData != NULL) {
-                    LJParam ljParam = ljData->getData();
-                    currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
-                  } else {
-                    sprintf( painCave.errMsg,
-                             "Can not cast GenericData to LJParam\n");
-                    painCave.severity = OPENMD_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                  }       
-                }
+              LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+              if (lja.isLennardJones()){
+                currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
               } else {
                 int aNum = etab.GetAtomicNum((atom->getType()).c_str());
                 if (aNum != 0) {

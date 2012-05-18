@@ -41,16 +41,23 @@
  */
  
 #include "primitives/DirectionalAtom.hpp"
+#include "types/DirectionalAdapter.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
   
-  DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) 
-    : Atom(dAtomType){
+  DirectionalAtom::DirectionalAtom(AtomType* dAtomType) 
+    : Atom(dAtomType) {
     objType_= otDAtom;
-    if (dAtomType->isMultipole()) {
-      electroBodyFrame_ = dAtomType->getElectroBodyFrame();
+
+    DirectionalAdapter da = DirectionalAdapter(dAtomType);
+    I_ = da.getI();
+
+    MultipoleAdapter ma = MultipoleAdapter(dAtomType);
+    if (ma.isMultipole()) {
+      electroBodyFrame_ = ma.getElectroBodyFrame();
     }
-    
+
     // Check if one of the diagonal inertia tensor of this directional
     // atom is zero:
     int nLinearAxis = 0;
@@ -74,7 +81,7 @@ namespace OpenMD {
   }
   
   Mat3x3d DirectionalAtom::getI() {
-    return static_cast<DirectionalAtomType*>(getAtomType())->getI();
+    return I_;     
   }    
   
   void DirectionalAtom::setPrevA(const RotMat3x3d& a) {

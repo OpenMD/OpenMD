@@ -40,33 +40,27 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-
 #ifndef IO_MULTIPOLEATOMTYPESSECTIONPARSER_HPP
 #define IO_MULTIPOLEATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/DirectionalAtomType.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "types/MultipoleAdapter.hpp"
+
 namespace OpenMD {
 
-  /**
-   * @class MultipoleAtomTypesSectionParser MultipoleAtomTypesSectionParser.hpp "io/MultipoleAtomTypesSectionParser.hpp"
-   */
   class MultipoleAtomTypesSectionParser : public SectionParser {
   public:
     MultipoleAtomTypesSectionParser(ForceFieldOptions& options);
-            
+    
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-
-    void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
-    void parseSplitDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
-    void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
+    
+    void parseDipole(StringTokenizer& tokenizer, RealType dipoleMoment, int lineNo);
+    void parseSplitDipole(StringTokenizer& tokenizer, RealType dipoleMoment, RealType splitDipoleDistance, int lineNo);
+    void parseQuadrupole(StringTokenizer& tokenizer, Vector3d quadrupoleMoments, int lineNo);
     ForceFieldOptions& options_;
-  };
-
-
-} //namespace OpenMD
-
-#endif //IO_DIRECTIONALATOMTYPESECTIONPARSER_HPP
+  };  
+} 
+#endif
 

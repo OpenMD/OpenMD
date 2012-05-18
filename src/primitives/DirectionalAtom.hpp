@@ -51,11 +51,11 @@
 #define PRIMITIVES_DIRECTIONALATOM_HPP
 
 #include "primitives/Atom.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/AtomType.hpp"
 namespace OpenMD{
   class DirectionalAtom : public Atom {
   public:
-    DirectionalAtom(DirectionalAtomType* dAtomType);
+    DirectionalAtom(AtomType* dAtomType);
     /**
      * Returns the inertia tensor of this stuntdouble
      * @return the inertia tensor of this stuntdouble
@@ -95,8 +95,9 @@ namespace OpenMD{
     virtual std::vector<RealType> getGrad();
     
     virtual void accept(BaseVisitor* v);
-    
-  protected:
+   
+  private:
+    Mat3x3d I_;
     RotMat3x3d electroBodyFrame_; // body fixed standard eletrostatic frame
   };  
 }//namespace OpenMD

@@ -53,28 +53,30 @@
 #include <vector>
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "utils/GenericData.hpp"
 #include "utils/simError.h"
 
+using namespace std;
+
 namespace OpenMD {   
-  class ShapeAtomType : public DirectionalAtomType {
+  class ShapeAtomType {
     
   public: 
     
-    ShapeAtomType() : DirectionalAtomType() { atp.is_Shape = 1; }
+    ShapeAtomType(){ }
     ~ShapeAtomType();
     
-    std::vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
-    std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
-    std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
+    vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
+    vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
+    vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
     
-    void setContactFuncs(std::vector<RealSphericalHarmonic*> cf) {
+    void setContactFuncs(vector<RealSphericalHarmonic*> cf) {
       contactFuncs = cf;
     }
-    void setRangeFuncs(std::vector<RealSphericalHarmonic*> rf) {
+    void setRangeFuncs(vector<RealSphericalHarmonic*> rf) {
       rangeFuncs = rf;
     }
-    void setStrengthFuncs(std::vector<RealSphericalHarmonic*> sf) {
+    void setStrengthFuncs(vector<RealSphericalHarmonic*> sf) {
       strengthFuncs = sf;
     }
     
@@ -99,12 +101,13 @@ namespace OpenMD {
      */
     RealType getStrengthValueAt(RealType costheta, RealType phi);
     
-  private:
-    
-    std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
-    std::vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
-    std::vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
+  private:    
+    vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
+    vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
+    vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
   }; 
+
+  typedef SimpleTypeData<ShapeAtomType*> ShapeAtypeData;  
 }
 #endif
 

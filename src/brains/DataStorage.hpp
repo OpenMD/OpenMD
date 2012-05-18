@@ -54,6 +54,7 @@
 #include <math/Vector3.hpp>
 #include <math/SquareMatrix3.hpp>
 
+using namespace std;
 namespace OpenMD {
   /**
    * @class DataStorage
@@ -79,11 +80,14 @@ namespace OpenMD {
       dslFunctional = 1024,
       dslFunctionalDerivative = 2048,
       dslElectricField = 4096,
-      dslSkippedCharge = 8192
+      dslSkippedCharge = 8192,
+      dslFlucQPosition = 16384,
+      dslFlucQVelocity = 32768,
+      dslFlucQForce = 65536
     };
 
     DataStorage();
-    DataStorage(int size, int storageLayout = 16383);
+    DataStorage(int size, int storageLayout = 0);
     /** return the size of this DataStorage. */
     int getSize();
     /**
@@ -103,11 +107,11 @@ namespace OpenMD {
     /**
      * Copies data inside DataStorage class.
      *
-     * Copy function actually call copy for every vector in
+     * Copy function actually calls copy for every vector in
      * DataStorage class.  One Precondition of copy is that
      * target is not within the range [source, soruce + num]
      *
-     * @param souce 
+     * @param source 
      * @param num number of element to be moved
      * @param target
      */
@@ -119,28 +123,31 @@ namespace OpenMD {
     /** Returns the pointer of internal array */
     RealType *getArrayPointer(int whichArray);
 
-    std::vector<Vector3d> position;        /** position array */
-    std::vector<Vector3d> velocity;        /** velocity array */
-    std::vector<RotMat3x3d> aMat;          /** rotation matrix array */
-    std::vector<Vector3d> angularMomentum; /** angular momentum array (body-fixed) */
-    std::vector<Mat3x3d> electroFrame;     /** the lab frame unit std::vector array*/
-    std::vector<RealType> zAngle;          /** z-angle array */        
-    std::vector<Vector3d> force;           /** force array */
-    std::vector<Vector3d> torque;          /** torque array */
-    std::vector<RealType> particlePot;     /** particle potential arrray */
-    std::vector<RealType> density;         /** electron density */
-    std::vector<RealType> functional;      /** density functional */
-    std::vector<RealType> functionalDerivative; /** derivative of functional */
-    std::vector<Vector3d> electricField;   /** local electric field */
-    std::vector<RealType> skippedCharge;   /** charge skipped during normal pairwise calculation */
+    vector<Vector3d> position;        /** position array */
+    vector<Vector3d> velocity;        /** velocity array */
+    vector<RotMat3x3d> aMat;          /** rotation matrix array */
+    vector<Vector3d> angularMomentum; /** angular momentum array (body-fixed) */
+    vector<Mat3x3d> electroFrame;     /** the lab frame unit vector array*/
+    vector<RealType> zAngle;          /** z-angle array */        
+    vector<Vector3d> force;           /** force array */
+    vector<Vector3d> torque;          /** torque array */
+    vector<RealType> particlePot;     /** particle potential arrray */
+    vector<RealType> density;         /** electron density */
+    vector<RealType> functional;      /** density functional */
+    vector<RealType> functionalDerivative; /** derivative of functional */
+    vector<Vector3d> electricField;   /** local electric field */
+    vector<RealType> skippedCharge;   /** charge skipped during normal pairwise calculation */
+    vector<RealType> flucQPos;        /** fluctuating charges */
+    vector<RealType> flucQVel;        /** fluctuating charge velocities */
+    vector<RealType> flucQFrc;        /** fluctuating charge forces */
 
     static int getBytesPerStuntDouble(int layout);
 
   private:
 
-    RealType* internalGetArrayPointer(std::vector<Vector3d>& v);            
-    RealType* internalGetArrayPointer(std::vector<RotMat3x3d>& v);
-    RealType* internalGetArrayPointer(std::vector<RealType>& v);
+    RealType* internalGetArrayPointer(vector<Vector3d>& v);            
+    RealType* internalGetArrayPointer(vector<RotMat3x3d>& v);
+    RealType* internalGetArrayPointer(vector<RealType>& v);
 
             
     template<typename T>

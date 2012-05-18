@@ -41,7 +41,7 @@
  */
  
 /**
- * @file SimCreatorr.hpp
+ * @file SimCreator.hpp
  * @author tlin
  * @date 11/02/2004
  * @time 12:126am
@@ -90,6 +90,12 @@ namespace OpenMD {
 
     /** create the molecules belong to current processor*/
     virtual void createMolecules(SimInfo* info);
+
+    /**
+     * Figure out the data storage layout based on what kinds of
+     * objects are being simulated
+     */
+    int computeStorageLayout(SimInfo* info);
     
     /** 
      * Sets the global index for atoms, rigidbodies and cutoff groups

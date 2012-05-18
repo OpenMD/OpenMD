@@ -46,56 +46,19 @@
 #include <cmath>
 #include "nonbonded/LJ.hpp"
 #include "utils/simError.h"
+#include "types/LennardJonesAdapter.hpp"
 #include "types/LennardJonesInteractionType.hpp"
 
 namespace OpenMD {
 
   LJ::LJ() : name_("LJ"), initialized_(false), forceField_(NULL) {}
 
-  LJParam LJ::getLJParam(AtomType* atomType) {
-    
-    // Do sanity checking on the AtomType we were passed before
-    // building any data structures:
-    if (!atomType->isLennardJones()) {
-      sprintf( painCave.errMsg,
-               "LJ::getLJParam was passed an atomType (%s) that does not\n"
-               "\tappear to be a Lennard-Jones atom.\n",
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    GenericData* data = atomType->getPropertyByName("LennardJones");
-    if (data == NULL) {
-      sprintf( painCave.errMsg, "LJ::getLJParam could not find Lennard-Jones\n"
-               "\tparameters for atomType %s.\n", atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-    if (ljData == NULL) {
-      sprintf( painCave.errMsg,
-               "LJ::getLJParam could not convert GenericData to LJParam for\n"
-               "\tatom type %s\n", atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return ljData->getData();
-  }
+  RealType LJ::getSigma(AtomType* atomType1, AtomType* atomType2) {
 
-  RealType LJ::getSigma(AtomType* atomType) {    
-    LJParam ljParam = getLJParam(atomType);
-    return ljParam.sigma;
-  }
-
-  RealType LJ::getSigma(AtomType* atomType1, AtomType* atomType2) {    
-    RealType sigma1 = getSigma(atomType1);
-    RealType sigma2 = getSigma(atomType2);
+    LennardJonesAdapter lja1 = LennardJonesAdapter(atomType1);
+    LennardJonesAdapter lja2 = LennardJonesAdapter(atomType2);
+    RealType sigma1 = lja1.getSigma();
+    RealType sigma2 = lja2.getSigma();
     
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     string DistanceMix = fopts.getDistanceMixingRule();
@@ -107,14 +70,12 @@ namespace OpenMD {
       return 0.5 * (sigma1 + sigma2);
   }
 
-  RealType LJ::getEpsilon(AtomType* atomType) {    
-    LJParam ljParam = getLJParam(atomType);
-    return ljParam.epsilon;
-  }
-
-  RealType LJ::getEpsilon(AtomType* atomType1, AtomType* atomType2) {    
-    RealType epsilon1 = getEpsilon(atomType1);
-    RealType epsilon2 = getEpsilon(atomType2);
+  RealType LJ::getEpsilon(AtomType* atomType1, AtomType* atomType2) {  
+    LennardJonesAdapter lja1 = LennardJonesAdapter(atomType1);
+    LennardJonesAdapter lja2 = LennardJonesAdapter(atomType2);
+  
+    RealType epsilon1 = lja1.getEpsilon();
+    RealType epsilon2 = lja2.getEpsilon();
     return sqrt(epsilon1 * epsilon2);
   }
 
@@ -125,7 +86,8 @@ namespace OpenMD {
 
     for (at = atomTypes->beginType(i); at != NULL; 
          at = atomTypes->nextType(i)) {
-      if (at->isLennardJones()){
+      LennardJonesAdapter lja = LennardJonesAdapter(at);
+      if (lja.isLennardJones()){
 	 addType(at);
       }
     }
@@ -167,18 +129,19 @@ namespace OpenMD {
 
 
   void LJ::addType(AtomType* atomType){
-    RealType sigma1 = getSigma(atomType);
-    RealType epsilon1 = getEpsilon(atomType);
+    LennardJonesAdapter lja1 = LennardJonesAdapter(atomType);
+
+    RealType sigma1 = lja1.getSigma();
+    RealType epsilon1 = lja1.getEpsilon();
     
     // add it to the map:
-    AtomTypeProperties atp = atomType->getATP();    
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = LJMap.insert( pair<int, AtomType*>(atp.ident, atomType) );
+    ret = LJMap.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "LJ already had a previous entry with ident %d\n",
-               atp.ident);
+               atomType->getIdent());
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         

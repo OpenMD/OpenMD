@@ -41,6 +41,7 @@
  */
 
 #include "applications/hydrodynamics/BeadModel.hpp"
+#include "types/LennardJonesAdapter.hpp"
 
 namespace OpenMD {
   bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
@@ -75,29 +76,15 @@ namespace OpenMD {
   
   bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
     AtomType* atomType = atom->getAtomType();
-    
+    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
     if (atomType->isGayBerne()) {
       return false;
-    } else if (atomType->isLennardJones()){
-      GenericData* data = atomType->getPropertyByName("LennardJones");
-      if (data != NULL) {
-        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-        
-        if (ljData != NULL) {
-          LJParam ljParam = ljData->getData();
-          BeadParam currBead;
-          currBead.atomName = atom->getType();
-          currBead.pos = atom->getPos();
-          currBead.radius = ljParam.sigma/2.0;
-          beads.push_back(currBead);
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to LJParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }       
-      }
+    } else if (lja.isLennardJones()){
+      BeadParam currBead;
+      currBead.atomName = atom->getType();
+      currBead.pos = atom->getPos();
+      currBead.radius = lja.getSigma()/2.0;
+      beads.push_back(currBead);
     } else {
       int obanum = etab.GetAtomicNum((atom->getType()).c_str());
       if (obanum != 0) {

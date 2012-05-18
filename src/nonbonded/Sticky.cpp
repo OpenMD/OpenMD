@@ -46,52 +46,14 @@
 #include <cmath>
 #include "nonbonded/Sticky.hpp"
 #include "nonbonded/LJ.hpp"
+#include "types/StickyAdapter.hpp"
 #include "utils/simError.h"
 
 using namespace std;
 namespace OpenMD {
   
   Sticky::Sticky() : name_("Sticky"), initialized_(false), forceField_(NULL) {}
-  
-  StickyParam Sticky::getStickyParam(AtomType* atomType) {
     
-    // Do sanity checking on the AtomType we were passed before
-    // building any data structures:
-    if (!atomType->isSticky() && !atomType->isStickyPower()) {
-      sprintf( painCave.errMsg,
-               "Sticky::getStickyParam was passed an atomType (%s) that does\n"
-               "\tnot appear to be a Sticky atom.\n",
-               atomType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    DirectionalAtomType* daType = dynamic_cast<DirectionalAtomType*>(atomType);
-    GenericData* data = daType->getPropertyByName("Sticky");
-    if (data == NULL) {
-      sprintf( painCave.errMsg, "Sticky::getStickyParam could not find\n"
-               "\tSticky parameters for atomType %s.\n", 
-               daType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    StickyParamGenericData* stickyData = dynamic_cast<StickyParamGenericData*>(data);
-    if (stickyData == NULL) {
-      sprintf( painCave.errMsg,
-               "Sticky::getStickyParam could not convert GenericData to\n"
-               "\tStickyParamGenericData for atom type %s\n", 
-               daType->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return stickyData->getData();
-  }
-  
   void Sticky::initialize() {    
     
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
@@ -104,8 +66,8 @@ namespace OpenMD {
     for (at = atomTypes->beginType(i); at != NULL;
          at = atomTypes->nextType(i)) {
       
-      if (at->isSticky() || at->isStickyPower())
-        addType(at);
+      StickyAdapter sa = StickyAdapter(at);
+      if (sa.isSticky()) addType(at);
     }
     
     initialized_ = true;
@@ -113,14 +75,14 @@ namespace OpenMD {
       
   void Sticky::addType(AtomType* atomType){
     // add it to the map:
-    AtomTypeProperties atp = atomType->getATP();    
     
     pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = StickyMap.insert( pair<int, AtomType*>(atp.ident, atomType) );
+    ret = StickyMap.insert( pair<int, AtomType*>(atomType->getIdent(), 
+                                                 atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "Sticky already had a previous entry with ident %d\n",
-               atp.ident);
+               atomType->getIdent() );
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
@@ -128,7 +90,7 @@ namespace OpenMD {
     
     RealType w0i, v0i, v0pi, rli, rui, rlpi, rupi;
     
-    StickyParam sticky1 = getStickyParam(atomType);
+    StickyAdapter sticky1 = StickyAdapter(atomType);
 
     // Now, iterate over all known types and add to the mixing map:
     
@@ -136,8 +98,8 @@ namespace OpenMD {
     for( it = StickyMap.begin(); it != StickyMap.end(); ++it) {
       
       AtomType* atype2 = (*it).second;
-    
-      StickyParam sticky2 = getStickyParam(atype2);
+      
+      StickyAdapter sticky2 = StickyAdapter(atype2);
 
       StickyInteractionData mixer;        
            
@@ -146,15 +108,15 @@ namespace OpenMD {
       // Lorentz- Berthelot mixing rules (which happen to do the right thing 
       // when atomType and atype2 happen to be the same.
       
-      mixer.rl   = 0.5 * ( sticky1.rl + sticky2.rl );
-      mixer.ru   = 0.5 * ( sticky1.ru + sticky2.ru );
-      mixer.rlp  = 0.5 * ( sticky1.rlp + sticky2.rlp );
-      mixer.rup  = 0.5 * ( sticky1.rup + sticky2.rup );
+      mixer.rl   = 0.5 * ( sticky1.getRl() + sticky2.getRl() );
+      mixer.ru   = 0.5 * ( sticky1.getRu() + sticky2.getRu() );
+      mixer.rlp  = 0.5 * ( sticky1.getRlp() + sticky2.getRlp() );
+      mixer.rup  = 0.5 * ( sticky1.getRup() + sticky2.getRup() );
       mixer.rbig = max(mixer.ru, mixer.rup);
-      mixer.w0  = sqrt( sticky1.w0   * sticky2.w0  );
-      mixer.v0  = sqrt( sticky1.v0   * sticky2.v0  );
-      mixer.v0p = sqrt( sticky1.v0p  * sticky2.v0p );
-      mixer.isPower = atomType->isStickyPower() && atype2->isStickyPower();
+      mixer.w0  = sqrt( sticky1.getW0()   * sticky2.getW0()  );
+      mixer.v0  = sqrt( sticky1.getW0()   * sticky2.getV0()  );
+      mixer.v0p = sqrt( sticky1.getV0p()  * sticky2.getV0p() );
+      mixer.isPower = sticky1.isStickyPower() && sticky2.isStickyPower();
 
       CubicSpline* s = new CubicSpline();
       s->addPoint(mixer.rl, 1.0);
