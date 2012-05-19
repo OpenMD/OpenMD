@@ -525,6 +525,19 @@ namespace OpenMD {
            atomColData.skippedCharge.end(), 0.0);
     }
 
+    if (storageLayout_ & DataStorage::dslElectricField) {    
+      fill(atomRowData.electricField.begin(), 
+           atomRowData.electricField.end(), V3Zero);
+      fill(atomColData.electricField.begin(), 
+           atomColData.electricField.end(), V3Zero);
+    }
+    if (storageLayout_ & DataStorage::dslFlucQForce) {    
+      fill(atomRowData.flucQFrc.begin(), atomRowData.flucQFrc.end(),
+           0.0);
+      fill(atomColData.flucQFrc.begin(), atomColData.flucQFrc.end(),
+           0.0);
+    }
+
 #endif
     // even in parallel, we need to zero out the local arrays:
 
@@ -551,6 +564,11 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslSkippedCharge) {      
       fill(snap_->atomData.skippedCharge.begin(), 
            snap_->atomData.skippedCharge.end(), 0.0);
+    }
+
+    if (storageLayout_ & DataStorage::dslElectricField) {      
+      fill(snap_->atomData.electricField.begin(), 
+           snap_->atomData.electricField.end(), V3Zero);
     }
   }
 
@@ -591,6 +609,14 @@ namespace OpenMD {
                                    atomColData.electroFrame);
     }
 
+    // if needed, gather the atomic fluctuating charge values
+    if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      AtomPlanRealRow->gather(snap_->atomData.flucQPos, 
+                              atomRowData.flucQPos);
+      AtomPlanRealColumn->gather(snap_->atomData.flucQPos, 
+                                 atomColData.flucQPos);
+    }
+
 #endif      
   }
   
@@ -612,6 +638,18 @@ namespace OpenMD {
       AtomPlanRealColumn->scatter(atomColData.density, rho_tmp);
       for (int i = 0; i < n; i++)
         snap_->atomData.density[i] += rho_tmp[i];
+    }
+
+    if (storageLayout_ & DataStorage::dslElectricField) {
+      
+      AtomPlanVectorRow->scatter(atomRowData.electricField, 
+                                 snap_->atomData.electricField);
+      
+      int n = snap_->atomData.electricField.size();
+      vector<Vector3d> field_tmp(n, V3Zero);
+      AtomPlanVectorColumn->scatter(atomColData.electricField, field_tmp);
+      for (int i = 0; i < n; i++)
+        snap_->atomData.electricField[i] += field_tmp[i];
     }
 #endif
   }
@@ -692,6 +730,23 @@ namespace OpenMD {
             
     }
     
+    if (storageLayout_ & DataStorage::dslFlucQForce) {
+
+      int nq = snap_->atomData.flucQFrc.size();
+      vector<RealType> fqfrc_tmp(nq, 0.0);
+
+      AtomPlanRealRow->scatter(atomRowData.flucQFrc, fqfrc_tmp);
+      for (int i = 0; i < nq; i++) {
+        snap_->atomData.flucQFrc[i] += fqfrc_tmp[i];
+        fqfrc_tmp[i] = 0.0;
+      }
+      
+      AtomPlanRealColumn->scatter(atomColData.flucQFrc, fqfrc_tmp);
+      for (int i = 0; i < nq; i++) 
+        snap_->atomData.flucQFrc[i] += fqfrc_tmp[i];
+            
+    }
+
     nLocal_ = snap_->getNumberOfAtoms();
 
     vector<potVec> pot_temp(nLocal_, 
@@ -1013,11 +1068,19 @@ namespace OpenMD {
 
     atomRowData.force[atom1] += *(idat.f1);
     atomColData.force[atom2] -= *(idat.f1);
+
+    // should particle pot be done here also?
 #else
     pairwisePot += *(idat.pot);
 
     snap_->atomData.force[atom1] += *(idat.f1);
     snap_->atomData.force[atom2] -= *(idat.f1);
+
+    if (idat.doParticlePot) {
+      snap_->atomData.particlePot[atom1] += *(idat.vpair) * *(idat.sw);
+      snap_->atomData.particlePot[atom2] -= *(idat.vpair) * *(idat.sw);
+    }
+      
 #endif
     
   }
