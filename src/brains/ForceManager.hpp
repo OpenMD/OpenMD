@@ -82,6 +82,7 @@ namespace OpenMD {
 
   protected: 
     bool initialized_; 
+    bool doParticlePot_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        

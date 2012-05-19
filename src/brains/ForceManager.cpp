@@ -388,6 +388,10 @@ namespace OpenMD {
       setupCutoffs();
 
       info_->prepareTopology();      
+
+      doParticlePot_ = info_->getSimParams()->getOutputParticlePotential();
+      cerr << "dPP = " << doParticlePot_ << "\n";
+   
     }
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
@@ -650,6 +654,8 @@ namespace OpenMD {
     idat.sw = &sw;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
     idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE) ? true : false;
+    idat.doParticlePot = doParticlePot_;
+    sdat.doParticlePot = doParticlePot_;
     
     loopEnd = PAIR_LOOP;
     if (info_->requiresPrepair() ) {

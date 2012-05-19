@@ -62,6 +62,7 @@ namespace OpenMD {
     needCompression_ = simParams->getCompressDumpFile();
     needForceVector_ = simParams->getOutputForceVector();
     needParticlePot_ = simParams->getOutputParticlePotential();
+    cerr << "DW npp = " << needParticlePot_ << "\n";
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {

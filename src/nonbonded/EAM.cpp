@@ -300,7 +300,9 @@ namespace OpenMD {
     *(sdat.dfrhodrho) = result.second;
 
     (*(sdat.pot))[METALLIC_FAMILY] += result.first;
-    *(sdat.particlePot) += result.first;
+    if (sdat.doParticlePot) {
+      *(sdat.particlePot) += result.first;
+    }
 
     return;
   }
@@ -392,20 +394,22 @@ namespace OpenMD {
     
     *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
         
-    // particlePot is the difference between the full potential and
-    // the full potential without the presence of a particular
-    // particle (atom1).
-    //
-    // This reduces the density at other particle locations, so we
-    // need to recompute the density at atom2 assuming atom1 didn't
-    // contribute.  This then requires recomputing the density
-    // functional for atom2 as well.
-    
-    *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha ) 
-      - *(idat.frho2);
-    
-    *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
-      - *(idat.frho1);
+    if (idat.doParticlePot) {
+      // particlePot is the difference between the full potential and
+      // the full potential without the presence of a particular
+      // particle (atom1).
+      //
+      // This reduces the density at other particle locations, so we
+      // need to recompute the density at atom2 assuming atom1 didn't
+      // contribute.  This then requires recomputing the density
+      // functional for atom2 as well.
+      
+      *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha ) 
+        - *(idat.frho2);
+      
+      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
+        - *(idat.frho1);
+    }
     
     (*(idat.pot))[METALLIC_FAMILY] += phab;
     

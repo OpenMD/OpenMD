@@ -278,8 +278,10 @@ namespace OpenMD {
     *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
 
     (*(sdat.pot))[METALLIC_FAMILY] += u;
-    *(sdat.particlePot) += u;
-    
+    if (sdat.doParticlePot) {
+      *(sdat.particlePot) += u;
+    }
+
     return;
   }
   
@@ -315,20 +317,22 @@ namespace OpenMD {
       
       *(idat.f1) += *(idat.d) * dudr / *(idat.rij) ;
         
-      // particlePot is the difference between the full potential and
-      // the full potential without the presence of a particular
-      // particle (atom1).
-      //
-      // This reduces the density at other particle locations, so we
-      // need to recompute the density at atom2 assuming atom1 didn't
-      // contribute.  This then requires recomputing the density
-      // functional for atom2 as well.
-           
-      *(idat.particlePot1) -= data2.c * data2.epsilon * 
-        sqrt( *(idat.rho2) - rhtmp) + *(idat.frho2);
+      if (idat.doParticlePot) {
+        // particlePot is the difference between the full potential and
+        // the full potential without the presence of a particular
+        // particle (atom1).
+        //
+        // This reduces the density at other particle locations, so we
+        // need to recompute the density at atom2 assuming atom1 didn't
+        // contribute.  This then requires recomputing the density
+        // functional for atom2 as well.
+        
+        *(idat.particlePot1) -= data2.c * data2.epsilon * 
+          sqrt( *(idat.rho2) - rhtmp) + *(idat.frho2);
 
-      *(idat.particlePot2) -= data1.c * data1.epsilon * 
-        sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
+        *(idat.particlePot2) -= data1.c * data1.epsilon * 
+          sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
+      }
       
       (*(idat.pot))[METALLIC_FAMILY] += pot_temp;
     }

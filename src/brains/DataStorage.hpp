@@ -72,18 +72,17 @@ namespace OpenMD {
       dslAmat = 4, 
       dslAngularMomentum = 8,
       dslElectroFrame = 16,
-      dslZAngle = 32,
-      dslForce = 64, 
-      dslTorque = 128,
-      dslParticlePot = 256,
-      dslDensity = 512,
-      dslFunctional = 1024,
-      dslFunctionalDerivative = 2048,
-      dslElectricField = 4096,
-      dslSkippedCharge = 8192,
-      dslFlucQPosition = 16384,
-      dslFlucQVelocity = 32768,
-      dslFlucQForce = 65536
+      dslForce = 32, 
+      dslTorque = 64,
+      dslParticlePot = 128,
+      dslDensity = 256,
+      dslFunctional = 512,
+      dslFunctionalDerivative = 1024,
+      dslElectricField = 2048,
+      dslSkippedCharge = 4096,
+      dslFlucQPosition = 8192,
+      dslFlucQVelocity = 16384,
+      dslFlucQForce = 32768
     };
 
     DataStorage();
@@ -128,7 +127,6 @@ namespace OpenMD {
     vector<RotMat3x3d> aMat;          /** rotation matrix array */
     vector<Vector3d> angularMomentum; /** angular momentum array (body-fixed) */
     vector<Mat3x3d> electroFrame;     /** the lab frame unit vector array*/
-    vector<RealType> zAngle;          /** z-angle array */        
     vector<Vector3d> force;           /** force array */
     vector<Vector3d> torque;          /** torque array */
     vector<RealType> particlePot;     /** particle potential arrray */

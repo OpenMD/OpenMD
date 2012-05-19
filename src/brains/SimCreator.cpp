@@ -669,6 +669,7 @@ namespace OpenMD {
     
   int SimCreator::computeStorageLayout(SimInfo* info) {
 
+    Globals* simParams = info->getSimParams();
     int nRigidBodies = info->getNGlobalRigidBodies();
     set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
     set<AtomType*>::iterator i;
@@ -745,6 +746,11 @@ namespace OpenMD {
         storageLayout |= DataStorage::dslFlucQForce;
       }
     }
+
+    if (simParams->getOutputParticlePotential()) {
+      storageLayout |= DataStorage::dslParticlePot;
+    }
+
     return storageLayout;
   }
 

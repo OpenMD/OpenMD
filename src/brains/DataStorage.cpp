@@ -88,11 +88,6 @@ namespace OpenMD {
       cerr << "size does not match"<< endl;        
     }
 
-    if (storageLayout_ & dslZAngle && zAngle.size() != size_) {
-      //error
-      cerr << "size does not match"<< endl;        
-    }
-
     if (storageLayout_ & dslForce && force.size() != size_) {
       //error
       cerr << "size does not match"<< endl;        
@@ -174,10 +169,6 @@ namespace OpenMD {
       internalResize(electroFrame, newSize);
     }
     
-    if (storageLayout_ & dslZAngle) {
-      internalResize(zAngle, newSize);
-    }
-
     if (storageLayout_ & dslForce) {
       internalResize(force, newSize);
     }
@@ -246,10 +237,6 @@ namespace OpenMD {
       electroFrame.reserve(size);
     }
     
-    if (storageLayout_ & dslZAngle) {
-      zAngle.reserve(size);
-    }
-
     if (storageLayout_ & dslForce) {
       force.reserve(size);
     } 
@@ -320,10 +307,6 @@ namespace OpenMD {
       internalCopy(electroFrame, source, num, target);
     }
     
-    if (storageLayout_ & dslZAngle) {
-      internalCopy(zAngle, source, num, target);
-    }
-
     if (storageLayout_ & dslForce) {
       internalCopy(force, source, num, target);
     } 
@@ -400,10 +383,6 @@ namespace OpenMD {
       return internalGetArrayPointer(electroFrame);
       break;
             
-    case dslZAngle:
-      return internalGetArrayPointer(zAngle);
-      break;
-
     case dslForce:
       return internalGetArrayPointer(force);
       break;            
@@ -531,9 +510,6 @@ namespace OpenMD {
     }
     if (layout & dslElectroFrame) {
       bytes += sizeof(Mat3x3d);
-    }
-    if (layout & dslZAngle) {
-      bytes += sizeof(RealType);
     }
     if (layout & dslForce) {
       bytes += sizeof(Vector3d);

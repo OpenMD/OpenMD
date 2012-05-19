@@ -118,9 +118,9 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(CutoffMethod, "cutoffMethod", "SHIFTED_FORCE");
   DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, "electrostaticScreeningMethod", "DAMPED");
   DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
-  DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
-  DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
-  DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", 0);
+  DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", false);
+  DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", false);
+  DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", false);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);

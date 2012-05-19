@@ -89,6 +89,7 @@ namespace OpenMD {
     RealType* electroMult;    /**< multiplier for electrostatic interactions */
     potVec* pot;              /**< total potential */
     RealType* vpair;          /**< pair potential */
+    bool doParticlePot;       /**< should we bother with the particle pot? */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
     Vector3d* f1;             /**< force between the two atoms */
@@ -124,6 +125,7 @@ namespace OpenMD {
     Mat3x3d* eFrame;        /**< pointer to electrostatic frame for atom */
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
     potVec* pot;            /**< total potential */
+    bool doParticlePot;     /**< should we bother with the particle pot? */
     RealType* particlePot;  /**< contribution to potential from this particle */
     Vector3d* t;            /**< pointer to resultant torque on atom */
     RealType* rho;          /**< electron density */

@@ -78,7 +78,6 @@ namespace OpenMD {
 
       // rotate about the z-axis
       angle = dt * ji[2] / I(2, 2);
-      sd->addZangle(angle);
       rotateStep( 0, 1, angle, ji, A);
 
       // rotate about the y-axis
