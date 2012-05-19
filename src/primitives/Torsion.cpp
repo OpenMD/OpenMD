@@ -48,7 +48,7 @@ namespace OpenMD {
 		   TorsionType *tt) :
     atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), torsionType_(tt) { }
 
-  void Torsion::calcForce(RealType& angle) {
+  void Torsion::calcForce(RealType& angle, bool doParticlePot) {
 
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
@@ -99,10 +99,12 @@ namespace OpenMD {
     atom3_->addFrc(f3 - f2);
     atom4_->addFrc(-f3);
     
-    atom1_->addParticlePot(potential_);
-    atom2_->addParticlePot(potential_);
-    atom3_->addParticlePot(potential_);
-    atom4_->addParticlePot(potential_);
+    if (doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
+      atom3_->addParticlePot(potential_);
+      atom4_->addParticlePot(potential_);
+    }
     
     angle = acos(cos_phi) /M_PI * 180.0;    
   }  

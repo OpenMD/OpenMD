@@ -62,7 +62,7 @@ namespace OpenMD {
       : Bend(atom1, ghostAtom, ghostAtom, bt) {      
     }
     
-    virtual void calcForce(RealType& angle);    
+    virtual void calcForce(RealType& angle, bool doParticlePot);    
   };  
 } //end namespace OpenMD
 #endif //PRIMITIVES_GHOSTBEND_HPP

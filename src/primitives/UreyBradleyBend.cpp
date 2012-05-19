@@ -52,10 +52,12 @@ namespace OpenMD {
     delete bond_;
   }
 
-  void UreyBradleyBend::calcForce(RealType& angle) {
-    Bend::calcForce(angle);
-    bond_->calcForce();
-    atom2_->addParticlePot(bond_->getPotential());
+  void UreyBradleyBend::calcForce(RealType& angle, bool doParticlePot) {
+    Bend::calcForce(angle, doParticlePot);
+    bond_->calcForce(doParticlePot);
+    if (doParticlePot) {
+      atom2_->addParticlePot(bond_->getPotential());
+    }
   }
 
 } //end namespace OpenMD

@@ -48,7 +48,7 @@ namespace OpenMD {
                              DirectionalAtom* ghostAtom, TorsionType *tt) 
     : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
   
-  void GhostTorsion::calcForce(RealType& angle) {
+  void GhostTorsion::calcForce(RealType& angle, bool doParticlePot) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
     
     Vector3d pos1 = atom1_->getPos();
@@ -97,9 +97,11 @@ namespace OpenMD {
     f3.negate();
     ghostAtom->addTrq(cross(r43, f3));    
     
-    atom1_->addParticlePot(potential_);
-    atom2_->addParticlePot(potential_);
-    ghostAtom->addParticlePot(potential_);
+    if (doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
+      ghostAtom->addParticlePot(potential_);
+    }
 
     angle = acos(cos_phi) /M_PI * 180.0;
   }

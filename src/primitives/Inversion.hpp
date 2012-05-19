@@ -74,7 +74,7 @@ namespace OpenMD {
   public:
     Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, InversionType* it);
     virtual ~Inversion() {}
-    virtual void calcForce(RealType& angle);
+    virtual void calcForce(RealType& angle, bool doParticlePot);
         
     RealType getPotential() {
       return potential_;

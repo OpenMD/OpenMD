@@ -74,7 +74,7 @@ struct TorsionDataSet {
   public:
     Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
     virtual ~Torsion() {}
-    virtual void calcForce(RealType& angle);
+    virtual void calcForce(RealType& angle, bool doParticlePot);
         
     RealType getPotential() {
       return potential_;

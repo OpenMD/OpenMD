@@ -62,7 +62,7 @@ namespace OpenMD {
     GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
 		 TorsionType* tt);
     
-    virtual void calcForce(RealType& angle);
+    virtual void calcForce(RealType& angle, bool doParticlePot);
     
   };
   

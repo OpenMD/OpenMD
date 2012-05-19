@@ -45,7 +45,7 @@
 namespace OpenMD {
   
   /**@todo still a lot left to improve*/
-  void Bend::calcForce(RealType& angle) {
+  void Bend::calcForce(RealType& angle, bool doParticlePot) {
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = atom3_->getPos();
@@ -95,9 +95,11 @@ namespace OpenMD {
     atom2_->addFrc(force2);
     atom3_->addFrc(force3);
 
-    atom1_->addParticlePot(potential_);
-    atom2_->addParticlePot(potential_);
-    atom3_->addParticlePot(potential_);
+    if (doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
+      atom3_->addParticlePot(potential_);
+    }
    
     angle = theta /M_PI * 180.0;
   }

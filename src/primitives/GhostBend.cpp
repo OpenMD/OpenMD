@@ -45,7 +45,7 @@
 namespace OpenMD {
 
   /**@todo still a lot left to improve*/
-  void GhostBend::calcForce(RealType& angle) {
+  void GhostBend::calcForce(RealType& angle, bool doParticlePot) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
     
     Vector3d pos1 = atom1_->getPos();
@@ -95,9 +95,10 @@ namespace OpenMD {
     ghostAtom->addFrc(-force1);
 
     ghostAtom->addTrq( cross(r23, force3) );    
-
-    atom1_->addParticlePot(potential_);
-    ghostAtom->addParticlePot(potential_);
+    if(doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      ghostAtom->addParticlePot(potential_);
+    }
 
     angle = theta /M_PI * 180.0;
    

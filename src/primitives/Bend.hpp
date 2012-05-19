@@ -70,7 +70,7 @@ namespace OpenMD {
       : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
     
     virtual ~Bend() {}
-    virtual void calcForce(RealType& angle);
+    virtual void calcForce(RealType& angle, bool doParticlePot);
     
     RealType getPotential() {
       return potential_;

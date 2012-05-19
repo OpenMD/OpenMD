@@ -390,7 +390,6 @@ namespace OpenMD {
       info_->prepareTopology();      
 
       doParticlePot_ = info_->getSimParams()->getOutputParticlePotential();
-      cerr << "dPP = " << doParticlePot_ << "\n";
    
     }
 
@@ -506,7 +505,7 @@ namespace OpenMD {
 
       for (bond = mol->beginBond(bondIter); bond != NULL; 
            bond = mol->nextBond(bondIter)) {
-        bond->calcForce();
+        bond->calcForce(doParticlePot_);
         bondPotential += bond->getPotential();
       }
 
@@ -514,7 +513,7 @@ namespace OpenMD {
            bend = mol->nextBend(bendIter)) {
         
         RealType angle;
-        bend->calcForce(angle);
+        bend->calcForce(angle, doParticlePot_);
         RealType currBendPot = bend->getPotential();          
          
         bendPotential += bend->getPotential();
@@ -539,7 +538,7 @@ namespace OpenMD {
       for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
            torsion = mol->nextTorsion(torsionIter)) {
         RealType angle;
-        torsion->calcForce(angle);
+        torsion->calcForce(angle, doParticlePot_);
         RealType currTorsionPot = torsion->getPotential();
         torsionPotential += torsion->getPotential();
         map<Torsion*, TorsionDataSet>::iterator i = torsionDataSets.find(torsion);
@@ -563,7 +562,7 @@ namespace OpenMD {
 	   inversion != NULL; 
            inversion = mol->nextInversion(inversionIter)) {
         RealType angle;
-        inversion->calcForce(angle);
+        inversion->calcForce(angle, doParticlePot_);
         RealType currInversionPot = inversion->getPotential();
         inversionPotential += inversion->getPotential();
         map<Inversion*, InversionDataSet>::iterator i = inversionDataSets.find(inversion);
