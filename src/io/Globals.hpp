@@ -119,6 +119,8 @@ namespace OpenMD {
     DeclareParameter(CompressDumpFile, bool);
     DeclareParameter(OutputForceVector, bool);
     DeclareParameter(OutputParticlePotential, bool);
+    DeclareParameter(OutputElectricField, bool);
+    DeclareParameter(OutputFluctuatingCharges, bool);
     DeclareParameter(SkinThickness, RealType);
     DeclareParameter(StatFileFormat, std::string);    
     DeclareParameter(HydroPropFile, std::string);

@@ -121,6 +121,8 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", false);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", false);
   DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", false);
+  DefineOptionalParameterWithDefaultValue(OutputElectricField, "outputElectricField", false);
+  DefineOptionalParameterWithDefaultValue(OutputFluctuatingCharges, "outputFluctuatingCharges", false);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);

@@ -1089,6 +1089,61 @@ namespace OpenMD{
     }       
 
 
+    /**
+     * Returns the previous electric field of this stuntDouble
+     * @return the electric field of this stuntDouble
+     */    
+    Vector3d getPrevElectricField() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_];
+    }
+       
+    /**
+     * Returns the current electric field of this stuntDouble
+     * @return the electric field of this stuntDouble
+     */    
+    Vector3d getElectricField() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_];
+    }
+
+    /**
+     * Returns the electric field of this stuntDouble in specified snapshot 
+     * @return the electric field of this stuntDouble
+     * @param snapshotNo
+     */    
+    Vector3d getElectricField(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_];
+    }
+
+    /**
+     * Sets  the previous electric field of this stuntDouble
+     * @param pos  new electric field 
+     * @see #getElectricField
+     */         
+    void setPrevElectricField(const Vector3d& pos) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] = pos;
+    }
+       
+    /**
+     * Sets  the current electric field of this stuntDouble
+     * @param pos  new electric field 
+     */         
+    void setElectricField(const Vector3d& pos) {
+      DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
+      data.electricField[localIndex_] = pos;
+      //((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] = pos;
+    }
+
+    /**
+     * Sets  the electric field of this stuntDouble in specified snapshot
+     * @param pos electric field to be set 
+     * @param snapshotNo 
+     * @see #getElectricField
+     */         
+    void setElectricField(const Vector3d& pos, int snapshotNo) {
+
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] = pos;
+
+    }
 
 
     /** Set the force of this stuntDouble to zero */

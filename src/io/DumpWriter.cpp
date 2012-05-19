@@ -59,10 +59,12 @@ namespace OpenMD {
     : info_(info), filename_(info->getDumpFileName()), eorFilename_(info->getFinalConfigFileName()){
 
     Globals* simParams = info->getSimParams();
-    needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getOutputForceVector();
-    needParticlePot_ = simParams->getOutputParticlePotential();
-    cerr << "DW npp = " << needParticlePot_ << "\n";
+    needCompression_   = simParams->getCompressDumpFile();
+    needForceVector_   = simParams->getOutputForceVector();
+    needParticlePot_   = simParams->getOutputParticlePotential();
+    needFlucQ_         = simParams->getOutputFluctuatingCharges();
+    needElectricField_ = simParams->getOutputElectricField();
+
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -100,9 +102,12 @@ namespace OpenMD {
     Globals* simParams = info->getSimParams();
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
 
-    needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getOutputForceVector();
-    needParticlePot_ = simParams->getOutputParticlePotential();
+    needCompression_   = simParams->getCompressDumpFile();
+    needForceVector_   = simParams->getOutputForceVector();
+    needParticlePot_   = simParams->getOutputParticlePotential();
+    needFlucQ_         = simParams->getOutputFluctuatingCharges();
+    needElectricField_ = simParams->getOutputElectricField();
+
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -140,10 +145,12 @@ namespace OpenMD {
     Globals* simParams = info->getSimParams();
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
     
-    needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getOutputForceVector();
-    needParticlePot_ = simParams->getOutputParticlePotential();
-    
+    needCompression_   = simParams->getCompressDumpFile();
+    needForceVector_   = simParams->getOutputForceVector();
+    needParticlePot_   = simParams->getOutputParticlePotential();
+    needFlucQ_         = simParams->getOutputFluctuatingCharges();
+    needElectricField_ = simParams->getOutputElectricField();
+
 #ifdef HAVE_LIBZ
     if (needCompression_) {
       filename_ += ".gz";
@@ -431,10 +438,7 @@ namespace OpenMD {
 
     if (needForceVector_) {
       type += "f";
-      Vector3d frc;
-
-      frc = integrableObject->getFrc();
-
+      Vector3d frc = integrableObject->getFrc();
       if (isinf(frc[0]) || isnan(frc[0]) || 
           isinf(frc[1]) || isnan(frc[1]) || 
           isinf(frc[2]) || isnan(frc[2]) ) {      
@@ -450,10 +454,7 @@ namespace OpenMD {
       
       if (integrableObject->isDirectional()) {
         type += "t";
-        Vector3d trq;
-        
-        trq = integrableObject->getTrq();
-        
+        Vector3d trq = integrableObject->getTrq();        
         if (isinf(trq[0]) || isnan(trq[0]) || 
             isinf(trq[1]) || isnan(trq[1]) || 
             isinf(trq[2]) || isnan(trq[2]) ) {      
@@ -462,19 +463,16 @@ namespace OpenMD {
                    " for object %d", index);      
           painCave.isFatal = 1;
           simError();
-        }
-        
+        }        
         sprintf(tempBuffer, " %13e %13e %13e",
                 trq[0], trq[1], trq[2]);
         line += tempBuffer;
       }      
     }
+
     if (needParticlePot_) {
       type += "u";
-      RealType particlePot;
-
-      particlePot = integrableObject->getParticlePot();
-
+      RealType particlePot = integrableObject->getParticlePot();
       if (isinf(particlePot) || isnan(particlePot)) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the particle "
@@ -486,6 +484,62 @@ namespace OpenMD {
       line += tempBuffer;
     }
     
+    if (needFlucQ_) {
+      type += "cw";
+      RealType fqPos = integrableObject->getFlucQPos();
+      if (isinf(fqPos) || isnan(fqPos) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the"
+                 " fluctuating charge for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e ", fqPos);
+      line += tempBuffer;
+    
+      RealType fqVel = integrableObject->getFlucQVel();
+      if (isinf(fqVel) || isnan(fqVel) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the"
+                 " fluctuating charge velocity for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e ", fqVel);
+      line += tempBuffer;
+
+      if (needForceVector_) {
+        type += "g";
+        RealType fqFrc = integrableObject->getFlucQFrc();        
+        if (isinf(fqFrc) || isnan(fqFrc) ) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the"
+                   " fluctuating charge force for object %d", index);      
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e ", fqFrc);        
+        line += tempBuffer;
+      }
+    }
+
+    if (needElectricField_) {
+      type += "e";
+      Vector3d eField= integrableObject->getElectricField();
+      if (isinf(eField[0]) || isnan(eField[0]) || 
+          isinf(eField[1]) || isnan(eField[1]) || 
+          isinf(eField[2]) || isnan(eField[2]) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the electric"
+                 " field for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e %13e %13e",
+              eField[0], eField[1], eField[2]);
+      line += tempBuffer;
+    }
+
     sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }

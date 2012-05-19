@@ -95,6 +95,8 @@ namespace OpenMD {
     bool needCompression_;
     bool needForceVector_;
     bool needParticlePot_;
+    bool needFlucQ_;
+    bool needElectricField_;
     bool createDumpFile_;
   };
 

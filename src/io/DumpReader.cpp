@@ -474,6 +474,36 @@ namespace OpenMD {
            integrableObject->setParticlePot(particlePot);          
            break;
         }
+        case 'c' : {
+
+           RealType flucQPos;
+           flucQPos = tokenizer.nextTokenAsDouble(); 
+           integrableObject->setFlucQPos(flucQPos);          
+           break;
+        }
+        case 'w' : {
+
+           RealType flucQVel;
+           flucQVel = tokenizer.nextTokenAsDouble(); 
+           integrableObject->setFlucQVel(flucQVel);          
+           break;
+        }
+        case 'g' : {
+
+           RealType flucQFrc;
+           flucQFrc = tokenizer.nextTokenAsDouble(); 
+           integrableObject->setFlucQFrc(flucQFrc);          
+           break;
+        }
+        case 'e' : {
+
+           Vector3d eField;
+           eField[0] = tokenizer.nextTokenAsDouble(); 
+           eField[1] = tokenizer.nextTokenAsDouble(); 
+           eField[2] = tokenizer.nextTokenAsDouble();           
+           integrableObject->setElectricField(eField);          
+           break;
+        }
         default: {
                sprintf(painCave.errMsg, 
                        "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 

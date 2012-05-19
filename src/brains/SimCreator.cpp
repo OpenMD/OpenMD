@@ -746,9 +746,20 @@ namespace OpenMD {
         storageLayout |= DataStorage::dslFlucQForce;
       }
     }
+    
+    // if the user has asked for them, make sure we've got the memory for the
+    // objects defined.
 
     if (simParams->getOutputParticlePotential()) {
       storageLayout |= DataStorage::dslParticlePot;
+    }
+    if (simParams->getOutputElectricField()) {
+      storageLayout |= DataStorage::dslElectricField;
+    }
+    if (simParams->getOutputFluctuatingCharges()) {
+      storageLayout |= DataStorage::dslFlucQPosition;
+      storageLayout |= DataStorage::dslFlucQVelocity;
+      storageLayout |= DataStorage::dslFlucQForce;
     }
 
     return storageLayout;
