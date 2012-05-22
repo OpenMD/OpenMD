@@ -118,13 +118,13 @@ namespace OpenMD {
       tt2 = tauThermostat * tauThermostat;
       tb2 = tauBarostat * tauBarostat;
 
-      update();
+      updateSizes();
     }
 
   NPT::~NPT() {
   }
 
-  void NPT::doUpdate() {
+  void NPT::doUpdateSizes() {
 
     oldPos.resize(info_->getNIntegrableObjects());
     oldVel.resize(info_->getNIntegrableObjects());
@@ -189,7 +189,7 @@ namespace OpenMD {
 	  //ji[j] += dt2 * (Tb[j] * PhysicalConstants::energyConvert - ji[j]*chi);
 	  ji += dt2*PhysicalConstants::energyConvert * Tb - dt2*chi* ji;
                 
-	  rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo_->rotate(integrableObject, ji, dt);
 
 	  integrableObject->setJ(ji);
 	}
@@ -205,6 +205,9 @@ namespace OpenMD {
     //calculate the integral of chidt
     integralOfChidt += dt2 * chi;
     
+    flucQ_->moveA();
+
+
     index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
@@ -233,7 +236,7 @@ namespace OpenMD {
 	}
       }
 
-      rattle->constraintA();
+      rattle_->constraintA();
     }
 
     // Scale the box after all the positions have been moved:
@@ -324,7 +327,7 @@ namespace OpenMD {
 	}
       }
         
-      rattle->constraintB();
+      rattle_->constraintB();
 
       if ((fabs(prevChi - chi) <= chiTolerance) && this->etaConverged())
 	break;
@@ -336,6 +339,7 @@ namespace OpenMD {
     currentSnapshot_->setChi(chi);
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);    
 
+    flucQ_->moveB();
     saveEta();
   }
 

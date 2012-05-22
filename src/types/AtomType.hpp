@@ -134,6 +134,7 @@ namespace OpenMD {
     bool isShape();
     bool isSC();
     bool isMetal();
+    bool isFluctuatingCharge();
 
   protected:
     int ident_;

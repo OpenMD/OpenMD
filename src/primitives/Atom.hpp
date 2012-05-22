@@ -115,12 +115,25 @@ namespace OpenMD{
       return atomType_->isMetal();
     }
 
+    bool isFluctuatingCharge() {
+      return atomType_->isFluctuatingCharge();
+    }
+
     int getIdent() {
       return atomType_->getIdent();
     }
     
+    RealType getChargeMass() {
+      return chargeMass_;
+    }
+
+    void setChargeMass(RealType cm) {
+      chargeMass_ = cm;
+    }
+
   protected:
     AtomType* atomType_;
+    RealType chargeMass_;
   };
   
 }//namespace OpenMD

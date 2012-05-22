@@ -122,7 +122,7 @@ namespace OpenMD {
       VelocityVerletIntegrator::integrateStep();
     }
 
-    virtual void doUpdate();
+    virtual void doUpdateSizes();
 
     virtual void resetIntegrator();
 

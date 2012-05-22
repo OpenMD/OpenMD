@@ -150,8 +150,14 @@ namespace OpenMD {
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
+    DeclareParameter(FlucQPropagator, std::string);
+    DeclareParameter(FlucQFriction, RealType);    
+    DeclareParameter(FlucQTolerance, RealType);    
+    DeclareParameter(FlucQMaxIterations, int);    
+    DeclareParameter(FlucQTargetTemp, RealType);
+    DeclareParameter(FlucQtauThermostat, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
-    
+
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);

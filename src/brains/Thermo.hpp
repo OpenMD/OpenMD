@@ -61,6 +61,7 @@ namespace OpenMD {
     RealType getTotalE(); // gets the total energy
 
     RealType getTemperature(); // gives the instant temp. in K
+    RealType getElectronicTemperature(); // gives the instant electronic temperature in K
 
     RealType getPressure(); // gives the instant pressure in atm;
     RealType getPressureX() { return getPressure(0); }

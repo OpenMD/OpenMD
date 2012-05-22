@@ -53,8 +53,10 @@
 
 #include "integrators/Integrator.hpp"
 #include "integrators/RotationAlgorithm.hpp"
+#include "integrators/FluctuatingChargePropagator.hpp"
 #include "constraints/Rattle.hpp"
 #include "utils/ProgressBar.hpp"
+
 namespace OpenMD {
 
   /**
@@ -65,37 +67,19 @@ namespace OpenMD {
   class VelocityVerletIntegrator : public Integrator {
   public:
     virtual ~VelocityVerletIntegrator();
-
-    void setRotationAlgorithm(RotationAlgorithm* algo) {
-      if (algo != rotAlgo && rotAlgo != NULL){            
-	delete rotAlgo;
-      }
-            
-      rotAlgo = algo;
-    }
         
   protected:
 
     VelocityVerletIntegrator(SimInfo* info);
-
     virtual void doIntegrate();
-
     virtual void initialize();
-
     virtual void preStep();
-        
     virtual void integrateStep();        
-
     virtual void postStep();
-
     virtual void finalize();
-
     virtual void resetIntegrator() {}
     
-    RotationAlgorithm* rotAlgo;
-    Rattle* rattle;
     RealType dt2;
-
     RealType currSample;
     RealType currStatus;
     RealType currThermal;
@@ -105,15 +89,10 @@ namespace OpenMD {
   private:
         
     virtual void calcForce();    
-        
     virtual void moveA() = 0;
-        
-    virtual void moveB() = 0;        
-
+    virtual void moveB() = 0;
     virtual RealType calcConservedQuantity() = 0;
-
     virtual DumpWriter* createDumpWriter();
-
     virtual StatWriter* createStatWriter();
 
     ProgressBar* progressBar;

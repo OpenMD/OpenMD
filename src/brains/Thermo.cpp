@@ -145,6 +145,42 @@ namespace OpenMD {
     return temperature;
   }
 
+  RealType Thermo::getElectronicTemperature() {
+    SimInfo::MoleculeIterator miter;
+    std::vector<Atom*>::iterator iiter;
+    Molecule* mol;
+    Atom* atom;    
+    RealType cvel;
+    RealType cmass;
+    RealType kinetic = 0.0;
+    RealType kinetic_global = 0.0;
+    
+    for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
+      for (atom = mol->beginFluctuatingCharge(iiter); atom != NULL; 
+	   atom = mol->nextFluctuatingCharge(iiter)) {
+        cmass = atom->getChargeMass();
+        cvel = atom->getFlucQVel();
+        
+        kinetic += cmass * cvel * cvel;
+        
+      }
+    }
+    
+#ifdef IS_MPI
+
+    MPI_Allreduce(&kinetic, &kinetic_global, 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
+    kinetic = kinetic_global;
+
+#endif //is_mpi
+
+    kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+    return ( 2.0 * kinetic) / (info_->getNFluctuatingCharges()* PhysicalConstants::kb );    
+  }
+
+
+
+
   RealType Thermo::getVolume() { 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     return curSnapshot->getVolume();

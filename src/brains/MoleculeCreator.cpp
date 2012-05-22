@@ -67,7 +67,7 @@ namespace OpenMD {
 					    int stampId, int globalIndex, 
                                             LocalIndexManager* localIndexMan) {
     Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getName());
-    
+
     //create atoms
     Atom* atom;
     AtomStamp* currentAtomStamp;
@@ -177,6 +177,13 @@ namespace OpenMD {
     createConstraintPair(mol);
     createConstraintElem(mol);
     
+    // Does this molecule stamp define a total constrained charge value?
+    // If so, let the created molecule know about it.
+
+    if (molStamp->haveConstrainedCharge() ) {
+      mol->setConstrainedCharge( molStamp->getConstrainedCharge() );
+    }
+
     //the construction of this molecule is finished
     mol->complete();
     

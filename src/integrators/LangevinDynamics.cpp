@@ -105,7 +105,7 @@ namespace OpenMD {
 
 	  ji += (dt2  * PhysicalConstants::energyConvert) * Tb;
 
-	  rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo_->rotate(integrableObject, ji, dt);
 
 	  integrableObject->setJ(ji);
 	}
@@ -114,8 +114,8 @@ namespace OpenMD {
       }
     } //end for(mol = info_->beginMolecule(i))
     
-    rattle->constraintA();
-    
+    flucQ_->moveA();
+    rattle_->constraintA();    
   }    
 
   void LangevinDynamics::moveB(){
@@ -161,9 +161,8 @@ namespace OpenMD {
       }
     } //end for(mol = info_->beginMolecule(i))
   
-
-    rattle->constraintB();
-
+    flucQ_->moveB();
+    rattle_->constraintB();
   }
 
 

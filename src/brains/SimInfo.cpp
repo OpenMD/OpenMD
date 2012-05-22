@@ -72,10 +72,10 @@ namespace OpenMD {
     forceField_(ff), simParams_(simParams), 
     ndf_(0), fdf_local(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
-    nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
+    nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0), nGlobalFluctuatingCharges_(0),
     nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nInversions_(0), 
     nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
-    nConstraints_(0), sman_(NULL), topologyDone_(false), 
+    nConstraints_(0), nFluctuatingCharges_(0), sman_(NULL), topologyDone_(false), 
     calcBoxDipole_(false), useAtomicVirial_(true) {    
     
     MoleculeStamp* molStamp;
@@ -225,13 +225,17 @@ namespace OpenMD {
 
 
   void SimInfo::calcNdf() {
-    int ndf_local;
+    int ndf_local, nfq_local;
     MoleculeIterator i;
     vector<StuntDouble*>::iterator j;
+    vector<Atom*>::iterator k;
+
     Molecule* mol;
     StuntDouble* integrableObject;
+    Atom* atom;
 
     ndf_local = 0;
+    nfq_local = 0;
     
     for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
@@ -246,7 +250,12 @@ namespace OpenMD {
 	    ndf_local += 3;
 	  }
 	}
-            
+      }
+      for (atom = mol->beginFluctuatingCharge(k); atom != NULL;
+           atom = mol->nextFluctuatingCharge(k)) {
+        if (atom->isFluctuatingCharge()) {
+          nfq_local++;
+        }
       }
     }
     
@@ -255,8 +264,10 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     MPI_Allreduce(&ndf_local,&ndf_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&nfq_local,&nGlobalFluctuatingCharges_,1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #else
     ndf_ = ndf_local;
+    nGlobalFluctuatingCharges_ = nfq_local;
 #endif
 
     // nZconstraints_ is global, as are the 3 COM translations for the 
@@ -780,11 +791,13 @@ namespace OpenMD {
     int usesElectrostatic = 0;
     int usesMetallic = 0;
     int usesDirectional = 0;
+    int usesFluctuatingCharges =  0;
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
       usesElectrostatic |= (*i)->isElectrostatic();
       usesMetallic |= (*i)->isMetal();
       usesDirectional |= (*i)->isDirectional();
+      usesFluctuatingCharges |= (*i)->isFluctuatingCharge();
     }
     
 #ifdef IS_MPI    
@@ -797,11 +810,15 @@ namespace OpenMD {
     
     temp = usesElectrostatic;
     MPI_Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
+
+    temp = usesFluctuatingCharges;
+    MPI_Allreduce(&temp, &usesFluctuatingCharges_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
 #else
 
     usesDirectionalAtoms_ = usesDirectional;
     usesMetallicAtoms_ = usesMetallic;
     usesElectrostaticAtoms_ = usesElectrostatic;
+    usesFluctuatingCharges_ = usesFluctuatingCharges;
 
 #endif
     

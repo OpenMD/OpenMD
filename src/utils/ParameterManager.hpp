@@ -217,7 +217,7 @@ template<class ParamType>
 class Parameter : public ParameterBase{
 public:    
   typedef ParameterTraits<ParamType> ValueType;
-  void setDefaultValue(const ParamType& value) {data_ = value; defaultValue_ = true;}
+  void setDefaultValue(const ParamType& value) {data_ = value; defaultValue_ = true; empty_ = false;}
   ParamType getData() { return data_;}
   
   virtual bool setData(std::string sval) {

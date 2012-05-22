@@ -101,7 +101,7 @@ namespace OpenMD {
 
 	  ji += (dt2  * PhysicalConstants::energyConvert) * Tb;
 
-	  rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo_->rotate(integrableObject, ji, dt);
 
 	  integrableObject->setJ(ji);
 	}
@@ -110,8 +110,8 @@ namespace OpenMD {
       }
     } //end for(mol = info_->beginMolecule(i))
     
-    rattle->constraintA();
-    
+    flucQ_->moveA();
+    rattle_->constraintA();    
   }    
 
   void NVE::moveB(){
@@ -157,14 +157,13 @@ namespace OpenMD {
       }
     } //end for(mol = info_->beginMolecule(i))
   
-
-    rattle->constraintB();
-
+    flucQ_->moveB();
+    rattle_->constraintB();
   }
 
 
   RealType NVE::calcConservedQuantity() {
-    return thermo.getTotalE() ;
+    return thermo.getTotalE();
   }
 
 } //end namespace OpenMD

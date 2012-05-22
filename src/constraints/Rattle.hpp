@@ -78,7 +78,8 @@ namespace OpenMD {
     int maxConsIteration_;        
     RealType consTolerance_;
     RealType dt_;
-    Snapshot* currentSnapshot_;     
+    Snapshot* currentSnapshot_;   
+    bool doRattle_;
   };
 
 }

@@ -55,8 +55,11 @@
 #include "restraints/ThermoIntegrationForceManager.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
+#include "integrators/RotationAlgorithm.hpp"
+#include "integrators/FluctuatingChargePropagator.hpp"
 #include "integrators/Velocitizer.hpp"
 #include "integrators/RNEMD.hpp"
+#include "constraints/Rattle.hpp"
 
 namespace OpenMD {
 
@@ -76,8 +79,9 @@ namespace OpenMD {
       doIntegrate();
     }
 
-    void update() {
-      doUpdate();
+    void updateSizes() {
+      doUpdateSizes();
+      flucQ_->updateSizes();
     }
 
     void setForceManager(ForceManager* forceMan) {
@@ -95,6 +99,21 @@ namespace OpenMD {
       velocitizer_ = velocitizer;
     }
 
+    void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop) {
+      if (prop != flucQ_ && flucQ_ != NULL){            
+        delete flucQ_;
+      }            
+      flucQ_ = prop;
+    }
+
+    void setRotationAlgorithm(RotationAlgorithm* algo) {
+      if (algo != rotAlgo_ && rotAlgo_ != NULL){            
+        delete rotAlgo_;
+      }
+            
+      rotAlgo_ = algo;
+    }
+
     void setRNEMD(RNEMD* rnemd) {
       if (rnemd_ != rnemd && rnemd_  != NULL) {
 	delete rnemd_;
@@ -108,7 +127,7 @@ namespace OpenMD {
 
     virtual void doIntegrate() = 0;
 
-    virtual void doUpdate() {}
+    virtual void doUpdateSizes() {}
         
     void saveConservedQuantity() {
       currentSnapshot_->statData[Stats::CONSERVED_QUANTITY] = calcConservedQuantity();
@@ -117,11 +136,15 @@ namespace OpenMD {
     SimInfo* info_;
     Globals* simParams;
     ForceManager* forceMan_;
+    RotationAlgorithm* rotAlgo_;
+    FluctuatingChargePropagator* flucQ_;
+    Rattle* rattle_;
+    Velocitizer* velocitizer_;
+    RNEMD* rnemd_;
+
     bool needPotential;
     bool needStress;
     bool needReset;    
-    Velocitizer* velocitizer_;
-    RNEMD* rnemd_;
     bool needVelocityScaling;
     RealType targetScalingTemp;
 

@@ -54,15 +54,11 @@
 #include "utils/ProgressBar.hpp"
 
 namespace OpenMD {
-  VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info) : Integrator(info), rotAlgo(NULL) { 
+  VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info) : Integrator(info) { 
     dt2 = 0.5 * dt;
-    rotAlgo = new DLM();
-    rattle = new Rattle(info);
   }
   
   VelocityVerletIntegrator::~VelocityVerletIntegrator() { 
-    delete rotAlgo;
-    delete rattle;
   }
   
   void VelocityVerletIntegrator::initialize(){
@@ -72,6 +68,9 @@ namespace OpenMD {
     // remove center of mass drift velocity (in case we passed in a
     // configuration that was drifting)
     velocitizer_->removeComDrift();
+
+    // find the initial fluctuating charges.
+    flucQ_->initialize();
     
     // initialize the forces before the first step
     calcForce();
@@ -79,9 +78,9 @@ namespace OpenMD {
     // execute the constraint algorithm to make sure that the system is
     // constrained at the very beginning  
     if (info_->getNGlobalConstraints() > 0) {
-      rattle->constraintA();
+      rattle_->constraintA();
       calcForce();
-      rattle->constraintB();      
+      rattle_->constraintB();      
       //copy the current snapshot to previous snapshot
       info_->getSnapshotManager()->advance();
     }
@@ -122,21 +121,14 @@ namespace OpenMD {
  
   void VelocityVerletIntegrator::doIntegrate() {
   
-  
     initialize();
   
-    while (currentSnapshot_->getTime() < runTime) {
-    
-      preStep();
-    
-      integrateStep();
-    
-      postStep();
-      
-    }
-  
+    while (currentSnapshot_->getTime() < runTime) {    
+      preStep();    
+      integrateStep();    
+      postStep();      
+    }  
     finalize();
-  
   }
 
 
@@ -211,7 +203,6 @@ namespace OpenMD {
   
     dumpWriter = NULL;
     statWriter = NULL;
-  
   }
 
   void VelocityVerletIntegrator::integrateStep() { 

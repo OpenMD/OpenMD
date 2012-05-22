@@ -141,8 +141,12 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
   DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
-
-
+  DefineOptionalParameterWithDefaultValue(FlucQPropagator, "flucQ.propagator", "NVT");
+  DefineOptionalParameterWithDefaultValue(FlucQFriction, "flucQ.friction", 1600.0);    
+  DefineOptionalParameterWithDefaultValue(FlucQTolerance, "flucQ.tolerance", 1.0e-6);    
+  DefineOptionalParameterWithDefaultValue(FlucQMaxIterations, "flucQ.maxIterations", 100);    
+  DefineOptionalParameterWithDefaultValue(FlucQTargetTemp, "flucQ.targetTemp", 1.0e-6);
+  DefineOptionalParameterWithDefaultValue(FlucQtauThermostat, "flucQ.tauThermostat", 10.0);
 
   deprecatedKeywords_.insert("nComponents");
   deprecatedKeywords_.insert("nZconstraints");
@@ -214,7 +218,12 @@ void Globals::validate() {
   CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale"));
   CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
   CheckParameter(Alpha, isPositive()); 
-
+  CheckParameter(FlucQPropagator, isEqualIgnoreCase("NVT") || isEqualIgnoreCase("Langevin") || isEqualIgnoreCase("Minimizer") || isEqualIgnoreCase("Exact") );
+  CheckParameter(FlucQFriction, isNonNegative());    
+  CheckParameter(FlucQTolerance, isPositive());    
+  CheckParameter(FlucQMaxIterations, isPositive());    
+  CheckParameter(FlucQTargetTemp,  isNonNegative());
+  CheckParameter(FlucQtauThermostat, isPositive()); 
   
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {

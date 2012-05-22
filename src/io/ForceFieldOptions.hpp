@@ -82,7 +82,7 @@ namespace OpenMD {
       CheckParameter(DistanceMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("cubic")));
       CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
       CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("hhg")));
-      CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180 is trans")) || isEqualIgnoreCase(std::string("0 is trans")));
+      CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180_is_trans")) || isEqualIgnoreCase(std::string("0_is_trans")));
       CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
       CheckParameter(EAMMixingMethod, isEqualIgnoreCase(std::string("JOHNSON")) || isEqualIgnoreCase(std::string("DAW")));
    }

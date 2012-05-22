@@ -58,6 +58,33 @@
 
 namespace OpenMD{
 
+  struct FrameData {
+    int id;                   /**< identification number of the snapshot */
+    RealType currentTime;     /**< current time */
+    Mat3x3d hmat;             /**< axes of the periodic box in matrix form */
+    Mat3x3d invHmat;          /**< the inverse of the Hmat matrix */
+    bool orthoRhombic;        /**< is this an orthorhombic periodic box? */
+    RealType volume;          /**< total volume of this frame */
+    RealType pressure;        /**< pressure of this frame */
+    RealType totalEnergy;     /**< total energy of this frame */
+    RealType kineticEnergy;   /**< kinetic energy of this frame */
+    RealType potentialEnergy; /**< potential energy of this frame */
+    RealType temperature;     /**< temperature of this frame */
+    RealType chi;             /**< thermostat velocity */
+    RealType integralOfChiDt; /**< the actual thermostat */
+    RealType electronicTemperature; /**< temperature of the electronic degrees of freedom */
+    RealType chiQ;            /**< fluctuating charge thermostat velocity */
+    RealType integralOfChiQDt; /**< the actual fluctuating charge thermostat */
+    Mat3x3d eta;              /**< barostat matrix */
+    Vector3d COM;             /**< location of center of mass */
+    Vector3d COMvel;          /**< system center of mass velocity */
+    Vector3d COMw;            /**< system center of mass angular velocity */
+    Mat3x3d tau;              /**< stress tensor */
+    Mat3x3d pressureTensor;   /**< pressure tensor */
+    Vector3d systemDipole;    /**< total system dipole moment */
+  };
+
+
   /**
    * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
    * @brief Snapshot class is a repository class for storing dynamic data during 
@@ -71,36 +98,74 @@ namespace OpenMD{
     Snapshot(int nAtoms, int nRigidbodies, 
              int nCutoffGroups) : atomData(nAtoms), 
                                   rigidbodyData(nRigidbodies),
-                                  cgData(nCutoffGroups, DataStorage::dslPosition),
-                                  currentTime_(0), 
-                                  orthoTolerance_(1e-6), 
-                                  orthoRhombic_(0), 
-                                  chi_(0.0), 
-                                  integralOfChiDt_(0.0), 
-                                  eta_(0.0), id_(-1), hasCOM_(false), 
-                                  volume_(0.0), hasVolume_(false) {
-
+                                  cgData(nCutoffGroups, DataStorage::dslPosition), 
+                                  orthoTolerance_(1e-6), hasCOM_(false), hasVolume_(false){
+      
+      frameData.id = -1;                   
+      frameData.currentTime = 0;     
+      frameData.hmat = Mat3x3d(0.0);             
+      frameData.invHmat = Mat3x3d(0.0);          
+      frameData.orthoRhombic = false;        
+      frameData.volume = 0.0;          
+      frameData.pressure = 0.0;        
+      frameData.totalEnergy = 0.0;     
+      frameData.kineticEnergy = 0.0;   
+      frameData.potentialEnergy = 0.0; 
+      frameData.temperature = 0.0;     
+      frameData.chi = 0.0;             
+      frameData.integralOfChiDt = 0.0; 
+      frameData.electronicTemperature = 0.0;
+      frameData.chiQ = 0.0;            
+      frameData.integralOfChiQDt = 0.0; 
+      frameData.eta = Mat3x3d(0.0);              
+      frameData.COM = V3Zero;             
+      frameData.COMvel = V3Zero;          
+      frameData.COMw = V3Zero;            
+      frameData.tau = Mat3x3d(0.0);              
+      frameData.pressureTensor = Mat3x3d(0.0);   
+      frameData.systemDipole = V3Zero;            
     }
 
     Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
              int storageLayout) : atomData(nAtoms, storageLayout), 
                                   rigidbodyData(nRigidbodies, storageLayout),
                                   cgData(nCutoffGroups, DataStorage::dslPosition),
-                                  currentTime_(0), orthoTolerance_(1e-6), 
-                                  orthoRhombic_(0), chi_(0.0), 
-                                  integralOfChiDt_(0.0), eta_(0.0), id_(-1), 
-                                  hasCOM_(false), volume_(0.0),
+                                  orthoTolerance_(1e-6),
+                                  hasCOM_(false),
                                   hasVolume_(false) {
+      frameData.id = -1;                   
+      frameData.currentTime = 0;     
+      frameData.hmat = Mat3x3d(0.0);             
+      frameData.invHmat = Mat3x3d(0.0);          
+      frameData.orthoRhombic = false;        
+      frameData.volume = 0.0;          
+      frameData.pressure = 0.0;        
+      frameData.totalEnergy = 0.0;     
+      frameData.kineticEnergy = 0.0;   
+      frameData.potentialEnergy = 0.0; 
+      frameData.temperature = 0.0;     
+      frameData.chi = 0.0;             
+      frameData.integralOfChiDt = 0.0; 
+      frameData.electronicTemperature = 0.0;
+      frameData.chiQ = 0.0;            
+      frameData.integralOfChiQDt = 0.0; 
+      frameData.eta = Mat3x3d(0.0);              
+      frameData.COM = V3Zero;             
+      frameData.COMvel = V3Zero;          
+      frameData.COMw = V3Zero;            
+      frameData.tau = Mat3x3d(0.0);              
+      frameData.pressureTensor = Mat3x3d(0.0);   
+      frameData.systemDipole = V3Zero;            
     }
     
     /** Returns the id of this Snapshot */
     int getID() {
-      return id_;
+      return frameData.id;
     }
 
     /** Sets the id of this Snapshot */
     void setID(int id) {
-      id_ = id;
+      frameData.id = id;
     }
 
     int getSize() {
@@ -124,7 +189,7 @@ namespace OpenMD{
 
     /** Returns the H-Matrix */
     Mat3x3d getHmat() {
-      return hmat_;
+      return frameData.hmat;
     }
 
     /** Sets the H-Matrix */
@@ -132,20 +197,20 @@ namespace OpenMD{
             
     RealType getVolume() {
       if (hasVolume_){
-        return volume_;
+        return frameData.volume;
       }else{
-        return hmat_.determinant();
+        return frameData.hmat.determinant();
       }
     }
 
     void setVolume(RealType volume){
       hasVolume_=true;
-      volume_ = volume;
+      frameData.volume = volume;
     }
 
     /** Returns the inverse H-Matrix */
     Mat3x3d getInvHmat() {
-      return invHmat_;
+      return frameData.invHmat;
     }
 
     /** Wrapping the vector according to periodic boundary condition*/
@@ -159,7 +224,7 @@ namespace OpenMD{
     Vector3d getCOMw();
             
     RealType getTime() {
-      return currentTime_;
+      return frameData.currentTime;
     }
 
     void increaseTime(RealType dt) {
@@ -167,25 +232,41 @@ namespace OpenMD{
     }
 
     void setTime(RealType time) {
-      currentTime_ =time;
+      frameData.currentTime =time;
       //time at statData is redundant
-      statData[Stats::TIME] = currentTime_;
+      statData[Stats::TIME] = frameData.currentTime;
     }
 
     RealType getChi() {
-      return chi_;
+      return frameData.chi;
     }
 
     void setChi(RealType chi) {
-      chi_ = chi;
+      frameData.chi = chi;
     }
 
     RealType getIntegralOfChiDt() {
-      return integralOfChiDt_;
+      return frameData.integralOfChiDt;
     }
 
     void setIntegralOfChiDt(RealType integralOfChiDt) {
-      integralOfChiDt_ = integralOfChiDt;
+      frameData.integralOfChiDt = integralOfChiDt;
+    }
+            
+    RealType getChiElectronic() {
+      return frameData.chiQ;
+    }
+
+    void setChiElectronic(RealType chiQ) {
+      frameData.chiQ = chiQ;
+    }
+
+    RealType getIntegralOfChiElectronicDt() {
+      return frameData.integralOfChiQDt;
+    }
+
+    void setIntegralOfChiElectronicDt(RealType integralOfChiQDt) {
+      frameData.integralOfChiQDt = integralOfChiQDt;
     }
             
 
@@ -194,19 +275,19 @@ namespace OpenMD{
     }
 
     Mat3x3d getEta() {
-      return eta_;
+      return frameData.eta;
     }
 
     void setEta(const Mat3x3d& eta) {
-      eta_ = eta;
+      frameData.eta = eta;
     }
 
     Mat3x3d getTau() {
-      return tau_;
+      return frameData.tau;
     }
         
     void setTau(const Mat3x3d& tau) {
-      tau_ = tau;
+      frameData.tau = tau;
     }
 
     bool hasCOM() {
@@ -214,36 +295,22 @@ namespace OpenMD{
     }
 
     void setCOMprops(const Vector3d& COM, const Vector3d& COMvel, const Vector3d& COMw) {
-      COM_ = COM;
-      COMvel_ = COMvel;
-      COMw_ = COMw;
+      frameData.COM = COM;
+      frameData.COMvel = COMvel;
+      frameData.COMw = COMw;
       hasCOM_ = true;
     }
 
     DataStorage atomData;
     DataStorage rigidbodyData;
     DataStorage cgData;
+    FrameData frameData;
     Stats statData;
 
   private:
-    RealType currentTime_;
-
-    Mat3x3d hmat_;
-    Mat3x3d invHmat_;
     RealType orthoTolerance_;
-    int orthoRhombic_;
-    RealType volume_;
-
-    RealType chi_;
-    RealType integralOfChiDt_;
-    Mat3x3d eta_;
-    Vector3d COM_;
-    Vector3d COMvel_;
-    Vector3d COMw_;
-    int id_; /**< identification number of the snapshot */
     bool hasCOM_;
-    bool hasVolume_;
-    Mat3x3d tau_;
+    bool hasVolume_;    
   };
 
   typedef DataStorage (Snapshot::*DataStoragePointer); 

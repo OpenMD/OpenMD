@@ -84,7 +84,7 @@ namespace OpenMD{
     typedef std::vector<StuntDouble*>::iterator IntegrableObjectIterator;
     typedef std::vector<ConstraintPair*>::iterator ConstraintPairIterator;
     typedef std::vector<ConstraintElem*>::iterator ConstraintElemIterator;
-    
+    typedef std::vector<Atom*>::iterator FluctuatingChargeIterator;
     
     Molecule(int stampId, int globalIndex, const std::string& molName);
     virtual ~Molecule();
@@ -121,6 +121,13 @@ namespace OpenMD{
       globalIndex_ = index;
     }
     
+    void setConstrainedCharge(RealType cc) {
+      constrainedCharge_ = cc;
+    }
+
+    RealType getConstrainedCharge() {
+      return constrainedCharge_;
+    }
     
     /** add an atom into this molecule */
     void addAtom(Atom* atom);
@@ -194,7 +201,12 @@ namespace OpenMD{
     unsigned int getNConstraintPairs() {
       return constraintPairs_.size();
     }
-    
+
+    /** Returns the total number of fluctuating charges in this molecule */
+    unsigned int getNFluctuatingCharges() {
+      return fluctuatingCharges_.size();
+    }
+
     Atom* getAtomAt(unsigned int i) {
       assert(i < atoms_.size());
       return atoms_[i];
@@ -305,6 +317,17 @@ namespace OpenMD{
       ++i;
       return (i == constraintElems_.end()) ? NULL : *i;    
     }
+
+    Atom* beginFluctuatingCharge(std::vector<Atom*>::iterator& i) {
+      i = fluctuatingCharges_.begin();
+      return (i == fluctuatingCharges_.end()) ? NULL : *i;
+    }
+    
+    Atom* nextFluctuatingCharge(std::vector<Atom*>::iterator& i) {
+      ++i;
+      return (i == fluctuatingCharges_.end()) ? NULL : *i;    
+    }
+
         
     /** 
      * Returns the total potential energy of short range interaction
@@ -382,9 +405,11 @@ namespace OpenMD{
     std::vector<CutoffGroup*> cutoffGroups_;
     std::vector<ConstraintPair*> constraintPairs_;
     std::vector<ConstraintElem*> constraintElems_;
+    std::vector<Atom*> fluctuatingCharges_;
     int stampId_;
     std::string moleculeName_;
     PropertyMap properties_;
+    RealType constrainedCharge_;
 
   };
 

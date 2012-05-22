@@ -40,12 +40,21 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
+#include <cmath>
 #include "primitives/Atom.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
+
 namespace OpenMD {
   
   Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData),
                              atomType_(at) {
     mass_ = at->getMass();
+    if (at->isFluctuatingCharge()) {
+      FluctuatingChargeAdapter fca = FluctuatingChargeAdapter(at);
+      chargeMass_ = fca.getChargeMass();
+    } else {
+      chargeMass_ = INFINITY;
+    }
   }
 
   Mat3x3d Atom::getI() {

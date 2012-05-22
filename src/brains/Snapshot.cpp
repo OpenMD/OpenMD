@@ -57,39 +57,33 @@
 namespace OpenMD {
 
   void  Snapshot::setHmat(const Mat3x3d& m) {
-    hmat_ = m;
-    invHmat_ = hmat_.inverse();
+    frameData.hmat = m;
+    frameData.invHmat = frameData.hmat.inverse();
     
-    //prepare fortran Hmat 
-    RealType fortranHmat[9];
-    RealType fortranInvHmat[9];
-    hmat_.getArray(fortranHmat);
-    invHmat_.getArray(fortranInvHmat);
-
     //determine whether the box is orthoTolerance or not
-    int oldOrthoRhombic = orthoRhombic_;
+    bool oldOrthoRhombic = frameData.orthoRhombic;
     
-    RealType smallDiag = fabs(hmat_(0, 0));
-    if(smallDiag > fabs(hmat_(1, 1))) smallDiag = fabs(hmat_(1, 1));
-    if(smallDiag > fabs(hmat_(2, 2))) smallDiag = fabs(hmat_(2, 2));    
+    RealType smallDiag = fabs(frameData.hmat(0, 0));
+    if(smallDiag > fabs(frameData.hmat(1, 1))) smallDiag = fabs(frameData.hmat(1, 1));
+    if(smallDiag > fabs(frameData.hmat(2, 2))) smallDiag = fabs(frameData.hmat(2, 2));    
     RealType tol = smallDiag * orthoTolerance_;
 
-    orthoRhombic_ = 1;
+    frameData.orthoRhombic = true;
 
     for (int i = 0; i < 3; i++ ) {
       for (int j = 0 ; j < 3; j++) {
 	if (i != j) {
-	  if (orthoRhombic_) {
-	    if ( fabs(hmat_(i, j)) >= tol)
-	      orthoRhombic_ = 0;
+	  if (frameData.orthoRhombic) {
+	    if ( fabs(frameData.hmat(i, j)) >= tol)
+	      frameData.orthoRhombic = false;
 	  }        
 	}
       }
     }
 
-    if( oldOrthoRhombic != orthoRhombic_ ){
+    if( oldOrthoRhombic != frameData.orthoRhombic){
 
-      if( orthoRhombic_ ) {
+      if( frameData.orthoRhombic ) {
 	sprintf( painCave.errMsg,
 		 "OpenMD is switching from the default Non-Orthorhombic\n"
 		 "\tto the faster Orthorhombic periodic boundary computations.\n"
@@ -113,9 +107,6 @@ namespace OpenMD {
 	simError();
       }
     }    
-
-    //notify fortran simulation box has changed
-    // setFortranBox(fortranHmat, fortranInvHmat, &orthoRhombic_);
   }
 
 
@@ -126,13 +117,13 @@ namespace OpenMD {
     for (int i = 0; i < 3; i++) 
       scaled[i] -= roundMe(scaled[i]);
 
-    if( !orthoRhombic_ )
-      pos = hmat_ * scaled;    
+    if( !frameData.orthoRhombic )
+      pos = frameData.hmat * scaled;    
     else {
 
       // calc the wrapped real coordinates from the wrapped scaled coordinates
       for (int i=0; i<3; i++) {
-	pos[i] = scaled[i] * hmat_(i, i);
+	pos[i] = scaled[i] * frameData.hmat(i, i);
       }   
     }
   }
@@ -141,12 +132,12 @@ namespace OpenMD {
     
     Vector3d scaled;
 
-    if( !orthoRhombic_ )
-      scaled = invHmat_* pos;
+    if( !frameData.orthoRhombic )
+      scaled = frameData.invHmat * pos;
     else {
       // calc the scaled coordinates.
       for (int i=0; i<3; i++) 
-        scaled[i] = pos[i] * invHmat_(i, i);
+        scaled[i] = pos[i] * frameData.invHmat(i, i);
     }
 
     return scaled;
@@ -158,7 +149,7 @@ namespace OpenMD {
       painCave.severity = OPENMD_ERROR;
       simError();
     }
-    return COM_;
+    return frameData.COM;
   }
   
   Vector3d Snapshot::getCOMvel() {
@@ -167,7 +158,7 @@ namespace OpenMD {
       painCave.severity = OPENMD_ERROR;
       simError();
     }
-    return COMvel_;
+    return frameData.COMvel;
   }
   
   Vector3d Snapshot::getCOMw() {
@@ -176,7 +167,7 @@ namespace OpenMD {
       painCave.severity = OPENMD_ERROR;
       simError();
     }
-    return COMw_;
+    return frameData.COMw;
   }
 }
   

@@ -223,6 +223,11 @@ namespace OpenMD{
      */
     Molecule* nextMolecule(MoleculeIterator& i);
 
+    /** Returns the total number of fluctuating charges that are present */
+    int getNFluctuatingCharges() {
+      return nGlobalFluctuatingCharges_;
+    }
+
     /** Returns the number of degrees of freedom */
     int getNdf() {
       return ndf_ - getFdf();
@@ -517,6 +522,7 @@ namespace OpenMD{
     int nIntegrableObjects_;  /**< number of integrable objects in local processor */
     int nCutoffGroups_;       /**< number of cutoff groups in local processor */
     int nConstraints_;        /**< number of constraints in local processors */
+    int nFluctuatingCharges_; /**< number of fluctuating charges in local processor */
         
     /// Counts of global objects
     int nGlobalMols_;              /**< number of molecules in the system (GLOBAL) */
@@ -524,6 +530,8 @@ namespace OpenMD{
     int nGlobalCutoffGroups_;      /**< number of cutoff groups in this system (GLOBAL) */
     int nGlobalIntegrableObjects_; /**< number of integrable objects in this system */
     int nGlobalRigidBodies_;       /**< number of rigid bodies in this system (GLOBAL) */
+    int nGlobalFluctuatingCharges_;/**< number of fluctuating charges in this system (GLOBAL) */
+    
        
     /// Degress of freedom
     int ndf_;          /**< number of degress of freedom (excludes constraints) (LOCAL) */
@@ -538,6 +546,7 @@ namespace OpenMD{
     bool usesDirectionalAtoms_;   /**< are there atoms with position AND orientation? */
     bool usesMetallicAtoms_;      /**< are there transition metal atoms? */
     bool usesElectrostaticAtoms_; /**< are there electrostatic atoms? */
+    bool usesFluctuatingCharges_; /**< are there fluctuating charges? */
     bool usesAtomicVirial_;       /**< are we computing atomic virials? */
     bool requiresPrepair_;        /**< does this simulation require a pre-pair loop? */
     bool requiresSkipCorrection_; /**< does this simulation require a skip-correction? */
@@ -546,7 +555,7 @@ namespace OpenMD{
   public:
     bool usesElectrostaticAtoms() { return usesElectrostaticAtoms_; }
     bool usesDirectionalAtoms() { return usesDirectionalAtoms_; }
-    bool usesMetallicAtoms() { return usesMetallicAtoms_; }
+    bool usesFluctuatingCharges() { return usesFluctuatingCharges_; }
     bool usesAtomicVirial() { return usesAtomicVirial_; }
     bool requiresPrepair() { return requiresPrepair_; }
     bool requiresSkipCorrection() { return requiresSkipCorrection_;}

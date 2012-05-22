@@ -426,8 +426,6 @@ namespace OpenMD {
 
     int storageLayout = computeStorageLayout(info);
 
-    cerr << "computed Storage Layout = " << storageLayout << "\n";
-
     //allocate memory for DataStorage(circular reference, need to
     //break it)
     info->setSnapshotManager(new SimSnapshotManager(info, storageLayout));

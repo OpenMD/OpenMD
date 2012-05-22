@@ -79,12 +79,12 @@ namespace OpenMD {
       tauThermostat_ = simParams->getTauThermostat();
     }
 
-    update();
+    updateSizes();
   }
 
-  void NVT::doUpdate() {
+  void NVT::doUpdateSizes() {
     oldVel_.resize(info_->getNIntegrableObjects());
-    oldJi_.resize(info_->getNIntegrableObjects());    
+    oldJi_.resize(info_->getNIntegrableObjects());
   }
   void NVT::moveA() {
     SimInfo::MoleculeIterator i;
@@ -137,7 +137,7 @@ namespace OpenMD {
 
 	  //ji[j] += dt2 * (Tb[j] * PhysicalConstants::energyConvert - ji[j]*chi);
 	  ji += dt2*PhysicalConstants::energyConvert*Tb - dt2*chi *ji;
-	  rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo_->rotate(integrableObject, ji, dt);
 
 	  integrableObject->setJ(ji);
         }
@@ -145,7 +145,8 @@ namespace OpenMD {
 
     }
     
-    rattle->constraintA();
+    flucQ_->moveA();
+    rattle_->constraintA();
 
     // Finally, evolve chi a half step (just like a velocity) using
     // temperature at time t, not time t+dt/2
@@ -237,16 +238,16 @@ namespace OpenMD {
 	}
       }
     
-
-      rattle->constraintB();
+      rattle_->constraintB();
 
       if (fabs(prevChi - chi) <= chiTolerance_)
 	break;
 
     }
 
-    integralOfChidt += dt2 * chi;
+    flucQ_->moveB();
 
+    integralOfChidt += dt2 * chi;
     currentSnapshot_->setChi(chi);
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);
   }

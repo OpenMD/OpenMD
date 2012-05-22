@@ -70,8 +70,10 @@ namespace OpenMD {
     MemoryUtils::deletePointers(cutoffGroups_);
     MemoryUtils::deletePointers(constraintPairs_);
     MemoryUtils::deletePointers(constraintElems_);
+
     // integrableObjects_ don't own the objects
     integrableObjects_.clear();
+    fluctuatingCharges_.clear();
     
   }
   
@@ -138,46 +140,44 @@ namespace OpenMD {
   void Molecule::complete() {
     
     std::set<Atom*> rigidAtoms;
+    Atom* atom;
+    AtomIterator ai;
     RigidBody* rb;
-    std::vector<RigidBody*>::iterator rbIter;
+    RigidBodyIterator rbIter;
 
-    
+    // Get list of all the atoms that are part of rigid bodies
+
     for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
       rigidAtoms.insert(rb->getBeginAtomIter(), rb->getEndAtomIter());
     }
     
-    Atom* atom;
-    AtomIterator ai;
+    // add any atom that wasn't part of a rigid body to the list of integrableObjects
+
     for (atom = beginAtom(ai); atom != NULL; atom = nextAtom(ai)) {
       
-      if (rigidAtoms.find(*ai) == rigidAtoms.end()) {
+      if (rigidAtoms.find(atom) == rigidAtoms.end()) {
 
 	// If an atom does not belong to a rigid body, it is an
 	// integrable object
 
-	integrableObjects_.push_back(*ai);
+	integrableObjects_.push_back(atom);
       }
     }
     
-    //find all free atoms (which do not belong to rigid bodies)  
-    // performs the "difference" operation from set theory, the output
-    // range contains a copy of every element that is contained in
-    // [allAtoms.begin(), allAtoms.end()) and not contained in
-    // [rigidAtoms.begin(), rigidAtoms.end()).
-    //std::set_difference(allAtoms.begin(), allAtoms.end(), rigidAtoms.begin(), rigidAtoms.end(),
-    //                        std::back_inserter(integrableObjects_));
+    // then add the rigid bodies themselves to the integrableObjects
 
-    //if (integrableObjects_.size() != allAtoms.size() - rigidAtoms.size()) {
-    //    //Some atoms in rigidAtoms are not in allAtoms, something must be wrong
-    //    sprintf(painCave.errMsg, "Atoms in rigidbody are not in the atom list of the same molecule");
-    //
-    //    painCave.isFatal = 1;
-    //    simError();        
-    //}
     for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
       integrableObjects_.push_back(rb);
     } 
-    //integrableObjects_.insert(integrableObjects_.end(), rigidBodies_.begin(), rigidBodies_.end());
+
+    // find the atoms that are fluctuating charges and add them to the 
+    // fluctuatingCharges_ vector
+
+    for (atom = beginAtom(ai); atom != NULL; atom = nextAtom(ai)) {
+      if ( atom->isFluctuatingCharge() )
+        fluctuatingCharges_.push_back( atom );      
+    }
+
   }
 
   RealType Molecule::getMass() {
@@ -300,9 +300,6 @@ namespace OpenMD {
     return properties_.getPropertyByName(propName); 
   }
 
-
-
-
   std::ostream& operator <<(std::ostream& o, Molecule& mol) {
     o << std::endl;
     o << "Molecule " << mol.getGlobalIndex() << "has: " << std::endl;
@@ -312,9 +309,10 @@ namespace OpenMD {
     o << mol.getNTorsions() << " torsions" << std::endl;
     o << mol.getNInversions() << " inversions" << std::endl;
     o << mol.getNRigidBodies() << " rigid bodies" << std::endl;
-    o << mol.getNIntegrableObjects() << "integrable objects" << std::endl;
-    o << mol.getNCutoffGroups() << "cutoff groups" << std::endl;
-    o << mol.getNConstraintPairs() << "constraint pairs" << std::endl;
+    o << mol.getNIntegrableObjects() << " integrable objects" << std::endl;
+    o << mol.getNCutoffGroups() << " cutoff groups" << std::endl;
+    o << mol.getNConstraintPairs() << " constraint pairs" << std::endl;
+    o << mol.getNFluctuatingCharges() << " fluctuating charges" << std::endl;
     return o;
   }
   

@@ -641,6 +641,7 @@ namespace OpenMD {
     RealType vpair;
     potVec longRangePotential(0.0);
     potVec workPot(0.0);
+    vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
 
@@ -698,11 +699,11 @@ namespace OpenMD {
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 
-          for (vector<int>::iterator ia = atomListRow.begin(); 
+          for (ia = atomListRow.begin(); 
                ia != atomListRow.end(); ++ia) {            
             atom1 = (*ia);
             
-            for (vector<int>::iterator jb = atomListColumn.begin(); 
+            for (jb = atomListColumn.begin(); 
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
 
@@ -754,7 +755,7 @@ namespace OpenMD {
                 tau -= outProduct( *(idat.d), fg);
               }
           
-              for (vector<int>::iterator ia = atomListRow.begin(); 
+              for (ia = atomListRow.begin(); 
                    ia != atomListRow.end(); ++ia) {            
                 atom1 = (*ia);                
                 mf = fDecomp_->getMassFactorRow(atom1);
@@ -771,7 +772,7 @@ namespace OpenMD {
                   }
                 }
               }
-              for (vector<int>::iterator jb = atomListColumn.begin(); 
+              for (jb = atomListColumn.begin(); 
                    jb != atomListColumn.end(); ++jb) {              
                 atom2 = (*jb);
                 mf = fDecomp_->getMassFactorColumn(atom2);

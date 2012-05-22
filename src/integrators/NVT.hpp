@@ -102,7 +102,7 @@ namespace OpenMD {
 
     virtual void moveB();
 
-    virtual void doUpdate() ;
+    virtual void doUpdateSizes() ;
 
     virtual void resetIntegrator();
     

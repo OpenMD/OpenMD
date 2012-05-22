@@ -190,6 +190,10 @@ namespace OpenMD {
     return hasProperty("Directional");
   }
 
+  bool AtomType::isFluctuatingCharge() {
+    return hasProperty("FlucQ");
+  }
+
   bool AtomType::isDipole() {
     MultipoleAdapter ma = MultipoleAdapter(this);
     if (ma.isMultipole()) {
