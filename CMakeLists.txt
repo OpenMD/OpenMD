@@ -218,6 +218,7 @@ src/hydrodynamics/Ellipsoid.cpp
 src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/Sphere.cpp
 src/integrators/DLM.cpp
+src/integrators/FluctuatingChargeNVT.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
