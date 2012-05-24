@@ -390,6 +390,8 @@ namespace OpenMD {
       info_->prepareTopology();      
 
       doParticlePot_ = info_->getSimParams()->getOutputParticlePotential();
+      doHeatFlux_ = info_->getSimParams()->getPrintHeatFlux();
+      if (doHeatFlux_) doParticlePot_ = true;
    
     }
 
@@ -471,8 +473,9 @@ namespace OpenMD {
     }
     
     // Zero out the stress tensor
-    tau *= 0.0;
-    
+    stressTensor *= 0.0;
+    // Zero out the heatFlux
+    fDecomp_->setHeatFlux( V3Zero );    
   }
   
   void ForceManager::shortRangeInteractions() {
@@ -595,6 +598,7 @@ namespace OpenMD {
   
   void ForceManager::longRangeInteractions() {
 
+
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
@@ -618,13 +622,14 @@ namespace OpenMD {
       // center of mass of the group is the same as position of the atom  
       // if cutoff group does not exist
       cgConfig->position = config->position;
+      cgConfig->velocity = config->velocity;
     }
 
     fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
     
     int cg1, cg2, atom1, atom2, topoDist;
-    Vector3d d_grp, dag, d;
+    Vector3d d_grp, dag, d, gvel2, vel2;
     RealType rgrpsq, rgrp, r2, r;
     RealType electroMult, vdwMult;
     RealType vij;
@@ -699,6 +704,9 @@ namespace OpenMD {
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 
+          if (doHeatFlux_)
+            gvel2 = fDecomp_->getGroupVelocityColumn(cg2);
+        
           for (ia = atomListRow.begin(); 
                ia != atomListRow.end(); ++ia) {            
             atom1 = (*ia);
@@ -721,12 +729,16 @@ namespace OpenMD {
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                   idat.d = &d_grp;
                   idat.r2 = &rgrpsq;
+                  if (doHeatFlux_)
+                    vel2 = gvel2;
                 } else {
                   d = fDecomp_->getInteratomicVector(atom1, atom2);
                   curSnapshot->wrapVector( d );
                   r2 = d.lengthSquare();
                   idat.d = &d;
                   idat.r2 = &r2;
+                  if (doHeatFlux_)
+                    vel2 = fDecomp_->getAtomVelocityColumn(atom2);
                 }
                
                 r = sqrt( *(idat.r2) );
@@ -739,7 +751,9 @@ namespace OpenMD {
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
                   vij += vpair;
                   fij += f1;
-                  tau -= outProduct( *(idat.d), f1);
+                  stressTensor -= outProduct( *(idat.d), f1);
+                  if (doHeatFlux_) 
+                    fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
                 }
               }
             }
@@ -752,7 +766,10 @@ namespace OpenMD {
               fij += fg;
 
               if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                tau -= outProduct( *(idat.d), fg);
+                stressTensor -= outProduct( *(idat.d), fg);
+                if (doHeatFlux_)
+                  fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                
               }
           
               for (ia = atomListRow.begin(); 
@@ -768,7 +785,9 @@ namespace OpenMD {
                     // find the distance between the atom
                     // and the center of the cutoff group:
                     dag = fDecomp_->getAtomToGroupVectorRow(atom1, cg1);
-                    tau -= outProduct(dag, fg);
+                    stressTensor -= outProduct(dag, fg);
+                    if (doHeatFlux_)
+                      fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
                   }
                 }
               }
@@ -786,13 +805,17 @@ namespace OpenMD {
                     // find the distance between the atom
                     // and the center of the cutoff group:
                     dag = fDecomp_->getAtomToGroupVectorColumn(atom2, cg2);
-                    tau -= outProduct(dag, fg);
+                    stressTensor -= outProduct(dag, fg);
+                    if (doHeatFlux_)
+                      fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
                   }
                 }
               }
             }
             //if (!info_->usesAtomicVirial()) {
-            //  tau -= outProduct(d_grp, fij);
+            //  stressTensor -= outProduct(d_grp, fij);
+            //  if (doHeatFlux_)
+            //     fDecomp_->addToHeatFlux( d_grp * dot(fij, vel2));
             //}
           }
         }
@@ -830,7 +853,7 @@ namespace OpenMD {
 
     lrPot = longRangePotential.sum();
 
-    //store the tau and long range potential    
+    //store the stressTensor and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
     curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VANDERWAALS_FAMILY];
     curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL] = longRangePotential[ELECTROSTATIC_FAMILY];
@@ -851,16 +874,17 @@ namespace OpenMD {
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) { 
         Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
-        tau += rbTau;
+        stressTensor += rbTau;
       }
     }
     
 #ifdef IS_MPI
-    Mat3x3d tmpTau(tau);
-    MPI_Allreduce(tmpTau.getArrayPointer(), tau.getArrayPointer(), 
-                  9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, stressTensor.getArrayPointer(), 9, 
+                              MPI::REALTYPE, MPI::SUM);
 #endif
-    curSnapshot->setTau(tau);
+    curSnapshot->setStressTensor(stressTensor);
+    
   }
 
 } //end namespace OpenMD

@@ -107,6 +107,7 @@ namespace OpenMD {
     DeclareParameter(ForceFieldFileName, std::string);
     DeclareParameter(SurfaceTension, RealType);
     DeclareParameter(PrintPressureTensor, bool);
+    DeclareParameter(PrintHeatFlux, bool);
     DeclareParameter(TaggedAtomPair, intPair);
     DeclareParameter(PrintTaggedPairDistance, bool);
     DeclareParameter(ElectrostaticSummationMethod, std::string);

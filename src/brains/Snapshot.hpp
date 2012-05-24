@@ -79,9 +79,10 @@ namespace OpenMD{
     Vector3d COM;             /**< location of center of mass */
     Vector3d COMvel;          /**< system center of mass velocity */
     Vector3d COMw;            /**< system center of mass angular velocity */
-    Mat3x3d tau;              /**< stress tensor */
+    Mat3x3d stressTensor;     /**< stress tensor */
     Mat3x3d pressureTensor;   /**< pressure tensor */
     Vector3d systemDipole;    /**< total system dipole moment */
+    Vector3d conductiveHeatFlux; /**< heat flux vector (conductive only) */
   };
 
 
@@ -121,9 +122,10 @@ namespace OpenMD{
       frameData.COM = V3Zero;             
       frameData.COMvel = V3Zero;          
       frameData.COMw = V3Zero;            
-      frameData.tau = Mat3x3d(0.0);              
+      frameData.stressTensor = Mat3x3d(0.0);              
       frameData.pressureTensor = Mat3x3d(0.0);   
       frameData.systemDipole = V3Zero;            
+      frameData.conductiveHeatFlux = V3Zero;            
     }
 
     Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
@@ -153,9 +155,10 @@ namespace OpenMD{
       frameData.COM = V3Zero;             
       frameData.COMvel = V3Zero;          
       frameData.COMw = V3Zero;            
-      frameData.tau = Mat3x3d(0.0);              
+      frameData.stressTensor = Mat3x3d(0.0);              
       frameData.pressureTensor = Mat3x3d(0.0);   
       frameData.systemDipole = V3Zero;            
+      frameData.conductiveHeatFlux = V3Zero;            
     }
     
     /** Returns the id of this Snapshot */
@@ -282,12 +285,20 @@ namespace OpenMD{
       frameData.eta = eta;
     }
 
-    Mat3x3d getTau() {
-      return frameData.tau;
+    Mat3x3d getStressTensor() {
+      return frameData.stressTensor;
     }
         
-    void setTau(const Mat3x3d& tau) {
-      frameData.tau = tau;
+    void setStressTensor(const Mat3x3d& stressTensor) {
+      frameData.stressTensor = stressTensor;
+    }
+
+    Vector3d getConductiveHeatFlux() {
+      return frameData.conductiveHeatFlux;
+    }
+        
+    void setConductiveHeatFlux(const Vector3d& heatFlux) {
+      frameData.conductiveHeatFlux = heatFlux;
     }
 
     bool hasCOM() {

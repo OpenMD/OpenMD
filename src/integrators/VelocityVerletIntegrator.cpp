@@ -258,6 +258,12 @@ namespace OpenMD {
       mask.set(Stats::BOX_DIPOLE_Y);
       mask.set(Stats::BOX_DIPOLE_Z);
     }
+
+    if (simParams->getPrintHeatFlux()) {
+      mask.set(Stats::HEATFLUX_X);
+      mask.set(Stats::HEATFLUX_Y);
+      mask.set(Stats::HEATFLUX_Z);
+    }
    
     if (simParams->haveTaggedAtomPair() && simParams->havePrintTaggedPairDistance()) {
       if (simParams->getPrintTaggedPairDistance()) {

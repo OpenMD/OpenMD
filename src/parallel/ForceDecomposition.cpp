@@ -48,14 +48,19 @@
 using namespace std;
 namespace OpenMD {
 
-  ForceDecomposition::ForceDecomposition(SimInfo* info, InteractionManager* iMan) : info_(info), interactionMan_(iMan) {
+  ForceDecomposition::ForceDecomposition(SimInfo* info, InteractionManager* iMan) : info_(info), interactionMan_(iMan), needVelocities_(false) {
     sman_ = info_->getSnapshotManager();
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
     userChoseCutoff_ = false;
 
     Globals* simParams_ = info_->getSimParams();    
-  
+    if (simParams_->havePrintHeatFlux()) {
+      if (simParams_->getPrintHeatFlux()) {
+        needVelocities_ = true;
+      }
+    }
+
     if (simParams_->haveSkinThickness()) {
       skinThickness_ = simParams_->getSkinThickness();
     } else {      
@@ -126,7 +131,9 @@ namespace OpenMD {
   bool ForceDecomposition::checkNeighborList() {
 
     int nGroups = snap_->cgData.position.size();
-
+    if (needVelocities_) 
+      snap_->cgData.setStorageLayout(DataStorage::dslPosition | DataStorage::dslVelocity);
+    
     // if we have changed the group identities or haven't set up the
     // saved positions we automatically will need a neighbor list update:
 
@@ -154,4 +161,12 @@ namespace OpenMD {
 
     return false;
   }
+
+  void ForceDecomposition::addToHeatFlux(Vector3d hf) {
+    snap_->frameData.conductiveHeatFlux += hf;
+  }
+  void ForceDecomposition::setHeatFlux(Vector3d hf) {
+    snap_->frameData.conductiveHeatFlux = hf;
+  }
+
 }

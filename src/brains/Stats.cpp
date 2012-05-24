@@ -104,7 +104,13 @@ namespace OpenMD {
     Stats::title_[BOX_DIPOLE_Z] = "box dipole z";
     Stats::title_[TAGGED_PAIR_DISTANCE] = "Tagged_Pair_Distance";
     Stats::title_[RNEMD_EXCHANGE_TOTAL] = "RNEMD_exchange_total";
-    
+    Stats::title_[THERMAL_HELFANDMOMENT_X] = "Thermal Helfand Moment x";
+    Stats::title_[THERMAL_HELFANDMOMENT_Y] = "Thermal Helfand Moment y";
+    Stats::title_[THERMAL_HELFANDMOMENT_Z] = "Thermal Helfand Moment z";
+    Stats::title_[HEATFLUX_X]= "Heat Flux x component";  
+    Stats::title_[HEATFLUX_Y]= "Heat Flux y component";  
+    Stats::title_[HEATFLUX_Z]= "Heat Flux z component";  
+
     Stats::units_[TIME] = "fs";
     Stats::units_[TOTAL_ENERGY] = "kcal/mol";
     Stats::units_[POTENTIAL_ENERGY] = "kcal/mol";
@@ -142,6 +148,12 @@ namespace OpenMD {
     Stats::units_[BOX_DIPOLE_Z] = "C*m";
     Stats::units_[TAGGED_PAIR_DISTANCE] = "Ang";
     Stats::units_[RNEMD_EXCHANGE_TOTAL] = "Variable";
+    Stats::units_[THERMAL_HELFANDMOMENT_X] = "Ang*kcal/mol";
+    Stats::units_[THERMAL_HELFANDMOMENT_Y] = "Ang*kcal/mol";
+    Stats::units_[THERMAL_HELFANDMOMENT_Z] = "Ang*kcal/mol";
+    Stats::units_[HEATFLUX_X]="amu/fs^3";
+    Stats::units_[HEATFLUX_Y]="amu/fs^3";      
+    Stats::units_[HEATFLUX_Z]="amu/fs^3";      
 
     Stats::statsMap.insert(StatsMapType::value_type("TIME", TIME));
     Stats::statsMap.insert(StatsMapType::value_type("TOTAL_ENERGY", TOTAL_ENERGY));
@@ -179,7 +191,13 @@ namespace OpenMD {
     Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Z", BOX_DIPOLE_Z));    
     Stats::statsMap.insert(StatsMapType::value_type("TAGGED_PAIR_DISTANCE", TAGGED_PAIR_DISTANCE));    
     Stats::statsMap.insert(StatsMapType::value_type("RNEMD_EXCHANGE_TOTAL", RNEMD_EXCHANGE_TOTAL));    
-    Stats::statsMap.insert(StatsMapType::value_type("SHADOWH", SHADOWH));    
+    Stats::statsMap.insert(StatsMapType::value_type("SHADOWH", SHADOWH)); 
+    Stats::statsMap.insert(StatsMapType::value_type("THERMAL_HELFANDMOMENT_X",THERMAL_HELFANDMOMENT_X));
+    Stats::statsMap.insert(StatsMapType::value_type("THERMAL_HELFANDMOMENT_Y",THERMAL_HELFANDMOMENT_Y));
+    Stats::statsMap.insert(StatsMapType::value_type("THERMAL_HELFANDMOMENT_Z",THERMAL_HELFANDMOMENT_Z));
+    Stats::statsMap.insert(StatsMapType::value_type("HEATFLUX_X",HEATFLUX_X));
+    Stats::statsMap.insert(StatsMapType::value_type("HEATFLUX_Y",HEATFLUX_Y));
+    Stats::statsMap.insert(StatsMapType::value_type("HEATFLUX_Z",HEATFLUX_Z));
   }
 
 }

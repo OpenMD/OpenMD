@@ -83,6 +83,7 @@ namespace OpenMD {
   protected: 
     bool initialized_; 
     bool doParticlePot_;
+    bool doHeatFlux_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
@@ -97,8 +98,6 @@ namespace OpenMD {
     SwitchingFunction* switcher_;
 
     SwitchingFunctionType sft_;/**< Type of switching function in use */
-
-
     RealType rCut_;            /**< cutoff radius for non-bonded interactions */
     RealType rSwitch_;         /**< inner radius of switching function */
     CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
@@ -112,8 +111,7 @@ namespace OpenMD {
     vector<RealType> vdwScale_;
     vector<RealType> electrostaticScale_;
 
-    Mat3x3d tau;
-
+    Mat3x3d stressTensor;
   };
 } 
 #endif //BRAINS_FORCEMANAGER_HPP

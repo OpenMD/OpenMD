@@ -54,6 +54,7 @@
 #include "math/SeqRandNumGen.hpp"
 #else
 #include "math/ParallelRandNumGen.hpp"
+#include <mpi.h>
 #endif
 
 #define HONKING_LARGE_VALUE 1.0e10

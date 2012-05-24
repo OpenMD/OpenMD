@@ -95,7 +95,7 @@ namespace OpenMD {
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
     nLocal_ = snap_->getNumberOfAtoms();
-    
+   
     nGroups_ = info_->getNLocalCutoffGroups();
     // gather the information for atomtype IDs (atids):
     idents = info_->getIdentArray();
@@ -109,7 +109,13 @@ namespace OpenMD {
     PairList* oneTwo = info_->getOneTwoInteractions();
     PairList* oneThree = info_->getOneThreeInteractions();
     PairList* oneFour = info_->getOneFourInteractions();
-
+    
+    if (needVelocities_) 
+      snap_->cgData.setStorageLayout(DataStorage::dslPosition | 
+                                     DataStorage::dslVelocity);
+    else 
+      snap_->cgData.setStorageLayout(DataStorage::dslPosition);
+    
 #ifdef IS_MPI
  
     MPI::Intracomm row = rowComm.getComm();
@@ -145,8 +151,13 @@ namespace OpenMD {
     cgRowData.resize(nGroupsInRow_);
     cgRowData.setStorageLayout(DataStorage::dslPosition);
     cgColData.resize(nGroupsInCol_);
-    cgColData.setStorageLayout(DataStorage::dslPosition);
-        
+    if (needVelocities_)
+      // we only need column velocities if we need them.
+      cgColData.setStorageLayout(DataStorage::dslPosition |
+                                 DataStorage::dslVelocity);
+    else     
+      cgColData.setStorageLayout(DataStorage::dslPosition);
+      
     identsRow.resize(nAtomsInRow_);
     identsCol.resize(nAtomsInCol_);
     
@@ -600,6 +611,17 @@ namespace OpenMD {
     cgPlanVectorColumn->gather(snap_->cgData.position, 
                                cgColData.position);
 
+
+
+    if (needVelocities_) {
+      // gather up the atomic velocities
+      AtomPlanVectorColumn->gather(snap_->atomData.velocity, 
+                                   atomColData.velocity);
+      
+      cgPlanVectorColumn->gather(snap_->cgData.velocity, 
+                                 cgColData.velocity);
+    }
+
     
     // if needed, gather the atomic rotation matrices
     if (storageLayout_ & DataStorage::dslAmat) {
@@ -766,7 +788,21 @@ namespace OpenMD {
 
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];
-    
+        
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      // This is the pairwise contribution to the particle pot.  The
+      // embedding contribution is added in each of the low level
+      // non-bonded routines.  In single processor, this is done in
+      // unpackInteractionData, not in collectData.
+      for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+        for (int i = 0; i < nLocal_; i++) {
+          // factor of two is because the total potential terms are divided
+          // by 2 in parallel due to row/ column scatter       
+          snap_->atomData.particlePot[i] += 2.0 * pot_temp[i](ii);
+        }
+      }
+    }
+
     fill(pot_temp.begin(), pot_temp.end(), 
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
       
@@ -774,7 +810,41 @@ namespace OpenMD {
     
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];    
+
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      // This is the pairwise contribution to the particle pot.  The
+      // embedding contribution is added in each of the low level
+      // non-bonded routines.  In single processor, this is done in
+      // unpackInteractionData, not in collectData.
+      for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+        for (int i = 0; i < nLocal_; i++) {
+          // factor of two is because the total potential terms are divided
+          // by 2 in parallel due to row/ column scatter       
+          snap_->atomData.particlePot[i] += 2.0 * pot_temp[i](ii);
+        }
+      }
+    }
     
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      int npp = snap_->atomData.particlePot.size();
+      vector<RealType> ppot_temp(npp, 0.0);
+
+      // This is the direct or embedding contribution to the particle
+      // pot.
+      
+      AtomPlanRealRow->scatter(atomRowData.particlePot, ppot_temp);
+      for (int i = 0; i < npp; i++) {
+        snap_->atomData.particlePot[i] += ppot_temp[i];
+      }
+
+      fill(ppot_temp.begin(), ppot_temp.end(), 0.0);
+      
+      AtomPlanRealColumn->scatter(atomColData.particlePot, ppot_temp);
+      for (int i = 0; i < npp; i++) {
+        snap_->atomData.particlePot[i] += ppot_temp[i];
+      }
+    }
+
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = pairwisePot[ii];
       RealType ploc2 = 0.0;
@@ -788,6 +858,14 @@ namespace OpenMD {
       MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
       embeddingPot[ii] = ploc2;
     }
+    
+    // Here be dragons.
+    MPI::Intracomm col = colComm.getComm();
+
+    col.Allreduce(MPI::IN_PLACE, 
+                  &snap_->frameData.conductiveHeatFlux[0], 3, 
+                  MPI::REALTYPE, MPI::SUM);
+
 
 #endif
 
@@ -831,6 +909,22 @@ namespace OpenMD {
     
     snap_->wrapVector(d);
     return d;    
+  }
+
+  Vector3d ForceMatrixDecomposition::getGroupVelocityColumn(int cg2){
+#ifdef IS_MPI
+    return cgColData.velocity[cg2];
+#else
+    return snap_->cgData.velocity[cg2];
+#endif
+  }
+
+  Vector3d ForceMatrixDecomposition::getAtomVelocityColumn(int atom2){
+#ifdef IS_MPI
+    return atomColData.velocity[atom2];
+#else
+    return snap_->atomData.velocity[atom2];
+#endif
   }
 
 
@@ -1098,7 +1192,6 @@ namespace OpenMD {
       atomColData.electricField[atom2] += *(idat.eField2);
     }
 
-    // should particle pot be done here also?
 #else
     pairwisePot += *(idat.pot);
 
@@ -1106,8 +1199,12 @@ namespace OpenMD {
     snap_->atomData.force[atom2] -= *(idat.f1);
 
     if (idat.doParticlePot) {
+      // This is the pairwise contribution to the particle pot.  The
+      // embedding contribution is added in each of the low level
+      // non-bonded routines.  In parallel, this calculation is done
+      // in collectData, not in unpackInteractionData.
       snap_->atomData.particlePot[atom1] += *(idat.vpair) * *(idat.sw);
-      snap_->atomData.particlePot[atom2] -= *(idat.vpair) * *(idat.sw);
+      snap_->atomData.particlePot[atom2] += *(idat.vpair) * *(idat.sw);
     }
     
     if (storageLayout_ & DataStorage::dslFlucQForce) {              

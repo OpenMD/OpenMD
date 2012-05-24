@@ -134,9 +134,9 @@ namespace OpenMD {
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
     
     // scale the pressure tensor
-    tempTau = curSnapshot->getTau();
+    tempTau = curSnapshot->getStressTensor();
     tempTau *= factor_;
-    curSnapshot->setTau(tempTau);
+    curSnapshot->setStressTensor(tempTau);
 
     // now, on to the applied restraining potentials (if needed):
     RealType restPot_local = 0.0;

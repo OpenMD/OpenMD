@@ -246,9 +246,10 @@ namespace OpenMD {
 
     RealType volume = this->getVolume();
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    Mat3x3d tau = curSnapshot->getTau();
+    Mat3x3d stressTensor = curSnapshot->getStressTensor();
 
-    pressureTensor =  (p_global + PhysicalConstants::energyConvert* tau)/volume;
+    pressureTensor =  (p_global + 
+                       PhysicalConstants::energyConvert * stressTensor)/volume;
     
     return pressureTensor;
   }
@@ -285,6 +286,15 @@ namespace OpenMD {
     }
 
     Globals* simParams = info_->getSimParams();
+    // grab the heat flux if desired
+    if (simParams->havePrintHeatFlux()) {
+      if (simParams->getPrintHeatFlux()){
+        Vector3d heatFlux = getHeatFlux();
+        stat[Stats::HEATFLUX_X] = heatFlux(0);
+        stat[Stats::HEATFLUX_Y] = heatFlux(1);
+        stat[Stats::HEATFLUX_Z] = heatFlux(2);
+      }
+    }
 
     if (simParams->haveTaggedAtomPair() && 
         simParams->havePrintTaggedPairDistance()) {
@@ -457,5 +467,103 @@ namespace OpenMD {
     boxDipole += (pPos - nPos) * chg_value;
 
     return boxDipole;
+  }
+
+  // Returns the Heat Flux Vector for the system
+  Vector3d Thermo::getHeatFlux(){
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    SimInfo::MoleculeIterator miter;
+    std::vector<StuntDouble*>::iterator iiter;
+    Molecule* mol;
+    StuntDouble* integrableObject;    
+    RigidBody::AtomIterator ai; 
+    Atom* atom;       
+    Vector3d vel;
+    Vector3d angMom;
+    Mat3x3d I;
+    int i;
+    int j;
+    int k;
+    RealType mass;
+
+    Vector3d x_a;
+    RealType kinetic;
+    RealType potential;
+    RealType eatom;
+    RealType AvgE_a_ = 0;
+    // Convective portion of the heat flux
+    Vector3d heatFluxJc = V3Zero;
+
+    /* Calculate convective portion of the heat flux */
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter)) {
+      
+      for (integrableObject = mol->beginIntegrableObject(iiter); 
+           integrableObject != NULL; 
+	   integrableObject = mol->nextIntegrableObject(iiter)) {
+        
+	mass = integrableObject->getMass();
+	vel = integrableObject->getVel();
+
+	kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
+        
+	if (integrableObject->isDirectional()) {
+	  angMom = integrableObject->getJ();
+	  I = integrableObject->getI();
+
+	  if (integrableObject->isLinear()) {
+	    i = integrableObject->linearAxis();
+	    j = (i + 1) % 3;
+	    k = (i + 2) % 3;
+	    kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+	  } else {                        
+	    kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1) 
+	      + angMom[2]*angMom[2]/I(2, 2);
+	  }
+	}
+
+        potential = 0.0;
+
+        if (integrableObject->isRigidBody()) {
+          RigidBody* rb = dynamic_cast<RigidBody*>(integrableObject);
+          for (atom = rb->beginAtom(ai); atom != NULL; 
+               atom = rb->nextAtom(ai)) {
+            potential +=  atom->getParticlePot();
+          }          
+        } else {
+          potential = integrableObject->getParticlePot();
+          cerr << "ppot = "  << potential << "\n";
+        }
+
+        potential *= PhysicalConstants::energyConvert; // amu A^2/fs^2
+        // The potential may not be a 1/2 factor
+        eatom = (kinetic + potential)/2.0;  // amu A^2/fs^2
+        heatFluxJc[0] += eatom*vel[0]; // amu A^3/fs^3
+        heatFluxJc[1] += eatom*vel[1]; // amu A^3/fs^3
+        heatFluxJc[2] += eatom*vel[2]; // amu A^3/fs^3
+      }
+    }
+
+    std::cerr << "Heat flux heatFluxJc is: " << heatFluxJc << std::endl;
+
+    /* The J_v vector is reduced in fortan so everyone has the global
+     *  Jv. Jc is computed over the local atoms and must be reduced
+     *  among all processors.
+     */
+#ifdef IS_MPI
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &heatFluxJc[0], 3, MPI::REALTYPE, 
+                              MPI::SUM);
+#endif
+    
+    // (kcal/mol * A/fs) * conversion => (amu A^3)/fs^3
+
+    Vector3d heatFluxJv = currSnapshot->getConductiveHeatFlux() * 
+      PhysicalConstants::energyConvert;
+    
+    std::cerr << "Heat flux Jc is: " << heatFluxJc << std::endl;
+    std::cerr << "Heat flux Jv is: " << heatFluxJv << std::endl;
+    
+    // Correct for the fact the flux is 1/V (Jc + Jv)
+    return (heatFluxJv + heatFluxJc) / this->getVolume(); // amu / fs^3 
   }
 } //end namespace OpenMD

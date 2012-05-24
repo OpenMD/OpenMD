@@ -217,7 +217,6 @@ namespace OpenMD {
         addType(at);
     }
     
-
     cutoffRadius2_ = cutoffRadius_ * cutoffRadius_;
     rcuti_ = 1.0 / cutoffRadius_;
     rcuti2_ = rcuti_ * rcuti_;
@@ -284,6 +283,7 @@ namespace OpenMD {
     electrostaticAtomData.is_Dipole = false;
     electrostaticAtomData.is_SplitDipole = false;
     electrostaticAtomData.is_Quadrupole = false;
+    electrostaticAtomData.is_Fluctuating = false;
 
     FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 
@@ -321,8 +321,6 @@ namespace OpenMD {
       electrostaticAtomData.hardness = fqa.getHardness();
       electrostaticAtomData.slaterN = fqa.getSlaterN();
       electrostaticAtomData.slaterZeta = fqa.getSlaterZeta();
-    } else {
-      electrostaticAtomData.is_Fluctuating = false;
     }
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
@@ -449,6 +447,7 @@ namespace OpenMD {
     Vector3d indirect_dVdr(V3Zero);
     Vector3d indirect_duduz_i(V3Zero), indirect_duduz_j(V3Zero);
 
+    RealType coulInt, vFluc1(0.0), vFluc2(0.0);
     pair<RealType, RealType> res;
     
     // splines for coulomb integrals
@@ -623,28 +622,36 @@ namespace OpenMD {
           dudr  = -  *(idat.sw)  * preVal * c2;
           
         }
-
         
-        if (i_is_Fluctuating) {
-          if (!idat.excluded)
-            *(idat.dVdFQ1) += *(idat.sw) * vterm / q_i;
-          else {
-            res = J1->getValueAndDerivativeAt( *(idat.rij) );
-            *(idat.dVdFQ1) += pre11_ * res.first * q_j;
-          }
-        }
-        if (j_is_Fluctuating) {
-          if (!idat.excluded)
-            *(idat.dVdFQ2) += *(idat.sw) * vterm / q_j;
-          else {
-            res = J2->getValueAndDerivativeAt( *(idat.rij) );
-            *(idat.dVdFQ2) += pre11_ * res.first * q_i;
-          }
-        }
-
         vpair += vterm;
         epot +=  *(idat.sw)  * vterm;
-        dVdr += dudr * rhat;                 
+        dVdr += dudr * rhat;
+
+        if (i_is_Fluctuating) {
+          if (idat.excluded) {
+            // vFluc1 is the difference between the direct coulomb integral
+            // and the normal 1/r-like  interaction between point charges.
+            coulInt = J1->getValueAt( *(idat.rij) );
+            vFluc1 = pre11_ * coulInt * q_i * q_j  - (*(idat.sw) * vterm);
+          } else {
+            vFluc1 = 0.0;
+          }
+          *(idat.dVdFQ1) += ( *(idat.sw) * vterm + vFluc1 ) / q_i;
+        }
+
+        if (j_is_Fluctuating) {
+          if (idat.excluded) {
+            // vFluc2 is the difference between the direct coulomb integral
+            // and the normal 1/r-like  interaction between point charges.
+            coulInt = J2->getValueAt( *(idat.rij) );
+            vFluc2 = pre11_ * coulInt * q_i * q_j  - (*(idat.sw) * vterm);
+          } else {
+            vFluc2 = 0.0;
+          }
+          *(idat.dVdFQ2) += ( *(idat.sw) * vterm + vFluc2 ) / q_j;
+        }
+          
+ 
       }
 
       if (j_is_Dipole) {
@@ -717,6 +724,9 @@ namespace OpenMD {
           duduz_j += -preSw * pot_term * rhat;
 
         }
+        if (i_is_Fluctuating) {
+          *(idat.dVdFQ1) += ( *(idat.sw) * vterm ) / q_i;
+        }
       }
 
       if (j_is_Quadrupole) {
@@ -769,6 +779,10 @@ namespace OpenMD {
         dudux_j += preSw * qxx_j * cx_j * rhatdot2;
         duduy_j += preSw * qyy_j * cy_j * rhatdot2;
         duduz_j += preSw * qzz_j * cz_j * rhatdot2;
+        if (i_is_Fluctuating) {
+          *(idat.dVdFQ1) += ( *(idat.sw) * vterm ) / q_i;
+        }
+
       }
     }
     
@@ -845,6 +859,11 @@ namespace OpenMD {
           dVdr += preSw * (uz_i * c2ri - ct_i * rhat * sc2 * c3);
           duduz_i += preSw * pot_term * rhat;
         }
+
+        if (j_is_Fluctuating) {
+          *(idat.dVdFQ2) += ( *(idat.sw) * vterm ) / q_j;
+        }
+
       }
 
       if (j_is_Dipole) {
@@ -995,6 +1014,11 @@ namespace OpenMD {
         dudux_i += preSw * qxx_i * cx_i *  rhatdot2;
         duduy_i += preSw * qyy_i * cy_i *  rhatdot2;
         duduz_i += preSw * qzz_i * cz_i *  rhatdot2;
+
+        if (j_is_Fluctuating) {
+          *(idat.dVdFQ2) += ( *(idat.sw) * vterm ) / q_j;
+        }
+
       }
     }
 
@@ -1032,7 +1056,6 @@ namespace OpenMD {
       if (j_is_Dipole) 
         *(idat.t2) -= cross(uz_j, indirect_duduz_j);
     }
-
 
     return;
   }  

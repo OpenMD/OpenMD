@@ -91,6 +91,7 @@ Globals::Globals() {
   DefineOptionalParameter(DampingAlpha, "dampingAlpha");
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
+  DefineOptionalParameter(PrintHeatFlux, "printHeatFlux");
   DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
   DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");

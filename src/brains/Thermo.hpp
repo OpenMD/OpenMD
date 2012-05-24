@@ -74,7 +74,7 @@ namespace OpenMD {
 
     // accumulate and return the simulation box dipole moment in C*m
     Vector3d getBoxDipole(); 
-
+    Vector3d getHeatFlux();
     void saveStat();
     
   private:

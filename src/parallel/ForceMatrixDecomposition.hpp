@@ -70,6 +70,7 @@ namespace OpenMD {
 
     // group bookkeeping
     groupCutoffs getGroupCutoffs(int cg1, int cg2);
+    Vector3d getGroupVelocityColumn(int cg2);
 
     // Group->atom bookkeeping
     vector<int> getAtomsInGroupRow(int cg1);
@@ -91,6 +92,7 @@ namespace OpenMD {
     bool excludeAtomPair(int atom1, int atom2);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);
+    Vector3d getAtomVelocityColumn(int atom2);
 
     // filling interaction blocks with pointers
     void fillInteractionData(InteractionData &idat, int atom1, int atom2);
@@ -107,8 +109,7 @@ namespace OpenMD {
     vector<int> groupToGtype;
 
 #ifdef IS_MPI    
-    DataStorage atomRowData;
-    DataStorage atomColData;
+    DataStorage atomRowData;    DataStorage atomColData;
     DataStorage cgRowData;
     DataStorage cgColData;
 

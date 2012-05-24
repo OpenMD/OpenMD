@@ -114,6 +114,7 @@ namespace OpenMD {
 
     // group bookkeeping
     virtual groupCutoffs getGroupCutoffs(int cg1, int cg2) = 0;
+    virtual Vector3d getGroupVelocityColumn(int atom2) = 0;
 
     // Group->atom bookkeeping
     virtual vector<int> getAtomsInGroupRow(int cg1) = 0; 
@@ -136,13 +137,16 @@ namespace OpenMD {
     virtual int getTopologicalDistance(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
-
+    virtual Vector3d getAtomVelocityColumn(int atom2) = 0;
 
     // filling interaction blocks with pointers
     virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
     virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
 
     virtual void fillSelfData(SelfData &sdat, int atom1);
+
+    virtual void addToHeatFlux(Vector3d hf);
+    virtual void setHeatFlux(Vector3d hf);
     
   protected:
     SimInfo* info_;   
@@ -152,6 +156,7 @@ namespace OpenMD {
     InteractionManager* interactionMan_;
 
     int storageLayout_;
+    bool needVelocities_;
     RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
     RealType largestRcut_;
 

@@ -105,6 +105,7 @@ namespace OpenMD {
       Atom * atom;
 
       DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
+      int storageLayout = data.getStorageLayout();
      
       totalMass = getMass();
       
@@ -117,11 +118,26 @@ namespace OpenMD {
 	}        
 	data.position[localIndex_] /= totalMass;
       }
+
+      if (storageLayout & DataStorage::dslVelocity) {
+        if (cutoffAtomList.size() == 1) {
+          data.velocity[localIndex_] = beginAtom(i)->getVel();
+        } else {
+          data.velocity[localIndex_] = V3Zero;
+          for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+            data.velocity[localIndex_] += atom->getMass() * atom->getVel();
+          }        
+          data.velocity[localIndex_] /= totalMass;
+        }
+      }
     }
 
 
     Vector3d getPos() {
       return ((snapshotMan_->getCurrentSnapshot())->*storage_).position[localIndex_];      
+    }
+    Vector3d getVel() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).velocity[localIndex_];      
     }
     
     int getNumAtom() {

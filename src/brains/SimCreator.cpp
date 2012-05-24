@@ -751,6 +751,13 @@ namespace OpenMD {
     if (simParams->getOutputParticlePotential()) {
       storageLayout |= DataStorage::dslParticlePot;
     }
+
+    if (simParams->havePrintHeatFlux()) {
+      if (simParams->getPrintHeatFlux()) {
+        storageLayout |= DataStorage::dslParticlePot;
+      }
+    }
+
     if (simParams->getOutputElectricField()) {
       storageLayout |= DataStorage::dslElectricField;
     }
