@@ -112,7 +112,7 @@ namespace OpenMD {
     bool haveElectroSpline_;
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
-    map<pair<AtomType*, AtomType*>, CubicSpline*> Jij; /** coulomb integral */
+    map<pair<AtomType*, AtomType*>, CubicSpline*> Jij;  /** coulomb integral */
     SimInfo* info_;
     ForceField* forceField_;
     RealType cutoffRadius_;

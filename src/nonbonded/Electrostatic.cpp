@@ -321,6 +321,8 @@ namespace OpenMD {
       electrostaticAtomData.hardness = fqa.getHardness();
       electrostaticAtomData.slaterN = fqa.getSlaterN();
       electrostaticAtomData.slaterZeta = fqa.getSlaterZeta();
+    } else {
+      electrostaticAtomData.is_Fluctuating = false;
     }
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
@@ -364,6 +366,7 @@ namespace OpenMD {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
           J1vals.push_back( sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromsToBohr ) );
+          // may not be necessary if Slater coulomb integral is symmetric
           J2vals.push_back( sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromsToBohr ) );
         }
 
@@ -448,6 +451,10 @@ namespace OpenMD {
 
     pair<RealType, RealType> res;
     
+    // splines for coulomb integrals
+    CubicSpline* J1;
+    CubicSpline* J2;
+    
     if (!initialized_) initialize();
     
     ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
@@ -464,14 +471,21 @@ namespace OpenMD {
     bool i_is_Dipole = data1.is_Dipole;
     bool i_is_SplitDipole = data1.is_SplitDipole;
     bool i_is_Quadrupole = data1.is_Quadrupole;
+    bool i_is_Fluctuating = data1.is_Fluctuating;
 
     bool j_is_Charge = data2.is_Charge;
     bool j_is_Dipole = data2.is_Dipole;
     bool j_is_SplitDipole = data2.is_SplitDipole;
     bool j_is_Quadrupole = data2.is_Quadrupole;
+    bool j_is_Fluctuating = data2.is_Fluctuating;
     
     if (i_is_Charge) {
       q_i = data1.fixedCharge;
+
+      if (i_is_Fluctuating) {
+        q_i += *(idat.flucQ1);
+      }
+      
       if (idat.excluded) {
         *(idat.skippedCharge2) += q_i;
       }
@@ -510,6 +524,10 @@ namespace OpenMD {
 
     if (j_is_Charge) {
       q_j = data2.fixedCharge;
+
+      if (i_is_Fluctuating) 
+        q_j += *(idat.flucQ2);
+
       if (idat.excluded) {
         *(idat.skippedCharge1) += q_j;
       }
@@ -547,6 +565,11 @@ namespace OpenMD {
       duduz_j = V3Zero;
     }
     
+    if (i_is_Fluctuating && j_is_Fluctuating) {
+      J1 = Jij[idat.atypes];
+      J2 = Jij[make_pair(idat.atypes.second, idat.atypes.first)];
+    }
+
     epot = 0.0;
     dVdr = V3Zero;
     
@@ -598,7 +621,25 @@ namespace OpenMD {
 
           vterm = preVal * riji * erfcVal;           
           dudr  = -  *(idat.sw)  * preVal * c2;
+          
+        }
 
+        
+        if (i_is_Fluctuating) {
+          if (!idat.excluded)
+            *(idat.dVdFQ1) += *(idat.sw) * vterm / q_i;
+          else {
+            res = J1->getValueAndDerivativeAt( *(idat.rij) );
+            *(idat.dVdFQ1) += pre11_ * res.first * q_j;
+          }
+        }
+        if (j_is_Fluctuating) {
+          if (!idat.excluded)
+            *(idat.dVdFQ2) += *(idat.sw) * vterm / q_j;
+          else {
+            res = J2->getValueAndDerivativeAt( *(idat.rij) );
+            *(idat.dVdFQ2) += pre11_ * res.first * q_i;
+          }
         }
 
         vpair += vterm;

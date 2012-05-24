@@ -105,6 +105,12 @@ namespace OpenMD {
     RealType* frho2;          /**< density functional at second atom */
     RealType* dfrho1;         /**< derivative of functional for atom 1 */
     RealType* dfrho2;         /**< derivative of functional for atom 2 */
+    RealType* flucQ1;         /**< fluctuating charge on atom1 */
+    RealType* flucQ2;         /**< fluctuating charge on atom2 */
+    RealType* dVdFQ1;         /**< fluctuating charge force on atom1 */
+    RealType* dVdFQ2;         /**< fluctuating charge force on atom2 */
+    Vector3d* eField1;        /**< pointer to electric field on first atom */
+    Vector3d* eField2;        /**< pointer to electric field on second atom */
     RealType* skippedCharge1; /**< charge skipped on atom1 in pairwise interaction loop with atom2 */
     RealType* skippedCharge2; /**< charge skipped on atom2 in pairwise interaction loop with atom1 */
   };

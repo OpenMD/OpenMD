@@ -525,12 +525,20 @@ namespace OpenMD {
            atomColData.skippedCharge.end(), 0.0);
     }
 
+    if (storageLayout_ & DataStorage::dslFlucQForce) {      
+      fill(atomRowData.flucQFrc.begin(), 
+           atomRowData.flucQFrc.end(), 0.0);
+      fill(atomColData.flucQFrc.begin(), 
+           atomColData.flucQFrc.end(), 0.0);
+    }
+
     if (storageLayout_ & DataStorage::dslElectricField) {    
       fill(atomRowData.electricField.begin(), 
            atomRowData.electricField.end(), V3Zero);
       fill(atomColData.electricField.begin(), 
            atomColData.electricField.end(), V3Zero);
     }
+
     if (storageLayout_ & DataStorage::dslFlucQForce) {    
       fill(atomRowData.flucQFrc.begin(), atomRowData.flucQFrc.end(),
            0.0);
@@ -1007,6 +1015,11 @@ namespace OpenMD {
       idat.skippedCharge2 = &(atomColData.skippedCharge[atom2]);
     }
 
+    if (storageLayout_ & DataStorage::dslFlucQPosition) {              
+      idat.flucQ1 = &(atomRowData.flucQPos[atom1]);
+      idat.flucQ2 = &(atomColData.flucQPos[atom2]);
+    }
+
 #else
     
 
@@ -1057,6 +1070,12 @@ namespace OpenMD {
       idat.skippedCharge1 = &(snap_->atomData.skippedCharge[atom1]);
       idat.skippedCharge2 = &(snap_->atomData.skippedCharge[atom2]);
     }
+
+    if (storageLayout_ & DataStorage::dslFlucQPosition) {              
+      idat.flucQ1 = &(snap_->atomData.flucQPos[atom1]);
+      idat.flucQ2 = &(snap_->atomData.flucQPos[atom2]);
+    }
+
 #endif
   }
 
@@ -1069,6 +1088,16 @@ namespace OpenMD {
     atomRowData.force[atom1] += *(idat.f1);
     atomColData.force[atom2] -= *(idat.f1);
 
+    if (storageLayout_ & DataStorage::dslFlucQForce) {              
+      atomRowData.flucQFrc[atom1] += *(idat.dVdFQ1);
+      atomColData.flucQFrc[atom2] += *(idat.dVdFQ2);
+    }
+
+    if (storageLayout_ & DataStorage::dslElectricField) {              
+      atomRowData.electricField[atom1] += *(idat.eField1);
+      atomColData.electricField[atom2] += *(idat.eField2);
+    }
+
     // should particle pot be done here also?
 #else
     pairwisePot += *(idat.pot);
@@ -1080,7 +1109,17 @@ namespace OpenMD {
       snap_->atomData.particlePot[atom1] += *(idat.vpair) * *(idat.sw);
       snap_->atomData.particlePot[atom2] -= *(idat.vpair) * *(idat.sw);
     }
-      
+    
+    if (storageLayout_ & DataStorage::dslFlucQForce) {              
+      snap_->atomData.flucQFrc[atom1] += *(idat.dVdFQ1);
+      snap_->atomData.flucQFrc[atom2] -= *(idat.dVdFQ2);
+    }
+
+    if (storageLayout_ & DataStorage::dslElectricField) {              
+      snap_->atomData.electricField[atom1] += *(idat.eField1);
+      snap_->atomData.electricField[atom2] += *(idat.eField2);
+    }
+
 #endif
     
   }
