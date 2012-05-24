@@ -36,8 +36,7 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 /**
@@ -71,6 +70,7 @@ namespace OpenMD {
     void doRNEMD();
     void doSwap();
     void doScale();
+    void doShiftScale();
     void collectData();
     void getStarted();
     void getStatus();
@@ -81,6 +81,10 @@ namespace OpenMD {
     void set_RNEMD_logWidth(int logWidth) { rnemdLogWidth_ = logWidth; }
     void set_RNEMD_exchange_total(RealType et) { exchangeSum_ = et; }
     void set_RNEMD_target_flux(RealType targetFlux) {targetFlux_ = targetFlux;}
+    void set_RNEMD_target_JzKE(RealType targetJzKE) {targetJzKE_ = targetJzKE;}
+    void set_RNEMD_target_jzpx(RealType targetJzpx) {targetJzpx_ = targetJzpx;}
+    void set_RNEMD_target_jzpy(RealType targetJzpy) {targetJzpy_ = targetJzpy;}
+    void set_RNEMD_target_jzpz(RealType targetJzpz) {targetJzpz_ = targetJzpz;}
     RealType get_RNEMD_exchange_total() { return exchangeSum_; }
 
   private:
@@ -88,12 +92,16 @@ namespace OpenMD {
     enum RNEMDTypeEnum {
       rnemdKineticSwap,
       rnemdKineticScale,
+      rnemdKineticScaleVAM,
+      rnemdKineticScaleAM,
       rnemdPxScale,
       rnemdPyScale,
       rnemdPzScale,
       rnemdPx,
       rnemdPy,
       rnemdPz,
+      rnemdShiftScaleV,
+      rnemdShiftScaleVAM,
       rnemdUnknown
     };
     
@@ -105,7 +113,11 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
+    bool outputTemp_;
+    bool outputVx_;
+    bool outputVy_;
     bool output3DTemp_;
+    bool outputRotTemp_;
     int nBins_; /**< The number of bins to divide the simulation box into.  */
     /*!
       The middle bin for the RNEMD method. midBin_ = nBins_/2;
@@ -117,16 +129,22 @@ namespace OpenMD {
     RealType zShift_;
     RealType exchangeTime_;
     RealType targetFlux_;
+    RealType targetJzKE_;
+    RealType targetJzpx_;
+    RealType targetJzpy_;
+    RealType targetJzpz_;
+    Vector3d jzp_, njzp_;
     RealType exchangeSum_;
     int failTrialCount_;
     int failRootCount_;
-    ofstream rnemdLog_;
+    ofstream tempLog_, vxzLog_, vyzLog_;
+    ofstream xTempLog_, yTempLog_, zTempLog_, rotTempLog_;
     // keeps track of what's being averaged
-    vector<RealType> valueHist_;
-    vector<int> valueCount_, xyzTempCount_;
+    vector<RealType> tempHist_, pxzHist_, pyzHist_, mHist_;
+    vector<RealType> xTempHist_, yTempHist_, zTempHist_, rotTempHist_;
     // keeps track of the number of degrees of freedom being averaged
-    vector<RealType> xTempHist_, yTempHist_, zTempHist_;
-    ofstream xTempLog_, yTempLog_, zTempLog_;
+    //vector<int> pxzCount_, pyzCount_;
+    vector<int> tempCount_, xyzTempCount_, rotTempCount_;
   };
 
 }

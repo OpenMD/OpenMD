@@ -134,9 +134,18 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_logWidth, "RNEMD_logWidth", 16);
   DefineOptionalParameterWithDefaultValue(RNEMD_exchangeType, "RNEMD_exchangeType", "KineticScale");
   DefineOptionalParameterWithDefaultValue(RNEMD_targetFlux, "RNEMD_targetFlux", 0.0);
+  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzKE, "RNEMD_targetJzKE", 0.0);
+  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpx, "RNEMD_targetJzpx", 0.0);
+  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpy, "RNEMD_targetJzpy", 0.0);
+  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpz, "RNEMD_targetJzpz", 0.0);
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
   DefineOptionalParameterWithDefaultValue(RNEMD_binShift, "RNEMD_binShift", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputDimensionalTemperature, "RNEMD_outputDimensionalTemperature", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputTemperature, "RNEMD_outputTemperature", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputVx, "RNEMD_outputVx", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputVy, "RNEMD_outputVy", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputXyzTemperature, "RNEMD_outputXyzTemperature", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputRotTemperature, "RNEMD_outputRotTemperature", false);
+
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
@@ -215,7 +224,7 @@ void Globals::validate() {
   CheckParameter(NeighborListNeighbors, isPositive());
   CheckParameter(RNEMD_exchangeTime, isPositive());
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
-  CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale"));
+  CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("KineticScaleVAM") || isEqualIgnoreCase("KineticScaleAM") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale") || isEqualIgnoreCase("ShiftScaleV") || isEqualIgnoreCase("ShiftScaleVAM"));
   CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
   CheckParameter(Alpha, isPositive()); 
   CheckParameter(FlucQPropagator, isEqualIgnoreCase("NVT") || isEqualIgnoreCase("Langevin") || isEqualIgnoreCase("Minimizer") || isEqualIgnoreCase("Exact") );
