@@ -215,6 +215,7 @@ namespace OpenMD {
 
   void VelocityVerletIntegrator::calcForce() { 
     forceMan_->calcForces();
+    flucQ_->applyConstraints();
   }
 
   DumpWriter* VelocityVerletIntegrator::createDumpWriter() {

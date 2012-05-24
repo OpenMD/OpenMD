@@ -56,7 +56,8 @@
 
 namespace OpenMD {
   Molecule::Molecule(int stampId, int globalIndex, const std::string& molName) 
-    : stampId_(stampId), globalIndex_(globalIndex), moleculeName_(molName) {
+    : stampId_(stampId), globalIndex_(globalIndex), moleculeName_(molName), 
+      constrainTotalCharge_(false) {
   }
   
   Molecule::~Molecule() {

@@ -58,7 +58,7 @@ namespace OpenMD {
   
   MoleculeStamp::MoleculeStamp() {
     DefineParameter(Name, "name");
-    DefineOptionalParameter(ConstrainedCharge, "constrainedCharge");
+    DefineOptionalParameter(ConstrainTotalCharge, "constrainTotalCharge");
     
     deprecatedKeywords_.insert("nAtoms");
     deprecatedKeywords_.insert("nBonds");

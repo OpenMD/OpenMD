@@ -120,15 +120,15 @@ namespace OpenMD{
     void setGlobalIndex(int index) {
       globalIndex_ = index;
     }
+
+    void setConstrainTotalCharge(bool ctc) {
+      constrainTotalCharge_ = ctc;
+    }
     
-    void setConstrainedCharge(RealType cc) {
-      constrainedCharge_ = cc;
+    bool constrainTotalCharge() {
+      return constrainTotalCharge_;
     }
 
-    RealType getConstrainedCharge() {
-      return constrainedCharge_;
-    }
-    
     /** add an atom into this molecule */
     void addAtom(Atom* atom);
     
@@ -409,7 +409,7 @@ namespace OpenMD{
     int stampId_;
     std::string moleculeName_;
     PropertyMap properties_;
-    RealType constrainedCharge_;
+    bool constrainTotalCharge_;
 
   };
 

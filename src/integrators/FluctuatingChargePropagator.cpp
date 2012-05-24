@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,78 +40,68 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file LegendrePolynomial.hpp
- * @author    teng lin
- * @date  11/16/2004
- * @version 1.0
- */ 
-
-#ifndef MATH_LEGENDREPOLYNOMIALS_HPP
-#define MATH_LEGENDREPOLYNOMIALS_HPP
-
-#include <vector>
-#include <cassert>
-
-#include "math/Polynomial.hpp"
+#include "FluctuatingChargePropagator.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/simError.h"
+#include "utils/PhysicalConstants.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace OpenMD {
 
-  /**
-   * @class LegendrePolynomial
-   * A collection of Legendre Polynomials.
-   * @todo document
-   */
-  class LegendrePolynomial {
-  public:
-    LegendrePolynomial(int maxPower);
-    virtual ~LegendrePolynomial() {}
-    /**
-     * Calculates the value of the nth Legendre Polynomial evaluated at the given x value.
-     * @return The value of the nth Legendre Polynomial evaluates at the given x value
-     * @param n
-     * @param x the value of the independent variable for the nth Legendre Polynomial  function
-     */
-        
-    RealType evaluate(int n, RealType x) {
-      assert (n <= maxPower_ && n >=0); 
-      return polyList_[n].evaluate(x);
+  void FluctuatingChargePropagator::applyConstraints() {
+    if (!hasFlucQ_) return;
+
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator  j;
+    Molecule* mol;
+    Atom* atom;
+    
+    RealType totalFrc, totalMolFrc, constrainedFrc;
+
+    // accumulate the total system fluctuating charge forces
+    totalFrc = 0.0;
+
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        totalFrc += atom->getFlucQFrc();
+      }
+
     }
 
-    /**
-     * Returns the first derivative of the nth Legendre Polynomial.
-     * @return the first derivative of the nth Legendre Polynomial
-     * @param n
-     * @param x the value of the independent variable for the nth Legendre Polynomial  function
-     */
-    RealType evaluateDerivative(int n, RealType x) {
-      assert (n <= maxPower_ && n >=0); 
-      return polyList_[n].evaluateDerivative(x);        
+#ifdef IS_MPI
+    // in parallel, we need to add up the contributions from all
+    // processors:
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalFrc, 1, MPI::REALTYPE, 
+                              MPI::SUM);
+#endif
+ 
+    // divide by the total number of fluctuating charges:
+    totalFrc /= info_->getNFluctuatingCharges();
+
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {     
+      
+      totalMolFrc = 0.0;
+
+      // molecular constraints can be done with a second loop.
+      if (mol->constrainTotalCharge()) {
+        for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+             atom = mol->nextFluctuatingCharge(j)) {
+          totalMolFrc += atom->getFlucQFrc();
+        }
+        totalMolFrc /= mol->getNFluctuatingCharges();
+      }
+
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
+        atom->setFlucQFrc(constrainedFrc);
+      }      
     }
-
-    /**
-     * Returns the nth Legendre Polynomial 
-     * @return the nth Legendre Polynomial
-     * @param n
-     */
-    const DoublePolynomial& getLegendrePolynomial(int n) const {
-      assert (n <= maxPower_ && n >=0); 
-      return polyList_[n];
-    }
-
-  protected:
-
-    std::vector<DoublePolynomial> polyList_;
-                
-  private:
-        
-    void GeneratePolynomials(int maxPower);
-    virtual void GenerateFirstTwoTerms();
-        
-    int maxPower_;
-  };    
-
-
-} 
-#endif 
-
+  }
+}

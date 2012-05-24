@@ -50,6 +50,9 @@
 #include "types/FixedChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "io/Globals.hpp"
+#include "nonbonded/SlaterIntegrals.hpp"
+#include "utils/PhysicalConstants.hpp"
+
 
 namespace OpenMD {
   
@@ -309,6 +312,15 @@ namespace OpenMD {
       }
     }
     
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+
+    if (fqa.isFluctuatingCharge()) {
+      electrostaticAtomData.is_FluctuatingCharge = true;
+      electrostaticAtomData.electronegativity = fca.getElectronegativity();
+      electrostaticAtomData.hardness = fca.getHardness();
+      electrostaticAtomData.slaterN = fca.getSlaterN();
+      electrostaticAtomData.slaterZeta = fca.getSlaterZeta();
+    }
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
     ret = ElectrostaticList.insert( pair<int,AtomType*>(atomType->getIdent(),
@@ -322,7 +334,51 @@ namespace OpenMD {
       simError();         
     }
     
-    ElectrostaticMap[atomType] = electrostaticAtomData;    
+    ElectrostaticMap[atomType] = electrostaticAtomData;   
+
+    // Now, iterate over all known types and add to the mixing map:
+    
+    map<AtomType*, ElectrostaticAtomData>::iterator it;
+    for( it = ElectrostaticMap.begin(); it != ElectrostaticMap.end(); ++it) {
+      AtomType* atype2 = (*it).first;
+      
+      if ((*it).is_FluctuatingCharge && electrostaticAtomData.is_FluctuatingCharge) {
+        
+        RealType a = electrostaticAtomData.slaterZeta;
+        RealType b = (*it).slaterZeta;
+        int m = electrostaticAtomData.slaterN;
+        int n = (*it).slaterN;
+
+        // Create the spline of the coulombic integral for s-type
+        // Slater orbitals.  Add a 2 angstrom safety window to deal
+        // with cutoffGroups that have charged atoms longer than the
+        // cutoffRadius away from each other.
+
+        RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
+        vector<RealType> rvals;
+        vector<RealType> J1vals;
+        vector<RealType> J2vals;
+        for (int i = 0; i < np_; i++) {
+          rval = RealType(i) * dr;
+          rvals.push_back(rval);
+          J1vals.push_back( sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromsToBohr ) );
+          J2vals.push_back( sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromsToBohr ) );
+        }
+
+        CubicSpline J1 = new CubicSpline();
+        J1->addPoints(rvals, J1vals);
+        CubicSpline J2 = new CubicSpline();
+        J2->addPoints(rvals, J2vals);
+        
+        pair<AtomType*, AtomType*> key1, key2;
+        key1 = make_pair(atomType, atype2);
+        key2 = make_pair(atype2, atomType);
+        
+        Jij[key1] = J1;
+        Jij[key2] = J2;
+      }
+    }
+ 
     return;
   }
   

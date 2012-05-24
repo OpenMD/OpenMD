@@ -56,7 +56,7 @@
 namespace OpenMD {
   class MoleculeStamp : public DataHolder {
     DeclareParameter(Name, std::string);
-    DeclareParameter(ConstrainedCharge, RealType);
+    DeclareParameter(ConstrainTotalCharge, bool);
 
   public:
     MoleculeStamp();

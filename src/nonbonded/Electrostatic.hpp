@@ -57,12 +57,17 @@ namespace OpenMD {
     bool is_Dipole;
     bool is_SplitDipole;
     bool is_Quadrupole;
-    RealType charge;
+    bool is_Fluctuating;
+    RealType fixedCharge;
+    RealType hardness;
+    RealType electronegativity;
+    RealType slaterN;
+    RealType slaterZeta;
     RealType dipole_moment;
     RealType split_dipole_distance;
     Vector3d quadrupole_moments;
   };
-  
+      
   enum ElectrostaticSummationMethod{
     esm_HARD,
     esm_SWITCHING_FUNCTION,
@@ -107,6 +112,7 @@ namespace OpenMD {
     bool haveElectroSpline_;
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
+    map<pair<AtomType*, AtomType*>, CubicSpline*> Jij; /** coulomb integral */
     SimInfo* info_;
     ForceField* forceField_;
     RealType cutoffRadius_;

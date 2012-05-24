@@ -79,6 +79,9 @@ namespace OpenMD {
      *      kcal mol^-1 Angstrom^-1 fs^-1 Kelvin^-1
      */
     const RealType thermalConductivityConvert = 1.439326479e-5; 
+
+    const RealType bohrToAngstroms = 1.8897161646320724;
+    const RealType angstromsToBohr = 0.52918;
   }
 }
 #endif 

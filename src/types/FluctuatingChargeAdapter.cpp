@@ -42,6 +42,7 @@
  
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
+#include "nonbonded/SlaterIntegrals.hpp"
 
 namespace OpenMD {
 
@@ -100,7 +101,28 @@ namespace OpenMD {
   
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType electronegativity,
-                                                       RealType hardness) {
+                                                       RealType hardness,
+                                                       RealType slaterN,
+                                                       RealType slaterZeta) {
+    
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+    
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    fqParam->chargeMass = chargeMass;
+    fqParam->electronegativity = electronegativity;
+    fqParam->hardness = hardness;
+    fqParam->slaterN = slaterN;
+    fqParam->slaterZeta = slaterZeta;
+    
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType electronegativity,
+                                                       RealType hardness,
+                                                       RealType slaterN) {
 
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
@@ -110,7 +132,9 @@ namespace OpenMD {
     fqParam->chargeMass = chargeMass;
     fqParam->electronegativity = electronegativity;
     fqParam->hardness = hardness;
-    
+    fqParam->slaterN = slaterN;
+    fqParam->slaterZeta = getSTOZeta(slaterN, hardness);
+        
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 }

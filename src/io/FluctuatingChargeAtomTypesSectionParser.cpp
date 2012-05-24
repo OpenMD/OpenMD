@@ -57,9 +57,12 @@ namespace OpenMD {
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();
 
-    //in FluctuatingChargeAtomTypesSectionParser, a line at least contains 4 tokens
-    //atomTypeName, electronegativity, hardness (Jii), and charge mass
-    if (nTokens < 4)  {
+    //in FluctuatingChargeAtomTypesSectionParser, a line contains at least
+    //contains 6 tokens:
+
+    //atomTypeName, electronegativity, hardness (Jii), slaterN, slaterZeta, and charge mass
+
+    if (nTokens < 6)  {
       sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
               "Not enough tokens at line %d\n",
               lineNo);
@@ -75,9 +78,11 @@ namespace OpenMD {
         FluctuatingChargeAdapter fca = FluctuatingChargeAdapter(atomType);
         RealType chi = tokenizer.nextTokenAsDouble();
         RealType Jii = tokenizer.nextTokenAsDouble();
+        RealType slaterN = tokenizer.nextTokenAsInt();
+        RealType slaterZeta = tokenizer.nextTokenAsDouble();
         RealType chargeMass = tokenizer.nextTokenAsDouble();
         
-        fca.makeFluctuatingCharge(chargeMass, chi, Jii);
+        fca.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
         
       } else {
         sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());

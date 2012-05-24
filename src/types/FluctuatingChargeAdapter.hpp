@@ -53,8 +53,10 @@ namespace OpenMD {
 
   struct FluctuatingAtypeParameters {
     RealType chargeMass;
-    RealType electronegativity;
-    RealType hardness;
+    RealType electronegativity; /** (relative) electronegativity */
+    RealType hardness;      /** diagonal "Coulomb" Jii */
+    RealType slaterN;       /** principal quantum number for Slater orbitals */
+    RealType slaterZeta;    /** off-diagonal Slater exponent */
   };
   typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;   
 
@@ -62,12 +64,15 @@ namespace OpenMD {
   public:
     FluctuatingChargeAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness);
+    void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, RealType slaterN, RealType slaterZeta);
+    void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, RealType slaterN);
     
     bool isFluctuatingCharge();
     RealType getChargeMass();
     RealType getElectronegativity();
     RealType getHardness();
+    RealType getSlaterN();
+    RealType getSlaterZeta();
 
   private:
     AtomType* at_;

@@ -57,15 +57,14 @@ namespace OpenMD {
     FluctuatingChargePropagator(SimInfo* info) : info_(info), hasFlucQ_(false) {};
     virtual ~FluctuatingChargePropagator(){ }
     virtual void initialize() = 0;
-    virtual void moveA() = 0;
     virtual void updateSizes() = 0;
+    virtual void moveA() = 0;
+    virtual void applyConstraints();
     virtual void moveB() = 0;
 
   protected:
     SimInfo* info_;
     bool hasFlucQ_;
-
   };
-
 }
 #endif
