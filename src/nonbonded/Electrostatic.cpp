@@ -48,6 +48,7 @@
 #include "utils/simError.h"
 #include "types/NonBondedInteractionType.hpp"
 #include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "io/Globals.hpp"
 #include "nonbonded/SlaterIntegrals.hpp"
@@ -288,7 +289,7 @@ namespace OpenMD {
 
     if (fca.isFixedCharge()) {
       electrostaticAtomData.is_Charge = true;
-      electrostaticAtomData.charge = fca.getCharge();
+      electrostaticAtomData.fixedCharge = fca.getCharge();
     }
 
     MultipoleAdapter ma = MultipoleAdapter(atomType);
@@ -315,11 +316,11 @@ namespace OpenMD {
     FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 
     if (fqa.isFluctuatingCharge()) {
-      electrostaticAtomData.is_FluctuatingCharge = true;
-      electrostaticAtomData.electronegativity = fca.getElectronegativity();
-      electrostaticAtomData.hardness = fca.getHardness();
-      electrostaticAtomData.slaterN = fca.getSlaterN();
-      electrostaticAtomData.slaterZeta = fca.getSlaterZeta();
+      electrostaticAtomData.is_Fluctuating = true;
+      electrostaticAtomData.electronegativity = fqa.getElectronegativity();
+      electrostaticAtomData.hardness = fqa.getHardness();
+      electrostaticAtomData.slaterN = fqa.getSlaterN();
+      electrostaticAtomData.slaterZeta = fqa.getSlaterZeta();
     }
 
     pair<map<int,AtomType*>::iterator,bool> ret;    
@@ -341,19 +342,20 @@ namespace OpenMD {
     map<AtomType*, ElectrostaticAtomData>::iterator it;
     for( it = ElectrostaticMap.begin(); it != ElectrostaticMap.end(); ++it) {
       AtomType* atype2 = (*it).first;
-      
-      if ((*it).is_FluctuatingCharge && electrostaticAtomData.is_FluctuatingCharge) {
+      ElectrostaticAtomData eaData2 = (*it).second;
+      if (eaData2.is_Fluctuating && electrostaticAtomData.is_Fluctuating) {
         
         RealType a = electrostaticAtomData.slaterZeta;
-        RealType b = (*it).slaterZeta;
+        RealType b = eaData2.slaterZeta;
         int m = electrostaticAtomData.slaterN;
-        int n = (*it).slaterN;
+        int n = eaData2.slaterN;
 
         // Create the spline of the coulombic integral for s-type
         // Slater orbitals.  Add a 2 angstrom safety window to deal
         // with cutoffGroups that have charged atoms longer than the
         // cutoffRadius away from each other.
 
+        RealType rval;
         RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
         vector<RealType> rvals;
         vector<RealType> J1vals;
@@ -365,9 +367,9 @@ namespace OpenMD {
           J2vals.push_back( sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromsToBohr ) );
         }
 
-        CubicSpline J1 = new CubicSpline();
+        CubicSpline* J1 = new CubicSpline();
         J1->addPoints(rvals, J1vals);
-        CubicSpline J2 = new CubicSpline();
+        CubicSpline* J2 = new CubicSpline();
         J2->addPoints(rvals, J2vals);
         
         pair<AtomType*, AtomType*> key1, key2;
@@ -469,7 +471,7 @@ namespace OpenMD {
     bool j_is_Quadrupole = data2.is_Quadrupole;
     
     if (i_is_Charge) {
-      q_i = data1.charge;
+      q_i = data1.fixedCharge;
       if (idat.excluded) {
         *(idat.skippedCharge2) += q_i;
       }
@@ -507,7 +509,7 @@ namespace OpenMD {
     }
 
     if (j_is_Charge) {
-      q_j = data2.charge;
+      q_j = data2.fixedCharge;
       if (idat.excluded) {
         *(idat.skippedCharge1) += q_j;
       }
@@ -1020,7 +1022,7 @@ namespace OpenMD {
       }
     } else if (summationMethod_ == esm_SHIFTED_FORCE || summationMethod_ == esm_SHIFTED_POTENTIAL) {
       if (i_is_Charge) {        
-        chg1 = data.charge;
+        chg1 = data.fixedCharge;
         if (screeningMethod_ == DAMPED) {
           self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + *(sdat.skippedCharge)) * pre11_;
         } else {         

@@ -98,11 +98,19 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->hardness;
   }
+  int FluctuatingChargeAdapter::getSlaterN() {    
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->slaterN;
+  }
+  RealType FluctuatingChargeAdapter::getSlaterZeta() {    
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->slaterZeta;
+  }
   
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType electronegativity,
                                                        RealType hardness,
-                                                       RealType slaterN,
+                                                       int slaterN,
                                                        RealType slaterZeta) {
     
     if (isFluctuatingCharge()){
@@ -122,7 +130,7 @@ namespace OpenMD {
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType electronegativity,
                                                        RealType hardness,
-                                                       RealType slaterN) {
+                                                       int slaterN) {
 
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
