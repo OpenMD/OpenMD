@@ -46,7 +46,7 @@
 #include "types/CubicBondType.hpp"
 #include "types/QuarticBondType.hpp"
 #include "types/PolynomialBondType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 

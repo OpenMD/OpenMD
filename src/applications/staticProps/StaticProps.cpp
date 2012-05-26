@@ -44,7 +44,6 @@
 #include <fstream>
 #include <string>
 
-#include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
@@ -82,8 +81,6 @@ using namespace OpenMD;
 
 int main(int argc, char* argv[]){
   
-  //register force fields
-  registerForceFields();
   
   gengetopt_args_info args_info;
   

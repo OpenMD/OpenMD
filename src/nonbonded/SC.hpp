@@ -44,7 +44,7 @@
 #define NONBONDED_SC_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "math/CubicSpline.hpp"
 #include "types/SuttonChenAdapter.hpp"
 

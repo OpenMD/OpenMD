@@ -55,7 +55,7 @@
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/Globals.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 
 namespace OpenMD {
 

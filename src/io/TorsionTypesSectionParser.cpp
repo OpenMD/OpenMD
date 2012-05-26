@@ -48,7 +48,7 @@
 #include "types/CharmmTorsionType.hpp"
 #include "types/OplsTorsionType.hpp"
 #include "types/TrappeTorsionType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 //#include <fstream>
 

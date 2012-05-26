@@ -60,7 +60,7 @@ namespace OpenMD {
   class MinimizerCreator;
   class SimInfo;
   /**
-   * @class MinimizerFactory MinimizerFactory.hpp "UseTheForce/MinimizerFactory.hpp"
+   * @class MinimizerFactory
    * Factory pattern and Singleton Pattern are used to define an interface for creating an Minimizer.
    */
   class MinimizerFactory {

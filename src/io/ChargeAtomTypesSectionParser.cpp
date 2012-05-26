@@ -42,7 +42,7 @@
  
 #include "io/ChargeAtomTypesSectionParser.hpp"
 #include "types/FixedChargeAdapter.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 namespace OpenMD {

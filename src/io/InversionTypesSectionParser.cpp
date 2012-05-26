@@ -49,7 +49,7 @@
 #include "types/AmberImproperTorsionType.hpp"
 #include "types/PolynomialInversionType.hpp"
 //These two are added by me. Maybe it is wrong.
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 
 namespace OpenMD {

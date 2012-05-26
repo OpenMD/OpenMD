@@ -52,7 +52,7 @@
 #include "primitives/Molecule.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 namespace OpenMD {
   //convert lattice vector to rotation matrix
   RealType getAtomMass(const std::string& at, ForceField* myFF);

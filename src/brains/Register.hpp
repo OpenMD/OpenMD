@@ -45,9 +45,6 @@
 
 namespace OpenMD {
 
-  /** Register different force fields */
-  void registerForceFields();
-
   /** Register all integrators*/
   void registerIntegrators();
 

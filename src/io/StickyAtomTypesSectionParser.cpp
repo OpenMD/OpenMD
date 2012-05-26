@@ -42,7 +42,7 @@
 
 #include "io/StickyAtomTypesSectionParser.hpp"
 #include "types/StickyAdapter.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 using namespace std;
 namespace OpenMD {

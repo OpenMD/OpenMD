@@ -53,11 +53,10 @@ dt = 2.0;
 runTime = 3e5;
 statusTime = 10.0;
 sampleTime = 500;
-electrostaticSummationMethod = "shifted_force";
+cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 dampingAlpha = 0.185;
 cutoffRadius = 10.0;
-switchingRadius = 10.0;
   </MetaData>
   <Snapshot>
     <FrameData>

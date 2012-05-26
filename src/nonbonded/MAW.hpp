@@ -45,7 +45,7 @@
 
 #include "types/MAWInteractionType.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "math/Vector3.hpp"
 
 using namespace std;

@@ -68,8 +68,6 @@ void registerHydrodynamicsModels();
 void writeHydroProps(std::ostream& os);
 
 int main(int argc, char* argv[]){
-  //register force fields
-  registerForceFields();    
   registerHydrodynamicsModels();
   
   gengetopt_args_info args_info;

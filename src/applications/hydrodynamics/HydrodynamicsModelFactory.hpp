@@ -64,7 +64,7 @@ namespace OpenMD {
   class SimInfo;
 
   /**
-   * @class HydrodynamicsModelFactory HydrodynamicsModelFactory.hpp "UseTheForce/HydrodynamicsModelFactory.hpp"
+   * @class HydrodynamicsModelFactory
    * Factory pattern and Singleton Pattern are used to define an interface for creating an HydrodynamicsModel.
    */
   class HydrodynamicsModelFactory {

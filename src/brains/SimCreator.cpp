@@ -56,7 +56,7 @@
 #include "brains/SimCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
-#include "UseTheForce/ForceFieldFactory.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
 #include "math/SeqRandNumGen.hpp"
@@ -371,7 +371,7 @@ namespace OpenMD {
                                    metaDataBlockStart + 1);
     
     //create the force field
-    ForceField * ff = ForceFieldFactory::getInstance()->createForceField(simParams->getForceField());
+    ForceField * ff = new ForceField(simParams->getForceField());
 
     if (ff == NULL) {
       sprintf(painCave.errMsg, 

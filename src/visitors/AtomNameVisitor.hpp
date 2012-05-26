@@ -48,7 +48,7 @@
 #include "visitors/AtomVisitor.hpp"
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 
 namespace OpenMD {
   

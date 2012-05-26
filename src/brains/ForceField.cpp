@@ -49,14 +49,39 @@
  */
   
 #include <algorithm>
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
-#include "utils/Tuple.hpp"
+
+#include "io/OptionSectionParser.hpp"
+#include "io/BaseAtomTypesSectionParser.hpp"
+#include "io/DirectionalAtomTypesSectionParser.hpp"
+#include "io/AtomTypesSectionParser.hpp"
+#include "io/BendTypesSectionParser.hpp"
+#include "io/BondTypesSectionParser.hpp"
+#include "io/ChargeAtomTypesSectionParser.hpp"
+#include "io/EAMAtomTypesSectionParser.hpp"
+#include "io/FluctuatingChargeAtomTypesSectionParser.hpp"
+#include "io/GayBerneAtomTypesSectionParser.hpp"
+#include "io/InversionTypesSectionParser.hpp"
+#include "io/LennardJonesAtomTypesSectionParser.hpp"
+#include "io/MultipoleAtomTypesSectionParser.hpp"
+#include "io/NonBondedInteractionsSectionParser.hpp"
+#include "io/PolarizableAtomTypesSectionParser.hpp"
+#include "io/SCAtomTypesSectionParser.hpp"
+#include "io/ShapeAtomTypesSectionParser.hpp"
+#include "io/StickyAtomTypesSectionParser.hpp"
+#include "io/StickyPowerAtomTypesSectionParser.hpp"
+#include "io/TorsionTypesSectionParser.hpp"
+
 #include "types/LennardJonesAdapter.hpp"
+#include "types/EAMAdapter.hpp"
+#include "types/SuttonChenAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
+#include "types/StickyAdapter.hpp"
 
 namespace OpenMD {
 
-  ForceField::ForceField() { 
+  ForceField::ForceField(std::string ffName) { 
 
     char* tempPath; 
     tempPath = getenv("FORCE_PARAM_PATH");
@@ -67,6 +92,83 @@ namespace OpenMD {
     } else {
       ffPath_ = tempPath;
     }
+
+    setForceFieldFileName(ffName + ".frc");
+
+    /**
+     * The order of adding section parsers is important.
+     *
+     * OptionSectionParser must come first to set options for other
+     * parsers
+     * 
+     * DirectionalAtomTypesSectionParser should be added before
+     * AtomTypesSectionParser, and these two section parsers will
+     * actually create "real" AtomTypes (AtomTypesSectionParser will
+     * create AtomType and DirectionalAtomTypesSectionParser will
+     * create DirectionalAtomType, which is a subclass of AtomType and
+     * should come first). 
+     *
+     * Other AtomTypes Section Parsers will not create the "real"
+     * AtomType, they only add and set some attributes of the AtomType
+     * (via the Adapters). Thus ordering of these is not important.
+     * AtomTypesSectionParser should be added before other atom type
+     *
+     * The order of BondTypesSectionParser, BendTypesSectionParser and
+     * TorsionTypesSectionParser, etc. are not important.
+     */
+
+    spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BaseAtomTypesSectionParser());
+    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new AtomTypesSectionParser());
+
+    spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new FluctuatingChargeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new PolarizableAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new GayBerneAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new ShapeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyPowerAtomTypesSectionParser(forceFieldOptions_));
+
+    spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new InversionTypesSectionParser(forceFieldOptions_));
+
+    spMan_.push_back(new NonBondedInteractionsSectionParser(forceFieldOptions_));    
+  }
+
+  void ForceField::parse(const std::string& filename) {
+    ifstrstream* ffStream;
+
+    ffStream = openForceFieldFile(filename);
+
+    spMan_.parse(*ffStream, *this);
+
+    ForceField::AtomTypeContainer::MapTypeIterator i;
+    AtomType* at;
+
+    for (at = atomTypeCont_.beginType(i); at != NULL; 
+         at = atomTypeCont_.nextType(i)) {
+
+      // useBase sets the responsibilities, and these have to be done 
+      // after the atomTypes and Base types have all been scanned:
+
+      std::vector<AtomType*> ayb = at->allYourBase();      
+      if (ayb.size() > 1) {
+        for (int j = ayb.size()-1; j > 0; j--) {
+          
+          ayb[j-1]->useBase(ayb[j]);
+
+        }
+      }
+    }
+
+    delete ffStream;
   }
 
   /**
@@ -637,12 +739,29 @@ namespace OpenMD {
   }
   
   RealType ForceField::getRcutFromAtomType(AtomType* at) {
-    RealType rcut = 0.0;
+    RealType rcut(0.0);
     
     LennardJonesAdapter lja = LennardJonesAdapter(at);
     if (lja.isLennardJones()) {
       rcut = 2.5 * lja.getSigma();
     }
+    EAMAdapter ea = EAMAdapter(at);
+    if (ea.isEAM()) {
+      rcut = max(rcut, ea.getRcut());
+    }
+    SuttonChenAdapter sca = SuttonChenAdapter(at);
+    if (sca.isSuttonChen()) {
+      rcut = max(rcut, 2.0 * sca.getAlpha());
+    }
+    GayBerneAdapter gba = GayBerneAdapter(at);
+    if (gba.isGayBerne()) {
+      rcut = max(rcut, 2.5 * sqrt(2.0) * max(gba.getD(), gba.getL()));
+    }
+    StickyAdapter sa = StickyAdapter(at);
+    if (sa.isSticky()) {
+      rcut = max(rcut, max(sa.getRu(), sa.getRup()));
+    }
+
     return rcut;    
   }
   

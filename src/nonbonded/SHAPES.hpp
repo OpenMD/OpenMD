@@ -45,7 +45,7 @@
 
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "types/ShapeAtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 
 using namespace std;

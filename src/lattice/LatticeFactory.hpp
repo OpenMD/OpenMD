@@ -59,7 +59,7 @@ namespace OpenMD {
   class Lattice;
   class LatticeCreator;
   /**
-   * @class LatticeFactory LatticeFactory.hpp "UseTheForce/LatticeFactory.hpp"
+   * @class LatticeFactory
    * Factory pattern and Singleton Pattern are used to define an interface for creating an Lattice.
    */
   class LatticeFactory {

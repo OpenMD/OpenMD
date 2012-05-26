@@ -43,7 +43,7 @@
 #include "io/GayBerneAtomTypesSectionParser.hpp"
 #include "types/AtomType.hpp"
 #include "types/GayBerneAdapter.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 
 

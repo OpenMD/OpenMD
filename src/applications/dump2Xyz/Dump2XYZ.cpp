@@ -67,9 +67,6 @@ using namespace OpenMD;
 using namespace std;
 int main(int argc, char* argv[]){
   
-  //register force fields
-  registerForceFields();
-  
   gengetopt_args_info args_info;
   string dumpFileName;
   string xyzFileName;

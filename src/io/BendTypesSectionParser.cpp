@@ -47,7 +47,7 @@
 #include "types/QuarticBendType.hpp"
 #include "types/PolynomialBendType.hpp"
 #include "types/CosineBendType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 namespace OpenMD {

@@ -46,7 +46,7 @@
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
 #include "types/MorseInteractionType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "math/Vector3.hpp"
 
 using namespace std;

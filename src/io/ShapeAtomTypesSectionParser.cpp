@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "io/ShapeAtomTypesSectionParser.hpp"
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"

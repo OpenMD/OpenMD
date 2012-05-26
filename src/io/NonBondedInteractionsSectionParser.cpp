@@ -46,7 +46,7 @@
 #include "types/MAWInteractionType.hpp"
 #include "types/LennardJonesInteractionType.hpp"
 #include "types/RepulsivePowerInteractionType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 

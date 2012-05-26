@@ -207,6 +207,7 @@ src/antlr/TokenStreamSelector.cpp
 src/antlr/TreeParser.cpp
 src/brains/BlockSnapshotManager.cpp
 src/brains/DataStorage.cpp
+src/brains/ForceField.cpp
 src/brains/MoleculeCreator.cpp
 src/brains/PairList.cpp
 src/brains/Register.cpp
@@ -342,16 +343,6 @@ src/types/StickyAdapter.cpp
 src/types/SuttonChenAdapter.cpp
 src/types/TorsionStamp.cpp
 src/types/ZconsStamp.cpp
-src/UseTheForce/Amber_FF.cpp
-src/UseTheForce/CLAYFF.cpp
-src/UseTheForce/DUFF.cpp
-src/UseTheForce/EADM_FF.cpp
-src/UseTheForce/EAM_FF.cpp
-src/UseTheForce/ForceField.cpp
-src/UseTheForce/ForceFieldFactory.cpp
-src/UseTheForce/MnM_FF.cpp
-src/UseTheForce/SC_FF.cpp
-src/UseTheForce/SHAPES_FF.cpp
 src/utils/ElementsTable.cpp
 src/utils/MoLocator.cpp
 src/utils/OpenMDBitSet.cpp

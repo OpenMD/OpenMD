@@ -44,7 +44,7 @@
 #define NONBONDED_GB_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 
 using namespace std;

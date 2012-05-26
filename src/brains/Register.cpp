@@ -63,43 +63,12 @@
 #include "minimizers/MinimizerCreator.hpp"
 #include "minimizers/PRCG.hpp"
 #include "minimizers/SDMinimizer.hpp"
-#include "UseTheForce/DUFF.hpp"
-#include "UseTheForce/EAM_FF.hpp"
-#include "UseTheForce/EADM_FF.hpp"
-#include "UseTheForce/ForceFieldFactory.hpp"
-#include "UseTheForce/ForceFieldCreator.hpp"
-#include "UseTheForce/SHAPES_FF.hpp"
-#include "UseTheForce/SC_FF.hpp"
-#include "UseTheForce/MnM_FF.hpp"
-#include "UseTheForce/CLAYFF.hpp"
-#include "UseTheForce/Amber_FF.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
 
 namespace OpenMD {
 
-
-  void registerForceFields() {
-    /** @todo move to a seperate initialization module */
-    //DUFF, WATER and LJ are merged into one force field
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("DUFF"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("WATER"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
-    //in theory, EAM can also be merged
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EADM_FF>("EADM"));
-    //heck, that worked...  let's try merging SHAPES
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
-    //Well if EAM worked... then Sutton-Chen should work like a CHARMM(Hopefully not).
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SC_FF>("SC"));
-    //Well if Sutton-Chen worked... then lets just mangle all of the forcefields together in MnM.
-    //That sounds like a good idea right......
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<MnM_FF>("MnM"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<CLAYFF>("CLAY"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<Amber_FF>("Amber"));
-  }
-  
   void registerIntegrators() {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
@@ -130,7 +99,6 @@ namespace OpenMD {
   }
 
   void registerAll() {
-    registerForceFields();
     registerIntegrators();
     registerMinimizers();
   }

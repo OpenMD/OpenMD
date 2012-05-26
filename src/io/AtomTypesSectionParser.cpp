@@ -42,7 +42,7 @@
  
 #include "io/AtomTypesSectionParser.hpp"
 #include "types/AtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 

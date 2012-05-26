@@ -60,7 +60,7 @@ namespace OpenMD {
   class IntegratorCreator;
   class SimInfo;
   /**
-   * @class IntegratorFactory IntegratorFactory.hpp "UseTheForce/IntegratorFactory.hpp"
+   * @class IntegratorFactory
    * Factory pattern and Singleton Pattern are used to define an interface for creating an Integrator.
    */
   class IntegratorFactory {

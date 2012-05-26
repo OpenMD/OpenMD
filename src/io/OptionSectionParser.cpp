@@ -46,7 +46,7 @@
 
 #include "io/OptionSectionParser.hpp"
 #include "types/AtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
 namespace OpenMD {

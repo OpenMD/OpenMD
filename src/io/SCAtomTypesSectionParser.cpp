@@ -46,7 +46,7 @@
 
 #include "io/SCAtomTypesSectionParser.hpp"
 #include "types/SuttonChenAdapter.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
   

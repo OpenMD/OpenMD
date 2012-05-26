@@ -59,7 +59,7 @@
 #include "utils/simError.h"
 #include "selection/SelectionManager.hpp"
 #include "io/ForceFieldOptions.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 #ifdef IS_MPI
 #include <mpi.h>

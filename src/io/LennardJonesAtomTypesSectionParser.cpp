@@ -42,7 +42,7 @@
  
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "types/LennardJonesAdapter.hpp"
 #include "utils/simError.h"
 

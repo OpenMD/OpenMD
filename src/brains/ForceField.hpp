@@ -58,6 +58,7 @@
 
 #include "io/ifstrstream.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParserManager.hpp"
 #include "utils/TypeContainer.hpp"
 #include "utils/Tuple.hpp"
 #include "types/AtomType.hpp"
@@ -66,16 +67,12 @@
 #include "types/TorsionType.hpp"
 #include "types/InversionType.hpp"
 #include "types/NonBondedInteractionType.hpp"
+
 namespace OpenMD {
 
-  /**
-   * @class ForceField ForceField.hpp ''UseTheForce/ForceField.hpp"
-   * @brief
-   */
   class ForceField{
 
   public:
-
     typedef TypeContainer<AtomType, 1> AtomTypeContainer;
     typedef TypeContainer<BondType, 2> BondTypeContainer;
     typedef TypeContainer<BendType, 3> BendTypeContainer;
@@ -83,7 +80,7 @@ namespace OpenMD {
     typedef TypeContainer<InversionType, 4> InversionTypeContainer;
     typedef TypeContainer<NonBondedInteractionType, 2> NonBondedInteractionTypeContainer;
     
-    ForceField();
+    ForceField(std::string ffName);
     
     virtual ~ForceField() {};
 
@@ -95,7 +92,7 @@ namespace OpenMD {
       forceFieldFileName_ = filename;
     }
         
-    virtual void parse(const std::string& filename) = 0;  
+    virtual void parse(const std::string& filename);  
 
     AtomType* getAtomType(const std::string &at);
     AtomType* getAtomType(int ident);
@@ -184,6 +181,8 @@ namespace OpenMD {
     NonBondedInteractionTypeContainer nonBondedInteractionTypeCont_;
     ForceFieldOptions forceFieldOptions_;
     std::map<int, std::string> atypeIdentToName;
+    SectionParserManager spMan_;
+
     
   private:  
     std::string ffPath_;    
