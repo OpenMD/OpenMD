@@ -42,6 +42,7 @@
  
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
+#include <cstdio>
 #include "nonbonded/SlaterIntegrals.hpp"
 
 namespace OpenMD {

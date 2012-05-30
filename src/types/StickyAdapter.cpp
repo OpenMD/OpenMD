@@ -42,6 +42,7 @@
  
 #include "types/StickyAdapter.hpp"
 #include "utils/simError.h"
+#include <cstdio>
 
 namespace OpenMD {
   

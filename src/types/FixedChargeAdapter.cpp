@@ -42,6 +42,7 @@
  
 #include "types/FixedChargeAdapter.hpp"
 #include "utils/simError.h"
+#include <cstdio>
 
 namespace OpenMD {
 

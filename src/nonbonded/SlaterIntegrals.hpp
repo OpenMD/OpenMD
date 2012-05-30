@@ -61,6 +61,7 @@
 
 #include "config.h"
 #include <cmath>
+#include <cstdlib>
 #include "math/Factorials.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP

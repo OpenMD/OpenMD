@@ -220,7 +220,6 @@ src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/Sphere.cpp
 src/integrators/DLM.cpp
 src/integrators/FluctuatingChargeNVT.cpp
-src/integrators/FluctuatingChargePropagator.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
@@ -368,6 +367,8 @@ src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp
 src/brains/Thermo.cpp
 src/constraints/ZconstraintForceManager.cpp
+src/integrators/FluctuatingChargePropagator.cpp
+src/integrators/LangevinHullForceManager.cpp
 src/integrators/RNEMD.cpp
 src/integrators/Velocitizer.cpp
 src/io/DumpReader.cpp

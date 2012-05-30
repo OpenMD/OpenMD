@@ -147,13 +147,16 @@ namespace OpenMD {
     int logFrameCount_;
     // James added denLog, vzzLog
     ofstream tempLog_, vxzLog_, vyzLog_, denLog_, vzzLog_, denLog2_;
-    ofstream xTempLog_, yTempLog_, zTempLog_, rotTempLog_;
+    ofstream xTempLog_, yTempLog_, zTempLog_, rotTempLog_, AhLog_;
     // keeps track of what's being averaged James added DenHist, pzzHist
     vector<RealType> tempHist_, pxzHist_, pyzHist_, mHist_, DenHist_, pzzHist_, DenHist2_;
     vector<RealType> xTempHist_, yTempHist_, zTempHist_, rotTempHist_;
     // keeps track of the number of degrees of freedom being averaged
     //vector<int> pxzCount_, pyzCount_;
     vector<int> tempCount_, xyzTempCount_, rotTempCount_;
+    RealType Asum_, Jsum_, AhCount_, runTime_, statusTime_;
+    int Numcount_;
+    bool outputAh_;
   };
 
 }

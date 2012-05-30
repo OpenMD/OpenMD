@@ -42,6 +42,7 @@
  
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
+#include <cstdio>
 
 namespace OpenMD {
   
