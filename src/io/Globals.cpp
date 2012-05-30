@@ -144,6 +144,10 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_outputTemperature, "RNEMD_outputTemperature", false);
   DefineOptionalParameterWithDefaultValue(RNEMD_outputVx, "RNEMD_outputVx", false);
   DefineOptionalParameterWithDefaultValue(RNEMD_outputVy, "RNEMD_outputVy", false);
+  // James put this in.
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputDen, "RNEMD_outputDen", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputAh, "RNEMD_outputAh", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputVz, "RNEMD_outputVz", false);  
   DefineOptionalParameterWithDefaultValue(RNEMD_outputXyzTemperature, "RNEMD_outputXyzTemperature", false);
   DefineOptionalParameterWithDefaultValue(RNEMD_outputRotTemperature, "RNEMD_outputRotTemperature", false);
 

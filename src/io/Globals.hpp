@@ -153,6 +153,10 @@ namespace OpenMD {
     DeclareParameter(RNEMD_outputTemperature, bool);
     DeclareParameter(RNEMD_outputVx, bool);
     DeclareParameter(RNEMD_outputVy, bool);
+    // James put this in.
+    DeclareParameter(RNEMD_outputDen, bool);
+    DeclareParameter(RNEMD_outputVz, bool);    
+    DeclareParameter(RNEMD_outputAh, bool);
     DeclareParameter(RNEMD_outputXyzTemperature, bool);
     DeclareParameter(RNEMD_outputRotTemperature, bool);
     DeclareParameter(UseRestraints, bool);
