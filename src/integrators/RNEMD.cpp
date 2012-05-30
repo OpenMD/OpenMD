@@ -85,6 +85,9 @@ namespace OpenMD {
     stringToEnumMap_["ShiftScaleVAM"] = rnemdShiftScaleVAM;
     stringToEnumMap_["Unknown"] = rnemdUnknown;
 
+    runTime_ = simParams->getRunTime();
+    statusTime_ = simParams->getStatusTime();
+
     rnemdObjectSelection_ = simParams->getRNEMD_objectSelection();
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -155,6 +158,22 @@ namespace OpenMD {
     if (simParams->haveRNEMD_outputRotTemperature()) {
       outputRotTemp_ = simParams->getRNEMD_outputRotTemperature();
     }
+    // James put this in.
+    outputDen_ = false;
+    if (simParams->haveRNEMD_outputDen()) {
+      outputDen_ = simParams->getRNEMD_outputDen();
+    }
+    outputAh_ = false;
+    if (simParams->haveRNEMD_outputAh()) {
+      outputAh_ = simParams->getRNEMD_outputAh();
+    }    
+    outputVz_ = false;
+    if (simParams->haveRNEMD_outputVz()) {
+      outputVz_ = simParams->getRNEMD_outputVz();
+    } else if ((rnemdType_ == rnemdPz) || (rnemdType_ == rnemdPzScale)) {
+      outputVz_ = true;
+    }
+    
 
 #ifdef IS_MPI
     if (worldRank == 0) {
@@ -188,7 +207,21 @@ namespace OpenMD {
         rnemdFileName = "temperatureR.log";
       	rotTempLog_.open(rnemdFileName.c_str());
       }
-
+      
+      //James put this in
+      if (outputDen_) {
+	rnemdFileName = "Density.log";
+	denLog_.open(rnemdFileName.c_str());
+      }
+      if (outputAh_) {
+	rnemdFileName = "Ah.log";
+	AhLog_.open(rnemdFileName.c_str());
+      }
+      if (outputVz_) {
+	rnemdFileName = "velocityZ.log";
+	vzzLog_.open(rnemdFileName.c_str());
+      }
+      logFrameCount_ = 0;
 #ifdef IS_MPI
     }
 #endif
@@ -233,6 +266,9 @@ namespace OpenMD {
     xyzTempCount_.resize(rnemdLogWidth_, 0);
     rotTempHist_.resize(rnemdLogWidth_, 0.0);
     rotTempCount_.resize(rnemdLogWidth_, 0);
+    // James put this in
+    DenHist_.resize(rnemdLogWidth_, 0.0);
+    pzzHist_.resize(rnemdLogWidth_, 0.0);
 
     set_RNEMD_exchange_total(0.0);
     if (simParams->haveRNEMD_targetFlux()) {
@@ -297,7 +333,7 @@ namespace OpenMD {
       painCave.isFatal = 0;
       painCave.severity = OPENMD_INFO;
       simError();
-
+      
       if (outputTemp_) tempLog_.close();
       if (outputVx_)   vxzLog_.close();
       if (outputVy_)   vyzLog_.close();
@@ -317,7 +353,11 @@ namespace OpenMD {
         zTempLog_.close();
       }
       if (outputRotTemp_) rotTempLog_.close();
-
+      // James put this in
+      if (outputDen_) denLog_.close();
+      if (outputAh_)  AhLog_.close();
+      if (outputVz_)  vzzLog_.close();
+      
 #ifdef IS_MPI
     }
 #endif
@@ -454,7 +494,7 @@ namespace OpenMD {
 	RealType val;
 	int rank;
       } max_vals, min_vals;
-    
+      
       if (my_min_found) {
         min_vals.val = min_val;
       } else {
@@ -760,11 +800,11 @@ namespace OpenMD {
     Kcz *= 0.5;
     Kcw *= 0.5;
 
-    std::cerr << "Khx= " << Khx << "\tKhy= " << Khy << "\tKhz= " << Khz
-	      << "\tKhw= " << Khw << "\tKcx= " << Kcx << "\tKcy= " << Kcy
-	      << "\tKcz= " << Kcz << "\tKcw= " << Kcw << "\n";
-    std::cerr << "Phx= " << Phx << "\tPhy= " << Phy << "\tPhz= " << Phz
-	      << "\tPcx= " << Pcx << "\tPcy= " << Pcy << "\tPcz= " <<Pcz<<"\n";
+    // std::cerr << "Khx= " << Khx << "\tKhy= " << Khy << "\tKhz= " << Khz
+    // 	      << "\tKhw= " << Khw << "\tKcx= " << Kcx << "\tKcy= " << Kcy
+    // 	      << "\tKcz= " << Kcz << "\tKcw= " << Kcw << "\n";
+    // std::cerr << "Phx= " << Phx << "\tPhy= " << Phy << "\tPhz= " << Phz
+    // 	      << "\tPcx= " << Pcx << "\tPcy= " << Pcy << "\tPcz= " <<Pcz<<"\n";
 
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Phx, 1, MPI::REALTYPE, MPI::SUM);
@@ -1105,6 +1145,7 @@ namespace OpenMD {
   void RNEMD::doShiftScale() {
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    RealType time = currentSnap_->getTime();	 
     Mat3x3d hmat = currentSnap_->getHmat();
 
     seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -1121,6 +1162,7 @@ namespace OpenMD {
     Vector3d Pc(V3Zero);
     RealType Mc = 0.0;
     RealType Kc = 0.0;
+    
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
@@ -1198,10 +1240,10 @@ namespace OpenMD {
     Kh *= 0.5;
     Kc *= 0.5;
 
-    std::cerr << "Mh= " << Mh << "\tKh= " << Kh << "\tMc= " << Mc
-	      << "\tKc= " << Kc << endl;
-    std::cerr << "Ph= " << Ph << "\tPc= " << Pc << endl;
-
+    // std::cerr << "Mh= " << Mh << "\tKh= " << Kh << "\tMc= " << Mc
+    // 	      << "\tKc= " << Kc << endl;
+    // std::cerr << "Ph= " << Ph << "\tPc= " << Pc << endl;
+    
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Ph[0], 3, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Pc[0], 3, MPI::REALTYPE, MPI::SUM);
@@ -1215,6 +1257,7 @@ namespace OpenMD {
     if ((Mh > 0.0) && (Mc > 0.0)) {//both slabs are not empty
       Vector3d vc = Pc / Mc;
       Vector3d ac = njzp_ / Mc + vc;
+      Vector3d acrec = njzp_ / Mc;
       RealType cNumerator = Kc - targetJzKE_ - 0.5 * Mc * ac.lengthSquare();
       if (cNumerator > 0.0) {
 	RealType cDenominator = Kc - 0.5 * Mc * vc.lengthSquare();
@@ -1223,6 +1266,7 @@ namespace OpenMD {
 	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
 	    Vector3d vh = Ph / Mh;
 	    Vector3d ah = jzp_ / Mh + vh;
+	    Vector3d ahrec = jzp_ / Mh;
 	    RealType hNumerator = Kh + targetJzKE_
 	      - 0.5 * Mh * ah.lengthSquare();
 	    if (hNumerator > 0.0) {
@@ -1230,8 +1274,8 @@ namespace OpenMD {
 	      if (hDenominator > 0.0) {
 		RealType h = sqrt(hNumerator / hDenominator);
 		if ((h > 0.9) && (h < 1.1)) {
-		  std::cerr << "cold slab scaling coefficient: " << c << "\n";
-		  std::cerr << "hot slab scaling coefficient: " << h << "\n";
+		  // std::cerr << "cold slab scaling coefficient: " << c << "\n";
+		  // std::cerr << "hot slab scaling coefficient: " << h <<  "\n";
 		  vector<StuntDouble*>::iterator sdi;
 		  Vector3d vel;
 		  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
@@ -1261,6 +1305,17 @@ namespace OpenMD {
 		  // this is a redundant variable for doShiftScale() so that
 		  // RNEMD can output one exchange quantity needed in a job.
 		  // need a better way to do this.
+		  //cerr << "acx =" << ac.x() << "ahx =" << ah.x() << '\n';
+		  //cerr << "acy =" << ac.y() << "ahy =" << ah.y() << '\n';
+		  //cerr << "acz =" << ac.z() << "ahz =" << ah.z() << '\n';
+		  Asum_ += (ahrec.z() - acrec.z());
+		  Jsum_ += (jzp_.z()*((1/Mh)+(1/Mc)));
+		  AhCount_ = ahrec.z();
+		  if (outputAh_) {
+		    AhLog_ << time << "   ";
+		    AhLog_ << AhCount_;
+		    AhLog_ << endl;
+		  }		  
 		}
 	      }
 	    }
@@ -1269,11 +1324,11 @@ namespace OpenMD {
       }
     }
     if (successfulExchange != true) {
-      sprintf(painCave.errMsg, 
-	      "RNEMD: exchange NOT performed!\n");
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();        
+      //   sprintf(painCave.errMsg, 
+      // 	      "RNEMD: exchange NOT performed!\n");
+      //   painCave.isFatal = 0;
+      //   painCave.severity = OPENMD_INFO;
+      //   simError();        
       failTrialCount_++;
     }
   }
@@ -1316,6 +1371,8 @@ namespace OpenMD {
     StuntDouble* sd;
     int idx;
 
+    logFrameCount_++;
+
     // alternative approach, track all molecules instead of only those
     // selected for scaling/swapping:
     /*
@@ -1324,7 +1381,7 @@ namespace OpenMD {
     Molecule* mol;
     StuntDouble* integrableObject;
     for (mol = info_->beginMolecule(miter); mol != NULL;
-         mol = info_->nextMolecule(miter))
+      mol = info_->nextMolecule(miter))
       integrableObject is essentially sd
         for (integrableObject = mol->beginIntegrableObject(iiter);
              integrableObject != NULL;
@@ -1427,7 +1484,16 @@ namespace OpenMD {
 	  / PhysicalConstants::kb;//may move to getStatus()
 	rotTempHist_[binNo] += value;
       }
-
+      // James put this in.
+      if (outputDen_) {
+	//value = 1.0;
+	DenHist_[binNo] += 1;
+      }
+      if (outputVz_) {
+	value = mass * vel[2];
+	//vyzCount_[binNo]++;
+	pzzHist_[binNo] += value;
+      }     
     }
   }
 
@@ -1493,7 +1559,20 @@ namespace OpenMD {
       MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &rotTempCount_[0],
 				rnemdLogWidth_, MPI::INT, MPI::SUM);
     }
-
+    // James put this in
+    if (outputDen_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &DenHist_[0],
+				rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+    }
+    if (outputAh_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &AhCount_,
+				1, MPI::REALTYPE, MPI::SUM);
+    }
+    if (outputVz_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pzzHist_[0],
+				rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+    }
+    
     // If we're the root node, should we print out the results
     int worldRank = MPI::COMM_WORLD.Get_rank();
     if (worldRank == 0) {
@@ -1550,7 +1629,24 @@ namespace OpenMD {
 	}
 	rotTempLog_ << endl;
       }
-
+      // James put this in.
+      Mat3x3d hmat = currentSnap_->getHmat();
+      if (outputDen_) {
+	denLog_ << time;
+	for (j = 0; j < rnemdLogWidth_; j++) {
+	  
+	  RealType binVol = hmat(0,0) * hmat(1,1) * (hmat(2,2) / float(nBins_));
+	  denLog_ << "\t" << DenHist_[j] / (float(logFrameCount_) * binVol);
+	}
+	denLog_ << endl;
+      }
+      if (outputVz_) {
+	vzzLog_ << time;
+	for (j = 0; j < rnemdLogWidth_; j++) {
+	  vzzLog_ << "\t" << pzzHist_[j] / mHist_[j];
+	}
+	vzzLog_ << endl;
+      }      
 #ifdef IS_MPI
     }
 #endif
@@ -1586,6 +1682,26 @@ namespace OpenMD {
 	rotTempCount_[j] = 0;
 	rotTempHist_[j] = 0.0;
       }
+    // James put this in
+    if (outputDen_)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+	//pyzCount_[j] = 0;
+	DenHist_[j] = 0.0;
+      }
+    if (outputVz_)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+	//pyzCount_[j] = 0;
+	pzzHist_[j] = 0.0;
+      }    
+     // reset the counter
+     
+    Numcount_++;
+    if (Numcount_ > int(runTime_/statusTime_))
+      cerr << "time =" << time << "  Asum =" << Asum_ << '\n';
+    if (Numcount_ > int(runTime_/statusTime_))
+      cerr << "time =" << time << "  Jsum =" << Jsum_ << '\n';
+    
+    logFrameCount_ = 0;
   }
 }
 

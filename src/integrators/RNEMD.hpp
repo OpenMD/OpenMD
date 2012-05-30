@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -85,6 +86,7 @@ namespace OpenMD {
     void set_RNEMD_target_jzpx(RealType targetJzpx) {targetJzpx_ = targetJzpx;}
     void set_RNEMD_target_jzpy(RealType targetJzpy) {targetJzpy_ = targetJzpy;}
     void set_RNEMD_target_jzpz(RealType targetJzpz) {targetJzpz_ = targetJzpz;}
+    void set_RNEMD_target_jzpz2(RealType targetJzpz2) {targetJzpz2_ = targetJzpz2;}
     RealType get_RNEMD_exchange_total() { return exchangeSum_; }
 
   private:
@@ -118,6 +120,9 @@ namespace OpenMD {
     bool outputVy_;
     bool output3DTemp_;
     bool outputRotTemp_;
+    // James put this in.
+    bool outputDen_;
+    bool outputVz_;
     int nBins_; /**< The number of bins to divide the simulation box into.  */
     /*!
       The middle bin for the RNEMD method. midBin_ = nBins_/2;
@@ -133,14 +138,18 @@ namespace OpenMD {
     RealType targetJzpx_;
     RealType targetJzpy_;
     RealType targetJzpz_;
+    RealType targetJzpz2_;
     Vector3d jzp_, njzp_;
     RealType exchangeSum_;
     int failTrialCount_;
     int failRootCount_;
-    ofstream tempLog_, vxzLog_, vyzLog_;
+    ofstream rnemdLog_;
+    int logFrameCount_;
+    // James added denLog, vzzLog
+    ofstream tempLog_, vxzLog_, vyzLog_, denLog_, vzzLog_, denLog2_;
     ofstream xTempLog_, yTempLog_, zTempLog_, rotTempLog_;
-    // keeps track of what's being averaged
-    vector<RealType> tempHist_, pxzHist_, pyzHist_, mHist_;
+    // keeps track of what's being averaged James added DenHist, pzzHist
+    vector<RealType> tempHist_, pxzHist_, pyzHist_, mHist_, DenHist_, pzzHist_, DenHist2_;
     vector<RealType> xTempHist_, yTempHist_, zTempHist_, rotTempHist_;
     // keeps track of the number of degrees of freedom being averaged
     //vector<int> pxzCount_, pyzCount_;
