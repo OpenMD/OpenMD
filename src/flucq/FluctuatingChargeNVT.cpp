@@ -52,11 +52,13 @@ namespace OpenMD {
     thermo(info), 
     currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
+
     if (info_->usesFluctuatingCharges()) {
       if (info_->getNFluctuatingCharges() > 0) {
 
         hasFlucQ_ = true;
         Globals* simParams = info_->getSimParams();
+        FluctuatingChargeParameters* fqParams = simParams->getFluctuatingChargeParameters();
 
         if (simParams->haveDt()) {
           dt_ = simParams->getDt();
@@ -73,19 +75,19 @@ namespace OpenMD {
           currentSnapshot_->setIntegralOfChiElectronicDt(0.0);
         }
         
-        if (!simParams->haveFlucQTargetTemp()) {
+        if (!fqParams->haveTargetTemp()) {
           sprintf(painCave.errMsg, "You can't use the FluctuatingChargeNVT "
                   "propagator without a flucQ.targetTemp!\n");
           painCave.isFatal = 1;
           painCave.severity = OPENMD_ERROR;
           simError();
         } else {
-          targetTemp_ = simParams->getFlucQTargetTemp();
+          targetTemp_ = fqParams->getTargetTemp();
         }
         
         // We must set tauThermostat.
         
-        if (!simParams->haveFlucQtauThermostat()) {
+        if (!fqParams->haveTauThermostat()) {
           sprintf(painCave.errMsg, "If you use the FluctuatingChargeNVT\n"
                   "\tpropagator, you must set flucQ.tauThermostat .\n");
           
@@ -93,7 +95,7 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();
         } else {
-          tauThermostat_ = simParams->getFlucQtauThermostat();
+          tauThermostat_ = fqParams->getTauThermostat();
         }
         updateSizes();
       }

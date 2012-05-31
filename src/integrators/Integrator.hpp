@@ -56,9 +56,9 @@
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
 #include "integrators/RotationAlgorithm.hpp"
-#include "integrators/FluctuatingChargePropagator.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
 #include "integrators/Velocitizer.hpp"
-#include "integrators/RNEMD.hpp"
+#include "rnemd/RNEMD.hpp"
 #include "constraints/Rattle.hpp"
 
 namespace OpenMD {

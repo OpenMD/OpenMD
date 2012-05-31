@@ -35,12 +35,13 @@ mdfile  : (statement)* {blockStack.top()->validate(); blockStack.pop();}
         ;
 
 statement : assignment
-          | componentblock
-          | moleculeblock
-          | zconstraintblock
-          | restraintblock
-          ;
-
+    | componentblock
+    | moleculeblock
+    | zconstraintblock
+    | restraintblock
+    | flucqblock
+    | rnemdblock
+    ;
 
 assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
             ;
@@ -75,6 +76,17 @@ restraintblock  : #(RESTRAINT {RestraintStamp* currRestraintStamp = new Restrain
                          ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRestraintStamp(currRestraintStamp);}
                   ;
   
+flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new FluctuatingChargeParameters(); blockStack.push(flucQpars);}
+                      (assignment)* 
+                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addFluctuatingChargeParameters(flucQpars);}
+                ;
+
+rnemdblock  : #(RNEMD  {RNEMDParameters* rnemdPars = new RNEMDParameters(); blockStack.push(rnemdPars);}
+                      (assignment)* 
+                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRNEMDParameters(rnemdPars);}
+                ;
+
+
 moleculeblock : #(MOLECULE {MoleculeStamp* currMoleculeStamp = new MoleculeStamp(); blockStack.push(currMoleculeStamp);}
                     (moleculestatement)* 
                      ENDBLOCK ) {blockStack.top()->validate(); blockStack.pop(); currConf->addMoleculeStamp(currMoleculeStamp);}

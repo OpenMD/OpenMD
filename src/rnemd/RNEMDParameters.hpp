@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,64 +40,39 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 13:25am
- * @version 1.0
- */
+#ifndef RNEMD_RNEMDPARAMTERS_HPP
+#define RNEMD_RNEMDPARAMTERS_HPP
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
+#include "types/DataHolder.hpp"
 
 namespace OpenMD {
-
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
-  class VelocityVerletIntegrator : public Integrator {
-  public:
-    virtual ~VelocityVerletIntegrator();
-        
-  protected:
-
-    VelocityVerletIntegrator(SimInfo* info);
-    virtual void doIntegrate();
-    virtual void initialize();
-    virtual void preStep();
-    virtual void integrateStep();        
-    virtual void postStep();
-    virtual void finalize();
-    virtual void resetIntegrator() {}
+  class RNEMDParameters : public DataHolder {
+    DeclareParameter(UseRNEMD, bool);
+    DeclareParameter(ExchangeTime, RealType);
+    DeclareParameter(Nbins, int);
+    DeclareParameter(LogWidth, int);
+    DeclareParameter(ExchangeType, std::string);
+    DeclareParameter(ObjectSelection, std::string);
+    DeclareParameter(TargetFlux, RealType);
+    DeclareParameter(TargetJzKE, RealType);
+    DeclareParameter(TargetJzpx, RealType);
+    DeclareParameter(TargetJzpy, RealType);
+    DeclareParameter(TargetJzpz, RealType);
+    DeclareParameter(BinShift, bool);
+    DeclareParameter(OutputTemperature, bool);
+    DeclareParameter(OutputXyzTemperature, bool);
+    DeclareParameter(OutputRotTemperature, bool);
+    DeclareParameter(OutputVx, bool);
+    DeclareParameter(OutputVy, bool);
+    DeclareParameter(OutputVz, bool);    
+    DeclareParameter(OutputDen, bool);    
+    DeclareParameter(OutputAh, bool);
     
-    RealType dt2;
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-        
-  private:
-        
-    virtual void calcForce();    
-    virtual void moveA() = 0;
-    virtual void moveB() = 0;
-    virtual RealType calcConservedQuantity() = 0;
-    virtual DumpWriter* createDumpWriter();
-    virtual StatWriter* createStatWriter();
-
-    ProgressBar* progressBar;
-
+  public:
+    RNEMDParameters();
+    virtual ~RNEMDParameters();
+    virtual void validate();
+    
   };
-
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+}
+#endif

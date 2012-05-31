@@ -219,7 +219,7 @@ src/hydrodynamics/Ellipsoid.cpp
 src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/Sphere.cpp
 src/integrators/DLM.cpp
-src/integrators/FluctuatingChargeNVT.cpp
+src/flucq/FluctuatingChargeNVT.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
@@ -359,6 +359,8 @@ src/visitors/OtherVisitor.cpp
 src/visitors/ReplacementVisitor.cpp
 src/visitors/RigidBodyVisitor.cpp
 src/visitors/ZconsVisitor.cpp
+src/flucq/FluctuatingChargeParameters.cpp
+src/rnemd/RNEMDParameters.cpp
 )
 
 set( PARALLEL_SOURCE
@@ -367,9 +369,9 @@ src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp
 src/brains/Thermo.cpp
 src/constraints/ZconstraintForceManager.cpp
-src/integrators/FluctuatingChargePropagator.cpp
+src/flucq/FluctuatingChargePropagator.cpp
 src/integrators/LangevinHullForceManager.cpp
-src/integrators/RNEMD.cpp
+src/rnemd/RNEMD.cpp
 src/integrators/Velocitizer.cpp
 src/io/DumpReader.cpp
 src/io/DumpWriter.cpp

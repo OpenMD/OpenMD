@@ -40,7 +40,7 @@
  */
 
 #include <cmath>
-#include "integrators/RNEMD.hpp"
+#include "rnemd/RNEMD.hpp"
 #include "math/Vector3.hpp"
 #include "math/Vector.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -70,6 +70,7 @@ namespace OpenMD {
 
     int seedValue;
     Globals * simParams = info->getSimParams();
+    RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
 
     stringToEnumMap_["KineticSwap"] = rnemdKineticSwap;
     stringToEnumMap_["KineticScale"] = rnemdKineticScale;
@@ -88,7 +89,7 @@ namespace OpenMD {
     runTime_ = simParams->getRunTime();
     statusTime_ = simParams->getStatusTime();
 
-    rnemdObjectSelection_ = simParams->getRNEMD_objectSelection();
+    rnemdObjectSelection_ = rnemdParams->getObjectSelection();
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
@@ -113,7 +114,7 @@ namespace OpenMD {
       simError();
     }
     
-    const string st = simParams->getRNEMD_exchangeType();
+    const string st = rnemdParams->getExchangeType();
 
     map<string, RNEMDTypeEnum>::iterator i;
     i = stringToEnumMap_.find(st);
@@ -130,8 +131,8 @@ namespace OpenMD {
     }
     
     outputTemp_ = false;
-    if (simParams->haveRNEMD_outputTemperature()) {
-      outputTemp_ = simParams->getRNEMD_outputTemperature();
+    if (rnemdParams->haveOutputTemperature()) {
+      outputTemp_ = rnemdParams->getOutputTemperature();
     } else if ((rnemdType_ == rnemdKineticSwap) ||
 	       (rnemdType_ == rnemdKineticScale) ||
 	       (rnemdType_ == rnemdKineticScaleVAM) ||
@@ -139,37 +140,37 @@ namespace OpenMD {
       outputTemp_ = true;
     }
     outputVx_ = false;
-    if (simParams->haveRNEMD_outputVx()) {
-      outputVx_ = simParams->getRNEMD_outputVx();
+    if (rnemdParams->haveOutputVx()) {
+      outputVx_ = rnemdParams->getOutputVx();
     } else if ((rnemdType_ == rnemdPx) || (rnemdType_ == rnemdPxScale)) {
       outputVx_ = true;
     }
     outputVy_ = false;
-    if (simParams->haveRNEMD_outputVy()) {
-      outputVy_ = simParams->getRNEMD_outputVy();
+    if (rnemdParams->haveOutputVy()) {
+      outputVy_ = rnemdParams->getOutputVy();
     } else if ((rnemdType_ == rnemdPy) || (rnemdType_ == rnemdPyScale)) {
       outputVy_ = true;
     }
     output3DTemp_ = false;
-    if (simParams->haveRNEMD_outputXyzTemperature()) {
-      output3DTemp_ = simParams->getRNEMD_outputXyzTemperature();
+    if (rnemdParams->haveOutputXyzTemperature()) {
+      output3DTemp_ = rnemdParams->getOutputXyzTemperature();
     }
     outputRotTemp_ = false;
-    if (simParams->haveRNEMD_outputRotTemperature()) {
-      outputRotTemp_ = simParams->getRNEMD_outputRotTemperature();
+    if (rnemdParams->haveOutputRotTemperature()) {
+      outputRotTemp_ = rnemdParams->getOutputRotTemperature();
     }
     // James put this in.
     outputDen_ = false;
-    if (simParams->haveRNEMD_outputDen()) {
-      outputDen_ = simParams->getRNEMD_outputDen();
+    if (rnemdParams->haveOutputDen()) {
+      outputDen_ = rnemdParams->getOutputDen();
     }
     outputAh_ = false;
-    if (simParams->haveRNEMD_outputAh()) {
-      outputAh_ = simParams->getRNEMD_outputAh();
+    if (rnemdParams->haveOutputAh()) {
+      outputAh_ = rnemdParams->getOutputAh();
     }    
     outputVz_ = false;
-    if (simParams->haveRNEMD_outputVz()) {
-      outputVz_ = simParams->getRNEMD_outputVz();
+    if (rnemdParams->haveOutputVz()) {
+      outputVz_ = rnemdParams->getOutputVz();
     } else if ((rnemdType_ == rnemdPz) || (rnemdType_ == rnemdPzScale)) {
       outputVz_ = true;
     }
@@ -226,11 +227,11 @@ namespace OpenMD {
     }
 #endif
 
-    set_RNEMD_exchange_time(simParams->getRNEMD_exchangeTime());
-    set_RNEMD_nBins(simParams->getRNEMD_nBins());
+    set_RNEMD_exchange_time(rnemdParams->getExchangeTime());
+    set_RNEMD_nBins(rnemdParams->getNbins());
     midBin_ = nBins_ / 2;
-    if (simParams->haveRNEMD_binShift()) {
-      if (simParams->getRNEMD_binShift()) {
+    if (rnemdParams->haveBinShift()) {
+      if (rnemdParams->getBinShift()) {
         zShift_ = 0.5 / (RealType)(nBins_);
       } else {
         zShift_ = 0.0;
@@ -241,8 +242,8 @@ namespace OpenMD {
     //cerr << "I shift slabs by " << zShift_ << " Lz\n";
     //shift slabs by half slab width, maybe useful in heterogeneous systems
     //set to 0.0 if not using it; N/A in status output yet
-    if (simParams->haveRNEMD_logWidth()) {
-      set_RNEMD_logWidth(simParams->getRNEMD_logWidth());
+    if (rnemdParams->haveLogWidth()) {
+      set_RNEMD_logWidth(rnemdParams->getLogWidth());
       /*arbitary rnemdLogWidth_, no checking;
       if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
         cerr << "WARNING! RNEMD_logWidth has abnormal value!\n";
@@ -271,32 +272,32 @@ namespace OpenMD {
     pzzHist_.resize(rnemdLogWidth_, 0.0);
 
     set_RNEMD_exchange_total(0.0);
-    if (simParams->haveRNEMD_targetFlux()) {
-      set_RNEMD_target_flux(simParams->getRNEMD_targetFlux());
+    if (rnemdParams->haveTargetFlux()) {
+      set_RNEMD_target_flux(rnemdParams->getTargetFlux());
     } else {
       set_RNEMD_target_flux(0.0);
     }
-    if (simParams->haveRNEMD_targetJzKE()) {
-      set_RNEMD_target_JzKE(simParams->getRNEMD_targetJzKE());
+    if (rnemdParams->haveTargetJzKE()) {
+      set_RNEMD_target_JzKE(rnemdParams->getTargetJzKE());
     } else {
       set_RNEMD_target_JzKE(0.0);
     }
-    if (simParams->haveRNEMD_targetJzpx()) {
-      set_RNEMD_target_jzpx(simParams->getRNEMD_targetJzpx());
+    if (rnemdParams->haveTargetJzpx()) {
+      set_RNEMD_target_jzpx(rnemdParams->getTargetJzpx());
     } else {
       set_RNEMD_target_jzpx(0.0);
     }
     jzp_.x() = targetJzpx_;
     njzp_.x() = -targetJzpx_;
-    if (simParams->haveRNEMD_targetJzpy()) {
-      set_RNEMD_target_jzpy(simParams->getRNEMD_targetJzpy());
+    if (rnemdParams->haveTargetJzpy()) {
+      set_RNEMD_target_jzpy(rnemdParams->getTargetJzpy());
     } else {
       set_RNEMD_target_jzpy(0.0);
     }
     jzp_.y() = targetJzpy_;
     njzp_.y() = -targetJzpy_;
-    if (simParams->haveRNEMD_targetJzpz()) {
-      set_RNEMD_target_jzpz(simParams->getRNEMD_targetJzpz());
+    if (rnemdParams->haveTargetJzpz()) {
+      set_RNEMD_target_jzpz(rnemdParams->getTargetJzpz());
     } else {
       set_RNEMD_target_jzpz(0.0);
     }

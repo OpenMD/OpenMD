@@ -54,6 +54,8 @@
 #include "types/ZconsStamp.hpp"
 #include "types/RestraintStamp.hpp"
 #include "types/MoleculeStamp.hpp"
+#include "flucq/FluctuatingChargeParameters.hpp"
+#include "rnemd/RNEMDParameters.hpp"
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
@@ -138,37 +140,10 @@ namespace OpenMD {
     DeclareParameter(MTM_Io, RealType);
     DeclareParameter(MTM_Sigma, RealType);    
     DeclareParameter(MTM_R, RealType);    
-    DeclareParameter(UseRNEMD, bool);
-    DeclareParameter(RNEMD_exchangeTime, RealType);
-    DeclareParameter(RNEMD_nBins, int);
-    DeclareParameter(RNEMD_logWidth, int);
-    DeclareParameter(RNEMD_exchangeType, std::string);
-    DeclareParameter(RNEMD_objectSelection, std::string);
-    DeclareParameter(RNEMD_targetFlux, RealType);
-    DeclareParameter(RNEMD_targetJzKE, RealType);
-    DeclareParameter(RNEMD_targetJzpx, RealType);
-    DeclareParameter(RNEMD_targetJzpy, RealType);
-    DeclareParameter(RNEMD_targetJzpz, RealType);
-    DeclareParameter(RNEMD_binShift, bool);
-    DeclareParameter(RNEMD_outputTemperature, bool);
-    DeclareParameter(RNEMD_outputVx, bool);
-    DeclareParameter(RNEMD_outputVy, bool);
-    // James put this in.
-    DeclareParameter(RNEMD_outputDen, bool);
-    DeclareParameter(RNEMD_outputVz, bool);    
-    DeclareParameter(RNEMD_outputAh, bool);
-    DeclareParameter(RNEMD_outputXyzTemperature, bool);
-    DeclareParameter(RNEMD_outputRotTemperature, bool);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
-    DeclareParameter(FlucQPropagator, std::string);
-    DeclareParameter(FlucQFriction, RealType);    
-    DeclareParameter(FlucQTolerance, RealType);    
-    DeclareParameter(FlucQMaxIterations, int);    
-    DeclareParameter(FlucQTargetTemp, RealType);
-    DeclareParameter(FlucQtauThermostat, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
 
   public:
@@ -187,6 +162,12 @@ namespace OpenMD {
     int getNRestraintStamps() {return restraints_.size();}
     std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
     RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}    
+
+    bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
+    FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
+
+    bool addRNEMDParameters(RNEMDParameters* rnemdPars);
+    RNEMDParameters* getRNEMDParameters() {return rnemdPars_;}
     
     virtual void validate();
   private:
@@ -196,6 +177,8 @@ namespace OpenMD {
     std::vector<RestraintStamp*> restraints_;    
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
+    FluctuatingChargeParameters* flucQpars_;
+    RNEMDParameters* rnemdPars_;
 };
 }
 #endif

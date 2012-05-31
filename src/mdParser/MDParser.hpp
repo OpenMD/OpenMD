@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20090623): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (20110725): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -51,6 +51,8 @@ public:
 	public: void moleculeblock();
 	public: void zconstraintblock();
 	public: void restraintblock();
+	public: void flucqblock();
+	public: void rnemdblock();
 	public: void constant();
 	protected: void intConst();
 	protected: void floatConst();
@@ -85,10 +87,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 54;
+	static const int NUM_TOKENS = 56;
 #else
 	enum {
-		NUM_TOKENS = 54
+		NUM_TOKENS = 56
 	};
 #endif
 	

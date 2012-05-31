@@ -129,38 +129,10 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);
   DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, "accumulateBoxDipole", false);
 
-  DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_exchangeTime, "RNEMD_exchangeTime", 100.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 16);
-  DefineOptionalParameterWithDefaultValue(RNEMD_logWidth, "RNEMD_logWidth", 16);
-  DefineOptionalParameterWithDefaultValue(RNEMD_exchangeType, "RNEMD_exchangeType", "KineticScale");
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetFlux, "RNEMD_targetFlux", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzKE, "RNEMD_targetJzKE", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpx, "RNEMD_targetJzpx", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpy, "RNEMD_targetJzpy", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpz, "RNEMD_targetJzpz", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
-  DefineOptionalParameterWithDefaultValue(RNEMD_binShift, "RNEMD_binShift", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputTemperature, "RNEMD_outputTemperature", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputVx, "RNEMD_outputVx", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputVy, "RNEMD_outputVy", false);
-  // James put this in.
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputDen, "RNEMD_outputDen", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputAh, "RNEMD_outputAh", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputVz, "RNEMD_outputVz", false);  
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputXyzTemperature, "RNEMD_outputXyzTemperature", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputRotTemperature, "RNEMD_outputRotTemperature", false);
-
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
   DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
-  DefineOptionalParameterWithDefaultValue(FlucQPropagator, "flucQ.propagator", "NVT");
-  DefineOptionalParameterWithDefaultValue(FlucQFriction, "flucQ.friction", 1600.0);    
-  DefineOptionalParameterWithDefaultValue(FlucQTolerance, "flucQ.tolerance", 1.0e-6);    
-  DefineOptionalParameterWithDefaultValue(FlucQMaxIterations, "flucQ.maxIterations", 100);    
-  DefineOptionalParameterWithDefaultValue(FlucQTargetTemp, "flucQ.targetTemp", 1.0e-6);
-  DefineOptionalParameterWithDefaultValue(FlucQtauThermostat, "flucQ.tauThermostat", 10.0);
 
   deprecatedKeywords_.insert("nComponents");
   deprecatedKeywords_.insert("nZconstraints");
@@ -227,17 +199,8 @@ void Globals::validate() {
   CheckParameter(FrozenBufferRadius, isPositive());
   CheckParameter(LangevinBufferRadius, isPositive());
   CheckParameter(NeighborListNeighbors, isPositive());
-  CheckParameter(RNEMD_exchangeTime, isPositive());
-  CheckParameter(RNEMD_nBins, isPositive() && isEven());
-  CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("KineticScaleVAM") || isEqualIgnoreCase("KineticScaleAM") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale") || isEqualIgnoreCase("ShiftScaleV") || isEqualIgnoreCase("ShiftScaleVAM"));
   CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
   CheckParameter(Alpha, isPositive()); 
-  CheckParameter(FlucQPropagator, isEqualIgnoreCase("NVT") || isEqualIgnoreCase("Langevin") || isEqualIgnoreCase("Minimizer") || isEqualIgnoreCase("Exact") );
-  CheckParameter(FlucQFriction, isNonNegative());    
-  CheckParameter(FlucQTolerance, isPositive());    
-  CheckParameter(FlucQMaxIterations, isPositive());    
-  CheckParameter(FlucQTargetTemp,  isNonNegative());
-  CheckParameter(FlucQtauThermostat, isPositive()); 
   
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
@@ -261,6 +224,22 @@ bool Globals::addZConsStamp(ZConsStamp* zcons) {
 bool Globals::addRestraintStamp(RestraintStamp* rest) {
     restraints_.push_back(rest);
     return true;
+}
+
+bool Globals::addFluctuatingChargeParameters(FluctuatingChargeParameters* fqp) {
+  if (flucQpars_ != NULL)
+    delete flucQpars_;
+    
+  flucQpars_ = fqp;
+  return true;
+}
+
+bool Globals::addRNEMDParameters(RNEMDParameters* rnemdPars) {
+  if (rnemdPars_ != NULL)
+    delete rnemdPars_;
+    
+  rnemdPars_ = rnemdPars;
+  return true;
 }
 
 bool Globals::addMoleculeStamp(MoleculeStamp* molStamp) {

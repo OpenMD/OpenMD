@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20090623): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20110725): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -54,6 +54,8 @@ public:
 	public: void moleculeblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void zconstraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void restraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void flucqblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void rnemdblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 		ANTLR_USE_NAMESPACE(antlr)RefAST id
 	);
@@ -91,10 +93,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 54;
+	static const int NUM_TOKENS = 56;
 #else
 	enum {
-		NUM_TOKENS = 54
+		NUM_TOKENS = 56
 	};
 #endif
 	

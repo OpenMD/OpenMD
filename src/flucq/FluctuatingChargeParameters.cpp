@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,64 +40,32 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 13:25am
- * @version 1.0
- */
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
+#include "flucq/FluctuatingChargeParameters.hpp"
 
 namespace OpenMD {
-
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
-  class VelocityVerletIntegrator : public Integrator {
-  public:
-    virtual ~VelocityVerletIntegrator();
-        
-  protected:
-
-    VelocityVerletIntegrator(SimInfo* info);
-    virtual void doIntegrate();
-    virtual void initialize();
-    virtual void preStep();
-    virtual void integrateStep();        
-    virtual void postStep();
-    virtual void finalize();
-    virtual void resetIntegrator() {}
-    
-    RealType dt2;
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-        
-  private:
-        
-    virtual void calcForce();    
-    virtual void moveA() = 0;
-    virtual void moveB() = 0;
-    virtual RealType calcConservedQuantity() = 0;
-    virtual DumpWriter* createDumpWriter();
-    virtual StatWriter* createStatWriter();
-
-    ProgressBar* progressBar;
-
-  };
-
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+  FluctuatingChargeParameters::FluctuatingChargeParameters() { 
+    DefineOptionalParameterWithDefaultValue(Propagator, "propagator", "NVT");
+    DefineOptionalParameterWithDefaultValue(Friction, "friction", 1600.0);    
+    DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-6);    
+    DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations", 100);    
+    DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
+    DefineOptionalParameterWithDefaultValue(TauThermostat, "tauThermostat", 10.0);
+  }
+  
+  FluctuatingChargeParameters::~FluctuatingChargeParameters() {    
+  }
+  
+  void FluctuatingChargeParameters::validate() {
+    CheckParameter(Propagator, isEqualIgnoreCase("NVT") || isEqualIgnoreCase("Langevin") || isEqualIgnoreCase("Minimizer") || isEqualIgnoreCase("Exact") );
+    CheckParameter(Friction, isNonNegative());    
+    CheckParameter(Tolerance, isPositive());    
+    CheckParameter(MaxIterations, isPositive());    
+    CheckParameter(TargetTemp,  isNonNegative());
+    CheckParameter(TauThermostat, isPositive()); 
+  }
+  
+}

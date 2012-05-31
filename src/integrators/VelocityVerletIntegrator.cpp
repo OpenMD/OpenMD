@@ -100,7 +100,7 @@ namespace OpenMD {
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
     saveConservedQuantity();
-    if (simParams->getUseRNEMD())
+    if (simParams->getRNEMDParameters()->getUseRNEMD())
       rnemd_->getStarted();
 
     statWriter->writeStat(currentSnapshot_->statData);
@@ -111,7 +111,7 @@ namespace OpenMD {
     if (needReset) {
       currReset = resetTime + currentSnapshot_->getTime();
     }
-    if (simParams->getUseRNEMD()){
+    if (simParams->getRNEMDParameters()->getUseRNEMD()){
       currRNEMD = RNEMD_exchangeTime + currentSnapshot_->getTime();
     }
     needPotential = false;
@@ -174,7 +174,7 @@ namespace OpenMD {
       thermo.saveStat();
       saveConservedQuantity();
 
-      if (simParams->getUseRNEMD()) {
+      if (simParams->getRNEMDParameters()->getUseRNEMD()) {
 	rnemd_->getStatus();
       }
 
@@ -271,7 +271,7 @@ namespace OpenMD {
       }
     }
 
-    if (simParams->getUseRNEMD()) {
+    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
       mask.set(Stats::RNEMD_EXCHANGE_TOTAL);
     }
     

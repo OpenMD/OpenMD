@@ -40,64 +40,70 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 13:25am
- * @version 1.0
- */
+#ifndef INTEGRATORS_FLUCTUATINGCHARGENVT_HPP
+#define INTEGRATORS_FLUCTUATINGCHARGENVT_HPP
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
 #include "flucq/FluctuatingChargePropagator.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
+#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
-  class VelocityVerletIntegrator : public Integrator {
+  class FluctuatingChargeNVT : public FluctuatingChargePropagator {
   public:
-    virtual ~VelocityVerletIntegrator();
-        
-  protected:
+    FluctuatingChargeNVT(SimInfo* info);
 
-    VelocityVerletIntegrator(SimInfo* info);
-    virtual void doIntegrate();
-    virtual void initialize();
-    virtual void preStep();
-    virtual void integrateStep();        
-    virtual void postStep();
-    virtual void finalize();
-    virtual void resetIntegrator() {}
+    int getMaxIterationNumber() {
+      return maxIterNum_;
+    }
     
-    RealType dt2;
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-        
+    void setMaxIterationNumber(int maxIter) {
+      maxIterNum_ = maxIter;
+    }
+    
+    RealType getTauThermostat() {
+      return tauThermostat_;
+    }
+
+    void setTauThermostat(RealType tt) {
+      tauThermostat_ = tt;
+    }
+
+    RealType getTargetTemp() {
+      return targetTemp_;
+    }
+
+    void setTargetTemp(RealType tt) {
+      targetTemp_ = tt;
+    }
+
+    RealType getChiTolerance() {
+      return chiTolerance_;
+    }
+
+    void setChiTolerance(RealType tol) {
+      chiTolerance_ = tol;
+    }
+
   private:
-        
-    virtual void calcForce();    
-    virtual void moveA() = 0;
-    virtual void moveB() = 0;
-    virtual RealType calcConservedQuantity() = 0;
-    virtual DumpWriter* createDumpWriter();
-    virtual StatWriter* createStatWriter();
+    virtual void initialize();
+    virtual void moveA();
+    virtual void moveB();
+    virtual RealType calcConservedQuantity();
+    virtual void updateSizes();
+    virtual void resetPropagator();
 
-    ProgressBar* progressBar;
-
+    std::vector<RealType> oldVel_;
+    int maxIterNum_;
+    RealType targetTemp_;
+    RealType tauThermostat_;
+    RealType chiTolerance_;
+    RealType dt2_;
+    RealType dt_;
+    
+    Snapshot* currentSnapshot_;
+    Thermo thermo;
   };
 
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+}
+
+#endif 

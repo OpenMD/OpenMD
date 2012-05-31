@@ -43,7 +43,7 @@
 #include "brains/Snapshot.hpp"
 #include "integrators/Integrator.hpp"
 #include "integrators/DLM.hpp"
-#include "integrators/FluctuatingChargeNVT.hpp"
+#include "flucq/FluctuatingChargeNVT.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -126,13 +126,13 @@ namespace OpenMD {
     // a different velocitizer, use setVelocitizer
     velocitizer_ = new Velocitizer(info);
 
-    if (simParams->haveUseRNEMD()) {
-      if (simParams->getUseRNEMD()) {
+    if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
+      if (simParams->getRNEMDParameters()->getUseRNEMD()) {
         // Create a default a RNEMD.
         rnemd_ = new RNEMD(info);
-        useRNEMD = simParams->getUseRNEMD();
-        if (simParams->haveRNEMD_exchangeTime()) {
-          RNEMD_exchangeTime = simParams->getRNEMD_exchangeTime();
+        useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
+        if (simParams->getRNEMDParameters()->haveExchangeTime()) {
+          RNEMD_exchangeTime = simParams->getRNEMDParameters()->getExchangeTime();
         } 
       }
     }

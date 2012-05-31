@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,70 +40,25 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef INTEGRATORS_FLUCTUATINGCHARGENVT_HPP
-#define INTEGRATORS_FLUCTUATINGCHARGENVT_HPP
+#ifndef FLUCQ_FLUCTUATINGCHARGEPARAMETERS_HPP
+#define FLUCQ_FLUCTUATINGCHARGEPARAMETERS_HPP
 
-#include "integrators/FluctuatingChargePropagator.hpp"
-#include "brains/Thermo.hpp"
+#include "types/DataHolder.hpp"
 
 namespace OpenMD {
-
-  class FluctuatingChargeNVT : public FluctuatingChargePropagator {
+  class FluctuatingChargeParameters : public DataHolder {
+    DeclareParameter(Propagator, std::string);
+    DeclareParameter(Friction, RealType);    
+    DeclareParameter(Tolerance, RealType);    
+    DeclareParameter(MaxIterations, int);    
+    DeclareParameter(TargetTemp, RealType);
+    DeclareParameter(TauThermostat, RealType);
+    
   public:
-    FluctuatingChargeNVT(SimInfo* info);
-
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
+    FluctuatingChargeParameters();
+    virtual ~FluctuatingChargeParameters();
+    virtual void validate();
     
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
-    
-    RealType getTauThermostat() {
-      return tauThermostat_;
-    }
-
-    void setTauThermostat(RealType tt) {
-      tauThermostat_ = tt;
-    }
-
-    RealType getTargetTemp() {
-      return targetTemp_;
-    }
-
-    void setTargetTemp(RealType tt) {
-      targetTemp_ = tt;
-    }
-
-    RealType getChiTolerance() {
-      return chiTolerance_;
-    }
-
-    void setChiTolerance(RealType tol) {
-      chiTolerance_ = tol;
-    }
-
-  private:
-    virtual void initialize();
-    virtual void moveA();
-    virtual void moveB();
-    virtual RealType calcConservedQuantity();
-    virtual void updateSizes();
-    virtual void resetPropagator();
-
-    std::vector<RealType> oldVel_;
-    int maxIterNum_;
-    RealType targetTemp_;
-    RealType tauThermostat_;
-    RealType chiTolerance_;
-    RealType dt2_;
-    RealType dt_;
-    
-    Snapshot* currentSnapshot_;
-    Thermo thermo;
   };
-
 }
-
-#endif 
+#endif
