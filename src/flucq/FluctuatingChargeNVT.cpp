@@ -47,81 +47,57 @@
 
 namespace OpenMD {
 
-  FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
-    FluctuatingChargePropagator(info), chiTolerance_ (1e-6), maxIterNum_(4),
-    thermo(info), 
+  FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info, ForceManager* fm) : 
+    FluctuatingChargePropagator(info, fm), chiTolerance_ (1e-6), 
+    maxIterNum_(4), thermo(info), 
     currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
-
-
-    if (info_->usesFluctuatingCharges()) {
-      if (info_->getNFluctuatingCharges() > 0) {
-
-        hasFlucQ_ = true;
-        Globals* simParams = info_->getSimParams();
-        FluctuatingChargeParameters* fqParams = simParams->getFluctuatingChargeParameters();
-
-        if (simParams->haveDt()) {
-          dt_ = simParams->getDt();
-          dt2_ = dt_ * 0.5;
-        } else {
-          sprintf(painCave.errMsg,
-                  "FluctuatingChargeNVT Error: dt is not set\n");
-          painCave.isFatal = 1;
-          simError();
-        }
-        
-        if (!simParams->getUseIntialExtendedSystemState()) {
-          currentSnapshot_->setChiElectronic(0.0);
-          currentSnapshot_->setIntegralOfChiElectronicDt(0.0);
-        }
-        
-        if (!fqParams->haveTargetTemp()) {
-          sprintf(painCave.errMsg, "You can't use the FluctuatingChargeNVT "
-                  "propagator without a flucQ.targetTemp!\n");
-          painCave.isFatal = 1;
-          painCave.severity = OPENMD_ERROR;
-          simError();
-        } else {
-          targetTemp_ = fqParams->getTargetTemp();
-        }
-        
-        // We must set tauThermostat.
-        
-        if (!fqParams->haveTauThermostat()) {
-          sprintf(painCave.errMsg, "If you use the FluctuatingChargeNVT\n"
-                  "\tpropagator, you must set flucQ.tauThermostat .\n");
-          
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          tauThermostat_ = fqParams->getTauThermostat();
-        }
-        updateSizes();
+    
+    if (hasFlucQ_) {     
+      if (info_->getSimParams()->haveDt()) {
+        dt_ = info_->getSimParams()->getDt();
+        dt2_ = dt_ * 0.5;
+      } else {
+        sprintf(painCave.errMsg,
+                "FluctuatingChargeNVT Error: dt is not set\n");
+        painCave.isFatal = 1;
+        simError();
       }
-    }       
+      
+      if (!info_->getSimParams()->getUseIntialExtendedSystemState()) {
+        currentSnapshot_->setChiElectronic(0.0);
+        currentSnapshot_->setIntegralOfChiElectronicDt(0.0);
+      }
+      
+      if (!fqParams_->haveTargetTemp()) {
+        sprintf(painCave.errMsg, "You can't use the FluctuatingChargeNVT "
+                "propagator without a flucQ.targetTemp!\n");
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      } else {
+        targetTemp_ = fqParams_->getTargetTemp();
+      }
+      
+      // We must set tauThermostat.
+      
+      if (!fqParams_->haveTauThermostat()) {
+        sprintf(painCave.errMsg, "If you use the FluctuatingChargeNVT\n"
+                "\tpropagator, you must set flucQ.tauThermostat .\n");
+        
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        tauThermostat_ = fqParams_->getTauThermostat();
+      }
+      updateSizes();
+    }
   }
 
   void FluctuatingChargeNVT::initialize() {
-
-    if (!hasFlucQ_) return;
-
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        atom->setFlucQPos(0.0);
-        atom->setFlucQVel(0.0);
-      }
-    }
-    
-    cerr << "Yeah, you should probably implement this\n";
+    FluctuatingChargePropagator::initialize();
   }
+
 
   void FluctuatingChargeNVT::moveA() {
 

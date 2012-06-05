@@ -43,8 +43,9 @@
 #ifndef INTEGRATORS_FLUCTUATINGCHARGEPROPAGATOR_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGEPROPAGATOR_HPP
 
-#include "primitives/StuntDouble.hpp"
 #include "brains/SimInfo.hpp"
+#include "brains/ForceManager.hpp"
+#include "flucq/FluctuatingChargeConstraints.hpp"
 
 namespace OpenMD {
 
@@ -54,17 +55,21 @@ namespace OpenMD {
    */
   class FluctuatingChargePropagator {
   public:
-    FluctuatingChargePropagator(SimInfo* info) : info_(info), hasFlucQ_(false) {};
+    FluctuatingChargePropagator(SimInfo* info, ForceManager* forceMan);
     virtual ~FluctuatingChargePropagator(){ }
-    virtual void initialize() = 0;
+    virtual void initialize();
     virtual void updateSizes() = 0;
     virtual void moveA() = 0;
     virtual void applyConstraints();
     virtual void moveB() = 0;
 
   protected:
+    FluctuatingChargeParameters* fqParams_;
+    FluctuatingChargeConstraints* fqConstraints_;
     SimInfo* info_;
+    ForceManager* forceMan_;
     bool hasFlucQ_;
+    
   };
 }
 #endif

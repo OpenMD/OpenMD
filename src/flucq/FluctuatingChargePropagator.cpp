@@ -40,17 +40,40 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include "FluctuatingChargePropagator.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
+#include "flucq/FluctuatingChargeObjectiveFunction.hpp"
+#include "optimization/Constraint.hpp"
+#include "optimization/Problem.hpp"
+#include "optimization/EndCriteria.hpp"
+#include "optimization/StatusFunction.hpp"
+#include "optimization/OptimizationFactory.hpp"
+
+
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
+using namespace QuantLib;
 namespace OpenMD {
 
-  void FluctuatingChargePropagator::applyConstraints() {
+  FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info, 
+                                                           ForceManager* fm) : 
+    info_(info), forceMan_(fm), hasFlucQ_(false) {
+    
+    if (info_->usesFluctuatingCharges()) {
+      if (info_->getNFluctuatingCharges() > 0) {
+        
+        hasFlucQ_ = true;
+        Globals* simParams = info_->getSimParams();
+        fqParams_ = simParams->getFluctuatingChargeParameters();
+        
+      }
+    }
+  }
+
+  void FluctuatingChargePropagator::initialize() {
+
     if (!hasFlucQ_) return;
 
     SimInfo::MoleculeIterator i;
@@ -58,50 +81,31 @@ namespace OpenMD {
     Molecule* mol;
     Atom* atom;
     
-    RealType totalFrc, totalMolFrc, constrainedFrc;
-
-    // accumulate the total system fluctuating charge forces
-    totalFrc = 0.0;
-
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
-
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        totalFrc += atom->getFlucQFrc();
+        atom->setFlucQPos(0.0);
+        atom->setFlucQVel(0.0);
       }
-
     }
 
-#ifdef IS_MPI
-    // in parallel, we need to add up the contributions from all
-    // processors:
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalFrc, 1, MPI::REALTYPE, 
-                              MPI::SUM);
-#endif
- 
-    // divide by the total number of fluctuating charges:
-    totalFrc /= info_->getNFluctuatingCharges();
+    std::cerr << "doing a minimization\n";
+    
+    FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, fqConstraints_);    
+    DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
+    Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), initCoords);
+    EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
+    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {     
-      
-      totalMolFrc = 0.0;
+    minim->minimize(problem, endCriteria);
 
-      // molecular constraints can be done with a second loop.
-      if (mol->constrainTotalCharge()) {
-        for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-             atom = mol->nextFluctuatingCharge(j)) {
-          totalMolFrc += atom->getFlucQFrc();
-        }
-        totalMolFrc /= mol->getNFluctuatingCharges();
-      }
+  }
 
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
-        atom->setFlucQFrc(constrainedFrc);
-      }      
-    }
+
+  void FluctuatingChargePropagator::applyConstraints() {
+    if (!hasFlucQ_) return;
+
+    fqConstraints_->applyConstraints();
   }
 }
