@@ -59,14 +59,18 @@
 #include "integrators/LangevinHullDynamics.hpp"
 #endif
 
-#include "minimizers/MinimizerFactory.hpp"
-#include "minimizers/MinimizerCreator.hpp"
-#include "minimizers/PRCG.hpp"
-#include "minimizers/SDMinimizer.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/OptimizationCreator.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/SteepestDescent.hpp"
+#include "optimization/ConjugateGradient.hpp"
+#include "optimization/BFGS.hpp"
+
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
 
+using namespace QuantLib;
 namespace OpenMD {
 
   void registerIntegrators() {
@@ -89,9 +93,10 @@ namespace OpenMD {
 #endif
   }
 
-  void registerMinimizers() {
-    MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<SDMinimizer>("SD"));
-    MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<PRCGMinimizer>("CG"));
+  void registerOptimizers() {
+    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::SteepestDescent>("SD"));
+    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::ConjugateGradient>("CG"));
+    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::BFGS>("BFGS"));
   }
 
   void registerLattice(){
@@ -100,7 +105,7 @@ namespace OpenMD {
 
   void registerAll() {
     registerIntegrators();
-    registerMinimizers();
+    registerOptimizers();
   }
 
 }

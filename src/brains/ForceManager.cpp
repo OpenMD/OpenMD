@@ -475,7 +475,7 @@ namespace OpenMD {
     // Zero out the stress tensor
     stressTensor *= 0.0;
     // Zero out the heatFlux
-    fDecomp_->setHeatFlux( V3Zero );    
+    fDecomp_->setHeatFlux( Vector3d(0.0) );    
   }
   
   void ForceManager::shortRangeInteractions() {

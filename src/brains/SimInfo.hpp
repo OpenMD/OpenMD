@@ -233,6 +233,11 @@ namespace OpenMD{
       return ndf_ - getFdf();
     }
 
+    /** Returns the number of degrees of freedom (LOCAL) */
+    int getNdfLocal() {
+      return ndfLocal_;
+    }
+
     /** Returns the number of raw degrees of freedom */
     int getNdfRaw() {
       return ndfRaw_;
@@ -535,6 +540,7 @@ namespace OpenMD{
        
     /// Degress of freedom
     int ndf_;          /**< number of degress of freedom (excludes constraints) (LOCAL) */
+    int ndfLocal_;     /**< number of degrees of freedom (LOCAL, excludes constraints) */
     int fdf_local;     /**< number of frozen degrees of freedom (LOCAL) */
     int fdf_;          /**< number of frozen degrees of freedom (GLOBAL) */
     int ndfRaw_;       /**< number of degress of freedom (includes constraints),  (LOCAL) */

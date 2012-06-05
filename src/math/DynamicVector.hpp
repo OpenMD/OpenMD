@@ -226,6 +226,7 @@ namespace OpenMD {
      * @param s the scalar value
      */
     inline void mul( const DynamicVector<Real>& v1, Real s) {
+      this->resize(v1.size());
       for (unsigned int i = 0; i < this->size(); i++)
 	(*this)[i] = s * v1[i];
     }
@@ -271,6 +272,12 @@ namespace OpenMD {
     inline DynamicVector<Real>& operator /=( Real s ) {
       div(s);
       return *this;
+    }
+
+    /** zero out the vector */
+    inline void setZero( ) {
+      for (unsigned int i = 0; i < this->size(); i++)
+	(*this)[i] = 0;
     }
 
     /**
@@ -336,8 +343,8 @@ namespace OpenMD {
    */   
   template<typename Real>    
   inline DynamicVector<Real> operator +(const DynamicVector<Real>& v1, const DynamicVector<Real>& v2) {
-    DynamicVector<Real> result;
-        
+    assert(v1.size() == v2.size());
+    DynamicVector<Real>result(v1.size());
     result.add(v1, v2);
     return result;        
   }
@@ -350,7 +357,8 @@ namespace OpenMD {
    */  
   template<typename Real>    
   DynamicVector<Real> operator -(const DynamicVector<Real>& v1, const DynamicVector<Real>& v2) {
-    DynamicVector<Real> result;
+    assert(v1.size() == v2.size());
+    DynamicVector<Real> result(v1.size());
     result.sub(v1, v2);
     return result;        
   }
@@ -362,8 +370,8 @@ namespace OpenMD {
    * @param s the scalar value
    */ 
   template<typename Real>                 
-  DynamicVector<Real> operator * ( const DynamicVector<Real>& v1, Real s) {       
-    DynamicVector<Real> result;
+  DynamicVector<Real> operator *( const DynamicVector<Real>& v1, Real s) {      
+    DynamicVector<Real> result(v1.size());
     result.mul(v1,s);
     return result;           
   }
@@ -375,8 +383,8 @@ namespace OpenMD {
    * @param v1 the source vector
    */  
   template<typename Real>
-  DynamicVector<Real> operator * ( Real s, const DynamicVector<Real>& v1 ) {
-    DynamicVector<Real> result;
+  DynamicVector<Real> operator *( Real s, const DynamicVector<Real>& v1 ) {
+    DynamicVector<Real> result(v1.size());
     result.mul(v1, s);
     return result;           
   }
@@ -388,8 +396,8 @@ namespace OpenMD {
    * @param s the scalar value
    */
   template<typename Real>    
-  DynamicVector<Real> operator / ( const DynamicVector<Real>& v1, Real s) {       
-    DynamicVector<Real> result;
+  DynamicVector<Real> operator / ( const DynamicVector<Real>& v1, Real s) {     
+    DynamicVector<Real> result(v1.size());
     result.div( v1,s);
     return result;           
   }

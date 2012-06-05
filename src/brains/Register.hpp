@@ -48,13 +48,13 @@ namespace OpenMD {
   /** Register all integrators*/
   void registerIntegrators();
 
-  /** Register all minimizers*/
-  void registerMinimizers();
+  /** Register all optimizers */
+  void registerOptimizers();
 
   /** Register all lattice */
   void registerLattice();
 
-  /** register force fields, integrators and  minmizers*/
+  /** register force fields, integrators and optimizers */
   void registerAll();
 
 }

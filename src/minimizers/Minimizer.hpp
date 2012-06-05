@@ -53,23 +53,18 @@
 // base class of minimizer
 
 namespace OpenMD {
-
-  /** @todo need refactorying */
-  const int MIN_LSERROR = -1;
-  const int MIN_MAXITER = 0;
-  const int MIN_CONVERGE = 1;
-
-  const int CONVG_UNCONVG = 0;
-  const int CONVG_FTOL = 1;
-  const int CONVG_GTOL = 2;
-  const int CONVG_ABSGTOL = 3;
-  const int CONVG_STEPTOL = 4;
-
-  const int LS_SUCCEED =1;
-  const int LS_ERROR  = -1;
-
-  /** @todo move to math module */
-  RealType dotProduct(const std::vector<RealType>& v1, const std::vector<RealType>& v2);
+  
+  /** minimizer stop codes */
+  enum{MIN_MAXITER,
+       MIN_MAXEVAL,
+       MIN_ETOL,
+       MIN_FTOL,
+       MIN_DOWNHILL,
+       MIN_ZEROALPHA,
+       MIN_ZEROFORCE,
+       MIN_ZEROQUAD};
+  
+  typedef int (*FnPtr)(std::vector<RealType> &, std::vector<RealType> &, RealType &);    
 
   /**
    * @class Minimizer
@@ -77,33 +72,24 @@ namespace OpenMD {
    */
   class Minimizer {
   public:
-
     Minimizer(SimInfo *rhs);
-
     virtual ~Minimizer();
-
-    //
     virtual void init() {}
-
     //driver function of minimization method
     virtual void minimize();
-
-    //
     virtual int step() = 0;
-
-    //
     virtual void prepareStep() {};
 
-    //line search algorithm, for the time being, we use back track algorithm
+    //line search algorithm, for the time being, we use a back track
+    //algorithm
     virtual int doLineSearch(std::vector<RealType>& direction, RealType stepSize);
-
-    virtual int checkConvg() = 0;
+    virtual int checkConvergence() = 0;
 
     //save the result when minimization method is done
     virtual void saveResult(){}
-
+    
     //get the status of minimization
-    int getMinStatus() {return minStatus;}
+    int getMinimizerStatus() {return minStatus;}
 
     // get the dimension of the model
     int getDim() {  return ndim;  }
@@ -111,13 +97,13 @@ namespace OpenMD {
     //get the name of minimizer method
     std::string getMinimizerName() {  return minimizerName;  }
 
-    //return number of  current Iteration  
-    int getCurIter() {  return curIter;  }
+    //return number of the current Iteration  
+    int getCurrentIteration() {  return curIter;  }
 
     // set the verbose mode of minimizer
     void setVerbose(bool verbose) {  bVerbose = verbose;}
 
-    //get and set the coordinate
+    //get and set the coordinates
     std::vector<RealType> getX() {  return curX;  }
     void setX(std::vector<RealType>& x);
 
@@ -132,9 +118,7 @@ namespace OpenMD {
     std::vector<RealType> getGrad() {  return curG;  }
     void setGrad(std::vector<RealType>& g) {  curG = g;  }
 
-    //interal function to evaluate the energy and gradient in OpenMD
-    void calcEnergyGradient(std::vector<RealType>& x,  std::vector<RealType>& grad, RealType&
-			    energy, int& status);
+    void setGradientFunction(FnPtr efunc) { calcEnergyGradient = efunc; }
 
     //calculate the value of object function
     virtual void calcF();
@@ -152,26 +136,24 @@ namespace OpenMD {
 
   protected:
 
+    typedef int (*FnPtr)(std::vector<RealType> &, std::vector<RealType> &, RealType &);    
+    FnPtr calcEnergyGradient;
+
     // transfrom cartesian and rotational coordinates into minimization coordinates 
     std::vector<RealType> getCoor();
 
     // transfrom minimization coordinates into cartesian and rotational coordinates  
     void setCoor(std::vector<RealType>& x);
 
-
-
     //constraint the bonds;
     int shakeR() { return 0;}
 
     //remove the force component along the bond direction
     int shakeF() { return 0;}
-
     RealType calcPotential();
         
     SimInfo* info;
-
-    ForceManager* forceMan;
-        
+    ForceManager* forceMan;        
     //parameter set of minimization method
     MinimizerParameterSet* paramSet;
 
@@ -211,10 +193,8 @@ namespace OpenMD {
     //SymMatrix curH;
 
   private:
-
-    //calculate the dimension od the model for minimization
+    //calculate the dimension of the model for minimization
     void calcDim();
-
   };
 
 }

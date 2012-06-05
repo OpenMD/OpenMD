@@ -124,8 +124,8 @@ namespace OpenMD{
       frameData.COMw = V3Zero;            
       frameData.stressTensor = Mat3x3d(0.0);              
       frameData.pressureTensor = Mat3x3d(0.0);   
-      frameData.systemDipole = V3Zero;            
-      frameData.conductiveHeatFlux = V3Zero;            
+      frameData.systemDipole = Vector3d(0.0);            
+      frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
     }
 
     Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
@@ -158,7 +158,7 @@ namespace OpenMD{
       frameData.stressTensor = Mat3x3d(0.0);              
       frameData.pressureTensor = Mat3x3d(0.0);   
       frameData.systemDipole = V3Zero;            
-      frameData.conductiveHeatFlux = V3Zero;            
+      frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);            
     }
     
     /** Returns the id of this Snapshot */

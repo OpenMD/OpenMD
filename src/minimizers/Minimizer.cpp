@@ -50,76 +50,62 @@
 #include <mpi.h>
 #endif
 namespace OpenMD {
-  RealType dotProduct(const std::vector<RealType>& v1, const std::vector<RealType>& v2) {
-    if (v1.size() != v2.size()) {
-
-    }
-
-
-    RealType result = 0.0;    
-    for (unsigned int i = 0; i < v1.size(); ++i) {
-      result += v1[i] * v2[i];
-    }
-
-    return result;
-  }
 
   Minimizer::Minimizer(SimInfo* rhs) :
     info(rhs), usingShake(false) {
-
-      forceMan = new ForceManager(info);
-      paramSet= new MinimizerParameterSet(info), calcDim();
-      curX = getCoor();
-      curG.resize(ndim);
-
-    }
-
+    
+    forceMan = new ForceManager(info);
+    paramSet= new MinimizerParameterSet(info), calcDim();
+    curX = getCoor();
+    curG.resize(ndim);
+  }
+  
   Minimizer::~Minimizer() {
     delete forceMan;
     delete paramSet;
   }
+  
+  // void Minimizer::calcEnergyGradient(std::vector<RealType> &x,
+  //       			     std::vector<RealType> &grad, 
+  //                                    RealType&energy, int&status) {
 
-  void Minimizer::calcEnergyGradient(std::vector<RealType> &x,
-				     std::vector<RealType> &grad, RealType&energy, int&status) {
+  //   SimInfo::MoleculeIterator i;
+  //   Molecule::IntegrableObjectIterator  j;
+  //   Molecule* mol;
+  //   StuntDouble* integrableObject;    
+  //   std::vector<RealType> myGrad;    
+  //   int shakeStatus;
 
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* integrableObject;    
-    std::vector<RealType> myGrad;    
-    int shakeStatus;
+  //   status = 1;
 
-    status = 1;
+  //   setCoor(x);
 
-    setCoor(x);
+  //   if (usingShake) {
+  //     shakeStatus = shakeR();
+  //   }
 
-    if (usingShake) {
-      shakeStatus = shakeR();
-    }
+  //   energy = calcPotential();
 
-    energy = calcPotential();
+  //   if (usingShake) {
+  //     shakeStatus = shakeF();
+  //   }
 
-    if (usingShake) {
-      shakeStatus = shakeF();
-    }
+  //   x = getCoordinates();
 
-    x = getCoor();
+  //   int index = 0;
 
-    int index = 0;
-
-    for (mol = info->beginMolecule(i); mol != NULL; mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
-
-	myGrad = integrableObject->getGrad();
-	for (unsigned int k = 0; k < myGrad.size(); ++k) {
-
-	  grad[index++] = myGrad[k];
-	}
-      }            
-    }
-
-  }
+  //   for (mol = info->beginMolecule(i); mol != NULL; 
+  //        mol = info->nextMolecule(i)) {
+  //     for (integrableObject = mol->beginIntegrableObject(j); 
+  //          integrableObject != NULL;
+  //          integrableObject = mol->nextIntegrableObject(j)) {        
+  //       myGrad = integrableObject->getGrad();
+  //       for (unsigned int k = 0; k < myGrad.size(); ++k) {
+  //         grad[index++] = myGrad[k];
+  //       }
+  //     }            
+  //   }    
+  // }
 
   void Minimizer::setCoor(std::vector<RealType> &x) {
     Vector3d position;
@@ -130,26 +116,27 @@ namespace OpenMD {
     StuntDouble* integrableObject;    
     int index = 0;
 
-    for (mol = info->beginMolecule(i); mol != NULL; mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+    for (mol = info->beginMolecule(i); mol != NULL; 
+         mol = info->nextMolecule(i)) {
+      for (integrableObject = mol->beginIntegrableObject(j); 
+           integrableObject != NULL;
 	   integrableObject = mol->nextIntegrableObject(j)) {
-
+        
 	position[0] = x[index++];
 	position[1] = x[index++];
 	position[2] = x[index++];
-
+        
 	integrableObject->setPos(position);
-
+        
 	if (integrableObject->isDirectional()) {
 	  eulerAngle[0] = x[index++];
 	  eulerAngle[1] = x[index++];
 	  eulerAngle[2] = x[index++];
-
+          
 	  integrableObject->setEuler(eulerAngle);
 	}
       }
-    }
-    
+    }    
   }
 
   std::vector<RealType> Minimizer::getCoor() {
@@ -162,15 +149,17 @@ namespace OpenMD {
     int index = 0;
     std::vector<RealType> x(getDim());
 
-    for (mol = info->beginMolecule(i); mol != NULL; mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+    for (mol = info->beginMolecule(i); mol != NULL; 
+         mol = info->nextMolecule(i)) {
+      for (integrableObject = mol->beginIntegrableObject(j); 
+           integrableObject != NULL;
 	   integrableObject = mol->nextIntegrableObject(j)) {
-                
+        
 	position = integrableObject->getPos();
 	x[index++] = position[0];
 	x[index++] = position[1];
 	x[index++] = position[2];
-
+        
 	if (integrableObject->isDirectional()) {
 	  eulerAngle = integrableObject->getEuler();
 	  x[index++] = eulerAngle[0];
@@ -181,12 +170,12 @@ namespace OpenMD {
     }
     return x;
   }
-
-
+  
+  
   /*
     int Minimizer::shakeR() {
     int    i,       j;
-
+    
     int    done;
 
     RealType posA[3], posB[3];
@@ -524,52 +513,55 @@ namespace OpenMD {
   //calculate the value of object function
 
   void Minimizer::calcF() {
-    calcEnergyGradient(curX, curG, curF, egEvalStatus);
+    egEvalStatus = calcEnergyGradient(curX, curG, curF);
   }
-
+  
   void Minimizer::calcF(std::vector < RealType > &x, RealType&f, int&status) {
     std::vector < RealType > tempG;
-
+    
     tempG.resize(x.size());
-
-    calcEnergyGradient(x, tempG, f, status);
+    
+    status = calcEnergyGradient(x, tempG, f);
   }
-
+  
   //calculate the gradient
-
+  
   void Minimizer::calcG() {
-    calcEnergyGradient(curX, curG, curF, egEvalStatus);
+    egEvalStatus = calcEnergyGradient(curX, curG, curF);
   }
-
-  void Minimizer::calcG(std::vector<RealType>& x, std::vector<RealType>& g, RealType&f, int&status) {
-    calcEnergyGradient(x, g, f, status);
+  
+  void Minimizer::calcG(std::vector<RealType>& x, 
+                        std::vector<RealType>& g, RealType&f, int&status) {
+    status = calcEnergyGradient(x, g, f);
   }
-
+  
   void Minimizer::calcDim() {
-
+    
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
     StuntDouble* integrableObject;    
     ndim = 0;
-
-    for (mol = info->beginMolecule(i); mol != NULL; mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+    
+    for (mol = info->beginMolecule(i); mol != NULL; 
+         mol = info->nextMolecule(i)) {
+      for (integrableObject = mol->beginIntegrableObject(j); 
+           integrableObject != NULL;
 	   integrableObject = mol->nextIntegrableObject(j)) {
-
+        
 	ndim += 3;
-
+        
 	if (integrableObject->isDirectional()) {
 	  ndim += 3;
 	}
-      }
-
+      }      
     }
   }
 
-  void Minimizer::setX(std::vector < RealType > &x) {
+  void Minimizer::setX(std::vector<RealType> &x) {
     if (x.size() != ndim) {
-      sprintf(painCave.errMsg, "Minimizer Error: dimesion of x and curX does not match\n");
+      sprintf(painCave.errMsg, 
+              "Minimizer setX: dimensions of x and curX do not match\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -577,26 +569,25 @@ namespace OpenMD {
     curX = x;
   }
 
-  void Minimizer::setG(std::vector < RealType > &g) {
+  void Minimizer::setG(std::vector <RealType> &g) {
     if (g.size() != ndim) {
-      sprintf(painCave.errMsg, "Minimizer Error: dimesion of g and curG does not match\n");
+      sprintf(painCave.errMsg, 
+              "Minimizer setG: dimensions of g and curG do not match\n");
       painCave.isFatal = 1;
       simError();
     }
-
+    
     curG = g;
   }
 
 
   /**
-
-  * In thoery, we need to find the minimum along the search direction
-  * However, function evaluation is too expensive. 
-  * At the very begining of the problem, we check the search direction and make sure
-  * it is a descent direction
-  * we will compare the energy of two end points,
-  * if the right end point has lower energy, we just take it
-  * @todo optimize this line search algorithm
+  * In theory, we need to find the minimum along the search direction
+  * However, function evaluation is usually too expensive.  At the
+  * very begining of the problem, we check the search direction and
+  * make sure it is a descent direction we will compare the energy of
+  * two end points, if the right end point has lower energy, we'll
+  * just take it. 
   */
 
   int Minimizer::doLineSearch(std::vector<RealType> &direction,
@@ -635,17 +626,13 @@ namespace OpenMD {
     gc.resize(ndim);
 
     a = 0.0;
-
     fa = curF;
-
     xa = curX;
-
     ga = curG;
 
     c = a + stepSize;
 
     ftol = paramSet->getFTol();
-
     lsTol = paramSet->getLineSearchTol();
 
     //calculate the derivative at a = 0 
@@ -655,7 +642,14 @@ namespace OpenMD {
     for(size_t i = 0; i < ndim; i++) {
       slopeA += curG[i] * direction[i];
     }
-    
+
+#ifdef IS_MPI
+    // in parallel, we need to add up the contributions from all
+    // processors:
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &slopeA, 1, MPI::REALTYPE, 
+                              MPI::SUM);
+#endif
+
     initSlope = slopeA;
 
     // if  going uphill, use negative gradient as searching direction 
@@ -670,6 +664,12 @@ namespace OpenMD {
 	slopeA += curG[i] * direction[i];
       }
         
+#ifdef IS_MPI
+      // in parallel, we need to add up the contributions from all
+      // processors:
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &slopeA, 1, MPI::REALTYPE, 
+                              MPI::SUM);
+#endif
       initSlope = slopeA;
     }
 
@@ -697,11 +697,8 @@ namespace OpenMD {
 
     if (fc < fa) {
       curX = xc;
-
       curG = gc;
-
       curF = fc;
-
       return LS_SUCCEED;
     } else {
       if (slopeC > 0)

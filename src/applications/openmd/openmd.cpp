@@ -54,11 +54,15 @@
 #include "restraints/RestraintForceManager.hpp"
 #include "integrators/IntegratorFactory.hpp"
 #include "integrators/Integrator.hpp"
-#include "minimizers/MinimizerFactory.hpp"
-#include "minimizers/Minimizer.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/Constraint.hpp"
+#include "optimization/Problem.hpp"
+#include "optimization/PotentialEnergyObjectiveFunction.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
 
 using namespace OpenMD;
+using namespace QuantLib;
 
 int main(int argc,char* argv[]){
   
@@ -145,16 +149,26 @@ int main(int argc,char* argv[]){
 
   if (simParams->haveMinimizer()) {
     //create minimizer
-    Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(toUpperCopy(simParams->getMinimizer()), info);
+    OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(simParams->getMinimizer()), info);
 
     if (myMinimizer == NULL) {
-      sprintf(painCave.errMsg, "Minimizer Factory can not create %s Minimizer\n",
+      sprintf(painCave.errMsg, "Optimization Factory can not create %s OptimizationMethod\n",
 	      simParams->getMinimizer().c_str());
       painCave.isFatal = 1;
       simError();
     }
 
-    myMinimizer->minimize();
+    ForceManager* fman = new ForceManager(info);      
+    fman->initialize();
+
+    PotentialEnergyObjectiveFunction potObjf(info, fman); 
+    DumpStatusFunction dsf(info);
+    DynamicVector<RealType> initCoords = potObjf.setInitialCoords();
+    Problem problem(potObjf, *(new NoConstraint()), dsf, initCoords);
+    EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5); 
+
+    myMinimizer->minimize(problem, endCriteria);
+
     delete myMinimizer;
   } else if (simParams->haveEnsemble()) {
     //create Integrator

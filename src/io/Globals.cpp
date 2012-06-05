@@ -52,6 +52,10 @@
 
 namespace OpenMD {
 Globals::Globals() {
+  
+  flucQpars_ = new FluctuatingChargeParameters();
+  rnemdPars_ = new RNEMDParameters();
+
   DefineParameter(ForceField, "forceField")
  
   DefineOptionalParameter(TargetTemp, "targetTemp");

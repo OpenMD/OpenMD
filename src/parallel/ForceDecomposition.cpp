@@ -171,10 +171,12 @@ namespace OpenMD {
   }
 
   void ForceDecomposition::addToHeatFlux(Vector3d hf) {
-    snap_->frameData.conductiveHeatFlux += hf;
+    Vector3d chf = snap_->getConductiveHeatFlux();
+    chf += hf;
+    snap_->setConductiveHeatFlux(chf);
   }
   void ForceDecomposition::setHeatFlux(Vector3d hf) {
-    snap_->frameData.conductiveHeatFlux = hf;
+    snap_->setConductiveHeatFlux(hf);
   }
 
 }
