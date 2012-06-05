@@ -61,7 +61,7 @@
 
 #include "config.h"
 #include <cmath>
-#include <cstdlib>
+#include <iostream>
 #include "math/Factorials.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP
@@ -94,7 +94,7 @@ inline RealType RosenA(int n, RealType a)
     {
       RealType Term = 1.;
       RosenA_ = Term;
-      for (unsigned nu=1; nu<=n; nu++)
+      for (int nu=1; nu<=n; nu++)
         {
           Term *= a / nu;
           RosenA_ += Term;
@@ -173,10 +173,7 @@ inline RealType RosenB(int n, RealType alpha)
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
 inline RealType RosenD(int m, int n, int p)
-// [?ERROR?] can't return int
 {
-  printf("RosenD\n");
-  exit(0);
   if (m+n+p > maxFact)
     {
       printf("Error, arguments exceed maximum factorial computed %d > %d\n", m+n+p, maxFact);
@@ -236,9 +233,11 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
       else
         {
           // Not implemented
-          printf("ERROR, sSTOCoulInt cannot compute from arguments\n");
-          printf("a = %lf b = %lf m = %d n = %d R = %lf\n",a, b, m, n, R);
-          exit(0);
+	  cerr << "ERROR, sSTOCoulInt cannot compute from arguments\n";
+	  cerr << "a = " << a << "\tb = " << b << "\tm = " << m <<"\tn = " << n << "\t R = " << R << "\n";
+          //printf("ERROR, sSTOCoulInt cannot compute from arguments\n");
+          //printf("a = %lf b = %lf m = %d n = %d R = %lf\n",a, b, m, n, R);
+          //exit(0);
         }
     }
   else

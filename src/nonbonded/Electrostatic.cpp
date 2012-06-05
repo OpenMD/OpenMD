@@ -363,9 +363,9 @@ namespace OpenMD {
         for (int i = 0; i < np_; i++) {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
-          J1vals.push_back( sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromsToBohr ) );
+          J1vals.push_back(electrostaticAtomData.hardness * sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromsToBohr ) );
           // may not be necessary if Slater coulomb integral is symmetric
-          J2vals.push_back( sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromsToBohr ) );
+          J2vals.push_back(eaData2.hardness *  sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromsToBohr ) );
         }
 
         CubicSpline* J1 = new CubicSpline();
@@ -524,7 +524,7 @@ namespace OpenMD {
     if (j_is_Charge) {
       q_j = data2.fixedCharge;
 
-      if (i_is_Fluctuating) 
+      if (j_is_Fluctuating) 
         q_j += *(idat.flucQ2);
 
       if (idat.excluded) {
@@ -591,7 +591,7 @@ namespace OpenMD {
           c2 = c1 * riji;
         }
 
-        preVal =  *(idat.electroMult) * pre11_ * q_i * q_j;
+        preVal =  *(idat.electroMult) * pre11_;
         
         if (summationMethod_ == esm_SHIFTED_POTENTIAL) {
           vterm = preVal * (c1 - c1c_);
@@ -623,20 +623,20 @@ namespace OpenMD {
           
         }
         
-        vpair += vterm;
-        epot +=  *(idat.sw)  * vterm;
-        dVdr += dudr * rhat;
+        vpair += vterm * q_i * q_j;
+        epot +=  *(idat.sw)  * vterm * q_i * q_j;
+        dVdr += dudr * rhat * q_i * q_j;
 
         if (i_is_Fluctuating) {
           if (idat.excluded) {
             // vFluc1 is the difference between the direct coulomb integral
             // and the normal 1/r-like  interaction between point charges.
             coulInt = J1->getValueAt( *(idat.rij) );
-            vFluc1 = pre11_ * coulInt * q_i * q_j  - (*(idat.sw) * vterm);
+            vFluc1 = coulInt - (*(idat.sw) * vterm);
           } else {
             vFluc1 = 0.0;
           }
-          *(idat.dVdFQ1) += ( *(idat.sw) * vterm + vFluc1 ) / q_i;
+          *(idat.dVdFQ1) += ( *(idat.sw) * vterm + vFluc1 ) * q_j;
         }
 
         if (j_is_Fluctuating) {
@@ -644,11 +644,11 @@ namespace OpenMD {
             // vFluc2 is the difference between the direct coulomb integral
             // and the normal 1/r-like  interaction between point charges.
             coulInt = J2->getValueAt( *(idat.rij) );
-            vFluc2 = pre11_ * coulInt * q_i * q_j  - (*(idat.sw) * vterm);
+            vFluc2 = coulInt - (*(idat.sw) * vterm);
           } else {
             vFluc2 = 0.0;
           }
-          *(idat.dVdFQ2) += ( *(idat.sw) * vterm + vFluc2 ) / q_j;
+          *(idat.dVdFQ2) += ( *(idat.sw) * vterm + vFluc2 ) * q_i;
         }
           
  
@@ -1061,8 +1061,7 @@ namespace OpenMD {
   }  
     
   void Electrostatic::calcSelfCorrection(SelfData &sdat) {
-    RealType mu1, preVal, chg1, self;
-    
+    RealType mu1, preVal, self;
     if (!initialized_) initialize();
 
     ElectrostaticAtomData data = ElectrostaticMap[sdat.atype];
@@ -1070,6 +1069,14 @@ namespace OpenMD {
     // logicals
     bool i_is_Charge = data.is_Charge;
     bool i_is_Dipole = data.is_Dipole;
+    bool i_is_Fluctuating = data.is_Fluctuating;
+    RealType chg1 = data.fixedCharge;   
+    
+    if (i_is_Fluctuating) {
+      chg1 += *(sdat.flucQ);
+      // dVdFQ is really a force, so this is negative the derivative
+      *(sdat.dVdFQ) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
+    }
 
     if (summationMethod_ == esm_REACTION_FIELD) {
       if (i_is_Dipole) {
@@ -1086,7 +1093,6 @@ namespace OpenMD {
       }
     } else if (summationMethod_ == esm_SHIFTED_FORCE || summationMethod_ == esm_SHIFTED_POTENTIAL) {
       if (i_is_Charge) {        
-        chg1 = data.fixedCharge;
         if (screeningMethod_ == DAMPED) {
           self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + *(sdat.skippedCharge)) * pre11_;
         } else {         

@@ -137,6 +137,8 @@ namespace OpenMD {
     RealType* rho;          /**< electron density */
     RealType* frho;         /**< value of density functional for atom */
     RealType* dfrhodrho;    /**< derivative of density functional for atom */
+    RealType* flucQ;	    /**< current value of atom's fluctuating charge */
+    RealType* dVdFQ;	    /**< fluctuating charge derivative */
   };
   
     
