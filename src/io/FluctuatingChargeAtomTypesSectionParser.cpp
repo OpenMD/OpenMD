@@ -42,6 +42,7 @@
 
 #include "io/FluctuatingChargeAtomTypesSectionParser.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "types/FixedChargeAdapter.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "types/AtomType.hpp"
 #include "brains/ForceField.hpp"
@@ -74,15 +75,23 @@ namespace OpenMD {
       AtomType* atomType = ff.getAtomType(atomTypeName);
 
       if (atomType != NULL) {
-        
-        FluctuatingChargeAdapter fca = FluctuatingChargeAdapter(atomType);
+        FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+
+	// All fluctuating charges are charges, and if we haven't already set values for the
+	// charge, then start with zero.
+	if (! fca.isFixedCharge()) {
+	  RealType charge = 0.0;
+	  fca.makeFixedCharge(charge);
+	}
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         RealType chi = tokenizer.nextTokenAsDouble();
         RealType Jii = tokenizer.nextTokenAsDouble();
         RealType slaterN = tokenizer.nextTokenAsInt();
         RealType slaterZeta = tokenizer.nextTokenAsDouble();
         RealType chargeMass = tokenizer.nextTokenAsDouble();
         
-        fca.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
+        fqa.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
         
       } else {
         sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
