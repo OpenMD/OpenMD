@@ -141,7 +141,7 @@ namespace OpenMD {
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
     forceMan_->initialize();
-    flucQ_ = new FluctuatingChargeNVT(info);
+    flucQ_ = new FluctuatingChargeNVT(info, forceMan_);
   }
   
   Integrator::~Integrator(){
