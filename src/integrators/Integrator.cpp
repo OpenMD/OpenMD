@@ -73,6 +73,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
+    
     // set the status, sample, and thermal kick times
     if (simParams->haveSampleTime()){
       sampleTime = simParams->getSampleTime();
@@ -81,31 +82,31 @@ namespace OpenMD {
       sampleTime = simParams->getRunTime();
       statusTime = sampleTime;
     }
-
+    
     if (simParams->haveStatusTime()){
       statusTime = simParams->getStatusTime();
     }
-
+    
     if (simParams->haveThermalTime()){
       thermalTime = simParams->getThermalTime();
     } else {
       thermalTime = simParams->getRunTime();
     }
-
+    
     if (!simParams->getUseInitalTime()) {
       currentSnapshot_->setTime(0.0);
     }
-
+    
     if (simParams->haveResetTime()) {
       needReset = true;
       resetTime = simParams->getResetTime();
     }
-      
+    
     // Create a default ForceManager: If the subclass wants to use 
     // a different ForceManager, use setForceManager
 
     forceMan_ = new ForceManager(info);
-     
+    
     // check for the temperature set flag (velocity scaling)      
     if (simParams->haveTempSet()) {
       needVelocityScaling = simParams->getTempSet();
@@ -121,11 +122,11 @@ namespace OpenMD {
 
       }
     }
-      
+    
     // Create a default a velocitizer: If the subclass wants to use 
     // a different velocitizer, use setVelocitizer
     velocitizer_ = new Velocitizer(info);
-
+    
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
         // Create a default a RNEMD.
@@ -136,9 +137,10 @@ namespace OpenMD {
         } 
       }
     }
-
+    
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
+    forceMan_->initialize();
     flucQ_ = new FluctuatingChargeNVT(info);
   }
   

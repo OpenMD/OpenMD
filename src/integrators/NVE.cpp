@@ -109,7 +109,6 @@ namespace OpenMD {
             
       }
     } //end for(mol = info_->beginMolecule(i))
-    
     flucQ_->moveA();
     rattle_->constraintA();    
   }    
