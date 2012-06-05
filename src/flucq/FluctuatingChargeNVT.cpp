@@ -137,7 +137,6 @@ namespace OpenMD {
     RealType integralOfChidt = currentSnapshot_->getIntegralOfChiElectronicDt();
     RealType instTemp = thermo.getElectronicTemperature();
 
-    cerr << "why are we here?\n";
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
@@ -149,11 +148,18 @@ namespace OpenMD {
         cfrc = atom->getFlucQFrc();
         cmass = atom->getChargeMass();
         
-        // velocity half step
-        cvel += dt2_ *PhysicalConstants::energyConvert/cmass*cfrc - dt2_*chi*cvel;                    
+	cerr << atom->getType() << "\n";
+	cerr << "Before\n";
+	cerr << "cvel: " << cvel << "\tcpos: " << cpos << "\tcfrc: " << cfrc << "\tcmass: " << cmass << "\n";
+        
+	// velocity half step
+        cvel += dt2_ * cfrc / cmass - dt2_*chi*cvel;                    
         // position whole step
         cpos += dt_ * cvel;
-        
+	
+	cerr << "After\n";
+	cerr << "cvel: " << cvel << "\tcpos: " << cpos << "\n\n";        
+
         atom->setFlucQVel(cvel);
         atom->setFlucQPos(cpos);
       }
@@ -163,6 +169,7 @@ namespace OpenMD {
       (tauThermostat_ * tauThermostat_);
 
     integralOfChidt += chi * dt2_;
+    cerr << "Move A instTemp: " << instTemp << "\n";
     currentSnapshot_->setChiElectronic(chi);
     currentSnapshot_->setIntegralOfChiElectronicDt(integralOfChidt);
        
@@ -203,7 +210,7 @@ namespace OpenMD {
     for(int k = 0; k < maxIterNum_; k++) {
       index = 0;
       instTemp = thermo.getElectronicTemperature();
-
+      cerr << "MoveB instTemp: " << instTemp << "\n";
       // evolve chi another half step using the temperature at t + dt/2
       prevChi = chi;
       chi = oldChi + dt2_ * (instTemp / targetTemp_ - 1.0) / 
@@ -219,7 +226,7 @@ namespace OpenMD {
           cmass = atom->getChargeMass();
           
           // velocity half step
-          cvel = oldVel_[index] + dt2_/cmass*PhysicalConstants::energyConvert * cfrc - dt2_*chi*oldVel_[index];
+          cvel = oldVel_[index] + dt2_ * cfrc / cmass - dt2_*chi*oldVel_[index];
           
           atom->setFlucQVel(cvel);      
           ++index;          
