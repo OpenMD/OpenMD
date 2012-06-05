@@ -126,6 +126,14 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslParticlePot) {
       sdat.particlePot = &(snap_->atomData.particlePot[atom1]);
     }
+    
+    if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      sdat.flucQ = &(snap_->atomData.flucQPos[atom1]);
+    }
+    
+    if (storageLayout_ & DataStorage::dslFlucQForce) {
+      sdat.dVdFQ = &(snap_->atomData.flucQFrc[atom1]);
+    }
   }
 
   bool ForceDecomposition::checkNeighborList() {

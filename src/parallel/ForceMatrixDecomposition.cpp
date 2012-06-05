@@ -1183,8 +1183,8 @@ namespace OpenMD {
     atomColData.force[atom2] -= *(idat.f1);
 
     if (storageLayout_ & DataStorage::dslFlucQForce) {              
-      atomRowData.flucQFrc[atom1] += *(idat.dVdFQ1);
-      atomColData.flucQFrc[atom2] += *(idat.dVdFQ2);
+      atomRowData.flucQFrc[atom1] -= *(idat.dVdFQ1);
+      atomColData.flucQFrc[atom2] -= *(idat.dVdFQ2);
     }
 
     if (storageLayout_ & DataStorage::dslElectricField) {              
@@ -1208,7 +1208,7 @@ namespace OpenMD {
     }
     
     if (storageLayout_ & DataStorage::dslFlucQForce) {              
-      snap_->atomData.flucQFrc[atom1] += *(idat.dVdFQ1);
+      snap_->atomData.flucQFrc[atom1] -= *(idat.dVdFQ1);
       snap_->atomData.flucQFrc[atom2] -= *(idat.dVdFQ2);
     }
 
