@@ -88,6 +88,18 @@ ELSE(OPENBABEL2_FOUND)
   MESSAGE(STATUS "No OpenBabel found - will not build atom2md")
 ENDIF(OPENBABEL2_FOUND)
 
+find_package(Eigen3)
+if(EIGEN3_FOUND)
+  add_definitions(-DHAVE_EIGEN -DHAVE_EIGEN3)
+  include_directories(${EIGEN3_INCLUDE_DIR})
+else()
+  find_package(Eigen2) # find and setup Eigen2
+  if(EIGEN2_FOUND)
+    add_definitions (-DHAVE_EIGEN)
+    include_directories(${EIGEN2_INCLUDE_DIR})
+  endif()
+endif()
+
 #Look for QHULL Libraries
 set(QHULL_USE_STATIC 1)
 find_package(Qhull)
@@ -219,7 +231,9 @@ src/hydrodynamics/Ellipsoid.cpp
 src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/Sphere.cpp
 src/integrators/DLM.cpp
+src/flucq/FluctuatingChargeParameters.cpp
 src/flucq/FluctuatingChargeNVT.cpp
+src/flucq/FluctuatingChargePropagator.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
@@ -280,8 +294,16 @@ src/mdParser/FilenameObserver.cpp
 src/mdParser/MDLexer.cpp
 src/mdParser/MDParser.cpp
 src/mdParser/MDTreeParser.cpp
-src/minimizers/MinimizerFactory.cpp
-src/minimizers/MinimizerParameterSet.cpp
+src/optimization/OptimizationFactory.cpp
+src/optimization/Armijo.cpp
+src/optimization/BFGS.cpp
+src/optimization/ConjugateGradient.cpp
+src/optimization/Constraint.cpp
+src/optimization/EndCriteria.cpp
+src/optimization/LineSearch.cpp
+src/optimization/LineSearchBasedMethod.cpp
+src/optimization/SteepestDescent.cpp
+src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/nonbonded/EAM.cpp
 src/nonbonded/Electrostatic.cpp
 src/nonbonded/GB.cpp
@@ -359,7 +381,6 @@ src/visitors/OtherVisitor.cpp
 src/visitors/ReplacementVisitor.cpp
 src/visitors/RigidBodyVisitor.cpp
 src/visitors/ZconsVisitor.cpp
-src/flucq/FluctuatingChargeParameters.cpp
 src/rnemd/RNEMDParameters.cpp
 )
 
@@ -369,7 +390,8 @@ src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp
 src/brains/Thermo.cpp
 src/constraints/ZconstraintForceManager.cpp
-src/flucq/FluctuatingChargePropagator.cpp
+src/flucq/FluctuatingChargeConstraints.cpp
+src/flucq/FluctuatingChargeObjectiveFunction.cpp
 src/integrators/LangevinHullForceManager.cpp
 src/rnemd/RNEMD.cpp
 src/integrators/Velocitizer.cpp
@@ -381,16 +403,13 @@ src/io/StatWriter.cpp
 src/io/ZConsWriter.cpp
 src/io/ifstrstream.cpp
 src/math/ParallelRandNumGen.cpp
-src/minimizers/CGFamilyMinimizer.cpp
-src/minimizers/Minimizer.cpp
-src/minimizers/PRCG.cpp
-src/minimizers/SDMinimizer.cpp
 src/parallel/ForceDecomposition.cpp
 src/parallel/ForceMatrixDecomposition.cpp
 src/restraints/RestraintForceManager.cpp
 src/restraints/ThermoIntegrationForceManager.cpp
 src/utils/ProgressBar.cpp
 src/utils/simError.cpp
+src/optimization/Problem.cpp
 )
 
 IF(QHULL_FOUND)
