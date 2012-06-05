@@ -174,7 +174,7 @@ namespace OpenMD {
 
 #endif //is_mpi
 
-    kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+    kinetic = kinetic * 0.5;
     return ( 2.0 * kinetic) / (info_->getNFluctuatingCharges()* PhysicalConstants::kb );    
   }
 

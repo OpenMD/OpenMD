@@ -644,6 +644,8 @@ namespace OpenMD {
     RealType mf;
     RealType lrPot;
     RealType vpair;
+    RealType dVdFQ1(0.0);
+    RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
     potVec workPot(0.0);
     vector<int>::iterator ia, jb;
@@ -655,6 +657,8 @@ namespace OpenMD {
     idat.pot = &workPot;
     sdat.pot = fDecomp_->getEmbeddingPotential();
     idat.vpair = &vpair;
+    idat.dVdFQ1 = &dVdFQ1;
+    idat.dVdFQ2 = &dVdFQ2;
     idat.f1 = &f1;
     idat.sw = &sw;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
@@ -719,6 +723,8 @@ namespace OpenMD {
                 vpair = 0.0;
                 workPot = 0.0;
                 f1 = V3Zero;
+		dVdFQ1 = 0.0;
+		dVdFQ2 = 0.0;
 
                 fDecomp_->fillInteractionData(idat, atom1, atom2);
                 
