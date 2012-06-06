@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,73 +40,40 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "flucq/FluctuatingChargeObjectiveFunction.hpp"
-#include "optimization/Constraint.hpp"
-#include "optimization/Problem.hpp"
-#include "optimization/EndCriteria.hpp"
-#include "optimization/StatusFunction.hpp"
-#include "optimization/OptimizationFactory.hpp"
+#ifndef CONSTRAINTS_SHAKE_HPP
+#define CONSTRAINTS_SHAKE_HPP
 
-
-
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
-using namespace QuantLib;
+#include "brains/SimInfo.hpp"
+#include "constraints/ConstraintPair.hpp"
 namespace OpenMD {
 
-  FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info, 
-                                                           ForceManager* fm) : 
-    info_(info), forceMan_(fm), hasFlucQ_(false) {
+  class Shake {
+  public:
+    enum ConsStatus{
+      consFail = -1,  //Constraint Fail
+      consSuccess = 0,  //constrain the pair by moving two elements
+      consAlready = 1}; //current pair is already constrained, do not need to move the elements
     
-    if (info_->usesFluctuatingCharges()) {
-      if (info_->getNFluctuatingCharges() > 0) {
-        
-        hasFlucQ_ = true;
-        Globals* simParams = info_->getSimParams();
-        fqParams_ = simParams->getFluctuatingChargeParameters();
-        
-      }
-    }
-  }
-
-  void FluctuatingChargePropagator::initialize() {
-
-    if (!hasFlucQ_) return;
-
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
+    Shake(SimInfo* info);
+    void constraintR();
+    void constraintF();
     
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        atom->setFlucQPos(0.0);
-        atom->setFlucQVel(0.0);
-      }
-    }
-
-    std::cerr << "doing a minimization\n";
+    int getMaxConsIteration() { return maxConsIteration_; }
+    void setMaxConsIteration(int iteration) { maxConsIteration_ = iteration; }
     
-    fqConstraints_ = new FluctuatingChargeConstraints(info_);
-    FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, fqConstraints_);    
-    DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
-    Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), initCoords);
-    EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
-    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
-
-    minim->minimize(problem, endCriteria);
-
-  }
-
-
-  void FluctuatingChargePropagator::applyConstraints() {
-    if (!hasFlucQ_) return;
-
-    fqConstraints_->applyConstraints();
-  }
+    RealType getConsTolerance() { return consTolerance_; } 
+    void setConsTolerance(RealType tolerance) { consTolerance_ = tolerance;}           
+  private:
+    typedef int (Shake::*ConstraintPairFuncPtr)(ConstraintPair*);
+    void doConstraint(ConstraintPairFuncPtr func);
+    int constraintPairR(ConstraintPair* consPair);
+    int constraintPairF(ConstraintPair* consPair);
+    
+    SimInfo* info_;
+    int maxConsIteration_;        
+    RealType consTolerance_;
+    Snapshot* currentSnapshot_;   
+    bool doShake_;
+  };
 }
+#endif

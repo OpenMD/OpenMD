@@ -45,29 +45,36 @@
 namespace OpenMD{
 
   PotentialEnergyObjectiveFunction::PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan)
-    : info_(info), forceMan_(forceMan), thermo(info) {       
+    : info_(info), forceMan_(forceMan), thermo(info) {   
+    shake_ = new Shake(info_);    
   }
   
 
   
   RealType PotentialEnergyObjectiveFunction::value(const DynamicVector<RealType>& x) {
     setCoor(x);
+    shake_->constraintR();
     forceMan_->calcForces();
+    shake_->constraintF();
     return thermo.getPotential();
   }
   
   void PotentialEnergyObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
     
-    setCoor(x);         
-    forceMan_->calcForces(); 
-    getGrad(grad);      
+    setCoor(x);       
+    shake_->constraintR();
+    forceMan_->calcForces();
+    shake_->constraintF();
+    getGrad(grad);
   }
   
   RealType PotentialEnergyObjectiveFunction::valueAndGradient(DynamicVector<RealType>& grad,
                                                               const DynamicVector<RealType>& x) {
    
-    setCoor(x);     
-    forceMan_->calcForces();   
+    setCoor(x);
+    shake_->constraintR();
+    forceMan_->calcForces();
+    shake_->constraintF();
     getGrad(grad); 
     return thermo.getPotential();
   }
@@ -99,7 +106,12 @@ namespace OpenMD{
           eulerAngle[2] = x[index++];
           
           integrableObject->setEuler(eulerAngle);
-          }
+
+          if (integrableObject->isRigidBody()) {
+            RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+            rb->updateAtoms();
+          }        
+        }
       }
     }    
   }

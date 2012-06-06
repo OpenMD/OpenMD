@@ -226,6 +226,7 @@ src/brains/Register.cpp
 src/brains/SimSnapshotManager.cpp
 src/brains/Snapshot.cpp
 src/brains/Stats.cpp
+src/constraints/Shake.cpp
 src/constraints/Rattle.cpp
 src/hydrodynamics/Ellipsoid.cpp
 src/hydrodynamics/HydroProp.cpp

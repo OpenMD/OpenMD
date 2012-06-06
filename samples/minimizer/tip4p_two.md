@@ -14,7 +14,7 @@ minimizer {
   maxIterations = 5000;
 }
 
-forceField = "DUFF";
+forceField = "DUFF2";
 electrostaticSummationMethod = "none";
 dielectric = 80.0;
 cutoffRadius = 12.0;

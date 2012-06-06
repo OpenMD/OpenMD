@@ -46,7 +46,7 @@
 #include "optimization/ObjectiveFunction.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
-#include "constraints/Rattle.hpp"
+#include "constraints/Shake.hpp"
 
 using namespace QuantLib;
 namespace OpenMD {
@@ -71,7 +71,7 @@ namespace OpenMD {
 
     SimInfo* info_;
     ForceManager* forceMan_;
-    Rattle* rattle_;
+    Shake* shake_;
     Thermo thermo;
     bool usingRattle_;
   };

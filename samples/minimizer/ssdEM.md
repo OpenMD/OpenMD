@@ -9,10 +9,12 @@ component{
 }
 
 
-minimizer = CG;
-minimizerMaxIter = 500;
-minimizerWriteFrq = 1;
-minimizerStepSize = 0.01;
+forceField = "DUFF2";
+minimizer {
+  useMinimizer = true;
+  method = CG;
+  maxIterations = 500;
+}
 forceField = "DUFF";
 electrostaticSummationMethod = "none";
 dielectric = 80.0;
