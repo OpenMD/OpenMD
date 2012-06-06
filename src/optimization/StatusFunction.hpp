@@ -8,13 +8,13 @@ namespace OpenMD {
   class StatusFunction {
   public:
     virtual ~StatusFunction() {}
-    virtual void writeStatus() { std::cerr << "doing status\n"; }    
+    virtual void writeStatus(const DynamicVector<RealType>& currentValue) { std::cerr << "doing status\n"; }    
   };
 
   //! No status
   class NoStatus : public StatusFunction {
   public:
-    virtual void writeStatus() {};
+    virtual void writeStatus(const DynamicVector<RealType>& currentValue) {};
   };
 
   class DumpStatusFunction : public StatusFunction {
@@ -27,9 +27,8 @@ namespace OpenMD {
       mask.set(Stats::POTENTIAL_ENERGY);
       statWriter = new StatWriter(info_->getStatFileName(), mask);
     }
-    virtual void writeStatus() {
+    virtual void writeStatus(const DynamicVector<RealType>& currentValue) {
       Snapshot* curSnapshot =info_->getSnapshotManager()->getCurrentSnapshot();
-      info_->getSnapshotManager()->advance();      
       dumpWriter->writeDumpAndEor();
       statWriter->writeStat(curSnapshot->statData);
     }

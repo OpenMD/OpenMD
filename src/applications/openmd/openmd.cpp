@@ -142,13 +142,13 @@ int main(int argc,char* argv[]){
   Globals* simParams = info->getSimParams();
   MinimizerParameters* miniPars = simParams->getMinimizerParameters();
 
-  if (miniPars->haveUseMinimizer() && simParams->haveEnsemble()) {
+  if (miniPars->getUseMinimizer() && simParams->haveEnsemble()) {
     sprintf(painCave.errMsg, "Ensemble keyword can not co-exist with useMinimizer = \"true\" in the minimizer block\n");
     painCave.isFatal = 1;
     simError();        
   }
 
-  if (miniPars->haveUseMinimizer()) {
+  if (miniPars->getUseMinimizer()) {
     //create minimizer
     OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
 

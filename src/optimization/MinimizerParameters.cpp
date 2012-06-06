@@ -48,7 +48,7 @@
 
 namespace OpenMD {
   MinimizerParameters::MinimizerParameters() { 
-    DefineOptionalParameterWithDefaultValue(UseMinimizer, "useMinimizer", "false");
+    DefineOptionalParameterWithDefaultValue(UseMinimizer, "useMinimizer", false);
     DefineOptionalParameterWithDefaultValue(Method, "method", "SD");
     DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations", 1000);
     DefineOptionalParameterWithDefaultValue(MaxStationaryStateIterations, "maxStationaryStateIterations", 100);
