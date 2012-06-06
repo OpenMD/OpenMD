@@ -38,6 +38,7 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
  */
  
 #ifdef IS_MPI
@@ -115,7 +116,7 @@ int main(int argc,char* argv[]){
       "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).               |\n"<<
       "  | [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).                |\n"<<
       "  | [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |\n"<<
-      "  | [6] Kuang & Gezelter, Mol. Phys., in press (2012).                       |\n"<<
+      "  | [6] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                   |\n"<<
       "  +--------------------------------------------------------------------------+\n"<<
       "\n";
     
@@ -139,21 +140,21 @@ int main(int argc,char* argv[]){
   SimInfo* info = creator.createSim(argv[1]);
 
   Globals* simParams = info->getSimParams();
+  MinimizerParameters* miniPars = simParams->getMinimizerParameters();
 
-  if (simParams->haveMinimizer() && simParams->haveEnsemble()) {
-    sprintf(painCave.errMsg, "Minimizer keyword and Ensemble keyword can not exist together\n");
+  if (miniPars->haveUseMinimizer() && simParams->haveEnsemble()) {
+    sprintf(painCave.errMsg, "Ensemble keyword can not co-exist with useMinimizer = \"true\" in the minimizer block\n");
     painCave.isFatal = 1;
     simError();        
   }
-  
 
-  if (simParams->haveMinimizer()) {
+  if (miniPars->haveUseMinimizer()) {
     //create minimizer
-    OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(simParams->getMinimizer()), info);
+    OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
 
     if (myMinimizer == NULL) {
       sprintf(painCave.errMsg, "Optimization Factory can not create %s OptimizationMethod\n",
-	      simParams->getMinimizer().c_str());
+	      miniPars->getMethod().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -165,7 +166,15 @@ int main(int argc,char* argv[]){
     DumpStatusFunction dsf(info);
     DynamicVector<RealType> initCoords = potObjf.setInitialCoords();
     Problem problem(potObjf, *(new NoConstraint()), dsf, initCoords);
-    EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5); 
+
+
+    int maxIter = miniPars->getMaxIterations();
+    int mssIter = miniPars->getMaxStationaryStateIterations();
+    RealType rEps = miniPars->getRootEpsilon();
+    RealType fEps = miniPars->getFunctionEpsilon();
+    RealType gnEps = miniPars->getGradientNormEpsilon();
+
+    EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
 
     myMinimizer->minimize(problem, endCriteria);
 

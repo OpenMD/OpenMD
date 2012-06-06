@@ -41,6 +41,7 @@ statement : assignment
     | restraintblock
     | flucqblock
     | rnemdblock
+    | minimizerblock
     ;
 
 assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
@@ -84,6 +85,11 @@ flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new Fluctuating
 rnemdblock  : #(RNEMD  {RNEMDParameters* rnemdPars = new RNEMDParameters(); blockStack.push(rnemdPars);}
                       (assignment)* 
                        ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRNEMDParameters(rnemdPars);}
+                ;
+
+minimizerblock  : #(MINIMIZER  {MinimizerParameters* minimizerPars = new MinimizerParameters(); blockStack.push(minimizerPars);}
+                      (assignment)* 
+                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addMinimizerParameters(minimizerPars);}
                 ;
 
 

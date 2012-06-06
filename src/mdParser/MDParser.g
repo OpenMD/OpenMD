@@ -43,6 +43,7 @@ tokens
   ORIENTATION = "orientation";
   FLUCQ       = "flucQ";
   RNEMD       = "RNEMD";
+  MINIMIZER   = "minimizer";
   ENDBLOCK;
 }
 
@@ -57,6 +58,7 @@ statement : assignment
     | restraintblock
     | flucqblock
     | rnemdblock
+    | minimizerblock
     ;
 
 assignment  : ID ASSIGNEQUAL^ constant SEMICOLON!
@@ -81,6 +83,9 @@ flucqblock  : FLUCQ^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;
 
 rnemdblock  : RNEMD^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+    ;
+
+minimizerblock  : MINIMIZER^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;
   
 moleculeblock : MOLECULE^ LCURLY! (moleculestatement)*  RCURLY {#RCURLY->setType(ENDBLOCK);}

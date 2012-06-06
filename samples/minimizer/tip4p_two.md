@@ -8,11 +8,11 @@ component{
   nMol = 2;
 }
 
-
-minimizer = CG;
-minimizerMaxIter = 5000;
-minimizerWriteFreq = 10;
-minimizerStepSize = 0.05;
+minimizer {
+  useMinimizer = true;
+  method = CG;
+  maxIterations = 5000;
+}
 
 forceField = "DUFF";
 electrostaticSummationMethod = "none";

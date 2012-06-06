@@ -53,6 +53,7 @@ public:
 	public: void restraintblock();
 	public: void flucqblock();
 	public: void rnemdblock();
+	public: void minimizerblock();
 	public: void constant();
 	protected: void intConst();
 	protected: void floatConst();
@@ -87,10 +88,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 56;
+	static const int NUM_TOKENS = 57;
 #else
 	enum {
-		NUM_TOKENS = 56
+		NUM_TOKENS = 57
 	};
 #endif
 	

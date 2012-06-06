@@ -55,6 +55,7 @@ Globals::Globals() {
   
   flucQpars_ = new FluctuatingChargeParameters();
   rnemdPars_ = new RNEMDParameters();
+  minimizerPars_ = new MinimizerParameters();
 
   DefineParameter(ForceField, "forceField")
  
@@ -77,14 +78,6 @@ Globals::Globals() {
   DefineOptionalParameter(ZconsTol, "zconsTol");
   DefineOptionalParameter(ZconsForcePolicy, "zconsForcePolicy");
   DefineOptionalParameter(Seed, "seed");
-  DefineOptionalParameter(Minimizer, "minimizer");
-  DefineOptionalParameter(MinimizerMaxIter,"minimizerMaxIter");
-  DefineOptionalParameter(MinimizerWriteFreq, "minimizerWriteFreq");
-  DefineOptionalParameter(MinimizerStepSize, "minimizerStepSize");
-  DefineOptionalParameter(MinimizerFTol, "minimizerFTol");
-  DefineOptionalParameter(MinimizerGTol, "minimizerGTol");
-  DefineOptionalParameter(MinimizerLSTol, "minimizerLSTol");
-  DefineOptionalParameter(MinimizerLSMaxIter, "minimizerLSMaxIter");
   DefineOptionalParameter(ZconsGap, "zconsGap");
   DefineOptionalParameter(ZconsFixtime, "zconsFixtime");
   DefineOptionalParameter(ZconsUsingSMD, "zconsUsingSMD");
@@ -146,6 +139,14 @@ Globals::Globals() {
   deprecatedKeywords_.insert("thermIntOmegaSpringConst");
   deprecatedKeywords_.insert("useSolidThermInt");  
   deprecatedKeywords_.insert("useLiquidThermInt");
+  deprecatedKeywords_.insert("minimizerMaxIter");
+  deprecatedKeywords_.insert("minimizerWriteFreq");
+  deprecatedKeywords_.insert("minimizerStepSize");
+  deprecatedKeywords_.insert("minimizerFTol");
+  deprecatedKeywords_.insert("minimizerGTol");
+  deprecatedKeywords_.insert("minimizerLSTol");
+  deprecatedKeywords_.insert("minimizerLSMaxIter");
+
     
 }
 
@@ -176,14 +177,6 @@ void Globals::validate() {
   CheckParameter(ZconsTime, isPositive());
   CheckParameter(ZconsTol, isPositive());
   CheckParameter(Seed, isPositive());
-  CheckParameter(Minimizer, isEqualIgnoreCase("SD") || isEqualIgnoreCase("CG"));
-  CheckParameter(MinimizerMaxIter, isPositive());
-  CheckParameter(MinimizerWriteFreq, isPositive());
-  CheckParameter(MinimizerStepSize, isPositive());
-  CheckParameter(MinimizerFTol, isPositive());
-  CheckParameter(MinimizerGTol, isPositive());
-  CheckParameter(MinimizerLSTol, isPositive());
-  CheckParameter(MinimizerLSMaxIter, isPositive());
   CheckParameter(ZconsGap, isPositive());
   CheckParameter(ZconsFixtime, isPositive());
   CheckParameter(ThermodynamicIntegrationLambda, isNonNegative());
@@ -243,6 +236,14 @@ bool Globals::addRNEMDParameters(RNEMDParameters* rnemdPars) {
     delete rnemdPars_;
     
   rnemdPars_ = rnemdPars;
+  return true;
+}
+
+bool Globals::addMinimizerParameters(MinimizerParameters* miniPars) {
+  if (minimizerPars_ != NULL)
+    delete minimizerPars_;
+    
+  minimizerPars_ = miniPars;
   return true;
 }
 

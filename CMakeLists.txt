@@ -304,6 +304,7 @@ src/optimization/LineSearch.cpp
 src/optimization/LineSearchBasedMethod.cpp
 src/optimization/SteepestDescent.cpp
 src/optimization/PotentialEnergyObjectiveFunction.cpp
+src/optimization/MinimizerParameters.cpp
 src/nonbonded/EAM.cpp
 src/nonbonded/Electrostatic.cpp
 src/nonbonded/GB.cpp

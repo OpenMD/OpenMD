@@ -56,6 +56,7 @@
 #include "types/MoleculeStamp.hpp"
 #include "flucq/FluctuatingChargeParameters.hpp"
 #include "rnemd/RNEMDParameters.hpp"
+#include "optimization/MinimizerParameters.hpp"
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
@@ -91,14 +92,6 @@ namespace OpenMD {
     DeclareParameter(UseInitalTime, bool);
     DeclareParameter(UseIntialExtendedSystemState, bool);
     DeclareParameter(OrthoBoxTolerance, RealType);
-    DeclareParameter(Minimizer, std::string);
-    DeclareParameter(MinimizerMaxIter, RealType);
-    DeclareParameter(MinimizerWriteFreq, int);
-    DeclareParameter(MinimizerStepSize, RealType);
-    DeclareParameter(MinimizerFTol, RealType);
-    DeclareParameter(MinimizerGTol, RealType);
-    DeclareParameter(MinimizerLSTol, RealType);
-    DeclareParameter(MinimizerLSMaxIter, int);
     DeclareParameter(ZconsGap, RealType);
     DeclareParameter(ZconsFixtime, RealType);
     DeclareParameter(ZconsUsingSMD, bool);
@@ -168,6 +161,9 @@ namespace OpenMD {
 
     bool addRNEMDParameters(RNEMDParameters* rnemdPars);
     RNEMDParameters* getRNEMDParameters() {return rnemdPars_;}
+
+    bool addMinimizerParameters(MinimizerParameters* miniPars);
+    MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
     
     virtual void validate();
   private:
@@ -179,6 +175,7 @@ namespace OpenMD {
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;
     RNEMDParameters* rnemdPars_;
+    MinimizerParameters* minimizerPars_;
 };
 }
 #endif

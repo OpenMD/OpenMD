@@ -361,7 +361,7 @@ namespace OpenMD {
 
   template<typename T>
   inline LessThanOrEqualToConstraint<T> isLessThanOrEqualTo(T& v ) {
-    return ParamConstraintFacade<LessThanOrEqualToConstraint<T> >(v);
+    return LessThanOrEqualToConstraint<T>(v);
   }
 
   template<typename T>

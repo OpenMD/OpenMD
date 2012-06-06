@@ -621,7 +621,7 @@ namespace OpenMD {
     newOStream = new std::ofstream(filename.c_str());
 #endif
     //write out MetaData first
-    (*newOStream) << "<OpenMD version=1>" << std::endl;
+    (*newOStream) << "<OpenMD version=2>" << std::endl;
     (*newOStream) << "  <MetaData>" << std::endl;
     (*newOStream) << info_->getRawMetaData();
     (*newOStream) << "  </MetaData>" << std::endl;
