@@ -193,8 +193,9 @@ namespace OpenMD {
         
         // throw warning
         sprintf( painCave.errMsg,
-                 "Electrostatic::initialize: dampingAlpha was not specified in the input file.\n"
-                 "\tA default value of %f (1/ang) will be used for the cutoff of\n\t%f (ang).\n", 
+                 "Electrostatic::initialize: dampingAlpha was not specified in the\n"
+                 "\tinput file.  A default value of %f (1/ang) will be used for the\n"
+                 "\tcutoff of %f (ang).\n", 
                  dampingAlpha_, cutoffRadius_);
         painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;

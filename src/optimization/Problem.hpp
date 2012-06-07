@@ -68,7 +68,10 @@ namespace QuantLib {
 
         void setCurrentValue(const DynamicVector<RealType>& currentValue) {
             currentValue_=currentValue;
-            statusFunction_.writeStatus(currentValue);
+            statusFunction_.writeStatus(functionEvaluation_, 
+                                        gradientEvaluation_, 
+                                        currentValue_,
+                                        functionValue_);
         }
 
         //! current value of the local minimum

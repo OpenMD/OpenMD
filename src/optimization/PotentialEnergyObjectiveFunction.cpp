@@ -70,7 +70,6 @@ namespace OpenMD{
   
   RealType PotentialEnergyObjectiveFunction::valueAndGradient(DynamicVector<RealType>& grad,
                                                               const DynamicVector<RealType>& x) {
-   
     setCoor(x);
     shake_->constraintR();
     forceMan_->calcForces();
@@ -131,7 +130,8 @@ namespace OpenMD{
            integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(j)) {        
         myGrad = integrableObject->getGrad();
-        for (size_t k = 0; k < myGrad.size(); ++k) {
+
+        for (size_t k = 0; k < myGrad.size(); ++k) {   
           grad[index++] = myGrad[k];
         }
       }            

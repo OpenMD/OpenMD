@@ -260,7 +260,6 @@ namespace OpenMD {
     }
     
     ndfLocal_ = ndf_local;
-    cerr << "ndfLocal_ = " << ndfLocal_ << "\n";
 
     // n_constraints is local, so subtract them on each processor
     ndf_local -= nConstraints_;

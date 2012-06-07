@@ -10,7 +10,7 @@ component{
 
 minimizer {
   useMinimizer = true;
-  method = CG;
+  method = SD;
   maxIterations = 5000;
 }
 

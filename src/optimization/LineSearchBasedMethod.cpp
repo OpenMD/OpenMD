@@ -89,7 +89,6 @@ namespace QuantLib {
 
                 // conjugate gradient search direction
                 direction = getUpdatedDirection(P, gold2, prevGradient);
-
                 sddiff = direction - lineSearch_->searchDirection();
                 lineSearch_->searchDirection() = direction;
                 // Now compute accuracy and check end criteria
@@ -97,7 +96,6 @@ namespace QuantLib {
                 fnew = P.functionValue();
                 fdiff = 2.0*std::fabs(fnew-fold) /
                     (std::fabs(fnew) + std::fabs(fold) + NumericConstant::epsilon);
-                std::cerr << "fdiff = " << fdiff << "ftol = " << ftol << "\n";
                 if (fdiff < ftol ||
                     endCriteria.checkMaxIterations(iterationNumber_, ecType)) {
                     endCriteria.checkStationaryFunctionValue(0.0, 0.0,
@@ -107,7 +105,6 @@ namespace QuantLib {
                 }
                 P.setCurrentValue(x_);      // update problem current value
                 ++iterationNumber_;         // Increase iteration number
-                std::cerr << "in = " << iterationNumber_ << "\n";
                 first_time = false;
             } else {
                 done = true;
