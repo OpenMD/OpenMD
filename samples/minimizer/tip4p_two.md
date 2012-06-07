@@ -15,10 +15,10 @@ minimizer {
 }
 
 forceField = "DUFF2";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+cutoffMethod = "shifted_force";
+dampingAlpha = 0.185;
 cutoffRadius = 12.0;
-switchingRadius = 9.0;
+
   </MetaData>
   <Snapshot>
     <FrameData>
