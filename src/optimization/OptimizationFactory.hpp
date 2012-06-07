@@ -53,7 +53,6 @@ using namespace QuantLib;
 namespace OpenMD {
 
   //forward declaration
-  class QuantLib::OptimizationMethod;
   class OptimizationCreator;
   class SimInfo;
   /**

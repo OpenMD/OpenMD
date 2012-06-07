@@ -61,6 +61,7 @@
 
 #include "config.h"
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include "math/Factorials.hpp"
 

@@ -88,7 +88,7 @@ Globals::Globals() {
   DefineOptionalParameter(DampingAlpha, "dampingAlpha");
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
-  DefineOptionalParameter(PrintHeatFlux, "printHeatFlux");
+
   DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
   DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
@@ -117,6 +117,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, "electrostaticScreeningMethod", "DAMPED");
   DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", false);
+  DefineOptionalParameterWithDefaultValue(PrintHeatFlux, "printHeatFlux", false);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", false);
   DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", false);
   DefineOptionalParameterWithDefaultValue(OutputElectricField, "outputElectricField", false);

@@ -672,7 +672,6 @@ namespace OpenMD {
     } else {
       loopStart = PAIR_LOOP;
     }
-   
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
     
       if (iLoop == loopStart) {
@@ -704,17 +703,16 @@ namespace OpenMD {
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
                                                      rgrp); 
-          
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 
           if (doHeatFlux_)
             gvel2 = fDecomp_->getGroupVelocityColumn(cg2);
-        
+
           for (ia = atomListRow.begin(); 
                ia != atomListRow.end(); ++ia) {            
             atom1 = (*ia);
-            
+
             for (jb = atomListColumn.begin(); 
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
@@ -727,7 +725,7 @@ namespace OpenMD {
 		dVdFQ2 = 0.0;
 
                 fDecomp_->fillInteractionData(idat, atom1, atom2);
-                
+
                 topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
                 vdwMult = vdwScale_[topoDist];
                 electroMult = electrostaticScale_[topoDist];

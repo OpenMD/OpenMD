@@ -134,7 +134,7 @@ namespace QuantLib {
     
     inline void Problem::reset() {
         functionEvaluation_ = gradientEvaluation_ = 0;
-        functionValue_ = squaredNorm_ = NULL;
+        functionValue_ = squaredNorm_ = 0;
     }
     
 }
