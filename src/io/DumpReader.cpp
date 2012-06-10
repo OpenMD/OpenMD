@@ -143,6 +143,7 @@ namespace OpenMD {
       prevPos = currPos;
       bool foundOpenSnapshotTag = false;
       bool foundClosedSnapshotTag = false;
+      bool foundOpenSiteDataTag = false;
       while(inFile_->getline(buffer, bufferSize)) {
         ++lineNo;
         
@@ -325,13 +326,18 @@ namespace OpenMD {
 
     inputStream.getline(buffer, bufferSize);
     line = buffer;
-    if (line.find("</Snapshot>") == std::string::npos) {
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: can not find </Snapshot>\n"); 
-      painCave.isFatal = 1; 
-      simError(); 
-    }        
-   
+
+    if (line.find("<SiteData>") != std::string::npos) {
+      //read SiteData
+      readSiteData(inputStream);         
+    } else {
+      if (line.find("</Snapshot>") == std::string::npos) {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: can not find </Snapshot>\n"); 
+        painCave.isFatal = 1; 
+        simError(); 
+      }        
+    }
   } 
    
   void DumpReader::parseDumpLine(const std::string& line) { 
@@ -518,8 +524,107 @@ namespace OpenMD {
   } 
    
 
-  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+  void DumpReader::parseSiteLine(const std::string& line) { 
 
+    StringTokenizer tokenizer(line); 
+    int nTokens; 
+     
+    nTokens = tokenizer.countTokens(); 
+     
+    if (nTokens < 2) {  
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
+      painCave.isFatal = 1; 
+      simError(); 
+    } 
+
+    /**
+     * The first token is the global integrable object index.
+     */
+
+    int index = tokenizer.nextTokenAsInt();
+    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+    if (integrableObject == NULL) {
+      return;
+    }
+    StuntDouble* sd = integrableObject;
+
+    /**
+     * Test to see if the next token is an integer or not.  If not,
+     * we've got data on the integrable object itself.  If there is an
+     * integer, we're parsing data for a site on a rigid body.
+     */
+
+    std::string indexTest = tokenizer.peekNextToken();
+    std::istringstream i(indexTest);
+    int siteIndex;
+    if (i >> siteIndex) {
+      // chew up this token and parse as an int:
+      siteIndex = tokenizer.nextTokenAsInt();
+      RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+      sd = rb->getAtoms()[siteIndex];
+    }
+
+    /**
+     * The next token contains information on what follows.
+     */
+    std::string type = tokenizer.nextToken(); 
+    int size = type.size();
+    
+    for(int i = 0; i < size; ++i) {
+      switch(type[i]) {
+        
+      case 'u' : {
+        
+        RealType particlePot;
+        particlePot = tokenizer.nextTokenAsDouble(); 
+        sd->setParticlePot(particlePot);
+        break;
+      }
+      case 'c' : {
+        
+        RealType flucQPos;
+        flucQPos = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQPos(flucQPos);
+        break;
+      }
+      case 'w' : {
+        
+        RealType flucQVel;
+        flucQVel = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQVel(flucQVel);
+        break;
+      }
+      case 'g' : {
+        
+        RealType flucQFrc;
+        flucQFrc = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQFrc(flucQFrc);
+        break;
+      }
+      case 'e' : {
+        
+        Vector3d eField;
+        eField[0] = tokenizer.nextTokenAsDouble(); 
+        eField[1] = tokenizer.nextTokenAsDouble(); 
+        eField[2] = tokenizer.nextTokenAsDouble();  
+        sd->setElectricField(eField);          
+        break;
+      }
+      default: {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+        break;   
+      }
+      }
+    }    
+  } 
+  
+  
+  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+    
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
     
@@ -538,6 +643,28 @@ namespace OpenMD {
       }
 
       parseDumpLine(line);
+    }
+  
+  }
+
+  void  DumpReader::readSiteData(std::istream& inputStream) {
+
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+    
+    if (line.find("<SiteData>") == std::string::npos) {
+      // site data isn't required for a simulation, so skip
+      return;
+    }
+
+    while(inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+      
+      if(line.find("</SiteData>") != std::string::npos) {
+        break;
+      }
+
+      parseSiteLine(line);
     }
   
   }

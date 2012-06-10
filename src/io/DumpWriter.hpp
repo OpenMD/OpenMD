@@ -85,6 +85,7 @@ namespace OpenMD {
     void writeFrame(std::ostream& os);
     void writeFrameProperties(std::ostream& os, Snapshot* s);
     std::string prepareDumpLine(StuntDouble* integrableObject);
+    std::string prepareSiteLine(StuntDouble* integrableObject, int ioIndex, int siteIndex);
     std::ostream* createOStream(const std::string& filename);
     void writeClosing(std::ostream& os);
     
@@ -97,6 +98,7 @@ namespace OpenMD {
     bool needParticlePot_;
     bool needFlucQ_;
     bool needElectricField_;
+    bool doSiteData_;
     bool createDumpFile_;
   };
 

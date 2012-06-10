@@ -65,6 +65,12 @@ namespace OpenMD {
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
 
+    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+      doSiteData_ = true;
+    } else {
+      doSiteData_ = false;
+    }
+
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -108,6 +114,12 @@ namespace OpenMD {
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
 
+    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+      doSiteData_ = true;
+    } else {
+      doSiteData_ = false;
+    }
+
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -150,6 +162,12 @@ namespace OpenMD {
     needParticlePot_   = simParams->getOutputParticlePotential();
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
+
+    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+      doSiteData_ = true;
+    } else {
+      doSiteData_ = false;
+    }
 
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -284,6 +302,8 @@ namespace OpenMD {
     StuntDouble* integrableObject;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
+    RigidBody::AtomIterator ai;
+    Atom* atom;
 
 #ifndef IS_MPI
     os << "  <Snapshot>\n";
@@ -301,7 +321,32 @@ namespace OpenMD {
       }
     }    
     os << "    </StuntDoubles>\n";
-    
+
+    if (doSiteData_) {
+      os << "    <SiteData>\n";
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+               
+        for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
+           integrableObject = mol->nextIntegrableObject(ii)) { 	
+
+          int ioIndex = integrableObject->getGlobalIntegrableObjectIndex();
+          // do one for the IO itself
+          os << prepareSiteLine(integrableObject, ioIndex, 0);
+
+          if (integrableObject->isRigidBody()) {
+            
+            RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+            int siteIndex = 0;
+            for (atom = rb->beginAtom(ai); atom != NULL;  
+                 atom = rb->nextAtom(ai)) { 	                                        
+              os << prepareSiteLine(atom, ioIndex, siteIndex);
+              siteIndex++;
+            }
+          }
+        }
+      }    
+      os << "    </SiteData>\n";
+    }
     os << "  </Snapshot>\n";
 
     os.flush();
@@ -470,27 +515,33 @@ namespace OpenMD {
       }      
     }
 
-    if (needParticlePot_) {
-      type += "u";
-      RealType particlePot = integrableObject->getParticlePot();
-      if (isinf(particlePot) || isnan(particlePot)) {      
-        sprintf( painCave.errMsg,
-                 "DumpWriter detected a numerical error writing the particle "
-                 " potential for object %d", index);      
-        painCave.isFatal = 1;
-        simError();
-      }
-      sprintf(tempBuffer, " %13e", particlePot);
-      line += tempBuffer;
+    sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
+    return std::string(tempBuffer);
+  }
+
+  std::string DumpWriter::prepareSiteLine(StuntDouble* integrableObject, int ioIndex, int siteIndex) {
+	
+
+    std::string id;
+    std::string type;
+    std::string line;
+    char tempBuffer[4096];
+
+    if (integrableObject->isRigidBody()) {
+      sprintf(tempBuffer, "%10d           ", ioIndex);
+      id = std::string(tempBuffer);
+    } else {
+      sprintf(tempBuffer, "%10d %10d", ioIndex, siteIndex);
+      id = std::string(tempBuffer);
     }
-    
+              
     if (needFlucQ_) {
       type += "cw";
       RealType fqPos = integrableObject->getFlucQPos();
       if (isinf(fqPos) || isnan(fqPos) ) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the"
-                 " fluctuating charge for object %d", index);      
+                 " fluctuating charge for object %s", id.c_str());      
         painCave.isFatal = 1;
         simError();
       }
@@ -501,7 +552,7 @@ namespace OpenMD {
       if (isinf(fqVel) || isnan(fqVel) ) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the"
-                 " fluctuating charge velocity for object %d", index);      
+                 " fluctuating charge velocity for object %s", id.c_str());      
         painCave.isFatal = 1;
         simError();
       }
@@ -514,7 +565,7 @@ namespace OpenMD {
         if (isinf(fqFrc) || isnan(fqFrc) ) {      
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the"
-                   " fluctuating charge force for object %d", index);      
+                   " fluctuating charge force for object %s", id.c_str());      
           painCave.isFatal = 1;
           simError();
         }
@@ -531,7 +582,7 @@ namespace OpenMD {
           isinf(eField[2]) || isnan(eField[2]) ) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the electric"
-                 " field for object %d", index);      
+                 " field for object %s", id.c_str());      
         painCave.isFatal = 1;
         simError();
       }
@@ -540,7 +591,23 @@ namespace OpenMD {
       line += tempBuffer;
     }
 
-    sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
+
+    if (needParticlePot_) {
+      type += "u";
+      RealType particlePot = integrableObject->getParticlePot();
+      if (isinf(particlePot) || isnan(particlePot)) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the particle "
+                 " potential for object %s", id.c_str());      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e", particlePot);
+      line += tempBuffer;
+    }
+    
+
+    sprintf(tempBuffer, "%s %7s %s\n", id.c_str(), type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }
 

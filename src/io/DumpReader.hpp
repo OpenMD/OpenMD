@@ -80,15 +80,13 @@ namespace OpenMD {
  
   protected: 
  
-    void scanFile(); 
- 
+    void scanFile();  
     void readSet(int whichFrame); 
- 
     virtual void parseDumpLine(const std::string&); 
- 
+    virtual void parseSiteLine(const std::string&);  
     virtual void readFrameProperties(std::istream& inputStream);
-
-    void readStuntDoubles(std::istream& inputStream);                  
+    void readStuntDoubles(std::istream& inputStream);
+    void readSiteData(std::istream& inputStream);
          
     SimInfo* info_; 
  
