@@ -110,6 +110,7 @@ namespace OpenMD {
       return *this;
     }
 
+    
     /**
      * Sets this matrix to a rotation matrix by three euler angles
      * @ param euler
@@ -186,7 +187,6 @@ namespace OpenMD {
         
         
     }
-
 
 
     /**
