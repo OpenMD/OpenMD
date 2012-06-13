@@ -110,7 +110,8 @@ namespace OpenMD {
     Globals* simParams_ = info_->getSimParams();
     ForceFieldOptions& forceFieldOptions_ = forceField_->getForceFieldOptions();
     int mdFileVersion;
-    
+    rCut_ = 0.0; //Needs a value for a later max() call;   
+ 
     if (simParams_->haveMDfileVersion()) 
       mdFileVersion = simParams_->getMDfileVersion();
     else

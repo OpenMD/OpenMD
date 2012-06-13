@@ -67,6 +67,7 @@ namespace OpenMD {
         hasFlucQ_ = true;
         Globals* simParams = info_->getSimParams();
         fqParams_ = simParams->getFluctuatingChargeParameters();
+	fqConstraints_ = new FluctuatingChargeConstraints(info_);
         
       }
     }
@@ -99,8 +100,17 @@ namespace OpenMD {
     EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 
-    minim->minimize(problem, endCriteria);
+    DumpStatusFunction dsf(info_);                           // we want a dump file written every iteration
 
+    minim->minimize(problem, endCriteria);
+    cerr << "Finished minimization\n";
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+	cerr << atom->getType() << "\tQ Pos: " << atom->getFlucQPos() << "\n";
+      }
+    }
   }
 
 
