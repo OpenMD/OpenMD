@@ -1116,14 +1116,7 @@ namespace OpenMD {
 
 #else
     
-
-    // cerr << "atoms = " << atom1 << " " << atom2 << "\n";
-    // cerr << "pos1 = " << snap_->atomData.position[atom1] << "\n";
-    // cerr << "pos2 = " << snap_->atomData.position[atom2] << "\n";
-
     idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
-    //idat.atypes = make_pair( ff_->getAtomType(idents[atom1]), 
-    //                         ff_->getAtomType(idents[atom2]) );
 
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);

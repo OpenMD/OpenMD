@@ -60,7 +60,9 @@ namespace OpenMD {
   }
 
   void InteractionManager::initialize() {
-    
+
+    if (initialized_) return; 
+
     ForceField* forceField_ = info_->getForceField();
     
     lj_->setForceField(forceField_);
@@ -379,7 +381,7 @@ namespace OpenMD {
 
   RealType InteractionManager::getSuggestedCutoffRadius(int *atid) {
     if (!initialized_) initialize();
-    
+
     AtomType* atype = typeMap_[*atid];
 
     pair<AtomType*, AtomType*> key = make_pair(atype, atype);

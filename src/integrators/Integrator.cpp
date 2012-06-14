@@ -104,7 +104,6 @@ namespace OpenMD {
     
     // Create a default ForceManager: If the subclass wants to use 
     // a different ForceManager, use setForceManager
-
     forceMan_ = new ForceManager(info);
     
     // check for the temperature set flag (velocity scaling)      

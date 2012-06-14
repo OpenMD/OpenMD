@@ -49,6 +49,7 @@ using namespace std;
 namespace OpenMD {
 
   ForceDecomposition::ForceDecomposition(SimInfo* info, InteractionManager* iMan) : info_(info), interactionMan_(iMan), needVelocities_(false) {
+
     sman_ = info_->getSnapshotManager();
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
