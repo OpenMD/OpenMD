@@ -111,6 +111,16 @@ namespace OpenMD {
 	cerr << atom->getType() << "\tQ Pos: " << atom->getFlucQPos() << "\n";
       }
     }
+    // std::cerr << "after minim\n";
+    // for (mol = info_->beginMolecule(i); mol != NULL; 
+    //      mol = info_->nextMolecule(i)) {
+    //   for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+    //        atom = mol->nextFluctuatingCharge(j)) {
+    //     cerr << "q = " << atom->getFlucQPos(0.0) << "\n";
+    //   }
+    // }
+
+
   }
 
 

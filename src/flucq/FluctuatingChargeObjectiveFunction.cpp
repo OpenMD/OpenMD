@@ -93,7 +93,7 @@ namespace OpenMD{
       
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        
+       
         atom->setFlucQPos(x[index++]);
       }
     }    
@@ -112,8 +112,9 @@ namespace OpenMD{
 
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        
+
         grad[index++] = -atom->getFlucQFrc();
+
       }
     }
   }

@@ -63,6 +63,7 @@ namespace OpenMD {
     void distributeData();
     void collectIntermediateData();
     void distributeIntermediateData();
+    void collectSelfData();
     void collectData();
 
     // neighbor list routines
@@ -88,7 +89,7 @@ namespace OpenMD {
     int getNAtomsInRow();
     int getTopologicalDistance(int atom1, int atom2);
     vector<int> getExcludesForAtom(int atom1); 
-    bool skipAtomPair(int atom1, int atom2);
+    bool skipAtomPair(int atom1, int atom2, int cg1, int cg2);
     bool excludeAtomPair(int atom1, int atom2);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);

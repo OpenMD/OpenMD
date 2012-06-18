@@ -704,6 +704,7 @@ namespace OpenMD {
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
                                                      rgrp); 
+
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 
@@ -718,7 +719,8 @@ namespace OpenMD {
                  jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
 
-              if (!fDecomp_->skipAtomPair(atom1, atom2)) {
+              if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
+
                 vpair = 0.0;
                 workPot = 0.0;
                 f1 = V3Zero;
@@ -842,16 +844,18 @@ namespace OpenMD {
       }
     }
     
+    // collects pairwise information
     fDecomp_->collectData();
         
     if (info_->requiresSelfCorrection()) {
-
-      for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {          
+      for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) { 
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
       }
-
     }
+
+    // collects single-atom information
+    fDecomp_->collectSelfData();
 
     longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
       *(fDecomp_->getPairwisePotential());
@@ -884,7 +888,6 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, stressTensor.getArrayPointer(), 9, 
                               MPI::REALTYPE, MPI::SUM);
 #endif

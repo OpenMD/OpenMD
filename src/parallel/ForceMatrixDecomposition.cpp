@@ -461,7 +461,6 @@ namespace OpenMD {
     }
   }
 
-
   groupCutoffs ForceMatrixDecomposition::getGroupCutoffs(int cg1, int cg2) {
     int i, j;   
 #ifdef IS_MPI
@@ -852,13 +851,6 @@ namespace OpenMD {
       pairwisePot[ii] = ploc2;
     }
 
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = embeddingPot[ii];
-      RealType ploc2 = 0.0;
-      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
-      embeddingPot[ii] = ploc2;
-    }
-    
     // Here be dragons.
     MPI::Intracomm col = colComm.getComm();
 
@@ -870,6 +862,27 @@ namespace OpenMD {
 #endif
 
   }
+
+  /** 
+   * Collects information obtained during the post-pair (and embedding
+   * functional) loops onto local data structures.
+   */
+  void ForceMatrixDecomposition::collectSelfData() {
+    snap_ = sman_->getCurrentSnapshot();
+    storageLayout_ = sman_->getStorageLayout();
+
+#ifdef IS_MPI
+    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+      RealType ploc1 = embeddingPot[ii];
+      RealType ploc2 = 0.0;
+      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      embeddingPot[ii] = ploc2;
+    }    
+#endif
+    
+  }
+
+
 
   int ForceMatrixDecomposition::getNAtomsInRow() {   
 #ifdef IS_MPI
@@ -993,16 +1006,20 @@ namespace OpenMD {
    * We need to exclude some overcounted interactions that result from
    * the parallel decomposition.
    */
-  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2) {
-    int unique_id_1, unique_id_2;
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1, int cg2) {
+    int unique_id_1, unique_id_2, group1, group2;
         
 #ifdef IS_MPI
     // in MPI, we have to look up the unique IDs for each atom
     unique_id_1 = AtomRowToGlobal[atom1];
     unique_id_2 = AtomColToGlobal[atom2];
+    group1 = cgRowToGlobal[cg1];
+    group2 = cgColToGlobal[cg2];
 #else
     unique_id_1 = AtomLocalToGlobal[atom1];
     unique_id_2 = AtomLocalToGlobal[atom2];
+    group1 = cgLocalToGlobal[cg1];
+    group2 = cgLocalToGlobal[cg2];
 #endif   
 
     if (unique_id_1 == unique_id_2) return true;
@@ -1013,6 +1030,12 @@ namespace OpenMD {
       if ((unique_id_1 + unique_id_2) % 2 == 0) return true;
     } else {
       if ((unique_id_1 + unique_id_2) % 2 == 1) return true;
+    }
+#endif    
+
+#ifndef IS_MPI
+    if (group1 == group2) {
+      if (unique_id_1 < unique_id_2) return true;
     }
 #endif
     

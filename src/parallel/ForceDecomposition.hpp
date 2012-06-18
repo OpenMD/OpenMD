@@ -101,6 +101,7 @@ namespace OpenMD {
     virtual void collectIntermediateData() = 0;
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
+    virtual void collectSelfData() = 0;
     virtual potVec* getEmbeddingPotential() { return &embeddingPot; }
     virtual potVec* getPairwisePotential() { return &pairwisePot; }
 
@@ -132,7 +133,7 @@ namespace OpenMD {
     // atom bookkeeping
     virtual int getNAtomsInRow() = 0;
     virtual vector<int> getExcludesForAtom(int atom1) = 0;
-    virtual bool skipAtomPair(int atom1, int atom2) = 0;
+    virtual bool skipAtomPair(int atom1, int atom2, int cg1, int cg2) = 0;
     virtual bool excludeAtomPair(int atom1, int atom2) = 0;
     virtual int getTopologicalDistance(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;

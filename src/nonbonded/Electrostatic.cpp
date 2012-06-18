@@ -578,12 +578,12 @@ namespace OpenMD {
       if (j_is_Charge) {
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          //erfcVal = res.first;
-          //derfcVal = res.second;
+          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
+          erfcVal = res.first;
+          derfcVal = res.second;
 
-          erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-          derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
+          //erfcVal = erfc(dampingAlpha_ * *(idat.rij));
+          //derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
 
           c1 = erfcVal * riji;
           c2 = (-derfcVal + c1) * riji;
