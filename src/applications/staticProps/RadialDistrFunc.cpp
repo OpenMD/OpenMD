@@ -45,12 +45,17 @@
 #include "RadialDistrFunc.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+
 namespace OpenMD {
 
-  RadialDistrFunc::RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : StaticAnalyser(info, filename), 
-      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info), common_(info), sele1_minus_common_(info), sele2_minus_common_(info){
+  RadialDistrFunc::RadialDistrFunc(SimInfo* info, 
+                                   const std::string& filename, 
+                                   const std::string& sele1, 
+                                   const std::string& sele2)
+    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
+      selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
+      seleMan1_(info), seleMan2_(info), common_(info), 
+      sele1_minus_common_(info), sele2_minus_common_(info) {
           
       evaluator1_.loadScriptString(sele1);
       evaluator2_.loadScriptString(sele2);
@@ -65,7 +70,8 @@ namespace OpenMD {
       }
 
       if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
-        //if all selections are static,  we can precompute the number of real pairs    
+        // If all selections are static, we can precompute the number
+        // of real pairs.
         common_ = seleMan1_ & seleMan2_;
         sele1_minus_common_ = seleMan1_ - common_;
         sele2_minus_common_ = seleMan2_ - common_;      
@@ -74,7 +80,7 @@ namespace OpenMD {
         int nSelected2 = seleMan2_.getSelectionCount();
         int nIntersect = common_.getSelectionCount();
         
-        nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;            
+        nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;  
       }
     
     }
@@ -104,32 +110,38 @@ namespace OpenMD {
 	validateSelection2(seleMan2_);
       }
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
 
-	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	// Change the positions of atoms which belong to the RigidBodies
+	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+             rb = mol->nextRigidBody(rbIter)) {
 	  rb->updateAtoms();
 	}
       }
         
       initalizeHistogram();
-
-
         
-      //selections may overlap.
+      // Selections may overlap, and we need a bit of logic to deal
+      // with this.
       //
-      // |s1 -c | c |
-      //            | c |s2 - c|
+      // |     s1    |
+      // | s1 -c | c |
+      //         | c | s2 - c |
+      //         |    s2      |
       //
-      // s1 : number of selected stuntdoubles in selection1
-      // s2 : number of selected stuntdoubles in selection2
-      // c   : number of intersect stuntdouble between selection1 and selection2
-      //when loop over the pairs, we can divide the looping into 3 stages
-      //stage 1 :     [s1-c]      [s2]
-      //stage 2 :     [c]            [s2 - c]
-      //stage 3 :     [c]            [c]
-      //stage 1 and stage 2 are completly non-overlapping
-      //stage 3 are completely overlapping
+      // s1 : Set of StuntDoubles in selection1
+      // s2 : Set of StuntDoubles in selection2
+      // c  : Intersection of selection1 and selection2
+      // 
+      // When we loop over the pairs, we can divide the looping into 3
+      // stages:
+      //
+      // Stage 1 :     [s1-c]      [s2]
+      // Stage 2 :     [c]         [s2 - c]
+      // Stage 3 :     [c]         [c]
+      // Stages 1 and 2 are completely non-overlapping.
+      // Stage 3 is completely overlapping.
 
       if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
 	common_ = seleMan1_ & seleMan2_;
@@ -141,8 +153,9 @@ namespace OpenMD {
             
 	nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;
       }
+      
       processNonOverlapping(sele1_minus_common_, seleMan2_);
-      processNonOverlapping(common_, sele2_minus_common_);        
+      processNonOverlapping(common_,             sele2_minus_common_);
       processOverlapping(common_);
       
       processHistogram();
@@ -154,19 +167,25 @@ namespace OpenMD {
     writeRdf();
   }
 
-  void RadialDistrFunc::processNonOverlapping( SelectionManager& sman1, SelectionManager& sman2) {
+  void RadialDistrFunc::processNonOverlapping( SelectionManager& sman1, 
+                                               SelectionManager& sman2) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int i;    
     int j;
     
-    for (sd1 = sman1.beginSelected(i); sd1 != NULL; sd1 = sman1.nextSelected(i)) {
+    // This is the same as a non-overlapping pairwise loop structure:
+    // for (int i = 0;  i < ni ; ++i ) {
+    //   for (int j = 0; j < nj; ++j) {} 
+    // }
 
-      for (sd2 = sman2.beginSelected(j); sd2 != NULL; sd2 = sman2.nextSelected(j)) {
+    for (sd1 = sman1.beginSelected(i); sd1 != NULL; 
+         sd1 = sman1.nextSelected(i)) {
+      for (sd2 = sman2.beginSelected(j); sd2 != NULL; 
+           sd2 = sman2.nextSelected(j)) {
 	collectHistogram(sd1, sd2);
-      }            
+      }
     }
-
   }
 
   void RadialDistrFunc::processOverlapping( SelectionManager& sman) {
@@ -175,16 +194,17 @@ namespace OpenMD {
     int i;    
     int j;
 
-    //basically, it is the same as below loop
-    //for (int i = 0;  i < n; ++i )
-    //  for (int j = i + 1; j < n; ++j) {}
+    // This is the same as a pairwise loop structure:
+    // for (int i = 0;  i < n-1 ; ++i ) {
+    //   for (int j = i + 1; j < n; ++j) {} 
+    // }
     
-    for (sd1 = sman.beginSelected(i); sd1 != NULL; sd1 = sman.nextSelected(i)) {                    
-      for (j  = i, sd2 = sman.nextSelected(j); sd2 != NULL; sd2 = sman.nextSelected(j)) {
+    for (sd1 = sman.beginSelected(i); sd1 != NULL; 
+         sd1 = sman.nextSelected(i)) {                    
+      for (j  = i, sd2 = sman.nextSelected(j); sd2 != NULL; 
+           sd2 = sman.nextSelected(j)) {
 	collectHistogram(sd1, sd2);
       }            
     }
-
   }
-
 }

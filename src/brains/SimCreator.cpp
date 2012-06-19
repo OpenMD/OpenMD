@@ -786,7 +786,8 @@ namespace OpenMD {
     int nGlobalAtoms = info->getNGlobalAtoms();
     
     beginAtomIndex = 0;
-    beginRigidBodyIndex = 0;
+    //rigidbody's index begins right after atom's
+    beginRigidBodyIndex = info->getNGlobalAtoms();
     beginCutoffGroupIndex = 0;
 
     for(int i = 0; i < info->getNGlobalMolecules(); i++) {

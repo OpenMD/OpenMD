@@ -54,6 +54,7 @@
 #include <vector>
 
 #include "brains/DataStorage.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "brains/Stats.hpp"
 
 namespace OpenMD{
@@ -69,6 +70,13 @@ namespace OpenMD{
     RealType totalEnergy;     /**< total energy of this frame */
     RealType kineticEnergy;   /**< kinetic energy of this frame */
     RealType potentialEnergy; /**< potential energy of this frame */
+    RealType shortRangePotential; /**< short-range contributions to the potential*/
+    RealType longRangePotential; /**< long-range contributions to the potential */
+    RealType bondPotential;   /**< bonded contribution to the potential */
+    RealType bendPotential;   /**< angle-bending contribution to the potential */
+    RealType torsionPotential; /**< dihedral (torsion angle) contribution to the potential */
+    RealType inversionPotential; /**< inversion (planarity) contribution to the potential */
+    potVec   lrPotentials;    /**< breakdown of long-range potentials by family */
     RealType temperature;     /**< temperature of this frame */
     RealType chi;             /**< thermostat velocity */
     RealType integralOfChiDt; /**< the actual thermostat */

@@ -119,7 +119,6 @@ namespace OpenMD {
 	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
       }
-        
     } else {
 
       sprintf(painCave.errMsg, "GofR: unable to open %s\n", outputFilename_.c_str());
