@@ -107,15 +107,18 @@ namespace OpenMD {
     forceMan_ = new ForceManager(info);
     
     // check for the temperature set flag (velocity scaling)      
+    needVelocityScaling = false;
     if (simParams->haveTempSet()) {
       needVelocityScaling = simParams->getTempSet();
+    } 
 
+    if (needVelocityScaling) {
       if (simParams->haveTargetTemp()) {
         targetScalingTemp = simParams->getTargetTemp();
       }
       else {
         sprintf(painCave.errMsg,
-                "Integrator Error: Target Temperature is not set\n");
+                "Integrator Error: Target Temperature must be set to turn on tempSet\n");
         painCave.isFatal = 1;
         simError();
 
