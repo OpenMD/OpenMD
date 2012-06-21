@@ -801,7 +801,7 @@ namespace OpenMD {
       usesDirectional |= (*i)->isDirectional();
       usesFluctuatingCharges |= (*i)->isFluctuatingCharge();
     }
-    
+
 #ifdef IS_MPI    
     int temp;
     temp = usesDirectional;

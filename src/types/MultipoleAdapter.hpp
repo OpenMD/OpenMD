@@ -58,8 +58,10 @@ namespace OpenMD {
     bool isSplitDipole;
     bool isQuadrupole;
     RealType dipoleMoment;
+    Vector3d dipole;
     RealType splitDipoleDistance;
     Vector3d quadrupoleMoments;
+    Mat3x3d quadrupole;
   };
   typedef SimpleTypeData<MultipoleAtypeParameters*> MultipoleAtypeData;   
   
@@ -75,8 +77,10 @@ namespace OpenMD {
     bool isQuadrupole();
 
     RealType getDipoleMoment();
+    Vector3d getDipole();
     RealType getSplitDipoleDistance();
     Vector3d getQuadrupoleMoments();
+    Mat3x3d getQuadrupole();
     RotMat3x3d getElectroBodyFrame();
 
   private:

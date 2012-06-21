@@ -125,13 +125,13 @@ namespace OpenMD {
       }
     }
     
-    // set vraw to be the unmodulated potential
-    lrPot_ = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
-    curSnapshot->statData[Stats::VRAW] = lrPot_;
+    // set rawPotential to be the unmodulated potential
+    lrPot_ = curSnapshot->getLongRangePotential();
+    curSnapshot->setRawPotential(lrPot_);
     
     // modulate the potential and update the snapshot
     lrPot_ *= factor_;
-    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
+    curSnapshot->setLongRangePotential(lrPot_);
     
     // scale the pressure tensor
     tempTau = curSnapshot->getStressTensor();
@@ -144,7 +144,6 @@ namespace OpenMD {
     
     if (simParam->getUseRestraints()) {
       // do restraints from RestraintForceManager:
-      //restPot_local = doRestraints(1.0 - factor_);     
       restPot_local = doRestraints(1.0 - factor_);      
       vHarm_local = getUnscaledPotential();
     }
@@ -162,7 +161,7 @@ namespace OpenMD {
 #endif
 
     // give the final values to stats
-    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
-    curSnapshot->statData[Stats::VHARM] = vHarm_;
+    curSnapshot->setLongRangePotential(lrPot_);
+    curSnapshot->setRestraintPotential(vHarm_);
   }  
 }

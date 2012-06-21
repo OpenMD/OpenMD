@@ -47,8 +47,8 @@
 
 namespace OpenMD {
 
-  FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info, ForceManager* fm) : 
-    FluctuatingChargePropagator(info, fm), chiTolerance_ (1e-6), 
+  FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
+    FluctuatingChargePropagator(info), chiTolerance_ (1e-6), 
     maxIterNum_(4), thermo(info), 
     currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
     

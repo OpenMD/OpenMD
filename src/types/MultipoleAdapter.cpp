@@ -118,6 +118,11 @@ namespace OpenMD {
     return multipoleParam->dipoleMoment;
   }
 
+  Vector3d MultipoleAdapter::getDipole() {    
+    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
+    return multipoleParam->dipole;
+  }
+
   RealType MultipoleAdapter::getSplitDipoleDistance() {    
     MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
     return multipoleParam->splitDipoleDistance;
@@ -126,6 +131,11 @@ namespace OpenMD {
   Vector3d MultipoleAdapter::getQuadrupoleMoments() {    
     MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
     return multipoleParam->quadrupoleMoments;
+  }
+
+  Mat3x3d MultipoleAdapter::getQuadrupole() {    
+    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
+    return multipoleParam->quadrupole;
   }
 
 
@@ -148,8 +158,8 @@ namespace OpenMD {
     multipoleParam->quadrupoleMoments = quadrupoleMoments;
     multipoleParam->isDipole = isDipole;
     multipoleParam->isSplitDipole = isSplitDipole;
-    multipoleParam->isQuadrupole = isQuadrupole;
-    
+    multipoleParam->isQuadrupole = isQuadrupole;   
+
     at_->addProperty(new MultipoleAtypeData(MultipoleTypeID, multipoleParam));
   }
 }

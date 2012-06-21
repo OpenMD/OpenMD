@@ -586,15 +586,32 @@ namespace OpenMD {
         }      
       }      
     }
-    
-    RealType  shortRangePotential = bondPotential + bendPotential + 
-      torsionPotential +  inversionPotential;    
+
+#ifdef IS_MPI
+    // Collect from all nodes.  This should eventually be moved into a
+    // SystemDecomposition, but this is a better place than in
+    // Thermo to do the collection.
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bondPotential, 1, MPI::REALTYPE, 
+                              MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bendPotential, 1, MPI::REALTYPE, 
+                              MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &torsionPotential, 1, 
+                              MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &inversionPotential, 1, 
+                              MPI::REALTYPE, MPI::SUM);
+#endif
+
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] = shortRangePotential;
-    curSnapshot->statData[Stats::BOND_POTENTIAL] = bondPotential;
-    curSnapshot->statData[Stats::BEND_POTENTIAL] = bendPotential;
-    curSnapshot->statData[Stats::DIHEDRAL_POTENTIAL] = torsionPotential;
-    curSnapshot->statData[Stats::INVERSION_POTENTIAL] = inversionPotential;    
+
+    curSnapshot->setBondPotential(bondPotential);
+    curSnapshot->setBendPotential(bendPotential);
+    curSnapshot->setTorsionPotential(torsionPotential);
+    curSnapshot->setInversionPotential(inversionPotential);
+    
+    RealType shortRangePotential = bondPotential + bendPotential + 
+      torsionPotential +  inversionPotential;    
+
+    curSnapshot->setShortRangePotential(shortRangePotential);
   }
   
   void ForceManager::longRangeInteractions() {
@@ -649,6 +666,7 @@ namespace OpenMD {
     RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
     potVec workPot(0.0);
+    potVec exPot(0.0);
     vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
@@ -656,6 +674,7 @@ namespace OpenMD {
     idat.vdwMult = &vdwMult;
     idat.electroMult = &electroMult;
     idat.pot = &workPot;
+    idat.excludedPot = &exPot;
     sdat.pot = fDecomp_->getEmbeddingPotential();
     idat.vpair = &vpair;
     idat.dVdFQ1 = &dVdFQ1;
@@ -723,6 +742,7 @@ namespace OpenMD {
 
                 vpair = 0.0;
                 workPot = 0.0;
+                exPot = 0.0;
                 f1 = V3Zero;
 		dVdFQ1 = 0.0;
 		dVdFQ2 = 0.0;
@@ -860,12 +880,15 @@ namespace OpenMD {
     longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
       *(fDecomp_->getPairwisePotential());
 
+    curSnapshot->setLongRangePotentialFamilies(longRangePotential);
+
     lrPot = longRangePotential.sum();
 
-    //store the stressTensor and long range potential    
-    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
-    curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VANDERWAALS_FAMILY];
-    curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL] = longRangePotential[ELECTROSTATIC_FAMILY];
+    //store the long range potential  
+    curSnapshot->setLongRangePotential(lrPot);
+
+    curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedPotential()));
+
   }
 
   

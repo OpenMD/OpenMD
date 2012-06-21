@@ -143,6 +143,9 @@ namespace OpenMD {
     vector<potVec> pot_row;
     vector<potVec> pot_col;
 
+    vector<potVec> expot_row;
+    vector<potVec> expot_col;
+
     vector<int> identsRow;
     vector<int> identsCol;
 

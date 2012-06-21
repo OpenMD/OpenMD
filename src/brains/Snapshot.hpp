@@ -40,14 +40,6 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
   
-/**
- * @file Snapshot.hpp
- * @author tlin
- * @date 10/20/2004
- * @time 23:56am
- * @version 1.0
- */
-  
 #ifndef BRAINS_SNAPSHOT_HPP
 #define BRAINS_SNAPSHOT_HPP
 
@@ -59,56 +51,70 @@
 
 namespace OpenMD{
 
+  /**
+   * FrameData is a structure for holding system-wide dynamic data
+   * about the simulation.
+   */
+  
   struct FrameData {
-    int id;                   /**< identification number of the snapshot */
-    RealType currentTime;     /**< current time */
-    Mat3x3d hmat;             /**< axes of the periodic box in matrix form */
-    Mat3x3d invHmat;          /**< the inverse of the Hmat matrix */
-    bool orthoRhombic;        /**< is this an orthorhombic periodic box? */
-    RealType volume;          /**< total volume of this frame */
-    RealType pressure;        /**< pressure of this frame */
-    RealType totalEnergy;     /**< total energy of this frame */
-    RealType kineticEnergy;   /**< kinetic energy of this frame */
-    RealType potentialEnergy; /**< potential energy of this frame */
+    int id;                       /**< identification number of the snapshot */
+    RealType currentTime;         /**< current time */
+    Mat3x3d  hmat;                /**< axes of the periodic box in matrix form */
+    Mat3x3d  invHmat;             /**< the inverse of the Hmat matrix */
+    bool     orthoRhombic;        /**< is this an orthorhombic periodic box? */
+    RealType volume;              /**< total volume of this frame */
+    RealType pressure;            /**< pressure of this frame */
+    RealType totalEnergy;         /**< total energy of this frame */
+    RealType kineticEnergy;       /**< kinetic energy of this frame */
+    RealType potentialEnergy;     /**< potential energy of this frame */
     RealType shortRangePotential; /**< short-range contributions to the potential*/
-    RealType longRangePotential; /**< long-range contributions to the potential */
-    RealType bondPotential;   /**< bonded contribution to the potential */
-    RealType bendPotential;   /**< angle-bending contribution to the potential */
-    RealType torsionPotential; /**< dihedral (torsion angle) contribution to the potential */
-    RealType inversionPotential; /**< inversion (planarity) contribution to the potential */
-    potVec   lrPotentials;    /**< breakdown of long-range potentials by family */
-    RealType temperature;     /**< temperature of this frame */
-    RealType chi;             /**< thermostat velocity */
-    RealType integralOfChiDt; /**< the actual thermostat */
+    RealType longRangePotential;  /**< long-range contributions to the potential */
+    RealType bondPotential;       /**< bonded contribution to the potential */
+    RealType bendPotential;       /**< angle-bending contribution to the potential */
+    RealType torsionPotential;    /**< dihedral (torsion angle) contribution to the potential */
+    RealType inversionPotential;  /**< inversion (planarity) contribution to the potential */
+    potVec   lrPotentials;        /**< breakdown of long-range potentials by family */
+    potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
+    RealType restraintPotential;  /**< potential energy of restraints */
+    RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
+    RealType temperature;         /**< temperature of this frame */
+    RealType chi;                 /**< thermostat velocity */
+    RealType integralOfChiDt;     /**< thermostat position */
     RealType electronicTemperature; /**< temperature of the electronic degrees of freedom */
-    RealType chiQ;            /**< fluctuating charge thermostat velocity */
-    RealType integralOfChiQDt; /**< the actual fluctuating charge thermostat */
-    Mat3x3d eta;              /**< barostat matrix */
-    Vector3d COM;             /**< location of center of mass */
-    Vector3d COMvel;          /**< system center of mass velocity */
-    Vector3d COMw;            /**< system center of mass angular velocity */
-    Mat3x3d stressTensor;     /**< stress tensor */
-    Mat3x3d pressureTensor;   /**< pressure tensor */
-    Vector3d systemDipole;    /**< total system dipole moment */
-    Vector3d conductiveHeatFlux; /**< heat flux vector (conductive only) */
+    RealType chiQ;                /**< fluctuating charge thermostat velocity */
+    RealType integralOfChiQDt;    /**< fluctuating charge thermostat position */
+    Mat3x3d  eta;                 /**< barostat matrix */
+    Vector3d COM;                 /**< location of system center of mass */
+    Vector3d COMvel;              /**< system center of mass velocity */
+    Vector3d COMw;                /**< system center of mass angular velocity */
+    Mat3x3d  stressTensor;        /**< stress tensor */
+    Mat3x3d  pressureTensor;      /**< pressure tensor */
+    Vector3d systemDipole;        /**< total system dipole moment */
+    Vector3d conductiveHeatFlux;  /**< heat flux vector (conductive only) */
   };
 
 
   /**
-   * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
-   * @brief Snapshot class is a repository class for storing dynamic data during 
-   *  Simulation
-   * Every snapshot class will contain one DataStorage for atoms and one DataStorage
-   *  for rigid bodies.
+   * @class Snapshot 
+   * @brief The Snapshot class is a repository storing dynamic data during a
+   * Simulation.  Every Snapshot contains FrameData (for global information)
+   * as well as DataStorage (one for Atoms, one for RigidBodies, and one for 
+   * CutoffGroups).
    */
   class Snapshot {
-  public:
-            
-    Snapshot(int nAtoms, int nRigidbodies, 
-             int nCutoffGroups) : atomData(nAtoms), 
-                                  rigidbodyData(nRigidbodies),
-                                  cgData(nCutoffGroups, DataStorage::dslPosition), 
-                                  orthoTolerance_(1e-6), hasCOM_(false), hasVolume_(false){
+
+  public:            
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups) : 
+      atomData(nAtoms), rigidbodyData(nRigidbodies),
+      cgData(nCutoffGroups, DataStorage::dslPosition), 
+      orthoTolerance_(1e-6), hasCOM_(false), hasVolume_(false),
+      hasShortRangePotential_(false),
+      hasBondPotential_(false), hasBendPotential_(false),
+      hasTorsionPotential_(false), hasInversionPotential_(false),
+      hasLongRangePotential_(false), hasLongRangePotentialFamilies_(false),
+      hasRestraintPotential_(false), hasRawPotential_(false),
+      hasExcludedPotentials_(false)
+    {
       
       frameData.id = -1;                   
       frameData.currentTime = 0;     
@@ -136,13 +142,19 @@ namespace OpenMD{
       frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
     }
 
-    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
-             int storageLayout) : atomData(nAtoms, storageLayout), 
-                                  rigidbodyData(nRigidbodies, storageLayout),
-                                  cgData(nCutoffGroups, DataStorage::dslPosition),
-                                  orthoTolerance_(1e-6),
-                                  hasCOM_(false),
-                                  hasVolume_(false) {
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, int storageLayout) : 
+      atomData(nAtoms, storageLayout), 
+      rigidbodyData(nRigidbodies, storageLayout),
+      cgData(nCutoffGroups, DataStorage::dslPosition),
+      orthoTolerance_(1e-6), hasCOM_(false), hasVolume_(false),
+      hasShortRangePotential_(false),
+      hasBondPotential_(false), hasBendPotential_(false),
+      hasTorsionPotential_(false), hasInversionPotential_(false),
+      hasLongRangePotential_(false), hasLongRangePotentialFamilies_(false),
+      hasRestraintPotential_(false), hasRawPotential_(false),
+      hasExcludedPotentials_(false)
+    {
+
       frameData.id = -1;                   
       frameData.currentTime = 0;     
       frameData.hmat = Mat3x3d(0.0);             
@@ -207,11 +219,11 @@ namespace OpenMD{
     void setHmat(const Mat3x3d& m);
             
     RealType getVolume() {
-      if (hasVolume_){
-        return frameData.volume;
-      }else{
-        return frameData.hmat.determinant();
+      if (!hasVolume_) {
+        frameData.volume = frameData.hmat.determinant();
+        hasVolume_ = true;
       }
+      return frameData.volume;
     }
 
     void setVolume(RealType volume){
@@ -248,6 +260,93 @@ namespace OpenMD{
       statData[Stats::TIME] = frameData.currentTime;
     }
 
+    void setShortRangePotential(RealType srp) {
+      frameData.shortRangePotential = srp;
+      hasShortRangePotential_ = true;
+      statData[Stats::SHORT_RANGE_POTENTIAL] = frameData.shortRangePotential;
+    }
+
+    RealType getShortRangePotential() {
+      return frameData.shortRangePotential;
+    }
+
+    void setBondPotential(RealType bp) {
+      frameData.bondPotential = bp;
+      hasBondPotential_ = true;
+      statData[Stats::BOND_POTENTIAL] = frameData.bondPotential;
+    }
+
+    void setBendPotential(RealType bp) {
+      frameData.bendPotential = bp;
+      hasBendPotential_ = true;
+      statData[Stats::BEND_POTENTIAL] = frameData.bendPotential;
+    }
+
+    void setTorsionPotential(RealType tp) {
+      frameData.torsionPotential = tp;
+      hasTorsionPotential_ = true;
+      statData[Stats::DIHEDRAL_POTENTIAL] = frameData.torsionPotential;
+    }
+
+    void setInversionPotential(RealType ip) {
+      frameData.inversionPotential = ip;
+      hasInversionPotential_ = true;
+      statData[Stats::INVERSION_POTENTIAL] = frameData.inversionPotential;
+    }
+
+    void setLongRangePotential(RealType lrp) {
+      frameData.longRangePotential = lrp;
+      hasLongRangePotential_ = true;
+      statData[Stats::LONG_RANGE_POTENTIAL] = frameData.longRangePotential;
+    }
+
+    RealType getLongRangePotential() {
+      return frameData.longRangePotential;
+    }
+
+    void setLongRangePotentialFamilies(potVec lrPot) {
+      frameData.lrPotentials = lrPot;
+      hasLongRangePotentialFamilies_ = true;
+      statData[Stats::VANDERWAALS_POTENTIAL] = frameData.lrPotentials[VANDERWAALS_FAMILY];
+      statData[Stats::ELECTROSTATIC_POTENTIAL] = frameData.lrPotentials[ELECTROSTATIC_FAMILY];
+      statData[Stats::METALLIC_POTENTIAL] = frameData.lrPotentials[METALLIC_FAMILY];
+      statData[Stats::HYDROGENBONDING_POTENTIAL] = frameData.lrPotentials[HYDROGENBONDING_FAMILY];
+    }
+
+    potVec getLongRangePotentials() {
+      return frameData.lrPotentials;
+    }
+
+    void setExcludedPotentials(potVec exPot) {
+      frameData.excludedPotentials = exPot;
+      hasExcludedPotentials_ = true;
+    }
+
+    potVec getExcludedPotentials() {
+      return frameData.excludedPotentials;
+    }
+
+    
+    void setRestraintPotential(RealType rp) {
+      frameData.restraintPotential = rp;
+      hasRestraintPotential_ = true;
+      statData[Stats::RESTRAINT_POTENTIAL] = frameData.restraintPotential;
+    }
+
+    RealType getRestraintPotential() {
+      return frameData.restraintPotential;
+    }
+
+    void setRawPotential(RealType rp) {
+      frameData.rawPotential = rp;
+      hasRawPotential_ = true;
+      statData[Stats::RAW_POTENTIAL] = frameData.rawPotential;
+    }
+
+    RealType getRawPotential() {
+      return frameData.rawPotential;
+    }
+
     RealType getChi() {
       return frameData.chi;
     }
@@ -279,7 +378,6 @@ namespace OpenMD{
     void setIntegralOfChiElectronicDt(RealType integralOfChiQDt) {
       frameData.integralOfChiQDt = integralOfChiQDt;
     }
-            
 
     void setOrthoTolerance(RealType orthoTolerance) {
       orthoTolerance_ = orthoTolerance;
@@ -330,6 +428,16 @@ namespace OpenMD{
     RealType orthoTolerance_;
     bool hasCOM_;
     bool hasVolume_;    
+    bool hasShortRangePotential_;
+    bool hasBondPotential_;
+    bool hasBendPotential_;
+    bool hasTorsionPotential_;
+    bool hasInversionPotential_;
+    bool hasLongRangePotential_;
+    bool hasLongRangePotentialFamilies_;
+    bool hasRestraintPotential_;
+    bool hasRawPotential_;
+    bool hasExcludedPotentials_;
   };
 
   typedef DataStorage (Snapshot::*DataStoragePointer); 

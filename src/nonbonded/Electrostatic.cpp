@@ -1049,6 +1049,7 @@ namespace OpenMD {
       // indirect reaction field terms.
 
       *(idat.vpair) += indirect_vpair;
+      (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] += epot;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += indirect_Pot;
       *(idat.f1) += indirect_dVdr;
       
@@ -1077,6 +1078,7 @@ namespace OpenMD {
       chg1 += *(sdat.flucQ);
       // dVdFQ is really a force, so this is negative the derivative
       *(sdat.dVdFQ) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
+      cerr << "dVdFQ harmonic part = " << *(sdat.dVdFQ) << "\n";
     }
 
     if (summationMethod_ == esm_REACTION_FIELD) {

@@ -55,13 +55,14 @@ namespace OpenMD {
    */
   class FluctuatingChargePropagator {
   public:
-    FluctuatingChargePropagator(SimInfo* info, ForceManager* forceMan);
+    FluctuatingChargePropagator(SimInfo* info);
     virtual ~FluctuatingChargePropagator(){ }
     virtual void initialize();
     virtual void updateSizes() = 0;
     virtual void moveA() = 0;
     virtual void applyConstraints();
     virtual void moveB() = 0;
+    virtual void setForceManager(ForceManager* forceMan);
 
   protected:
     FluctuatingChargeParameters* fqParams_;

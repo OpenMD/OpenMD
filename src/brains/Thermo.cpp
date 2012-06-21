@@ -112,23 +112,9 @@ namespace OpenMD {
 
   RealType Thermo::getPotential() {
     RealType potential = 0.0;
+
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType shortRangePot_local =  curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
-
-    // Get total potential for entire system from MPI.
-
-#ifdef IS_MPI
-
-    MPI_Allreduce(&shortRangePot_local, &potential, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    potential += curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
-
-#else
-
-    potential = shortRangePot_local + curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
-
-#endif // is_mpi
-
+    potential = curSnapshot->getShortRangePotential() + curSnapshot->getLongRangePotential();
     return potential;
   }
 

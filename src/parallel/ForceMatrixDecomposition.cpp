@@ -176,6 +176,9 @@ namespace OpenMD {
     pot_row.resize(nAtomsInRow_);
     pot_col.resize(nAtomsInCol_);
 
+    expot_row.resize(nAtomsInRow_);
+    expot_col.resize(nAtomsInCol_);
+
     AtomRowToGlobal.resize(nAtomsInRow_);
     AtomColToGlobal.resize(nAtomsInCol_);
     AtomPlanIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
@@ -484,6 +487,7 @@ namespace OpenMD {
   void ForceMatrixDecomposition::zeroWorkArrays() {
     pairwisePot = 0.0;
     embeddingPot = 0.0;
+    excludedPot = 0.0;
 
 #ifdef IS_MPI
     if (storageLayout_ & DataStorage::dslForce) {
@@ -500,6 +504,12 @@ namespace OpenMD {
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
 
     fill(pot_col.begin(), pot_col.end(), 
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));   
+
+    fill(expot_row.begin(), expot_row.end(), 
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+
+    fill(expot_col.begin(), expot_col.end(), 
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));   
 
     if (storageLayout_ & DataStorage::dslParticlePot) {    
@@ -780,13 +790,19 @@ namespace OpenMD {
 
     vector<potVec> pot_temp(nLocal_, 
                             Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+    vector<potVec> expot_temp(nLocal_, 
+                              Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
 
     // scatter/gather pot_row into the members of my column
           
     AtomPlanPotRow->scatter(pot_row, pot_temp);
+    AtomPlanPotRow->scatter(expot_row, expot_temp);
 
-    for (int ii = 0;  ii < pot_temp.size(); ii++ )
+    for (int ii = 0;  ii < pot_temp.size(); ii++ ) 
       pairwisePot += pot_temp[ii];
+
+    for (int ii = 0;  ii < expot_temp.size(); ii++ ) 
+      excludedPot += expot_temp[ii];
         
     if (storageLayout_ & DataStorage::dslParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
@@ -804,11 +820,17 @@ namespace OpenMD {
 
     fill(pot_temp.begin(), pot_temp.end(), 
          Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+    fill(expot_temp.begin(), expot_temp.end(), 
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
       
     AtomPlanPotColumn->scatter(pot_col, pot_temp);    
+    AtomPlanPotColumn->scatter(expot_col, expot_temp);    
     
     for (int ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];    
+
+    for (int ii = 0;  ii < expot_temp.size(); ii++ )
+      excludedPot += expot_temp[ii];    
 
     if (storageLayout_ & DataStorage::dslParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
@@ -849,6 +871,13 @@ namespace OpenMD {
       RealType ploc2 = 0.0;
       MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
       pairwisePot[ii] = ploc2;
+    }
+
+    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+      RealType ploc1 = excludedPot[ii];
+      RealType ploc2 = 0.0;
+      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      excludedPot[ii] = ploc2;
     }
 
     // Here be dragons.
@@ -1194,6 +1223,8 @@ namespace OpenMD {
 #ifdef IS_MPI
     pot_row[atom1] += RealType(0.5) *  *(idat.pot);
     pot_col[atom2] += RealType(0.5) *  *(idat.pot);
+    expot_row[atom1] += RealType(0.5) *  *(idat.excludedPot);
+    expot_col[atom2] += RealType(0.5) *  *(idat.excludedPot);
 
     atomRowData.force[atom1] += *(idat.f1);
     atomColData.force[atom2] -= *(idat.f1);
@@ -1210,6 +1241,7 @@ namespace OpenMD {
 
 #else
     pairwisePot += *(idat.pot);
+    excludedPot += *(idat.excludedPot);
 
     snap_->atomData.force[atom1] += *(idat.f1);
     snap_->atomData.force[atom2] -= *(idat.f1);

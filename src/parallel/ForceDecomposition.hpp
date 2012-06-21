@@ -84,6 +84,10 @@ namespace OpenMD {
    *  |  endif
    *  end
    * collectData                        (parallel communication)
+   * loop over i
+   * | localComputation
+   * end
+   * collectSelfData                    (parallel communication)
    *
    * ForceDecomposition provides the interface for ForceLoop to do the
    * communication steps and to iterate using the correct set of atoms
@@ -104,6 +108,7 @@ namespace OpenMD {
     virtual void collectSelfData() = 0;
     virtual potVec* getEmbeddingPotential() { return &embeddingPot; }
     virtual potVec* getPairwisePotential() { return &pairwisePot; }
+    virtual potVec* getExcludedPotential() { return &excludedPot; }
 
     // neighbor list routines
     virtual bool checkNeighborList();
@@ -164,6 +169,7 @@ namespace OpenMD {
     vector<int> idents;
     potVec pairwisePot;
     potVec embeddingPot;
+    potVec excludedPot;
 
     /** 
      * The topological distance between two atomic sites is handled

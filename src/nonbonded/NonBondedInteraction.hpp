@@ -88,6 +88,7 @@ namespace OpenMD {
     RealType* vdwMult;        /**< multiplier for van der Waals interactions */
     RealType* electroMult;    /**< multiplier for electrostatic interactions */
     potVec* pot;              /**< total potential */
+    potVec* excludedPot;      /**< potential energy excluded from the overall calculation */
     RealType* vpair;          /**< pair potential */
     bool doParticlePot;       /**< should we bother with the particle pot? */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */

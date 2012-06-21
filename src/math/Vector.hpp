@@ -73,7 +73,6 @@ namespace OpenMD {
   inline bool equal(RealType e1, RealType e2) {
     return fabs(e1 - e2) < epsilon;
   }
-
     
   /**
    * @class Vector Vector.hpp "math/Vector.hpp"
@@ -285,6 +284,23 @@ namespace OpenMD {
 	this->data_[i] = v1.data_[i] * v2.data_[i];
     }
 
+    /* replaces the elements with the absolute values of those elements */
+    inline Vector<Real, Dim>& abs() {
+      for (unsigned int i = 0; i < Dim; i++) {
+        this->data_[i] = std::abs(this->data_[i]);
+      }
+      return *this;
+    }
+    
+    /* returns the maximum value in this vector */
+    inline Real max() {
+      Real val = this->data_[0];
+      for (unsigned int i = 0; i < Dim; i++) {
+        if (this->data_[i] > val) val = this->data_[i];
+      }
+      return val;
+    }
+     
     /**
      * Sets the value of this vector to the scalar division of itself  (*this /= s ).
      * @param s the scalar value

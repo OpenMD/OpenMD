@@ -188,7 +188,7 @@ namespace OpenMD {
       hydroTensor *= PhysicalConstants::viscoConvert;
       Mat3x3d S;
       CholeskyDecomposition(hydroTensor, S);
-      
+
       Vector3d extPressure = -unitNormal * (targetPressure_ * thisArea) /
         PhysicalConstants::energyConvert;
 

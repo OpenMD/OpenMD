@@ -57,23 +57,26 @@
 using namespace QuantLib;
 namespace OpenMD {
 
-  FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info, 
-                                                           ForceManager* fm) : 
-    info_(info), forceMan_(fm), hasFlucQ_(false) {
+  FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info) : 
+    info_(info), hasFlucQ_(false), forceMan_(NULL) {
     
-    if (info_->usesFluctuatingCharges()) {
-      if (info_->getNFluctuatingCharges() > 0) {
-        
-        hasFlucQ_ = true;
-        Globals* simParams = info_->getSimParams();
-        fqParams_ = simParams->getFluctuatingChargeParameters();
-	fqConstraints_ = new FluctuatingChargeConstraints(info_);
-        
-      }
-    }
+    Globals* simParams = info_->getSimParams();
+    fqParams_ = simParams->getFluctuatingChargeParameters();
+
+  }
+
+  void FluctuatingChargePropagator::setForceManager(ForceManager* forceMan) {
+    forceMan_ = forceMan;
   }
 
   void FluctuatingChargePropagator::initialize() {
+
+    if (info_->usesFluctuatingCharges()) {
+      if (info_->getNFluctuatingCharges() > 0) {
+        hasFlucQ_ = true;
+	fqConstraints_ = new FluctuatingChargeConstraints(info_);        
+      }
+    }
 
     if (!hasFlucQ_) return;
 
@@ -100,7 +103,7 @@ namespace OpenMD {
     EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 
-    DumpStatusFunction dsf(info_);                           // we want a dump file written every iteration
+    DumpStatusFunction dsf(info_);  // we want a dump file written every iteration
 
     minim->minimize(problem, endCriteria);
     cerr << "Finished minimization\n";
@@ -111,16 +114,6 @@ namespace OpenMD {
 	cerr << atom->getType() << "\tQ Pos: " << atom->getFlucQPos() << "\n";
       }
     }
-    // std::cerr << "after minim\n";
-    // for (mol = info_->beginMolecule(i); mol != NULL; 
-    //      mol = info_->nextMolecule(i)) {
-    //   for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-    //        atom = mol->nextFluctuatingCharge(j)) {
-    //     cerr << "q = " << atom->getFlucQPos(0.0) << "\n";
-    //   }
-    // }
-
-
   }
 
 

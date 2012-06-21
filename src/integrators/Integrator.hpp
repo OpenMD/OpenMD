@@ -90,6 +90,10 @@ namespace OpenMD {
 	delete forceMan_;
       }
       forceMan_ = forceMan;
+      // forward this on:
+      if (flucQ_ != NULL) {
+        flucQ_->setForceManager(forceMan_);
+      }
     }
 
     void setVelocitizer(Velocitizer* velocitizer) {
@@ -104,6 +108,9 @@ namespace OpenMD {
         delete flucQ_;
       }            
       flucQ_ = prop;
+      if (forceMan_ != NULL) {
+        flucQ_->setForceManager(forceMan_);
+      }
     }
 
     void setRotationAlgorithm(RotationAlgorithm* algo) {

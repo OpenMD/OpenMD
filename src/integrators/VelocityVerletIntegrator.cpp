@@ -232,12 +232,12 @@ namespace OpenMD {
 
  
     if (simParams->getUseThermodynamicIntegration()) 
-      mask.set(Stats::VRAW);
+      mask.set(Stats::RAW_POTENTIAL);
 
     // if we've got restraints turned on, we'll also want a report of the
     // total harmonic restraints
     if (simParams->getUseRestraints()){
-      mask.set(Stats::VHARM);
+      mask.set(Stats::RESTRAINT_POTENTIAL);
     }
 
     if (simParams->havePrintPressureTensor() && 

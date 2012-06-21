@@ -320,8 +320,10 @@ namespace OpenMD {
     restPot = restPot_local;
 #endif
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += restPot;
-    currSnapshot_->statData[Stats::VHARM] = restPot;
+    RealType pot = currSnapshot_->getLongRangePotential();
+    pot += restPot;
+    currSnapshot_->setLongRangePotential(pot);
+    currSnapshot_->setRestraintPotential(restPot);
 
     //write out forces and current positions of restrained molecules    
     if (currSnapshot_->getTime() >= currRestTime_){

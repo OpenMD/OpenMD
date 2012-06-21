@@ -52,8 +52,14 @@ namespace OpenMD{
   RealType FluctuatingChargeObjectiveFunction::value(const DynamicVector<RealType>& x) {
     setCoor(x);
     forceMan_->calcForces();
+
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    return curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL];
+    potVec pot = curSnapshot->getLongRangePotentials();
+    potVec exPot = curSnapshot->getExcludedPotentials();  
+    cerr << "val p= " <<   pot[ELECTROSTATIC_FAMILY] << "\n";
+    cerr << "val e= " << exPot[ELECTROSTATIC_FAMILY] << "\n";
+  
+    return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
   }
   
   void FluctuatingChargeObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
@@ -63,7 +69,7 @@ namespace OpenMD{
     
     forceMan_->calcForces(); 
     fqConstraints_->applyConstraints();
-    
+    cerr << "grad\n";
     getGrad(grad);      
   }
   
@@ -78,7 +84,12 @@ namespace OpenMD{
     getGrad(grad); 
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    return curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL];
+    potVec pot = curSnapshot->getLongRangePotentials();
+    potVec exPot = curSnapshot->getExcludedPotentials();    
+    cerr << "vang p= " <<   pot[ELECTROSTATIC_FAMILY] << "\n";
+    cerr << "vang e= " << exPot[ELECTROSTATIC_FAMILY] << "\n";
+
+    return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
   }
   
   void FluctuatingChargeObjectiveFunction::setCoor(const DynamicVector<RealType> &x) const {
@@ -95,6 +106,7 @@ namespace OpenMD{
            atom = mol->nextFluctuatingCharge(j)) {
        
         atom->setFlucQPos(x[index++]);
+        cerr << "setting charge = " << x[index -1] << "\n";
       }
     }    
   }
@@ -113,8 +125,8 @@ namespace OpenMD{
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
 
-        grad[index++] = -atom->getFlucQFrc();
-
+        grad[index++] = atom->getFlucQFrc();
+        cerr << "getting grad = " << grad[index -1] << "\n";
       }
     }
   }

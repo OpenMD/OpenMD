@@ -184,6 +184,19 @@ namespace OpenMD {
       return true;
     }
 
+    /** 
+     * Returns a column vector that contains the elements from the
+     * diagonal of m in the order R(0) = m(0,0), R(1) = m(1,1), and so
+     * on.
+     */
+    Vector<Real, Dim> diagonals() const {
+      Vector<Real, Dim> result;
+      for (unsigned int i = 0; i < Dim; i++) {
+        result(i) = this->data_[i][i];
+      }
+      return result;
+    }
+
     /** Tests if this matrix is the unit matrix. */
     bool isUnitMatrix() const {
       if (!isDiagonal())

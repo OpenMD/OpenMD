@@ -50,7 +50,7 @@ namespace OpenMD {
 
   class FluctuatingChargeNVT : public FluctuatingChargePropagator {
   public:
-    FluctuatingChargeNVT(SimInfo* info, ForceManager* forceMan);
+    FluctuatingChargeNVT(SimInfo* info);
 
     int getMaxIterationNumber() {
       return maxIterNum_;
