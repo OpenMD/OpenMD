@@ -277,7 +277,10 @@ namespace OpenMD {
 	   integrableObject = mol->nextIntegrableObject(j)) {
                 
 	oldVel[index] = integrableObject->getVel();
-	oldJi[index] = integrableObject->getJ();
+
+        if (integrableObject->isDirectional())
+	   oldJi[index] = integrableObject->getJ();
+
 	++index;
       }
     }
