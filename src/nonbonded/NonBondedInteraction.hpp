@@ -132,6 +132,7 @@ namespace OpenMD {
     Mat3x3d* eFrame;        /**< pointer to electrostatic frame for atom */
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
     potVec* pot;            /**< total potential */
+    potVec* excludedPot;    /**< potential energy excluded from the overall calculation */
     bool doParticlePot;     /**< should we bother with the particle pot? */
     RealType* particlePot;  /**< contribution to potential from this particle */
     Vector3d* t;            /**< pointer to resultant torque on atom */

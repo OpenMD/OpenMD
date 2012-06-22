@@ -99,6 +99,7 @@ namespace OpenMD {
     sdat.atype = atypesLocal[atom1];
 
     sdat.pot = &embeddingPot;
+    sdat.excludedPot = &excludedSelfPot;
 
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);

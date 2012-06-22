@@ -109,6 +109,7 @@ namespace OpenMD {
     virtual potVec* getEmbeddingPotential() { return &embeddingPot; }
     virtual potVec* getPairwisePotential() { return &pairwisePot; }
     virtual potVec* getExcludedPotential() { return &excludedPot; }
+    virtual potVec* getExcludedSelfPotential() { return &excludedSelfPot; }
 
     // neighbor list routines
     virtual bool checkNeighborList();
@@ -170,6 +171,7 @@ namespace OpenMD {
     potVec pairwisePot;
     potVec embeddingPot;
     potVec excludedPot;
+    potVec excludedSelfPot;
 
     /** 
      * The topological distance between two atomic sites is handled

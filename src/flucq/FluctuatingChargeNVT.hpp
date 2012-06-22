@@ -102,6 +102,7 @@ namespace OpenMD {
     
     Snapshot* currentSnapshot_;
     Thermo thermo;
+
   };
 
 }

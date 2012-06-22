@@ -37,7 +37,6 @@ forceFieldFileName = "FQ.frc";
 cutoffMethod = "shifted_force";
 dielectric = 80.0;
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
 outputFluctuatingCharges = true;
 
 targetTemp = 300;
@@ -45,6 +44,12 @@ targetPressure = 1.0;
 
 tauThermostat = 1e3;
 tauBarostat = 1e4;
+
+flucQ {
+ targetTemp = 1.0;
+ tauThermostat = 10.0;
+}
+
 
 dt = 1.0;
 runTime = 1e4;

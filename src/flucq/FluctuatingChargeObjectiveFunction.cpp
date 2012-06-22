@@ -56,8 +56,6 @@ namespace OpenMD{
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     potVec pot = curSnapshot->getLongRangePotentials();
     potVec exPot = curSnapshot->getExcludedPotentials();  
-    cerr << "val p= " <<   pot[ELECTROSTATIC_FAMILY] << "\n";
-    cerr << "val e= " << exPot[ELECTROSTATIC_FAMILY] << "\n";
   
     return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
   }
@@ -69,7 +67,7 @@ namespace OpenMD{
     
     forceMan_->calcForces(); 
     fqConstraints_->applyConstraints();
-    cerr << "grad\n";
+
     getGrad(grad);      
   }
   
@@ -86,8 +84,6 @@ namespace OpenMD{
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     potVec pot = curSnapshot->getLongRangePotentials();
     potVec exPot = curSnapshot->getExcludedPotentials();    
-    cerr << "vang p= " <<   pot[ELECTROSTATIC_FAMILY] << "\n";
-    cerr << "vang e= " << exPot[ELECTROSTATIC_FAMILY] << "\n";
 
     return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
   }
@@ -106,7 +102,6 @@ namespace OpenMD{
            atom = mol->nextFluctuatingCharge(j)) {
        
         atom->setFlucQPos(x[index++]);
-        cerr << "setting charge = " << x[index -1] << "\n";
       }
     }    
   }
@@ -125,8 +120,7 @@ namespace OpenMD{
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
 
-        grad[index++] = atom->getFlucQFrc();
-        cerr << "getting grad = " << grad[index -1] << "\n";
+        grad[index++] = -atom->getFlucQFrc();
       }
     }
   }

@@ -11,11 +11,10 @@ component{
 
 ensemble = NVE;
 forceField = "Amber";
-electrostaticSummationMethod = "none";
-electrostaticScreeningMethod = "undamped";
-dampingAlpha = 0.25;
+cutoffMethod = "shifted_force";
+electrostaticScreeningMethod = "damped";
+dampingAlpha = 0.20;
 cutoffRadius = 9.0;
-switchingRadius = 9.0;
 
 targetTemp = 300;
 targetPressure = 1.0;

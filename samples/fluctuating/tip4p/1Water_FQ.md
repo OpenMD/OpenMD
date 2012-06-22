@@ -31,7 +31,7 @@ component{
 }
 
 flucQ {
- targetTemp = 1.0e-6;
+ targetTemp = 1.0;
  tauThermostat = 10.0;
 }
 
@@ -43,10 +43,9 @@ dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 outputFluctuatingCharges = true;
-runTime = 1e-1;
-sampleTime = 1;
+runTime = 10000;
+sampleTime = 100;
 statusTime = 1;
-resetTime = 1;
 
 targetTemp = 300;
 targetPressure = 1.0;
@@ -70,7 +69,7 @@ useInitialExtendedSystemState = "false";
     Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
     </FrameData>
     <StuntDoubles>
-         0  pvqjcw        0.0 0.0 0.0   0.0 0.0 0.0  1.0 0.0 0.0 0.0  0.0 0.0 0.0   0.0 0.0
+         0  pvqj        0.0 0.0 0.0   0.0 0.0 0.0  1.0 0.0 0.0 0.0  0.0 0.0 0.0 
     </StuntDoubles>
   </Snapshot>
 </OpenMD>

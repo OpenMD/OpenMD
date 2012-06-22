@@ -361,7 +361,8 @@ namespace OpenMD {
         vector<RealType> rvals;
         vector<RealType> J1vals;
         vector<RealType> J2vals;
-        for (int i = 0; i < np_; i++) {
+        // don't start at i = 0, as rval = 0 is undefined for the slater overlap integrals.
+        for (int i = 1; i < np_+1; i++) {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
           J1vals.push_back(electrostaticAtomData.hardness * sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromsToBohr ) );
@@ -1049,7 +1050,9 @@ namespace OpenMD {
       // indirect reaction field terms.
 
       *(idat.vpair) += indirect_vpair;
-      (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] += epot;
+      
+      (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] +=   (*(idat.sw) * vterm + 
+                                                        vFluc1 ) * q_i * q_j;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += indirect_Pot;
       *(idat.f1) += indirect_dVdr;
       
@@ -1078,7 +1081,8 @@ namespace OpenMD {
       chg1 += *(sdat.flucQ);
       // dVdFQ is really a force, so this is negative the derivative
       *(sdat.dVdFQ) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
-      cerr << "dVdFQ harmonic part = " << *(sdat.dVdFQ) << "\n";
+      (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY] += (*sdat.flucQ) * 
+        (*(sdat.flucQ) * data.hardness * 0.5 + data.electronegativity);
     }
 
     if (summationMethod_ == esm_REACTION_FIELD) {

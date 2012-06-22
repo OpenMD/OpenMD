@@ -488,6 +488,7 @@ namespace OpenMD {
     pairwisePot = 0.0;
     embeddingPot = 0.0;
     excludedPot = 0.0;
+    excludedSelfPot = 0.0;
 
 #ifdef IS_MPI
     if (storageLayout_ & DataStorage::dslForce) {
@@ -906,6 +907,12 @@ namespace OpenMD {
       RealType ploc2 = 0.0;
       MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
       embeddingPot[ii] = ploc2;
+    }    
+    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
+      RealType ploc1 = excludedSelfPot[ii];
+      RealType ploc2 = 0.0;
+      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      excludedSelfPot[ii] = ploc2;
     }    
 #endif
     

@@ -93,8 +93,6 @@ namespace OpenMD {
         atom->setFlucQVel(0.0);
       }
     }
-
-    std::cerr << "doing a minimization\n";
     
     fqConstraints_ = new FluctuatingChargeConstraints(info_);
     FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, fqConstraints_);    
@@ -106,16 +104,8 @@ namespace OpenMD {
     DumpStatusFunction dsf(info_);  // we want a dump file written every iteration
 
     minim->minimize(problem, endCriteria);
-    cerr << "Finished minimization\n";
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-	cerr << atom->getType() << "\tQ Pos: " << atom->getFlucQPos() << "\n";
-      }
-    }
-  }
 
+  }
 
   void FluctuatingChargePropagator::applyConstraints() {
     if (!hasFlucQ_) return;

@@ -676,6 +676,7 @@ namespace OpenMD {
     idat.pot = &workPot;
     idat.excludedPot = &exPot;
     sdat.pot = fDecomp_->getEmbeddingPotential();
+    sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
     idat.vpair = &vpair;
     idat.dVdFQ1 = &dVdFQ1;
     idat.dVdFQ2 = &dVdFQ2;
@@ -886,8 +887,9 @@ namespace OpenMD {
 
     //store the long range potential  
     curSnapshot->setLongRangePotential(lrPot);
-
-    curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedPotential()));
+    
+    curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
+                                         *(fDecomp_->getExcludedPotential()));
 
   }
 

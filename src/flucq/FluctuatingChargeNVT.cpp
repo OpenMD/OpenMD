@@ -45,14 +45,18 @@
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
 
+
 namespace OpenMD {
 
   FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
     FluctuatingChargePropagator(info), chiTolerance_ (1e-6), 
-    maxIterNum_(4), thermo(info), 
-    currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
-    
-    if (hasFlucQ_) {     
+    maxIterNum_(4), thermo(info),
+    currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {    
+  }
+
+  void FluctuatingChargeNVT::initialize() {
+    FluctuatingChargePropagator::initialize();  
+    if (hasFlucQ_) {
       if (info_->getSimParams()->haveDt()) {
         dt_ = info_->getSimParams()->getDt();
         dt2_ = dt_ * 0.5;
@@ -90,12 +94,8 @@ namespace OpenMD {
       } else {
         tauThermostat_ = fqParams_->getTauThermostat();
       }
-      updateSizes();
+      updateSizes(); 
     }
-  }
-
-  void FluctuatingChargeNVT::initialize() {
-    FluctuatingChargePropagator::initialize();
   }
 
 
@@ -113,7 +113,6 @@ namespace OpenMD {
     RealType integralOfChidt = currentSnapshot_->getIntegralOfChiElectronicDt();
     RealType instTemp = thermo.getElectronicTemperature();
 
-
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
@@ -122,20 +121,13 @@ namespace OpenMD {
         cvel = atom->getFlucQVel();
         cpos = atom->getFlucQPos();
         cfrc = atom->getFlucQFrc();
-        cmass = atom->getChargeMass();
-        
-	cerr << atom->getType() << "\n";
-	cerr << "Before\n";
-	cerr << "cvel: " << cvel << "\tcpos: " << cpos << "\tcfrc: " << cfrc << "\tcmass: " << cmass << "\n";
-        
+        cmass = atom->getChargeMass();       
+
 	// velocity half step
         cvel += dt2_ * cfrc / cmass - dt2_*chi*cvel;                    
         // position whole step
         cpos += dt_ * cvel;
 	
-	cerr << "After\n";
-	cerr << "cvel: " << cvel << "\tcpos: " << cpos << "\n\n";        
-
         atom->setFlucQVel(cvel);
         atom->setFlucQPos(cpos);
       }
@@ -145,14 +137,12 @@ namespace OpenMD {
       (tauThermostat_ * tauThermostat_);
 
     integralOfChidt += chi * dt2_;
-    cerr << "Move A instTemp: " << instTemp << "\n";
     currentSnapshot_->setChiElectronic(chi);
     currentSnapshot_->setIntegralOfChiElectronicDt(integralOfChidt);
        
   }
 
   void FluctuatingChargeNVT::updateSizes() {
-    if (!hasFlucQ_) return;
     oldVel_.resize(info_->getNFluctuatingCharges());
   }
 
@@ -186,7 +176,6 @@ namespace OpenMD {
     for(int k = 0; k < maxIterNum_; k++) {
       index = 0;
       instTemp = thermo.getElectronicTemperature();
-      cerr << "MoveB instTemp: " << instTemp << "\n";
       // evolve chi another half step using the temperature at t + dt/2
       prevChi = chi;
       chi = oldChi + dt2_ * (instTemp / targetTemp_ - 1.0) / 
@@ -203,7 +192,6 @@ namespace OpenMD {
           
           // velocity half step
           cvel = oldVel_[index] + dt2_ * cfrc / cmass - dt2_*chi*oldVel_[index];
-          
           atom->setFlucQVel(cvel);      
           ++index;          
         }

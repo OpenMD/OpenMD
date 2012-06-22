@@ -45,6 +45,7 @@
 
 #include "brains/SimInfo.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
 
 namespace OpenMD {
