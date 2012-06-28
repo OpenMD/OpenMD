@@ -76,7 +76,7 @@
 #include "applications/staticProps/RhoR.hpp"
 #include "applications/staticProps/AngleR.hpp"
 #include "applications/staticProps/TetrahedralityParam.hpp"
-
+#include "applications/staticProps/TetrahedralityParamZ.hpp"
 using namespace OpenMD;
 
 int main(int argc, char* argv[]){
@@ -270,6 +270,18 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+  } else if (args_info.tet_param_z_given) {
+    if (args_info.rcut_given) {	  
+      analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, 
+					 args_info.rcut_arg, 
+					 args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   } else if (args_info.bor_given){
     if (args_info.rcut_given) {
       analyser = new BOPofR(info, dumpFileName, sele1, args_info.rcut_arg,
@@ -338,7 +350,7 @@ int main(int argc, char* argv[]){
   if (args_info.step_given) {
     analyser->setStep(args_info.step_arg);
   }
-  
+ 
   analyser->process();
   
   delete analyser;    

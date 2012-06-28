@@ -180,12 +180,11 @@ namespace OpenMD {
 	
 	// Use only the 4 closest neighbors to do the rest of the work:
 	
-	int nbors =  myNeighbors.size();
-	// > 4 ? 4 : myNeighbors.size();
+	int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
 	int nang = int (0.5 * (nbors * (nbors - 1)));
 
 	rk = sd->getPos();
-
+	std::cerr<<nbors<<endl;
 	for (int i = 0; i < nbors-1; i++) {	  
 
 	  sdi = myNeighbors[i].second;
@@ -211,30 +210,33 @@ namespace OpenMD {
 
 	    // Calculates scaled Qk for each molecule using calculated angles from 4 or fewer nearest neighbors.
 	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
-	   
+	    //std::cerr<<Qk<<"\t"<<nang<<endl;
 	  }
 	}
-
+	//std::cerr<<nang<<endl;
 	if (nang > 0) {
 	  collectHistogram(Qk);
 
 	// Saves positions of StuntDoubles & neighbors with distorted coordination (low Qk value)
 	if ((Qk < 0.55) && (Qk > 0.45)) {
-
+	  //std::cerr<<Distorted_.size()<<endl;
 	  Distorted_.push_back(sd);
-
+	  //std::cerr<<Distorted_.size()<<endl;
 	  dposition = sd->getPos();
 	  //std::cerr << "distorted position \t" << dposition << "\n";
 	}
 
 	// Saves positions of StuntDoubles & neighbors with tetrahedral coordination (high Qk value)
-	if (Qk > 0.95) { 
+	if (Qk > 0.05) { 
 
 	  Tetrahedral_.push_back(sd);
 
 	  tposition = sd->getPos();
 	  //std::cerr << "tetrahedral position \t" << tposition << "\n";
 	}
+
+	//std::cerr<<Tetrahedral_.size()<<endl;
+
 
 	}
 
