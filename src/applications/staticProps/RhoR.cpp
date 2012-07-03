@@ -48,6 +48,7 @@
 #include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
 #include <math.h>
 
 namespace OpenMD {
@@ -73,9 +74,8 @@ namespace OpenMD {
   
 
   void RhoR::process() {
-    
-
-    
+   
+    Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
@@ -89,10 +89,7 @@ namespace OpenMD {
       StuntDouble* sd;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d CenterOfMass = info_->getCom();      
-      
-      
-      
+      Vector3d CenterOfMass = thermo.getCom();      
       
       if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());

@@ -78,7 +78,7 @@ namespace OpenMD {
   }
 
   void NPTi::calcVelScale() {
-    vScale = chi + eta;
+    vScale = thermostat.first + eta;
   }
 
   void NPTi::getVelScaleA(Vector3d& sc, const Vector3d& vel) {
@@ -112,9 +112,9 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     } else {
-      Mat3x3d hmat = currentSnapshot_->getHmat();
+      Mat3x3d hmat = snap->getHmat();
       hmat *= scaleFactor;
-      currentSnapshot_->setHmat(hmat);
+      snap->setHmat(hmat);
     }
 
   }
@@ -126,8 +126,7 @@ namespace OpenMD {
 
   RealType NPTi::calcConservedQuantity(){
 
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    thermostat = snap->getThermostat();
     loadEta();
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
@@ -146,11 +145,12 @@ namespace OpenMD {
     RealType barostat_kinetic;
     RealType barostat_potential;
 
-    Energy =thermo.getTotalE();
+    Energy =thermo.getTotalEnergy();
 
-    thermostat_kinetic = fkBT* tt2 * chi * chi / (2.0 * PhysicalConstants::energyConvert);
+    thermostat_kinetic = fkBT* tt2 * thermostat.first * 
+      thermostat.first / (2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_potential = fkBT* integralOfChidt / PhysicalConstants::energyConvert;
+    thermostat_potential = fkBT* thermostat.second / PhysicalConstants::energyConvert;
 
 
     barostat_kinetic = 3.0 * NkBT * tb2 * eta * eta /(2.0 * PhysicalConstants::energyConvert);
@@ -165,7 +165,7 @@ namespace OpenMD {
   }
 
   void NPTi::loadEta() {
-    Mat3x3d etaMat = currentSnapshot_->getEta();
+    Mat3x3d etaMat = snap->getBarostat();
     eta = etaMat(0,0);
     //if (fabs(etaMat(1,1) - eta) >= OpenMD::epsilon || fabs(etaMat(1,1) - eta) >= OpenMD::epsilon || !etaMat.isDiagonal()) {
     //    sprintf( painCave.errMsg,
@@ -180,6 +180,6 @@ namespace OpenMD {
     etaMat(0, 0) = eta;
     etaMat(1, 1) = eta;
     etaMat(2, 2) = eta;
-    currentSnapshot_->setEta(etaMat);
+    snap->setBarostat(etaMat);
   }
 }

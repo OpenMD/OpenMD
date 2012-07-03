@@ -63,7 +63,7 @@ namespace OpenMD {
 
   }
   void NPrT::evolveEtaA() {
-    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Mat3x3d hmat = snap->getHmat();
     RealType hz = hmat(2, 2);
     RealType Axy = hmat(0,0) * hmat(1, 1);
     RealType sx = -hz * (press(0, 0) - targetPressure/PhysicalConstants::pressureConvert);
@@ -75,7 +75,7 @@ namespace OpenMD {
   }
 
   void NPrT::evolveEtaB() {
-    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Mat3x3d hmat = snap->getHmat();
     RealType hz = hmat(2, 2);
     RealType Axy = hmat(0,0) * hmat(1, 1);
     prevEta = eta;
@@ -94,7 +94,7 @@ namespace OpenMD {
 	vScale(i, j) = eta(i, j);
 
 	if (i == j) {
-	  vScale(i, j) += chi;
+	  vScale(i, j) += thermostat.first;
 	}
       }
     }
@@ -121,9 +121,9 @@ namespace OpenMD {
     scaleMat(0, 0) = exp(dt*eta(0, 0));
     scaleMat(1, 1) = exp(dt*eta(1, 1));    
     scaleMat(2, 2) = exp(dt*eta(2, 2));
-    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Mat3x3d hmat = snap->getHmat();
     hmat = hmat *scaleMat;
-    currentSnapshot_->setHmat(hmat);
+    snap->setHmat(hmat);
 
   }
 
@@ -142,9 +142,7 @@ namespace OpenMD {
   }
 
   RealType NPrT::calcConservedQuantity(){
-
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    thermostat = snap->getThermostat();
     loadEta();
     
     // We need NkBT a lot, so just set it here: This is the RAW number
@@ -158,11 +156,11 @@ namespace OpenMD {
     fkBT = info_->getNdf()*PhysicalConstants::kB *targetTemp;    
     
 
-    RealType totalEnergy = thermo.getTotalE();
+    RealType totalEnergy = thermo.getTotalEnergy();
 
-    RealType thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * PhysicalConstants::energyConvert);
+    RealType thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /(2.0 * PhysicalConstants::energyConvert);
 
-    RealType thermostat_potential = fkBT* integralOfChidt / PhysicalConstants::energyConvert;
+    RealType thermostat_potential = fkBT* thermostat.second / PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     RealType trEta = tmp.trace();
@@ -171,7 +169,7 @@ namespace OpenMD {
 
     RealType barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
 
-    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Mat3x3d hmat = snap->getHmat();
     RealType hz = hmat(2, 2);
     RealType area = hmat(0,0) * hmat(1, 1);
 
@@ -183,7 +181,7 @@ namespace OpenMD {
   }
 
   void NPrT::loadEta() {
-    eta= currentSnapshot_->getEta();
+    eta= snap->getBarostat();
 
     //if (!eta.isDiagonal()) {
     //    sprintf( painCave.errMsg,
@@ -194,7 +192,7 @@ namespace OpenMD {
   }
 
   void NPrT::saveEta() {
-    currentSnapshot_->setEta(eta);
+    snap->setBarostat(eta);
   }
 
 }

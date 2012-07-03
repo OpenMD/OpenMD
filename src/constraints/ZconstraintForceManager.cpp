@@ -436,6 +436,7 @@ namespace OpenMD {
     Vector3d force(0.0);
     Vector3d com;
     RealType totalFZ_local = 0;
+    RealType lrPot;
     std::list<ZconstraintMol>::iterator i;
     StuntDouble* integrableObject;
     Molecule::IntegrableObjectIterator ii;
@@ -446,7 +447,9 @@ namespace OpenMD {
       RealType resPos = usingSMD_? i->cantPos : i->param.zTargetPos;
       RealType diff = com[whichDirection] - resPos; 
       RealType harmonicU = 0.5 * i->param.kz * diff * diff;
-      currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += harmonicU;
+      lrPot = currSnapshot_->getLongRangePotential();
+      lrPot += harmonicU;
+      currSnapshot_->setLongRangePotential(lrPot);
       RealType harmonicF = -i->param.kz * diff;
       totalFZ_local += harmonicF;
 

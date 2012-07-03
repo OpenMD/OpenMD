@@ -449,8 +449,23 @@ namespace OpenMD {
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
     
-    // forces are zeroed here, before any are accumulated.
+    // forces and potentials are zeroed here, before any are
+    // accumulated.
     
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    snap->setBondPotential(0.0);
+    snap->setBendPotential(0.0);
+    snap->setTorsionPotential(0.0);
+    snap->setInversionPotential(0.0);
+
+    potVec zeroPot(0.0);
+    snap->setLongRangePotential(zeroPot);
+    snap->setExcludedPotentials(zeroPot);
+
+    snap->setRestraintPotential(0.0);
+    snap->setRawPotential(0.0);
+
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
       for(atom = mol->beginAtom(ai); atom != NULL; 
@@ -608,10 +623,10 @@ namespace OpenMD {
     curSnapshot->setTorsionPotential(torsionPotential);
     curSnapshot->setInversionPotential(inversionPotential);
     
-    RealType shortRangePotential = bondPotential + bendPotential + 
-      torsionPotential +  inversionPotential;    
+    // RealType shortRangePotential = bondPotential + bendPotential + 
+    //   torsionPotential +  inversionPotential;    
 
-    curSnapshot->setShortRangePotential(shortRangePotential);
+    // curSnapshot->setShortRangePotential(shortRangePotential);
   }
   
   void ForceManager::longRangeInteractions() {
@@ -881,12 +896,12 @@ namespace OpenMD {
     longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
       *(fDecomp_->getPairwisePotential());
 
-    curSnapshot->setLongRangePotentialFamilies(longRangePotential);
+    curSnapshot->setLongRangePotential(longRangePotential);
 
-    lrPot = longRangePotential.sum();
+    // lrPot = longRangePotential.sum();
 
-    //store the long range potential  
-    curSnapshot->setLongRangePotential(lrPot);
+    // //store the long range potential  
+    // curSnapshot->setLongRangePotential(lrPot);
     
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                          *(fDecomp_->getExcludedPotential()));
@@ -900,7 +915,7 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    
+   
     // collect the atomic forces onto rigid bodies
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 

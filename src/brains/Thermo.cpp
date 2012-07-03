@@ -51,417 +51,383 @@
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
+#include "math/ConvexHull.hpp"
+#include "math/AlphaHull.hpp"
 
+using namespace std;
 namespace OpenMD {
 
-  RealType Thermo::getKinetic() {
-    SimInfo::MoleculeIterator miter;
-    std::vector<StuntDouble*>::iterator iiter;
-    Molecule* mol;
-    StuntDouble* integrableObject;    
-    Vector3d vel;
-    Vector3d angMom;
-    Mat3x3d I;
-    int i;
-    int j;
-    int k;
-    RealType mass;
-    RealType kinetic = 0.0;
-    RealType kinetic_global = 0.0;
-    
-    for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
-	   integrableObject = mol->nextIntegrableObject(iiter)) {
-        
-	mass = integrableObject->getMass();
-	vel = integrableObject->getVel();
-        
-	kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
-        
-	if (integrableObject->isDirectional()) {
-	  angMom = integrableObject->getJ();
-	  I = integrableObject->getI();
+  RealType Thermo::getTranslationalKinetic() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
-	  if (integrableObject->isLinear()) {
-	    i = integrableObject->linearAxis();
-	    j = (i + 1) % 3;
-	    k = (i + 2) % 3;
-	    kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
-	  } else {                        
-	    kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1) 
-	      + angMom[2]*angMom[2]/I(2, 2);
-	  }
-	}
-            
+    if (!snap->hasTranslationalKineticEnergy) {
+      SimInfo::MoleculeIterator miter;
+      vector<StuntDouble*>::iterator iiter;
+      Molecule* mol;
+      StuntDouble* sd;    
+      Vector3d vel;
+      RealType mass;
+      RealType kinetic(0.0);
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
+        
+        for (sd = mol->beginIntegrableObject(iiter); sd != NULL; 
+             sd = mol->nextIntegrableObject(iiter)) {
+          
+          mass = sd->getMass();
+          vel = sd->getVel();
+          
+          kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
+          
+        }
       }
-    }
-    
+      
 #ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &kinetic, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+#endif
+      
+      kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+      
+      
+      snap->setTranslationalKineticEnergy(kinetic);
+    }
+    return snap->getTranslationalKineticEnergy();
+  }
 
-    MPI_Allreduce(&kinetic, &kinetic_global, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    kinetic = kinetic_global;
+  RealType Thermo::getRotationalKinetic() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
-#endif //is_mpi
+    if (!snap->hasRotationalKineticEnergy) {
+      SimInfo::MoleculeIterator miter;
+      vector<StuntDouble*>::iterator iiter;
+      Molecule* mol;
+      StuntDouble* sd;    
+      Vector3d angMom;
+      Mat3x3d I;
+      int i, j, k;
+      RealType kinetic(0.0);
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
+        
+        for (sd = mol->beginIntegrableObject(iiter); sd != NULL; 
+             sd = mol->nextIntegrableObject(iiter)) {
+          
+          if (sd->isDirectional()) {
+            angMom = sd->getJ();
+            I = sd->getI();
+            
+            if (sd->isLinear()) {
+              i = sd->linearAxis();
+              j = (i + 1) % 3;
+              k = (i + 2) % 3;
+              kinetic += angMom[j] * angMom[j] / I(j, j) 
+                + angMom[k] * angMom[k] / I(k, k);
+            } else {                        
+              kinetic += angMom[0]*angMom[0]/I(0, 0) 
+                + angMom[1]*angMom[1]/I(1, 1) 
+                + angMom[2]*angMom[2]/I(2, 2);
+            }
+          }           
+        }
+      }
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &kinetic, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+#endif
+      
+      kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+           
+      snap->setRotationalKineticEnergy(kinetic);
+    }
+    return snap->getRotationalKineticEnergy();
+  }
 
-    kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+      
 
-    return kinetic;
+  RealType Thermo::getKinetic() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasKineticEnergy) {
+      RealType ke = getTranslationalKinetic() + getRotationalKinetic();
+      snap->setKineticEnergy(ke);
+    }
+    return snap->getKineticEnergy();
   }
 
   RealType Thermo::getPotential() {
-    RealType potential = 0.0;
 
-    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    potential = curSnapshot->getShortRangePotential() + curSnapshot->getLongRangePotential();
-    return potential;
+    // ForceManager computes the potential and stores it in the
+    // Snapshot.  All we have to do is report it.
+
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    return snap->getPotentialEnergy();
   }
 
-  RealType Thermo::getTotalE() {
-    RealType total;
+  RealType Thermo::getTotalEnergy() {
 
-    total = this->getKinetic() + this->getPotential();
-    return total;
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasTotalEnergy) {
+      snap->setTotalEnergy(this->getKinetic() + this->getPotential());
+    }
+
+    return snap->getTotalEnergy();
   }
 
   RealType Thermo::getTemperature() {
+
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasTemperature) {
+
+      RealType temperature = ( 2.0 * this->getKinetic() ) 
+        / (info_->getNdf()* PhysicalConstants::kb );
+
+      snap->setTemperature(temperature);
+    }
     
-    RealType temperature = ( 2.0 * this->getKinetic() ) / (info_->getNdf()* PhysicalConstants::kb );
-    return temperature;
+    return snap->getTemperature();
   }
 
   RealType Thermo::getElectronicTemperature() {
-    SimInfo::MoleculeIterator miter;
-    std::vector<Atom*>::iterator iiter;
-    Molecule* mol;
-    Atom* atom;    
-    RealType cvel;
-    RealType cmass;
-    RealType kinetic = 0.0;
-    RealType kinetic_global = 0.0;
-    
-    for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
-      for (atom = mol->beginFluctuatingCharge(iiter); atom != NULL; 
-	   atom = mol->nextFluctuatingCharge(iiter)) {
-        cmass = atom->getChargeMass();
-        cvel = atom->getFlucQVel();
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasElectronicTemperature) {
+      
+      SimInfo::MoleculeIterator miter;
+      vector<Atom*>::iterator iiter;
+      Molecule* mol;
+      Atom* atom;    
+      RealType cvel;
+      RealType cmass;
+      RealType kinetic(0.0);
+      RealType eTemp;
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
         
-        kinetic += cmass * cvel * cvel;
-        
+        for (atom = mol->beginFluctuatingCharge(iiter); atom != NULL; 
+             atom = mol->nextFluctuatingCharge(iiter)) {
+          
+          cmass = atom->getChargeMass();
+          cvel = atom->getFlucQVel();
+          
+          kinetic += cmass * cvel * cvel;
+          
+        }
       }
-    }
     
 #ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &kinetic, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+#endif
 
-    MPI_Allreduce(&kinetic, &kinetic_global, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    kinetic = kinetic_global;
+      kinetic *= 0.5;
+      eTemp =  (2.0 * kinetic) / 
+        (info_->getNFluctuatingCharges() * PhysicalConstants::kb );
+     
+      snap->setElectronicTemperature(eTemp);
+    }
 
-#endif //is_mpi
-
-    kinetic = kinetic * 0.5;
-    return ( 2.0 * kinetic) / (info_->getNFluctuatingCharges()* PhysicalConstants::kb );    
+    return snap->getElectronicTemperature();
   }
-
-
 
 
   RealType Thermo::getVolume() { 
-    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    return curSnapshot->getVolume();
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    return snap->getVolume();
   }
 
   RealType Thermo::getPressure() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // Relies on the calculation of the full molecular pressure tensor
-
-
-    Mat3x3d tensor;
-    RealType pressure;
-
-    tensor = getPressureTensor();
-
-    pressure = PhysicalConstants::pressureConvert * (tensor(0, 0) + tensor(1, 1) + tensor(2, 2)) / 3.0;
-
-    return pressure;
-  }
-
-  RealType Thermo::getPressure(int direction) {
-
-    // Relies on the calculation of the full molecular pressure tensor
-
-	  
-    Mat3x3d tensor;
-    RealType pressure;
-
-    tensor = getPressureTensor();
-
-    pressure = PhysicalConstants::pressureConvert * tensor(direction, direction);
-
-    return pressure;
+    if (!snap->hasPressure) {
+      // Relies on the calculation of the full molecular pressure tensor
+      
+      Mat3x3d tensor;
+      RealType pressure;
+      
+      tensor = getPressureTensor();
+      
+      pressure = PhysicalConstants::pressureConvert * 
+        (tensor(0, 0) + tensor(1, 1) + tensor(2, 2)) / 3.0;
+      
+      snap->setPressure(pressure);
+    }
+    
+    return snap->getPressure();    
   }
 
   Mat3x3d Thermo::getPressureTensor() {
     // returns pressure tensor in units amu*fs^-2*Ang^-1
     // routine derived via viral theorem description in:
     // Paci, E. and Marchi, M. J.Phys.Chem. 1996, 100, 4314-4322
-    Mat3x3d pressureTensor;
-    Mat3x3d p_local(0.0);
-    Mat3x3d p_global(0.0);
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    SimInfo::MoleculeIterator i;
-    std::vector<StuntDouble*>::iterator j;
-    Molecule* mol;
-    StuntDouble* integrableObject;    
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
-	   integrableObject = mol->nextIntegrableObject(j)) {
+    if (!snap->hasPressureTensor) {
 
-	RealType mass = integrableObject->getMass();
-	Vector3d vcom = integrableObject->getVel();
-	p_local += mass * outProduct(vcom, vcom);         
-      }
-    }
-    
-#ifdef IS_MPI
-    MPI_Allreduce(p_local.getArrayPointer(), p_global.getArrayPointer(), 9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-#else
-    p_global = p_local;
-#endif // is_mpi
-
-    RealType volume = this->getVolume();
-    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    Mat3x3d stressTensor = curSnapshot->getStressTensor();
-
-    pressureTensor =  (p_global + 
-                       PhysicalConstants::energyConvert * stressTensor)/volume;
-    
-    return pressureTensor;
-  }
-
-
-  void Thermo::saveStat(){
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    Stats& stat = currSnapshot->statData;
-    
-    stat[Stats::KINETIC_ENERGY] = getKinetic();
-    stat[Stats::POTENTIAL_ENERGY] = getPotential();
-    stat[Stats::TOTAL_ENERGY] = stat[Stats::KINETIC_ENERGY]  + stat[Stats::POTENTIAL_ENERGY] ;
-    stat[Stats::TEMPERATURE] = getTemperature();
-    stat[Stats::PRESSURE] = getPressure();
-    stat[Stats::VOLUME] = getVolume();      
-
-    Mat3x3d tensor =getPressureTensor();
-    stat[Stats::PRESSURE_TENSOR_XX] = tensor(0, 0);      
-    stat[Stats::PRESSURE_TENSOR_XY] = tensor(0, 1);      
-    stat[Stats::PRESSURE_TENSOR_XZ] = tensor(0, 2);      
-    stat[Stats::PRESSURE_TENSOR_YX] = tensor(1, 0);      
-    stat[Stats::PRESSURE_TENSOR_YY] = tensor(1, 1);      
-    stat[Stats::PRESSURE_TENSOR_YZ] = tensor(1, 2);      
-    stat[Stats::PRESSURE_TENSOR_ZX] = tensor(2, 0);      
-    stat[Stats::PRESSURE_TENSOR_ZY] = tensor(2, 1);      
-    stat[Stats::PRESSURE_TENSOR_ZZ] = tensor(2, 2);      
-
-    // grab the simulation box dipole moment if specified
-    if (info_->getCalcBoxDipole()){
-      Vector3d totalDipole = getBoxDipole();
-      stat[Stats::BOX_DIPOLE_X] = totalDipole(0);
-      stat[Stats::BOX_DIPOLE_Y] = totalDipole(1);
-      stat[Stats::BOX_DIPOLE_Z] = totalDipole(2);
-    }
-
-    Globals* simParams = info_->getSimParams();
-    // grab the heat flux if desired
-    if (simParams->havePrintHeatFlux()) {
-      if (simParams->getPrintHeatFlux()){
-        Vector3d heatFlux = getHeatFlux();
-        stat[Stats::HEATFLUX_X] = heatFlux(0);
-        stat[Stats::HEATFLUX_Y] = heatFlux(1);
-        stat[Stats::HEATFLUX_Z] = heatFlux(2);
-      }
-    }
-
-    if (simParams->haveTaggedAtomPair() && 
-        simParams->havePrintTaggedPairDistance()) {
-      if ( simParams->getPrintTaggedPairDistance()) {
-        
-        std::pair<int, int> tap = simParams->getTaggedAtomPair();
-        Vector3d pos1, pos2, rab;
-
-#ifdef IS_MPI        
-        std::cerr << "tap = " << tap.first << "  " << tap.second << std::endl;
-
-	int mol1 = info_->getGlobalMolMembership(tap.first);
-	int mol2 = info_->getGlobalMolMembership(tap.second);
-        std::cerr << "mols = " << mol1 << " " << mol2 << std::endl;
-
-        int proc1 = info_->getMolToProc(mol1);
-        int proc2 = info_->getMolToProc(mol2);
-
-        std::cerr << " procs = " << proc1 << " " <<proc2 <<std::endl;
-
-	RealType data[3];
-        if (proc1 == worldRank) {
-          StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
-          std::cerr << " on proc " << proc1 << ", sd1 has global index= " << sd1->getGlobalIndex() << std::endl;
-          pos1 = sd1->getPos();
-          data[0] = pos1.x();
-          data[1] = pos1.y();
-          data[2] = pos1.z();          
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
-        } else {
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
-          pos1 = Vector3d(data);
-        }
-
-
-        if (proc2 == worldRank) {
-          StuntDouble* sd2 = info_->getIOIndexToIntegrableObject(tap.second);
-          std::cerr << " on proc " << proc2 << ", sd2 has global index= " << sd2->getGlobalIndex() << std::endl;
-          pos2 = sd2->getPos();
-          data[0] = pos2.x();
-          data[1] = pos2.y();
-          data[2] = pos2.z();          
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
-        } else {
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
-          pos2 = Vector3d(data);
-        }
-#else
-        StuntDouble* at1 = info_->getIOIndexToIntegrableObject(tap.first);
-        StuntDouble* at2 = info_->getIOIndexToIntegrableObject(tap.second);
-        pos1 = at1->getPos();
-        pos2 = at2->getPos();
-#endif        
-        rab = pos2 - pos1;
-        currSnapshot->wrapVector(rab);
-        stat[Stats::TAGGED_PAIR_DISTANCE] =  rab.length();
-      }
-    }
+      Mat3x3d pressureTensor;
+      Mat3x3d p_tens(0.0);
+      RealType mass;
+      Vector3d vcom;
       
-    /**@todo need refactorying*/
-    //Conserved Quantity is set by integrator and time is set by setTime
-    
+      SimInfo::MoleculeIterator i;
+      vector<StuntDouble*>::iterator j;
+      Molecule* mol;
+      StuntDouble* sd;    
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        for (sd = mol->beginIntegrableObject(j); sd != NULL; 
+             sd = mol->nextIntegrableObject(j)) {
+          
+          mass = sd->getMass();
+          vcom = sd->getVel();
+          p_tens += mass * outProduct(vcom, vcom);         
+        }
+      }
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, p_tens.getArrayPointer(), 9, 
+                                MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      RealType volume = this->getVolume();
+      Mat3x3d stressTensor = snap->getStressTensor();
+      
+      pressureTensor =  (p_tens + 
+                         PhysicalConstants::energyConvert * stressTensor)/volume;
+      
+      snap->setPressureTensor(pressureTensor);
+    }
+    return snap->getPressureTensor();
   }
 
 
-  Vector3d Thermo::getBoxDipole() {
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    SimInfo::MoleculeIterator miter;
-    std::vector<Atom*>::iterator aiter;
-    Molecule* mol;
-    Atom* atom;
-    RealType charge;
-    RealType moment(0.0);
-    Vector3d ri(0.0);
-    Vector3d dipoleVector(0.0);
-    Vector3d nPos(0.0);
-    Vector3d pPos(0.0);
-    RealType nChg(0.0);
-    RealType pChg(0.0);
-    int nCount = 0;
-    int pCount = 0;
 
-    RealType chargeToC = 1.60217733e-19;
-    RealType angstromToM = 1.0e-10;
-    RealType debyeToCm = 3.33564095198e-30;
-    
-    for (mol = info_->beginMolecule(miter); mol != NULL; 
-         mol = info_->nextMolecule(miter)) {
 
-      for (atom = mol->beginAtom(aiter); atom != NULL;
-           atom = mol->nextAtom(aiter)) {
+  Vector3d Thermo::getSystemDipole() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasSystemDipole) {
+      SimInfo::MoleculeIterator miter;
+      vector<Atom*>::iterator aiter;
+      Molecule* mol;
+      Atom* atom;
+      RealType charge;
+      RealType moment(0.0);
+      Vector3d ri(0.0);
+      Vector3d dipoleVector(0.0);
+      Vector3d nPos(0.0);
+      Vector3d pPos(0.0);
+      RealType nChg(0.0);
+      RealType pChg(0.0);
+      int nCount = 0;
+      int pCount = 0;
+      
+      RealType chargeToC = 1.60217733e-19;
+      RealType angstromToM = 1.0e-10;
+      RealType debyeToCm = 3.33564095198e-30;
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
         
-        if (atom->isCharge() ) {
+        for (atom = mol->beginAtom(aiter); atom != NULL;
+             atom = mol->nextAtom(aiter)) {
+          
           charge = 0.0;
-          GenericData* data = atom->getAtomType()->getPropertyByName("Charge");
-          if (data != NULL) {
-
-            charge = (dynamic_cast<DoubleGenericData*>(data))->getData();
-            charge *= chargeToC;
-
-            ri = atom->getPos();
-            currSnapshot->wrapVector(ri);
-            ri *= angstromToM;
-
-            if (charge < 0.0) {
-              nPos += ri;
-              nChg -= charge;
-              nCount++;
-            } else if (charge > 0.0) {
-              pPos += ri;
-              pChg += charge;
-              pCount++;
-            }                       
+          
+          FixedChargeAdapter fca = FixedChargeAdapter(atom->getAtomType());
+          if ( fca.isFixedCharge() ) {
+            charge = fca.getCharge();
+          }
+          
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atom->getAtomType());
+          if ( fqa.isFluctuatingCharge() ) {
+            charge += atom->getFlucQPos();
+          }
+          
+          charge *= chargeToC;
+          
+          ri = atom->getPos();
+          snap->wrapVector(ri);
+          ri *= angstromToM;
+          
+          if (charge < 0.0) {
+            nPos += ri;
+            nChg -= charge;
+            nCount++;
+          } else if (charge > 0.0) {
+            pPos += ri;
+            pChg += charge;
+            pCount++;
+          }
+          
+          MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
+          if (ma.isDipole() ) {
+            Vector3d u_i = atom->getElectroFrame().getColumn(2);
+            moment = ma.getDipoleMoment();
+            moment *= debyeToCm;
+            dipoleVector += u_i * moment;
           }
         }
-        
-        MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
-        if (ma.isDipole() ) {
-          Vector3d u_i = atom->getElectroFrame().getColumn(2);
-          moment = ma.getDipoleMoment();
-          moment *= debyeToCm;
-          dipoleVector += u_i * moment;
-        }
       }
-    }
-    
-                       
+      
+      
 #ifdef IS_MPI
-    RealType pChg_global, nChg_global;
-    int pCount_global, nCount_global;
-    Vector3d pPos_global, nPos_global, dipVec_global;
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pChg, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &nChg, 1, MPI::REALTYPE, 
+                                MPI::SUM);
 
-    MPI_Allreduce(&pChg, &pChg_global, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    pChg = pChg_global;
-    MPI_Allreduce(&nChg, &nChg_global, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    nChg = nChg_global;
-    MPI_Allreduce(&pCount, &pCount_global, 1, MPI_INTEGER, MPI_SUM,
-                  MPI_COMM_WORLD);
-    pCount = pCount_global;
-    MPI_Allreduce(&nCount, &nCount_global, 1, MPI_INTEGER, MPI_SUM,
-                  MPI_COMM_WORLD);
-    nCount = nCount_global;
-    MPI_Allreduce(pPos.getArrayPointer(), pPos_global.getArrayPointer(), 3, 
-                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    pPos = pPos_global;
-    MPI_Allreduce(nPos.getArrayPointer(), nPos_global.getArrayPointer(), 3, 
-                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    nPos = nPos_global;
-    MPI_Allreduce(dipoleVector.getArrayPointer(), 
-                  dipVec_global.getArrayPointer(), 3, 
-                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    dipoleVector = dipVec_global;
-#endif //is_mpi
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pCount, 1, MPI::INTEGER, 
+                                MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &nCount, 1, MPI::INTEGER, 
+                                MPI::SUM);
 
-    // first load the accumulated dipole moment (if dipoles were present)
-    Vector3d boxDipole = dipoleVector;
-    // now include the dipole moment due to charges
-    // use the lesser of the positive and negative charge totals
-    RealType chg_value = nChg <= pChg ? nChg : pChg;
-       
-    // find the average positions
-    if (pCount > 0 && nCount > 0 ) {
-      pPos /= pCount;
-      nPos /= nCount;
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, pPos.getArrayPointer(), 3, 
+                                MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, nPos.getArrayPointer(), 3, 
+                                MPI::REALTYPE, MPI::SUM);
+
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, dipoleVector.getArrayPointer(),
+                                3, MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      // first load the accumulated dipole moment (if dipoles were present)
+      Vector3d boxDipole = dipoleVector;
+      // now include the dipole moment due to charges
+      // use the lesser of the positive and negative charge totals
+      RealType chg_value = nChg <= pChg ? nChg : pChg;
+      
+      // find the average positions
+      if (pCount > 0 && nCount > 0 ) {
+        pPos /= pCount;
+        nPos /= nCount;
+      }
+      
+      // dipole is from the negative to the positive (physics notation)
+      boxDipole += (pPos - nPos) * chg_value;
+      snap->setSystemDipole(boxDipole);
     }
 
-    // dipole is from the negative to the positive (physics notation)
-    boxDipole += (pPos - nPos) * chg_value;
-
-    return boxDipole;
+    return snap->getSystemDipole();
   }
 
   // Returns the Heat Flux Vector for the system
   Vector3d Thermo::getHeatFlux(){
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     SimInfo::MoleculeIterator miter;
-    std::vector<StuntDouble*>::iterator iiter;
+    vector<StuntDouble*>::iterator iiter;
     Molecule* mol;
-    StuntDouble* integrableObject;    
+    StuntDouble* sd;    
     RigidBody::AtomIterator ai; 
     Atom* atom;       
     Vector3d vel;
@@ -484,41 +450,42 @@ namespace OpenMD {
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
       
-      for (integrableObject = mol->beginIntegrableObject(iiter); 
-           integrableObject != NULL; 
-	   integrableObject = mol->nextIntegrableObject(iiter)) {
+      for (sd = mol->beginIntegrableObject(iiter); 
+           sd != NULL; 
+	   sd = mol->nextIntegrableObject(iiter)) {
         
-	mass = integrableObject->getMass();
-	vel = integrableObject->getVel();
+	mass = sd->getMass();
+	vel = sd->getVel();
 
 	kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
         
-	if (integrableObject->isDirectional()) {
-	  angMom = integrableObject->getJ();
-	  I = integrableObject->getI();
+	if (sd->isDirectional()) {
+	  angMom = sd->getJ();
+	  I = sd->getI();
 
-	  if (integrableObject->isLinear()) {
-	    i = integrableObject->linearAxis();
+	  if (sd->isLinear()) {
+	    i = sd->linearAxis();
 	    j = (i + 1) % 3;
 	    k = (i + 2) % 3;
-	    kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+	    kinetic += angMom[j] * angMom[j] / I(j, j) 
+              + angMom[k] * angMom[k] / I(k, k);
 	  } else {                        
-	    kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1) 
+	    kinetic += angMom[0]*angMom[0]/I(0, 0) 
+              + angMom[1]*angMom[1]/I(1, 1) 
 	      + angMom[2]*angMom[2]/I(2, 2);
 	  }
 	}
 
         potential = 0.0;
 
-        if (integrableObject->isRigidBody()) {
-          RigidBody* rb = dynamic_cast<RigidBody*>(integrableObject);
+        if (sd->isRigidBody()) {
+          RigidBody* rb = dynamic_cast<RigidBody*>(sd);
           for (atom = rb->beginAtom(ai); atom != NULL; 
                atom = rb->nextAtom(ai)) {
             potential +=  atom->getParticlePot();
           }          
         } else {
-          potential = integrableObject->getParticlePot();
-          cerr << "ppot = "  << potential << "\n";
+          potential = sd->getParticlePot();
         }
 
         potential *= PhysicalConstants::energyConvert; // amu A^2/fs^2
@@ -530,11 +497,9 @@ namespace OpenMD {
       }
     }
 
-    std::cerr << "Heat flux heatFluxJc is: " << heatFluxJc << std::endl;
-
-    /* The J_v vector is reduced in fortan so everyone has the global
-     *  Jv. Jc is computed over the local atoms and must be reduced
-     *  among all processors.
+    /* The J_v vector is reduced in the forceManager so everyone has
+     *  the global Jv. Jc is computed over the local atoms and must be
+     *  reduced among all processors.
      */
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &heatFluxJc[0], 3, MPI::REALTYPE, 
@@ -545,11 +510,397 @@ namespace OpenMD {
 
     Vector3d heatFluxJv = currSnapshot->getConductiveHeatFlux() * 
       PhysicalConstants::energyConvert;
-    
-    std::cerr << "Heat flux Jc is: " << heatFluxJc << std::endl;
-    std::cerr << "Heat flux Jv is: " << heatFluxJv << std::endl;
-    
+        
     // Correct for the fact the flux is 1/V (Jc + Jv)
     return (heatFluxJv + heatFluxJc) / this->getVolume(); // amu / fs^3 
   }
-} //end namespace OpenMD
+
+
+  Vector3d Thermo::getComVel(){ 
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasCOMvel) {
+
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      Vector3d comVel(0.0);
+      RealType totalMass(0.0);
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        RealType mass = mol->getMass();
+        totalMass += mass;
+        comVel += mass * mol->getComVel();
+      }  
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalMass, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, comVel.getArrayPointer(), 3, 
+                                MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      comVel /= totalMass;
+      snap->setCOMvel(comVel);
+    }
+    return snap->getCOMvel();
+  }
+
+  Vector3d Thermo::getCom(){ 
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasCOM) {
+      
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      Vector3d com(0.0);
+      RealType totalMass(0.0);
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        RealType mass = mol->getMass();
+        totalMass += mass;
+        com += mass * mol->getCom();
+      }  
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalMass, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, com.getArrayPointer(), 3, 
+                                MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      com /= totalMass;
+      snap->setCOM(com);
+    }
+    return snap->getCOM();
+  }        
+
+  /** 
+   * Returns center of mass and center of mass velocity in one
+   * function call.
+   */   
+  void Thermo::getComAll(Vector3d &com, Vector3d &comVel){ 
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!(snap->hasCOM && snap->hasCOMvel)) {
+
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      RealType totalMass(0.0);
+      
+      com = 0.0;
+      comVel = 0.0;
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        RealType mass = mol->getMass();
+        totalMass += mass;
+        com += mass * mol->getCom();
+        comVel += mass * mol->getComVel();           
+      }  
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalMass, 1, MPI::REALTYPE, 
+                                MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, com.getArrayPointer(), 3, 
+                                MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, comVel.getArrayPointer(), 3, 
+                                MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      com /= totalMass;
+      comVel /= totalMass;
+      snap->setCOM(com);
+      snap->setCOMvel(comVel);
+    }    
+    com = snap->getCOM();
+    comVel = snap->getCOMvel();
+    return;
+  }        
+   
+  /**
+   * Return intertia tensor for entire system and angular momentum
+   * Vector.
+   *
+   *
+   *
+   *    [  Ixx -Ixy  -Ixz ]
+   * I =| -Iyx  Iyy  -Iyz |
+   *    [ -Izx -Iyz   Izz ]
+   */
+  void Thermo::getInertiaTensor(Mat3x3d &inertiaTensor, 
+                                Vector3d &angularMomentum){
+
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!(snap->hasInertiaTensor && snap->hasCOMw)) {
+       
+      RealType xx = 0.0;
+      RealType yy = 0.0;
+      RealType zz = 0.0;
+      RealType xy = 0.0;
+      RealType xz = 0.0;
+      RealType yz = 0.0;
+      Vector3d com(0.0);
+      Vector3d comVel(0.0);
+      
+      getComAll(com, comVel);
+      
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      Vector3d thisq(0.0);
+      Vector3d thisv(0.0);
+      
+      RealType thisMass = 0.0;
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        thisq = mol->getCom()-com;
+        thisv = mol->getComVel()-comVel;
+        thisMass = mol->getMass();
+        // Compute moment of intertia coefficients.
+        xx += thisq[0]*thisq[0]*thisMass;
+        yy += thisq[1]*thisq[1]*thisMass;
+        zz += thisq[2]*thisq[2]*thisMass;
+        
+        // compute products of intertia
+        xy += thisq[0]*thisq[1]*thisMass;
+        xz += thisq[0]*thisq[2]*thisMass;
+        yz += thisq[1]*thisq[2]*thisMass;
+        
+        angularMomentum += cross( thisq, thisv ) * thisMass;            
+      }
+      
+      inertiaTensor(0,0) = yy + zz;
+      inertiaTensor(0,1) = -xy;
+      inertiaTensor(0,2) = -xz;
+      inertiaTensor(1,0) = -xy;
+      inertiaTensor(1,1) = xx + zz;
+      inertiaTensor(1,2) = -yz;
+      inertiaTensor(2,0) = -xz;
+      inertiaTensor(2,1) = -yz;
+      inertiaTensor(2,2) = xx + yy;
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, inertiaTensor.getArrayPointer(),
+                                9, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, 
+                                angularMomentum.getArrayPointer(), 3,
+                                MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      snap->setCOMw(angularMomentum);
+      snap->setInertiaTensor(inertiaTensor);
+    }
+    
+    angularMomentum = snap->getCOMw();
+    inertiaTensor = snap->getInertiaTensor();
+    
+    return;
+  }
+
+  // Returns the angular momentum of the system
+  Vector3d Thermo::getAngularMomentum(){
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!snap->hasCOMw) {
+      
+      Vector3d com(0.0);
+      Vector3d comVel(0.0);
+      Vector3d angularMomentum(0.0);
+      
+      getComAll(com, comVel);
+      
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      Vector3d thisr(0.0);
+      Vector3d thisp(0.0);
+      
+      RealType thisMass;
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        thisMass = mol->getMass(); 
+        thisr = mol->getCom() - com;
+        thisp = (mol->getComVel() - comVel) * thisMass;
+        
+        angularMomentum += cross( thisr, thisp );      
+      }  
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, 
+                                angularMomentum.getArrayPointer(), 3,
+                                MPI::REALTYPE, MPI::SUM);
+#endif
+      
+      snap->setCOMw(angularMomentum);
+    }
+    
+    return snap->getCOMw();
+  }
+  
+  
+  /**
+   * Returns the Volume of the system based on a ellipsoid with
+   * semi-axes based on the radius of gyration V=4/3*Pi*R_1*R_2*R_3
+   * where R_i are related to the principle inertia moments
+   *  R_i = sqrt(C*I_i/N), this reduces to 
+   *  V = 4/3*Pi*(C/N)^3/2*sqrt(det(I)). 
+   * See S.E. Baltazar et. al. Comp. Mat. Sci. 37 (2006) 526-536.
+   */
+  RealType Thermo::getGyrationalVolume(){
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!snap->hasGyrationalVolume) {
+      
+      Mat3x3d intTensor;
+      RealType det;
+      Vector3d dummyAngMom; 
+      RealType sysconstants;
+      RealType geomCnst;
+      RealType volume;
+      
+      geomCnst = 3.0/2.0;
+      /* Get the inertial tensor and angular momentum for free*/
+      getInertiaTensor(intTensor, dummyAngMom);
+      
+      det = intTensor.determinant();
+      sysconstants = geomCnst / (RealType)(info_->getNGlobalIntegrableObjects());
+      volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,geomCnst)*sqrt(det);
+
+      snap->setGyrationalVolume(volume);
+    } 
+    return snap->getGyrationalVolume();
+  }
+  
+  void Thermo::getGyrationalVolume(RealType &volume, RealType &detI){
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!(snap->hasInertiaTensor && snap->hasGyrationalVolume)) {
+    
+      Mat3x3d intTensor;
+      Vector3d dummyAngMom; 
+      RealType sysconstants;
+      RealType geomCnst;
+      
+      geomCnst = 3.0/2.0;
+      /* Get the inertia tensor and angular momentum for free*/
+      this->getInertiaTensor(intTensor, dummyAngMom);
+      
+      detI = intTensor.determinant();
+      sysconstants = geomCnst/(RealType)(info_->getNGlobalIntegrableObjects());
+      volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,geomCnst)*sqrt(detI);
+      snap->setGyrationalVolume(volume);
+    } else {
+      volume = snap->getGyrationalVolume();
+      detI = snap->getInertiaTensor().determinant();
+    }
+    return;
+  }
+  
+  RealType Thermo::getTaggedAtomPairDistance(){
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    Globals* simParams = info_->getSimParams();
+    
+    if (simParams->haveTaggedAtomPair() && 
+        simParams->havePrintTaggedPairDistance()) {
+      if ( simParams->getPrintTaggedPairDistance()) {
+        
+        pair<int, int> tap = simParams->getTaggedAtomPair();
+        Vector3d pos1, pos2, rab;
+        
+#ifdef IS_MPI        
+	int mol1 = info_->getGlobalMolMembership(tap.first);
+	int mol2 = info_->getGlobalMolMembership(tap.second);
+
+        int proc1 = info_->getMolToProc(mol1);
+        int proc2 = info_->getMolToProc(mol2);
+
+	RealType data[3];
+        if (proc1 == worldRank) {
+          StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
+          pos1 = sd1->getPos();
+          data[0] = pos1.x();
+          data[1] = pos1.y();
+          data[2] = pos1.z();          
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
+        } else {
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
+          pos1 = Vector3d(data);
+        }
+
+        if (proc2 == worldRank) {
+          StuntDouble* sd2 = info_->getIOIndexToIntegrableObject(tap.second);
+          pos2 = sd2->getPos();
+          data[0] = pos2.x();
+          data[1] = pos2.y();
+          data[2] = pos2.z();          
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
+        } else {
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
+          pos2 = Vector3d(data);
+        }
+#else
+        StuntDouble* at1 = info_->getIOIndexToIntegrableObject(tap.first);
+        StuntDouble* at2 = info_->getIOIndexToIntegrableObject(tap.second);
+        pos1 = at1->getPos();
+        pos2 = at2->getPos();
+#endif        
+        rab = pos2 - pos1;
+        currSnapshot->wrapVector(rab);
+        return rab.length();
+      }
+      return 0.0;     
+    }
+    return 0.0;
+  }
+
+  RealType Thermo::getHullVolume(){
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!snap->hasHullVolume) {
+
+      Hull* surfaceMesh_;
+
+      Globals* simParams = info_->getSimParams();
+      const std::string ht = simParams->getHULL_Method();
+      
+      if (ht == "Convex") {
+        surfaceMesh_ = new ConvexHull();
+      } else if (ht == "AlphaShape") {
+        surfaceMesh_ = new AlphaHull(simParams->getAlpha());
+      } else {
+        return 0.0;
+      }
+      
+      // Build a vector of stunt doubles to determine if they are
+      // surface atoms
+      std::vector<StuntDouble*> localSites_;
+      Molecule* mol;
+      StuntDouble* sd;
+      SimInfo::MoleculeIterator i;
+      Molecule::IntegrableObjectIterator  j;
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {          
+        for (sd = mol->beginIntegrableObject(j); 
+             sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {   
+          localSites_.push_back(sd);
+        }
+      }   
+      
+      // Compute surface Mesh
+      surfaceMesh_->computeHull(localSites_);
+      snap->setHullVolume(surfaceMesh_->getVolume());
+    }
+    return snap->getHullVolume();
+  }  
+}

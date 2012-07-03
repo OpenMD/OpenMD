@@ -1512,10 +1512,7 @@ namespace OpenMD {
   void RNEMD::getStatus() {
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    Stats& stat = currentSnap_->statData;
     RealType time = currentSnap_->getTime();
-
-    stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
     //or to be more meaningful, define another item as exchangeSum_ / time
     int j;
 

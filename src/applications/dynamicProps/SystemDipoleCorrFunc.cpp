@@ -69,11 +69,11 @@ namespace OpenMD {
   void SystemDipoleCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     assert(snapshot1);
-    Vector3d dipoleMoment1 = thermo_->getBoxDipole();
+    Vector3d dipoleMoment1 = thermo_->getSystemDipole();
 
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot2);
-    Vector3d dipoleMoment2 = thermo_->getBoxDipole();
+    Vector3d dipoleMoment2 = thermo_->getSystemDipole();
     assert(snapshot1 && snapshot2);
 
     RealType time1 = snapshot1->getTime();

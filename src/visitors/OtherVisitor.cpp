@@ -45,6 +45,8 @@
 #include "primitives/RigidBody.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
+
 namespace OpenMD {
 
   void WrappingVisitor::visit(Atom *atom) {
@@ -77,16 +79,20 @@ namespace OpenMD {
 
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     
-    for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
+    for( atomInfo = atomData->beginAtomInfo(i); atomInfo; 
+         atomInfo = atomData->nextAtomInfo(i) ) {
+
       Vector3d newPos = atomInfo->pos - origin_;
       currSnapshot->wrapVector(newPos);
       atomInfo->pos = newPos;
+
     }
   }
 
   void WrappingVisitor::update() {
     if (useCom_){
-      origin_ = info->getCom();
+      Thermo thermo(info);
+      origin_ = thermo.getCom();
     }
   }
   

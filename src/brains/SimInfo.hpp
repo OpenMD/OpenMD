@@ -287,29 +287,6 @@ namespace OpenMD{
       return simParams_;
     }
 
-    /** Returns the velocity of center of mass of the whole system.*/
-    Vector3d getComVel();
-
-    /** Returns the center of the mass of the whole system.*/
-    Vector3d getCom();
-    /** Returns the center of the mass and Center of Mass velocity of
-        the whole system.*/ 
-    void getComAll(Vector3d& com,Vector3d& comVel);
-
-    /** Returns intertia tensor for the entire system and system
-        Angular Momentum.*/
-    void getInertiaTensor(Mat3x3d &intertiaTensor,Vector3d &angularMomentum);
-    
-    /** Returns system angular momentum */
-    Vector3d getAngularMomentum();
-
-    /** Returns volume of system as estimated by an ellipsoid defined
-        by the radii of gyration*/
-    void getGyrationalVolume(RealType &vol);
-    /** Overloaded version of gyrational volume that also returns
-        det(I) so dV/dr can be calculated*/
-    void getGyrationalVolume(RealType &vol, RealType &detI);
-
     void update();
     /**
      * Do final bookkeeping before Force managers need their data.

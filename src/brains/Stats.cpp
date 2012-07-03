@@ -49,161 +49,510 @@
  */
 
 #include "brains/Stats.hpp"
+#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  bool Stats::isInit_ = false;
-  std::string Stats::title_[Stats::ENDINDEX - Stats::BEGININDEX];
-  std::string Stats::units_[Stats::ENDINDEX - Stats::BEGININDEX];
-  Stats::StatsMapType Stats::statsMap;
-  Stats::Stats() {
+  Stats::Stats(SimInfo* info) : isInit_(false), info_(info) {   
 
     if (!isInit_) {
       init();
       isInit_ = true;
     }
-
   }
 
   void Stats::init() {
+   
+    data_.resize(Stats::ENDINDEX);
 
-    Stats::title_[TIME] = "Time";
-    Stats::title_[TOTAL_ENERGY] = "Total Energy";
-    Stats::title_[POTENTIAL_ENERGY] = "Potential Energy";
-    Stats::title_[KINETIC_ENERGY] = "Kinetic Energy";
-    Stats::title_[TEMPERATURE] = "Temperature";
-    Stats::title_[PRESSURE] = "Pressure";
-    Stats::title_[VOLUME] = "Volume";
-    Stats::title_[HULLVOLUME] = "Hull Volume";
-    Stats::title_[GYRVOLUME] = "Gyrational Volume";
-    Stats::title_[CONSERVED_QUANTITY] = "Conserved Quantity";             
-    Stats::title_[TRANSLATIONAL_KINETIC] = "Translational Kinetic";
-    Stats::title_[ROTATIONAL_KINETIC] = "Rotational Kinetic";
-    Stats::title_[LONG_RANGE_POTENTIAL] = "Long Range Potential";
-    Stats::title_[VANDERWAALS_POTENTIAL] = "van der Waals Potential";
-    Stats::title_[ELECTROSTATIC_POTENTIAL] = "Electrostatic Potential";    
-    Stats::title_[METALLIC_POTENTIAL] = "Metallic Potential";    
-    Stats::title_[HYDROGENBONDING_POTENTIAL] = "Hydrogen Bonding Potential";
-    Stats::title_[SHORT_RANGE_POTENTIAL] = "Short Range Potential";
-    Stats::title_[BOND_POTENTIAL] = "Bond Potential";
-    Stats::title_[BEND_POTENTIAL] = "Bend Potential";
-    Stats::title_[DIHEDRAL_POTENTIAL] = "Dihedral Potential";
-    Stats::title_[INVERSION_POTENTIAL] = "Inversion Potential";
-    Stats::title_[RAW_POTENTIAL] = "Raw Potential";
-    Stats::title_[RESTRAINT_POTENTIAL] = "Restraint Potential";
-    Stats::title_[SHADOWH] = "Shadow Hamiltonian";
-    Stats::title_[PRESSURE_TENSOR_XX] = "P_xx";
-    Stats::title_[PRESSURE_TENSOR_XY] = "P_xy";
-    Stats::title_[PRESSURE_TENSOR_XZ] = "P_xz";
-    Stats::title_[PRESSURE_TENSOR_YX] = "P_yx";
-    Stats::title_[PRESSURE_TENSOR_YY] = "P_yy";
-    Stats::title_[PRESSURE_TENSOR_YZ] = "P_yz";
-    Stats::title_[PRESSURE_TENSOR_ZX] = "P_zx";
-    Stats::title_[PRESSURE_TENSOR_ZY] = "P_zy";
-    Stats::title_[PRESSURE_TENSOR_ZZ] = "P_zz";
-    Stats::title_[BOX_DIPOLE_X] = "box dipole x";
-    Stats::title_[BOX_DIPOLE_Y] = "box dipole y";
-    Stats::title_[BOX_DIPOLE_Z] = "box dipole z";
-    Stats::title_[TAGGED_PAIR_DISTANCE] = "Tagged_Pair_Distance";
-    Stats::title_[RNEMD_EXCHANGE_TOTAL] = "RNEMD_exchange_total";
-    Stats::title_[THERMAL_HELFANDMOMENT_X] = "Thermal Helfand Moment x";
-    Stats::title_[THERMAL_HELFANDMOMENT_Y] = "Thermal Helfand Moment y";
-    Stats::title_[THERMAL_HELFANDMOMENT_Z] = "Thermal Helfand Moment z";
-    Stats::title_[HEATFLUX_X]= "Heat Flux x component";  
-    Stats::title_[HEATFLUX_Y]= "Heat Flux y component";  
-    Stats::title_[HEATFLUX_Z]= "Heat Flux z component";  
+    StatsData time;
+    time.units =  "fs";
+    time.title =  "Time";
+    time.dataType = "RealType";
+    time.accumulator = new Accumulator();
+    data_[TIME] = time;
+    statsMap_["TIME"] = TIME;
 
-    Stats::units_[TIME] = "fs";
-    Stats::units_[TOTAL_ENERGY] = "kcal/mol";
-    Stats::units_[POTENTIAL_ENERGY] = "kcal/mol";
-    Stats::units_[KINETIC_ENERGY] = "kcal/mol";
-    Stats::units_[TEMPERATURE] = "K";
-    Stats::units_[PRESSURE] = "atm";
-    Stats::units_[VOLUME] = "A^3";
-    Stats::units_[HULLVOLUME] = "A^3";
-    Stats::units_[GYRVOLUME] = "A^3";
-    Stats::units_[CONSERVED_QUANTITY] = "kcal/mol";             
-    Stats::units_[TRANSLATIONAL_KINETIC] = "kcal/mol";
-    Stats::units_[ROTATIONAL_KINETIC] = "kcal/mol";
-    Stats::units_[LONG_RANGE_POTENTIAL] = "kcal/mol";
-    Stats::units_[VANDERWAALS_POTENTIAL] = "kcal/mol";
-    Stats::units_[ELECTROSTATIC_POTENTIAL] = "kcal/mol";
-    Stats::units_[METALLIC_POTENTIAL] = "kcal/mol";
-    Stats::units_[HYDROGENBONDING_POTENTIAL] = "kcal/mol";
-    Stats::units_[SHORT_RANGE_POTENTIAL] = "kcal/mol";
-    Stats::units_[BOND_POTENTIAL] = "kcal/mol";
-    Stats::units_[BEND_POTENTIAL] = "kcal/mol";
-    Stats::units_[DIHEDRAL_POTENTIAL] = "kcal/mol";
-    Stats::units_[INVERSION_POTENTIAL] = "kcal/mol";
-    Stats::units_[RAW_POTENTIAL] = "kcal/mol";
-    Stats::units_[RESTRAINT_POTENTIAL] = "kcal/mol";
-    Stats::units_[SHADOWH] = "kcal/mol";
-    Stats::units_[PRESSURE_TENSOR_XX] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_XY] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_XZ] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_YX] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_YY] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_YZ] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_ZX] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_ZY] = "amu*fs^-2*Ang^-1";
-    Stats::units_[PRESSURE_TENSOR_ZZ] = "amu*fs^-2*Ang^-1";
-    Stats::units_[BOX_DIPOLE_X] = "C*m";
-    Stats::units_[BOX_DIPOLE_Y] = "C*m";
-    Stats::units_[BOX_DIPOLE_Z] = "C*m";
-    Stats::units_[TAGGED_PAIR_DISTANCE] = "Ang";
-    Stats::units_[RNEMD_EXCHANGE_TOTAL] = "Variable";
-    Stats::units_[THERMAL_HELFANDMOMENT_X] = "Ang*kcal/mol";
-    Stats::units_[THERMAL_HELFANDMOMENT_Y] = "Ang*kcal/mol";
-    Stats::units_[THERMAL_HELFANDMOMENT_Z] = "Ang*kcal/mol";
-    Stats::units_[HEATFLUX_X]="amu/fs^3";
-    Stats::units_[HEATFLUX_Y]="amu/fs^3";      
-    Stats::units_[HEATFLUX_Z]="amu/fs^3";      
+    StatsData total_energy;
+    total_energy.units =  "kcal/mol";
+    total_energy.title =  "Total Energy";
+    total_energy.dataType = "RealType";
+    total_energy.accumulator = new Accumulator();
+    data_[TOTAL_ENERGY] = total_energy;
+    statsMap_["TOTAL_ENERGY"] =  TOTAL_ENERGY;
+   
+    StatsData potential_energy;
+    potential_energy.units =  "kcal/mol";
+    potential_energy.title =  "Potential Energy";
+    potential_energy.dataType = "RealType";
+    potential_energy.accumulator = new Accumulator();
+    data_[POTENTIAL_ENERGY] = potential_energy;
+    statsMap_["POTENTIAL_ENERGY"] =  POTENTIAL_ENERGY;
 
-    Stats::statsMap.insert(StatsMapType::value_type("TIME", TIME));
-    Stats::statsMap.insert(StatsMapType::value_type("TOTAL_ENERGY", TOTAL_ENERGY));
-    Stats::statsMap.insert(StatsMapType::value_type("POTENTIAL_ENERGY", POTENTIAL_ENERGY));
-    Stats::statsMap.insert(StatsMapType::value_type("KINETIC_ENERGY", KINETIC_ENERGY));
-    Stats::statsMap.insert(StatsMapType::value_type("TEMPERATURE", TEMPERATURE));
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE", PRESSURE));
-    Stats::statsMap.insert(StatsMapType::value_type("VOLUME", VOLUME));
-    Stats::statsMap.insert(StatsMapType::value_type("HULLVOLUME", HULLVOLUME));
-    Stats::statsMap.insert(StatsMapType::value_type("GYRVOLUME", GYRVOLUME));
-    Stats::statsMap.insert(StatsMapType::value_type("CONSERVED_QUANTITY", CONSERVED_QUANTITY));
-    Stats::statsMap.insert(StatsMapType::value_type("TRANSLATIONAL_KINETIC", TRANSLATIONAL_KINETIC));
-    Stats::statsMap.insert(StatsMapType::value_type("ROTATIONAL_KINETIC", ROTATIONAL_KINETIC));
-    Stats::statsMap.insert(StatsMapType::value_type("LONG_RANGE_POTENTIAL", LONG_RANGE_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("VANDERWAALS_POTENTIAL", VANDERWAALS_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("ELECTROSTATIC_POTENTIAL", ELECTROSTATIC_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("METALLIC_POTENTIAL", METALLIC_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("HYDROGENBONDING_POTENTIAL", HYDROGENBONDING_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("SHORT_RANGE_POTENTIAL", SHORT_RANGE_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("BOND_POTENTIAL", BOND_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("BEND_POTENTIAL", BEND_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("DIHEDRAL_POTENTIAL", DIHEDRAL_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("INVERSION_POTENTIAL", INVERSION_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("RAW_POTENTIAL", RAW_POTENTIAL));    
-    Stats::statsMap.insert(StatsMapType::value_type("RESTRAINT_POTENTIAL", RESTRAINT_POTENTIAL));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_XX", PRESSURE_TENSOR_XX));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_XY", PRESSURE_TENSOR_XY));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_XZ", PRESSURE_TENSOR_XZ));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_YX", PRESSURE_TENSOR_YX));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_YY", PRESSURE_TENSOR_YY));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_YZ", PRESSURE_TENSOR_YZ));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_ZX", PRESSURE_TENSOR_ZX));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_ZY", PRESSURE_TENSOR_ZY));    
-    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_ZZ", PRESSURE_TENSOR_ZZ));    
-    Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_X", BOX_DIPOLE_X));    
-    Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Y", BOX_DIPOLE_Y));    
-    Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Z", BOX_DIPOLE_Z));    
-    Stats::statsMap.insert(StatsMapType::value_type("TAGGED_PAIR_DISTANCE", TAGGED_PAIR_DISTANCE));    
-    Stats::statsMap.insert(StatsMapType::value_type("RNEMD_EXCHANGE_TOTAL", RNEMD_EXCHANGE_TOTAL));    
-    Stats::statsMap.insert(StatsMapType::value_type("SHADOWH", SHADOWH)); 
-    Stats::statsMap.insert(StatsMapType::value_type("THERMAL_HELFANDMOMENT_X",THERMAL_HELFANDMOMENT_X));
-    Stats::statsMap.insert(StatsMapType::value_type("THERMAL_HELFANDMOMENT_Y",THERMAL_HELFANDMOMENT_Y));
-    Stats::statsMap.insert(StatsMapType::value_type("THERMAL_HELFANDMOMENT_Z",THERMAL_HELFANDMOMENT_Z));
-    Stats::statsMap.insert(StatsMapType::value_type("HEATFLUX_X",HEATFLUX_X));
-    Stats::statsMap.insert(StatsMapType::value_type("HEATFLUX_Y",HEATFLUX_Y));
-    Stats::statsMap.insert(StatsMapType::value_type("HEATFLUX_Z",HEATFLUX_Z));
+    StatsData kinetic_energy;
+    kinetic_energy.units =  "kcal/mol";
+    kinetic_energy.title =  "Kinetic Energy";
+    kinetic_energy.dataType = "RealType";
+    kinetic_energy.accumulator = new Accumulator();
+    data_[KINETIC_ENERGY] = kinetic_energy;
+    statsMap_["KINETIC_ENERGY"] =  KINETIC_ENERGY;
+
+    StatsData temperature;
+    temperature.units =  "K";
+    temperature.title =  "Temperature";
+    temperature.dataType = "RealType";
+    temperature.accumulator = new Accumulator();
+    data_[TEMPERATURE] = temperature;
+    statsMap_["TEMPERATURE"] =  TEMPERATURE;
+
+    StatsData pressure;
+    pressure.units =  "atm";
+    pressure.title =  "Pressure";
+    pressure.dataType = "RealType";
+    pressure.accumulator = new Accumulator();
+    data_[PRESSURE] = pressure;
+    statsMap_["PRESSURE"] =  PRESSURE;
+
+    StatsData volume;
+    volume.units =  "A^3";
+    volume.title =  "Volume";
+    volume.dataType = "RealType";
+    volume.accumulator = new Accumulator();
+    data_[VOLUME] = volume;
+    statsMap_["VOLUME"] =  VOLUME;
+
+    StatsData hullvolume;
+    hullvolume.units =  "A^3";
+    hullvolume.title =  "Hull Volume";
+    hullvolume.dataType = "RealType";
+    hullvolume.accumulator = new Accumulator();
+    data_[HULLVOLUME] = hullvolume;
+    statsMap_["HULLVOLUME"] =  HULLVOLUME;
+
+    StatsData gyrvolume;
+    gyrvolume.units =  "A^3";
+    gyrvolume.title =  "Gyrational Volume";
+    gyrvolume.dataType = "RealType";
+    gyrvolume.accumulator = new Accumulator();
+    data_[GYRVOLUME] = gyrvolume;
+    statsMap_["GYRVOLUME"] =  GYRVOLUME;
+
+    StatsData conserved_quantity;
+    conserved_quantity.units =  "kcal/mol";             
+    conserved_quantity.title =  "Conserved Quantity";             
+    conserved_quantity.dataType = "RealType";
+    conserved_quantity.accumulator = new Accumulator();
+    data_[CONSERVED_QUANTITY] = conserved_quantity;
+    statsMap_["CONSERVED_QUANTITY"] =  CONSERVED_QUANTITY;
+
+    StatsData translational_kinetic;
+    translational_kinetic.units =  "kcal/mol";
+    translational_kinetic.title =  "Translational Kinetic";
+    translational_kinetic.dataType = "RealType";
+    translational_kinetic.accumulator = new Accumulator();
+    data_[TRANSLATIONAL_KINETIC] = translational_kinetic;
+    statsMap_["TRANSLATIONAL_KINETIC"] =  TRANSLATIONAL_KINETIC;
+
+    StatsData rotational_kinetic;
+    rotational_kinetic.units =  "kcal/mol";
+    rotational_kinetic.title =  "Rotational Kinetic";
+    rotational_kinetic.dataType = "RealType";
+    rotational_kinetic.accumulator = new Accumulator();
+    data_[ROTATIONAL_KINETIC] = rotational_kinetic;
+    statsMap_["ROTATIONAL_KINETIC"] =  ROTATIONAL_KINETIC;
+
+    StatsData long_range_potential;
+    long_range_potential.units =  "kcal/mol";
+    long_range_potential.title =  "Long Range Potential";
+    long_range_potential.dataType = "RealType";
+    long_range_potential.accumulator = new Accumulator();
+    data_[LONG_RANGE_POTENTIAL] = long_range_potential;
+    statsMap_["LONG_RANGE_POTENTIAL"] =  LONG_RANGE_POTENTIAL;
+
+    StatsData vanderwaals_potential;
+    vanderwaals_potential.units =  "kcal/mol";
+    vanderwaals_potential.title =  "van der waals Potential";
+    vanderwaals_potential.dataType = "RealType";
+    vanderwaals_potential.accumulator = new Accumulator();
+    data_[VANDERWAALS_POTENTIAL] = vanderwaals_potential;
+    statsMap_["VANDERWAALS_POTENTIAL"] =  VANDERWAALS_POTENTIAL;
+
+    StatsData electrostatic_potential;
+    electrostatic_potential.units =  "kcal/mol";
+    electrostatic_potential.title =  "Electrostatic Potential";    
+    electrostatic_potential.dataType = "RealType";
+    electrostatic_potential.accumulator = new Accumulator();
+    data_[ELECTROSTATIC_POTENTIAL] = electrostatic_potential;
+    statsMap_["ELECTROSTATIC_POTENTIAL"] =  ELECTROSTATIC_POTENTIAL;
+
+    StatsData metallic_potential;
+    metallic_potential.units =  "kcal/mol";
+    metallic_potential.title =  "Metallic Potential";    
+    metallic_potential.dataType = "RealType";
+    metallic_potential.accumulator = new Accumulator();
+    data_[METALLIC_POTENTIAL] = metallic_potential;
+    statsMap_["METALLIC_POTENTIAL"] =  METALLIC_POTENTIAL;
+
+    StatsData hydrogenbonding_potential;
+    hydrogenbonding_potential.units =  "kcal/mol";
+    hydrogenbonding_potential.title =  "Metallic Potential";    
+    hydrogenbonding_potential.dataType = "RealType";
+    hydrogenbonding_potential.accumulator = new Accumulator();
+    data_[HYDROGENBONDING_POTENTIAL] = hydrogenbonding_potential;
+    statsMap_["HYDROGENBONDING_POTENTIAL"] =  HYDROGENBONDING_POTENTIAL;
+
+    StatsData short_range_potential;
+    short_range_potential.units =  "kcal/mol";
+    short_range_potential.title =  "Short Range Potential";
+    short_range_potential.dataType = "RealType";
+    short_range_potential.accumulator = new Accumulator();
+    data_[SHORT_RANGE_POTENTIAL] = short_range_potential;
+    statsMap_["SHORT_RANGE_POTENTIAL"] =  SHORT_RANGE_POTENTIAL;
+
+    StatsData bond_potential;
+    bond_potential.units =  "kcal/mol";
+    bond_potential.title =  "Bond Potential";
+    bond_potential.dataType = "RealType";
+    bond_potential.accumulator = new Accumulator();
+    data_[BOND_POTENTIAL] = bond_potential;
+    statsMap_["BOND_POTENTIAL"] =  BOND_POTENTIAL;
+
+    StatsData bend_potential;
+    bend_potential.units =  "kcal/mol";
+    bend_potential.title =  "Bend Potential";
+    bend_potential.dataType = "RealType";
+    bend_potential.accumulator = new Accumulator();
+    data_[BEND_POTENTIAL] = bend_potential;
+    statsMap_["BEND_POTENTIAL"] =  BEND_POTENTIAL;
+    
+    StatsData dihedral_potential;
+    dihedral_potential.units =  "kcal/mol";
+    dihedral_potential.title =  "Dihedral Potential";
+    dihedral_potential.dataType = "RealType";
+    dihedral_potential.accumulator = new Accumulator();
+    data_[DIHEDRAL_POTENTIAL] = dihedral_potential;
+    statsMap_["DIHEDRAL_POTENTIAL"] =  DIHEDRAL_POTENTIAL;
+
+    StatsData inversion_potential;
+    inversion_potential.units =  "kcal/mol";
+    inversion_potential.title =  "Inversion Potential";
+    inversion_potential.dataType = "RealType";
+    inversion_potential.accumulator = new Accumulator();
+    data_[INVERSION_POTENTIAL] = inversion_potential;
+    statsMap_["INVERSION_POTENTIAL"] =  INVERSION_POTENTIAL;
+
+    StatsData vraw;
+    vraw.units =  "kcal/mol";
+    vraw.title =  "Raw Potential";
+    vraw.dataType = "RealType";
+    vraw.accumulator = new Accumulator();
+    data_[RAW_POTENTIAL] = vraw;
+    statsMap_["RAW_POTENTIAL"] =  RAW_POTENTIAL;
+
+    StatsData vrestraint;
+    vrestraint.units =  "kcal/mol";
+    vrestraint.title =  "Restraint Potential";
+    vrestraint.dataType = "RealType";
+    vrestraint.accumulator = new Accumulator();
+    data_[RESTRAINT_POTENTIAL] = vrestraint;
+    statsMap_["RESTRAINT_POTENTIAL"] =  RESTRAINT_POTENTIAL;
+
+    StatsData pressure_tensor;
+    pressure_tensor.units =  "amu*fs^-2*Ang^-1";
+    pressure_tensor.title =  "Ptensor";
+    pressure_tensor.dataType = "Mat3x3d";
+    pressure_tensor.accumulator = new MatrixAccumulator();
+    data_[PRESSURE_TENSOR] = pressure_tensor;
+    statsMap_["PRESSURE_TENSOR"] =  PRESSURE_TENSOR;
+
+    StatsData system_dipole;
+    system_dipole.units =  "C*m";
+    system_dipole.title =  "System Dipole";
+    system_dipole.dataType = "Vector3d";
+    system_dipole.accumulator = new VectorAccumulator();
+    data_[SYSTEM_DIPOLE] = system_dipole;
+    statsMap_["SYSTEM_DIPOLE"] =  SYSTEM_DIPOLE;
+
+    StatsData tagged_pair_distance;
+    tagged_pair_distance.units =  "Ang";
+    tagged_pair_distance.title =  "Tagged_Pair_Distance";
+    tagged_pair_distance.dataType = "RealType";
+    tagged_pair_distance.accumulator = new Accumulator();
+    data_[TAGGED_PAIR_DISTANCE] = tagged_pair_distance;
+    statsMap_["TAGGED_PAIR_DISTANCE"] =  TAGGED_PAIR_DISTANCE;
+
+    StatsData rnemd_exchange_total;
+    rnemd_exchange_total.units =  "Variable";
+    rnemd_exchange_total.title =  "RNEMD_exchange_total";
+    rnemd_exchange_total.dataType = "RealType";
+    rnemd_exchange_total.accumulator = new Accumulator();
+    data_[RNEMD_EXCHANGE_TOTAL] = rnemd_exchange_total;
+    statsMap_["RNEMD_EXCHANGE_TOTAL"] =  RNEMD_EXCHANGE_TOTAL;
+
+    StatsData shadowh;
+    shadowh.units =  "kcal/mol";
+    shadowh.title =  "Shadow Hamiltonian";
+    shadowh.dataType = "RealType";
+    shadowh.accumulator = new Accumulator();
+    data_[SHADOWH] = shadowh;
+    statsMap_["SHADOWH"] =  SHADOWH;
+
+    StatsData helfandmoment;
+    helfandmoment.units =  "Ang*kcal/mol";
+    helfandmoment.title =  "Thermal Helfand Moment";
+    helfandmoment.dataType = "Vector3d";
+    helfandmoment.accumulator = new VectorAccumulator();
+    data_[HELFANDMOMENT] = helfandmoment;
+    statsMap_["HELFANDMOMENT"] = HELFANDMOMENT;
+
+    StatsData heatflux;
+    heatflux.units = "amu/fs^3";
+    heatflux.title =  "Heat Flux";  
+    heatflux.dataType = "Vector3d";
+    heatflux.accumulator = new VectorAccumulator();
+    data_[HEATFLUX] = heatflux;
+    statsMap_["HEATFLUX"] = HEATFLUX;
+
+    StatsData electronic_temperature;
+    electronic_temperature.units = "K";
+    electronic_temperature.title =  "Electronic Temperature";  
+    electronic_temperature.dataType = "RealType";
+    electronic_temperature.accumulator = new Accumulator();
+    data_[ELECTRONIC_TEMPERATURE] = electronic_temperature;
+    statsMap_["ELECTRONIC_TEMPERATURE"] = ELECTRONIC_TEMPERATURE;
+
+    // Now, set some defaults in the mask:
+
+    Globals* simParams = info_->getSimParams();
+    std::string statFileFormatString = simParams->getStatFileFormat();
+    parseStatFileFormat(statFileFormatString);
+
+    // if we're doing a thermodynamic integration, we'll want the raw
+    // potential as well as the full potential:
+    
+    if (simParams->getUseThermodynamicIntegration()) 
+      statsMask_.set(RAW_POTENTIAL);
+    
+    // if we've got restraints turned on, we'll also want a report of the
+    // total harmonic restraints
+    if (simParams->getUseRestraints()){
+      statsMask_.set(RESTRAINT_POTENTIAL);
+    }
+    
+    if (simParams->havePrintPressureTensor() && 
+	simParams->getPrintPressureTensor()){
+      statsMask_.set(PRESSURE_TENSOR);
+    }
+
+    // Why do we have both of these?
+    if (simParams->getAccumulateBoxDipole()) {
+      statsMask_.set(SYSTEM_DIPOLE);
+    }
+    if (info_->getCalcBoxDipole()){
+      statsMask_.set(SYSTEM_DIPOLE);
+    }
+
+    if (simParams->havePrintHeatFlux()) {
+      if (simParams->getPrintHeatFlux()){
+        statsMask_.set(HEATFLUX);
+      }
+    }    
+    
+    
+    if (simParams->haveTaggedAtomPair() && simParams->havePrintTaggedPairDistance()) {
+      if (simParams->getPrintTaggedPairDistance()) {
+        statsMask_.set(TAGGED_PAIR_DISTANCE);
+      }
+    }
+    
+    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+      statsMask_.set(RNEMD_EXCHANGE_TOTAL);
+    }
+
+
+
+  }
+
+  void Stats::parseStatFileFormat(const std::string& format) {
+    StringTokenizer tokenizer(format, " ,;|\t\n\r");
+
+    while(tokenizer.hasMoreTokens()) {
+      std::string token(tokenizer.nextToken());
+      toUpper(token);
+      StatsMapType::iterator i = statsMap_.find(token);
+      if (i != statsMap_.end()) {
+        statsMask_.set(i->second);
+      } else {
+        sprintf( painCave.errMsg,
+                 "Stats::parseStatFileFormat: %s is not a recognized\n"
+                 "\tstatFileFormat keyword.\n", token.c_str() );
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_ERROR;
+        simError();            
+      }
+    }   
+  }
+
+
+  std::string Stats::getTitle(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    return data_[index].title;
+  }
+
+  std::string Stats::getUnits(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    return data_[index].units;
+  }
+
+  std::string Stats::getDataType(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    return data_[index].dataType;
+  }
+
+  void Stats::collectStats(){
+    Globals* simParams = info_->getSimParams();
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    Thermo thermo(info_);
+   
+    for (int i = 0; i < statsMask_.size(); ++i) {
+      if (statsMask_[i]) {
+        switch (i) {
+        case TIME:
+          data_[i].accumulator->add(snap->getTime());
+          break;
+        case KINETIC_ENERGY:
+          data_[i].accumulator->add(thermo.getKinetic());
+          break;
+        case POTENTIAL_ENERGY:
+          data_[i].accumulator->add(thermo.getPotential());
+          break;
+        case TOTAL_ENERGY:
+          data_[i].accumulator->add(thermo.getTotalEnergy());
+          break;
+        case TEMPERATURE:
+          data_[i].accumulator->add(thermo.getTemperature());
+          break;
+        case PRESSURE:
+          data_[i].accumulator->add(thermo.getPressure());
+          break;
+        case VOLUME:
+          data_[i].accumulator->add(thermo.getVolume());
+          break;
+        case CONSERVED_QUANTITY:
+          data_[i].accumulator->add(snap->getConservedQuantity());
+          break;
+        case PRESSURE_TENSOR:
+          dynamic_cast<MatrixAccumulator *>(data_[i].accumulator)->add(thermo.getPressureTensor());
+          break;
+        case SYSTEM_DIPOLE:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getSystemDipole());
+          break;
+        case HEATFLUX:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getHeatFlux());
+          break;
+        case HULLVOLUME:
+          data_[i].accumulator->add(thermo.getHullVolume());
+          break;
+        case GYRVOLUME:
+          data_[i].accumulator->add(thermo.getGyrationalVolume());
+          break;
+        case TRANSLATIONAL_KINETIC:
+          data_[i].accumulator->add(thermo.getTranslationalKinetic());
+          break;
+        case ROTATIONAL_KINETIC:
+          data_[i].accumulator->add(thermo.getRotationalKinetic());
+          break;
+        case LONG_RANGE_POTENTIAL:
+          data_[i].accumulator->add(snap->getLongRangePotential());
+          break;
+        case VANDERWAALS_POTENTIAL:
+          data_[i].accumulator->add(snap->getLongRangePotentials()[VANDERWAALS_FAMILY]);
+          break;
+        case ELECTROSTATIC_POTENTIAL:
+          data_[i].accumulator->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY]);
+          break;
+        case METALLIC_POTENTIAL:
+          data_[i].accumulator->add(snap->getLongRangePotentials()[METALLIC_FAMILY]);
+          break;
+        case HYDROGENBONDING_POTENTIAL:
+          data_[i].accumulator->add(snap->getLongRangePotentials()[HYDROGENBONDING_FAMILY]);
+          break;
+        case SHORT_RANGE_POTENTIAL:
+          data_[i].accumulator->add(snap->getShortRangePotential());
+          break;
+        case BOND_POTENTIAL:
+          data_[i].accumulator->add(snap->getBondPotential());
+          break;
+        case BEND_POTENTIAL:
+          data_[i].accumulator->add(snap->getBendPotential());
+          break;
+        case DIHEDRAL_POTENTIAL:
+          data_[i].accumulator->add(snap->getTorsionPotential());
+          break;
+        case INVERSION_POTENTIAL:
+          data_[i].accumulator->add(snap->getInversionPotential());
+          break;
+        case RAW_POTENTIAL:
+          data_[i].accumulator->add(snap->getRawPotential());
+          break;
+        case RESTRAINT_POTENTIAL:
+          data_[i].accumulator->add(snap->getRestraintPotential());
+          break;
+        case TAGGED_PAIR_DISTANCE:
+          data_[i].accumulator->add(thermo.getTaggedAtomPairDistance());
+          break;
+          /*
+        case RNEMD_EXCHANGE_TOTAL:
+          data_[i].accumulator->add(thermo.get_RNEMD_exchange_total());
+          break;
+        case SHADOWH:
+          data_[i].accumulator->add(thermo.getShadowHamiltionian());
+          break;
+        case HELFANDMOMENT:
+          data_[i].accumulator->add(thermo.getHelfandMoment());
+          break;
+          */
+        case ELECTRONIC_TEMPERATURE:
+          data_[i].accumulator->add(thermo.getElectronicTemperature());
+          break; 
+        }
+      }
+    }
+  }
+
+  int Stats::getIntData(int index) { 
+    assert(index >=0 && index < ENDINDEX);
+    RealType value;
+    data_[index].accumulator->getLastValue(value);
+    return (int) value;
+  }
+  RealType Stats::getRealData(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    RealType value(0.0);
+    data_[index].accumulator->getLastValue(value);
+    return value;
+  }
+  Vector3d Stats::getVectorData(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    Vector3d value;
+    dynamic_cast<VectorAccumulator*>(data_[index].accumulator)->getLastValue(value);
+    return value;
+  }
+  Mat3x3d Stats::getMatrixData(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    Mat3x3d value;
+    dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getLastValue(value);
+    return value;
+  }
+ 
+  Stats::StatsBitSet Stats::getStatsMask() {
+    return statsMask_;
+  }
+  Stats::StatsMapType Stats::getStatsMap() {
+    return statsMap_;
+  }
+  void Stats::setStatsMask(Stats::StatsBitSet mask) {
+    statsMask_ = mask;
   }
 
 }

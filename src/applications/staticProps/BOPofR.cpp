@@ -50,6 +50,7 @@
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
 #include "math/Wigner3jm.hpp"
+#include "brains/Thermo.hpp"
 
 using namespace MATPACK;
 namespace OpenMD {
@@ -189,6 +190,8 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
 
+    Thermo thermo(info_);
+
     q_l.resize(lMax_+1);
     q2.resize(lMax_+1);
     w.resize(lMax_+1);
@@ -204,7 +207,7 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      CenterOfMass = info_->getCom();
+      CenterOfMass = thermo.getCom();
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }

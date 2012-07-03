@@ -57,8 +57,7 @@ namespace OpenMD {
    */   
   RealType NPTsz::calcConservedQuantity(){
 
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    thermostat = snap->getThermostat();
     loadEta();
     
     // We need NkBT a lot, so just set it here: This is the RAW number
@@ -80,12 +79,12 @@ namespace OpenMD {
     RealType barostat_potential;
     RealType trEta;
 
-    totalEnergy = thermo.getTotalE();
+    totalEnergy = thermo.getTotalEnergy();
 
-    thermostat_kinetic = fkBT * tt2 * chi * chi /
+    thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /
       (2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_potential = fkBT* integralOfChidt / 
+    thermostat_potential = fkBT* thermostat.second / 
       PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
@@ -162,13 +161,13 @@ namespace OpenMD {
       simError();
     } else {
 
-      Mat3x3d hmat = currentSnapshot_->getHmat();
+      Mat3x3d hmat = snap->getHmat();
       hmat = hmat *scaleMat;
-      currentSnapshot_->setHmat(hmat);
+      snap->setHmat(hmat);
     }
   }
 
   void NPTsz::loadEta() {
-    eta= currentSnapshot_->getEta();
+    eta= snap->getBarostat();
   }
 }

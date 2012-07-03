@@ -100,7 +100,7 @@ namespace OpenMD {
     RealType dt2_;
     RealType dt_;
     
-    Snapshot* currentSnapshot_;
+    Snapshot* snap;
     Thermo thermo;
 
   };

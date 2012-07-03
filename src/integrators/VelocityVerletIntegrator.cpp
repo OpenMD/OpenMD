@@ -98,21 +98,22 @@ namespace OpenMD {
     progressBar = new ProgressBar();
 
     //save statistics, before writeStat,  we must save statistics
-    thermo.saveStat();
     saveConservedQuantity();
+    stats->collectStats();
+
     if (simParams->getRNEMDParameters()->getUseRNEMD())
       rnemd_->getStarted();
 
-    statWriter->writeStat(currentSnapshot_->statData);
+    statWriter->writeStat();
     
-    currSample = sampleTime + currentSnapshot_->getTime();
-    currStatus =  statusTime + currentSnapshot_->getTime();
-    currThermal = thermalTime + currentSnapshot_->getTime();
+    currSample = sampleTime + snap->getTime();
+    currStatus =  statusTime + snap->getTime();
+    currThermal = thermalTime + snap->getTime();
     if (needReset) {
-      currReset = resetTime + currentSnapshot_->getTime();
+      currReset = resetTime + snap->getTime();
     }
     if (simParams->getRNEMDParameters()->getUseRNEMD()){
-      currRNEMD = RNEMD_exchangeTime + currentSnapshot_->getTime();
+      currRNEMD = RNEMD_exchangeTime + snap->getTime();
     }
     needPotential = false;
     needStress = false;       
@@ -123,7 +124,7 @@ namespace OpenMD {
   
     initialize();
   
-    while (currentSnapshot_->getTime() < runTime) {    
+    while (snap->getTime() < runTime) {    
       preStep();    
       integrateStep();    
       postStep();      
@@ -133,7 +134,7 @@ namespace OpenMD {
 
 
   void VelocityVerletIntegrator::preStep() {
-    RealType difference = currentSnapshot_->getTime() + dt - currStatus;
+    RealType difference = snap->getTime() + dt - currStatus;
   
     if (difference > 0 || fabs(difference) < OpenMD::epsilon) {
       needPotential = true;
@@ -147,40 +148,40 @@ namespace OpenMD {
     info_->getSnapshotManager()->advance();
   
     //increase time
-    currentSnapshot_->increaseTime(dt);        
+    snap->increaseTime(dt);        
    
     if (needVelocityScaling) {
-      if (currentSnapshot_->getTime() >= currThermal) {
+      if (snap->getTime() >= currThermal) {
 	velocitizer_->velocitize(targetScalingTemp);
 	currThermal += thermalTime;
       }
     }
     if (useRNEMD) {
-      if (currentSnapshot_->getTime() >= currRNEMD) {
+      if (snap->getTime() >= currRNEMD) {
 	rnemd_->doRNEMD();
 	currRNEMD += RNEMD_exchangeTime;
       }
       rnemd_->collectData();
     }
     
-    if (currentSnapshot_->getTime() >= currSample) {
+    if (snap->getTime() >= currSample) {
       dumpWriter->writeDumpAndEor();
       
       currSample += sampleTime;
     }
     
-    if (currentSnapshot_->getTime() >= currStatus) {
+    if (snap->getTime() >= currStatus) {
       //save statistics, before writeStat,  we must save statistics
-      thermo.saveStat();
+      stats->collectStats();
       saveConservedQuantity();
 
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
 	rnemd_->getStatus();
       }
 
-      statWriter->writeStat(currentSnapshot_->statData);
+      statWriter->writeStat();
 
-      progressBar->setStatus(currentSnapshot_->getTime(), runTime);
+      progressBar->setStatus(snap->getTime(), runTime);
       progressBar->update();
 
       needPotential = false;
@@ -188,7 +189,7 @@ namespace OpenMD {
       currStatus += statusTime;
     }
     
-    if (needReset && currentSnapshot_->getTime() >= currReset) {    
+    if (needReset && snap->getTime() >= currReset) {    
       resetIntegrator();
       currReset += resetTime;
     }        
@@ -223,61 +224,11 @@ namespace OpenMD {
   }
 
   StatWriter* VelocityVerletIntegrator::createStatWriter() {
-
-    std::string statFileFormatString = simParams->getStatFileFormat();
-    StatsBitSet mask = parseStatFileFormat(statFileFormatString);
-   
-    // if we're doing a thermodynamic integration, we'll want the raw
-    // potential as well as the full potential:
-
- 
-    if (simParams->getUseThermodynamicIntegration()) 
-      mask.set(Stats::RAW_POTENTIAL);
-
-    // if we've got restraints turned on, we'll also want a report of the
-    // total harmonic restraints
-    if (simParams->getUseRestraints()){
-      mask.set(Stats::RESTRAINT_POTENTIAL);
-    }
-
-    if (simParams->havePrintPressureTensor() && 
-	simParams->getPrintPressureTensor()){
-      mask.set(Stats::PRESSURE_TENSOR_XX);
-      mask.set(Stats::PRESSURE_TENSOR_XY);
-      mask.set(Stats::PRESSURE_TENSOR_XZ);
-      mask.set(Stats::PRESSURE_TENSOR_YX);
-      mask.set(Stats::PRESSURE_TENSOR_YY);
-      mask.set(Stats::PRESSURE_TENSOR_YZ);
-      mask.set(Stats::PRESSURE_TENSOR_ZX);
-      mask.set(Stats::PRESSURE_TENSOR_ZY);
-      mask.set(Stats::PRESSURE_TENSOR_ZZ);
-    }
     
-    if (simParams->getAccumulateBoxDipole()) {
-      mask.set(Stats::BOX_DIPOLE_X);
-      mask.set(Stats::BOX_DIPOLE_Y);
-      mask.set(Stats::BOX_DIPOLE_Z);
-    }
-
-    if (simParams->getPrintHeatFlux()) {
-      mask.set(Stats::HEATFLUX_X);
-      mask.set(Stats::HEATFLUX_Y);
-      mask.set(Stats::HEATFLUX_Z);
-    }
-   
-    if (simParams->haveTaggedAtomPair() && simParams->havePrintTaggedPairDistance()) {
-      if (simParams->getPrintTaggedPairDistance()) {
-        mask.set(Stats::TAGGED_PAIR_DISTANCE);
-      }
-    }
-
-    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
-      mask.set(Stats::RNEMD_EXCHANGE_TOTAL);
-    }
+    stats = new Stats(info_);
+    statWriter = new StatWriter(info_->getStatFileName(), stats);
     
-
-    return new StatWriter(info_->getStatFileName(), mask);
+    return statWriter;
   }
-
 
 } //end namespace OpenMD

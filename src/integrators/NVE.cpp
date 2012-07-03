@@ -162,7 +162,7 @@ namespace OpenMD {
 
 
   RealType NVE::calcConservedQuantity() {
-    return thermo.getTotalE();
+    return thermo.getTotalEnergy();
   }
 
 } //end namespace OpenMD

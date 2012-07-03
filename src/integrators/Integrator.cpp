@@ -52,7 +52,7 @@ namespace OpenMD {
       needReset(false), velocitizer_(NULL), needVelocityScaling(false), 
       rnemd_(NULL), useRNEMD(false), rotAlgo_(NULL), flucQ_(NULL), 
       rattle_(NULL), dumpWriter(NULL), statWriter(NULL), thermo(info),
-      currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
+      snap(info->getSnapshotManager()->getCurrentSnapshot()) {
     
     simParams = info->getSimParams();
     
@@ -94,7 +94,7 @@ namespace OpenMD {
     }
     
     if (!simParams->getUseInitalTime()) {
-      currentSnapshot_->setTime(0.0);
+      snap->setTime(0.0);
     }
     
     if (simParams->haveResetTime()) {

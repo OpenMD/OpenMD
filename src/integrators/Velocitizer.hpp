@@ -51,6 +51,7 @@
 #ifndef INTEGRATORS_VELOCITIZER_HPP
 #define INTEGRATORS_VELOCITIZER_HPP
 #include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
 #include "math/RandNumGen.hpp"
 
 namespace OpenMD {
@@ -74,8 +75,8 @@ namespace OpenMD {
         
   private:
         
-    SimInfo* info_;
-
+    SimInfo* info_;    
+    Thermo thermo;
     RandNumGen* randNumGen_;
 
   };

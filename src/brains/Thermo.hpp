@@ -52,34 +52,59 @@ namespace OpenMD {
 
   public:
 
-    Thermo( SimInfo* info) : info_(info) {}
+    Thermo( SimInfo* info ) : info_(info) {}
 
     // note: all the following energies are in kcal/mol
 
+    RealType getTranslationalKinetic(); // the translational kinetic energy 
+    RealType getRotationalKinetic(); // the rotational kinetic energy 
     RealType getKinetic(); // the total kinetic energy 
     RealType getPotential(); // the total potential energy
-    RealType getTotalE(); // gets the total energy
+    RealType getTotalEnergy(); // gets the total energy
 
-    RealType getTemperature(); // gives the instant temp. in K
+    RealType getTemperature(); // Gives the instant temp. in K
     RealType getElectronicTemperature(); // gives the instant electronic temperature in K
 
     RealType getPressure(); // gives the instant pressure in atm;
-    RealType getPressureX() { return getPressure(0); }
-    RealType getPressureY() { return getPressure(1); }
-    RealType getPressureZ() { return getPressure(2); }
 
     // gives the pressure tensor in amu*fs^-2*Ang^-1
-    Mat3x3d getPressureTensor(); 
+    Mat3x3d  getPressureTensor(); 
     RealType getVolume();   // gives the volume in Ang^3 
 
     // accumulate and return the simulation box dipole moment in C*m
-    Vector3d getBoxDipole(); 
+    Vector3d getSystemDipole(); 
     Vector3d getHeatFlux();
-    void saveStat();
+
+    /** Returns the center of the mass of the whole system.*/
+    Vector3d getCom();
+
+    /** Returns the velocity of center of mass of the whole system.*/
+    Vector3d getComVel();
+
+    /** Returns the center of the mass and Center of Mass velocity of
+        the whole system.*/ 
+    void getComAll(Vector3d& com,Vector3d& comVel);
+
+    /** Returns intertia tensor for the entire system and system
+        Angular Momentum.*/
+    void getInertiaTensor(Mat3x3d &intertiaTensor,Vector3d &angularMomentum);
     
-  private:
-    RealType getPressure(int direction);
+    /** Returns system angular momentum */
+    Vector3d getAngularMomentum();
+
+    /** Returns volume of system as estimated by an ellipsoid defined
+        by the radii of gyration */
+    RealType getGyrationalVolume();
+
+    /** Overloaded version of gyrational volume that also returns
+        det(I) so dV/dr can be calculated */
+    void getGyrationalVolume(RealType &vol, RealType &detI);
+
+    RealType getHullVolume();
+
+    RealType getTaggedAtomPairDistance();
     
+  private:    
     SimInfo* info_;
   };
   

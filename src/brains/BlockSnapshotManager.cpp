@@ -227,6 +227,7 @@ namespace OpenMD {
   Snapshot* BlockSnapshotManager::loadFrame(int frame){
     Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_, getStorageLayout());
     snapshot->setID(frame);
+    snapshot->clearDerivedProperties();
     
     /** @todo fixed me */
     Snapshot* oldSnapshot = currentSnapshot_;

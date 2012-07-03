@@ -43,11 +43,13 @@
 /* Calculates Rho(theta) */
 
 #include <algorithm>
-  #include <fstream>
+#include <fstream>
 #include "applications/staticProps/pAngle.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
+
 namespace OpenMD {
   
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
@@ -74,6 +76,7 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     int i;
 
+    Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
@@ -94,7 +97,7 @@ namespace OpenMD {
         }
       }
       
-      Vector3d CenterOfMass = info_->getCom();      
+      Vector3d CenterOfMass = thermo.getCom();      
 
       if  (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());

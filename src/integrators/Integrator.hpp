@@ -53,6 +53,7 @@
 
 #include "brains/ForceManager.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
+#include "brains/Stats.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
 #include "integrators/RotationAlgorithm.hpp"
@@ -137,7 +138,7 @@ namespace OpenMD {
     virtual void doUpdateSizes() {}
         
     void saveConservedQuantity() {
-      currentSnapshot_->statData[Stats::CONSERVED_QUANTITY] = calcConservedQuantity();
+      snap->setConservedQuantity( calcConservedQuantity() );
     }
         
     SimInfo* info_;
@@ -157,6 +158,7 @@ namespace OpenMD {
 
     bool useRNEMD;    
     
+    Stats* stats;
     DumpWriter* dumpWriter;
     StatWriter* statWriter;
     Thermo thermo;
@@ -169,7 +171,7 @@ namespace OpenMD {
     RealType RNEMD_exchangeTime;
     RealType dt;
 
-    Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change
+    Snapshot* snap; // During the integration, the address of snap Will not change
 
         
   private:

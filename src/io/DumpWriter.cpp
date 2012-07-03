@@ -50,7 +50,7 @@
 
 #ifdef IS_MPI
 #include <mpi.h>
-#endif //is_mpi
+#endif
 
 using namespace std;
 namespace OpenMD {
@@ -257,20 +257,21 @@ namespace OpenMD {
             hmat(0, 2), hmat(1, 2), hmat(2, 2));
     os << buffer;
 
-    RealType chi = s->getChi();
-    RealType integralOfChiDt = s->getIntegralOfChiDt();
-    if (isinf(chi) || isnan(chi) || 
-        isinf(integralOfChiDt) || isnan(integralOfChiDt)) {      
+    pair<RealType, RealType> thermostat = s->getThermostat();
+
+    if (isinf(thermostat.first)  || isnan(thermostat.first) || 
+        isinf(thermostat.second) || isnan(thermostat.second)) {      
       sprintf( painCave.errMsg,
                "DumpWriter detected a numerical error writing the thermostat");
       painCave.isFatal = 1;
       simError();
     }
-    sprintf(buffer, "  Thermostat: %.10g , %.10g\n", chi, integralOfChiDt);
+    sprintf(buffer, "  Thermostat: %.10g , %.10g\n", thermostat.first, 
+            thermostat.second);
     os << buffer;
 
     Mat3x3d eta;
-    eta = s->getEta();
+    eta = s->getBarostat();
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {

@@ -58,14 +58,11 @@
 #include "utils/simError.h" 
 #include "utils/MemoryUtils.hpp" 
 #include "utils/StringTokenizer.hpp" 
+#include "brains/Thermo.hpp"
  
 #ifdef IS_MPI 
- 
 #include <mpi.h> 
-#define TAKE_THIS_TAG_CHAR 0 
-#define TAKE_THIS_TAG_INT 1 
- 
-#endif // is_mpi 
+#endif
  
  
 namespace OpenMD { 
@@ -245,20 +242,18 @@ namespace OpenMD {
 
     if (needCOMprops_) {
       Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
+      Thermo thermo(info_);
       Vector3d com;
-      Vector3d comvel;
-      Vector3d comw;
-      if (needPos_ && needVel_){
-	info_->getComAll(com, comvel);
-	comw = info_->getAngularMomentum();
-      }else{
-	com = info_->getCom();
-	comvel = 0.0;
-	comw   = 0.0;
-      }
-      s->setCOMprops(com, comvel, comw);      
-    }
 
+      if (needPos_ && needVel_) {
+        Vector3d comvel;
+        Vector3d comw;
+        thermo.getComAll(com, comvel);
+        comw = thermo.getAngularMomentum();
+      } else {
+        com = thermo.getCom();
+      }                    
+    }
   } 
    
   void DumpReader::readSet(int whichFrame) {     
@@ -714,10 +709,10 @@ namespace OpenMD {
         hmat(2, 2) = tokenizer.nextTokenAsDouble(); 
         s->setHmat(hmat);      
       } else if (propertyName == "Thermostat") {
-        RealType chi = tokenizer.nextTokenAsDouble();
-        RealType integralOfChiDt = tokenizer.nextTokenAsDouble();
-        s->setChi(chi); 
-        s->setIntegralOfChiDt(integralOfChiDt);        
+        pair<RealType, RealType> thermostat;
+        thermostat.first = tokenizer.nextTokenAsDouble();
+        thermostat.second = tokenizer.nextTokenAsDouble();
+        s->setThermostat(thermostat); 
      } else if (propertyName == "Barostat") {
         Mat3x3d eta;
         eta(0, 0) = tokenizer.nextTokenAsDouble(); 
@@ -729,7 +724,7 @@ namespace OpenMD {
         eta(2, 0) = tokenizer.nextTokenAsDouble(); 
         eta(2, 1) = tokenizer.nextTokenAsDouble(); 
         eta(2, 2) = tokenizer.nextTokenAsDouble(); 
-        s->setEta(eta); 
+        s->setBarostat(eta); 
       } else {
         sprintf(painCave.errMsg, 
                 "DumpReader Error: %s is an invalid property in <FrameData>\n", propertyName.c_str()); 

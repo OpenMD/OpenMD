@@ -48,6 +48,7 @@
 #include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
 #include <math.h>
 
 namespace OpenMD {
@@ -88,7 +89,8 @@ namespace OpenMD {
       StuntDouble* sd;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d CenterOfMass = info_->getCom();      
+      Thermo thermo(info_);
+      Vector3d CenterOfMass = thermo.getCom();      
       
       
       if (evaluator_.isDynamic()) {

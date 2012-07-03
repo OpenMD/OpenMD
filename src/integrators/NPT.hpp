@@ -153,8 +153,7 @@ namespace OpenMD {
 
     RealType etaTolerance;
        
-    RealType chi;
-    RealType integralOfChidt;
+    pair<RealType, RealType> thermostat;
     Mat3x3d press;
             
   private:

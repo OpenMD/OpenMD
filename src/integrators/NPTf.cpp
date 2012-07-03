@@ -114,7 +114,7 @@ namespace OpenMD {
 	vScale(i, j) = eta(i, j);
 
 	if (i == j) {
-	  vScale(i, j) += chi;
+	  vScale(i, j) += thermostat.first;
 	}
       }
     }
@@ -222,9 +222,9 @@ namespace OpenMD {
       simError();
     } else {
 
-      Mat3x3d hmat = currentSnapshot_->getHmat();
+      Mat3x3d hmat = snap->getHmat();
       hmat = hmat *scaleMat;
-      currentSnapshot_->setHmat(hmat);
+      snap->setHmat(hmat);
         
     }
   }
@@ -244,9 +244,8 @@ namespace OpenMD {
   }
 
   RealType NPTf::calcConservedQuantity(){
-
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    
+    thermostat = snap->getThermostat();
     loadEta();
     
     // We need NkBT a lot, so just set it here: This is the RAW number
@@ -267,11 +266,12 @@ namespace OpenMD {
     RealType barostat_potential;
     RealType trEta;
 
-    totalEnergy = thermo.getTotalE();
+    totalEnergy = thermo.getTotalEnergy();
+    
+    thermostat_kinetic = fkBT * tt2 * thermostat.first * 
+      thermostat.first /(2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * PhysicalConstants::energyConvert);
-
-    thermostat_potential = fkBT* integralOfChidt / PhysicalConstants::energyConvert;
+    thermostat_potential = fkBT* thermostat.second / PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
@@ -288,7 +288,7 @@ namespace OpenMD {
   }
 
   void NPTf::loadEta() {
-    eta= currentSnapshot_->getEta();
+    eta= snap->getBarostat();
 
     //if (!eta.isDiagonal()) {
     //    sprintf( painCave.errMsg,
@@ -299,7 +299,7 @@ namespace OpenMD {
   }
 
   void NPTf::saveEta() {
-    currentSnapshot_->setEta(eta);
+    snap->setBarostat(eta);
   }
 
 }

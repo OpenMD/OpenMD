@@ -51,7 +51,7 @@ namespace OpenMD {
   FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
     FluctuatingChargePropagator(info), chiTolerance_ (1e-6), 
     maxIterNum_(4), thermo(info),
-    currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {    
+    snap(info->getSnapshotManager()->getCurrentSnapshot()) {    
   }
 
   void FluctuatingChargeNVT::initialize() {
@@ -68,8 +68,7 @@ namespace OpenMD {
       }
       
       if (!info_->getSimParams()->getUseIntialExtendedSystemState()) {
-        currentSnapshot_->setChiElectronic(0.0);
-        currentSnapshot_->setIntegralOfChiElectronicDt(0.0);
+        snap->setElectronicThermostat(make_pair(0.0, 0.0));
       }
       
       if (!fqParams_->haveTargetTemp()) {
@@ -109,8 +108,9 @@ namespace OpenMD {
     Atom* atom;
     RealType cvel, cpos, cfrc, cmass;
 
-    RealType chi = currentSnapshot_->getChiElectronic();
-    RealType integralOfChidt = currentSnapshot_->getIntegralOfChiElectronicDt();
+    pair<RealType, RealType> thermostat = snap->getElectronicThermostat();
+    RealType chi = thermostat.first;
+    RealType integralOfChidt = thermostat.second;
     RealType instTemp = thermo.getElectronicTemperature();
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
@@ -137,9 +137,7 @@ namespace OpenMD {
       (tauThermostat_ * tauThermostat_);
 
     integralOfChidt += chi * dt2_;
-    currentSnapshot_->setChiElectronic(chi);
-    currentSnapshot_->setIntegralOfChiElectronicDt(integralOfChidt);
-       
+    snap->setElectronicThermostat(make_pair(chi, integralOfChidt));
   }
 
   void FluctuatingChargeNVT::updateSizes() {
@@ -153,10 +151,11 @@ namespace OpenMD {
     Molecule* mol;
     Atom* atom;
     RealType instTemp;
-    RealType chi = currentSnapshot_->getChiElectronic();
+    pair<RealType, RealType> thermostat = snap->getElectronicThermostat();
+    RealType chi = thermostat.first;
     RealType oldChi = chi;
     RealType prevChi;
-    RealType integralOfChidt = currentSnapshot_->getIntegralOfChiElectronicDt();
+    RealType integralOfChidt = thermostat.second;
     int index;
     RealType cfrc, cvel, cmass;
 
@@ -200,20 +199,19 @@ namespace OpenMD {
         break;
     }
     integralOfChidt += dt2_ * chi;
-    currentSnapshot_->setChiElectronic(chi);
-    currentSnapshot_->setIntegralOfChiElectronicDt(integralOfChidt);
+    snap->setElectronicThermostat(make_pair(chi, integralOfChidt));
   }
   
   void FluctuatingChargeNVT::resetPropagator() {
     if (!hasFlucQ_) return;
-    currentSnapshot_->setChiElectronic(0.0);
-    currentSnapshot_->setIntegralOfChiElectronicDt(0.0);
+    snap->setElectronicThermostat(make_pair(0.0, 0.0));
   }
   
   RealType FluctuatingChargeNVT::calcConservedQuantity() {
     if (!hasFlucQ_) return 0.0;
-    RealType chi = currentSnapshot_->getChiElectronic();
-    RealType integralOfChidt = currentSnapshot_->getIntegralOfChiElectronicDt();
+    pair<RealType, RealType> thermostat = snap->getElectronicThermostat();
+    RealType chi = thermostat.first;
+    RealType integralOfChidt = thermostat.second;
     RealType fkBT = info_->getNFluctuatingCharges() * 
       PhysicalConstants::kB *targetTemp_;
 

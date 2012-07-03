@@ -67,6 +67,7 @@ namespace OpenMD {
 
     *previousSnapshot_ = *currentSnapshot_;
     currentSnapshot_->setID(currentSnapshot_->getID() + 1);    
+    currentSnapshot_->clearDerivedProperties();
     return true;
   }
 
