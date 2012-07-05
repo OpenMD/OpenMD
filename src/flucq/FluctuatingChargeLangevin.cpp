@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include "FluctuatingChargeNVT.hpp"
+#include "FluctuatingChargeLangevin.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
@@ -48,13 +48,13 @@
 
 namespace OpenMD {
 
-  FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
-    FluctuatingChargePropagator(info), chiTolerance_ (1e-6), 
-    maxIterNum_(4), thermo(info),
+  FluctuatingChargeLangevin::FluctuatingChargeLangevin(SimInfo* info) : 
+    FluctuatingChargePropagator(info), maxIterNum_(4),
+    forceTolerance_(1e-6),
     snap(info->getSnapshotManager()->getCurrentSnapshot()) {    
   }
 
-  void FluctuatingChargeNVT::initialize() {
+  void FluctuatingChargeLangevin::initialize() {
     FluctuatingChargePropagator::initialize();  
     if (hasFlucQ_) {
       if (info_->getSimParams()->haveDt()) {
@@ -62,17 +62,13 @@ namespace OpenMD {
         dt2_ = dt_ * 0.5;
       } else {
         sprintf(painCave.errMsg,
-                "FluctuatingChargeNVT Error: dt is not set\n");
+                "FluctuatingChargeLangevin Error: dt is not set\n");
         painCave.isFatal = 1;
         simError();
       }
-      
-      if (!info_->getSimParams()->getUseIntialExtendedSystemState()) {
-        snap->setElectronicThermostat(make_pair(0.0, 0.0));
-      }
-      
+            
       if (!fqParams_->haveTargetTemp()) {
-        sprintf(painCave.errMsg, "You can't use the FluctuatingChargeNVT "
+        sprintf(painCave.errMsg, "You can't use the FluctuatingChargeLangevin "
                 "propagator without a flucQ.targetTemp!\n");
         painCave.isFatal = 1;
         painCave.severity = OPENMD_ERROR;
@@ -83,22 +79,23 @@ namespace OpenMD {
       
       // We must set tauThermostat.
       
-      if (!fqParams_->haveTauThermostat()) {
-        sprintf(painCave.errMsg, "If you use the FluctuatingChargeNVT\n"
-                "\tpropagator, you must set flucQ.tauThermostat .\n");
+      if (!fqParams_->haveDragCoefficient()) {
+        sprintf(painCave.errMsg, "If you use the FluctuatingChargeLangevin\n"
+                "\tpropagator, you must set flucQ.dragCoefficient .\n");
         
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();
       } else {
-        tauThermostat_ = fqParams_->getTauThermostat();
+        drag_ = fqParams_->getDragCoefficient();
       }
-      updateSizes(); 
     }
+
+    variance_ = 2.0 * PhysicalConstants::kb * targetTemp_ * drag_ / dt_;
   }
 
 
-  void FluctuatingChargeNVT::moveA() {
+  void FluctuatingChargeLangevin::moveA() {
 
     if (!hasFlucQ_) return;
 
@@ -107,11 +104,6 @@ namespace OpenMD {
     Molecule* mol;
     Atom* atom;
     RealType cvel, cpos, cfrc, cmass;
-
-    pair<RealType, RealType> thermostat = snap->getElectronicThermostat();
-    RealType chi = thermostat.first;
-    RealType integralOfChidt = thermostat.second;
-    RealType instTemp = thermo.getElectronicTemperature();
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
@@ -123,105 +115,104 @@ namespace OpenMD {
         cfrc = atom->getFlucQFrc();
         cmass = atom->getChargeMass();       
 
-        cerr << cpos << "\t" << cvel << "\t" << cfrc << "\t" << instTemp << "\t" <<chi << "\t" << integralOfChidt << "\n";
 	// velocity half step
-        cvel += dt2_ * cfrc / cmass - dt2_*chi*cvel;                    
+        cvel += dt2_ * cfrc / cmass;
         // position whole step
         cpos += dt_ * cvel;
 	
         atom->setFlucQVel(cvel);
         atom->setFlucQPos(cpos);
       }
-    }
-    
-    chi += dt2_ * (instTemp / targetTemp_ - 1.0) / 
-      (tauThermostat_ * tauThermostat_);
-
-    integralOfChidt += chi * dt2_;
-    snap->setElectronicThermostat(make_pair(chi, integralOfChidt));
+    }   
   }
 
-  void FluctuatingChargeNVT::updateSizes() {
-    oldVel_.resize(info_->getNFluctuatingCharges());
+  void FluctuatingChargeLangevin::applyConstraints() {
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator  j;
+    Molecule* mol;
+    Atom* atom;
+    RealType cvel, cpos, cfrc, cmass, randomForce, frictionForce, velstep;
+    RealType velStep, oldFF;  // used to test for convergence
+
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+
+        cvel = atom->getFlucQVel();
+        cpos = atom->getFlucQPos();
+        cfrc = atom->getFlucQFrc();
+        cmass = atom->getChargeMass();       
+
+        randomForce = randNumGen_.randNorm(0, variance_ );
+        atom->addFlucQFrc(randomForce);        
+        
+        // What remains contains velocity explicitly, but the velocity
+        // required is at the full step: v(t + h), while we have
+        // initially the velocity at the half step: v(t + h/2).  We
+        // need to iterate to converge the friction force vector.
+          
+        // this is the velocity at the half-step:
+            
+        cvel = atom->getFlucQVel();
+
+        // estimate velocity at full-step using everything but
+        // friction forces:
+        
+        cfrc = atom->getFlucQFrc();
+        velStep = cvel + dt2_ * cfrc / cmass;
+
+        frictionForce = 0.0;
+        //iteration starts here:
+        
+        for (int k = 0; k < maxIterNum_; k++) {
+          
+          oldFF = frictionForce;                            
+          frictionForce = -drag_ * velStep;
+          // re-estimate velocities at full-step using friction forces:
+          
+          velStep = cvel + dt2_ * (cfrc + frictionForce) / cmass;
+          
+          // check for convergence
+          
+          if (fabs(frictionForce - oldFF) <= forceTolerance_)
+            break; // iteration ends here
+        }
+        //cerr << "rand = " << randomForce << " fric = " << frictionForce << "\n";
+        atom->addFlucQFrc(frictionForce);
+      }
+    }        
+    fqConstraints_->applyConstraints();
   }
 
-  void FluctuatingChargeNVT::moveB() {
+  void FluctuatingChargeLangevin::moveB() {
     if (!hasFlucQ_) return;
     SimInfo::MoleculeIterator i;
     Molecule::FluctuatingChargeIterator  j;
     Molecule* mol;
     Atom* atom;
-    RealType instTemp;
-    pair<RealType, RealType> thermostat = snap->getElectronicThermostat();
-    RealType chi = thermostat.first;
-    RealType oldChi = chi;
-    RealType prevChi;
-    RealType integralOfChidt = thermostat.second;
-    int index;
     RealType cfrc, cvel, cmass;
 
-    index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
+           atom = mol->nextFluctuatingCharge(j)) {        
+
+        cvel =atom->getFlucQVel();
+        cfrc = atom->getFlucQFrc();
+        cmass = atom->getChargeMass();
+                
+        // velocity half step
+        cvel += (dt2_ * cfrc) / cmass;
         
-        oldVel_[index] = atom->getFlucQVel();
-        ++index;
+        atom->setFlucQVel(cvel);
       }
-    }
-        
-    // do the iteration:
+    }    
+  }
     
-    for(int k = 0; k < maxIterNum_; k++) {
-      index = 0;
-      instTemp = thermo.getElectronicTemperature();
-      // evolve chi another half step using the temperature at t + dt/2
-      prevChi = chi;
-      chi = oldChi + dt2_ * (instTemp / targetTemp_ - 1.0) / 
-        (tauThermostat_ * tauThermostat_);
+  void FluctuatingChargeLangevin::updateSizes() { }
 
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {
-        for (atom = mol->beginFluctuatingCharge(j);  atom != NULL;
-             atom = mol->nextFluctuatingCharge(j)) {
-
-          cfrc = atom->getFlucQFrc();
-          cvel =atom->getFlucQVel();
-          cmass = atom->getChargeMass();
-          
-          // velocity half step
-          cvel = oldVel_[index] + dt2_ * cfrc / cmass - dt2_*chi*oldVel_[index];
-          atom->setFlucQVel(cvel);      
-          ++index;          
-        }
-      }
-      if (fabs(prevChi - chi) <= chiTolerance_)
-        break;
-    }
-    integralOfChidt += dt2_ * chi;
-    snap->setElectronicThermostat(make_pair(chi, integralOfChidt));
-  }
-  
-  void FluctuatingChargeNVT::resetPropagator() {
-    if (!hasFlucQ_) return;
-    snap->setElectronicThermostat(make_pair(0.0, 0.0));
-  }
-  
-  RealType FluctuatingChargeNVT::calcConservedQuantity() {
-    if (!hasFlucQ_) return 0.0;
-    pair<RealType, RealType> thermostat = snap->getElectronicThermostat();
-    RealType chi = thermostat.first;
-    RealType integralOfChidt = thermostat.second;
-    RealType fkBT = info_->getNFluctuatingCharges() * 
-      PhysicalConstants::kB *targetTemp_;
-
-    RealType thermostat_kinetic = fkBT * tauThermostat_ * tauThermostat_ * 
-      chi * chi / (2.0 * PhysicalConstants::energyConvert);
-
-    RealType thermostat_potential = fkBT * integralOfChidt / 
-      PhysicalConstants::energyConvert;
-
-    return thermostat_kinetic + thermostat_potential;
+  RealType FluctuatingChargeLangevin::calcConservedQuantity() {
+    return 0.0;
   }
 }

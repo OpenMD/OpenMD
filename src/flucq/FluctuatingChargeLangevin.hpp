@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,74 +40,72 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#ifndef INTEGRATORS_FLUCTUATINGCHARGELANGEVIN_HPP
+#define INTEGRATORS_FLUCTUATINGCHARGELANGEVIN_HPP
+
 #include "flucq/FluctuatingChargePropagator.hpp"
-#include "flucq/FluctuatingChargeObjectiveFunction.hpp"
-#include "optimization/Constraint.hpp"
-#include "optimization/Problem.hpp"
-#include "optimization/EndCriteria.hpp"
-#include "optimization/StatusFunction.hpp"
-#include "optimization/OptimizationFactory.hpp"
+#include "math/SeqRandNumGen.hpp"
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
-using namespace QuantLib;
 namespace OpenMD {
 
-  FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info) : 
-    info_(info), hasFlucQ_(false), forceMan_(NULL) {
+  class FluctuatingChargeLangevin : public FluctuatingChargePropagator {
+  public:
+    FluctuatingChargeLangevin(SimInfo* info);
     
-    Globals* simParams = info_->getSimParams();
-    fqParams_ = simParams->getFluctuatingChargeParameters();
-
-  }
-
-  void FluctuatingChargePropagator::setForceManager(ForceManager* forceMan) {
-    forceMan_ = forceMan;
-  }
-
-  void FluctuatingChargePropagator::initialize() {
-
-    if (info_->usesFluctuatingCharges()) {
-      if (info_->getNFluctuatingCharges() > 0) {
-        hasFlucQ_ = true;
-	fqConstraints_ = new FluctuatingChargeConstraints(info_);        
-      }
+    RealType getTargetTemp() {
+      return targetTemp_;
     }
 
-    if (!hasFlucQ_) return;
-
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        atom->setFlucQPos(0.0);
-        atom->setFlucQVel(0.0);
-      }
+    void setTargetTemp(RealType tt) {
+      targetTemp_ = tt;
     }
+
+    RealType getDragCoefficient() {
+      return drag_;
+    }
+
+    void setDragCoefficient(RealType drag) {
+      drag_ = drag;
+    }
+
+    int getMaxIterationNumber() {
+      return maxIterNum_;
+    }
+        
+    void setMaxIterationNumber(int maxIter) {
+      maxIterNum_ = maxIter;
+    }
+
+    RealType getForceTolerance() {
+      return forceTolerance_;
+    }
+
+    void setForceTolerance(RealType tol) {
+      forceTolerance_ = tol;
+    }
+
+
+  private:
+    virtual void initialize();
+    virtual void moveA();
+    virtual void applyConstraints();
+    virtual void moveB();
+    virtual void updateSizes();
+    virtual RealType calcConservedQuantity();
+
+    int maxIterNum_;
+    RealType forceTolerance_;
+    RealType targetTemp_;
+    RealType drag_;
+    RealType variance_;
+    RealType dt2_;
+    RealType dt_;
     
-    fqConstraints_ = new FluctuatingChargeConstraints(info_);
-    FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, fqConstraints_);    
-    DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
-    Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), initCoords);
-    EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
-    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
+    Snapshot* snap;
+    SeqRandNumGen randNumGen_; 
 
-    DumpStatusFunction dsf(info_);  // we want a dump file written every iteration
+  };
 
-    minim->minimize(problem, endCriteria);
-
-  }
-
-  void FluctuatingChargePropagator::applyConstraints() {
-    if (!hasFlucQ_) return;
-
-    fqConstraints_->applyConstraints();
-  }
 }
+
+#endif 

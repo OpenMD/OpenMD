@@ -54,6 +54,7 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations", 100);    
     DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
     DefineOptionalParameterWithDefaultValue(TauThermostat, "tauThermostat", 10.0);
+    DefineOptionalParameterWithDefaultValue(DragCoefficient, "dragCoefficient", 0.01);
   }
   
   FluctuatingChargeParameters::~FluctuatingChargeParameters() {    
@@ -66,6 +67,7 @@ namespace OpenMD {
     CheckParameter(MaxIterations, isPositive());    
     CheckParameter(TargetTemp,  isNonNegative());
     CheckParameter(TauThermostat, isPositive()); 
+    CheckParameter(DragCoefficient, isPositive()); 
   }
   
 }

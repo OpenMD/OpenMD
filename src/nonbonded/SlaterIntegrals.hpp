@@ -64,6 +64,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "math/Factorials.hpp"
+#include "utils/NumericConstant.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP
 #define NONBONDED_SLATERINTEGRALS_HPP
@@ -219,27 +220,40 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
 	
   // First compute the two-electron component
   RealType sSTOCoulInt_ = 0.;
-  if (x == 0.) // Pathological case
+  if (std::fabs(x) < OpenMD::NumericConstant::epsilon) // Pathological case
     {
-      if ((a==b) && (m==n))
-        {
-          for (int nu=0; nu<=2*n-1; nu++)
-            {
-              K2 = 0.;
-              for (unsigned p=0; p<=2*n+m; p++) K2 += 1. / fact[p];
-              sSTOCoulInt_ += K2 * fact[2*n+m] / fact[m];
-            }
-          sSTOCoulInt_ = 2 * a / (n * fact[2*n]) * sSTOCoulInt_;
-        }
-      else
-        {
-          // Not implemented
-	  cerr << "ERROR, sSTOCoulInt cannot compute from arguments\n";
-	  cerr << "a = " << a << "\tb = " << b << "\tm = " << m <<"\tn = " << n << "\t R = " << R << "\n";
-          //printf("ERROR, sSTOCoulInt cannot compute from arguments\n");
-          //printf("a = %lf b = %lf m = %d n = %d R = %lf\n",a, b, m, n, R);
-          //exit(0);
-        }
+
+      // This solution for the one-center coulomb integrals comes from 
+      // Yoshiyuki Hase, Computers & Chemistry 9(4), pp. 285-287 (1985).
+      
+      RealType Term1 = fact[2*m - 1] / pow(2*a, 2*m);
+      RealType Term2 = 0.;
+      for (int nu = 1; nu <= 2*n; nu++) {
+        Term2 += nu * pow(2*b, 2*n - nu) * fact[2*(m+n)-nu-1] / (fact[2*n-nu]*2*n * pow(2*(a+b), 2*(m+n)-nu));
+      }
+      sSTOCoulInt_ = pow(2*a, 2*m+1) * (Term1 - Term2) / fact[2*m];
+
+      // Original QTPIE code for the one-center case is below.  Doesn't
+      // appear to generate the correct one-center results.
+      //
+      // if ((a==b) && (m==n))
+      //   {
+      //     for (int nu=0; nu<=2*n-1; nu++)
+      //       {
+      //         K2 = 0.;
+      //         for (unsigned p=0; p<=2*n+m; p++) K2 += 1. / fact[p];
+      //         sSTOCoulInt_ += K2 * fact[2*n+m] / fact[m];
+      //       }
+      //     sSTOCoulInt_ = 2 * a / (n * fact[2*n]) * sSTOCoulInt_;
+      //   }
+      // else
+      //   {
+      //     // Not implemented
+      //     printf("ERROR, sSTOCoulInt cannot compute from arguments\n");
+      //     printf("a = %lf b = %lf m = %d n = %d R = %lf\n",a, b, m, n, R);
+      //     exit(0);
+      //   }
+
     }
   else
     {

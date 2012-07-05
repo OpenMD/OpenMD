@@ -43,6 +43,7 @@
 #include "brains/Snapshot.hpp"
 #include "integrators/Integrator.hpp"
 #include "integrators/DLM.hpp"
+#include "flucq/FluctuatingChargeLangevin.hpp"
 #include "flucq/FluctuatingChargeNVT.hpp"
 #include "utils/simError.h"
 
@@ -142,7 +143,7 @@ namespace OpenMD {
     
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
-    flucQ_ = new FluctuatingChargeNVT(info);
+    flucQ_ = new FluctuatingChargeLangevin(info);
     flucQ_->setForceManager(forceMan_);
   }
   

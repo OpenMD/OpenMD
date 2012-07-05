@@ -80,8 +80,13 @@ namespace OpenMD {
      */
     const RealType thermalConductivityConvert = 1.439326479e-5; 
 
-    const RealType bohrToAngstroms = 1.8897161646320724;
-    const RealType angstromsToBohr = 0.52918;
+    /* Atomic Units are used in the Slater overlap code, and we need
+     * to get distances back and forth to angstroms and energies back 
+     * and forth to kcal / mol 
+     */
+    const RealType angstromToBohr = 1.88972612;
+    const RealType bohrToAngstrom = 0.52917721092;
+    const RealType hartreeToKcal   = 627.509469;
   }
 }
 #endif 

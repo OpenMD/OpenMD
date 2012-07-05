@@ -31,30 +31,24 @@ component{
 }
 
 flucQ {
- targetTemp = 1.0;
+ targetTemp = 10.0;
  tauThermostat = 10.0;
+ dragCoefficient = 0.0001;
 }
+
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTRONIC_TEMPERATURE";
 
 ensemble = NVE;
 forceField = "FlucQ";
 forceFieldFileName = "FQ.frc";
 cutoffMethod = "shifted_force";
-dielectric = 80.0;
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
 outputFluctuatingCharges = true;
-runTime = 10000;
+runTime = 1e6;
 sampleTime = 100;
-statusTime = 1;
+statusTime = 10;
 
-targetTemp = 300;
-targetPressure = 1.0;
-
-tauThermostat = 1e3;
-tauBarostat = 1e4;
-
-
-dt = 1.0;
+dt = 1;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

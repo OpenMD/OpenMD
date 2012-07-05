@@ -365,9 +365,9 @@ namespace OpenMD {
         for (int i = 1; i < np_+1; i++) {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
-          J1vals.push_back(electrostaticAtomData.hardness * sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromsToBohr ) );
+          J1vals.push_back(sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromToBohr ) * PhysicalConstants::hartreeToKcal );
           // may not be necessary if Slater coulomb integral is symmetric
-          J2vals.push_back(eaData2.hardness *  sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromsToBohr ) );
+          J2vals.push_back(sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromToBohr ) * PhysicalConstants::hartreeToKcal );
         }
 
         CubicSpline* J1 = new CubicSpline();
