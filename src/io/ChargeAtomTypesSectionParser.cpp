@@ -39,11 +39,10 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include "io/ChargeAtomTypesSectionParser.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "brains/ForceField.hpp"
-#include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 

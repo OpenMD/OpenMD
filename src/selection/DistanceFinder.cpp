@@ -78,7 +78,7 @@ namespace OpenMD {
     OpenMDBitSet bsResult(nStuntDoubles_);
     assert(bsResult.size() == bs.size());
    
-    for (int j = 0; j < stuntdoubles_.size(); ++j) {
+    for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
       if (stuntdoubles_[j]->isRigidBody()) {
         RigidBody* rb = static_cast<RigidBody*>(stuntdoubles_[j]);
         rb->updateAtoms();
@@ -88,7 +88,7 @@ namespace OpenMD {
     for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
       center = stuntdoubles_[i];
       centerPos = center->getPos();
-      for (int j = 0; j < stuntdoubles_.size(); ++j) {
+      for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos();
 	currSnapshot->wrapVector(r);
 	if (r.length() <= distance) {

@@ -138,25 +138,21 @@ namespace OpenMD {
     // Build a vector of integrable objects to determine if the are
     // surface atoms
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {          
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {	
-	localSites_.push_back(integrableObject);
+      for (sd = mol->beginIntegrableObject(j); 
+           sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {	
+	localSites_.push_back(sd);
       }
     }   
   }  
    
   void LangevinHullForceManager::postCalculation(){
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* integrableObject;
   
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);

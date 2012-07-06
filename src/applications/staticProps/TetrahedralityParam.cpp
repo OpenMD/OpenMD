@@ -94,7 +94,6 @@ namespace OpenMD {
     StuntDouble* sd2;
     StuntDouble* sdi;
     StuntDouble* sdj;
-    StuntDouble* sdk;
     RigidBody* rb;
     int myIndex;
     SimInfo::MoleculeIterator mi;
@@ -103,7 +102,6 @@ namespace OpenMD {
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj, dposition, tposition;
     RealType r;
-    RealType dist;
     RealType cospsi;
     RealType Qk;
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
@@ -265,7 +263,7 @@ namespace OpenMD {
     for (int i = 0; i < nBins_; ++i) {
       nSelected = nSelected + Q_histogram_[i]*deltaQ_;
     }
-
+    
     std::ofstream osq((getOutputFileName() + "Q").c_str());
 
     if (osq.is_open()) {
@@ -305,22 +303,14 @@ namespace OpenMD {
       osd << "1000000.00000000;    34.52893134     0.00000000     0.00000000;     0.00000000    34.52893134     0.00000000;     0.00000000     0.00000000    34.52893134" << "\n";
       
       for (iter = Distorted_.begin(); iter != Distorted_.end(); ++iter) {
-
 	Vector3d position;
-
 	position = (*iter)->getPos();
-
 	osd << "O  " << "\t";
-
-	  for (int z=0; z<position.size(); z++) {
-
+	  for (unsigned int z = 0; z < position.size(); z++) {
 	    osd << position[z] << "  " << "\t";
 	  }
-
 	  osd << "\n";
-
       }
-
       osd.close();
     }
 
@@ -341,7 +331,7 @@ namespace OpenMD {
 
 	ost << "O  " << "\t";
 
-	  for (int z=0; z<position.size(); z++) {
+	  for (unsigned int z = 0; z < position.size(); z++) {
 
 	    ost << position[z] << "  " << "\t";
 	  }

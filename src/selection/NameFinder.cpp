@@ -226,7 +226,7 @@ namespace OpenMD {
   }
 
   bool NameFinder::isMatched(const std::string& str, const std::string& wildcard) {
-    return Wildcard::wildcardfit (wildcard.c_str(), str.c_str());
+    return Wildcard::wildcardfit(wildcard.c_str(), str.c_str()) > 0 ? true : false;
   }
 
 
@@ -256,7 +256,7 @@ namespace OpenMD {
   }
 
   bool NameFinder::isInteger(const std::string str) {
-    for(int i =0; i < str.size(); ++i){
+    for(unsigned int i = 0; i < str.size(); ++i){
       if (!std::isdigit(str[i])) {
 	return false;
       }

@@ -89,7 +89,6 @@ namespace OpenMD {
   }
 
   OpenMDBitSet HullFinder::findHull() {
-    StuntDouble* sd;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     OpenMDBitSet bsResult(nStuntDoubles_);
 #ifdef HAVE_QHULL

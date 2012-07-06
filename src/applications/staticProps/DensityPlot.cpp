@@ -194,7 +194,7 @@ namespace OpenMD {
       ofs << "#selection: (" << selectionScript_ << ")\n";
       ofs << "#cmSelection:(" << cmSelectionScript_ << ")\n";
       ofs << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "\tdeltaR = " << deltaR_ <<"\n";
-      for (int i = 0; i < histogram_.size(); ++i) {
+      for (unsigned int i = 0; i < histogram_.size(); ++i) {
         ofs << i*deltaR_ - halfLen_ <<"\t" << density_[i]<< std::endl;
       }        
     } else {

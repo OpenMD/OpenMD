@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include <cmath>
+#include "utils/NumericConstant.hpp"
 #include "primitives/Atom.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 
@@ -53,7 +53,7 @@ namespace OpenMD {
       FluctuatingChargeAdapter fca = FluctuatingChargeAdapter(at);
       chargeMass_ = fca.getChargeMass();
     } else {
-      chargeMass_ = INFINITY;
+      chargeMass_ = NumericConstant::infinity;
     }
   }
 

@@ -675,7 +675,6 @@ namespace OpenMD {
     InteractionData idat;
     SelfData sdat;
     RealType mf;
-    RealType lrPot;
     RealType vpair;
     RealType dVdFQ1(0.0);
     RealType dVdFQ2(0.0);
@@ -869,7 +868,7 @@ namespace OpenMD {
 
           fDecomp_->collectIntermediateData();
 
-          for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
+          for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
@@ -884,7 +883,7 @@ namespace OpenMD {
     fDecomp_->collectData();
         
     if (info_->requiresSelfCorrection()) {
-      for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) { 
+      for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) { 
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
       }
@@ -897,11 +896,6 @@ namespace OpenMD {
       *(fDecomp_->getPairwisePotential());
 
     curSnapshot->setLongRangePotential(longRangePotential);
-
-    // lrPot = longRangePotential.sum();
-
-    // //store the long range potential  
-    // curSnapshot->setLongRangePotential(lrPot);
     
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                          *(fDecomp_->getExcludedPotential()));

@@ -94,7 +94,7 @@ namespace OpenMD {
   void MoLocator::calcRef( void ){
     AtomStamp* currAtomStamp;
     RigidBodyStamp* rbStamp;
-    int nAtoms; 
+    unsigned int nAtoms; 
     int nRigidBodies;
     std::vector<RealType> mass;
     Vector3d coor;
@@ -107,7 +107,7 @@ namespace OpenMD {
     nAtoms= myStamp->getNAtoms();
     nRigidBodies = myStamp->getNRigidBodies();
     
-    for(size_t i=0; i<nAtoms; i++){
+    for(unsigned int i = 0; i < nAtoms; i++){
       
       currAtomStamp = myStamp->getAtomStamp(i);
       
@@ -197,11 +197,11 @@ namespace OpenMD {
   }
   
   RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
-    int nAtoms;
+    unsigned int nAtoms;
     RealType totMass = 0;
     nAtoms = molStamp->getNAtoms();
     
-    for(size_t i = 0; i < nAtoms; i++) {
+    for(unsigned int i = 0; i < nAtoms; i++) {
       AtomStamp *currAtomStamp = molStamp->getAtomStamp(i);
       totMass += getAtomMass(currAtomStamp->getType(), myFF);         
     }

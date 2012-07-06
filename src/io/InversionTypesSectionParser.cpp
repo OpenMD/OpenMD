@@ -40,17 +40,16 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "utils/NumericConstant.hpp"
 #include "io/InversionTypesSectionParser.hpp"
 #include "types/InversionType.hpp"
 #include "types/ImproperCosineInversionType.hpp"
-//#include "types/ImproperHarmonicInversionType.hpp"
-//#include "types/CentralAtomHeightInversionType.hpp"
-//#include "types/DreidingInversionType.hpp"
+// #include "types/ImproperHarmonicInversionType.hpp"
+// #include "types/CentralAtomHeightInversionType.hpp"
+// #include "types/DreidingInversionType.hpp"
 #include "types/AmberImproperTorsionType.hpp"
 #include "types/PolynomialInversionType.hpp"
-//These two are added by me. Maybe it is wrong.
 #include "brains/ForceField.hpp"
-#include "utils/NumericConstant.hpp"
 
 namespace OpenMD {
   

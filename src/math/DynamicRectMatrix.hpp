@@ -440,19 +440,19 @@ namespace OpenMD {
     unsigned int nrow_;
     unsigned int ncol_;
   private:
-    void allocate(int nrow, int ncol) {
-        nrow_ = nrow;
-        ncol_ = ncol;
-        data_ = new Real*[nrow_];
-        for (int i = 0; i < nrow_; ++i)
-            data_[i] = new Real[ncol_];
+    void allocate( int nrow,  int ncol ) {
+      nrow_ = (unsigned int) nrow;
+      ncol_ = (unsigned int) ncol;
+      data_ = new Real*[nrow_];
+      for (unsigned int i = 0; i < nrow_; ++i)
+        data_[i] = new Real[ncol_];
     }
-
+    
     void deallocate() {
-      for (int i = 0; i < nrow_; ++i)
+      for (unsigned int i = 0; i < nrow_; ++i)
         delete data_[i];
       delete []data_;
-
+      
       nrow_ = 0;
       ncol_ = 0;
       data_ = NULL;

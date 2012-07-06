@@ -93,8 +93,6 @@ int main(int argc, char* argv[]){
   std::string dumpFileName = args_info.input_arg;
   std::string sele1;
   std::string sele2;
-  bool userSpecifiedSelect1;
-  bool userSpecifiedSelect2;
   
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"

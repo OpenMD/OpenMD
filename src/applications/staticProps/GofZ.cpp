@@ -76,7 +76,7 @@ namespace OpenMD {
     RealType pairDensity = nPairs /volume * 2.0;
     RealType pairConstant = ( 2.0 * NumericConstant::PI * pairDensity );
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       RealType zLower = i * deltaZ_;
       RealType zUpper = zLower + deltaZ_;
@@ -121,7 +121,7 @@ namespace OpenMD {
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgGofz_.size(); ++i) {
+      for (unsigned int i = 0; i < avgGofz_.size(); ++i) {
 	RealType z = deltaZ_ * (i + 0.5);
 	rdfStream << z << "\t" << avgGofz_[i]/nProcessed_ << "\n";
       }

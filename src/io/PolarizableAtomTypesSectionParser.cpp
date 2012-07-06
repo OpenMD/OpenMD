@@ -43,7 +43,6 @@
 #include "io/PolarizableAtomTypesSectionParser.hpp"
 #include "types/PolarizableAdapter.hpp"
 #include "brains/ForceField.hpp"
-#include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 

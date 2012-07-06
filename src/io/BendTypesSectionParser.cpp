@@ -39,7 +39,8 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
+#include "utils/NumericConstant.hpp" 
 #include "io/BendTypesSectionParser.hpp"
 #include "types/HarmonicBendType.hpp"
 #include "types/UreyBradleyBendType.hpp"
@@ -48,7 +49,6 @@
 #include "types/PolynomialBendType.hpp"
 #include "types/CosineBendType.hpp"
 #include "brains/ForceField.hpp"
-#include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 

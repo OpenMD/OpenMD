@@ -131,7 +131,7 @@ namespace OpenMD {
     Molecule::FluctuatingChargeIterator  j;
     Molecule* mol;
     Atom* atom;
-    RealType cvel, cpos, cfrc, cmass, randomForce, frictionForce, velstep;
+    RealType cvel, cpos, cfrc, cmass, randomForce, frictionForce;
     RealType velStep, oldFF;  // used to test for convergence
 
     for (mol = info_->beginMolecule(i); mol != NULL; 

@@ -74,7 +74,7 @@ int main(int argc,char* argv[]){
 #endif
    
   initSimError();           // the error handler
-  srand48( 1337 );          // the random number generator.
+  //srand48( 1337 );          // the random number generator.
 
   std::string svnrev;
   //convert a macro from compiler to a string in c++

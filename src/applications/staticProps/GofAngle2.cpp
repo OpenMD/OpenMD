@@ -67,14 +67,14 @@ namespace OpenMD {
 
   void GofAngle2::preProcess() {
 
-    for (int i = 0; i < avgGofr_.size(); ++i) {
+    for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
       std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
   }
 
   void GofAngle2::initalizeHistogram() {
     npairs_ = 0;
-    for (int i = 0; i < histogram_.size(); ++i)
+    for (unsigned int i = 0; i < histogram_.size(); ++i)
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
   }
 
@@ -122,10 +122,10 @@ namespace OpenMD {
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
-      for (int i = 0; i < avgGofr_.size(); ++i) {
+      for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	RealType cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
 
-	for(int j = 0; j < avgGofr_[i].size(); ++j) {
+	for(unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
 	  RealType cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
 	  rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
 	}

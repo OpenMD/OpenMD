@@ -8,6 +8,10 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+IF(WIN32)
+   ADD_DEFINITIONS(/D _CRT_SECURE_NO_WARNINGS)
+ENDIF(WIN32)
+
 find_package(MPI)
 if (NOT MPI_CXX_FOUND)
 message(STATUS "========== OpenMD Parallel Information ==========")
@@ -262,7 +266,6 @@ src/io/FluctuatingChargeAtomTypesSectionParser.cpp
 src/io/ForceFieldOptions.cpp
 src/io/GayBerneAtomTypesSectionParser.cpp
 src/io/Globals.cpp
-src/io/gzstream.cpp
 src/io/InversionTypesSectionParser.cpp
 src/io/LennardJonesAtomTypesSectionParser.cpp
 src/io/MultipoleAtomTypesSectionParser.cpp
@@ -415,6 +418,12 @@ src/utils/simError.cpp
 src/optimization/Problem.cpp
 )
 
+IF(ZLIB_FOUND)
+set(ZLIB_SOURCE
+src/io/gzstream.cpp
+)
+ENDIF(ZLIB_FOUND)
+
 IF(QHULL_FOUND)
 set(QHULL_SOURCE 
 src/integrators/LangevinHullDynamics.cpp 
@@ -427,7 +436,13 @@ src/math/AlphaHull.cpp
 )
 ENDIF(QHULL_FOUND)
 
-add_library(openmd_core STATIC ${SOURCE} ${QHULL_SOURCE} )
+IF(WIN32)
+set(GETOPT_SOURCE
+src/utils/getopt.cpp
+)
+ENDIF(WIN32)
+
+add_library(openmd_core STATIC ${SOURCE} ${QHULL_SOURCE} ${ZLIB_SOURCE} )
 add_library(openmd_single STATIC ${PARALLEL_SOURCE} ${QHULL_PARALLEL_SOURCE} )
 
 IF(MPI_FOUND)
@@ -556,25 +571,25 @@ src/applications/thermalizer/thermalizer.cpp
 src/applications/thermalizer/thermalizerCmd.cpp
 )
 
-add_executable(Dump2XYZ ${DUMP2XYZSOURCE})
+add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single openmd_core)
-add_executable(DynamicProps ${DYNAMICPROPSSOURCE})
+add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single openmd_core)
-add_executable(Hydro ${HYDROSOURCE})
+add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Hydro openmd_single openmd_core openmd_single openmd_core)
-add_executable(StaticProps ${STATICPROPSSOURCE})
+add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(StaticProps openmd_single openmd_core openmd_single openmd_core)
-add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE})
+add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanoparticleBuilder openmd_single openmd_core openmd_single openmd_core)
-add_executable(nanorodBuilder ${NANORODBUILDERSOURCE})
+add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single openmd_core)
-add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE})
+add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorod_pentBuilder openmd_single openmd_core openmd_single openmd_core)
-add_executable(randomBuilder ${RANDOMBUILDERSOURCE})
+add_executable(randomBuilder ${RANDOMBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(randomBuilder openmd_single openmd_core openmd_single openmd_core)
-add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE})
+add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(simpleBuilder openmd_single openmd_core openmd_single openmd_core)
-add_executable(thermalizer ${THERMALIZERSOURCE})
+add_executable(thermalizer ${THERMALIZERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(thermalizer openmd_single openmd_core openmd_single openmd_core)
 
 if (OPENBABEL2_FOUND)
@@ -582,7 +597,7 @@ set (ATOM2MDSOURCE
 src/applications/atom2md/atom2md.cpp 
 src/applications/atom2md/openmdformat.cpp
 )
-  add_executable(atom2md ${ATOM2MDSOURCE})
+  add_executable(atom2md ${ATOM2MDSOURCE} ${GETOPT_SOURCE})
   target_link_libraries(atom2md openmd_single openmd_core openmd_single openmd_core ${OPENBABEL2_LIBRARIES})
   INSTALL(TARGETS atom2md RUNTIME DESTINATION bin
           PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

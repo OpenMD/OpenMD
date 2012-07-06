@@ -39,8 +39,8 @@ GNU General Public License for more details.
 	#include <conio.h>
 #endif
 
-#if !HAVE_STRNCASECMP
-extern "C" int strncasecmp(const char *s1, const char *s2, size_t n);
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
 #endif
 
 #include <openbabel/obconversion.h>

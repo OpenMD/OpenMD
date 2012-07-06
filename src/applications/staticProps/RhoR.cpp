@@ -122,7 +122,7 @@ namespace OpenMD {
     RealType particleDensity =  3.0 * info_->getNGlobalMolecules() / (4.0 * NumericConstant::PI * pow(particleR_,3));
     RealType pairConstant = ( 4.0 * NumericConstant::PI * particleDensity ) / 3.0;
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
@@ -141,7 +141,7 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#radial density function rho(r)\n";
       rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgRhoR_.size(); ++i) {
+      for (unsigned int i = 0; i < avgRhoR_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgRhoR_[i]/nProcessed_ << "\n";
       }

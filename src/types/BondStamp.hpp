@@ -49,6 +49,9 @@ namespace OpenMD {
   class BondStamp : public DataHolder {
     
   public:
+    BondStamp();
+    virtual ~BondStamp();
+
     void setMembers(std::vector<int> members) {
       if (members.size() ==2) {
         a = members[0];
@@ -69,6 +72,8 @@ namespace OpenMD {
     
     int getA() {return a;} 
     int getB() {return b;}
+    virtual void validate();
+
   private:
     int a;
     int b;

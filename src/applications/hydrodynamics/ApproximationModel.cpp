@@ -84,7 +84,7 @@ namespace OpenMD {
   
   bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr) {
     
-    int nbeads = beads.size();
+    unsigned int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
     DynamicRectMatrix<RealType> C(3*nbeads, 3*nbeads);
     Mat3x3d I;
@@ -121,7 +121,7 @@ namespace OpenMD {
     
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
-    for (int i = 0; i < nbeads; ++i) {
+    for (unsigned int i = 0; i < nbeads; ++i) {
       Mat3x3d currU;
       currU.setupSkewMat(beads[i].pos);
       U.push_back(currU);
@@ -257,7 +257,7 @@ namespace OpenMD {
   
   bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cd) {
     
-    int nbeads = beads.size();
+    unsigned int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
     DynamicRectMatrix<RealType> C(3*nbeads, 3*nbeads);
     Mat3x3d I;
@@ -294,7 +294,7 @@ namespace OpenMD {
     
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
-    for (int i = 0; i < nbeads; ++i) {
+    for (unsigned int i = 0; i < nbeads; ++i) {
       Mat3x3d currU;
       currU.setupSkewMat(beads[i].pos);
       U.push_back(currU);

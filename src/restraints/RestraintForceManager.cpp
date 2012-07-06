@@ -40,7 +40,9 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
 #include <cmath>
+
 #include "restraints/RestraintForceManager.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"
@@ -338,7 +340,6 @@ namespace OpenMD {
     Molecule::IntegrableObjectIterator ioi;
     MolecularRestraint* mRest;
     StuntDouble* sd;
-    RealType pTot;
 
     std::vector<StuntDouble*>::const_iterator ro;
     ObjectRestraint* oRest;

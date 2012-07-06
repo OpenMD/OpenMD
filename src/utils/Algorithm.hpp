@@ -64,8 +64,8 @@ namespace OpenMD {
 
 
   template<typename T>
-  struct logical_xor :public std::binary_function<T, T, bool> {
-    RealType operator()(T x, T y) { return x ^ y; }
+  struct logical_xor : public std::binary_function<T, T, bool> {
+    T operator()(const T& x, const T& y) { return x ^ y; }
   };
 
 }

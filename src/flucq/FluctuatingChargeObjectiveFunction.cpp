@@ -61,7 +61,6 @@ namespace OpenMD{
   }
   
   void FluctuatingChargeObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
-    int shakeStatus;
     
     setCoor(x);     
     

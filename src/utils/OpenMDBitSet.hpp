@@ -49,7 +49,7 @@ namespace OpenMD {
 
   /**
    * @class OpenMDBitSet OpenMDBitSet.hpp "OpenMDBitSet.hpp"
-   * @brief OpenMDBitSet is a wrapper class of std::vector<char> to act as a growable std::bitset 
+   * @brief OpenMDBitSet is a wrapper class of std::vector<bool> to act as a growable std::bitset 
    */
   class OpenMDBitSet {
   public:
@@ -148,7 +148,7 @@ namespace OpenMD {
     /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
     void setBits(int fromIndex, int toIndex, bool value);
         
-    std::vector<char> bitset_;
+    std::vector<bool> bitset_;
   };
 
 

@@ -73,9 +73,12 @@ void initSimError( void ){
 int simError( void ) {
   
   int myError = 1;
-  int isError;
   char errorMsg[MAX_SIM_ERROR_MSG_LENGTH];
+
+#ifdef IS_MPI
+  int isError;
   char nodeMsg[MAX_SIM_ERROR_MSG_LENGTH];
+#endif
   
   strcpy(errorMsg, "OpenMD ");
   switch( painCave.severity ) {

@@ -39,10 +39,11 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
+#include "config.h"
+#include <cstdio> 
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
-#include <cstdio>
 #include "nonbonded/SlaterIntegrals.hpp"
 
 namespace OpenMD {

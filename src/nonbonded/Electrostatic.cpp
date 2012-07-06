@@ -53,7 +53,7 @@
 #include "io/Globals.hpp"
 #include "nonbonded/SlaterIntegrals.hpp"
 #include "utils/PhysicalConstants.hpp"
-
+#include "math/erfc.hpp"
 
 namespace OpenMD {
   

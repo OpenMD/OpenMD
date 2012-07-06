@@ -114,7 +114,8 @@ namespace OpenMD {
     std::vector<StuntDouble*> Distorted_;
     std::vector<StuntDouble*> Tetrahedral_;
     std::vector<RealType> zBox_;
-    std::vector<RealType>Qave_;
+    std::vector<RealType> Qave_;
+    std::vector<RealType> count_;
     std::vector<std::vector<RealType> > sliceSDLists_;
   };
 }

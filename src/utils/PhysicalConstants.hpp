@@ -42,6 +42,8 @@
  
 #ifndef UTILS_PHYSICALCONSTANTS_HPP
 #define UTILS_PHYSICALCONSTANTS_HPP
+#include "config.h"
+#include <cmath>
 
 namespace OpenMD {
 

@@ -1,4 +1,6 @@
 /* config.h.  Generated from config.h.cmake by CMake for @PROJECT_NAME@  */
+#ifndef __CONFIG_H
+#define __CONFIG_H
 
 #define OPENMD_VERSION_MAJOR "${VERSION_MAJOR}"
 #define OPENMD_VERSION_MINOR "${VERSION_MINOR}"
@@ -9,6 +11,10 @@
 
 /* Is defined if OpenMD should be compiled with single precision arithmetic. */
 #cmakedefine SINGLE_PRECISION
+
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
 
 /* Is defined if the qhull library is available. */
 
@@ -72,3 +78,5 @@ typedef double RealType;
 #define REALTYPE_INT DOUBLE_INT
 #endif
 #endif
+
+#endif // __CONFIG_H

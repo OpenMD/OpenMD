@@ -125,7 +125,6 @@ inline RealType RosenB(int n, RealType alpha)
 {
   RealType TheSum, Term;
   RealType RosenB_, PSinhRosenA, PCoshRosenA, PHyperRosenA;
-  int nu;
   bool IsPositive;
   if (alpha != 0.)
     {
@@ -206,7 +205,6 @@ inline RealType RosenD(int m, int n, int p)
  */
 inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
 {
-  int nu, p;
   RealType x, K2;
   RealType Factor1, Factor2, Term, OneElectronTerm;
   RealType eps, epsi;

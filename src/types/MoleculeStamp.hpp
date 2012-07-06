@@ -108,27 +108,28 @@ namespace OpenMD {
     void checkRigidBodies();
     void checkCutoffGroups();
     void checkFragments();
+
     template <class Cont, class T>
     bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
-    typename Cont::iterator i;
-    int index = stamp->getIndex();
-    bool ret = false;
-    size_t size = cont.size();
-    
-    if (size >= index +1) {
-      if (cont[index]!= NULL) {
-        ret = false;
-      }else {
+      typename Cont::iterator i;
+      unsigned int index = stamp->getIndex();
+      bool ret = false;
+      size_t size = cont.size();
+      
+      if (size >= index +1) {
+        if (cont[index]!= NULL) {
+          ret = false;
+        }else {
+          cont[index] = stamp;
+          ret = true;
+        }
+      } else {
+        cont.insert(cont.end(), index - cont.size() + 1, NULL);
         cont[index] = stamp;
         ret = true;
       }
-    } else {
-      cont.insert(cont.end(), index - cont.size() + 1, NULL);
-      cont[index] = stamp;
-      ret = true;
-    }
-    
-    return ret;
+      
+      return ret;
     }
     
     std::vector<AtomStamp*> atomStamps_;

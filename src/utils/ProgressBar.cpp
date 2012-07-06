@@ -42,12 +42,22 @@
 
 #include <iostream>
 #include <cstdlib>
+
+#ifdef _MSC_VER
+#include <Windows.h>
+#include <stdio.h>
+#include <io.h>
+#define isatty _isatty
+#define fileno _fileno
+#else
 #include <cstdio>
 #include <sys/ioctl.h>
-#include <unistd.h>
+#endif
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
 #include "utils/ProgressBar.hpp"
 
 using namespace std;
@@ -85,9 +95,19 @@ namespace OpenMD {
       // only do the progress bar if we are actually running in a tty:
       if (isatty(fileno(stdout))  && (getenv("SGE_TASK_ID")==NULL)) {     
         // get the window width:
+
+#ifdef _MSC_VER
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        int ret = GetConsoleScreenBufferInfo(GetStdHandle( STD_OUTPUT_HANDLE ),
+                                             &csbi);
+        if(ret) {
+          width = csbi.dwSize.X;
+        }
+#else
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);
         width = w.ws_col;
+#endif
 
         // handle the case when the width is returned as a nonsensical value.
         if (width <= 0) width = 80;

@@ -93,7 +93,7 @@ void ObjectCount::process() {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
     }
         
-    int count = seleMan_.getSelectionCount();
+    unsigned int count = seleMan_.getSelectionCount();
 
     if (counts_.size() <= count)  {
       counts_.resize(count, 0);
@@ -122,7 +122,7 @@ void ObjectCount::process() {
       ofs << "# <N^2> = " << n2Avg << "\n";
       ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
       ofs << "# N\tcounts[N]\n";
-      for (int i = 0; i < counts_.size(); ++i) {
+      for (unsigned int i = 0; i < counts_.size(); ++i) {
         ofs << i << "\t" << counts_[i] << "\n";
       }
       

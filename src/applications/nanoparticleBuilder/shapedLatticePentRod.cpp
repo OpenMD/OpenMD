@@ -94,8 +94,8 @@ namespace OpenMD {
     z_int = z/2.04;
 
     //Rotate by 45 degrees around z-axis so length of rod lies along y axis
-    new_x = (sqrt(2)/2)*(x - y);
-    new_y = (sqrt(2)/2)*(x + y);
+    new_x = (sqrt(2.0)/2)*(x - y);
+    new_y = (sqrt(2.0)/2)*(x + y);
  
     left_newx = (z - 1.44)*(0.577350269/0.816496581);
     right_newx = (z + 1.44)*(-0.577350269/0.816496581);

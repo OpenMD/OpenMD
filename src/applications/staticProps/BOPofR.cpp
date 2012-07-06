@@ -167,7 +167,6 @@ namespace OpenMD {
     RealType costheta;
     RealType phi;
     RealType r;
-    RealType dist;
     Vector3d rCOM;
     RealType distCOM;
     Vector3d pos;
@@ -184,8 +183,8 @@ namespace OpenMD {
     std::vector<ComplexType> W_hat;
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
-    int i, j;
-
+    int i;
+    
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;

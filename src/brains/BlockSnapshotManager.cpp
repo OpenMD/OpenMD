@@ -71,7 +71,7 @@ namespace OpenMD {
 
       // total number of frames that can fit in memory
       //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
-      RealType frameCapacity = memSize_ / bytesPerFrame;
+      RealType frameCapacity = (RealType) memSize_ / (RealType) bytesPerFrame;
 
       // number of frames in each block given the need to hold multiple blocks 
       // in memory at the same time:
@@ -151,7 +151,7 @@ namespace OpenMD {
       //if number of active blocks is less than the block capacity, just load it
       internalLoad(block);
       loadSuccess = true;
-    } else if (hasZeroRefBlock() > 0) {
+    } else if ( hasZeroRefBlock() ) {
       //if already reach the block capacity, need to unload a block with 0 reference
       int zeroRefBlock = getFirstZeroRefBlock();
       assert(zeroRefBlock != -1);

@@ -157,7 +157,6 @@ namespace OpenMD {
     RealType costheta;
     RealType phi;
     RealType r;
-    RealType dist;
     std::map<std::pair<int,int>,ComplexType> q;
     std::vector<RealType> q_l;
     std::vector<RealType> q2;
@@ -170,7 +169,7 @@ namespace OpenMD {
     std::vector<ComplexType> W_hat;
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
-    int i, j;
+    int i;
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

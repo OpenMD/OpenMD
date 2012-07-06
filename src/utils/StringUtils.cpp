@@ -40,9 +40,20 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
+#include "config.h"
 #include <algorithm> 
 #include <stdlib.h>
+#include <cctype>
+#include <cstdlib>
+#include <string>
 #include "utils/StringUtils.hpp"
+
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strdup _strdup
+#define strtoull _strtoui64
+#endif
+
 
 namespace OpenMD {
   std::string UpperCase(const std::string& S) {

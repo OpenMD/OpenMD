@@ -99,13 +99,9 @@ namespace OpenMD {
     Vector3d vec;
     std::vector<Vector3d> bondvec;
     std::vector<RealType> bonddist;
-    RealType costheta;
-    RealType r;
-    RealType dist;
-    
-    int nBonds;
-    
-    int i, j;
+    RealType r;    
+    int nBonds;    
+    int i;
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

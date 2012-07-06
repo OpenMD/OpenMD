@@ -61,7 +61,7 @@ namespace OpenMD {
     RealType fixedCharge;
     RealType hardness;
     RealType electronegativity;
-    RealType slaterN;
+    int slaterN;
     RealType slaterZeta;
     RealType dipole_moment;
     RealType split_dipole_distance;

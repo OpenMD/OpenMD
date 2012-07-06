@@ -53,7 +53,7 @@ namespace OpenMD {
   void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
     
-    for (int i =0 ; i < atoms_.size(); ++i){
+    for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setPrevA(refOrients_[i].transpose() * a);
       }
@@ -65,7 +65,7 @@ namespace OpenMD {
   void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
-    for (int i =0 ; i < atoms_.size(); ++i){
+    for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a);
       }
@@ -77,7 +77,7 @@ namespace OpenMD {
     
     //((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;    
     
-    for (int i =0 ; i < atoms_.size(); ++i){
+    for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);
       }
@@ -229,7 +229,7 @@ namespace OpenMD {
     Vector3d frc(0.0);
     Vector3d trq(0.0);    
     Vector3d pos = this->getPos();
-    for (int i = 0; i < atoms_.size(); i++) {
+    for (unsigned int i = 0; i < atoms_.size(); i++) {
 
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
@@ -264,7 +264,7 @@ namespace OpenMD {
     Vector3d pos = this->getPos();
     Mat3x3d tau_(0.0);
 
-    for (int i = 0; i < atoms_.size(); i++) {
+    for (unsigned int i = 0; i < atoms_.size(); i++) {
       
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
@@ -376,7 +376,7 @@ namespace OpenMD {
 
 
     Vector3d velRot;        
-    for (int i =0 ; i < refCoords_.size(); ++i) {
+    for (unsigned int i = 0 ; i < refCoords_.size(); ++i) {
       atoms_[i]->setVel(rbVel + mat * refCoords_[i]);
     }
 
@@ -405,7 +405,7 @@ namespace OpenMD {
 
 
     Vector3d velRot;        
-    for (int i =0 ; i < refCoords_.size(); ++i) {
+    for (unsigned int i = 0 ; i < refCoords_.size(); ++i) {
       atoms_[i]->setVel(rbVel + mat * refCoords_[i], frame);
     }
 

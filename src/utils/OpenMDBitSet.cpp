@@ -43,6 +43,7 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <iterator>
 
 #include "utils/OpenMDBitSet.hpp"
 #include "utils/Algorithm.hpp"
@@ -64,8 +65,8 @@ namespace OpenMD {
     assert(fromIndex <= toIndex);
     assert(fromIndex >=0);
     assert(toIndex <= size());
-    std::vector<char>::iterator first = bitset_.begin() + fromIndex;
-    std::vector<char>::iterator last = bitset_.begin() + toIndex;
+    std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
+    std::vector<bool>::iterator last = bitset_.begin() + toIndex;
 
     std::transform(first, last, first, std::logical_not<bool>());
         
@@ -75,8 +76,8 @@ namespace OpenMD {
     assert(fromIndex <= toIndex);
     assert(fromIndex >=0);
     assert(toIndex <= size());
-    std::vector<char>::iterator first = bitset_.begin() + fromIndex;
-    std::vector<char>::iterator last = bitset_.begin() + toIndex;
+    std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
+    std::vector<bool>::iterator last = bitset_.begin() + toIndex;
 
     OpenMDBitSet result;
     std::copy(first, last, std::back_inserter(result.bitset_));
@@ -84,7 +85,7 @@ namespace OpenMD {
   }
 
   bool OpenMDBitSet::none() {
-    std::vector<char>::iterator i = std::find(bitset_.begin(), bitset_.end(), true);
+    std::vector<bool>::iterator i = std::find(bitset_.begin(), bitset_.end(), true);
     return i == bitset_.end() ? true : false;
   }
     
@@ -142,8 +143,8 @@ namespace OpenMD {
     assert(fromIndex <= toIndex);
     assert(fromIndex >=0);
     assert(toIndex <= size());
-    std::vector<char>::iterator first = bitset_.begin() + fromIndex;
-    std::vector<char>::iterator last = bitset_.begin() + toIndex;
+    std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
+    std::vector<bool>::iterator last = bitset_.begin() + toIndex;
     std::fill(first, last, value);
   }
 
@@ -198,7 +199,7 @@ namespace OpenMD {
   //}
 
   std::ostream& operator<< ( std::ostream& os, const OpenMDBitSet& bs) {
-    for (int i = 0; i < bs.bitset_.size(); ++i) {
+    for (unsigned int i = 0; i < bs.bitset_.size(); ++i) {
       std::string val = bs[i] ? "true" : "false";
       os << "OpenMDBitSet[" << i <<"] = " << val << std::endl; 
     }

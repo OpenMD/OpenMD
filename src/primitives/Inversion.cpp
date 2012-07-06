@@ -40,6 +40,9 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
+#include <cmath>
+
 #include "primitives/Inversion.hpp"
 
 namespace OpenMD {

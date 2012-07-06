@@ -310,7 +310,6 @@ namespace OpenMD {
     
     RealType tol = 1e-6;
     largestRcut_ = 0.0;
-    RealType rc;
     int atid;
     set<AtomType*> atypes = info_->getSimulatedAtomTypes();
     
@@ -395,7 +394,7 @@ namespace OpenMD {
       }
       
       bool gTypeFound = false;
-      for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
+      for (unsigned int gt = 0; gt < gTypeCutoffs.size(); gt++) {
         if (abs(groupCutoff[cg1] - gTypeCutoffs[gt]) < tol) {
           groupToGtype[cg1] = gt;
           gTypeFound = true;
@@ -420,8 +419,8 @@ namespace OpenMD {
     
     RealType tradRcut = groupMax;
 
-    for (int i = 0; i < gTypeCutoffs.size();  i++) {
-      for (int j = 0; j < gTypeCutoffs.size();  j++) {       
+    for (unsigned int i = 0; i < gTypeCutoffs.size();  i++) {
+      for (unsigned int j = 0; j < gTypeCutoffs.size();  j++) {       
         RealType thisRcut;
         switch(cutoffPolicy_) {
         case TRADITIONAL:
@@ -477,7 +476,7 @@ namespace OpenMD {
   }
 
   int ForceMatrixDecomposition::getTopologicalDistance(int atom1, int atom2) {
-    for (int j = 0; j < toposForAtom[atom1].size(); j++) {
+    for (unsigned int j = 0; j < toposForAtom[atom1].size(); j++) {
       if (toposForAtom[atom1][j] == atom2) 
         return topoDist[atom1][j];
     }

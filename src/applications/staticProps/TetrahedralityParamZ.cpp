@@ -66,6 +66,7 @@ namespace OpenMD
     //std ::cerrnZBins_:"<<nZBins_<<"\t"<<"nzbins:"<<nzbins<<endl;
     // nZBins_ = 90;
     //fixed numbe of bins
+    count_.resize(nZBins_);
     sliceSDLists_.resize(nZBins_);
     Qave_.resize(nZBins_);
 
@@ -107,7 +108,6 @@ namespace OpenMD
     StuntDouble* sd2;
     StuntDouble* sdi;
     StuntDouble* sdj;
-    StuntDouble* sdk;
     RigidBody* rb;
     int myIndex;
     SimInfo::MoleculeIterator mi;
@@ -116,12 +116,9 @@ namespace OpenMD
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj, dposition, tposition;
     RealType r;
-    RealType dist;
     RealType cospsi;
     RealType Qk;
-    RealType Qsum;
-    RealType count[nZBins_];
-    std::vector<RealType> Qave_;
+
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd1, isd2;
     cerr << "After Creation of variables in TP:process()\n";
@@ -152,7 +149,7 @@ namespace OpenMD
 	int i;
 	for(i=0;i<nZBins_;i++)
 	  {
-	    count[i]=0;
+	    count_[i]=0;
 	  }	
 	
 	reader.readFrame(istep);
@@ -272,16 +269,16 @@ namespace OpenMD
     for(int i=0;i< nZBins_; i++)
       {
 	RealType Qsum=0;
-	for (int k = 0; k < sliceSDLists_[i].size(); ++k) 
+	for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) 
 	  {
 	    Qsum=Qsum+sliceSDLists_[i][k];
-	    count[i]=count[i]+1;
+	    count_[i]++;
 	  }
 	//std::cerr<<"past averagin Qk"<<endl;
 	//std::cerr<<Qsum<<endl;
-	if(count[i]!=0)
+	if(count_[i]!=0)
 	  {
-	    Qave_.push_back(Qsum/count[i]);
+	    Qave_.push_back(Qsum/count_[i]);
 	  }
 	//std::cerr<<count[i]<<endl;
       }
@@ -296,7 +293,7 @@ namespace OpenMD
 	//rdfStream << "#z\tdensity\n";
 	for (int i = 0; i < nZBins_; ++i) 
 	  {
-	    if(count[i]!=0)
+	    if(count_[i]!=0)
 	      {
 		rdfStream << ((hmat(2,2)*i)/nZBins_)+(hmat(2,2)/(2*nZBins_)) << "\t" << Qave_[i] << "\n";
 	      }
@@ -358,7 +355,7 @@ namespace OpenMD
   		Vector3d position;
   		position = (*iter)->getPos();
  		osd << "O  " << "\t";
-  		for (int z=0; z<position.size(); z++) 
+  		for (unsigned int z=0; z<position.size(); z++) 
   		  {
   		    osd << position[z] << "  " << "\t";
   		  }
@@ -377,7 +374,7 @@ namespace OpenMD
   		Vector3d position;		
   		position = (*iter)->getPos();
   		ost << "O  " << "\t";
-  		for (int z=0; z<position.size(); z++) 
+  		for (unsigned int z=0; z<position.size(); z++) 
   		  {
   		    ost << position[z] << "  " << "\t";
   		  }

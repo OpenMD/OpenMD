@@ -183,7 +183,7 @@ namespace OpenMD {
     std::vector<int> linenumbers;
     std::vector<int> lineIndices;
     std::vector<std::vector<Token> > aatoken;
-    int pc; // program counter
+    unsigned int pc; // program counter
 
     bool error;
     std::string errorMessage;

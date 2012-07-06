@@ -315,7 +315,7 @@ int main(int argc, char *argv []) {
   // Randomize a vector of ints:
 
   vector<int> ids;
-  for (int i = 0; i < sites.size(); i++) ids.push_back(i);
+  for (unsigned int i = 0; i < sites.size(); i++) ids.push_back(i);
   std::random_shuffle(ids.begin(), ids.end());
 
   Molecule* mol;
@@ -368,12 +368,12 @@ void createMdFile(const std::string&oldMdFileName,
   
   oldMdFile.getline(buffer, MAXLEN);
  
-  int i = 0;
+  unsigned int i = 0;
   while (!oldMdFile.eof()) {
     
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      if(i<nMol.size()){
+      if (i<nMol.size()){
 	sprintf(buffer, "\tnMol = %i;", nMol.at(i));
 	newMdFile << buffer << std::endl;
 	i++;

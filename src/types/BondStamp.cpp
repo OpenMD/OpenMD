@@ -46,5 +46,14 @@
 #include "types/BondStamp.hpp"
 namespace OpenMD {
   
+  BondStamp::BondStamp() {
+  }
   
+  BondStamp::~BondStamp() {    
+  }
+  
+  void BondStamp::validate() {
+    DataHolder::validate();
+  }
+
 }

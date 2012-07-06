@@ -252,7 +252,7 @@ namespace OpenMD {
     }
     
     int nframes =  bsMan_->getNFrames();
-    for (int i = 0; i < AvgE_a_.size(); i++){
+    for (unsigned int i = 0; i < AvgE_a_.size(); i++){
       AvgE_a_[i] /= nframes;
     }
     

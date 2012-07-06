@@ -143,7 +143,7 @@ namespace OpenMD {
     // belong to rigidbody. Every element in atom2Rigidbody has unique
     // negative number at the very beginning
 
-    for(int i = 0; i < atom2Rigidbody.size(); ++i) {
+    for(unsigned int i = 0; i < atom2Rigidbody.size(); ++i) {
       atom2Rigidbody[i] = -1 - i;
     }
     for (int i = 0; i < getNRigidBodies(); ++i) {

@@ -122,7 +122,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     StuntDouble* sd;
-    int i, ii;
+    int ii;
   
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

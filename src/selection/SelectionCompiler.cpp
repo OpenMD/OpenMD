@@ -441,7 +441,7 @@ namespace OpenMD {
 
   bool SelectionCompiler::compileExpression() {
     /** todo */
-    int i = 1;
+    unsigned int i = 1;
     int tokCommand = atokenCommand[0].tok;
     if (tokCommand == Token::define) {
       i = 2;
@@ -666,7 +666,7 @@ namespace OpenMD {
   bool SelectionCompiler::isNameValid(const std::string& name) {
     int nbracket = 0;
     int ndot = 0;
-    for (int i =0 ; i < name.size(); ++i) {
+    for (unsigned int i = 0 ; i < name.size(); ++i) {
       switch(name[i]) {
 
       case '[' :

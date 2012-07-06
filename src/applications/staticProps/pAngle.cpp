@@ -134,10 +134,10 @@ namespace OpenMD {
   void pAngle::processHistogram() {
     
     int atot = 0;
-    for(int i = 0; i < count_.size(); ++i) 
+    for(unsigned int i = 0; i < count_.size(); ++i) 
       atot += count_[i];
     
-    for(int i = 0; i < count_.size(); ++i) {
+    for(unsigned int i = 0; i < count_.size(); ++i) {
       histogram_[i] = double(count_[i] / double(atot));
     }    
   }
@@ -152,7 +152,7 @@ namespace OpenMD {
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#cos(theta)\tp(cos(theta))\n";
       RealType dct = 2.0 / histogram_.size();
-      for (int i = 0; i < histogram_.size(); ++i) {
+      for (unsigned int i = 0; i < histogram_.size(); ++i) {
         RealType ct = -1.0 + (2.0 * i + 1) / (histogram_.size());
         rdfStream << ct << "\t" << histogram_[i]/dct << "\n";
       }

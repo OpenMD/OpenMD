@@ -48,6 +48,8 @@
  */
 #ifndef MATH_SQUAREMATRIX3_HPP
 #define  MATH_SQUAREMATRIX3_HPP
+#include "config.h"
+#include <cmath>
 #include <vector>
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"

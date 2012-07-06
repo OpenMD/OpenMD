@@ -90,7 +90,7 @@ namespace OpenMD {
 
     phivals.push_back(0.0);
 
-    for (int i = 1; i < rvals.size(); i++ ) {
+    for (unsigned int i = 1; i < rvals.size(); i++ ) {
       r = rvals[i];
 
       // only use z(r) if we're inside this atom's cutoff radius,

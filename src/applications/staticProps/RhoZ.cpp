@@ -126,7 +126,7 @@ namespace OpenMD {
       //loop over the slices to calculate the densities
       for (i = 0; i < nZBins_; i++) {
         RealType totalMass = 0;
-        for (int k = 0; k < sliceSDLists_[i].size(); ++k) {
+        for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
           totalMass += sliceSDLists_[i][k]->getMass();
         }
         density_[i] += totalMass/sliceVolume;
@@ -155,7 +155,7 @@ namespace OpenMD {
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#z\tdensity\n";
-      for (int i = 0; i < density_.size(); ++i) {
+      for (unsigned int i = 0; i < density_.size(); ++i) {
         RealType z = zAve * (i+0.5)/density_.size();
         rdfStream << z << "\t" << 1.660535*density_[i]/nProcessed_ << "\n";
       }

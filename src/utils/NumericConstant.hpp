@@ -50,8 +50,12 @@
 
 #ifndef UTILS_NUMERICCONSTANT_HPP
 #define UTILS_NUMERICCONSTANT_HPP
+
+#include "config.h"
 #include <cmath>
 #include <limits>
+#include "config.h"
+
 namespace OpenMD {
 
   /**
@@ -63,6 +67,7 @@ namespace OpenMD {
     static const RealType epsilon = std::numeric_limits<RealType>::epsilon();
     static const RealType PI = M_PI;
     static const RealType TWO_PI = 2.0 * PI;
+    static const RealType infinity = std::numeric_limits<RealType>::infinity();
   }
 
 

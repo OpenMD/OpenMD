@@ -157,11 +157,6 @@ namespace OpenMD {
     // count array set to zero
     std::fill(count_.begin(), count_.end(), 0);
 
-    SimInfo::MoleculeIterator mi;
-    Molecule* mol;
-    Molecule::AtomIterator ai;
-    Atom* atom;
-
     // We'll need the force manager to compute forces for the average pressure
     ForceManager* forceMan = new ForceManager(info_);
 

@@ -256,7 +256,7 @@ namespace OpenMD {
     int metaDataBlockStart = -1;
     int metaDataBlockEnd = -1;
     int i;
-    int mdOffset;
+    streamoff mdOffset;
     int mdFileVersion;
 
 #ifdef IS_MPI            

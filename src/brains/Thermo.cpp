@@ -54,8 +54,10 @@
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
+#ifdef HAVE_QHULL
 #include "math/ConvexHull.hpp"
 #include "math/AlphaHull.hpp"
+#endif
 
 using namespace std;
 namespace OpenMD {
@@ -864,9 +866,9 @@ namespace OpenMD {
 
   RealType Thermo::getHullVolume(){
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-    
-    if (!snap->hasHullVolume) {
 
+#ifdef HAVE_QHULL    
+    if (!snap->hasHullVolume) {
       Hull* surfaceMesh_;
 
       Globals* simParams = info_->getSimParams();
@@ -902,5 +904,8 @@ namespace OpenMD {
       snap->setHullVolume(surfaceMesh_->getVolume());
     }
     return snap->getHullVolume();
-  }  
+#else
+    return 0.0;
+#endif
+  }
 }

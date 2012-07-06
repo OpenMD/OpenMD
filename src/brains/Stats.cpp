@@ -414,7 +414,7 @@ namespace OpenMD {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     Thermo thermo(info_);
    
-    for (int i = 0; i < statsMask_.size(); ++i) {
+    for (unsigned int i = 0; i < statsMask_.size(); ++i) {
       if (statsMask_[i]) {
         switch (i) {
         case TIME:

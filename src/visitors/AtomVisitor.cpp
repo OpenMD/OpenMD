@@ -83,7 +83,6 @@ namespace OpenMD {
     Vector3d  vel;
     Vector3d  frc;
     Vector3d  u;
-    RealType  c;
 
     if (isVisited(atom))
       return;
@@ -126,7 +125,6 @@ namespace OpenMD {
     Vector3d  vel;
     Vector3d  frc;
     Vector3d  u;
-    RealType  c;
 
     if (isVisited(datom))
       return;

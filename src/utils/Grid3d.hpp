@@ -99,7 +99,7 @@ namespace OpenMD {
   private:
     
     int isValidGrid(unsigned int i, unsigned int j, unsigned int k) const {
-      int index = i * dim2_*dim3_ + j * dim3_ + k;
+      unsigned int index = i * dim2_*dim3_ + j * dim3_ + k;
       return index < data_.size() ? index : -1;
     };
     

@@ -107,10 +107,11 @@ namespace OpenMD {
       return *this;
     }
 
-    template<typename T>
-    inline Vector(const T& s){
+    // template<typename T>
+    // inline Vector(const T& s){
+    inline Vector(const Real& s) {
       for (unsigned int i = 0; i < Dim; i++)
-	this->data_[i] = s;
+        this->data_[i] = s;
     }
             
     /** Constructs and initializes a Vector from an array */            

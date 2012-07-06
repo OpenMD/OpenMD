@@ -109,14 +109,12 @@ namespace OpenMD {
     
   void NPTxyz::scaleSimBox(){
 
-    int i,j,k;
+    int i, j;
     Mat3x3d scaleMat;
-    RealType eta2ij, scaleFactor;
+    RealType scaleFactor;
     RealType bigScale, smallScale, offDiagMax;
     Mat3x3d hm;
     Mat3x3d hmnew;
-
-
 
     // Scale the box after all the positions have been moved:
 

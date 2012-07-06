@@ -86,7 +86,7 @@ namespace OpenMD {
       
       Mat3x3d R(0.0);
       
-      for (int n = 0; n < struc.size(); n++){
+      for (unsigned int n = 0; n < struc.size(); n++){
 
         /*
          * correlation matrix R:   
@@ -138,16 +138,16 @@ namespace OpenMD {
       Vector3d eularAngles = A.toEulerAngles();
 
 
-      RealType twistAngle, swingAngle;
+      RealType twistAngle;
       Vector3d swingAxis;
 
       Quat4d quat = A.toQuaternion();  
 
-      RealType tw, sx, sy, ttw, swingX, swingY;
+      RealType swingX, swingY;
       quat.toSwingTwist(swingX, swingY, twistAngle);
 
-      RealType dVdtwist, dVdswing, dVdswingX, dVdswingY;
-      RealType dTwist, dSwing, dSwingX, dSwingY;
+      RealType dVdtwist, dVdswingX, dVdswingY;
+      RealType dTwist, dSwingX, dSwingY;
       RealType p;
 
       if (restType_ & rtTwist){
@@ -190,7 +190,7 @@ namespace OpenMD {
       
       Vector3d rLab, rBody, txr, fBody, fLab;
 
-      for (int i = 0; i < struc.size(); i++) {
+      for (unsigned int i = 0; i < struc.size(); i++) {
                    
         rLab = struc[i];        
         rBody = A * rLab;

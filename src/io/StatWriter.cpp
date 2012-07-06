@@ -42,6 +42,10 @@
  
 #define _LARGEFILE_SOURCE64
 #define _FILE_OFFSET_BITS 64
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
 
 #include "io/StatWriter.hpp"
 #include "brains/Stats.hpp"
@@ -104,7 +108,7 @@ namespace OpenMD {
 
       //write title
       statfile_ << "#";
-      for (int i = 0; i <mask.size(); ++i) {
+      for (unsigned int i = 0; i <mask.size(); ++i) {
 	if (mask[i]) {
 	  statfile_ << "\t" << stats_->getTitle(i) << 
             "(" << stats_->getUnits(i) << ")";
@@ -125,7 +129,7 @@ namespace OpenMD {
 
       Stats::StatsBitSet mask = stats_->getStatsMask();
       statfile_.precision(8);
-      for (int i = 0; i < mask.size(); ++i) {
+      for (unsigned int i = 0; i < mask.size(); ++i) {
 	if (mask[i]) {
           if (stats_->getDataType(i) == "RealType")
             writeReal(i);

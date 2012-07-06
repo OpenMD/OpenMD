@@ -131,7 +131,7 @@ namespace OpenMD {
 
   void AngleR::processHistogram() {
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       if (count_[i] > 0)
 	avgAngleR_[i] += histogram_[i] / count_[i];    
@@ -150,7 +150,7 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#radial density function Angle(r)\n";
       rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgAngleR_.size(); ++i) {
+      for (unsigned int i = 0; i < avgAngleR_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgAngleR_[i] << "\n";
       }

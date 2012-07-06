@@ -68,7 +68,7 @@ void CubicSpline::addPoints(const vector<RealType>& xps,
     simError();    
   }
 
-  for (int i = 0; i < xps.size(); i++) 
+  for (unsigned int i = 0; i < xps.size(); i++) 
     data_.push_back(make_pair(xps[i], yps[i]));
 }
 

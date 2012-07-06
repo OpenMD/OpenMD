@@ -150,7 +150,7 @@ namespace OpenMD {
     OpenMDBitSet bs;
     std::stack<OpenMDBitSet> stack; 
    
-    for (int pc = pcStart; pc < code.size(); ++pc) {
+    for (unsigned int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
 
       switch (instruction.tok) {
@@ -222,7 +222,6 @@ namespace OpenMD {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
-    float propertyValue;
     OpenMDBitSet bs(nStuntDouble);
     bs.clearAll();
     

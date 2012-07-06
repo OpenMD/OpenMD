@@ -790,10 +790,10 @@ namespace OpenMD {
     set<AtomType*>::iterator i;
     set<AtomType*> atomTypes;
     atomTypes = getSimulatedAtomTypes();    
-    int usesElectrostatic = 0;
-    int usesMetallic = 0;
-    int usesDirectional = 0;
-    int usesFluctuatingCharges =  0;
+    bool usesElectrostatic = false;
+    bool usesMetallic = false;
+    bool usesDirectional = false;
+    bool usesFluctuatingCharges =  false;
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
       usesElectrostatic |= (*i)->isElectrostatic();
@@ -802,19 +802,23 @@ namespace OpenMD {
       usesFluctuatingCharges |= (*i)->isFluctuatingCharge();
     }
 
-#ifdef IS_MPI    
-    int temp;
+#ifdef IS_MPI
+    bool temp;
     temp = usesDirectional;
-    MPI_Allreduce(&temp, &usesDirectionalAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
-    
+    MPI::COMM_WORLD.Allreduce(&temp, &usesDirectionalAtoms_, 1, MPI::BOOL, 
+                              MPI::LOR);
+        
     temp = usesMetallic;
-    MPI_Allreduce(&temp, &usesMetallicAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+    MPI::COMM_WORLD.Allreduce(&temp, &usesMetallicAtoms_, 1, MPI::BOOL, 
+                              MPI::LOR);
     
     temp = usesElectrostatic;
-    MPI_Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
+    MPI::COMM_WORLD.Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI::BOOL, 
+                              MPI::LOR);
 
     temp = usesFluctuatingCharges;
-    MPI_Allreduce(&temp, &usesFluctuatingCharges_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
+    MPI::COMM_WORLD.Allreduce(&temp, &usesFluctuatingCharges_, 1, MPI::BOOL, 
+                              MPI::LOR);
 #else
 
     usesDirectionalAtoms_ = usesDirectional;

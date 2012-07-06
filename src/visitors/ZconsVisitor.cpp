@@ -138,9 +138,7 @@ namespace OpenMD {
   }
 
   void ZConsVisitor::update(){
-    Molecule* mol;
     Vector3d com;
-    ZConsState state;
     std::map<int, ZConsState>::iterator i;
     for ( i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
       i->second = zsMoving;

@@ -87,7 +87,7 @@ namespace OpenMD {
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         RealType chi = tokenizer.nextTokenAsDouble();
         RealType Jii = tokenizer.nextTokenAsDouble();
-        RealType slaterN = tokenizer.nextTokenAsInt();
+        int slaterN = tokenizer.nextTokenAsInt();
         RealType slaterZeta = tokenizer.nextTokenAsDouble();
         RealType chargeMass = tokenizer.nextTokenAsDouble();
         

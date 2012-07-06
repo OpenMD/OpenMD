@@ -86,9 +86,7 @@ namespace OpenMD {
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
-    }
-    
-    RealType w0i, v0i, v0pi, rli, rui, rlpi, rupi;
+    }   
     
     StickyAdapter sticky1 = StickyAdapter(atomType);
 

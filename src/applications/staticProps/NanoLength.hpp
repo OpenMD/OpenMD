@@ -48,7 +48,7 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
-typedef std::pair<int, RealType> evIndex;
+typedef std::pair<RealType, int> evIndex;
 
 namespace OpenMD {
   class NanoLength : public StaticAnalyser {

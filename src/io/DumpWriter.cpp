@@ -44,9 +44,15 @@
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "io/basic_teebuf.hpp"
+#ifdef HAVE_ZLIB
 #include "io/gzstream.hpp"
+#endif
 #include "io/Globals.hpp"
 
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
 
 #ifdef IS_MPI
 #include <mpi.h>
@@ -679,7 +685,7 @@ namespace OpenMD {
   std::ostream* DumpWriter::createOStream(const std::string& filename) {
 
     std::ostream* newOStream;
-#ifdef HAVE_LIBZ 
+#ifdef HAVE_ZLIB
     if (needCompression_) {
       newOStream = new ogzstream(filename.c_str());
     } else {
