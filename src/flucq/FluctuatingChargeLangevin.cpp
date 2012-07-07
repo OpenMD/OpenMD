@@ -127,6 +127,9 @@ namespace OpenMD {
   }
 
   void FluctuatingChargeLangevin::applyConstraints() {
+
+    if (!hasFlucQ_) return;
+
     SimInfo::MoleculeIterator i;
     Molecule::FluctuatingChargeIterator  j;
     Molecule* mol;

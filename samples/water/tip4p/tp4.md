@@ -12,9 +12,8 @@ component{
 ensemble = NVE;
 forceField = "DUFF";
 cutoffMethod = "shifted_force";
-dielectric = 80.0;
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
+dampingAlpha = 0.2;
 
 targetTemp = 300;
 targetPressure = 1.0;

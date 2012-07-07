@@ -60,7 +60,6 @@ namespace OpenMD {
     
     Globals* simParams = info_->getSimParams();
     fqParams_ = simParams->getFluctuatingChargeParameters();
-
   }
 
   void FluctuatingChargePropagator::setForceManager(ForceManager* forceMan) {
@@ -102,12 +101,10 @@ namespace OpenMD {
     DumpStatusFunction dsf(info_);  // we want a dump file written every iteration
 
     minim->minimize(problem, endCriteria);
-
   }
 
   void FluctuatingChargePropagator::applyConstraints() {
     if (!hasFlucQ_) return;
-
     fqConstraints_->applyConstraints();
   }
 }
