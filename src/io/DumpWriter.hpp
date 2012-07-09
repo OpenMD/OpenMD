@@ -84,8 +84,8 @@ namespace OpenMD {
         
     void writeFrame(std::ostream& os);
     void writeFrameProperties(std::ostream& os, Snapshot* s);
-    std::string prepareDumpLine(StuntDouble* integrableObject);
-    std::string prepareSiteLine(StuntDouble* integrableObject, int ioIndex, int siteIndex);
+    std::string prepareDumpLine(StuntDouble* sd);
+    std::string prepareSiteLine(StuntDouble* sd, int ioIndex, int siteIndex);
     std::ostream* createOStream(const std::string& filename);
     void writeClosing(std::ostream& os);
     

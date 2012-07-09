@@ -181,7 +181,7 @@ int main(int argc, char* argv[]){
                                  250); 
   } else if (args_info.refsele_given || args_info.originsele_given) {
     cerr << "Both of --refsele and --originsele should appear by pair" 
-              << endl;
+         << endl;
     exit(1);
   }
   
@@ -226,7 +226,7 @@ int main(int argc, char* argv[]){
   Molecule::IntegrableObjectIterator  iiter;
   Molecule::RigidBodyIterator rbIter;
   Molecule* mol;
-  StuntDouble* integrableObject;
+  StuntDouble* sd;
   RigidBody* rb;
   Vector3d molCom;
   Vector3d newMolCom;
@@ -244,17 +244,21 @@ int main(int argc, char* argv[]){
       currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();    
       for (mol = info->beginMolecule(miter); mol != NULL; 
            mol = info->nextMolecule(miter)) {
-          molCom = mol->getCom();
-          newMolCom = molCom;
-          currentSnapshot->wrapVector(newMolCom);
-          displacement = newMolCom - molCom;
-        for (integrableObject = mol->beginIntegrableObject(iiter); 
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(iiter)) {  
-          integrableObject->setPos(integrableObject->getPos() + displacement);
+        
+        molCom = mol->getCom();
+        newMolCom = molCom;
+        currentSnapshot->wrapVector(newMolCom);
+        displacement = newMolCom - molCom;
+
+        for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+             sd = mol->nextIntegrableObject(iiter)) {  
+
+          sd->setPos(sd->getPos() + displacement);
+          
         }
       }    
     }
+
     //update atoms of rigidbody
     for (mol = info->beginMolecule(miter); mol != NULL; 
          mol = info->nextMolecule(miter)) {
@@ -262,18 +266,22 @@ int main(int argc, char* argv[]){
       //change the positions of atoms which belong to the rigidbodies
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
+
         rb->updateAtoms();
         if (printVel) rb->updateAtomVel();
+
       }
     }
     
     //prepare visit
     for (mol = info->beginMolecule(miter); mol != NULL; 
          mol = info->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(iiter)) {
-        integrableObject->accept(prepareVisitor);
+
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+           sd = mol->nextIntegrableObject(iiter)) {
+
+        sd->accept(prepareVisitor);
+
       }
     }
     
@@ -284,10 +292,12 @@ int main(int argc, char* argv[]){
     //visit stuntdouble
     for (mol = info->beginMolecule(miter); mol != NULL; 
          mol = info->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(iiter)) {
-        integrableObject->accept(compositeVisitor);
+
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+           sd = mol->nextIntegrableObject(iiter)) {
+
+        sd->accept(compositeVisitor);
+
       }
     }
     

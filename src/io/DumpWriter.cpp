@@ -306,7 +306,7 @@ namespace OpenMD {
 #endif
 
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
     RigidBody::AtomIterator ai;
@@ -321,9 +321,9 @@ namespace OpenMD {
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
       
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
-           integrableObject = mol->nextIntegrableObject(ii)) { 	
-          os << prepareDumpLine(integrableObject);
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
+           sd = mol->nextIntegrableObject(ii)) { 	
+          os << prepareDumpLine(sd);
           
       }
     }    
@@ -333,16 +333,16 @@ namespace OpenMD {
       os << "    <SiteData>\n";
       for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
                
-        for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
-           integrableObject = mol->nextIntegrableObject(ii)) { 	
+        for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
+           sd = mol->nextIntegrableObject(ii)) { 	
 
-          int ioIndex = integrableObject->getGlobalIntegrableObjectIndex();
+          int ioIndex = sd->getGlobalIntegrableObjectIndex();
           // do one for the IO itself
-          os << prepareSiteLine(integrableObject, ioIndex, 0);
+          os << prepareSiteLine(sd, ioIndex, 0);
 
-          if (integrableObject->isRigidBody()) {
+          if (sd->isRigidBody()) {
             
-            RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+            RigidBody* rb = static_cast<RigidBody*>(sd);
             int siteIndex = 0;
             for (atom = rb->beginAtom(ai); atom != NULL;  
                  atom = rb->nextAtom(ai)) { 	                                        
@@ -363,9 +363,9 @@ namespace OpenMD {
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
 
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) { 	
-          buffer += prepareDumpLine(integrableObject);
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL; 
+           sd = mol->nextIntegrableObject(ii)) { 	
+          buffer += prepareDumpLine(sd);
       }
     }
     
@@ -415,16 +415,16 @@ namespace OpenMD {
 
   }
 
-  std::string DumpWriter::prepareDumpLine(StuntDouble* integrableObject) {
+  std::string DumpWriter::prepareDumpLine(StuntDouble* sd) {
 	
-    int index = integrableObject->getGlobalIntegrableObjectIndex();
+    int index = sd->getGlobalIntegrableObjectIndex();
     std::string type("pv");
     std::string line;
     char tempBuffer[4096];
 
     Vector3d pos;
     Vector3d vel;
-    pos = integrableObject->getPos();
+    pos = sd->getPos();
 
     if (isinf(pos[0]) || isnan(pos[0]) || 
         isinf(pos[1]) || isnan(pos[1]) || 
@@ -436,7 +436,7 @@ namespace OpenMD {
       simError();
     }
 
-    vel = integrableObject->getVel();		
+    vel = sd->getVel();		
 
     if (isinf(vel[0]) || isnan(vel[0]) || 
         isinf(vel[1]) || isnan(vel[1]) || 
@@ -453,11 +453,11 @@ namespace OpenMD {
             vel[0], vel[1], vel[2]);		        
     line += tempBuffer;
 
-    if (integrableObject->isDirectional()) {
+    if (sd->isDirectional()) {
       type += "qj";
       Quat4d q;
       Vector3d ji;
-      q = integrableObject->getQ();
+      q = sd->getQ();
 
       if (isinf(q[0]) || isnan(q[0]) || 
           isinf(q[1]) || isnan(q[1]) || 
@@ -470,7 +470,7 @@ namespace OpenMD {
         simError();
       }
 
-      ji = integrableObject->getJ();
+      ji = sd->getJ();
 
       if (isinf(ji[0]) || isnan(ji[0]) || 
           isinf(ji[1]) || isnan(ji[1]) || 
@@ -490,7 +490,7 @@ namespace OpenMD {
 
     if (needForceVector_) {
       type += "f";
-      Vector3d frc = integrableObject->getFrc();
+      Vector3d frc = sd->getFrc();
       if (isinf(frc[0]) || isnan(frc[0]) || 
           isinf(frc[1]) || isnan(frc[1]) || 
           isinf(frc[2]) || isnan(frc[2]) ) {      
@@ -504,9 +504,9 @@ namespace OpenMD {
               frc[0], frc[1], frc[2]);
       line += tempBuffer;
       
-      if (integrableObject->isDirectional()) {
+      if (sd->isDirectional()) {
         type += "t";
-        Vector3d trq = integrableObject->getTrq();        
+        Vector3d trq = sd->getTrq();        
         if (isinf(trq[0]) || isnan(trq[0]) || 
             isinf(trq[1]) || isnan(trq[1]) || 
             isinf(trq[2]) || isnan(trq[2]) ) {      
@@ -526,7 +526,7 @@ namespace OpenMD {
     return std::string(tempBuffer);
   }
 
-  std::string DumpWriter::prepareSiteLine(StuntDouble* integrableObject, int ioIndex, int siteIndex) {
+  std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex, int siteIndex) {
 	
 
     std::string id;
@@ -534,7 +534,7 @@ namespace OpenMD {
     std::string line;
     char tempBuffer[4096];
 
-    if (integrableObject->isRigidBody()) {
+    if (sd->isRigidBody()) {
       sprintf(tempBuffer, "%10d           ", ioIndex);
       id = std::string(tempBuffer);
     } else {
@@ -544,7 +544,7 @@ namespace OpenMD {
               
     if (needFlucQ_) {
       type += "cw";
-      RealType fqPos = integrableObject->getFlucQPos();
+      RealType fqPos = sd->getFlucQPos();
       if (isinf(fqPos) || isnan(fqPos) ) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the"
@@ -555,7 +555,7 @@ namespace OpenMD {
       sprintf(tempBuffer, " %13e ", fqPos);
       line += tempBuffer;
     
-      RealType fqVel = integrableObject->getFlucQVel();
+      RealType fqVel = sd->getFlucQVel();
       if (isinf(fqVel) || isnan(fqVel) ) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the"
@@ -568,7 +568,7 @@ namespace OpenMD {
 
       if (needForceVector_) {
         type += "g";
-        RealType fqFrc = integrableObject->getFlucQFrc();        
+        RealType fqFrc = sd->getFlucQFrc();        
         if (isinf(fqFrc) || isnan(fqFrc) ) {      
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the"
@@ -583,7 +583,7 @@ namespace OpenMD {
 
     if (needElectricField_) {
       type += "e";
-      Vector3d eField= integrableObject->getElectricField();
+      Vector3d eField= sd->getElectricField();
       if (isinf(eField[0]) || isnan(eField[0]) || 
           isinf(eField[1]) || isnan(eField[1]) || 
           isinf(eField[2]) || isnan(eField[2]) ) {      
@@ -601,7 +601,7 @@ namespace OpenMD {
 
     if (needParticlePot_) {
       type += "u";
-      RealType particlePot = integrableObject->getParticlePot();
+      RealType particlePot = sd->getParticlePot();
       if (isinf(particlePot) || isnan(particlePot)) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the particle "

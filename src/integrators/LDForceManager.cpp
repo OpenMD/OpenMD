@@ -95,19 +95,19 @@ namespace OpenMD {
     std::map<std::string, HydroProp*> hydroPropMap;
 
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;		
     bool needHydroPropFile = false;
     
     for (mol = info->beginMolecule(i); mol != NULL; 
          mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
         
-        if (integrableObject->isRigidBody()) {
-          RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+        if (sd->isRigidBody()) {
+          RigidBody* rb = static_cast<RigidBody*>(sd);
           if (rb->getNumAtoms() > 1) needHydroPropFile = true;
         }
         
@@ -130,16 +130,16 @@ namespace OpenMD {
 
       for (mol = info->beginMolecule(i); mol != NULL; 
            mol = info->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); 
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(j)) {
 
-          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
+        for (sd = mol->beginIntegrableObject(j);  sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+
+          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(sd->getType());
           if (iter != hydroPropMap.end()) {
             hydroProps_.push_back(iter->second);
           } else {
             sprintf( painCave.errMsg,
-                     "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
+                     "Can not find resistance tensor for atom [%s]\n", sd->getType().c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();  
@@ -151,13 +151,14 @@ namespace OpenMD {
       std::map<std::string, HydroProp*> hydroPropMap;
       for (mol = info->beginMolecule(i); mol != NULL; 
            mol = info->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); 
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(j)) {
+
+        for (sd = mol->beginIntegrableObject(j); sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+
           Shape* currShape = NULL;
 
-          if (integrableObject->isAtom()){
-            Atom* atom = static_cast<Atom*>(integrableObject);
+          if (sd->isAtom()){
+            Atom* atom = static_cast<Atom*>(sd);
             AtomType* atomType = atom->getAtomType();
             GayBerneAdapter gba = GayBerneAdapter(atomType);
             if (gba.isGayBerne()) {
@@ -199,12 +200,12 @@ namespace OpenMD {
 
 
           HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
-          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
+          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(sd->getType());
           if (iter != hydroPropMap.end()) 
             hydroProps_.push_back(iter->second);
           else {
             currHydroProp->complete();
-            hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(integrableObject->getType(), currHydroProp));
+            hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(sd->getType(), currHydroProp));
             hydroProps_.push_back(currHydroProp);
           }
         }
@@ -234,7 +235,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     RealType mass;
     Vector3d pos;
     Vector3d frc;
@@ -271,19 +272,19 @@ namespace OpenMD {
         }
       }
       
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
           
         if (freezeMolecule) 
-          fdf += integrableObject->freeze();
+          fdf += sd->freeze();
         
         if (doLangevinForces) {  
-          mass = integrableObject->getMass();
-          if (integrableObject->isDirectional()){
+          mass = sd->getMass();
+          if (sd->isDirectional()){
 
             // preliminaries for directional objects:
 
-            A = integrableObject->getA();
+            A = sd->getA();
             Atrans = A.transpose();
             Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();  
 
@@ -294,10 +295,10 @@ namespace OpenMD {
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
             Vector3d randomForceLab = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
-            integrableObject->addFrc(randomForceLab);            
-            integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
+            sd->addFrc(randomForceLab);            
+            sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
 
-            Mat3x3d I = integrableObject->getI();
+            Mat3x3d I = sd->getI();
             Vector3d omegaBody;
 
             // What remains contains velocity explicitly, but the velocity required
@@ -307,15 +308,15 @@ namespace OpenMD {
 
             // this is the velocity at the half-step:
             
-            Vector3d vel =integrableObject->getVel();
-            Vector3d angMom = integrableObject->getJ();
+            Vector3d vel =sd->getVel();
+            Vector3d angMom = sd->getJ();
 
             //estimate velocity at full-step using everything but friction forces:           
 
-            frc = integrableObject->getFrc();
+            frc = sd->getFrc();
             Vector3d velStep = vel + (dt2_ /mass * PhysicalConstants::energyConvert) * frc;
 
-            Tb = integrableObject->lab2Body(integrableObject->getTrq());
+            Tb = sd->lab2Body(sd->getTrq());
             Vector3d angMomStep = angMom + (dt2_ * PhysicalConstants::energyConvert) * Tb;                             
 
             Vector3d omegaLab;
@@ -334,8 +335,8 @@ namespace OpenMD {
 
             for (int k = 0; k < maxIterNum_; k++) {
                             
-              if (integrableObject->isLinear()) {
-                int linearAxis = integrableObject->linearAxis();
+              if (sd->isLinear()) {
+                int linearAxis = sd->linearAxis();
                 int l = (linearAxis +1 )%3;
                 int m = (linearAxis +2 )%3;
                 omegaBody[l] = angMomStep[l] /I(l, l);
@@ -374,8 +375,8 @@ namespace OpenMD {
                 break; // iteration ends here
             }
 
-            integrableObject->addFrc(frictionForceLab);
-            integrableObject->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
+            sd->addFrc(frictionForceLab);
+            sd->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
 
             
           } else {
@@ -384,7 +385,7 @@ namespace OpenMD {
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
-            integrableObject->addFrc(randomForce);            
+            sd->addFrc(randomForce);            
 
             // What remains contains velocity explicitly, but the velocity required
             // is at the full step: v(t + h), while we have initially the velocity
@@ -393,11 +394,11 @@ namespace OpenMD {
 
             // this is the velocity at the half-step:
             
-            Vector3d vel =integrableObject->getVel();
+            Vector3d vel =sd->getVel();
 
             //estimate velocity at full-step using everything but friction forces:           
 
-            frc = integrableObject->getFrc();
+            frc = sd->getFrc();
             Vector3d velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * frc;
 
             Vector3d frictionForce(0.0);
@@ -423,7 +424,7 @@ namespace OpenMD {
                 break; // iteration ends here
             }
 
-            integrableObject->addFrc(frictionForce);
+            sd->addFrc(frictionForce);
 
           }
         }

@@ -73,20 +73,20 @@ namespace OpenMD {
     }
     
     Molecule::IntegrableObjectIterator ii;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     int i;
-    for (integrableObject = mol->beginIntegrableObject(ii), i = 0; integrableObject != NULL; 
-         integrableObject = mol->nextIntegrableObject(ii), ++i) { 
+    for (sd = mol->beginIntegrableObject(ii), i = 0; sd != NULL; 
+         sd = mol->nextIntegrableObject(ii), ++i) { 
       
       newCoor = rotMat * refCoords[i];
       newCoor += offset;
      
-      integrableObject->setPos(newCoor);
-      integrableObject->setVel(V3Zero);
+      sd->setPos(newCoor);
+      sd->setVel(V3Zero);
       
-      if(integrableObject->isDirectional()){
-        integrableObject->setA(rotMat * integrableObject->getA());
-        integrableObject->setJ(V3Zero);  
+      if(sd->isDirectional()){
+        sd->setA(rotMat * sd->getA());
+        sd->setJ(V3Zero);  
       }        
     }
   }

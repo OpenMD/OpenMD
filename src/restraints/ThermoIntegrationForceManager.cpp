@@ -96,7 +96,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::IntegrableObjectIterator ii;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Vector3d frc;
     Vector3d trq;
     Mat3x3d tempTau;
@@ -106,21 +106,22 @@ namespace OpenMD {
     
     curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // now scale forces and torques of all the integrableObjects
+    // now scale forces and torques of all the sds
       
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-      for (integrableObject = mol->beginIntegrableObject(ii); 
-           integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) {
-        frc = integrableObject->getFrc();
+
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL; 
+           sd = mol->nextIntegrableObject(ii)) {
+
+        frc = sd->getFrc();
         frc *= factor_;
-        integrableObject->setFrc(frc);
+        sd->setFrc(frc);
         
-        if (integrableObject->isDirectional()){
-          trq = integrableObject->getTrq();
+        if (sd->isDirectional()){
+          trq = sd->getTrq();
           trq *= factor_;
-          integrableObject->setTrq(trq);
+          sd->setTrq(trq);
         }
       }
     }

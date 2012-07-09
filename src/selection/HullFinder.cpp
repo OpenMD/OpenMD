@@ -53,7 +53,7 @@ namespace OpenMD {
     
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Molecule::IntegrableObjectIterator  ioi;
     Molecule::AtomIterator ai;
     Atom* atom;
@@ -64,10 +64,10 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
         
       // Hull is constructed from all known integrable objects.
-      for (integrableObject = mol->beginIntegrableObject(ioi);
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(ioi)) {
-        localSites_.push_back(integrableObject);
+      for (sd = mol->beginIntegrableObject(ioi);
+           sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        localSites_.push_back(sd);
       }
       
       // selection can include atoms (which may be a subset of the IOs)

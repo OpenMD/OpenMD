@@ -61,8 +61,8 @@
 using namespace OpenMD;
 
 struct SDShape{
-    StuntDouble* sd;
-    Shape* shape;
+  StuntDouble* sd;
+  Shape* shape;
 };
 void registerHydrodynamicsModels();
 void writeHydroProps(std::ostream& os);
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]){
   SimInfo::MoleculeIterator mi;
   Molecule* mol;
   Molecule::IntegrableObjectIterator  ii;
-  StuntDouble* integrableObject;
+  StuntDouble* sd;
   Mat3x3d identMat;
   identMat(0,0) = 1.0;
   identMat(1,1) = 1.0;
@@ -130,61 +130,64 @@ int main(int argc, char* argv[]){
  
   std::map<std::string, SDShape> uniqueStuntDoubles;
   
-  for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(ii)) {
-          if (uniqueStuntDoubles.find(integrableObject->getType()) ==  uniqueStuntDoubles.end()) {
-
-            integrableObject->setPos(V3Zero);
-            integrableObject->setA(identMat);
-            if (integrableObject->isRigidBody()) {
-                RigidBody* rb = static_cast<RigidBody*>(integrableObject);
-                rb->updateAtoms();
-            }
-
-            SDShape tmp;
-            tmp.shape = ShapeBuilder::createShape(integrableObject);
-            tmp.sd = integrableObject;    
-            uniqueStuntDoubles.insert(std::map<std::string, SDShape>::value_type(integrableObject->getType(), tmp));
-
-          }
-	}
+  for (mol = info->beginMolecule(mi); mol != NULL; 
+       mol = info->nextMolecule(mi)) {
+    
+    for (sd = mol->beginIntegrableObject(ii); sd != NULL;
+         sd = mol->nextIntegrableObject(ii)) {
+      
+      if (uniqueStuntDoubles.find(sd->getType()) ==  uniqueStuntDoubles.end()) {
+        
+        sd->setPos(V3Zero);
+        sd->setA(identMat);
+        if (sd->isRigidBody()) {
+          RigidBody* rb = static_cast<RigidBody*>(sd);
+          rb->updateAtoms();
+        }
+        
+        SDShape tmp;
+        tmp.shape = ShapeBuilder::createShape(sd);
+        tmp.sd = sd;    
+        uniqueStuntDoubles.insert(std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
+        
+      }
+    }
   }
-
-
+  
+  
   
   std::map<std::string, SDShape>::iterator si;
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
-      HydrodynamicsModel* model;
-      Shape* shape = si->second.shape;
-      StuntDouble* sd = si->second.sd;;
-      if (args_info.model_given) {  
-        model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(args_info.model_arg, sd, info);
-      } else if (shape->hasAnalyticalSolution()) {
-        model = new AnalyticalModel(sd, info);
-      } else {
-        model = new BeadModel(sd, info);
-      }
-
-        model->init();
+    HydrodynamicsModel* model;
+    Shape* shape = si->second.shape;
+    StuntDouble* sd = si->second.sd;;
+    if (args_info.model_given) {  
+      model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(args_info.model_arg, sd, info);
+    } else if (shape->hasAnalyticalSolution()) {
+      model = new AnalyticalModel(sd, info);
+    } else {
+      model = new BeadModel(sd, info);
+    }
+    
+    model->init();
+    
+    std::ofstream ofs;
+    std::stringstream outputBeads;
+    outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
+    ofs.open(outputBeads.str().c_str());        
+    model->writeBeads(ofs);
+    ofs.close();
+    
+    //if beads option is turned on, skip the calculation
+    if (!args_info.beads_flag) {
+      model->calcHydroProps(shape, viscosity, temperature);
+      std::ofstream outputDiff;
+      outputDiff.open(outputFilename.c_str());
+      model->writeHydroProps(outputDiff);
+      outputDiff.close();
+    }
         
-        std::ofstream ofs;
-        std::stringstream outputBeads;
-        outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
-        ofs.open(outputBeads.str().c_str());        
-        model->writeBeads(ofs);
-        ofs.close();
-
-        //if beads option is turned on, skip the calculation
-        if (!args_info.beads_flag) {
-          model->calcHydroProps(shape, viscosity, temperature);
-	  std::ofstream outputDiff;
-	  outputDiff.open(outputFilename.c_str());
-          model->writeHydroProps(outputDiff);
-	  outputDiff.close();
-        }
-        
-        delete model;
+    delete model;
   }
 
 
@@ -194,8 +197,7 @@ int main(int argc, char* argv[]){
 }
 
 void registerHydrodynamicsModels() {
-    HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<RoughShell>("RoughShell"));
-    HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<BeadModel>("BeadModel"));
-    HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
-
+  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<RoughShell>("RoughShell"));
+  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<BeadModel>("BeadModel"));
+  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
 }

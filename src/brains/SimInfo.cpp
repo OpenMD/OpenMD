@@ -231,26 +231,28 @@ namespace OpenMD {
     vector<Atom*>::iterator k;
 
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Atom* atom;
 
     ndf_local = 0;
     nfq_local = 0;
     
     for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
-	   integrableObject = mol->nextIntegrableObject(j)) {
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL; 
+	   sd = mol->nextIntegrableObject(j)) {
 
 	ndf_local += 3;
 
-	if (integrableObject->isDirectional()) {
-	  if (integrableObject->isLinear()) {
+	if (sd->isDirectional()) {
+	  if (sd->isLinear()) {
 	    ndf_local += 2;
 	  } else {
 	    ndf_local += 3;
 	  }
 	}
       }
+
       for (atom = mol->beginFluctuatingCharge(k); atom != NULL;
            atom = mol->nextFluctuatingCharge(k)) {
         if (atom->isFluctuatingCharge()) {
@@ -312,19 +314,20 @@ namespace OpenMD {
     MoleculeIterator i;
     vector<StuntDouble*>::iterator j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
 
     // Raw degrees of freedom that we have to set
     ndfRaw_local = 0;
     
     for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
 
 	ndfRaw_local += 3;
 
-	if (integrableObject->isDirectional()) {
-	  if (integrableObject->isLinear()) {
+	if (sd->isDirectional()) {
+	  if (sd->isLinear()) {
 	    ndfRaw_local += 2;
 	  } else {
 	    ndfRaw_local += 3;
@@ -384,14 +387,13 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Molecule::IntegrableObjectIterator ii;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     
-    for (integrableObject = mol->beginIntegrableObject(ii); 
-         integrableObject != NULL;
-         integrableObject = mol->nextIntegrableObject(ii)) {
+    for (sd = mol->beginIntegrableObject(ii); sd != NULL;
+         sd = mol->nextIntegrableObject(ii)) {
       
-      if (integrableObject->isRigidBody()) {
-        rb = static_cast<RigidBody*>(integrableObject);
+      if (sd->isRigidBody()) {
+        rb = static_cast<RigidBody*>(sd);
         vector<Atom*> atoms = rb->getAtoms();
         set<int> rigidAtoms;
         for (int i = 0; i < static_cast<int>(atoms.size()); ++i) {
@@ -402,8 +404,8 @@ namespace OpenMD {
         }      
       } else {
         set<int> oneAtomSet;
-        oneAtomSet.insert(integrableObject->getGlobalIndex());
-        atomGroups.insert(map<int, set<int> >::value_type(integrableObject->getGlobalIndex(), oneAtomSet));        
+        oneAtomSet.insert(sd->getGlobalIndex());
+        atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(), oneAtomSet));        
       }
     }  
            
@@ -537,14 +539,13 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Molecule::IntegrableObjectIterator ii;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     
-    for (integrableObject = mol->beginIntegrableObject(ii); 
-         integrableObject != NULL;
-         integrableObject = mol->nextIntegrableObject(ii)) {
+    for (sd = mol->beginIntegrableObject(ii); sd != NULL;
+         sd = mol->nextIntegrableObject(ii)) {
       
-      if (integrableObject->isRigidBody()) {
-        rb = static_cast<RigidBody*>(integrableObject);
+      if (sd->isRigidBody()) {
+        rb = static_cast<RigidBody*>(sd);
         vector<Atom*> atoms = rb->getAtoms();
         set<int> rigidAtoms;
         for (int i = 0; i < static_cast<int>(atoms.size()); ++i) {
@@ -555,8 +556,8 @@ namespace OpenMD {
         }      
       } else {
         set<int> oneAtomSet;
-        oneAtomSet.insert(integrableObject->getGlobalIndex());
-        atomGroups.insert(map<int, set<int> >::value_type(integrableObject->getGlobalIndex(), oneAtomSet));        
+        oneAtomSet.insert(sd->getGlobalIndex());
+        atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(), oneAtomSet));        
       }
     }  
 

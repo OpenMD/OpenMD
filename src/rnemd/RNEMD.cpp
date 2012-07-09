@@ -1380,13 +1380,13 @@ namespace OpenMD {
     SimInfo::MoleculeIterator miter;
     vector<StuntDouble*>::iterator iiter;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     for (mol = info_->beginMolecule(miter); mol != NULL;
       mol = info_->nextMolecule(miter))
-      integrableObject is essentially sd
-        for (integrableObject = mol->beginIntegrableObject(iiter);
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(iiter))
+      sd is essentially sd
+        for (sd = mol->beginIntegrableObject(iiter);
+             sd != NULL;
+             sd = mol->nextIntegrableObject(iiter))
     */
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {

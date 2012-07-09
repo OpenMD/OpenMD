@@ -352,9 +352,9 @@ namespace OpenMD {
 
     int index = tokenizer.nextTokenAsInt();
  
-    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
 
-    if (integrableObject == NULL) {
+    if (sd == NULL) {
       return;
     }
     std::string type = tokenizer.nextToken(); 
@@ -374,7 +374,7 @@ namespace OpenMD {
       }
     }
     
-    if (integrableObject->isDirectional()) {
+    if (sd->isDirectional()) {
       if (needQuaternion_) {
         found = type.find("q");      
         if (found == std::string::npos) {
@@ -397,7 +397,7 @@ namespace OpenMD {
             pos[1] = tokenizer.nextTokenAsDouble(); 
             pos[2] = tokenizer.nextTokenAsDouble(); 
             if (needPos_) { 
-              integrableObject->setPos(pos); 
+              sd->setPos(pos); 
             }             
             break;
         }
@@ -407,14 +407,14 @@ namespace OpenMD {
             vel[1] = tokenizer.nextTokenAsDouble(); 
             vel[2] = tokenizer.nextTokenAsDouble(); 
             if (needVel_) { 
-              integrableObject->setVel(vel); 
+              sd->setVel(vel); 
             } 
             break;
         }
 
         case 'q' : {
            Quat4d q;
-           if (integrableObject->isDirectional()) { 
+           if (sd->isDirectional()) { 
               
              q[0] = tokenizer.nextTokenAsDouble(); 
              q[1] = tokenizer.nextTokenAsDouble(); 
@@ -433,19 +433,19 @@ namespace OpenMD {
               
              q.normalize(); 
              if (needQuaternion_) {            
-               integrableObject->setQ(q); 
+               sd->setQ(q); 
              }               
            }            
            break;
         }  
         case 'j' : {
           Vector3d ji;
-          if (integrableObject->isDirectional()) {
+          if (sd->isDirectional()) {
              ji[0] = tokenizer.nextTokenAsDouble(); 
              ji[1] = tokenizer.nextTokenAsDouble(); 
              ji[2] = tokenizer.nextTokenAsDouble(); 
              if (needAngMom_) { 
-               integrableObject->setJ(ji); 
+               sd->setJ(ji); 
              } 
           }
           break;
@@ -456,7 +456,7 @@ namespace OpenMD {
           force[0] = tokenizer.nextTokenAsDouble(); 
           force[1] = tokenizer.nextTokenAsDouble(); 
           force[2] = tokenizer.nextTokenAsDouble();           
-          integrableObject->setFrc(force); 
+          sd->setFrc(force); 
           break;
         }
         case 't' : {
@@ -465,35 +465,35 @@ namespace OpenMD {
            torque[0] = tokenizer.nextTokenAsDouble(); 
            torque[1] = tokenizer.nextTokenAsDouble(); 
            torque[2] = tokenizer.nextTokenAsDouble();           
-           integrableObject->setTrq(torque);          
+           sd->setTrq(torque);          
            break;
         }
         case 'u' : {
 
            RealType particlePot;
            particlePot = tokenizer.nextTokenAsDouble(); 
-           integrableObject->setParticlePot(particlePot);          
+           sd->setParticlePot(particlePot);          
            break;
         }
         case 'c' : {
 
            RealType flucQPos;
            flucQPos = tokenizer.nextTokenAsDouble(); 
-           integrableObject->setFlucQPos(flucQPos);          
+           sd->setFlucQPos(flucQPos);          
            break;
         }
         case 'w' : {
 
            RealType flucQVel;
            flucQVel = tokenizer.nextTokenAsDouble(); 
-           integrableObject->setFlucQVel(flucQVel);          
+           sd->setFlucQVel(flucQVel);          
            break;
         }
         case 'g' : {
 
            RealType flucQFrc;
            flucQFrc = tokenizer.nextTokenAsDouble(); 
-           integrableObject->setFlucQFrc(flucQFrc);          
+           sd->setFlucQFrc(flucQFrc);          
            break;
         }
         case 'e' : {
@@ -502,7 +502,7 @@ namespace OpenMD {
            eField[0] = tokenizer.nextTokenAsDouble(); 
            eField[1] = tokenizer.nextTokenAsDouble(); 
            eField[2] = tokenizer.nextTokenAsDouble();           
-           integrableObject->setElectricField(eField);          
+           sd->setElectricField(eField);          
            break;
         }
         default: {
@@ -538,11 +538,10 @@ namespace OpenMD {
      */
 
     int index = tokenizer.nextTokenAsInt();
-    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
-    if (integrableObject == NULL) {
+    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
+    if (sd == NULL) {
       return;
     }
-    StuntDouble* sd = integrableObject;
 
     /**
      * Test to see if the next token is an integer or not.  If not,
@@ -556,7 +555,7 @@ namespace OpenMD {
     if (i >> siteIndex) {
       // chew up this token and parse as an int:
       siteIndex = tokenizer.nextTokenAsInt();
-      RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+      RigidBody* rb = static_cast<RigidBody*>(sd);
       sd = rb->getAtoms()[siteIndex];
     }
 

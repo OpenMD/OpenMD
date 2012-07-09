@@ -84,32 +84,33 @@ namespace OpenMD{
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;    
+    StuntDouble* sd;    
     int index = 0;
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {
+
+      for (sd = mol->beginIntegrableObject(j);  sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
         
         position[0] = x[index++];
         position[1] = x[index++];
         position[2] = x[index++];
         
-        integrableObject->setPos(position);
+        sd->setPos(position);
         
-        if (integrableObject->isDirectional()) {
+        if (sd->isDirectional()) {
           eulerAngle[0] = x[index++];
           eulerAngle[1] = x[index++];
           eulerAngle[2] = x[index++];
           
-          integrableObject->setEuler(eulerAngle);
+          sd->setEuler(eulerAngle);
 
-          if (integrableObject->isRigidBody()) {
-            RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+          if (sd->isRigidBody()) {
+            RigidBody* rb = static_cast<RigidBody*>(sd);
             rb->updateAtoms();
           }        
+
         }
       }
     }    
@@ -119,21 +120,23 @@ namespace OpenMD{
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;    
+    StuntDouble* sd;    
     std::vector<RealType> myGrad;
     
     int index = 0;
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {        
-        myGrad = integrableObject->getGrad();
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {        
+
+        myGrad = sd->getGrad();
 
         for (size_t k = 0; k < myGrad.size(); ++k) {   
           grad[index++] = myGrad[k];
         }
+
       }            
     }         
   }
@@ -142,7 +145,7 @@ namespace OpenMD{
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;    
+    StuntDouble* sd;    
 
     Vector3d pos;
     Vector3d eulerAngle;
@@ -153,22 +156,23 @@ namespace OpenMD{
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {        
 
-        pos = integrableObject->getPos();
+      for (sd = mol->beginIntegrableObject(j);  sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {        
+
+        pos = sd->getPos();
 
         xinit[index++] = pos[0];
         xinit[index++] = pos[1];
         xinit[index++] = pos[2];
                 
-        if (integrableObject->isDirectional()) {
-          eulerAngle = integrableObject->getEuler();
+        if (sd->isDirectional()) {
+          eulerAngle = sd->getEuler();
           xinit[index++] = eulerAngle[0];
           xinit[index++] = eulerAngle[1];
           xinit[index++] = eulerAngle[2];          
         }
+
       }
     }
     return xinit;

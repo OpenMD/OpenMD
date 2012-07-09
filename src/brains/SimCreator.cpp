@@ -905,10 +905,10 @@ namespace OpenMD {
     for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
       int myGlobalIndex = mol->getGlobalIndex();
       int globalIO = startingIOIndexForMol[myGlobalIndex];
-      for (StuntDouble* integrableObject = mol->beginIntegrableObject(ioi); integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(ioi)) {
-        integrableObject->setGlobalIntegrableObjectIndex(globalIO);
-        IOIndexToIntegrableObject[globalIO] = integrableObject;
+      for (StuntDouble* sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        sd->setGlobalIntegrableObjectIndex(globalIO);
+        IOIndexToIntegrableObject[globalIO] = sd;
         globalIO++;
       }
     }
