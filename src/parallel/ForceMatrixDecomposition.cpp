@@ -1339,6 +1339,10 @@ namespace OpenMD {
         for (int j = 0; j < 3; j++) {
           scaled[j] -= roundMe(scaled[j]);
           scaled[j] += 0.5;
+          // Handle the special case when an object is exactly on the
+          // boundary (a scaled coordinate of 1.0 is the same as
+          // scaled coordinate of 0.0)
+          if (scaled[j] >= 1.0) scaled[j] -= 1.0;
         }
         
         // find xyz-indices of cell that cutoffGroup is in.
@@ -1363,6 +1367,10 @@ namespace OpenMD {
         for (int j = 0; j < 3; j++) {
           scaled[j] -= roundMe(scaled[j]);
           scaled[j] += 0.5;
+          // Handle the special case when an object is exactly on the
+          // boundary (a scaled coordinate of 1.0 is the same as
+          // scaled coordinate of 0.0)
+          if (scaled[j] >= 1.0) scaled[j] -= 1.0;
         }
         
         // find xyz-indices of cell that cutoffGroup is in.
