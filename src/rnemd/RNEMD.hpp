@@ -59,10 +59,6 @@
 using namespace std;
 namespace OpenMD {
 
-  /**
-   * @class RNEMD RNEMD.hpp "integrators/RNEMD.hpp"
-   * @todo document
-   */
   class RNEMD {
   public:
     RNEMD(SimInfo* info);
@@ -70,94 +66,99 @@ namespace OpenMD {
     
     void doRNEMD();
     void doSwap();
-    void doScale();
-    void doShiftScale();
+    void doNIVS();
+    void doVSS();
     void collectData();
     void getStarted();
-    void getStatus();
-    void set_RNEMD_exchange_time(RealType exchangeTime) {
-      exchangeTime_ = exchangeTime;
-    }
-    void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
-    void set_RNEMD_logWidth(int logWidth) { rnemdLogWidth_ = logWidth; }
-    void set_RNEMD_exchange_total(RealType et) { exchangeSum_ = et; }
-    void set_RNEMD_target_flux(RealType targetFlux) {targetFlux_ = targetFlux;}
-    void set_RNEMD_target_JzKE(RealType targetJzKE) {targetJzKE_ = targetJzKE;}
-    void set_RNEMD_target_jzpx(RealType targetJzpx) {targetJzpx_ = targetJzpx;}
-    void set_RNEMD_target_jzpy(RealType targetJzpy) {targetJzpy_ = targetJzpy;}
-    void set_RNEMD_target_jzpz(RealType targetJzpz) {targetJzpz_ = targetJzpz;}
-    void set_RNEMD_target_jzpz2(RealType targetJzpz2) {targetJzpz2_ = targetJzpz2;}
-    RealType get_RNEMD_exchange_total() { return exchangeSum_; }
+    bool inSlabA(Vector3d pos);
+    bool inSlabB(Vector3d pos);
+    void parseOutputFileFormat(const std::string& format);
+    void writeOutputFile();
+    void writeReal(int index, unsigned int bin);
+    void writeVector(int index, unsigned int bin);
 
   private:
 
-    enum RNEMDTypeEnum {
-      rnemdKineticSwap,
-      rnemdKineticScale,
-      rnemdKineticScaleVAM,
-      rnemdKineticScaleAM,
-      rnemdPxScale,
-      rnemdPyScale,
-      rnemdPzScale,
-      rnemdPx,
-      rnemdPy,
-      rnemdPz,
-      rnemdShiftScaleV,
-      rnemdShiftScaleVAM,
-      rnemdUnknown
+    enum RNEMDMethod {
+      rnemdSwap,
+      rnemdNIVS,
+      rnemdVSS,
+      rnemdUnkownMethod
     };
+    enum RNEMDFluxType {
+      rnemdKE,       // translational kinetic energy flux
+      rnemdRotKE,    // rotational kinetic energy flux
+      rnemdFullKE,   // full kinetic energy flux
+      rnemdPx,       // flux of momentum along x axis 
+      rnemdPy,       // flux of momentum along y axis 
+      rnemdPz,       // flux of momentum along z axis 
+      rnemdPvector,  // flux of momentum vector
+      rnemdKePx,     // flux of translational KE and x-momentum
+      rnemdKePy,     // flux of translational KE and y-momentum
+      rnemdKePvector, // full combo platter
+      rnemdUnknownFluxType
+    };
+
+    enum OutputFields {
+      BEGININDEX = 0,
+      Z = BEGININDEX,
+      TEMPERATURE,
+      VELOCITY,
+      DENSITY,
+      ENDINDEX 
+    };
+
+    struct OutputData {
+      string title;
+      string units;
+      string dataType;
+      vector<Accumulator*> accumulator;
+    };
+
+    typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;
+    typedef map<string, OutputFields> OutputMapType;
     
     SimInfo* info_;
-    RandNumGen* randNumGen_;
-    map<string, RNEMDTypeEnum> stringToEnumMap_;
-    RNEMDTypeEnum rnemdType_;
+
+    map<string, RNEMDMethod> stringToMethod_;
+    map<string, RNEMDFluxType> stringToFluxType_;
+    RNEMDMethod rnemdMethod_;
+    RNEMDFluxType rnemdFluxType_;
     string rnemdObjectSelection_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
-    bool outputTemp_;
-    bool outputVx_;
-    bool outputVy_;
-    bool output3DTemp_;
-    bool outputRotTemp_;
-    // James put this in.
-    bool outputDen_;
-    bool outputVz_;
-    int nBins_; /**< The number of bins to divide the simulation box into.  */
-    /*!
-      The middle bin for the RNEMD method. midBin_ = nBins_/2;
-      Depending on the setting of the flux, this box should contain the minimum energy (temperature)
-      within the simulation. 
-    */
-    int midBin_;
-    int rnemdLogWidth_; /**< Number of elements to print out in logs */
-    RealType zShift_;
-    RealType exchangeTime_;
-    RealType targetFlux_;
-    RealType targetJzKE_;
-    RealType targetJzpx_;
-    RealType targetJzpy_;
-    RealType targetJzpz_;
-    RealType targetJzpz2_;
-    Vector3d jzp_, njzp_;
-    RealType exchangeSum_;
-    int failTrialCount_;
-    int failRootCount_;
-    ofstream rnemdLog_;
-    int logFrameCount_;
-    // James added denLog, vzzLog
-    ofstream tempLog_, vxzLog_, vyzLog_, denLog_, vzzLog_, denLog2_;
-    ofstream xTempLog_, yTempLog_, zTempLog_, rotTempLog_, AhLog_;
-    // keeps track of what's being averaged James added DenHist, pzzHist
-    vector<RealType> tempHist_, pxzHist_, pyzHist_, mHist_, DenHist_, pzzHist_, DenHist2_;
-    vector<RealType> xTempHist_, yTempHist_, zTempHist_, rotTempHist_;
-    // keeps track of the number of degrees of freedom being averaged
-    //vector<int> pxzCount_, pyzCount_;
-    vector<int> tempCount_, xyzTempCount_, rotTempCount_;
-    RealType Asum_, Jsum_, AhCount_, runTime_, statusTime_;
-    int Numcount_;
-    bool outputAh_;
-  };
+    int nBins_; 
+    RealType slabWidth_;
+    RealType slabACenter_;
+    RealType slabBCenter_;
 
+    RealType kineticFlux_;        // target or desired *flux*
+    Vector3d momentumFluxVector_; // target or desired *flux*
+
+    RealType kineticTarget_;     // target or desired one-time exchange energy
+    Vector3d momentumTarget_;    // target or desired one-time exchange momentum
+
+    RealType kineticExchange_;    // actual exchange energy (running total)
+    Vector3d momentumExchange_;   // actual exchange momentum (running total)
+
+    RealType exchangeTime_;
+
+    RealType targetJzpz2_;
+
+    unsigned int trialCount_;
+    unsigned int failTrialCount_;
+    unsigned int failRootCount_;
+
+    string rnemdFileName_;
+    ofstream rnemdFile_;
+
+    RealType runTime_, statusTime_;
+
+    vector<OutputData> data_;
+    OutputBitSet outputMask_;
+    OutputMapType outputMap_;
+
+  };
 }
 #endif //INTEGRATORS_RNEMD_HPP

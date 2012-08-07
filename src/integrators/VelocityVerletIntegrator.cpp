@@ -176,7 +176,7 @@ namespace OpenMD {
       saveConservedQuantity();
 
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
-	rnemd_->getStatus();
+	rnemd_->writeOutputFile();
       }
 
       statWriter->writeStat();
@@ -198,6 +198,7 @@ namespace OpenMD {
 
   void VelocityVerletIntegrator::finalize() {
     dumpWriter->writeEor();
+    rnemd_->writeOutputFile();
   
     delete dumpWriter;
     delete statWriter;

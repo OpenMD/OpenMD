@@ -274,7 +274,7 @@ namespace OpenMD {
      * @return the first derivative of this polynomial
      */
     PolynomialType & getDerivative() {
-      Polynomial<Real> p();
+      Polynomial<Real> p;
       
       typename Polynomial<Real>::const_iterator i;
       ExponentType exponent;
@@ -631,7 +631,7 @@ namespace OpenMD {
    */
   template<typename Real>
   Polynomial<Real> getDerivative(const Polynomial<Real>& p1) {
-    Polynomial<Real> p();
+    Polynomial<Real> p;
     
     typename Polynomial<Real>::const_iterator i;
     int exponent;

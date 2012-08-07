@@ -49,25 +49,20 @@
 namespace OpenMD {
   RNEMDParameters::RNEMDParameters() { 
     DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
-    DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime", 100.0);
-    DefineOptionalParameterWithDefaultValue(Nbins, "nBins", 16);
-    DefineOptionalParameterWithDefaultValue(LogWidth, "logWidth", 16);
-    DefineOptionalParameterWithDefaultValue(ExchangeType, "exchangeType", "KineticScale");
-    DefineOptionalParameterWithDefaultValue(TargetFlux, "targetFlux", 0.0);
-    DefineOptionalParameterWithDefaultValue(TargetJzKE, "targetJzKE", 0.0);
-    DefineOptionalParameterWithDefaultValue(TargetJzpx, "targetJzpx", 0.0);
-    DefineOptionalParameterWithDefaultValue(TargetJzpy, "targetJzpy", 0.0);
-    DefineOptionalParameterWithDefaultValue(TargetJzpz, "targetJzpz", 0.0);
     DefineOptionalParameterWithDefaultValue(ObjectSelection, "objectSelection", "select all");
-    DefineOptionalParameterWithDefaultValue(BinShift, "binShift", false);
-    DefineOptionalParameterWithDefaultValue(OutputTemperature, "outputTemperature", false);
-    DefineOptionalParameterWithDefaultValue(OutputVx, "outputVx", false);
-    DefineOptionalParameterWithDefaultValue(OutputVy, "outputVy", false);
-    DefineOptionalParameterWithDefaultValue(OutputDen, "outputDen", false);
-    DefineOptionalParameterWithDefaultValue(OutputAh, "outputAh", false);
-    DefineOptionalParameterWithDefaultValue(OutputVz, "outputVz", false);  
-    DefineOptionalParameterWithDefaultValue(OutputXyzTemperature, "outputXyzTemperature", false);
-    DefineOptionalParameterWithDefaultValue(OutputRotTemperature, "outputRotTemperature", false);
+    DefineOptionalParameterWithDefaultValue(Method, "method", "VSS");
+    DefineOptionalParameter(FluxType, "fluxType");
+
+    DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime", 100.0);
+    DefineOptionalParameter(KineticFlux, "kineticFlux");
+    DefineOptionalParameter(MomentumFlux, "momentumFlux");
+    DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
+    DefineOptionalParameter(SlabWidth, "slabWidth");
+    DefineOptionalParameter(SlabACenter, "slabAcenter");
+    DefineOptionalParameter(SlabBCenter, "slabBcenter");
+    DefineOptionalParameter(OutputFileName, "outputFileName");
+    DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
+    DefineOptionalParameter(OutputFields, "outputFields")
   }
   
   RNEMDParameters::~RNEMDParameters() {    
@@ -75,8 +70,20 @@ namespace OpenMD {
   
   void RNEMDParameters::validate() {
     CheckParameter(ExchangeTime, isPositive());
-    CheckParameter(Nbins, isPositive() && isEven());
-    CheckParameter(ExchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("KineticScaleVAM") || isEqualIgnoreCase("KineticScaleAM") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale") || isEqualIgnoreCase("ShiftScaleV") || isEqualIgnoreCase("ShiftScaleVAM"));
+    CheckParameter(OutputBins, isPositive());
+    CheckParameter(Method, 
+                   isEqualIgnoreCase("swap") ||  
+                   isEqualIgnoreCase("NIVS")  ||
+                   isEqualIgnoreCase("VSS"));
+    CheckParameter(FluxType, 
+                   isEqualIgnoreCase("KE") || 
+                   isEqualIgnoreCase("Px") ||
+                   isEqualIgnoreCase("Py") ||
+                   isEqualIgnoreCase("Pz") ||
+                   isEqualIgnoreCase("Pvector") ||
+                   isEqualIgnoreCase("KE+Px") || 
+                   isEqualIgnoreCase("KE+Py") || 
+                   isEqualIgnoreCase("KE+Pvector"));
   }
   
 }

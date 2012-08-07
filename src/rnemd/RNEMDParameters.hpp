@@ -48,26 +48,19 @@
 namespace OpenMD {
   class RNEMDParameters : public DataHolder {
     DeclareParameter(UseRNEMD, bool);
-    DeclareParameter(ExchangeTime, RealType);
-    DeclareParameter(Nbins, int);
-    DeclareParameter(LogWidth, int);
-    DeclareParameter(ExchangeType, std::string);
     DeclareParameter(ObjectSelection, std::string);
-    DeclareParameter(TargetFlux, RealType);
-    DeclareParameter(TargetJzKE, RealType);
-    DeclareParameter(TargetJzpx, RealType);
-    DeclareParameter(TargetJzpy, RealType);
-    DeclareParameter(TargetJzpz, RealType);
-    DeclareParameter(BinShift, bool);
-    DeclareParameter(OutputTemperature, bool);
-    DeclareParameter(OutputXyzTemperature, bool);
-    DeclareParameter(OutputRotTemperature, bool);
-    DeclareParameter(OutputVx, bool);
-    DeclareParameter(OutputVy, bool);
-    DeclareParameter(OutputVz, bool);    
-    DeclareParameter(OutputDen, bool);    
-    DeclareParameter(OutputAh, bool);
-    
+    DeclareParameter(Method, std::string);
+    DeclareParameter(FluxType, std::string);
+    DeclareParameter(ExchangeTime, RealType);
+    DeclareParameter(KineticFlux, RealType);
+    DeclareParameter(MomentumFlux, RealType);
+    DeclareParameter(MomentumFluxVector, Vector3d);
+    DeclareParameter(SlabWidth, RealType);
+    DeclareParameter(SlabACenter, RealType);
+    DeclareParameter(SlabBCenter, RealType);
+    DeclareParameter(OutputFileName, std::string);
+    DeclareParameter(OutputBins, int);
+    DeclareParameter(OutputFields, std::string);    
   public:
     RNEMDParameters();
     virtual ~RNEMDParameters();
