@@ -90,7 +90,6 @@ end AtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
-//Au 		0.24437807	0.24437807	0.00
 SSD		1.7696	0.6145	1.1550  
 SSD1		1.7696	0.6145	1.1550  
 SSD_E		1.7696	0.6145	1.1550  

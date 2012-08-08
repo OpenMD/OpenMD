@@ -1613,7 +1613,7 @@ namespace OpenMD {
           rnemdFile_ << "#    fluxType  = \"" << (*fi).first << "\";\n";
       }
       
-      rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << "; fs\n";
+      rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << ";\n";
 
       rnemdFile_ << "#    objectSelection = \"" 
                  << rnemdObjectSelection_ << "\";\n";

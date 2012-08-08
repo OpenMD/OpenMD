@@ -206,9 +206,10 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
+
     //below code still have some kind of hard-coding smell
     if (atomType->isDirectional()){
+
       DirectionalAtom* dAtom;
       dAtom = new DirectionalAtom(atomType);
       atom = dAtom;    
