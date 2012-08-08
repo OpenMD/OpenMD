@@ -78,6 +78,7 @@ namespace OpenMD{
     potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
     RealType restraintPotential;  /**< potential energy of restraints */
     RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
+    RealType xyArea;              /**< XY area of this frame */
     RealType volume;              /**< total volume of this frame */
     RealType pressure;            /**< pressure of this frame */
     RealType temperature;         /**< temperature of this frame */
@@ -136,6 +137,7 @@ namespace OpenMD{
     Mat3x3d  getInvHmat();
             
     RealType getVolume();
+    RealType getXYarea();
     void     setVolume(const RealType vol);
 
     /** Wrapping the vector according to periodic boundary condition*/
@@ -246,7 +248,8 @@ namespace OpenMD{
     bool hasKineticEnergy;    
     bool hasShortRangePotential;
     bool hasLongRangePotential;
-    bool hasPotentialEnergy;     
+    bool hasPotentialEnergy;    
+    bool hasXYarea;
     bool hasVolume;         
     bool hasPressure;       
     bool hasTemperature;    

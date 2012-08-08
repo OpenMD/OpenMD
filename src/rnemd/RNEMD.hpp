@@ -76,6 +76,8 @@ namespace OpenMD {
     void writeOutputFile();
     void writeReal(int index, unsigned int bin);
     void writeVector(int index, unsigned int bin);
+    void writeRealStdDev(int index, unsigned int bin);
+    void writeVectorStdDev(int index, unsigned int bin);
 
   private:
 
@@ -158,6 +160,7 @@ namespace OpenMD {
     vector<OutputData> data_;
     OutputBitSet outputMask_;
     OutputMapType outputMap_;
+    Accumulator* areaAccumulator_;
 
   };
 }

@@ -73,7 +73,8 @@ namespace OpenMD {
     frameData.lrPotentials = potVec(0.0);
     frameData.excludedPotentials = potVec(0.0); 
     frameData.restraintPotential = 0.0; 
-    frameData.rawPotential = 0.0;       
+    frameData.rawPotential = 0.0;   
+    frameData.xyArea = 0.0;
     frameData.volume = 0.0;          
     frameData.thermostat = make_pair(0.0, 0.0);
     frameData.electronicThermostat = make_pair(0.0, 0.0);
@@ -104,6 +105,7 @@ namespace OpenMD {
     frameData.excludedPotentials = potVec(0.0); 
     frameData.restraintPotential = 0.0; 
     frameData.rawPotential = 0.0;       
+    frameData.xyArea = 0.0;
     frameData.volume = 0.0;          
     frameData.thermostat = make_pair(0.0, 0.0);
     frameData.electronicThermostat = make_pair(0.0, 0.0);
@@ -138,7 +140,8 @@ namespace OpenMD {
     hasKineticEnergy = false;       
     hasShortRangePotential = false;
     hasLongRangePotential = false;
-    hasPotentialEnergy = false;     
+    hasPotentialEnergy = false;   
+    hasXYarea = false;
     hasVolume = false;         
     hasPressure = false;       
     hasTemperature = false;    
@@ -247,6 +250,16 @@ namespace OpenMD {
   /** Returns the inverse H-Matrix */
   Mat3x3d Snapshot::getInvHmat() {
     return frameData.invHmat;
+  }
+
+  RealType Snapshot::getXYarea() {
+    if (!hasXYarea) {
+      Vector3d x = frameData.hmat.getColumn(0);
+      Vector3d y = frameData.hmat.getColumn(1);
+      frameData.xyArea = cross(x,y).length();
+      hasXYarea = true;
+    }
+    return frameData.xyArea;
   }
 
   RealType Snapshot::getVolume() {

@@ -288,6 +288,8 @@ namespace OpenMD {
       simError();
     }
 
+    areaAccumulator_ = new Accumulator();
+
     nBins_ = rnemdParams->getOutputBins();
 
     data_.resize(RNEMD::ENDINDEX);
@@ -381,8 +383,9 @@ namespace OpenMD {
     // dt = exchange time interval
     // flux = target flux
 
-    kineticTarget_ = 2.0*kineticFlux_*exchangeTime_*hmat(0,0)*hmat(1,1);
-    momentumTarget_ = 2.0*momentumFluxVector_*exchangeTime_*hmat(0,0)*hmat(1,1);
+    RealType area = currentSnap_->getXYarea();
+    kineticTarget_ = 2.0 * kineticFlux_ * exchangeTime_ * area;
+    momentumTarget_ = 2.0 * momentumFluxVector_ * exchangeTime_ * area;
 
     // total exchange sums are zeroed out at the beginning:
 
@@ -1414,6 +1417,8 @@ namespace OpenMD {
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
+    areaAccumulator_->add(currentSnap_->getXYarea());
+
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
     int selei;
@@ -1453,6 +1458,7 @@ namespace OpenMD {
       
       if (usePeriodicBoundaryConditions_)
         currentSnap_->wrapVector(pos);
+
 
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
@@ -1518,7 +1524,7 @@ namespace OpenMD {
       vel.x() = binPx[i] / binMass[i];
       vel.y() = binPy[i] / binMass[i];
       vel.z() = binPz[i] / binMass[i];
-      den = binCount[i] * nBins_ / (hmat(0,0) * hmat(1,1) * hmat(2,2));
+      den = binCount[i] * nBins_ / currentSnap_->getVolume();
       temp = 2.0 * binKE[i] / (binDOF[i] * PhysicalConstants::kb *
                                PhysicalConstants::energyConvert);
 
@@ -1588,53 +1594,55 @@ namespace OpenMD {
       Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
       RealType time = currentSnap_->getTime();
-      
-      
+      RealType avgArea;
+      areaAccumulator_->getAverage(avgArea);
+      RealType Jz = kineticExchange_ / (2.0 * time * avgArea);
+      Vector3d JzP = momentumExchange_ / (2.0 * time * avgArea);      
+
       rnemdFile_ << "#######################################################\n";
       rnemdFile_ << "# RNEMD {\n";
 
       map<string, RNEMDMethod>::iterator mi;
       for(mi = stringToMethod_.begin(); mi != stringToMethod_.end(); ++mi) {
         if ( (*mi).second == rnemdMethod_) 
-          rnemdFile_ << "#    exchangeMethod  = " << (*mi).first << "\n";
+          rnemdFile_ << "#    exchangeMethod  = \"" << (*mi).first << "\";\n";
       }
       map<string, RNEMDFluxType>::iterator fi;
       for(fi = stringToFluxType_.begin(); fi != stringToFluxType_.end(); ++fi) {
         if ( (*fi).second == rnemdFluxType_) 
-          rnemdFile_ << "#    fluxType  = " << (*fi).first << "\n";
+          rnemdFile_ << "#    fluxType  = \"" << (*fi).first << "\";\n";
       }
       
-      rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << " fs\n";
+      rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << "; fs\n";
 
       rnemdFile_ << "#    objectSelection = \"" 
-                 << rnemdObjectSelection_ << "\"\n";
-      rnemdFile_ << "#    slabWidth = " << slabWidth_ << " angstroms\n";
-      rnemdFile_ << "#    slabAcenter = " << slabACenter_ << " angstroms\n";
-      rnemdFile_ << "#    slabBcenter = " << slabBCenter_ << " angstroms\n";
+                 << rnemdObjectSelection_ << "\";\n";
+      rnemdFile_ << "#    slabWidth = " << slabWidth_ << ";\n";
+      rnemdFile_ << "#    slabAcenter = " << slabACenter_ << ";\n";
+      rnemdFile_ << "#    slabBcenter = " << slabBCenter_ << ";\n";
       rnemdFile_ << "# }\n";
       rnemdFile_ << "#######################################################\n";
-      
-      rnemdFile_ << "# running time = " << time << " fs\n";
-      rnemdFile_ << "# target kinetic flux = " << kineticFlux_ << "\n";
-      rnemdFile_ << "# target momentum flux = " << momentumFluxVector_ << "\n";
-      
-      rnemdFile_ << "# target one-time kinetic exchange = " << kineticTarget_ 
-                 << "\n";
-      rnemdFile_ << "# target one-time momentum exchange = " << momentumTarget_ 
-                 << "\n";
-      
-      rnemdFile_ << "# actual kinetic exchange = " << kineticExchange_ << "\n";
-      rnemdFile_ << "# actual momentum exchange = " << momentumExchange_ 
-                 << "\n";
-      
-      rnemdFile_ << "# attempted exchanges: " << trialCount_ << "\n";
-      rnemdFile_ << "# failed exchanges: " << failTrialCount_ << "\n";
-
-      
+      rnemdFile_ << "# RNEMD report:\n";      
+      rnemdFile_ << "#     running time = " << time << " fs\n";
+      rnemdFile_ << "#     target flux:\n";
+      rnemdFile_ << "#         kinetic = " << kineticFlux_ << "\n";
+      rnemdFile_ << "#         momentum = " << momentumFluxVector_ << "\n";
+      rnemdFile_ << "#     target one-time exchanges:\n";
+      rnemdFile_ << "#         kinetic = " << kineticTarget_ << "\n";
+      rnemdFile_ << "#         momentum = " << momentumTarget_ << "\n";
+      rnemdFile_ << "#     actual exchange totals:\n";
+      rnemdFile_ << "#         kinetic = " << kineticExchange_ << "\n";
+      rnemdFile_ << "#         momentum = " << momentumExchange_  << "\n";
+      rnemdFile_ << "#     actual flux:\n";
+      rnemdFile_ << "#         kinetic = " << Jz << "\n";
+      rnemdFile_ << "#         momentum = " << JzP  << "\n";
+      rnemdFile_ << "#     exchange statistics:\n";
+      rnemdFile_ << "#         attempted = " << trialCount_ << "\n";
+      rnemdFile_ << "#         failed = " << failTrialCount_ << "\n";     
       if (rnemdMethod_ == rnemdNIVS) {
-        rnemdFile_ << "# NIVS root-check warnings: " << failRootCount_ << "\n";
+        rnemdFile_ << "#         NIVS root-check errors = "
+                   << failRootCount_ << "\n";
       }
-
       rnemdFile_ << "#######################################################\n";
       
       
@@ -1671,6 +1679,32 @@ namespace OpenMD {
         rnemdFile_ << std::endl;
         
       }        
+
+      rnemdFile_ << "#######################################################\n";
+      rnemdFile_ << "# Standard Deviations in those quantities follow:\n";
+      rnemdFile_ << "#######################################################\n";
+
+
+      for (unsigned int j = 0; j < nBins_; j++) {        
+        rnemdFile_ << "#";
+        for (unsigned int i = 0; i < outputMask_.size(); ++i) {
+          if (outputMask_[i]) {
+            if (data_[i].dataType == "RealType")
+              writeRealStdDev(i,j);
+            else if (data_[i].dataType == "Vector3d")
+              writeVectorStdDev(i,j);
+            else {
+              sprintf( painCave.errMsg,
+                       "RNEMD found an unknown data type for: %s ",
+                       data_[i].title.c_str());
+              painCave.isFatal = 1;
+              simError();
+            }
+          }
+        }
+        rnemdFile_ << std::endl;
+        
+      }        
       
       rnemdFile_.flush();
       rnemdFile_.close();
@@ -1683,7 +1717,7 @@ namespace OpenMD {
   
   void RNEMD::writeReal(int index, unsigned int bin) {
     assert(index >=0 && index < ENDINDEX);
-    assert(bin >=0 && bin < nBins_);
+    assert(bin < nBins_);
     RealType s;
     
     data_[index].accumulator[bin]->getAverage(s);
@@ -1701,7 +1735,7 @@ namespace OpenMD {
   
   void RNEMD::writeVector(int index, unsigned int bin) {
     assert(index >=0 && index < ENDINDEX);
-    assert(bin >=0 && bin < nBins_);
+    assert(bin < nBins_);
     Vector3d s;
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getAverage(s);
     if (isinf(s[0]) || isnan(s[0]) || 
@@ -1709,6 +1743,42 @@ namespace OpenMD {
         isinf(s[2]) || isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
                "RNEMD detected a numerical error writing: %s for bin %d",
+               data_[index].title.c_str(), bin);
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      rnemdFile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
+    }
+  }  
+
+  void RNEMD::writeRealStdDev(int index, unsigned int bin) {
+    assert(index >=0 && index < ENDINDEX);
+    assert(bin < nBins_);
+    RealType s;
+    
+    data_[index].accumulator[bin]->getStdDev(s);
+    
+    if (! isinf(s) && ! isnan(s)) {
+      rnemdFile_ << "\t" << s;
+    } else{
+      sprintf( painCave.errMsg,
+               "RNEMD detected a numerical error writing: %s std. dev. for bin %d",
+               data_[index].title.c_str(), bin);
+      painCave.isFatal = 1;
+      simError();
+    }    
+  }
+  
+  void RNEMD::writeVectorStdDev(int index, unsigned int bin) {
+    assert(index >=0 && index < ENDINDEX);
+    assert(bin < nBins_);
+    Vector3d s;
+    dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getStdDev(s);
+    if (isinf(s[0]) || isnan(s[0]) || 
+        isinf(s[1]) || isnan(s[1]) || 
+        isinf(s[2]) || isnan(s[2]) ) {      
+      sprintf( painCave.errMsg,
+               "RNEMD detected a numerical error writing: %s std. dev. for bin %d",
                data_[index].title.c_str(), bin);
       painCave.isFatal = 1;
       simError();
