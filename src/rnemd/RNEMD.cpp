@@ -69,6 +69,9 @@ namespace OpenMD {
     Globals * simParams = info->getSimParams();
     RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
 
+    doRNEMD_ = rnemdParams->getUseRNEMD();
+    if (!doRNEMD_) return;
+
     stringToMethod_["Swap"]  = rnemdSwap;
     stringToMethod_["NIVS"]  = rnemdNIVS;
     stringToMethod_["VSS"]   = rnemdVSS;
@@ -410,7 +413,7 @@ namespace OpenMD {
   }
    
   RNEMD::~RNEMD() {
-    
+    if (!doRNEMD_) return;
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
@@ -432,7 +435,7 @@ namespace OpenMD {
   }
 
   void RNEMD::doSwap() {
-
+    if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
@@ -767,7 +770,7 @@ namespace OpenMD {
   }
   
   void RNEMD::doNIVS() {
-
+    if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
@@ -1216,7 +1219,7 @@ namespace OpenMD {
   }
 
   void RNEMD::doVSS() {
-
+    if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     RealType time = currentSnap_->getTime();	 
     Mat3x3d hmat = currentSnap_->getHmat();
@@ -1394,7 +1397,7 @@ namespace OpenMD {
   }
 
   void RNEMD::doRNEMD() {
-
+    if (!doRNEMD_) return;
     trialCount_++;
     switch(rnemdMethod_) {
     case rnemdSwap: 
@@ -1413,7 +1416,7 @@ namespace OpenMD {
   }
 
   void RNEMD::collectData() {
-
+    if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
@@ -1550,11 +1553,13 @@ namespace OpenMD {
   }
 
   void RNEMD::getStarted() {
+    if (!doRNEMD_) return;
     collectData();
     writeOutputFile();
   }
 
   void RNEMD::parseOutputFileFormat(const std::string& format) {
+    if (!doRNEMD_) return;
     StringTokenizer tokenizer(format, " ,;|\t\n\r");
     
     while(tokenizer.hasMoreTokens()) {
@@ -1575,6 +1580,7 @@ namespace OpenMD {
   }
   
   void RNEMD::writeOutputFile() {
+    if (!doRNEMD_) return;
     
 #ifdef IS_MPI
     // If we're the root node, should we print out the results
@@ -1716,6 +1722,7 @@ namespace OpenMD {
   }
   
   void RNEMD::writeReal(int index, unsigned int bin) {
+    if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
     assert(bin < nBins_);
     RealType s;
@@ -1734,6 +1741,7 @@ namespace OpenMD {
   }
   
   void RNEMD::writeVector(int index, unsigned int bin) {
+    if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
     assert(bin < nBins_);
     Vector3d s;
@@ -1752,6 +1760,7 @@ namespace OpenMD {
   }  
 
   void RNEMD::writeRealStdDev(int index, unsigned int bin) {
+    if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
     assert(bin < nBins_);
     RealType s;
@@ -1770,6 +1779,7 @@ namespace OpenMD {
   }
   
   void RNEMD::writeVectorStdDev(int index, unsigned int bin) {
+    if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
     assert(bin < nBins_);
     Vector3d s;

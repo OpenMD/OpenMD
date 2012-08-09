@@ -198,8 +198,10 @@ namespace OpenMD {
 
   void VelocityVerletIntegrator::finalize() {
     dumpWriter->writeEor();
-    rnemd_->writeOutputFile();
-  
+    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+      rnemd_->writeOutputFile();
+    }
+ 
     delete dumpWriter;
     delete statWriter;
   

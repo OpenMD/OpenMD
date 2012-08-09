@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20110725): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (20120725): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -57,6 +57,7 @@ public:
 	public: void constant();
 	protected: void intConst();
 	protected: void floatConst();
+	protected: void vectorConst();
 	public: void moleculestatement();
 	public: void atomblock();
 	public: void bondblock();

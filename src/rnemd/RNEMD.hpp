@@ -161,6 +161,7 @@ namespace OpenMD {
     OutputBitSet outputMask_;
     OutputMapType outputMap_;
     Accumulator* areaAccumulator_;
+    bool doRNEMD_;
 
   };
 }

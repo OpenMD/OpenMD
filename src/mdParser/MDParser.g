@@ -65,7 +65,8 @@ assignment  : ID ASSIGNEQUAL^ constant SEMICOLON!
             ;
             
 constant    : intConst
-						| floatConst
+			| floatConst
+            | vectorConst
             | ID
             | StringLiteral
             ;
@@ -183,7 +184,11 @@ floatConst
           NUM_FLOAT | NUM_DOUBLE
         ;
 
-
+protected
+vectorConst
+    : 
+        LPAREN^ doubleNumber COMMA doubleNumber COMMA doubleNumber RPAREN
+    ;
 
 class MDLexer extends Lexer;
 

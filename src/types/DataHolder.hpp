@@ -69,7 +69,7 @@ namespace OpenMD {
         if (!result ) {
           std::stringstream ss;
           ss <<   "Error in parsing " << keyword << ": expected " << 
-            i->second->getParamType() <<"\n";
+            i->second->getParamType() << " but got " << val << "\n";
           throw OpenMDException(ss.str());
         }
       } else if (deprecatedKeywords_.find(keyword) != 

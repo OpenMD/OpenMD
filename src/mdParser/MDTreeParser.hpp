@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20110725): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20120725): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -62,6 +62,7 @@ public:
 	);
 	protected: int  intConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	protected: RealType  floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void moleculestatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -81,7 +82,6 @@ public:
 	public: void rigidbodystatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{

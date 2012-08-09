@@ -49,17 +49,24 @@ assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID
             
 constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
 {
-  int ival;
-  RealType dval;
+    int ival;
+    RealType dval, x, y, z;
+    Vector3d dvec;
 }    
-            : ival=intConst {blockStack.top()->assign(id->getText(), ival);}
-            | dval=floatConst {blockStack.top()->assign(id->getText(), dval);}
-            | str1:ID {blockStack.top()->assign(id->getText(), str1->getText());}
-            | str2:StringLiteral { std::string s =  str2->getText();
-                                   s = s.substr(1, s.length()-2);
-                                   blockStack.top()->assign(id->getText(),s);
-                                 }
-            ;
+    : ival=intConst {blockStack.top()->assign(id->getText(), ival);}
+    | dval=floatConst {blockStack.top()->assign(id->getText(), dval);}
+    | #(LPAREN x=doubleNumber COMMA y=doubleNumber COMMA z=doubleNumber RPAREN) 
+        {   dvec.x() = x; 
+            dvec.y() = y; 
+            dvec.z() = z; 
+            blockStack.top()->assign(id->getText(), dvec);
+        }
+    | str1:ID {blockStack.top()->assign(id->getText(), str1->getText());}
+    | str2:StringLiteral {std::string s =  str2->getText();
+            s = s.substr(1, s.length()-2);
+            blockStack.top()->assign(id->getText(),s);
+        }
+    ;
             
 
 componentblock  : #(COMPONENT  {Component* currComponet = new Component(); blockStack.push(currComponet);}
@@ -264,41 +271,40 @@ fragmentblock {int ival;}
               ;
 
 fragmentstatement : assignment
-              ;
+    ;
 
 
               
-doubleNumberTuple   returns [vector<RealType> dvec]
+doubleNumberTuple returns [vector<RealType> dvec]
 {
-  RealType dval;
-}
-              : (dval=doubleNumber {dvec.push_back(dval);})+  
-              ;
-                          
-inttuple  returns [vector<int> ivec]
+    RealType dval;
+}   
+    : (dval=doubleNumber {dvec.push_back(dval);})+  
+    ;
+
+
+inttuple returns [vector<int> ivec]
 {
-  int ival;
+    int ival;
 }
-              : (ival=intConst {ivec.push_back(ival);})+ 
-              ;
+    : (ival=intConst {ivec.push_back(ival);})+ 
+    ;
 
 protected
 intConst returns [int ival]
-        : i1:NUM_INT {ival = lexi_cast<int>(i1->getText());} 
-        | i2:NUM_LONG {ival = lexi_cast<int>(i2->getText());}
-        ;
+    : i1:NUM_INT {ival = lexi_cast<int>(i1->getText());} 
+    | i2:NUM_LONG {ival = lexi_cast<int>(i2->getText());}
+    ;
 
 protected
-doubleNumber  returns [RealType dval]
-              : 
-                ic:intConst {dval = lexi_cast<RealType>(ic->getText());}
-                | fc:floatConst {dval = lexi_cast<RealType>(fc->getText());} 
-                               
-              ;
+doubleNumber returns [RealType dval]
+    : ic:intConst {dval = lexi_cast<RealType>(ic->getText());}
+    | fc:floatConst {dval = lexi_cast<RealType>(fc->getText());}         
+    ;
               
 protected
 floatConst returns [RealType dval]
-        : d1:NUM_FLOAT {dval = lexi_cast<RealType>(d1->getText());}  
-        | d2:NUM_DOUBLE {dval = lexi_cast<RealType>(d2->getText());} 
-        ;
-        
+    : d1:NUM_FLOAT {dval = lexi_cast<RealType>(d1->getText());}  
+    | d2:NUM_DOUBLE {dval = lexi_cast<RealType>(d2->getText());} 
+    ;
+  
