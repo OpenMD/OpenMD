@@ -20,11 +20,11 @@ RNEMD {
    useRNEMD = true;
    exchangeTime = 50;
    objectSelection = "select Ar";
-   fluxType = "KE";
+   fluxType = "KE+Pvector";
    method = "VSS";
    outputBins = 30;
-   kineticFlux = -2e-9;
-   outputFields = "Z|TEMPERATURE|VELOCITY|DENSITY";
+   kineticFlux = -5.0e-6;
+   momentumFluxVector = (-2e-7, 0, 0);
 }
 dt = 1.0;
 runTime = 1e5;
