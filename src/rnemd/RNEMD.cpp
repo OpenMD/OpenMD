@@ -80,6 +80,7 @@ namespace OpenMD {
     stringToFluxType_["Px"]  = rnemdPx;
     stringToFluxType_["Py"]  = rnemdPy;
     stringToFluxType_["Pz"]  = rnemdPz;
+    stringToFluxType_["Pvector"]  = rnemdPvector;
     stringToFluxType_["KE+Px"]  = rnemdKePx;
     stringToFluxType_["KE+Py"]  = rnemdKePy;
     stringToFluxType_["KE+Pvector"]  = rnemdKePvector;
@@ -101,8 +102,8 @@ namespace OpenMD {
       sprintf(painCave.errMsg, 
               "RNEMD: No fluxType was set in the md file.  This parameter,\n"
               "\twhich must be one of the following values:\n"
-              "\tKE, Px, Py, Pz, KE+Px, KE+Py, KE+Pvector, must be set to\n"
-              "\tuse RNEMD\n");
+              "\tKE, Px, Py, Pz, Pvector, KE+Px, KE+Py, KE+Pvector\n"
+              "\tmust be set to use RNEMD\n");
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -200,6 +201,7 @@ namespace OpenMD {
         break;
       case rnemdPvector:
         hasCorrectFlux = hasMomentumFluxVector;
+        break;
       case rnemdKePx:
       case rnemdKePy:
         hasCorrectFlux = hasMomentumFlux && hasKineticFlux;
@@ -227,8 +229,7 @@ namespace OpenMD {
     } 
     if (!hasCorrectFlux) {
       sprintf(painCave.errMsg, 
-              "RNEMD: The current method,\n"
-              "\t%s, and flux type %s\n"
+              "RNEMD: The current method, %s, and flux type, %s,\n"
               "\tdid not have the correct flux value specified. Options\n"
               "\tinclude: kineticFlux, momentumFlux, and momentumFluxVector\n",
               methStr.c_str(), fluxStr.c_str());
@@ -238,7 +239,10 @@ namespace OpenMD {
     } 
 
     if (hasKineticFlux) {
-      kineticFlux_ = rnemdParams->getKineticFlux();
+      // convert the kcal / mol / Angstroms^2 / fs values in the md file 
+      // into  amu / fs^3:
+      kineticFlux_ = rnemdParams->getKineticFlux() 
+        * PhysicalConstants::energyConvert;
     } else {
       kineticFlux_ = 0.0;
     }
@@ -317,7 +321,7 @@ namespace OpenMD {
     outputMap_["TEMPERATURE"] =  TEMPERATURE;
 
     OutputData velocity;
-    velocity.units = "amu/fs";
+    velocity.units = "angstroms/fs";
     velocity.title =  "Velocity";  
     velocity.dataType = "Vector3d";
     velocity.accumulator.reserve(nBins_);
@@ -494,9 +498,6 @@ namespace OpenMD {
 		+ angMom[2]*angMom[2]/I(2, 2);
             }
 	  } //angular momenta exchange enabled
-          //energyConvert temporarily disabled
-          //make kineticExchange_ comparable between swap & scale
-          //value = value * 0.5 / PhysicalConstants::energyConvert;
           value *= 0.5;
           break;
         case rnemdPx :
@@ -734,7 +735,6 @@ namespace OpenMD {
         
         switch(rnemdFluxType_) {
         case rnemdKE:
-          cerr << "KE\n";
           kineticExchange_ += max_val - min_val;
           break;
         case rnemdPx:
@@ -747,7 +747,6 @@ namespace OpenMD {
           momentumExchange_.z() += max_val - min_val;
           break;
         default:
-          cerr << "default\n";
           break;
         }
       } else {        
@@ -1527,7 +1526,10 @@ namespace OpenMD {
       vel.x() = binPx[i] / binMass[i];
       vel.y() = binPy[i] / binMass[i];
       vel.z() = binPz[i] / binMass[i];
-      den = binCount[i] * nBins_ / currentSnap_->getVolume();
+
+      den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
+        / currentSnap_->getVolume() ;
+
       temp = 2.0 * binKE[i] / (binDOF[i] * PhysicalConstants::kb *
                                PhysicalConstants::energyConvert);
 
@@ -1602,7 +1604,8 @@ namespace OpenMD {
       RealType time = currentSnap_->getTime();
       RealType avgArea;
       areaAccumulator_->getAverage(avgArea);
-      RealType Jz = kineticExchange_ / (2.0 * time * avgArea);
+      RealType Jz = kineticExchange_ / (2.0 * time * avgArea) 
+        / PhysicalConstants::energyConvert;
       Vector3d JzP = momentumExchange_ / (2.0 * time * avgArea);      
 
       rnemdFile_ << "#######################################################\n";
@@ -1631,17 +1634,28 @@ namespace OpenMD {
       rnemdFile_ << "# RNEMD report:\n";      
       rnemdFile_ << "#     running time = " << time << " fs\n";
       rnemdFile_ << "#     target flux:\n";
-      rnemdFile_ << "#         kinetic = " << kineticFlux_ << "\n";
-      rnemdFile_ << "#         momentum = " << momentumFluxVector_ << "\n";
+      rnemdFile_ << "#         kinetic = " 
+                 << kineticFlux_ / PhysicalConstants::energyConvert 
+                 << " (kcal/mol/A^2/fs)\n";
+      rnemdFile_ << "#         momentum = " << momentumFluxVector_ 
+                 << " (amu/A/fs^2)\n";
       rnemdFile_ << "#     target one-time exchanges:\n";
-      rnemdFile_ << "#         kinetic = " << kineticTarget_ << "\n";
-      rnemdFile_ << "#         momentum = " << momentumTarget_ << "\n";
+      rnemdFile_ << "#         kinetic = " 
+                 << kineticTarget_ / PhysicalConstants::energyConvert 
+                 << " (kcal/mol)\n";
+      rnemdFile_ << "#         momentum = " << momentumTarget_ 
+                 << " (amu*A/fs)\n";
       rnemdFile_ << "#     actual exchange totals:\n";
-      rnemdFile_ << "#         kinetic = " << kineticExchange_ << "\n";
-      rnemdFile_ << "#         momentum = " << momentumExchange_  << "\n";
+      rnemdFile_ << "#         kinetic = " 
+                 << kineticExchange_ / PhysicalConstants::energyConvert 
+                 << " (kcal/mol)\n";
+      rnemdFile_ << "#         momentum = " << momentumExchange_ 
+                 << " (amu*A/fs)\n";      
       rnemdFile_ << "#     actual flux:\n";
-      rnemdFile_ << "#         kinetic = " << Jz << "\n";
-      rnemdFile_ << "#         momentum = " << JzP  << "\n";
+      rnemdFile_ << "#         kinetic = " << Jz
+                 << " (kcal/mol/A^2/fs)\n";
+      rnemdFile_ << "#         momentum = " << JzP 
+                 << " (amu/A/fs^2)\n";
       rnemdFile_ << "#     exchange statistics:\n";
       rnemdFile_ << "#         attempted = " << trialCount_ << "\n";
       rnemdFile_ << "#         failed = " << failTrialCount_ << "\n";     
@@ -1659,6 +1673,8 @@ namespace OpenMD {
         if (outputMask_[i]) {
           rnemdFile_ << "\t" << data_[i].title << 
             "(" << data_[i].units << ")";
+          // add some extra tabs for column alignment
+          if (data_[i].dataType == "Vector3d") rnemdFile_ << "\t\t";
         }
       }
       rnemdFile_ << std::endl;

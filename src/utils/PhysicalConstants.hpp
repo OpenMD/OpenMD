@@ -73,6 +73,12 @@ namespace OpenMD {
      */
     const RealType viscoConvert = 1.439326479e4; 
 
+    /*
+     *  densityConvert
+     *    used for converting amu / Angstroms^3 into  g / cm^3
+     */
+    const RealType densityConvert = 1.66053886;
+
     /* 
      *  thermalConductivityConvert   
      *    multiplies standard input file units of 

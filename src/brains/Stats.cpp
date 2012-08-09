@@ -281,14 +281,6 @@ namespace OpenMD {
     data_[TAGGED_PAIR_DISTANCE] = tagged_pair_distance;
     statsMap_["TAGGED_PAIR_DISTANCE"] =  TAGGED_PAIR_DISTANCE;
 
-    StatsData rnemd_exchange_total;
-    rnemd_exchange_total.units =  "Variable";
-    rnemd_exchange_total.title =  "RNEMD_exchange_total";
-    rnemd_exchange_total.dataType = "RealType";
-    rnemd_exchange_total.accumulator = new Accumulator();
-    data_[RNEMD_EXCHANGE_TOTAL] = rnemd_exchange_total;
-    statsMap_["RNEMD_EXCHANGE_TOTAL"] =  RNEMD_EXCHANGE_TOTAL;
-
     StatsData shadowh;
     shadowh.units =  "kcal/mol";
     shadowh.title =  "Shadow Hamiltonian";
@@ -365,12 +357,6 @@ namespace OpenMD {
       }
     }
     
-    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
-      statsMask_.set(RNEMD_EXCHANGE_TOTAL);
-    }
-
-
-
   }
 
   void Stats::parseStatFileFormat(const std::string& format) {
@@ -502,9 +488,6 @@ namespace OpenMD {
           data_[i].accumulator->add(thermo.getTaggedAtomPairDistance());
           break;
           /*
-        case RNEMD_EXCHANGE_TOTAL:
-          data_[i].accumulator->add(thermo.get_RNEMD_exchange_total());
-          break;
         case SHADOWH:
           data_[i].accumulator->add(thermo.getShadowHamiltionian());
           break;

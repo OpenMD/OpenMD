@@ -93,7 +93,6 @@ namespace OpenMD {
       PRESSURE_TENSOR,
       SYSTEM_DIPOLE,
       TAGGED_PAIR_DISTANCE,
-      RNEMD_EXCHANGE_TOTAL,
       SHADOWH,
       HELFANDMOMENT,
       HEATFLUX,  
