@@ -88,7 +88,8 @@ namespace OpenMD {
     
     vector<Component*> components = simParams->getComponents();
     
-    for (vector<Component*>::iterator i = components.begin(); i !=components.end(); ++i) {
+    for (vector<Component*>::iterator i = components.begin(); 
+         i !=components.end(); ++i) {
       molStamp = (*i)->getMoleculeStamp();
       nMolWithSameStamp = (*i)->getNMol();
       
@@ -781,7 +782,8 @@ namespace OpenMD {
 
   void SimInfo::setupSimVariables() {
     useAtomicVirial_ = simParams_->getUseAtomicVirial();
-    // we only call setAccumulateBoxDipole if the accumulateBoxDipole parameter is true
+    // we only call setAccumulateBoxDipole if the accumulateBoxDipole
+    // parameter is true
     calcBoxDipole_ = false;
     if ( simParams_->haveAccumulateBoxDipole() ) 
       if ( simParams_->getAccumulateBoxDipole() ) {
@@ -979,15 +981,18 @@ namespace OpenMD {
  
     for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
         
-      for (atom = mol->beginAtom(atomIter); atom != NULL; atom = mol->nextAtom(atomIter)) {
+      for (atom = mol->beginAtom(atomIter); atom != NULL; 
+           atom = mol->nextAtom(atomIter)) {
 	atom->setSnapshotManager(sman_);
       }
         
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
 	rb->setSnapshotManager(sman_);
       }
 
-      for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; cg = mol->nextCutoffGroup(cgIter)) {
+      for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; 
+           cg = mol->nextCutoffGroup(cgIter)) {
 	cg->setSnapshotManager(sman_);
       }
     }    
@@ -1002,23 +1007,21 @@ namespace OpenMD {
    
   
   StuntDouble* SimInfo::getIOIndexToIntegrableObject(int index) {
-    return IOIndexToIntegrableObject.at(index);
+    if (index >= IOIndexToIntegrableObject.size()) {
+      sprintf(painCave.errMsg,
+              "SimInfo::getIOIndexToIntegrableObject Error: Integrable Object\n"
+              "\tindex exceeds number of known objects!\n");
+      painCave.isFatal = 1;
+      simError();
+      return NULL;
+    } else
+      return IOIndexToIntegrableObject.at(index);
   }
   
   void SimInfo::setIOIndexToIntegrableObject(const vector<StuntDouble*>& v) {
     IOIndexToIntegrableObject= v;
   }
-/*
-   void SimInfo::setStuntDoubleFromGlobalIndex(vector<StuntDouble*> v) {
-      assert( v.size() == nAtoms_ + nRigidBodies_);
-      sdByGlobalIndex_ = v;
-    }
 
-    StuntDouble* SimInfo::getStuntDoubleFromGlobalIndex(int index) {
-      //assert(index < nAtoms_ + nRigidBodies_);
-      return sdByGlobalIndex_.at(index);
-    }   
-*/   
   int SimInfo::getNGlobalConstraints() {
     int nGlobalConstraints;
 #ifdef IS_MPI
