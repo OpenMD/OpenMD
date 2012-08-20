@@ -40,27 +40,36 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_MULTIPOLEATOMTYPESSECTIONPARSER_HPP
-#define IO_MULTIPOLEATOMTYPESSECTIONPARSER_HPP
+#ifndef PERTURBATIONS_ELECTRICFIELD_HPP
+#define PERTURBATIONS_ELECTRICFIELD_HPP
 
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
-#include "types/MultipoleAdapter.hpp"
+#include "perturbations/Perturbation.hpp"
+#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
-
-  class MultipoleAtomTypesSectionParser : public SectionParser {
+   
+  /**
+   * @class ElectricFieldForceManager 
+   * Perturbation for external Electric Field forces and torques.
+   */
+  class ElectricField : public Perturbation {
+    
   public:
-    MultipoleAtomTypesSectionParser(ForceFieldOptions& options);
+    ElectricField(SimInfo* info);
+    
+  protected:
+    virtual void initialize();
+    virtual void applyPerturbation();
     
   private:
-    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    
-    void parseDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, int lineNo);
-    void parseSplitDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, RealType& splitDipoleDistance, int lineNo);
-    void parseQuadrupole(StringTokenizer& tokenizer, Vector3d& quadrupoleMoments, int lineNo);
-    ForceFieldOptions& options_;
-  };  
-} 
+    bool initialized;
+    bool doElectricField;
+    bool doParticlePot;
+    Globals* simParams;
+    SimInfo* info_;
+    Vector3d EF;
+  };
+  
+} //end namespace OpenMD
 #endif
 

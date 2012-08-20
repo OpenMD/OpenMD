@@ -332,6 +332,7 @@ src/primitives/RigidBody.cpp
 src/primitives/StuntDouble.cpp
 src/primitives/Torsion.cpp
 src/primitives/UreyBradleyBend.cpp
+src/perturbations/ElectricField.cpp
 src/restraints/MolecularRestraint.cpp
 src/restraints/ObjectRestraint.cpp
 src/selection/DistanceFinder.cpp

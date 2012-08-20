@@ -167,6 +167,7 @@ struct ParameterTraits<OpenMD::Vector3d >{
   template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
   static bool convert(RepType v, RepType& r)            {r=v; return true;}
   static bool convert(std::string v, RepType& r) { 
+    std::cerr << "calling tokenizer\n";
     OpenMD::StringTokenizer tokenizer(v," ();,\t\n\r");
     if (tokenizer.countTokens() == 3) {
       RealType v1 = tokenizer.nextTokenAsDouble();

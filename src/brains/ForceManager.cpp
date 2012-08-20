@@ -58,6 +58,7 @@
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "perturbations/ElectricField.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
 
 #include <cstdio>
@@ -423,6 +424,11 @@ namespace OpenMD {
     electrostaticScale_[2] = fopts.getelectrostatic13scale();
     electrostaticScale_[3] = fopts.getelectrostatic14scale();    
     
+    if (info_->getSimParams()->haveElectricField()) {
+      ElectricField* eField = new ElectricField(info_);
+      perturbations_.push_back(eField);
+    }
+
     fDecomp_->distributeInitialData();
  
     initialized_ = true;
@@ -904,6 +910,12 @@ namespace OpenMD {
 
   
   void ForceManager::postCalculation() {
+
+    vector<Perturbation*>::iterator pi;
+    for (pi = perturbations_.begin(); pi != perturbations_.end(); ++pi) {
+      (*pi)->applyPerturbation();
+    }
+
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::RigidBodyIterator rbIter;
@@ -928,5 +940,4 @@ namespace OpenMD {
     curSnapshot->setStressTensor(stressTensor);
     
   }
-
 } //end namespace OpenMD

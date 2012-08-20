@@ -56,6 +56,7 @@
 #include "nonbonded/Cutoffs.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 #include "nonbonded/InteractionManager.hpp"
+#include "perturbations/Perturbation.hpp"
 #include "parallel/ForceDecomposition.hpp"
 
 #define PREPAIR_LOOP 0
@@ -112,6 +113,8 @@ namespace OpenMD {
     vector<RealType> electrostaticScale_;
 
     Mat3x3d stressTensor;
+
+    vector<Perturbation*> perturbations_;
   };
 } 
 #endif //BRAINS_FORCEMANAGER_HPP

@@ -138,6 +138,7 @@ namespace OpenMD {
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
+    DeclareParameter(ElectricField, OpenMD::Vector3d);
 
   public:
     bool addComponent(Component* comp);

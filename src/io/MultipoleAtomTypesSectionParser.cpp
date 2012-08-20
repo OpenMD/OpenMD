@@ -141,11 +141,11 @@ namespace OpenMD {
   }
 
   void MultipoleAtomTypesSectionParser::parseDipole(StringTokenizer& tokenizer, 
-						    RealType dipoleMoment,
+						    RealType& dipoleMoment,
                                                     int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
-      dipoleMoment = tokenizer.nextTokenAsDouble();      
+      dipoleMoment = tokenizer.nextTokenAsDouble();    
     } else {
       sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
 	      lineNo);
@@ -155,8 +155,8 @@ namespace OpenMD {
   }
 
   void MultipoleAtomTypesSectionParser::parseSplitDipole(StringTokenizer& tokenizer, 
-                                                         RealType dipoleMoment,
-                                                         RealType splitDipoleDistance,
+                                                         RealType& dipoleMoment,
+                                                         RealType& splitDipoleDistance,
                                                          int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
@@ -171,7 +171,7 @@ namespace OpenMD {
   }
 
   void MultipoleAtomTypesSectionParser::parseQuadrupole(StringTokenizer& tokenizer,
-                                                        Vector3d quadrupoleMoments,
+                                                        Vector3d& quadrupoleMoments,
                                                         int lineNo) {
     int nTokens = tokenizer.countTokens();   
     if (nTokens >= 3) {
