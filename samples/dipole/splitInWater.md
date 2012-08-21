@@ -16,8 +16,7 @@ component{
 
 
 ensemble = NVT;
-forceField = "DUFF";
-forceFieldFileName = "Lipid.frc";
+forceField = "Lipid";
 electrostaticSummationMethod = "none";
 dielectric = 80.0;
 cutoffRadius = 9.0;
