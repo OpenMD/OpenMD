@@ -39,8 +39,8 @@ GNU General Public License for more details.
 	#include <conio.h>
 #endif
 
-#if !HAVE_STRNCASECMP
-extern "C" int strncasecmp(const char *s1, const char *s2, size_t n);
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
 #endif
 
 #include <openbabel/obconversion.h>
@@ -400,7 +400,7 @@ int main(int argc,char *argv[])
       clog << messageSummary << endl;
     }
 
-#ifdef _DEBUG
+#ifdef DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
   getch();
@@ -451,7 +451,7 @@ void usage()
        << " [-i<input-type>] <name> [-o<output-type>] <name>" << endl;
   cout << "Try  -H option for more information." << endl;
  
-#ifdef _DEBUG
+#ifdef DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
   getch();

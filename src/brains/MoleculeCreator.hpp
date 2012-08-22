@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -86,8 +87,10 @@ namespace OpenMD {
     virtual Inversion* createInversion(ForceField* ff, Molecule* mol, 
                                        InversionStamp* stamp);
     virtual CutoffGroup* createCutoffGroup(Molecule* mol, 
-                                           CutoffGroupStamp* stamp);
-    virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom);
+                                           CutoffGroupStamp* stamp, 
+                                           LocalIndexManager* localIndexMan);
+    virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom, 
+                                           LocalIndexManager* localIndexMan);
     virtual void createConstraintPair(Molecule* mol);     
     virtual void createConstraintElem(Molecule* mol);
   };

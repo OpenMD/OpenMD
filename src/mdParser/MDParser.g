@@ -41,6 +41,9 @@ tokens
   CENTER      = "center";
   POSITION    = "position";
   ORIENTATION = "orientation";
+  FLUCQ       = "flucQ";
+  RNEMD       = "RNEMD";
+  MINIMIZER   = "minimizer";
   ENDBLOCK;
 }
 
@@ -49,17 +52,21 @@ mdfile  : (statement)*
         ;
 
 statement : assignment
-          | componentblock
-          | moleculeblock
-          | zconstraintblock
-          | restraintblock
-          ;
-            
+    | componentblock
+    | moleculeblock
+    | zconstraintblock
+    | restraintblock
+    | flucqblock
+    | rnemdblock
+    | minimizerblock
+    ;
+
 assignment  : ID ASSIGNEQUAL^ constant SEMICOLON!
             ;
             
 constant    : intConst
-						| floatConst
+			| floatConst
+            | vectorConst
             | ID
             | StringLiteral
             ;
@@ -72,6 +79,15 @@ zconstraintblock  : ZCONSTRAINT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(
 
 restraintblock  : RESTRAINT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
                   ;
+
+flucqblock  : FLUCQ^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+    ;
+
+rnemdblock  : RNEMD^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+    ;
+
+minimizerblock  : MINIMIZER^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+    ;
   
 moleculeblock : MOLECULE^ LCURLY! (moleculestatement)*  RCURLY {#RCURLY->setType(ENDBLOCK);}
               ;
@@ -168,7 +184,11 @@ floatConst
           NUM_FLOAT | NUM_DOUBLE
         ;
 
-
+protected
+vectorConst
+    : 
+        LPAREN^ doubleNumber COMMA doubleNumber COMMA doubleNumber RPAREN
+    ;
 
 class MDLexer extends Lexer;
 

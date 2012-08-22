@@ -36,10 +36,12 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "applications/hydrodynamics/BeadModel.hpp"
+#include "types/LennardJonesAdapter.hpp"
 
 namespace OpenMD {
   bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
@@ -74,29 +76,15 @@ namespace OpenMD {
   
   bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
     AtomType* atomType = atom->getAtomType();
-    
+    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
     if (atomType->isGayBerne()) {
       return false;
-    } else if (atomType->isLennardJones()){
-      GenericData* data = atomType->getPropertyByName("LennardJones");
-      if (data != NULL) {
-        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-        
-        if (ljData != NULL) {
-          LJParam ljParam = ljData->getData();
-          BeadParam currBead;
-          currBead.atomName = atom->getType();
-          currBead.pos = atom->getPos();
-          currBead.radius = ljParam.sigma/2.0;
-          beads.push_back(currBead);
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to LJParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }       
-      }
+    } else if (lja.isLennardJones()){
+      BeadParam currBead;
+      currBead.atomName = atom->getType();
+      currBead.pos = atom->getPos();
+      currBead.radius = lja.getSigma()/2.0;
+      beads.push_back(currBead);
     } else {
       int obanum = etab.GetAtomicNum((atom->getType()).c_str());
       if (obanum != 0) {

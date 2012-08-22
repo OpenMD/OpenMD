@@ -36,12 +36,16 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include "applications/hydrodynamics/ShapeBuilder.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
+#include "types/LennardJonesAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
+
 namespace OpenMD {
   
   Shape* ShapeBuilder::createShape(StuntDouble* sd) {
@@ -59,22 +63,9 @@ namespace OpenMD {
   Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
     AtomType* atomType = atom->getAtomType();
     Shape* currShape = NULL;
-    if (atomType->isLennardJones()){
-      GenericData* data = atomType->getPropertyByName("LennardJones");
-      if (data != NULL) {
-        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-        
-        if (ljData != NULL) {
-          LJParam ljParam = ljData->getData();
-          currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to LJParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }       
-      }
+    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+    if (lja.isLennardJones()){      
+      currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
     } else {
       int obanum = etab.GetAtomicNum((atom->getType()).c_str());
       if (obanum != 0) {
@@ -93,58 +84,25 @@ namespace OpenMD {
   Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
     AtomType* atomType = datom->getAtomType();
     Shape* currShape = NULL;
-    if (atomType->isGayBerne()) {
-      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-      
-      GenericData* data = dAtomType->getPropertyByName("GayBerne");
-      if (data != NULL) {
-        GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
-        
-        if (gayBerneData != NULL) {  
-          GayBerneParam gayBerneParam = gayBerneData->getData();
-          currShape = new Ellipsoid(datom->getPos(), gayBerneParam.GB_l/2.0, 
-				    gayBerneParam.GB_d/2.0, datom->getA());
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to GayBerneParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();   
-        }
+    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+    GayBerneAdapter gba = GayBerneAdapter(atomType);
+    if (gba.isGayBerne()) {
+      currShape = new Ellipsoid(datom->getPos(), gba.getL()/2.0, 
+                                gba.getD()/2.0, datom->getA());
+    } else if (lja.isLennardJones()) {
+      currShape = new Sphere(datom->getPos(), lja.getSigma()/2.0);
+    } else {
+      int obanum = etab.GetAtomicNum((datom->getType()).c_str());
+      if (obanum != 0) {
+        currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
       } else {
-        sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
+        sprintf( painCave.errMsg,
+                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
-        simError();    
-      }            
-    } else if (atomType->isLennardJones()) {
-      GenericData* data = atomType->getPropertyByName("LennardJones");
-      if (data != NULL) {
-        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-        
-        if (ljData != NULL) {
-          LJParam ljParam = ljData->getData();
-          currShape = new Sphere(datom->getPos(), ljParam.sigma/2.0);
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to LJParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }       
-      } else {
-        int obanum = etab.GetAtomicNum((datom->getType()).c_str());
-        if (obanum != 0) {
-          currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
-        } else {
-          sprintf( painCave.errMsg,
-                   "Could not find atom type in default element.txt\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-      }      
-    }
+        simError();          
+      }
+    }        
     return currShape;
   }
 

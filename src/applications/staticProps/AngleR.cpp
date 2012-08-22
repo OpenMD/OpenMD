@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 /* Calculates Angle(R) for DirectionalAtoms*/
@@ -47,6 +48,7 @@
 #include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
 #include <math.h>
 
 namespace OpenMD {
@@ -87,7 +89,8 @@ namespace OpenMD {
       StuntDouble* sd;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d CenterOfMass = info_->getCom();      
+      Thermo thermo(info_);
+      Vector3d CenterOfMass = thermo.getCom();      
       
       
       if (evaluator_.isDynamic()) {
@@ -128,7 +131,7 @@ namespace OpenMD {
 
   void AngleR::processHistogram() {
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       if (count_[i] > 0)
 	avgAngleR_[i] += histogram_[i] / count_[i];    
@@ -147,7 +150,7 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#radial density function Angle(r)\n";
       rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgAngleR_.size(); ++i) {
+      for (unsigned int i = 0; i < avgAngleR_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgAngleR_[i] << "\n";
       }

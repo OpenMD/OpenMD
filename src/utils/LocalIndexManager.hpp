@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -294,11 +295,32 @@ namespace OpenMD {
     void releaseRigidBodyIndex(std::vector<int> indices) {
       rigidBodyIndexContainer_.insert(indices);
     }
+
+    int getNextCutoffGroupIndex() {
+      return cutoffGroupIndexContainer_.pop();
+    }
+
+    std::vector<int> getCutoffGroupIndicesBefore(int index) {
+      return cutoffGroupIndexContainer_.getIndicesBefore(index);
+    }
+        
+    void releaseCutoffGroupIndex(int index) {
+      cutoffGroupIndexContainer_.insert(index);
+    }
+
+    void releaseCutoffGroupIndex(int beginIndex, int endIndex) {
+      cutoffGroupIndexContainer_.insert(beginIndex, endIndex);
+    }
+
+    void releaseCutoffGroupIndex(std::vector<int> indices) {
+      cutoffGroupIndexContainer_.insert(indices);
+    }
  
   private:
 
     IndexListContainer atomIndexContainer_;
     IndexListContainer rigidBodyIndexContainer_;
+    IndexListContainer cutoffGroupIndexContainer_;
   };
 
 } //end namespace OpenMD

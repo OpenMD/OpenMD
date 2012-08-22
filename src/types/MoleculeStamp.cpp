@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include <algorithm>
 #include <functional> 
@@ -57,6 +58,7 @@ namespace OpenMD {
   
   MoleculeStamp::MoleculeStamp() {
     DefineParameter(Name, "name");
+    DefineOptionalParameter(ConstrainTotalCharge, "constrainTotalCharge");
     
     deprecatedKeywords_.insert("nAtoms");
     deprecatedKeywords_.insert("nBonds");
@@ -141,7 +143,7 @@ namespace OpenMD {
     // belong to rigidbody. Every element in atom2Rigidbody has unique
     // negative number at the very beginning
 
-    for(int i = 0; i < atom2Rigidbody.size(); ++i) {
+    for(unsigned int i = 0; i < atom2Rigidbody.size(); ++i) {
       atom2Rigidbody[i] = -1 - i;
     }
     for (int i = 0; i < getNRigidBodies(); ++i) {
@@ -721,6 +723,14 @@ namespace OpenMD {
   }
   
   void MoleculeStamp::checkCutoffGroups() {
+    std::vector<AtomStamp*>::iterator ai;
+    std::vector<int>::iterator fai;
+
+    //add all atoms into freeAtoms_ set
+    for(ai = atomStamps_.begin(); ai != atomStamps_.end(); ++ai) {
+      freeAtoms_.push_back( (*ai)->getIndex() );
+    }
+
     for(int i = 0; i < getNCutoffGroups(); ++i) {
       CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
       std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
@@ -734,7 +744,16 @@ namespace OpenMD {
           " is out of range\n"; 
         throw OpenMDException(oss.str());
       }
-    }    
+
+      for(fai = cutoffGroupAtoms.begin(); fai != cutoffGroupAtoms.end(); 
+          ++fai) {
+
+        // erase the atoms belonging to cutoff groups from freeAtoms_ vector        
+        freeAtoms_.erase(std::remove(freeAtoms_.begin(),
+                                     freeAtoms_.end(), (*fai)), 
+                         freeAtoms_.end());
+      }
+    }  
   }
 
   void MoleculeStamp::checkFragments() {

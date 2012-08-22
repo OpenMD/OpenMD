@@ -36,36 +36,59 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+
+#include "math/Vector.hpp"
+
 #ifndef MATH_CHOLESKYDECOMPOSITION_HPP
 #define MATH_CHOLESKYDECOMPOSITION_HPP
 
+using namespace std;
 namespace OpenMD {
-template<class MatrixType>
-int CholeskyDecomposition(MatrixType& A, MatrixType& L) {
+
+  template<class MatrixType>
+  void CholeskyDecomposition(MatrixType& A, MatrixType& L) {
+
     int n = A.getNRow();
-    assert(n == A.getNCol() && n == L.getNRow()&& n==L.getNCol());
-    for(int i = 0; i < n; ++i) {
-        RealType sum1 = 0;
-        for (int k = 0; k < i -1; ++k) {
-            sum1 +=L(i,k)*L(i,k);
+    assert(n == A.getNCol() && n == L.getNRow() && n == L.getNCol());
+
+    bool isspd(true);  
+    RealType eps = A.diagonals().abs().max()  *
+      (numeric_limits<RealType>::epsilon())/100;
+
+  
+    for(int j = 0; j < n; j++) {
+      RealType d(0.0);
+      for (int k = 0; k < j; k++) {
+        RealType s(0.0);
+      
+        for (int i = 0; i < k; i++) {
+          s += L(k,i) * L(j,i);
         }
-        L(i, i) = sqrt(A(i, i) - sum1);
-        for (int j = i+1; j < n; ++j) {
-            RealType sum2 = 0;
-            for (int k = 0; k < i-1; ++k) {
-                sum2 += L(j ,k)*L(i, k);
-            }
-            L(j, i) = (A(j, i) - sum2) /L(i,i);
+      
+        // if L(k,k) != 0
+        if (std::abs(L(k,k)) > eps) {
+          s = (A(j,k) - s) / L(k,k);
+        } else {
+          s = (A(j,k) -s);
+          isspd = false;
         }
+        L(j,k) = s;
+        d = d + s*s;
+      
+        // this is approximately doing: isspd = isspd && ( A(k,j) == A(j,k) )
+        isspd = isspd && (abs(A(k,j) - A(j,k)) < eps );
+      }
+      d = A(j,j) - d;
+      isspd = isspd && (d > eps);
+      L(j,j) = sqrt(d > 0.0 ? d : 0.0);
+      for (int k = j+1; k < n; k++)  {
+        L(j,k) = 0.0;
+      }
     }
-
-    return 0;
-
-}
-
-
+  }
 }
 
 #endif

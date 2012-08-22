@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
@@ -100,9 +100,9 @@ namespace OpenMD {
       errbin_sum_sq.clear();
       errbin_sq.clear();
       
-      for(int i=0; i < bin.size(); i++)
+      for(unsigned int i=0; i < bin.size(); i++)
 	bin[i].clear();
-      for(int i=0; i < samples.size(); i++)
+      for(unsigned int i=0; i < samples.size(); i++)
 	samples[i].clear();
 
       mag.clear();
@@ -115,9 +115,9 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
     
-    for(int k=0; k < bin.size(); k++)
+    for(unsigned int k=0; k < bin.size(); k++)
       bin[k].resize(nFrames);
-    for(int k=0; k < samples.size(); k++)
+    for(unsigned int k=0; k < samples.size(); k++)
       samples[k].resize(nFrames);
 
     RealType lenX_, lenY_;
@@ -145,10 +145,10 @@ namespace OpenMD {
     std::fill(errbin_sum_sq.begin(), errbin_sum_sq.end(), 0.0);
     std::fill(errbin_sq.begin(), errbin_sq.end(), 0.0);
     
-    for(int i=0; i < bin.size(); i++)
+    for(unsigned int i=0; i < bin.size(); i++)
       std::fill(bin[i].begin(), bin[i].end(), 0.0);
     
-    for(int i=0; i < samples.size(); i++)
+    for(unsigned int i=0; i < samples.size(); i++)
       std::fill(samples[i].begin(), samples[i].end(), 0);
     
     for (int istep = 0; istep < nFrames; istep += step_) {

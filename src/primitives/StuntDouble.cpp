@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -61,9 +62,16 @@ namespace OpenMD {
   }
 
   void StuntDouble::zeroForcesAndTorques() {    
-    setFrc(V3Zero);
-    setTrq(V3Zero);
-    setParticlePot(0.0);
+    int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
+
+    if (sl & DataStorage::dslForce) 
+      setFrc(V3Zero);
+    if (sl & DataStorage::dslTorque) 
+      setTrq(V3Zero);
+    if (sl & DataStorage::dslParticlePot) 
+      setParticlePot(0.0);
+    if (sl & DataStorage::dslFlucQForce) 
+      setFlucQFrc(0.0);
   }
   void StuntDouble::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  

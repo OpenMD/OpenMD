@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 
@@ -68,11 +69,11 @@ namespace OpenMD {
   void SystemDipoleCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     assert(snapshot1);
-    Vector3d dipoleMoment1 = thermo_->getBoxDipole();
+    Vector3d dipoleMoment1 = thermo_->getSystemDipole();
 
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot2);
-    Vector3d dipoleMoment2 = thermo_->getBoxDipole();
+    Vector3d dipoleMoment2 = thermo_->getSystemDipole();
     assert(snapshot1 && snapshot2);
 
     RealType time1 = snapshot1->getTime();

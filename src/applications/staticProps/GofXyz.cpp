@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <algorithm>
@@ -139,7 +140,7 @@ namespace OpenMD {
     
     Vector3d newR12 = i->second * r12;
     // x, y and z's possible values range -halfLen_ to halfLen_
-    int xbin = (newR12.x()+ halfLen_) / deltaR_;
+    int xbin = (newR12.x() + halfLen_) / deltaR_;
     int ybin = (newR12.y() + halfLen_) / deltaR_;
     int zbin = (newR12.z() + halfLen_) / deltaR_;
 
@@ -158,12 +159,11 @@ namespace OpenMD {
       //rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       //rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
-      for (int i = 0; i < histogram_.size(); ++i) {
- 
-	for(int j = 0; j < histogram_[i].size(); ++j) {
- 
-	  for(int k = 0;k < histogram_[i][j].size(); ++k) {
-	    rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ), sizeof(histogram_[i][j][k] ));
+      for (unsigned int i = 0; i < histogram_.size(); ++i) { 
+	for(unsigned int j = 0; j < histogram_[i].size(); ++j) { 
+	  for(unsigned int k = 0;k < histogram_[i][j].size(); ++k) {
+	    rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ),
+                            sizeof(histogram_[i][j][k] ));
 	  }
 	}
       }

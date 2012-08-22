@@ -52,7 +52,7 @@ namespace OpenMD {
       ref_ = ref;
       ref_com = V3Zero;
       
-      for (int n=0; n<ref_.size(); n++) {
+      for (unsigned int n = 0; n < ref_.size(); n++) {
         ref_com += ref_[n];
       }
       ref_com /= (RealType)ref.size();      

@@ -35,8 +35,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
  *  randomBuilder.cpp
  *
@@ -77,8 +77,6 @@ void createMdFile(const std::string&oldMdFileName,
 
 int main(int argc, char *argv []) {
 
-  // register force fields
-  registerForceFields();
   registerLattice();
     
   gengetopt_args_info args_info;
@@ -317,7 +315,7 @@ int main(int argc, char *argv []) {
   // Randomize a vector of ints:
 
   vector<int> ids;
-  for (int i = 0; i < sites.size(); i++) ids.push_back(i);
+  for (unsigned int i = 0; i < sites.size(); i++) ids.push_back(i);
   std::random_shuffle(ids.begin(), ids.end());
 
   Molecule* mol;
@@ -370,12 +368,12 @@ void createMdFile(const std::string&oldMdFileName,
   
   oldMdFile.getline(buffer, MAXLEN);
  
-  int i = 0;
+  unsigned int i = 0;
   while (!oldMdFile.eof()) {
     
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      if(i<nMol.size()){
+      if (i<nMol.size()){
 	sprintf(buffer, "\tnMol = %i;", nMol.at(i));
 	newMdFile << buffer << std::endl;
 	i++;

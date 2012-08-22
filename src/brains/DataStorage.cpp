@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -48,7 +49,7 @@
  */
 
 #include "brains/DataStorage.hpp"
-
+using namespace std;
 namespace OpenMD {
 
   DataStorage::DataStorage() : size_(0), storageLayout_(0){
@@ -64,46 +65,82 @@ namespace OpenMD {
 
     if (storageLayout_ & dslPosition && position.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;
+      cerr << "size does not match"<< endl;
     }
 
     if (storageLayout_ & dslVelocity && velocity.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslAmat && aMat.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslAngularMomentum && angularMomentum.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslElectroFrame && electroFrame.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
-    }
-
-    if (storageLayout_ & dslZAngle && zAngle.size() != size_) {
-      //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslForce && force.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslTorque && torque.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
     }
+
     if (storageLayout_ & dslParticlePot && particlePot.size() != size_) {
       //error
-      std::cerr << "size does not match"<< std::endl;        
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslDensity && density.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFunctional && functional.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFunctionalDerivative && functionalDerivative.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslElectricField && electricField.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslSkippedCharge && skippedCharge.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFlucQPosition && flucQPos.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFlucQVelocity && flucQVel.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslFlucQForce && flucQFrc.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
     }
     
     return size_;
@@ -132,10 +169,6 @@ namespace OpenMD {
       internalResize(electroFrame, newSize);
     }
     
-    if (storageLayout_ & dslZAngle) {
-      internalResize(zAngle, newSize);
-    }
-
     if (storageLayout_ & dslForce) {
       internalResize(force, newSize);
     }
@@ -146,6 +179,38 @@ namespace OpenMD {
 
     if (storageLayout_ & dslParticlePot) {
       internalResize(particlePot, newSize);
+    }
+
+    if (storageLayout_ & dslDensity) {
+      internalResize(density, newSize);
+    }
+
+    if (storageLayout_ & dslFunctional) {
+      internalResize(functional, newSize);
+    }
+
+    if (storageLayout_ & dslFunctionalDerivative) {
+      internalResize(functionalDerivative, newSize);
+    }
+
+    if (storageLayout_ & dslElectricField) {
+      internalResize(electricField, newSize);
+    }
+
+    if (storageLayout_ & dslSkippedCharge) {
+      internalResize(skippedCharge, newSize);
+    }
+
+    if (storageLayout_ & dslFlucQPosition) {
+      internalResize(flucQPos, newSize);
+    }
+
+    if (storageLayout_ & dslFlucQVelocity) {
+      internalResize(flucQVel, newSize);
+    }
+
+    if (storageLayout_ & dslFlucQForce) {
+      internalResize(flucQFrc, newSize);
     }
 
     size_ = newSize;
@@ -172,10 +237,6 @@ namespace OpenMD {
       electroFrame.reserve(size);
     }
     
-    if (storageLayout_ & dslZAngle) {
-      zAngle.reserve(size);
-    }
-
     if (storageLayout_ & dslForce) {
       force.reserve(size);
     } 
@@ -188,6 +249,37 @@ namespace OpenMD {
       particlePot.reserve(size);
     }
 
+    if (storageLayout_ & dslDensity) {
+      density.reserve(size);
+    }
+
+    if (storageLayout_ & dslFunctional) {
+      functional.reserve(size);
+    }
+
+    if (storageLayout_ & dslFunctionalDerivative) {
+      functionalDerivative.reserve(size);
+    }
+
+    if (storageLayout_ & dslElectricField) {
+      electricField.reserve(size);
+    }
+
+    if (storageLayout_ & dslSkippedCharge) {
+      skippedCharge.reserve(size);
+    }
+
+    if (storageLayout_ & dslFlucQPosition) {
+      flucQPos.reserve(size);
+    }
+
+    if (storageLayout_ & dslFlucQVelocity) {
+      flucQVel.reserve(size);
+    }
+
+    if (storageLayout_ & dslFlucQForce) {
+      flucQFrc.reserve(size);
+    }
   }
 
   void DataStorage::copy(int source, int num, int target) {
@@ -215,10 +307,6 @@ namespace OpenMD {
       internalCopy(electroFrame, source, num, target);
     }
     
-    if (storageLayout_ & dslZAngle) {
-      internalCopy(zAngle, source, num, target);
-    }
-
     if (storageLayout_ & dslForce) {
       internalCopy(force, source, num, target);
     } 
@@ -230,8 +318,37 @@ namespace OpenMD {
     if (storageLayout_ & dslParticlePot) {
       internalCopy(particlePot, source, num, target); 
     }
-    
 
+    if (storageLayout_ & dslDensity) {
+      internalCopy(density, source, num, target);
+    }
+
+    if (storageLayout_ & dslFunctional) {
+      internalCopy(functional, source, num, target);
+    }
+
+    if (storageLayout_ & dslFunctionalDerivative) {
+      internalCopy(functionalDerivative, source, num, target);
+    }
+
+    if (storageLayout_ & dslElectricField) {
+      internalCopy(electricField, source, num, target);
+    }
+
+    if (storageLayout_ & dslSkippedCharge) {
+      internalCopy(skippedCharge, source, num, target);
+    }
+
+    if (storageLayout_ & dslFlucQPosition) {
+      internalCopy(flucQPos, source, num, target);
+    }
+
+    if (storageLayout_ & dslFlucQVelocity) {
+      internalCopy(flucQVel, source, num, target);
+    }
+    if (storageLayout_ & dslFlucQForce) {
+      internalCopy(flucQFrc, source, num, target);
+    }
   }
 
   int DataStorage::getStorageLayout() {
@@ -266,10 +383,6 @@ namespace OpenMD {
       return internalGetArrayPointer(electroFrame);
       break;
             
-    case dslZAngle:
-      return internalGetArrayPointer(zAngle);
-      break;
-
     case dslForce:
       return internalGetArrayPointer(force);
       break;            
@@ -281,7 +394,39 @@ namespace OpenMD {
     case dslParticlePot:
       return internalGetArrayPointer(particlePot);
       break;
-            
+
+    case dslDensity:
+      return internalGetArrayPointer(density);
+      break;
+
+    case dslFunctional:
+      return internalGetArrayPointer(functional);
+      break;
+
+    case dslFunctionalDerivative:
+      return internalGetArrayPointer(functionalDerivative);
+      break;
+
+    case dslElectricField:
+      return internalGetArrayPointer(electricField);
+      break;
+
+    case dslSkippedCharge:
+      return internalGetArrayPointer(skippedCharge);
+      break;
+
+    case dslFlucQPosition:
+      return internalGetArrayPointer(flucQPos);
+      break;
+
+    case dslFlucQVelocity:
+      return internalGetArrayPointer(flucQVel);
+      break;
+           
+    case dslFlucQForce:
+      return internalGetArrayPointer(flucQFrc);
+      break;
+           
     default:
       //error message
       return NULL;
@@ -366,9 +511,6 @@ namespace OpenMD {
     if (layout & dslElectroFrame) {
       bytes += sizeof(Mat3x3d);
     }
-    if (layout & dslZAngle) {
-      bytes += sizeof(RealType);
-    }
     if (layout & dslForce) {
       bytes += sizeof(Vector3d);
     }
@@ -378,6 +520,31 @@ namespace OpenMD {
     if (layout & dslParticlePot) {
       bytes += sizeof(RealType);
     }
+    if (layout & dslDensity) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFunctional) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFunctionalDerivative) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslElectricField) {
+      bytes += sizeof(Vector3d);
+    }
+    if (layout & dslSkippedCharge) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFlucQPosition) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFlucQVelocity) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslFlucQForce) {
+      bytes += sizeof(RealType);
+    }
+
     return bytes;
   }
 

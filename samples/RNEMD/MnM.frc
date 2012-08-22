@@ -1,0 +1,479 @@
+// This is the forcefield file for the Metal-NonMetal(MnM) Interaction Forcefield
+//
+// The sections are divided into AtomTypes
+//
+
+
+begin Options
+      Name                   = "MnM"
+	  MetallicEnergyUnitScaling   23.0605423
+end Options
+
+
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+CH4		16.05		
+CH3		15.04		
+CH2		14.03		
+CH		13.02
+// Aromatic CH as in benzene
+CHar             13.02
+//
+RCHar           12.0107
+// CH3 (sp3) thiol/sulfide/disulfide
+CH3S    15.04
+// CH2 (sp3) thiol/sulfide/disulfide
+CH2S    14.03
+//CH (sp3) all other/thiol
+CHS     13.02
+//C (sp3) all other/thiol
+CS      12.0107
+// sulfone
+SYZ     32.0655
+// O in sulfone
+//OY
+// thiol S
+SH      32.0655
+//Thiol H
+HS      1.0079
+//Thiol S
+S      32.0655
+// Sulfoxide
+SZ  32.0655
+// Sulfur in disulfide
+SS  32.0655
+// Sulfur in aromatic (thiophene)
+SP  32.0655
+// sp2 carbon in thiophene
+CS   12.0107
+// Sulfur attached to gold
+SAu  228.9807
+
+
+//Water
+SSD		18.0153		
+SSD1        	18.0153 
+SSD_E       	18.0153
+SSD_RF      	18.0153			
+O_TIP3P		15.9994			
+O_TIP4P		15.9994
+O_TIP4P-Ew  	15.9994
+O_TIP5P		15.9994	
+O_TIP5P-E	15.9994	
+O_SPCE		15.9994
+O_SPC		15.9994	
+H_TIP3P		1.0079
+H_TIP4P		1.0079
+H_TIP4P-Ew  	1.0079
+H_TIP5P		1.0079
+H_SPCE		1.0079
+H_SPC		1.0079
+EP_TIP4P	0.0
+EP_TIP4P-Ew 	0.0
+EP_TIP5P	0.0
+
+//Standard Atoms
+C		12.0107
+S       32.0655	
+Ni      58.710
+Cu      63.550
+Rh      102.90550
+Pd      106.42
+Ag      107.8682
+Ir      192.217
+Pt      195.09
+Au      196.97
+end BaseAtomTypes
+
+begin AtomTypes
+end AtomTypes
+
+begin DirectionalAtomTypes
+//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+SSD		1.7696	0.6145	1.1550  
+SSD1		1.7696	0.6145	1.1550  
+SSD_E		1.7696	0.6145	1.1550  
+SSD_RF		1.7696	0.6145	1.1550  
+end DirectionalAtomTypes                    
+
+
+begin LennardJonesAtomTypes
+//Name		epsilon		    sigma	
+SSD	  	0.152	    	3.051					
+SSD1      	0.152           3.016 
+SSD_E	 	0.152	        3.035
+SSD_RF    	0.152           3.019
+O_TIP3P   	0.1521          3.15061 
+O_TIP4P   	0.1550          3.15365 
+O_TIP4P-Ew  	0.16275         3.16435
+O_TIP5P   	0.16            3.12   
+O_TIP5P-E   	0.178           3.097   
+O_SPCE    	0.15532         3.16549
+O_SPC     	0.15532         3.16549
+// From TraPPE-UA JPCB, 109, 24100 and JCPB 102,2569
+CH4       	0.2941          3.73
+CH3       	0.1947          3.75
+CH2       	0.09140         3.95
+CH       	0.0987          4.68
+CS	     	0.0009935	    6.40
+CH3S       	0.1947          3.75
+CH2S       	0.09140         3.95
+CHS         0.0987          4.68
+// From CPC 177 2007 S-S distance on gold surfaces is 4.45
+S           0.3954          4.45
+SH          0.4610          3.62
+SS          0.3279          3.72
+SP          0.3576          3.60
+//From TraPPE-UA JPCB 104, 8008
+CHar         0.1003          3.695
+RCHar       0.04173         3.88
+// ---- End From TraPPE-UA
+
+end LennardJonesAtomTypes
+
+begin SCAtomTypes
+// Name  epsilon(eV)      c      m       n      alpha(angstroms)
+Ni      0.0073767       84.745  5.0     10.0    3.5157 
+Cu      0.0057921       84.843  5.0     10.0    3.6030
+Rh      0.0024612       305.499 5.0     13.0    3.7984
+Pd      0.0032864       148.205 6.0     12.0    3.8813
+Ag      0.0039450       96.524  6.0     11.0    4.0691
+Ir      0.0037674       224.815 6.0     13.0    3.8344  
+Pt      0.0097894       71.336  7.0     11.0    3.9163
+Au      0.0078052       53.581  8.0     11.0    4.0651
+end SCAtomTypes
+
+
+// Metal non-metal interactions.
+// Format: Metal Atom, Non-Metal Atom, Interaction Type, Interaction Parameters
+// Interaction type can be: MAW, LennardJones or ShiftedMorse or RepulsiveMorse
+begin NonBondedInteractions
+
+//MAW (Metal Angular Water section)
+// r_e, D_e beta ca1 cb1
+Cu   SSD_E  MAW  2.5525 1.9850 1.1680  1.1250 0.750000
+Au   SSD_E  MAW  2.68 0.6   1.33  0.95 -0.25
+
+//LennardJones
+// sigma epsilon
+Au CH3 LennardJones 3.54 0.2146
+Au CH2 LennardJones 3.54 0.1749 
+//Au SH   LennardJones   2.40 8.465
+Au S   LennardJones    2.40 8.465
+
+//Shifted Morse
+// r0 D0 beta0
+Au	O_SPCE	ShiftedMorse	3.70 0.0424 0.769
+
+//Repulsive Morse
+// r0 D0 beta0
+Au	H_SPCE	RepulsiveMorse	-1.00 0.00850 0.769
+
+//Repulsive Power
+Au      ON      RepulsivePower   3.47005  0.186208   11
+Au      NO      RepulsivePower   3.53955  0.168629   11
+end NonBondedInteractions
+
+
+begin ChargeAtomTypes
+// Name 	charge
+O_TIP3P  	-0.834
+O_SPCE   	-0.8476
+O_SPC    	-0.82
+H_TIP3P   	0.417
+H_TIP4P   	0.520
+H_TIP4P-Ew	0.52422
+H_TIP5P   	0.241
+H_SPCE    	0.4238
+H_SPC     	0.42
+EP_TIP4P 	-1.040
+EP_TIP4P-Ew     -1.04844
+EP_TIP5P 	-0.241
+end ChargeAtomTypes
+
+begin MultipoleAtomTypes
+// OpenMD currently only supports charge-charge, charge-dipole, 
+// dipole-dipole, and charge-quadrupole interactions.
+// Dipoles may be either traditional point-dipoles or split-dipoles.
+// possible formats for a multipolar atom type are:
+//
+// Point-dipoles:
+// name d phi theta psi dipole_moment
+//
+// Split-dipoles:
+// name s phi theta psi dipole_moment splitdipole_distance
+//
+// Point-Quadrupoles:
+// name q phi theta psi Qxx Qyy Qzz
+//
+// Atoms with both dipole and quadrupole moments:
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+//
+// Atoms with both split dipoles and quadrupole moments:
+// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+//
+// Euler angles are given in zxz convention in units of degrees.
+//
+// Charges are given in units of electrons.
+//
+// Dipoles are given in units of Debyes.
+//
+// Split dipole distances are given in units of Angstroms.
+//  
+// Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
+//                                                           esu centi-barn)
+//
+SSD_E   dq      0.0     0.0     0.0     2.42    -1.682  1.762   -0.08
+SSD_RF  dq      0.0     0.0     0.0     2.48    -1.682  1.762   -0.08
+SSD     dq      0.0     0.0     0.0     2.35    -1.682  1.762   -0.08
+SSD1    dq      0.0     0.0     0.0     2.35    -1.682  1.762   -0.08
+end MultipoleAtomTypes
+
+begin StickyAtomTypes
+//name  w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
+SSD_E	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD_RF	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD	0.07715	3.7284		3.7284	2.75	  3.35	2.75	4.0
+SSD1	0.07715	3.6613		3.6613	2.75	  3.35	2.75	4.0
+end StickyAtomTypes
+
+
+begin BondTypes
+
+//Atom1	Atom2	Fixed
+//V_Fixed = 0
+
+//Atom1	Atom2	Harmonic	b0	        Kb (kcal/mol)
+//V_Harmonic = 0.5*Kb(b- bo)^2
+//Harmonic Examples
+CH3	    CH3	Harmonic		1.526		260
+CH3	    CH2	Harmonic		1.526		260
+CH3	    CH	Harmonic		1.526		260
+CH2	    CH2	Harmonic		1.526		260
+CH2	    CH	Harmonic		1.526		260
+CH	    CH	Harmonic		1.526		260
+// fix the Kb for the thiol below:
+S           CH2 Harmonic                1.82            281
+SH          CH2 Harmonic                1.82            281  
+
+//Atom1	Atom2	Cubic		b0	K3	K2	K1	K0
+//V_Cubic = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
+
+
+//Atom1	Atom2	Quartic	b0	K4	K3	K2	K1	K0
+//V_Quartic = K4(b - b0)^4 + K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
+
+
+//Atom1	Atom2	Polynomial	b0	i	Ki	[j	Kj]
+//V_Quartic = Ki(b - b0)^i + Kj(b - b0)^j + ...
+
+
+end BondTypes
+
+begin BendTypes
+
+//Harmonic
+//Atom1	Atom2	Atom3	Harmonic	Theta0	Ktheta
+//V_Harmonic = 0.5*Ktheta(Theta - Theta0)^2
+//Ktheta: kcal/mole/rad**2
+//Theta0: degrees
+//Harmonic examples
+//
+//CH3	CH2	CH3	Harmonic	114.0	117.68
+//CH3	CH2	CH2	Harmonic	114.0	117.68
+//CH3	CH2	CH	Harmonic	114.0	117.68
+//CH3	CH	CH3	Harmonic	112.0	117.68
+//CH3	CH	CH2	Harmonic	112.0	117.68
+//CH3	CH	CH	Harmonic	112.0	117.68
+//CH2	CH2	CH2	Harmonic	114.0	117.68
+//CH2	CH2	CH	Harmonic	114.0	117.68
+CH2	CH	CH2	Harmonic	112.0	117.68
+CH2	CH	CH	Harmonic	112.0	117.68
+//CH	CH2	CH	Harmonic	114.0	117.68
+CH	CH	CH	Harmonic	112.0	117.68
+
+//From Lubna et al.JPCB 109, 24100 (2005) TraPPE
+CH3     CH2     SH      Harmonic        96.0     67.220
+CH2     CH2     SH      Harmonic        96.0     67.220
+CH2     CH2     S       Harmonic        114.0    124.19
+CH3     CH2     S       Harmonic        114.0    124.19
+CH3     CH2     CH3     Harmonic        114.0    124.19
+CH3     CH2     CH2     Harmonic        114.0    124.19
+CH2     CH2     CH2     Harmonic        114.0    124.19
+CH3     CH2     CH      Harmonic        114.0    124.19
+
+
+//UreyBradley
+//Atom1	Atom2	Atom3	UreyBradley		Theta0	Ktheta	S0	Kub
+//V_UreyBradleyBend = Ktheta(Theta - Theta0)^2 +  Kub(S - S0)^2
+//Ktheta: kcal/mole/rad**2
+//Theta0: degrees
+//Kub: kcal/mole/A**2
+//S0: A
+
+//Cubic
+//Atom1	Atom2	Atom3	Cubic	Theta0	K3	K2	K1	K0
+//V_Cubic = K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
+
+//Quartic
+//Atom1	Atom2	Atom3	Quartic	Theta0	K4	K3	K2	K1	K0
+//V_Quartic = K4(Theta - Theta0)^4 + K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
+
+//Polynomial
+//Atom1	Atom2	Atom3	Polynomial	Theta0	i	Ki 	[j	Kj]
+//V_Polynomial = Ki(Theta - Theta0)^i +  Kj(Theta - Theta0)^j + ...
+
+end BendTypes
+
+begin TorsionTypes
+
+// All thiol torsions from Kautman and Klein (J. Phys. Chem. 1989, 91, 4994-5001)
+
+//S	CH2	CH2	CH3	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	CH2	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	CH	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	C	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+
+// All type 1 possibilities from Dubbeldam et al. (J. Phys. Chem. B 2004, 108, 12301-12313)
+
+//CH3	CH2	CH2	CH3	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	CH2	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH2	CH2	CH2	CH2	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH2	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH2	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//C	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+
+// All type 2 possibilities:
+
+//H	CH	CH2	CH3	Polynomial	0	2.7167  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	CH2	Polynomial	0	2.7161	1	8.665	2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	CH	Polynomial	0	2.7161  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	C	Polynomial	0	2.7161  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
+
+// All type 3 possibilities:
+
+//CH3	C	CH2	CH3	Polynomial	0	2.5701  1	7.710   2	0	3	-10.29  4	0	5	0
+//CH3	C	CH2	CH2	Polynomial	0	2.5701  1	7.710   2	0	3	-10.29	4	0	5	0
+//CH3	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH3	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH2	C	CH2	CH2	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH2	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH2	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//C	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+
+// All type 4 possibilities:
+
+//CH3	C	C	CH3	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	CH2	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH2	C	C	CH2	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH2	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH2	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//C	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+
+//All type 5 possibilities:
+
+//CH3	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//CH2	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//CH	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//C	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+
+//All type 6 possibilities:
+
+//H	CH	CH	H	Polynomial	0	2.1706	1	5.609	2	-1.804	3	-5.976	4	3.6089	5	-3.6089
+
+//Cubic
+//Atom1	Atom2	Atom3	Atom4	Cubic		k3		k2		k1		k0  ( all are kcal/mol )
+//V_Cubic = k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
+//Cubic Examples
+//CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+//CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+//CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+//CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+//S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802          2.1586
+
+//Opls
+//Atom1	Atom2	Atom3	Atom4	Opls	v1	v2	v3
+//V_Opls = v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
+//units for v_n: kcal / mol
+
+
+//Trappe
+//Atom1	Atom2	Atom3	Atom4	Trappe	c0	c1	c2	c3
+//V_Opls = c0 + c1 * [1 + cos(phi)] + c2 * [1 - cos(2*phi)] + c3 * [1 + cos(3*phi)]
+//units for c_n: kcal / mol
+
+//From Martin et al. JPCB 120, 2569 (1998)
+CH3     CH2    CH2     CH3      Trappe    0.0         0.70544  -0.13549   1.5723
+CH3     CH2    CH2     CH2      Trappe    0.0         0.70544  -0.13549   1.5723  
+CH3     CH2    CH2     CH       Trappe    0.0         0.70544  -0.13549   1.5723  
+CH2     CH2    CH2     CH2      Trappe    0.0         0.70544  -0.13549   1.5723  
+
+
+//From Lubna et al.JPCB 109, 24100 (2005)
+CH3	CH2	CH2	SH	Trappe    0.10507    -0.10342   0.036680  0.60874     
+CH2     CH2     CH2     SH      Trappe    0.10507    -0.10342   0.036680  0.60874
+// Thiol attached to a metal surface.
+CH3	CH2	CH2	S	Trappe    0.10507    -0.10342   0.036680  0.60874     
+CH2     CH2     CH2     S       Trappe    0.10507    -0.10342   0.036680  0.60874
+CH3     CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
+CH2     CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
+CH      CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
+CH2     S       S       CH2     Trappe    3.5049      0.79083  -4.3348    1.003932
+CH3     S       S       CH3     Trappe    3.5049      0.79083  -4.3348    1.003932
+CH3     CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH3     CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH2     CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH      CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH3     CH2     C       S	Trappe    0.0         0.0       0.0       0.91658
+CH2     CH2     C       S	Trappe	  0.0         0.0       0.0	  0.91658
+CH      CH2     C       S	Trappe	  0.0         0.0       0.0	  0.91658
+CH3     CG      S       H	Trappe	  0.0         0.0       0.0	  0.79480
+//From TraPPE-UA JPCB 104, 8008
+
+//Charmm
+//Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]
+//V_Charmm =  Kchi(1 + cos(n(chi) - delta))
+//Kchi: kcal/mole
+//n: multiplicity
+//delta: degrees
+//in some cases, a Charmm may have two or three terms. If n is equal to 0, it falls back to harmonic form
+
+//Quartic
+//Atom1	Atom2	Atom3	Atom4	Quartic		k4		k3		k2		k1		k0  ( all are kcal/mol )
+//V_Quartic = k4(cos phi)^4 + k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
+
+//Polynomial
+//Atom1	Atom2	Atom3	Atom4	Polynomial	i	Ki	[j	Kj] 
+//VPolynomial = Ki (cos phi)^i + ... + Kj (cos phi)^j
+
+
+end TorsionTypes
+
+

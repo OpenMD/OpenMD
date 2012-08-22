@@ -36,9 +36,13 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
+#include <cmath>
+
 #include "primitives/GhostTorsion.hpp"
 
 namespace OpenMD {
@@ -47,7 +51,7 @@ namespace OpenMD {
                              DirectionalAtom* ghostAtom, TorsionType *tt) 
     : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
   
-  void GhostTorsion::calcForce(RealType& angle) {
+  void GhostTorsion::calcForce(RealType& angle, bool doParticlePot) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
     
     Vector3d pos1 = atom1_->getPos();
@@ -96,9 +100,11 @@ namespace OpenMD {
     f3.negate();
     ghostAtom->addTrq(cross(r43, f3));    
     
-    atom1_->addParticlePot(potential_);
-    atom2_->addParticlePot(potential_);
-    ghostAtom->addParticlePot(potential_);
+    if (doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
+      ghostAtom->addParticlePot(potential_);
+    }
 
     angle = acos(cos_phi) /M_PI * 180.0;
   }

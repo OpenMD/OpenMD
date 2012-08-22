@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include <iostream>
@@ -63,18 +64,17 @@
 
 using namespace OpenMD;
 
+using namespace std;
 int main(int argc, char* argv[]){
   
-  //register force fields
-  registerForceFields();
-  
   gengetopt_args_info args_info;
-  std::string dumpFileName;
-  std::string xyzFileName;
-  bool printVel;
-  bool printFrc;
-  bool printVec;
-  bool printChrg;
+  string dumpFileName;
+  string xyzFileName;
+
+  bool printVel(false);
+  bool printFrc(false);
+  bool printVec(false);
+  bool printChrg(false);
   
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
   if (args_info.input_given){
     dumpFileName = args_info.input_arg;
   } else {
-    std::cerr << "Does not have input file name" << std::endl;
+    cerr << "Does not have input file name" << endl;
     exit(1);
   }
   
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]){
   if (args_info.basetype_flag) {
     AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
     compositeVisitor->addVisitor(atomNameVisitor, 550);    
-    std::cout << compositeVisitor->toString();
+    cout << compositeVisitor->toString();
   }
   
   //create ZconsVisitor
@@ -180,8 +180,8 @@ int main(int argc, char* argv[]){
                                                        args_info.refsele_arg),
                                  250); 
   } else if (args_info.refsele_given || args_info.originsele_given) {
-    std::cerr << "Both of --refsele and --originsele should appear by pair" 
-              << std::endl;
+    cerr << "Both of --refsele and --originsele should appear by pair" 
+         << endl;
     exit(1);
   }
   
@@ -220,13 +220,13 @@ int main(int argc, char* argv[]){
   DumpReader* dumpReader = new DumpReader(info, dumpFileName);
   int nframes = dumpReader->getNFrames();
   
-  std::ofstream xyzStream(xyzFileName.c_str());
+  ofstream xyzStream(xyzFileName.c_str());
   
   SimInfo::MoleculeIterator miter;
   Molecule::IntegrableObjectIterator  iiter;
   Molecule::RigidBodyIterator rbIter;
   Molecule* mol;
-  StuntDouble* integrableObject;
+  StuntDouble* sd;
   RigidBody* rb;
   Vector3d molCom;
   Vector3d newMolCom;
@@ -244,17 +244,21 @@ int main(int argc, char* argv[]){
       currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();    
       for (mol = info->beginMolecule(miter); mol != NULL; 
            mol = info->nextMolecule(miter)) {
-          molCom = mol->getCom();
-          newMolCom = molCom;
-          currentSnapshot->wrapVector(newMolCom);
-          displacement = newMolCom - molCom;
-        for (integrableObject = mol->beginIntegrableObject(iiter); 
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(iiter)) {  
-          integrableObject->setPos(integrableObject->getPos() + displacement);
+        
+        molCom = mol->getCom();
+        newMolCom = molCom;
+        currentSnapshot->wrapVector(newMolCom);
+        displacement = newMolCom - molCom;
+
+        for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+             sd = mol->nextIntegrableObject(iiter)) {  
+
+          sd->setPos(sd->getPos() + displacement);
+          
         }
       }    
     }
+
     //update atoms of rigidbody
     for (mol = info->beginMolecule(miter); mol != NULL; 
          mol = info->nextMolecule(miter)) {
@@ -262,18 +266,22 @@ int main(int argc, char* argv[]){
       //change the positions of atoms which belong to the rigidbodies
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
+
         rb->updateAtoms();
         if (printVel) rb->updateAtomVel();
+
       }
     }
     
     //prepare visit
     for (mol = info->beginMolecule(miter); mol != NULL; 
          mol = info->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(iiter)) {
-        integrableObject->accept(prepareVisitor);
+
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+           sd = mol->nextIntegrableObject(iiter)) {
+
+        sd->accept(prepareVisitor);
+
       }
     }
     
@@ -284,10 +292,12 @@ int main(int argc, char* argv[]){
     //visit stuntdouble
     for (mol = info->beginMolecule(miter); mol != NULL; 
          mol = info->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(iiter)) {
-        integrableObject->accept(compositeVisitor);
+
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+           sd = mol->nextIntegrableObject(iiter)) {
+
+        sd->accept(compositeVisitor);
+
       }
     }
     

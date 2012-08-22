@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <stack>
@@ -45,7 +46,7 @@
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
 #include "primitives/Molecule.hpp"
-#include "io/basic_ifstrstream.hpp"
+#include "io/ifstrstream.hpp"
 
 namespace OpenMD {
 
@@ -149,7 +150,7 @@ namespace OpenMD {
     OpenMDBitSet bs;
     std::stack<OpenMDBitSet> stack; 
    
-    for (int pc = pcStart; pc < code.size(); ++pc) {
+    for (unsigned int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
 
       switch (instruction.tok) {
@@ -221,7 +222,6 @@ namespace OpenMD {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
-    float propertyValue;
     OpenMDBitSet bs(nStuntDouble);
     bs.clearAll();
     

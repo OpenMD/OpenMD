@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  ParameterManager.hpp
  *
  *  Created by Charles F. Vardeman II on 11/16/05.
@@ -149,7 +149,7 @@ struct ParameterTraits<std::pair<int, int> >{
     } else {
       sprintf(painCave.errMsg, 
               "ParameterManager Error: "
-              "Not enough tokens to make pair!\n");
+              "Incorrect number of tokens to make a pair!\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();    
@@ -157,6 +157,35 @@ struct ParameterTraits<std::pair<int, int> >{
     return false;
   }
   static std::string getParamType() { return "std::pair<int, int>";}    
+};
+
+//OpenMD's internal Vector3d
+template<>                     
+struct ParameterTraits<OpenMD::Vector3d >{
+  typedef OpenMD::Vector3d  RepType;
+  template<typename T> static bool    convert(T, RepType&){return false;} 
+  template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+  static bool convert(RepType v, RepType& r)            {r=v; return true;}
+  static bool convert(std::string v, RepType& r) { 
+    std::cerr << "calling tokenizer\n";
+    OpenMD::StringTokenizer tokenizer(v," ();,\t\n\r");
+    if (tokenizer.countTokens() == 3) {
+      RealType v1 = tokenizer.nextTokenAsDouble();
+      RealType v2 = tokenizer.nextTokenAsDouble();
+      RealType v3 = tokenizer.nextTokenAsDouble();
+      r = OpenMD::Vector3d(v1, v2, v3);
+      return true;
+    } else {
+      sprintf(painCave.errMsg, 
+              "ParameterManager Error: "
+              "Incorrect number of tokens to make a Vector3!\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();    
+    }
+    return false;
+  }
+  static std::string getParamType() { return "OpenMD::Vector3d";}    
 };
 
 
@@ -176,6 +205,7 @@ public:
   virtual bool setData(unsigned long int) = 0;
   virtual bool setData(RealType) = 0;
   virtual bool setData(std::pair<int, int>) = 0;
+  virtual bool setData(OpenMD::Vector3d) = 0;
   virtual std::string getParamType() = 0;
 protected:
   std::string keyword_;
@@ -188,7 +218,7 @@ template<class ParamType>
 class Parameter : public ParameterBase{
 public:    
   typedef ParameterTraits<ParamType> ValueType;
-  void setDefaultValue(const ParamType& value) {data_ = value; defaultValue_ = true;}
+  void setDefaultValue(const ParamType& value) {data_ = value; defaultValue_ = true; empty_ = false;}
   ParamType getData() { return data_;}
   
   virtual bool setData(std::string sval) {
@@ -209,6 +239,9 @@ public:
 
   virtual bool setData(std::pair<int, int> pval) {
     return internalSetData<std::pair<int, int> >(pval);
+  }
+  virtual bool setData(OpenMD::Vector3d pval) {
+    return internalSetData<OpenMD::Vector3d >(pval);
   }
   
   virtual std::string getParamType() { return ParameterTraits<ParamType>::getParamType();}
@@ -234,6 +267,14 @@ Parameter<TYPE> NAME;                                     \
 public:                                                      \
 bool have##NAME() { return !NAME.empty();}  \
 TYPE get##NAME() { return NAME.getData();}
+
+#define DeclareAlterableParameter(NAME, TYPE)         \
+private:                                                   \
+Parameter<TYPE> NAME;                                     \
+public:                                                      \
+bool have##NAME() { return !NAME.empty();}  \
+TYPE get##NAME() { return NAME.getData();}  \
+bool set##NAME(TYPE s) { return NAME.setData(s);}  \
 
 
 

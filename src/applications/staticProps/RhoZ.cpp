@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
  *  @version $Id$
@@ -126,7 +126,7 @@ namespace OpenMD {
       //loop over the slices to calculate the densities
       for (i = 0; i < nZBins_; i++) {
         RealType totalMass = 0;
-        for (int k = 0; k < sliceSDLists_[i].size(); ++k) {
+        for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
           totalMass += sliceSDLists_[i][k]->getMass();
         }
         density_[i] += totalMass/sliceVolume;
@@ -155,7 +155,7 @@ namespace OpenMD {
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#z\tdensity\n";
-      for (int i = 0; i < density_.size(); ++i) {
+      for (unsigned int i = 0; i < density_.size(); ++i) {
         RealType z = zAve * (i+0.5)/density_.size();
         rdfStream << z << "\t" << 1.660535*density_[i]/nProcessed_ << "\n";
       }

@@ -36,16 +36,28 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman, Stocker & Gezelter, in progress (2010).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <iostream>
 #include <cstdlib>
+
+#ifdef _MSC_VER
+#include <Windows.h>
+#include <stdio.h>
+#include <io.h>
+#define isatty _isatty
+#define fileno _fileno
+#else
 #include <cstdio>
 #include <sys/ioctl.h>
+#endif
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
 #include "utils/ProgressBar.hpp"
 
 using namespace std;
@@ -83,9 +95,19 @@ namespace OpenMD {
       // only do the progress bar if we are actually running in a tty:
       if (isatty(fileno(stdout))  && (getenv("SGE_TASK_ID")==NULL)) {     
         // get the window width:
+
+#ifdef _MSC_VER
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        int ret = GetConsoleScreenBufferInfo(GetStdHandle( STD_OUTPUT_HANDLE ),
+                                             &csbi);
+        if(ret) {
+          width = csbi.dwSize.X;
+        }
+#else
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);
         width = w.ws_col;
+#endif
 
         // handle the case when the width is returned as a nonsensical value.
         if (width <= 0) width = 80;

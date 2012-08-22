@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include <stdlib.h>
@@ -51,6 +52,11 @@
 
 namespace OpenMD {
 Globals::Globals() {
+  
+  flucQpars_ = new FluctuatingChargeParameters();
+  rnemdPars_ = new RNEMDParameters();
+  minimizerPars_ = new MinimizerParameters();
+
   DefineParameter(ForceField, "forceField")
  
   DefineOptionalParameter(TargetTemp, "targetTemp");
@@ -72,14 +78,6 @@ Globals::Globals() {
   DefineOptionalParameter(ZconsTol, "zconsTol");
   DefineOptionalParameter(ZconsForcePolicy, "zconsForcePolicy");
   DefineOptionalParameter(Seed, "seed");
-  DefineOptionalParameter(Minimizer, "minimizer");
-  DefineOptionalParameter(MinimizerMaxIter,"minimizerMaxIter");
-  DefineOptionalParameter(MinimizerWriteFreq, "minimizerWriteFreq");
-  DefineOptionalParameter(MinimizerStepSize, "minimizerStepSize");
-  DefineOptionalParameter(MinimizerFTol, "minimizerFTol");
-  DefineOptionalParameter(MinimizerGTol, "minimizerGTol");
-  DefineOptionalParameter(MinimizerLSTol, "minimizerLSTol");
-  DefineOptionalParameter(MinimizerLSMaxIter, "minimizerLSMaxIter");
   DefineOptionalParameter(ZconsGap, "zconsGap");
   DefineOptionalParameter(ZconsFixtime, "zconsFixtime");
   DefineOptionalParameter(ZconsUsingSMD, "zconsUsingSMD");
@@ -90,9 +88,10 @@ Globals::Globals() {
   DefineOptionalParameter(DampingAlpha, "dampingAlpha");
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
+  DefineOptionalParameter(ElectricField, "electricField");
+
   DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
   DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
-  DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
   DefineOptionalParameter(HydroPropFile, "HydroPropFile");
   DefineOptionalParameter(Viscosity, "viscosity");
@@ -101,6 +100,7 @@ Globals::Globals() {
   DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
   DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
   DefineOptionalParameter(UseMultipleTemperatureMethod, "useMultipleTemperatureMethod");
+  DefineOptionalParameter(ElectrostaticSummationMethod, "electrostaticSummationMethod");
   DefineOptionalParameter(MTM_Ce, "MTM_Ce");
   DefineOptionalParameter(MTM_G, "MTM_G");
   DefineOptionalParameter(MTM_Io, "MTM_Io");
@@ -114,39 +114,24 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
   DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, "useInitialExtendedSystemState", false);
   DefineOptionalParameterWithDefaultValue(OrthoBoxTolerance, "orthoBoxTolerance", 1E-6);  
-  DefineOptionalParameterWithDefaultValue(ElectrostaticSummationMethod, "electrostaticSummationMethod", "SHIFTED_FORCE");
+  DefineOptionalParameterWithDefaultValue(CutoffMethod, "cutoffMethod", "SHIFTED_FORCE");
   DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, "electrostaticScreeningMethod", "DAMPED");
-  DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 78.5);
-  DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
-  DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
-  DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", 0);
+  DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
+  DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", false);
+  DefineOptionalParameterWithDefaultValue(PrintHeatFlux, "printHeatFlux", false);
+  DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", false);
+  DefineOptionalParameterWithDefaultValue(OutputParticlePotential, "outputParticlePotential", false);
+  DefineOptionalParameterWithDefaultValue(OutputElectricField, "outputElectricField", false);
+  DefineOptionalParameterWithDefaultValue(OutputFluctuatingCharges, "outputFluctuatingCharges", false);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);
   DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, "accumulateBoxDipole", false);
 
-  DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_exchangeTime, "RNEMD_exchangeTime", 100.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 16);
-  DefineOptionalParameterWithDefaultValue(RNEMD_logWidth, "RNEMD_logWidth", 16);
-  DefineOptionalParameterWithDefaultValue(RNEMD_exchangeType, "RNEMD_exchangeType", "KineticScale");
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetFlux, "RNEMD_targetFlux", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzKE, "RNEMD_targetJzKE", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpx, "RNEMD_targetJzpx", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpy, "RNEMD_targetJzpy", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_targetJzpz, "RNEMD_targetJzpz", 0.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
-  DefineOptionalParameterWithDefaultValue(RNEMD_binShift, "RNEMD_binShift", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputTemperature, "RNEMD_outputTemperature", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputVx, "RNEMD_outputVx", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputVy, "RNEMD_outputVy", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputXyzTemperature, "RNEMD_outputXyzTemperature", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_outputRotTemperature, "RNEMD_outputRotTemperature", false);
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
   DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
-
 
   deprecatedKeywords_.insert("nComponents");
   deprecatedKeywords_.insert("nZconstraints");
@@ -156,6 +141,14 @@ Globals::Globals() {
   deprecatedKeywords_.insert("thermIntOmegaSpringConst");
   deprecatedKeywords_.insert("useSolidThermInt");  
   deprecatedKeywords_.insert("useLiquidThermInt");
+  deprecatedKeywords_.insert("minimizerMaxIter");
+  deprecatedKeywords_.insert("minimizerWriteFreq");
+  deprecatedKeywords_.insert("minimizerStepSize");
+  deprecatedKeywords_.insert("minimizerFTol");
+  deprecatedKeywords_.insert("minimizerGTol");
+  deprecatedKeywords_.insert("minimizerLSTol");
+  deprecatedKeywords_.insert("minimizerLSMaxIter");
+
     
 }
 
@@ -186,25 +179,17 @@ void Globals::validate() {
   CheckParameter(ZconsTime, isPositive());
   CheckParameter(ZconsTol, isPositive());
   CheckParameter(Seed, isPositive());
-  CheckParameter(Minimizer, isEqualIgnoreCase("SD") || isEqualIgnoreCase("CG"));
-  CheckParameter(MinimizerMaxIter, isPositive());
-  CheckParameter(MinimizerWriteFreq, isPositive());
-  CheckParameter(MinimizerStepSize, isPositive());
-  CheckParameter(MinimizerFTol, isPositive());
-  CheckParameter(MinimizerGTol, isPositive());
-  CheckParameter(MinimizerLSTol, isPositive());
-  CheckParameter(MinimizerLSMaxIter, isPositive());
   CheckParameter(ZconsGap, isPositive());
   CheckParameter(ZconsFixtime, isPositive());
   CheckParameter(ThermodynamicIntegrationLambda, isNonNegative());
   CheckParameter(ThermodynamicIntegrationK, isPositive());
   CheckParameter(ForceFieldVariant, isNotEmpty());
   CheckParameter(ForceFieldFileName, isNotEmpty());
-  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
-  CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
+  CheckParameter(CutoffMethod, isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE"));
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
+  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
+  CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
   CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
-  //CheckParameter(StatFileFormat,);     
   CheckParameter(OrthoBoxTolerance, isPositive());  
   CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
@@ -213,13 +198,8 @@ void Globals::validate() {
   CheckParameter(FrozenBufferRadius, isPositive());
   CheckParameter(LangevinBufferRadius, isPositive());
   CheckParameter(NeighborListNeighbors, isPositive());
-  CheckParameter(RNEMD_exchangeTime, isPositive());
-  CheckParameter(RNEMD_nBins, isPositive() && isEven());
-  CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("KineticScaleVAM") || isEqualIgnoreCase("KineticScaleAM") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale") || isEqualIgnoreCase("ShiftScaleV") || isEqualIgnoreCase("ShiftScaleVAM"));
-  //CheckParameter(RNEMD_targetFlux, isNonNegative());
   CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
   CheckParameter(Alpha, isPositive()); 
-
   
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
@@ -229,7 +209,7 @@ void Globals::validate() {
     }
   }
 }
-  
+
 bool Globals::addComponent(Component* comp) {
     components_.push_back(comp);
     return true;
@@ -243,6 +223,30 @@ bool Globals::addZConsStamp(ZConsStamp* zcons) {
 bool Globals::addRestraintStamp(RestraintStamp* rest) {
     restraints_.push_back(rest);
     return true;
+}
+
+bool Globals::addFluctuatingChargeParameters(FluctuatingChargeParameters* fqp) {
+  if (flucQpars_ != NULL)
+    delete flucQpars_;
+    
+  flucQpars_ = fqp;
+  return true;
+}
+
+bool Globals::addRNEMDParameters(RNEMDParameters* rnemdPars) {
+  if (rnemdPars_ != NULL)
+    delete rnemdPars_;
+    
+  rnemdPars_ = rnemdPars;
+  return true;
+}
+
+bool Globals::addMinimizerParameters(MinimizerParameters* miniPars) {
+  if (minimizerPars_ != NULL)
+    delete minimizerPars_;
+    
+  minimizerPars_ = miniPars;
+  return true;
 }
 
 bool Globals::addMoleculeStamp(MoleculeStamp* molStamp) {

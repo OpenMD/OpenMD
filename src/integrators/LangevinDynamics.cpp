@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -66,7 +67,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Vector3d vel;
     Vector3d pos;
     Vector3d frc;
@@ -74,14 +75,16 @@ namespace OpenMD {
     Vector3d ji;
     RealType mass;
     
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
 
-	vel =integrableObject->getVel();
-	pos = integrableObject->getPos();
-	frc = integrableObject->getFrc();
-	mass = integrableObject->getMass();
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
+
+	vel = sd->getVel();
+	pos = sd->getPos();
+	frc = sd->getFrc();
+	mass = sd->getMass();
                 
 	// velocity half step
 	vel += (dt2 /mass * PhysicalConstants::energyConvert) * frc;
@@ -89,80 +92,81 @@ namespace OpenMD {
 	// position whole step
 	pos += dt * vel;
 
-	integrableObject->setVel(vel);
-	integrableObject->setPos(pos);
+	sd->setVel(vel);
+	sd->setPos(pos);
 
-	if (integrableObject->isDirectional()){
+	if (sd->isDirectional()){
 
 	  // get and convert the torque to body frame
 
-	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  Tb = sd->lab2Body(sd->getTrq());
 
 	  // get the angular momentum, and propagate a half step
 
-	  ji = integrableObject->getJ();
+	  ji = sd->getJ();
 
 	  ji += (dt2  * PhysicalConstants::energyConvert) * Tb;
 
-	  rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo_->rotate(sd, ji, dt);
 
-	  integrableObject->setJ(ji);
+	  sd->setJ(ji);
 	}
 
             
       }
     } //end for(mol = info_->beginMolecule(i))
     
-    rattle->constraintA();
-    
+    flucQ_->moveA();
+    rattle_->constraintA();    
   }    
 
   void LangevinDynamics::moveB(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Vector3d vel;
     Vector3d frc;
     Vector3d Tb;
     Vector3d ji;
     RealType mass;
     
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
 
-	vel =integrableObject->getVel();
-	frc = integrableObject->getFrc();
-	mass = integrableObject->getMass();
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
+
+	vel = sd->getVel();
+	frc = sd->getFrc();
+	mass = sd->getMass();
                 
 	// velocity half step
 	vel += (dt2 /mass * PhysicalConstants::energyConvert) * frc;
                 
-	integrableObject->setVel(vel);
+	sd->setVel(vel);
 
-	if (integrableObject->isDirectional()){
+	if (sd->isDirectional()){
 
 	  // get and convert the torque to body frame
 
-	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  Tb = sd->lab2Body(sd->getTrq());
 
 	  // get the angular momentum, and propagate a half step
 
-	  ji = integrableObject->getJ();
+	  ji = sd->getJ();
 
 	  ji += (dt2  * PhysicalConstants::energyConvert) * Tb;
 
-	  integrableObject->setJ(ji);
+	  sd->setJ(ji);
 	}
 
             
       }
     } //end for(mol = info_->beginMolecule(i))
   
-
-    rattle->constraintB();
-
+    flucQ_->moveB();
+    rattle_->constraintB();
   }
 
 

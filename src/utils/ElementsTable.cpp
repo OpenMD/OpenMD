@@ -29,19 +29,22 @@ GNU General Public License for more details.
  * @version 1.0
  */
 
-#include <iostream>
 #include "config.h"
+
+#include <iostream>
 #include <cstdlib>
 #include <string>
 #include <fstream>
 #include <cstdlib>
 #include "utils/ElementsTable.hpp"
 #include "utils/simError.h"
-#include "io/basic_ifstrstream.hpp"
+#include "io/ifstrstream.hpp"
 
-#if !HAVE_STRNCASECMP
-extern "C" int strncasecmp(const char *s1, const char *s2, size_t n);
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
 #endif
+
 
 #ifdef WIN32
 #define FILE_SEP_CHAR "\\"

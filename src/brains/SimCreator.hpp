@@ -36,11 +36,12 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
- * @file SimCreatorr.hpp
+ * @file SimCreator.hpp
  * @author tlin
  * @date 11/02/2004
  * @time 12:126am
@@ -54,14 +55,16 @@
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/Globals.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 
 namespace OpenMD {
 
   /**
    * @class SimCreator SimCreator.hpp "brains/SimCreator.hpp"
-   * The only responsibility of SimCreator is to parse the meta-data file and create a SimInfo
-   * instance based on the information returned by parser. 
+   *
+   * The only responsibility of SimCreator is to parse the meta-data
+   * file and create a SimInfo instance based on the information
+   * returned by parser.
    */
   class SimCreator {
   public:
@@ -82,17 +85,24 @@ namespace OpenMD {
      * @param mdfile
      * @return simParams
      */
-    Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int metaDataStartingLine);
+    Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int mdFileVersion, int metaDataStartingLine);
 
 
     /** create the molecules belong to current processor*/
     virtual void createMolecules(SimInfo* info);
 
+    /**
+     * Figure out the data storage layout based on what kinds of
+     * objects are being simulated
+     */
+    int computeStorageLayout(SimInfo* info);
+    
     /** 
-     * Sets the global index for atoms, rigidbodies and cutoff groups and fill up
-     * globalGroupMembership and globalMolMembership arrays which map atoms'
-     * global index to the global index of the groups (or molecules) they belong to.
-     * These array are never changed during the simulation.
+     * Sets the global index for atoms, rigidbodies and cutoff groups
+     * and fill up globalGroupMembership and globalMolMembership
+     * arrays which map atoms' global index to the global index of the
+     * groups (or molecules) they belong to.  These array are never
+     * changed during the simulation.
      */
     void setGlobalIndex(SimInfo* info);
 
@@ -108,6 +118,7 @@ namespace OpenMD {
     void loadCoordinates(SimInfo* info, const std::string& mdFileName);     
 
     std::string mdFileName_;  //save the meta-data file name which may be used later
+
   };
 
 } //end namespace OpenMD

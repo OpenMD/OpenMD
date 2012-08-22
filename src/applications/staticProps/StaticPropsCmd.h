@@ -129,6 +129,7 @@ struct gengetopt_args_info
   const char *hullvol_help; /**< @brief hull volume of nanoparticle help description.  */
   const char *rodlength_help; /**< @brief length of nanorod help description.  */
   const char *tet_param_help; /**< @brief tetrahedrality order parameter help description.  */
+  const char *tet_param_z_help; /**< @brief tetrahedrality order parameter by zbin(--sele1 must be specified) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -178,6 +179,7 @@ struct gengetopt_args_info
   unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
   unsigned int rodlength_given ;	/**< @brief Whether rodlength was given.  */
   unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
+  unsigned int tet_param_z_given ;	/**< @brief Whether tet_param_z was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

@@ -9,13 +9,12 @@ component{
 }
 
 
-ensemble = NVT;
+ensemble = NVE;
 forceField = "Amber";
-electrostaticSummationMethod = "shifted_force";
+cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
-dampingAlpha = 0.18;
+dampingAlpha = 0.20;
 cutoffRadius = 9.0;
-switchingRadius = 9.0;
 
 targetTemp = 300;
 targetPressure = 1.0;
@@ -24,13 +23,13 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e4;
+runTime = 2;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 100;
+sampleTime = 1000;
 statusTime = 2;
   </MetaData>
   <Snapshot>

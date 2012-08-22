@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "selection/DistanceFinder.hpp"
@@ -77,7 +78,7 @@ namespace OpenMD {
     OpenMDBitSet bsResult(nStuntDoubles_);
     assert(bsResult.size() == bs.size());
    
-    for (int j = 0; j < stuntdoubles_.size(); ++j) {
+    for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
       if (stuntdoubles_[j]->isRigidBody()) {
         RigidBody* rb = static_cast<RigidBody*>(stuntdoubles_[j]);
         rb->updateAtoms();
@@ -87,7 +88,7 @@ namespace OpenMD {
     for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
       center = stuntdoubles_[i];
       centerPos = center->getPos();
-      for (int j = 0; j < stuntdoubles_.size(); ++j) {
+      for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos();
 	currSnapshot->wrapVector(r);
 	if (r.length() <= distance) {

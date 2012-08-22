@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -52,10 +53,14 @@
 
 #include "brains/ForceManager.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
+#include "brains/Stats.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
+#include "integrators/RotationAlgorithm.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
 #include "integrators/Velocitizer.hpp"
-#include "integrators/RNEMD.hpp"
+#include "rnemd/RNEMD.hpp"
+#include "constraints/Rattle.hpp"
 
 namespace OpenMD {
 
@@ -75,8 +80,9 @@ namespace OpenMD {
       doIntegrate();
     }
 
-    void update() {
-      doUpdate();
+    void updateSizes() {
+      doUpdateSizes();
+      flucQ_->updateSizes();
     }
 
     void setForceManager(ForceManager* forceMan) {
@@ -85,6 +91,10 @@ namespace OpenMD {
 	delete forceMan_;
       }
       forceMan_ = forceMan;
+      // forward this on:
+      if (flucQ_ != NULL) {
+        flucQ_->setForceManager(forceMan_);
+      }
     }
 
     void setVelocitizer(Velocitizer* velocitizer) {
@@ -92,6 +102,24 @@ namespace OpenMD {
 	delete velocitizer_;
       }
       velocitizer_ = velocitizer;
+    }
+
+    void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop) {
+      if (prop != flucQ_ && flucQ_ != NULL){            
+        delete flucQ_;
+      }            
+      flucQ_ = prop;
+      if (forceMan_ != NULL) {
+        flucQ_->setForceManager(forceMan_);
+      }
+    }
+
+    void setRotationAlgorithm(RotationAlgorithm* algo) {
+      if (algo != rotAlgo_ && rotAlgo_ != NULL){            
+        delete rotAlgo_;
+      }
+            
+      rotAlgo_ = algo;
     }
 
     void setRNEMD(RNEMD* rnemd) {
@@ -107,25 +135,30 @@ namespace OpenMD {
 
     virtual void doIntegrate() = 0;
 
-    virtual void doUpdate() {}
+    virtual void doUpdateSizes() {}
         
     void saveConservedQuantity() {
-      currentSnapshot_->statData[Stats::CONSERVED_QUANTITY] = calcConservedQuantity();
+      snap->setConservedQuantity( calcConservedQuantity() );
     }
         
     SimInfo* info_;
     Globals* simParams;
     ForceManager* forceMan_;
+    RotationAlgorithm* rotAlgo_;
+    FluctuatingChargePropagator* flucQ_;
+    Rattle* rattle_;
+    Velocitizer* velocitizer_;
+    RNEMD* rnemd_;
+
     bool needPotential;
     bool needStress;
     bool needReset;    
-    Velocitizer* velocitizer_;
-    RNEMD* rnemd_;
     bool needVelocityScaling;
     RealType targetScalingTemp;
 
     bool useRNEMD;    
     
+    Stats* stats;
     DumpWriter* dumpWriter;
     StatWriter* statWriter;
     Thermo thermo;
@@ -138,7 +171,7 @@ namespace OpenMD {
     RealType RNEMD_exchangeTime;
     RealType dt;
 
-    Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change
+    Snapshot* snap; // During the integration, the address of snap Will not change
 
         
   private:

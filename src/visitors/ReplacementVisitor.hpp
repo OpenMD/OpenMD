@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef VISITORS_REPLACEMENTVISITOR_HPP
@@ -84,21 +85,21 @@ namespace OpenMD {
       visitorName = "SSDAtomVisitor";
       
       /// these are the atom names we can replace with a fixed structure
-        addReplacedAtomName("SSD");
-        addReplacedAtomName("SSD_E");
-        addReplacedAtomName("SSD_RF");
-        addReplacedAtomName("SSD1");
-        addReplacedAtomName("TAP");
-        addReplacedAtomName("TRED");
-        
-        // this is the reference structure we'll use for the replacement:
-        addSite("H", Vector3d(0.0, -0.75695, 0.5206));
-        addSite("H", Vector3d(0.0,  0.75695, 0.5206));
-        addSite("O", Vector3d(0.0,  0.0,    -0.0654));
-        addSite("X", Vector3d(0.0,  0.0,     0.0   ), Vector3d(0,0,1));
+      addReplacedAtomName("SSD");
+      addReplacedAtomName("SSD_E");
+      addReplacedAtomName("SSD_RF");
+      addReplacedAtomName("SSD1");
+      addReplacedAtomName("TAP");
+      addReplacedAtomName("TRED");
+      
+      // this is the reference structure we'll use for the replacement:
+      addSite("H", Vector3d(0.0, -0.75695, 0.5206));
+      addSite("H", Vector3d(0.0,  0.75695, 0.5206));
+      addSite("O", Vector3d(0.0,  0.0,    -0.0654));
+      addSite("X", Vector3d(0.0,  0.0,     0.0   ), Vector3d(0,0,1));
     }
-  };  
-
+  };
+  
   class GBtailVisitor : public ReplacementVisitor{
   public:
     GBtailVisitor(SimInfo* info) : ReplacementVisitor(info) {
@@ -106,12 +107,12 @@ namespace OpenMD {
       
       
       /// these are the atom names we can replace with a fixed structure
-        addReplacedAtomName("GBtail");
-        
-        // this is the reference structure we'll use for the replacement:
-        addSite("C", Vector3d(0.0, 0.0, 9.0));
-        addSite("C", Vector3d(0.0, 0.0, 0.0));
-        addSite("C", Vector3d(0.0, 0.0, -9.0));
+      addReplacedAtomName("GBtail");
+      
+      // this is the reference structure we'll use for the replacement:
+      addSite("C", Vector3d(0.0, 0.0, 9.0));
+      addSite("C", Vector3d(0.0, 0.0, 0.0));
+      addSite("C", Vector3d(0.0, 0.0, -9.0));
     }
   };  
   
@@ -121,15 +122,13 @@ namespace OpenMD {
       visitorName = "GBheadVisitor";
       
       /// these are the atom names we can replace with a fixed structure
-        addReplacedAtomName("GBhead");
-        
-        // this is the reference structure we'll use for the replacement:
-        addSite("N", Vector3d(0.0, 0.0, 3.5));
-        addSite("C", Vector3d(0.0, 0.0, 0.0));
-        addSite("P", Vector3d(0.0, 0.0, -3.5));
+      addReplacedAtomName("GBhead");
+      
+      // this is the reference structure we'll use for the replacement:
+      addSite("N", Vector3d(0.0, 0.0, 3.5));
+      addSite("C", Vector3d(0.0, 0.0, 0.0));
+      addSite("P", Vector3d(0.0, 0.0, -3.5));
     }
-  };  
-
-
+  };      
 }//namespace OpenMD
 #endif

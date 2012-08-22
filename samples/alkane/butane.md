@@ -12,7 +12,12 @@ dt = 1.0;
 forceField = "DUFF";
 ensemble = NVE;
 runTime = 10000.0;
-sampleTime = 10.0;
+sampleTime = 100.0;
+statusTime = 1.0;
+cutoffRadius = 9.0;
+switchingRadius = 7.0;
+cutoffMethod = "switched";
+
   </MetaData>
   <Snapshot>
     <FrameData>

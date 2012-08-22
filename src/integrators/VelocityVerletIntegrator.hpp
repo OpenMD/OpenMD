@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -52,8 +53,10 @@
 
 #include "integrators/Integrator.hpp"
 #include "integrators/RotationAlgorithm.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
 #include "constraints/Rattle.hpp"
 #include "utils/ProgressBar.hpp"
+
 namespace OpenMD {
 
   /**
@@ -64,37 +67,19 @@ namespace OpenMD {
   class VelocityVerletIntegrator : public Integrator {
   public:
     virtual ~VelocityVerletIntegrator();
-
-    void setRotationAlgorithm(RotationAlgorithm* algo) {
-      if (algo != rotAlgo && rotAlgo != NULL){            
-	delete rotAlgo;
-      }
-            
-      rotAlgo = algo;
-    }
         
   protected:
 
     VelocityVerletIntegrator(SimInfo* info);
-
     virtual void doIntegrate();
-
     virtual void initialize();
-
     virtual void preStep();
-        
     virtual void integrateStep();        
-
     virtual void postStep();
-
     virtual void finalize();
-
     virtual void resetIntegrator() {}
     
-    RotationAlgorithm* rotAlgo;
-    Rattle* rattle;
     RealType dt2;
-
     RealType currSample;
     RealType currStatus;
     RealType currThermal;
@@ -104,15 +89,10 @@ namespace OpenMD {
   private:
         
     virtual void calcForce();    
-        
     virtual void moveA() = 0;
-        
-    virtual void moveB() = 0;        
-
+    virtual void moveB() = 0;
     virtual RealType calcConservedQuantity() = 0;
-
     virtual DumpWriter* createDumpWriter();
-
     virtual StatWriter* createStatWriter();
 
     ProgressBar* progressBar;

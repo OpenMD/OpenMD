@@ -36,14 +36,15 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef IO_EAMATOMTYPESSECTIONPARSER_HPP
 #define IO_EAMATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/AtomType.hpp"
+#include "types/EAMAdapter.hpp"
 #include "io/ForceFieldOptions.hpp"
 
 namespace OpenMD {
@@ -57,7 +58,7 @@ namespace OpenMD {
             
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    void parseEAMParamFile(ForceField& ff, AtomType* atomType, const std::string& potentialParamFile, int iden);
+    void parseEAMParamFile(ForceField& ff, EAMAdapter ea, const std::string& potentialParamFile, int iden);
     void parseEAMArray(std::istream& input, std::vector<RealType>& array, int num);
     ForceFieldOptions& options_;
   };

@@ -16,7 +16,7 @@ forceFieldVariant="u3";
 
 ensemble = "NVE";
 dt = 4.0;
-runTime = 1e5;
+runTime = 2e3;
 
 
 sampleTime = 200.0;

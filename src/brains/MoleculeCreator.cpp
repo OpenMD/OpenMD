@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
   
 /**
@@ -54,7 +55,7 @@
 #include "brains/MoleculeCreator.hpp"
 #include "primitives/GhostBend.hpp"
 #include "primitives/GhostTorsion.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/AtomType.hpp"
 #include "types/FixedBondType.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
@@ -66,7 +67,7 @@ namespace OpenMD {
 					    int stampId, int globalIndex, 
                                             LocalIndexManager* localIndexMan) {
     Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getName());
-    
+
     //create atoms
     Atom* atom;
     AtomStamp* currentAtomStamp;
@@ -138,7 +139,7 @@ namespace OpenMD {
     int nCutoffGroups = molStamp->getNCutoffGroups();
     for (int i = 0; i < nCutoffGroups; ++i) {
       currentCutoffGroupStamp = molStamp->getCutoffGroupStamp(i);
-      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp);
+      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp, localIndexMan);
       mol->addCutoffGroup(cutoffGroup);
     }
 
@@ -169,13 +170,20 @@ namespace OpenMD {
     // every single free atom
     
     for (fai = freeAtoms.begin(); fai != freeAtoms.end(); ++fai) {
-      cutoffGroup = createCutoffGroup(mol, *fai);
+      cutoffGroup = createCutoffGroup(mol, *fai, localIndexMan);
       mol->addCutoffGroup(cutoffGroup);
     }
     //create constraints
     createConstraintPair(mol);
     createConstraintElem(mol);
     
+    // Does this molecule stamp define a total constrained charge value?
+    // If so, let the created molecule know about it.
+
+    if (molStamp->haveConstrainTotalCharge() ) {
+      mol->setConstrainTotalCharge( molStamp->getConstrainTotalCharge() );
+    }
+
     //the construction of this molecule is finished
     mol->complete();
     
@@ -198,21 +206,12 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
+
     //below code still have some kind of hard-coding smell
     if (atomType->isDirectional()){
-     
-      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-        
-      if (dAtomType == NULL) {
-	sprintf(painCave.errMsg, "Can not cast AtomType to DirectionalAtomType");
-
-	painCave.isFatal = 1;
-	simError();
-      }
 
       DirectionalAtom* dAtom;
-      dAtom = new DirectionalAtom(dAtomType);
+      dAtom = new DirectionalAtom(atomType);
       atom = dAtom;    
     }
     else{
@@ -449,7 +448,9 @@ namespace OpenMD {
   }
   
 
-  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp) {
+  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, 
+                                                  CutoffGroupStamp* stamp,
+                                                  LocalIndexManager* localIndexMan) {
     int nAtoms;
     CutoffGroup* cg;
     Atom* atom;
@@ -461,14 +462,22 @@ namespace OpenMD {
       assert(atom);
       cg->addAtom(atom);
     }
-
+    
+    //set the local index of this cutoffGroup, global index will be set later
+    cg->setLocalIndex(localIndexMan->getNextCutoffGroupIndex());
+    
     return cg;
   }    
-
-  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule * mol, Atom* atom) {
+  
+  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule * mol, Atom* atom,
+                                                  LocalIndexManager* localIndexMan) {
     CutoffGroup* cg;
     cg  = new CutoffGroup();
     cg->addAtom(atom);
+
+    //set the local index of this cutoffGroup, global index will be set later
+    cg->setLocalIndex(localIndexMan->getNextCutoffGroupIndex());
+
     return cg;
   }
 

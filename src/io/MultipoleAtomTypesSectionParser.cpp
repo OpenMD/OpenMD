@@ -36,13 +36,15 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "io/MultipoleAtomTypesSectionParser.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
@@ -91,46 +93,59 @@ namespace OpenMD {
 	simError();
       }
         
-      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);            
-      if (dAtomType == NULL) {
-	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line %d\n", lineNo);
-	painCave.isFatal = 1;
-	simError();
-      }        
-        
-      RotMat3x3d electroBodyFrame(phi, theta, psi);        
-      dAtomType->setElectroBodyFrame(electroBodyFrame);        
+      MultipoleAdapter ma = MultipoleAdapter(atomType);
 
+      RotMat3x3d electroBodyFrame(0.0);
+
+      electroBodyFrame.setupRotMat(phi, theta, psi);
+
+      RealType dipoleMoment(0);
+      RealType splitDipoleDistance(0);
+      Vector3d quadrupoleMoments(V3Zero);
+      bool isDipole(false);
+      bool isSplitDipole(false);
+      bool isQuadrupole(false);
+      
       if (multipoleType== "d") {
-	parseDipole(tokenizer, dAtomType, lineNo);
+	parseDipole(tokenizer, dipoleMoment, lineNo);
+        isDipole = true;
       } else if (multipoleType== "s") {
-	parseSplitDipole(tokenizer, dAtomType, lineNo);
+	parseSplitDipole(tokenizer, dipoleMoment, splitDipoleDistance, lineNo);
+        isDipole = true;
+        isSplitDipole = true;
       } else if (multipoleType== "q") {
-	parseQuadruple( tokenizer, dAtomType, lineNo);
+	parseQuadrupole( tokenizer, quadrupoleMoments, lineNo);
+        isQuadrupole = true;
       } else if (multipoleType== "dq") {
-	parseDipole(tokenizer, dAtomType, lineNo);
-	parseQuadruple( tokenizer, dAtomType, lineNo);
+	parseDipole(tokenizer, dipoleMoment, lineNo);
+        isDipole = true;
+	parseQuadrupole( tokenizer, quadrupoleMoments, lineNo);
+        isQuadrupole = true;
       } else if (multipoleType== "sq") {
-	parseSplitDipole(tokenizer, dAtomType, lineNo);
-	parseQuadruple( tokenizer, dAtomType, lineNo);
+	parseSplitDipole(tokenizer, dipoleMoment, splitDipoleDistance, lineNo);
+        isDipole = true;
+        isSplitDipole = true;
+	parseQuadrupole( tokenizer, quadrupoleMoments, lineNo);
+        isQuadrupole = true;
       } else {
 	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: unrecognized multiple type at line %d\n",
 		lineNo);
 	painCave.isFatal = 1;
 	simError();
       }
-    }
 
+      ma.makeMultipole(electroBodyFrame, dipoleMoment, splitDipoleDistance,
+                       quadrupoleMoments, isDipole, isSplitDipole, 
+                       isQuadrupole);
+    }
   }
 
   void MultipoleAtomTypesSectionParser::parseDipole(StringTokenizer& tokenizer, 
-						    DirectionalAtomType* dAtomType, int lineNo) {
+						    RealType& dipoleMoment,
+                                                    int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
-      RealType dipole = tokenizer.nextTokenAsDouble();
-
-      dAtomType->addProperty(new DoubleGenericData("Dipole", dipole));
-      dAtomType->setDipole();
+      dipoleMoment = tokenizer.nextTokenAsDouble();    
     } else {
       sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
 	      lineNo);
@@ -140,13 +155,13 @@ namespace OpenMD {
   }
 
   void MultipoleAtomTypesSectionParser::parseSplitDipole(StringTokenizer& tokenizer, 
-							 DirectionalAtomType* dAtomType, int lineNo) {
+                                                         RealType& dipoleMoment,
+                                                         RealType& splitDipoleDistance,
+                                                         int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
-      parseDipole(tokenizer, dAtomType, lineNo);    
-      RealType splitDipoleDistance = tokenizer.nextTokenAsDouble();
-      dAtomType->addProperty(new DoubleGenericData("SplitDipoleDistance", splitDipoleDistance));
-      dAtomType->setSplitDipole();
+      parseDipole(tokenizer, dipoleMoment, lineNo);    
+      splitDipoleDistance = tokenizer.nextTokenAsDouble();
     } else {
       sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
 	      lineNo);
@@ -155,17 +170,18 @@ namespace OpenMD {
     }
   }
 
-  void MultipoleAtomTypesSectionParser::parseQuadruple(StringTokenizer& tokenizer,
-						       DirectionalAtomType* dAtomType, int lineNo) {
+  void MultipoleAtomTypesSectionParser::parseQuadrupole(StringTokenizer& tokenizer,
+                                                        Vector3d& quadrupoleMoments,
+                                                        int lineNo) {
     int nTokens = tokenizer.countTokens();   
     if (nTokens >= 3) {
-      Vector3d Q;
-      Q[0] = tokenizer.nextTokenAsDouble();
-      Q[1] = tokenizer.nextTokenAsDouble();
-      Q[2] = tokenizer.nextTokenAsDouble();
+      
+      quadrupoleMoments[0] = tokenizer.nextTokenAsDouble();
+      quadrupoleMoments[1] = tokenizer.nextTokenAsDouble();
+      quadrupoleMoments[2] = tokenizer.nextTokenAsDouble();
 
-      RealType trace =  Q[0] + Q[1] + Q[2];
-
+      RealType trace =  quadrupoleMoments.sum();
+      
       if (fabs(trace) > OpenMD::epsilon) {
 	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of quadrupole moments is not zero at line %d\n",
 		lineNo);
@@ -173,8 +189,6 @@ namespace OpenMD {
 	simError();
       }
 
-      dAtomType->addProperty(new Vector3dGenericData("QuadrupoleMoments", Q));
-      dAtomType->setQuadrupole();
     } else {
       sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
 	      lineNo);

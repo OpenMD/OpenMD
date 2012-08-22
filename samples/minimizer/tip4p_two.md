@@ -8,17 +8,17 @@ component{
   nMol = 2;
 }
 
+minimizer {
+  useMinimizer = true;
+  method = SD;
+  maxIterations = 5000;
+}
 
-minimizer = CG;
-minimizerMaxIter = 5000;
-minimizerWriteFreq = 10;
-minimizerStepSize = 0.05;
-
-forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+forceField = "DUFF2";
+cutoffMethod = "shifted_force";
+dampingAlpha = 0.185;
 cutoffRadius = 12.0;
-switchingRadius = 9.0;
+
   </MetaData>
   <Snapshot>
     <FrameData>

@@ -36,9 +36,13 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
+#include <cmath>
+
 #include "primitives/Inversion.hpp"
 
 namespace OpenMD {
@@ -48,7 +52,7 @@ namespace OpenMD {
     atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), 
     inversionType_(it) { }
   
-  void Inversion::calcForce(RealType& angle) {
+  void Inversion::calcForce(RealType& angle, bool doParticlePot) {
     
     // In OpenMD's version of an inversion, the central atom
     // comes first.  However, to get the planarity in a typical cosine
@@ -109,11 +113,13 @@ namespace OpenMD {
     atom4_->addFrc(-f2);
     atom3_->addFrc(-f3);
 
-    atom1_->addParticlePot(potential_);
-    atom2_->addParticlePot(potential_);
-    atom3_->addParticlePot(potential_);
-    atom4_->addParticlePot(potential_);
-
+    if (doParticlePot) { 
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
+      atom3_->addParticlePot(potential_);
+      atom4_->addParticlePot(potential_);
+    }
+    
     angle = acos(cos_phi) /M_PI * 180.0;
   }
 

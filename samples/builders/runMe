@@ -112,3 +112,25 @@
 #
 ../../bin/nanoparticleBuilder -o vacancy_alloy.md --radius=30.0 --latticeConstant=4.09 --molFraction=0.4 --vacancyPercent=80 bimetallic.md
 ../../bin/thermalizer -o vacancy_alloy-900K.md -t 900 vacancy_alloy.md
+#
+#Example 9:
+# Builds a spherically-capped nanorod (FCC) from the <MetaData> block in gold.md
+# using a nanorod radius of 20 Angstroms, a length of 50 Angstroms and a lattice constant of 4.08
+# angstroms. Places the output (which can be used to start an OpenMD job) in 
+# gold_fccrod.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/nanorodBuilder -o gold_fccrod.md --radius=20.0 --length=50.0 --latticeConstant=4.08 gold.md
+#
+#Example 10:
+# Builds a pentagonal nanorod from the <MetaData> block in gold.md
+# using a nanorod radius of 15 Angstroms, a length of 64 Angstroms and a lattice constant of 4.08
+# angstroms. Places the output (which can be used to start an OpenMD job) in 
+# gold_pentrod.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/nanorod_pentBuilder -o gold_pentrod.md --radius=15.0 --length=64.0 --latticeConstant=4.08 gold.md

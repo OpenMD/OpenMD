@@ -35,8 +35,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
  *  Triangle.cpp
  *
@@ -92,7 +92,7 @@ Vector3d Triangle::computeUnitNormal(){
 
 Vector3d Triangle::computeCentroid(){
   HaveCentroid_ = true;
-  centroid_ = (vertices_[0] + vertices_[1] + vertices_[2])/3.0;
+  centroid_ = (vertices_[0] + vertices_[1] + vertices_[2])/RealType(3.0);
   return centroid_;
 }
 
@@ -126,12 +126,12 @@ Mat3x3d Triangle::hydro_tensor(
                                const Vector3d& rj2,
                                RealType s, RealType viscosity){
   
-  Vector3d v2 = (rj0 + rj1 + rj2)/3.0;  // sub-centroid
+  Vector3d v2 = (rj0 + rj1 + rj2) / RealType(3.0);  // sub-centroid
   Vector3d dr = ri - v2;                // real centroid to sub-centroid
-  RealType l2 = 1.0/dr.lengthSquare();  
+  RealType l2 = RealType(1.0)/dr.lengthSquare();  
  
   Mat3x3d G;
-  G = (SquareMatrix3<RealType>::identity() + outProduct(dr,dr)*l2)*sqrt(l2);
+  G = (SquareMatrix3<RealType>::identity() + outProduct(dr,dr)*l2)*RealType(sqrt(l2));
 
   G *= 0.125/3.14159285358979;
   G *= s/viscosity;

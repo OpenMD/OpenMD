@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "applications/dynamicProps/StressCorrFunc.hpp"
@@ -156,14 +157,8 @@ namespace OpenMD {
     // count array set to zero
     std::fill(count_.begin(), count_.end(), 0);
 
-    SimInfo::MoleculeIterator mi;
-    Molecule* mol;
-    Molecule::AtomIterator ai;
-    Atom* atom;
-
     // We'll need the force manager to compute forces for the average pressure
     ForceManager* forceMan = new ForceManager(info_);
-    forceMan->init();
 
     // We'll need thermo to compute the pressures from the virial
     Thermo* thermo =  new Thermo(info_);

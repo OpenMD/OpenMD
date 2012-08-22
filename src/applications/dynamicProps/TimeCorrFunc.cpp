@@ -36,103 +36,105 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "utils/simError.h"
 #include "primitives/Molecule.hpp"
+using namespace std;
 namespace OpenMD {
 
-  TimeCorrFunc::TimeCorrFunc(SimInfo* info, const std::string& filename, 
-			     const std::string& sele1, const std::string& sele2,
+  TimeCorrFunc::TimeCorrFunc(SimInfo* info, const string& filename, 
+			     const string& sele1, const string& sele2,
                              int storageLayout, long long int memSize)
     : info_(info), storageLayout_(storageLayout), memSize_(memSize),
       dumpFilename_(filename), selectionScript1_(sele1), 
       selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info){
-
-      int nAtoms = info->getNGlobalAtoms();
-      int nRigidBodies = info->getNGlobalRigidBodies();
-      int nStuntDoubles =   nAtoms + nRigidBodies;
-
-      std::set<AtomType*> atomTypes = info->getUniqueAtomTypes();
-      std::set<AtomType*>::iterator i;
-      bool hasDirectionalAtom = false;
-      bool hasMultipole = false;    
-      for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
-        if ((*i)->isDirectional()){
-	  hasDirectionalAtom = true;
-        }
-        if ((*i)->isMultipole()){
-	  hasMultipole = true;
-        }
-      }
+      seleMan1_(info), seleMan2_(info) {
     
-      if (nRigidBodies > 0 || hasDirectionalAtom) {
-        storageLayout_ |= DataStorage::dslAmat;
-	if(storageLayout_ & DataStorage::dslVelocity) {
-	  storageLayout_ |= DataStorage::dslAngularMomentum;
-	}
-	if (storageLayout_ & DataStorage::dslForce) {
-	  storageLayout_ |= DataStorage::dslTorque;
-	}
-      }
-      if (hasMultipole) {
-        storageLayout_ |= DataStorage::dslElectroFrame;
-      }
-        
-      bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, memSize_);
-      info_->setSnapshotManager(bsMan_);
-
-      evaluator1_.loadScriptString(selectionScript1_);
-      evaluator2_.loadScriptString(selectionScript2_);
+    int nAtoms = info->getNGlobalAtoms();
+    int nRigidBodies = info->getNGlobalRigidBodies();
+    int nStuntDoubles =   nAtoms + nRigidBodies;
     
-      //if selection is static, we only need to evaluate it once
-      if (!evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-        validateSelection(seleMan1_);
-      } else {
-	sprintf(painCave.errMsg,
-                "TimeCorrFunc Error: dynamic selection is not supported\n");
-	painCave.isFatal = 1;
-	simError();  
+    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
+    set<AtomType*>::iterator i;
+    bool hasDirectionalAtom = false;
+    bool hasMultipole = false;    
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+      if ((*i)->isDirectional()){
+        hasDirectionalAtom = true;
       }
-    
-      if (!evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
-        validateSelection(seleMan2_);
-      } else {
-	sprintf(painCave.errMsg,
-                "TimeCorrFunc Error: dynamic selection is not supported\n");
-	painCave.isFatal = 1;
-	simError();  
+      if ((*i)->isMultipole()){
+        hasMultipole = true;
       }
-    
-
-    
-      /**@todo Fix Me */
-      Globals* simParams = info_->getSimParams();
-      if (simParams->haveSampleTime()){
-        deltaTime_ = simParams->getSampleTime();
-      } else {
-	sprintf(painCave.errMsg,
-                "TimeCorrFunc::writeCorrelate Error: can not figure out deltaTime\n");
-	painCave.isFatal = 1;
-	simError();  
-      }
-
-      int nframes =  bsMan_->getNFrames();
-      nTimeBins_ = nframes;
-      histogram_.resize(nTimeBins_);
-      count_.resize(nTimeBins_);
-      time_.resize(nTimeBins_);
-
-      for (int i = 0; i < nTimeBins_; ++i) {
-        time_[i] = i * deltaTime_;
-      }
-    
     }
+    
+    if (nRigidBodies > 0 || hasDirectionalAtom) {
+      storageLayout_ |= DataStorage::dslAmat;
+      if(storageLayout_ & DataStorage::dslVelocity) {
+        storageLayout_ |= DataStorage::dslAngularMomentum;
+      }
+      if (storageLayout_ & DataStorage::dslForce) {
+        storageLayout_ |= DataStorage::dslTorque;
+      }
+    }
+    if (hasMultipole) {
+      storageLayout_ |= DataStorage::dslElectroFrame;
+    }
+    
+    bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, memSize_);
+    info_->setSnapshotManager(bsMan_);
+    
+    evaluator1_.loadScriptString(selectionScript1_);
+    evaluator2_.loadScriptString(selectionScript2_);
+    
+    //if selection is static, we only need to evaluate it once
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      validateSelection(seleMan1_);
+    } else {
+      sprintf(painCave.errMsg,
+              "TimeCorrFunc Error: dynamic selection is not supported\n");
+      painCave.isFatal = 1;
+      simError();  
+    }
+    
+    if (!evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      validateSelection(seleMan2_);
+    } else {
+      sprintf(painCave.errMsg,
+              "TimeCorrFunc Error: dynamic selection is not supported\n");
+      painCave.isFatal = 1;
+      simError();  
+    }
+    
+
+    
+    /**@todo Fix Me */
+    Globals* simParams = info_->getSimParams();
+    if (simParams->haveSampleTime()){
+      deltaTime_ = simParams->getSampleTime();
+    } else {
+      sprintf(painCave.errMsg,
+              "TimeCorrFunc::writeCorrelate Error: can not figure out deltaTime\n");
+      painCave.isFatal = 1;
+      simError();  
+    }
+
+    int nframes =  bsMan_->getNFrames();
+    nTimeBins_ = nframes;
+    histogram_.resize(nTimeBins_);
+    count_.resize(nTimeBins_);
+    time_.resize(nTimeBins_);
+
+    for (int i = 0; i < nTimeBins_; ++i) {
+      time_[i] = i * deltaTime_;
+    }
+    
+  }
 
 
   void TimeCorrFunc::doCorrelate() {
@@ -218,16 +220,14 @@ namespace OpenMD {
 	     rb = mol->nextRigidBody(rbIter)) {
 	  rb->updateAtomVel(frame);
 	}
-      }
-      
-    }
-    
+      }      
+    }    
   }
 
 
   void TimeCorrFunc::preCorrelate() {
-    std::fill(histogram_.begin(), histogram_.end(), 0.0);
-    std::fill(count_.begin(), count_.end(), 0);
+    fill(histogram_.begin(), histogram_.end(), 0.0);
+    fill(count_.begin(), count_.end(), 0);
   }
 
   void TimeCorrFunc::postCorrelate() {
@@ -240,12 +240,13 @@ namespace OpenMD {
 
 
   void TimeCorrFunc::writeCorrelate() {
-    std::ofstream ofs(outputFilename_.c_str());
+    ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
 
       ofs << "#" << getCorrFuncType() << "\n";
-      ofs << "#selection script1: \"" << selectionScript1_ <<"\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      ofs << "#selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       ofs << "#extra information: " << extra_ << "\n";
       ofs << "#time\tcorrVal\n";
 
@@ -255,7 +256,8 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-	      "TimeCorrFunc::writeCorrelate Error: fail to open %s\n", outputFilename_.c_str());
+	      "TimeCorrFunc::writeCorrelate Error: fail to open %s\n", 
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();        
     }

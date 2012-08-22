@@ -36,20 +36,27 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "io/DumpWriter.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "io/basic_teebuf.hpp"
+#ifdef HAVE_ZLIB
 #include "io/gzstream.hpp"
+#endif
 #include "io/Globals.hpp"
 
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
 
 #ifdef IS_MPI
 #include <mpi.h>
-#endif //is_mpi
+#endif
 
 using namespace std;
 namespace OpenMD {
@@ -58,9 +65,18 @@ namespace OpenMD {
     : info_(info), filename_(info->getDumpFileName()), eorFilename_(info->getFinalConfigFileName()){
 
     Globals* simParams = info->getSimParams();
-    needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getOutputForceVector();
-    needParticlePot_ = simParams->getOutputParticlePotential();
+    needCompression_   = simParams->getCompressDumpFile();
+    needForceVector_   = simParams->getOutputForceVector();
+    needParticlePot_   = simParams->getOutputParticlePotential();
+    needFlucQ_         = simParams->getOutputFluctuatingCharges();
+    needElectricField_ = simParams->getOutputElectricField();
+
+    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+      doSiteData_ = true;
+    } else {
+      doSiteData_ = false;
+    }
+
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -98,9 +114,18 @@ namespace OpenMD {
     Globals* simParams = info->getSimParams();
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
 
-    needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getOutputForceVector();
-    needParticlePot_ = simParams->getOutputParticlePotential();
+    needCompression_   = simParams->getCompressDumpFile();
+    needForceVector_   = simParams->getOutputForceVector();
+    needParticlePot_   = simParams->getOutputParticlePotential();
+    needFlucQ_         = simParams->getOutputFluctuatingCharges();
+    needElectricField_ = simParams->getOutputElectricField();
+
+    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+      doSiteData_ = true;
+    } else {
+      doSiteData_ = false;
+    }
+
     createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -138,10 +163,18 @@ namespace OpenMD {
     Globals* simParams = info->getSimParams();
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
     
-    needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getOutputForceVector();
-    needParticlePot_ = simParams->getOutputParticlePotential();
-    
+    needCompression_   = simParams->getCompressDumpFile();
+    needForceVector_   = simParams->getOutputForceVector();
+    needParticlePot_   = simParams->getOutputParticlePotential();
+    needFlucQ_         = simParams->getOutputFluctuatingCharges();
+    needElectricField_ = simParams->getOutputElectricField();
+
+    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+      doSiteData_ = true;
+    } else {
+      doSiteData_ = false;
+    }
+
 #ifdef HAVE_LIBZ
     if (needCompression_) {
       filename_ += ".gz";
@@ -230,20 +263,21 @@ namespace OpenMD {
             hmat(0, 2), hmat(1, 2), hmat(2, 2));
     os << buffer;
 
-    RealType chi = s->getChi();
-    RealType integralOfChiDt = s->getIntegralOfChiDt();
-    if (isinf(chi) || isnan(chi) || 
-        isinf(integralOfChiDt) || isnan(integralOfChiDt)) {      
+    pair<RealType, RealType> thermostat = s->getThermostat();
+
+    if (isinf(thermostat.first)  || isnan(thermostat.first) || 
+        isinf(thermostat.second) || isnan(thermostat.second)) {      
       sprintf( painCave.errMsg,
                "DumpWriter detected a numerical error writing the thermostat");
       painCave.isFatal = 1;
       simError();
     }
-    sprintf(buffer, "  Thermostat: %.10g , %.10g\n", chi, integralOfChiDt);
+    sprintf(buffer, "  Thermostat: %.10g , %.10g\n", thermostat.first, 
+            thermostat.second);
     os << buffer;
 
     Mat3x3d eta;
-    eta = s->getEta();
+    eta = s->getBarostat();
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
@@ -272,9 +306,11 @@ namespace OpenMD {
 #endif
 
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
+    RigidBody::AtomIterator ai;
+    Atom* atom;
 
 #ifndef IS_MPI
     os << "  <Snapshot>\n";
@@ -285,14 +321,39 @@ namespace OpenMD {
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
       
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
-           integrableObject = mol->nextIntegrableObject(ii)) { 	
-          os << prepareDumpLine(integrableObject);
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
+           sd = mol->nextIntegrableObject(ii)) { 	
+          os << prepareDumpLine(sd);
           
       }
     }    
     os << "    </StuntDoubles>\n";
-    
+
+    if (doSiteData_) {
+      os << "    <SiteData>\n";
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+               
+        for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
+           sd = mol->nextIntegrableObject(ii)) { 	
+
+          int ioIndex = sd->getGlobalIntegrableObjectIndex();
+          // do one for the IO itself
+          os << prepareSiteLine(sd, ioIndex, 0);
+
+          if (sd->isRigidBody()) {
+            
+            RigidBody* rb = static_cast<RigidBody*>(sd);
+            int siteIndex = 0;
+            for (atom = rb->beginAtom(ai); atom != NULL;  
+                 atom = rb->nextAtom(ai)) { 	                                        
+              os << prepareSiteLine(atom, ioIndex, siteIndex);
+              siteIndex++;
+            }
+          }
+        }
+      }    
+      os << "    </SiteData>\n";
+    }
     os << "  </Snapshot>\n";
 
     os.flush();
@@ -302,9 +363,9 @@ namespace OpenMD {
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
 
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) { 	
-          buffer += prepareDumpLine(integrableObject);
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL; 
+           sd = mol->nextIntegrableObject(ii)) { 	
+          buffer += prepareDumpLine(sd);
       }
     }
     
@@ -318,12 +379,11 @@ namespace OpenMD {
 	
       os << buffer;
 
-     
       for (int i = 1; i < nProc; ++i) {
 
         // receive the length of the string buffer that was
         // prepared by processor i
-       
+
         MPI_Bcast(&i, 1, MPI_INT,masterNode,MPI_COMM_WORLD);
         int recvLength;
         MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
@@ -355,16 +415,16 @@ namespace OpenMD {
 
   }
 
-  std::string DumpWriter::prepareDumpLine(StuntDouble* integrableObject) {
+  std::string DumpWriter::prepareDumpLine(StuntDouble* sd) {
 	
-    int index = integrableObject->getGlobalIntegrableObjectIndex();
+    int index = sd->getGlobalIntegrableObjectIndex();
     std::string type("pv");
     std::string line;
     char tempBuffer[4096];
 
     Vector3d pos;
     Vector3d vel;
-    pos = integrableObject->getPos();
+    pos = sd->getPos();
 
     if (isinf(pos[0]) || isnan(pos[0]) || 
         isinf(pos[1]) || isnan(pos[1]) || 
@@ -376,7 +436,7 @@ namespace OpenMD {
       simError();
     }
 
-    vel = integrableObject->getVel();		
+    vel = sd->getVel();		
 
     if (isinf(vel[0]) || isnan(vel[0]) || 
         isinf(vel[1]) || isnan(vel[1]) || 
@@ -393,11 +453,11 @@ namespace OpenMD {
             vel[0], vel[1], vel[2]);		        
     line += tempBuffer;
 
-    if (integrableObject->isDirectional()) {
+    if (sd->isDirectional()) {
       type += "qj";
       Quat4d q;
       Vector3d ji;
-      q = integrableObject->getQ();
+      q = sd->getQ();
 
       if (isinf(q[0]) || isnan(q[0]) || 
           isinf(q[1]) || isnan(q[1]) || 
@@ -410,7 +470,7 @@ namespace OpenMD {
         simError();
       }
 
-      ji = integrableObject->getJ();
+      ji = sd->getJ();
 
       if (isinf(ji[0]) || isnan(ji[0]) || 
           isinf(ji[1]) || isnan(ji[1]) || 
@@ -430,10 +490,7 @@ namespace OpenMD {
 
     if (needForceVector_) {
       type += "f";
-      Vector3d frc;
-
-      frc = integrableObject->getFrc();
-
+      Vector3d frc = sd->getFrc();
       if (isinf(frc[0]) || isnan(frc[0]) || 
           isinf(frc[1]) || isnan(frc[1]) || 
           isinf(frc[2]) || isnan(frc[2]) ) {      
@@ -447,12 +504,9 @@ namespace OpenMD {
               frc[0], frc[1], frc[2]);
       line += tempBuffer;
       
-      if (integrableObject->isDirectional()) {
+      if (sd->isDirectional()) {
         type += "t";
-        Vector3d trq;
-        
-        trq = integrableObject->getTrq();
-        
+        Vector3d trq = sd->getTrq();        
         if (isinf(trq[0]) || isnan(trq[0]) || 
             isinf(trq[1]) || isnan(trq[1]) || 
             isinf(trq[2]) || isnan(trq[2]) ) {      
@@ -461,23 +515,97 @@ namespace OpenMD {
                    " for object %d", index);      
           painCave.isFatal = 1;
           simError();
-        }
-        
+        }        
         sprintf(tempBuffer, " %13e %13e %13e",
                 trq[0], trq[1], trq[2]);
         line += tempBuffer;
       }      
     }
+
+    sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
+    return std::string(tempBuffer);
+  }
+
+  std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex, int siteIndex) {
+	
+
+    std::string id;
+    std::string type;
+    std::string line;
+    char tempBuffer[4096];
+
+    if (sd->isRigidBody()) {
+      sprintf(tempBuffer, "%10d           ", ioIndex);
+      id = std::string(tempBuffer);
+    } else {
+      sprintf(tempBuffer, "%10d %10d", ioIndex, siteIndex);
+      id = std::string(tempBuffer);
+    }
+              
+    if (needFlucQ_) {
+      type += "cw";
+      RealType fqPos = sd->getFlucQPos();
+      if (isinf(fqPos) || isnan(fqPos) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the"
+                 " fluctuating charge for object %s", id.c_str());      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e ", fqPos);
+      line += tempBuffer;
+    
+      RealType fqVel = sd->getFlucQVel();
+      if (isinf(fqVel) || isnan(fqVel) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the"
+                 " fluctuating charge velocity for object %s", id.c_str());      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e ", fqVel);
+      line += tempBuffer;
+
+      if (needForceVector_) {
+        type += "g";
+        RealType fqFrc = sd->getFlucQFrc();        
+        if (isinf(fqFrc) || isnan(fqFrc) ) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the"
+                   " fluctuating charge force for object %s", id.c_str());      
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e ", fqFrc);        
+        line += tempBuffer;
+      }
+    }
+
+    if (needElectricField_) {
+      type += "e";
+      Vector3d eField= sd->getElectricField();
+      if (isinf(eField[0]) || isnan(eField[0]) || 
+          isinf(eField[1]) || isnan(eField[1]) || 
+          isinf(eField[2]) || isnan(eField[2]) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the electric"
+                 " field for object %s", id.c_str());      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e %13e %13e",
+              eField[0], eField[1], eField[2]);
+      line += tempBuffer;
+    }
+
+
     if (needParticlePot_) {
       type += "u";
-      RealType particlePot;
-
-      particlePot = integrableObject->getParticlePot();
-
+      RealType particlePot = sd->getParticlePot();
       if (isinf(particlePot) || isnan(particlePot)) {      
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the particle "
-                 " potential for object %d", index);      
+                 " potential for object %s", id.c_str());      
         painCave.isFatal = 1;
         simError();
       }
@@ -485,7 +613,8 @@ namespace OpenMD {
       line += tempBuffer;
     }
     
-    sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
+
+    sprintf(tempBuffer, "%s %7s %s\n", id.c_str(), type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }
 
@@ -556,7 +685,7 @@ namespace OpenMD {
   std::ostream* DumpWriter::createOStream(const std::string& filename) {
 
     std::ostream* newOStream;
-#ifdef HAVE_LIBZ 
+#ifdef HAVE_ZLIB
     if (needCompression_) {
       newOStream = new ogzstream(filename.c_str());
     } else {
@@ -566,7 +695,7 @@ namespace OpenMD {
     newOStream = new std::ofstream(filename.c_str());
 #endif
     //write out MetaData first
-    (*newOStream) << "<OpenMD version=1>" << std::endl;
+    (*newOStream) << "<OpenMD version=2>" << std::endl;
     (*newOStream) << "  <MetaData>" << std::endl;
     (*newOStream) << info_->getRawMetaData();
     (*newOStream) << "  </MetaData>" << std::endl;

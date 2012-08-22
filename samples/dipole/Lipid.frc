@@ -1,4 +1,4 @@
-begin AtomTypes    
+begin BaseAtomTypes    
 //Name		mass	 (amu)
 CH4		16.05		
 CH3		15.04		
@@ -13,7 +13,7 @@ SSD		18.0153
 SSD1            18.0153 
 SSD_E           18.0153
 SSD_RF          18.0153
-end AtomTypes
+end BaseAtomTypes
 
 
 

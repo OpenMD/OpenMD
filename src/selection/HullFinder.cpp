@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "selection/HullFinder.hpp"
@@ -52,7 +53,7 @@ namespace OpenMD {
     
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Molecule::IntegrableObjectIterator  ioi;
     Molecule::AtomIterator ai;
     Atom* atom;
@@ -63,10 +64,10 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
         
       // Hull is constructed from all known integrable objects.
-      for (integrableObject = mol->beginIntegrableObject(ioi);
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(ioi)) {
-        localSites_.push_back(integrableObject);
+      for (sd = mol->beginIntegrableObject(ioi);
+           sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        localSites_.push_back(sd);
       }
       
       // selection can include atoms (which may be a subset of the IOs)
@@ -88,15 +89,14 @@ namespace OpenMD {
   }
 
   OpenMDBitSet HullFinder::findHull() {
-    StuntDouble* sd;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     OpenMDBitSet bsResult(nStuntDoubles_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
 #else
     sprintf( painCave.errMsg,
-             "HullFinder error: Hull calculation is not possible without libqhull.\n",
-             "Please rebuild OpenMD with qhull enabled.");
+             "HullFinder : Hull calculation is not possible without libqhull.\n"
+             "\tPlease rebuild OpenMD with qhull enabled.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();

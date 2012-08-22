@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -52,48 +53,68 @@
 
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
+#include "nonbonded/Cutoffs.hpp"
+#include "nonbonded/SwitchingFunction.hpp"
+#include "nonbonded/InteractionManager.hpp"
+#include "perturbations/Perturbation.hpp"
+#include "parallel/ForceDecomposition.hpp"
+
+#define PREPAIR_LOOP 0
+#define PAIR_LOOP 1
+
+using namespace std;
 namespace OpenMD {
   /**
    * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range
-   * interactions (C++) and long range interactions (Fortran). If the
-   * Fortran side is not set up before the force calculation, call
-   * SimInfo's update function to settle it down.
+   * ForceManager is responsible for calculating both the short range
+   * (bonded) interactions and long range (non-bonded) interactions.
    *
-   * @note the reason we delay fortran side's setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so why
-   * bother?
+   * @note the reason we delay some of the setup is that
+   * initialization must wait until after the force field has been
+   * parsed so that the atom types are known.
    */
   class ForceManager {
 
   public:
-    ForceManager(SimInfo * info) : info_(info) {}
-        
+    ForceManager(SimInfo * info);                          
     virtual ~ForceManager() {}
-
-    // public virtual functions should be avoided
-    /**@todo needs refactoring */
     virtual void calcForces();
+    void initialize();
 
-    virtual void init() {}
-  protected:
+  protected: 
+    bool initialized_; 
+    bool doParticlePot_;
+    bool doHeatFlux_;
 
-    virtual void preCalculation();
-        
-    virtual void calcShortRangeInteraction();
-
-    virtual void calcLongRangeInteraction();
-
+    virtual void setupCutoffs();
+    virtual void preCalculation();        
+    virtual void shortRangeInteractions();
+    virtual void longRangeInteractions();
     virtual void postCalculation();
- 
-    SimInfo * info_;        
 
-    std::map<Bend*, BendDataSet> bendDataSets;
-    std::map<Torsion*, TorsionDataSet> torsionDataSets;
-    std::map<Inversion*, InversionDataSet> inversionDataSets;
-    Mat3x3d tau;
-    
+    SimInfo* info_;        
+    ForceField* forceField_;
+    InteractionManager* interactionMan_;
+    ForceDecomposition* fDecomp_;
+    SwitchingFunction* switcher_;
+
+    SwitchingFunctionType sft_;/**< Type of switching function in use */
+    RealType rCut_;            /**< cutoff radius for non-bonded interactions */
+    RealType rSwitch_;         /**< inner radius of switching function */
+    CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
+    CutoffPolicy cutoffPolicy_;/**< Cutoff Policy for non-bonded interactions */
+
+    map<Bend*, BendDataSet> bendDataSets;
+    map<Torsion*, TorsionDataSet> torsionDataSets;
+    map<Inversion*, InversionDataSet> inversionDataSets;
+    vector<pair<int, int> > neighborList;
+
+    vector<RealType> vdwScale_;
+    vector<RealType> electrostaticScale_;
+
+    Mat3x3d stressTensor;
+
+    vector<Perturbation*> perturbations_;
   };
-
-} //end namespace OpenMD
+} 
 #endif //BRAINS_FORCEMANAGER_HPP

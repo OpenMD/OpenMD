@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -83,7 +84,7 @@ namespace OpenMD{
     typedef std::vector<StuntDouble*>::iterator IntegrableObjectIterator;
     typedef std::vector<ConstraintPair*>::iterator ConstraintPairIterator;
     typedef std::vector<ConstraintElem*>::iterator ConstraintElemIterator;
-    
+    typedef std::vector<Atom*>::iterator FluctuatingChargeIterator;
     
     Molecule(int stampId, int globalIndex, const std::string& molName);
     virtual ~Molecule();
@@ -119,8 +120,15 @@ namespace OpenMD{
     void setGlobalIndex(int index) {
       globalIndex_ = index;
     }
+
+    void setConstrainTotalCharge(bool ctc) {
+      constrainTotalCharge_ = ctc;
+    }
     
-    
+    bool constrainTotalCharge() {
+      return constrainTotalCharge_;
+    }
+
     /** add an atom into this molecule */
     void addAtom(Atom* atom);
     
@@ -193,7 +201,12 @@ namespace OpenMD{
     unsigned int getNConstraintPairs() {
       return constraintPairs_.size();
     }
-    
+
+    /** Returns the total number of fluctuating charges in this molecule */
+    unsigned int getNFluctuatingCharges() {
+      return fluctuatingCharges_.size();
+    }
+
     Atom* getAtomAt(unsigned int i) {
       assert(i < atoms_.size());
       return atoms_[i];
@@ -304,6 +317,17 @@ namespace OpenMD{
       ++i;
       return (i == constraintElems_.end()) ? NULL : *i;    
     }
+
+    Atom* beginFluctuatingCharge(std::vector<Atom*>::iterator& i) {
+      i = fluctuatingCharges_.begin();
+      return (i == fluctuatingCharges_.end()) ? NULL : *i;
+    }
+    
+    Atom* nextFluctuatingCharge(std::vector<Atom*>::iterator& i) {
+      ++i;
+      return (i == fluctuatingCharges_.end()) ? NULL : *i;    
+    }
+
         
     /** 
      * Returns the total potential energy of short range interaction
@@ -381,9 +405,11 @@ namespace OpenMD{
     std::vector<CutoffGroup*> cutoffGroups_;
     std::vector<ConstraintPair*> constraintPairs_;
     std::vector<ConstraintElem*> constraintElems_;
+    std::vector<Atom*> fluctuatingCharges_;
     int stampId_;
     std::string moleculeName_;
     PropertyMap properties_;
+    bool constrainTotalCharge_;
 
   };
 

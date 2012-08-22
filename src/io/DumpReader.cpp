@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
   
 #define _LARGEFILE_SOURCE64 
@@ -57,14 +58,11 @@
 #include "utils/simError.h" 
 #include "utils/MemoryUtils.hpp" 
 #include "utils/StringTokenizer.hpp" 
+#include "brains/Thermo.hpp"
  
 #ifdef IS_MPI 
- 
 #include <mpi.h> 
-#define TAKE_THIS_TAG_CHAR 0 
-#define TAKE_THIS_TAG_INT 1 
- 
-#endif // is_mpi 
+#endif
  
  
 namespace OpenMD { 
@@ -142,6 +140,7 @@ namespace OpenMD {
       prevPos = currPos;
       bool foundOpenSnapshotTag = false;
       bool foundClosedSnapshotTag = false;
+      bool foundOpenSiteDataTag = false;
       while(inFile_->getline(buffer, bufferSize)) {
         ++lineNo;
         
@@ -243,20 +242,18 @@ namespace OpenMD {
 
     if (needCOMprops_) {
       Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
+      Thermo thermo(info_);
       Vector3d com;
-      Vector3d comvel;
-      Vector3d comw;
-      if (needPos_ && needVel_){
-	info_->getComAll(com, comvel);
-	comw = info_->getAngularMomentum();
-      }else{
-	com = info_->getCom();
-	comvel = 0.0;
-	comw   = 0.0;
-      }
-      s->setCOMprops(com, comvel, comw);      
-    }
 
+      if (needPos_ && needVel_) {
+        Vector3d comvel;
+        Vector3d comw;
+        thermo.getComAll(com, comvel);
+        comw = thermo.getAngularMomentum();
+      } else {
+        com = thermo.getCom();
+      }                    
+    }
   } 
    
   void DumpReader::readSet(int whichFrame) {     
@@ -324,13 +321,18 @@ namespace OpenMD {
 
     inputStream.getline(buffer, bufferSize);
     line = buffer;
-    if (line.find("</Snapshot>") == std::string::npos) {
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: can not find </Snapshot>\n"); 
-      painCave.isFatal = 1; 
-      simError(); 
-    }        
-   
+
+    if (line.find("<SiteData>") != std::string::npos) {
+      //read SiteData
+      readSiteData(inputStream);         
+    } else {
+      if (line.find("</Snapshot>") == std::string::npos) {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: can not find </Snapshot>\n"); 
+        painCave.isFatal = 1; 
+        simError(); 
+      }        
+    }
   } 
    
   void DumpReader::parseDumpLine(const std::string& line) { 
@@ -350,9 +352,9 @@ namespace OpenMD {
 
     int index = tokenizer.nextTokenAsInt();
  
-    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
 
-    if (integrableObject == NULL) {
+    if (sd == NULL) {
       return;
     }
     std::string type = tokenizer.nextToken(); 
@@ -372,7 +374,7 @@ namespace OpenMD {
       }
     }
     
-    if (integrableObject->isDirectional()) {
+    if (sd->isDirectional()) {
       if (needQuaternion_) {
         found = type.find("q");      
         if (found == std::string::npos) {
@@ -395,7 +397,7 @@ namespace OpenMD {
             pos[1] = tokenizer.nextTokenAsDouble(); 
             pos[2] = tokenizer.nextTokenAsDouble(); 
             if (needPos_) { 
-              integrableObject->setPos(pos); 
+              sd->setPos(pos); 
             }             
             break;
         }
@@ -405,14 +407,14 @@ namespace OpenMD {
             vel[1] = tokenizer.nextTokenAsDouble(); 
             vel[2] = tokenizer.nextTokenAsDouble(); 
             if (needVel_) { 
-              integrableObject->setVel(vel); 
+              sd->setVel(vel); 
             } 
             break;
         }
 
         case 'q' : {
            Quat4d q;
-           if (integrableObject->isDirectional()) { 
+           if (sd->isDirectional()) { 
               
              q[0] = tokenizer.nextTokenAsDouble(); 
              q[1] = tokenizer.nextTokenAsDouble(); 
@@ -431,19 +433,19 @@ namespace OpenMD {
               
              q.normalize(); 
              if (needQuaternion_) {            
-               integrableObject->setQ(q); 
+               sd->setQ(q); 
              }               
            }            
            break;
         }  
         case 'j' : {
           Vector3d ji;
-          if (integrableObject->isDirectional()) {
+          if (sd->isDirectional()) {
              ji[0] = tokenizer.nextTokenAsDouble(); 
              ji[1] = tokenizer.nextTokenAsDouble(); 
              ji[2] = tokenizer.nextTokenAsDouble(); 
              if (needAngMom_) { 
-               integrableObject->setJ(ji); 
+               sd->setJ(ji); 
              } 
           }
           break;
@@ -454,7 +456,7 @@ namespace OpenMD {
           force[0] = tokenizer.nextTokenAsDouble(); 
           force[1] = tokenizer.nextTokenAsDouble(); 
           force[2] = tokenizer.nextTokenAsDouble();           
-          integrableObject->setFrc(force); 
+          sd->setFrc(force); 
           break;
         }
         case 't' : {
@@ -463,14 +465,44 @@ namespace OpenMD {
            torque[0] = tokenizer.nextTokenAsDouble(); 
            torque[1] = tokenizer.nextTokenAsDouble(); 
            torque[2] = tokenizer.nextTokenAsDouble();           
-           integrableObject->setTrq(torque);          
+           sd->setTrq(torque);          
            break;
         }
         case 'u' : {
 
            RealType particlePot;
            particlePot = tokenizer.nextTokenAsDouble(); 
-           integrableObject->setParticlePot(particlePot);          
+           sd->setParticlePot(particlePot);          
+           break;
+        }
+        case 'c' : {
+
+           RealType flucQPos;
+           flucQPos = tokenizer.nextTokenAsDouble(); 
+           sd->setFlucQPos(flucQPos);          
+           break;
+        }
+        case 'w' : {
+
+           RealType flucQVel;
+           flucQVel = tokenizer.nextTokenAsDouble(); 
+           sd->setFlucQVel(flucQVel);          
+           break;
+        }
+        case 'g' : {
+
+           RealType flucQFrc;
+           flucQFrc = tokenizer.nextTokenAsDouble(); 
+           sd->setFlucQFrc(flucQFrc);          
+           break;
+        }
+        case 'e' : {
+
+           Vector3d eField;
+           eField[0] = tokenizer.nextTokenAsDouble(); 
+           eField[1] = tokenizer.nextTokenAsDouble(); 
+           eField[2] = tokenizer.nextTokenAsDouble();           
+           sd->setElectricField(eField);          
            break;
         }
         default: {
@@ -487,8 +519,106 @@ namespace OpenMD {
   } 
    
 
-  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+  void DumpReader::parseSiteLine(const std::string& line) { 
 
+    StringTokenizer tokenizer(line); 
+    int nTokens; 
+     
+    nTokens = tokenizer.countTokens(); 
+     
+    if (nTokens < 2) {  
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
+      painCave.isFatal = 1; 
+      simError(); 
+    } 
+
+    /**
+     * The first token is the global integrable object index.
+     */
+
+    int index = tokenizer.nextTokenAsInt();
+    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
+    if (sd == NULL) {
+      return;
+    }
+
+    /**
+     * Test to see if the next token is an integer or not.  If not,
+     * we've got data on the integrable object itself.  If there is an
+     * integer, we're parsing data for a site on a rigid body.
+     */
+
+    std::string indexTest = tokenizer.peekNextToken();
+    std::istringstream i(indexTest);
+    int siteIndex;
+    if (i >> siteIndex) {
+      // chew up this token and parse as an int:
+      siteIndex = tokenizer.nextTokenAsInt();
+      RigidBody* rb = static_cast<RigidBody*>(sd);
+      sd = rb->getAtoms()[siteIndex];
+    }
+
+    /**
+     * The next token contains information on what follows.
+     */
+    std::string type = tokenizer.nextToken(); 
+    int size = type.size();
+    
+    for(int i = 0; i < size; ++i) {
+      switch(type[i]) {
+        
+      case 'u' : {
+        
+        RealType particlePot;
+        particlePot = tokenizer.nextTokenAsDouble(); 
+        sd->setParticlePot(particlePot);
+        break;
+      }
+      case 'c' : {
+        
+        RealType flucQPos;
+        flucQPos = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQPos(flucQPos);
+        break;
+      }
+      case 'w' : {
+        
+        RealType flucQVel;
+        flucQVel = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQVel(flucQVel);
+        break;
+      }
+      case 'g' : {
+        
+        RealType flucQFrc;
+        flucQFrc = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQFrc(flucQFrc);
+        break;
+      }
+      case 'e' : {
+        
+        Vector3d eField;
+        eField[0] = tokenizer.nextTokenAsDouble(); 
+        eField[1] = tokenizer.nextTokenAsDouble(); 
+        eField[2] = tokenizer.nextTokenAsDouble();  
+        sd->setElectricField(eField);          
+        break;
+      }
+      default: {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+        break;   
+      }
+      }
+    }    
+  } 
+  
+  
+  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+    
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
     
@@ -507,6 +637,28 @@ namespace OpenMD {
       }
 
       parseDumpLine(line);
+    }
+  
+  }
+
+  void  DumpReader::readSiteData(std::istream& inputStream) {
+
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+    
+    if (line.find("<SiteData>") == std::string::npos) {
+      // site data isn't required for a simulation, so skip
+      return;
+    }
+
+    while(inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+      
+      if(line.find("</SiteData>") != std::string::npos) {
+        break;
+      }
+
+      parseSiteLine(line);
     }
   
   }
@@ -556,10 +708,10 @@ namespace OpenMD {
         hmat(2, 2) = tokenizer.nextTokenAsDouble(); 
         s->setHmat(hmat);      
       } else if (propertyName == "Thermostat") {
-        RealType chi = tokenizer.nextTokenAsDouble();
-        RealType integralOfChiDt = tokenizer.nextTokenAsDouble();
-        s->setChi(chi); 
-        s->setIntegralOfChiDt(integralOfChiDt);        
+        pair<RealType, RealType> thermostat;
+        thermostat.first = tokenizer.nextTokenAsDouble();
+        thermostat.second = tokenizer.nextTokenAsDouble();
+        s->setThermostat(thermostat); 
      } else if (propertyName == "Barostat") {
         Mat3x3d eta;
         eta(0, 0) = tokenizer.nextTokenAsDouble(); 
@@ -571,7 +723,7 @@ namespace OpenMD {
         eta(2, 0) = tokenizer.nextTokenAsDouble(); 
         eta(2, 1) = tokenizer.nextTokenAsDouble(); 
         eta(2, 2) = tokenizer.nextTokenAsDouble(); 
-        s->setEta(eta); 
+        s->setBarostat(eta); 
       } else {
         sprintf(painCave.errMsg, 
                 "DumpReader Error: %s is an invalid property in <FrameData>\n", propertyName.c_str()); 

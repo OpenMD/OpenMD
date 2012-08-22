@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -55,7 +56,7 @@
 #include "brains/SimCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
-#include "UseTheForce/ForceFieldFactory.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
 #include "math/SeqRandNumGen.hpp"
@@ -75,13 +76,22 @@
 #include "antlr/NoViableAltForCharException.hpp"
 #include "antlr/NoViableAltException.hpp"
 
+#include "types/DirectionalAdapter.hpp"
+#include "types/MultipoleAdapter.hpp"
+#include "types/EAMAdapter.hpp"
+#include "types/SuttonChenAdapter.hpp"
+#include "types/PolarizableAdapter.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
+
 #ifdef IS_MPI
+#include "mpi.h"
 #include "math/ParallelRandNumGen.hpp"
 #endif
 
 namespace OpenMD {
   
-  Globals* SimCreator::parseFile(std::istream& rawMetaDataStream, const std::string& filename, int startOfMetaDataBlock ){
+  Globals* SimCreator::parseFile(std::istream& rawMetaDataStream, const std::string& filename, int mdFileVersion, int startOfMetaDataBlock ){
     Globals* simParams = NULL;
     try {
 
@@ -92,8 +102,8 @@ namespace OpenMD {
       const int masterNode = 0;
       int commStatus;
       if (worldRank == masterNode) {
-#endif 
-                
+        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+#endif                 
         SimplePreprocessor preprocessor;
         preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
                 
@@ -106,6 +116,9 @@ namespace OpenMD {
             
                 
       } else {
+
+        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+
         //get stream size
         commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
 
@@ -229,12 +242,13 @@ namespace OpenMD {
       simError();
     }
 
+    simParams->setMDfileVersion(mdFileVersion);
     return simParams;
   }
   
   SimInfo*  SimCreator::createSim(const std::string & mdFileName, 
                                   bool loadInitCoords) {
-
+    
     const int bufferSize = 65535;
     char buffer[bufferSize];
     int lineNo = 0;
@@ -242,7 +256,8 @@ namespace OpenMD {
     int metaDataBlockStart = -1;
     int metaDataBlockEnd = -1;
     int i;
-    int mdOffset;
+    streamoff mdOffset;
+    int mdFileVersion;
 
 #ifdef IS_MPI            
     const int masterNode = 0;
@@ -276,7 +291,27 @@ namespace OpenMD {
         painCave.isFatal = 1; 
         simError(); 
       }
+      
+      // found the correct opening string, now try to get the file
+      // format version number.
 
+      StringTokenizer tokenizer(line, "=<> \t\n\r");
+      std::string fileType = tokenizer.nextToken();
+      toUpper(fileType);
+
+      mdFileVersion = 0;
+
+      if (fileType == "OPENMD") {
+        while (tokenizer.hasMoreTokens()) {
+          std::string token(tokenizer.nextToken());
+          toUpper(token);
+          if (token == "VERSION") {
+            mdFileVersion = tokenizer.nextTokenAsInt();
+            break;
+          }
+        }
+      }
+            
       //scan through the input stream and find MetaData tag        
       while(mdFile_.getline(buffer, bufferSize)) {
         ++lineNo;
@@ -332,10 +367,11 @@ namespace OpenMD {
     std::stringstream rawMetaDataStream(mdRawData);
 
     //parse meta-data file
-    Globals* simParams = parseFile(rawMetaDataStream, mdFileName, metaDataBlockStart+1);
+    Globals* simParams = parseFile(rawMetaDataStream, mdFileName, mdFileVersion,
+                                   metaDataBlockStart + 1);
     
     //create the force field
-    ForceField * ff = ForceFieldFactory::getInstance()->createForceField(simParams->getForceField());
+    ForceField * ff = new ForceField(simParams->getForceField());
 
     if (ff == NULL) {
       sprintf(painCave.errMsg, 
@@ -369,7 +405,6 @@ namespace OpenMD {
     } 
     
     ff->parse(forcefieldFileName);
-    ff->setFortranForceOptions();
     //create SimInfo
     SimInfo * info = new SimInfo(ff, simParams);
 
@@ -387,10 +422,13 @@ namespace OpenMD {
     //create the molecules
     createMolecules(info);
     
-    
+    //find the storage layout
+
+    int storageLayout = computeStorageLayout(info);
+
     //allocate memory for DataStorage(circular reference, need to
     //break it)
-    info->setSnapshotManager(new SimSnapshotManager(info));
+    info->setSnapshotManager(new SimSnapshotManager(info, storageLayout));
     
     //set the global index of atoms, rigidbodies and cutoffgroups
     //(only need to be set once, the global index will never change
@@ -413,7 +451,6 @@ namespace OpenMD {
     
     if (loadInitCoords)
       loadCoordinates(info, mdFileName);    
-    
     return info;
   }
   
@@ -612,8 +649,10 @@ namespace OpenMD {
 #endif
         
         stampId = info->getMoleculeStampId(i);
-        Molecule * mol = molCreator.createMolecule(info->getForceField(), info->getMoleculeStamp(stampId),
-                                                   stampId, i, info->getLocalIndexManager());
+        Molecule * mol = molCreator.createMolecule(info->getForceField(), 
+                                                   info->getMoleculeStamp(stampId),
+                                                   stampId, i, 
+                                                   info->getLocalIndexManager());
         
         info->addMolecule(mol);
         
@@ -626,6 +665,111 @@ namespace OpenMD {
     } //end for(int i=0)   
   }
     
+  int SimCreator::computeStorageLayout(SimInfo* info) {
+
+    Globals* simParams = info->getSimParams();
+    int nRigidBodies = info->getNGlobalRigidBodies();
+    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
+    set<AtomType*>::iterator i;
+    bool hasDirectionalAtoms = false;
+    bool hasFixedCharge = false;
+    bool hasMultipoles = false;    
+    bool hasPolarizable = false;    
+    bool hasFluctuatingCharge = false;    
+    bool hasMetallic = false;
+    int storageLayout = 0;
+    storageLayout |= DataStorage::dslPosition;
+    storageLayout |= DataStorage::dslVelocity;
+    storageLayout |= DataStorage::dslForce;
+
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+
+      DirectionalAdapter da = DirectionalAdapter( (*i) );
+      MultipoleAdapter ma = MultipoleAdapter( (*i) );
+      EAMAdapter ea = EAMAdapter( (*i) );
+      SuttonChenAdapter sca = SuttonChenAdapter( (*i) );
+      PolarizableAdapter pa = PolarizableAdapter( (*i) );
+      FixedChargeAdapter fca = FixedChargeAdapter( (*i) );
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter( (*i) );
+
+      if (da.isDirectional()){
+        hasDirectionalAtoms = true;
+      }
+      if (ma.isMultipole()){
+        hasMultipoles = true;
+      }
+      if (ea.isEAM() || sca.isSuttonChen()){
+        hasMetallic = true;
+      }
+      if ( fca.isFixedCharge() ){
+        hasFixedCharge = true;
+      }
+      if ( fqa.isFluctuatingCharge() ){
+        hasFluctuatingCharge = true;
+      }
+      if ( pa.isPolarizable() ){
+        hasPolarizable = true;
+      }
+    }
+    
+    if (nRigidBodies > 0 || hasDirectionalAtoms) {
+      storageLayout |= DataStorage::dslAmat;
+      if(storageLayout & DataStorage::dslVelocity) {
+        storageLayout |= DataStorage::dslAngularMomentum;
+      }
+      if (storageLayout & DataStorage::dslForce) {
+        storageLayout |= DataStorage::dslTorque;
+      }
+    }
+    if (hasMultipoles) {
+      storageLayout |= DataStorage::dslElectroFrame;
+    }
+    if (hasFixedCharge || hasFluctuatingCharge) {
+      storageLayout |= DataStorage::dslSkippedCharge;
+    }
+    if (hasMetallic) {
+      storageLayout |= DataStorage::dslDensity;
+      storageLayout |= DataStorage::dslFunctional;
+      storageLayout |= DataStorage::dslFunctionalDerivative;
+    }
+    if (hasPolarizable) {
+      storageLayout |= DataStorage::dslElectricField;
+    }
+    if (hasFluctuatingCharge){
+      storageLayout |= DataStorage::dslFlucQPosition;
+      if(storageLayout & DataStorage::dslVelocity) {
+        storageLayout |= DataStorage::dslFlucQVelocity;
+      }
+      if (storageLayout & DataStorage::dslForce) {
+        storageLayout |= DataStorage::dslFlucQForce;
+      }
+    }
+    
+    // if the user has asked for them, make sure we've got the memory for the
+    // objects defined.
+
+    if (simParams->getOutputParticlePotential()) {
+      storageLayout |= DataStorage::dslParticlePot;
+    }
+
+    if (simParams->havePrintHeatFlux()) {
+      if (simParams->getPrintHeatFlux()) {
+        storageLayout |= DataStorage::dslParticlePot;
+      }
+    }
+
+    if (simParams->getOutputElectricField()) {
+      storageLayout |= DataStorage::dslElectricField;
+    }
+    if (simParams->getOutputFluctuatingCharges()) {
+      storageLayout |= DataStorage::dslFlucQPosition;
+      storageLayout |= DataStorage::dslFlucQVelocity;
+      storageLayout |= DataStorage::dslFlucQForce;
+    }
+
+    return storageLayout;
+  }
+
   void SimCreator::setGlobalIndex(SimInfo *info) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
@@ -640,76 +784,53 @@ namespace OpenMD {
     int beginRigidBodyIndex;
     int beginCutoffGroupIndex;
     int nGlobalAtoms = info->getNGlobalAtoms();
-
-    /**@todo fixme */
-#ifndef IS_MPI
     
     beginAtomIndex = 0;
-    beginRigidBodyIndex = 0;
-    beginCutoffGroupIndex = 0;
-    
-#else
-    
-    int nproc;
-    int myNode;
-    
-    myNode = worldRank;
-    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
-    
-    std::vector < int > tmpAtomsInProc(nproc, 0);
-    std::vector < int > tmpRigidBodiesInProc(nproc, 0);
-    std::vector < int > tmpCutoffGroupsInProc(nproc, 0);
-    std::vector < int > NumAtomsInProc(nproc, 0);
-    std::vector < int > NumRigidBodiesInProc(nproc, 0);
-    std::vector < int > NumCutoffGroupsInProc(nproc, 0);
-    
-    tmpAtomsInProc[myNode] = info->getNAtoms();
-    tmpRigidBodiesInProc[myNode] = info->getNRigidBodies();
-    tmpCutoffGroupsInProc[myNode] = info->getNCutoffGroups();
-    
-    //do MPI_ALLREDUCE to exchange the total number of atoms, rigidbodies and cutoff groups
-    MPI_Allreduce(&tmpAtomsInProc[0], &NumAtomsInProc[0], nproc, MPI_INT,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&tmpRigidBodiesInProc[0], &NumRigidBodiesInProc[0], nproc,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&tmpCutoffGroupsInProc[0], &NumCutoffGroupsInProc[0], nproc,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    
-    beginAtomIndex = 0;
-    beginRigidBodyIndex = 0;
-    beginCutoffGroupIndex = 0;
-    
-    for(int i = 0; i < myNode; i++) {
-      beginAtomIndex += NumAtomsInProc[i];
-      beginRigidBodyIndex += NumRigidBodiesInProc[i];
-      beginCutoffGroupIndex += NumCutoffGroupsInProc[i];
-    }
-    
-#endif
-    
     //rigidbody's index begins right after atom's
-    beginRigidBodyIndex += info->getNGlobalAtoms();
-    
-    for(mol = info->beginMolecule(mi); mol != NULL;
-        mol = info->nextMolecule(mi)) {
+    beginRigidBodyIndex = info->getNGlobalAtoms();
+    beginCutoffGroupIndex = 0;
+
+    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
       
-      //local index(index in DataStorge) of atom is important
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-        atom->setGlobalIndex(beginAtomIndex++);
+#ifdef IS_MPI      
+      if (info->getMolToProc(i) == worldRank) {
+#endif        
+        // stuff to do if I own this molecule
+        mol = info->getMoleculeByGlobalIndex(i);
+
+        //local index(index in DataStorge) of atom is important
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+          atom->setGlobalIndex(beginAtomIndex++);
+        }
+        
+        for(rb = mol->beginRigidBody(ri); rb != NULL;
+            rb = mol->nextRigidBody(ri)) {
+          rb->setGlobalIndex(beginRigidBodyIndex++);
+        }
+        
+        //local index of cutoff group is trivial, it only depends on
+        //the order of travesing
+        for(cg = mol->beginCutoffGroup(ci); cg != NULL;
+            cg = mol->nextCutoffGroup(ci)) {
+          cg->setGlobalIndex(beginCutoffGroupIndex++);
+        }        
+        
+#ifdef IS_MPI        
+      }  else {
+
+        // stuff to do if I don't own this molecule
+        
+        int stampId = info->getMoleculeStampId(i);
+        MoleculeStamp* stamp = info->getMoleculeStamp(stampId);
+
+        beginAtomIndex += stamp->getNAtoms();
+        beginRigidBodyIndex += stamp->getNRigidBodies();
+        beginCutoffGroupIndex += stamp->getNCutoffGroups() + stamp->getNFreeAtoms();
       }
-      
-      for(rb = mol->beginRigidBody(ri); rb != NULL;
-          rb = mol->nextRigidBody(ri)) {
-        rb->setGlobalIndex(beginRigidBodyIndex++);
-      }
-      
-      //local index of cutoff group is trivial, it only depends on the order of travesing
-      for(cg = mol->beginCutoffGroup(ci); cg != NULL;
-          cg = mol->nextCutoffGroup(ci)) {
-        cg->setGlobalIndex(beginCutoffGroupIndex++);
-      }
-    }
-    
+#endif          
+
+    } //end for(int i=0)  
+
     //fill globalGroupMembership
     std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), 0);
     for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {        
@@ -721,7 +842,7 @@ namespace OpenMD {
         
       }       
     }
-    
+   
 #ifdef IS_MPI    
     // Since the globalGroupMembership has been zero filled and we've only
     // poked values into the atoms we know, we can do an Allreduce
@@ -784,26 +905,26 @@ namespace OpenMD {
     for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
       int myGlobalIndex = mol->getGlobalIndex();
       int globalIO = startingIOIndexForMol[myGlobalIndex];
-      for (StuntDouble* integrableObject = mol->beginIntegrableObject(ioi); integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(ioi)) {
-        integrableObject->setGlobalIntegrableObjectIndex(globalIO);
-        IOIndexToIntegrableObject[globalIO] = integrableObject;
+      for (StuntDouble* sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        sd->setGlobalIntegrableObjectIndex(globalIO);
+        IOIndexToIntegrableObject[globalIO] = sd;
         globalIO++;
       }
     }
-    
+      
     info->setIOIndexToIntegrableObject(IOIndexToIntegrableObject);
     
   }
   
   void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
     Globals* simParams;
+
     simParams = info->getSimParams();
-    
     
     DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
-    
+
     if (nframes > 0) {
       reader.readFrame(nframes - 1);
     } else {
@@ -814,7 +935,6 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
     //copy the current snapshot to previous snapshot
     info->getSnapshotManager()->advance();
   }

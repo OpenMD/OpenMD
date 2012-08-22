@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include <fstream> 
 #include <iostream>
@@ -46,6 +47,8 @@
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "utils/ElementsTable.hpp"
+#include "types/LennardJonesAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
 
 namespace OpenMD {
 
@@ -92,19 +95,19 @@ namespace OpenMD {
     std::map<std::string, HydroProp*> hydroPropMap;
 
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;		
     bool needHydroPropFile = false;
     
     for (mol = info->beginMolecule(i); mol != NULL; 
          mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
         
-        if (integrableObject->isRigidBody()) {
-          RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+        if (sd->isRigidBody()) {
+          RigidBody* rb = static_cast<RigidBody*>(sd);
           if (rb->getNumAtoms() > 1) needHydroPropFile = true;
         }
         
@@ -127,16 +130,16 @@ namespace OpenMD {
 
       for (mol = info->beginMolecule(i); mol != NULL; 
            mol = info->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); 
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(j)) {
 
-          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
+        for (sd = mol->beginIntegrableObject(j);  sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+
+          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(sd->getType());
           if (iter != hydroPropMap.end()) {
             hydroProps_.push_back(iter->second);
           } else {
             sprintf( painCave.errMsg,
-                     "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
+                     "Can not find resistance tensor for atom [%s]\n", sd->getType().c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();  
@@ -148,55 +151,24 @@ namespace OpenMD {
       std::map<std::string, HydroProp*> hydroPropMap;
       for (mol = info->beginMolecule(i); mol != NULL; 
            mol = info->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); 
-             integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(j)) {
+
+        for (sd = mol->beginIntegrableObject(j); sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+
           Shape* currShape = NULL;
 
-          if (integrableObject->isAtom()){
-            Atom* atom = static_cast<Atom*>(integrableObject);
+          if (sd->isAtom()){
+            Atom* atom = static_cast<Atom*>(sd);
             AtomType* atomType = atom->getAtomType();
-            if (atomType->isGayBerne()) {
-              DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);              
-              GenericData* data = dAtomType->getPropertyByName("GayBerne");
-              if (data != NULL) {
-                GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
-                
-                if (gayBerneData != NULL) {  
-                  GayBerneParam gayBerneParam = gayBerneData->getData();
-                  currShape = new Ellipsoid(V3Zero,
-                                            gayBerneParam.GB_l / 2.0, 
-                                            gayBerneParam.GB_d / 2.0, 
-                                            Mat3x3d::identity());
-                } else {
-                  sprintf( painCave.errMsg,
-                           "Can not cast GenericData to GayBerneParam\n");
-                  painCave.severity = OPENMD_ERROR;
-                  painCave.isFatal = 1;
-                  simError();   
-                }
-              } else {
-                sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
-                painCave.severity = OPENMD_ERROR;
-                painCave.isFatal = 1;
-                simError();    
-              }
+            GayBerneAdapter gba = GayBerneAdapter(atomType);
+            if (gba.isGayBerne()) {
+              currShape = new Ellipsoid(V3Zero, gba.getL() / 2.0,
+                                        gba.getD() / 2.0,
+                                        Mat3x3d::identity());
             } else {
-              if (atomType->isLennardJones()){
-                GenericData* data = atomType->getPropertyByName("LennardJones");
-                if (data != NULL) {
-                  LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-                  if (ljData != NULL) {
-                    LJParam ljParam = ljData->getData();
-                    currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
-                  } else {
-                    sprintf( painCave.errMsg,
-                             "Can not cast GenericData to LJParam\n");
-                    painCave.severity = OPENMD_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                  }       
-                }
+              LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+              if (lja.isLennardJones()){
+                currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
               } else {
                 int aNum = etab.GetAtomicNum((atom->getType()).c_str());
                 if (aNum != 0) {
@@ -226,14 +198,14 @@ namespace OpenMD {
 	    simError();
 	  }
 
-          HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
 
-          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
+          HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
+          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(sd->getType());
           if (iter != hydroPropMap.end()) 
             hydroProps_.push_back(iter->second);
           else {
             currHydroProp->complete();
-            hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(integrableObject->getType(), currHydroProp));
+            hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(sd->getType(), currHydroProp));
             hydroProps_.push_back(currHydroProp);
           }
         }
@@ -263,7 +235,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     RealType mass;
     Vector3d pos;
     Vector3d frc;
@@ -300,19 +272,19 @@ namespace OpenMD {
         }
       }
       
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
           
         if (freezeMolecule) 
-          fdf += integrableObject->freeze();
+          fdf += sd->freeze();
         
         if (doLangevinForces) {  
-          mass = integrableObject->getMass();
-          if (integrableObject->isDirectional()){
+          mass = sd->getMass();
+          if (sd->isDirectional()){
 
             // preliminaries for directional objects:
 
-            A = integrableObject->getA();
+            A = sd->getA();
             Atrans = A.transpose();
             Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();  
 
@@ -323,11 +295,10 @@ namespace OpenMD {
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
             Vector3d randomForceLab = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
+            sd->addFrc(randomForceLab);            
+            sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
 
-            integrableObject->addFrc(randomForceLab);            
-            integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
-
-            Mat3x3d I = integrableObject->getI();
+            Mat3x3d I = sd->getI();
             Vector3d omegaBody;
 
             // What remains contains velocity explicitly, but the velocity required
@@ -337,15 +308,15 @@ namespace OpenMD {
 
             // this is the velocity at the half-step:
             
-            Vector3d vel =integrableObject->getVel();
-            Vector3d angMom = integrableObject->getJ();
+            Vector3d vel =sd->getVel();
+            Vector3d angMom = sd->getJ();
 
             //estimate velocity at full-step using everything but friction forces:           
 
-            frc = integrableObject->getFrc();
+            frc = sd->getFrc();
             Vector3d velStep = vel + (dt2_ /mass * PhysicalConstants::energyConvert) * frc;
 
-            Tb = integrableObject->lab2Body(integrableObject->getTrq());
+            Tb = sd->lab2Body(sd->getTrq());
             Vector3d angMomStep = angMom + (dt2_ * PhysicalConstants::energyConvert) * Tb;                             
 
             Vector3d omegaLab;
@@ -364,8 +335,8 @@ namespace OpenMD {
 
             for (int k = 0; k < maxIterNum_; k++) {
                             
-              if (integrableObject->isLinear()) {
-                int linearAxis = integrableObject->linearAxis();
+              if (sd->isLinear()) {
+                int linearAxis = sd->linearAxis();
                 int l = (linearAxis +1 )%3;
                 int m = (linearAxis +2 )%3;
                 omegaBody[l] = angMomStep[l] /I(l, l);
@@ -404,8 +375,8 @@ namespace OpenMD {
                 break; // iteration ends here
             }
 
-            integrableObject->addFrc(frictionForceLab);
-            integrableObject->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
+            sd->addFrc(frictionForceLab);
+            sd->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
 
             
           } else {
@@ -414,7 +385,7 @@ namespace OpenMD {
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
-            integrableObject->addFrc(randomForce);            
+            sd->addFrc(randomForce);            
 
             // What remains contains velocity explicitly, but the velocity required
             // is at the full step: v(t + h), while we have initially the velocity
@@ -423,11 +394,11 @@ namespace OpenMD {
 
             // this is the velocity at the half-step:
             
-            Vector3d vel =integrableObject->getVel();
+            Vector3d vel =sd->getVel();
 
             //estimate velocity at full-step using everything but friction forces:           
 
-            frc = integrableObject->getFrc();
+            frc = sd->getFrc();
             Vector3d velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * frc;
 
             Vector3d frictionForce(0.0);
@@ -453,7 +424,7 @@ namespace OpenMD {
                 break; // iteration ends here
             }
 
-            integrableObject->addFrc(frictionForce);
+            sd->addFrc(frictionForce);
 
           }
         }

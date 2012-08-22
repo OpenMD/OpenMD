@@ -35,8 +35,10 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2010).                        
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
  */
  
 #ifdef IS_MPI
@@ -53,11 +55,15 @@
 #include "restraints/RestraintForceManager.hpp"
 #include "integrators/IntegratorFactory.hpp"
 #include "integrators/Integrator.hpp"
-#include "minimizers/MinimizerFactory.hpp"
-#include "minimizers/Minimizer.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/Constraint.hpp"
+#include "optimization/Problem.hpp"
+#include "optimization/PotentialEnergyObjectiveFunction.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
 
 using namespace OpenMD;
+using namespace QuantLib;
 
 int main(int argc,char* argv[]){
   
@@ -68,7 +74,7 @@ int main(int argc,char* argv[]){
 #endif
    
   initSimError();           // the error handler
-  srand48( 1337 );          // the random number generator.
+  //srand48( 1337 );          // the random number generator.
 
   std::string svnrev;
   //convert a macro from compiler to a string in c++
@@ -86,30 +92,32 @@ int main(int argc,char* argv[]){
   if( worldRank == 0 ){
 #endif
     std::cerr << 
-      "  +-----------------------------------------------------------------------+\n"<<
-      "  |    ____                    __  ___ ____                               |\n"<<
-      "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics |\n"<<
-      "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).    |\n"<<
-      "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                               |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2011 by the  |\n"<<
-      "  |     /_/                                   University of Notre Dame.   |\n"<<
-      "  |                                                                       |\n"<<
+      "  +--------------------------------------------------------------------------+\n"<<
+      "  |    ____                    __  ___ ____                                  |\n"<<
+      "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
+      "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
+      "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2012 by the     |\n"<<
+      "  |     /_/                                   University of Notre Dame.      |\n"<<
+      "  |                                                                          |\n"<<
       "  |        version " << 
       OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << revision << 
-      "     http://www.openmd.net       |\n"<<
-      "  |                                                                       |\n"<<
-      "  | OpenMD is an OpenScience project.  All source code is available for   |\n"<<
-      "  | any use whatsoever under a BSD-style license.                         |\n"<<
-      "  |                                                                       |\n"<<
-      "  | Support OpenScience!  If you use OpenMD or its source code in your    |\n"<<
-      "  | research, please cite the appropriate papers when you publish your    |\n"<<
-      "  | work.  Good starting points are:                                      |\n"<<
-      "  |                                                                       |\n"<<
-      "  | [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).              |\n"<<
-      "  | [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).           |\n"<<
-      "  | [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          |\n"<<
-      "  | [4]  Vardeman & Gezelter, in progress (2010).                         |\n"<<
-      "  +-----------------------------------------------------------------------+\n"<<
+      "     http://www.openmd.net          |\n"<<
+      "  |                                                                          |\n"<<
+      "  | OpenMD is an OpenScience project.  All source code is available for any  |\n"<<
+      "  | use whatsoever under a BSD-style license.                                |\n"<<
+      "  |                                                                          |\n"<<
+      "  | Support OpenScience!  If you use OpenMD or its source code in your       |\n"<<
+      "  | research, please cite the appropriate papers when you publish your work  |\n"<<
+      "  | Good starting points are:                                                |\n"<<
+      "  |                                                                          |\n"<<
+      "  | [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).                  |\n"<<
+      "  | [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).               |\n"<<
+      "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).               |\n"<<
+      "  | [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).                |\n"<<
+      "  | [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |\n"<<
+      "  | [6] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                   |\n"<<
+      "  +--------------------------------------------------------------------------+\n"<<
       "\n";
     
     if( argc < 2 ){
@@ -130,26 +138,46 @@ int main(int argc,char* argv[]){
   //create simulation model
   SimCreator creator;
   SimInfo* info = creator.createSim(argv[1]);
-  Globals* simParams = info->getSimParams();
 
-  if (simParams->haveMinimizer() && simParams->haveEnsemble()) {
-    sprintf(painCave.errMsg, "Minimizer keyword and Ensemble keyword can not exist together\n");
+  Globals* simParams = info->getSimParams();
+  MinimizerParameters* miniPars = simParams->getMinimizerParameters();
+
+  if (miniPars->getUseMinimizer() && simParams->haveEnsemble()) {
+    sprintf(painCave.errMsg, "Ensemble keyword can not co-exist with useMinimizer = \"true\" in the minimizer block\n");
     painCave.isFatal = 1;
     simError();        
   }
-    
-  if (simParams->haveMinimizer()) {
+
+  if (miniPars->getUseMinimizer()) {
     //create minimizer
-    Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(toUpperCopy(simParams->getMinimizer()), info);
+    OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
 
     if (myMinimizer == NULL) {
-      sprintf(painCave.errMsg, "Minimizer Factory can not create %s Minimizer\n",
-	      simParams->getMinimizer().c_str());
+      sprintf(painCave.errMsg, "Optimization Factory can not create %s OptimizationMethod\n",
+	      miniPars->getMethod().c_str());
       painCave.isFatal = 1;
       simError();
     }
 
-    myMinimizer->minimize();
+    ForceManager* fman = new ForceManager(info);      
+    fman->initialize();
+
+    PotentialEnergyObjectiveFunction potObjf(info, fman); 
+    DumpStatusFunction dsf(info);
+    DynamicVector<RealType> initCoords = potObjf.setInitialCoords();
+    Problem problem(potObjf, *(new NoConstraint()), dsf, initCoords);
+
+
+    int maxIter = miniPars->getMaxIterations();
+    int mssIter = miniPars->getMaxStationaryStateIterations();
+    RealType rEps = miniPars->getRootEpsilon();
+    RealType fEps = miniPars->getFunctionEpsilon();
+    RealType gnEps = miniPars->getGradientNormEpsilon();
+
+    EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
+
+    myMinimizer->minimize(problem, endCriteria);
+
     delete myMinimizer;
   } else if (simParams->haveEnsemble()) {
     //create Integrator
@@ -157,7 +185,7 @@ int main(int argc,char* argv[]){
     Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(toUpperCopy(simParams->getEnsemble()), info);
  
     if (myIntegrator == NULL) {
-      sprintf(painCave.errMsg, "Integrator Factory cannot create %s Integrator\n",
+      sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
 	      simParams->getEnsemble().c_str());
       painCave.isFatal = 1;
       simError();

@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -53,12 +54,13 @@
 #include <math/Vector3.hpp>
 #include <math/SquareMatrix3.hpp>
 
+using namespace std;
 namespace OpenMD {
   /**
    * @class DataStorage
    * @warning do not try to insert element into (or ease element from) private member data 
    * of DataStorage directly.
-   * @todo DataStorage may need refactoring. Every std::vector can inherit from the same base class
+   * @todo DataStorage may need refactoring. Every vector can inherit from the same base class
    * which will make it easy to maintain
    */
   class DataStorage {
@@ -70,15 +72,21 @@ namespace OpenMD {
       dslAmat = 4, 
       dslAngularMomentum = 8,
       dslElectroFrame = 16,
-      dslZAngle = 32,
-      dslForce = 64, 
-      dslTorque = 128,
-      dslParticlePot = 256
+      dslForce = 32, 
+      dslTorque = 64,
+      dslParticlePot = 128,
+      dslDensity = 256,
+      dslFunctional = 512,
+      dslFunctionalDerivative = 1024,
+      dslElectricField = 2048,
+      dslSkippedCharge = 4096,
+      dslFlucQPosition = 8192,
+      dslFlucQVelocity = 16384,
+      dslFlucQForce = 32768
     };
 
-
     DataStorage();
-    DataStorage(int size, int storageLayout = 511);
+    DataStorage(int size, int storageLayout = 0);
     /** return the size of this DataStorage. */
     int getSize();
     /**
@@ -87,16 +95,22 @@ namespace OpenMD {
      */
     void resize(int newSize);
     /**
-     * Reallocates memory manually. The main reason for using reserve() is efficiency
-     * if you know the capacity to which your std::vector must eventually grow, then it is usually more
-     * efficient to allocate that memory all at once.
+     * Reallocates memory manually. 
+     *
+     * The main reason for using reserve() is efficiency if you know
+     * the capacity to which your vector must eventually grow,
+     * then it is usually more efficient to allocate that memory all
+     * at once.
      */
     void reserve(int size);
     /**
      * Copies data inside DataStorage class.
-     * Copy function actually call std::copy for every std::vector in DataStorage class. 
-     * One Precondition of std::copy is that target is not within the range [soruce, soruce + num]
-     * @param souce 
+     *
+     * Copy function actually calls copy for every vector in
+     * DataStorage class.  One Precondition of copy is that
+     * target is not within the range [source, soruce + num]
+     *
+     * @param source 
      * @param num number of element to be moved
      * @param target
      */
@@ -108,24 +122,30 @@ namespace OpenMD {
     /** Returns the pointer of internal array */
     RealType *getArrayPointer(int whichArray);
 
-    std::vector<Vector3d> position;               /** position array */
-    std::vector<Vector3d> velocity;               /** velocity array */
-    std::vector<RotMat3x3d> aMat;            /** rotation matrix array */
-    std::vector<Vector3d> angularMomentum;/** angular momentum array (body-fixed) */
-    std::vector<Mat3x3d> electroFrame;                /** the lab frame unit std::vector array*/
-    std::vector<RealType> zAngle;              /** z -angle array */        
-    std::vector<Vector3d> force;               /** force array */
-    std::vector<Vector3d> torque;               /** torque array */
-    std::vector<RealType> particlePot;         /** pair potential arrray */
+    vector<Vector3d> position;        /** position array */
+    vector<Vector3d> velocity;        /** velocity array */
+    vector<RotMat3x3d> aMat;          /** rotation matrix array */
+    vector<Vector3d> angularMomentum; /** angular momentum array (body-fixed) */
+    vector<Mat3x3d> electroFrame;     /** the lab frame unit vector array*/
+    vector<Vector3d> force;           /** force array */
+    vector<Vector3d> torque;          /** torque array */
+    vector<RealType> particlePot;     /** particle potential arrray */
+    vector<RealType> density;         /** electron density */
+    vector<RealType> functional;      /** density functional */
+    vector<RealType> functionalDerivative; /** derivative of functional */
+    vector<Vector3d> electricField;   /** local electric field */
+    vector<RealType> skippedCharge;   /** charge skipped during normal pairwise calculation */
+    vector<RealType> flucQPos;        /** fluctuating charges */
+    vector<RealType> flucQVel;        /** fluctuating charge velocities */
+    vector<RealType> flucQFrc;        /** fluctuating charge forces */
 
     static int getBytesPerStuntDouble(int layout);
 
   private:
 
-    RealType* internalGetArrayPointer(std::vector<Vector3d>& v);
-            
-    RealType* internalGetArrayPointer(std::vector<RotMat3x3d>& v);
-    RealType* internalGetArrayPointer(std::vector<RealType>& v);
+    RealType* internalGetArrayPointer(vector<Vector3d>& v);            
+    RealType* internalGetArrayPointer(vector<RotMat3x3d>& v);
+    RealType* internalGetArrayPointer(vector<RealType>& v);
 
             
     template<typename T>

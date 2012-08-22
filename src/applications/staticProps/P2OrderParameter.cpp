@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "applications/staticProps/P2OrderParameter.hpp"
@@ -121,7 +122,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     StuntDouble* sd;
-    int i, ii;
+    int ii;
   
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -196,7 +197,6 @@ namespace OpenMD {
       }   
 
       RealType angle = 0.0;
-      RealType p4 = 0.0;
       
       if (doVect_) {
         for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
@@ -204,32 +204,26 @@ namespace OpenMD {
           if (sd->isDirectional()) {
             Vector3d vec = sd->getA().getColumn(2);
             vec.normalize();
-            RealType myDot = dot(vec, director);
-            angle += acos(myDot);
-            p4 += (35.0 * pow(myDot, 4) - 30.0 * pow(myDot, 2) + 3.0) / 8.0;
+            angle += acos(dot(vec, director));
           }
         }
         angle = angle/(seleMan1_.getSelectionCount()*NumericConstant::PI)*180.0;
-        p4 /= (seleMan1_.getSelectionCount());
+        
       } else {
         for (vector<pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(vec);
           vec.normalize();          
-          RealType myDot = dot(vec, director);
-          angle += acos(myDot);
-          p4 += (35.0 * pow(myDot, 4) - 30.0 * pow(myDot, 2) + 3.0) / 8.0;
+          angle += acos(dot(vec, director)) ;
         }
         angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
-        p4 /= (seleMan1_.getSelectionCount());
       }
 
       OrderParam param;
       param.p2 = p2;
       param.director = director;
       param.angle = angle;
-      param.p4 = p4;
 
       orderParams_.push_back(param);       
     
@@ -247,15 +241,14 @@ namespace OpenMD {
     if (!doVect_) {
       os << "selection2: (" << selectionScript2_ << ")\n";
     }
-    os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\t<p4>\n";    
+    os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";    
 
     for (size_t i = 0; i < orderParams_.size(); ++i) {
       os <<  orderParams_[i].p2 << "\t"
          <<  orderParams_[i].director[0] << "\t"
          <<  orderParams_[i].director[1] << "\t"
          <<  orderParams_[i].director[2] << "\t"
-         <<  orderParams_[i].angle << "\t"
-         <<  orderParams_[i].p4 << "\n";
+         <<  orderParams_[i].angle << "\n";
 
     }
 

@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "primitives/UreyBradleyBend.hpp"
@@ -51,10 +52,12 @@ namespace OpenMD {
     delete bond_;
   }
 
-  void UreyBradleyBend::calcForce(RealType& angle) {
-    Bend::calcForce(angle);
-    bond_->calcForce();
-    atom2_->addParticlePot(bond_->getPotential());
+  void UreyBradleyBend::calcForce(RealType& angle, bool doParticlePot) {
+    Bend::calcForce(angle, doParticlePot);
+    bond_->calcForce(doParticlePot);
+    if (doParticlePot) {
+      atom2_->addParticlePot(bond_->getPotential());
+    }
   }
 
 } //end namespace OpenMD

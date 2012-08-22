@@ -135,8 +135,16 @@ namespace OpenMD {
     uint32 loBits( const uint32& u ) const { return u & 0x7fffffffUL; }
     uint32 mixBits( const uint32& u, const uint32& v ) const
     { return hiBit(u) | loBits(v); }
+#ifdef _MSC_VER
+#pragma warning( push ) // save current warning settings
+#pragma warning( disable : 4146 ) // warning C4146: unary minus operator applied to unsigned type, result still unsigned
+#endif
     uint32 twist( const uint32& m, const uint32& s0, const uint32& s1 ) const
     { return m ^ (mixBits(s0,s1)>>1) ^ (-loBit(s1) & 0x9908b0dfUL); }
+#ifdef _MSC_VER
+#pragma warning( pop ) // return warning settings to what they were
+#endif
+
     static uint32 hash( time_t t, clock_t c );
   };
 
@@ -321,7 +329,7 @@ namespace OpenMD {
 	register int i = N;
 	register bool success = true;
 	while( success && i-- )
-	  success = fread( s++, sizeof(uint32), 1, urandom );
+	  success = (fread( s++, sizeof(uint32), 1, urandom ) == 0);
 	fclose(urandom);
 	if( success ) { return bigSeed; }
       }

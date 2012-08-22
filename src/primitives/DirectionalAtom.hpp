@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -50,11 +51,11 @@
 #define PRIMITIVES_DIRECTIONALATOM_HPP
 
 #include "primitives/Atom.hpp"
-#include "types/DirectionalAtomType.hpp"
+#include "types/AtomType.hpp"
 namespace OpenMD{
   class DirectionalAtom : public Atom {
   public:
-    DirectionalAtom(DirectionalAtomType* dAtomType);
+    DirectionalAtom(AtomType* dAtomType);
     /**
      * Returns the inertia tensor of this stuntdouble
      * @return the inertia tensor of this stuntdouble
@@ -94,8 +95,9 @@ namespace OpenMD{
     virtual std::vector<RealType> getGrad();
     
     virtual void accept(BaseVisitor* v);
-    
-  protected:
+   
+  private:
+    Mat3x3d I_;
     RotMat3x3d electroBodyFrame_; // body fixed standard eletrostatic frame
   };  
 }//namespace OpenMD

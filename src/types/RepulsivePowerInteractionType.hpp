@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
@@ -49,7 +50,7 @@ namespace OpenMD {
    * @class RepulsivePowerInteractionType 
    *
    * RepulsivePowerInteractionType is one of the basic interaction types.
-   * Formula is V = epsilon* (sigma/R)^n
+   * \f[ V =  \epsilon \left( \sigma/r \right)^{n}\f]
    */
   class RepulsivePowerInteractionType : public NonBondedInteractionType {
     
@@ -59,22 +60,24 @@ namespace OpenMD {
       sigma = mySigma;
       epsilon = myEpsilon;
       nRep = myNrep;
+      setRepulsivePower();
+    }
+
+    RealType getSigma() {
+      return sigma;
     }
     
-    virtual void tellFortran(int atid1, int atid2) {
-      mnmit.MNMInteractionType = MNM_REPULSIVEPOWER;
-      mnmit.metal_atid = atid1;
-      mnmit.nonmetal_atid = atid2;
-      mnmit.sigma = sigma;
-      mnmit.epsilon = epsilon;     
-      mnmit.nRep = nRep;
-      addMNMInteraction(&mnmit);
+    RealType getEpsilon() {
+      return epsilon;
     }
     
-    
+    int getNrep() {
+      return nRep;
+    }
+        
   private:
     RealType sigma;
-    RealType epsilon;   
+    RealType epsilon;    
     int nRep;
   };
 }

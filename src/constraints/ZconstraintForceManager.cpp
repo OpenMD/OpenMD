@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include <cmath>
@@ -45,6 +46,10 @@
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
 #include "utils/StringUtils.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
   ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(info), infiniteTime(1e31) {
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -282,18 +287,21 @@ namespace OpenMD {
     Vector3d vel;
     std::list<ZconstraintMol>::iterator i;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Molecule::IntegrableObjectIterator ii;
 
     //zero out the velocities of center of mass of fixed z-constrained molecules
     for(i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
+
       mol = i->mol;
       comVel = mol->getComVel();
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
-	vel = integrableObject->getVel();  
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
+
+	vel = sd->getVel();  
 	vel[whichDirection] -= comVel[whichDirection];
-	integrableObject->setVel(vel);
+	sd->setVel(vel);
       }
     }
 
@@ -326,25 +334,29 @@ namespace OpenMD {
 
     //modify the velocities of moving z-constrained molecuels
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-      mol = i->mol;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-	vel = integrableObject->getVel();
+      mol = i->mol;
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
+
+	vel = sd->getVel();
 	vel[whichDirection] -= vzMovingMols;
-	integrableObject->setVel(vel); 
+	sd->setVel(vel); 
       }
     }
 
     //modify the velocites of unconstrained molecules  
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
-      mol =*j;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-	vel = integrableObject->getVel();
+      mol =*j;
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
+
+	vel = sd->getVel();
 	vel[whichDirection] -= vzMovingMols;
-	integrableObject->setVel(vel); 
+	sd->setVel(vel); 
       }
     }
     
@@ -366,16 +378,18 @@ namespace OpenMD {
     //calculate the total z-contrained force of fixed z-contrained molecules
     std::list<ZconstraintMol>::iterator i;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Molecule::IntegrableObjectIterator ii;
 
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
+
       mol = i->mol;
       i->fz = 0.0;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-	force = integrableObject->getFrc();    
+      for( sd = mol->beginIntegrableObject(ii); sd != NULL; 
+           sd = mol->nextIntegrableObject(ii)) {
+
+	force = sd->getFrc();    
 	i->fz += force[whichDirection]; 
       }
       totalFZ_local += i->fz;
@@ -391,35 +405,41 @@ namespace OpenMD {
 
     // apply negative to fixed z-constrained molecues;
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
-      mol = i->mol;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-	force[whichDirection] = -getZFOfFixedZMols(mol, integrableObject, i->fz);
-	integrableObject->addFrc(force);
+      mol = i->mol;
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
+
+	force[whichDirection] = -getZFOfFixedZMols(mol, sd, i->fz);
+	sd->addFrc(force);
       }
     }
 
     //modify the forces of moving z-constrained molecules
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
+
       mol = i->mol;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
 
 	force[whichDirection] = -getZFOfMovingMols(mol,totalFZ);
-	integrableObject->addFrc(force);
+	sd->addFrc(force);
       }
     }
 
     //modify the forces of unconstrained molecules
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
+
       mol =*j;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
 
 	force[whichDirection] = -getZFOfMovingMols(mol, totalFZ);
-	integrableObject->addFrc(force);
+	sd->addFrc(force);
       }
     }
 
@@ -431,8 +451,9 @@ namespace OpenMD {
     Vector3d force(0.0);
     Vector3d com;
     RealType totalFZ_local = 0;
+    RealType lrPot;
     std::list<ZconstraintMol>::iterator i;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Molecule::IntegrableObjectIterator ii;
     Molecule* mol;
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
@@ -441,16 +462,18 @@ namespace OpenMD {
       RealType resPos = usingSMD_? i->cantPos : i->param.zTargetPos;
       RealType diff = com[whichDirection] - resPos; 
       RealType harmonicU = 0.5 * i->param.kz * diff * diff;
-      currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += harmonicU;
+      lrPot = currSnapshot_->getLongRangePotential();
+      lrPot += harmonicU;
+      currSnapshot_->setLongRangePotential(lrPot);
       RealType harmonicF = -i->param.kz * diff;
       totalFZ_local += harmonicF;
 
       //adjust force
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
 
-	force[whichDirection] = getHFOfFixedZMols(mol, integrableObject, harmonicF);
-	integrableObject->addFrc(force);            
+	force[whichDirection] = getHFOfFixedZMols(mol, sd, harmonicF);
+	sd->addFrc(force);            
       }
     }
 
@@ -463,12 +486,14 @@ namespace OpenMD {
     //modify the forces of unconstrained molecules
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
+
       mol = *j;
-      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-	  integrableObject = mol->nextIntegrableObject(ii)) {
+
+      for(sd = mol->beginIntegrableObject(ii); sd != NULL; 
+	  sd = mol->nextIntegrableObject(ii)) {
 
 	force[whichDirection] = getHFOfUnconsMols(mol, totalFZ);
-	integrableObject->addFrc(force);            
+	sd->addFrc(force);            
       }
     }
 

@@ -36,11 +36,24 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include <algorithm>
+#include "config.h"
+#include <algorithm> 
+#include <stdlib.h>
+#include <cctype>
+#include <cstdlib>
+#include <string>
 #include "utils/StringUtils.hpp"
+
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strdup _strdup
+#define strtoull _strtoui64
+#endif
+
 
 namespace OpenMD {
   std::string UpperCase(const std::string& S) {
@@ -217,7 +230,7 @@ namespace OpenMD {
   std::string getSuffix(const std::string& str) {
     return str.substr(0, str.find('.'));
   }
-
+  
   bool isInteger(const std::string& str) {
     
     bool result = false;
@@ -233,30 +246,30 @@ namespace OpenMD {
     
     return result;
   }
+
+  bool CaseInsensitiveEquals(const char ch1, const char ch2) {
+    return std::toupper((unsigned char)ch1) == std::toupper((unsigned char)ch2);
+  }
   
-bool CaseInsensitiveEquals(const char ch1, const char ch2) {
-  return std::toupper((unsigned char)ch1) == std::toupper((unsigned char)ch2);
-}
-
-size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
-  std::string::const_iterator pos = std::search(str1.begin(), str1.end(), str2.begin(), str2.end(), CaseInsensitiveEquals);
-  if (pos == str1.end())
-    return std::string::npos;
-  else
-    return pos - str1.begin();
-}
-
+  size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
+    std::string::const_iterator pos = std::search(str1.begin(), str1.end(), str2.begin(), str2.end(), CaseInsensitiveEquals);
+    if (pos == str1.end())
+      return std::string::npos;
+    else
+      return pos - str1.begin();
+  }
+  
   /**
-   *	memparse - parse a string with mem suffixes into a number
-   *	@ptr: Where parse begins
-   *	@retptr: (output) Pointer to next char after parse completes
+   *    memparse - parse a string with mem suffixes into a number
+   *    @ptr: Where parse begins
+   *    @retptr: (output) Pointer to next char after parse completes
    *
-   *	Parses a string into a number.  The number stored at @ptr is
-   *	potentially suffixed with %K (for kilobytes, or 1024 bytes),
-   *	%M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
-   *	1073741824).  If the number is suffixed with K, M, or G, then
-   *	the return value is the number multiplied by one kilobyte, one
-   *	megabyte, or one gigabyte, respectively.
+   *    Parses a string into a number.  The number stored at @ptr is
+   *    potentially suffixed with %K (for kilobytes, or 1024 bytes),
+   *    %M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
+   *    1073741824).  If the number is suffixed with K, M, or G, then
+   *    the return value is the number multiplied by one kilobyte, one
+   *    megabyte, or one gigabyte, respectively.
    */  
   unsigned long long memparse (char *ptr,  char **retptr) {
     unsigned long long ret = strtoull (ptr, retptr, 0);
@@ -277,5 +290,5 @@ size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
     }
     return ret;
   }
-
+  
 }

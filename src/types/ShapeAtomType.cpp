@@ -36,17 +36,17 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "types/ShapeAtomType.hpp"
-#include "UseTheForce/DarkSide/shapes_interface.h"
-#include <cstdio>
 
+using namespace std;
 namespace OpenMD {
   
   ShapeAtomType::~ShapeAtomType() {
-    std::vector<RealSphericalHarmonic*>::iterator iter;
+    vector<RealSphericalHarmonic*>::iterator iter;
     for (iter = contactFuncs.begin(); iter != contactFuncs.end(); ++iter) 
       delete (*iter);
     for (iter = rangeFuncs.begin(); iter != rangeFuncs.end(); ++iter) 
@@ -60,7 +60,7 @@ namespace OpenMD {
   
   RealType ShapeAtomType::getContactValueAt(RealType costheta, RealType phi) {
     
-    std::vector<RealSphericalHarmonic*>::iterator contactIter;
+    vector<RealSphericalHarmonic*>::iterator contactIter;
     RealType contactVal;
     
     contactVal = 0.0;
@@ -74,7 +74,7 @@ namespace OpenMD {
   
   RealType ShapeAtomType::getRangeValueAt(RealType costheta, RealType phi) {
     
-    std::vector<RealSphericalHarmonic*>::iterator rangeIter;
+    vector<RealSphericalHarmonic*>::iterator rangeIter;
     RealType rangeVal;
     
     rangeVal = 0.0;
@@ -88,7 +88,7 @@ namespace OpenMD {
   
   RealType ShapeAtomType::getStrengthValueAt(RealType costheta, RealType phi) {
     
-    std::vector<RealSphericalHarmonic*>::iterator strengthIter;
+    vector<RealSphericalHarmonic*>::iterator strengthIter;
     RealType strengthVal;
     
     strengthVal = 0.0;
@@ -100,98 +100,4 @@ namespace OpenMD {
     
     return strengthVal;
   }
-  
-  void ShapeAtomType::complete() {
-    
-    // first complete all the non-shape atomTypes
-    DirectionalAtomType::complete();
-    
-    int isError = 0;
-    
-    //setup dipole atom  type in fortran side
-    if (isShape()) {
-      // vectors for shape transfer to fortran
-      std::vector<RealSphericalHarmonic*> tempSHVector;
-      std::vector<int> contactL;
-      std::vector<int> contactM;
-      std::vector<int> contactFunc;
-      std::vector<RealType> contactCoeff;
-      std::vector<int> rangeL;
-      std::vector<int> rangeM;
-      std::vector<int> rangeFunc;
-      std::vector<RealType> rangeCoeff;
-      std::vector<int> strengthL;
-      std::vector<int> strengthM;
-      std::vector<int> strengthFunc;
-      std::vector<RealType> strengthCoeff;
-      
-      tempSHVector.clear();
-      contactL.clear();
-      contactM.clear();
-      contactFunc.clear();
-      contactCoeff.clear();
-      
-      tempSHVector = getContactFuncs();
-      
-      int nContact = tempSHVector.size();
-      for (int i=0; i<nContact; i++){
-        contactL.push_back(tempSHVector[i]->getL());
-        contactM.push_back(tempSHVector[i]->getM());
-        contactFunc.push_back(tempSHVector[i]->getFunctionType());
-        contactCoeff.push_back(tempSHVector[i]->getCoefficient());
-      }
-      
-      tempSHVector.clear();
-      rangeL.clear();
-      rangeM.clear();
-      rangeFunc.clear();
-      rangeCoeff.clear();
-      
-      tempSHVector = getRangeFuncs();
-      
-      int nRange = tempSHVector.size();
-      for (int i=0; i<nRange; i++){
-        rangeL.push_back(tempSHVector[i]->getL());
-        rangeM.push_back(tempSHVector[i]->getM());
-        rangeFunc.push_back(tempSHVector[i]->getFunctionType());
-        rangeCoeff.push_back(tempSHVector[i]->getCoefficient());
-      }
-      
-      tempSHVector.clear();
-      strengthL.clear();
-      strengthM.clear();
-      strengthFunc.clear();
-      strengthCoeff.clear();
-      
-      tempSHVector = getStrengthFuncs();
-      
-      int nStrength = tempSHVector.size();
-      for (int i=0; i<nStrength; i++){
-        strengthL.push_back(tempSHVector[i]->getL());
-        strengthM.push_back(tempSHVector[i]->getM());
-        strengthFunc.push_back(tempSHVector[i]->getFunctionType());
-        strengthCoeff.push_back(tempSHVector[i]->getCoefficient());
-      }
-      
-      int myATID = getIdent();
-      
-      makeShape( &nContact, &contactL[0], &contactM[0], &contactFunc[0], 
-                 &contactCoeff[0],
-                 &nRange, &rangeL[0], &rangeM[0], &rangeFunc[0], 
-		 &rangeCoeff[0],
-                 &nStrength, &strengthL[0], &strengthM[0], &strengthFunc[0], 
-                 &strengthCoeff[0],
-                 &myATID, 
-                 &isError);
-      
-      if( isError ){
-        sprintf( painCave.errMsg,
-                 "Error initializing the \"%s\" shape in fortran\n",
-                 (getName()).c_str() );
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
-    }
-  }  
 }

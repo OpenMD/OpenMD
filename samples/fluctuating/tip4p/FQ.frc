@@ -1,0 +1,42 @@
+// This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF)
+//
+// The sections are divided into AtomTypes
+//
+// many parameters (but not all) are derived from the TRAPPE force field
+// of Siepmann's group.
+
+
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+O_TIP4P_FQ	15.9994
+H_TIP4P_FQ	1.0079
+M_TIP4P_FQ	0.0
+end BaseAtomTypes
+
+begin LennardJonesAtomTypes
+//Name		epsilon		    sigma	
+O_TIP4P_FQ	0.2862		3.159
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+// Name 	charge
+//O_TIP4P_FQ	0.0
+//H_TIP4P_FQ	0.0
+//M_TIP4P_FQ	0.0
+end ChargeAtomTypes
+
+
+begin FluctuatingChargeAtomTypes
+//Name	   chi (kcal/mol e)   hardness (kcal/(mol*e^2))  slaterN   slaterZeta   ChargeMass (fs^2 kcal/ e^2 mol)
+//Values obtained from Rick, Stuart, and Berne J Chem Phys, 1994, 101
+//Since they gave chi as an electronegativity difference, we will assign Oxygen's (the M site 
+//actually for TIP4P) electronegativity from Rappe and Goddard III, and setting H to equal 
+//the difference 
+// Rappe and Goddard, O or M chi: 8.741 eV = 201.5705 kcal/mol
+// Rick, Stuart, and Berne, delta Chi between O and H = 68.49
+// SlaterZeta has units of Bohr radius
+// Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
+// this code and the Rick, Stuart, and Berne paper
+H_TIP4P_FQ  133.0805   353.0   1	  0.90	  60.0
+M_TIP4P_FQ  201.5705   371.6   2	  1.63	  60.0
+end FluctuatingChargeAtomTypes

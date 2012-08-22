@@ -35,7 +35,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "applications/staticProps/NanoLength.hpp"
@@ -67,15 +68,13 @@ NanoLength::NanoLength(SimInfo* info,
 
 void NanoLength::process() {
   Molecule* mol;
-  Atom* atom;
   RigidBody* rb;
-  int myIndex;
   SimInfo::MoleculeIterator mi;
   Molecule::RigidBodyIterator rbIter;
   Molecule::AtomIterator ai;
   StuntDouble* sd;
   Vector3d vec;
-  int i,j;
+  int i;
   
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();

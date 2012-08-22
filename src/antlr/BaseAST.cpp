@@ -270,7 +270,8 @@ void BaseAST::toStream( ANTLR_USE_NAMESPACE(std)ostream& out ) const
 // this is nasty, but it makes the code generation easier
 ANTLR_API RefAST nullAST;
 
-#if defined(_MSC_VER) && !defined(__ICL) // Microsoft Visual C++
+#if defined(_MSC_VER) && !defined(__ICL) 
+// Microsoft Visual C++
 extern ANTLR_API AST* const nullASTptr = 0;
 #else
 ANTLR_API AST* const nullASTptr = 0;

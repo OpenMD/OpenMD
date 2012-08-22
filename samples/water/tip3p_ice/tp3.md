@@ -11,19 +11,19 @@ component{
 
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "shifted_force";
+cutoffMethod = "switched";
 dielectric = 80.0;
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
+switchingRadius = 8.0;
 
-targetTemp = 250
+targetTemp = 250;
 targetPressure = 1.0;
 
 tauThermostat = 1e4;
 tauBarostat = 5e3;
 
 dt = 2.0;
-runTime = 2e5;
+runTime = 200;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef TYPES_MAWINTERACTIONTYPE_HPP
@@ -52,21 +53,22 @@ namespace OpenMD {
    * MAWInteractionType (Metal-Angular-Water) is one of the basic
    * Metal-to-NonMetal interaction types.
    *
-   * Formula is V =  D_e * exp(-a(r-re)) * (exp(-a(r-re)) - 2) *
-   *                      (1 + ca1*(1-sqrt(3)*cos(theta))^2 + 
-   *                           cb1*3*(sin(theta)*cos(phi))^2)
-   *
+   * \f[ V =  D_e * \exp(-a(r-r_e)) * (\exp(-a(r-r_e)) - 2) *
+                         (1 + ca1*(1-\sqrt(3)*\cos(\theta))^2 + 
+                              cb1*3*(\sin(\theta)*\cos(\phi))^2) \f]
+   
    * The spherical coordinates are defined in the body-fixed frame
    * of a rigid-body water molecule (HO bonds are on the Y-Z plane)
    * and the dipole vector of the water molecule points along the
    * Z-axis.  A metal atom's position is uniquely defined by a set
-   * of spherical polar coordinates (r, theta, phi) in the
+   * of spherical polar coordinates \f$(r, \theta, \phi)\f$ in the
    * body-fixed frame of each water molecule.
    */
+
   class MAWInteractionType : public NonBondedInteractionType {
-    
+       
   public:
-    
+        
     MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
                        RealType myCa1, RealType myCb1){
       D_e = myD0;
@@ -74,20 +76,28 @@ namespace OpenMD {
       r_e = myR0;
       ca1 = myCa1;
       cb1 = myCb1;
+      setMAW();
+    }
+    RealType getD() {
+      return D_e;
     }
     
-    virtual void tellFortran(int atid1, int atid2) {
-      mnmit.MNMInteractionType = MNM_MAW;
-      mnmit.metal_atid = atid1;
-      mnmit.nonmetal_atid = atid2;
-      mnmit.R0 = r_e;
-      mnmit.D0 = D_e;
-      mnmit.beta0 = beta;
-      mnmit.ca1 = ca1;
-      mnmit.cb1 = cb1;
-      addMNMInteraction(&mnmit);
+    RealType getBeta() {
+      return beta;
     }
-    
+
+    RealType getR() {
+      return r_e;
+    }
+
+    RealType getCA1() {
+      return ca1;
+    }
+
+    RealType getCB1() {
+      return cb1;
+    }
+
   private:    
     RealType D_e;
     RealType beta;

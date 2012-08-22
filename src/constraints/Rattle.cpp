@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "constraints/Rattle.hpp"
@@ -44,8 +45,12 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-  Rattle::Rattle(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6) {
+  Rattle::Rattle(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6), doRattle_(false) {
     
+    if (info_->getNConstraints() > 0)
+      doRattle_ = true;
+    
+
     if (info_->getSimParams()->haveDt()) {
       dt_ = info_->getSimParams()->getDt();
     } else {
@@ -59,17 +64,17 @@ namespace OpenMD {
   }
 
   void Rattle::constraintA() {
-    if (info_->getNConstraints() > 0) {
-      doConstraint(&Rattle::constraintPairA);
-    }
+    if (!doRattle_) return;
+    doConstraint(&Rattle::constraintPairA);
   }
   void Rattle::constraintB() {
-    if (info_->getNConstraints() > 0) {
-      doConstraint(&Rattle::constraintPairB);
-    }
+    if (!doRattle_) return;    
+    doConstraint(&Rattle::constraintPairB);
   }
 
   void Rattle::doConstraint(ConstraintPairFuncPtr func) {
+    if (!doRattle_) return;
+
     Molecule* mol;
     SimInfo::MoleculeIterator mi;
     ConstraintElem* consElem;
@@ -148,6 +153,7 @@ namespace OpenMD {
   }
 
   int Rattle::constraintPairA(ConstraintPair* consPair){
+
     ConstraintElem* consElem1 = consPair->getConsElem1();
     ConstraintElem* consElem2 = consPair->getConsElem2();
 

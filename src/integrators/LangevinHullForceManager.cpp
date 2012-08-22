@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include <fstream> 
 #include <iostream>
@@ -46,6 +47,9 @@
 #include "math/AlphaHull.hpp"
 #include "math/Triangle.hpp"
 #include "math/CholeskyDecomposition.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace OpenMD {
 
@@ -134,25 +138,21 @@ namespace OpenMD {
     // Build a vector of integrable objects to determine if the are
     // surface atoms
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {          
-      for (integrableObject = mol->beginIntegrableObject(j); 
-           integrableObject != NULL;
-           integrableObject = mol->nextIntegrableObject(j)) {	
-	localSites_.push_back(integrableObject);
+      for (sd = mol->beginIntegrableObject(j); 
+           sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {	
+	localSites_.push_back(sd);
       }
     }   
   }  
    
   void LangevinHullForceManager::postCalculation(){
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* integrableObject;
   
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);
@@ -184,7 +184,7 @@ namespace OpenMD {
       hydroTensor *= PhysicalConstants::viscoConvert;
       Mat3x3d S;
       CholeskyDecomposition(hydroTensor, S);
-      
+
       Vector3d extPressure = -unitNormal * (targetPressure_ * thisArea) /
         PhysicalConstants::energyConvert;
 
@@ -196,7 +196,7 @@ namespace OpenMD {
       // Apply triangle force to stuntdouble vertices
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 	if ((*vertex) != NULL){
-	  Vector3d vertexForce = langevinForce / 3.0;
+	  Vector3d vertexForce = langevinForce / RealType(3.0);
 	  (*vertex)->addFrc(vertexForce);	   
 	}  
       }

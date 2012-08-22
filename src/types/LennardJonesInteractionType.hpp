@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef TYPES_LENNARDJONESINTERACTIONTYPE_HPP
@@ -49,27 +50,27 @@ namespace OpenMD {
    * @class LennardJonesInteractionType 
    *
    * LennardJonesInteractionType is one of the basic interaction types.
-   * Formula is V = 4*epsilon*((sigma/R)^12 - (sigma/r)^6)
+   * \f[ V = 4 \epsilon \left(\left( \sigma/r \right)^{12} - 
+         \left( \sigma/r\right)^6\right) \f]
    */
   class LennardJonesInteractionType : public NonBondedInteractionType {
     
   public:
     
     LennardJonesInteractionType(RealType mySigma, RealType myEpsilon) {
+      setLennardJones();
       sigma = mySigma;
       epsilon = myEpsilon;
     }
-    
-    virtual void tellFortran(int atid1, int atid2) {
-      mnmit.MNMInteractionType = MNM_LENNARDJONES;
-      mnmit.metal_atid = atid1;
-      mnmit.nonmetal_atid = atid2;
-      mnmit.sigma = sigma;
-      mnmit.epsilon = epsilon;     
-      addMNMInteraction(&mnmit);
+
+    RealType getSigma() {
+      return sigma;
     }
     
-    
+    RealType getEpsilon() {
+      return epsilon;
+    }
+
   private:
     RealType sigma;
     RealType epsilon;    

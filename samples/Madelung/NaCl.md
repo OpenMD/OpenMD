@@ -31,11 +31,12 @@ component{
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "shifted_force";
+cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
-cutoffRadius = 12;
-dampingAlpha = 0.18;
-switchingRadius = 12;
+cutoffRadius = 28;
+dampingAlpha = 0.14159292;
+switchingRadius = 28;
+
 
 dt = 2.0;
 runTime = 2;

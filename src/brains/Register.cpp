@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "brains/Register.hpp"
@@ -58,54 +59,26 @@
 #include "integrators/LangevinHullDynamics.hpp"
 #endif
 
-#include "minimizers/MinimizerFactory.hpp"
-#include "minimizers/MinimizerCreator.hpp"
-#include "minimizers/PRCG.hpp"
-#include "minimizers/SDMinimizer.hpp"
-#include "UseTheForce/DUFF.hpp"
-#include "UseTheForce/EAM_FF.hpp"
-#include "UseTheForce/EADM_FF.hpp"
-#include "UseTheForce/ForceFieldFactory.hpp"
-#include "UseTheForce/ForceFieldCreator.hpp"
-#include "UseTheForce/SHAPES_FF.hpp"
-#include "UseTheForce/SC_FF.hpp"
-#include "UseTheForce/MnM_FF.hpp"
-#include "UseTheForce/CLAYFF.hpp"
-#include "UseTheForce/Amber_FF.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/OptimizationCreator.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/SteepestDescent.hpp"
+#include "optimization/ConjugateGradient.hpp"
+#include "optimization/BFGS.hpp"
+
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
 
+using namespace QuantLib;
 namespace OpenMD {
 
-
-  void registerForceFields() {
-    /** @todo move to a seperate initialization module */
-    //DUFF, WATER and LJ are merged into one force field
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("DUFF"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("WATER"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
-    //in theory, EAM can also be merged
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EADM_FF>("EADM"));
-    //heck, that worked...  let's try merging SHAPES
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
-    //Well if EAM worked... then Sutton-Chen should work like a CHARMM(Hopefully not).
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SC_FF>("SC"));
-    //Well if Sutton-Chen worked... then lets just mangle all of the forcefields together in MnM.
-    //That sounds like a good idea right......
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<MnM_FF>("MnM"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<CLAYFF>("CLAY"));
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<Amber_FF>("Amber"));
-  }
-  
   void registerIntegrators() {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTI"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTsz>("NPTSZ"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPGT"));
@@ -120,9 +93,10 @@ namespace OpenMD {
 #endif
   }
 
-  void registerMinimizers() {
-    MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<SDMinimizer>("SD"));
-    MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<PRCGMinimizer>("CG"));
+  void registerOptimizers() {
+    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::SteepestDescent>("SD"));
+    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::ConjugateGradient>("CG"));
+    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::BFGS>("BFGS"));
   }
 
   void registerLattice(){
@@ -130,9 +104,8 @@ namespace OpenMD {
   }
 
   void registerAll() {
-    registerForceFields();
     registerIntegrators();
-    registerMinimizers();
+    registerOptimizers();
   }
 
 }

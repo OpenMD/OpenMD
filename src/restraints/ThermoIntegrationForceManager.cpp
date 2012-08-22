@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 
@@ -95,7 +96,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::IntegrableObjectIterator ii;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Vector3d frc;
     Vector3d trq;
     Mat3x3d tempTau;
@@ -105,37 +106,38 @@ namespace OpenMD {
     
     curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // now scale forces and torques of all the integrableObjects
+    // now scale forces and torques of all the sds
       
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-      for (integrableObject = mol->beginIntegrableObject(ii); 
-           integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) {
-        frc = integrableObject->getFrc();
+
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL; 
+           sd = mol->nextIntegrableObject(ii)) {
+
+        frc = sd->getFrc();
         frc *= factor_;
-        integrableObject->setFrc(frc);
+        sd->setFrc(frc);
         
-        if (integrableObject->isDirectional()){
-          trq = integrableObject->getTrq();
+        if (sd->isDirectional()){
+          trq = sd->getTrq();
           trq *= factor_;
-          integrableObject->setTrq(trq);
+          sd->setTrq(trq);
         }
       }
     }
     
-    // set vraw to be the unmodulated potential
-    lrPot_ = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
-    curSnapshot->statData[Stats::VRAW] = lrPot_;
+    // set rawPotential to be the unmodulated potential
+    lrPot_ = curSnapshot->getLongRangePotential();
+    curSnapshot->setRawPotential(lrPot_);
     
     // modulate the potential and update the snapshot
     lrPot_ *= factor_;
-    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
+    curSnapshot->setLongRangePotential(lrPot_);
     
     // scale the pressure tensor
-    tempTau = curSnapshot->statData.getTau();
+    tempTau = curSnapshot->getStressTensor();
     tempTau *= factor_;
-    curSnapshot->statData.setTau(tempTau);
+    curSnapshot->setStressTensor(tempTau);
 
     // now, on to the applied restraining potentials (if needed):
     RealType restPot_local = 0.0;
@@ -143,7 +145,6 @@ namespace OpenMD {
     
     if (simParam->getUseRestraints()) {
       // do restraints from RestraintForceManager:
-      //restPot_local = doRestraints(1.0 - factor_);     
       restPot_local = doRestraints(1.0 - factor_);      
       vHarm_local = getUnscaledPotential();
     }
@@ -161,7 +162,7 @@ namespace OpenMD {
 #endif
 
     // give the final values to stats
-    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
-    curSnapshot->statData[Stats::VHARM] = vHarm_;
+    curSnapshot->setLongRangePotential(lrPot_);
+    curSnapshot->setRestraintPotential(vHarm_);
   }  
 }

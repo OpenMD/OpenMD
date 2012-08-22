@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "DLM.hpp"
@@ -77,7 +78,6 @@ namespace OpenMD {
 
       // rotate about the z-axis
       angle = dt * ji[2] / I(2, 2);
-      sd->addZangle(angle);
       rotateStep( 0, 1, angle, ji, A);
 
       // rotate about the y-axis
@@ -108,7 +108,7 @@ namespace OpenMD {
     RotMat3x3d rot = RotMat3x3d::identity(); // initalize rot as a unit matrix
 
     // use a small angle aproximation for sin and cosine
-    /*
+    
     angleSqr = angle * angle;
     angleSqrOver4 = angleSqr / 4.0;
     top = 1.0 - angleSqrOver4;
@@ -116,10 +116,10 @@ namespace OpenMD {
 
     cosAngle = top / bottom;
     sinAngle = angle / bottom;
-    */
+    
     // or don't use the small angle approximation:
-    cosAngle = cos(angle);
-    sinAngle = sin(angle);
+    //cosAngle = cos(angle);
+    //sinAngle = sin(angle);
 
     rot(axes1, axes1) = cosAngle;
     rot(axes2, axes2) = cosAngle;

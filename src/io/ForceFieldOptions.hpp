@@ -36,21 +36,21 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef IO_FORCEFIELDOPTIONS_HPP
 #define IO_FORCEFIELDOPTIONS_HPP
 #include "utils/simError.h"
+#include "types/DataHolder.hpp"
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
 #include "io/ParamConstraint.hpp"
-#define __OPENMD_C
-#include "UseTheForce/fForceOptions.h"
 
 namespace OpenMD {
   
-  class ForceFieldOptions {
+  class ForceFieldOptions : public DataHolder {
     DeclareParameter(Name, std::string);
     DeclareParameter(vdWtype, std::string);
     DeclareParameter(DistanceMixingRule, std::string);
@@ -70,6 +70,7 @@ namespace OpenMD {
     DeclareParameter(electrostatic14scale, RealType);
     DeclareParameter(GayBerneMu, RealType);
     DeclareParameter(GayBerneNu, RealType);
+    DeclareParameter(EAMMixingMethod, std::string);
     
   public:
     ForceFieldOptions();
@@ -81,8 +82,9 @@ namespace OpenMD {
       CheckParameter(DistanceMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("cubic")));
       CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
       CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("hhg")));
-      CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180 is trans")) || isEqualIgnoreCase(std::string("0 is trans")));
+      CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180_is_trans")) || isEqualIgnoreCase(std::string("0_is_trans")));
       CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
+      CheckParameter(EAMMixingMethod, isEqualIgnoreCase(std::string("JOHNSON")) || isEqualIgnoreCase(std::string("DAW")));
    }
     
     bool setData(const std::string& keyword, const std::string& value) {
@@ -116,7 +118,6 @@ namespace OpenMD {
       return result;
     }
 
-    void makeFortranOptions(ForceOptions & fortranForceOptions);
   private:
     typedef std::map<std::string, ParameterBase*> ParamMap;
     ParamMap parameters_;                  

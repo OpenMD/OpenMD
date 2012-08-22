@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include <math.h>
@@ -68,9 +69,8 @@ namespace OpenMD {
     
       if (!simParams->getUseIntialExtendedSystemState()) {
         Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-        currSnapshot->setChi(0.0);
-        currSnapshot->setIntegralOfChiDt(0.0);
-        currSnapshot->setEta(Mat3x3d(0.0));
+        currSnapshot->setThermostat(make_pair(0.0, 0.0));
+        currSnapshot->setBarostat(Mat3x3d(0.0));
       }
     
       if (!simParams->haveTargetTemp()) {
@@ -117,13 +117,13 @@ namespace OpenMD {
       tt2 = tauThermostat * tauThermostat;
       tb2 = tauBarostat * tauBarostat;
 
-      update();
+      updateSizes();
     }
 
   NPT::~NPT() {
   }
 
-  void NPT::doUpdate() {
+  void NPT::doUpdateSizes() {
 
     oldPos.resize(info_->getNIntegrableObjects());
     oldVel.resize(info_->getNIntegrableObjects());
@@ -135,7 +135,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     Vector3d Tb, ji;
     RealType mass;
     Vector3d vel;
@@ -144,8 +144,7 @@ namespace OpenMD {
     Vector3d sc;
     int index;
 
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    thermostat = snap->getThermostat();
     loadEta();
     
     instaTemp =thermo.getTemperature();
@@ -153,62 +152,71 @@ namespace OpenMD {
     instaPress = PhysicalConstants::pressureConvert* (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
     instaVol =thermo.getVolume();
 
-    Vector3d  COM = info_->getCom();
+    Vector3d  COM = thermo.getCom();
 
     //evolve velocity half step
 
     calcVelScale();
 
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
-                
-	vel = integrableObject->getVel();
-	frc = integrableObject->getFrc();
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
 
-	mass = integrableObject->getMass();
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
+                
+	vel = sd->getVel();
+	frc = sd->getFrc();
+
+	mass = sd->getMass();
 
 	getVelScaleA(sc, vel);
 
 	// velocity half step  (use chi from previous step here):
-	//vel[j] += dt2 * ((frc[j] / mass) * PhysicalConstants::energyConvert - sc[j]);
-	vel += dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
-	integrableObject->setVel(vel);
 
-	if (integrableObject->isDirectional()) {
+	vel += dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
+	sd->setVel(vel);
+
+	if (sd->isDirectional()) {
 
 	  // get and convert the torque to body frame
 
-	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  Tb = sd->lab2Body(sd->getTrq());
 
 	  // get the angular momentum, and propagate a half step
 
-	  ji = integrableObject->getJ();
+	  ji = sd->getJ();
 
-	  //ji[j] += dt2 * (Tb[j] * PhysicalConstants::energyConvert - ji[j]*chi);
-	  ji += dt2*PhysicalConstants::energyConvert * Tb - dt2*chi* ji;
+	  ji += dt2*PhysicalConstants::energyConvert * Tb 
+            - dt2*thermostat.first* ji;
                 
-	  rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo_->rotate(sd, ji, dt);
 
-	  integrableObject->setJ(ji);
+	  sd->setJ(ji);
 	}
             
       }
     }
     // evolve chi and eta  half step
 
-    chi += dt2 * (instaTemp / targetTemp - 1.0) / tt2;
+    thermostat.first += dt2 * (instaTemp / targetTemp - 1.0) / tt2;
     
     evolveEtaA();
 
     //calculate the integral of chidt
-    integralOfChidt += dt2 * chi;
+    thermostat.second += dt2 * thermostat.first;
     
+    flucQ_->moveA();
+
+
     index = 0;
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
-	oldPos[index++] = integrableObject->getPos();            
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
+
+	oldPos[index++] = sd->getPos();            
+
       }
     }
     
@@ -216,31 +224,32 @@ namespace OpenMD {
 
     for(int k = 0; k < maxIterNum_; k++) {
       index = 0;
-      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-	for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	     integrableObject = mol->nextIntegrableObject(j)) {
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
 
-	  vel = integrableObject->getVel();
-	  pos = integrableObject->getPos();
+	for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	     sd = mol->nextIntegrableObject(j)) {
+
+	  vel = sd->getVel();
+	  pos = sd->getPos();
 
 	  this->getPosScale(pos, COM, index, sc);
 
 	  pos = oldPos[index] + dt * (vel + sc);
-	  integrableObject->setPos(pos);     
+	  sd->setPos(pos);     
 
 	  ++index;
 	}
       }
 
-      rattle->constraintA();
+      rattle_->constraintA();
     }
 
     // Scale the box after all the positions have been moved:
 
     this->scaleSimBox();
 
-    currentSnapshot_->setChi(chi);
-    currentSnapshot_->setIntegralOfChiDt(integralOfChidt);
+    snap->setThermostat(thermostat);
 
     saveEta();
   }
@@ -249,7 +258,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     int index;
     Vector3d Tb;
     Vector3d ji;
@@ -258,22 +267,25 @@ namespace OpenMD {
     Vector3d frc;
     RealType mass;
 
-
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
-    RealType oldChi  = chi;
+    thermostat = snap->getThermostat();
+    RealType oldChi  = thermostat.first;
     RealType prevChi;
 
     loadEta();
     
     //save velocity and angular momentum
     index = 0;
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(j)) {
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
                 
-	oldVel[index] = integrableObject->getVel();
-	oldJi[index] = integrableObject->getJ();
+	oldVel[index] = sd->getVel();
+
+        if (sd->isDirectional())
+	   oldJi[index] = sd->getJ();
+
 	++index;
       }
     }
@@ -286,68 +298,72 @@ namespace OpenMD {
       instaPress =thermo.getPressure();
 
       // evolve chi another half step using the temperature at t + dt/2
-      prevChi = chi;
-      chi = oldChi + dt2 * (instaTemp / targetTemp - 1.0) / tt2;
+      prevChi = thermostat.first;
+      thermostat.first = oldChi + dt2 * (instaTemp / targetTemp - 1.0) / tt2;
 
       //evolve eta
       this->evolveEtaB();
       this->calcVelScale();
 
       index = 0;
-      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-	for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-	     integrableObject = mol->nextIntegrableObject(j)) {            
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
 
-	  frc = integrableObject->getFrc();
-	  vel = integrableObject->getVel();
+	for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	     sd = mol->nextIntegrableObject(j)) {            
 
-	  mass = integrableObject->getMass();
+	  frc = sd->getFrc();
+	  vel = sd->getVel();
+
+	  mass = sd->getMass();
 
 	  getVelScaleB(sc, index);
 
 	  // velocity half step
-	  //vel[j] = oldVel[3 * i + j] + dt2 *((frc[j] / mass) * PhysicalConstants::energyConvert - sc[j]);
-	  vel = oldVel[index] + dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
-	  integrableObject->setVel(vel);
+	  vel = oldVel[index] 
+            + dt2*PhysicalConstants::energyConvert/mass* frc 
+            - dt2*sc;
 
-	  if (integrableObject->isDirectional()) {
+	  sd->setVel(vel);
+
+	  if (sd->isDirectional()) {
 	    // get and convert the torque to body frame
-	    Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	    Tb = sd->lab2Body(sd->getTrq());
 
-	    //ji[j] = oldJi[3*i + j] + dt2 * (Tb[j] * PhysicalConstants::energyConvert - oldJi[3*i+j]*chi);
-	    ji = oldJi[index] + dt2*PhysicalConstants::energyConvert*Tb - dt2*chi*oldJi[index];
-	    integrableObject->setJ(ji);
+	    ji = oldJi[index] 
+              + dt2*PhysicalConstants::energyConvert*Tb 
+              - dt2*thermostat.first*oldJi[index];
+
+	    sd->setJ(ji);
 	  }
 
 	  ++index;
 	}
       }
         
-      rattle->constraintB();
+      rattle_->constraintB();
 
-      if ((fabs(prevChi - chi) <= chiTolerance) && this->etaConverged())
+      if ((fabs(prevChi - thermostat.first) <= chiTolerance) && 
+          this->etaConverged())
 	break;
     }
 
     //calculate integral of chidt
-    integralOfChidt += dt2 * chi;
+    thermostat.second += dt2 * thermostat.first;
 
-    currentSnapshot_->setChi(chi);
-    currentSnapshot_->setIntegralOfChiDt(integralOfChidt);    
+    snap->setThermostat(thermostat);
 
+    flucQ_->moveB();
     saveEta();
   }
 
   void NPT::resetIntegrator(){
-      currentSnapshot_->setChi(0.0);
-      currentSnapshot_->setIntegralOfChiDt(0.0);
-      resetEta();
+    snap->setThermostat(make_pair(0.0, 0.0));
+    resetEta();
   }
 
-
-    void NPT::resetEta() {
-      Mat3x3d etaMat(0.0);
-      currentSnapshot_->setEta(etaMat);    
-    }
-    
+  void NPT::resetEta() {
+    Mat3x3d etaMat(0.0);
+    snap->setBarostat(etaMat);    
+  }
 }

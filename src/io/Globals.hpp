@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef IO_GLOBALS_HPP
@@ -53,6 +54,9 @@
 #include "types/ZconsStamp.hpp"
 #include "types/RestraintStamp.hpp"
 #include "types/MoleculeStamp.hpp"
+#include "flucq/FluctuatingChargeParameters.hpp"
+#include "rnemd/RNEMDParameters.hpp"
+#include "optimization/MinimizerParameters.hpp"
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
@@ -88,14 +92,6 @@ namespace OpenMD {
     DeclareParameter(UseInitalTime, bool);
     DeclareParameter(UseIntialExtendedSystemState, bool);
     DeclareParameter(OrthoBoxTolerance, RealType);
-    DeclareParameter(Minimizer, std::string);
-    DeclareParameter(MinimizerMaxIter, RealType);
-    DeclareParameter(MinimizerWriteFreq, int);
-    DeclareParameter(MinimizerStepSize, RealType);
-    DeclareParameter(MinimizerFTol, RealType);
-    DeclareParameter(MinimizerGTol, RealType);
-    DeclareParameter(MinimizerLSTol, RealType);
-    DeclareParameter(MinimizerLSMaxIter, int);
     DeclareParameter(ZconsGap, RealType);
     DeclareParameter(ZconsFixtime, RealType);
     DeclareParameter(ZconsUsingSMD, bool);
@@ -106,17 +102,21 @@ namespace OpenMD {
     DeclareParameter(ForceFieldFileName, std::string);
     DeclareParameter(SurfaceTension, RealType);
     DeclareParameter(PrintPressureTensor, bool);
+    DeclareParameter(PrintHeatFlux, bool);
     DeclareParameter(TaggedAtomPair, intPair);
     DeclareParameter(PrintTaggedPairDistance, bool);
     DeclareParameter(ElectrostaticSummationMethod, std::string);
     DeclareParameter(ElectrostaticScreeningMethod, std::string);
     DeclareParameter(DampingAlpha, RealType);
     DeclareParameter(Dielectric, RealType);
+    DeclareParameter(CutoffMethod, std::string);
     DeclareParameter(CutoffPolicy, std::string);
     DeclareParameter(SwitchingFunctionType, std::string);
     DeclareParameter(CompressDumpFile, bool);
     DeclareParameter(OutputForceVector, bool);
     DeclareParameter(OutputParticlePotential, bool);
+    DeclareParameter(OutputElectricField, bool);
+    DeclareParameter(OutputFluctuatingCharges, bool);
     DeclareParameter(SkinThickness, RealType);
     DeclareParameter(StatFileFormat, std::string);    
     DeclareParameter(HydroPropFile, std::string);
@@ -133,28 +133,13 @@ namespace OpenMD {
     DeclareParameter(MTM_Io, RealType);
     DeclareParameter(MTM_Sigma, RealType);    
     DeclareParameter(MTM_R, RealType);    
-    DeclareParameter(UseRNEMD, bool);
-    DeclareParameter(RNEMD_exchangeTime, RealType);
-    DeclareParameter(RNEMD_nBins, int);
-    DeclareParameter(RNEMD_logWidth, int);
-    DeclareParameter(RNEMD_exchangeType, std::string);
-    DeclareParameter(RNEMD_objectSelection, std::string);
-    DeclareParameter(RNEMD_targetFlux, RealType);
-    DeclareParameter(RNEMD_targetJzKE, RealType);
-    DeclareParameter(RNEMD_targetJzpx, RealType);
-    DeclareParameter(RNEMD_targetJzpy, RealType);
-    DeclareParameter(RNEMD_targetJzpz, RealType);
-    DeclareParameter(RNEMD_binShift, bool);
-    DeclareParameter(RNEMD_outputTemperature, bool);
-    DeclareParameter(RNEMD_outputVx, bool);
-    DeclareParameter(RNEMD_outputVy, bool);
-    DeclareParameter(RNEMD_outputXyzTemperature, bool);
-    DeclareParameter(RNEMD_outputRotTemperature, bool);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
-    
+    DeclareAlterableParameter(MDfileVersion, int);
+    DeclareParameter(ElectricField, OpenMD::Vector3d);
+
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);
@@ -172,7 +157,14 @@ namespace OpenMD {
     std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
     RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}    
 
-    //std::string getRestraint_file(){
+    bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
+    FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
+
+    bool addRNEMDParameters(RNEMDParameters* rnemdPars);
+    RNEMDParameters* getRNEMDParameters() {return rnemdPars_;}
+
+    bool addMinimizerParameters(MinimizerParameters* miniPars);
+    MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
     
     virtual void validate();
   private:
@@ -182,6 +174,9 @@ namespace OpenMD {
     std::vector<RestraintStamp*> restraints_;    
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
+    FluctuatingChargeParameters* flucQpars_;
+    RNEMDParameters* rnemdPars_;
+    MinimizerParameters* minimizerPars_;
 };
 }
 #endif

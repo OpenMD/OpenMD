@@ -36,14 +36,16 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
-#include "types/AtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
+#include "types/LennardJonesAdapter.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
@@ -67,23 +69,24 @@ namespace OpenMD {
       AtomType* atomType = ff.getAtomType(atomTypeName);
 
       if (atomType != NULL) {
-	LJParam ljParam;                        
-	ljParam.epsilon = tokenizer.nextTokenAsDouble();
-	ljParam.sigma = tokenizer.nextTokenAsDouble();
-	ljParam.soft_pot = 0;
+
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        RealType sigma = tokenizer.nextTokenAsDouble();
+        bool isSoft = false;
   
-	ljParam.epsilon *= options_.getEnergyUnitScaling();
-	ljParam.sigma   *= options_.getDistanceUnitScaling();
-  
+	epsilon *= options_.getEnergyUnitScaling();
+	sigma   *= options_.getDistanceUnitScaling();
+        
 	if (tokenizer.hasMoreTokens()) {
 	  std::string pot_type = tokenizer.nextToken();
 	  if (pot_type == "soft") {
-	    ljParam.soft_pot = 1;
+	    isSoft = true;
 	  }
 	}
-            
-	atomType->addProperty(new LJParamGenericData("LennardJones", ljParam));
-	atomType->setLennardJones();
+        
+        LennardJonesAdapter lj = LennardJonesAdapter(atomType);
+        lj.makeLennardJones(sigma, epsilon, isSoft);
+
       }else {
 	sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
 	painCave.isFatal = 1;

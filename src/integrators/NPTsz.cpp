@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "brains/SimInfo.hpp"
@@ -56,8 +57,7 @@ namespace OpenMD {
    */   
   RealType NPTsz::calcConservedQuantity(){
 
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    thermostat = snap->getThermostat();
     loadEta();
     
     // We need NkBT a lot, so just set it here: This is the RAW number
@@ -79,12 +79,12 @@ namespace OpenMD {
     RealType barostat_potential;
     RealType trEta;
 
-    totalEnergy = thermo.getTotalE();
+    totalEnergy = thermo.getTotalEnergy();
 
-    thermostat_kinetic = fkBT * tt2 * chi * chi /
+    thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /
       (2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_potential = fkBT* integralOfChidt / 
+    thermostat_potential = fkBT* thermostat.second / 
       PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
@@ -106,9 +106,9 @@ namespace OpenMD {
     
   void NPTsz::scaleSimBox(){
 
-    int i,j,k;
+    int i, j;
     Mat3x3d scaleMat;
-    RealType eta2ij, scaleFactor;
+    RealType scaleFactor;
     RealType bigScale, smallScale, offDiagMax;
     Mat3x3d hm;
     Mat3x3d hmnew;
@@ -161,13 +161,13 @@ namespace OpenMD {
       simError();
     } else {
 
-      Mat3x3d hmat = currentSnapshot_->getHmat();
+      Mat3x3d hmat = snap->getHmat();
       hmat = hmat *scaleMat;
-      currentSnapshot_->setHmat(hmat);
+      snap->setHmat(hmat);
     }
   }
 
   void NPTsz::loadEta() {
-    eta= currentSnapshot_->getEta();
+    eta= snap->getBarostat();
   }
 }

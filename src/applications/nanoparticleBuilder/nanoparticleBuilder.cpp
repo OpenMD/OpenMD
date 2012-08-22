@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <cstdlib>
@@ -71,8 +72,6 @@ void createMdFile(const std::string&oldMdFileName,
 
 int main(int argc, char *argv []) {
   
-  //register force fields
-  registerForceFields();
   registerLattice();
   
   gengetopt_args_info args_info;
@@ -126,6 +125,8 @@ int main(int argc, char *argv []) {
   /* Build a lattice and get lattice points for this lattice constant */
   vector<Vector3d> sites = nanoParticle.getSites();
   vector<Vector3d> orientations = nanoParticle.getOrientations();
+
+
   std::vector<int> vacancyTargets;
   vector<bool> isVacancy;
   

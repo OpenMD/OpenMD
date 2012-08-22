@@ -36,12 +36,13 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include <algorithm>
 #include "brains/BlockSnapshotManager.hpp"
-// #include "utils/residentMem.h"
-// #include "utils/physmem.h"
+//#include "utils/residentMem.h"
+//#include "utils/physmem.h"
 #include "utils/Algorithm.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
@@ -49,29 +50,28 @@
 namespace OpenMD {
   BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, 
                                              const std::string& filename, 
-					     int storageLayout, 
-                                             long long int memSize, 
+					     int storageLayout,
+                                             long long int memSize,
                                              int blockCapacity) 
-    : SnapshotManager(storageLayout), info_(info), memSize_(memSize),
+    : SnapshotManager(storageLayout), info_(info), memSize_(memSize), 
       blockCapacity_(blockCapacity), activeBlocks_(blockCapacity_, -1), 
       activeRefCount_(blockCapacity_, 0) {
 
       nAtoms_ = info->getNGlobalAtoms();
       nRigidBodies_ = info->getNGlobalRigidBodies();
+      nCutoffGroups_ = info->getNCutoffGroups();
 
       // eliminate suspect calls to figure out free memory:
       // RealType physMem = physmem_total();
       // RealType rssMem = residentMem();
       // RealType avaliablePhysMem = physMem - rssMem;
-
+    
       int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
-
       int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
 
       // total number of frames that can fit in memory
-      
       //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
-      RealType frameCapacity = memSize_ / bytesPerFrame;
+      RealType frameCapacity = (RealType) memSize_ / (RealType) bytesPerFrame;
 
       // number of frames in each block given the need to hold multiple blocks 
       // in memory at the same time:
@@ -151,7 +151,7 @@ namespace OpenMD {
       //if number of active blocks is less than the block capacity, just load it
       internalLoad(block);
       loadSuccess = true;
-    } else if (hasZeroRefBlock() > 0) {
+    } else if ( hasZeroRefBlock() ) {
       //if already reach the block capacity, need to unload a block with 0 reference
       int zeroRefBlock = getFirstZeroRefBlock();
       assert(zeroRefBlock != -1);
@@ -225,8 +225,9 @@ namespace OpenMD {
   }
 
   Snapshot* BlockSnapshotManager::loadFrame(int frame){
-    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, getStorageLayout());
+    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_, getStorageLayout());
     snapshot->setID(frame);
+    snapshot->clearDerivedProperties();
     
     /** @todo fixed me */
     Snapshot* oldSnapshot = currentSnapshot_;

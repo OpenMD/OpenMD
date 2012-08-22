@@ -36,18 +36,20 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  */
 
 /* Calculates Rho(theta) */
 
 #include <algorithm>
-  #include <fstream>
+#include <fstream>
 #include "applications/staticProps/pAngle.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
+
 namespace OpenMD {
   
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
@@ -74,6 +76,7 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     int i;
 
+    Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
@@ -94,17 +97,16 @@ namespace OpenMD {
         }
       }
       
-      Vector3d CenterOfMass = info_->getCom();      
+      Vector3d CenterOfMass = thermo.getCom();      
 
       if  (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }
       
-
       int runningTot = 0;
       for (sd = seleMan_.beginSelected(i); sd != NULL; 
            sd = seleMan_.nextSelected(i)) {
-       
+        
         Vector3d pos = sd->getPos();
         
         Vector3d r1 = CenterOfMass - pos;
@@ -132,11 +134,11 @@ namespace OpenMD {
   void pAngle::processHistogram() {
     
     int atot = 0;
-    for(int i = 0; i < count_.size(); ++i) 
+    for(unsigned int i = 0; i < count_.size(); ++i) 
       atot += count_[i];
     
-    for(int i = 0; i < count_.size(); ++i) {
-      histogram_[i] = double(count_[i]) / double(atot);
+    for(unsigned int i = 0; i < count_.size(); ++i) {
+      histogram_[i] = double(count_[i] / double(atot));
     }    
   }
   
@@ -150,7 +152,7 @@ namespace OpenMD {
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#cos(theta)\tp(cos(theta))\n";
       RealType dct = 2.0 / histogram_.size();
-      for (int i = 0; i < histogram_.size(); ++i) {
+      for (unsigned int i = 0; i < histogram_.size(); ++i) {
         RealType ct = -1.0 + (2.0 * i + 1) / (histogram_.size());
         rdfStream << ct << "\t" << histogram_[i]/dct << "\n";
       }

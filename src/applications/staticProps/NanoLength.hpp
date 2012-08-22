@@ -35,7 +35,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #ifndef APPLICATIONS_STATICPROPS_NANOLENGTH_HPP
 #define APPLICATIONS_STATICPROPS_NANOLENGTH_HPP
@@ -47,7 +48,7 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
-typedef std::pair<int, RealType> evIndex;
+typedef std::pair<RealType, int> evIndex;
 
 namespace OpenMD {
   class NanoLength : public StaticAnalyser {

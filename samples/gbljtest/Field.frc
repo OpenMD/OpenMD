@@ -1,0 +1,438 @@
+// This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF)
+//
+// The sections are divided into AtomTypes
+//
+// many parameters (but not all) are derived from the TRAPPE force field
+// of Siepmann's group.
+
+begin Options
+      Name                    "DUFF"
+      GayBerneMu              2.0
+      GayBerneNu              1.0
+end Options
+
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+CH4		16.05		
+CH3		15.04		
+CH2		14.03		
+CH		13.02
+DIP             9.00764		
+SSD		18.0153		
+SSD1            18.0153 
+SSD_E           18.0153
+SSD_RF          18.0153
+TAP		18.0153
+O_DIP3P		15.9994			
+O_TIP3P		15.9994			
+O_TIP4P		15.9994
+O_TIP4P-Ew      15.9994
+O_TIP5P		15.9994	
+O_TIP5P-E	15.9994	
+O_SPCE		15.9994
+O_SPC		15.9994	
+H_DIP3P		1.0079
+H_TIP3P		1.0079
+H_TIP4P		1.0079
+H_TIP4P-Ew      1.0079
+H_TIP5P		1.0079
+H_SPCE		1.0079
+H_SPC		1.0079
+EP_TIP4P	0.0
+EP_TIP4P-Ew     0.0
+EP_TIP5P	0.0
+HEAD		196		
+TB1		14.03		
+TE1		15.04		
+TB2		21.05		
+TE2		22.56		
+TB3		28.06		
+TE3		30.08	
+H		1.00794		
+He		4.002602
+C		12.0107		
+N		14.00674	
+O		15.9994		
+F		18.9984032	
+Ne		20.1797		
+S		32.066		
+Cl		35.4527		
+Cl-		35.4527
+Na+		22.98977
+Ar		39.948		
+GBAr		39.948		
+Br		79.904		
+Kr		83.80
+GBKr		83.80
+U 		1.00
+GBPaper		48.0428	
+GBlinear	48.0428
+GBlipid		760.0
+GBlh	        196
+GBC6H6		78.11184
+GBCH3OH		32.04186
+GBH2O		18.0153
+Pchg+		5.000	
+Pchg-		5.000	
+PDIP		10.000	
+DPD		72.06112
+TESTP		100.00
+end BaseAtomTypes
+
+begin DirectionalAtomTypes
+//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+TESTP		1270	1270	304
+H_DIP3P         0       0       0
+DIP             0.8202  0.8202  0
+SSD		1.7696	0.6145	1.1550  
+SSD1		1.7696	0.6145	1.1550  
+SSD_E		1.7696	0.6145	1.1550  
+SSD_RF		1.7696	0.6145	1.1550  
+TAP		1.7696  0.6145  1.1550
+HEAD		1125	1125	0
+GBPaper		86.477	86.477	0
+GBlinear	86.477	86.477	0
+GBlipid		45000	45000	9000
+GBlh          1125	1125	0
+GBC6H6		88.781	88.781	177.561
+GBCH3OH		4.056	20.258	20.999
+GBH2O		1.777	0.581	1.196
+GBAr		1.777	0.581	1.196
+GBKr		1.777	0.581	1.196
+PDIP		10.0	10.0	0
+end DirectionalAtomTypes                    
+
+begin GayBerneAtomTypes
+//Name		d   	l	Ex		Es		Ee	dw
+TESTP		4.2426	5.6568	0.185		0.185		0.185	1.0
+TESTP2		3.81838	14.142	1.5		1.5		0.3	1.0
+GBDPPCh		4.2426	5.6568	0.185		0.185		0.185	1.0
+GBPOPEh		1.5	5.14	0.185		0.185		0.185	1.0
+GBDPPCt		3.81838	14.142	1.5		1.5		0.3	1.0
+GBPOPEt		5	22	1.5		1.5		0.3	1.0
+GBPaper		3.35    10.05	0.774729 	0.774729	0.154945 1.0
+GBlinear	2.8104  9.993	0.774729 	0.774729 	0.116839 1.0
+GBlipid         4.596194077712558909	13.78858223313767673	1.0	1.0	0.2	1.0
+//GBlh		4.596194077712558909   4.596194077712558909	0.185	0.185	1.0	1.0
+GBlh		6.2     6.2	0.185  		0.185		0.185	1.0
+//GBlh		6.4     6.7	0.185		0.185		0.17501	1.0
+//GBlh		6.3     6.919249181153943059	0.185		0.185	0.1295	1.0
+//GBlh		6.2     7.144250780437044745	0.185		0.185	0.1295	1.0
+//GBlh		6.1     7.380408492340768611	0.185		0.185	0.111	1.0
+GBC6H6		4.65	2.03	0.540		0.540		1.9818	0.6
+GBCH3OH		2.55	3.18	0.542		0.542		0.55826	1.0
+end GayBerneAtomTypes                 	
+
+begin LennardJonesAtomTypes
+//Name		epsilon		sigma	
+DIP             0.038025        3.12
+SSD	  	0.152		3.051					
+SSD1      	0.152           3.016 
+SSD_E	 	0.152	        3.035
+SSD_RF    	0.152           3.019
+TAP	  	0.152		2.9 
+O_DIP3P   	0.1521          3.15061 
+O_TIP3P   	0.1521          3.15061 
+O_TIP4P   	0.1550          3.15365 
+O_TIP4P-Ew      0.16275         3.16435
+O_TIP5P   	0.16            3.12   
+O_TIP5P-E   	0.178           3.097   
+O_SPCE    	0.15532         3.16549
+O_SPC     	0.15532         3.16549
+CH4       	0.279           3.73
+CH3       	0.185           3.75
+CH2       	0.0866          3.95
+CH       	0.0189          4.68
+HEAD	  	0.185		9.192388155425117817				
+TB1		0.0866		4.0     		         
+TE1	  	0.185		4.0     		             
+TB2	  	0.25		6.0     		             
+TE2	  	0.5		6.0     		             
+TB3	  	0.5		8.0     		              
+TE3	  	0.75		8.0     
+H	  	0.017090056482	2.81
+He	  	0.020269601874	2.28
+C	  	0.101745452544	3.35
+N	  	0.074123151951	3.31
+O	  	0.122412497592	2.95
+F	  	0.104924997936	2.83
+Ne	  	0.09339914589	2.72
+S	  	0.36366050421	3.52
+Cl	  	0.344781953445	3.35
+Cl-		0.100		4.445
+Na+		0.118		2.579
+Ar	  	0.238068461226	3.41
+Br	  	0.511111921764	3.54
+Kr	  	0.32590340268	3.83
+U	  	1.0		1.0
+Pchg+		0.1		3.0
+Pchg-		0.1		3.0
+PDIP		0.15		5.0
+DPD		0.8		4.70
+//DPD		0.48		4.70
+GBH2O		0.2		2.35
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+// Name 	charge
+O_TIP3P  	-0.834
+O_SPCE   	-0.8476
+O_SPC    	-0.82
+H_TIP3P   	0.417
+H_TIP4P   	0.520
+H_TIP4P-Ew      0.52422
+H_TIP5P   	0.241
+H_SPCE    	0.4238
+H_SPC     	0.42
+EP_TIP4P 	-1.040
+EP_TIP4P-Ew     -1.04844
+EP_TIP5P 	-0.241
+Cl	 	-1.0
+Cl-		-1.0
+Na+		1.0
+Pchg+		0.5
+Pchg-		-1.0
+end ChargeAtomTypes
+
+begin MultipoleAtomTypes
+// OOPSE currently only supports charge-charge, charge-dipole, 
+// dipole-dipole, and charge-quadrupole interactions.
+// Dipoles may be either traditional point-dipoles or split-dipoles.
+// possible formats for a multipolar atom type are:
+//
+// Point-dipoles:
+// name d phi theta psi dipole_moment
+//
+// Split-dipoles:
+// name s phi theta psi dipole_moment splitdipole_distance
+//
+// Point-Quadrupoles:
+// name q phi theta psi Qxx Qyy Qzz
+//
+// Atoms with both dipole and quadrupole moments:
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+//
+// Atoms with both split dipoles and quadrupole moments:
+// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+//
+// Euler angles are given in zxz convention in units of degrees.
+//
+// Charges are given in units of electrons.
+//
+// Dipoles are given in units of Debyes.
+//
+// Split dipole distances are given in units of Angstroms.
+//  
+// Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
+//                                                           esu centi-barn)
+//
+H_DIP3P d        0.0     0.0     0.0     1.91
+DIP     d        0.0     0.0     0.0     1.91
+SSD_E   dq       0.0     0.0     0.0     2.42  -1.682  1.762  -0.08
+SSD_RF  dq       0.0     0.0     0.0     2.48  -1.682  1.762  -0.08
+SSD     dq       0.0     0.0     0.0     2.35  -1.682  1.762  -0.08
+SSD1    dq       0.0     0.0     0.0     2.35  -1.682  1.762  -0.08
+TAP	dq       0.0     0.0     0.0     2.12  -1.682  1.762  -0.08
+PDIP	d        0.0     0.0     0.0     9.6064
+GBH2O	dq	0.0	0.0	0.0	1.772	-2.165	2.446	-0.281
+GBlh  d       0.0     0.0     0.0     13.0
+HEAD  d       0.0     0.0     0.0     13.0
+GBC6H6	q	0.0	0.0	0.0	4.584	4.584	-9.168
+//HDP     s       0.0     0.0     0.0     20.6    4.63
+end MultipoleAtomTypes
+
+begin StickyAtomTypes
+//name w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
+SSD_E	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD_RF	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD	0.07715	3.7284		3.7284	2.75	  3.35	2.75	4.0
+SSD1	0.07715	3.6613		3.6613	2.75	  3.35	2.75	4.0
+end StickyAtomTypes
+
+begin StickyPowerAtomTypes
+//name w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
+TAP	0.075	5.5		0.25	2.75	  3.5	2.75	3.25
+end StickyPowerAtomTypes
+
+begin BondTypes
+
+//Atom1	Atom2	Fixed
+//V_Fixed = 0
+
+//Atom1	Atom2	Harmonic	b0	Kb (kcal/mol)
+//V_Harmonic = 0.5*Kb(b- bo)^2
+//Harmonic Examples
+HEAD	CH3	Harmonic		2.75		260
+HEAD	CH2	Harmonic		2.75		260
+HEAD	CH	Harmonic		2.75		260
+HEAD    TB1	Harmonic		2.76		260
+HEAD	TB2	Harmonic		3.20		260
+HEAD	TB3	Harmonic		3.63		260
+CH3	CH3	Harmonic		1.526		260
+CH3	CH2	Harmonic		1.526		260
+CH3	CH	Harmonic		1.526		260
+CH2	CH2	Harmonic		1.526		260
+CH2	CH	Harmonic		1.526		260
+CH	CH	Harmonic		1.526		260
+TB1	TB1	Harmonic		1.526		260
+TB2	TB2	Harmonic		2.34		260
+TB3	TB3	Harmonic		3.12		260
+TB1	TE1	Harmonic		1.526		260
+TB2	TE2	Harmonic		2.34		260
+TB3	TE3	Harmonic		3.12		260
+
+//Atom1	Atom2	Cubic		b0	K3	K2	K1	K0
+//V_Cubic = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
+
+
+//Atom1	Atom2	Quartic	b0	K4	K3	K2	K1	K0
+//V_Quartic = K4(b - b0)^4 + K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
+
+
+//Atom1	Atom2	Polynomial	b0	i	Ki	[j	Kj]
+//V_Quartic = Ki(b - b0)^i + Kj(b - b0)^j + ...
+
+
+end BondTypes
+
+begin BendTypes
+
+//Harmonic
+//Atom1	Atom2	Atom3	Harmonic	Theta0	Ktheta
+//V_Harmonic = 0.5*Ktheta(Theta - Theta0)^2
+//Ktheta: kcal/mole/rad**2
+//Theta0: degrees
+//Harmonic examples
+//
+HEAD	CH2	HEAD	Harmonic	114.0	117.68
+HEAD	CH2	CH3	Harmonic	114.0	117.68
+HEAD	CH2	CH2	Harmonic	114.0	117.68
+HEAD	TB1	TB1	Harmonic	114.0	117.68
+HEAD	TB2	TB2	Harmonic	114.0	117.68
+HEAD	TB3	TB3	Harmonic	114.0	117.68
+HEAD	CH2	CH	Harmonic	114.0	117.68
+HEAD	CH	CH3	Harmonic	112.0	117.68
+HEAD	CH	CH2	Harmonic	112.0	117.68
+HEAD	CH	CH	Harmonic	112.0	117.68
+CH3	CH2	CH3	Harmonic	114.0	117.68
+CH3	CH2	CH2	Harmonic	114.0	117.68
+CH3	CH2	CH	Harmonic	114.0	117.68
+CH3	CH	CH3	Harmonic	112.0	117.68
+CH3	CH	CH2	Harmonic	112.0	117.68
+CH3	CH	CH	Harmonic	112.0	117.68
+CH2	CH2	CH2	Harmonic	114.0	117.68
+CH2	CH2	CH	Harmonic	114.0	117.68
+CH2	CH	CH2	Harmonic	112.0	117.68
+CH2	CH	CH	Harmonic	112.0	117.68
+CH	CH2	CH	Harmonic	114.0	117.68
+CH	CH	CH	Harmonic	112.0	117.68
+TB1	TB1	TB1	Harmonic	114.0	117.68
+TB2	TB2	TB2	Harmonic	114.0	117.68
+TB3	TB3	TB3	Harmonic	114.0	117.68
+TE1	TB1	TB1	Harmonic	114.0	117.68
+TE2	TB2	TB2	Harmonic	114.0	117.68
+TE3	TB3	TB3	Harmonic	114.0	117.68
+
+//GhostBend
+//Atom1	Atom2	GHOST	GhostBend	Theta0	Ktheta
+//Atom2 must be directional atom
+//Ghost examples
+CH2	HEAD	GHOST	GhostBend	129.783	0.00354
+CH2	HEAD	GHOST	GhostBend	90.0	117.68	
+TB1	HEAD	GHOST	GhostBend	90.0	117.68	
+TB2	HEAD	GHOST	GhostBend	90.0	260.00
+TB3	HEAD	GHOST	GhostBend	90.0 	117.68	
+
+//UreyBradley
+//Atom1	Atom2	Atom3	UreyBradley		Theta0	Ktheta	S0	Kub
+//V_UreyBradleyBend = Ktheta(Theta - Theta0)^2 +  Kub(S - S0)^2
+//Ktheta: kcal/mole/rad**2
+//Theta0: degrees
+//Kub: kcal/mole/A**2
+//S0: A
+
+//Cubic
+//Atom1	Atom2	Atom3	Cubic	Theta0	K3	K2	K1	K0
+//V_Cubic = K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
+
+//Quartic
+//Atom1	Atom2	Atom3	Quartic	Theta0	K4	K3	K2	K1	K0
+//V_Quartic = K4(Theta - Theta0)^4 + K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
+
+//Polynomial
+//Atom1	Atom2	Atom3	Polynomial	Theta0	i	Ki 	[j	Kj]
+//V_Polynomial = Ki(Theta - Theta0)^i +  Kj(Theta - Theta0)^j + ...
+
+end BendTypes
+
+begin TorsionTypes
+
+//Cubic
+//Atom1	Atom2	Atom3	Atom4	Cubic		k3		k2		k1		k0  ( all are kcal/mol )
+//V_Cubic = k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
+//Cubic Examples
+HEAD	CH2	CH2	HEAD	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	HEAD	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	HEAD	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	TB1	TB1	TB1	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	TB2	TB2	TB2	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+TB1	TB1	TB1	TB1	Cubic		5.9602		-0.2568		-3.802		2.1586
+TB2	TB2	TB2	TB2	Cubic		5.9602		-0.2568		-3.802		2.1586
+TB3	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
+TE1	TB1	TB1	TB1	Cubic		5.9602		-0.2568		-3.802		2.1586
+TE2	TB2	TB2	TB2	Cubic		5.9602		-0.2568		-3.802		2.1586
+TE3	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
+
+//Charmm
+//Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]
+//V_Charmm =  Kchi(1 + cos(n(chi) - delta))
+//Kchi: kcal/mole
+//n: multiplicity
+//delta: degrees
+//in some cases, a Charmm may have two or three terms. If n is equal to 0, it falls back to harmonic form
+
+//Quartic
+//Atom1	Atom2	Atom3	Atom4	Quartic		k4		k3		k2		k1		k0  ( all are kcal/mol )
+//V_Quartic = k4(cos phi)^4 + k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
+
+//Polynomial
+//Atom1	Atom2	Atom3	Atom4	Polynomial	i	Ki	[j	Kj] 
+//VPolynomial = Ki (cos phi)^i + ... + Kj (cos phi)^j
+
+end TorsionTypes
+
+

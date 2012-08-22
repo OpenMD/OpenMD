@@ -35,8 +35,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
  *  ConvexHull.cpp
  *
@@ -62,20 +62,10 @@
 #include <mpi.h>
 #endif
 
-using namespace OpenMD;
+#include "math/qhull.hpp"
 
 #ifdef HAVE_QHULL
-extern "C"
-{
-#include <qhull/libqhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
-}
+using namespace OpenMD;
 
 ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp") {
 }
@@ -214,6 +204,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   } //qh_new_qhull
 
 #endif
+
   intPoint = qh interior_point;
   RealType calcvol = 0.0;
   FORALLfacets {  
@@ -274,7 +265,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
     face.addVertices(p[0], p[1], p[2]);
     face.setFacetMass(faceMass);
-    face.setFacetVelocity(faceVel/3.0);
+    face.setFacetVelocity(faceVel / RealType(3.0));
     /*
     RealType comparea = face.computeArea();
     realT calcarea = qh_facetarea (facet);

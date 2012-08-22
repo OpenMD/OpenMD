@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <algorithm>
@@ -62,14 +63,14 @@ namespace OpenMD {
 
 
   void GofRAngle::preProcess() {
-    for (int i = 0; i < avgGofr_.size(); ++i) {
+    for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
       std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
   }
 
   void GofRAngle::initalizeHistogram() {
     npairs_ = 0;
-    for (int i = 0; i < histogram_.size(); ++i){
+    for (unsigned int i = 0; i < histogram_.size(); ++i){
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
     }
   }
@@ -80,14 +81,14 @@ namespace OpenMD {
     RealType pairDensity = nPairs /volume;
     RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
       RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
       RealType nIdeal = volSlice * pairConstant;
 
-      for (int j = 0; j < histogram_[i].size(); ++j){
+      for (unsigned int j = 0; j < histogram_[i].size(); ++j){
 	avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
       }
     }
@@ -127,10 +128,10 @@ namespace OpenMD {
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
       rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
-      for (int i = 0; i < avgGofr_.size(); ++i) {
+      for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 
-	for(int j = 0; j < avgGofr_[i].size(); ++j) {
+	for(unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
 	  RealType cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
 	  rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
 	}

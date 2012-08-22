@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
  *  @version $Id: BondOrderParameter.cpp 1442 2010-05-10 17:28:26Z gezelter $
@@ -94,7 +94,6 @@ namespace OpenMD {
     StuntDouble* sd2;
     StuntDouble* sdi;
     StuntDouble* sdj;
-    StuntDouble* sdk;
     RigidBody* rb;
     int myIndex;
     SimInfo::MoleculeIterator mi;
@@ -103,7 +102,6 @@ namespace OpenMD {
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj, dposition, tposition;
     RealType r;
-    RealType dist;
     RealType cospsi;
     RealType Qk;
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
@@ -180,12 +178,11 @@ namespace OpenMD {
 	
 	// Use only the 4 closest neighbors to do the rest of the work:
 	
-	int nbors =  myNeighbors.size();
-	// > 4 ? 4 : myNeighbors.size();
+	int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
 	int nang = int (0.5 * (nbors * (nbors - 1)));
 
 	rk = sd->getPos();
-
+	std::cerr<<nbors<<endl;
 	for (int i = 0; i < nbors-1; i++) {	  
 
 	  sdi = myNeighbors[i].second;
@@ -211,30 +208,33 @@ namespace OpenMD {
 
 	    // Calculates scaled Qk for each molecule using calculated angles from 4 or fewer nearest neighbors.
 	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
-	   
+	    //std::cerr<<Qk<<"\t"<<nang<<endl;
 	  }
 	}
-
+	//std::cerr<<nang<<endl;
 	if (nang > 0) {
 	  collectHistogram(Qk);
 
 	// Saves positions of StuntDoubles & neighbors with distorted coordination (low Qk value)
 	if ((Qk < 0.55) && (Qk > 0.45)) {
-
+	  //std::cerr<<Distorted_.size()<<endl;
 	  Distorted_.push_back(sd);
-
+	  //std::cerr<<Distorted_.size()<<endl;
 	  dposition = sd->getPos();
 	  //std::cerr << "distorted position \t" << dposition << "\n";
 	}
 
 	// Saves positions of StuntDoubles & neighbors with tetrahedral coordination (high Qk value)
-	if (Qk > 0.95) { 
+	if (Qk > 0.05) { 
 
 	  Tetrahedral_.push_back(sd);
 
 	  tposition = sd->getPos();
 	  //std::cerr << "tetrahedral position \t" << tposition << "\n";
 	}
+
+	//std::cerr<<Tetrahedral_.size()<<endl;
+
 
 	}
 
@@ -263,7 +263,7 @@ namespace OpenMD {
     for (int i = 0; i < nBins_; ++i) {
       nSelected = nSelected + Q_histogram_[i]*deltaQ_;
     }
-
+    
     std::ofstream osq((getOutputFileName() + "Q").c_str());
 
     if (osq.is_open()) {
@@ -303,22 +303,14 @@ namespace OpenMD {
       osd << "1000000.00000000;    34.52893134     0.00000000     0.00000000;     0.00000000    34.52893134     0.00000000;     0.00000000     0.00000000    34.52893134" << "\n";
       
       for (iter = Distorted_.begin(); iter != Distorted_.end(); ++iter) {
-
 	Vector3d position;
-
 	position = (*iter)->getPos();
-
 	osd << "O  " << "\t";
-
-	  for (int z=0; z<position.size(); z++) {
-
+	  for (unsigned int z = 0; z < position.size(); z++) {
 	    osd << position[z] << "  " << "\t";
 	  }
-
 	  osd << "\n";
-
       }
-
       osd.close();
     }
 
@@ -339,7 +331,7 @@ namespace OpenMD {
 
 	ost << "O  " << "\t";
 
-	  for (int z=0; z<position.size(); z++) {
+	  for (unsigned int z = 0; z < position.size(); z++) {
 
 	    ost << position[z] << "  " << "\t";
 	  }

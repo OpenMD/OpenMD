@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYTHON_EXECUTABLE@
 """Pressure Correlation function
 
 Computes various correlation functions of the pressure and pressure tensor

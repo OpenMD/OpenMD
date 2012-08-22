@@ -36,45 +36,31 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #define _LARGEFILE_SOURCE64
 #define _FILE_OFFSET_BITS 64
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
 
 #include "io/StatWriter.hpp"
+#include "brains/Stats.hpp"
 #include "utils/simError.h"
 
 using namespace std;
 
 namespace OpenMD {
-  StatsBitSet parseStatFileFormat(const std::string& format) {
-    StringTokenizer tokenizer(format, " ,;|\t\n\r");
-    StatsBitSet mask;
-    while(tokenizer.hasMoreTokens()) {
-        std::string token(tokenizer.nextToken());
-        toUpper(token);
-        Stats::StatsMapType::iterator i = Stats::statsMap.find(token);
-        if (i != Stats::statsMap.end()) {
-            mask.set(i->second);
-        } else {
-          sprintf( painCave.errMsg,
-	               "%s is not a valid statFileFormat keyword.\n", token.c_str() );
-          painCave.isFatal = 0;
-          painCave.severity = OPENMD_ERROR;
-          simError();            
-        }
-    }
-    
-    return mask;
-  }
   
-  StatWriter::StatWriter( const std::string& filename, const StatsBitSet& mask) : mask_(mask){
-
+  StatWriter::StatWriter( const std::string& filename, Stats* stats) : stats_(stats){
+    
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif // is_mpi
-
+      
       statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc );
     
       if( !statfile_ ){
@@ -111,8 +97,10 @@ namespace OpenMD {
 #endif // is_mpi
   }
 
+
   void StatWriter::writeTitle() {
 
+    Stats::StatsBitSet mask = stats_->getStatsMask();    
 
 #ifdef IS_MPI
     if(worldRank == 0 ){
@@ -120,9 +108,10 @@ namespace OpenMD {
 
       //write title
       statfile_ << "#";
-      for (int i =0; i < mask_.size(); ++i) {
-	if (mask_[i]) {
-	  statfile_ << "\t" << Stats::getTitle(i) << "(" << Stats::getUnits(i) << ")";
+      for (unsigned int i = 0; i <mask.size(); ++i) {
+	if (mask[i]) {
+	  statfile_ << "\t" << stats_->getTitle(i) << 
+            "(" << stats_->getUnits(i) << ")";
 	}
       }
       statfile_ << std::endl;
@@ -132,29 +121,33 @@ namespace OpenMD {
 #endif // is_mpi    
   }
 
-  void StatWriter::writeStat(const Stats& s){
-
+  void StatWriter::writeStat() {
+    
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif // is_mpi
 
+      Stats::StatsBitSet mask = stats_->getStatsMask();
       statfile_.precision(8);
-      for (int i =0; i < mask_.size(); ++i) {
-	if (mask_[i]) {
-          if (! isinf(s[i]) && ! isnan(s[i])){
-            statfile_ << "\t" << s[i];
-          }
-          else{
+      for (unsigned int i = 0; i < mask.size(); ++i) {
+	if (mask[i]) {
+          if (stats_->getDataType(i) == "RealType")
+            writeReal(i);
+          else if (stats_->getDataType(i) == "Vector3d")
+            writeVector(i);
+          else if (stats_->getDataType(i) == "Mat3x3d")
+            writeMatrix(i);
+          else {
             sprintf( painCave.errMsg,
-                     "StatWriter detected a numerical error writing: %s ",
-                     Stats::getTitle(i).c_str());
+                     "StatWriter found an unknown data type for: %s ",
+                     stats_->getTitle(i).c_str());
             painCave.isFatal = 1;
             simError();
-          }          
-	}
+          }
+        }
       }
+            
       statfile_ << std::endl;
-
       statfile_.flush();
 
 #ifdef IS_MPI
@@ -163,4 +156,53 @@ namespace OpenMD {
 #endif // is_mpi
   }
 
+  void StatWriter::writeReal(int i) {
+
+    RealType s = stats_->getRealData(i);
+
+    if (! isinf(s) && ! isnan(s)) {
+      statfile_ << "\t" << s;
+    } else{
+      sprintf( painCave.errMsg,
+               "StatWriter detected a numerical error writing: %s ",
+               stats_->getTitle(i).c_str());
+      painCave.isFatal = 1;
+      simError();
+    }    
+  }
+
+  void StatWriter::writeVector(int i) {
+
+    Vector3d s = stats_->getVectorData(i);
+    if (isinf(s[0]) || isnan(s[0]) || 
+        isinf(s[1]) || isnan(s[1]) || 
+        isinf(s[2]) || isnan(s[2]) ) {      
+      sprintf( painCave.errMsg,
+               "StatWriter detected a numerical error writing: %s",
+               stats_->getTitle(i).c_str());
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      statfile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
+    }
+  }
+
+  void StatWriter::writeMatrix(int i) {
+
+    Mat3x3d s = stats_->getMatrixData(i);
+
+    for (unsigned int i = 0; i < 3; i++) {
+      for (unsigned int j = 0; j < 3; j++) {
+        if (isinf(s(i,j)) || isnan(s(i,j))) {      
+          sprintf( painCave.errMsg,
+                   "StatWriter detected a numerical error writing: %s",
+                   stats_->getTitle(i).c_str());
+          painCave.isFatal = 1;
+          simError();
+        } else {
+          statfile_ << "\t" << s(i,j);
+        }
+      }
+    }
+  }    
 }

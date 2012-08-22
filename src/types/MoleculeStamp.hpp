@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef TYPES_MOLECULESTAMP_HPP
@@ -55,6 +56,8 @@
 namespace OpenMD {
   class MoleculeStamp : public DataHolder {
     DeclareParameter(Name, std::string);
+    DeclareParameter(ConstrainTotalCharge, bool);
+
   public:
     MoleculeStamp();
     virtual ~MoleculeStamp();
@@ -76,6 +79,7 @@ namespace OpenMD {
     int  getNRigidBodies() { return rigidBodyStamps_.size(); }
     int  getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
     int getNIntegrable() { return nintegrable_;}
+    int getNFreeAtoms() { return freeAtoms_.size(); }
     virtual void validate();
     
     AtomStamp* getAtomStamp(int index) { return atomStamps_[index]; }
@@ -104,30 +108,32 @@ namespace OpenMD {
     void checkRigidBodies();
     void checkCutoffGroups();
     void checkFragments();
+
     template <class Cont, class T>
     bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
-    typename Cont::iterator i;
-    int index = stamp->getIndex();
-    bool ret = false;
-    size_t size = cont.size();
-    
-    if (size >= index +1) {
-      if (cont[index]!= NULL) {
-        ret = false;
-      }else {
+      typename Cont::iterator i;
+      unsigned int index = stamp->getIndex();
+      bool ret = false;
+      size_t size = cont.size();
+      
+      if (size >= index +1) {
+        if (cont[index]!= NULL) {
+          ret = false;
+        }else {
+          cont[index] = stamp;
+          ret = true;
+        }
+      } else {
+        cont.insert(cont.end(), index - cont.size() + 1, NULL);
         cont[index] = stamp;
         ret = true;
       }
-    } else {
-      cont.insert(cont.end(), index - cont.size() + 1, NULL);
-      cont[index] = stamp;
-      ret = true;
-    }
-    
-    return ret;
+      
+      return ret;
     }
     
     std::vector<AtomStamp*> atomStamps_;
+    std::vector<int> freeAtoms_;
     std::vector<BondStamp*> bondStamps_;
     std::vector<BendStamp*> bendStamps_;
     std::vector<TorsionStamp*> torsionStamps_;

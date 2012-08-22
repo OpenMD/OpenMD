@@ -36,15 +36,18 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
+#include <cmath>
 #include "primitives/GhostBend.hpp"
 #include "primitives/DirectionalAtom.hpp"
 namespace OpenMD {
 
   /**@todo still a lot left to improve*/
-  void GhostBend::calcForce(RealType& angle) {
+  void GhostBend::calcForce(RealType& angle, bool doParticlePot) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
     
     Vector3d pos1 = atom1_->getPos();
@@ -94,9 +97,10 @@ namespace OpenMD {
     ghostAtom->addFrc(-force1);
 
     ghostAtom->addTrq( cross(r23, force3) );    
-
-    atom1_->addParticlePot(potential_);
-    ghostAtom->addParticlePot(potential_);
+    if(doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      ghostAtom->addParticlePot(potential_);
+    }
 
     angle = theta /M_PI * 180.0;
    

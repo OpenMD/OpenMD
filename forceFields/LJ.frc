@@ -1,0 +1,26 @@
+// This is the forcefield file for stock Lennard-Jones simulations
+//
+// The sections are divided into AtomTypes
+//
+// many parameters (but not all) are derived from the TRAPPE force field
+// of Siepmann's group.
+
+begin Options
+      Name                   "LJ"
+end Options
+
+begin BaseAtomTypes    
+//Name		mass(amu)
+He		4.002602
+Ne		20.1797		
+Ar		39.948		
+Kr		83.80
+end BaseAtomTypes
+
+begin LennardJonesAtomTypes
+//Name		epsilon(kcal/mol)	sigma(Angstroms)
+He	  	0.020269601874	2.28
+Ne	  	0.09339914589	2.72
+Ar	  	0.238068461226	3.41
+Kr	  	0.32590340268	3.83
+end LennardJonesAtomTypes

@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <algorithm>
@@ -92,7 +93,7 @@ void ObjectCount::process() {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
     }
         
-    int count = seleMan_.getSelectionCount();
+    unsigned int count = seleMan_.getSelectionCount();
 
     if (counts_.size() <= count)  {
       counts_.resize(count, 0);
@@ -121,7 +122,7 @@ void ObjectCount::process() {
       ofs << "# <N^2> = " << n2Avg << "\n";
       ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
       ofs << "# N\tcounts[N]\n";
-      for (int i = 0; i < counts_.size(); ++i) {
+      for (unsigned int i = 0; i < counts_.size(); ++i) {
         ofs << i << "\t" << counts_[i] << "\n";
       }
       

@@ -36,15 +36,18 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
+#include <cmath>
 #include "primitives/Bend.hpp"
 
 namespace OpenMD {
   
   /**@todo still a lot left to improve*/
-  void Bend::calcForce(RealType& angle) {
+  void Bend::calcForce(RealType& angle, bool doParticlePot) {
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = atom3_->getPos();
@@ -94,9 +97,11 @@ namespace OpenMD {
     atom2_->addFrc(force2);
     atom3_->addFrc(force3);
 
-    atom1_->addParticlePot(potential_);
-    atom2_->addParticlePot(potential_);
-    atom3_->addParticlePot(potential_);
+    if (doParticlePot) {
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
+      atom3_->addParticlePot(potential_);
+    }
    
     angle = theta /M_PI * 180.0;
   }

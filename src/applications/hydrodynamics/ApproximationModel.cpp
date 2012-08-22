@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "applications/hydrodynamics/ApproximationModel.hpp" 
@@ -83,7 +84,7 @@ namespace OpenMD {
   
   bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr) {
     
-    int nbeads = beads.size();
+    unsigned int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
     DynamicRectMatrix<RealType> C(3*nbeads, 3*nbeads);
     Mat3x3d I;
@@ -120,7 +121,7 @@ namespace OpenMD {
     
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
-    for (int i = 0; i < nbeads; ++i) {
+    for (unsigned int i = 0; i < nbeads; ++i) {
       Mat3x3d currU;
       currU.setupSkewMat(beads[i].pos);
       U.push_back(currU);
@@ -151,7 +152,7 @@ namespace OpenMD {
     }
 
     // add the volume correction
-    Xiorr += (6.0 * viscosity * volume) * I;    
+    Xiorr += (RealType(6.0) * viscosity * volume) * I;    
     
     Xiott *= PhysicalConstants::viscoConvert;
     Xiotr *= PhysicalConstants::viscoConvert;
@@ -256,7 +257,7 @@ namespace OpenMD {
   
   bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cd) {
     
-    int nbeads = beads.size();
+    unsigned int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
     DynamicRectMatrix<RealType> C(3*nbeads, 3*nbeads);
     Mat3x3d I;
@@ -293,7 +294,7 @@ namespace OpenMD {
     
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
-    for (int i = 0; i < nbeads; ++i) {
+    for (unsigned int i = 0; i < nbeads; ++i) {
       Mat3x3d currU;
       currU.setupSkewMat(beads[i].pos);
       U.push_back(currU);
@@ -323,7 +324,7 @@ namespace OpenMD {
       }
     }
     // add the volume correction here:
-    Xirr += (6.0 * viscosity * volume) * I;    
+    Xirr += (RealType(6.0) * viscosity * volume) * I;    
     
     Xitt *= PhysicalConstants::viscoConvert;
     Xitr *= PhysicalConstants::viscoConvert;

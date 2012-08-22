@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <algorithm>
@@ -74,7 +75,7 @@ namespace OpenMD {
     RealType pairDensity = nPairs /volume * 2.0;
     RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
@@ -114,11 +115,10 @@ namespace OpenMD {
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgGofr_.size(); ++i) {
+      for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
       }
-        
     } else {
 
       sprintf(painCave.errMsg, "GofR: unable to open %s\n", outputFilename_.c_str());

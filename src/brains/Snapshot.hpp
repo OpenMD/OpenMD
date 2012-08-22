@@ -36,15 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- */
-  
-/**
- * @file Snapshot.hpp
- * @author tlin
- * @date 10/20/2004
- * @time 23:56am
- * @version 1.0
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
   
 #ifndef BRAINS_SNAPSHOT_HPP
@@ -53,175 +46,228 @@
 #include <vector>
 
 #include "brains/DataStorage.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "brains/Stats.hpp"
-#include "UseTheForce/DarkSide/simulation_interface.h"
 
-
+using namespace std;
 namespace OpenMD{
 
   /**
-   * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
-   * @brief Snapshot class is a repository class for storing dynamic data during 
-   *  Simulation
-   * Every snapshot class will contain one DataStorage  for atoms and one DataStorage
-   *  for rigid bodies.
+   * FrameData is a structure for holding system-wide dynamic data
+   * about the simulation.
+   */
+  
+  struct FrameData {
+    int id;                       /**< identification number of the snapshot */
+    RealType currentTime;         /**< current time */
+    Mat3x3d  hmat;                /**< axes of the periodic box in matrix form */
+    Mat3x3d  invHmat;             /**< the inverse of the Hmat matrix */
+    bool     orthoRhombic;        /**< is this an orthorhombic periodic box? */
+    RealType totalEnergy;         /**< total energy of this frame */
+    RealType translationalKinetic; /**< translational kinetic energy of this frame */
+    RealType rotationalKinetic;   /**< rotational kinetic energy of this frame */
+    RealType kineticEnergy;       /**< kinetic energy of this frame */
+    RealType potentialEnergy;     /**< potential energy of this frame */
+    RealType shortRangePotential; /**< short-range contributions to the potential*/
+    RealType longRangePotential;  /**< long-range contributions to the potential */
+    RealType bondPotential;       /**< bonded contribution to the potential */
+    RealType bendPotential;       /**< angle-bending contribution to the potential */
+    RealType torsionPotential;    /**< dihedral (torsion angle) contribution to the potential */
+    RealType inversionPotential;  /**< inversion (planarity) contribution to the potential */
+    potVec   lrPotentials;        /**< breakdown of long-range potentials by family */
+    potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
+    RealType restraintPotential;  /**< potential energy of restraints */
+    RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
+    RealType xyArea;              /**< XY area of this frame */
+    RealType volume;              /**< total volume of this frame */
+    RealType pressure;            /**< pressure of this frame */
+    RealType temperature;         /**< temperature of this frame */
+    pair<RealType, RealType> thermostat;    /**< thermostat variables */
+    RealType electronicTemperature; /**< temperature of the electronic degrees of freedom */
+    pair<RealType, RealType> electronicThermostat; /**< thermostat variables for electronic degrees of freedom */
+    Mat3x3d  barostat;            /**< barostat matrix */
+    Vector3d COM;                 /**< location of system center of mass */
+    Vector3d COMvel;              /**< system center of mass velocity */
+    Vector3d COMw;                /**< system center of mass angular velocity */
+    Mat3x3d  inertiaTensor;       /**< inertia tensor for entire system */
+    RealType gyrationalVolume;    /**< gyrational volume for entire system */
+    RealType hullVolume;          /**< hull volume for entire system */
+    Mat3x3d  stressTensor;        /**< stress tensor */
+    Mat3x3d  pressureTensor;      /**< pressure tensor */
+    Vector3d systemDipole;        /**< total system dipole moment */
+    Vector3d conductiveHeatFlux;  /**< heat flux vector (conductive only) */
+    Vector3d convectiveHeatFlux;  /**< heat flux vector (convective only) */
+    RealType conservedQuantity;   /**< anything conserved by the integrator */
+  };
+
+
+  /**
+   * @class Snapshot 
+   * @brief The Snapshot class is a repository storing dynamic data during a
+   * Simulation.  Every Snapshot contains FrameData (for global information)
+   * as well as DataStorage (one for Atoms, one for RigidBodies, and one for 
+   * CutoffGroups).
    */
   class Snapshot {
-  public:
-            
-    Snapshot(int nAtoms, int nRigidbodies) : atomData(nAtoms), 
-                                             rigidbodyData(nRigidbodies),
-					     currentTime_(0), 
-                                             orthoTolerance_(1e-6), 
-                                             orthoRhombic_(0), 
-                                             chi_(0.0), 
-                                             integralOfChiDt_(0.0), 
-                                             eta_(0.0), id_(-1), 
-                                             hasCOM_(false), hasVolume_(false), volume_(0.0) {
 
-    }
-
-    Snapshot(int nAtoms, int nRigidbodies, int storageLayout) 
-      : atomData(nAtoms, storageLayout), 
-        rigidbodyData(nRigidbodies, storageLayout),
-	currentTime_(0), orthoTolerance_(1e-6), orthoRhombic_(0), chi_(0.0), 
-        integralOfChiDt_(0.0), eta_(0.0), id_(-1), hasCOM_(false), hasVolume_(false),volume_(0.0)  {
-
-      }
-            
+  public:            
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups);
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, int storageLayout);    
     /** Returns the id of this Snapshot */
-    int getID() {
-      return id_;
-    }
-
+    int      getID();
     /** Sets the id of this Snapshot */
-    void setID(int id) {
-      id_ = id;
-    }
+    void     setID(int id);
 
-    int getSize() {
-      return atomData.getSize() + rigidbodyData.getSize();
-    }
+    /** sets the state of the computed properties to false */
+    void     clearDerivedProperties();
 
+    int      getSize();
     /** Returns the number of atoms */
-    int getNumberOfAtoms() {
-      return atomData.getSize();
-    }
-
+    int      getNumberOfAtoms();
     /** Returns the number of rigid bodies */
-    int getNumberOfRigidBodies() {
-      return rigidbodyData.getSize();
-    }
+    int      getNumberOfRigidBodies();
+    /** Returns the number of rigid bodies */
+    int      getNumberOfCutoffGroups();
 
     /** Returns the H-Matrix */
-    Mat3x3d getHmat() {
-      return hmat_;
-    }
-
+    Mat3x3d  getHmat();
     /** Sets the H-Matrix */
-    void setHmat(const Mat3x3d& m);
-            
-    RealType getVolume() {
-      if (hasVolume_){
-        return volume_;
-      }else{
-        return hmat_.determinant();
-      }
-    }
-
-    void setVolume(RealType volume){
-      hasVolume_=true;
-      volume_ = volume;
-    }
-
+    void     setHmat(const Mat3x3d& m);
     /** Returns the inverse H-Matrix */
-    Mat3x3d getInvHmat() {
-      return invHmat_;
-    }
+    Mat3x3d  getInvHmat();
+            
+    RealType getVolume();
+    RealType getXYarea();
+    void     setVolume(const RealType vol);
 
     /** Wrapping the vector according to periodic boundary condition*/
-    void wrapVector(Vector3d& v);
+    void     wrapVector(Vector3d& v);
+
+    /** Scaling a vector to multiples of the periodic box */
+    Vector3d scaleVector(Vector3d &v);
+
+    void     setCOM(const Vector3d &com);
+    void     setCOMvel(const Vector3d &comVel);
+    void     setCOMw(const Vector3d &comw);
+
     Vector3d getCOM();
     Vector3d getCOMvel();
     Vector3d getCOMw();
             
-    RealType getTime() {
-      return currentTime_;
-    }
+    RealType getTime();
+    void     increaseTime(const RealType dt);
+    void     setTime(const RealType time);
 
-    void increaseTime(RealType dt) {
-      setTime(getTime() + dt);
-    }
+    void     setBondPotential(const RealType bp);
+    void     setBendPotential(const RealType bp);
+    void     setTorsionPotential(const RealType tp);
+    void     setInversionPotential(const RealType ip);
+    RealType getBondPotential();
+    RealType getBendPotential();
+    RealType getTorsionPotential();
+    RealType getInversionPotential();
 
-    void setTime(RealType time) {
-      currentTime_ =time;
-      //time at statData is redundant
-      statData[Stats::TIME] = currentTime_;
-    }
+    RealType getShortRangePotential();
 
-    RealType getChi() {
-      return chi_;
-    }
+    void     setLongRangePotential(const potVec lrPot);
+    RealType getLongRangePotential();
+    potVec   getLongRangePotentials();
 
-    void setChi(RealType chi) {
-      chi_ = chi;
-    }
+    void     setExcludedPotentials(const potVec exPot);
+    potVec   getExcludedPotentials();
+   
+    void     setRestraintPotential(const RealType rp);
+    RealType getRestraintPotential();
 
-    RealType getIntegralOfChiDt() {
-      return integralOfChiDt_;
-    }
+    void     setRawPotential(const RealType rp);
+    RealType getRawPotential();
 
-    void setIntegralOfChiDt(RealType integralOfChiDt) {
-      integralOfChiDt_ = integralOfChiDt;
-    }
+    RealType getPotentialEnergy();
+    RealType getKineticEnergy();
+    RealType getTranslationalKineticEnergy();
+    RealType getRotationalKineticEnergy();
+    void     setKineticEnergy(const RealType ke);
+    void     setTranslationalKineticEnergy(const RealType tke);
+    void     setRotationalKineticEnergy(const RealType rke);
+    RealType getTotalEnergy();
+    void     setTotalEnergy(const RealType te);
+    RealType getConservedQuantity();
+    void     setConservedQuantity(const RealType cq);
+    RealType getTemperature();
+    void     setTemperature(const RealType temp);
+    RealType getElectronicTemperature();
+    void     setElectronicTemperature(const RealType eTemp);
+    RealType getPressure();
+    void     setPressure(const RealType pressure);
+
+    Mat3x3d  getPressureTensor();
+    void     setPressureTensor(const Mat3x3d& pressureTensor);
+
+    Mat3x3d  getStressTensor();
+    void     setStressTensor(const Mat3x3d& stressTensor);
+
+    Vector3d getConductiveHeatFlux();
+    void     setConductiveHeatFlux(const Vector3d& chf);
+
+    Vector3d getConvectiveHeatFlux();
+    void     setConvectiveHeatFlux(const Vector3d& chf);
+
+    Vector3d getHeatFlux();
+    
+    Vector3d getSystemDipole();
+    void     setSystemDipole(const Vector3d& bd);
+
+    pair<RealType, RealType> getThermostat();
+    void setThermostat(const pair<RealType, RealType>& thermostat);
+
+    pair<RealType, RealType> getElectronicThermostat();
+    void setElectronicThermostat(const pair<RealType, RealType>& eThermostat);
             
+    Mat3x3d  getBarostat();
+    void     setBarostat(const Mat3x3d& barostat);
 
-    void setOrthoTolerance(RealType orthoTolerance) {
-      orthoTolerance_ = orthoTolerance;
-    }
+    Mat3x3d  getInertiaTensor();
+    void     setInertiaTensor(const Mat3x3d& inertiaTensor);
 
-    Mat3x3d getEta() {
-      return eta_;
-    }
+    RealType getGyrationalVolume();
+    void     setGyrationalVolume(const RealType gv);
 
-    void setEta(const Mat3x3d& eta) {
-      eta_ = eta;
-    }
+    RealType getHullVolume();
+    void     setHullVolume(const RealType hv);
+    
+    void     setOrthoTolerance(RealType orthoTolerance);
 
-    bool hasCOM() {
-      return hasCOM_;
-    }
-
-    void setCOMprops(const Vector3d& COM, const Vector3d& COMvel, const Vector3d& COMw) {
-      COM_ = COM;
-      COMvel_ = COMvel;
-      COMw_ = COMw;
-      hasCOM_ = true;
-    }
-                  
     DataStorage atomData;
     DataStorage rigidbodyData;
-    Stats statData;
-            
+    DataStorage cgData;
+    FrameData   frameData;
+
+    bool hasTotalEnergy;         
+    bool hasTranslationalKineticEnergy;    
+    bool hasRotationalKineticEnergy;    
+    bool hasKineticEnergy;    
+    bool hasShortRangePotential;
+    bool hasLongRangePotential;
+    bool hasPotentialEnergy;    
+    bool hasXYarea;
+    bool hasVolume;         
+    bool hasPressure;       
+    bool hasTemperature;    
+    bool hasElectronicTemperature;
+    bool hasCOM;             
+    bool hasCOMvel;
+    bool hasCOMw;
+    bool hasPressureTensor;    
+    bool hasSystemDipole;    
+    bool hasConvectiveHeatFlux;
+    bool hasInertiaTensor;
+    bool hasGyrationalVolume;
+    bool hasHullVolume;
+    bool hasConservedQuantity;
+
   private:
-    RealType currentTime_;
-
-    Mat3x3d hmat_;
-    Mat3x3d invHmat_;
     RealType orthoTolerance_;
-    int orthoRhombic_;
-    RealType volume_;
-
-    RealType chi_;
-    RealType integralOfChiDt_;
-    Mat3x3d eta_;
-    Vector3d COM_;
-    Vector3d COMvel_;
-    Vector3d COMw_;
-    int id_; /**< identification number of the snapshot */
-    bool hasCOM_;
-    bool hasVolume_;
-            
+    
   };
 
   typedef DataStorage (Snapshot::*DataStoragePointer); 

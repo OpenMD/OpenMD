@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
   
 /**
@@ -52,13 +53,15 @@
 
 #include <string>
 #include <map>
+#include <bitset>
 
 #include "math/SquareMatrix3.hpp"
+#include "utils/Accumulator.hpp"
+#include "brains/SimInfo.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  /**
-   * @class Stats Stats.hpp "brains/Stats.hpp"
-   */
   class Stats{
   public:
     enum StatsIndex {
@@ -76,78 +79,61 @@ namespace OpenMD {
       TRANSLATIONAL_KINETIC,
       ROTATIONAL_KINETIC,
       LONG_RANGE_POTENTIAL,   
-      SHORT_RANGE_POTENTIAL,
       VANDERWAALS_POTENTIAL,
       ELECTROSTATIC_POTENTIAL,
+      METALLIC_POTENTIAL,
+      HYDROGENBONDING_POTENTIAL,
+      SHORT_RANGE_POTENTIAL,
       BOND_POTENTIAL,
       BEND_POTENTIAL,
       DIHEDRAL_POTENTIAL,
       INVERSION_POTENTIAL,
-      VRAW,
-      VHARM,
-      PRESSURE_TENSOR_XX,
-      PRESSURE_TENSOR_XY,
-      PRESSURE_TENSOR_XZ,
-      PRESSURE_TENSOR_YX,
-      PRESSURE_TENSOR_YY,
-      PRESSURE_TENSOR_YZ,
-      PRESSURE_TENSOR_ZX,
-      PRESSURE_TENSOR_ZY,
-      PRESSURE_TENSOR_ZZ,
-      BOX_DIPOLE_X,
-      BOX_DIPOLE_Y,
-      BOX_DIPOLE_Z,
+      RAW_POTENTIAL,
+      RESTRAINT_POTENTIAL,
+      PRESSURE_TENSOR,
+      SYSTEM_DIPOLE,
       TAGGED_PAIR_DISTANCE,
-      RNEMD_EXCHANGE_TOTAL,
       SHADOWH,
-      THERMAL_HELFANDMOMENT_X,
-      THERMAL_HELFANDMOMENT_Y,
-      THERMAL_HELFANDMOMENT_Z,
+      HELFANDMOMENT,
+      HEATFLUX,  
+      ELECTRONIC_TEMPERATURE,
       ENDINDEX  //internal use
     };
 
-    Stats();
-    const RealType& operator [](int index) const {
-      assert(index >=0 && index < ENDINDEX);
-      return data_[index];
-    }
+    struct StatsData {
+      string title;
+      string units;
+      string dataType;
+      Accumulator* accumulator;
+    };
+    
+    typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;
+    typedef map<string, StatsIndex> StatsMapType;
 
-    RealType& operator [](int index){
-      assert(index >=0 && index < ENDINDEX);            
-      return data_[index];
-    }
-        
-    static std::string getTitle(int index) {
-      assert(index >=0 && index < ENDINDEX);
-      return title_[index];
-    }
+    Stats(SimInfo* info);
+    void parseStatFileFormat(const std::string& format);
+    void collectStats();
 
-    static std::string getUnits(int index) {
-      assert(index >=0 && index < ENDINDEX);
-      return units_[index];
-    }
+    StatsBitSet  getStatsMask();
+    StatsMapType getStatsMap();
+    void         setStatsMask(StatsBitSet mask);
 
-    Mat3x3d getTau() {
-      return tau_;
-    }
-        
-    void setTau(const Mat3x3d& tau) {
-      tau_ = tau;
-    }
+    string    getTitle(int index); 
+    string    getUnits(int index);
+    string    getDataType(int index);
 
-    typedef std::map<std::string, Stats::StatsIndex> StatsMapType;
-    static  StatsMapType statsMap;
-  
+    int       getIntData(int index);
+    RealType  getRealData(int index);
+    Vector3d  getVectorData(int index);
+    Mat3x3d   getMatrixData(int index);
+    
   private:
-    static void init();
-    static bool isInit_;
-    RealType data_[ENDINDEX - BEGININDEX];
-    static std::string title_[ENDINDEX - BEGININDEX];
-    static std::string units_[ENDINDEX - BEGININDEX];
-    Mat3x3d tau_;
+    SimInfo* info_;
+    void init();
+    bool isInit_;
+    vector<StatsData> data_;
+    StatsBitSet statsMask_;
+    StatsMapType statsMap_;
   };
-
-
-
 } //end namespace OpenMD
 #endif //BRAINS_STATS_HPP

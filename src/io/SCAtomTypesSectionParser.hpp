@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by Charles F. Vardeman II on 11/14/05.
  *  @author  Charles F. Vardeman II 
  *  @version $Id$
@@ -48,7 +48,6 @@
 #define IO_SCATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/AtomType.hpp"
 #include "io/ForceFieldOptions.hpp"
 
 namespace OpenMD {

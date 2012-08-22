@@ -36,17 +36,18 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "applications/dynamicProps/CrossTimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo* info, 
+  CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo * info, 
                                        const std::string & filename,
-				       const std::string & sele1, 
-                                       const std::string & sele2, 
+				       const std :: string & sele1,
+                                       const std :: string & sele2, 
                                        int storageLayout, long long int memSize)
     : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize) {
     
@@ -54,7 +55,7 @@ namespace OpenMD {
     nSelected2_ = seleMan2_.getSelectionCount();  
     nSelectedPairs_ = nSelected1_ * nSelected2_;
   }
-
+  
   void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);

@@ -49,6 +49,8 @@
 
 #ifndef MATH_QUATERNION_HPP
 #define MATH_QUATERNION_HPP
+#include "config.h"
+#include <cmath>
 
 #include "math/Vector3.hpp"
 #include "math/SquareMatrix.hpp"

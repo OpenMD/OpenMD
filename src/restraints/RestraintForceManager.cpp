@@ -36,10 +36,13 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include "config.h"
 #include <cmath>
+
 #include "restraints/RestraintForceManager.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"
@@ -319,8 +322,10 @@ namespace OpenMD {
     restPot = restPot_local;
 #endif
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += restPot;
-    currSnapshot_->statData[Stats::VHARM] = restPot;
+    RealType pot = currSnapshot_->getLongRangePotential();
+    pot += restPot;
+    currSnapshot_->setLongRangePotential(pot);
+    currSnapshot_->setRestraintPotential(restPot);
 
     //write out forces and current positions of restrained molecules    
     if (currSnapshot_->getTime() >= currRestTime_){
@@ -335,7 +340,6 @@ namespace OpenMD {
     Molecule::IntegrableObjectIterator ioi;
     MolecularRestraint* mRest;
     StuntDouble* sd;
-    RealType pTot;
 
     std::vector<StuntDouble*>::const_iterator ro;
     ObjectRestraint* oRest;

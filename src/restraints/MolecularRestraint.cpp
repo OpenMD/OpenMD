@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "restraints/MolecularRestraint.hpp"
@@ -85,7 +86,7 @@ namespace OpenMD {
       
       Mat3x3d R(0.0);
       
-      for (int n = 0; n < struc.size(); n++){
+      for (unsigned int n = 0; n < struc.size(); n++){
 
         /*
          * correlation matrix R:   
@@ -137,16 +138,16 @@ namespace OpenMD {
       Vector3d eularAngles = A.toEulerAngles();
 
 
-      RealType twistAngle, swingAngle;
+      RealType twistAngle;
       Vector3d swingAxis;
 
       Quat4d quat = A.toQuaternion();  
 
-      RealType tw, sx, sy, ttw, swingX, swingY;
+      RealType swingX, swingY;
       quat.toSwingTwist(swingX, swingY, twistAngle);
 
-      RealType dVdtwist, dVdswing, dVdswingX, dVdswingY;
-      RealType dTwist, dSwing, dSwingX, dSwingY;
+      RealType dVdtwist, dVdswingX, dVdswingY;
+      RealType dTwist, dSwingX, dSwingY;
       RealType p;
 
       if (restType_ & rtTwist){
@@ -189,7 +190,7 @@ namespace OpenMD {
       
       Vector3d rLab, rBody, txr, fBody, fLab;
 
-      for (int i = 0; i < struc.size(); i++) {
+      for (unsigned int i = 0; i < struc.size(); i++) {
                    
         rLab = struc[i];        
         rBody = A * rLab;

@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by J. Daniel Gezelter on 07/27/07.
  *  @author  J. Daniel Gezelter
  *  @version $Id$
@@ -99,13 +99,9 @@ namespace OpenMD {
     Vector3d vec;
     std::vector<Vector3d> bondvec;
     std::vector<RealType> bonddist;
-    RealType costheta;
-    RealType r;
-    RealType dist;
-    
-    int nBonds;
-    
-    int i, j;
+    RealType r;    
+    int nBonds;    
+    int i;
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

@@ -1,0 +1,13 @@
+tolerance 4.0
+output test.xyz
+filetype xyz
+structure  Au_Thiols_FullCoverage.xyz
+  number 1
+  center
+  fixed 0. 0. 0. 0. 0. 0.
+end structure
+structure hexane.xyz
+  number 400
+  inside box -12.8961549 -10.8980698 -73. 12.8961549 10.8980698 73
+end structure
+

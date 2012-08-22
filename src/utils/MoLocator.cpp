@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include <iostream>
@@ -72,20 +73,20 @@ namespace OpenMD {
     }
     
     Molecule::IntegrableObjectIterator ii;
-    StuntDouble* integrableObject;
+    StuntDouble* sd;
     int i;
-    for (integrableObject = mol->beginIntegrableObject(ii), i = 0; integrableObject != NULL; 
-         integrableObject = mol->nextIntegrableObject(ii), ++i) { 
+    for (sd = mol->beginIntegrableObject(ii), i = 0; sd != NULL; 
+         sd = mol->nextIntegrableObject(ii), ++i) { 
       
       newCoor = rotMat * refCoords[i];
       newCoor += offset;
      
-      integrableObject->setPos(newCoor);
-      integrableObject->setVel(V3Zero);
+      sd->setPos(newCoor);
+      sd->setVel(V3Zero);
       
-      if(integrableObject->isDirectional()){
-        integrableObject->setA(rotMat * integrableObject->getA());
-        integrableObject->setJ(V3Zero);  
+      if(sd->isDirectional()){
+        sd->setA(rotMat * sd->getA());
+        sd->setJ(V3Zero);  
       }        
     }
   }
@@ -93,7 +94,7 @@ namespace OpenMD {
   void MoLocator::calcRef( void ){
     AtomStamp* currAtomStamp;
     RigidBodyStamp* rbStamp;
-    int nAtoms; 
+    unsigned int nAtoms; 
     int nRigidBodies;
     std::vector<RealType> mass;
     Vector3d coor;
@@ -106,7 +107,7 @@ namespace OpenMD {
     nAtoms= myStamp->getNAtoms();
     nRigidBodies = myStamp->getNRigidBodies();
     
-    for(size_t i=0; i<nAtoms; i++){
+    for(unsigned int i = 0; i < nAtoms; i++){
       
       currAtomStamp = myStamp->getAtomStamp(i);
       
@@ -196,11 +197,11 @@ namespace OpenMD {
   }
   
   RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
-    int nAtoms;
+    unsigned int nAtoms;
     RealType totMass = 0;
     nAtoms = molStamp->getNAtoms();
     
-    for(size_t i = 0; i < nAtoms; i++) {
+    for(unsigned int i = 0; i < nAtoms; i++) {
       AtomStamp *currAtomStamp = molStamp->getAtomStamp(i);
       totMass += getAtomMass(currAtomStamp->getType(), myFF);         
     }

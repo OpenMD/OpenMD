@@ -36,26 +36,12 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
- 
-/**
- * @file StatWriter.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 10:03am
- * @version 1.0
- */
-
-
 #ifndef IO_STATWRITER_HPP
 #define IO_STATWRITER_HPP
-#include <bitset>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <string.h>
 
 #include "brains/Stats.hpp"
 #include "utils/StringTokenizer.hpp"
@@ -63,10 +49,6 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-
-  typedef std::bitset<Stats::ENDINDEX-Stats::BEGININDEX> StatsBitSet;
-
-  StatsBitSet parseStatFileFormat(const std::string& format);
   
   /**
    * @class StatWriter StatWriter.hpp "io/StatWriter.hpp"
@@ -74,23 +56,19 @@ namespace OpenMD {
    */
   class StatWriter {
   public:
-    StatWriter(const std::string& filename, const StatsBitSet& mask);
+    StatWriter(const std::string& filename, Stats* stats);
     ~StatWriter();
 
-    void writeStat(const Stats& s);
-
-    StatsBitSet getMask() {
-      return mask_;
-    }
-        
+    void writeStat();
+            
   private:
-
     void writeTitle();
+    void writeReal(int i);
+    void writeVector(int i);
+    void writeMatrix(int i);
         
     std::ofstream statfile_;
-    StatsBitSet mask_;
-        
+    Stats* stats_;
   };
-
 }
-#endif //IO_STATWRITER_HPP
+#endif

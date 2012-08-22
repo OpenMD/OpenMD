@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -134,6 +135,25 @@ namespace OpenMD {
 
       return tmp;
     }
+    
+    /**
+     * Returns the tensor contraction (double dot product) of two rank 2
+     * tensors (or Matrices)
+     * @param t1 first tensor
+     * @param t2 second tensor
+     * @return the tensor contraction (double dot product) of t1 and t2
+     */
+    Real doubleDot( const SquareMatrix<Real, Dim>& t1, const SquareMatrix<Real, Dim>& t2 ) {
+      Real tmp;
+      tmp = 0;
+      
+      for (unsigned int i = 0; i < Dim; i++)
+        for (unsigned int j =0; j < Dim; j++)
+          tmp += t1[i][j] * t2[i][j];
+      
+      return tmp;
+    }
+
 
     /** Tests if this matrix is symmetrix. */            
     bool isSymmetric() const {
@@ -162,6 +182,19 @@ namespace OpenMD {
 	    return false;
                         
       return true;
+    }
+
+    /** 
+     * Returns a column vector that contains the elements from the
+     * diagonal of m in the order R(0) = m(0,0), R(1) = m(1,1), and so
+     * on.
+     */
+    Vector<Real, Dim> diagonals() const {
+      Vector<Real, Dim> result;
+      for (unsigned int i = 0; i < Dim; i++) {
+        result(i) = this->data_[i][i];
+      }
+      return result;
     }
 
     /** Tests if this matrix is the unit matrix. */

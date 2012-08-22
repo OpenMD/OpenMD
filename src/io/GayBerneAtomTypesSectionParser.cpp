@@ -42,8 +42,8 @@
  
 #include "io/GayBerneAtomTypesSectionParser.hpp"
 #include "types/AtomType.hpp"
-#include "types/DirectionalAtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "types/GayBerneAdapter.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/simError.h"
 
 
@@ -71,24 +71,17 @@ namespace OpenMD {
       std::string atomTypeName = tokenizer.nextToken();    
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType != NULL) {
-        DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);        
-        if (dAtomType != NULL) {
-          GayBerneParam gayBerne;
-          gayBerne.GB_d = tokenizer.nextTokenAsDouble();
-          gayBerne.GB_l = tokenizer.nextTokenAsDouble();  
-          gayBerne.GB_eps_X = tokenizer.nextTokenAsDouble();
-          gayBerne.GB_eps_S = tokenizer.nextTokenAsDouble();
-          gayBerne.GB_eps_E = tokenizer.nextTokenAsDouble();
-          gayBerne.GB_dw = tokenizer.nextTokenAsDouble();          
-          dAtomType->addProperty(new GayBerneParamGenericData("GayBerne", gayBerne));
-          dAtomType->setGayBerne();
-        } else {
-          sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser: Can not find matching DirectionalAtomType %s\n"
-                  "\tfor this GayBerne atom type\n",
-                  atomTypeName.c_str());
-          painCave.isFatal = 1;
-          simError();                   
-        }
+
+        RealType GB_d = tokenizer.nextTokenAsDouble();
+        RealType GB_l = tokenizer.nextTokenAsDouble();  
+        RealType GB_eps_X = tokenizer.nextTokenAsDouble();
+        RealType GB_eps_S = tokenizer.nextTokenAsDouble();
+        RealType GB_eps_E = tokenizer.nextTokenAsDouble();
+        RealType GB_dw = tokenizer.nextTokenAsDouble();
+
+        GayBerneAdapter gba = GayBerneAdapter(atomType);
+        gba.makeGayBerne(GB_d, GB_l, GB_eps_X, GB_eps_S, GB_eps_E, GB_dw);
+        
       } else {
         sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser: Can not find matching AtomType %s\n"
                 "\tfor this GayBerne atom type\n",

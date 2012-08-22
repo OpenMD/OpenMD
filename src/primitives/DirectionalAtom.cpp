@@ -36,20 +36,28 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "primitives/DirectionalAtom.hpp"
+#include "types/DirectionalAdapter.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
   
-  DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) 
-    : Atom(dAtomType){
+  DirectionalAtom::DirectionalAtom(AtomType* dAtomType) 
+    : Atom(dAtomType) {
     objType_= otDAtom;
-    if (dAtomType->isMultipole()) {
-      electroBodyFrame_ = dAtomType->getElectroBodyFrame();
+
+    DirectionalAdapter da = DirectionalAdapter(dAtomType);
+    I_ = da.getI();
+
+    MultipoleAdapter ma = MultipoleAdapter(dAtomType);
+    if (ma.isMultipole()) {
+      electroBodyFrame_ = ma.getElectroBodyFrame();
     }
-    
+
     // Check if one of the diagonal inertia tensor of this directional
     // atom is zero:
     int nLinearAxis = 0;
@@ -73,7 +81,7 @@ namespace OpenMD {
   }
   
   Mat3x3d DirectionalAtom::getI() {
-    return static_cast<DirectionalAtomType*>(getAtomType())->getI();
+    return I_;     
   }    
   
   void DirectionalAtom::setPrevA(const RotMat3x3d& a) {

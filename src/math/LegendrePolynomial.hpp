@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -46,8 +47,8 @@
  * @version 1.0
  */ 
 
-#ifndef MATH_CHEBYSHEVPOLYNOMIALS_HPP
-#define MATH_CHEBYSHEVPOLYNOMIALS_HPP
+#ifndef MATH_LEGENDREPOLYNOMIALS_HPP
+#define MATH_LEGENDREPOLYNOMIALS_HPP
 
 #include <vector>
 #include <cassert>
@@ -58,7 +59,7 @@ namespace OpenMD {
 
   /**
    * @class LegendrePolynomial
-   * A collection of Chebyshev Polynomials.
+   * A collection of Legendre Polynomials.
    * @todo document
    */
   class LegendrePolynomial {
@@ -66,10 +67,10 @@ namespace OpenMD {
     LegendrePolynomial(int maxPower);
     virtual ~LegendrePolynomial() {}
     /**
-     * Calculates the value of the nth Chebyshev Polynomial evaluated at the given x value.
-     * @return The value of the nth Chebyshev Polynomial evaluates at the given x value
+     * Calculates the value of the nth Legendre Polynomial evaluated at the given x value.
+     * @return The value of the nth Legendre Polynomial evaluates at the given x value
      * @param n
-     * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
+     * @param x the value of the independent variable for the nth Legendre Polynomial  function
      */
         
     RealType evaluate(int n, RealType x) {
@@ -78,10 +79,10 @@ namespace OpenMD {
     }
 
     /**
-     * Returns the first derivative of the nth Chebyshev Polynomial.
-     * @return the first derivative of the nth Chebyshev Polynomial
+     * Returns the first derivative of the nth Legendre Polynomial.
+     * @return the first derivative of the nth Legendre Polynomial
      * @param n
-     * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
+     * @param x the value of the independent variable for the nth Legendre Polynomial  function
      */
     RealType evaluateDerivative(int n, RealType x) {
       assert (n <= maxPower_ && n >=0); 
@@ -89,8 +90,8 @@ namespace OpenMD {
     }
 
     /**
-     * Returns the nth Chebyshev Polynomial 
-     * @return the nth Chebyshev Polynomial
+     * Returns the nth Legendre Polynomial 
+     * @return the nth Legendre Polynomial
      * @param n
      */
     const DoublePolynomial& getLegendrePolynomial(int n) const {
@@ -111,6 +112,6 @@ namespace OpenMD {
   };    
 
 
-} //end namespace OpenMD
-#endif //MATH_CHEBYSHEVPOLYNOMIALS_HPP
+} 
+#endif 
 

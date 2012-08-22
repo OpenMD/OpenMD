@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20101020): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20120725): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -54,11 +54,15 @@ public:
 	public: void moleculeblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void zconstraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void restraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void flucqblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void rnemdblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void minimizerblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 		ANTLR_USE_NAMESPACE(antlr)RefAST id
 	);
 	protected: int  intConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	protected: RealType  floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void moleculestatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -78,7 +82,6 @@ public:
 	public: void rigidbodystatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{
@@ -91,10 +94,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 54;
+	static const int NUM_TOKENS = 57;
 #else
 	enum {
-		NUM_TOKENS = 54
+		NUM_TOKENS = 57
 	};
 #endif
 	

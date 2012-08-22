@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -59,55 +60,63 @@
 #include "math/Vector3.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "types/MoleculeStamp.hpp"
-#include "UseTheForce/ForceField.hpp"
+#include "brains/ForceField.hpp"
 #include "utils/PropertyMap.hpp"
 #include "utils/LocalIndexManager.hpp"
+#include "nonbonded/SwitchingFunction.hpp"
 
-//another nonsense macro declaration
-#define __OPENMD_C
-#include "brains/fSimulation.h"
-
+using namespace std;
 namespace OpenMD{
-
-  //forward decalration 
+  //forward declaration 
   class SnapshotManager;
   class Molecule;
   class SelectionManager;
   class StuntDouble;
+
   /**
-   * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp" 
-   * @brief One of the heavy weight classes of OpenMD, SimInfo maintains a list of molecules.
-    * The Molecule class maintains all of the concrete objects 
-    * (atoms, bond, bend, torsions, inversions, rigid bodies, cutoff groups, 
-    * constraints). In both the single and parallel versions, atoms and
-    * rigid bodies have both global and local indices.  The local index is 
-    * not relevant to molecules or cutoff groups.
-    */
+   * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp"
+   *
+   * @brief One of the heavy-weight classes of OpenMD, SimInfo
+   * maintains objects and variables relating to the current
+   * simulation.  This includes the master list of Molecules.  The
+   * Molecule class maintains all of the concrete objects (Atoms,
+   * Bond, Bend, Torsions, Inversions, RigidBodies, CutoffGroups,
+   * Constraints). In both the single and parallel versions, Atoms and
+   * RigidBodies have both global and local indices.
+   */
   class SimInfo {
   public:
-    typedef std::map<int, Molecule*>::iterator  MoleculeIterator;
-
+    typedef map<int, Molecule*>::iterator  MoleculeIterator;
+    
     /**
      * Constructor of SimInfo
-     * @param molStampPairs MoleculeStamp Array. The first element of the pair is molecule stamp, the
-     * second element is the total number of molecules with the same molecule stamp in the system
+     *
+     * @param molStampPairs MoleculeStamp Array. The first element of
+     * the pair is molecule stamp, the second element is the total
+     * number of molecules with the same molecule stamp in the system
+     *
      * @param ff pointer of a concrete ForceField instance
+     *
      * @param simParams 
-     * @note
      */
     SimInfo(ForceField* ff, Globals* simParams);
     virtual ~SimInfo();
 
     /**
      * Adds a molecule
-     * @return return true if adding successfully, return false if the molecule is already in SimInfo
+     *
+     * @return return true if adding successfully, return false if the
+     * molecule is already in SimInfo
+     *
      * @param mol molecule to be added
      */
     bool addMolecule(Molecule* mol);
 
     /**
      * Removes a molecule from SimInfo
-     * @return true if removing successfully, return false if molecule is not in this SimInfo
+     *
+     * @return true if removing successfully, return false if molecule
+     * is not in this SimInfo
      */
     bool removeMolecule(Molecule* mol);
 
@@ -127,16 +136,18 @@ namespace OpenMD{
     }
 
     /**
-     * Returns the total number of integrable objects (total number of rigid bodies plus the total number
-     * of atoms which do not belong to the rigid bodies) in the system
+     * Returns the total number of integrable objects (total number of
+     * rigid bodies plus the total number of atoms which do not belong
+     * to the rigid bodies) in the system
      */
     int getNGlobalIntegrableObjects() {
       return nGlobalIntegrableObjects_;
     }
 
     /**
-     * Returns the total number of integrable objects (total number of rigid bodies plus the total number
-     * of atoms which do not belong to the rigid bodies) in the system
+     * Returns the total number of integrable objects (total number of
+     * rigid bodies plus the total number of atoms which do not belong
+     * to the rigid bodies) in the system
      */
     int getNGlobalRigidBodies() {
       return nGlobalRigidBodies_;
@@ -155,6 +166,9 @@ namespace OpenMD{
     unsigned int getNAtoms() {
       return nAtoms_;
     }
+
+    /** Returns the number of effective cutoff groups on local processor */
+    unsigned int getNLocalCutoffGroups();
 
     /** Returns the number of local bonds */        
     unsigned int getNBonds(){
@@ -209,9 +223,19 @@ namespace OpenMD{
      */
     Molecule* nextMolecule(MoleculeIterator& i);
 
+    /** Returns the total number of fluctuating charges that are present */
+    int getNFluctuatingCharges() {
+      return nGlobalFluctuatingCharges_;
+    }
+
     /** Returns the number of degrees of freedom */
     int getNdf() {
       return ndf_ - getFdf();
+    }
+
+    /** Returns the number of degrees of freedom (LOCAL) */
+    int getNdfLocal() {
+      return ndfLocal_;
     }
 
     /** Returns the number of raw degrees of freedom */
@@ -231,7 +255,8 @@ namespace OpenMD{
 
     int getFdf(); 
     
-    //getNZconstraint and setNZconstraint ruin the coherent of SimInfo class, need refactorying
+    //getNZconstraint and setNZconstraint ruin the coherence of
+    //SimInfo class, need refactoring
         
     /** Returns the total number of z-constraint molecules in the system */
     int getNZconstraint() {
@@ -262,26 +287,12 @@ namespace OpenMD{
       return simParams_;
     }
 
-    /** Returns the velocity of center of mass of the whole system.*/
-    Vector3d getComVel();
-
-    /** Returns the center of the mass of the whole system.*/
-    Vector3d getCom();
-   /** Returns the center of the mass and Center of Mass velocity of the whole system.*/ 
-    void getComAll(Vector3d& com,Vector3d& comVel);
-
-    /** Returns intertia tensor for the entire system and system Angular Momentum.*/
-    void getInertiaTensor(Mat3x3d &intertiaTensor,Vector3d &angularMomentum);
-    
-    /** Returns system angular momentum */
-    Vector3d getAngularMomentum();
-
-    /** Returns volume of system as estimated by an ellipsoid defined by the radii of gyration*/
-    void getGyrationalVolume(RealType &vol);
-    /** Overloaded version of gyrational volume that also returns det(I) so dV/dr can be calculated*/
-    void getGyrationalVolume(RealType &vol, RealType &detI);
-    /** main driver function to interact with fortran during the initialization and molecule migration */
     void update();
+    /**
+     * Do final bookkeeping before Force managers need their data.
+     */
+    void prepareTopology();
+
 
     /** Returns the local index manager */
     LocalIndexManager* getLocalIndexManager() {
@@ -318,54 +329,57 @@ namespace OpenMD{
       return globalMolMembership_[id];
     }
 
-    RealType getRcut() {
-      return rcut_;
-    }
+    /** 
+     * returns a vector which maps the local atom index on this
+     * processor to the global atom index.  With only one processor,
+     * these should be identical.
+     */
+    vector<int> getGlobalAtomIndices();
 
-    RealType getRsw() {
-      return rsw_;
-    }
+    /** 
+     * returns a vector which maps the local cutoff group index on
+     * this processor to the global cutoff group index.  With only one
+     * processor, these should be identical.
+     */
+    vector<int> getGlobalGroupIndices();
 
-    RealType getList() {
-      return rlist_;
-    }
         
-    std::string getFinalConfigFileName() {
+    string getFinalConfigFileName() {
       return finalConfigFileName_;
     }
 
-    void setFinalConfigFileName(const std::string& fileName) {
+    void setFinalConfigFileName(const string& fileName) {
       finalConfigFileName_ = fileName;
     }
 
-    std::string getRawMetaData() {
+    string getRawMetaData() {
       return rawMetaData_;
     }
-    void setRawMetaData(const std::string& rawMetaData) {
+    void setRawMetaData(const string& rawMetaData) {
       rawMetaData_ = rawMetaData;
     }
         
-    std::string getDumpFileName() {
+    string getDumpFileName() {
       return dumpFileName_;
     }
         
-    void setDumpFileName(const std::string& fileName) {
+    void setDumpFileName(const string& fileName) {
       dumpFileName_ = fileName;
     }
 
-    std::string getStatFileName() {
+    string getStatFileName() {
       return statFileName_;
     }
         
-    void setStatFileName(const std::string& fileName) {
+    void setStatFileName(const string& fileName) {
       statFileName_ = fileName;
     }
         
-    std::string getRestFileName() {
+    string getRestFileName() {
       return restFileName_;
     }
         
-    void setRestFileName(const std::string& fileName) {
+    void setRestFileName(const string& fileName) {
       restFileName_ = fileName;
     }
 
@@ -373,7 +387,7 @@ namespace OpenMD{
      * Sets GlobalGroupMembership
      * @see #SimCreator::setGlobalIndex
      */  
-    void setGlobalGroupMembership(const std::vector<int>& globalGroupMembership) {
+    void setGlobalGroupMembership(const vector<int>& globalGroupMembership) {
       assert(globalGroupMembership.size() == static_cast<size_t>(nGlobalAtoms_));
       globalGroupMembership_ = globalGroupMembership;
     }
@@ -382,14 +396,14 @@ namespace OpenMD{
      * Sets GlobalMolMembership
      * @see #SimCreator::setGlobalIndex
      */        
-    void setGlobalMolMembership(const std::vector<int>& globalMolMembership) {
+    void setGlobalMolMembership(const vector<int>& globalMolMembership) {
       assert(globalMolMembership.size() == static_cast<size_t>(nGlobalAtoms_));
       globalMolMembership_ = globalMolMembership;
     }
 
 
-    bool isFortranInitialized() {
-      return fortranInitialized_;
+    bool isTopologyDone() {
+      return topologyDone_;
     }
         
     bool getCalcBoxDipole() {
@@ -400,9 +414,6 @@ namespace OpenMD{
       return useAtomicVirial_;
     }
 
-    //below functions are just forward functions
-    //To compose or to inherit is always a hot debate. In general, is-a relation need subclassing, in the
-    //the other hand, has-a relation need composing.
     /**
      * Adds property into property map
      * @param genData GenericData to be added into PropertyMap
@@ -413,7 +424,7 @@ namespace OpenMD{
      * Removes property from PropertyMap by name
      * @param propName the name of property to be removed
      */
-    void removeProperty(const std::string& propName);
+    void removeProperty(const string& propName);
 
     /**
      * clear all of the properties
@@ -424,13 +435,13 @@ namespace OpenMD{
      * Returns all names of properties
      * @return all names of properties
      */
-    std::vector<std::string> getPropertyNames();
+    vector<string> getPropertyNames();
 
     /**
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
      */      
-    std::vector<GenericData*> getProperties();
+    vector<GenericData*> getProperties();
 
     /**
      * Returns property 
@@ -438,7 +449,7 @@ namespace OpenMD{
      * @return a pointer point to property with propName. If no property named propName
      * exists, return NULL
      */      
-    GenericData* getPropertyByName(const std::string& propName);
+    GenericData* getPropertyByName(const string& propName);
 
     /**
      * add all special interaction pairs (including excluded
@@ -452,33 +463,18 @@ namespace OpenMD{
      */
     void removeInteractionPairs(Molecule* mol);
 
-
-    /** Returns the unique atom types of local processor in an array */
-    std::set<AtomType*> getUniqueAtomTypes();
+    /** Returns the set of atom types present in this simulation */
+    set<AtomType*> getSimulatedAtomTypes();
         
-    friend std::ostream& operator <<(std::ostream& o, SimInfo& info);
+    friend ostream& operator <<(ostream& o, SimInfo& info);
 
     void getCutoff(RealType& rcut, RealType& rsw);
         
   private:
 
-    /** fill up the simtype struct*/
-    void setupSimType();
+    /** fill up the simtype struct and other simulation-related variables */
+    void setupSimVariables();
 
-    /**
-     * Setup Fortran Simulation
-     * @see #setupFortranParallel
-     */
-    void setupFortranSim();
-
-    /** Figure out the radius of cutoff, radius of switching function and pass them to fortran */
-    void setupCutoff();
-
-    /** Figure out which coulombic correction method to use and pass to fortran */
-    void setupElectrostaticSummationMethod( int isError );
-
-    /** Figure out which polynomial type to use for the switching function */
-    void setupSwitchingFunction();
 
     /** Determine if we need to accumulate the simulation box dipole */
     void setupAccumulateBoxDipole();
@@ -488,50 +484,17 @@ namespace OpenMD{
     void calcNdfRaw();
     void calcNdfTrans();
 
-    ForceField* forceField_;      
-    Globals* simParams_;
-
-    std::map<int, Molecule*>  molecules_; /**< Molecule array */
-
     /**
-     * Adds molecule stamp and the total number of the molecule with same molecule stamp in the whole
-     * system.
+     * Adds molecule stamp and the total number of the molecule with
+     * same molecule stamp in the whole system.
      */
     void addMoleculeStamp(MoleculeStamp* molStamp, int nmol);
-        
-    //degress of freedom
-    int ndf_;           /**< number of degress of freedom (excludes constraints),  ndf_ is local */
-    int fdf_local;       /**< number of frozen degrees of freedom */
-    int fdf_;            /**< number of frozen degrees of freedom */
-    int ndfRaw_;    /**< number of degress of freedom (includes constraints),  ndfRaw_ is local */
-    int ndfTrans_; /**< number of translation degress of freedom, ndfTrans_ is local */
-    int nZconstraint_; /** number of  z-constraint molecules, nZconstraint_ is global */
-        
-    //number of global objects
-    int nGlobalMols_;       /**< number of molecules in the system */
-    int nGlobalAtoms_;   /**< number of atoms in the system */
-    int nGlobalCutoffGroups_; /**< number of cutoff groups in this system */
-    int nGlobalIntegrableObjects_; /**< number of integrable objects in this system */
-    int nGlobalRigidBodies_; /**< number of rigid bodies in this system */
-    /**
-     * the size of globalGroupMembership_  is nGlobalAtoms. Its index is  global index of an atom, and the
-     * corresponding content is the global index of cutoff group this atom belong to. 
-     * It is filled by SimCreator once and only once, since it never changed during the simulation.
-     */
-    std::vector<int> globalGroupMembership_; 
 
-    /**
-     * the size of globalMolMembership_  is nGlobalAtoms. Its index is  global index of an atom, and the
-     * corresponding content is the global index of molecule this atom belong to. 
-     * It is filled by SimCreator once and only once, since it is never changed during the simulation.
-     */
-    std::vector<int> globalMolMembership_;        
+    // Other classes holdingn important information
+    ForceField* forceField_; /**< provides access to defined atom types, bond types, etc. */
+    Globals* simParams_;     /**< provides access to simulation parameters set by user */
 
-        
-    std::vector<int> molStampIds_;                                /**< stamp id array of all molecules in the system */
-    std::vector<MoleculeStamp*> moleculeStamps_;      /**< molecule stamps array */        
-        
-    //number of local objects
+    ///  Counts of local objects
     int nAtoms_;              /**< number of atoms in local processor */
     int nBonds_;              /**< number of bonds in local processor */
     int nBends_;              /**< number of bends in local processor */
@@ -541,68 +504,155 @@ namespace OpenMD{
     int nIntegrableObjects_;  /**< number of integrable objects in local processor */
     int nCutoffGroups_;       /**< number of cutoff groups in local processor */
     int nConstraints_;        /**< number of constraints in local processors */
+    int nFluctuatingCharges_; /**< number of fluctuating charges in local processor */
+        
+    /// Counts of global objects
+    int nGlobalMols_;              /**< number of molecules in the system (GLOBAL) */
+    int nGlobalAtoms_;             /**< number of atoms in the system (GLOBAL) */
+    int nGlobalCutoffGroups_;      /**< number of cutoff groups in this system (GLOBAL) */
+    int nGlobalIntegrableObjects_; /**< number of integrable objects in this system */
+    int nGlobalRigidBodies_;       /**< number of rigid bodies in this system (GLOBAL) */
+    int nGlobalFluctuatingCharges_;/**< number of fluctuating charges in this system (GLOBAL) */
+    
+       
+    /// Degress of freedom
+    int ndf_;          /**< number of degress of freedom (excludes constraints) (LOCAL) */
+    int ndfLocal_;     /**< number of degrees of freedom (LOCAL, excludes constraints) */
+    int fdf_local;     /**< number of frozen degrees of freedom (LOCAL) */
+    int fdf_;          /**< number of frozen degrees of freedom (GLOBAL) */
+    int ndfRaw_;       /**< number of degress of freedom (includes constraints),  (LOCAL) */
+    int ndfTrans_;     /**< number of translation degress of freedom, (LOCAL) */
+    int nZconstraint_; /**< number of  z-constraint molecules (GLOBAL) */
 
-    simtype fInfo_; /**< A dual struct shared by c++/fortran which indicates the atom types in simulation*/
-    PairList excludedInteractions_;      
-    PairList oneTwoInteractions_;      
-    PairList oneThreeInteractions_;      
-    PairList oneFourInteractions_;      
-    PropertyMap properties_;                  /**< Generic Property */
-    SnapshotManager* sman_;               /**< SnapshotManager */
+    /// logicals 
+    bool usesPeriodicBoundaries_; /**< use periodic boundary conditions? */
+    bool usesDirectionalAtoms_;   /**< are there atoms with position AND orientation? */
+    bool usesMetallicAtoms_;      /**< are there transition metal atoms? */
+    bool usesElectrostaticAtoms_; /**< are there electrostatic atoms? */
+    bool usesFluctuatingCharges_; /**< are there fluctuating charges? */
+    bool usesAtomicVirial_;       /**< are we computing atomic virials? */
+    bool requiresPrepair_;        /**< does this simulation require a pre-pair loop? */
+    bool requiresSkipCorrection_; /**< does this simulation require a skip-correction? */
+    bool requiresSelfCorrection_; /**< does this simulation require a self-correction? */
+
+  public:
+    bool usesElectrostaticAtoms() { return usesElectrostaticAtoms_; }
+    bool usesDirectionalAtoms() { return usesDirectionalAtoms_; }
+    bool usesFluctuatingCharges() { return usesFluctuatingCharges_; }
+    bool usesAtomicVirial() { return usesAtomicVirial_; }
+    bool requiresPrepair() { return requiresPrepair_; }
+    bool requiresSkipCorrection() { return requiresSkipCorrection_;}
+    bool requiresSelfCorrection() { return requiresSelfCorrection_;}
+
+  private:
+    /// Data structures holding primary simulation objects
+    map<int, Molecule*>  molecules_;  /**< map holding pointers to LOCAL molecules */
+
+    /// Stamps are templates for objects that are then used to create
+    /// groups of objects.  For example, a molecule stamp contains
+    /// information on how to build that molecule (i.e. the topology,
+    /// the atoms, the bonds, etc.)  Once the system is built, the
+    /// stamps are no longer useful.
+    vector<int> molStampIds_;                /**< stamp id for molecules in the system */
+    vector<MoleculeStamp*> moleculeStamps_;  /**< molecule stamps array */        
+
+    /**
+     * A vector that maps between the global index of an atom, and the
+     * global index of cutoff group the atom belong to.  It is filled
+     * by SimCreator once and only once, since it never changed during
+     * the simulation.  It should be nGlobalAtoms_ in size.
+     */
+    vector<int> globalGroupMembership_; 
+  public:
+    vector<int> getGlobalGroupMembership() { return globalGroupMembership_; }
+  private:
+
+    /**
+     * A vector that maps between the global index of an atom and the
+     * global index of the molecule the atom belongs to.  It is filled
+     * by SimCreator once and only once, since it is never changed
+     * during the simulation. It shoudl be nGlobalAtoms_ in size.
+     */
+    vector<int> globalMolMembership_; 
 
     /** 
-     * The reason to have a local index manager is that when molecule is migrating to other processors, 
-     * the atoms and the rigid-bodies will release their local indices to LocalIndexManager. Combining the
-     * information of molecule migrating to current processor, Migrator class can query  the LocalIndexManager
-     * to make a efficient data moving plan.
+     * A vector that maps between the local index of an atom and the
+     * index of the AtomType.
+     */
+    vector<int> identArray_;
+  public:
+    vector<int> getIdentArray() { return identArray_; }
+  private:
+    
+    /** 
+     * A vector which contains the fractional contribution of an
+     * atom's mass to the total mass of the cutoffGroup that atom
+     * belongs to.  In the case of single atom cutoff groups, the mass
+     * factor for that atom is 1.  For massless atoms, the factor is
+     * also 1.
+     */
+    vector<RealType> massFactors_;
+  public:
+    vector<RealType> getMassFactors() { return massFactors_; }
+
+    PairList* getExcludedInteractions() { return &excludedInteractions_; }
+    PairList* getOneTwoInteractions() { return &oneTwoInteractions_; }
+    PairList* getOneThreeInteractions() { return &oneThreeInteractions_; }
+    PairList* getOneFourInteractions() { return &oneFourInteractions_; }
+
+  private:
+               
+    /// lists to handle atoms needing special treatment in the non-bonded interactions
+    PairList excludedInteractions_;  /**< atoms excluded from interacting with each other */
+    PairList oneTwoInteractions_;    /**< atoms that are directly Bonded */ 
+    PairList oneThreeInteractions_;  /**< atoms sharing a Bend */    
+    PairList oneFourInteractions_;   /**< atoms sharing a Torsion */
+
+    PropertyMap properties_;       /**< Generic Properties can be added */
+    SnapshotManager* sman_;        /**< SnapshotManager (handles particle positions, etc.) */
+
+    /** 
+     * The reason to have a local index manager is that when molecule
+     * is migrating to other processors, the atoms and the
+     * rigid-bodies will release their local indices to
+     * LocalIndexManager. Combining the information of molecule
+     * migrating to current processor, Migrator class can query the
+     * LocalIndexManager to make a efficient data moving plan.
      */        
     LocalIndexManager localIndexMan_;
 
     // unparsed MetaData block for storing in Dump and EOR files:
-    std::string rawMetaData_;
+    string rawMetaData_;
 
-    //file names
-    std::string finalConfigFileName_;
-    std::string dumpFileName_;
-    std::string statFileName_;
-    std::string restFileName_;
+    // file names
+    string finalConfigFileName_;
+    string dumpFileName_;
+    string statFileName_;
+    string restFileName_;
         
-    RealType rcut_;       /**< cutoff radius*/
-    RealType rsw_;        /**< radius of switching function*/
-    RealType rlist_;      /**< neighbor list radius */
 
-    int ljsp_; /**< use shifted potential for LJ*/
-    int ljsf_; /**< use shifted force for LJ*/
-
-    bool fortranInitialized_; /**< flag indicate whether fortran side 
-                                 is initialized */
+    bool topologyDone_;  /** flag to indicate whether the topology has
+                             been scanned and all the relevant
+                             bookkeeping has been done*/
     
     bool calcBoxDipole_; /**< flag to indicate whether or not we calculate 
                             the simulation box dipole moment */
     
     bool useAtomicVirial_; /**< flag to indicate whether or not we use 
                               Atomic Virials to calculate the pressure */
-
-    public:
-     /**
-      * return an integral objects by its global index. In MPI version, if the StuntDouble with specified
-      * global index does not belong to local processor, a NULL will be return.
-      */
-      StuntDouble* getIOIndexToIntegrableObject(int index);
-      void setIOIndexToIntegrableObject(const std::vector<StuntDouble*>& v);
-    private:
-      std::vector<StuntDouble*> IOIndexToIntegrableObject;
-  //public:
-    //void setStuntDoubleFromGlobalIndex(std::vector<StuntDouble*> v);
-    /**
-     * return a StuntDouble by its global index. In MPI version, if the StuntDouble with specified
-     * global index does not belong to local processor, a NULL will be return.
-     */
-    //StuntDouble* getStuntDoubleFromGlobalIndex(int index);
-  //private:
-    //std::vector<StuntDouble*> sdByGlobalIndex_;
     
-    //in Parallel version, we need MolToProc
+  public:
+    /**
+     * return an integral objects by its global index. In MPI
+     * version, if the StuntDouble with specified global index does
+      * not belong to local processor, a NULL will be return.
+      */
+    StuntDouble* getIOIndexToIntegrableObject(int index);
+    void setIOIndexToIntegrableObject(const vector<StuntDouble*>& v);
+    
+  private:
+    vector<StuntDouble*> IOIndexToIntegrableObject;
+    
   public:
                 
     /**
@@ -614,26 +664,23 @@ namespace OpenMD{
       //assert(globalIndex < molToProcMap_.size());
       return molToProcMap_[globalIndex];
     }
-
+    
     /** 
      * Set MolToProcMap array
      * @see #SimCreator::divideMolecules
      */
-    void setMolToProcMap(const std::vector<int>& molToProcMap) {
+    void setMolToProcMap(const vector<int>& molToProcMap) {
       molToProcMap_ = molToProcMap;
     }
         
   private:
-
-    void setupFortranParallel();
         
     /** 
      * The size of molToProcMap_ is equal to total number of molecules
      * in the system.  It maps a molecule to the processor on which it
      * resides. it is filled by SimCreator once and only once.
      */        
-    std::vector<int> molToProcMap_; 
-
+    vector<int> molToProcMap_; 
 
   };
 

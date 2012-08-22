@@ -11,7 +11,7 @@ component{
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
+cutoffMethod = "HARD";
 electrostaticScreeningMethod = "undamped";
 dampingAlpha = 0.2;
 cutoffRadius = 9.0;

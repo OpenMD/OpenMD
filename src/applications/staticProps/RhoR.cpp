@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 /* Calculates Rho(R) for nanoparticle with radius R*/
@@ -47,6 +48,7 @@
 #include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
 #include <math.h>
 
 namespace OpenMD {
@@ -72,9 +74,8 @@ namespace OpenMD {
   
 
   void RhoR::process() {
-    
-
-    
+   
+    Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
@@ -88,10 +89,7 @@ namespace OpenMD {
       StuntDouble* sd;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d CenterOfMass = info_->getCom();      
-      
-      
-      
+      Vector3d CenterOfMass = thermo.getCom();      
       
       if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -124,7 +122,7 @@ namespace OpenMD {
     RealType particleDensity =  3.0 * info_->getNGlobalMolecules() / (4.0 * NumericConstant::PI * pow(particleR_,3));
     RealType pairConstant = ( 4.0 * NumericConstant::PI * particleDensity ) / 3.0;
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
@@ -143,7 +141,7 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#radial density function rho(r)\n";
       rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgRhoR_.size(); ++i) {
+      for (unsigned int i = 0; i < avgRhoR_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgRhoR_[i]/nProcessed_ << "\n";
       }

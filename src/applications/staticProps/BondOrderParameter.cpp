@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
  *  @version $Id$
@@ -49,7 +49,9 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "math/Wigner3jm.hpp"
 
+using namespace MATPACK;
 namespace OpenMD {
 
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
@@ -85,16 +87,16 @@ namespace OpenMD {
     deltaW_ = (MaxW_ - MinW_) / nbins;
 
     // Make arrays for Wigner3jm
-    double* THRCOF = new double[2*lMax_+1];
+    RealType* THRCOF = new RealType[2*lMax_+1];
     // Variables for Wigner routine
-    double lPass, m1Pass, m2m, m2M;
+    RealType lPass, m1Pass, m2m, m2M;
     int error, mSize;
     mSize = 2*lMax_+1;
 
     for (int l = 0; l <= lMax_; l++) {
-      lPass = (double)l;
+      lPass = (RealType)l;
       for (int m1 = -l; m1 <= l; m1++) {
-        m1Pass = (double)m1;
+        m1Pass = (RealType)m1;
 
         std::pair<int,int> lm = std::make_pair(l, m1);
         
@@ -104,9 +106,9 @@ namespace OpenMD {
         }
 
         // Get Wigner coefficients
-        Wigner3jm(&lPass, &lPass, &lPass, 
-                  &m1Pass, &m2m, &m2M, 
-                  THRCOF, &mSize, &error);
+        Wigner3jm(lPass, lPass, lPass, 
+                  m1Pass, m2m, m2M, 
+                  THRCOF, mSize, error);
        
         m2Min[lm] = (int)floor(m2m);
         m2Max[lm] = (int)floor(m2M);
@@ -155,7 +157,6 @@ namespace OpenMD {
     RealType costheta;
     RealType phi;
     RealType r;
-    RealType dist;
     std::map<std::pair<int,int>,ComplexType> q;
     std::vector<RealType> q_l;
     std::vector<RealType> q2;
@@ -168,7 +169,7 @@ namespace OpenMD {
     std::vector<ComplexType> W_hat;
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
-    int i, j;
+    int i;
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -263,7 +264,7 @@ namespace OpenMD {
         for (int l = 0; l <= lMax_; l++) {
           q2[l] = 0.0;
           for (int m = -l; m <= l; m++){
-            q[std::make_pair(l,m)] /= (RealType)nBonds;            
+            q[std::make_pair(l,m)] /= (RealType)nBonds; 
 
             q2[l] += norm(q[std::make_pair(l,m)]);
           }
@@ -284,7 +285,7 @@ namespace OpenMD {
             }
           }
           
-          w_hat[l] = w[l] / pow(q2[l], 1.5);
+          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
         }
 
         collectHistogram(q_l, w_hat);
@@ -329,7 +330,7 @@ namespace OpenMD {
         }
       }
       
-      W_hat[l] = W[l] / pow(Q2[l], 1.5);
+      W_hat[l] = W[l] / pow(Q2[l], RealType(1.5));
     }
     
     writeOrderParameter(Q, W_hat);    

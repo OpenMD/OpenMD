@@ -36,9 +36,11 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
+#include "utils/NumericConstant.hpp" 
 #include "io/TorsionTypesSectionParser.hpp"
 #include "types/TorsionType.hpp"
 #include "types/CubicTorsionType.hpp"
@@ -47,9 +49,7 @@
 #include "types/CharmmTorsionType.hpp"
 #include "types/OplsTorsionType.hpp"
 #include "types/TrappeTorsionType.hpp"
-#include "UseTheForce/ForceField.hpp"
-#include "utils/NumericConstant.hpp"
-//#include <fstream>
+#include "brains/ForceField.hpp"
 
 namespace OpenMD {
 
@@ -83,7 +83,6 @@ namespace OpenMD {
     std::string at4 = tokenizer.nextToken();
     TorsionTypeEnum tt = getTorsionTypeEnum(tokenizer.nextToken());
 
-    //std::cout << at1 << "-" << at2 << "-" << at3 << "-" << at4 << std::endl;
     nTokens -= 5;
 
     switch(tt) {

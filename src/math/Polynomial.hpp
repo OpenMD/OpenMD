@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -273,7 +274,7 @@ namespace OpenMD {
      * @return the first derivative of this polynomial
      */
     PolynomialType & getDerivative() {
-      Polynomial<Real> p();
+      Polynomial<Real> p;
       
       typename Polynomial<Real>::const_iterator i;
       ExponentType exponent;
@@ -630,7 +631,7 @@ namespace OpenMD {
    */
   template<typename Real>
   Polynomial<Real> getDerivative(const Polynomial<Real>& p1) {
-    Polynomial<Real> p();
+    Polynomial<Real> p;
     
     typename Polynomial<Real>::const_iterator i;
     int exponent;

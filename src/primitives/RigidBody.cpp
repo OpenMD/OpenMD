@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include <algorithm>
 #include <math.h>
@@ -52,7 +53,7 @@ namespace OpenMD {
   void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
     
-    for (int i =0 ; i < atoms_.size(); ++i){
+    for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setPrevA(refOrients_[i].transpose() * a);
       }
@@ -64,7 +65,7 @@ namespace OpenMD {
   void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
-    for (int i =0 ; i < atoms_.size(); ++i){
+    for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a);
       }
@@ -76,7 +77,7 @@ namespace OpenMD {
     
     //((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;    
     
-    for (int i =0 ; i < atoms_.size(); ++i){
+    for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);
       }
@@ -228,7 +229,7 @@ namespace OpenMD {
     Vector3d frc(0.0);
     Vector3d trq(0.0);    
     Vector3d pos = this->getPos();
-    for (int i = 0; i < atoms_.size(); i++) {
+    for (unsigned int i = 0; i < atoms_.size(); i++) {
 
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
@@ -263,7 +264,7 @@ namespace OpenMD {
     Vector3d pos = this->getPos();
     Mat3x3d tau_(0.0);
 
-    for (int i = 0; i < atoms_.size(); i++) {
+    for (unsigned int i = 0; i < atoms_.size(); i++) {
       
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
@@ -375,7 +376,7 @@ namespace OpenMD {
 
 
     Vector3d velRot;        
-    for (int i =0 ; i < refCoords_.size(); ++i) {
+    for (unsigned int i = 0 ; i < refCoords_.size(); ++i) {
       atoms_[i]->setVel(rbVel + mat * refCoords_[i]);
     }
 
@@ -404,7 +405,7 @@ namespace OpenMD {
 
 
     Vector3d velRot;        
-    for (int i =0 ; i < refCoords_.size(); ++i) {
+    for (unsigned int i = 0 ; i < refCoords_.size(); ++i) {
       atoms_[i]->setVel(rbVel + mat * refCoords_[i], frame);
     }
 

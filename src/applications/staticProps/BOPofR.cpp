@@ -36,8 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
  *  @version $Id$
@@ -49,8 +49,10 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "math/Wigner3jm.hpp"
+#include "brains/Thermo.hpp"
 
-
+using namespace MATPACK;
 namespace OpenMD {
 
   BOPofR::BOPofR(SimInfo* info, const std::string& filename, const std::string& sele, double rCut,
@@ -81,16 +83,16 @@ namespace OpenMD {
 	}
 	
     // Make arrays for Wigner3jm
-    double* THRCOF = new double[2*lMax_+1];
+    RealType* THRCOF = new RealType[2*lMax_+1];
     // Variables for Wigner routine
-    double lPass, m1Pass, m2m, m2M;
+    RealType lPass, m1Pass, m2m, m2M;
     int error, mSize;
     mSize = 2*lMax_+1;
 
     for (int l = 0; l <= lMax_; l++) {
-      lPass = (double)l;
+      lPass = (RealType)l;
       for (int m1 = -l; m1 <= l; m1++) {
-        m1Pass = (double)m1;
+        m1Pass = (RealType)m1;
 
         std::pair<int,int> lm = std::make_pair(l, m1);
         
@@ -100,9 +102,9 @@ namespace OpenMD {
         }
 
         // Get Wigner coefficients
-        Wigner3jm(&lPass, &lPass, &lPass, 
-                  &m1Pass, &m2m, &m2M, 
-                  THRCOF, &mSize, &error);
+        Wigner3jm(lPass, lPass, lPass, 
+                  m1Pass, m2m, m2M, 
+                  THRCOF, mSize, error);
         
         m2Min[lm] = (int)floor(m2m);
         m2Max[lm] = (int)floor(m2M);
@@ -165,7 +167,6 @@ namespace OpenMD {
     RealType costheta;
     RealType phi;
     RealType r;
-    RealType dist;
     Vector3d rCOM;
     RealType distCOM;
     Vector3d pos;
@@ -182,11 +183,13 @@ namespace OpenMD {
     std::vector<ComplexType> W_hat;
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
-    int i, j;
-
+    int i;
+    
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
+
+    Thermo thermo(info_);
 
     q_l.resize(lMax_+1);
     q2.resize(lMax_+1);
@@ -203,7 +206,7 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      CenterOfMass = info_->getCom();
+      CenterOfMass = thermo.getCom();
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }
@@ -301,7 +304,7 @@ namespace OpenMD {
             }
           }
           
-          w_hat[l] = w[l] / pow(q2[l], 1.5);
+          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
         }
 
         collectHistogram(q_l, w_hat, distCOM);

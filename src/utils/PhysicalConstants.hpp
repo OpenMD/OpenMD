@@ -36,11 +36,14 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef UTILS_PHYSICALCONSTANTS_HPP
 #define UTILS_PHYSICALCONSTANTS_HPP
+#include "config.h"
+#include <cmath>
 
 namespace OpenMD {
 
@@ -70,6 +73,12 @@ namespace OpenMD {
      */
     const RealType viscoConvert = 1.439326479e4; 
 
+    /*
+     *  densityConvert
+     *    used for converting amu / Angstroms^3 into  g / cm^3
+     */
+    const RealType densityConvert = 1.66053886;
+
     /* 
      *  thermalConductivityConvert   
      *    multiplies standard input file units of 
@@ -78,6 +87,14 @@ namespace OpenMD {
      *      kcal mol^-1 Angstrom^-1 fs^-1 Kelvin^-1
      */
     const RealType thermalConductivityConvert = 1.439326479e-5; 
+
+    /* Atomic Units are used in the Slater overlap code, and we need
+     * to get distances back and forth to angstroms and energies back 
+     * and forth to kcal / mol 
+     */
+    const RealType angstromToBohr = 1.88972612;
+    const RealType bohrToAngstrom = 0.52917721092;
+    const RealType hartreeToKcal   = 627.509469;
   }
 }
 #endif 

@@ -36,14 +36,14 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include <iostream>
 #include <fstream>
 #include <string>
 
-#include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
@@ -75,15 +75,12 @@
 #endif
 #include "applications/staticProps/RhoR.hpp"
 #include "applications/staticProps/AngleR.hpp"
-#include "applications/staticProps/RhoAngleR.hpp"
 #include "applications/staticProps/TetrahedralityParam.hpp"
-
+#include "applications/staticProps/TetrahedralityParamZ.hpp"
 using namespace OpenMD;
 
 int main(int argc, char* argv[]){
   
-  //register force fields
-  registerForceFields();
   
   gengetopt_args_info args_info;
   
@@ -96,8 +93,6 @@ int main(int argc, char* argv[]){
   std::string dumpFileName = args_info.input_arg;
   std::string sele1;
   std::string sele2;
-  bool userSpecifiedSelect1;
-  bool userSpecifiedSelect2;
   
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"
@@ -273,6 +268,18 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+  } else if (args_info.tet_param_z_given) {
+    if (args_info.rcut_given) {	  
+      analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, 
+					 args_info.rcut_arg, 
+					 args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   } else if (args_info.bor_given){
     if (args_info.rcut_given) {
       analyser = new BOPofR(info, dumpFileName, sele1, args_info.rcut_arg,
@@ -341,7 +348,7 @@ int main(int argc, char* argv[]){
   if (args_info.step_given) {
     analyser->setStep(args_info.step_arg);
   }
-  
+ 
   analyser->process();
   
   delete analyser;    

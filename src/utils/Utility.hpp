@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #ifndef UTILS_UTILITY_HPP
@@ -46,6 +47,7 @@
 #include "config.h"
 #include "utils/next_combination.hpp"
 
+using namespace std;
 namespace OpenMD {
   inline RealType roundMe( RealType x ){
     return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
@@ -53,28 +55,33 @@ namespace OpenMD {
 
   /**
    * @brief iteratively replace the sequence with wild cards
-   * @return true if more combination sequence is avaliable, otherwise return true
-   * @param cont iterator container, if expect the whole series of combinations,  pass an empty iterator 
-   * container. The user should not modify this iterator container
+   * @return true if more combination sequence is avaliable, otherwise
+   * return true
+   * @param cont iterator container, if expect the whole series of
+   * combinations, pass an empty iterator container. The user should
+   * not modify this iterator container
    * @param sequence the whole sequence used to generate combination
    * @param result a possible combination sequence which is set on return
    * @param wildCard the wild card string. Its value is "X" by default
-   * @note since next_combination never returns an empty sequence, replaceWildCard will not generate 
-   * one special combination, which is n identical wild cards (n is equal to the size of the passing sequence)
+   * @note since next_combination never returns an empty sequence,
+   * replaceWildCard will not generate one special combination, which
+   * is n identical wild cards (n is equal to the size of the passing
+   * sequence)
    * 
    * @code
-   * std::vector<std::string> sv;
-   * std::vector<std::vector<std::string>::iterator> sic;
-   * std::vector<std::string> resultString;
+   * vector<string> sv;
+   * vector<vector<string>::iterator> sic;
+   * vector<string> resultString;
    * sv.push_back("H");
    * sv.push_back("C");
    * sv.push_back("N");
 
    * while (replaceWithWildCard(sic, sv, resultString)) {   
-   *     for(std::vector<std::string>::iterator i = resultString.begin(); i != resultString.end(); ++i) {
-   *         std::cout << *i << "\t";
+   *     for(vector<string>::iterator i = resultString.begin(); 
+   *          i != resultString.end(); ++i) {
+   *         cout << *i << "\t";
    *     }
-   *     std::cout << std::endl;
+   *     cout << endl;
    * }
    * //output
    * //H X X
@@ -86,8 +93,9 @@ namespace OpenMD {
    * //H C N
    * @endcode
    */
-  bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
-			   std::vector<std::string>& sequence, std::vector<std::string>& result, const std::string& wildCard = "X");
+  bool replaceWithWildCard(vector<vector<string>::iterator>& cont,
+			   vector<string>& sequence, vector<string>& result, 
+                           const string& wildCard = "X");
 }
 #endif
 

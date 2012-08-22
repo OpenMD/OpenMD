@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */ 
 
  
@@ -279,9 +280,9 @@ namespace OpenMD {
 
     int index = tokenizer.nextTokenAsInt();
 
-    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
 
-    if (integrableObject == NULL) {
+    if (sd == NULL) {
       return;
     }
   
@@ -309,7 +310,7 @@ namespace OpenMD {
       }
 
       case 'q' : {
-        if (integrableObject->isDirectional()) { 
+        if (sd->isDirectional()) { 
           
           q[0] = tokenizer.nextTokenAsDouble(); 
           q[1] = tokenizer.nextTokenAsDouble(); 
@@ -331,7 +332,7 @@ namespace OpenMD {
       }  
       case 'j' : {
         Vector3d ji;
-        if (integrableObject->isDirectional()) {
+        if (sd->isDirectional()) {
           ji[0] = tokenizer.nextTokenAsDouble(); 
           ji[1] = tokenizer.nextTokenAsDouble(); 
           ji[2] = tokenizer.nextTokenAsDouble(); 
@@ -365,7 +366,7 @@ namespace OpenMD {
       all_pos_[index] = pos;      
         
       // is this io restrained?
-      GenericData* data = integrableObject->getPropertyByName("Restraint");
+      GenericData* data = sd->getPropertyByName("Restraint");
       ObjectRestraint* oRest;
       
       if (data != NULL) {
@@ -376,7 +377,7 @@ namespace OpenMD {
             // an ObjectRestraint:
           oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
           if (oRest != NULL) {          
-            if (integrableObject->isDirectional()) {
+            if (sd->isDirectional()) {
               oRest->setReferenceStructure(pos, q.toRotationMatrix3());
             } else {                           
               oRest->setReferenceStructure(pos);

@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 /**
@@ -72,7 +73,6 @@ namespace OpenMD {
   inline bool equal(RealType e1, RealType e2) {
     return fabs(e1 - e2) < epsilon;
   }
-
     
   /**
    * @class Vector Vector.hpp "math/Vector.hpp"
@@ -107,10 +107,11 @@ namespace OpenMD {
       return *this;
     }
 
-    template<typename T>
-    inline Vector(const T& s){
+    // template<typename T>
+    // inline Vector(const T& s){
+    inline Vector(const Real& s) {
       for (unsigned int i = 0; i < Dim; i++)
-	this->data_[i] = s;
+        this->data_[i] = s;
     }
             
     /** Constructs and initializes a Vector from an array */            
@@ -284,6 +285,23 @@ namespace OpenMD {
 	this->data_[i] = v1.data_[i] * v2.data_[i];
     }
 
+    /* replaces the elements with the absolute values of those elements */
+    inline Vector<Real, Dim>& abs() {
+      for (unsigned int i = 0; i < Dim; i++) {
+        this->data_[i] = std::abs(this->data_[i]);
+      }
+      return *this;
+    }
+    
+    /* returns the maximum value in this vector */
+    inline Real max() {
+      Real val = this->data_[0];
+      for (unsigned int i = 0; i < Dim; i++) {
+        if (this->data_[i] > val) val = this->data_[i];
+      }
+      return val;
+    }
+     
     /**
      * Sets the value of this vector to the scalar division of itself  (*this /= s ).
      * @param s the scalar value

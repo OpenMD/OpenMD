@@ -45,6 +45,9 @@ Cmass = 12.011
 Omass = 15.999
 Nmass = 14.007
 Smass = 32.066
+Aumass = 196.466569
+Au1mass = 196.466569
+Au2mass =   0.5
 
 def usage():
     print __doc__
@@ -97,8 +100,14 @@ def findCOM():
             myMass = Nmass
         elif (atypes[i] == "S"):
             myMass = Smass
+        elif (atypes[i] == "Au1"):
+            myMass = Au1mass
+        elif (atypes[i] == "Au2"):
+            myMass = Au2mass
+        elif (atypes[i] == "Au"):
+            myMass = Aumass
         else:
-            print "unknown atom type!"
+            print "unknown atom type! %s" % (atypes[i])
         
         Xcom = Xcom + myMass * positions[i][0]
         Ycom = Ycom + myMass * positions[i][1]
@@ -132,6 +141,12 @@ def findMoments():
             myMass = Nmass
         elif (atypes[i] == "S"):
             myMass = Smass
+        elif (atypes[i] == "Au1"):
+            myMass = Au1mass
+        elif (atypes[i] == "Au2"):
+            myMass = Au2mass
+        elif (atypes[i] == "Au"):
+            myMass = Aumass
         else:
             print "unknown atom type!"
 

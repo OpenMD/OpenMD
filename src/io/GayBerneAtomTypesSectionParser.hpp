@@ -45,7 +45,6 @@
 #define IO_GAYBERNEATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
-#include "types/DirectionalAtomType.hpp"
 #include "io/ForceFieldOptions.hpp"
 namespace OpenMD {
   

@@ -35,8 +35,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
- *
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
  *  AlphaHull.cpp
  *
@@ -58,25 +58,14 @@
 #include <utility>
 #include "math/AlphaHull.hpp"
 #include "utils/simError.h"
-
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+#include "math/qhull.hpp"
 
 using namespace OpenMD;
 
 #ifdef HAVE_QHULL
-extern "C"
-{
-#include <qhull/libqhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
-}
 double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim);
 
 AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), options_("qhull d QJ Tcv Pp") {
@@ -358,7 +347,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       facetlist.push_back(virtexlist);
       face.addVertices(p[0],p[1],p[2]);
       face.setFacetMass(faceMass);
-      face.setFacetVelocity(faceVel/3.0);
+      face.setFacetVelocity(faceVel / RealType(3.0));
       
       RealType area = face.getArea();
       area_ += area;

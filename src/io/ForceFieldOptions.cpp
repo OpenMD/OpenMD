@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #define __OPENMD_C
 #include "io/ForceFieldOptions.hpp"
@@ -45,7 +46,6 @@ namespace OpenMD {
 
     ForceFieldOptions::ForceFieldOptions() {
       DefineOptionalParameter(Name, "Name");
-      DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
       DefineOptionalParameterWithDefaultValue(vdWtype, "vdWtype", "Lennard-Jones");
       DefineOptionalParameterWithDefaultValue(DistanceMixingRule, "DistanceMixingRule", "arithmetic");
       DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType", "sigma");
@@ -55,53 +55,23 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
-      DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(electrostatic12scale, "electrostatic-12-scale", 0.0)
-      DefineOptionalParameterWithDefaultValue(electrostatic13scale, "electrostatic-13-scale", 0.0)
-      DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0)
+      DefineOptionalParameter(vdw12scale, "vdW-12-scale");
+      DefineOptionalParameter(vdw13scale, "vdW-13-scale");
+      DefineOptionalParameter(vdw14scale, "vdW-14-scale");
+      DefineOptionalParameter(electrostatic12scale, "electrostatic-12-scale");
+      DefineOptionalParameter(electrostatic13scale, "electrostatic-13-scale");
+      DefineOptionalParameter(electrostatic14scale, "electrostatic-14-scale");
+
+      // DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(electrostatic12scale, "electrostatic-12-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(electrostatic13scale, "electrostatic-13-scale", 0.0);
+      // DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
+      DefineOptionalParameterWithDefaultValue(EAMMixingMethod, "EAMMixingMethod", "Johnson");
+
+      deprecatedKeywords_.insert("cutoffPolicy");
     }
-
-
-  void ForceFieldOptions::makeFortranOptions(ForceOptions& fortranForceOptions){
-    
-    fortranForceOptions.vdw12scale = this->getvdw12scale();
-    fortranForceOptions.vdw13scale = this->getvdw13scale();
-    fortranForceOptions.vdw14scale = this->getvdw14scale();
-    fortranForceOptions.electrostatic12scale = this->getelectrostatic12scale();
-    fortranForceOptions.electrostatic13scale = this->getelectrostatic13scale();
-    fortranForceOptions.electrostatic14scale = this->getelectrostatic14scale();
-    fortranForceOptions.GayBerneMu = this->getGayBerneMu();
-    fortranForceOptions.GayBerneNu = this->getGayBerneNu();
-
-
-    std::string DistanceMix = this->getDistanceMixingRule();
-    toUpper(DistanceMix);
-    if(DistanceMix == "ARITHMETIC"){
-      fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
-    }else if(DistanceMix == "GEOMETRIC"){
-      fortranForceOptions.DistanceMixingRule = GEOMETRIC_MIXING_RULE;
-    }else if(DistanceMix == "CUBIC"){
-      fortranForceOptions.DistanceMixingRule = CUBIC_MIXING_RULE;
-    }else{
-      fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
-    }
-    std::string EnergyMix = this->getEnergyMixingRule();  
-    toUpper(EnergyMix);
-    if(EnergyMix == "ARITHMETIC"){
-      fortranForceOptions.EnergyMixingRule = ARITHMETIC_MIXING_RULE;
-    }else if(EnergyMix == "GEOMETRIC"){
-      fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
-    }else if(EnergyMix == "HHG"){
-      fortranForceOptions.EnergyMixingRule = HHG_MIXING_RULE;
-    }else{
-      fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
-    }
-
-
-  }
-
 }

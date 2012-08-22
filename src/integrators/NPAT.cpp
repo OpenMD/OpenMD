@@ -36,7 +36,8 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
 #include "brains/SimInfo.hpp"
@@ -69,7 +70,7 @@ namespace OpenMD {
 	vScale(i, j) = eta(i, j);
 
 	if (i == j) {
-	  vScale(i, j) += chi;
+	  vScale(i, j) += thermostat.first;
 	}
       }
     }
@@ -103,9 +104,9 @@ namespace OpenMD {
     }
     
     scaleMat(2, 2) = exp(dt*eta(2, 2));
-    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Mat3x3d hmat = snap->getHmat();
     hmat = hmat *scaleMat;
-    currentSnapshot_->setHmat(hmat);
+    snap->setHmat(hmat);
   }
 
   bool NPAT::etaConverged() {
@@ -124,8 +125,7 @@ namespace OpenMD {
 
   RealType NPAT::calcConservedQuantity(){
 
-    chi= currentSnapshot_->getChi();
-    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    thermostat = snap->getThermostat();
     loadEta();
     
     // We need NkBT a lot, so just set it here: This is the RAW number
@@ -146,11 +146,12 @@ namespace OpenMD {
     RealType barostat_potential;
     RealType trEta;
 
-    totalEnergy = thermo.getTotalE();
+    totalEnergy = thermo.getTotalEnergy();
 
-    thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * PhysicalConstants::energyConvert);
+    thermostat_kinetic = fkBT * tt2 * thermostat.first * 
+      thermostat.first /(2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_potential = fkBT* integralOfChidt / PhysicalConstants::energyConvert;
+    thermostat_potential = fkBT* thermostat.second / PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
@@ -167,7 +168,7 @@ namespace OpenMD {
   }
 
   void NPAT::loadEta() {
-    eta= currentSnapshot_->getEta();
+    eta= snap->getBarostat();
 
     //if (!eta.isDiagonal()) {
     //    sprintf( painCave.errMsg,
@@ -178,7 +179,7 @@ namespace OpenMD {
   }
 
   void NPAT::saveEta() {
-    currentSnapshot_->setEta(eta);
+    snap->setBarostat(eta);
   }
 
 }
