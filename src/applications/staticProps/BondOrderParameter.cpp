@@ -135,7 +135,7 @@ namespace OpenMD {
     m2Max.clear();
   }
   
-  void BondOrderParameter::initalizeHistogram() {
+  void BondOrderParameter::initializeHistogram() {
     for (int bin = 0; bin < nBins_; bin++) {
       for (int l = 0; l <= lMax_; l++) {
         Q_histogram_[std::make_pair(bin,l)] = 0;

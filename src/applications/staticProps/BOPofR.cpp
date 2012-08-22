@@ -145,7 +145,7 @@ namespace OpenMD {
   }
 
   
-  void BOPofR::initalizeHistogram() {
+  void BOPofR::initializeHistogram() {
  	for (int i = 0; i < nBins_; i++){
 		RCount_[i] = 0;
 		WofR_[i] = 0;

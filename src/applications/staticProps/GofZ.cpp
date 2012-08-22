@@ -64,7 +64,7 @@ namespace OpenMD {
     std::fill(avgGofz_.begin(), avgGofz_.end(), 0.0);    
   }
 
-  void GofZ::initalizeHistogram() {
+  void GofZ::initializeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
   }
 

@@ -63,7 +63,7 @@ namespace OpenMD {
     std::fill(avgGofr_.begin(), avgGofr_.end(), 0.0);    
   }
 
-  void GofR::initalizeHistogram() {
+  void GofR::initializeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
   }
 

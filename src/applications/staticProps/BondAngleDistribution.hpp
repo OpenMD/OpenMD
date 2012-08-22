@@ -69,7 +69,7 @@ namespace OpenMD {
     virtual void process();
     
   private:
-    virtual void initalizeHistogram();
+    virtual void initializeHistogram();
        
     void writeBondAngleDistribution();
 

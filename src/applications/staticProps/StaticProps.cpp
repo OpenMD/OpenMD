@@ -118,7 +118,11 @@ int main(int argc, char* argv[]){
     if (sele2Env) {
       sele2 = sele2Env;            
     } else { 
-      sele2 = "select all";
+      //It seems likely (from previous discussions) that if sele2 is not specified, then the default behavior
+      //should not be 'select all' but rather what is already intended for sele1
+      //JRM 8/22/12
+      sele2 = sele1;
+      //sele2 = "select all";
     }
   }
   

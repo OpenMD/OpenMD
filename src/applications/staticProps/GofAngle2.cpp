@@ -72,7 +72,7 @@ namespace OpenMD {
     }
   }
 
-  void GofAngle2::initalizeHistogram() {
+  void GofAngle2::initializeHistogram() {
     npairs_ = 0;
     for (unsigned int i = 0; i < histogram_.size(); ++i)
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);

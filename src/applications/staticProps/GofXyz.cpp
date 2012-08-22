@@ -79,7 +79,7 @@ namespace OpenMD {
   }
 
 
-  void GofXyz::initalizeHistogram() {
+  void GofXyz::initializeHistogram() {
     //calculate the center of mass of the molecule of selected stuntdouble in selection1
 
     if (!evaluator3_.isDynamic()) {

@@ -120,7 +120,7 @@ namespace OpenMD {
 	}
       }
         
-      initalizeHistogram();
+      initializeHistogram();
         
       // Selections may overlap, and we need a bit of logic to deal
       // with this.

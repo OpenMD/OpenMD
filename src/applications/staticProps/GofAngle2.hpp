@@ -55,7 +55,7 @@ namespace OpenMD {
   private:
 
     virtual void preProcess();
-    virtual void initalizeHistogram();
+    virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void processHistogram();
 

@@ -65,7 +65,7 @@ namespace OpenMD {
     std::fill(avgTwoDGofR_.begin(), avgTwoDGofR_.end(), 0.0);    
   }
 
-  void TwoDGofR::initalizeHistogram() {
+  void TwoDGofR::initializeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
   }
 

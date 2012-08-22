@@ -92,7 +92,7 @@ namespace OpenMD {
     virtual void process();
     
   private:
-    virtual void initalizeHistogram();
+    virtual void initializeHistogram();
     virtual void collectHistogram(std::vector<RealType> q, 
                                   std::vector<ComplexType> what, RealType distCOM);    
     void writeOrderParameter();

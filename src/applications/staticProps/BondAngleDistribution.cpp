@@ -81,7 +81,7 @@ namespace OpenMD {
     histogram_.clear();
   }
   
-  void BondAngleDistribution::initalizeHistogram() {
+  void BondAngleDistribution::initializeHistogram() {
     for (int bin = 0; bin < nBins_; bin++) {      
       histogram_[bin] = 0;
     }

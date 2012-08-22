@@ -83,7 +83,7 @@ namespace OpenMD {
         
   private:
 
-    virtual void initalizeHistogram() {}
+    virtual void initializeHistogram() {}
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
     virtual void processHistogram() {}
     void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
