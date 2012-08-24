@@ -174,7 +174,7 @@ namespace OpenMD {
 	// Sort the vector using predicate and std::sort
 	std::sort(myNeighbors.begin(), myNeighbors.end());
 
-	std::cerr << myNeighbors.size() <<  " neighbors within " << rCut_  << " A" << " \n";
+	//std::cerr << myNeighbors.size() <<  " neighbors within " << rCut_  << " A" << " \n";
 	
 	// Use only the 4 closest neighbors to do the rest of the work:
 	
@@ -182,7 +182,7 @@ namespace OpenMD {
 	int nang = int (0.5 * (nbors * (nbors - 1)));
 
 	rk = sd->getPos();
-	std::cerr<<nbors<<endl;
+	//std::cerr<<nbors<<endl;
 	for (int i = 0; i < nbors-1; i++) {	  
 
 	  sdi = myNeighbors[i].second;
