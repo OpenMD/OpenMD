@@ -54,8 +54,11 @@ namespace OpenMD {
     I_ = da.getI();
 
     MultipoleAdapter ma = MultipoleAdapter(dAtomType);
-    if (ma.isMultipole()) {
-      electroBodyFrame_ = ma.getElectroBodyFrame();
+    if (ma.isDipole()) {
+      dipole_ = ma.getDipole();
+    }
+    if (ma.isQuadrupole()) {
+      quadrupole_ = ma.getQuadrupole();
     }
 
     // Check if one of the diagonal inertia tensor of this directional
@@ -86,26 +89,53 @@ namespace OpenMD {
   
   void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
+
     if (atomType_->isMultipole()) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;
+      RotMat3x3d atrans = a.transpose();
+      
+      if (atomType_->isDipole()) {
+        ((snapshotMan_->getPrevSnapshot())->*storage_).dipole[localIndex_] = atrans * dipole_;
+      }
+
+      if (atomType_->isQuadrupole()) {
+        ((snapshotMan_->getPrevSnapshot())->*storage_).quadrupole[localIndex_] = atrans * quadrupole_ * a;
+      }
     }
   }
   
   
   void DirectionalAtom::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
-    
+ 
     if (atomType_->isMultipole()) {
-      ((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;
+      RotMat3x3d atrans = a.transpose();
+      
+      if (atomType_->isDipole()) {
+        ((snapshotMan_->getCurrentSnapshot())->*storage_).dipole[localIndex_] = atrans * dipole_;
+      }
+
+      if (atomType_->isQuadrupole()) {
+        ((snapshotMan_->getCurrentSnapshot())->*storage_).quadrupole[localIndex_] = atrans * quadrupole_ * a;
+      }
     }
+   
   }    
   
   void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
-    
+
     if (atomType_->isMultipole()) {
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;    
+      RotMat3x3d atrans = a.transpose();
+      
+      if (atomType_->isDipole()) {
+        ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).dipole[localIndex_] = atrans * dipole_;
+      }
+
+      if (atomType_->isQuadrupole()) {
+        ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).quadrupole[localIndex_] = atrans * quadrupole_ * a;
+      }
     }
+
   }    
   
   void DirectionalAtom::rotateBy(const RotMat3x3d& m) {

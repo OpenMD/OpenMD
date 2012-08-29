@@ -98,7 +98,8 @@ namespace OpenMD{
    
   private:
     Mat3x3d I_;
-    RotMat3x3d electroBodyFrame_; // body fixed standard eletrostatic frame
+    Vector3d dipole_;    // body fixed dipole vector
+    Mat3x3d quadrupole_; // body fixed quadrupole tensor
   };  
 }//namespace OpenMD
 #endif //PRIMITIVES_DIRECTIONALATOM_HPP

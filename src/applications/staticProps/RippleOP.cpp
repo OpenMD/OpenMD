@@ -45,6 +45,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "types/MultipoleAdapter.hpp"
 namespace OpenMD {
 
 
@@ -151,12 +152,22 @@ namespace OpenMD {
           currentSnapshot_->wrapVector(pos);
 	Vector3d vecHeadUpper;
 	if (pos.z() >= avgZ){
-	  vecHeadUpper = j1->getElectroFrame().getColumn(2);
+          AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
+          MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+          if (ma1.isDipole())
+            vecHeadUpper = j1->getDipole();
+          else
+            vecHeadUpper = j1->getA().transpose()*V3Z;
 	  nUpper++;
 	}
 	Vector3d vecHeadLower;
 	if (pos.z() <= avgZ){
-	  vecHeadLower = j1->getElectroFrame().getColumn(2);
+          AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
+          MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+          if (ma1.isDipole())
+            vecHeadLower = j1->getDipole();
+          else
+            vecHeadLower = j1->getA().transpose() * V3Z;
 	  nLower++;
 	}
 	orderTensorHeadUpper +=outProduct(vecHeadUpper, vecHeadUpper);

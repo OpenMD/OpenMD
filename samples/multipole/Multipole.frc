@@ -1,0 +1,30 @@
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+X               100.0
+XM              100.0
+end BaseAtomTypes
+
+begin AtomTypes
+P+      X
+N-      X
+D       XM
+Q       XM
+end AtomTypes
+
+begin DirectionalAtomTypes
+//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+XM		1.7696	0.6145	1.1550  
+end DirectionalAtomTypes  
+
+begin ChargeAtomTypes
+// name charge
+P+   1.0
+N-  -1.0
+end ChargeAtomTypes
+
+begin MultipoleAtomTypes
+// name d theta phi psi dipole_moment
+// name q theta phi psi Qxx Qyy Qzz
+D   d	0.0	0.0	0.0	1.0
+Q   q   0.0     0.0     0.0     1.0  1.0  -2.0
+end MultipoleAtomTypes

@@ -46,7 +46,7 @@
 
 namespace OpenMD {
   LegendreCorrFunc::LegendreCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat | DataStorage::dslElectroFrame, memSize){
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat, memSize){
 
       setCorrFuncType("Legendre Correlation Function");
       setOutputName(getPrefix(dumpFilename_) + ".lcorr");

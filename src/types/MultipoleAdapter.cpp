@@ -93,13 +93,6 @@ namespace OpenMD {
     } else 
       return false;
   }
-  bool MultipoleAdapter::isSplitDipole() {
-    if (isMultipole()) {
-      MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-      return multipoleParam->isSplitDipole;
-    } else 
-      return false;
-  }
   bool MultipoleAdapter::isQuadrupole() {
     if (isMultipole()) {
       MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
@@ -108,43 +101,19 @@ namespace OpenMD {
       return false;
   }
 
-  RotMat3x3d MultipoleAdapter::getElectroBodyFrame() {    
-    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-    return multipoleParam->electroBodyFrame;
-  }
-
-  RealType MultipoleAdapter::getDipoleMoment() {    
-    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-    return multipoleParam->dipoleMoment;
-  }
-
   Vector3d MultipoleAdapter::getDipole() {    
     MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
     return multipoleParam->dipole;
-  }
-
-  RealType MultipoleAdapter::getSplitDipoleDistance() {    
-    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-    return multipoleParam->splitDipoleDistance;
-  }
-
-  Vector3d MultipoleAdapter::getQuadrupoleMoments() {    
-    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-    return multipoleParam->quadrupoleMoments;
   }
 
   Mat3x3d MultipoleAdapter::getQuadrupole() {    
     MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
     return multipoleParam->quadrupole;
   }
-
-
     
-  void MultipoleAdapter::makeMultipole(RotMat3x3d electroBodyFrame, 
-                                       RealType dipoleMoment, 
-                                       RealType splitDipoleDistance, 
-                                       Vector3d quadrupoleMoments, 
-                                       bool isDipole, bool isSplitDipole, 
+  void MultipoleAdapter::makeMultipole(Vector3d dipole, 
+                                       Mat3x3d quadrupole, 
+                                       bool isDipole,
                                        bool isQuadrupole){ 
 
     if (isMultipole()){
@@ -152,12 +121,11 @@ namespace OpenMD {
     }
 
     MultipoleAtypeParameters* multipoleParam = new MultipoleAtypeParameters();
-    multipoleParam->electroBodyFrame = electroBodyFrame;
-    multipoleParam->dipoleMoment = dipoleMoment;
-    multipoleParam->splitDipoleDistance = splitDipoleDistance;
-    multipoleParam->quadrupoleMoments = quadrupoleMoments;
+
+    multipoleParam->dipole = dipole;
+    multipoleParam->quadrupole = quadrupole;
+
     multipoleParam->isDipole = isDipole;
-    multipoleParam->isSplitDipole = isSplitDipole;
     multipoleParam->isQuadrupole = isQuadrupole;   
 
     at_->addProperty(new MultipoleAtypeData(MultipoleTypeID, multipoleParam));

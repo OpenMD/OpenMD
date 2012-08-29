@@ -84,6 +84,7 @@ namespace OpenMD {
   protected: 
     bool initialized_; 
     bool doParticlePot_;
+    bool doElectricField_;
     bool doHeatFlux_;
 
     virtual void setupCutoffs();

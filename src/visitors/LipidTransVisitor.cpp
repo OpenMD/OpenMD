@@ -41,6 +41,7 @@
  */
 
 #include "visitors/LipidTransVisitor.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -90,7 +91,15 @@ namespace OpenMD {
     origin_ = originDatom_->getPos();
     Vector3d v1 =  ref - origin_;
     info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
-    Vector3d zaxis = originDatom_->getElectroFrame().getColumn(2);
+
+    MultipoleAdapter ma = MultipoleAdapter(originDatom_->getAtomType());
+    Vector3d zaxis;
+    if (ma.isDipole() ) {
+      zaxis = originDatom_->getDipole();
+    } else {
+      zaxis = originDatom_->getA().transpose()*V3Z;
+    }
+
     Vector3d xaxis = cross(v1, zaxis);
     Vector3d yaxis = cross(zaxis, xaxis);
 

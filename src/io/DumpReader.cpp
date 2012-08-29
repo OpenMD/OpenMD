@@ -226,7 +226,9 @@ namespace OpenMD {
       needVel_ = false; 
     } 
      
-    if (storageLayout & DataStorage::dslAmat || storageLayout & DataStorage::dslElectroFrame) { 
+    if (storageLayout & DataStorage::dslAmat || 
+        storageLayout & DataStorage::dslDipole || 
+        storageLayout & DataStorage::dslQuadrupole) { 
       needQuaternion_ = true; 
     } else { 
       needQuaternion_ = false; 

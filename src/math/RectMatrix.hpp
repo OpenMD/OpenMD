@@ -507,7 +507,7 @@ namespace OpenMD {
   }
     
   /**
-   * Return the multiplication of  a matrix and a vector  (m * v). 
+   * Returns the multiplication of  a matrix and a vector  (m * v). 
    * @return the multiplication of a matrix and a vector
    * @param m the matrix
    * @param v the vector
@@ -519,6 +519,23 @@ namespace OpenMD {
     for (unsigned int i = 0; i < Row ; i++)
       for (unsigned int j = 0; j < Col ; j++)            
 	result[i] += m(i, j) * v[j];
+            
+    return result;                                                                 
+  }
+
+  /**
+   * Returns the multiplication of a vector transpose and a matrix  (v^T * m). 
+   * @return the multiplication of a vector transpose and a matrix
+   * @param v the vector
+   * @param m the matrix
+   */
+  template<typename Real, unsigned int Row, unsigned int Col>
+  inline Vector<Real, Col> operator *(const Vector<Real, Row>& v, const RectMatrix<Real, Row, Col>& m) {
+    Vector<Real, Row> result;
+    
+    for (unsigned int i = 0; i < Col ; i++)
+      for (unsigned int j = 0; j < Row ; j++)            
+	result[i] += v[j] * m(j, i);
             
     return result;                                                                 
   }
@@ -538,6 +555,44 @@ namespace OpenMD {
     return result;
   }    
 
+  
+  /**
+   * Returns the vector (cross) product of two matrices.  This
+   * operation is defined in:
+   *
+   * W. Smith, "Point Multipoles in the Ewald Summation (Revisited),"
+   * CCP5 Newsletter No 46., pp. 18-30.
+   *
+   * Equation 21 defines:
+   * V_alpha = \sum_\beta [ A_{\alpha+1,\beta} * B_{\alpha+2,\beta} 
+                           -A_{\alpha+2,\beta} * B_{\alpha+2,\beta} ]
+   * where \alpha+1 and \alpha+2 are regarded as cyclic permuations of the
+   * matrix indices (i.e. for a 3x3 matrix, when \alpha = 2, \alpha + 1 = 3,
+   * and \alpha + 2 = 1).
+   *
+   * @param t1 first matrix
+   * @param t2 second matrix
+   * @return the cross product (vector product) of t1 and t2
+   */
+  template<typename Real, unsigned int Row, unsigned int Col>
+  inline Vector<Real, Row> cross( const RectMatrix<Real, Row, Col>& t1, const RectMatrix<Real, Row, Col>& t2 ) {
+    Vector<Real, Row> result;
+    unsigned int i1;
+    unsigned int i2;
+    
+    for (unsigned int i = 0; i < Row; i++) {
+      i1 = (i+1)%Row;
+      i2 = (i+2)%Row;
+      
+      for (unsigned int j =0; j < Col; j++) {        
+        result[i] = t1(i1,j) * t2(i2,j) - t1(i2,j) * t2(i1,j);
+      }
+    }
+    
+    return result;
+  }
+  
+  
   /**
    * Write to an output stream
    */

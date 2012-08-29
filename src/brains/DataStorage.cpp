@@ -73,22 +73,17 @@ namespace OpenMD {
       cerr << "size does not match"<< endl;        
     }
 
+    if (storageLayout_ & dslForce && force.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
     if (storageLayout_ & dslAmat && aMat.size() != size_) {
       //error
       cerr << "size does not match"<< endl;        
     }
 
     if (storageLayout_ & dslAngularMomentum && angularMomentum.size() != size_) {
-      //error
-      cerr << "size does not match"<< endl;        
-    }
-
-    if (storageLayout_ & dslElectroFrame && electroFrame.size() != size_) {
-      //error
-      cerr << "size does not match"<< endl;        
-    }
-
-    if (storageLayout_ & dslForce && force.size() != size_) {
       //error
       cerr << "size does not match"<< endl;        
     }
@@ -114,6 +109,16 @@ namespace OpenMD {
     }
 
     if (storageLayout_ & dslFunctionalDerivative && functionalDerivative.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslDipole && dipole.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
+
+    if (storageLayout_ & dslQuadrupole && quadrupole.size() != size_) {
       //error
       cerr << "size does not match"<< endl;        
     }
@@ -157,6 +162,10 @@ namespace OpenMD {
       internalResize(velocity, newSize);
     }
 
+    if (storageLayout_ & dslForce) {
+      internalResize(force, newSize);
+    }
+
     if (storageLayout_ & dslAmat) {
       internalResize(aMat, newSize);
     }
@@ -164,15 +173,7 @@ namespace OpenMD {
     if (storageLayout_ & dslAngularMomentum) {
       internalResize(angularMomentum, newSize);
     }
-
-    if (storageLayout_ & dslElectroFrame) {
-      internalResize(electroFrame, newSize);
-    }
     
-    if (storageLayout_ & dslForce) {
-      internalResize(force, newSize);
-    }
-
     if (storageLayout_ & dslTorque) {
       internalResize(torque, newSize);
     }
@@ -191,6 +192,14 @@ namespace OpenMD {
 
     if (storageLayout_ & dslFunctionalDerivative) {
       internalResize(functionalDerivative, newSize);
+    }
+
+    if (storageLayout_ & dslDipole) {
+      internalResize(dipole, newSize);
+    }
+
+    if (storageLayout_ & dslQuadrupole) {
+      internalResize(quadrupole, newSize);
     }
 
     if (storageLayout_ & dslElectricField) {
@@ -225,20 +234,16 @@ namespace OpenMD {
       velocity.reserve(size);
     } 
 
+    if (storageLayout_ & dslForce) {
+      force.reserve(size);
+    } 
+
     if (storageLayout_ & dslAmat) {
       aMat.reserve(size);
     } 
 
     if (storageLayout_ & dslAngularMomentum) {
       angularMomentum.reserve(size);
-    } 
-
-    if (storageLayout_ & dslElectroFrame) {
-      electroFrame.reserve(size);
-    }
-    
-    if (storageLayout_ & dslForce) {
-      force.reserve(size);
     } 
 
     if (storageLayout_ & dslTorque) {
@@ -259,6 +264,14 @@ namespace OpenMD {
 
     if (storageLayout_ & dslFunctionalDerivative) {
       functionalDerivative.reserve(size);
+    }
+
+    if (storageLayout_ & dslDipole) {
+      dipole.reserve(size);
+    }
+
+    if (storageLayout_ & dslQuadrupole) {
+      quadrupole.reserve(size);
     }
 
     if (storageLayout_ & dslElectricField) {
@@ -295,20 +308,16 @@ namespace OpenMD {
       internalCopy(velocity, source, num, target);
     } 
 
+    if (storageLayout_ & dslForce) {
+      internalCopy(force, source, num, target);
+    } 
+
     if (storageLayout_ & dslAmat) {
       internalCopy(aMat, source, num, target);
     } 
 
     if (storageLayout_ & dslAngularMomentum) {
       internalCopy(angularMomentum, source, num, target);
-    } 
-
-    if (storageLayout_ & dslElectroFrame) {
-      internalCopy(electroFrame, source, num, target);
-    }
-    
-    if (storageLayout_ & dslForce) {
-      internalCopy(force, source, num, target);
     } 
 
     if (storageLayout_ & dslTorque) {
@@ -329,6 +338,14 @@ namespace OpenMD {
 
     if (storageLayout_ & dslFunctionalDerivative) {
       internalCopy(functionalDerivative, source, num, target);
+    }
+
+    if (storageLayout_ & dslDipole) {
+      internalCopy(dipole, source, num, target);
+    }
+
+    if (storageLayout_ & dslQuadrupole) {
+      internalCopy(quadrupole, source, num, target);
     }
 
     if (storageLayout_ & dslElectricField) {
@@ -371,6 +388,10 @@ namespace OpenMD {
       return internalGetArrayPointer(velocity);
       break;
             
+    case dslForce:
+      return internalGetArrayPointer(force);
+      break;            
+
     case dslAmat:
       return internalGetArrayPointer(aMat);
       break;            
@@ -379,14 +400,6 @@ namespace OpenMD {
       return internalGetArrayPointer(angularMomentum);
       break;
             
-    case dslElectroFrame:
-      return internalGetArrayPointer(electroFrame);
-      break;
-            
-    case dslForce:
-      return internalGetArrayPointer(force);
-      break;            
-
     case dslTorque:
       return internalGetArrayPointer(torque);
       break;
@@ -405,6 +418,14 @@ namespace OpenMD {
 
     case dslFunctionalDerivative:
       return internalGetArrayPointer(functionalDerivative);
+      break;
+
+    case dslDipole:
+      return internalGetArrayPointer(dipole);
+      break;
+
+    case dslQuadrupole:
+      return internalGetArrayPointer(quadrupole);
       break;
 
     case dslElectricField:
@@ -442,7 +463,7 @@ namespace OpenMD {
     }
   }
 
-  RealType* DataStorage::internalGetArrayPointer(std::vector<RotMat3x3d>& v) {
+  RealType* DataStorage::internalGetArrayPointer(std::vector<Mat3x3d>& v) {
     if (v.size() == 0) {
       return NULL;
     } else {
@@ -502,16 +523,13 @@ namespace OpenMD {
     if (layout & dslVelocity) {
       bytes += sizeof(Vector3d);
     }
+    if (layout & dslForce) {
+      bytes += sizeof(Vector3d);
+    }
     if (layout & dslAmat) {
       bytes += sizeof(RotMat3x3d);    
     }
     if (layout & dslAngularMomentum) {
-      bytes += sizeof(Vector3d);
-    }
-    if (layout & dslElectroFrame) {
-      bytes += sizeof(Mat3x3d);
-    }
-    if (layout & dslForce) {
       bytes += sizeof(Vector3d);
     }
     if (layout & dslTorque) {
@@ -528,6 +546,12 @@ namespace OpenMD {
     }
     if (layout & dslFunctionalDerivative) {
       bytes += sizeof(RealType);
+    }
+    if (layout & dslDipole) {
+      bytes += sizeof(Vector3d);
+    }
+    if (layout & dslQuadrupole) {
+      bytes += sizeof(Mat3x3d);
     }
     if (layout & dslElectricField) {
       bytes += sizeof(Vector3d);

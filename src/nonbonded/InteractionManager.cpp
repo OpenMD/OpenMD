@@ -304,10 +304,6 @@ namespace OpenMD {
     eam_->setCutoffRadius(rcut);
   }
 
-  void InteractionManager::setSwitchingRadius(RealType rswitch) {
-    electrostatic_->setSwitchingRadius(rswitch);
-  }
-  
   void InteractionManager::doPrePair(InteractionData idat){
     
     if (!initialized_) initialize();

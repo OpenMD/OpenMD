@@ -57,7 +57,6 @@ namespace OpenMD {
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     
     void parseDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, int lineNo);
-    void parseSplitDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, RealType& splitDipoleDistance, int lineNo);
     void parseQuadrupole(StringTokenizer& tokenizer, Vector3d& quadrupoleMoments, int lineNo);
     ForceFieldOptions& options_;
   };  

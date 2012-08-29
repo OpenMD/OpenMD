@@ -43,6 +43,8 @@
 #include <algorithm>
 #include <fstream>
 #include "applications/staticProps/GofRAngle.hpp"
+#include "primitives/Atom.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -157,14 +159,39 @@ namespace OpenMD {
       currentSnapshot_->wrapVector(r12);
 
     r12.normalize();
-    Vector3d dipole = sd1->getElectroFrame().getColumn(2);
-    dipole.normalize();    
-    return dot(r12, dipole);
+
+    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+    Vector3d vec;
+    if (ma1.isDipole() )
+      vec = sd1->getDipole();
+    else 
+      vec = sd1->getA().transpose() * V3Z;
+    vec.normalize();    
+
+    return dot(r12, vec);
   }
 
   RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-    Vector3d v1 = sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd2->getElectroFrame().getColumn(2);    
+
+    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+    AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
+
+    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+
+    Vector3d v1, v2;
+
+    if (ma1.isDipole() )
+      v1 = sd1->getDipole();
+    else 
+      v1 = sd1->getA().transpose() * V3Z;
+
+    if (ma2.isDipole() )
+      v2 = sd2->getDipole();
+    else 
+      v2 = sd2->getA().transpose() * V3Z;
+
     v1.normalize();
     v2.normalize();
     return dot(v1, v2);

@@ -127,6 +127,7 @@ namespace OpenMD {
     bool isCharge();
     bool isDirectional();
     bool isDipole();
+    bool isQuadrupole();
     bool isMultipole();
     bool isGayBerne();
     bool isSticky();

@@ -44,6 +44,8 @@
 #include "visitors/AtomVisitor.hpp"
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
+#include "types/MultipoleAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
 
 namespace OpenMD {
   void BaseAtomVisitor::visit(RigidBody *rb) {
@@ -132,10 +134,14 @@ namespace OpenMD {
     pos = datom->getPos();
     vel = datom->getVel();
     frc = datom->getFrc();
-    if (datom->getAtomType()->isGayBerne()) {
-        u = datom->getA().transpose()*V3Z;         
-    } else if (datom->getAtomType()->isMultipole()) {
-        u = datom->getElectroFrame().getColumn(2);
+
+    GayBerneAdapter gba = GayBerneAdapter(datom->getAtomType());
+    MultipoleAdapter ma = MultipoleAdapter(datom->getAtomType());
+    
+    if (gba.isGayBerne()) {
+      u = datom->getA().transpose()*V3Z;         
+    } else if (ma.isDipole()) {
+      u = datom->getDipole();
     }
     atomData = new AtomData;
     atomData->setID("ATOMDATA");

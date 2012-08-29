@@ -372,12 +372,8 @@ namespace OpenMD {
             pCount++;
           }
           
-          MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
-          if (ma.isDipole() ) {
-            Vector3d u_i = atom->getElectroFrame().getColumn(2);
-            moment = ma.getDipoleMoment();
-            moment *= debyeToCm;
-            dipoleVector += u_i * moment;
+          if (atom->isDipole()) {
+            dipoleVector += atom->getDipole() * debyeToCm;
           }
         }
       }

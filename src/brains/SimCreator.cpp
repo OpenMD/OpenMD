@@ -721,9 +721,6 @@ namespace OpenMD {
         storageLayout |= DataStorage::dslTorque;
       }
     }
-    if (hasMultipoles) {
-      storageLayout |= DataStorage::dslElectroFrame;
-    }
     if (hasFixedCharge || hasFluctuatingCharge) {
       storageLayout |= DataStorage::dslSkippedCharge;
     }
@@ -761,6 +758,7 @@ namespace OpenMD {
     if (simParams->getOutputElectricField()) {
       storageLayout |= DataStorage::dslElectricField;
     }
+
     if (simParams->getOutputFluctuatingCharges()) {
       storageLayout |= DataStorage::dslFlucQPosition;
       storageLayout |= DataStorage::dslFlucQVelocity;

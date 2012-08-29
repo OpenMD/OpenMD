@@ -201,6 +201,14 @@ namespace OpenMD {
     } else
       return false;
   }
+
+  bool AtomType::isQuadrupole() {
+    MultipoleAdapter ma = MultipoleAdapter(this);
+    if (ma.isMultipole()) {
+      return ma.isQuadrupole();
+    } else
+      return false;
+  }
       
   bool AtomType::isMultipole() {
     return hasProperty("Multipole");

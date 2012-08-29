@@ -484,31 +484,58 @@ namespace OpenMD {
     }
     
     /**
-     * Returns the previous unit vectors of this stuntdouble
-     * @return the unit vectors of this stuntdouble
+     * Returns the previous dipole vector of this stuntDouble
+     * @return the dipole vector of this stuntDouble
      */    
-    RotMat3x3d getPrevElectroFrame() {
-      return sd_->getPrevElectroFrame();
+    Vector3d getPrevDipole() {
+      return sd_->getPrevDipole();
     }
     
     /**
-     * Returns the current unit vectors of this stuntdouble
-     * @return the unit vectors of this stuntdouble
+     * Returns the current dipole vector of this stuntDouble
+     * @return the dipole vector of this stuntDouble
      */    
-    RotMat3x3d getElectroFrame() {
-      return sd_->getElectroFrame();
+    Vector3d getDipole() {
+      return sd_->getDipole();
     }
     
     /**
-     * Returns the unit vectors of this stuntdouble in specified snapshot 
+     * Returns the dipole vector of this stuntDouble in specified snapshot 
      *
-     * @return the unit vectors of this stuntdouble
+     * @return the dipole vector of this stuntDouble
      * @param snapshotNo
      */    
-    RotMat3x3d getElectroFrame(int snapshotNo) {
-      return sd_->getElectroFrame(snapshotNo);
+    Vector3d getDipole(int snapshotNo) {
+      return sd_->getDipole(snapshotNo);
+    }
+
+
+    /**
+     * Returns the previous quadrupole tensor of this stuntDouble
+     * @return the quadrupole tensor of this stuntDouble
+     */    
+    Mat3x3d getPrevQuadrupole() {
+      return sd_->getPrevQuadrupole();
     }
     
+    /**
+     * Returns the current quadrupole tensor of this stuntDouble
+     * @return the quadrupole tensor of this stuntDouble
+     */    
+    Mat3x3d getQuadrupole() {
+      return sd_->getQuadrupole();
+    }
+    
+    /**
+     * Returns the quadrupole tensor of this stuntDouble in specified snapshot 
+     *
+     * @return the quadrupole tensor of this stuntDouble
+     * @param snapshotNo
+     */    
+    Mat3x3d getQuadrupole(int snapshotNo) {
+      return sd_->getQuadrupole(snapshotNo);
+    }
+
     /**
      * Returns the previous force of this stuntdouble
      * @return the force of this stuntdouble

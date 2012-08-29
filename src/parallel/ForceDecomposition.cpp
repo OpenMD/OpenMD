@@ -101,10 +101,14 @@ namespace OpenMD {
     sdat.pot = &embeddingPot;
     sdat.excludedPot = &excludedSelfPot;
 
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);
+    if (storageLayout_ & DataStorage::dslDipole) {
+      sdat.dipole = &(snap_->atomData.dipole[atom1]);
     }
-    
+
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      sdat.quadrupole = &(snap_->atomData.quadrupole[atom1]);
+    }
+
     if (storageLayout_ & DataStorage::dslTorque) {
       sdat.t = &(snap_->atomData.torque[atom1]);
     }

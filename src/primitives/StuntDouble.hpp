@@ -568,33 +568,60 @@ namespace OpenMD{
     void setEuler(const Vector3d& euler, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = euler;
     }
-       
-    /**
-     * Returns the previous unit vectors of this stuntDouble
-     * @return the unit vectors of this stuntDouble
-     */    
-    RotMat3x3d getPrevElectroFrame() {
-      return ((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_];
-    }
-       
-    /**
-     * Returns the current unit vectors of this stuntDouble
-     * @return the unit vectors of this stuntDouble
-     */    
-    RotMat3x3d getElectroFrame() {
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_];
-    }
 
     /**
-     * Returns the unit vectors of this stuntDouble in specified snapshot 
+     * Returns the previous dipole vector of this stuntDouble
+     * @return the dipole vector of this stuntDouble
+     */    
+    Vector3d getPrevDipole() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).dipole[localIndex_];
+    }
+    
+    /**
+     * Returns the current dipole vector of this stuntDouble
+     * @return the dipole vector of this stuntDouble
+     */    
+    Vector3d getDipole() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).dipole[localIndex_];
+    }
+    
+    /**
+     * Returns the dipole vector of this stuntDouble in specified snapshot 
      *
-     * @return the unit vectors of this stuntDouble
+     * @return the dipole vector of this stuntDouble
      * @param snapshotNo
      */    
-    RotMat3x3d getElectroFrame(int snapshotNo) {
-      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_];
+    Vector3d getDipole(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).dipole[localIndex_];
     }
 
+
+    /**
+     * Returns the previous quadrupole tensor of this stuntDouble
+     * @return the quadrupole tensor of this stuntDouble
+     */    
+    Mat3x3d getPrevQuadrupole() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).quadrupole[localIndex_];
+    }
+    
+    /**
+     * Returns the current quadrupole tensor of this stuntDouble
+     * @return the quadrupole tensor of this stuntDouble
+     */    
+    Mat3x3d getQuadrupole() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).quadrupole[localIndex_];
+    }
+    
+    /**
+     * Returns the quadrupole tensor of this stuntDouble in specified snapshot 
+     *
+     * @return the quadrupole tensor of this stuntDouble
+     * @param snapshotNo
+     */    
+    Mat3x3d getQuadrupole(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).quadrupole[localIndex_];
+    }
+        
     /**
      * Returns the previous force of this stuntDouble
      * @return the force of this stuntDouble

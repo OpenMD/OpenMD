@@ -559,13 +559,6 @@ namespace OpenMD {
            atomColData.electricField.end(), V3Zero);
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {    
-      fill(atomRowData.flucQFrc.begin(), atomRowData.flucQFrc.end(),
-           0.0);
-      fill(atomColData.flucQFrc.begin(), atomColData.flucQFrc.end(),
-           0.0);
-    }
-
 #endif
     // even in parallel, we need to zero out the local arrays:
 
@@ -639,15 +632,22 @@ namespace OpenMD {
       AtomPlanMatrixColumn->gather(snap_->atomData.aMat, 
                                    atomColData.aMat);
     }
-    
-    // if needed, gather the atomic eletrostatic frames
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      AtomPlanMatrixRow->gather(snap_->atomData.electroFrame, 
-                                atomRowData.electroFrame);
-      AtomPlanMatrixColumn->gather(snap_->atomData.electroFrame, 
-                                   atomColData.electroFrame);
+
+    // if needed, gather the atomic eletrostatic information
+    if (storageLayout_ & DataStorage::dslDipole) {
+      AtomPlanVectorRow->gather(snap_->atomData.dipole, 
+                                atomRowData.dipole);
+      AtomPlanVectorColumn->gather(snap_->atomData.dipole, 
+                                   atomColData.dipole);
     }
 
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      AtomPlanMatrixRow->gather(snap_->atomData.quadrupole, 
+                                atomRowData.quadrupole);
+      AtomPlanMatrixColumn->gather(snap_->atomData.quadrupole, 
+                                   atomColData.quadrupole);
+    }
+        
     // if needed, gather the atomic fluctuating charge values
     if (storageLayout_ & DataStorage::dslFlucQPosition) {
       AtomPlanRealRow->gather(snap_->atomData.flucQPos, 
@@ -1132,14 +1132,19 @@ namespace OpenMD {
       idat.A2 = &(atomColData.aMat[atom2]);
     }
     
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      idat.eFrame1 = &(atomRowData.electroFrame[atom1]);
-      idat.eFrame2 = &(atomColData.electroFrame[atom2]);
-    }
-
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(atomRowData.torque[atom1]);
       idat.t2 = &(atomColData.torque[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslDipole) {
+      idat.dipole1 = &(atomRowData.dipole[atom1]);
+      idat.dipole2 = &(atomColData.dipole[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      idat.quadrupole1 = &(atomRowData.quadrupole[atom1]);
+      idat.quadrupole2 = &(atomColData.quadrupole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {
@@ -1181,14 +1186,19 @@ namespace OpenMD {
       idat.A2 = &(snap_->atomData.aMat[atom2]);
     }
 
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      idat.eFrame1 = &(snap_->atomData.electroFrame[atom1]);
-      idat.eFrame2 = &(snap_->atomData.electroFrame[atom2]);
-    }
-
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(snap_->atomData.torque[atom1]);
       idat.t2 = &(snap_->atomData.torque[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslDipole) {
+      idat.dipole1 = &(snap_->atomData.dipole[atom1]);
+      idat.dipole2 = &(snap_->atomData.dipole[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      idat.quadrupole1 = &(snap_->atomData.quadrupole[atom1]);
+      idat.quadrupole2 = &(snap_->atomData.quadrupole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {     

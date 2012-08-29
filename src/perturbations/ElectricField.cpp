@@ -108,7 +108,7 @@ namespace OpenMD {
 	    EFfrc = EF*chrg;
 	    EFfrc *= chrgToKcal;
 	    atom->addFrc(EFfrc);
-	    // totally ad-hoc choice of the origin for potential calculation
+	    // ad-hoc choice of the origin for potential calculation
 	    pos = atom->getPos();
 	    pot = -dot(pos, EFfrc);
 	    if (doParticlePot) {      
@@ -119,16 +119,13 @@ namespace OpenMD {
 	    
 	  MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
 	  if (ma.isDipole() ) {
-	    Vector3d u_i = atom->getElectroFrame().getColumn(2);
-	    moment = ma.getDipoleMoment();
-	    moment *= debyeToKcal;
-	    dip = u_i * moment;
-	    trq = cross(dip, EF);
-	    //cerr << "dip = " << dip << "\n";
-	    // cerr << "trq = " << trq << "\n";
+            Vector3d dipole = atom->getDipole();
+	    dipole *= debyeToKcal;
+
+	    trq = cross(dipole, EF);
 	    atom->addTrq(trq);
-	    pot = -dot(dip, EF);
-	    //cerr << "pot = " << pot << "\n";
+
+	    pot = -dot(dipole, EF);
 	    if (doParticlePot) {      
 	      atom->addParticlePot(pot);
 	    }
@@ -142,9 +139,7 @@ namespace OpenMD {
 #endif
       Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
       longRangePotential = snap->getLongRangePotentials();
-      // << "longRangePotential = " << longRangePotential << "\n";
       longRangePotential[ELECTROSTATIC_FAMILY] += fieldPot;
-      //cerr << "longRangePotential[ELECTROSTATIC_FAMILY] = " << longRangePotential[ELECTROSTATIC_FAMILY] << "\n";
       snap->setLongRangePotential(longRangePotential);
     }
   }

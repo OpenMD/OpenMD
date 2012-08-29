@@ -41,11 +41,13 @@
  */
 
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
+#include "primitives/Atom.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
   DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame, memSize){
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat | DataStorage::dslDipole, memSize){
 
       setCorrFuncType("Dipole Correlation Function");
       setOutputName(getPrefix(dumpFilename_) + ".dcorr");
@@ -53,8 +55,9 @@ namespace OpenMD {
     }
 
   RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getElectroFrame(frame1).getColumn(2);
-    Vector3d v2 = sd2->getElectroFrame(frame2).getColumn(2);
+
+    Vector3d v1 = sd1->getDipole(frame1);
+    Vector3d v2 = sd2->getDipole(frame2);
 
     return dot(v1, v2)/(v1.length()*v2.length());
   }
@@ -63,17 +66,21 @@ namespace OpenMD {
   void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectionalAtom()) {
+    for (sd = seleMan1_.beginSelected(i); sd != NULL; 
+         sd = seleMan1_.nextSelected(i)) {
+
+      AtomType* at = static_cast<Atom*>(sd)->getAtomType();
+      MultipoleAdapter ma = MultipoleAdapter(at);
+
+      if (!ma.isDipole()) {
 	sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
+                "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
+                "\tnot have a dipole\n");
 	painCave.isFatal = 1;
 	simError();        
       }
-    }
-    
+    }    
   }
-
 }
 
 

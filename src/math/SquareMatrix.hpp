@@ -154,7 +154,6 @@ namespace OpenMD {
       return tmp;
     }
 
-
     /** Tests if this matrix is symmetrix. */            
     bool isSymmetric() const {
       for (unsigned int i = 0; i < Dim - 1; i++)

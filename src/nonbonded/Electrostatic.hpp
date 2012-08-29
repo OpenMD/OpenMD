@@ -55,7 +55,6 @@ namespace OpenMD {
   struct ElectrostaticAtomData {
     bool is_Charge;
     bool is_Dipole;
-    bool is_SplitDipole;
     bool is_Quadrupole;
     bool is_Fluctuating;
     RealType fixedCharge;
@@ -63,9 +62,8 @@ namespace OpenMD {
     RealType electronegativity;
     int slaterN;
     RealType slaterZeta;
-    RealType dipole_moment;
-    RealType split_dipole_distance;
-    Vector3d quadrupole_moments;
+    Vector3d dipole;
+    Mat3x3d  quadrupole;
   };
       
   enum ElectrostaticSummationMethod{
@@ -96,7 +94,6 @@ namespace OpenMD {
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     void setCutoffRadius( RealType rCut );
-    void setSwitchingRadius( RealType rSwitch );
     void setElectrostaticSummationMethod( ElectrostaticSummationMethod esm );
     void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
     void setDampingAlpha( RealType alpha );
@@ -109,18 +106,24 @@ namespace OpenMD {
     bool haveCutoffRadius_;
     bool haveDampingAlpha_;
     bool haveDielectric_;
-    bool haveElectroSpline_;
+    bool haveElectroSplines_;
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
     map<pair<AtomType*, AtomType*>, CubicSpline*> Jij;  /** coulomb integral */
     SimInfo* info_;
     ForceField* forceField_;
     RealType cutoffRadius_;
-    RealType cutoffRadius2_;
     RealType pre11_;
     RealType pre12_;
     RealType pre22_;
     RealType pre14_;
+    RealType pre24_;
+    RealType pre44_;
+    RealType v01, v02;
+    RealType v11, v12, v13;
+    RealType v21, v22, v23, v24;
+    RealType v31, v32, v33, v34, v35;
+    RealType v41, v42, v43, v44, v45, v46;
     RealType chargeToC_;
     RealType angstromToM_;
     RealType debyeToCm_;
@@ -130,39 +133,30 @@ namespace OpenMD {
     map<string, ElectrostaticSummationMethod> summationMap_;
     map<string, ElectrostaticScreeningMethod> screeningMap_;
     RealType dampingAlpha_;
-    RealType alpha2_;
-    RealType alpha4_;
-    RealType alpha6_;
-    RealType alpha8_;
     RealType dielectric_;
-    RealType constEXP_;
-    RealType rcuti_;
-    RealType rcuti2_;
-    RealType rcuti3_;
-    RealType rcuti4_;
-    RealType alphaPi_;
-    RealType invRootPi_;
-    RealType rrf_;
-    RealType rt_;
-    RealType rrfsq_;
     RealType preRF_;
-    RealType preRF2_;
-    RealType erfcVal_;
-    RealType derfcVal_;
-    CubicSpline* erfcSpline_;
-    RealType c1_;
-    RealType c2_;
-    RealType c3_;
-    RealType c4_;
-    RealType c5_;
-    RealType c6_;
-    RealType c1c_;
-    RealType c2c_;
-    RealType c3c_;
-    RealType c4c_;
-    RealType c5c_;
-    RealType c6c_;
-    RealType one_third_;    
+    RealType selfMult_;
+
+    CubicSpline* v01s;
+    CubicSpline* v02s;
+    CubicSpline* v11s;
+    CubicSpline* v12s;
+    CubicSpline* v13s;
+    CubicSpline* v21s;
+    CubicSpline* v22s;
+    CubicSpline* v23s;
+    CubicSpline* v24s;
+    CubicSpline* v31s;
+    CubicSpline* v32s;
+    CubicSpline* v33s;
+    CubicSpline* v34s;
+    CubicSpline* v35s;
+    CubicSpline* v41s;
+    CubicSpline* v42s;
+    CubicSpline* v43s;
+    CubicSpline* v44s;
+    CubicSpline* v45s;
+    CubicSpline* v46s;    
   };
 }
 

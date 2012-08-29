@@ -61,13 +61,17 @@ namespace OpenMD {
     set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
     set<AtomType*>::iterator i;
     bool hasDirectionalAtom = false;
-    bool hasMultipole = false;    
+    bool hasDipole = false;    
+    bool hasQuadrupole = false;    
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
       if ((*i)->isDirectional()){
         hasDirectionalAtom = true;
       }
-      if ((*i)->isMultipole()){
-        hasMultipole = true;
+      if ((*i)->isDipole()){
+        hasDipole = true;
+      }
+      if ((*i)->isQuadrupole()){
+        hasQuadrupole = true;
       }
     }
     
@@ -79,11 +83,14 @@ namespace OpenMD {
       if (storageLayout_ & DataStorage::dslForce) {
         storageLayout_ |= DataStorage::dslTorque;
       }
+      if (hasDipole) {
+        storageLayout |= DataStorage::dslDipole;
+      }
+      if (hasQuadrupole) {
+        storageLayout |= DataStorage::dslQuadrupole;
+      }
     }
-    if (hasMultipole) {
-      storageLayout_ |= DataStorage::dslElectroFrame;
-    }
-    
+
     bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, memSize_);
     info_->setSnapshotManager(bsMan_);
     
