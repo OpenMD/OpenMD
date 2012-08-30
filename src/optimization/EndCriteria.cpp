@@ -183,11 +183,12 @@ namespace QuantLib {
         case QuantLib::EndCriteria::Unknown:
             return out << "Unknown";
         default:
-            sprintf(painCave.errMsg, "unknown EndCriteria::Type ( %d )\n",
+            sprintf(painCave.errMsg, "Unknown EndCriteria::Type ( %d )\n",
                     int(ec));
             painCave.isFatal = 1;
             painCave.severity = OPENMD_ERROR;
             simError();
+            return out << "Unknown EndCriteria::Type";
         }
     }
 

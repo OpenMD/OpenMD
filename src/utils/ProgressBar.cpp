@@ -98,10 +98,10 @@ namespace OpenMD {
 
 #ifdef _MSC_VER
         CONSOLE_SCREEN_BUFFER_INFO csbi;
-        int ret = GetConsoleScreenBufferInfo(GetStdHandle( STD_OUTPUT_HANDLE ),
-                                             &csbi);
+        HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
+        int ret = GetConsoleScreenBufferInfo(hConsole, &csbi);
         if(ret) {
-          width = csbi.dwSize.X;
+          width = csbi.dwSize.X - 1;
         }
 #else
         struct winsize w;
@@ -134,8 +134,13 @@ namespace OpenMD {
           struct tm * ender = localtime(&end_);
           char buffer[22];
           strftime(buffer, 22, "%a %b %d @ %I:%M %p", ender);
-          
+
+#ifdef _MSC_VER
+          csbi.dwCursorPosition.X = 0;
+          SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
+#else          
           cout << '\r';
+#endif
           cout.width(3); 
           cout << right << int(percent);
           cout.width(3); 

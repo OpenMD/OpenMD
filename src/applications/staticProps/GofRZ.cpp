@@ -109,14 +109,14 @@ namespace OpenMD {
 
     RealType distance = sqrt(pow(r12.x(), 2) + pow(r12.y(), 2));
 
-    int whichRBin = distance / deltaR_;
+    int whichRBin = int(distance / deltaR_);
 
     if (distance <= len_) {
      
       RealType Z = fabs(r12.z());
 
       if (Z <= zLen_) {
-        int whichZBin = Z / deltaZ_;
+        int whichZBin = int(Z / deltaZ_);
               
         ++histogram_[whichRBin][whichZBin];        
         ++npairs_;

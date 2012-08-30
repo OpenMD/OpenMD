@@ -40,10 +40,15 @@ set (VERSION_TINY "0")
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  SET(CMAKE_INSTALL_PREFIX
-    "/usr/local/openmd" CACHE PATH "OpenMD install prefix" FORCE
-    )
+  IF(WIN32)
+    SET(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/openmd" 
+        CACHE PATH "OpenMD install prefix" FORCE)
+  ELSE(WIN32)
+    SET(CMAKE_INSTALL_PREFIX "/usr/local/openmd" 
+        CACHE PATH "OpenMD install prefix" FORCE)
+  ENDIF(WIN32)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+ADD_DEFINITIONS( -DFRC_PATH=${CMAKE_INSTALL_PREFIX}/forceFields )
 
 # ---------- Setup output Directories -------------------------
 SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY
@@ -716,5 +721,12 @@ message( STATUS "       -DOPENBABEL2_ROOT=/path/to/openbabel")
 message( STATUS "            -DQHULL_ROOT=/path/to/qhull")
 message( STATUS "            -DFFTW3_ROOT=/path/to/fftw3")
 message( STATUS )
-message( STATUS "To build and install OpenMD, enter \"make\" and \"make install\"")
+IF(WIN32)
+  message( STATUS "To build and install OpenMD, enter: ")
+  message( STATUS "  msbuild /m ALL_BUILD.vcxproj /p:Configuration=${CMAKE_BUILD_TYPE}")
+  message( STATUS "followed by:")
+  message( STATUS "  msbuild /m INSTALL.vcxproj /p:Configuration=${CMAKE_BUILD_TYPE}")
+ELSE(WIN32)
+  message( STATUS "To build and install OpenMD, enter \"make\" and \"make install\"")
+ENDIF(WIN32)
 message( STATUS )

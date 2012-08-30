@@ -261,7 +261,7 @@ namespace OpenMD {
     int nSelected = 0;
 
     for (int i = 0; i < nBins_; ++i) {
-      nSelected = nSelected + Q_histogram_[i]*deltaQ_;
+      nSelected = nSelected + int(Q_histogram_[i]*deltaQ_);
     }
     
     std::ofstream osq((getOutputFileName() + "Q").c_str());

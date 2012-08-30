@@ -181,7 +181,7 @@ namespace OpenMD {
               if (theta > 180.0){
                 theta = 360.0 - theta;
               }
-              int whichBin = theta/deltaTheta_;
+              int whichBin = int(theta/deltaTheta_);
               
               histogram_[whichBin] += 2;
             }

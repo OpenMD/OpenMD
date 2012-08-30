@@ -322,7 +322,7 @@ namespace OpenMD {
 
     if ( distCOM < len_){
       // Figure out where this distance goes...
-      int whichBin = distCOM / deltaR_;
+      int whichBin = int(distCOM / deltaR_);
       RCount_[whichBin]++;
 
       if(real(what[6]) < -0.15){      				

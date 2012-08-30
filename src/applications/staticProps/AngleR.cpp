@@ -113,7 +113,7 @@ namespace OpenMD {
 	  RealType cosangle = dot(r1, dipole);
 	  
 	  if (distance < len_) {
-	    int whichBin = distance / deltaR_;
+	    int whichBin = int(distance / deltaR_);
 	    histogram_[whichBin] += cosangle;
 	    count_[whichBin] += 1;
 	  }

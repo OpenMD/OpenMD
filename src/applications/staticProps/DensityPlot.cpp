@@ -158,7 +158,7 @@ namespace OpenMD {
             continue;
           }
               
-          int which =wrappedZdist / deltaR_;        
+          int which = int(wrappedZdist / deltaR_);
           density_[which] += nelectron * exp(-zdist*zdist/(sigma2*2.0)) /(slabVolume* sqrt(2*NumericConstant::PI*sigma*sigma));
               
         }            

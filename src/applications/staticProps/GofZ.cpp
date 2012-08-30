@@ -108,7 +108,7 @@ namespace OpenMD {
 
     if (xydist < rC_) {
       thisZ = abs(r12.z());
-      int whichBin = thisZ / deltaZ_;
+      int whichBin = int(thisZ / deltaZ_);
       histogram_[whichBin] += 2;
     }
   }

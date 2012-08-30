@@ -110,7 +110,6 @@ namespace OpenMD {
     int foundText = 0;
     int lineNum;
     char* the_token;
-    char* eof_test;
 
     // rewind the stream
     theStream.seekg (0, std::ios::beg);

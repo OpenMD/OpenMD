@@ -100,7 +100,7 @@ private:
     PredT pred_;
 };
        
- inline CharClassification isSpace(const std::locale& loc=std::locale()){
+  inline CharClassification isSpace(const std::locale& loc=std::locale()){
     return CharClassification(std::ctype_base::space, loc);
  }
 

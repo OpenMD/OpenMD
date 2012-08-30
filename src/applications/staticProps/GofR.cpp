@@ -102,7 +102,7 @@ namespace OpenMD {
     RealType distance = r12.length();
 
     if (distance < len_) {
-      int whichBin = distance / deltaR_;
+      int whichBin = int(distance / deltaR_);
       histogram_[whichBin] += 2;
     }
   }

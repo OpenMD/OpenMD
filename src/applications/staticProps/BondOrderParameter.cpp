@@ -341,7 +341,7 @@ namespace OpenMD {
 
     for (int l = 0; l <= lMax_; l++) {
       if (q[l] >= MinQ_ && q[l] < MaxQ_) {
-        int qbin = (q[l] - MinQ_) / deltaQ_;
+        int qbin = int((q[l] - MinQ_) / deltaQ_);
         Q_histogram_[std::make_pair(qbin,l)] += 1;
         Qcount_[l]++;      
       } else {
@@ -355,7 +355,7 @@ namespace OpenMD {
 
     for (int l = 0; l <= lMax_; l++) {
       if (real(what[l]) >= MinW_ && real(what[l]) < MaxW_) {
-        int wbin = (real(what[l]) - MinW_) / deltaW_;
+        int wbin = int((real(what[l]) - MinW_) / deltaW_);
         W_histogram_[std::make_pair(wbin,l)] += 1;
         Wcount_[l]++;      
       } else {

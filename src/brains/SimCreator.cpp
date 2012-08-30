@@ -256,15 +256,17 @@ namespace OpenMD {
     int metaDataBlockStart = -1;
     int metaDataBlockEnd = -1;
     int i;
-    streamoff mdOffset;
+    streamoff mdOffset(0);
     int mdFileVersion;
+
 
 #ifdef IS_MPI            
     const int masterNode = 0;
     if (worldRank == masterNode) {
 #endif 
 
-      std::ifstream mdFile_(mdFileName.c_str()); 
+      std::ifstream mdFile_;
+      mdFile_.open(mdFileName.c_str(), ifstream::in | ifstream::binary);
       
       if (mdFile_.fail()) { 
         sprintf(painCave.errMsg, 

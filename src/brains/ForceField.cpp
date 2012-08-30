@@ -771,11 +771,13 @@ namespace OpenMD {
     ifstrstream* ffStream = new ifstrstream();
     
     //try to open the force filed file in current directory first    
-    ffStream->open(forceFieldFilename.c_str());
+    ffStream->open(forceFieldFilename.c_str(), ifstream::in | ifstream::binary);
+
     if(!ffStream->is_open()){
 
       forceFieldFilename = ffPath_ + "/" + forceFieldFilename;
-      ffStream->open( forceFieldFilename.c_str() );
+      ffStream->open( forceFieldFilename.c_str(),  
+                      ifstream::in | ifstream::binary );
 
       //if current directory does not contain the force field file,
       //try to open it in the path        
