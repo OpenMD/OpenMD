@@ -444,7 +444,6 @@ namespace OpenMD {
     RealType kinetic;
     RealType potential;
     RealType eatom;
-    RealType AvgE_a_ = 0;
     // Convective portion of the heat flux
     Vector3d heatFluxJc = V3Zero;
 

@@ -337,8 +337,8 @@ namespace OpenMD {
         Real fC0 = getCoefficient(0);
         roots.push_back( -fC0 / fC1);
         return roots;
-      }
         break;      
+      }
       case 2: {
         Real fC2 = getCoefficient(2);
         Real fC1 = getCoefficient(1);
