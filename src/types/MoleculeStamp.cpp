@@ -867,7 +867,7 @@ namespace OpenMD {
     for(int i = 0; i < natomInRb1; i++){
       atomIndex1 = rbStamp1->getMemberAt(i);
       
-      for(int j= 0; j < natomInRb1; j++){
+      for(int j= 0; j < natomInRb2; j++){
         atomIndex2 = rbStamp2->getMemberAt(j);
 
         if(atomIndex1 == atomIndex2){

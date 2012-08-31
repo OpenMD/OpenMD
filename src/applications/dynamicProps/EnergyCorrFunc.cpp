@@ -82,8 +82,6 @@ namespace OpenMD {
   void EnergyCorrFunc::correlateFrames(int frame1, int frame2) {
     SimInfo::MoleculeIterator mi1;
     SimInfo::MoleculeIterator mi2;
-    Molecule::IntegrableObjectIterator mj1;
-    Molecule::IntegrableObjectIterator mj2;
     Molecule* mol1;
     Molecule* mol2;
     Molecule::AtomIterator ai1;
@@ -183,7 +181,6 @@ namespace OpenMD {
     std::fill(count_.begin(), count_.end(), 0);
 
     SimInfo::MoleculeIterator mi;
-    Molecule::IntegrableObjectIterator mj;
     Molecule* mol;
     Molecule::AtomIterator ai;
     Atom* atom;
@@ -194,16 +191,11 @@ namespace OpenMD {
 
     // We'll need thermo to compute the pressures from the virial
     Thermo* thermo =  new Thermo(info_);
-
-    // prepare the averages
-    RealType pSum = 0.0;
-    RealType vSum = 0.0;
-    int nsamp = 0;
-
+    
     // dump files can be enormous, so read them in block-by-block:
     int nblocks = bsMan_->getNBlocks();
     bool firsttime = true;
-    int junkframe = 0;
+
     for (int i = 0; i < nblocks; ++i) {
       bsMan_->loadBlock(i);
       assert(bsMan_->isBlockActive(i));      

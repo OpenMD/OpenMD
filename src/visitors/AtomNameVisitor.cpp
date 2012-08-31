@@ -57,7 +57,6 @@ namespace OpenMD {
   void AtomNameVisitor::visitAtom(Atom* atom) {
     AtomData* atomData;
     GenericData* data;    
-    bool haveAtomData;
     
     data = atom->getPropertyByName("ATOMDATA");
     if(data != NULL){
@@ -65,13 +64,9 @@ namespace OpenMD {
       if(atomData == NULL){
 	std::cerr << "can not get Atom Data from " << atom->getType() << std::endl;
 	atomData = new AtomData; 
-	haveAtomData = false;      
-      } else {
-	haveAtomData = true;
       }
     } else {
-      atomData = new AtomData;
-      haveAtomData = false;
+      atomData = new AtomData;      
     }
     
     std::vector<AtomInfo*>::iterator i;

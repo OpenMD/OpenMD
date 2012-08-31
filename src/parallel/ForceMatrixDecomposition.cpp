@@ -1295,7 +1295,6 @@ namespace OpenMD {
 #endif
 
     RealType rList_ = (largestRcut_ + skinThickness_);
-    RealType rl2 = rList_ * rList_;
     Snapshot* snap_ = sman_->getCurrentSnapshot();
     Mat3x3d Hmat = snap_->getHmat();
     Vector3d Hx = Hmat.getColumn(0);

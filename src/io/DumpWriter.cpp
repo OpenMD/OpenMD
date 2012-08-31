@@ -334,8 +334,8 @@ namespace OpenMD {
       for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
                
         for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
-           sd = mol->nextIntegrableObject(ii)) { 	
-
+             sd = mol->nextIntegrableObject(ii)) { 	
+          
           int ioIndex = sd->getGlobalIntegrableObjectIndex();
           // do one for the IO itself
           os << prepareSiteLine(sd, ioIndex, 0);

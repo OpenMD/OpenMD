@@ -51,10 +51,10 @@ namespace OpenMD {
 
   ParallelRandNumGen::ParallelRandNumGen(const uint32& oneSeed) {
 
-    const int masterNode = 0;
     unsigned long seed = oneSeed;
 
 #ifdef IS_MPI
+    const int masterNode = 0;
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 #endif
 
@@ -86,9 +86,9 @@ namespace OpenMD {
   ParallelRandNumGen::ParallelRandNumGen() {
 
     std::vector<uint32> bigSeed;
-    const int masterNode = 0;
     int nProcessors;
 #ifdef IS_MPI
+    const int masterNode = 0;
     MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
     MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
 #else
@@ -104,9 +104,9 @@ namespace OpenMD {
 
   void ParallelRandNumGen::seed( const uint32 oneSeed ) {
 
-    const int masterNode = 0;
     unsigned long seed = oneSeed;
 #ifdef IS_MPI
+    const int masterNode = 0;
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 #endif
     if (seed != oneSeed) {
@@ -126,8 +126,9 @@ namespace OpenMD {
 
     std::vector<uint32> bigSeed;
     int size;
-    const int masterNode = 0;
+
 #ifdef IS_MPI
+    const int masterNode = 0;
     if (worldRank == masterNode) {
 #endif
 

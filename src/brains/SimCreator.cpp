@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -100,33 +100,33 @@ namespace OpenMD {
 #ifdef IS_MPI            
       int streamSize;
       const int masterNode = 0;
-      int commStatus;
+
       if (worldRank == masterNode) {
-        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 #endif                 
         SimplePreprocessor preprocessor;
-        preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
+        preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, 
+                                ppStream);
                 
 #ifdef IS_MPI            
         //brocasting the stream size
         streamSize = ppStream.str().size() +1;
-        commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
-
-        commStatus = MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
-            
+        MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
+        MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())),
+                              streamSize, MPI::CHAR, masterNode);
                 
       } else {
 
-        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 
         //get stream size
-        commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
+        MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
 
         char* buf = new char[streamSize];
         assert(buf);
                 
         //receive file content
-        commStatus = MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+        MPI::COMM_WORLD.Bcast(buf, streamSize, MPI::CHAR, masterNode);
                 
         ppStream.str(buf);
         delete [] buf;
@@ -499,7 +499,6 @@ namespace OpenMD {
     int nTarget;
     int done;
     int i;
-    int j;
     int loops;
     int which_proc;
     int nProcessors;
@@ -920,10 +919,7 @@ namespace OpenMD {
   }
   
   void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
-    Globals* simParams;
 
-    simParams = info->getSimParams();
-    
     DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
 

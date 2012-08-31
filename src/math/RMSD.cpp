@@ -109,7 +109,6 @@ RotMat3x3d RMSD::optimal_superposition(std::vector<Vector3d> mov,
   
   /* initialize */
   Mat3x3d R(0.0);
-  RealType E0 = 0.0;
   
   for (n=0; n < n_vec; n++) {
     

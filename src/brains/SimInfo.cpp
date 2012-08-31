@@ -877,7 +877,6 @@ namespace OpenMD {
 
 
   void SimInfo::prepareTopology() {
-    int nExclude, nOneTwo, nOneThree, nOneFour;
 
     //calculate mass ratio of cutoff group
     SimInfo::MoleculeIterator mi;
@@ -925,11 +924,6 @@ namespace OpenMD {
     }    
     
     //scan topology 
-
-    nExclude = excludedInteractions_.getSize();
-    nOneTwo = oneTwoInteractions_.getSize();
-    nOneThree = oneThreeInteractions_.getSize();
-    nOneFour = oneFourInteractions_.getSize();
 
     int* excludeList = excludedInteractions_.getPairList();
     int* oneTwoList = oneTwoInteractions_.getPairList();

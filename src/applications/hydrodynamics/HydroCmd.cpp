@@ -399,13 +399,11 @@ int update_arg(void *field, char **orig_field,
                const char *long_opt, char short_opt,
                const char *additional_error)
 {
-  char *stop_char = 0;
   const char *val = value;
   int found;
   char **string_field;
   FIX_UNUSED (field);
 
-  stop_char = 0;
   found = 0;
 
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))

@@ -451,7 +451,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     RealType min_val;
     bool min_found = false;   
@@ -463,8 +462,6 @@ namespace OpenMD {
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-
-      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
@@ -543,12 +540,9 @@ namespace OpenMD {
       }
     }
     
-#ifdef IS_MPI
-    int nProc, worldRank;
+#ifdef IS_MPI    
+    int worldRank = MPI::COMM_WORLD.Get_rank();
     
-    nProc = MPI::COMM_WORLD.Get_size();
-    worldRank = MPI::COMM_WORLD.Get_rank();
-
     bool my_min_found = min_found;
     bool my_max_found = max_found;
 
@@ -781,7 +775,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     vector<StuntDouble*> hotBin, coldBin;
 
@@ -802,8 +795,6 @@ namespace OpenMD {
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-
-      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
@@ -1231,7 +1222,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     vector<StuntDouble*> hotBin, coldBin;
 
@@ -1245,8 +1235,6 @@ namespace OpenMD {
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-
-      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
@@ -1429,7 +1417,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     vector<RealType> binMass(nBins_, 0.0);
     vector<RealType> binPx(nBins_, 0.0);
@@ -1454,9 +1441,7 @@ namespace OpenMD {
              sd = mol->nextIntegrableObject(iiter))
     */
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
-         sd = seleMan_.nextSelected(selei)) {
-      
-      idx = sd->getLocalIndex();
+         sd = seleMan_.nextSelected(selei)) {     
       
       Vector3d pos = sd->getPos();
 

@@ -225,17 +225,14 @@ namespace OpenMD {
   }
 
   Snapshot* BlockSnapshotManager::loadFrame(int frame){
-    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_, getStorageLayout());
+    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_,
+                                      getStorageLayout());
     snapshot->setID(frame);
     snapshot->clearDerivedProperties();
     
     /** @todo fixed me */
-    Snapshot* oldSnapshot = currentSnapshot_;
     currentSnapshot_ = snapshot;   
     reader_->readFrame(frame);
-
-    // What was this for?  It doesn't make sense!
-    //currentSnapshot_ = oldSnapshot;
 
     return snapshot;
   }

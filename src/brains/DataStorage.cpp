@@ -365,67 +365,51 @@ namespace OpenMD {
     switch (whichArray) {
     case dslPosition:
       return internalGetArrayPointer(position);
-      break;
             
     case dslVelocity:
       return internalGetArrayPointer(velocity);
-      break;
             
     case dslAmat:
       return internalGetArrayPointer(aMat);
-      break;            
             
     case dslAngularMomentum:
       return internalGetArrayPointer(angularMomentum);
-      break;
             
     case dslElectroFrame:
       return internalGetArrayPointer(electroFrame);
-      break;
             
     case dslForce:
       return internalGetArrayPointer(force);
-      break;            
 
     case dslTorque:
       return internalGetArrayPointer(torque);
-      break;
 
     case dslParticlePot:
       return internalGetArrayPointer(particlePot);
-      break;
 
     case dslDensity:
       return internalGetArrayPointer(density);
-      break;
 
     case dslFunctional:
       return internalGetArrayPointer(functional);
-      break;
 
     case dslFunctionalDerivative:
       return internalGetArrayPointer(functionalDerivative);
-      break;
 
     case dslElectricField:
       return internalGetArrayPointer(electricField);
-      break;
 
     case dslSkippedCharge:
       return internalGetArrayPointer(skippedCharge);
-      break;
 
     case dslFlucQPosition:
       return internalGetArrayPointer(flucQPos);
-      break;
 
     case dslFlucQVelocity:
       return internalGetArrayPointer(flucQVel);
-      break;
            
     case dslFlucQForce:
       return internalGetArrayPointer(flucQFrc);
-      break;
            
     default:
       //error message

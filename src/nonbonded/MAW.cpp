@@ -185,7 +185,6 @@ namespace OpenMD {
       RealType y = r.y();
       RealType z = r.z();
       RealType x2 = x * x;
-      RealType y2 = y * y;
       RealType z2 = z * z;
 
       RealType r3 = *(idat.r2) *  *(idat.rij) ;

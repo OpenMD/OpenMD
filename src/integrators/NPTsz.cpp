@@ -109,7 +109,7 @@ namespace OpenMD {
     int i, j;
     Mat3x3d scaleMat;
     RealType scaleFactor;
-    RealType bigScale, smallScale, offDiagMax;
+    RealType bigScale, smallScale;
     Mat3x3d hm;
     Mat3x3d hmnew;
 
@@ -121,7 +121,6 @@ namespace OpenMD {
 
     bigScale = 1.0;
     smallScale = 1.0;
-    offDiagMax = 0.0;
 
     for(i=0; i<3; i++){
       for(j=0; j<3; j++){

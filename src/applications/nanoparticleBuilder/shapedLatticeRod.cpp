@@ -57,7 +57,7 @@ namespace OpenMD {
     
     rodRadius_= radius;
     rodLength_= length;
-    RealType x, y, z, distance, delta_z;
+
     Vector3d dimension;
     dimension[0] = 3.0*radius;
     dimension[1] = 3.0*radius;
