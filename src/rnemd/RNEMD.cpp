@@ -1541,16 +1541,16 @@ namespace OpenMD {
         if(outputMask_[j]) {
           switch(j) {
           case Z:
-            (data_[j].accumulator[i])->add(z);
+            dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(z);
             break;
           case TEMPERATURE:
-            data_[j].accumulator[i]->add(temp);
+            dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(temp);
             break;
           case VELOCITY:
             dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(vel);
             break;
           case DENSITY:
-            data_[j].accumulator[i]->add(den);
+            dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
             break;
           }
         }
@@ -1747,7 +1747,7 @@ namespace OpenMD {
     assert(bin < nBins_);
     RealType s;
     
-    data_[index].accumulator[bin]->getAverage(s);
+    dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getAverage(s);
     
     if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;
@@ -1785,7 +1785,7 @@ namespace OpenMD {
     assert(bin < nBins_);
     RealType s;
     
-    data_[index].accumulator[bin]->getStdDev(s);
+    dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getStdDev(s);
     
     if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;

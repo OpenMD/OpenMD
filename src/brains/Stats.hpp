@@ -104,7 +104,7 @@ namespace OpenMD {
       string title;
       string units;
       string dataType;
-      Accumulator* accumulator;
+      BaseAccumulator* accumulator;
     };
     
     typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;

@@ -114,7 +114,7 @@ namespace OpenMD {
       string title;
       string units;
       string dataType;
-      vector<Accumulator*> accumulator;
+      vector<BaseAccumulator*> accumulator;
     };
 
     typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;

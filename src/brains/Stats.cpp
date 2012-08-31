@@ -404,28 +404,28 @@ namespace OpenMD {
       if (statsMask_[i]) {
         switch (i) {
         case TIME:
-          data_[i].accumulator->add(snap->getTime());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getTime());
           break;
         case KINETIC_ENERGY:
-          data_[i].accumulator->add(thermo.getKinetic());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getKinetic());
           break;
         case POTENTIAL_ENERGY:
-          data_[i].accumulator->add(thermo.getPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getPotential());
           break;
         case TOTAL_ENERGY:
-          data_[i].accumulator->add(thermo.getTotalEnergy());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTotalEnergy());
           break;
         case TEMPERATURE:
-          data_[i].accumulator->add(thermo.getTemperature());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTemperature());
           break;
         case PRESSURE:
-          data_[i].accumulator->add(thermo.getPressure());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getPressure());
           break;
         case VOLUME:
-          data_[i].accumulator->add(thermo.getVolume());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getVolume());
           break;
         case CONSERVED_QUANTITY:
-          data_[i].accumulator->add(snap->getConservedQuantity());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getConservedQuantity());
           break;
         case PRESSURE_TENSOR:
           dynamic_cast<MatrixAccumulator *>(data_[i].accumulator)->add(thermo.getPressureTensor());
@@ -437,66 +437,66 @@ namespace OpenMD {
           dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getHeatFlux());
           break;
         case HULLVOLUME:
-          data_[i].accumulator->add(thermo.getHullVolume());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getHullVolume());
           break;
         case GYRVOLUME:
-          data_[i].accumulator->add(thermo.getGyrationalVolume());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getGyrationalVolume());
           break;
         case TRANSLATIONAL_KINETIC:
-          data_[i].accumulator->add(thermo.getTranslationalKinetic());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTranslationalKinetic());
           break;
         case ROTATIONAL_KINETIC:
-          data_[i].accumulator->add(thermo.getRotationalKinetic());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getRotationalKinetic());
           break;
         case LONG_RANGE_POTENTIAL:
-          data_[i].accumulator->add(snap->getLongRangePotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotential());
           break;
         case VANDERWAALS_POTENTIAL:
-          data_[i].accumulator->add(snap->getLongRangePotentials()[VANDERWAALS_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[VANDERWAALS_FAMILY]);
           break;
         case ELECTROSTATIC_POTENTIAL:
-          data_[i].accumulator->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY]);
           break;
         case METALLIC_POTENTIAL:
-          data_[i].accumulator->add(snap->getLongRangePotentials()[METALLIC_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_FAMILY]);
           break;
         case HYDROGENBONDING_POTENTIAL:
-          data_[i].accumulator->add(snap->getLongRangePotentials()[HYDROGENBONDING_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[HYDROGENBONDING_FAMILY]);
           break;
         case SHORT_RANGE_POTENTIAL:
-          data_[i].accumulator->add(snap->getShortRangePotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getShortRangePotential());
           break;
         case BOND_POTENTIAL:
-          data_[i].accumulator->add(snap->getBondPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getBondPotential());
           break;
         case BEND_POTENTIAL:
-          data_[i].accumulator->add(snap->getBendPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getBendPotential());
           break;
         case DIHEDRAL_POTENTIAL:
-          data_[i].accumulator->add(snap->getTorsionPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getTorsionPotential());
           break;
         case INVERSION_POTENTIAL:
-          data_[i].accumulator->add(snap->getInversionPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getInversionPotential());
           break;
         case RAW_POTENTIAL:
-          data_[i].accumulator->add(snap->getRawPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getRawPotential());
           break;
         case RESTRAINT_POTENTIAL:
-          data_[i].accumulator->add(snap->getRestraintPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getRestraintPotential());
           break;
         case TAGGED_PAIR_DISTANCE:
-          data_[i].accumulator->add(thermo.getTaggedAtomPairDistance());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTaggedAtomPairDistance());
           break;
           /*
         case SHADOWH:
-          data_[i].accumulator->add(thermo.getShadowHamiltionian());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getShadowHamiltionian());
           break;
         case HELFANDMOMENT:
-          data_[i].accumulator->add(thermo.getHelfandMoment());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getHelfandMoment());
           break;
           */
         case ELECTRONIC_TEMPERATURE:
-          data_[i].accumulator->add(thermo.getElectronicTemperature());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicTemperature());
           break; 
         }
       }
@@ -506,13 +506,13 @@ namespace OpenMD {
   int Stats::getIntData(int index) { 
     assert(index >=0 && index < ENDINDEX);
     RealType value;
-    data_[index].accumulator->getLastValue(value);
+    dynamic_cast<Accumulator *>(data_[index].accumulator)->getLastValue(value);
     return (int) value;
   }
   RealType Stats::getRealData(int index) {
     assert(index >=0 && index < ENDINDEX);
     RealType value(0.0);
-    data_[index].accumulator->getLastValue(value);
+    dynamic_cast<Accumulator *>(data_[index].accumulator)->getLastValue(value);
     return value;
   }
   Vector3d Stats::getVectorData(int index) {

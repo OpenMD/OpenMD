@@ -49,18 +49,34 @@
 
 namespace OpenMD {
 
+
+  class BaseAccumulator {
+  public:
+    virtual void clear() = 0;
+    /**
+     * get the number of accumulated values
+     */
+    virtual size_t count()  {
+      return Count_;
+    }
+  protected:
+    size_t Count_;
+
+  };   
+
+
+
   /** 
    * Basic Accumulator class for numbers. 
-   */
-  
-  class Accumulator {    
+   */  
+  class Accumulator : public BaseAccumulator {    
 
     typedef RealType ElementType;
     typedef RealType ResultType;
 
   public:
     
-    Accumulator() {
+    Accumulator() : BaseAccumulator() {
       this->clear();
     }
 
@@ -91,12 +107,6 @@ namespace OpenMD {
       Val_   = 0;
     }
     
-    /**
-     * get the number of accumulated values
-     */
-    size_t count()  {
-      return Count_;
-    }
 
     /**
      * return the most recently added value
@@ -153,8 +163,6 @@ namespace OpenMD {
       return;
     }
 
-  protected:
-    size_t Count_;
   private:
     ElementType Val_;
     ResultType Avg_;
@@ -163,13 +171,13 @@ namespace OpenMD {
     ElementType Max_;
   };
 
-  class VectorAccumulator : public Accumulator {
+  class VectorAccumulator : public BaseAccumulator {
     
     typedef Vector3d ElementType;
     typedef Vector3d ResultType;
     
   public:
-    VectorAccumulator() : Accumulator() {
+    VectorAccumulator() : BaseAccumulator() {
       this->clear();
     }
 
@@ -311,13 +319,13 @@ namespace OpenMD {
 
   };
 
-  class MatrixAccumulator : public Accumulator {
+  class MatrixAccumulator : public BaseAccumulator {
     
     typedef Mat3x3d ElementType;
     typedef Mat3x3d ResultType;
     
   public:
-    MatrixAccumulator() : Accumulator() {
+    MatrixAccumulator() : BaseAccumulator() {
       this->clear();
     }
 
