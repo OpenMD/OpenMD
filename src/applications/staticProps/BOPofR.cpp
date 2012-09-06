@@ -145,7 +145,7 @@ namespace OpenMD {
   }
 
   
-  void BOPofR::initalizeHistogram() {
+  void BOPofR::initializeHistogram() {
  	for (int i = 0; i < nBins_; i++){
 		RCount_[i] = 0;
 		WofR_[i] = 0;
@@ -322,7 +322,7 @@ namespace OpenMD {
 
     if ( distCOM < len_){
       // Figure out where this distance goes...
-      int whichBin = distCOM / deltaR_;
+      int whichBin = int(distCOM / deltaR_);
       RCount_[whichBin]++;
 
       if(real(what[6]) < -0.15){      				

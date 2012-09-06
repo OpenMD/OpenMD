@@ -74,7 +74,7 @@ namespace OpenMD {
     }
   }
 
-  void GofAngle2::initalizeHistogram() {
+  void GofAngle2::initializeHistogram() {
     npairs_ = 0;
     for (unsigned int i = 0; i < histogram_.size(); ++i)
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
@@ -124,8 +124,8 @@ namespace OpenMD {
     RealType cosAngle2 = dot(dipole1, dipole2);
 
     RealType halfBin = (nAngleBins_ - 1) * 0.5;
-    int angleBin1 = halfBin * (cosAngle1 + 1.0);
-    int angleBin2 = halfBin * (cosAngle2 + 1.0);
+    int angleBin1 = int(halfBin * (cosAngle1 + 1.0));
+    int angleBin2 = int(halfBin * (cosAngle2 + 1.0));
 
     ++histogram_[angleBin1][angleBin2];    
     ++npairs_;

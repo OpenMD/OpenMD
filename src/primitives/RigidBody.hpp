@@ -96,10 +96,6 @@ namespace OpenMD{
      */ 
     virtual Mat3x3d getI();
 
-
-    /** Sets the internal unit frame of this stuntdouble by three euler angles */
-    void setElectroFrameFromEuler(RealType phi, RealType theta, RealType psi);
-        
     /**
      * Returns the gradient of this stuntdouble
      * @return the inertia tensor of this stuntdouble
@@ -117,9 +113,14 @@ namespace OpenMD{
     /** Converts Atomic forces and torques to total forces and torques */
     void calcForcesAndTorques();
 
-    /** Converts Atomic forces and torques to total forces and torques and computes the rigid body contribution to the virial.  Returns the rigid body contribution to the virial as a 3x3 matrix. */
+    /** 
+        Converts Atomic forces and torques to total forces and torques
+        and computes the rigid body contribution to the virial.
+        Returns the rigid body contribution to the virial as a 3x3
+        matrix.
+        */ 
     Mat3x3d calcForcesAndTorquesAndVirial();
-
+    
     /** update the positions of atoms belong to this rigidbody */
     void updateAtoms();
 

@@ -65,7 +65,7 @@ namespace OpenMD {
     std::fill(avgTwoDGofR_.begin(), avgTwoDGofR_.end(), 0.0);    
   }
 
-  void TwoDGofR::initalizeHistogram() {
+  void TwoDGofR::initializeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
   }
 
@@ -108,7 +108,7 @@ namespace OpenMD {
     RealType distance = sqrt(r12.x()*r12.x() + r12.y()*r12.y());
 
     if (distance < len_) {
-      int whichBin = distance / deltaR_;
+      int whichBin = int(distance / deltaR_);
       histogram_[whichBin] += 2;
     }
   }

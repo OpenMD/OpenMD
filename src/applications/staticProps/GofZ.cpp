@@ -64,7 +64,7 @@ namespace OpenMD {
     std::fill(avgGofz_.begin(), avgGofz_.end(), 0.0);    
   }
 
-  void GofZ::initalizeHistogram() {
+  void GofZ::initializeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
   }
 
@@ -108,7 +108,7 @@ namespace OpenMD {
 
     if (xydist < rC_) {
       thisZ = abs(r12.z());
-      int whichBin = thisZ / deltaZ_;
+      int whichBin = int(thisZ / deltaZ_);
       histogram_[whichBin] += 2;
     }
   }

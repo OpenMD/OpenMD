@@ -70,7 +70,7 @@ namespace OpenMD {
     }
   }
 
-  void GofRZ::initalizeHistogram() {
+  void GofRZ::initializeHistogram() {
     npairs_ = 0;
     for (unsigned int i = 0; i < histogram_.size(); ++i){
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);

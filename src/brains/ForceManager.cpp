@@ -908,6 +908,14 @@ namespace OpenMD {
       *(fDecomp_->getPairwisePotential());
 
     curSnapshot->setLongRangePotential(longRangePotential);
+
+    // collects single-atom information
+    fDecomp_->collectSelfData();
+
+    longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
+      *(fDecomp_->getPairwisePotential());
+
+    curSnapshot->setLongRangePotential(longRangePotential);
     
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                          *(fDecomp_->getExcludedPotential()));

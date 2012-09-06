@@ -74,9 +74,7 @@ namespace OpenMD {
   
   void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
-    
-    //((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;    
-    
+        
     for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);

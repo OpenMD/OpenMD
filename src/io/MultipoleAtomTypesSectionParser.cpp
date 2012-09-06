@@ -142,7 +142,6 @@ namespace OpenMD {
 	painCave.isFatal = 1;
 	simError();
       }
-
       if (isDipole)
         dipole = dipoleMoment * eFrame.transpose() * V3Z;
       if (isQuadrupole) {

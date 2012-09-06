@@ -46,6 +46,8 @@
 #endif
 
 #include <fstream>
+#include <iostream>
+#include <locale>
 #include "utils/simError.h"
 #include "utils/CaseConversion.hpp"
 #include "brains/Register.hpp"

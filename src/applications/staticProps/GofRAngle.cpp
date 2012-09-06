@@ -70,7 +70,7 @@ namespace OpenMD {
     }
   }
 
-  void GofRAngle::initalizeHistogram() {
+  void GofRAngle::initializeHistogram() {
     npairs_ = 0;
     for (unsigned int i = 0; i < histogram_.size(); ++i){
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
@@ -109,13 +109,13 @@ namespace OpenMD {
       currentSnapshot_->wrapVector(r12);
 
     RealType distance = r12.length();
-    int whichRBin = distance / deltaR_;
+    int whichRBin = int(distance / deltaR_);
 
     if (distance <= len_) {
 
       RealType cosAngle = evaluateAngle(sd1, sd2);
       RealType halfBin = (nAngleBins_ - 1) * 0.5;
-      int whichThetaBin = halfBin * (cosAngle + 1.0);
+      int whichThetaBin = int(halfBin * (cosAngle + 1.0));
       ++histogram_[whichRBin][whichThetaBin];
         
       ++npairs_;

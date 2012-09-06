@@ -259,12 +259,14 @@ namespace OpenMD {
     streamoff mdOffset;
     int mdFileVersion;
 
+
 #ifdef IS_MPI            
     const int masterNode = 0;
     if (worldRank == masterNode) {
 #endif 
 
-      std::ifstream mdFile_(mdFileName.c_str()); 
+      std::ifstream mdFile_;
+      mdFile_.open(mdFileName.c_str(), ifstream::in | ifstream::binary);
       
       if (mdFile_.fail()) { 
         sprintf(painCave.errMsg, 
@@ -673,7 +675,8 @@ namespace OpenMD {
     set<AtomType*>::iterator i;
     bool hasDirectionalAtoms = false;
     bool hasFixedCharge = false;
-    bool hasMultipoles = false;    
+    bool hasDipoles = false;    
+    bool hasQuadrupoles = false;    
     bool hasPolarizable = false;    
     bool hasFluctuatingCharge = false;    
     bool hasMetallic = false;
@@ -695,8 +698,11 @@ namespace OpenMD {
       if (da.isDirectional()){
         hasDirectionalAtoms = true;
       }
-      if (ma.isMultipole()){
-        hasMultipoles = true;
+      if (ma.isDipole()){
+        hasDipoles = true;
+      }
+      if (ma.isQuadrupole()){
+        hasQuadrupoles = true;
       }
       if (ea.isEAM() || sca.isSuttonChen()){
         hasMetallic = true;
@@ -720,6 +726,12 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslForce) {
         storageLayout |= DataStorage::dslTorque;
       }
+    }
+    if (hasDipoles) {
+      storageLayout |= DataStorage::dslDipole;
+    }
+    if (hasQuadrupoles) {
+      storageLayout |= DataStorage::dslQuadrupole;
     }
     if (hasFixedCharge || hasFluctuatingCharge) {
       storageLayout |= DataStorage::dslSkippedCharge;

@@ -84,7 +84,7 @@ namespace OpenMD {
     Q_histogram_.clear(); 
   }
   
-  void TetrahedralityParam::initalizeHistogram() {
+  void TetrahedralityParam::initializeHistogram() {
     std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
   }
   
@@ -174,7 +174,7 @@ namespace OpenMD {
 	// Sort the vector using predicate and std::sort
 	std::sort(myNeighbors.begin(), myNeighbors.end());
 
-	std::cerr << myNeighbors.size() <<  " neighbors within " << rCut_  << " A" << " \n";
+	//std::cerr << myNeighbors.size() <<  " neighbors within " << rCut_  << " A" << " \n";
 	
 	// Use only the 4 closest neighbors to do the rest of the work:
 	
@@ -261,7 +261,7 @@ namespace OpenMD {
     int nSelected = 0;
 
     for (int i = 0; i < nBins_; ++i) {
-      nSelected = nSelected + Q_histogram_[i]*deltaQ_;
+      nSelected = nSelected + int(Q_histogram_[i]*deltaQ_);
     }
     
     std::ofstream osq((getOutputFileName() + "Q").c_str());

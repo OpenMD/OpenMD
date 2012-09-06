@@ -75,7 +75,8 @@ namespace OpenMD {
     if (worldRank == 0) { 
 #endif 
       
-      inFile_ = new std::ifstream(filename_.c_str()); 
+      inFile_ = new std::ifstream(filename_.c_str(),   
+                                  ifstream::in | ifstream::binary); 
       
       if (inFile_->fail()) { 
 	sprintf(painCave.errMsg, 

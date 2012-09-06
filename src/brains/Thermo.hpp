@@ -105,6 +105,7 @@ namespace OpenMD {
     RealType getTaggedAtomPairDistance();
     
   private:    
+  private:    
     SimInfo* info_;
   };
   

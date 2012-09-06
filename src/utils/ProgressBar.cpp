@@ -134,8 +134,13 @@ namespace OpenMD {
           struct tm * ender = localtime(&end_);
           char buffer[22];
           strftime(buffer, 22, "%a %b %d @ %I:%M %p", ender);
-          
+
+#ifdef _MSC_VER
+          csbi.dwCursorPosition.X = 0;
+          SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
+#else          
           cout << '\r';
+#endif
           cout.width(3); 
           cout << right << int(percent);
           cout.width(3); 
