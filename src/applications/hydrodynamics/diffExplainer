@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYTHON_EXECUTABLE@
 """Computes predicted diffusion constants and rotational relaxation
 times from a diff file.  Explains the values in the diff file in
 terms of properties that can be calculated from a molecular dynamics
