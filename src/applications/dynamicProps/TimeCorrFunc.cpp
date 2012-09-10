@@ -56,7 +56,6 @@ namespace OpenMD {
     
     int nAtoms = info->getNGlobalAtoms();
     int nRigidBodies = info->getNGlobalRigidBodies();
-    int nStuntDoubles =   nAtoms + nRigidBodies;
     
     set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
     set<AtomType*>::iterator i;

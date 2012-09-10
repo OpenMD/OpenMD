@@ -99,19 +99,19 @@ namespace OpenMD {
       output_ << i->mol->getGlobalIndex() <<"\t" << i->fz << "\t" << i->zpos << "\t" << i->param.zTargetPos <<std::endl;
     }
 #else
-    int nproc;
-    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+    int nproc = MPI::COMM_WORLD.Get_size();
     const int masterNode = 0;
     int myNode = worldRank;
     std::vector<int> tmpNFixedZmols(nproc, 0);
     std::vector<int> nFixedZmolsInProc(nproc, 0);
     tmpNFixedZmols[myNode] = fixedZmols.size();
     
-    //do MPI_ALLREDUCE to exchange the total number of atoms, rigidbodies and cutoff groups
-    MPI_Allreduce(&tmpNFixedZmols[0], &nFixedZmolsInProc[0], nproc, MPI_INT,
-                  MPI_SUM, MPI_COMM_WORLD);
+    //do MPI_ALLREDUCE to exchange the total number of atoms,
+    //rigidbodies and cutoff groups
+    MPI::COMM_WORLD.Allreduce(&tmpNFixedZmols[0], &nFixedZmolsInProc[0], 
+                              nproc, MPI::INT, MPI::SUM);
 
-    MPI_Status ierr;
+    MPI::Status ierr;
     int zmolIndex;
     RealType data[3];
     
@@ -132,8 +132,8 @@ namespace OpenMD {
 
 	} else {
 	  for(int k =0 ; k < nFixedZmolsInProc[i]; ++k) {
-	    MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
-	    MPI_Recv(data, 3, MPI_REALTYPE, i, 0, MPI_COMM_WORLD,&ierr);
+            MPI::COMM_WORLD.Recv(&zmolIndex, 1, MPI::INT, i, 0, ierr);
+            MPI::COMM_WORLD.Recv(data, 3, MPI::REALTYPE, i, 0, ierr);
 	    tmpData.zmolIndex = zmolIndex;
 	    tmpData.zforce= data[0];
 	    tmpData.zpos = data[1];
@@ -161,8 +161,8 @@ namespace OpenMD {
 	data[0] = j->fz;
 	data[1] = j->zpos;
 	data[2] = j->param.zTargetPos;
-	MPI_Send(&zmolIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-	MPI_Send(data, 3, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
+        MPI::COMM_WORLD.Send(&zmolIndex, 1, MPI::INT, masterNode, 0);
+        MPI::COMM_WORLD.Send(data, 3, MPI::REALTYPE, masterNode, 0);
             
       }
     }

@@ -81,7 +81,7 @@ namespace OpenMD {
   bool shapedLatticePentRod::isInterior(Vector3d point){
 
     RealType x, y, z, new_x, new_y, left_newx, right_newx;
-    int z_int;
+    // int z_int;
 
     bool isIT=false;
 
@@ -89,7 +89,7 @@ namespace OpenMD {
     y = point[1];
     z = point[2];
 
-    z_int = int(z/2.04);
+    // z_int = int(z/2.04);
 
     //Rotate by 45 degrees around z-axis so length of rod lies along y axis
     new_x = (sqrt(2.0)/2)*(x - y);

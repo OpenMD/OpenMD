@@ -64,7 +64,7 @@ void initSimError( void ){
   painCave.isEventLoop = 0;
   nChecks = 0;
 #ifdef IS_MPI
-  MPI_Comm_rank( MPI_COMM_WORLD, &worldRank );
+  worldRank = MPI::COMM_WORLD.Get_rank();
 #else
   worldRank = 0;
 #endif
@@ -118,36 +118,33 @@ int simError( void ) {
 
   if (painCave.isFatal) {
 #ifdef IS_MPI    
-    MPI_Allreduce( &myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD );
-    MPI_Finalize();
+    MPI::COMM_WORLD.Allreduce(&myError, &isError, 1, MPI::INT, MPI::LOR);
+    MPI::Finalize();
 #endif
     exit(0);
-  } 
-
+  }  
   return 1;  
 }
- 
+
 
 void errorCheckPoint( void ){
-    
+  
   int myError = 0;
   int isError = 0;
-
+  
 #ifdef IS_MPI
-  MPI_Allreduce( &myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD );
+  MPI::COMM_WORLD.Allreduce(&myError, &isError, 1, MPI::INT, MPI::LOR);
 #else
   isError = myError;
 #endif
-
-  if( isError ){
-
+  
+  if( isError ){    
 #ifdef IS_MPI
-    MPI_Finalize();
-#endif
-
+    MPI::Finalize();
+#endif    
     exit(0);
   }
-
+  
 #ifdef CHECKPOINT_VERBOSE  
   nChecks++;
 

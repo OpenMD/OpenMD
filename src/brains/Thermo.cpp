@@ -831,9 +831,9 @@ namespace OpenMD {
           data[0] = pos1.x();
           data[1] = pos1.y();
           data[2] = pos1.z();          
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
+          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc1);
         } else {
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
+          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc1);
           pos1 = Vector3d(data);
         }
 
@@ -842,10 +842,10 @@ namespace OpenMD {
           pos2 = sd2->getPos();
           data[0] = pos2.x();
           data[1] = pos2.y();
-          data[2] = pos2.z();          
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
+          data[2] = pos2.z();  
+          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc2);
         } else {
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
+          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc2);
           pos2 = Vector3d(data);
         }
 #else

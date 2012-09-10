@@ -124,17 +124,15 @@ namespace OpenMD {
     RealType gridX_, gridY_;
     RealType halfBoxX_, halfBoxY_;
 
-    int binNoX, binNoY;
     RealType interpsum, value;
     int ninterp, px, py, newp;
-    int newx, newy, newindex, index;
+    int newindex, index;
     int new_i, new_j, new_index;
 
     RealType freq_x, freq_y, zero_freq_x, zero_freq_y, freq;
     RealType maxfreqx, maxfreqy, maxfreq;
 
     int whichbin;
-    int nMolecules;
 
     std::fill(sum_bin.begin(), sum_bin.end(), 0.0);
     std::fill(avg_bin.begin(), avg_bin.end(), 0.0);
@@ -155,7 +153,6 @@ namespace OpenMD {
       
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      nMolecules = info_->getNGlobalMolecules();
       
       Mat3x3d hmat = currentSnapshot_->getHmat();
       

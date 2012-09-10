@@ -493,7 +493,6 @@ int main(int argc, char *argv []) {
   mol = NewInfo->beginMolecule(mi);
 
   int l = 0;
-  int whichSite = 0;
 
   for (int i = 0; i < nComponents; i++){
     locator = new MoLocator(NewInfo->getMoleculeStamp(i), 
