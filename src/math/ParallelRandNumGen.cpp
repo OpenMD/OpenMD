@@ -124,17 +124,17 @@ namespace OpenMD {
   void ParallelRandNumGen::seed() {
 
     std::vector<uint32> bigSeed;
-    int size;
 
 #ifdef IS_MPI
+    int size;
     const int masterNode = 0;
     if (worldRank == masterNode) {
 #endif
 
       bigSeed = mtRand_->generateSeeds();
-      size = bigSeed.size();
 
 #ifdef IS_MPI
+      size = bigSeed.size();
       MPI::COMM_WORLD.Bcast(&size, 1, MPI::INT, masterNode);
       MPI::COMM_WORLD.Bcast(&bigSeed[0], size, MPI::UNSIGNED_LONG, masterNode);
     }else {

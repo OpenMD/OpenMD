@@ -441,7 +441,7 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 0;
     simError();
 
-    RealType smallestSoFar;
+    // RealType smallestSoFar;
     int myComponent = -1;
     nMol.clear();
     nMol.resize(nComponents);
@@ -452,8 +452,8 @@ int main(int argc, char *argv []) {
     for (unsigned int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
       myR = myLoc.length();
-      smallestSoFar = rodRadius;  
-      //cerr << "vac = " << isVacancy[i]<< "\n";
+      // smallestSoFar = rodRadius;  
+      // cerr << "vac = " << isVacancy[i]<< "\n";
     
       if (!isVacancy[i]) {
 

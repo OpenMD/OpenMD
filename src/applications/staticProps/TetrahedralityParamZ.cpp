@@ -302,7 +302,6 @@ namespace OpenMD
   }    
 
   void TetrahedralityParamZ::writeOrderParameter() {
-    int nSelected = 0;
     std::ofstream osq((getOutputFileName() + "Q").c_str());
     if (osq.is_open()) {
       osq << "# Tetrahedrality Parameters\n";
