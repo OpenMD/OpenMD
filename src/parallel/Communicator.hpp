@@ -72,8 +72,8 @@ namespace OpenMD{
     static int Length() { return 1; };
   };
   
-  template<> inline MPI::Datatype MPITraits<int>::Type() { return MPI_INT; }
-  template<> inline MPI::Datatype MPITraits<RealType>::Type() { return MPI_REALTYPE; }
+  template<> inline MPI::Datatype MPITraits<int>::Type() { return MPI::INT; }
+  template<> inline MPI::Datatype MPITraits<RealType>::Type() { return MPI::REALTYPE; }
 
   template<class T, unsigned int Dim>
   class MPITraits< Vector<T, Dim> > {

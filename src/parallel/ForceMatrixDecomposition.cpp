@@ -1042,19 +1042,19 @@ namespace OpenMD {
    * the parallel decomposition.
    */
   bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1, int cg2) {
-    int unique_id_1, unique_id_2, group1, group2;
+    int unique_id_1, unique_id_2;
         
 #ifdef IS_MPI
     // in MPI, we have to look up the unique IDs for each atom
     unique_id_1 = AtomRowToGlobal[atom1];
     unique_id_2 = AtomColToGlobal[atom2];
-    group1 = cgRowToGlobal[cg1];
-    group2 = cgColToGlobal[cg2];
+    // group1 = cgRowToGlobal[cg1];
+    // group2 = cgColToGlobal[cg2];
 #else
     unique_id_1 = AtomLocalToGlobal[atom1];
     unique_id_2 = AtomLocalToGlobal[atom2];
-    group1 = cgLocalToGlobal[cg1];
-    group2 = cgLocalToGlobal[cg2];
+    int group1 = cgLocalToGlobal[cg1];
+    int group2 = cgLocalToGlobal[cg2];
 #endif   
 
     if (unique_id_1 == unique_id_2) return true;

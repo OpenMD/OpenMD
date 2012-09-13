@@ -67,12 +67,12 @@
 using namespace OpenMD;
 using namespace QuantLib;
 
-int main(int argc,char* argv[]){
+int main(int argc, char* argv[]){
   
   // first things first, all of the initializations
 
 #ifdef IS_MPI
-  MPI_Init( &argc, &argv ); // the MPI communicators
+  MPI::Init( argc, argv ); // the MPI communicators
 #endif
    
   initSimError();           // the error handler
@@ -229,7 +229,7 @@ int main(int argc,char* argv[]){
   errorCheckPoint();
 
 #ifdef IS_MPI  
-  MPI_Finalize();
+  MPI::Finalize();
 #endif
 
   return 0 ;

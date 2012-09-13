@@ -439,7 +439,7 @@ ENDIF(QHULL_FOUND)
 
 IF(WIN32)
 set(GETOPT_SOURCE
-src/utils/getopt.cpp
+src/utils/wingetopt.cpp
 )
 ENDIF(WIN32)
 
@@ -613,20 +613,27 @@ src/applications/utilities/md-solvator
 src/applications/utilities/md2md
 src/applications/utilities/mdSplit
 src/applications/utilities/principalAxisCalculator
+src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
 src/applications/utilities/waterRotator
 src/applications/utilities/waterReplacer
 )
 
 IF(PYTHON_EXECUTABLE)
-   foreach(PY_FILE ${PY_FILES})
-      GET_FILENAME_COMPONENT(filename "${PY_FILE}" NAME)
-      CONFIGURE_FILE(${PY_FILE} 
-                     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}" @ONLY)
-      INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}"
-              DESTINATION bin 
-              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-   endforeach(PY_FILE)
+  IF(WIN32)
+    SET(PYEXT ".py")
+  ELSE(WIN32)
+    SET(PYEXT "")
+  ENDIF(WIN32)
+
+  foreach(PY_FILE ${PY_FILES})
+    GET_FILENAME_COMPONENT(filename "${PY_FILE}" NAME)
+    CONFIGURE_FILE(${PY_FILE} 
+                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PYEXT}" @ONLY)
+    INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PYEXT}"
+            DESTINATION bin 
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  endforeach(PY_FILE)
 ENDIF(PYTHON_EXECUTABLE)
 
 set(PERL_FILES
@@ -635,14 +642,20 @@ src/applications/utilities/waterBoxer
 )
 
 IF(PERL_FOUND)
-   foreach(PERL_FILE ${PERL_FILES})
-      GET_FILENAME_COMPONENT(filename "${PERL_FILE}" NAME)
-      configure_file(${PERL_FILE} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}" @ONLY)
-      INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}"
-              DESTINATION bin 
-              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  IF(WIN32)
+    SET(PLEXT ".PL")
+  ELSE(WIN32)
+    SET(PLEXT "")
+  ENDIF(WIN32)
 
-   endforeach(PERL_FILE)
+  foreach(PERL_FILE ${PERL_FILES})
+     GET_FILENAME_COMPONENT(filename "${PERL_FILE}" NAME)
+     configure_file(${PERL_FILE} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PLEXT}" @ONLY)
+     INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PLEXT}"
+             DESTINATION bin 
+             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+  endforeach(PERL_FILE)
 ENDIF(PERL_FOUND)
 
 INSTALL(FILES AUTHORS LICENSE README INSTALL DESTINATION . 
@@ -675,6 +688,8 @@ install(DIRECTORY samples/
         PATTERN ".svn" EXCLUDE
 	PATTERN "*.dump" EXCLUDE
 	PATTERN "*.stat" EXCLUDE
+	PATTERN "*.eor" EXCLUDE
+	PATTERN "*.rnemd" EXCLUDE
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
         DESTINATION doc
@@ -718,3 +733,14 @@ message( STATUS "            -DFFTW3_ROOT=/path/to/fftw3")
 message( STATUS )
 message( STATUS "To build and install OpenMD, enter \"make\" and \"make install\"")
 message( STATUS )
+
+# build a CPack driven installer package
+IF(NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+   SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
+ENDIF()
+include (InstallRequiredSystemLibraries)
+set (CPACK_RESOURCE_FILE_LICENSE  
+     "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set (CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
+set (CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
+include (CPack)

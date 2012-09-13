@@ -161,8 +161,8 @@ namespace OpenMD {
 #ifndef IS_MPI
     totMassUnconsMols_ = totMassUnconsMols_local;
 #else
-    MPI_Allreduce(&totMassUnconsMols_local, &totMassUnconsMols_, 1, MPI_REALTYPE,
-		  MPI_SUM, MPI_COMM_WORLD);  
+    MPI::COMM_WORLD.Allreduce(&totMassUnconsMols_local, &totMassUnconsMols_, 1,
+                              MPI::REALTYPE, MPI::SUM);
 #endif
 
     // creat zconsWriter  
@@ -326,8 +326,8 @@ namespace OpenMD {
 #ifndef IS_MPI
     pzMovingMols = pzMovingMols_local;
 #else
-    MPI_Allreduce(&pzMovingMols_local, &pzMovingMols, 1, MPI_REALTYPE,
-		  MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&pzMovingMols_local, &pzMovingMols, 1, 
+                              MPI::REALTYPE, MPI::SUM);
 #endif
 
     RealType vzMovingMols = pzMovingMols / (totMassMovingZMols_ + totMassUnconsMols_);
@@ -397,7 +397,8 @@ namespace OpenMD {
 
     //calculate total z-constraint force
 #ifdef IS_MPI
-    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&totalFZ_local, &totalFZ, 1, 
+                              MPI::REALTYPE, MPI::SUM);
 #else
     totalFZ = totalFZ_local;
 #endif
@@ -480,7 +481,8 @@ namespace OpenMD {
 #ifndef IS_MPI
     totalFZ = totalFZ_local;
 #else
-    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);  
+    MPI::COMM_WORLD.Allreduce(&totalFZ_local, &totalFZ, 1, MPI::REALTYPE, 
+                              MPI::SUM);
 #endif
 
     //modify the forces of unconstrained molecules
@@ -552,7 +554,7 @@ namespace OpenMD {
 #ifndef IS_MPI
     changed = changed_local; 
 #else
-    MPI_Allreduce(&changed_local, &changed, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&changed_local, &changed, 1, MPI::INT, MPI::SUM);
 #endif
 
     return (changed > 0);
@@ -565,8 +567,8 @@ namespace OpenMD {
 #ifndef IS_MPI
     havingFixed = havingFixed_local;
 #else
-    MPI_Allreduce(&havingFixed_local, &havingFixed, 1, MPI_INT, MPI_SUM,
-		  MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&havingFixed_local, &havingFixed, 1, 
+                              MPI::INT, MPI::SUM);
 #endif
 
     return havingFixed > 0;
@@ -582,8 +584,8 @@ namespace OpenMD {
 #ifndef IS_MPI
     havingMoving = havingMoving_local;
 #else
-    MPI_Allreduce(&havingMoving_local, &havingMoving, 1, MPI_INT, MPI_SUM,
-		  MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&havingMoving_local, &havingMoving, 1, 
+                              MPI::INT, MPI::SUM);
 #endif
 
     return havingMoving > 0;
@@ -598,8 +600,8 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-    MPI_Allreduce(&totMassMovingZMols_local, &totMassMovingZMols_, 1, MPI_REALTYPE,
-		  MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&totMassMovingZMols_local, &totMassMovingZMols_, 
+                              1, MPI::REALTYPE, MPI::SUM);
 #else
     totMassMovingZMols_ = totMassMovingZMols_local;
 #endif
@@ -646,7 +648,7 @@ namespace OpenMD {
     zTargetPos = com[whichDirection];
 #else
     int whicProc = info_->getMolToProc(index);
-    MPI_Bcast(&zTargetPos, 1, MPI_REALTYPE, whicProc, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Bcast(&zTargetPos, 1, MPI::REALTYPE, whicProc);
 #endif
     return zTargetPos;
   }

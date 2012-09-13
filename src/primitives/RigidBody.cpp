@@ -92,7 +92,8 @@ namespace OpenMD {
     Vector3d force;
     Vector3d torque;
     Vector3d myEuler;
-    RealType phi, theta, psi;
+    RealType phi, theta;
+    // RealType psi;
     RealType cphi, sphi, ctheta, stheta;
     Vector3d ephi;
     Vector3d etheta;
@@ -104,7 +105,7 @@ namespace OpenMD {
     
     phi = myEuler[0];
     theta = myEuler[1];
-    psi = myEuler[2];
+    // psi = myEuler[2];
     
     cphi = cos(phi);
     sphi = sin(phi);

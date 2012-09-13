@@ -103,7 +103,6 @@ namespace OpenMD {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }
       
-      int runningTot = 0;
       for (sd = seleMan_.beginSelected(i); sd != NULL; 
            sd = seleMan_.nextSelected(i)) {
         

@@ -21,7 +21,11 @@
 #define FIX_UNUSED(X) (void) (X) /* avoid warnings for unused params */
 #endif
 
+#ifdef WIN32
+#include "utils/wingetopt.h"
+#else
 #include <getopt.h>
+#endif
 
 #include "nanoparticleBuilderCmd.h"
 

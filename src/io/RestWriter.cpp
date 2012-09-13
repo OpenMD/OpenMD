@@ -78,7 +78,7 @@ namespace OpenMD {
 
 
 #ifdef IS_MPI
-    MPI_Status istatus;
+    MPI::Status istatus;
 #endif
     
 #ifndef IS_MPI
@@ -148,20 +148,19 @@ namespace OpenMD {
       (*output_) << "#time\t";
       (*output_) << buffer;
       
-      int nProc;
-      MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+      int nProc = MPI::COMM_WORLD.Get_size();
       for (int i = 1; i < nProc; ++i) {
         
         // receive the length of the string buffer that was
         // prepared by processor i
         
         int recvLength;
-        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
+        MPI::COMM_WORLD.Recv(&recvLength, 1, MPI::INT, i, 0, istatus);
         char* recvBuffer = new char[recvLength];
         if (recvBuffer == NULL) {
         } else {
-          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, 
-                   &istatus);
+          MPI::COMM_WORLD.Recv(recvBuffer, recvLength, MPI::CHAR, i, 0,
+                               istatus);
           (*output_) << recvBuffer;
           delete [] recvBuffer;
         }
@@ -169,9 +168,9 @@ namespace OpenMD {
       (*output_).flush();
     } else {
       int sendBufferLength = buffer.size() + 1;
-      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode,
-               0, MPI_COMM_WORLD);
+      MPI::COMM_WORLD.Send(&sendBufferLength, 1, MPI::INT, masterNode, 0);
+      MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, MPI::CHAR,
+                           masterNode, 0);
     }
     
 #endif // is_mpi    
@@ -181,7 +180,7 @@ namespace OpenMD {
   void RestWriter::writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo) {
     
 #ifdef IS_MPI
-    MPI_Status istatus;
+    MPI::Status istatus;
 #endif
     
 #ifndef IS_MPI
@@ -225,19 +224,19 @@ namespace OpenMD {
       (*output_) << buffer;
       
       int nProc;
-      MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+      nProc = MPI::COMM_WORLD.Get_size();
       for (int i = 1; i < nProc; ++i) {
         
         // receive the length of the string buffer that was
         // prepared by processor i
         
         int recvLength;
-        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
+        MPI::COMM_WORLD.Recv(&recvLength, 1, MPI::INT, i, 0, istatus);
         char* recvBuffer = new char[recvLength];
         if (recvBuffer == NULL) {
         } else {
-          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, 
-                   &istatus);
+          MPI::COMM_WORLD.Recv(recvBuffer, recvLength, MPI::CHAR, i, 0,
+                               istatus);
           (*output_) << recvBuffer;
           
           delete [] recvBuffer;
@@ -246,9 +245,9 @@ namespace OpenMD {
       (*output_).flush();
     } else {
       int sendBufferLength = buffer.size() + 1;
-      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode,
-               0, MPI_COMM_WORLD);
+      MPI::COMM_WORLD.Send(&sendBufferLength, 1, MPI::INT, masterNode, 0);
+      MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
+                           MPI::CHAR, masterNode, 0);
     }
 #endif // is_mpi
   }

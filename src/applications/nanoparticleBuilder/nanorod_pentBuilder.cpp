@@ -441,7 +441,7 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 0;
     simError();
 
-    RealType smallestSoFar;
+    // RealType smallestSoFar;
     int myComponent = -1;
     nMol.clear();
     nMol.resize(nComponents);
@@ -452,8 +452,8 @@ int main(int argc, char *argv []) {
     for (int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
       myR = myLoc.length();
-      smallestSoFar = rodRadius;  
-      //cerr << "vac = " << isVacancy[i]<< "\n";
+      // smallestSoFar = rodRadius;  
+      // cerr << "vac = " << isVacancy[i]<< "\n";
     
       if (!isVacancy[i]) {
 
@@ -493,7 +493,6 @@ int main(int argc, char *argv []) {
   mol = NewInfo->beginMolecule(mi);
 
   int l = 0;
-  int whichSite = 0;
 
   for (int i = 0; i < nComponents; i++){
     locator = new MoLocator(NewInfo->getMoleculeStamp(i), 

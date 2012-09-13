@@ -302,7 +302,7 @@ namespace OpenMD {
   void DumpWriter::writeFrame(std::ostream& os) {
 
 #ifdef IS_MPI
-    MPI_Status istatus;
+    MPI::Status istatus;
 #endif
 
     Molecule* mol;
@@ -331,7 +331,8 @@ namespace OpenMD {
 
     if (doSiteData_) {
       os << "    <SiteData>\n";
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
                
         for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
            sd = mol->nextIntegrableObject(ii)) { 	
@@ -358,61 +359,158 @@ namespace OpenMD {
 
     os.flush();
 #else
+
+    const int masterNode = 0;
+    int worldRank = MPI::COMM_WORLD.Get_rank();
+    int nProc = MPI::COMM_WORLD.Get_size();
+
+    if (worldRank == masterNode) {	
+      os << "  <Snapshot>\n";	
+      writeFrameProperties(os, 
+                           info_->getSnapshotManager()->getCurrentSnapshot());
+      os << "    <StuntDoubles>\n";
+    }
+
     //every node prepares the dump lines for integrable objects belong to itself
     std::string buffer;
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-
-
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
       for (sd = mol->beginIntegrableObject(ii); sd != NULL; 
            sd = mol->nextIntegrableObject(ii)) { 	
-          buffer += prepareDumpLine(sd);
+        buffer += prepareDumpLine(sd);
       }
     }
     
-    const int masterNode = 0;
-    int nProc;
-    MPI_Comm_size(MPI_COMM_WORLD, &nProc);
     if (worldRank == masterNode) {	
-      os << "  <Snapshot>\n";	
-      writeFrameProperties(os, info_->getSnapshotManager()->getCurrentSnapshot());
-      os << "    <StuntDoubles>\n";
-	
       os << buffer;
-
+      
       for (int i = 1; i < nProc; ++i) {
+        // tell processor i to start sending us data:
+        MPI::COMM_WORLD.Bcast(&i, 1, MPI::INT, masterNode);
 
         // receive the length of the string buffer that was
-        // prepared by processor i
-
-        MPI_Bcast(&i, 1, MPI_INT,masterNode,MPI_COMM_WORLD);
+        // prepared by processor i:        
         int recvLength;
-        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
+        MPI::COMM_WORLD.Recv(&recvLength, 1, MPI::INT, i, MPI::ANY_TAG, 
+                             istatus);
+
+        // create a buffer to receive the data
         char* recvBuffer = new char[recvLength];
         if (recvBuffer == NULL) {
         } else {
-          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, &istatus);
+          // receive the data:
+          MPI::COMM_WORLD.Recv(recvBuffer, recvLength, MPI::CHAR, i, 
+                               MPI::ANY_TAG, istatus);
+          // send it to the file:
           os << recvBuffer;
+          // get rid of the receive buffer:
           delete [] recvBuffer;
         }
       }	
-      os << "    </StuntDoubles>\n";
-      
-      os << "  </Snapshot>\n";
-      os.flush();
     } else {
       int sendBufferLength = buffer.size() + 1;
       int myturn = 0;
       for (int i = 1; i < nProc; ++i){
-        MPI_Bcast(&myturn,1, MPI_INT,masterNode,MPI_COMM_WORLD);
+        // wait for the master node to call our number:
+        MPI::COMM_WORLD.Bcast(&myturn, 1, MPI::INT, masterNode);
         if (myturn == worldRank){
-          MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-          MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+          // send the length of our buffer:
+          MPI::COMM_WORLD.Send(&sendBufferLength, 1, MPI::INT, masterNode, 0);
+
+          // send our buffer:
+          MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
+                               MPI::CHAR, masterNode, 0);
         }
       }
     }
+    
+    if (worldRank == masterNode) {	
+      os << "    </StuntDoubles>\n";
+    }
 
+    if (doSiteData_) {
+      if (worldRank == masterNode) {
+        os << "    <SiteData>\n";
+      }
+      buffer.clear();
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+               
+        for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
+             sd = mol->nextIntegrableObject(ii)) { 	
+          
+          int ioIndex = sd->getGlobalIntegrableObjectIndex();
+          // do one for the IO itself
+          buffer += prepareSiteLine(sd, ioIndex, 0);
+
+          if (sd->isRigidBody()) {
+            
+            RigidBody* rb = static_cast<RigidBody*>(sd);
+            int siteIndex = 0;
+            for (atom = rb->beginAtom(ai); atom != NULL;  
+                 atom = rb->nextAtom(ai)) { 	                                        
+              buffer += prepareSiteLine(atom, ioIndex, siteIndex);
+              siteIndex++;
+            }
+          }
+        }
+      }
+
+      if (worldRank == masterNode) {	
+        os << buffer;
+        
+        for (int i = 1; i < nProc; ++i) {
+          
+          // tell processor i to start sending us data:
+          MPI::COMM_WORLD.Bcast(&i, 1, MPI::INT, masterNode);
+          
+          // receive the length of the string buffer that was
+          // prepared by processor i:        
+          int recvLength;
+          MPI::COMM_WORLD.Recv(&recvLength, 1, MPI::INT, i, MPI::ANY_TAG, 
+                               istatus);
+          
+          // create a buffer to receive the data
+          char* recvBuffer = new char[recvLength];
+          if (recvBuffer == NULL) {
+          } else {
+            // receive the data:
+            MPI::COMM_WORLD.Recv(recvBuffer, recvLength, MPI::CHAR, i, 
+                                 MPI::ANY_TAG, istatus);
+            // send it to the file:
+            os << recvBuffer;
+            // get rid of the receive buffer:
+            delete [] recvBuffer;
+          }
+        }	
+      } else {
+        int sendBufferLength = buffer.size() + 1;
+        int myturn = 0;
+        for (int i = 1; i < nProc; ++i){
+          // wait for the master node to call our number:
+          MPI::COMM_WORLD.Bcast(&myturn, 1, MPI::INT, masterNode);
+          if (myturn == worldRank){
+            // send the length of our buffer:
+            MPI::COMM_WORLD.Send(&sendBufferLength, 1, MPI::INT, masterNode, 0);
+            // send our buffer:
+            MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
+                                 MPI::CHAR, masterNode, 0);
+          }
+        }
+      }
+      
+      if (worldRank == masterNode) {	
+        os << "    </SiteData>\n";
+      }
+    }
+    
+    if (worldRank == masterNode) {
+      os << "  </Snapshot>\n";
+      os.flush();
+    }
+    
 #endif // is_mpi
-
+    
   }
 
   std::string DumpWriter::prepareDumpLine(StuntDouble* sd) {

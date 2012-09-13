@@ -133,10 +133,10 @@ namespace OpenMD {
       rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
       rdfStream << "#nZBins =" << nZBins_ << "\t deltaZ = " << deltaZ_ << "\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
-        RealType r = deltaR_ * (i + 0.5);
+        // RealType r = deltaR_ * (i + 0.5);
 
         for(unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
-          RealType z = deltaZ_ * (j + 0.5);
+          // RealType z = deltaZ_ * (j + 0.5);
           rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
         }
 

@@ -507,7 +507,7 @@ namespace OpenMD {
     int nGlobalMols = info->getNGlobalMolecules();
     std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error condition:
     
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    nProcessors = MPI::COMM_WORLD.Get_size();
     
     if (nProcessors > nGlobalMols) {
       sprintf(painCave.errMsg,
@@ -622,13 +622,11 @@ namespace OpenMD {
       delete myRandom;
       
       // Spray out this nonsense to all other processors:
-      
-      MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
     } else {
       
       // Listen to your marching orders from processor 0:
-      
-      MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
     }
     
     info->setMolToProcMap(molToProcMap);
@@ -860,8 +858,9 @@ namespace OpenMD {
     // This would be prettier if we could use MPI_IN_PLACE like the MPI-2
     // docs said we could.
     std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
-    MPI_Allreduce(&globalGroupMembership[0], &tmpGroupMembership[0], nGlobalAtoms,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&globalGroupMembership[0], 
+                              &tmpGroupMembership[0], nGlobalAtoms,
+                              MPI::INT, MPI::SUM);
     info->setGlobalGroupMembership(tmpGroupMembership);
 #else
     info->setGlobalGroupMembership(globalGroupMembership);
@@ -878,9 +877,9 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     std::vector<int> tmpMolMembership(info->getNGlobalAtoms(), 0);
-    
-    MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], nGlobalAtoms,
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
+                              nGlobalAtoms,
+                              MPI::INT, MPI::SUM);
     
     info->setGlobalMolMembership(tmpMolMembership);
 #else
@@ -897,8 +896,8 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     std::vector<int> numIntegrableObjectsPerMol(info->getNGlobalMolecules(), 0);
-    MPI_Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
-                  info->getNGlobalMolecules(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
+                              info->getNGlobalMolecules(), MPI::INT, MPI::SUM);
 #else
     std::vector<int> numIntegrableObjectsPerMol = nIOPerMol;
 #endif    

@@ -51,11 +51,11 @@ namespace OpenMD {
 
   ParallelRandNumGen::ParallelRandNumGen(const uint32& oneSeed) {
 
-    const int masterNode = 0;
     unsigned long seed = oneSeed;
 
 #ifdef IS_MPI
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+    const int masterNode = 0;
+    MPI::COMM_WORLD.Bcast(&seed, 1, MPI::UNSIGNED_LONG, masterNode); 
 #endif
 
     if (seed != oneSeed) {
@@ -67,8 +67,8 @@ namespace OpenMD {
 
     int nProcessors;
 #ifdef IS_MPI
-    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
-    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
+    nProcessors = MPI::COMM_WORLD.Get_size();
+    myRank_ = MPI::COMM_WORLD.Get_rank();
 #else
     nProcessors = 1;
     myRank_ = 0;
@@ -86,11 +86,10 @@ namespace OpenMD {
   ParallelRandNumGen::ParallelRandNumGen() {
 
     std::vector<uint32> bigSeed;
-    const int masterNode = 0;
     int nProcessors;
 #ifdef IS_MPI
-    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
-    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
+    nProcessors = MPI::COMM_WORLD.Get_size();
+    myRank_ = MPI::COMM_WORLD.Get_rank();
 #else
     nProcessors = 1;
     myRank_ = 0;
@@ -104,10 +103,10 @@ namespace OpenMD {
 
   void ParallelRandNumGen::seed( const uint32 oneSeed ) {
 
-    const int masterNode = 0;
     unsigned long seed = oneSeed;
 #ifdef IS_MPI
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+    const int masterNode = 0;
+    MPI::COMM_WORLD.Bcast(&seed, 1, MPI::UNSIGNED_LONG, masterNode); 
 #endif
     if (seed != oneSeed) {
       sprintf(painCave.errMsg,
@@ -125,22 +124,23 @@ namespace OpenMD {
   void ParallelRandNumGen::seed() {
 
     std::vector<uint32> bigSeed;
+
+#ifdef IS_MPI
     int size;
     const int masterNode = 0;
-#ifdef IS_MPI
     if (worldRank == masterNode) {
 #endif
 
       bigSeed = mtRand_->generateSeeds();
-      size = bigSeed.size();
 
 #ifdef IS_MPI
-      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
-      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+      size = bigSeed.size();
+      MPI::COMM_WORLD.Bcast(&size, 1, MPI::INT, masterNode);
+      MPI::COMM_WORLD.Bcast(&bigSeed[0], size, MPI::UNSIGNED_LONG, masterNode);
     }else {
-      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
+      MPI::COMM_WORLD.Bcast(&size, 1, MPI::INT, masterNode);
       bigSeed.resize(size);
-      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+      MPI::COMM_WORLD.Bcast(&bigSeed[0], size, MPI::UNSIGNED_LONG, masterNode);
     }
 #endif
     

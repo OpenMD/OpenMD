@@ -139,10 +139,10 @@ namespace OpenMD {
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
-	RealType cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
-
+	// RealType cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
+        
 	for(unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
-	  RealType cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
+	  // RealType cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
 	  rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
 	}
 

@@ -268,8 +268,9 @@ namespace OpenMD {
     ndf_local -= nConstraints_;
 
 #ifdef IS_MPI
-    MPI_Allreduce(&ndf_local,&ndf_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&nfq_local,&nGlobalFluctuatingCharges_,1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&ndf_local, &ndf_, 1, MPI::INT,MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
+                              MPI::INT, MPI::SUM);
 #else
     ndf_ = ndf_local;
     nGlobalFluctuatingCharges_ = nfq_local;
@@ -283,7 +284,7 @@ namespace OpenMD {
 
   int SimInfo::getFdf() {
 #ifdef IS_MPI
-    MPI_Allreduce(&fdf_local,&fdf_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&fdf_local, &fdf_, 1, MPI::INT, MPI::SUM);
 #else
     fdf_ = fdf_local;
 #endif
@@ -339,7 +340,7 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-    MPI_Allreduce(&ndfRaw_local,&ndfRaw_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&ndfRaw_local, &ndfRaw_, 1, MPI::INT, MPI::SUM);
 #else
     ndfRaw_ = ndfRaw_local;
 #endif
@@ -352,7 +353,8 @@ namespace OpenMD {
 
 
 #ifdef IS_MPI
-    MPI_Allreduce(&ndfTrans_local,&ndfTrans_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+    MPI::COMM_WORLD.Allreduce(&ndfTrans_local, &ndfTrans_, 1, 
+                              MPI::INT, MPI::SUM);
 #else
     ndfTrans_ = ndfTrans_local;
 #endif
@@ -1025,8 +1027,8 @@ namespace OpenMD {
   int SimInfo::getNGlobalConstraints() {
     int nGlobalConstraints;
 #ifdef IS_MPI
-    MPI_Allreduce(&nConstraints_, &nGlobalConstraints, 1, MPI_INT, MPI_SUM,
-                  MPI_COMM_WORLD);    
+    MPI::COMM_WORLD.Allreduce(&nConstraints_, &nGlobalConstraints, 1, 
+                              MPI::INT, MPI::SUM);
 #else
     nGlobalConstraints =  nConstraints_;
 #endif
