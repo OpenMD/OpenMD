@@ -108,6 +108,9 @@ namespace OpenMD {
     std::vector<Triangle>::iterator face;
     std::vector<StuntDouble*>::iterator vertex;
 
+    // This will work in parallel because the triangles returned by the mesh
+    // have a NULL stuntDouble if this processor doesn't own the 
+    
     for (face = sMesh.begin(); face != sMesh.end(); ++face) {
       Triangle thisTriangle = *face;
       std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();

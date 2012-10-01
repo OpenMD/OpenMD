@@ -123,6 +123,7 @@ namespace OpenMD {
     void instructionDispatchLoop(OpenMDBitSet& bs);
 
     void withinInstruction(const Token& instruction, OpenMDBitSet& bs);
+    OpenMDBitSet allInstruction();
         
     OpenMDBitSet comparatorInstruction(const Token& instruction); 
     void compareProperty(StuntDouble* sd, OpenMDBitSet& bs, int property, int comparator, float comparisonValue);

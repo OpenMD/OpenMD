@@ -544,6 +544,7 @@ namespace OpenMD {
       nTarget = (int)(precast + 0.5);
       
       for(i = 0; i < nGlobalMols; i++) {
+
         done = 0;
         loops = 0;
         
@@ -568,13 +569,15 @@ namespace OpenMD {
           // and be done with it. 
           
           if (loops > 100) {
+
             sprintf(painCave.errMsg,
-                    "I've tried 100 times to assign molecule %d to a "
-                    " processor, but can't find a good spot.\n"
-                    "I'm assigning it at random to processor %d.\n",
+                    "There have been 100 attempts to assign molecule %d to an\n"
+                    "\tunderworked processor, but there's no good place to\n"
+                    "\tleave it.  OpenMD is assigning it at random to processor %d.\n",
                     i, which_proc);
-            
+           
             painCave.isFatal = 0;
+            painCave.severity = OPENMD_INFO;
             simError();
             
             molToProcMap[i] = which_proc;
@@ -619,13 +622,14 @@ namespace OpenMD {
       }
       
       delete myRandom;
-      
+
       // Spray out this nonsense to all other processors:
       MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
     } else {
       
       // Listen to your marching orders from processor 0:
       MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
+
     }
     
     info->setMolToProcMap(molToProcMap);

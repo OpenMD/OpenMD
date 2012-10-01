@@ -48,10 +48,6 @@
 namespace OpenMD {
 
   class SimInfo;
-  /**
-   * @class SelectionManager SelectionManager.hpp "selection/SelectionManager.hpp"
-   * @brief
-   */
   class SelectionManager {
   public:
     SelectionManager(SimInfo* info);

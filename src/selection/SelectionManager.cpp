@@ -33,9 +33,9 @@
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
  *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -49,7 +49,7 @@ namespace OpenMD {
     int nStuntDoubles = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
 
     bsSelection_.resize(nStuntDoubles);
-    stuntdoubles_.resize(nStuntDoubles);
+    stuntdoubles_.resize(nStuntDoubles, NULL);
     
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
@@ -57,27 +57,27 @@ namespace OpenMD {
     Atom* atom;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
-
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
         
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+      for(atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {
 	stuntdoubles_[atom->getGlobalIndex()] = atom;
       }
-
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+      
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
 	stuntdoubles_[rb->getGlobalIndex()] = rb;
-      }
-        
-    }    
-    
+      }   
+    }
   }
-
 
   StuntDouble* SelectionManager::beginSelected(int& i) {
     i = bsSelection_.firstOnBit();
     return i == -1 ? NULL : stuntdoubles_[i];
   }
+
   StuntDouble* SelectionManager::nextSelected(int& i) {
     i = bsSelection_.nextOnBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
@@ -87,34 +87,38 @@ namespace OpenMD {
     i = bsSelection_.firstOffBit();
     return i == -1 ? NULL : stuntdoubles_[i];
   }
+
   StuntDouble* SelectionManager::nextUnSelected(int& i) {
     i = bsSelection_.nextOffBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
   }
 
-
-  SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2) {
+  SelectionManager operator| (const SelectionManager& sman1, 
+                              const SelectionManager& sman2) {
     SelectionManager result(sman1);
     result |= sman2;
     return result;
   }
-  SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2) {
+
+  SelectionManager operator& (const SelectionManager& sman1, 
+                              const SelectionManager& sman2) {
     SelectionManager result(sman1);
     result &= sman2;
     return result;
-
   }
-  SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2) {
+
+  SelectionManager operator^ (const SelectionManager& sman1, 
+                              const SelectionManager& sman2) {
     SelectionManager result(sman1);
     result ^= sman2;
     return result;
-
   }
-  SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2){
+
+  SelectionManager operator-(const SelectionManager& sman1, 
+                             const SelectionManager& sman2){
     SelectionManager result(sman1);
     result -= sman2;
     return result;
-
   }
 
 }

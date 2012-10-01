@@ -57,18 +57,19 @@ namespace OpenMD {
     RigidBody* rb;
 
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
         
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+      for(atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {
 	stuntdoubles_[atom->getGlobalIndex()] = atom;
       }
 
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
 	stuntdoubles_[rb->getGlobalIndex()] = rb;
       }
-        
-    }    
-
+    }
   }
 
   OpenMDBitSet DistanceFinder::find(const OpenMDBitSet& bs, RealType distance) {
@@ -85,6 +86,8 @@ namespace OpenMD {
       }
     }
    
+    // This will fail in parallel because i might not be on this processor.
+
     for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
       center = stuntdoubles_[i];
       centerPos = center->getPos();

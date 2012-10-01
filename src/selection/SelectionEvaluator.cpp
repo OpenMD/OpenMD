@@ -159,8 +159,7 @@ namespace OpenMD {
       case Token::expressionEnd:
         break;
       case Token::all:
-        bs = OpenMDBitSet(nStuntDouble);
-        bs.setAll();
+        bs = allInstruction();
         stack.push(bs);            
         break;
       case Token::none:
@@ -447,6 +446,33 @@ namespace OpenMD {
     return bs;
   }
 
+  OpenMDBitSet SelectionEvaluator::allInstruction() {
+    OpenMDBitSet bs(nStuntDouble);
+
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+
+    // Doing the loop insures that we're actually on this processor.
+
+    for (mol = info->beginMolecule(mi); mol != NULL; 
+         mol = info->nextMolecule(mi)) {
+
+      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+        bs.setBitOn(atom->getGlobalIndex());
+      }
+     
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
+        bs.setBitOn(rb->getGlobalIndex());
+      }
+    }
+
+    return bs;
+  }
 
   OpenMDBitSet SelectionEvaluator::hull() {
     OpenMDBitSet bs(nStuntDouble);
@@ -455,8 +481,6 @@ namespace OpenMD {
     
     return bs;
   }
-
-
 
   RealType SelectionEvaluator::getCharge(Atom* atom) {
     RealType charge =0.0;

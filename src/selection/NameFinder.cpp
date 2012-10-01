@@ -54,12 +54,10 @@ namespace OpenMD {
     children.clear();
   }
 
-
   NameFinder::NameFinder(SimInfo* info) : info_(info), root_(NULL){
     nStuntDouble_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
     loadNames();
   }
-
 
   NameFinder::~NameFinder(){
     delete root_;
@@ -79,7 +77,8 @@ namespace OpenMD {
     root_->bs.resize(nStuntDouble_);
     root_->bs.setAll(); //
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
            
       std::string molName = mol->getMoleculeName();
       TreeNode* currentMolNode = createNode(root_, molName);
@@ -92,7 +91,8 @@ namespace OpenMD {
 	currentAtomNode->bs.setBitOn(atom->getGlobalIndex());
       }
 
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
 	std::string rbName = rb->getType();
 	TreeNode* currentRbNode = createNode(currentMolNode, rbName);
             
@@ -106,11 +106,8 @@ namespace OpenMD {
 
 	  currentRbAtomNode->bs.setBitOn(atom->getGlobalIndex());
 	}
-
       }
-        
-    }    
-
+    }
   }
 
   TreeNode* NameFinder::createNode(TreeNode* parent, const std::string& name) {
@@ -236,7 +233,8 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
 
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
            
       if (isMatched(mol->getMoleculeName(), name) ) {
 	int natoms = mol->getNAtoms();
@@ -250,9 +248,7 @@ namespace OpenMD {
 	  bs.setBitOn(mol->getRigidBodyAt(internalIndex - natoms)->getGlobalIndex());
 	}
       }
-        
-    }    
-    
+    }
   }
 
   bool NameFinder::isInteger(const std::string str) {
@@ -261,8 +257,6 @@ namespace OpenMD {
 	return false;
       }
     }
-
     return true;
   }
-
 }
