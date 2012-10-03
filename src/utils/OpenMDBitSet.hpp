@@ -128,6 +128,8 @@ namespace OpenMD {
       *this &= tmp;
       return *this;
     }
+
+    OpenMDBitSet parallelReduce();
         
     bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
     friend OpenMDBitSet operator| (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);

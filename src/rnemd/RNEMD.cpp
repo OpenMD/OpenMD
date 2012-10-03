@@ -277,6 +277,7 @@ namespace OpenMD {
     // do some sanity checking
 
     int selectionCount = seleMan_.getSelectionCount();
+
     int nIntegrable = info->getNGlobalIntegrableObjects();
 
     if (selectionCount > nIntegrable) {
@@ -913,8 +914,7 @@ namespace OpenMD {
 
       if ((c > 0.81) && (c < 1.21)) {//restrict scaling coefficients
 	c = sqrt(c);
-	//std::cerr << "cold slab scaling coefficient: " << c << endl;
-	//now convert to hotBin coefficient
+
 	RealType w = 0.0;
 	if (rnemdFluxType_ ==  rnemdFullKE) {
 	  x = 1.0 + px * (1.0 - c);
@@ -952,8 +952,6 @@ namespace OpenMD {
 	    }
 	  }
 	  w = sqrt(w);
-	  // std::cerr << "xh= " << x << "\tyh= " << y << "\tzh= " << z
-	  //           << "\twh= " << w << endl;
 	  for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
 	    if (rnemdFluxType_ == rnemdFullKE) {
 	      vel = (*sdi)->getVel();
@@ -1262,9 +1260,7 @@ namespace OpenMD {
        
         if (inA) {
           hotBin.push_back(sd);
-	  //std::cerr << "before, velocity = " << vel << endl;
 	  Ph += mass * vel;
-	  //std::cerr << "after, velocity = " << vel << endl;
 	  Mh += mass;
 	  Kh += mass * vel.lengthSquare();
 	  if (rnemdFluxType_ == rnemdFullKE) {
@@ -1312,10 +1308,6 @@ namespace OpenMD {
     
     Kh *= 0.5;
     Kc *= 0.5;
-
-    // std::cerr << "Mh= " << Mh << "\tKh= " << Kh << "\tMc= " << Mc
-    // 	      << "\tKc= " << Kc << endl;
-    // std::cerr << "Ph= " << Ph << "\tPc= " << Pc << endl;
     
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Ph[0], 3, MPI::REALTYPE, MPI::SUM);
@@ -1347,8 +1339,7 @@ namespace OpenMD {
 	      if (hDenominator > 0.0) {
 		RealType h = sqrt(hNumerator / hDenominator);
 		if ((h > 0.9) && (h < 1.1)) {
-		  // std::cerr << "cold slab scaling coefficient: " << c << "\n";
-		  // std::cerr << "hot slab scaling coefficient: " << h <<  "\n";
+
 		  vector<StuntDouble*>::iterator sdi;
 		  Vector3d vel;
 		  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
@@ -1423,7 +1414,7 @@ namespace OpenMD {
 
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
-    int selei;
+    int selei(0);
     StuntDouble* sd;
     int idx;
 
@@ -1449,9 +1440,10 @@ namespace OpenMD {
              sd != NULL;
              sd = mol->nextIntegrableObject(iiter))
     */
+
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-      
+    
       idx = sd->getLocalIndex();
       
       Vector3d pos = sd->getPos();
@@ -1468,7 +1460,7 @@ namespace OpenMD {
       // The modulo operator is used to wrap the case when we are 
       // beyond the end of the bins back to the beginning.
       int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
-     
+
       RealType mass = sd->getMass();
       Vector3d vel = sd->getVel();
 
@@ -1499,7 +1491,6 @@ namespace OpenMD {
       }
     }
     
-
 #ifdef IS_MPI
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binCount[0],
 			      nBins_, MPI::INT, MPI::SUM);
@@ -1532,7 +1523,7 @@ namespace OpenMD {
 
       temp = 2.0 * binKE[i] / (binDOF[i] * PhysicalConstants::kb *
                                PhysicalConstants::energyConvert);
-
+  
       for (unsigned int j = 0; j < outputMask_.size(); ++j) {
         if(outputMask_[j]) {
           switch(j) {

@@ -43,14 +43,11 @@
 #include "primitives/Molecule.hpp"
 namespace OpenMD {
 
-
-
   IndexFinder::IndexFinder(SimInfo* info) : info_(info){
     nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
     bitSets_.resize(info_->getNGlobalMolecules());
     init();
   }
-
 
   void IndexFinder::init() {
 
@@ -61,20 +58,19 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
            
       OpenMDBitSet bs(nStuntDoubles_);
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	bs.setBitOn(atom->getGlobalIndex());
       }
-
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
 	bs.setBitOn(rb->getGlobalIndex());
       }
-
       bitSets_[mol->getGlobalIndex()] = bs;
-    }    
-
+    }
   }
 
   OpenMDBitSet IndexFinder::find(int molIndex){
@@ -86,11 +82,8 @@ namespace OpenMD {
         
     for (int i = begMolIndex; i < endMolIndex; ++i) {
       bs |= bitSets_[i];
-    }
-    
+    }    
     return bs;
   }
-
-
 }
 

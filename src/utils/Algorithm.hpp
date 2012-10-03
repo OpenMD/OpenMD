@@ -61,11 +61,17 @@ namespace OpenMD {
     return result;
   }
 
-
-
   template<typename T>
   struct logical_xor : public std::binary_function<T, T, bool> {
     T operator()(const T& x, const T& y) { return x ^ y; }
   };
-
+  
+  template<typename T>
+  struct to_bool : public std::unary_function<T, bool> {
+    bool operator()(const T& x) const {
+      return x != 0;
+    }
+  };
 }
+
+

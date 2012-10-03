@@ -545,6 +545,7 @@ namespace OpenMD {
       nTarget = (int)(precast + 0.5);
       
       for(i = 0; i < nGlobalMols; i++) {
+
         done = 0;
         loops = 0;
         
@@ -569,13 +570,15 @@ namespace OpenMD {
           // and be done with it. 
           
           if (loops > 100) {
+
             sprintf(painCave.errMsg,
-                    "I've tried 100 times to assign molecule %d to a "
-                    " processor, but can't find a good spot.\n"
-                    "I'm assigning it at random to processor %d.\n",
+                    "There have been 100 attempts to assign molecule %d to an\n"
+                    "\tunderworked processor, but there's no good place to\n"
+                    "\tleave it.  OpenMD is assigning it at random to processor %d.\n",
                     i, which_proc);
-            
+           
             painCave.isFatal = 0;
+            painCave.severity = OPENMD_INFO;
             simError();
             
             molToProcMap[i] = which_proc;
@@ -620,13 +623,14 @@ namespace OpenMD {
       }
       
       delete myRandom;
-      
+
       // Spray out this nonsense to all other processors:
       MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
     } else {
       
       // Listen to your marching orders from processor 0:
       MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
+
     }
     
     info->setMolToProcMap(molToProcMap);
@@ -792,6 +796,7 @@ namespace OpenMD {
     int beginRigidBodyIndex;
     int beginCutoffGroupIndex;
     int nGlobalAtoms = info->getNGlobalAtoms();
+    int nGlobalRigidBodies = info->getNGlobalRigidBodies();
     
     beginAtomIndex = 0;
     //rigidbody's index begins right after atom's
@@ -867,18 +872,25 @@ namespace OpenMD {
 #endif
     
     //fill molMembership
-    std::vector<int> globalMolMembership(info->getNGlobalAtoms(), 0);
+    std::vector<int> globalMolMembership(info->getNGlobalAtoms() + 
+                                         info->getNGlobalRigidBodies(), 0);
     
-    for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for(mol = info->beginMolecule(mi); mol != NULL; 
+        mol = info->nextMolecule(mi)) {
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         globalMolMembership[atom->getGlobalIndex()] = mol->getGlobalIndex();
+      }
+      for (rb = mol->beginRigidBody(ri); rb != NULL; 
+           rb = mol->nextRigidBody(ri)) {
+        globalMolMembership[rb->getGlobalIndex()] = mol->getGlobalIndex();
       }
     }
     
 #ifdef IS_MPI
-    std::vector<int> tmpMolMembership(info->getNGlobalAtoms(), 0);
+    std::vector<int> tmpMolMembership(info->getNGlobalAtoms() + 
+                                      info->getNGlobalRigidBodies(), 0);
     MPI::COMM_WORLD.Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
-                              nGlobalAtoms,
+                              nGlobalAtoms + nGlobalRigidBodies,
                               MPI::INT, MPI::SUM);
     
     info->setGlobalMolMembership(tmpMolMembership);
@@ -890,7 +902,8 @@ namespace OpenMD {
     // here the molecules are listed by their global indices.
 
     std::vector<int> nIOPerMol(info->getNGlobalMolecules(), 0);
-    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for (mol = info->beginMolecule(mi); mol != NULL;
+         mol = info->nextMolecule(mi)) {
       nIOPerMol[mol->getGlobalIndex()] = mol->getNIntegrableObjects();       
     }
     
@@ -911,7 +924,8 @@ namespace OpenMD {
     }
     
     std::vector<StuntDouble*> IOIndexToIntegrableObject(info->getNGlobalIntegrableObjects(), (StuntDouble*)NULL);
-    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for (mol = info->beginMolecule(mi); mol != NULL; 
+         mol = info->nextMolecule(mi)) {
       int myGlobalIndex = mol->getGlobalIndex();
       int globalIO = startingIOIndexForMol[myGlobalIndex];
       for (StuntDouble* sd = mol->beginIntegrableObject(ioi); sd != NULL;

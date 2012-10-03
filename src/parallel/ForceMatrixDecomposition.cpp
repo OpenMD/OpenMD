@@ -686,7 +686,8 @@ namespace OpenMD {
       
       int n = snap_->atomData.electricField.size();
       vector<Vector3d> field_tmp(n, V3Zero);
-      AtomPlanVectorColumn->scatter(atomColData.electricField, field_tmp);
+      AtomPlanVectorColumn->scatter(atomColData.electricField, 
+                                    field_tmp);
       for (int i = 0; i < n; i++)
         snap_->atomData.electricField[i] += field_tmp[i];
     }
