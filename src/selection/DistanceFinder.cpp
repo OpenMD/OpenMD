@@ -42,6 +42,10 @@
 
 #include "selection/DistanceFinder.hpp"
 #include "primitives/Molecule.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
 
   DistanceFinder::DistanceFinder(SimInfo* info) : info_(info) {
@@ -76,21 +80,53 @@ namespace OpenMD {
     StuntDouble * center;
     Vector3d centerPos;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    OpenMDBitSet bsResult(nStuntDoubles_);
+    OpenMDBitSet bsResult(nStuntDoubles_);   
     assert(bsResult.size() == bs.size());
-   
+
+#ifdef IS_MPI
+    int mol;
+    int proc;
+    RealType data[3];
+    int worldRank = MPI::COMM_WORLD.Get_rank();
+#endif
+ 
     for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
       if (stuntdoubles_[j]->isRigidBody()) {
         RigidBody* rb = static_cast<RigidBody*>(stuntdoubles_[j]);
         rb->updateAtoms();
       }
     }
-   
-    // This will fail in parallel because i might not be on this processor.
+       
+    OpenMDBitSet bsTemp(nStuntDoubles_);
+    bsTemp = bs;
+    bsTemp.parallelReduce();
 
-    for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
+    for (int i = bsTemp.firstOnBit(); i != -1; i = bsTemp.nextOnBit(i)) {
+
+      // Now, if we own stuntdouble i, we can use the position, but in
+      // parallel, we'll need to let everyone else know what that
+      // position is!
+
+#ifdef IS_MPI
+      mol = info_->getGlobalMolMembership(i);
+      proc = info_->getMolToProc(mol);
+     
+      if (proc == worldRank) {
+        center = stuntdoubles_[i];
+        centerPos = center->getPos();
+        data[0] = centerPos.x();
+        data[1] = centerPos.y();
+        data[2] = centerPos.z();          
+        MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc);
+      } else {
+        MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc);
+        centerPos = Vector3d(data);
+      }
+#else
       center = stuntdoubles_[i];
       centerPos = center->getPos();
+#endif
+      
       for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos();
 	currSnapshot->wrapVector(r);

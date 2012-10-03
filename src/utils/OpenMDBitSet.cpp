@@ -47,6 +47,9 @@
 
 #include "utils/OpenMDBitSet.hpp"
 #include "utils/Algorithm.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace OpenMD {
   int OpenMDBitSet::countBits() {
@@ -191,6 +194,34 @@ namespace OpenMD {
   bool operator== (const OpenMDBitSet & bs1, const OpenMDBitSet &bs2) {
     assert(bs1.size() == bs2.size());
     return std::equal(bs1.bitset_.begin(), bs1.bitset_.end(), bs2.bitset_.begin());
+  }  
+
+  OpenMDBitSet OpenMDBitSet::parallelReduce() {
+    OpenMDBitSet result;
+
+#ifdef IS_MPI
+
+    // This is necessary because std::vector<bool> isn't really a
+    // std::vector, so we can't pass the address of the first element
+    // to the MPI call that follows.  We first have to convert to a
+    // std::vector<int> to do the logical_or Allreduce call, then back
+    // convert it into the vector<bool>.
+
+    std::vector<int> bsInt(bitset_.begin(), bitset_.end());
+
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bsInt[0], 
+                              bsInt.size(), MPI::INT, MPI::LOR);
+
+    std::transform(bsInt.begin(), bsInt.end(), 
+                   std::back_inserter( result.bitset_ ), to_bool<int>());
+#else
+
+    // Not in MPI?  Just return a copy of the current bitset:
+    std::copy(bitset_.begin(), bitset_.end(), 
+              std::back_inserter( result.bitset_ ));
+#endif
+
+    return result;
   }
 
   //std::istream& operator>> ( std::istream& is, const OpenMDBitSet& bs) {

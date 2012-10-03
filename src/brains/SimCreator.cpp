@@ -787,6 +787,7 @@ namespace OpenMD {
     int beginRigidBodyIndex;
     int beginCutoffGroupIndex;
     int nGlobalAtoms = info->getNGlobalAtoms();
+    int nGlobalRigidBodies = info->getNGlobalRigidBodies();
     
     beginAtomIndex = 0;
     //rigidbody's index begins right after atom's
@@ -862,18 +863,25 @@ namespace OpenMD {
 #endif
     
     //fill molMembership
-    std::vector<int> globalMolMembership(info->getNGlobalAtoms(), 0);
+    std::vector<int> globalMolMembership(info->getNGlobalAtoms() + 
+                                         info->getNGlobalRigidBodies(), 0);
     
-    for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for(mol = info->beginMolecule(mi); mol != NULL; 
+        mol = info->nextMolecule(mi)) {
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         globalMolMembership[atom->getGlobalIndex()] = mol->getGlobalIndex();
+      }
+      for (rb = mol->beginRigidBody(ri); rb != NULL; 
+           rb = mol->nextRigidBody(ri)) {
+        globalMolMembership[rb->getGlobalIndex()] = mol->getGlobalIndex();
       }
     }
     
 #ifdef IS_MPI
-    std::vector<int> tmpMolMembership(info->getNGlobalAtoms(), 0);
+    std::vector<int> tmpMolMembership(info->getNGlobalAtoms() + 
+                                      info->getNGlobalRigidBodies(), 0);
     MPI::COMM_WORLD.Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
-                              nGlobalAtoms,
+                              nGlobalAtoms + nGlobalRigidBodies,
                               MPI::INT, MPI::SUM);
     
     info->setGlobalMolMembership(tmpMolMembership);
@@ -885,7 +893,8 @@ namespace OpenMD {
     // here the molecules are listed by their global indices.
 
     std::vector<int> nIOPerMol(info->getNGlobalMolecules(), 0);
-    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for (mol = info->beginMolecule(mi); mol != NULL;
+         mol = info->nextMolecule(mi)) {
       nIOPerMol[mol->getGlobalIndex()] = mol->getNIntegrableObjects();       
     }
     
@@ -906,7 +915,8 @@ namespace OpenMD {
     }
     
     std::vector<StuntDouble*> IOIndexToIntegrableObject(info->getNGlobalIntegrableObjects(), (StuntDouble*)NULL);
-    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for (mol = info->beginMolecule(mi); mol != NULL; 
+         mol = info->nextMolecule(mi)) {
       int myGlobalIndex = mol->getGlobalIndex();
       int globalIO = startingIOIndexForMol[myGlobalIndex];
       for (StuntDouble* sd = mol->beginIntegrableObject(ioi); sd != NULL;

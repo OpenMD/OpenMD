@@ -340,7 +340,6 @@ src/primitives/UreyBradleyBend.cpp
 src/perturbations/ElectricField.cpp
 src/restraints/MolecularRestraint.cpp
 src/restraints/ObjectRestraint.cpp
-src/selection/DistanceFinder.cpp
 src/selection/HullFinder.cpp
 src/selection/IndexFinder.cpp
 src/selection/NameFinder.cpp
@@ -378,7 +377,6 @@ src/types/TorsionStamp.cpp
 src/types/ZconsStamp.cpp
 src/utils/ElementsTable.cpp
 src/utils/MoLocator.cpp
-src/utils/OpenMDBitSet.cpp
 src/utils/PropertyMap.cpp
 src/utils/StringTokenizer.cpp
 src/utils/StringUtils.cpp
@@ -419,8 +417,10 @@ src/parallel/ForceDecomposition.cpp
 src/parallel/ForceMatrixDecomposition.cpp
 src/restraints/RestraintForceManager.cpp
 src/restraints/ThermoIntegrationForceManager.cpp
+src/selection/DistanceFinder.cpp
 src/utils/ProgressBar.cpp
 src/utils/simError.cpp
+src/utils/OpenMDBitSet.cpp
 src/optimization/Problem.cpp
 )
 
