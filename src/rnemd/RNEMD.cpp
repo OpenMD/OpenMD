@@ -1510,24 +1510,27 @@ namespace OpenMD {
       den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
         / currentSnap_->getVolume() ;
 
-      temp = 2.0 * binKE[i] / (binDOF[i] * PhysicalConstants::kb *
-                               PhysicalConstants::energyConvert);
-  
-      for (unsigned int j = 0; j < outputMask_.size(); ++j) {
-        if(outputMask_[j]) {
-          switch(j) {
-          case Z:
-            dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(z);
-            break;
-          case TEMPERATURE:
-            dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(temp);
-            break;
-          case VELOCITY:
-            dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(vel);
-            break;
-          case DENSITY:
-            dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
-            break;
+      if (binCount[i] > 0) {
+        // only add values if there are things to add
+        temp = 2.0 * binKE[i] / (binDOF[i] * PhysicalConstants::kb *
+                                 PhysicalConstants::energyConvert);
+        
+        for (unsigned int j = 0; j < outputMask_.size(); ++j) {
+          if(outputMask_[j]) {
+            switch(j) {
+            case Z:
+              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(z);
+              break;
+            case TEMPERATURE:
+              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(temp);
+              break;
+            case VELOCITY:
+              dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(vel);
+              break;
+            case DENSITY:
+              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
+              break;
+            }
           }
         }
       }
