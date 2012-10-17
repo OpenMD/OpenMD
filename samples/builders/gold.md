@@ -7,7 +7,8 @@ component{
   nMol = 1;
 }
 
-forceField = "SC";
+forceField = "SuttonChen";
+forceFieldVariant = "SC";
 targetTemp = 1000.0;
 
 ensemble = "NVE";

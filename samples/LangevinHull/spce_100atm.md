@@ -1,4 +1,4 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 
 #include "water.md"
@@ -10,7 +10,7 @@ component{
 
 ensemble = "LangevinHull";
 forceField = "Amber";
-electrostaticSummationMethod = "shifted_force";
+cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 dampingAlpha = 0.20;
 cutoffRadius = 9.0;

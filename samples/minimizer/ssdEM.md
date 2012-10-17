@@ -1,4 +1,4 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 #include "water.md"
 
@@ -16,8 +16,7 @@ minimizer {
   maxIterations = 500;
 }
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+cutoffMethod = "switched";
 cutoffRadius = 9.0;
 switchingRadius = 7.0;
   </MetaData>

@@ -1,4 +1,4 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 #include "water.md"
 #include "metals.md"
@@ -23,7 +23,7 @@ sampleTime = 1e4;
 statusTime=10;
 seed = 985456376;
 
-electrostaticSummationMethod = "shifted_force";
+cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 cutoffRadius = 12;
 switchingRadius = 12;
