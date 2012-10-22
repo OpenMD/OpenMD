@@ -44,7 +44,6 @@
  * @file MoleculeCreator.cpp
  * @author tlin
  * @date 11/04/2004
- * @time 13:44am
  * @version 1.0
  */
 

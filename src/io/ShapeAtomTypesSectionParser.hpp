@@ -50,8 +50,7 @@
 namespace OpenMD {
   
   /**
-   * @class ShapeAtomTypesSectionParser ShapesAtomTypesSectionParser.hpp 
-   *        "io/ShapesAtomTypesSectionParser.hpp"
+   * @class ShapeAtomTypesSectionParser 
    */
   class ShapeAtomTypesSectionParser : public SectionParser {
 

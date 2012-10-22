@@ -44,7 +44,6 @@
  * @file ForceField.hpp
  * @author tlin
  * @date 11/04/2004
- * @time 22:51am
  * @version 1.0
  */
   

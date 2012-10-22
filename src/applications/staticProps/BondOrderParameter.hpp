@@ -77,11 +77,12 @@ namespace OpenMD {
    * distance-dependent weighting as used in the second reference above.
    *
    * The selection script can be utilized to look at specific types of
-   * central atoms.  A dynamic selector can also be utilized.  By default, 
-   * this class computes the Q_{l} and \hat{W}_{l} parameters up to l = 12.
-   * The completed configurational averages of these values as
-   * well as the distributions of atomic q_{l} and \hat{w}_{l} values
-   * are then placed in .boq and .bow files.
+   * central atoms.  A dynamic selector can also be utilized.  By
+   * default, this class computes the \f[ Q_{l} \f] and 
+   * \f[ \hat{W}_{l} \f] parameters up to \f[ l = 12 \f].  The completed
+   * configurational averages of these values as well as the
+   * distributions of atomic \f[ q_{l} \f] and \f[ \hat{w}_{l} \f]
+   * values are then placed in .boq and .bow files.
    */
   class BondOrderParameter : public StaticAnalyser{
   public:

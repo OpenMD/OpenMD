@@ -61,7 +61,8 @@ using namespace std;
 namespace OpenMD {
 
   /**
-   * @class InteractionManager InteractionManager is responsible for
+   * @class InteractionManager 
+   * InteractionManager is responsible for
    * keeping track of the non-bonded interactions (C++)
    */
   class InteractionManager {

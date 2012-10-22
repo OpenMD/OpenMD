@@ -92,7 +92,7 @@ namespace OpenMD {
     int getSize();
     /**
      * Changes the size of this DataStorage.
-     * @param size new size of this DataStorage
+     * @param newSize new size of this DataStorage
      */
     void resize(int newSize);
     /**

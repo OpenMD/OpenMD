@@ -55,7 +55,7 @@
 /**
  * @class SimplePreprocessor
  * @brief A simple preprocessor.
- * @note only supports #include #ifdef, #ifndef, #endif, #define and #undef, c-like multiple line
+ * @note only supports \#include \#ifdef, \#ifndef, \#endif, \#define and \#undef, c-like multiple line
  *  comment is not supported, macro substitute is not supported.
  */
 namespace OpenMD { 

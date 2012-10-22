@@ -44,7 +44,6 @@
  * @file NVE.hpp
  * @author tlin
  * @date 11/08/2004
- * @time 13:25am
  * @version 1.0
  */
 

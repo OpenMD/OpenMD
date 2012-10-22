@@ -44,7 +44,6 @@
  * @file RNEMD.hpp
  * @author gezelter
  * @date 03/13/2009
- * @time 15:56pm
  * @version 1.0
  */
 

@@ -64,24 +64,26 @@ namespace OpenMD {
    *    P. J. Steinhart, D. R. Nelson, and M. Ronchetti, 
    *    Phys. Rev. B, 28, 784 (1983).
    *
-   * A somewhat more useful reference which has formulae for these order
-   * parameters for individual atoms is:
+   * A somewhat more useful reference which has formulae for these
+   * order parameters for individual atoms is:
    *
    *   "Numerical calculation of the rate of crystal nucleation in a
-   *    Lennard-Jones system at moderate undercooling," by
-   *    Pieter Rein ten Wolde, Maria J. Ruiz-Montero, and Daan Frenkel,
+   *    Lennard-Jones system at moderate undercooling," by Pieter Rein
+   *    ten Wolde, Maria J. Ruiz-Montero, and Daan Frenkel,
    *    J. Chem. Phys. 104, pp. 9932-9947 (1996).
    *
-   * Note that this version uses a single cutoff radius to decide 
+   * Note that this version uses a single cutoff radius to decide
    * membership in the list of neighbors, and does not have use a
-   * distance-dependent weighting as used in the second reference above.
+   * distance-dependent weighting as used in the second reference
+   * above.
    *
    * The selection script can be utilized to look at specific types of
-   * central atoms.  A dynamic selector can also be utilized.  By default, 
-   * this class computes the Q_{l} and \hat{W}_{l} parameters up to l = 12.
-   * The completed configurational averages of these values as
-   * well as the distributions of atomic q_{l} and \hat{w}_{l} values
-   * are then placed in .boq and .bow files.
+   * central atoms.  A dynamic selector can also be utilized.  By
+   * default, this class computes the \f[ Q_{l} \f] and 
+   * \f[ \hat{W}_{l} \f] parameters up to \f[ l = 12 \f].  The 
+   * completed configurational averages of these values as well as the
+   * distributions of atomic \f[ q_{l} \f] and \f[ \hat{w}_{l} \f]
+   * values are then placed in .boq and .bow files.
    */
   class BOPofR : public StaticAnalyser{
   public:
@@ -106,8 +108,8 @@ namespace OpenMD {
     static const int lMax_ = 6;
     int frameCounter_;
     int nBins_;
-	RealType len_;
-	RealType deltaR_;
+    RealType len_;
+    RealType deltaR_;
     
     std::map<std::pair<int,int>,int> m2Min;
     std::map<std::pair<int,int>,int> m2Max;

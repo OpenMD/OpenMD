@@ -85,7 +85,7 @@ template <typename T> inline T mod(T x, T m)
  *   \frac{\alpha^\nu}{\nu!}
  * \f]
  * @param n - principal quantum number
- * @param alpha - Slater exponent 
+ * @param a - Slater exponent 
  * @return the value of Rosen's A integral
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
@@ -510,7 +510,7 @@ inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n, RealType R)
 
 /**
  * @brief Calculates a Slater-type orbital exponent based on the hardness parameters
- * @param Hardness: chemical hardness in atomic units
+ * @param hardness: chemical hardness in atomic units
  * @param        n: principal quantum number
  * @note Modified for use with OpenMD by Gezelter and Michalka.
  */

@@ -52,7 +52,8 @@
 namespace OpenMD {
 
   /**
-   * @class RandNumGen a random number generator class
+   * @class RandNumGen 
+   * @brief a random number generator class
    */
   class RandNumGen{
   public:

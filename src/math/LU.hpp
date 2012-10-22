@@ -267,8 +267,8 @@ int LUFactorLinearSystem(MatrixType& A, int *index, int size,
  * lower triangular matrix and U is upper triangular matrix. 
  * @param A input square matrix
  * @param index pivot indices
+ * @param x vector
  * @param size size of the matrix and temporary arrays
- * @param tmpSize temporary array
  * @return true if inverse is computed, otherwise return false
  * @note A=LU and index[] are generated from method LUFactorLinearSystem). 
  * Also, solution vector is written directly over input load vector.

@@ -44,7 +44,6 @@
  * @file Snapshot.cpp
  * @author tlin
  * @date 11/11/2004
- * @time 10:56am
  * @version 1.0
  */
 

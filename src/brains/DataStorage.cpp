@@ -44,7 +44,6 @@
  * @file DataStorage.cpp
  * @author tlin
  * @date 10/26/2004
- * @time 11:56am
  * @version 1.0
  */
 

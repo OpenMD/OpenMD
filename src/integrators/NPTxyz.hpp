@@ -44,7 +44,6 @@
  * @file NPTxyz.hpp
  * @author tlin
  * @date 11/19/2004
- * @time 4:33pm
  * @version 1.0
  */
 

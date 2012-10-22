@@ -56,7 +56,7 @@ namespace OpenMD {
    * Remove all leading spaces in-place. The supplied predicate is used to determine which 
    * characters are considered spaces
    * @param str An input sequence
-   * @param IsSpace An unary predicate identifying spaces 
+   * @param pred The unary predicate identifying spaces
    *
    * @code
    * std::string str = "  acb  trimLeftIf test case"
@@ -65,8 +65,8 @@ namespace OpenMD {
    * 
    * @endcode
    */
-  template<typename Predict>     
-  void trimLeftIf(std::string& str, Predict pred) {
+  template<typename P>     
+  void trimLeftIf(std::string& str, P pred) {
     std::string::iterator i = str.begin();
 
     for (; i != str.end(); ++i) {
@@ -82,9 +82,10 @@ namespace OpenMD {
    * Remove all trailing spaces in-place. The supplied predicate is used to determine which 
    * characters are considered spaces
    * @param str An input sequence 
+   * @param pred The unary predicate identifying spaces
    */
-  template<typename Predict>     
-  void trimRightIf(std::string& str, Predict pred) {
+  template<typename P>     
+  void trimRightIf(std::string& str, P pred) {
     std::string::iterator i = str.end();
 
     for (; i != str.begin();) {
@@ -101,9 +102,10 @@ namespace OpenMD {
    *Remove all leading and trailing spaces in-place. The supplied predicate is used to determine 
    * which characters are considered spaces
    * @param str An input sequence
+   * @param pred The unary predicate identifying spaces
    */
-  template<typename Predict>     
-  void trimIf(std::string& str, Predict pred) {
+  template<typename P>     
+  void trimIf(std::string& str, P pred) {
     trimLeftIf(str, pred);
     trimRightIf(str, pred);        
   }
@@ -112,10 +114,11 @@ namespace OpenMD {
    * Remove all leading spaces from the input. The supplied predicate is used to determine 
    * which characters are considered spaces
    * @return A trimmed copy of the input
-   * @param input An input sequence 
+   * @param input An input sequence
+   * @param pred The unary predicate identifying spaces
    */
-  template<typename Predict>
-  std::string trimLeftCopyIf(const std::string& input, Predict pred) {
+  template<typename P>
+  std::string trimLeftCopyIf(const std::string& input, P pred) {
     std::string result(input);
     trimLeftIf(result, pred);
     return result;
@@ -126,9 +129,10 @@ namespace OpenMD {
    * which characters are considered spaces
    * @return A trimmed copy of the input
    * @param input An input sequence
+   * @param pred The unary predicate identifying spaces
    */
-  template<typename Predict>
-  std::string trimRightCopyIf(const std::string& input, Predict pred) {
+  template<typename P>
+  std::string trimRightCopyIf(const std::string& input, P pred) {
     std::string result(input);
     trimRightIf(result, pred);
     return result;
@@ -139,9 +143,10 @@ namespace OpenMD {
    * determine which characters are considered spaces
    * @return A trimmed copy of the input
    * @param input An input sequence
+   * @param pred The unary predicate identifying spaces
    */
-  template<typename Predict>     
-  std::string trimCopyIf(const std::string& input, Predict pred) {
+  template<typename P>     
+  std::string trimCopyIf(const std::string& input, P pred) {
     std::string result(input);
     trimIf(result, pred);
     return result;

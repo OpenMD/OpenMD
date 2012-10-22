@@ -157,8 +157,8 @@ int main(int argc, char *argv []) {
 
   // Calculate lattice constant (in Angstroms)
 
-  RealType avgMass = getMolMass(oldInfo->getMoleculeStamp(0),
-                                  oldInfo->getForceField());
+  RealType avgMass = MoLocator::getMolMass(oldInfo->getMoleculeStamp(0),
+                                           oldInfo->getForceField());
 
   latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
 			(RealType)(1.0 / 3.0));

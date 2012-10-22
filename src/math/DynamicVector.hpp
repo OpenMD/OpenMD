@@ -94,6 +94,7 @@ namespace OpenMD {
        *  @brief  Create a %DynamicVector with copies of an exemplar element.
        *  @param  n  The number of elements to initially create.
        *  @param  value  An element to copy.
+       *  @param  alloc  The allocator_type to use
        *
        *  This constructor fills the %DynamicVector with @a n copies of @a value.
        */

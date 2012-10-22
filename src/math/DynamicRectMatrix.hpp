@@ -233,7 +233,7 @@ namespace OpenMD {
     /**
      * Tests if this matrix is identical to matrix m
      * @return true if this matrix is equal to the matrix m, return false otherwise
-     * @m matrix to be compared
+     * @param m matrix to be compared
      *
      * @todo replace operator == by template function equal
      */
@@ -250,7 +250,7 @@ namespace OpenMD {
     /**
      * Tests if this matrix is not equal to matrix m
      * @return true if this matrix is not equal to the matrix m, return false otherwise
-     * @m matrix to be compared
+     * @param m matrix to be compared
      */
     bool operator !=(const DynamicRectMatrix<Real> m) {
       return !(*this == m);

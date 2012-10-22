@@ -44,7 +44,6 @@
  * @file PropertyMap.hpp
  * @author tlin
  * @date 09/21/2004
- * @time 9:20am
  * @version 1.0
  */
  

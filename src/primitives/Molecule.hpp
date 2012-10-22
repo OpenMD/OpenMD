@@ -115,7 +115,7 @@ namespace OpenMD{
     
     /**
      * Sets the global index of this molecule.
-     * @param new global index to be set
+     * @param index new global index to be set
      */
     void setGlobalIndex(int index) {
       globalIndex_ = index;

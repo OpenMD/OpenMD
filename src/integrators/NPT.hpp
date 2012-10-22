@@ -44,7 +44,6 @@
  * @file NPT.hpp
  * @author tlin
  * @date 11/19/2004
- * @time 13:25am
  * @version 1.0
  */
 

@@ -111,7 +111,7 @@ namespace OpenMD {
 
   /**
    * Convert a variable to a string
-   * @param T data type
+   * @tparam T data type
    * @param v data to be converted
    * @return a string
    */

@@ -58,7 +58,8 @@ namespace OpenMD {
     calcRef();
   }
   
-  void MoLocator::placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol){
+  void MoLocator::placeMol( const Vector3d& offset, const Vector3d& ort, 
+                            Molecule* mol) {
 
     Vector3d newCoor;
     Vector3d curRefCoor;  
@@ -66,8 +67,9 @@ namespace OpenMD {
     
     if(mol->getNIntegrableObjects() != nIntegrableObjects){
       sprintf( painCave.errMsg,
-               "MoLocator error.\n"
-               "  The number of integrable objects of MoleculeStamp is not the same as  that of Molecule\n");
+               "MoLocator::placeMol error.\n"
+               "\tThe number of integrable objects of MoleculeStamp is not\n"
+               "\tthe same as that of Molecule\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -113,9 +115,9 @@ namespace OpenMD {
       
       if( !currAtomStamp->havePosition() ){
         sprintf( painCave.errMsg,
-                 "MoLocator error.\n"
-                 "  Component %s, atom %s does not have a position specified.\n"
-                 "  This means MoLocator cannot initalize it's position.\n",
+                 "MoLocator::calcRef error.\n"
+                 "\tComponent %s, atom %s does not have a position specified.\n"
+                 "\tThis means MoLocator cannot initalize it's position.\n",
                  myStamp->getName().c_str(),
                  currAtomStamp->getType().c_str());
         
@@ -178,13 +180,13 @@ namespace OpenMD {
     
     refMolCom /= molMass;
     
-    //move the reference center of mass to (0,0,0) and adjust the reference coordinate 
-    //of the integrabel objects
+    //move the reference center of mass to (0,0,0) and adjust the
+    //reference coordinate of the integrabel objects
     for(int i = 0; i < nIntegrableObjects; i++)
       refCoords[i] -= refMolCom;
   }
   
-  RealType getAtomMass(const std::string& at, ForceField* myFF) {
+  RealType MoLocator::getAtomMass(const std::string& at, ForceField* myFF) {
     RealType mass;
     AtomType* atomType= myFF->getAtomType(at);
     if (atomType != NULL) {
@@ -196,7 +198,7 @@ namespace OpenMD {
     return mass;
   }
   
-  RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
+  RealType MoLocator::getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
     unsigned int nAtoms;
     RealType totMass = 0;
     nAtoms = molStamp->getNAtoms();
@@ -207,14 +209,14 @@ namespace OpenMD {
     }
     return totMass;
   }
-  RotMat3x3d latVec2RotMat(const Vector3d& lv){
+
+  RotMat3x3d MoLocator::latVec2RotMat(const Vector3d& lv){
     
     RealType theta =acos(lv[2]);
     RealType phi = atan2(lv[1], lv[0]);
     RealType psi = 0;
     
-    return RotMat3x3d(phi, theta, psi);
-    
+    return RotMat3x3d(phi, theta, psi);    
   }
 }
 

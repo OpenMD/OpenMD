@@ -107,7 +107,7 @@ namespace OpenMD{
 
     /**
      * Sets the global index of this stuntDouble.
-     * @param new global index to be set
+     * @param index new global index to be set
      */
     void setGlobalIndex(int index) {
       globalIndex_ = index;
@@ -904,7 +904,7 @@ namespace OpenMD{
     /**
      * Sets  the previous fluctuating charge of this stuntDouble
      * @param charge  new fluctuating charge 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void setPrevFlucQPos(RealType charge) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_] = charge;
@@ -922,7 +922,7 @@ namespace OpenMD{
      * Sets  the fluctuating charge of this stuntDouble in specified snapshot
      * @param charge fluctuating charge to be set 
      * @param snapshotNo 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void setFlucQPos(RealType charge, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] = charge;
@@ -931,7 +931,7 @@ namespace OpenMD{
     /**
      * Adds fluctuating charge into the previous fluctuating charge of this stuntDouble
      * @param charge  new fluctuating charge 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void addPrevFlucQPos(RealType charge) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_] += charge;
@@ -947,9 +947,9 @@ namespace OpenMD{
 
     /**
      * Adds fluctuating charge into the fluctuating charge of this stuntDouble in specified snapshot
-     * @param value fluctuating charge to be add 
+     * @param charge fluctuating charge to be add 
      * @param snapshotNo 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void addflucQPos(RealType charge, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] += charge;
@@ -984,7 +984,7 @@ namespace OpenMD{
     /**
      * Sets  the previous charge velocity of this stuntDouble
      * @param cvel  new charge velocity 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void setPrevFlucQVel(RealType cvel) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_] = cvel;
@@ -1002,7 +1002,7 @@ namespace OpenMD{
      * Sets  the charge velocity of this stuntDouble in specified snapshot
      * @param cvel charge velocity to be set 
      * @param snapshotNo 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void setFlucQVel(RealType cvel, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] = cvel;
@@ -1011,7 +1011,7 @@ namespace OpenMD{
     /**
      * Adds charge velocity into the previous charge velocity of this stuntDouble
      * @param cvel  new charge velocity 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void addPrevFlucQVel(RealType cvel) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_] += cvel;
@@ -1027,9 +1027,9 @@ namespace OpenMD{
 
     /**
      * Adds charge velocity into the charge velocity of this stuntDouble in specified snapshot
-     * @param value charge velocity to be add 
+     * @param cvel charge velocity to be add 
      * @param snapshotNo 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void addflucQVel(RealType cvel, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] += cvel;
@@ -1064,7 +1064,7 @@ namespace OpenMD{
     /**
      * Sets  the previous charge force of this stuntDouble
      * @param cfrc  new charge force 
-     * @see #getflucQFrc
+     * @see #getFlucQFrc
      */         
     void setPrevFlucQFrc(RealType cfrc) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_] = cfrc;
@@ -1082,7 +1082,7 @@ namespace OpenMD{
      * Sets  the charge force of this stuntDouble in specified snapshot
      * @param cfrc charge force to be set 
      * @param snapshotNo 
-     * @see #getflucQFrc
+     * @see #getFlucQFrc
      */         
     void setFlucQFrc(RealType cfrc, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] = cfrc;
@@ -1090,8 +1090,8 @@ namespace OpenMD{
 
     /**
      * Adds charge force into the previous charge force of this stuntDouble
-     * @param cfrc  new charge force 
-     * @see #getflucQFrc
+     * @param cfrc   charge force to be added 
+     * @see #getFlucQFrc
      */         
     void addPrevFlucQFrc(RealType cfrc) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_] += cfrc;
@@ -1099,7 +1099,7 @@ namespace OpenMD{
        
     /**
      * Adds charge force into the current charge force of this stuntDouble
-     * @param cfrc  new charge force 
+     * @param cfrc   charge force to be added 
      */         
     void addFlucQFrc(RealType cfrc) {
       ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQFrc[localIndex_] += cfrc;
@@ -1107,9 +1107,9 @@ namespace OpenMD{
 
     /**
      * Adds charge force into the charge force of this stuntDouble in specified snapshot
-     * @param value charge force to be add 
+     * @param cfrc charge force to be added
      * @param snapshotNo 
-     * @see #getflucQFrc
+     * @see #getFlucQFrc
      */         
     void addflucQFrc(RealType cfrc, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] += cfrc;

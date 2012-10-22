@@ -260,10 +260,10 @@ namespace OpenMD {
   
   /**
    *    memparse - parse a string with mem suffixes into a number
-   *    @ptr: Where parse begins
-   *    @retptr: (output) Pointer to next char after parse completes
+   *    @param ptr: Where parse begins
+   *    @param retptr: (output) Pointer to next char after parse completes
    *
-   *    Parses a string into a number.  The number stored at @ptr is
+   *    Parses a string into a number.  The number stored at @param ptr is
    *    potentially suffixed with %K (for kilobytes, or 1024 bytes),
    *    %M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
    *    1073741824).  If the number is suffixed with K, M, or G, then

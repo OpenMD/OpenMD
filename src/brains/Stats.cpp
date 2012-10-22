@@ -44,7 +44,6 @@
  * @file Stats.cpp
  * @author tlin
  * @date 11/04/2004
- * @time 14:26am
  * @version 1.0
  */
 

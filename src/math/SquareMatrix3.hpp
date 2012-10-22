@@ -125,7 +125,7 @@ namespace OpenMD {
      * Sets this matrix to a rotation matrix by three euler angles
      * @param phi
      * @param theta
-     * @psi theta
+     * @param psi
      */
     void setupRotMat(Real phi, Real theta, Real psi) {
       Real sphi, stheta, spsi;

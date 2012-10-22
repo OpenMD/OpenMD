@@ -159,7 +159,7 @@ namespace OpenMD {
      * this Polynomial.
      * @return the coefficient associated with the given power for
      * this Polynomial
-     * @exponent exponent of any term in this Polynomial
+     * @param exponent exponent of any term in this Polynomial
      */
     Real getCoefficient(ExponentType exponent) {
       iterator i = polyPairMap_.find(exponent);

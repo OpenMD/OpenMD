@@ -98,8 +98,7 @@ namespace OpenMD{
 
     /**
      * Returns the gradient of this stuntdouble
-     * @return the inertia tensor of this stuntdouble
-     * @see #setI
+     * @return the gradient of this stuntdouble
      */ 
     virtual std::vector<RealType> getGrad();
 
@@ -151,7 +150,7 @@ namespace OpenMD{
     /** 
      * Returns the atoms of this rigid body
      * @return the atoms of this rigid body in a vector
-     * @deprecate
+     * @deprecated
      */           
     std::vector<Atom*> getAtoms() {
       return atoms_;

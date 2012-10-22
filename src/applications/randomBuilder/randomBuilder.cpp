@@ -231,8 +231,8 @@ int main(int argc, char *argv []) {
   for (int i=0; i < nComponents; i++) {
     molFractions[i] = (RealType)(nMol.at(i))/(RealType)nSites;
     totalMolecules += nMol.at(i);
-    molecularMasses.push_back(getMolMass(oldInfo->getMoleculeStamp(i),
-                                         oldInfo->getForceField()));
+    molecularMasses.push_back(MoLocator::getMolMass(oldInfo->getMoleculeStamp(i),
+                                                    oldInfo->getForceField()));
     totalMass += (RealType)(nMol.at(i)) * molecularMasses.at(i);
   }
   RealType avgMass = totalMass / (RealType) totalMolecules;

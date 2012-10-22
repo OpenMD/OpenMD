@@ -44,9 +44,9 @@
  * @file SnapshotManager.hpp
  * @author tlin
  * @date 10/20/2004
- * @time 23:56am
  * @version 1.0
  */
+
 #ifndef BRAINS_SNAPSHOTMANAGER_HPP
 #define BRAINS_SNAPSHOTMANAGER_HPP
 

@@ -70,12 +70,16 @@ namespace OpenMD {
    *
    * This torsion potential has the form:
    * 
-   *  Vtors = c0 + c1*(1+cos(phi)) + c2*(1-cos(2*phi)) + c3*(1+cos(3*phi))
+   *  \f[ 
+         V_{tors} = c_0 + c_1*(1+\cos(\phi)) + c_2*(1-\cos(2*\phi)) + 
+                    c_3*(1+\cos(3*\phi)) 
+       \f]
    *
    * Notes: 
    * 
    * 1) This is very similar to the OplsTorsionType with coefficients
-   *    defined without the factor of 1/2, and an extra c0 term.
+   *    defined without the factor of 1/2, and an extra \f$c_0\f$ term.
+   *
    * 2) Coefficients are assumed to be in kcal / mol, although the papers
    *    usually give the parameters in units of K.
    */

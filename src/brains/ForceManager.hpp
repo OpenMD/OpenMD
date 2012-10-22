@@ -44,7 +44,6 @@
  * @file ForceManager.hpp
  * @author tlin
  * @date 11/09/2004
- * @time 10:36am
  * @version 1.0
  */
 

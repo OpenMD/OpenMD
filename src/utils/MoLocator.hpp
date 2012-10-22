@@ -41,7 +41,6 @@
  */
  
 #ifndef UTILS_MOLOCATOR_HPP
-
 #define UTILS_MOLOCATOR_HPP
 
 #include <vector>
@@ -53,25 +52,26 @@
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
 #include "brains/ForceField.hpp"
+
 namespace OpenMD {
-  //convert lattice vector to rotation matrix
-  RealType getAtomMass(const std::string& at, ForceField* myFF);
-  RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
-  RotMat3x3d latVec2RotMat(const Vector3d& lv);
+
   class MoLocator{
   public:
     MoLocator( MoleculeStamp* theStamp, ForceField* theFF);
     void placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol);
+    static RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
+
   private:
     void calcRef( void );
+    static RealType getAtomMass(const std::string& at, ForceField* myFF);
+    RotMat3x3d latVec2RotMat(const Vector3d& lv); ///< convert lattice vector to rotation matrix
+    
     MoleculeStamp* myStamp;
 
     ForceField* myFF;
     std::vector<Vector3d> refCoords;
     int nIntegrableObjects;
-
   };
-
 }
 #endif
 

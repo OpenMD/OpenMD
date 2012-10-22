@@ -51,7 +51,8 @@
 namespace OpenMD {
   
   /**
-   * @class ParallelRandNumGen a parallel random number generator
+   * @class ParallelRandNumGen 
+   * @brief a parallel random number generator
    * @note use SeqRandNumGen if you want a non-parallel random number
    * generator.
    */

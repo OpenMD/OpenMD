@@ -44,7 +44,6 @@
  * @file ForceManager.cpp
  * @author tlin
  * @date 11/09/2004
- * @time 10:39am
  * @version 1.0
  */
 

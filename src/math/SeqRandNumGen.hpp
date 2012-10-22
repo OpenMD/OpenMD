@@ -51,7 +51,8 @@
 namespace OpenMD {
 
   /**
-   * @class SeqRandNumGen a sequential random number generator
+   * @class SeqRandNumGen 
+   * @brief a sequential random number generator
    */
   class SeqRandNumGen : public RandNumGen{
   public:

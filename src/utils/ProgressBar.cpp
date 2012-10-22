@@ -52,6 +52,7 @@
 #else
 #include <cstdio>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 
 #ifdef IS_MPI

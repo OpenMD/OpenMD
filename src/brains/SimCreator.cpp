@@ -44,7 +44,6 @@
  * @file SimCreator.cpp
  * @author tlin
  * @date 11/03/2004
- * @time 13:51am
  * @version 1.0
  */
 #include <exception>

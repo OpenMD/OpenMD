@@ -42,9 +42,10 @@
 #ifndef APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 #define APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 
-namespace OpenMD {
 #include <string>
 #include "brains/SimInfo.hpp"
+
+namespace OpenMD {
 
   class StaticAnalyser{
   public:

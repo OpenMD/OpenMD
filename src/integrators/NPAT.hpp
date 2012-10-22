@@ -44,7 +44,6 @@
  * @file NPAT.hpp
  * @author tlin
  * @date 11/19/2004
- * @time 4:27pm
  * @version 1.0
  */
 

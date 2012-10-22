@@ -25,7 +25,6 @@ GNU General Public License for more details.
  * @file ElementsTable.cpp
  * @author gezelter
  * @date 12/21/2007
- * @time 11:30am
  * @version 1.0
  */
 

@@ -45,7 +45,6 @@
  * @brief
  * @author tlin
  * @date 09/20/2004
- * @time 9:30am
  * @version 1.0
  */
  
@@ -133,7 +132,7 @@ namespace OpenMD{
     ElemDataType& getData()  {return data_;}
     /**
      * Sets POD data
-     * @data POD data to be set
+     * @param data POD data to be set
      */
     void setData(const ElemDataType& data) { data_ = data;  }
 
@@ -180,8 +179,8 @@ namespace OpenMD{
    * @class STLContainerTypeData 
    * @brief STL container type generic data which is associated with an id
    *
-   * @template ContainerType
-   * @template ElemDataType
+   * \tparam ContainerType
+   * \tparam ElemDataType
    */
   template <typename ElemDataType > 
   class VectorTypeData : public GenericData {

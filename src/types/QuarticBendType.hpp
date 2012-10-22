@@ -41,7 +41,7 @@
  */
  
 /**
- * @file QuadraticBendType.hpp
+ * @file QuarticBendType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0

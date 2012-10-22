@@ -44,7 +44,6 @@
  * @file NumericConstant.hpp
  * @author teng lin
  * @date 11/17/2004
- * @time 23:33am
  * @version 1.0
  */ 
 

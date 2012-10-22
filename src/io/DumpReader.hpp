@@ -44,7 +44,6 @@
  * @file DumpReader.hpp 
  * @author tlin 
  * @date 11/15/2004 
- * @time 09:25am 
  * @version 2.0 
  */ 
  

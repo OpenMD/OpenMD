@@ -91,13 +91,9 @@ namespace OpenMD{
     /**
      * Constructor of SimInfo
      *
-     * @param molStampPairs MoleculeStamp Array. The first element of
-     * the pair is molecule stamp, the second element is the total
-     * number of molecules with the same molecule stamp in the system
+     * @param ff pointer to a concrete ForceField instance
      *
-     * @param ff pointer of a concrete ForceField instance
-     *
-     * @param simParams 
+     * @param simParams pointer to the simulation parameters in a Globals object
      */
     SimInfo(ForceField* ff, Globals* simParams);
     virtual ~SimInfo();
@@ -108,7 +104,7 @@ namespace OpenMD{
      * @return return true if adding successfully, return false if the
      * molecule is already in SimInfo
      *
-     * @param mol molecule to be added
+     * @param mol Molecule to be added
      */
     bool addMolecule(Molecule* mol);
 
@@ -385,7 +381,6 @@ namespace OpenMD{
 
     /** 
      * Sets GlobalGroupMembership
-     * @see #SimCreator::setGlobalIndex
      */  
     void setGlobalGroupMembership(const vector<int>& globalGroupMembership) {
       assert(globalGroupMembership.size() == static_cast<size_t>(nGlobalAtoms_));
@@ -394,7 +389,6 @@ namespace OpenMD{
 
     /** 
      * Sets GlobalMolMembership
-     * @see #SimCreator::setGlobalIndex
      */        
     void setGlobalMolMembership(const vector<int>& globalMolMembership) {
       assert(globalMolMembership.size() == static_cast<size_t>(nGlobalAtoms_));
@@ -667,7 +661,6 @@ namespace OpenMD{
     
     /** 
      * Set MolToProcMap array
-     * @see #SimCreator::divideMolecules
      */
     void setMolToProcMap(const vector<int>& molToProcMap) {
       molToProcMap_ = molToProcMap;

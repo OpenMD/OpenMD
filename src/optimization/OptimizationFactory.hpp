@@ -84,8 +84,7 @@ namespace OpenMD {
     /**
      * Registers a creator with a type identifier
      * @return true if registration is succeed, otherwise return false
-     * @id the identification of the concrete object
-     * @creator the object responsible to create the concrete object 
+     * @param creator the object responsible to create the concrete object 
      */
     bool registerOptimization(OptimizationCreator* creator);
 
@@ -94,7 +93,7 @@ namespace OpenMD {
      * was previously registered, the function returns true.
      * @return truethe type identifier was previously registered and the creator is removed,
      * otherwise return false
-     * @id the identification of the concrete object
+     * @param id the identification of the concrete object
      */
     bool unregisterOptimization(const std::string& id);
     /**
@@ -103,6 +102,7 @@ namespace OpenMD {
      * @return a pointer of the concrete object, return NULL if no creator is registed for 
      * creating this concrete object
      * @param id the identification of the concrete object
+     * @param info pointer to the SimInfo object
      */
     QuantLib::OptimizationMethod* createOptimization(const std::string& id, SimInfo* info);
 

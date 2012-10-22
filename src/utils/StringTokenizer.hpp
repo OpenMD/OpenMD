@@ -44,7 +44,6 @@
  * @file StringTokenizer.hpp
  * @author tlin
  * @date 09/20/2004
- * @time 11:30am
  * @version 1.0
  */
 
@@ -58,7 +57,7 @@
 namespace OpenMD {
 
   /**
-   * @class StringTokenizer.hpp "util/StringTokenizer.hpp"
+   * @class StringTokenizer
    * @brief The string tokenizer class allows an application to break a string into tokens
    * The set of delimiters (the characters that separate tokens) may be specified either 
    * at creation time or on a per-token basis. 

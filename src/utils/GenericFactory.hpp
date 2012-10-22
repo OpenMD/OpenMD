@@ -159,8 +159,8 @@ namespace OpenMD {
     /**
      * Registers a creator with a type identifier
      * @return true if registration is succeed, otherwise return false
-     * @id the identification of the concrete object
-     * @creator the object responsible to create the concrete object 
+     * @param id the identification of the concrete object
+     * @param creator the object responsible to create the concrete object 
      */
     bool registerCreator(const IdentType& id, Creator creator) {
       return creatorMap_.insert(
@@ -172,7 +172,7 @@ namespace OpenMD {
      * was previously registered, the function returns true.
      * @return truethe type identifier was previously registered and the creator is removed,
      * otherwise return false
-     * @id the identification of the concrete object
+     * @param id the identification of the concrete object
      */
     bool unregisterCreator(const IdentType& id) {
       return creatorMap_.erase(id) == 1;

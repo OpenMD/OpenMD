@@ -221,7 +221,7 @@ namespace OpenMD {
     /**
      * Tests if this matrix is identical to matrix m
      * @return true if this matrix is equal to the matrix m, return false otherwise
-     * @m matrix to be compared
+     * @param m matrix to be compared
      *
      * @todo replace operator == by template function equal
      */
@@ -237,7 +237,7 @@ namespace OpenMD {
     /**
      * Tests if this matrix is not equal to matrix m
      * @return true if this matrix is not equal to the matrix m, return false otherwise
-     * @m matrix to be compared
+     * @param m matrix to be compared
      */
     bool operator !=(const RectMatrix<Real, Row, Col>& m) {
       return !(*this == m);
@@ -564,11 +564,13 @@ namespace OpenMD {
    * CCP5 Newsletter No 46., pp. 18-30.
    *
    * Equation 21 defines:
-   * V_alpha = \sum_\beta [ A_{\alpha+1,\beta} * B_{\alpha+2,\beta} 
-                           -A_{\alpha+2,\beta} * B_{\alpha+2,\beta} ]
-   * where \alpha+1 and \alpha+2 are regarded as cyclic permuations of the
-   * matrix indices (i.e. for a 3x3 matrix, when \alpha = 2, \alpha + 1 = 3,
-   * and \alpha + 2 = 1).
+   * \f[
+   * V_alpha = \sum_\beta \left[ A_{\alpha+1,\beta} * B_{\alpha+2,\beta} 
+                           -A_{\alpha+2,\beta} * B_{\alpha+2,\beta} \right]
+   * \f]
+   * where \f[\alpha+1\f] and \f[\alpha+2\f] are regarded as cyclic permuations of the
+   * matrix indices (i.e. for a 3x3 matrix, when \f[\alpha = 2\f], \f[\alpha + 1 = 3 \f],
+   * and \f[\alpha + 2 = 1 \f] ).
    *
    * @param t1 first matrix
    * @param t2 second matrix

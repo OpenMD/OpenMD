@@ -746,18 +746,30 @@ namespace OpenMD {
     // Obtain all of the required radial function values from the
     // spline structures:
     
-    if (a_is_Charge && b_is_Charge) {
-      v01 = v01s->getValueAt( *(idat.rij) );
+    // needed for fields (and forces):
+    if (a_is_Charge || b_is_Charge) {
       v02 = v02s->getValueAt( *(idat.rij) );
     }
-    if ((a_is_Charge && b_is_Dipole) || (b_is_Charge && a_is_Dipole)) {
-      v11 = v11s->getValueAt( *(idat.rij) );
+    if (a_is_Dipole || b_is_Dipole) {
       v12 = v12s->getValueAt( *(idat.rij) );
       v13 = v13s->getValueAt( *(idat.rij) );
     }
-    if ((a_is_Charge && b_is_Quadrupole) || 
-        (b_is_Charge && a_is_Quadrupole) ||
-        (a_is_Dipole && b_is_Dipole)) {
+    if (a_is_Quadrupole || b_is_Quadrupole) {
+      v23 = v23s->getValueAt( *(idat.rij) );
+      v24 = v24s->getValueAt( *(idat.rij) );
+    }
+
+    // needed for potentials (and torques):
+    if (a_is_Charge && b_is_Charge) {
+      v01 = v01s->getValueAt( *(idat.rij) );
+    }
+    if ((a_is_Charge && b_is_Dipole) || (b_is_Charge && a_is_Dipole)) {
+      v11 = v11s->getValueAt( *(idat.rij) );
+    }
+    if ((a_is_Charge && b_is_Quadrupole) || (b_is_Charge && a_is_Quadrupole)) {
+      v21 = v21s->getValueAt( *(idat.rij) );
+      v22 = v22s->getValueAt( *(idat.rij) );
+    } else if (a_is_Dipole && b_is_Dipole) {
       v21 = v21s->getValueAt( *(idat.rij) );
       v22 = v22s->getValueAt( *(idat.rij) );
       v23 = v23s->getValueAt( *(idat.rij) );

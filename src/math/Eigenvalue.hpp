@@ -957,7 +957,7 @@ namespace JAMA
     /** Return the imaginary parts of the eigenvalues
         in parameter e_.
         
-        @pararm e_: new matrix with imaginary parts of the eigenvalues.
+        @param e_: new matrix with imaginary parts of the eigenvalues.
     */
     void getImagEigenvalues (DynamicVector<Real> &e_) {
       e_ = e;

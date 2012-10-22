@@ -44,7 +44,6 @@
  * @file LangevinDynamics.cpp
  * @author tlin
  * @date 11/08/2004
- * @time 15:13am
  * @version 1.0
  */
 

@@ -2,7 +2,6 @@
  * @file Communicator.hpp
  * @author Charles Vardeman <cvardema.at.nd.edu>
  * @date 08/18/2010
- * @time 11:56am
  * @version 1.0
  *
  * @section LICENSE

@@ -44,7 +44,6 @@
  * @file Stats.hpp
  * @author tlin
  * @date 11/04/2004
- * @time 23:56am
  * @version 1.0
  */
 
