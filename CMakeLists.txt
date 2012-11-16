@@ -493,6 +493,7 @@ src/applications/dynamicProps/MomentumCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/RadialRCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
+src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp
 src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
 src/applications/dynamicProps/ThetaCorrFunc.cpp

@@ -2,6 +2,9 @@
 # for parsing command line arguments useing getopt and getoptlong.
 # gengetopt is available from:
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
+# invoke with:
+# gengetopt < DynamicProps.ggo --file-name=DynamicPropsCmd --unamed-opts
+
 package "DynamicProps"
 version "1.00"
 
@@ -13,11 +16,12 @@ option  "sele2"         -       "select second stuntdouble set (if sele2 is not 
 option  "order"         -       "Lengendre Polynomial Order"  int  no
 option  "memory"        m       "Available memory (defaults to 2G)" string  typestr="memory specification" default="2G" no
 defgroup "dynamicProps" groupdesc=" an option of this group is required" yes
+groupoption "selecorr"  s       "selection correlation function" group="dynamicProps"
 groupoption "rcorr"     r       "rmsd" group="dynamicProps"
 groupoption "vcorr" 	v	"velocity correlation function" group="dynamicProps"
 groupoption "dcorr"	d	"dipole correlation function" group="dynamicProps"
 groupoption "lcorr"     l       "Lengendre correlation function" group="dynamicProps"
-groupoption "sdcorr"   s       "System dipole correlation function" group="dynamicProps"
+groupoption "sdcorr"    M       "System dipole correlation function" group="dynamicProps"
 groupoption "r_rcorr"   -       "Radial rmsd" group="dynamicProps"
 groupoption "thetacorr" -       "Angular rmsd" group="dynamicProps"
 groupoption "drcorr"     -      "Directional rmsd for particles with unit vectors" group="dynamicProps"

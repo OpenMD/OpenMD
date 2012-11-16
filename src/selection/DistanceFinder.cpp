@@ -47,9 +47,9 @@
 #endif
 
 namespace OpenMD {
-
+  
   DistanceFinder::DistanceFinder(SimInfo* info) : info_(info) {
-
+    
     nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
     stuntdoubles_.resize(nStuntDoubles_);
     
@@ -59,7 +59,7 @@ namespace OpenMD {
     Atom* atom;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
-
+    
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
@@ -135,8 +135,6 @@ namespace OpenMD {
 	}
       }
     }
-
     return bsResult;
   }
-
 }
