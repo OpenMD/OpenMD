@@ -44,6 +44,7 @@
  * @file Stats.hpp
  * @author tlin
  * @date 11/04/2004
+ * @time 23:56am
  * @version 1.0
  */
 
@@ -103,7 +104,7 @@ namespace OpenMD {
       string title;
       string units;
       string dataType;
-      Accumulator* accumulator;
+      BaseAccumulator* accumulator;
     };
     
     typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;

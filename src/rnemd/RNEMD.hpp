@@ -44,6 +44,7 @@
  * @file RNEMD.hpp
  * @author gezelter
  * @date 03/13/2009
+ * @time 15:56pm
  * @version 1.0
  */
 
@@ -113,7 +114,7 @@ namespace OpenMD {
       string title;
       string units;
       string dataType;
-      vector<Accumulator*> accumulator;
+      vector<BaseAccumulator*> accumulator;
     };
 
     typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;

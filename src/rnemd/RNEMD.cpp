@@ -53,6 +53,11 @@
 #include <mpi.h>
 #endif
 
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
+
 #define HONKING_LARGE_VALUE 1.0e10
 
 using namespace std;
@@ -65,7 +70,6 @@ namespace OpenMD {
     failTrialCount_ = 0;
     failRootCount_ = 0;
 
-    int seedValue;
     Globals * simParams = info->getSimParams();
     RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
 
@@ -306,7 +310,7 @@ namespace OpenMD {
     z.title =  "Z";
     z.dataType = "RealType";
     z.accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
+    for (int i = 0; i < nBins_; i++) 
       z.accumulator.push_back( new Accumulator() );
     data_[Z] = z;
     outputMap_["Z"] =  Z;
@@ -316,7 +320,7 @@ namespace OpenMD {
     temperature.title =  "Temperature";
     temperature.dataType = "RealType";
     temperature.accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
+    for (int i = 0; i < nBins_; i++) 
       temperature.accumulator.push_back( new Accumulator() );
     data_[TEMPERATURE] = temperature;
     outputMap_["TEMPERATURE"] =  TEMPERATURE;
@@ -326,7 +330,7 @@ namespace OpenMD {
     velocity.title =  "Velocity";  
     velocity.dataType = "Vector3d";
     velocity.accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
+    for (int i = 0; i < nBins_; i++) 
       velocity.accumulator.push_back( new VectorAccumulator() );
     data_[VELOCITY] = velocity;
     outputMap_["VELOCITY"] = VELOCITY;
@@ -336,7 +340,7 @@ namespace OpenMD {
     density.title =  "Density";
     density.dataType = "RealType";
     density.accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
+    for (int i = 0; i < nBins_; i++) 
       density.accumulator.push_back( new Accumulator() );
     data_[DENSITY] = density;
     outputMap_["DENSITY"] =  DENSITY;
@@ -448,7 +452,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     RealType min_val;
     bool min_found = false;   
@@ -460,8 +463,6 @@ namespace OpenMD {
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-
-      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
@@ -540,12 +541,9 @@ namespace OpenMD {
       }
     }
     
-#ifdef IS_MPI
-    int nProc, worldRank;
+#ifdef IS_MPI    
+    int worldRank = MPI::COMM_WORLD.Get_rank();
     
-    nProc = MPI::COMM_WORLD.Get_size();
-    worldRank = MPI::COMM_WORLD.Get_rank();
-
     bool my_min_found = min_found;
     bool my_max_found = max_found;
 
@@ -778,7 +776,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     vector<StuntDouble*> hotBin, coldBin;
 
@@ -799,8 +796,6 @@ namespace OpenMD {
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-
-      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
@@ -1225,7 +1220,6 @@ namespace OpenMD {
 
     int selei;
     StuntDouble* sd;
-    int idx;
 
     vector<StuntDouble*> hotBin, coldBin;
 
@@ -1239,8 +1233,6 @@ namespace OpenMD {
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
-
-      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
@@ -1416,7 +1408,6 @@ namespace OpenMD {
 
     int selei(0);
     StuntDouble* sd;
-    int idx;
 
     vector<RealType> binMass(nBins_, 0.0);
     vector<RealType> binPx(nBins_, 0.0);
@@ -1442,10 +1433,8 @@ namespace OpenMD {
     */
 
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
-         sd = seleMan_.nextSelected(selei)) {
+         sd = seleMan_.nextSelected(selei)) {     
     
-      idx = sd->getLocalIndex();
-      
       Vector3d pos = sd->getPos();
 
       // wrap the stuntdouble's position back into the box:
@@ -1675,7 +1664,7 @@ namespace OpenMD {
       
       rnemdFile_.precision(8);
       
-      for (unsigned int j = 0; j < nBins_; j++) {        
+      for (int j = 0; j < nBins_; j++) {        
         
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
@@ -1701,7 +1690,7 @@ namespace OpenMD {
       rnemdFile_ << "#######################################################\n";
 
 
-      for (unsigned int j = 0; j < nBins_; j++) {        
+      for (int j = 0; j < nBins_; j++) {        
         rnemdFile_ << "#";
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
@@ -1737,7 +1726,7 @@ namespace OpenMD {
     assert(bin < nBins_);
     RealType s;
     
-    data_[index].accumulator[bin]->getAverage(s);
+    dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getAverage(s);
     
     if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;
@@ -1775,7 +1764,7 @@ namespace OpenMD {
     assert(bin < nBins_);
     RealType s;
     
-    data_[index].accumulator[bin]->getStdDev(s);
+    dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getStdDev(s);
     
     if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;
