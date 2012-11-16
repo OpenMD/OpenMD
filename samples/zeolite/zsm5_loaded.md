@@ -1,4 +1,4 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 
 molecule{
@@ -43,7 +43,7 @@ component{
   nMol =         36;
 }
 
-forceField = "CLAY";
+forceField = "CLAYFF";
 targetTemp = 300;
 targetPressure = 1;
 ensemble="NVE";

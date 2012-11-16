@@ -90,7 +90,8 @@ namespace OpenMD {
       }
     }
 
-    bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, memSize_);
+    bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, 
+                                      memSize_);
     info_->setSnapshotManager(bsMan_);
     
     evaluator1_.loadScriptString(selectionScript1_);
@@ -100,24 +101,12 @@ namespace OpenMD {
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
       validateSelection(seleMan1_);
-    } else {
-      sprintf(painCave.errMsg,
-              "TimeCorrFunc Error: dynamic selection is not supported\n");
-      painCave.isFatal = 1;
-      simError();  
     }
     
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
       validateSelection(seleMan2_);
-    } else {
-      sprintf(painCave.errMsg,
-              "TimeCorrFunc Error: dynamic selection is not supported\n");
-      painCave.isFatal = 1;
-      simError();  
     }
-    
-
     
     /**@todo Fix Me */
     Globals* simParams = info_->getSimParams();
@@ -181,6 +170,10 @@ namespace OpenMD {
       //update the position or velocity of the atoms belong to rigid bodies
       updateFrame(i);
 
+      if (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      }
+
       // if the two blocks are the same, we don't want to correlate
       // backwards in time, so start j at the same frame as i
       if (block1 == block2) {
@@ -192,7 +185,10 @@ namespace OpenMD {
       for(int j  = jstart; j < jend; ++j) {
 	//update the position or velocity of the atoms belong to rigid bodies
 	updateFrame(j);
-
+        if (evaluator2_.isDynamic()) {
+          seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        }
+        
 	correlateFrames(i, j);
       }
     }

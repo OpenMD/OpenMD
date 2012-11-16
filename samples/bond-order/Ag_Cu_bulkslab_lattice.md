@@ -1,4 +1,4 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 #include "metals.md"
 

@@ -87,6 +87,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   // Copy the positon vector into a points vector for qhull.
   std::vector<StuntDouble*>::iterator SD;
   int i = 0;
+
   for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
     Vector3d pos = (*SD)->getPos();      
     ptArray[dim_ * i] = pos.x();

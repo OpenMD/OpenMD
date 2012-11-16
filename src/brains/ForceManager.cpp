@@ -819,10 +819,13 @@ namespace OpenMD {
               fij += fg;
 
               if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                stressTensor -= outProduct( *(idat.d), fg);
-                if (doHeatFlux_)
-                  fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
-                
+                if (!fDecomp_->skipAtomPair(atomListRow[0], 
+                                            atomListColumn[0], 
+                                            cg1, cg2)) {
+                  stressTensor -= outProduct( *(idat.d), fg);
+                  if (doHeatFlux_)
+                    fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                }                
               }
           
               for (ia = atomListRow.begin(); 

@@ -2,22 +2,16 @@
   <MetaData>
 #include "water.md"
 
-
 component{
   type = "SSD_E";
   nMol = 2;
 }
 
-
-
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+cutoffMethod = "switched";
 cutoffRadius = 9.0;
 switchingRadius = 7.8;
-
-
 
 targetTemp = 0.1;
 targetPressure = 1.0;

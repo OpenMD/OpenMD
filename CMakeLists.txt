@@ -488,6 +488,7 @@ src/applications/dynamicProps/MomentumCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/RadialRCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
+src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp
 src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
 src/applications/dynamicProps/ThetaCorrFunc.cpp
@@ -581,17 +582,17 @@ target_link_libraries(Hydro openmd_single openmd_core openmd_single openmd_core)
 add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(StaticProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(nanoparticleBuilder openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(nanoparticleBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(nanorod_pentBuilder openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(nanorod_pentBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(randomBuilder ${RANDOMBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(randomBuilder openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(randomBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(simpleBuilder openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(simpleBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(thermalizer ${THERMALIZERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(thermalizer openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(thermalizer openmd_single openmd_core openmd_single openmd_core openmd_single)
 
 if (OPENBABEL2_FOUND)
 set (ATOM2MDSOURCE 
@@ -658,6 +659,7 @@ IF(PERL_FOUND)
   endforeach(PERL_FILE)
 ENDIF(PERL_FOUND)
 
+
 INSTALL(FILES AUTHORS LICENSE README INSTALL DESTINATION . 
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 INSTALL(TARGETS 
@@ -670,6 +672,8 @@ INSTALL(TARGETS
         DynamicProps
         randomBuilder 
         nanoparticleBuilder 
+        nanorodBuilder
+        nanorod_pentBuilder
         thermalizer 
         Hydro
   RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
@@ -690,7 +694,16 @@ install(DIRECTORY samples/
 	PATTERN "*.stat" EXCLUDE
 	PATTERN "*.eor" EXCLUDE
 	PATTERN "*.rnemd" EXCLUDE
+	PATTERN "*.fz" EXCLUDE
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
+configure_file( samples/builders/runMe.in
+                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe" @ONLY)
+INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe" 
+             DESTINATION samples/builders 
+             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)                
+
+
 INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
         DESTINATION doc
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)

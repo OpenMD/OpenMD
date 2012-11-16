@@ -1,4 +1,4 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 #include "water.md"
 
@@ -14,7 +14,7 @@ minimizer {
   maxIterations = 5000;
 }
 
-forceField = "DUFF2";
+forceField = "DUFF";
 cutoffMethod = "shifted_force";
 dampingAlpha = 0.185;
 cutoffRadius = 12.0;

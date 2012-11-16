@@ -57,6 +57,7 @@ struct gengetopt_args_info
   char * memory_arg;	/**< @brief Available memory (defaults to 2G) (default='2G').  */
   char * memory_orig;	/**< @brief Available memory (defaults to 2G) original value given at command line.  */
   const char *memory_help; /**< @brief Available memory (defaults to 2G) help description.  */
+  const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief rmsd help description.  */
   const char *vcorr_help; /**< @brief velocity correlation function help description.  */
   const char *dcorr_help; /**< @brief dipole correlation function help description.  */
@@ -77,6 +78,7 @@ struct gengetopt_args_info
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
   unsigned int order_given ;	/**< @brief Whether order was given.  */
   unsigned int memory_given ;	/**< @brief Whether memory was given.  */
+  unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int vcorr_given ;	/**< @brief Whether vcorr was given.  */
   unsigned int dcorr_given ;	/**< @brief Whether dcorr was given.  */

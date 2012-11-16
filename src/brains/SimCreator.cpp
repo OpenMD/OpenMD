@@ -254,11 +254,28 @@ namespace OpenMD {
     std::string mdRawData;
     int metaDataBlockStart = -1;
     int metaDataBlockEnd = -1;
-    int i;
+    int i, j;
     streamoff mdOffset;
     int mdFileVersion;
 
+    // Create a string for embedding the version information in the MetaData
+    std::string version;
+    version.assign("## Last run using OpenMD Version: ");
+    version.append(OPENMD_VERSION_MAJOR);
+    version.append(".");
+    version.append(OPENMD_VERSION_MINOR);
 
+    std::string svnrev;
+    //convert a macro from compiler to a string in c++
+    STR_DEFINE(svnrev, SVN_REV );
+    version.append(" Revision: ");
+    // If there's no SVN revision, just call this the RELEASE revision.
+    if (!svnrev.empty()) {
+      version.append(svnrev);
+    } else {
+      version.append("RELEASE");
+    }
+   
 #ifdef IS_MPI            
     const int masterNode = 0;
     if (worldRank == masterNode) {
@@ -353,12 +370,23 @@ namespace OpenMD {
 
       mdRawData.clear();
 
+      bool foundVersion = false;
+
       for (int i = 0; i < metaDataBlockEnd - metaDataBlockStart - 1; ++i) {
         mdFile_.getline(buffer, bufferSize);
-        mdRawData += buffer;
+        std::string line = trimLeftCopy(buffer);
+        j = CaseInsensitiveFind(line, "## Last run using OpenMD Version");
+        if (static_cast<size_t>(j) != string::npos) {
+          foundVersion = true;
+          mdRawData += version;
+        } else {
+          mdRawData += buffer;
+        }
         mdRawData += "\n";
       }
-
+      
+      if (!foundVersion) mdRawData += version + "\n";
+      
       mdFile_.close();
 
 #ifdef IS_MPI

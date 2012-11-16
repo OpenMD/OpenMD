@@ -50,6 +50,7 @@
 #include "utils/simError.h"
 
 #include "applications/dynamicProps/DynamicPropsCmd.h"
+#include "applications/dynamicProps/SelectionCorrFunc.hpp"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
@@ -61,8 +62,6 @@
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
-
-
 
 using namespace OpenMD;
 
@@ -99,7 +98,7 @@ int main(int argc, char* argv[]){
     
   if (args_info.sele2_given) {
     sele2 = args_info.sele2_arg;
-  }else {
+  } else {
     char* sele2Env = getenv("SELECTION2");
     if (sele2Env) {
       sele2 = sele2Env;            
@@ -121,10 +120,11 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-
   TimeCorrFunc* corrFunc;
   if(args_info.sdcorr_given){
     corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.selecorr_given){
+    corrFunc = new SelectionCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.dcorr_given){
     corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.rcorr_given) {

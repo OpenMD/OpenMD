@@ -1,7 +1,6 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 #include "water.md"
-
 
 component{
   type = "Cl-";
@@ -12,16 +11,11 @@ component{
   nMol = 1;
 }
 
-
-
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+cutoffMethod = "shifted_force";
+dampingAlpha = 0.2;
 cutoffRadius = 9.0;
-switchingRadius = 7.8;
-
-
 
 targetTemp = 0.001;
 targetPressure = 1.0;

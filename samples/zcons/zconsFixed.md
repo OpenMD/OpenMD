@@ -1,13 +1,11 @@
-<OpenMD version=1>
+<OpenMD version=2>
   <MetaData>
 #include "water.md"
-
 
 component{
   type = "SSD";
   nMol = 256;
 }
-
 
 ensemble = NVE;
 forceField = "DUFF";
@@ -15,8 +13,7 @@ forceField = "DUFF";
 zconsTime = 1;
 zconsTol = 0.01; 
 
-nZconstraints = 1;
-zConstraint[0]{
+zconstraint{
   molIndex =0;
   kRatio = 0.5;
 }
@@ -24,11 +21,9 @@ zConstraint[0]{
 cutoffRadius = 9.0;
 switchingRadius = 7.8;
 
-electrostaticSummationMethod = "none";
+cutoffMethod = "switched";
 
 dielectric = 80.0;
-
-
 
 targetTemp = 300;
 targetPressure = 1.0;
