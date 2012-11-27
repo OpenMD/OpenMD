@@ -142,6 +142,8 @@ namespace OpenMD {
       u = datom->getA().transpose()*V3Z;         
     } else if (ma.isDipole()) {
       u = datom->getDipole();
+    } else if (ma.isQuadrupole()) {
+      u = datom->getQuadrupole().getColumn(2);
     }
     atomData = new AtomData;
     atomData->setID("ATOMDATA");

@@ -953,7 +953,7 @@ namespace OpenMD {
         F  -= pref * (DadDb * rhat + rdDb * D_a + rdDa * D_b)*v23;
         F  -= pref * (rdDa * rdDb) * v24 * rhat;
         Ta += pref * ( v21 * DaxDb - v22 * rdDb * rxDa);
-        Tb += pref * (-v21 * DaxDb + v22 * rdDa * rxDb);
+        Tb += pref * (-v21 * DaxDb - v22 * rdDa * rxDb);
 
         // Even if we excluded this pair from direct interactions, we
         // still have the reaction-field-mediated dipole-dipole
@@ -1007,7 +1007,7 @@ namespace OpenMD {
         F  += pref * (rdDb * rdQar * rhat * v35);
         Ta += pref * ((-2.0*cross(DbdQa, rhat) + 2.0*DbxQar)*v31 
                       + 2.0*rdDb*rxQar*v32);
-        Tb += pref * ((trQa*rxDb + 2.0 * DbxQar)*v31 + rxDb*rdQar*v32);
+        Tb += pref * ((trQa*rxDb - 2.0 * DbxQar)*v31 + rxDb*rdQar*v32);
       }
       if (b_is_Quadrupole) {
         pref = pre44_ * *(idat.electroMult);
