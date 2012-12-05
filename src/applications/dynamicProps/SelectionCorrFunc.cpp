@@ -81,7 +81,6 @@ namespace OpenMD {
         }
       }
     }
-
     count_[timeBin] += seleMan1_.getSelectionCount();
   }
 

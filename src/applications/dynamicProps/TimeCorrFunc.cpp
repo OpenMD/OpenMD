@@ -229,6 +229,8 @@ namespace OpenMD {
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
 	histogram_[i] /= count_[i];
+      } else {
+        histogram_[i] = 0;
       }
     }
   }
