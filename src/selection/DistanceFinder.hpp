@@ -51,6 +51,7 @@ namespace OpenMD {
     DistanceFinder(SimInfo* si);
 
     OpenMDBitSet find(const OpenMDBitSet& bs, RealType distance);
+    OpenMDBitSet find(const OpenMDBitSet& bs, RealType distance, int frame);
 
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;

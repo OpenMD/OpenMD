@@ -164,7 +164,8 @@ namespace OpenMD {
       updateFrame(i);
 
       if (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+        seleMan1_.clearSelection();
+        seleMan1_.setSelectionSet(evaluator1_.evaluate(i));
       }
 
       // if the two blocks are the same, we don't want to correlate
@@ -179,7 +180,8 @@ namespace OpenMD {
 	//update the position or velocity of the atoms belong to rigid bodies
 	updateFrame(j);
         if (evaluator2_.isDynamic()) {
-          seleMan2_.setSelectionSet(evaluator2_.evaluate());
+          seleMan2_.clearSelection();
+          seleMan2_.setSelectionSet(evaluator2_.evaluate(j));
         }
         
 	correlateFrames(i, j);
@@ -192,7 +194,6 @@ namespace OpenMD {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-
     /** @todo need improvement */    
     if (storageLayout_ & DataStorage::dslPosition) {
       for (mol = info_->beginMolecule(mi); mol != NULL; 

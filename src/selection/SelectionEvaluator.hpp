@@ -74,6 +74,7 @@ namespace OpenMD {
     bool loadScriptFile(const std::string& filename);
         
     OpenMDBitSet evaluate();
+    OpenMDBitSet evaluate(int frame);
         
     /**
      * Tests if the result from evaluation of script is dynamic.
@@ -118,22 +119,29 @@ namespace OpenMD {
          
     void define();
     void select(OpenMDBitSet& bs);
+    void select(OpenMDBitSet& bs, int frame);
     void predefine(const std::string& script);
 
     void instructionDispatchLoop(OpenMDBitSet& bs);
+    void instructionDispatchLoop(OpenMDBitSet& bs, int frame);
 
     void withinInstruction(const Token& instruction, OpenMDBitSet& bs);
+    void withinInstruction(const Token& instruction, OpenMDBitSet& bs, int frame);
     OpenMDBitSet allInstruction();
         
     OpenMDBitSet comparatorInstruction(const Token& instruction); 
+    OpenMDBitSet comparatorInstruction(const Token& instruction, int frame); 
     void compareProperty(StuntDouble* sd, OpenMDBitSet& bs, int property, int comparator, float comparisonValue);
+    void compareProperty(StuntDouble* sd, OpenMDBitSet& bs, int property, int comparator, float comparisonValue, int frame);
     OpenMDBitSet nameInstruction(const std::string& name);
     OpenMDBitSet indexInstruction(const boost::any& value);
     OpenMDBitSet expression(const std::vector<Token>& tokens, int pc);
+    OpenMDBitSet expression(const std::vector<Token>& tokens, int pc, int frame);
 
     OpenMDBitSet lookupValue(const std::string& variable);
 
     OpenMDBitSet hull();
+    OpenMDBitSet hull(int frame);
         
     void evalError(const std::string& message) {
       sprintf( painCave.errMsg,
@@ -171,6 +179,7 @@ namespace OpenMD {
     bool containDynamicToken(const std::vector<Token>& tokens);
 
     RealType getCharge(Atom* atom);
+    RealType getCharge(Atom* atom, int frame);
         
     SelectionCompiler compiler;
 
