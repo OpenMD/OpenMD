@@ -58,10 +58,6 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".p2");
     
     evaluator1_.loadScriptString(sele1);
-    
-    if (!evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }
   }
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
@@ -73,47 +69,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".p2");
     
     evaluator1_.loadScriptString(sele1);
-    evaluator2_.loadScriptString(sele2);
-    
-    if (!evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }else {
-      sprintf( painCave.errMsg,
-               "--sele1 must be static selection\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();  
-    }
-    
-    if (!evaluator2_.isDynamic()) {
-      seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    }else {
-      sprintf( painCave.errMsg,
-               "--sele2 must be static selection\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();  
-    }
-    
-    if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
-      sprintf( painCave.errMsg,
-               "The number of selected Stuntdoubles are not the same in --sele1 and sele2\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();  
-      
-    }
-    
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-         sd1 != NULL && sd2 != NULL;
-         sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
-
-      sdPairs_.push_back(make_pair(sd1, sd2));
-    } 
+    evaluator2_.loadScriptString(sele2);    
   }
 
   void P2OrderParameter::process() {
@@ -121,9 +77,12 @@ namespace OpenMD {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    StuntDouble* sd;
-    int ii;
-  
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int ii; 
+    int jj;
+    int vecCount;
+ 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
 
@@ -141,37 +100,67 @@ namespace OpenMD {
       }      
 
       Mat3x3d orderTensor(0.0);
+      vecCount = 0;
 
+      if  (evaluator1_.isDynamic()) 
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      
       if (doVect_) {
         
-        if  (evaluator1_.isDynamic()) 
-          seleMan1_.setSelectionSet(evaluator1_.evaluate());
-        
-        for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
-             sd = seleMan1_.nextSelected(ii)) {
-          if (sd->isDirectional()) {
-            Vector3d vec = sd->getA().getColumn(2);
+        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
+             sd1 = seleMan1_.nextSelected(ii)) {
+          if (sd1->isDirectional()) {
+            Vector3d vec = sd1->getA().getColumn(2);
             vec.normalize();
             orderTensor += outProduct(vec, vec);
+            vecCount++;
           }
         }
   
-        orderTensor /= seleMan1_.getSelectionCount();
+        orderTensor /= vecCount;
 
       } else {
+
+        if (evaluator2_.isDynamic())
+          seleMan2_.setSelectionSet(evaluator2_.evaluate());
             
-        for (vector<pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); 
-             j != sdPairs_.end(); ++j) {
-          Vector3d vec = j->first->getPos() - j->second->getPos();
+        if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
+          sprintf( painCave.errMsg,
+                   "In frame %d, the number of selected StuntDoubles are not\n"
+                   "\tthe same in --sele1 and sele2\n", i);
+          painCave.severity = OPENMD_INFO;
+          painCave.isFatal = 0;
+          simError();            
+        }
+        
+        for (sd1 = seleMan1_.beginSelected(ii), 
+               sd2 = seleMan2_.beginSelected(jj);
+             sd1 != NULL && sd2 != NULL;
+             sd1 = seleMan1_.nextSelected(ii), 
+               sd2 = seleMan2_.nextSelected(jj)) {
+
+          Vector3d vec = sd1->getPos() - sd2->getPos();
+
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(vec);
+
           vec.normalize();
+
           orderTensor +=outProduct(vec, vec);
+          vecCount++;
         }
       
-        orderTensor /= sdPairs_.size();
+        orderTensor /= vecCount;
       }
       
+      if (vecCount == 0) {
+          sprintf( painCave.errMsg,
+                   "In frame %d, the number of selected vectors was zero.\n"
+                   "\tThis will not give a meaningful order parameter.", i);
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal = 1;
+          simError();        
+      }
 
       orderTensor -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
       
@@ -197,27 +186,35 @@ namespace OpenMD {
       }   
 
       RealType angle = 0.0;
+      vecCount = 0;
       
       if (doVect_) {
-        for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
-             sd = seleMan1_.nextSelected(ii)) {
-          if (sd->isDirectional()) {
-            Vector3d vec = sd->getA().getColumn(2);
+        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
+             sd1 = seleMan1_.nextSelected(ii)) {
+          if (sd1->isDirectional()) {
+            Vector3d vec = sd1->getA().getColumn(2);
             vec.normalize();
             angle += acos(dot(vec, director));
+            vecCount++;
           }
         }
-        angle = angle/(seleMan1_.getSelectionCount()*NumericConstant::PI)*180.0;
+        angle = angle/(vecCount*NumericConstant::PI)*180.0;
         
       } else {
-        for (vector<pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-          Vector3d vec = j->first->getPos() - j->second->getPos();
+        for (sd1 = seleMan1_.beginSelected(ii), 
+               sd2 = seleMan2_.beginSelected(jj);
+             sd1 != NULL && sd2 != NULL;
+             sd1 = seleMan1_.nextSelected(ii), 
+               sd2 = seleMan2_.nextSelected(jj)) {
+          
+          Vector3d vec = sd1->getPos() - sd2->getPos();
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(vec);
           vec.normalize();          
           angle += acos(dot(vec, director)) ;
+          vecCount++;
         }
-        angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
+        angle = angle / (vecCount * NumericConstant::PI) * 180.0;
       }
 
       OrderParam param;

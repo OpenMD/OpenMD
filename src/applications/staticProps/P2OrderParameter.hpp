@@ -75,10 +75,6 @@ namespace OpenMD {
     SelectionManager seleMan2_;       
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
-    vector<pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used
-                                                            to define a vector,
-                                                            v = first - second 
-                                                         */
     vector<OrderParam> orderParams_;
     
   };
