@@ -102,8 +102,7 @@ namespace OpenMD {
       Mat3x3d orderTensor(0.0);
       vecCount = 0;
 
-      if  (evaluator1_.isDynamic()) 
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
       
       if (doVect_) {
         
@@ -121,8 +120,7 @@ namespace OpenMD {
 
       } else {
 
-        if (evaluator2_.isDynamic())
-          seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
             
         if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
           sprintf( painCave.errMsg,
