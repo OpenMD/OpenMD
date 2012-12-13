@@ -51,9 +51,9 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1)
-    : StaticAnalyser(info, filename), doVect_(true),
-      selectionScript1_(sele1), evaluator1_(info), 
-      evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+  : StaticAnalyser(info, filename), doVect_(true), doOffset_(false),
+    selectionScript1_(sele1), evaluator1_(info), 
+    evaluator2_(info), seleMan1_(info), seleMan2_(info) {
     
     setOutputName(getPrefix(filename) + ".p2");
     
@@ -62,14 +62,25 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1, const string& sele2)
-    : StaticAnalyser(info, filename), doVect_(false),
-      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), 
-      evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+  : StaticAnalyser(info, filename), doVect_(false), doOffset_(false),
+    selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), 
+    evaluator2_(info), seleMan1_(info), seleMan2_(info) {
     
     setOutputName(getPrefix(filename) + ".p2");
     
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);    
+  }
+
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
+                                     const string& sele1, int seleOffset)
+  : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
+    seleOffset_(seleOffset), selectionScript1_(sele1), evaluator1_(info), 
+    evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+    
+    setOutputName(getPrefix(filename) + ".p2");
+    
+    evaluator1_.loadScriptString(sele1);
   }
 
   void P2OrderParameter::process() {
@@ -120,35 +131,62 @@ namespace OpenMD {
 
       } else {
 
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        if (doOffset_) {
+
+          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+               sd1 = seleMan1_.nextSelected(ii)) {
+
+            // This will require careful rewriting if StaticProps is
+            // ever parallelized.  For an example, see
+            // Thermo::getTaggedAtomPairDistance
+
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
             
-        if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
-          sprintf( painCave.errMsg,
-                   "In frame %d, the number of selected StuntDoubles are not\n"
-                   "\tthe same in --sele1 and sele2\n", i);
-          painCave.severity = OPENMD_INFO;
-          painCave.isFatal = 0;
-          simError();            
+            Vector3d vec = sd1->getPos() - sd2->getPos();
+            
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            
+            vec.normalize();
+            
+            orderTensor +=outProduct(vec, vec);
+            vecCount++;
+          }
+          
+          orderTensor /= vecCount;
+        } else {
+          
+          seleMan2_.setSelectionSet(evaluator2_.evaluate());
+          
+          if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
+            sprintf( painCave.errMsg,
+                     "In frame %d, the number of selected StuntDoubles are\n"
+                     "\tnot the same in --sele1 and sele2\n", i);
+            painCave.severity = OPENMD_INFO;
+            painCave.isFatal = 0;
+            simError();            
+          }
+          
+          for (sd1 = seleMan1_.beginSelected(ii), 
+                 sd2 = seleMan2_.beginSelected(jj);
+               sd1 != NULL && sd2 != NULL;
+               sd1 = seleMan1_.nextSelected(ii), 
+                 sd2 = seleMan2_.nextSelected(jj)) {
+            
+            Vector3d vec = sd1->getPos() - sd2->getPos();
+            
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+
+            vec.normalize();
+            
+            orderTensor +=outProduct(vec, vec);
+            vecCount++;
+          }
+          
+          orderTensor /= vecCount;
         }
-        
-        for (sd1 = seleMan1_.beginSelected(ii), 
-               sd2 = seleMan2_.beginSelected(jj);
-             sd1 != NULL && sd2 != NULL;
-             sd1 = seleMan1_.nextSelected(ii), 
-               sd2 = seleMan2_.nextSelected(jj)) {
-
-          Vector3d vec = sd1->getPos() - sd2->getPos();
-
-          if (usePeriodicBoundaryConditions_)
-            currentSnapshot_->wrapVector(vec);
-
-          vec.normalize();
-
-          orderTensor +=outProduct(vec, vec);
-          vecCount++;
-        }
-      
-        orderTensor /= vecCount;
       }
       
       if (vecCount == 0) {
@@ -199,20 +237,44 @@ namespace OpenMD {
         angle = angle/(vecCount*NumericConstant::PI)*180.0;
         
       } else {
-        for (sd1 = seleMan1_.beginSelected(ii), 
-               sd2 = seleMan2_.beginSelected(jj);
-             sd1 != NULL && sd2 != NULL;
-             sd1 = seleMan1_.nextSelected(ii), 
-               sd2 = seleMan2_.nextSelected(jj)) {
-          
-          Vector3d vec = sd1->getPos() - sd2->getPos();
-          if (usePeriodicBoundaryConditions_)
-            currentSnapshot_->wrapVector(vec);
-          vec.normalize();          
-          angle += acos(dot(vec, director)) ;
-          vecCount++;
+        if (doOffset_) {
+
+          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+               sd1 = seleMan1_.nextSelected(ii)) {
+            
+            // This will require careful rewriting if StaticProps is
+            // ever parallelized.  For an example, see
+            // Thermo::getTaggedAtomPairDistance
+            
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
+            
+            Vector3d vec = sd1->getPos() - sd2->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            vec.normalize();          
+            angle += acos(dot(vec, director)) ;
+            vecCount++;
+          }
+          angle = angle / (vecCount * NumericConstant::PI) * 180.0;
+
+        } else {
+
+          for (sd1 = seleMan1_.beginSelected(ii), 
+                 sd2 = seleMan2_.beginSelected(jj);
+               sd1 != NULL && sd2 != NULL;
+               sd1 = seleMan1_.nextSelected(ii), 
+                 sd2 = seleMan2_.nextSelected(jj)) {
+            
+            Vector3d vec = sd1->getPos() - sd2->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            vec.normalize();          
+            angle += acos(dot(vec, director)) ;
+            vecCount++;
+          }
+          angle = angle / (vecCount * NumericConstant::PI) * 180.0;
         }
-        angle = angle / (vecCount * NumericConstant::PI) * 180.0;
       }
 
       OrderParam param;

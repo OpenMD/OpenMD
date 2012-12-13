@@ -93,6 +93,9 @@ struct gengetopt_args_info
   char * comsele_arg;	/**< @brief select stunt doubles for center-of-mass reference point.  */
   char * comsele_orig;	/**< @brief select stunt doubles for center-of-mass reference point original value given at command line.  */
   const char *comsele_help; /**< @brief select stunt doubles for center-of-mass reference point help description.  */
+  int seleoffset_arg;	/**< @brief global index offset for a second object (used to define a vector between sites in molecule).  */
+  char * seleoffset_orig;	/**< @brief global index offset for a second object (used to define a vector between sites in molecule) original value given at command line.  */
+  const char *seleoffset_help; /**< @brief global index offset for a second object (used to define a vector between sites in molecule) help description.  */
   char * molname_arg;	/**< @brief molecule name.  */
   char * molname_orig;	/**< @brief molecule name original value given at command line.  */
   const char *molname_help; /**< @brief molecule name help description.  */
@@ -151,6 +154,7 @@ struct gengetopt_args_info
   unsigned int sele3_given ;	/**< @brief Whether sele3 was given.  */
   unsigned int refsele_given ;	/**< @brief Whether refsele was given.  */
   unsigned int comsele_given ;	/**< @brief Whether comsele was given.  */
+  unsigned int seleoffset_given ;	/**< @brief Whether seleoffset was given.  */
   unsigned int molname_given ;	/**< @brief Whether molname was given.  */
   unsigned int begin_given ;	/**< @brief Whether begin was given.  */
   unsigned int end_given ;	/**< @brief Whether end was given.  */

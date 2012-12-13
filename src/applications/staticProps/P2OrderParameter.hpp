@@ -54,6 +54,8 @@ namespace OpenMD {
                      const string& sele1);
     P2OrderParameter(SimInfo* info, const string& filename, 
                      const string& sele1, const string& sele2);
+    P2OrderParameter(SimInfo* info, const string& filename, 
+                     const string& sele1, const int seleOffset);
     virtual void process();
     
   private:
@@ -69,12 +71,15 @@ namespace OpenMD {
     Snapshot* currentSnapshot_;
     
     bool doVect_;
+    bool doOffset_;
     string selectionScript1_;
     string selectionScript2_;
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;       
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
+    int seleOffset_;
+
     vector<OrderParam> orderParams_;
     
   };
