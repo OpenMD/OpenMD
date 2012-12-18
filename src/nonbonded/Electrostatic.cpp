@@ -499,7 +499,7 @@ namespace OpenMD {
       v33v.push_back(v33);
       v34v.push_back(v34);
       v35v.push_back(v35);
-
+      
       v41v.push_back(v41);
       v42v.push_back(v42);
       v43v.push_back(v43);
@@ -693,9 +693,10 @@ namespace OpenMD {
     RealType pref;
 
     RealType DadDb, trQaQb, DadQbr, DbdQar;       // Cross-interaction scalars
+    RealType rQaQbr;
     Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar; // Cross-interaction vectors
-    Vector3d rQaQb, QaQbr, QaxQb;
-    Mat3x3d  QaQb;                                // Cross-interaction matrices
+    Vector3d rQaQb, QaQbr, QaxQb, rQaxQbr, QbQar, rQbxQar;
+    Mat3x3d  QaQb, QbQa;                          // Cross-interaction matrices
 
     RealType U(0.0);  // Potential
     Vector3d F(0.0);  // Force
@@ -1012,35 +1013,48 @@ namespace OpenMD {
       if (b_is_Quadrupole) {
         pref = pre44_ * *(idat.electroMult);
         QaQb = Q_a * Q_b;
+        QbQa = Q_b * Q_a;
         trQaQb = QaQb.trace();
         rQaQb = rhat * QaQb;
+        QbQar = QbQa * rhat;
         QaQbr = QaQb * rhat;        
         QaxQb = cross(Q_a, Q_b);
+        rQaQbr = dot(rQa, Qbr);
+        rQaxQbr = cross(rQa, Qbr);
+        rQbxQar = cross(rQb, Qar);
 
-        U  += pref * (trQa * trQb + 2.0*trQaQb) * v41;
-        U  += pref * (trQa*rdQbr + trQb*rdQar  + 4.0*dot(rQa, Qbr)) * v42;
+        U  += pref * (trQa * trQb + 2.0 * trQaQb) * v41;
+        U  += pref * (trQa * rdQbr + trQb * rdQar  + 4.0 * rQaQbr) * v42;
         U  += pref * (rdQar * rdQbr) * v43;
 
-        F  += pref * (trQa*trQb*rhat + 2.0*trQaQb*rhat)*v44;
-        F  += pref * (2.0*trQb*rQa + 2.0*trQa*rQb)*v44;
-        F  += pref * (4.0* QaQb * rhat + 4.0 * rhat * QaQb)*v44;
-        F  += pref * (trQa*rdQbr*rhat + trQb*rdQar*rhat 
-                      + 4.0*dot(rQa, Qbr)*rhat)*v45;
-        F  += pref * (2.0*rQa*rdQbr + 2.0*rdQar*rQb)*v45;
-        F  += pref * (rdQar*rdQbr*rhat) * v46;
+        F  += pref * rhat * (trQa * trQb + 2.0 * trQaQb)*v44;
+        F  += pref * rhat * (trQa * rdQbr + trQb * rdQar + 4.0 * rQaQbr)*v45;
+        F  += pref * rhat * (rdQar * rdQbr)*v46;
 
-        Ta += pref * (-4.0 * QaxQb  * v41);
-        Ta += pref * (-2.0*trQb*cross(rQa, rhat) 
-                      + 4.0*cross(rhat, QaQbr) 
-                      - 4.0*cross(rQa, Qbr)) * v42;
+        F  += pref * 2.0 * (trQb*rQa + trQa*rQb)*v44;
+        F  += pref * 4.0 * (rQaQb + QaQbr)*v44;
+        F  += pref * 2.0 * (rQa*rdQbr + rdQar*rQb)*v45;
+
+        Ta += pref * (- 4.0 * QaxQb * v41);
+        Ta += pref * (- 2.0 * trQb * cross(rQa, rhat) 
+                      + 4.0 * cross(rhat, QaQbr) 
+                      - 4.0 * rQaxQbr) * v42;
         Ta += pref * 2.0 * cross(rhat,Qar) * rdQbr * v43;
 
-        Tb += pref * (4.0 * QaxQb * v41);
-        Tb += pref * (-2.0*trQa*cross(rQb, rhat) 
-                      - 4.0*cross(rQaQb, rhat) 
-                      + 4.0*cross(rQa, Qbr))*v42;
-        Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;        
 
+        Tb += pref * (+ 4.0 * QaxQb * v41);
+        Tb += pref * (- 2.0 * trQa * cross(rQb, rhat) 
+                      + 4.0 * cross(rhat, QbQar) 
+                      - 4.0 * rQbxQar) * v42;
+        Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
+
+        // Tb += pref * (+ 4.0 * QaxQb * v41);
+        // Tb += pref * (- 2.0 * trQa * cross(rQb, rhat) 
+        //               - 4.0 * cross(rQaQb, rhat) 
+        //               + 4.0 * rQaxQbr) * v42;
+        // Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
+
+        cerr << " tsum = " << Ta + Tb - cross(  *(idat.d) , F ) << "\n";
       }
     }
 

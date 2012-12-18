@@ -581,13 +581,17 @@ namespace OpenMD {
     Vector<Real, Row> result;
     unsigned int i1;
     unsigned int i2;
-    
+   
     for (unsigned int i = 0; i < Row; i++) {
+      //for (unsigned int i = 0; i < Col; i++) {
       i1 = (i+1)%Row;
       i2 = (i+2)%Row;
-      
-      for (unsigned int j =0; j < Col; j++) {        
+      //i1 = (i+1)%Col;
+      //i2 = (i+2)%Col;
+      for (unsigned int j =0; j < Col; j++) {
+      //for (unsigned int j =0; j < Row; j++) {
         result[i] = t1(i1,j) * t2(i2,j) - t1(i2,j) * t2(i1,j);
+        //result[i] = t1(j,i1) * t2(j,i2) - t1(j,i2) * t2(j,i1);
       }
     }
     

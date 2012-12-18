@@ -28,6 +28,15 @@ molecule{
     orientation( 0.0, 0.0, 0.0 );
   }
 }
+molecule{
+  name = "SSD_Q";
+  
+  atom[0]{
+    type = "SSD_Q";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}
 
 molecule{
   name = "SSD_RF";

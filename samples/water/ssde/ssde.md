@@ -9,13 +9,14 @@ component{
 }
 
 
-ensemble = NVT;
+ensemble = NVE;
 forceField = "DUFF";
-cutoffMethod = "switched";
+cutoffMethod = "shifted_potential";
+electrostaticScreeningMethod = "damped";
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
+dampingAlpha = 0.2;
 
-targetTemp =2.0;
+targetTemp = 300.0;
 targetPressure = 1.0;
 
 tauThermostat = 1e3;
@@ -29,7 +30,7 @@ useInitialExtendedSystemState = "false";
 //tempSet = "true";
 //thermalTime = 10;
 sampleTime = 1000;
-statusTime = 10;
+statusTime = 2;
   </MetaData>
   <Snapshot>
     <FrameData>

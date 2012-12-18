@@ -23,7 +23,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 2;
+runTime = 10000;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

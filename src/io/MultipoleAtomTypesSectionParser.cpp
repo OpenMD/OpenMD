@@ -181,12 +181,12 @@ namespace OpenMD {
 
       RealType trace =  quadrupoleMoments.sum();
       
-      if (fabs(trace) > OpenMD::epsilon) {
-	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of quadrupole moments is not zero at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      }
+      // if (fabs(trace) > OpenMD::epsilon) {
+      //   sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of quadrupole moments is not zero at line %d\n",
+      //   	lineNo);
+      //   painCave.isFatal = 1;
+      //   simError();
+      // }
 
     } else {
       sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
