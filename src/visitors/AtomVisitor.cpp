@@ -143,7 +143,8 @@ namespace OpenMD {
     } else if (ma.isDipole()) {
       u = datom->getDipole();
     } else if (ma.isQuadrupole()) {
-      u = datom->getQuadrupole().getColumn(2);
+      //u = datom->getQuadrupole().getColumn(2);
+      u = datom->getA().transpose()*V3Z;
     }
     atomData = new AtomData;
     atomData->setID("ATOMDATA");

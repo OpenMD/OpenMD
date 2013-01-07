@@ -9,6 +9,8 @@ P+      X
 N-      X
 D       XM
 Q       XM
+Qplane  XM
+CCl4       XM
 end AtomTypes
 
 begin DirectionalAtomTypes
@@ -16,6 +18,11 @@ begin DirectionalAtomTypes
 XM		1.7696	0.6145	1.1550  
 // XM		1.7696e9	0.6145e9	1.1550e9  
 end DirectionalAtomTypes  
+
+begin LennardJonesAtomTypes
+XM  0.238068461226  1.4
+end LennardJonesAtomTypes
+
 
 begin ChargeAtomTypes
 // name charge
@@ -28,4 +35,6 @@ begin MultipoleAtomTypes
 // name q theta phi psi Qxx Qyy Qzz
 D   d	0.0	0.0	0.0	1.0
 Q   q   0.0     0.0     0.0     0.0  0.0  1.0
+Qplane q 0.0 0.0 0.0 -2.0 0.0 2.0
+CCl4 q  0.0 0.0 0.0 -1.333 -1.333 -1.333
 end MultipoleAtomTypes

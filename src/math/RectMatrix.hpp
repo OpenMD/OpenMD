@@ -568,33 +568,29 @@ namespace OpenMD {
    * V_alpha = \sum_\beta \left[ A_{\alpha+1,\beta} * B_{\alpha+2,\beta} 
                            -A_{\alpha+2,\beta} * B_{\alpha+2,\beta} \right]
    * \f]
-   * where \f[\alpha+1\f] and \f[\alpha+2\f] are regarded as cyclic permuations of the
-   * matrix indices (i.e. for a 3x3 matrix, when \f[\alpha = 2\f], \f[\alpha + 1 = 3 \f],
-   * and \f[\alpha + 2 = 1 \f] ).
+
+   * where \f[\alpha+1\f] and \f[\alpha+2\f] are regarded as cyclic
+   * permuations of the matrix indices (i.e. for a 3x3 matrix, when
+   * \f[\alpha = 2\f], \f[\alpha + 1 = 3 \f], and \f[\alpha + 2 = 1 \f] ).
    *
    * @param t1 first matrix
    * @param t2 second matrix
    * @return the cross product (vector product) of t1 and t2
    */
   template<typename Real, unsigned int Row, unsigned int Col>
-  inline Vector<Real, Row> cross( const RectMatrix<Real, Row, Col>& t1, const RectMatrix<Real, Row, Col>& t2 ) {
+  inline Vector<Real, Row> cross( const RectMatrix<Real, Row, Col>& t1, 
+                                  const RectMatrix<Real, Row, Col>& t2 ) {
     Vector<Real, Row> result;
     unsigned int i1;
     unsigned int i2;
-   
+    
     for (unsigned int i = 0; i < Row; i++) {
-      //for (unsigned int i = 0; i < Col; i++) {
       i1 = (i+1)%Row;
       i2 = (i+2)%Row;
-      //i1 = (i+1)%Col;
-      //i2 = (i+2)%Col;
-      for (unsigned int j =0; j < Col; j++) {
-      //for (unsigned int j =0; j < Row; j++) {
-        result[i] = t1(i1,j) * t2(i2,j) - t1(i2,j) * t2(i1,j);
-        //result[i] = t1(j,i1) * t2(j,i2) - t1(j,i2) * t2(j,i1);
+      for (unsigned int j = 0; j < Col; j++) {
+        result[i] += t1(i1,j) * t2(i2,j) - t1(i2,j) * t2(i1,j);
       }
-    }
-    
+    }    
     return result;
   }
   

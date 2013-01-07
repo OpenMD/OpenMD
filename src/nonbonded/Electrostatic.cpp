@@ -107,7 +107,7 @@ namespace OpenMD {
     debyeToCm_ = 3.33564095198e-30;
     
     // number of points for electrostatic splines
-    np_ = 100;
+    np_ = 1000;
     
     // variables to handle different summation methods for long-range 
     // electrostatics:
@@ -695,7 +695,7 @@ namespace OpenMD {
     RealType DadDb, trQaQb, DadQbr, DbdQar;       // Cross-interaction scalars
     RealType rQaQbr;
     Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar; // Cross-interaction vectors
-    Vector3d rQaQb, QaQbr, QaxQb, rQaxQbr, QbQar, rQbxQar;
+    Vector3d rQaQb, QaQbr, QaxQb, QbxQa, rQaxQbr, QbQar, rQbxQar;
     Mat3x3d  QaQb, QbQa;                          // Cross-interaction matrices
 
     RealType U(0.0);  // Potential
@@ -1019,10 +1019,49 @@ namespace OpenMD {
         QbQar = QbQa * rhat;
         QaQbr = QaQb * rhat;        
         QaxQb = cross(Q_a, Q_b);
+        QbxQa = cross(Q_b, Q_a);
         rQaQbr = dot(rQa, Qbr);
         rQaxQbr = cross(rQa, Qbr);
-        rQbxQar = cross(rQb, Qar);
+        //rQbxQar = cross(rQb, Qar);
 
+
+        // First part of potential and associated forces:
+        // U += pref * (trQa * trQb) * v41;
+        // F += pref * rhat * (trQa * trQb) * v44;
+        // Ta += 0.0;
+        // Tb += 0.0;
+
+        // cerr << "Aa:\n";
+        // cerr << *(idat.A1)  << "\n\n";
+
+        // cerr << "Ab:\n";
+        // cerr << *(idat.A2)  << "\n\n";
+
+        // cerr << "Qa:\n";
+        // cerr << Q_a << "\n\n";
+        // cerr << "Qb:\n";
+        // cerr << Q_b << "\n\n";
+
+         
+        // Second part of potential and associated forces:
+        // Probably suspect (particularly torques):
+        // cerr << "trQaQb = " << trQaQb << "\n";
+
+        // U += pref * 2.0 * trQaQb * v41;
+        // F += pref * rhat * (2.0 * trQaQb) * v44;
+        // Ta += pref * (-4.0*QaxQb) * v41;
+        // Tb += pref * (-4.0*QbxQa) * v41;
+
+        // cerr << "QaxQb = " << QaxQb << "\n";
+        // cerr << "QbxQa = " << QbxQa << "\n";
+
+        // Third part of potential:
+        // U += pref * (trQa * rdQbr) * v42;
+        // F += pref * rhat * (trQa * rdQbr) * v45;
+        // F += pref * 2.0 * (trQa * rQb) * v44;
+        // Ta += 0.0;
+        // Tb += pref * 2.0 * trQa * cross(rhat, Qbr) * v42;
+        
         U  += pref * (trQa * trQb + 2.0 * trQaQb) * v41;
         U  += pref * (trQa * rdQbr + trQb * rdQar  + 4.0 * rQaQbr) * v42;
         U  += pref * (rdQar * rdQbr) * v43;
@@ -1045,7 +1084,7 @@ namespace OpenMD {
         Tb += pref * (+ 4.0 * QaxQb * v41);
         Tb += pref * (- 2.0 * trQa * cross(rQb, rhat) 
                       + 4.0 * cross(rhat, QbQar) 
-                      - 4.0 * rQbxQar) * v42;
+                      + 4.0 * rQaxQbr) * v42;
         Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
 
         // Tb += pref * (+ 4.0 * QaxQb * v41);
@@ -1054,7 +1093,7 @@ namespace OpenMD {
         //               + 4.0 * rQaxQbr) * v42;
         // Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
 
-        cerr << " tsum = " << Ta + Tb - cross(  *(idat.d) , F ) << "\n";
+        //  cerr << " tsum = " << Ta + Tb - cross(  *(idat.d) , F ) << "\n";
       }
     }
 

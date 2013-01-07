@@ -1187,6 +1187,8 @@ namespace OpenMD {
       idat.A2 = &(snap_->atomData.aMat[atom2]);
     }
 
+    RealType ct = dot(idat.A1->getColumn(2), idat.A2->getColumn(2));
+
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(snap_->atomData.torque[atom1]);
       idat.t2 = &(snap_->atomData.torque[atom2]);
