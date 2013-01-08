@@ -106,8 +106,8 @@ namespace OpenMD {
     angstromToM_ = 1.0e-10;
     debyeToCm_ = 3.33564095198e-30;
     
-    // number of points for electrostatic splines
-    np_ = 1000;
+    // Default number of points for electrostatic splines
+    np_ = 140;
     
     // variables to handle different summation methods for long-range 
     // electrostatics:
@@ -246,7 +246,7 @@ namespace OpenMD {
       b3c = (5.0 * b2c + pow(2.0*a2, 3) * expTerm * invArootPi) / r2;
       b4c = (7.0 * b3c + pow(2.0*a2, 4) * expTerm * invArootPi) / r2;
       b5c = (9.0 * b4c + pow(2.0*a2, 5) * expTerm * invArootPi) / r2;
-      selfMult_ = b0c  +  2.0 * a2 * invArootPi;
+      selfMult_ = b0c + a2 * invArootPi;
     } else {
       a2 = 0.0;
       b0c = 1.0 / r;
@@ -279,6 +279,11 @@ namespace OpenMD {
     // working variables for Taylor expansion:
     RealType rmRc, rmRc2, rmRc3, rmRc4;
 
+    // Approximate using splines using a maximum of 0.1 Angstroms
+    // between points.
+    int nptest = int((cutoffRadius_ + 2.0) / 0.1);
+    np_ = (np_ > nptest) ? np_ : nptest;
+  
     // Add a 2 angstrom safety window to deal with cutoffGroups that
     // have charged atoms longer than the cutoffRadius away from each
     // other.  Splining is almost certainly the best choice here.
@@ -1088,7 +1093,7 @@ namespace OpenMD {
         *(idat.t2) += *(idat.sw) * indirect_Tb;
     }
     return;
-  }  
+  }
     
   void Electrostatic::calcSelfCorrection(SelfData &sdat) {
 
@@ -1131,8 +1136,8 @@ namespace OpenMD {
       
     case esm_SHIFTED_FORCE:
     case esm_SHIFTED_POTENTIAL:
-      if (i_is_Charge) {        
-        self = -0.5 * selfMult_ * C_a * (C_a + *(sdat.skippedCharge)) * pre11_;
+      if (i_is_Charge) {
+        self = - selfMult_ * C_a * (C_a + *(sdat.skippedCharge)) * pre11_;
         (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
       }
       break;
