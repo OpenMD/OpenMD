@@ -526,7 +526,6 @@ namespace OpenMD {
         }      
       }
         return roots;
-        break;
       }
 
       return roots; // should be empty if you got here

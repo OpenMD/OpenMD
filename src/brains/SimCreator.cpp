@@ -99,9 +99,9 @@ namespace OpenMD {
 #ifdef IS_MPI            
       int streamSize;
       const int masterNode = 0;
-      int commStatus;
+
       if (worldRank == masterNode) {
-        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 #endif                 
         SimplePreprocessor preprocessor;
         preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
@@ -109,27 +109,23 @@ namespace OpenMD {
 #ifdef IS_MPI            
         //brocasting the stream size
         streamSize = ppStream.str().size() +1;
-        commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
-
-        commStatus = MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
-            
-                
+        MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
+        MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI::CHAR, masterNode);
+                           
       } else {
-
-        commStatus = MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 
         //get stream size
-        commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
+        MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
 
         char* buf = new char[streamSize];
         assert(buf);
                 
         //receive file content
-        commStatus = MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+        MPI::COMM_WORLD.Bcast(buf, streamSize, MPI::CHAR, masterNode);
                 
         ppStream.str(buf);
         delete [] buf;
-
       }
 #endif            
       // Create a scanner that reads from the input stream
