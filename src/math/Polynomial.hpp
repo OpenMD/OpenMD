@@ -527,8 +527,6 @@ namespace OpenMD {
       }
         return roots;
       }
-
-      return roots; // should be empty if you got here
     }
     
   private:
