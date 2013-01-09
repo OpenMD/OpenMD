@@ -190,6 +190,7 @@ namespace QuantLib {
             painCave.severity = OPENMD_ERROR;
             simError();
         }
+        return out;
     }
 
 }

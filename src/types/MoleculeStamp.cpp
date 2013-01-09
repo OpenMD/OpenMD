@@ -144,7 +144,7 @@ namespace OpenMD {
     // negative number at the very beginning
 
     for(unsigned int i = 0; i < atom2Rigidbody.size(); ++i) {
-      atom2Rigidbody[i] = -1 - i;
+      atom2Rigidbody[i] = -1 - int(i);
     }
     for (int i = 0; i < getNRigidBodies(); ++i) {
       RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
