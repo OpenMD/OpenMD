@@ -119,7 +119,7 @@ namespace OpenMD{
         if (nProc % i == 0) nColumns = i;        
       }
         
-      int nRows = nProc / nColumns;
+      // int nRows = nProc / nColumns;
       rowIndex_ = myRank / nColumns;      
       columnIndex_ = myRank % nColumns;
 

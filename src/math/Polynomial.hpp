@@ -338,7 +338,6 @@ namespace OpenMD {
         roots.push_back( -fC0 / fC1);
         return roots;
       }
-        break;      
       case 2: {
         Real fC2 = getCoefficient(2);
         Real fC1 = getCoefficient(1);
@@ -347,13 +346,13 @@ namespace OpenMD {
         if (abs(fDiscr) <= fEpsilon) {
           fDiscr = (Real)0.0;
         }
-      
+        
         if (fDiscr < (Real)0.0) {  // complex roots only
           return roots;
         }
-      
+        
         Real fTmp = ((Real)0.5)/fC2;
-      
+        
         if (fDiscr > (Real)0.0) { // 2 real roots
           fDiscr = sqrt(fDiscr);
           roots.push_back(fTmp*(-fC1 - fDiscr));
@@ -362,9 +361,7 @@ namespace OpenMD {
           roots.push_back(-fTmp * fC1);  // 1 real root
         }
       }
-        return roots;
-        break;
-      
+        return roots;      
       case 3: {
         Real fC3 = getCoefficient(3);
         Real fC2 = getCoefficient(2);
@@ -431,7 +428,6 @@ namespace OpenMD {
         }
       }
         return roots;
-        break;
       case 4: {
         Real fC4 = getCoefficient(4);
         Real fC3 = getCoefficient(3);
@@ -517,7 +513,6 @@ namespace OpenMD {
         }
       }
         return roots;
-        break;
       default: {
         DynamicRectMatrix<Real> companion = CreateCompanion();
         JAMA::Eigenvalue<Real> eig(companion);
@@ -536,7 +531,7 @@ namespace OpenMD {
 
       return roots; // should be empty if you got here
     }
-   
+    
   private:
         
     PolynomialPairMap polyPairMap_;

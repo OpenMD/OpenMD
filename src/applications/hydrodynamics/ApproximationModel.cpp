@@ -72,7 +72,6 @@ namespace OpenMD {
   
   bool ApproximationModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
     
-    bool ret = true;
     HydroProp* cr = new HydroProp();
     HydroProp* cd = new HydroProp();
     calcHydroPropsAtCR(beads_, viscosity, temperature, cr);

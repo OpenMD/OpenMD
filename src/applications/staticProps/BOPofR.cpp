@@ -181,7 +181,7 @@ namespace OpenMD {
     std::vector<RealType> Q;
     std::vector<ComplexType> W;
     std::vector<ComplexType> W_hat;
-    int nBonds, Nbonds;
+    int nBonds;
     SphericalHarmonic sphericalHarmonic;
     int i;
     
@@ -200,7 +200,6 @@ namespace OpenMD {
     Q.resize(lMax_+1);
     W.resize(lMax_+1);
     W_hat.resize(lMax_+1);
-    Nbonds = 0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);

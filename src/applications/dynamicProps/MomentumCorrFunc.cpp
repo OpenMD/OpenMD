@@ -76,8 +76,6 @@ namespace OpenMD {
   void MomentumCorrFunc::correlateFrames(int frame1, int frame2) {
     SimInfo::MoleculeIterator mi1;
     SimInfo::MoleculeIterator mi2;
-    Molecule::IntegrableObjectIterator mj1;
-    Molecule::IntegrableObjectIterator mj2;
     Molecule* mol1;
     Molecule* mol2;
     Molecule::AtomIterator ai1;

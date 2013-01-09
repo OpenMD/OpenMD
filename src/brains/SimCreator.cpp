@@ -526,7 +526,6 @@ namespace OpenMD {
     int nTarget;
     int done;
     int i;
-    int j;
     int loops;
     int which_proc;
     int nProcessors;
