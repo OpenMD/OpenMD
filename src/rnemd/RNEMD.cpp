@@ -1723,7 +1723,7 @@ namespace OpenMD {
   void RNEMD::writeReal(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(bin < nBins_);
+    assert(int(bin) < nBins_);
     RealType s;
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getAverage(s);
@@ -1742,7 +1742,7 @@ namespace OpenMD {
   void RNEMD::writeVector(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(bin < nBins_);
+    assert(int(bin) < nBins_);
     Vector3d s;
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getAverage(s);
     if (isinf(s[0]) || isnan(s[0]) || 
@@ -1761,7 +1761,7 @@ namespace OpenMD {
   void RNEMD::writeRealStdDev(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(bin < nBins_);
+    assert(int(bin) < nBins_);
     RealType s;
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getStdDev(s);
@@ -1780,7 +1780,7 @@ namespace OpenMD {
   void RNEMD::writeVectorStdDev(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(bin < nBins_);
+    assert(int(bin) < nBins_);
     Vector3d s;
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getStdDev(s);
     if (isinf(s[0]) || isnan(s[0]) || 
