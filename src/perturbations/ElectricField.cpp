@@ -78,7 +78,7 @@ namespace OpenMD {
     Vector3d EFfrc;				
     Vector3d pos;
     RealType chrg;
-    RealType pot, fieldPot, moment;
+    RealType pot, fieldPot;
     RealType chrgToKcal = 23.0609;
     RealType debyeToKcal = 4.8018969509;
     bool isCharge;

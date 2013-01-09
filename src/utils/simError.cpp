@@ -72,10 +72,10 @@ void initSimError( void ){
 
 int simError( void ) {
   
-  int myError = 1;
   char errorMsg[MAX_SIM_ERROR_MSG_LENGTH];
 
 #ifdef IS_MPI
+  int myError = 1;
   int isError;
   char nodeMsg[MAX_SIM_ERROR_MSG_LENGTH];
 #endif

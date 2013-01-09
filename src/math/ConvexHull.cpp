@@ -80,7 +80,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   facetT *facet;
   setT *vertices;
   int curlong, totlong;
-  pointT *intPoint;
+  // pointT *intPoint;
   
   std::vector<double> ptArray(numpoints*dim_);
 
@@ -205,9 +205,9 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   } //qh_new_qhull
 
 #endif
-
-  intPoint = qh interior_point;
-  RealType calcvol = 0.0;
+  // commented out below, so comment out here also.
+  // intPoint = qh interior_point;
+  // RealType calcvol = 0.0;
   FORALLfacets {  
     Triangle face;
     //Qhull sets the unit normal in facet->normal

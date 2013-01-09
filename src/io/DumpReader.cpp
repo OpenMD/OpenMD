@@ -141,7 +141,7 @@ namespace OpenMD {
       prevPos = currPos;
       bool foundOpenSnapshotTag = false;
       bool foundClosedSnapshotTag = false;
-      bool foundOpenSiteDataTag = false;
+
       while(inFile_->getline(buffer, bufferSize)) {
         ++lineNo;
         

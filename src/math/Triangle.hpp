@@ -189,7 +189,6 @@ namespace OpenMD {
       RealType t2 = -a1 + b1 + c1;
       RealType t3 =  a1 - b1 + c1;
       RealType t4 =  a1 + b1 - c1;
-      RealType junk = t1*t2*t3*t4;
       return a1 * b1 * c1 / sqrt(t1 * t2 * t3 * t4);
     }
       

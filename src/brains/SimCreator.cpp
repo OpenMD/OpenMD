@@ -968,13 +968,10 @@ namespace OpenMD {
   }
   
   void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
-    Globals* simParams;
-
-    simParams = info->getSimParams();
     
     DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
-
+    
     if (nframes > 0) {
       reader.readFrame(nframes - 1);
     } else {

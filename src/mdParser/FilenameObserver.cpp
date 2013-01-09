@@ -11,4 +11,3 @@ void FilenameObserver::notify(const std::string& filename) {
     if (parser_)
         parser_->setFilename(filename);
 }
-        

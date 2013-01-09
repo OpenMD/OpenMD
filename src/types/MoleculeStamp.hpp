@@ -111,7 +111,7 @@ namespace OpenMD {
 
     template <class Cont, class T>
     bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
-      typename Cont::iterator i;
+      // typename Cont::iterator i;
       unsigned int index = stamp->getIndex();
       bool ret = false;
       size_t size = cont.size();

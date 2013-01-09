@@ -690,7 +690,7 @@ namespace OpenMD {
     Vector3d D_a, D_b;  // Dipoles (space-fixed)
     Mat3x3d  Q_a, Q_b;  // Quadrupoles (space-fixed)
 
-    RealType ri, ri2, ri3, ri4;                  // Distance utility scalars
+    RealType ri;                                 // Distance utility scalar
     RealType rdDa, rdDb;                         // Dipole utility scalars
     Vector3d rxDa, rxDb;                         // Dipole utility vectors
     RealType rdQar, rdQbr, trQa, trQb;           // Quadrupole utility scalars
@@ -735,7 +735,6 @@ namespace OpenMD {
 
     ri = 1.0 /  *(idat.rij);
     Vector3d rhat =  *(idat.d)  * ri;
-    ri2 = ri * ri;
       
     // logicals
 

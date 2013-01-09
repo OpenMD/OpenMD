@@ -111,7 +111,7 @@ namespace OpenMD {
         
         bool vdwExplicit = false;
         bool metExplicit = false;
-        bool hbExplicit = false;
+        // bool hbExplicit = false;
                        
         key = make_pair(atype1, atype2);
         

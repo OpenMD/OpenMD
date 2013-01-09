@@ -74,13 +74,14 @@ AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), options_("q
 void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) { 
  
   int numpoints = bodydoubles.size();
-  bool alphashape=true;
+  // bool alphashape=true;
   
   Triangles_.clear();
   
-  vertexT *vertex, **vertexp;
+  vertexT *vertex;
+  // vertexT **vertexp;
   facetT *facet, *neighbor;
-  setT *vertices, *verticestop, *verticesbottom;
+  // setT *vertices, *verticestop, *verticesbottom;
   int curlong, totlong;
   pointT *interiorPoint;
   

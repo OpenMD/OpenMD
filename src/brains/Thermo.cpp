@@ -324,7 +324,6 @@ namespace OpenMD {
       Molecule* mol;
       Atom* atom;
       RealType charge;
-      RealType moment(0.0);
       Vector3d ri(0.0);
       Vector3d dipoleVector(0.0);
       Vector3d nPos(0.0);
@@ -440,7 +439,6 @@ namespace OpenMD {
     RealType kinetic;
     RealType potential;
     RealType eatom;
-    RealType AvgE_a_ = 0;
     // Convective portion of the heat flux
     Vector3d heatFluxJc = V3Zero;
 

@@ -63,7 +63,6 @@ namespace OpenMD {
   
   void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
-    NonBondedInteractionType* nbiType = NULL;
     int nTokens = tokenizer.countTokens();
     
     if (nTokens < 3) {
