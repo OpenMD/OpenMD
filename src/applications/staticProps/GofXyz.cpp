@@ -151,9 +151,9 @@ namespace OpenMD {
     
     Vector3d newR12 = i->second * r12;
     // x, y and z's possible values range -halfLen_ to halfLen_
-    int xbin = (newR12.x() + halfLen_) / deltaR_;
-    int ybin = (newR12.y() + halfLen_) / deltaR_;
-    int zbin = (newR12.z() + halfLen_) / deltaR_;
+    int xbin = int( (newR12.x() + halfLen_) / deltaR_);
+    int ybin = int( (newR12.y() + halfLen_) / deltaR_);
+    int zbin = int( (newR12.z() + halfLen_) / deltaR_);
 
     if (xbin < nRBins_ && xbin >=0 &&
         ybin < nRBins_ && ybin >= 0 &&

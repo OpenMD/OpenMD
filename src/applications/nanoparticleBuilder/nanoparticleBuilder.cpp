@@ -133,7 +133,7 @@ int main(int argc, char *argv []) {
   Vector3d myLoc;
   RealType myR;
  
-  for (int i = 0; i < sites.size(); i++) 
+  for (unsigned int i = 0; i < sites.size(); i++) 
     isVacancy.push_back(false);
 
   if (args_info.vacancyPercent_given) {
@@ -157,7 +157,7 @@ int main(int argc, char *argv []) {
       }
       if (vIR >= 0.0 && vOR <= particleRadius && vOR >= vIR) {
         
-        for (int i = 0; i < sites.size(); i++) {
+        for (unsigned int i = 0; i < sites.size(); i++) {
           myLoc = sites[i];
           myR = myLoc.length();
           if (myR >= vIR && myR <= vOR) {
@@ -177,9 +177,9 @@ int main(int argc, char *argv []) {
         simError();
 
         isVacancy.clear();
-        for (int i = 0; i < sites.size(); i++) {
+        for (unsigned int i = 0; i < sites.size(); i++) {
           bool vac = false;
-          for (int j = 0; j < vacancyTargets.size(); j++) {
+          for (unsigned int j = 0; j < vacancyTargets.size(); j++) {
             if (i == vacancyTargets[j]) vac = true;
           }
           isVacancy.push_back(vac);
@@ -305,7 +305,7 @@ int main(int argc, char *argv []) {
     }
   } else {
 
-    for (int i = 0; i < shellRadii.size(); i++) {
+    for (unsigned int i = 0; i < shellRadii.size(); i++) {
       if (shellRadii.at(i) > particleRadius + 1e-6 ) {
         sprintf(painCave.errMsg, "One of the shellRadius values exceeds the particle Radius.");
         painCave.isFatal = 1;
@@ -326,7 +326,7 @@ int main(int argc, char *argv []) {
     simError();
     /* Random particle is the default case*/
 
-    for (int i = 0; i < sites.size(); i++) 
+    for (unsigned int i = 0; i < sites.size(); i++) 
       if (!isVacancy[i]) ids.push_back(i);
     
     std::random_shuffle(ids.begin(), ids.end());
@@ -341,7 +341,7 @@ int main(int argc, char *argv []) {
     nMol.clear();
     nMol.resize(nComponents);
 
-    for (int i = 0; i < sites.size(); i++) {
+    for (unsigned int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
       myR = myLoc.length();
       smallestSoFar = particleRadius;      
@@ -383,7 +383,7 @@ int main(int argc, char *argv []) {
                             NewInfo->getForceField());
     
     if (!args_info.molFraction_given) {
-      for (int n = 0; n < sites.size(); n++) {
+      for (unsigned int n = 0; n < sites.size(); n++) {
         if (!isVacancy[n]) {
           if (componentFromSite[n] == i) {
             mol = NewInfo->getMoleculeByGlobalIndex(l);
@@ -454,7 +454,7 @@ void createMdFile(const std::string&oldMdFileName,
   newMdFile.open(newMdFileName.c_str());
   oldMdFile.getline(buffer, MAXLEN);
 
-  int i = 0;
+  unsigned int i = 0;
   while (!oldMdFile.eof()) {
 
     //correct molecule number

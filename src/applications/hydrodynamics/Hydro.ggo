@@ -2,33 +2,37 @@
 # for parsing command line arguments useing getopt and getoptlong.
 # gengetopt is available from:
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
+# invoke with:
+# gengetopt < Hydro.ggo --file-name=HydroCmd --unamed-opts
+
 package "Hydro"
 version "1.0"
 purpose
       "
- +-----------------------------------------------------------------------+
- |    ____                    __  ___ ____                               |
- |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics |
- |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).    |
- | / /_/ / /_/ /  __/ / / // /  / // /_/ /                               |
- | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2009 by the  |
- |     /_/                                   University of Notre Dame.   |
- |                                                                       |
- |                                           http://www.openmd.net       |
- |                                                                       |
- | OpenMD is an OpenScience project.  All source code is available for   |
- | any use whatsoever under a BSD-style license.                         |
- |                                                                       |
- | Support OpenScience!  If you use OpenMD or its source code in your    |
- | research, please cite the appropriate papers when you publish your    |
- | work.  Good starting points are:                                      |
- |                                                                       |
- | [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).              |
- | [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).           |
- | [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).           |
- | [4]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).                         |
- +-----------------------------------------------------------------------+"
-
++--------------------------------------------------------------------------+
+|    ____                    __  ___ ____                                  |
+|   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |
+|  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |
+| / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |
+| \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2013 by the     |
+|     /_/                                   University of Notre Dame.      |
+|                                                                          |
+|                                           http://www.openmd.net          |
+|                                                                          |
+| OpenMD is an OpenScience project.  All source code is available for      |
+| any use whatsoever under a BSD-style license.                            |
+|                                                                          |
+| Support OpenScience!  If you use OpenMD or its source code in your       |
+| research, please cite the appropriate papers when you publish your       |
+| work.  Good starting points are:                                         |
+|                                                                          |
+| [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).                  |
+| [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).               |
+| [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).               |
+| [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).                |
+| [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |
+| [6] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                   |
++--------------------------------------------------------------------------+"
 
 # Options
 option	"input"		i	"input MetaData (md) file"					string	typestr="filename" 	yes
