@@ -54,6 +54,7 @@ namespace OpenMD {
     HullFinder(SimInfo* si);
     
     OpenMDBitSet findHull();
+    OpenMDBitSet findHull(int frame);
     
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;

@@ -67,6 +67,7 @@ namespace OpenMD {
 
     int i;
     int j;
+    int coincident = 0;
     StuntDouble* sd1;
     StuntDouble* sd2;
 
@@ -77,11 +78,12 @@ namespace OpenMD {
            sd2 = seleMan2_.nextSelected(j)) {
         
         if (sd1->getGlobalIndex() == sd2->getGlobalIndex()) {
-          histogram_[timeBin] += 1.0;
+          coincident++;
         }
       }
     }
 
+    histogram_[timeBin] += coincident;
     count_[timeBin] += seleMan1_.getSelectionCount();
   }
 

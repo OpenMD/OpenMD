@@ -2,6 +2,9 @@
 # for parsing command line arguments useing getopt and getoptlong.
 # gengetopt is available from:
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
+# invoke with:
+# gengetopt < StaticProps.ggo --file-name=StaticPropsCmd --unamed-opts
+
 package "StaticProps"
 version "1.00"
 
@@ -24,6 +27,7 @@ option  "sele2"         -       "select the second stuntdouble set" string  type
 option  "sele3"         -       "select the third stuntdouble set" string  typestr="selection script"      no
 option  "refsele"       -       "select reference (use and only use with --gxyz)" string  typestr="selection script"     no
 option  "comsele"       -       "select stunt doubles for center-of-mass reference point" string typestr="selection script"  no
+option  "seleoffset"    -       "global index offset for a second object (used to define a vector between sites in molecule)" int no
 option  "molname"       -       "molecule name" string       no
 option  "begin"         -       "begin internal index"                                 int                  no
 option  "end"           -       "end internal index"                                 int                  no

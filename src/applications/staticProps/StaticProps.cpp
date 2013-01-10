@@ -118,9 +118,8 @@ int main(int argc, char* argv[]){
     if (sele2Env) {
       sele2 = sele2Env;            
     } else { 
-      //It seems likely (from previous discussions) that if sele2 is not specified, then the default behavior
-      //should not be 'select all' but rather what is already intended for sele1
-      //JRM 8/22/12
+      //If sele2 is not specified, then the default behavior
+      //should be what is already intended for sele1
       sele2 = sele1;
       //sele2 = "select all";
     }
@@ -237,7 +236,11 @@ int main(int argc, char* argv[]){
       if (args_info.sele2_given) 
         analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
       else 
-        analyser  = new P2OrderParameter(info, dumpFileName, sele1);
+        if (args_info.seleoffset_given) 
+          analyser  = new P2OrderParameter(info, dumpFileName, sele1, 
+                                           args_info.seleoffset_arg);
+        else 
+          analyser  = new P2OrderParameter(info, dumpFileName, sele1);
     } else {
       sprintf( painCave.errMsg,
 	       "At least one selection script (--sele1) must be specified when calculating P2 order parameters");

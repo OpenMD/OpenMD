@@ -123,4 +123,39 @@ namespace OpenMD {
     return bsResult;
   }
 
+  OpenMDBitSet HullFinder::findHull(int frame) {
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getSnapshot(frame);
+    OpenMDBitSet bsResult(nStuntDoubles_);
+#ifdef HAVE_QHULL
+    surfaceMesh_->computeHull(localSites_);
+#else
+    sprintf( painCave.errMsg,
+             "HullFinder : Hull calculation is not possible without libqhull.\n"
+             "\tPlease rebuild OpenMD with qhull enabled.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+#endif
+    
+    std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
+    int nTriangles = sMesh.size();
+    // Loop over the mesh faces
+    std::vector<Triangle>::iterator face;
+    std::vector<StuntDouble*>::iterator vertex;
+
+    // This will work in parallel because the triangles returned by the mesh
+    // have a NULL stuntDouble if this processor doesn't own the 
+    
+    for (face = sMesh.begin(); face != sMesh.end(); ++face) {
+      Triangle thisTriangle = *face;
+      std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
+      for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
+        if ((*vertex) != NULL) {
+          bsResult.setBitOn((*vertex)->getGlobalIndex());          
+        }
+      }
+    }
+    return bsResult;
+  }
+
 }
