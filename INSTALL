@@ -8,7 +8,7 @@ Requirements
   To build OpenMD, you need the following:
 
    * The source code for the latest release of OpenMD
-   * C++ and C compilers
+   * A C++ compiler
    * CMake 2.6 or newer
 
   OpenMD uses CMake as its build system. CMake is an open source
