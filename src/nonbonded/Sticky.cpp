@@ -112,7 +112,7 @@ namespace OpenMD {
       mixer.rup  = 0.5 * ( sticky1.getRup() + sticky2.getRup() );
       mixer.rbig = max(mixer.ru, mixer.rup);
       mixer.w0  = sqrt( sticky1.getW0()   * sticky2.getW0()  );
-      mixer.v0  = sqrt( sticky1.getW0()   * sticky2.getV0()  );
+      mixer.v0  = sqrt( sticky1.getV0()   * sticky2.getV0()  );
       mixer.v0p = sqrt( sticky1.getV0p()  * sticky2.getV0p() );
       mixer.isPower = sticky1.isStickyPower() && sticky2.isStickyPower();
 
@@ -167,6 +167,7 @@ namespace OpenMD {
       RealType rbig = mixer.rbig;
       bool isPower = mixer.isPower;
       
+      cerr << rl << " " << ru << " " << rlp << " " << rup << " " << rbig << " " << w0 << " " << v0 << " " << v0p << "\n";
       if ( *(idat.rij) <= rbig) {
         
         RealType r3 = *(idat.r2) * *(idat.rij);
@@ -233,6 +234,7 @@ namespace OpenMD {
           }
         }
         
+
         RealType wi = 2.0*(xi2-yi2)*zi / r3;
         RealType wj = 2.0*(xj2-yj2)*zj / r3;
         RealType w = wi+wj;
@@ -284,6 +286,7 @@ namespace OpenMD {
                         0.0);
         
         if (isPower) {
+          cerr << "This is probably an error!\n";
           RealType frac1 = 0.25;
           RealType frac2 = 0.75;      
           RealType wi2 = wi*wi;
@@ -328,7 +331,7 @@ namespace OpenMD {
         Vector3d fjj = A2trans * radcomj;
         
         // now assemble these with the radial-only terms:
-        
+       
         *(idat.f1) += RealType(0.5) * ((v0*dsdr*w + v0p*dspdr*wp) * *(idat.d) / 
                                        *(idat.rij)  + fii - fjj);
         
