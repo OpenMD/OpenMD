@@ -81,6 +81,9 @@ IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
      COMMAND ${GENERATELOGS} "--group-by-day" "--include-rev"
      "--linelen=78" "--output=${PROJECT_BINARY_DIR}/ChangeLog" "${PROJECT_SOURCE_DIR}"
   )
+ELSE()
+  SET(SVN_REV Release)
+  ADD_DEFINITIONS( -DSVN_REV=Release )
 ENDIF()
 
 check_include_file_cxx(conio.h      HAVE_CONIO_H)
