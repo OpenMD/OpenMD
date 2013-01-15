@@ -195,7 +195,7 @@ namespace OpenMD {
 
     StatsData hydrogenbonding_potential;
     hydrogenbonding_potential.units =  "kcal/mol";
-    hydrogenbonding_potential.title =  "Metallic Potential";    
+    hydrogenbonding_potential.title =  "Hydrogen Bonding Potential";    
     hydrogenbonding_potential.dataType = "RealType";
     hydrogenbonding_potential.accumulator = new Accumulator();
     data_[HYDROGENBONDING_POTENTIAL] = hydrogenbonding_potential;

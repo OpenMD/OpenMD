@@ -112,7 +112,7 @@ namespace OpenMD {
       mixer.rup  = 0.5 * ( sticky1.getRup() + sticky2.getRup() );
       mixer.rbig = max(mixer.ru, mixer.rup);
       mixer.w0  = sqrt( sticky1.getW0()   * sticky2.getW0()  );
-      mixer.v0  = sqrt( sticky1.getW0()   * sticky2.getV0()  );
+      mixer.v0  = sqrt( sticky1.getV0()   * sticky2.getV0()  );
       mixer.v0p = sqrt( sticky1.getV0p()  * sticky2.getV0p() );
       mixer.isPower = sticky1.isStickyPower() && sticky2.isStickyPower();
 
@@ -303,6 +303,8 @@ namespace OpenMD {
           dspdr = 0.0;
         }
         
+
+
         *(idat.vpair) += RealType(0.5)*(v0*s*w + v0p*sp*wp);
         (*(idat.pot))[HYDROGENBONDING_FAMILY] += RealType(0.5)*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
         
