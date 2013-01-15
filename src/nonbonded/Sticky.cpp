@@ -167,7 +167,6 @@ namespace OpenMD {
       RealType rbig = mixer.rbig;
       bool isPower = mixer.isPower;
       
-      cerr << rl << " " << ru << " " << rlp << " " << rup << " " << rbig << " " << w0 << " " << v0 << " " << v0p << "\n";
       if ( *(idat.rij) <= rbig) {
         
         RealType r3 = *(idat.r2) * *(idat.rij);
