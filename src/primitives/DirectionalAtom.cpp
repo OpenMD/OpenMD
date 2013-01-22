@@ -106,10 +106,10 @@ namespace OpenMD {
   
   void DirectionalAtom::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
- 
+
     if (atomType_->isMultipole()) {
       RotMat3x3d atrans = a.transpose();
-      
+
       if (atomType_->isDipole()) {
         ((snapshotMan_->getCurrentSnapshot())->*storage_).dipole[localIndex_] = atrans * dipole_;
       }

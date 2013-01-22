@@ -56,39 +56,12 @@ namespace OpenMD {
     
     int nAtoms = info->getNGlobalAtoms();
     int nRigidBodies = info->getNGlobalRigidBodies();
-    
-    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
-    set<AtomType*>::iterator i;
-    bool hasDirectionalAtom = false;
-    bool hasDipole = false;    
-    bool hasQuadrupole = false;    
-    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
-      if ((*i)->isDirectional()){
-        hasDirectionalAtom = true;
-      }
-      if ((*i)->isDipole()){
-        hasDipole = true;
-      }
-      if ((*i)->isQuadrupole()){
-        hasQuadrupole = true;
-      }
-    }
-    
-    if (nRigidBodies > 0 || hasDirectionalAtom) {
-      storageLayout_ |= DataStorage::dslAmat;
-      if(storageLayout_ & DataStorage::dslVelocity) {
-        storageLayout_ |= DataStorage::dslAngularMomentum;
-      }
-      if (storageLayout_ & DataStorage::dslForce) {
-        storageLayout_ |= DataStorage::dslTorque;
-      }
-      if (hasDipole) {
-        storageLayout |= DataStorage::dslDipole;
-      }
-      if (hasQuadrupole) {
-        storageLayout |= DataStorage::dslQuadrupole;
-      }
-    }
+
+    // Request maximum needed storage for the simulation (including of
+    // whatever was passed down by the individual correlation
+    // function).
+
+    storageLayout_ = info->getStorageLayout() | storageLayout;
 
     bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, 
                                       memSize_);

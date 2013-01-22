@@ -801,6 +801,8 @@ namespace OpenMD {
       storageLayout |= DataStorage::dslFlucQForce;
     }
 
+    info->setStorageLayout(storageLayout);
+
     return storageLayout;
   }
 

@@ -270,7 +270,15 @@ namespace OpenMD{
     SnapshotManager* getSnapshotManager() {
       return sman_;
     }
-
+    /** Returns the storage layout (computed by SimCreator) */
+    int getStorageLayout() {
+      return storageLayout_;
+    }
+    /** Sets the storage layout (computed by SimCreator) */
+    void setStorageLayout(int sl) {
+      storageLayout_ = sl;
+    }
+    
     /** Sets the snapshot manager. */
     void setSnapshotManager(SnapshotManager* sman);
         
@@ -604,6 +612,7 @@ namespace OpenMD{
 
     PropertyMap properties_;       /**< Generic Properties can be added */
     SnapshotManager* sman_;        /**< SnapshotManager (handles particle positions, etc.) */
+    int storageLayout_;            /**< Bits to tell how much data to store on each object */
 
     /** 
      * The reason to have a local index manager is that when molecule
@@ -623,7 +632,6 @@ namespace OpenMD{
     string dumpFileName_;
     string statFileName_;
     string restFileName_;
-        
 
     bool topologyDone_;  /** flag to indicate whether the topology has
                              been scanned and all the relevant
