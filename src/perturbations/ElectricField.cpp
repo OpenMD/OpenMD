@@ -92,6 +92,8 @@ namespace OpenMD {
 	  isCharge = false;
 	  chrg = 0.0;
 
+          atom->addElectricField(EF * chrgToKcal);
+
 	  FixedChargeAdapter fca = FixedChargeAdapter(atom->getAtomType());
 	  if ( fca.isFixedCharge() ) {
 	    isCharge = true;
@@ -143,5 +145,4 @@ namespace OpenMD {
       snap->setLongRangePotential(longRangePotential);
     }
   }
-
 }

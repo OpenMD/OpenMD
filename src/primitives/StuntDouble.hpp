@@ -1142,35 +1142,61 @@ namespace OpenMD{
     }
 
     /**
-     * Sets  the previous electric field of this stuntDouble
-     * @param pos  new electric field 
+     * Sets the previous electric field of this stuntDouble
+     * @param eField  new electric field 
      * @see #getElectricField
      */         
-    void setPrevElectricField(const Vector3d& pos) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] = pos;
+    void setPrevElectricField(const Vector3d& eField) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] = eField;
     }
        
     /**
-     * Sets  the current electric field of this stuntDouble
-     * @param pos  new electric field 
+     * Sets the current electric field of this stuntDouble
+     * @param eField  new electric field 
      */         
-    void setElectricField(const Vector3d& pos) {
-      DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
-      data.electricField[localIndex_] = pos;
-      //((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] = pos;
+    void setElectricField(const Vector3d& eField) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] = eField;
     }
 
     /**
-     * Sets  the electric field of this stuntDouble in specified snapshot
-     * @param pos electric field to be set 
+     * Sets the electric field of this stuntDouble in specified snapshot
+     * @param eField electric field to be set 
      * @param snapshotNo 
      * @see #getElectricField
      */         
-    void setElectricField(const Vector3d& pos, int snapshotNo) {
-
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] = pos;
-
+    void setElectricField(const Vector3d& eField, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] = eField;
     }
+
+    /**
+     * Adds electric field into the previous electric field of this
+     * stuntDouble
+     *
+     * @param eField new electric field 
+     * @see #getElectricField
+     */         
+    void addPrevEelectricField(const Vector3d& eField) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] += eField;
+    }
+       
+    /**
+     * Adds electric field into the current electric field of this stuntDouble
+     * @param eField  new electric field 
+     */         
+    void addElectricField(const Vector3d& eField) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] += eField;
+    }
+
+    /**
+     * Adds electric field into the electric field of this stuntDouble in specified snapshot
+     *
+     * @param eField electric field to be added
+     * @param snapshotNo 
+     * @see #getElectricField
+     */         
+    void addElectricField(const Vector3d& eField, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] += eField;
+    }       
 
 
     /** Set the force of this stuntDouble to zero */

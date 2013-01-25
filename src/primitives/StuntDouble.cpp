@@ -72,6 +72,8 @@ namespace OpenMD {
       setParticlePot(0.0);
     if (sl & DataStorage::dslFlucQForce) 
       setFlucQFrc(0.0);
+    if (sl & DataStorage::dslElectricField) 
+      setElectricField(V3Zero);
   }
   void StuntDouble::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  
