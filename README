@@ -12,29 +12,33 @@ analysis and utility programs that are easy to use and modify. An
 OpenMD simulation is specified using a very simple meta-data language
 that is easy to learn.
 
-Simulations are started in OpenMD using a single Molecular Dynamics (.md)
-file.   These files must start with the <OpenMD> tag and must 
-have two sections:
+Simulations are started in OpenMD using a single Molecular Dynamics (.md) 
+file.  These files must start with the <OpenMD> tag and must have two 
+sections:
 
   1) a C-based <MetaData> section, and 
 
   2) a <Snapshot> block for initial coordinate and velocity information.
 
-Detailed descriptions of the structures of these files are 
-available in the "doc" directory.  Sample simulations are 
-available in the "samples" directory. 
+Detailed descriptions of the structures of these files are available
+in the "doc" directory.  Sample simulations are available in the
+"samples" directory.
 
 What you need to compile and use OpenMD:
 
- 1) Good C++ and C compilers.  We've built and tested OpenMD
-    on the following architecture & compiler combinations:
+ 1) A good C++ compiler.  We've built and tested OpenMD on the
+    following architecture & compiler combinations:
 
-    Architecture                CC     CXX     Notes
-    -------------------------   ----   -----   ----------------------
-    ix86-pc-linux-gnu           icc    icpc    (Intel v. 10)
-    i386-apple-darwin11.1.0     gcc    g++     (GNU v.4.3)
-    i386-apple-darwin11.1.0     icc    icpc    (Intel v. 12)
-    x86_64-unknown-linux-gnu    gcc    g++     (Pathscale 3.2)
+    Architecture                CXX    Notes
+    -------------------------   ----   ----------------------
+    Mac OS X 10.8 (intel)       c++    (Apple clang version 4.1)
+    Mac OS X 10.8 (intel)       g++    (GNU version 4.7)
+    Mac OS X 10.8 (intel)       icpc   (Intel version 12.1)
+    Linux (RHEL 5.9 - x86_64)   icpc   (Intel version 12.1)
+    Linux (RHEL 5.9 - x86_64)   pgCC   (Portland Group version 12.3)
+
+    OpenMD uses features in the standard template library (STL). Most
+    (but not all) C++ compilers support these features.
 
  2) CMake, a cross-platform build system which is available at
     http://www.cmake.org     Most Linux and some Unix distributions
@@ -43,10 +47,11 @@ What you need to compile and use OpenMD:
     download the CMake installer or install it from the command line
     using macports.
 
- 3) MPI-2 is optional for the single processor version of OpenMD, but
-    is required if you want OpenMD to run in parallel. We like
-    OpenMPI. Other implementations of MPI-2 might work, but we haven't
-    tested them.  You can get Open MPI here: http://www.open-mpi.org/
+ 3) An implementation of MPI-2 is optional for the single processor
+    version of OpenMD, but is required if you want OpenMD to run in
+    parallel. We like OpenMPI. Other implementations of MPI-2 might
+    work, but we haven't tried.  You can get Open MPI here:
+    http://www.open-mpi.org/
 
  4) Other optional (but quite useful) libraries that will unlock some
     features of OpenMD:
@@ -59,7 +64,6 @@ What you need to compile and use OpenMD:
  5) Some of the utility scripts depend on Python and Perl.  These
     interpreters are common installations on most flavors of Unix and
     Mac OS X.
-
 
 INSTRUCTIONS
 

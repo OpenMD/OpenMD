@@ -233,6 +233,7 @@ namespace OpenMD {
           }
         }
         
+
         RealType wi = 2.0*(xi2-yi2)*zi / r3;
         RealType wj = 2.0*(xj2-yj2)*zj / r3;
         RealType w = wi+wj;
@@ -284,6 +285,7 @@ namespace OpenMD {
                         0.0);
         
         if (isPower) {
+          cerr << "This is probably an error!\n";
           RealType frac1 = 0.25;
           RealType frac2 = 0.75;      
           RealType wi2 = wi*wi;
@@ -330,7 +332,7 @@ namespace OpenMD {
         Vector3d fjj = A2trans * radcomj;
         
         // now assemble these with the radial-only terms:
-        
+       
         *(idat.f1) += RealType(0.5) * ((v0*dsdr*w + v0p*dspdr*wp) * *(idat.d) / 
                                        *(idat.rij)  + fii - fjj);
         
