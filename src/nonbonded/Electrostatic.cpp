@@ -808,15 +808,18 @@ namespace OpenMD {
       
       if (idat.excluded) {
         *(idat.skippedCharge2) += C_a;
+      } else {
+        // only do the field if we're not excluded:
+        Eb -= C_a *  pre11_ * v02 * rhat;
       }
-      Eb -= C_a *  pre11_ * v02 * rhat;
     }
     
     if (a_is_Dipole) {
       D_a = *(idat.dipole1);
       rdDa = dot(rhat, D_a);
       rxDa = cross(rhat, D_a);
-      Eb -=  pre12_ * (v13 * rdDa * rhat + v12 * D_a);
+      if (!idat.excluded) 
+        Eb -=  pre12_ * (v13 * rdDa * rhat + v12 * D_a);
     }
     
     if (a_is_Quadrupole) {
@@ -826,7 +829,8 @@ namespace OpenMD {
       rQa = rhat * Q_a;
       rdQar = dot(rhat, Qar);
       rxQar = cross(rhat, Qar);
-      Eb -= pre14_ * ((trQa * rhat + 2.0 * Qar) * v23 + rdQar * rhat * v24);
+      if (!idat.excluded) 
+        Eb -= pre14_ * ((trQa * rhat + 2.0 * Qar) * v23 + rdQar * rhat * v24);
     }
     
     if (b_is_Charge) {
@@ -837,15 +841,18 @@ namespace OpenMD {
       
       if (idat.excluded) {
         *(idat.skippedCharge1) += C_b;
+      } else {
+        // only do the field if we're not excluded:
+        Ea += C_b *  pre11_ * v02 * rhat;
       }
-      Ea += C_b *  pre11_ * v02 * rhat;
     }
     
     if (b_is_Dipole) {
       D_b = *(idat.dipole2);
       rdDb = dot(rhat, D_b);
       rxDb = cross(rhat, D_b);
-      Ea += pre12_ * (v13 * rdDb * rhat + v12 * D_b);
+      if (!idat.excluded) 
+        Ea += pre12_ * (v13 * rdDb * rhat + v12 * D_b);
     }
     
     if (b_is_Quadrupole) {
@@ -855,7 +862,8 @@ namespace OpenMD {
       rQb = rhat * Q_b;
       rdQbr = dot(rhat, Qbr);
       rxQbr = cross(rhat, Qbr);
-      Ea += pre14_ * ((trQb * rhat + 2.0 * Qbr) * v23 + rdQbr * rhat * v24);
+      if (!idat.excluded) 
+        Ea += pre14_ * ((trQb * rhat + 2.0 * Qbr) * v23 + rdQbr * rhat * v24);
     }
     
     if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {

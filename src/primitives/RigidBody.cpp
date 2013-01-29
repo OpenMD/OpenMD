@@ -226,8 +226,12 @@ namespace OpenMD {
     Vector3d apos;
     Vector3d rpos;
     Vector3d frc(0.0);
-    Vector3d trq(0.0);    
+    Vector3d trq(0.0);
+    Vector3d ef(0.0);
     Vector3d pos = this->getPos();
+
+    int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
+
     for (unsigned int i = 0; i < atoms_.size(); i++) {
 
       afrc = atoms_[i]->getFrc();
@@ -246,10 +250,20 @@ namespace OpenMD {
       if (atoms_[i]->isDirectional()) {
 	atrq = atoms_[i]->getTrq();
 	trq += atrq;
-      }      
+      }
+
+      if (sl & DataStorage::dslElectricField) {
+        ef += atoms_[i]->getElectricField();
+      }
     }         
     addFrc(frc);
     addTrq(trq);    
+
+    if (sl & DataStorage::dslElectricField) {
+      ef /= atoms_.size();
+      setElectricField(ef);
+    }
+
   }
 
   Mat3x3d RigidBody::calcForcesAndTorquesAndVirial() {
@@ -259,9 +273,13 @@ namespace OpenMD {
     Vector3d rpos;
     Vector3d dfrc;
     Vector3d frc(0.0);
-    Vector3d trq(0.0);    
+    Vector3d trq(0.0);
+    Vector3d ef(0.0);
+    
     Vector3d pos = this->getPos();
     Mat3x3d tau_(0.0);
+
+    int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
 
     for (unsigned int i = 0; i < atoms_.size(); i++) {
       
@@ -282,6 +300,9 @@ namespace OpenMD {
 	atrq = atoms_[i]->getTrq();
 	trq += atrq;
       }
+      if (sl & DataStorage::dslElectricField) {
+        ef += atoms_[i]->getElectricField();
+      }
       
       tau_(0,0) -= rpos[0]*afrc[0];
       tau_(0,1) -= rpos[0]*afrc[1];
@@ -296,6 +317,12 @@ namespace OpenMD {
     }
     addFrc(frc);
     addTrq(trq);
+
+    if (sl & DataStorage::dslElectricField) {
+      ef /= atoms_.size();
+      setElectricField(ef);
+    }
+
     return tau_;
   }
 
