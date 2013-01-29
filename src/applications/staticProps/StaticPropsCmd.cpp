@@ -81,8 +81,8 @@ const char *gengetopt_args_info_help[] = {
   "      --angle_r                 angle of R",
   "      --hullvol                 hull volume of nanoparticle",
   "      --rodlength               length of nanorod",
-  "  -Q, --tet_param               tetrahedrality order parameter",
-  "      --tet_param_z             tetrahedrality order parameter by zbin(--sele1 \n                                  must be specified)",
+  "  -Q, --tet_param               tetrahedrality order parameter (Qk)",
+  "      --tet_param_z             spatially-resolved tetrahedrality order \n                                  parameter Qk(z)",
     0
 };
 
@@ -1072,7 +1072,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'Q':	/* tetrahedrality order parameter.  */
+        case 'Q':	/* tetrahedrality order parameter (Qk).  */
         
           if (args_info->staticProps_group_counter && override)
             reset_group_staticProps (args_info);
@@ -1608,7 +1608,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* tetrahedrality order parameter by zbin(--sele1 must be specified).  */
+          /* spatially-resolved tetrahedrality order parameter Qk(z).  */
           else if (strcmp (long_options[option_index].name, "tet_param_z") == 0)
           {
           
