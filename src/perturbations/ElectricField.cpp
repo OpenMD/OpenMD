@@ -72,6 +72,7 @@ namespace OpenMD {
     Molecule::AtomIterator  j;
     Molecule* mol;
     Atom* atom;
+    AtomType* atype;
     potVec longRangePotential(0.0);
     Vector3d dip;
     Vector3d trq;
@@ -86,21 +87,28 @@ namespace OpenMD {
     if (doElectricField) {
       fieldPot = 0.0;
 
-      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {      
+
 	for (atom = mol->beginAtom(j); atom != NULL;
 	     atom = mol->nextAtom(j)) {
+
 	  isCharge = false;
 	  chrg = 0.0;
-
-          atom->addElectricField(EF * chrgToKcal);
-
-	  FixedChargeAdapter fca = FixedChargeAdapter(atom->getAtomType());
+          
+          atype = atom->getAtomType();
+          
+          if (atype->isElectrostatic()) {
+            atom->addElectricField(EF * chrgToKcal);
+          }
+          
+	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
 	  if ( fca.isFixedCharge() ) {
 	    isCharge = true;
 	    chrg = fca.getCharge();
 	  }
 	  
-          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atom->getAtomType());
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
           if ( fqa.isFluctuatingCharge() ) {
 	    isCharge = true;
             chrg += atom->getFlucQPos();
@@ -119,7 +127,7 @@ namespace OpenMD {
 	    fieldPot += pot;
 	  }
 	    
-	  MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
+	  MultipoleAdapter ma = MultipoleAdapter(atype);
 	  if (ma.isDipole() ) {
             Vector3d dipole = atom->getDipole();
 	    dipole *= debyeToKcal;

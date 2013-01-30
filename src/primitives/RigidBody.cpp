@@ -229,10 +229,14 @@ namespace OpenMD {
     Vector3d trq(0.0);
     Vector3d ef(0.0);
     Vector3d pos = this->getPos();
-
+    AtomType* atype;
+    int eCount = 0;
+    
     int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
-
+    
     for (unsigned int i = 0; i < atoms_.size(); i++) {
+
+      atype = atoms_[i]->getAtomType();
 
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
@@ -252,15 +256,16 @@ namespace OpenMD {
 	trq += atrq;
       }
 
-      if (sl & DataStorage::dslElectricField) {
+      if ((sl & DataStorage::dslElectricField) && (atype->isElectrostatic())) {
         ef += atoms_[i]->getElectricField();
+        eCount++;
       }
     }         
     addFrc(frc);
     addTrq(trq);    
 
-    if (sl & DataStorage::dslElectricField) {
-      ef /= atoms_.size();
+    if (sl & DataStorage::dslElectricField)  {
+      ef /= eCount;
       setElectricField(ef);
     }
 
@@ -275,7 +280,9 @@ namespace OpenMD {
     Vector3d frc(0.0);
     Vector3d trq(0.0);
     Vector3d ef(0.0);
-    
+    AtomType* atype;
+    int eCount = 0;
+
     Vector3d pos = this->getPos();
     Mat3x3d tau_(0.0);
 
@@ -300,8 +307,9 @@ namespace OpenMD {
 	atrq = atoms_[i]->getTrq();
 	trq += atrq;
       }
-      if (sl & DataStorage::dslElectricField) {
+      if ((sl & DataStorage::dslElectricField) && (atype->isElectrostatic())) {
         ef += atoms_[i]->getElectricField();
+        eCount++;
       }
       
       tau_(0,0) -= rpos[0]*afrc[0];
@@ -319,7 +327,7 @@ namespace OpenMD {
     addTrq(trq);
 
     if (sl & DataStorage::dslElectricField) {
-      ef /= atoms_.size();
+      ef /= eCount;
       setElectricField(ef);
     }
 
