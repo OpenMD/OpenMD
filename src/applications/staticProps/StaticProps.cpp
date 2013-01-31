@@ -121,38 +121,18 @@ int main(int argc, char* argv[]){
       //If sele2 is not specified, then the default behavior
       //should be what is already intended for sele1
       sele2 = sele1;
-      //sele2 = "select all";
     }
   }
-  
-  
-  // Problems if sele1 wasn't specified, but 
-  // if (!args_info.scd_given) {
-  //       sprintf( painCave.errMsg,
-  //                "neither --sele1 option nor $SELECTION1 is set");
-  //       painCave.severity = OPENMD_ERROR;
-  //       painCave.isFatal = 1;
-  //       simError();
-  //     }
-  //   }
-  
-  // Problems if sele1 wasn't specified
-  
-  //     if(!args_info.scd_given && !args_info.density_given && !args_info.slab_density_given)  {
-  //       sprintf( painCave.errMsg,
-  //                "neither --sele2 option nor $SELECTION1 is set");
-  //       painCave.severity = OPENMD_ERROR;
-  //       painCave.isFatal = 1;
-  //       simError();        
-  //     }
-  //   }
-  
+
   bool batchMode;
   if (args_info.scd_given){
-    if (args_info.sele1_given && args_info.sele2_given && args_info.sele3_given) {
+    if (args_info.sele1_given && 
+        args_info.sele2_given && args_info.sele3_given) {
       batchMode = false;
-    } else if (args_info.molname_given && args_info.begin_given && args_info.end_given) {
-      if (args_info.begin_arg < 0 || args_info.end_arg < 0 || args_info.begin_arg > args_info.end_arg-2) {
+    } else if (args_info.molname_given && 
+               args_info.begin_given && args_info.end_given) {
+      if (args_info.begin_arg < 0 || 
+          args_info.end_arg < 0 || args_info.begin_arg > args_info.end_arg-2) {
         sprintf( painCave.errMsg,
                  "below conditions are not satisfied:\n"
                  "0 <= begin && 0<= end && begin <= end-2\n");
@@ -167,14 +147,12 @@ int main(int argc, char* argv[]){
                " or --molname, --begin, --end are specified\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
-      simError();        
-      
+      simError();
     }
   }
   
   //parse md file and set up the system
   SimCreator creator;
-  std::cout << "dumpFile = " << dumpFileName << "\n";
   SimInfo* info = creator.createSim(dumpFileName);
 
   RealType maxLen;
@@ -211,8 +189,8 @@ int main(int argc, char* argv[]){
 			      args_info.nanglebins_arg);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
-      analyser= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, 
-			   maxLen, args_info.nbins_arg);        
+      analyser= new GofXyz(info, dumpFileName, sele1, sele2,
+                           args_info.refsele_arg, maxLen, args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
 	       "--refsele must set when --gxyz is used");
@@ -277,9 +255,9 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.tet_param_z_given) {
     if (args_info.rcut_given) {	  
-      analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, 
-					 args_info.rcut_arg, 
-					 args_info.nbins_arg);
+      analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
+                                          args_info.rcut_arg, 
+                                          args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
@@ -300,7 +278,8 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.bad_given){
     if (args_info.rcut_given) {
-      analyser = new BondAngleDistribution(info, dumpFileName, sele1, args_info.rcut_arg,
+      analyser = new BondAngleDistribution(info, dumpFileName, sele1, 
+                                           args_info.rcut_arg,
 					   args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
@@ -308,14 +287,16 @@ int main(int argc, char* argv[]){
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-      }
+    }
   } else if (args_info.scd_given) {
     if (batchMode) {
-      analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
+      analyser  = new SCDOrderParameter(info, dumpFileName, 
+                                        args_info.molname_arg, 
 					args_info.begin_arg, args_info.end_arg);
     } else{
       std::string sele3 = args_info.sele3_arg;
-      analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
+      analyser  = new SCDOrderParameter(info, dumpFileName, 
+                                        sele1, sele2, sele3);
     }
   }else if (args_info.density_given) {
     analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen,
@@ -348,19 +329,18 @@ int main(int argc, char* argv[]){
   } else if (args_info.angle_r_given) {
     analyser = new AngleR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg);
   }
-    
+  
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);
   }
   if (args_info.step_given) {
     analyser->setStep(args_info.step_arg);
   }
- 
+  
   analyser->process();
   
   delete analyser;    
   delete info;
-
+  
   return 0;   
 }
-

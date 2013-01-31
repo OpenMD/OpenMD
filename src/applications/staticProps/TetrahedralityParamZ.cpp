@@ -54,14 +54,20 @@ using namespace std;
 namespace OpenMD {
   TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info,  
                                              const std::string& filename, 
-                                             const std::string& sele,
+                                             const std::string& sele1,
+                                             const std::string& sele2,
                                              double rCut, int nzbins) 
-    : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), 
-      seleMan_(info), nZBins_(nzbins) {
+    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
+      evaluator1_(info), seleMan1_(info), selectionScript2_(sele2), 
+      evaluator2_(info), seleMan2_(info), nZBins_(nzbins) {
     
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+    evaluator2_.loadScriptString(sele2);
+    if (!evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
     
     // Set up cutoff radius:    
@@ -91,7 +97,6 @@ namespace OpenMD {
     RigidBody* rb;
     int myIndex;
     SimInfo::MoleculeIterator mi;
-    Molecule::IntegrableObjectIterator ioi;
     Molecule::RigidBodyIterator rbIter;
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj;
@@ -99,7 +104,8 @@ namespace OpenMD {
     RealType cospsi;
     RealType Qk;
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
-    int isd;
+    int isd1;
+    int isd2;
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -113,8 +119,12 @@ namespace OpenMD {
       
       RealType halfBoxZ_ = hmat(2,2) / 2.0;      
 
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
+      if (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      }
+      
+      if (evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
       }
       
       // update the positions of atoms which belong to the rigidbodies
@@ -127,36 +137,30 @@ namespace OpenMD {
       }
       
       // outer loop is over the selected StuntDoubles:
-      for (sd = seleMan_.beginSelected(isd); sd != NULL;
-           sd = seleMan_.nextSelected(isd)) {
+      for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
+           sd = seleMan1_.nextSelected(isd1)) {
         
         myIndex = sd->getGlobalIndex();
-
+        
         Qk = 1.0;	  
-        myNeighbors.clear();
-        
-        // inner loop is over all StuntDoubles in the system:
-        
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
+        myNeighbors.clear();       
 
-          for (sd2 = mol->beginIntegrableObject(ioi); sd2 != NULL; 
-               sd2 = mol->nextIntegrableObject(ioi)) {
+        for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
+             sd2 = seleMan2_.nextSelected(isd2)) {
+          
+          if (sd2->getGlobalIndex() != myIndex) {
             
-            if (sd2->getGlobalIndex() != myIndex) {
-              
-              vec = sd->getPos() - sd2->getPos();       
-              
-              if (usePeriodicBoundaryConditions_) 
-                currentSnapshot_->wrapVector(vec);
-              
-              r = vec.length();             
-
-              // Check to see if neighbor is in bond cutoff 
-              
-              if (r < rCut_) {                
-                myNeighbors.push_back(std::make_pair(r,sd2));
-              }
+            vec = sd->getPos() - sd2->getPos();       
+            
+            if (usePeriodicBoundaryConditions_) 
+              currentSnapshot_->wrapVector(vec);
+            
+            r = vec.length();             
+            
+            // Check to see if neighbor is in bond cutoff 
+            
+            if (r < rCut_) {                
+              myNeighbors.push_back(std::make_pair(r,sd2));
             }
           }
         }
@@ -170,9 +174,9 @@ namespace OpenMD {
         int nang = int (0.5 * (nbors * (nbors - 1)));
         
         rk = sd->getPos();
-
+        
         for (int i = 0; i < nbors-1; i++) {       
-
+          
           sdi = myNeighbors[i].second;
           ri = sdi->getPos();
           rik = rk - ri;
@@ -180,9 +184,9 @@ namespace OpenMD {
             currentSnapshot_->wrapVector(rik);
           
           rik.normalize();
-
+          
           for (int j = i+1; j < nbors; j++) {       
-
+            
             sdj = myNeighbors[j].second;
             rj = sdj->getPos();
             rkj = rk - rj;
@@ -191,13 +195,13 @@ namespace OpenMD {
             rkj.normalize();
             
             cospsi = dot(rik,rkj);           
-
+            
             // Calculates scaled Qk for each molecule using calculated
             // angles from 4 or fewer nearest neighbors.
             Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
           }
         }
-
+        
         if (nang > 0) {
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(rk);
@@ -226,7 +230,8 @@ namespace OpenMD {
     if (qZstream.is_open()) {
       qZstream << "#Tetrahedrality Parameters (z)\n";
       qZstream << "#nFrames:\t" << zBox_.size() << "\n";
-      qZstream << "#selection: (" << selectionScript_ << ")\n";
+      qZstream << "#selection 1: (" << selectionScript1_ << ")\n";
+      qZstream << "#selection 2: (" << selectionScript2_ << ")\n";
       qZstream << "#z\tQk\n";
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType z = zAve * (i+0.5) / sliceQ_.size();

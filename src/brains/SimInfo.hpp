@@ -387,18 +387,19 @@ namespace OpenMD{
      * Sets GlobalGroupMembership
      * @see #SimCreator::setGlobalIndex
      */  
-    void setGlobalGroupMembership(const vector<int>& globalGroupMembership) {
-      assert(globalGroupMembership.size() == static_cast<size_t>(nGlobalAtoms_));
-      globalGroupMembership_ = globalGroupMembership;
+    void setGlobalGroupMembership(const vector<int>& ggm) {
+      assert(ggm.size() == static_cast<size_t>(nGlobalAtoms_));
+      globalGroupMembership_ = ggm;
     }
 
     /** 
      * Sets GlobalMolMembership
      * @see #SimCreator::setGlobalIndex
      */        
-    void setGlobalMolMembership(const vector<int>& globalMolMembership) {
-      assert(globalMolMembership.size() == static_cast<size_t>(nGlobalAtoms_));
-      globalMolMembership_ = globalMolMembership;
+    void setGlobalMolMembership(const vector<int>& gmm) {
+      assert(gmm.size() == (static_cast<size_t>(nGlobalAtoms_ + 
+                                                nGlobalRigidBodies_)));
+      globalMolMembership_ = gmm;
     }
 
 

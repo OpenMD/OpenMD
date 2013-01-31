@@ -81,7 +81,8 @@ namespace OpenMD {
   class TetrahedralityParamZ : public StaticAnalyser{
   public:
     TetrahedralityParamZ(SimInfo* info, const std::string& filename, 
-                         const std::string& sele, double rCut, int nzbins);
+                         const std::string& sele1, const std::string& sele2, 
+                         double rCut, int nzbins);
     int getNZBins(){
       return nZBins_;
     }
@@ -93,9 +94,12 @@ namespace OpenMD {
     void writeQz();
 
     Snapshot* currentSnapshot_;
-    std::string selectionScript_;
-    SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;
+    std::string selectionScript1_;
+    std::string selectionScript2_;
+    SelectionManager seleMan1_;
+    SelectionEvaluator evaluator1_;
+    SelectionManager seleMan2_;
+    SelectionEvaluator evaluator2_;
     RealType rCut_;
     int nZBins_;
     std::vector<RealType> zBox_;
