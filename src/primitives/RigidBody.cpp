@@ -290,6 +290,8 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < atoms_.size(); i++) {
       
+      atype = atoms_[i]->getAtomType();
+
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
       rpos = apos - pos;
@@ -307,6 +309,7 @@ namespace OpenMD {
 	atrq = atoms_[i]->getTrq();
 	trq += atrq;
       }
+
       if ((sl & DataStorage::dslElectricField) && (atype->isElectrostatic())) {
         ef += atoms_[i]->getElectricField();
         eCount++;

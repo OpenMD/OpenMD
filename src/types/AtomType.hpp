@@ -125,6 +125,7 @@ namespace OpenMD {
     bool isElectrostatic();
     bool isEAM();
     bool isCharge();
+    bool isFixedCharge();
     bool isDirectional();
     bool isDipole();
     bool isQuadrupole();

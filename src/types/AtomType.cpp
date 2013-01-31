@@ -183,7 +183,7 @@ namespace OpenMD {
   }
   
   bool AtomType::isCharge() {
-    return hasProperty("Charge");
+    return isFixedCharge() || isFluctuatingCharge();
   }
 
   bool AtomType::isDirectional() {
@@ -192,6 +192,10 @@ namespace OpenMD {
 
   bool AtomType::isFluctuatingCharge() {
     return hasProperty("FlucQ");
+  }
+
+  bool AtomType::isFixedCharge() {
+    return hasProperty("Charge");
   }
 
   bool AtomType::isDipole() {
