@@ -745,6 +745,8 @@ namespace OpenMD {
           if (iLoop == PAIR_LOOP) {
             vij = 0.0;
             fij = V3Zero;
+            eField1 = V3Zero;
+            eField2 = V3Zero;
           }
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
