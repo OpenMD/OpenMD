@@ -36,12 +36,9 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by J. Daniel Gezelter on 09/26/06
- *  @author  J. Daniel Gezelter 
- *  @version $Id: BondOrderParameter.hpp 1442 2010-05-10 17:28:26Z gezelter $
- *
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
  */
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMZ_HPP
@@ -59,7 +56,7 @@ namespace OpenMD {
    *
    * Computes local tetrahedral order parameter Q as introduced in:
    *
-   *   "A new order parameter for tetrahedral configurations," by P.-L. Chau and 
+   *  "A new order parameter for tetrahedral configurations," by P.-L. Chau and 
    *    A.J. Hardwick, Mol. Phys. 93, pp. 511-518 (1998).
    *
    *
@@ -68,22 +65,24 @@ namespace OpenMD {
    * of 1 and an ideal gas configuration has a Q value of 0. This rescaled
    * version of the tetrahedrality parameter was first introduced in:
    *
-   *   "Relationship between structural order and the anomalies of liquid water,"
+   *  "Relationship between structural order and the anomalies of liquid water,"
    *    by J.R. Errington and P.G. Debenedetti, Nature 409, pp. 318-321 (2001).
    * 
    *
-   * Characterization of the spatial correlations of the the local order parameter Q
-   * are done according to the procedure outlined in:
+   * Characterization of the spatial correlations of the the local
+   * order parameter Q are done according to the procedure outlined
+   * in:
    *
    *   "Space-time correlations in the orientational order parameter and the
-   *    orientational entropy of water," by P. Kumar, S.V. Buldyrev, and H.E. Stanley,
-   *    arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
+   *    orientational entropy of water," by P. Kumar, S.V. Buldyrev, and 
+   *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
   class TetrahedralityParamZ : public StaticAnalyser{
   public:
     TetrahedralityParamZ(SimInfo* info, const std::string& filename, 
-			const std::string& sele, double rCut, int nzbins);
+                         const std::string& sele1, const std::string& sele2, 
+                         double rCut, int nzbins);
     int getNZBins(){
       return nZBins_;
     }
@@ -92,33 +91,21 @@ namespace OpenMD {
     virtual void process();
     
   private:
-    virtual void initalizeHistogram();
-    virtual void collectHistogram(RealType Qk);
-    void writeOrderParameter();
+    void writeQz();
 
     Snapshot* currentSnapshot_;
-    std::string selectionScript_;
-    SelectionManager seleMan1_;    
-    SelectionManager seleMan2_;    
-    SelectionEvaluator evaluator_;           
-            
+    std::string selectionScript1_;
+    std::string selectionScript2_;
+    SelectionManager seleMan1_;
+    SelectionEvaluator evaluator1_;
+    SelectionManager seleMan2_;
+    SelectionEvaluator evaluator2_;
     RealType rCut_;
-    int frameCounter_;
     int nZBins_;
-    int nProcessed_;
-   
-    RealType MinQ_;
-    RealType MaxQ_;
-    RealType deltaQ_;
-    std::vector<int> Q_histogram_;
-    std::vector<StuntDouble*> Distorted_;
-    std::vector<StuntDouble*> Tetrahedral_;
     std::vector<RealType> zBox_;
-    std::vector<RealType> Qave_;
-    std::vector<RealType> count_;
-    std::vector<std::vector<RealType> > sliceSDLists_;
+    std::vector<RealType> sliceQ_;
+    std::vector<int> sliceCount_;
   };
 }
-
 #endif
 
