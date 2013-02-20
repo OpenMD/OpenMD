@@ -83,6 +83,7 @@ namespace OpenMD {
     DeclareParameter(UsePeriodicBoundaryConditions, bool);
     DeclareParameter(TargetPressure, RealType);
     DeclareParameter(UseAtomicVirial, bool);
+    DeclareParameter(UseLongRangeCorrections, bool);
     DeclareParameter(TauThermostat, RealType);
     DeclareParameter(TauBarostat, RealType);
     DeclareParameter(ZconsTime, RealType);

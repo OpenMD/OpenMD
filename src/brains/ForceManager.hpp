@@ -85,6 +85,7 @@ namespace OpenMD {
     bool doParticlePot_;
     bool doElectricField_;
     bool doHeatFlux_;
+    bool doLongRangeCorrections_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
@@ -104,6 +105,8 @@ namespace OpenMD {
     CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
     CutoffPolicy cutoffPolicy_;/**< Cutoff Policy for non-bonded interactions */
 
+    set<AtomType*> atomTypes_;
+    vector<pair<AtomType*, AtomType*> > interactions_;
     map<Bend*, BendDataSet> bendDataSets;
     map<Torsion*, TorsionDataSet> torsionDataSets;
     map<Inversion*, InversionDataSet> inversionDataSets;

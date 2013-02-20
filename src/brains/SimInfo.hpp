@@ -468,6 +468,9 @@ namespace OpenMD{
 
     /** Returns the set of atom types present in this simulation */
     set<AtomType*> getSimulatedAtomTypes();
+
+    /** Returns the global count of atoms of a particular type */
+    int getGlobalCountOfType(AtomType* atype);
         
     friend ostream& operator <<(ostream& o, SimInfo& info);
 

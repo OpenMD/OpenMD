@@ -679,6 +679,8 @@ namespace OpenMD {
         snap_->atomData.density[i] += rho_tmp[i];
     }
 
+    // this isn't necessary if we don't have polarizable atoms, but
+    // we'll leave it here for now.
     if (storageLayout_ & DataStorage::dslElectricField) {
       
       AtomPlanVectorRow->scatter(atomRowData.electricField, 
@@ -786,6 +788,23 @@ namespace OpenMD {
         snap_->atomData.flucQFrc[i] += fqfrc_tmp[i];
             
     }
+
+    if (storageLayout_ & DataStorage::dslElectricField) {
+
+      int nef = snap_->atomData.electricField.size();
+      vector<Vector3d> efield_tmp(nef, V3Zero);
+
+      AtomPlanVectorRow->scatter(atomRowData.electricField, efield_tmp);
+      for (int i = 0; i < nef; i++) {
+        snap_->atomData.electricField[i] += efield_tmp[i];
+        efield_tmp[i] = 0.0;
+      }
+      
+      AtomPlanVectorColumn->scatter(atomColData.electricField, efield_tmp);
+      for (int i = 0; i < nef; i++)
+        snap_->atomData.electricField[i] += efield_tmp[i];
+    }
+
 
     nLocal_ = snap_->getNumberOfAtoms();
 

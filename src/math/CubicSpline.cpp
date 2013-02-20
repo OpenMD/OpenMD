@@ -41,8 +41,8 @@
  */
  
 #include "math/CubicSpline.hpp"
-#include "utils/simError.h"
 #include <cmath>
+#include <cassert>
 #include <cstdio>
 #include <algorithm>
 
@@ -60,14 +60,8 @@ void CubicSpline::addPoint(const RealType xp, const RealType yp) {
 void CubicSpline::addPoints(const vector<RealType>& xps, 
                             const vector<RealType>& yps) {
   
-  if (xps.size() != yps.size()) {
-    printf( painCave.errMsg,
-            "CubicSpline::addPoints was passed vectors of different length!\n");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();    
-  }
-
+  assert(xps.size() == yps.size());
+  
   for (unsigned int i = 0; i < xps.size(); i++) 
     data_.push_back(make_pair(xps[i], yps[i]));
 }
@@ -152,11 +146,11 @@ void CubicSpline::generate() {
                                c[1] + c[0]) / (data_[3].first - data_[0].first);
   
   fpn = c[n-2] + b[n-2]*(c[n-2] - c[n-3])/(b[n-3] + b[n-2]);
-
-  if (n > 3)  fpn = fpn + b[n-2] * 
-    (c[n-2] - c[n-3] - (b[n-3] + b[n-2]) * 
-     (c[n-3] - c[n-4])/(b[n-3] + b[n-4]))/(data_[n-1].first - data_[n-4].first);
   
+  if (n > 3)  fpn = fpn + b[n-2] * 
+                (c[n-2] - c[n-3] - (b[n-3] + b[n-2]) * 
+                 (c[n-3] - c[n-4])/(b[n-3] + b[n-4])) /
+                (data_[n-1].first - data_[n-4].first);
   
   // Calculate the right hand side and store it in C.
   
@@ -203,20 +197,12 @@ RealType CubicSpline::getValueAt(RealType t) {
   //   value of spline at t.
   
   if (!generated) generate();
-  RealType dt;
   
-  if ( t < data_[0].first || t > data_[n-1].first ) {    
-    sprintf( painCave.errMsg,
-             "CubicSpline::getValueAt was passed a value outside the range of the spline!\n");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();    
-  }
+  assert(t < data_.front().first);
+  assert(t > data_.back().first);
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
-
-  int j;
 
   if (isUniform) {    
     
@@ -237,8 +223,7 @@ RealType CubicSpline::getValueAt(RealType t) {
   //  Evaluate the cubic polynomial.
   
   dt = t - data_[j].first;
-  return data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
-  
+  return data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));  
 }
 
 
@@ -251,20 +236,12 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
   //   pair containing value of spline at t and first derivative at t
 
   if (!generated) generate();
-  RealType dt;
   
-  if ( t < data_.front().first || t > data_.back().first ) {    
-    sprintf( painCave.errMsg,
-             "CubicSpline::getValueAndDerivativeAt was passed a value outside the range of the spline!\n");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();    
-  }
+  assert(t < data_.front().first);
+  assert(t > data_.back().first);
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
-
-  int j;
 
   if (isUniform) {    
     
@@ -286,8 +263,8 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
   
   dt = t - data_[j].first;
 
-  RealType yval = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
-  RealType dydx = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]);
+  yval = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
+  dydx = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]);
   
   return make_pair(yval, dydx);
 }

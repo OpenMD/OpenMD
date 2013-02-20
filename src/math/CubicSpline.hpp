@@ -63,8 +63,8 @@ namespace OpenMD {
     void generate();
     bool isUniform;
     bool generated;
-    RealType dx;
-    int n;
+    RealType dx, dt, yval, dydx;
+    int n, j;
     vector<pair<RealType, RealType> > data_;
     vector<RealType> b;
     vector<RealType> c;

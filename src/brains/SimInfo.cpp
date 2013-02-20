@@ -782,6 +782,22 @@ namespace OpenMD {
     return atomTypes;        
   }
 
+
+  int getGlobalCountOfType(AtomType* atype) {
+    /*
+    set<AtomType*> atypes = getSimulatedAtomTypes();
+    map<AtomType*, int> counts_;
+
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+      for(atom = mol->beginAtom(ai); atom != NULL;
+          atom = mol->nextAtom(ai)) {
+	atom->getAtomType();
+      }      
+    }    
+    */
+    return 0;
+  }
+
   void SimInfo::setupSimVariables() {
     useAtomicVirial_ = simParams_->getUseAtomicVirial();
     // we only call setAccumulateBoxDipole if the accumulateBoxDipole

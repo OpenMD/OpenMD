@@ -117,6 +117,13 @@ namespace OpenMD {
     else
       mdFileVersion = 0;
    
+    // We need the list of simulated atom types to figure out cutoffs
+    // as well as long range corrections.
+
+    set<AtomType*>::iterator i;
+    set<AtomType*> atomTypes_;
+    atomTypes_ = info_->getSimulatedAtomTypes();
+
     if (simParams_->haveCutoffRadius()) {
       rCut_ = simParams_->getCutoffRadius();
     } else {      
@@ -131,10 +138,7 @@ namespace OpenMD {
         rCut_ = 12.0;
       } else {
         RealType thisCut;
-        set<AtomType*>::iterator i;
-        set<AtomType*> atomTypes;
-        atomTypes = info_->getSimulatedAtomTypes();        
-        for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+        for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
           thisCut = interactionMan_->getSuggestedCutoffRadius((*i));
           rCut_ = max(thisCut, rCut_);
         }
@@ -912,14 +916,6 @@ namespace OpenMD {
       *(fDecomp_->getPairwisePotential());
 
     curSnapshot->setLongRangePotential(longRangePotential);
-
-    // collects single-atom information
-    fDecomp_->collectSelfData();
-
-    longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
-      *(fDecomp_->getPairwisePotential());
-
-    curSnapshot->setLongRangePotential(longRangePotential);
     
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                          *(fDecomp_->getExcludedPotential()));
@@ -957,5 +953,41 @@ namespace OpenMD {
 #endif
     curSnapshot->setStressTensor(stressTensor);
     
+    if (info_->getSimParams()->getUseLongRangeCorrections()) {
+      /*
+      RealType vol = curSnapshot->getVolume();
+      RealType Elrc(0.0);
+      RealType Wlrc(0.0);
+
+      set<AtomType*>::iterator i;
+      set<AtomType*>::iterator j;
+    
+      RealType n_i, n_j;
+      RealType rho_i, rho_j;
+      pair<RealType, RealType> LRI;
+      
+      for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
+        n_i = RealType(info_->getGlobalCountOfType(*i));
+        rho_i = n_i /  vol;
+        for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
+          n_j = RealType(info_->getGlobalCountOfType(*j));
+          rho_j = n_j / vol;
+          
+          LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+
+          Elrc += n_i   * rho_j * LRI.first;
+          Wlrc -= rho_i * rho_j * LRI.second;
+        }
+      }
+      Elrc *= 2.0 * NumericConstant::PI;
+      Wlrc *= 2.0 * NumericConstant::PI;
+
+      RealType lrp = curSnapshot->getLongRangePotential();
+      curSnapshot->setLongRangePotential(lrp + Elrc);
+      stressTensor += Wlrc * SquareMatrix3<RealType>::identity();
+      curSnapshot->setStressTensor(stressTensor);
+      */
+     
+    }
   }
-} //end namespace OpenMD
+}
