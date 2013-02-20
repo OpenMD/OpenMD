@@ -171,8 +171,8 @@ namespace OpenMD {
     
     if (snap->getTime() >= currStatus) {
       //save statistics, before writeStat,  we must save statistics
-      stats->collectStats();
       saveConservedQuantity();
+      stats->collectStats();
 
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
 	rnemd_->writeOutputFile();
