@@ -22,7 +22,7 @@
 #include "optimization/EndCriteria.hpp"
 #include "utils/simError.h"
 #include <cmath>
-
+#include <cstdio>
 
 
 namespace QuantLib {

@@ -19,6 +19,7 @@
 
 #include "optimization/Constraint.hpp"
 #include "utils/simError.h"
+#include <cstdio>
 
 namespace QuantLib {
 
