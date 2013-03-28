@@ -55,11 +55,19 @@ namespace OpenMD {
     DeclareParameter(KineticFlux, RealType);
     DeclareParameter(MomentumFlux, RealType);
     DeclareParameter(MomentumFluxVector, Vector3d);
+    DeclareParameter(AngularMomentumFlux, RealType);
+    DeclareParameter(AngularMomentumFluxVector, Vector3d);
     DeclareParameter(SlabWidth, RealType);
     DeclareParameter(SlabACenter, RealType);
     DeclareParameter(SlabBCenter, RealType);
+    DeclareParameter(SphereARadius, RealType);
+    DeclareParameter(SphereBRadius, RealType);
+    DeclareParameter(SelectionA, std::string);
+    DeclareParameter(SelectionB, std::string);
+    DeclareParameter(CoordinateOrigin, Vector3d);
     DeclareParameter(OutputFileName, std::string);
     DeclareParameter(OutputBins, int);
+    DeclareParameter(OutputBinWidth, RealType);
     DeclareParameter(OutputFields, std::string);    
   public:
     RNEMDParameters();

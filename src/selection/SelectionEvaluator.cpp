@@ -376,6 +376,7 @@ namespace OpenMD {
                                            int property, int comparator, 
                                            float comparisonValue) {
     RealType propertyValue = 0.0;
+    Vector3d pos;
     switch (property) {
     case Token::mass:
       propertyValue = sd->getMass();
@@ -401,6 +402,21 @@ namespace OpenMD {
       break;
     case Token::z:
       propertyValue = sd->getPos().z();
+      break;
+    case Token::wrappedX:    
+      pos = sd->getPos();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.x();
+      break;
+    case Token::wrappedY:
+      pos = sd->getPos();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.y();
+      break;
+    case Token::wrappedZ:
+      pos = sd->getPos();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.z();
       break;
     case Token::r:
       propertyValue = sd->getPos().length();
@@ -440,6 +456,7 @@ namespace OpenMD {
                                            int property, int comparator, 
                                            float comparisonValue, int frame) {
     RealType propertyValue = 0.0;
+    Vector3d pos;
     switch (property) {
     case Token::mass:
       propertyValue = sd->getMass();
@@ -466,6 +483,22 @@ namespace OpenMD {
     case Token::z:
       propertyValue = sd->getPos(frame).z();
       break;
+    case Token::wrappedX:    
+      pos = sd->getPos(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.x();
+      break;
+    case Token::wrappedY:
+      pos = sd->getPos(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.y();
+      break;
+    case Token::wrappedZ:
+      pos = sd->getPos(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.z();
+      break;
+
     case Token::r:
       propertyValue = sd->getPos(frame).length();
       break;
