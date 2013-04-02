@@ -91,7 +91,7 @@ namespace OpenMD {
     std::map<std::string, HullTypeEnum> stringToEnumMap_;
     HullTypeEnum hullType_;
 
-
+    bool doThermalCoupling_;
     
     Hull* surfaceMesh_;
     std::vector<StuntDouble*> localSites_;

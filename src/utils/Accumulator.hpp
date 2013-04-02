@@ -305,9 +305,7 @@ namespace OpenMD {
       ret = sqrt(var);
       return;
     }
-        
-  protected:
-    size_t Count_;
+
   private:
     ResultType Val_;
     ResultType Avg_;
@@ -398,8 +396,6 @@ namespace OpenMD {
       return;
     }
         
-  protected:
-    size_t Count_;
   private:
     ElementType Val_;
     ResultType Avg_;

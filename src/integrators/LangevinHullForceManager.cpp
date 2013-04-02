@@ -131,6 +131,18 @@ namespace OpenMD {
       viscosity_ = simParams->getViscosity();
     }
     
+    doThermalCoupling_ = true;
+    if ( fabs(viscosity_) < 1e-6 ) {
+      sprintf(painCave.errMsg, 
+              "LangevinHullDynamics: The bath viscosity was set lower than\n"
+              "\t1e-6 poise.  OpenMD is turning off the thermal coupling to\n"
+              "\t the bath.\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+      doThermalCoupling_ = false;
+    }
+
     dt_ = simParams->getDt();
   
     variance_ = 2.0 * PhysicalConstants::kb * targetTemp_ / dt_;
@@ -188,8 +200,12 @@ namespace OpenMD {
       Vector3d extPressure = -unitNormal * (targetPressure_ * thisArea) /
         PhysicalConstants::energyConvert;
 
-      Vector3d randomForce = S * randNums[thisFacet++];
-      Vector3d dragForce = -hydroTensor * facetVel;
+      Vector3d randomForce(V3Zero);
+      Vector3d dragForce(V3Zero);
+      if (doThermalCoupling_) {
+        randomForce = S * randNums[thisFacet++];
+        dragForce = -hydroTensor * facetVel;
+      }
 
       Vector3d langevinForce = (extPressure + randomForce + dragForce);
       

@@ -420,6 +420,16 @@ namespace OpenMD {
       data_[VELOCITY] = velocity;
       outputMap_["VELOCITY"] = VELOCITY;
 
+      OutputData angularVelocity;
+      angularVelocity.units = "angstroms^2/fs";
+      angularVelocity.title =  "AngularVelocity";  
+      angularVelocity.dataType = "Vector3d";
+      angularVelocity.accumulator.reserve(nBins_);
+      for (int i = 0; i < nBins_; i++) 
+        angularVelocity.accumulator.push_back( new VectorAccumulator() );
+      data_[ANGULARVELOCITY] = angularVelocity;
+      outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
+
       OutputData density;
       density.units =  "g cm^-3";
       density.title =  "Density";
@@ -1610,7 +1620,8 @@ namespace OpenMD {
 		    //vel = (*sdi)->getVel();
                     rPos = (*sdi)->getPos() - coordinateOrigin_;
                     vel = ((*sdi)->getVel() - vh - cross(omegah, rPos)) * h 
-                      + ah + cross(bh, rPos);                   
+                      + ah + cross(bh, rPos);     
+                    cerr << "setting vel to " << vel << "\n";
 		    (*sdi)->setVel(vel);
 		    if (rnemdFluxType_ == rnemdFullKE) {
 		      if ((*sdi)->isDirectional()) {
@@ -1707,6 +1718,7 @@ namespace OpenMD {
     if (!doRNEMD_) return;
     trialCount_++;
 
+    cerr << "trialCount = " << trialCount_ << "\n";
     // object evaluator:
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -1751,11 +1763,12 @@ namespace OpenMD {
   void RNEMD::collectData() {
     if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
+    
+    cerr << "collecting data\n";
     // collectData can be called more frequently than the doRNEMD, so use the 
     // computed area from the last exchange time:
-
-    areaAccumulator_->add(getDividingArea());
+    RealType area = getDividingArea();
+    areaAccumulator_->add(area);
     Mat3x3d hmat = currentSnap_->getHmat();
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
@@ -1814,7 +1827,7 @@ namespace OpenMD {
       Vector3d rPos = sd->getPos() - coordinateOrigin_;
       Vector3d aVel = cross(rPos, vel);
       
-      if (binNo < nBins_)  {
+      if (binNo >= 0 && binNo < nBins_)  {
         binCount[binNo]++;
         binMass[binNo] += mass;
         binPx[binNo] += mass*vel.x();
@@ -1914,7 +1927,7 @@ namespace OpenMD {
             case VELOCITY:
               dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(vel);
               break;
-            case ANGULARVELOCITY:
+            case ANGULARVELOCITY:  
               dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(aVel);
               break;
             case DENSITY:
@@ -2069,7 +2082,7 @@ namespace OpenMD {
           if (outputMask_[i]) {
             if (data_[i].dataType == "RealType")
               writeReal(i,j);
-            else if (data_[i].dataType == "Vector3d")
+            else if (data_[i].dataType == "Vector3d") 
               writeVector(i,j);
             else {
               sprintf( painCave.errMsg,
@@ -2126,7 +2139,7 @@ namespace OpenMD {
     RealType s;
     int count;
     
-    count = dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->count();
+    count = data_[index].accumulator[bin]->count();
     if (count == 0) return;
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getAverage(s);
@@ -2149,7 +2162,8 @@ namespace OpenMD {
     Vector3d s;
     int count;
     
-    count = dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->count();
+    count = data_[index].accumulator[bin]->count();
+
     if (count == 0) return;
 
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getAverage(s);
@@ -2173,7 +2187,7 @@ namespace OpenMD {
     RealType s;
     int count;
     
-    count = dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->count();
+    count = data_[index].accumulator[bin]->count();
     if (count == 0) return;
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getStdDev(s);
@@ -2196,7 +2210,7 @@ namespace OpenMD {
     Vector3d s;
     int count;
     
-    count = dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->count();
+    count = data_[index].accumulator[bin]->count();
     if (count == 0) return;
 
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getStdDev(s);
