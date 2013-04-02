@@ -143,11 +143,6 @@ namespace OpenMD {
 
   void VelocityVerletIntegrator::postStep() {
 
-    //save snapshot
-    info_->getSnapshotManager()->advance();
-  
-    //increase time
-    snap->increaseTime(dt);        
    
     if (needVelocityScaling) {
       if (snap->getTime() >= currThermal) {
@@ -192,6 +187,12 @@ namespace OpenMD {
       resetIntegrator();
       currReset += resetTime;
     }        
+    //save snapshot
+    info_->getSnapshotManager()->advance();
+  
+    //increase time
+    snap->increaseTime(dt);        
+
   }
 
 

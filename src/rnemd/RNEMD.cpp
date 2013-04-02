@@ -1621,7 +1621,6 @@ namespace OpenMD {
                     rPos = (*sdi)->getPos() - coordinateOrigin_;
                     vel = ((*sdi)->getVel() - vh - cross(omegah, rPos)) * h 
                       + ah + cross(bh, rPos);     
-                    cerr << "setting vel to " << vel << "\n";
 		    (*sdi)->setVel(vel);
 		    if (rnemdFluxType_ == rnemdFullKE) {
 		      if ((*sdi)->isDirectional()) {
@@ -1718,7 +1717,6 @@ namespace OpenMD {
     if (!doRNEMD_) return;
     trialCount_++;
 
-    cerr << "trialCount = " << trialCount_ << "\n";
     // object evaluator:
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -1764,7 +1762,6 @@ namespace OpenMD {
     if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     
-    cerr << "collecting data\n";
     // collectData can be called more frequently than the doRNEMD, so use the 
     // computed area from the last exchange time:
     RealType area = getDividingArea();

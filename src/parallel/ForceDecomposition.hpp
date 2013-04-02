@@ -164,6 +164,7 @@ namespace OpenMD {
 
     int storageLayout_;
     bool needVelocities_;
+    bool usePeriodicBoundaryConditions_;
     RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
     RealType largestRcut_;
 

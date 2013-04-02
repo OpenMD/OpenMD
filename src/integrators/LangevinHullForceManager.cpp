@@ -136,7 +136,7 @@ namespace OpenMD {
       sprintf(painCave.errMsg, 
               "LangevinHullDynamics: The bath viscosity was set lower than\n"
               "\t1e-6 poise.  OpenMD is turning off the thermal coupling to\n"
-              "\t the bath.\n");
+              "\tthe bath.\n");
       painCave.isFatal = 0;
       painCave.severity = OPENMD_INFO;
       simError();
@@ -223,6 +223,7 @@ namespace OpenMD {
     
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());    
+    currSnapshot->setHullVolume(surfaceMesh_->getVolume());
     ForceManager::postCalculation();   
   }
   

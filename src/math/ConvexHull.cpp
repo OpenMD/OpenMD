@@ -284,7 +284,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   qh_getarea(qh facet_list);
   volume_ = qh totvol;
   area_ = qh totarea;
-  //  std::cout << "My volume is: " << calcvol << " qhull volume is:" << volume_ << std::endl; 
+  // std::cout << " qhull volume is:" << volume_ << std::endl; 
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
   if (curlong || totlong) {

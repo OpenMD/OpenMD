@@ -55,6 +55,8 @@ namespace OpenMD {
     ff_ = info_->getForceField();
     userChoseCutoff_ = false;
 
+    usePeriodicBoundaryConditions_ = info->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Globals* simParams_ = info_->getSimParams();    
     if (simParams_->havePrintHeatFlux()) {
       if (simParams_->getPrintHeatFlux()) {

@@ -975,7 +975,9 @@ namespace OpenMD {
     d = snap_->cgData.position[cg2] - snap_->cgData.position[cg1];
 #endif
     
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
 
@@ -1005,8 +1007,9 @@ namespace OpenMD {
 #else
     d = snap_->cgData.position[cg1] - snap_->atomData.position[atom1];
 #endif
-
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
   
@@ -1018,8 +1021,9 @@ namespace OpenMD {
 #else
     d = snap_->cgData.position[cg2] - snap_->atomData.position[atom2];
 #endif
-    
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
 
@@ -1048,8 +1052,9 @@ namespace OpenMD {
 #else
     d = snap_->atomData.position[atom2] - snap_->atomData.position[atom1];
 #endif
-
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
 
@@ -1317,6 +1322,13 @@ namespace OpenMD {
     groupCutoffs cuts;
     bool doAllPairs = false;
 
+    RealType rList_ = (largestRcut_ + skinThickness_);
+    Snapshot* snap_ = sman_->getCurrentSnapshot();
+    Mat3x3d invHmat = snap_->getInvHmat();
+    Vector3d rs, scaled, dr;
+    Vector3i whichCell;
+    int cellIndex;
+
 #ifdef IS_MPI
     cellListRow_.clear();
     cellListCol_.clear();
@@ -1324,35 +1336,34 @@ namespace OpenMD {
     cellList_.clear();
 #endif
 
-    RealType rList_ = (largestRcut_ + skinThickness_);
-    Snapshot* snap_ = sman_->getCurrentSnapshot();
-    Mat3x3d Hmat = snap_->getHmat();
-    Vector3d Hx = Hmat.getColumn(0);
-    Vector3d Hy = Hmat.getColumn(1);
-    Vector3d Hz = Hmat.getColumn(2);
+    if (!usePeriodicBoundaryConditions_) {
+      doAllPairs = true;
+    } else {
 
-    nCells_.x() = (int) ( Hx.length() )/ rList_;
-    nCells_.y() = (int) ( Hy.length() )/ rList_;
-    nCells_.z() = (int) ( Hz.length() )/ rList_;
+      Mat3x3d Hmat = snap_->getHmat();
+      Vector3d Hx = Hmat.getColumn(0);
+      Vector3d Hy = Hmat.getColumn(1);
+      Vector3d Hz = Hmat.getColumn(2);
 
-    // handle small boxes where the cell offsets can end up repeating cells
-    
-    if (nCells_.x() < 3) doAllPairs = true;
-    if (nCells_.y() < 3) doAllPairs = true;
-    if (nCells_.z() < 3) doAllPairs = true;
-
-    Mat3x3d invHmat = snap_->getInvHmat();
-    Vector3d rs, scaled, dr;
-    Vector3i whichCell;
-    int cellIndex;
-    int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
-
+      nCells_.x() = (int) ( Hx.length() )/ rList_;
+      nCells_.y() = (int) ( Hy.length() )/ rList_;
+      nCells_.z() = (int) ( Hz.length() )/ rList_;
+      
+      // handle small boxes where the cell offsets can end up repeating cells
+      
+      if (nCells_.x() < 3) doAllPairs = true;
+      if (nCells_.y() < 3) doAllPairs = true;
+      if (nCells_.z() < 3) doAllPairs = true;
+      
+      int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
+      
 #ifdef IS_MPI
-    cellListRow_.resize(nCtot);
-    cellListCol_.resize(nCtot);
+      cellListRow_.resize(nCtot);
+      cellListCol_.resize(nCtot);
 #else
-    cellList_.resize(nCtot);
+      cellList_.resize(nCtot);
 #endif
+    }
 
     if (!doAllPairs) {
 #ifdef IS_MPI
@@ -1488,7 +1499,9 @@ namespace OpenMD {
                   // & column indicies and will divide labor in the
                   // force evaluation later.
                   dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
-                  snap_->wrapVector(dr);
+                  if (usePeriodicBoundaryConditions_) {
+                    snap_->wrapVector(dr);
+                  }
                   cuts = getGroupCutoffs( (*j1), (*j2) );
                   if (dr.lengthSquare() < cuts.third) {
                     neighborList.push_back(make_pair((*j1), (*j2)));
@@ -1515,7 +1528,9 @@ namespace OpenMD {
                   if (m2 != m1 || (*j2) >= (*j1) ) {
 
                     dr = snap_->cgData.position[(*j2)] - snap_->cgData.position[(*j1)];
-                    snap_->wrapVector(dr);
+                    if (usePeriodicBoundaryConditions_) {
+                      snap_->wrapVector(dr);
+                    }
                     cuts = getGroupCutoffs( (*j1), (*j2) );
                     if (dr.lengthSquare() < cuts.third) {
                       neighborList.push_back(make_pair((*j1), (*j2)));
@@ -1534,7 +1549,9 @@ namespace OpenMD {
       for (int j1 = 0; j1 < nGroupsInRow_; j1++) {
         for (int j2 = 0; j2 < nGroupsInCol_; j2++) {    
           dr = cgColData.position[j2] - cgRowData.position[j1];
-          snap_->wrapVector(dr);
+          if (usePeriodicBoundaryConditions_) {
+            snap_->wrapVector(dr);
+          }
           cuts = getGroupCutoffs( j1, j2 );
           if (dr.lengthSquare() < cuts.third) {
             neighborList.push_back(make_pair(j1, j2));
@@ -1547,7 +1564,9 @@ namespace OpenMD {
         // include self group interactions j2 == j1
         for (int j2 = j1; j2 < nGroups_; j2++) {
           dr = snap_->cgData.position[j2] - snap_->cgData.position[j1];
-          snap_->wrapVector(dr);
+          if (usePeriodicBoundaryConditions_) {
+            snap_->wrapVector(dr);
+          }
           cuts = getGroupCutoffs( j1, j2 );
           if (dr.lengthSquare() < cuts.third) {
             neighborList.push_back(make_pair(j1, j2));
