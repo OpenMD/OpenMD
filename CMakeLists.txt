@@ -196,6 +196,7 @@ DynamicProps
 randomBuilder 
 nanoparticleBuilder 
 thermalizer 
+recenter
 atom2md 
 Hydro)
 
@@ -581,6 +582,11 @@ src/applications/thermalizer/thermalizer.cpp
 src/applications/thermalizer/thermalizerCmd.cpp
 )
 
+set(RECENTERSOURCE 
+src/applications/recenter/recenter.cpp
+src/applications/recenter/recenterCmd.cpp
+)
+
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single openmd_core)
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
@@ -601,6 +607,8 @@ add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(simpleBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(thermalizer ${THERMALIZERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(thermalizer openmd_single openmd_core openmd_single openmd_core openmd_single)
+add_executable(recenter ${RECENTERSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(recenter openmd_single openmd_core openmd_single openmd_core openmd_single)
 
 if (OPENBABEL2_FOUND)
 set (ATOM2MDSOURCE 
@@ -683,6 +691,7 @@ INSTALL(TARGETS
         nanorodBuilder
         nanorod_pentBuilder
         thermalizer 
+        recenter
         Hydro
   RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
   LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ 

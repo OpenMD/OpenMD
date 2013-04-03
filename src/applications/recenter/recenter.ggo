@@ -1,0 +1,11 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+package "recenter"
+version "1.0"
+purpose "Moves all integrable objects in an OpenMD file so that the center of mass is at the origin."
+
+# Options
+
+option "output"        o  "Output file name" string yes
