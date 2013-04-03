@@ -94,7 +94,9 @@ namespace OpenMD {
     frameData.id = -1;                   
     frameData.currentTime = 0;     
     frameData.hmat = Mat3x3d(0.0);             
-    frameData.invHmat = Mat3x3d(0.0);          
+    frameData.invHmat = Mat3x3d(0.0);      
+    frameData.bBox = Mat3x3d(0.0);             
+    frameData.invBbox = Mat3x3d(0.0);
     frameData.orthoRhombic = false;        
     frameData.bondPotential = 0.0;      
     frameData.bendPotential = 0.0;      
@@ -131,7 +133,7 @@ namespace OpenMD {
     frameData.electronicTemperature = 0.0;
     frameData.COM = V3Zero;             
     frameData.COMvel = V3Zero;          
-    frameData.COMw = V3Zero;            
+    frameData.COMw = V3Zero;  
 
     hasTotalEnergy = false;         
     hasTranslationalKineticEnergy = false;       
@@ -252,6 +254,22 @@ namespace OpenMD {
   /** Returns the inverse H-Matrix */
   Mat3x3d Snapshot::getInvHmat() {
     return frameData.invHmat;
+  }
+
+  /** Returns the Bounding Box */
+  Mat3x3d Snapshot::getBoundingBox() {
+    return frameData.bBox;
+  }
+
+  /** Sets the Bounding Box */  
+  void Snapshot::setBoundingBox(const Mat3x3d& m) {
+    frameData.bBox = m;
+    frameData.invBbox = frameData.bBox.inverse();
+  }
+
+  /** Returns the inverse Bounding Box */
+  Mat3x3d Snapshot::getInvBoundingBox() {
+    return frameData.invBbox;
   }
 
   RealType Snapshot::getXYarea() {

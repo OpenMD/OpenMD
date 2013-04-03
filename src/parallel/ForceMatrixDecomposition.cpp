@@ -1324,7 +1324,9 @@ namespace OpenMD {
 
     RealType rList_ = (largestRcut_ + skinThickness_);
     Snapshot* snap_ = sman_->getCurrentSnapshot();
-    Mat3x3d invHmat = snap_->getInvHmat();
+    Mat3x3d box;
+    Mat3x3d invBox;
+
     Vector3d rs, scaled, dr;
     Vector3i whichCell;
     int cellIndex;
@@ -1335,44 +1337,46 @@ namespace OpenMD {
 #else
     cellList_.clear();
 #endif
-
+    
     if (!usePeriodicBoundaryConditions_) {
-      doAllPairs = true;
+      box = snap_->getBoundingBox();
+      invBox = snap_->getInvBoundingBox();
     } else {
-
-      Mat3x3d Hmat = snap_->getHmat();
-      Vector3d Hx = Hmat.getColumn(0);
-      Vector3d Hy = Hmat.getColumn(1);
-      Vector3d Hz = Hmat.getColumn(2);
-
-      nCells_.x() = (int) ( Hx.length() )/ rList_;
-      nCells_.y() = (int) ( Hy.length() )/ rList_;
-      nCells_.z() = (int) ( Hz.length() )/ rList_;
-      
-      // handle small boxes where the cell offsets can end up repeating cells
-      
-      if (nCells_.x() < 3) doAllPairs = true;
-      if (nCells_.y() < 3) doAllPairs = true;
-      if (nCells_.z() < 3) doAllPairs = true;
-      
-      int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
-      
-#ifdef IS_MPI
-      cellListRow_.resize(nCtot);
-      cellListCol_.resize(nCtot);
-#else
-      cellList_.resize(nCtot);
-#endif
+      box = snap_->getHmat();
+      invBox = snap_->getInvHmat();
     }
-
+    
+    Vector3d boxX = box.getColumn(0);
+    Vector3d boxY = box.getColumn(1);
+    Vector3d boxZ = box.getColumn(2);
+    
+    nCells_.x() = (int) ( boxX.length() )/ rList_;
+    nCells_.y() = (int) ( boxY.length() )/ rList_;
+    nCells_.z() = (int) ( boxZ.length() )/ rList_;
+    
+    // handle small boxes where the cell offsets can end up repeating cells
+    
+    if (nCells_.x() < 3) doAllPairs = true;
+    if (nCells_.y() < 3) doAllPairs = true;
+    if (nCells_.z() < 3) doAllPairs = true;
+    
+    int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
+    
+#ifdef IS_MPI
+    cellListRow_.resize(nCtot);
+    cellListCol_.resize(nCtot);
+#else
+    cellList_.resize(nCtot);
+#endif
+    
     if (!doAllPairs) {
 #ifdef IS_MPI
-
+      
       for (int i = 0; i < nGroupsInRow_; i++) {
         rs = cgRowData.position[i];
         
         // scaled positions relative to the box vectors
-        scaled = invHmat * rs;
+        scaled = invBox * rs;
         
         // wrap the vector back into the unit box by subtracting integer box 
         // numbers
@@ -1400,7 +1404,7 @@ namespace OpenMD {
         rs = cgColData.position[i];
         
         // scaled positions relative to the box vectors
-        scaled = invHmat * rs;
+        scaled = invBox * rs;
         
         // wrap the vector back into the unit box by subtracting integer box 
         // numbers
@@ -1424,13 +1428,13 @@ namespace OpenMD {
         // add this cutoff group to the list of groups in this cell;
         cellListCol_[cellIndex].push_back(i);
       }
-     
+      
 #else
       for (int i = 0; i < nGroups_; i++) {
         rs = snap_->cgData.position[i];
         
         // scaled positions relative to the box vectors
-        scaled = invHmat * rs;
+        scaled = invBox * rs;
         
         // wrap the vector back into the unit box by subtracting integer box 
         // numbers
@@ -1522,8 +1526,6 @@ namespace OpenMD {
                   // deals with atom-by-atom computation.  OpenMD
                   // allows atoms within a single cutoff group to
                   // interact with each other.
-
-
 
                   if (m2 != m1 || (*j2) >= (*j1) ) {
 

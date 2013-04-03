@@ -62,6 +62,8 @@ namespace OpenMD{
     RealType currentTime;         /**< current time */
     Mat3x3d  hmat;                /**< axes of the periodic box in matrix form */
     Mat3x3d  invHmat;             /**< the inverse of the Hmat matrix */
+    Mat3x3d  bBox;                /**< axes of a bounding box in matrix form */
+    Mat3x3d  invBbox;             /**< the inverse of the bounding box */
     bool     orthoRhombic;        /**< is this an orthorhombic periodic box? */
     RealType totalEnergy;         /**< total energy of this frame */
     RealType translationalKinetic; /**< translational kinetic energy of this frame */
@@ -135,6 +137,13 @@ namespace OpenMD{
     void     setHmat(const Mat3x3d& m);
     /** Returns the inverse H-Matrix */
     Mat3x3d  getInvHmat();
+
+    /** Returns the Bounding Box */
+    Mat3x3d  getBoundingBox();
+    /** Sets the Bounding Box */
+    void     setBoundingBox(const Mat3x3d& m);
+    /** Returns the inverse Bounding Box*/
+    Mat3x3d  getInvBoundingBox();
             
     RealType getVolume();
     RealType getXYarea();
@@ -264,6 +273,7 @@ namespace OpenMD{
     bool hasGyrationalVolume;
     bool hasHullVolume;
     bool hasConservedQuantity;
+    bool hasBoundingBox;
 
   private:
     RealType orthoTolerance_;

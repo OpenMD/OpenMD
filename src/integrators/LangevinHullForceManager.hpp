@@ -51,14 +51,16 @@
 #include "math/Triangle.hpp"
 #include "math/SeqRandNumGen.hpp"
 
+using namespace std;
 namespace OpenMD {
    
   /**
    * @class LangevinHullForceManager
-   * Force manager for NPT Langevin Hull Dynamics
-   * applying friction and random forces as well as torques. 
-   * Stochasitc force is determined by area of surface triangles 
-   * on the convex hull. See: Kohanoff et al. CHEMPHYSCHEM 2005, 6, 1848-1852.
+   * Force manager for NPT Langevin Hull Dynamics applying friction
+   * and random forces as well as torques.  Stochastic force is
+   * determined by the area of surface triangles on the convex hull.
+   * See: Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011),
+   *      and Kohanoff et al. CHEMPHYSCHEM 6, 1848-1852 (2005).
    */
   class LangevinHullForceManager : public ForceManager{
     
@@ -69,32 +71,33 @@ namespace OpenMD {
     virtual void postCalculation();
     
   private:
-    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
-
+    vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
+    
     Globals* simParams;
     SeqRandNumGen randNumGen_;    
     Velocitizer* veloMunge;
-
+    
     RealType dt_;
     RealType targetTemp_;
     RealType targetPressure_; 
     RealType viscosity_;
-
+    
     RealType variance_;
-
-  enum HullTypeEnum {
+    
+    enum HullTypeEnum {
       hullConvex,
       hullAlphaShape,
       hullUnknown
     };
     
-    std::map<std::string, HullTypeEnum> stringToEnumMap_;
+    map<string, HullTypeEnum> stringToEnumMap_;
     HullTypeEnum hullType_;
-
+    
     bool doThermalCoupling_;
+    bool doPressureCoupling_;
     
     Hull* surfaceMesh_;
-    std::vector<StuntDouble*> localSites_;
+    vector<StuntDouble*> localSites_;
   };
   
 } //end namespace OpenMD

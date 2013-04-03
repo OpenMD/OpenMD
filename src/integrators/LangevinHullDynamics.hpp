@@ -47,18 +47,14 @@
 #include "integrators/VelocityVerletIntegrator.hpp"
 
 namespace OpenMD {
-
-
-
-class LangevinHullDynamics: public VelocityVerletIntegrator {
+  class LangevinHullDynamics: public VelocityVerletIntegrator {
   public:
     LangevinHullDynamics(SimInfo* info);
-
+    
   private:    
     virtual void moveA();
     virtual void moveB();
-    virtual RealType calcConservedQuantity();            
-    
+    virtual RealType calcConservedQuantity();
 };
 
 }

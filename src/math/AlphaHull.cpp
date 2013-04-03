@@ -1,4 +1,4 @@
-/* Copyright (c) 2008, 2009, 2010 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,20 +32,15 @@
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
  *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
+ * [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  *
  *  AlphaHull.cpp
  *
- *  Purpose: To calculate Alpha hull, hull volume libqhull.
- *
- *  Created by Charles F. Vardeman II on 11 Dec 2006.
- *  @author  Charles F. Vardeman II
- *  @version $Id$
- *
+ *  Purpose: To calculate an alpha-shape hull.
  */
 
 /* Standard includes independent of library */
@@ -55,40 +50,43 @@
 #include <list>
 #include <algorithm>
 #include <iterator>
-#include <utility>
 #include "math/AlphaHull.hpp"
 #include "utils/simError.h"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
 #include "math/qhull.hpp"
 
+#ifdef HAVE_QHULL
+using namespace std;
 using namespace OpenMD;
 
-#ifdef HAVE_QHULL
-double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim);
+double calculate_circumradius(pointT* p0, pointT* p1, pointT* p2, int dim);
 
-AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), options_("qhull d QJ Tcv Pp") {
+AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), 
+                                     options_("qhull d QJ Tcv Pp") {
 }
 
-void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) { 
+void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) { 
  
   int numpoints = bodydoubles.size();
-  // bool alphashape=true;
   
   Triangles_.clear();
   
   vertexT *vertex;
-  // vertexT **vertexp;
   facetT *facet, *neighbor;
-  // setT *vertices, *verticestop, *verticesbottom;
-  int curlong, totlong;
   pointT *interiorPoint;
+  int curlong, totlong;
   
-  std::vector<double> ptArray(numpoints*dim_);
-
+  Vector3d boxMax;
+  Vector3d boxMin;
+  
+  vector<double> ptArray(numpoints*dim_);
+  
   // Copy the positon vector into a points vector for qhull.
-  std::vector<StuntDouble*>::iterator SD;
+  vector<StuntDouble*>::iterator SD;
   int i = 0;
   for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
     Vector3d pos = (*SD)->getPos();      
@@ -97,21 +95,22 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     ptArray[dim_ * i + 2] = pos.z();
     i++;
   }
-
-    /* Clean up memory from previous convex hull calculations*/
+  
+  /* Clean up memory from previous convex hull calculations*/
   boolT ismalloc = False;
-
-  int ridgesCount=0;
+  
+  /* compute the hull for our local points (or all the points for single
+     processor versions) */
   if (qh_new_qhull(dim_, numpoints, &ptArray[0], ismalloc,
                    const_cast<char *>(options_.c_str()), NULL, stderr)) {
-
+    
     sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
     
   } //qh_new_qhull
-
-
+  
+  
 #ifdef IS_MPI
   //If we are doing the mpi version, set up some vectors for data communication
   
@@ -119,15 +118,15 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   int myrank = MPI::COMM_WORLD.Get_rank();
   int localHullSites = 0;
 
-  std::vector<int> hullSitesOnProc(nproc, 0);
-  std::vector<int> coordsOnProc(nproc, 0);
-  std::vector<int> displacements(nproc, 0);
-  std::vector<int> vectorDisplacements(nproc, 0);
+  vector<int> hullSitesOnProc(nproc, 0);
+  vector<int> coordsOnProc(nproc, 0);
+  vector<int> displacements(nproc, 0);
+  vector<int> vectorDisplacements(nproc, 0);
 
-  std::vector<double> coords;
-  std::vector<double> vels;
-  std::vector<int> indexMap;
-  std::vector<double> masses;
+  vector<double> coords;
+  vector<double> vels;
+  vector<int> indexMap;
+  vector<double> masses;
 
   FORALLvertices{
     localHullSites++;
@@ -167,9 +166,9 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     vectorDisplacements[iproc] = vectorDisplacements[iproc-1] + coordsOnProc[iproc-1]; 
   }
 
-  std::vector<double> globalCoords(dim_ * globalHullSites);
-  std::vector<double> globalVels(dim_ * globalHullSites);
-  std::vector<double> globalMasses(globalHullSites);
+  vector<double> globalCoords(dim_ * globalHullSites);
+  vector<double> globalVels(dim_ * globalHullSites);
+  vector<double> globalMasses(globalHullSites);
 
   int count = coordsOnProc[myrank];
   
@@ -188,19 +187,23 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   // Free previous hull
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
-  if (curlong || totlong)
-    std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
-	      << totlong << curlong << std::endl;
+  if (curlong || totlong) {
+    sprintf(painCave.errMsg, "AlphaHull: qhull internal warning:\n"
+            "\tdid not free %d bytes of long memory (%d pieces)", 
+            totlong, curlong);
+    painCave.isFatal = 1;
+    simError();
+  }
   
   if (qh_new_qhull(dim_, globalHullSites, &globalCoords[0], ismalloc,
                    const_cast<char *>(options_.c_str()), NULL, stderr)){
     
-    sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute global convex hull");
+    sprintf(painCave.errMsg, 
+            "AlphaHull: Qhull failed to compute global convex hull");
     painCave.isFatal = 1;
     simError();
-    
+        
   } //qh_new_qhull
-
 
 #endif
 
@@ -233,7 +236,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   
   qh visit_id++;
   int numFacets=0;
-  std::vector<std::vector <int> > facetlist;
+  vector<vector <int> > facetlist;
   interiorPoint = qh interior_point;
   FORALLfacet_(qh facet_list) {
     numFacets++;
@@ -300,7 +303,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   
   //Filter the triangles (only the ones on the boundary of the alpha complex) and build the mesh
 
-
+  int ridgesCount=0;
   
   ridgeT *ridge, **ridgep;
   FOREACHridge_(set) {
@@ -315,7 +318,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       
       
       //coordT *center = qh_getcenter(ridge->vertices);
-      //std::cout << "Centers are " << center[0] << "  " <<center[1] << "  " << center[2] << std::endl;
+      //cout << "Centers are " << center[0] << "  " <<center[1] << "  " << center[2] << endl;
       //Vector3d V3dCentroid(center[0], center[1], center[2]);
       //face.setCentroid(V3dCentroid);
 
@@ -325,7 +328,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       RealType faceMass = 0.0;
       
       int ver = 0;
-      std::vector<int> virtexlist;
+      vector<int> virtexlist;
       FOREACHvertex_i_(ridge->vertices){
         int id = qh_pointid(vertex->point);
         p[ver][0] = vertex->point[0];
@@ -335,7 +338,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
         RealType mass;
         ver++;
         virtexlist.push_back(id);
-        // std::cout << "Ridge: " << ridgesCount << " Vertex " << id << std::endl; 
+        // cout << "Ridge: " << ridgesCount << " Vertex " << id << endl; 
 
         vel = bodydoubles[id]->getVel();
         mass = bodydoubles[id]->getMass();
@@ -355,14 +358,14 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       Vector3d normal = face.getUnitNormal();
       RealType offset =  ((0.0-p[0][0])*normal[0] + (0.0-p[0][1])*normal[1] + (0.0-p[0][2])*normal[2]);
       RealType dist =  normal[0] * interiorPoint[0] + normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
-      std::cout << "Dist and normal and area are: " << normal << std::endl;
+     cout << "Dist and normal and area are: " << normal << endl;
       volume_ += dist *area/qh hull_dim;
       
       Triangles_.push_back(face);
     }
   }
 
-  std::cout << "Volume is: " << volume_ << std::endl; 
+  cout << "Volume is: " << volume_ << endl; 
 
 //assert(pm.cm.fn == ridgesCount);
 /*
@@ -456,27 +459,51 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   //volume_ = qh totvol;
   // area_ = qh totarea;
 
+
+  int index = 0;
+  FORALLvertices {
+    Vector3d point(vertex->point[0], vertex->point[1], vertex->point[2]);
+    if (index == 0) {
+      boxMax = point;
+      boxMin = point;
+    } else {
+      for (int i = 0; i < 3; i++) {
+        boxMax[i] = max(boxMax[i], point[i]);
+        boxMin[i] = min(boxMin[i], point[i]);
+      }
+    }
+    index++;
+  }
+  boundingBox_ = Mat3x3d(0.0);
+  boundingBox_(0,0) = boxMax[0] - boxMin[0];
+  boundingBox_(1,1) = boxMax[1] - boxMin[1];
+  boundingBox_(2,2) = boxMax[2] - boxMin[2];
+
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
-  if (curlong || totlong)
-    std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
-              << totlong << curlong << std::endl;    
+  if (curlong || totlong) {
+    sprintf(painCave.errMsg, "AlphaHull: qhull internal warning:\n"
+            "\tdid not free %d bytes of long memory (%d pieces)", 
+            totlong, curlong);
+    painCave.isFatal = 1;
+    simError();
+  }
 }
 
-void AlphaHull::printHull(const std::string& geomFileName) {
-
+void AlphaHull::printHull(const string& geomFileName) {
+  
 #ifdef IS_MPI
   if (worldRank == 0)  {
 #endif
-  FILE *newGeomFile;
-  
-  //create new .md file based on old .md file
-  newGeomFile = fopen(geomFileName.c_str(), "w");
-  qh_findgood_all(qh facet_list);
-  for (int i = 0; i < qh_PRINTEND; i++)
-    qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
-  
-  fclose(newGeomFile);
+    FILE *newGeomFile;
+    
+    //create new .md file based on old .md file
+    newGeomFile = fopen(geomFileName.c_str(), "w");
+    qh_findgood_all(qh facet_list);
+    for (int i = 0; i < qh_PRINTEND; i++)
+      qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
+    
+    fclose(newGeomFile);
 #ifdef IS_MPI
   }
 #endif  

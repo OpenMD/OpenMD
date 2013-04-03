@@ -112,7 +112,6 @@ namespace OpenMD {
     
     flucQ_->moveA();
     rattle_->constraintA();
-    
   }    
 
   void LangevinHullDynamics::moveB(){
@@ -163,7 +162,6 @@ namespace OpenMD {
     flucQ_->moveB();
     rattle_->constraintB();
   }
-
 
   RealType LangevinHullDynamics::calcConservedQuantity() {
     return 0.0;

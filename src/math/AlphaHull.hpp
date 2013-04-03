@@ -60,34 +60,38 @@
 #include <vector>
 #include <string>
 
-
+using namespace std;
 namespace OpenMD {
   class AlphaHull : public Hull {
   public:
-
-    AlphaHull(double alpha);    
+    
+    AlphaHull(RealType alpha);    
     virtual ~AlphaHull(){};
-
-    void computeHull( std::vector<StuntDouble*> bodydoubles );
-
+    
+    void computeHull( vector<StuntDouble*> bodydoubles );
+    
     /* Total area of Hull*/
-    RealType getArea(){return area_;}
-
+    RealType getArea(){ return area_; }
+    
     /* Total Volume enclosed by Hull */
     RealType getVolume(){ return volume_; } 
-
-    std::vector<Triangle> getMesh(){return Triangles_;}
+    
+    /* Bounding Box for Hull sites */
+    Mat3x3d getBoundingBox(){ return boundingBox_; } 
+    
+    vector<Triangle> getMesh(){ return Triangles_; }
     void printHull(const std::string& geomFileName);
-
+    
   protected:
     RealType volume_;
     RealType area_;
+    Mat3x3d boundingBox_;
     int dim_;
-    double alpha_;
+    RealType alpha_;
     const std::string options_;
     
   private:
-    std::vector<Triangle> Triangles_;
+    vector<Triangle> Triangles_;
   };
 }
-#endif /*MATH_CONVEXHULL_HPP_*/
+#endif
