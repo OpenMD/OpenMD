@@ -313,6 +313,30 @@ namespace OpenMD {
     data_[ELECTRONIC_TEMPERATURE] = electronic_temperature;
     statsMap_["ELECTRONIC_TEMPERATURE"] = ELECTRONIC_TEMPERATURE;
 
+    StatsData com;
+    com.units =  "A";
+    com.title =  "Center of Mass";
+    com.dataType = "Vector3d";
+    com.accumulator = new VectorAccumulator();
+    data_[COM] = com;
+    statsMap_["COM"] =  COM;
+
+    StatsData comVel;
+    comVel.units =  "A/fs";
+    comVel.title =  "Center of Mass Velocity";
+    comVel.dataType = "Vector3d";
+    comVel.accumulator = new VectorAccumulator();
+    data_[COM_VELOCITY] = comVel;
+    statsMap_["COM_VELOCITY"] =  COM_VELOCITY;
+
+    StatsData angMom;
+    angMom.units =  "amu A^2/fs";
+    angMom.title =  "Angular Momentum";
+    angMom.dataType = "Vector3d";
+    angMom.accumulator = new VectorAccumulator();
+    data_[ANGULAR_MOMENTUM] = angMom;
+    statsMap_["ANGULAR_MOMENTUM"] =  ANGULAR_MOMENTUM;
+
     // Now, set some defaults in the mask:
 
     Globals* simParams = info_->getSimParams();
@@ -487,6 +511,18 @@ namespace OpenMD {
         case TAGGED_PAIR_DISTANCE:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTaggedAtomPairDistance());
           break;
+        case ELECTRONIC_TEMPERATURE:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicTemperature());
+          break; 
+        case COM:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getCom());
+          break;
+        case COM_VELOCITY:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getComVel());
+          break;
+        case ANGULAR_MOMENTUM:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getAngularMomentum());
+          break;
           /*
         case SHADOWH:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getShadowHamiltionian());
@@ -495,9 +531,6 @@ namespace OpenMD {
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getHelfandMoment());
           break;
           */
-        case ELECTRONIC_TEMPERATURE:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicTemperature());
-          break; 
         }
       }
     }

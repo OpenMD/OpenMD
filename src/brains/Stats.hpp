@@ -97,6 +97,9 @@ namespace OpenMD {
       HELFANDMOMENT,
       HEATFLUX,  
       ELECTRONIC_TEMPERATURE,
+      COM,
+      COM_VELOCITY,
+      ANGULAR_MOMENTUM,
       ENDINDEX  //internal use
     };
 
