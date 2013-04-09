@@ -212,6 +212,7 @@ def writeFile(outputFileName):
     for i in range(len(indices)):
         if  i not in Eliminate:
             outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e \n" % (index, sdFormat, positions[i][0], positions[i][1], positions[i][2], 0.0, 0.0, 0.0))
+            index = index + 1
 
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")

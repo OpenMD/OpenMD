@@ -1445,6 +1445,44 @@ namespace OpenMD {
     RealType Mc = 0.0;
     Mat3x3d Ic(0.0);
     RealType Kc = 0.0;
+
+    // Constraints can be on only the linear or angular momentum, but
+    // not both.  Usually, the user will specify which they want, but
+    // in case they don't, the use of periodic boundaries should make
+    // the choice for us.
+    bool doLinearPart = false;
+    bool doAngularPart = false;
+
+    switch (rnemdFluxType_) {
+    case rnemdPx:
+    case rnemdPy:
+    case rnemdPz:
+    case rnemdPvector:
+    case rnemdKePx:
+    case rnemdKePy:
+    case rnemdKePvector:
+      doLinearPart = true;
+      break;
+    case rnemdLx:
+    case rnemdLy:
+    case rnemdLz:
+    case rnemdLvector:
+    case rnemdKeLx:
+    case rnemdKeLy:
+    case rnemdKeLz:
+    case rnemdKeLvector:
+      doAngularPart = true;
+      break;
+    case rnemdKE:
+    case rnemdRotKE:
+    case rnemdFullKE:
+    default:
+      if (usePeriodicBoundaryConditions_) 
+        doLinearPart = true;
+      else
+        doAngularPart = true;
+      break;
+    }
     
     for (sd = smanA.beginSelected(selei); sd != NULL; 
          sd = smanA.nextSelected(selei)) {
@@ -1553,47 +1591,72 @@ namespace OpenMD {
                               MPI::REALTYPE, MPI::SUM);
 #endif
     
+
+    Vector3d ac, acrec, bc, bcrec;
+    Vector3d ah, ahrec, bh, bhrec;
+    RealType cNumerator, cDenominator;
+    RealType hNumerator, hDenominator;
+
+
     bool successfulExchange = false;
     if ((Mh > 0.0) && (Mc > 0.0)) {//both slabs are not empty
       Vector3d vc = Pc / Mc;
-      Vector3d ac = -momentumTarget_ / Mc + vc;
-      Vector3d acrec = -momentumTarget_ / Mc;
+      ac = -momentumTarget_ / Mc + vc;
+      acrec = -momentumTarget_ / Mc;
       
       // We now need the inverse of the inertia tensor to calculate the 
       // angular velocity of the cold slab;
       Mat3x3d Ici = Ic.inverse();
       Vector3d omegac = Ici * Lc;
-      Vector3d bc  = -(Ici * angularMomentumTarget_) + omegac;
-      Vector3d bcrec = bc - omegac;
+      bc  = -(Ici * angularMomentumTarget_) + omegac;
+      bcrec = bc - omegac;
       
-      RealType cNumerator = Kc - kineticTarget_ 
-        - 0.5 * Mc * ac.lengthSquare() - 0.5 * ( dot(bc, Ic * bc));
+      cNumerator = Kc - kineticTarget_;
+      if (doLinearPart) 
+        cNumerator -= 0.5 * Mc * ac.lengthSquare();
+      
+      if (doAngularPart)
+        cNumerator -= 0.5 * ( dot(bc, Ic * bc));
+
       if (cNumerator > 0.0) {
         
-        RealType cDenominator = Kc - 0.5 * Mc * vc.lengthSquare() 
-          - 0.5*(dot(omegac, Ic * omegac));
+        cDenominator = Kc;
+
+        if (doLinearPart)
+          cDenominator -= 0.5 * Mc * vc.lengthSquare();
+
+        if (doAngularPart)
+          cDenominator -= 0.5*(dot(omegac, Ic * omegac));
         
 	if (cDenominator > 0.0) {
 	  RealType c = sqrt(cNumerator / cDenominator);
 	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
             
 	    Vector3d vh = Ph / Mh;
-	    Vector3d ah = momentumTarget_ / Mh + vh;
-	    Vector3d ahrec = momentumTarget_ / Mh;
+            ah = momentumTarget_ / Mh + vh;
+            ahrec = momentumTarget_ / Mh;
             
             // We now need the inverse of the inertia tensor to
             // calculate the angular velocity of the hot slab;
             Mat3x3d Ihi = Ih.inverse();
             Vector3d omegah = Ihi * Lh;
-            Vector3d bh  = (Ihi * angularMomentumTarget_) + omegah;
-            Vector3d bhrec = bh - omegah;
+            bh  = (Ihi * angularMomentumTarget_) + omegah;
+            bhrec = bh - omegah;
             
-            RealType hNumerator = Kh + kineticTarget_
-              - 0.5 * Mh * ah.lengthSquare() - 0.5 * ( dot(bh, Ih * bh));;
+            hNumerator = Kh + kineticTarget_;
+            if (doLinearPart) 
+              hNumerator -= 0.5 * Mh * ah.lengthSquare();
+            
+            if (doAngularPart)
+              hNumerator -= 0.5 * ( dot(bh, Ih * bh));
+              
             if (hNumerator > 0.0) {
               
-              RealType hDenominator = Kh - 0.5 * Mh * vh.lengthSquare() 
-                - 0.5*(dot(omegah, Ih * omegah));
+              hDenominator = Kh;
+              if (doLinearPart) 
+                hDenominator -= 0.5 * Mh * vh.lengthSquare();
+              if (doAngularPart)
+                hDenominator -= 0.5*(dot(omegah, Ih * omegah));
               
 	      if (hDenominator > 0.0) {
 		RealType h = sqrt(hNumerator / hDenominator);
@@ -1606,8 +1669,11 @@ namespace OpenMD {
 		  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
 		    //vel = (*sdi)->getVel();
                     rPos = (*sdi)->getPos() - coordinateOrigin_;
-                    vel = ((*sdi)->getVel() - vc - cross(omegac, rPos)) * c 
-                      + ac + cross(bc, rPos);
+                    if (doLinearPart)
+                      vel = ((*sdi)->getVel() - vc) * c + ac;
+                    if (doAngularPart)
+                      vel = ((*sdi)->getVel() - cross(omegac, rPos)) * c + cross(bc, rPos);
+
 		    (*sdi)->setVel(vel);
 		    if (rnemdFluxType_ == rnemdFullKE) {
 		      if ((*sdi)->isDirectional()) {
@@ -1619,8 +1685,11 @@ namespace OpenMD {
 		  for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
 		    //vel = (*sdi)->getVel();
                     rPos = (*sdi)->getPos() - coordinateOrigin_;
-                    vel = ((*sdi)->getVel() - vh - cross(omegah, rPos)) * h 
-                      + ah + cross(bh, rPos);     
+                    if (doLinearPart)
+                      vel = ((*sdi)->getVel() - vh) * h + ah;     
+                    if (doAngularPart)
+                      vel = ((*sdi)->getVel() - cross(omegah, rPos)) * h + cross(bh, rPos);     
+
 		    (*sdi)->setVel(vel);
 		    if (rnemdFluxType_ == rnemdFullKE) {
 		      if ((*sdi)->isDirectional()) {
@@ -1900,9 +1969,9 @@ namespace OpenMD {
       vel.x() = binPx[i] / binMass[i];
       vel.y() = binPy[i] / binMass[i];
       vel.z() = binPz[i] / binMass[i];
-      aVel.x() = binOmegax[i];
-      aVel.y() = binOmegay[i];
-      aVel.z() = binOmegaz[i];
+      aVel.x() = binOmegax[i] / binCount[i];
+      aVel.y() = binOmegay[i] / binCount[i];
+      aVel.z() = binOmegaz[i] / binCount[i];
 
       if (binCount[i] > 0) {
         // only add values if there are things to add

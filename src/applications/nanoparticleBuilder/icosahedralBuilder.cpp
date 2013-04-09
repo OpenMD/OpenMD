@@ -40,27 +40,14 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <cmath>
-#include <iostream>
-#include <string>
-#include <map>
-#include <fstream>
-#include <algorithm>
-
 #include "config.h"
 #include "icosahedralBuilderCmd.h"
 #include "utils/MoLocator.hpp"
 #include "utils/Tuple.hpp"
-#include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/SimCreator.hpp"
 #include "io/DumpWriter.hpp"
-#include "math/Vector3.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "utils/StringUtils.hpp"
 
 using namespace OpenMD;
 using namespace std;
@@ -72,7 +59,7 @@ using namespace std;
 //
 
 vector<Vector3d> Points;
-vector<std::pair<int, int> > Edges;
+vector<pair<int, int> > Edges;
 vector<tuple3<int, int, int> > Facets;
 vector<Vector3d> Basis; // Basis vectors of the edges
 
@@ -112,20 +99,20 @@ void init() {
   //
   // Initialize Basis vectors.
   //
-  const RealType HT = ( sqrt(5.0) + 1.0 ) / 4.0;   // half Tau
+  const RealType HGR = ( sqrt(5.0) + 1.0 ) / 4.0;   // half of the golden ratio
   
-  Basis.push_back( Vector3d( HT, 0.0, 0.5 ));
-  Basis.push_back( Vector3d( HT, 0.0, -0.5 ));
-  Basis.push_back( Vector3d( 0.5, HT, 0.0 ));
-  Basis.push_back( Vector3d( -0.5, HT, 0.0 ));
-  Basis.push_back( Vector3d( 0.0, 0.5, HT ));
-  Basis.push_back( Vector3d( 0.0, -0.5, HT ));
-  Basis.push_back( Vector3d( 0.5, -HT, 0.0 ));
-  Basis.push_back( Vector3d( 0.0, 0.5, -HT ));
-  Basis.push_back( Vector3d( -HT, 0.0, 0.5 ));
-  Basis.push_back( Vector3d( 0.0, -0.5, -HT ));
-  Basis.push_back( Vector3d( -HT, 0.0, -0.5 ));
-  Basis.push_back( Vector3d( -0.5, -HT, 0.0 ));
+  Basis.push_back( Vector3d(  HGR,  0.0,  0.5 ));
+  Basis.push_back( Vector3d(  HGR,  0.0, -0.5 ));
+  Basis.push_back( Vector3d(  0.5,  HGR,  0.0 ));
+  Basis.push_back( Vector3d( -0.5,  HGR,  0.0 ));
+  Basis.push_back( Vector3d(  0.0,  0.5,  HGR ));
+  Basis.push_back( Vector3d(  0.0, -0.5,  HGR ));
+  Basis.push_back( Vector3d(  0.5, -HGR,  0.0 ));
+  Basis.push_back( Vector3d(  0.0,  0.5, -HGR ));
+  Basis.push_back( Vector3d( -HGR,  0.0,  0.5 ));
+  Basis.push_back( Vector3d(  0.0, -0.5, -HGR ));
+  Basis.push_back( Vector3d( -HGR,  0.0, -0.5 ));
+  Basis.push_back( Vector3d( -0.5, -HGR,  0.0 ));
   
   //
   // Initialize 30 edges
@@ -357,6 +344,7 @@ int main(int argc, char *argv []) {
             "\tgiven.  Total number of atoms in a Mackay Icosahedron with\n"
             "\t%d shells is %d.", nShells, count);
     painCave.isFatal = 1;
+    painCave.severity = OPENMD_INFO;
     cmdline_parser_print_help();
     simError();
   }

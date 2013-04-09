@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,51 +40,78 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_TORSIONTYPESSECTIONPARSER_HPP
-#define IO_TORSIONTYPESSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_HARMONICTORSIONTYPE_HPP
+#define TYPES_HARMONICTORSIONTYPE_HPP
 
 namespace OpenMD {
 
   /**
-   * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
+   * @class HarmonicTorsionType
+   * These torsion types are defined identically with functional form given
+   * in equation 5 in the following paper:
+   *
+   * "Transferable Potentials for Phase Equilibria. 4. United-Atom
+   * Description of Linear and Branched Alkenes and Alkylbenzenes" by
+   * Collin D. Wick, Marcus G. Martin and J. Ilja Siepmann,
+   * J. Phys. Chem. B; 2000; 104(33) pp 8008 - 8016;
+   *
+   *    http://pubs.acs.org/doi/abs/10.1021/jp001044x
+   *
+   * This torsion potential has the form:
+   * 
+   *  \f[ 
+         V_{tors} = \frac{d_0}{2} \left(\phi - \phi_0\right)^2
+       \f]
+   *
    */
-  class TorsionTypesSectionParser : public SectionParser {
+  class HarmonicTorsionType : public TorsionType {
+    
   public:
+    
+    HarmonicTorsionType(RealType d0, RealType phi0) :  
+      TorsionType(), d0_(d0), phi0_(phi0) {}
 
-            
-    TorsionTypesSectionParser(ForceFieldOptions& options);
+
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
+      //check roundoff     
+      if (cosPhi > 1.0) {
+        cosPhi = 1.0;
+      } else if (cosPhi < -1.0) {
+        cosPhi = -1.0;
+      }
+
+      RealType phi = acos(cosPhi);
+      RealType sinPhi = sqrt(1.0 - cosPhi * cosPhi);
+
+      // trick to avoid divergence in angles near 0 and pi:
+
+      if (fabs(sinPhi) < 1.0E-6) {
+        sinPhi = copysign(1.0E-6, sinPhi);
+      }
+
+      V = 0.5 * d0_ * pow((phi - phi0_), 2);
+
+      dVdCosPhi = -d0_ * (phi - phi0_) / sinPhi;
+    }
+
+    
+    friend std::ostream& operator <<(std::ostream& os, HarmonicTorsionType& ttt);
+    
   private:
-
-
-    enum TorsionTypeEnum{
-      ttGhostTorsion,
-      ttCubic,
-      ttQuartic,
-      ttPolynomial,
-      ttCharmm,
-      ttOpls,
-      ttTrappe,
-      ttHarmonic,
-      ttUnknown
-    };
-
-    TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
-
-    std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
-    ForceFieldOptions& options_;
+    
+    RealType d0_;
+    RealType phi0_;
+   
   };
-
-
-} //namespace OpenMD
-
-#endif //IO_TORSIONTYPESSECTIONPARSER_HPP
-
-
+  
+  std::ostream& operator <<(std::ostream& os, HarmonicTorsionType& htt) {
+    
+    os << "This HarmonicTorsionType has below form:" << std::endl;
+    os << htt.d0_ << "*(phi - " << htt.phi0_ << ")/2" << std::endl; 
+    return os;
+  }
+  
+} //end namespace OpenMD
+#endif //TYPES_HARMONICTORSIONTYPE_HPP
 
 

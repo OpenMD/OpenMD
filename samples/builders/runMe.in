@@ -134,3 +134,15 @@ ${OPENMD_HOME}/bin/nanorodBuilder -o gold_fccrod.md --radius=20.0 --length=50.0 
 # to match the number of lattice sites.
 #
 ${OPENMD_HOME}/bin/nanorod_pentBuilder -o gold_pentrod.md --radius=15.0 --length=64.0 --latticeConstant=4.08 gold.md
+#
+#Example 11:
+# Builds a Mackay icosahedral nanoparticle from the <MetaData> block in gold.md
+# using a 8 shells, and a lattice constant of 4.08 angstroms.
+# Places the output (which can be used to start an OpenMD job) in 
+# gold_ico.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+${OPENMD_HOME}/bin/icosahedralBuilder -o gold_ico.md --shells=8 --latticeConstant=4.08 gold.md
+${OPENMD_HOME}/bin/thermalizer -o gold_ico_300K.md -t 300 gold_ico.md
