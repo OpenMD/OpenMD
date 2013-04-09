@@ -1,0 +1,16 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+# invoke with:
+# gengetopt < icosahedralBuilder.ggo --file-name=icosahedralBuilderCmd --unamed-opts
+
+package "icosahedralBuilder"
+version "1.0"
+purpose "Builds icosahedral nanoparticles and outputs an OpenMD startup file"
+
+# Options
+
+option "output"             o  "Output file name" string yes
+option "latticeConstant"    d  "Lattice spacing in Angstroms for cubic lattice." double no
+option "shells"             n  "Nanoparticle shells" int yes"

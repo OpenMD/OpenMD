@@ -567,6 +567,11 @@ src/applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
 src/applications/nanoparticleBuilder/shapedLatticePentRod.cpp
 )
 
+set (ICOSAHEDRALBUILDERSOURCE 
+src/applications/nanoparticleBuilder/icosahedralBuilder.cpp
+src/applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp
+)
+
 set (RANDOMBUILDERSOURCE
 src/applications/randomBuilder/randomBuilder.cpp
 src/applications/randomBuilder/randomBuilderCmd.cpp
@@ -601,6 +606,8 @@ add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorod_pentBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
+add_executable(icosahedralBuilder ${ICOSAHEDRALBUILDERSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(icosahedralBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(randomBuilder ${RANDOMBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(randomBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
