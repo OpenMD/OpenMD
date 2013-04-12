@@ -35,8 +35,17 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help                    Print help and exit",
   "  -V, --version                 Print version and exit",
   "  -o, --output=STRING           Output file name",
-  "  -d, --latticeConstant=DOUBLE  Lattice spacing in Angstroms for cubic lattice.",
   "  -n, --shells=INT              Nanoparticle shells",
+  "  -d, --latticeConstant=DOUBLE  Lattice spacing in Angstroms for cubic lattice.",
+  "  -c, --columnAtoms=INT         Number of atoms along central column \n                                  (Decahedron only)",
+  "  -t, --twinAtoms=INT           Number of atoms along twin boundary (Decahedron \n                                  only)",
+  "  -p, --truncatedPlanes=INT     Number of truncated planes (Curling-stone \n                                  Decahedron only)",
+  "\n Group: clusterShape\n   a cluster shape is required",
+  "      --ico                     Create an Icosahedral cluster",
+  "      --deca                    Create a regualar Decahedral cluster",
+  "      --ino                     Create an Ino Decahedral cluster",
+  "      --marks                   Create a Marks Decahedral cluster",
+  "      --stone                   Create a Curling-stone Decahedral cluster",
     0
 };
 
@@ -67,8 +76,17 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->output_given = 0 ;
-  args_info->latticeConstant_given = 0 ;
   args_info->shells_given = 0 ;
+  args_info->latticeConstant_given = 0 ;
+  args_info->columnAtoms_given = 0 ;
+  args_info->twinAtoms_given = 0 ;
+  args_info->truncatedPlanes_given = 0 ;
+  args_info->ico_given = 0 ;
+  args_info->deca_given = 0 ;
+  args_info->ino_given = 0 ;
+  args_info->marks_given = 0 ;
+  args_info->stone_given = 0 ;
+  args_info->clusterShape_group_counter = 0 ;
 }
 
 static
@@ -77,8 +95,11 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->output_arg = NULL;
   args_info->output_orig = NULL;
-  args_info->latticeConstant_orig = NULL;
   args_info->shells_orig = NULL;
+  args_info->latticeConstant_orig = NULL;
+  args_info->columnAtoms_orig = NULL;
+  args_info->twinAtoms_orig = NULL;
+  args_info->truncatedPlanes_orig = NULL;
   
 }
 
@@ -90,8 +111,16 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->output_help = gengetopt_args_info_help[2] ;
-  args_info->latticeConstant_help = gengetopt_args_info_help[3] ;
-  args_info->shells_help = gengetopt_args_info_help[4] ;
+  args_info->shells_help = gengetopt_args_info_help[3] ;
+  args_info->latticeConstant_help = gengetopt_args_info_help[4] ;
+  args_info->columnAtoms_help = gengetopt_args_info_help[5] ;
+  args_info->twinAtoms_help = gengetopt_args_info_help[6] ;
+  args_info->truncatedPlanes_help = gengetopt_args_info_help[7] ;
+  args_info->ico_help = gengetopt_args_info_help[9] ;
+  args_info->deca_help = gengetopt_args_info_help[10] ;
+  args_info->ino_help = gengetopt_args_info_help[11] ;
+  args_info->marks_help = gengetopt_args_info_help[12] ;
+  args_info->stone_help = gengetopt_args_info_help[13] ;
   
 }
 
@@ -177,8 +206,11 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   unsigned int i;
   free_string_field (&(args_info->output_arg));
   free_string_field (&(args_info->output_orig));
-  free_string_field (&(args_info->latticeConstant_orig));
   free_string_field (&(args_info->shells_orig));
+  free_string_field (&(args_info->latticeConstant_orig));
+  free_string_field (&(args_info->columnAtoms_orig));
+  free_string_field (&(args_info->twinAtoms_orig));
+  free_string_field (&(args_info->truncatedPlanes_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -220,10 +252,26 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->output_given)
     write_into_file(outfile, "output", args_info->output_orig, 0);
-  if (args_info->latticeConstant_given)
-    write_into_file(outfile, "latticeConstant", args_info->latticeConstant_orig, 0);
   if (args_info->shells_given)
     write_into_file(outfile, "shells", args_info->shells_orig, 0);
+  if (args_info->latticeConstant_given)
+    write_into_file(outfile, "latticeConstant", args_info->latticeConstant_orig, 0);
+  if (args_info->columnAtoms_given)
+    write_into_file(outfile, "columnAtoms", args_info->columnAtoms_orig, 0);
+  if (args_info->twinAtoms_given)
+    write_into_file(outfile, "twinAtoms", args_info->twinAtoms_orig, 0);
+  if (args_info->truncatedPlanes_given)
+    write_into_file(outfile, "truncatedPlanes", args_info->truncatedPlanes_orig, 0);
+  if (args_info->ico_given)
+    write_into_file(outfile, "ico", 0, 0 );
+  if (args_info->deca_given)
+    write_into_file(outfile, "deca", 0, 0 );
+  if (args_info->ino_given)
+    write_into_file(outfile, "ino", 0, 0 );
+  if (args_info->marks_given)
+    write_into_file(outfile, "marks", 0, 0 );
+  if (args_info->stone_given)
+    write_into_file(outfile, "stone", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -269,6 +317,21 @@ gengetopt_strdup (const char *s)
     return (char*)0;
   strcpy(result, s);
   return result;
+}
+
+static void
+reset_group_clusterShape(struct gengetopt_args_info *args_info)
+{
+  if (! args_info->clusterShape_group_counter)
+    return;
+  
+  args_info->ico_given = 0 ;
+  args_info->deca_given = 0 ;
+  args_info->ino_given = 0 ;
+  args_info->marks_given = 0 ;
+  args_info->stone_given = 0 ;
+
+  args_info->clusterShape_group_counter = 0;
 }
 
 int
@@ -352,7 +415,13 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
       error = 1;
     }
   
+  if (args_info->clusterShape_group_counter == 0)
+    {
+      fprintf (stderr, "%s: %d options of group clusterShape were given. One is required%s.\n", prog_name, args_info->clusterShape_group_counter, (additional_error ? additional_error : ""));
+      error = 1;
+    }
   
+
   /* checks for dependences among options */
 
   return error;
@@ -515,12 +584,20 @@ cmdline_parser_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "output",	1, NULL, 'o' },
-        { "latticeConstant",	1, NULL, 'd' },
         { "shells",	1, NULL, 'n' },
+        { "latticeConstant",	1, NULL, 'd' },
+        { "columnAtoms",	1, NULL, 'c' },
+        { "twinAtoms",	1, NULL, 't' },
+        { "truncatedPlanes",	1, NULL, 'p' },
+        { "ico",	0, NULL, 0 },
+        { "deca",	0, NULL, 0 },
+        { "ino",	0, NULL, 0 },
+        { "marks",	0, NULL, 0 },
+        { "stone",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVo:d:n:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVo:n:d:c:t:p:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -548,18 +625,6 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'd':	/* Lattice spacing in Angstroms for cubic lattice..  */
-        
-        
-          if (update_arg( (void *)&(args_info->latticeConstant_arg), 
-               &(args_info->latticeConstant_orig), &(args_info->latticeConstant_given),
-              &(local_args_info.latticeConstant_given), optarg, 0, 0, ARG_DOUBLE,
-              check_ambiguity, override, 0, 0,
-              "latticeConstant", 'd',
-              additional_error))
-            goto failure;
-        
-          break;
         case 'n':	/* Nanoparticle shells.  */
         
         
@@ -572,8 +637,143 @@ cmdline_parser_internal (
             goto failure;
         
           break;
+        case 'd':	/* Lattice spacing in Angstroms for cubic lattice..  */
+        
+        
+          if (update_arg( (void *)&(args_info->latticeConstant_arg), 
+               &(args_info->latticeConstant_orig), &(args_info->latticeConstant_given),
+              &(local_args_info.latticeConstant_given), optarg, 0, 0, ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "latticeConstant", 'd',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* Number of atoms along central column (Decahedron only).  */
+        
+        
+          if (update_arg( (void *)&(args_info->columnAtoms_arg), 
+               &(args_info->columnAtoms_orig), &(args_info->columnAtoms_given),
+              &(local_args_info.columnAtoms_given), optarg, 0, 0, ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "columnAtoms", 'c',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 't':	/* Number of atoms along twin boundary (Decahedron only).  */
+        
+        
+          if (update_arg( (void *)&(args_info->twinAtoms_arg), 
+               &(args_info->twinAtoms_orig), &(args_info->twinAtoms_given),
+              &(local_args_info.twinAtoms_given), optarg, 0, 0, ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "twinAtoms", 't',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'p':	/* Number of truncated planes (Curling-stone Decahedron only).  */
+        
+        
+          if (update_arg( (void *)&(args_info->truncatedPlanes_arg), 
+               &(args_info->truncatedPlanes_orig), &(args_info->truncatedPlanes_given),
+              &(local_args_info.truncatedPlanes_given), optarg, 0, 0, ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "truncatedPlanes", 'p',
+              additional_error))
+            goto failure;
+        
+          break;
 
         case 0:	/* Long option with no short option */
+          /* Create an Icosahedral cluster.  */
+          if (strcmp (long_options[option_index].name, "ico") == 0)
+          {
+          
+            if (args_info->clusterShape_group_counter && override)
+              reset_group_clusterShape (args_info);
+            args_info->clusterShape_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ico_given),
+                &(local_args_info.ico_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ico", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Create a regualar Decahedral cluster.  */
+          else if (strcmp (long_options[option_index].name, "deca") == 0)
+          {
+          
+            if (args_info->clusterShape_group_counter && override)
+              reset_group_clusterShape (args_info);
+            args_info->clusterShape_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->deca_given),
+                &(local_args_info.deca_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "deca", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Create an Ino Decahedral cluster.  */
+          else if (strcmp (long_options[option_index].name, "ino") == 0)
+          {
+          
+            if (args_info->clusterShape_group_counter && override)
+              reset_group_clusterShape (args_info);
+            args_info->clusterShape_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ino_given),
+                &(local_args_info.ino_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ino", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Create a Marks Decahedral cluster.  */
+          else if (strcmp (long_options[option_index].name, "marks") == 0)
+          {
+          
+            if (args_info->clusterShape_group_counter && override)
+              reset_group_clusterShape (args_info);
+            args_info->clusterShape_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->marks_given),
+                &(local_args_info.marks_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "marks", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Create a Curling-stone Decahedral cluster.  */
+          else if (strcmp (long_options[option_index].name, "stone") == 0)
+          {
+          
+            if (args_info->clusterShape_group_counter && override)
+              reset_group_clusterShape (args_info);
+            args_info->clusterShape_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->stone_given),
+                &(local_args_info.stone_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "stone", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          
+          break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
           goto failure;
@@ -584,6 +784,12 @@ cmdline_parser_internal (
         } /* switch */
     } /* while */
 
+  if (args_info->clusterShape_group_counter > 1)
+    {
+      fprintf (stderr, "%s: %d options of group clusterShape were given. One is required%s.\n", argv[0], args_info->clusterShape_group_counter, (additional_error ? additional_error : ""));
+      error = 1;
+    }
+  
 
 
   if (check_required)

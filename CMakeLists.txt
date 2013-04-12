@@ -113,7 +113,6 @@ else()
 endif()
 
 #Look for QHULL Libraries
-set(QHULL_USE_STATIC 1)
 find_package(Qhull)
 IF(QHULL_FOUND)
   SET(HAVE_QHULL 1)
@@ -396,6 +395,8 @@ src/visitors/ReplacementVisitor.cpp
 src/visitors/RigidBodyVisitor.cpp
 src/visitors/ZconsVisitor.cpp
 src/rnemd/RNEMDParameters.cpp
+src/clusters/Icosahedron.cpp
+src/clusters/Decahedron.cpp
 )
 
 set( PARALLEL_SOURCE

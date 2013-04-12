@@ -12,5 +12,14 @@ purpose "Builds icosahedral nanoparticles and outputs an OpenMD startup file"
 # Options
 
 option "output"             o  "Output file name" string yes
+option "shells"             n  "Nanoparticle shells" int yes
 option "latticeConstant"    d  "Lattice spacing in Angstroms for cubic lattice." double no
-option "shells"             n  "Nanoparticle shells" int yes"
+option "columnAtoms"        c  "Number of atoms along central column (Decahedron only)" int no
+option "twinAtoms"          t  "Number of atoms along twin boundary (Decahedron only)" int no
+option "truncatedPlanes"    p  "Number of truncated planes (Curling-stone Decahedron only)" int no
+defgroup "clusterShape" groupdesc=" a cluster shape is required" yes
+groupoption "ico"           -  "Create an Icosahedral cluster" group="clusterShape"
+groupoption "deca"          -  "Create a regualar Decahedral cluster"  group="clusterShape"
+groupoption "ino"           -  "Create an Ino Decahedral cluster"  group="clusterShape"
+groupoption "marks"         -  "Create a Marks Decahedral cluster"  group="clusterShape"
+groupoption "stone"         -  "Create a Curling-stone Decahedral cluster"  group="clusterShape"

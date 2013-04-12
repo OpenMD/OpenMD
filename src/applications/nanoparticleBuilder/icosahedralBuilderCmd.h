@@ -42,21 +42,44 @@ struct gengetopt_args_info
   char * output_arg;	/**< @brief Output file name.  */
   char * output_orig;	/**< @brief Output file name original value given at command line.  */
   const char *output_help; /**< @brief Output file name help description.  */
-  double latticeConstant_arg;	/**< @brief Lattice spacing in Angstroms for cubic lattice..  */
-  char * latticeConstant_orig;	/**< @brief Lattice spacing in Angstroms for cubic lattice. original value given at command line.  */
-  const char *latticeConstant_help; /**< @brief Lattice spacing in Angstroms for cubic lattice. help description.  */
   int shells_arg;	/**< @brief Nanoparticle shells.  */
   char * shells_orig;	/**< @brief Nanoparticle shells original value given at command line.  */
   const char *shells_help; /**< @brief Nanoparticle shells help description.  */
+  double latticeConstant_arg;	/**< @brief Lattice spacing in Angstroms for cubic lattice..  */
+  char * latticeConstant_orig;	/**< @brief Lattice spacing in Angstroms for cubic lattice. original value given at command line.  */
+  const char *latticeConstant_help; /**< @brief Lattice spacing in Angstroms for cubic lattice. help description.  */
+  int columnAtoms_arg;	/**< @brief Number of atoms along central column (Decahedron only).  */
+  char * columnAtoms_orig;	/**< @brief Number of atoms along central column (Decahedron only) original value given at command line.  */
+  const char *columnAtoms_help; /**< @brief Number of atoms along central column (Decahedron only) help description.  */
+  int twinAtoms_arg;	/**< @brief Number of atoms along twin boundary (Decahedron only).  */
+  char * twinAtoms_orig;	/**< @brief Number of atoms along twin boundary (Decahedron only) original value given at command line.  */
+  const char *twinAtoms_help; /**< @brief Number of atoms along twin boundary (Decahedron only) help description.  */
+  int truncatedPlanes_arg;	/**< @brief Number of truncated planes (Curling-stone Decahedron only).  */
+  char * truncatedPlanes_orig;	/**< @brief Number of truncated planes (Curling-stone Decahedron only) original value given at command line.  */
+  const char *truncatedPlanes_help; /**< @brief Number of truncated planes (Curling-stone Decahedron only) help description.  */
+  const char *ico_help; /**< @brief Create an Icosahedral cluster help description.  */
+  const char *deca_help; /**< @brief Create a regualar Decahedral cluster help description.  */
+  const char *ino_help; /**< @brief Create an Ino Decahedral cluster help description.  */
+  const char *marks_help; /**< @brief Create a Marks Decahedral cluster help description.  */
+  const char *stone_help; /**< @brief Create a Curling-stone Decahedral cluster help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int output_given ;	/**< @brief Whether output was given.  */
-  unsigned int latticeConstant_given ;	/**< @brief Whether latticeConstant was given.  */
   unsigned int shells_given ;	/**< @brief Whether shells was given.  */
+  unsigned int latticeConstant_given ;	/**< @brief Whether latticeConstant was given.  */
+  unsigned int columnAtoms_given ;	/**< @brief Whether columnAtoms was given.  */
+  unsigned int twinAtoms_given ;	/**< @brief Whether twinAtoms was given.  */
+  unsigned int truncatedPlanes_given ;	/**< @brief Whether truncatedPlanes was given.  */
+  unsigned int ico_given ;	/**< @brief Whether ico was given.  */
+  unsigned int deca_given ;	/**< @brief Whether deca was given.  */
+  unsigned int ino_given ;	/**< @brief Whether ino was given.  */
+  unsigned int marks_given ;	/**< @brief Whether marks was given.  */
+  unsigned int stone_given ;	/**< @brief Whether stone was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
+  int clusterShape_group_counter; /**< @brief Counter for group clusterShape */
 } ;
 
 /** @brief The additional parameters to pass to parser functions */
