@@ -47,6 +47,7 @@
 #ifndef CLUSTERS_ICOSAHEDRON_HPP
 #define CLUSTERS_ICOSAHEDRON_HPP
 
+#include <string>
 #include <vector>
 #include "utils/Tuple.hpp"
 #include "math/Vector3.hpp"
