@@ -51,6 +51,8 @@ struct gengetopt_args_info
   double length_arg;	/**< @brief Nanorod length in Angstroms.  */
   char * length_orig;	/**< @brief Nanorod length in Angstroms original value given at command line.  */
   const char *length_help; /**< @brief Nanorod length in Angstroms help description.  */
+  int ellipsoid_flag;	/**< @brief Build an Ellipsoid instead of a rod. (default=off).  */
+  const char *ellipsoid_help; /**< @brief Build an Ellipsoid instead of a rod. help description.  */
   double* shellRadius_arg;	/**< @brief Radius containing within it only molecules of a specific component. Specified for each component > 1 in the template file..  */
   char ** shellRadius_orig;	/**< @brief Radius containing within it only molecules of a specific component. Specified for each component > 1 in the template file. original value given at command line.  */
   unsigned int shellRadius_min; /**< @brief Radius containing within it only molecules of a specific component. Specified for each component > 1 in the template file.'s minimum occurreces */
@@ -70,9 +72,6 @@ struct gengetopt_args_info
   double vacancyOuterRadius_arg;	/**< @brief Radius arround core-shell where vacancies should be located..  */
   char * vacancyOuterRadius_orig;	/**< @brief Radius arround core-shell where vacancies should be located. original value given at command line.  */
   const char *vacancyOuterRadius_help; /**< @brief Radius arround core-shell where vacancies should be located. help description.  */
-  char * type_arg;	/**< @brief Type of nanorod -- select 'fcc' or 'pentagonal'.  */
-  char * type_orig;	/**< @brief Type of nanorod -- select 'fcc' or 'pentagonal' original value given at command line.  */
-  const char *type_help; /**< @brief Type of nanorod -- select 'fcc' or 'pentagonal' help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -80,12 +79,12 @@ struct gengetopt_args_info
   unsigned int latticeConstant_given ;	/**< @brief Whether latticeConstant was given.  */
   unsigned int radius_given ;	/**< @brief Whether radius was given.  */
   unsigned int length_given ;	/**< @brief Whether length was given.  */
+  unsigned int ellipsoid_given ;	/**< @brief Whether ellipsoid was given.  */
   unsigned int shellRadius_given ;	/**< @brief Whether shellRadius was given.  */
   unsigned int molFraction_given ;	/**< @brief Whether molFraction was given.  */
   unsigned int vacancyPercent_given ;	/**< @brief Whether vacancyPercent was given.  */
   unsigned int vacancyInnerRadius_given ;	/**< @brief Whether vacancyInnerRadius was given.  */
   unsigned int vacancyOuterRadius_given ;	/**< @brief Whether vacancyOuterRadius was given.  */
-  unsigned int type_given ;	/**< @brief Whether type was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

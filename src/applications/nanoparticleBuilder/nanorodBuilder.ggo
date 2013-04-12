@@ -2,9 +2,12 @@
 # for parsing command line arguments useing getopt and getoptlong.
 # gengetopt is available from:
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
+# invoke with:
+# gengetopt < nanorodBuilder.ggo --file-name=nanorodBuilderCmd --unamed-opts
+
 package "nanorodBuilder"
 version "1.0"
-purpose "Builds fcc or pentagonal nanorods and outputs an OpenMD startup file"
+purpose "Builds pill-shaped, ellipsoidal, or pentagonal nanoparticles and outputs an OpenMD startup file"
 
 # Options
 
@@ -12,6 +15,7 @@ option "output"             o  "Output file name" string yes
 option "latticeConstant"    -  "Lattice spacing in Angstroms for cubic lattice." double yes
 option "radius"             -  "Nanorod radius in Angstroms" double yes
 option "length"		    -  "Nanorod length in Angstroms" double yes
+option "ellipsoid"          e  "Build an Ellipsoid instead of a rod." flag off
 option "shellRadius"        -  "Radius containing within it only molecules of a specific component. Specified for each component > 1 in the template file." double no multiple
 option "molFraction"        -  "Builds a multi-component random alloy nanoparticle. A mole Fraction must be specified for each component > 1 in the template file." double no multiple
 option "vacancyPercent"     -  "Percentage of atoms to remove from within vacancy range" double no

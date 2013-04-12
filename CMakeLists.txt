@@ -559,6 +559,7 @@ src/applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
 set (NANORODBUILDERSOURCE 
 src/applications/nanoparticleBuilder/nanorodBuilder.cpp
 src/applications/nanoparticleBuilder/shapedLatticeRod.cpp
+src/applications/nanoparticleBuilder/shapedLatticeEllipsoid.cpp
 src/applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
 )
 

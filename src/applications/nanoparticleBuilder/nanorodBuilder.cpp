@@ -55,6 +55,7 @@
 
 #include "config.h"
 #include "shapedLatticeRod.hpp"
+#include "shapedLatticeEllipsoid.hpp"
 #include "nanorodBuilderCmd.h"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
@@ -123,13 +124,24 @@ int main(int argc, char *argv []) {
   rodLength = args_info.length_arg;
   Globals* simParams = oldInfo->getSimParams();
   
-  /* Create nanorod */
-  shapedLatticeRod nanoRod(latticeConstant, latticeType,
-			   rodRadius, rodLength);
-  
-  /* Build a lattice and get lattice points for this lattice constant */
-  vector<Vector3d> sites = nanoRod.getSites();
-  vector<Vector3d> orientations = nanoRod.getOrientations();
+  vector<Vector3d> sites;
+  vector<Vector3d> orientations;
+
+  if (args_info.ellipsoid_flag) {
+    shapedLatticeEllipsoid nanoEllipsoid(latticeConstant, latticeType,
+                                         rodLength, rodRadius);
+    sites = nanoEllipsoid.getSites();
+    orientations = nanoEllipsoid.getOrientations();
+  } else {
+    
+    /* Create nanorod */
+    shapedLatticeRod nanoRod(latticeConstant, latticeType,
+                             rodRadius, rodLength);
+    /* Build a lattice and get lattice points for this lattice constant */
+    sites = nanoRod.getSites();
+    orientations = nanoRod.getOrientations();
+  }
+
   std::vector<int> vacancyTargets;
   vector<bool> isVacancy;
   
