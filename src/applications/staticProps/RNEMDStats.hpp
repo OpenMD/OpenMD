@@ -36,47 +36,44 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  */
-#ifndef APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
-#define APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
+
+#ifndef APPLICATIONS_STATICPROPS_RNEMDSTATS_HPP
+#define APPLICATIONS_STATICPROPS_RNEMDSTATS_HPP
 
 #include <string>
-#include "brains/SimInfo.hpp"
-#include "brains/Snapshot.hpp"
+#include <vector>
+#include "applications/staticProps/SpatialStatistics.hpp"
 
 namespace OpenMD {
-
-  class StaticAnalyser{
+  
+  class RNEMDZ : public SlabStatistics {
+    
   public:
-    StaticAnalyser(SimInfo* info, const std::string& filename) : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {}
-    virtual ~StaticAnalyser() {}
-    virtual void process()=0;
-
-    void setOutputName(const std::string& filename) {
-      outputFilename_ = filename;
-    }
-        
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
-        
-    void setStep(int step) {
-      assert(step > 0);
-      step_ =step;    
-    }
-
-    int getStep() { return step_;}
+    RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);    
+    void processStuntDouble(StuntDouble* sd, int bin);
 
   protected:
-    SimInfo* info_;
-    Snapshot* currentSnapshot_;
-    std::string dumpFilename_;        
-    std::string outputFilename_;
-    int step_;
-    bool usePeriodicBoundaryConditions_;
+    OutputData* temperature;
+    OutputData* velocity;
+    OutputData* density;
   };
 
+  class RNEMDR : public ShellStatistics {
+    
+  public:
+    RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);    
+    void processStuntDouble(StuntDouble* sd, int bin);
+
+  protected:
+    OutputData* temperature;
+    OutputData* angularVelocity;
+    OutputData* density;
+  };
+  
 }
 #endif
+
+
+

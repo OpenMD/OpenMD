@@ -58,3 +58,5 @@ groupoption "hullvol"   -       "hull volume of nanoparticle" group="staticProps
 groupoption "rodlength" -       "length of nanorod" group="staticProps"
 groupoption "tet_param" Q       "tetrahedrality order parameter (Qk)" group="staticProps"
 groupoption "tet_param_z" -     "spatially-resolved tetrahedrality order parameter Qk(z)" group="staticProps"
+groupoption "rnemdz"    -       "slab-resolved RNEMD statistics (temperature, density, velocity)" group="staticProps"
+groupoption "rnemdr"    -       "shell-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"

@@ -133,6 +133,8 @@ struct gengetopt_args_info
   const char *rodlength_help; /**< @brief length of nanorod help description.  */
   const char *tet_param_help; /**< @brief tetrahedrality order parameter (Qk) help description.  */
   const char *tet_param_z_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
+  const char *rnemdz_help; /**< @brief slab-resolved RNEMD statistics (temperature, density, velocity) help description.  */
+  const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -184,6 +186,8 @@ struct gengetopt_args_info
   unsigned int rodlength_given ;	/**< @brief Whether rodlength was given.  */
   unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
   unsigned int tet_param_z_given ;	/**< @brief Whether tet_param_z was given.  */
+  unsigned int rnemdz_given ;	/**< @brief Whether rnemdz was given.  */
+  unsigned int rnemdr_given ;	/**< @brief Whether rnemdr was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

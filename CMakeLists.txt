@@ -542,7 +542,9 @@ src/applications/staticProps/RadialDistrFunc.cpp
 src/applications/staticProps/RhoR.cpp
 src/applications/staticProps/RhoZ.cpp
 src/applications/staticProps/RippleOP.cpp
+src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp
+src/applications/staticProps/SpatialStatistics.cpp
 src/applications/staticProps/StaticProps.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp

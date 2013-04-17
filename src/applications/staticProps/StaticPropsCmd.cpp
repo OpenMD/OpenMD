@@ -21,11 +21,7 @@
 #define FIX_UNUSED(X) (void) (X) /* avoid warnings for unused params */
 #endif
 
-#ifdef WIN32
-#include "utils/wingetopt.h"
-#else
 #include <getopt.h>
-#endif
 
 #include "StaticPropsCmd.h"
 
@@ -87,6 +83,8 @@ const char *gengetopt_args_info_help[] = {
   "      --rodlength               length of nanorod",
   "  -Q, --tet_param               tetrahedrality order parameter (Qk)",
   "      --tet_param_z             spatially-resolved tetrahedrality order \n                                  parameter Qk(z)",
+  "      --rnemdz                  slab-resolved RNEMD statistics (temperature, \n                                  density, velocity)",
+  "      --rnemdr                  shell-resolved RNEMD statistics (temperature, \n                                  density, angular velocity)",
     0
 };
 
@@ -164,6 +162,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
+  args_info->rnemdz_given = 0 ;
+  args_info->rnemdr_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -267,6 +267,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->rodlength_help = gengetopt_args_info_help[48] ;
   args_info->tet_param_help = gengetopt_args_info_help[49] ;
   args_info->tet_param_z_help = gengetopt_args_info_help[50] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[51] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[52] ;
   
 }
 
@@ -516,6 +518,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "tet_param", 0, 0 );
   if (args_info->tet_param_z_given)
     write_into_file(outfile, "tet_param_z", 0, 0 );
+  if (args_info->rnemdz_given)
+    write_into_file(outfile, "rnemdz", 0, 0 );
+  if (args_info->rnemdr_given)
+    write_into_file(outfile, "rnemdr", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -594,6 +600,8 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
+  args_info->rnemdz_given = 0 ;
+  args_info->rnemdr_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -889,6 +897,8 @@ cmdline_parser_internal (
         { "rodlength",	0, NULL, 0 },
         { "tet_param",	0, NULL, 'Q' },
         { "tet_param_z",	0, NULL, 0 },
+        { "rnemdz",	0, NULL, 0 },
+        { "rnemdr",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1625,6 +1635,40 @@ cmdline_parser_internal (
                 &(local_args_info.tet_param_z_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "tet_param_z", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* slab-resolved RNEMD statistics (temperature, density, velocity).  */
+          else if (strcmp (long_options[option_index].name, "rnemdz") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->rnemdz_given),
+                &(local_args_info.rnemdz_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "rnemdz", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* shell-resolved RNEMD statistics (temperature, density, angular velocity).  */
+          else if (strcmp (long_options[option_index].name, "rnemdr") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->rnemdr_given),
+                &(local_args_info.rnemdr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "rnemdr", '-',
                 additional_error))
               goto failure;
           
