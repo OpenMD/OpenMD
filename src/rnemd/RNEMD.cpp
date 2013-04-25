@@ -556,7 +556,7 @@ namespace OpenMD {
             slabWidth_ = hmat(2,2) / 10.0;
         
           if (hasSlabBCenter) 
-            slabBCenter_ = rnemdParams->getSlabACenter();
+            slabBCenter_ = rnemdParams->getSlabBCenter();
           else 
             slabBCenter_ = hmat(2,2) / 2.0;
         
@@ -577,18 +577,16 @@ namespace OpenMD {
         }
       }
     }
+
     // object evaluator:
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
-    
     evaluatorA_.loadScriptString(selectionA_);
     evaluatorB_.loadScriptString(selectionB_);
-    
     seleManA_.setSelectionSet(evaluatorA_.evaluate());
     seleManB_.setSelectionSet(evaluatorB_.evaluate());
-    
     commonA_ = seleManA_ & seleMan_;
-    commonB_ = seleManB_ & seleMan_;    
+    commonB_ = seleManB_ & seleMan_;  
   }
   
     
@@ -1738,6 +1736,7 @@ namespace OpenMD {
            sd = seleManA_.nextSelected(isd)) {
         aSites.push_back(sd);
       }
+
       surfaceMeshA->computeHull(aSites);
       areaA = surfaceMeshA->getArea();
     } else {
@@ -1753,16 +1752,22 @@ namespace OpenMD {
       }
     }
 
+
+
     if (hasSelectionB_) {
       int isd;
       StuntDouble* sd;
       vector<StuntDouble*> bSites;
-      ConvexHull* surfaceMeshB = new ConvexHull();
+
       seleManB_.setSelectionSet(evaluatorB_.evaluate());
+    
       for (sd = seleManB_.beginSelected(isd); sd != NULL; 
            sd = seleManB_.nextSelected(isd)) {
         bSites.push_back(sd);
       }
+
+      ConvexHull* surfaceMeshB = new ConvexHull();
+
       surfaceMeshB->computeHull(bSites);
       areaB = surfaceMeshB->getArea();
     } else {

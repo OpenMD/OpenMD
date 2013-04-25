@@ -67,7 +67,6 @@ namespace OpenMD {
     virtual void computeHull(std::vector<StuntDouble*> bodydoubles)=0;
     virtual RealType getArea()=0; //Total area of Hull
     virtual RealType getVolume()=0; //Total Volume enclosed by Hull
-    virtual Mat3x3d getBoundingBox()=0; //Bounding box of Hull sites
     virtual std::vector<Triangle > getMesh()=0;
     virtual void printHull(const std::string& geomFileName)=0;
   };

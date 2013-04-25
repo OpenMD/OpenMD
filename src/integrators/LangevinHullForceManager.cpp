@@ -56,7 +56,7 @@ namespace OpenMD {
   
   LangevinHullForceManager::LangevinHullForceManager(SimInfo* info) : 
     ForceManager(info) {
-    
+   
     simParams = info->getSimParams();
     veloMunge = new Velocitizer(info);
     
@@ -104,8 +104,29 @@ namespace OpenMD {
       doThermalCoupling_ = false;
     } else {
       targetTemp_ = simParams->getTargetTemp();
+
+      if (!simParams->haveViscosity()) {
+        sprintf(painCave.errMsg, 
+                "LangevinHullForceManager: no viscosity was set.\n"
+                "\tOpenMD is turning off the thermal coupling to the bath.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();      
+        doThermalCoupling_ = false;
+      }else{
+        viscosity_ = simParams->getViscosity();
+        if ( fabs(viscosity_) < 1e-6 ) {
+          sprintf(painCave.errMsg, 
+                  "LangevinHullDynamics: The bath viscosity was set lower\n"
+                  "\tthan 1e-6 poise.  OpenMD is turning off the thermal\n"
+                  "\tcoupling to the bath.\n");
+          painCave.isFatal = 0;
+          painCave.severity = OPENMD_INFO;
+          simError();
+          doThermalCoupling_ = false;
+        }      
+      }      
     }
-    
     if (!simParams->haveTargetPressure()) {
       sprintf(painCave.errMsg, 
               "LangevinHullForceManager: no targetPressure (atm) was set.\n"
@@ -119,7 +140,6 @@ namespace OpenMD {
       targetPressure_ = simParams->getTargetPressure() / 
         PhysicalConstants::pressureConvert;
     }
-   
     if (simParams->getUsePeriodicBoundaryConditions()) {
       sprintf(painCave.errMsg, 
               "LangevinHallForceManager: You can't use the Langevin Hull\n"
@@ -127,32 +147,9 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     } 
-    
-    if (!simParams->haveViscosity()) {
-      sprintf(painCave.errMsg, 
-              "LangevinHullForceManager: no viscosity was set.\n"
-              "\tOpenMD is turning off the thermal coupling to the bath.\n");
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();
-      doThermalCoupling_ = false;
-    }else{
-      viscosity_ = simParams->getViscosity();
-    }
-    
-    if ( fabs(viscosity_) < 1e-6 ) {
-      sprintf(painCave.errMsg, 
-              "LangevinHullDynamics: The bath viscosity was set lower than\n"
-              "\t1e-6 poise.  OpenMD is turning off the thermal coupling to\n"
-              "\tthe bath.\n");
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();
-      doThermalCoupling_ = false;
-    }
 
     dt_ = simParams->getDt();
-  
+
     if (doThermalCoupling_)
       variance_ = 2.0 * PhysicalConstants::kb * targetTemp_ / dt_;
 
@@ -178,7 +175,6 @@ namespace OpenMD {
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    currSnapshot->setBoundingBox(surfaceMesh_->getBoundingBox());
   }  
   
   void LangevinHullForceManager::postCalculation(){
@@ -200,7 +196,6 @@ namespace OpenMD {
 
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);
-
     // Get total area and number of surface stunt doubles
     area = surfaceMesh_->getArea();
     sMesh = surfaceMesh_->getMesh();
@@ -254,8 +249,6 @@ namespace OpenMD {
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());   
     currSnapshot->setHullVolume(surfaceMesh_->getVolume());
-    // update the bounding box for use by ForceMatrixDecomposition:
-    currSnapshot->setBoundingBox(surfaceMesh_->getBoundingBox());
     ForceManager::postCalculation();   
   }
     

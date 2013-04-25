@@ -67,36 +67,44 @@ namespace OpenMD {
 
     RealType getPressure(); // gives the instant pressure in atm;
 
-    // gives the pressure tensor in amu*fs^-2*Ang^-1
+    /** \brief gives the pressure tensor in amu*fs^-2*Ang^-1 */
     Mat3x3d  getPressureTensor(); 
     RealType getVolume();   // gives the volume in Ang^3 
 
-    // accumulate and return the simulation box dipole moment in C*m
+    /** \brief accumulate and return the simulation box dipole moment in C*m */
     Vector3d getSystemDipole(); 
     Vector3d getHeatFlux();
 
-    /** Returns the center of the mass of the whole system.*/
+    /** \brief Returns the center of the mass of the whole system.*/
     Vector3d getCom();
 
-    /** Returns the velocity of center of mass of the whole system.*/
+    /** \brief Returns the velocity of center of mass of the whole system.*/
     Vector3d getComVel();
 
-    /** Returns the center of the mass and Center of Mass velocity of
+    /** \brief Returns the center of the mass and Center of Mass velocity of
         the whole system.*/ 
     void getComAll(Vector3d& com,Vector3d& comVel);
 
-    /** Returns intertia tensor for the entire system and system
-        Angular Momentum.*/
-    void getInertiaTensor(Mat3x3d &intertiaTensor,Vector3d &angularMomentum);
+    /** \brief Returns the inertia tensor and the total angular
+        momentum for for the entire system
+     * \param[out] inertiaTensor the inertia tensor 
+     * \param[out] angularMomentum the angular momentum vector
+     * \ingroup surface
+     */
+    void getInertiaTensor(Mat3x3d &inertiaTensor,Vector3d &angularMomentum);
     
-    /** Returns system angular momentum */
+    /** \brief Returns the Axis-aligned bounding box for the current system.
+     */
+    Mat3x3d getBoundingBox();
+
+    /** \brief Returns system angular momentum */
     Vector3d getAngularMomentum();
 
-    /** Returns volume of system as estimated by an ellipsoid defined
+    /** \brief Returns volume of system as estimated by an ellipsoid defined
         by the radii of gyration */
     RealType getGyrationalVolume();
 
-    /** Overloaded version of gyrational volume that also returns
+    /** \brief Overloaded version of gyrational volume that also returns
         det(I) so dV/dr can be calculated */
     void getGyrationalVolume(RealType &vol, RealType &detI);
 
@@ -104,7 +112,6 @@ namespace OpenMD {
 
     RealType getTaggedAtomPairDistance();
     
-  private:    
   private:    
     SimInfo* info_;
   };

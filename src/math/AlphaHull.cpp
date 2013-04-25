@@ -80,8 +80,6 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   pointT *interiorPoint;
   int curlong, totlong;
   
-  Vector3d boxMax;
-  Vector3d boxMin;
   
   vector<double> ptArray(numpoints*dim_);
   
@@ -458,26 +456,6 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // qh_getarea(qh facet_list);
   //volume_ = qh totvol;
   // area_ = qh totarea;
-
-
-  int index = 0;
-  FORALLvertices {
-    Vector3d point(vertex->point[0], vertex->point[1], vertex->point[2]);
-    if (index == 0) {
-      boxMax = point;
-      boxMin = point;
-    } else {
-      for (int i = 0; i < 3; i++) {
-        boxMax[i] = max(boxMax[i], point[i]);
-        boxMin[i] = min(boxMin[i], point[i]);
-      }
-    }
-    index++;
-  }
-  boundingBox_ = Mat3x3d(0.0);
-  boundingBox_(0,0) = boxMax[0] - boxMin[0];
-  boundingBox_(1,1) = boxMax[1] - boxMin[1];
-  boundingBox_(2,2) = boxMax[2] - boxMin[2];
 
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);

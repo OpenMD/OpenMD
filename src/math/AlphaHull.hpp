@@ -76,9 +76,6 @@ namespace OpenMD {
     /* Total Volume enclosed by Hull */
     RealType getVolume(){ return volume_; } 
     
-    /* Bounding Box for Hull sites */
-    Mat3x3d getBoundingBox(){ return boundingBox_; } 
-    
     vector<Triangle> getMesh(){ return Triangles_; }
     void printHull(const std::string& geomFileName);
     

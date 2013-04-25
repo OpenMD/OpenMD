@@ -71,6 +71,7 @@ namespace OpenMD {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
+    thermo = new Thermo(info_);
   }
 
   /**
@@ -433,16 +434,18 @@ namespace OpenMD {
       perturbations_.push_back(eField);
     }
 
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
     fDecomp_->distributeInitialData();
- 
+    
     initialized_ = true;
-
+    
   }
-
+  
   void ForceManager::calcForces() {
     
     if (!initialized_) initialize();
-
+    
     preCalculation();   
     shortRangeInteractions();
     longRangeInteractions();
@@ -726,9 +729,12 @@ namespace OpenMD {
     
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
-        if (update_nlist) 
+        if (update_nlist) {
+          if (!usePeriodicBoundaryConditions_)
+            Mat3x3d bbox = thermo->getBoundingBox();
           neighborList = fDecomp_->buildNeighborList();
-      }             
+        }
+      }
 
       for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
              it != neighborList.end(); ++it) {

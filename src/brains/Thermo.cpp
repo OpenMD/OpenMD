@@ -619,8 +619,8 @@ namespace OpenMD {
   }        
    
   /**
-   * Return intertia tensor for entire system and angular momentum
-   * Vector.
+   * \brief Return inertia tensor for entire system and angular momentum
+   *  Vector.
    *
    *
    *
@@ -701,6 +701,67 @@ namespace OpenMD {
     return;
   }
 
+
+  Mat3x3d Thermo::getBoundingBox(){
+    
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!(snap->hasBoundingBox)) {
+      
+      SimInfo::MoleculeIterator i;
+      Molecule::RigidBodyIterator ri;
+      Molecule::AtomIterator ai;
+      Molecule* mol;
+      RigidBody* rb;
+      Atom* atom;
+      Vector3d pos, bMax, bMin;
+      int index = 0;
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        //change the positions of atoms which belong to the rigidbodies
+        for (rb = mol->beginRigidBody(ri); rb != NULL; 
+             rb = mol->nextRigidBody(ri)) {          
+          rb->updateAtoms();
+        }
+        
+        for(atom = mol->beginAtom(ai); atom != NULL;
+            atom = mol->nextAtom(ai)) {
+          
+          pos = atom->getPos();
+
+          if (index == 0) {
+            bMax = pos;
+            bMin = pos;
+          } else {
+            for (int i = 0; i < 3; i++) {
+              bMax[i] = max(bMax[i], pos[i]);
+              bMin[i] = min(bMin[i], pos[i]);
+            }
+          }
+          index++;
+        }
+      }
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bMax[0], 3, MPI::REALTYPE, 
+                                MPI::MAX);
+
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bMin[0], 3, MPI::REALTYPE, 
+                                MPI::MIN);
+#endif
+      Mat3x3d bBox = Mat3x3d(0.0);
+      for (int i = 0; i < 3; i++) {           
+        bBox(i,i) = bMax[i] - bMin[i];
+      }
+      snap->setBoundingBox(bBox);
+    }
+    
+    return snap->getBoundingBox();    
+  }
+  
+  
   // Returns the angular momentum of the system
   Vector3d Thermo::getAngularMomentum(){
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -902,4 +963,6 @@ namespace OpenMD {
     return 0.0;
 #endif
   }
+
+
 }

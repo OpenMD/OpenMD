@@ -63,7 +63,7 @@
 using namespace OpenMD;
 using namespace std;
 
-ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp") {
+ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull FA Qt Pp") {
 }
 
 void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) { 
@@ -85,7 +85,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // Copy the positon vector into a points vector for qhull.
   vector<StuntDouble*>::iterator SD;
   int i = 0;
-  
+ 
   for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
     Vector3d pos = (*SD)->getPos();      
     ptArray[dim_ * i] = pos.x();
@@ -207,6 +207,11 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // commented out below, so comment out here also.
   // intPoint = qh interior_point;
   // RealType calcvol = 0.0;
+  
+  qh_triangulate ();
+  int num_facets = qh num_facets;
+  int num_vertices = qh num_vertices;
+
   FORALLfacets {  
     Triangle face;
     //Qhull sets the unit normal in facet->normal

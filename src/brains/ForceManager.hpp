@@ -57,6 +57,7 @@
 #include "nonbonded/InteractionManager.hpp"
 #include "perturbations/Perturbation.hpp"
 #include "parallel/ForceDecomposition.hpp"
+#include "brains/Thermo.hpp"
 
 #define PREPAIR_LOOP 0
 #define PAIR_LOOP 1
@@ -86,6 +87,7 @@ namespace OpenMD {
     bool doElectricField_;
     bool doHeatFlux_;
     bool doLongRangeCorrections_;
+    bool usePeriodicBoundaryConditions_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
@@ -98,6 +100,7 @@ namespace OpenMD {
     InteractionManager* interactionMan_;
     ForceDecomposition* fDecomp_;
     SwitchingFunction* switcher_;
+    Thermo* thermo;
 
     SwitchingFunctionType sft_;/**< Type of switching function in use */
     RealType rCut_;            /**< cutoff radius for non-bonded interactions */
