@@ -957,7 +957,10 @@ namespace OpenMD {
       // Compute surface Mesh
       surfaceMesh_->computeHull(localSites_);
       snap->setHullVolume(surfaceMesh_->getVolume());
+
+      delete surfaceMesh_;
     }
+
     return snap->getHullVolume();
 #else
     return 0.0;

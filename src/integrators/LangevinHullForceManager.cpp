@@ -176,6 +176,10 @@ namespace OpenMD {
     surfaceMesh_->computeHull(localSites_);
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
   }  
+
+  LangevinHullForceManager::~LangevinHullForceManager() { 
+    delete surfaceMesh_;
+  }
   
   void LangevinHullForceManager::postCalculation(){
   

@@ -1730,15 +1730,16 @@ namespace OpenMD {
       int isd;
       StuntDouble* sd;
       vector<StuntDouble*> aSites;
-      ConvexHull* surfaceMeshA = new ConvexHull();
       seleManA_.setSelectionSet(evaluatorA_.evaluate());
       for (sd = seleManA_.beginSelected(isd); sd != NULL; 
            sd = seleManA_.nextSelected(isd)) {
         aSites.push_back(sd);
       }
-
+      ConvexHull* surfaceMeshA = new ConvexHull();
       surfaceMeshA->computeHull(aSites);
       areaA = surfaceMeshA->getArea();
+      delete surfaceMeshA;
+
     } else {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the x-y
@@ -1758,18 +1759,16 @@ namespace OpenMD {
       int isd;
       StuntDouble* sd;
       vector<StuntDouble*> bSites;
-
       seleManB_.setSelectionSet(evaluatorB_.evaluate());
-    
       for (sd = seleManB_.beginSelected(isd); sd != NULL; 
            sd = seleManB_.nextSelected(isd)) {
         bSites.push_back(sd);
       }
-
-      ConvexHull* surfaceMeshB = new ConvexHull();
-
+      ConvexHull* surfaceMeshB = new ConvexHull();    
       surfaceMeshB->computeHull(bSites);
       areaB = surfaceMeshB->getArea();
+      delete surfaceMeshB;
+
     } else {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the x-y

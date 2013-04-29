@@ -88,6 +88,10 @@ namespace OpenMD {
 #endif
   }
 
+  HullFinder::~HullFinder() {
+    delete surfaceMesh_;
+  }
+
   OpenMDBitSet HullFinder::findHull() {
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     OpenMDBitSet bsResult(nStuntDoubles_);

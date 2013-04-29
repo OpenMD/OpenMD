@@ -52,6 +52,7 @@ namespace OpenMD {
   class HullFinder {
   public:
     HullFinder(SimInfo* si);
+    ~HullFinder();
     
     OpenMDBitSet findHull();
     OpenMDBitSet findHull(int frame);
