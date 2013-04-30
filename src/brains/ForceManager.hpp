@@ -77,7 +77,7 @@ namespace OpenMD {
 
   public:
     ForceManager(SimInfo * info);                          
-    virtual ~ForceManager() {}
+    virtual ~ForceManager();
     virtual void calcForces();
     void initialize();
 

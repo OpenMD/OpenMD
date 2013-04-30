@@ -67,13 +67,22 @@
 using namespace std;
 namespace OpenMD {
   
-  ForceManager::ForceManager(SimInfo * info) : info_(info) {
+  ForceManager::ForceManager(SimInfo * info) : info_(info), switcher_(NULL) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
     thermo = new Thermo(info_);
   }
 
+  ForceManager::~ForceManager() {
+    perturbations_.clear();
+    
+    delete switcher_;
+    delete interactionMan_;
+    delete fDecomp_;
+    delete thermo;
+  }
+  
   /**
    * setupCutoffs
    *

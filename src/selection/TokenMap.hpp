@@ -64,6 +64,7 @@ namespace OpenMD {
   private:
         
     TokenMap();
+    ~TokenMap();
         
     static TokenMap* instance_;
 

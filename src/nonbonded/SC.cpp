@@ -54,6 +54,21 @@ namespace OpenMD {
   SC::SC() : name_("SC"), initialized_(false), forceField_(NULL), 
              scRcut_(0.0), np_(3000) {}
   
+  SC::~SC() {
+    initialized_ = false;
+
+    map<pair<AtomType*, AtomType*>, SCInteractionData>::iterator it;
+    for (it = MixingMap.begin(); it != MixingMap.end(); ++it) {
+      SCInteractionData mixer = (*it).second;
+      delete mixer.V;
+      delete mixer.phi;
+    }
+
+    MixingMap.clear();
+    SCMap.clear();
+    SClist.clear();
+  }
+        
   RealType SC::getM(AtomType* atomType1, AtomType* atomType2) {    
     SuttonChenAdapter sca1 = SuttonChenAdapter(atomType1);
     SuttonChenAdapter sca2 = SuttonChenAdapter(atomType2);

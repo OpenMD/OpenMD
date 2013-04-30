@@ -96,4 +96,8 @@ namespace OpenMD {
 
     return i != tokenMap_.end() ? &(i->second) : NULL;
   }
+
+  TokenMap::~TokenMap() {
+    tokenMap_.clear();
+  }
 }

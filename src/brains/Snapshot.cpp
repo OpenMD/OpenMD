@@ -157,6 +157,7 @@ namespace OpenMD {
     hasGyrationalVolume = false;   
     hasHullVolume = false;
     hasConservedQuantity = false; 
+    hasBoundingBox = false;
   }
 
   /** Returns the id of this Snapshot */
@@ -265,6 +266,7 @@ namespace OpenMD {
   void Snapshot::setBoundingBox(const Mat3x3d& m) {
     frameData.bBox = m;
     frameData.invBbox = frameData.bBox.inverse();
+    hasBoundingBox = true;
   }
 
   /** Returns the inverse Bounding Box */

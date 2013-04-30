@@ -179,6 +179,7 @@ namespace OpenMD {
 
   LangevinHullForceManager::~LangevinHullForceManager() { 
     delete surfaceMesh_;
+    delete veloMunge;
   }
   
   void LangevinHullForceManager::postCalculation(){

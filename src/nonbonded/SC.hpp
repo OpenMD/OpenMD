@@ -75,6 +75,7 @@ namespace OpenMD {
     
   public:    
     SC();
+    ~SC();
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType epsilon, RealType m, RealType n, RealType alpha);

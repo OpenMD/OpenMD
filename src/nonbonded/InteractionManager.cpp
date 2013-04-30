@@ -59,6 +59,18 @@ namespace OpenMD {
     maw_ = new MAW();
   }
 
+  InteractionManager::~InteractionManager() {
+    delete lj_;
+    delete gb_;
+    delete sticky_;
+    delete morse_;
+    delete repulsivePower_;
+    delete eam_;
+    delete sc_;
+    delete electrostatic_;
+    delete maw_;
+  }
+
   void InteractionManager::initialize() {
 
     if (initialized_) return; 

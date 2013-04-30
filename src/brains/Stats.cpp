@@ -403,6 +403,10 @@ namespace OpenMD {
     }   
   }
 
+  Stats::~Stats() {
+    data_.clear();
+    statsMap_.clear();
+  }
 
   std::string Stats::getTitle(int index) {
     assert(index >=0 && index < ENDINDEX);

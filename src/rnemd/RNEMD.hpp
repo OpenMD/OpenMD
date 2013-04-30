@@ -62,7 +62,7 @@ namespace OpenMD {
   class RNEMD {
   public:
     RNEMD(SimInfo* info);
-    virtual ~RNEMD();
+    ~RNEMD();
     
     void doRNEMD();
     void doSwap(SelectionManager& smanA, SelectionManager& smanB);
@@ -199,6 +199,7 @@ namespace OpenMD {
     OutputMapType outputMap_;
     Accumulator* areaAccumulator_;
     bool doRNEMD_;
+    bool hasData_;
 
   };
 }

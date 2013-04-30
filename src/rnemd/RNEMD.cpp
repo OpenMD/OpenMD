@@ -71,7 +71,8 @@ namespace OpenMD {
   RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info), 
                                 evaluatorA_(info), seleManA_(info), 
                                 commonA_(info), evaluatorB_(info), 
-                                seleManB_(info), commonB_(info),
+                                seleManB_(info), commonB_(info), 
+                                hasData_(false),
                                 usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {
 
     trialCount_ = 0;
@@ -603,6 +604,10 @@ namespace OpenMD {
 #ifdef IS_MPI
     }
 #endif
+
+    // delete all of the objects we created:
+    delete areaAccumulator_;    
+    data_.clear();
   }
   
   void RNEMD::doSwap(SelectionManager& smanA, SelectionManager& smanB) {
@@ -2008,6 +2013,7 @@ namespace OpenMD {
         }
       }
     }
+    hasData_ = true;
   }
 
   void RNEMD::getStarted() {
@@ -2040,6 +2046,7 @@ namespace OpenMD {
   
   void RNEMD::writeOutputFile() {
     if (!doRNEMD_) return;
+    if (!hasData_) return;
     
 #ifdef IS_MPI
     // If we're the root node, should we print out the results
@@ -2061,10 +2068,16 @@ namespace OpenMD {
       RealType time = currentSnap_->getTime();
       RealType avgArea;
       areaAccumulator_->getAverage(avgArea);
-      RealType Jz = kineticExchange_ / (time * avgArea) 
-        / PhysicalConstants::energyConvert;
-      Vector3d JzP = momentumExchange_ / (time * avgArea);      
-      Vector3d JzL = angularMomentumExchange_ / (time * avgArea);      
+
+      RealType Jz(0.0);
+      Vector3d JzP(V3Zero);
+      Vector3d JzL(V3Zero);
+      if (time >= info_->getSimParams()->getDt()) {
+        Jz = kineticExchange_ / (time * avgArea)
+          / PhysicalConstants::energyConvert;
+        JzP = momentumExchange_ / (time * avgArea);
+        JzL = angularMomentumExchange_ / (time * avgArea);
+      }
 
       rnemdFile_ << "#######################################################\n";
       rnemdFile_ << "# RNEMD {\n";

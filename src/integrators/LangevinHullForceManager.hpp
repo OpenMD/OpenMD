@@ -66,7 +66,7 @@ namespace OpenMD {
     
   public:
     LangevinHullForceManager(SimInfo * info);
-    ~LangevinHullForceManager();
+    virtual ~LangevinHullForceManager();
     
   protected:
     virtual void postCalculation();

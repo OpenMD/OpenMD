@@ -114,6 +114,7 @@ namespace OpenMD {
     typedef map<string, StatsIndex> StatsMapType;
 
     Stats(SimInfo* info);
+    virtual ~Stats();
     void parseStatFileFormat(const std::string& format);
     void collectStats();
 

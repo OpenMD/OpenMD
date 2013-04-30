@@ -69,7 +69,7 @@ namespace OpenMD {
 
   public:
     InteractionManager();
-    ~InteractionManager();
+    virtual ~InteractionManager();
     void setSimInfo(SimInfo* info) {info_ = info;} 
     void initialize();
 
