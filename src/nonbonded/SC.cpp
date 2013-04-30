@@ -57,13 +57,6 @@ namespace OpenMD {
   SC::~SC() {
     initialized_ = false;
 
-    map<pair<AtomType*, AtomType*>, SCInteractionData>::iterator it;
-    for (it = MixingMap.begin(); it != MixingMap.end(); ++it) {
-      SCInteractionData mixer = (*it).second;
-      delete mixer.V;
-      delete mixer.phi;
-    }
-
     MixingMap.clear();
     SCMap.clear();
     SClist.clear();
