@@ -6,7 +6,7 @@ molecule {
 
   atom[0]{
     type = "O_TIP4P_FQ";
-    position( 0.0, 0.0, -0.6556 );
+    position( 0.0, 0.0, -0.06556 );
   }
   atom[1]{
     type = "H_TIP4P_FQ";
@@ -24,13 +24,14 @@ molecule {
   rigidBody[0]{
     members(0,1,2,3);
   }
+  constrainTotalCharge = true;
 }
 component{
   type = "TIP4P_FQ";
   nMol = 2;
 }
 
-
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTRONIC_TEMPERATURE";
 ensemble = NVE;
 forceField = "FlucQ";
 forceFieldFileName = "FQ.frc";

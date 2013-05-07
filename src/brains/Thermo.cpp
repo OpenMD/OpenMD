@@ -233,7 +233,7 @@ namespace OpenMD {
 
       kinetic *= 0.5;
       eTemp =  (2.0 * kinetic) / 
-        (info_->getNFluctuatingCharges() * PhysicalConstants::kb );
+        (info_->getNFluctuatingCharges() * PhysicalConstants::kb );            
      
       snap->setElectronicTemperature(eTemp);
     }

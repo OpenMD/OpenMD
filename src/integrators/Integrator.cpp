@@ -143,7 +143,19 @@ namespace OpenMD {
     
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
-    flucQ_ = new FluctuatingChargeLangevin(info);
+    if (simParams->getFluctuatingChargeParameters()->havePropagator()) {
+      std::string prop = toUpperCopy(simParams->getFluctuatingChargeParameters()->getPropagator());
+      if (prop.compare("NVT")==0){
+         flucQ_ = new FluctuatingChargeNVT(info);
+      } else if (prop.compare("LANGEVIN")==0) {
+         flucQ_ = new FluctuatingChargeLangevin(info);
+      } else {
+        sprintf(painCave.errMsg,
+                "Integrator Error: Unknown Fluctuating Charge propagator (%s) requested\n",
+                simParams->getFluctuatingChargeParameters()->getPropagator().c_str());
+        painCave.isFatal = 1;
+      }
+    }
     flucQ_->setForceManager(forceMan_);
   }
   

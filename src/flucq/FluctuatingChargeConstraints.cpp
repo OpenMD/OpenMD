@@ -108,7 +108,8 @@ namespace OpenMD {
 
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
+        //constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
+        constrainedFrc = atom->getFlucQFrc() - totalMolFrc;
         atom->setFlucQFrc(constrainedFrc);
       }      
     }

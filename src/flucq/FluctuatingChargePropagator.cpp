@@ -92,13 +92,19 @@ namespace OpenMD {
     }
     
     fqConstraints_ = new FluctuatingChargeConstraints(info_);
-    FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, fqConstraints_);    
+    FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, 
+                                                 fqConstraints_);
+
     DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
-    Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), initCoords);
+    Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
+                    initCoords);
+
     EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
+
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 
-    DumpStatusFunction dsf(info_);  // we want a dump file written every iteration
+    DumpStatusFunction dsf(info_);  // we want a dump file written
+                                    // every iteration
 
     minim->minimize(problem, endCriteria);
   }

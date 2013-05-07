@@ -51,7 +51,7 @@ namespace OpenMD {
   FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
     FluctuatingChargePropagator(info), chiTolerance_ (1e-6), 
     maxIterNum_(4), thermo(info),
-    snap(info->getSnapshotManager()->getCurrentSnapshot()) {    
+    snap(info->getSnapshotManager()->getCurrentSnapshot()) {  
   }
 
   void FluctuatingChargeNVT::initialize() {
@@ -123,7 +123,6 @@ namespace OpenMD {
         cfrc = atom->getFlucQFrc();
         cmass = atom->getChargeMass();       
 
-        cerr << cpos << "\t" << cvel << "\t" << cfrc << "\t" << instTemp << "\t" <<chi << "\t" << integralOfChidt << "\n";
 	// velocity half step
         cvel += dt2_ * cfrc / cmass - dt2_*chi*cvel;                    
         // position whole step
