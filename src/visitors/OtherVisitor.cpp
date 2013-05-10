@@ -333,6 +333,11 @@ namespace OpenMD {
                 atomInfo->frc[1], atomInfo->frc[2]);
         line += buffer;
       }      
+      if (doElectricFields_ && atomInfo->hasElectricField) {
+        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->eField[0], 
+                atomInfo->eField[1], atomInfo->eField[2]);
+        line += buffer;
+      }      
       frame.push_back(line);
     }    
   }

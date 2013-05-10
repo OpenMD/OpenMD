@@ -1,9 +1,15 @@
 # Input file for gengetopt --generates cmdline.c and cmdline.h
 # for parsing command line arguments useing getopt and getoptlong.
 # gengetopt is available from:
+#
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# invoke with the following two commands:
+#    gengetopt < Dump2XYZ.ggo --file-name=Dump2XYZCmd --unamed-opts
+#    mv Dump2XYZCmd.c Dump2XYZCmd.cpp
+
 package "Dump2XYZ"
-version "0.99"
+version "1.0"
 
 # Options
 option	"input"		i	"input dump file"                                       string	typestr="filename" 	yes
@@ -25,3 +31,4 @@ option  "velocities"    v       "Print velocities in xyz file"                  
 option  "forces"        f       "Print forces xyz file"                                 flag                            off
 option  "vectors"       u       "Print vectors (dipoles, etc) in xyz file"              flag                            off
 option  "charges"       c       "Print charges in xyz file"                             flag                            off
+option  "efield"        e       "Print electric field vector in xyz file"               flag                            off

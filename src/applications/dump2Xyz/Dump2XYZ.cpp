@@ -75,6 +75,7 @@ int main(int argc, char* argv[]){
   bool printFrc(false);
   bool printVec(false);
   bool printChrg(false);
+  bool printField(false);
   
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
@@ -209,6 +210,10 @@ int main(int argc, char* argv[]){
   if(args_info.charges_flag){
     printChrg = true;
     xyzVisitor->doCharges(printChrg);
+  }
+  if(args_info.efield_flag){
+    printField = true;
+    xyzVisitor->doElectricFields(printField);
   }
   
   compositeVisitor->addVisitor(xyzVisitor, 200); 

@@ -527,7 +527,7 @@ namespace OpenMD {
 
     StringTokenizer tokenizer(line); 
     int nTokens; 
-     
+         
     nTokens = tokenizer.countTokens(); 
      
     if (nTokens < 2) {  
@@ -647,14 +647,12 @@ namespace OpenMD {
 
   void  DumpReader::readSiteData(std::istream& inputStream) {
 
-    inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
-    
-    if (line.find("<SiteData>") == std::string::npos) {
-      // site data isn't required for a simulation, so skip
-      return;
-    }
 
+    // We already found the starting <SiteData> tag or we wouldn't be
+    // here, so just start parsing until we get to the ending
+    // </SiteData> tag:
+    
     while(inputStream.getline(buffer, bufferSize)) {
       line = buffer;
       

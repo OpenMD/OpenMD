@@ -41,7 +41,7 @@ outputFluctuatingCharges = true;
 
 flucQ {
  targetTemp = 1.0;
- tauThermostat = 10.0;
+ tauThermostat = 100.0;
 }
 
 

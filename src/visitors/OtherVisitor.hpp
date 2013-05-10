@@ -114,11 +114,12 @@ namespace OpenMD {
     
     void writeFrame(std::ostream& outStream);    
     void clear() {frame.clear();}
-    void doPositions(bool pos) {doPositions_  = pos;}
-    void doVelocities(bool vel){doVelocities_ = vel;}
-    void doForces(bool frc)    {doForces_     = frc;}
-    void doVectors(bool vec)   {doVectors_    = vec;}
-    void doCharges(bool chg)   {doCharges_    = chg;}
+    void doPositions(bool pos) {doPositions_ = pos;}
+    void doVelocities(bool vel) {doVelocities_ = vel;}
+    void doForces(bool frc) {doForces_ = frc;}
+    void doVectors(bool vec) {doVectors_ = vec;}
+    void doCharges(bool chg) {doCharges_ = chg;}
+    void doElectricFields(bool efl) {doElectricFields_ = efl;}
 
   protected:
     void internalVisit(StuntDouble* sd);
@@ -136,6 +137,7 @@ namespace OpenMD {
     bool doForces_;
     bool doVectors_;
     bool doCharges_;
+    bool doElectricFields_;
   };
 
 

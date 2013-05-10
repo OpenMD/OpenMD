@@ -32,8 +32,9 @@ component{
 }
 
 flucQ {
+ propagator = "NVT";
  targetTemp = 10.0;
- tauThermostat = 10.0;
+ tauThermostat = 1000.0;
  dragCoefficient = 0.0001;
 }
 
