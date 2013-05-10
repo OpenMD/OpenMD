@@ -50,6 +50,11 @@
 #include "types/GayBerneAdapter.hpp"
 
 namespace OpenMD {
+
+  BaseAtomVisitor::BaseAtomVisitor(SimInfo* info) : BaseVisitor() {
+    storageLayout_ = info->getStorageLayout(); 
+  }    
+  
   void BaseAtomVisitor::visit(RigidBody *rb) {
     //vector<Atom*> myAtoms;
     //vector<Atom*>::iterator atomIter;
@@ -108,8 +113,9 @@ namespace OpenMD {
       atomInfo->hasCharge = true;
       atomInfo->charge += atom->getFlucQPos();
     }
-
-    if (atype->isElectrostatic()) {
+    
+    if ((storageLayout_ & DataStorage::dslElectricField) && 
+        (atype->isElectrostatic())) {
       atomInfo->hasElectricField = true;
       atomInfo->eField = atom->getElectricField();
     }
@@ -151,7 +157,8 @@ namespace OpenMD {
       atomInfo->charge += datom->getFlucQPos();
     }
 
-    if (atype->isElectrostatic()) {
+    if ((storageLayout_ & DataStorage::dslElectricField) && 
+        (atype->isElectrostatic())) {
       atomInfo->hasElectricField = true;
       atomInfo->eField = datom->getElectricField();
     }

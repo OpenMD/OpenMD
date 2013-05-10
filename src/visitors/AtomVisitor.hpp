@@ -63,8 +63,9 @@ namespace OpenMD {
     bool isVisited(Atom* atom);
     
   protected:
-    BaseAtomVisitor(SimInfo* info) : BaseVisitor() {}    
+    BaseAtomVisitor(SimInfo* info);
     SimInfo* info;
+    int storageLayout_;
   };
 
   class DefaultAtomVisitor : public BaseAtomVisitor{
