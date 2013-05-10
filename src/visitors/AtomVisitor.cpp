@@ -170,7 +170,10 @@ namespace OpenMD {
       atomInfo->vec = datom->getA().transpose()*V3Z;
     }
 
+    atomData = new AtomData;
+    atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
+
     datom->addProperty(atomData);
 
     setVisited(datom);
