@@ -68,13 +68,13 @@ namespace OpenMD {
   
   ElementsTable::~ElementsTable() {
     std::vector<Element*>::iterator i;
-    for (i = elements_.begin(); i != elements_.end(); i++)
+    for (i = elements_.begin(); i != elements_.end(); ++i)
       delete *i;
   }
   
   void ElementsTable::ParseLine(const char *line) {
     int num, maxbonds;
-    char symbol[5];
+    char symbol[6];
     char name[256];
     RealType Rcov,Rvdw,mass, elNeg, ionize, elAffin;
     RealType red, green, blue;
@@ -269,7 +269,7 @@ namespace OpenMD {
       Init();
     
     std::vector<Element*>::iterator i;
-    for (i = elements_.begin();i != elements_.end();i++)
+    for (i = elements_.begin();i != elements_.end(); ++i)
       if (!strncasecmp(sym,(*i)->GetSymbol(),2))
         return((*i)->GetAtomicNum());
 
@@ -326,11 +326,12 @@ namespace OpenMD {
       simError();
     }
       
-    char charBuffer[BUFF_SIZE];
+
     if ((*ifsP)) {
+      char charBuffer[BUFF_SIZE];
       while(ifsP->getline(charBuffer,BUFF_SIZE))
         ParseLine(charBuffer);
-
+      
       if (ifs1)
 	ifs1.close();
       if (ifs2)

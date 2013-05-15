@@ -65,7 +65,6 @@ namespace OpenMD {
 
   void NameFinder::loadNames() {
 
-    std::map<std::string, TreeNode*>::iterator foundIter;
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::AtomIterator ai;
@@ -229,7 +228,6 @@ namespace OpenMD {
 
   void NameFinder::matchInternalIndex(const std::string& name, int internalIndex, OpenMDBitSet& bs){
 
-    std::map<std::string, TreeNode*>::iterator foundIter;
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
 
@@ -251,7 +249,7 @@ namespace OpenMD {
     }
   }
 
-  bool NameFinder::isInteger(const std::string str) {
+  bool NameFinder::isInteger(const std::string &str) {
     for(unsigned int i = 0; i < str.size(); ++i){
       if (!std::isdigit(str[i])) {
 	return false;

@@ -88,11 +88,11 @@ namespace OpenMD{
     static int Length() {return 3;}
   };
 
-  template<class T, unsigned int Row, unsigned int Col>
-  class MPITraits< RectMatrix<T, Row, Col> > {
+  template<class T, unsigned int R, unsigned int C>
+  class MPITraits< RectMatrix<T, R, C> > {
   public:
     static MPI::Datatype Type() { return MPITraits<T>::Type(); }
-    static int Length() {return Row * Col;}
+    static int Length() {return R * C;}
   };
 
   template<class T>

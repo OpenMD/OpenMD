@@ -87,8 +87,6 @@ namespace OpenMD {
   
   void ProgressBar::update() {
 
-    int width;
-
 #ifdef IS_MPI
     if (MPI::COMM_WORLD.Get_rank() == 0) {
 #endif
@@ -97,13 +95,14 @@ namespace OpenMD {
       if (isatty(fileno(stdout))  && (getenv("SGE_TASK_ID")==NULL)) {     
         // get the window width:
 
+        int width = 0;
 #ifdef _MSC_VER
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
         int ret = GetConsoleScreenBufferInfo(hConsole, &csbi);
         if(ret) {
           width = csbi.dwSize.X - 1;
-        }
+        } 
 #else
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);

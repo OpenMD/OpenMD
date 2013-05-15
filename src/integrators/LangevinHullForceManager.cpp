@@ -174,7 +174,6 @@ namespace OpenMD {
 
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
   }  
 
   LangevinHullForceManager::~LangevinHullForceManager() { 
@@ -279,11 +278,8 @@ namespace OpenMD {
     // push these out to the other processors
     
 #ifdef IS_MPI
-    if (worldRank == 0) {
-      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles*3, MPI::REALTYPE, 0);
-    } else {
-      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles*3, MPI::REALTYPE, 0);
-    }
+    // Same command on all nodes:
+    MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles*3, MPI::REALTYPE, 0);
 #endif
     
     return gaussRand;

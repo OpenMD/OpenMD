@@ -183,11 +183,15 @@ namespace OpenMD {
     foo = strtok(working_line, " ,;\t");
 
     if (foo != NULL) {
-
-      if (!strcasecmp(foo, "end")) return 1;
+      
+      if (!strcasecmp(foo, "end")) {
+        free(working_line);
+        return 1;
+      }
 
     }
  
+    free(working_line);
     return 0;
   }
   

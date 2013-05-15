@@ -222,7 +222,7 @@ namespace OpenMD {
         
         if (fileSize < 0) {
           fin.close();                    
-          delete fbuf;
+          delete[] fbuf;
           
           return false;
         }
@@ -234,7 +234,7 @@ namespace OpenMD {
         //close the file and delete the buffer
         fin.close();      
         internalStringBuf_.str(fbuf);
-        delete [] fbuf;
+        delete[] fbuf;
       }else{
         fileSize = FileNotExists;
         MPI::COMM_WORLD.Bcast(&fileSize, 1, MPI::LONG, masterNode);
@@ -256,7 +256,7 @@ namespace OpenMD {
         else
           diffFilename = 1;
         
-        delete masterFilename;
+        delete[] masterFilename;
         
         MPI::COMM_WORLD.Allreduce(&diffFilename, &error, 1, MPI::INT, MPI::SUM);
         

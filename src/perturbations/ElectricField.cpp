@@ -72,7 +72,6 @@ namespace OpenMD {
     Molecule::AtomIterator  j;
     Molecule* mol;
     Atom* atom;
-    AtomType* atype;
     potVec longRangePotential(0.0);
     Vector3d dip;
     Vector3d trq;
@@ -82,7 +81,7 @@ namespace OpenMD {
     RealType pot, fieldPot;
     RealType chrgToKcal = 23.0609;
     RealType debyeToKcal = 4.8018969509;
-    bool isCharge;
+
 
     if (doElectricField) {
       fieldPot = 0.0;
@@ -93,10 +92,10 @@ namespace OpenMD {
 	for (atom = mol->beginAtom(j); atom != NULL;
 	     atom = mol->nextAtom(j)) {
 
-	  isCharge = false;
+	  bool isCharge = false;
 	  chrg = 0.0;
           
-          atype = atom->getAtomType();
+          AtomType* atype = atom->getAtomType();
           
           if (atype->isElectrostatic()) {
             atom->addElectricField(EF * chrgToKcal);

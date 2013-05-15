@@ -60,7 +60,7 @@ namespace OpenMD {
   struct NotEmptyConstraint : public ParamConstraintFacade<NotEmptyConstraint>{
     
     NotEmptyConstraint() { description_= "nonempty";}
-    bool operator()( const std::string data ) const {
+    bool operator()( const std::string &data ) const {
       return !data.empty();
     }
   };

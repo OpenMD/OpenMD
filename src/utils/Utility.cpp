@@ -56,7 +56,7 @@ namespace OpenMD {
       result.clear();
       result.insert(result.begin(), sequence.size(), wildCard);
       std::vector<std::vector<std::string>::iterator>::iterator i;
-      for ( i = cont.begin(); i != cont.end(); i++){
+      for ( i = cont.begin(); i != cont.end(); ++i){
 	result[*i - sequence.begin()] = **i;
       }
     }

@@ -44,16 +44,15 @@
 #define UTILS_OPENMDEXCEPTION_HPP
 namespace OpenMD {
 
-class OpenMDException {
-    public:
-        OpenMDException() : msg_("") {}
-        OpenMDException(const std::string msg) : msg_(msg) {}
-        const std::string getMessage() {return msg_;}
-    private:
-
-        std::string msg_;
-
-};
-
+  class OpenMDException {
+  public:
+    OpenMDException() : msg_("") {}
+    OpenMDException(const std::string &msg) : msg_(msg) {}
+    const std::string getMessage() {return msg_;}
+  private:    
+    std::string msg_;
+    
+  };
+  
 }
 #endif

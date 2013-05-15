@@ -726,20 +726,18 @@ namespace OpenMD {
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi
-
+      
       eorStream = createOStream(eorFilename_);
-
+      writeFrame(*eorStream);
+      
 #ifdef IS_MPI
     }
-#endif // is_mpi    
-
-    writeFrame(*eorStream);
-
-#ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi
+
       writeClosing(*eorStream);
       delete eorStream;
+
 #ifdef IS_MPI
     }
 #endif // is_mpi  

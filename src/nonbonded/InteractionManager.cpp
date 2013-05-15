@@ -93,7 +93,6 @@ namespace OpenMD {
     AtomType* atype1;
     AtomType* atype2;
     pair<AtomType*, AtomType*> key;
-    pair<set<NonBondedInteraction*>::iterator, bool> ret;
     
     for (atype1 = atomTypes->beginType(i1); atype1 != NULL; 
          atype1 = atomTypes->nextType(i1)) {
@@ -120,11 +119,7 @@ namespace OpenMD {
 
       for( it2 = typeMap_.begin(); it2 != typeMap_.end(); ++it2) {        
         atype2 = (*it2).second;
-        
-        bool vdwExplicit = false;
-        bool metExplicit = false;
-        // bool hbExplicit = false;
-                       
+                               
         key = make_pair(atype1, atype2);
         
         if (atype1->isLennardJones() && atype2->isLennardJones()) {
@@ -158,6 +153,10 @@ namespace OpenMD {
         NonBondedInteractionType* nbiType = forceField_->getNonBondedInteractionType(atype1->getName(), atype2->getName());
         
         if (nbiType != NULL) {
+
+          bool vdwExplicit = false;
+          bool metExplicit = false;
+          // bool hbExplicit = false;
 
           if (nbiType->isLennardJones()) {
             // We found an explicit Lennard-Jones interaction.  

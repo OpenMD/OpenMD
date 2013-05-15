@@ -146,7 +146,7 @@ namespace OpenMD {
     PrepareVisitor() : BaseVisitor() {visitorName = "prepareVisitor";}
 
     virtual void visit(Atom* atom) {internalVisit(atom);}
-    virtual void visit(DirectionalAtom* datom) {internalVisit((Atom*)datom);}
+    virtual void visit(DirectionalAtom* datom) {internalVisit(reinterpret_cast<Atom*>(datom));}
     virtual void visit(RigidBody* rb) {internalVisit(rb);}
 
     virtual const std::string toString();

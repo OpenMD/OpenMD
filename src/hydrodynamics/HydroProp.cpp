@@ -51,12 +51,13 @@ namespace OpenMD {
     hasXi = false;
   }
   
-  HydroProp::HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D) : cor_(cor), Xi_(Xi), D_(D){
-    hasCOR = true;
-    hasXi = true;
+  HydroProp::HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D) : cor_(cor), 
+                                                              Xi_(Xi), D_(D), 
+                                                              hasCOR(true), 
+                                                              hasXi(true) {
   }
   
-  HydroProp::HydroProp(const std::string frictionLine) {
+  HydroProp::HydroProp(const std::string &frictionLine) {
     
     StringTokenizer tokenizer(frictionLine);
     if (tokenizer.countTokens() >= 40) {

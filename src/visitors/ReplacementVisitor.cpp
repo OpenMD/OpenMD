@@ -56,22 +56,22 @@ namespace OpenMD {
     myTypes_.clear();
   }
    
-  bool ReplacementVisitor::isReplacedAtom(const std::string& atomType) {
+  bool ReplacementVisitor::isReplacedAtom(const std::string &atomType) {
     std::set<std::string>::iterator strIter;
     strIter = myTypes_.find(atomType);
     return strIter != myTypes_.end() ? true : false;
   }
 
-  void ReplacementVisitor::addSite(const std::string& name, 
-                                   const Vector3d refPos) {
+  void ReplacementVisitor::addSite(const std::string &name, 
+                                   const Vector3d &refPos) {
     AtomInfo* atomInfo = new AtomInfo();
     atomInfo->atomTypeName = name;
     atomInfo->pos = refPos;
     sites_->addAtomInfo(atomInfo);
   }
-  void ReplacementVisitor::addSite(const std::string& name, 
-                                   const Vector3d refPos, 
-                                   const Vector3d refVec) {
+  void ReplacementVisitor::addSite(const std::string &name, 
+                                   const Vector3d &refPos, 
+                                   const Vector3d &refVec) {
     AtomInfo* atomInfo = new AtomInfo();
     atomInfo->atomTypeName = name;
     atomInfo->pos = refPos;
@@ -81,7 +81,6 @@ namespace OpenMD {
   }
   
   void ReplacementVisitor::visit(DirectionalAtom *datom) {
-    std::vector<AtomInfo*>atoms;
     
     RotMat3x3d   A;
     RotMat3x3d   Atrans;

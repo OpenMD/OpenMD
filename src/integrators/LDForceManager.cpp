@@ -208,6 +208,7 @@ namespace OpenMD {
             hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(sd->getType(), currHydroProp));
             hydroProps_.push_back(currHydroProp);
           }
+          delete currShape;
         }
       }
     }

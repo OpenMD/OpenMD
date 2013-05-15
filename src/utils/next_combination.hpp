@@ -56,7 +56,7 @@
 namespace OpenMD {
 
   /**
-   * @brief STL next_permuationtation like combination sequence generator.
+   * @brief STL next_permuation-like combination sequence generator.
    * Given the first and last iterator of a sequence, next_combination iteratively generates all 
    * possible combinations.
    * @return if more combination is availiable, otherwise return false
@@ -111,10 +111,10 @@ namespace OpenMD {
       //For instance, sequence may contain 6, 7, 8, 9 at this time, we need to increase the size
       // of combination to 5
       typename std::vector<RandomAccessIterator>::iterator j = i;
-      j--;
+      --j;
       while( j >= iterContainer.begin() && *i == *j + 1){
-	i--;
-	j--;
+	--i;
+	--j;
       };
 
       RandomAccessIterator raIter;

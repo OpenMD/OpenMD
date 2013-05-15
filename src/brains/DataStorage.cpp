@@ -437,7 +437,7 @@ namespace OpenMD {
   }    
 
   RealType* DataStorage::internalGetArrayPointer(std::vector<Vector3d>& v) {
-    if (v.size() == 0) {
+    if (v.empty()) {
       return NULL;
     } else {
       return v[0].getArrayPointer();
@@ -445,7 +445,7 @@ namespace OpenMD {
   }
 
   RealType* DataStorage::internalGetArrayPointer(std::vector<Mat3x3d>& v) {
-    if (v.size() == 0) {
+    if (v.empty()) {
       return NULL;
     } else {
       return v[0].getArrayPointer();
@@ -454,7 +454,7 @@ namespace OpenMD {
   }
 
   RealType* DataStorage::internalGetArrayPointer(std::vector<RealType>& v) {
-    if (v.size() == 0) {
+    if (v.empty()) {
       return NULL;
     } else {
       return &(v[0]);

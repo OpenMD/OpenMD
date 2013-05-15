@@ -57,7 +57,7 @@ namespace OpenMD {
   class TupleMatcher {
     static ReturnType match(const std::map<TupleType, ReturnType>& container, const TupleType& t) {
       typename std::map<TupleType, ReturnType>::iterator i;
-
+      
       i = container.find(t);
       if (i != container.end()) {
 	return i->second;

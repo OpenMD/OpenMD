@@ -186,7 +186,6 @@ namespace OpenMD {
              atom = mol->nextFluctuatingCharge(j)) {
 
           cfrc = atom->getFlucQFrc();
-          cvel =atom->getFlucQVel();
           cmass = atom->getChargeMass();
           
           // velocity half step

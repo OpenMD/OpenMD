@@ -920,12 +920,11 @@ namespace OpenMD {
   }
 
   RealType Thermo::getHullVolume(){
-    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-
 #ifdef HAVE_QHULL    
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     if (!snap->hasHullVolume) {
       Hull* surfaceMesh_;
-
+      
       Globals* simParams = info_->getSimParams();
       const std::string ht = simParams->getHULL_Method();
       
@@ -957,10 +956,10 @@ namespace OpenMD {
       // Compute surface Mesh
       surfaceMesh_->computeHull(localSites_);
       snap->setHullVolume(surfaceMesh_->getVolume());
-
+      
       delete surfaceMesh_;
     }
-
+    
     return snap->getHullVolume();
 #else
     return 0.0;

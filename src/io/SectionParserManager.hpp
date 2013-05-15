@@ -59,8 +59,8 @@ namespace OpenMD {
 
   class SameSectionParserFunctor {
   public:
-    SameSectionParserFunctor(const std::string section) : section_(section) {}
-
+    SameSectionParserFunctor(const std::string &section) : section_(section) {}
+    
     bool operator()(SectionParserContext context) {
       return context.sectionParser->getSectionName() == section_;
     }
@@ -99,7 +99,7 @@ namespace OpenMD {
     }
         
   private:
-    iterator findSectionParser(const std::string& sectionName);
+    iterator findSectionParser(const std::string &sectionName);
     const int beginPriority_;
     int priorityDifference_;
         

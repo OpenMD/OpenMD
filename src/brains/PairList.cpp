@@ -61,7 +61,7 @@ namespace OpenMD {
       modified_ = false;
     } 
     
-    return pairList_.size() > 0 ? &(pairList_[0]) : NULL;    
+    return pairList_.empty() ? NULL : &(pairList_[0]);
   }
   
   void PairList::addPair(int i, int j) {

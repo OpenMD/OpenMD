@@ -173,8 +173,6 @@ namespace OpenBabel
                                             vector<int>& fragment) {
     
     OBMol* newMol = new OBMol();
-    OBChainsParser* chainParser = new OBChainsParser();   
-    bool molIsWater = false;
 
     newMol->ReserveAtoms(fragment.size());
     newMol->BeginModify();
@@ -200,25 +198,17 @@ namespace OpenBabel
     const int BUFFLEN = 1024;
     char buffer[BUFFLEN];
     string str, str1, str2, str3;
-    OBAtom *a, *b, *c, *d;    
     bool molIsWater = false;
     OBResidue *r;
-    int resKey, myserial;
-    char type_name[10];
-    char *element_name;
-    int res_num;
-    OBChainsParser* chainParser = new OBChainsParser();   
     double min_x, max_x, min_y, max_y, min_z, max_z; /* Edges of bounding box */
     
-    os << "<OpenMD version=1>" << endl;
+    os << "<OpenMD version=2>" << endl;
     os << "  <MetaData>" << endl << endl;
     
     for(i = 0; i < mols.size(); ++i) {
       OBMol* pmol = mols[i];
       map<OBAtom*, int> atomMap;
 
-
-      //chainParser->PerceiveChains(*pmol, false);
       molIsWater = false;
       FOR_RESIDUES_OF_MOL(residue, *pmol) {
         if (residue->GetName().compare("HOH") == 0) {
@@ -233,7 +223,7 @@ namespace OpenBabel
       } else {
 
         os << "molecule {\n";
-        sprintf(buffer, "%d", i);
+        sprintf(buffer, "%u", i);
         os << "  name = \"" << molPrefix << buffer << "\";\n";
         
         int ai = 0;
@@ -397,7 +387,7 @@ namespace OpenBabel
       if (std::string(pmol->GetTitle()).compare("HOH") == 0) {
         os << "  type = " << "\"HOH\"" << "; // change to appropriate water model" << endl;
       } else {
-        sprintf(buffer, "%d", i);
+        sprintf(buffer, "%u", i);
         os << "  type = " << molPrefix << buffer << ";" << endl;
       }
       os << "  nMol = " << numMols[i]<< ";" << endl;

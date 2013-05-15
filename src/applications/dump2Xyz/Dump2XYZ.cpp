@@ -164,7 +164,7 @@ int main(int argc, char* argv[]){
   //create replicate visitor
   if(args_info.repeatX_given > 0 || 
      args_info.repeatY_given > 0 || 
-     args_info.repeatY_given > 0) {
+     args_info.repeatZ_given > 0) {
     Vector3i replicateOpt(args_info.repeatX_arg, 
                           args_info.repeatY_arg, 
                           args_info.repeatZ_arg);

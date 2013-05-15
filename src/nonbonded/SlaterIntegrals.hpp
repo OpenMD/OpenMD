@@ -125,12 +125,11 @@ inline RealType RosenB(int n, RealType alpha)
 {
   RealType TheSum, Term;
   RealType RosenB_, PSinhRosenA, PCoshRosenA, PHyperRosenA;
-  bool IsPositive;
+
   if (alpha != 0.)
     {
       Term = 1.;
-      TheSum = 1.;
-      IsPositive = true;
+      bool IsPositive = true;
 		
       // These two expressions are (up to constant factors) equivalent
       // to computing the hyperbolic sine and cosine of a respectively

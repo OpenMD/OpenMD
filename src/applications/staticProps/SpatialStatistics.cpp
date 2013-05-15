@@ -320,6 +320,11 @@ namespace OpenMD {
     data_.push_back(z_);
   }
 
+  SlabStatistics::~SlabStatistics() {
+    delete z_;
+  }
+
+
   void SlabStatistics::processFrame(int istep) {
     RealType z;
     hmat_ = currentSnapshot_->getHmat();
@@ -342,7 +347,6 @@ namespace OpenMD {
     return int(nBins_ * (pos.z() / hmat_(2,2) + 0.5)) % nBins_;  
   }
 
-
   ShellStatistics::ShellStatistics(SimInfo* info, const string& filename, 
                                    const string& sele, int nbins) : 
     SpatialStatistics(info, filename, sele, nbins){
@@ -364,6 +368,10 @@ namespace OpenMD {
       RealType r = (((RealType)i + 0.5) * binWidth_);
       dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
     }
+  }
+
+  ShellStatistics::~ShellStatistics() {
+    delete r_;
   }
 
   int ShellStatistics::getBin(Vector3d pos) {    

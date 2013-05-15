@@ -174,7 +174,7 @@ namespace OpenMD {
         myDerivC = 0.0;
       } else if (idat.shiftedForce) {
         myPotC = D_e * (expfnc2C - 2.0 * expfncC);
-        myDerivC  = 2.0 * D_e * beta * (expfnc2C - expfnc2C);
+        myDerivC  = 2.0 * D_e * beta * (expfncC - expfnc2C);
         myPotC += myDerivC * ( *(idat.rij)  -  *(idat.rcut) );
       } else {
         myPotC = 0.0;

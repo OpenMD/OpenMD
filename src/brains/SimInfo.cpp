@@ -941,13 +941,6 @@ namespace OpenMD {
       }
     }    
     
-    //scan topology 
-
-    int* excludeList = excludedInteractions_.getPairList();
-    int* oneTwoList = oneTwoInteractions_.getPairList();
-    int* oneThreeList = oneThreeInteractions_.getPairList();
-    int* oneFourList = oneFourInteractions_.getPairList();
-
     topologyDone_ = true;
   }
 

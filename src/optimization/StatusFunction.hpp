@@ -40,6 +40,7 @@ namespace OpenMD {
       dumpWriter->writeDumpAndEor();
     }
     ~DumpStatusFunction() {
+      delete stats;
       delete dumpWriter;
       delete statWriter;
     }

@@ -57,7 +57,7 @@ namespace OpenMD {
   class FluctuatingChargePropagator {
   public:
     FluctuatingChargePropagator(SimInfo* info);
-    virtual ~FluctuatingChargePropagator(){ }
+    virtual ~FluctuatingChargePropagator();
     virtual void initialize();
     virtual void updateSizes() = 0;
     virtual void moveA() = 0;

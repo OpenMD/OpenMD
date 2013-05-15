@@ -60,21 +60,21 @@ namespace OpenMD {
   public:
     NameFinder(SimInfo* info);
     ~NameFinder();
-    OpenMDBitSet  match(const std::string& name);
+    OpenMDBitSet  match(const std::string &name);
 
   private:
     void loadNames();
-    void matchMolecule(const std::string& molName, OpenMDBitSet& bs);
-    void matchStuntDouble(const std::string& molName, const std::string& sdName, OpenMDBitSet& bs);
-    void matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, OpenMDBitSet& bs);
+    void matchMolecule(const std::string &molName, OpenMDBitSet &bs);
+    void matchStuntDouble(const std::string &molName, const std::string &sdName, OpenMDBitSet &bs);
+    void matchRigidAtoms(const std::string &molName, const std::string &rbName, const std::string &rbAtomName, OpenMDBitSet &bs);
 
-    void matchInternalIndex(const std::string& name, int internalIndex, OpenMDBitSet& bs);
+    void matchInternalIndex(const std::string &name, int internalIndex, OpenMDBitSet &bs);
 
-    TreeNode* createNode(TreeNode* parent, const std::string& name);
-    std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string& name);
-    bool isMatched(const std::string& str, const std::string& wildcard);
+    TreeNode* createNode(TreeNode* parent, const std::string &name);
+    std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string &name);
+    bool isMatched(const std::string &str, const std::string &wildcard);
 
-    bool isInteger(const std::string str);
+    bool isInteger(const std::string &str);
 
     SimInfo* info_;
     int nStuntDouble_;

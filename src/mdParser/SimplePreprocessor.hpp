@@ -95,10 +95,9 @@ class SimplePreprocessor {
               if (!line.empty() && line[0] == '#') {
                     StringTokenizer tokenizer(line.substr(1, line.length()));
                     std::vector<std::string> tokens = tokenizer.getAllTokens();
-                    if (tokens.size() < 1 ) {
+                    if (tokens.empty()) {
                         return false;
                     }
-                    std::string keyword = tokens[0];
                     if (tokens[0] == "endif") {
                         ifStates.pop();
                         if (ifStates.empty()) {

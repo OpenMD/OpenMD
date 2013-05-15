@@ -111,6 +111,8 @@ namespace OpenMD {
   class SlabStatistics : public SpatialStatistics {
   public: 
     SlabStatistics(SimInfo* info, const string& filename, const string& sele, int nbins);
+    virtual ~SlabStatistics();
+
     virtual int getBin(Vector3d pos);
     virtual void processFrame(int frame);
   protected:
@@ -123,6 +125,7 @@ namespace OpenMD {
   class ShellStatistics : public SpatialStatistics {
   public: 
     ShellStatistics(SimInfo* info, const string& filename, const string& sele, int nbins);
+    virtual ~ShellStatistics();
     virtual int getBin(Vector3d pos);
 
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }

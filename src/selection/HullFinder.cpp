@@ -93,7 +93,6 @@ namespace OpenMD {
   }
 
   OpenMDBitSet HullFinder::findHull() {
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     OpenMDBitSet bsResult(nStuntDoubles_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
@@ -107,7 +106,6 @@ namespace OpenMD {
 #endif
     
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
-    int nTriangles = sMesh.size();
     // Loop over the mesh faces
     std::vector<Triangle>::iterator face;
     std::vector<StuntDouble*>::iterator vertex;
@@ -128,7 +126,6 @@ namespace OpenMD {
   }
 
   OpenMDBitSet HullFinder::findHull(int frame) {
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getSnapshot(frame);
     OpenMDBitSet bsResult(nStuntDoubles_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
@@ -142,7 +139,6 @@ namespace OpenMD {
 #endif
     
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
-    int nTriangles = sMesh.size();
     // Loop over the mesh faces
     std::vector<Triangle>::iterator face;
     std::vector<StuntDouble*>::iterator vertex;

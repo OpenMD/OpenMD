@@ -273,8 +273,8 @@ namespace OpenMD {
      * Returns the first derivative of this polynomial.
      * @return the first derivative of this polynomial
      */
-    PolynomialType & getDerivative() {
-      Polynomial<Real> p;
+    PolynomialType* getDerivative() {
+      Polynomial<Real>* p = new Polynomial<Real>();
       
       typename Polynomial<Real>::const_iterator i;
       ExponentType exponent;
@@ -283,7 +283,7 @@ namespace OpenMD {
       for (i =  this->begin(); i  != this->end(); ++i) {
         exponent = i->first;
         coefficient = i->second;
-        p.setCoefficient(exponent-1, coefficient * exponent);
+        p->setCoefficient(exponent-1, coefficient * exponent);
       }
     
       return p;
@@ -622,8 +622,8 @@ namespace OpenMD {
    * @return the first derivative of this polynomial
    */
   template<typename Real>
-  Polynomial<Real> getDerivative(const Polynomial<Real>& p1) {
-    Polynomial<Real> p;
+  Polynomial<Real> * getDerivative(const Polynomial<Real>& p1) {
+    Polynomial<Real> * p = new Polynomial<Real>();
     
     typename Polynomial<Real>::const_iterator i;
     int exponent;
@@ -632,7 +632,7 @@ namespace OpenMD {
     for (i =  p1.begin(); i  != p1.end(); ++i) {
       exponent = i->first;
       coefficient = i->second;
-      p.setCoefficient(exponent-1, coefficient * exponent);
+      p->setCoefficient(exponent-1, coefficient * exponent);
     }
     
     return p;

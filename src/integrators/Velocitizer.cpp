@@ -55,19 +55,19 @@ namespace OpenMD {
   
   Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo(info) {
     
-    int seedValue;
+
     Globals * simParams = info->getSimParams();
     
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
-      seedValue = simParams->getSeed();
+      int seedValue = simParams->getSeed();
       randNumGen_ = new SeqRandNumGen(seedValue);
     }else {
       randNumGen_ = new SeqRandNumGen();
     }    
 #else
     if (simParams->haveSeed()) {
-      seedValue = simParams->getSeed();
+      int seedValue = simParams->getSeed();
       randNumGen_ = new ParallelRandNumGen(seedValue);
     }else {
       randNumGen_ = new ParallelRandNumGen();

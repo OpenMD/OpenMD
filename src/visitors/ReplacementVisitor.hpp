@@ -70,9 +70,9 @@ namespace OpenMD {
     
     const std::string toString();
 
-    void addReplacedAtomName(const std::string& repName);
-    void addSite(const std::string& name, const Vector3d refPos);
-    void addSite(const std::string& name, const Vector3d refPos, const Vector3d refVec);
+    void addReplacedAtomName(const std::string &repName);
+    void addSite(const std::string &name, const Vector3d &refPos);
+    void addSite(const std::string &name, const Vector3d &refPos, const Vector3d &refVec);
   private:
     inline bool isReplacedAtom(const std::string& atomType);
     std::set<std::string> myTypes_;

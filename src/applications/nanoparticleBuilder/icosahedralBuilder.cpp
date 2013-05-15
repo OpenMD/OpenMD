@@ -176,8 +176,7 @@ int main(int argc, char *argv []) {
 
   createMdFile(inputFileName, outputFileName, Points.size());
   
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
   
   SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outputFileName, false);

@@ -80,7 +80,6 @@ namespace OpenMD {
 	std::cerr << "" << std::endl;
       }
 
-      IndexListContainerIterator i = indexContainer_.begin();
       int result;
             
       result = indexContainer_.front().first;
@@ -129,7 +128,6 @@ namespace OpenMD {
       std::unique(indices.begin(), indices.end());
 
       std::vector<int>::iterator i;
-      IndexListContainerIterator insertPos;
       int beginIndex;
 
       beginIndex = indices[0];
@@ -140,8 +138,6 @@ namespace OpenMD {
 	  beginIndex = *i;
 	}
       }
-            
-            
     }
         
     std::vector<int> getIndicesBefore(int index) {
@@ -197,10 +193,7 @@ namespace OpenMD {
       if (endIndex > maxIndex_) {
 	std::cerr << "" << std::endl;
       }
-
-                      
-      IndexListContainerIterator j;
-
+      
       IndexListContainerIterator i = indexContainer_.begin();  
       for (; i != indexContainer_.end(); ++i) {
 	if ((*i).first > endIndex) {

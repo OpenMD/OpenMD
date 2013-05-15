@@ -185,7 +185,7 @@ namespace OpenMD {
     std::vector<AtomInfo *>::iterator i;
 
     for( dirIter = dir.begin(); dirIter != dir.end(); ++dirIter ) {
-      for( i = infoList.begin(); i != infoList.end(); i++ ) {
+      for( i = infoList.begin(); i != infoList.end(); ++i ) {
 	newAtomInfo = new AtomInfo();
 	*newAtomInfo = *(*i);
 
@@ -200,10 +200,10 @@ namespace OpenMD {
   const std::string ReplicateVisitor::toString() {
     char                            buffer[65535];
     std::string                     result;
-    std::set<std::string>::iterator i;
+
 
     sprintf(buffer,
-            "------------------------------------------------------------------\n");
+            "--------------------------------------------------------------\n");
     result += buffer;
 
     sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
@@ -224,7 +224,7 @@ namespace OpenMD {
     result += buffer;
 
     sprintf(buffer,
-            "------------------------------------------------------------------\n");
+            "--------------------------------------------------------------\n");
     result += buffer;
 
     return result;
@@ -236,7 +236,8 @@ namespace OpenMD {
                                           evaluator(info), doPositions_(true),
                                           doVelocities_(false), 
                                           doForces_(false), doVectors_(false),
-                                          doCharges_(false) {
+                                          doCharges_(false), 
+                                          doElectricFields_(false) {
     this->info = info;
     visitorName = "XYZVisitor";
     
@@ -250,7 +251,7 @@ namespace OpenMD {
   XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
     BaseVisitor(), seleMan(info), evaluator(info), doPositions_(true),
     doVelocities_(false), doForces_(false), doVectors_(false),
-    doCharges_(false) {
+    doCharges_(false), doElectricFields_(false) {
     
     this->info = info;
     visitorName = "XYZVisitor";
@@ -350,7 +351,7 @@ namespace OpenMD {
     std::vector<std::string>::iterator i;
     char buffer[1024];
     
-    if (frame.size() == 0)
+    if (frame.empty())
       std::cerr << "Current Frame does not contain any atoms" << std::endl;
     
     //total number of atoms  
@@ -403,7 +404,6 @@ namespace OpenMD {
   
   void PrepareVisitor::internalVisit(Atom *atom) {
     GenericData *data;
-    AtomData *   atomData;
     
     //if visited property is  existed, remove it
     data = atom->getPropertyByName("VISITED");
@@ -416,7 +416,7 @@ namespace OpenMD {
     data = atom->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+      AtomData* atomData = dynamic_cast<AtomData *>(data);
 
       if (atomData != NULL)
 	atom->removeProperty("ATOMDATA");
@@ -491,19 +491,17 @@ namespace OpenMD {
     std::string rbName;
     std::vector<Atom *> myAtoms;
     std::vector<Atom *>::iterator atomIter;
-    GenericData* data;
-    AtomData* atomData;
-    AtomInfo* atomInfo;
     std::vector<AtomInfo *>::iterator i;
+    AtomData* atomData;
 
     rbName = rb->getType();
     
     if (waterTypeList.find(rbName) != waterTypeList.end()) {
       myAtoms = rb->getAtoms();
-
+      
       for( atomIter = myAtoms.begin(); atomIter != myAtoms.end();
 	   ++atomIter ) {
-	data = (*atomIter)->getPropertyByName("ATOMDATA");
+	GenericData* data = (*atomIter)->getPropertyByName("ATOMDATA");
         
 	if (data != NULL) {
 	  atomData = dynamic_cast<AtomData *>(data);
@@ -513,12 +511,12 @@ namespace OpenMD {
 	} else
 	  continue;
         
-	for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
+	for( AtomInfo* atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	     atomInfo = atomData->nextAtomInfo(i) ) {
 	  atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
-	} //end for(atomInfo)
-      }     //end for(atomIter)
-    }         //end if (waterTypeList.find(rbName) != waterTypeList.end())
+	} 
+      }   
+    } 
   }
 
   std::string WaterTypeVisitor::trimmedName(const std::string&atomTypeName) {

@@ -101,7 +101,6 @@ namespace OpenMD {
       if (myType.compare("MOLECULAR")==0){
 
         int molIndex;
-        std::vector<Vector3d> ref;
         Vector3d refCom;
 
         if (!stamp[i]->haveMolIndex()) {

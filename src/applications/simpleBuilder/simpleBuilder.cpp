@@ -199,8 +199,7 @@ int main(int argc, char *argv []) {
 
   createMdFile(inputFileName, outputFileName, nSites);
 
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
 
   // We need to read in the new SimInfo object, then Parse the 
   // md file and set up the system

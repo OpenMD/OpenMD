@@ -206,8 +206,6 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // RealType calcvol = 0.0;
   
   qh_triangulate ();
-  int num_facets = qh num_facets;
-  int num_vertices = qh num_vertices;
 
   FORALLfacets {  
     Triangle face;

@@ -399,8 +399,7 @@ int main(int argc, char *argv []) {
 
   createMdFile(inputFileName, outputFileName, nMol);
   
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
   
   SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outputFileName, false);

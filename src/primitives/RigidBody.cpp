@@ -355,7 +355,7 @@ namespace OpenMD {
 
       if (atoms_[i]->isDirectional()) {
           
-	dAtom = (DirectionalAtom *) atoms_[i];
+	dAtom = dynamic_cast<DirectionalAtom *>(atoms_[i]);
 	dAtom->setA(refOrients_[i].transpose() * a);
       }
 
@@ -382,7 +382,7 @@ namespace OpenMD {
 
       if (atoms_[i]->isDirectional()) {
           
-	dAtom = (DirectionalAtom *) atoms_[i];
+	dAtom = dynamic_cast<DirectionalAtom *>(atoms_[i]);
 	dAtom->setA(refOrients_[i].transpose() * a, frame);
       }
 

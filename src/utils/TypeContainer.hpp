@@ -129,14 +129,13 @@ namespace OpenMD {
     ElemPtr permutedFindSkippingFirstElement(KeyType& keys) {
       assert(keys.size() == SIZE);
       MapTypeIterator i;
-      ValueType foundType;
                 
       KeyType permutedKeys = keys;
 
       // skip the first element:
       KeyTypeIterator start;
       start = permutedKeys.begin();
-      start++;
+      ++start;
 
       std::sort(start, permutedKeys.end());
 

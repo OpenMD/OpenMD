@@ -67,7 +67,8 @@
 using namespace std;
 namespace OpenMD {
   
-  ForceManager::ForceManager(SimInfo * info) : info_(info), switcher_(NULL) {
+  ForceManager::ForceManager(SimInfo * info) : info_(info), switcher_(NULL),
+                                               initialized_(false) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
@@ -693,7 +694,7 @@ namespace OpenMD {
     RealType rCutSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
-    vector<int> atomListColumn, atomListRow, atomListLocal;
+    vector<int> atomListColumn, atomListRow;
     InteractionData idat;
     SelfData sdat;
     RealType mf;

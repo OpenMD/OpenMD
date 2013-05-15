@@ -424,7 +424,6 @@ namespace OpenMD {
   }
 
   void Stats::collectStats(){
-    Globals* simParams = info_->getSimParams();
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     Thermo thermo(info_);
    

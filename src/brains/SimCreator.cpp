@@ -516,18 +516,12 @@ namespace OpenMD {
     RealType x;
     RealType y;
     RealType a;
-    int old_atoms;
-    int add_atoms;
-    int new_atoms;
-    int nTarget;
-    int done;
-    int i;
-    int loops;
-    int which_proc;
     int nProcessors;
     std::vector<int> atomsPerProc;
     int nGlobalMols = info->getNGlobalMolecules();
-    std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error condition:
+    std::vector<int> molToProcMap(nGlobalMols, -1); // default to an
+                                                    // error
+                                                    // condition:
     
     nProcessors = MPI::COMM_WORLD.Get_size();
     
@@ -538,17 +532,18 @@ namespace OpenMD {
               "\tthe number of molecules.  This will not result in a \n"
               "\tusable division of atoms for force decomposition.\n"
               "\tEither try a smaller number of processors, or run the\n"
-              "\tsingle-processor version of OpenMD.\n", nProcessors, nGlobalMols);
+              "\tsingle-processor version of OpenMD.\n", nProcessors, 
+              nGlobalMols);
       
       painCave.isFatal = 1;
       simError();
     }
     
-    int seedValue;
     Globals * simParams = info->getSimParams();
-    SeqRandNumGen* myRandom; //divide labor does not need Parallel random number generator
+    SeqRandNumGen* myRandom; //divide labor does not need Parallel
+                             //random number generator
     if (simParams->haveSeed()) {
-      seedValue = simParams->getSeed();
+      int seedValue = simParams->getSeed();
       myRandom = new SeqRandNumGen(seedValue);
     }else {
       myRandom = new SeqRandNumGen();
@@ -564,28 +559,28 @@ namespace OpenMD {
       numerator = info->getNGlobalAtoms();
       denominator = nProcessors;
       precast = numerator / denominator;
-      nTarget = (int)(precast + 0.5);
+      int nTarget = (int)(precast + 0.5);
       
-      for(i = 0; i < nGlobalMols; i++) {
+      for(int i = 0; i < nGlobalMols; i++) {
 
-        done = 0;
-        loops = 0;
+        int done = 0;
+        int loops = 0;
         
         while (!done) {
           loops++;
           
           // Pick a processor at random
           
-          which_proc = (int) (myRandom->rand() * nProcessors);
+          int which_proc = (int) (myRandom->rand() * nProcessors);
           
           //get the molecule stamp first
           int stampId = info->getMoleculeStampId(i);
           MoleculeStamp * moleculeStamp = info->getMoleculeStamp(stampId);
           
           // How many atoms does this processor have so far?
-          old_atoms = atomsPerProc[which_proc];
-          add_atoms = moleculeStamp->getNAtoms();
-          new_atoms = old_atoms + add_atoms;
+          int old_atoms = atomsPerProc[which_proc];
+          int add_atoms = moleculeStamp->getNAtoms();
+          int new_atoms = old_atoms + add_atoms;
           
           // If we've been through this loop too many times, we need
           // to just give up and assign the molecule to this processor

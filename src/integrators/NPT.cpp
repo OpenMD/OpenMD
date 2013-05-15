@@ -313,8 +313,6 @@ namespace OpenMD {
 	     sd = mol->nextIntegrableObject(j)) {            
 
 	  frc = sd->getFrc();
-	  vel = sd->getVel();
-
 	  mass = sd->getMass();
 
 	  getVelScaleB(sc, index);

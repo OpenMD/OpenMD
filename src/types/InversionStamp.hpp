@@ -66,7 +66,7 @@ namespace OpenMD {
 	satellites_.push_back(sat);
       }
     }
-    void setSatellites(const std::vector<int> sats) {
+    void setSatellites(const std::vector<int> &sats) {
       if (sats.size() == 3) {
 	satellites_.push_back(sats.at(0));
 	satellites_.push_back(sats.at(1));

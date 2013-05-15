@@ -88,7 +88,7 @@ namespace OpenMD {
    }
     
     bool setData(const std::string& keyword, const std::string& value) {
-      bool result;
+      bool result(false);
       ParamMap::iterator i =parameters_.find(keyword);
       if (i != parameters_.end()) {
         if(isInteger(value)){

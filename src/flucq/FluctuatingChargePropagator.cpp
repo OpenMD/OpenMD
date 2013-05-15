@@ -60,6 +60,11 @@ namespace OpenMD {
     
     Globals* simParams = info_->getSimParams();
     fqParams_ = simParams->getFluctuatingChargeParameters();
+    fqConstraints_ = new FluctuatingChargeConstraints(info_);
+  }
+
+  FluctuatingChargePropagator::~FluctuatingChargePropagator() {
+    if (fqConstraints_ != NULL) delete fqConstraints_;
   }
 
   void FluctuatingChargePropagator::setForceManager(ForceManager* forceMan) {
@@ -71,7 +76,6 @@ namespace OpenMD {
     if (info_->usesFluctuatingCharges()) {
       if (info_->getNFluctuatingCharges() > 0) {
         hasFlucQ_ = true;
-	fqConstraints_ = new FluctuatingChargeConstraints(info_);        
       }
     }
 
@@ -91,7 +95,6 @@ namespace OpenMD {
       }
     }
     
-    fqConstraints_ = new FluctuatingChargeConstraints(info_);
     FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, 
                                                  fqConstraints_);
 

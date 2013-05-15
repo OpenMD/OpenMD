@@ -365,8 +365,7 @@ int main(int argc, char *argv []) {
   //creat new .md file on fly which corrects the number of molecule     
   createMdFile(inputFileName, outputFileName, nMol);
   
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
   
   SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outputFileName, false);

@@ -51,7 +51,7 @@ namespace OpenMD {
   class CutoffGroup {
   public:
     
-    CutoffGroup() :  snapshotMan_(NULL) {
+    CutoffGroup() :  snapshotMan_(NULL), globalIndex(-1), localIndex_(-1) {
 
       storage_ = &Snapshot::cgData;
       haveTotalMass = false;

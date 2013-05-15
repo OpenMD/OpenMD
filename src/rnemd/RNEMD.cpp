@@ -72,7 +72,7 @@ namespace OpenMD {
                                 evaluatorA_(info), seleManA_(info), 
                                 commonA_(info), evaluatorB_(info), 
                                 seleManB_(info), commonB_(info), 
-                                hasData_(false),
+                                hasData_(false), hasDividingArea_(false),
                                 usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {
 
     trialCount_ = 0;
@@ -1151,7 +1151,7 @@ namespace OpenMD {
 	  //if w is in the right range, so should be x, y, z.
 	  vector<StuntDouble*>::iterator sdi;
 	  Vector3d vel;
-	  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
+	  for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
 	    if (rnemdFluxType_ == rnemdFullKE) {
 	      vel = (*sdi)->getVel() * c;
 	      (*sdi)->setVel(vel);
@@ -1162,7 +1162,7 @@ namespace OpenMD {
 	    }
 	  }
 	  w = sqrt(w);
-	  for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
+	  for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
 	    if (rnemdFluxType_ == rnemdFullKE) {
 	      vel = (*sdi)->getVel();
 	      vel.x() *= x;
@@ -1281,7 +1281,7 @@ namespace OpenMD {
       vector<RealType>::iterator ri;
       RealType r1, r2, alpha0;
       vector<pair<RealType,RealType> > rps;
-      for (ri = realRoots.begin(); ri !=realRoots.end(); ri++) {
+      for (ri = realRoots.begin(); ri !=realRoots.end(); ++ri) {
 	r2 = *ri;
 	//check if FindRealRoots() give the right answer
 	if ( fabs(u0 + r2 * (u1 + r2 * (u2 + r2 * (u3 + r2 * u4)))) > 1e-6 ) {
@@ -1313,7 +1313,7 @@ namespace OpenMD {
 	RealType diff;
 	pair<RealType,RealType> bestPair = make_pair(1.0, 1.0);
 	vector<pair<RealType,RealType> >::iterator rpi;
-	for (rpi = rps.begin(); rpi != rps.end(); rpi++) {
+	for (rpi = rps.begin(); rpi != rps.end(); ++rpi) {
 	  r1 = (*rpi).first;
 	  r2 = (*rpi).second;
 	  switch(rnemdFluxType_) {
@@ -1380,7 +1380,7 @@ namespace OpenMD {
 	}
 	vector<StuntDouble*>::iterator sdi;
 	Vector3d vel;
-	for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
+	for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
 	  vel = (*sdi)->getVel();
 	  vel.x() *= x;
 	  vel.y() *= y;
@@ -1391,7 +1391,7 @@ namespace OpenMD {
 	x = 1.0 + px * (1.0 - x);
 	y = 1.0 + py * (1.0 - y);
 	z = 1.0 + pz * (1.0 - z);
-	for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
+	for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
 	  vel = (*sdi)->getVel();
 	  vel.x() *= x;
 	  vel.y() *= y;
@@ -1669,7 +1669,7 @@ namespace OpenMD {
 		  Vector3d vel;
                   Vector3d rPos;
                   
-		  for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
+		  for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
 		    //vel = (*sdi)->getVel();
                     rPos = (*sdi)->getPos() - coordinateOrigin_;
                     if (doLinearPart)
@@ -1685,7 +1685,7 @@ namespace OpenMD {
 		      }
 		    }
 		  }
-		  for (sdi = hotBin.begin(); sdi != hotBin.end(); sdi++) {
+		  for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
 		    //vel = (*sdi)->getVel();
                     rPos = (*sdi)->getPos() - coordinateOrigin_;
                     if (doLinearPart)
@@ -2231,7 +2231,7 @@ namespace OpenMD {
       rnemdFile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
-               "RNEMD detected a numerical error writing: %s for bin %d",
+               "RNEMD detected a numerical error writing: %s for bin %u",
                data_[index].title.c_str(), bin);
       painCave.isFatal = 1;
       simError();
@@ -2254,7 +2254,7 @@ namespace OpenMD {
         isinf(s[1]) || isnan(s[1]) || 
         isinf(s[2]) || isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
-               "RNEMD detected a numerical error writing: %s for bin %d",
+               "RNEMD detected a numerical error writing: %s for bin %u",
                data_[index].title.c_str(), bin);
       painCave.isFatal = 1;
       simError();
@@ -2279,7 +2279,7 @@ namespace OpenMD {
       rnemdFile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
-               "RNEMD detected a numerical error writing: %s std. dev. for bin %d",
+               "RNEMD detected a numerical error writing: %s std. dev. for bin %u",
                data_[index].title.c_str(), bin);
       painCave.isFatal = 1;
       simError();
@@ -2301,7 +2301,7 @@ namespace OpenMD {
         isinf(s[1]) || isnan(s[1]) || 
         isinf(s[2]) || isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
-               "RNEMD detected a numerical error writing: %s std. dev. for bin %d",
+               "RNEMD detected a numerical error writing: %s std. dev. for bin %u",
                data_[index].title.c_str(), bin);
       painCave.isFatal = 1;
       simError();

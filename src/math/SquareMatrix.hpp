@@ -371,6 +371,10 @@ namespace OpenMD {
     //// this is NEVER called
     if ( i >= VTK_MAX_ROTATIONS ) {
       std::cout << "vtkMath::Jacobi: Error extracting eigenfunctions" << std::endl;
+      if (n > 4) {
+        delete[] b;
+        delete[] z;
+      }      
       return 0;
     }
 

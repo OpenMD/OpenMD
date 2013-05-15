@@ -50,7 +50,6 @@ namespace OpenMD {
   class FluctuatingChargeConstraints {
   public:
     FluctuatingChargeConstraints(SimInfo* info);
-    ~FluctuatingChargeConstraints(){}
     void applyConstraints();
 
   protected:

@@ -267,6 +267,8 @@ namespace OpenMD {
         RealType proji = sqrt(r * 1.0e-12);
         Vector3d dcpidx(1.0 / proji,
                         0.0,
+
+                        // pickup the ball here!
                         
         dcpidx = 1.0_dp / proji
           dcpidy = 0.0_dp
