@@ -184,7 +184,7 @@ namespace OpenMD {
   void LangevinHullForceManager::postCalculation(){
   
     int nTriangles, thisFacet;
-    RealType area, thisArea, thisMass;
+    RealType area, thisArea;
     vector<Triangle> sMesh;
     Triangle thisTriangle;
     vector<Triangle>::iterator face;
@@ -200,8 +200,7 @@ namespace OpenMD {
 
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);
-    // Get total area and number of surface stunt doubles
-    area = surfaceMesh_->getArea();
+    // Get number of surface stunt doubles
     sMesh = surfaceMesh_->getMesh();
     nTriangles = sMesh.size();
 
@@ -219,7 +218,6 @@ namespace OpenMD {
       unitNormal = thisTriangle.getUnitNormal();
       centroid = thisTriangle.getCentroid();
       facetVel = thisTriangle.getFacetVelocity();
-      thisMass = thisTriangle.getFacetMass();
 
       langevinForce = V3Zero;
 

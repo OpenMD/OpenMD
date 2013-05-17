@@ -68,7 +68,6 @@ int main(int argc, char *argv []) {
   gengetopt_args_info args_info;
   std::string inputFileName;
   std::string outputFileName;
-  RealType temperature;
 
   // parse command line arguments
   if (cmdline_parser(argc, argv, &args_info) != 0)

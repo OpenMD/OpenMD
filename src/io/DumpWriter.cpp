@@ -310,7 +310,6 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
     RigidBody::AtomIterator ai;
-    Atom* atom;
 
 #ifndef IS_MPI
     os << "  <Snapshot>\n";
@@ -318,8 +317,8 @@ namespace OpenMD {
     writeFrameProperties(os, info_->getSnapshotManager()->getCurrentSnapshot());
 
     os << "    <StuntDoubles>\n";
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
       
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
            sd = mol->nextIntegrableObject(ii)) { 	
@@ -345,7 +344,7 @@ namespace OpenMD {
             
             RigidBody* rb = static_cast<RigidBody*>(sd);
             int siteIndex = 0;
-            for (atom = rb->beginAtom(ai); atom != NULL;  
+            for (Atom* atom = rb->beginAtom(ai); atom != NULL;  
                  atom = rb->nextAtom(ai)) { 	                                        
               os << prepareSiteLine(atom, ioIndex, siteIndex);
               siteIndex++;
@@ -447,7 +446,7 @@ namespace OpenMD {
             
             RigidBody* rb = static_cast<RigidBody*>(sd);
             int siteIndex = 0;
-            for (atom = rb->beginAtom(ai); atom != NULL;  
+            for (Atom* atom = rb->beginAtom(ai); atom != NULL;  
                  atom = rb->nextAtom(ai)) { 	                                        
               buffer += prepareSiteLine(atom, ioIndex, siteIndex);
               siteIndex++;

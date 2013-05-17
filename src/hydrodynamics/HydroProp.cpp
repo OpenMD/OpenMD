@@ -46,9 +46,7 @@
 
 namespace OpenMD {
   
-  HydroProp::HydroProp(){    
-    hasCOR = false;
-    hasXi = false;
+  HydroProp::HydroProp() : hasCOR(false), hasXi(false) {    
   }
   
   HydroProp::HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D) : cor_(cor), 
@@ -57,7 +55,8 @@ namespace OpenMD {
                                                               hasXi(true) {
   }
   
-  HydroProp::HydroProp(const std::string &frictionLine) {
+  HydroProp::HydroProp(const std::string &frictionLine) : hasCOR(false),
+                                                          hasXi(false) {
     
     StringTokenizer tokenizer(frictionLine);
     if (tokenizer.countTokens() >= 40) {
@@ -66,6 +65,8 @@ namespace OpenMD {
       cor_[1] = tokenizer.nextTokenAsDouble();
       cor_[2] = tokenizer.nextTokenAsDouble();
       
+      hasCOR = true;
+
       Xitt_(0,0) = tokenizer.nextTokenAsDouble();
       Xitt_(0,1) = tokenizer.nextTokenAsDouble();
       Xitt_(0,2) = tokenizer.nextTokenAsDouble();
@@ -110,6 +111,8 @@ namespace OpenMD {
       Xi_.setSubMatrix(0, 3, Xirt_);
       Xi_.setSubMatrix(3, 0, Xitr_);
       Xi_.setSubMatrix(3, 3, Xirr_);
+
+      hasXi = true;
 
       CholeskyDecomposition(Xi_, S_);            
 

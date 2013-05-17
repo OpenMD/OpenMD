@@ -61,8 +61,7 @@ namespace OpenMD {
   public: 
     RestReader(SimInfo* info, const std::string &filename, 
                            std::vector<int> stuntDoubleIndex) 
-      : info_(info), filename_(filename){
-      stuntDoubleIndex_ = stuntDoubleIndex;
+      : info_(info), filename_(filename), stuntDoubleIndex_(stuntDoubleIndex) {
 #ifdef IS_MPI 
       
       if (worldRank == 0) { 

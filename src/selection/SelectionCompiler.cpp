@@ -177,7 +177,7 @@ namespace OpenMD {
 	continue;
       }
 
-      if (ltoken.size() == 0) {
+      if (ltoken.empty()) {
 	return commandExpected();
       }
         

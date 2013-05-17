@@ -128,7 +128,7 @@ namespace OpenMD {
   } 
    
   void DumpReader::scanFile(void) { 
-    int lineNo = 0; 
+
     std::streampos prevPos;
     std::streampos  currPos; 
     
@@ -142,6 +142,7 @@ namespace OpenMD {
       bool foundOpenSnapshotTag = false;
       bool foundClosedSnapshotTag = false;
 
+      int lineNo = 0; 
       while(inFile_->getline(buffer, bufferSize)) {
         ++lineNo;
         

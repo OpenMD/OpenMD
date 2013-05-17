@@ -83,14 +83,12 @@ namespace OpenMD {
     std::vector<Atom*> getAtoms() { return cutoffAtomList; }
     RealType getMass() {
       std::vector<Atom *>::iterator i;
-      Atom * atom;
-      RealType mass;
       
       if (!haveTotalMass) {
 	totalMass = 0;
         
-	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
-	  mass = atom->getMass();
+	for(Atom* atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+	  RealType mass = atom->getMass();
 	  totalMass += mass;
 	}
         

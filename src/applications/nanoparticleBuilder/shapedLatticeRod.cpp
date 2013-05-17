@@ -82,7 +82,7 @@ namespace OpenMD {
    */ 
   bool shapedLatticeRod::isInterior(Vector3d point){
 
-    RealType x, y, z, distance, delta_z;
+    RealType x, y, z, distance;
 
     distance = 0;
     
@@ -91,7 +91,7 @@ namespace OpenMD {
     z = point[2];
     
     if ( abs(z) >= rodLength_/2.0 ) {
-      delta_z = abs(z) - rodLength_/2.0;
+      RealType delta_z = abs(z) - rodLength_/2.0;
       distance = sqrt((x*x) + (y*y) + (delta_z*delta_z));
     } else {
       distance = sqrt((x*x) + (y*y)); 

@@ -53,11 +53,11 @@
 #include "brains/Register.hpp"
 #include "lattice/LatticeFactory.hpp"
 
+using namespace std;
 namespace OpenMD{
-  shapedLattice::shapedLattice(RealType latticeConstant, 
-                               std::string latticeType) {
-    latticeConstant_ = latticeConstant;
-    latticeType_ = latticeType;
+  shapedLattice::shapedLattice(RealType latticeConstant, string latticeType) 
+  : latticeConstant_(latticeConstant), latticeType_(latticeType) {
+
     registerLattice();
     simpleLattice_ = LatticeFactory::getInstance()->createLattice(latticeType);
     if (simpleLattice_ == NULL){

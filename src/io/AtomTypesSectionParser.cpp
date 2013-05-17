@@ -67,7 +67,7 @@ namespace OpenMD {
       std::string atomTypeName = tokenizer.nextToken();   
       std::string baseAtomTypeName = tokenizer.nextToken();
 
-      AtomType* baseAtomType = (AtomType*) (ff.getAtomType(baseAtomTypeName));
+      AtomType* baseAtomType = dynamic_cast<AtomType*>(ff.getAtomType(baseAtomTypeName));
 
       if (baseAtomType == NULL) {
 	sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Could not find matching base atom type to %s at line %d\n",

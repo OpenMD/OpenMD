@@ -57,10 +57,11 @@ namespace OpenMD {
 
     template<typename ContainterType>
     static void deletePointers(ContainterType& container) {
-      for (typename ContainterType::iterator i = container.begin(); i != container.end(); i++) {
+      for (typename ContainterType::iterator i = container.begin(); 
+           i != container.end(); ++i) {
 	delete *i;
       }
-                
+      
       container.clear();
     }
   };

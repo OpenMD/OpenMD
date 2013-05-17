@@ -63,8 +63,8 @@ namespace OpenMD {
 
   void CubicLattice::setLatticeConstant(const  std::vector<RealType>& lc){
   
-    if(lc.size() < 1){
-      std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
+    if(lc.empty()){
+      std::cerr << "CubicLattice::setLatticeConstant Error: the lattice constant vector is empty" << std::endl;
       exit(1);
     }
     else if (lc.size() > 1){

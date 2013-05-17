@@ -95,7 +95,7 @@ namespace OpenMD {
     const int bufferSize = 65535;
     char buffer[bufferSize];
     std::string token;
-    std::string line;
+
     int junk;
     Mat3x3d momInert;
     RealSphericalHarmonic* rsh;

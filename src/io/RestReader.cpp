@@ -68,7 +68,7 @@
 namespace OpenMD { 
 
   void RestReader::scanFile(){
-    int lineNo = 0; 
+
     std::streampos prevPos;
     std::streampos  currPos;
     
@@ -82,7 +82,7 @@ namespace OpenMD {
       prevPos = currPos;
       
       bool foundOpenSnapshotTag = false;
-      
+      int lineNo = 0;       
       while(!foundOpenSnapshotTag && inFile_->getline(buffer, bufferSize)) {
         ++lineNo;
         
@@ -368,7 +368,6 @@ namespace OpenMD {
         
       // is this io restrained?
       GenericData* data = sd->getPropertyByName("Restraint");
-      ObjectRestraint* oRest;
       
       if (data != NULL) {
         // make sure we can reinterpret the generic data as restraint data:
@@ -376,7 +375,7 @@ namespace OpenMD {
         if (restData != NULL) {
           // make sure we can reinterpet the restraint data as a pointer to
             // an ObjectRestraint:
-          oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
+          ObjectRestraint* oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
           if (oRest != NULL) {          
             if (sd->isDirectional()) {
               oRest->setReferenceStructure(pos, q.toRotationMatrix3());

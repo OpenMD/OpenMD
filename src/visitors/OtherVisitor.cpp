@@ -121,10 +121,9 @@ namespace OpenMD {
   //----------------------------------------------------------------------------//
 
   ReplicateVisitor::ReplicateVisitor(SimInfo *info, Vector3i opt) :
-    BaseVisitor() {
+    BaseVisitor(), replicateOpt(opt) {
       this->info = info;
       visitorName = "ReplicateVisitor";
-      this->replicateOpt = opt;
 
       //generate the replicate directions
       for( int i = 0; i <= replicateOpt[0]; i++ ) {
@@ -515,7 +514,7 @@ namespace OpenMD {
 	     atomInfo = atomData->nextAtomInfo(i) ) {
 	  atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
 	} 
-      }   
+      }
     } 
   }
 

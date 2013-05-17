@@ -149,8 +149,7 @@ namespace OpenMD{
   class Plan {
   public:
     
-    Plan<T>(MPI::Intracomm comm, int nObjects) {
-      myComm = comm;
+    Plan<T>(MPI::Intracomm comm, int nObjects) : myComm(comm) {
       int nCommProcs = myComm.Get_size();
       
       counts.resize(nCommProcs, 0);

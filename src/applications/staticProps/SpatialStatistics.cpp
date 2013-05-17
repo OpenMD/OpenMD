@@ -221,15 +221,13 @@ namespace OpenMD {
     int n = dat->accumulator[bin]->count();
     if (n == 0) return;
 
-    RealType r;
-    Vector3d v;
-
     if( dat->dataType == odtReal ) {
+      RealType r;
       dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
       if (isinf(r) || isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "SpatialStatistics detected a numerical error writing:\n"
-                 "\t%s for bin %d",
+                 "\t%s for bin %u",
                  dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
@@ -238,13 +236,14 @@ namespace OpenMD {
       os << "\t" << r;      
 
     } else if ( dat->dataType == odtVector3 ) {
+      Vector3d v;
       dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
       if (isinf(v[0]) || isnan(v[0]) || 
           isinf(v[1]) || isnan(v[1]) || 
           isinf(v[2]) || isnan(v[2]) ) {      
         sprintf( painCave.errMsg,
                  "SpatialStatistics detected a numerical error writing:\n"
-                 "\t%s for bin %d",
+                 "\t%s for bin %u",
                  dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
@@ -260,15 +259,13 @@ namespace OpenMD {
     int n = dat->accumulator[bin]->count();
     if (n == 0) return;
 
-    RealType r;
-    Vector3d v;
-
     if( dat->dataType == odtReal ) {
+      RealType r;
       dynamic_cast<Accumulator*>(dat->accumulator[bin])->getStdDev(r);      
       if (isinf(r) || isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "SpatialStatistics detected a numerical error writing:\n"
-                 "\tstandard deviation of %s for bin %d",
+                 "\tstandard deviation of %s for bin %u",
                  dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
@@ -277,13 +274,14 @@ namespace OpenMD {
       os << "\t" << r;      
 
     } else if ( dat->dataType == odtVector3 ) {
+      Vector3d v;
       dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getStdDev(v);
       if (isinf(v[0]) || isnan(v[0]) || 
           isinf(v[1]) || isnan(v[1]) || 
           isinf(v[2]) || isnan(v[2]) ) {      
         sprintf( painCave.errMsg,
                  "SpatialStatistics detected a numerical error writing:\n"
-                 "\tstandard deviation of %s for bin %d",
+                 "\tstandard deviation of %s for bin %u",
                  dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
@@ -349,11 +347,10 @@ namespace OpenMD {
 
   ShellStatistics::ShellStatistics(SimInfo* info, const string& filename, 
                                    const string& sele, int nbins) : 
-    SpatialStatistics(info, filename, sele, nbins){
+    SpatialStatistics(info, filename, sele, nbins), coordinateOrigin_(V3Zero) {
     
-    coordinateOrigin_ = V3Zero;
     binWidth_ = 1.0;
-
+    
     r_ = new OutputData;
     r_->units =  "Angstroms";
     r_->title =  "R";

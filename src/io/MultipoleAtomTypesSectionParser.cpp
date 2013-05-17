@@ -88,8 +88,7 @@ namespace OpenMD {
       std::string multipoleType = tokenizer.nextToken();
       RealType phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
       RealType theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-      RealType psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;        
-      nTokens -=  5;
+      RealType psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
 
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType == NULL) {
@@ -179,8 +178,8 @@ namespace OpenMD {
       quadrupoleMoments[1] = tokenizer.nextTokenAsDouble();
       quadrupoleMoments[2] = tokenizer.nextTokenAsDouble();
 
-      RealType trace =  quadrupoleMoments.sum();
-      
+      // RealType trace =  quadrupoleMoments.sum();
+      //
       // if (fabs(trace) > OpenMD::epsilon) {
       //   sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of quadrupole moments is not zero at line %d\n",
       //   	lineNo);

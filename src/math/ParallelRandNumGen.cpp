@@ -85,7 +85,6 @@ namespace OpenMD {
 
   ParallelRandNumGen::ParallelRandNumGen() {
 
-    std::vector<uint32> bigSeed;
     int nProcessors;
 #ifdef IS_MPI
     nProcessors = MPI::COMM_WORLD.Get_size();

@@ -90,8 +90,6 @@ namespace OpenMD {
 
   void GofZ::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
-    RealType thisZ;
-
     if (sd1 == sd2) {
       return;
     }
@@ -107,7 +105,7 @@ namespace OpenMD {
     RealType xydist = sqrt(distance*distance - z2);
 
     if (xydist < rC_) {
-      thisZ = abs(r12.z());
+      RealType thisZ = abs(r12.z());
       int whichBin = int(thisZ / deltaZ_);
       histogram_[whichBin] += 2;
     }

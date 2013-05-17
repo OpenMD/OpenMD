@@ -50,14 +50,15 @@
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
 
+using namespace std;
 namespace OpenMD {
 
   BondAngleDistribution::BondAngleDistribution(SimInfo* info, 
-                                              const std::string& filename, 
-                                              const std::string& sele,
-                                              double rCut, int nbins) : StaticAnalyser(info, filename), 
-                                              selectionScript_(sele), 
-			                                        evaluator_(info), seleMan_(info){
+                                               const string& filename, 
+                                               const string& sele, 
+                                               double rCut, int nbins) 
+  : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), 
+    seleMan_(info) {
     
     setOutputName(getPrefix(filename) + ".bad");
     
@@ -98,7 +99,6 @@ namespace OpenMD {
     StuntDouble* sd;
     Vector3d vec;
     std::vector<Vector3d> bondvec;
-    std::vector<RealType> bonddist;
     RealType r;    
     int nBonds;    
     int i;

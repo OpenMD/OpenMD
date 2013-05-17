@@ -77,14 +77,12 @@ namespace OpenMD {
     Vector3d trq;
     Vector3d EFfrc;				
     Vector3d pos;
-    RealType chrg;
-    RealType pot, fieldPot;
-    RealType chrgToKcal = 23.0609;
-    RealType debyeToKcal = 4.8018969509;
-
 
     if (doElectricField) {
-      fieldPot = 0.0;
+      const RealType chrgToKcal = 23.0609;
+      const RealType debyeToKcal = 4.8018969509;
+      RealType pot;
+      RealType fieldPot = 0.0;
 
       for (mol = info_->beginMolecule(i); mol != NULL; 
            mol = info_->nextMolecule(i)) {      
@@ -93,7 +91,7 @@ namespace OpenMD {
 	     atom = mol->nextAtom(j)) {
 
 	  bool isCharge = false;
-	  chrg = 0.0;
+	  RealType chrg = 0.0;
           
           AtomType* atype = atom->getAtomType();
           

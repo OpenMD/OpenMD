@@ -176,7 +176,6 @@ namespace OpenMD {
     std::vector<RealType> q2;
     std::vector<ComplexType> w;
     std::vector<ComplexType> w_hat;
-    std::map<std::pair<int,int>,ComplexType> QBar;
     std::vector<RealType> Q2;
     std::vector<RealType> Q;
     std::vector<ComplexType> W;

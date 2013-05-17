@@ -68,9 +68,7 @@ ComplexType SphericalHarmonic::getValueAt(RealType costheta, RealType phi) {
 //
 RealType SphericalHarmonic::LegendreP(int l,int m, RealType x) {
 
-  RealType temp1, temp2, temp3, temp4, result;
-  RealType temp5;
-  int i, ll;
+  RealType result;
   
   if (fabs(x) > 1.0) {
     printf("LegendreP: x out of range: l = %d\tm = %d\tx = %lf\n", l, m, x);
@@ -86,12 +84,13 @@ RealType SphericalHarmonic::LegendreP(int l,int m, RealType x) {
     printf("LegendreP: m < 0: l = %d\tm = %d\tx = %lf\n", l, m, x);
     return std::numeric_limits <RealType>:: quiet_NaN();
   } else {
+    RealType temp1, temp2, temp3, temp4, temp5;
     temp3=1.0;
     
     if (m>0) {
       temp1=sqrt(1.0-pow(x,2));
       temp5 = 1.0;
-      for (i=1;i<=m;++i) {
+      for (int i=1;i<=m;++i) {
         temp3 *= -temp5*temp1;
         temp5 += 2.0;
       }
@@ -103,7 +102,7 @@ RealType SphericalHarmonic::LegendreP(int l,int m, RealType x) {
       if (l==(m+1)) {
         result = temp4;
       } else {
-        for (ll=(m+2);ll<=l;++ll) {
+        for (int ll=(m+2);ll<=l;++ll) {
           temp2 = (x*(2.*ll-1.)*temp4-(ll+m-1.)*temp3)/(RealType)(ll-m);
           temp3=temp4;
           temp4=temp2;

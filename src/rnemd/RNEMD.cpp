@@ -1597,9 +1597,6 @@ namespace OpenMD {
 
     Vector3d ac, acrec, bc, bcrec;
     Vector3d ah, ahrec, bh, bhrec;
-    RealType cNumerator, cDenominator;
-    RealType hNumerator, hDenominator;
-
 
     bool successfulExchange = false;
     if ((Mh > 0.0) && (Mc > 0.0)) {//both slabs are not empty
@@ -1614,7 +1611,7 @@ namespace OpenMD {
       bc  = -(Ici * angularMomentumTarget_) + omegac;
       bcrec = bc - omegac;
       
-      cNumerator = Kc - kineticTarget_;
+      RealType cNumerator = Kc - kineticTarget_;
       if (doLinearPart) 
         cNumerator -= 0.5 * Mc * ac.lengthSquare();
       
@@ -1623,7 +1620,7 @@ namespace OpenMD {
 
       if (cNumerator > 0.0) {
         
-        cDenominator = Kc;
+        RealType cDenominator = Kc;
 
         if (doLinearPart)
           cDenominator -= 0.5 * Mc * vc.lengthSquare();
@@ -1646,7 +1643,7 @@ namespace OpenMD {
             bh  = (Ihi * angularMomentumTarget_) + omegah;
             bhrec = bh - omegah;
             
-            hNumerator = Kh + kineticTarget_;
+            RealType hNumerator = Kh + kineticTarget_;
             if (doLinearPart) 
               hNumerator -= 0.5 * Mh * ah.lengthSquare();
             
@@ -1655,7 +1652,7 @@ namespace OpenMD {
               
             if (hNumerator > 0.0) {
               
-              hDenominator = Kh;
+              RealType hDenominator = Kh;
               if (doLinearPart) 
                 hDenominator -= 0.5 * Mh * vh.lengthSquare();
               if (doAngularPart)

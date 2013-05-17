@@ -510,11 +510,6 @@ namespace OpenMD {
   
 #ifdef IS_MPI
   void SimCreator::divideMolecules(SimInfo *info) {
-    RealType numerator;
-    RealType denominator;
-    RealType precast;
-    RealType x;
-    RealType y;
     RealType a;
     int nProcessors;
     std::vector<int> atomsPerProc;
@@ -556,9 +551,9 @@ namespace OpenMD {
     atomsPerProc.insert(atomsPerProc.end(), nProcessors, 0);
     
     if (worldRank == 0) {
-      numerator = info->getNGlobalAtoms();
-      denominator = nProcessors;
-      precast = numerator / denominator;
+      RealType numerator = info->getNGlobalAtoms();
+      RealType denominator = nProcessors;
+      RealType precast = numerator / denominator;
       int nTarget = (int)(precast + 0.5);
       
       for(int i = 0; i < nGlobalMols; i++) {
@@ -624,8 +619,8 @@ namespace OpenMD {
           //           Pacc(x) = exp(- a * x)
           // where a = penalty / (average atoms per molecule)
           
-          x = (RealType)(new_atoms - nTarget);
-          y = myRandom->rand();
+          RealType x = (RealType)(new_atoms - nTarget);
+          RealType y = myRandom->rand();
           
           if (y < exp(- a * x)) {
             molToProcMap[i] = which_proc;

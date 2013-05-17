@@ -182,7 +182,16 @@ namespace OpenMD {
         eS2 = eX2;
         eE2 = eX2;
         dw2 = 1.0;
-      } 
+      } else {
+        sprintf( painCave.errMsg,
+                 "GB::addType found an atomType (%s) that does not\n"
+                 "\tappear to be a Gay-Berne or Lennard-Jones atom.\n",
+                 atype2->getName().c_str());
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+
                        
       GBInteractionData mixer1, mixer2;     
       

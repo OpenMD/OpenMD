@@ -78,18 +78,11 @@ int main(int argc, char *argv []) {
   std::string latticeType;
   std::string inputFileName;
   std::string outputFileName;
-
   MoLocator* locator;
   int nComponents;
   double latticeConstant;
-  std::vector<double> lc;
-
   RealType particleRadius;
-
   Mat3x3d hmat;
-  std::vector<Vector3d> latticePos;
-  std::vector<Vector3d> latticeOrt;
- 
   DumpWriter *writer;
   
   // Parse Command Line Arguments
@@ -200,7 +193,6 @@ int main(int argc, char *argv []) {
   std::vector<Component*> components = simParams->getComponents();
   std::vector<RealType> molFractions;
   std::vector<RealType> shellRadii;
-  std::vector<RealType> molecularMasses;
   std::vector<int> nMol;
   std::map<int, int> componentFromSite;
   nComponents = components.size();
