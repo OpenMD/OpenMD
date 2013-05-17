@@ -41,6 +41,7 @@
  */
 
 #include "clusters/Decahedron.hpp"
+#include <math.h>
 
 using namespace std;
 

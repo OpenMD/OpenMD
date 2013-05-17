@@ -194,11 +194,11 @@ int main(int argc, char *argv []) {
   Vector3d boxMax;
   Vector3d boxMin;
 
-  for (int n = 0; n < Points.size(); n++) {
+  for (unsigned int n = 0; n < Points.size(); n++) {
     mol = NewInfo->getMoleculeByGlobalIndex(l);
     Vector3d location = Points[n] * latticeConstant;
     Vector3d orientation = Vector3d(0, 0, 1.0);
-
+    
     if (n == 0) {
       boxMax = location;
       boxMin = location;

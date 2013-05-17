@@ -1737,10 +1737,19 @@ namespace OpenMD {
            sd = seleManA_.nextSelected(isd)) {
         aSites.push_back(sd);
       }
+#if defined(HAVE_QHULL)
       ConvexHull* surfaceMeshA = new ConvexHull();
       surfaceMeshA->computeHull(aSites);
       areaA = surfaceMeshA->getArea();
       delete surfaceMeshA;
+#else
+      sprintf( painCave.errMsg,
+               "RNEMD::getDividingArea : Hull calculation is not possible\n"
+               "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+#endif
 
     } else {
       if (usePeriodicBoundaryConditions_) {
@@ -1755,8 +1764,6 @@ namespace OpenMD {
       }
     }
 
-
-
     if (hasSelectionB_) {
       int isd;
       StuntDouble* sd;
@@ -1766,10 +1773,21 @@ namespace OpenMD {
            sd = seleManB_.nextSelected(isd)) {
         bSites.push_back(sd);
       }
+
+#if defined(HAVE_QHULL)
       ConvexHull* surfaceMeshB = new ConvexHull();    
       surfaceMeshB->computeHull(bSites);
       areaB = surfaceMeshB->getArea();
       delete surfaceMeshB;
+#else
+      sprintf( painCave.errMsg,
+               "RNEMD::getDividingArea : Hull calculation is not possible\n"
+               "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+#endif
+
 
     } else {
       if (usePeriodicBoundaryConditions_) {

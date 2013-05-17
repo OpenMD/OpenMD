@@ -184,7 +184,7 @@ namespace OpenMD {
   void LangevinHullForceManager::postCalculation(){
   
     int nTriangles, thisFacet;
-    RealType area, thisArea;
+    RealType thisArea;
     vector<Triangle> sMesh;
     Triangle thisTriangle;
     vector<Triangle>::iterator face;

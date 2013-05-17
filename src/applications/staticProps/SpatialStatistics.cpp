@@ -43,6 +43,10 @@
 #include "applications/staticProps/SpatialStatistics.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
 
 namespace OpenMD {
   

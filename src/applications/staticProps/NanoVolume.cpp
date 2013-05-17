@@ -47,8 +47,10 @@
  */
 
 #include "applications/staticProps/NanoVolume.hpp"
+#if defined(HAVE_QHULL)
 #include "math/ConvexHull.hpp"
 #include "math/AlphaHull.hpp"
+#endif
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -83,10 +85,8 @@ void NanoVolume::process() {
   Vector3d vec;
   int i,j;
 
-#ifdef HAVE_QHULL
    //ConvexHull* thishull = new ConvexHull();
    AlphaHull* thishull = new AlphaHull(2.0);
-#endif
 
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();
@@ -155,7 +155,6 @@ void NanoVolume::process() {
   sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
   painCave.isFatal = 1;
   simError();  
-
 #endif
 
 }

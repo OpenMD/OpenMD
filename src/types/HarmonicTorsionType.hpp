@@ -43,6 +43,10 @@
 #ifndef TYPES_HARMONICTORSIONTYPE_HPP
 #define TYPES_HARMONICTORSIONTYPE_HPP
 
+#if defined(_MSC_VER)
+#define copysign _copysign
+#endif
+
 namespace OpenMD {
 
   /**
