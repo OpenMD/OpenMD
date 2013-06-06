@@ -71,6 +71,7 @@ namespace OpenMD {
     esm_SWITCHING_FUNCTION,
     esm_SHIFTED_POTENTIAL,
     esm_SHIFTED_FORCE,
+    esm_TAYLOR_SHIFTED,
     esm_REACTION_FIELD,
     esm_EWALD_FULL,  /**< Ewald methods aren't supported yet */
     esm_EWALD_PME,   /**< Ewald methods aren't supported yet */
@@ -119,11 +120,9 @@ namespace OpenMD {
     RealType pre14_;
     RealType pre24_;
     RealType pre44_;
-    RealType v01, v02;
-    RealType v11, v12, v13;
-    RealType v21, v22, v23, v24;
-    RealType v31, v32, v33, v34, v35;
-    RealType v41, v42, v43, v44, v45, v46;
+    RealType v01, v11, v21, v22, v31, v32, v41, v42, v43;
+    RealType dv01, dv11, dv21, dv22, dv31, dv32, dv41, dv42, dv43;
+    RealType v01or, v11or, v21or, v22or, v31or, v32or, v41or, v42or, v43or;
     RealType chargeToC_;
     RealType angstromToM_;
     RealType debyeToCm_;
@@ -138,25 +137,26 @@ namespace OpenMD {
     RealType selfMult_;
 
     CubicSpline* v01s;
-    CubicSpline* v02s;
     CubicSpline* v11s;
-    CubicSpline* v12s;
-    CubicSpline* v13s;
     CubicSpline* v21s;
     CubicSpline* v22s;
-    CubicSpline* v23s;
-    CubicSpline* v24s;
     CubicSpline* v31s;
     CubicSpline* v32s;
-    CubicSpline* v33s;
-    CubicSpline* v34s;
-    CubicSpline* v35s;
     CubicSpline* v41s;
     CubicSpline* v42s;
     CubicSpline* v43s;
-    CubicSpline* v44s;
-    CubicSpline* v45s;
-    CubicSpline* v46s;    
+
+    /*
+    CubicSpline* dv01s;
+    CubicSpline* dv11s;
+    CubicSpline* dv21s;
+    CubicSpline* dv22s;
+    CubicSpline* dv31s;
+    CubicSpline* dv32s;
+    CubicSpline* dv41s;
+    CubicSpline* dv42s;
+    CubicSpline* dv43s;
+    */
   };
 }
 

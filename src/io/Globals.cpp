@@ -228,7 +228,8 @@ namespace OpenMD {
     CheckParameter(CutoffMethod, isEqualIgnoreCase("HARD") || 
                    isEqualIgnoreCase("SWITCHED") || 
                    isEqualIgnoreCase("SHIFTED_POTENTIAL") || 
-                   isEqualIgnoreCase("SHIFTED_FORCE"));
+                   isEqualIgnoreCase("SHIFTED_FORCE") || 
+                   isEqualIgnoreCase("TAYLOR_SHIFTED"));
     CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || 
                    isEqualIgnoreCase("MAX") || 
                    isEqualIgnoreCase("TRADITIONAL"));
@@ -236,7 +237,8 @@ namespace OpenMD {
                    isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || 
                    isEqualIgnoreCase("SHIFTED_POTENTIAL") || 
                    isEqualIgnoreCase("SHIFTED_FORCE") || 
-                   isEqualIgnoreCase("REACTION_FIELD"));
+                   isEqualIgnoreCase("REACTION_FIELD") || 
+                   isEqualIgnoreCase("TAYLOR_SHIFTED"));
     CheckParameter(ElectrostaticScreeningMethod, 
                    isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
     CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || 

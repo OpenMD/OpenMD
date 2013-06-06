@@ -188,7 +188,7 @@ void CubicSpline::generate() {
   return;
 }
 
-RealType CubicSpline::getValueAt(RealType t) {
+RealType CubicSpline::getValueAt(const RealType& t) {
   // Evaluate the spline at t using coefficients 
   //
   // Input parameters
@@ -227,7 +227,46 @@ RealType CubicSpline::getValueAt(RealType t) {
 }
 
 
-pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
+void CubicSpline::getValueAt(const RealType& t, RealType& v) {
+  // Evaluate the spline at t using coefficients 
+  //
+  // Input parameters
+  //   t = point where spline is to be evaluated.
+  // Output:
+  //   value of spline at t.
+  
+  if (!generated) generate();
+  
+  assert(t > data_.front().first);
+  assert(t < data_.back().first);
+
+  //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
+  //  to t.
+
+  if (isUniform) {    
+    
+    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
+
+  } else { 
+
+    j = n-1;
+    
+    for (int i = 0; i < n; i++) {
+      if ( t < data_[i].first ) {
+        j = i-1;
+        break;
+      }      
+    }
+  }
+  
+  //  Evaluate the cubic polynomial.
+  
+  dt = t - data_[j].first;
+  v = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));  
+}
+
+
+pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(const RealType& t){
   // Evaluate the spline and first derivative at t using coefficients 
   //
   // Input parameters
@@ -264,7 +303,46 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
   dt = t - data_[j].first;
 
   yval = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
-  dydx = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]);
-  
+  dydx = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]); 
+
   return make_pair(yval, dydx);
+}
+
+void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v, 
+                                          RealType &dv) {
+  // Evaluate the spline and first derivative at t using coefficients 
+  //
+  // Input parameters
+  //   t = point where spline is to be evaluated.
+
+  if (!generated) generate();
+  
+  assert(t > data_.front().first);
+  assert(t < data_.back().first);
+
+  //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
+  //  to t.
+
+  if (isUniform) {    
+    
+    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
+
+  } else { 
+
+    j = n-1;
+    
+    for (int i = 0; i < n; i++) {
+      if ( t < data_[i].first ) {
+        j = i-1;
+        break;
+      }      
+    }
+  }
+  
+  //  Evaluate the cubic polynomial.
+  
+  dt = t - data_[j].first;
+
+  v = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
+  dv = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]); 
 }

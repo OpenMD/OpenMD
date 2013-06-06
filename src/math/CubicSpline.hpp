@@ -56,8 +56,10 @@ namespace OpenMD {
     virtual ~CubicSpline() {} 
     void addPoint(const RealType xp, const RealType yp);
     void addPoints(const vector<RealType>& xps, const vector<RealType>& yps);
-    RealType getValueAt(RealType t);
-    pair<RealType, RealType> getValueAndDerivativeAt(RealType t);
+    RealType getValueAt(const RealType& t);
+    pair<RealType, RealType> getValueAndDerivativeAt(const RealType& t);
+    void getValueAt(const RealType& t, RealType& v);
+    void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
     
   private:
     void generate();

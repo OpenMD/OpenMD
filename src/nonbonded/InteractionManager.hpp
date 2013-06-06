@@ -60,6 +60,16 @@ using namespace std;
 
 namespace OpenMD {
 
+  const static int ELECTROSTATIC_PAIR  = (1 << 0);  
+  const static int LJ_PAIR             = (1 << 1);
+  const static int EAM_PAIR            = (1 << 2);
+  const static int SC_PAIR             = (1 << 3);
+  const static int STICKY_PAIR         = (1 << 4);
+  const static int GB_PAIR             = (1 << 5);
+  const static int MORSE_PAIR          = (1 << 6);
+  const static int REPULSIVEPOWER_PAIR = (1 << 7);
+  const static int MAW_PAIR            = (1 << 8);
+
   /**
    * @class InteractionManager 
    * InteractionManager is responsible for
@@ -106,7 +116,9 @@ namespace OpenMD {
      * natural data structures are a map between the pair, and a set
      * of non-bonded interactions.
      */
-    map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;    
+    map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
+    map<pair<AtomType*, AtomType*>, int> iHash_;
+
   };
 }
 #endif

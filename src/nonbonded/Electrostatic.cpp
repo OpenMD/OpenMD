@@ -75,6 +75,7 @@ namespace OpenMD {
     summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;
     summationMap_["SHIFTED_POTENTIAL"]  = esm_SHIFTED_POTENTIAL; 
     summationMap_["SHIFTED_FORCE"]      = esm_SHIFTED_FORCE;     
+    summationMap_["TAYLOR_SHIFTED"]     = esm_TAYLOR_SHIFTED;     
     summationMap_["REACTION_FIELD"]     = esm_REACTION_FIELD;    
     summationMap_["EWALD_FULL"]         = esm_EWALD_FULL;        
     summationMap_["EWALD_PME"]          = esm_EWALD_PME;         
@@ -107,7 +108,7 @@ namespace OpenMD {
     debyeToCm_ = 3.33564095198e-30;
     
     // Default number of points for electrostatic splines
-    np_ = 140;
+    np_ = 100;
     
     // variables to handle different summation methods for long-range 
     // electrostatics:
@@ -129,8 +130,9 @@ namespace OpenMD {
                  "Electrostatic::initialize: Unknown electrostaticSummationMethod.\n"
                  "\t(Input file specified %s .)\n"
                  "\telectrostaticSummationMethod must be one of: \"hard\",\n"
-                 "\t\"shifted_potential\", \"shifted_force\", or \n"
-                 "\t\"reaction_field\".\n", myMethod.c_str() );
+                 "\t\"shifted_potential\", \"shifted_force\",\n"
+                 "\t\"taylor_shifted\", or \"reaction_field\".\n", 
+                 myMethod.c_str() );
         painCave.isFatal = 1;
         simError();
       }
@@ -234,6 +236,8 @@ namespace OpenMD {
     
     RealType r = cutoffRadius_;
     RealType r2 = r * r;
+    RealType ric = 1.0 / r;
+    RealType ric2 = ric * ric;
 
     if (screeningMethod_ == DAMPED) {      
       a2 = dampingAlpha_ * dampingAlpha_;
@@ -265,16 +269,17 @@ namespace OpenMD {
     db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
     db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;
     
+
     // working variables for the splines:
     RealType ri, ri2;
     RealType b0, b1, b2, b3, b4, b5;
     RealType db0_1, db0_2, db0_3, db0_4, db0_5;
-    RealType f0;
-    RealType g0, g1, g2, g3, g4;
-    RealType h1, h2, h3, h4;
-    RealType s2, s3, s4;
-    RealType t3, t4;
-    RealType u4;
+    RealType f, fc, f0;
+    RealType g, gc, g0, g1, g2, g3, g4;
+    RealType h, hc, h1, h2, h3, h4;
+    RealType s, sc, s2, s3, s4;
+    RealType t, tc, t3, t4;
+    RealType u, uc, u4;
 
     // working variables for Taylor expansion:
     RealType rmRc, rmRc2, rmRc3, rmRc4;
@@ -294,11 +299,19 @@ namespace OpenMD {
 
     // Storage vectors for the computed functions    
     vector<RealType> rv;
-    vector<RealType> v01v, v02v;
-    vector<RealType> v11v, v12v, v13v;
-    vector<RealType> v21v, v22v, v23v, v24v;
-    vector<RealType> v31v, v32v, v33v, v34v, v35v;
-    vector<RealType> v41v, v42v, v43v, v44v, v45v, v46v;
+    vector<RealType> v01v;
+    vector<RealType> v11v;
+    vector<RealType> v21v, v22v;
+    vector<RealType> v31v, v32v;
+    vector<RealType> v41v, v42v, v43v;
+
+    /*
+    vector<RealType> dv01v;
+    vector<RealType> dv11v;
+    vector<RealType> dv21v, dv22v;
+    vector<RealType> dv31v, dv32v;
+    vector<RealType> dv41v, dv42v, dv43v;
+    */
 
     for (int i = 1; i < np_ + 1; i++) {
       r = RealType(i) * dx;
@@ -340,106 +353,185 @@ namespace OpenMD {
       db0_4 =          3.0*b2   - 6.0*r2*b3     + r2*r2*b4;
       db0_5 =                    -15.0*r*b3 + 10.0*r2*r*b4 - r2*r2*r*b5;
 
+      f = b0;
+      fc = b0c;
+      f0 = f - fc - rmRc*db0c_1;
+
+      g = db0_1;        
+      gc = db0c_1;
+      g0 = g - gc;
+      g1 = g0 - rmRc *db0c_2;
+      g2 = g1 - rmRc2*db0c_3;
+      g3 = g2 - rmRc3*db0c_4;
+      g4 = g3 - rmRc4*db0c_5;
+
+      h = db0_2;      
+      hc = db0c_2;
+      h1 = h - hc;
+      h2 = h1 - rmRc *db0c_3;
+      h3 = h2 - rmRc2*db0c_4;
+      h4 = h3 - rmRc3*db0c_5;
+
+      s = db0_3;      
+      sc = db0c_3;
+      s2 = s - sc;
+      s3 = s2 - rmRc *db0c_4;
+      s4 = s3 - rmRc2*db0c_5;
+
+      t = db0_4;      
+      tc = db0c_4;
+      t3 = t - tc;
+      t4 = t3 - rmRc *db0c_5;
+      
+      u = db0_5;         
+      uc = db0c_5;
+      u4 = u - uc;
+
+      // in what follows below, the various v functions are used for
+      // potentials and torques, while the w functions show up in the
+      // forces.
 
       switch (summationMethod_) {
       case esm_SHIFTED_FORCE:
-        f0 = b0 - b0c - rmRc*db0c_1;
+                
+        v01 = f - fc - rmRc*gc;
+        v11 = g - gc - rmRc*hc;
+        v21 = g*ri - gc*ric - rmRc*(hc - gc*ric)*ric;
+        v22 = h - g*ri - (hc - gc*ric) - rmRc*(sc - (hc - gc*ric)*ric);
+        v31 = (h-g*ri)*ri - (hc-g*ric)*ric - rmRc*(sc-2.0*(hc-gc*ric)*ric)*ric;
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric) 
+          - rmRc*(tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2 
+          - rmRc*(sc - 3.0*(hc-gc*ric)*ric)*ric2;
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric 
+          - rmRc*(tc - (4.0*sc - 9.0*(hc - gc*ric)*ric)*ric)*ric;
         
-        g0 = db0_1 - db0c_1;
-        g1 = g0 - rmRc *db0c_2;
-        g2 = g1 - rmRc2*db0c_3;
-        g3 = g2 - rmRc3*db0c_4;
-        g4 = g3 - rmRc4*db0c_5;
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+          - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric)
+          - rmRc*(uc-3.0*(2.0*tc - (7.0*sc - 15.0*(hc - gc*ric)*ric)*ric)*ric);
+
+        dv01 = g - gc;
+        dv11 = h - hc;
+        dv21 = (h - g*ri)*ri - (hc - gc*ric)*ric;
+        dv22 = (s - (h - g*ri)*ri) - (sc - (hc - gc*ric)*ric);        
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri - (sc - 2.0*(hc-gc*ric)*ric)*ric;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri) 
+          - (tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2 - (sc - 3.0*(hc - gc*ric)*ric)*ric2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri 
+          - (tc - (4.0*sc - 9.0*(hc-gc*ric)*ric)*ric)*ric; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri)
+          - (uc - 3.0*(2.0*tc - (7.0*sc - 15.0*(hc - gc*ric)*ric)*ric)*ric);
         
-        h1 = db0_2 - db0c_2;
-        h2 = h1 - rmRc *db0c_3;
-        h3 = h2 - rmRc2*db0c_4;
-        h4 = h3 - rmRc3*db0c_5;
+        break;
+
+      case esm_TAYLOR_SHIFTED:
         
-        s2 = db0_3 - db0c_3;
-        s3 = s2 - rmRc *db0c_4;
-        s4 = s3 - rmRc2*db0c_5;
-        
-        t3 = db0_4 - db0c_4;
-        t4 = t3 - rmRc *db0c_5;
-        
-        u4 = db0_5 - db0c_5;
+        v01 = f0;
+        v11 = g1;
+        v21 = g2 * ri;
+        v22 = h2 - v21;
+        v31 = (h3 - g3 * ri) * ri;
+        v32 = s3 - 3.0*v31;
+        v41 = (h4 - g4 * ri) * ri2;
+        v42 = s4 * ri - 3.0*v41;
+        v43 = t4 - 6.0*v42 - 3.0*v41;
+
+        dv01 = g0;
+        dv11 = h1;
+        dv21 = (h2 - g2*ri)*ri;
+        dv22 = (s2 - (h2 - g2*ri)*ri);
+        dv31 = (s3 - 2.0*(h3-g3*ri)*ri)*ri;
+        dv32 = (t3 - 3.0*(s3-2.0*(h3-g3*ri)*ri)*ri); 
+        dv41 = (s4 - 3.0*(h4 - g4*ri)*ri)*ri2;
+        dv42 = (t4 - (4.0*s4 - 9.0*(h4-g4*ri)*ri)*ri)*ri; 
+        dv43 = (u4 - 3.0*(2.0*t4 - (7.0*s4 - 15.0*(h4 - g4*ri)*ri)*ri)*ri);
+
         break;
 
       case esm_SHIFTED_POTENTIAL:
-        f0 = b0 - b0c;
-        
-        g0 = db0_1;
-        g1 = db0_1 - db0c_1;
-        g2 = g1 - rmRc *db0c_2;
-        g3 = g2 - rmRc2*db0c_3;
-        g4 = g3 - rmRc3*db0c_4;
 
-        h1 = db0_2;
-        h2 = db0_2 - db0c_2;
-        h3 = h2 - rmRc *db0c_3;
-        h4 = h3 - rmRc2*db0c_4;
-        
-        s2 = db0_3;
-        s3 = db0_3 - db0c_3;
-        s4 = s3 - rmRc *db0c_4;
+        v01 = f - fc;
+        v11 = g - gc;
+        v21 = g*ri - gc*ric;
+        v22 = h - g*ri - (hc - gc*ric);
+        v31 = (h-g*ri)*ri - (hc-g*ric)*ric;
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+          - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric);
 
-        t3 = db0_4;
-        t4 = db0_4 - db0c_4;
-        
-        u4 = db0_5;
+        dv01 = g;
+        dv11 = h;
+        dv21 = (h - g*ri)*ri;
+        dv22 = (s - (h - g*ri)*ri);
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
+
         break;
 
       case esm_SWITCHING_FUNCTION:
       case esm_HARD:
-        f0 = b0;
-        
-        g0 = db0_1;
-        g1 = g0;
-        g2 = g1;
-        g3 = g2;
-        g4 = g3;
-        
-        h1 = db0_2;
-        h2 = h1;
-        h3 = h2;
-        h4 = h3;
-        
-        s2 = db0_3;
-        s3 = s2;
-        s4 = s3;
-        
-        t3 = db0_4;
-        t4 = t3;
-        
-        u4 = db0_5;
+
+        v01 = f;
+        v11 = g;
+        v21 = g*ri;
+        v22 = h - g*ri;
+        v31 = (h-g*ri)*ri;
+        v32 = (s - 3.0*(h-g*ri)*ri);
+        v41 = (h - g*ri)*ri2; 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri;        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri);
+
+        dv01 = g;
+        dv11 = h;
+        dv21 = (h - g*ri)*ri;
+        dv22 = (s - (h - g*ri)*ri);
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
+
         break;
 
       case esm_REACTION_FIELD:
-
+        
         // following DL_POLY's lead for shifting the image charge potential:
-        f0 = b0  + preRF_ * r2
-          - (b0c + preRF_ * cutoffRadius_ * cutoffRadius_);
+        f = b0 + preRF_ * r2;
+        fc = b0c + preRF_ * cutoffRadius_ * cutoffRadius_;
 
-        g0 = db0_1 + preRF_ * 2.0 * r;
-        g1 = g0;
-        g2 = g1;
-        g3 = g2;
-        g4 = g3;
- 
-        h1 = db0_2 + preRF_ * 2.0;
-        h2 = h1;
-        h3 = h2;
-        h4 = h3;
+        g = db0_1 + preRF_ * 2.0 * r;        
+        gc = db0c_1 + preRF_ * 2.0 * cutoffRadius_;
 
-        s2 = db0_3;
-        s3 = s2;
-        s4 = s3;
-        
-        t3 = db0_4;
-        t4 = t3;
-        
-        u4 = db0_5;        
+        h = db0_2 + preRF_ * 2.0;
+        hc = db0c_2 + preRF_ * 2.0;
+
+        v01 = f - fc;
+        v11 = g - gc;
+        v21 = g*ri - gc*ric;
+        v22 = h - g*ri - (hc - gc*ric);
+        v31 = (h-g*ri)*ri - (hc-g*ric)*ric;
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+          - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric);
+
+        dv01 = g;
+        dv11 = h;
+        dv21 = (h - g*ri)*ri;
+        dv22 = (s - (h - g*ri)*ri);
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
+
         break;
                 
       case esm_EWALD_FULL:
@@ -461,56 +553,27 @@ namespace OpenMD {
         break;       
       }
 
-      v01 = f0;
-      v02 = g0;
-
-      v11 = g1;
-      v12 = g1 * ri;
-      v13 = h1 - v12;
-
-      v21 = g2 * ri;
-      v22 = h2 - v21;
-      v23 = v22 * ri;
-      v24 = s2 - 3.0*v23;        
-
-      v31 = (h3 - g3 * ri) * ri;
-      v32 = s3 - 3.0*v31;
-      v33 = v31 * ri;
-      v34 = v32 * ri;
-      v35 = t3 - 6.0*v34 - 3.0*v33;
-
-      v41 = (h4 - g4 * ri) * ri2;
-      v42 = s4 * ri - 3.0*v41;
-      v43 = t4 - 6.0*v42 - 3.0*v41;
-      v44 = v42 * ri;
-      v45 = v43 * ri;
-      v46 = u4 - 10.0*v45 - 15.0*v44;
-
       // Add these computed values to the storage vectors for spline creation:
       v01v.push_back(v01);
-      v02v.push_back(v02);
-
       v11v.push_back(v11);
-      v12v.push_back(v12);
-      v13v.push_back(v13);
-
       v21v.push_back(v21);
       v22v.push_back(v22);
-      v23v.push_back(v23);
-      v24v.push_back(v24);
-
       v31v.push_back(v31);
-      v32v.push_back(v32);
-      v33v.push_back(v33);
-      v34v.push_back(v34);
-      v35v.push_back(v35);
-      
+      v32v.push_back(v32);      
       v41v.push_back(v41);
       v42v.push_back(v42);
       v43v.push_back(v43);
-      v44v.push_back(v44);
-      v45v.push_back(v45);
-      v46v.push_back(v46);
+      /*
+      dv01v.push_back(dv01);
+      dv11v.push_back(dv11);
+      dv21v.push_back(dv21);
+      dv22v.push_back(dv22);
+      dv31v.push_back(dv31);
+      dv32v.push_back(dv32);      
+      dv41v.push_back(dv41);
+      dv42v.push_back(dv42);
+      dv43v.push_back(dv43);
+      */
     }
 
     // construct the spline structures and fill them with the values we've
@@ -518,48 +581,43 @@ namespace OpenMD {
 
     v01s = new CubicSpline();
     v01s->addPoints(rv, v01v);
-    v02s = new CubicSpline();
-    v02s->addPoints(rv, v02v);
-
     v11s = new CubicSpline();
     v11s->addPoints(rv, v11v);
-    v12s = new CubicSpline();
-    v12s->addPoints(rv, v12v);
-    v13s = new CubicSpline();
-    v13s->addPoints(rv, v13v);
-
     v21s = new CubicSpline();
     v21s->addPoints(rv, v21v);
     v22s = new CubicSpline();
     v22s->addPoints(rv, v22v);
-    v23s = new CubicSpline();
-    v23s->addPoints(rv, v23v);
-    v24s = new CubicSpline();
-    v24s->addPoints(rv, v24v);
-
     v31s = new CubicSpline();
     v31s->addPoints(rv, v31v);
     v32s = new CubicSpline();
     v32s->addPoints(rv, v32v);
-    v33s = new CubicSpline();
-    v33s->addPoints(rv, v33v);
-    v34s = new CubicSpline();
-    v34s->addPoints(rv, v34v);
-    v35s = new CubicSpline();
-    v35s->addPoints(rv, v35v);
-
     v41s = new CubicSpline();
     v41s->addPoints(rv, v41v);
     v42s = new CubicSpline();
     v42s->addPoints(rv, v42v);
     v43s = new CubicSpline();
     v43s->addPoints(rv, v43v);
-    v44s = new CubicSpline();
-    v44s->addPoints(rv, v44v);
-    v45s = new CubicSpline();
-    v45s->addPoints(rv, v45v);
-    v46s = new CubicSpline();
-    v46s->addPoints(rv, v46v);
+
+    /*
+    dv01s = new CubicSpline();
+    dv01s->addPoints(rv, dv01v);
+    dv11s = new CubicSpline();
+    dv11s->addPoints(rv, dv11v);
+    dv21s = new CubicSpline();
+    dv21s->addPoints(rv, dv21v);
+    dv22s = new CubicSpline();
+    dv22s->addPoints(rv, dv22v);
+    dv31s = new CubicSpline();
+    dv31s->addPoints(rv, dv31v);
+    dv32s = new CubicSpline();
+    dv32s->addPoints(rv, dv32v);
+    dv41s = new CubicSpline();
+    dv41s->addPoints(rv, dv41v);
+    dv42s = new CubicSpline();
+    dv42s->addPoints(rv, dv42v);
+    dv43s = new CubicSpline();
+    dv43s->addPoints(rv, dv43v);
+    */
 
     haveElectroSplines_ = true;
 
@@ -753,48 +811,32 @@ namespace OpenMD {
     
     // needed for fields (and forces):
     if (a_is_Charge || b_is_Charge) {
-      v02 = v02s->getValueAt( *(idat.rij) );
+      v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
     }
     if (a_is_Dipole || b_is_Dipole) {
-      v12 = v12s->getValueAt( *(idat.rij) );
-      v13 = v13s->getValueAt( *(idat.rij) );
+      v11s->getValueAndDerivativeAt( *(idat.rij), v11, dv11);
+      v11or = ri * v11;
     }
-    if (a_is_Quadrupole || b_is_Quadrupole) {
-      v23 = v23s->getValueAt( *(idat.rij) );
-      v24 = v24s->getValueAt( *(idat.rij) );
-    }
+    if (a_is_Quadrupole || b_is_Quadrupole ||  (a_is_Dipole && b_is_Dipole)) {
+      v21s->getValueAndDerivativeAt( *(idat.rij), v21, dv21);
+      v22s->getValueAndDerivativeAt( *(idat.rij), v22, dv22);
+      v22or = ri * v22;
+    }      
 
-    // needed for potentials (and torques):
-    if (a_is_Charge && b_is_Charge) {
-      v01 = v01s->getValueAt( *(idat.rij) );
-    }
-    if ((a_is_Charge && b_is_Dipole) || (b_is_Charge && a_is_Dipole)) {
-      v11 = v11s->getValueAt( *(idat.rij) );
-    }
-    if ((a_is_Charge && b_is_Quadrupole) || (b_is_Charge && a_is_Quadrupole)) {
-      v21 = v21s->getValueAt( *(idat.rij) );
-      v22 = v22s->getValueAt( *(idat.rij) );
-    } else if (a_is_Dipole && b_is_Dipole) {
-      v21 = v21s->getValueAt( *(idat.rij) );
-      v22 = v22s->getValueAt( *(idat.rij) );
-      v23 = v23s->getValueAt( *(idat.rij) );
-      v24 = v24s->getValueAt( *(idat.rij) );
-    }
+    // needed for potentials (and forces and torques):
     if ((a_is_Dipole && b_is_Quadrupole) || 
         (b_is_Dipole && a_is_Quadrupole)) {
-      v31 = v31s->getValueAt( *(idat.rij) );
-      v32 = v32s->getValueAt( *(idat.rij) );
-      v33 = v33s->getValueAt( *(idat.rij) );
-      v34 = v34s->getValueAt( *(idat.rij) );
-      v35 = v35s->getValueAt( *(idat.rij) );
+      v31s->getValueAndDerivativeAt( *(idat.rij), v31, dv31);
+      v32s->getValueAndDerivativeAt( *(idat.rij), v32, dv32);
+      v31or = v31 * ri;
+      v32or = v32 * ri;
     }
     if (a_is_Quadrupole && b_is_Quadrupole) {
-      v41 = v41s->getValueAt( *(idat.rij) );
-      v42 = v42s->getValueAt( *(idat.rij) );
-      v43 = v43s->getValueAt( *(idat.rij) );
-      v44 = v44s->getValueAt( *(idat.rij) );
-      v45 = v45s->getValueAt( *(idat.rij) );
-      v46 = v46s->getValueAt( *(idat.rij) );
+      v41s->getValueAndDerivativeAt( *(idat.rij), v41, dv41);
+      v42s->getValueAndDerivativeAt( *(idat.rij), v42, dv42);
+      v43s->getValueAndDerivativeAt( *(idat.rij), v43, dv43);
+      v42or = v42 * ri;
+      v43or = v43 * ri;
     }
 
     // calculate the single-site contributions (fields, etc).
@@ -810,7 +852,7 @@ namespace OpenMD {
         *(idat.skippedCharge2) += C_a;
       } else {
         // only do the field if we're not excluded:
-        Eb -= C_a *  pre11_ * v02 * rhat;
+        Eb -= C_a *  pre11_ * dv01 * rhat;
       }
     }
     
@@ -819,7 +861,7 @@ namespace OpenMD {
       rdDa = dot(rhat, D_a);
       rxDa = cross(rhat, D_a);
       if (!idat.excluded) 
-        Eb -=  pre12_ * (v13 * rdDa * rhat + v12 * D_a);
+        Eb -=  pre12_ * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
     }
     
     if (a_is_Quadrupole) {
@@ -830,7 +872,8 @@ namespace OpenMD {
       rdQar = dot(rhat, Qar);
       rxQar = cross(rhat, Qar);
       if (!idat.excluded) 
-        Eb -= pre14_ * ((trQa * rhat + 2.0 * Qar) * v23 + rdQar * rhat * v24);
+        Eb -= pre14_ * (trQa * rhat * dv21 + 2.0 * Qar * v22or 
+                        + rdQar * rhat * (dv22 - 2.0*v22or));
     }
     
     if (b_is_Charge) {
@@ -843,7 +886,7 @@ namespace OpenMD {
         *(idat.skippedCharge1) += C_b;
       } else {
         // only do the field if we're not excluded:
-        Ea += C_b *  pre11_ * v02 * rhat;
+        Ea += C_b *  pre11_ * dv01 * rhat;
       }
     }
     
@@ -852,7 +895,7 @@ namespace OpenMD {
       rdDb = dot(rhat, D_b);
       rxDb = cross(rhat, D_b);
       if (!idat.excluded) 
-        Ea += pre12_ * (v13 * rdDb * rhat + v12 * D_b);
+        Ea += pre12_ * ((dv11-v11or) * rdDb * rhat + v11or * D_b);
     }
     
     if (b_is_Quadrupole) {
@@ -863,7 +906,8 @@ namespace OpenMD {
       rdQbr = dot(rhat, Qbr);
       rxQbr = cross(rhat, Qbr);
       if (!idat.excluded) 
-        Ea += pre14_ * ((trQb * rhat + 2.0 * Qbr) * v23 + rdQbr * rhat * v24);
+        Ea += pre14_ * (trQb * rhat * dv21 + 2.0 * Qbr * v22or 
+                        + rdQbr * rhat * (dv22 - 2.0*v22or));
     }
     
     if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {
@@ -873,9 +917,9 @@ namespace OpenMD {
     if (a_is_Charge) {     
       
       if (b_is_Charge) {
-        pref =  pre11_ * *(idat.electroMult);          
+        pref =  pre11_ * *(idat.electroMult);      
         U  += C_a * C_b * pref * v01;
-        F  += C_a * C_b * pref * v02 * rhat;
+        F  += C_a * C_b * pref * dv01 * rhat;
         
         // If this is an excluded pair, there are still indirect
         // interactions via the reaction field we must worry about:
@@ -906,7 +950,7 @@ namespace OpenMD {
       if (b_is_Dipole) {
         pref =  pre12_ * *(idat.electroMult);        
         U  += C_a * pref * v11 * rdDb;
-        F  += C_a * pref * (v13 * rdDb * rhat + v12 * D_b);
+        F  += C_a * pref * ((dv11 - v11or) * rdDb * rhat + v11or * D_b);
         Tb += C_a * pref * v11 * rxDb;
 
         if (a_is_Fluctuating) dUdCa += pref * v11 * rdDb;
@@ -926,8 +970,8 @@ namespace OpenMD {
       if (b_is_Quadrupole) {
         pref = pre14_ * *(idat.electroMult);
         U  +=  C_a * pref * (v21 * trQb + v22 * rdQbr);
-        F  +=  C_a * pref * (trQb * rhat + 2.0 * Qbr) * v23;
-        F  +=  C_a * pref * rdQbr * rhat * v24;
+        F  +=  C_a * pref * (trQb * dv21 * rhat + 2.0 * Qbr * v22or);
+        F  +=  C_a * pref * rdQbr * rhat * (dv22 - 2.0*v22or);
         Tb +=  C_a * pref * 2.0 * rxQbr * v22;
 
         if (a_is_Fluctuating) dUdCa += pref * (v21 * trQb + v22 * rdQbr);
@@ -940,7 +984,7 @@ namespace OpenMD {
         pref = pre12_ * *(idat.electroMult);
 
         U  -= C_b * pref * v11 * rdDa;
-        F  -= C_b * pref * (v13 * rdDa * rhat + v12 * D_a);
+        F  -= C_b * pref * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
         Ta -= C_b * pref * v11 * rxDa;
 
         if (b_is_Fluctuating) dUdCb -= pref * v11 * rdDa;
@@ -962,8 +1006,8 @@ namespace OpenMD {
         DaxDb = cross(D_a, D_b);
 
         U  -= pref * (DadDb * v21 + rdDa * rdDb * v22);
-        F  -= pref * (DadDb * rhat + rdDb * D_a + rdDa * D_b)*v23;
-        F  -= pref * (rdDa * rdDb) * v24 * rhat;
+        F  -= pref * (dv21 * DadDb * rhat + v22or * (rdDb * D_a + rdDa * D_b));
+        F  -= pref * (rdDa * rdDb) * (dv22 - 2.0*v22or) * rhat;
         Ta += pref * ( v21 * DaxDb - v22 * rdDb * rxDa);
         Tb += pref * (-v21 * DaxDb - v22 * rdDa * rxDb);
 
@@ -976,7 +1020,6 @@ namespace OpenMD {
           indirect_Ta  += rfContrib * DaxDb;
           indirect_Tb  -= rfContrib * DaxDb;
         }
-
       }
 
       if (b_is_Quadrupole) {
@@ -986,10 +1029,10 @@ namespace OpenMD {
         DaxQbr = cross(D_a, Qbr);
 
         U  -= pref * ((trQb*rdDa + 2.0*DadQbr)*v31 + rdDa*rdQbr*v32);
-        F  -= pref * (trQb*D_a + 2.0*DadQb) * v33;
-        F  -= pref * (trQb*rdDa*rhat + 2.0*DadQbr*rhat + D_a*rdQbr 
-                      + 2.0*rdDa*rQb)*v34;
-        F  -= pref * (rdDa * rdQbr * rhat * v35);
+        F  -= pref * (trQb*D_a + 2.0*DadQb) * v31or;
+        F  -= pref * (trQb*rdDa + 2.0*DadQbr) * (dv31-v31or) * rhat;
+        F  -= pref * (D_a*rdQbr + 2.0*rdDa*rQb) * v32or;
+        F  -= pref * (rdDa * rdQbr * rhat * (dv32-3.0*v32or));
         Ta += pref * ((-trQb*rxDa + 2.0 * DaxQbr)*v31 - rxDa*rdQbr*v32);
         Tb += pref * ((2.0*cross(DadQb, rhat) - 2.0*DaxQbr)*v31 
                       - 2.0*rdDa*rxQbr*v32);
@@ -1000,8 +1043,8 @@ namespace OpenMD {
       if (b_is_Charge) {
         pref = pre14_ * *(idat.electroMult);
         U  += C_b * pref * (v21 * trQa + v22 * rdQar);
-        F  += C_b * pref * (trQa * rhat + 2.0 * Qar) * v23;
-        F  += C_b * pref * rdQar * rhat * v24;
+        F  += C_b * pref * (trQa * rhat * dv21 + 2.0 * Qar * v22or);
+        F  += C_b * pref * rdQar * rhat * (dv22 - 2.0*v22or);
         Ta += C_b * pref * 2.0 * rxQar * v22;
 
         if (b_is_Fluctuating) dUdCb += pref * (v21 * trQa + v22 * rdQar);
@@ -1013,10 +1056,10 @@ namespace OpenMD {
         DbxQar = cross(D_b, Qar);
 
         U  += pref * ((trQa*rdDb + 2.0*DbdQar)*v31 + rdDb*rdQar*v32);
-        F  += pref * (trQa*D_b + 2.0*DbdQa) * v33;
-        F  += pref * (trQa*rdDb*rhat + 2.0*DbdQar*rhat + D_b*rdQar 
-                      + 2.0*rdDb*rQa)*v34;
-        F  += pref * (rdDb * rdQar * rhat * v35);
+        F  += pref * (trQa*D_b + 2.0*DbdQa) * v31or;
+        F  += pref * (trQa*rdDb + 2.0*DbdQar) * (dv31-v31or) * rhat;
+        F  += pref * (D_b*rdQar + 2.0*rdDb*rQa) * v32or;
+        F  += pref * (rdDb * rdQar * rhat * (dv32-3.0*v32or));
         Ta += pref * ((-2.0*cross(DbdQa, rhat) + 2.0*DbxQar)*v31 
                       + 2.0*rdDb*rxQar*v32);
         Tb += pref * ((trQa*rxDb - 2.0 * DbxQar)*v31 + rxDb*rdQar*v32);
@@ -1035,13 +1078,13 @@ namespace OpenMD {
         U  += pref * (trQa * rdQbr + trQb * rdQar  + 4.0 * rQaQbr) * v42;
         U  += pref * (rdQar * rdQbr) * v43;
 
-        F  += pref * rhat * (trQa * trQb + 2.0 * trQaQb)*v44;
-        F  += pref * rhat * (trQa * rdQbr + trQb * rdQar + 4.0 * rQaQbr)*v45;
-        F  += pref * rhat * (rdQar * rdQbr)*v46;
+        F  += pref * rhat * (trQa * trQb + 2.0 * trQaQb)*dv41;
+        F  += pref*rhat*(trQa*rdQbr + trQb*rdQar + 4.0*rQaQbr)*(dv42-2.0*v42or);
+        F  += pref * rhat * (rdQar * rdQbr)*(dv43 - 4.0*v43or);
 
-        F  += pref * 2.0 * (trQb*rQa + trQa*rQb)*v44;
-        F  += pref * 4.0 * (rQaQb + QaQbr)*v44;
-        F  += pref * 2.0 * (rQa*rdQbr + rdQar*rQb)*v45;
+        F  += pref * 2.0 * (trQb*rQa + trQa*rQb) * v42or;
+        F  += pref * 4.0 * (rQaQb + QaQbr) * v42or;
+        F  += pref * 2.0 * (rQa*rdQbr + rdQar*rQb) * v43or;
 
         Ta += pref * (- 4.0 * QaxQb * v41);
         Ta += pref * (- 2.0 * trQb * cross(rQa, rhat) 

@@ -196,6 +196,12 @@ namespace OpenMD {
     inline bool operator !=(const Vector<Real, Dim>& v) {
       return !(*this == v);
     }
+
+    /** Zeros out the values in this vector in place */
+    inline void zero() {
+      for (unsigned int i = 0; i < Dim; i++)
+	this->data_[i] = 0;
+    }      
              
     /** Negates the value of this vector in place. */           
     inline void negate() {

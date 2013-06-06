@@ -49,7 +49,8 @@ namespace OpenMD {
     HARD,
     SWITCHED,
     SHIFTED_POTENTIAL,
-    SHIFTED_FORCE
+    SHIFTED_FORCE,
+    TAYLOR_SHIFTED
   };
 
   enum CutoffPolicy {

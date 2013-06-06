@@ -98,7 +98,7 @@ namespace OpenMD {
    *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
    *      Use the maximum suggested value that was found.
    *
-   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, 
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, TAYLOR_SHIFTED, 
    *                        or SHIFTED_POTENTIAL)
    *      If cutoffMethod was explicitly set, use that choice.
    *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
@@ -171,6 +171,7 @@ namespace OpenMD {
     stringToCutoffMethod["SWITCHED"] = SWITCHED;
     stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
     stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
+    stringToCutoffMethod["TAYLOR_SHIFTED"] = TAYLOR_SHIFTED;
   
     if (simParams_->haveCutoffMethod()) {
       string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
@@ -180,7 +181,8 @@ namespace OpenMD {
         sprintf(painCave.errMsg,
                 "ForceManager::setupCutoffs: Could not find chosen cutoffMethod %s\n"
                 "\tShould be one of: "
-                "HARD, SWITCHED, SHIFTED_POTENTIAL, or SHIFTED_FORCE\n",
+                "HARD, SWITCHED, SHIFTED_POTENTIAL, TAYLOR_SHIFTED,\n"
+                "\tor SHIFTED_FORCE\n",
                 cutMeth.c_str());
         painCave.isFatal = 1;
         painCave.severity = OPENMD_ERROR;
@@ -224,12 +226,15 @@ namespace OpenMD {
             cutoffMethod_ = SHIFTED_POTENTIAL;
           } else if (myMethod == "SHIFTED_FORCE") {
             cutoffMethod_ = SHIFTED_FORCE;
+          } else if (myMethod == "TAYLOR_SHIFTED") {
+            cutoffMethod_ = TAYLOR_SHIFTED;
           }
         
           if (simParams_->haveSwitchingRadius()) 
             rSwitch_ = simParams_->getSwitchingRadius();
 
-          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
+          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE" ||
+              myMethod == "TAYLOR_SHIFTED") {
             if (simParams_->haveSwitchingRadius()){
               sprintf(painCave.errMsg,
                       "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
@@ -654,7 +659,6 @@ namespace OpenMD {
   
   void ForceManager::longRangeInteractions() {
 
-
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
@@ -724,7 +728,7 @@ namespace OpenMD {
     idat.f1 = &f1;
     idat.sw = &sw;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
-    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE) ? true : false;
+    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE || cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
     idat.doParticlePot = doParticlePot_;
     idat.doElectricField = doElectricField_;
     sdat.doParticlePot = doParticlePot_;
@@ -764,9 +768,9 @@ namespace OpenMD {
           idat.rcut = &cuts.first;
           if (iLoop == PAIR_LOOP) {
             vij = 0.0;
-            fij = V3Zero;
-            eField1 = V3Zero;
-            eField2 = V3Zero;
+            fij.zero();
+            eField1.zero();
+            eField2.zero();
           }
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
@@ -791,7 +795,7 @@ namespace OpenMD {
                 vpair = 0.0;
                 workPot = 0.0;
                 exPot = 0.0;
-                f1 = V3Zero;
+                f1.zero();
 		dVdFQ1 = 0.0;
 		dVdFQ2 = 0.0;
 
