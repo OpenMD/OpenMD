@@ -123,7 +123,7 @@ namespace OpenMD {
   
     initialize();
   
-    while (snap->getTime() < runTime) {    
+    while (snap->getTime() < runTime) { 
       preStep();    
       integrateStep();    
       postStep();      

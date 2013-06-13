@@ -419,6 +419,7 @@ namespace OpenMD {
           // send our buffer:
           MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
                                MPI::CHAR, masterNode, 0);
+
         }
       }
     }
@@ -727,16 +728,20 @@ namespace OpenMD {
 #endif // is_mpi
       
       eorStream = createOStream(eorFilename_);
-      writeFrame(*eorStream);
-      
+
 #ifdef IS_MPI
     }
+#endif
+    
+    writeFrame(*eorStream);
+      
+#ifdef IS_MPI
     if (worldRank == 0) {
-#endif // is_mpi
-
+#endif
+      
       writeClosing(*eorStream);
       delete eorStream;
-
+      
 #ifdef IS_MPI
     }
 #endif // is_mpi  
