@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -782,6 +782,22 @@ namespace OpenMD {
     return atomTypes;        
   }
 
+
+  int getGlobalCountOfType(AtomType* atype) {
+    /*
+    set<AtomType*> atypes = getSimulatedAtomTypes();
+    map<AtomType*, int> counts_;
+
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+      for(atom = mol->beginAtom(ai); atom != NULL;
+          atom = mol->nextAtom(ai)) {
+	atom->getAtomType();
+      }      
+    }    
+    */
+    return 0;
+  }
+
   void SimInfo::setupSimVariables() {
     useAtomicVirial_ = simParams_->getUseAtomicVirial();
     // we only call setAccumulateBoxDipole if the accumulateBoxDipole
@@ -925,13 +941,6 @@ namespace OpenMD {
       }
     }    
     
-    //scan topology 
-
-    int* excludeList = excludedInteractions_.getPairList();
-    int* oneTwoList = oneTwoInteractions_.getPairList();
-    int* oneThreeList = oneThreeInteractions_.getPairList();
-    int* oneFourList = oneFourInteractions_.getPairList();
-
     topologyDone_ = true;
   }
 
@@ -1003,7 +1012,7 @@ namespace OpenMD {
    
   
   StuntDouble* SimInfo::getIOIndexToIntegrableObject(int index) {
-    if (index >= IOIndexToIntegrableObject.size()) {
+    if (index >= int(IOIndexToIntegrableObject.size())) {
       sprintf(painCave.errMsg,
               "SimInfo::getIOIndexToIntegrableObject Error: Integrable Object\n"
               "\tindex exceeds number of known objects!\n");

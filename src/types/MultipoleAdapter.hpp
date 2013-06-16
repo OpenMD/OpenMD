@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -53,14 +53,9 @@ namespace OpenMD {
   string const MultipoleTypeID = "Multipole";
 
   struct MultipoleAtypeParameters{
-    RotMat3x3d electroBodyFrame;
     bool isDipole;
-    bool isSplitDipole;
     bool isQuadrupole;
-    RealType dipoleMoment;
     Vector3d dipole;
-    RealType splitDipoleDistance;
-    Vector3d quadrupoleMoments;
     Mat3x3d quadrupole;
   };
   typedef SimpleTypeData<MultipoleAtypeParameters*> MultipoleAtypeData;   
@@ -69,19 +64,14 @@ namespace OpenMD {
   public:
     MultipoleAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeMultipole(RotMat3x3d electroBodyFrame, RealType dipoleMoment, RealType splitDipoleDistance, Vector3d quadrupoleMoments, bool isDipole, bool isSplitDipole, bool isQuadrupole);
+    void makeMultipole(Vector3d dipole, Mat3x3d quadrupole, bool isDipole, bool isQuadrupole);
     
     bool isMultipole();
     bool isDipole();
-    bool isSplitDipole();
     bool isQuadrupole();
 
-    RealType getDipoleMoment();
     Vector3d getDipole();
-    RealType getSplitDipoleDistance();
-    Vector3d getQuadrupoleMoments();
-    Mat3x3d getQuadrupole();
-    RotMat3x3d getElectroBodyFrame();
+    Mat3x3d  getQuadrupole();
 
   private:
     AtomType* at_;

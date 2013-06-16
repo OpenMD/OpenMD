@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -54,6 +54,7 @@
 #include "nonbonded/SlaterIntegrals.hpp"
 #include "utils/PhysicalConstants.hpp"
 #include "math/erfc.hpp"
+#include "math/SquareMatrix.hpp"
 
 namespace OpenMD {
   
@@ -62,7 +63,7 @@ namespace OpenMD {
                                   haveCutoffRadius_(false),
                                   haveDampingAlpha_(false), 
                                   haveDielectric_(false),
-                                  haveElectroSpline_(false)
+                                  haveElectroSplines_(false)
   {}
   
   void Electrostatic::initialize() { 
@@ -74,6 +75,7 @@ namespace OpenMD {
     summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;
     summationMap_["SHIFTED_POTENTIAL"]  = esm_SHIFTED_POTENTIAL; 
     summationMap_["SHIFTED_FORCE"]      = esm_SHIFTED_FORCE;     
+    summationMap_["TAYLOR_SHIFTED"]     = esm_TAYLOR_SHIFTED;     
     summationMap_["REACTION_FIELD"]     = esm_REACTION_FIELD;    
     summationMap_["EWALD_FULL"]         = esm_EWALD_FULL;        
     summationMap_["EWALD_PME"]          = esm_EWALD_PME;         
@@ -88,19 +90,24 @@ namespace OpenMD {
     // Charge-Dipole, assuming charges are measured in electrons, and
     // dipoles are measured in debyes
     pre12_ = 69.13373;
-    // Dipole-Dipole, assuming dipoles are measured in debyes
+    // Dipole-Dipole, assuming dipoles are measured in Debye
     pre22_ = 14.39325;
     // Charge-Quadrupole, assuming charges are measured in electrons, and
     // quadrupoles are measured in 10^-26 esu cm^2
-    // This unit is also known affectionately as an esu centi-barn.
+    // This unit is also known affectionately as an esu centibarn.
     pre14_ = 69.13373;
-    
+    // Dipole-Quadrupole, assuming dipoles are measured in debyes and
+    // quadrupoles in esu centibarns:
+    pre24_ = 14.39325;
+    // Quadrupole-Quadrupole, assuming esu centibarns:
+    pre44_ = 14.39325;
+
     // conversions for the simulation box dipole moment
     chargeToC_ = 1.60217733e-19;
     angstromToM_ = 1.0e-10;
     debyeToCm_ = 3.33564095198e-30;
     
-    // number of points for electrostatic splines
+    // Default number of points for electrostatic splines
     np_ = 100;
     
     // variables to handle different summation methods for long-range 
@@ -108,7 +115,6 @@ namespace OpenMD {
     summationMethod_ = esm_HARD;    
     screeningMethod_ = UNDAMPED;
     dielectric_ = 1.0;
-    one_third_ = 1.0 / 3.0;
   
     // check the summation method:
     if (simParams_->haveElectrostaticSummationMethod()) {
@@ -124,8 +130,9 @@ namespace OpenMD {
                  "Electrostatic::initialize: Unknown electrostaticSummationMethod.\n"
                  "\t(Input file specified %s .)\n"
                  "\telectrostaticSummationMethod must be one of: \"hard\",\n"
-                 "\t\"shifted_potential\", \"shifted_force\", or \n"
-                 "\t\"reaction_field\".\n", myMethod.c_str() );
+                 "\t\"shifted_potential\", \"shifted_force\",\n"
+                 "\t\"taylor_shifted\", or \"reaction_field\".\n", 
+                 myMethod.c_str() );
         painCave.isFatal = 1;
         simError();
       }
@@ -216,63 +223,403 @@ namespace OpenMD {
       
       if (at->isElectrostatic())
         addType(at);
-    }
+    }   
     
-    cutoffRadius2_ = cutoffRadius_ * cutoffRadius_;
-    rcuti_ = 1.0 / cutoffRadius_;
-    rcuti2_ = rcuti_ * rcuti_;
-    rcuti3_ = rcuti2_ * rcuti_;
-    rcuti4_ = rcuti2_ * rcuti2_;
-
-    if (screeningMethod_ == DAMPED) {
-      
-      alpha2_ = dampingAlpha_ * dampingAlpha_;
-      alpha4_ = alpha2_ * alpha2_;
-      alpha6_ = alpha4_ * alpha2_;
-      alpha8_ = alpha4_ * alpha4_;
-      
-      constEXP_ = exp(-alpha2_ * cutoffRadius2_);
-      invRootPi_ = 0.56418958354775628695;
-      alphaPi_ = 2.0 * dampingAlpha_ * invRootPi_;
-
-      c1c_ = erfc(dampingAlpha_ * cutoffRadius_) * rcuti_;
-      c2c_ = alphaPi_ * constEXP_ * rcuti_ + c1c_ * rcuti_;
-      c3c_ = 2.0 * alphaPi_ * alpha2_ + 3.0 * c2c_ * rcuti_;
-      c4c_ = 4.0 * alphaPi_ * alpha4_ + 5.0 * c3c_ * rcuti2_;
-      c5c_ = 8.0 * alphaPi_ * alpha6_ + 7.0 * c4c_ * rcuti2_;
-      c6c_ = 16.0 * alphaPi_ * alpha8_ + 9.0 * c5c_ * rcuti2_;
-    } else {
-      c1c_ = rcuti_;
-      c2c_ = c1c_ * rcuti_;
-      c3c_ = 3.0 * c2c_ * rcuti_;
-      c4c_ = 5.0 * c3c_ * rcuti2_;
-      c5c_ = 7.0 * c4c_ * rcuti2_;
-      c6c_ = 9.0 * c5c_ * rcuti2_;
-    }
-   
     if (summationMethod_ == esm_REACTION_FIELD) {
       preRF_ = (dielectric_ - 1.0) / 
-        ((2.0 * dielectric_ + 1.0) * cutoffRadius2_ * cutoffRadius_);
-      preRF2_ = 2.0 * preRF_;
+        ((2.0 * dielectric_ + 1.0) * pow(cutoffRadius_,3) );
     }
     
+    RealType b0c, b1c, b2c, b3c, b4c, b5c;
+    RealType db0c_1, db0c_2, db0c_3, db0c_4, db0c_5;
+    RealType a2, expTerm, invArootPi;
+    
+    RealType r = cutoffRadius_;
+    RealType r2 = r * r;
+    RealType ric = 1.0 / r;
+    RealType ric2 = ric * ric;
+
+    if (screeningMethod_ == DAMPED) {      
+      a2 = dampingAlpha_ * dampingAlpha_;
+      invArootPi = 1.0 / (dampingAlpha_ * sqrt(M_PI));    
+      expTerm = exp(-a2 * r2);
+      // values of Smith's B_l functions at the cutoff radius:
+      b0c = erfc(dampingAlpha_ * r) / r;
+      b1c = (      b0c     + 2.0*a2     * expTerm * invArootPi) / r2;
+      b2c = (3.0 * b1c + pow(2.0*a2, 2) * expTerm * invArootPi) / r2;
+      b3c = (5.0 * b2c + pow(2.0*a2, 3) * expTerm * invArootPi) / r2;
+      b4c = (7.0 * b3c + pow(2.0*a2, 4) * expTerm * invArootPi) / r2;
+      b5c = (9.0 * b4c + pow(2.0*a2, 5) * expTerm * invArootPi) / r2;
+      selfMult_ = b0c + a2 * invArootPi;
+    } else {
+      a2 = 0.0;
+      b0c = 1.0 / r;
+      b1c = (      b0c) / r2;
+      b2c = (3.0 * b1c) / r2;
+      b3c = (5.0 * b2c) / r2;
+      b4c = (7.0 * b3c) / r2;
+      b5c = (9.0 * b4c) / r2;
+      selfMult_ = b0c;
+    }
+
+    // higher derivatives of B_0 at the cutoff radius:
+    db0c_1 = -r * b1c;
+    db0c_2 =     -b1c + r2 * b2c;
+    db0c_3 =          3.0*r*b2c  - r2*r*b3c;
+    db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
+    db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;
+    
+
+    // working variables for the splines:
+    RealType ri, ri2;
+    RealType b0, b1, b2, b3, b4, b5;
+    RealType db0_1, db0_2, db0_3, db0_4, db0_5;
+    RealType f, fc, f0;
+    RealType g, gc, g0, g1, g2, g3, g4;
+    RealType h, hc, h1, h2, h3, h4;
+    RealType s, sc, s2, s3, s4;
+    RealType t, tc, t3, t4;
+    RealType u, uc, u4;
+
+    // working variables for Taylor expansion:
+    RealType rmRc, rmRc2, rmRc3, rmRc4;
+
+    // Approximate using splines using a maximum of 0.1 Angstroms
+    // between points.
+    int nptest = int((cutoffRadius_ + 2.0) / 0.1);
+    np_ = (np_ > nptest) ? np_ : nptest;
+  
     // Add a 2 angstrom safety window to deal with cutoffGroups that
     // have charged atoms longer than the cutoffRadius away from each
-    // other.  Splining may not be the best choice here.  Direct calls
-    // to erfc might be preferrable.
+    // other.  Splining is almost certainly the best choice here.
+    // Direct calls to erfc would be preferrable if it is a very fast
+    // implementation.
 
-    RealType dx = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
-    RealType rval;
-    vector<RealType> rvals;
-    vector<RealType> yvals;
-    for (int i = 0; i < np_; i++) {
-      rval = RealType(i) * dx;
-      rvals.push_back(rval);
-      yvals.push_back(erfc(dampingAlpha_ * rval));
+    RealType dx = (cutoffRadius_ + 2.0) / RealType(np_);
+
+    // Storage vectors for the computed functions    
+    vector<RealType> rv;
+    vector<RealType> v01v;
+    vector<RealType> v11v;
+    vector<RealType> v21v, v22v;
+    vector<RealType> v31v, v32v;
+    vector<RealType> v41v, v42v, v43v;
+
+    /*
+    vector<RealType> dv01v;
+    vector<RealType> dv11v;
+    vector<RealType> dv21v, dv22v;
+    vector<RealType> dv31v, dv32v;
+    vector<RealType> dv41v, dv42v, dv43v;
+    */
+
+    for (int i = 1; i < np_ + 1; i++) {
+      r = RealType(i) * dx;
+      rv.push_back(r);
+
+      ri = 1.0 / r;
+      ri2 = ri * ri;
+
+      r2 = r * r;
+      expTerm = exp(-a2 * r2);
+
+      // Taylor expansion factors (no need for factorials this way):
+      rmRc = r - cutoffRadius_;
+      rmRc2 = rmRc  * rmRc / 2.0;
+      rmRc3 = rmRc2 * rmRc / 3.0;
+      rmRc4 = rmRc3 * rmRc / 4.0;
+
+      // values of Smith's B_l functions at r:
+      if (screeningMethod_ == DAMPED) {             
+        b0 = erfc(dampingAlpha_ * r) * ri;
+        b1 = (      b0 +     2.0*a2     * expTerm * invArootPi) * ri2;
+        b2 = (3.0 * b1 + pow(2.0*a2, 2) * expTerm * invArootPi) * ri2;
+        b3 = (5.0 * b2 + pow(2.0*a2, 3) * expTerm * invArootPi) * ri2;
+        b4 = (7.0 * b3 + pow(2.0*a2, 4) * expTerm * invArootPi) * ri2;
+        b5 = (9.0 * b4 + pow(2.0*a2, 5) * expTerm * invArootPi) * ri2;
+      } else {
+        b0 = ri;
+        b1 = (      b0) * ri2;
+        b2 = (3.0 * b1) * ri2;
+        b3 = (5.0 * b2) * ri2;
+        b4 = (7.0 * b3) * ri2;
+        b5 = (9.0 * b4) * ri2;
+      }
+                
+      // higher derivatives of B_0 at r:
+      db0_1 = -r * b1;
+      db0_2 =     -b1 + r2 * b2;
+      db0_3 =          3.0*r*b2   - r2*r*b3;
+      db0_4 =          3.0*b2   - 6.0*r2*b3     + r2*r2*b4;
+      db0_5 =                    -15.0*r*b3 + 10.0*r2*r*b4 - r2*r2*r*b5;
+
+      f = b0;
+      fc = b0c;
+      f0 = f - fc - rmRc*db0c_1;
+
+      g = db0_1;        
+      gc = db0c_1;
+      g0 = g - gc;
+      g1 = g0 - rmRc *db0c_2;
+      g2 = g1 - rmRc2*db0c_3;
+      g3 = g2 - rmRc3*db0c_4;
+      g4 = g3 - rmRc4*db0c_5;
+
+      h = db0_2;      
+      hc = db0c_2;
+      h1 = h - hc;
+      h2 = h1 - rmRc *db0c_3;
+      h3 = h2 - rmRc2*db0c_4;
+      h4 = h3 - rmRc3*db0c_5;
+
+      s = db0_3;      
+      sc = db0c_3;
+      s2 = s - sc;
+      s3 = s2 - rmRc *db0c_4;
+      s4 = s3 - rmRc2*db0c_5;
+
+      t = db0_4;      
+      tc = db0c_4;
+      t3 = t - tc;
+      t4 = t3 - rmRc *db0c_5;
+      
+      u = db0_5;         
+      uc = db0c_5;
+      u4 = u - uc;
+
+      // in what follows below, the various v functions are used for
+      // potentials and torques, while the w functions show up in the
+      // forces.
+
+      switch (summationMethod_) {
+      case esm_SHIFTED_FORCE:
+                
+        v01 = f - fc - rmRc*gc;
+        v11 = g - gc - rmRc*hc;
+        v21 = g*ri - gc*ric - rmRc*(hc - gc*ric)*ric;
+        v22 = h - g*ri - (hc - gc*ric) - rmRc*(sc - (hc - gc*ric)*ric);
+        v31 = (h-g*ri)*ri - (hc-g*ric)*ric - rmRc*(sc-2.0*(hc-gc*ric)*ric)*ric;
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric) 
+          - rmRc*(tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2 
+          - rmRc*(sc - 3.0*(hc-gc*ric)*ric)*ric2;
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric 
+          - rmRc*(tc - (4.0*sc - 9.0*(hc - gc*ric)*ric)*ric)*ric;
+        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+          - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric)
+          - rmRc*(uc-3.0*(2.0*tc - (7.0*sc - 15.0*(hc - gc*ric)*ric)*ric)*ric);
+
+        dv01 = g - gc;
+        dv11 = h - hc;
+        dv21 = (h - g*ri)*ri - (hc - gc*ric)*ric;
+        dv22 = (s - (h - g*ri)*ri) - (sc - (hc - gc*ric)*ric);        
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri - (sc - 2.0*(hc-gc*ric)*ric)*ric;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri) 
+          - (tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2 - (sc - 3.0*(hc - gc*ric)*ric)*ric2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri 
+          - (tc - (4.0*sc - 9.0*(hc-gc*ric)*ric)*ric)*ric; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri)
+          - (uc - 3.0*(2.0*tc - (7.0*sc - 15.0*(hc - gc*ric)*ric)*ric)*ric);
+        
+        break;
+
+      case esm_TAYLOR_SHIFTED:
+        
+        v01 = f0;
+        v11 = g1;
+        v21 = g2 * ri;
+        v22 = h2 - v21;
+        v31 = (h3 - g3 * ri) * ri;
+        v32 = s3 - 3.0*v31;
+        v41 = (h4 - g4 * ri) * ri2;
+        v42 = s4 * ri - 3.0*v41;
+        v43 = t4 - 6.0*v42 - 3.0*v41;
+
+        dv01 = g0;
+        dv11 = h1;
+        dv21 = (h2 - g2*ri)*ri;
+        dv22 = (s2 - (h2 - g2*ri)*ri);
+        dv31 = (s3 - 2.0*(h3-g3*ri)*ri)*ri;
+        dv32 = (t3 - 3.0*(s3-2.0*(h3-g3*ri)*ri)*ri); 
+        dv41 = (s4 - 3.0*(h4 - g4*ri)*ri)*ri2;
+        dv42 = (t4 - (4.0*s4 - 9.0*(h4-g4*ri)*ri)*ri)*ri; 
+        dv43 = (u4 - 3.0*(2.0*t4 - (7.0*s4 - 15.0*(h4 - g4*ri)*ri)*ri)*ri);
+
+        break;
+
+      case esm_SHIFTED_POTENTIAL:
+
+        v01 = f - fc;
+        v11 = g - gc;
+        v21 = g*ri - gc*ric;
+        v22 = h - g*ri - (hc - gc*ric);
+        v31 = (h-g*ri)*ri - (hc-g*ric)*ric;
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+          - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric);
+
+        dv01 = g;
+        dv11 = h;
+        dv21 = (h - g*ri)*ri;
+        dv22 = (s - (h - g*ri)*ri);
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
+
+        break;
+
+      case esm_SWITCHING_FUNCTION:
+      case esm_HARD:
+
+        v01 = f;
+        v11 = g;
+        v21 = g*ri;
+        v22 = h - g*ri;
+        v31 = (h-g*ri)*ri;
+        v32 = (s - 3.0*(h-g*ri)*ri);
+        v41 = (h - g*ri)*ri2; 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri;        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri);
+
+        dv01 = g;
+        dv11 = h;
+        dv21 = (h - g*ri)*ri;
+        dv22 = (s - (h - g*ri)*ri);
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
+
+        break;
+
+      case esm_REACTION_FIELD:
+        
+        // following DL_POLY's lead for shifting the image charge potential:
+        f = b0 + preRF_ * r2;
+        fc = b0c + preRF_ * cutoffRadius_ * cutoffRadius_;
+
+        g = db0_1 + preRF_ * 2.0 * r;        
+        gc = db0c_1 + preRF_ * 2.0 * cutoffRadius_;
+
+        h = db0_2 + preRF_ * 2.0;
+        hc = db0c_2 + preRF_ * 2.0;
+
+        v01 = f - fc;
+        v11 = g - gc;
+        v21 = g*ri - gc*ric;
+        v22 = h - g*ri - (hc - gc*ric);
+        v31 = (h-g*ri)*ri - (hc-g*ric)*ric;
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+          - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric);
+
+        dv01 = g;
+        dv11 = h;
+        dv21 = (h - g*ri)*ri;
+        dv22 = (s - (h - g*ri)*ri);
+        dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
+
+        break;
+                
+      case esm_EWALD_FULL:
+      case esm_EWALD_PME:
+      case esm_EWALD_SPME:
+      default :
+        map<string, ElectrostaticSummationMethod>::iterator i;
+        std::string meth;
+        for (i = summationMap_.begin(); i != summationMap_.end(); ++i) {
+          if ((*i).second == summationMethod_) meth = (*i).first;
+        }
+        sprintf( painCave.errMsg,
+                 "Electrostatic::initialize: electrostaticSummationMethod %s \n"
+                 "\thas not been implemented yet. Please select one of:\n"
+                 "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n", 
+                 meth.c_str() );
+        painCave.isFatal = 1;
+        simError();
+        break;       
+      }
+
+      // Add these computed values to the storage vectors for spline creation:
+      v01v.push_back(v01);
+      v11v.push_back(v11);
+      v21v.push_back(v21);
+      v22v.push_back(v22);
+      v31v.push_back(v31);
+      v32v.push_back(v32);      
+      v41v.push_back(v41);
+      v42v.push_back(v42);
+      v43v.push_back(v43);
+      /*
+      dv01v.push_back(dv01);
+      dv11v.push_back(dv11);
+      dv21v.push_back(dv21);
+      dv22v.push_back(dv22);
+      dv31v.push_back(dv31);
+      dv32v.push_back(dv32);      
+      dv41v.push_back(dv41);
+      dv42v.push_back(dv42);
+      dv43v.push_back(dv43);
+      */
     }
-    erfcSpline_ = new CubicSpline();
-    erfcSpline_->addPoints(rvals, yvals);
-    haveElectroSpline_ = true;
+
+    // construct the spline structures and fill them with the values we've
+    // computed:
+
+    v01s = new CubicSpline();
+    v01s->addPoints(rv, v01v);
+    v11s = new CubicSpline();
+    v11s->addPoints(rv, v11v);
+    v21s = new CubicSpline();
+    v21s->addPoints(rv, v21v);
+    v22s = new CubicSpline();
+    v22s->addPoints(rv, v22v);
+    v31s = new CubicSpline();
+    v31s->addPoints(rv, v31v);
+    v32s = new CubicSpline();
+    v32s->addPoints(rv, v32v);
+    v41s = new CubicSpline();
+    v41s->addPoints(rv, v41v);
+    v42s = new CubicSpline();
+    v42s->addPoints(rv, v42v);
+    v43s = new CubicSpline();
+    v43s->addPoints(rv, v43v);
+
+    /*
+    dv01s = new CubicSpline();
+    dv01s->addPoints(rv, dv01v);
+    dv11s = new CubicSpline();
+    dv11s->addPoints(rv, dv11v);
+    dv21s = new CubicSpline();
+    dv21s->addPoints(rv, dv21v);
+    dv22s = new CubicSpline();
+    dv22s->addPoints(rv, dv22v);
+    dv31s = new CubicSpline();
+    dv31s->addPoints(rv, dv31v);
+    dv32s = new CubicSpline();
+    dv32s->addPoints(rv, dv32v);
+    dv41s = new CubicSpline();
+    dv41s->addPoints(rv, dv41v);
+    dv42s = new CubicSpline();
+    dv42s->addPoints(rv, dv42v);
+    dv43s = new CubicSpline();
+    dv43s->addPoints(rv, dv43v);
+    */
+
+    haveElectroSplines_ = true;
 
     initialized_ = true;
   }
@@ -282,7 +629,6 @@ namespace OpenMD {
     ElectrostaticAtomData electrostaticAtomData;
     electrostaticAtomData.is_Charge = false;
     electrostaticAtomData.is_Dipole = false;
-    electrostaticAtomData.is_SplitDipole = false;
     electrostaticAtomData.is_Quadrupole = false;
     electrostaticAtomData.is_Fluctuating = false;
 
@@ -297,20 +643,11 @@ namespace OpenMD {
     if (ma.isMultipole()) {
       if (ma.isDipole()) {
         electrostaticAtomData.is_Dipole = true;
-        electrostaticAtomData.dipole_moment = ma.getDipoleMoment();
-      }
-      if (ma.isSplitDipole()) {
-        electrostaticAtomData.is_SplitDipole = true;
-        electrostaticAtomData.split_dipole_distance = ma.getSplitDipoleDistance();
+        electrostaticAtomData.dipole = ma.getDipole();
       }
       if (ma.isQuadrupole()) {
-        // Quadrupoles in OpenMD are set as the diagonal elements
-        // of the diagonalized traceless quadrupole moment tensor.
-        // The column vectors of the unitary matrix that diagonalizes 
-        // the quadrupole moment tensor become the eFrame (or the
-        // electrostatic version of the body-fixed frame.
         electrostaticAtomData.is_Quadrupole = true;
-        electrostaticAtomData.quadrupole_moments = ma.getQuadrupoleMoments();
+        electrostaticAtomData.quadrupole = ma.getQuadrupole();
       }
     }
     
@@ -359,28 +696,26 @@ namespace OpenMD {
         RealType rval;
         RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
         vector<RealType> rvals;
-        vector<RealType> J1vals;
-        vector<RealType> J2vals;
-        // don't start at i = 0, as rval = 0 is undefined for the slater overlap integrals.
+        vector<RealType> Jvals;
+        // don't start at i = 0, as rval = 0 is undefined for the
+        // slater overlap integrals.
         for (int i = 1; i < np_+1; i++) {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
-          J1vals.push_back(sSTOCoulInt( a, b, m, n, rval * PhysicalConstants::angstromToBohr ) * PhysicalConstants::hartreeToKcal );
-          // may not be necessary if Slater coulomb integral is symmetric
-          J2vals.push_back(sSTOCoulInt( b, a, n, m, rval * PhysicalConstants::angstromToBohr ) * PhysicalConstants::hartreeToKcal );
+          Jvals.push_back(sSTOCoulInt( a, b, m, n, rval * 
+                                       PhysicalConstants::angstromToBohr ) * 
+                          PhysicalConstants::hartreeToKcal );
         }
-
-        CubicSpline* J1 = new CubicSpline();
-        J1->addPoints(rvals, J1vals);
-        CubicSpline* J2 = new CubicSpline();
-        J2->addPoints(rvals, J2vals);
+        
+        CubicSpline* J = new CubicSpline();
+        J->addPoints(rvals, Jvals);
         
         pair<AtomType*, AtomType*> key1, key2;
         key1 = make_pair(atomType, atype2);
         key2 = make_pair(atype2, atomType);
         
-        Jij[key1] = J1;
-        Jij[key2] = J2;
+        Jij[key1] = J;
+        Jij[key2] = J;
       }
     }
  
@@ -389,13 +724,9 @@ namespace OpenMD {
   
   void Electrostatic::setCutoffRadius( RealType rCut ) {
     cutoffRadius_ = rCut;
-    rrf_ = cutoffRadius_;
     haveCutoffRadius_ = true;
   }
 
-  void Electrostatic::setSwitchingRadius( RealType rSwitch ) {
-    rt_ = rSwitch;
-  }
   void Electrostatic::setElectrostaticSummationMethod( ElectrostaticSummationMethod esm ) {
     summationMethod_ = esm;
   }
@@ -413,49 +744,46 @@ namespace OpenMD {
 
   void Electrostatic::calcForce(InteractionData &idat) {
 
-    // utility variables.  Should clean these up and use the Vector3d and 
-    // Mat3x3d to replace as many as we can in future versions:
+    RealType C_a, C_b;  // Charges 
+    Vector3d D_a, D_b;  // Dipoles (space-fixed)
+    Mat3x3d  Q_a, Q_b;  // Quadrupoles (space-fixed)
 
-    RealType q_i, q_j, mu_i, mu_j, d_i, d_j;
-    RealType qxx_i, qyy_i, qzz_i;
-    RealType qxx_j, qyy_j, qzz_j;
-    RealType cx_i, cy_i, cz_i;
-    RealType cx_j, cy_j, cz_j;
-    RealType cx2, cy2, cz2;
-    RealType ct_i, ct_j, ct_ij, a1;
-    RealType riji, ri, ri2, ri3, ri4;
-    RealType pref, vterm, epot, dudr;
-    RealType vpair(0.0);
-    RealType scale, sc2;
-    RealType pot_term, preVal, rfVal;
-    RealType c2ri, c3ri, c4rij, cti3, ctj3, ctidotj;
-    RealType preSw, preSwSc;
-    RealType c1, c2, c3, c4;
-    RealType erfcVal(1.0), derfcVal(0.0);
-    RealType BigR;
-    RealType two(2.0), three(3.0);
+    RealType ri;                                 // Distance utility scalar
+    RealType rdDa, rdDb;                         // Dipole utility scalars
+    Vector3d rxDa, rxDb;                         // Dipole utility vectors
+    RealType rdQar, rdQbr, trQa, trQb;           // Quadrupole utility scalars
+    Vector3d Qar, Qbr, rQa, rQb, rxQar, rxQbr;   // Quadrupole utility vectors
+    RealType pref;
 
-    Vector3d Q_i, Q_j;
-    Vector3d ux_i, uy_i, uz_i;
-    Vector3d ux_j, uy_j, uz_j;
-    Vector3d dudux_i, duduy_i, duduz_i;
-    Vector3d dudux_j, duduy_j, duduz_j;
-    Vector3d rhatdot2, rhatc4;
-    Vector3d dVdr;
+    RealType DadDb, trQaQb, DadQbr, DbdQar;       // Cross-interaction scalars
+    RealType rQaQbr;
+    Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar; // Cross-interaction vectors
+    Vector3d rQaQb, QaQbr, QaxQb, rQaxQbr;
+    Mat3x3d  QaQb;                                // Cross-interaction matrices
 
-    // variables for indirect (reaction field) interactions for excluded pairs:
-    RealType indirect_Pot(0.0);
-    RealType indirect_vpair(0.0);
-    Vector3d indirect_dVdr(V3Zero);
-    Vector3d indirect_duduz_i(V3Zero), indirect_duduz_j(V3Zero);
-
-    RealType coulInt, vFluc1(0.0), vFluc2(0.0);
-    pair<RealType, RealType> res;
+    RealType U(0.0);  // Potential
+    Vector3d F(0.0);  // Force
+    Vector3d Ta(0.0); // Torque on site a
+    Vector3d Tb(0.0); // Torque on site b
+    Vector3d Ea(0.0); // Electric field at site a
+    Vector3d Eb(0.0); // Electric field at site b
+    RealType dUdCa(0.0); // fluctuating charge force at site a
+    RealType dUdCb(0.0); // fluctuating charge force at site a
     
-    // splines for coulomb integrals
-    CubicSpline* J1;
-    CubicSpline* J2;
+    // Indirect interactions mediated by the reaction field.
+    RealType indirect_Pot(0.0);  // Potential
+    Vector3d indirect_F(0.0);    // Force
+    Vector3d indirect_Ta(0.0);   // Torque on site a
+    Vector3d indirect_Tb(0.0);   // Torque on site b
+
+    // Excluded potential that is still computed for fluctuating charges
+    RealType excluded_Pot(0.0);
+
+    RealType rfContrib, coulInt;
     
+    // spline for coulomb integral
+    CubicSpline* J;
+
     if (!initialized_) initialize();
     
     ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
@@ -463,653 +791,411 @@ namespace OpenMD {
     
     // some variables we'll need independent of electrostatic type:
 
-    riji = 1.0 /  *(idat.rij) ;
-    Vector3d rhat =  *(idat.d)   * riji;
-
+    ri = 1.0 /  *(idat.rij);
+    Vector3d rhat =  *(idat.d)  * ri;
+      
     // logicals
 
-    bool i_is_Charge = data1.is_Charge;
-    bool i_is_Dipole = data1.is_Dipole;
-    bool i_is_SplitDipole = data1.is_SplitDipole;
-    bool i_is_Quadrupole = data1.is_Quadrupole;
-    bool i_is_Fluctuating = data1.is_Fluctuating;
+    bool a_is_Charge = data1.is_Charge;
+    bool a_is_Dipole = data1.is_Dipole;
+    bool a_is_Quadrupole = data1.is_Quadrupole;
+    bool a_is_Fluctuating = data1.is_Fluctuating;
 
-    bool j_is_Charge = data2.is_Charge;
-    bool j_is_Dipole = data2.is_Dipole;
-    bool j_is_SplitDipole = data2.is_SplitDipole;
-    bool j_is_Quadrupole = data2.is_Quadrupole;
-    bool j_is_Fluctuating = data2.is_Fluctuating;
+    bool b_is_Charge = data2.is_Charge;
+    bool b_is_Dipole = data2.is_Dipole;
+    bool b_is_Quadrupole = data2.is_Quadrupole;
+    bool b_is_Fluctuating = data2.is_Fluctuating;
+
+    // Obtain all of the required radial function values from the
+    // spline structures:
     
-    if (i_is_Charge) {
-      q_i = data1.fixedCharge;
+    // needed for fields (and forces):
+    if (a_is_Charge || b_is_Charge) {
+      v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
+    }
+    if (a_is_Dipole || b_is_Dipole) {
+      v11s->getValueAndDerivativeAt( *(idat.rij), v11, dv11);
+      v11or = ri * v11;
+    }
+    if (a_is_Quadrupole || b_is_Quadrupole ||  (a_is_Dipole && b_is_Dipole)) {
+      v21s->getValueAndDerivativeAt( *(idat.rij), v21, dv21);
+      v22s->getValueAndDerivativeAt( *(idat.rij), v22, dv22);
+      v22or = ri * v22;
+    }      
 
-      if (i_is_Fluctuating) {
-        q_i += *(idat.flucQ1);
+    // needed for potentials (and forces and torques):
+    if ((a_is_Dipole && b_is_Quadrupole) || 
+        (b_is_Dipole && a_is_Quadrupole)) {
+      v31s->getValueAndDerivativeAt( *(idat.rij), v31, dv31);
+      v32s->getValueAndDerivativeAt( *(idat.rij), v32, dv32);
+      v31or = v31 * ri;
+      v32or = v32 * ri;
+    }
+    if (a_is_Quadrupole && b_is_Quadrupole) {
+      v41s->getValueAndDerivativeAt( *(idat.rij), v41, dv41);
+      v42s->getValueAndDerivativeAt( *(idat.rij), v42, dv42);
+      v43s->getValueAndDerivativeAt( *(idat.rij), v43, dv43);
+      v42or = v42 * ri;
+      v43or = v43 * ri;
+    }
+
+    // calculate the single-site contributions (fields, etc).
+    
+    if (a_is_Charge) {
+      C_a = data1.fixedCharge;
+      
+      if (a_is_Fluctuating) {
+        C_a += *(idat.flucQ1);
       }
       
       if (idat.excluded) {
-        *(idat.skippedCharge2) += q_i;
+        *(idat.skippedCharge2) += C_a;
+      } else {
+        // only do the field if we're not excluded:
+        Eb -= C_a *  pre11_ * dv01 * rhat;
       }
     }
-
-    if (i_is_Dipole) {
-      mu_i = data1.dipole_moment;
-      uz_i = idat.eFrame1->getColumn(2);
-      
-      ct_i = dot(uz_i, rhat);
-
-      if (i_is_SplitDipole) 
-        d_i = data1.split_dipole_distance;
-      
-      duduz_i = V3Zero;
+    
+    if (a_is_Dipole) {
+      D_a = *(idat.dipole1);
+      rdDa = dot(rhat, D_a);
+      rxDa = cross(rhat, D_a);
+      if (!idat.excluded) 
+        Eb -=  pre12_ * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
     }
     
-    if (i_is_Quadrupole) {
-      Q_i = data1.quadrupole_moments;
-      qxx_i = Q_i.x();
-      qyy_i = Q_i.y();
-      qzz_i = Q_i.z();
-      
-      ux_i = idat.eFrame1->getColumn(0);
-      uy_i = idat.eFrame1->getColumn(1);
-      uz_i = idat.eFrame1->getColumn(2);
-
-      cx_i = dot(ux_i, rhat);
-      cy_i = dot(uy_i, rhat);
-      cz_i = dot(uz_i, rhat); 
-
-      dudux_i = V3Zero;
-      duduy_i = V3Zero;
-      duduz_i = V3Zero;
+    if (a_is_Quadrupole) {
+      Q_a = *(idat.quadrupole1);
+      trQa =  Q_a.trace();
+      Qar =   Q_a * rhat;
+      rQa = rhat * Q_a;
+      rdQar = dot(rhat, Qar);
+      rxQar = cross(rhat, Qar);
+      if (!idat.excluded) 
+        Eb -= pre14_ * (trQa * rhat * dv21 + 2.0 * Qar * v22or 
+                        + rdQar * rhat * (dv22 - 2.0*v22or));
     }
-
-    if (j_is_Charge) {
-      q_j = data2.fixedCharge;
-
-      if (j_is_Fluctuating) 
-        q_j += *(idat.flucQ2);
-
+    
+    if (b_is_Charge) {
+      C_b = data2.fixedCharge;
+      
+      if (b_is_Fluctuating) 
+        C_b += *(idat.flucQ2);
+      
       if (idat.excluded) {
-        *(idat.skippedCharge1) += q_j;
+        *(idat.skippedCharge1) += C_b;
+      } else {
+        // only do the field if we're not excluded:
+        Ea += C_b *  pre11_ * dv01 * rhat;
       }
     }
-
-
-    if (j_is_Dipole) {
-      mu_j = data2.dipole_moment;
-      uz_j = idat.eFrame2->getColumn(2);
-      
-      ct_j = dot(uz_j, rhat);
-
-      if (j_is_SplitDipole) 
-        d_j = data2.split_dipole_distance;
-      
-      duduz_j = V3Zero;
+    
+    if (b_is_Dipole) {
+      D_b = *(idat.dipole2);
+      rdDb = dot(rhat, D_b);
+      rxDb = cross(rhat, D_b);
+      if (!idat.excluded) 
+        Ea += pre12_ * ((dv11-v11or) * rdDb * rhat + v11or * D_b);
     }
     
-    if (j_is_Quadrupole) {
-      Q_j = data2.quadrupole_moments;
-      qxx_j = Q_j.x();
-      qyy_j = Q_j.y();
-      qzz_j = Q_j.z();
-      
-      ux_j = idat.eFrame2->getColumn(0);
-      uy_j = idat.eFrame2->getColumn(1);
-      uz_j = idat.eFrame2->getColumn(2);
-
-      cx_j = dot(ux_j, rhat);
-      cy_j = dot(uy_j, rhat);
-      cz_j = dot(uz_j, rhat);
-
-      dudux_j = V3Zero;
-      duduy_j = V3Zero;
-      duduz_j = V3Zero;
+    if (b_is_Quadrupole) {
+      Q_b = *(idat.quadrupole2);
+      trQb =  Q_b.trace();
+      Qbr =   Q_b * rhat;
+      rQb = rhat * Q_b;
+      rdQbr = dot(rhat, Qbr);
+      rxQbr = cross(rhat, Qbr);
+      if (!idat.excluded) 
+        Ea += pre14_ * (trQb * rhat * dv21 + 2.0 * Qbr * v22or 
+                        + rdQbr * rhat * (dv22 - 2.0*v22or));
     }
     
-    if (i_is_Fluctuating && j_is_Fluctuating) {
-      J1 = Jij[idat.atypes];
-      J2 = Jij[make_pair(idat.atypes.second, idat.atypes.first)];
-    }
-
-    epot = 0.0;
-    dVdr = V3Zero;
+    if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {
+      J = Jij[idat.atypes];
+    }    
     
-    if (i_is_Charge) {
+    if (a_is_Charge) {     
       
-      if (j_is_Charge) {
-        if (screeningMethod_ == DAMPED) {
-          // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          erfcVal = res.first;
-          derfcVal = res.second;
-
-          //erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-          //derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
-
-          c1 = erfcVal * riji;
-          c2 = (-derfcVal + c1) * riji;
-        } else {
-          c1 = riji;
-          c2 = c1 * riji;
-        }
-
-        preVal =  *(idat.electroMult) * pre11_;
+      if (b_is_Charge) {
+        pref =  pre11_ * *(idat.electroMult);      
+        U  += C_a * C_b * pref * v01;
+        F  += C_a * C_b * pref * dv01 * rhat;
         
-        if (summationMethod_ == esm_SHIFTED_POTENTIAL) {
-          vterm = preVal * (c1 - c1c_);
-          dudr  = - *(idat.sw)  * preVal * c2;
+        // If this is an excluded pair, there are still indirect
+        // interactions via the reaction field we must worry about:
 
-        } else if (summationMethod_ == esm_SHIFTED_FORCE)  {
-          vterm = preVal * ( c1 - c1c_ + c2c_*( *(idat.rij)  - cutoffRadius_) );
-          dudr  =  *(idat.sw)  * preVal * (c2c_ - c2);
-
-        } else if (summationMethod_ == esm_REACTION_FIELD) {
-          rfVal = preRF_ *  *(idat.rij)  *  *(idat.rij);
-
-          vterm = preVal * ( riji + rfVal );             
-          dudr  =  *(idat.sw)  * preVal * ( 2.0 * rfVal - riji ) * riji;
-          
-          // if this is an excluded pair, there are still indirect
-          // interactions via the reaction field we must worry about:
-
-          if (idat.excluded) {
-            indirect_vpair += preVal * rfVal;
-            indirect_Pot += *(idat.sw) * preVal * rfVal;
-            indirect_dVdr += *(idat.sw)  * preVal * two * rfVal  * riji * rhat;
-          }
-          
-        } else {
-
-          vterm = preVal * riji * erfcVal;           
-          dudr  = -  *(idat.sw)  * preVal * c2;
-          
+        if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
+          rfContrib = preRF_ * pref * C_a * C_b * *(idat.r2);
+          indirect_Pot += rfContrib;
+          indirect_F   += rfContrib * 2.0 * ri * rhat;
         }
         
-        vpair += vterm * q_i * q_j;
-        epot +=  *(idat.sw)  * vterm * q_i * q_j;
-        dVdr += dudr * rhat * q_i * q_j;
+        // Fluctuating charge forces are handled via Coulomb integrals
+        // for excluded pairs (i.e. those connected via bonds) and
+        // with the standard charge-charge interaction otherwise.
 
-        if (i_is_Fluctuating) {
-          if (idat.excluded) {
-            // vFluc1 is the difference between the direct coulomb integral
-            // and the normal 1/r-like  interaction between point charges.
-            coulInt = J1->getValueAt( *(idat.rij) );
-            vFluc1 = coulInt - (*(idat.sw) * vterm);
-          } else {
-            vFluc1 = 0.0;
-          }
-          *(idat.dVdFQ1) += ( *(idat.sw) * vterm + vFluc1 ) * q_j;
-        }
-
-        if (j_is_Fluctuating) {
-          if (idat.excluded) {
-            // vFluc2 is the difference between the direct coulomb integral
-            // and the normal 1/r-like  interaction between point charges.
-            coulInt = J2->getValueAt( *(idat.rij) );
-            vFluc2 = coulInt - (*(idat.sw) * vterm);
-          } else {
-            vFluc2 = 0.0;
-          }
-          *(idat.dVdFQ2) += ( *(idat.sw) * vterm + vFluc2 ) * q_i;
-        }
-          
- 
-      }
-
-      if (j_is_Dipole) {
-        // pref is used by all the possible methods
-        pref =  *(idat.electroMult) * pre12_ * q_i * mu_j;
-        preSw =  *(idat.sw)  * pref;
-
-        if (summationMethod_ == esm_REACTION_FIELD) {
-          ri2 = riji * riji;
-          ri3 = ri2 * riji;
-    
-          vterm = - pref * ct_j * ( ri2 - preRF2_ *  *(idat.rij)  );
-          vpair += vterm;
-          epot +=  *(idat.sw)  * vterm;
-
-          dVdr +=  -preSw * (ri3 * (uz_j - three * ct_j * rhat) - preRF2_*uz_j);
-          duduz_j += -preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );   
-
-          // Even if we excluded this pair from direct interactions,
-          // we still have the reaction-field-mediated charge-dipole
-          // interaction:
-
-          if (idat.excluded) {
-            indirect_vpair += pref * ct_j * preRF2_ * *(idat.rij);
-            indirect_Pot += preSw * ct_j * preRF2_ * *(idat.rij);
-            indirect_dVdr += preSw * preRF2_ * uz_j;
-            indirect_duduz_j += preSw * rhat * preRF2_ *  *(idat.rij); 
-          }
-                       
+        if (idat.excluded) {          
+          if (a_is_Fluctuating || b_is_Fluctuating) {
+            coulInt = J->getValueAt( *(idat.rij) );
+            if (a_is_Fluctuating)  dUdCa += coulInt * C_b;
+            if (b_is_Fluctuating)  dUdCb += coulInt * C_a;
+            excluded_Pot += C_a * C_b * coulInt;
+          }          
         } else {
-          // determine the inverse r used if we have split dipoles
-          if (j_is_SplitDipole) {
-            BigR = sqrt( *(idat.r2) + 0.25 * d_j * d_j);
-            ri = 1.0 / BigR;
-            scale =  *(idat.rij)  * ri;
-          } else {
-            ri = riji;
-            scale = 1.0;
-          }
-          
-          sc2 = scale * scale;
-
-          if (screeningMethod_ == DAMPED) {
-            // assemble the damping variables
-            //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-            //erfcVal = res.first;
-            //derfcVal = res.second;
-            erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-            derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
-            c1 = erfcVal * ri;
-            c2 = (-derfcVal + c1) * ri;
-            c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * ri;
-          } else {
-            c1 = ri;
-            c2 = c1 * ri;
-            c3 = 3.0 * c2 * ri;
-          }
-             
-          c2ri = c2 * ri;
-
-          // calculate the potential
-          pot_term =  scale * c2;
-          vterm = -pref * ct_j * pot_term;
-          vpair += vterm;
-          epot +=  *(idat.sw)  * vterm;
-             
-          // calculate derivatives for forces and torques
-
-          dVdr += -preSw * (uz_j * c2ri - ct_j * rhat * sc2 * c3);
-          duduz_j += -preSw * pot_term * rhat;
-
-        }
-        if (i_is_Fluctuating) {
-          *(idat.dVdFQ1) += ( *(idat.sw) * vterm ) / q_i;
+          if (a_is_Fluctuating) dUdCa += C_b * pref * v01;
+          if (a_is_Fluctuating) dUdCb += C_a * pref * v01;
         }
       }
 
-      if (j_is_Quadrupole) {
-        // first precalculate some necessary variables
-        cx2 = cx_j * cx_j;
-        cy2 = cy_j * cy_j;
-        cz2 = cz_j * cz_j;
-        pref =   *(idat.electroMult) * pre14_ * q_i * one_third_;
-          
-        if (screeningMethod_ == DAMPED) {
-          // assemble the damping variables
-          //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          //erfcVal = res.first;
-          //derfcVal = res.second;
-          erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-          derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
-          c1 = erfcVal * riji;
-          c2 = (-derfcVal + c1) * riji;
-          c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * riji;
-          c4 = -4.0 * derfcVal * alpha4_ + 5.0 * c3 * riji * riji;
-        } else {
-          c1 = riji;
-          c2 = c1 * riji;
-          c3 = 3.0 * c2 * riji;
-          c4 = 5.0 * c3 * riji * riji;
+      if (b_is_Dipole) {
+        pref =  pre12_ * *(idat.electroMult);        
+        U  += C_a * pref * v11 * rdDb;
+        F  += C_a * pref * ((dv11 - v11or) * rdDb * rhat + v11or * D_b);
+        Tb += C_a * pref * v11 * rxDb;
+
+        if (a_is_Fluctuating) dUdCa += pref * v11 * rdDb;
+
+        // Even if we excluded this pair from direct interactions, we
+        // still have the reaction-field-mediated charge-dipole
+        // interaction:
+
+        if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
+          rfContrib = C_a * pref * preRF_ * 2.0 * *(idat.rij);
+          indirect_Pot += rfContrib * rdDb;
+          indirect_F   += rfContrib * D_b / (*idat.rij);
+          indirect_Tb  += C_a * pref * preRF_ * rxDb;
         }
-
-        // precompute variables for convenience
-        preSw =  *(idat.sw)  * pref;
-        c2ri = c2 * riji;
-        c3ri = c3 * riji;
-        c4rij = c4 *  *(idat.rij) ;
-        rhatdot2 = two * rhat * c3;
-        rhatc4 = rhat * c4rij;
-
-        // calculate the potential
-        pot_term = ( qxx_j * (cx2*c3 - c2ri) + 
-                     qyy_j * (cy2*c3 - c2ri) + 
-                     qzz_j * (cz2*c3 - c2ri) );
-        vterm = pref * pot_term;
-        vpair += vterm;
-        epot +=  *(idat.sw)  * vterm;
-                
-        // calculate derivatives for the forces and torques
-
-        dVdr += -preSw * ( qxx_j* (cx2*rhatc4 - (two*cx_j*ux_j + rhat)*c3ri) +
-                           qyy_j* (cy2*rhatc4 - (two*cy_j*uy_j + rhat)*c3ri) +
-                           qzz_j* (cz2*rhatc4 - (two*cz_j*uz_j + rhat)*c3ri));
-                           
-        dudux_j += preSw * qxx_j * cx_j * rhatdot2;
-        duduy_j += preSw * qyy_j * cy_j * rhatdot2;
-        duduz_j += preSw * qzz_j * cz_j * rhatdot2;
-        if (i_is_Fluctuating) {
-          *(idat.dVdFQ1) += ( *(idat.sw) * vterm ) / q_i;
-        }
-
-      }
-    }
-    
-    if (i_is_Dipole) {
-
-      if (j_is_Charge) {
-        // variables used by all the methods
-        pref =  *(idat.electroMult) * pre12_ * q_j * mu_i;
-        preSw =  *(idat.sw)  * pref;
-
-        if (summationMethod_ == esm_REACTION_FIELD) {
-
-          ri2 = riji * riji;
-          ri3 = ri2 * riji;
-
-          vterm = pref * ct_i * ( ri2 - preRF2_ *  *(idat.rij)  );
-          vpair += vterm;
-          epot +=  *(idat.sw)  * vterm;
-          
-          dVdr += preSw * (ri3 * (uz_i - three * ct_i * rhat) - preRF2_ * uz_i);
-          
-          duduz_i += preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );
-
-          // Even if we excluded this pair from direct interactions,
-          // we still have the reaction-field-mediated charge-dipole
-          // interaction:
-
-          if (idat.excluded) {
-            indirect_vpair += -pref * ct_i * preRF2_ * *(idat.rij);
-            indirect_Pot += -preSw * ct_i * preRF2_ * *(idat.rij);
-            indirect_dVdr += -preSw * preRF2_ * uz_i;
-            indirect_duduz_i += -preSw * rhat * preRF2_ *  *(idat.rij); 
-          }
-             
-        } else {
-          
-          // determine inverse r if we are using split dipoles
-          if (i_is_SplitDipole) {
-            BigR = sqrt( *(idat.r2) + 0.25 * d_i * d_i);
-            ri = 1.0 / BigR;
-            scale =  *(idat.rij)  * ri;
-          } else {
-            ri = riji;
-            scale = 1.0;
-          }
-          
-          sc2 = scale * scale;
-            
-          if (screeningMethod_ == DAMPED) {
-            // assemble the damping variables
-            //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-            //erfcVal = res.first;
-            //derfcVal = res.second;
-            erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-            derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
-            c1 = erfcVal * ri;
-            c2 = (-derfcVal + c1) * ri;
-            c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * ri;
-          } else {
-            c1 = ri;
-            c2 = c1 * ri;
-            c3 = 3.0 * c2 * ri;
-          }
-          
-          c2ri = c2 * ri;
-               
-          // calculate the potential
-          pot_term = c2 * scale;
-          vterm = pref * ct_i * pot_term;
-          vpair += vterm;
-          epot +=  *(idat.sw)  * vterm;
-
-          // calculate derivatives for the forces and torques
-          dVdr += preSw * (uz_i * c2ri - ct_i * rhat * sc2 * c3);
-          duduz_i += preSw * pot_term * rhat;
-        }
-
-        if (j_is_Fluctuating) {
-          *(idat.dVdFQ2) += ( *(idat.sw) * vterm ) / q_j;
-        }
-
       }
 
-      if (j_is_Dipole) {
-        // variables used by all methods
-        ct_ij = dot(uz_i, uz_j);
+      if (b_is_Quadrupole) {
+        pref = pre14_ * *(idat.electroMult);
+        U  +=  C_a * pref * (v21 * trQb + v22 * rdQbr);
+        F  +=  C_a * pref * (trQb * dv21 * rhat + 2.0 * Qbr * v22or);
+        F  +=  C_a * pref * rdQbr * rhat * (dv22 - 2.0*v22or);
+        Tb +=  C_a * pref * 2.0 * rxQbr * v22;
 
-        pref =  *(idat.electroMult) * pre22_ * mu_i * mu_j;
-        preSw =  *(idat.sw)  * pref;
-
-        if (summationMethod_ == esm_REACTION_FIELD) {
-          ri2 = riji * riji;
-          ri3 = ri2 * riji;
-          ri4 = ri2 * ri2;
-
-          vterm = pref * ( ri3 * (ct_ij - 3.0 * ct_i * ct_j) -
-                           preRF2_ * ct_ij );
-          vpair += vterm;
-          epot +=  *(idat.sw)  * vterm;
-             
-          a1 = 5.0 * ct_i * ct_j - ct_ij;
-             
-          dVdr += preSw * three * ri4 * (a1 * rhat - ct_i * uz_j - ct_j * uz_i);
-
-          duduz_i += preSw * (ri3 * (uz_j - three * ct_j * rhat) - preRF2_*uz_j);
-          duduz_j += preSw * (ri3 * (uz_i - three * ct_i * rhat) - preRF2_*uz_i);
-
-          if (idat.excluded) {
-            indirect_vpair +=  - pref * preRF2_ * ct_ij;
-            indirect_Pot +=    - preSw * preRF2_ * ct_ij;
-            indirect_duduz_i += -preSw * preRF2_ * uz_j;
-            indirect_duduz_j += -preSw * preRF2_ * uz_i;
-          }
-
-        } else {
-          
-          if (i_is_SplitDipole) {
-            if (j_is_SplitDipole) {
-              BigR = sqrt( *(idat.r2) + 0.25 * d_i * d_i + 0.25 * d_j * d_j);
-            } else {
-              BigR = sqrt( *(idat.r2) + 0.25 * d_i * d_i);
-            }
-            ri = 1.0 / BigR;
-            scale =  *(idat.rij)  * ri;
-          } else {
-            if (j_is_SplitDipole) {
-              BigR = sqrt( *(idat.r2) + 0.25 * d_j * d_j);
-              ri = 1.0 / BigR;
-              scale =  *(idat.rij)  * ri;
-            } else {
-              ri = riji;
-              scale = 1.0;
-            }
-          }
-          if (screeningMethod_ == DAMPED) {
-            // assemble damping variables
-            //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-            //erfcVal = res.first;
-            //derfcVal = res.second;
-            erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-            derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
-            c1 = erfcVal * ri;
-            c2 = (-derfcVal + c1) * ri;
-            c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * ri;
-            c4 = -4.0 * derfcVal * alpha4_ + 5.0 * c3 * ri * ri;
-          } else {
-            c1 = ri;
-            c2 = c1 * ri;
-            c3 = 3.0 * c2 * ri;
-            c4 = 5.0 * c3 * ri * ri;
-          }
-
-          // precompute variables for convenience
-          sc2 = scale * scale;
-          cti3 = ct_i * sc2 * c3;
-          ctj3 = ct_j * sc2 * c3;
-          ctidotj = ct_i * ct_j * sc2;
-          preSwSc = preSw * scale;
-          c2ri = c2 * ri;
-          c3ri = c3 * ri;
-          c4rij = c4 *  *(idat.rij) ;
-
-          // calculate the potential 
-          pot_term = (ct_ij * c2ri - ctidotj * c3);
-          vterm = pref * pot_term;
-          vpair += vterm;
-          epot +=  *(idat.sw)  * vterm;
-
-          // calculate derivatives for the forces and torques
-          dVdr += preSwSc * ( ctidotj * rhat * c4rij  - 
-                              (ct_i*uz_j + ct_j*uz_i + ct_ij*rhat) * c3ri);
-          
-          duduz_i += preSw * (uz_j * c2ri - ctj3 * rhat);
-          duduz_j += preSw * (uz_i * c2ri - cti3 * rhat);
-        }
+        if (a_is_Fluctuating) dUdCa += pref * (v21 * trQb + v22 * rdQbr);
       }
     }
 
-    if (i_is_Quadrupole) {
-      if (j_is_Charge) {
-        // precompute some necessary variables
-        cx2 = cx_i * cx_i;
-        cy2 = cy_i * cy_i;
-        cz2 = cz_i * cz_i;
+    if (a_is_Dipole) {
 
-        pref =  *(idat.electroMult) * pre14_ * q_j * one_third_;
+      if (b_is_Charge) {
+        pref = pre12_ * *(idat.electroMult);
 
-        if (screeningMethod_ == DAMPED) {
-          // assemble the damping variables
-          //res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
-          //erfcVal = res.first;
-          //derfcVal = res.second;
-          erfcVal = erfc(dampingAlpha_ * *(idat.rij));
-          derfcVal = - alphaPi_ * exp(-alpha2_ * *(idat.r2));
-          c1 = erfcVal * riji;
-          c2 = (-derfcVal + c1) * riji;
-          c3 = -2.0 * derfcVal * alpha2_ + 3.0 * c2 * riji;
-          c4 = -4.0 * derfcVal * alpha4_ + 5.0 * c3 * riji * riji;
-        } else {
-          c1 = riji;
-          c2 = c1 * riji;
-          c3 = 3.0 * c2 * riji;
-          c4 = 5.0 * c3 * riji * riji;
+        U  -= C_b * pref * v11 * rdDa;
+        F  -= C_b * pref * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
+        Ta -= C_b * pref * v11 * rxDa;
+
+        if (b_is_Fluctuating) dUdCb -= pref * v11 * rdDa;
+
+        // Even if we excluded this pair from direct interactions,
+        // we still have the reaction-field-mediated charge-dipole
+        // interaction:
+        if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
+          rfContrib = C_b * pref * preRF_ * 2.0 * *(idat.rij);
+          indirect_Pot -= rfContrib * rdDa;
+          indirect_F   -= rfContrib * D_a / (*idat.rij);
+          indirect_Ta  -= C_b * pref * preRF_ * rxDa;
         }
-          
-        // precompute some variables for convenience
-        preSw =  *(idat.sw)  * pref;
-        c2ri = c2 * riji;
-        c3ri = c3 * riji;
-        c4rij = c4 *  *(idat.rij) ;
-        rhatdot2 = two * rhat * c3;
-        rhatc4 = rhat * c4rij;
+      }
 
-        // calculate the potential
-        pot_term = ( qxx_i * (cx2 * c3 - c2ri) + 
-                     qyy_i * (cy2 * c3 - c2ri) + 
-                     qzz_i * (cz2 * c3 - c2ri) );
+      if (b_is_Dipole) {
+        pref = pre22_ * *(idat.electroMult);
+        DadDb = dot(D_a, D_b);
+        DaxDb = cross(D_a, D_b);
+
+        U  -= pref * (DadDb * v21 + rdDa * rdDb * v22);
+        F  -= pref * (dv21 * DadDb * rhat + v22or * (rdDb * D_a + rdDa * D_b));
+        F  -= pref * (rdDa * rdDb) * (dv22 - 2.0*v22or) * rhat;
+        Ta += pref * ( v21 * DaxDb - v22 * rdDb * rxDa);
+        Tb += pref * (-v21 * DaxDb - v22 * rdDa * rxDb);
+
+        // Even if we excluded this pair from direct interactions, we
+        // still have the reaction-field-mediated dipole-dipole
+        // interaction:
+        if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
+          rfContrib = -pref * preRF_ * 2.0;
+          indirect_Pot += rfContrib * DadDb;
+          indirect_Ta  += rfContrib * DaxDb;
+          indirect_Tb  -= rfContrib * DaxDb;
+        }
+      }
+
+      if (b_is_Quadrupole) {
+        pref = pre24_ * *(idat.electroMult);
+        DadQb = D_a * Q_b;
+        DadQbr = dot(D_a, Qbr);
+        DaxQbr = cross(D_a, Qbr);
+
+        U  -= pref * ((trQb*rdDa + 2.0*DadQbr)*v31 + rdDa*rdQbr*v32);
+        F  -= pref * (trQb*D_a + 2.0*DadQb) * v31or;
+        F  -= pref * (trQb*rdDa + 2.0*DadQbr) * (dv31-v31or) * rhat;
+        F  -= pref * (D_a*rdQbr + 2.0*rdDa*rQb) * v32or;
+        F  -= pref * (rdDa * rdQbr * rhat * (dv32-3.0*v32or));
+        Ta += pref * ((-trQb*rxDa + 2.0 * DaxQbr)*v31 - rxDa*rdQbr*v32);
+        Tb += pref * ((2.0*cross(DadQb, rhat) - 2.0*DaxQbr)*v31 
+                      - 2.0*rdDa*rxQbr*v32);
+      }
+    }
+
+    if (a_is_Quadrupole) {
+      if (b_is_Charge) {
+        pref = pre14_ * *(idat.electroMult);
+        U  += C_b * pref * (v21 * trQa + v22 * rdQar);
+        F  += C_b * pref * (trQa * rhat * dv21 + 2.0 * Qar * v22or);
+        F  += C_b * pref * rdQar * rhat * (dv22 - 2.0*v22or);
+        Ta += C_b * pref * 2.0 * rxQar * v22;
+
+        if (b_is_Fluctuating) dUdCb += pref * (v21 * trQa + v22 * rdQar);
+      }
+      if (b_is_Dipole) {
+        pref = pre24_ * *(idat.electroMult);
+        DbdQa = D_b * Q_a;
+        DbdQar = dot(D_b, Qar);
+        DbxQar = cross(D_b, Qar);
+
+        U  += pref * ((trQa*rdDb + 2.0*DbdQar)*v31 + rdDb*rdQar*v32);
+        F  += pref * (trQa*D_b + 2.0*DbdQa) * v31or;
+        F  += pref * (trQa*rdDb + 2.0*DbdQar) * (dv31-v31or) * rhat;
+        F  += pref * (D_b*rdQar + 2.0*rdDb*rQa) * v32or;
+        F  += pref * (rdDb * rdQar * rhat * (dv32-3.0*v32or));
+        Ta += pref * ((-2.0*cross(DbdQa, rhat) + 2.0*DbxQar)*v31 
+                      + 2.0*rdDb*rxQar*v32);
+        Tb += pref * ((trQa*rxDb - 2.0 * DbxQar)*v31 + rxDb*rdQar*v32);
+      }
+      if (b_is_Quadrupole) {
+        pref = pre44_ * *(idat.electroMult);  // yes
+        QaQb = Q_a * Q_b;
+        trQaQb = QaQb.trace();
+        rQaQb = rhat * QaQb;
+        QaQbr = QaQb * rhat;
+        QaxQb = cross(Q_a, Q_b);
+        rQaQbr = dot(rQa, Qbr);
+        rQaxQbr = cross(rQa, Qbr);
         
-        vterm = pref * pot_term;
-        vpair += vterm;
-        epot +=  *(idat.sw)  * vterm;
+        U  += pref * (trQa * trQb + 2.0 * trQaQb) * v41;
+        U  += pref * (trQa * rdQbr + trQb * rdQar  + 4.0 * rQaQbr) * v42;
+        U  += pref * (rdQar * rdQbr) * v43;
 
-        // calculate the derivatives for the forces and torques
+        F  += pref * rhat * (trQa * trQb + 2.0 * trQaQb)*dv41;
+        F  += pref*rhat*(trQa*rdQbr + trQb*rdQar + 4.0*rQaQbr)*(dv42-2.0*v42or);
+        F  += pref * rhat * (rdQar * rdQbr)*(dv43 - 4.0*v43or);
 
-        dVdr += -preSw * (qxx_i* (cx2*rhatc4 - (two*cx_i*ux_i + rhat)*c3ri) +
-                          qyy_i* (cy2*rhatc4 - (two*cy_i*uy_i + rhat)*c3ri) +
-                          qzz_i* (cz2*rhatc4 - (two*cz_i*uz_i + rhat)*c3ri));
+        F  += pref * 2.0 * (trQb*rQa + trQa*rQb) * v42or;
+        F  += pref * 4.0 * (rQaQb + QaQbr) * v42or;
+        F  += pref * 2.0 * (rQa*rdQbr + rdQar*rQb) * v43or;
 
-        dudux_i += preSw * qxx_i * cx_i *  rhatdot2;
-        duduy_i += preSw * qyy_i * cy_i *  rhatdot2;
-        duduz_i += preSw * qzz_i * cz_i *  rhatdot2;
+        Ta += pref * (- 4.0 * QaxQb * v41);
+        Ta += pref * (- 2.0 * trQb * cross(rQa, rhat) 
+                      + 4.0 * cross(rhat, QaQbr) 
+                      - 4.0 * rQaxQbr) * v42;
+        Ta += pref * 2.0 * cross(rhat,Qar) * rdQbr * v43;
 
-        if (j_is_Fluctuating) {
-          *(idat.dVdFQ2) += ( *(idat.sw) * vterm ) / q_j;
-        }
 
+        Tb += pref * (+ 4.0 * QaxQb * v41);
+        Tb += pref * (- 2.0 * trQa * cross(rQb, rhat) 
+                      - 4.0 * cross(rQaQb, rhat) 
+                      + 4.0 * rQaxQbr) * v42;
+        // Possible replacement for line 2 above:
+        //             + 4.0 * cross(rhat, QbQar) 
+
+        Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
+
+        //  cerr << " tsum = " << Ta + Tb - cross(  *(idat.d) , F ) << "\n";
       }
     }
 
+    if (idat.doElectricField) {
+      *(idat.eField1) += Ea * *(idat.electroMult);
+      *(idat.eField2) += Eb * *(idat.electroMult);
+    }
+
+    if (a_is_Fluctuating) *(idat.dVdFQ1) += dUdCa * *(idat.sw);
+    if (b_is_Fluctuating) *(idat.dVdFQ2) += dUdCb * *(idat.sw);
 
     if (!idat.excluded) {
-      *(idat.vpair) += vpair;
-      (*(idat.pot))[ELECTROSTATIC_FAMILY] += epot;
-      *(idat.f1) += dVdr;
       
-      if (i_is_Dipole || i_is_Quadrupole) 
-        *(idat.t1) -= cross(uz_i, duduz_i);
-      if (i_is_Quadrupole) {
-        *(idat.t1) -= cross(ux_i, dudux_i);
-        *(idat.t1) -= cross(uy_i, duduy_i);
-      }
+      *(idat.vpair) += U;
+      (*(idat.pot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
+      *(idat.f1) += F * *(idat.sw);
       
-      if (j_is_Dipole || j_is_Quadrupole) 
-        *(idat.t2) -= cross(uz_j, duduz_j);
-      if (j_is_Quadrupole) {
-        *(idat.t2) -= cross(uz_j, dudux_j);
-        *(idat.t2) -= cross(uz_j, duduy_j);
-      }
+      if (a_is_Dipole || a_is_Quadrupole) 
+        *(idat.t1) += Ta * *(idat.sw);
 
+      if (b_is_Dipole || b_is_Quadrupole) 
+        *(idat.t2) += Tb * *(idat.sw);
+      
     } else {
 
       // only accumulate the forces and torques resulting from the
       // indirect reaction field terms.
 
-      *(idat.vpair) += indirect_vpair;
+      *(idat.vpair) += indirect_Pot;      
+      (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] +=  excluded_Pot;
+      (*(idat.pot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
+      *(idat.f1) += *(idat.sw) * indirect_F;
       
-      (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] +=   (*(idat.sw) * vterm + 
-                                                        vFluc1 ) * q_i * q_j;
-      (*(idat.pot))[ELECTROSTATIC_FAMILY] += indirect_Pot;
-      *(idat.f1) += indirect_dVdr;
-      
-      if (i_is_Dipole) 
-        *(idat.t1) -= cross(uz_i, indirect_duduz_i);
-      if (j_is_Dipole) 
-        *(idat.t2) -= cross(uz_j, indirect_duduz_j);
+      if (a_is_Dipole || a_is_Quadrupole) 
+        *(idat.t1) += *(idat.sw) * indirect_Ta;
+            
+      if (b_is_Dipole || b_is_Quadrupole) 
+        *(idat.t2) += *(idat.sw) * indirect_Tb;
     }
-
     return;
-  }  
+  }
     
   void Electrostatic::calcSelfCorrection(SelfData &sdat) {
-    RealType mu1, preVal, self;
+
     if (!initialized_) initialize();
 
     ElectrostaticAtomData data = ElectrostaticMap[sdat.atype];
-   
+    
     // logicals
     bool i_is_Charge = data.is_Charge;
     bool i_is_Dipole = data.is_Dipole;
     bool i_is_Fluctuating = data.is_Fluctuating;
-    RealType chg1 = data.fixedCharge;   
+    RealType C_a = data.fixedCharge;   
+    RealType self, preVal, DadDa;
     
     if (i_is_Fluctuating) {
-      chg1 += *(sdat.flucQ);
+      C_a += *(sdat.flucQ);
       // dVdFQ is really a force, so this is negative the derivative
       *(sdat.dVdFQ) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
       (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY] += (*sdat.flucQ) * 
         (*(sdat.flucQ) * data.hardness * 0.5 + data.electronegativity);
     }
 
-    if (summationMethod_ == esm_REACTION_FIELD) {
-      if (i_is_Dipole) {
-        mu1 = data.dipole_moment;          
-        preVal = pre22_ * preRF2_ * mu1 * mu1;
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal;
-        
-        // The self-correction term adds into the reaction field vector
-        Vector3d uz_i = sdat.eFrame->getColumn(2);
-        Vector3d ei = preVal * uz_i;
-
-        // This looks very wrong.  A vector crossed with itself is zero.
-        *(sdat.t) -= cross(uz_i, ei);
+    switch (summationMethod_) {
+    case esm_REACTION_FIELD:
+      
+      if (i_is_Charge) {
+        // Self potential [see Wang and Hermans, "Reaction Field
+        // Molecular Dynamics Simulation with Friedman’s Image Charge
+        // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
+        preVal = pre11_ * preRF_ * C_a * C_a;
+        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
       }
-    } else if (summationMethod_ == esm_SHIFTED_FORCE || summationMethod_ == esm_SHIFTED_POTENTIAL) {
-      if (i_is_Charge) {        
-        if (screeningMethod_ == DAMPED) {
-          self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + *(sdat.skippedCharge)) * pre11_;
-        } else {         
-          self = - 0.5 * rcuti_ * chg1 * (chg1 +  *(sdat.skippedCharge)) * pre11_;
-        }
+
+      if (i_is_Dipole) {
+        DadDa = data.dipole.lengthSquare();
+        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DadDa;
+      }
+      
+      break;
+      
+    case esm_SHIFTED_FORCE:
+    case esm_SHIFTED_POTENTIAL:
+      if (i_is_Charge) {
+        self = - selfMult_ * C_a * (C_a + *(sdat.skippedCharge)) * pre11_;
         (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
       }
+      break;
+    default:
+      break;
     }
   }
-
+  
   RealType Electrostatic::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     // This seems to work moderately well as a default.  There's no
     // inherent scale for 1/r interactions that we can standardize.

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -62,16 +62,15 @@ namespace OpenMD {
   class RNEMD {
   public:
     RNEMD(SimInfo* info);
-    virtual ~RNEMD();
+    ~RNEMD();
     
     void doRNEMD();
-    void doSwap();
-    void doNIVS();
-    void doVSS();
+    void doSwap(SelectionManager& smanA, SelectionManager& smanB);
+    void doNIVS(SelectionManager& smanA, SelectionManager& smanB);
+    void doVSS(SelectionManager& smanA, SelectionManager& smanB);
+    RealType getDividingArea();
     void collectData();
     void getStarted();
-    bool inSlabA(Vector3d pos);
-    bool inSlabB(Vector3d pos);
     void parseOutputFileFormat(const std::string& format);
     void writeOutputFile();
     void writeReal(int index, unsigned int bin);
@@ -95,17 +94,27 @@ namespace OpenMD {
       rnemdPy,       // flux of momentum along y axis 
       rnemdPz,       // flux of momentum along z axis 
       rnemdPvector,  // flux of momentum vector
+      rnemdLx,       // flux of angular momentum along x axis 
+      rnemdLy,       // flux of angular momentum along y axis 
+      rnemdLz,       // flux of angular momentum along z axis 
+      rnemdLvector,  // flux of angular momentum vector
       rnemdKePx,     // flux of translational KE and x-momentum
       rnemdKePy,     // flux of translational KE and y-momentum
-      rnemdKePvector, // full combo platter
+      rnemdKePvector, // full combo flying platter
+      rnemdKeLx,     // flux of translational KE and x-angular momentum
+      rnemdKeLy,     // flux of translational KE and y-angular momentum
+      rnemdKeLz,     // flux of translational KE and z-angular momentum
+      rnemdKeLvector, // full combo spinning platter
       rnemdUnknownFluxType
     };
 
     enum OutputFields {
       BEGININDEX = 0,
       Z = BEGININDEX,
+      R,
       TEMPERATURE,
       VELOCITY,
+      ANGULARVELOCITY,
       DENSITY,
       ENDINDEX 
     };
@@ -126,24 +135,52 @@ namespace OpenMD {
     map<string, RNEMDFluxType> stringToFluxType_;
     RNEMDMethod rnemdMethod_;
     RNEMDFluxType rnemdFluxType_;
+
+    // object selection for specifying a particular species:
     string rnemdObjectSelection_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
+
+    // Geometric selections for the two regions for the exchange:
+    string selectionA_;
+    SelectionEvaluator evaluatorA_;
+    SelectionManager seleManA_;
+    string selectionB_;
+    SelectionEvaluator evaluatorB_;
+    SelectionManager seleManB_;
+    SelectionManager commonA_;
+    SelectionManager commonB_;
+    bool hasSelectionA_;
+    bool hasSelectionB_;                      
+    bool hasSphereBRadius_;
+
     bool usePeriodicBoundaryConditions_;
-    int nBins_; 
+    bool hasDividingArea_;
+    RealType dividingArea_;
+
+    int nBins_;
+    RealType binWidth_;
     RealType slabWidth_;
     RealType slabACenter_;
     RealType slabBCenter_;
+    RealType sphereARadius_;
+    RealType sphereBRadius_;
+
+    Vector3d coordinateOrigin_;
 
     RealType kineticFlux_;        // target or desired *flux*
     Vector3d momentumFluxVector_; // target or desired *flux*
+    Vector3d angularMomentumFluxVector_; // target or desired *flux*
 
     RealType kineticTarget_;     // target or desired one-time exchange energy
     Vector3d momentumTarget_;    // target or desired one-time exchange momentum
+    Vector3d angularMomentumTarget_; // target or desired one-time
+                                     // exchange angular momentum
 
     RealType kineticExchange_;    // actual exchange energy (running total)
     Vector3d momentumExchange_;   // actual exchange momentum (running total)
-
+    Vector3d angularMomentumExchange_; // actual exchange momentum
+                                       // (running total)
     RealType exchangeTime_;
 
     RealType targetJzpz2_;
@@ -162,6 +199,7 @@ namespace OpenMD {
     OutputMapType outputMap_;
     Accumulator* areaAccumulator_;
     bool doRNEMD_;
+    bool hasData_;
 
   };
 }

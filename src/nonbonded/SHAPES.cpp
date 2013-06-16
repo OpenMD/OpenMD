@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -267,6 +267,8 @@ namespace OpenMD {
         RealType proji = sqrt(r * 1.0e-12);
         Vector3d dcpidx(1.0 / proji,
                         0.0,
+
+                        // pickup the ball here!
                         
         dcpidx = 1.0_dp / proji
           dcpidy = 0.0_dp

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -54,6 +54,8 @@ namespace OpenMD {
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
     userChoseCutoff_ = false;
+
+    usePeriodicBoundaryConditions_ = info->getSimParams()->getUsePeriodicBoundaryConditions();
 
     Globals* simParams_ = info_->getSimParams();    
     if (simParams_->havePrintHeatFlux()) {
@@ -101,10 +103,14 @@ namespace OpenMD {
     sdat.pot = &embeddingPot;
     sdat.excludedPot = &excludedSelfPot;
 
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);
+    if (storageLayout_ & DataStorage::dslDipole) {
+      sdat.dipole = &(snap_->atomData.dipole[atom1]);
     }
-    
+
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      sdat.quadrupole = &(snap_->atomData.quadrupole[atom1]);
+    }
+
     if (storageLayout_ & DataStorage::dslTorque) {
       sdat.t = &(snap_->atomData.torque[atom1]);
     }

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -267,8 +267,8 @@ int LUFactorLinearSystem(MatrixType& A, int *index, int size,
  * lower triangular matrix and U is upper triangular matrix. 
  * @param A input square matrix
  * @param index pivot indices
+ * @param x vector
  * @param size size of the matrix and temporary arrays
- * @param tmpSize temporary array
  * @return true if inverse is computed, otherwise return false
  * @note A=LU and index[] are generated from method LUFactorLinearSystem). 
  * Also, solution vector is written directly over input load vector.

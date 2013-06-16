@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -61,7 +61,7 @@ namespace OpenMD {
     VisitorIterator i;
     int curPriority;
   
-    for(i = visitorList.begin(); i != visitorList.end(); i++){
+    for(i = visitorList.begin(); i != visitorList.end(); ++i){
       curPriority = (*i).second;
       //if new visitor has higher priority, just insert it before current visitor
       if(priority > curPriority){      
@@ -135,7 +135,7 @@ namespace OpenMD {
     sprintf(buffer , "visitors in current priority list:\n");
     result += buffer;
   
-    for(i = visitorList.begin(); i != visitorList.end(); i++){
+    for(i = visitorList.begin(); i != visitorList.end(); ++i){
       sprintf(buffer, "Priority = %d\tvisitor = %s\n",  (*i).second, ((*i).first->getVisitorName()).c_str());
       result += buffer;
     }
@@ -143,7 +143,7 @@ namespace OpenMD {
     sprintf(buffer, "Detail information about every visitor:\n");
 
 
-    for(i = visitorList.begin(); i != visitorList.end(); i++)
+    for(i = visitorList.begin(); i != visitorList.end(); ++i)
       result += ((*i).first)->toString();
 
     sprintf(buffer ,"******************************************************************\n");

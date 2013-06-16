@@ -32,20 +32,15 @@
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
  *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
+ * [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). 
  *
  *  ConvexHull.cpp
  *
- *  Purpose: To calculate convexhull, hull volume libqhull.
- *
- *  Created by Charles F. Vardeman II on 11 Dec 2006.
- *  @author  Charles F. Vardeman II
- *  @version $Id$
- *
+ *  Purpose: To calculate a convex hull.
  */
 
 /* Standard includes independent of library */
@@ -66,28 +61,28 @@
 
 #ifdef HAVE_QHULL
 using namespace OpenMD;
+using namespace std;
 
-ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp") {
+ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull FA Qt Pp") {
 }
 
-void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) { 
- 
+void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) { 
+  
   int numpoints = bodydoubles.size();
-
+  
   Triangles_.clear();
   
   vertexT *vertex, **vertexp;
   facetT *facet;
   setT *vertices;
   int curlong, totlong;
-  pointT *intPoint;
-  
-  std::vector<double> ptArray(numpoints*dim_);
+
+  vector<double> ptArray(numpoints*dim_);
 
   // Copy the positon vector into a points vector for qhull.
-  std::vector<StuntDouble*>::iterator SD;
+  vector<StuntDouble*>::iterator SD;
   int i = 0;
-
+ 
   for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
     Vector3d pos = (*SD)->getPos();      
     ptArray[dim_ * i] = pos.x();
@@ -118,15 +113,15 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   int myrank = MPI::COMM_WORLD.Get_rank();
   int localHullSites = 0;
 
-  std::vector<int> hullSitesOnProc(nproc, 0);
-  std::vector<int> coordsOnProc(nproc, 0);
-  std::vector<int> displacements(nproc, 0);
-  std::vector<int> vectorDisplacements(nproc, 0);
+  vector<int> hullSitesOnProc(nproc, 0);
+  vector<int> coordsOnProc(nproc, 0);
+  vector<int> displacements(nproc, 0);
+  vector<int> vectorDisplacements(nproc, 0);
 
-  std::vector<double> coords;
-  std::vector<double> vels;
-  std::vector<int> indexMap;
-  std::vector<double> masses;
+  vector<double> coords;
+  vector<double> vels;
+  vector<int> indexMap;
+  vector<double> masses;
 
   FORALLvertices{
     localHullSites++;
@@ -166,9 +161,9 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     vectorDisplacements[iproc] = vectorDisplacements[iproc-1] + coordsOnProc[iproc-1]; 
   }
 
-  std::vector<double> globalCoords(dim_ * globalHullSites);
-  std::vector<double> globalVels(dim_ * globalHullSites);
-  std::vector<double> globalMasses(globalHullSites);
+  vector<double> globalCoords(dim_ * globalHullSites);
+  vector<double> globalVels(dim_ * globalHullSites);
+  vector<double> globalMasses(globalHullSites);
 
   int count = coordsOnProc[myrank];
   
@@ -198,16 +193,20 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   if (qh_new_qhull(dim_, globalHullSites, &globalCoords[0], ismalloc,
                    const_cast<char *>(options_.c_str()), NULL, stderr)){
     
-    sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute global convex hull");
+    sprintf(painCave.errMsg, 
+            "ConvexHull: Qhull failed to compute global convex hull");
     painCave.isFatal = 1;
     simError();
     
   } //qh_new_qhull
 
 #endif
+  // commented out below, so comment out here also.
+  // intPoint = qh interior_point;
+  // RealType calcvol = 0.0;
+  
+  qh_triangulate ();
 
-  intPoint = qh interior_point;
-  RealType calcvol = 0.0;
   FORALLfacets {  
     Triangle face;
     //Qhull sets the unit normal in facet->normal
@@ -273,7 +272,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     Vector3d V3dCompNorm = -face.computeUnitNormal();
     RealType thisOffset = ((0.0-p[0][0])*V3dCompNorm[0] + (0.0-p[0][1])*V3dCompNorm[1] + (0.0-p[0][2])*V3dCompNorm[2]);
     RealType dist = facet->offset + intPoint[0]*V3dNormal[0] + intPoint[1]*V3dNormal[1] + intPoint[2]*V3dNormal[2];
-    std::cout << "facet offset and computed offset: " << facet->offset << "  " << thisOffset <<  std::endl;
+    cout << "facet offset and computed offset: " << facet->offset << "  " << thisOffset <<  endl;
     calcvol +=  -dist*comparea/qh hull_dim;
     */
     Triangles_.push_back(face);
@@ -284,7 +283,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   qh_getarea(qh facet_list);
   volume_ = qh totvol;
   area_ = qh totarea;
-  //  std::cout << "My volume is: " << calcvol << " qhull volume is:" << volume_ << std::endl; 
+     
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
   if (curlong || totlong) {
@@ -296,20 +295,20 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   }
 }
 
-void ConvexHull::printHull(const std::string& geomFileName) {
-
+void ConvexHull::printHull(const string& geomFileName) {
+  
 #ifdef IS_MPI
   if (worldRank == 0)  {
 #endif
-  FILE *newGeomFile;
-  
-  //create new .md file based on old .md file
-  newGeomFile = fopen(geomFileName.c_str(), "w");
-  qh_findgood_all(qh facet_list);
-  for (int i = 0; i < qh_PRINTEND; i++)
-    qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
-  
-  fclose(newGeomFile);
+    FILE *newGeomFile;
+    
+    //create new .md file based on old .md file
+    newGeomFile = fopen(geomFileName.c_str(), "w");
+    qh_findgood_all(qh facet_list);
+    for (int i = 0; i < qh_PRINTEND; i++)
+      qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
+    
+    fclose(newGeomFile);
 #ifdef IS_MPI
   }
 #endif

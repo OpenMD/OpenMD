@@ -13,7 +13,7 @@ ensemble = NVE;
 forceField = "Amber";
 cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
-dampingAlpha = 0.20;
+dampingAlpha = 0.18;
 cutoffRadius = 9.0;
 
 targetTemp = 300;
@@ -23,7 +23,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 2;
+runTime = 10000;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

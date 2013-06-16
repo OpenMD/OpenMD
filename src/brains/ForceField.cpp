@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file ForceField.cpp
  * @author tlin
  * @date 11/04/2004
- * @time 22:51am
  * @version 1.0
  */
   
@@ -228,9 +227,9 @@ namespace OpenMD {
 
       std::vector<std::pair<int, std::vector<std::string> > > foundBonds;
 
-      for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+      for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
 	jj = 0;
-	for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+	for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
 
 	  bondTypeScore = ii + jj;
 
@@ -248,11 +247,10 @@ namespace OpenMD {
       }
 
 
-      if (foundBonds.size() > 0) {
+      if (!foundBonds.empty()) {
         // sort the foundBonds by the score:
         std::sort(foundBonds.begin(), foundBonds.end());
      
-        int bestScore = foundBonds[0].first;
         std::vector<std::string> theKeys = foundBonds[0].second;
         
         BondType* bestType = bondTypeCont_.find(theKeys);
@@ -310,11 +308,11 @@ namespace OpenMD {
 
       std::vector<tuple3<int, int, std::vector<std::string> > > foundBends;
 
-      for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+      for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
 	ii = 0;
-	for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
 	  kk = 0;
-	  for (k = at3Chain.begin(); k != at3Chain.end(); k++) {
+	  for (k = at3Chain.begin(); k != at3Chain.end(); ++k) {
 	  
 	    IKscore = ii + kk;
 
@@ -334,10 +332,8 @@ namespace OpenMD {
 	jj++;
       }
       
-      if (foundBends.size() > 0) {
+      if (!foundBends.empty()) {
         std::sort(foundBends.begin(), foundBends.end());
-        int jscore = foundBends[0].first;
-        int ikscore = foundBends[0].second;
         std::vector<std::string> theKeys = foundBends[0].third;       
         
         BendType* bestType = bendTypeCont_.find(theKeys);  
@@ -406,13 +402,13 @@ namespace OpenMD {
 
       std::vector<tuple3<int, int, std::vector<std::string> > > foundTorsions;
 
-      for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+      for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
 	kk = 0;
-	for (k = at3Chain.begin(); k != at3Chain.end(); k++) {
+	for (k = at3Chain.begin(); k != at3Chain.end(); ++k) {
 	  ii = 0;	
-	  for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	  for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
 	    ll = 0;
-	    for (l = at4Chain.begin(); l != at4Chain.end(); l++) {
+	    for (l = at4Chain.begin(); l != at4Chain.end(); ++l) {
 	  
 	      ILscore = ii + ll;
 	      JKscore = jj + kk;
@@ -436,10 +432,8 @@ namespace OpenMD {
 	jj++;
       }
       
-      if (foundTorsions.size() > 0) {
+      if (!foundTorsions.empty()) {
         std::sort(foundTorsions.begin(), foundTorsions.end());
-        int jkscore = foundTorsions[0].first;
-        int ilscore = foundTorsions[0].second;
         std::vector<std::string> theKeys = foundTorsions[0].third;
         
         TorsionType* bestType = torsionTypeCont_.find(theKeys);
@@ -507,13 +501,13 @@ namespace OpenMD {
       
       std::vector<tuple3<int, int, std::vector<std::string> > > foundInversions;
       
-      for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+      for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
 	kk = 0;
-	for (k = at3Chain.begin(); k != at3Chain.end(); k++) {
+	for (k = at3Chain.begin(); k != at3Chain.end(); ++k) {
 	  ii = 0;	
-	  for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	  for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
 	    ll = 0;
-	    for (l = at4Chain.begin(); l != at4Chain.end(); l++) {
+	    for (l = at4Chain.begin(); l != at4Chain.end(); ++l) {
 	      
 	      Iscore = ii;
 	      JKLscore = jj + kk + ll;
@@ -537,10 +531,8 @@ namespace OpenMD {
 	jj++;
       }
          
-      if (foundInversions.size() > 0) {
+      if (!foundInversions.empty()) {
         std::sort(foundInversions.begin(), foundInversions.end());
-        int iscore = foundInversions[0].first;
-        int jklscore = foundInversions[0].second;
         std::vector<std::string> theKeys = foundInversions[0].third;
         
         InversionType* bestType = inversionTypeCont_.permutedFindSkippingFirstElement(theKeys);
@@ -586,9 +578,9 @@ namespace OpenMD {
       
       std::vector<std::pair<int, std::vector<std::string> > > foundNBI;
       
-      for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+      for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
         jj = 0;
-        for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+        for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
           
           nbiTypeScore = ii + jj;
           
@@ -606,11 +598,9 @@ namespace OpenMD {
       }
       
       
-      if (foundNBI.size() > 0) {
+      if (!foundNBI.empty()) {
         // sort the foundNBI by the score:
-        std::sort(foundNBI.begin(), foundNBI.end());
-        
-        int bestScore = foundNBI[0].first;
+        std::sort(foundNBI.begin(), foundNBI.end());       
         std::vector<std::string> theKeys = foundNBI[0].second;
         
         NonBondedInteractionType* bestType = nonBondedInteractionTypeCont_.find(theKeys);        

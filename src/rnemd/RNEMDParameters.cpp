@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -57,12 +57,21 @@ namespace OpenMD {
     DefineOptionalParameter(KineticFlux, "kineticFlux");
     DefineOptionalParameter(MomentumFlux, "momentumFlux");
     DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
+    DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
+    DefineOptionalParameter(AngularMomentumFluxVector, 
+                            "angularMomentumFluxVector");    
     DefineOptionalParameter(SlabWidth, "slabWidth");
     DefineOptionalParameter(SlabACenter, "slabAcenter");
     DefineOptionalParameter(SlabBCenter, "slabBcenter");
+    DefineOptionalParameter(SphereARadius, "sphereAradius");
+    DefineOptionalParameter(SphereBRadius, "sphereBradius");    
+    DefineOptionalParameter(SelectionA, "selectionA");
+    DefineOptionalParameter(SelectionB, "selectionB");
+    DefineOptionalParameter(CoordinateOrigin, "coordinateOrigin");
     DefineOptionalParameter(OutputFileName, "outputFileName");
     DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
-    DefineOptionalParameter(OutputFields, "outputFields")
+    DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth", 2.0);
+    DefineOptionalParameter(OutputFields, "outputFields");
   }
   
   RNEMDParameters::~RNEMDParameters() {    
@@ -71,19 +80,29 @@ namespace OpenMD {
   void RNEMDParameters::validate() {
     CheckParameter(ExchangeTime, isPositive());
     CheckParameter(OutputBins, isPositive());
+    CheckParameter(OutputBinWidth, isPositive());
     CheckParameter(Method, 
                    isEqualIgnoreCase("swap") ||  
                    isEqualIgnoreCase("NIVS")  ||
                    isEqualIgnoreCase("VSS"));
     CheckParameter(FluxType, 
-                   isEqualIgnoreCase("KE") || 
+                   isEqualIgnoreCase("KE") ||
                    isEqualIgnoreCase("Px") ||
                    isEqualIgnoreCase("Py") ||
                    isEqualIgnoreCase("Pz") ||
+                   isEqualIgnoreCase("Lx") ||
+                   isEqualIgnoreCase("Ly") ||
+                   isEqualIgnoreCase("Lz") ||
                    isEqualIgnoreCase("Pvector") ||
+                   isEqualIgnoreCase("Lvector") ||
                    isEqualIgnoreCase("KE+Px") || 
                    isEqualIgnoreCase("KE+Py") || 
-                   isEqualIgnoreCase("KE+Pvector"));
+                   isEqualIgnoreCase("KE+Lx") || 
+                   isEqualIgnoreCase("KE+Ly") || 
+                   isEqualIgnoreCase("KE+Lz") || 
+                   isEqualIgnoreCase("KE+Pvector") ||
+                   isEqualIgnoreCase("KE+Lvector")
+                   );
   }
   
 }

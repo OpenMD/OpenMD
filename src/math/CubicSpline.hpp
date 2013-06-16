@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -56,15 +56,17 @@ namespace OpenMD {
     virtual ~CubicSpline() {} 
     void addPoint(const RealType xp, const RealType yp);
     void addPoints(const vector<RealType>& xps, const vector<RealType>& yps);
-    RealType getValueAt(RealType t);
-    pair<RealType, RealType> getValueAndDerivativeAt(RealType t);
+    RealType getValueAt(const RealType& t);
+    pair<RealType, RealType> getValueAndDerivativeAt(const RealType& t);
+    void getValueAt(const RealType& t, RealType& v);
+    void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
     
   private:
     void generate();
     bool isUniform;
     bool generated;
-    RealType dx;
-    int n;
+    RealType dx, dt, yval, dydx;
+    int n, j;
     vector<pair<RealType, RealType> > data_;
     vector<RealType> b;
     vector<RealType> c;

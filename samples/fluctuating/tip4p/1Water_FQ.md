@@ -6,7 +6,7 @@ molecule {
 
   atom[0]{
     type = "O_TIP4P_FQ";
-    position( 0.0, 0.0, -0.6556 );
+    position( 0.0, 0.0, -0.06556 );
   }
   atom[1]{
     type = "H_TIP4P_FQ";
@@ -24,6 +24,7 @@ molecule {
   rigidBody[0]{
     members(0,1,2,3);
   }
+  constrainTotalCharge = true;
 }
 component{
   type = "TIP4P_FQ";
@@ -31,8 +32,9 @@ component{
 }
 
 flucQ {
+ propagator = "NVT";
  targetTemp = 10.0;
- tauThermostat = 10.0;
+ tauThermostat = 1000.0;
  dragCoefficient = 0.0001;
 }
 

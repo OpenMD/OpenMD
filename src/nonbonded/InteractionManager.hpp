@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -60,15 +60,26 @@ using namespace std;
 
 namespace OpenMD {
 
+  const static int ELECTROSTATIC_PAIR  = (1 << 0);  
+  const static int LJ_PAIR             = (1 << 1);
+  const static int EAM_PAIR            = (1 << 2);
+  const static int SC_PAIR             = (1 << 3);
+  const static int STICKY_PAIR         = (1 << 4);
+  const static int GB_PAIR             = (1 << 5);
+  const static int MORSE_PAIR          = (1 << 6);
+  const static int REPULSIVEPOWER_PAIR = (1 << 7);
+  const static int MAW_PAIR            = (1 << 8);
+
   /**
-   * @class InteractionManager InteractionManager is responsible for
+   * @class InteractionManager 
+   * InteractionManager is responsible for
    * keeping track of the non-bonded interactions (C++)
    */
   class InteractionManager {
 
   public:
     InteractionManager();
-    ~InteractionManager();
+    virtual ~InteractionManager();
     void setSimInfo(SimInfo* info) {info_ = info;} 
     void initialize();
 
@@ -80,7 +91,6 @@ namespace OpenMD {
     void doSkipCorrection(InteractionData idat);
     void doSelfCorrection(SelfData sdat);
     void setCutoffRadius(RealType rCut);
-    void setSwitchingRadius(RealType rSwitch);
     RealType getSuggestedCutoffRadius(int *atid1);   
     RealType getSuggestedCutoffRadius(AtomType *atype);
     
@@ -106,7 +116,9 @@ namespace OpenMD {
      * natural data structures are a map between the pair, and a set
      * of non-bonded interactions.
      */
-    map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;    
+    map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
+    map<pair<AtomType*, AtomType*>, int> iHash_;
+
   };
 }
 #endif

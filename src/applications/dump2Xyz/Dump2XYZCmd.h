@@ -31,7 +31,7 @@ extern "C" {
 
 #ifndef CMDLINE_PARSER_VERSION
 /** @brief the program version */
-#define CMDLINE_PARSER_VERSION "0.99"
+#define CMDLINE_PARSER_VERSION "1.0"
 #endif
 
 /** @brief Where the command line options are stored */
@@ -86,6 +86,8 @@ struct gengetopt_args_info
   const char *vectors_help; /**< @brief Print vectors (dipoles, etc) in xyz file help description.  */
   int charges_flag;	/**< @brief Print charges in xyz file (default=off).  */
   const char *charges_help; /**< @brief Print charges in xyz file help description.  */
+  int efield_flag;	/**< @brief Print electric field vector in xyz file (default=off).  */
+  const char *efield_help; /**< @brief Print electric field vector in xyz file help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -108,6 +110,7 @@ struct gengetopt_args_info
   unsigned int forces_given ;	/**< @brief Whether forces was given.  */
   unsigned int vectors_given ;	/**< @brief Whether vectors was given.  */
   unsigned int charges_given ;	/**< @brief Whether charges was given.  */
+  unsigned int efield_given ;	/**< @brief Whether efield was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -57,7 +57,6 @@ namespace OpenMD {
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     
     void parseDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, int lineNo);
-    void parseSplitDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, RealType& splitDipoleDistance, int lineNo);
     void parseQuadrupole(StringTokenizer& tokenizer, Vector3d& quadrupoleMoments, int lineNo);
     ForceFieldOptions& options_;
   };  

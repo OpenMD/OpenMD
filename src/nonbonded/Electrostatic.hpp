@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -55,7 +55,6 @@ namespace OpenMD {
   struct ElectrostaticAtomData {
     bool is_Charge;
     bool is_Dipole;
-    bool is_SplitDipole;
     bool is_Quadrupole;
     bool is_Fluctuating;
     RealType fixedCharge;
@@ -63,9 +62,8 @@ namespace OpenMD {
     RealType electronegativity;
     int slaterN;
     RealType slaterZeta;
-    RealType dipole_moment;
-    RealType split_dipole_distance;
-    Vector3d quadrupole_moments;
+    Vector3d dipole;
+    Mat3x3d  quadrupole;
   };
       
   enum ElectrostaticSummationMethod{
@@ -73,6 +71,7 @@ namespace OpenMD {
     esm_SWITCHING_FUNCTION,
     esm_SHIFTED_POTENTIAL,
     esm_SHIFTED_FORCE,
+    esm_TAYLOR_SHIFTED,
     esm_REACTION_FIELD,
     esm_EWALD_FULL,  /**< Ewald methods aren't supported yet */
     esm_EWALD_PME,   /**< Ewald methods aren't supported yet */
@@ -96,7 +95,6 @@ namespace OpenMD {
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     void setCutoffRadius( RealType rCut );
-    void setSwitchingRadius( RealType rSwitch );
     void setElectrostaticSummationMethod( ElectrostaticSummationMethod esm );
     void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
     void setDampingAlpha( RealType alpha );
@@ -109,18 +107,22 @@ namespace OpenMD {
     bool haveCutoffRadius_;
     bool haveDampingAlpha_;
     bool haveDielectric_;
-    bool haveElectroSpline_;
+    bool haveElectroSplines_;
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
     map<pair<AtomType*, AtomType*>, CubicSpline*> Jij;  /** coulomb integral */
     SimInfo* info_;
     ForceField* forceField_;
     RealType cutoffRadius_;
-    RealType cutoffRadius2_;
     RealType pre11_;
     RealType pre12_;
     RealType pre22_;
     RealType pre14_;
+    RealType pre24_;
+    RealType pre44_;
+    RealType v01, v11, v21, v22, v31, v32, v41, v42, v43;
+    RealType dv01, dv11, dv21, dv22, dv31, dv32, dv41, dv42, dv43;
+    RealType v01or, v11or, v21or, v22or, v31or, v32or, v41or, v42or, v43or;
     RealType chargeToC_;
     RealType angstromToM_;
     RealType debyeToCm_;
@@ -130,39 +132,31 @@ namespace OpenMD {
     map<string, ElectrostaticSummationMethod> summationMap_;
     map<string, ElectrostaticScreeningMethod> screeningMap_;
     RealType dampingAlpha_;
-    RealType alpha2_;
-    RealType alpha4_;
-    RealType alpha6_;
-    RealType alpha8_;
     RealType dielectric_;
-    RealType constEXP_;
-    RealType rcuti_;
-    RealType rcuti2_;
-    RealType rcuti3_;
-    RealType rcuti4_;
-    RealType alphaPi_;
-    RealType invRootPi_;
-    RealType rrf_;
-    RealType rt_;
-    RealType rrfsq_;
     RealType preRF_;
-    RealType preRF2_;
-    RealType erfcVal_;
-    RealType derfcVal_;
-    CubicSpline* erfcSpline_;
-    RealType c1_;
-    RealType c2_;
-    RealType c3_;
-    RealType c4_;
-    RealType c5_;
-    RealType c6_;
-    RealType c1c_;
-    RealType c2c_;
-    RealType c3c_;
-    RealType c4c_;
-    RealType c5c_;
-    RealType c6c_;
-    RealType one_third_;    
+    RealType selfMult_;
+
+    CubicSpline* v01s;
+    CubicSpline* v11s;
+    CubicSpline* v21s;
+    CubicSpline* v22s;
+    CubicSpline* v31s;
+    CubicSpline* v32s;
+    CubicSpline* v41s;
+    CubicSpline* v42s;
+    CubicSpline* v43s;
+
+    /*
+    CubicSpline* dv01s;
+    CubicSpline* dv11s;
+    CubicSpline* dv21s;
+    CubicSpline* dv22s;
+    CubicSpline* dv31s;
+    CubicSpline* dv32s;
+    CubicSpline* dv41s;
+    CubicSpline* dv42s;
+    CubicSpline* dv43s;
+    */
   };
 }
 

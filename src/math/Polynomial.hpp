@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -159,7 +159,7 @@ namespace OpenMD {
      * this Polynomial.
      * @return the coefficient associated with the given power for
      * this Polynomial
-     * @exponent exponent of any term in this Polynomial
+     * @param exponent exponent of any term in this Polynomial
      */
     Real getCoefficient(ExponentType exponent) {
       iterator i = polyPairMap_.find(exponent);
@@ -273,8 +273,8 @@ namespace OpenMD {
      * Returns the first derivative of this polynomial.
      * @return the first derivative of this polynomial
      */
-    PolynomialType & getDerivative() {
-      Polynomial<Real> p;
+    PolynomialType* getDerivative() {
+      Polynomial<Real>* p = new Polynomial<Real>();
       
       typename Polynomial<Real>::const_iterator i;
       ExponentType exponent;
@@ -283,7 +283,7 @@ namespace OpenMD {
       for (i =  this->begin(); i  != this->end(); ++i) {
         exponent = i->first;
         coefficient = i->second;
-        p.setCoefficient(exponent-1, coefficient * exponent);
+        p->setCoefficient(exponent-1, coefficient * exponent);
       }
     
       return p;
@@ -346,13 +346,13 @@ namespace OpenMD {
         if (abs(fDiscr) <= fEpsilon) {
           fDiscr = (Real)0.0;
         }
-      
+        
         if (fDiscr < (Real)0.0) {  // complex roots only
           return roots;
         }
-      
+        
         Real fTmp = ((Real)0.5)/fC2;
-      
+        
         if (fDiscr > (Real)0.0) { // 2 real roots
           fDiscr = sqrt(fDiscr);
           roots.push_back(fTmp*(-fC1 - fDiscr));
@@ -361,7 +361,7 @@ namespace OpenMD {
           roots.push_back(-fTmp * fC1);  // 1 real root
         }
       }
-        return roots;        
+        return roots;      
       case 3: {
         Real fC3 = getCoefficient(3);
         Real fC2 = getCoefficient(2);
@@ -428,7 +428,6 @@ namespace OpenMD {
         }
       }
         return roots;
-
       case 4: {
         Real fC4 = getCoefficient(4);
         Real fC3 = getCoefficient(3);
@@ -514,7 +513,6 @@ namespace OpenMD {
         }
       }
         return roots;
-
       default: {
         DynamicRectMatrix<Real> companion = CreateCompanion();
         JAMA::Eigenvalue<Real> eig(companion);
@@ -528,8 +526,7 @@ namespace OpenMD {
         }      
       }
         return roots;
-        
-      }     
+      }
     }
     
   private:
@@ -625,8 +622,8 @@ namespace OpenMD {
    * @return the first derivative of this polynomial
    */
   template<typename Real>
-  Polynomial<Real> getDerivative(const Polynomial<Real>& p1) {
-    Polynomial<Real> p;
+  Polynomial<Real> * getDerivative(const Polynomial<Real>& p1) {
+    Polynomial<Real> * p = new Polynomial<Real>();
     
     typename Polynomial<Real>::const_iterator i;
     int exponent;
@@ -635,7 +632,7 @@ namespace OpenMD {
     for (i =  p1.begin(); i  != p1.end(); ++i) {
       exponent = i->first;
       coefficient = i->second;
-      p.setCoefficient(exponent-1, coefficient * exponent);
+      p->setCoefficient(exponent-1, coefficient * exponent);
     }
     
     return p;

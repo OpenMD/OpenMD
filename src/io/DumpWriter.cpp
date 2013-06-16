@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -310,7 +310,6 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
     RigidBody::AtomIterator ai;
-    Atom* atom;
 
 #ifndef IS_MPI
     os << "  <Snapshot>\n";
@@ -318,8 +317,8 @@ namespace OpenMD {
     writeFrameProperties(os, info_->getSnapshotManager()->getCurrentSnapshot());
 
     os << "    <StuntDoubles>\n";
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
       
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;  
            sd = mol->nextIntegrableObject(ii)) { 	
@@ -345,7 +344,7 @@ namespace OpenMD {
             
             RigidBody* rb = static_cast<RigidBody*>(sd);
             int siteIndex = 0;
-            for (atom = rb->beginAtom(ai); atom != NULL;  
+            for (Atom* atom = rb->beginAtom(ai); atom != NULL;  
                  atom = rb->nextAtom(ai)) { 	                                        
               os << prepareSiteLine(atom, ioIndex, siteIndex);
               siteIndex++;
@@ -420,6 +419,7 @@ namespace OpenMD {
           // send our buffer:
           MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
                                MPI::CHAR, masterNode, 0);
+
         }
       }
     }
@@ -447,7 +447,7 @@ namespace OpenMD {
             
             RigidBody* rb = static_cast<RigidBody*>(sd);
             int siteIndex = 0;
-            for (atom = rb->beginAtom(ai); atom != NULL;  
+            for (Atom* atom = rb->beginAtom(ai); atom != NULL;  
                  atom = rb->nextAtom(ai)) { 	                                        
               buffer += prepareSiteLine(atom, ioIndex, siteIndex);
               siteIndex++;
@@ -726,20 +726,22 @@ namespace OpenMD {
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi
-
+      
       eorStream = createOStream(eorFilename_);
 
 #ifdef IS_MPI
     }
-#endif // is_mpi    
-
+#endif
+    
     writeFrame(*eorStream);
-
+      
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif // is_mpi
+#endif
+      
       writeClosing(*eorStream);
       delete eorStream;
+      
 #ifdef IS_MPI
     }
 #endif // is_mpi  

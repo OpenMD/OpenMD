@@ -35,7 +35,7 @@ include(CheckCXXSymbolExists)
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
-set (VERSION_MINOR "0")
+set (VERSION_MINOR "1")
 set (VERSION_TINY "0")  
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -113,7 +113,7 @@ else()
 endif()
 
 #Look for QHULL Libraries
-set(QHULL_USE_STATIC 1)
+SET(QHULL_USE_STATIC 1)
 find_package(Qhull)
 IF(QHULL_FOUND)
   SET(HAVE_QHULL 1)
@@ -196,6 +196,7 @@ DynamicProps
 randomBuilder 
 nanoparticleBuilder 
 thermalizer 
+recenter
 atom2md 
 Hydro)
 
@@ -395,6 +396,8 @@ src/visitors/ReplacementVisitor.cpp
 src/visitors/RigidBodyVisitor.cpp
 src/visitors/ZconsVisitor.cpp
 src/rnemd/RNEMDParameters.cpp
+src/clusters/Icosahedron.cpp
+src/clusters/Decahedron.cpp
 )
 
 set( PARALLEL_SOURCE
@@ -540,7 +543,9 @@ src/applications/staticProps/RadialDistrFunc.cpp
 src/applications/staticProps/RhoR.cpp
 src/applications/staticProps/RhoZ.cpp
 src/applications/staticProps/RippleOP.cpp
+src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp
+src/applications/staticProps/SpatialStatistics.cpp
 src/applications/staticProps/StaticProps.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
@@ -557,6 +562,7 @@ src/applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
 set (NANORODBUILDERSOURCE 
 src/applications/nanoparticleBuilder/nanorodBuilder.cpp
 src/applications/nanoparticleBuilder/shapedLatticeRod.cpp
+src/applications/nanoparticleBuilder/shapedLatticeEllipsoid.cpp
 src/applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
 )
 
@@ -564,6 +570,11 @@ set (NANOROD_PENTBUILDERSOURCE
 src/applications/nanoparticleBuilder/nanorod_pentBuilder.cpp
 src/applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
 src/applications/nanoparticleBuilder/shapedLatticePentRod.cpp
+)
+
+set (ICOSAHEDRALBUILDERSOURCE 
+src/applications/nanoparticleBuilder/icosahedralBuilder.cpp
+src/applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp
 )
 
 set (RANDOMBUILDERSOURCE
@@ -581,6 +592,11 @@ src/applications/thermalizer/thermalizer.cpp
 src/applications/thermalizer/thermalizerCmd.cpp
 )
 
+set(RECENTERSOURCE 
+src/applications/recenter/recenter.cpp
+src/applications/recenter/recenterCmd.cpp
+)
+
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single openmd_core)
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
@@ -595,12 +611,16 @@ add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorod_pentBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
+add_executable(icosahedralBuilder ${ICOSAHEDRALBUILDERSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(icosahedralBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(randomBuilder ${RANDOMBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(randomBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(simpleBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(thermalizer ${THERMALIZERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(thermalizer openmd_single openmd_core openmd_single openmd_core openmd_single)
+add_executable(recenter ${RECENTERSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(recenter openmd_single openmd_core openmd_single openmd_core openmd_single)
 
 if (OPENBABEL2_FOUND)
 set (ATOM2MDSOURCE 
@@ -683,6 +703,7 @@ INSTALL(TARGETS
         nanorodBuilder
         nanorod_pentBuilder
         thermalizer 
+        recenter
         Hydro
   RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
   LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ 

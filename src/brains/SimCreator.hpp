@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file SimCreator.hpp
  * @author tlin
  * @date 11/02/2004
- * @time 12:126am
  * @version 1.0
  */
 
@@ -74,7 +73,8 @@ namespace OpenMD {
     /**
      * Setup Simulation
      * @return a pointer to SimInfo
-     * @param mdfile the meta-data file name
+     * @param mdFileName the meta-data file name
+     * @param loadInitCoords should the initial coordinates be loaded from a file?
      */
     SimInfo* createSim(const std::string & mdFileName, bool loadInitCoords = true);
         
@@ -82,8 +82,11 @@ namespace OpenMD {
         
     /**
      * Parses the meta-data file
-     * @param mdfile
-     * @return simParams
+     * @param mdFileName the meta-data file name
+     * @param rawMetaData the raw meta-data stream
+     * @param mdFileVersion the version of code used to create the meta-data file
+     * @param metaDataStartingLine the starting line of the meta-data block
+     * @return a pointer to the simulation parameters in a #Globals object
      */
     Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int mdFileVersion, int metaDataStartingLine);
 

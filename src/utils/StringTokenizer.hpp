@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file StringTokenizer.hpp
  * @author tlin
  * @date 09/20/2004
- * @time 11:30am
  * @version 1.0
  */
 
@@ -58,7 +57,7 @@
 namespace OpenMD {
 
   /**
-   * @class StringTokenizer.hpp "util/StringTokenizer.hpp"
+   * @class StringTokenizer
    * @brief The string tokenizer class allows an application to break a string into tokens
    * The set of delimiters (the characters that separate tokens) may be specified either 
    * at creation time or on a per-token basis. 

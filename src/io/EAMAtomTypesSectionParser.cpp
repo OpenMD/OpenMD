@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -91,15 +91,12 @@ namespace OpenMD {
     ifstrstream* ppfStream = ff.openForceFieldFile(potentialParamFile);
     const int bufferSize = 65535;
     char buffer[bufferSize];
-    string line;
 
     // skip first line
     ppfStream->getline(buffer, bufferSize);
 
     // The second line contains atomic number, atomic mass, a lattice
     // constant and lattice type
-    int junk;
-    RealType mass;
     RealType latticeConstant; 
     string lattice;
 
@@ -117,8 +114,8 @@ namespace OpenMD {
       StringTokenizer tokenizer1(buffer);
         
       if (tokenizer1.countTokens() >= 4) {
-	junk = tokenizer1.nextTokenAsInt();
-	mass = tokenizer1.nextTokenAsDouble();
+	int junk = tokenizer1.nextTokenAsInt();
+	RealType mass = tokenizer1.nextTokenAsDouble();
 	latticeConstant = tokenizer1.nextTokenAsDouble();
 	lattice = tokenizer1.nextToken();
       }else {
@@ -169,11 +166,10 @@ namespace OpenMD {
     
     const int bufferSize = 65535;
     char buffer[bufferSize];
-    string line;
     int lineCount = 0;
 
     while(lineCount < nlinesToRead && input.getline(buffer, bufferSize) ){
-
+      
       StringTokenizer tokenizer(buffer);
       if (tokenizer.countTokens() >= dataPerLine) {
 	for (int i = 0; i < dataPerLine; ++i) {

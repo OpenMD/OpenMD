@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -160,7 +160,7 @@ namespace OpenMD {
           myDerivC = 0.0;
         } else if (idat.shiftedForce) {
           myPotC = De * (expfnc2C - 2.0 * expfncC);
-          myDerivC  = 2.0 * De * beta * (expfnc2C - expfnc2C);
+          myDerivC  = 2.0 * De * beta * (expfncC - expfnc2C);
           myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut) );
         } else {
           myPotC = 0.0;

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  *  Created by Kelsey M. Stocker on 4/5/12.
@@ -83,19 +83,12 @@ int main(int argc, char *argv []) {
   std::string latticeType;
   std::string inputFileName;
   std::string outputFileName;
-
   MoLocator* locator;
   int nComponents;
   double latticeConstant;
-  std::vector<double> lc;
-
   RealType rodRadius;
   RealType rodLength;
-
   Mat3x3d hmat;
-  std::vector<Vector3d> latticePos;
-  std::vector<Vector3d> latticeOrt;
- 
   DumpWriter *writer;
   
   // Parse Command Line Arguments
@@ -134,6 +127,7 @@ int main(int argc, char *argv []) {
   //Rotation angles for lattice
   RealType phi, theta, psi;
 
+  // RealType cphi, sphi, ctheta, stheta, cpsi, spsi;
 
   /*
     RealType cphi, sphi, ctheta, stheta, cpsi, spsi;
@@ -210,15 +204,15 @@ int main(int argc, char *argv []) {
     orientations.push_back( o2 );
   }
 
-  int nCenter = int((rodLength + 1.154700538*rodRadius)/2.88);
+  int nCenter = int( (rodLength + 1.154700538*rodRadius)/2.88 );
 
-  for (int index = 0; index <= 0.5*nCenter; index++) {
+  for (unsigned int index = 0; index <= 0.5*nCenter; index++) {
     Vector3d myLoc_top(2.88*index, 0.0, 0.0);
     sites.push_back(myLoc_top);
     orientations.push_back(Vector3d(0.0));
   }
 
-  for (int index = 1; index <= 0.5*nCenter; index++) {
+  for (unsigned int index = 1; index <= 0.5*nCenter; index++) {
     Vector3d myLoc_bottom(-2.88*index, 0.0, 0.0);
     sites.push_back(myLoc_bottom);
     orientations.push_back(Vector3d(0.0));
@@ -304,7 +298,6 @@ int main(int argc, char *argv []) {
   std::vector<Component*> components = simParams->getComponents();
   std::vector<RealType> molFractions;
   std::vector<RealType> shellRadii;
-  std::vector<RealType> molecularMasses;
   std::vector<int> nMol;
   std::map<int, int> componentFromSite;
   nComponents = components.size();
@@ -481,8 +474,7 @@ int main(int argc, char *argv []) {
 
   createMdFile(inputFileName, outputFileName, nMol);
   
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
   
   SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outputFileName, false);

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -54,6 +54,14 @@ namespace OpenMD {
   SC::SC() : name_("SC"), initialized_(false), forceField_(NULL), 
              scRcut_(0.0), np_(3000) {}
   
+  SC::~SC() {
+    initialized_ = false;
+
+    MixingMap.clear();
+    SCMap.clear();
+    SClist.clear();
+  }
+        
   RealType SC::getM(AtomType* atomType1, AtomType* atomType2) {    
     SuttonChenAdapter sca1 = SuttonChenAdapter(atomType1);
     SuttonChenAdapter sca2 = SuttonChenAdapter(atomType2);

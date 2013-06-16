@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -51,7 +51,7 @@ namespace OpenMD {
   FluctuatingChargeNVT::FluctuatingChargeNVT(SimInfo* info) : 
     FluctuatingChargePropagator(info), chiTolerance_ (1e-6), 
     maxIterNum_(4), thermo(info),
-    snap(info->getSnapshotManager()->getCurrentSnapshot()) {    
+    snap(info->getSnapshotManager()->getCurrentSnapshot()) {  
   }
 
   void FluctuatingChargeNVT::initialize() {
@@ -123,7 +123,6 @@ namespace OpenMD {
         cfrc = atom->getFlucQFrc();
         cmass = atom->getChargeMass();       
 
-        cerr << cpos << "\t" << cvel << "\t" << cfrc << "\t" << instTemp << "\t" <<chi << "\t" << integralOfChidt << "\n";
 	// velocity half step
         cvel += dt2_ * cfrc / cmass - dt2_*chi*cvel;                    
         // position whole step
@@ -187,7 +186,6 @@ namespace OpenMD {
              atom = mol->nextFluctuatingCharge(j)) {
 
           cfrc = atom->getFlucQFrc();
-          cvel =atom->getFlucQVel();
           cmass = atom->getChargeMass();
           
           // velocity half step

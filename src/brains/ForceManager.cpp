@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file ForceManager.cpp
  * @author tlin
  * @date 11/09/2004
- * @time 10:39am
  * @version 1.0
  */
 
@@ -68,12 +67,23 @@
 using namespace std;
 namespace OpenMD {
   
-  ForceManager::ForceManager(SimInfo * info) : info_(info) {
+  ForceManager::ForceManager(SimInfo * info) : info_(info), switcher_(NULL),
+                                               initialized_(false) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
+    thermo = new Thermo(info_);
   }
 
+  ForceManager::~ForceManager() {
+    perturbations_.clear();
+    
+    delete switcher_;
+    delete interactionMan_;
+    delete fDecomp_;
+    delete thermo;
+  }
+  
   /**
    * setupCutoffs
    *
@@ -88,7 +98,7 @@ namespace OpenMD {
    *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
    *      Use the maximum suggested value that was found.
    *
-   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, 
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, TAYLOR_SHIFTED, 
    *                        or SHIFTED_POTENTIAL)
    *      If cutoffMethod was explicitly set, use that choice.
    *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
@@ -118,6 +128,13 @@ namespace OpenMD {
     else
       mdFileVersion = 0;
    
+    // We need the list of simulated atom types to figure out cutoffs
+    // as well as long range corrections.
+
+    set<AtomType*>::iterator i;
+    set<AtomType*> atomTypes_;
+    atomTypes_ = info_->getSimulatedAtomTypes();
+
     if (simParams_->haveCutoffRadius()) {
       rCut_ = simParams_->getCutoffRadius();
     } else {      
@@ -132,10 +149,7 @@ namespace OpenMD {
         rCut_ = 12.0;
       } else {
         RealType thisCut;
-        set<AtomType*>::iterator i;
-        set<AtomType*> atomTypes;
-        atomTypes = info_->getSimulatedAtomTypes();        
-        for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+        for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
           thisCut = interactionMan_->getSuggestedCutoffRadius((*i));
           rCut_ = max(thisCut, rCut_);
         }
@@ -157,6 +171,7 @@ namespace OpenMD {
     stringToCutoffMethod["SWITCHED"] = SWITCHED;
     stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
     stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
+    stringToCutoffMethod["TAYLOR_SHIFTED"] = TAYLOR_SHIFTED;
   
     if (simParams_->haveCutoffMethod()) {
       string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
@@ -166,7 +181,8 @@ namespace OpenMD {
         sprintf(painCave.errMsg,
                 "ForceManager::setupCutoffs: Could not find chosen cutoffMethod %s\n"
                 "\tShould be one of: "
-                "HARD, SWITCHED, SHIFTED_POTENTIAL, or SHIFTED_FORCE\n",
+                "HARD, SWITCHED, SHIFTED_POTENTIAL, TAYLOR_SHIFTED,\n"
+                "\tor SHIFTED_FORCE\n",
                 cutMeth.c_str());
         painCave.isFatal = 1;
         painCave.severity = OPENMD_ERROR;
@@ -210,12 +226,15 @@ namespace OpenMD {
             cutoffMethod_ = SHIFTED_POTENTIAL;
           } else if (myMethod == "SHIFTED_FORCE") {
             cutoffMethod_ = SHIFTED_FORCE;
+          } else if (myMethod == "TAYLOR_SHIFTED") {
+            cutoffMethod_ = TAYLOR_SHIFTED;
           }
         
           if (simParams_->haveSwitchingRadius()) 
             rSwitch_ = simParams_->getSwitchingRadius();
 
-          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
+          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE" ||
+              myMethod == "TAYLOR_SHIFTED") {
             if (simParams_->haveSwitchingRadius()){
               sprintf(painCave.errMsg,
                       "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
@@ -370,7 +389,6 @@ namespace OpenMD {
     }
     switcher_->setSwitchType(sft_);
     switcher_->setSwitch(rSwitch_, rCut_);
-    interactionMan_->setSwitchingRadius(rSwitch_);
   }
 
 
@@ -394,6 +412,8 @@ namespace OpenMD {
       doParticlePot_ = info_->getSimParams()->getOutputParticlePotential();
       doHeatFlux_ = info_->getSimParams()->getPrintHeatFlux();
       if (doHeatFlux_) doParticlePot_ = true;
+
+      doElectricField_ = info_->getSimParams()->getOutputElectricField();
    
     }
 
@@ -429,16 +449,18 @@ namespace OpenMD {
       perturbations_.push_back(eField);
     }
 
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
     fDecomp_->distributeInitialData();
- 
+    
     initialized_ = true;
-
+    
   }
-
+  
   void ForceManager::calcForces() {
     
     if (!initialized_) initialize();
-
+    
     preCalculation();   
     shortRangeInteractions();
     longRangeInteractions();
@@ -637,7 +659,6 @@ namespace OpenMD {
   
   void ForceManager::longRangeInteractions() {
 
-
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
@@ -677,7 +698,7 @@ namespace OpenMD {
     RealType rCutSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
-    vector<int> atomListColumn, atomListRow, atomListLocal;
+    vector<int> atomListColumn, atomListRow;
     InteractionData idat;
     SelfData sdat;
     RealType mf;
@@ -703,12 +724,13 @@ namespace OpenMD {
     idat.dVdFQ1 = &dVdFQ1;
     idat.dVdFQ2 = &dVdFQ2;
     idat.eField1 = &eField1;
-    idat.eField2 = &eField2;
+    idat.eField2 = &eField2;   
     idat.f1 = &f1;
     idat.sw = &sw;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
-    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE) ? true : false;
+    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE || cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
     idat.doParticlePot = doParticlePot_;
+    idat.doElectricField = doElectricField_;
     sdat.doParticlePot = doParticlePot_;
     
     loopEnd = PAIR_LOOP;
@@ -721,9 +743,12 @@ namespace OpenMD {
     
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
-        if (update_nlist) 
+        if (update_nlist) {
+          if (!usePeriodicBoundaryConditions_)
+            Mat3x3d bbox = thermo->getBoundingBox();
           neighborList = fDecomp_->buildNeighborList();
-      }             
+        }
+      }
 
       for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
              it != neighborList.end(); ++it) {
@@ -743,7 +768,9 @@ namespace OpenMD {
           idat.rcut = &cuts.first;
           if (iLoop == PAIR_LOOP) {
             vij = 0.0;
-            fij = V3Zero;
+            fij.zero();
+            eField1.zero();
+            eField2.zero();
           }
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
@@ -768,7 +795,7 @@ namespace OpenMD {
                 vpair = 0.0;
                 workPot = 0.0;
                 exPot = 0.0;
-                f1 = V3Zero;
+                f1.zero();
 		dVdFQ1 = 0.0;
 		dVdFQ2 = 0.0;
 
@@ -946,5 +973,41 @@ namespace OpenMD {
 #endif
     curSnapshot->setStressTensor(stressTensor);
     
+    if (info_->getSimParams()->getUseLongRangeCorrections()) {
+      /*
+      RealType vol = curSnapshot->getVolume();
+      RealType Elrc(0.0);
+      RealType Wlrc(0.0);
+
+      set<AtomType*>::iterator i;
+      set<AtomType*>::iterator j;
+    
+      RealType n_i, n_j;
+      RealType rho_i, rho_j;
+      pair<RealType, RealType> LRI;
+      
+      for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
+        n_i = RealType(info_->getGlobalCountOfType(*i));
+        rho_i = n_i /  vol;
+        for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
+          n_j = RealType(info_->getGlobalCountOfType(*j));
+          rho_j = n_j / vol;
+          
+          LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+
+          Elrc += n_i   * rho_j * LRI.first;
+          Wlrc -= rho_i * rho_j * LRI.second;
+        }
+      }
+      Elrc *= 2.0 * NumericConstant::PI;
+      Wlrc *= 2.0 * NumericConstant::PI;
+
+      RealType lrp = curSnapshot->getLongRangePotential();
+      curSnapshot->setLongRangePotential(lrp + Elrc);
+      stressTensor += Wlrc * SquareMatrix3<RealType>::identity();
+      curSnapshot->setStressTensor(stressTensor);
+      */
+     
+    }
   }
-} //end namespace OpenMD
+}

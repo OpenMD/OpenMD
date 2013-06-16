@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -55,7 +55,7 @@
 /**
  * @class SimplePreprocessor
  * @brief A simple preprocessor.
- * @note only supports #include #ifdef, #ifndef, #endif, #define and #undef, c-like multiple line
+ * @note only supports \#include \#ifdef, \#ifndef, \#endif, \#define and \#undef, c-like multiple line
  *  comment is not supported, macro substitute is not supported.
  */
 namespace OpenMD { 
@@ -95,10 +95,9 @@ class SimplePreprocessor {
               if (!line.empty() && line[0] == '#') {
                     StringTokenizer tokenizer(line.substr(1, line.length()));
                     std::vector<std::string> tokens = tokenizer.getAllTokens();
-                    if (tokens.size() < 1 ) {
+                    if (tokens.empty()) {
                         return false;
                     }
-                    std::string keyword = tokens[0];
                     if (tokens[0] == "endif") {
                         ifStates.pop();
                         if (ifStates.empty()) {

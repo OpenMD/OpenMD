@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -87,8 +87,6 @@ namespace OpenMD {
   
   void ProgressBar::update() {
 
-    int width;
-
 #ifdef IS_MPI
     if (MPI::COMM_WORLD.Get_rank() == 0) {
 #endif
@@ -97,13 +95,14 @@ namespace OpenMD {
       if (isatty(fileno(stdout))  && (getenv("SGE_TASK_ID")==NULL)) {     
         // get the window width:
 
+        int width = 0;
 #ifdef _MSC_VER
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
         int ret = GetConsoleScreenBufferInfo(hConsole, &csbi);
         if(ret) {
           width = csbi.dwSize.X - 1;
-        }
+        } 
 #else
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);

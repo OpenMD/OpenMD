@@ -2,7 +2,6 @@
  * @file Communicator.hpp
  * @author Charles Vardeman <cvardema.at.nd.edu>
  * @date 08/18/2010
- * @time 11:56am
  * @version 1.0
  *
  * @section LICENSE
@@ -42,7 +41,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -89,11 +88,11 @@ namespace OpenMD{
     static int Length() {return 3;}
   };
 
-  template<class T, unsigned int Row, unsigned int Col>
-  class MPITraits< RectMatrix<T, Row, Col> > {
+  template<class T, unsigned int R, unsigned int C>
+  class MPITraits< RectMatrix<T, R, C> > {
   public:
     static MPI::Datatype Type() { return MPITraits<T>::Type(); }
-    static int Length() {return Row * Col;}
+    static int Length() {return R * C;}
   };
 
   template<class T>
@@ -120,6 +119,7 @@ namespace OpenMD{
         if (nProc % i == 0) nColumns = i;        
       }
         
+      // int nRows = nProc / nColumns;
       rowIndex_ = myRank / nColumns;      
       columnIndex_ = myRank % nColumns;
 
@@ -149,8 +149,7 @@ namespace OpenMD{
   class Plan {
   public:
     
-    Plan<T>(MPI::Intracomm comm, int nObjects) {
-      myComm = comm;
+    Plan<T>(MPI::Intracomm comm, int nObjects) : myComm(comm) {
       int nCommProcs = myComm.Get_size();
       
       counts.resize(nCommProcs, 0);

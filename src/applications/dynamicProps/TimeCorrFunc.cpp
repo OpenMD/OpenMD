@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -56,33 +56,13 @@ namespace OpenMD {
     
     int nAtoms = info->getNGlobalAtoms();
     int nRigidBodies = info->getNGlobalRigidBodies();
-    
-    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
-    set<AtomType*>::iterator i;
-    bool hasDirectionalAtom = false;
-    bool hasMultipole = false;    
-    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
-      if ((*i)->isDirectional()){
-        hasDirectionalAtom = true;
-      }
-      if ((*i)->isMultipole()){
-        hasMultipole = true;
-      }
-    }
-    
-    if (nRigidBodies > 0 || hasDirectionalAtom) {
-      storageLayout_ |= DataStorage::dslAmat;
-      if(storageLayout_ & DataStorage::dslVelocity) {
-        storageLayout_ |= DataStorage::dslAngularMomentum;
-      }
-      if (storageLayout_ & DataStorage::dslForce) {
-        storageLayout_ |= DataStorage::dslTorque;
-      }
-    }
-    if (hasMultipole) {
-      storageLayout_ |= DataStorage::dslElectroFrame;
-    }
-    
+
+    // Request maximum needed storage for the simulation (including of
+    // whatever was passed down by the individual correlation
+    // function).
+
+    storageLayout_ = info->getStorageLayout() | storageLayout;
+
     bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_, 
                                       memSize_);
     info_->setSnapshotManager(bsMan_);

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -63,8 +63,8 @@ namespace OpenMD {
 
   void CubicLattice::setLatticeConstant(const  std::vector<RealType>& lc){
   
-    if(lc.size() < 1){
-      std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
+    if(lc.empty()){
+      std::cerr << "CubicLattice::setLatticeConstant Error: the lattice constant vector is empty" << std::endl;
       exit(1);
     }
     else if (lc.size() > 1){

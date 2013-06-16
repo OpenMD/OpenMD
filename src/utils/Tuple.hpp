@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).                        
  */
  
@@ -83,44 +83,44 @@ namespace OpenMD {
   tuple4<T1,T2,T3,T4> make_tuple4( T1 t1, T2 t2, T3 t3, T4 t4 ) {
     return tuple4<T1,T2,T3,T4>( t1, t2, t3, t4 );
   }
-
-template<class T1, class T2, class T3>
-inline bool operator < (const tuple3<T1, T2, T3>& t1, const tuple3<T1, T2, T3>& t2) {
-
-        return t1.first < t2.first
-             || (!(t2.first < t1.first) && t1.second < t2.second)
-             || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third);
-}
-
-
-inline bool operator < (const tuple3<int, int, std::vector<std::string> >& t1, const tuple3<int, int, std::vector<std::string> >& t2) {
   
-  if (t1.first < t2.first)
-    return true;
-  else {
-    if (t1.first > t2.first) 
-      return false;
+  template<class T1, class T2, class T3>
+  inline bool operator < (const tuple3<T1, T2, T3>& t1, const tuple3<T1, T2, T3>& t2) {
     
-    if (t1.second < t2.second) 
+    return t1.first < t2.first
+      || (!(t2.first < t1.first) && t1.second < t2.second)
+      || (!(t2.first < t1.first) && !(t2.second < t1.second) && t1.third < t2.third);
+  }
+  
+  
+  inline bool operator < (const tuple3<int, int, std::vector<std::string> >& t1, const tuple3<int, int, std::vector<std::string> >& t2) {
+    
+    if (t1.first < t2.first)
       return true;
-    else 
-      if (t1.second > t2.second) 
-	return false;
+    else {
+      if (t1.first > t2.first) 
+        return false;
     
-    return true;
-  }  
-}
+      if (t1.second < t2.second) 
+        return true;
+      else 
+        if (t1.second > t2.second) 
+          return false;
+    
+      return true;
+    }  
+  }
 
-template<class T1, class T2, class T3, class T4>
-inline bool operator < (const tuple4<T1, T2, T3, T4>& t1, const tuple4<T1, T2, T3, T4>& t2) {
-
-        return t1.first < t2.first
-             || (!(t2.first < t1.first) && t1.second < t2.second)
-             || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third)
-             ||(!(t2.first < t1.first) && !(t2.second < t2.second) && !(t2.third < t1.third) && t1.fourth < t2.fourth);
-}
-typedef tuple3<int, int, int> IntTuple3;
-typedef tuple4<int, int, int, int> IntTuple4;
+  template<class T1, class T2, class T3, class T4>
+  inline bool operator < (const tuple4<T1, T2, T3, T4>& t1, const tuple4<T1, T2, T3, T4>& t2) {
+  
+    return t1.first < t2.first
+      || (!(t2.first < t1.first) && t1.second < t2.second)
+      || (!(t2.first < t1.first) && !(t2.second < t1.second) && t1.third < t2.third)
+      || (!(t2.first < t1.first) && !(t2.second < t1.second) && !(t2.third < t1.third) && t1.fourth < t2.fourth);
+  }
+  typedef tuple3<int, int, int> IntTuple3;
+  typedef tuple4<int, int, int, int> IntTuple4;
 
 }
 

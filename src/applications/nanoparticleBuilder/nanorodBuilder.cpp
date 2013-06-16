@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  *  Created by Kelsey M. Stocker on 2/9/12.
@@ -55,6 +55,7 @@
 
 #include "config.h"
 #include "shapedLatticeRod.hpp"
+#include "shapedLatticeEllipsoid.hpp"
 #include "nanorodBuilderCmd.h"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
@@ -81,19 +82,12 @@ int main(int argc, char *argv []) {
   std::string latticeType;
   std::string inputFileName;
   std::string outputFileName;
-
   MoLocator* locator;
   int nComponents;
   double latticeConstant;
-  std::vector<double> lc;
-
   RealType rodRadius;
   RealType rodLength;
-
   Mat3x3d hmat;
-  std::vector<Vector3d> latticePos;
-  std::vector<Vector3d> latticeOrt;
- 
   DumpWriter *writer;
   
   // Parse Command Line Arguments
@@ -123,22 +117,33 @@ int main(int argc, char *argv []) {
   rodLength = args_info.length_arg;
   Globals* simParams = oldInfo->getSimParams();
   
-  /* Create nanorod */
-  shapedLatticeRod nanoRod(latticeConstant, latticeType,
-			   rodRadius, rodLength);
-  
-  /* Build a lattice and get lattice points for this lattice constant */
-  vector<Vector3d> sites = nanoRod.getSites();
-  vector<Vector3d> orientations = nanoRod.getOrientations();
+  vector<Vector3d> sites;
+  vector<Vector3d> orientations;
+
+  if (args_info.ellipsoid_flag) {
+    shapedLatticeEllipsoid nanoEllipsoid(latticeConstant, latticeType,
+                                         rodLength, rodRadius);
+    sites = nanoEllipsoid.getSites();
+    orientations = nanoEllipsoid.getOrientations();
+  } else {
+    
+    /* Create nanorod */
+    shapedLatticeRod nanoRod(latticeConstant, latticeType,
+                             rodRadius, rodLength);
+    /* Build a lattice and get lattice points for this lattice constant */
+    sites = nanoRod.getSites();
+    orientations = nanoRod.getOrientations();
+  }
+
   std::vector<int> vacancyTargets;
   vector<bool> isVacancy;
   
   Vector3d myLoc;
   RealType myR;
  
-  for (int i = 0; i < sites.size(); i++) 
+  for (unsigned int i = 0; i < sites.size(); i++) 
     isVacancy.push_back(false);
-
+  
   // cerr << "checking vacancyPercent" << "\n";
   if (args_info.vacancyPercent_given) {
     // cerr << "vacancyPercent given" << "\n";
@@ -163,7 +168,7 @@ int main(int argc, char *argv []) {
       }
       if (vIR >= 0.0 && vOR <= rodRadius && vOR >= vIR) {
         
-        for (int i = 0; i < sites.size(); i++) {
+        for (unsigned int i = 0; i < sites.size(); i++) {
           myLoc = sites[i];
           myR = myLoc.length();
           if (myR >= vIR && myR <= vOR) {
@@ -183,9 +188,9 @@ int main(int argc, char *argv []) {
         simError();
 
         isVacancy.clear();
-        for (int i = 0; i < sites.size(); i++) {
+        for (unsigned int i = 0; i < sites.size(); i++) {
           bool vac = false;
-          for (int j = 0; j < vacancyTargets.size(); j++) {
+          for (unsigned int j = 0; j < vacancyTargets.size(); j++) {
             if (i == vacancyTargets[j]) vac = true;
           }
           isVacancy.push_back(vac);
@@ -210,7 +215,6 @@ int main(int argc, char *argv []) {
   std::vector<Component*> components = simParams->getComponents();
   std::vector<RealType> molFractions;
   std::vector<RealType> shellRadii;
-  std::vector<RealType> molecularMasses;
   std::vector<int> nMol;
   std::map<int, int> componentFromSite;
   nComponents = components.size();
@@ -315,7 +319,7 @@ int main(int argc, char *argv []) {
     }
   } else {
 
-    for (int i = 0; i < shellRadii.size(); i++) {
+    for (unsigned int i = 0; i < shellRadii.size(); i++) {
       if (shellRadii.at(i) > rodRadius + 1e-6 ) {
         sprintf(painCave.errMsg, "One of the shellRadius values exceeds the rod Radius.");
         painCave.isFatal = 1;
@@ -337,7 +341,7 @@ int main(int argc, char *argv []) {
     simError();
     /* Random rod is the default case*/
 
-    for (int i = 0; i < sites.size(); i++) 
+    for (unsigned int i = 0; i < sites.size(); i++) 
       if (!isVacancy[i]) ids.push_back(i);
     
     std::random_shuffle(ids.begin(), ids.end());
@@ -353,13 +357,13 @@ int main(int argc, char *argv []) {
     nMol.resize(nComponents);
 
     // cerr << "shellRadii[0] " << shellRadii[0] << "\n";
-    //  cerr << "rodRadius " << rodRadius << "\n";
+    // cerr << "rodRadius " << rodRadius << "\n";
 
-    for (int i = 0; i < sites.size(); i++) {
+    for (unsigned int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
       myR = myLoc.length();
       // smallestSoFar = rodRadius;  
-      //cerr << "vac = " << isVacancy[i]<< "\n";
+      // cerr << "vac = " << isVacancy[i]<< "\n";
     
       if (!isVacancy[i]) {
 
@@ -387,8 +391,7 @@ int main(int argc, char *argv []) {
 
   createMdFile(inputFileName, outputFileName, nMol);
   
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
   
   SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outputFileName, false);
@@ -400,13 +403,13 @@ int main(int argc, char *argv []) {
 
   int l = 0;
 
-  for (int i = 0; i < nComponents; i++){
+  for (unsigned int i = 0; i < nComponents; i++){
     locator = new MoLocator(NewInfo->getMoleculeStamp(i), 
                             NewInfo->getForceField());
     
     //   cerr << "nMol = " << nMol.at(i) << "\n";
     if (!args_info.molFraction_given) {
-      for (int n = 0; n < sites.size(); n++) {
+      for (unsigned int n = 0; n < sites.size(); n++) {
         if (!isVacancy[n]) {
           if (componentFromSite[n] == i) {
             mol = NewInfo->getMoleculeByGlobalIndex(l);
@@ -416,7 +419,7 @@ int main(int argc, char *argv []) {
         }
       }
     } else {
-      for (int n = 0; n < nMol.at(i); n++) {
+      for (unsigned int n = 0; n < nMol.at(i); n++) {
         mol = NewInfo->getMoleculeByGlobalIndex(l);
         locator->placeMol(sites[ids[l]], orientations[ids[l]], mol);
         l++;
@@ -477,7 +480,7 @@ void createMdFile(const std::string&oldMdFileName,
   newMdFile.open(newMdFileName.c_str());
   oldMdFile.getline(buffer, MAXLEN);
 
-  int i = 0;
+  unsigned int i = 0;
   while (!oldMdFile.eof()) {
 
     //correct molecule number

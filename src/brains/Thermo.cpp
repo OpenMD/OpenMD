@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -233,7 +233,7 @@ namespace OpenMD {
 
       kinetic *= 0.5;
       eTemp =  (2.0 * kinetic) / 
-        (info_->getNFluctuatingCharges() * PhysicalConstants::kb );
+        (info_->getNFluctuatingCharges() * PhysicalConstants::kb );            
      
       snap->setElectronicTemperature(eTemp);
     }
@@ -324,7 +324,6 @@ namespace OpenMD {
       Molecule* mol;
       Atom* atom;
       RealType charge;
-      RealType moment(0.0);
       Vector3d ri(0.0);
       Vector3d dipoleVector(0.0);
       Vector3d nPos(0.0);
@@ -372,12 +371,8 @@ namespace OpenMD {
             pCount++;
           }
           
-          MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
-          if (ma.isDipole() ) {
-            Vector3d u_i = atom->getElectroFrame().getColumn(2);
-            moment = ma.getDipoleMoment();
-            moment *= debyeToCm;
-            dipoleVector += u_i * moment;
+          if (atom->isDipole()) {
+            dipoleVector += atom->getDipole() * debyeToCm;
           }
         }
       }
@@ -624,8 +619,8 @@ namespace OpenMD {
   }        
    
   /**
-   * Return intertia tensor for entire system and angular momentum
-   * Vector.
+   * \brief Return inertia tensor for entire system and angular momentum
+   *  Vector.
    *
    *
    *
@@ -706,6 +701,67 @@ namespace OpenMD {
     return;
   }
 
+
+  Mat3x3d Thermo::getBoundingBox(){
+    
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!(snap->hasBoundingBox)) {
+      
+      SimInfo::MoleculeIterator i;
+      Molecule::RigidBodyIterator ri;
+      Molecule::AtomIterator ai;
+      Molecule* mol;
+      RigidBody* rb;
+      Atom* atom;
+      Vector3d pos, bMax, bMin;
+      int index = 0;
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        //change the positions of atoms which belong to the rigidbodies
+        for (rb = mol->beginRigidBody(ri); rb != NULL; 
+             rb = mol->nextRigidBody(ri)) {          
+          rb->updateAtoms();
+        }
+        
+        for(atom = mol->beginAtom(ai); atom != NULL;
+            atom = mol->nextAtom(ai)) {
+          
+          pos = atom->getPos();
+
+          if (index == 0) {
+            bMax = pos;
+            bMin = pos;
+          } else {
+            for (int i = 0; i < 3; i++) {
+              bMax[i] = max(bMax[i], pos[i]);
+              bMin[i] = min(bMin[i], pos[i]);
+            }
+          }
+          index++;
+        }
+      }
+      
+#ifdef IS_MPI
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bMax[0], 3, MPI::REALTYPE, 
+                                MPI::MAX);
+
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bMin[0], 3, MPI::REALTYPE, 
+                                MPI::MIN);
+#endif
+      Mat3x3d bBox = Mat3x3d(0.0);
+      for (int i = 0; i < 3; i++) {           
+        bBox(i,i) = bMax[i] - bMin[i];
+      }
+      snap->setBoundingBox(bBox);
+    }
+    
+    return snap->getBoundingBox();    
+  }
+  
+  
   // Returns the angular momentum of the system
   Vector3d Thermo::getAngularMomentum(){
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -864,12 +920,11 @@ namespace OpenMD {
   }
 
   RealType Thermo::getHullVolume(){
-    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-
 #ifdef HAVE_QHULL    
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     if (!snap->hasHullVolume) {
       Hull* surfaceMesh_;
-
+      
       Globals* simParams = info_->getSimParams();
       const std::string ht = simParams->getHULL_Method();
       
@@ -901,10 +956,15 @@ namespace OpenMD {
       // Compute surface Mesh
       surfaceMesh_->computeHull(localSites_);
       snap->setHullVolume(surfaceMesh_->getVolume());
+      
+      delete surfaceMesh_;
     }
+    
     return snap->getHullVolume();
 #else
     return 0.0;
 #endif
   }
+
+
 }

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -43,6 +43,8 @@
 #include <algorithm>
 #include <fstream>
 #include "applications/staticProps/GofAngle2.hpp"
+#include "primitives/Atom.hpp"
+#include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -96,8 +98,22 @@ namespace OpenMD {
     Vector3d r12 = pos1 - pos2;
     if (usePeriodicBoundaryConditions_) 
       currentSnapshot_->wrapVector(r12);
-    Vector3d dipole1 = sd1->getElectroFrame().getColumn(2);
-    Vector3d dipole2 = sd2->getElectroFrame().getColumn(2);
+
+    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+    AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
+    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+
+    Vector3d dipole1, dipole2;
+    if (ma1.isDipole())         
+        dipole1 = sd1->getDipole();
+    else
+        dipole1 = sd1->getA().transpose() * V3Z;
+
+    if (ma2.isDipole())         
+        dipole2 = sd2->getDipole();
+    else
+        dipole2 = sd2->getA().transpose() * V3Z;
     
     r12.normalize();
     dipole1.normalize();    

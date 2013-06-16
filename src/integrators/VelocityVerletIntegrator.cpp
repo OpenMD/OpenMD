@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file VelocityVerletIntegrator.cpp
  * @author tlin
  * @date 11/09/2004
- * @time 16:16am
  * @version 1.0
  */
 
@@ -124,7 +123,7 @@ namespace OpenMD {
   
     initialize();
   
-    while (snap->getTime() < runTime) {    
+    while (snap->getTime() < runTime) { 
       preStep();    
       integrateStep();    
       postStep();      
@@ -144,11 +143,6 @@ namespace OpenMD {
 
   void VelocityVerletIntegrator::postStep() {
 
-    //save snapshot
-    info_->getSnapshotManager()->advance();
-  
-    //increase time
-    snap->increaseTime(dt);        
    
     if (needVelocityScaling) {
       if (snap->getTime() >= currThermal) {
@@ -172,8 +166,8 @@ namespace OpenMD {
     
     if (snap->getTime() >= currStatus) {
       //save statistics, before writeStat,  we must save statistics
-      stats->collectStats();
       saveConservedQuantity();
+      stats->collectStats();
 
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
 	rnemd_->writeOutputFile();
@@ -193,6 +187,12 @@ namespace OpenMD {
       resetIntegrator();
       currReset += resetTime;
     }        
+    //save snapshot
+    info_->getSnapshotManager()->advance();
+  
+    //increase time
+    snap->increaseTime(dt);        
+
   }
 
 

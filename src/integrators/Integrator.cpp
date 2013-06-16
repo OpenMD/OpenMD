@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -143,7 +143,19 @@ namespace OpenMD {
     
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
-    flucQ_ = new FluctuatingChargeLangevin(info);
+    if (simParams->getFluctuatingChargeParameters()->havePropagator()) {
+      std::string prop = toUpperCopy(simParams->getFluctuatingChargeParameters()->getPropagator());
+      if (prop.compare("NVT")==0){
+         flucQ_ = new FluctuatingChargeNVT(info);
+      } else if (prop.compare("LANGEVIN")==0) {
+         flucQ_ = new FluctuatingChargeLangevin(info);
+      } else {
+        sprintf(painCave.errMsg,
+                "Integrator Error: Unknown Fluctuating Charge propagator (%s) requested\n",
+                simParams->getFluctuatingChargeParameters()->getPropagator().c_str());
+        painCave.isFatal = 1;
+      }
+    }
     flucQ_->setForceManager(forceMan_);
   }
   

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -75,6 +75,7 @@ int main(int argc, char* argv[]){
   bool printFrc(false);
   bool printVec(false);
   bool printChrg(false);
+  bool printField(false);
   
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
@@ -163,7 +164,7 @@ int main(int argc, char* argv[]){
   //create replicate visitor
   if(args_info.repeatX_given > 0 || 
      args_info.repeatY_given > 0 || 
-     args_info.repeatY_given > 0) {
+     args_info.repeatZ_given > 0) {
     Vector3i replicateOpt(args_info.repeatX_arg, 
                           args_info.repeatY_arg, 
                           args_info.repeatZ_arg);
@@ -209,6 +210,10 @@ int main(int argc, char* argv[]){
   if(args_info.charges_flag){
     printChrg = true;
     xyzVisitor->doCharges(printChrg);
+  }
+  if(args_info.efield_flag){
+    printField = true;
+    xyzVisitor->doElectricFields(printField);
   }
   
   compositeVisitor->addVisitor(xyzVisitor, 200); 

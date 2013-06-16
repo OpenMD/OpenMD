@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -376,6 +376,7 @@ namespace OpenMD {
                                            int property, int comparator, 
                                            float comparisonValue) {
     RealType propertyValue = 0.0;
+    Vector3d pos;
     switch (property) {
     case Token::mass:
       propertyValue = sd->getMass();
@@ -401,6 +402,21 @@ namespace OpenMD {
       break;
     case Token::z:
       propertyValue = sd->getPos().z();
+      break;
+    case Token::wrappedX:    
+      pos = sd->getPos();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.x();
+      break;
+    case Token::wrappedY:
+      pos = sd->getPos();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.y();
+      break;
+    case Token::wrappedZ:
+      pos = sd->getPos();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.z();
       break;
     case Token::r:
       propertyValue = sd->getPos().length();
@@ -440,6 +456,7 @@ namespace OpenMD {
                                            int property, int comparator, 
                                            float comparisonValue, int frame) {
     RealType propertyValue = 0.0;
+    Vector3d pos;
     switch (property) {
     case Token::mass:
       propertyValue = sd->getMass();
@@ -466,6 +483,22 @@ namespace OpenMD {
     case Token::z:
       propertyValue = sd->getPos(frame).z();
       break;
+    case Token::wrappedX:    
+      pos = sd->getPos(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.x();
+      break;
+    case Token::wrappedY:
+      pos = sd->getPos(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.y();
+      break;
+    case Token::wrappedZ:
+      pos = sd->getPos(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.z();
+      break;
+
     case Token::r:
       propertyValue = sd->getPos(frame).length();
       break;

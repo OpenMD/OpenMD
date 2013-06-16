@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -109,7 +109,7 @@ namespace OpenMD {
     ~DynamicRectMatrix() { deallocate();}
 
     /** copy assignment operator */
-    DynamicRectMatrix<Real> operator =(const DynamicRectMatrix<Real> m) {
+    DynamicRectMatrix<Real> operator =(const DynamicRectMatrix<Real> &m) {
       if (this == &m)
 	  return *this;
       if (nrow_ != m.getNRow() || ncol_ != m.getNCol()) {
@@ -233,11 +233,11 @@ namespace OpenMD {
     /**
      * Tests if this matrix is identical to matrix m
      * @return true if this matrix is equal to the matrix m, return false otherwise
-     * @m matrix to be compared
+     * @param m matrix to be compared
      *
      * @todo replace operator == by template function equal
      */
-    bool operator ==(const DynamicRectMatrix<Real> m) {
+    bool operator ==(const DynamicRectMatrix<Real> &m) {
       assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)
@@ -250,9 +250,9 @@ namespace OpenMD {
     /**
      * Tests if this matrix is not equal to matrix m
      * @return true if this matrix is not equal to the matrix m, return false otherwise
-     * @m matrix to be compared
+     * @param m matrix to be compared
      */
-    bool operator !=(const DynamicRectMatrix<Real> m) {
+    bool operator !=(const DynamicRectMatrix<Real> &m) {
       return !(*this == m);
     }
 
@@ -267,7 +267,7 @@ namespace OpenMD {
      * Sets the value of this matrix to the negation of matrix m.
      * @param m the source matrix
      */
-    inline void negate(const DynamicRectMatrix<Real> m) {
+    inline void negate(const DynamicRectMatrix<Real> &m) {
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)
 	  this->data_[i][j] = -m.data_[i][j];        
@@ -277,7 +277,7 @@ namespace OpenMD {
      * Sets the value of this matrix to the sum of itself and m (*this += m).
      * @param m the other matrix
      */
-    inline void add( const DynamicRectMatrix<Real> m ) {
+    inline void add( const DynamicRectMatrix<Real> &m ) {
       assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)        
@@ -289,7 +289,7 @@ namespace OpenMD {
      * @param m1 the first matrix
      * @param m2 the second matrix
      */
-    inline void add( const DynamicRectMatrix<Real> m1, const DynamicRectMatrix<Real> m2 ) {
+    inline void add( const DynamicRectMatrix<Real> &m1, const DynamicRectMatrix<Real> &m2 ) {
       assert(m1.getNRow() == m2.getNRow() && m1.getNCol() == m2.getNCol());
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)        
@@ -300,7 +300,7 @@ namespace OpenMD {
      * Sets the value of this matrix to the difference  of itself and m (*this -= m).
      * @param m the other matrix
      */
-    inline void sub( const DynamicRectMatrix<Real> m ) {
+    inline void sub( const DynamicRectMatrix<Real> &m ) {
       assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)        
@@ -312,7 +312,7 @@ namespace OpenMD {
      * @param m1 the first matrix
      * @param m2 the second matrix
      */
-    inline void sub( const DynamicRectMatrix<Real> m1, const DynamicRectMatrix<Real> m2){
+    inline void sub( const DynamicRectMatrix<Real> &m1, const DynamicRectMatrix<Real> &m2){
       assert(m1.getNRow() == m2.getNRow() && m1.getNCol() == m2.getNCol());
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)        
@@ -334,7 +334,7 @@ namespace OpenMD {
      * @param s the scalar value
      * @param m the matrix
      */
-    inline void mul( Real s, const DynamicRectMatrix<Real> m ) {
+    inline void mul( Real s, const DynamicRectMatrix<Real> &m ) {
       assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());    
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)  
@@ -356,7 +356,7 @@ namespace OpenMD {
      * @param s the scalar value
      * @param m the matrix
      */
-    inline void div( Real s, const DynamicRectMatrix<Real> m ) {
+    inline void div( Real s, const DynamicRectMatrix<Real> &m ) {
       assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)  
@@ -462,7 +462,7 @@ namespace OpenMD {
 
   /** Negate the value of every element of this matrix. */
   template<typename Real> 
-  inline DynamicRectMatrix<Real> operator -(const DynamicRectMatrix<Real> m) {
+  inline DynamicRectMatrix<Real> operator -(const DynamicRectMatrix<Real> &m) {
     DynamicRectMatrix<Real> result(m);
 
     result.negate();
@@ -477,7 +477,7 @@ namespace OpenMD {
    * @param m2 the second matrix
    */ 
   template<typename Real> 
-  inline DynamicRectMatrix<Real> operator + (const DynamicRectMatrix<Real> m1,const DynamicRectMatrix<Real> m2) {
+  inline DynamicRectMatrix<Real> operator + (const DynamicRectMatrix<Real> &m1, const DynamicRectMatrix<Real> &m2) {
     
     DynamicRectMatrix<Real> result(m1.getNRow(), m1.getNCol());
 
@@ -493,7 +493,7 @@ namespace OpenMD {
    * @param m2 the second matrix
    */
   template<typename Real> 
-  inline DynamicRectMatrix<Real> operator - (const DynamicRectMatrix<Real> m1, const DynamicRectMatrix<Real> m2) {
+  inline DynamicRectMatrix<Real> operator - (const DynamicRectMatrix<Real> &m1, const DynamicRectMatrix<Real> &m2) {
     DynamicRectMatrix<Real> result(m1.getNRow(), m1.getNCol());
 
     result.sub(m1, m2);
@@ -508,7 +508,7 @@ namespace OpenMD {
    * @param s the scalar
    */
   template<typename Real> 
-  inline DynamicRectMatrix<Real> operator *(const DynamicRectMatrix<Real> m, Real s) {
+  inline DynamicRectMatrix<Real> operator *(const DynamicRectMatrix<Real> &m, Real s) {
     DynamicRectMatrix<Real> result(m.getNRow(), m.getNCol());
 
     result.mul(s, m);
@@ -523,7 +523,7 @@ namespace OpenMD {
    * @param m the matrix
    */
   template<typename Real> 
-  inline DynamicRectMatrix<Real> operator *(Real s, const DynamicRectMatrix<Real> m) {
+  inline DynamicRectMatrix<Real> operator *(Real s, const DynamicRectMatrix<Real> &m) {
     DynamicRectMatrix<Real> result(m.getNRow(), m.getNCol());
 
     result.mul(s, m);
@@ -559,10 +559,10 @@ namespace OpenMD {
    * @param v the vector
    */
   template<typename Real>
-  inline DynamicVector<Real> operator *(const DynamicRectMatrix<Real> m, const DynamicVector<Real>& v) {
+  inline DynamicVector<Real> operator *(const DynamicRectMatrix<Real> &m, const DynamicVector<Real> &v) {
     int nrow = m.getNRow();
     int ncol = m.getNCol();
-    assert(ncol = v.size());
+    assert(ncol == v.size());
     DynamicVector<Real> result(nrow);
     
     for (unsigned int i = 0; i < nrow ; i++)
@@ -579,7 +579,7 @@ namespace OpenMD {
    * @param s the scalar
    */
   template<typename Real> 
-  inline DynamicRectMatrix<Real> operator /(const DynamicRectMatrix<Real> m, Real s) {
+  inline DynamicRectMatrix<Real> operator /(const DynamicRectMatrix<Real> &m, Real s) {
     DynamicRectMatrix<Real> result(m.getNRow(), m.getNCol());
 
     result.div(s, m);
@@ -591,7 +591,7 @@ namespace OpenMD {
    * Write to an output stream
    */
   template<typename Real>
-  std::ostream &operator<< ( std::ostream& o, const DynamicRectMatrix<Real> m) {
+  std::ostream &operator<< ( std::ostream& o, const DynamicRectMatrix<Real> &m) {
     for (unsigned int i = 0; i < m.getNRow() ; i++) {
       o << "(";
       for (unsigned int j = 0; j < m.getNCol() ; j++) {

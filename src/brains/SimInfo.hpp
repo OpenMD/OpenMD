@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -91,13 +91,9 @@ namespace OpenMD{
     /**
      * Constructor of SimInfo
      *
-     * @param molStampPairs MoleculeStamp Array. The first element of
-     * the pair is molecule stamp, the second element is the total
-     * number of molecules with the same molecule stamp in the system
+     * @param ff pointer to a concrete ForceField instance
      *
-     * @param ff pointer of a concrete ForceField instance
-     *
-     * @param simParams 
+     * @param simParams pointer to the simulation parameters in a Globals object
      */
     SimInfo(ForceField* ff, Globals* simParams);
     virtual ~SimInfo();
@@ -108,7 +104,7 @@ namespace OpenMD{
      * @return return true if adding successfully, return false if the
      * molecule is already in SimInfo
      *
-     * @param mol molecule to be added
+     * @param mol Molecule to be added
      */
     bool addMolecule(Molecule* mol);
 
@@ -274,7 +270,15 @@ namespace OpenMD{
     SnapshotManager* getSnapshotManager() {
       return sman_;
     }
-
+    /** Returns the storage layout (computed by SimCreator) */
+    int getStorageLayout() {
+      return storageLayout_;
+    }
+    /** Sets the storage layout (computed by SimCreator) */
+    void setStorageLayout(int sl) {
+      storageLayout_ = sl;
+    }
+    
     /** Sets the snapshot manager. */
     void setSnapshotManager(SnapshotManager* sman);
         
@@ -385,7 +389,6 @@ namespace OpenMD{
 
     /** 
      * Sets GlobalGroupMembership
-     * @see #SimCreator::setGlobalIndex
      */  
     void setGlobalGroupMembership(const vector<int>& ggm) {
       assert(ggm.size() == static_cast<size_t>(nGlobalAtoms_));
@@ -394,7 +397,6 @@ namespace OpenMD{
 
     /** 
      * Sets GlobalMolMembership
-     * @see #SimCreator::setGlobalIndex
      */        
     void setGlobalMolMembership(const vector<int>& gmm) {
       assert(gmm.size() == (static_cast<size_t>(nGlobalAtoms_ + 
@@ -466,6 +468,9 @@ namespace OpenMD{
 
     /** Returns the set of atom types present in this simulation */
     set<AtomType*> getSimulatedAtomTypes();
+
+    /** Returns the global count of atoms of a particular type */
+    int getGlobalCountOfType(AtomType* atype);
         
     friend ostream& operator <<(ostream& o, SimInfo& info);
 
@@ -611,6 +616,7 @@ namespace OpenMD{
 
     PropertyMap properties_;       /**< Generic Properties can be added */
     SnapshotManager* sman_;        /**< SnapshotManager (handles particle positions, etc.) */
+    int storageLayout_;            /**< Bits to tell how much data to store on each object */
 
     /** 
      * The reason to have a local index manager is that when molecule
@@ -630,7 +636,6 @@ namespace OpenMD{
     string dumpFileName_;
     string statFileName_;
     string restFileName_;
-        
 
     bool topologyDone_;  /** flag to indicate whether the topology has
                              been scanned and all the relevant
@@ -668,7 +673,6 @@ namespace OpenMD{
     
     /** 
      * Set MolToProcMap array
-     * @see #SimCreator::divideMolecules
      */
     void setMolToProcMap(const vector<int>& molToProcMap) {
       molToProcMap_ = molToProcMap;

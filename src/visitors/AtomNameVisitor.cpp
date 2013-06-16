@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).                        
  */
 #include <sstream> 
@@ -62,11 +62,13 @@ namespace OpenMD {
     if(data != NULL){
       atomData = dynamic_cast<AtomData*>(data);  
       if(atomData == NULL){
-	std::cerr << "can not get Atom Data from " << atom->getType() << std::endl;
+	std::cerr << "can not get Atom Data from " << atom->getType() 
+                  << std::endl;
 	atomData = new AtomData; 
+      } else {
       }
     } else {
-      atomData = new AtomData;      
+      atomData = new AtomData;
     }
     
     std::vector<AtomInfo*>::iterator i;

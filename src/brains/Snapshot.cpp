@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file Snapshot.cpp
  * @author tlin
  * @date 11/11/2004
- * @time 10:56am
  * @version 1.0
  */
 
@@ -95,7 +94,9 @@ namespace OpenMD {
     frameData.id = -1;                   
     frameData.currentTime = 0;     
     frameData.hmat = Mat3x3d(0.0);             
-    frameData.invHmat = Mat3x3d(0.0);          
+    frameData.invHmat = Mat3x3d(0.0);      
+    frameData.bBox = Mat3x3d(0.0);             
+    frameData.invBbox = Mat3x3d(0.0);
     frameData.orthoRhombic = false;        
     frameData.bondPotential = 0.0;      
     frameData.bendPotential = 0.0;      
@@ -132,7 +133,7 @@ namespace OpenMD {
     frameData.electronicTemperature = 0.0;
     frameData.COM = V3Zero;             
     frameData.COMvel = V3Zero;          
-    frameData.COMw = V3Zero;            
+    frameData.COMw = V3Zero;  
 
     hasTotalEnergy = false;         
     hasTranslationalKineticEnergy = false;       
@@ -156,6 +157,7 @@ namespace OpenMD {
     hasGyrationalVolume = false;   
     hasHullVolume = false;
     hasConservedQuantity = false; 
+    hasBoundingBox = false;
   }
 
   /** Returns the id of this Snapshot */
@@ -221,35 +223,55 @@ namespace OpenMD {
     
     if( oldOrthoRhombic != frameData.orthoRhombic){
       
-      if( frameData.orthoRhombic ) {
-	sprintf( painCave.errMsg,
-		 "OpenMD is switching from the default Non-Orthorhombic\n"
-		 "\tto the faster Orthorhombic periodic boundary computations.\n"
-		 "\tThis is usually a good thing, but if you want the\n"
-		 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
-		 "\tvariable ( currently set to %G ) smaller.\n",
-		 orthoTolerance_);
-	painCave.severity = OPENMD_INFO;
-	simError();
-      }
-      else {
-	sprintf( painCave.errMsg,
-		 "OpenMD is switching from the faster Orthorhombic to the more\n"
-		 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
-		 "\tThis is usually because the box has deformed under\n"
-		 "\tNPTf integration. If you want to live on the edge with\n"
-		 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
-		 "\tvariable ( currently set to %G ) larger.\n",
-		 orthoTolerance_);
-	painCave.severity = OPENMD_WARNING;
-	simError();
-      }
+      // It is finally time to suppress these warnings once and for
+      // all.  They were annoying and not very informative.
+
+      // if( frameData.orthoRhombic ) {
+      //   sprintf( painCave.errMsg,
+      //   	 "OpenMD is switching from the default Non-Orthorhombic\n"
+      //   	 "\tto the faster Orthorhombic periodic boundary computations.\n"
+      //   	 "\tThis is usually a good thing, but if you want the\n"
+      //   	 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
+      //   	 "\tvariable ( currently set to %G ) smaller.\n",
+      //   	 orthoTolerance_);
+      //   painCave.severity = OPENMD_INFO;
+      //   simError();
+      // }
+      // else {
+      //   sprintf( painCave.errMsg,
+      //   	 "OpenMD is switching from the faster Orthorhombic to the more\n"
+      //   	 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
+      //   	 "\tThis is usually because the box has deformed under\n"
+      //   	 "\tNPTf integration. If you want to live on the edge with\n"
+      //   	 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
+      //   	 "\tvariable ( currently set to %G ) larger.\n",
+      //   	 orthoTolerance_);
+      //   painCave.severity = OPENMD_WARNING;
+      //   simError();
+      // }
     }    
   }
   
   /** Returns the inverse H-Matrix */
   Mat3x3d Snapshot::getInvHmat() {
     return frameData.invHmat;
+  }
+
+  /** Returns the Bounding Box */
+  Mat3x3d Snapshot::getBoundingBox() {
+    return frameData.bBox;
+  }
+
+  /** Sets the Bounding Box */  
+  void Snapshot::setBoundingBox(const Mat3x3d& m) {
+    frameData.bBox = m;
+    frameData.invBbox = frameData.bBox.inverse();
+    hasBoundingBox = true;
+  }
+
+  /** Returns the inverse Bounding Box */
+  Mat3x3d Snapshot::getInvBoundingBox() {
+    return frameData.invBbox;
   }
 
   RealType Snapshot::getXYarea() {

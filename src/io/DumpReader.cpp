@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -128,7 +128,7 @@ namespace OpenMD {
   } 
    
   void DumpReader::scanFile(void) { 
-    int lineNo = 0; 
+
     std::streampos prevPos;
     std::streampos  currPos; 
     
@@ -142,6 +142,7 @@ namespace OpenMD {
       bool foundOpenSnapshotTag = false;
       bool foundClosedSnapshotTag = false;
 
+      int lineNo = 0; 
       while(inFile_->getline(buffer, bufferSize)) {
         ++lineNo;
         
@@ -227,7 +228,9 @@ namespace OpenMD {
       needVel_ = false; 
     } 
      
-    if (storageLayout & DataStorage::dslAmat || storageLayout & DataStorage::dslElectroFrame) { 
+    if (storageLayout & DataStorage::dslAmat || 
+        storageLayout & DataStorage::dslDipole || 
+        storageLayout & DataStorage::dslQuadrupole) { 
       needQuaternion_ = true; 
     } else { 
       needQuaternion_ = false; 
@@ -525,7 +528,7 @@ namespace OpenMD {
 
     StringTokenizer tokenizer(line); 
     int nTokens; 
-     
+         
     nTokens = tokenizer.countTokens(); 
      
     if (nTokens < 2) {  
@@ -645,14 +648,12 @@ namespace OpenMD {
 
   void  DumpReader::readSiteData(std::istream& inputStream) {
 
-    inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
-    
-    if (line.find("<SiteData>") == std::string::npos) {
-      // site data isn't required for a simulation, so skip
-      return;
-    }
 
+    // We already found the starting <SiteData> tag or we wouldn't be
+    // here, so just start parsing until we get to the ending
+    // </SiteData> tag:
+    
     while(inputStream.getline(buffer, bufferSize)) {
       line = buffer;
       

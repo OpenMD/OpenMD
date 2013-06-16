@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -77,14 +77,12 @@ namespace OpenMD {
       
       quat.toSwingTwist(swingX, swingY, twistAngle);
 
-      RealType dVdtwist, dVdswingX, dVdswingY;
-      RealType dTwist, dSwingX, dSwingY;
       RealType p;
       Vector3d tTwist, tSwing;
 
       if (restType_ & rtTwist){
-        dTwist = twistAngle - twist0_;
-        dVdtwist = kTwist_ * sin(dTwist);
+        RealType dTwist = twistAngle - twist0_;
+        RealType dVdtwist = kTwist_ * sin(dTwist);
         p = kTwist_ * (1.0 - cos(dTwist) );
         pot_ += p;
         tBody -= dVdtwist * V3Z;
@@ -92,8 +90,8 @@ namespace OpenMD {
       }
 
       if (restType_ & rtSwingX){
-        dSwingX = swingX - swingX0_;
-        dVdswingX = kSwingX_ * 0.5 * sin(2.0 * dSwingX);
+        RealType dSwingX = swingX - swingX0_;
+        RealType dVdswingX = kSwingX_ * 0.5 * sin(2.0 * dSwingX);
         p = 0.25 * kSwingX_ * (1.0 - cos(2.0 * dSwingX));
         pot_ += p;
         tBody -= dVdswingX * V3X;
@@ -101,8 +99,8 @@ namespace OpenMD {
       }
 
       if (restType_ & rtSwingY){
-        dSwingY = swingY - swingY0_;
-        dVdswingY = kSwingY_ * 0.5 * sin(2.0 * dSwingY);
+        RealType dSwingY = swingY - swingY0_;
+        RealType dVdswingY = kSwingY_ * 0.5 * sin(2.0 * dSwingY);
         p = 0.25 * kSwingY_ * (1.0 - cos(2.0 * dSwingY));
         pot_ += p;
         tBody -= dVdswingY * V3Y;

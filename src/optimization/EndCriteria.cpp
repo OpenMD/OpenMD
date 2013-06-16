@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdio>
 
+
 namespace QuantLib {
     
     EndCriteria::EndCriteria(size_t maxIterations,
@@ -190,6 +191,7 @@ namespace QuantLib {
             simError();
             return out << "Unknown EndCriteria::Type";
         }
+        return out;
     }
 
 }

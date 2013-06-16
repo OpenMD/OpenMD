@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -141,11 +141,7 @@ namespace OpenMD {
          mol = info_->nextMolecule(i)) {
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-
-        cvel = atom->getFlucQVel();
-        cfrc = atom->getFlucQFrc();
-        cmass = atom->getChargeMass();       
-
+        
         randomForce = randNumGen_.randNorm(0, variance_ );
         atom->addFlucQFrc(randomForce);        
         
@@ -153,18 +149,20 @@ namespace OpenMD {
         // required is at the full step: v(t + h), while we have
         // initially the velocity at the half step: v(t + h/2).  We
         // need to iterate to converge the friction force vector.
-          
+        
         // this is the velocity at the half-step:
-            
+        
         cvel = atom->getFlucQVel();
-
+        
         // estimate velocity at full-step using everything but
         // friction forces:
         
         cfrc = atom->getFlucQFrc();
+        cmass = atom->getChargeMass();
         velStep = cvel + dt2_ * cfrc / cmass;
-
+        
         frictionForce = 0.0;
+        
         //iteration starts here:
         
         for (int k = 0; k < maxIterNum_; k++) {

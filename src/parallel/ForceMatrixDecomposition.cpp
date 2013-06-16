@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -559,13 +559,6 @@ namespace OpenMD {
            atomColData.electricField.end(), V3Zero);
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {    
-      fill(atomRowData.flucQFrc.begin(), atomRowData.flucQFrc.end(),
-           0.0);
-      fill(atomColData.flucQFrc.begin(), atomColData.flucQFrc.end(),
-           0.0);
-    }
-
 #endif
     // even in parallel, we need to zero out the local arrays:
 
@@ -639,15 +632,22 @@ namespace OpenMD {
       AtomPlanMatrixColumn->gather(snap_->atomData.aMat, 
                                    atomColData.aMat);
     }
-    
-    // if needed, gather the atomic eletrostatic frames
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      AtomPlanMatrixRow->gather(snap_->atomData.electroFrame, 
-                                atomRowData.electroFrame);
-      AtomPlanMatrixColumn->gather(snap_->atomData.electroFrame, 
-                                   atomColData.electroFrame);
+
+    // if needed, gather the atomic eletrostatic information
+    if (storageLayout_ & DataStorage::dslDipole) {
+      AtomPlanVectorRow->gather(snap_->atomData.dipole, 
+                                atomRowData.dipole);
+      AtomPlanVectorColumn->gather(snap_->atomData.dipole, 
+                                   atomColData.dipole);
     }
 
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      AtomPlanMatrixRow->gather(snap_->atomData.quadrupole, 
+                                atomRowData.quadrupole);
+      AtomPlanMatrixColumn->gather(snap_->atomData.quadrupole, 
+                                   atomColData.quadrupole);
+    }
+        
     // if needed, gather the atomic fluctuating charge values
     if (storageLayout_ & DataStorage::dslFlucQPosition) {
       AtomPlanRealRow->gather(snap_->atomData.flucQPos, 
@@ -679,6 +679,8 @@ namespace OpenMD {
         snap_->atomData.density[i] += rho_tmp[i];
     }
 
+    // this isn't necessary if we don't have polarizable atoms, but
+    // we'll leave it here for now.
     if (storageLayout_ & DataStorage::dslElectricField) {
       
       AtomPlanVectorRow->scatter(atomRowData.electricField, 
@@ -686,7 +688,8 @@ namespace OpenMD {
       
       int n = snap_->atomData.electricField.size();
       vector<Vector3d> field_tmp(n, V3Zero);
-      AtomPlanVectorColumn->scatter(atomColData.electricField, field_tmp);
+      AtomPlanVectorColumn->scatter(atomColData.electricField, 
+                                    field_tmp);
       for (int i = 0; i < n; i++)
         snap_->atomData.electricField[i] += field_tmp[i];
     }
@@ -785,6 +788,23 @@ namespace OpenMD {
         snap_->atomData.flucQFrc[i] += fqfrc_tmp[i];
             
     }
+
+    if (storageLayout_ & DataStorage::dslElectricField) {
+
+      int nef = snap_->atomData.electricField.size();
+      vector<Vector3d> efield_tmp(nef, V3Zero);
+
+      AtomPlanVectorRow->scatter(atomRowData.electricField, efield_tmp);
+      for (int i = 0; i < nef; i++) {
+        snap_->atomData.electricField[i] += efield_tmp[i];
+        efield_tmp[i] = 0.0;
+      }
+      
+      AtomPlanVectorColumn->scatter(atomColData.electricField, efield_tmp);
+      for (int i = 0; i < nef; i++)
+        snap_->atomData.electricField[i] += efield_tmp[i];
+    }
+
 
     nLocal_ = snap_->getNumberOfAtoms();
 
@@ -955,7 +975,9 @@ namespace OpenMD {
     d = snap_->cgData.position[cg2] - snap_->cgData.position[cg1];
 #endif
     
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
 
@@ -985,8 +1007,9 @@ namespace OpenMD {
 #else
     d = snap_->cgData.position[cg1] - snap_->atomData.position[atom1];
 #endif
-
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
   
@@ -998,8 +1021,9 @@ namespace OpenMD {
 #else
     d = snap_->cgData.position[cg2] - snap_->atomData.position[atom2];
 #endif
-    
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
 
@@ -1028,8 +1052,9 @@ namespace OpenMD {
 #else
     d = snap_->atomData.position[atom2] - snap_->atomData.position[atom1];
 #endif
-
-    snap_->wrapVector(d);
+    if (usePeriodicBoundaryConditions_) {
+      snap_->wrapVector(d);
+    }
     return d;    
   }
 
@@ -1132,14 +1157,19 @@ namespace OpenMD {
       idat.A2 = &(atomColData.aMat[atom2]);
     }
     
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      idat.eFrame1 = &(atomRowData.electroFrame[atom1]);
-      idat.eFrame2 = &(atomColData.electroFrame[atom2]);
-    }
-
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(atomRowData.torque[atom1]);
       idat.t2 = &(atomColData.torque[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslDipole) {
+      idat.dipole1 = &(atomRowData.dipole[atom1]);
+      idat.dipole2 = &(atomColData.dipole[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      idat.quadrupole1 = &(atomRowData.quadrupole[atom1]);
+      idat.quadrupole2 = &(atomColData.quadrupole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {
@@ -1181,14 +1211,19 @@ namespace OpenMD {
       idat.A2 = &(snap_->atomData.aMat[atom2]);
     }
 
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      idat.eFrame1 = &(snap_->atomData.electroFrame[atom1]);
-      idat.eFrame2 = &(snap_->atomData.electroFrame[atom2]);
-    }
-
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(snap_->atomData.torque[atom1]);
       idat.t2 = &(snap_->atomData.torque[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslDipole) {
+      idat.dipole1 = &(snap_->atomData.dipole[atom1]);
+      idat.dipole2 = &(snap_->atomData.dipole[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslQuadrupole) {
+      idat.quadrupole1 = &(snap_->atomData.quadrupole[atom1]);
+      idat.quadrupole2 = &(snap_->atomData.quadrupole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {     
@@ -1287,51 +1322,61 @@ namespace OpenMD {
     groupCutoffs cuts;
     bool doAllPairs = false;
 
+    RealType rList_ = (largestRcut_ + skinThickness_);
+    Snapshot* snap_ = sman_->getCurrentSnapshot();
+    Mat3x3d box;
+    Mat3x3d invBox;
+
+    Vector3d rs, scaled, dr;
+    Vector3i whichCell;
+    int cellIndex;
+
 #ifdef IS_MPI
     cellListRow_.clear();
     cellListCol_.clear();
 #else
     cellList_.clear();
 #endif
-
-    RealType rList_ = (largestRcut_ + skinThickness_);
-    Snapshot* snap_ = sman_->getCurrentSnapshot();
-    Mat3x3d Hmat = snap_->getHmat();
-    Vector3d Hx = Hmat.getColumn(0);
-    Vector3d Hy = Hmat.getColumn(1);
-    Vector3d Hz = Hmat.getColumn(2);
-
-    nCells_.x() = (int) ( Hx.length() )/ rList_;
-    nCells_.y() = (int) ( Hy.length() )/ rList_;
-    nCells_.z() = (int) ( Hz.length() )/ rList_;
-
+    
+    if (!usePeriodicBoundaryConditions_) {
+      box = snap_->getBoundingBox();
+      invBox = snap_->getInvBoundingBox();
+    } else {
+      box = snap_->getHmat();
+      invBox = snap_->getInvHmat();
+    }
+    
+    Vector3d boxX = box.getColumn(0);
+    Vector3d boxY = box.getColumn(1);
+    Vector3d boxZ = box.getColumn(2);
+    
+    nCells_.x() = (int) ( boxX.length() )/ rList_;
+    nCells_.y() = (int) ( boxY.length() )/ rList_;
+    nCells_.z() = (int) ( boxZ.length() )/ rList_;
+    
     // handle small boxes where the cell offsets can end up repeating cells
     
     if (nCells_.x() < 3) doAllPairs = true;
     if (nCells_.y() < 3) doAllPairs = true;
     if (nCells_.z() < 3) doAllPairs = true;
-
-    Mat3x3d invHmat = snap_->getInvHmat();
-    Vector3d rs, scaled, dr;
-    Vector3i whichCell;
-    int cellIndex;
+    
     int nCtot = nCells_.x() * nCells_.y() * nCells_.z();
-
+    
 #ifdef IS_MPI
     cellListRow_.resize(nCtot);
     cellListCol_.resize(nCtot);
 #else
     cellList_.resize(nCtot);
 #endif
-
+    
     if (!doAllPairs) {
 #ifdef IS_MPI
-
+      
       for (int i = 0; i < nGroupsInRow_; i++) {
         rs = cgRowData.position[i];
         
         // scaled positions relative to the box vectors
-        scaled = invHmat * rs;
+        scaled = invBox * rs;
         
         // wrap the vector back into the unit box by subtracting integer box 
         // numbers
@@ -1359,7 +1404,7 @@ namespace OpenMD {
         rs = cgColData.position[i];
         
         // scaled positions relative to the box vectors
-        scaled = invHmat * rs;
+        scaled = invBox * rs;
         
         // wrap the vector back into the unit box by subtracting integer box 
         // numbers
@@ -1383,13 +1428,13 @@ namespace OpenMD {
         // add this cutoff group to the list of groups in this cell;
         cellListCol_[cellIndex].push_back(i);
       }
-     
+      
 #else
       for (int i = 0; i < nGroups_; i++) {
         rs = snap_->cgData.position[i];
         
         // scaled positions relative to the box vectors
-        scaled = invHmat * rs;
+        scaled = invBox * rs;
         
         // wrap the vector back into the unit box by subtracting integer box 
         // numbers
@@ -1458,7 +1503,9 @@ namespace OpenMD {
                   // & column indicies and will divide labor in the
                   // force evaluation later.
                   dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
-                  snap_->wrapVector(dr);
+                  if (usePeriodicBoundaryConditions_) {
+                    snap_->wrapVector(dr);
+                  }
                   cuts = getGroupCutoffs( (*j1), (*j2) );
                   if (dr.lengthSquare() < cuts.third) {
                     neighborList.push_back(make_pair((*j1), (*j2)));
@@ -1480,12 +1527,12 @@ namespace OpenMD {
                   // allows atoms within a single cutoff group to
                   // interact with each other.
 
-
-
                   if (m2 != m1 || (*j2) >= (*j1) ) {
 
                     dr = snap_->cgData.position[(*j2)] - snap_->cgData.position[(*j1)];
-                    snap_->wrapVector(dr);
+                    if (usePeriodicBoundaryConditions_) {
+                      snap_->wrapVector(dr);
+                    }
                     cuts = getGroupCutoffs( (*j1), (*j2) );
                     if (dr.lengthSquare() < cuts.third) {
                       neighborList.push_back(make_pair((*j1), (*j2)));
@@ -1504,7 +1551,9 @@ namespace OpenMD {
       for (int j1 = 0; j1 < nGroupsInRow_; j1++) {
         for (int j2 = 0; j2 < nGroupsInCol_; j2++) {    
           dr = cgColData.position[j2] - cgRowData.position[j1];
-          snap_->wrapVector(dr);
+          if (usePeriodicBoundaryConditions_) {
+            snap_->wrapVector(dr);
+          }
           cuts = getGroupCutoffs( j1, j2 );
           if (dr.lengthSquare() < cuts.third) {
             neighborList.push_back(make_pair(j1, j2));
@@ -1517,7 +1566,9 @@ namespace OpenMD {
         // include self group interactions j2 == j1
         for (int j2 = j1; j2 < nGroups_; j2++) {
           dr = snap_->cgData.position[j2] - snap_->cgData.position[j1];
-          snap_->wrapVector(dr);
+          if (usePeriodicBoundaryConditions_) {
+            snap_->wrapVector(dr);
+          }
           cuts = getGroupCutoffs( j1, j2 );
           if (dr.lengthSquare() < cuts.third) {
             neighborList.push_back(make_pair(j1, j2));

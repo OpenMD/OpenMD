@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -91,13 +91,16 @@ namespace OpenMD {
     potVec* excludedPot;      /**< potential energy excluded from the overall calculation */
     RealType* vpair;          /**< pair potential */
     bool doParticlePot;       /**< should we bother with the particle pot? */
+    bool doElectricField;     /**< should we bother with the electric field? */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
     Vector3d* f1;             /**< force between the two atoms */
-    Mat3x3d* eFrame1;         /**< pointer to electrostatic frame for atom 1 */
-    Mat3x3d* eFrame2;         /**< pointer to electrostatic frame for atom 2 */
     RotMat3x3d* A1;           /**< pointer to rotation matrix of first atom */
     RotMat3x3d* A2;           /**< pointer to rotation matrix of second atom */
+    Vector3d* dipole1;        /**< pointer to dipole vector of first atom */
+    Vector3d* dipole2;        /**< pointer to dipole vector of first atom */
+    Mat3x3d* quadrupole1;     /**< pointer to quadrupole tensor of first atom */
+    Mat3x3d* quadrupole2;     /**< pointer to quadrupole tensor of first atom */
     Vector3d* t1;             /**< pointer to torque on first atom */
     Vector3d* t2;             /**< pointer to torque on second atom */
     RealType* rho1;           /**< total electron density at first atom */
@@ -129,7 +132,8 @@ namespace OpenMD {
    */
   struct SelfData {
     AtomType* atype;        /**< pointer to AtomType of the atom */
-    Mat3x3d* eFrame;        /**< pointer to electrostatic frame for atom */
+    Vector3d* dipole;       /**< pointer to dipole vector of the atom */
+    Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
     potVec* pot;            /**< total potential */
     potVec* excludedPot;    /**< potential energy excluded from the overall calculation */

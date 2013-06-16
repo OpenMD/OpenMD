@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -157,8 +157,8 @@ int main(int argc, char *argv []) {
 
   // Calculate lattice constant (in Angstroms)
 
-  RealType avgMass = getMolMass(oldInfo->getMoleculeStamp(0),
-                                  oldInfo->getForceField());
+  RealType avgMass = MoLocator::getMolMass(oldInfo->getMoleculeStamp(0),
+                                           oldInfo->getForceField());
 
   latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
 			(RealType)(1.0 / 3.0));
@@ -199,8 +199,7 @@ int main(int argc, char *argv []) {
 
   createMdFile(inputFileName, outputFileName, nSites);
 
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete oldInfo;
 
   // We need to read in the new SimInfo object, then Parse the 
   // md file and set up the system

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -96,14 +96,9 @@ namespace OpenMD{
      */ 
     virtual Mat3x3d getI();
 
-
-    /** Sets the internal unit frame of this stuntdouble by three euler angles */
-    void setElectroFrameFromEuler(RealType phi, RealType theta, RealType psi);
-        
     /**
      * Returns the gradient of this stuntdouble
-     * @return the inertia tensor of this stuntdouble
-     * @see #setI
+     * @return the gradient of this stuntdouble
      */ 
     virtual std::vector<RealType> getGrad();
 
@@ -117,9 +112,14 @@ namespace OpenMD{
     /** Converts Atomic forces and torques to total forces and torques */
     void calcForcesAndTorques();
 
-    /** Converts Atomic forces and torques to total forces and torques and computes the rigid body contribution to the virial.  Returns the rigid body contribution to the virial as a 3x3 matrix. */
+    /** 
+        Converts Atomic forces and torques to total forces and torques
+        and computes the rigid body contribution to the virial.
+        Returns the rigid body contribution to the virial as a 3x3
+        matrix.
+        */ 
     Mat3x3d calcForcesAndTorquesAndVirial();
-
+    
     /** update the positions of atoms belong to this rigidbody */
     void updateAtoms();
 
@@ -150,7 +150,7 @@ namespace OpenMD{
     /** 
      * Returns the atoms of this rigid body
      * @return the atoms of this rigid body in a vector
-     * @deprecate
+     * @deprecated
      */           
     std::vector<Atom*> getAtoms() {
       return atoms_;

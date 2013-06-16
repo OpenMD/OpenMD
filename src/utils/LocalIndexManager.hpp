@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -80,7 +80,6 @@ namespace OpenMD {
 	std::cerr << "" << std::endl;
       }
 
-      IndexListContainerIterator i = indexContainer_.begin();
       int result;
             
       result = indexContainer_.front().first;
@@ -129,7 +128,6 @@ namespace OpenMD {
       std::unique(indices.begin(), indices.end());
 
       std::vector<int>::iterator i;
-      IndexListContainerIterator insertPos;
       int beginIndex;
 
       beginIndex = indices[0];
@@ -140,8 +138,6 @@ namespace OpenMD {
 	  beginIndex = *i;
 	}
       }
-            
-            
     }
         
     std::vector<int> getIndicesBefore(int index) {
@@ -197,10 +193,7 @@ namespace OpenMD {
       if (endIndex > maxIndex_) {
 	std::cerr << "" << std::endl;
       }
-
-                      
-      IndexListContainerIterator j;
-
+      
       IndexListContainerIterator i = indexContainer_.begin();  
       for (; i != indexContainer_.end(); ++i) {
 	if ((*i).first > endIndex) {

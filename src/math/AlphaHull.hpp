@@ -34,7 +34,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
@@ -60,34 +60,35 @@
 #include <vector>
 #include <string>
 
-
+using namespace std;
 namespace OpenMD {
   class AlphaHull : public Hull {
   public:
-
-    AlphaHull(double alpha);    
+    
+    AlphaHull(RealType alpha);    
     virtual ~AlphaHull(){};
-
-    void computeHull( std::vector<StuntDouble*> bodydoubles );
-
+    
+    void computeHull( vector<StuntDouble*> bodydoubles );
+    
     /* Total area of Hull*/
-    RealType getArea(){return area_;}
-
+    RealType getArea(){ return area_; }
+    
     /* Total Volume enclosed by Hull */
     RealType getVolume(){ return volume_; } 
-
-    std::vector<Triangle> getMesh(){return Triangles_;}
+    
+    vector<Triangle> getMesh(){ return Triangles_; }
     void printHull(const std::string& geomFileName);
-
+    
   protected:
     RealType volume_;
     RealType area_;
+    Mat3x3d boundingBox_;
     int dim_;
-    double alpha_;
+    RealType alpha_;
     const std::string options_;
     
   private:
-    std::vector<Triangle> Triangles_;
+    vector<Triangle> Triangles_;
   };
 }
-#endif /*MATH_CONVEXHULL_HPP_*/
+#endif

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -51,50 +51,54 @@
 #include "math/Triangle.hpp"
 #include "math/SeqRandNumGen.hpp"
 
+using namespace std;
 namespace OpenMD {
    
   /**
    * @class LangevinHullForceManager
-   * Force manager for NPT Langevin Hull Dynamics
-   * applying friction and random forces as well as torques. 
-   * Stochasitc force is determined by area of surface triangles 
-   * on the convex hull. See: Kohanoff et al. CHEMPHYSCHEM 2005, 6, 1848-1852.
+   * Force manager for NPT Langevin Hull Dynamics applying friction
+   * and random forces as well as torques.  Stochastic force is
+   * determined by the area of surface triangles on the convex hull.
+   * See: Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011),
+   *      and Kohanoff et al. CHEMPHYSCHEM 6, 1848-1852 (2005).
    */
   class LangevinHullForceManager : public ForceManager{
     
   public:
     LangevinHullForceManager(SimInfo * info);
+    virtual ~LangevinHullForceManager();
     
   protected:
     virtual void postCalculation();
     
   private:
-    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
-
+    vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
+    
     Globals* simParams;
     SeqRandNumGen randNumGen_;    
     Velocitizer* veloMunge;
-
+    
     RealType dt_;
     RealType targetTemp_;
     RealType targetPressure_; 
     RealType viscosity_;
-
+    
     RealType variance_;
-
-  enum HullTypeEnum {
+    
+    enum HullTypeEnum {
       hullConvex,
       hullAlphaShape,
       hullUnknown
     };
     
-    std::map<std::string, HullTypeEnum> stringToEnumMap_;
+    map<string, HullTypeEnum> stringToEnumMap_;
     HullTypeEnum hullType_;
-
-
+    
+    bool doThermalCoupling_;
+    bool doPressureCoupling_;
     
     Hull* surfaceMesh_;
-    std::vector<StuntDouble*> localSites_;
+    vector<StuntDouble*> localSites_;
   };
   
 } //end namespace OpenMD

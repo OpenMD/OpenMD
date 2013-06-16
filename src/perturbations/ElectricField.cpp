@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -77,28 +77,35 @@ namespace OpenMD {
     Vector3d trq;
     Vector3d EFfrc;				
     Vector3d pos;
-    RealType chrg;
-    RealType pot, fieldPot, moment;
-    RealType chrgToKcal = 23.0609;
-    RealType debyeToKcal = 4.8018969509;
-    bool isCharge;
 
     if (doElectricField) {
-      fieldPot = 0.0;
+      const RealType chrgToKcal = 23.0609;
+      const RealType debyeToKcal = 4.8018969509;
+      RealType pot;
+      RealType fieldPot = 0.0;
 
-      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {      
+
 	for (atom = mol->beginAtom(j); atom != NULL;
 	     atom = mol->nextAtom(j)) {
-	  isCharge = false;
-	  chrg = 0.0;
 
-	  FixedChargeAdapter fca = FixedChargeAdapter(atom->getAtomType());
+	  bool isCharge = false;
+	  RealType chrg = 0.0;
+          
+          AtomType* atype = atom->getAtomType();
+          
+          if (atype->isElectrostatic()) {
+            atom->addElectricField(EF * chrgToKcal);
+          }
+          
+	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
 	  if ( fca.isFixedCharge() ) {
 	    isCharge = true;
 	    chrg = fca.getCharge();
 	  }
 	  
-          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atom->getAtomType());
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
           if ( fqa.isFluctuatingCharge() ) {
 	    isCharge = true;
             chrg += atom->getFlucQPos();
@@ -108,7 +115,7 @@ namespace OpenMD {
 	    EFfrc = EF*chrg;
 	    EFfrc *= chrgToKcal;
 	    atom->addFrc(EFfrc);
-	    // totally ad-hoc choice of the origin for potential calculation
+	    // ad-hoc choice of the origin for potential calculation
 	    pos = atom->getPos();
 	    pot = -dot(pos, EFfrc);
 	    if (doParticlePot) {      
@@ -117,18 +124,15 @@ namespace OpenMD {
 	    fieldPot += pot;
 	  }
 	    
-	  MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
+	  MultipoleAdapter ma = MultipoleAdapter(atype);
 	  if (ma.isDipole() ) {
-	    Vector3d u_i = atom->getElectroFrame().getColumn(2);
-	    moment = ma.getDipoleMoment();
-	    moment *= debyeToKcal;
-	    dip = u_i * moment;
-	    trq = cross(dip, EF);
-	    //cerr << "dip = " << dip << "\n";
-	    // cerr << "trq = " << trq << "\n";
+            Vector3d dipole = atom->getDipole();
+	    dipole *= debyeToKcal;
+
+	    trq = cross(dipole, EF);
 	    atom->addTrq(trq);
-	    pot = -dot(dip, EF);
-	    //cerr << "pot = " << pot << "\n";
+
+	    pot = -dot(dipole, EF);
 	    if (doParticlePot) {      
 	      atom->addParticlePot(pot);
 	    }
@@ -142,11 +146,8 @@ namespace OpenMD {
 #endif
       Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
       longRangePotential = snap->getLongRangePotentials();
-      // << "longRangePotential = " << longRangePotential << "\n";
       longRangePotential[ELECTROSTATIC_FAMILY] += fieldPot;
-      //cerr << "longRangePotential[ELECTROSTATIC_FAMILY] = " << longRangePotential[ELECTROSTATIC_FAMILY] << "\n";
       snap->setLongRangePotential(longRangePotential);
     }
   }
-
 }

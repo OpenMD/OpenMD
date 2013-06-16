@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -81,6 +81,9 @@ namespace OpenMD {
     tokenMap_.insert(TokenMapType::value_type("x", Token(Token::x, std::string("x"))));
     tokenMap_.insert(TokenMapType::value_type("y", Token(Token::y, std::string("y"))));
     tokenMap_.insert(TokenMapType::value_type("z", Token(Token::z, std::string("z"))));
+    tokenMap_.insert(TokenMapType::value_type("wrappedx", Token(Token::wrappedX, std::string("wrappedx"))));
+    tokenMap_.insert(TokenMapType::value_type("wrappedy", Token(Token::wrappedY, std::string("wrappedy"))));
+    tokenMap_.insert(TokenMapType::value_type("wrappedz", Token(Token::wrappedZ, std::string("wrappedz"))));
     tokenMap_.insert(TokenMapType::value_type("r", Token(Token::r, std::string("r"))));
     tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     
@@ -92,5 +95,9 @@ namespace OpenMD {
     std::map<std::string, Token>::iterator i = tokenMap_.find(ident);
 
     return i != tokenMap_.end() ? &(i->second) : NULL;
+  }
+
+  TokenMap::~TokenMap() {
+    tokenMap_.clear();
   }
 }

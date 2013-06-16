@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]){
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
       "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
       "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2012 by the     |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2013 by the     |\n"<<
       "  |     /_/                                   University of Notre Dame.      |\n"<<
       "  |                                                                          |\n"<<
       "  |        version " << 
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]){
       "  |                                                                          |\n"<<
       "  | [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).                  |\n"<<
       "  | [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).               |\n"<<
-      "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).               |\n"<<
+      "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).              |\n"<<
       "  | [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).                |\n"<<
       "  | [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |\n"<<
       "  | [6] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                   |\n"<<

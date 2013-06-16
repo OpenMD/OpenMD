@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file LangevinDynamics.cpp
  * @author tlin
  * @date 11/08/2004
- * @time 15:13am
  * @version 1.0
  */
 
@@ -113,7 +112,6 @@ namespace OpenMD {
     
     flucQ_->moveA();
     rattle_->constraintA();
-    
   }    
 
   void LangevinHullDynamics::moveB(){
@@ -164,7 +162,6 @@ namespace OpenMD {
     flucQ_->moveB();
     rattle_->constraintB();
   }
-
 
   RealType LangevinHullDynamics::calcConservedQuantity() {
     return 0.0;

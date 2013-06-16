@@ -35,9 +35,12 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
+ * [4]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). 
+ */
+
+/*
  *  Created by Kelsey M. Stocker on 2/9/12.
  *  @author  Kelsey M. Stocker 
  *  @version $Id: shapedLatticeRod.cpp 1665 2011-11-22 20:38:56Z gezelter $
@@ -53,11 +56,11 @@ namespace OpenMD {
   
   shapedLatticeRod::shapedLatticeRod(RealType latticeConstant,
 				     std::string latticeType, 
-				     RealType radius, RealType length) : shapedLattice(latticeConstant, latticeType){
+				     RealType radius, 
+                                     RealType length) : shapedLattice(latticeConstant, latticeType){
     
     rodRadius_= radius;
     rodLength_= length;
-
     Vector3d dimension;
     dimension[0] = 3.0*radius;
     dimension[1] = 3.0*radius;
@@ -72,38 +75,31 @@ namespace OpenMD {
     setOrigin(origin);
   }
 
-
   /**
-   * Determines whether a point lies within a spherically-capped nanorod at origin (0,0,0)
+   * Determines whether a point lies within a spherically-capped
+   * nanorod at origin (0,0,0)
    *
    */ 
-
   bool shapedLatticeRod::isInterior(Vector3d point){
 
-    RealType x, y, z, distance, delta_z;
+    RealType x, y, z, distance;
 
     distance = 0;
     
     x = point[0];
     y = point[1];
     z = point[2];
-    //  std::cerr << "Testing xyz = " << point << " \n";
     
     if ( abs(z) >= rodLength_/2.0 ) {
-      delta_z = abs(z) - rodLength_/2.0;
+      RealType delta_z = abs(z) - rodLength_/2.0;
       distance = sqrt((x*x) + (y*y) + (delta_z*delta_z));
-      //    std::cerr << "abs_end " ;
     } else {
       distance = sqrt((x*x) + (y*y)); 
-      //   std::cerr << "middle ";
     }
     
     bool isIT=false;
     if ( distance <= rodRadius_ ) {
-      //   cerr << "accepted!\n";
       isIT=true;
-    } else {
-      //     cerr << "rejected!\n";
     }
     return isIT;
   }

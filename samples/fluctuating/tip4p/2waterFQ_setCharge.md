@@ -6,7 +6,7 @@ molecule {
 
   atom[0]{
     type = "O_TIP4P_FQ";
-    position( 0.0, 0.0, -0.6556 );
+    position( 0.0, 0.0, -0.06556 );
   }
   atom[1]{
     type = "H_TIP4P_FQ";

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -49,6 +49,7 @@
 #include "types/CharmmTorsionType.hpp"
 #include "types/OplsTorsionType.hpp"
 #include "types/TrappeTorsionType.hpp"
+#include "types/HarmonicTorsionType.hpp"
 #include "brains/ForceField.hpp"
 
 namespace OpenMD {
@@ -63,6 +64,7 @@ namespace OpenMD {
     stringToEnumMap_["Charmm"] =  ttCharmm;
     stringToEnumMap_["Opls"] =  ttOpls;
     stringToEnumMap_["Trappe"] =  ttTrappe;
+    stringToEnumMap_["Harmonic"] =  ttHarmonic;
   }
 
   void TorsionTypesSectionParser::parseLine(ForceField& ff,
@@ -199,6 +201,31 @@ namespace OpenMD {
 	RealType c2 = tokenizer.nextTokenAsDouble();
 	RealType c3 = tokenizer.nextTokenAsDouble();
 	torsionType = new TrappeTorsionType(c0, c1, c2, c3);
+      }
+
+      break;
+
+    case TorsionTypesSectionParser::ttHarmonic:
+            
+      if (nTokens < 2) {
+
+      } else {
+        // Most torsions don't have specific angle information since
+        // they are cosine polynomials.  This one is different,
+        // however.  To match our other force field files
+        // (particularly for bends): 
+        //
+        // d0 should be read in kcal / mol / degrees^2
+        // phi0 should be read in degrees
+
+        RealType degreesPerRadian = 180.0 * NumericConstant::PI;
+
+        // convert to kcal / mol / radians^2
+	RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
+
+        // convert to radians
+	RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
+	torsionType = new HarmonicTorsionType(d0, phi0);
       }
 
       break;

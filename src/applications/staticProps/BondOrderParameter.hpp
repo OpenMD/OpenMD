@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *  Created by J. Daniel Gezelter on 09/26/06
@@ -77,11 +77,12 @@ namespace OpenMD {
    * distance-dependent weighting as used in the second reference above.
    *
    * The selection script can be utilized to look at specific types of
-   * central atoms.  A dynamic selector can also be utilized.  By default, 
-   * this class computes the Q_{l} and \hat{W}_{l} parameters up to l = 12.
-   * The completed configurational averages of these values as
-   * well as the distributions of atomic q_{l} and \hat{w}_{l} values
-   * are then placed in .boq and .bow files.
+   * central atoms.  A dynamic selector can also be utilized.  By
+   * default, this class computes the \f[ Q_{l} \f] and 
+   * \f[ \hat{W}_{l} \f] parameters up to \f[ l = 12 \f].  The completed
+   * configurational averages of these values as well as the
+   * distributions of atomic \f[ q_{l} \f] and \f[ \hat{w}_{l} \f]
+   * values are then placed in .boq and .bow files.
    */
   class BondOrderParameter : public StaticAnalyser{
   public:

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -77,6 +77,8 @@
 #include "applications/staticProps/AngleR.hpp"
 #include "applications/staticProps/TetrahedralityParam.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
+#include "applications/staticProps/RNEMDStats.hpp"
+
 using namespace OpenMD;
 
 int main(int argc, char* argv[]){
@@ -305,6 +307,10 @@ int main(int argc, char* argv[]){
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.rnemdz_given) {
+    analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.rnemdr_given) {
+    analyser = new RNEMDR(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.p_angle_given) {
     analyser = new pAngle(info, dumpFileName, sele1, args_info.nbins_arg);
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)

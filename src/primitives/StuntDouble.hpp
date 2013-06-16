@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -107,7 +107,7 @@ namespace OpenMD{
 
     /**
      * Sets the global index of this stuntDouble.
-     * @param new global index to be set
+     * @param index new global index to be set
      */
     void setGlobalIndex(int index) {
       globalIndex_ = index;
@@ -568,33 +568,60 @@ namespace OpenMD{
     void setEuler(const Vector3d& euler, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = euler;
     }
-       
-    /**
-     * Returns the previous unit vectors of this stuntDouble
-     * @return the unit vectors of this stuntDouble
-     */    
-    RotMat3x3d getPrevElectroFrame() {
-      return ((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_];
-    }
-       
-    /**
-     * Returns the current unit vectors of this stuntDouble
-     * @return the unit vectors of this stuntDouble
-     */    
-    RotMat3x3d getElectroFrame() {
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_];
-    }
 
     /**
-     * Returns the unit vectors of this stuntDouble in specified snapshot 
+     * Returns the previous dipole vector of this stuntDouble
+     * @return the dipole vector of this stuntDouble
+     */    
+    Vector3d getPrevDipole() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).dipole[localIndex_];
+    }
+    
+    /**
+     * Returns the current dipole vector of this stuntDouble
+     * @return the dipole vector of this stuntDouble
+     */    
+    Vector3d getDipole() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).dipole[localIndex_];
+    }
+    
+    /**
+     * Returns the dipole vector of this stuntDouble in specified snapshot 
      *
-     * @return the unit vectors of this stuntDouble
+     * @return the dipole vector of this stuntDouble
      * @param snapshotNo
      */    
-    RotMat3x3d getElectroFrame(int snapshotNo) {
-      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_];
+    Vector3d getDipole(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).dipole[localIndex_];
     }
 
+
+    /**
+     * Returns the previous quadrupole tensor of this stuntDouble
+     * @return the quadrupole tensor of this stuntDouble
+     */    
+    Mat3x3d getPrevQuadrupole() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).quadrupole[localIndex_];
+    }
+    
+    /**
+     * Returns the current quadrupole tensor of this stuntDouble
+     * @return the quadrupole tensor of this stuntDouble
+     */    
+    Mat3x3d getQuadrupole() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).quadrupole[localIndex_];
+    }
+    
+    /**
+     * Returns the quadrupole tensor of this stuntDouble in specified snapshot 
+     *
+     * @return the quadrupole tensor of this stuntDouble
+     * @param snapshotNo
+     */    
+    Mat3x3d getQuadrupole(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).quadrupole[localIndex_];
+    }
+        
     /**
      * Returns the previous force of this stuntDouble
      * @return the force of this stuntDouble
@@ -877,7 +904,7 @@ namespace OpenMD{
     /**
      * Sets  the previous fluctuating charge of this stuntDouble
      * @param charge  new fluctuating charge 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void setPrevFlucQPos(RealType charge) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_] = charge;
@@ -895,7 +922,7 @@ namespace OpenMD{
      * Sets  the fluctuating charge of this stuntDouble in specified snapshot
      * @param charge fluctuating charge to be set 
      * @param snapshotNo 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void setFlucQPos(RealType charge, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] = charge;
@@ -904,7 +931,7 @@ namespace OpenMD{
     /**
      * Adds fluctuating charge into the previous fluctuating charge of this stuntDouble
      * @param charge  new fluctuating charge 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void addPrevFlucQPos(RealType charge) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQPos[localIndex_] += charge;
@@ -920,9 +947,9 @@ namespace OpenMD{
 
     /**
      * Adds fluctuating charge into the fluctuating charge of this stuntDouble in specified snapshot
-     * @param value fluctuating charge to be add 
+     * @param charge fluctuating charge to be add 
      * @param snapshotNo 
-     * @see #getflucQPos
+     * @see #getFlucQPos
      */         
     void addflucQPos(RealType charge, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] += charge;
@@ -957,7 +984,7 @@ namespace OpenMD{
     /**
      * Sets  the previous charge velocity of this stuntDouble
      * @param cvel  new charge velocity 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void setPrevFlucQVel(RealType cvel) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_] = cvel;
@@ -975,7 +1002,7 @@ namespace OpenMD{
      * Sets  the charge velocity of this stuntDouble in specified snapshot
      * @param cvel charge velocity to be set 
      * @param snapshotNo 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void setFlucQVel(RealType cvel, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] = cvel;
@@ -984,7 +1011,7 @@ namespace OpenMD{
     /**
      * Adds charge velocity into the previous charge velocity of this stuntDouble
      * @param cvel  new charge velocity 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void addPrevFlucQVel(RealType cvel) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQVel[localIndex_] += cvel;
@@ -1000,9 +1027,9 @@ namespace OpenMD{
 
     /**
      * Adds charge velocity into the charge velocity of this stuntDouble in specified snapshot
-     * @param value charge velocity to be add 
+     * @param cvel charge velocity to be add 
      * @param snapshotNo 
-     * @see #getflucQVel
+     * @see #getFlucQVel
      */         
     void addflucQVel(RealType cvel, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] += cvel;
@@ -1037,7 +1064,7 @@ namespace OpenMD{
     /**
      * Sets  the previous charge force of this stuntDouble
      * @param cfrc  new charge force 
-     * @see #getflucQFrc
+     * @see #getFlucQFrc
      */         
     void setPrevFlucQFrc(RealType cfrc) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_] = cfrc;
@@ -1055,7 +1082,7 @@ namespace OpenMD{
      * Sets  the charge force of this stuntDouble in specified snapshot
      * @param cfrc charge force to be set 
      * @param snapshotNo 
-     * @see #getflucQFrc
+     * @see #getFlucQFrc
      */         
     void setFlucQFrc(RealType cfrc, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] = cfrc;
@@ -1063,8 +1090,8 @@ namespace OpenMD{
 
     /**
      * Adds charge force into the previous charge force of this stuntDouble
-     * @param cfrc  new charge force 
-     * @see #getflucQFrc
+     * @param cfrc   charge force to be added 
+     * @see #getFlucQFrc
      */         
     void addPrevFlucQFrc(RealType cfrc) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).flucQFrc[localIndex_] += cfrc;
@@ -1072,7 +1099,7 @@ namespace OpenMD{
        
     /**
      * Adds charge force into the current charge force of this stuntDouble
-     * @param cfrc  new charge force 
+     * @param cfrc   charge force to be added 
      */         
     void addFlucQFrc(RealType cfrc) {
       ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQFrc[localIndex_] += cfrc;
@@ -1080,9 +1107,9 @@ namespace OpenMD{
 
     /**
      * Adds charge force into the charge force of this stuntDouble in specified snapshot
-     * @param value charge force to be add 
+     * @param cfrc charge force to be added
      * @param snapshotNo 
-     * @see #getflucQFrc
+     * @see #getFlucQFrc
      */         
     void addflucQFrc(RealType cfrc, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] += cfrc;
@@ -1115,35 +1142,61 @@ namespace OpenMD{
     }
 
     /**
-     * Sets  the previous electric field of this stuntDouble
-     * @param pos  new electric field 
+     * Sets the previous electric field of this stuntDouble
+     * @param eField  new electric field 
      * @see #getElectricField
      */         
-    void setPrevElectricField(const Vector3d& pos) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] = pos;
+    void setPrevElectricField(const Vector3d& eField) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] = eField;
     }
        
     /**
-     * Sets  the current electric field of this stuntDouble
-     * @param pos  new electric field 
+     * Sets the current electric field of this stuntDouble
+     * @param eField  new electric field 
      */         
-    void setElectricField(const Vector3d& pos) {
-      DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
-      data.electricField[localIndex_] = pos;
-      //((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] = pos;
+    void setElectricField(const Vector3d& eField) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] = eField;
     }
 
     /**
-     * Sets  the electric field of this stuntDouble in specified snapshot
-     * @param pos electric field to be set 
+     * Sets the electric field of this stuntDouble in specified snapshot
+     * @param eField electric field to be set 
      * @param snapshotNo 
      * @see #getElectricField
      */         
-    void setElectricField(const Vector3d& pos, int snapshotNo) {
-
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] = pos;
-
+    void setElectricField(const Vector3d& eField, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] = eField;
     }
+
+    /**
+     * Adds electric field into the previous electric field of this
+     * stuntDouble
+     *
+     * @param eField new electric field 
+     * @see #getElectricField
+     */         
+    void addPrevEelectricField(const Vector3d& eField) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] += eField;
+    }
+       
+    /**
+     * Adds electric field into the current electric field of this stuntDouble
+     * @param eField  new electric field 
+     */         
+    void addElectricField(const Vector3d& eField) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).electricField[localIndex_] += eField;
+    }
+
+    /**
+     * Adds electric field into the electric field of this stuntDouble in specified snapshot
+     *
+     * @param eField electric field to be added
+     * @param snapshotNo 
+     * @see #getElectricField
+     */         
+    void addElectricField(const Vector3d& eField, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] += eField;
+    }       
 
 
     /** Set the force of this stuntDouble to zero */

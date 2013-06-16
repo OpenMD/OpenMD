@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -45,6 +45,8 @@
 #include "applications/staticProps/GofXyz.hpp"
 #include "utils/simError.h"
 #include "primitives/Molecule.hpp"
+#include "types/MultipoleAdapter.hpp"
+
 namespace OpenMD {
 
   GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, RealType len, int nrbins)
@@ -104,12 +106,21 @@ namespace OpenMD {
 	 sd1 != NULL || sd3 != NULL;
 	 sd1 = seleMan1_.nextSelected(i), sd3 = seleMan3_.nextSelected(j)) {
 
-      Vector3d r3 =sd3->getPos();
+      Vector3d r3 = sd3->getPos();
       Vector3d r1 = sd1->getPos();
       Vector3d v1 =  r3 - r1;
       if (usePeriodicBoundaryConditions_)
         info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
-      Vector3d zaxis = sd1->getElectroFrame().getColumn(2);
+
+      AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+      MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+
+      Vector3d zaxis;
+      if (ma1.isDipole()) 
+        zaxis = sd1->getDipole();
+      else
+        zaxis = sd1->getA().transpose() * V3Z;
+
       Vector3d xaxis = cross(v1, zaxis);
       Vector3d yaxis = cross(zaxis, xaxis);
 
@@ -140,9 +151,9 @@ namespace OpenMD {
     
     Vector3d newR12 = i->second * r12;
     // x, y and z's possible values range -halfLen_ to halfLen_
-    int xbin = int((newR12.x() + halfLen_) / deltaR_);
-    int ybin = int((newR12.y() + halfLen_) / deltaR_);
-    int zbin = int((newR12.z() + halfLen_) / deltaR_);
+    int xbin = int( (newR12.x() + halfLen_) / deltaR_);
+    int ybin = int( (newR12.y() + halfLen_) / deltaR_);
+    int zbin = int( (newR12.z() + halfLen_) / deltaR_);
 
     if (xbin < nRBins_ && xbin >=0 &&
         ybin < nRBins_ && ybin >= 0 &&

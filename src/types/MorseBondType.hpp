@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -46,13 +46,17 @@
 #include "types/BondType.hpp"
 
 namespace OpenMD {
+
   /**
    * @class MorseBondType 
    *
-   * MorseBondType is a more realistic bond potential.
+   * @brief MorseBondType is a more realistic bond potential.
    *
-   * The functional form is given by: \f$V(r) = D_e (1 - e^{-\beta (r
-   * - r_0)})^2\f$ where \f$D_e\f$ is the bond dissociation energy (in
+   * The functional form is given by: 
+     \f[ 
+        V(r) = D_e (1 - e^{-\beta (r - r_0)})^2 
+      \f] 
+   * where \f$D_e\f$ is the bond dissociation energy (in
    * kcal / mol), \f$\beta\f$ is an inverse distance parameter related
    * to the force constant. \f$\beta = \sqrt{\frac{k}{2 D_e}}\f$, and
    * \f$r_0\f$ is the equilibrium bond length.

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -70,12 +70,16 @@ namespace OpenMD {
    *
    * This torsion potential has the form:
    * 
-   *  Vtors = c0 + c1*(1+cos(phi)) + c2*(1-cos(2*phi)) + c3*(1+cos(3*phi))
+   *  \f[ 
+         V_{tors} = c_0 + c_1*(1+\cos(\phi)) + c_2*(1-\cos(2*\phi)) + 
+                    c_3*(1+\cos(3*\phi)) 
+       \f]
    *
    * Notes: 
    * 
    * 1) This is very similar to the OplsTorsionType with coefficients
-   *    defined without the factor of 1/2, and an extra c0 term.
+   *    defined without the factor of 1/2, and an extra \f$c_0\f$ term.
+   *
    * 2) Coefficients are assumed to be in kcal / mol, although the papers
    *    usually give the parameters in units of K.
    */

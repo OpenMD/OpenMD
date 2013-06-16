@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -45,6 +45,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "types/MultipoleAdapter.hpp"
 namespace OpenMD {
 
 
@@ -151,12 +152,22 @@ namespace OpenMD {
           currentSnapshot_->wrapVector(pos);
 	Vector3d vecHeadUpper;
 	if (pos.z() >= avgZ){
-	  vecHeadUpper = j1->getElectroFrame().getColumn(2);
+          AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
+          MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+          if (ma1.isDipole())
+            vecHeadUpper = j1->getDipole();
+          else
+            vecHeadUpper = j1->getA().transpose()*V3Z;
 	  nUpper++;
 	}
 	Vector3d vecHeadLower;
 	if (pos.z() <= avgZ){
-	  vecHeadLower = j1->getElectroFrame().getColumn(2);
+          AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
+          MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+          if (ma1.isDipole())
+            vecHeadLower = j1->getDipole();
+          else
+            vecHeadLower = j1->getA().transpose() * V3Z;
 	  nLower++;
 	}
 	orderTensorHeadUpper +=outProduct(vecHeadUpper, vecHeadUpper);

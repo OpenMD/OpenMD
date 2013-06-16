@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -101,9 +101,9 @@ class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
         
     /**
      * Explicit constructor
-     * @filename String containing the name of the file to be opened
-     * @mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
-     * @checkFilename Flags indicating checking the file name in parallel
+     * @param filename String containing the name of the file to be opened
+     * @param mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
+     * @param checkFilename Flags indicating checking the file name in parallel
      */
     explicit ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false);
 
@@ -116,9 +116,9 @@ class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
      * Opens a file and associats a buffer with the specified file to perform the i/o operations 
      * (single mode). Master reads a file and brocasts its content to the other slave nodes. After
      * brocasting, every nodes fall back to stringstream (parallel mode).
-     * @filename String containing the name of the file to be opened
-     * @mode Flags describing the requested i/o mode for the file
-     * @checkFilename Flags indicating checking the file name in parallel
+     * @param filename String containing the name of the file to be opened
+     * @param mode Flags describing the requested i/o mode for the file
+     * @param checkFilename Flags indicating checking the file name in parallel
      */
     void open(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false);
 
@@ -149,8 +149,9 @@ class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
      * Internal function used to open the file
      * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode)
      * otherwise return false
-     * @filename String containing the name of the file to be opened
-     * @mode Flags describing the requested i/o mode for the file
+     * @param filename String containing the name of the file to be opened
+     * @param mode Flags describing the requested i/o mode for the file
+     * @param checkFilename Flags indicating checking the file name in parallel
      * @todo use try - catch syntax to make the program more readable
      */
     bool internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename);

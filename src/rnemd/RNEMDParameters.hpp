@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -55,11 +55,19 @@ namespace OpenMD {
     DeclareParameter(KineticFlux, RealType);
     DeclareParameter(MomentumFlux, RealType);
     DeclareParameter(MomentumFluxVector, Vector3d);
+    DeclareParameter(AngularMomentumFlux, RealType);
+    DeclareParameter(AngularMomentumFluxVector, Vector3d);
     DeclareParameter(SlabWidth, RealType);
     DeclareParameter(SlabACenter, RealType);
     DeclareParameter(SlabBCenter, RealType);
+    DeclareParameter(SphereARadius, RealType);
+    DeclareParameter(SphereBRadius, RealType);
+    DeclareParameter(SelectionA, std::string);
+    DeclareParameter(SelectionB, std::string);
+    DeclareParameter(CoordinateOrigin, Vector3d);
     DeclareParameter(OutputFileName, std::string);
     DeclareParameter(OutputBins, int);
+    DeclareParameter(OutputBinWidth, RealType);
     DeclareParameter(OutputFields, std::string);    
   public:
     RNEMDParameters();

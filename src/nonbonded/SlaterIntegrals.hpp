@@ -85,7 +85,7 @@ template <typename T> inline T mod(T x, T m)
  *   \frac{\alpha^\nu}{\nu!}
  * \f]
  * @param n - principal quantum number
- * @param alpha - Slater exponent 
+ * @param a - Slater exponent 
  * @return the value of Rosen's A integral
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
@@ -121,23 +121,21 @@ inline RealType RosenA(int n, RealType a)
  * @return the value of Rosen's B integral
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
-inline RealType RosenB(int n, RealType alpha)
-{
-  RealType TheSum, Term;
-  RealType RosenB_, PSinhRosenA, PCoshRosenA, PHyperRosenA;
-  bool IsPositive;
+inline RealType RosenB(int n, RealType alpha) {
+  RealType RosenB_;
+
   if (alpha != 0.)
     {
-      Term = 1.;
-      TheSum = 1.;
-      IsPositive = true;
+      RealType Term = 1.;
+      bool IsPositive = true;
 		
       // These two expressions are (up to constant factors) equivalent
       // to computing the hyperbolic sine and cosine of a respectively
       // The series consists of adding up these terms in an alternating fashion
-      PSinhRosenA =  exp(alpha) - exp(-alpha);
-      PCoshRosenA = -exp(alpha) - exp(-alpha);
-      TheSum = PSinhRosenA;
+      RealType PSinhRosenA =  exp(alpha) - exp(-alpha);
+      RealType PCoshRosenA = -exp(alpha) - exp(-alpha);
+      RealType TheSum = PSinhRosenA;
+      RealType PHyperRosenA;
       for (unsigned nu=1; nu<=n; nu++)
         {
           if (IsPositive)
@@ -227,7 +225,8 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
       RealType Term1 = fact[2*m - 1] / pow(2*a, 2*m);
       RealType Term2 = 0.;
       for (int nu = 1; nu <= 2*n; nu++) {
-        Term2 += nu * pow(2*b, 2*n - nu) * fact[2*(m+n)-nu-1] / (fact[2*n-nu]*2*n * pow(2*(a+b), 2*(m+n)-nu));
+        Term2 += nu * pow(2*b, 2*n - nu) * fact[2*(m+n)-nu-1] / 
+          (fact[2*n-nu]*2*n * pow(2*(a+b), 2*(m+n)-nu));
       }
       sSTOCoulInt_ = pow(2*a, 2*m+1) * (Term1 - Term2) / fact[2*m];
 
@@ -395,7 +394,7 @@ inline RealType KinInt(RealType a, RealType b, int m, int n,RealType R)
  */
 inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R)
 {
-  RealType x, y, z, K2, TheSum;
+  RealType x;
   // x is the argument of the auxiliary RosenA and RosenB functions
   x = 2. * a * R;
 	
@@ -408,6 +407,7 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
     }
   else
     {
+      RealType K2, TheSum;
       if (a == b)
         {
           TheSum = 0.;
@@ -433,8 +433,8 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
         {
           // Slater exponents are different
           // First calculate some useful arguments
-          y = R*(a+b);
-          z = R*(a-b);
+          RealType y = R*(a+b);
+          RealType z = R*(a-b);
           TheSum = 0.;
           for (int nu=0; nu<=2*n-1; nu++)
             {
@@ -479,15 +479,13 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
  * @note Derived in QTPIE research notes, May 15 2007
  */
 inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n, RealType R)
-{
-  RealType w, x, y, z, TheSum;
-	
+{	
   // Calculate first term
   RealType sSTOOvIntGrad_ = (m+n+1.)/R * sSTOOvInt(a, b, m, n, R);
 	
   // Calculate remaining terms; answers depend on exponents 
-  TheSum = 0.;
-  x = a * R;
+  RealType TheSum = 0.;
+  RealType x = a * R;
   if (a == b)
     {
       for (int q=0; q<=(m+n)/2; q++)
@@ -496,9 +494,9 @@ inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n, RealType R)
     }
   else
     {
-      w = b*R;
-      y = 0.5*R*(a+b);
-      z = 0.5*R*(a-b);
+      RealType w = b*R;
+      RealType y = 0.5*R*(a+b);
+      RealType z = 0.5*R*(a-b);
       for (int q=0; q<m+n; q++)
         TheSum = TheSum + RosenD(m,n,q) *
           ((a-b)*RosenB(q+1,z)*RosenA(m+n-q  ,y)
@@ -510,7 +508,7 @@ inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n, RealType R)
 
 /**
  * @brief Calculates a Slater-type orbital exponent based on the hardness parameters
- * @param Hardness: chemical hardness in atomic units
+ * @param hardness: chemical hardness in atomic units
  * @param        n: principal quantum number
  * @note Modified for use with OpenMD by Gezelter and Michalka.
  */

@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,8 +44,17 @@
 #include "visitors/AtomVisitor.hpp"
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
+#include "types/MultipoleAdapter.hpp"
+#include "types/GayBerneAdapter.hpp"
 
 namespace OpenMD {
+
+  BaseAtomVisitor::BaseAtomVisitor(SimInfo* info) : BaseVisitor() {
+    storageLayout_ = info->getStorageLayout(); 
+  }    
+  
   void BaseAtomVisitor::visit(RigidBody *rb) {
     //vector<Atom*> myAtoms;
     //vector<Atom*>::iterator atomIter;
@@ -79,38 +88,40 @@ namespace OpenMD {
   void DefaultAtomVisitor::visit(Atom *atom) {
     AtomData *atomData;
     AtomInfo *atomInfo;
-    Vector3d  pos;
-    Vector3d  vel;
-    Vector3d  frc;
-    Vector3d  u;
-
+    AtomType* atype = atom->getAtomType();
+              
     if (isVisited(atom))
       return;
     
     atomInfo = new AtomInfo;
-    
-    atomData = new AtomData;
-    atomData->setID("ATOMDATA");
-    
-    pos = atom->getPos();
-    vel = atom->getVel();
-    frc = atom->getFrc();
     atomInfo->atomTypeName = atom->getType();
-    atomInfo->pos[0] = pos[0];
-    atomInfo->pos[1] = pos[1];
-    atomInfo->pos[2] = pos[2];
-    atomInfo->vel[0] = vel[0];
-    atomInfo->vel[1] = vel[1];
-    atomInfo->vel[2] = vel[2];
+    atomInfo->pos = atom->getPos();
+    atomInfo->vel = atom->getVel();
+    atomInfo->frc = atom->getFrc();
+    atomInfo->vec = V3Zero;
     atomInfo->hasVelocity = true;
-    atomInfo->frc[0] = frc[0];
-    atomInfo->frc[1] = frc[1];
-    atomInfo->frc[2] = frc[2];
     atomInfo->hasForce = true;
-    atomInfo->vec[0] = 0.0;
-    atomInfo->vec[1] = 0.0;
-    atomInfo->vec[2] = 0.0;
+        
+    FixedChargeAdapter fca = FixedChargeAdapter(atype);
+    if ( fca.isFixedCharge() ) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge = fca.getCharge();
+    }
+          
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+    if ( fqa.isFluctuatingCharge() ) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge += atom->getFlucQPos();
+    }
     
+    if ((storageLayout_ & DataStorage::dslElectricField) && 
+        (atype->isElectrostatic())) {
+      atomInfo->hasElectricField = true;
+      atomInfo->eField = atom->getElectricField();
+    }
+
+    atomData = new AtomData;
+    atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
     
     atom->addProperty(atomData);
@@ -121,43 +132,53 @@ namespace OpenMD {
   void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
     AtomData *atomData;
     AtomInfo *atomInfo;
-    Vector3d  pos;
-    Vector3d  vel;
-    Vector3d  frc;
-    Vector3d  u;
+    AtomType* atype = datom->getAtomType();
 
     if (isVisited(datom))
       return;
     
-    pos = datom->getPos();
-    vel = datom->getVel();
-    frc = datom->getFrc();
-    if (datom->getAtomType()->isGayBerne()) {
-        u = datom->getA().transpose()*V3Z;         
-    } else if (datom->getAtomType()->isMultipole()) {
-        u = datom->getElectroFrame().getColumn(2);
-    }
-    atomData = new AtomData;
-    atomData->setID("ATOMDATA");
     atomInfo = new AtomInfo;
-
     atomInfo->atomTypeName = datom->getType();
-    atomInfo->pos[0] = pos[0];
-    atomInfo->pos[1] = pos[1];
-    atomInfo->pos[2] = pos[2];
-    atomInfo->vel[0] = vel[0];
-    atomInfo->vel[1] = vel[1];
-    atomInfo->vel[2] = vel[2];
+    atomInfo->pos = datom->getPos();
+    atomInfo->vel = datom->getVel();
+    atomInfo->frc = datom->getFrc();
     atomInfo->hasVelocity = true;
-    atomInfo->frc[0] = frc[0];
-    atomInfo->frc[1] = frc[1];
-    atomInfo->frc[2] = frc[2];
     atomInfo->hasForce = true;
-    atomInfo->vec[0] = u[0];
-    atomInfo->vec[1] = u[1];
-    atomInfo->vec[2] = u[2];
-    atomInfo->hasVector = true;
 
+    FixedChargeAdapter fca = FixedChargeAdapter(atype);
+    if ( fca.isFixedCharge() ) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge = fca.getCharge();
+    }
+          
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+    if ( fqa.isFluctuatingCharge() ) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge += datom->getFlucQPos();
+    }
+
+    if ((storageLayout_ & DataStorage::dslElectricField) && 
+        (atype->isElectrostatic())) {
+      atomInfo->hasElectricField = true;
+      atomInfo->eField = datom->getElectricField();
+    }
+
+    GayBerneAdapter gba = GayBerneAdapter(atype);
+    MultipoleAdapter ma = MultipoleAdapter(atype);
+    
+    if (gba.isGayBerne()) {
+      atomInfo->hasVector = true;
+      atomInfo->vec = datom->getA().transpose()*V3Z;
+    } else if (ma.isDipole()) {
+      atomInfo->hasVector = true;
+      atomInfo->vec = datom->getDipole();
+    } else if (ma.isQuadrupole()) {
+      atomInfo->hasVector = true;
+      atomInfo->vec = datom->getA().transpose()*V3Z;
+    }
+
+    atomData = new AtomData;
+    atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
 
     datom->addProperty(atomData);
@@ -170,7 +191,7 @@ namespace OpenMD {
     std::string result;
 
     sprintf(buffer,
-            "------------------------------------------------------------------\n");
+            "--------------------------------------------------------------\n");
     result += buffer;
 
     sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
@@ -181,7 +202,7 @@ namespace OpenMD {
     result += buffer;
 
     sprintf(buffer,
-            "------------------------------------------------------------------\n");
+            "--------------------------------------------------------------\n");
     result += buffer;
 
     return result;

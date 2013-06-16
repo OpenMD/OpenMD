@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -92,8 +92,7 @@ namespace OpenMD {
     /**
      * Registers a creator with a type identifier
      * @return true if registration is successful, otherwise return false
-     * @id the identification of the concrete object
-     * @creator the object responsible to create the concrete object 
+     * @param creator the object responsible to create the concrete object 
      */
     bool registerHydrodynamicsModel(HydrodynamicsModelCreator* creator);
 
@@ -102,7 +101,7 @@ namespace OpenMD {
      * was previously registered, the function returns true.
      * @return truethe type identifier was previously registered and the creator is removed,
      * otherwise return false
-     * @id the identification of the concrete object
+     * @param id the identification of the concrete object
      */
     bool unregisterHydrodynamicsModel(const std::string& id);
     /**
@@ -111,6 +110,8 @@ namespace OpenMD {
      * @return a pointer of the concrete object, return NULL if no creator is registed for 
      * creating this concrete object
      * @param id the identification of the concrete object
+     * @param sd a pointer to the StuntDouble being modeled
+     * @param info a pointer to the SimInfo object
      */
     HydrodynamicsModel* createHydrodynamicsModel(const std::string& id, StuntDouble* sd, SimInfo* info);
 

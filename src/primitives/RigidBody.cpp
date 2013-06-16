@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -74,9 +74,7 @@ namespace OpenMD {
   
   void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
-    
-    //((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;    
-    
+        
     for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);
@@ -228,45 +226,18 @@ namespace OpenMD {
     Vector3d apos;
     Vector3d rpos;
     Vector3d frc(0.0);
-    Vector3d trq(0.0);    
+    Vector3d trq(0.0);
+    Vector3d ef(0.0);
     Vector3d pos = this->getPos();
+    AtomType* atype;
+    int eCount = 0;
+    
+    int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
+    
     for (unsigned int i = 0; i < atoms_.size(); i++) {
 
-      afrc = atoms_[i]->getFrc();
-      apos = atoms_[i]->getPos();
-      rpos = apos - pos;
-        
-      frc += afrc;
+      atype = atoms_[i]->getAtomType();
 
-      trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
-      trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
-      trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
-
-      // If the atom has a torque associated with it, then we also need to 
-      // migrate the torques onto the center of mass:
-
-      if (atoms_[i]->isDirectional()) {
-	atrq = atoms_[i]->getTrq();
-	trq += atrq;
-      }      
-    }         
-    addFrc(frc);
-    addTrq(trq);    
-  }
-
-  Mat3x3d RigidBody::calcForcesAndTorquesAndVirial() {
-    Vector3d afrc;
-    Vector3d atrq;
-    Vector3d apos;
-    Vector3d rpos;
-    Vector3d dfrc;
-    Vector3d frc(0.0);
-    Vector3d trq(0.0);    
-    Vector3d pos = this->getPos();
-    Mat3x3d tau_(0.0);
-
-    for (unsigned int i = 0; i < atoms_.size(); i++) {
-      
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
       rpos = apos - pos;
@@ -284,6 +255,65 @@ namespace OpenMD {
 	atrq = atoms_[i]->getTrq();
 	trq += atrq;
       }
+
+      if ((sl & DataStorage::dslElectricField) && (atype->isElectrostatic())) {
+        ef += atoms_[i]->getElectricField();
+        eCount++;
+      }
+    }         
+    addFrc(frc);
+    addTrq(trq);    
+
+    if (sl & DataStorage::dslElectricField)  {
+      ef /= eCount;
+      setElectricField(ef);
+    }
+
+  }
+
+  Mat3x3d RigidBody::calcForcesAndTorquesAndVirial() {
+    Vector3d afrc;
+    Vector3d atrq;
+    Vector3d apos;
+    Vector3d rpos;
+    Vector3d dfrc;
+    Vector3d frc(0.0);
+    Vector3d trq(0.0);
+    Vector3d ef(0.0);
+    AtomType* atype;
+    int eCount = 0;
+
+    Vector3d pos = this->getPos();
+    Mat3x3d tau_(0.0);
+
+    int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
+
+    for (unsigned int i = 0; i < atoms_.size(); i++) {
+      
+      atype = atoms_[i]->getAtomType();
+
+      afrc = atoms_[i]->getFrc();
+      apos = atoms_[i]->getPos();
+      rpos = apos - pos;
+        
+      frc += afrc;
+
+      trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
+      trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
+      trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
+
+      // If the atom has a torque associated with it, then we also need to 
+      // migrate the torques onto the center of mass:
+
+      if (atoms_[i]->isDirectional()) {
+	atrq = atoms_[i]->getTrq();
+	trq += atrq;
+      }
+
+      if ((sl & DataStorage::dslElectricField) && (atype->isElectrostatic())) {
+        ef += atoms_[i]->getElectricField();
+        eCount++;
+      }
       
       tau_(0,0) -= rpos[0]*afrc[0];
       tau_(0,1) -= rpos[0]*afrc[1];
@@ -298,6 +328,12 @@ namespace OpenMD {
     }
     addFrc(frc);
     addTrq(trq);
+
+    if (sl & DataStorage::dslElectricField) {
+      ef /= eCount;
+      setElectricField(ef);
+    }
+
     return tau_;
   }
 
@@ -319,7 +355,7 @@ namespace OpenMD {
 
       if (atoms_[i]->isDirectional()) {
           
-	dAtom = (DirectionalAtom *) atoms_[i];
+	dAtom = dynamic_cast<DirectionalAtom *>(atoms_[i]);
 	dAtom->setA(refOrients_[i].transpose() * a);
       }
 
@@ -346,7 +382,7 @@ namespace OpenMD {
 
       if (atoms_[i]->isDirectional()) {
           
-	dAtom = (DirectionalAtom *) atoms_[i];
+	dAtom = dynamic_cast<DirectionalAtom *>(atoms_[i]);
 	dAtom->setA(refOrients_[i].transpose() * a, frame);
       }
 

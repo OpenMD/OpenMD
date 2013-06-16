@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -313,6 +313,30 @@ namespace OpenMD {
     data_[ELECTRONIC_TEMPERATURE] = electronic_temperature;
     statsMap_["ELECTRONIC_TEMPERATURE"] = ELECTRONIC_TEMPERATURE;
 
+    StatsData com;
+    com.units =  "A";
+    com.title =  "Center of Mass";
+    com.dataType = "Vector3d";
+    com.accumulator = new VectorAccumulator();
+    data_[COM] = com;
+    statsMap_["COM"] =  COM;
+
+    StatsData comVel;
+    comVel.units =  "A/fs";
+    comVel.title =  "Center of Mass Velocity";
+    comVel.dataType = "Vector3d";
+    comVel.accumulator = new VectorAccumulator();
+    data_[COM_VELOCITY] = comVel;
+    statsMap_["COM_VELOCITY"] =  COM_VELOCITY;
+
+    StatsData angMom;
+    angMom.units =  "amu A^2/fs";
+    angMom.title =  "Angular Momentum";
+    angMom.dataType = "Vector3d";
+    angMom.accumulator = new VectorAccumulator();
+    data_[ANGULAR_MOMENTUM] = angMom;
+    statsMap_["ANGULAR_MOMENTUM"] =  ANGULAR_MOMENTUM;
+
     // Now, set some defaults in the mask:
 
     Globals* simParams = info_->getSimParams();
@@ -379,6 +403,10 @@ namespace OpenMD {
     }   
   }
 
+  Stats::~Stats() {
+    data_.clear();
+    statsMap_.clear();
+  }
 
   std::string Stats::getTitle(int index) {
     assert(index >=0 && index < ENDINDEX);
@@ -396,7 +424,6 @@ namespace OpenMD {
   }
 
   void Stats::collectStats(){
-    Globals* simParams = info_->getSimParams();
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     Thermo thermo(info_);
    
@@ -487,6 +514,18 @@ namespace OpenMD {
         case TAGGED_PAIR_DISTANCE:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTaggedAtomPairDistance());
           break;
+        case ELECTRONIC_TEMPERATURE:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicTemperature());
+          break; 
+        case COM:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getCom());
+          break;
+        case COM_VELOCITY:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getComVel());
+          break;
+        case ANGULAR_MOMENTUM:
+          dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getAngularMomentum());
+          break;
           /*
         case SHADOWH:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getShadowHamiltionian());
@@ -495,9 +534,6 @@ namespace OpenMD {
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getHelfandMoment());
           break;
           */
-        case ELECTRONIC_TEMPERATURE:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicTemperature());
-          break; 
         }
       }
     }

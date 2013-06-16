@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -114,11 +114,12 @@ namespace OpenMD {
     
     void writeFrame(std::ostream& outStream);    
     void clear() {frame.clear();}
-    void doPositions(bool pos) {doPositions_  = pos;}
-    void doVelocities(bool vel){doVelocities_ = vel;}
-    void doForces(bool frc)    {doForces_     = frc;}
-    void doVectors(bool vec)   {doVectors_    = vec;}
-    void doCharges(bool chg)   {doCharges_    = chg;}
+    void doPositions(bool pos) {doPositions_ = pos;}
+    void doVelocities(bool vel) {doVelocities_ = vel;}
+    void doForces(bool frc) {doForces_ = frc;}
+    void doVectors(bool vec) {doVectors_ = vec;}
+    void doCharges(bool chg) {doCharges_ = chg;}
+    void doElectricFields(bool efl) {doElectricFields_ = efl;}
 
   protected:
     void internalVisit(StuntDouble* sd);
@@ -136,6 +137,7 @@ namespace OpenMD {
     bool doForces_;
     bool doVectors_;
     bool doCharges_;
+    bool doElectricFields_;
   };
 
 
@@ -144,7 +146,7 @@ namespace OpenMD {
     PrepareVisitor() : BaseVisitor() {visitorName = "prepareVisitor";}
 
     virtual void visit(Atom* atom) {internalVisit(atom);}
-    virtual void visit(DirectionalAtom* datom) {internalVisit((Atom*)datom);}
+    virtual void visit(DirectionalAtom* datom) {internalVisit(reinterpret_cast<Atom*>(datom));}
     virtual void visit(RigidBody* rb) {internalVisit(rb);}
 
     virtual const std::string toString();

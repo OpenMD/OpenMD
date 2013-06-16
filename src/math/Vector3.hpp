@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -88,37 +88,37 @@ namespace OpenMD {
     }
     
     /**
-     * Retunrs reference of the first element of Vector3.
+     * Returns reference of the first element of Vector3.
      * @return reference of the first element of Vector3
      */
     inline Real& x() {  return this->data_[0];}
     
     /**
-     * Retunrs the first element of Vector3.
+     * Returns the first element of Vector3.
      * @return  the first element of Vector3
      */
     inline Real x() const {  return this->data_[0];}
     
     /**
-     * Retunrs reference of the second element of Vector3.
+     * Returns reference of the second element of Vector3.
      * @return reference of the second element of Vector3
      */
     inline Real& y() {  return this->data_[1];}
     
     /**
-     * Retunrs  the second element of Vector3.
+     * Returns  the second element of Vector3.
      * @return c the second element of Vector3
      */
     inline Real y() const {  return this->data_[1];}
     
     /**
-     * Retunrs reference of the third element of Vector3.
+     * Returns reference of the third element of Vector3.
      * @return reference of the third element of Vector3
      */
     inline Real& z() {  return this->data_[2];}
     
     /**
-     * Retunrs  the third element of Vector3.
+     * Returns  the third element of Vector3.
      * @return f the third element of Vector3
      */
     inline Real z() const {  return this->data_[2];}
@@ -130,7 +130,6 @@ namespace OpenMD {
    * @param v1 first vector
    * @param v2 second vector
    * @return the cross product  of v1 and v2
-   * @see #vector::dot
    */
   template<typename Real>
   inline Vector3<Real> cross( const Vector3<Real>& v1, const Vector3<Real>& v2 ) {

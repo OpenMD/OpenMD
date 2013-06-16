@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -183,11 +183,15 @@ namespace OpenMD {
     foo = strtok(working_line, " ,;\t");
 
     if (foo != NULL) {
-
-      if (!strcasecmp(foo, "end")) return 1;
+      
+      if (!strcasecmp(foo, "end")) {
+        free(working_line);
+        return 1;
+      }
 
     }
  
+    free(working_line);
     return 0;
   }
   
@@ -260,10 +264,10 @@ namespace OpenMD {
   
   /**
    *    memparse - parse a string with mem suffixes into a number
-   *    @ptr: Where parse begins
-   *    @retptr: (output) Pointer to next char after parse completes
+   *    @param ptr: Where parse begins
+   *    @param retptr: (output) Pointer to next char after parse completes
    *
-   *    Parses a string into a number.  The number stored at @ptr is
+   *    Parses a string into a number.  The number stored at @param ptr is
    *    potentially suffixed with %K (for kilobytes, or 1024 bytes),
    *    %M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
    *    1073741824).  If the number is suffixed with K, M, or G, then

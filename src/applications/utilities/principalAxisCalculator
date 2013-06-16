@@ -185,7 +185,6 @@ def writeFile(OutFileName):
 
     (COM, evals, evects) = findMoments()
 
-
     # we need to re-order the axes so that the smallest moment of inertia
     # (which corresponds to the long axis of the molecule) is along the z-axis
     # we'll just reverse the order of the three axes:
@@ -195,6 +194,69 @@ def writeFile(OutFileName):
     RotMat[0] = evects[axOrder[2]]
     RotMat[1] = evects[axOrder[1]]
     RotMat[2] = evects[axOrder[0]]
+
+    q = [0.0, 0.0, 0.0, 0.0]
+    myEuler = [0.0, 0.0, 0.0]
+
+    # RotMat to Quat code is out of OpenMD's SquareMatrix3.hpp code:
+    
+    t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
+        
+    if( t > 1e-6 ):
+        s = 0.5 / math.sqrt( t )
+        q[0] = 0.25 / s
+        q[1] = (RotMat[1][2] - RotMat[2][1]) * s
+        q[2] = (RotMat[2][0] - RotMat[0][2]) * s
+        q[3] = (RotMat[0][1] - RotMat[1][0]) * s
+    else:
+        ad1 = RotMat[0][0]
+        ad2 = RotMat[1][1]
+        ad3 = RotMat[2][2]
+        
+        if( ad1 >= ad2 and ad1 >= ad3 ):
+            s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
+            q[0] = (RotMat[1][2] - RotMat[2][1]) * s
+            q[1] = 0.25 / s
+            q[2] = (RotMat[0][1] + RotMat[1][0]) * s
+            q[3] = (RotMat[0][2] + RotMat[2][0]) * s
+        elif ( ad2 >= ad1 and ad2 >= ad3 ):
+            s = 0.5 / math.sqrt( 1.0 + RotMat[1][1] - RotMat[0][0] - RotMat[2][2] )
+            q[0] = (RotMat[2][0] - RotMat[0][2] ) * s
+            q[1] = (RotMat[0][1] + RotMat[1][0]) * s
+            q[2] = 0.25 / s
+            q[3] = (RotMat[1][2] + RotMat[2][1]) * s
+        else:
+            s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
+            q[0] = (RotMat[0][1] - RotMat[1][0]) * s
+            q[1] = (RotMat[0][2] + RotMat[2][0]) * s
+            q[2] = (RotMat[1][2] + RotMat[2][1]) * s        
+
+    print "Quaternions:"
+    print q
+
+    theta = math.acos(RotMat[2][2])
+    ctheta = RotMat[2][2]
+    stheta = math.sqrt(1.0 - ctheta * ctheta)
+
+    if (math.fabs(stheta) < 1e-6):
+        psi = 0.0
+        phi = math.atan2(-RotMat[1][0], RotMat[0][0]) 
+    else:
+        phi = math.atan2(RotMat[2][0], -RotMat[2][1])
+        psi = math.atan2(RotMat[0][2], RotMat[1][2])
+        
+    if (phi < 0):
+        phi = phi + 2.0 * math.pi;
+        
+    if (psi < 0):
+        psi = psi + 2.0 * math.pi;
+        
+    myEuler[0] = phi * 180.0 / math.pi;
+    myEuler[1] = theta * 180.0 / math.pi;
+    myEuler[2] = psi * 180.0 / math.pi;
+
+    print "Euler Angles:"
+    print myEuler
 
     nAtoms = len(indices)
     

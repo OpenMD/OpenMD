@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -57,8 +57,8 @@ namespace OpenMD {
   /**
    * @class SquareMatrix SquareMatrix.hpp "math/SquareMatrix.hpp"
    * @brief A square matrix class
-   * @template Real the element type
-   * @template Dim the dimension of the square matrix
+   * \tparam Real the element type
+   * \tparam Dim the dimension of the square matrix
    */
   template<typename Real, int Dim>
   class SquareMatrix : public RectMatrix<Real, Dim, Dim> {
@@ -125,7 +125,7 @@ namespace OpenMD {
       Real det;
       return det;
     }
-
+    
     /** Returns the trace of this matrix. */
     Real trace() const {
       Real tmp = 0;
@@ -232,7 +232,7 @@ namespace OpenMD {
      * @return true if success, otherwise return false
      * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is
      *     overwritten
-     * @param w will contain the eigenvalues of the matrix On return of this function
+     * @param d will contain the eigenvalues of the matrix On return of this function
      * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are 
      *    normalized and mutually orthogonal. 
      */
@@ -371,6 +371,10 @@ namespace OpenMD {
     //// this is NEVER called
     if ( i >= VTK_MAX_ROTATIONS ) {
       std::cout << "vtkMath::Jacobi: Error extracting eigenfunctions" << std::endl;
+      if (n > 4) {
+        delete[] b;
+        delete[] z;
+      }      
       return 0;
     }
 

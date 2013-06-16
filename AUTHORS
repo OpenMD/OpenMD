@@ -1,16 +1,18 @@
-OpenMD is the combined effort of a number of graduate students
-in the Gezelter lab at the University of Notre Dame.  The 
-principal authors of this code are:
+OpenMD is the combined effort of a number of currenta and previous
+graduate students in the Gezelter lab at the University of Notre Dame.  
+The principal authors of this code are:
 
-Prof. J. Daniel Gezelter   <gezelter@nd.edu>
-Dr. Charles F. Vardeman II <cvardema@nd.edu>
-Shenyu Kuang               <skuang@nd.edu>
+J. Daniel Gezelter         <gezelter@nd.edu>
 James Marr                 <jmarr@nd.edu>
-Kelsey Stocker             <kstocke1@nd.edu>
 Joseph Michalka            <jmichalk@nd.edu>
+Kelsey Stocker             <kstocke1@nd.edu>
+Patrick Louden             <plouden@nd.edu>
+Madan Lamichhane           <mlamichh@nd.edu>
+Dr. Charles F. Vardeman II <cvardema@nd.edu>
 Dr. Teng Lin               Now at: <lin@schrodinger.com>
 Dr. Christopher J. Fennell Now at: <christopher.fennell@stonybrook.edu>
-Dr. Matthew A. Meineke     <mmeineke@maul.chem.nd.edu>
+Dr. Shenyu Kuang           Now at: <shenyu.kuang@gmail.com>
+Dr. Matthew A. Meineke     Now at: <mmeineke@hmh.net>
 Dr. Xiuquan Sun            Now at: <Xiuquan.Sun@pnnl.gov>
 Chunlei Li                 <cli2@nd.edu>
 Kyle Daily                 Now at: <kdaily@gmail.com>

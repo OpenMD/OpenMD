@@ -25,7 +25,6 @@ GNU General Public License for more details.
  * @file ElementsTable.hpp
  * @author gezelter
  * @date 12/21/2007
- * @time 11:30am
  * @version 1.0
  */
 
@@ -39,7 +38,7 @@ GNU General Public License for more details.
 namespace OpenMD {
 
   /**
-   * @class ElementsTable.hpp "util/ElementsTable.hpp"
+   * @class ElementsTable
    * @brief Periodic Table of the Elements 
    * Using element data is a place holder when we lack information about
    * a specific atom type.  In particular, the Langevin algorithms must
@@ -98,12 +97,17 @@ namespace OpenMD {
     unsigned int GetSize() { return GetNumberOfElements(); }
     /**
      * @return the atomic number matching the element symbol passed
+     * or 0 if not defined. 
+     * @param str the element symbol
+     */
+    int GetAtomicNum(const char *str);
+    /**
+     * @return the atomic number matching the element symbol passed
      * or 0 if not defined. For 'D' or 'T' hydrogen isotopes, will return
      * a value in the second argument
      * @param str the element symbol
      * @param iso the isotope index for Deuterium or Tritium
      */
-    int GetAtomicNum(const char *str);
     int GetAtomicNum(const char *str, int &iso);
     /**
      * @return the element symbol matching the atomic number passed

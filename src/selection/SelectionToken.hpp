@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -156,6 +156,9 @@ namespace OpenMD {
     const static int y            = atomproperty | dynamic | 3;
     const static int z            = atomproperty | dynamic | 4;
     const static int r            = atomproperty | dynamic | 5;
+    const static int wrappedX     = atomproperty | dynamic | 6;
+    const static int wrappedY     = atomproperty | dynamic | 7;
+    const static int wrappedZ     = atomproperty | dynamic | 8;
         
     const static int opGT         = comparator |  dynamic | 0;
     const static int opGE         = comparator |  dynamic | 1;

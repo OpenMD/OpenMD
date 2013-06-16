@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file SimCreator.cpp
  * @author tlin
  * @date 11/03/2004
- * @time 13:51am
  * @version 1.0
  */
 #include <exception>
@@ -112,11 +111,9 @@ namespace OpenMD {
         //brocasting the stream size
         streamSize = ppStream.str().size() +1;
         MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
-        MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())),
-                              streamSize, MPI::CHAR, masterNode);
-                
+        MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI::CHAR, masterNode);
+                           
       } else {
-
         MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 
         //get stream size
@@ -130,7 +127,6 @@ namespace OpenMD {
                 
         ppStream.str(buf);
         delete [] buf;
-
       }
 #endif            
       // Create a scanner that reads from the input stream
@@ -256,7 +252,7 @@ namespace OpenMD {
     int metaDataBlockStart = -1;
     int metaDataBlockEnd = -1;
     int i, j;
-    streamoff mdOffset(0);
+    streamoff mdOffset;
     int mdFileVersion;
 
     // Create a string for embedding the version information in the MetaData
@@ -515,24 +511,13 @@ namespace OpenMD {
   
 #ifdef IS_MPI
   void SimCreator::divideMolecules(SimInfo *info) {
-    RealType numerator;
-    RealType denominator;
-    RealType precast;
-    RealType x;
-    RealType y;
     RealType a;
-    int old_atoms;
-    int add_atoms;
-    int new_atoms;
-    int nTarget;
-    int done;
-    int i;
-    int loops;
-    int which_proc;
     int nProcessors;
     std::vector<int> atomsPerProc;
     int nGlobalMols = info->getNGlobalMolecules();
-    std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error condition:
+    std::vector<int> molToProcMap(nGlobalMols, -1); // default to an
+                                                    // error
+                                                    // condition:
     
     nProcessors = MPI::COMM_WORLD.Get_size();
     
@@ -543,17 +528,18 @@ namespace OpenMD {
               "\tthe number of molecules.  This will not result in a \n"
               "\tusable division of atoms for force decomposition.\n"
               "\tEither try a smaller number of processors, or run the\n"
-              "\tsingle-processor version of OpenMD.\n", nProcessors, nGlobalMols);
+              "\tsingle-processor version of OpenMD.\n", nProcessors, 
+              nGlobalMols);
       
       painCave.isFatal = 1;
       simError();
     }
     
-    int seedValue;
     Globals * simParams = info->getSimParams();
-    SeqRandNumGen* myRandom; //divide labor does not need Parallel random number generator
+    SeqRandNumGen* myRandom; //divide labor does not need Parallel
+                             //random number generator
     if (simParams->haveSeed()) {
-      seedValue = simParams->getSeed();
+      int seedValue = simParams->getSeed();
       myRandom = new SeqRandNumGen(seedValue);
     }else {
       myRandom = new SeqRandNumGen();
@@ -566,31 +552,31 @@ namespace OpenMD {
     atomsPerProc.insert(atomsPerProc.end(), nProcessors, 0);
     
     if (worldRank == 0) {
-      numerator = info->getNGlobalAtoms();
-      denominator = nProcessors;
-      precast = numerator / denominator;
-      nTarget = (int)(precast + 0.5);
+      RealType numerator = info->getNGlobalAtoms();
+      RealType denominator = nProcessors;
+      RealType precast = numerator / denominator;
+      int nTarget = (int)(precast + 0.5);
       
-      for(i = 0; i < nGlobalMols; i++) {
+      for(int i = 0; i < nGlobalMols; i++) {
 
-        done = 0;
-        loops = 0;
+        int done = 0;
+        int loops = 0;
         
         while (!done) {
           loops++;
           
           // Pick a processor at random
           
-          which_proc = (int) (myRandom->rand() * nProcessors);
+          int which_proc = (int) (myRandom->rand() * nProcessors);
           
           //get the molecule stamp first
           int stampId = info->getMoleculeStampId(i);
           MoleculeStamp * moleculeStamp = info->getMoleculeStamp(stampId);
           
           // How many atoms does this processor have so far?
-          old_atoms = atomsPerProc[which_proc];
-          add_atoms = moleculeStamp->getNAtoms();
-          new_atoms = old_atoms + add_atoms;
+          int old_atoms = atomsPerProc[which_proc];
+          int add_atoms = moleculeStamp->getNAtoms();
+          int new_atoms = old_atoms + add_atoms;
           
           // If we've been through this loop too many times, we need
           // to just give up and assign the molecule to this processor
@@ -634,8 +620,8 @@ namespace OpenMD {
           //           Pacc(x) = exp(- a * x)
           // where a = penalty / (average atoms per molecule)
           
-          x = (RealType)(new_atoms - nTarget);
-          y = myRandom->rand();
+          RealType x = (RealType)(new_atoms - nTarget);
+          RealType y = myRandom->rand();
           
           if (y < exp(- a * x)) {
             molToProcMap[i] = which_proc;
@@ -704,7 +690,8 @@ namespace OpenMD {
     set<AtomType*>::iterator i;
     bool hasDirectionalAtoms = false;
     bool hasFixedCharge = false;
-    bool hasMultipoles = false;    
+    bool hasDipoles = false;    
+    bool hasQuadrupoles = false;    
     bool hasPolarizable = false;    
     bool hasFluctuatingCharge = false;    
     bool hasMetallic = false;
@@ -726,8 +713,11 @@ namespace OpenMD {
       if (da.isDirectional()){
         hasDirectionalAtoms = true;
       }
-      if (ma.isMultipole()){
-        hasMultipoles = true;
+      if (ma.isDipole()){
+        hasDipoles = true;
+      }
+      if (ma.isQuadrupole()){
+        hasQuadrupoles = true;
       }
       if (ea.isEAM() || sca.isSuttonChen()){
         hasMetallic = true;
@@ -752,8 +742,11 @@ namespace OpenMD {
         storageLayout |= DataStorage::dslTorque;
       }
     }
-    if (hasMultipoles) {
-      storageLayout |= DataStorage::dslElectroFrame;
+    if (hasDipoles) {
+      storageLayout |= DataStorage::dslDipole;
+    }
+    if (hasQuadrupoles) {
+      storageLayout |= DataStorage::dslQuadrupole;
     }
     if (hasFixedCharge || hasFluctuatingCharge) {
       storageLayout |= DataStorage::dslSkippedCharge;
@@ -789,14 +782,17 @@ namespace OpenMD {
       }
     }
 
-    if (simParams->getOutputElectricField()) {
+    if (simParams->getOutputElectricField() | simParams->haveElectricField()) {
       storageLayout |= DataStorage::dslElectricField;
     }
+
     if (simParams->getOutputFluctuatingCharges()) {
       storageLayout |= DataStorage::dslFlucQPosition;
       storageLayout |= DataStorage::dslFlucQVelocity;
       storageLayout |= DataStorage::dslFlucQForce;
     }
+
+    info->setStorageLayout(storageLayout);
 
     return storageLayout;
   }
@@ -960,10 +956,10 @@ namespace OpenMD {
   }
   
   void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
-
+    
     DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
-
+    
     if (nframes > 0) {
       reader.readFrame(nframes - 1);
     } else {

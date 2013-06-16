@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -44,7 +44,6 @@
  * @file ForceManager.hpp
  * @author tlin
  * @date 11/09/2004
- * @time 10:36am
  * @version 1.0
  */
 
@@ -58,6 +57,7 @@
 #include "nonbonded/InteractionManager.hpp"
 #include "perturbations/Perturbation.hpp"
 #include "parallel/ForceDecomposition.hpp"
+#include "brains/Thermo.hpp"
 
 #define PREPAIR_LOOP 0
 #define PAIR_LOOP 1
@@ -77,14 +77,17 @@ namespace OpenMD {
 
   public:
     ForceManager(SimInfo * info);                          
-    virtual ~ForceManager() {}
+    virtual ~ForceManager();
     virtual void calcForces();
     void initialize();
 
   protected: 
     bool initialized_; 
     bool doParticlePot_;
+    bool doElectricField_;
     bool doHeatFlux_;
+    bool doLongRangeCorrections_;
+    bool usePeriodicBoundaryConditions_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
@@ -97,6 +100,7 @@ namespace OpenMD {
     InteractionManager* interactionMan_;
     ForceDecomposition* fDecomp_;
     SwitchingFunction* switcher_;
+    Thermo* thermo;
 
     SwitchingFunctionType sft_;/**< Type of switching function in use */
     RealType rCut_;            /**< cutoff radius for non-bonded interactions */
@@ -104,6 +108,8 @@ namespace OpenMD {
     CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
     CutoffPolicy cutoffPolicy_;/**< Cutoff Policy for non-bonded interactions */
 
+    set<AtomType*> atomTypes_;
+    vector<pair<AtomType*, AtomType*> > interactions_;
     map<Bend*, BendDataSet> bendDataSets;
     map<Torsion*, TorsionDataSet> torsionDataSets;
     map<Inversion*, InversionDataSet> inversionDataSets;

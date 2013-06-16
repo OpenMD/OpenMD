@@ -5,13 +5,19 @@
 // many parameters (but not all) are derived from the TRAPPE force field
 // of Siepmann's group.
 
-
-begin BaseAtomTypes    
-//Name		mass	 (amu)
-O_TIP4P_FQ	15.9994
-H_TIP4P_FQ	1.0079
-M_TIP4P_FQ	0.0
+begin BaseAtomTypes
+//Name 		mass (amu)
+O	15.9994
+H	1.0079
+M	0.0
 end BaseAtomTypes
+
+begin AtomTypes    
+//Name		mass	 (amu)
+O_TIP4P_FQ	O
+H_TIP4P_FQ	H
+M_TIP4P_FQ	M
+end AtomTypes
 
 begin LennardJonesAtomTypes
 //Name		epsilon		    sigma	

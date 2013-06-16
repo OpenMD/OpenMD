@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -55,19 +55,19 @@ namespace OpenMD {
   
   Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo(info) {
     
-    int seedValue;
+
     Globals * simParams = info->getSimParams();
     
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
-      seedValue = simParams->getSeed();
+      int seedValue = simParams->getSeed();
       randNumGen_ = new SeqRandNumGen(seedValue);
     }else {
       randNumGen_ = new SeqRandNumGen();
     }    
 #else
     if (simParams->haveSeed()) {
-      seedValue = simParams->getSeed();
+      int seedValue = simParams->getSeed();
       randNumGen_ = new ParallelRandNumGen(seedValue);
     }else {
       randNumGen_ = new ParallelRandNumGen();
