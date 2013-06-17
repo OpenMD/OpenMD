@@ -1,5 +1,5 @@
 /*
- * copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -104,8 +104,7 @@ namespace OpenMD {
         MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 #endif                 
         SimplePreprocessor preprocessor;
-        preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, 
-                                ppStream);
+        preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
                 
 #ifdef IS_MPI            
         //brocasting the stream size

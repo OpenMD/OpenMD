@@ -705,11 +705,11 @@ namespace OpenMD {
     RealType vpair;
     RealType dVdFQ1(0.0);
     RealType dVdFQ2(0.0);
-    Vector3d eField1(0.0);
-    Vector3d eField2(0.0);
     potVec longRangePotential(0.0);
     potVec workPot(0.0);
     potVec exPot(0.0);
+    Vector3d eField1(0.0);
+    Vector3d eField2(0.0);
     vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
@@ -918,7 +918,7 @@ namespace OpenMD {
         }
       }
     }
-   
+    
     // collects pairwise information
     fDecomp_->collectData();
         

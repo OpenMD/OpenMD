@@ -127,8 +127,6 @@ int main(int argc, char *argv []) {
   //Rotation angles for lattice
   RealType phi, theta, psi;
 
-  // RealType cphi, sphi, ctheta, stheta, cpsi, spsi;
-
   /*
     RealType cphi, sphi, ctheta, stheta, cpsi, spsi;
     
