@@ -44,7 +44,7 @@
 #include "io/InversionTypesSectionParser.hpp"
 #include "types/InversionType.hpp"
 #include "types/ImproperCosineInversionType.hpp"
-// #include "types/ImproperHarmonicInversionType.hpp"
+#include "types/HarmonicInversionType.hpp"
 // #include "types/CentralAtomHeightInversionType.hpp"
 // #include "types/DreidingInversionType.hpp"
 #include "types/AmberImproperTorsionType.hpp"
@@ -58,7 +58,7 @@ namespace OpenMD {
     setSectionName("InversionTypes");
     stringToEnumMap_["AmberImproper"] = itAmberImproper;
     stringToEnumMap_["ImproperCosine"] = itImproperCosine;
-    stringToEnumMap_["ImproperHarmonic"] = itImproperHarmonic;
+    stringToEnumMap_["Harmonic"] = itHarmonic;
     stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
     stringToEnumMap_["Dreiding"] = itDreiding;
   }
@@ -118,21 +118,30 @@ namespace OpenMD {
 
       break;
             
-
-
-
-      /*      
-    case InversionTypesSectionParser::itImproperHarmonic :
+    case InversionTypesSectionParser::itHarmonic :
       if (nTokens < 2) {
 	
       } else {
-	
-	RealType k = tokenizer.nextTokenAsDouble();
-        
-	inversionType = new ImproperHarmonicInversionType(k);
+        // Most inversion don't have specific angle information since
+        // they are cosine polynomials.  This one is different,
+        // however.  To match our other force field files
+        // (particularly for bends): 
+        //
+        // d0 should be read in kcal / mol / degrees^2
+        // phi0 should be read in degrees
+
+        RealType degreesPerRadian = 180.0 * NumericConstant::PI;
+
+        // convert to kcal / mol / radians^2
+        RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
+
+        // convert to radians
+        RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
+        inversionType = new HarmonicInversionType(d0, phi0);
       }
       break;
-       
+
+      /*             
     case InversionTypesSectionParser::itCentralAtomHeight :
       if (nTokens < 1) {
 	

@@ -50,7 +50,9 @@ namespace OpenMD {
   Inversion::Inversion(Atom *atom1, Atom *atom2, Atom *atom3, 
 		       Atom *atom4, InversionType *it) :
     atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), 
-    inversionType_(it) { }
+    inversionType_(it) { 
+    inversionKey_ = inversionType_->getKey();
+  }
   
   void Inversion::calcForce(RealType& angle, bool doParticlePot) {
     
@@ -86,7 +88,22 @@ namespace OpenMD {
     if (cos_phi < -1.0) cos_phi = -1.0;
 
     RealType dVdcosPhi;
-    inversionType_->calcForce(cos_phi, potential_, dVdcosPhi);
+    switch (inversionKey_) {
+    case itCosAngle:
+      inversionType_->calcForce(cos_phi, potential_, dVdcosPhi);
+      break;
+    case itAngle:
+      RealType phi = acos(cos_phi);
+      RealType dVdPhi;
+      inversionType_->calcForce(phi, potential_, dVdPhi);
+      RealType sin_phi = sqrt(1.0 - cos_phi * cos_phi);   
+      if (fabs(sin_phi) < 1.0E-6) {
+        sin_phi = 1.0E-6;
+      }
+      dVdcosPhi = dVdPhi / sin_phi;
+      break;
+    }
+    
     Vector3d f1 ;
     Vector3d f2 ;
     Vector3d f3 ;

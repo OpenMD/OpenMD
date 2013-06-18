@@ -81,7 +81,7 @@ namespace OpenMD {
 
     enum InversionTypeEnum{
       itImproperCosine,
-      itImproperHarmonic,
+      itHarmonic,
       itCentralAtomHeight,
       itAmberImproper,
       itDreiding,

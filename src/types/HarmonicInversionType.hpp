@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,91 +40,57 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file PolynomialInversionType.hpp
- * @author teng lin
- * @date  11/16/2004
- * @version 1.0
- */ 
+#ifndef TYPES_HARMONICINVERSIONTYPE_HPP
+#define TYPES_HARMONICINVERSIONTYPE_HPP
 
-#ifndef TYPES_POLYNOMIALINVERSIONTYPE_HPP
-#define TYPES_POLYNOMIALINVERSIONTYPE_HPP
-
-#include "math/Polynomial.hpp"
-#include "types/InversionType.hpp"
+#if defined(_MSC_VER)
+#define copysign _copysign
+#endif
 
 namespace OpenMD {
-  
+
   /**
-   * @class PolynomialInversionType PolynomialInversionType.hpp "types/PolynomialInversionType.hpp"
-   * @todo documentation
+   * @class HarmonicInversionType
+   * This inversion potential has the form:
+   * 
+   *  \f[ 
+         V_{inv} = \frac{d_0}{2} \left(\phi - \phi_0\right)^2
+       \f]
+   *
    */
-  class PolynomialInversionType : public InversionType{
+  class HarmonicInversionType : public InversionType {
     
   public:
-    PolynomialInversionType() { /* polynomial_ = new DoublePolynomial(); */ }
-    
-    RealType getCoefficient(int power) {
-      return polynomial_.getCoefficient(power);
-    }
-    
-    void addCoefficient(int power, RealType coefficient) {
-      polynomial_.addCoefficient(power, coefficient);
-    }
-    
-    void setCoefficient(int power, RealType coefficient) {
-      polynomial_.setCoefficient(power, coefficient);
-    }
+        
+    HarmonicInversionType(RealType d0, RealType phi0) :  
+      InversionType(), d0_(d0), phi0_(phi0) {}
 
-    void setPolynomial(DoublePolynomial p) {
-      polynomial_ = p;
-    }
-    
-    virtual InversionKey getKey() { return itCosAngle; }
 
-    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
-      V = polynomial_.evaluate(cosPhi);
-      dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
+    virtual void calcForce(RealType phi, RealType& V, RealType& dVdPhi) {
+
+      V = 0.5 * d0_ * pow((phi - phi0_), 2);
+      dVdPhi = -d0_ * (phi - phi0_);
 
     }
-
-    //friend std::ostream& operator <<(std::ostream& os, PolynomialInversionType& pit);
+    
+    virtual InversionKey getKey() { return itAngle; }
+    friend std::ostream& operator <<(std::ostream& os, HarmonicInversionType& ttt);
+    
   private:
-    DoublePolynomial polynomial_;
+    
+    RealType d0_;
+    RealType phi0_;
+    
   };
   
-/*  
-    std::ostream& operator <<(std::ostream& os, PolynomialInversionType& ptt) {
-    DoublePolynomial::const_iterator i;
-
-    i = ptt.polynomial_.begin();
+  std::ostream& operator <<(std::ostream& os, HarmonicInversionType& hit) {
     
-    if (i == ptt.polynomial_.end()) {
-      os << "This Polynomial contains nothing" << std::endl;
-      return os;
-    }
-
-     os << "This Polynomial contains below terms:" << std::endl;    
-    
-     while(true){
-     os << i->second << "*" << "(cosPhi)" << "^" << i->first;
-
-      if (++i == ptt.polynomial_.end()) {
-	//if we reach the end of the polynomial pair, write out a
-	//newline and then escape the loop
-	os << std::endl;
-	break;
-      } else {
-	//otherwise, write out a "+"
-	os << " + ";
-      }
-    }
-    
-     os << std::endl;
-     return os;
-     }
-  */
-
+    os << "This HarmonicInversionType has below form:" << std::endl;
+    os << hit.d0_ << "*(phi - " << hit.phi0_ << ")/2" << std::endl; 
+    return os;
+  }
+  
 } //end namespace OpenMD
-#endif //TYPES_POLYNOMIALINVERSIONTYPE_HPP
+#endif //TYPES_HARMONICINVERSIONTYPE_HPP
+
 

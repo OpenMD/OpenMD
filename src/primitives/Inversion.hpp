@@ -66,7 +66,6 @@ namespace OpenMD {
     InversionData curr;
   };
 
-  
   /**
    * @class Inversion Inversion.hpp "primitives/Inversion.hpp"
    */
@@ -108,6 +107,7 @@ namespace OpenMD {
     Atom* atom4_;
 
     InversionType* inversionType_;
+    InversionKey inversionKey_;
 
     RealType potential_;
   };    

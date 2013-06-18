@@ -52,6 +52,14 @@
 #include "config.h"
 namespace OpenMD {
   
+  enum InversionKey {
+    itAngle,
+    itCosAngle
+    // itHeight,
+    // itUmbrella
+  };
+  
+
   /**
    * @class InversionType InversionType.hpp "types/InversionType.hpp"
    */
@@ -60,6 +68,7 @@ namespace OpenMD {
     virtual ~InversionType() {}
     
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) = 0;
+    virtual InversionKey getKey() = 0;
     
   };
   
