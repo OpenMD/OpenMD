@@ -86,6 +86,16 @@ namespace OpenMD {
   }
 
   void RNEMDZ::processFrame(int istep) {
+    RealType z;
+
+    hmat_ = currentSnapshot_->getHmat();
+    for (int i = 0; i < nBins_; i++) {
+      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(2,2);
+      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
+    }
+    volume_ = currentSnapshot_->getVolume();
+
+
     Molecule* mol;
     RigidBody* rb;
     StuntDouble* sd;
@@ -110,7 +120,7 @@ namespace OpenMD {
         rb->updateAtoms();
       }
     }
-    
+   
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
@@ -125,8 +135,8 @@ namespace OpenMD {
       Vector3d vel = sd->getVel();
       RealType m = sd->getMass();
 
-      currentSnapshot_->wrapVector(pos);
       int bin = getBin(pos);
+
       binCount[bin] += 1;
 
       binMass[bin] += m;
