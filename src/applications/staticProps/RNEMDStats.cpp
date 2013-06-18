@@ -154,15 +154,17 @@ namespace OpenMD {
     }
     
     for (int i = 0; i < nBins_; i++) {
-      RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
-                                        PhysicalConstants::energyConvert);
-      RealType den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
-        / volume_;
-      Vector3d vel = binVel[i] / RealType(binCount[i]);
-      dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
-      dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
-      dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
-      dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+      if (binDof[i] > 0) {
+        RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
+                                          PhysicalConstants::energyConvert);
+        RealType den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
+          / volume_;
+        Vector3d vel = binVel[i] / RealType(binCount[i]);
+        dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
+        dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
+        dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
+        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+      }
     }
   }
   
