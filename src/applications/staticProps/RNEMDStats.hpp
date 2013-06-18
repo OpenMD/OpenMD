@@ -52,6 +52,7 @@ namespace OpenMD {
     
   public:
     RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);    
+    void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
 
   protected:

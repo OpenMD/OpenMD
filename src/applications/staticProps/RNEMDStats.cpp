@@ -43,6 +43,7 @@
 #include <algorithm>
 #include <fstream>
 #include "applications/staticProps/RNEMDStats.hpp"
+#include "primitives/Molecule.hpp"
 #include "utils/PhysicalConstants.hpp"
 
 namespace OpenMD {
@@ -84,39 +85,88 @@ namespace OpenMD {
     data_.push_back(density);
   }
 
-  void RNEMDZ::processStuntDouble(StuntDouble* sd, int bin) {
-    RealType mass = sd->getMass();
-    Vector3d pos = sd->getPos();    
-    Vector3d vel = sd->getVel();
-    RealType KE = 0.5 * (mass * vel.lengthSquare());
-    int dof = 3;
+  void RNEMDZ::processFrame(int istep) {
+    Molecule* mol;
+    RigidBody* rb;
+    StuntDouble* sd;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    int i;
 
-    if (sd->isDirectional()) {
-      Vector3d angMom = sd->getJ();
-      Mat3x3d I = sd->getI();
-      if (sd->isLinear()) {
-        int i = sd->linearAxis();
-        int j = (i + 1) % 3;
-        int k = (i + 2) % 3;
-        KE += 0.5 * (angMom[j] * angMom[j] / I(j, j) + 
-                     angMom[k] * angMom[k] / I(k, k));
-        dof += 2;
-      } else {
-        KE += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
-                     angMom[1] * angMom[1] / I(1, 1) +
-                     angMom[2] * angMom[2] / I(2, 2));
-        dof += 3;
+    vector<RealType> binMass(nBins_, 0.0);
+    vector<Vector3d> binVel(nBins_, V3Zero);
+    vector<RealType> binKE(nBins_, 0.0);
+    vector<int> binDof(nBins_, 0);
+    vector<int> binCount(nBins_, 0);
+    
+    
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      
+      // change the positions of atoms which belong to the rigidbodies
+      
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
+        rb->updateAtoms();
       }
     }
     
-    RealType temp = 2.0 * KE / (dof * PhysicalConstants::kb *
-                                PhysicalConstants::energyConvert);
-    RealType den = mass * nBins_ * PhysicalConstants::densityConvert / volume_;
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
     
-    dynamic_cast<Accumulator *>(temperature->accumulator[bin])->add(temp);
-    dynamic_cast<VectorAccumulator *>(velocity->accumulator[bin])->add(vel);
-    dynamic_cast<Accumulator *>(density->accumulator[bin])->add(den);
+    // loop over the selected atoms:
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+         sd = seleMan_.nextSelected(i)) {
+      
+      // figure out where that object is:
+      Vector3d pos = sd->getPos(); 
+      currentSnapshot_->wrapVector(pos);
 
+      int bin = getBin(pos);
+      binCount[bin]++;
+
+      RealType m = sd->getMass();
+      binMass[bin] += m;
+      Vector3d vel = sd->getVel();
+      binVel[bin] += vel;
+      binKE[bin] += 0.5 * (m * vel.lengthSquare());
+      binDof[bin] += 3;
+      
+      if (sd->isDirectional()) {
+        Vector3d angMom = sd->getJ();
+        Mat3x3d I = sd->getI();
+        if (sd->isLinear()) {
+          int i = sd->linearAxis();
+          int j = (i + 1) % 3;
+          int k = (i + 2) % 3;
+          binKE[bin] += 0.5 * (angMom[j] * angMom[j] / I(j, j) + 
+                               angMom[k] * angMom[k] / I(k, k));
+          binDof[bin] += 2;
+        } else {
+          binKE[bin] += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
+                               angMom[1] * angMom[1] / I(1, 1) +
+                               angMom[2] * angMom[2] / I(2, 2));
+          binDof[bin] += 3;
+        }
+      }
+    }
+    
+    for (int i = 0; i < nBins_; i++) {
+      RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
+                                        PhysicalConstants::energyConvert);
+      RealType den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
+        / volume_;
+      Vector3d vel = binVel[i] / RealType(binCount[i]);
+      dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
+      dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
+      dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
+      dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+    }
+  }
+  
+  void RNEMDZ::processStuntDouble(StuntDouble* sd, int bin) {
   }
 
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename, 

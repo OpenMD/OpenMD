@@ -141,7 +141,7 @@ namespace OpenMD {
       processStuntDouble( sd, bin );
 
       dynamic_cast<Accumulator *>(counts_->accumulator[bin])->add(1);
-    }      
+    }
   }
   
 
@@ -323,7 +323,6 @@ namespace OpenMD {
   }
 
   SlabStatistics::~SlabStatistics() {
-    delete z_;
   }
 
 
@@ -372,7 +371,6 @@ namespace OpenMD {
   }
 
   ShellStatistics::~ShellStatistics() {
-    delete r_;
   }
 
   int ShellStatistics::getBin(Vector3d pos) {    
