@@ -96,8 +96,8 @@ namespace OpenMD {
     vector<RealType> binMass(nBins_, 0.0);
     vector<Vector3d> binVel(nBins_, V3Zero);
     vector<RealType> binKE(nBins_, 0.0);
-    vector<int> binDof(nBins_, 0);
-    vector<int> binCount(nBins_, 0);
+    vector<unsigned int> binDof(nBins_, 0);
+    vector<unsigned int> binCount(nBins_, 0);
     
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -122,14 +122,14 @@ namespace OpenMD {
       
       // figure out where that object is:
       Vector3d pos = sd->getPos(); 
-      currentSnapshot_->wrapVector(pos);
-
-      int bin = getBin(pos);
-      binCount[bin]++;
-
-      RealType m = sd->getMass();
-      binMass[bin] += m;
       Vector3d vel = sd->getVel();
+      RealType m = sd->getMass();
+
+      currentSnapshot_->wrapVector(pos);
+      int bin = getBin(pos);
+      binCount[bin] += 1;
+
+      binMass[bin] += m;
       binVel[bin] += vel;
       binKE[bin] += 0.5 * (m * vel.lengthSquare());
       binDof[bin] += 3;
@@ -153,7 +153,7 @@ namespace OpenMD {
       }
     }
     
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       if (binDof[i] > 0) {
         RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
                                           PhysicalConstants::energyConvert);
