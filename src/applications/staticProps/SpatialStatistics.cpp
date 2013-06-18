@@ -328,6 +328,7 @@ namespace OpenMD {
 
   void SlabStatistics::processFrame(int istep) {
     RealType z;
+
     hmat_ = currentSnapshot_->getHmat();
     for (int i = 0; i < nBins_; i++) {
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(2,2);

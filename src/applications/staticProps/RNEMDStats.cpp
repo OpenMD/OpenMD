@@ -220,45 +220,96 @@ namespace OpenMD {
     data_.push_back(density);
   }
 
-  void RNEMDR::processStuntDouble(StuntDouble* sd, int bin) {
-    RealType mass = sd->getMass();
-    Vector3d vel = sd->getVel();
-    Vector3d rPos = sd->getPos() - coordinateOrigin_;
-    Vector3d aVel = cross(rPos, vel);
 
-    RealType KE = 0.5 * (mass * vel.lengthSquare());
-    int dof = 3;
+  void RNEMDR::processFrame(int istep) {
 
-    if (sd->isDirectional()) {
-      Vector3d angMom = sd->getJ();
-      Mat3x3d I = sd->getI();
-      if (sd->isLinear()) {
-        int i = sd->linearAxis();
-        int j = (i + 1) % 3;
-        int k = (i + 2) % 3;
-        KE += 0.5 * (angMom[j] * angMom[j] / I(j, j) + 
-                     angMom[k] * angMom[k] / I(k, k));
-        dof += 2;
-      } else {
-        KE += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
-                     angMom[1] * angMom[1] / I(1, 1) +
-                     angMom[2] * angMom[2] / I(2, 2));
-        dof += 3;
+    Molecule* mol;
+    RigidBody* rb;
+    StuntDouble* sd;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    int i;
+
+    vector<RealType> binMass(nBins_, 0.0);
+    vector<Vector3d> binaVel(nBins_, V3Zero);
+    vector<RealType> binKE(nBins_, 0.0);
+    vector<unsigned int> binDof(nBins_, 0);
+    vector<unsigned int> binCount(nBins_, 0);
+    
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      
+      // change the positions of atoms which belong to the rigidbodies
+      
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
+        rb->updateAtoms();
+      }
+    }
+   
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    // loop over the selected atoms:
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+         sd = seleMan_.nextSelected(i)) {
+      
+      // figure out where that object is:
+
+      Vector3d rPos = sd->getPos() - coordinateOrigin_;
+      Vector3d vel = sd->getVel();      
+      Vector3d aVel = cross(rPos, vel);
+      RealType m = sd->getMass();
+
+      int bin = getBin(pos);
+
+      binCount[bin] += 1;
+
+      binMass[bin] += m;
+      binaVel[bin] += aVel;
+      binKE[bin] += 0.5 * (m * vel.lengthSquare());
+      binDof[bin] += 3;
+      
+      if (sd->isDirectional()) {
+        Vector3d angMom = sd->getJ();
+        Mat3x3d I = sd->getI();
+        if (sd->isLinear()) {
+          int i = sd->linearAxis();
+          int j = (i + 1) % 3;
+          int k = (i + 2) % 3;
+          binKE[bin] += 0.5 * (angMom[j] * angMom[j] / I(j, j) + 
+                               angMom[k] * angMom[k] / I(k, k));
+          binDof[bin] += 2;
+        } else {
+          binKE[bin] += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
+                               angMom[1] * angMom[1] / I(1, 1) +
+                               angMom[2] * angMom[2] / I(2, 2));
+          binDof[bin] += 3;
+        }
       }
     }
     
-    RealType temp = 2.0 * KE / (dof * PhysicalConstants::kb *
-                                PhysicalConstants::energyConvert);
+    for (unsigned int i = 0; i < nBins_; i++) {
+      RealType rinner = (RealType)i * binWidth_;
+      RealType router = (RealType)(i+1) * binWidth_;
+      if (binDof[i] > 0) {
+        RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
+                                          PhysicalConstants::energyConvert);
+        RealType den = binMass[i] * 3.0 * PhysicalConstants::densityConvert
+          / (4.0 * M_PI * (pow(router,3) - pow(rinner,3)));  
+        Vector3d aVel = binaVel[i] / RealType(binCount[i]);
+        dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
+        dynamic_cast<VectorAccumulator *>(angularVelocity->accumulator[i])->add(aVel);
+        dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
+        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+      }
+    }
+  }
 
-    RealType rinner = (RealType)bin * binWidth_;
-    RealType router = (RealType)(bin+1) * binWidth_;
-    RealType den = mass * 3.0 * PhysicalConstants::densityConvert
-      / (4.0 * M_PI * (pow(router,3) - pow(rinner,3)));  
-    
-    dynamic_cast<Accumulator *>(temperature->accumulator[bin])->add(temp);
-    dynamic_cast<VectorAccumulator *>(angularVelocity->accumulator[bin])->add(aVel);
-    dynamic_cast<Accumulator *>(density->accumulator[bin])->add(den);
 
+  void RNEMDR::processStuntDouble(StuntDouble* sd, int bin) {
   }
 }
 
