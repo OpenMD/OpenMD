@@ -1,0 +1,194 @@
+#! /usr/bin/env python
+
+"""Dipolar Lattice Builder
+
+Creates cubic lattices of dipoles to test the dipole-dipole
+interaction code.  
+
+Usage: buildDipolarArray 
+
+Options:
+  -h, --help              show this help
+  -a, --array-type-A      use array type "A" (default)
+  -b, --array-type-B      use array type "B"
+  -l, --lattice=...       use the specified lattice ( SC, FCC, or BCC )
+  -d, --direction=...     use dipole orientation (001, 111, or 011)
+  -c, --constant=...      use the specified lattice constant
+  -n                      use the specified number of unit cells
+  -o, --output-file=...   use specified output (.xyz) file
+
+Type "A" arrays have nearest neighbor strings of antiparallel dipoles.
+
+Type "B" arrays have nearest neighbor strings of antiparallel dipoles
+if the dipoles are contained in a plane perpendicular to the dipole
+direction that passes through the dipole.
+
+Example:
+   buildDipolarArray -a -l fcc -d 001 -c 5 -n 3 -o A_fcc_001.xyz
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1639 $"
+__date__ = "$Date: 2011-09-24 16:18:07 -0400 (Sat, 24 Sep 2011) $"
+
+__copyright__ = "Copyright (c) 2013 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+import numpy
+
+def usage():
+    print __doc__
+    
+def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, doTypeA, outputFileName):
+    a1 = numpy.array([1.0,0.0,0.0])
+    a2 = numpy.array([0.0,1.0,0.0])
+    a3 = numpy.array([0.0,0.0,1.0])
+
+    sc =      numpy.array([[0.0,0.0,0.0]])
+
+    bcc =     numpy.array([[0.0,0.0,0.0],
+                           [0.5,0.5,0.5]])
+
+    fcc =     numpy.array([[0.0,0.0,0.0], 
+                           [0.5,0.5,0.0],
+                           [0.0,0.5,0.5],
+                           [0.5,0.0,0.5]])
+
+    dipole001 = numpy.array([0.0,0.0,1.0])
+    dipole011 = numpy.array([0.0,1.0/math.sqrt(2.0),1.0/math.sqrt(2.0)])
+    dipole111 = numpy.array([1.0/math.sqrt(3.0),1.0/math.sqrt(3.0),1.0/math.sqrt(3.0)])
+
+    if (latticeType.lower() == 'sc'):
+        basis_atoms = sc
+    elif(latticeType.lower() == 'fcc'):
+        basis_atoms = fcc
+    elif(latticeType.lower() == 'bcc'):
+        basis_atoms = bcc
+    else:
+        print "unknown lattice type"
+        print __doc__
+
+    ijklvector = numpy.array([1,1,1,1])
+
+    if (dipoleDirection.lower() == '001'):
+        basis_dipoles = numpy.array([dipole001, -dipole001])
+    elif(dipoleDirection.lower() == '011'):
+        basis_dipoles = numpy.array([dipole011, -dipole011])
+    elif(dipoleDirection.lower() == '111'):
+        basis_dipoles = numpy.array([dipole111, -dipole111])
+    else:
+        print "unknown lattice type"
+        print __doc__
+
+    if (not doTypeA):
+        if (latticeType.lower() == 'sc'):
+            if (dipoleDirection.lower() == '001'):
+                ijkl = numpy.array([1,1,0,0])
+            elif(dipoleDirection.lower() == '011'):
+                ijkl = numpy.array([1,1,-1,0])
+            elif(dipoleDirection.lower() == '111'):
+                ijkl = numpy.array([1,1,-2,0])
+        elif(latticeType.lower() == 'fcc'):
+            if (dipoleDirection.lower() == '001'):
+                ijkl = numpy.array([1,1,0,1])
+            elif(dipoleDirection.lower() == '011'):
+                ijkl = numpy.array([1,1,-1,2])
+            elif(dipoleDirection.lower() == '111'):
+                ijkl = numpy.array([1,1,-2,1])
+        elif(latticeType.lower() == 'bcc'):
+            if (dipoleDirection.lower() == '001'):
+                ijkl = numpy.array([1,1,0,1])
+            elif(dipoleDirection.lower() == '011'):
+                ijkl = numpy.array([1,1,-1,1])
+            elif(dipoleDirection.lower() == '111'):
+                ijkl = numpy.array([1,1,-2,0])
+    else:
+      if (latticeType.lower() == 'sc'):
+        ijkl = numpy.array([1,1,1,0])
+      elif(latticeType.lower() == 'fcc'):
+        ijkl = numpy.array([1,1,1,1])
+      elif(latticeType.lower() == 'bcc'):
+        ijkl = numpy.array([0,0,0,1])
+
+    bravais_lattice = []
+    bravais_dipoles = []
+
+    for i in range(latticeNumber):
+        for j in range(latticeNumber):
+            for k in range(latticeNumber):
+                for l in range(len(basis_atoms)):
+                    bravais_lattice.append(i*a1 + j*a2 + k*a3 + basis_atoms[l])
+                    tester = numpy.array([i,j,k,l])
+                    flip = numpy.dot(tester, ijkl) % 2
+                    print flip
+                    bravais_dipoles.append(basis_dipoles[flip])
+
+    outputFile = open(outputFileName,'w')
+
+    outputFile.write(repr(len(bravais_lattice)) + '\n')
+    Hxx = latticeConstant * latticeNumber
+    Hyy = latticeConstant * latticeNumber
+    Hzz = latticeConstant * latticeNumber
+    
+    outputFile.write('Hmat: {{%d, 0, 0}, {0, %d, 0}, {0, 0, %d}}\n' % (Hxx, Hyy, Hzz))
+
+    for i in range(len(bravais_lattice)):
+        xcart = latticeConstant*(bravais_lattice[i][0])
+        ycart = latticeConstant*(bravais_lattice[i][1])
+        zcart = latticeConstant*(bravais_lattice[i][2])
+        dx = bravais_dipoles[i][0]
+        dy = bravais_dipoles[i][1]
+        dz = bravais_dipoles[i][2]
+        outputFile.write('Ar ' + repr(xcart) + '   ' + repr(ycart) + '   ' + repr(zcart) + ' ' + repr(dx) + ' ' + repr(dy) + ' ' + repr(dz) + '\n')
+               
+    outputFile.close()
+
+def main(argv):
+    
+    doTypeA = True
+    haveOutputFileName = False
+    latticeType = "fcc"
+    dipoleDirection = "001"
+    latticeNumber = 3
+    latticeConstant = 4
+    try:                                
+        opts, args = getopt.getopt(argv, "habl:d:c:n:o:", ["help","array-type-A", "array-type-B", "lattice=" "direction=", "constant=", "output-file="])  
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()
+        elif opt in ("-a", "--array-type-A"):
+            doTypeA = True
+        elif opt in ("-b", "--array-type-B"):
+            doTypeA = False
+        elif opt in ("-l", "--lattice"): 
+            latticeType = arg
+        elif opt in ("-d", "--direction"):
+            dipoleDirection = arg
+        elif opt in ("-c", "--constant"):
+            latticeConstant = float(arg)
+        elif opt in ("-n"):
+            latticeNumber = int(arg)
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            haveOutputFileName = True
+    if (not haveOutputFileName):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+        
+    createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, doTypeA, outputFileName);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
