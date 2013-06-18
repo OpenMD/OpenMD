@@ -1,0 +1,396 @@
+#!@PYTHON_EXECUTABLE@
+"""Packmol RigidBody Replacer
+
+Finds atomistic rigid bodies in a packmol-generated xyz file and
+generates a meta-data file with center of mass and orientational
+coordinates for rigid bodies.
+
+Usage: pack2md
+
+Options:
+  -h, --help              show this help
+  -x,                     use the specified packmol (.xyz) file
+  -r, --rigid-body=...    use this xyz structure as the rigid body
+  -o, --output-file=...   use specified output (.md) file
+
+
+Example:
+   pack2md -x tolueneBox.xyz -r singleToluene.xyz -o tolueneBox.md
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1646 $"
+__date__ = "$Date: 2011-09-26 09:30:00 -0400 (Mon, 26 Sep 2011) $"
+__copyright__ = "Copyright (c) 2011 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+import random
+import numpy
+
+_haveXYZFileName = 0
+_haveRBFileName = 0
+_haveOutputFileName = 0
+
+atypes = []
+positions = []
+metaData = []
+frameData = []
+RBPos = []
+RBQuats = []
+indices = []
+Hmat = []
+BoxInv = []
+H = []
+Eliminate = []
+
+mass_table = {
+    'H': 1.00794,
+    'C': 12.0107,
+    'Cl': 35.453,
+    'O': 15.999,
+    'N': 14.007,
+    'S': 32.0655,
+    'Au': 196.466569,
+    'CH4': 16.05,           
+    'CH3': 15.04,           
+    'CH2': 14.03,           
+    'CH':  13.02,
+    'CHar': 13.02,
+    'CHa': 13.02,
+    'RCHar': 12.0107,
+    'RCH': 12.0107,    
+    'CH3S': 15.04,
+    'CH2S': 14.03,
+    'CHS': 13.02,
+    'CS': 12.0107,
+    'SYZ': 32.0655,
+    'SH': 32.0655,
+    'HS': 1.0079,
+    'S': 32.0655,
+    'SZ': 32.0655,
+    'SS': 32.0655, 
+    'SP': 32.0655,
+    'CS': 12.0107,
+    'SAu': 228.9807,
+    'SSD': 18.0153,         
+    'SSD1': 18.0153,
+    'SSD_E': 18.0153,
+    'SSD_RF': 18.0153,                 
+    'O_TIP3P': 15.9994,                 
+    'O_TIP4P': 15.9994,
+    'O_TIP4P-Ew': 15.9994,
+    'O_TIP5P': 15.9994,
+    'O_TIP5P-E': 15.9994, 
+    'O_SPCE': 15.9994,
+    'O_SPC': 15.9994,
+    'H_TIP3P':    1.0079,
+    'H_TIP4P':    1.0079,
+    'H_TIP4P-Ew': 1.0079,
+    'H_TIP5P':    1.0079,
+    'H_SPCE':     1.0079,
+    'H_SPC':      1.0079,
+    'EP_TIP4P':   0.0,
+    'EP_TIP4P-Ew':0.0,
+    'EP_TIP5P':   0.0,
+    'Ni':      58.710,
+    'Cu':      63.550,
+    'Rh':      102.90550,
+    'Pd':      106.42,
+    'Ag':      107.8682,
+    'Ir':      192.217,
+    'Pt':      195.09
+}
+
+#Hmat = zeros([3,3],Float)
+#BoxInv = zeros([3],Float)
+
+def usage():
+    print __doc__
+
+def readFile(XYZFileName):
+    print "reading XYZ file"
+
+    XYZFile = open(XYZFileName, 'r')        
+    # Find number of atoms first
+    line = XYZFile.readline()
+    L = line.split()
+    nAtoms = int(L[0])
+    # skip comment line
+    line = XYZFile.readline()
+    for i in range(nAtoms):
+        line = XYZFile.readline()
+        L = line.split()
+        myIndex = i
+        indices.append(myIndex)
+        atomType = L[0]
+        atypes.append(atomType)
+        x = float(L[1])
+        y = float(L[2])
+        z = float(L[3])
+        positions.append([x, y, z])
+    XYZFile.close()
+
+def readRBFile(RBFileName):
+    print "reading Rigid Body file"
+
+    RBFile = open(RBFileName, 'r')        
+    # Find number of atoms first
+    line = RBFile.readline()
+    L = line.split()
+    nAtoms = int(L[0])
+    # skip comment line
+    line = RBFile.readline()
+    for i in range(nAtoms):
+        line = RBFile.readline()
+        L = line.split()
+        myIndex = i
+        RBindices.append(myIndex)
+        atomType = L[0]
+        RBatypes.append(atomType)
+        x = float(L[1])
+        y = float(L[2])
+        z = float(L[3])
+        RBpositions.append([x, y, z])
+    RBFile.close()
+
+def findCOM():
+    #find center of mass
+    Xcom = 0.0
+    Ycom = 0.0
+    Zcom = 0.0
+    totalMass = 0.0
+
+    for i in range(0,len(RBindices)):
+        myMass = mass_table[RBatypes[i]]
+        
+        Xcom = Xcom + myMass * RBpositions[i][0]
+        Ycom = Ycom + myMass * RBpositions[i][1]
+        Zcom = Zcom + myMass * RBpositions[i][2]
+        totalMass = totalMass + myMass
+
+    Xcom = Xcom / totalMass
+    Ycom = Ycom / totalMass
+    Zcom = Zcom / totalMass
+
+    COM = [Xcom, Ycom, Zcom]
+
+    return COM
+
+def calcMoments():
+
+    COM = findCOM()
+    
+    #find inertia tensor matrix elements
+
+    I = numpy.zeros((3,3), numpy.float)
+    
+    for i in range(0,len(RBindices)):
+        myMass = mass_table[RBatypes[i]]
+
+        # move the origin of the reference coordinate system to the COM
+        RBpositions[i][0] -= COM[0]
+        RBpositions[i][1] -= COM[1]
+        RBpositions[i][2] -= COM[2]
+
+        dx = RBpositions[i][0]
+        dy = RBpositions[i][1]
+        dz = RBpositions[i][2]
+
+        I[0,0] = I[0,0] + myMass * ( dy * dy + dz * dz )
+        I[1,1] = I[1,1] + myMass * ( dx * dx + dz * dz )
+        I[2,2] = I[2,2] + myMass * ( dx * dx + dy * dy )
+
+        I[0,1] = I[0,1] - myMass * ( dx * dy )
+        I[0,2] = I[0,2] - myMass * ( dx * dz )
+
+        I[1,2] = I[1,2] - myMass * ( dy * dz )
+
+        I[1,0] = I[0,1]
+        I[2,0] = I[0,2]
+        I[2,1] = I[1,2]
+
+    print "Inertia Tensor:"
+    print I
+    print
+
+    (evals, evects) = numpy.linalg.eig(I)
+    print "evals:"
+    print evals
+    print 
+    print "evects:"
+    print evects
+    print
+
+    return (COM, evals, evects)
+
+def findRBs():
+
+    for i in range(len(RBindices)):
+        ref_[i] = numpy.array([RBpositions[i][0], RBpositions[i][1], RBpositions[i][2]], numpy.float)
+
+    print "finding rigid bodies (assuming strict packmol ordering)"
+    xyzIndex =  0    
+
+    for j in range(nBodies):
+        mov_com = numpy.zeros(3, numpy.float)
+        totalMass = 0.0
+        
+        for i in range(len(RBindices)):
+            mov[i] = numpy.array([positions[xyzIndex][0], positions[xyzIndex][1], positions[xyzIndex][2]], numpy.float)
+            myMass = mass_table[RBatypes[i]]
+            mov_com = mov_com + myMass*mov[i]
+            totalMass = totalMass + myMass
+            xyzIndex = xyzIndex + 1
+
+        mov_com = mov_com / totalMass
+
+        RBpos.append(mov_com)
+
+        for i in range(len(RBindices)):
+            mov[i] = mov[i] - mov_com
+
+        R = numpy.zeros((3,3), numpy.float)
+        E0 = 0.0
+
+        for n in range(len(RBindices)):
+    
+            # correlation matrix R:   
+            #   R(i,j) = sum(over n): y(n,i) * x(n,j)  
+            #   where x(n) and y(n) are two vector sets   
+
+            R = R + numpy.linalg.outer(mov[n], ref_[n])
+
+        v, s, w = numpy.linalg.svd(R, full_matrices = True)
+
+        if (numpy.linalg.det(v) * numpy.linalg.det(w) < 0.0):
+            is_reflection = true
+        else
+            is_reflection = false
+            
+        if (is_reflection):
+            s[2] = -s[2]
+
+        RotMat = numpy.zeros((3,3), numpy.float)
+        RotMat = v * w
+    
+        q = numpy.array([0.0, 0.0, 0.0, 0.0], numpy.float)
+
+        t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
+        
+        if( t > 1e-6 ):
+            s = 0.5 / math.sqrt( t )
+            q[0] = 0.25 / s
+            q[1] = (RotMat[1][2] - RotMat[2][1]) * s
+            q[2] = (RotMat[2][0] - RotMat[0][2]) * s
+            q[3] = (RotMat[0][1] - RotMat[1][0]) * s
+        else:
+            ad1 = RotMat[0][0]
+            ad2 = RotMat[1][1]
+            ad3 = RotMat[2][2]
+
+            if( ad1 >= ad2 and ad1 >= ad3 ):
+                s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
+                q[0] = (RotMat[1][2] - RotMat[2][1]) * s
+                q[1] = 0.25 / s
+                q[2] = (RotMat[0][1] + RotMat[1][0]) * s
+                q[3] = (RotMat[0][2] + RotMat[2][0]) * s
+            elif ( ad2 >= ad1 and ad2 >= ad3 ):
+                s = 0.5 / math.sqrt( 1.0 + RotMat[1][1] - RotMat[0][0] - RotMat[2][2] )
+                q[0] = (RotMat[2][0] - RotMat[0][2] ) * s
+                q[1] = (RotMat[0][1] + RotMat[1][0]) * s
+                q[2] = 0.25 / s
+                q[3] = (RotMat[1][2] + RotMat[2][1]) * s
+            else:
+                s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
+                q[0] = (RotMat[0][1] - RotMat[1][0]) * s
+                q[1] = (RotMat[0][2] + RotMat[2][0]) * s
+                q[2] = (RotMat[1][2] + RotMat[2][1]) * s
+                q[3] = 0.25 / s
+
+                RBQuats.append(q)
+
+
+def writeFile(outputFileName):
+    outputFile = open(outputFileName, 'w')
+
+    outputFile.write("<OpenMD version=1>\n");
+    
+    for metaline in metaData:
+        outputFile.write(metaline)
+
+    outputFile.write("  <Snapshot>\n")
+
+    for frameline in frameData:
+        outputFile.write(frameline)
+        
+    outputFile.write("    <StuntDoubles>\n")
+
+    sdFormat = 'pvqj'
+
+    index = 0
+    for i in range(len(RBPos)):
+        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, RBPos[i][0], RBPos[i][1], RBPos[i][2], 0.0, 0.0, 0.0, RBQuats[i][0], RBQuats[i][1], RBQuats[i][2], RBQuats[i][3], 0.0, 0.0, 0.0))
+        index = index + 1
+
+
+    sdFormat = 'pv'
+    for i in range(len(indices)):
+        if  i not in Eliminate:
+            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e \n" % (index, sdFormat, positions[i][0], positions[i][1], positions[i][2], 0.0, 0.0, 0.0))
+
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OpenMD>\n")
+    outputFile.close()
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hx:o:", ["help", "xyz-file=", "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-x", "--xyz-file"): 
+            xyzFileName = arg
+            global _haveXYZFileName
+            _haveXYZFileName = 1
+        elif opt in ("-r", "--rigid-body"): 
+            rbFileName = arg
+            global _haveRBFileName
+            _haveRBFileName = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            global _haveOutputFileName
+            _haveOutputFileName = 1
+    if (_haveXYZFileName != 1):
+        usage() 
+        print "No input packmol (xyz) file was specified"
+        sys.exit()
+    if (_haveRBFileName != 1):
+        usage() 
+        print "No Rigid Body file (xyz) was specified"
+        sys.exit()
+    if (_haveOutputFileName != 1):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+    readRBFile(rbFileName)
+    
+    readFile(xyzFileName)
+
+    findRBs()
+    writeFile(outputFileName)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])

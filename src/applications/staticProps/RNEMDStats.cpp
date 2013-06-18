@@ -263,7 +263,7 @@ namespace OpenMD {
       Vector3d aVel = cross(rPos, vel);
       RealType m = sd->getMass();
 
-      int bin = getBin(pos);
+      int bin = getBin(rPos);
 
       binCount[bin] += 1;
 
