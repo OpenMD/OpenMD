@@ -82,7 +82,6 @@ namespace OpenMD {
   protected:
     RealType volume_;
     RealType area_;
-    Mat3x3d boundingBox_;
     int dim_;
     RealType alpha_;
     const std::string options_;
