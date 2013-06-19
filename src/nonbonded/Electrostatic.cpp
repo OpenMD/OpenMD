@@ -744,67 +744,46 @@ namespace OpenMD {
 
   void Electrostatic::calcForce(InteractionData &idat) {
 
-    RealType C_a, C_b;  // Charges 
-    Vector3d D_a, D_b;  // Dipoles (space-fixed)
-    Mat3x3d  Q_a, Q_b;  // Quadrupoles (space-fixed)
-
-    RealType ri;                                 // Distance utility scalar
-    RealType rdDa, rdDb;                         // Dipole utility scalars
-    Vector3d rxDa, rxDb;                         // Dipole utility vectors
-    RealType rdQar, rdQbr, trQa, trQb;           // Quadrupole utility scalars
-    Vector3d Qar, Qbr, rQa, rQb, rxQar, rxQbr;   // Quadrupole utility vectors
-    RealType pref;
-
-    RealType DadDb, trQaQb, DadQbr, DbdQar;       // Cross-interaction scalars
-    RealType rQaQbr;
-    Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar; // Cross-interaction vectors
-    Vector3d rQaQb, QaQbr, QaxQb, rQaxQbr;
-    Mat3x3d  QaQb;                                // Cross-interaction matrices
-
-    RealType U(0.0);  // Potential
-    Vector3d F(0.0);  // Force
-    Vector3d Ta(0.0); // Torque on site a
-    Vector3d Tb(0.0); // Torque on site b
-    Vector3d Ea(0.0); // Electric field at site a
-    Vector3d Eb(0.0); // Electric field at site b
-    RealType dUdCa(0.0); // fluctuating charge force at site a
-    RealType dUdCb(0.0); // fluctuating charge force at site a
-    
-    // Indirect interactions mediated by the reaction field.
-    RealType indirect_Pot(0.0);  // Potential
-    Vector3d indirect_F(0.0);    // Force
-    Vector3d indirect_Ta(0.0);   // Torque on site a
-    Vector3d indirect_Tb(0.0);   // Torque on site b
-
-    // Excluded potential that is still computed for fluctuating charges
-    RealType excluded_Pot(0.0);
-
-    RealType rfContrib, coulInt;
-    
-    // spline for coulomb integral
-    CubicSpline* J;
-
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
-    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
+    data1 = ElectrostaticMap[idat.atypes.first];
+    data2 = ElectrostaticMap[idat.atypes.second];
+
+    U = 0.0;  // Potential
+    F.zero();  // Force
+    Ta.zero(); // Torque on site a
+    Tb.zero(); // Torque on site b
+    Ea.zero(); // Electric field at site a
+    Eb.zero(); // Electric field at site b
+    dUdCa = 0.0; // fluctuating charge force at site a
+    dUdCb = 0.0; // fluctuating charge force at site a
     
+    // Indirect interactions mediated by the reaction field.
+    indirect_Pot = 0.0;   // Potential
+    indirect_F.zero();    // Force
+    indirect_Ta.zero();   // Torque on site a
+    indirect_Tb.zero();   // Torque on site b
+
+    // Excluded potential that is still computed for fluctuating charges
+    excluded_Pot= 0.0;
+
+
     // some variables we'll need independent of electrostatic type:
 
     ri = 1.0 /  *(idat.rij);
-    Vector3d rhat =  *(idat.d)  * ri;
+    rhat =  *(idat.d)  * ri;
       
     // logicals
 
-    bool a_is_Charge = data1.is_Charge;
-    bool a_is_Dipole = data1.is_Dipole;
-    bool a_is_Quadrupole = data1.is_Quadrupole;
-    bool a_is_Fluctuating = data1.is_Fluctuating;
+    a_is_Charge = data1.is_Charge;
+    a_is_Dipole = data1.is_Dipole;
+    a_is_Quadrupole = data1.is_Quadrupole;
+    a_is_Fluctuating = data1.is_Fluctuating;
 
-    bool b_is_Charge = data2.is_Charge;
-    bool b_is_Dipole = data2.is_Dipole;
-    bool b_is_Quadrupole = data2.is_Quadrupole;
-    bool b_is_Fluctuating = data2.is_Fluctuating;
+    b_is_Charge = data2.is_Charge;
+    b_is_Dipole = data2.is_Dipole;
+    b_is_Quadrupole = data2.is_Quadrupole;
+    b_is_Fluctuating = data2.is_Fluctuating;
 
     // Obtain all of the required radial function values from the
     // spline structures:

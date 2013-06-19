@@ -71,29 +71,29 @@ namespace OpenMD {
 
     // group bookkeeping
     groupCutoffs getGroupCutoffs(int cg1, int cg2);
-    Vector3d getGroupVelocityColumn(int cg2);
+    Vector3d& getGroupVelocityColumn(int cg2);
 
     // Group->atom bookkeeping
-    vector<int> getAtomsInGroupRow(int cg1);
-    vector<int> getAtomsInGroupColumn(int cg2);
+    vector<int>& getAtomsInGroupRow(int cg1);
+    vector<int>& getAtomsInGroupColumn(int cg2);
     Vector3d getAtomToGroupVectorRow(int atom1, int cg1);
     Vector3d getAtomToGroupVectorColumn(int atom2, int cg2);
-    RealType getMassFactorRow(int atom1);
-    RealType getMassFactorColumn(int atom2);
+    RealType& getMassFactorRow(int atom1);
+    RealType& getMassFactorColumn(int atom2);
 
     // spatial data
     Vector3d getIntergroupVector(int cg1, int cg2);
     Vector3d getInteratomicVector(int atom1, int atom2);
        
     // atom bookkeeping
-    int getNAtomsInRow();
+    int& getNAtomsInRow();
     int getTopologicalDistance(int atom1, int atom2);
-    vector<int> getExcludesForAtom(int atom1); 
+    vector<int>& getExcludesForAtom(int atom1); 
     bool skipAtomPair(int atom1, int atom2, int cg1, int cg2);
     bool excludeAtomPair(int atom1, int atom2);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);
-    Vector3d getAtomVelocityColumn(int atom2);
+    Vector3d& getAtomVelocityColumn(int atom2);
 
     // filling interaction blocks with pointers
     void fillInteractionData(InteractionData &idat, int atom1, int atom2);

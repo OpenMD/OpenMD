@@ -146,6 +146,62 @@ namespace OpenMD {
     CubicSpline* v42s;
     CubicSpline* v43s;
 
+    ElectrostaticAtomData data1;
+    ElectrostaticAtomData data2;
+    RealType C_a, C_b;  // Charges 
+    Vector3d D_a, D_b;  // Dipoles (space-fixed)
+    Mat3x3d  Q_a, Q_b;  // Quadrupoles (space-fixed)
+
+    RealType ri;                                 // Distance utility scalar
+    RealType rdDa, rdDb;                         // Dipole utility scalars
+    Vector3d rxDa, rxDb;                         // Dipole utility vectors
+    RealType rdQar, rdQbr, trQa, trQb;           // Quadrupole utility scalars
+    Vector3d Qar, Qbr, rQa, rQb, rxQar, rxQbr;   // Quadrupole utility vectors
+    RealType pref;
+
+    RealType DadDb, trQaQb, DadQbr, DbdQar;       // Cross-interaction scalars
+    RealType rQaQbr;
+    Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar; // Cross-interaction vectors
+    Vector3d rQaQb, QaQbr, QaxQb, rQaxQbr;
+    Mat3x3d  QaQb;                                // Cross-interaction matrices
+
+    RealType U;  // Potential
+    Vector3d F;  // Force
+    Vector3d Ta; // Torque on site a
+    Vector3d Tb; // Torque on site b
+    Vector3d Ea; // Electric field at site a
+    Vector3d Eb; // Electric field at site b
+    RealType dUdCa; // fluctuating charge force at site a
+    RealType dUdCb; // fluctuating charge force at site a
+    
+    // Indirect interactions mediated by the reaction field.
+    RealType indirect_Pot;  // Potential
+    Vector3d indirect_F;    // Force
+    Vector3d indirect_Ta;   // Torque on site a
+    Vector3d indirect_Tb;   // Torque on site b
+
+    // Excluded potential that is still computed for fluctuating charges
+    RealType excluded_Pot;
+
+    RealType rfContrib, coulInt;
+    
+    // spline for coulomb integral
+    CubicSpline* J;
+    Vector3d rhat;
+      
+    // logicals
+
+    bool a_is_Charge;
+    bool a_is_Dipole;
+    bool a_is_Quadrupole;
+    bool a_is_Fluctuating;
+
+    bool b_is_Charge;
+    bool b_is_Dipole;
+    bool b_is_Quadrupole;
+    bool b_is_Fluctuating;
+
+
     /*
     CubicSpline* dv01s;
     CubicSpline* dv11s;

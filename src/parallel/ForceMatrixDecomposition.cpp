@@ -479,7 +479,7 @@ namespace OpenMD {
     for (unsigned int j = 0; j < toposForAtom[atom1].size(); j++) {
       if (toposForAtom[atom1][j] == atom2) 
         return topoDist[atom1][j];
-    }
+    }                                           
     return 0;
   }
 
@@ -939,7 +939,7 @@ namespace OpenMD {
 
 
 
-  int ForceMatrixDecomposition::getNAtomsInRow() {   
+  int& ForceMatrixDecomposition::getNAtomsInRow() {   
 #ifdef IS_MPI
     return nAtomsInRow_;
 #else
@@ -950,7 +950,7 @@ namespace OpenMD {
   /**
    * returns the list of atoms belonging to this group.  
    */
-  vector<int> ForceMatrixDecomposition::getAtomsInGroupRow(int cg1){
+  vector<int>& ForceMatrixDecomposition::getAtomsInGroupRow(int cg1){
 #ifdef IS_MPI
     return groupListRow_[cg1];
 #else 
@@ -958,7 +958,7 @@ namespace OpenMD {
 #endif
   }
 
-  vector<int> ForceMatrixDecomposition::getAtomsInGroupColumn(int cg2){
+  vector<int>& ForceMatrixDecomposition::getAtomsInGroupColumn(int cg2){
 #ifdef IS_MPI
     return groupListCol_[cg2];
 #else 
@@ -981,7 +981,7 @@ namespace OpenMD {
     return d;    
   }
 
-  Vector3d ForceMatrixDecomposition::getGroupVelocityColumn(int cg2){
+  Vector3d& ForceMatrixDecomposition::getGroupVelocityColumn(int cg2){
 #ifdef IS_MPI
     return cgColData.velocity[cg2];
 #else
@@ -989,7 +989,7 @@ namespace OpenMD {
 #endif
   }
 
-  Vector3d ForceMatrixDecomposition::getAtomVelocityColumn(int atom2){
+  Vector3d& ForceMatrixDecomposition::getAtomVelocityColumn(int atom2){
 #ifdef IS_MPI
     return atomColData.velocity[atom2];
 #else
@@ -1027,7 +1027,7 @@ namespace OpenMD {
     return d;    
   }
 
-  RealType ForceMatrixDecomposition::getMassFactorRow(int atom1) {
+  RealType& ForceMatrixDecomposition::getMassFactorRow(int atom1) {
 #ifdef IS_MPI
     return massFactorsRow[atom1];
 #else
@@ -1035,7 +1035,7 @@ namespace OpenMD {
 #endif
   }
 
-  RealType ForceMatrixDecomposition::getMassFactorColumn(int atom2) {
+  RealType& ForceMatrixDecomposition::getMassFactorColumn(int atom2) {
 #ifdef IS_MPI
     return massFactorsCol[atom2];
 #else
@@ -1058,7 +1058,7 @@ namespace OpenMD {
     return d;    
   }
 
-  vector<int> ForceMatrixDecomposition::getExcludesForAtom(int atom1) {
+  vector<int>& ForceMatrixDecomposition::getExcludesForAtom(int atom1) {
     return excludesForAtom[atom1];
   }
 

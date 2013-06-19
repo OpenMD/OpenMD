@@ -760,7 +760,8 @@ namespace OpenMD {
 
         d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
 
-        curSnapshot->wrapVector(d_grp);        
+        // already wrapped in the getIntergroupVector call:
+        // curSnapshot->wrapVector(d_grp);        
         rgrpsq = d_grp.lengthSquare();
         rCutSq = cuts.second;
 
