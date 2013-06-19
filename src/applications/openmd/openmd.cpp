@@ -104,7 +104,7 @@ int main(int argc, char* argv[]){
       "  |                                                                          |\n"<<
       "  |        version " << 
       OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << revision << 
-      "     http://www.openmd.net          |\n"<<
+      "     http://www.openmd.org          |\n"<<
       "  |                                                                          |\n"<<
       "  | OpenMD is an OpenScience project.  All source code is available for any  |\n"<<
       "  | use whatsoever under a BSD-style license.                                |\n"<<

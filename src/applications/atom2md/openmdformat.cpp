@@ -45,7 +45,7 @@ namespace OpenBabel
     };
     
     virtual const char* SpecificationURL()
-    {return "http://www.openmd.net";}; //optional
+    {return "http://www.openmd.org";}; //optional
     
     virtual const char* GetMIMEType() 
     {return "chemical/x-md"; };
