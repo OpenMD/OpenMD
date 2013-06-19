@@ -104,7 +104,9 @@ namespace OpenMD {
     int i;
 
     vector<RealType> binMass(nBins_, 0.0);
-    vector<Vector3d> binVel(nBins_, V3Zero);
+    vector<RealType> binPx(nBins_, 0.0);
+    vector<RealType> binPy(nBins_, 0.0);
+    vector<RealType> binPz(nBins_, 0.0);
     vector<RealType> binKE(nBins_, 0.0);
     vector<unsigned int> binDof(nBins_, 0);
     vector<unsigned int> binCount(nBins_, 0);
@@ -117,7 +119,7 @@ namespace OpenMD {
       
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtoms();
+        rb->updateAtomVel();
       }
     }
    
@@ -140,7 +142,9 @@ namespace OpenMD {
       binCount[bin] += 1;
 
       binMass[bin] += m;
-      binVel[bin] += vel;
+      binPx[bin] += m * vel.x();
+      binPy[bin] += m * vel.y();
+      binPz[bin] += m * vel.z();
       binKE[bin] += 0.5 * (m * vel.lengthSquare());
       binDof[bin] += 3;
       
@@ -170,7 +174,11 @@ namespace OpenMD {
                                           PhysicalConstants::energyConvert);
         RealType den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
           / volume_;
-        Vector3d vel = binVel[i] / RealType(binCount[i]);
+        Vector3d vel;
+        vel.x() = binPx[i] / binMass[i];
+        vel.y() = binPy[i] / binMass[i];
+        vel.z() = binPz[i] / binMass[i];
+
         dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
         dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
         dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
@@ -243,7 +251,7 @@ namespace OpenMD {
       
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtoms();
+        rb->updateAtomVel();
       }
     }
    
