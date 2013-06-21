@@ -398,7 +398,7 @@ namespace OpenMD {
         v11 = g - gc - rmRc*hc;
         v21 = g*ri - gc*ric - rmRc*(hc - gc*ric)*ric;
         v22 = h - g*ri - (hc - gc*ric) - rmRc*(sc - (hc - gc*ric)*ric);
-        v31 = (h-g*ri)*ri - (hc-g*ric)*ric - rmRc*(sc-2.0*(hc-gc*ric)*ric)*ric;
+        v31 = (h-g*ri)*ri - (hc-gc*ric)*ric - rmRc*(sc-2.0*(hc-gc*ric)*ric)*ric;
         v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric) 
           - rmRc*(tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
         v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2 
@@ -455,7 +455,7 @@ namespace OpenMD {
         v11 = g - gc;
         v21 = g*ri - gc*ric;
         v22 = h - g*ri - (hc - gc*ric);
-        v31 = (h-g*ri)*ri - (hc-g*ric)*ric;
+        v31 = (h-g*ri)*ri - (hc-gc*ric)*ric;
         v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
         v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
         v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
@@ -515,7 +515,7 @@ namespace OpenMD {
         v11 = g - gc;
         v21 = g*ri - gc*ric;
         v22 = h - g*ri - (hc - gc*ric);
-        v31 = (h-g*ri)*ri - (hc-g*ric)*ric;
+        v31 = (h-g*ri)*ri - (hc-gc*ric)*ric;
         v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
         v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
         v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
