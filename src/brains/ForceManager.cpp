@@ -713,7 +713,7 @@ namespace OpenMD {
     vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
-
+    
     idat.vdwMult = &vdwMult;
     idat.electroMult = &electroMult;
     idat.pot = &workPot;
@@ -746,12 +746,12 @@ namespace OpenMD {
         if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
-          neighborList = fDecomp_->buildNeighborList();
+          fDecomp_->buildNeighborList(neighborList_);
         }
       }
 
-      for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
-             it != neighborList.end(); ++it) {
+      for (vector<pair<int, int> >::iterator it = neighborList_.begin(); 
+             it != neighborList_.end(); ++it) {
                 
         cg1 = (*it).first;
         cg2 = (*it).second;

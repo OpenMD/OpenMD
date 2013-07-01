@@ -58,8 +58,9 @@ namespace OpenMD {
     initialized_ = false;
 
     MixingMap.clear();
-    SCMap.clear();
-    SClist.clear();
+    SCtypes.clear();
+    SCdata.clear();
+    SCtids.clear();
   }
         
   RealType SC::getM(AtomType* atomType1, AtomType* atomType2) {    
@@ -102,18 +103,25 @@ namespace OpenMD {
     return sqrt(epsilon1 * epsilon2);
   }
 
-  void SC::initialize() { 
+  void SC::initialize() {      
     // find all of the SC atom Types:
-    ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
+    SCtypes.clear();
+    SCtids.clear();
+    SCdata.clear();
+    MixingMap.clear();
+    nSC_ = 0;
 
-    for (at = atomTypes->beginType(i); at != NULL; 
-         at = atomTypes->nextType(i)) {
-      SuttonChenAdapter sca = SuttonChenAdapter(at);
-      if (sca.isSuttonChen())
-        addType(at);
-    }    
+    SCtids.resize( forceField_->getNAtomType(), -1);
+
+    set<AtomType*>::iterator at;
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isSC()) nSC_++;
+    }
+    SCdata.resize(nSC_);
+    MixingMap.resize(nSC_);
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isSC()) addType((*at));
+    }
     initialized_ = true;
   }
   
@@ -130,28 +138,33 @@ namespace OpenMD {
     scAtomData.alpha = sca.getAlpha();
     scAtomData.epsilon = sca.getEpsilon();
     scAtomData.rCut = 2.0 * scAtomData.alpha;
-
+ 
     // add it to the map:
+    int atid = atomType->getIdent();
+    int sctid = SCtypes.size();
 
-    pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = SClist.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
+    pair<set<int>::iterator,bool> ret;    
+    ret = SCtypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "SC already had a previous entry with ident %d\n",
-               atomType->getIdent() );
+               atid );
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
     }
-
-    SCMap[atomType] = scAtomData;
+    
+    SCtids[atid] = sctid;
+    SCdata[sctid] = scAtomData;
+    MixingMap[sctid].resize(nSC_);
     
     // Now, iterate over all known types and add to the mixing map:
     
-    map<AtomType*, SCAtomData>::iterator it;
-    for( it = SCMap.begin(); it != SCMap.end(); ++it) {
+    std::set<int>::iterator it;
+    for( it = SCtypes.begin(); it != SCtypes.end(); ++it) {
       
-      AtomType* atype2 = (*it).first;
+      int sctid2 = SCtids[ (*it) ];
+      AtomType* atype2 = forceField_->getAtomType( (*it) );
       
       SCInteractionData mixer;
 
@@ -190,13 +203,11 @@ namespace OpenMD {
 
       mixer.explicitlySet = false;
 
-      pair<AtomType*, AtomType*> key1, key2;
-      key1 = make_pair(atomType, atype2);
-      key2 = make_pair(atype2, atomType);
+      MixingMap[sctid2].resize( nSC_ );
       
-      MixingMap[key1] = mixer;
-      if (key2 != key1) {
-        MixingMap[key2] = mixer;
+      MixingMap[sctid][sctid2] = mixer;
+      if (sctid2 != sctid) {
+        MixingMap[sctid2][sctid] = mixer;
       }
     }      
     return;
@@ -247,13 +258,12 @@ namespace OpenMD {
     
     mixer.explicitlySet = true;
 
-    pair<AtomType*, AtomType*> key1, key2;
-    key1 = make_pair(atype1, atype2);
-    key2 = make_pair(atype2, atype1);
-    
-    MixingMap[key1] = mixer;
-    if (key2 != key1) {
-      MixingMap[key2] = mixer;
+    int sctid1 = SCtids[ atype1->getIdent() ];
+    int sctid2 = SCtids[ atype2->getIdent() ];
+
+    MixingMap[sctid1][sctid2] = mixer;
+    if (sctid2 != sctid1) {
+      MixingMap[sctid2][sctid1] = mixer;
     }    
     return;
   }
@@ -261,8 +271,10 @@ namespace OpenMD {
   void SC::calcDensity(InteractionData &idat) {
     
     if (!initialized_) initialize();
+    int sctid1 = SCtids[idat.atid1];
+    int sctid2 = SCtids[idat.atid2];
     
-    SCInteractionData mixer = MixingMap[ idat.atypes ];
+    SCInteractionData &mixer = MixingMap[sctid1][sctid2];
 
     RealType rcij = mixer.rCut;
 
@@ -279,7 +291,7 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
 
-    SCAtomData data1 = SCMap[sdat.atype];
+    SCAtomData &data1 = SCdata[SCtids[sdat.atid]];
    
     RealType u = - data1.c * data1.epsilon * sqrt( *(sdat.rho) );
     *(sdat.frho) = u;
@@ -298,25 +310,22 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    SCAtomData data1 = SCMap[idat.atypes.first];
-    SCAtomData data2 = SCMap[idat.atypes.second];
+    int &sctid1 = SCtids[idat.atid1];
+    int &sctid2 = SCtids[idat.atid2];
 
-    SCInteractionData mixer = MixingMap[idat.atypes];
+    SCAtomData &data1 = SCdata[sctid1];
+    SCAtomData &data2 = SCdata[sctid2];
+
+    SCInteractionData &mixer = MixingMap[sctid1][sctid2];
 
     RealType rcij = mixer.rCut;
 
     if ( *(idat.rij)  < rcij) {
-      RealType vcij = mixer.vCut;
+      RealType vcij = mixer.vCut; 
+      RealType rhtmp, drhodr, vptmp, dvpdr;
       
-      pair<RealType, RealType> res;
-      
-      res = mixer.phi->getValueAndDerivativeAt( *(idat.rij) );
-      RealType rhtmp = res.first;
-      RealType drhodr = res.second;
-      
-      res = mixer.V->getValueAndDerivativeAt( *(idat.rij) );
-      RealType vptmp = res.first;
-      RealType dvpdr = res.second;
+      mixer.phi->getValueAndDerivativeAt( *(idat.rij), rhtmp, drhodr );      
+      mixer.V->getValueAndDerivativeAt( *(idat.rij), vptmp, dvpdr);
       
       RealType pot_temp = vptmp - vcij;
       *(idat.vpair) += pot_temp;
@@ -351,13 +360,15 @@ namespace OpenMD {
   RealType SC::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
 
-    map<pair<AtomType*, AtomType*>, SCInteractionData>::iterator it;
-    it = MixingMap.find(atypes);
-    if (it == MixingMap.end()) 
+    int atid1 = atypes.first->getIdent();
+    int atid2 = atypes.second->getIdent();
+    int &sctid1 = SCtids[atid1];
+    int &sctid2 = SCtids[atid2];
+    
+    if (sctid1 == -1 || sctid2 == -1) {
       return 0.0;
-    else  {
-      SCInteractionData mixer = (*it).second;
-      return mixer.rCut;
+    } else {
+      return MixingMap[sctid1][sctid2].rCut;
     }
   }
 }

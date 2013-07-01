@@ -69,7 +69,7 @@ namespace OpenMD {
 
       if (baseAtomType == NULL) {
       	baseAtomType = new AtomType();
-      	int ident = ff.getNAtomType() + 1;
+      	int ident = ff.getNAtomType();
       	baseAtomType->setIdent(ident); 
       	baseAtomType->setName(baseAtomTypeName);
       	ff.addAtomType(baseAtomTypeName, baseAtomType);

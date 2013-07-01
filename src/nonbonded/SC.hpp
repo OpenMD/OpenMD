@@ -77,12 +77,14 @@ namespace OpenMD {
     SC();
     ~SC();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType epsilon, RealType m, RealType n, RealType alpha);
     void calcDensity(InteractionData &idat);
     void calcFunctional(SelfData &sdat);
     void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
+    virtual int getHash() { return SC_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
    
   private:
@@ -94,10 +96,15 @@ namespace OpenMD {
     
     string name_;
     bool initialized_;
-    map<int, AtomType*> SClist;
-    map<AtomType*, SCAtomData> SCMap;
-    map<pair<AtomType*, AtomType*>, SCInteractionData> MixingMap;
+    set<int> SCtypes;         /**< The set of AtomType idents that are SC types */
+    vector<int> SCtids;       /**< The mapping from AtomType ident -> SC type ident */
+    vector<SCAtomData> SCdata; /**< The EAM atomic data indexed by SC type ident */
+    vector<vector<SCInteractionData> > MixingMap;  /**< The mixing parameters between two SC types */
+    int nSC_;
+
     ForceField* forceField_;
+    set<AtomType*> simTypes_;
+
     RealType scRcut_;
     int np_;
     

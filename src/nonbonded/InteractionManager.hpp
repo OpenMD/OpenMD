@@ -60,16 +60,6 @@ using namespace std;
 
 namespace OpenMD {
 
-  const static int ELECTROSTATIC_PAIR  = (1 << 0);  
-  const static int LJ_PAIR             = (1 << 1);
-  const static int EAM_PAIR            = (1 << 2);
-  const static int SC_PAIR             = (1 << 3);
-  const static int STICKY_PAIR         = (1 << 4);
-  const static int GB_PAIR             = (1 << 5);
-  const static int MORSE_PAIR          = (1 << 6);
-  const static int REPULSIVEPOWER_PAIR = (1 << 7);
-  const static int MAW_PAIR            = (1 << 8);
-
   /**
    * @class InteractionManager 
    * InteractionManager is responsible for
@@ -85,11 +75,11 @@ namespace OpenMD {
 
     // Fortran support routines
 
-    void doPrePair(InteractionData idat);
-    void doPreForce(SelfData sdat);
-    void doPair(InteractionData idat);    
-    void doSkipCorrection(InteractionData idat);
-    void doSelfCorrection(SelfData sdat);
+    void doPrePair(InteractionData &idat);
+    void doPreForce(SelfData &sdat);
+    void doPair(InteractionData &idat);    
+    void doSkipCorrection(InteractionData &idat);
+    void doSelfCorrection(SelfData &sdat);
     void setCutoffRadius(RealType rCut);
     RealType getSuggestedCutoffRadius(int *atid1);   
     RealType getSuggestedCutoffRadius(AtomType *atype);
@@ -112,13 +102,21 @@ namespace OpenMD {
     
     map<int, AtomType*> typeMap_;
     /**
-     * Each pair of atom types can have multiple interactions, so the 
+     * Each pair of atom types can have multiple interactions, so the
      * natural data structures are a map between the pair, and a set
-     * of non-bonded interactions.
+     * of non-bonded interactions:
+     *
+     *  map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
+     *
+     * Pair creation turns out to be inefficient, and map searching
+     * isn't necessary.  Instead of AtomType* sort keys, we now use
+     * the AtomType idents (atids) which are ints to access the vector
+     * locations.  iHash_ contains largely the same information as
+     * interactions_, but in a way that doesn't require a set iterator
+     * inside the main pair loop.
      */
-    map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
-    map<pair<AtomType*, AtomType*>, int> iHash_;
-
+    vector<vector<set<NonBondedInteraction*> > > interactions_;
+    vector<vector<int> > iHash_;
   };
 }
 #endif

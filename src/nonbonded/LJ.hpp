@@ -62,10 +62,12 @@ namespace OpenMD {
   public:    
     LJ();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
+    virtual int getHash() {return LJ_PAIR;}
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);    
             
   private:
@@ -77,9 +79,12 @@ namespace OpenMD {
     
     bool initialized_;
 
-    map<int, AtomType*> LJMap;
-    map<pair<AtomType*, AtomType*>, LJInteractionData> MixingMap;
+    set<int> LJtypes;                              /**< The set of AtomType idents that are LJ types */
+    vector<int> LJtids;                            /**< The mapping from AtomType ident -> LJ type ident */
+    vector<vector<LJInteractionData> > MixingMap;  /**< The mixing parameters between two LJ types */
+    int nLJ_;
     ForceField* forceField_;
+    set<AtomType*> simTypes_;
     string name_;
   };
 }

@@ -113,7 +113,7 @@ namespace OpenMD {
     map<Bend*, BendDataSet> bendDataSets;
     map<Torsion*, TorsionDataSet> torsionDataSets;
     map<Inversion*, InversionDataSet> inversionDataSets;
-    vector<pair<int, int> > neighborList;
+    vector<pair<int, int> > neighborList_;
 
     vector<RealType> vdwScale_;
     vector<RealType> electrostaticScale_;

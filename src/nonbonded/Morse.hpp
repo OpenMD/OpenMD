@@ -64,16 +64,23 @@ namespace OpenMD {
   public:    
     Morse();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType Re, RealType beta, MorseType mt);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
+    virtual int getHash() { return MORSE_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:
     void initialize();
     bool initialized_;
-    map<pair<AtomType*, AtomType*>, MorseInteractionData> MixingMap;
+    set<int> Mtypes;           /**< The set of AtomType idents that are Morse types */
+    vector<int> Mtids;         /**< The mapping from AtomType ident -> Morse type ident */
+    vector<vector<MorseInteractionData> > MixingMap;  /**< The mixing parameters
+                                                         between two Morse types */
+
     ForceField* forceField_;    
+    set<AtomType*> simTypes_;
     string name_;
 
   };

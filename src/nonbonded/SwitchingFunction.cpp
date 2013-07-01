@@ -159,9 +159,7 @@ namespace OpenMD {
       } else {
         in_switching_region = true;
         r = sqrt(r2);
-        pair<RealType, RealType> result = switchSpline_->getValueAndDerivativeAt(r);
-        sw = result.first;
-        dswdr = result.second;
+        switchSpline_->getValueAndDerivativeAt(r, sw, dswdr);
       }
     }
     return in_switching_region;

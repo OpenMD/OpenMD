@@ -63,18 +63,28 @@ namespace OpenMD {
   public:    
     RepulsivePower();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon, int nRep);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
+    virtual int getHash() { return REPULSIVEPOWER_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:
     void initialize();
-    void getNRepulsionFunc(const RealType r, int n, RealType &pot, RealType &deriv);
+    void getNRepulsionFunc(const RealType &r, int &n, RealType &pot, RealType &deriv);
 
     bool initialized_;
-    map<pair<AtomType*, AtomType*>, RPInteractionData> MixingMap;
+
+    set<int> RPtypes;                  /**< The set of AtomType idents that are RP types */
+    vector<int> RPtids;                /**< The mapping from AtomType ident -> RP type ident */
+    vector<vector<RPInteractionData> > MixingMap;  /**< The mixing
+                                                      parameters
+                                                      between two RP
+                                                      types */
+
     ForceField* forceField_;    
+    set<AtomType*> simTypes_;
     string name_;
 
   };

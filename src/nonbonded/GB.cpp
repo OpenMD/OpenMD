@@ -92,45 +92,55 @@ namespace OpenMD {
     
   void GB::initialize() {    
     
+    GBtypes.clear();
+    GBtids.clear();
+    MixingMap.clear();
+    nGB_ = 0;
+
+    GBtids.resize( forceField_->getNAtomType(), -1);
+
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     mu_ = fopts.getGayBerneMu();
     nu_ = fopts.getGayBerneNu();
-    ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
 
     // GB handles all of the GB-GB interactions as well as GB-LJ cross
     // interactions:
-
-    for (at = atomTypes->beginType(i); at != NULL;
-         at = atomTypes->nextType(i)) {
-      
-      LennardJonesAdapter lja = LennardJonesAdapter(at);
-      GayBerneAdapter gba = GayBerneAdapter(at);
-
-      if (gba.isGayBerne() || lja.isLennardJones())
-        addType(at);
+    set<AtomType*>::iterator at;
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isGayBerne()) nGB_++;
+      if ((*at)->isLennardJones()) nGB_++;
     }
-   
+
+    MixingMap.resize(nGB_);
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isGayBerne() || (*at)->isLennardJones()) addType( *at );
+    }
+    
     initialized_ = true;
   }
       
   void GB::addType(AtomType* atomType){
-    // add it to the map:
 
-    pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = GBMap.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
+    // add it to the map:
+    int atid = atomType->getIdent();
+    int gbtid = GBtypes.size();
+  
+    pair<set<int>::iterator,bool> ret;    
+    ret = GBtypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "GB already had a previous entry with ident %d\n",
-               atomType->getIdent() );
+               atid) ;
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
     }
+
+    GBtids[atid] = gbtid;
+    MixingMap[gbtid].resize( nGB_ );
     
     RealType d1, l1, eX1, eS1, eE1, dw1;
-        
+    
     LennardJonesAdapter lja1 = LennardJonesAdapter(atomType);
     GayBerneAdapter gba1 = GayBerneAdapter(atomType);
     if (gba1.isGayBerne()) {
@@ -157,13 +167,15 @@ namespace OpenMD {
       simError();
     }
       
-
+    
     // Now, iterate over all known types and add to the mixing map:
     
-    map<int, AtomType*>::iterator it;
-    for( it = GBMap.begin(); it != GBMap.end(); ++it) {
+    std::set<int>::iterator it;
+    for( it = GBtypes.begin(); it != GBtypes.end(); ++it) {
       
-      AtomType* atype2 = (*it).second;
+      int gbtid2 = GBtids[ (*it) ];
+      AtomType* atype2 = forceField_->getAtomType( (*it) );
+
       LennardJonesAdapter lja2 = LennardJonesAdapter(atype2);
       GayBerneAdapter gba2 = GayBerneAdapter(atype2);
       RealType d2, l2, eX2, eS2, eE2, dw2;
@@ -191,41 +203,41 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-
-                       
+      
+      
       GBInteractionData mixer1, mixer2;     
       
       //  Cleaver paper uses sqrt of squares to get sigma0 for
       //  mixed interactions.
-            
+      
       mixer1.sigma0 = sqrt(d1*d1 + d2*d2);
       mixer1.xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2);
       mixer1.xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1);
       mixer1.x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) /
         ((l2*l2 + d1*d1) * (l1*l1 + d2*d2));
-
+      
       mixer2.sigma0 = mixer1.sigma0;
       // xa2 and xai2 for j-i pairs are reversed from the same i-j pairing.
       // Swapping the particles reverses the anisotropy parameters:
       mixer2.xa2 = mixer1.xai2;
       mixer2.xai2 = mixer1.xa2;
       mixer2.x2 = mixer1.x2;
- 
+      
       // assumed LB mixing rules for now:
-
+      
       mixer1.dw = 0.5 * (dw1 + dw2);
       mixer1.eps0 = sqrt(eX1 * eX2);
 
       mixer2.dw = mixer1.dw;
       mixer2.eps0 = mixer1.eps0;
-
+      
       RealType mi = RealType(1.0)/mu_;
       
       mixer1.xpap2  = (pow(eS1, mi) - pow(eE1, mi)) / (pow(eS1, mi) + pow(eE2, mi));
       mixer1.xpapi2 = (pow(eS2, mi) - pow(eE2, mi)) / (pow(eS2, mi) + pow(eE1, mi));
       mixer1.xp2    = (pow(eS1, mi) - pow(eE1, mi)) * (pow(eS2, mi) - pow(eE2, mi))  / 
         (pow(eS2, mi) + pow(eE1, mi)) / (pow(eS1, mi) + pow(eE2, mi)) ;
-
+      
       // xpap2 and xpapi2 for j-i pairs are reversed from the same i-j pairing.
       // Swapping the particles reverses the anisotropy parameters:
       mixer2.xpap2 = mixer1.xpapi2;
@@ -235,24 +247,19 @@ namespace OpenMD {
       // only add this pairing if at least one of the atoms is a Gay-Berne atom
 
       if (gba1.isGayBerne() || gba2.isGayBerne()) {
-
-        pair<AtomType*, AtomType*> key1, key2;
-        key1 = make_pair(atomType, atype2);
-        key2 = make_pair(atype2, atomType);
-        
-        MixingMap[key1] = mixer1;
-        if (key2 != key1) {
-          MixingMap[key2] = mixer2;
-        }
+        MixingMap[gbtid2].resize( nGB_ );        
+        MixingMap[gbtid][gbtid2] = mixer1;
+        if (gbtid2 != gbtid) 
+          MixingMap[gbtid2][gbtid] = mixer2;
       }
-    }      
+    }
   }
    
   void GB::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
     
-    GBInteractionData mixer = MixingMap[idat.atypes];
+    GBInteractionData &mixer = MixingMap[GBtids[idat.atid1]][GBtids[idat.atid2]];
 
     RealType sigma0 = mixer.sigma0;
     RealType dw     = mixer.dw;
@@ -367,7 +374,7 @@ namespace OpenMD {
     
     RealType dUdb = pref1 * (xpapi2*bu - xp2*au*g) / (1.0 - xp2 * g2) 
       + pref2 * (xai2 * bu - x2 *au*g) / (1.0 - x2 * g2);
-
+    
     RealType dUdg = 4.0 * eps * nu_ * (R12 - R6) * x2 * g / (1.0 - x2*g2)
       + 8.0 * eps * mu_ * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / 
       (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
@@ -375,12 +382,12 @@ namespace OpenMD {
 
     // cerr << "pref = " << pref1 << " " << pref2 << "\n";
     // cerr << "dU = " << dUdr << " " << dUda <<" " << dUdb << " " << dUdg << "\n";
-
+    
     Vector3d rhat = *(idat.d) / *(idat.rij);   
     Vector3d rxu1 = cross(*(idat.d), ul1);
     Vector3d rxu2 = cross(*(idat.d), ul2);
     Vector3d uxu = cross(ul1, ul2);
-
+    
     (*(idat.pot))[VANDERWAALS_FAMILY] += U *  *(idat.sw);
     *(idat.f1) += (dUdr * rhat + dUda * ul1 + dUdb * ul2) * *(idat.sw);
     *(idat.t1) += (dUda * rxu1 - dUdg * uxu) * *(idat.sw);

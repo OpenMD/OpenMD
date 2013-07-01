@@ -117,7 +117,6 @@ namespace OpenMD {
   }
 
   void EAM::initialize() { 
-
     // set up the mixing method:
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     string EAMMixMeth = fopts.getEAMMixingMethod();
@@ -131,15 +130,23 @@ namespace OpenMD {
       mixMeth_ = eamUnknown;
       
     // find all of the EAM atom Types:
-    ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
+    EAMtypes.clear();
+    EAMtids.clear();
+    EAMdata.clear();
+    MixingMap.clear();
+    nEAM_ = 0;
+    
+    EAMtids.resize( forceField_->getNAtomType(), -1);
 
-    for (at = atomTypes->beginType(i); at != NULL; 
-         at = atomTypes->nextType(i)) {
-      
-      if (at->isEAM())
-        addType(at);
+    set<AtomType*>::iterator at;
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isEAM()) nEAM_++;
+    }
+    EAMdata.resize(nEAM_);
+    MixingMap.resize(nEAM_);
+
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isEAM()) addType(*at);
     }
     
     // find all of the explicit EAM interactions (setfl):
@@ -202,38 +209,41 @@ namespace OpenMD {
     eamAtomData.rcut = ea.getRcut();
 
     // add it to the map:
+    int atid = atomType->getIdent();
+    int eamtid = EAMtypes.size();
 
-    pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = EAMlist.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
+    pair<set<int>::iterator,bool> ret;    
+    ret = EAMtypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "EAM already had a previous entry with ident %d\n",
-               atomType->getIdent());
+               atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
     }
 
-    EAMMap[atomType] = eamAtomData;
+    EAMtids[atid] = eamtid;
+    EAMdata[eamtid] = eamAtomData;
+    MixingMap[eamtid].resize(nEAM_);
     
     // Now, iterate over all known types and add to the mixing map:
     
-    map<AtomType*, EAMAtomData>::iterator it;
-    for( it = EAMMap.begin(); it != EAMMap.end(); ++it) {
+    std::set<int>::iterator it;
+    for( it = EAMtypes.begin(); it != EAMtypes.end(); ++it) {
       
-      AtomType* atype2 = (*it).first;
+      int eamtid2 = EAMtids[ (*it) ];
+      AtomType* atype2 = forceField_->getAtomType( (*it) );
 
       EAMInteractionData mixer;
       mixer.phi = getPhi(atomType, atype2);
       mixer.explicitlySet = false;
 
-      pair<AtomType*, AtomType*> key1, key2;
-      key1 = make_pair(atomType, atype2);
-      key2 = make_pair(atype2, atomType);
+      MixingMap[eamtid2].resize( nEAM_ );
       
-      MixingMap[key1] = mixer;
-      if (key2 != key1) {
-        MixingMap[key2] = mixer;
+      MixingMap[eamtid][eamtid2] = mixer;
+      if (eamtid2 != eamtid) {
+        MixingMap[eamtid2][eamtid] = mixer;
       }
     }      
     return;
@@ -257,13 +267,12 @@ namespace OpenMD {
     mixer.phi = cs;
     mixer.explicitlySet = true;
 
-    pair<AtomType*, AtomType*> key1, key2;
-    key1 = make_pair(atype1, atype2);
-    key2 = make_pair(atype2, atype1);
+    int eamtid1 = EAMtids[ atype1->getIdent() ];
+    int eamtid2 = EAMtids[ atype2->getIdent() ];
     
-    MixingMap[key1] = mixer;
-    if (key2 != key1) {
-      MixingMap[key2] = mixer;
+    MixingMap[eamtid1][eamtid2] = mixer;
+    if (eamtid2 != eamtid1) {
+      MixingMap[eamtid2][eamtid1] = mixer;
     }    
     return;
   }
@@ -272,9 +281,9 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    EAMAtomData data1 = EAMMap[idat.atypes.first];
-    EAMAtomData data2 = EAMMap[idat.atypes.second];
-    
+    EAMAtomData &data1 = EAMdata[EAMtids[idat.atid1]];
+    EAMAtomData &data2 = EAMdata[EAMtids[idat.atid2]];
+
     if (haveCutoffRadius_) 
       if ( *(idat.rij) > eamRcut_) return;
     
@@ -292,16 +301,13 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
 
-    EAMAtomData data1 = EAMMap[ sdat.atype ];
+    EAMAtomData &data1 = EAMdata[ EAMtids[sdat.atid] ];
         
-    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt( *(sdat.rho) );
+    data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho), *(sdat.dfrhodrho) );
 
-    *(sdat.frho) = result.first;
-    *(sdat.dfrhodrho) = result.second;
-
-    (*(sdat.pot))[METALLIC_FAMILY] += result.first;
+    (*(sdat.pot))[METALLIC_FAMILY] += *(sdat.frho);
     if (sdat.doParticlePot) {
-      *(sdat.particlePot) += result.first;
+      *(sdat.particlePot) += *(sdat.frho);
     }
 
     return;
@@ -315,10 +321,12 @@ namespace OpenMD {
     if (haveCutoffRadius_) 
       if ( *(idat.rij) > eamRcut_) return;
    
-    pair<RealType, RealType> res;
+
+    int eamtid1 = EAMtids[idat.atid1];
+    int eamtid2 = EAMtids[idat.atid2];
     
-    EAMAtomData data1 = EAMMap[idat.atypes.first];
-    EAMAtomData data2 = EAMMap[idat.atypes.second];
+    EAMAtomData &data1 = EAMdata[eamtid1];
+    EAMAtomData &data2 = EAMdata[eamtid2];
     
     // get type-specific cutoff radii
     
@@ -331,23 +339,15 @@ namespace OpenMD {
     RealType drhoidr, drhojdr, dudr;
     
     if ( *(idat.rij) < rci) {
-      res = data1.rho->getValueAndDerivativeAt( *(idat.rij));
-      rha = res.first;
-      drha = res.second;
-      
-      res = MixingMap[make_pair(idat.atypes.first, idat.atypes.first)].phi->getValueAndDerivativeAt( *(idat.rij) );
-      pha = res.first;
-      dpha = res.second;
+      data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
+      CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
+      phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
     }
     
     if ( *(idat.rij) < rcj) {
-      res = data2.rho->getValueAndDerivativeAt( *(idat.rij) );
-      rhb = res.first;
-      drhb = res.second;
-      
-      res = MixingMap[make_pair(idat.atypes.second, idat.atypes.second)].phi->getValueAndDerivativeAt( *(idat.rij) );
-      phb = res.first;
-      dphb = res.second;
+      data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
+      CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
+      phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
     }
 
     switch(mixMeth_) {
@@ -370,9 +370,7 @@ namespace OpenMD {
       break;
       
     case eamDaw:
-      res = MixingMap[idat.atypes].phi->getValueAndDerivativeAt( *(idat.rij));
-      phab = res.first;
-      dvpdr = res.second;
+      MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
       
       break;
     case eamUnknown:
@@ -424,21 +422,22 @@ namespace OpenMD {
 
     RealType cut = 0.0;
 
-    map<AtomType*, EAMAtomData>::iterator it;
-
-    it = EAMMap.find(atypes.first);
-    if (it != EAMMap.end()) {
-      EAMAtomData data1 = (*it).second;
+    int atid1 = atypes.first->getIdent();
+    int atid2 = atypes.second->getIdent();
+    int eamtid1 = EAMtids[atid1];
+    int eamtid2 = EAMtids[atid2];
+    
+    if (eamtid1 != -1) {
+      EAMAtomData data1 = EAMdata[eamtid1];
       cut = data1.rcut;
     }
 
-    it = EAMMap.find(atypes.second);
-    if (it != EAMMap.end()) {
-      EAMAtomData data2 = (*it).second;
+    if (eamtid2 != -1) {
+      EAMAtomData data2 = EAMdata[eamtid2];
       if (data2.rcut > cut)
         cut = data2.rcut;
     }
-
+    
     return cut;
   }
 }

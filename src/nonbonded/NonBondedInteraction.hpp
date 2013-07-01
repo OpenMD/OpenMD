@@ -65,6 +65,21 @@ namespace OpenMD {
     N_INTERACTION_FAMILIES = 5
   };
 
+  /**
+   * Boolean flags for the iHash_ data structure. These are used to
+   * greatly increase the speed of looking up the low-level
+   * interaction for any given pair:
+   */
+  const static int ELECTROSTATIC_PAIR  = (1 << 0);  
+  const static int LJ_PAIR             = (1 << 1);
+  const static int EAM_PAIR            = (1 << 2);
+  const static int SC_PAIR             = (1 << 3);
+  const static int STICKY_PAIR         = (1 << 4);
+  const static int GB_PAIR             = (1 << 5);
+  const static int MORSE_PAIR          = (1 << 6);
+  const static int REPULSIVEPOWER_PAIR = (1 << 7);
+  const static int MAW_PAIR            = (1 << 8);
+
   typedef Vector<RealType, N_INTERACTION_FAMILIES> potVec;
 
   /**
@@ -76,6 +91,8 @@ namespace OpenMD {
    */
   struct InteractionData {
     pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
+    int atid1;                /**< atomType ident for atom 1 */
+    int atid2;                /**< atomType ident for atom 2 */
     Vector3d* d;              /**< interatomic vector (already wrapped into box) */
     RealType* rij;            /**< interatomic separation */
     RealType* r2;             /**< square of rij */
@@ -132,6 +149,7 @@ namespace OpenMD {
    */
   struct SelfData {
     AtomType* atype;        /**< pointer to AtomType of the atom */
+    int atid;               /**< atomType ident for the atom */
     Vector3d* dipole;       /**< pointer to dipole vector of the atom */
     Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
@@ -157,6 +175,7 @@ namespace OpenMD {
     virtual ~NonBondedInteraction() {}
     virtual void calcForce(InteractionData &idat) = 0;
     virtual InteractionFamily getFamily() = 0;
+    virtual int getHash() = 0;
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) = 0;
     virtual string getName() =  0;
   };    
@@ -179,7 +198,8 @@ namespace OpenMD {
     ElectrostaticInteraction() : NonBondedInteraction() { }
     virtual ~ElectrostaticInteraction() {}
     virtual void calcSelfCorrection(SelfData &sdat) = 0;
-    virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}    
+    virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}   
+    virtual int getHash() {return ELECTROSTATIC_PAIR;}
   };    
 
   /**

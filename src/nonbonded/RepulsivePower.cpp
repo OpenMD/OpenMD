@@ -57,10 +57,16 @@ namespace OpenMD {
   
   void RepulsivePower::initialize() {    
 
+    RPtypes.clear();
+    RPtids.clear();
+    MixingMap.clear();
+    RPtids.resize( forceField_->getNAtomType(), -1);
+
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     ForceField::NonBondedInteractionTypeContainer::KeyType keys;
     NonBondedInteractionType* nbt;
+    int rptid1, rptid2;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
@@ -70,9 +76,20 @@ namespace OpenMD {
         AtomType* at1 = forceField_->getAtomType(keys[0]);
         AtomType* at2 = forceField_->getAtomType(keys[1]);
 
-
+        int atid1 = at1->getIdent();
+        if (RPtids[atid1] == -1) {
+          rptid1 = RPtypes.size();
+          RPtypes.insert(atid1);
+          RPtids[atid1] = rptid1;         
+        }
+        int atid2 = at2->getIdent();
+        if (RPtids[atid2] == -1) {
+          rptid2 = RPtypes.size();
+          RPtypes.insert(atid2);
+          RPtids[atid2] = rptid2;         
+        }
+          
         RepulsivePowerInteractionType* rpit = dynamic_cast<RepulsivePowerInteractionType*>(nbt);
-
         if (rpit == NULL) {
           sprintf( painCave.errMsg,
                    "RepulsivePower::initialize could not convert NonBondedInteractionType\n"
@@ -83,7 +100,6 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();          
         }
-
         
         RealType sigma = rpit->getSigma();
         RealType epsilon = rpit->getEpsilon();
@@ -107,67 +123,66 @@ namespace OpenMD {
     mixer.sigmai = 1.0 / mixer.sigma;
     mixer.nRep = nRep;
 
-    pair<AtomType*, AtomType*> key1, key2;
-    key1 = make_pair(atype1, atype2);
-    key2 = make_pair(atype2, atype1);
+    int rptid1 = RPtids[atype1->getIdent()];
+    int rptid2 = RPtids[atype2->getIdent()];
+    int nRP = RPtypes.size();
+
+    MixingMap.resize(nRP);
+    MixingMap[rptid1].resize(nRP);
     
-    MixingMap[key1] = mixer;
-    if (key2 != key1) {
-      MixingMap[key2] = mixer;
+    MixingMap[rptid1][rptid2] = mixer;
+    if (rptid2 != rptid1) {
+      MixingMap[rptid2].resize(nRP);
+      MixingMap[rptid2][rptid1] = mixer;
     }    
   }
   
   void RepulsivePower::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
+
+    RPInteractionData &mixer = MixingMap[RPtids[idat.atid1]][RPtids[idat.atid2]];
+    RealType sigmai = mixer.sigmai;
+    RealType epsilon = mixer.epsilon;
+    int nRep = mixer.nRep;
     
-    map<pair<AtomType*, AtomType*>, RPInteractionData>::iterator it;
-    it = MixingMap.find( idat.atypes );
-
-    if (it != MixingMap.end()) {
-
-      RPInteractionData mixer = (*it).second;
-      RealType sigmai = mixer.sigmai;
-      RealType epsilon = mixer.epsilon;
-      int nRep = mixer.nRep;
-      
-      RealType ros;
-      RealType rcos;
-      RealType myPot = 0.0;
-      RealType myPotC = 0.0;
-      RealType myDeriv = 0.0;
-      RealType myDerivC = 0.0;
-     
-      ros = *(idat.rij) * sigmai;     
-      
-      getNRepulsionFunc(ros, nRep, myPot, myDeriv);
-      
-      if (idat.shiftedPot) {
-        rcos = *(idat.rcut) * sigmai;
-        getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
-        myDerivC = 0.0;
-      } else if (idat.shiftedForce) {
-        rcos = *(idat.rcut) * sigmai;
-        getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
-        myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
-      } else {
-        myPotC = 0.0;
-        myDerivC = 0.0;        
-      }
-
-      RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
-      *(idat.vpair) += pot_temp;
-      
-      RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
-                                                                myDerivC)*sigmai;      
-
-      (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
-      *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
+    RealType ros;
+    RealType rcos;
+    RealType myPot = 0.0;
+    RealType myPotC = 0.0;
+    RealType myDeriv = 0.0;
+    RealType myDerivC = 0.0;
+    
+    ros = *(idat.rij) * sigmai;     
+    
+    getNRepulsionFunc(ros, nRep, myPot, myDeriv);
+    
+    if (idat.shiftedPot) {
+      rcos = *(idat.rcut) * sigmai;
+      getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
+      myDerivC = 0.0;
+    } else if (idat.shiftedForce) {
+      rcos = *(idat.rcut) * sigmai;
+      getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
+      myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
+    } else {
+      myPotC = 0.0;
+      myDerivC = 0.0;        
     }
+    
+    RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
+    *(idat.vpair) += pot_temp;
+    
+    RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
+                                                              myDerivC)*sigmai;      
+    
+    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
+    
     return;
   }
 
-  void RepulsivePower::getNRepulsionFunc(RealType r, int n, RealType &pot, RealType &deriv) {
+  void RepulsivePower::getNRepulsionFunc(const RealType &r, int &n, RealType &pot, RealType &deriv) {
 
     RealType ri = 1.0 / r;
     RealType rin = pow(ri, n);
@@ -182,15 +197,17 @@ namespace OpenMD {
 
   RealType RepulsivePower::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {   
     if (!initialized_) initialize();   
-    map<pair<AtomType*, AtomType*>, RPInteractionData>::iterator it;
-    it = MixingMap.find(atypes);
-    if (it == MixingMap.end()) 
-      return 0.0;
-    else  {
-      RPInteractionData mixer = (*it).second;
+    
+    int atid1 = atypes.first->getIdent();
+    int atid2 = atypes.second->getIdent();
+    int rptid1 = RPtids[atid1];
+    int rptid2 = RPtids[atid2];
+    
+    if (rptid1 == -1 || rptid2 == -1) return 0.0;
+    else {      
+      RPInteractionData mixer = MixingMap[rptid1][rptid2];
       return 2.5 * mixer.sigma;
     }
-  }
-
+  }  
 }
 

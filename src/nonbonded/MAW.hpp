@@ -64,16 +64,22 @@ namespace OpenMD {
   public:    
     MAW();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType beta, RealType Re, RealType ca1, RealType cb1); 
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
+    virtual int getHash() { return MAW_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:
     void initialize();
     bool initialized_;
-    map<pair<AtomType*, AtomType*>, MAWInteractionData> MixingMap;
+    set<int> MAWtypes;           /**< The set of AtomType idents that are MAW types */
+    vector<int> MAWtids;         /**< The mapping from AtomType ident -> MAW type ident */
+    vector<vector<MAWInteractionData> > MixingMap;  /**< The mixing parameters
+                                                       between two Morse types */
     ForceField* forceField_;    
+    set<AtomType*> simTypes_;
     string name_;
     
   };

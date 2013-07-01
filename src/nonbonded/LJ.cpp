@@ -80,22 +80,29 @@ namespace OpenMD {
   }
 
   void LJ::initialize() {    
-    ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
 
-    for (at = atomTypes->beginType(i); at != NULL; 
-         at = atomTypes->nextType(i)) {
-      LennardJonesAdapter lja = LennardJonesAdapter(at);
-      if (lja.isLennardJones()){
-	 addType(at);
-      }
+    LJtypes.clear();
+    LJtids.clear();
+    MixingMap.clear();
+    nLJ_ = 0;
+
+    LJtids.resize( forceField_->getNAtomType(), -1);
+
+    set<AtomType*>::iterator at;
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isLennardJones()) nLJ_++;
     }
+
+    MixingMap.resize(nLJ_);
+
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isLennardJones()) addType(*at);      
+    }
+
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     NonBondedInteractionType* nbt;
     ForceField::NonBondedInteractionTypeContainer::KeyType keys;
-
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
@@ -125,7 +132,6 @@ namespace OpenMD {
     }  
     initialized_ = true;
   }
-      
 
 
   void LJ::addType(AtomType* atomType){
@@ -135,38 +141,41 @@ namespace OpenMD {
     RealType epsilon1 = lja1.getEpsilon();
     
     // add it to the map:
-
-    pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = LJMap.insert( pair<int, AtomType*>(atomType->getIdent(), atomType) );
+    int atid = atomType->getIdent();
+    int ljtid = LJtypes.size();
+  
+    pair<set<int>::iterator,bool> ret;    
+    ret = LJtypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "LJ already had a previous entry with ident %d\n",
-               atomType->getIdent());
+               atid) ;
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
     }
-    
+
+    LJtids[atid] = ljtid;
+    MixingMap[ljtid].resize( nLJ_ );
+
     // Now, iterate over all known types and add to the mixing map:
     
-    std::map<int, AtomType*>::iterator it;
-    for( it = LJMap.begin(); it != LJMap.end(); ++it) {
-      
-      AtomType* atype2 = (*it).second;
+    std::set<int>::iterator it;
+    for( it = LJtypes.begin(); it != LJtypes.end(); ++it) {
+
+      int ljtid2 = LJtids[ (*it) ];
+      AtomType* atype2 = forceField_->getAtomType( (*it) );
 
       LJInteractionData mixer;
       mixer.sigma = getSigma(atomType, atype2);
       mixer.epsilon = getEpsilon(atomType, atype2);
       mixer.sigmai = 1.0 / mixer.sigma;
       mixer.explicitlySet = false;
+      MixingMap[ljtid2].resize( nLJ_ );
 
-      std::pair<AtomType*, AtomType*> key1, key2;
-      key1 = std::make_pair(atomType, atype2);
-      key2 = std::make_pair(atype2, atomType);
-      
-      MixingMap[key1] = mixer;
-      if (key2 != key1) {
-        MixingMap[key2] = mixer;
+      MixingMap[ljtid][ljtid2] = mixer;
+      if (ljtid2 != ljtid) {
+        MixingMap[ljtid2][ljtid] = mixer;
       }
     }      
   }
@@ -179,61 +188,85 @@ namespace OpenMD {
     mixer.sigmai = 1.0 / mixer.sigma;
     mixer.explicitlySet = true;
 
-    std::pair<AtomType*, AtomType*> key1, key2;
-    key1 = std::make_pair(atype1, atype2);
-    key2 = std::make_pair(atype2, atype1);
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+
+    int ljtid1, ljtid2;
+
+    pair<set<int>::iterator,bool> ret;    
+    ret = LJtypes.insert( atid1 );
+    if (ret.second == false) {
+      // already had this type in the LJMap, just get the ljtid:
+      ljtid1 = LJtids[ atid1 ];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      ljtid1 = nLJ_;
+      LJtids[atid1] = nLJ_;
+      nLJ_++;
+    }
+
+    ret = LJtypes.insert( atid2 );
+    if (ret.second == false) {
+      // already had this type in the LJMap, just get the ljtid:
+      ljtid2 = LJtids[ atid2 ];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      ljtid2 = nLJ_;
+      LJtids[atid2] = nLJ_;
+      nLJ_++;
+    }
     
-    MixingMap[key1] = mixer;
-    if (key2 != key1) {
-      MixingMap[key2] = mixer;
+    MixingMap.resize(nLJ_);
+    MixingMap[ljtid1].resize(nLJ_);
+
+    MixingMap[ljtid1][ljtid2] = mixer;
+    if (ljtid2 != ljtid1) {
+      MixingMap[ljtid2].resize(nLJ_);
+      MixingMap[ljtid2][ljtid1] = mixer;
     }    
   }
  
   void LJ::calcForce(InteractionData &idat) {
     if (!initialized_) initialize();
-    map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
-    it = MixingMap.find( idat.atypes );
     
-    if (it != MixingMap.end())  {
-      
-      LJInteractionData mixer = (*it).second;
-      
-      RealType sigmai = mixer.sigmai;
-      RealType epsilon = mixer.epsilon;
-      
-      RealType ros;
-      RealType rcos;
-      RealType myPot = 0.0;
-      RealType myPotC = 0.0;
-      RealType myDeriv = 0.0;
-      RealType myDerivC = 0.0;
-     
-      ros = *(idat.rij) * sigmai;     
-      
-      getLJfunc(ros, myPot, myDeriv);
-      
-      if (idat.shiftedPot) {
-        rcos = *(idat.rcut) * sigmai;
-        getLJfunc(rcos, myPotC, myDerivC);
-        myDerivC = 0.0;
-      } else if (idat.shiftedForce) {
-        rcos = *(idat.rcut) * sigmai;
-        getLJfunc(rcos, myPotC, myDerivC);
-        myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
-      } else {
-        myPotC = 0.0;
-        myDerivC = 0.0;        
-      }
+    LJInteractionData &mixer = MixingMap[LJtids[idat.atid1]][LJtids[idat.atid2]];
 
-      RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
-      *(idat.vpair) += pot_temp;
-      
-      RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
-                                                                myDerivC)*sigmai;      
-
-      (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
-      *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+    RealType sigmai = mixer.sigmai;
+    RealType epsilon = mixer.epsilon;
+    
+    RealType ros;
+    RealType rcos;
+    RealType myPot = 0.0;
+    RealType myPotC = 0.0;
+    RealType myDeriv = 0.0;
+    RealType myDerivC = 0.0;
+    
+    ros = *(idat.rij) * sigmai;     
+    
+    getLJfunc(ros, myPot, myDeriv);
+    
+    if (idat.shiftedPot) {
+      rcos = *(idat.rcut) * sigmai;
+      getLJfunc(rcos, myPotC, myDerivC);
+      myDerivC = 0.0;
+    } else if (idat.shiftedForce) {
+      rcos = *(idat.rcut) * sigmai;
+      getLJfunc(rcos, myPotC, myDerivC);
+      myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
+    } else {
+      myPotC = 0.0;
+      myDerivC = 0.0;        
     }
+    
+    RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
+    *(idat.vpair) += pot_temp;
+    
+    RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
+                                                              myDerivC)*sigmai;      
+    
+    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+    
     return;
   }
   
@@ -254,14 +287,17 @@ namespace OpenMD {
   
   RealType LJ::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
-    map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
-    it = MixingMap.find(atypes);
-    if (it == MixingMap.end()) 
-      return 0.0;
-    else  {
-      LJInteractionData mixer = (*it).second;
+    
+    int atid1 = atypes.first->getIdent();
+    int atid2 = atypes.second->getIdent();
+    int ljtid1 = LJtids[atid1];
+    int ljtid2 = LJtids[atid2];
+    
+    if (ljtid1 == -1 || ljtid2 == -1) return 0.0;
+    else {      
+      LJInteractionData mixer = MixingMap[ljtid1][ljtid2];
       return 2.5 * mixer.sigma;
     }
   }
-
+  
 }

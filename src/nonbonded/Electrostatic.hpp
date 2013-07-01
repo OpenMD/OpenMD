@@ -88,6 +88,7 @@ namespace OpenMD {
   public:    
     Electrostatic();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void setSimInfo(SimInfo* info) {info_ = info;};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
@@ -108,11 +109,21 @@ namespace OpenMD {
     bool haveDampingAlpha_;
     bool haveDielectric_;
     bool haveElectroSplines_;
-    std::map<int, AtomType*> ElectrostaticList;
-    std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
-    map<pair<AtomType*, AtomType*>, CubicSpline*> Jij;  /** coulomb integral */
+
+    int nElectro_;
+    int nFlucq_;
+
+    set<int> Etypes;             /**< The set of AtomType idents that are Electrostatic types */
+    vector<int> Etids;           /**< The mapping from AtomType ident -> Electrostatic ident */
+    set<int> FQtypes;            /**< The set of AtomType idents that are fluctuating types */
+    vector<int> FQtids;          /**< The mapping from AtomType ident -> fluctuating ident */
+    vector<ElectrostaticAtomData> ElectrostaticMap; /**< data about Electrostatic types */
+    vector<vector<CubicSpline*> > Jij;              /**< Coulomb integral for two fq types */
+    
+
     SimInfo* info_;
     ForceField* forceField_;
+    set<AtomType*> simTypes_;
     RealType cutoffRadius_;
     RealType pre11_;
     RealType pre12_;

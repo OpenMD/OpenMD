@@ -74,12 +74,14 @@ namespace OpenMD {
   public:    
     EAM();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
     void calcDensity(InteractionData &idat);
     void calcFunctional(SelfData &sdat);
     void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
+    virtual int getHash() { return EAM_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*,AtomType*> atypes);
     void setCutoffRadius( RealType rCut );
 
@@ -90,10 +92,14 @@ namespace OpenMD {
     
     bool initialized_;
     bool haveCutoffRadius_;
-    std::map<int, AtomType*> EAMlist;
-    std::map<AtomType*, EAMAtomData> EAMMap;
-    std::map<std::pair<AtomType*, AtomType*>, EAMInteractionData> MixingMap;
+    set<int> EAMtypes;         /**< The set of AtomType idents that are EAM types */
+    vector<int> EAMtids;       /**< The mapping from AtomType ident -> EAM type ident */
+    vector<EAMAtomData> EAMdata; /**< The EAM atomic data indexed by EAM type ident */
+    vector<vector<EAMInteractionData> > MixingMap;  /**< The mixing parameters between two EAM types */
+    int nEAM_;
+
     ForceField* forceField_;
+    set<AtomType*> simTypes_;
     RealType eamRcut_;
     EAMMixingMethod mixMeth_;    
     string name_;

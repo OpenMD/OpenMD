@@ -67,9 +67,11 @@ namespace OpenMD {
   public:    
     GB();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
+    virtual int getHash() { return GB_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:
@@ -77,9 +79,14 @@ namespace OpenMD {
 
     bool initialized_;
     string name_;
-    map<int, AtomType*> GBMap;
-    map<pair<AtomType*, AtomType*>, GBInteractionData> MixingMap;
+    set<int> GBtypes;               /**< The set of AtomType idents that are GB types */
+    vector<int> GBtids;             /**< The mapping from AtomType ident -> GB type ident */
+    vector<vector<GBInteractionData> > MixingMap;  /**< The mixing parameters between two 
+                                                      GB types */
+    int nGB_;
+
     ForceField* forceField_;
+    set<AtomType*> simTypes_;
     RealType mu_;
     RealType nu_;
     

@@ -113,7 +113,7 @@ namespace OpenMD {
 
     // neighbor list routines
     virtual bool checkNeighborList();
-    virtual vector<pair<int, int> >  buildNeighborList() = 0;
+    virtual void buildNeighborList(vector<pair<int, int> >& neighborList) = 0;
 
     // how to handle cutoffs:
     void setCutoffPolicy(CutoffPolicy cp) {cutoffPolicy_ = cp;}

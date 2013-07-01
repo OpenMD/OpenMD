@@ -71,17 +71,23 @@ namespace OpenMD {
   public:    
     Sticky();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
+    virtual int getHash() { return STICKY_PAIR; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:
     void initialize();
     bool initialized_;
-    map<int, AtomType*> StickyMap;
-    map<pair<AtomType*, AtomType*>, StickyInteractionData> MixingMap;
+    set<int> Stypes;              /**< The set of AtomType idents that are Sticky types */
+    vector<int> Stids;            /**< The mapping from AtomType ident -> Sticky type ident */
+    vector<vector<StickyInteractionData> > MixingMap;  /**< The mixing parameters between 
+                                                          two Sticky types */
+    int nSticky_;
     ForceField* forceField_;    
+    set<AtomType*> simTypes_;
     string name_;
   };
 }

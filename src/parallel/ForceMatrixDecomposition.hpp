@@ -67,7 +67,7 @@ namespace OpenMD {
     void collectData();
 
     // neighbor list routines
-    vector<pair<int, int> >  buildNeighborList();
+    void buildNeighborList(vector<pair<int, int> >& neighborList);
 
     // group bookkeeping
     groupCutoffs getGroupCutoffs(int cg1, int cg2);

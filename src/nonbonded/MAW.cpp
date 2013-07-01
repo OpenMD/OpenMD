@@ -55,10 +55,16 @@ namespace OpenMD {
   
   void MAW::initialize() {    
 
+    MAWtypes.clear();
+    MAWtids.clear();
+    MixingMap.clear();
+    MAWtids.resize( forceField_->getNAtomType(), -1);
+
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
-    NonBondedInteractionType* nbt;
     ForceField::NonBondedInteractionTypeContainer::KeyType keys;
+    NonBondedInteractionType* nbt;
+    int mtid1, mtid2;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
@@ -67,6 +73,19 @@ namespace OpenMD {
         keys = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
         AtomType* at2 = forceField_->getAtomType(keys[1]);
+
+        int atid1 = at1->getIdent();
+        if (MAWtids[atid1] == -1) {
+          mtid1 = MAWtypes.size();
+          MAWtypes.insert(atid1);
+          MAWtids[atid1] = mtid1;         
+        }
+        int atid2 = at2->getIdent();
+        if (MAWtids[atid2] == -1) {
+          mtid2 = MAWtypes.size();
+          MAWtypes.insert(atid2);
+          MAWtids[atid2] = mtid2;
+        }
 
         MAWInteractionType* mit = dynamic_cast<MAWInteractionType*>(nbt);
 
@@ -105,171 +124,172 @@ namespace OpenMD {
     mixer.ca1 = ca1;
     mixer.cb1 = cb1;
 
-    pair<AtomType*, AtomType*> key1, key2;
-    key1 = make_pair(atype1, atype2);
-    key2 = make_pair(atype2, atype1);
+    int mtid1 = MAWtids[atype1->getIdent()];
+    int mtid2 = MAWtids[atype2->getIdent()];
+    int nM = MAWtypes.size();
+
+    MixingMap.resize(nM);
+    MixingMap[mtid1].resize(nM);
     
-    MixingMap[key1] = mixer;
-    if (key2 != key1) {
-      MixingMap[key2] = mixer;
+    MixingMap[mtid1][mtid2] = mixer;
+    if (mtid2 != mtid1) {
+      MixingMap[mtid2].resize(nM);
+      MixingMap[mtid2][mtid1] = mixer;
     }    
   }
   
   void MAW::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
+
+    MAWInteractionData &mixer = MixingMap[MAWtids[idat.atid1]][MAWtids[idat.atid2]];
+
+    RealType myPot = 0.0;
+    RealType myPotC = 0.0;
+    RealType myDeriv = 0.0;
+    RealType myDerivC = 0.0;
     
-    map<pair<AtomType*, AtomType*>, MAWInteractionData>::iterator it;
-    it = MixingMap.find( idat.atypes );
-    if (it != MixingMap.end()) {
-      MAWInteractionData mixer = (*it).second;
-      
-      RealType myPot = 0.0;
-      RealType myPotC = 0.0;
-      RealType myDeriv = 0.0;
-      RealType myDerivC = 0.0;
-      
-      RealType D_e = mixer.De;
-      RealType R_e = mixer.Re;
-      RealType beta = mixer.beta;
-      RealType ca1 = mixer.ca1;
-      RealType cb1 = mixer.cb1;
-
-      bool j_is_Metal = idat.atypes.second->isMetal();
-
-      Vector3d r;
-      RotMat3x3d Atrans;
-      if (j_is_Metal) {
-        // rotate the inter-particle separation into the two different 
-        // body-fixed coordinate systems:
-        r = *(idat.A1) * *(idat.d);
-        Atrans = idat.A1->transpose();
-      } else {
-        // negative sign because this is the vector from j to i:       
-        r = -*(idat.A2) * *(idat.d);
-        Atrans = idat.A2->transpose();
-      }
-      
-      // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
-      
-      RealType expt     = -beta*( *(idat.rij) - R_e);
-      RealType expfnc   = exp(expt);
-      RealType expfnc2  = expfnc*expfnc;
-      
-      RealType exptC = 0.0;
-      RealType expfncC = 0.0;
-      RealType expfnc2C = 0.0;
-
-      myPot  = D_e * (expfnc2  - 2.0 * expfnc);
-      myDeriv   = 2.0 * D_e * beta * (expfnc - expfnc2);
-      
-      if (idat.shiftedPot || idat.shiftedForce) {
-        exptC     = -beta*( *(idat.rcut)  - R_e);
-        expfncC   = exp(exptC);
-        expfnc2C  = expfncC*expfncC;
-      }
-      
-      if (idat.shiftedPot) {
-        myPotC = D_e * (expfnc2C - 2.0 * expfncC);
-        myDerivC = 0.0;
-      } else if (idat.shiftedForce) {
-        myPotC = D_e * (expfnc2C - 2.0 * expfncC);
-        myDerivC  = 2.0 * D_e * beta * (expfncC - expfnc2C);
-        myPotC += myDerivC * ( *(idat.rij)  -  *(idat.rcut) );
-      } else {
-        myPotC = 0.0;
-        myDerivC = 0.0;
-      }
-
-      RealType x = r.x();
-      RealType y = r.y();
-      RealType z = r.z();
-      RealType x2 = x * x;
-      RealType z2 = z * z;
-
-      RealType r3 = *(idat.r2) *  *(idat.rij) ;
-      RealType r4 = *(idat.r2) *  *(idat.r2);
-
-      // angular modulation of morse part of potential to approximate 
-      // the squares of the two HOMO lone pair orbitals in water:
-      //********************** old form*************************
-      // s = 1 / (4 pi)
-      // ta1 = (s - pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
-      // b1 = px^2 = 3 * (sin(theta)*cos(phi))^2 / (4 pi)   
-      //********************** old form*************************
-      // we'll leave out the 4 pi for now
-      
-      // new functional form just using the p orbitals.
-      // Vmorse(r)*[a*p_x + b p_z + (1-a-b)]
-      // which is 
-      // Vmorse(r)*[a sin^2(theta) cos^2(phi) + b cos(theta) + (1-a-b)]
-      // Vmorse(r)*[a*x2/r2 + b*z/r + (1-a-b)]
-       
-      RealType Vmorse = (myPot - myPotC);
-      RealType Vang = ca1 * x2 / *(idat.r2) + 
-        cb1 * z /  *(idat.rij)  + (0.8 - ca1 / 3.0);
-      
-      RealType pot_temp = *(idat.vdwMult) * Vmorse * Vang;
-      *(idat.vpair) += pot_temp;
-      (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
-           
-      Vector3d dVmorsedr = (myDeriv - myDerivC) * Vector3d(x, y, z) /  *(idat.rij) ;
-      
-      Vector3d dVangdr = Vector3d(-2.0 * ca1 * x2 * x / r4 + 2.0 * ca1 * x / *(idat.r2) - cb1 * x * z / r3,
-                                  -2.0 * ca1 * x2 * y / r4 - cb1 * z * y / r3,
-                                  -2.0 * ca1 * x2 * z / r4 + cb1 /  *(idat.rij)           - cb1 * z2  / r3);
-      
-      // chain rule to put these back on x, y, z
-
-      Vector3d dvdr = Vang * dVmorsedr + Vmorse * dVangdr;
-
-      // Torques for Vang using method of Price:
-      // S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
-      
-      Vector3d dVangdu = Vector3d(cb1 * y /  *(idat.rij) ,
-                                  2.0 * ca1 * x * z / *(idat.r2) - cb1 * x /  *(idat.rij),
-                                  -2.0 * ca1 * y * x / *(idat.r2));
-
-      // do the torques first since they are easy:
-      // remember that these are still in the body fixed axes    
-
-      Vector3d trq = *(idat.vdwMult) * Vmorse * dVangdu * *(idat.sw);
-
-      // go back to lab frame using transpose of rotation matrix:
-      
-      if (j_is_Metal) {
-        *(idat.t1) += Atrans * trq;
-      } else {
-        *(idat.t2) += Atrans * trq;
-      }
-
-      // Now, on to the forces (still in body frame of water)
-
-      Vector3d ftmp = *(idat.vdwMult) * *(idat.sw) * dvdr;
-
-      // rotate the terms back into the lab frame:
-      Vector3d flab;
-      if (j_is_Metal) {
-        flab = Atrans * ftmp;
-      } else {
-        flab = - Atrans * ftmp;
-      }
-      
-      *(idat.f1) += flab;
+    RealType D_e = mixer.De;
+    RealType R_e = mixer.Re;
+    RealType beta = mixer.beta;
+    RealType ca1 = mixer.ca1;
+    RealType cb1 = mixer.cb1;
+    
+    bool j_is_Metal = idat.atypes.second->isMetal();
+    
+    Vector3d r;
+    RotMat3x3d Atrans;
+    if (j_is_Metal) {
+      // rotate the inter-particle separation into the two different 
+      // body-fixed coordinate systems:
+      r = *(idat.A1) * *(idat.d);
+      Atrans = idat.A1->transpose();
+    } else {
+      // negative sign because this is the vector from j to i:       
+      r = -*(idat.A2) * *(idat.d);
+      Atrans = idat.A2->transpose();
     }
-    return;
     
+    // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
+    
+    RealType expt     = -beta*( *(idat.rij) - R_e);
+    RealType expfnc   = exp(expt);
+    RealType expfnc2  = expfnc*expfnc;
+    
+    RealType exptC = 0.0;
+    RealType expfncC = 0.0;
+    RealType expfnc2C = 0.0;
+    
+    myPot  = D_e * (expfnc2  - 2.0 * expfnc);
+    myDeriv   = 2.0 * D_e * beta * (expfnc - expfnc2);
+    
+    if (idat.shiftedPot || idat.shiftedForce) {
+      exptC     = -beta*( *(idat.rcut)  - R_e);
+      expfncC   = exp(exptC);
+      expfnc2C  = expfncC*expfncC;
+    }
+    
+    if (idat.shiftedPot) {
+      myPotC = D_e * (expfnc2C - 2.0 * expfncC);
+      myDerivC = 0.0;
+    } else if (idat.shiftedForce) {
+      myPotC = D_e * (expfnc2C - 2.0 * expfncC);
+      myDerivC  = 2.0 * D_e * beta * (expfncC - expfnc2C);
+      myPotC += myDerivC * ( *(idat.rij)  -  *(idat.rcut) );
+    } else {
+      myPotC = 0.0;
+      myDerivC = 0.0;
+    }
+    
+    RealType x = r.x();
+    RealType y = r.y();
+    RealType z = r.z();
+    RealType x2 = x * x;
+    RealType z2 = z * z;
+    
+    RealType r3 = *(idat.r2) *  *(idat.rij) ;
+    RealType r4 = *(idat.r2) *  *(idat.r2);
+    
+    // angular modulation of morse part of potential to approximate 
+    // the squares of the two HOMO lone pair orbitals in water:
+    //********************** old form*************************
+    // s = 1 / (4 pi)
+    // ta1 = (s - pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
+    // b1 = px^2 = 3 * (sin(theta)*cos(phi))^2 / (4 pi)   
+    //********************** old form*************************
+    // we'll leave out the 4 pi for now
+    
+    // new functional form just using the p orbitals.
+    // Vmorse(r)*[a*p_x + b p_z + (1-a-b)]
+    // which is 
+    // Vmorse(r)*[a sin^2(theta) cos^2(phi) + b cos(theta) + (1-a-b)]
+    // Vmorse(r)*[a*x2/r2 + b*z/r + (1-a-b)]
+    
+    RealType Vmorse = (myPot - myPotC);
+    RealType Vang = ca1 * x2 / *(idat.r2) + 
+      cb1 * z /  *(idat.rij)  + (0.8 - ca1 / 3.0);
+    
+    RealType pot_temp = *(idat.vdwMult) * Vmorse * Vang;
+    *(idat.vpair) += pot_temp;
+    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    
+    Vector3d dVmorsedr = (myDeriv - myDerivC) * Vector3d(x, y, z) /  *(idat.rij) ;
+    
+    Vector3d dVangdr = Vector3d(-2.0 * ca1 * x2 * x / r4 + 2.0 * ca1 * x / *(idat.r2) - cb1 * x * z / r3,
+                                -2.0 * ca1 * x2 * y / r4 - cb1 * z * y / r3,
+                                -2.0 * ca1 * x2 * z / r4 + cb1 /  *(idat.rij)           - cb1 * z2  / r3);
+    
+    // chain rule to put these back on x, y, z
+    
+    Vector3d dvdr = Vang * dVmorsedr + Vmorse * dVangdr;
+    
+    // Torques for Vang using method of Price:
+    // S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
+    
+    Vector3d dVangdu = Vector3d(cb1 * y /  *(idat.rij) ,
+                                2.0 * ca1 * x * z / *(idat.r2) - cb1 * x /  *(idat.rij),
+                                -2.0 * ca1 * y * x / *(idat.r2));
+    
+    // do the torques first since they are easy:
+    // remember that these are still in the body fixed axes    
+    
+    Vector3d trq = *(idat.vdwMult) * Vmorse * dVangdu * *(idat.sw);
+    
+    // go back to lab frame using transpose of rotation matrix:
+    
+    if (j_is_Metal) {
+      *(idat.t1) += Atrans * trq;
+    } else {
+      *(idat.t2) += Atrans * trq;
+    }
+    
+    // Now, on to the forces (still in body frame of water)
+    
+    Vector3d ftmp = *(idat.vdwMult) * *(idat.sw) * dvdr;
+    
+    // rotate the terms back into the lab frame:
+    Vector3d flab;
+    if (j_is_Metal) {
+      flab = Atrans * ftmp;
+    } else {
+      flab = - Atrans * ftmp;
+    }
+    
+    *(idat.f1) += flab;
+    
+    return;    
   }
-    
+
   RealType MAW::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
-    map<pair<AtomType*, AtomType*>, MAWInteractionData>::iterator it;
-    it = MixingMap.find(atypes);
-    if (it == MixingMap.end()) 
-      return 0.0;
-    else  {
-      MAWInteractionData mixer = (*it).second;
-
+    int atid1 = atypes.first->getIdent();
+    int atid2 = atypes.second->getIdent();
+    int mtid1 = MAWtids[atid1];
+    int mtid2 = MAWtids[atid2];
+    
+    if ( mtid1 == -1 || mtid2 == -1) return 0.0;
+    else {      
+      MAWInteractionData mixer = MixingMap[mtid1][mtid2];
       RealType R_e = mixer.Re;
       RealType beta = mixer.beta;
       // This value of the r corresponds to an energy about 1.48% of 

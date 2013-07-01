@@ -89,18 +89,44 @@ namespace OpenMD {
     repulsivePower_->setForceField(forceField_);
 
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
+    int nTypes = atomTypes->size();
+    iHash_.resize(nTypes);
+    interactions_.resize(nTypes);
     ForceField::AtomTypeContainer::MapTypeIterator i1, i2;
     AtomType* atype1;
     AtomType* atype2;
-    pair<AtomType*, AtomType*> key;
+    int atid1, atid2;
+
+    // We only need to worry about the types that are actually in the simulation:
+
+    set<AtomType*> atypes = info_->getSimulatedAtomTypes();
+
+    lj_->setSimulatedAtomTypes(atypes);
+    gb_->setSimulatedAtomTypes(atypes);
+    sticky_->setSimulatedAtomTypes(atypes);
+    eam_->setSimulatedAtomTypes(atypes);
+    sc_->setSimulatedAtomTypes(atypes);
+    morse_->setSimulatedAtomTypes(atypes);
+    electrostatic_->setSimInfo(info_);
+    electrostatic_->setSimulatedAtomTypes(atypes);
+    maw_->setSimulatedAtomTypes(atypes);
+    repulsivePower_->setSimulatedAtomTypes(atypes);
+
+    set<AtomType*>::iterator at;
+
+    for (at = atypes.begin(); at != atypes.end(); ++at) {
     
-    for (atype1 = atomTypes->beginType(i1); atype1 != NULL; 
-         atype1 = atomTypes->nextType(i1)) {
+      //for (atype1 = atomTypes->beginType(i1); atype1 != NULL; 
+      //   atype1 = atomTypes->nextType(i1)) {
       
-      // add it to the map:
-      
+      atype1 = *at;
+      atid1 = atype1->getIdent();
+      iHash_[atid1].resize(nTypes);
+      interactions_[atid1].resize(nTypes);
+
+      // add it to the map:      
       pair<map<int,AtomType*>::iterator,bool> ret;    
-      ret = typeMap_.insert( pair<int, AtomType*>(atype1->getIdent(), atype1) );
+      ret = typeMap_.insert( pair<int, AtomType*>(atid1, atype1) );
       if (ret.second == false) {
         sprintf( painCave.errMsg,
                  "InteractionManager already had a previous entry with ident %d\n",
@@ -116,46 +142,46 @@ namespace OpenMD {
     map<int, AtomType*>::iterator it1, it2;
     for (it1 = typeMap_.begin(); it1 != typeMap_.end(); ++it1) {
       atype1 = (*it1).second;
+      atid1 = atype1->getIdent();
 
       for( it2 = typeMap_.begin(); it2 != typeMap_.end(); ++it2) {        
         atype2 = (*it2).second;
+        atid2 = atype2->getIdent();
                                
-        key = make_pair(atype1, atype2);
-
-        iHash_[key] = 0;
+        iHash_[atid1][atid2] = 0;
         
         if (atype1->isLennardJones() && atype2->isLennardJones()) {
-          interactions_[key].insert(lj_);
-          iHash_[key] |= LJ_PAIR;
+          interactions_[atid1][atid2].insert(lj_);
+          iHash_[atid1][atid2] |= LJ_PAIR;
         }
         if (atype1->isElectrostatic() && atype2->isElectrostatic() ) {
-          interactions_[key].insert(electrostatic_);
-          iHash_[key] |= ELECTROSTATIC_PAIR;
+          interactions_[atid1][atid2].insert(electrostatic_);
+          iHash_[atid1][atid2] |= ELECTROSTATIC_PAIR;
         }
         if (atype1->isSticky() && atype2->isSticky() ) {
-          interactions_[key].insert(sticky_);
-          iHash_[key] |= STICKY_PAIR;
+          interactions_[atid1][atid2].insert(sticky_);
+          iHash_[atid1][atid2] |= STICKY_PAIR;
         }
         if (atype1->isStickyPower() && atype2->isStickyPower() ) {
-          interactions_[key].insert(sticky_);
-          iHash_[key] |= STICKY_PAIR;
+          interactions_[atid1][atid2].insert(sticky_);
+          iHash_[atid1][atid2] |= STICKY_PAIR;
         }
         if (atype1->isEAM() && atype2->isEAM() ) {
-          interactions_[key].insert(eam_);
-          iHash_[key] |= EAM_PAIR;
+          interactions_[atid1][atid2].insert(eam_);
+          iHash_[atid1][atid2] |= EAM_PAIR;
         }
         if (atype1->isSC() && atype2->isSC() ) {
-          interactions_[key].insert(sc_);
-          iHash_[key] |= SC_PAIR;
+          interactions_[atid1][atid2].insert(sc_);
+          iHash_[atid1][atid2] |= SC_PAIR;
         }
         if (atype1->isGayBerne() && atype2->isGayBerne() ) {
-          interactions_[key].insert(gb_);
-          iHash_[key] |= GB_PAIR;
+          interactions_[atid1][atid2].insert(gb_);
+          iHash_[atid1][atid2] |= GB_PAIR;
         }
         if ((atype1->isGayBerne() && atype2->isLennardJones())
             || (atype1->isLennardJones() && atype2->isGayBerne())) {
-          interactions_[key].insert(gb_);
-          iHash_[key] |= GB_PAIR;
+          interactions_[atid1][atid2].insert(gb_);
+          iHash_[atid1][atid2] |= GB_PAIR;
         } 
         
         // look for an explicitly-set non-bonded interaction type using the 
@@ -172,16 +198,16 @@ namespace OpenMD {
             // We found an explicit Lennard-Jones interaction.  
             // override all other vdw entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[key].begin(); 
-                 it != interactions_[key].end(); ++it) {
+            for (it = interactions_[atid1][atid2].begin(); 
+                 it != interactions_[atid1][atid2].end(); ++it) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[key].erase(*it);
-                // work on iHash here;
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
               }
             }
-            interactions_[key].insert(lj_);
-            iHash_[key] |= LJ_PAIR;
+            interactions_[atid1][atid2].insert(lj_);
+            iHash_[atid1][atid2] |= LJ_PAIR;
             vdwExplicit = true;
           }
           
@@ -199,16 +225,16 @@ namespace OpenMD {
             // We found an explicit Morse interaction.  
             // override all other vdw entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[key].begin(); 
-                 it != interactions_[key].end(); ++it) {
+            for (it = interactions_[atid1][atid2].begin(); 
+                 it != interactions_[atid1][atid2].end(); ++it) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[key].erase(*it);
-                // work on iHash here;
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
               }
             }
-            interactions_[key].insert(morse_);
-            iHash_[key] |= MORSE_PAIR;
+            interactions_[atid1][atid2].insert(morse_);
+            iHash_[atid1][atid2] |= MORSE_PAIR;
             vdwExplicit = true;
           }
 
@@ -226,16 +252,16 @@ namespace OpenMD {
             // We found an explicit RepulsivePower interaction.  
             // override all other vdw entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[key].begin(); 
-                 it != interactions_[key].end(); ++it) {
+            for (it = interactions_[atid1][atid2].begin(); 
+                 it != interactions_[atid1][atid2].end(); ++it) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[key].erase(*it);
-                // work on iHash here;
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
               }
             }
-            interactions_[key].insert(repulsivePower_);
-            iHash_[key] |= REPULSIVEPOWER_PAIR;
+            interactions_[atid1][atid2].insert(repulsivePower_);
+            iHash_[atid1][atid2] |= REPULSIVEPOWER_PAIR;
             vdwExplicit = true;
           }
           
@@ -244,16 +270,16 @@ namespace OpenMD {
             // We found an explicit EAM interaction.  
             // override all other metallic entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[key].begin(); 
-                 it != interactions_[key].end(); ++it) {
+            for (it = interactions_[atid1][atid2].begin(); 
+                 it != interactions_[atid1][atid2].end(); ++it) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == METALLIC_FAMILY) {
-                interactions_[key].erase(*it);
-                // work on iHash here;
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
               }
             }
-            interactions_[key].insert(eam_);
-            iHash_[key] |= EAM_PAIR;
+            interactions_[atid1][atid2].insert(eam_);
+            iHash_[atid1][atid2] |= EAM_PAIR;
             metExplicit = true;
           }
           
@@ -271,16 +297,16 @@ namespace OpenMD {
             // We found an explicit Sutton-Chen interaction.  
             // override all other metallic entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[key].begin(); 
-                 it != interactions_[key].end(); ++it) {
+            for (it = interactions_[atid1][atid2].begin(); 
+                 it != interactions_[atid1][atid2].end(); ++it) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == METALLIC_FAMILY) {
-                interactions_[key].erase(*it);
-                // work on iHash here;
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
               }
             }
-            interactions_[key].insert(sc_);
-            iHash_[key] |= SC_PAIR;
+            interactions_[atid1][atid2].insert(sc_);
+            iHash_[atid1][atid2] |= SC_PAIR;
             metExplicit = true;
           }
           
@@ -298,16 +324,16 @@ namespace OpenMD {
             // We found an explicit MAW interaction.  
             // override all other vdw entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[key].begin(); 
-                 it != interactions_[key].end(); ++it) {
+            for (it = interactions_[atid1][atid2].begin(); 
+                 it != interactions_[atid1][atid2].end(); ++it) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[key].erase(*it);
-                // work on iHash here;
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
               }
             }
-            interactions_[key].insert(maw_);
-            iHash_[key] |= MAW_PAIR;
+            interactions_[atid1][atid2].insert(maw_);
+            iHash_[atid1][atid2] |= MAW_PAIR;
             vdwExplicit = true;
           }        
         }
@@ -323,11 +349,12 @@ namespace OpenMD {
 
     for (it = simTypes.begin(); it != simTypes.end(); ++it) {
       atype1 = (*it);
+      atid1 = atype1->getIdent();
       for (jt = it; jt != simTypes.end(); ++jt) {
         atype2 = (*jt);
-        key = make_pair(atype1, atype2);
+        atid1 = atype1->getIdent();
         
-        if (interactions_[key].size() == 0) {
+        if (interactions_[atid1][atid2].size() == 0) {
           sprintf( painCave.errMsg,
                    "InteractionManager could not find a matching non-bonded\n"
                    "\tinteraction for atom types %s - %s\n"
@@ -349,14 +376,14 @@ namespace OpenMD {
     eam_->setCutoffRadius(rcut);
   }
 
-  void InteractionManager::doPrePair(InteractionData idat){
+  void InteractionManager::doPrePair(InteractionData &idat){
     
     if (!initialized_) initialize();
 	 
     // excluded interaction, so just return
     if (idat.excluded) return;
 
-    int& iHash = iHash_[idat.atypes];
+    int& iHash = iHash_[idat.atid1][idat.atid2];
 
     if ((iHash & EAM_PAIR) != 0) eam_->calcDensity(idat);
     if ((iHash & SC_PAIR) != 0)  sc_->calcDensity(idat);
@@ -373,20 +400,18 @@ namespace OpenMD {
     return;    
   }
   
-  void InteractionManager::doPreForce(SelfData sdat){
+  void InteractionManager::doPreForce(SelfData &sdat){
 
     if (!initialized_) initialize();
     
-    // pair<AtomType*, AtomType*> key = make_pair(sdat.atype, sdat.atype);
-
-    int& iHash = iHash_[ make_pair(sdat.atype, sdat.atype) ];
+    int& iHash = iHash_[sdat.atid][sdat.atid];
 
     if ((iHash & EAM_PAIR) != 0) eam_->calcFunctional(sdat);
     if ((iHash & SC_PAIR) != 0)  sc_->calcFunctional(sdat);
 
     // set<NonBondedInteraction*>::iterator it;
     
-    // for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it){
+    // for (it = interactions_[atid1][atid2].begin(); it != interactions_[atid1][atid2].end(); ++it){
     //   if ((*it)->getFamily() == METALLIC_FAMILY) {
     //     dynamic_cast<MetallicInteraction*>(*it)->calcFunctional(sdat);
     //   }
@@ -395,11 +420,11 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::doPair(InteractionData idat){
+  void InteractionManager::doPair(InteractionData &idat){
     
     if (!initialized_) initialize();
 
-    int& iHash = iHash_[idat.atypes];
+    int& iHash = iHash_[idat.atid1][idat.atid2];
 
     if ((iHash & ELECTROSTATIC_PAIR) != 0) electrostatic_->calcForce(idat);
        
@@ -433,19 +458,17 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::doSelfCorrection(SelfData sdat){
+  void InteractionManager::doSelfCorrection(SelfData &sdat){
 
     if (!initialized_) initialize();
     
-    int& iHash = iHash_[ make_pair(sdat.atype, sdat.atype) ];
+    int& iHash = iHash_[sdat.atid][sdat.atid];
 
     if ((iHash & ELECTROSTATIC_PAIR) != 0) electrostatic_->calcSelfCorrection(sdat);
 
-
-    // pair<AtomType*, AtomType*> key = make_pair(sdat.atype, sdat.atype);
     // set<NonBondedInteraction*>::iterator it;
 
-    // for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it){
+    // for (it = interactions_[atid1][atid2].begin(); it != interactions_[atid1][atid2].end(); ++it){
     //   if ((*it)->getFamily() == ELECTROSTATIC_FAMILY) {
     //     dynamic_cast<ElectrostaticInteraction*>(*it)->calcSelfCorrection(sdat);
     //   }
@@ -459,24 +482,25 @@ namespace OpenMD {
 
     AtomType* atype = typeMap_[*atid];
 
-    pair<AtomType*, AtomType*> key = make_pair(atype, atype);
     set<NonBondedInteraction*>::iterator it;
     RealType cutoff = 0.0;
     
-    for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it)
-      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(key));   
+    for (it = interactions_[*atid][*atid].begin(); it != interactions_[*atid][*atid].end();
+         ++it)
+      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype, atype)));   
     return cutoff;    
   }
 
   RealType InteractionManager::getSuggestedCutoffRadius(AtomType* atype) {
     if (!initialized_) initialize();
     
-    pair<AtomType*, AtomType*> key = make_pair(atype, atype);
+    int atid = atype->getIdent();
+
     set<NonBondedInteraction*>::iterator it;
     RealType cutoff = 0.0;
     
-    for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it)
-      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(key));   
+    for (it = interactions_[atid][atid].begin(); it != interactions_[atid][atid].end(); ++it)
+      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype, atype)));   
     return cutoff;    
   }
 } //end namespace OpenMD

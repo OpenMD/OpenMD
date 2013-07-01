@@ -213,16 +213,28 @@ namespace OpenMD {
       haveDampingAlpha_ = true;
     }
 
-    // find all of the Electrostatic atom Types:
-    ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
+    Etypes.clear();
+    Etids.clear();
+    FQtypes.clear();
+    FQtids.clear();
+    ElectrostaticMap.clear();
+    Jij.clear();
+    nElectro_ = 0;
+    nFlucq_ = 0;
+
+    Etids.resize( forceField_->getNAtomType(), -1);
+    FQtids.resize( forceField_->getNAtomType(), -1);
+
+    set<AtomType*>::iterator at;
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {     
+      if ((*at)->isElectrostatic()) nElectro_++;
+      if ((*at)->isFluctuatingCharge()) nFlucq_++;
+    }
     
-    for (at = atomTypes->beginType(i); at != NULL; 
-         at = atomTypes->nextType(i)) {
-      
-      if (at->isElectrostatic())
-        addType(at);
+    Jij.resize(nFlucq_);
+
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
+      if ((*at)->isElectrostatic()) addType(*at);
     }   
     
     if (summationMethod_ == esm_REACTION_FIELD) {
@@ -625,7 +637,7 @@ namespace OpenMD {
   }
       
   void Electrostatic::addType(AtomType* atomType){
-
+    
     ElectrostaticAtomData electrostaticAtomData;
     electrostaticAtomData.is_Charge = false;
     electrostaticAtomData.is_Dipole = false;
@@ -661,38 +673,54 @@ namespace OpenMD {
       electrostaticAtomData.slaterZeta = fqa.getSlaterZeta();
     }
 
-    pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = ElectrostaticList.insert( pair<int,AtomType*>(atomType->getIdent(),
-                                                        atomType) );
+    int atid = atomType->getIdent();
+    int etid = Etypes.size();
+    int fqtid = FQtypes.size();
+
+    pair<set<int>::iterator,bool> ret;    
+    ret = Etypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "Electrostatic already had a previous entry with ident %d\n",
-               atomType->getIdent() );
+               atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
     }
     
-    ElectrostaticMap[atomType] = electrostaticAtomData;   
+    Etids[ atid ] = etid;
+    ElectrostaticMap.push_back(electrostaticAtomData);
 
-    // Now, iterate over all known types and add to the mixing map:
-    
-    map<AtomType*, ElectrostaticAtomData>::iterator it;
-    for( it = ElectrostaticMap.begin(); it != ElectrostaticMap.end(); ++it) {
-      AtomType* atype2 = (*it).first;
-      ElectrostaticAtomData eaData2 = (*it).second;
-      if (eaData2.is_Fluctuating && electrostaticAtomData.is_Fluctuating) {
-        
+    if (electrostaticAtomData.is_Fluctuating) {
+      ret = FQtypes.insert( atid );
+      if (ret.second == false) {
+        sprintf( painCave.errMsg,
+                 "Electrostatic already had a previous fluctuating charge entry with ident %d\n",
+                 atid );
+        painCave.severity = OPENMD_INFO;
+        painCave.isFatal = 0;
+        simError();         
+      }
+      FQtids[atid] = fqtid;
+      Jij[fqtid].resize(nFlucq_);
+
+      // Now, iterate over all known fluctuating and add to the coulomb integral map:
+      
+      std::set<int>::iterator it;
+      for( it = FQtypes.begin(); it != FQtypes.end(); ++it) {     
+        int etid2 = Etids[ (*it) ];
+        int fqtid2 = FQtids[ (*it) ];
+        ElectrostaticAtomData eaData2 = ElectrostaticMap[ etid2 ];
         RealType a = electrostaticAtomData.slaterZeta;
         RealType b = eaData2.slaterZeta;
         int m = electrostaticAtomData.slaterN;
         int n = eaData2.slaterN;
-
+        
         // Create the spline of the coulombic integral for s-type
         // Slater orbitals.  Add a 2 angstrom safety window to deal
         // with cutoffGroups that have charged atoms longer than the
         // cutoffRadius away from each other.
-
+        
         RealType rval;
         RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
         vector<RealType> rvals;
@@ -709,16 +737,11 @@ namespace OpenMD {
         
         CubicSpline* J = new CubicSpline();
         J->addPoints(rvals, Jvals);
-        
-        pair<AtomType*, AtomType*> key1, key2;
-        key1 = make_pair(atomType, atype2);
-        key2 = make_pair(atype2, atomType);
-        
-        Jij[key1] = J;
-        Jij[key2] = J;
-      }
-    }
- 
+        Jij[fqtid][fqtid2] = J;
+        Jij[fqtid2].resize( nFlucq_ );
+        Jij[fqtid2][fqtid] = J;
+      }      
+    }       
     return;
   }
   
@@ -746,8 +769,8 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    data1 = ElectrostaticMap[idat.atypes.first];
-    data2 = ElectrostaticMap[idat.atypes.second];
+    data1 = ElectrostaticMap[Etids[idat.atid1]];
+    data2 = ElectrostaticMap[Etids[idat.atid2]];
 
     U = 0.0;  // Potential
     F.zero();  // Force
@@ -890,7 +913,7 @@ namespace OpenMD {
     }
     
     if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {
-      J = Jij[idat.atypes];
+      J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
     }    
     
     if (a_is_Charge) {     
@@ -1128,7 +1151,7 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
 
-    ElectrostaticAtomData data = ElectrostaticMap[sdat.atype];
+    ElectrostaticAtomData data = ElectrostaticMap[Etids[sdat.atid]];
     
     // logicals
     bool i_is_Charge = data.is_Charge;

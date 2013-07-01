@@ -1149,6 +1149,8 @@ namespace OpenMD {
    
 #ifdef IS_MPI
     idat.atypes = make_pair( atypesRow[atom1], atypesCol[atom2]);
+    idat.atid1 = identsRow[atom1];
+    idat.atid2 = identsCol[atom2];
     //idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
     //                         ff_->getAtomType(identsCol[atom2]) );
     
@@ -1205,6 +1207,8 @@ namespace OpenMD {
 #else
     
     idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
+    idat.atid1 = idents[atom1];
+    idat.atid2 = idents[atom2];
 
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);
@@ -1316,9 +1320,9 @@ namespace OpenMD {
    * first element of pair is row-indexed CutoffGroup
    * second element of pair is column-indexed CutoffGroup
    */
-  vector<pair<int, int> > ForceMatrixDecomposition::buildNeighborList() {
-      
-    vector<pair<int, int> > neighborList;
+  void ForceMatrixDecomposition::buildNeighborList(vector<pair<int,int> >& neighborList) {
+    
+    neighborList.clear();
     groupCutoffs cuts;
     bool doAllPairs = false;
 
@@ -1583,7 +1587,5 @@ namespace OpenMD {
     saved_CG_positions_.clear();
     for (int i = 0; i < nGroups_; i++)
       saved_CG_positions_.push_back(snap_->cgData.position[i]);
-    
-    return neighborList;
   }
 } //end namespace OpenMD
