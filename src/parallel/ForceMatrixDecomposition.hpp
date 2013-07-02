@@ -70,7 +70,7 @@ namespace OpenMD {
     void buildNeighborList(vector<pair<int, int> >& neighborList);
 
     // group bookkeeping
-    groupCutoffs getGroupCutoffs(int cg1, int cg2);
+    void getGroupCutoffs(int &cg1, int &cg2, RealType &rcut, RealType &rcutsq, RealType &rlistsq);
     Vector3d& getGroupVelocityColumn(int cg2);
 
     // Group->atom bookkeeping

@@ -49,7 +49,7 @@
 
 using namespace std;
 namespace OpenMD {
-  inline RealType roundMe( RealType x ){
+  inline RealType roundMe( const RealType &x ){
     return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
   }
 

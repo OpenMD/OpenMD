@@ -297,26 +297,26 @@ namespace OpenMD {
     frameData.volume = vol;
   }
 
+
   /** Wrap a vector according to periodic boundary conditions */
   void Snapshot::wrapVector(Vector3d& pos) {
     
     if( !frameData.orthoRhombic ) {
       Vector3d scaled = frameData.invHmat * pos;
-      for (int i = 0; i < 3; i++) 
-        scaled[i] -= roundMe(scaled[i]);
+      for (int i = 0; i < 3; i++) {
+        scaled[i] -= roundMe( scaled[i] );        
+      }
       // calc the wrapped real coordinates from the wrapped scaled coordinates
       pos = frameData.hmat * scaled;
     } else {
-      // calc the scaled coordinates.
       RealType scaled;
-      for (int i=0; i<3; i++) {
-        scaled = pos[i] * frameData.invHmat(i, i);
-        scaled -= roundMe(scaled);
-	pos[i] = scaled * frameData.hmat(i, i);
+      for (int i=0; i<3; i++) {      
+        scaled = pos[i] * frameData.invHmat(i,i);
+        scaled -= roundMe( scaled );
+        pos[i] = scaled * frameData.hmat(i,i);
       }
     }
   }
-
 
   /** Scaling a vector to multiples of the periodic box */
   inline Vector3d Snapshot::scaleVector(Vector3d& pos) {   

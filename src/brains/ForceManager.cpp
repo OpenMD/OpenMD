@@ -695,7 +695,7 @@ namespace OpenMD {
     RealType vij;
     Vector3d fij, fg, f1;
     tuple3<RealType, RealType, RealType> cuts;
-    RealType rCutSq;
+    RealType rCut, rCutSq, rListSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
     vector<int> atomListColumn, atomListRow;
@@ -714,6 +714,7 @@ namespace OpenMD {
 
     int loopStart, loopEnd;
     
+    idat.rcut = &rCut;
     idat.vdwMult = &vdwMult;
     idat.electroMult = &electroMult;
     idat.pot = &workPot;
@@ -756,17 +757,16 @@ namespace OpenMD {
         cg1 = (*it).first;
         cg2 = (*it).second;
         
-        cuts = fDecomp_->getGroupCutoffs(cg1, cg2);
+        fDecomp_->getGroupCutoffs(cg1, cg2, rCut, rCutSq, rListSq);
 
         d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
 
         // already wrapped in the getIntergroupVector call:
         // curSnapshot->wrapVector(d_grp);        
         rgrpsq = d_grp.lengthSquare();
-        rCutSq = cuts.second;
 
         if (rgrpsq < rCutSq) {
-          idat.rcut = &cuts.first;
+
           if (iLoop == PAIR_LOOP) {
             vij = 0.0;
             fij.zero();

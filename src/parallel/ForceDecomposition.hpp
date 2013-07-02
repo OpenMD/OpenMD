@@ -120,7 +120,7 @@ namespace OpenMD {
     void setUserCutoff(RealType rcut) {userCutoff_ = rcut; userChoseCutoff_ = true; }
 
     // group bookkeeping
-    virtual groupCutoffs getGroupCutoffs(int cg1, int cg2) = 0;
+    virtual void getGroupCutoffs(int &cg1, int &cg2, RealType &rcut, RealType &rcutsq, RealType &rlistsq) = 0;
     virtual Vector3d& getGroupVelocityColumn(int atom2) = 0;
 
     // Group->atom bookkeeping
@@ -198,7 +198,10 @@ namespace OpenMD {
     RealType userCutoff_;
     CutoffPolicy cutoffPolicy_;
 
-    map<pair<int, int>, tuple3<RealType, RealType, RealType> > gTypeCutoffMap;
+    //map<pair<int, int>, tuple3<RealType, RealType, RealType> > gTypeCutoffMap;
+    vector<vector<RealType> > GrCut;
+    vector<vector<RealType> > GrCutSq;
+    vector<vector<RealType> > GrlistSq;
 
   };    
 }

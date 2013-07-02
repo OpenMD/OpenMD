@@ -308,6 +308,10 @@ namespace OpenMD {
    
   void ForceMatrixDecomposition::createGtypeCutoffMap() {
     
+    GrCut.clear();
+    GrCutSq.clear();
+    GrlistSq.clear();
+
     RealType tol = 1e-6;
     largestRcut_ = 0.0;
     int atid;
@@ -419,7 +423,16 @@ namespace OpenMD {
     
     RealType tradRcut = groupMax;
 
+    GrCut.resize( gTypeCutoffs.size() );
+    GrCutSq.resize( gTypeCutoffs.size() );
+    GrlistSq.resize( gTypeCutoffs.size() );
+
+
     for (unsigned int i = 0; i < gTypeCutoffs.size();  i++) {
+      GrCut[i].resize( gTypeCutoffs.size() , 0.0);
+      GrCutSq[i].resize( gTypeCutoffs.size(), 0.0 );
+      GrlistSq[i].resize( gTypeCutoffs.size(), 0.0 );
+
       for (unsigned int j = 0; j < gTypeCutoffs.size();  j++) {       
         RealType thisRcut;
         switch(cutoffPolicy_) {
@@ -442,15 +455,18 @@ namespace OpenMD {
           break;
         }
 
-        pair<int,int> key = make_pair(i,j);
-        gTypeCutoffMap[key].first = thisRcut;
+        GrCut[i][j] = thisRcut;
         if (thisRcut > largestRcut_) largestRcut_ = thisRcut;
-        gTypeCutoffMap[key].second = thisRcut*thisRcut;
-        gTypeCutoffMap[key].third = pow(thisRcut + skinThickness_, 2);
+        GrCutSq[i][j] = thisRcut * thisRcut;
+        GrlistSq[i][j] = pow(thisRcut + skinThickness_, 2);
+
+        // pair<int,int> key = make_pair(i,j);
+        // gTypeCutoffMap[key].first = thisRcut;
+        // gTypeCutoffMap[key].third = pow(thisRcut + skinThickness_, 2);
         // sanity check
         
         if (userChoseCutoff_) {
-          if (abs(gTypeCutoffMap[key].first - userCutoff_) > 0.0001) {
+          if (abs(GrCut[i][j] - userCutoff_) > 0.0001) {
             sprintf(painCave.errMsg,
                     "ForceMatrixDecomposition::createGtypeCutoffMap " 
                     "user-specified rCut (%lf) does not match computed group Cutoff\n", userCutoff_);
@@ -463,7 +479,7 @@ namespace OpenMD {
     }
   }
 
-  groupCutoffs ForceMatrixDecomposition::getGroupCutoffs(int cg1, int cg2) {
+  void ForceMatrixDecomposition::getGroupCutoffs(int &cg1, int &cg2, RealType &rcut, RealType &rcutsq, RealType &rlistsq) {
     int i, j;   
 #ifdef IS_MPI
     i = groupRowToGtype[cg1];
@@ -472,7 +488,11 @@ namespace OpenMD {
     i = groupToGtype[cg1];
     j = groupToGtype[cg2];
 #endif    
-    return gTypeCutoffMap[make_pair(i,j)];
+    rcut = GrCut[i][j];
+    rcutsq = GrCutSq[i][j];
+    rlistsq = GrlistSq[i][j];
+    return;
+    //return gTypeCutoffMap[make_pair(i,j)];
   }
 
   int ForceMatrixDecomposition::getTopologicalDistance(int atom1, int atom2) {
@@ -1327,6 +1347,7 @@ namespace OpenMD {
     bool doAllPairs = false;
 
     RealType rList_ = (largestRcut_ + skinThickness_);
+    RealType rcut, rcutsq, rlistsq;
     Snapshot* snap_ = sman_->getCurrentSnapshot();
     Mat3x3d box;
     Mat3x3d invBox;
@@ -1510,8 +1531,8 @@ namespace OpenMD {
                   if (usePeriodicBoundaryConditions_) {
                     snap_->wrapVector(dr);
                   }
-                  cuts = getGroupCutoffs( (*j1), (*j2) );
-                  if (dr.lengthSquare() < cuts.third) {
+                  getGroupCutoffs( (*j1), (*j2), rcut, rcutsq, rlistsq );
+                  if (dr.lengthSquare() < rlistsq) {
                     neighborList.push_back(make_pair((*j1), (*j2)));
                   }                  
                 }
@@ -1537,8 +1558,8 @@ namespace OpenMD {
                     if (usePeriodicBoundaryConditions_) {
                       snap_->wrapVector(dr);
                     }
-                    cuts = getGroupCutoffs( (*j1), (*j2) );
-                    if (dr.lengthSquare() < cuts.third) {
+                    getGroupCutoffs( (*j1), (*j2), rcut, rcutsq, rlistsq );
+                    if (dr.lengthSquare() < rlistsq) {
                       neighborList.push_back(make_pair((*j1), (*j2)));
                     }
                   }
@@ -1558,8 +1579,8 @@ namespace OpenMD {
           if (usePeriodicBoundaryConditions_) {
             snap_->wrapVector(dr);
           }
-          cuts = getGroupCutoffs( j1, j2 );
-          if (dr.lengthSquare() < cuts.third) {
+          getGroupCutoffs( j1, j2, rcut, rcutsq, rlistsq);
+          if (dr.lengthSquare() < rlistsq) {
             neighborList.push_back(make_pair(j1, j2));
           }
         }
@@ -1573,8 +1594,8 @@ namespace OpenMD {
           if (usePeriodicBoundaryConditions_) {
             snap_->wrapVector(dr);
           }
-          cuts = getGroupCutoffs( j1, j2 );
-          if (dr.lengthSquare() < cuts.third) {
+          getGroupCutoffs( j1, j2, rcut, rcutsq, rlistsq );
+          if (dr.lengthSquare() < rlistsq) {
             neighborList.push_back(make_pair(j1, j2));
           }
         }    
