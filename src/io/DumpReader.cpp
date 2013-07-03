@@ -560,8 +560,11 @@ namespace OpenMD {
     if (i >> siteIndex) {
       // chew up this token and parse as an int:
       siteIndex = tokenizer.nextTokenAsInt();
-      RigidBody* rb = static_cast<RigidBody*>(sd);
-      sd = rb->getAtoms()[siteIndex];
+
+      if (sd->isRigidBody()) {
+        RigidBody* rb = static_cast<RigidBody*>(sd);
+        sd = rb->getAtoms()[siteIndex];
+      }
     }
 
     /**
