@@ -43,11 +43,67 @@ import numpy
 
 def usage():
     print __doc__
+
+    
     
 def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, doTypeA, outputFileName):
-    a1 = numpy.array([1.0,0.0,0.0])
-    a2 = numpy.array([0.0,1.0,0.0])
-    a3 = numpy.array([0.0,0.0,1.0])
+    # The following section creates 24 basic arrays from Luttinger and
+    # Tisza:
+
+    # The six unit vectors are: 3 spatial and 3 to describe the
+    # orientation of the dipole.
+    
+    e1 = numpy.array([1.0,0.0,0.0,0.0,0.0,0.0])
+    e2 = numpy.array([0.0,1.0,0.0,0.0,0.0,0.0])
+    e3 = numpy.array([0.0,0.0,1.0,0.0,0.0,0.0])
+    e4 = numpy.array([0.0,0.0,0.0,1.0,0.0,0.0])
+    e5 = numpy.array([0.0,0.0,0.0,0.0,1.0,0.0])
+    e6 = numpy.array([0.0,0.0,0.0,0.0,0.0,1.0])
+
+    # Parameters describing the 8 basic arrays:
+    cell = numpy.array([[0,0,0],[0,0,1],[1,0,0],[0,1,0],
+                        [1,1,0],[0,1,1],[1,0,1],[1,1,1]])
+
+    X = numpy.zeros(384).reshape((8,8,6))
+    Y = numpy.zeros(384).reshape((8,8,6))
+    Z = numpy.zeros(384).reshape((8,8,6))
+    # mX, mY, and mZ arrays have dipole direction flipped
+    mX = numpy.zeros(384).reshape((8,8,6))
+    mY = numpy.zeros(384).reshape((8,8,6))
+    mZ = numpy.zeros(384).reshape((8,8,6))
+
+    # create the 24 basic arrays using Eq. 12 in Luttinger & Tisza:
+    for i in range(8):
+        which = 0
+        for l1 in range(2):
+            for l2 in range(2):
+                for l3 in range(2):
+                    lvals = numpy.array([l1,l2,l3])
+                    value = math.pow(-1, numpy.dot(cell[i], lvals))
+                    Xvec = (l1*e1 + l2*e2 + l3*e3) + value * e4             
+                    Yvec = (l1*e1 + l2*e2 + l3*e3) + value * e5             
+                    Zvec = (l1*e1 + l2*e2 + l3*e3) + value * e6             
+                    mXvec = (l1*e1 + l2*e2 + l3*e3) - value * e4             
+                    mYvec = (l1*e1 + l2*e2 + l3*e3) - value * e5             
+                    mZvec = (l1*e1 + l2*e2 + l3*e3) - value * e6             
+                    X[i][which] = Xvec
+                    Y[i][which] = Yvec
+                    Z[i][which] = Zvec
+                    mX[i][which] = mXvec
+                    mY[i][which] = mYvec
+                    mZ[i][which] = mZvec
+                    which = which + 1
+
+    # The simple cubic array has only one site at the lattice point:
+    lp = numpy.array([0.0,0.0,0.0,0.0,0.0,0.0])
+
+    # The body-centered cubic array also has a body-centerered site:
+    bc = numpy.array([0.5,0.5,0.5,0.0,0.0,0.0])
+
+    # The face-centered cubic array also has 3 face-centered sites:
+    xy = numpy.array([0.5,0.5,0.0,0.0,0.0,0.0])
+    yz = numpy.array([0.0,0.5,0.5,0.0,0.0,0.0])
+    xz = numpy.array([0.5,0.0,0.5,0.0,0.0,0.0])
 
     sc =      numpy.array([[0.0,0.0,0.0]])
 
@@ -59,95 +115,179 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                            [0.0,0.5,0.5],
                            [0.5,0.0,0.5]])
 
-    dipole001 = numpy.array([0.0,0.0,1.0])
-    dipole011 = numpy.array([0.0,1.0/math.sqrt(2.0),1.0/math.sqrt(2.0)])
-    dipole111 = numpy.array([1.0/math.sqrt(3.0),1.0/math.sqrt(3.0),1.0/math.sqrt(3.0)])
-
-    if (latticeType.lower() == 'sc'):
-        basis_atoms = sc
-    elif(latticeType.lower() == 'fcc'):
-        basis_atoms = fcc
-    elif(latticeType.lower() == 'bcc'):
-        basis_atoms = bcc
-    else:
-        print "unknown lattice type"
-        print __doc__
-
-    ijklvector = numpy.array([1,1,1,1])
-
-    if (dipoleDirection.lower() == '001'):
-        basis_dipoles = numpy.array([dipole001, -dipole001])
-    elif(dipoleDirection.lower() == '011'):
-        basis_dipoles = numpy.array([dipole011, -dipole011])
-    elif(dipoleDirection.lower() == '111'):
-        basis_dipoles = numpy.array([dipole111, -dipole111])
-    else:
-        print "unknown lattice type"
-        print __doc__
-
-    if (not doTypeA):
+    known_case = False
+    if (doTypeA):
         if (latticeType.lower() == 'sc'):
+            basic_array = Z[5]+lp
+            known_case = True
+        if (latticeType.lower() == 'bcc'):
             if (dipoleDirection.lower() == '001'):
-                ijkl = numpy.array([1,1,0,0])
-            elif(dipoleDirection.lower() == '011'):
-                ijkl = numpy.array([1,1,-1,0])
-            elif(dipoleDirection.lower() == '111'):
-                ijkl = numpy.array([1,1,-2,0])
-        elif(latticeType.lower() == 'fcc'):
+                basic_array = numpy.append(Z[1]+lp, mZ[1]+bc, axis=0)
+                known_case = True
+            if (dipoleDirection.lower() == '111'):
+                basic_array = numpy.append(Z[5]+X[7]+Y[6]+lp,
+                                           Z[5]+X[7]+Y[6]+bc, axis=0)
+                known_case = True
+        if (latticeType.lower() == 'fcc'):
             if (dipoleDirection.lower() == '001'):
-                ijkl = numpy.array([1,1,0,1])
-            elif(dipoleDirection.lower() == '011'):
-                ijkl = numpy.array([1,1,-1,2])
-            elif(dipoleDirection.lower() == '111'):
-                ijkl = numpy.array([1,1,-2,1])
-        elif(latticeType.lower() == 'bcc'):
-            if (dipoleDirection.lower() == '001'):
-                ijkl = numpy.array([1,1,0,1])
-            elif(dipoleDirection.lower() == '011'):
-                ijkl = numpy.array([1,1,-1,1])
-            elif(dipoleDirection.lower() == '111'):
-                ijkl = numpy.array([1,1,-2,0])
+                basic_array = numpy.append(Z[1]+lp,  Z[1]+xy, axis=0)
+                basic_array = numpy.append(basic_array, mZ[1]+yz, axis=0) 
+                basic_array = numpy.append(basic_array, mZ[1]+xz, axis=0) 
+                known_case = True
+            if (dipoleDirection.lower() == '011'):
+                basic_array = numpy.append(Z[1]+Y[1]+lp, Z[1]+Y[1]+yz, axis=0)
+                basic_array = numpy.append(basic_array, mZ[1]+mY[1]+xy, axis=0)
+                basic_array = numpy.append(basic_array, mZ[1]+mY[1]+xz, axis=0) 
+                known_case = True
     else:
-      if (latticeType.lower() == 'sc'):
-        ijkl = numpy.array([1,1,1,0])
-      elif(latticeType.lower() == 'fcc'):
-        ijkl = numpy.array([1,1,1,1])
-      elif(latticeType.lower() == 'bcc'):
-        ijkl = numpy.array([0,0,0,1])
+        if (latticeType.lower() == 'sc'):
+            basic_array = Z[5]+lp
+            known_case = True
+        if (latticeType.lower() == 'bcc'):
+            if (dipoleDirection.lower() == '001'):
+                basic_array = numpy.append(Z[5]+lp, mZ[5]+bc, axis=0)
+                known_case = True
+            if (dipoleDirection.lower() == '111'):
+                basic_array = numpy.append(Z[5]+X[7]+Y[6]+lp,
+                                           Z[5]+X[7]+Y[6]+bc, axis=0)
+                known_case = True
+        if (latticeType.lower() == 'fcc'):
+            if (dipoleDirection.lower() == '001'):
+                basic_array = numpy.append(Z[1]+lp,  Z[1]+yz, axis=0)
+                basic_array = numpy.append(basic_array, mZ[1]+xy, axis=0) 
+                basic_array = numpy.append(basic_array, mZ[1]+xz, axis=0) 
+                known_case = True
+            if (dipoleDirection.lower() == '011'):
+                basic_array = numpy.append(Z[8]+Y[8]+lp, Z[8]+Y[8]+xy, axis=0)
+                basic_array = numpy.append(basic_array, Z[8]+Y[8]+yz, axis=0)
+                basic_array = numpy.append(basic_array, mZ[8]+mY[8]+xz, axis=0) 
+                known_case = True
+
+    if (not known_case):
+        print "unhandled combination of lattice and dipole direction"
+        print __doc__
+
+    print basic_array
 
     bravais_lattice = []
-    bravais_dipoles = []
-
     for i in range(latticeNumber):
         for j in range(latticeNumber):
             for k in range(latticeNumber):
-                for l in range(len(basis_atoms)):
-                    bravais_lattice.append(i*a1 + j*a2 + k*a3 + basis_atoms[l])
-                    tester = numpy.array([i,j,k,l])
-                    flip = numpy.dot(tester, ijkl) % 2
-                    print flip
-                    bravais_dipoles.append(basis_dipoles[flip])
+                for l in range(len(basic_array)):
+                    bravais_lattice.append(2*i*e1 + 2*j*e2 + 2*k*e3 + basic_array[l])
 
-    outputFile = open(outputFileName,'w')
-
-    outputFile.write(repr(len(bravais_lattice)) + '\n')
-    Hxx = latticeConstant * latticeNumber
-    Hyy = latticeConstant * latticeNumber
-    Hzz = latticeConstant * latticeNumber
+    outputFile = open(outputFileName, 'w')
     
-    outputFile.write('Hmat: {{%d, 0, 0}, {0, %d, 0}, {0, 0, %d}}\n' % (Hxx, Hyy, Hzz))
+    outputFile.write('<OpenMD version=2>\n')
+    outputFile.write('  <MetaData>\n')
+    outputFile.write('     molecule{\n')
+    outputFile.write('       name = \"D\";\n')
+    outputFile.write('       \n')
+    outputFile.write('       atom[0]{\n')
+    outputFile.write('         type = \"D\";\n')
+    outputFile.write('         position(0.0, 0.0, 0.0);\n')
+    outputFile.write('         orientation(0.0, 0.0, 0.0);\n')
+    outputFile.write('       }\n')
+    outputFile.write('     }\n')
+    outputFile.write('     component{\n')
+    outputFile.write('       type = \"D\";\n')
+    outputFile.write('       nMol = '+ repr(len(bravais_lattice)) + ';\n')
+    outputFile.write('     }\n')
 
+    outputFile.write('     ensemble = NVE;\n')
+    outputFile.write('     forceField = \"Multipole\";\n')
+
+    outputFile.write('     cutoffMethod = \"shifted_force\";\n')
+    outputFile.write('     electrostaticScreeningMethod = \"damped\";\n')
+
+    outputFile.write('     cutoffRadius = 9.0;\n')
+    outputFile.write('     dampingAlpha = 0.18;\n')
+    outputFile.write('     statFileFormat = \"TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL\";\n')
+    outputFile.write('     dt = 1.0;\n')
+    outputFile.write('     runTime = 1.0;\n')
+    outputFile.write('     sampleTime = 1.0;\n')
+    outputFile.write('     statusTime = 1.0;\n')
+    outputFile.write('  </MetaData>\n')
+    outputFile.write('  <Snapshot>\n')
+    outputFile.write('    <FrameData>\n');
+    outputFile.write("        Time: %.10g\n" % (0.0))
+    
+    Hxx = 2.0 * latticeConstant * latticeNumber
+    Hyy = 2.0 * latticeConstant * latticeNumber
+    Hzz = 2.0 * latticeConstant * latticeNumber
+    
+    outputFile.write('        Hmat: {{%d, 0, 0}, {0, %d, 0}, {0, 0, %d}}\n' % (Hxx, Hyy, Hzz))
+    outputFile.write('    </FrameData>\n')
+    outputFile.write('    <StuntDoubles>\n')
+    sdFormat = 'pvqj'
+    index = 0
+    
     for i in range(len(bravais_lattice)):
         xcart = latticeConstant*(bravais_lattice[i][0])
         ycart = latticeConstant*(bravais_lattice[i][1])
         zcart = latticeConstant*(bravais_lattice[i][2])
-        dx = bravais_dipoles[i][0]
-        dy = bravais_dipoles[i][1]
-        dz = bravais_dipoles[i][2]
-        outputFile.write('Ar ' + repr(xcart) + '   ' + repr(ycart) + '   ' + repr(zcart) + ' ' + repr(dx) + ' ' + repr(dy) + ' ' + repr(dz) + '\n')
-               
+        dx = bravais_lattice[i][3]
+        dy = bravais_lattice[i][4]
+        dz = bravais_lattice[i][5]
+
+        uz = numpy.array([dx, dy, dz])
+        uz = uz/numpy.linalg.norm(uz)
+        
+        uy = numpy.array([0.0, 1.0, 0.0])
+        uy = uy - uz * numpy.vdot(uy, uz) / numpy.vdot(uz, uz) 
+        uy = uy/numpy.linalg.norm(uy)
+
+        ux = numpy.cross(uy, uz)
+
+        RotMat = [ux, uy, uz]
+
+        q = [0.0, 0.0, 0.0, 0.0]
+
+        # RotMat to Quat code is out of OpenMD's SquareMatrix3.hpp code:
+
+        t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
+        
+        if( t > 1e-6 ):
+            s = 0.5 / math.sqrt( t )
+            q[0] = 0.25 / s
+            q[1] = (RotMat[1][2] - RotMat[2][1]) * s
+            q[2] = (RotMat[2][0] - RotMat[0][2]) * s
+            q[3] = (RotMat[0][1] - RotMat[1][0]) * s
+        else:
+            ad1 = RotMat[0][0]
+            ad2 = RotMat[1][1]
+            ad3 = RotMat[2][2]
+
+            if( ad1 >= ad2 and ad1 >= ad3 ):
+                s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
+                q[0] = (RotMat[1][2] - RotMat[2][1]) * s
+                q[1] = 0.25 / s
+                q[2] = (RotMat[0][1] + RotMat[1][0]) * s
+                q[3] = (RotMat[0][2] + RotMat[2][0]) * s
+            elif ( ad2 >= ad1 and ad2 >= ad3 ):
+                s = 0.5 / math.sqrt( 1.0 + RotMat[1][1] - RotMat[0][0] - RotMat[2][2] )
+                q[0] = (RotMat[2][0] - RotMat[0][2] ) * s
+                q[1] = (RotMat[0][1] + RotMat[1][0]) * s
+                q[2] = 0.25 / s
+                q[3] = (RotMat[1][2] + RotMat[2][1]) * s
+            else:
+                s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
+                q[0] = (RotMat[0][1] - RotMat[1][0]) * s
+                q[1] = (RotMat[0][2] + RotMat[2][0]) * s
+                q[2] = (RotMat[1][2] + RotMat[2][1]) * s
+                q[3] = 0.25 / s
+
+        
+        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, xcart, ycart, zcart, 0.0, 0.0, 0.0, q[0], q[1], q[2], q[3], 0.0, 0.0, 0.0))
+        index = index+1
+
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OpenMD>\n")
     outputFile.close()
 
+    outputFile.close()
+    
 def main(argv):
     
     doTypeA = True
