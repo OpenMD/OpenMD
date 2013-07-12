@@ -262,7 +262,13 @@ namespace OpenMD {
       b3c = (5.0 * b2c + pow(2.0*a2, 3) * expTerm * invArootPi) / r2;
       b4c = (7.0 * b3c + pow(2.0*a2, 4) * expTerm * invArootPi) / r2;
       b5c = (9.0 * b4c + pow(2.0*a2, 5) * expTerm * invArootPi) / r2;
-      selfMult_ = b0c + a2 * invArootPi;
+      //selfMult1_ = - 2.0 * a2 * invArootPi;
+      //selfMult2_ = - 4.0 * a2 * a2 * invArootPi / 3.0;
+      //selfMult4_ = - 8.0 * a2 * a2 * a2 * invArootPi / 5.0;
+      // Half the Smith self piece:
+      selfMult1_ = - a2 * invArootPi;
+      selfMult2_ = - 2.0 * a2 * a2 * invArootPi / 3.0;
+      selfMult4_ = - 4.0 * a2 * a2 * a2 * invArootPi / 5.0;
     } else {
       a2 = 0.0;
       b0c = 1.0 / r;
@@ -271,7 +277,9 @@ namespace OpenMD {
       b3c = (5.0 * b2c) / r2;
       b4c = (7.0 * b3c) / r2;
       b5c = (9.0 * b4c) / r2;
-      selfMult_ = b0c;
+      selfMult1_ = 0.0;
+      selfMult2_ = 0.0;
+      selfMult4_ = 0.0;
     }
 
     // higher derivatives of B_0 at the cutoff radius:
@@ -279,8 +287,11 @@ namespace OpenMD {
     db0c_2 =     -b1c + r2 * b2c;
     db0c_3 =          3.0*r*b2c  - r2*r*b3c;
     db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
-    db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;
+    db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;   
     
+    selfMult1_ -= b0c;
+    selfMult2_ += (db0c_2 + 2.0*db0c_1*ric) /  3.0;
+    selfMult4_ -= (db0c_4 + 4.0*db0c_3*ric) / 15.0;
 
     // working variables for the splines:
     RealType ri, ri2;
@@ -1104,7 +1115,6 @@ namespace OpenMD {
 
         Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
 
-        //  cerr << " tsum = " << Ta + Tb - cross(  *(idat.d) , F ) << "\n";
       }
     }
 
@@ -1156,10 +1166,15 @@ namespace OpenMD {
     // logicals
     bool i_is_Charge = data.is_Charge;
     bool i_is_Dipole = data.is_Dipole;
+    bool i_is_Quadrupole = data.is_Quadrupole;
     bool i_is_Fluctuating = data.is_Fluctuating;
     RealType C_a = data.fixedCharge;   
-    RealType self, preVal, DadDa;
-    
+    RealType self(0.0), preVal, DdD, trQ, trQQ;
+
+    if (i_is_Dipole) {
+      DdD = data.dipole.lengthSquare();
+    }
+        
     if (i_is_Fluctuating) {
       C_a += *(sdat.flucQ);
       // dVdFQ is really a force, so this is negative the derivative
@@ -1180,18 +1195,25 @@ namespace OpenMD {
       }
 
       if (i_is_Dipole) {
-        DadDa = data.dipole.lengthSquare();
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DadDa;
+        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
       }
       
       break;
       
     case esm_SHIFTED_FORCE:
     case esm_SHIFTED_POTENTIAL:
-      if (i_is_Charge) {
-        self = - selfMult_ * C_a * (C_a + *(sdat.skippedCharge)) * pre11_;
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
+      if (i_is_Charge) 
+        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));      
+      if (i_is_Dipole) 
+        self += selfMult2_ * pre22_ * DdD;      
+      if (i_is_Quadrupole) {
+        trQ = data.quadrupole.trace();
+        trQQ = (data.quadrupole * data.quadrupole).trace();
+        self += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
+        if (i_is_Charge)
+          self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
       }
+      (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;      
       break;
     default:
       break;

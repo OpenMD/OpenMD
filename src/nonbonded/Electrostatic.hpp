@@ -145,7 +145,9 @@ namespace OpenMD {
     RealType dampingAlpha_;
     RealType dielectric_;
     RealType preRF_;
-    RealType selfMult_;
+    RealType selfMult1_; 
+    RealType selfMult2_;
+    RealType selfMult4_;
 
     CubicSpline* v01s;
     CubicSpline* v11s;

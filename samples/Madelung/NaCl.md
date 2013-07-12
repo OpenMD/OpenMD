@@ -35,7 +35,6 @@ cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 cutoffRadius = 28;
 dampingAlpha = 0.14159292;
-switchingRadius = 28;
 
 
 dt = 2.0;
