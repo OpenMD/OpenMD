@@ -9,6 +9,9 @@ Usage: buildDipolarArray
 
 Options:
   -h, --help              show this help
+  -x, --array-type-X      use one of the basic "X" arrays
+  -y, --array-type-Y      use one of the basic "Y" arrays
+  -z, --array-type-Z      use one of the basic "Z" arrays
   -a, --array-type-A      use array type "A" (default)
   -b, --array-type-B      use array type "B"
   -l, --lattice=...       use the specified lattice ( SC, FCC, or BCC )
@@ -46,7 +49,7 @@ def usage():
 
     
     
-def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, doTypeA, outputFileName):
+def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, arrayType, outputFileName):
     # The following section creates 24 basic arrays from Luttinger and
     # Tisza:
 
@@ -116,7 +119,23 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                            [0.5,0.0,0.5]])
 
     known_case = False
-    if (doTypeA):
+
+    if (arrayType == 'X'):
+        if (int(latticeType)):
+            which = int(latticeType) - 1
+            basic_array = X[which]
+            known_case = True
+    if (arrayType == 'Y'):
+        if (int(latticeType)):
+            which = int(latticeType) - 1
+            basic_array = Y[which]
+            known_case = True
+    if (arrayType == 'Z'):
+        if (int(latticeType)):
+            which = int(latticeType) - 1 
+            basic_array = Z[which]
+            known_case = True
+    if (arrayType == 'A'):
         if (latticeType.lower() == 'sc'):
             basic_array = Z[5]+lp
             known_case = True
@@ -290,14 +309,14 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
     
 def main(argv):
     
-    doTypeA = True
+    arrayType = "A"
     haveOutputFileName = False
     latticeType = "fcc"
     dipoleDirection = "001"
     latticeNumber = 3
     latticeConstant = 4
     try:                                
-        opts, args = getopt.getopt(argv, "habl:d:c:n:o:", ["help","array-type-A", "array-type-B", "lattice=" "direction=", "constant=", "output-file="])  
+        opts, args = getopt.getopt(argv, "hxyzabl:d:c:n:o:", ["help","array-type-X", "array-type-Y", "array-type-Z", "array-type-A", "array-type-B", "lattice=" "direction=", "constant=", "output-file="])  
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -305,10 +324,14 @@ def main(argv):
         if opt in ("-h", "--help"):      
             usage()                     
             sys.exit()
-        elif opt in ("-a", "--array-type-A"):
-            doTypeA = True
+        elif opt in ("-x", "--array-type-X"):
+            arrayType = "X"
+        elif opt in ("-y", "--array-type-Y"):
+            arrayType = "Y"
+        elif opt in ("-z", "--array-type-Z"):
+            arrayType = "Z"
         elif opt in ("-b", "--array-type-B"):
-            doTypeA = False
+            arrayType = "B"
         elif opt in ("-l", "--lattice"): 
             latticeType = arg
         elif opt in ("-d", "--direction"):
@@ -325,7 +348,7 @@ def main(argv):
         print "No output file was specified"
         sys.exit()
         
-    createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, doTypeA, outputFileName);
+    createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, arrayType, outputFileName);
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
