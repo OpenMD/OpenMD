@@ -448,9 +448,9 @@ namespace OpenMD {
         int rigidbodyIndex = atom2Rigidbody[*j];
         if (rigidbodyIndex >= 0) {
           ++rigidSet[rigidbodyIndex];
-          if (rigidSet[rigidbodyIndex] > 1) {
+          if (rigidSet[rigidbodyIndex] > 3) {
             oss << "Error in Molecule " << getName() << ": torsion" << 
-              containerToString(torsionAtoms) << "is invalid\n";           
+              containerToString(torsionAtoms) << "has four atoms on the same rigid body\n";           
             throw OpenMDException(oss.str());
           }
         }
@@ -605,9 +605,9 @@ namespace OpenMD {
         int rigidbodyIndex = atom2Rigidbody[*j];
         if (rigidbodyIndex >= 0) {
           ++rigidSet[rigidbodyIndex];
-          if (rigidSet[rigidbodyIndex] > 1) {
+          if (rigidSet[rigidbodyIndex] > 3) {
             oss << "Error in Molecule " << getName() << ": inversion centered on atom " << 
-              inversionStamp->getCenter() << " has atoms that belong to same rigidbody " << 
+              inversionStamp->getCenter() << " has four atoms that belong to same rigidbody " << 
               rigidbodyIndex << "\n";  
             throw OpenMDException(oss.str());
           }
