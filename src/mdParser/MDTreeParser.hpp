@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20120725): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20121118): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -94,10 +94,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 57;
+	static const int NUM_TOKENS = 58;
 #else
 	enum {
-		NUM_TOKENS = 57
+		NUM_TOKENS = 58
 	};
 #endif
 	

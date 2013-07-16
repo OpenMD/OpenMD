@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20120725): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (20121118): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -89,10 +89,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 57;
+	static const int NUM_TOKENS = 58;
 #else
 	enum {
-		NUM_TOKENS = 57
+		NUM_TOKENS = 58
 	};
 #endif
 	
@@ -128,6 +128,8 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_14;
 	static const unsigned long _tokenSet_15_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_15;
+	static const unsigned long _tokenSet_16_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_16;
 };
 
 #endif /*INC_MDParser_hpp_*/

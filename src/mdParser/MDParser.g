@@ -39,6 +39,7 @@ tokens
   FRAGMENT    = "fragment";
   MEMBERS     = "members";
   CENTER      = "center";
+  SATELLITES  = "satellites";
   POSITION    = "position";
   ORIENTATION = "orientation";
   FLUCQ       = "flucQ";
@@ -138,6 +139,7 @@ inversionblock  : INVERSION^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(inversion
 
 inversionstatement  : assignment
               | CENTER^ LPAREN! intConst RPAREN! SEMICOLON!
+              | SATELLITES^ LPAREN! inttuple RPAREN! SEMICOLON!
               ;
 
 rigidbodyblock  : RIGIDBODY^  LBRACKET! intConst RBRACKET! LCURLY!(rigidbodystatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}

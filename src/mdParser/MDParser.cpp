@@ -1,4 +1,4 @@
-/* $ANTLR 2.7.7 (20120725): "MDParser.g" -> "MDParser.cpp"$ */
+/* $ANTLR 2.7.7 (20121118): "MDParser.g" -> "MDParser.cpp"$ */
 #include "MDParser.hpp"
 #include <antlr/NoViableAltException.hpp>
 #include <antlr/SemanticException.hpp>
@@ -188,7 +188,7 @@ void MDParser::componentblock() {
 		tmp6_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp6_AST);
 		match(RCURLY);
-#line 74 "MDParser.g"
+#line 75 "MDParser.g"
 		tmp6_AST->setType(ENDBLOCK);
 #line 194 "MDParser.cpp"
 		componentblock_AST = currentAST.root;
@@ -228,7 +228,7 @@ void MDParser::moleculeblock() {
 		tmp9_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp9_AST);
 		match(RCURLY);
-#line 92 "MDParser.g"
+#line 93 "MDParser.g"
 		tmp9_AST->setType(ENDBLOCK);
 #line 234 "MDParser.cpp"
 		moleculeblock_AST = currentAST.root;
@@ -268,7 +268,7 @@ void MDParser::zconstraintblock() {
 		tmp12_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp12_AST);
 		match(RCURLY);
-#line 77 "MDParser.g"
+#line 78 "MDParser.g"
 		tmp12_AST->setType(ENDBLOCK);
 #line 274 "MDParser.cpp"
 		zconstraintblock_AST = currentAST.root;
@@ -308,7 +308,7 @@ void MDParser::restraintblock() {
 		tmp15_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp15_AST);
 		match(RCURLY);
-#line 80 "MDParser.g"
+#line 81 "MDParser.g"
 		tmp15_AST->setType(ENDBLOCK);
 #line 314 "MDParser.cpp"
 		restraintblock_AST = currentAST.root;
@@ -348,7 +348,7 @@ void MDParser::flucqblock() {
 		tmp18_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp18_AST);
 		match(RCURLY);
-#line 83 "MDParser.g"
+#line 84 "MDParser.g"
 		tmp18_AST->setType(ENDBLOCK);
 #line 354 "MDParser.cpp"
 		flucqblock_AST = currentAST.root;
@@ -388,7 +388,7 @@ void MDParser::rnemdblock() {
 		tmp21_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp21_AST);
 		match(RCURLY);
-#line 86 "MDParser.g"
+#line 87 "MDParser.g"
 		tmp21_AST->setType(ENDBLOCK);
 #line 394 "MDParser.cpp"
 		rnemdblock_AST = currentAST.root;
@@ -428,7 +428,7 @@ void MDParser::minimizerblock() {
 		tmp24_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp24_AST);
 		match(RCURLY);
-#line 89 "MDParser.g"
+#line 90 "MDParser.g"
 		tmp24_AST->setType(ENDBLOCK);
 #line 434 "MDParser.cpp"
 		minimizerblock_AST = currentAST.root;
@@ -729,7 +729,7 @@ void MDParser::atomblock() {
 		tmp39_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp39_AST);
 		match(RCURLY);
-#line 106 "MDParser.g"
+#line 107 "MDParser.g"
 		tmp39_AST->setType(ENDBLOCK);
 #line 735 "MDParser.cpp"
 		atomblock_AST = currentAST.root;
@@ -788,7 +788,7 @@ void MDParser::bondblock() {
 		tmp44_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp44_AST);
 		match(RCURLY);
-#line 115 "MDParser.g"
+#line 116 "MDParser.g"
 		tmp44_AST->setType(ENDBLOCK);
 #line 794 "MDParser.cpp"
 		bondblock_AST = currentAST.root;
@@ -847,7 +847,7 @@ void MDParser::bendblock() {
 		tmp49_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp49_AST);
 		match(RCURLY);
-#line 122 "MDParser.g"
+#line 123 "MDParser.g"
 		tmp49_AST->setType(ENDBLOCK);
 #line 853 "MDParser.cpp"
 		bendblock_AST = currentAST.root;
@@ -906,7 +906,7 @@ void MDParser::torsionblock() {
 		tmp54_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp54_AST);
 		match(RCURLY);
-#line 129 "MDParser.g"
+#line 130 "MDParser.g"
 		tmp54_AST->setType(ENDBLOCK);
 #line 912 "MDParser.cpp"
 		torsionblock_AST = currentAST.root;
@@ -950,7 +950,7 @@ void MDParser::inversionblock() {
 		match(LCURLY);
 		{ // ( ... )*
 		for (;;) {
-			if ((LA(1) == CENTER || LA(1) == ID)) {
+			if ((_tokenSet_10.member(LA(1)))) {
 				inversionstatement();
 				astFactory->addASTChild( currentAST, returnAST );
 			}
@@ -965,7 +965,7 @@ void MDParser::inversionblock() {
 		tmp59_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp59_AST);
 		match(RCURLY);
-#line 136 "MDParser.g"
+#line 137 "MDParser.g"
 		tmp59_AST->setType(ENDBLOCK);
 #line 971 "MDParser.cpp"
 		inversionblock_AST = currentAST.root;
@@ -1009,7 +1009,7 @@ void MDParser::rigidbodyblock() {
 		tmp64_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp64_AST);
 		match(RCURLY);
-#line 143 "MDParser.g"
+#line 145 "MDParser.g"
 		tmp64_AST->setType(ENDBLOCK);
 #line 1015 "MDParser.cpp"
 		rigidbodyblock_AST = currentAST.root;
@@ -1068,7 +1068,7 @@ void MDParser::cutoffgroupblock() {
 		tmp69_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp69_AST);
 		match(RCURLY);
-#line 150 "MDParser.g"
+#line 152 "MDParser.g"
 		tmp69_AST->setType(ENDBLOCK);
 #line 1074 "MDParser.cpp"
 		cutoffgroupblock_AST = currentAST.root;
@@ -1112,7 +1112,7 @@ void MDParser::fragmentblock() {
 		tmp74_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp74_AST);
 		match(RCURLY);
-#line 157 "MDParser.g"
+#line 159 "MDParser.g"
 		tmp74_AST->setType(ENDBLOCK);
 #line 1118 "MDParser.cpp"
 		fragmentblock_AST = currentAST.root;
@@ -1174,7 +1174,7 @@ void MDParser::atomstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_10);
+		recover(ex,_tokenSet_11);
 	}
 	returnAST = atomstatement_AST;
 }
@@ -1205,7 +1205,7 @@ void MDParser::doubleNumberTuple() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_11);
+		recover(ex,_tokenSet_12);
 	}
 	returnAST = doubleNumberTuple_AST;
 }
@@ -1246,7 +1246,7 @@ void MDParser::bondstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_12);
+		recover(ex,_tokenSet_13);
 	}
 	returnAST = bondstatement_AST;
 }
@@ -1277,7 +1277,7 @@ void MDParser::inttuple() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_11);
+		recover(ex,_tokenSet_12);
 	}
 	returnAST = inttuple_AST;
 }
@@ -1318,7 +1318,7 @@ void MDParser::bendstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_12);
+		recover(ex,_tokenSet_13);
 	}
 	returnAST = bendstatement_AST;
 }
@@ -1359,7 +1359,7 @@ void MDParser::torsionstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_12);
+		recover(ex,_tokenSet_13);
 	}
 	returnAST = torsionstatement_AST;
 }
@@ -1392,6 +1392,20 @@ void MDParser::inversionstatement() {
 			inversionstatement_AST = currentAST.root;
 			break;
 		}
+		case SATELLITES:
+		{
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp101_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp101_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp101_AST);
+			match(SATELLITES);
+			match(LPAREN);
+			inttuple();
+			astFactory->addASTChild( currentAST, returnAST );
+			match(RPAREN);
+			match(SEMICOLON);
+			inversionstatement_AST = currentAST.root;
+			break;
+		}
 		default:
 		{
 			throw ANTLR_USE_NAMESPACE(antlr)NoViableAltException(LT(1), getFilename());
@@ -1400,7 +1414,7 @@ void MDParser::inversionstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_13);
+		recover(ex,_tokenSet_14);
 	}
 	returnAST = inversionstatement_AST;
 }
@@ -1421,9 +1435,9 @@ void MDParser::rigidbodystatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp101_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp101_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp101_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp105_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp105_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp105_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1441,7 +1455,7 @@ void MDParser::rigidbodystatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_12);
+		recover(ex,_tokenSet_13);
 	}
 	returnAST = rigidbodystatement_AST;
 }
@@ -1462,9 +1476,9 @@ void MDParser::cutoffgroupstatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp105_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp105_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp105_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp109_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp109_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp109_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1482,7 +1496,7 @@ void MDParser::cutoffgroupstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_12);
+		recover(ex,_tokenSet_13);
 	}
 	returnAST = cutoffgroupstatement_AST;
 }
@@ -1499,7 +1513,7 @@ void MDParser::fragmentstatement() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_14);
+		recover(ex,_tokenSet_15);
 	}
 	returnAST = fragmentstatement_AST;
 }
@@ -1536,14 +1550,14 @@ void MDParser::doubleNumber() {
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
 		reportError(ex);
-		recover(ex,_tokenSet_15);
+		recover(ex,_tokenSet_16);
 	}
 	returnAST = doubleNumber_AST;
 }
 
 void MDParser::initializeASTFactory( ANTLR_USE_NAMESPACE(antlr)ASTFactory& factory )
 {
-	factory.setMaxNodeType(56);
+	factory.setMaxNodeType(57);
 }
 const char* MDParser::tokenNames[] = {
 	"<0>",
@@ -1564,6 +1578,7 @@ const char* MDParser::tokenNames[] = {
 	"\"fragment\"",
 	"\"members\"",
 	"\"center\"",
+	"\"satellites\"",
 	"\"position\"",
 	"\"orientation\"",
 	"\"flucQ\"",
@@ -1606,59 +1621,63 @@ const char* MDParser::tokenNames[] = {
 	0
 };
 
-const unsigned long MDParser::_tokenSet_0_data_[] = { 24117488UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_0_data_[] = { 48234736UL, 0UL, 0UL, 0UL };
 // "component" "molecule" "zconstraint" "restraint" "flucQ" "RNEMD" "minimizer" 
 // ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_0(_tokenSet_0_data_,4);
 const unsigned long MDParser::_tokenSet_1_data_[] = { 2UL, 0UL, 0UL, 0UL };
 // EOF 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_1(_tokenSet_1_data_,4);
-const unsigned long MDParser::_tokenSet_2_data_[] = { 24117490UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_2_data_[] = { 48234738UL, 0UL, 0UL, 0UL };
 // EOF "component" "molecule" "zconstraint" "restraint" "flucQ" "RNEMD" 
 // "minimizer" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_2(_tokenSet_2_data_,4);
-const unsigned long MDParser::_tokenSet_3_data_[] = { 562036722UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_3_data_[] = { 1124073458UL, 0UL, 0UL, 0UL };
 // EOF "component" "molecule" "zconstraint" "restraint" "atom" "bond" "bend" 
 // "torsion" "inversion" "rigidBody" "cutoffGroup" "fragment" "members" 
-// "center" "position" "orientation" "flucQ" "RNEMD" "minimizer" ID RCURLY 
+// "center" "satellites" "position" "orientation" "flucQ" "RNEMD" "minimizer" 
+// ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_3(_tokenSet_3_data_,4);
-const unsigned long MDParser::_tokenSet_4_data_[] = { 16842496UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_4_data_[] = { 33619712UL, 0UL, 0UL, 0UL };
 // "atom" "bond" "bend" "torsion" "inversion" "rigidBody" "cutoffGroup" 
 // "fragment" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_4(_tokenSet_4_data_,4);
-const unsigned long MDParser::_tokenSet_5_data_[] = { 67108864UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_5_data_[] = { 134217728UL, 0UL, 0UL, 0UL };
 // SEMICOLON 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_5(_tokenSet_5_data_,4);
-const unsigned long MDParser::_tokenSet_6_data_[] = { 2214592512UL, 6UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_6_data_[] = { 134217728UL, 13UL, 0UL, 0UL };
 // SEMICOLON RBRACKET RPAREN COMMA 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_6(_tokenSet_6_data_,4);
-const unsigned long MDParser::_tokenSet_7_data_[] = { 67108864UL, 6UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_7_data_[] = { 134217728UL, 12UL, 0UL, 0UL };
 // SEMICOLON RPAREN COMMA 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_7(_tokenSet_7_data_,4);
-const unsigned long MDParser::_tokenSet_8_data_[] = { 553713408UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_8_data_[] = { 1107361536UL, 0UL, 0UL, 0UL };
 // "atom" "bond" "bend" "torsion" "inversion" "rigidBody" "cutoffGroup" 
 // "fragment" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_8(_tokenSet_8_data_,4);
-const unsigned long MDParser::_tokenSet_9_data_[] = { 17563648UL, 0UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_9_data_[] = { 35127296UL, 0UL, 0UL, 0UL };
 // "position" "orientation" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_9(_tokenSet_9_data_,4);
-const unsigned long MDParser::_tokenSet_10_data_[] = { 554434560UL, 0UL, 0UL, 0UL };
-// "position" "orientation" ID RCURLY 
+const unsigned long MDParser::_tokenSet_10_data_[] = { 33947648UL, 0UL, 0UL, 0UL };
+// "center" "satellites" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_10(_tokenSet_10_data_,4);
-const unsigned long MDParser::_tokenSet_11_data_[] = { 0UL, 2UL, 0UL, 0UL };
-// RPAREN 
+const unsigned long MDParser::_tokenSet_11_data_[] = { 1108869120UL, 0UL, 0UL, 0UL };
+// "position" "orientation" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_11(_tokenSet_11_data_,4);
-const unsigned long MDParser::_tokenSet_12_data_[] = { 553713664UL, 0UL, 0UL, 0UL };
-// "members" ID RCURLY 
+const unsigned long MDParser::_tokenSet_12_data_[] = { 0UL, 4UL, 0UL, 0UL };
+// RPAREN 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_12(_tokenSet_12_data_,4);
-const unsigned long MDParser::_tokenSet_13_data_[] = { 553779200UL, 0UL, 0UL, 0UL };
-// "center" ID RCURLY 
+const unsigned long MDParser::_tokenSet_13_data_[] = { 1107361792UL, 0UL, 0UL, 0UL };
+// "members" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_13(_tokenSet_13_data_,4);
-const unsigned long MDParser::_tokenSet_14_data_[] = { 553648128UL, 0UL, 0UL, 0UL };
-// ID RCURLY 
+const unsigned long MDParser::_tokenSet_14_data_[] = { 1107689472UL, 0UL, 0UL, 0UL };
+// "center" "satellites" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_14(_tokenSet_14_data_,4);
-const unsigned long MDParser::_tokenSet_15_data_[] = { 0UL, 6UL, 0UL, 0UL };
-// RPAREN COMMA 
+const unsigned long MDParser::_tokenSet_15_data_[] = { 1107296256UL, 0UL, 0UL, 0UL };
+// ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_15(_tokenSet_15_data_,4);
+const unsigned long MDParser::_tokenSet_16_data_[] = { 0UL, 12UL, 0UL, 0UL };
+// RPAREN COMMA 
+const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_16(_tokenSet_16_data_,4);
 
 

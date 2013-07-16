@@ -211,10 +211,12 @@ inversionblock  : #(INVERSION {InversionStamp* currInversionStamp = new Inversio
 inversionstatement
 {
   int icent;
+  vector<int> ivec;
   InversionStamp* currInversionStamp = static_cast<InversionStamp*>(blockStack.top());
 }  
               : assignment
               | #(CENTER icent=intConst) {currInversionStamp->setCenter(icent);}
+              | #(SATELLITES ivec=inttuple) {currInversionStamp->setSatellites(ivec);}
               ;
 
 rigidbodyblock
