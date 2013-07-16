@@ -105,6 +105,20 @@ namespace OpenMD {
       }            
       return script.substr(ichBegin, ichEnd);
     }
+    bool hasSurfaceArea() { return hasSurfaceArea_; }
+    RealType getSurfaceArea() { 
+      if (hasSurfaceArea_) {
+        return surfaceArea_;
+      } else {
+        sprintf( painCave.errMsg,
+                 "SelectionEvaluator Error: %s\n", "No Surface Area For You!");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+        return 0.0;
+      }
+    }
+
   
   private:
 
@@ -213,6 +227,8 @@ namespace OpenMD {
 
     bool isDynamic_;
     bool isLoaded_;
+    bool hasSurfaceArea_;
+    RealType surfaceArea_;
         
   };
 

@@ -56,11 +56,13 @@ namespace OpenMD {
     
     OpenMDBitSet findHull();
     OpenMDBitSet findHull(int frame);
+    RealType getSurfaceArea(){ return surfaceArea_; }
     
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;
     int nStuntDoubles_;
     Hull* surfaceMesh_;
+    RealType surfaceArea_;
     std::vector<StuntDouble*> localSites_;
 
   };

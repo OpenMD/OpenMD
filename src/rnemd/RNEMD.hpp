@@ -165,6 +165,10 @@ namespace OpenMD {
     RealType slabBCenter_;
     RealType sphereARadius_;
     RealType sphereBRadius_;
+    RealType areaA_;
+    bool AisHull_;
+    RealType areaB_;
+    bool BisHull_;
 
     Vector3d coordinateOrigin_;
 

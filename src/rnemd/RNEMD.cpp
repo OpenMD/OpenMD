@@ -547,6 +547,7 @@ namespace OpenMD {
     
       if (hasSelectionB_) {
         selectionB_ = rnemdParams->getSelectionB();
+
       } else {
         if (usePeriodicBoundaryConditions_) {     
           Mat3x3d hmat = currentSnap_->getHmat();
@@ -573,6 +574,7 @@ namespace OpenMD {
             selectionB_ = selectionBstream.str();
           } else {
             selectionB_ = "select hull";
+            BisHull_ = true;
             hasSelectionB_ = true;
           }
         }
@@ -1729,27 +1731,34 @@ namespace OpenMD {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (hasSelectionA_) {
-      int isd;
-      StuntDouble* sd;
-      vector<StuntDouble*> aSites;
-      seleManA_.setSelectionSet(evaluatorA_.evaluate());
-      for (sd = seleManA_.beginSelected(isd); sd != NULL; 
-           sd = seleManA_.nextSelected(isd)) {
-        aSites.push_back(sd);
-      }
+
+      if (evaluatorA_.hasSurfaceArea()) 
+        areaA = evaluatorA_.getSurfaceArea();
+      else {
+         
+        cerr << "selection A did not have surface area, recomputing\n";
+        int isd;
+        StuntDouble* sd;
+        vector<StuntDouble*> aSites;
+        seleManA_.setSelectionSet(evaluatorA_.evaluate());
+        for (sd = seleManA_.beginSelected(isd); sd != NULL; 
+             sd = seleManA_.nextSelected(isd)) {
+          aSites.push_back(sd);
+        }
 #if defined(HAVE_QHULL)
-      ConvexHull* surfaceMeshA = new ConvexHull();
-      surfaceMeshA->computeHull(aSites);
-      areaA = surfaceMeshA->getArea();
-      delete surfaceMeshA;
+        ConvexHull* surfaceMeshA = new ConvexHull();
+        surfaceMeshA->computeHull(aSites);
+        areaA = surfaceMeshA->getArea();
+        delete surfaceMeshA;
 #else
-      sprintf( painCave.errMsg,
+        sprintf( painCave.errMsg,
                "RNEMD::getDividingArea : Hull calculation is not possible\n"
-               "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
+                 "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
 #endif
+      }
 
     } else {
       if (usePeriodicBoundaryConditions_) {
@@ -1765,30 +1774,35 @@ namespace OpenMD {
     }
 
     if (hasSelectionB_) {
-      int isd;
-      StuntDouble* sd;
-      vector<StuntDouble*> bSites;
-      seleManB_.setSelectionSet(evaluatorB_.evaluate());
-      for (sd = seleManB_.beginSelected(isd); sd != NULL; 
-           sd = seleManB_.nextSelected(isd)) {
-        bSites.push_back(sd);
-      }
+      if (evaluatorB_.hasSurfaceArea()) 
+        areaB = evaluatorB_.getSurfaceArea();
+      else {
+        cerr << "selection B did not have surface area, recomputing\n";
 
+        int isd;
+        StuntDouble* sd;
+        vector<StuntDouble*> bSites;
+        seleManB_.setSelectionSet(evaluatorB_.evaluate());
+        for (sd = seleManB_.beginSelected(isd); sd != NULL; 
+             sd = seleManB_.nextSelected(isd)) {
+          bSites.push_back(sd);
+        }
+        
 #if defined(HAVE_QHULL)
-      ConvexHull* surfaceMeshB = new ConvexHull();    
-      surfaceMeshB->computeHull(bSites);
-      areaB = surfaceMeshB->getArea();
-      delete surfaceMeshB;
+        ConvexHull* surfaceMeshB = new ConvexHull();    
+        surfaceMeshB->computeHull(bSites);
+        areaB = surfaceMeshB->getArea();
+        delete surfaceMeshB;
 #else
-      sprintf( painCave.errMsg,
-               "RNEMD::getDividingArea : Hull calculation is not possible\n"
-               "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
+        sprintf( painCave.errMsg,
+                 "RNEMD::getDividingArea : Hull calculation is not possible\n"
+                 "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
 #endif
-
-
+      }
+      
     } else {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the x-y
@@ -1800,7 +1814,7 @@ namespace OpenMD {
         areaB = 4.0 * M_PI * pow(sphereBRadius_, 2);
       }
     }
-    
+      
     dividingArea_ = min(areaA, areaB);
     hasDividingArea_ = true;
     return dividingArea_;

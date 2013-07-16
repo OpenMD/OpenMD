@@ -56,7 +56,7 @@ namespace OpenMD {
 
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
     : info(si), nameFinder(info), distanceFinder(info), hullFinder(info),
-      indexFinder(info), 
+      indexFinder(info), hasSurfaceArea_(false),
       isLoaded_(false){    
       nStuntDouble = info->getNGlobalAtoms() + info->getNGlobalRigidBodies();
     }            
@@ -730,7 +730,8 @@ namespace OpenMD {
     OpenMDBitSet bs(nStuntDouble);
     
     bs = hullFinder.findHull();
-    
+    surfaceArea_ = hullFinder.getSurfaceArea();
+    hasSurfaceArea_ = true;
     return bs;
   }
 
@@ -739,7 +740,7 @@ namespace OpenMD {
     OpenMDBitSet bs(nStuntDouble);
     
     bs = hullFinder.findHull(frame);
-    
+
     return bs;
   }
 
