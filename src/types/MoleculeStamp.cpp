@@ -538,30 +538,35 @@ namespace OpenMD {
       int center = inversionStamp->getCenter();
       std::vector<int> satellites;
 
-      for (int j = 0; j < getNBonds(); ++j) {
-	BondStamp* bondStamp = getBondStamp(j);
-	int a = bondStamp->getA();
-	int b = bondStamp->getB();
-      
-	if(a == center) {
-	  satellites.push_back(b);
-	}
-	if (b == center) {
-	  satellites.push_back(a);
-	}
-      }
+      // Some inversions come pre-programmed with the satellites.  If
+      // so, don't add the satellites as they are already there.
 
-      if (satellites.size() == 3) {
-	std::sort(satellites.begin(), satellites.end());
-	inversionStamp->setSatellites(satellites);	
-      } else {
-	oss << "Error in Molecule " << getName() << ": found wrong number" << 
-	  " of bonds for inversion center " << center;
-        throw OpenMDException(oss.str());
+      if (inversionStamp->getNSatellites() != 3) {        
+        for (int j = 0; j < getNBonds(); ++j) {
+          BondStamp* bondStamp = getBondStamp(j);
+          int a = bondStamp->getA();
+          int b = bondStamp->getB();
+          
+          if(a == center) {
+            satellites.push_back(b);
+          }
+          if (b == center) {
+            satellites.push_back(a);
+          }
+        }
+        
+        if (satellites.size() == 3) {
+          std::sort(satellites.begin(), satellites.end());
+          inversionStamp->setSatellites(satellites);	
+        } else {
+          oss << "Error in Molecule " << getName() << ": found wrong number" << 
+            " of bonds for inversion center " << center;
+          throw OpenMDException(oss.str());
+        }
       }
     }
     
-
+    
     // then we do some sanity checking on the inversions:
     
     for(int i = 0; i < getNInversions(); ++i) {
