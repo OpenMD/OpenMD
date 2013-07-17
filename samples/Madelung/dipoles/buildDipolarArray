@@ -296,6 +296,11 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                 q[2] = (RotMat[1][2] + RotMat[2][1]) * s
                 q[3] = 0.25 / s
 
+        qlen = math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3])
+        q[0] = q[0]/qlen
+        q[1] = q[1]/qlen
+        q[2] = q[2]/qlen
+        q[3] = q[3]/qlen
         
         outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, xcart, ycart, zcart, 0.0, 0.0, 0.0, q[0], q[1], q[2], q[3], 0.0, 0.0, 0.0))
         index = index+1

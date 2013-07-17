@@ -130,7 +130,7 @@ namespace OpenMD {
         // d0 should be read in kcal / mol / degrees^2
         // phi0 should be read in degrees
 
-        RealType degreesPerRadian = 180.0 * NumericConstant::PI;
+        RealType degreesPerRadian = 180.0 / NumericConstant::PI;
 
         // convert to kcal / mol / radians^2
         RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);

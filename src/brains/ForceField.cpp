@@ -80,7 +80,7 @@
 
 namespace OpenMD {
 
-  ForceField::ForceField(std::string ffName) { 
+  ForceField::ForceField(std::string ffName): wildCardAtomTypeName_("X") { 
 
     char* tempPath; 
     tempPath = getenv("FORCE_PARAM_PATH");
