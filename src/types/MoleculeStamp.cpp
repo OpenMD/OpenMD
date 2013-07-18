@@ -310,10 +310,9 @@ namespace OpenMD {
         int rigidbodyIndex = atom2Rigidbody[*j];
         if (rigidbodyIndex >= 0) {
           ++rigidSet[rigidbodyIndex];
-          if (rigidSet[rigidbodyIndex] > 1) {
+          if (rigidSet[rigidbodyIndex] > 2) {
             oss << "Error in Molecule " << getName() << ": bend" << 
-              containerToString(bendAtoms) << " belong to same rigidbody " << 
-              rigidbodyIndex << "\n";  
+              containerToString(bendAtoms) << "has three atoms on the same rigid body\n";           
             throw OpenMDException(oss.str());
           }
         }
