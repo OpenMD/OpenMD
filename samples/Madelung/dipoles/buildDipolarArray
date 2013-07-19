@@ -56,24 +56,17 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
     # The six unit vectors are: 3 spatial and 3 to describe the
     # orientation of the dipole.
     
-    e1 = numpy.array([1.0,0.0,0.0,0.0,0.0,0.0])
-    e2 = numpy.array([0.0,1.0,0.0,0.0,0.0,0.0])
-    e3 = numpy.array([0.0,0.0,1.0,0.0,0.0,0.0])
-    e4 = numpy.array([0.0,0.0,0.0,1.0,0.0,0.0])
-    e5 = numpy.array([0.0,0.0,0.0,0.0,1.0,0.0])
-    e6 = numpy.array([0.0,0.0,0.0,0.0,0.0,1.0])
+    e1 = numpy.array([1.0,0.0,0.0])
+    e2 = numpy.array([0.0,1.0,0.0])
+    e3 = numpy.array([0.0,0.0,1.0])
 
     # Parameters describing the 8 basic arrays:
     cell = numpy.array([[0,0,0],[0,0,1],[1,0,0],[0,1,0],
                         [1,1,0],[0,1,1],[1,0,1],[1,1,1]])
 
-    X = numpy.zeros(384).reshape((8,8,6))
-    Y = numpy.zeros(384).reshape((8,8,6))
-    Z = numpy.zeros(384).reshape((8,8,6))
-    # mX, mY, and mZ arrays have dipole direction flipped
-    mX = numpy.zeros(384).reshape((8,8,6))
-    mY = numpy.zeros(384).reshape((8,8,6))
-    mZ = numpy.zeros(384).reshape((8,8,6))
+    X = numpy.zeros(192).reshape((8,8,3))
+    Y = numpy.zeros(192).reshape((8,8,3))
+    Z = numpy.zeros(192).reshape((8,8,3))
 
     # create the 24 basic arrays using Eq. 12 in Luttinger & Tisza:
     for i in range(8):
@@ -83,117 +76,143 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                 for l3 in range(2):
                     lvals = numpy.array([l1,l2,l3])
                     value = math.pow(-1, numpy.dot(cell[i], lvals))
-                    Xvec = (l1*e1 + l2*e2 + l3*e3) + value * e4             
-                    Yvec = (l1*e1 + l2*e2 + l3*e3) + value * e5             
-                    Zvec = (l1*e1 + l2*e2 + l3*e3) + value * e6             
-                    mXvec = (l1*e1 + l2*e2 + l3*e3) - value * e4             
-                    mYvec = (l1*e1 + l2*e2 + l3*e3) - value * e5             
-                    mZvec = (l1*e1 + l2*e2 + l3*e3) - value * e6             
-                    X[i][which] = Xvec
-                    Y[i][which] = Yvec
-                    Z[i][which] = Zvec
-                    mX[i][which] = mXvec
-                    mY[i][which] = mYvec
-                    mZ[i][which] = mZvec
+                    X[i][which] = value * e1
+                    Y[i][which] = value * e2
+                    Z[i][which] = value * e3
                     which = which + 1
+    
+    lp_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):        
+        lp_array = numpy.vstack((lp_array, cell[i]))
+    
+    bc_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        bc_array = numpy.vstack((bc_array, cell[i] + [0.5,0.5,0.5]))
 
-    # The simple cubic array has only one site at the lattice point:
-    lp = numpy.array([0.0,0.0,0.0,0.0,0.0,0.0])
+    xy_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        xy_array = numpy.vstack((xy_array, cell[i] + [0.5,0.5,0.0]))
 
-    # The body-centered cubic array also has a body-centerered site:
-    bc = numpy.array([0.5,0.5,0.5,0.0,0.0,0.0])
+    xz_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        xz_array = numpy.vstack((xz_array, cell[i] + [0.5,0.0,0.5]))
 
-    # The face-centered cubic array also has 3 face-centered sites:
-    xy = numpy.array([0.5,0.5,0.0,0.0,0.0,0.0])
-    yz = numpy.array([0.0,0.5,0.5,0.0,0.0,0.0])
-    xz = numpy.array([0.5,0.0,0.5,0.0,0.0,0.0])
-
-    sc =      numpy.array([[0.0,0.0,0.0]])
-
-    bcc =     numpy.array([[0.0,0.0,0.0],
-                           [0.5,0.5,0.5]])
-
-    fcc =     numpy.array([[0.0,0.0,0.0], 
-                           [0.5,0.5,0.0],
-                           [0.0,0.5,0.5],
-                           [0.5,0.0,0.5]])
+    yz_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        yz_array = numpy.vstack((yz_array, cell[i] + [0.0,0.5,0.5]))
 
     known_case = False
+    basic_array = numpy.zeros(0).reshape((0,3,3))
+
+    lp_part = numpy.zeros(0).reshape((0,3,3))
+    bc_part = numpy.zeros(0).reshape((0,3,3))
+    xy_part = numpy.zeros(0).reshape((0,3,3))
+    xz_part = numpy.zeros(0).reshape((0,3,3))
+    yz_part = numpy.zeros(0).reshape((0,3,3))
 
     if (arrayType == 'X'):
         if (int(latticeType)):
             which = int(latticeType) - 1
-            basic_array = X[which]
+            basic_array = numpy.append(lp_array, X[which], axis=1)
             known_case = True
     if (arrayType == 'Y'):
         if (int(latticeType)):
             which = int(latticeType) - 1
-            basic_array = Y[which]
+            basic_array = numpy.append(lp_array, Y[which], axis=1)
             known_case = True
     if (arrayType == 'Z'):
         if (int(latticeType)):
             which = int(latticeType) - 1 
-            basic_array = Z[which]
+            basic_array = numpy.append(lp_array, Z[which], axis=1)
             known_case = True
     if (arrayType == 'A'):
         if (latticeType.lower() == 'sc'):
-            basic_array = Z[5]+lp
+            basic_array = numpy.append(lp_array, Z[4], axis=1)
             known_case = True
         if (latticeType.lower() == 'bcc'):
             if (dipoleDirection.lower() == '001'):
-                basic_array = numpy.append(Z[1]+lp, mZ[1]+bc, axis=0)
+                lp_part = numpy.append(lp_array,  Z[0], axis=1)
+                bc_part = numpy.append(bc_array, -Z[0], axis=1)
+                basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
             if (dipoleDirection.lower() == '111'):
-                basic_array = numpy.append(Z[5]+X[7]+Y[6]+lp,
-                                           Z[5]+X[7]+Y[6]+bc, axis=0)
+                lp_part = numpy.append(lp_array, Z[4]+X[6]+Y[5], axis=1)
+                bc_part = numpy.append(bc_array, Z[4]+X[6]+Y[5], axis=1)
+                basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
         if (latticeType.lower() == 'fcc'):
             if (dipoleDirection.lower() == '001'):
-                basic_array = numpy.append(Z[1]+lp,  Z[1]+xy, axis=0)
-                basic_array = numpy.append(basic_array, mZ[1]+yz, axis=0) 
-                basic_array = numpy.append(basic_array, mZ[1]+xz, axis=0) 
+                lp_part = numpy.append(lp_array,  Z[0], axis=1)
+                xy_part = numpy.append(xy_array,  Z[0], axis=1)
+                xz_part = numpy.append(xz_array, -Z[0], axis=1)
+                yz_part = numpy.append(yz_array, -Z[0], axis=1)
+
+                basic_array = numpy.append(lp_part, xy_part, axis=0)
+                basic_array = numpy.append(basic_array, xz_part, axis=0)
+                basic_array = numpy.append(basic_array, yz_part, axis=0)
+                
                 known_case = True
             if (dipoleDirection.lower() == '011'):
-                basic_array = numpy.append(Z[1]+Y[1]+lp, Z[1]+Y[1]+yz, axis=0)
-                basic_array = numpy.append(basic_array, mZ[1]+mY[1]+xy, axis=0)
-                basic_array = numpy.append(basic_array, mZ[1]+mY[1]+xz, axis=0) 
+                lp_part = numpy.append(lp_array,  Z[0]+Y[0], axis=1)
+                xy_part = numpy.append(xy_array, -Z[0]-Y[0], axis=1)
+                xz_part = numpy.append(xz_array, -Z[0]-Y[0], axis=1)
+                yz_part = numpy.append(yz_array,  Z[0]+Y[0], axis=1)
+
+                basic_array = numpy.append(lp_part, xy_part, axis=0)
+                basic_array = numpy.append(basic_array, xz_part, axis=0)
+                basic_array = numpy.append(basic_array, yz_part, axis=0)
+
                 known_case = True
     else:
         if (latticeType.lower() == 'sc'):
-            basic_array = Z[5]+lp
+            basic_array = numpy.append(lp_array, Z[4], axis=1)
             known_case = True
         if (latticeType.lower() == 'bcc'):
             if (dipoleDirection.lower() == '001'):
-                basic_array = numpy.append(Z[5]+lp, mZ[5]+bc, axis=0)
+                lp_part = numpy.append(lp_array,  Z[4], axis=1)
+                bc_part = numpy.append(bc_array, -Z[4], axis=1)
+                basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
             if (dipoleDirection.lower() == '111'):
-                basic_array = numpy.append(Z[5]+X[7]+Y[6]+lp,
-                                           Z[5]+X[7]+Y[6]+bc, axis=0)
+                lp_part = numpy.append(lp_array, Z[4]+X[6]+Y[5], axis=1)
+                bc_part = numpy.append(bc_array, Z[4]+X[6]+Y[5], axis=1)
+                basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
         if (latticeType.lower() == 'fcc'):
             if (dipoleDirection.lower() == '001'):
-                basic_array = numpy.append(Z[1]+lp,  Z[1]+yz, axis=0)
-                basic_array = numpy.append(basic_array, mZ[1]+xy, axis=0) 
-                basic_array = numpy.append(basic_array, mZ[1]+xz, axis=0) 
+                lp_part = numpy.append(lp_array,  Z[0], axis=1)
+                xy_part = numpy.append(xy_array, -Z[0], axis=1)
+                xz_part = numpy.append(xz_array, -Z[0], axis=1)
+                yz_part = numpy.append(yz_array,  Z[0], axis=1)
+
+                basic_array = numpy.append(lp_part, xy_part, axis=0)
+                basic_array = numpy.append(basic_array, xz_part, axis=0)
+                basic_array = numpy.append(basic_array, yz_part, axis=0)
+
                 known_case = True
             if (dipoleDirection.lower() == '011'):
-                basic_array = numpy.append(Z[8]+Y[8]+lp, Z[8]+Y[8]+xy, axis=0)
-                basic_array = numpy.append(basic_array, Z[8]+Y[8]+yz, axis=0)
-                basic_array = numpy.append(basic_array, mZ[8]+mY[8]+xz, axis=0) 
+                lp_part = numpy.append(lp_array,  Z[7]+Y[7], axis=1)
+                xy_part = numpy.append(xy_array,  Z[7]+Y[7], axis=1)
+                xz_part = numpy.append(xz_array, -Z[7]-Y[7], axis=1)
+                yz_part = numpy.append(yz_array,  Z[7]+Y[7], axis=1)
+
+                basic_array = numpy.append(lp_part, xy_part, axis=0)
+                basic_array = numpy.append(basic_array, xz_part, axis=0)
+                basic_array = numpy.append(basic_array, yz_part, axis=0)
+
                 known_case = True
 
     if (not known_case):
         print "unhandled combination of lattice and dipole direction"
         print __doc__
 
-    print basic_array
-
-    bravais_lattice = []
+    bravais_lattice = numpy.zeros(0).reshape((0,6))
     for i in range(latticeNumber):
         for j in range(latticeNumber):
             for k in range(latticeNumber):
                 for l in range(len(basic_array)):
-                    bravais_lattice.append(2*i*e1 + 2*j*e2 + 2*k*e3 + basic_array[l])
+                    lat_vec = numpy.array([[2*i, 2*j, 2*k, 0.0, 0.0, 0.0]])
+                    bravais_lattice = numpy.append(bravais_lattice, lat_vec + basic_array[l], axis=0)
 
     outputFile = open(outputFileName, 'w')
     
@@ -240,7 +259,8 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
     outputFile.write('    <StuntDoubles>\n')
     sdFormat = 'pvqj'
     index = 0
-    
+
+    print bravais_lattice
     for i in range(len(bravais_lattice)):
         xcart = latticeConstant*(bravais_lattice[i][0])
         ycart = latticeConstant*(bravais_lattice[i][1])

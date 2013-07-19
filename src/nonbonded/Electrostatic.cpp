@@ -1202,6 +1202,7 @@ namespace OpenMD {
       
     case esm_SHIFTED_FORCE:
     case esm_SHIFTED_POTENTIAL:
+    case esm_TAYLOR_SHIFTED:
       if (i_is_Charge) 
         self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));      
       if (i_is_Dipole) 
