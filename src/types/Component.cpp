@@ -50,6 +50,7 @@ namespace OpenMD {
   Component::Component() : moleculeStamp_(NULL) {
     DefineParameter(Type, "type");
     DefineParameter(NMol, "nMol");
+    DefineParameter(Region, "region");
   }
   
   Component::~Component() {    
@@ -58,6 +59,7 @@ namespace OpenMD {
   void Component::validate() {
     CheckParameter(Type, isNotEmpty());
     CheckParameter(NMol, isPositive());
+    CheckParameter(Region, isNonNegative());
   }
   
   bool Component::findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps) {

@@ -55,9 +55,12 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-  Molecule::Molecule(int stampId, int globalIndex, const std::string& molName) 
-    : stampId_(stampId), globalIndex_(globalIndex), moleculeName_(molName), 
-      constrainTotalCharge_(false) {
+  Molecule::Molecule(int stampId, int globalIndex, const std::string& molName, 
+                     int region) : stampId_(stampId),
+                                   globalIndex_(globalIndex), 
+                                   moleculeName_(molName), 
+                                   region_(region),
+                                   constrainTotalCharge_(false) {
   }
   
   Molecule::~Molecule() {

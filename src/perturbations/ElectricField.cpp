@@ -94,6 +94,10 @@ namespace OpenMD {
 	  RealType chrg = 0.0;
           
           AtomType* atype = atom->getAtomType();
+
+          // ad-hoc choice of the origin for potential calculation and
+          // fluctuating charge force:
+          pos = atom->getPos();
           
           if (atype->isElectrostatic()) {
             atom->addElectricField(EF * chrgToKcal);
@@ -109,14 +113,13 @@ namespace OpenMD {
           if ( fqa.isFluctuatingCharge() ) {
 	    isCharge = true;
             chrg += atom->getFlucQPos();
+            atom->addFlucQFrc( dot(pos,EF) * chrgToKcal );
           }
 	  
 	  if (isCharge) {
 	    EFfrc = EF*chrg;
 	    EFfrc *= chrgToKcal;
 	    atom->addFrc(EFfrc);
-	    // ad-hoc choice of the origin for potential calculation
-	    pos = atom->getPos();
 	    pot = -dot(pos, EFfrc);
 	    if (doParticlePot) {      
 	      atom->addParticlePot(pot);

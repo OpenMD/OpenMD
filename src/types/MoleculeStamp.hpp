@@ -71,6 +71,8 @@ namespace OpenMD {
     bool addCutoffGroupStamp( CutoffGroupStamp* cutoffgroup);
     bool addFragmentStamp( FragmentStamp* fragment);
     
+    void setRegion(int r) { region_ = r; }
+    int  getRegion(){ return region_; }
     int  getNAtoms() { return atomStamps_.size(); }
     int  getNBonds() { return bondStamps_.size(); }
     int  getNBends() { return bendStamps_.size(); }
@@ -143,6 +145,7 @@ namespace OpenMD {
     std::vector<FragmentStamp*> fragmentStamps_;
     std::vector<int> atom2Rigidbody;
     int nintegrable_;
+    int region_;
   };
   
 }

@@ -951,7 +951,7 @@ namespace OpenMD{
      * @param snapshotNo 
      * @see #getFlucQPos
      */         
-    void addflucQPos(RealType charge, int snapshotNo) {
+    void addFlucQPos(RealType charge, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQPos[localIndex_] += charge;
     }       
 
@@ -1031,7 +1031,7 @@ namespace OpenMD{
      * @param snapshotNo 
      * @see #getFlucQVel
      */         
-    void addflucQVel(RealType cvel, int snapshotNo) {
+    void addFlucQVel(RealType cvel, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQVel[localIndex_] += cvel;
     }       
 
@@ -1111,7 +1111,7 @@ namespace OpenMD{
      * @param snapshotNo 
      * @see #getFlucQFrc
      */         
-    void addflucQFrc(RealType cfrc, int snapshotNo) {
+    void addFlucQFrc(RealType cfrc, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).flucQFrc[localIndex_] += cfrc;
     }       
 

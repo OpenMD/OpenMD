@@ -91,6 +91,13 @@ namespace OpenMD {
     for (vector<Component*>::iterator i = components.begin(); 
          i !=components.end(); ++i) {
       molStamp = (*i)->getMoleculeStamp();
+      if ( (*i)->haveRegion() ) {        
+        molStamp->setRegion( (*i)->getRegion() );
+      } else {
+        // set the region to a disallowed value:
+        molStamp->setRegion( -1 );
+      }
+
       nMolWithSameStamp = (*i)->getNMol();
       
       addMoleculeStamp(molStamp, nMolWithSameStamp);

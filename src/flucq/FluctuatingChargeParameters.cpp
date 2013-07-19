@@ -55,6 +55,7 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
     DefineOptionalParameterWithDefaultValue(TauThermostat, "tauThermostat", 10.0);
     DefineOptionalParameterWithDefaultValue(DragCoefficient, "dragCoefficient", 0.01);
+    DefineOptionalParameterWithDefaultValue(ConstrainRegions, "constrainRegions", false);
   }
   
   FluctuatingChargeParameters::~FluctuatingChargeParameters() {    

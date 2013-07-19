@@ -48,6 +48,7 @@ namespace OpenMD {
   class Component : public DataHolder {
     DeclareParameter(Type, std::string);
     DeclareParameter(NMol, int);
+    DeclareParameter(Region, int);
     
   public:
     Component();

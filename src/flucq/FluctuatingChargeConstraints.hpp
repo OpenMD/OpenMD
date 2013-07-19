@@ -50,11 +50,16 @@ namespace OpenMD {
   class FluctuatingChargeConstraints {
   public:
     FluctuatingChargeConstraints(SimInfo* info);
+    void setConstrainRegions(bool cr);
     void applyConstraints();
 
   protected:
     SimInfo* info_;
     bool hasFlucQ_;
+    bool constrainRegions_;
+    std::vector<int> regionKeys_;
+    std::vector<RealType> regionForce_;
+    std::vector<int> regionCharges_;
   };
 }
 #endif

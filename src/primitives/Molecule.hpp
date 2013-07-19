@@ -86,7 +86,7 @@ namespace OpenMD{
     typedef std::vector<ConstraintElem*>::iterator ConstraintElemIterator;
     typedef std::vector<Atom*>::iterator FluctuatingChargeIterator;
     
-    Molecule(int stampId, int globalIndex, const std::string& molName);
+    Molecule(int stampId, int globalIndex, const std::string& molName, int region);
     virtual ~Molecule();
 
     /**
@@ -106,6 +106,9 @@ namespace OpenMD{
      */
     int getStampId() {
       return stampId_;
+    }
+    int getRegion() {
+      return region_;
     }
     
     /** Returns the name of the molecule */
@@ -407,6 +410,7 @@ namespace OpenMD{
     std::vector<ConstraintElem*> constraintElems_;
     std::vector<Atom*> fluctuatingCharges_;
     int stampId_;
+    int region_;
     std::string moleculeName_;
     PropertyMap properties_;
     bool constrainTotalCharge_;

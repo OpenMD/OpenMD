@@ -50,7 +50,7 @@
 namespace OpenMD {
 
   FluctuatingChargeConstraints::FluctuatingChargeConstraints(SimInfo* info) : 
-    info_(info), hasFlucQ_(false) {
+    info_(info), constrainRegions_(false), hasFlucQ_(false) {
     
     if (info_->usesFluctuatingCharges()) {
       if (info_->getNFluctuatingCharges() > 0) {
@@ -58,6 +58,33 @@ namespace OpenMD {
       }
     }
   }
+
+  void FluctuatingChargeConstraints::setConstrainRegions(bool cr) {
+    constrainRegions_ = cr;
+    regionKeys_.clear();
+    regionForce_.clear();
+    regionCharges_.clear();
+
+    if (constrainRegions_) {
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      int reg;
+      std::set<int> regions;      
+
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        reg = mol->getRegion();
+        if (reg >= 0) regions.insert(reg);
+        
+      }
+      for (std::set<int>::iterator r=regions.begin(); r!=regions.end(); ++r) {
+        regionKeys_.push_back( (*r) );
+      }
+      regionForce_.resize( regionKeys_.size() );
+      regionCharges_.resize( regionKeys_.size() );
+    }
+  }
+
 
   void FluctuatingChargeConstraints::applyConstraints() {
     if (!hasFlucQ_) return;
@@ -67,19 +94,30 @@ namespace OpenMD {
     Molecule* mol;
     Atom* atom;
     
-    RealType totalFrc, totalMolFrc, constrainedFrc;
+    RealType totalFrc, totalMolFrc, regionFrc, constrainedFrc;
     
     // accumulate the total system fluctuating charge forces
     totalFrc = 0.0;
+    if (constrainRegions_) {
+      std::fill(regionForce_.begin(), regionForce_.end(), 0.0); 
+      std::fill(regionCharges_.begin(), regionCharges_.end(), 0); 
+    }
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
 
+      int region = mol->getRegion();
+          
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        totalFrc += atom->getFlucQFrc();
-      }
 
+        RealType frc = atom->getFlucQFrc();
+        totalFrc += frc;
+        if (constrainRegions_) {
+          regionForce_[regionKeys_[region]] += frc;
+          regionCharges_[regionKeys_[region]] += 1;
+        }
+      }
     }
 
 #ifdef IS_MPI
@@ -87,16 +125,38 @@ namespace OpenMD {
     // processors:
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalFrc, 1, MPI::REALTYPE, 
                               MPI::SUM);
+
+    if (constrainRegions_) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &regionForce_[0], 
+                                regionForce_.size(), MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &regionCharges_[0], 
+                                regionCharges_.size(), MPI::INT, MPI::SUM);
+    }
+
 #endif
- 
+
     // divide by the total number of fluctuating charges:
     totalFrc /= info_->getNFluctuatingCharges();
+    
+    // do the same in the regions:
+    if (constrainRegions_) {
+      for (int i = 0; i < regionForce_.size(); ++i)  {
+        regionForce_[ i ] /= regionCharges_[ i ];
+      }
+    }
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {     
       
-      totalMolFrc = 0.0;
+      if (constrainRegions_) {
+        int region = mol->getRegion();
+        regionFrc = regionForce_[regionKeys_[region]];
+      } else {
+        regionFrc = 0.0;
+      }
 
+      totalMolFrc = 0.0;
+      
       // molecular constraints can be done with a second loop.
       if (mol->constrainTotalCharge()) {
         for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
@@ -109,7 +169,12 @@ namespace OpenMD {
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
         //constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
+
         constrainedFrc = atom->getFlucQFrc() - totalMolFrc;
+
+        if (constrainRegions_) 
+          constrainedFrc -= regionFrc;
+        
         atom->setFlucQFrc(constrainedFrc);
       }      
     }
