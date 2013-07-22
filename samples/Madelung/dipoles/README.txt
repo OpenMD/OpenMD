@@ -48,12 +48,12 @@ energies are:
 
   E = 14.39325 C N^2 mu^2
 
-The A_SC_001.md sample has a 8000 dipoles with a lattice spacing of 2
+The A_sc_001.md sample has a 1000 dipoles with a lattice spacing of 2
 angstroms, so the resulting energy is:
 
-  E = 14.39325 (-2.67678868438) 1000 * 1^2 = -38527.7 kcal / mol
+  E = 14.39325 (-2.67678868438) * (1000 / 2^3)  = -4815.9611 kcal / mol
 
-
+---------------------------------------------------------------------
 [1] J. A. Sauer, "Magnetic Energy Constants of Dipolar Lattices,"
     Phys. Rev. 57, 142–146 (1940) doi: 10.1103/PhysRev.57.142
 

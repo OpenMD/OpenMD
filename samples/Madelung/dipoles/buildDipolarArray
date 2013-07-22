@@ -63,6 +63,9 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
     # Parameters describing the 8 basic arrays:
     cell = numpy.array([[0,0,0],[0,0,1],[1,0,0],[0,1,0],
                         [1,1,0],[0,1,1],[1,0,1],[1,1,1]])
+    # order in which the basic arrays are constructed in the l loops below:
+    corners = numpy.array([[0,0,0],[0,0,1],[0,1,0],[0,1,1],
+                           [1,0,0],[1,0,1],[1,1,0],[1,1,1]])
 
     X = numpy.zeros(192).reshape((8,8,3))
     Y = numpy.zeros(192).reshape((8,8,3))
@@ -79,27 +82,28 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                     X[i][which] = value * e1
                     Y[i][which] = value * e2
                     Z[i][which] = value * e3
-                    which = which + 1
+                    which = which+1
+
     
     lp_array = numpy.zeros(0).reshape((0,3))
     for i in range(8):        
-        lp_array = numpy.vstack((lp_array, cell[i]))
+        lp_array = numpy.vstack((lp_array, corners[i]))
     
     bc_array = numpy.zeros(0).reshape((0,3))
     for i in range(8):
-        bc_array = numpy.vstack((bc_array, cell[i] + [0.5,0.5,0.5]))
+        bc_array = numpy.vstack((bc_array, corners[i] + [0.5,0.5,0.5]))
 
     xy_array = numpy.zeros(0).reshape((0,3))
     for i in range(8):
-        xy_array = numpy.vstack((xy_array, cell[i] + [0.5,0.5,0.0]))
+        xy_array = numpy.vstack((xy_array, corners[i] + [0.5,0.5,0.0]))
 
     xz_array = numpy.zeros(0).reshape((0,3))
     for i in range(8):
-        xz_array = numpy.vstack((xz_array, cell[i] + [0.5,0.0,0.5]))
+        xz_array = numpy.vstack((xz_array, corners[i] + [0.5,0.0,0.5]))
 
     yz_array = numpy.zeros(0).reshape((0,3))
     for i in range(8):
-        yz_array = numpy.vstack((yz_array, cell[i] + [0.0,0.5,0.5]))
+        yz_array = numpy.vstack((yz_array, corners[i] + [0.0,0.5,0.5]))
 
     known_case = False
     basic_array = numpy.zeros(0).reshape((0,3,3))
@@ -260,7 +264,6 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
     sdFormat = 'pvqj'
     index = 0
 
-    print bravais_lattice
     for i in range(len(bravais_lattice)):
         xcart = latticeConstant*(bravais_lattice[i][0])
         ycart = latticeConstant*(bravais_lattice[i][1])
@@ -269,52 +272,18 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
         dy = bravais_lattice[i][4]
         dz = bravais_lattice[i][5]
 
-        uz = numpy.array([dx, dy, dz])
-        uz = uz/numpy.linalg.norm(uz)
-        
-        uy = numpy.array([0.0, 1.0, 0.0])
-        uy = uy - uz * numpy.vdot(uy, uz) / numpy.vdot(uz, uz) 
-        uy = uy/numpy.linalg.norm(uy)
+        dlen = math.sqrt(dx*dx + dy*dy + dz*dz)
+        ctheta = dz / dlen
+        theta = math.acos(ctheta)
+        stheta = math.sqrt(1.0 - ctheta*ctheta)
+        psi = 0.0
+        phi = math.atan2(-dy/dlen, dx/dlen)
 
-        ux = numpy.cross(uy, uz)
-
-        RotMat = [ux, uy, uz]
-
-        q = [0.0, 0.0, 0.0, 0.0]
-
-        # RotMat to Quat code is out of OpenMD's SquareMatrix3.hpp code:
-
-        t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
-        
-        if( t > 1e-6 ):
-            s = 0.5 / math.sqrt( t )
-            q[0] = 0.25 / s
-            q[1] = (RotMat[1][2] - RotMat[2][1]) * s
-            q[2] = (RotMat[2][0] - RotMat[0][2]) * s
-            q[3] = (RotMat[0][1] - RotMat[1][0]) * s
-        else:
-            ad1 = RotMat[0][0]
-            ad2 = RotMat[1][1]
-            ad3 = RotMat[2][2]
-
-            if( ad1 >= ad2 and ad1 >= ad3 ):
-                s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
-                q[0] = (RotMat[1][2] - RotMat[2][1]) * s
-                q[1] = 0.25 / s
-                q[2] = (RotMat[0][1] + RotMat[1][0]) * s
-                q[3] = (RotMat[0][2] + RotMat[2][0]) * s
-            elif ( ad2 >= ad1 and ad2 >= ad3 ):
-                s = 0.5 / math.sqrt( 1.0 + RotMat[1][1] - RotMat[0][0] - RotMat[2][2] )
-                q[0] = (RotMat[2][0] - RotMat[0][2] ) * s
-                q[1] = (RotMat[0][1] + RotMat[1][0]) * s
-                q[2] = 0.25 / s
-                q[3] = (RotMat[1][2] + RotMat[2][1]) * s
-            else:
-                s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
-                q[0] = (RotMat[0][1] - RotMat[1][0]) * s
-                q[1] = (RotMat[0][2] + RotMat[2][0]) * s
-                q[2] = (RotMat[1][2] + RotMat[2][1]) * s
-                q[3] = 0.25 / s
+        q = [0.0,0.0,0.0,0.0]
+        q[0] = math.cos(theta/2)*math.cos((phi+psi)/2)
+        q[1] = math.sin(theta/2)*math.cos((phi-psi)/2)
+        q[2] = math.sin(theta/2)*math.sin((phi-psi)/2)
+        q[3] = math.cos(theta/2)*math.sin((phi+psi)/2)
 
         qlen = math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3])
         q[0] = q[0]/qlen
@@ -322,7 +291,7 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
         q[2] = q[2]/qlen
         q[3] = q[3]/qlen
         
-        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, xcart, ycart, zcart, 0.0, 0.0, 0.0, q[0], q[1], q[2], q[3], 0.0, 0.0, 0.0))
+        outputFile.write("%10d %7s %g %g %1g %g %g %g %13e %13e %13e %13e %g %g %g\n" % (index, sdFormat, xcart, ycart, zcart, 0.0, 0.0, 0.0, q[0], q[1], q[2], q[3], 0.0, 0.0, 0.0))
         index = index+1
 
     outputFile.write("    </StuntDoubles>\n")
