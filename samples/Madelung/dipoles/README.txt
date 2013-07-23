@@ -48,10 +48,19 @@ energies are:
 
   E = 14.39325 C N^2 mu^2
 
-The A_sc_001.md sample has a 1000 dipoles with a lattice spacing of 2
-angstroms, so the resulting energy is:
+E here is an energy density, so it must be multiplied by the total
+volume of the box.
 
-  E = 14.39325 (-2.67678868438) * (1000 / 2^3)  = -4815.9611 kcal / mol
+For example, the A_sc_001.md sample has a 8000 dipoles in a (40 angstrom)^3 box
+with a lattice spacing of 2 angstroms, so the resulting energy is:
+
+  E = Total volume * Energy per unit volume
+    = 40 * 40 * 40 * 14.39325 * (-2.67678868438) * N^2 * mu^2
+    = 64000 * (-38.527688) * (1/8)^2 * 1^2 
+    = 38527.69 KCal/Mol
+
+Here we've used the definition of N as the number of dipoles per unit 
+volume:  N = 1/a^3 = 1/(2^3) 
 
 ---------------------------------------------------------------------
 [1] J. A. Sauer, "Magnetic Energy Constants of Dipolar Lattices,"
