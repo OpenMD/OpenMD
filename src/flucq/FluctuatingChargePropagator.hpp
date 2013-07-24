@@ -71,6 +71,7 @@ namespace OpenMD {
     SimInfo* info_;
     ForceManager* forceMan_;
     bool hasFlucQ_;
+    bool initialized_;
     
   };
 }

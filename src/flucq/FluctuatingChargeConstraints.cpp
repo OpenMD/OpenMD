@@ -50,13 +50,17 @@
 namespace OpenMD {
 
   FluctuatingChargeConstraints::FluctuatingChargeConstraints(SimInfo* info) : 
-    info_(info), constrainRegions_(false), hasFlucQ_(false) {
+    info_(info), constrainRegions_(false), hasFlucQ_(false), initialized_(false) {
     
-    if (info_->usesFluctuatingCharges()) {
-      if (info_->getNFluctuatingCharges() > 0) {
-        hasFlucQ_ = true;
+  }
+
+  void FluctuatingChargeConstraints::initialize(){
+    if(info_->usesFluctuatingCharges()){
+      if(info_->getNFluctuatingCharges() > 0){
+	hasFlucQ_ = true;
       }
     }
+    initialized_ = true;
   }
 
   void FluctuatingChargeConstraints::setConstrainRegions(bool cr) {
@@ -75,10 +79,13 @@ namespace OpenMD {
            mol = info_->nextMolecule(i)) {
         reg = mol->getRegion();
         if (reg >= 0) regions.insert(reg);
-        
       }
+      // resize the keys vector to the largest found value for regions.
+      regionKeys_.resize( *(regions.end()) );
+      int which = 0;
       for (std::set<int>::iterator r=regions.begin(); r!=regions.end(); ++r) {
-        regionKeys_.push_back( (*r) );
+	regionKeys_[ (*r) ] = which;
+	which++;
       }
       regionForce_.resize( regionKeys_.size() );
       regionCharges_.resize( regionKeys_.size() );
@@ -87,15 +94,14 @@ namespace OpenMD {
 
 
   void FluctuatingChargeConstraints::applyConstraints() {
+    if (!initialized_) initialize();
     if (!hasFlucQ_) return;
-    
     SimInfo::MoleculeIterator i;
     Molecule::FluctuatingChargeIterator  j;
     Molecule* mol;
     Atom* atom;
     
     RealType totalFrc, totalMolFrc, regionFrc, constrainedFrc;
-    
     // accumulate the total system fluctuating charge forces
     totalFrc = 0.0;
     if (constrainRegions_) {
@@ -114,8 +120,10 @@ namespace OpenMD {
         RealType frc = atom->getFlucQFrc();
         totalFrc += frc;
         if (constrainRegions_) {
-          regionForce_[regionKeys_[region]] += frc;
-          regionCharges_[regionKeys_[region]] += 1;
+	  if (region >= 0) {	    
+	    regionForce_[regionKeys_[region]] += frc;
+	    regionCharges_[regionKeys_[region]] += 1;
+	  }
         }
       }
     }
@@ -150,7 +158,10 @@ namespace OpenMD {
       
       if (constrainRegions_) {
         int region = mol->getRegion();
-        regionFrc = regionForce_[regionKeys_[region]];
+	if (region >= 0) 
+	  regionFrc = regionForce_[regionKeys_[region]];
+	else
+	  regionFrc = 0.0;
       } else {
         regionFrc = 0.0;
       }

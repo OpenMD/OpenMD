@@ -54,7 +54,9 @@ namespace OpenMD {
     void applyConstraints();
 
   protected:
+    void initialize();
     SimInfo* info_;
+    bool initialized_;
     bool hasFlucQ_;
     bool constrainRegions_;
     std::vector<int> regionKeys_;

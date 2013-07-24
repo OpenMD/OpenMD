@@ -56,7 +56,7 @@ using namespace QuantLib;
 namespace OpenMD {
 
   FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info) : 
-    info_(info), hasFlucQ_(false), forceMan_(NULL) {
+    info_(info), hasFlucQ_(false), forceMan_(NULL), initialized_(false) {
     
     Globals* simParams = info_->getSimParams();
     fqParams_ = simParams->getFluctuatingChargeParameters();    
@@ -73,14 +73,16 @@ namespace OpenMD {
   }
 
   void FluctuatingChargePropagator::initialize() {
-
     if (info_->usesFluctuatingCharges()) {
       if (info_->getNFluctuatingCharges() > 0) {
         hasFlucQ_ = true;
       }
     }
-
-    if (!hasFlucQ_) return;
+    
+    if (!hasFlucQ_) {
+      initialized_ = true;
+      return;
+    }
 
     SimInfo::MoleculeIterator i;
     Molecule::FluctuatingChargeIterator  j;
@@ -109,11 +111,12 @@ namespace OpenMD {
 
     DumpStatusFunction dsf(info_);  // we want a dump file written
                                     // every iteration
-
     minim->minimize(problem, endCriteria);
+    initialized_ = true;
   }
 
   void FluctuatingChargePropagator::applyConstraints() {
+    if (!initialized_) initialize();
     if (!hasFlucQ_) return;
     fqConstraints_->applyConstraints();
   }
