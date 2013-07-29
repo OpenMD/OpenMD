@@ -145,8 +145,8 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                 basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
             if (dipoleDirection.lower() == 'min'):
-                lp_part = numpy.append(lp_array, Z[5], axis=1)
-                bc_part = numpy.append(bc_array, Y[6], axis=1)
+                lp_part = numpy.append(lp_array, X[6]+Y[4]+Z[5], axis=1)
+                bc_part = numpy.append(bc_array, X[4]+Y[5]+Z[6], axis=1)
                 basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
         if (latticeType.lower() == 'fcc'):
@@ -282,7 +282,7 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
         theta = math.acos(ctheta)
         stheta = math.sqrt(1.0 - ctheta*ctheta)
         psi = 0.0
-        phi = math.atan2(-dy/dlen, dx/dlen)
+        phi = math.atan2(dx/dlen, -dy/dlen)
 
         q = [0.0,0.0,0.0,0.0]
         q[0] = math.cos(theta/2)*math.cos((phi+psi)/2)
