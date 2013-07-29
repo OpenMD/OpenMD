@@ -99,7 +99,7 @@ namespace OpenMD {
    *      Use the maximum suggested value that was found.
    *
    * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, TAYLOR_SHIFTED, 
-   *                        or SHIFTED_POTENTIAL)
+   *                        SHIFTED_POTENTIAL, or EWALD_FULL)
    *      If cutoffMethod was explicitly set, use that choice.
    *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
    *
@@ -172,6 +172,7 @@ namespace OpenMD {
     stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
     stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
     stringToCutoffMethod["TAYLOR_SHIFTED"] = TAYLOR_SHIFTED;
+    stringToCutoffMethod["EWALD_FULL"] = EWALD_FULL;
   
     if (simParams_->haveCutoffMethod()) {
       string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
@@ -182,7 +183,7 @@ namespace OpenMD {
                 "ForceManager::setupCutoffs: Could not find chosen cutoffMethod %s\n"
                 "\tShould be one of: "
                 "HARD, SWITCHED, SHIFTED_POTENTIAL, TAYLOR_SHIFTED,\n"
-                "\tor SHIFTED_FORCE\n",
+                "\tSHIFTED_FORCE, or EWALD_FULL\n",
                 cutMeth.c_str());
         painCave.isFatal = 1;
         painCave.severity = OPENMD_ERROR;
@@ -228,13 +229,15 @@ namespace OpenMD {
             cutoffMethod_ = SHIFTED_FORCE;
           } else if (myMethod == "TAYLOR_SHIFTED") {
             cutoffMethod_ = TAYLOR_SHIFTED;
+          } else if (myMethod == "EWALD_FULL") {
+            cutoffMethod_ = EWALD_FULL;
           }
         
           if (simParams_->haveSwitchingRadius()) 
             rSwitch_ = simParams_->getSwitchingRadius();
 
           if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE" ||
-              myMethod == "TAYLOR_SHIFTED") {
+              myMethod == "TAYLOR_SHIFTED" || myMethod == "EWALD_FULL") {
             if (simParams_->haveSwitchingRadius()){
               sprintf(painCave.errMsg,
                       "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
@@ -922,6 +925,9 @@ namespace OpenMD {
     
     // collects pairwise information
     fDecomp_->collectData();
+    if (cutoffMethod_ == EWALD_FULL) {
+      interactionMan_->doReciprocalSpaceSum();
+    }
         
     if (info_->requiresSelfCorrection()) {
       for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) { 

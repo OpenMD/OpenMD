@@ -63,8 +63,12 @@ namespace OpenMD {
     initialized_ = true;
   }
 
+
   void FluctuatingChargeConstraints::setConstrainRegions(bool cr) {
     constrainRegions_ = cr;
+
+    if (!initialized_) initialize();
+
     regionKeys_.clear();
     regionForce_.clear();
     regionCharges_.clear();

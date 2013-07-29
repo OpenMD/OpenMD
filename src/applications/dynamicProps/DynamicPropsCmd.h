@@ -54,6 +54,9 @@ struct gengetopt_args_info
   int order_arg;	/**< @brief Lengendre Polynomial Order.  */
   char * order_orig;	/**< @brief Lengendre Polynomial Order original value given at command line.  */
   const char *order_help; /**< @brief Lengendre Polynomial Order help description.  */
+  int nzbins_arg;	/**< @brief Number of Z bins (default='100').  */
+  char * nzbins_orig;	/**< @brief Number of Z bins original value given at command line.  */
+  const char *nzbins_help; /**< @brief Number of Z bins help description.  */
   char * memory_arg;	/**< @brief Available memory (defaults to 2G) (default='2G').  */
   char * memory_orig;	/**< @brief Available memory (defaults to 2G) original value given at command line.  */
   const char *memory_help; /**< @brief Available memory (defaults to 2G) help description.  */
@@ -62,6 +65,7 @@ struct gengetopt_args_info
   const char *vcorr_help; /**< @brief velocity correlation function help description.  */
   const char *dcorr_help; /**< @brief dipole correlation function help description.  */
   const char *lcorr_help; /**< @brief Lengendre correlation function help description.  */
+  const char *lcorrZ_help; /**< @brief Lengendre correlation function binned by Z help description.  */
   const char *sdcorr_help; /**< @brief System dipole correlation function help description.  */
   const char *r_rcorr_help; /**< @brief Radial rmsd help description.  */
   const char *thetacorr_help; /**< @brief Angular rmsd help description.  */
@@ -77,12 +81,14 @@ struct gengetopt_args_info
   unsigned int sele1_given ;	/**< @brief Whether sele1 was given.  */
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
   unsigned int order_given ;	/**< @brief Whether order was given.  */
+  unsigned int nzbins_given ;	/**< @brief Whether nzbins was given.  */
   unsigned int memory_given ;	/**< @brief Whether memory was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int vcorr_given ;	/**< @brief Whether vcorr was given.  */
   unsigned int dcorr_given ;	/**< @brief Whether dcorr was given.  */
   unsigned int lcorr_given ;	/**< @brief Whether lcorr was given.  */
+  unsigned int lcorrZ_given ;	/**< @brief Whether lcorrZ was given.  */
   unsigned int sdcorr_given ;	/**< @brief Whether sdcorr was given.  */
   unsigned int r_rcorr_given ;	/**< @brief Whether r_rcorr was given.  */
   unsigned int thetacorr_given ;	/**< @brief Whether thetacorr was given.  */

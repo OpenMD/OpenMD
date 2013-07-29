@@ -44,6 +44,7 @@
 #include <string.h>
 
 #include <cmath>
+#include <numeric>
 #include "nonbonded/Electrostatic.hpp"
 #include "utils/simError.h"
 #include "types/NonBondedInteractionType.hpp"
@@ -55,6 +56,8 @@
 #include "utils/PhysicalConstants.hpp"
 #include "math/erfc.hpp"
 #include "math/SquareMatrix.hpp"
+#include "primitives/Molecule.hpp"
+
 
 namespace OpenMD {
   
@@ -191,13 +194,12 @@ namespace OpenMD {
       simError();
     }
            
-    if (screeningMethod_ == DAMPED) {      
+    if (screeningMethod_ == DAMPED || summationMethod_ == esm_EWALD_FULL) {
       if (!simParams_->haveDampingAlpha()) {
         // first set a cutoff dependent alpha value
         // we assume alpha depends linearly with rcut from 0 to 20.5 ang
         dampingAlpha_ = 0.425 - cutoffRadius_* 0.02;
-        if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;
-        
+        if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;        
         // throw warning
         sprintf( painCave.errMsg,
                  "Electrostatic::initialize: dampingAlpha was not specified in the\n"
@@ -212,6 +214,7 @@ namespace OpenMD {
       }
       haveDampingAlpha_ = true;
     }
+
 
     Etypes.clear();
     Etids.clear();
@@ -262,9 +265,6 @@ namespace OpenMD {
       b3c = (5.0 * b2c + pow(2.0*a2, 3) * expTerm * invArootPi) / r2;
       b4c = (7.0 * b3c + pow(2.0*a2, 4) * expTerm * invArootPi) / r2;
       b5c = (9.0 * b4c + pow(2.0*a2, 5) * expTerm * invArootPi) / r2;
-      //selfMult1_ = - 2.0 * a2 * invArootPi;
-      //selfMult2_ = - 4.0 * a2 * a2 * invArootPi / 3.0;
-      //selfMult4_ = - 8.0 * a2 * a2 * a2 * invArootPi / 5.0;
       // Half the Smith self piece:
       selfMult1_ = - a2 * invArootPi;
       selfMult2_ = - 2.0 * a2 * a2 * invArootPi / 3.0;
@@ -288,10 +288,12 @@ namespace OpenMD {
     db0c_3 =          3.0*r*b2c  - r2*r*b3c;
     db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
     db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;   
-    
-    selfMult1_ -= b0c;
-    selfMult2_ += (db0c_2 + 2.0*db0c_1*ric) /  3.0;
-    selfMult4_ -= (db0c_4 + 4.0*db0c_3*ric) / 15.0;
+
+    if (summationMethod_ != esm_EWALD_FULL) {
+      selfMult1_ -= b0c;
+      selfMult2_ += (db0c_2 + 2.0*db0c_1*ric) /  3.0;
+      selfMult4_ -= (db0c_4 + 4.0*db0c_3*ric) / 15.0;
+    }
 
     // working variables for the splines:
     RealType ri, ri2;
@@ -327,14 +329,6 @@ namespace OpenMD {
     vector<RealType> v21v, v22v;
     vector<RealType> v31v, v32v;
     vector<RealType> v41v, v42v, v43v;
-
-    /*
-    vector<RealType> dv01v;
-    vector<RealType> dv11v;
-    vector<RealType> dv21v, dv22v;
-    vector<RealType> dv31v, dv32v;
-    vector<RealType> dv41v, dv42v, dv43v;
-    */
 
     for (int i = 1; i < np_ + 1; i++) {
       r = RealType(i) * dx;
@@ -499,6 +493,7 @@ namespace OpenMD {
 
       case esm_SWITCHING_FUNCTION:
       case esm_HARD:
+      case esm_EWALD_FULL:
 
         v01 = f;
         v11 = g;
@@ -557,7 +552,6 @@ namespace OpenMD {
 
         break;
                 
-      case esm_EWALD_FULL:
       case esm_EWALD_PME:
       case esm_EWALD_SPME:
       default :
@@ -586,17 +580,6 @@ namespace OpenMD {
       v41v.push_back(v41);
       v42v.push_back(v42);
       v43v.push_back(v43);
-      /*
-      dv01v.push_back(dv01);
-      dv11v.push_back(dv11);
-      dv21v.push_back(dv21);
-      dv22v.push_back(dv22);
-      dv31v.push_back(dv31);
-      dv32v.push_back(dv32);      
-      dv41v.push_back(dv41);
-      dv42v.push_back(dv42);
-      dv43v.push_back(dv43);
-      */
     }
 
     // construct the spline structures and fill them with the values we've
@@ -620,27 +603,6 @@ namespace OpenMD {
     v42s->addPoints(rv, v42v);
     v43s = new CubicSpline();
     v43s->addPoints(rv, v43v);
-
-    /*
-    dv01s = new CubicSpline();
-    dv01s->addPoints(rv, dv01v);
-    dv11s = new CubicSpline();
-    dv11s->addPoints(rv, dv11v);
-    dv21s = new CubicSpline();
-    dv21s->addPoints(rv, dv21v);
-    dv22s = new CubicSpline();
-    dv22s->addPoints(rv, dv22v);
-    dv31s = new CubicSpline();
-    dv31s->addPoints(rv, dv31v);
-    dv32s = new CubicSpline();
-    dv32s->addPoints(rv, dv32v);
-    dv41s = new CubicSpline();
-    dv41s->addPoints(rv, dv41v);
-    dv42s = new CubicSpline();
-    dv42s->addPoints(rv, dv42v);
-    dv43s = new CubicSpline();
-    dv43s->addPoints(rv, dv43v);
-    */
 
     haveElectroSplines_ = true;
 
@@ -1227,5 +1189,307 @@ namespace OpenMD {
     // 12 angstroms seems to be a reasonably good guess for most
     // cases.
     return 12.0;
+  }
+
+
+  void Electrostatic::ReciprocalSpaceSum () {
+    
+    RealType kPot = 0.0;
+    RealType kVir = 0.0;
+    
+    const RealType mPoleConverter = 0.20819434; // converts from the
+                                                // internal units of
+                                                // Debye (for dipoles)
+                                                // or Debye-angstroms
+                                                // (for quadrupoles) to
+                                                // electron angstroms or
+                                                // electron-angstroms^2
+    
+    const RealType eConverter = 332.0637778; // convert the
+                                             // Charge-Charge
+                                             // electrostatic
+                                             // interactions into kcal /
+                                             // mol assuming distances
+                                             // are measured in
+                                             // angstroms.
+
+    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    Vector3d box = hmat.diagonals();
+    RealType boxMax = box.max();
+    
+    //int kMax = int(pow(dampingAlpha_,2)*cutoffRadius_ * boxMax / M_PI);
+    const int kMax = 5;
+    int kSqMax = kMax*kMax + 2;
+    
+    int kLimit = kMax+1;
+    int kLim2 = 2*kMax+1;
+    int kSqLim = kSqMax;
+    
+    vector<RealType> AK(kSqLim+1, 0.0);
+    RealType xcl = 2.0 * M_PI / box.x();
+    RealType ycl = 2.0 * M_PI / box.y();
+    RealType zcl = 2.0 * M_PI / box.z();
+    RealType rcl = 2.0 * M_PI / boxMax;
+    RealType rvol = 2.0 * M_PI /(box.x() * box.y() * box.z());
+    
+    if(dampingAlpha_ < 1.0e-12) return;
+    
+    RealType ralph = -0.25/pow(dampingAlpha_,2);
+    
+    // Calculate and store exponential factors  
+    
+    vector<vector<Vector3d> > eCos;
+    vector<vector<Vector3d> > eSin;
+    
+    int nMax = info_->getNAtoms();
+    
+    eCos.resize(kLimit+1);
+    eSin.resize(kLimit+1);
+    for (int j = 0; j < kLimit+1; j++) {
+      eCos[j].resize(nMax);
+      eSin[j].resize(nMax);
+    }
+    
+    Vector3d t( 2.0 * M_PI );
+    t.Vdiv(t, box);
+    
+    SimInfo::MoleculeIterator mi;
+    Molecule::AtomIterator ai;
+    int i;
+    Vector3d r;
+    Vector3d tt;
+    Vector3d w;
+    Vector3d u;
+    
+    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {  
+        
+        i = atom->getLocalIndex();
+        r = atom->getPos();
+        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
+        
+        tt.Vmul(t, r);
+        
+        eCos[1][i] = Vector3d(1.0, 1.0, 1.0);
+        eSin[1][i] = Vector3d(0.0, 0.0, 0.0);
+        eCos[2][i] = Vector3d(cos(tt.x()), cos(tt.y()), cos(tt.z()));
+        eSin[2][i] = Vector3d(sin(tt.x()), sin(tt.y()), sin(tt.z()));
+        u = 2.0 * eCos[1][i];
+        eCos[3][i].Vmul(u, eCos[2][i]);
+        eSin[3][i].Vmul(u, eSin[2][i]);       
+        
+        for(int l = 3; l <= kLimit; l++) {
+          w.Vmul(u, eCos[l-1][i]);
+          eCos[l][i] = w - eCos[l-2][i];
+          w.Vmul(u, eSin[l-1][i]);
+          eSin[l][i] = w - eSin[l-2][i];
+        }
+      }
+    }
+    
+    // Calculate and store AK coefficients:
+    
+    RealType eksq = 1.0;
+    RealType expf = 0.0;
+    if (ralph < 0.0) expf = exp(ralph*rcl*rcl);
+    for (i = 1; i <= kSqLim; i++) {
+      RealType rksq = float(i)*rcl*rcl;
+      eksq = expf*eksq;
+      AK[i] = eConverter * eksq/rksq;
+    }
+    
+    /*
+     * Loop over all k vectors k = 2 pi (ll/Lx, mm/Ly, nn/Lz)
+     * the values of ll, mm and nn are selected so that the symmetry of
+     * reciprocal lattice is taken into account i.e. the following
+     * rules apply.
+     *
+     * ll ranges over the values 0 to kMax only.
+     *
+     * mm ranges over 0 to kMax when ll=0 and over
+     *            -kMax to kMax otherwise.
+     * nn ranges over 1 to kMax when ll=mm=0 and over
+     *            -kMax to kMax otherwise.
+     *
+     * Hence the result of the summation must be doubled at the end.     
+     */
+    
+    std::vector<RealType> clm(nMax, 0.0);
+    std::vector<RealType> slm(nMax, 0.0);
+    std::vector<RealType> ckr(nMax, 0.0);
+    std::vector<RealType> skr(nMax, 0.0);
+    std::vector<RealType> ckc(nMax, 0.0);
+    std::vector<RealType> cks(nMax, 0.0);
+    std::vector<RealType> dkc(nMax, 0.0);
+    std::vector<RealType> dks(nMax, 0.0);
+    std::vector<RealType> qkc(nMax, 0.0);
+    std::vector<RealType> qks(nMax, 0.0);
+    std::vector<Vector3d> dxk(nMax, V3Zero);
+    std::vector<Vector3d> qxk(nMax, V3Zero);
+    
+    int mMin = kLimit;
+    int nMin = kLimit + 1;
+    for (int l = 1; l <= kLimit; l++) {
+      int ll =l - 1; 
+      RealType rl = xcl * float(ll);
+      for (int mmm = mMin; mmm <= kLim2; mmm++) {
+        int mm = mmm - kLimit;
+        int m = abs(mm) + 1;
+        RealType rm = ycl * float(mm);
+        // Set temporary products of exponential terms
+        for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+             mol = info_->nextMolecule(mi)) {
+          for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+              atom = mol->nextAtom(ai)) {
+            
+            i = atom->getLocalIndex();
+            if(mm < 0) {
+              clm[i] = eCos[l][i].x()*eCos[m][i].y() 
+                     + eSin[l][i].x()*eSin[m][i].y(); 
+              slm[i] = eCos[l][i].x()*eCos[m][i].y() 
+                     - eSin[m][i].y()*eCos[l][i].x();
+            } else {
+              clm[i] = eCos[l][i].x()*eCos[m][i].y() 
+                     - eSin[l][i].x()*eSin[m][i].y(); 
+              slm[i] = eSin[l][i].x()*eCos[m][i].y() 
+                     + eSin[m][i].y()*eCos[l][i].x();
+            }
+          }
+        }
+        for (int nnn = nMin; nnn <= kLim2; nnn++) {
+          int nn = nnn - kLimit;          
+          int n = abs(nn) + 1;
+          RealType rn = zcl * float(nn);
+          // Test on magnitude of k vector:
+          int kk=ll*ll + mm*mm + nn*nn;
+          if(kk <= kSqLim) {
+            Vector3d kVec = Vector3d(rl, rm, rn);
+            Mat3x3d  k2 = outProduct(kVec, kVec);
+            // Calculate exp(ikr) terms
+            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+                 mol = info_->nextMolecule(mi)) {
+              for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+                  atom = mol->nextAtom(ai)) { 
+                i = atom->getLocalIndex();
+                
+                if (nn < 0) {
+                  ckr[i]=clm[i]*eCos[n][i].z()+slm[i]*eSin[n][i].z();
+                  skr[i]=slm[i]*eCos[n][i].z()-clm[i]*eSin[n][i].z();
+                } else {
+                  ckr[i]=clm[i]*eCos[n][i].z()-slm[i]*eSin[n][i].z();
+                  skr[i]=slm[i]*eCos[n][i].z()+clm[i]*eSin[n][i].z();
+                }
+              }
+            }
+            
+            // Calculate scalar and vector products for each site:
+            
+            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+                 mol = info_->nextMolecule(mi)) {
+              for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+                  atom = mol->nextAtom(ai)) {
+                i = atom->getGlobalIndex();
+                int atid = atom->getAtomType()->getIdent();
+                ElectrostaticAtomData data = ElectrostaticMap[Etids[atid]];
+                               
+                if (data.is_Charge) {
+                  RealType C = data.fixedCharge;
+                  if (atom->isFluctuatingCharge()) C += atom->getFlucQPos();
+                  ckc[i] = C * ckr[i];
+                  cks[i] = C * cks[i];
+                }
+                
+                if (data.is_Dipole) {
+                  Vector3d D = atom->getDipole() * mPoleConverter;
+                  RealType dk = dot(kVec, D);
+                  dxk[i] = cross(kVec, D);
+                  dkc[i] = dk * ckr[i];
+                  dks[i] = dk * skr[i];
+                }
+                if (data.is_Quadrupole) {
+                  Mat3x3d Q = atom->getQuadrupole();
+                  Q *= mPoleConverter;
+                  RealType qk = -( Q * k2 ).trace();
+                  qxk[i] = -2.0 * cross(k2, Q);
+                  qkc[i] = qk * ckr[i];
+                  qks[i] = qk * skr[i];
+                }              
+              }
+            }
+            
+            // calculate vector sums
+            
+            RealType ckcs = std::accumulate(ckc.begin(),ckc.end(),0.0);
+            RealType ckss = std::accumulate(cks.begin(),cks.end(),0.0);
+            RealType dkcs = std::accumulate(dkc.begin(),dkc.end(),0.0);
+            RealType dkss = std::accumulate(dks.begin(),dks.end(),0.0);
+            RealType qkcs = std::accumulate(qkc.begin(),qkc.end(),0.0);
+            RealType qkss = std::accumulate(qks.begin(),qks.end(),0.0);
+            
+#ifdef IS_MPI
+            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &ckcs, 1, MPI::REALTYPE, 
+                                      MPI::SUM);
+            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &ckss, 1, MPI::REALTYPE, 
+                                      MPI::SUM);
+            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &dkcs, 1, MPI::REALTYPE, 
+                                      MPI::SUM);
+            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &dkss, 1, MPI::REALTYPE, 
+                                      MPI::SUM);
+            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &qkcs, 1, MPI::REALTYPE, 
+                                      MPI::SUM);
+            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &qkss, 1, MPI::REALTYPE, 
+                                      MPI::SUM);
+#endif        
+            
+            // Accumulate potential energy and virial contribution:
+            
+            //cerr << "l, m, n = " << l << " " << m << " " << n << "\n";
+            cerr << "kVec = " << kVec << "\n";
+            cerr << "ckss = " << ckss << " ckcs = " << ckcs << "\n";
+            kPot += 2.0 * rvol * AK[kk]*((ckss+dkcs-qkss)*(ckss+dkcs-qkss) 
+                                         + (ckcs-dkss-qkcs)*(ckcs-dkss-qkss));
+            //cerr << "kspace pot = " << kPot << "\n";
+            kVir -= 2.0 * rvol * AK[kk]*(ckcs*ckcs+ckss*ckss
+                                         +4.0*(ckss*dkcs-ckcs*dkss)
+                                         +3.0*(dkcs*dkcs+dkss*dkss)
+                                         -6.0*(ckss*qkss+ckcs*qkcs)
+                                         +8.0*(dkss*qkcs-dkcs*qkss)
+                                         +5.0*(qkss*qkss+qkcs*qkcs));
+            
+            // Calculate force and torque for each site:
+            
+            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+                 mol = info_->nextMolecule(mi)) {
+              for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+                  atom = mol->nextAtom(ai)) {
+                
+                i = atom->getLocalIndex();
+                int atid = atom->getAtomType()->getIdent();
+                ElectrostaticAtomData data = ElectrostaticMap[Etids[atid]];
+                
+                RealType qfrc = AK[kk]*((cks[i]+dkc[i]-qks[i])*(ckcs-dkss-qkcs)
+                                        - (ckc[i]-dks[i]-qkc[i])*(ckss+dkcs-qkss));
+                RealType qtrq1 = AK[kk]*(skr[i]*(ckcs-dkss-qkcs)
+                                         -ckr[i]*(ckss+dkcs-qkss));
+                RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)+
+                                             skr[i]*(ckss+dkcs-qkss));
+                
+                
+                atom->addFrc( 4.0 * rvol * qfrc * kVec );
+                
+                if (data.is_Dipole) {
+                  atom->addTrq( 4.0 * rvol * qtrq1 * dxk[i] );
+                }
+                if (data.is_Quadrupole) {
+                  atom->addTrq( 4.0 * rvol * qtrq2 * qxk[i] );
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

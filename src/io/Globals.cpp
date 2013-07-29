@@ -229,7 +229,8 @@ namespace OpenMD {
                    isEqualIgnoreCase("SWITCHED") || 
                    isEqualIgnoreCase("SHIFTED_POTENTIAL") || 
                    isEqualIgnoreCase("SHIFTED_FORCE") || 
-                   isEqualIgnoreCase("TAYLOR_SHIFTED"));
+                   isEqualIgnoreCase("TAYLOR_SHIFTED") ||
+                   isEqualIgnoreCase("EWALD_FULL"));
     CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || 
                    isEqualIgnoreCase("MAX") || 
                    isEqualIgnoreCase("TRADITIONAL"));

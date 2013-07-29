@@ -21,11 +21,7 @@
 #define FIX_UNUSED(X) (void) (X) /* avoid warnings for unused params */
 #endif
 
-#ifdef WIN32
-#include "utils/wingetopt.h"
-#else
 #include <getopt.h>
-#endif
 
 #include "DynamicPropsCmd.h"
 
@@ -43,6 +39,7 @@ const char *gengetopt_args_info_help[] = {
   "      --sele1=selection script  select first stuntdouble set",
   "      --sele2=selection script  select second stuntdouble set (if sele2 is not \n                                  set, use script from sele1)",
   "      --order=INT               Lengendre Polynomial Order",
+  "  -z, --nzbins=INT              Number of Z bins  (default=`100')",
   "  -m, --memory=memory specification\n                                Available memory (defaults to 2G)  \n                                  (default=`2G')",
   "\n Group: dynamicProps\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
@@ -50,6 +47,7 @@ const char *gengetopt_args_info_help[] = {
   "  -v, --vcorr                   velocity correlation function",
   "  -d, --dcorr                   dipole correlation function",
   "  -l, --lcorr                   Lengendre correlation function",
+  "      --lcorrZ                  Lengendre correlation function binned by Z",
   "  -M, --sdcorr                  System dipole correlation function",
   "      --r_rcorr                 Radial rmsd",
   "      --thetacorr               Angular rmsd",
@@ -90,12 +88,14 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
   args_info->order_given = 0 ;
+  args_info->nzbins_given = 0 ;
   args_info->memory_given = 0 ;
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->vcorr_given = 0 ;
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
+  args_info->lcorrZ_given = 0 ;
   args_info->sdcorr_given = 0 ;
   args_info->r_rcorr_given = 0 ;
   args_info->thetacorr_given = 0 ;
@@ -119,6 +119,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->sele2_arg = NULL;
   args_info->sele2_orig = NULL;
   args_info->order_orig = NULL;
+  args_info->nzbins_arg = 100;
+  args_info->nzbins_orig = NULL;
   args_info->memory_arg = gengetopt_strdup ("2G");
   args_info->memory_orig = NULL;
   
@@ -136,19 +138,21 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->sele1_help = gengetopt_args_info_help[4] ;
   args_info->sele2_help = gengetopt_args_info_help[5] ;
   args_info->order_help = gengetopt_args_info_help[6] ;
-  args_info->memory_help = gengetopt_args_info_help[7] ;
-  args_info->selecorr_help = gengetopt_args_info_help[9] ;
-  args_info->rcorr_help = gengetopt_args_info_help[10] ;
-  args_info->vcorr_help = gengetopt_args_info_help[11] ;
-  args_info->dcorr_help = gengetopt_args_info_help[12] ;
-  args_info->lcorr_help = gengetopt_args_info_help[13] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[14] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[15] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[16] ;
-  args_info->drcorr_help = gengetopt_args_info_help[17] ;
-  args_info->helfandEcorr_help = gengetopt_args_info_help[18] ;
-  args_info->momentum_help = gengetopt_args_info_help[19] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[20] ;
+  args_info->nzbins_help = gengetopt_args_info_help[7] ;
+  args_info->memory_help = gengetopt_args_info_help[8] ;
+  args_info->selecorr_help = gengetopt_args_info_help[10] ;
+  args_info->rcorr_help = gengetopt_args_info_help[11] ;
+  args_info->vcorr_help = gengetopt_args_info_help[12] ;
+  args_info->dcorr_help = gengetopt_args_info_help[13] ;
+  args_info->lcorr_help = gengetopt_args_info_help[14] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[15] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[16] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[17] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[18] ;
+  args_info->drcorr_help = gengetopt_args_info_help[19] ;
+  args_info->helfandEcorr_help = gengetopt_args_info_help[20] ;
+  args_info->momentum_help = gengetopt_args_info_help[21] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[22] ;
   
 }
 
@@ -241,6 +245,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->sele2_arg));
   free_string_field (&(args_info->sele2_orig));
   free_string_field (&(args_info->order_orig));
+  free_string_field (&(args_info->nzbins_orig));
   free_string_field (&(args_info->memory_arg));
   free_string_field (&(args_info->memory_orig));
   
@@ -292,6 +297,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "sele2", args_info->sele2_orig, 0);
   if (args_info->order_given)
     write_into_file(outfile, "order", args_info->order_orig, 0);
+  if (args_info->nzbins_given)
+    write_into_file(outfile, "nzbins", args_info->nzbins_orig, 0);
   if (args_info->memory_given)
     write_into_file(outfile, "memory", args_info->memory_orig, 0);
   if (args_info->selecorr_given)
@@ -304,6 +311,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dcorr", 0, 0 );
   if (args_info->lcorr_given)
     write_into_file(outfile, "lcorr", 0, 0 );
+  if (args_info->lcorrZ_given)
+    write_into_file(outfile, "lcorrZ", 0, 0 );
   if (args_info->sdcorr_given)
     write_into_file(outfile, "sdcorr", 0, 0 );
   if (args_info->r_rcorr_given)
@@ -376,6 +385,7 @@ reset_group_dynamicProps(struct gengetopt_args_info *args_info)
   args_info->vcorr_given = 0 ;
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
+  args_info->lcorrZ_given = 0 ;
   args_info->sdcorr_given = 0 ;
   args_info->r_rcorr_given = 0 ;
   args_info->thetacorr_given = 0 ;
@@ -631,12 +641,14 @@ cmdline_parser_internal (
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
         { "order",	1, NULL, 0 },
+        { "nzbins",	1, NULL, 'z' },
         { "memory",	1, NULL, 'm' },
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "vcorr",	0, NULL, 'v' },
         { "dcorr",	0, NULL, 'd' },
         { "lcorr",	0, NULL, 'l' },
+        { "lcorrZ",	0, NULL, 0 },
         { "sdcorr",	0, NULL, 'M' },
         { "r_rcorr",	0, NULL, 0 },
         { "thetacorr",	0, NULL, 0 },
@@ -647,7 +659,7 @@ cmdline_parser_internal (
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:m:srvdlMp", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:z:m:srvdlMp", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -683,6 +695,18 @@ cmdline_parser_internal (
               &(local_args_info.output_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "output", 'o',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'z':	/* Number of Z bins.  */
+        
+        
+          if (update_arg( (void *)&(args_info->nzbins_arg), 
+               &(args_info->nzbins_orig), &(args_info->nzbins_given),
+              &(local_args_info.nzbins_given), optarg, 0, "100", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "nzbins", 'z',
               additional_error))
             goto failure;
         
@@ -844,6 +868,23 @@ cmdline_parser_internal (
                 &(local_args_info.order_given), optarg, 0, 0, ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "order", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Lengendre correlation function binned by Z.  */
+          else if (strcmp (long_options[option_index].name, "lcorrZ") == 0)
+          {
+          
+            if (args_info->dynamicProps_group_counter && override)
+              reset_group_dynamicProps (args_info);
+            args_info->dynamicProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->lcorrZ_given),
+                &(local_args_info.lcorrZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "lcorrZ", '-',
                 additional_error))
               goto failure;
           

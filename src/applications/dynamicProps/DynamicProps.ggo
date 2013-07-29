@@ -14,6 +14,7 @@ option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string  typestr="selection script"      no
 option  "order"         -       "Lengendre Polynomial Order"  int  no
+option  "nzbins"        z       "Number of Z bins" int default="100" no
 option  "memory"        m       "Available memory (defaults to 2G)" string  typestr="memory specification" default="2G" no
 defgroup "dynamicProps" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"  s       "selection correlation function" group="dynamicProps"
@@ -21,6 +22,7 @@ groupoption "rcorr"     r       "rmsd" group="dynamicProps"
 groupoption "vcorr" 	v	"velocity correlation function" group="dynamicProps"
 groupoption "dcorr"	d	"dipole correlation function" group="dynamicProps"
 groupoption "lcorr"     l       "Lengendre correlation function" group="dynamicProps"
+groupoption "lcorrZ"    -       "Lengendre correlation function binned by Z" group="dynamicProps"
 groupoption "sdcorr"    M       "System dipole correlation function" group="dynamicProps"
 groupoption "r_rcorr"   -       "Radial rmsd" group="dynamicProps"
 groupoption "thetacorr" -       "Angular rmsd" group="dynamicProps"

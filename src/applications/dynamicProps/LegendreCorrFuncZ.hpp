@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,27 +39,37 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#ifndef NONBONDED_CUTOFFS_HPP
-#define NONBONDED_CUTOFFS_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNCZ_HPP
+#define APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNCZ_HPP
 
+#include "math/Polynomial.hpp"
+#include "math/Vector3.hpp"
+#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  enum CutoffMethod {
-    HARD,
-    SWITCHED,
-    SHIFTED_POTENTIAL,
-    SHIFTED_FORCE,
-    TAYLOR_SHIFTED,
-    EWALD_FULL
-  };
+  class LegendreCorrFuncZ : public ParticleTimeCorrFunc {
+  public:
+    LegendreCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, int nZbins, long long int memSize);   
 
-  enum CutoffPolicy {
-    MIX,
-    MAX,
-    TRADITIONAL
+  private:
+    virtual void correlateFrames(int frame1, int frame2);
+    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) { return 0.0; }
+    virtual Vector3d calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
+    virtual void writeCorrelate();
+
+    virtual void validateSelection(const SelectionManager& seleMan);
+    int order_;
+    DoublePolynomial legendre_;
+
+  protected:
+    virtual void preCorrelate();
+    virtual void postCorrelate();
+    vector<vector<Vector3d> > histogram_;
+    vector<vector<int> > counts_;
+    int nZBins_;
   };
 
 }
-
 #endif

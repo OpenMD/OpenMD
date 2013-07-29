@@ -88,10 +88,8 @@ namespace OpenMD {
       velocitizer_->velocitize(targetScalingTemp);
     }
     
-    dumpWriter = createDumpWriter();
-    
-    statWriter = createStatWriter();
- 
+    dumpWriter = createDumpWriter();    
+    statWriter = createStatWriter(); 
     dumpWriter->writeDumpAndEor();
 
     progressBar = new ProgressBar();

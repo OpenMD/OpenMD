@@ -55,6 +55,7 @@
 #include "applications/dynamicProps/RCorrFunc.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
+#include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
 #include "applications/dynamicProps/RadialRCorrFunc.hpp"
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
@@ -149,13 +150,27 @@ int main(int argc, char* argv[]){
         order = args_info.order_arg;
     else {
       sprintf( painCave.errMsg,
-               "--order must be set if --lcoor is set\n");
+               "--order must be set if --lcorr is set\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
         
     corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order, memSize); 
+  } else if (args_info.lcorrZ_given) {
+    int order;
+    if (args_info.order_given)
+        order = args_info.order_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--order must be set if --lcorrZ is set\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+        
+    corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order, args_info.nzbins_arg, memSize); 
+
   }
 
   if (args_info.output_given) {

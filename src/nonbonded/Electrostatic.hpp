@@ -73,9 +73,9 @@ namespace OpenMD {
     esm_SHIFTED_FORCE,
     esm_TAYLOR_SHIFTED,
     esm_REACTION_FIELD,
-    esm_EWALD_FULL,  /**< Ewald methods aren't supported yet */
-    esm_EWALD_PME,   /**< Ewald methods aren't supported yet */
-    esm_EWALD_SPME   /**< Ewald methods aren't supported yet */
+    esm_EWALD_FULL,  
+    esm_EWALD_PME,   /**< PME  Ewald methods aren't supported yet */
+    esm_EWALD_SPME   /**< SPME Ewald methods aren't supported yet */
   };
 
   enum ElectrostaticScreeningMethod{
@@ -100,6 +100,7 @@ namespace OpenMD {
     void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
     void setDampingAlpha( RealType alpha );
     void setReactionFieldDielectric( RealType dielectric );
+    void ReciprocalSpaceSum();
 
   private:
     void initialize();

@@ -477,6 +477,11 @@ namespace OpenMD {
     return;    
   }
 
+  void InteractionManager::doReciprocalSpaceSum(){
+    if (!initialized_) initialize();
+    electrostatic_->ReciprocalSpaceSum();
+  }
+
   RealType InteractionManager::getSuggestedCutoffRadius(int *atid) {
     if (!initialized_) initialize();
 
