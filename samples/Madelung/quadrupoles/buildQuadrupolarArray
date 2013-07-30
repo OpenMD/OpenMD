@@ -1,0 +1,285 @@
+#! /usr/bin/env python
+
+"""Quadrupolar Lattice Builder
+
+Creates cubic lattices of quadrupoles to test the
+quadrupole-quadrupole interaction code.
+
+Usage: buildQuadrupolarArray 
+
+Options:
+  -h, --help              show this help
+  -x, --array-type-X      use one of the basic "X" arrays
+  -y, --array-type-Y      use one of the basic "Y" arrays
+  -z, --array-type-Z      use one of the basic "Z" arrays
+  -l, --lattice=...       use the specified lattice ( SC, FCC, or BCC )
+  -c, --constant=...      use the specified lattice constant
+  -n                      use the specified number of unit cells
+  -o, --output-file=...   use specified output (.xyz) file
+
+Type "A" arrays have nearest neighbor strings of antiparallel dipoles.
+
+Type "B" arrays have nearest neighbor strings of antiparallel dipoles
+if the dipoles are contained in a plane perpendicular to the dipole
+direction that passes through the dipole.
+
+Example:
+   buildQuadrupolarArray -l fcc -c 5 -n 3 -o FCC.md
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Rev: 1914 $"
+__date__ = "$LastChangedDate: 2013-07-29 11:34:04 -0400 (Mon, 29 Jul 2013) $"
+
+__copyright__ = "Copyright (c) 2013 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+import numpy
+
+def usage():
+    print __doc__
+    
+def createLattice(latticeType, latticeNumber, latticeConstant, arrayType, outputFileName):
+    # The following section creates 24 basic arrays from Luttinger and
+    # Tisza:
+
+    # The six unit vectors are: 3 spatial and 3 to describe the
+    # orientation of the dipole.
+    
+    e1 = numpy.array([1.0,0.0,0.0])
+    e2 = numpy.array([0.0,1.0,0.0])
+    e3 = numpy.array([0.0,0.0,1.0])
+
+    # Parameters describing the 8 basic arrays:
+    cell = numpy.array([[0,0,0],[0,0,1],[1,0,0],[0,1,0],
+                        [1,1,0],[0,1,1],[1,0,1],[1,1,1]])
+    # order in which the basic arrays are constructed in the l loops below:
+    corners = numpy.array([[0,0,0],[0,0,1],[0,1,0],[0,1,1],
+                           [1,0,0],[1,0,1],[1,1,0],[1,1,1]])
+
+    X = numpy.zeros(192).reshape((8,8,3))
+    Y = numpy.zeros(192).reshape((8,8,3))
+    Z = numpy.zeros(192).reshape((8,8,3))
+
+    # create the 24 basic arrays using Eq. 12 in Luttinger & Tisza:
+    for i in range(8):
+        which = 0
+        for l1 in range(2):
+            for l2 in range(2):
+                for l3 in range(2):
+                    lvals = numpy.array([l1,l2,l3])
+                    value = math.pow(-1, numpy.dot(cell[i], lvals))
+                    X[i][which] = value * e1
+                    Y[i][which] = value * e2
+                    Z[i][which] = value * e3
+                    which = which+1
+
+    
+    lp_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):        
+        lp_array = numpy.vstack((lp_array, corners[i]))
+    
+    bc_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        bc_array = numpy.vstack((bc_array, corners[i] + [0.5,0.5,0.5]))
+
+    xy_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        xy_array = numpy.vstack((xy_array, corners[i] + [0.5,0.5,0.0]))
+
+    xz_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        xz_array = numpy.vstack((xz_array, corners[i] + [0.5,0.0,0.5]))
+
+    yz_array = numpy.zeros(0).reshape((0,3))
+    for i in range(8):
+        yz_array = numpy.vstack((yz_array, corners[i] + [0.0,0.5,0.5]))
+
+    known_case = False
+    basic_array = numpy.zeros(0).reshape((0,3,3))
+
+    lp_part = numpy.zeros(0).reshape((0,3,3))
+    bc_part = numpy.zeros(0).reshape((0,3,3))
+    xy_part = numpy.zeros(0).reshape((0,3,3))
+    xz_part = numpy.zeros(0).reshape((0,3,3))
+    yz_part = numpy.zeros(0).reshape((0,3,3))
+
+    if (arrayType == 'X'):
+        if (int(latticeType)):
+            which = int(latticeType) - 1
+            basic_array = numpy.append(lp_array, X[which], axis=1)
+            known_case = True
+    if (arrayType == 'Y'):
+        if (int(latticeType)):
+            which = int(latticeType) - 1
+            basic_array = numpy.append(lp_array, Y[which], axis=1)
+            known_case = True
+    if (arrayType == 'Z'):
+        if (int(latticeType)):
+            which = int(latticeType) - 1 
+            basic_array = numpy.append(lp_array, Z[which], axis=1)
+            known_case = True
+    if (latticeType.lower() == 'sc'):
+        lp_part = numpy.append(lp_array, X[0]+Y[0]+Z[0], axis=1)
+        basic_array = lp_part
+        known_case = True
+    if (latticeType.lower() == 'bcc'):
+        lp_part = numpy.append(lp_array,  X[0]+Y[0], axis=1)
+        bc_part = numpy.append(bc_array,  X[0]-Y[0], axis=1)
+        basic_array = numpy.append(lp_part, bc_part, axis=0)
+        known_case = True
+    if (latticeType.lower() == 'fcc'):
+        lp_part = numpy.append(lp_array,  X[0]+Y[0]+Z[0], axis=1)
+        xy_part = numpy.append(xy_array,  X[0]-Y[0]-Z[0], axis=1)
+        xz_part = numpy.append(xz_array, -X[0]-Y[0]+Z[0], axis=1)
+        yz_part = numpy.append(yz_array, -X[0]+Y[0]-Z[0], axis=1)
+        basic_array = numpy.append(lp_part, xy_part, axis=0)
+        basic_array = numpy.append(basic_array, xz_part, axis=0)
+        basic_array = numpy.append(basic_array, yz_part, axis=0)
+        
+        known_case = True
+
+        
+    if (not known_case):
+        print "unhandled combination of lattice and dipole direction"
+        print __doc__
+
+    bravais_lattice = numpy.zeros(0).reshape((0,6))
+    for i in range(latticeNumber):
+        for j in range(latticeNumber):
+            for k in range(latticeNumber):
+                for l in range(len(basic_array)):
+                    lat_vec = numpy.array([[2*i, 2*j, 2*k, 0.0, 0.0, 0.0]])
+                    bravais_lattice = numpy.append(bravais_lattice, lat_vec + basic_array[l], axis=0)
+
+    outputFile = open(outputFileName, 'w')
+    
+    outputFile.write('<OpenMD version=2>\n')
+    outputFile.write('  <MetaData>\n')
+    outputFile.write('     molecule{\n')
+    outputFile.write('       name = \"Q\";\n')
+    outputFile.write('       \n')
+    outputFile.write('       atom[0]{\n')
+    outputFile.write('         type = \"Q\";\n')
+    outputFile.write('         position(0.0, 0.0, 0.0);\n')
+    outputFile.write('         orientation(0.0, 0.0, 0.0);\n')
+    outputFile.write('       }\n')
+    outputFile.write('     }\n')
+    outputFile.write('     component{\n')
+    outputFile.write('       type = \"Q\";\n')
+    outputFile.write('       nMol = '+ repr(len(bravais_lattice)) + ';\n')
+    outputFile.write('     }\n')
+
+    outputFile.write('     ensemble = NVE;\n')
+    outputFile.write('     forceField = \"Multipole\";\n')
+
+    outputFile.write('     cutoffMethod = \"shifted_force\";\n')
+    outputFile.write('     electrostaticScreeningMethod = \"damped\";\n')
+
+    outputFile.write('     cutoffRadius = 9.0;\n')
+    outputFile.write('     dampingAlpha = 0.18;\n')
+    outputFile.write('     statFileFormat = \"TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL\";\n')
+    outputFile.write('     dt = 1.0;\n')
+    outputFile.write('     runTime = 1.0;\n')
+    outputFile.write('     sampleTime = 1.0;\n')
+    outputFile.write('     statusTime = 1.0;\n')
+    outputFile.write('  </MetaData>\n')
+    outputFile.write('  <Snapshot>\n')
+    outputFile.write('    <FrameData>\n');
+    outputFile.write("        Time: %.10g\n" % (0.0))
+    
+    Hxx = 2.0 * latticeConstant * latticeNumber
+    Hyy = 2.0 * latticeConstant * latticeNumber
+    Hzz = 2.0 * latticeConstant * latticeNumber
+    
+    outputFile.write('        Hmat: {{%d, 0, 0}, {0, %d, 0}, {0, 0, %d}}\n' % (Hxx, Hyy, Hzz))
+    outputFile.write('    </FrameData>\n')
+    outputFile.write('    <StuntDoubles>\n')
+    sdFormat = 'pvqj'
+    index = 0
+
+    for i in range(len(bravais_lattice)):
+        xcart = latticeConstant*(bravais_lattice[i][0])
+        ycart = latticeConstant*(bravais_lattice[i][1])
+        zcart = latticeConstant*(bravais_lattice[i][2])
+        dx = bravais_lattice[i][3]
+        dy = bravais_lattice[i][4]
+        dz = bravais_lattice[i][5]
+
+        dlen = math.sqrt(dx*dx + dy*dy + dz*dz)
+        ctheta = dz / dlen
+        theta = math.acos(ctheta)
+        stheta = math.sqrt(1.0 - ctheta*ctheta)
+        psi = 0.0
+        phi = math.atan2(dx/dlen, -dy/dlen)
+
+        q = [0.0,0.0,0.0,0.0]
+        q[0] = math.cos(theta/2)*math.cos((phi+psi)/2)
+        q[1] = math.sin(theta/2)*math.cos((phi-psi)/2)
+        q[2] = math.sin(theta/2)*math.sin((phi-psi)/2)
+        q[3] = math.cos(theta/2)*math.sin((phi+psi)/2)
+
+        qlen = math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3])
+        q[0] = q[0]/qlen
+        q[1] = q[1]/qlen
+        q[2] = q[2]/qlen
+        q[3] = q[3]/qlen
+        
+        outputFile.write("%10d %7s %g %g %1g %g %g %g %13e %13e %13e %13e %g %g %g\n" % (index, sdFormat, xcart, ycart, zcart, 0.0, 0.0, 0.0, q[0], q[1], q[2], q[3], 0.0, 0.0, 0.0))
+        index = index+1
+
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OpenMD>\n")
+    outputFile.close()
+
+    outputFile.close()
+    
+def main(argv):
+    
+    arrayType = "A"
+    haveOutputFileName = False
+    latticeType = "fcc"
+    latticeNumber = 3
+    latticeConstant = 4
+    try:                                
+        opts, args = getopt.getopt(argv, "hxyzl:c:n:o:", ["help","array-type-X", "array-type-Y", "array-type-Z", "lattice=", "constant=", "output-file="])  
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()
+        elif opt in ("-x", "--array-type-X"):
+            arrayType = "X"
+        elif opt in ("-y", "--array-type-Y"):
+            arrayType = "Y"
+        elif opt in ("-z", "--array-type-Z"):
+            arrayType = "Z"
+        elif opt in ("-l", "--lattice"): 
+            latticeType = arg
+        elif opt in ("-c", "--constant"):
+            latticeConstant = float(arg)
+        elif opt in ("-n"):
+            latticeNumber = int(arg)
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            haveOutputFileName = True
+    if (not haveOutputFileName):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+        
+    createLattice(latticeType, latticeNumber, latticeConstant, arrayType, outputFileName);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
