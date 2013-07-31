@@ -73,15 +73,27 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
 
     # create the 24 basic arrays using Eq. 12 in Luttinger & Tisza:
     for i in range(8):
+        # The X and Y arrays are cubic rotations of the Z array, so we
+        # need to re-order them to match the numbering scheme in
+        # Luttinger & Tisza:
+        if (i > 0 and i < 4):
+            iX = 1 + (i + 1) % 3
+            iY = 1 + (i ) % 3
+        elif (i > 3 and i < 7):
+            iX = 4 + (i - 2) % 3
+            iY = 4 + (i ) % 3
+        else:
+            iX = i
+            iY = i
         which = 0
         for l1 in range(2):
             for l2 in range(2):
                 for l3 in range(2):
                     lvals = numpy.array([l1,l2,l3])
                     value = math.pow(-1, numpy.dot(cell[i], lvals))
-                    X[i][which] = value * e1
-                    Y[i][which] = value * e2
-                    Z[i][which] = value * e3
+                    X[iX][which] = value * e1
+                    Y[iY][which] = value * e2
+                    Z[i][which]  = value * e3                    
                     which = which+1
 
     
@@ -114,6 +126,8 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
     xz_part = numpy.zeros(0).reshape((0,3,3))
     yz_part = numpy.zeros(0).reshape((0,3,3))
 
+    # Python indexing starts at zero, so we're always shifted down an
+    # array from the L&T numbering scheme:
     if (arrayType == 'X'):
         if (int(latticeType)):
             which = int(latticeType) - 1
@@ -145,8 +159,8 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                 basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
             if (dipoleDirection.lower() == 'min'):
-                lp_part = numpy.append(lp_array, X[6]+Y[4]+Z[5], axis=1)
-                bc_part = numpy.append(bc_array, X[4]+Y[5]+Z[6], axis=1)
+                lp_part = numpy.append(lp_array, X[5]+Y[5]+Z[5], axis=1)
+                bc_part = numpy.append(bc_array, X[6]+Y[6]+Z[6], axis=1)
                 basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
         if (latticeType.lower() == 'fcc'):
