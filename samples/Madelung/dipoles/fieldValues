@@ -1,0 +1,177 @@
+#! /usr/bin/env python
+
+from __future__ import division,print_function
+
+__doc__ = """Luttinger and Tisza Field values
+
+Computes the sums for the field values (and also the energy constants
+for the low energy lattices) from the paper by Luttinger and Tisza
+paper:
+
+  J. M. Luttinger and L. Tisza, "Theory of Dipole Interaction in
+  Crystals," Phys. Rev. 70, 954-964 (1946) doi: 10.1103/PhysRev.70.954
+
+  Also note the errata: Phys. Rev. 72 257 (1947) doi: 10.1103/PhysRev.72.257
+  
+This script can obtain a much higher degree of accuracy than the
+original paper (simply by going to many more terms).  Using the option
+-c 350 appears to converge the energy constants to approximately 1
+part in 10^9  (but takes a long time).  
+
+Usage: fieldValues 
+
+Options:
+
+  -h, --help              show this help
+  -c                      use the specified cutoff in inverse space
+
+Example:
+   fieldValues -c 100
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu) and Kathie Newman (newman@nd.edu)"
+__version__ = "$Rev: 1917 $"
+__date__ = "$LastChangedDate: 2013-07-31 08:58:35 -0400 (Wed, 31 Jul 2013) $"
+__copyright__ = "Copyright (c) 2013 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math as m
+
+def usage():
+    print(__doc__)
+
+
+def doSums(r_c):
+
+    sum1=0  # Sz(  0, 1/2, 1/2)
+    sum2=0  # Sz(1/2,   0,   0)
+    sum3=0  # Sz(  0, 1/4, 1/4)
+    sum4=0  # Sy(1/4, 1/4, 1/4)
+    sum5=0  # Sy(  0, 1/4, 1/4)
+    sum6=0  # Sy(1/2, 1/4, 1/4)
+    
+    x = -r_c-1
+    
+    while x <= r_c:
+        x = x + 1
+        dx = x
+        dx2 = 1/2 - x
+        dx4 = 1/4 - x
+        
+        y = -r_c-1
+        while y <= r_c:
+            y =  y + 1
+            dy = y
+            dy2 = 1/2 - y
+            dy4 = 1/4 - y
+            
+            z = -r_c-1
+            while z <= r_c:
+                z = z + 1
+                dz = z
+                dz2 = 1/2 - z
+                dz4 = 1/4 - z
+                
+                r = m.sqrt( dx*dx + dy*dy + dz*dz)
+                r1 =m.sqrt( dx*dx + dy2*dy2 + dz2*dz2)
+                r2 =m.sqrt( dx2*dx2 + dy*dy + dz*dz)
+                r3 =m.sqrt( dx*dx + dy4*dy4 + dz4*dz4)
+                r4 =m.sqrt( dx4*dx4 + dy4*dy4 + dz4*dz4)
+                r5 =r3
+                r6 =m.sqrt( dx2*dx2 + dy4*dy4 + dz4*dz4)
+                
+                if r <= r_c:
+                    r15 = pow(r1,5)
+                    r25 = pow(r2,5)
+                    r35 = pow(r3,5)
+                    r45 = pow(r4,5)
+                    r55 = pow(r5,5)
+                    r65 = pow(r6,5)
+                    
+                    term1 = (2 * dz2 * dz2 - dx*dx - dy2*dy2)/r15
+                    term2 = (2 * dz*dz - dx2*dx2 - dy*dy)/r25
+                    term3 = (2 * dz4*dz4 - dx*dx - dy4*dy4)/r35
+                    term4 = 3 * dy4 * dz4 / r45
+                    term5 = 3 * dy4 * dz4 / r55
+                    term6 = 3 * dy4 * dz4 / r65
+                    
+                    sum1 += term1
+                    sum2 += term2
+                    sum3 += term3
+                    sum4 += term4
+                    sum5 += term5
+                    sum6 += term6
+
+    f2 = -(sum1 - sum2) / 2
+    f3 = -(sum1 - sum2) / 4
+    f4 = -(sum1 - sum2) / 4
+    f5 = -(sum1 + sum2) / 2
+    f6 = (sum1 + sum2) / 4
+    f7 = (sum1 + sum2) / 4
+    g = sum4
+    h1 = sum1
+    h2 = sum3 - sum1
+    h3 = (sum5+sum6)/2
+    h4 = (sum5-sum6)/2
+
+    print ("Raw Sums:")
+    print ("Sz(  0, 1/2, 1/2) = ", sum1)
+    print ("Sz(1/2,   0,   0) = ", sum2)
+    print ("Sz(  0, 1/4, 1/4) = ", sum3)
+    print ("Sy(1/4, 1/4, 1/4) = ", sum4)
+    print ("Sy(  0, 1/4, 1/4) = ", sum5)
+    print ("Sy(1/2, 1/4, 1/4) = ", sum6)
+    print ("")
+    print ("Field Values:")
+    print ("f2 = ", f2)
+    print ("f3 = ", f3)
+    print ("f4 = ", f4)
+    print ("f5 = ", f5)
+    print ("f6 = ", f6)
+    print ("f7 = ", f7)
+    print (" g = ", g)
+    print ("h1 = ", h1)
+    print ("h2 = ", h2)
+    print ("h3 = ", h3)
+    print ("h4 = ", h4)
+    print ("")
+    print ("Energy Constants for selected lattices:")
+    print ("A_sc_001  :", -f5 / 2 )
+    print ("A_bcc_001 :", 0 )
+    print ("A_bcc_111 :", -g / 6 )
+    print ("A_bcc_min :", -(g+f6) / 4)
+    print ("A_fcc_001 :",  h1 / 2)
+    print ("A_fcc_011 :", -h1 / 4)
+    print ("B_sc_001  :", -f5 / 2)
+    print ("B_bcc_001 :", -f5 / 4)
+    print ("B_bcc_111 :", -g / 6 )
+    print ("B_fcc_001 :", -h1 / 4)
+    print ("B_fcc_011 :", -h4 / 8)
+
+
+def main(argv):
+    
+    r_c = 100
+    try:                                
+        opts, args = getopt.getopt(argv, "hc:", ["help","r_c="])  
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()
+        elif opt in ("-c", "--r_c"):
+            r_c = int(arg)
+        
+    doSums(r_c)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
+ 
