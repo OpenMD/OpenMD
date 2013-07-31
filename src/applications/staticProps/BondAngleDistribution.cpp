@@ -174,9 +174,9 @@ namespace OpenMD {
               Vector3d vec2 = bondvec[j];
               
               vec2.normalize();
-             
+	      
               RealType theta = acos(dot(vec1,vec2))*180.0/NumericConstant::PI;
-               
+              
               
               if (theta > 180.0){
                 theta = 360.0 - theta;

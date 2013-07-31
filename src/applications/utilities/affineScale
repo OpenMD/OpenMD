@@ -41,6 +41,7 @@ frameData = []
 indices = []
 pvqj = []
 p = []
+wrap = []
 v = []
 q = []
 j = []
@@ -123,6 +124,7 @@ def readFile(mdFileName):
                         y = float(L[3])
                         z = float(L[4])
                         p.append([x, y, z])
+			wrap.append([0,0,0])
                         vx = float(L[5])
                         vy = float(L[6])
                         vz = float(L[7])
@@ -217,11 +219,13 @@ def roundMe(x):
 
 def wrapVector(myVect):
     scaled = [0.0, 0.0, 0.0]
+    wrappingNumber = [0,0,0]
     for i in range(3):
         scaled[i] = myVect[i] * BoxInv[i]
-        scaled[i] = scaled[i] - roundMe(scaled[i])
+	wrappingNumber[i] = roundMe(scaled[i])
+        scaled[i] = scaled[i] - wrappingNumber[i]
         myVect[i] = scaled[i] * Hmat[i][i]
-    return myVect
+    return myVect, wrappingNumber
 
 def dot(L1, L2):
     myDot = 0.0
@@ -251,7 +255,7 @@ def mapToBox():
         dpos.append(p[i][0])
         dpos.append(p[i][1])
         dpos.append(p[i][2])
-        p[i] = wrapVector(dpos)
+        p[i], wrap[i] = wrapVector(dpos)
 
 def scaleBox(scaleX, scaleY, scaleZ):
     for i in range(3):
@@ -265,9 +269,9 @@ def scaleBox(scaleX, scaleY, scaleZ):
 
 def scaleCoordinates(scaleX, scaleY, scaleZ):
     for i in range(len(indices)):
-        p[i][0] = p[i][0]*scaleX
-        p[i][1] = p[i][1]*scaleY
-        p[i][2] = p[i][2]*scaleZ
+        p[i][0] = p[i][0]*scaleX + wrap[i][0] * Hmat[0][0]
+        p[i][1] = p[i][1]*scaleY + wrap[i][1] * Hmat[1][1]
+        p[i][2] = p[i][2]*scaleZ + wrap[i][2] * Hmat[2][2]
 
 def main(argv):
     _haveMDFileName = 0
