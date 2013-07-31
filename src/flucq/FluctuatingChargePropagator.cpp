@@ -60,8 +60,6 @@ namespace OpenMD {
     
     Globals* simParams = info_->getSimParams();
     fqParams_ = simParams->getFluctuatingChargeParameters();    
-    fqConstraints_ = new FluctuatingChargeConstraints(info_);
-    fqConstraints_->setConstrainRegions( fqParams_->getConstrainRegions() );
   }
 
   FluctuatingChargePropagator::~FluctuatingChargePropagator() {
@@ -76,6 +74,8 @@ namespace OpenMD {
     if (info_->usesFluctuatingCharges()) {
       if (info_->getNFluctuatingCharges() > 0) {
         hasFlucQ_ = true;
+	fqConstraints_ = new FluctuatingChargeConstraints(info_);
+	fqConstraints_->setConstrainRegions(fqParams_->getConstrainRegions());
       }
     }
     

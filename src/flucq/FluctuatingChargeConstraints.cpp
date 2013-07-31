@@ -51,7 +51,6 @@ namespace OpenMD {
 
   FluctuatingChargeConstraints::FluctuatingChargeConstraints(SimInfo* info) : 
     info_(info), constrainRegions_(false), hasFlucQ_(false), initialized_(false) {
-    
   }
 
   void FluctuatingChargeConstraints::initialize(){
@@ -100,6 +99,7 @@ namespace OpenMD {
   void FluctuatingChargeConstraints::applyConstraints() {
     if (!initialized_) initialize();
     if (!hasFlucQ_) return;
+
     SimInfo::MoleculeIterator i;
     Molecule::FluctuatingChargeIterator  j;
     Molecule* mol;
