@@ -63,7 +63,6 @@ namespace OpenMD {
   }
 
   FluctuatingChargePropagator::~FluctuatingChargePropagator() {
-    if (fqConstraints_ != NULL) delete fqConstraints_;
   }
 
   void FluctuatingChargePropagator::setForceManager(ForceManager* forceMan) {

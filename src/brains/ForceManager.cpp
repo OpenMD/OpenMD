@@ -926,7 +926,7 @@ namespace OpenMD {
     // collects pairwise information
     fDecomp_->collectData();
     if (cutoffMethod_ == EWALD_FULL) {
-      interactionMan_->doReciprocalSpaceSum();
+      interactionMan_->doReciprocalSpaceSum(longRangePotential);
     }
         
     if (info_->requiresSelfCorrection()) {
@@ -949,7 +949,6 @@ namespace OpenMD {
 
   }
 
-  
   void ForceManager::postCalculation() {
 
     vector<Perturbation*>::iterator pi;

@@ -15,7 +15,7 @@
      }
      ensemble = NVE;
      forceField = "Multipole";
-     cutoffMethod = "hard";
+     cutoffMethod = "shifted_force";
      electrostaticScreeningMethod = "undamped";
      cutoffRadius = 20.0;
      dampingAlpha = 0.18;

@@ -289,7 +289,11 @@ namespace OpenMD {
     db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
     db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;   
 
-    if (summationMethod_ != esm_EWALD_FULL) {
+    if (summationMethod_ == esm_EWALD_FULL) {
+      selfMult1_ *= 2.0;
+      selfMult2_ *= 2.0;
+      selfMult4_ *= 2.0;
+    } else {
       selfMult1_ -= b0c;
       selfMult2_ += (db0c_2 + 2.0*db0c_1*ric) /  3.0;
       selfMult4_ -= (db0c_4 + 4.0*db0c_3*ric) / 15.0;
@@ -677,7 +681,8 @@ namespace OpenMD {
       FQtids[atid] = fqtid;
       Jij[fqtid].resize(nFlucq_);
 
-      // Now, iterate over all known fluctuating and add to the coulomb integral map:
+      // Now, iterate over all known fluctuating and add to the
+      // coulomb integral map:
       
       std::set<int>::iterator it;
       for( it = FQtypes.begin(); it != FQtypes.end(); ++it) {     
@@ -1165,6 +1170,7 @@ namespace OpenMD {
     case esm_SHIFTED_FORCE:
     case esm_SHIFTED_POTENTIAL:
     case esm_TAYLOR_SHIFTED:
+    case esm_EWALD_FULL:
       if (i_is_Charge) 
         self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));      
       if (i_is_Dipole) 
@@ -1192,7 +1198,7 @@ namespace OpenMD {
   }
 
 
-  void Electrostatic::ReciprocalSpaceSum () {
+  void Electrostatic::ReciprocalSpaceSum(potVec& pot) {
     
     RealType kPot = 0.0;
     RealType kVir = 0.0;
@@ -1217,8 +1223,11 @@ namespace OpenMD {
     Vector3d box = hmat.diagonals();
     RealType boxMax = box.max();
     
-    //int kMax = int(pow(dampingAlpha_,2)*cutoffRadius_ * boxMax / M_PI);
-    const int kMax = 5;
+    cerr << "da = " << dampingAlpha_ << " rc = " << cutoffRadius_ << "\n";
+    cerr << "boxMax = " << boxMax << "\n";
+    //int kMax = int(2.0 * M_PI / (pow(dampingAlpha_,2)*cutoffRadius_ * boxMax) );
+    int kMax = 5;
+    cerr << "kMax = " << kMax << "\n";
     int kSqMax = kMax*kMax + 2;
     
     int kLimit = kMax+1;
@@ -1260,6 +1269,8 @@ namespace OpenMD {
     Vector3d tt;
     Vector3d w;
     Vector3d u;
+    Vector3d a;
+    Vector3d b;
     
     for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
@@ -1270,21 +1281,28 @@ namespace OpenMD {
         r = atom->getPos();
         info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
         
+        // Shift so that all coordinates are in the range [0,L]:
+
+        r += box/2.0;
+
         tt.Vmul(t, r);
+
+        //cerr << "tt = " << tt << "\n";
         
         eCos[1][i] = Vector3d(1.0, 1.0, 1.0);
         eSin[1][i] = Vector3d(0.0, 0.0, 0.0);
         eCos[2][i] = Vector3d(cos(tt.x()), cos(tt.y()), cos(tt.z()));
         eSin[2][i] = Vector3d(sin(tt.x()), sin(tt.y()), sin(tt.z()));
-        u = 2.0 * eCos[1][i];
-        eCos[3][i].Vmul(u, eCos[2][i]);
-        eSin[3][i].Vmul(u, eSin[2][i]);       
+        u = eCos[2][i];
+        w = eSin[2][i];
         
         for(int l = 3; l <= kLimit; l++) {
-          w.Vmul(u, eCos[l-1][i]);
-          eCos[l][i] = w - eCos[l-2][i];
-          w.Vmul(u, eSin[l-1][i]);
-          eSin[l][i] = w - eSin[l-2][i];
+          a.Vmul(eCos[l-1][i], u);
+          b.Vmul(eSin[l-1][i], w);
+          eCos[l][i] = a - b;
+          a.Vmul(eSin[l-1][i], u);
+          b.Vmul(eCos[l-1][i], w);
+          eSin[l][i] = a + b;
         }
       }
     }
@@ -1348,7 +1366,7 @@ namespace OpenMD {
             if(mm < 0) {
               clm[i] = eCos[l][i].x()*eCos[m][i].y() 
                      + eSin[l][i].x()*eSin[m][i].y(); 
-              slm[i] = eCos[l][i].x()*eCos[m][i].y() 
+              slm[i] = eSin[l][i].x()*eCos[m][i].y() 
                      - eSin[m][i].y()*eCos[l][i].x();
             } else {
               clm[i] = eCos[l][i].x()*eCos[m][i].y() 
@@ -1390,7 +1408,7 @@ namespace OpenMD {
                  mol = info_->nextMolecule(mi)) {
               for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
                   atom = mol->nextAtom(ai)) {
-                i = atom->getGlobalIndex();
+                i = atom->getLocalIndex();
                 int atid = atom->getAtomType()->getIdent();
                 ElectrostaticAtomData data = ElectrostaticMap[Etids[atid]];
                                
@@ -1398,7 +1416,7 @@ namespace OpenMD {
                   RealType C = data.fixedCharge;
                   if (atom->isFluctuatingCharge()) C += atom->getFlucQPos();
                   ckc[i] = C * ckr[i];
-                  cks[i] = C * cks[i];
+                  cks[i] = C * skr[i];
                 }
                 
                 if (data.is_Dipole) {
@@ -1418,7 +1436,7 @@ namespace OpenMD {
                 }              
               }
             }
-            
+
             // calculate vector sums
             
             RealType ckcs = std::accumulate(ckc.begin(),ckc.end(),0.0);
@@ -1427,6 +1445,7 @@ namespace OpenMD {
             RealType dkss = std::accumulate(dks.begin(),dks.end(),0.0);
             RealType qkcs = std::accumulate(qkc.begin(),qkc.end(),0.0);
             RealType qkss = std::accumulate(qks.begin(),qks.end(),0.0);
+
             
 #ifdef IS_MPI
             MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &ckcs, 1, MPI::REALTYPE, 
@@ -1443,14 +1462,11 @@ namespace OpenMD {
                                       MPI::SUM);
 #endif        
             
-            // Accumulate potential energy and virial contribution:
-            
-            //cerr << "l, m, n = " << l << " " << m << " " << n << "\n";
-            cerr << "kVec = " << kVec << "\n";
-            cerr << "ckss = " << ckss << " ckcs = " << ckcs << "\n";
+            // Accumulate potential energy and virial contribution:           
+
             kPot += 2.0 * rvol * AK[kk]*((ckss+dkcs-qkss)*(ckss+dkcs-qkss) 
                                          + (ckcs-dkss-qkcs)*(ckcs-dkss-qkss));
-            //cerr << "kspace pot = " << kPot << "\n";
+
             kVir -= 2.0 * rvol * AK[kk]*(ckcs*ckcs+ckss*ckss
                                          +4.0*(ckss*dkcs-ckcs*dkss)
                                          +3.0*(dkcs*dkcs+dkss*dkss)
@@ -1491,5 +1507,7 @@ namespace OpenMD {
         }
       }
     }
+    cerr << "kPot = " << kPot << "\n";
+    pot[ELECTROSTATIC_FAMILY] += kPot;  
   }
 }

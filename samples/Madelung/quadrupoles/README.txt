@@ -21,7 +21,7 @@ The electrostatic energy for one of these dipolar arrays is
 where C is the energy constant above, N is the number of quadrupoles
 per unit volume, and Q is the strength of the dipole.
 
-In the units used by OpenMD, with quadrupole momentss of 1
+In the units used by OpenMD, with quadrupole moments of 1
 Debye-angstrom, lengths in angstroms, and energies reported in
 kcal / mol, the electrostatic energies are:
 
@@ -34,7 +34,8 @@ volume of the box.
 ---------------------------------------------------------------------
 [1] O. Nagai and T. Nakamura, "Quadrupole Interaction in Crystals,"
     Progress of Theoretical Physics 24 (2), 432-454 (1960) 
-    doi: 10.1143/PTP.24.432
+    doi: 10.1143/PTP.24.432,   also see Errata: Progress of
+    Theoretical Physics 30 (3), 412 (1963).  doi: 10.1143/PTP.30.412a
 
 [2] J. M. Luttinger and L. Tisza, "Theory of Dipole Interaction in
     Crystals," Phys. Rev. 70, 954–964 (1946) doi: 10.1103/PhysRev.70.954

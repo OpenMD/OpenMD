@@ -80,7 +80,7 @@ namespace OpenMD {
     void doPair(InteractionData &idat);    
     void doSkipCorrection(InteractionData &idat);
     void doSelfCorrection(SelfData &sdat);
-    void doReciprocalSpaceSum();
+    void doReciprocalSpaceSum(potVec &pot);
     void setCutoffRadius(RealType rCut);
     RealType getSuggestedCutoffRadius(int *atid1);   
     RealType getSuggestedCutoffRadius(AtomType *atype);

@@ -477,9 +477,9 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::doReciprocalSpaceSum(){
+  void InteractionManager::doReciprocalSpaceSum(potVec &pot){
     if (!initialized_) initialize();
-    electrostatic_->ReciprocalSpaceSum();
+    electrostatic_->ReciprocalSpaceSum(pot);
   }
 
   RealType InteractionManager::getSuggestedCutoffRadius(int *atid) {
@@ -490,7 +490,8 @@ namespace OpenMD {
     set<NonBondedInteraction*>::iterator it;
     RealType cutoff = 0.0;
     
-    for (it = interactions_[*atid][*atid].begin(); it != interactions_[*atid][*atid].end();
+    for (it = interactions_[*atid][*atid].begin(); 
+         it != interactions_[*atid][*atid].end();
          ++it)
       cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype, atype)));   
     return cutoff;    
@@ -504,7 +505,8 @@ namespace OpenMD {
     set<NonBondedInteraction*>::iterator it;
     RealType cutoff = 0.0;
     
-    for (it = interactions_[atid][atid].begin(); it != interactions_[atid][atid].end(); ++it)
+    for (it = interactions_[atid][atid].begin(); 
+         it != interactions_[atid][atid].end(); ++it)
       cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype, atype)));   
     return cutoff;    
   }

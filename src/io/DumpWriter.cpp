@@ -625,7 +625,7 @@ namespace OpenMD {
   }
 
   std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex, int siteIndex) {
-	
+    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
 
     std::string id;
     std::string type;
@@ -641,77 +641,87 @@ namespace OpenMD {
     }
               
     if (needFlucQ_) {
-      type += "cw";
-      RealType fqPos = sd->getFlucQPos();
-      if (isinf(fqPos) || isnan(fqPos) ) {      
-        sprintf( painCave.errMsg,
-                 "DumpWriter detected a numerical error writing the"
-                 " fluctuating charge for object %s", id.c_str());      
-        painCave.isFatal = 1;
-        simError();
-      }
-      sprintf(tempBuffer, " %13e ", fqPos);
-      line += tempBuffer;
-    
-      RealType fqVel = sd->getFlucQVel();
-      if (isinf(fqVel) || isnan(fqVel) ) {      
-        sprintf( painCave.errMsg,
-                 "DumpWriter detected a numerical error writing the"
-                 " fluctuating charge velocity for object %s", id.c_str());      
-        painCave.isFatal = 1;
-        simError();
-      }
-      sprintf(tempBuffer, " %13e ", fqVel);
-      line += tempBuffer;
-
-      if (needForceVector_) {
-        type += "g";
-        RealType fqFrc = sd->getFlucQFrc();        
-        if (isinf(fqFrc) || isnan(fqFrc) ) {      
+      if (storageLayout & DataStorage::dslFlucQPosition) {
+        type += "c";
+        RealType fqPos = sd->getFlucQPos();
+        if (isinf(fqPos) || isnan(fqPos) ) {      
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the"
-                   " fluctuating charge force for object %s", id.c_str());      
+                   " fluctuating charge for object %s", id.c_str());      
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e ", fqFrc);        
+        sprintf(tempBuffer, " %13e ", fqPos);
+        line += tempBuffer;
+      } 
+
+      if (storageLayout & DataStorage::dslFlucQVelocity) {
+        type += "w";    
+        RealType fqVel = sd->getFlucQVel();
+        if (isinf(fqVel) || isnan(fqVel) ) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the"
+                   " fluctuating charge velocity for object %s", id.c_str());      
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e ", fqVel);
+        line += tempBuffer;
+      }
+
+      if (needForceVector_) {
+        if (storageLayout & DataStorage::dslFlucQForce) {          
+          type += "g";
+          RealType fqFrc = sd->getFlucQFrc();        
+          if (isinf(fqFrc) || isnan(fqFrc) ) {      
+            sprintf( painCave.errMsg,
+                     "DumpWriter detected a numerical error writing the"
+                     " fluctuating charge force for object %s", id.c_str());      
+            painCave.isFatal = 1;
+            simError();
+          }
+          sprintf(tempBuffer, " %13e ", fqFrc);        
+          line += tempBuffer;
+        }
+      }
+    }
+    
+    if (needElectricField_) {
+      if (storageLayout & DataStorage::dslElectricField) {
+        type += "e";
+        Vector3d eField= sd->getElectricField();
+        if (isinf(eField[0]) || isnan(eField[0]) || 
+            isinf(eField[1]) || isnan(eField[1]) || 
+            isinf(eField[2]) || isnan(eField[2]) ) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the electric"
+                   " field for object %s", id.c_str());      
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e %13e %13e",
+                eField[0], eField[1], eField[2]);
         line += tempBuffer;
       }
     }
 
-    if (needElectricField_) {
-      type += "e";
-      Vector3d eField= sd->getElectricField();
-      if (isinf(eField[0]) || isnan(eField[0]) || 
-          isinf(eField[1]) || isnan(eField[1]) || 
-          isinf(eField[2]) || isnan(eField[2]) ) {      
-        sprintf( painCave.errMsg,
-                 "DumpWriter detected a numerical error writing the electric"
-                 " field for object %s", id.c_str());      
-        painCave.isFatal = 1;
-        simError();
-      }
-      sprintf(tempBuffer, " %13e %13e %13e",
-              eField[0], eField[1], eField[2]);
-      line += tempBuffer;
-    }
-
 
     if (needParticlePot_) {
-      type += "u";
-      RealType particlePot = sd->getParticlePot();
-      if (isinf(particlePot) || isnan(particlePot)) {      
-        sprintf( painCave.errMsg,
-                 "DumpWriter detected a numerical error writing the particle "
-                 " potential for object %s", id.c_str());      
-        painCave.isFatal = 1;
-        simError();
+      if (storageLayout & DataStorage::dslParticlePot) {
+        type += "u";
+        RealType particlePot = sd->getParticlePot();
+        if (isinf(particlePot) || isnan(particlePot)) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the particle "
+                   " potential for object %s", id.c_str());      
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e", particlePot);
+        line += tempBuffer;
       }
-      sprintf(tempBuffer, " %13e", particlePot);
-      line += tempBuffer;
     }
-    
-
+   
     sprintf(tempBuffer, "%s %7s %s\n", id.c_str(), type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }
