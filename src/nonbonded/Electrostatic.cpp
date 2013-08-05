@@ -1292,8 +1292,8 @@ namespace OpenMD {
           eCos[l][i].z() = eCos[l-1][i].z()*eCos[2][i].z() - eSin[l-1][i].z()*eSin[2][i].z();
           
           eSin[l][i].x() = eSin[l-1][i].x()*eCos[2][i].x() + eCos[l-1][i].x()*eSin[2][i].x();
-          eSin[l][i].y() = eSin[l-1][i].y()*eCos[2][i].y() + eCos[l-1][i].y()*eSin[2][i].z();
-          eSin[l][i].z() = eSin[l-1][i].z()*eCos[2][i].z() + eCos[l-1][i].z()*eSin[2][i].y();
+          eSin[l][i].y() = eSin[l-1][i].y()*eCos[2][i].y() + eCos[l-1][i].y()*eSin[2][i].y();
+          eSin[l][i].z() = eSin[l-1][i].z()*eCos[2][i].z() + eCos[l-1][i].z()*eSin[2][i].z();
 
 
           // a.Vmul(eCos[l-1][i], u);
@@ -1462,7 +1462,7 @@ namespace OpenMD {
                                       MPI::SUM);
 #endif        
             
-            // Accumulate potential energy and virial contribution:           
+            // Accumulate potential energy and virial contribution:
 
             kPot += 2.0 * rvol * AK[kk]*((ckss+dkcs-qkss)*(ckss+dkcs-qkss) 
                                          + (ckcs-dkss-qkcs)*(ckcs-dkss-qkss));
@@ -1491,7 +1491,7 @@ namespace OpenMD {
                                          -ckr[i]*(ckss+dkcs-qkss));
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)+
                                              skr[i]*(ckss+dkcs-qkss));
-                
+               
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
                 
                 if (data.is_Dipole) {

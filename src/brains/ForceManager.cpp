@@ -709,6 +709,7 @@ namespace OpenMD {
     RealType dVdFQ1(0.0);
     RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
+    potVec reciprocalPotential(0.0);
     potVec workPot(0.0);
     potVec exPot(0.0);
     Vector3d eField1(0.0);
@@ -926,7 +927,7 @@ namespace OpenMD {
     // collects pairwise information
     fDecomp_->collectData();
     if (cutoffMethod_ == EWALD_FULL) {
-      interactionMan_->doReciprocalSpaceSum(longRangePotential);
+      interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
     }
         
     if (info_->requiresSelfCorrection()) {
@@ -940,7 +941,7 @@ namespace OpenMD {
     fDecomp_->collectSelfData();
 
     longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
-      *(fDecomp_->getPairwisePotential());
+      *(fDecomp_->getPairwisePotential()) + reciprocalPotential;
 
     curSnapshot->setLongRangePotential(longRangePotential);
     
