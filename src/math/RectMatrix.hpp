@@ -555,6 +555,31 @@ namespace OpenMD {
     return result;
   }    
 
+    
+    /**
+     * Returns the tensor contraction (double dot product) of two rank 2
+     * tensors (or Matrices)
+     *
+     * \f[ \mathbf{A} \colon \! \mathbf{B} = \sum_\alpha \sum_\beta \mathbf{A}_{\alpha \beta} B_{\alpha \beta} \f] 
+     *
+     * @param t1 first tensor
+     * @param t2 second tensor
+     * @return the tensor contraction (double dot product) of t1 and t2
+     */
+  template<typename Real, unsigned int Row, unsigned int Col> 
+  inline Real doubleDot( const RectMatrix<Real, Row, Col>& t1, 
+                         const RectMatrix<Real, Row, Col>& t2 ) {
+    Real tmp;
+    tmp = 0;
+    
+    for (unsigned int i = 0; i < Row; i++)
+      for (unsigned int j =0; j < Col; j++)
+        tmp += t1(i,j) * t2(i,j);
+    
+    return tmp;
+  }
+  
+
   
   /**
    * Returns the vector (cross) product of two matrices.  This

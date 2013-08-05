@@ -666,6 +666,7 @@ namespace OpenMD {
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
 
+
     //calculate the center of mass of cutoff group
 
     SimInfo::MoleculeIterator mi;
@@ -770,7 +771,6 @@ namespace OpenMD {
         rgrpsq = d_grp.lengthSquare();
 
         if (rgrpsq < rCutSq) {
-
           if (iLoop == PAIR_LOOP) {
             vij = 0.0;
             fij.zero();
@@ -827,7 +827,7 @@ namespace OpenMD {
                
                 r = sqrt( *(idat.r2) );
                 idat.rij = &r;
-               
+
                 if (iLoop == PREPAIR_LOOP) {
                   interactionMan_->doPrePair(idat);
                 } else {

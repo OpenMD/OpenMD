@@ -1421,15 +1421,16 @@ namespace OpenMD {
                 
                 if (data.is_Dipole) {
                   Vector3d D = atom->getDipole() * mPoleConverter;
-                  RealType dk = dot(kVec, D);
-                  dxk[i] = cross(kVec, D);
+                  RealType dk = dot(D, kVec);
+                  dxk[i] = cross(D, kVec);
                   dkc[i] = dk * ckr[i];
                   dks[i] = dk * skr[i];
                 }
                 if (data.is_Quadrupole) {
                   Mat3x3d Q = atom->getQuadrupole();
                   Q *= mPoleConverter;
-                  RealType qk = -( Q * k2 ).trace();
+                  RealType qk = - doubleDot(Q, k2);
+                  // RealType qk = -( Q * k2 ).trace();
                   qxk[i] = -2.0 * cross(k2, Q);
                   qkc[i] = qk * ckr[i];
                   qks[i] = qk * skr[i];

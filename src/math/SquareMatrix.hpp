@@ -135,25 +135,6 @@ namespace OpenMD {
 
       return tmp;
     }
-    
-    /**
-     * Returns the tensor contraction (double dot product) of two rank 2
-     * tensors (or Matrices)
-     * @param t1 first tensor
-     * @param t2 second tensor
-     * @return the tensor contraction (double dot product) of t1 and t2
-     */
-    Real doubleDot( const SquareMatrix<Real, Dim>& t1, const SquareMatrix<Real, Dim>& t2 ) {
-      Real tmp;
-      tmp = 0;
-      
-      for (unsigned int i = 0; i < Dim; i++)
-        for (unsigned int j =0; j < Dim; j++)
-          tmp += t1[i][j] * t2[i][j];
-      
-      return tmp;
-    }
-
 
     /** Tests if this matrix is symmetrix. */            
     bool isSymmetric() const {
