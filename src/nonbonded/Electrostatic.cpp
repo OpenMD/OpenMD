@@ -289,11 +289,7 @@ namespace OpenMD {
     db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
     db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;   
 
-    if (summationMethod_ == esm_EWALD_FULL) {
-      selfMult1_ *= 2.0;
-      selfMult2_ *= 2.0;
-      selfMult4_ *= 2.0;
-    } else {
+    if (summationMethod_ != esm_EWALD_FULL) {
       selfMult1_ -= b0c;
       selfMult2_ += (db0c_2 + 2.0*db0c_1*ric) /  3.0;
       selfMult4_ -= (db0c_4 + 4.0*db0c_3*ric) / 15.0;
@@ -1223,11 +1219,8 @@ namespace OpenMD {
     Vector3d box = hmat.diagonals();
     RealType boxMax = box.max();
     
-    cerr << "da = " << dampingAlpha_ << " rc = " << cutoffRadius_ << "\n";
-    cerr << "boxMax = " << boxMax << "\n";
     //int kMax = int(2.0 * M_PI / (pow(dampingAlpha_,2)*cutoffRadius_ * boxMax) );
-    int kMax = 5;
-    cerr << "kMax = " << kMax << "\n";
+    int kMax = 7;
     int kSqMax = kMax*kMax + 2;
     
     int kLimit = kMax+1;
@@ -1261,6 +1254,7 @@ namespace OpenMD {
     
     Vector3d t( 2.0 * M_PI );
     t.Vdiv(t, box);
+
     
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
@@ -1281,28 +1275,34 @@ namespace OpenMD {
         r = atom->getPos();
         info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
         
-        // Shift so that all coordinates are in the range [0,L]:
-
-        r += box/2.0;
-
         tt.Vmul(t, r);
 
-        //cerr << "tt = " << tt << "\n";
         
         eCos[1][i] = Vector3d(1.0, 1.0, 1.0);
         eSin[1][i] = Vector3d(0.0, 0.0, 0.0);
         eCos[2][i] = Vector3d(cos(tt.x()), cos(tt.y()), cos(tt.z()));
         eSin[2][i] = Vector3d(sin(tt.x()), sin(tt.y()), sin(tt.z()));
+
         u = eCos[2][i];
         w = eSin[2][i];
         
         for(int l = 3; l <= kLimit; l++) {
-          a.Vmul(eCos[l-1][i], u);
-          b.Vmul(eSin[l-1][i], w);
-          eCos[l][i] = a - b;
-          a.Vmul(eSin[l-1][i], u);
-          b.Vmul(eCos[l-1][i], w);
-          eSin[l][i] = a + b;
+          eCos[l][i].x() = eCos[l-1][i].x()*eCos[2][i].x() - eSin[l-1][i].x()*eSin[2][i].x();
+          eCos[l][i].y() = eCos[l-1][i].y()*eCos[2][i].y() - eSin[l-1][i].y()*eSin[2][i].y();
+          eCos[l][i].z() = eCos[l-1][i].z()*eCos[2][i].z() - eSin[l-1][i].z()*eSin[2][i].z();
+          
+          eSin[l][i].x() = eSin[l-1][i].x()*eCos[2][i].x() + eCos[l-1][i].x()*eSin[2][i].x();
+          eSin[l][i].y() = eSin[l-1][i].y()*eCos[2][i].y() + eCos[l-1][i].y()*eSin[2][i].z();
+          eSin[l][i].z() = eSin[l-1][i].z()*eCos[2][i].z() + eCos[l-1][i].z()*eSin[2][i].y();
+
+
+          // a.Vmul(eCos[l-1][i], u);
+          // b.Vmul(eSin[l-1][i], w);
+          // eCos[l][i] = a - b;
+          // a.Vmul(eSin[l-1][i], u);
+          // b.Vmul(eCos[l-1][i], w);
+          // eSin[l][i] = a + b;
+        
         }
       }
     }
@@ -1350,7 +1350,7 @@ namespace OpenMD {
     int mMin = kLimit;
     int nMin = kLimit + 1;
     for (int l = 1; l <= kLimit; l++) {
-      int ll =l - 1; 
+      int ll = l - 1; 
       RealType rl = xcl * float(ll);
       for (int mmm = mMin; mmm <= kLim2; mmm++) {
         int mm = mmm - kLimit;
@@ -1372,7 +1372,7 @@ namespace OpenMD {
               clm[i] = eCos[l][i].x()*eCos[m][i].y() 
                      - eSin[l][i].x()*eSin[m][i].y(); 
               slm[i] = eSin[l][i].x()*eCos[m][i].y() 
-                     + eSin[m][i].y()*eCos[l][i].x();
+                     + eSin[m][i].y()*eCos[l][i].x();              
             }
           }
         }
@@ -1486,12 +1486,11 @@ namespace OpenMD {
                 ElectrostaticAtomData data = ElectrostaticMap[Etids[atid]];
                 
                 RealType qfrc = AK[kk]*((cks[i]+dkc[i]-qks[i])*(ckcs-dkss-qkcs)
-                                        - (ckc[i]-dks[i]-qkc[i])*(ckss+dkcs-qkss));
+                                     - (ckc[i]-dks[i]-qkc[i])*(ckss+dkcs-qkss));
                 RealType qtrq1 = AK[kk]*(skr[i]*(ckcs-dkss-qkcs)
                                          -ckr[i]*(ckss+dkcs-qkss));
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)+
                                              skr[i]*(ckss+dkcs-qkss));
-                
                 
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
                 
@@ -1505,7 +1504,9 @@ namespace OpenMD {
             }
           }
         }
+        nMin = 1;
       }
+      mMin = 1;
     }
     cerr << "kPot = " << kPot << "\n";
     pot[ELECTROSTATIC_FAMILY] += kPot;  
