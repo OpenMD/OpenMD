@@ -201,6 +201,14 @@ namespace OpenMD {
     data_[HYDROGENBONDING_POTENTIAL] = hydrogenbonding_potential;
     statsMap_["HYDROGENBONDING_POTENTIAL"] =  HYDROGENBONDING_POTENTIAL;
 
+    StatsData reciprocal_potential;
+    reciprocal_potential.units =  "kcal/mol";
+    reciprocal_potential.title =  "Reciprocal Space Potential";    
+    reciprocal_potential.dataType = "RealType";
+    reciprocal_potential.accumulator = new Accumulator();
+    data_[RECIPROCAL_POTENTIAL] = reciprocal_potential;
+    statsMap_["RECIPROCAL_POTENTIAL"] =  RECIPROCAL_POTENTIAL;
+
     StatsData short_range_potential;
     short_range_potential.units =  "kcal/mol";
     short_range_potential.title =  "Short Range Potential";
@@ -489,6 +497,9 @@ namespace OpenMD {
           break;
         case HYDROGENBONDING_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[HYDROGENBONDING_FAMILY]);
+          break;
+        case RECIPROCAL_POTENTIAL:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getReciprocalPotential());
           break;
         case SHORT_RANGE_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getShortRangePotential());

@@ -477,7 +477,7 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::doReciprocalSpaceSum(potVec &pot){
+  void InteractionManager::doReciprocalSpaceSum(RealType &pot){
     if (!initialized_) initialize();
     electrostatic_->ReciprocalSpaceSum(pot);
   }

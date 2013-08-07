@@ -72,6 +72,7 @@ namespace OpenMD{
     RealType potentialEnergy;     /**< potential energy of this frame */
     RealType shortRangePotential; /**< short-range contributions to the potential*/
     RealType longRangePotential;  /**< long-range contributions to the potential */
+    RealType reciprocalPotential; /**< reciprocal-space contributions to the potential */
     RealType bondPotential;       /**< bonded contribution to the potential */
     RealType bendPotential;       /**< angle-bending contribution to the potential */
     RealType torsionPotential;    /**< dihedral (torsion angle) contribution to the potential */
@@ -182,6 +183,9 @@ namespace OpenMD{
     RealType getLongRangePotential();
     potVec   getLongRangePotentials();
 
+    void     setReciprocalPotential(const RealType rp);
+    RealType getReciprocalPotential();
+    
     void     setExcludedPotentials(const potVec exPot);
     potVec   getExcludedPotentials();
    
