@@ -320,7 +320,6 @@ src/optimization/SteepestDescent.cpp
 src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/optimization/MinimizerParameters.cpp
 src/nonbonded/EAM.cpp
-src/nonbonded/Electrostatic.cpp
 src/nonbonded/GB.cpp
 src/nonbonded/InteractionManager.cpp
 src/nonbonded/LJ.cpp
@@ -419,6 +418,7 @@ src/io/StatWriter.cpp
 src/io/ZConsWriter.cpp
 src/io/ifstrstream.cpp
 src/math/ParallelRandNumGen.cpp
+src/nonbonded/Electrostatic.cpp
 src/parallel/ForceDecomposition.cpp
 src/parallel/ForceMatrixDecomposition.cpp
 src/restraints/RestraintForceManager.cpp
