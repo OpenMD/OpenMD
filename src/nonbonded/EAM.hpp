@@ -56,6 +56,8 @@ namespace OpenMD {
     CubicSpline* F;
     CubicSpline* Z;
     RealType rcut;
+    bool isFluctuating;
+    RealType qToRhoScaling;
   };
   
   struct EAMInteractionData {
@@ -81,7 +83,7 @@ namespace OpenMD {
     void calcFunctional(SelfData &sdat);
     void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
-    virtual int getHash() { return EAM_PAIR; }
+    virtual int getHash() { return EAM_INTERACTION; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*,AtomType*> atypes);
     void setCutoffRadius( RealType rCut );
 
@@ -100,6 +102,7 @@ namespace OpenMD {
 
     ForceField* forceField_;
     set<AtomType*> simTypes_;
+    RealType pre11_;
     RealType eamRcut_;
     EAMMixingMethod mixMeth_;    
     string name_;

@@ -60,8 +60,13 @@ namespace OpenMD {
     CubicSpline* z1 = ea1.getZ();
     CubicSpline* z2 = ea2.getZ();
 
-    // make the r grid:
+    // Thise prefactors convert the charge-charge interactions into
+    // kcal / mol all were computed assuming distances are measured in
+    // angstroms Charge-Charge, assuming charges are measured in
+    // electrons.  Matches value in Electrostatics.cpp
+    pre11_ = 332.0637778;
 
+    // make the r grid:
 
     // we need phi out to the largest value we'll encounter in the radial space;
     
@@ -101,7 +106,7 @@ namespace OpenMD {
       zi = r <= ea1.getRcut() ? z1->getValueAt(r) : 0.0;
       zj = r <= ea2.getRcut() ? z2->getValueAt(r) : 0.0;
 
-      phi = 331.999296 * (zi * zj) / r;
+      phi = pre11_ * (zi * zj) / r;
 
       phivals.push_back(phi);
     }
@@ -207,7 +212,8 @@ namespace OpenMD {
     eamAtomData.F = ea.getF();
     eamAtomData.Z = ea.getZ();
     eamAtomData.rcut = ea.getRcut();
-
+    eamAtomData.isFluctuating = atomType->isFluctuatingCharge();
+      
     // add it to the map:
     int atid = atomType->getIdent();
     int eamtid = EAMtypes.size();
@@ -222,6 +228,24 @@ namespace OpenMD {
       painCave.isFatal = 0;
       simError();         
     }
+
+    if (eamAtomData.isFluctuating) {
+      // compute charge to rho scaling:
+      RealType z0 = eamAtomData.Z->getValueAt(0.0);
+      RealType dr = ea.getDr();
+      RealType rmax = max(eamAtomData.rcut, ea.getNr() * dr);
+      int nr = int(rmax/dr + 0.5);
+      RealType r;
+      RealType sum(0.0);
+
+      for (int i = 0; i < nr; i++) {
+        r = RealType(i*dr);
+        sum += r * r * eamAtomData.rho->getValueAt(r) * dr;       
+      } 
+      sum *= 4.0 * M_PI;
+      eamAtomData.qToRhoScaling = sum / z0;
+    }
+
 
     EAMtids[atid] = eamtid;
     EAMdata[eamtid] = eamAtomData;
@@ -287,12 +311,23 @@ namespace OpenMD {
     if (haveCutoffRadius_) 
       if ( *(idat.rij) > eamRcut_) return;
     
-    if ( *(idat.rij) < data1.rcut) 
-      *(idat.rho1) += data1.rho->getValueAt( *(idat.rij));
-    
+    if ( *(idat.rij) < data1.rcut) {
+      if (data1.isFluctuating) {
+        *(idat.rho2) += (1.0 -  *(idat.flucQ1) * data1.qToRhoScaling ) * 
+          data1.rho->getValueAt( *(idat.rij) );
+      } else {
+        *(idat.rho2) += data1.rho->getValueAt( *(idat.rij));
+      }
+    }
       
-    if ( *(idat.rij) < data2.rcut) 
-      *(idat.rho2) += data2.rho->getValueAt( *(idat.rij));
+    if ( *(idat.rij) < data2.rcut) {
+      if (data2.isFluctuating) {
+        *(idat.rho1) += (1.0 -  *(idat.flucQ2) * data2.qToRhoScaling ) *
+          data2.rho->getValueAt( *(idat.rij) );
+      } else {
+        *(idat.rho1) += data2.rho->getValueAt( *(idat.rij));
+      }
+    }
     
     return;  
   }
@@ -302,7 +337,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
 
     EAMAtomData &data1 = EAMdata[ EAMtids[sdat.atid] ];
-        
+            
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho), *(sdat.dfrhodrho) );
 
     (*(sdat.pot))[METALLIC_FAMILY] += *(sdat.frho);
@@ -342,12 +377,18 @@ namespace OpenMD {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+      if (data1.isFluctuating) {
+        *(idat.dVdFQ1) -= *(idat.dfrho2) * rha * data1.qToRhoScaling;
+      }
     }
     
     if ( *(idat.rij) < rcj) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+      if (data2.isFluctuating) {
+        *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb * data2.qToRhoScaling;
+      }
     }
 
     switch(mixMeth_) {
@@ -391,6 +432,7 @@ namespace OpenMD {
     dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr; 
     
     *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+
         
     if (idat.doParticlePot) {
       // particlePot is the difference between the full potential and

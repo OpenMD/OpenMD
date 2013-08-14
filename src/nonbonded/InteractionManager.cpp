@@ -90,6 +90,7 @@ namespace OpenMD {
 
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     int nTypes = atomTypes->size();
+    sHash_.resize(nTypes);
     iHash_.resize(nTypes);
     interactions_.resize(nTypes);
     ForceField::AtomTypeContainer::MapTypeIterator i1, i2;
@@ -136,7 +137,29 @@ namespace OpenMD {
         simError();                 
       }
     }
-    
+
+    if (atype1->isLennardJones()) {
+      sHash_[atid1] |= LJ_INTERACTION;
+    }
+    if (atype1->isElectrostatic()) {
+      sHash_[atid1] |= ELECTROSTATIC_INTERACTION;
+    }
+    if (atype1->isSticky()) {
+      sHash_[atid1] |= STICKY_INTERACTION;
+    }
+    if (atype1->isStickyPower()) {
+      sHash_[atid1] |= STICKY_INTERACTION;
+    }
+    if (atype1->isEAM()) {
+      sHash_[atid1] |= EAM_INTERACTION;
+    }
+    if (atype1->isSC()) {
+      sHash_[atid1] |= SC_INTERACTION;
+    }
+    if (atype1->isGayBerne()) {
+      sHash_[atid1] |= GB_INTERACTION;
+    }
+   
     // Now, iterate over all known types and add to the interaction map:
     
     map<int, AtomType*>::iterator it1, it2;
@@ -152,36 +175,42 @@ namespace OpenMD {
         
         if (atype1->isLennardJones() && atype2->isLennardJones()) {
           interactions_[atid1][atid2].insert(lj_);
-          iHash_[atid1][atid2] |= LJ_PAIR;
+          iHash_[atid1][atid2] |= LJ_INTERACTION;
         }
         if (atype1->isElectrostatic() && atype2->isElectrostatic() ) {
-          interactions_[atid1][atid2].insert(electrostatic_);
-          iHash_[atid1][atid2] |= ELECTROSTATIC_PAIR;
+          // Pairs of fluctuating density EAM atoms have their
+          // interactions handled via the EAM routines.  All other
+          // interactions with these atoms are handled via normal
+          // electrostatic channels:
+          if (!(atype1->isEAM() && atype2->isEAM())) {
+            interactions_[atid1][atid2].insert(electrostatic_);
+            iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
+          }
         }
         if (atype1->isSticky() && atype2->isSticky() ) {
           interactions_[atid1][atid2].insert(sticky_);
-          iHash_[atid1][atid2] |= STICKY_PAIR;
+          iHash_[atid1][atid2] |= STICKY_INTERACTION;
         }
         if (atype1->isStickyPower() && atype2->isStickyPower() ) {
           interactions_[atid1][atid2].insert(sticky_);
-          iHash_[atid1][atid2] |= STICKY_PAIR;
+          iHash_[atid1][atid2] |= STICKY_INTERACTION;
         }
         if (atype1->isEAM() && atype2->isEAM() ) {
           interactions_[atid1][atid2].insert(eam_);
-          iHash_[atid1][atid2] |= EAM_PAIR;
+          iHash_[atid1][atid2] |= EAM_INTERACTION;
         }
         if (atype1->isSC() && atype2->isSC() ) {
           interactions_[atid1][atid2].insert(sc_);
-          iHash_[atid1][atid2] |= SC_PAIR;
+          iHash_[atid1][atid2] |= SC_INTERACTION;
         }
         if (atype1->isGayBerne() && atype2->isGayBerne() ) {
           interactions_[atid1][atid2].insert(gb_);
-          iHash_[atid1][atid2] |= GB_PAIR;
+          iHash_[atid1][atid2] |= GB_INTERACTION;
         }
         if ((atype1->isGayBerne() && atype2->isLennardJones())
             || (atype1->isLennardJones() && atype2->isGayBerne())) {
           interactions_[atid1][atid2].insert(gb_);
-          iHash_[atid1][atid2] |= GB_PAIR;
+          iHash_[atid1][atid2] |= GB_INTERACTION;
         } 
         
         // look for an explicitly-set non-bonded interaction type using the 
@@ -207,7 +236,7 @@ namespace OpenMD {
               }
             }
             interactions_[atid1][atid2].insert(lj_);
-            iHash_[atid1][atid2] |= LJ_PAIR;
+            iHash_[atid1][atid2] |= LJ_INTERACTION;
             vdwExplicit = true;
           }
           
@@ -234,7 +263,7 @@ namespace OpenMD {
               }
             }
             interactions_[atid1][atid2].insert(morse_);
-            iHash_[atid1][atid2] |= MORSE_PAIR;
+            iHash_[atid1][atid2] |= MORSE_INTERACTION;
             vdwExplicit = true;
           }
 
@@ -261,7 +290,7 @@ namespace OpenMD {
               }
             }
             interactions_[atid1][atid2].insert(repulsivePower_);
-            iHash_[atid1][atid2] |= REPULSIVEPOWER_PAIR;
+            iHash_[atid1][atid2] |= REPULSIVEPOWER_INTERACTION;
             vdwExplicit = true;
           }
           
@@ -279,7 +308,7 @@ namespace OpenMD {
               }
             }
             interactions_[atid1][atid2].insert(eam_);
-            iHash_[atid1][atid2] |= EAM_PAIR;
+            iHash_[atid1][atid2] |= EAM_INTERACTION;
             metExplicit = true;
           }
           
@@ -306,7 +335,7 @@ namespace OpenMD {
               }
             }
             interactions_[atid1][atid2].insert(sc_);
-            iHash_[atid1][atid2] |= SC_PAIR;
+            iHash_[atid1][atid2] |= SC_INTERACTION;
             metExplicit = true;
           }
           
@@ -333,7 +362,7 @@ namespace OpenMD {
               }
             }
             interactions_[atid1][atid2].insert(maw_);
-            iHash_[atid1][atid2] |= MAW_PAIR;
+            iHash_[atid1][atid2] |= MAW_INTERACTION;
             vdwExplicit = true;
           }        
         }
@@ -385,8 +414,8 @@ namespace OpenMD {
 
     int& iHash = iHash_[idat.atid1][idat.atid2];
 
-    if ((iHash & EAM_PAIR) != 0) eam_->calcDensity(idat);
-    if ((iHash & SC_PAIR) != 0)  sc_->calcDensity(idat);
+    if ((iHash & EAM_INTERACTION) != 0) eam_->calcDensity(idat);
+    if ((iHash & SC_INTERACTION) != 0)  sc_->calcDensity(idat);
 
     // set<NonBondedInteraction*>::iterator it;
 
@@ -404,10 +433,10 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    int& iHash = iHash_[sdat.atid][sdat.atid];
+    int& sHash = sHash_[sdat.atid];
 
-    if ((iHash & EAM_PAIR) != 0) eam_->calcFunctional(sdat);
-    if ((iHash & SC_PAIR) != 0)  sc_->calcFunctional(sdat);
+    if ((sHash & EAM_INTERACTION) != 0) eam_->calcFunctional(sdat);
+    if ((sHash & SC_INTERACTION) != 0)  sc_->calcFunctional(sdat);
 
     // set<NonBondedInteraction*>::iterator it;
     
@@ -426,21 +455,21 @@ namespace OpenMD {
 
     int& iHash = iHash_[idat.atid1][idat.atid2];
 
-    if ((iHash & ELECTROSTATIC_PAIR) != 0) electrostatic_->calcForce(idat);
+    if ((iHash & ELECTROSTATIC_INTERACTION) != 0) electrostatic_->calcForce(idat);
        
     // electrostatics still has to worry about indirect
     // contributions from excluded pairs of atoms, but nothing else does:
 
     if (idat.excluded) return; 
 
-    if ((iHash & LJ_PAIR) != 0)             lj_->calcForce(idat);
-    if ((iHash & GB_PAIR) != 0)             gb_->calcForce(idat);
-    if ((iHash & STICKY_PAIR) != 0)         sticky_->calcForce(idat);
-    if ((iHash & MORSE_PAIR) != 0)          morse_->calcForce(idat);
-    if ((iHash & REPULSIVEPOWER_PAIR) != 0) repulsivePower_->calcForce(idat);
-    if ((iHash & EAM_PAIR) != 0)            eam_->calcForce(idat);
-    if ((iHash & SC_PAIR) != 0)             sc_->calcForce(idat);
-    if ((iHash & MAW_PAIR) != 0)            maw_->calcForce(idat);
+    if ((iHash & LJ_INTERACTION) != 0)             lj_->calcForce(idat);
+    if ((iHash & GB_INTERACTION) != 0)             gb_->calcForce(idat);
+    if ((iHash & STICKY_INTERACTION) != 0)         sticky_->calcForce(idat);
+    if ((iHash & MORSE_INTERACTION) != 0)          morse_->calcForce(idat);
+    if ((iHash & REPULSIVEPOWER_INTERACTION) != 0) repulsivePower_->calcForce(idat);
+    if ((iHash & EAM_INTERACTION) != 0)            eam_->calcForce(idat);
+    if ((iHash & SC_INTERACTION) != 0)             sc_->calcForce(idat);
+    if ((iHash & MAW_INTERACTION) != 0)            maw_->calcForce(idat);
 
     // set<NonBondedInteraction*>::iterator it;
 
@@ -462,9 +491,9 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    int& iHash = iHash_[sdat.atid][sdat.atid];
+    int& sHash = sHash_[sdat.atid];
 
-    if ((iHash & ELECTROSTATIC_PAIR) != 0) electrostatic_->calcSelfCorrection(sdat);
+    if ((sHash & ELECTROSTATIC_INTERACTION) != 0) electrostatic_->calcSelfCorrection(sdat);
 
     // set<NonBondedInteraction*>::iterator it;
 

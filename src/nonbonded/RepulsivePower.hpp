@@ -67,7 +67,7 @@ namespace OpenMD {
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon, int nRep);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
-    virtual int getHash() { return REPULSIVEPOWER_PAIR; }
+    virtual int getHash() { return REPULSIVEPOWER_INTERACTION; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:

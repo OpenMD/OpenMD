@@ -84,7 +84,7 @@ namespace OpenMD {
     void calcFunctional(SelfData &sdat);
     void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
-    virtual int getHash() { return SC_PAIR; }
+    virtual int getHash() { return SC_INTERACTION; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
    
   private:

@@ -66,19 +66,19 @@ namespace OpenMD {
   };
 
   /**
-   * Boolean flags for the iHash_ data structure. These are used to
-   * greatly increase the speed of looking up the low-level
-   * interaction for any given pair:
+   * Boolean flags for the iHash_ and sHash_ data structures. These
+   * are used to greatly increase the speed of looking up the
+   * low-level interaction for any given pair:
    */
-  const static int ELECTROSTATIC_PAIR  = (1 << 0);  
-  const static int LJ_PAIR             = (1 << 1);
-  const static int EAM_PAIR            = (1 << 2);
-  const static int SC_PAIR             = (1 << 3);
-  const static int STICKY_PAIR         = (1 << 4);
-  const static int GB_PAIR             = (1 << 5);
-  const static int MORSE_PAIR          = (1 << 6);
-  const static int REPULSIVEPOWER_PAIR = (1 << 7);
-  const static int MAW_PAIR            = (1 << 8);
+  const static int ELECTROSTATIC_INTERACTION  = (1 << 0);  
+  const static int LJ_INTERACTION             = (1 << 1);
+  const static int EAM_INTERACTION            = (1 << 2);
+  const static int SC_INTERACTION             = (1 << 3);
+  const static int STICKY_INTERACTION         = (1 << 4);
+  const static int GB_INTERACTION             = (1 << 5);
+  const static int MORSE_INTERACTION          = (1 << 6);
+  const static int REPULSIVEPOWER_INTERACTION = (1 << 7);
+  const static int MAW_INTERACTION            = (1 << 8);
 
   typedef Vector<RealType, N_INTERACTION_FAMILIES> potVec;
 
@@ -199,7 +199,7 @@ namespace OpenMD {
     virtual ~ElectrostaticInteraction() {}
     virtual void calcSelfCorrection(SelfData &sdat) = 0;
     virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}   
-    virtual int getHash() {return ELECTROSTATIC_PAIR;}
+    virtual int getHash() {return ELECTROSTATIC_INTERACTION;}
   };    
 
   /**

@@ -118,6 +118,9 @@ namespace OpenMD {
      */
     vector<vector<set<NonBondedInteraction*> > > interactions_;
     vector<vector<int> > iHash_;
+
+    /* sHash_ contains the self-interaction version of iHash_ */
+    vector<int> sHash_;
   };
 }
 #endif
