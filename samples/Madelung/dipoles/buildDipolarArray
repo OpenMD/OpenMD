@@ -154,8 +154,10 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                 basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
             if (dipoleDirection.lower() == '111'):
-                lp_part = numpy.append(lp_array, Z[4]+X[6]+Y[5], axis=1)
-                bc_part = numpy.append(bc_array, Z[4]+X[6]+Y[5], axis=1)
+                #lp_part = numpy.append(lp_array, Z[4]+X[6]+Y[5], axis=1)
+                #bc_part = numpy.append(bc_array, Z[4]+X[6]+Y[5], axis=1)
+                lp_part = numpy.append(lp_array, X[6]+Z[6], axis=1)
+                bc_part = numpy.append(bc_array, X[6]+Z[6], axis=1)
                 basic_array = numpy.append(lp_part, bc_part, axis=0)
                 known_case = True
             if (dipoleDirection.lower() == 'min'):

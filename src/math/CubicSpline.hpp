@@ -58,6 +58,7 @@ namespace OpenMD {
     void addPoints(const vector<RealType>& xps, const vector<RealType>& yps);
     RealType getValueAt(const RealType& t);
     pair<RealType, RealType> getValueAndDerivativeAt(const RealType& t);
+    pair<RealType, RealType> getLimits();
     void getValueAt(const RealType& t, RealType& v);
     void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
     

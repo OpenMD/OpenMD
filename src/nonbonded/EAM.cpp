@@ -261,6 +261,7 @@ namespace OpenMD {
 
       EAMInteractionData mixer;
       mixer.phi = getPhi(atomType, atype2);
+      mixer.rcut = mixer.phi->getLimits().second;
       mixer.explicitlySet = false;
 
       MixingMap[eamtid2].resize( nEAM_ );
@@ -289,6 +290,7 @@ namespace OpenMD {
 
     cs->addPoints(rVals, phiVals);
     mixer.phi = cs;
+    mixer.rcut = mixer.phi->getLimits().second;
     mixer.explicitlySet = true;
 
     int eamtid1 = EAMtids[ atype1->getIdent() ];
@@ -411,7 +413,11 @@ namespace OpenMD {
       break;
       
     case eamDaw:
-      MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
+      
+      if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
+        MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij), 
+                                                                  phab, dvpdr);
+      }
       
       break;
     case eamUnknown:

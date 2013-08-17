@@ -62,6 +62,7 @@ namespace OpenMD {
   
   struct EAMInteractionData {
     CubicSpline* phi;
+    RealType rcut;
     bool explicitlySet;
   };
   

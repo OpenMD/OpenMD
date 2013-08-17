@@ -198,8 +198,8 @@ RealType CubicSpline::getValueAt(const RealType& t) {
   
   if (!generated) generate();
   
-  assert(t > data_.front().first);
-  assert(t < data_.back().first);
+  assert(t >= data_.front().first);
+  assert(t <= data_.back().first);
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
@@ -237,8 +237,8 @@ void CubicSpline::getValueAt(const RealType& t, RealType& v) {
   
   if (!generated) generate();
   
-  assert(t > data_.front().first);
-  assert(t < data_.back().first);
+  assert(t >= data_.front().first);
+  assert(t <= data_.back().first);
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
@@ -276,8 +276,8 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(const RealType& t)
 
   if (!generated) generate();
   
-  assert(t > data_.front().first);
-  assert(t < data_.back().first);
+  assert(t >= data_.front().first);
+  assert(t <= data_.back().first);
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
@@ -308,6 +308,11 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(const RealType& t)
   return make_pair(yval, dydx);
 }
 
+pair<RealType, RealType> CubicSpline::getLimits(){
+  if (!generated) generate();
+  return make_pair( data_.front().first, data_.back().first );
+}
+
 void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v, 
                                           RealType &dv) {
   // Evaluate the spline and first derivative at t using coefficients 
@@ -317,8 +322,8 @@ void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v,
 
   if (!generated) generate();
   
-  assert(t > data_.front().first);
-  assert(t < data_.back().first);
+  assert(t >= data_.front().first);
+  assert(t <= data_.back().first);
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.

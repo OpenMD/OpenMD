@@ -921,7 +921,7 @@ namespace OpenMD {
           }          
         } else {
           if (a_is_Fluctuating) dUdCa += C_b * pref * v01;
-          if (a_is_Fluctuating) dUdCb += C_a * pref * v01;
+          if (b_is_Fluctuating) dUdCb += C_a * pref * v01;
         }
       }
 
