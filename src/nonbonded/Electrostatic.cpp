@@ -1443,11 +1443,10 @@ namespace OpenMD {
                   dks[i] = dk * skr[i];
                 }
                 if (data.is_Quadrupole) {
-                  Q = atom->getQuadrupole();
-                  Q *= mPoleConverter;
-                  Qk = Q * kVec;
+                  Q = atom->getQuadrupole() * mPoleConverter; 
+                  Qk = Q * kVec;                  
                   qk = dot(kVec, Qk);
-                  qxk[i] = cross(kVec, Qk);
+                  qxk[i] = cross(Qk, kVec);
                   qkc[i] = qk * ckr[i];
                   qks[i] = qk * skr[i];
                 }              
@@ -1508,6 +1507,14 @@ namespace OpenMD {
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)
                                              +skr[i]*(ckss+dkcs-qkss));
                
+
+                cerr << "qkcs = " << qkcs << "\n";
+                cerr << "qkss = " << qkss << "\n";
+                cerr << "qkc[i] = " << qkc[i] << "\n";
+                cerr << "qks[i] = " << qks[i] << "\n";
+                cerr << "pot = " << 2.0 * rvol * AK[kk]*(qkss*qkss + qkcs*qkcs) << "\n";
+                cerr << "qfrc = " << 4.0 * rvol * qfrc << "\n";
+                cerr << "qtrq2 = " << 4.0 * rvol * qtrq2 << "\n";
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
                 
                 if (data.is_Dipole) {

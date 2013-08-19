@@ -377,6 +377,7 @@ namespace OpenMD {
                                            float comparisonValue) {
     RealType propertyValue = 0.0;
     Vector3d pos;
+
     switch (property) {
     case Token::mass:
       propertyValue = sd->getMass();
@@ -446,6 +447,7 @@ namespace OpenMD {
       match = propertyValue != comparisonValue;
       break;
     }
+
     if (match) 
       bs.setBitOn(sd->getGlobalIndex());
 

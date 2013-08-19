@@ -122,8 +122,8 @@ namespace OpenMD {
     const  static int embeddedExpression= (1 << 19); // embedded expression
     const static int index = (1 << 20) | expression;
     // rasmol commands
-    const static int define       = command | expressionCommand |1;
-    const static int select       = command |expressionCommand |2 ;
+    const static int define       = command | expressionCommand | 1;
+    const static int select       = command | expressionCommand | 2 ;
 
     //predefine
     //const static int selected    = predefinedset |0;
@@ -151,7 +151,7 @@ namespace OpenMD {
     const static int expressionEnd   = expression | 101;
 
     const static int mass         = atomproperty | 0;
-    const static int charge       = atomproperty | 1;
+    const static int charge       = atomproperty | dynamic | 1;
     const static int x            = atomproperty | dynamic | 2;
     const static int y            = atomproperty | dynamic | 3;
     const static int z            = atomproperty | dynamic | 4;

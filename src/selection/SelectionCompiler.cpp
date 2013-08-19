@@ -119,12 +119,14 @@ namespace OpenMD {
 	//    ltoken.push_back(Token(Token::string, str));
 	//    continue;
 	//}
-	if (lookingAtDecimal((tokCommand & Token::negnums) != 0)) {
+	//if (lookingAtDecimal((tokCommand & Token::negnums) != 0)) {
+        if (lookingAtDecimal((tokCommand) != 0)) {
 	  float value = lexi_cast<float>(script.substr(ichToken, cchToken));        
 	  ltoken.push_back(Token(Token::decimal, boost::any(value)));
 	  continue;
 	}
-	if (lookingAtInteger((tokCommand & Token::negnums) != 0)) {
+	//if (lookingAtInteger((tokCommand & Token::negnums) != 0)) {
+        if (lookingAtInteger((tokCommand) != 0)) {
 
 	  int val = lexi_cast<int>(script.substr(ichToken, cchToken));
 	  ltoken.push_back(Token(Token::integer,   boost::any(val)));

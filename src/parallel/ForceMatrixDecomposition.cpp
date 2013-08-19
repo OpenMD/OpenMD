@@ -1179,9 +1179,12 @@ namespace OpenMD {
     idat.atid1 = identsRow[atom1];
     idat.atid2 = identsCol[atom2];
 
-    if (regionsRow[atom1] >= 0 && regionsCol[atom2] >= 0) 
+    if (regionsRow[atom1] >= 0 && regionsCol[atom2] >= 0) {
       idat.sameRegion = (regionsRow[atom1] == regionsCol[atom2]);
-       
+    } else {
+      idat.sameRegion = false;
+    }
+
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(atomRowData.aMat[atom1]);
       idat.A2 = &(atomColData.aMat[atom2]);
@@ -1238,8 +1241,11 @@ namespace OpenMD {
     idat.atid1 = idents[atom1];
     idat.atid2 = idents[atom2];
 
-    if (regions[atom1] >= 0 && regions[atom2] >= 0) 
+    if (regions[atom1] >= 0 && regions[atom2] >= 0) {
       idat.sameRegion = (regions[atom1] == regions[atom2]);
+    } else {
+      idat.sameRegion = false;
+    }
 
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);
