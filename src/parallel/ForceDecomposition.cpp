@@ -98,7 +98,7 @@ namespace OpenMD {
 
   void ForceDecomposition::fillSelfData(SelfData &sdat, int atom1) {
 
-    sdat.atype = atypesLocal[atom1];
+    //sdat.atype = atypesLocal[atom1];
     sdat.atid = idents[atom1];
 
     sdat.pot = &embeddingPot;

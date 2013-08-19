@@ -243,14 +243,21 @@ namespace OpenMD {
       mixer2.xpap2 = mixer1.xpapi2;
       mixer2.xpapi2 = mixer1.xpap2;
       mixer2.xp2 = mixer1.xp2;
+      // keep track of who is the LJ atom:
+      mixer1.i_is_LJ = atomType->isLennardJones();
+      mixer1.j_is_LJ = atype2->isLennardJones();
+      mixer2.i_is_LJ = mixer1.j_is_LJ;
+      mixer2.j_is_LJ = mixer1.i_is_LJ;
+
 
       // only add this pairing if at least one of the atoms is a Gay-Berne atom
 
       if (gba1.isGayBerne() || gba2.isGayBerne()) {
         MixingMap[gbtid2].resize( nGB_ );        
         MixingMap[gbtid][gbtid2] = mixer1;
-        if (gbtid2 != gbtid) 
+        if (gbtid2 != gbtid)  {
           MixingMap[gbtid2][gbtid] = mixer2;
+        }          
       }
     }
   }
@@ -271,45 +278,26 @@ namespace OpenMD {
     RealType xpap2  = mixer.xpap2; 
     RealType xpapi2 = mixer.xpapi2;
 
-    // cerr << "atypes = " << idat.atypes.first->getName() << " " << idat.atypes.second->getName() << "\n";
-    // cerr << "sigma0 = " <<mixer.sigma0 <<"\n";
-    // cerr << "dw     = " <<mixer.dw <<"\n";
-    // cerr << "eps0   = " <<mixer.eps0 <<"\n";  
-    // cerr << "x2     = " <<mixer.x2 <<"\n";    
-    // cerr << "xa2    = " <<mixer.xa2 <<"\n";   
-    // cerr << "xai2   = " <<mixer.xai2 <<"\n";  
-    // cerr << "xp2    = " <<mixer.xp2 <<"\n";   
-    // cerr << "xpap2  = " <<mixer.xpap2 <<"\n"; 
-    // cerr << "xpapi2 = " <<mixer.xpapi2 <<"\n";
-
     Vector3d ul1 = idat.A1->getRow(2);
     Vector3d ul2 = idat.A2->getRow(2);
 
-    // cerr << "ul1 = " <<ul1<<"\n";
-    // cerr << "ul2 = " <<ul2<<"\n";
-
     RealType a, b, g;
-
-    // This is not good.  We should store this in the mixing map, and not
-    // query atom types in calc force.
-    bool i_is_LJ = idat.atypes.first->isLennardJones();
-    bool j_is_LJ = idat.atypes.second->isLennardJones();
     
-    if (i_is_LJ) {
+    if (mixer.i_is_LJ) {
       a = 0.0;
       ul1 = V3Zero;
     } else {
       a = dot(*(idat.d), ul1);
     }
 
-    if (j_is_LJ) {
+    if (mixer.j_is_LJ) {
       b = 0.0;
       ul2 = V3Zero;
     } else {
       b = dot(*(idat.d), ul2);
     }
 
-    if (i_is_LJ || j_is_LJ) 
+    if (mixer.i_is_LJ || mixer.j_is_LJ) 
       g = 0.0;
     else
       g = dot(ul1, ul2);
@@ -323,12 +311,6 @@ namespace OpenMD {
 
     RealType H  = (xa2 * au2 + xai2 * bu2 - 2.0*x2*au*bu*g)  / (1.0 - x2*g2);
     RealType Hp = (xpap2*au2 + xpapi2*bu2 - 2.0*xp2*au*bu*g) / (1.0 - xp2*g2);
-
-    // cerr << "au2 = " << au2 << "\n";
-    // cerr << "bu2 = " << bu2 << "\n";
-    // cerr << "g2 = " << g2 << "\n";
-    // cerr << "H = " << H << "\n";
-    // cerr << "Hp = " << Hp << "\n";
 
     RealType sigma = sigma0 / sqrt(1.0 - H);
     RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
@@ -346,19 +328,6 @@ namespace OpenMD {
 
     RealType s3 = sigma*sigma*sigma;
     RealType s03 = sigma0*sigma0*sigma0;
-
-    // cerr << "vdwMult = " << *(idat.vdwMult) << "\n";
-    // cerr << "eps = " << eps <<"\n";
-    // cerr << "mu = " << mu_ << "\n";
-    // cerr << "R12 = " << R12 << "\n";
-    // cerr << "R6 = " << R6 << "\n";
-    // cerr << "R13 = " << R13 << "\n";
-    // cerr << "R7 = " << R7 << "\n";
-    // cerr << "e2 = " << e2 << "\n";
-    // cerr << "rij = " << *(idat.rij) << "\n";
-    // cerr << "s3 = " << s3 << "\n";
-    // cerr << "s03 = " << s03 << "\n";
-    // cerr << "dw = " << dw << "\n";
 
     RealType pref1 = - *(idat.vdwMult) * 8.0 * eps * mu_ * (R12 - R6) / 
       (e2 * *(idat.rij));
@@ -379,9 +348,6 @@ namespace OpenMD {
       + 8.0 * eps * mu_ * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / 
       (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
       (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
-
-    // cerr << "pref = " << pref1 << " " << pref2 << "\n";
-    // cerr << "dU = " << dUdr << " " << dUda <<" " << dUdb << " " << dUdg << "\n";
     
     Vector3d rhat = *(idat.d) / *(idat.rij);   
     Vector3d rxu1 = cross(*(idat.d), ul1);
@@ -393,11 +359,6 @@ namespace OpenMD {
     *(idat.t1) += (dUda * rxu1 - dUdg * uxu) * *(idat.sw);
     *(idat.t2) += (dUdb * rxu2 + dUdg * uxu) * *(idat.sw);
     *(idat.vpair) += U;
-
-    // cerr << "f1 term = " <<  (dUdr * rhat + dUda * ul1 + dUdb * ul2) * *(idat.sw) << "\n";
-    // cerr << "t1 term = " << (dUda * rxu1 - dUdg * uxu) * *(idat.sw) << "\n";
-    // cerr << "t2 term = " << (dUdb * rxu2 + dUdg * uxu) * *(idat.sw) << "\n";
-    // cerr << "vp term = " << U << "\n";
 
     return;
 

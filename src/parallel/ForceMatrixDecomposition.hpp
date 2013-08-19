@@ -110,7 +110,8 @@ namespace OpenMD {
     vector<int> groupToGtype;
 
 #ifdef IS_MPI    
-    DataStorage atomRowData;    DataStorage atomColData;
+    DataStorage atomRowData;
+    DataStorage atomColData;
     DataStorage cgRowData;
     DataStorage cgColData;
 
@@ -176,6 +177,9 @@ private:
 
     vector<RealType> massFactorsRow;
     vector<RealType> massFactorsCol;
+
+    vector<int> regionRow;
+    vector<int> regionCol;
 #endif
 
   };

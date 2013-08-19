@@ -372,10 +372,12 @@ namespace OpenMD {
 
   void SimInfo::addInteractionPairs(Molecule* mol) {
     ForceFieldOptions& options_ = forceField_->getForceFieldOptions();
+    vector<Atom*>::iterator atomIter;
     vector<Bond*>::iterator bondIter;
     vector<Bend*>::iterator bendIter;
     vector<Torsion*>::iterator torsionIter;
     vector<Inversion*>::iterator inversionIter;
+    Atom* atom;
     Bond* bond;
     Bend* bend;
     Torsion* torsion;
@@ -418,6 +420,7 @@ namespace OpenMD {
         atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(), oneAtomSet));        
       }
     }  
+
            
     for (bond= mol->beginBond(bondIter); bond != NULL; 
          bond = mol->nextBond(bondIter)) {

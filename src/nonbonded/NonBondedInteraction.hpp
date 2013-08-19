@@ -90,7 +90,7 @@ namespace OpenMD {
    * members are utilized by any given interaction.
    */
   struct InteractionData {
-    pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
+    //pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
     int atid1;                /**< atomType ident for atom 1 */
     int atid2;                /**< atomType ident for atom 2 */
     Vector3d* d;              /**< interatomic vector (already wrapped into box) */
@@ -149,7 +149,7 @@ namespace OpenMD {
    * members are utilized by any given self interaction.
    */
   struct SelfData {
-    AtomType* atype;        /**< pointer to AtomType of the atom */
+    //AtomType* atype;        /**< pointer to AtomType of the atom */
     int atid;               /**< atomType ident for the atom */
     Vector3d* dipole;       /**< pointer to dipole vector of the atom */
     Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */

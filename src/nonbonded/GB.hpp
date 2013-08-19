@@ -60,6 +60,8 @@ namespace OpenMD {
     RealType xp2;
     RealType xpap2;
     RealType xpapi2;
+    bool i_is_LJ;
+    bool j_is_LJ;
   };
 
   class GB : public VanDerWaalsInteraction {

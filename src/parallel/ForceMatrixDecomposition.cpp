@@ -1175,16 +1175,13 @@ namespace OpenMD {
     idat.excluded = excludeAtomPair(atom1, atom2);
    
 #ifdef IS_MPI
-    idat.atypes = make_pair( atypesRow[atom1], atypesCol[atom2]);
+    //idat.atypes = make_pair( atypesRow[atom1], atypesCol[atom2]);
     idat.atid1 = identsRow[atom1];
     idat.atid2 = identsCol[atom2];
 
     if (regionsRow[atom1] >= 0 && regionsCol[atom2] >= 0) 
       idat.sameRegion = (regionsRow[atom1] == regionsCol[atom2]);
        
-    //idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
-    //                         ff_->getAtomType(identsCol[atom2]) );
-    
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(atomRowData.aMat[atom1]);
       idat.A2 = &(atomColData.aMat[atom2]);
@@ -1237,7 +1234,7 @@ namespace OpenMD {
 
 #else
     
-    idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
+    //idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
     idat.atid1 = idents[atom1];
     idat.atid2 = idents[atom2];
 

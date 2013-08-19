@@ -57,6 +57,8 @@ namespace OpenMD {
     RealType beta;
     RealType ca1;
     RealType cb1;
+    bool i_is_Metal;
+    bool j_is_Metal;
   };
 
   class MAW : public VanDerWaalsInteraction {

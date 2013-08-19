@@ -123,6 +123,7 @@ namespace OpenMD {
     mixer.Re = Re;
     mixer.ca1 = ca1;
     mixer.cb1 = cb1;
+    mixer.j_is_Metal = atype2->isMetal();
 
     int mtid1 = MAWtids[atype1->getIdent()];
     int mtid2 = MAWtids[atype2->getIdent()];
@@ -134,6 +135,7 @@ namespace OpenMD {
     MixingMap[mtid1][mtid2] = mixer;
     if (mtid2 != mtid1) {
       MixingMap[mtid2].resize(nM);
+      mixer.j_is_Metal = atype1->isMetal();
       MixingMap[mtid2][mtid1] = mixer;
     }    
   }
@@ -153,13 +155,11 @@ namespace OpenMD {
     RealType R_e = mixer.Re;
     RealType beta = mixer.beta;
     RealType ca1 = mixer.ca1;
-    RealType cb1 = mixer.cb1;
-    
-    bool j_is_Metal = idat.atypes.second->isMetal();
+    RealType cb1 = mixer.cb1;   
     
     Vector3d r;
     RotMat3x3d Atrans;
-    if (j_is_Metal) {
+    if (mixer.j_is_Metal) {
       // rotate the inter-particle separation into the two different 
       // body-fixed coordinate systems:
       r = *(idat.A1) * *(idat.d);
@@ -257,7 +257,7 @@ namespace OpenMD {
     
     // go back to lab frame using transpose of rotation matrix:
     
-    if (j_is_Metal) {
+    if (mixer.j_is_Metal) {
       *(idat.t1) += Atrans * trq;
     } else {
       *(idat.t2) += Atrans * trq;
@@ -269,7 +269,7 @@ namespace OpenMD {
     
     // rotate the terms back into the lab frame:
     Vector3d flab;
-    if (j_is_Metal) {
+    if (mixer.j_is_Metal) {
       flab = Atrans * ftmp;
     } else {
       flab = - Atrans * ftmp;
