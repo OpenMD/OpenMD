@@ -212,7 +212,6 @@ namespace OpenMD {
     eamAtomData.F = ea.getF();
     eamAtomData.Z = ea.getZ();
     eamAtomData.rcut = ea.getRcut();
-    eamAtomData.isFluctuating = atomType->isFluctuatingCharge();
       
     // add it to the map:
     int atid = atomType->getIdent();
@@ -227,23 +226,6 @@ namespace OpenMD {
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();         
-    }
-
-    if (eamAtomData.isFluctuating) {
-      // compute charge to rho scaling:
-      RealType z0 = eamAtomData.Z->getValueAt(0.0);
-      RealType dr = ea.getDr();
-      RealType rmax = max(eamAtomData.rcut, ea.getNr() * dr);
-      int nr = int(rmax/dr + 0.5);
-      RealType r;
-      RealType sum(0.0);
-
-      for (int i = 0; i < nr; i++) {
-        r = RealType(i*dr);
-        sum += r * r * eamAtomData.rho->getValueAt(r) * dr;       
-      } 
-      sum *= 4.0 * M_PI;
-      eamAtomData.qToRhoScaling = sum / z0;
     }
 
 
@@ -314,21 +296,11 @@ namespace OpenMD {
       if ( *(idat.rij) > eamRcut_) return;
     
     if ( *(idat.rij) < data1.rcut) {
-      if (data1.isFluctuating) {
-        *(idat.rho2) += (1.0 -  *(idat.flucQ1) * data1.qToRhoScaling ) * 
-          data1.rho->getValueAt( *(idat.rij) );
-      } else {
-        *(idat.rho2) += data1.rho->getValueAt( *(idat.rij));
-      }
+      *(idat.rho2) += data1.rho->getValueAt( *(idat.rij));
     }
       
     if ( *(idat.rij) < data2.rcut) {
-      if (data2.isFluctuating) {
-        *(idat.rho1) += (1.0 -  *(idat.flucQ2) * data2.qToRhoScaling ) *
-          data2.rho->getValueAt( *(idat.rij) );
-      } else {
-        *(idat.rho1) += data2.rho->getValueAt( *(idat.rij));
-      }
+      *(idat.rho1) += data2.rho->getValueAt( *(idat.rij));
     }
     
     return;  
@@ -379,18 +351,12 @@ namespace OpenMD {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
-      if (data1.isFluctuating) {
-        *(idat.dVdFQ1) -= *(idat.dfrho2) * rha * data1.qToRhoScaling;
-      }
     }
     
     if ( *(idat.rij) < rcj) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
-      if (data2.isFluctuating) {
-        *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb * data2.qToRhoScaling;
-      }
     }
 
     switch(mixMeth_) {

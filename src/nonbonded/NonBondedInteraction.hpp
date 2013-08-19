@@ -102,6 +102,7 @@ namespace OpenMD {
     RealType* sw;             /**< switching function value at rij */
     int* topoDist;            /**< topological distance between atoms */
     bool excluded;            /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
+    bool sameRegion;          /**< are these atoms specified to be in the same region? */ 
     RealType* vdwMult;        /**< multiplier for van der Waals interactions */
     RealType* electroMult;    /**< multiplier for electrostatic interactions */
     potVec* pot;              /**< total potential */
@@ -162,7 +163,7 @@ namespace OpenMD {
     RealType* frho;         /**< value of density functional for atom */
     RealType* dfrhodrho;    /**< derivative of density functional for atom */
     RealType* flucQ;	    /**< current value of atom's fluctuating charge */
-    RealType* dVdFQ;	    /**< fluctuating charge derivative */
+    RealType* flucQfrc;	    /**< fluctuating charge derivative */
   };
   
     

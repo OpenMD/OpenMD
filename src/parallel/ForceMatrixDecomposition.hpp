@@ -149,6 +149,9 @@ namespace OpenMD {
     vector<int> identsRow;
     vector<int> identsCol;
 
+    vector<int> regionsRow;
+    vector<int> regionsCol;
+
     vector<AtomType*> atypesRow;
     vector<AtomType*> atypesCol;
 

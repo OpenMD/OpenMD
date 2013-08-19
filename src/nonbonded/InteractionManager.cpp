@@ -178,14 +178,8 @@ namespace OpenMD {
           iHash_[atid1][atid2] |= LJ_INTERACTION;
         }
         if (atype1->isElectrostatic() && atype2->isElectrostatic() ) {
-          // Pairs of fluctuating density EAM atoms have their
-          // interactions handled via the EAM routines.  All other
-          // interactions with these atoms are handled via normal
-          // electrostatic channels:
-          if (!(atype1->isEAM() && atype2->isEAM())) {
-            interactions_[atid1][atid2].insert(electrostatic_);
-            iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
-          }
+          interactions_[atid1][atid2].insert(electrostatic_);
+          iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
         }
         if (atype1->isSticky() && atype2->isSticky() ) {
           interactions_[atid1][atid2].insert(sticky_);

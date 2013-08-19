@@ -938,16 +938,21 @@ namespace OpenMD {
       }       
     }
 
-    // Build the identArray_
+    // Build the identArray_ and regions_
 
     identArray_.clear();
-    identArray_.reserve(getNAtoms());    
-    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
+    identArray_.reserve(getNAtoms());   
+    regions_.clear();
+    regions_.reserve(getNAtoms());
+ 
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {      
+      int reg = mol->getRegion();      
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	identArray_.push_back(atom->getIdent());
+        regions_.push_back(reg);
       }
     }    
-    
+       
     topologyDone_ = true;
   }
 

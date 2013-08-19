@@ -54,12 +54,10 @@ namespace OpenMD{
     forceMan_->calcForces();
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    //potVec pot = curSnapshot->getLongRangePotentials();
-    RealType lrPot = curSnapshot->getLongRangePotential();
+    potVec pot = curSnapshot->getLongRangePotentials();
     potVec exPot = curSnapshot->getExcludedPotentials();  
   
-    //return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
-    return lrPot + exPot[ELECTROSTATIC_FAMILY];
+    return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
   }
   
   void FluctuatingChargeObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {

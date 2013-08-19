@@ -99,6 +99,7 @@ namespace OpenMD {
     nGroups_ = info_->getNLocalCutoffGroups();
     // gather the information for atomtype IDs (atids):
     idents = info_->getIdentArray();
+    regions = info_->getRegions();
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
@@ -163,6 +164,12 @@ namespace OpenMD {
     
     AtomPlanIntRow->gather(idents, identsRow);
     AtomPlanIntColumn->gather(idents, identsCol);
+
+    regionsRow.resize(nAtomsInRow_);
+    regionsCol.resize(nAtomsInCol_);
+    
+    AtomPlanIntRow->gather(regions, regionsRow);
+    AtomPlanIntColumn->gather(regions, regionsCol);
     
     // allocate memory for the parallel objects
     atypesRow.resize(nAtomsInRow_);
@@ -1171,6 +1178,10 @@ namespace OpenMD {
     idat.atypes = make_pair( atypesRow[atom1], atypesCol[atom2]);
     idat.atid1 = identsRow[atom1];
     idat.atid2 = identsCol[atom2];
+
+    if (regionsRow[atom1] >= 0 && regionsCol[atom2] >= 0) 
+      idat.sameRegion = (regionsRow[atom1] == regionsCol[atom2]);
+       
     //idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
     //                         ff_->getAtomType(identsCol[atom2]) );
     
@@ -1229,6 +1240,9 @@ namespace OpenMD {
     idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
     idat.atid1 = idents[atom1];
     idat.atid2 = idents[atom2];
+
+    if (regions[atom1] >= 0 && regions[atom2] >= 0) 
+      idat.sameRegion = (regions[atom1] == regions[atom2]);
 
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);

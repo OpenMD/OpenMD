@@ -141,7 +141,7 @@ namespace OpenMD {
     }
     
     if (storageLayout_ & DataStorage::dslFlucQForce) {
-      sdat.dVdFQ = &(snap_->atomData.flucQFrc[atom1]);
+      sdat.flucQfrc = &(snap_->atomData.flucQFrc[atom1]);
     }
   }
 

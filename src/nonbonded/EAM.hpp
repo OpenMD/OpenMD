@@ -56,8 +56,6 @@ namespace OpenMD {
     CubicSpline* F;
     CubicSpline* Z;
     RealType rcut;
-    bool isFluctuating;
-    RealType qToRhoScaling;
   };
   
   struct EAMInteractionData {
@@ -87,7 +85,6 @@ namespace OpenMD {
     virtual int getHash() { return EAM_INTERACTION; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*,AtomType*> atypes);
     void setCutoffRadius( RealType rCut );
-
 
   private:
     void initialize();  

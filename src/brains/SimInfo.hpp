@@ -588,8 +588,16 @@ namespace OpenMD{
     vector<int> identArray_;
   public:
     vector<int> getIdentArray() { return identArray_; }
+
+    /** 
+     * A vector that contains information about the local region of an
+     * atom (used for fluctuating charges, etc.) 
+     */
   private:
-    
+    vector<int> regions_;
+  public:
+    vector<int> getRegions() { return regions_; }
+  private:
     /** 
      * A vector which contains the fractional contribution of an
      * atom's mass to the total mass of the cutoffGroup that atom

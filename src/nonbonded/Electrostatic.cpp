@@ -888,7 +888,8 @@ namespace OpenMD {
                         + rdQbr * rhat * (dv22 - 2.0*v22or));
     }
     
-    if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {
+    if ((a_is_Fluctuating || b_is_Fluctuating) 
+        && (idat.excluded || idat.sameRegion)) {
       J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
     }    
     
@@ -909,15 +910,17 @@ namespace OpenMD {
         }
         
         // Fluctuating charge forces are handled via Coulomb integrals
-        // for excluded pairs (i.e. those connected via bonds) and
-        // with the standard charge-charge interaction otherwise.
+        // for excluded pairs (i.e. those connected via bonds), atoms
+        // within the same region (for metals) and with the standard
+        // charge-charge interaction otherwise.
 
-        if (idat.excluded) {          
+        if (idat.excluded || idat.sameRegion) {          
           if (a_is_Fluctuating || b_is_Fluctuating) {
             coulInt = J->getValueAt( *(idat.rij) );
             if (a_is_Fluctuating)  dUdCa += coulInt * C_b;
             if (b_is_Fluctuating)  dUdCb += coulInt * C_a;
-            excluded_Pot += C_a * C_b * coulInt;
+            if (idat.excluded)
+              excluded_Pot += C_a * C_b * coulInt;
           }          
         } else {
           if (a_is_Fluctuating) dUdCa += C_b * pref * v01;
@@ -1142,8 +1145,7 @@ namespace OpenMD {
         
     if (i_is_Fluctuating) {
       C_a += *(sdat.flucQ);
-      // dVdFQ is really a force, so this is negative the derivative
-      *(sdat.dVdFQ) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
+      *(sdat.flucQfrc) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
       (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY] += (*sdat.flucQ) * 
         (*(sdat.flucQ) * data.hardness * 0.5 + data.electronegativity);
     }

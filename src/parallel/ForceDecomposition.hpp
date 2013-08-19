@@ -169,6 +169,7 @@ namespace OpenMD {
     RealType largestRcut_;
 
     vector<int> idents;
+    vector<int> regions;
     potVec pairwisePot;
     potVec embeddingPot;
     potVec excludedPot;
