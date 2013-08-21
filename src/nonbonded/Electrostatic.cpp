@@ -766,7 +766,6 @@ namespace OpenMD {
     // Excluded potential that is still computed for fluctuating charges
     excluded_Pot= 0.0;
 
-
     // some variables we'll need independent of electrostatic type:
 
     ri = 1.0 /  *(idat.rij);
@@ -887,19 +886,19 @@ namespace OpenMD {
         Ea += pre14_ * (trQb * rhat * dv21 + 2.0 * Qbr * v22or 
                         + rdQbr * rhat * (dv22 - 2.0*v22or));
     }
-    
-    if ((a_is_Fluctuating || b_is_Fluctuating) 
-        && (idat.excluded || idat.sameRegion)) {
+        
+
+    if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {
       J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
     }    
-    
+
     if (a_is_Charge) {     
       
       if (b_is_Charge) {
         pref =  pre11_ * *(idat.electroMult);      
         U  += C_a * C_b * pref * v01;
         F  += C_a * C_b * pref * dv01 * rhat;
-        
+
         // If this is an excluded pair, there are still indirect
         // interactions via the reaction field we must worry about:
 
@@ -908,24 +907,21 @@ namespace OpenMD {
           indirect_Pot += rfContrib;
           indirect_F   += rfContrib * 2.0 * ri * rhat;
         }
-        
-        // Fluctuating charge forces are handled via Coulomb integrals
-        // for excluded pairs (i.e. those connected via bonds), atoms
-        // within the same region (for metals) and with the standard
-        // charge-charge interaction otherwise.
 
-        if (idat.excluded || idat.sameRegion) {          
+        // Fluctuating charge forces are handled via Coulomb integrals
+        // for excluded pairs (i.e. those connected via bonds) and
+        // with the standard charge-charge interaction otherwise.
+
+        if (idat.excluded) {
           if (a_is_Fluctuating || b_is_Fluctuating) {
             coulInt = J->getValueAt( *(idat.rij) );
-            if (a_is_Fluctuating)  dUdCa += coulInt * C_b;
-            if (b_is_Fluctuating)  dUdCb += coulInt * C_a;
-            if (idat.excluded)
-              excluded_Pot += C_a * C_b * coulInt;
-          }          
+            if (a_is_Fluctuating) dUdCa += C_b * coulInt;
+            if (b_is_Fluctuating) dUdCb += C_a * coulInt;          
+          }
         } else {
           if (a_is_Fluctuating) dUdCa += C_b * pref * v01;
           if (b_is_Fluctuating) dUdCb += C_a * pref * v01;
-        }
+        }              
       }
 
       if (b_is_Dipole) {
@@ -1445,7 +1441,7 @@ namespace OpenMD {
                 if (data.is_Quadrupole) {
                   Q = atom->getQuadrupole() * mPoleConverter; 
                   Qk = Q * kVec;                  
-                  qk = dot(kVec, Qk);
+                  qk = dot(Qk, kVec);
                   qxk[i] = cross(Qk, kVec);
                   qkc[i] = qk * ckr[i];
                   qks[i] = qk * skr[i];
@@ -1507,14 +1503,6 @@ namespace OpenMD {
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)
                                              +skr[i]*(ckss+dkcs-qkss));
                
-
-                cerr << "qkcs = " << qkcs << "\n";
-                cerr << "qkss = " << qkss << "\n";
-                cerr << "qkc[i] = " << qkc[i] << "\n";
-                cerr << "qks[i] = " << qks[i] << "\n";
-                cerr << "pot = " << 2.0 * rvol * AK[kk]*(qkss*qkss + qkcs*qkcs) << "\n";
-                cerr << "qfrc = " << 4.0 * rvol * qfrc << "\n";
-                cerr << "qtrq2 = " << 4.0 * rvol * qtrq2 << "\n";
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
                 
                 if (data.is_Dipole) {

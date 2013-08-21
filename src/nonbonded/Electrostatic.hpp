@@ -197,7 +197,7 @@ namespace OpenMD {
     // Excluded potential that is still computed for fluctuating charges
     RealType excluded_Pot;
 
-    RealType rfContrib, coulInt;
+    RealType rfContrib, coulInt, dJdr;
     
     // spline for coulomb integral
     CubicSpline* J;
