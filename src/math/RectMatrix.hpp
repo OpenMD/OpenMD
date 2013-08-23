@@ -603,7 +603,7 @@ namespace OpenMD {
    * @return the cross product (vector product) of t1 and t2
    */
   template<typename Real, unsigned int Row, unsigned int Col>
-  inline Vector<Real, Row> cross( const RectMatrix<Real, Row, Col>& t1, 
+  inline Vector<Real, Row> mCross( const RectMatrix<Real, Row, Col>& t1, 
                                   const RectMatrix<Real, Row, Col>& t2 ) {
     Vector<Real, Row> result;
     unsigned int i1;
@@ -615,7 +615,7 @@ namespace OpenMD {
       for (unsigned int j = 0; j < Col; j++) {
         result[i] += t1(i1,j) * t2(i2,j) - t1(i2,j) * t2(i1,j);
       }
-    }    
+    }
     return result;
   }
   

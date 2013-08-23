@@ -987,7 +987,6 @@ namespace OpenMD {
         F  -= pref * (rdDa * rdDb) * (dv22 - 2.0*v22or) * rhat;
         Ta += pref * ( v21 * DaxDb - v22 * rdDb * rxDa);
         Tb += pref * (-v21 * DaxDb - v22 * rdDa * rxDb);
-
         // Even if we excluded this pair from direct interactions, we
         // still have the reaction-field-mediated dipole-dipole
         // interaction:
@@ -1047,7 +1046,7 @@ namespace OpenMD {
         trQaQb = QaQb.trace();
         rQaQb = rhat * QaQb;
         QaQbr = QaQb * rhat;
-        QaxQb = cross(Q_a, Q_b);
+        QaxQb = mCross(Q_a, Q_b);
         rQaQbr = dot(rQa, Qbr);
         rQaxQbr = cross(rQa, Qbr);
         
@@ -1078,7 +1077,6 @@ namespace OpenMD {
         //             + 4.0 * cross(rhat, QbQar) 
 
         Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
-
       }
     }
 
@@ -1441,8 +1439,8 @@ namespace OpenMD {
                 if (data.is_Quadrupole) {
                   Q = atom->getQuadrupole() * mPoleConverter; 
                   Qk = Q * kVec;                  
-                  qk = dot(Qk, kVec);
-                  qxk[i] = cross(Qk, kVec);
+                  qk = dot(kVec, Qk);
+                  qxk[i] = cross(kVec, Qk);
                   qkc[i] = qk * ckr[i];
                   qks[i] = qk * skr[i];
                 }              
@@ -1501,7 +1499,7 @@ namespace OpenMD {
                 RealType qtrq1 = AK[kk]*(skr[i]*(ckcs-dkss-qkcs)
                                          -ckr[i]*(ckss+dkcs-qkss));
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)
-                                             +skr[i]*(ckss+dkcs-qkss));
+                                            +skr[i]*(ckss+dkcs-qkss));
                
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
                 
