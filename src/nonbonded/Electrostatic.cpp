@@ -1440,7 +1440,7 @@ namespace OpenMD {
                   Q = atom->getQuadrupole() * mPoleConverter; 
                   Qk = Q * kVec;                  
                   qk = dot(kVec, Qk);
-                  qxk[i] = cross(kVec, Qk);
+                  qxk[i] = -cross(kVec, Qk);
                   qkc[i] = qk * ckr[i];
                   qks[i] = qk * skr[i];
                 }              

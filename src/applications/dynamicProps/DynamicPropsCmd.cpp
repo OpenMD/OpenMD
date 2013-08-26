@@ -48,6 +48,7 @@ const char *gengetopt_args_info_help[] = {
   "  -d, --dcorr                   dipole correlation function",
   "  -l, --lcorr                   Lengendre correlation function",
   "      --lcorrZ                  Lengendre correlation function binned by Z",
+  "      --cohZ                    Lengendre correlation function for OH bond \n                                  vectors binned by Z",
   "  -M, --sdcorr                  System dipole correlation function",
   "      --r_rcorr                 Radial rmsd",
   "      --thetacorr               Angular rmsd",
@@ -96,6 +97,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
   args_info->lcorrZ_given = 0 ;
+  args_info->cohZ_given = 0 ;
   args_info->sdcorr_given = 0 ;
   args_info->r_rcorr_given = 0 ;
   args_info->thetacorr_given = 0 ;
@@ -146,13 +148,14 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->dcorr_help = gengetopt_args_info_help[13] ;
   args_info->lcorr_help = gengetopt_args_info_help[14] ;
   args_info->lcorrZ_help = gengetopt_args_info_help[15] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[16] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[17] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[18] ;
-  args_info->drcorr_help = gengetopt_args_info_help[19] ;
-  args_info->helfandEcorr_help = gengetopt_args_info_help[20] ;
-  args_info->momentum_help = gengetopt_args_info_help[21] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[22] ;
+  args_info->cohZ_help = gengetopt_args_info_help[16] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[17] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[18] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[19] ;
+  args_info->drcorr_help = gengetopt_args_info_help[20] ;
+  args_info->helfandEcorr_help = gengetopt_args_info_help[21] ;
+  args_info->momentum_help = gengetopt_args_info_help[22] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[23] ;
   
 }
 
@@ -313,6 +316,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "lcorr", 0, 0 );
   if (args_info->lcorrZ_given)
     write_into_file(outfile, "lcorrZ", 0, 0 );
+  if (args_info->cohZ_given)
+    write_into_file(outfile, "cohZ", 0, 0 );
   if (args_info->sdcorr_given)
     write_into_file(outfile, "sdcorr", 0, 0 );
   if (args_info->r_rcorr_given)
@@ -386,6 +391,7 @@ reset_group_dynamicProps(struct gengetopt_args_info *args_info)
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
   args_info->lcorrZ_given = 0 ;
+  args_info->cohZ_given = 0 ;
   args_info->sdcorr_given = 0 ;
   args_info->r_rcorr_given = 0 ;
   args_info->thetacorr_given = 0 ;
@@ -649,6 +655,7 @@ cmdline_parser_internal (
         { "dcorr",	0, NULL, 'd' },
         { "lcorr",	0, NULL, 'l' },
         { "lcorrZ",	0, NULL, 0 },
+        { "cohZ",	0, NULL, 0 },
         { "sdcorr",	0, NULL, 'M' },
         { "r_rcorr",	0, NULL, 0 },
         { "thetacorr",	0, NULL, 0 },
@@ -885,6 +892,23 @@ cmdline_parser_internal (
                 &(local_args_info.lcorrZ_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "lcorrZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Lengendre correlation function for OH bond vectors binned by Z.  */
+          else if (strcmp (long_options[option_index].name, "cohZ") == 0)
+          {
+          
+            if (args_info->dynamicProps_group_counter && override)
+              reset_group_dynamicProps (args_info);
+            args_info->dynamicProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->cohZ_given),
+                &(local_args_info.cohZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "cohZ", '-',
                 additional_error))
               goto failure;
           

@@ -66,6 +66,7 @@ struct gengetopt_args_info
   const char *dcorr_help; /**< @brief dipole correlation function help description.  */
   const char *lcorr_help; /**< @brief Lengendre correlation function help description.  */
   const char *lcorrZ_help; /**< @brief Lengendre correlation function binned by Z help description.  */
+  const char *cohZ_help; /**< @brief Lengendre correlation function for OH bond vectors binned by Z help description.  */
   const char *sdcorr_help; /**< @brief System dipole correlation function help description.  */
   const char *r_rcorr_help; /**< @brief Radial rmsd help description.  */
   const char *thetacorr_help; /**< @brief Angular rmsd help description.  */
@@ -89,6 +90,7 @@ struct gengetopt_args_info
   unsigned int dcorr_given ;	/**< @brief Whether dcorr was given.  */
   unsigned int lcorr_given ;	/**< @brief Whether lcorr was given.  */
   unsigned int lcorrZ_given ;	/**< @brief Whether lcorrZ was given.  */
+  unsigned int cohZ_given ;	/**< @brief Whether cohZ was given.  */
   unsigned int sdcorr_given ;	/**< @brief Whether sdcorr was given.  */
   unsigned int r_rcorr_given ;	/**< @brief Whether r_rcorr was given.  */
   unsigned int thetacorr_given ;	/**< @brief Whether thetacorr was given.  */

@@ -63,6 +63,7 @@
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
+#include "applications/dynamicProps/cOHz.hpp"
 
 using namespace OpenMD;
 
@@ -171,7 +172,23 @@ int main(int argc, char* argv[]){
         
     corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order, args_info.nzbins_arg, memSize); 
 
+  } else if (args_info.cohZ_given) {
+    int order;
+    if (args_info.order_given)
+        order = args_info.order_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--order must be set if --cohZ is set\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+        
+    corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, args_info.nzbins_arg, memSize); 
+
   }
+
+
 
   if (args_info.output_given) {
     corrFunc->setOutputName(args_info.output_arg);
