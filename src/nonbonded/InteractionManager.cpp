@@ -116,10 +116,7 @@ namespace OpenMD {
     set<AtomType*>::iterator at;
 
     for (at = atypes.begin(); at != atypes.end(); ++at) {
-    
-      //for (atype1 = atomTypes->beginType(i1); atype1 != NULL; 
-      //   atype1 = atomTypes->nextType(i1)) {
-      
+          
       atype1 = *at;
       atid1 = atype1->getIdent();
       iHash_[atid1].resize(nTypes);
@@ -136,30 +133,29 @@ namespace OpenMD {
         painCave.isFatal = 0;
         simError();                 
       }
+          
+      if (atype1->isLennardJones()) {
+        sHash_[atid1] |= LJ_INTERACTION;
+      }
+      if (atype1->isElectrostatic()) {
+        sHash_[atid1] |= ELECTROSTATIC_INTERACTION;
+      }
+      if (atype1->isSticky()) {
+        sHash_[atid1] |= STICKY_INTERACTION;
+      }
+      if (atype1->isStickyPower()) {
+        sHash_[atid1] |= STICKY_INTERACTION;
+      }
+      if (atype1->isEAM()) {      
+        sHash_[atid1] |= EAM_INTERACTION;
+      }
+      if (atype1->isSC()) {
+        sHash_[atid1] |= SC_INTERACTION;
+      }
+      if (atype1->isGayBerne()) {
+        sHash_[atid1] |= GB_INTERACTION;
+      }
     }
-
-    if (atype1->isLennardJones()) {
-      sHash_[atid1] |= LJ_INTERACTION;
-    }
-    if (atype1->isElectrostatic()) {
-      sHash_[atid1] |= ELECTROSTATIC_INTERACTION;
-    }
-    if (atype1->isSticky()) {
-      sHash_[atid1] |= STICKY_INTERACTION;
-    }
-    if (atype1->isStickyPower()) {
-      sHash_[atid1] |= STICKY_INTERACTION;
-    }
-    if (atype1->isEAM()) {
-      sHash_[atid1] |= EAM_INTERACTION;
-    }
-    if (atype1->isSC()) {
-      sHash_[atid1] |= SC_INTERACTION;
-    }
-    if (atype1->isGayBerne()) {
-      sHash_[atid1] |= GB_INTERACTION;
-    }
-   
     // Now, iterate over all known types and add to the interaction map:
     
     map<int, AtomType*>::iterator it1, it2;
