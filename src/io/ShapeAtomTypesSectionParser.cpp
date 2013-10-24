@@ -116,7 +116,7 @@ namespace OpenMD {
     
     shapeStream.open( shapeFileName.c_str() );
     
-    if( shapeStream == NULL ){
+    if( !shapeStream.is_open() ){
       
       tempString = ffPath;
       tempString += "/";
@@ -125,7 +125,7 @@ namespace OpenMD {
       
       shapeStream.open( shapeFileName.c_str() );
       
-      if( shapeStream == NULL ){
+      if( !shapeStream.is_open() ){
         
         sprintf( painCave.errMsg,
                  "Error opening the shape file:\n"
