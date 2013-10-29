@@ -100,8 +100,7 @@ namespace OpenMD {
 
     for (int i = 0; i < nTimeBins_; ++i) {
       time_[i] = i * deltaTime_;
-    }
-    
+    } 
   }
 
 
@@ -130,6 +129,7 @@ namespace OpenMD {
   void TimeCorrFunc::correlateBlocks(int block1, int block2) {
 
     int jstart, jend;
+    RealType i_t, j_t;
 
     assert(bsMan_->isBlockActive(block1) && bsMan_->isBlockActive(block2));
 
@@ -139,7 +139,7 @@ namespace OpenMD {
     jend = snapshotBlock2.second;
 
     for (int i = snapshotBlock1.first; i < snapshotBlock1.second; ++i) {
-
+               
       //update the position or velocity of the atoms belong to rigid bodies
       updateFrame(i);
 
@@ -155,8 +155,27 @@ namespace OpenMD {
       } else {
 	jstart = snapshotBlock2.first;
       }
-        
+      
+      i_t = bsMan_->getSnapshot(i)->getTime();
+              
       for(int j  = jstart; j < jend; ++j) {
+
+        // Perform a sanity check on the actual configuration times to
+        // make sure the configurations are spaced the same amount the
+        // sample time said they were spaced:
+               
+        j_t = bsMan_->getSnapshot(j)->getTime(); 
+
+        if ( fabs( (j_t - i_t) - (j-i)*deltaTime_ ) > 1.0e-4 ) {
+          sprintf(painCave.errMsg,
+                  "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
+                  "\tin %s does not match actual time-spacing between\n"
+                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                  deltaTime_, dumpFilename_.c_str(), i, i_t, j, j_t);
+          painCave.isFatal = 1;
+          simError();  
+        }
+
 	//update the position or velocity of the atoms belong to rigid bodies
 	updateFrame(j);
         if (evaluator2_.isDynamic()) {

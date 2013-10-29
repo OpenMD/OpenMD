@@ -76,35 +76,38 @@ int main(int argc, char* argv[]){
     exit(1) ;
   }
 
-
   //get the dumpfile name and meta-data file name
   std::string dumpFileName = args_info.input_arg;
     
   std::string sele1;
   std::string sele2;
-
+  
+  // check the first selection argument, or set it to the environment
+  // variable, or failing that, set it to "select all"
+  
   if (args_info.sele1_given) {
     sele1 = args_info.sele1_arg;
-  }else {
+  } else {
     char*  sele1Env= getenv("SELECTION1");
     if (sele1Env) {
       sele1 = sele1Env;
-    }else {
-      sprintf( painCave.errMsg,
-               "neither --sele1 option nor $SELECTION1 is set");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
+    } else {
+      sele1 = "select all";
     }
   }
-    
+  
+  // check the second selection argument, or set it to the environment
+  // variable, or failing that, set it to the first selection
+  
   if (args_info.sele2_given) {
     sele2 = args_info.sele2_arg;
   } else {
     char* sele2Env = getenv("SELECTION2");
     if (sele2Env) {
       sele2 = sele2Env;            
-    } else {
+    } else { 
+      //If sele2 is not specified, then the default behavior
+      //should be what is already intended for sele1
       sele2 = sele1;
     }
   }
@@ -187,7 +190,6 @@ int main(int argc, char* argv[]){
     corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, args_info.nzbins_arg, memSize); 
 
   }
-
 
 
   if (args_info.output_given) {

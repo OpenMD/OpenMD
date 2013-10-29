@@ -17,6 +17,7 @@
      forceField = "Multipole";
      cutoffMethod = "shifted_force";
      electrostaticScreeningMethod = "damped";
+     outputForceVector = true;
      cutoffRadius = 20.0;
      dampingAlpha = 0.18;
      statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";

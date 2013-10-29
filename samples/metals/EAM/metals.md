@@ -25,4 +25,12 @@ molecule{
      position( 0.0, 0.0, 0.0 );
   }
 }
+molecule{
+  name = "Pd";
+  
+  atom[0]{
+     type="Pd";
+     position( 0.0, 0.0, 0.0 );
+  }
+}
 #endif

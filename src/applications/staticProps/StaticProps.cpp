@@ -111,12 +111,12 @@ int main(int argc, char* argv[]){
   }
   
   // check the second selection argument, or set it to the environment
-  // variable, or failing that, set it to "select all"
+  // variable, or failing that, set it to the first selection
   
   if (args_info.sele2_given) {
     sele2 = args_info.sele2_arg;
   } else {
-    char* sele2Env = getenv("SELECTION1");
+    char* sele2Env = getenv("SELECTION2");
     if (sele2Env) {
       sele2 = sele2Env;            
     } else { 
