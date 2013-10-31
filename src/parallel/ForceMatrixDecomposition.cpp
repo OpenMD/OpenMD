@@ -1392,9 +1392,9 @@ namespace OpenMD {
     Vector3d boxY = box.getColumn(1);
     Vector3d boxZ = box.getColumn(2);
     
-    nCells_.x() = (int) ( boxX.length() )/ rList_;
-    nCells_.y() = (int) ( boxY.length() )/ rList_;
-    nCells_.z() = (int) ( boxZ.length() )/ rList_;
+    nCells_.x() = int( boxX.length() / rList_ );
+    nCells_.y() = int( boxY.length() / rList_ );
+    nCells_.z() = int( boxZ.length() / rList_ );
     
     // handle small boxes where the cell offsets can end up repeating cells
     
@@ -1490,9 +1490,9 @@ namespace OpenMD {
         }
         
         // find xyz-indices of cell that cutoffGroup is in.
-        whichCell.x() = nCells_.x() * scaled.x();
-        whichCell.y() = nCells_.y() * scaled.y();
-        whichCell.z() = nCells_.z() * scaled.z();
+        whichCell.x() = int(nCells_.x() * scaled.x());
+        whichCell.y() = int(nCells_.y() * scaled.y());
+        whichCell.z() = int(nCells_.z() * scaled.z());
         
         // find single index of this cell:
         cellIndex = Vlinear(whichCell, nCells_);

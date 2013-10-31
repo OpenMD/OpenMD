@@ -130,7 +130,8 @@ namespace OpenMD {
           
           // compute the best estimate of the ending time:
           time_t current_ = time(NULL);
-          time_t end_ = start_ + (current_ - start_) * (100.0/percent);
+          time_t end_ = static_cast<time_t>(start_ + (current_ - start_) * 
+                                            (100.0/percent) );
           struct tm * ender = localtime(&end_);
           char buffer[22];
           strftime(buffer, 22, "%a %b %d @ %I:%M %p", ender);

@@ -152,7 +152,7 @@ namespace OpenMD {
     
     // do the same in the regions:
     if (constrainRegions_) {
-      for (int i = 0; i < regionForce_.size(); ++i)  {
+      for (unsigned int i = 0; i < regionForce_.size(); ++i)  {
         regionForce_[ i ] /= regionCharges_[ i ];
       }
     }
