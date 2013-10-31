@@ -43,6 +43,10 @@
  *  Purpose: To calculate an alpha-shape hull.
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 /* Standard includes independent of library */
 
 #include <iostream>
@@ -52,10 +56,6 @@
 #include <iterator>
 #include "math/AlphaHull.hpp"
 #include "utils/simError.h"
-
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 #include "math/qhull.hpp"
 

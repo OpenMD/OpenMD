@@ -43,6 +43,10 @@
 #define _LARGEFILE_SOURCE64 
 #define _FILE_OFFSET_BITS 64 
  
+#ifdef IS_MPI 
+#include <mpi.h> 
+#endif
+ 
 #include <sys/types.h> 
 #include <sys/stat.h> 
  
@@ -59,10 +63,6 @@
 #include "utils/MemoryUtils.hpp" 
 #include "utils/StringTokenizer.hpp" 
 #include "brains/Thermo.hpp"
- 
-#ifdef IS_MPI 
-#include <mpi.h> 
-#endif
  
  
 namespace OpenMD { 

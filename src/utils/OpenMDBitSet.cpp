@@ -40,6 +40,10 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include <algorithm>
 #include <cassert>
 #include <string>
@@ -47,9 +51,6 @@
 
 #include "utils/OpenMDBitSet.hpp"
 #include "utils/Algorithm.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 namespace OpenMD {
   int OpenMDBitSet::countBits() {

@@ -39,7 +39,10 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */ 
-
+ 
+#ifdef IS_MPI 
+#include <mpi.h> 
+#endif
  
 #include <sys/types.h> 
 #include <sys/stat.h> 
@@ -59,11 +62,6 @@
 #include "utils/StringTokenizer.hpp"
 #include "restraints/ObjectRestraint.hpp"
 #include "restraints/MolecularRestraint.hpp" 
- 
-#ifdef IS_MPI 
- 
-#include <mpi.h> 
-#endif
 
 namespace OpenMD { 
 

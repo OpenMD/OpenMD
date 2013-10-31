@@ -40,6 +40,10 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "config.h"
 #include <cmath>
 
@@ -52,10 +56,6 @@
 #include "utils/StringUtils.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
 
 namespace OpenMD {
 

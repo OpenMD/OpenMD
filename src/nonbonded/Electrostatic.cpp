@@ -40,6 +40,10 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -57,9 +61,6 @@
 #include "math/erfc.hpp"
 #include "math/SquareMatrix.hpp"
 #include "primitives/Molecule.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 namespace OpenMD {
   

@@ -40,15 +40,15 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 #include <cmath>
 #include "constraints/ZconstraintForceManager.hpp"
 #include "integrators/Integrator.hpp"
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
 #include "utils/StringUtils.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 namespace OpenMD {
   ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(info), infiniteTime(1e31) {

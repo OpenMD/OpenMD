@@ -40,12 +40,11 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-
-#include "restraints/ThermoIntegrationForceManager.hpp"
-
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
+#include "restraints/ThermoIntegrationForceManager.hpp"
 
 namespace OpenMD {
   

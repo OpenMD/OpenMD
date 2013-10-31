@@ -1,10 +1,9 @@
-#include "config.h"
-#include "optimization/Problem.hpp"
-
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
+#include "config.h"
+#include "optimization/Problem.hpp"
 
 namespace QuantLib {
   RealType Problem::DotProduct(DynamicVector<RealType>& v1, 

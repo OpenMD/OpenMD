@@ -39,13 +39,13 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#include <math.h>
-#include <iostream>
 
 #ifdef IS_MPI
 #include <mpi.h>
 #endif //is_mpi
+ 
+#include <math.h>
+#include <iostream>
 
 #include "brains/Thermo.hpp"
 #include "primitives/Molecule.hpp"

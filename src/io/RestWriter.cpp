@@ -40,6 +40,9 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 #include <string>
 #include <sstream>
@@ -48,9 +51,6 @@
 #include "io/RestWriter.hpp"
 #include "utils/simError.h"
 #include "brains/SnapshotManager.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 namespace OpenMD {
   RestWriter::RestWriter(SimInfo* info, const std::string& filename, 

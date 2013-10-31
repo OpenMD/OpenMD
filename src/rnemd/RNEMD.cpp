@@ -38,6 +38,9 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 #include <cmath>
 #include <sstream>
@@ -54,9 +57,6 @@
 #include "utils/Tuple.hpp"
 #include "brains/Thermo.hpp"
 #include "math/ConvexHull.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 #ifdef _MSC_VER
 #define isnan(x) _isnan((x))

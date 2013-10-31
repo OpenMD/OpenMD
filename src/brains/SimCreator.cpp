@@ -46,6 +46,12 @@
  * @date 11/03/2004
  * @version 1.0
  */
+
+#ifdef IS_MPI
+#include "mpi.h"
+#include "math/ParallelRandNumGen.hpp"
+#endif
+
 #include <exception>
 #include <iostream>
 #include <sstream>
@@ -83,10 +89,6 @@
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 
-#ifdef IS_MPI
-#include "mpi.h"
-#include "math/ParallelRandNumGen.hpp"
-#endif
 
 namespace OpenMD {
   

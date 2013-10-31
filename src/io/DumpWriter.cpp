@@ -39,6 +39,12 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+
+#include "config.h"
+
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
  
 #include "io/DumpWriter.hpp"
 #include "primitives/Molecule.hpp"
@@ -52,10 +58,6 @@
 #ifdef _MSC_VER
 #define isnan(x) _isnan((x))
 #define isinf(x) (!_finite(x) && !_isnan(x))
-#endif
-
-#ifdef IS_MPI
-#include <mpi.h>
 #endif
 
 using namespace std;

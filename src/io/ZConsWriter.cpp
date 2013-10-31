@@ -40,16 +40,16 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
 
-
 #include "io/ZConsWriter.hpp"
 #include "utils/simError.h"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 namespace OpenMD {
   ZConsWriter::ZConsWriter(SimInfo* info, const std::string& filename) : info_(info) {

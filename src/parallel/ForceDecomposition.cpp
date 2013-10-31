@@ -39,11 +39,13 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#include "parallel/ForceDecomposition.hpp"
-#include "math/Vector3.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
+#include "parallel/ForceDecomposition.hpp"
+#include "math/Vector3.hpp"
 
 using namespace std;
 namespace OpenMD {

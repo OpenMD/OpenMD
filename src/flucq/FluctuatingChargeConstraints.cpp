@@ -40,12 +40,12 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include "FluctuatingChargeConstraints.hpp"
-#include "primitives/Molecule.hpp"
-
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
+#include "FluctuatingChargeConstraints.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 

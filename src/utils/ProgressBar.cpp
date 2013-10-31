@@ -40,6 +40,10 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include <iostream>
 #include <cstdlib>
 
@@ -53,10 +57,6 @@
 #include <cstdio>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#endif
-
-#ifdef IS_MPI
-#include <mpi.h>
 #endif
 
 #include "utils/ProgressBar.hpp"

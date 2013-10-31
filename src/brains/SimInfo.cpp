@@ -47,6 +47,9 @@
  * @version 1.0
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 #include <algorithm>
 #include <set>
 #include <map>
@@ -61,9 +64,6 @@
 #include "io/ForceFieldOptions.hpp"
 #include "brains/ForceField.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 using namespace std;
 namespace OpenMD {
