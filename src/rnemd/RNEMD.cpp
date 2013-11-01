@@ -424,10 +424,10 @@ namespace OpenMD {
       OutputData angularVelocity;
       angularVelocity.units = "angstroms^2/fs";
       angularVelocity.title =  "AngularVelocity";  
-      angularVelocity.dataType = "Vector3d";
+      angularVelocity.dataType = "RealType";
       angularVelocity.accumulator.reserve(nBins_);
       for (int i = 0; i < nBins_; i++) 
-        angularVelocity.accumulator.push_back( new VectorAccumulator() );
+        angularVelocity.accumulator.push_back( new Accumulator() );
       data_[ANGULARVELOCITY] = angularVelocity;
       outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
 
@@ -1874,6 +1874,9 @@ namespace OpenMD {
     RealType area = getDividingArea();
     areaAccumulator_->add(area);
     Mat3x3d hmat = currentSnap_->getHmat();
+    Vector3d u = angularMomentumFluxVector_;
+    u.normalize();
+
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
     int selei(0);
@@ -1884,9 +1887,7 @@ namespace OpenMD {
     vector<RealType> binPx(nBins_, 0.0);
     vector<RealType> binPy(nBins_, 0.0);
     vector<RealType> binPz(nBins_, 0.0);
-    vector<RealType> binOmegax(nBins_, 0.0);
-    vector<RealType> binOmegay(nBins_, 0.0);
-    vector<RealType> binOmegaz(nBins_, 0.0);
+    vector<RealType> binOmega(nBins_, 0.0);
     vector<RealType> binKE(nBins_, 0.0);
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
@@ -1926,10 +1927,19 @@ namespace OpenMD {
         binNo = int(rPos.length() / binWidth_);
       }
 
+
       RealType mass = sd->getMass();
       Vector3d vel = sd->getVel();
       Vector3d rPos = sd->getPos() - coordinateOrigin_;
-      Vector3d aVel = cross(rPos, vel);
+      // Project the relative position onto a plane perpendicular to
+      // the angularMomentumFluxVector:
+      Vector3d rProj = rPos - dot(rPos, u) * u;
+      // Project the velocity onto a plane perpendicular to the
+      // angularMomentumFluxVector:
+      Vector3d vProj = vel  - dot(vel, u) * u;
+      // Compute angular velocity vector (should be nearly parallel to
+      // angularMomentumFluxVector
+      Vector3d aVel = cross(rProj, vProj);
       
       if (binNo >= 0 && binNo < nBins_)  {
         binCount[binNo]++;
@@ -1937,9 +1947,7 @@ namespace OpenMD {
         binPx[binNo] += mass*vel.x();
         binPy[binNo] += mass*vel.y();
         binPz[binNo] += mass*vel.z();
-        binOmegax[binNo] += aVel.x();
-        binOmegay[binNo] += aVel.y();
-        binOmegaz[binNo] += aVel.z();
+        binOmega[binNo] += dot(aVel, u);
         binKE[binNo] += 0.5 * (mass * vel.lengthSquare());
         binDOF[binNo] += 3;
         
@@ -1974,11 +1982,7 @@ namespace OpenMD {
 			      nBins_, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binPz[0],
 			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmegax[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmegay[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmegaz[0],
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmega[0],
 			      nBins_, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binKE[0],
 			      nBins_, MPI::REALTYPE, MPI::SUM);
@@ -1987,7 +1991,7 @@ namespace OpenMD {
 #endif
 
     Vector3d vel;
-    Vector3d aVel;
+    RealType omega;
     RealType den;
     RealType temp;
     RealType z;
@@ -2007,9 +2011,7 @@ namespace OpenMD {
       vel.x() = binPx[i] / binMass[i];
       vel.y() = binPy[i] / binMass[i];
       vel.z() = binPz[i] / binMass[i];
-      aVel.x() = binOmegax[i] / binCount[i];
-      aVel.y() = binOmegay[i] / binCount[i];
-      aVel.z() = binOmegaz[i] / binCount[i];
+      omega = binOmega[i] / binCount[i];
 
       if (binCount[i] > 0) {
         // only add values if there are things to add
@@ -2032,7 +2034,7 @@ namespace OpenMD {
               dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(vel);
               break;
             case ANGULARVELOCITY:  
-              dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(aVel);
+              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(omega);
               break;
             case DENSITY:
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
