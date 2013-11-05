@@ -424,10 +424,10 @@ namespace OpenMD {
       OutputData angularVelocity;
       angularVelocity.units = "angstroms^2/fs";
       angularVelocity.title =  "AngularVelocity";  
-      angularVelocity.dataType = "RealType";
+      angularVelocity.dataType = "Vector3d";
       angularVelocity.accumulator.reserve(nBins_);
       for (int i = 0; i < nBins_; i++) 
-        angularVelocity.accumulator.push_back( new Accumulator() );
+        angularVelocity.accumulator.push_back( new VectorAccumulator() );
       data_[ANGULARVELOCITY] = angularVelocity;
       outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
 
@@ -1882,12 +1882,19 @@ namespace OpenMD {
     int selei(0);
     StuntDouble* sd;
     int binNo;
+    RealType mass;
+    Vector3d vel; 
+    Vector3d rPos;
+    RealType KE;
+    Vector3d L;
+    Mat3x3d I;
+    RealType r2;
 
     vector<RealType> binMass(nBins_, 0.0);
-    vector<RealType> binPx(nBins_, 0.0);
-    vector<RealType> binPy(nBins_, 0.0);
-    vector<RealType> binPz(nBins_, 0.0);
+    vector<Vector3d> binP(nBins_, V3Zero);
     vector<RealType> binOmega(nBins_, 0.0);
+    vector<Vector3d> binL(nBins_, V3Zero);
+    vector<Mat3x3d>  binI(nBins_);
     vector<RealType> binKE(nBins_, 0.0);
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
@@ -1927,44 +1934,51 @@ namespace OpenMD {
         binNo = int(rPos.length() / binWidth_);
       }
 
+      mass = sd->getMass();
+      vel = sd->getVel();
+      rPos = sd->getPos() - coordinateOrigin_;
+      KE = mass * vel.lengthSquare();
+      L = mass * cross(rPos, vel);
+      I = outProduct(rPos, rPos) * mass;
+      r2 = rPos.lengthSquare();
+      I(0, 0) += mass * r2;
+      I(1, 1) += mass * r2;
+      I(2, 2) += mass * r2;
 
-      RealType mass = sd->getMass();
-      Vector3d vel = sd->getVel();
-      Vector3d rPos = sd->getPos() - coordinateOrigin_;
       // Project the relative position onto a plane perpendicular to
       // the angularMomentumFluxVector:
-      Vector3d rProj = rPos - dot(rPos, u) * u;
+      // Vector3d rProj = rPos - dot(rPos, u) * u;
       // Project the velocity onto a plane perpendicular to the
       // angularMomentumFluxVector:
-      Vector3d vProj = vel  - dot(vel, u) * u;
+      // Vector3d vProj = vel  - dot(vel, u) * u;
       // Compute angular velocity vector (should be nearly parallel to
       // angularMomentumFluxVector
-      Vector3d aVel = cross(rProj, vProj);
-      
+      // Vector3d aVel = cross(rProj, vProj);
+
       if (binNo >= 0 && binNo < nBins_)  {
         binCount[binNo]++;
         binMass[binNo] += mass;
-        binPx[binNo] += mass*vel.x();
-        binPy[binNo] += mass*vel.y();
-        binPz[binNo] += mass*vel.z();
-        binOmega[binNo] += dot(aVel, u);
-        binKE[binNo] += 0.5 * (mass * vel.lengthSquare());
+        binP[binNo] += mass*vel;
+        //binOmega[binNo] += dot(aVel, u);
+        binKE[binNo] += KE;
+        binI[binNo] += I;
+        binL[binNo] += L;
         binDOF[binNo] += 3;
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
-          Mat3x3d I = sd->getI();
+          Mat3x3d Ia = sd->getI();
           if (sd->isLinear()) {
             int i = sd->linearAxis();
             int j = (i + 1) % 3;
             int k = (i + 2) % 3;
-            binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / I(j, j) + 
-                                   angMom[k] * angMom[k] / I(k, k));
+            binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) + 
+                                   angMom[k] * angMom[k] / Ia(k, k));
             binDOF[binNo] += 2;
           } else {
-            binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
-                                   angMom[1] * angMom[1] / I(1, 1) +
-                                   angMom[2] * angMom[2] / I(2, 2));
+            binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                                   angMom[1] * angMom[1] / Ia(1, 1) +
+                                   angMom[2] * angMom[2] / Ia(2, 2));
             binDOF[binNo] += 3;
           }
         }
@@ -1972,26 +1986,30 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binCount[0],
-			      nBins_, MPI::INT, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binMass[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binPx[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binPy[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binPz[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmega[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binKE[0],
-			      nBins_, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binDOF[0],
-			      nBins_, MPI::INT, MPI::SUM);
+
+    for (int i = 0; i < nBins_; i++) {
+
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binCount[i],
+                                1, MPI::INT, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binMass[i],
+                                1, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binP[i],
+                                3, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binL[i],
+                                3, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binI[i],
+                                9, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binKE[i],
+                                1, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binDOF[i],
+                                1, MPI::INT, MPI::SUM);
+      //MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmega[i],
+      //                          1, MPI::REALTYPE, MPI::SUM);
+    }
+    
 #endif
 
-    Vector3d vel;
-    RealType omega;
+    Vector3d omega;
     RealType den;
     RealType temp;
     RealType z;
@@ -2008,10 +2026,11 @@ namespace OpenMD {
         den = binMass[i] * 3.0 * PhysicalConstants::densityConvert
           / (4.0 * M_PI * (pow(router,3) - pow(rinner,3)));
       }
-      vel.x() = binPx[i] / binMass[i];
-      vel.y() = binPy[i] / binMass[i];
-      vel.z() = binPz[i] / binMass[i];
-      omega = binOmega[i] / binCount[i];
+      vel = binP[i] / binMass[i];
+
+      omega = binI[i].inverse() * binL[i];
+
+      // omega = binOmega[i] / binCount[i];
 
       if (binCount[i] > 0) {
         // only add values if there are things to add
@@ -2034,7 +2053,7 @@ namespace OpenMD {
               dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(vel);
               break;
             case ANGULARVELOCITY:  
-              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(omega);
+              dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(omega);
               break;
             case DENSITY:
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
