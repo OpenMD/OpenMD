@@ -54,7 +54,8 @@ bool pairComparator( const evIndex& l, const evIndex& r) {
 NanoLength::NanoLength(SimInfo* info,
                        const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info) {
+  : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), 
+    seleMan_(info) {
   setOutputName(getPrefix(filename) + ".length");
   
   osq.open(getOutputFileName().c_str());
@@ -118,6 +119,7 @@ void NanoLength::process() {
       osq << time << "\t" << rodLength << std::endl;      
     }
   }
+  osq.close();
 }
     
 RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {

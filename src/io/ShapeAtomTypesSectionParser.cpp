@@ -96,7 +96,6 @@ namespace OpenMD {
     char buffer[bufferSize];
     std::string token;
 
-    int junk;
     Mat3x3d momInert;
     RealSphericalHarmonic* rsh;
     std::vector<RealSphericalHarmonic*> functionVector;
@@ -165,7 +164,7 @@ namespace OpenMD {
             painCave.isFatal = 1;
             simError();  
           } else {
-            junk = tokenInfo.nextTokenAsInt();
+            int junk = tokenInfo.nextTokenAsInt();
             at->setMass( tokenInfo.nextTokenAsDouble() );
             DirectionalAdapter da = DirectionalAdapter(at);
             Mat3x3d I;

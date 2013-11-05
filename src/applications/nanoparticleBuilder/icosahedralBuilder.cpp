@@ -66,7 +66,6 @@ void createMdFile(const std::string&oldMdFileName,
   newMdFile.open(newMdFileName.c_str());
   oldMdFile.getline(buffer, MAXLEN);
 
-  unsigned int i = 0;
   while (!oldMdFile.eof()) {
 
     //correct molecule number
@@ -167,12 +166,11 @@ int main(int argc, char *argv []) {
     CurlingStoneDecahedron* csd = new CurlingStoneDecahedron(columnAtoms, nShells, twinAtoms, truncatedPlanes);
     Points = csd->getPoints();
   }
-  
-    
 
   outputFileName = args_info.output_arg;
    
-  //creat new .md file on fly which corrects the number of molecule    
+  // create a new .md file on fly which corrects the number of
+  // molecules
 
   createMdFile(inputFileName, outputFileName, Points.size());
   
@@ -236,7 +234,7 @@ int main(int argc, char *argv []) {
 
   delete writer;
 
-  // cleanup a by calling sim error.....
+  // clean up by calling simError.....
   sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
           "generated.\n", outputFileName.c_str());
   painCave.isFatal = 0;

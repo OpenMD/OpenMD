@@ -61,33 +61,33 @@ using namespace OpenMD;
 NanoVolume::NanoVolume(SimInfo* info,
                        const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info) {
+  : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), 
+    seleMan_(info) {
+
   setOutputName(getPrefix(filename) + ".avol");
+
+  osq.open(getOutputFileName().c_str());
   
   evaluator_.loadScriptString(sele);
   if (!evaluator_.isDynamic()) {
     seleMan_.setSelectionSet(evaluator_.evaluate());
   }
   frameCounter_ = 0;
-  totalVolume_ = 0.0;
 }
 
 void NanoVolume::process() {
 #if defined(HAVE_QHULL)
   Molecule* mol;
-  Atom* atom;
   RigidBody* rb;
-  int myIndex;
   SimInfo::MoleculeIterator mi;
   Molecule::RigidBodyIterator rbIter;
-  Molecule::AtomIterator ai;
   StuntDouble* sd;
   Vector3d vec;
-  int i,j;
+  int i;
 
-   //ConvexHull* thishull = new ConvexHull();
-   AlphaHull* thishull = new AlphaHull(2.0);
-
+  AlphaHull* thishull = new AlphaHull(2.0);
+  //ConvexHull* thishull = new ConvexHull();
+  
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();
   frameCounter_ = 0;
@@ -98,6 +98,7 @@ void NanoVolume::process() {
     reader.readFrame(istep);
     frameCounter_++;
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    RealType time = currentSnapshot_->getTime();
     
     // Clear pos vector between each frame.
     theAtoms_.clear();
@@ -106,7 +107,7 @@ void NanoVolume::process() {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
     
-    // update the positions of atoms which belong to the rigidbodies
+    // update the positions of atoms which belong to the rigid bodies
     
     for (mol = info_->beginMolecule(mi); mol != NULL;
 	 mol = info_->nextMolecule(mi)) {
@@ -119,38 +120,31 @@ void NanoVolume::process() {
     // outer loop is over the selected StuntDoubles:
     
     for (sd = seleMan_.beginSelected(i); sd != NULL;
-	    sd = seleMan_.nextSelected(i)) {
-      
-     theAtoms_.push_back(sd);
-      myIndex = sd->getGlobalIndex();
-      
+         sd = seleMan_.nextSelected(i)) {      
+      theAtoms_.push_back(sd);      
     }
     
-    /*
+    /* variant below for signle atoms, not StuntDoubles:
     for (mol = info_->beginMolecule(mi); mol != NULL; 
-                 mol = info_->nextMolecule(mi)) {
-              for (atom = mol->beginAtom(ai); atom != NULL; 
-                   atom = mol->nextAtom(ai)) {
-                     theAtoms_.push_back(atom);
-              }
-            }
+         mol = info_->nextMolecule(mi)) {
+      for (atom = mol->beginAtom(ai); atom != NULL; 
+           atom = mol->nextAtom(ai)) {
+        theAtoms_.push_back(atom);
+      }
+    }
     */
+
     // Generate convex hull for this frame.
     thishull->computeHull(theAtoms_);
-  //  totalVolume_ += hull->getVolume();		
-  }
-  //RealType avgVolume = totalVolume_/(RealType) frameCounter_;
-  //std::cout.precision(7);
-  //std::cout  << avgVolume << std::endl;
-/*
-  std::ofstream osq(getOutputFileName().c_str());
-  osq.precision(7);
-  if (osq.is_open()){
-      osq << avgVolume << std::endl;
+    RealType volume = thishull->getVolume();
 
+    osq.precision(7);
+    if (osq.is_open()){
+      osq << time << "\t" << volume << std::endl;      
+    }
   }
   osq.close();
-*/
+
 #else
   sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
   painCave.isFatal = 1;

@@ -71,8 +71,7 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     std::vector<StuntDouble*> theAtoms_;
     int frameCounter_;
-    RealType totalVolume_;
-    
+    std::ofstream osq;   
   };
 }
 #endif /*NANOVOLUME_HPP_*/
