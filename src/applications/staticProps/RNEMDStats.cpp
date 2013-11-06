@@ -104,13 +104,9 @@ namespace OpenMD {
     int i;
 
     vector<RealType> binMass(nBins_, 0.0);
-    vector<RealType> binPx(nBins_, 0.0);
-    vector<RealType> binPy(nBins_, 0.0);
-    vector<RealType> binPz(nBins_, 0.0);
+    vector<Vector3d> binP(nBins_, V3Zero);
     vector<RealType> binKE(nBins_, 0.0);
     vector<unsigned int> binDof(nBins_, 0);
-    vector<unsigned int> binCount(nBins_, 0);
-    
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
@@ -139,12 +135,8 @@ namespace OpenMD {
 
       int bin = getBin(pos);
 
-      binCount[bin] += 1;
-
       binMass[bin] += m;
-      binPx[bin] += m * vel.x();
-      binPy[bin] += m * vel.y();
-      binPz[bin] += m * vel.z();
+      binP[bin] += m * vel;
       binKE[bin] += 0.5 * (m * vel.lengthSquare());
       binDof[bin] += 3;
       
@@ -174,10 +166,7 @@ namespace OpenMD {
                                           PhysicalConstants::energyConvert);
         RealType den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
           / volume_;
-        Vector3d vel;
-        vel.x() = binPx[i] / binMass[i];
-        vel.y() = binPy[i] / binMass[i];
-        vel.z() = binPz[i] / binMass[i];
+        Vector3d vel = binP[i] / binMass[i];
 
         dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
         dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
@@ -239,10 +228,10 @@ namespace OpenMD {
     int i;
 
     vector<RealType> binMass(nBins_, 0.0);
-    vector<Vector3d> binaVel(nBins_, V3Zero);
+    vector<Mat3x3d>  binI(nBins_);
+    vector<Vector3d> binL(nBins_, V3Zero);
     vector<RealType> binKE(nBins_, 0.0);
-    vector<unsigned int> binDof(nBins_, 0);
-    vector<unsigned int> binCount(nBins_, 0);
+    vector<int> binDof(nBins_, 0);
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
@@ -263,38 +252,45 @@ namespace OpenMD {
     
     for (sd = seleMan_.beginSelected(i); sd != NULL; 
          sd = seleMan_.nextSelected(i)) {
-      
+
       // figure out where that object is:
+      int bin = getBin(sd->getPos() );      
 
-      Vector3d rPos = sd->getPos() - coordinateOrigin_;
-      Vector3d vel = sd->getVel();      
-      Vector3d aVel = cross(rPos, vel);
-      RealType m = sd->getMass();
+      if (bin >= 0 && bin < nBins_)  {
 
-      int bin = getBin(rPos);
+        Vector3d rPos = sd->getPos() - coordinateOrigin_;
+        Vector3d vel = sd->getVel();      
+        RealType m = sd->getMass();
+        Vector3d L = m * cross(rPos, vel);
+        Mat3x3d I(0.0);
+        I = outProduct(rPos, rPos) * m;
+        RealType r2 = rPos.lengthSquare();
+        I(0, 0) += m * r2;
+        I(1, 1) += m * r2;
+        I(2, 2) += m * r2;       
 
-      binCount[bin] += 1;
-
-      binMass[bin] += m;
-      binaVel[bin] += aVel;
-      binKE[bin] += 0.5 * (m * vel.lengthSquare());
-      binDof[bin] += 3;
-      
-      if (sd->isDirectional()) {
-        Vector3d angMom = sd->getJ();
-        Mat3x3d I = sd->getI();
-        if (sd->isLinear()) {
-          int i = sd->linearAxis();
-          int j = (i + 1) % 3;
-          int k = (i + 2) % 3;
-          binKE[bin] += 0.5 * (angMom[j] * angMom[j] / I(j, j) + 
-                               angMom[k] * angMom[k] / I(k, k));
-          binDof[bin] += 2;
-        } else {
-          binKE[bin] += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
-                               angMom[1] * angMom[1] / I(1, 1) +
-                               angMom[2] * angMom[2] / I(2, 2));
-          binDof[bin] += 3;
+        binMass[bin] += m;
+        binI[bin] += I;
+        binL[bin] += L;
+        binKE[bin] += 0.5 * (m * vel.lengthSquare());
+        binDof[bin] += 3;
+        
+        if (sd->isDirectional()) {
+          Vector3d angMom = sd->getJ();
+          Mat3x3d Ia = sd->getI();
+          if (sd->isLinear()) {
+            int i = sd->linearAxis();
+            int j = (i + 1) % 3;
+            int k = (i + 2) % 3;
+            binKE[bin] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) + 
+                                 angMom[k] * angMom[k] / Ia(k, k));
+            binDof[bin] += 2;
+          } else {
+            binKE[bin] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                                 angMom[1] * angMom[1] / Ia(1, 1) +
+                                 angMom[2] * angMom[2] / Ia(2, 2));
+            binDof[bin] += 3;
+          }
         }
       }
     }
@@ -306,10 +302,12 @@ namespace OpenMD {
         RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
                                           PhysicalConstants::energyConvert);
         RealType den = binMass[i] * 3.0 * PhysicalConstants::densityConvert
-          / (4.0 * M_PI * (pow(router,3) - pow(rinner,3)));  
-        Vector3d aVel = binaVel[i] / RealType(binCount[i]);
+          / (4.0 * M_PI * (pow(router,3) - pow(rinner,3))); 
+
+        Vector3d omega = binI[i].inverse() * binL[i];
+ 
         dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
-        dynamic_cast<VectorAccumulator *>(angularVelocity->accumulator[i])->add(aVel);
+        dynamic_cast<VectorAccumulator *>(angularVelocity->accumulator[i])->add(omega);
         dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
         dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
       }
