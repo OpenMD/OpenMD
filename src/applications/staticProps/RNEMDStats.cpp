@@ -254,7 +254,7 @@ namespace OpenMD {
          sd = seleMan_.nextSelected(i)) {
 
       // figure out where that object is:
-      int bin = getBin(sd->getPos() );      
+      int bin = getBin( sd->getPos() );   
 
       if (bin >= 0 && bin < nBins_)  {
 

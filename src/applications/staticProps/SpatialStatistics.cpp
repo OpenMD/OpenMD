@@ -354,6 +354,16 @@ namespace OpenMD {
     SpatialStatistics(info, filename, sele, nbins), coordinateOrigin_(V3Zero) {
     
     binWidth_ = 1.0;
+
+    Globals* simParams = info->getSimParams();
+    RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
+    bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
+    
+    if (hasCoordinateOrigin) {
+      coordinateOrigin_ = rnemdParams->getCoordinateOrigin();
+    } else {
+      coordinateOrigin_ = V3Zero;
+    }
     
     r_ = new OutputData;
     r_->units =  "Angstroms";
@@ -374,7 +384,7 @@ namespace OpenMD {
   ShellStatistics::~ShellStatistics() {
   }
 
-  int ShellStatistics::getBin(Vector3d pos) {    
+  int ShellStatistics::getBin(Vector3d pos) { 
     Vector3d rPos = pos - coordinateOrigin_;
     return int(rPos.length() / binWidth_);
   }
