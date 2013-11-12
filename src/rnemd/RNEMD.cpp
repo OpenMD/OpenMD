@@ -1937,7 +1937,7 @@ namespace OpenMD {
       mass = sd->getMass();
       vel = sd->getVel();
       rPos = sd->getPos() - coordinateOrigin_;
-      KE = mass * vel.lengthSquare();
+      KE = 0.5 * mass * vel.lengthSquare();
       L = mass * cross(rPos, vel);
       I = outProduct(rPos, rPos) * mass;
       r2 = rPos.lengthSquare();
@@ -1959,7 +1959,6 @@ namespace OpenMD {
         binCount[binNo]++;
         binMass[binNo] += mass;
         binP[binNo] += mass*vel;
-        //binOmega[binNo] += dot(aVel, u);
         binKE[binNo] += KE;
         binI[binNo] += I;
         binL[binNo] += L;
