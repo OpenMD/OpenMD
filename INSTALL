@@ -9,7 +9,7 @@ Requirements
 
    * The source code for the latest release of OpenMD
    * A C++ compiler
-   * CMake 2.6 or newer
+   * CMake 2.8.5 or newer
 
   OpenMD uses CMake as its build system. CMake is an open source
   cross-platform build system from KitWare.
