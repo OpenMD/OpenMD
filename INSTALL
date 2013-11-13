@@ -67,30 +67,30 @@ Requirements
 Basic build procedure
 
   The recommended way to build OpenMD is to use a separate source and
-  build directory; for example, openmd-2.0 and build. The first step
+  build directory; for example, openmd-2.1 and build. The first step
   is to create these directories:
 
-  $ tar zxf openmd-2.0.tar.gz   # (this creates openmd-2.0)
+  $ tar zxf openmd-2.1.tar.gz   # (this creates openmd-2.1)
   $ mkdir build
 
   Now you need to run cmake to configure the build. The following will
   configure the build to use all of the default options:
 
   $ cd build
-  $ cmake ../openmd-2.0
+  $ cmake ../openmd-2.1
 
   If you need to specify a particular compiler, you can do that with
   environment variables before the cmake line
 
   $ export CC=/opt/local/lib/openmpi/bin/mpicc
   $ export CXX=/opt/local/lib/openmpi/bin/mpic++
-  $ cmake ../openmd-2.0
+  $ cmake ../openmd-2.1
 
   If you need to specify an option, use the -D switch to cmake. For
   example, the following line sets the value of CMAKE_INSTALL_PREFIX
   and CMAKE_BUILD_TYPE:
 
-  $ cmake ../openmd-2.0 -DCMAKE_INSTALL_PREFIX=~/Tools -DCMAKE_BUILD_TYPE=DEBUG
+  $ cmake ../openmd-2.1 -DCMAKE_INSTALL_PREFIX=~/Tools -DCMAKE_BUILD_TYPE=DEBUG
 
   We will discuss various possible options later.
 
@@ -130,7 +130,7 @@ Local build
   To configure cmake to install into ~/Tools/openmd-install, for
   example, you would do the following:
 
-  $ cmake ../openmd-2.0 -DCMAKE_INSTALL_PREFIX=~/Tools/openmd-install
+  $ cmake ../openmd-2.1 -DCMAKE_INSTALL_PREFIX=~/Tools/openmd-install
 
   Then you can run make and make install without needing root access:
 

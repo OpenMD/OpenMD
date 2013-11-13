@@ -31,11 +31,12 @@ What you need to compile and use OpenMD:
 
     Architecture                CXX    Notes
     -------------------------   ----   ----------------------
-    Mac OS X 10.8 (intel)       c++    (Apple clang version 4.1)
-    Mac OS X 10.8 (intel)       g++    (GNU version 4.7)
-    Mac OS X 10.8 (intel)       icpc   (Intel version 12.1)
-    Linux (RHEL 5.9 - x86_64)   icpc   (Intel version 12.1)
-    Linux (RHEL 5.9 - x86_64)   pgCC   (Portland Group version 12.3)
+    Mac OS X 10.9 (intel)       c++    (Apple LLVM version 5.0)
+    Mac OS X 10.9 (intel)       g++    (GNU version 4.8.1)
+    Mac OS X 10.9 (intel)       icpc   (Intel version 14.0)
+    Linux (Ubuntu 13 – x86_64)	g++    (GNU version 4.7.3)
+    Linux (RHEL 6.4 - x86_64)   icpc   (Intel version 14.0)
+    Linux (RHEL 6.4 - x86_64)   pgCC   (Portland Group version 12.3)
 
     OpenMD uses features in the standard template library (STL). Most
     (but not all) C++ compilers support these features.
