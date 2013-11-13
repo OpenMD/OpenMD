@@ -704,6 +704,7 @@ INSTALL(TARGETS
         nanoparticleBuilder 
         nanorodBuilder
         nanorod_pentBuilder
+        icosahedralBuilder
         thermalizer 
         recenter
         Hydro

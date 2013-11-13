@@ -146,3 +146,28 @@ ${OPENMD_HOME}/bin/nanorod_pentBuilder -o gold_pentrod.md --radius=15.0 --length
 #
 ${OPENMD_HOME}/bin/icosahedralBuilder -o gold_ico.md --shells=8 --latticeConstant=4.08 gold.md
 ${OPENMD_HOME}/bin/thermalizer -o gold_ico_300K.md -t 300 gold_ico.md
+#
+#Example 12:
+# Builds a regular decahedral nanoparticle from the <MetaData> block in gold.md
+# using a 10 shells, and a lattice constant of 4.08 angstroms.
+# Places the output (which can be used to start an OpenMD job) in 
+# gold_deca.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+${OPENMD_HOME}/bin/icosahedralBuilder -o gold_deca.md --shells=10 --latticeConstant=4.08 gold.md
+${OPENMD_HOME}/bin/thermalizer -o gold_deca_300.md -t 300 gold_deca.md
+#
+#Example 13:
+# Builds a ino-decahedral nanorod from the <MetaData> block in gold.md
+# using a 10 shells, 5 atoms along the twin boundary, 100 atoms along the 
+# column axis, and a lattice constant of 4.08 angstroms.
+# Places the output (which can be used to start an OpenMD job) in 
+# penta_rod.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+${OPENMD_HOME}/bin/icosahedralBuilder --ino --columnAtoms=100 --twinAtoms=5 --shells=10 -d 4.08 -o penta_rod.md gold.md
+${OPENMD_HOME}/bin/thermalizer -o gold_penta_rod_300.md -t 300 penta_rod.md
