@@ -62,6 +62,7 @@ namespace OpenMD {
       btCubic,
       btQuartic,
       btPolynomial,
+      btMorse,
       btUnknown
     };
             

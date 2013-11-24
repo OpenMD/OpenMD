@@ -46,6 +46,7 @@
 #include "types/CubicBondType.hpp"
 #include "types/QuarticBondType.hpp"
 #include "types/PolynomialBondType.hpp"
+#include "types/MorseBondType.hpp"
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
@@ -58,6 +59,7 @@ namespace OpenMD {
     stringToEnumMap_["Cubic"] = btCubic;
     stringToEnumMap_["Quartic"] = btQuartic;
     stringToEnumMap_["Polynomial"] = btPolynomial;
+    stringToEnumMap_["Morse"] = btMorse;
   }
 
   void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
@@ -157,6 +159,22 @@ namespace OpenMD {
       }
             
       break;
+
+    case btMorse :
+      if (nTokens < 3) {
+	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+		lineNo);
+	painCave.isFatal = 1;
+	simError();
+      } else {
+
+        RealType r0 = tokenizer.nextTokenAsDouble();
+        RealType D = tokenizer.nextTokenAsDouble();
+        RealType beta = tokenizer.nextTokenAsDouble();
+        bondType = new MorseBondType(r0, D, beta);
+      }
+      break;
+            
 
     case btUnknown :
     default:
