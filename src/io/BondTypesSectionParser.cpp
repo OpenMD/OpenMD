@@ -161,17 +161,16 @@ namespace OpenMD {
       break;
 
     case btMorse :
-      if (nTokens < 3) {
+      if (nTokens < 2) {
 	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
 		lineNo);
 	painCave.isFatal = 1;
 	simError();
       } else {
 
-        RealType r0 = tokenizer.nextTokenAsDouble();
         RealType D = tokenizer.nextTokenAsDouble();
         RealType beta = tokenizer.nextTokenAsDouble();
-        bondType = new MorseBondType(r0, D, beta);
+        bondType = new MorseBondType(b0, D, beta);
       }
       break;
             
