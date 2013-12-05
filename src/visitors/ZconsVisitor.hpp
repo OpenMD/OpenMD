@@ -58,6 +58,7 @@ namespace OpenMD {
    */
   class ZConsVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit;
     enum ZConsState{zsFixed = 0, zsMoving};
 
     ZConsVisitor(SimInfo* info);

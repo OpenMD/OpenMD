@@ -55,11 +55,11 @@ namespace OpenMD {
   
   class AtomNameVisitor : public BaseVisitor {
   public:
+    using BaseVisitor::visit;
     AtomNameVisitor(SimInfo* info);  
     
-      virtual void visit(Atom* atom) {visitAtom(atom);}
+    virtual void visit(Atom* atom) {visitAtom(atom);}
     virtual void visit(DirectionalAtom* datom) {visitAtom(static_cast<Atom*>(datom));}
-    
     virtual void visit(RigidBody* rb);
     
     virtual const std::string toString();    

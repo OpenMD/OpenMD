@@ -54,6 +54,7 @@ namespace OpenMD {
 
   class LipidTransVisitor : public BaseVisitor {
   public:
+    using BaseVisitor::visit;
     LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript); 
         
     virtual void visit(Atom* atom) { internalVisit(atom); }

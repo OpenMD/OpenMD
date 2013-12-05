@@ -56,6 +56,7 @@ namespace OpenMD {
    */
   class BaseAtomVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit;
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb);
@@ -70,6 +71,7 @@ namespace OpenMD {
 
   class DefaultAtomVisitor : public BaseAtomVisitor{
   public:
+    using BaseVisitor::visit;
     DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) { visitorName = "DefaultAtomVisitor";}
     
     virtual void visit(Atom* atom);   

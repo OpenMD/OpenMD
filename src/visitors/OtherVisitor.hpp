@@ -59,6 +59,7 @@ namespace OpenMD {
 
   class WrappingVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit; 
     WrappingVisitor(SimInfo* info, bool useCom = true) : BaseVisitor(), useCom_(useCom) {
       this->info = info;
       visitorName = "WrappingVisitor";
@@ -81,6 +82,7 @@ namespace OpenMD {
 
   class ReplicateVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit; 
     ReplicateVisitor(SimInfo* info, Vector3i opt);
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
@@ -99,6 +101,7 @@ namespace OpenMD {
 
   class XYZVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit; 
     
     XYZVisitor(SimInfo* info);
     
@@ -143,6 +146,7 @@ namespace OpenMD {
 
   class PrepareVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit; 
     PrepareVisitor() : BaseVisitor() {visitorName = "prepareVisitor";}
 
     virtual void visit(Atom* atom) {internalVisit(atom);}
@@ -158,6 +162,7 @@ namespace OpenMD {
 
   class WaterTypeVisitor : public BaseVisitor{
   public:
+    using BaseVisitor::visit; 
     WaterTypeVisitor() ;
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}

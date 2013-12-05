@@ -54,6 +54,7 @@ namespace OpenMD {
 
   class CompositeVisitor: public BaseVisitor{
   public:
+    using BaseVisitor::visit;
     CompositeVisitor() : BaseVisitor() { visitorName = "CompositeVisitor";}
     ~CompositeVisitor();
     

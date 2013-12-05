@@ -58,6 +58,7 @@ namespace OpenMD {
    */
   class ReplacementVisitor : public BaseAtomVisitor{
   public:
+    using BaseVisitor::visit;
     ReplacementVisitor(SimInfo* info) : BaseAtomVisitor(info) {
       visitorName = "ReplacementVisitor";   
       sites_ = new AtomData; 
@@ -81,6 +82,7 @@ namespace OpenMD {
   
   class SSDAtomVisitor : public ReplacementVisitor{
   public:
+    using BaseVisitor::visit;
     SSDAtomVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "SSDAtomVisitor";
       
@@ -102,6 +104,7 @@ namespace OpenMD {
   
   class GBtailVisitor : public ReplacementVisitor{
   public:
+    using BaseVisitor::visit;
     GBtailVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "GBtailVisitor";
       
@@ -118,6 +121,7 @@ namespace OpenMD {
   
   class GBheadVisitor : public ReplacementVisitor{
   public:
+    using BaseVisitor::visit;
     GBheadVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "GBheadVisitor";
       
