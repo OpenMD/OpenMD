@@ -338,6 +338,7 @@ src/primitives/Inversion.cpp
 src/primitives/Molecule.cpp
 src/primitives/RigidBody.cpp
 src/primitives/StuntDouble.cpp
+src/primitives/ShortRangeInteraction.cpp
 src/primitives/Torsion.cpp
 src/primitives/UreyBradleyBend.cpp
 src/perturbations/ElectricField.cpp
@@ -351,6 +352,7 @@ src/selection/SelectionEvaluator.cpp
 src/selection/SelectionManager.cpp
 src/selection/SelectionToken.cpp
 src/selection/TokenMap.cpp
+src/selection/SelectionSet.cpp
 src/types/AtomStamp.cpp
 src/types/AtomType.cpp
 src/types/BendStamp.cpp
@@ -499,6 +501,7 @@ src/applications/dynamicProps/LegendreCorrFuncZ.cpp
 src/applications/dynamicProps/cOHz.cpp
 src/applications/dynamicProps/MomentumCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
+src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
 src/applications/dynamicProps/RadialRCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
 src/applications/dynamicProps/SelectionCorrFunc.cpp
@@ -507,6 +510,7 @@ src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
 src/applications/dynamicProps/ThetaCorrFunc.cpp
 src/applications/dynamicProps/TimeCorrFunc.cpp
 src/applications/dynamicProps/VCorrFunc.cpp
+src/applications/dynamicProps/BondCorrFunc.cpp
 src/applications/dynamicProps/DynamicPropsCmd.cpp
 )
 
