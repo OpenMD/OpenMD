@@ -69,6 +69,8 @@ namespace OpenMD {
   
   class Bend : public ShortRangeInteraction {
   public:
+    using ShortRangeInteraction::getValue;
+    using ShortRangeInteraction::getPrevValue;
     Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
       : ShortRangeInteraction(), bendType_(bt) {
       atoms_.resize(3);
@@ -88,12 +90,8 @@ namespace OpenMD {
       Vector3d r21 = pos1 - pos2;
       RealType d21 = r21.length();
       
-      RealType d21inv = 1.0 / d21;
-    
       Vector3d r23 = pos3 - pos2;
       RealType d23 = r23.length();
-      
-      RealType d23inv = 1.0 / d23;
       
       RealType cosTheta = dot(r21, r23) / (d21 * d23);
       

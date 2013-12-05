@@ -59,6 +59,8 @@ namespace OpenMD {
   
   class Bond : public ShortRangeInteraction {
   public:
+    using ShortRangeInteraction::getValue;
+    using ShortRangeInteraction::getPrevValue;
     Bond(Atom* atom1, Atom* atom2, BondType* bt) : ShortRangeInteraction(),
                                                    bondType_(bt) {
       atoms_.resize(2);

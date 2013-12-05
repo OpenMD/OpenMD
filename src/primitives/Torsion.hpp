@@ -73,6 +73,9 @@ struct TorsionDataSet {
    */
   class Torsion : public ShortRangeInteraction {
   public:
+    using ShortRangeInteraction::getValue;
+    using ShortRangeInteraction::getPrevValue;
+
     Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
     virtual ~Torsion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);

@@ -71,6 +71,9 @@ namespace OpenMD {
    */
   class Inversion : public ShortRangeInteraction {
   public:
+    using ShortRangeInteraction::getValue;
+    using ShortRangeInteraction::getPrevValue;
+
     Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, InversionType* it);
     virtual ~Inversion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
