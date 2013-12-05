@@ -54,6 +54,7 @@ namespace OpenMD {
     
   class BaseRigidBodyVisitor: public BaseVisitor{
   public:
+    using BaseVisitor::visit;
 
   protected:
     BaseRigidBodyVisitor(SimInfo* info) : BaseVisitor(){ this->info = info;}
@@ -65,6 +66,7 @@ namespace OpenMD {
   //LipidHeadVisitor  adds a pesudo atom into rigidbody which holds a dipole moment
   class LipidHeadVisitor : public BaseRigidBodyVisitor{
   public:
+    using BaseVisitor::visit;
     LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ 
       visitorName = "LipidHeadVisitor";
     }
@@ -84,6 +86,7 @@ namespace OpenMD {
 
   class RBCOMVisitor : public BaseRigidBodyVisitor{
   public:
+    using BaseVisitor::visit;
     RBCOMVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ visitorName = "RBCOMVisitor";}
 
     virtual void visit(Atom* atom) {}
