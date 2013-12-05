@@ -89,6 +89,7 @@ const char *gengetopt_args_info_help[] = {
   "      --tet_param_z             spatially-resolved tetrahedrality order \n                                  parameter Qk(z)",
   "      --rnemdz                  slab-resolved RNEMD statistics (temperature, \n                                  density, velocity)",
   "      --rnemdr                  shell-resolved RNEMD statistics (temperature, \n                                  density, angular velocity)",
+  "      --rnemdrt                 shell and angle-resolved RNEMD statistics \n                                  (temperature, density, angular velocity)",
     0
 };
 
@@ -168,6 +169,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->tet_param_z_given = 0 ;
   args_info->rnemdz_given = 0 ;
   args_info->rnemdr_given = 0 ;
+  args_info->rnemdrt_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -273,6 +275,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->tet_param_z_help = gengetopt_args_info_help[50] ;
   args_info->rnemdz_help = gengetopt_args_info_help[51] ;
   args_info->rnemdr_help = gengetopt_args_info_help[52] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[53] ;
   
 }
 
@@ -526,6 +529,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "rnemdz", 0, 0 );
   if (args_info->rnemdr_given)
     write_into_file(outfile, "rnemdr", 0, 0 );
+  if (args_info->rnemdrt_given)
+    write_into_file(outfile, "rnemdrt", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -606,6 +611,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->tet_param_z_given = 0 ;
   args_info->rnemdz_given = 0 ;
   args_info->rnemdr_given = 0 ;
+  args_info->rnemdrt_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -903,6 +909,7 @@ cmdline_parser_internal (
         { "tet_param_z",	0, NULL, 0 },
         { "rnemdz",	0, NULL, 0 },
         { "rnemdr",	0, NULL, 0 },
+        { "rnemdrt",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1673,6 +1680,23 @@ cmdline_parser_internal (
                 &(local_args_info.rnemdr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "rnemdr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* shell and angle-resolved RNEMD statistics (temperature, density, angular velocity).  */
+          else if (strcmp (long_options[option_index].name, "rnemdrt") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->rnemdrt_given),
+                &(local_args_info.rnemdrt_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "rnemdrt", '-',
                 additional_error))
               goto failure;
           

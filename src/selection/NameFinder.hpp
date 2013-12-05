@@ -45,14 +45,14 @@
 #include <string>
 #include <map>
 #include "brains/SimInfo.hpp"
-#include "utils/OpenMDBitSet.hpp"
+#include "selection/SelectionSet.hpp"
 namespace OpenMD {
 
   class TreeNode{
   public:
     ~TreeNode();
     std::string name;
-    OpenMDBitSet bs;
+    SelectionSet bs;
     std::map<std::string, TreeNode*> children;
   };
 
@@ -60,27 +60,30 @@ namespace OpenMD {
   public:
     NameFinder(SimInfo* info);
     ~NameFinder();
-    OpenMDBitSet  match(const std::string &name);
+    SelectionSet  match(const std::string &name);
 
   private:
     void loadNames();
-    void matchMolecule(const std::string &molName, OpenMDBitSet &bs);
-    void matchStuntDouble(const std::string &molName, const std::string &sdName, OpenMDBitSet &bs);
-    void matchRigidAtoms(const std::string &molName, const std::string &rbName, const std::string &rbAtomName, OpenMDBitSet &bs);
+    void matchMolecule(const std::string &molName, SelectionSet &bs);
+    void matchStuntDouble(const std::string &molName, const std::string &sdName, SelectionSet &bs);
+    void matchRigidAtoms(const std::string &molName, const std::string &rbName, const std::string &rbAtomName, SelectionSet &bs);
+    void matchBond(const std::string &molName, const std::string &bondName,  SelectionSet &bs);
+    void matchBend(const std::string &molName, const std::string &bendName, SelectionSet &bs);
+    void matchTorsion(const std::string &molName, const std::string &torsionName, SelectionSet &bs);
+    void matchInversion(const std::string &molName, const std::string &inversionName, SelectionSet &bs);
 
-    void matchInternalIndex(const std::string &name, int internalIndex, OpenMDBitSet &bs);
+    void matchInternalIndex(const std::string &name, int internalIndex, SelectionSet &bs);
 
     TreeNode* createNode(TreeNode* parent, const std::string &name);
+    std::vector<TreeNode*> getAllChildren(TreeNode* node);
     std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string &name);
     bool isMatched(const std::string &str, const std::string &wildcard);
 
     bool isInteger(const std::string &str);
 
     SimInfo* info_;
-    int nStuntDouble_;
+    vector<int> nObjects_;
     TreeNode* root_;
   };
-
-
 }
 #endif

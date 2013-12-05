@@ -64,7 +64,7 @@ namespace OpenMD {
   class RNEMDR : public ShellStatistics {
     
   public:
-    RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);    
+    RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
 
@@ -72,6 +72,23 @@ namespace OpenMD {
     OutputData* temperature;
     OutputData* angularVelocity;
     OutputData* density;
+  };
+
+  class RNEMDRTheta : public ShellStatistics {
+    
+  public:
+    RNEMDRTheta(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins, int nanglebins);    
+    void processFrame(int frame);
+    void processStuntDouble(StuntDouble* sd, int bin);
+    std::pair<int,int> getBins(Vector3d pos);
+    void writeOutput();
+    
+  protected:
+    OutputData* temperature;
+    OutputData* angularVelocity;
+    OutputData* density;
+    int nAngleBins_;
+    Vector3d fluxVector_;
   };
   
 }

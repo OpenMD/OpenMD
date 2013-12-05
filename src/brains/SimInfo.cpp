@@ -72,10 +72,12 @@ namespace OpenMD {
     forceField_(ff), simParams_(simParams), 
     ndf_(0), fdf_local(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
-    nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0), nGlobalFluctuatingCharges_(0),
-    nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nInversions_(0), 
-    nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
-    nConstraints_(0), nFluctuatingCharges_(0), sman_(NULL), topologyDone_(false), 
+    nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0), 
+    nGlobalFluctuatingCharges_(0), nGlobalBonds_(0), nGlobalBends_(0), 
+    nGlobalTorsions_(0), nGlobalInversions_(0), nAtoms_(0), nBonds_(0), 
+    nBends_(0), nTorsions_(0), nInversions_(0), nRigidBodies_(0), 
+    nIntegrableObjects_(0), nCutoffGroups_(0), nConstraints_(0), 
+    nFluctuatingCharges_(0), sman_(NULL), topologyDone_(false), 
     calcBoxDipole_(false), useAtomicVirial_(true) {    
     
     MoleculeStamp* molStamp;
@@ -103,7 +105,11 @@ namespace OpenMD {
       addMoleculeStamp(molStamp, nMolWithSameStamp);
       
       //calculate atoms in molecules
-      nGlobalAtoms_ += molStamp->getNAtoms() *nMolWithSameStamp;   
+      nGlobalAtoms_ += molStamp->getNAtoms() * nMolWithSameStamp;
+      nGlobalBonds_ += molStamp->getNBonds() * nMolWithSameStamp;
+      nGlobalBends_ += molStamp->getNBends() * nMolWithSameStamp;
+      nGlobalTorsions_ += molStamp->getNTorsions() * nMolWithSameStamp;
+      nGlobalInversions_ += molStamp->getNInversions() * nMolWithSameStamp;
       
       //calculate atoms in cutoff groups
       int nAtomsInGroups = 0;
@@ -988,33 +994,55 @@ namespace OpenMD {
     delete sman_;
     sman_ = sman;
 
-    Molecule* mol;
-    RigidBody* rb;
-    Atom* atom;
-    CutoffGroup* cg;
     SimInfo::MoleculeIterator mi;
+    Molecule::AtomIterator ai;
     Molecule::RigidBodyIterator rbIter;
-    Molecule::AtomIterator atomIter;
     Molecule::CutoffGroupIterator cgIter;
+    Molecule::BondIterator bondIter;
+    Molecule::BendIterator bendIter;
+    Molecule::TorsionIterator torsionIter;
+    Molecule::InversionIterator inversionIter;
  
+    Molecule* mol;
+    Atom* atom;
+    RigidBody* rb;
+    CutoffGroup* cg;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;    
+
     for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
         
-      for (atom = mol->beginAtom(atomIter); atom != NULL; 
-           atom = mol->nextAtom(atomIter)) {
+      for (atom = mol->beginAtom(ai); atom != NULL; 
+           atom = mol->nextAtom(ai)) {
 	atom->setSnapshotManager(sman_);
-      }
-        
+      }        
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
 	rb->setSnapshotManager(sman_);
       }
-
       for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; 
            cg = mol->nextCutoffGroup(cgIter)) {
 	cg->setSnapshotManager(sman_);
       }
-    }    
-    
+      for (bond = mol->beginBond(bondIter); bond != NULL; 
+           bond = mol->nextBond(bondIter)) {
+        bond->setSnapshotManager(sman_);
+      }
+      for (bend = mol->beginBend(bendIter); bend != NULL; 
+           bend = mol->nextBend(bendIter)) {
+        bend->setSnapshotManager(sman_);
+      }
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+           torsion = mol->nextTorsion(torsionIter)) {
+        torsion->setSnapshotManager(sman_);
+      }
+      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+        inversion->setSnapshotManager(sman_);
+      }
+    }
   }
 
 

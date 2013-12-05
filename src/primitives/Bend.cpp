@@ -48,9 +48,9 @@ namespace OpenMD {
   
   /**@todo still a lot left to improve*/
   void Bend::calcForce(RealType& angle, bool doParticlePot) {
-    Vector3d pos1 = atom1_->getPos();
-    Vector3d pos2 = atom2_->getPos();
-    Vector3d pos3 = atom3_->getPos();
+    Vector3d pos1 = atoms_[0]->getPos();
+    Vector3d pos2 = atoms_[1]->getPos();
+    Vector3d pos3 = atoms_[2]->getPos();
     
     Vector3d r21 = pos1 - pos2;
     RealType d21 = r21.length();
@@ -93,14 +93,14 @@ namespace OpenMD {
     Vector3d force2 = force1 + force3;
     force2 *= -1.0;
     
-    atom1_->addFrc(force1);
-    atom2_->addFrc(force2);
-    atom3_->addFrc(force3);
+    atoms_[0]->addFrc(force1);
+    atoms_[1]->addFrc(force2);
+    atoms_[2]->addFrc(force3);
 
     if (doParticlePot) {
-      atom1_->addParticlePot(potential_);
-      atom2_->addParticlePot(potential_);
-      atom3_->addParticlePot(potential_);
+      atoms_[0]->addParticlePot(potential_);
+      atoms_[1]->addParticlePot(potential_);
+      atoms_[2]->addParticlePot(potential_);
     }
    
     angle = theta /M_PI * 180.0;

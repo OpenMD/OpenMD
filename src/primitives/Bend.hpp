@@ -50,8 +50,11 @@
 
 #ifndef PRIMITIVES_BEND_HPP
 #define PRIMITIVES_BEND_HPP
+
+#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
 #include "types/BendType.hpp"
+
 namespace OpenMD {
   struct BendData {
     RealType angle;
@@ -64,42 +67,81 @@ namespace OpenMD {
     BendData curr;
   };
   
-  class Bend {
+  class Bend : public ShortRangeInteraction {
   public:
     Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
-      : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
+      : ShortRangeInteraction(), bendType_(bt) {
+      atoms_.resize(3);
+      atoms_[0] = atom1;
+      atoms_[1] = atom2;
+      atoms_[2] = atom3;
+    }
     
     virtual ~Bend() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
     
+    RealType getValue(int snapshotNo) {
+      Vector3d pos1 = atoms_[0]->getPos(snapshotNo);
+      Vector3d pos2 = atoms_[1]->getPos(snapshotNo);
+      Vector3d pos3 = atoms_[2]->getPos(snapshotNo);
+      
+      Vector3d r21 = pos1 - pos2;
+      RealType d21 = r21.length();
+      
+      RealType d21inv = 1.0 / d21;
+    
+      Vector3d r23 = pos3 - pos2;
+      RealType d23 = r23.length();
+      
+      RealType d23inv = 1.0 / d23;
+      
+      RealType cosTheta = dot(r21, r23) / (d21 * d23);
+      
+      //check roundoff     
+      if (cosTheta > 1.0) {
+        cosTheta = 1.0;
+      } else if (cosTheta < -1.0) {
+        cosTheta = -1.0;
+      }
+      
+      return acos(cosTheta);
+    }
+
+
     RealType getPotential() {
       return potential_;
     }
     
     Atom* getAtomA() {
-      return atom1_;
+      return atoms_[0];
     }
     
     Atom* getAtomB() {
-      return atom2_;
+      return atoms_[1];
     }
     
     Atom* getAtomC() {
-      return atom3_;
+      return atoms_[2];
     }
     
     BendType * getBendType() {
       return bendType_;
     }
     
+    virtual std::string getName() { return name_;}        
+    /** Sets the name of this bend for selections */
+    virtual void setName(const std::string& name) { name_ = name;}
+
+    void accept(BaseVisitor* v) {
+      v->visit(this);
+    }    
+
   protected:
     
     RealType potential_;
-    Atom* atom1_;
-    Atom* atom2_;
-    Atom* atom3_;
     BendType* bendType_; /**< bend type */
-    
+    std::string name_;        
+
   };    
 } //end namespace OpenMD
 #endif //PRIMITIVES_BEND_HPP

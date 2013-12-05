@@ -43,8 +43,13 @@
 #ifndef SELECTION_SELECTIONMANAGER_HPP
 #define SELECTION_SELECTIONMANAGER_HPP
 
-#include "utils/OpenMDBitSet.hpp"
+#include "selection/SelectionSet.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "primitives/Bond.hpp"
+#include "primitives/Bend.hpp"
+#include "primitives/Torsion.hpp"
+#include "primitives/Inversion.hpp"
+
 namespace OpenMD {
 
   class SimInfo;
@@ -53,82 +58,236 @@ namespace OpenMD {
     SelectionManager(SimInfo* info);
 
     void addSelection(StuntDouble* sd) {
-      bsSelection_.setBitOn(sd->getGlobalIndex());
+      
+      ss_.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
+    }
+    void addSelection(Bond* b) {
+      ss_.bitsets_[BOND].setBitOn(b->getGlobalIndex());
+    }
+    void addSelection(Bend* b) {
+      ss_.bitsets_[BEND].setBitOn(b->getGlobalIndex());
+    }
+    void addSelection(Torsion* t) {
+      ss_.bitsets_[TORSION].setBitOn(t->getGlobalIndex());
+    }
+    void addSelection(Inversion* i) {
+      ss_.bitsets_[INVERSION].setBitOn(i->getGlobalIndex());
     }
         
-    void addSelectionSet(const OpenMDBitSet& bs) {
-      bsSelection_ |= bs;
+    void addSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[STUNTDOUBLE] |= bs.bitsets_[STUNTDOUBLE];
     }
-
-    void setSelection(StuntDouble* sd) {
-      bsSelection_.clearAll();
-      bsSelection_.setBitOn(sd->getGlobalIndex());
+    void addBondSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[BOND] |= bs.bitsets_[BOND];
     }
-        
-    void setSelectionSet(const OpenMDBitSet& bs) {
-      bsSelection_ = bs;           
+    void addBendSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[BEND] |= bs.bitsets_[BEND];
     }
-
-    void toggleSelection(StuntDouble* sd) {
-      bsSelection_.flip(sd->getGlobalIndex());
+    void addTorsionSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[TORSION] |= bs.bitsets_[TORSION];
     }
-
-    void toggleSelection() {
-      bsSelection_.flip();
-    }
-        
-    void selectAll() {
-      bsSelection_.setAll();                
-    }
-
-    void clearSelection() {
-      bsSelection_.clearAll();
-    }
-
-    void clearSelection(StuntDouble* sd) {
-      bsSelection_.setBitOff(sd->getGlobalIndex());
-    }
-
-    bool isSelected(StuntDouble* sd) {
-      return bsSelection_[sd->getGlobalIndex()];
+    void addInversionSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[INVERSION] |= bs.bitsets_[INVERSION];
     }
 
     bool isEmpty() {
-      return bsSelection_.none();
+      return ss_.bitsets_[STUNTDOUBLE].none() && ss_.bitsets_[BOND].none() 
+        && ss_.bitsets_[BEND].none()  && ss_.bitsets_[TORSION].none() 
+        && ss_.bitsets_[INVERSION].none();
     }
 
+    void setSelectionSet(const SelectionSet& bs) {
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i] = bs.bitsets_[i];
+    }
+
+    //void setSelectionSet(const SelectionSet& bs) {
+    //  ss_.bitsets_[STUNTDOUBLE] = bs.bitsets_[];           
+    //}
+    void setBondSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[BOND] = bs.bitsets_[BOND];           
+    }
+    void setBendSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[BEND] = bs.bitsets_[BEND];           
+    }
+    void setTorsionSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[TORSION] = bs.bitsets_[TORSION];           
+    }
+    void setInversionSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[INVERSION] = bs.bitsets_[INVERSION];           
+    }
+
+    std::vector<int> getSelectionCounts() {
+      std::vector<int> counts(N_SELECTIONTYPES,0);
+      for (int i = 0; i < N_SELECTIONTYPES; i++) {
+        counts[i] = ss_.bitsets_[i].countBits();
+      }
+      return counts;
+    }
+     
     int getSelectionCount() {
-      return bsSelection_.countBits();
+      return ss_.bitsets_[STUNTDOUBLE].countBits();
+    }
+    int getBondSelectionCount() {
+      return ss_.bitsets_[BOND].countBits();
+    }
+    int getBendSelectionCount() {
+      return ss_.bitsets_[BEND].countBits();
+    }
+    int getTorsionSelectionCount() {
+      return ss_.bitsets_[TORSION].countBits();
+    }
+    int getInversionSelectionCount() {
+      return ss_.bitsets_[INVERSION].countBits();
+    }
+    
+    SelectionSet getSelectionSet() {
+      return ss_;
+    }
+    /*    SelectionSet getBondSelectionSet() {
+      return ss_.bitsets_[BOND];
+    }
+    SelectionSet getBendSelectionSet() {
+      return ss_.bitsets_[BEND];
+    }
+    SelectionSet getTorsionSelectionSet() {
+      return ss_.bitsets_[TORSION];
+    }
+    SelectionSet getInversionSelectionSet() {
+      return ss_.bitsets_[INVERSION];
+    }
+    */
+
+    void setSelection(StuntDouble* sd) {
+      ss_.bitsets_[STUNTDOUBLE].clearAll();
+      ss_.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
+    }
+    void setSelection(Bond* b) {
+      ss_.bitsets_[BOND].clearAll();
+      ss_.bitsets_[BOND].setBitOn(b->getGlobalIndex());
+    }
+    void setSelection(Bend* b) {
+      ss_.bitsets_[BEND].clearAll();
+      ss_.bitsets_[BEND].setBitOn(b->getGlobalIndex());
+    }
+    void setSelection(Torsion* t) {
+      ss_.bitsets_[TORSION].clearAll();
+      ss_.bitsets_[TORSION].setBitOn(t->getGlobalIndex());
+    }
+    void setSelection(Inversion* i) {
+      ss_.bitsets_[INVERSION].clearAll();
+      ss_.bitsets_[INVERSION].setBitOn(i->getGlobalIndex());
     }
 
-    OpenMDBitSet getSelectionSet() {
-      return bsSelection_;
+    void toggleSelection(StuntDouble* sd) {
+      ss_.bitsets_[STUNTDOUBLE].flip(sd->getGlobalIndex());
+    }
+    void toggleSelection(Bond* b) {
+      ss_.bitsets_[BOND].flip(b->getGlobalIndex());
+    }
+    void toggleSelection(Bend* b) {
+      ss_.bitsets_[BEND].flip(b->getGlobalIndex());
+    }
+    void toggleSelection(Torsion* t) {
+      ss_.bitsets_[TORSION].flip(t->getGlobalIndex());
+    }
+    void toggleSelection(Inversion* i) {
+      ss_.bitsets_[INVERSION].flip(i->getGlobalIndex());
     }
 
+    void toggleSelection() {
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i].flip();
+    }
+        
+    void selectAll() {
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i].setAll();
+    }
+
+    void clearSelection() {
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i].clearAll();
+    }
+
+    void clearSelection(StuntDouble* sd) {
+      ss_.bitsets_[STUNTDOUBLE].setBitOff(sd->getGlobalIndex());
+    }
+    void clearSelection(Bond* b) {
+      ss_.bitsets_[BOND].setBitOff(b->getGlobalIndex());
+    }
+    void clearSelection(Bend* b) {
+      ss_.bitsets_[BEND].setBitOff(b->getGlobalIndex());
+    }
+    void clearSelection(Torsion* t) {
+      ss_.bitsets_[TORSION].setBitOff(t->getGlobalIndex());
+    }
+    void clearSelection(Inversion* i) {
+      ss_.bitsets_[INVERSION].setBitOff(i->getGlobalIndex());
+    }
+
+    bool isSelected(StuntDouble* sd) {
+      return ss_.bitsets_[STUNTDOUBLE][sd->getGlobalIndex()];
+    }
+    bool isSelected(Bond* b) {
+      return ss_.bitsets_[BOND][b->getGlobalIndex()];
+    }
+    bool isSelected(Bend* b) {
+      return ss_.bitsets_[BEND][b->getGlobalIndex()];
+    }
+    bool isSelected(Torsion* t) {
+      return ss_.bitsets_[TORSION][t->getGlobalIndex()];
+    }
+    bool isSelected(Inversion* i) {
+      return ss_.bitsets_[INVERSION][i->getGlobalIndex()];
+    }
 
     StuntDouble* beginSelected(int& i);
     StuntDouble* nextSelected(int& i);
-
     StuntDouble* beginUnselected(int& i);
     StuntDouble* nextUnSelected(int& i);
 
+    Bond* beginSelectedBond(int& i);
+    Bond* nextSelectedBond(int& i);
+    Bond* beginUnselectedBond(int& i);
+    Bond* nextUnSelectedBond(int& i);
+
+    Bend* beginSelectedBend(int& i);
+    Bend* nextSelectedBend(int& i);
+    Bend* beginUnselectedBend(int& i);
+    Bend* nextUnSelectedBend(int& i);
+
+    Torsion* beginSelectedTorsion(int& i);
+    Torsion* nextSelectedTorsion(int& i);
+    Torsion* beginUnselectedTorsion(int& i);
+    Torsion* nextUnSelectedTorsion(int& i);
+
+    Inversion* beginSelectedInversion(int& i);
+    Inversion* nextSelectedInversion(int& i);
+    Inversion* beginUnselectedInversion(int& i);
+    Inversion* nextUnSelectedInversion(int& i);
+
     SelectionManager& operator&= (const SelectionManager &sman) {
-      bsSelection_ &= sman.bsSelection_;
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i] &= sman.ss_.bitsets_[i];
       return *this; 
     }
         
     SelectionManager& operator|= (const SelectionManager &sman) {
-      bsSelection_ |= sman.bsSelection_;
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i] |= sman.ss_.bitsets_[i];
       return *this; 
     }
         
     SelectionManager& operator^= (const SelectionManager &sman) {
-      bsSelection_ ^= sman.bsSelection_;
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i] ^= sman.ss_.bitsets_[i];
       return *this; 
     }
 
     SelectionManager& operator-= (const SelectionManager &sman) {
-      bsSelection_ -= sman.bsSelection_;
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        ss_.bitsets_[i] -= sman.ss_.bitsets_[i];
       return *this; 
     }
         
@@ -139,8 +298,13 @@ namespace OpenMD {
         
   private:
     SimInfo* info_;
-    OpenMDBitSet bsSelection_;
+    SelectionSet ss_;
+    std::vector<int> nObjects_;
     std::vector<StuntDouble*> stuntdoubles_;
+    std::vector<Bond*> bonds_;
+    std::vector<Bend*> bends_;
+    std::vector<Torsion*> torsions_;
+    std::vector<Inversion*> inversions_;
   };
 
 }

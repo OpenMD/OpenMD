@@ -79,12 +79,16 @@ namespace OpenMD {
     virtual RigidBody* createRigidBody(MoleculeStamp *molStamp, Molecule* mol, 
 				       RigidBodyStamp* rbStamp,  
                                        LocalIndexManager* localIndexMan); 
-    virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp);
-    virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp);
+    virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp, 
+                             LocalIndexManager* localIndexMan);
+    virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp, 
+                             LocalIndexManager* localIndexMan);
     virtual Torsion* createTorsion(ForceField* ff, Molecule* mol, 
-                                   TorsionStamp* stamp);
+                                   TorsionStamp* stamp, 
+                                   LocalIndexManager* localIndexMan);
     virtual Inversion* createInversion(ForceField* ff, Molecule* mol, 
-                                       InversionStamp* stamp);
+                                       InversionStamp* stamp, 
+                                       LocalIndexManager* localIndexMan);
     virtual CutoffGroup* createCutoffGroup(Molecule* mol, 
                                            CutoffGroupStamp* stamp, 
                                            LocalIndexManager* localIndexMan);

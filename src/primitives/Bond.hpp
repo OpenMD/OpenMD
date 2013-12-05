@@ -51,16 +51,20 @@
 #ifndef PRIMITIVES_BOND_HPP
 #define PRIMITIVES_BOND_HPP
 
+#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
 #include "types/BondType.hpp"
 
 namespace OpenMD {
   
-  class Bond {
+  class Bond : public ShortRangeInteraction {
   public:
-    Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), 
-                                                   atom2_(atom2), 
-                                                   bondType_(bt) {}
+    Bond(Atom* atom1, Atom* atom2, BondType* bt) : ShortRangeInteraction(),
+                                                   bondType_(bt) {
+      atoms_.resize(2);
+      atoms_[0] = atom1;
+      atoms_[1] = atom2;
+    }
     virtual ~Bond() {}
     void calcForce(bool doParticlePot) {
       RealType len;
@@ -68,42 +72,54 @@ namespace OpenMD {
       Vector3d r12;
       Vector3d force;
       
-      r12 = atom2_->getPos() - atom1_->getPos();
+      r12 = atoms_[1]->getPos() - atoms_[0]->getPos();
       len = r12.length();            
       bondType_->calcForce(len,  potential_, dvdr);
       
       force = r12 * (-dvdr / len);
 
-      atom1_->addFrc(-force);
-      atom2_->addFrc(force);
+      atoms_[0]->addFrc(-force);
+      atoms_[1]->addFrc(force);
       if (doParticlePot) {
-        atom1_->addParticlePot(potential_);
-        atom2_->addParticlePot(potential_);
+        atoms_[0]->addParticlePot(potential_);
+        atoms_[1]->addParticlePot(potential_);
       }
     }
     
+    RealType getValue(int snap) {
+      Vector3d r12 = atoms_[1]->getPos(snap) - atoms_[0]->getPos(snap);
+      return r12.length();            
+    }
+
     RealType getPotential() {
       return potential_;
     }
     
     Atom* getAtomA() {
-      return atom1_;
+      return atoms_[0];
     }
     
     Atom* getAtomB() {
-      return atom2_;
+      return atoms_[1];
     }
     
     BondType* getBondType() {
       return bondType_;
     }
+
+    virtual std::string getName() { return name_;}        
+    /** Sets the name of this bond for selections */
+    virtual void setName(const std::string& name) { name_ = name; }
+
+    void accept(BaseVisitor* v) {
+      v->visit(this);
+    }    
     
   private:
     RealType potential_;
-    Atom* atom1_;
-    Atom* atom2_;        
     BondType* bondType_; /**< bond type */
-    
+    std::string name_;
+
   };    
 } //end namespace OpenMD
 #endif //PRIMITIVES_BOND_HPP

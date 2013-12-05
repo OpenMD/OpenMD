@@ -39,37 +39,50 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef SELECTION_HULLFINDER_HPP
-#define SELECTION_HULLFINDER_HPP
-#include "brains/SimInfo.hpp"
-#include "selection/SelectionSet.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "math/Hull.hpp"
-#include "math/Triangle.hpp"
+
+#include "applications/dynamicProps/BondCorrFunc.hpp"
 
 namespace OpenMD {
+  BondCorrFunc::BondCorrFunc(SimInfo* info, const std::string& filename, 
+                             const std::string& sele1, long long int memSize)
+    : InteractionTimeCorrFunc(info, filename, sele1, 
+                              DataStorage::dslPosition, memSize){
 
-  class HullFinder {
-  public:
-    HullFinder(SimInfo* si);
-    ~HullFinder();
-    
-    SelectionSet findHull();
-    SelectionSet findHull(int frame);
-    RealType getSurfaceArea(){ return surfaceArea_; }
-    
-    SimInfo* info_;
-    std::vector<StuntDouble*> stuntdoubles_;
-    std::vector<Bond*> bonds_;
-    std::vector<Bend*> bends_;
-    std::vector<Torsion*> torsions_;
-    std::vector<Inversion*> inversions_;
-    vector<int> nObjects_;
-
-    Hull* surfaceMesh_;
-    RealType surfaceArea_;
-    std::vector<StuntDouble*> localSites_;
-  };
+      setCorrFuncType("Bond Correlation Function");
+      setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
+      nSelectedBonds_ =   seleMan1_.getBondSelectionCount();  
+  }
   
+
+  void BondCorrFunc::correlateFrames(int frame1, int frame2) {
+    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
+    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
+    assert(snapshot1 && snapshot2);
+
+    RealType time1 = snapshot1->getTime();
+    RealType time2 = snapshot2->getTime();
+
+    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
+    count_[timeBin] += nSelectedBonds_;    
+
+    int i;
+    Bond* bond;
+
+    for (bond = seleMan1_.beginSelectedBond(i);
+         bond != NULL ;
+         bond = seleMan1_.nextSelectedBond(i)) {
+
+      RealType corrVal = calcCorrVal(frame1, frame2, bond);
+      histogram_[timeBin] += corrVal;    
+    }    
+  }
+
+  RealType BondCorrFunc::calcCorrVal(int frame1, int frame2, ShortRangeInteraction* sri) {
+    Bond* bond = dynamic_cast<Bond*>(sri);
+    RealType re = bond->getBondType()->getEquilibriumBondLength();
+    RealType val1 = bond->getValue(frame1) - re;
+    RealType val2 = bond->getValue(frame2) - re;
+    return val1 * val2;
+  }
 }
-#endif 
+

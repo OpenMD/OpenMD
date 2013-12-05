@@ -60,6 +60,7 @@ const char *gengetopt_args_info_help[] = {
   "      --helfandEcorr            Helfand moment for thermal conductvity",
   "  -p, --momentum                Helfand momentum for viscosity",
   "      --stresscorr              Stress tensor correlation function",
+  "  -b, --bondcorr                Bond extension correlation function",
     0
 };
 
@@ -109,6 +110,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->helfandEcorr_given = 0 ;
   args_info->momentum_given = 0 ;
   args_info->stresscorr_given = 0 ;
+  args_info->bondcorr_given = 0 ;
   args_info->dynamicProps_group_counter = 0 ;
 }
 
@@ -160,6 +162,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->helfandEcorr_help = gengetopt_args_info_help[21] ;
   args_info->momentum_help = gengetopt_args_info_help[22] ;
   args_info->stresscorr_help = gengetopt_args_info_help[23] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[24] ;
   
 }
 
@@ -336,6 +339,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "momentum", 0, 0 );
   if (args_info->stresscorr_given)
     write_into_file(outfile, "stresscorr", 0, 0 );
+  if (args_info->bondcorr_given)
+    write_into_file(outfile, "bondcorr", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -403,6 +408,7 @@ reset_group_dynamicProps(struct gengetopt_args_info *args_info)
   args_info->helfandEcorr_given = 0 ;
   args_info->momentum_given = 0 ;
   args_info->stresscorr_given = 0 ;
+  args_info->bondcorr_given = 0 ;
 
   args_info->dynamicProps_group_counter = 0;
 }
@@ -667,10 +673,11 @@ cmdline_parser_internal (
         { "helfandEcorr",	0, NULL, 0 },
         { "momentum",	0, NULL, 'p' },
         { "stresscorr",	0, NULL, 0 },
+        { "bondcorr",	0, NULL, 'b' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:z:m:srvdlMp", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:z:m:srvdlMpb", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -835,6 +842,21 @@ cmdline_parser_internal (
               &(local_args_info.momentum_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "momentum", 'p',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'b':	/* Bond extension correlation function.  */
+        
+          if (args_info->dynamicProps_group_counter && override)
+            reset_group_dynamicProps (args_info);
+          args_info->dynamicProps_group_counter += 1;
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->bondcorr_given),
+              &(local_args_info.bondcorr_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "bondcorr", 'b',
               additional_error))
             goto failure;
         

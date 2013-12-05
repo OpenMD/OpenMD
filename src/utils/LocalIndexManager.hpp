@@ -65,17 +65,14 @@ namespace OpenMD {
   class IndexListContainer{
   public:
     static const int MAX_INTEGER = 2147483647;
-    typedef std::list<std::pair<int, int> >::iterator  IndexListContainerIterator;
+    typedef std::list<std::pair<int, int> >::iterator IndexListContainerIterator;
 
-        
     IndexListContainer(int minIndex = 0, int maxIndex = MAX_INTEGER) 
       :minIndex_(minIndex), maxIndex_(maxIndex) {
-            
-	indexContainer_.push_back(std::make_pair(minIndex, maxIndex));
-      }
+      indexContainer_.push_back(std::make_pair(minIndex, maxIndex));
+    }
         
-    int pop() {
-            
+    int pop() {            
       if (indexContainer_.empty()) {
 	std::cerr << "" << std::endl;
       }
@@ -86,12 +83,13 @@ namespace OpenMD {
             
       if (indexContainer_.front().first  == indexContainer_.front().second) {
 	indexContainer_.pop_front();
-      } else if (indexContainer_.front().first < indexContainer_.front().second) {
+      } else if (indexContainer_.front().first < 
+                 indexContainer_.front().second) {
 	++indexContainer_.front().first;
       } else {
 	std::cerr << "" << std::endl;
       }
-
+      
       return result;
     }
 
@@ -100,7 +98,7 @@ namespace OpenMD {
      *
      */
     void insert(int index) {
-      IndexListContainerIterator insertPos = internalInsert(index, index);            
+      IndexListContainerIterator insertPos = internalInsert(index, index);
       merge(insertPos);
     }
 
@@ -110,7 +108,8 @@ namespace OpenMD {
      * @param endIndex
      */
     void insert(int beginIndex, int endIndex) {
-      IndexListContainerIterator insertPos = internalInsert(beginIndex, endIndex); 
+      IndexListContainerIterator insertPos = internalInsert(beginIndex, 
+                                                            endIndex); 
       merge(insertPos);            
     }
 
@@ -161,20 +160,15 @@ namespace OpenMD {
 	  indexContainer_.erase(indexContainer_.begin(), i);
 	  break;
 	} else {
-
 	  for (int j = (*i).first; j < index; ++j) {
 	    result.push_back(j);
-	  }
-                        
+	  }                        
 	  (*i).first =  index;                   
 	  indexContainer_.erase(indexContainer_.begin(), i);
 	  break;
 	}
-                
       }
-
       return result;
-
     }
         
     int getMaxIndex() {
@@ -308,12 +302,96 @@ namespace OpenMD {
     void releaseCutoffGroupIndex(std::vector<int> indices) {
       cutoffGroupIndexContainer_.insert(indices);
     }
- 
+    
+    int getNextBondIndex() {
+      return bondIndexContainer_.pop();
+    }
+
+    std::vector<int> getBondIndicesBefore(int index) {
+      return bondIndexContainer_.getIndicesBefore(index);
+    }
+        
+    void releaseBondIndex(int index) {
+      bondIndexContainer_.insert(index);
+    }
+
+    void releaseBondIndex(int beginIndex, int endIndex) {
+      bondIndexContainer_.insert(beginIndex, endIndex);
+    }
+
+    void releaseBondIndex(std::vector<int> indices) {
+      bondIndexContainer_.insert(indices);
+    }
+
+    int getNextBendIndex() {
+      return bendIndexContainer_.pop();
+    }
+
+    std::vector<int> getBendIndicesBefore(int index) {
+      return bendIndexContainer_.getIndicesBefore(index);
+    }
+        
+    void releaseBendIndex(int index) {
+      bendIndexContainer_.insert(index);
+    }
+
+    void releaseBendIndex(int beginIndex, int endIndex) {
+      bendIndexContainer_.insert(beginIndex, endIndex);
+    }
+
+    void releaseBendIndex(std::vector<int> indices) {
+      bendIndexContainer_.insert(indices);
+    }
+
+    int getNextTorsionIndex() {
+      return torsionIndexContainer_.pop();
+    }
+
+    std::vector<int> getTorsionIndicesBefore(int index) {
+      return torsionIndexContainer_.getIndicesBefore(index);
+    }
+        
+    void releaseTorsionIndex(int index) {
+      torsionIndexContainer_.insert(index);
+    }
+
+    void releaseTorsionIndex(int beginIndex, int endIndex) {
+      torsionIndexContainer_.insert(beginIndex, endIndex);
+    }
+
+    void releaseTorsionIndex(std::vector<int> indices) {
+      torsionIndexContainer_.insert(indices);
+    }
+
+    int getNextInversionIndex() {
+      return inversionIndexContainer_.pop();
+    }
+
+    std::vector<int> getInversionIndicesBefore(int index) {
+      return inversionIndexContainer_.getIndicesBefore(index);
+    }
+        
+    void releaseInversionIndex(int index) {
+      inversionIndexContainer_.insert(index);
+    }
+
+    void releaseInversionIndex(int beginIndex, int endIndex) {
+      inversionIndexContainer_.insert(beginIndex, endIndex);
+    }
+
+    void releaseInversionIndex(std::vector<int> indices) {
+      inversionIndexContainer_.insert(indices);
+    }
+
   private:
 
     IndexListContainer atomIndexContainer_;
     IndexListContainer rigidBodyIndexContainer_;
     IndexListContainer cutoffGroupIndexContainer_;
+    IndexListContainer bondIndexContainer_;
+    IndexListContainer bendIndexContainer_;
+    IndexListContainer torsionIndexContainer_;
+    IndexListContainer inversionIndexContainer_;
   };
 
 } //end namespace OpenMD

@@ -51,6 +51,10 @@ namespace OpenMD {
   class Atom;
   class DirectionalAtom;
   class RigidBody;
+  class Bond;
+  class Bend;
+  class Torsion;
+  class Inversion;
   class SimInfo;
 
   class BaseVisitor{
@@ -59,6 +63,10 @@ namespace OpenMD {
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb) {}
+    virtual void visit(Bond* bond) {}
+    virtual void visit(Bend* bend) {}
+    virtual void visit(Torsion* torsion) {}
+    virtual void visit(Inversion* inversion) {}
 
     virtual void update() {}
 

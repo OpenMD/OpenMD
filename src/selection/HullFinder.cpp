@@ -48,18 +48,36 @@ namespace OpenMD {
 
   HullFinder::HullFinder(SimInfo* info) : info_(info) {
 
-    nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
-    stuntdoubles_.resize(nStuntDoubles_);
+    nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
+    nObjects_.push_back(info_->getNGlobalBonds());
+    nObjects_.push_back(info_->getNGlobalBends());
+    nObjects_.push_back(info_->getNGlobalTorsions());
+    nObjects_.push_back(info_->getNGlobalInversions());
+
+    stuntdoubles_.resize(nObjects_[STUNTDOUBLE]);
+    bonds_.resize(nObjects_[BOND]);
+    bends_.resize(nObjects_[BEND]);
+    torsions_.resize(nObjects_[TORSION]);
+    inversions_.resize(nObjects_[INVERSION]);
     
     SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
+    Molecule::AtomIterator ai;
+    Molecule::RigidBodyIterator rbIter;
+    Molecule::BondIterator bondIter;
+    Molecule::BendIterator bendIter;
+    Molecule::TorsionIterator torsionIter;
+    Molecule::InversionIterator inversionIter;
+    
     Molecule* mol;
     StuntDouble* sd;
-    Molecule::IntegrableObjectIterator  ioi;
-    Molecule::AtomIterator ai;
     Atom* atom;
-    Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
-    
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;    
+
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
         
@@ -81,7 +99,25 @@ namespace OpenMD {
            rb = mol->nextRigidBody(rbIter)) {
 	stuntdoubles_[rb->getGlobalIndex()] = rb;
       }
-        
+
+      // These others are going to be inferred from the objects on the hull:
+      for (bond = mol->beginBond(bondIter); bond != NULL; 
+           bond = mol->nextBond(bondIter)) {
+        bonds_[bond->getGlobalIndex()] = bond;
+      }   
+      for (bend = mol->beginBend(bendIter); bend != NULL; 
+           bend = mol->nextBend(bendIter)) {
+        bends_[bend->getGlobalIndex()] = bend;
+      }   
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+           torsion = mol->nextTorsion(torsionIter)) {
+        torsions_[torsion->getGlobalIndex()] = torsion;
+      }   
+      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+        inversions_[inversion->getGlobalIndex()] = inversion;
+      }   
+
     }
 #ifdef HAVE_QHULL
     surfaceMesh_ = new ConvexHull();
@@ -92,8 +128,8 @@ namespace OpenMD {
     delete surfaceMesh_;
   }
 
-  OpenMDBitSet HullFinder::findHull() {
-    OpenMDBitSet bsResult(nStuntDoubles_);
+  SelectionSet HullFinder::findHull() {
+    SelectionSet ssResult(nObjects_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
 #else
@@ -118,15 +154,15 @@ namespace OpenMD {
       std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
         if ((*vertex) != NULL) {
-          bsResult.setBitOn((*vertex)->getGlobalIndex());          
+          ssResult.bitsets_[STUNTDOUBLE].setBitOn((*vertex)->getGlobalIndex());
         }
       }
     }
-    return bsResult;
+    return ssResult;
   }
 
-  OpenMDBitSet HullFinder::findHull(int frame) {
-    OpenMDBitSet bsResult(nStuntDoubles_);
+  SelectionSet HullFinder::findHull(int frame) {
+    SelectionSet ssResult(nObjects_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
 #else
@@ -151,12 +187,12 @@ namespace OpenMD {
       std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
         if ((*vertex) != NULL) {
-          bsResult.setBitOn((*vertex)->getGlobalIndex());          
+          ssResult.bitsets_[STUNTDOUBLE].setBitOn((*vertex)->getGlobalIndex());
         }
       }
     }
     surfaceArea_ = surfaceMesh_->getArea();
-    return bsResult;
+    return ssResult;
   }
 
 }

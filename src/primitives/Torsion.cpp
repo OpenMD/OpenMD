@@ -48,15 +48,21 @@
 namespace OpenMD {
 
   Torsion::Torsion(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4,
-		   TorsionType *tt) :
-    atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), torsionType_(tt) { }
+		   TorsionType *tt) : ShortRangeInteraction(),
+                                      torsionType_(tt) {
+    atoms_.resize(4);
+    atoms_[0] = atom1;
+    atoms_[1] = atom2;
+    atoms_[2] = atom3;
+    atoms_[3] = atom4;
+  }
 
   void Torsion::calcForce(RealType& angle, bool doParticlePot) {
 
-    Vector3d pos1 = atom1_->getPos();
-    Vector3d pos2 = atom2_->getPos();
-    Vector3d pos3 = atom3_->getPos();
-    Vector3d pos4 = atom4_->getPos();
+    Vector3d pos1 = atoms_[0]->getPos();
+    Vector3d pos2 = atoms_[1]->getPos();
+    Vector3d pos3 = atoms_[2]->getPos();
+    Vector3d pos4 = atoms_[3]->getPos();
 
     Vector3d r21 = pos1 - pos2;
     Vector3d r32 = pos2 - pos3;
@@ -97,16 +103,16 @@ namespace OpenMD {
     f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
     f3 = dVdcosPhi * cross(dcosdB, r32);
     
-    atom1_->addFrc(f1);
-    atom2_->addFrc(f2 - f1);
-    atom3_->addFrc(f3 - f2);
-    atom4_->addFrc(-f3);
+    atoms_[0]->addFrc(f1);
+    atoms_[1]->addFrc(f2 - f1);
+    atoms_[2]->addFrc(f3 - f2);
+    atoms_[3]->addFrc(-f3);
     
     if (doParticlePot) {
-      atom1_->addParticlePot(potential_);
-      atom2_->addParticlePot(potential_);
-      atom3_->addParticlePot(potential_);
-      atom4_->addParticlePot(potential_);
+      atoms_[0]->addParticlePot(potential_);
+      atoms_[1]->addParticlePot(potential_);
+      atoms_[2]->addParticlePot(potential_);
+      atoms_[3]->addParticlePot(potential_);
     }
     
     angle = acos(cos_phi) /M_PI * 180.0;    

@@ -56,7 +56,7 @@ namespace OpenMD {
     Bend::calcForce(angle, doParticlePot);
     bond_->calcForce(doParticlePot);
     if (doParticlePot) {
-      atom2_->addParticlePot(bond_->getPotential());
+      atoms_[1]->addParticlePot(bond_->getPotential());
     }
   }
 

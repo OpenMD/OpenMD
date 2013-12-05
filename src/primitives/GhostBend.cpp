@@ -48,9 +48,9 @@ namespace OpenMD {
 
   /**@todo still a lot left to improve*/
   void GhostBend::calcForce(RealType& angle, bool doParticlePot) {
-    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
+    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atoms_[1]);
     
-    Vector3d pos1 = atom1_->getPos();
+    Vector3d pos1 = atoms_[0]->getPos();
     Vector3d pos2 = ghostAtom->getPos();
 
     Vector3d r21 = pos1 - pos2;   
@@ -93,12 +93,12 @@ namespace OpenMD {
 
     // Total force in current bend is zero
 
-    atom1_->addFrc(force1);
+    atoms_[0]->addFrc(force1);
     ghostAtom->addFrc(-force1);
 
     ghostAtom->addTrq( cross(r23, force3) );    
     if(doParticlePot) {
-      atom1_->addParticlePot(potential_);
+      atoms_[0]->addParticlePot(potential_);
       ghostAtom->addParticlePot(potential_);
     }
 

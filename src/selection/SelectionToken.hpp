@@ -103,24 +103,24 @@ namespace OpenMD {
     const static int endofline         = 9;
     const static int endofstatement    = 10;
 
-    const static int command           = (1 <<  11);
-    const static int expressionCommand = (1 <<  12); // expression command
-    const static int expression        = (1 << 13); /// expression term
+    const static int command           = (1 <<  8);
+    const static int expressionCommand = (1 <<  9); // expression command
+    const static int expression        = (1 << 10); /// expression term
 
     // generally, the minus sign is used to denote atom ranges
     // this property is used for the few commands which allow negative integers
-    const static int negnums      = (1 << 14);
+    const static int negnums      = (1 << 11);
 
     //expression involves coordinates which will change every frame, such as withins
-    const static int dynamic        = (1 << 15);
+    const static int dynamic        = (1 << 12);
 
     // every property is also valid in an expression context
-    const static int atomproperty      = (1 << 16) | expression | negnums;
+    const static int atomproperty      = (1 << 12) | expression | negnums;
     // every predefined is also valid in an expression context
-    const static int comparator        = (1 << 17) | expression;
-    const static int predefinedset     = (1 << 18) | expression;
-    const  static int embeddedExpression= (1 << 19); // embedded expression
-    const static int index = (1 << 20) | expression;
+    const static int comparator        = (1 << 13) | expression;
+    const static int predefinedset     = (1 << 14) | expression;
+    const  static int embeddedExpression= (1 << 15); // embedded expression
+    const static int index = (1 << 16) | expression;
     // rasmol commands
     const static int define       = command | expressionCommand | 1;
     const static int select       = command | expressionCommand | 2 ;

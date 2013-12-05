@@ -58,9 +58,13 @@ namespace OpenMD {
     : info(si), nameFinder(info), distanceFinder(info), hullFinder(info),
       indexFinder(info), hasSurfaceArea_(false),
       isLoaded_(false){    
-      nStuntDouble = info->getNGlobalAtoms() + info->getNGlobalRigidBodies();
-    }            
-
+    nObjects.push_back(info->getNGlobalAtoms() + info->getNGlobalRigidBodies());
+    nObjects.push_back(info->getNGlobalBonds());
+    nObjects.push_back(info->getNGlobalBends());
+    nObjects.push_back(info->getNGlobalTorsions());
+    nObjects.push_back(info->getNGlobalInversions());
+  }
+  
   bool SelectionEvaluator::loadScript(const std::string& filename, 
                                       const std::string& script) {
     clearDefinitionsAndLoadPredefined();
@@ -127,7 +131,7 @@ namespace OpenMD {
     return loadScript(filename, script);
   }
   
-  void SelectionEvaluator::instructionDispatchLoop(OpenMDBitSet& bs){
+  void SelectionEvaluator::instructionDispatchLoop(SelectionSet& bs){
     
     while ( pc < aatoken.size()) {
       statement = aatoken[pc++];
@@ -148,7 +152,7 @@ namespace OpenMD {
 
   }
 
-  void SelectionEvaluator::instructionDispatchLoop(OpenMDBitSet& bs, int frame){
+  void SelectionEvaluator::instructionDispatchLoop(SelectionSet& bs, int frame){
     
     while ( pc < aatoken.size()) {
       statement = aatoken[pc++];
@@ -169,10 +173,11 @@ namespace OpenMD {
 
   }
 
-  OpenMDBitSet SelectionEvaluator::expression(const std::vector<Token>& code, 
+  SelectionSet SelectionEvaluator::expression(const std::vector<Token>& code, 
                                              int pcStart) {
-    OpenMDBitSet bs;
-    std::stack<OpenMDBitSet> stack; 
+    SelectionSet bs = createSelectionSets();
+    std::stack<SelectionSet> stack; 
+    vector<int> bsSize = bs.size();
    
     for (unsigned int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
@@ -184,42 +189,42 @@ namespace OpenMD {
         break;
       case Token::all:
         bs = allInstruction();
-        stack.push(bs);            
+        stack.push(bs);
         break;
       case Token::none:
-        bs = OpenMDBitSet(nStuntDouble);
-        stack.push(bs);            
+        bs = createSelectionSets();
+        stack.push(bs);
         break;
       case Token::opOr:
-        bs = stack.top();
-        stack.pop();
-        stack.top() |= bs;
+          bs= stack.top();
+          stack.pop();
+          stack.top() |= bs;
         break;
       case Token::opAnd:
-        bs = stack.top();
-        stack.pop();
-        stack.top() &= bs;
+          bs = stack.top();
+          stack.pop();
+          stack.top() &= bs;
         break;
       case Token::opNot:
-        stack.top().flip();
+          stack.top().flip();
         break;
       case Token::within:
         withinInstruction(instruction, stack.top());
         break;
       case Token::hull:
-        stack.push(hull());
+          stack.push(hull());
         break;
 	//case Token::selected:
 	//  stack.push(getSelectionSet());
 	//  break;
       case Token::name:
-        stack.push(nameInstruction(boost::any_cast<std::string>(instruction.value)));
+          stack.push(nameInstruction(boost::any_cast<std::string>(instruction.value)));
         break;
       case Token::index:
-        stack.push(indexInstruction(instruction.value));
+          stack.push(indexInstruction(instruction.value));
         break;
       case Token::identifier:
-        stack.push(lookupValue(boost::any_cast<std::string>(instruction.value)));
+          stack.push(lookupValue(boost::any_cast<std::string>(instruction.value)));
         break;
       case Token::opLT:
       case Token::opLE:
@@ -240,10 +245,10 @@ namespace OpenMD {
   }
 
 
-  OpenMDBitSet SelectionEvaluator::expression(const std::vector<Token>& code, 
+  SelectionSet SelectionEvaluator::expression(const std::vector<Token>& code, 
                                               int pcStart, int frame) {
-    OpenMDBitSet bs;
-    std::stack<OpenMDBitSet> stack; 
+    SelectionSet bs = createSelectionSets();
+    std::stack<SelectionSet> stack; 
    
     for (unsigned int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
@@ -258,7 +263,7 @@ namespace OpenMD {
         stack.push(bs);            
         break;
       case Token::none:
-        bs = OpenMDBitSet(nStuntDouble);
+        bs = SelectionSet(nObjects);
         stack.push(bs);            
         break;
       case Token::opOr:
@@ -312,11 +317,11 @@ namespace OpenMD {
 
 
 
-  OpenMDBitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
+  SelectionSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
-    OpenMDBitSet bs(nStuntDouble);
+    SelectionSet bs = createSelectionSets();
     bs.clearAll();
     
     SimInfo::MoleculeIterator mi;
@@ -342,11 +347,11 @@ namespace OpenMD {
     return bs;
   }
 
-  OpenMDBitSet SelectionEvaluator::comparatorInstruction(const Token& instruction, int frame) {
+  SelectionSet SelectionEvaluator::comparatorInstruction(const Token& instruction, int frame) {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
-    OpenMDBitSet bs(nStuntDouble);
+    SelectionSet bs = createSelectionSets();
     bs.clearAll();
     
     SimInfo::MoleculeIterator mi;
@@ -372,7 +377,7 @@ namespace OpenMD {
     return bs;
   }
 
-  void SelectionEvaluator::compareProperty(StuntDouble* sd, OpenMDBitSet& bs, 
+  void SelectionEvaluator::compareProperty(StuntDouble* sd, SelectionSet& bs, 
                                            int property, int comparator, 
                                            float comparisonValue) {
     RealType propertyValue = 0.0;
@@ -449,12 +454,12 @@ namespace OpenMD {
     }
 
     if (match) 
-      bs.setBitOn(sd->getGlobalIndex());
+      bs.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
 
     
   }
 
-  void SelectionEvaluator::compareProperty(StuntDouble* sd, OpenMDBitSet& bs, 
+  void SelectionEvaluator::compareProperty(StuntDouble* sd, SelectionSet& bs, 
                                            int property, int comparator, 
                                            float comparisonValue, int frame) {
     RealType propertyValue = 0.0;
@@ -530,13 +535,13 @@ namespace OpenMD {
       break;
     }
     if (match) 
-      bs.setBitOn(sd->getGlobalIndex());
+      bs.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
 
     
   }
 
   void SelectionEvaluator::withinInstruction(const Token& instruction, 
-                                             OpenMDBitSet& bs){
+                                             SelectionSet& bs){
     
     boost::any withinSpec = instruction.value;
     float distance;
@@ -553,7 +558,7 @@ namespace OpenMD {
   }
 
   void SelectionEvaluator::withinInstruction(const Token& instruction, 
-                                             OpenMDBitSet& bs, int frame){
+                                             SelectionSet& bs, int frame){
     
     boost::any withinSpec = instruction.value;
     float distance;
@@ -610,22 +615,22 @@ namespace OpenMD {
     }
   }
 
-  void SelectionEvaluator::select(OpenMDBitSet& bs){
+  void SelectionEvaluator::select(SelectionSet& bs){
     bs = expression(statement, 1);
   }
 
-  void SelectionEvaluator::select(OpenMDBitSet& bs, int frame){
+  void SelectionEvaluator::select(SelectionSet& bs, int frame){
     bs = expression(statement, 1, frame);
   }
   
-  OpenMDBitSet SelectionEvaluator::lookupValue(const std::string& variable){
+  SelectionSet SelectionEvaluator::lookupValue(const std::string& variable){
     
-    OpenMDBitSet bs(nStuntDouble);
+    SelectionSet bs = createSelectionSets();
     std::map<std::string, boost::any>::iterator i = variables.find(variable);
     
     if (i != variables.end()) {
-      if (i->second.type() == typeid(OpenMDBitSet)) {
-	return boost::any_cast<OpenMDBitSet>(i->second);
+      if (i->second.type() == typeid(SelectionSet)) {
+	return boost::any_cast<SelectionSet>(i->second);
       } else if (i->second.type() ==  typeid(std::vector<Token>)){
 	bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
 	i->second =  bs; /**@todo fixme */
@@ -638,7 +643,7 @@ namespace OpenMD {
     return bs;
   }
   
-  OpenMDBitSet SelectionEvaluator::nameInstruction(const std::string& name){    
+  SelectionSet SelectionEvaluator::nameInstruction(const std::string& name){    
     return nameFinder.match(name);    
   }    
 
@@ -659,8 +664,13 @@ namespace OpenMD {
     //predefine();
   }
 
-  OpenMDBitSet SelectionEvaluator::evaluate() {
-    OpenMDBitSet bs(nStuntDouble);
+  SelectionSet SelectionEvaluator::createSelectionSets() {
+    SelectionSet ss(nObjects);
+    return ss;
+  }
+
+  SelectionSet SelectionEvaluator::evaluate() {
+    SelectionSet bs = createSelectionSets();
     if (isLoaded_) {
       pc = 0;
       instructionDispatchLoop(bs);
@@ -668,8 +678,8 @@ namespace OpenMD {
     return bs;
   }
 
-  OpenMDBitSet SelectionEvaluator::evaluate(int frame) {
-    OpenMDBitSet bs(nStuntDouble);
+  SelectionSet SelectionEvaluator::evaluate(int frame) {
+    SelectionSet bs = createSelectionSets();
     if (isLoaded_) {
       pc = 0;
       instructionDispatchLoop(bs, frame);
@@ -677,12 +687,12 @@ namespace OpenMD {
     return bs;
   }
 
-  OpenMDBitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
-    OpenMDBitSet bs(nStuntDouble);
+  SelectionSet SelectionEvaluator::indexInstruction(const boost::any& value) {
+    SelectionSet bs = createSelectionSets();
 
     if (value.type() == typeid(int)) {
       int index = boost::any_cast<int>(value);
-      if (index < 0 || index >= bs.size()) {
+      if (index < 0 || index >= bs.bitsets_[STUNTDOUBLE].size()) {
 	invalidIndex(index);
       } else {
 	bs = indexFinder.find(index);
@@ -690,7 +700,8 @@ namespace OpenMD {
     } else if (value.type() == typeid(std::pair<int, int>)) {
       std::pair<int, int> indexRange= boost::any_cast<std::pair<int, int> >(value);
       assert(indexRange.first <= indexRange.second);
-      if (indexRange.first < 0 || indexRange.second >= bs.size()) {
+      if (indexRange.first < 0 || 
+          indexRange.second >= bs.bitsets_[STUNTDOUBLE].size()) {
 	invalidIndexRange(indexRange);
       }else {
 	bs = indexFinder.find(indexRange.first, indexRange.second);
@@ -700,36 +711,59 @@ namespace OpenMD {
     return bs;
   }
 
-  OpenMDBitSet SelectionEvaluator::allInstruction() {
-    OpenMDBitSet bs(nStuntDouble);
+  SelectionSet SelectionEvaluator::allInstruction() {
+    SelectionSet ss = createSelectionSets();
 
     SimInfo::MoleculeIterator mi;
-    Molecule* mol;
     Molecule::AtomIterator ai;
-    Atom* atom;
     Molecule::RigidBodyIterator rbIter;
+    Molecule::BondIterator bondIter;
+    Molecule::BendIterator bendIter;
+    Molecule::TorsionIterator torsionIter;
+    Molecule::InversionIterator inversionIter;
+
+    Molecule* mol;
+    Atom* atom;
     RigidBody* rb;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;    
 
     // Doing the loop insures that we're actually on this processor.
 
     for (mol = info->beginMolecule(mi); mol != NULL; 
          mol = info->nextMolecule(mi)) {
-
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-        bs.setBitOn(atom->getGlobalIndex());
-      }
-     
+        ss.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
+      }     
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
-        bs.setBitOn(rb->getGlobalIndex());
+        ss.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
       }
+      for (bond = mol->beginBond(bondIter); bond != NULL; 
+           bond = mol->nextBond(bondIter)) {
+        ss.bitsets_[BOND].setBitOn(bond->getGlobalIndex());
+      }   
+      for (bend = mol->beginBend(bendIter); bend != NULL; 
+           bend = mol->nextBend(bendIter)) {
+        ss.bitsets_[BEND].setBitOn(bend->getGlobalIndex());
+      }   
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+           torsion = mol->nextTorsion(torsionIter)) {
+        ss.bitsets_[TORSION].setBitOn(torsion->getGlobalIndex());
+      }   
+      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+        ss.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
+      }   
     }
 
-    return bs;
+    return ss;
   }
 
-  OpenMDBitSet SelectionEvaluator::hull() {
-    OpenMDBitSet bs(nStuntDouble);
+  SelectionSet SelectionEvaluator::hull() {
+    SelectionSet bs = createSelectionSets();
     
     bs = hullFinder.findHull();
     surfaceArea_ = hullFinder.getSurfaceArea();
@@ -738,8 +772,8 @@ namespace OpenMD {
   }
 
 
-  OpenMDBitSet SelectionEvaluator::hull(int frame) {
-    OpenMDBitSet bs(nStuntDouble);
+  SelectionSet SelectionEvaluator::hull(int frame) {
+    SelectionSet bs = createSelectionSets();
     
     bs = hullFinder.findHull(frame);
 

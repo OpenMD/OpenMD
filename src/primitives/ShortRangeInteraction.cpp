@@ -39,37 +39,49 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef SELECTION_HULLFINDER_HPP
-#define SELECTION_HULLFINDER_HPP
-#include "brains/SimInfo.hpp"
-#include "selection/SelectionSet.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "math/Hull.hpp"
-#include "math/Triangle.hpp"
+ 
+#include "primitives/ShortRangeInteraction.hpp"
 
 namespace OpenMD {
 
-  class HullFinder {
-  public:
-    HullFinder(SimInfo* si);
-    ~HullFinder();
-    
-    SelectionSet findHull();
-    SelectionSet findHull(int frame);
-    RealType getSurfaceArea(){ return surfaceArea_; }
-    
-    SimInfo* info_;
-    std::vector<StuntDouble*> stuntdoubles_;
-    std::vector<Bond*> bonds_;
-    std::vector<Bend*> bends_;
-    std::vector<Torsion*> torsions_;
-    std::vector<Inversion*> inversions_;
-    vector<int> nObjects_;
+  ShortRangeInteraction::ShortRangeInteraction() : globalIndex_(-1), 
+                                                   localIndex_(-1) {
+  }
 
-    Hull* surfaceMesh_;
-    RealType surfaceArea_;
-    std::vector<StuntDouble*> localSites_;
-  };
+  ShortRangeInteraction::~ShortRangeInteraction() {
+  }
+
+  RealType ShortRangeInteraction::getValue() {
+    int id = snapshotMan_->getCurrentSnapshot()->getID();
+    return getValue(id);
+  }
+
+  RealType ShortRangeInteraction::getPrevValue() {
+    int id = snapshotMan_->getPrevSnapshot()->getID();
+    return getValue(id);
+  }
+
+  void ShortRangeInteraction::addProperty(GenericData* genData) {
+    properties_.addProperty(genData);  
+  }
   
+  void ShortRangeInteraction::removeProperty(const std::string& propName) {
+    properties_.removeProperty(propName);  
+  }
+  
+  void ShortRangeInteraction::clearProperties() {
+    properties_.clearProperties(); 
+  }
+  
+  std::vector<std::string> ShortRangeInteraction::getPropertyNames() {
+    return properties_.getPropertyNames();  
+  }
+  
+  std::vector<GenericData*> ShortRangeInteraction::getProperties() { 
+    return properties_.getProperties(); 
+  }
+  
+  GenericData* ShortRangeInteraction::getPropertyByName(const std::string& propName) {
+    return properties_.getPropertyByName(propName); 
+  }   
 }
-#endif 

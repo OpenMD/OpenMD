@@ -56,7 +56,7 @@ namespace OpenMD {
     if (internalCompile()) {
       return true;
     }
-    
+      
     int icharEnd;
     if ((icharEnd = script.find('\r', ichCurrentCommand)) == std::string::npos &&
         (icharEnd = script.find('\n', ichCurrentCommand)) == std::string::npos) {
@@ -374,7 +374,7 @@ namespace OpenMD {
       return false;
     }
     cchToken = ichT - ichToken;
-    return true;
+    return isInteger(script.substr(ichToken, ichT).c_str());
   }
 
   bool SelectionCompiler::lookingAtLookupToken() {
@@ -692,7 +692,6 @@ namespace OpenMD {
     if (token.tok == Token::integer) {
       int index = boost::any_cast<int>(token.value);
       int tok = tokPeek();
-      std::cout << "Token::to is " << Token::to << ", tok = " << tok << std::endl;
       if (tok == Token::to) {
 	tokenNext();
 	tok = tokPeek();

@@ -61,6 +61,7 @@ namespace OpenMD {
   enum OutputDataType {
     odtReal,
     odtVector3,
+    odtArray2d,
     odtUnknownDataType
   };
 
@@ -77,8 +78,9 @@ namespace OpenMD {
     OutputDataType dataType;
     OutputDataHandling dataHandling;
     vector<BaseAccumulator*> accumulator;
+    vector<vector<BaseAccumulator*> > accumulatorArray2d;
   };
-    
+
   class SpatialStatistics : public StaticAnalyser {
     
   public:

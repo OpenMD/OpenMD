@@ -45,52 +45,162 @@
 #include "brains/SimInfo.hpp"
 namespace OpenMD {
   SelectionManager::SelectionManager(SimInfo* info) : info_(info){
+    nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
+    nObjects_.push_back(info_->getNGlobalBonds());
+    nObjects_.push_back(info_->getNGlobalBends());
+    nObjects_.push_back(info_->getNGlobalTorsions());
+    nObjects_.push_back(info_->getNGlobalInversions());
 
-    int nStuntDoubles = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
-
-    bsSelection_.resize(nStuntDoubles);
-    stuntdoubles_.resize(nStuntDoubles, NULL);
+    stuntdoubles_.resize(nObjects_[STUNTDOUBLE]);
+    bonds_.resize(nObjects_[BOND]);
+    bends_.resize(nObjects_[BEND]);
+    torsions_.resize(nObjects_[TORSION]);
+    inversions_.resize(nObjects_[INVERSION]);
     
     SimInfo::MoleculeIterator mi;
-    Molecule* mol;
     Molecule::AtomIterator ai;
-    Atom* atom;
     Molecule::RigidBodyIterator rbIter;
+    Molecule::BondIterator bondIter;
+    Molecule::BendIterator bendIter;
+    Molecule::TorsionIterator torsionIter;
+    Molecule::InversionIterator inversionIter;
+
+    Molecule* mol;
+    Atom* atom;
     RigidBody* rb;
-    
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;    
+        
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-        
+      
       for(atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {
 	stuntdoubles_[atom->getGlobalIndex()] = atom;
-      }
-      
+      }  
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
 	stuntdoubles_[rb->getGlobalIndex()] = rb;
+      }   
+      for (bond = mol->beginBond(bondIter); bond != NULL; 
+           bond = mol->nextBond(bondIter)) {
+	bonds_[bond->getGlobalIndex()] = bond;
+      }   
+      for (bend = mol->beginBend(bendIter); bend != NULL; 
+           bend = mol->nextBend(bendIter)) {
+	bends_[bend->getGlobalIndex()] = bend;
+      }   
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+           torsion = mol->nextTorsion(torsionIter)) {
+	torsions_[torsion->getGlobalIndex()] = torsion;
+      }   
+      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+	inversions_[inversion->getGlobalIndex()] = inversion;
       }   
     }
   }
 
   StuntDouble* SelectionManager::beginSelected(int& i) {
-    i = bsSelection_.firstOnBit();
+    i = ss_.bitsets_[STUNTDOUBLE].firstOnBit();
     return i == -1 ? NULL : stuntdoubles_[i];
   }
 
   StuntDouble* SelectionManager::nextSelected(int& i) {
-    i = bsSelection_.nextOnBit(i);
+    i = ss_.bitsets_[STUNTDOUBLE].nextOnBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
   }
 
   StuntDouble* SelectionManager::beginUnselected(int& i){
-    i = bsSelection_.firstOffBit();
+    i = ss_.bitsets_[STUNTDOUBLE].firstOffBit();
     return i == -1 ? NULL : stuntdoubles_[i];
   }
 
   StuntDouble* SelectionManager::nextUnSelected(int& i) {
-    i = bsSelection_.nextOffBit(i);
+    i = ss_.bitsets_[STUNTDOUBLE].nextOffBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
+  }
+
+  Bond* SelectionManager::beginSelectedBond(int& i) {
+    i = ss_.bitsets_[BOND].firstOnBit();
+    return i == -1 ? NULL : bonds_[i];
+  }
+
+  Bond* SelectionManager::nextSelectedBond(int& i) {
+    i = ss_.bitsets_[BOND].nextOnBit(i);
+    return i == -1 ? NULL : bonds_[i];
+  }
+
+  Bond* SelectionManager::beginUnselectedBond(int& i){
+    i = ss_.bitsets_[BOND].firstOffBit();
+    return i == -1 ? NULL : bonds_[i];
+  }
+
+  Bond* SelectionManager::nextUnSelectedBond(int& i) {
+    i = ss_.bitsets_[BOND].nextOffBit(i);
+    return i == -1 ? NULL : bonds_[i];
+  }
+
+  Bend* SelectionManager::beginSelectedBend(int& i) {
+    i = ss_.bitsets_[BEND].firstOnBit();
+    return i == -1 ? NULL : bends_[i];
+  }
+
+  Bend* SelectionManager::nextSelectedBend(int& i) {
+    i = ss_.bitsets_[BEND].nextOnBit(i);
+    return i == -1 ? NULL : bends_[i];
+  }
+
+  Bend* SelectionManager::beginUnselectedBend(int& i){
+    i = ss_.bitsets_[BEND].firstOffBit();
+    return i == -1 ? NULL : bends_[i];
+  }
+
+  Bend* SelectionManager::nextUnSelectedBend(int& i) {
+    i = ss_.bitsets_[BEND].nextOffBit(i);
+    return i == -1 ? NULL : bends_[i];
+  }
+
+  Torsion* SelectionManager::beginSelectedTorsion(int& i) {
+    i = ss_.bitsets_[TORSION].firstOnBit();
+    return i == -1 ? NULL : torsions_[i];
+  }
+
+  Torsion* SelectionManager::nextSelectedTorsion(int& i) {
+    i = ss_.bitsets_[TORSION].nextOnBit(i);
+    return i == -1 ? NULL : torsions_[i];
+  }
+
+  Torsion* SelectionManager::beginUnselectedTorsion(int& i){
+    i = ss_.bitsets_[TORSION].firstOffBit();
+    return i == -1 ? NULL : torsions_[i];
+  }
+
+  Torsion* SelectionManager::nextUnSelectedTorsion(int& i) {
+    i = ss_.bitsets_[TORSION].nextOffBit(i);
+    return i == -1 ? NULL : torsions_[i];
+  }
+
+  Inversion* SelectionManager::beginSelectedInversion(int& i) {
+    i = ss_.bitsets_[INVERSION].firstOnBit();
+    return i == -1 ? NULL : inversions_[i];
+  }
+
+  Inversion* SelectionManager::nextSelectedInversion(int& i) {
+    i = ss_.bitsets_[INVERSION].nextOnBit(i);
+    return i == -1 ? NULL : inversions_[i];
+  }
+
+  Inversion* SelectionManager::beginUnselectedInversion(int& i){
+    i = ss_.bitsets_[INVERSION].firstOffBit();
+    return i == -1 ? NULL : inversions_[i];
+  }
+
+  Inversion* SelectionManager::nextUnSelectedInversion(int& i) {
+    i = ss_.bitsets_[INVERSION].nextOffBit(i);
+    return i == -1 ? NULL : inversions_[i];
   }
 
   SelectionManager operator| (const SelectionManager& sman1, 

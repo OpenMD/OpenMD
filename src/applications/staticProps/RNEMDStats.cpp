@@ -159,7 +159,7 @@ namespace OpenMD {
       }
     }
     
-    for (unsigned int i = 0; i < nBins_; i++) {
+    for (int i = 0; i < nBins_; i++) {
 
       if (binDof[i] > 0) {
         RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
@@ -198,7 +198,7 @@ namespace OpenMD {
     
     angularVelocity = new OutputData;
     angularVelocity->units = "angstroms^2/fs";
-    angularVelocity->title =  "Velocity";  
+    angularVelocity->title =  "Angular Velocity";  
     angularVelocity->dataType = odtVector3;
     angularVelocity->dataHandling = odhAverage;
     angularVelocity->accumulator.reserve(nBins_);
@@ -295,7 +295,7 @@ namespace OpenMD {
       }
     }
     
-    for (unsigned int i = 0; i < nBins_; i++) {
+    for (int i = 0; i < nBins_; i++) {
       RealType rinner = (RealType)i * binWidth_;
       RealType router = (RealType)(i+1) * binWidth_;
       if (binDof[i] > 0) {
@@ -316,6 +316,177 @@ namespace OpenMD {
 
 
   void RNEMDR::processStuntDouble(StuntDouble* sd, int bin) {
+  }
+  
+  RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename, 
+                           const std::string& sele, int nrbins, int nangleBins)
+    : ShellStatistics(info, filename, sele, nrbins), nAngleBins_(nangleBins) {
+    
+    Globals* simParams = info->getSimParams();
+    RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
+    bool hasAngularMomentumFluxVector = rnemdParams->haveAngularMomentumFluxVector();
+    
+    if (hasAngularMomentumFluxVector) {
+      fluxVector_ = rnemdParams->getAngularMomentumFluxVector();
+    } else {
+      
+      std::string fluxStr = rnemdParams->getFluxType();
+      if (fluxStr.find("Lx") != std::string::npos) {
+        fluxVector_ = V3X;
+      } else if (fluxStr.find("Ly") != std::string::npos) {
+        fluxVector_ = V3Y;
+      } else {
+        fluxVector_ = V3Z;
+      }
+    }
+    
+    fluxVector_.normalize();
+
+    setOutputName(getPrefix(filename) + ".rnemdRTheta");
+
+    angularVelocity = new OutputData;
+    angularVelocity->units = "angstroms^2/fs";
+    angularVelocity->title =  "Angular Velocity";  
+    angularVelocity->dataType = odtArray2d;
+    angularVelocity->dataHandling = odhAverage;
+    angularVelocity->accumulatorArray2d.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) {
+      angularVelocity->accumulatorArray2d[i].reserve(nAngleBins_);
+      for (int j = 0 ; j < nAngleBins_; j++) {       
+        angularVelocity->accumulatorArray2d[i][j] = new Accumulator();
+      }
+    }
+    data_.push_back(angularVelocity);
+
+  }
+
+
+  std::pair<int,int> RNEMDRTheta::getBins(Vector3d pos) { 
+    std::pair<int,int> result;
+
+    Vector3d rPos = pos - coordinateOrigin_;
+    RealType cosAngle= dot(rPos, fluxVector_) / rPos.length();
+
+    result.first = int(rPos.length() / binWidth_);
+    result.second = int( (nAngleBins_ - 1) * 0.5 * (cosAngle + 1.0) );
+    return result;
+  }
+
+  void RNEMDRTheta::processStuntDouble(StuntDouble* sd, int bin) {
+  }
+
+  void RNEMDRTheta::processFrame(int istep) {
+
+    Molecule* mol;
+    RigidBody* rb;
+    StuntDouble* sd;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    int i;
+
+    vector<vector<Mat3x3d> >  binI;
+    vector<vector<Vector3d> > binL;
+    vector<vector<int> > binCount;
+    
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      
+      // change the positions of atoms which belong to the rigidbodies
+      
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
+        rb->updateAtomVel();
+      }
+    }
+   
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    // loop over the selected atoms:
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+         sd = seleMan_.nextSelected(i)) {
+
+      // figure out where that object is:
+      std::pair<int,int> bins = getBins( sd->getPos() );   
+
+      if (bins.first >= 0 && bins.first < nBins_)  {
+        if (bins.second >= 0 && bins.second < nAngleBins_) {
+
+          Vector3d rPos = sd->getPos() - coordinateOrigin_;
+          Vector3d vel = sd->getVel();      
+          RealType m = sd->getMass();
+          Vector3d L = m * cross(rPos, vel);
+          Mat3x3d I(0.0);
+          I = outProduct(rPos, rPos) * m;
+          RealType r2 = rPos.lengthSquare();
+          I(0, 0) += m * r2;
+          I(1, 1) += m * r2;
+          I(2, 2) += m * r2;       
+
+          binI[bins.first][bins.second] += I;
+          binL[bins.first][bins.second] += L;
+          binCount[bins.first][bins.second]++;
+        }
+      }
+    }
+  
+    
+    for (int i = 0; i < nBins_; i++) {
+      for (int j = 0; j < nAngleBins_; j++) {
+
+        if (binCount[i][j] > 0) {
+          Vector3d omega = binI[i][j].inverse() * binL[i][j];
+          RealType omegaProj = dot(omega, fluxVector_);
+ 
+          dynamic_cast<Accumulator *>(angularVelocity->accumulatorArray2d[i][j])->add(omegaProj);
+        }
+      }
+    }
+  }
+
+  void RNEMDRTheta::writeOutput() {
+    
+    vector<OutputData*>::iterator i;
+    OutputData* outputData;
+    
+    ofstream outStream(outputFilename_.c_str());
+    if (outStream.is_open()) {
+      
+      //write title
+      outStream << "# SPATIAL STATISTICS\n";
+      outStream << "#";
+      
+      for(outputData = beginOutputData(i); outputData; 
+          outputData = nextOutputData(i)) {
+        outStream << "\t" << outputData->title << 
+          "(" << outputData->units << ")";
+        // add some extra tabs for column alignment
+        if (outputData->dataType == odtVector3) outStream << "\t\t";
+      }
+      
+      outStream << std::endl;
+      
+      outStream.precision(8);
+      
+      for (int j = 0; j < nBins_; j++) {        
+        
+        int counts = counts_->accumulator[j]->count();
+
+        if (counts > 0) {
+          for(outputData = beginOutputData(i); outputData; 
+              outputData = nextOutputData(i)) {
+            
+            int n = outputData->accumulator[j]->count();
+            if (n != 0) {
+              writeData( outStream, outputData, j );
+            }
+          }
+          outStream << std::endl;
+        }
+      }
+    }
   }
 }
 

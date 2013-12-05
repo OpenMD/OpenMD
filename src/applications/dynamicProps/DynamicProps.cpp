@@ -64,6 +64,7 @@
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
+#include "applications/dynamicProps/BondCorrFunc.hpp"
 
 using namespace OpenMD;
 
@@ -142,6 +143,8 @@ int main(int argc, char* argv[]){
     corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
+  } else if (args_info.bondcorr_given) {
+    corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize); 
   } else if (args_info.helfandEcorr_given){
     corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.stresscorr_given){

@@ -50,9 +50,10 @@
 #ifndef PRIMITIVES_TORSION_HPP
 #define PRIMITIVES_TORSION_HPP
 
+#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
-
 #include "types/TorsionType.hpp"
+#include <limits>
 
 namespace OpenMD {
 struct TorsionData {
@@ -70,44 +71,83 @@ struct TorsionDataSet {
   /**
    * @class Torsion Torsion.hpp "types/Torsion.hpp"
    */
-  class Torsion {
+  class Torsion : public ShortRangeInteraction {
   public:
     Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
     virtual ~Torsion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
-        
+                
+    RealType getValue(int snapshotNo) {
+      Vector3d pos1 = atoms_[0]->getPos(snapshotNo);
+      Vector3d pos2 = atoms_[1]->getPos(snapshotNo);
+      Vector3d pos3 = atoms_[2]->getPos(snapshotNo);
+      Vector3d pos4 = atoms_[3]->getPos(snapshotNo);
+      
+      Vector3d r21 = pos1 - pos2;
+      Vector3d r32 = pos2 - pos3;
+      Vector3d r43 = pos3 - pos4;
+      
+      //  Calculate the cross products and distances
+      Vector3d A = cross(r21, r32);
+      RealType rA = A.length();
+      Vector3d B = cross(r32, r43);
+      RealType rB = B.length();
+      
+      /* 
+         If either of the two cross product vectors is tiny, that means
+         the three atoms involved are colinear, and the torsion angle is
+         going to be undefined.  The easiest check for this problem is
+         to use the product of the two lengths.
+      */
+      if (rA * rB < OpenMD::epsilon) return numeric_limits<double>::quiet_NaN();
+      
+      A.normalize();
+      B.normalize();  
+      
+      //  Calculate the sin and cos
+      RealType cos_phi = dot(A, B) ;
+      if (cos_phi > 1.0) cos_phi = 1.0;
+      if (cos_phi < -1.0) cos_phi = -1.0;            
+      return acos(cos_phi);
+    }
+    
+
     RealType getPotential() {
       return potential_;
     }
 
     Atom* getAtomA() {
-      return atom1_;
+      return atoms_[0];
     }
 
     Atom* getAtomB() {
-      return atom2_;
+      return atoms_[1];
     }
 
     Atom* getAtomC() {
-      return atom3_;
+      return atoms_[2];
     }
 
     Atom* getAtomD() {
-      return atom4_;
+      return atoms_[3];
     }
 
     TorsionType * getTorsionType() {
       return torsionType_;
     }
         
+    virtual std::string getName() { return name_;}        
+    /** Sets the name of this torsion for selections */
+    virtual void setName(const std::string& name) { name_ = name;}
+
+    void accept(BaseVisitor* v) {
+      v->visit(this);
+    }    
+
   protected:
 
-    Atom* atom1_;
-    Atom* atom2_;
-    Atom* atom3_;
-    Atom* atom4_;
-
     TorsionType* torsionType_;
+    std::string name_;        
 
     RealType potential_;
   };    

@@ -311,6 +311,9 @@ int main(int argc, char* argv[]){
     analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.rnemdr_given) {
     analyser = new RNEMDR(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.rnemdrt_given) {
+    analyser = new RNEMDRTheta(info, dumpFileName, sele1,
+                               args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.p_angle_given) {
     analyser = new pAngle(info, dumpFileName, sele1, args_info.nbins_arg);
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)

@@ -50,17 +50,33 @@
 namespace OpenMD {
   
   DistanceFinder::DistanceFinder(SimInfo* info) : info_(info) {
-    
-    nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
-    stuntdoubles_.resize(nStuntDoubles_);
+    nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
+    nObjects_.push_back(info_->getNGlobalBonds());
+    nObjects_.push_back(info_->getNGlobalBends());
+    nObjects_.push_back(info_->getNGlobalTorsions());
+    nObjects_.push_back(info_->getNGlobalInversions());
+
+    stuntdoubles_.resize(nObjects_[STUNTDOUBLE]);
+    bonds_.resize(nObjects_[BOND]);
+    bends_.resize(nObjects_[BEND]);
+    torsions_.resize(nObjects_[TORSION]);
+    inversions_.resize(nObjects_[INVERSION]);
     
     SimInfo::MoleculeIterator mi;
-    Molecule* mol;
     Molecule::AtomIterator ai;
-    Atom* atom;
     Molecule::RigidBodyIterator rbIter;
+    Molecule::BondIterator bondIter;
+    Molecule::BendIterator bendIter;
+    Molecule::TorsionIterator torsionIter;
+    Molecule::InversionIterator inversionIter;
+
+    Molecule* mol;
+    Atom* atom;
     RigidBody* rb;
-    
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;    
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
@@ -69,19 +85,35 @@ namespace OpenMD {
           atom = mol->nextAtom(ai)) {
 	stuntdoubles_[atom->getGlobalIndex()] = atom;
       }
-
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
 	stuntdoubles_[rb->getGlobalIndex()] = rb;
       }
+      for (bond = mol->beginBond(bondIter); bond != NULL; 
+           bond = mol->nextBond(bondIter)) {
+        bonds_[bond->getGlobalIndex()] = bond;
+      }   
+      for (bend = mol->beginBend(bendIter); bend != NULL; 
+           bend = mol->nextBend(bendIter)) {
+        bends_[bend->getGlobalIndex()] = bend;
+      }   
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+           torsion = mol->nextTorsion(torsionIter)) {
+        torsions_[torsion->getGlobalIndex()] = torsion;
+      }   
+      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+        inversions_[inversion->getGlobalIndex()] = inversion;
+      }   
+
     }
   }
 
-  OpenMDBitSet DistanceFinder::find(const OpenMDBitSet& bs, RealType distance) {
+  SelectionSet DistanceFinder::find(const SelectionSet& bs, RealType distance) {
     StuntDouble * center;
     Vector3d centerPos;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    OpenMDBitSet bsResult(nStuntDoubles_);   
+    SelectionSet bsResult(nObjects_);   
     assert(bsResult.size() == bs.size());
 
 #ifdef IS_MPI
@@ -97,17 +129,18 @@ namespace OpenMD {
         rb->updateAtoms();
       }
     }
-       
-    OpenMDBitSet bsTemp(nStuntDoubles_);
+            
+    SelectionSet bsTemp(nObjects_);
     bsTemp = bs;
     bsTemp.parallelReduce();
 
-    for (int i = bsTemp.firstOnBit(); i != -1; i = bsTemp.nextOnBit(i)) {
-
+    for (int i = bsTemp.bitsets_[STUNTDOUBLE].firstOnBit(); i != -1; 
+         i = bsTemp.bitsets_[STUNTDOUBLE].nextOnBit(i)) {
+      
       // Now, if we own stuntdouble i, we can use the position, but in
       // parallel, we'll need to let everyone else know what that
       // position is!
-
+      
 #ifdef IS_MPI
       mol = info_->getGlobalMolMembership(i);
       proc = info_->getMolToProc(mol);
@@ -132,19 +165,64 @@ namespace OpenMD {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos();
 	currSnapshot->wrapVector(r);
 	if (r.length() <= distance) {
-	  bsResult.setBitOn(j);
+	  bsResult.bitsets_[STUNTDOUBLE].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < bonds_.size(); ++j) {
+        Vector3d loc = bonds_[j]->getAtomA()->getPos();
+        loc += bonds_[j]->getAtomB()->getPos();
+        loc = loc / 2.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[BOND].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < bends_.size(); ++j) {
+        Vector3d loc = bends_[j]->getAtomA()->getPos();
+        loc += bends_[j]->getAtomB()->getPos();
+        loc += bends_[j]->getAtomC()->getPos();
+        loc = loc / 3.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[BEND].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < torsions_.size(); ++j) {
+        Vector3d loc = torsions_[j]->getAtomA()->getPos();
+        loc += torsions_[j]->getAtomB()->getPos();
+        loc += torsions_[j]->getAtomC()->getPos();
+        loc += torsions_[j]->getAtomD()->getPos();
+        loc = loc / 4.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[TORSION].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < inversions_.size(); ++j) {
+        Vector3d loc = inversions_[j]->getAtomA()->getPos();
+        loc += inversions_[j]->getAtomB()->getPos();
+        loc += inversions_[j]->getAtomC()->getPos();
+        loc += inversions_[j]->getAtomD()->getPos();
+        loc = loc / 4.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[INVERSION].setBitOn(j);
 	}
       }
     }
     return bsResult;
   }
-
-
-OpenMDBitSet DistanceFinder::find(const OpenMDBitSet& bs, RealType distance, int frame ) {
+  
+  
+  SelectionSet DistanceFinder::find(const SelectionSet& bs, RealType distance, int frame ) {
     StuntDouble * center;
     Vector3d centerPos;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getSnapshot(frame);
-    OpenMDBitSet bsResult(nStuntDoubles_);   
+    SelectionSet bsResult(nObjects_);   
     assert(bsResult.size() == bs.size());
 
 #ifdef IS_MPI
@@ -161,11 +239,12 @@ OpenMDBitSet DistanceFinder::find(const OpenMDBitSet& bs, RealType distance, int
       }
     }
        
-    OpenMDBitSet bsTemp(nStuntDoubles_);
+    SelectionSet bsTemp(nObjects_);
     bsTemp = bs;
     bsTemp.parallelReduce();
 
-    for (int i = bsTemp.firstOnBit(); i != -1; i = bsTemp.nextOnBit(i)) {
+    for (int i = bsTemp.bitsets_[STUNTDOUBLE].firstOnBit(); i != -1; 
+         i = bsTemp.bitsets_[STUNTDOUBLE].nextOnBit(i)) {
 
       // Now, if we own stuntdouble i, we can use the position, but in
       // parallel, we'll need to let everyone else know what that
@@ -190,12 +269,56 @@ OpenMDBitSet DistanceFinder::find(const OpenMDBitSet& bs, RealType distance, int
       center = stuntdoubles_[i];
       centerPos = center->getPos(frame);
 #endif
-      
       for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos(frame);
 	currSnapshot->wrapVector(r);
 	if (r.length() <= distance) {
-	  bsResult.setBitOn(j);
+	  bsResult.bitsets_[STUNTDOUBLE].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < bonds_.size(); ++j) {       
+        Vector3d loc = bonds_[j]->getAtomA()->getPos(frame);
+        loc += bonds_[j]->getAtomB()->getPos(frame);
+        loc = loc / 2.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[BOND].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < bends_.size(); ++j) {
+        Vector3d loc = bends_[j]->getAtomA()->getPos(frame);
+        loc += bends_[j]->getAtomB()->getPos(frame);
+        loc += bends_[j]->getAtomC()->getPos(frame);
+        loc = loc / 3.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[BEND].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < torsions_.size(); ++j) {
+        Vector3d loc = torsions_[j]->getAtomA()->getPos(frame);
+        loc += torsions_[j]->getAtomB()->getPos(frame);
+        loc += torsions_[j]->getAtomC()->getPos(frame);
+        loc += torsions_[j]->getAtomD()->getPos(frame);
+        loc = loc / 4.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[TORSION].setBitOn(j);
+	}
+      }
+      for (unsigned int j = 0; j < inversions_.size(); ++j) {
+        Vector3d loc = inversions_[j]->getAtomA()->getPos(frame);
+        loc += inversions_[j]->getAtomB()->getPos(frame);
+        loc += inversions_[j]->getAtomC()->getPos(frame);
+        loc += inversions_[j]->getAtomD()->getPos(frame);
+        loc = loc / 4.0;
+	Vector3d r = centerPos - loc;
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[INVERSION].setBitOn(j);
 	}
       }
     }

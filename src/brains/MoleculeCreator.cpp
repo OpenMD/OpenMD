@@ -97,7 +97,7 @@ namespace OpenMD {
 
     for (int i = 0; i < nBonds; ++i) {
       currentBondStamp = molStamp->getBondStamp(i);
-      bond = createBond(ff, mol, currentBondStamp);
+      bond = createBond(ff, mol, currentBondStamp, localIndexMan);
       mol->addBond(bond);
     }
 
@@ -107,7 +107,7 @@ namespace OpenMD {
     int nBends = molStamp->getNBends();
     for (int i = 0; i < nBends; ++i) {
       currentBendStamp = molStamp->getBendStamp(i);
-      bend = createBend(ff, mol, currentBendStamp);
+      bend = createBend(ff, mol, currentBendStamp, localIndexMan);
       mol->addBend(bend);
     }
 
@@ -117,7 +117,7 @@ namespace OpenMD {
     int nTorsions = molStamp->getNTorsions();
     for (int i = 0; i < nTorsions; ++i) {
       currentTorsionStamp = molStamp->getTorsionStamp(i);
-      torsion = createTorsion(ff, mol, currentTorsionStamp);
+      torsion = createTorsion(ff, mol, currentTorsionStamp, localIndexMan);
       mol->addTorsion(torsion);
     }
 
@@ -127,7 +127,8 @@ namespace OpenMD {
     int nInversions = molStamp->getNInversions();
     for (int i = 0; i < nInversions; ++i) {
       currentInversionStamp = molStamp->getInversionStamp(i);
-      inversion = createInversion(ff, mol, currentInversionStamp);
+      inversion = createInversion(ff, mol, currentInversionStamp, 
+                                  localIndexMan);
       if (inversion != NULL ) {
         mol->addInversion(inversion);
       }
@@ -139,7 +140,8 @@ namespace OpenMD {
     int nCutoffGroups = molStamp->getNCutoffGroups();
     for (int i = 0; i < nCutoffGroups; ++i) {
       currentCutoffGroupStamp = molStamp->getCutoffGroupStamp(i);
-      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp, localIndexMan);
+      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp, 
+                                      localIndexMan);
       mol->addCutoffGroup(cutoffGroup);
     }
 
@@ -226,7 +228,7 @@ namespace OpenMD {
   RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, 
                                               Molecule* mol,
 					      RigidBodyStamp* rbStamp, 
-					      LocalIndexManager* localIndexMan) {
+					      LocalIndexManager* localIndexMan){
     Atom* atom;
     int nAtoms;
     Vector3d refCoor;
@@ -250,20 +252,20 @@ namespace OpenMD {
     //set the local index of this rigid body, global index will be set later
     rb->setLocalIndex(localIndexMan->getNextRigidBodyIndex());
 
-    //the rule for naming rigidbody MoleculeName_RB_Integer
-    //The first part is the name of the molecule
-    //The second part is alway fixed as "RB"
-    //The third part is the index of the rigidbody defined in meta-data file
-    //For example, Butane_RB_0 is a valid rigid body name of butane molecule
-    /**@todo replace itoa by lexi_cast */
+    // The rule for naming a rigidbody is: MoleculeName_RB_Integer
+    // The first part is the name of the molecule
+    // The second part is always fixed as "RB"
+    // The third part is the index of the rigidbody defined in meta-data file
+    // For example, Butane_RB_0 is a valid rigid body name of butane molecule
+
     std::string s = OpenMD_itoa(mol->getNRigidBodies(), 10);
     rb->setType(mol->getType() + "_RB_" + s.c_str());
-
     return rb;
   }    
 
   Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, 
-                                    BondStamp* stamp) {
+                                    BondStamp* stamp,
+                                    LocalIndexManager* localIndexMan) {
     BondType* bondType;
     Atom* atomA;
     Atom* atomB;
@@ -283,11 +285,25 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    return new Bond(atomA, atomB, bondType);    
+    Bond* bond = new Bond(atomA, atomB, bondType);
+
+    //set the local index of this bond, the global index will be set later
+    bond->setLocalIndex(localIndexMan->getNextBondIndex());
+
+    // The rule for naming a bond is: MoleculeName_Bond_Integer
+    // The first part is the name of the molecule
+    // The second part is always fixed as "Bond"
+    // The third part is the index of the bond defined in meta-data file
+    // For example, Butane_bond_0 is a valid Bond name in a butane molecule
+
+    std::string s = OpenMD_itoa(mol->getNBonds(), 10);
+    bond->setName(mol->getType() + "_Bond_" + s.c_str());
+    return bond;    
   }    
   
   Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, 
-                                    BendStamp* stamp) {
+                                    BendStamp* stamp,
+                                    LocalIndexManager* localIndexMan) {
     Bend* bend = NULL; 
     std::vector<int> bendAtoms = stamp->getMembers(); 
     if (bendAtoms.size() == 3) {
@@ -302,7 +318,8 @@ namespace OpenMD {
                                            atomC->getType().c_str());
       
       if (bendType == NULL) {
-        sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
+        sprintf(painCave.errMsg, 
+                "Can not find Matching Bend Type for[%s, %s, %s]",
                 atomA->getType().c_str(),
                 atomB->getType().c_str(),
                 atomC->getType().c_str());
@@ -326,7 +343,8 @@ namespace OpenMD {
       BendType* bendType = ff->getBendType(normalAtom->getType(), ghostAtom->getType(), "GHOST");
 
       if (bendType == NULL) {
-	sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
+	sprintf(painCave.errMsg, 
+                "Can not find Matching Bend Type for[%s, %s, %s]",
 		normalAtom->getType().c_str(),
 		ghostAtom->getType().c_str(),
 		"GHOST");
@@ -338,12 +356,24 @@ namespace OpenMD {
       bend = new GhostBend(normalAtom, ghostAtom, bendType);       
       
     } 
-    
+
+    //set the local index of this bend, the global index will be set later
+    bend->setLocalIndex(localIndexMan->getNextBendIndex());
+
+    // The rule for naming a bend is: MoleculeName_Bend_Integer
+    // The first part is the name of the molecule
+    // The second part is always fixed as "Bend"
+    // The third part is the index of the bend defined in meta-data file
+    // For example, Butane_Bend_0 is a valid Bend name in a butane molecule
+
+    std::string s = OpenMD_itoa(mol->getNBends(), 10);
+    bend->setName(mol->getType() + "_Bend_" + s.c_str());    
     return bend;
   }    
 
   Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, 
-                                          TorsionStamp* stamp) {
+                                          TorsionStamp* stamp,
+                                          LocalIndexManager* localIndexMan) {
 
     Torsion* torsion = NULL;
     std::vector<int> torsionAtoms = stamp->getMembers();
@@ -365,7 +395,8 @@ namespace OpenMD {
 						    atomC->getType(), 
                                                     atomD->getType());
       if (torsionType == NULL) {
-	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+	sprintf(painCave.errMsg, 
+                "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
 		atomA->getType().c_str(),
 		atomB->getType().c_str(),
 		atomC->getType().c_str(),
@@ -402,12 +433,25 @@ namespace OpenMD {
       
       torsion = new GhostTorsion(atomA, atomB, dAtom, torsionType);               
     }
+
+    //set the local index of this torsion, the global index will be set later
+    torsion->setLocalIndex(localIndexMan->getNextTorsionIndex());
     
+    // The rule for naming a torsion is: MoleculeName_Torsion_Integer
+    // The first part is the name of the molecule
+    // The second part is always fixed as "Torsion"
+    // The third part is the index of the torsion defined in meta-data file
+    // For example, Butane_Torsion_0 is a valid Torsion name in a
+    // butane molecule
+
+    std::string s = OpenMD_itoa(mol->getNTorsions(), 10);
+    torsion->setName(mol->getType() + "_Torsion_" + s.c_str());
     return torsion;
   }    
 
   Inversion* MoleculeCreator::createInversion(ForceField* ff, Molecule* mol, 
-                                              InversionStamp* stamp) {
+                                              InversionStamp* stamp,
+                                              LocalIndexManager* localIndexMan) {
     
     Inversion* inversion = NULL;
     int center = stamp->getCenter();
@@ -443,6 +487,20 @@ namespace OpenMD {
     } else {
       
       inversion = new Inversion(atomA, atomB, atomC, atomD, inversionType);
+
+      // set the local index of this inversion, the global index will
+      // be set later
+      inversion->setLocalIndex(localIndexMan->getNextInversionIndex());
+
+      // The rule for naming an inversion is: MoleculeName_Inversion_Integer
+      // The first part is the name of the molecule
+      // The second part is always fixed as "Inversion"
+      // The third part is the index of the inversion defined in meta-data file
+      // For example, Benzene_Inversion_0 is a valid Inversion name in a
+      // Benzene molecule
+
+      std::string s = OpenMD_itoa(mol->getNInversions(), 10);
+      inversion->setName(mol->getType() + "_Inversion_" + s.c_str());
       return inversion;
     }
   }
@@ -489,13 +547,6 @@ namespace OpenMD {
     for (bond = mol->beginBond(bi); bond != NULL; bond = mol->nextBond(bi)) {
         
       BondType* bt = bond->getBondType();
-
-      //class Parent1 {};
-      //class Child1 : public Parent {};
-      //class Child2 : public Parent {};
-      //Child1* ch1 = new Child1();
-      //Child2* ch2 = dynamic_cast<Child2*>(ch1); 
-      //the dynamic_cast is succeed in above line. A compiler bug?        
 
       if (typeid(FixedBondType) == typeid(*bt)) {
 	FixedBondType* fbt = dynamic_cast<FixedBondType*>(bt);

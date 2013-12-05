@@ -44,46 +44,78 @@
 namespace OpenMD {
 
   IndexFinder::IndexFinder(SimInfo* info) : info_(info){
-    nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
-    bitSets_.resize(info_->getNGlobalMolecules());
+    nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
+    nObjects_.push_back(info_->getNGlobalBonds());
+    nObjects_.push_back(info_->getNGlobalBends());
+    nObjects_.push_back(info_->getNGlobalTorsions());
+    nObjects_.push_back(info_->getNGlobalInversions());
+
+    selectionSets_.resize(info_->getNGlobalMolecules());
     init();
   }
 
   void IndexFinder::init() {
 
     SimInfo::MoleculeIterator mi;
-    Molecule* mol;
     Molecule::AtomIterator ai;
-    Atom* atom;
     Molecule::RigidBodyIterator rbIter;
+    Molecule::BondIterator bondIter;
+    Molecule::BendIterator bendIter;
+    Molecule::TorsionIterator torsionIter;
+    Molecule::InversionIterator inversionIter;
+
+    Molecule* mol;
+    Atom* atom;
     RigidBody* rb;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;    
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
            
-      OpenMDBitSet bs(nStuntDoubles_);
+      SelectionSet ss(nObjects_);
+
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-	bs.setBitOn(atom->getGlobalIndex());
+	ss.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
       }
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
-	bs.setBitOn(rb->getGlobalIndex());
+        ss.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
       }
-      bitSets_[mol->getGlobalIndex()] = bs;
+      for (bond = mol->beginBond(bondIter); bond != NULL; 
+           bond = mol->nextBond(bondIter)) {
+        ss.bitsets_[BOND].setBitOn(bond->getGlobalIndex());
+      }   
+      for (bend = mol->beginBend(bendIter); bend != NULL; 
+           bend = mol->nextBend(bendIter)) {
+        ss.bitsets_[BEND].setBitOn(bend->getGlobalIndex());
+      }   
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+           torsion = mol->nextTorsion(torsionIter)) {
+        ss.bitsets_[TORSION].setBitOn(torsion->getGlobalIndex());
+      }   
+      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+        ss.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
+      }   
+
+      selectionSets_[mol->getGlobalIndex()] = ss;
     }
   }
 
-  OpenMDBitSet IndexFinder::find(int molIndex){
-    return bitSets_[molIndex];
+  SelectionSet IndexFinder::find(int molIndex){
+    return selectionSets_[molIndex];
   }
 
-  OpenMDBitSet IndexFinder::find(int begMolIndex, int endMolIndex){
-    OpenMDBitSet bs(nStuntDoubles_);
+  SelectionSet IndexFinder::find(int begMolIndex, int endMolIndex){
+    SelectionSet ss(nObjects_);
         
     for (int i = begMolIndex; i < endMolIndex; ++i) {
-      bs |= bitSets_[i];
+      ss |= selectionSets_[i];
     }    
-    return bs;
+    return ss;
   }
 }
 

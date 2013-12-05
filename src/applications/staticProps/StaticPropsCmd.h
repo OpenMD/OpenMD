@@ -135,6 +135,7 @@ struct gengetopt_args_info
   const char *tet_param_z_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
   const char *rnemdz_help; /**< @brief slab-resolved RNEMD statistics (temperature, density, velocity) help description.  */
   const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
+  const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -188,6 +189,7 @@ struct gengetopt_args_info
   unsigned int tet_param_z_given ;	/**< @brief Whether tet_param_z was given.  */
   unsigned int rnemdz_given ;	/**< @brief Whether rnemdz was given.  */
   unsigned int rnemdr_given ;	/**< @brief Whether rnemdr was given.  */
+  unsigned int rnemdrt_given ;	/**< @brief Whether rnemdrt was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

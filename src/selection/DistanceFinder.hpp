@@ -42,20 +42,28 @@
 #ifndef SELECTION_DISTANCEFINDER_HPP
 #define SELECTION_DISTANCEFINDER_HPP
 #include "brains/SimInfo.hpp"
-#include "utils/OpenMDBitSet.hpp"
+#include "selection/SelectionSet.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "primitives/Bond.hpp"
+#include "primitives/Bend.hpp"
+#include "primitives/Torsion.hpp"
+#include "primitives/Inversion.hpp"
 namespace OpenMD {
 
   class DistanceFinder {
   public:
     DistanceFinder(SimInfo* si);
 
-    OpenMDBitSet find(const OpenMDBitSet& bs, RealType distance);
-    OpenMDBitSet find(const OpenMDBitSet& bs, RealType distance, int frame);
+    SelectionSet find(const SelectionSet& bs, RealType distance);
+    SelectionSet find(const SelectionSet& bs, RealType distance, int frame);
 
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;
-    int nStuntDoubles_;
+    std::vector<Bond*> bonds_;
+    std::vector<Bend*> bends_;
+    std::vector<Torsion*> torsions_;
+    std::vector<Inversion*> inversions_;
+    vector<int> nObjects_;
         
   };
 

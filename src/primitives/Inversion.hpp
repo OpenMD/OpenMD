@@ -50,8 +50,8 @@
 #ifndef PRIMITIVES_INVERSION_HPP
 #define PRIMITIVES_INVERSION_HPP
 
+#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
-
 #include "types/InversionType.hpp"
 
 namespace OpenMD {
@@ -69,45 +69,82 @@ namespace OpenMD {
   /**
    * @class Inversion Inversion.hpp "primitives/Inversion.hpp"
    */
-  class Inversion {
+  class Inversion : public ShortRangeInteraction {
   public:
     Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, InversionType* it);
     virtual ~Inversion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
         
+    RealType getValue(int snapshotNo) {
+      // In OpenMD's version of an inversion, the central atom
+      // comes first.  However, to get the planarity in a typical cosine
+      // version of this potential (i.e. Amber-style), the central atom
+      // is treated as atom *3* in a standard torsion form:
+      
+      Vector3d pos1 = atoms_[1]->getPos(snapshotNo);
+      Vector3d pos2 = atoms_[2]->getPos(snapshotNo);
+      Vector3d pos3 = atoms_[0]->getPos(snapshotNo);
+      Vector3d pos4 = atoms_[3]->getPos(snapshotNo);
+      
+      Vector3d r31 = pos1 - pos3;
+      Vector3d r23 = pos3 - pos2;
+      Vector3d r43 = pos3 - pos4;
+      
+      //  Calculate the cross products and distances
+      Vector3d A = cross(r31, r43);
+      RealType rA = A.length();
+      Vector3d B = cross(r43, r23);
+      RealType rB = B.length();
+      //Vector3d C = cross(r23, A);
+      //RealType rC = C.length();
+      
+      A.normalize();
+      B.normalize();
+      //C.normalize();
+      
+      //  Calculate the sin and cos
+      RealType cos_phi = dot(A, B) ;
+      if (cos_phi > 1.0) cos_phi = 1.0;
+      if (cos_phi < -1.0) cos_phi = -1.0;
+      return acos(cos_phi);
+    }
+
+
     RealType getPotential() {
       return potential_;
     }
 
     Atom* getAtomA() {
-      return atom1_;
+      return atoms_[0];
     }
 
     Atom* getAtomB() {
-      return atom2_;
+      return atoms_[1];
     }
 
     Atom* getAtomC() {
-      return atom3_;
+      return atoms_[2];
     }
 
     Atom* getAtomD() {
-      return atom4_;
+      return atoms_[3];
     }
 
     InversionType * getInversionType() {
       return inversionType_;
     }
-        
+    virtual std::string getName() { return name_;}        
+    /** Sets the name of this inversion for selections */
+    virtual void setName(const std::string& name) { name_ = name;}
+
+    void accept(BaseVisitor* v) {
+      v->visit(this);
+    }    
+
   protected:
-
-    Atom* atom1_;
-    Atom* atom2_;
-    Atom* atom3_;
-    Atom* atom4_;
-
     InversionType* inversionType_;
     InversionKey inversionKey_;
+    std::string name_;        
 
     RealType potential_;
   };    

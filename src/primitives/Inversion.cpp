@@ -48,9 +48,15 @@
 namespace OpenMD {
 
   Inversion::Inversion(Atom *atom1, Atom *atom2, Atom *atom3, 
-		       Atom *atom4, InversionType *it) :
-    atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), 
-    inversionType_(it) { 
+		       Atom *atom4, InversionType *it) : 
+    ShortRangeInteraction(), inversionType_(it) { 
+
+    atoms_.resize(4);
+    atoms_[0] = atom1;
+    atoms_[1] = atom2;
+    atoms_[2] = atom3;
+    atoms_[3] = atom4;
+    
     inversionKey_ = inversionType_->getKey();
   }
   
@@ -61,10 +67,10 @@ namespace OpenMD {
     // version of this potential (i.e. Amber-style), the central atom
     // is treated as atom *3* in a standard torsion form:
 
-    Vector3d pos1 = atom2_->getPos();
-    Vector3d pos2 = atom3_->getPos();
-    Vector3d pos3 = atom1_->getPos();
-    Vector3d pos4 = atom4_->getPos();
+    Vector3d pos1 = atoms_[1]->getPos();
+    Vector3d pos2 = atoms_[2]->getPos();
+    Vector3d pos3 = atoms_[0]->getPos();
+    Vector3d pos4 = atoms_[3]->getPos();
 
     Vector3d r31 = pos1 - pos3;
     Vector3d r23 = pos3 - pos2;
@@ -125,16 +131,16 @@ namespace OpenMD {
 
     // Confusing enough?  Good.
 
-    atom2_->addFrc(f1);
-    atom1_->addFrc(f2 - f1 + f3);
-    atom4_->addFrc(-f2);
-    atom3_->addFrc(-f3);
+    atoms_[1]->addFrc(f1);
+    atoms_[0]->addFrc(f2 - f1 + f3);
+    atoms_[3]->addFrc(-f2);
+    atoms_[2]->addFrc(-f3);
 
     if (doParticlePot) { 
-      atom1_->addParticlePot(potential_);
-      atom2_->addParticlePot(potential_);
-      atom3_->addParticlePot(potential_);
-      atom4_->addParticlePot(potential_);
+      atoms_[0]->addParticlePot(potential_);
+      atoms_[1]->addParticlePot(potential_);
+      atoms_[2]->addParticlePot(potential_);
+      atoms_[3]->addParticlePot(potential_);
     }
     
     angle = acos(cos_phi) /M_PI * 180.0;

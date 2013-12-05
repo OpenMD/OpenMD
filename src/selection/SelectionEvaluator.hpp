@@ -55,7 +55,7 @@
 #include "selection/DistanceFinder.hpp"
 #include "selection/HullFinder.hpp"
 #include "selection/IndexFinder.hpp"
-#include "utils/OpenMDBitSet.hpp"
+#include "selection/SelectionSet.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "utils/StringUtils.hpp"
 namespace OpenMD {
@@ -73,8 +73,8 @@ namespace OpenMD {
     bool loadScriptString(const std::string& script);
     bool loadScriptFile(const std::string& filename);
         
-    OpenMDBitSet evaluate();
-    OpenMDBitSet evaluate(int frame);
+    SelectionSet evaluate();
+    SelectionSet evaluate(int frame);
         
     /**
      * Tests if the result from evaluation of script is dynamic.
@@ -128,34 +128,34 @@ namespace OpenMD {
 
     bool loadScriptFileInternal(const std::string& filename);
 
-
+    SelectionSet createSelectionSets();
     void clearDefinitionsAndLoadPredefined();
          
     void define();
-    void select(OpenMDBitSet& bs);
-    void select(OpenMDBitSet& bs, int frame);
+    void select(SelectionSet& bs);
+    void select(SelectionSet& bs, int frame);
     void predefine(const std::string& script);
 
-    void instructionDispatchLoop(OpenMDBitSet& bs);
-    void instructionDispatchLoop(OpenMDBitSet& bs, int frame);
+    void instructionDispatchLoop(SelectionSet& bs);
+    void instructionDispatchLoop(SelectionSet& bs, int frame);
 
-    void withinInstruction(const Token& instruction, OpenMDBitSet& bs);
-    void withinInstruction(const Token& instruction, OpenMDBitSet& bs, int frame);
-    OpenMDBitSet allInstruction();
+    void withinInstruction(const Token& instruction, SelectionSet& bs);
+    void withinInstruction(const Token& instruction, SelectionSet& bs, int frame);
+    SelectionSet allInstruction();
         
-    OpenMDBitSet comparatorInstruction(const Token& instruction); 
-    OpenMDBitSet comparatorInstruction(const Token& instruction, int frame); 
-    void compareProperty(StuntDouble* sd, OpenMDBitSet& bs, int property, int comparator, float comparisonValue);
-    void compareProperty(StuntDouble* sd, OpenMDBitSet& bs, int property, int comparator, float comparisonValue, int frame);
-    OpenMDBitSet nameInstruction(const std::string& name);
-    OpenMDBitSet indexInstruction(const boost::any& value);
-    OpenMDBitSet expression(const std::vector<Token>& tokens, int pc);
-    OpenMDBitSet expression(const std::vector<Token>& tokens, int pc, int frame);
+    SelectionSet comparatorInstruction(const Token& instruction); 
+    SelectionSet comparatorInstruction(const Token& instruction, int frame); 
+    void compareProperty(StuntDouble* sd, SelectionSet& bs, int property, int comparator, float comparisonValue);
+    void compareProperty(StuntDouble* sd, SelectionSet& bs, int property, int comparator, float comparisonValue, int frame);
+    SelectionSet nameInstruction(const std::string& name);
+    SelectionSet indexInstruction(const boost::any& value);
+    SelectionSet expression(const std::vector<Token>& tokens, int pc);
+    SelectionSet expression(const std::vector<Token>& tokens, int pc, int frame);
 
-    OpenMDBitSet lookupValue(const std::string& variable);
+    SelectionSet lookupValue(const std::string& variable);
 
-    OpenMDBitSet hull();
-    OpenMDBitSet hull(int frame);
+    SelectionSet hull();
+    SelectionSet hull(int frame);
         
     void evalError(const std::string& message) {
       sprintf( painCave.errMsg,
@@ -220,7 +220,7 @@ namespace OpenMD {
     DistanceFinder distanceFinder;
     HullFinder hullFinder;
     IndexFinder indexFinder;
-    int nStuntDouble;   //nGLOBALatoms + nGLOBALrigidbodies
+    vector<int> nObjects;
 
     typedef std::map<std::string, boost::any > VariablesType;
     VariablesType variables;

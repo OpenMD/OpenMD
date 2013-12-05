@@ -40,118 +40,141 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#ifndef UTILS_OPENMDBITSET_HPP
-#define UTILS_OPENMDBITSET_HPP
+#ifndef SELECTION_SELECTIONSET_HPP
+#define SELECTION_SELECTIONSET_HPP
 
 #include <iostream>
 #include <vector>
+#include "utils/OpenMDBitSet.hpp"
+
 namespace OpenMD {
 
-  /**
-   * @class OpenMDBitSet OpenMDBitSet.hpp "OpenMDBitSet.hpp"
-   * @brief OpenMDBitSet is a wrapper class of std::vector<bool> to act as a growable std::bitset 
+  /** 
+   * The SelectionType enum.
+   *
+   * This is used to sort different types of selections by object type
    */
-  class OpenMDBitSet {
+  enum SelectionType {
+    STUNTDOUBLE = 0,     /**< StuntDoubles (Atoms & RigidBodies) */
+    BOND = 1,            /**< Bonds */
+    BEND = 2,            /**< Bends */
+    TORSION = 3,         /**< Torsions */
+    INVERSION = 4,       /**< Inversions */
+    N_SELECTIONTYPES = 5
+  };
+
+  class SelectionSet {
   public:
     /** */
-    OpenMDBitSet() {}
+    SelectionSet() { bitsets_.resize(N_SELECTIONTYPES); }
     /** */
-    OpenMDBitSet(int nbits) : bitset_(nbits) {clearAll(); }
+    SelectionSet(std::vector<int> nbits);
 
-    /** Returns the number of bits set to true in this OpenMDBitSet.  */
-    int countBits();
+    /** Returns the number of bits set to true in this SelectionSet.  */
+    std::vector<int> countBits();
 
     /** Sets the bit at the specified index to to the complement of its current value. */
-    void flip(int bitIndex) {  bitset_[bitIndex] = !bitset_[bitIndex];  }
+    void flip(std::vector<int> bitIndex);
  
     /** Sets each bit from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the complement of its current value. */
-    void flip(int fromIndex, int toIndex); 
+    void flip(std::vector<int> fromIndex, std::vector<int> toIndex); 
 
     /** Sets each bit to the complement of its current value. */
-    void flip() { flip(0, size()); }
+    void flip();
         
     /** Returns the value of the bit with the specified index. */
-    bool get(int bitIndex) {  return bitset_[bitIndex];  }
+    std::vector<bool> get(std::vector<int> bitIndex);
         
-    /** Returns a new OpenMDBitSet composed of bits from this OpenMDBitSet from fromIndex(inclusive) to toIndex(exclusive). */
-    OpenMDBitSet get(int fromIndex, int toIndex); 
+    /** Returns a new SelectionSet composed of bits from this SelectionSet from fromIndex(inclusive) to toIndex(exclusive). */
+    SelectionSet get(std::vector<int> fromIndex, std::vector<int> toIndex); 
         
     /** Returns true if any bits are set to true */
-    bool any() {return !none(); }
+    std::vector<bool> any();
 
     /** Returns true if no bits are set to true */
-    bool none();
+    std::vector<bool> none();
 
-    int firstOffBit() const { return !bitset_[0] ? 0 : nextOffBit(0); }
+    std::vector<int> firstOffBit() const;
         
     /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
-    int nextOffBit(int fromIndex) const; 
+    std::vector<int> nextOffBit(std::vector<int> fromIndex) const; 
 
-    int firstOnBit() const { return bitset_[0] ? 0 : nextOnBit(0); }
+    std::vector<int> firstOnBit() const;
         
     /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
-    int nextOnBit(int fromIndex) const; 
+    std::vector<int> nextOnBit(std::vector<int> fromIndex) const; 
         
     /** Performs a logical AND of this target bit set with the argument bit set. */
-    void andOperator (const OpenMDBitSet& bs);
+    void andOperator (const SelectionSet& bs);
        
     /** Performs a logical OR of this bit set with the bit set argument. */
-    void orOperator (const OpenMDBitSet& bs); 
+    void orOperator (const SelectionSet& bs); 
         
     /** Performs a logical XOR of this bit set with the bit set argument. */
-    void xorOperator (const OpenMDBitSet& bs);        
+    void xorOperator (const SelectionSet& bs);        
                
-    void setBitOn(int bitIndex) {  setBit(bitIndex, true);  }
+    void setBitOn(std::vector<int> bitIndex);
 
-    void setBitOff(int bitIndex) {  setBit(bitIndex, false);  }
+    void setBitOff(std::vector<int> bitIndex);
 
-    void setRangeOn(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, true);  }
+    //void setRangeOn(std::vector<int> fromIndex, std::vector<int> toIndex) {  setBits(fromIndex, toIndex, true);  }
 
-    void setRangeOff(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, false);  }        
+    //void setRangeOff(std::vector<int> fromIndex, std::vector<int> toIndex) {  setBits(fromIndex, toIndex, false);  }        
 
-    /** Sets all of the bits in this OpenMDBitSet to false. */
-    void clearAll() {  setRangeOff(0, size());  }         
+    /** Sets all of the bits in this SelectionSet to false. */
+    void clearAll();
 
-    void setAll() {  setRangeOn(0, size());  }        
+    void setAll();
         
-    /** Returns the number of bits of space actually in use by this OpenMDBitSet to represent bit values. */
-    int size() const {  return bitset_.size();  }
+    /** Returns the number of bits of space actually in use by this SelectionSet to represent bit values. */
+    std::vector<int> size() const;
 
-    /** Changes the size of OpenMDBitSet*/
-    void resize(int nbits);
+    /** Changes the size of SelectionSet*/
+    void resize(std::vector<int> nbits);
         
-    OpenMDBitSet& operator&= (const OpenMDBitSet &bs) {  andOperator (bs); return *this; }
-    OpenMDBitSet& operator|= (const OpenMDBitSet &bs) { orOperator (bs); return *this; }
-    OpenMDBitSet& operator^= (const OpenMDBitSet &bs) { xorOperator (bs); return *this; }
-    OpenMDBitSet& operator-= (const OpenMDBitSet &bs) { 
-      OpenMDBitSet tmp = *this ^ bs;
+    SelectionSet& operator&= (const SelectionSet &ss) {  andOperator (ss); return *this; }
+    SelectionSet& operator|= (const SelectionSet &ss) { orOperator (ss); return *this; }
+    SelectionSet& operator^= (const SelectionSet &ss) { xorOperator (ss); return *this; }
+    SelectionSet& operator-= (const SelectionSet &ss) { 
+      SelectionSet tmp = *this ^ ss;
       *this &= tmp;
       return *this;
     }
 
-    OpenMDBitSet parallelReduce();
+    SelectionSet parallelReduce();
         
-    bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
-    friend OpenMDBitSet operator| (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-    friend OpenMDBitSet operator& (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-    friend OpenMDBitSet operator^ (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-    friend OpenMDBitSet operator- (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-        
-    friend bool operator== (const OpenMDBitSet & bs1, const OpenMDBitSet &bs2);
+    std::vector<bool>  operator[] (std::vector<int> bitIndex)  const {  
+      std::vector<bool> result(N_SELECTIONTYPES);
+      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+        result[i] = bitsets_[i][bitIndex[i]];
+      return result;
+    }
 
-    //friend std::istream& operator>> ( std::istream&, const OpenMDBitSet& bs);
-    friend std::ostream& operator<< ( std::ostream&, const OpenMDBitSet& bs) ;
+    friend SelectionSet operator| (const SelectionSet& bs1, const SelectionSet& bs2);
+    friend SelectionSet operator& (const SelectionSet& bs1, const SelectionSet& bs2);
+    friend SelectionSet operator^ (const SelectionSet& bs1, const SelectionSet& bs2);
+    friend SelectionSet operator- (const SelectionSet& bs1, const SelectionSet& bs2);
+        
+    friend bool operator== (const SelectionSet & bs1, const SelectionSet &bs2);
+
+    //friend std::istream& operator>> ( std::istream&, const SelectionSet& bs);
+    friend std::ostream& operator<< ( std::ostream&, const SelectionSet& bs) ;
+
+    std::vector<OpenMDBitSet> bitsets_;
+
+    
 
   private:
 
     /** Sets the bit at the specified index to the specified value. */
-    void setBit(int bitIndex, bool value) { bitset_[bitIndex] = value; }
+    //void setBit(std::vector<int> bitIndex, bool value);
         
     /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
-    void setBits(int fromIndex, int toIndex, bool value);
+    //void setBits(std::vector<int> fromIndex, std::vector<int> toIndex, bool value);
         
-    std::vector<bool> bitset_;
-  }; 
+
+  };
+
 
 }
 #endif

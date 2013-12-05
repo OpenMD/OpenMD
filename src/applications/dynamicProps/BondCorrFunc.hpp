@@ -39,37 +39,22 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef SELECTION_HULLFINDER_HPP
-#define SELECTION_HULLFINDER_HPP
-#include "brains/SimInfo.hpp"
-#include "selection/SelectionSet.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "math/Hull.hpp"
-#include "math/Triangle.hpp"
+#ifndef APPLICATIONS_DYNAMICPROPS_BONDCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_BONDCORRFUNC_HPP
 
+#include "applications/dynamicProps/InteractionTimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class HullFinder {
+  class BondCorrFunc : public InteractionTimeCorrFunc {
   public:
-    HullFinder(SimInfo* si);
-    ~HullFinder();
-    
-    SelectionSet findHull();
-    SelectionSet findHull(int frame);
-    RealType getSurfaceArea(){ return surfaceArea_; }
-    
-    SimInfo* info_;
-    std::vector<StuntDouble*> stuntdoubles_;
-    std::vector<Bond*> bonds_;
-    std::vector<Bend*> bends_;
-    std::vector<Torsion*> torsions_;
-    std::vector<Inversion*> inversions_;
-    vector<int> nObjects_;
+    BondCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, long long int memSize);   
+        
+    virtual void correlateFrames(int frame1, int frame2);
 
-    Hull* surfaceMesh_;
-    RealType surfaceArea_;
-    std::vector<StuntDouble*> localSites_;
+  private:
+    virtual RealType calcCorrVal(int frame1, int frame2, ShortRangeInteraction* sri);
+    int nSelectedBonds_;
+         
   };
-  
 }
-#endif 
+#endif

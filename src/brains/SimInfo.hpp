@@ -149,6 +149,26 @@ namespace OpenMD{
       return nGlobalRigidBodies_;
     }
 
+    /** Returns the number of global bonds */        
+    unsigned int getNGlobalBonds(){
+      return nGlobalBonds_;
+    }
+
+    /** Returns the number of global bends */        
+    unsigned int getNGlobalBends() {
+      return nGlobalBends_;
+    }
+
+    /** Returns the number of global torsions */        
+    unsigned int getNGlobalTorsions() {
+      return nGlobalTorsions_;
+    }
+
+    /** Returns the number of global inversions */        
+    unsigned int getNGlobalInversions() {
+      return nGlobalInversions_;
+    }
+
     int getNGlobalConstraints();
     /** 
      * Returns the number of local molecules.
@@ -181,7 +201,7 @@ namespace OpenMD{
       return nTorsions_;
     }
 
-    /** Returns the number of local torsions */        
+    /** Returns the number of local inversions */        
     unsigned int getNInversions() {
       return nInversions_;
     }
@@ -519,8 +539,11 @@ namespace OpenMD{
     int nGlobalIntegrableObjects_; /**< number of integrable objects in this system */
     int nGlobalRigidBodies_;       /**< number of rigid bodies in this system (GLOBAL) */
     int nGlobalFluctuatingCharges_;/**< number of fluctuating charges in this system (GLOBAL) */
-    
-       
+    int nGlobalBonds_;              /**< number of bonds in the system */
+    int nGlobalBends_;              /**< number of bends in the system */
+    int nGlobalTorsions_;           /**< number of torsions in the system */
+    int nGlobalInversions_;         /**< number of inversions in the system */
+      
     /// Degress of freedom
     int ndf_;          /**< number of degress of freedom (excludes constraints) (LOCAL) */
     int ndfLocal_;     /**< number of degrees of freedom (LOCAL, excludes constraints) */

@@ -803,22 +803,38 @@ namespace OpenMD {
     Molecule::AtomIterator ai;
     Molecule::RigidBodyIterator ri;
     Molecule::CutoffGroupIterator ci;
+    Molecule::BondIterator boi;
+    Molecule::BendIterator bei;
+    Molecule::TorsionIterator ti;
+    Molecule::InversionIterator ii;
     Molecule::IntegrableObjectIterator  ioi;
-    Molecule * mol;
-    Atom * atom;
-    RigidBody * rb;
-    CutoffGroup * cg;
+    Molecule* mol;
+    Atom* atom;
+    RigidBody* rb;
+    CutoffGroup* cg;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;
     int beginAtomIndex;
     int beginRigidBodyIndex;
     int beginCutoffGroupIndex;
+    int beginBondIndex;
+    int beginBendIndex;
+    int beginTorsionIndex;
+    int beginInversionIndex;
     int nGlobalAtoms = info->getNGlobalAtoms();
     int nGlobalRigidBodies = info->getNGlobalRigidBodies();
     
     beginAtomIndex = 0;
-    //rigidbody's index begins right after atom's
+    // The rigid body indices begin immediately after the atom indices:
     beginRigidBodyIndex = info->getNGlobalAtoms();
     beginCutoffGroupIndex = 0;
-
+    beginBondIndex = 0;
+    beginBendIndex = 0;
+    beginTorsionIndex = 0;
+    beginInversionIndex = 0;
+   
     for(int i = 0; i < info->getNGlobalMolecules(); i++) {
       
 #ifdef IS_MPI      
@@ -827,8 +843,9 @@ namespace OpenMD {
         // stuff to do if I own this molecule
         mol = info->getMoleculeByGlobalIndex(i);
 
-        //local index(index in DataStorge) of atom is important
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+        // The local index(index in DataStorge) of the atom is important:
+        for(atom = mol->beginAtom(ai); atom != NULL; 
+            atom = mol->nextAtom(ai)) {
           atom->setGlobalIndex(beginAtomIndex++);
         }
         
@@ -837,11 +854,27 @@ namespace OpenMD {
           rb->setGlobalIndex(beginRigidBodyIndex++);
         }
         
-        //local index of cutoff group is trivial, it only depends on
-        //the order of travesing
+        // The local index of other objects only depends on the order
+        // of traversal:
         for(cg = mol->beginCutoffGroup(ci); cg != NULL;
             cg = mol->nextCutoffGroup(ci)) {
           cg->setGlobalIndex(beginCutoffGroupIndex++);
+        }        
+        for(bond = mol->beginBond(boi); bond != NULL;
+            bond = mol->nextBond(boi)) {
+          bond->setGlobalIndex(beginBondIndex++);
+        }        
+        for(bend = mol->beginBend(bei); bend != NULL;
+            bend = mol->nextBend(bei)) {
+          bend->setGlobalIndex(beginBendIndex++);
+        }        
+        for(torsion = mol->beginTorsion(ti); torsion != NULL;
+            torsion = mol->nextTorsion(ti)) {
+          torsion->setGlobalIndex(beginTorsionIndex++);
+        }        
+        for(inversion = mol->beginInversion(ii); inversion != NULL;
+            inversion = mol->nextInversion(ii)) {
+          inversion->setGlobalIndex(beginInversionIndex++);
         }        
         
 #ifdef IS_MPI        
@@ -855,6 +888,10 @@ namespace OpenMD {
         beginAtomIndex += stamp->getNAtoms();
         beginRigidBodyIndex += stamp->getNRigidBodies();
         beginCutoffGroupIndex += stamp->getNCutoffGroups() + stamp->getNFreeAtoms();
+        beginBondIndex += stamp->getNBonds();
+        beginBendIndex += stamp->getNBends();
+        beginTorsionIndex += stamp->getNTorsions();
+        beginInversionIndex += stamp->getNInversions();
       }
 #endif          
 
@@ -862,9 +899,10 @@ namespace OpenMD {
 
     //fill globalGroupMembership
     std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), 0);
-    for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {        
-      for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
-        
+    for(mol = info->beginMolecule(mi); mol != NULL; 
+        mol = info->nextMolecule(mi)) {        
+      for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
+           cg = mol->nextCutoffGroup(ci)) {        
         for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
           globalGroupMembership[atom->getGlobalIndex()] = cg->getGlobalIndex();
         }

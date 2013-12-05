@@ -254,9 +254,9 @@ namespace OpenMD {
     
     this->info = info;
     visitorName = "XYZVisitor";
-    
+
     evaluator.loadScriptString(script);
-    
+
     if (!evaluator.isDynamic()) {
       seleMan.setSelectionSet(evaluator.evaluate());
     }

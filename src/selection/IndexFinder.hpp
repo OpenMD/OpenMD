@@ -42,7 +42,7 @@
 #ifndef SELECTION_INDEXFINDER_HPP
 #define SELECTION_INDEXFINDER_HPP
 #include "brains/SimInfo.hpp"
-#include "utils/OpenMDBitSet.hpp"
+#include "selection/SelectionSet.hpp"
 #include "primitives/StuntDouble.hpp"
 namespace OpenMD {
 
@@ -50,16 +50,16 @@ namespace OpenMD {
   public:
     IndexFinder(SimInfo* si);
 
-    OpenMDBitSet find(int molIndex);
-    OpenMDBitSet find(int begMolIndex, int endMolIndex);
+    SelectionSet find(int molIndex);
+    SelectionSet find(int begMolIndex, int endMolIndex);
 
   private:
 
     void init();
         
     SimInfo* info_;
-    std::vector<OpenMDBitSet> bitSets_;
-    int nStuntDoubles_;
+    vector<SelectionSet> selectionSets_;
+    vector<int> nObjects_;
         
   };
 
