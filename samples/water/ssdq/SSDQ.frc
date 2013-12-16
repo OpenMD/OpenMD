@@ -1,0 +1,47 @@
+begin Options
+      Name                   "SSDQ"
+end Options
+
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+SSDQ            18.0153      
+Cl-             35.4527
+Na+             22.98977   
+end BaseAtomTypes
+
+begin DirectionalAtomTypes
+//Name          I_xx    I_yy    I_zz    (All moments in (amu*Ang^2)
+SSDQ            1.7696  0.6145  1.1550  
+end DirectionalAtomTypes  
+
+begin LennardJonesAtomTypes
+//Name          epsilon             sigma       
+//SSDQ            0.152           3.16549
+SSDQ            0.152           3.3
+Cl-             0.100           4.445
+Na+             0.118           2.579
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+Cl-             -1.0
+Na+             1.0
+end ChargeAtomTypes
+
+begin MultipoleAtomTypes
+// Atoms with both dipole and quadrupole moments:
+//
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+//
+// Dipoles are given in units of Debyes.
+//
+// Note that Quadrupoles in OpenMD are *NOT* traceless.
+//
+// Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
+//                                                           esu centi-barn)
+//SSDQ   dq      0.0     0.0     0.0     2.64    -7.99  -4.27  -5.94
+//SSDQ   dq      0.0     0.0     0.0     2.95    -7.99  -4.27  -5.94
+//SSDQ   dq      0.0     0.0     0.0     2.12    -6.82667  -5.40667  -5.97667
+//SSDQ   dq      0.0     0.0     0.0     2.43    -6.99333 -5.18 -6.03667
+//SSDQ   dq      0.0     0.0     0.0     2.29    -6.61167 -5.57167 -6.02667
+SSDQ   dq      0.0     0.0     0.0     2.55    -7.04 -5.1667 -6.0033
+end MultipoleAtomTypes
