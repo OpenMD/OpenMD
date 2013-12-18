@@ -38,10 +38,10 @@ begin MultipoleAtomTypes
 //
 // Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
 //                                                           esu centi-barn)
-//SSDQ   dq      0.0     0.0     0.0     2.64    -7.99  -4.27  -5.94
+SSDQ   dq      0.0     0.0     0.0     2.64    -7.99  -4.27  -5.94
 //SSDQ   dq      0.0     0.0     0.0     2.95    -7.99  -4.27  -5.94
 //SSDQ   dq      0.0     0.0     0.0     2.12    -6.82667  -5.40667  -5.97667
 //SSDQ   dq      0.0     0.0     0.0     2.43    -6.99333 -5.18 -6.03667
 //SSDQ   dq      0.0     0.0     0.0     2.29    -6.61167 -5.57167 -6.02667
-SSDQ   dq      0.0     0.0     0.0     2.55    -7.04 -5.1667 -6.0033
+//SSDQ   dq      0.0     0.0     0.0     2.55    -7.04 -5.1667 -6.0033
 end MultipoleAtomTypes
