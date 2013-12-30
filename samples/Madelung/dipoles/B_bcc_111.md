@@ -17,12 +17,12 @@
      forceField = "Multipole";
      cutoffMethod = "shifted_force";
      electrostaticScreeningMethod = "damped";
-     cutoffRadius = 20.0;
+     cutoffRadius = 9.0;
      dampingAlpha = 0.18;
      statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
      dt = 1.0;
-     runTime = 1.0;
-     sampleTime = 1.0;
+     runTime = 1000.0;
+     sampleTime = 10.0;
      statusTime = 1.0;
   </MetaData>
   <Snapshot>

@@ -9,14 +9,16 @@ end AtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
-X		1.7696	0.6145	1.1550  
+X		17.696	17.696	0.0  
 end DirectionalAtomTypes  
 
 begin LennardJonesAtomTypes
-X  0.238068461226  1.4
+//X  0.7238068461226  3.11814
+X  0.8822  3.11814
 end LennardJonesAtomTypes
 
 begin MultipoleAtomTypes
 // name d theta phi psi dipole_moment
-D   d	0.0	0.0	0.0	1.0
+D   d	0.0	0.0	0.0	3.0
+
 end MultipoleAtomTypes
