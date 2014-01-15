@@ -428,6 +428,8 @@ sub printWaterMD {
   printSSD_E();
   printSSD_RF();
   printSSD();
+  printSSDQ();
+  printSSDQO();
   printSSD1();
   printTRED();
   printTIP3P();
@@ -494,6 +496,30 @@ sub printSSD {
   
   atom[0]{
     type = \"SSD\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSDQ {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSDQ\";
+  
+  atom[0]{
+    type = \"SSDQ\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSDQO {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSDQO\";
+  
+  atom[0]{
+    type = \"SSDQO\";
     position( 0.0, 0.0, 0.0 );
     orientation( 0.0, 0.0, 0.0 );
   }
@@ -775,6 +801,8 @@ sub validateWater {
   elsif ($waterName eq 'SPC')      { $waterCase = 12;   }
   elsif ($waterName eq 'DPD')      { $waterCase = 13;   }
   elsif ($waterName eq 'CG2')      { $waterCase = 14;   }
+  elsif ($waterName eq 'SSDQ')     { $waterCase = 15;   }
+  elsif ($waterName eq 'SSDQO')    { $waterCase = 16;   }
   else                             { $invalidWater = 1; }
 }
 
@@ -794,4 +822,6 @@ sub printWaterModel {
   elsif ($waterCase == 12) { printSPC();     }
   elsif ($waterCase == 13) { printDPD();     }
   elsif ($waterCase == 14) { printCG2();     }
+  elsif ($waterCase == 15) { printSSDQ();    }
+  elsif ($waterCase == 16) { printSSDQO();   }
 }

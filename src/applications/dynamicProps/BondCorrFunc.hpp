@@ -54,7 +54,12 @@ namespace OpenMD {
   private:
     virtual RealType calcCorrVal(int frame1, int frame2, ShortRangeInteraction* sri);
     int nSelectedBonds_;
-         
+    Bond* bond;
+    RealType re;
+    RealType val1;
+    RealType val2;
+    Snapshot* snapshot1;
+    Snapshot* snapshot2;
   };
 }
 #endif

@@ -110,13 +110,18 @@ namespace OpenMD {
 	molNode->bs.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
 	rbNode->bs.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
 
-	//create nodes for atoms belong to this rigidbody
-	for(atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-	  std::string rbAtomName = atom->getType();
-	  TreeNode* rbAtomNode = createNode(rbNode, rbAtomName);
+        // COMMENTED OUT because rigid bodies are IntegrableObjects
+        // (e.g. they are independently mobile, so selecting their
+        // member atoms will give some odd results if we are computing
+        // degrees of freedom elsewhere.
 
-	  rbAtomNode->bs.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
-	}
+	// //create nodes for atoms belong to this rigidbody
+	// for(atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+	//   std::string rbAtomName = atom->getType();
+	//   TreeNode* rbAtomNode = createNode(rbNode, rbAtomName);
+
+	//   rbAtomNode->bs.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
+	// }
       }
 
       for (bond = mol->beginBond(bondIter); bond != NULL; 

@@ -55,8 +55,8 @@ namespace OpenMD {
   
 
   void BondCorrFunc::correlateFrames(int frame1, int frame2) {
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
+    snapshot1 = bsMan_->getSnapshot(frame1);
+    snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot1 && snapshot2);
 
     RealType time1 = snapshot1->getTime();
@@ -66,7 +66,6 @@ namespace OpenMD {
     count_[timeBin] += nSelectedBonds_;    
 
     int i;
-    Bond* bond;
 
     for (bond = seleMan1_.beginSelectedBond(i);
          bond != NULL ;
@@ -78,10 +77,10 @@ namespace OpenMD {
   }
 
   RealType BondCorrFunc::calcCorrVal(int frame1, int frame2, ShortRangeInteraction* sri) {
-    Bond* bond = dynamic_cast<Bond*>(sri);
-    RealType re = bond->getBondType()->getEquilibriumBondLength();
-    RealType val1 = bond->getValue(frame1) - re;
-    RealType val2 = bond->getValue(frame2) - re;
+    bond = dynamic_cast<Bond*>(sri);
+    re = bond->getBondType()->getEquilibriumBondLength();
+    val1 = bond->getValue(frame1) - re;
+    val2 = bond->getValue(frame2) - re;
     return val1 * val2;
   }
 }

@@ -59,13 +59,13 @@ namespace OpenMD {
 #ifdef IS_MPI
   ifstrstream::ifstrstream() 
     :  std::basic_istream<char, std::char_traits<char> >(0),
-       internalStringBuf_(), isRead(false)  {    
+    internalStringBuf_(), isRead(false)  {    
     this->init(&internalStringBuf_);
   }
 #else
   ifstrstream::ifstrstream() 
     :  std::basic_istream<char, std::char_traits<char> >(0),
-       internalFileBuf_(), isRead(false)  {    
+    internalFileBuf_(), isRead(false)  {    
     this->init(&internalFileBuf_);
   }
 #endif
@@ -73,7 +73,8 @@ namespace OpenMD {
   /**
    * Explicit constructor
    * @param filename String containing the name of the file to be opened
-   * @param mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
+   * @param mode Flags describing the requested i/o mode for the file,
+   * default value is ios_base::in
    * @param checkFilename Flags indicating checking the file name in parallel
    */
 #ifdef IS_MPI
@@ -93,16 +94,19 @@ namespace OpenMD {
   }
 #endif  
   /**
-   * virtual destructor will close the file(in single mode) and clear the stream buffer
+   * virtual destructor will close the file (in single mode) and clear
+   * the stream buffer
    */
   ifstrstream::~ifstrstream(){
     close();
   }
   
   /**
-   * Opens a file and associats a buffer with the specified file to perform the i/o operations 
-   * (single mode). Master reads a file and brocasts its content to the other slave nodes. After
-   * brocasting, every nodes fall back to stringstream (parallel mode).
+   * Opens a file and associates a buffer with the specified file to
+   * perform the i/o operations (single mode). The master node reads a
+   * file and broadcasts its content to the other slave nodes. After
+   * broadcasting, all nodes fall back to stringstream (parallel
+   * mode).
    * @param filename String containing the name of the file to be opened
    * @param mode Flags describing the requested i/o mode for the file
    * @param checkFilename Flags indicating checking the file name in parallel
@@ -115,9 +119,10 @@ namespace OpenMD {
   }
 
   /**
-   * Tests if the stream is currently associated with a valid  buffer.
-   * @return true if a file has successfully been opened (single mode) or the whole file is read 
-   * and spreaded among all of the processors (parallel mode),  otherwise false is returned
+   * Tests if the stream is currently associated with a valid buffer.
+   * @return true if a file has successfully been opened (single mode)
+   * or the whole file has been read and spread among all of the
+   * processors (parallel mode), otherwise false is returned
    */
   bool ifstrstream::is_open ( ) {
 #ifdef IS_MPI            
@@ -131,7 +136,7 @@ namespace OpenMD {
   /**
    * In single mode, closes a file. The stream's file buffer is
    * released from its association with the currently open file. In
-   * parallel mode, clean the
+   * parallel mode, cleans up.
    */
   void ifstrstream::close() {
 #ifndef IS_MPI            
@@ -157,14 +162,14 @@ namespace OpenMD {
   }  
   
   /**
-     * Internal function used to open the file
-     * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode)
-     * otherwise return false
-     * @param filename String containing the name of the file to be opened
-     * @param mode Flags describing the requested i/o mode for the file
-     * @param checkFilename Flags indicating checking the file name in parallel
-     * @todo use try - catch syntax to make the program more readable
-     */
+   * Internal function used to open the file 
+   * @return true if succesfully opens a file (single mode) or gets
+   * the file content (parallel mode) otherwise return false
+   * @param filename String containing the name of the file to be opened
+   * @param mode Flags describing the requested i/o mode for the file
+   * @param checkFilename Flags indicating checking the file name in parallel
+   * @todo use try - catch syntax to make the program more readable
+   */
 
   bool ifstrstream::internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename){
     
@@ -193,7 +198,7 @@ namespace OpenMD {
         
         diffFilename = 0;
         MPI::COMM_WORLD.Allreduce(&diffFilename, &error, 1, MPI::INT, MPI::SUM);
-
+        
         //if file names are different just return false
         if (error > 0)
           return false;   
