@@ -59,10 +59,13 @@ namespace OpenMD {
 
   /**
    * @class ifstrstream ifstrstream.hpp "io/ifstrstream.hpp"
-   * @brief ifstrstream class provides a stream interface to read data from files.
-   * <p>In single mode, it falls back to ifstream. Don't need to read the whole file into memory.
-   * In parallel mode, the master node will read the whole file and brocast it to other slave nodes.
-   * After brocasting, every node will fall back to stringstream.</p>
+   * @brief ifstrstream class provides a stream interface to read data
+   * from files.
+   * <p>In single mode, it falls back to ifstream, as we don't need to
+   * read the whole file into memory.  In parallel mode, the master
+   * node will read the whole file and broadcast it to other slave
+   * nodes.  After broadcasting, every node will fall back to
+   * stringstream.</p>
    *
    * @code
    *       const int MAXLEN = 1024;
@@ -75,22 +78,21 @@ namespace OpenMD {
    *       in.close();
    * @endcode
    */
-class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
+  class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
   public:
     //traits
     typedef char                     char_type;
     typedef std::char_traits<char>::int_type int_type;
     typedef std::char_traits<char>::pos_type pos_type;
     typedef std::char_traits<char>::off_type off_type;
-    typedef std::char_traits<char>                    traits_type;
-
+    typedef std::char_traits<char> traits_type;
+    
     typedef std::basic_ios<char, std::char_traits<char> >       _Basic_ios;
     typedef std::basic_istream<char, std::char_traits<char> >   _Base;   
     typedef std::basic_streambuf<char, std::char_traits<char> > _Buf;
     typedef std::basic_stringbuf<char, std::char_traits<char> > _StringBuf;
     typedef std::basic_filebuf<char, std::char_traits<char> >   _FileBuf;
   
-
     static const int FileNotExists = -1;
     static const int FileIOError = -2;
         
@@ -102,44 +104,51 @@ class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
     /**
      * Explicit constructor
      * @param filename String containing the name of the file to be opened
-     * @param mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
+     * @param mode Flags describing the requested i/o mode for the
+     * file, default value is ios_base::in      
      * @param checkFilename Flags indicating checking the file name in parallel
      */
     explicit ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false);
 
     /**
-     * virtual destructor will close the file(in single mode) and clear the stream buffer
+     * virtual destructor will close the file(in single mode) and
+     * clear the stream buffer
      */
     ~ifstrstream();
 
     /**
-     * Opens a file and associats a buffer with the specified file to perform the i/o operations 
-     * (single mode). Master reads a file and brocasts its content to the other slave nodes. After
-     * brocasting, every nodes fall back to stringstream (parallel mode).
+     * Opens a file and associates a buffer with the specified file to
+     * perform the i/o operations (single mode). The master node reads
+     * a file and broadcasts its content to the other slave
+     * nodes. After broadcasting, all nodes fall back to stringstream
+     * (parallel mode).
      * @param filename String containing the name of the file to be opened
      * @param mode Flags describing the requested i/o mode for the file
      * @param checkFilename Flags indicating checking the file name in parallel
      */
     void open(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false);
 
-
     /**
-     * Tests if the stream is currently associated with a valid  buffer.
-     * @return true if a file has successfully been opened (single mode) or the whole file is read 
-     * and spreaded among all of the processors (parallel mode),  otherwise false is returned
+     * Tests if the stream is currently associated with a valid buffer.
+     * @return true if a file has successfully been opened (single
+     * mode) or the whole file has been read and spread among all of
+     * the processors (parallel mode), otherwise false is returned
+
      */
     bool is_open ( );
 
     /**
-     * In single mode, closes a file. The stream's file buffer is released from its association with
-     * the currently open file. In parallel mode, clean the 
+     * In single mode, closes a file. The stream's file buffer is
+     * released from its association with the currently open file. In
+     * parallel mode, clean up.
      */
     void close();
     
     /**
      * Gets the stream buffer object associated with the stream
-     * @return   A pointer to the stream buffer object(filebuf in single mode, 
-     * stringbuf in parallel mode) associated with the stream.
+     * @return A pointer to the stream buffer object (filebuf in
+     * single mode, stringbuf in parallel mode) associated with the
+     * stream.
      */
   _Buf* rdbuf();
 
@@ -147,19 +156,18 @@ class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
 
     /**
      * Internal function used to open the file
-     * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode)
-     * otherwise return false
+     * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode) 
+     * otherwise returns false
      * @param filename String containing the name of the file to be opened
      * @param mode Flags describing the requested i/o mode for the file
      * @param checkFilename Flags indicating checking the file name in parallel
      * @todo use try - catch syntax to make the program more readable
      */
     bool internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename);
-  
-  _StringBuf   internalStringBuf_; /** internal stream buffer */        
-  _FileBuf     internalFileBuf_;    /** internal stream buffer */        
-  bool isRead;        /** file opened flag */
-};
-  
+    
+    _StringBuf   internalStringBuf_; /** internal stream buffer */        
+    _FileBuf     internalFileBuf_;    /** internal stream buffer */        
+    bool isRead;        /** file opened flag */
+  };
 }
 #endif

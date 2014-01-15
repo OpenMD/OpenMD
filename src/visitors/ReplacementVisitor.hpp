@@ -91,6 +91,8 @@ namespace OpenMD {
       addReplacedAtomName("SSD_E");
       addReplacedAtomName("SSD_RF");
       addReplacedAtomName("SSD1");
+      addReplacedAtomName("SSDQ");
+      addReplacedAtomName("SSDQO");
       addReplacedAtomName("TAP");
       addReplacedAtomName("TRED");
       
