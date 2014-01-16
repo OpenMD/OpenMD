@@ -520,7 +520,6 @@ namespace OpenMD {
 
       }
     }
-     
   } 
    
 

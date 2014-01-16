@@ -178,6 +178,10 @@ namespace OpenMD {
 	//in case, unloadBlock called multiple times
 	activeRefCount_[i - activeBlocks_.begin()]  = 0;
       }
+
+      if (activeRefCount_[i-activeBlocks_.begin()] == 0) {
+        internalUnload(block);
+      }
         
       unloadSuccess = true;
     } else {
@@ -201,6 +205,7 @@ namespace OpenMD {
   }
 
   void BlockSnapshotManager::internalUnload(int block) {
+    std::cerr << "called internal unload for block "<< block << "\n";
     for (int i = blocks_[block].first; i < blocks_[block].second; ++i) {
       delete snapshots_[i];
       snapshots_[i] = NULL;

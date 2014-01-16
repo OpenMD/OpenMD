@@ -187,6 +187,9 @@ namespace OpenMD {
     MemoryUtils::deletePointers(components_);
     MemoryUtils::deletePointers(zconstraints_);
     MemoryUtils::deletePointers(restraints_);
+    delete flucQpars_;
+    delete rnemdPars_;
+    delete minimizerPars_;
   }
 
   void Globals::validate() {
