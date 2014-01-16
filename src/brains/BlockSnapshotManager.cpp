@@ -76,6 +76,9 @@ namespace OpenMD {
       // number of frames in each block given the need to hold multiple blocks 
       // in memory at the same time:
       nSnapshotPerBlock_ = int(frameCapacity) / blockCapacity_;
+      if (nSnapshotPerBlock_ <= 0) {
+       std::cerr << "not enough memory to hold two configs!" << std::endl;
+      }
       reader_ = new DumpReader(info, filename);
       nframes_ = reader_->getNFrames();
       int nblocks = nframes_ / nSnapshotPerBlock_;
