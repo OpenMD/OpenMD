@@ -67,7 +67,9 @@ namespace OpenMD {
       // RealType avaliablePhysMem = physMem - rssMem;
     
       int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
-      int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
+      int bytesPerCutoffGroup = DataStorage::getBytesPerStuntDouble(DataStorage::dslPosition);
+      int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble 
+	+ nCutoffGroups_ * bytesPerCutoffGroup;
 
       // total number of frames that can fit in memory
       //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
@@ -102,6 +104,7 @@ namespace OpenMD {
       //std::cout << "Memory available for OpenMD:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
       std::cout << "Memory requested for OpenMD:\t" << (unsigned long)memSize_ << " bytes" <<std::endl;
       std::cout << "      Bytes per StuntDouble:\t" << (unsigned long)bytesPerStuntDouble <<std::endl;
+      std::cout << "     Bytes per Cutoff Group:\t" << (unsigned long)bytesPerCutoffGroup <<std::endl;
       std::cout << "            Bytes per Frame:\t" << (unsigned long)bytesPerFrame <<std::endl;
       std::cout << "             Frame Capacity:\t" << (unsigned long)frameCapacity <<std::endl;
       std::cout << "       Frames in trajectory:\t" << (unsigned long)nframes_ <<std::endl;
