@@ -190,6 +190,11 @@ namespace OpenMD {
   int Snapshot::getNumberOfCutoffGroups() {
     return cgData.getSize();
   }
+
+    /** Returns the number of bytes in a FrameData structure */
+  int Snapshot::getFrameDataSize() {
+    return sizeof(FrameData);
+  }
   
   /** Returns the H-Matrix */
   Mat3x3d Snapshot::getHmat() {

@@ -131,6 +131,8 @@ namespace OpenMD{
     int      getNumberOfRigidBodies();
     /** Returns the number of rigid bodies */
     int      getNumberOfCutoffGroups();
+    /** Returns the number of bytes in a FrameData structure */
+    static int getFrameDataSize();
 
     /** Returns the H-Matrix */
     Mat3x3d  getHmat();

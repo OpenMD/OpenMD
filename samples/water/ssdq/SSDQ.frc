@@ -16,7 +16,7 @@ end DirectionalAtomTypes
 
 begin LennardJonesAtomTypes
 //Name          epsilon             sigma       
-SSDQ            0.152           3.16549
+SSDQ            0.15            3.25
 Cl-             0.100           4.445
 Na+             0.118           2.579
 end LennardJonesAtomTypes
@@ -38,7 +38,8 @@ begin MultipoleAtomTypes
 // Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
 //                                                           esu centi-barn)
 //SSDQ   dq      0.0     0.0     0.0     2.64    -7.99  -4.27  -5.94
-SSDQ   dq      0.0     0.0     0.0     2.64    -3.995  -2.135  -2.97
+SSDQ   dq      0.0     0.0     0.0     2.12    -4.3    -2.29  -3.19    
+//SSDQ   dq      0.0     0.0     0.0     2.64    -3.995  -2.135  -2.97
 //SSDQ   dq      0.0     0.0     0.0     2.35    -7.11  -3.8  -5.2866
 //SSDQ   dq      0.0     0.0     0.0     2.35    0.0   2.71408703 1.05339812 
 //SSDQ     dq      0.0     0.0     0.0     2.35  0.0   1.35704351 0.52669906
