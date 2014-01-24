@@ -14,9 +14,9 @@ component{
 ensemble = NVT;
 forceField = "SSDQ";
 cutoffMethod = "shifted_force";
-electrostaticScreeningMethod = "undamped";
+electrostaticScreeningMethod = "damped";
 cutoffRadius = 12.0;
-// dampingAlpha = 0.1;
+dampingAlpha = 0.1;
 
 targetTemp = 0.1;
 targetPressure = 1.0;

@@ -68,8 +68,11 @@ namespace OpenMD {
     
       int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
       int bytesPerCutoffGroup = DataStorage::getBytesPerStuntDouble(DataStorage::dslPosition);
+
+      int bytesPerFrameData = Snapshot::getFrameDataSize();
       int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble 
-	+ nCutoffGroups_ * bytesPerCutoffGroup;
+	+ nCutoffGroups_ * bytesPerCutoffGroup 
+        + bytesPerFrameData;
 
       // total number of frames that can fit in memory
       //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
@@ -96,21 +99,33 @@ namespace OpenMD {
 
       snapshots_.insert(snapshots_.begin(), nframes_, static_cast<Snapshot*>(NULL));   
 
-      std::cout << "-----------------------------------------------------"<<std::endl;
+      std::cout << "-----------------------------------------------------"
+                << std::endl;
       std::cout << "BlockSnapshotManager memory report:" << std::endl;
       std::cout << "\n";
       // std::cout << "  Physical Memory available:\t" << (unsigned long)physMem <<  " bytes" <<std::endl;
       //std::cout << "     Resident Memory in use:\t" << (unsigned long)rssMem << " bytes" <<std::endl;
       //std::cout << "Memory available for OpenMD:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
-      std::cout << "Memory requested for OpenMD:\t" << (unsigned long)memSize_ << " bytes" <<std::endl;
-      std::cout << "      Bytes per StuntDouble:\t" << (unsigned long)bytesPerStuntDouble <<std::endl;
-      std::cout << "     Bytes per Cutoff Group:\t" << (unsigned long)bytesPerCutoffGroup <<std::endl;
-      std::cout << "            Bytes per Frame:\t" << (unsigned long)bytesPerFrame <<std::endl;
-      std::cout << "             Frame Capacity:\t" << (unsigned long)frameCapacity <<std::endl;
-      std::cout << "       Frames in trajectory:\t" << (unsigned long)nframes_ <<std::endl;
-      std::cout << "        Snapshots per Block:\t" << (unsigned long)nSnapshotPerBlock_ <<std::endl;
-      std::cout << "     Total number of Blocks:\t" << (unsigned long)nblocks << std::endl;
-      std::cout << "-----------------------------------------------------"<<std::endl;
+      std::cout << "Memory requested for OpenMD:\t" 
+                << (unsigned long)memSize_ << " bytes" << std::endl;
+      std::cout << "        Bytes per FrameData:\t" 
+                << (unsigned long)bytesPerFrameData << std::endl;
+      std::cout << "      Bytes per StuntDouble:\t" 
+                << (unsigned long)bytesPerStuntDouble << std::endl;
+      std::cout << "     Bytes per Cutoff Group:\t" 
+                << (unsigned long)bytesPerCutoffGroup << std::endl;
+      std::cout << "            Bytes per Frame:\t" 
+                << (unsigned long)bytesPerFrame << std::endl;
+      std::cout << "             Frame Capacity:\t"
+                << (unsigned long)frameCapacity << std::endl;
+      std::cout << "       Frames in trajectory:\t" 
+                << (unsigned long)nframes_ << std::endl;
+      std::cout << "        Snapshots per Block:\t" 
+                << (unsigned long)nSnapshotPerBlock_ << std::endl;
+      std::cout << "     Total number of Blocks:\t" 
+                << (unsigned long)nblocks << std::endl;
+      std::cout << "-----------------------------------------------------"
+                << std::endl;
     
     }
 
