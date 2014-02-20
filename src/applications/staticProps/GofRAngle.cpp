@@ -160,38 +160,51 @@ namespace OpenMD {
 
     r12.normalize();
 
-    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
-    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-    Vector3d vec;
-    if (ma1.isDipole() )
-      vec = sd1->getDipole();
-    else 
+    Vector3d vec;    
+    
+    if (sd1->isAtom()) {
+      AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+      MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+      
+      if (ma1.isDipole() )
+        vec = sd1->getDipole();
+      else 
+        vec = sd1->getA().transpose() * V3Z;
+    } else {
       vec = sd1->getA().transpose() * V3Z;
-    vec.normalize();    
+    }
 
+    vec.normalize();    
+      
     return dot(r12, vec);
   }
 
   RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-
-    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
-    AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
-
-    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
-
     Vector3d v1, v2;
 
-    if (ma1.isDipole() )
-      v1 = sd1->getDipole();
-    else 
+    if (sd1->isAtom()){
+      AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+      MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+      if (ma1.isDipole() )
+        v1 = sd1->getDipole();
+      else 
+        v1 = sd1->getA().transpose() * V3Z;
+    } else {
       v1 = sd1->getA().transpose() * V3Z;
-
-    if (ma2.isDipole() )
-      v2 = sd2->getDipole();
-    else 
+    }
+    
+    if (sd2->isAtom()) {
+      AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
+      MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+           
+      if (ma2.isDipole() )
+        v2 = sd2->getDipole();
+      else 
+        v2 = sd2->getA().transpose() * V3Z;
+    } else {
       v2 = sd2->getA().transpose() * V3Z;
-
+    }
+      
     v1.normalize();
     v2.normalize();
     return dot(v1, v2);
