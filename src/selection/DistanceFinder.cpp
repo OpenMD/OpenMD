@@ -120,7 +120,8 @@ namespace OpenMD {
     int mol;
     int proc;
     RealType data[3];
-    int worldRank = MPI::COMM_WORLD.Get_rank();
+    int worldRank;
+    MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
 #endif
  
     for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
@@ -151,9 +152,9 @@ namespace OpenMD {
         data[0] = centerPos.x();
         data[1] = centerPos.y();
         data[2] = centerPos.z();          
-        MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc);
+        MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
       } else {
-        MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc);
+        MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
         centerPos = Vector3d(data);
       }
 #else
@@ -229,7 +230,8 @@ namespace OpenMD {
     int mol;
     int proc;
     RealType data[3];
-    int worldRank = MPI::COMM_WORLD.Get_rank();
+    int worldRank;
+    MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
 #endif
  
     for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
@@ -260,9 +262,9 @@ namespace OpenMD {
         data[0] = centerPos.x();
         data[1] = centerPos.y();
         data[2] = centerPos.z();          
-        MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc);
+        MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
       } else {
-        MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc);
+        MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
         centerPos = Vector3d(data);
       }
 #else

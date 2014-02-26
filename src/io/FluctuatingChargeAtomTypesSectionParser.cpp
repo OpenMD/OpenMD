@@ -52,52 +52,124 @@ namespace OpenMD {
 
   FluctuatingChargeAtomTypesSectionParser::FluctuatingChargeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
     setSectionName("FluctuatingChargeAtomTypes");
+
+    stringToEnumMap_["Hardness"] =  fqtHardness;                
+    stringToEnumMap_["MultipleMinima"] =  fqtMultipleMinima;
+
   }
 
-  void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,const string& line, int lineNo){
+  void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                          const string& line, 
+                                                          int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();
 
-    //in FluctuatingChargeAtomTypesSectionParser, a line contains at least
-    //contains 6 tokens:
 
-    //atomTypeName, electronegativity, hardness (Jii), slaterN, slaterZeta, and charge mass
-
-    if (nTokens < 6)  {
+    if (nTokens < 3)  {
       sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
               "Not enough tokens at line %d\n",
               lineNo);
       painCave.isFatal = 1;
       simError();
-    } else {
+    }
 
-      string atomTypeName = tokenizer.nextToken();
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-
-      if (atomType != NULL) {
+    string atomTypeName = tokenizer.nextToken();
+    AtomType* atomType = ff.getAtomType(atomTypeName);
+    if (atomType != NULL) {
         FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 
-	// All fluctuating charges are charges, and if we haven't already set values for the
-	// charge, then start with zero.
+	// All fluctuating charges are charges, and if we haven't
+	// already set values for the charge, then start with zero.
 	if (! fca.isFixedCharge()) {
 	  RealType charge = 0.0;
 	  fca.makeFixedCharge(charge);
 	}
+        
+      } else {
+      sprintf(painCave.errMsg, 
+              "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
+              "has not been created yet\n", atomTypeName.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+
+    RealType chargeMass = tokenizer.nextTokenAsDouble();
+    FluctuatingTypeEnum fqt = getFluctuatingTypeEnum(tokenizer.nextToken());
+    
+    nTokens -= 3;
+
+    switch(fqt) {
+
+    case fqtHardness:
+      // For Rick, Stuart, Berne style fluctuating charges, there's a
+      // self charge potential defined by electronegativity and
+      // hardness.  On molecular structures, the slater-type overlap
+      // integral is used to compute the hardness.
+      
+      // atomTypeName, chargeMass, Hardness, electronegativity,
+      //   hardness (Jii), slaterN, slaterZeta
+
+      if (nTokens < 4) {
+        sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
+                "Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
         RealType chi = tokenizer.nextTokenAsDouble();
         RealType Jii = tokenizer.nextTokenAsDouble();
         int slaterN = tokenizer.nextTokenAsInt();
         RealType slaterZeta = tokenizer.nextTokenAsDouble();
-        RealType chargeMass = tokenizer.nextTokenAsDouble();
-        
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);        
         fqa.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
-        
-      } else {
-        sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
+      }
+      break;
+
+    case fqtMultipleMinima:
+      if (nTokens < 4 || nTokens % 2 != 0) {
+        sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
+                "Not enough tokens at line %d\n",
+                lineNo);
         painCave.isFatal = 1;
         simError();
+
+      } else {
+        std::vector<std::pair<int, RealType> > diabaticStates;
+        RealType curvature = tokenizer.nextTokenAsDouble();
+        RealType coupling = tokenizer.nextTokenAsDouble();
+        nTokens -= 2;
+        int nStates = nTokens / 2;
+        RealType charge;
+        RealType ionizationEnergy;
+        for (int i = 0; i < nStates; ++i) {
+          charge = tokenizer.nextTokenAsInt();
+          ionizationEnergy = tokenizer.nextTokenAsDouble();
+          diabaticStates.push_back( std::make_pair( charge, ionizationEnergy ));
+        }
+        
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);        
+        fqa.makeFluctuatingCharge(chargeMass, curvature, coupling, diabaticStates);
       }
+      break;
+    case fqtUnknown:
+    default:
+      sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
+              "Unknown Bond Type at line %d\n",
+              lineNo);
+      painCave.isFatal = 1;
+      simError();
+      break;
+            
     }
   }
+
+  FluctuatingChargeAtomTypesSectionParser::FluctuatingTypeEnum FluctuatingChargeAtomTypesSectionParser::getFluctuatingTypeEnum(const std::string& str) {
+    std::map<std::string, FluctuatingTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(str);
+
+    return i == stringToEnumMap_.end() ? fqtUnknown : i->second;
+  }
+
 }

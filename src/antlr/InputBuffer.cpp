@@ -7,6 +7,11 @@
 
 #include "antlr/config.hpp"
 #include "antlr/InputBuffer.hpp"
+#include  <iostream>
+#ifdef IS_MPI
+#include "mpi.h"
+#endif
+
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
@@ -16,11 +21,12 @@ namespace antlr {
 void InputBuffer::fill(unsigned int amount)
 {
 	syncConsume();
+
 	// Fill the buffer sufficiently to hold needed characters
 	while (queue.entries() < amount + markerOffset)
-	{
-		// Append the next character
-		queue.append(getChar());
+        {         
+            // Append the next character
+            queue.append(getChar());            
 	}
 }
 

@@ -55,7 +55,7 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     const int masterNode = 0;
-    MPI::COMM_WORLD.Bcast(&seed, 1, MPI::UNSIGNED_LONG, masterNode); 
+    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 #endif
 
     if (seed != oneSeed) {
@@ -67,8 +67,9 @@ namespace OpenMD {
 
     int nProcessors;
 #ifdef IS_MPI
-    nProcessors = MPI::COMM_WORLD.Get_size();
-    myRank_ = MPI::COMM_WORLD.Get_rank();
+    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
+
 #else
     nProcessors = 1;
     myRank_ = 0;
@@ -87,8 +88,8 @@ namespace OpenMD {
 
     int nProcessors;
 #ifdef IS_MPI
-    nProcessors = MPI::COMM_WORLD.Get_size();
-    myRank_ = MPI::COMM_WORLD.Get_rank();
+    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
 #else
     nProcessors = 1;
     myRank_ = 0;
@@ -105,7 +106,7 @@ namespace OpenMD {
     unsigned long seed = oneSeed;
 #ifdef IS_MPI
     const int masterNode = 0;
-    MPI::COMM_WORLD.Bcast(&seed, 1, MPI::UNSIGNED_LONG, masterNode); 
+    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 #endif
     if (seed != oneSeed) {
       sprintf(painCave.errMsg,
@@ -134,12 +135,14 @@ namespace OpenMD {
 
 #ifdef IS_MPI
       size = bigSeed.size();
-      MPI::COMM_WORLD.Bcast(&size, 1, MPI::INT, masterNode);
-      MPI::COMM_WORLD.Bcast(&bigSeed[0], size, MPI::UNSIGNED_LONG, masterNode);
+      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, 
+                MPI_COMM_WORLD);
     }else {
-      MPI::COMM_WORLD.Bcast(&size, 1, MPI::INT, masterNode);
+      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
       bigSeed.resize(size);
-      MPI::COMM_WORLD.Bcast(&bigSeed[0], size, MPI::UNSIGNED_LONG, masterNode);
+      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, 
+                MPI_COMM_WORLD);
     }
 #endif
     

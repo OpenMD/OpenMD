@@ -109,8 +109,12 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 #ifdef IS_MPI
   //If we are doing the mpi version, set up some vectors for data communication
   
-  int nproc = MPI::COMM_WORLD.Get_size();
-  int myrank = MPI::COMM_WORLD.Get_rank();
+  int nproc;
+  int myrank;
+  
+  MPI_Comm_size( MPI_COMM_WORLD, &nproc);
+  MPI_Comm_rank( MPI_COMM_WORLD, &myrank);
+
   int localHullSites = 0;
 
   vector<int> hullSitesOnProc(nproc, 0);
@@ -144,8 +148,8 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     masses.push_back(sd->getMass());
   }
 
-  MPI::COMM_WORLD.Allgather(&localHullSites, 1, MPI::INT, &hullSitesOnProc[0],
-                            1, MPI::INT);
+  MPI_Allgather(&localHullSites, 1, MPI_INT, &hullSitesOnProc[0],
+                1, MPI_INT, MPI_COMM_WORLD);
 
   int globalHullSites = 0;
   for (int iproc = 0; iproc < nproc; iproc++){
@@ -167,18 +171,18 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 
   int count = coordsOnProc[myrank];
   
-  MPI::COMM_WORLD.Allgatherv(&coords[0], count, MPI::DOUBLE, &globalCoords[0],
-                             &coordsOnProc[0], &vectorDisplacements[0], 
-                             MPI::DOUBLE);
-
-  MPI::COMM_WORLD.Allgatherv(&vels[0], count, MPI::DOUBLE, &globalVels[0], 
-                             &coordsOnProc[0], &vectorDisplacements[0],
-                             MPI::DOUBLE);
-
-  MPI::COMM_WORLD.Allgatherv(&masses[0], localHullSites, MPI::DOUBLE,
-                             &globalMasses[0], &hullSitesOnProc[0], 
-                             &displacements[0], MPI::DOUBLE);
-
+  MPI_Allgatherv(&coords[0], count, MPI_DOUBLE, &globalCoords[0],
+                 &coordsOnProc[0], &vectorDisplacements[0], 
+                 MPI_DOUBLE, MPI_COMM_WORLD);
+  
+  MPI_Allgatherv(&vels[0], count, MPI_DOUBLE, &globalVels[0], 
+                 &coordsOnProc[0], &vectorDisplacements[0],
+                 MPI_DOUBLE, MPI_COMM_WORLD);
+  
+  MPI_Allgatherv(&masses[0], localHullSites, MPI_DOUBLE,
+                 &globalMasses[0], &hullSitesOnProc[0], 
+                 &displacements[0], MPI_DOUBLE, MPI_COMM_WORLD);
+  
   // Free previous hull
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);

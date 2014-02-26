@@ -17,7 +17,7 @@ MDLexer::MDLexer(ANTLR_USE_NAMESPACE(std)istream& in)
 }
 
 MDLexer::MDLexer(ANTLR_USE_NAMESPACE(antlr)InputBuffer& ib)
-	: ANTLR_USE_NAMESPACE(antlr)CharScanner(ib,true)
+  : ANTLR_USE_NAMESPACE(antlr)CharScanner(ib, true)
 {
 	initLiterals();
 }

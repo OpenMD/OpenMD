@@ -304,7 +304,7 @@ namespace OpenMD {
   void DumpWriter::writeFrame(std::ostream& os) {
 
 #ifdef IS_MPI
-    MPI::Status istatus;
+    MPI_Status* istatus;
 #endif
 
     Molecule* mol;
@@ -362,8 +362,12 @@ namespace OpenMD {
 #else
 
     const int masterNode = 0;
-    int worldRank = MPI::COMM_WORLD.Get_rank();
-    int nProc = MPI::COMM_WORLD.Get_size();
+    int worldRank;
+    int nProc;
+
+    MPI_Comm_size( MPI_COMM_WORLD, &nProc);
+    MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
+
 
     if (worldRank == masterNode) {	
       os << "  <Snapshot>\n";	
@@ -387,21 +391,21 @@ namespace OpenMD {
       
       for (int i = 1; i < nProc; ++i) {
         // tell processor i to start sending us data:
-        MPI::COMM_WORLD.Bcast(&i, 1, MPI::INT, masterNode);
+        MPI_Bcast(&i, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
 
         // receive the length of the string buffer that was
         // prepared by processor i:        
         int recvLength;
-        MPI::COMM_WORLD.Recv(&recvLength, 1, MPI::INT, i, MPI::ANY_TAG, 
-                             istatus);
+        MPI_Recv(&recvLength, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, 
+                 istatus);
 
         // create a buffer to receive the data
         char* recvBuffer = new char[recvLength];
         if (recvBuffer == NULL) {
         } else {
           // receive the data:
-          MPI::COMM_WORLD.Recv(recvBuffer, recvLength, MPI::CHAR, i, 
-                               MPI::ANY_TAG, istatus);
+          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 
+                               MPI_ANY_TAG, MPI_COMM_WORLD, istatus);
           // send it to the file:
           os << recvBuffer;
           // get rid of the receive buffer:
@@ -413,14 +417,14 @@ namespace OpenMD {
       int myturn = 0;
       for (int i = 1; i < nProc; ++i){
         // wait for the master node to call our number:
-        MPI::COMM_WORLD.Bcast(&myturn, 1, MPI::INT, masterNode);
+        MPI_Bcast(&myturn, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
         if (myturn == worldRank){
           // send the length of our buffer:
-          MPI::COMM_WORLD.Send(&sendBufferLength, 1, MPI::INT, masterNode, 0);
+          MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
 
           // send our buffer:
-          MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
-                               MPI::CHAR, masterNode, 0);
+          MPI_Send((void *)buffer.c_str(), sendBufferLength, 
+                   MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
 
         }
       }
@@ -464,21 +468,21 @@ namespace OpenMD {
         for (int i = 1; i < nProc; ++i) {
           
           // tell processor i to start sending us data:
-          MPI::COMM_WORLD.Bcast(&i, 1, MPI::INT, masterNode);
+          MPI_Bcast(&i, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
           
           // receive the length of the string buffer that was
           // prepared by processor i:        
           int recvLength;
-          MPI::COMM_WORLD.Recv(&recvLength, 1, MPI::INT, i, MPI::ANY_TAG, 
-                               istatus);
+          MPI_Recv(&recvLength, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, 
+                   istatus);
           
           // create a buffer to receive the data
           char* recvBuffer = new char[recvLength];
           if (recvBuffer == NULL) {
           } else {
             // receive the data:
-            MPI::COMM_WORLD.Recv(recvBuffer, recvLength, MPI::CHAR, i, 
-                                 MPI::ANY_TAG, istatus);
+            MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 
+                     MPI_ANY_TAG, MPI_COMM_WORLD, istatus);
             // send it to the file:
             os << recvBuffer;
             // get rid of the receive buffer:
@@ -490,13 +494,13 @@ namespace OpenMD {
         int myturn = 0;
         for (int i = 1; i < nProc; ++i){
           // wait for the master node to call our number:
-          MPI::COMM_WORLD.Bcast(&myturn, 1, MPI::INT, masterNode);
+          MPI_Bcast(&myturn, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
           if (myturn == worldRank){
             // send the length of our buffer:
-            MPI::COMM_WORLD.Send(&sendBufferLength, 1, MPI::INT, masterNode, 0);
+            MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
             // send our buffer:
-            MPI::COMM_WORLD.Send((void *)buffer.c_str(), sendBufferLength, 
-                                 MPI::CHAR, masterNode, 0);
+            MPI_Send((void *)buffer.c_str(), sendBufferLength, 
+                     MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
           }
         }
       }
@@ -767,20 +771,15 @@ namespace OpenMD {
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi
-
       buffers.push_back(dumpFile_->rdbuf());
-
       eorStream = createOStream(eorFilename_);
-
       buffers.push_back(eorStream->rdbuf());
-        
 #ifdef IS_MPI
     }
 #endif // is_mpi    
 
     TeeBuf tbuf(buffers.begin(), buffers.end());
     std::ostream os(&tbuf);
-
     writeFrame(os);
 
 #ifdef IS_MPI
@@ -790,8 +789,7 @@ namespace OpenMD {
       delete eorStream;
 #ifdef IS_MPI
     }
-#endif // is_mpi  
-    
+#endif // is_mpi      
   }
 
   std::ostream* DumpWriter::createOStream(const std::string& filename) {

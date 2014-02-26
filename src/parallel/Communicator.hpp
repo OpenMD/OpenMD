@@ -67,38 +67,38 @@ namespace OpenMD{
   template<class T>
   class MPITraits {
   public:
-    static MPI::Datatype Type();
+    static MPI_Datatype Type();
     static int Length() { return 1; };
   };
   
-  template<> inline MPI::Datatype MPITraits<int>::Type() { return MPI::INT; }
-  template<> inline MPI::Datatype MPITraits<RealType>::Type() { return MPI::REALTYPE; }
+  template<> inline MPI_Datatype MPITraits<int>::Type() { return MPI_INT; }
+  template<> inline MPI_Datatype MPITraits<RealType>::Type() { return MPI_REALTYPE; }
 
   template<class T, unsigned int Dim>
   class MPITraits< Vector<T, Dim> > {
   public:
-    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static MPI_Datatype Type() { return MPITraits<T>::Type(); }
     static int Length() {return Dim;}
   };
 
   template<class T>
   class MPITraits< Vector3<T> > {
   public:
-    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static MPI_Datatype Type() { return MPITraits<T>::Type(); }
     static int Length() {return 3;}
   };
 
   template<class T, unsigned int R, unsigned int C>
   class MPITraits< RectMatrix<T, R, C> > {
   public:
-    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static MPI_Datatype Type() { return MPITraits<T>::Type(); }
     static int Length() {return R * C;}
   };
 
   template<class T>
   class MPITraits< SquareMatrix3<T> > {
   public:
-    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static MPI_Datatype Type() { return MPITraits<T>::Type(); }
     static int Length() {return 9;}
   };
   
@@ -109,8 +109,11 @@ namespace OpenMD{
     
     Communicator<D>() {
       
-      int nProc = MPI::COMM_WORLD.Get_size();
-      int myRank = MPI::COMM_WORLD.Get_rank();
+      int nProc;
+      int myRank;
+
+      MPI_Comm_size( MPI_COMM_WORLD, &nProc);
+      MPI_Comm_rank( MPI_COMM_WORLD, &myRank);
       
       int nColumnsMax = (int) sqrt(RealType(nProc));
 
@@ -125,23 +128,26 @@ namespace OpenMD{
 
       switch(D) {
       case Row :
-        myComm = MPI::COMM_WORLD.Split(rowIndex_, 0);
+        MPI_Comm_split(MPI_COMM_WORLD, rowIndex_, 0, &myComm);
+        //  myComm = MPI::COMM_WORLD.Split(rowIndex_, 0);
         break;
       case Column:
-        myComm = MPI::COMM_WORLD.Split(columnIndex_, 0);
+        MPI_Comm_split(MPI_COMM_WORLD, columnIndex_, 0, &myComm);
+        //myComm = MPI::COMM_WORLD.Split(columnIndex_, 0);
         break;
       case Global:
-        myComm = MPI::COMM_WORLD.Split(myRank, 0);
+        MPI_Comm_split(MPI_COMM_WORLD, myRank, 0, &myComm);
+        //myComm = MPI::COMM_WORLD.Split(myRank, 0);
       }
 
     }
     
-    MPI::Intracomm getComm() { return myComm; }
+    MPI_Comm getComm() { return myComm; }
     
   private:
     int rowIndex_;
     int columnIndex_;
-    MPI::Intracomm myComm;
+    MPI_Comm myComm;
   };
   
 
@@ -149,15 +155,20 @@ namespace OpenMD{
   class Plan {
   public:
     
-    Plan<T>(MPI::Intracomm comm, int nObjects) : myComm(comm) {
-      int nCommProcs = myComm.Get_size();
+    Plan<T>(MPI_Comm comm, int nObjects) : myComm(comm) {
+
+      int nCommProcs;
+      MPI_Comm_size( myComm, &nCommProcs );
+
+      //int nCommProcs = myComm.Get_size();
       
       counts.resize(nCommProcs, 0);
       displacements.resize(nCommProcs, 0);
       
       planSize_ = MPITraits<T>::Length() * nObjects; 
       
-      myComm.Allgather(&planSize_, 1, MPI::INT, &counts[0], 1, MPI::INT);
+      MPI_Allgather(&planSize_, 1, MPI_INT, &counts[0], 1, MPI_INT, myComm);
+      //myComm.Allgather(&planSize_, 1, MPI_INT, &counts[0], 1, MPI_INT);
       
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
@@ -176,21 +187,32 @@ namespace OpenMD{
       // an assert would be helpful here to make sure the vectors are the
       // correct geometry
       
-      myComm.Allgatherv(&v1[0], 
-                        planSize_, 
-                        MPITraits<T>::Type(), 
-                        &v2[0], 
-                        &counts[0], 
-                        &displacements[0], 
-                        MPITraits<T>::Type());      
+      MPI_Allgatherv(&v1[0], 
+                     planSize_, 
+                     MPITraits<T>::Type(), 
+                     &v2[0], 
+                     &counts[0], 
+                     &displacements[0], 
+                     MPITraits<T>::Type(),
+                     myComm);
+      // myComm.Allgatherv(&v1[0], 
+      //                   planSize_, 
+      //                   MPITraits<T>::Type(), 
+      //                   &v2[0], 
+      //                   &counts[0], 
+      //                   &displacements[0], 
+      //                   MPITraits<T>::Type());      
     }       
     
     void scatter(vector<T>& v1, vector<T>& v2) {
       // an assert would be helpful here to make sure the vectors are the
       // correct geometry
             
-      myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
-                            MPITraits<T>::Type(), MPI::SUM);
+      MPI_Reduce_scatter(&v1[0], &v2[0], &counts[0], 
+                         MPITraits<T>::Type(), MPI_SUM, myComm);
+
+      // myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
+      //                       MPITraits<T>::Type(), MPI::SUM);
     }
     
     int getSize() {
@@ -202,7 +224,7 @@ namespace OpenMD{
     int size_;
     vector<int> counts;
     vector<int> displacements;
-    MPI::Intracomm myComm;
+    MPI_Comm myComm;
   }; 
 
 #endif

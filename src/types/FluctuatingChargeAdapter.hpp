@@ -53,10 +53,14 @@ namespace OpenMD {
 
   struct FluctuatingAtypeParameters {
     RealType chargeMass;
+    bool hasMultipleMinima;
     RealType electronegativity; /** (relative) electronegativity */
     RealType hardness;     /** diagonal "Coulomb" Jii */
     int slaterN;           /** principal quantum number for Slater orbitals */
     RealType slaterZeta;   /** off-diagonal Slater exponent */
+    RealType curvature;    /** multiple minima curvature for charge states */
+    RealType coupling;     /** multiple minima EVB coupling for charge states */
+    vector<pair<int, RealType> > diabaticStates; /** multiple minima diabats */
   };
   typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;   
 
@@ -66,13 +70,19 @@ namespace OpenMD {
 
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, int slaterN, RealType slaterZeta);
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, int slaterN);
+
+    void makeFluctuatingCharge(RealType chargeMass, RealType curvature, RealType coupling, vector<pair<int, RealType> > diabaticStates);
     
     bool isFluctuatingCharge();
+    bool hasMultipleMinima();
     RealType getChargeMass();
     RealType getElectronegativity();
     RealType getHardness();
     int getSlaterN();
     RealType getSlaterZeta();
+    RealType getCoupling();
+    RealType getCurvature();
+    vector<pair<int, RealType> > getDiabaticStates();
 
   private:
     AtomType* at_;

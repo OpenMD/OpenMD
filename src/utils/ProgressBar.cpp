@@ -72,7 +72,9 @@ namespace OpenMD {
   
   void ProgressBar::clear() {
 #ifdef IS_MPI
-    if (MPI::COMM_WORLD.Get_rank() == 0) {
+    int myRank;
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank);
+    if (myRank == 0) {
 #endif
       cout << endl;
       cout.flush();
@@ -88,7 +90,9 @@ namespace OpenMD {
   void ProgressBar::update() {
 
 #ifdef IS_MPI
-    if (MPI::COMM_WORLD.Get_rank() == 0) {
+    int myRank;
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank);
+    if (myRank == 0) {
 #endif
       
       // only do the progress bar if we are actually running in a tty:

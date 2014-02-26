@@ -59,13 +59,13 @@ namespace OpenMD {
 #ifdef IS_MPI
   ifstrstream::ifstrstream() 
     :  std::basic_istream<char, std::char_traits<char> >(0),
-    internalStringBuf_(), isRead(false)  {    
+    internalStringBuf_(), isRead(false)  {   
     this->init(&internalStringBuf_);
   }
 #else
   ifstrstream::ifstrstream() 
     :  std::basic_istream<char, std::char_traits<char> >(0),
-    internalFileBuf_(), isRead(false)  {    
+    internalFileBuf_(), isRead(false)  {     
     this->init(&internalFileBuf_);
   }
 #endif
@@ -80,14 +80,14 @@ namespace OpenMD {
 #ifdef IS_MPI
   ifstrstream::ifstrstream(const char* filename, std::ios_base::openmode mode, bool checkFilename)
     :  std::basic_istream<char, std::char_traits<char> >(0),
-       internalStringBuf_(), isRead(false) {
+    internalStringBuf_(), isRead(false) {
     this->init(&internalStringBuf_);
     isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
   }
 #else
   ifstrstream::ifstrstream(const char* filename, std::ios_base::openmode mode, bool checkFilename)
     :  std::basic_istream<char, std::char_traits<char> >(0),
-       internalFileBuf_(), isRead(false) {
+    internalFileBuf_(), isRead(false) {
     
     this->init(&internalFileBuf_);
     isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
@@ -97,8 +97,7 @@ namespace OpenMD {
    * virtual destructor will close the file (in single mode) and clear
    * the stream buffer
    */
-  ifstrstream::~ifstrstream(){
-    close();
+  ifstrstream::~ifstrstream(){    close();
   }
   
   /**
@@ -183,7 +182,8 @@ namespace OpenMD {
     int myRank;
     int masterNode;
     
-    myRank =  MPI::COMM_WORLD.Get_rank();
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank);
+      
     masterNode = 0;
     
     if (myRank == masterNode) {
@@ -192,12 +192,13 @@ namespace OpenMD {
         
         //check the filename is the same
         filenameLen = strlen(filename);
-        MPI::COMM_WORLD.Bcast(&filenameLen, 1, MPI::INT, masterNode);
-        MPI::COMM_WORLD.Bcast((void*)filename, filenameLen, MPI::CHAR, 
-                              masterNode);
+        MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast((void*)filename, filenameLen, MPI_CHAR, 
+                  masterNode, MPI_COMM_WORLD);
         
         diffFilename = 0;
-        MPI::COMM_WORLD.Allreduce(&diffFilename, &error, 1, MPI::INT, MPI::SUM);
+        MPI_Allreduce(&diffFilename, &error, 1, MPI_INT, MPI_SUM, 
+                      MPI_COMM_WORLD);
         
         //if file names are different just return false
         if (error > 0)
@@ -223,7 +224,7 @@ namespace OpenMD {
           fileSize = FileIOError;
         
         //broadcast the file size
-        MPI::COMM_WORLD.Bcast(&fileSize, 1, MPI::LONG, masterNode);
+        MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
         
         if (fileSize < 0) {
           fin.close();                    
@@ -234,7 +235,7 @@ namespace OpenMD {
         
         // make a c-style  std::string and broadcast it
         fbuf[fileSize] = '\0';
-        MPI::COMM_WORLD.Bcast(fbuf, fileSize + 1, MPI::CHAR, masterNode);
+        MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD);
         
         //close the file and delete the buffer
         fin.close();      
@@ -242,7 +243,7 @@ namespace OpenMD {
         delete[] fbuf;
       }else{
         fileSize = FileNotExists;
-        MPI::COMM_WORLD.Bcast(&fileSize, 1, MPI::LONG, masterNode);
+        MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
         return false;
       }
       
@@ -250,11 +251,11 @@ namespace OpenMD {
       
       //check file name
       if (checkFilename) {
-        MPI::COMM_WORLD.Bcast(&filenameLen, 1, MPI::INT, masterNode);
+        MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
         
         char * masterFilename = new char[filenameLen];
-        MPI::COMM_WORLD.Bcast(masterFilename, filenameLen, MPI::CHAR, 
-                              masterNode);
+        MPI_Bcast(masterFilename, filenameLen, MPI_CHAR, 
+                  masterNode, MPI_COMM_WORLD);
         
         if( strcmp(masterFilename, filename) == 0)
           diffFilename = 0;
@@ -263,20 +264,21 @@ namespace OpenMD {
         
         delete[] masterFilename;
         
-        MPI::COMM_WORLD.Allreduce(&diffFilename, &error, 1, MPI::INT, MPI::SUM);
+        MPI_Allreduce(&diffFilename, &error, 1, MPI_INT, MPI_SUM, 
+                      MPI_COMM_WORLD);
         
         if (error > 0)
           return false;                        
       }
       //get file size
-      MPI::COMM_WORLD.Bcast(&fileSize, 1, MPI::LONG, masterNode);
+      MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
       
       if (fileSize >= 0 ) {
         fbuf = new char[fileSize+1];
         assert(fbuf);
         
         //receive file content
-        MPI::COMM_WORLD.Bcast(fbuf, fileSize + 1, MPI::CHAR, masterNode);
+        MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD);
         
         internalStringBuf_.str(fbuf);
         delete [] fbuf;

@@ -119,8 +119,8 @@ namespace OpenMD {
     
 #ifdef IS_MPI
  
-    MPI::Intracomm row = rowComm.getComm();
-    MPI::Intracomm col = colComm.getComm();
+    MPI_Comm row = rowComm.getComm();
+    MPI_Comm col = colComm.getComm();
 
     AtomPlanIntRow = new Plan<int>(row, nLocal_);
     AtomPlanRealRow = new Plan<RealType>(row, nLocal_);
@@ -424,8 +424,8 @@ namespace OpenMD {
                                      gTypeCutoffs.end());
 
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&groupMax, &groupMax, 1, MPI::REALTYPE, 
-                              MPI::MAX);
+    MPI_Allreduce(&groupMax, &groupMax, 1, MPI_REALTYPE, 
+                  MPI_MAX, MPI_COMM_WORLD);
 #endif
     
     RealType tradRcut = groupMax;
@@ -916,23 +916,23 @@ namespace OpenMD {
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = pairwisePot[ii];
       RealType ploc2 = 0.0;
-      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       pairwisePot[ii] = ploc2;
     }
 
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = excludedPot[ii];
       RealType ploc2 = 0.0;
-      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       excludedPot[ii] = ploc2;
     }
 
     // Here be dragons.
-    MPI::Intracomm col = colComm.getComm();
+    MPI_Comm col = colComm.getComm();
 
-    col.Allreduce(MPI::IN_PLACE, 
+    MPI_Allreduce(MPI_IN_PLACE, 
                   &snap_->frameData.conductiveHeatFlux[0], 3, 
-                  MPI::REALTYPE, MPI::SUM);
+                  MPI_REALTYPE, MPI_SUM, col);
 
 
 #endif
@@ -951,13 +951,13 @@ namespace OpenMD {
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = embeddingPot[ii];
       RealType ploc2 = 0.0;
-      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       embeddingPot[ii] = ploc2;
     }    
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = excludedSelfPot[ii];
       RealType ploc2 = 0.0;
-      MPI::COMM_WORLD.Allreduce(&ploc1, &ploc2, 1, MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       excludedSelfPot[ii] = ploc2;
     }    
 #endif

@@ -281,9 +281,12 @@ namespace OpenMD {
     ndf_local -= nConstraints_;
 
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&ndf_local, &ndf_, 1, MPI::INT,MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
-                              MPI::INT, MPI::SUM);
+    MPI_Allreduce(&ndf_local, &ndf_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
+      MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&ndf_local, &ndf_, 1, MPI::INT,MPI::SUM);
+    // MPI::COMM_WORLD.Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
+    //                           MPI::INT, MPI::SUM);
 #else
     ndf_ = ndf_local;
     nGlobalFluctuatingCharges_ = nfq_local;
@@ -297,7 +300,8 @@ namespace OpenMD {
 
   int SimInfo::getFdf() {
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&fdf_local, &fdf_, 1, MPI::INT, MPI::SUM);
+    MPI_Allreduce(&fdf_local, &fdf_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&fdf_local, &fdf_, 1, MPI::INT, MPI::SUM);
 #else
     fdf_ = fdf_local;
 #endif
@@ -353,7 +357,8 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&ndfRaw_local, &ndfRaw_, 1, MPI::INT, MPI::SUM);
+    MPI_Allreduce(&ndfRaw_local, &ndfRaw_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&ndfRaw_local, &ndfRaw_, 1, MPI::INT, MPI::SUM);
 #else
     ndfRaw_ = ndfRaw_local;
 #endif
@@ -366,8 +371,10 @@ namespace OpenMD {
 
 
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&ndfTrans_local, &ndfTrans_, 1, 
-                              MPI::INT, MPI::SUM);
+    MPI_Allreduce(&ndfTrans_local, &ndfTrans_, 1, 
+      MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&ndfTrans_local, &ndfTrans_, 1, 
+    //                           MPI::INT, MPI::SUM);
 #else
     ndfTrans_ = ndfTrans_local;
 #endif
@@ -749,7 +756,9 @@ namespace OpenMD {
     // count_local holds the number of found types on this processor
     int count_local = foundTypes.size();
 
-    int nproc = MPI::COMM_WORLD.Get_size();
+    int nproc;
+    MPI_Comm_size( MPI_COMM_WORLD, &nproc);
+    // int nproc = MPI::COMM_WORLD.Get_size();
 
     // we need arrays to hold the counts and displacement vectors for
     // all processors
@@ -757,8 +766,10 @@ namespace OpenMD {
     vector<int> disps(nproc, 0);
 
     // fill the counts array
-    MPI::COMM_WORLD.Allgather(&count_local, 1, MPI::INT, &counts[0],
-                              1, MPI::INT);
+    MPI_Allgather(&count_local, 1, MPI_INT, &counts[0],
+                  1, MPI_INT, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allgather(&count_local, 1, MPI::INT, &counts[0],
+    //                           1, MPI::INT);
   
     // use the processor counts to compute the displacement array
     disps[0] = 0;    
@@ -772,9 +783,12 @@ namespace OpenMD {
     vector<int> ftGlobal(totalCount);
     
     // now spray out the foundTypes to all the other processors:    
-    MPI::COMM_WORLD.Allgatherv(&foundTypes[0], count_local, MPI::INT, 
-                               &ftGlobal[0], &counts[0], &disps[0], 
-                               MPI::INT);
+    MPI_Allgatherv(&foundTypes[0], count_local, MPI_INT, 
+                   &ftGlobal[0], &counts[0], &disps[0], 
+                   MPI_INT, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allgatherv(&foundTypes[0], count_local, MPI::INT, 
+    //                            &ftGlobal[0], &counts[0], &disps[0], 
+    //                            MPI::INT);
 
     vector<int>::iterator j;
 
@@ -838,22 +852,36 @@ namespace OpenMD {
     }
 
 #ifdef IS_MPI
-    bool temp;
+    int temp;
+
     temp = usesDirectional;
-    MPI::COMM_WORLD.Allreduce(&temp, &usesDirectionalAtoms_, 1, MPI::BOOL, 
-                              MPI::LOR);
-        
+    MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
+    usesDirectionalAtoms_ = (temp == 0) ? false : true;
+
+    // MPI::COMM_WORLD.Allreduce(&temp, &usesDirectionalAtoms_, 1, MPI::BOOL, 
+    //                           MPI::LOR);
+    
     temp = usesMetallic;
-    MPI::COMM_WORLD.Allreduce(&temp, &usesMetallicAtoms_, 1, MPI::BOOL, 
-                              MPI::LOR);
+    MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
+    usesMetallicAtoms_ = (temp == 0) ? false : true;
+
+    // MPI::COMM_WORLD.Allreduce(&temp, &usesMetallicAtoms_, 1, MPI::BOOL, 
+    //                           MPI::LOR);
     
     temp = usesElectrostatic;
-    MPI::COMM_WORLD.Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI::BOOL, 
-                              MPI::LOR);
+    MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
+    usesElectrostaticAtoms_ = (temp == 0) ? false : true;
+
+    // MPI::COMM_WORLD.Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI::BOOL, 
+    //                           MPI::LOR);
 
     temp = usesFluctuatingCharges;
-    MPI::COMM_WORLD.Allreduce(&temp, &usesFluctuatingCharges_, 1, MPI::BOOL, 
-                              MPI::LOR);
+    MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
+    usesFluctuatingCharges_ = (temp == 0) ? false : true;
+
+    // MPI::COMM_WORLD.Allreduce(&temp, &usesFluctuatingCharges_, 1, MPI::BOOL, 
+    //                           MPI::LOR);
+
 #else
 
     usesDirectionalAtoms_ = usesDirectional;
@@ -1071,8 +1099,10 @@ namespace OpenMD {
   int SimInfo::getNGlobalConstraints() {
     int nGlobalConstraints;
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&nConstraints_, &nGlobalConstraints, 1, 
-                              MPI::INT, MPI::SUM);
+    MPI_Allreduce(&nConstraints_, &nGlobalConstraints, 1,  
+                              MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&nConstraints_, &nGlobalConstraints, 1, 
+    //                           MPI::INT, MPI::SUM);
 #else
     nGlobalConstraints =  nConstraints_;
 #endif

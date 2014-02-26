@@ -210,8 +210,8 @@ namespace OpenMD {
 
     std::vector<int> bsInt(bitset_.begin(), bitset_.end());
 
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bsInt[0], 
-                              bsInt.size(), MPI::INT, MPI::LOR);
+    MPI_Allreduce(MPI_IN_PLACE, &bsInt[0], 
+                  bsInt.size(), MPI_INT, MPI_LOR, MPI_COMM_WORLD);
 
     std::transform(bsInt.begin(), bsInt.end(), 
                    std::back_inserter( result.bitset_ ), to_bool<int>());

@@ -89,8 +89,8 @@ namespace OpenMD {
       }
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &kinetic, 1, MPI::REALTYPE, 
-                                MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &kinetic, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
@@ -140,8 +140,8 @@ namespace OpenMD {
       }
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &kinetic, 1, MPI::REALTYPE, 
-                                MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &kinetic, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
@@ -227,8 +227,8 @@ namespace OpenMD {
       }
     
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &kinetic, 1, MPI::REALTYPE, 
-                                MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &kinetic, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
 #endif
 
       kinetic *= 0.5;
@@ -297,8 +297,8 @@ namespace OpenMD {
       }
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, p_tens.getArrayPointer(), 9, 
-                                MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, p_tens.getArrayPointer(), 9, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       RealType volume = this->getVolume();
@@ -379,23 +379,23 @@ namespace OpenMD {
       
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pChg, 1, MPI::REALTYPE, 
-                                MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &nChg, 1, MPI::REALTYPE, 
-                                MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &pChg, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &nChg, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      
+      MPI_Allreduce(MPI_IN_PLACE, &pCount, 1, MPI_INTEGER, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &nCount, 1, MPI_INTEGER, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      
+      MPI_Allreduce(MPI_IN_PLACE, pPos.getArrayPointer(), 3, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, nPos.getArrayPointer(), 3, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &pCount, 1, MPI::INTEGER, 
-                                MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &nCount, 1, MPI::INTEGER, 
-                                MPI::SUM);
-
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, pPos.getArrayPointer(), 3, 
-                                MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, nPos.getArrayPointer(), 3, 
-                                MPI::REALTYPE, MPI::SUM);
-
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, dipoleVector.getArrayPointer(),
-                                3, MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, dipoleVector.getArrayPointer(),
+                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       // first load the accumulated dipole moment (if dipoles were present)
@@ -498,8 +498,8 @@ namespace OpenMD {
      *  reduced among all processors.
      */
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &heatFluxJc[0], 3, MPI::REALTYPE, 
-                              MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &heatFluxJc[0], 3, MPI_REALTYPE, 
+                  MPI_SUM, MPI_COMM_WORLD);
 #endif
     
     // (kcal/mol * A/fs) * conversion => (amu A^3)/fs^3
@@ -531,10 +531,10 @@ namespace OpenMD {
       }  
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalMass, 1, MPI::REALTYPE, 
-                                MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, comVel.getArrayPointer(), 3, 
-                                MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &totalMass, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, comVel.getArrayPointer(), 3, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       comVel /= totalMass;
@@ -562,10 +562,10 @@ namespace OpenMD {
       }  
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalMass, 1, MPI::REALTYPE, 
-                                MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, com.getArrayPointer(), 3, 
-                                MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &totalMass, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, com.getArrayPointer(), 3, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       com /= totalMass;
@@ -600,12 +600,12 @@ namespace OpenMD {
       }  
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalMass, 1, MPI::REALTYPE, 
-                                MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, com.getArrayPointer(), 3, 
-                                MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, comVel.getArrayPointer(), 3, 
-                                MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &totalMass, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, com.getArrayPointer(), 3, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, comVel.getArrayPointer(), 3, 
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       com /= totalMass;
@@ -684,11 +684,11 @@ namespace OpenMD {
       inertiaTensor(2,2) = xx + yy;
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, inertiaTensor.getArrayPointer(),
-                                9, MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, 
-                                angularMomentum.getArrayPointer(), 3,
-                                MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, inertiaTensor.getArrayPointer(),
+                    9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, 
+                    angularMomentum.getArrayPointer(), 3,
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       snap->setCOMw(angularMomentum);
@@ -745,11 +745,11 @@ namespace OpenMD {
       }
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bMax[0], 3, MPI::REALTYPE, 
-                                MPI::MAX);
+      MPI_Allreduce(MPI_IN_PLACE, &bMax[0], 3, MPI_REALTYPE, 
+                    MPI_MAX, MPI_COMM_WORLD);
 
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bMin[0], 3, MPI::REALTYPE, 
-                                MPI::MIN);
+      MPI_Allreduce(MPI_IN_PLACE, &bMin[0], 3, MPI_REALTYPE, 
+                    MPI_MIN, MPI_COMM_WORLD);
 #endif
       Mat3x3d bBox = Mat3x3d(0.0);
       for (int i = 0; i < 3; i++) {           
@@ -792,9 +792,9 @@ namespace OpenMD {
       }  
       
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, 
-                                angularMomentum.getArrayPointer(), 3,
-                                MPI::REALTYPE, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, 
+                    angularMomentum.getArrayPointer(), 3,
+                    MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       snap->setCOMw(angularMomentum);
@@ -887,9 +887,9 @@ namespace OpenMD {
           data[0] = pos1.x();
           data[1] = pos1.y();
           data[2] = pos1.z();          
-          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc1);
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
         } else {
-          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc1);
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
           pos1 = Vector3d(data);
         }
 
@@ -899,9 +899,9 @@ namespace OpenMD {
           data[0] = pos2.x();
           data[1] = pos2.y();
           data[2] = pos2.z();  
-          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc2);
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
         } else {
-          MPI::COMM_WORLD.Bcast(data, 3, MPI::REALTYPE, proc2);
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
           pos2 = Vector3d(data);
         }
 #else

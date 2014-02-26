@@ -66,16 +66,20 @@
 #ifdef SINGLE_PRECISION
 typedef float RealType;
 #ifdef IS_MPI
+#define MPI_REALTYPE MPI_FLOAT
+#define MPI_REALTYPE_INT MPI_FLOAT_INT
 // Leave MPI:: namespace out for use by Communicator:
-#define REALTYPE FLOAT
-#define REALTYPE_INT FLOAT_INT
+//#define REALTYPE FLOAT
+//#define REALTYPE_INT FLOAT_INT
 #endif
 #else
 typedef double RealType;
 #ifdef IS_MPI
+#define MPI_REALTYPE MPI_DOUBLE
+#define MPI_REALTYPE_INT MPI_DOUBLE_INT
 // Leave MPI:: namespace out for use by Communicator:
-#define REALTYPE DOUBLE
-#define REALTYPE_INT DOUBLE_INT
+//#define REALTYPE DOUBLE
+//#define REALTYPE_INT DOUBLE_INT
 #endif
 #endif
 

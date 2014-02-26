@@ -61,6 +61,7 @@
 #include "math/erfc.hpp"
 #include "math/SquareMatrix.hpp"
 #include "primitives/Molecule.hpp"
+#include "flucq/FluctuatingChargeForces.hpp"
 
 namespace OpenMD {
   
@@ -70,8 +71,20 @@ namespace OpenMD {
                                   haveDampingAlpha_(false), 
                                   haveDielectric_(false),
                                   haveElectroSplines_(false)
-  {}
+  {
+    flucQ_ = new FluctuatingChargeForces(info_);
+  }
   
+  void Electrostatic::setForceField(ForceField *ff) {
+    forceField_ = ff;
+    flucQ_->setForceField(forceField_);
+  }
+
+  void Electrostatic::setSimulatedAtomTypes(set<AtomType*> &simtypes) {
+    simTypes_ = simtypes;
+    flucQ_->setSimulatedAtomTypes(simTypes_);
+  }
+
   void Electrostatic::initialize() { 
     
     Globals* simParams_ = info_->getSimParams();
@@ -1140,9 +1153,11 @@ namespace OpenMD {
         
     if (i_is_Fluctuating) {
       C_a += *(sdat.flucQ);
-      *(sdat.flucQfrc) -=  *(sdat.flucQ) * data.hardness + data.electronegativity;
-      (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY] += (*sdat.flucQ) * 
-        (*(sdat.flucQ) * data.hardness * 0.5 + data.electronegativity);
+
+      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ),  
+                                 (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY], 
+                                 *(sdat.flucQfrc) );
+
     }
 
     switch (summationMethod_) {
@@ -1458,18 +1473,18 @@ namespace OpenMD {
             qkss = std::accumulate(qks.begin(),qks.end(),0.0);
             
 #ifdef IS_MPI
-            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &ckcs, 1, MPI::REALTYPE, 
-                                      MPI::SUM);
-            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &ckss, 1, MPI::REALTYPE, 
-                                      MPI::SUM);
-            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &dkcs, 1, MPI::REALTYPE, 
-                                      MPI::SUM);
-            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &dkss, 1, MPI::REALTYPE, 
-                                      MPI::SUM);
-            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &qkcs, 1, MPI::REALTYPE, 
-                                      MPI::SUM);
-            MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &qkss, 1, MPI::REALTYPE, 
-                                      MPI::SUM);
+            MPI_Allreduce(MPI_IN_PLACE, &ckcs, 1, MPI_REALTYPE, 
+                          MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &ckss, 1, MPI_REALTYPE, 
+                          MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &dkcs, 1, MPI_REALTYPE, 
+                          MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &dkss, 1, MPI_REALTYPE, 
+                          MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &qkcs, 1, MPI_REALTYPE, 
+                          MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &qkss, 1, MPI_REALTYPE, 
+                          MPI_SUM, MPI_COMM_WORLD);
 #endif        
             
             // Accumulate potential energy and virial contribution:

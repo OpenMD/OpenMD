@@ -103,29 +103,39 @@ namespace OpenMD {
       const int masterNode = 0;
 
       if (worldRank == masterNode) {
-        MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
+        MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        // MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 #endif                 
         SimplePreprocessor preprocessor;
-        preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
+        preprocessor.preprocess(rawMetaDataStream, filename, 
+                                startOfMetaDataBlock, ppStream);
                 
 #ifdef IS_MPI            
-        //brocasting the stream size
+        //broadcasting the stream size
         streamSize = ppStream.str().size() +1;
-        MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
-        MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI::CHAR, masterNode);
+        MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), 
+                  streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+
+        // MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
+        // MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), 
+        //                       streamSize, MPI::CHAR, masterNode);
                            
       } else {
-        MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
+
+        MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        // MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 
         //get stream size
-        MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
-
+        MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
+        // MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
         char* buf = new char[streamSize];
         assert(buf);
                 
         //receive file content
-        MPI::COMM_WORLD.Bcast(buf, streamSize, MPI::CHAR, masterNode);
-                
+        MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+        // MPI::COMM_WORLD.Bcast(buf, streamSize, MPI::CHAR, masterNode);
+
         ppStream.str(buf);
         delete [] buf;
       }
@@ -149,7 +159,6 @@ namespace OpenMD {
       parser.initializeASTFactory(factory);
       parser.setASTFactory(&factory);
       parser.mdfile();
-
       // Create a tree parser that reads information into Globals
       MDTreeParser treeParser;
       treeParser.initializeASTFactory(factory);
@@ -520,7 +529,8 @@ namespace OpenMD {
                                                     // error
                                                     // condition:
     
-    nProcessors = MPI::COMM_WORLD.Get_size();
+    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);    
+    //nProcessors = MPI::COMM_WORLD.Get_size();
     
     if (nProcessors > nGlobalMols) {
       sprintf(painCave.errMsg,
@@ -639,11 +649,13 @@ namespace OpenMD {
       delete myRandom;
 
       // Spray out this nonsense to all other processors:
-      MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
+      MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
+      // MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
     } else {
       
       // Listen to your marching orders from processor 0:
-      MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
+      MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
+      // MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
 
     }
     
@@ -917,9 +929,12 @@ namespace OpenMD {
     // This would be prettier if we could use MPI_IN_PLACE like the MPI-2
     // docs said we could.
     std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
-    MPI::COMM_WORLD.Allreduce(&globalGroupMembership[0], 
-                              &tmpGroupMembership[0], nGlobalAtoms,
-                              MPI::INT, MPI::SUM);
+    MPI_Allreduce(&globalGroupMembership[0], 
+                  &tmpGroupMembership[0], nGlobalAtoms,
+                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&globalGroupMembership[0], 
+    //                           &tmpGroupMembership[0], nGlobalAtoms,
+    //                           MPI::INT, MPI::SUM);
     info->setGlobalGroupMembership(tmpGroupMembership);
 #else
     info->setGlobalGroupMembership(globalGroupMembership);
@@ -943,9 +958,12 @@ namespace OpenMD {
 #ifdef IS_MPI
     std::vector<int> tmpMolMembership(info->getNGlobalAtoms() + 
                                       info->getNGlobalRigidBodies(), 0);
-    MPI::COMM_WORLD.Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
-                              nGlobalAtoms + nGlobalRigidBodies,
-                              MPI::INT, MPI::SUM);
+    MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
+                  nGlobalAtoms + nGlobalRigidBodies,
+                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
+    //                           nGlobalAtoms + nGlobalRigidBodies,
+    //                           MPI::INT, MPI::SUM);
     
     info->setGlobalMolMembership(tmpMolMembership);
 #else
@@ -963,8 +981,10 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     std::vector<int> numIntegrableObjectsPerMol(info->getNGlobalMolecules(), 0);
-    MPI::COMM_WORLD.Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
-                              info->getNGlobalMolecules(), MPI::INT, MPI::SUM);
+    MPI_Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
+      info->getNGlobalMolecules(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    // MPI::COMM_WORLD.Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
+    //                           info->getNGlobalMolecules(), MPI::INT, MPI::SUM);
 #else
     std::vector<int> numIntegrableObjectsPerMol = nIOPerMol;
 #endif    
