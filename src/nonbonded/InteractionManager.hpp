@@ -55,6 +55,7 @@
 #include "nonbonded/MAW.hpp"
 #include "nonbonded/RepulsivePower.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
+#include "flucq/FluctuatingChargeForces.hpp"
 
 using namespace std;
 
@@ -100,6 +101,7 @@ namespace OpenMD {
     Electrostatic* electrostatic_;
     RepulsivePower* repulsivePower_;
     MAW* maw_;
+    FluctuatingChargeForces* flucq_;
     
     map<int, AtomType*> typeMap_;
     /**

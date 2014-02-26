@@ -53,7 +53,18 @@ namespace OpenMD {
     FluctuatingChargeAtomTypesSectionParser(ForceFieldOptions& options);
 
   private:
+
+    enum FluctuatingTypeEnum{
+      fqtHardness,
+      fqtMultipleMinima,
+      fqtUnknown
+    };
+
     void parseLine(ForceField& ff, const string& line, int lineNo);
+
+    FluctuatingTypeEnum getFluctuatingTypeEnum(const std::string& str);  
+    std::map<std::string, FluctuatingTypeEnum> stringToEnumMap_;   
+
     ForceFieldOptions& options_;
   };
 }

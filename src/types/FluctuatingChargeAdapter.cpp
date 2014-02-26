@@ -88,6 +88,11 @@ namespace OpenMD {
     return fqData->getData();
   }
   
+  bool FluctuatingChargeAdapter::hasMultipleMinima() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->hasMultipleMinima;
+  }
+    
   RealType FluctuatingChargeAdapter::getChargeMass() {    
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->chargeMass;
@@ -108,6 +113,18 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->slaterZeta;
   }
+  RealType FluctuatingChargeAdapter::getCurvature() {    
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->curvature;
+  }
+  RealType FluctuatingChargeAdapter::getCoupling() {    
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->coupling;
+  }
+  vector<pair<int, RealType> > FluctuatingChargeAdapter::getDiabaticStates() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->diabaticStates;
+  }
   
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType electronegativity,
@@ -121,6 +138,8 @@ namespace OpenMD {
     
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
+
     fqParam->electronegativity = electronegativity;
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
@@ -139,7 +158,10 @@ namespace OpenMD {
     }
 
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
+
     fqParam->electronegativity = electronegativity;
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
@@ -147,4 +169,24 @@ namespace OpenMD {
         
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType curvature,
+                                                       RealType coupling,
+                                 vector<pair<int, RealType> > diabaticStates) {
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+    
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = true;
+
+    fqParam->curvature = curvature;
+    fqParam->coupling = coupling;
+    fqParam->diabaticStates = diabaticStates;
+
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
 }

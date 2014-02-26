@@ -207,13 +207,10 @@ src/antlr/ASTNULLType.cpp
 src/antlr/ASTRefCount.cpp
 src/antlr/BaseAST.cpp
 src/antlr/BitSet.cpp
-src/antlr/CharBuffer.cpp
-src/antlr/CharScanner.cpp
 src/antlr/CommonAST.cpp
 src/antlr/CommonASTWithHiddenTokens.cpp
 src/antlr/CommonHiddenStreamToken.cpp
 src/antlr/CommonToken.cpp
-src/antlr/InputBuffer.cpp
 src/antlr/LLkParser.cpp
 src/antlr/MismatchedCharException.cpp
 src/antlr/MismatchedTokenException.cpp
@@ -223,7 +220,6 @@ src/antlr/Parser.cpp
 src/antlr/RecognitionException.cpp
 src/antlr/String.cpp
 src/antlr/Token.cpp
-src/antlr/TokenBuffer.cpp
 src/antlr/TokenRefCount.cpp
 src/antlr/TokenStreamBasicFilter.cpp
 src/antlr/TokenStreamHiddenTokenFilter.cpp
@@ -249,6 +245,7 @@ src/flucq/FluctuatingChargeLangevin.cpp
 src/flucq/FluctuatingChargeParameters.cpp
 src/flucq/FluctuatingChargeNVT.cpp
 src/flucq/FluctuatingChargePropagator.cpp
+src/flucq/FluctuatingChargeForces.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
@@ -305,9 +302,6 @@ src/math/SeqRandNumGen.cpp
 src/math/SphericalHarmonic.cpp
 src/math/Wigner3jm.cpp
 src/mdParser/FilenameObserver.cpp
-src/mdParser/MDLexer.cpp
-src/mdParser/MDParser.cpp
-src/mdParser/MDTreeParser.cpp
 src/optimization/OptimizationFactory.cpp
 src/optimization/Armijo.cpp
 src/optimization/BFGS.cpp
@@ -402,6 +396,13 @@ src/clusters/Decahedron.cpp
 )
 
 set( PARALLEL_SOURCE
+src/antlr/CharBuffer.cpp
+src/antlr/CharScanner.cpp
+src/antlr/InputBuffer.cpp
+src/antlr/TokenBuffer.cpp
+src/mdParser/MDLexer.cpp
+src/mdParser/MDParser.cpp
+src/mdParser/MDTreeParser.cpp
 src/brains/ForceManager.cpp
 src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp

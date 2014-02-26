@@ -75,7 +75,6 @@ namespace QuantLib {
             if (lineSearch_->succeed())
             {
                 // Updates
-
                 // New point
                 x_ = lineSearch_->lastX();
                 // New function value
@@ -93,9 +92,11 @@ namespace QuantLib {
                 lineSearch_->searchDirection() = direction;
                 // Now compute accuracy and check end criteria
                 // Numerical Recipes exit strategy on fx (see NR in C++, p.423)
+
                 fnew = P.functionValue();
                 fdiff = 2.0*std::fabs(fnew-fold) /
                     (std::fabs(fnew) + std::fabs(fold) + NumericConstant::epsilon);
+
                 if (fdiff < ftol ||
                     endCriteria.checkMaxIterations(iterationNumber_, ecType)) {
                     endCriteria.checkStationaryFunctionValue(0.0, 0.0,
@@ -103,6 +104,7 @@ namespace QuantLib {
                     endCriteria.checkMaxIterations(iterationNumber_, ecType);
                     return ecType;
                 }
+
                 P.setCurrentValue(x_);      // update problem current value
                 ++iterationNumber_;         // Increase iteration number
                 first_time = false;

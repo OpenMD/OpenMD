@@ -49,6 +49,7 @@
 #include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
 #include "brains/SimInfo.hpp"
+#include "flucq/FluctuatingChargeForces.hpp"
 
 namespace OpenMD {
 
@@ -57,11 +58,15 @@ namespace OpenMD {
     bool is_Dipole;
     bool is_Quadrupole;
     bool is_Fluctuating;
+    bool has_MultipleMinima;
     RealType fixedCharge;
     RealType hardness;
     RealType electronegativity;
     int slaterN;
     RealType slaterZeta;
+    RealType curvature;
+    RealType coupling;
+    vector<pair<int, RealType> > diabats;
     Vector3d dipole;
     Mat3x3d  quadrupole;
   };
@@ -87,8 +92,8 @@ namespace OpenMD {
     
   public:    
     Electrostatic();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
+    void setForceField(ForceField *ff);
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes);
     void setSimInfo(SimInfo* info) {info_ = info;};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
@@ -124,6 +129,7 @@ namespace OpenMD {
 
     SimInfo* info_;
     ForceField* forceField_;
+    FluctuatingChargeForces* flucQ_;
     set<AtomType*> simTypes_;
     RealType cutoffRadius_;
     RealType pre11_;

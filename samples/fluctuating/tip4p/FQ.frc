@@ -33,7 +33,6 @@ end ChargeAtomTypes
 
 
 begin FluctuatingChargeAtomTypes
-//Name	   chi (kcal/mol e)   hardness (kcal/(mol*e^2))  slaterN   slaterZeta   ChargeMass (fs^2 kcal/ e^2 mol)
 //Values obtained from Rick, Stuart, and Berne J Chem Phys, 1994, 101
 //Since they gave chi as an electronegativity difference, we will assign Oxygen's (the M site 
 //actually for TIP4P) electronegativity from Rappe and Goddard III, and setting H to equal 
@@ -43,6 +42,7 @@ begin FluctuatingChargeAtomTypes
 // SlaterZeta has units of Bohr radius
 // Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
 // this code and the Rick, Stuart, and Berne paper
-H_TIP4P_FQ  133.0805   353.0   1	  0.90	  60.0
-M_TIP4P_FQ  201.5705   371.6   2	  1.63	  60.0
+//Name	   ChargeMass (fs^2 kcal/e^2 mol) chi (kcal/mol e)   hardness (kcal/(mol*e^2))  slaterN   slaterZeta
+H_TIP4P_FQ  60.0 Hardness 133.0805   353.0   1	  0.90
+M_TIP4P_FQ  60.0 Hardness 201.5705   371.6   2	  1.63
 end FluctuatingChargeAtomTypes

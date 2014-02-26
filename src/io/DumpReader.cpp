@@ -203,7 +203,7 @@ namespace OpenMD {
 #ifdef IS_MPI 
     } 
      
-    MPI::COMM_WORLD.Bcast(&nframes_, 1, MPI::INT, 0); 
+    MPI_Bcast(&nframes_, 1, MPI_INT, 0, MPI_COMM_WORLD); 
     
 #endif // is_mpi 
     
@@ -289,18 +289,18 @@ namespace OpenMD {
       }
 
       int sendBufferSize = sendBuffer.size();
-      MPI::COMM_WORLD.Bcast(&sendBufferSize, 1, MPI::INT, masterNode);     
-      MPI::COMM_WORLD.Bcast((void *)sendBuffer.c_str(), sendBufferSize, 
-                            MPI::CHAR, masterNode);     
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+      MPI_Bcast((void *)sendBuffer.c_str(), sendBufferSize, 
+                MPI_CHAR, masterNode, MPI_COMM_WORLD);     
       
       sstream.str(sendBuffer);
     } else {
       int sendBufferSize;
-      MPI::COMM_WORLD.Bcast(&sendBufferSize, 1, MPI::INT, masterNode);
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
       char * recvBuffer = new char[sendBufferSize+1];
       assert(recvBuffer);
       recvBuffer[sendBufferSize] = '\0';
-      MPI::COMM_WORLD.Bcast(recvBuffer, sendBufferSize, MPI::CHAR, masterNode);
+      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
       sstream.str(recvBuffer);
       delete [] recvBuffer;
     }      

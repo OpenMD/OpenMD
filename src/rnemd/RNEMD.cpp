@@ -754,15 +754,18 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI    
-    int worldRank = MPI::COMM_WORLD.Get_rank();
-    
-    bool my_min_found = min_found;
-    bool my_max_found = max_found;
+    int worldRank;
+    MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
+         
+    int my_min_found = min_found;
+    int my_max_found = max_found;
 
     // Even if we didn't find a minimum, did someone else?
-    MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 1, MPI::BOOL, MPI::LOR);
+    MPI_Allreduce(&my_min_found, &min_found, 1, MPI_INT, MPI_LOR, 
+                  MPI_COMM_WORLD);
     // Even if we didn't find a maximum, did someone else?
-    MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 1, MPI::BOOL, MPI::LOR);
+    MPI_Allreduce(&my_max_found, &max_found, 1, MPI_INT, MPI_LOR, 
+                  MPI_COMM_WORLD);
 #endif
 
     if (max_found && min_found) {
@@ -781,8 +784,8 @@ namespace OpenMD {
       min_vals.rank = worldRank;    
       
       // Who had the minimum?
-      MPI::COMM_WORLD.Allreduce(&min_vals, &min_vals, 
-                                1, MPI::REALTYPE_INT, MPI::MINLOC);
+      MPI_Allreduce(&min_vals, &min_vals, 
+                    1, MPI_REALTYPE_INT, MPI_MINLOC, MPI_COMM_WORLD);
       min_val = min_vals.val;
       
       if (my_max_found) {
@@ -793,8 +796,8 @@ namespace OpenMD {
       max_vals.rank = worldRank;    
       
       // Who had the maximum?
-      MPI::COMM_WORLD.Allreduce(&max_vals, &max_vals, 
-                                1, MPI::REALTYPE_INT, MPI::MAXLOC);
+      MPI_Allreduce(&max_vals, &max_vals, 
+                    1, MPI_REALTYPE_INT, MPI_MAXLOC, MPI_COMM_WORLD);
       max_val = max_vals.val;
 #endif
       
@@ -854,13 +857,13 @@ namespace OpenMD {
           
           Vector3d min_vel;
           Vector3d max_vel = max_sd->getVel();
-          MPI::Status status;
+          MPI_Status* status;
 
           // point-to-point swap of the velocity vector
-          MPI::COMM_WORLD.Sendrecv(max_vel.getArrayPointer(), 3, MPI::REALTYPE,
-                                   min_vals.rank, 0, 
-                                   min_vel.getArrayPointer(), 3, MPI::REALTYPE,
-                                   min_vals.rank, 0, status);
+          MPI_Sendrecv(max_vel.getArrayPointer(), 3, MPI_REALTYPE,
+                       min_vals.rank, 0, 
+                       min_vel.getArrayPointer(), 3, MPI_REALTYPE,
+                       min_vals.rank, 0, MPI_COMM_WORLD, status);
           
           switch(rnemdFluxType_) {
           case rnemdKE :
@@ -871,11 +874,11 @@ namespace OpenMD {
               Vector3d max_angMom = max_sd->getJ();
               
               // point-to-point swap of the angular momentum vector
-              MPI::COMM_WORLD.Sendrecv(max_angMom.getArrayPointer(), 3, 
-                                       MPI::REALTYPE, min_vals.rank, 1, 
-                                       min_angMom.getArrayPointer(), 3, 
-                                       MPI::REALTYPE, min_vals.rank, 1, 
-                                       status);
+              MPI_Sendrecv(max_angMom.getArrayPointer(), 3, 
+                           MPI_REALTYPE, min_vals.rank, 1, 
+                           min_angMom.getArrayPointer(), 3, 
+                           MPI_REALTYPE, min_vals.rank, 1, 
+                           MPI_COMM_WORLD, status);
               
               max_sd->setJ(min_angMom);
 	    }
@@ -900,13 +903,13 @@ namespace OpenMD {
           
           Vector3d max_vel;
           Vector3d min_vel = min_sd->getVel();
-          MPI::Status status;
+          MPI_Status* status;
           
           // point-to-point swap of the velocity vector
-          MPI::COMM_WORLD.Sendrecv(min_vel.getArrayPointer(), 3, MPI::REALTYPE,
-                                   max_vals.rank, 0, 
-                                   max_vel.getArrayPointer(), 3, MPI::REALTYPE,
-                                   max_vals.rank, 0, status);
+          MPI_Sendrecv(min_vel.getArrayPointer(), 3, MPI_REALTYPE,
+                       max_vals.rank, 0, 
+                       max_vel.getArrayPointer(), 3, MPI_REALTYPE,
+                       max_vals.rank, 0, MPI_COMM_WORLD, status);
           
           switch(rnemdFluxType_) {
           case rnemdKE :
@@ -917,11 +920,11 @@ namespace OpenMD {
               Vector3d max_angMom;
               
               // point-to-point swap of the angular momentum vector
-              MPI::COMM_WORLD.Sendrecv(min_angMom.getArrayPointer(), 3, 
-                                       MPI::REALTYPE, max_vals.rank, 1, 
-                                       max_angMom.getArrayPointer(), 3, 
-                                       MPI::REALTYPE, max_vals.rank, 1, 
-                                       status);
+              MPI_Sendrecv(min_angMom.getArrayPointer(), 3, 
+                           MPI_REALTYPE, max_vals.rank, 1, 
+                           max_angMom.getArrayPointer(), 3, 
+                           MPI_REALTYPE, max_vals.rank, 1, 
+                           MPI_COMM_WORLD, status);
               
               min_sd->setJ(max_angMom);
             }
@@ -1090,22 +1093,22 @@ namespace OpenMD {
     Kcw *= 0.5;
 
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Phx, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Phy, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Phz, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Pcx, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Pcy, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Pcz, 1, MPI::REALTYPE, MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &Phx, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Phy, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Phz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Pcx, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Pcy, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Pcz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khx, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khy, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khz, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Khw, 1, MPI::REALTYPE, MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &Khx, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Khy, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Khz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Khw, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcx, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcy, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcz, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kcw, 1, MPI::REALTYPE, MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &Kcx, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kcy, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kcz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kcw, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 
     //solve coldBin coeff's first
@@ -1582,18 +1585,22 @@ namespace OpenMD {
     Kc *= 0.5;
     
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Ph[0], 3, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Pc[0], 3, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Lh[0], 3, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Lc[0], 3, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Mh, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kh, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Mc, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &Kc, 1, MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, Ih.getArrayPointer(), 9, 
-                              MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, Ic.getArrayPointer(), 9, 
-                              MPI::REALTYPE, MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &Ph[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Pc[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Lh[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Lc[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Mh, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kh, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Mc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, Ih.getArrayPointer(), 9, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, Ic.getArrayPointer(), 9, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
     
 
@@ -1987,23 +1994,23 @@ namespace OpenMD {
 #ifdef IS_MPI
 
     for (int i = 0; i < nBins_; i++) {
-
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binCount[i],
-                                1, MPI::INT, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binMass[i],
-                                1, MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binP[i],
-                                3, MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binL[i],
-                                3, MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binI[i],
-                                9, MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binKE[i],
-                                1, MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binDOF[i],
-                                1, MPI::INT, MPI::SUM);
-      //MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &binOmega[i],
-      //                          1, MPI::REALTYPE, MPI::SUM);
+      
+      MPI_Allreduce(MPI_IN_PLACE, &binCount[i],
+                    1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binMass[i],
+                    1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binP[i],
+                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binL[i],
+                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binI[i],
+                    9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binKE[i],
+                    1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binDOF[i],
+                    1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+      //MPI_Allreduce(MPI_IN_PLACE, &binOmega[i],
+      //                          1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     }
     
 #endif
@@ -2099,7 +2106,9 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     // If we're the root node, should we print out the results
-    int worldRank = MPI::COMM_WORLD.Get_rank();
+    int worldRank;
+    MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
+
     if (worldRank == 0) {
 #endif
       rnemdFile_.open(rnemdFileName_.c_str(), std::ios::out | std::ios::trunc );

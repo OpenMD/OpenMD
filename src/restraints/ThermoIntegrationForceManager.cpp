@@ -150,10 +150,10 @@ namespace OpenMD {
       
 #ifdef IS_MPI
     RealType restPot;
-    MPI::COMM_WORLD.Allreduce(&restPot_local, &restPot, 1, 
-                              MPI::REALTYPE, MPI::SUM);
-    MPI::COMM_WORLD.Allreduce(&vHarm_local, &vHarm_, 1, 
-                              MPI::REALTYPE, MPI::SUM);         
+    MPI_Allreduce(&restPot_local, &restPot, 1, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&vHarm_local, &vHarm_, 1, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);         
     lrPot_ += restPot;
 #else
     lrPot_ += restPot_local;

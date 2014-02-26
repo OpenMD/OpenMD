@@ -12,8 +12,8 @@ namespace QuantLib {
 #ifdef IS_MPI
     // in parallel, we need to add up the contributions from all
     // processors:
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &dp, 1, MPI::REALTYPE, 
-                              MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &dp, 1, MPI_REALTYPE, 
+                  MPI_SUM, MPI_COMM_WORLD);
 #endif
     return dp;    
   }
@@ -24,8 +24,8 @@ namespace QuantLib {
 #ifdef IS_MPI
     // in parallel, we need to add up the contributions from all
     // processors:
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &dot, 1, MPI::REALTYPE, 
-                              MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &dot, 1, MPI_REALTYPE, 
+                  MPI_SUM, MPI_COMM_WORLD);
 #endif
     return dot;
 

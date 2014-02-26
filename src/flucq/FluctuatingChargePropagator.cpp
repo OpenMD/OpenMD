@@ -92,8 +92,9 @@ namespace OpenMD {
          mol = info_->nextMolecule(i)) {
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        atom->setFlucQPos(0.0);
-        atom->setFlucQVel(0.0);
+        cerr << " starts with = " << atom->getFlucQPos() << "\n";
+        //atom->setFlucQPos(0.0);
+        //atom->setFlucQVel(0.0);
       }
     }
     
@@ -111,6 +112,7 @@ namespace OpenMD {
     DumpStatusFunction dsf(info_);  // we want a dump file written
                                     // every iteration
     minim->minimize(problem, endCriteria);
+    cerr << "back from minim\n";
     initialized_ = true;
   }
 

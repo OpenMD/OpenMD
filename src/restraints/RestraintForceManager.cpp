@@ -136,7 +136,9 @@ namespace OpenMD {
           // this proc doesn't have the molecule.  Do a quick check to
           // make sure another processor is supposed to have it.
          
-          int myrank = MPI::COMM_WORLD.Get_rank();
+          int myrank;
+          MPI_Comm_rank( MPI_COMM_WORLD, &myrank);
+
           if (info_->getMolToProc(molIndex) == myrank) {
          
             // If we were supposed to have it but got a null, then freak out.
@@ -158,7 +160,8 @@ namespace OpenMD {
 #ifdef IS_MPI
         // only handle this molecular restraint if this processor owns the
         // molecule
-        int myrank = MPI::COMM_WORLD.Get_rank();
+        int myrank;
+        MPI_Comm_rank( MPI_COMM_WORLD, &myrank);
         if (info_->getMolToProc(molIndex) == myrank) {
 
 #endif
@@ -315,8 +318,8 @@ namespace OpenMD {
     restPot_local = doRestraints(1.0);
 
 #ifdef IS_MPI    
-    MPI::COMM_WORLD.Allreduce(&restPot_local, &restPot, 1, 
-                              MPI::REALTYPE, MPI::SUM);
+    MPI_Allreduce(&restPot_local, &restPot, 1, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #else
     restPot = restPot_local;
 #endif

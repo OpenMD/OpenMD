@@ -168,7 +168,7 @@ namespace OpenMD {
     }
 
 #ifdef IS_MPI
-    MPI::COMM_WORLD.Allreduce(&dispmax, &dispmax, 1, MPI::REALTYPE, MPI::MAX);
+    MPI_Allreduce(&dispmax, &dispmax, 1, MPI_REALTYPE, MPI_MAX, MPI_COMM_WORLD);
 #endif
 
     // a conservative test of list skin crossings

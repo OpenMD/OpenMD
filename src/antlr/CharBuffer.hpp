@@ -40,10 +40,11 @@ public:
 	int getChar();
 
 protected:
+
+private:
 	// character source
 	ANTLR_USE_NAMESPACE(std)istream& input;
 
-private:
 	// NOTE: Unimplemented
 	CharBuffer(const CharBuffer& other);
 	CharBuffer& operator=(const CharBuffer& other);

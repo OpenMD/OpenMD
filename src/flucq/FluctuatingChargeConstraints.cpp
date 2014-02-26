@@ -135,14 +135,14 @@ namespace OpenMD {
 #ifdef IS_MPI
     // in parallel, we need to add up the contributions from all
     // processors:
-    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &totalFrc, 1, MPI::REALTYPE, 
-                              MPI::SUM);
+    MPI_Allreduce(MPI_IN_PLACE, &totalFrc, 1, MPI_REALTYPE, 
+                  MPI_SUM, MPI_COMM_WORLD);
 
     if (constrainRegions_) {
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &regionForce_[0], 
-                                regionForce_.size(), MPI::REALTYPE, MPI::SUM);
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &regionCharges_[0], 
-                                regionCharges_.size(), MPI::INT, MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &regionForce_[0], 
+                    regionForce_.size(), MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &regionCharges_[0], 
+                    regionCharges_.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     }
 
 #endif
@@ -183,9 +183,9 @@ namespace OpenMD {
 
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        //constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
+        constrainedFrc = atom->getFlucQFrc() - totalFrc - totalMolFrc;
 
-        constrainedFrc = atom->getFlucQFrc() - totalMolFrc;
+        //constrainedFrc = atom->getFlucQFrc() - totalMolFrc;
 
         if (constrainRegions_) 
           constrainedFrc -= regionFrc;
