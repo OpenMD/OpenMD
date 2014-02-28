@@ -245,7 +245,6 @@ src/flucq/FluctuatingChargeLangevin.cpp
 src/flucq/FluctuatingChargeParameters.cpp
 src/flucq/FluctuatingChargeNVT.cpp
 src/flucq/FluctuatingChargePropagator.cpp
-src/flucq/FluctuatingChargeForces.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
@@ -410,6 +409,7 @@ src/brains/Thermo.cpp
 src/constraints/ZconstraintForceManager.cpp
 src/flucq/FluctuatingChargeConstraints.cpp
 src/flucq/FluctuatingChargeObjectiveFunction.cpp
+src/flucq/FluctuatingChargeForces.cpp
 src/integrators/LangevinHullForceManager.cpp
 src/rnemd/RNEMD.cpp
 src/integrators/Velocitizer.cpp
