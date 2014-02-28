@@ -113,7 +113,7 @@ namespace OpenMD {
 #ifdef IS_MPI            
         //broadcasting the stream size
         streamSize = ppStream.str().size() +1;
-        MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(&streamSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
         MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), 
                   streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
 
@@ -127,7 +127,7 @@ namespace OpenMD {
         // MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 
         //get stream size
-        MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(&streamSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
         // MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
         char* buf = new char[streamSize];
         assert(buf);
