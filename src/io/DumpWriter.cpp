@@ -304,7 +304,7 @@ namespace OpenMD {
   void DumpWriter::writeFrame(std::ostream& os) {
 
 #ifdef IS_MPI
-    MPI_Status* istatus;
+    MPI_Status istatus;
 #endif
 
     Molecule* mol;
@@ -397,7 +397,7 @@ namespace OpenMD {
         // prepared by processor i:        
         int recvLength;
         MPI_Recv(&recvLength, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, 
-                 istatus);
+                 &istatus);
 
         // create a buffer to receive the data
         char* recvBuffer = new char[recvLength];
@@ -405,7 +405,7 @@ namespace OpenMD {
         } else {
           // receive the data:
           MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 
-                               MPI_ANY_TAG, MPI_COMM_WORLD, istatus);
+                               MPI_ANY_TAG, MPI_COMM_WORLD, &istatus);
           // send it to the file:
           os << recvBuffer;
           // get rid of the receive buffer:
@@ -474,7 +474,7 @@ namespace OpenMD {
           // prepared by processor i:        
           int recvLength;
           MPI_Recv(&recvLength, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, 
-                   istatus);
+                   &istatus);
           
           // create a buffer to receive the data
           char* recvBuffer = new char[recvLength];
@@ -482,7 +482,7 @@ namespace OpenMD {
           } else {
             // receive the data:
             MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 
-                     MPI_ANY_TAG, MPI_COMM_WORLD, istatus);
+                     MPI_ANY_TAG, MPI_COMM_WORLD, &istatus);
             // send it to the file:
             os << recvBuffer;
             // get rid of the receive buffer:

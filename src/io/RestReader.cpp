@@ -68,7 +68,7 @@ namespace OpenMD {
   void RestReader::scanFile(){
 
     std::streampos prevPos;
-    std::streampos  currPos;
+    std::streampos currPos;
     
 #ifdef IS_MPI 
     

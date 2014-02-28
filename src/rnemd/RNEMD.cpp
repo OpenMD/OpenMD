@@ -623,11 +623,11 @@ namespace OpenMD {
     StuntDouble* sd;
 
     RealType min_val;
-    bool min_found = false;   
+    int min_found = 0;   
     StuntDouble* min_sd;
 
     RealType max_val;
-    bool max_found = false;
+    int max_found = 0;
     StuntDouble* max_sd;
 
     for (sd = seleManA_.beginSelected(selei); sd != NULL; 
@@ -682,7 +682,7 @@ namespace OpenMD {
       if (!max_found) {
         max_val = value;
         max_sd = sd;
-        max_found = true;
+        max_found = 1;
       } else {
         if (max_val < value) {
           max_val = value;
@@ -744,7 +744,7 @@ namespace OpenMD {
       if (!min_found) {
         min_val = value;
         min_sd = sd;
-        min_found = true;
+        min_found = 1;
       } else {
         if (min_val > value) {
           min_val = value;
@@ -1999,11 +1999,11 @@ namespace OpenMD {
                     1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binMass[i],
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binP[i],
+      MPI_Allreduce(MPI_IN_PLACE, binP[i].getArrayPointer(),
                     3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binL[i],
+      MPI_Allreduce(MPI_IN_PLACE, binL[i].getArrayPointer(),
                     3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binI[i],
+      MPI_Allreduce(MPI_IN_PLACE, binI[i].getArrayPointer(),
                     9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binKE[i],
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);

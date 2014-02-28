@@ -424,7 +424,7 @@ namespace OpenMD {
                                      gTypeCutoffs.end());
 
 #ifdef IS_MPI
-    MPI_Allreduce(&groupMax, &groupMax, 1, MPI_REALTYPE, 
+    MPI_Allreduce(MPI_IN_PLACE, &groupMax, 1, MPI_REALTYPE, 
                   MPI_MAX, MPI_COMM_WORLD);
 #endif
     
