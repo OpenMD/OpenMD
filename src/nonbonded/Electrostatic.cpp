@@ -1260,7 +1260,6 @@ namespace OpenMD {
     vector<vector<RealType> > els;
     vector<vector<RealType> > ems;
     vector<vector<RealType> > ens;
-
     
     int nMax = info_->getNAtoms();
     
@@ -1283,7 +1282,6 @@ namespace OpenMD {
     Vector3d t( 2.0 * M_PI );
     t.Vdiv(t, box);
 
-    
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
     int i;
@@ -1518,7 +1516,11 @@ namespace OpenMD {
                                             +skr[i]*(ckss+dkcs-qkss));
                
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
-                
+
+                if (atom->isFluctuatingCharge()) { 
+                  atom->addFlucQFrc( -2.0 * rvol * qtrq2 );
+                }
+                  
                 if (data.is_Dipole) {
                   atom->addTrq( 4.0 * rvol * qtrq1 * dxk[i] );
                 }

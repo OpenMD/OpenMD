@@ -231,6 +231,7 @@ namespace OpenMD {
                 "\t\t%s\n"
                 "\twill result in %d integrable objects being\n"
                 "\trestrained.\n", objectSelection.c_str(), selectionCount);
+        painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;
         simError();                     
 
@@ -391,6 +392,7 @@ namespace OpenMD {
 
       std::vector<Vector3d> struc;
       std::vector<Vector3d> forces;
+
       
       for(sd = (*rm)->beginIntegrableObject(ioi); sd != NULL; 
           sd = (*rm)->nextIntegrableObject(ioi)) {
@@ -451,7 +453,6 @@ namespace OpenMD {
       
       // phew.  At this point, we should have the pointer to the
       // correct Object restraint in the variable oRest.
-
       oRest->setScaleFactor(scalingFactor);
       
       Vector3d pos = (*ro)->getPos();

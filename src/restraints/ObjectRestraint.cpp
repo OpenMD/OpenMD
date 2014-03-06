@@ -52,6 +52,7 @@ namespace OpenMD {
       RealType r = del.length();
       Vector3d frc = -kDisp_ * del;
       RealType p = 0.5 * kDisp_ * del.lengthSquare();
+
       pot_ = p;
       force_ = frc * scaleFactor_;
       restInfo_[rtDisplacement] = std::make_pair(r,p);

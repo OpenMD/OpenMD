@@ -88,14 +88,14 @@ namespace OpenMD {
         currPos = inFile_->tellg(); 
         if (line.find("<Snapshot>")!= std::string::npos) {
           foundOpenSnapshotTag = true;
-          framePos_ = prevPos;
+          framePos_ = (long long) prevPos;
         }
         prevPos = currPos;
       }
       
 #ifdef IS_MPI 
     }
-    MPI_Bcast(&framePos_, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&framePos_, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
 #endif // is_mpi 
   } 
 
