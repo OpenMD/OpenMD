@@ -123,7 +123,7 @@ namespace OpenMD {
     std::istream* inFile_;
     std::string filename_;
 
-    std::streampos framePos_;
+    long long framePos_;
 
     const static int bufferSize = 4096;
     char buffer[bufferSize];
