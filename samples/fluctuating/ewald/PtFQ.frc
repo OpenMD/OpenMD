@@ -1,0 +1,108 @@
+! This is the forcefield file for the Embedded Atom Method Force Field (EAM_FF).
+!
+! There is only a section for AtomTypes which defines mass and the name
+! of the file which contains the rho(r), phi(r) and F[rho] functions.
+
+begin BaseAtomTypes
+Au	196.97
+Ag	107.87
+Cu	63.550
+Ni	58.710
+Pd	106.40
+Pt	195.09
+Al      26.98
+C	12.01
+O	16.00
+//C	1000000
+//O	1000000
+Na      22.99
+Cl      200
+M_CO	0.0
+end BaseAtomTypes
+
+begin EAMAtomTypes
+Au	Au.u3.funcfl
+Ag	Ag.u3.funcfl
+Cu	Cu.u3.funcfl
+Ni	Ni.u3.funcfl
+Pd	Pd.u3.funcfl
+Pt	Pt.u3.funcfl
+end EAMAtomTypes
+
+begin AtomTypes
+//name	baseatomtype
+CO	C
+OC	O
+C_FQ    C
+O_FQ	O
+M_FQ    M_CO
+Pt_FQ   Pt
+end AtomTypes
+
+begin ChargeAtomTypes
+Na 1.0
+Cl -1.0
+//My new values
+CO -0.831
+OC -1.062
+M_CO 1.891
+Pt_FQ 0.0
+end ChargeAtomTypes
+
+begin BondTypes
+//Atom1 Atom2 Harmonic b0 kb (kcal/mole)
+// not real values
+//CO  OC	Harmonic  1.13	9999.99
+end BondTypes
+
+begin LennardJonesAtomTypes
+//Not real values
+// epsilon sigma
+//Na   0.118   2.579 
+Cl   0.118   2.579 
+//J. P. Bouanich
+//J. Quant. Spectrosc. Radiation Transfer Vol 47, No. 4 pp 243-250, 1992
+//CO    0.0627 3.56379 
+//OC    0.1029339 3.0058
+
+//Karplus and Straub
+CO  0.0262  3.83
+OC  0.1591  3.12
+C_FQ 0.0262  3.83
+O_FQ 0.1591  3.12
+end LennardJonesAtomTypes
+
+begin NonBondedInteractions
+//LennardJones
+//sigma epsilon
+//Parameter Set 9, ...
+Pt CO LennardJones 1.3 15 
+//Pt_FQ Na LennardJones 3.0 0.5 
+Pt_FQ Cl LennardJones 3.0 0.5 
+
+//Repulsive Morse
+// r0  D0  beta0
+//Parameter Set 9, appeared to have best atop preference (may have been fluke)
+Pt OC ShiftedMorse 3.8 3.0 1.0
+
+end NonBondedInteractions
+
+begin MultipoleAtomTypes
+//
+end MultipoleAtomTypes
+
+begin FluctuatingChargeAtomTypes
+//Name     chi (kcal/mol e)   hardness (kcal/(mol*e^2))  slaterN   slaterZeta   ChargeMass (fs^2 kcal/ e^2 mol)
+//Values obtained from Rick, Stuart, and Berne J Chem Phys, 1994, 101
+//Since they gave chi as an electronegativity difference, we will assign Oxygen's (the M site
+//actually for TIP4P) electronegativity from Rappe and Goddard III, and setting H to equal
+//the difference
+// Rappe and Goddard, O or M chi: 8.741 eV = 201.5705 kcal/mol
+// Rick, Stuart, and Berne, delta Chi between O and H = 68.49
+// SlaterZeta has units of Bohr radius
+// Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
+// this code and the Rick, Stuart, and Berne paper
+//Name  chargeMass (fs^2 kcal/e^2 mol) hardness/multipleMinima chi (kcal/mol e) hardness (kcal/mol*e^2) slaterN slaterZeta 
+Pt_FQ 400.0 Hardness 128.5 158.86 6 1.81
+end FluctuatingChargeAtomTypes
+
