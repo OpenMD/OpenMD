@@ -265,6 +265,7 @@ int main(int argc, char *argv []) {
         sprintf(painCave.errMsg, "Removing %d atoms from randomly-selected\n"
                 "\tsites between %lf and %lf.", (int) vacancyTargets.size(), 
                 vIR, vOR); 
+        painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;
         simError();
 
@@ -419,6 +420,7 @@ int main(int argc, char *argv []) {
     //  cerr << "molFraction given 2" << "\n";
     sprintf(painCave.errMsg, "Creating a randomized spherically-capped nanorod.");
     painCave.isFatal = 0;
+    painCave.severity = OPENMD_INFO;
     simError();
     /* Random rod is the default case*/
 
@@ -430,6 +432,7 @@ int main(int argc, char *argv []) {
   } else{ 
     sprintf(painCave.errMsg, "Creating an fcc nanorod.");
     painCave.isFatal = 0;
+    painCave.severity = OPENMD_INFO;
     simError();
 
     // RealType smallestSoFar;
@@ -544,6 +547,7 @@ int main(int argc, char *argv []) {
   sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
           "generated.\n", outputFileName.c_str());
   painCave.isFatal = 0;
+  painCave.severity = OPENMD_INFO;
   simError();
   return 0;
 }

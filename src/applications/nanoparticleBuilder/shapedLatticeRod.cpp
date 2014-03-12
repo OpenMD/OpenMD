@@ -65,9 +65,7 @@ namespace OpenMD {
     dimension[0] = 3.0*radius;
     dimension[1] = 3.0*radius;
     dimension[2] = length + 3.0*radius;
-    cerr << "using dimension = " << dimension << "\n";
     setGridDimension(dimension);
-    cerr << "done!\n";
     Vector3d origin;
     origin[0] = 0;
     origin[1] = 0;
