@@ -75,7 +75,6 @@ IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
   MESSAGE(STATUS "Current revision is ${Project_WC_REVISION}")
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
   SET(SVN_REV ${Project_WC_REVISION})
-  ADD_DEFINITIONS( -DSVN_REV=${Project_WC_REVISION} )
   SET(GENERATELOGS "${PROJECT_SOURCE_DIR}/doc/svn2cl")
   ADD_CUSTOM_TARGET(ChangeLog
      COMMAND ${GENERATELOGS} "--group-by-day" "--include-rev"
@@ -83,7 +82,6 @@ IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
   )
 ELSE()
   SET(SVN_REV Release)
-  ADD_DEFINITIONS( -DSVN_REV=Release )
 ENDIF()
 
 check_include_file_cxx(conio.h      HAVE_CONIO_H)
@@ -183,6 +181,11 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/src/config.h.cmake"
   "${PROJECT_BINARY_DIR}/config.h"
 )
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/utils/Revision.cpp.in" 
+  "${PROJECT_BINARY_DIR}/Revision.cpp"
+)
+
 include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/src")
 
 #Add executables for build
@@ -201,6 +204,7 @@ atom2md
 Hydro)
 
 set(SOURCE
+"${PROJECT_BINARY_DIR}/Revision.cpp"
 src/antlr/ANTLRUtil.cpp
 src/antlr/ASTFactory.cpp
 src/antlr/ASTNULLType.cpp

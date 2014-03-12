@@ -64,6 +64,7 @@
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
+#include "utils/Revision.hpp"
 #include "math/SeqRandNumGen.hpp"
 #include "mdParser/MDLexer.hpp"
 #include "mdParser/MDParser.hpp"
@@ -272,9 +273,9 @@ namespace OpenMD {
     version.append(".");
     version.append(OPENMD_VERSION_MINOR);
 
-    std::string svnrev;
+    std::string svnrev(g_REVISION, strnlen(g_REVISION, 20));
     //convert a macro from compiler to a string in c++
-    STR_DEFINE(svnrev, SVN_REV );
+    // STR_DEFINE(svnrev, SVN_REV );
     version.append(" Revision: ");
     // If there's no SVN revision, just call this the RELEASE revision.
     if (!svnrev.empty()) {
