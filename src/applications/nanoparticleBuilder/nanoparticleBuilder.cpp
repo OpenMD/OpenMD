@@ -167,6 +167,7 @@ int main(int argc, char *argv []) {
                 "\tsites between %lf and %lf.", (int) vacancyTargets.size(), 
                 vIR, vOR); 
         painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
         simError();
 
         isVacancy.clear();
@@ -315,6 +316,7 @@ int main(int argc, char *argv []) {
   if ((int)args_info.molFraction_given){
     sprintf(painCave.errMsg, "Creating a randomized spherical nanoparticle.");
     painCave.isFatal = 0;
+    painCave.severity = OPENMD_INFO;
     simError();
     /* Random particle is the default case*/
 
@@ -326,6 +328,7 @@ int main(int argc, char *argv []) {
   } else{ 
     sprintf(painCave.errMsg, "Creating a core-shell spherical nanoparticle.");
     painCave.isFatal = 0;
+    painCave.severity = OPENMD_INFO;
     simError();
 
     RealType smallestSoFar;
@@ -428,6 +431,7 @@ int main(int argc, char *argv []) {
   sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
           "generated.\n", outputFileName.c_str());
   painCave.isFatal = 0;
+  painCave.severity = OPENMD_INFO;
   simError();
   return 0;
 }

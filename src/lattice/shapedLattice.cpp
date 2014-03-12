@@ -81,8 +81,6 @@ namespace OpenMD{
     endNx_ = (int) ceil(0.5*dimension_[0]/latticeConstant_);
     endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
     endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);  
-    std::cerr << "begin = " << beginNx_ << " " << beginNy_ << " " << beginNz_ << "\n";
-    std::cerr << "end = " << endNx_ << " " << endNy_ << " " << endNz_ << "\n";
     sitesComputed_ = false;  
   }
 
