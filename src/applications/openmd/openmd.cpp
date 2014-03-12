@@ -50,6 +50,7 @@
 #include <locale>
 #include "utils/simError.h"
 #include "utils/CaseConversion.hpp"
+#include "utils/Revision.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
@@ -78,9 +79,9 @@ int main(int argc, char* argv[]){
   initSimError();           // the error handler
   //srand48( 1337 );          // the random number generator.
 
-  std::string svnrev;
+  std::string svnrev(g_REVISION, strnlen(g_REVISION, 20));
   //convert a macro from compiler to a string in c++
-  STR_DEFINE(svnrev, SVN_REV );
+  //STR_DEFINE(svnrev, SVN_REV );
 
   std::string revision;
 

@@ -1,0 +1,11 @@
+#define SVN_REV  "@Project_WC_REVISION@"
+#define GIT_SHA1 "@GIT_SHA1@"
+
+#include "utils/Revision.hpp"
+
+extern "C" { 
+const char g_REVISION[] = SVN_REV;
+
+/* for when we convert to git: */
+/* const char g_REVISION[] = GIT_SHA1; */
+}
