@@ -348,6 +348,7 @@ int main(int argc, char *argv []) {
   sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
           "generated.\n", outputFileName.c_str());
   painCave.isFatal = 0;
+  painCave.severity = OPENMD_INFO;
   simError();
   return 0;
 }
