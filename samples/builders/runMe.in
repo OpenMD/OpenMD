@@ -24,6 +24,7 @@ OPENMD_HOME=@CMAKE_INSTALL_PREFIX@
 #
 ${OPENMD_HOME}/bin/simpleBuilder -o FCC.md --nx=5 --ny=5 --nz=5 --density=1.0 one_component.md
 ${OPENMD_HOME}/bin/thermalizer -o FCC-100K.md -t 100 FCC.md
+${OPENMD_HOME}/bin/Dump2XYZ -i FCC-100K.md
 #
 # Example 2:
 # Builds an FCC lattice from the <MetaData> block in three_component.md
@@ -36,6 +37,7 @@ ${OPENMD_HOME}/bin/thermalizer -o FCC-100K.md -t 100 FCC.md
 #
 ${OPENMD_HOME}/bin/randomBuilder -o random_FCC.md --nx=4 --ny=4 --nz=4 --density=1.0 --molFraction=0.4 --molFraction=0.4 three_component.md
 ${OPENMD_HOME}/bin/thermalizer -o random_FCC-100K.md -t 100 random_FCC.md
+${OPENMD_HOME}/bin/Dump2XYZ -i random_FCC-100K.md
 #
 # Example 3:
 # Builds a spherical nanoparticle (FCC) from the <MetaData> block in gold.md
@@ -48,6 +50,7 @@ ${OPENMD_HOME}/bin/thermalizer -o random_FCC-100K.md -t 100 random_FCC.md
 #
 ${OPENMD_HOME}/bin/nanoparticleBuilder -o gold_sphere.md --radius=30.0 --latticeConstant=4.09 gold.md
 ${OPENMD_HOME}/bin/thermalizer -o gold_sphere-500K.md -t 500.0 gold_sphere.md
+${OPENMD_HOME}/bin/Dump2XYZ -i gold_sphere-500K.md
 #
 # Example 4:
 # Builds a random alloy spherical nanoparticle (FCC) from the <MetaData> 
@@ -61,6 +64,7 @@ ${OPENMD_HOME}/bin/thermalizer -o gold_sphere-500K.md -t 500.0 gold_sphere.md
 #
 ${OPENMD_HOME}/bin/nanoparticleBuilder -o Au_Ag_alloy.md --radius=30.0 --latticeConstant=4.09 --molFraction=0.4 bimetallic.md
 ${OPENMD_HOME}/bin/thermalizer -o Au_Ag_alloy-600K.md -t 600 Au_Ag_alloy.md
+${OPENMD_HOME}/bin/Dump2XYZ -i Au_Ag_alloy-600K.md
 #
 # Example 5:
 # Builds a Au(core)-Ag(shell) spherical nanoparticle (FCC) from the <MetaData> 
@@ -74,6 +78,7 @@ ${OPENMD_HOME}/bin/thermalizer -o Au_Ag_alloy-600K.md -t 600 Au_Ag_alloy.md
 #
 ${OPENMD_HOME}/bin/nanoparticleBuilder -o Au-core-Ag-shell.md --radius=30.0 --latticeConstant=4.09 --shellRadius=12.5 bimetallic.md
 ${OPENMD_HOME}/bin/thermalizer -o Au-core-Ag-shell-800K.md -t 800.0 Au-core-Ag-shell.md
+${OPENMD_HOME}/bin/Dump2XYZ -i Au-core-Ag-shell-800K.md
 #
 # Example 6:
 # Reverses example 5 by building a Ag(core)-Au(shell) spherical nanoparticle.
@@ -89,6 +94,7 @@ ${OPENMD_HOME}/bin/thermalizer -o Au-core-Ag-shell-800K.md -t 800.0 Au-core-Ag-s
 #
 ${OPENMD_HOME}/bin/nanoparticleBuilder -o Ag-core-Au-shell.md --radius=30.0 --latticeConstant=4.09 --shellRadius=30.0,12.5 bimetallic.md
 ${OPENMD_HOME}/bin/thermalizer -o Ag-core-Au-shell-800K.md -t 800.0 Ag-core-Au-shell.md
+${OPENMD_HOME}/bin/Dump2XYZ -i Ag-core-Au-shell-800K.md
 #
 # Example 7:
 # Builds a Au(core)-Ag(shell) spherical nanoparticle (FCC) from the <MetaData> 
@@ -102,6 +108,7 @@ ${OPENMD_HOME}/bin/thermalizer -o Ag-core-Au-shell-800K.md -t 800.0 Ag-core-Au-s
 #
 ${OPENMD_HOME}/bin/nanoparticleBuilder -o vacancy_interface.md --radius=20.0 --latticeConstant=4.09 --shellRadius=12.5 --vacancyPercent=70 --vacancyInnerRadius=9.5 --vacancyOuterRadius=15.5 bimetallic.md
 ${OPENMD_HOME}/bin/thermalizer -o vacancy_interface-800K.md -t 800 vacancy_interface.md
+${OPENMD_HOME}/bin/Dump2XYZ -i vacancy_interface-800K.md
 #
 # Example 8:
 # Builds a random alloy spherical nanoparticle with 30% vacancies using the
@@ -112,6 +119,7 @@ ${OPENMD_HOME}/bin/thermalizer -o vacancy_interface-800K.md -t 800 vacancy_inter
 #
 ${OPENMD_HOME}/bin/nanoparticleBuilder -o vacancy_alloy.md --radius=30.0 --latticeConstant=4.09 --molFraction=0.4 --vacancyPercent=80 bimetallic.md
 ${OPENMD_HOME}/bin/thermalizer -o vacancy_alloy-900K.md -t 900 vacancy_alloy.md
+${OPENMD_HOME}/bin/Dump2XYZ -i vacancy_alloy-900K.md
 #
 #Example 9:
 # Builds a spherically-capped nanorod (FCC) from the <MetaData> block in gold.md
@@ -123,6 +131,7 @@ ${OPENMD_HOME}/bin/thermalizer -o vacancy_alloy-900K.md -t 900 vacancy_alloy.md
 # to match the number of lattice sites.
 #
 ${OPENMD_HOME}/bin/nanorodBuilder -o gold_fccrod.md --radius=20.0 --length=50.0 --latticeConstant=4.08 gold.md
+${OPENMD_HOME}/bin/Dump2XYZ -i gold_fccrod.md
 #
 #Example 10:
 # Builds a pentagonal nanorod from the <MetaData> block in gold.md
@@ -134,6 +143,7 @@ ${OPENMD_HOME}/bin/nanorodBuilder -o gold_fccrod.md --radius=20.0 --length=50.0 
 # to match the number of lattice sites.
 #
 ${OPENMD_HOME}/bin/nanorod_pentBuilder -o gold_pentrod.md --radius=15.0 --length=64.0 --latticeConstant=4.08 gold.md
+${OPENMD_HOME}/bin/Dump2XYZ -i gold_pentrod.md
 #
 #Example 11:
 # Builds a Mackay icosahedral nanoparticle from the <MetaData> block in gold.md
@@ -144,8 +154,9 @@ ${OPENMD_HOME}/bin/nanorod_pentBuilder -o gold_pentrod.md --radius=15.0 --length
 # Note that builders will rewrite the number of molecules in each component
 # to match the number of lattice sites.
 #
-${OPENMD_HOME}/bin/icosahedralBuilder -o gold_ico.md --shells=8 --latticeConstant=4.08 gold.md
+${OPENMD_HOME}/bin/icosahedralBuilder --ico -o gold_ico.md --shells=8 --latticeConstant=4.08 gold.md
 ${OPENMD_HOME}/bin/thermalizer -o gold_ico_300K.md -t 300 gold_ico.md
+${OPENMD_HOME}/bin/Dump2XYZ -i gold_ico_300K.md
 #
 #Example 12:
 # Builds a regular decahedral nanoparticle from the <MetaData> block in gold.md
@@ -156,8 +167,9 @@ ${OPENMD_HOME}/bin/thermalizer -o gold_ico_300K.md -t 300 gold_ico.md
 # Note that builders will rewrite the number of molecules in each component
 # to match the number of lattice sites.
 #
-${OPENMD_HOME}/bin/icosahedralBuilder -o gold_deca.md --shells=10 --latticeConstant=4.08 gold.md
+${OPENMD_HOME}/bin/icosahedralBuilder --deca -o gold_deca.md --shells=10 --latticeConstant=4.08 gold.md
 ${OPENMD_HOME}/bin/thermalizer -o gold_deca_300.md -t 300 gold_deca.md
+${OPENMD_HOME}/bin/Dump2XYZ -i gold_deca_300.md
 #
 #Example 13:
 # Builds a ino-decahedral nanorod from the <MetaData> block in gold.md
@@ -171,3 +183,4 @@ ${OPENMD_HOME}/bin/thermalizer -o gold_deca_300.md -t 300 gold_deca.md
 #
 ${OPENMD_HOME}/bin/icosahedralBuilder --ino --columnAtoms=100 --twinAtoms=5 --shells=10 -d 4.08 -o penta_rod.md gold.md
 ${OPENMD_HOME}/bin/thermalizer -o gold_penta_rod_300.md -t 300 penta_rod.md
+${OPENMD_HOME}/bin/Dump2XYZ -i gold_penta_rod_300.md
