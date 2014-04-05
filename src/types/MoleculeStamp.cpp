@@ -79,6 +79,7 @@ namespace OpenMD {
     MemoryUtils::deletePointers(rigidBodyStamps_);
     MemoryUtils::deletePointers(cutoffGroupStamps_);
     MemoryUtils::deletePointers(fragmentStamps_);    
+    MemoryUtils::deletePointers(constraintStamps_);    
   }
   
   bool MoleculeStamp::addAtomStamp( AtomStamp* atom) {
@@ -133,6 +134,12 @@ namespace OpenMD {
   bool MoleculeStamp::addFragmentStamp( FragmentStamp* fragment) {
     return addIndexSensitiveStamp(fragmentStamps_, fragment);
   }
+
+  bool MoleculeStamp::addConstraintStamp( ConstraintStamp* constraint) {
+    constraintStamps_.push_back(constraint);
+    return true;
+  }
+
   
   void MoleculeStamp::validate() {
     DataHolder::validate();
@@ -164,6 +171,7 @@ namespace OpenMD {
     checkRigidBodies();
     checkCutoffGroups();
     checkFragments();
+    checkConstraints();
     
     int nrigidAtoms = 0;
     for (int i = 0; i < getNRigidBodies(); ++i) {
@@ -773,6 +781,62 @@ namespace OpenMD {
     }
     
   }
+
+  void MoleculeStamp::checkConstraints() {
+    std::ostringstream oss;
+    //make sure index is not out of range
+    int natoms = getNAtoms();
+    for(int i = 0; i < getNConstraints(); ++i) {
+      ConstraintStamp* constraintStamp = getConstraintStamp(i);
+      if (constraintStamp->getA() > natoms-1 ||  constraintStamp->getA() < 0 || 
+          constraintStamp->getB() > natoms-1 || constraintStamp->getB() < 0 || 
+          constraintStamp->getA() == constraintStamp->getB()) {
+        
+        oss << "Error in Molecule " << getName() <<  ": constraint(" 
+            << constraintStamp->getA() << ", " << constraintStamp->getB() 
+            << ") is invalid\n";
+        throw OpenMDException(oss.str());
+      }
+    }
+    
+    //make sure constraints are unique
+    std::set<std::pair<int, int> > allConstraints;
+    for(int i = 0; i < getNConstraints(); ++i) {
+      ConstraintStamp* constraintStamp= getConstraintStamp(i);        
+      std::pair<int, int> constraintPair(constraintStamp->getA(), 
+                                         constraintStamp->getB());
+      //make sure constraintTuple.first is always less than or equal to
+      //constraintTuple.third
+      if (constraintPair.first > constraintPair.second) {
+        std::swap(constraintPair.first, constraintPair.second);
+      }
+      
+      std::set<std::pair<int, int> >::iterator iter = allConstraints.find(constraintPair);
+      if ( iter != allConstraints.end()) {
+        
+        oss << "Error in Molecule " << getName() << ": " << "constraint(" <<
+          iter->first << ", "<< iter->second << ") appears multiple times\n";
+        throw OpenMDException(oss.str());
+      } else {
+        allConstraints.insert(constraintPair);
+      }
+    }
+    
+    // make sure atoms belong to same rigidbody are not constrained to
+    // each other
+    for(int i = 0; i < getNConstraints(); ++i) {
+      ConstraintStamp* constraintStamp = getConstraintStamp(i);
+      if (atom2Rigidbody[constraintStamp->getA()] == atom2Rigidbody[constraintStamp->getB()]) {
+        
+        oss << "Error in Molecule " << getName() << ": "<<"constraint(" << 
+          constraintStamp->getA() << ", " << constraintStamp->getB() << 
+          ") belong to same rigidbody " << 
+          atom2Rigidbody[constraintStamp->getA()] << "\n";
+        throw OpenMDException(oss.str());
+      }
+    }    
+  }
+
   
   void MoleculeStamp::fillBondInfo() {
     

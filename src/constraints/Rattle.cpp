@@ -59,7 +59,6 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }    
-    
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
   }
 
@@ -82,8 +81,10 @@ namespace OpenMD {
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-      for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      for (consElem = mol->beginConstraintElem(cei); consElem != NULL; 
+           consElem = mol->nextConstraintElem(cei)) {
 	consElem->setMoved(true);
 	consElem->setMoving(false);
       }
@@ -97,8 +98,10 @@ namespace OpenMD {
 
       //loop over every constraint pair
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; consPair = mol->nextConstraintPair(cpi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
+             consPair = mol->nextConstraintPair(cpi)) {
 
 
 	  //dispatch constraint algorithm
@@ -108,22 +111,25 @@ namespace OpenMD {
 	    switch(exeStatus){
 	    case consFail:
 	      sprintf(painCave.errMsg,
-		      "Constraint failure in Rattle::constrainA, Constraint Fail\n");
+		      "Constraint failure in Rattle::constrainA, " 
+                      "Constraint Fail\n");
 	      painCave.isFatal = 1;
 	      simError();                             
                             
 	      break;
 	    case consSuccess:
-	      //constrain the pair by moving two elements
+	      // constrain the pair by moving two elements
 	      done = false;
 	      consPair->getConsElem1()->setMoving(true);
 	      consPair->getConsElem2()->setMoving(true);
 	      break;
 	    case consAlready:
-	      //current pair is already constrained, do not need to move the elements
+	      // current pair is already constrained, do not need to
+	      // move the elements
 	      break;
 	    default:          
-	      sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstrain() Error: unrecognized status");
+	      sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstraint() "
+                      "Error: unrecognized status");
 	      painCave.isFatal = 1;
 	      simError();                           
 	      break;
@@ -133,8 +139,10 @@ namespace OpenMD {
       }//end for(iter->first())
 
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-	for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+	for (consElem = mol->beginConstraintElem(cei); consElem != NULL; 
+             consElem = mol->nextConstraintElem(cei)) {
 	  consElem->setMoved(consElem->getMoving());
 	  consElem->setMoving(false);
 	}
@@ -145,7 +153,8 @@ namespace OpenMD {
 
     if (!done){
       sprintf(painCave.errMsg,
-              "Constraint failure in Rattle::constrainA, too many iterations: %d\n",
+              "Constraint failure in Rattle::constrainA, "
+              "too many iterations: %d\n",
               iteration);
       painCave.isFatal = 1;
       simError();    
@@ -214,7 +223,9 @@ namespace OpenMD {
       Vector3d velB = consElem2->getVel();
       velB -= rmb * delta;
       consElem2->setVel(velB);
-
+      
+      // report the constraint force back to the constraint pair:
+      consPair->setConstraintForce(gab);
       return consSuccess;
     }
     else
@@ -256,6 +267,8 @@ namespace OpenMD {
       velB -= rmb * delta;
       consElem2->setVel(velB);
 
+      // report the constraint force back to the constraint pair:
+      consPair->setConstraintForce(gab);
       return consSuccess;
     }
     else

@@ -40,53 +40,46 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#ifndef TYPES_CONSTRAINTSTAMP_HPP
+#define TYPES_CONSTRAINTSTAMP_HPP
 
-#ifndef CONSTRAINTS_CONTRAINTPAIR_HPP
-#define CONSTRAINTS_CONTRAINTPAIR_HPP
+#include "types/DataHolder.hpp"
 
-#include "primitives/StuntDouble.hpp"
-#include "constraints/ConstraintElem.hpp"
 namespace OpenMD {
-
-
-  /**
-   * @class ConstraintPair
-   * @todo document
-   */
-  class ConstraintPair {
-
+  class ConstraintStamp : public DataHolder {   
+    DeclareParameter(ConstrainedDistance, RealType);
+    DeclareParameter(PrintConstraintForce, bool);
   public:
+    ConstraintStamp();
+    virtual ~ConstraintStamp();
 
-    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, 
-                   RealType len, bool printForce) 
-      : consElem1_(elem1), consElem2_(elem2), dist2(len*len), 
-        printForce_(printForce) { }
-
-    ~ConstraintPair() {
-      delete consElem1_;
-      delete consElem2_;
+    void setMembers(std::vector<int> members) {
+      if (members.size() ==2) {
+        a = members[0];
+        b = members[1];
+        if (a < 0 || b < 0) {
+          std::ostringstream oss;
+          oss << "ConstraintStamp Error: members" 
+              << containerToString(members) 
+              << " is invalid" << std::endl;
+          throw OpenMDException(oss.str());
+        }
+      } else {
+        std::ostringstream oss;
+        oss << "ConstraintStamp Error: members" 
+            << containerToString(members) 
+            << " is invalid" << std::endl;
+        throw OpenMDException(oss.str());
+      }           
     }
-    /** Return the first constraint elemet */
-    ConstraintElem* getConsElem1() {return consElem1_;}
-
-    /** Retunr the second constraint element */
-    ConstraintElem* getConsElem2() {return consElem2_;}
-
-    bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
-    RealType getConsDistSquare() {return dist2;}
-    void setConstraintForce(RealType frc) { force_ = frc; }
-    RealType getConstraintForce() { return force_; }
-    bool getPrintForce() {return printForce_;}
+    
+    int getA() {return a;} 
+    int getB() {return b;}    
+    virtual void validate();
 
   private:
-        
-    ConstraintElem* consElem1_;
-    ConstraintElem* consElem2_;        
-    RealType dist2;
-    RealType force_;
-    bool printForce_;
-  };
-
+    int a;
+    int b;
+  };  
 }
-
-#endif 
+#endif

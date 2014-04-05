@@ -40,53 +40,24 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
+#include <stdlib.h>
+#include <string.h>
 
-#ifndef CONSTRAINTS_CONTRAINTPAIR_HPP
-#define CONSTRAINTS_CONTRAINTPAIR_HPP
-
-#include "primitives/StuntDouble.hpp"
-#include "constraints/ConstraintElem.hpp"
+#include "types/ConstraintStamp.hpp"
 namespace OpenMD {
-
-
-  /**
-   * @class ConstraintPair
-   * @todo document
-   */
-  class ConstraintPair {
-
-  public:
-
-    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, 
-                   RealType len, bool printForce) 
-      : consElem1_(elem1), consElem2_(elem2), dist2(len*len), 
-        printForce_(printForce) { }
-
-    ~ConstraintPair() {
-      delete consElem1_;
-      delete consElem2_;
-    }
-    /** Return the first constraint elemet */
-    ConstraintElem* getConsElem1() {return consElem1_;}
-
-    /** Retunr the second constraint element */
-    ConstraintElem* getConsElem2() {return consElem2_;}
-
-    bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
-    RealType getConsDistSquare() {return dist2;}
-    void setConstraintForce(RealType frc) { force_ = frc; }
-    RealType getConstraintForce() { return force_; }
-    bool getPrintForce() {return printForce_;}
-
-  private:
-        
-    ConstraintElem* consElem1_;
-    ConstraintElem* consElem2_;        
-    RealType dist2;
-    RealType force_;
-    bool printForce_;
-  };
+  
+  ConstraintStamp::ConstraintStamp() {
+    DefineParameter(ConstrainedDistance, "constrainedDistance");
+    DefineOptionalParameterWithDefaultValue(PrintConstraintForce, 
+                                            "printConstraintForce", false);
+  }
+  
+  ConstraintStamp::~ConstraintStamp() {    
+  }
+  
+  void ConstraintStamp::validate() {
+    DataHolder::validate();
+    CheckParameter(ConstrainedDistance, isNonNegative());    
+  }
 
 }
-
-#endif 

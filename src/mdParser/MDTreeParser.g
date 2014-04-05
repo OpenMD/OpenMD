@@ -114,6 +114,7 @@ moleculestatement : assignment
                   | rigidbodyblock
                   | cutoffgroupblock
                   | fragmentblock
+                  | constraintblock
                   ;
 
 atomblock 
@@ -275,6 +276,23 @@ fragmentblock {int ival;}
 fragmentstatement : assignment
     ;
 
+constraintblock : #(CONSTRAINT {ConstraintStamp* currConstraintStamp = new ConstraintStamp(); blockStack.push(currConstraintStamp);}
+                (constraintstatement)* 
+                 ENDBLOCK )  {
+                                blockStack.pop(); 
+                                MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
+                                currMoleculeStamp->addConstraintStamp(currConstraintStamp); 
+                             }
+          ;
+
+constraintstatement 
+{
+  vector<int> ivec;
+  ConstraintStamp* currConstraintStamp = static_cast<ConstraintStamp*>(blockStack.top());
+}
+              : assignment
+              | #(MEMBERS ivec=inttuple) {currConstraintStamp->setMembers(ivec);}
+              ;
 
               
 doubleNumberTuple returns [vector<RealType> dvec]

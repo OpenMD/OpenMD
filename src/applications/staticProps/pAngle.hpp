@@ -49,12 +49,18 @@
 #include "utils/NumericConstant.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
+using namespace std;
 namespace OpenMD {
   
   class pAngle : public StaticAnalyser {
     
   public:
-    pAngle(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);
+    pAngle(SimInfo* info, const string& filename, 
+           const string& sele1, int nzbins);
+    pAngle(SimInfo* info, const string& filename, 
+           const string& sele1, const string& sele2, int nzbins);
+    pAngle(SimInfo* info, const string& filename, 
+           const string& sele, const int seleOffset, int nzbins);
     
     int getNThetaBins() {
       return nThetaBins_; 
@@ -68,16 +74,21 @@ namespace OpenMD {
     void writeProbs();
         
     Snapshot* currentSnapshot_;
-    
-    int nProcessed_;
-    std::string selectionScript_;
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
-    
-    int nThetaBins_; 
-    
-    std::vector<int> count_;
-    std::vector<RealType> histogram_;
+
+    bool doVect_;
+    bool doOffset_;
+    string selectionScript1_;
+    string selectionScript2_;
+    SelectionManager seleMan1_;
+    SelectionManager seleMan2_;       
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+    int seleOffset_;
+
+    int nProcessed_;    
+    int nThetaBins_;     
+    vector<int> count_;
+    vector<RealType> histogram_;
   };
   
 }

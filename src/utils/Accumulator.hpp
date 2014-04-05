@@ -163,6 +163,23 @@ namespace OpenMD {
       return;
     }
 
+    /**
+     * return the 95% confidence interval:
+     *
+     * That is returns c, such that we have 95% confidence that the
+     * true mean is within 2c of the Average (x):
+     *
+     *   x - c <= true mean <= x + c
+     *
+     */
+    void get95percentConfidenceInterval(ResultType &ret) {
+      assert(Count_ != 0);
+      RealType sd;
+      this->getStdDev(sd);
+      ret = 1.960 * sd / sqrt(Count_);
+      return;
+    }
+
   private:
     ElementType Val_;
     ResultType Avg_;
@@ -260,6 +277,25 @@ namespace OpenMD {
     }
 
     /**
+     * return the 95% confidence interval:
+     *
+     * That is returns c, such that we have 95% confidence that the
+     * true mean is within 2c of the Average (x):
+     *
+     *   x - c <= true mean <= x + c
+     *
+     */
+    void get95percentConfidenceInterval(ResultType &ret) {
+      assert(Count_ != 0);
+      ResultType sd;
+      this->getStdDev(sd);
+      ret[0] = 1.960 * sd[0] / sqrt(Count_);
+      ret[1] = 1.960 * sd[1] / sqrt(Count_);
+      ret[2] = 1.960 * sd[2] / sqrt(Count_);
+      return;
+    }
+
+    /**
      * return the largest length
      */
     void getMaxLength(RealType &ret) {
@@ -305,6 +341,24 @@ namespace OpenMD {
       ret = sqrt(var);
       return;
     }
+
+    /**
+     * return the 95% confidence interval:
+     *
+     * That is returns c, such that we have 95% confidence that the
+     * true mean is within 2c of the Average (x):
+     *
+     *   x - c <= true mean <= x + c
+     *
+     */
+    void getLength95percentConfidenceInterval(ResultType &ret) {
+      assert(Count_ != 0);
+      RealType sd;
+      this->getLengthStdDev(sd);
+      ret = 1.960 * sd / sqrt(Count_);
+      return;
+    }
+
 
   private:
     ResultType Val_;
@@ -395,7 +449,28 @@ namespace OpenMD {
       }
       return;
     }
-        
+      
+    /**
+     * return the 95% confidence interval:
+     *
+     * That is returns c, such that we have 95% confidence that the
+     * true mean is within 2c of the Average (x):
+     *
+     *   x - c <= true mean <= x + c
+     *
+     */
+    void get95percentConfidenceInterval(ResultType &ret) {
+      assert(Count_ != 0);
+      Mat3x3d sd;
+      this->getStdDev(sd);
+      for (unsigned int i = 0; i < 3; i++) {
+        for (unsigned int j = 0; j < 3; j++) {
+          ret(i,j) = 1.960 * sd(i,j) / sqrt(Count_);
+        }
+      }
+      return;
+    }
+
   private:
     ElementType Val_;
     ResultType Avg_;

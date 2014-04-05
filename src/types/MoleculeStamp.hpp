@@ -52,6 +52,7 @@
 #include "types/RigidBodyStamp.hpp"
 #include "types/CutoffGroupStamp.hpp"
 #include "types/FragmentStamp.hpp"
+#include "types/ConstraintStamp.hpp"
 
 namespace OpenMD {
   class MoleculeStamp : public DataHolder {
@@ -70,6 +71,7 @@ namespace OpenMD {
     bool addRigidBodyStamp( RigidBodyStamp* rigidbody);
     bool addCutoffGroupStamp( CutoffGroupStamp* cutoffgroup);
     bool addFragmentStamp( FragmentStamp* fragment);
+    bool addConstraintStamp( ConstraintStamp* constraint);
     
     void setRegion(int r) { region_ = r; }
     int  getRegion(){ return region_; }
@@ -80,8 +82,9 @@ namespace OpenMD {
     int  getNInversions() { return inversionStamps_.size(); }
     int  getNRigidBodies() { return rigidBodyStamps_.size(); }
     int  getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
-    int getNIntegrable() { return nintegrable_;}
-    int getNFreeAtoms() { return freeAtoms_.size(); }
+    int  getNConstraints() { return constraintStamps_.size(); }
+    int  getNIntegrable() { return nintegrable_;}
+    int  getNFreeAtoms() { return freeAtoms_.size(); }
     virtual void validate();
     
     AtomStamp* getAtomStamp(int index) { return atomStamps_[index]; }
@@ -90,9 +93,10 @@ namespace OpenMD {
     TorsionStamp* getTorsionStamp(int index) { return torsionStamps_[index]; }
     InversionStamp* getInversionStamp(int index) { return inversionStamps_[index]; }
     RigidBodyStamp* getRigidBodyStamp(int index) { return rigidBodyStamps_[index]; }
-    CutoffGroupStamp* getCutoffGroupStamp(int index) { return cutoffGroupStamps_[index]; }
+    CutoffGroupStamp* getCutoffGroupStamp(int index) { return cutoffGroupStamps_[index]; } 
     FragmentStamp* getFragmentStamp(int index) { return fragmentStamps_[index]; }
-    
+    ConstraintStamp* getConstraintStamp(int index) { return constraintStamps_[index]; }
+   
     bool isBondInSameRigidBody(BondStamp*bond);
     bool isAtomInRigidBody(int atomIndex);  
     bool isAtomInRigidBody(int atomIndex, int& whichRigidBody, 
@@ -110,6 +114,7 @@ namespace OpenMD {
     void checkRigidBodies();
     void checkCutoffGroups();
     void checkFragments();
+    void checkConstraints();
 
     template <class Cont, class T>
     bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
@@ -143,6 +148,7 @@ namespace OpenMD {
     std::vector<RigidBodyStamp*> rigidBodyStamps_;
     std::vector<CutoffGroupStamp*> cutoffGroupStamps_;
     std::vector<FragmentStamp*> fragmentStamps_;
+    std::vector<ConstraintStamp*> constraintStamps_;
     std::vector<int> atom2Rigidbody;
     int nintegrable_;
     int region_;

@@ -175,8 +175,46 @@ namespace OpenMD {
       cutoffGroup = createCutoffGroup(mol, *fai, localIndexMan);
       mol->addCutoffGroup(cutoffGroup);
     }
-    //create constraints
+
+    //create bonded constraintPairs:
     createConstraintPair(mol);
+
+    //create non-bonded constraintPairs
+    for (int i = 0; i < molStamp->getNConstraints(); ++i) {
+      ConstraintStamp* cStamp = molStamp->getConstraintStamp(i);
+      Atom* atomA;
+      Atom* atomB;
+      
+      atomA = mol->getAtomAt(cStamp->getA());
+      atomB = mol->getAtomAt(cStamp->getB());
+      assert( atomA && atomB );
+      
+      RealType distance;
+      bool printConstraintForce = false;
+
+      if (!cStamp->haveConstrainedDistance()) {
+        sprintf(painCave.errMsg,
+                "Constraint Error: A non-bond constraint was specified\n"
+                "\twithout providing a value for the constrainedDistance.\n");
+        painCave.isFatal = 1;
+        simError();      
+      } else {
+        distance = cStamp->getConstrainedDistance();
+      }
+
+      if (cStamp->havePrintConstraintForce()) {
+        printConstraintForce = cStamp->getPrintConstraintForce();
+      }
+    
+      ConstraintElem* consElemA = new ConstraintElem(atomA);
+      ConstraintElem* consElemB = new ConstraintElem(atomB);
+      ConstraintPair* cPair = new ConstraintPair(consElemA, consElemB, distance,
+                                                 printConstraintForce);
+      mol->addConstraintPair(cPair);
+    }
+
+    // now create the constraint elements:
+
     createConstraintElem(mol);
     
     // Does this molecule stamp define a total constrained charge value?
@@ -544,6 +582,8 @@ namespace OpenMD {
     //add bond constraints
     Molecule::BondIterator bi;
     Bond* bond;
+    ConstraintPair* cPair;
+
     for (bond = mol->beginBond(bi); bond != NULL; bond = mol->nextBond(bi)) {
         
       BondType* bt = bond->getBondType();
@@ -553,8 +593,9 @@ namespace OpenMD {
 
 	ConstraintElem* consElemA = new ConstraintElem(bond->getAtomA());
 	ConstraintElem* consElemB = new ConstraintElem(bond->getAtomB());            
-	ConstraintPair* consPair = new ConstraintPair(consElemA, consElemB, fbt->getEquilibriumBondLength());
-	mol->addConstraintPair(consPair);
+        cPair = new ConstraintPair(consElemA, consElemB, 
+                                   fbt->getEquilibriumBondLength(), false);
+	mol->addConstraintPair(cPair);
       }
     }
 
@@ -566,22 +607,20 @@ namespace OpenMD {
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
     std::set<StuntDouble*> sdSet;
-    for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; consPair = mol->nextConstraintPair(cpi)) {
+    for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
+         consPair = mol->nextConstraintPair(cpi)) {
 
       StuntDouble* sdA = consPair->getConsElem1()->getStuntDouble();            
       if (sdSet.find(sdA) == sdSet.end()){
 	sdSet.insert(sdA);
 	mol->addConstraintElem(new ConstraintElem(sdA));
       }
-
+      
       StuntDouble* sdB = consPair->getConsElem2()->getStuntDouble();            
       if (sdSet.find(sdB) == sdSet.end()){
 	sdSet.insert(sdB);
 	mol->addConstraintElem(new ConstraintElem(sdB));
-      }
-        
+      }      
     }
-
   }
-    
 }

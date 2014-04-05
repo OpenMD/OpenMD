@@ -315,7 +315,25 @@ int main(int argc, char* argv[]){
     analyser = new RNEMDRTheta(info, dumpFileName, sele1,
                                args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.p_angle_given) {
-    analyser = new pAngle(info, dumpFileName, sele1, args_info.nbins_arg);
+    if (args_info.sele1_given) {     
+      if (args_info.sele2_given) 
+        analyser  = new pAngle(info, dumpFileName, sele1, sele2,
+                               args_info.nbins_arg);
+      else 
+        if (args_info.seleoffset_given) 
+          analyser  = new pAngle(info, dumpFileName, sele1, 
+                                 args_info.seleoffset_arg, args_info.nbins_arg);
+        else 
+          analyser  = new pAngle(info, dumpFileName, sele1, 
+                                 args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+	       "At least one selection script (--sele1) must be specified when "
+               "calculating P(angle) distributions");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
