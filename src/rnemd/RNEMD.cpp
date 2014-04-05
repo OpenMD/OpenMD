@@ -857,13 +857,13 @@ namespace OpenMD {
           
           Vector3d min_vel;
           Vector3d max_vel = max_sd->getVel();
-          MPI_Status* status;
+          MPI_Status status;
 
           // point-to-point swap of the velocity vector
           MPI_Sendrecv(max_vel.getArrayPointer(), 3, MPI_REALTYPE,
                        min_vals.rank, 0, 
                        min_vel.getArrayPointer(), 3, MPI_REALTYPE,
-                       min_vals.rank, 0, MPI_COMM_WORLD, status);
+                       min_vals.rank, 0, MPI_COMM_WORLD, &status);
           
           switch(rnemdFluxType_) {
           case rnemdKE :
@@ -878,7 +878,7 @@ namespace OpenMD {
                            MPI_REALTYPE, min_vals.rank, 1, 
                            min_angMom.getArrayPointer(), 3, 
                            MPI_REALTYPE, min_vals.rank, 1, 
-                           MPI_COMM_WORLD, status);
+                           MPI_COMM_WORLD, &status);
               
               max_sd->setJ(min_angMom);
 	    }
@@ -903,13 +903,13 @@ namespace OpenMD {
           
           Vector3d max_vel;
           Vector3d min_vel = min_sd->getVel();
-          MPI_Status* status;
+          MPI_Status status;
           
           // point-to-point swap of the velocity vector
           MPI_Sendrecv(min_vel.getArrayPointer(), 3, MPI_REALTYPE,
                        max_vals.rank, 0, 
                        max_vel.getArrayPointer(), 3, MPI_REALTYPE,
-                       max_vals.rank, 0, MPI_COMM_WORLD, status);
+                       max_vals.rank, 0, MPI_COMM_WORLD, &status);
           
           switch(rnemdFluxType_) {
           case rnemdKE :
@@ -924,7 +924,7 @@ namespace OpenMD {
                            MPI_REALTYPE, max_vals.rank, 1, 
                            max_angMom.getArrayPointer(), 3, 
                            MPI_REALTYPE, max_vals.rank, 1, 
-                           MPI_COMM_WORLD, status);
+                           MPI_COMM_WORLD, &status);
               
               min_sd->setJ(max_angMom);
             }
