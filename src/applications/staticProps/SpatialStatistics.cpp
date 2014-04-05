@@ -187,7 +187,7 @@ namespace OpenMD {
       }
         
       outStream << "#######################################################\n";
-      outStream << "# Standard Deviations in those quantities follow:\n";
+      outStream << "# 95% confidence intervals in those quantities follow:\n";
       outStream << "#######################################################\n";
       
       for (int j = 0; j < nBins_; j++) {
@@ -200,7 +200,7 @@ namespace OpenMD {
             
             int n = outputData->accumulator[j]->count();
             if (n != 0) {
-              writeStdDev( outStream, outputData, j );
+              writeErrorBars( outStream, outputData, j );
             }
           }
           outStream << std::endl;
@@ -257,7 +257,7 @@ namespace OpenMD {
     }
   }
 
-  void SpatialStatistics::writeStdDev(ostream& os, OutputData* dat, 
+  void SpatialStatistics::writeErrorBars(ostream& os, OutputData* dat, 
                                     unsigned int bin) {
     assert(int(bin) < nBins_);
     int n = dat->accumulator[bin]->count();
@@ -265,7 +265,7 @@ namespace OpenMD {
 
     if( dat->dataType == odtReal ) {
       RealType r;
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->getStdDev(r);      
+      dynamic_cast<Accumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(r);      
       if (isinf(r) || isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "SpatialStatistics detected a numerical error writing:\n"
@@ -279,7 +279,7 @@ namespace OpenMD {
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getStdDev(v);
+      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(v);
       if (isinf(v[0]) || isnan(v[0]) || 
           isinf(v[1]) || isnan(v[1]) || 
           isinf(v[2]) || isnan(v[2]) ) {      

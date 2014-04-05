@@ -98,7 +98,7 @@ namespace OpenMD {
     OutputData* beginOutputData(vector<OutputData*>::iterator& i);
     OutputData* nextOutputData(vector<OutputData*>::iterator& i);
     void writeData(ostream& os, OutputData* dat, unsigned int bin);
-    void writeStdDev(ostream& os, OutputData* dat, unsigned int bin);
+    void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
 
     Snapshot* currentSnapshot_;    
     int nProcessed_;

@@ -125,7 +125,7 @@ struct gengetopt_args_info
   const char *scd_help; /**< @brief scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified) help description.  */
   const char *density_help; /**< @brief density plot help description.  */
   const char *slab_density_help; /**< @brief slab density help description.  */
-  const char *p_angle_help; /**< @brief p(cos(theta)) help description.  */
+  const char *p_angle_help; /**< @brief p(cos(theta)) (--sele1 must be specified, --sele2 is optional) help description.  */
   const char *hxy_help; /**< @brief hxy help description.  */
   const char *rho_r_help; /**< @brief rho of R help description.  */
   const char *angle_r_help; /**< @brief angle of R help description.  */

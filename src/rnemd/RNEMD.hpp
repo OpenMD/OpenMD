@@ -75,8 +75,8 @@ namespace OpenMD {
     void writeOutputFile();
     void writeReal(int index, unsigned int bin);
     void writeVector(int index, unsigned int bin);
-    void writeRealStdDev(int index, unsigned int bin);
-    void writeVectorStdDev(int index, unsigned int bin);
+    void writeRealErrorBars(int index, unsigned int bin);
+    void writeVectorErrorBars(int index, unsigned int bin);
 
   private:
 

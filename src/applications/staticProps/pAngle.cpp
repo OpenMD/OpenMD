@@ -53,32 +53,79 @@
 namespace OpenMD {
   
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
-                 const std::string& sele, int nthetabins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  
-      evaluator_(info), seleMan_(info), nThetaBins_(nthetabins){
+                 const std::string& sele1, int nthetabins)
+    : StaticAnalyser(info, filename), selectionScript1_(sele1),  
+      evaluator1_(info),  evaluator2_(info), seleMan1_(info), seleMan2_(info), 
+      nThetaBins_(nthetabins),
+      doVect_(true), doOffset_(false) {
     
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    setOutputName(getPrefix(filename) + ".pAngle");
+
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }            
     
     count_.resize(nThetaBins_);
-    histogram_.resize(nThetaBins_);
+    histogram_.resize(nThetaBins_); 
+  }
+
+  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+                 const std::string& sele1, const std::string& sele2, 
+                 int nthetabins)
+    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
+      selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
+      seleMan1_(info), seleMan2_(info), nThetaBins_(nthetabins),
+      doVect_(false), doOffset_(false) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
+
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }            
+    
+    evaluator2_.loadScriptString(sele2);
+    if (!evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }            
+    
+    count_.resize(nThetaBins_);
+    histogram_.resize(nThetaBins_); 
+  }
+
+  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+                 const std::string& sele1, int seleOffset, int nthetabins)
+    : StaticAnalyser(info, filename), selectionScript1_(sele1),  
+      evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info),
+      nThetaBins_(nthetabins),       
+      doVect_(false), doOffset_(true) {
+    
+    setOutputName(getPrefix(filename) + ".pAngle");
+    
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }            
+    
+    count_.resize(nThetaBins_);
+    histogram_.resize(nThetaBins_);    
   }
   
   void pAngle::process() {
     Molecule* mol;
     RigidBody* rb;
-    StuntDouble* sd;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    int i;
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int ii; 
+    int jj;
 
     Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
+
     nProcessed_ = nFrames/step_;
 
     std::fill(histogram_.begin(), histogram_.end(), 0.0);
@@ -99,32 +146,115 @@ namespace OpenMD {
       
       Vector3d CenterOfMass = thermo.getCom();      
 
-      if  (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
+      if  (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }
       
-      for (sd = seleMan_.beginSelected(i); sd != NULL; 
-           sd = seleMan_.nextSelected(i)) {
+      if (doVect_) {
         
-        Vector3d pos = sd->getPos();
-        
-        Vector3d r1 = CenterOfMass - pos;
-        // only do this if the stunt double actually has a vector associated
-        // with it
-        if (sd->isDirectional()) {
-          Vector3d dipole = sd->getA().getColumn(2);
-          RealType distance = r1.length();
+        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
+             sd1 = seleMan1_.nextSelected(ii)) {
           
-          dipole.normalize();
-          r1.normalize();
-          RealType cosangle = dot(r1, dipole);
-                          
-          int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
-          count_[binNo]++;
+          Vector3d pos = sd1->getPos();
+          
+          Vector3d r1 = CenterOfMass - pos;
+          // only do this if the stunt double actually has a vector associated
+          // with it
+          if (sd1->isDirectional()) {
+            Vector3d vec = sd1->getA().getColumn(2);
+            RealType distance = r1.length();
+            
+            vec.normalize();
+            r1.normalize();
+            RealType cosangle = dot(r1, vec);
+            
+            int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
+            count_[binNo]++;
+          }
         }
-        
+      } else {
+        if (doOffset_) {
+          
+          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+               sd1 = seleMan1_.nextSelected(ii)) {
+            
+            // This will require careful rewriting if StaticProps is
+            // ever parallelized.  For an example, see
+            // Thermo::getTaggedAtomPairDistance
+            
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
+            
+            Vector3d r1 = CenterOfMass - sd1->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(r1);
+            
+            Vector3d r2 = CenterOfMass - sd2->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(r1);
+            
+            Vector3d rc = 0.5*(r1 + r2);
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(rc);
+            
+            Vector3d vec = r1-r2;
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            
+            rc.normalize();
+            vec.normalize();
+            RealType cosangle = dot(rc, vec);
+            int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
+            count_[binNo]++;
+          }        
+        } else {
+          
+          if  (evaluator2_.isDynamic()) {
+            seleMan2_.setSelectionSet(evaluator2_.evaluate());
+          }
+          
+          if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
+            sprintf( painCave.errMsg,
+                     "In frame %d, the number of selected StuntDoubles are\n"
+                     "\tnot the same in --sele1 and sele2\n", istep);
+            painCave.severity = OPENMD_INFO;
+            painCave.isFatal = 0;
+            simError();            
+          }
+          
+          for (sd1 = seleMan1_.beginSelected(ii), 
+                 sd2 = seleMan2_.beginSelected(jj);
+               sd1 != NULL && sd2 != NULL;
+               sd1 = seleMan1_.nextSelected(ii), 
+                 sd2 = seleMan2_.nextSelected(jj)) {
+            
+            Vector3d r1 = CenterOfMass - sd1->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(r1);
+            
+            Vector3d r2 = CenterOfMass - sd2->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(r1);
+          
+            Vector3d rc = 0.5*(r1 + r2);
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(rc);
+            
+            Vector3d vec = r1-r2;
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            
+            rc.normalize();
+            vec.normalize();
+            RealType cosangle = dot(rc, vec);
+            int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
+            count_[binNo]++;
+            
+          }
+        }
       }
     }
+      
     processHistogram();
     writeProbs();
     
@@ -148,7 +278,11 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#pAngle\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\n";
+      rdfStream << "#selection1: (" << selectionScript1_ << ")";
+      if (!doVect_) {
+        rdfStream << "\tselection2: (" << selectionScript2_ << ")";
+      }
+      rdfStream << "\n";
       rdfStream << "#cos(theta)\tp(cos(theta))\n";
       RealType dct = 2.0 / histogram_.size();
       for (unsigned int i = 0; i < histogram_.size(); ++i) {
@@ -158,7 +292,8 @@ namespace OpenMD {
       
     } else {
       
-      sprintf(painCave.errMsg, "pAngle: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "pAngle: unable to open %s\n", 
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }

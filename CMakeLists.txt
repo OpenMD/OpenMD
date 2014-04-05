@@ -35,7 +35,7 @@ include(CheckCXXSymbolExists)
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
-set (VERSION_MINOR "1")
+set (VERSION_MINOR "2")
 set (VERSION_TINY "0")  
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -356,6 +356,7 @@ src/types/BendStamp.cpp
 src/types/BondStamp.cpp
 src/types/CharmmTorsionType.cpp
 src/types/Component.cpp
+src/types/ConstraintStamp.cpp
 src/types/CutoffGroupStamp.cpp
 src/types/DirectionalAdapter.cpp
 src/types/EAMAdapter.cpp

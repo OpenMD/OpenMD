@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20121118): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (20140107): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -67,6 +67,7 @@ public:
 	public: void rigidbodyblock();
 	public: void cutoffgroupblock();
 	public: void fragmentblock();
+	public: void constraintblock();
 	public: void atomstatement();
 	public: void doubleNumberTuple();
 	public: void bondstatement();
@@ -77,6 +78,7 @@ public:
 	public: void rigidbodystatement();
 	public: void cutoffgroupstatement();
 	public: void fragmentstatement();
+	public: void constraintstatement();
 	protected: void doubleNumber();
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
@@ -89,10 +91,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 58;
+	static const int NUM_TOKENS = 60;
 #else
 	enum {
-		NUM_TOKENS = 58
+		NUM_TOKENS = 60
 	};
 #endif
 	

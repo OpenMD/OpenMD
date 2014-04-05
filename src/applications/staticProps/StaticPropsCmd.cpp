@@ -79,7 +79,7 @@ const char *gengetopt_args_info_help[] = {
   "  -s, --scd                     scd order parameter (either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)",
   "  -d, --density                 density plot",
   "      --slab_density            slab density",
-  "      --p_angle                 p(cos(theta))",
+  "      --p_angle                 p(cos(theta)) (--sele1 must be specified, \n                                  --sele2 is optional)",
   "      --hxy                     hxy",
   "      --rho_r                   rho of R",
   "      --angle_r                 angle of R",
@@ -1531,7 +1531,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* p(cos(theta)).  */
+          /* p(cos(theta)) (--sele1 must be specified, --sele2 is optional).  */
           else if (strcmp (long_options[option_index].name, "p_angle") == 0)
           {
           

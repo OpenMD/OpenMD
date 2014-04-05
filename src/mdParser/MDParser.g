@@ -36,6 +36,8 @@ tokens
   INVERSION   = "inversion";
   RIGIDBODY   = "rigidBody";
   CUTOFFGROUP = "cutoffGroup";
+  CONSTRAINT  = "constraint";
+  DISTANCE    = "distance";
   FRAGMENT    = "fragment";
   MEMBERS     = "members";
   CENTER      = "center";
@@ -102,6 +104,7 @@ moleculestatement : assignment
                   | rigidbodyblock
                   | cutoffgroupblock
                   | fragmentblock
+                  | constraintblock
                   ;
 
 atomblock : ATOM^ LBRACKET! intConst RBRACKET! LCURLY! (atomstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
@@ -162,6 +165,12 @@ fragmentblock : FRAGMENT^ LBRACKET! intConst RBRACKET! LCURLY! (fragmentstatemen
 fragmentstatement : assignment
               ;
 
+constraintblock : CONSTRAINT^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(constraintstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+          ;
+
+constraintstatement : assignment
+              | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+              ;
 
               
 doubleNumberTuple   : doubleNumber (COMMA! doubleNumber)* 

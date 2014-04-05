@@ -2239,7 +2239,7 @@ namespace OpenMD {
       }        
 
       rnemdFile_ << "#######################################################\n";
-      rnemdFile_ << "# Standard Deviations in those quantities follow:\n";
+      rnemdFile_ << "# 95% confidence intervals in those quantities follow:\n";
       rnemdFile_ << "#######################################################\n";
 
 
@@ -2248,9 +2248,9 @@ namespace OpenMD {
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
             if (data_[i].dataType == "RealType")
-              writeRealStdDev(i,j);
+              writeRealErrorBars(i,j);
             else if (data_[i].dataType == "Vector3d")
-              writeVectorStdDev(i,j);
+              writeVectorErrorBars(i,j);
             else {
               sprintf( painCave.errMsg,
                        "RNEMD found an unknown data type for: %s ",
@@ -2321,7 +2321,7 @@ namespace OpenMD {
     }
   }  
 
-  void RNEMD::writeRealStdDev(int index, unsigned int bin) {
+  void RNEMD::writeRealErrorBars(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
     assert(int(bin) < nBins_);
@@ -2331,7 +2331,7 @@ namespace OpenMD {
     count = data_[index].accumulator[bin]->count();
     if (count == 0) return;
     
-    dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getStdDev(s);
+    dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->get95percentConfidenceInterval(s);
     
     if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;
@@ -2344,7 +2344,7 @@ namespace OpenMD {
     }    
   }
   
-  void RNEMD::writeVectorStdDev(int index, unsigned int bin) {
+  void RNEMD::writeVectorErrorBars(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
     assert(int(bin) < nBins_);
@@ -2354,7 +2354,7 @@ namespace OpenMD {
     count = data_[index].accumulator[bin]->count();
     if (count == 0) return;
 
-    dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getStdDev(s);
+    dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->get95percentConfidenceInterval(s);
     if (isinf(s[0]) || isnan(s[0]) || 
         isinf(s[1]) || isnan(s[1]) || 
         isinf(s[2]) || isnan(s[2]) ) {      
