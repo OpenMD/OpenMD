@@ -176,7 +176,7 @@ namespace OpenMD {
       assert(Count_ != 0);
       RealType sd;
       this->getStdDev(sd);
-      ret = 1.960 * sd / sqrt(Count_);
+      ret = 1.960 * sd / sqrt(RealType(Count_));
       return;
     }
 
@@ -289,9 +289,9 @@ namespace OpenMD {
       assert(Count_ != 0);
       ResultType sd;
       this->getStdDev(sd);
-      ret[0] = 1.960 * sd[0] / sqrt(Count_);
-      ret[1] = 1.960 * sd[1] / sqrt(Count_);
-      ret[2] = 1.960 * sd[2] / sqrt(Count_);
+      ret[0] = 1.960 * sd[0] / sqrt(RealType(Count_));
+      ret[1] = 1.960 * sd[1] / sqrt(RealType(Count_));
+      ret[2] = 1.960 * sd[2] / sqrt(RealType(Count_));
       return;
     }
 
@@ -355,7 +355,7 @@ namespace OpenMD {
       assert(Count_ != 0);
       RealType sd;
       this->getLengthStdDev(sd);
-      ret = 1.960 * sd / sqrt(Count_);
+      ret = 1.960 * sd / sqrt(RealType(Count_));
       return;
     }
 
@@ -465,7 +465,7 @@ namespace OpenMD {
       this->getStdDev(sd);
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          ret(i,j) = 1.960 * sd(i,j) / sqrt(Count_);
+          ret(i,j) = 1.960 * sd(i,j) / sqrt(RealType(Count_));
         }
       }
       return;
