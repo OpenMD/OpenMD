@@ -119,7 +119,7 @@ namespace OpenMD {
     int zmolIndex;
     RealType data[3];
     
-    if (masterNode == 0) {
+    if (myNode == masterNode) {
 
       std::vector<ZconsData> zconsData;
       ZconsData tmpData;       

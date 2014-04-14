@@ -111,6 +111,7 @@ namespace OpenMD {
     DefineOptionalParameter(MTM_Sigma, "MTM_Sigma");
     DefineOptionalParameter(MTM_R, "MTM_R");
     DefineOptionalParameter(Alpha, "alpha");
+    DefineOptionalParameter(ConstraintTime, "constraintTime");
 
   
     DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, 

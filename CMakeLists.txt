@@ -418,6 +418,7 @@ src/flucq/FluctuatingChargeForces.cpp
 src/integrators/LangevinHullForceManager.cpp
 src/rnemd/RNEMD.cpp
 src/integrators/Velocitizer.cpp
+src/io/ConstraintWriter.cpp
 src/io/DumpReader.cpp
 src/io/DumpWriter.cpp
 src/io/RestReader.cpp

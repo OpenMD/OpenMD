@@ -140,6 +140,7 @@ namespace OpenMD {
     DeclareParameter(Alpha, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
     DeclareParameter(ElectricField, OpenMD::Vector3d);
+    DeclareParameter(ConstraintTime, RealType);
 
   public:
     bool addComponent(Component* comp);

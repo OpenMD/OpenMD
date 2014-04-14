@@ -144,6 +144,12 @@ namespace QuantLib {
             checkStationaryFunctionValue(fold, fnew, statStateIterations, ecType) ||
             checkStationaryFunctionAccuracy(fnew, positiveOptimization, ecType) ||
             checkZeroGradientNorm(normgnew, ecType);
+            sprintf(painCave.errMsg,
+                    "\n\tOptimization: Current iteration Count: ( %lu )\n",
+                    (unsigned long)iteration);
+            painCave.isFatal = 0;
+            painCave.severity = OPENMD_INFO;
+            simError();
     }
     
     // Inspectors
