@@ -1518,7 +1518,7 @@ namespace OpenMD {
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
 
                 if (atom->isFluctuatingCharge()) { 
-                  atom->addFlucQFrc( 2.0 * rvol * qtrq2 );
+                  atom->addFlucQFrc( - 2.0 * rvol * qtrq2 );
                 }
                   
                 if (data.is_Dipole) {

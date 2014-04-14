@@ -50,9 +50,10 @@ namespace OpenMD {
     if (info_->getNConstraints() > 0)
       doRattle_ = true;
     
+    Globals* simParams = info_->getSimParams();
 
-    if (info_->getSimParams()->haveDt()) {
-      dt_ = info_->getSimParams()->getDt();
+    if (simParams->haveDt()) {
+      dt_ = simParams->getDt();
     } else {
       sprintf(painCave.errMsg,
 	      "Integrator Error: dt is not set\n");
@@ -60,6 +61,22 @@ namespace OpenMD {
       simError();
     }    
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    if (simParams->haveConstraintTime()){
+      constraintTime_ = simParams->getConstraintTime();
+    } else {
+      constraintTime_ = simParams->getStatusTime();
+    }
+
+    constraintOutputFile_ = getPrefix(info_->getFinalConfigFileName()) + ".constraintForces";
+
+    // create ConstraintWriter  
+    constraintWriter_ = new ConstraintWriter(info_, constraintOutputFile_.c_str());   
+
+    if (!constraintWriter_){
+      sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");
+      painCave.isFatal = 1;
+      simError();
+    }
   }
 
   void Rattle::constraintA() {
@@ -69,6 +86,25 @@ namespace OpenMD {
   void Rattle::constraintB() {
     if (!doRattle_) return;    
     doConstraint(&Rattle::constraintPairB);
+
+    if (currentSnapshot_->getTime() >= currConstraintTime_){
+      Molecule* mol;
+      SimInfo::MoleculeIterator mi;
+      ConstraintPair* consPair;
+      Molecule::ConstraintPairIterator cpi;
+      std::list<ConstraintPair*> constraints;
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
+             consPair = mol->nextConstraintPair(cpi)) {
+          
+          constraints.push_back(consPair);
+        }
+      }
+      
+      constraintWriter_->writeConstraintForces(constraints);
+      currConstraintTime_ += constraintTime_;
+    }
   }
 
   void Rattle::doConstraint(ConstraintPairFuncPtr func) {

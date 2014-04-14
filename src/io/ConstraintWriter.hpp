@@ -40,53 +40,40 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef CONSTRAINTS_RATTLE_HPP
-#define CONSTRAINTS_RATTLE_HPP
+#ifndef IO_CONSTRAINTWRITER_HPP
+#define IO_CONSTRAINTWRITER_HPP
+
+#define _LARGEFILE_SOURCE64
+# ifndef _FILE_OFFSET_BITS
+#   define _FILE_OFFSET_BITS 64
+# endif
+
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #include "brains/SimInfo.hpp"
 #include "constraints/ConstraintPair.hpp"
-#include "io/ConstraintWriter.hpp"
 
 namespace OpenMD {
 
-  /** 
-   * @class Rattle Rattle.hpp "constraints/Rattle.hpp"
-   * Velocity Verlet Constraint Algorithm
-   */ 
-  class Rattle {
+  struct ConstraintData{
+    int atom1;
+    int atom2;
+    RealType constraintForce;
+    bool printForce;
+  };
+
+  class ConstraintWriter {
+
   public:
-    enum ConsStatus{
-      consFail = -1,   //Constraint Fail
-      consSuccess = 0, //constrain the pair by moving two elements
-      consAlready = 1  //current pair is already constrained, do not need to move the elements
-    }; 
-  
-    Rattle(SimInfo* info);
-    void constraintA();
-    void constraintB();
-        
-    int getMaxConsIteration() { return maxConsIteration_; }
-    void setMaxConsIteration(int iteration) { maxConsIteration_ = iteration; }
-
-    RealType getConsTolerance() { return consTolerance_; } 
-    void setConsTolerance(RealType tolerance) { consTolerance_ = tolerance;}        
-
+    ConstraintWriter(SimInfo* info, const std::string& filename);
+    ~ConstraintWriter();  
+    void writeConstraintForces(const std::list<ConstraintPair*>& constraints);
+          
   private:
-    typedef int (Rattle::*ConstraintPairFuncPtr)(ConstraintPair*);
-    void doConstraint(ConstraintPairFuncPtr func);
-    int constraintPairA(ConstraintPair* consPair);
-    int constraintPairB(ConstraintPair* consPair);
-
     SimInfo* info_;
-    int maxConsIteration_;        
-    RealType consTolerance_;
-    RealType dt_;
-    Snapshot* currentSnapshot_;   
-    bool doRattle_;
-    std::string constraintOutputFile_;
-    ConstraintWriter* constraintWriter_;
-    RealType constraintTime_;
-    RealType currConstraintTime_;
+    std::ofstream output_;
   };
 }
 #endif

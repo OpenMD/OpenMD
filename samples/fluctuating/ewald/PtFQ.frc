@@ -103,6 +103,6 @@ begin FluctuatingChargeAtomTypes
 // Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
 // this code and the Rick, Stuart, and Berne paper
 //Name  chargeMass (fs^2 kcal/e^2 mol) hardness/multipleMinima chi (kcal/mol e) hardness (kcal/mol*e^2) slaterN slaterZeta 
-Pt_FQ 400.0 Hardness 128.5 158.86 6 1.81
+Pt_FQ 400.0 Hardness 128.5 150.86 6 1.81
 end FluctuatingChargeAtomTypes
 

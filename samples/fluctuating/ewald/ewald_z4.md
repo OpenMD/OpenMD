@@ -6,7 +6,7 @@
 	type = "Pd";
 	position(0.0, 0.0, 0.0);
       }
-    }
+   }
     
     molecule{
       name = "Pt";
@@ -41,10 +41,10 @@ sampleTime = 1;
 statusTime = 1;
 
 cutoffMethod = "ewald_full";
-cutoffRadius = 9;
+cutoffRadius = 13.5;
 electrostaticScreeningMethod = "DAMPED";
 statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL|ELECTRONIC_TEMPERATURE";
-dampingAlpha = 0.3488;
+dampingAlpha = 0.1;
 
 targetTemp = 300;
 targetPressure =1;

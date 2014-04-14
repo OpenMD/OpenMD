@@ -88,15 +88,17 @@ namespace OpenMD {
     Molecule* mol;
     Atom* atom;
     
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        cerr << " starts with = " << atom->getFlucQPos() << "\n";
-        //atom->setFlucQPos(0.0);
-        //atom->setFlucQVel(0.0);
-      }
-    }
+    // For single-minima flucq, this ensures a net neutral system, but
+    // for multiple minima, this is no longer the right thing to do:
+    //
+    // for (mol = info_->beginMolecule(i); mol != NULL; 
+    //      mol = info_->nextMolecule(i)) {
+    //   for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+    //        atom = mol->nextFluctuatingCharge(j)) {
+    //     atom->setFlucQPos(0.0);
+    //     atom->setFlucQVel(0.0);
+    //   }
+    // }
     
     FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, 
                                                  fqConstraints_);
