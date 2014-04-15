@@ -737,8 +737,9 @@ namespace OpenMD {
   }
 
   void DumpWriter::writeEor() {
-    std::ostream* eorStream;
-    
+
+    std::ostream* eorStream = NULL;
+
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi

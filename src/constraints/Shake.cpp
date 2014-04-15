@@ -45,7 +45,9 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-  Shake::Shake(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6), doShake_(false) {
+  Shake::Shake(SimInfo* info) : info_(info), maxConsIteration_(10), 
+                                consTolerance_(1.0e-6), doShake_(false),
+                                currConstraintTime_(0.0)  {
     
     if (info_->getNGlobalConstraints() > 0)
       doShake_ = true;
@@ -59,10 +61,12 @@ namespace OpenMD {
       constraintTime_ = simParams->getStatusTime();
     }
 
-    constraintOutputFile_ = getPrefix(info_->getFinalConfigFileName()) + ".constraintForces";
+    constraintOutputFile_ = getPrefix(info_->getFinalConfigFileName()) + 
+      ".constraintForces";
 
     // create ConstraintWriter  
-    constraintWriter_ = new ConstraintWriter(info_, constraintOutputFile_.c_str());   
+    constraintWriter_ = new ConstraintWriter(info_, 
+                                             constraintOutputFile_.c_str());   
 
     if (!constraintWriter_){
       sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");

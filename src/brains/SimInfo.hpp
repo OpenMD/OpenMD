@@ -169,7 +169,10 @@ namespace OpenMD{
       return nGlobalInversions_;
     }
 
-    int getNGlobalConstraints();
+    unsigned int getNGlobalConstraints() {
+      if (!hasNGlobalConstraints_) calcNConstraints();
+      return nGlobalConstraints_;
+    }
     /** 
      * Returns the number of local molecules.
      * @return the number of local molecules 
@@ -509,6 +512,7 @@ namespace OpenMD{
     void calcNdf();
     void calcNdfRaw();
     void calcNdfTrans();
+    void calcNConstraints();
 
     /**
      * Adds molecule stamp and the total number of the molecule with
@@ -543,7 +547,9 @@ namespace OpenMD{
     int nGlobalBends_;              /**< number of bends in the system */
     int nGlobalTorsions_;           /**< number of torsions in the system */
     int nGlobalInversions_;         /**< number of inversions in the system */
-      
+    int nGlobalConstraints_;        /**< number of constraints in the system */
+    bool hasNGlobalConstraints_;
+
     /// Degress of freedom
     int ndf_;          /**< number of degress of freedom (excludes constraints) (LOCAL) */
     int ndfLocal_;     /**< number of degrees of freedom (LOCAL, excludes constraints) */

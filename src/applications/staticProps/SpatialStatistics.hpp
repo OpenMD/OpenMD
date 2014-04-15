@@ -109,7 +109,7 @@ namespace OpenMD {
     OutputData* counts_;
     vector<OutputData*> data_;
   };
-
+  
   class SlabStatistics : public SpatialStatistics {
   public: 
     SlabStatistics(SimInfo* info, const string& filename, const string& sele, int nbins);

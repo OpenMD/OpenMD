@@ -51,17 +51,22 @@
 #include "io/ConstraintWriter.hpp"
 #include "utils/simError.h"
 
+//   debugging:
+#include <unistd.h>
+
 namespace OpenMD {
-  ConstraintWriter::ConstraintWriter(SimInfo* info, const std::string& filename) : info_(info) {
+  ConstraintWriter::ConstraintWriter(SimInfo* info, 
+                                     const std::string& filename): info_(info) {
     //use master - slave mode, only master node writes to disk
 #ifdef IS_MPI
     if(worldRank == 0){
 #endif
       output_.open(filename.c_str());
-
+      
       if(!output_){
 	sprintf( painCave.errMsg,
-		 "Could not open %s for Constraint output\n", filename.c_str());
+		 "Could not open %s for Constraint output\n", 
+                 filename.c_str());
 	painCave.isFatal = 1;
 	simError();
       }
@@ -69,15 +74,13 @@ namespace OpenMD {
       output_ << "#time(fs)\t"
               << "Index of atom 1\t"
               << "Index of atom 2\tconstraint force" << std::endl; 
-
+      
 #ifdef IS_MPI
     }
-#endif  
-
+#endif      
   }
-
-  ConstraintWriter::~ConstraintWriter() {
-    
+  
+  ConstraintWriter::~ConstraintWriter() {    
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif  
@@ -86,7 +89,7 @@ namespace OpenMD {
     }
 #endif
   }
-
+  
   void ConstraintWriter::writeConstraintForces(const std::list<ConstraintPair*>& constraints){
 #ifndef IS_MPI
     std::list<ConstraintPair*>::const_iterator i;
@@ -100,7 +103,7 @@ namespace OpenMD {
       }
     }
 #else
-   
+    
     const int masterNode = 0;
     int nproc;
     int myNode;      
@@ -108,11 +111,11 @@ namespace OpenMD {
     MPI_Comm_rank( MPI_COMM_WORLD, &myNode);
 
     std::vector<int> nConstraints(nproc, 0);
-
     nConstraints[myNode] = constraints.size();
     
     //do MPI_ALLREDUCE to exchange the total number of constraints:
-    MPI_Allreduce(MPI_IN_PLACE, &nConstraints[0], nproc, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &nConstraints[0], nproc, MPI_INT, MPI_SUM, 
+                  MPI_COMM_WORLD);
 
     MPI_Status ierr;
     int atom1, atom2, doPrint;
@@ -147,10 +150,7 @@ namespace OpenMD {
 	  }
 	}            
       }
-      
-      output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime() << std::endl;
-      output_ << constraintData.size() << std::endl;
-      
+            
       std::vector<ConstraintData>::iterator l;
       for (l = constraintData.begin(); l != constraintData.end(); ++l) {
         if (l->printForce) {
@@ -171,7 +171,8 @@ namespace OpenMD {
         
         MPI_Send(&atom1, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
         MPI_Send(&atom2, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-        MPI_Send(&constraintForce, 1, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
+        MPI_Send(&constraintForce, 1, MPI_REALTYPE, masterNode, 0, 
+                 MPI_COMM_WORLD);
         MPI_Send(&printForce, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);            
       }
     }

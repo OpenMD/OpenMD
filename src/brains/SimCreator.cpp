@@ -105,7 +105,6 @@ namespace OpenMD {
 
       if (worldRank == masterNode) {
         MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
-        // MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 #endif                 
         SimplePreprocessor preprocessor;
         preprocessor.preprocess(rawMetaDataStream, filename, 
@@ -115,27 +114,19 @@ namespace OpenMD {
         //broadcasting the stream size
         streamSize = ppStream.str().size() +1;
         MPI_Bcast(&streamSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
-        MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), 
+        MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())),
                   streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
-
-        // MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
-        // MPI::COMM_WORLD.Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), 
-        //                       streamSize, MPI::CHAR, masterNode);
-                           
       } else {
 
         MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
-        // MPI::COMM_WORLD.Bcast(&mdFileVersion, 1, MPI::INT, masterNode);
 
         //get stream size
         MPI_Bcast(&streamSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
-        // MPI::COMM_WORLD.Bcast(&streamSize, 1, MPI::LONG, masterNode);
         char* buf = new char[streamSize];
         assert(buf);
                 
         //receive file content
         MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
-        // MPI::COMM_WORLD.Bcast(buf, streamSize, MPI::CHAR, masterNode);
 
         ppStream.str(buf);
         delete [] buf;
@@ -531,7 +522,6 @@ namespace OpenMD {
                                                     // condition:
     
     MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);    
-    //nProcessors = MPI::COMM_WORLD.Get_size();
     
     if (nProcessors > nGlobalMols) {
       sprintf(painCave.errMsg,
@@ -651,12 +641,11 @@ namespace OpenMD {
 
       // Spray out this nonsense to all other processors:
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
-      // MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
+
     } else {
       
       // Listen to your marching orders from processor 0:
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
-      // MPI::COMM_WORLD.Bcast(&molToProcMap[0], nGlobalMols, MPI::INT, 0);
 
     }
     
@@ -933,9 +922,7 @@ namespace OpenMD {
     MPI_Allreduce(&globalGroupMembership[0], 
                   &tmpGroupMembership[0], nGlobalAtoms,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&globalGroupMembership[0], 
-    //                           &tmpGroupMembership[0], nGlobalAtoms,
-    //                           MPI::INT, MPI::SUM);
+
     info->setGlobalGroupMembership(tmpGroupMembership);
 #else
     info->setGlobalGroupMembership(globalGroupMembership);
@@ -962,9 +949,6 @@ namespace OpenMD {
     MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
                   nGlobalAtoms + nGlobalRigidBodies,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
-    //                           nGlobalAtoms + nGlobalRigidBodies,
-    //                           MPI::INT, MPI::SUM);
     
     info->setGlobalMolMembership(tmpMolMembership);
 #else
@@ -984,8 +968,6 @@ namespace OpenMD {
     std::vector<int> numIntegrableObjectsPerMol(info->getNGlobalMolecules(), 0);
     MPI_Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
       info->getNGlobalMolecules(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
-    //                           info->getNGlobalMolecules(), MPI::INT, MPI::SUM);
 #else
     std::vector<int> numIntegrableObjectsPerMol = nIOPerMol;
 #endif    
