@@ -133,7 +133,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     localHullSites++;
     
     int idx = qh_pointid(vertex->point);
-
+    
     indexMap.push_back(idx);
 
     coords.push_back(ptArray[dim_  * idx]);

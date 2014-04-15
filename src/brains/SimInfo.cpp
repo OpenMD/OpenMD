@@ -74,11 +74,12 @@ namespace OpenMD {
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0), 
     nGlobalFluctuatingCharges_(0), nGlobalBonds_(0), nGlobalBends_(0), 
-    nGlobalTorsions_(0), nGlobalInversions_(0), nAtoms_(0), nBonds_(0), 
-    nBends_(0), nTorsions_(0), nInversions_(0), nRigidBodies_(0), 
-    nIntegrableObjects_(0), nCutoffGroups_(0), nConstraints_(0), 
-    nFluctuatingCharges_(0), sman_(NULL), topologyDone_(false), 
-    calcBoxDipole_(false), useAtomicVirial_(true) {    
+    nGlobalTorsions_(0), nGlobalInversions_(0), nGlobalConstraints_(0),
+    nAtoms_(0), nBonds_(0), nBends_(0), nTorsions_(0), nInversions_(0), 
+    nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
+    nConstraints_(0), nFluctuatingCharges_(0), sman_(NULL), 
+    topologyDone_(false), calcBoxDipole_(false), useAtomicVirial_(true),
+    hasNGlobalConstraints_(false) {    
     
     MoleculeStamp* molStamp;
     int nMolWithSameStamp;
@@ -284,9 +285,6 @@ namespace OpenMD {
     MPI_Allreduce(&ndf_local, &ndf_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
       MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&ndf_local, &ndf_, 1, MPI::INT,MPI::SUM);
-    // MPI::COMM_WORLD.Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
-    //                           MPI::INT, MPI::SUM);
 #else
     ndf_ = ndf_local;
     nGlobalFluctuatingCharges_ = nfq_local;
@@ -301,7 +299,6 @@ namespace OpenMD {
   int SimInfo::getFdf() {
 #ifdef IS_MPI
     MPI_Allreduce(&fdf_local, &fdf_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&fdf_local, &fdf_, 1, MPI::INT, MPI::SUM);
 #else
     fdf_ = fdf_local;
 #endif
@@ -358,7 +355,6 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     MPI_Allreduce(&ndfRaw_local, &ndfRaw_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&ndfRaw_local, &ndfRaw_, 1, MPI::INT, MPI::SUM);
 #else
     ndfRaw_ = ndfRaw_local;
 #endif
@@ -369,18 +365,14 @@ namespace OpenMD {
 
     ndfTrans_local = 3 * nIntegrableObjects_ - nConstraints_;
 
-
 #ifdef IS_MPI
-    MPI_Allreduce(&ndfTrans_local, &ndfTrans_, 1, 
-      MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&ndfTrans_local, &ndfTrans_, 1, 
-    //                           MPI::INT, MPI::SUM);
+    MPI_Allreduce(&ndfTrans_local, &ndfTrans_, 1, MPI_INT, MPI_SUM, 
+                  MPI_COMM_WORLD);
 #else
     ndfTrans_ = ndfTrans_local;
 #endif
 
     ndfTrans_ = ndfTrans_ - 3 - nZconstraint_;
- 
   }
 
   void SimInfo::addInteractionPairs(Molecule* mol) {
@@ -717,6 +709,7 @@ namespace OpenMD {
    */
   void SimInfo::update() {   
     setupSimVariables();
+    calcNConstraints();
     calcNdf();
     calcNdfRaw();
     calcNdfTrans();
@@ -857,31 +850,18 @@ namespace OpenMD {
     temp = usesDirectional;
     MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
     usesDirectionalAtoms_ = (temp == 0) ? false : true;
-
-    // MPI::COMM_WORLD.Allreduce(&temp, &usesDirectionalAtoms_, 1, MPI::BOOL, 
-    //                           MPI::LOR);
     
     temp = usesMetallic;
     MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
     usesMetallicAtoms_ = (temp == 0) ? false : true;
 
-    // MPI::COMM_WORLD.Allreduce(&temp, &usesMetallicAtoms_, 1, MPI::BOOL, 
-    //                           MPI::LOR);
-    
     temp = usesElectrostatic;
     MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
     usesElectrostaticAtoms_ = (temp == 0) ? false : true;
 
-    // MPI::COMM_WORLD.Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI::BOOL, 
-    //                           MPI::LOR);
-
     temp = usesFluctuatingCharges;
     MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT,  MPI_LOR, MPI_COMM_WORLD);
     usesFluctuatingCharges_ = (temp == 0) ? false : true;
-
-    // MPI::COMM_WORLD.Allreduce(&temp, &usesFluctuatingCharges_, 1, MPI::BOOL, 
-    //                           MPI::LOR);
-
 #else
 
     usesDirectionalAtoms_ = usesDirectional;
@@ -1096,17 +1076,13 @@ namespace OpenMD {
     IOIndexToIntegrableObject= v;
   }
 
-  int SimInfo::getNGlobalConstraints() {
-    int nGlobalConstraints;
+  void SimInfo::calcNConstraints() {
 #ifdef IS_MPI
-    MPI_Allreduce(&nConstraints_, &nGlobalConstraints, 1,  
-                              MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(&nConstraints_, &nGlobalConstraints, 1, 
-    //                           MPI::INT, MPI::SUM);
+    MPI_Allreduce(&nConstraints_, &nGlobalConstraints_, 1,  
+                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #else
-    nGlobalConstraints =  nConstraints_;
+    nGlobalConstraints_ =  nConstraints_;
 #endif
-    return nGlobalConstraints;
   }
 
 }//end namespace OpenMD
