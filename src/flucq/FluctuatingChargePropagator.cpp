@@ -83,11 +83,11 @@ namespace OpenMD {
       return;
     }
 
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    
+    // SimInfo::MoleculeIterator i;
+    // Molecule::FluctuatingChargeIterator  j;
+    // Molecule* mol;
+    // Atom* atom;
+    //  
     // For single-minima flucq, this ensures a net neutral system, but
     // for multiple minima, this is no longer the right thing to do:
     //

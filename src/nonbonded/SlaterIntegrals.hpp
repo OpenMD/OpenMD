@@ -136,7 +136,7 @@ inline RealType RosenB(int n, RealType alpha) {
       RealType PCoshRosenA = -exp(alpha) - exp(-alpha);
       RealType TheSum = PSinhRosenA;
       RealType PHyperRosenA;
-      for (unsigned nu=1; nu<=n; nu++)
+      for (unsigned nu=1; nu<=(unsigned)n; nu++)
         {
           if (IsPositive)
             {
