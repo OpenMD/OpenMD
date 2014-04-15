@@ -51,9 +51,6 @@
 #include "io/ConstraintWriter.hpp"
 #include "utils/simError.h"
 
-//   debugging:
-#include <unistd.h>
-
 namespace OpenMD {
   ConstraintWriter::ConstraintWriter(SimInfo* info, 
                                      const std::string& filename): info_(info) {
