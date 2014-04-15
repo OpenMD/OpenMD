@@ -47,7 +47,7 @@ namespace OpenMD {
 
   Rattle::Rattle(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6), doRattle_(false) {
     
-    if (info_->getNConstraints() > 0)
+    if (info_->getNGlobalConstraints() > 0)
       doRattle_ = true;
     
     Globals* simParams = info_->getSimParams();
@@ -56,10 +56,11 @@ namespace OpenMD {
       dt_ = simParams->getDt();
     } else {
       sprintf(painCave.errMsg,
-	      "Integrator Error: dt is not set\n");
+	      "Rattle Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
     }    
+
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     if (simParams->haveConstraintTime()){
       constraintTime_ = simParams->getConstraintTime();

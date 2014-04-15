@@ -45,14 +45,17 @@
 
 #include "brains/SimInfo.hpp"
 #include "constraints/ConstraintPair.hpp"
+#include "io/ConstraintWriter.hpp"
+
 namespace OpenMD {
 
   class Shake {
   public:
     enum ConsStatus{
-      consFail = -1,  //Constraint Fail
-      consSuccess = 0,  //constrain the pair by moving two elements
-      consAlready = 1}; //current pair is already constrained, do not need to move the elements
+      consFail = -1,   //Constraint Fail
+      consSuccess = 0, //constrain the pair by moving two elements
+      consAlready = 1  //current pair is already constrained, do not need to move the elements
+    }; 
     
     Shake(SimInfo* info);
     void constraintR();
@@ -74,6 +77,10 @@ namespace OpenMD {
     RealType consTolerance_;
     Snapshot* currentSnapshot_;   
     bool doShake_;
+    std::string constraintOutputFile_;
+    ConstraintWriter* constraintWriter_;
+    RealType constraintTime_;
+    RealType currConstraintTime_;
   };
 }
 #endif

@@ -47,10 +47,28 @@ namespace OpenMD {
 
   Shake::Shake(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6), doShake_(false) {
     
-    if (info_->getNConstraints() > 0)
+    if (info_->getNGlobalConstraints() > 0)
       doShake_ = true;
     
+    Globals* simParams = info_->getSimParams();
+
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    if (simParams->haveConstraintTime()){
+      constraintTime_ = simParams->getConstraintTime();
+    } else {
+      constraintTime_ = simParams->getStatusTime();
+    }
+
+    constraintOutputFile_ = getPrefix(info_->getFinalConfigFileName()) + ".constraintForces";
+
+    // create ConstraintWriter  
+    constraintWriter_ = new ConstraintWriter(info_, constraintOutputFile_.c_str());   
+
+    if (!constraintWriter_){
+      sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");
+      painCave.isFatal = 1;
+      simError();
+    }
   }
   
   void Shake::constraintR() {
@@ -60,6 +78,25 @@ namespace OpenMD {
   void Shake::constraintF() {
     if (!doShake_) return;    
     doConstraint(&Shake::constraintPairF);
+
+    if (currentSnapshot_->getTime() >= currConstraintTime_){
+      Molecule* mol;
+      SimInfo::MoleculeIterator mi;
+      ConstraintPair* consPair;
+      Molecule::ConstraintPairIterator cpi;
+      std::list<ConstraintPair*> constraints;
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
+             consPair = mol->nextConstraintPair(cpi)) {
+          
+          constraints.push_back(consPair);
+        }
+      }
+      
+      constraintWriter_->writeConstraintForces(constraints);
+      currConstraintTime_ += constraintTime_;
+    }
   }
 
   void Shake::doConstraint(ConstraintPairFuncPtr func) {
@@ -72,8 +109,10 @@ namespace OpenMD {
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-      for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      for (consElem = mol->beginConstraintElem(cei); consElem != NULL; 
+           consElem = mol->nextConstraintElem(cei)) {
 	consElem->setMoved(true);
 	consElem->setMoving(false);
       }
@@ -87,9 +126,11 @@ namespace OpenMD {
 
       //loop over every constraint pair
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; consPair = mol->nextConstraintPair(cpi)) {
-
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
+             consPair = mol->nextConstraintPair(cpi)) {
+          
 
 	  //dispatch constraint algorithm
 	  if(consPair->isMoved()) {
@@ -98,22 +139,25 @@ namespace OpenMD {
 	    switch(exeStatus){
 	    case consFail:
 	      sprintf(painCave.errMsg,
-		      "Constraint failure in Shake::constrainA, Constraint Fail\n");
+		      "Constraint failure in Shake::constrainA, "
+                      "Constraint Fail\n");
 	      painCave.isFatal = 1;
 	      simError();                             
                             
 	      break;
 	    case consSuccess:
-	      //constrain the pair by moving two elements
+	      // constrain the pair by moving two elements
 	      done = false;
 	      consPair->getConsElem1()->setMoving(true);
 	      consPair->getConsElem2()->setMoving(true);
 	      break;
 	    case consAlready:
-	      //current pair is already constrained, do not need to move the elements
+	      // current pair is already constrained, do not need to
+	      // move the elements
 	      break;
 	    default:          
-	      sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstrain() Error: unrecognized status");
+	      sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstraint() "
+                      "Error: unrecognized status");
 	      painCave.isFatal = 1;
 	      simError();                           
 	      break;
@@ -123,8 +167,10 @@ namespace OpenMD {
       }//end for(iter->first())
 
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-	for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+	for (consElem = mol->beginConstraintElem(cei); consElem != NULL; 
+             consElem = mol->nextConstraintElem(cei)) {
 	  consElem->setMoved(consElem->getMoving());
 	  consElem->setMoving(false);
 	}
@@ -135,7 +181,8 @@ namespace OpenMD {
 
     if (!done){
       sprintf(painCave.errMsg,
-              "Constraint failure in Shake::constrainA, too many iterations: %d\n",
+              "Constraint failure in Shake::constrainA, "
+              "too many iterations: %d\n",
               iteration);
       painCave.isFatal = 1;
       simError();    
@@ -195,6 +242,9 @@ namespace OpenMD {
       //set atom2's position
       posB -= rmb * delta;
       consElem2->setPos(posB);
+
+      // report the constraint force back to the constraint pair:
+      consPair->setConstraintForce(gab);
       return consSuccess;
     }
     else
@@ -238,6 +288,8 @@ namespace OpenMD {
       consElem1->setFrc(frcA);
       consElem2->setFrc(frcB);
 
+      // report the constraint force back to the constraint pair:
+      consPair->setConstraintForce(gab);
       return consSuccess;
     }
     else
