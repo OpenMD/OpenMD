@@ -279,7 +279,6 @@ namespace OpenMD {
     // Same command on all nodes:
     MPI_Bcast(gaussRand[0].getArrayPointer(), nTriangles*3, MPI_REALTYPE, 0, 
               MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles*3, MPI::REALTYPE, 0);
 #endif
     
     return gaussRand;

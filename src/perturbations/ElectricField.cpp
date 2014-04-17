@@ -144,8 +144,8 @@ namespace OpenMD {
 	}
       }
 #ifdef IS_MPI
-      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &fieldPot, 1, MPI::REALTYPE, 
-                                MPI::SUM);
+      MPI_Allreduce(MPI_IN_PLACE, &fieldPot, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
 #endif
       Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
       longRangePotential = snap->getLongRangePotentials();

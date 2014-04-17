@@ -129,15 +129,12 @@ namespace OpenMD{
       switch(D) {
       case Row :
         MPI_Comm_split(MPI_COMM_WORLD, rowIndex_, 0, &myComm);
-        //  myComm = MPI::COMM_WORLD.Split(rowIndex_, 0);
         break;
       case Column:
         MPI_Comm_split(MPI_COMM_WORLD, columnIndex_, 0, &myComm);
-        //myComm = MPI::COMM_WORLD.Split(columnIndex_, 0);
         break;
       case Global:
         MPI_Comm_split(MPI_COMM_WORLD, myRank, 0, &myComm);
-        //myComm = MPI::COMM_WORLD.Split(myRank, 0);
       }
 
     }
@@ -159,8 +156,6 @@ namespace OpenMD{
 
       int nCommProcs;
       MPI_Comm_size( myComm, &nCommProcs );
-
-      //int nCommProcs = myComm.Get_size();
       
       counts.resize(nCommProcs, 0);
       displacements.resize(nCommProcs, 0);
@@ -168,7 +163,6 @@ namespace OpenMD{
       planSize_ = MPITraits<T>::Length() * nObjects; 
       
       MPI_Allgather(&planSize_, 1, MPI_INT, &counts[0], 1, MPI_INT, myComm);
-      //myComm.Allgather(&planSize_, 1, MPI_INT, &counts[0], 1, MPI_INT);
       
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
@@ -195,13 +189,6 @@ namespace OpenMD{
                      &displacements[0], 
                      MPITraits<T>::Type(),
                      myComm);
-      // myComm.Allgatherv(&v1[0], 
-      //                   planSize_, 
-      //                   MPITraits<T>::Type(), 
-      //                   &v2[0], 
-      //                   &counts[0], 
-      //                   &displacements[0], 
-      //                   MPITraits<T>::Type());      
     }       
     
     void scatter(vector<T>& v1, vector<T>& v2) {
@@ -210,9 +197,6 @@ namespace OpenMD{
             
       MPI_Reduce_scatter(&v1[0], &v2[0], &counts[0], 
                          MPITraits<T>::Type(), MPI_SUM, myComm);
-
-      // myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
-      //                       MPITraits<T>::Type(), MPI::SUM);
     }
     
     int getSize() {

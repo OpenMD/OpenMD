@@ -646,14 +646,6 @@ namespace OpenMD {
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &inversionPotential, 1, 
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bondPotential, 1, MPI::REALTYPE, 
-    //                           MPI::SUM);
-    // MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &bendPotential, 1, MPI::REALTYPE, 
-    //                           MPI::SUM);
-    // MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &torsionPotential, 1, 
-    //                           MPI::REALTYPE, MPI::SUM);
-    // MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &inversionPotential, 1, 
-    //                           MPI::REALTYPE, MPI::SUM);
 #endif
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -987,9 +979,7 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     MPI_Allreduce(MPI_IN_PLACE, stressTensor.getArrayPointer(), 9, 
-      MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, stressTensor.getArrayPointer(), 9, 
-    //                           MPI::REALTYPE, MPI::SUM);
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
     curSnapshot->setStressTensor(stressTensor);
     

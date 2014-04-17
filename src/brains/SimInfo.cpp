@@ -751,7 +751,6 @@ namespace OpenMD {
 
     int nproc;
     MPI_Comm_size( MPI_COMM_WORLD, &nproc);
-    // int nproc = MPI::COMM_WORLD.Get_size();
 
     // we need arrays to hold the counts and displacement vectors for
     // all processors
@@ -761,8 +760,6 @@ namespace OpenMD {
     // fill the counts array
     MPI_Allgather(&count_local, 1, MPI_INT, &counts[0],
                   1, MPI_INT, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allgather(&count_local, 1, MPI::INT, &counts[0],
-    //                           1, MPI::INT);
   
     // use the processor counts to compute the displacement array
     disps[0] = 0;    
@@ -779,9 +776,6 @@ namespace OpenMD {
     MPI_Allgatherv(&foundTypes[0], count_local, MPI_INT, 
                    &ftGlobal[0], &counts[0], &disps[0], 
                    MPI_INT, MPI_COMM_WORLD);
-    // MPI::COMM_WORLD.Allgatherv(&foundTypes[0], count_local, MPI::INT, 
-    //                            &ftGlobal[0], &counts[0], &disps[0], 
-    //                            MPI::INT);
 
     vector<int>::iterator j;
 
