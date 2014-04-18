@@ -52,6 +52,8 @@ namespace OpenMD {
     if (info_->getNGlobalConstraints() > 0)
       doShake_ = true;
     
+    if (!doShake_) return;
+
     Globals* simParams = info_->getSimParams();
 
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
