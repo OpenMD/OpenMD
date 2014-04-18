@@ -98,7 +98,7 @@ namespace OpenMD {
                  const std::string& sele1, int seleOffset, int nthetabins)
     : StaticAnalyser(info, filename), selectionScript1_(sele1),  
       evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info),
-      nThetaBins_(nthetabins),       
+      nThetaBins_(nthetabins), seleOffset_(seleOffset), 
       doVect_(false), doOffset_(true) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
@@ -151,6 +151,7 @@ namespace OpenMD {
       }
       
       if (doVect_) {
+
         
         for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
              sd1 = seleMan1_.nextSelected(ii)) {
