@@ -52,6 +52,8 @@ namespace OpenMD {
     if (info_->getNGlobalConstraints() > 0)
       doRattle_ = true;
     
+    if (!doRattle_) return;
+
     Globals* simParams = info_->getSimParams();
 
     if (simParams->haveDt()) {
@@ -73,9 +75,10 @@ namespace OpenMD {
     constraintOutputFile_ = getPrefix(info_->getFinalConfigFileName()) + 
       ".constraintForces";
 
+
     // create ConstraintWriter  
     constraintWriter_ = new ConstraintWriter(info_, 
-                                             constraintOutputFile_.c_str());   
+                                             constraintOutputFile_.c_str());
 
     if (!constraintWriter_){
       sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");
