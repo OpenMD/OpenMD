@@ -320,10 +320,18 @@ int main(int argc, char* argv[]){
         analyser  = new pAngle(info, dumpFileName, sele1, sele2,
                                args_info.nbins_arg);
       else 
-        if (args_info.seleoffset_given) 
-          analyser  = new pAngle(info, dumpFileName, sele1, 
-                                 args_info.seleoffset_arg, args_info.nbins_arg);
-        else 
+        if (args_info.seleoffset_given) {
+          if (args_info.seleoffset2_given) {
+            analyser  = new pAngle(info, dumpFileName, sele1, 
+                                   args_info.seleoffset_arg, 
+                                   args_info.seleoffset2_arg, 
+                                   args_info.nbins_arg);
+          } else {
+            analyser  = new pAngle(info, dumpFileName, sele1, 
+                                   args_info.seleoffset_arg, 
+                                   args_info.nbins_arg);
+          }
+        } else 
           analyser  = new pAngle(info, dumpFileName, sele1, 
                                  args_info.nbins_arg);
     } else {

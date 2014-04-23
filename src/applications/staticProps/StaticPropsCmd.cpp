@@ -57,6 +57,7 @@ const char *gengetopt_args_info_help[] = {
   "      --refsele=selection script\n                                select reference (use and only use with --gxyz)",
   "      --comsele=selection script\n                                select stunt doubles for center-of-mass \n                                  reference point",
   "      --seleoffset=INT          global index offset for a second object (used \n                                  to define a vector between sites in molecule)",
+  "      --seleoffset2=INT         global index offset for a third object (used to \n                                  define a vector between sites in molecule)",
   "      --molname=STRING          molecule name",
   "      --begin=INT               begin internal index",
   "      --end=INT                 end internal index",
@@ -138,6 +139,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->refsele_given = 0 ;
   args_info->comsele_given = 0 ;
   args_info->seleoffset_given = 0 ;
+  args_info->seleoffset2_given = 0 ;
   args_info->molname_given = 0 ;
   args_info->begin_given = 0 ;
   args_info->end_given = 0 ;
@@ -210,6 +212,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->comsele_arg = NULL;
   args_info->comsele_orig = NULL;
   args_info->seleoffset_orig = NULL;
+  args_info->seleoffset2_orig = NULL;
   args_info->molname_arg = NULL;
   args_info->molname_orig = NULL;
   args_info->begin_orig = NULL;
@@ -244,38 +247,39 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->refsele_help = gengetopt_args_info_help[18] ;
   args_info->comsele_help = gengetopt_args_info_help[19] ;
   args_info->seleoffset_help = gengetopt_args_info_help[20] ;
-  args_info->molname_help = gengetopt_args_info_help[21] ;
-  args_info->begin_help = gengetopt_args_info_help[22] ;
-  args_info->end_help = gengetopt_args_info_help[23] ;
-  args_info->radius_help = gengetopt_args_info_help[24] ;
-  args_info->bo_help = gengetopt_args_info_help[26] ;
-  args_info->bor_help = gengetopt_args_info_help[27] ;
-  args_info->bad_help = gengetopt_args_info_help[28] ;
-  args_info->count_help = gengetopt_args_info_help[29] ;
-  args_info->gofr_help = gengetopt_args_info_help[30] ;
-  args_info->gofz_help = gengetopt_args_info_help[31] ;
-  args_info->r_theta_help = gengetopt_args_info_help[32] ;
-  args_info->r_omega_help = gengetopt_args_info_help[33] ;
-  args_info->r_z_help = gengetopt_args_info_help[34] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[35] ;
-  args_info->gxyz_help = gengetopt_args_info_help[36] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[37] ;
-  args_info->p2_help = gengetopt_args_info_help[38] ;
-  args_info->rp2_help = gengetopt_args_info_help[39] ;
-  args_info->scd_help = gengetopt_args_info_help[40] ;
-  args_info->density_help = gengetopt_args_info_help[41] ;
-  args_info->slab_density_help = gengetopt_args_info_help[42] ;
-  args_info->p_angle_help = gengetopt_args_info_help[43] ;
-  args_info->hxy_help = gengetopt_args_info_help[44] ;
-  args_info->rho_r_help = gengetopt_args_info_help[45] ;
-  args_info->angle_r_help = gengetopt_args_info_help[46] ;
-  args_info->hullvol_help = gengetopt_args_info_help[47] ;
-  args_info->rodlength_help = gengetopt_args_info_help[48] ;
-  args_info->tet_param_help = gengetopt_args_info_help[49] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[50] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[51] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[52] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[53] ;
+  args_info->seleoffset2_help = gengetopt_args_info_help[21] ;
+  args_info->molname_help = gengetopt_args_info_help[22] ;
+  args_info->begin_help = gengetopt_args_info_help[23] ;
+  args_info->end_help = gengetopt_args_info_help[24] ;
+  args_info->radius_help = gengetopt_args_info_help[25] ;
+  args_info->bo_help = gengetopt_args_info_help[27] ;
+  args_info->bor_help = gengetopt_args_info_help[28] ;
+  args_info->bad_help = gengetopt_args_info_help[29] ;
+  args_info->count_help = gengetopt_args_info_help[30] ;
+  args_info->gofr_help = gengetopt_args_info_help[31] ;
+  args_info->gofz_help = gengetopt_args_info_help[32] ;
+  args_info->r_theta_help = gengetopt_args_info_help[33] ;
+  args_info->r_omega_help = gengetopt_args_info_help[34] ;
+  args_info->r_z_help = gengetopt_args_info_help[35] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[36] ;
+  args_info->gxyz_help = gengetopt_args_info_help[37] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[38] ;
+  args_info->p2_help = gengetopt_args_info_help[39] ;
+  args_info->rp2_help = gengetopt_args_info_help[40] ;
+  args_info->scd_help = gengetopt_args_info_help[41] ;
+  args_info->density_help = gengetopt_args_info_help[42] ;
+  args_info->slab_density_help = gengetopt_args_info_help[43] ;
+  args_info->p_angle_help = gengetopt_args_info_help[44] ;
+  args_info->hxy_help = gengetopt_args_info_help[45] ;
+  args_info->rho_r_help = gengetopt_args_info_help[46] ;
+  args_info->angle_r_help = gengetopt_args_info_help[47] ;
+  args_info->hullvol_help = gengetopt_args_info_help[48] ;
+  args_info->rodlength_help = gengetopt_args_info_help[49] ;
+  args_info->tet_param_help = gengetopt_args_info_help[50] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[51] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[52] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[53] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[54] ;
   
 }
 
@@ -385,6 +389,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->comsele_arg));
   free_string_field (&(args_info->comsele_orig));
   free_string_field (&(args_info->seleoffset_orig));
+  free_string_field (&(args_info->seleoffset2_orig));
   free_string_field (&(args_info->molname_arg));
   free_string_field (&(args_info->molname_orig));
   free_string_field (&(args_info->begin_orig));
@@ -467,6 +472,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "comsele", args_info->comsele_orig, 0);
   if (args_info->seleoffset_given)
     write_into_file(outfile, "seleoffset", args_info->seleoffset_orig, 0);
+  if (args_info->seleoffset2_given)
+    write_into_file(outfile, "seleoffset2", args_info->seleoffset2_orig, 0);
   if (args_info->molname_given)
     write_into_file(outfile, "molname", args_info->molname_orig, 0);
   if (args_info->begin_given)
@@ -878,6 +885,7 @@ cmdline_parser_internal (
         { "refsele",	1, NULL, 0 },
         { "comsele",	1, NULL, 0 },
         { "seleoffset",	1, NULL, 0 },
+        { "seleoffset2",	1, NULL, 0 },
         { "molname",	1, NULL, 0 },
         { "begin",	1, NULL, 0 },
         { "end",	1, NULL, 0 },
@@ -1250,6 +1258,20 @@ cmdline_parser_internal (
                 &(local_args_info.seleoffset_given), optarg, 0, 0, ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "seleoffset", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* global index offset for a third object (used to define a vector between sites in molecule).  */
+          else if (strcmp (long_options[option_index].name, "seleoffset2") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->seleoffset2_arg), 
+                 &(args_info->seleoffset2_orig), &(args_info->seleoffset2_given),
+                &(local_args_info.seleoffset2_given), optarg, 0, 0, ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "seleoffset2", '-',
                 additional_error))
               goto failure;
           

@@ -61,6 +61,9 @@ namespace OpenMD {
            const string& sele1, const string& sele2, int nzbins);
     pAngle(SimInfo* info, const string& filename, 
            const string& sele, const int seleOffset, int nzbins);
+    pAngle(SimInfo* info, const string& filename, 
+           const string& sele, const int seleOffset, const int seleOffset2, 
+           int nzbins);
     
     int getNThetaBins() {
       return nThetaBins_; 
@@ -77,6 +80,7 @@ namespace OpenMD {
 
     bool doVect_;
     bool doOffset_;
+    bool doOffset2_;
     string selectionScript1_;
     string selectionScript2_;
     SelectionManager seleMan1_;
@@ -84,6 +88,7 @@ namespace OpenMD {
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
     int seleOffset_;
+    int seleOffset2_;
 
     int nProcessed_;    
     int nThetaBins_;     
