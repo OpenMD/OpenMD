@@ -96,6 +96,9 @@ struct gengetopt_args_info
   int seleoffset_arg;	/**< @brief global index offset for a second object (used to define a vector between sites in molecule).  */
   char * seleoffset_orig;	/**< @brief global index offset for a second object (used to define a vector between sites in molecule) original value given at command line.  */
   const char *seleoffset_help; /**< @brief global index offset for a second object (used to define a vector between sites in molecule) help description.  */
+  int seleoffset2_arg;	/**< @brief global index offset for a third object (used to define a vector between sites in molecule).  */
+  char * seleoffset2_orig;	/**< @brief global index offset for a third object (used to define a vector between sites in molecule) original value given at command line.  */
+  const char *seleoffset2_help; /**< @brief global index offset for a third object (used to define a vector between sites in molecule) help description.  */
   char * molname_arg;	/**< @brief molecule name.  */
   char * molname_orig;	/**< @brief molecule name original value given at command line.  */
   const char *molname_help; /**< @brief molecule name help description.  */
@@ -158,6 +161,7 @@ struct gengetopt_args_info
   unsigned int refsele_given ;	/**< @brief Whether refsele was given.  */
   unsigned int comsele_given ;	/**< @brief Whether comsele was given.  */
   unsigned int seleoffset_given ;	/**< @brief Whether seleoffset was given.  */
+  unsigned int seleoffset2_given ;	/**< @brief Whether seleoffset2 was given.  */
   unsigned int molname_given ;	/**< @brief Whether molname was given.  */
   unsigned int begin_given ;	/**< @brief Whether begin was given.  */
   unsigned int end_given ;	/**< @brief Whether end was given.  */

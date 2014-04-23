@@ -99,7 +99,27 @@ namespace OpenMD {
     : StaticAnalyser(info, filename), selectionScript1_(sele1),  
       evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info),
       nThetaBins_(nthetabins), seleOffset_(seleOffset), 
-      doVect_(false), doOffset_(true) {
+      doVect_(false), doOffset_(true), doOffset2_(false) {
+    
+    setOutputName(getPrefix(filename) + ".pAngle");
+    
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }            
+    
+    count_.resize(nThetaBins_);
+    histogram_.resize(nThetaBins_);    
+  }
+
+  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+                 const std::string& sele1, int seleOffset, int seleOffset2,
+                 int nthetabins)
+    : StaticAnalyser(info, filename), selectionScript1_(sele1),  
+      evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info),
+      nThetaBins_(nthetabins), seleOffset_(seleOffset), 
+      seleOffset2_(seleOffset2),
+      doVect_(false), doOffset_(true), doOffset2_(true) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
     
@@ -182,14 +202,23 @@ namespace OpenMD {
             // This will require careful rewriting if StaticProps is
             // ever parallelized.  For an example, see
             // Thermo::getTaggedAtomPairDistance
+            Vector3d r1;
             
-            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
-            sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
-            
-            Vector3d r1 = CenterOfMass - sd1->getPos();
+            if (doOffset2_) {
+              int sd1Aind = sd1->getGlobalIndex() + seleOffset2_;
+              StuntDouble* sd1A = info_->getIOIndexToIntegrableObject(sd1Aind);
+              r1 = CenterOfMass - sd1A->getPos();              
+            } else {
+              r1 = CenterOfMass - sd1->getPos();
+            }
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(r1);
-            
+
+
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
+
             Vector3d r2 = CenterOfMass - sd2->getPos();
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(r1);
