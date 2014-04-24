@@ -55,33 +55,36 @@
 using namespace MATPACK;
 namespace OpenMD {
 
-  BOPofR::BOPofR(SimInfo* info, const std::string& filename, const std::string& sele, double rCut,
-		 int nbins, RealType len) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
+  BOPofR::BOPofR(SimInfo* info, const std::string& filename, 
+                 const std::string& sele, double rCut, int nbins, 
+                 RealType len) : StaticAnalyser(info, filename), 
+                                 selectionScript_(sele), 
+                                 evaluator_(info), seleMan_(info) {
     
     setOutputName(getPrefix(filename) + ".bo");
-
+    
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-
+    
     // Set up cutoff radius and order of the Legendre Polynomial:
-
+    
     rCut_ = rCut;
     nBins_ = nbins;
     len_ = len;
-	
+    
     deltaR_ = len_/nBins_;
     RCount_.resize(nBins_);
     WofR_.resize(nBins_);
     QofR_.resize(nBins_);
 
-	for (int i = 0; i < nBins_; i++){
-		RCount_[i] = 0;
-		WofR_[i] = 0;
-		QofR_[i] = 0;
-	}
-	
+    for (int i = 0; i < nBins_; i++){
+      RCount_[i] = 0;
+      WofR_[i] = 0;
+      QofR_[i] = 0;
+    }
+    
     // Make arrays for Wigner3jm
     RealType* THRCOF = new RealType[2*lMax_+1];
     // Variables for Wigner routine
@@ -121,8 +124,8 @@ namespace OpenMD {
   }
   
   BOPofR::~BOPofR() {
-	  /*
-	std::cerr << "Freeing stuff" << std::endl;
+  /*
+    std::cerr << "Freeing stuff" << std::endl;
     for (int l = 0; l <= lMax_; l++) {
       for (int m = -l; m <= l; m++) {
         w3j[std::make_pair(l,m)].clear();
@@ -146,14 +149,14 @@ namespace OpenMD {
 
   
   void BOPofR::initializeHistogram() {
- 	for (int i = 0; i < nBins_; i++){
-		RCount_[i] = 0;
-		WofR_[i] = 0;
-		QofR_[i] = 0;
-	}
+    for (int i = 0; i < nBins_; i++){
+      RCount_[i] = 0;
+      WofR_[i] = 0;
+      QofR_[i] = 0;
+    }
   }
-
-
+  
+  
   void BOPofR::process() {
     Molecule* mol;
     Atom* atom;
@@ -307,77 +310,136 @@ namespace OpenMD {
 
         collectHistogram(q_l, w_hat, distCOM);
 		
-//		printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
-
+        //  printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
+        
       }
     }
-	
+    
     writeOrderParameter();    
   }
+  
 
-  void BOPofR::collectHistogram(std::vector<RealType> q, 
-				std::vector<ComplexType> what, RealType distCOM) {
 
+  IcosahedralOfR::IcosahedralOfR(SimInfo* info, const std::string& filename, 
+                                 const std::string& sele, double rCut, 
+                                 int nbins, RealType len) : BOPofR(info, 
+                                                                   filename, 
+                                                                   sele, rCut,
+                                                                   nbins, len) {
+  }
+
+  void IcosahedralOfR::collectHistogram(std::vector<RealType> q, 
+                                        std::vector<ComplexType> what, 
+                                        RealType distCOM) {
+    
     if ( distCOM < len_){
       // Figure out where this distance goes...
       int whichBin = int(distCOM / deltaR_);
       RCount_[whichBin]++;
 
       if(real(what[6]) < -0.15){      				
-		WofR_[whichBin]++;
+        WofR_[whichBin]++;
       }
-	  if(q[6] > 0.5){
+      if(q[6] > 0.5){
       	QofR_[whichBin]++;
-	  }
-    }  
-
+      }
+    }      
   }
 
-  void BOPofR::writeOrderParameter() {
+  FCCOfR::FCCOfR(SimInfo* info, const std::string& filename, 
+                 const std::string& sele, double rCut, 
+                 int nbins, RealType len) : BOPofR(info, filename, sele, rCut,
+                                                   nbins, len) {}
+  
+  
+  void FCCOfR::collectHistogram(std::vector<RealType> q, 
+                                std::vector<ComplexType> what, 
+                                RealType distCOM) {
+    
+    if ( distCOM < len_){
+      // Figure out where this distance goes...
+      int whichBin = int(distCOM / deltaR_);
+      RCount_[whichBin]++;
+
+      if(real(what[4]) < -0.12){      				
+        WofR_[whichBin]++;
+      }
+    }      
+  }
+  
+  void IcosahedralOfR::writeOrderParameter() {
     
     std::ofstream osq((getOutputFileName() + "qr").c_str());
 
     if (osq.is_open()) {
       
       // Normalize by number of frames and write it out:
-	  
+      
       for (int i = 0; i < nBins_; ++i) {
         RealType Rval = (i + 0.5) * deltaR_;               
         osq << Rval;
-		if (RCount_[i] == 0){
-			osq << "\t" << 0;
-			osq << "\n";
-		}else{
-        	osq << "\t" << (RealType)QofR_[i]/(RealType)RCount_[i];        
-        	osq << "\n";
-		}
+        if (RCount_[i] == 0){
+          osq << "\t" << 0;
+          osq << "\n";
+        }else{
+          osq << "\t" << (RealType)QofR_[i]/(RealType)RCount_[i];        
+          osq << "\n";
+        }
       }
-
+      
       osq.close();
-
+      
     } else {
       sprintf(painCave.errMsg, "BOPofR: unable to open %s\n", 
               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();  
     }
-
+    
     std::ofstream osw((getOutputFileName() + "wr").c_str());
-
+    
     if (osw.is_open()) {
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Rval = deltaR_ * (i + 0.5);               
         osw << Rval;
-		if (RCount_[i] == 0){
-			osw << "\t" << 0;
-			osw << "\n";
-		}else{
-        	osw << "\t" << (RealType)WofR_[i]/(RealType)RCount_[i];
-        	osw << "\n";
-		}
+        if (RCount_[i] == 0){
+          osw << "\t" << 0;
+          osw << "\n";
+        }else{
+          osw << "\t" << (RealType)WofR_[i]/(RealType)RCount_[i];
+          osw << "\n";
+        }
       }
-
+      
+      osw.close();
+    } else {
+      sprintf(painCave.errMsg, "BOPofR: unable to open %s\n", 
+              (getOutputFileName() + "w").c_str());
+      painCave.isFatal = 1;
+      simError();  
+    
+    }
+	
+  }
+  void FCCOfR::writeOrderParameter() {
+    
+    std::ofstream osw((getOutputFileName() + "wr").c_str());
+    
+    if (osw.is_open()) {
+      // Normalize by number of frames and write it out:
+      for (int i = 0; i < nBins_; ++i) {
+        RealType Rval = deltaR_ * (i + 0.5);               
+        osw << Rval;
+        if (RCount_[i] == 0){
+          osw << "\t" << 0;
+          osw << "\n";
+        }else{
+          osw << "\t" << (RealType)WofR_[i]/(RealType)RCount_[i];
+          osw << "\n";
+        }
+      }
+      
       osw.close();
     } else {
       sprintf(painCave.errMsg, "BOPofR: unable to open %s\n", 

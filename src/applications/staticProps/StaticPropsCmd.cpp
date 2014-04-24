@@ -64,7 +64,8 @@ const char *gengetopt_args_info_help[] = {
   "      --radius=DOUBLE           nanoparticle radius",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
-  "      --bor                     bond order parameter as a function of radius \n                                  (--rcut must be specified)",
+  "      --ior                     icosahedral bond order parameter as a function \n                                  of radius (--rcut must be specified)",
+  "      --for                     FCC bond order parameter as a function of \n                                  radius (--rcut must be specified)",
   "      --bad                     N(theta) bond angle density within (--rcut must \n                                  be specified)",
   "      --count                   count of molecules matching selection criteria \n                                  (and associated statistics)",
   "  -g, --gofr                    g(r)",
@@ -145,7 +146,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->end_given = 0 ;
   args_info->radius_given = 0 ;
   args_info->bo_given = 0 ;
-  args_info->bor_given = 0 ;
+  args_info->ior_given = 0 ;
+  args_info->for_given = 0 ;
   args_info->bad_given = 0 ;
   args_info->count_given = 0 ;
   args_info->gofr_given = 0 ;
@@ -253,33 +255,34 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->end_help = gengetopt_args_info_help[24] ;
   args_info->radius_help = gengetopt_args_info_help[25] ;
   args_info->bo_help = gengetopt_args_info_help[27] ;
-  args_info->bor_help = gengetopt_args_info_help[28] ;
-  args_info->bad_help = gengetopt_args_info_help[29] ;
-  args_info->count_help = gengetopt_args_info_help[30] ;
-  args_info->gofr_help = gengetopt_args_info_help[31] ;
-  args_info->gofz_help = gengetopt_args_info_help[32] ;
-  args_info->r_theta_help = gengetopt_args_info_help[33] ;
-  args_info->r_omega_help = gengetopt_args_info_help[34] ;
-  args_info->r_z_help = gengetopt_args_info_help[35] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[36] ;
-  args_info->gxyz_help = gengetopt_args_info_help[37] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[38] ;
-  args_info->p2_help = gengetopt_args_info_help[39] ;
-  args_info->rp2_help = gengetopt_args_info_help[40] ;
-  args_info->scd_help = gengetopt_args_info_help[41] ;
-  args_info->density_help = gengetopt_args_info_help[42] ;
-  args_info->slab_density_help = gengetopt_args_info_help[43] ;
-  args_info->p_angle_help = gengetopt_args_info_help[44] ;
-  args_info->hxy_help = gengetopt_args_info_help[45] ;
-  args_info->rho_r_help = gengetopt_args_info_help[46] ;
-  args_info->angle_r_help = gengetopt_args_info_help[47] ;
-  args_info->hullvol_help = gengetopt_args_info_help[48] ;
-  args_info->rodlength_help = gengetopt_args_info_help[49] ;
-  args_info->tet_param_help = gengetopt_args_info_help[50] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[51] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[52] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[53] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[54] ;
+  args_info->ior_help = gengetopt_args_info_help[28] ;
+  args_info->for_help = gengetopt_args_info_help[29] ;
+  args_info->bad_help = gengetopt_args_info_help[30] ;
+  args_info->count_help = gengetopt_args_info_help[31] ;
+  args_info->gofr_help = gengetopt_args_info_help[32] ;
+  args_info->gofz_help = gengetopt_args_info_help[33] ;
+  args_info->r_theta_help = gengetopt_args_info_help[34] ;
+  args_info->r_omega_help = gengetopt_args_info_help[35] ;
+  args_info->r_z_help = gengetopt_args_info_help[36] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[37] ;
+  args_info->gxyz_help = gengetopt_args_info_help[38] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[39] ;
+  args_info->p2_help = gengetopt_args_info_help[40] ;
+  args_info->rp2_help = gengetopt_args_info_help[41] ;
+  args_info->scd_help = gengetopt_args_info_help[42] ;
+  args_info->density_help = gengetopt_args_info_help[43] ;
+  args_info->slab_density_help = gengetopt_args_info_help[44] ;
+  args_info->p_angle_help = gengetopt_args_info_help[45] ;
+  args_info->hxy_help = gengetopt_args_info_help[46] ;
+  args_info->rho_r_help = gengetopt_args_info_help[47] ;
+  args_info->angle_r_help = gengetopt_args_info_help[48] ;
+  args_info->hullvol_help = gengetopt_args_info_help[49] ;
+  args_info->rodlength_help = gengetopt_args_info_help[50] ;
+  args_info->tet_param_help = gengetopt_args_info_help[51] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[52] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[53] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[54] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[55] ;
   
 }
 
@@ -484,8 +487,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "radius", args_info->radius_orig, 0);
   if (args_info->bo_given)
     write_into_file(outfile, "bo", 0, 0 );
-  if (args_info->bor_given)
-    write_into_file(outfile, "bor", 0, 0 );
+  if (args_info->ior_given)
+    write_into_file(outfile, "ior", 0, 0 );
+  if (args_info->for_given)
+    write_into_file(outfile, "for", 0, 0 );
   if (args_info->bad_given)
     write_into_file(outfile, "bad", 0, 0 );
   if (args_info->count_given)
@@ -592,7 +597,8 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
     return;
   
   args_info->bo_given = 0 ;
-  args_info->bor_given = 0 ;
+  args_info->ior_given = 0 ;
+  args_info->for_given = 0 ;
   args_info->bad_given = 0 ;
   args_info->count_given = 0 ;
   args_info->gofr_given = 0 ;
@@ -891,7 +897,8 @@ cmdline_parser_internal (
         { "end",	1, NULL, 0 },
         { "radius",	1, NULL, 0 },
         { "bo",	0, NULL, 0 },
-        { "bor",	0, NULL, 0 },
+        { "ior",	0, NULL, 0 },
+        { "for",	0, NULL, 0 },
         { "bad",	0, NULL, 0 },
         { "count",	0, NULL, 0 },
         { "gofr",	0, NULL, 'g' },
@@ -1349,8 +1356,8 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* bond order parameter as a function of radius (--rcut must be specified).  */
-          else if (strcmp (long_options[option_index].name, "bor") == 0)
+          /* icosahedral bond order parameter as a function of radius (--rcut must be specified).  */
+          else if (strcmp (long_options[option_index].name, "ior") == 0)
           {
           
             if (args_info->staticProps_group_counter && override)
@@ -1358,10 +1365,27 @@ cmdline_parser_internal (
             args_info->staticProps_group_counter += 1;
           
             if (update_arg( 0 , 
-                 0 , &(args_info->bor_given),
-                &(local_args_info.bor_given), optarg, 0, 0, ARG_NO,
+                 0 , &(args_info->ior_given),
+                &(local_args_info.ior_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
-                "bor", '-',
+                "ior", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* FCC bond order parameter as a function of radius (--rcut must be specified).  */
+          else if (strcmp (long_options[option_index].name, "for") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->for_given),
+                &(local_args_info.for_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "for", '-',
                 additional_error))
               goto failure;
           
