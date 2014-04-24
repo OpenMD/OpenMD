@@ -35,7 +35,8 @@ option  "end"           -       "end internal index"                            
 option  "radius"        -       "nanoparticle radius" double no
 defgroup "staticProps" groupdesc=" an option of this group is required" yes
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"
-groupoption "bor"       -       "bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"
+groupoption "ior"       -       "icosahedral bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"
+groupoption "for"       -       "FCC bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"
 groupoption "bad"       -       "N(theta) bond angle density within (--rcut must be specified)" group="staticProps"
 groupoption "count"     -       "count of molecules matching selection criteria (and associated statistics)" group="staticProps"
 groupoption "gofr"      g       "g(r)" group="staticProps"

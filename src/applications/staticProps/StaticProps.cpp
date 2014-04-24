@@ -267,9 +267,21 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-  } else if (args_info.bor_given){
+  } else if (args_info.ior_given){
     if (args_info.rcut_given) {
-      analyser = new BOPofR(info, dumpFileName, sele1, args_info.rcut_arg,
+      analyser = new IcosahedralOfR(info, dumpFileName, sele1, 
+                                    args_info.rcut_arg,
+                                    args_info.nbins_arg, maxLen);
+    } else {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  } else if (args_info.for_given){
+    if (args_info.rcut_given) {
+      analyser = new FCCOfR(info, dumpFileName, sele1, args_info.rcut_arg,
 			    args_info.nbins_arg, maxLen);
     } else {
       sprintf( painCave.errMsg,

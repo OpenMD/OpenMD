@@ -54,50 +54,20 @@
 
 namespace OpenMD {
 
-  /**
-   * @class BondOrderParameter
-   * @brief Bond Order Parameter
-   *
-   * Computes orientational bond order parameters as outlined in:
-   *
-   *   "Bond-orientaional order in liquids and glasses," by
-   *    P. J. Steinhart, D. R. Nelson, and M. Ronchetti, 
-   *    Phys. Rev. B, 28, 784 (1983).
-   *
-   * A somewhat more useful reference which has formulae for these
-   * order parameters for individual atoms is:
-   *
-   *   "Numerical calculation of the rate of crystal nucleation in a
-   *    Lennard-Jones system at moderate undercooling," by Pieter Rein
-   *    ten Wolde, Maria J. Ruiz-Montero, and Daan Frenkel,
-   *    J. Chem. Phys. 104, pp. 9932-9947 (1996).
-   *
-   * Note that this version uses a single cutoff radius to decide
-   * membership in the list of neighbors, and does not have use a
-   * distance-dependent weighting as used in the second reference
-   * above.
-   *
-   * The selection script can be utilized to look at specific types of
-   * central atoms.  A dynamic selector can also be utilized.  By
-   * default, this class computes the \f[ Q_{l} \f] and 
-   * \f[ \hat{W}_{l} \f] parameters up to \f[ l = 12 \f].  The 
-   * completed configurational averages of these values as well as the
-   * distributions of atomic \f[ q_{l} \f] and \f[ \hat{w}_{l} \f]
-   * values are then placed in .boq and .bow files.
-   */
   class BOPofR : public StaticAnalyser{
   public:
     BOPofR(SimInfo* info, const std::string& filename, 
-                       const std::string& sele, double rCut, int nbins, RealType len);
+           const std::string& sele, double rCut, int nbins, RealType len);
     
     virtual ~BOPofR();
     virtual void process();
     
-  private:
+  protected:
     virtual void initializeHistogram();
     virtual void collectHistogram(std::vector<RealType> q, 
-                                  std::vector<ComplexType> what, RealType distCOM);    
-    void writeOrderParameter();
+                                  std::vector<ComplexType> what, 
+                                  RealType distCOM) = 0;
+    virtual void writeOrderParameter() = 0;
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
@@ -116,9 +86,33 @@ namespace OpenMD {
     std::map<std::pair<int,int>,std::vector<RealType> > w3j;
    
     std::vector<int> RCount_;
-    std::vector<int>  WofR_;
+    std::vector<int> WofR_;
     std::vector<int> QofR_;
   };
+
+
+  class IcosahedralOfR : public BOPofR {
+  public:
+    IcosahedralOfR(SimInfo* info, const std::string& filename, 
+                   const std::string& sele, double rCut, int nbins, 
+                   RealType len);
+
+    virtual void collectHistogram(std::vector<RealType> q, 
+                                  std::vector<ComplexType> what, 
+                                  RealType distCOM);
+    virtual void writeOrderParameter();
+  };
+
+  class FCCOfR : public BOPofR {
+  public:
+    FCCOfR(SimInfo* info, const std::string& filename, 
+           const std::string& sele, double rCut, int nbins, RealType len);
+
+    virtual void collectHistogram(std::vector<RealType> q, 
+                                  std::vector<ComplexType> what, 
+                                  RealType distCOM);
+    virtual void writeOrderParameter();
+  };  
 }
 
 #endif

@@ -112,7 +112,8 @@ struct gengetopt_args_info
   char * radius_orig;	/**< @brief nanoparticle radius original value given at command line.  */
   const char *radius_help; /**< @brief nanoparticle radius help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
-  const char *bor_help; /**< @brief bond order parameter as a function of radius (--rcut must be specified) help description.  */
+  const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
+  const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *bad_help; /**< @brief N(theta) bond angle density within (--rcut must be specified) help description.  */
   const char *count_help; /**< @brief count of molecules matching selection criteria (and associated statistics) help description.  */
   const char *gofr_help; /**< @brief g(r) help description.  */
@@ -167,7 +168,8 @@ struct gengetopt_args_info
   unsigned int end_given ;	/**< @brief Whether end was given.  */
   unsigned int radius_given ;	/**< @brief Whether radius was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
-  unsigned int bor_given ;	/**< @brief Whether bor was given.  */
+  unsigned int ior_given ;	/**< @brief Whether ior was given.  */
+  unsigned int for_given ;	/**< @brief Whether for was given.  */
   unsigned int bad_given ;	/**< @brief Whether bad was given.  */
   unsigned int count_given ;	/**< @brief Whether count was given.  */
   unsigned int gofr_given ;	/**< @brief Whether gofr was given.  */
