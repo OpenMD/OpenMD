@@ -85,6 +85,7 @@ namespace OpenMD {
     bool initialized_; 
     bool doParticlePot_;
     bool doElectricField_;
+    bool doSitePotential_;
     bool doHeatFlux_;
     bool doLongRangeCorrections_;
     bool usePeriodicBoundaryConditions_;

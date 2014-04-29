@@ -140,6 +140,7 @@ struct gengetopt_args_info
   const char *rnemdz_help; /**< @brief slab-resolved RNEMD statistics (temperature, density, velocity) help description.  */
   const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
+  const char *uFreqMap_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -196,6 +197,7 @@ struct gengetopt_args_info
   unsigned int rnemdz_given ;	/**< @brief Whether rnemdz was given.  */
   unsigned int rnemdr_given ;	/**< @brief Whether rnemdr was given.  */
   unsigned int rnemdrt_given ;	/**< @brief Whether rnemdrt was given.  */
+  unsigned int uFreqMap_given ;	/**< @brief Whether uFreqMap was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

@@ -191,6 +191,8 @@ namespace OpenMD {
     Vector3d Tb; // Torque on site b
     Vector3d Ea; // Electric field at site a
     Vector3d Eb; // Electric field at site b
+    RealType Pa; // Site potential at site a
+    RealType Pb; // Site potential at site b
     RealType dUdCa; // fluctuating charge force at site a
     RealType dUdCb; // fluctuating charge force at site a
     
