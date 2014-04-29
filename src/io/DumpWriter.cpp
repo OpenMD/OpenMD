@@ -64,7 +64,8 @@ using namespace std;
 namespace OpenMD {
 
   DumpWriter::DumpWriter(SimInfo* info) 
-    : info_(info), filename_(info->getDumpFileName()), eorFilename_(info->getFinalConfigFileName()){
+    : info_(info), filename_(info->getDumpFileName()), 
+      eorFilename_(info->getFinalConfigFileName()){
 
     Globals* simParams = info->getSimParams();
     needCompression_   = simParams->getCompressDumpFile();
@@ -72,8 +73,10 @@ namespace OpenMD {
     needParticlePot_   = simParams->getOutputParticlePotential();
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
+    needSitePotential_ = simParams->getOutputSitePotential();
 
-    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+    if (needParticlePot_ || needFlucQ_ || needElectricField_ || 
+        needSitePotential_) {
       doSiteData_ = true;
     } else {
       doSiteData_ = false;
@@ -121,8 +124,10 @@ namespace OpenMD {
     needParticlePot_   = simParams->getOutputParticlePotential();
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
+    needSitePotential_ = simParams->getOutputSitePotential();
 
-    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+    if (needParticlePot_ || needFlucQ_ || needElectricField_ || 
+        needSitePotential_) {
       doSiteData_ = true;
     } else {
       doSiteData_ = false;
@@ -170,8 +175,10 @@ namespace OpenMD {
     needParticlePot_   = simParams->getOutputParticlePotential();
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
+    needSitePotential_ = simParams->getOutputSitePotential();
 
-    if (needParticlePot_ || needFlucQ_ || needElectricField_) {
+    if (needParticlePot_ || needFlucQ_ || needElectricField_ || 
+        needSitePotential_) {
       doSiteData_ = true;
     } else {
       doSiteData_ = false;
@@ -711,7 +718,22 @@ namespace OpenMD {
       }
     }
 
-
+    if (needSitePotential_) {
+      if (storageLayout & DataStorage::dslSitePotential) {          
+        type += "s";
+        RealType sPot = sd->getSitePotential();        
+        if (isinf(sPot) || isnan(sPot) ) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the"
+                   " site potential for object %s", id.c_str());      
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e ", sPot);        
+        line += tempBuffer;
+      }
+    }    
+    
     if (needParticlePot_) {
       if (storageLayout & DataStorage::dslParticlePot) {
         type += "u";

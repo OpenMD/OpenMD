@@ -83,7 +83,8 @@ namespace OpenMD {
       dslSkippedCharge = 8192,
       dslFlucQPosition = 16384,
       dslFlucQVelocity = 32768,
-      dslFlucQForce = 65536
+      dslFlucQForce = 65536,
+      dslSitePotential = 131072
     };
 
     DataStorage();
@@ -140,6 +141,7 @@ namespace OpenMD {
     vector<RealType> flucQPos;        /** fluctuating charges */
     vector<RealType> flucQVel;        /** fluctuating charge velocities */
     vector<RealType> flucQFrc;        /** fluctuating charge forces */
+    vector<RealType> sitePotential;   /** electrostatic site potentials */
 
     static int getBytesPerStuntDouble(int layout);
 

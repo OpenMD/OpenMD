@@ -98,6 +98,7 @@ namespace OpenMD {
     bool needParticlePot_;
     bool needFlucQ_;
     bool needElectricField_;
+    bool needSitePotential_;
     bool doSiteData_;
     bool createDumpFile_;
   };

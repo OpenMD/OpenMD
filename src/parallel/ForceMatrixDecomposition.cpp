@@ -586,6 +586,13 @@ namespace OpenMD {
            atomColData.electricField.end(), V3Zero);
     }
 
+    if (storageLayout_ & DataStorage::dslSitePotential) {    
+      fill(atomRowData.sitePotential.begin(), 
+           atomRowData.sitePotential.end(), 0.0);
+      fill(atomColData.sitePotential.begin(), 
+           atomColData.sitePotential.end(), 0.0);
+    }
+
 #endif
     // even in parallel, we need to zero out the local arrays:
 
@@ -617,6 +624,10 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslElectricField) {      
       fill(snap_->atomData.electricField.begin(), 
            snap_->atomData.electricField.end(), V3Zero);
+    }
+    if (storageLayout_ & DataStorage::dslSitePotential) {      
+      fill(snap_->atomData.sitePotential.begin(), 
+           snap_->atomData.sitePotential.end(), 0.0);
     }
   }
 
@@ -832,6 +843,21 @@ namespace OpenMD {
         snap_->atomData.electricField[i] += efield_tmp[i];
     }
 
+    if (storageLayout_ & DataStorage::dslSitePotential) {
+
+      int nsp = snap_->atomData.sitePotential.size();
+      vector<RealType> sp_tmp(nsp, 0.0);
+
+      AtomPlanRealRow->scatter(atomRowData.sitePotential, sp_tmp);
+      for (int i = 0; i < nsp; i++) {
+        snap_->atomData.sitePotential[i] += sp_tmp[i];
+        sp_tmp[i] = 0.0;
+      }
+      
+      AtomPlanRealColumn->scatter(atomColData.sitePotential, sp_tmp);
+      for (int i = 0; i < nsp; i++)
+        snap_->atomData.sitePotential[i] += sp_tmp[i];
+    }
 
     nLocal_ = snap_->getNumberOfAtoms();
 
@@ -1321,6 +1347,11 @@ namespace OpenMD {
       atomColData.electricField[atom2] += *(idat.eField2);
     }
 
+    if (storageLayout_ & DataStorage::dslSitePotential) {              
+      atomRowData.sitePotential[atom1] += *(idat.sPot1);
+      atomColData.sitePotential[atom2] += *(idat.sPot2);
+    }
+
 #else
     pairwisePot += *(idat.pot);
     excludedPot += *(idat.excludedPot);
@@ -1345,6 +1376,11 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslElectricField) {              
       snap_->atomData.electricField[atom1] += *(idat.eField1);
       snap_->atomData.electricField[atom2] += *(idat.eField2);
+    }
+
+    if (storageLayout_ & DataStorage::dslSitePotential) {              
+      snap_->atomData.sitePotential[atom1] += *(idat.sPot1);
+      snap_->atomData.sitePotential[atom2] += *(idat.sPot2);
     }
 
 #endif

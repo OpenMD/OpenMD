@@ -118,6 +118,7 @@ namespace OpenMD {
     DeclareParameter(OutputParticlePotential, bool);
     DeclareParameter(OutputElectricField, bool);
     DeclareParameter(OutputFluctuatingCharges, bool);
+    DeclareParameter(OutputSitePotential, bool);
     DeclareParameter(SkinThickness, RealType);
     DeclareParameter(StatFileFormat, std::string);    
     DeclareParameter(HydroPropFile, std::string);

@@ -768,6 +768,8 @@ namespace OpenMD {
     Tb.zero(); // Torque on site b
     Ea.zero(); // Electric field at site a
     Eb.zero(); // Electric field at site b
+    Pa = 0.0;  // Site potential at site a
+    Pb = 0.0;  // Site potential at site b
     dUdCa = 0.0; // fluctuating charge force at site a
     dUdCb = 0.0; // fluctuating charge force at site a
     
@@ -842,8 +844,9 @@ namespace OpenMD {
       if (idat.excluded) {
         *(idat.skippedCharge2) += C_a;
       } else {
-        // only do the field if we're not excluded:
+        // only do the field and site potentials if we're not excluded:
         Eb -= C_a *  pre11_ * dv01 * rhat;
+        Pb += C_a *  pre11_ * v01;
       }
     }
     
@@ -851,8 +854,11 @@ namespace OpenMD {
       D_a = *(idat.dipole1);
       rdDa = dot(rhat, D_a);
       rxDa = cross(rhat, D_a);
-      if (!idat.excluded) 
+      if (!idat.excluded) {
         Eb -=  pre12_ * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
+        Pb +=  pre12_ * v11 * rdDa;
+      }
+
     }
     
     if (a_is_Quadrupole) {
@@ -862,9 +868,11 @@ namespace OpenMD {
       rQa = rhat * Q_a;
       rdQar = dot(rhat, Qar);
       rxQar = cross(rhat, Qar);
-      if (!idat.excluded) 
+      if (!idat.excluded) {
         Eb -= pre14_ * (trQa * rhat * dv21 + 2.0 * Qar * v22or 
                         + rdQar * rhat * (dv22 - 2.0*v22or));
+        Pb += pre14_ * (v21 * trQa + v22 * rdQar);
+      }
     }
     
     if (b_is_Charge) {
@@ -878,6 +886,8 @@ namespace OpenMD {
       } else {
         // only do the field if we're not excluded:
         Ea += C_b *  pre11_ * dv01 * rhat;
+        Pa += C_b *  pre11_ * v01;
+
       }
     }
     
@@ -885,8 +895,10 @@ namespace OpenMD {
       D_b = *(idat.dipole2);
       rdDb = dot(rhat, D_b);
       rxDb = cross(rhat, D_b);
-      if (!idat.excluded) 
+      if (!idat.excluded) {
         Ea += pre12_ * ((dv11-v11or) * rdDb * rhat + v11or * D_b);
+        Pa += pre12_ * v11 * rdDb;
+      }
     }
     
     if (b_is_Quadrupole) {
@@ -896,9 +908,11 @@ namespace OpenMD {
       rQb = rhat * Q_b;
       rdQbr = dot(rhat, Qbr);
       rxQbr = cross(rhat, Qbr);
-      if (!idat.excluded) 
+      if (!idat.excluded) {
         Ea += pre14_ * (trQb * rhat * dv21 + 2.0 * Qbr * v22or 
                         + rdQbr * rhat * (dv22 - 2.0*v22or));
+        Pa += pre14_ * (v21 * trQb + v22 * rdQbr);
+      }
     }
         
 
@@ -1097,6 +1111,11 @@ namespace OpenMD {
     if (idat.doElectricField) {
       *(idat.eField1) += Ea * *(idat.electroMult);
       *(idat.eField2) += Eb * *(idat.electroMult);
+    }
+
+    if (idat.doSitePotential) {
+      *(idat.sPot1) += Pa * *(idat.electroMult);
+      *(idat.sPot2) += Pb * *(idat.electroMult);
     }
 
     if (a_is_Fluctuating) *(idat.dVdFQ1) += dUdCa * *(idat.sw);

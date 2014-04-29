@@ -110,6 +110,7 @@ namespace OpenMD {
     RealType* vpair;          /**< pair potential */
     bool doParticlePot;       /**< should we bother with the particle pot? */
     bool doElectricField;     /**< should we bother with the electric field? */
+    bool doSitePotential;     /**< should we bother with electrostatic site potential */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
     Vector3d* f1;             /**< force between the two atoms */
@@ -135,6 +136,8 @@ namespace OpenMD {
     Vector3d* eField2;        /**< pointer to electric field on second atom */
     RealType* skippedCharge1; /**< charge skipped on atom1 in pairwise interaction loop with atom2 */
     RealType* skippedCharge2; /**< charge skipped on atom2 in pairwise interaction loop with atom1 */
+    RealType* sPot1;           /**< site potential on first atom */
+    RealType* sPot2;           /**< site potential on second atom */
   };
   
   /** 

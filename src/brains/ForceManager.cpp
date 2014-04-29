@@ -417,6 +417,7 @@ namespace OpenMD {
       if (doHeatFlux_) doParticlePot_ = true;
 
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
+      doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
    
     }
 
@@ -716,6 +717,9 @@ namespace OpenMD {
     potVec exPot(0.0);
     Vector3d eField1(0.0);
     Vector3d eField2(0.0);
+    RealType sPot1(0.0);
+    RealType sPot2(0.0);
+                   
     vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
@@ -731,13 +735,16 @@ namespace OpenMD {
     idat.dVdFQ1 = &dVdFQ1;
     idat.dVdFQ2 = &dVdFQ2;
     idat.eField1 = &eField1;
-    idat.eField2 = &eField2;   
+    idat.eField2 = &eField2; 
+    idat.sPot1 = &sPot1;
+    idat.sPot2 = &sPot2;
     idat.f1 = &f1;
     idat.sw = &sw;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
     idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE || cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
     idat.doParticlePot = doParticlePot_;
     idat.doElectricField = doElectricField_;
+    idat.doSitePotential = doSitePotential_;
     sdat.doParticlePot = doParticlePot_;
     
     loopEnd = PAIR_LOOP;
@@ -777,6 +784,8 @@ namespace OpenMD {
             fij.zero();
             eField1.zero();
             eField2.zero();
+            sPot1 = 0.0;
+            sPot2 = 0.0;
           }
           
           in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 

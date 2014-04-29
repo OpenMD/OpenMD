@@ -1198,6 +1198,86 @@ namespace OpenMD{
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electricField[localIndex_] += eField;
     }       
 
+    /**
+     * Returns the previous charge force of this stuntDouble
+     * @return the charge force of this stuntDouble
+     */    
+    RealType getPrevSitePotential() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).sitePotential[localIndex_];
+    }
+       
+    /**
+     * Returns the current charge force of this stuntDouble
+     * @return the charge force of this stuntDouble
+     */    
+    RealType getSitePotential() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).sitePotential[localIndex_];
+    }
+
+    /**
+     * Returns the charge force of this stuntDouble in specified snapshot
+     * @return the charge force of this stuntDouble
+     * @param snapshotNo
+     */    
+    RealType getSitePotential(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).sitePotential[localIndex_];
+    }
+
+    /**
+     * Sets  the previous charge force of this stuntDouble
+     * @param spot  new charge force 
+     * @see #getSitePotential
+     */         
+    void setPrevSitePotential(RealType spot) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).sitePotential[localIndex_] = spot;
+    }
+       
+    /**
+     * Sets  the current charge force of this stuntDouble
+     * @param spot  new charge force 
+     */         
+    void setSitePotential(RealType spot) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).sitePotential[localIndex_] = spot;
+    }
+
+    /**
+     * Sets  the charge force of this stuntDouble in specified snapshot
+     * @param spot charge force to be set 
+     * @param snapshotNo 
+     * @see #getSitePotential
+     */         
+    void setSitePotential(RealType spot, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).sitePotential[localIndex_] = spot;
+    }
+
+    /**
+     * Adds charge force into the previous charge force of this stuntDouble
+     * @param spot   charge force to be added 
+     * @see #getSitePotential
+     */         
+    void addPrevSitePotential(RealType spot) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).sitePotential[localIndex_] += spot;
+    }
+       
+    /**
+     * Adds charge force into the current charge force of this stuntDouble
+     * @param spot   charge force to be added 
+     */         
+    void addSitePotential(RealType spot) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).sitePotential[localIndex_] += spot;
+    }
+
+    /**
+     * Adds charge force into the charge force of this stuntDouble in specified snapshot
+     * @param spot charge force to be added
+     * @param snapshotNo 
+     * @see #getSitePotential
+     */         
+    void addSitePotential(RealType spot, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).sitePotential[localIndex_] += spot;
+    }       
+
+
 
     /** Set the force of this stuntDouble to zero */
     void zeroForcesAndTorques(); 

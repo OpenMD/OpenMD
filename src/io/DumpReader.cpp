@@ -510,6 +510,13 @@ namespace OpenMD {
            sd->setElectricField(eField);          
            break;
         }
+        case 's' : {
+
+           RealType sPot;
+           sPot = tokenizer.nextTokenAsDouble(); 
+           sd->setSitePotential(sPot);          
+           break;
+        }
         default: {
                sprintf(painCave.errMsg, 
                        "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
@@ -612,6 +619,13 @@ namespace OpenMD {
         sd->setElectricField(eField);          
         break;
       }
+      case 's' : {
+        
+        RealType sPot;
+        sPot = tokenizer.nextTokenAsDouble(); 
+        sd->setSitePotential(sPot);          
+        break;
+      }
       default: {
         sprintf(painCave.errMsg, 
                 "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
@@ -624,7 +638,7 @@ namespace OpenMD {
   } 
   
   
-  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+    void  DumpReader::readStuntDoubles(std::istream& inputStream) {
     
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);

@@ -789,6 +789,10 @@ namespace OpenMD {
       storageLayout |= DataStorage::dslElectricField;
     }
 
+    if (simParams->getOutputSitePotential() ) {
+      storageLayout |= DataStorage::dslSitePotential;
+    }
+
     if (simParams->getOutputFluctuatingCharges()) {
       storageLayout |= DataStorage::dslFlucQPosition;
       storageLayout |= DataStorage::dslFlucQVelocity;

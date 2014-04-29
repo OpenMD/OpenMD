@@ -146,6 +146,11 @@ namespace OpenMD {
       //error
       cerr << "size does not match"<< endl;        
     }
+
+    if (storageLayout_ & dslSitePotential && sitePotential.size() != size_) {
+      //error
+      cerr << "size does not match"<< endl;        
+    }
     
     return size_;
 
@@ -221,6 +226,10 @@ namespace OpenMD {
       internalResize(flucQFrc, newSize);
     }
 
+    if (storageLayout_ & dslSitePotential) {
+      internalResize(sitePotential, newSize);
+    }
+
     size_ = newSize;
   }
 
@@ -291,6 +300,10 @@ namespace OpenMD {
 
     if (storageLayout_ & dslFlucQForce) {
       flucQFrc.reserve(size);
+    }
+
+    if (storageLayout_ & dslSitePotential) {
+      sitePotential.reserve(size);
     }
   }
 
@@ -365,6 +378,10 @@ namespace OpenMD {
     if (storageLayout_ & dslFlucQForce) {
       internalCopy(flucQFrc, source, num, target);
     }
+
+    if (storageLayout_ & dslSitePotential) {
+      internalCopy(sitePotential, source, num, target);
+    }
   }
 
   int DataStorage::getStorageLayout() {
@@ -429,6 +446,9 @@ namespace OpenMD {
            
     case dslFlucQForce:
       return internalGetArrayPointer(flucQFrc);
+           
+    case dslSitePotential:
+      return internalGetArrayPointer(sitePotential);
            
     default:
       //error message
@@ -547,6 +567,9 @@ namespace OpenMD {
       bytes += sizeof(RealType);
     }
     if (layout & dslFlucQForce) {
+      bytes += sizeof(RealType);
+    }
+    if (layout & dslSitePotential) {
       bytes += sizeof(RealType);
     }
 
