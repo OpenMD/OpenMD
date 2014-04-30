@@ -78,6 +78,7 @@
 #include "applications/staticProps/TetrahedralityParam.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
 #include "applications/staticProps/RNEMDStats.hpp"
+#include "applications/staticProps/NitrileFrequencyMap.hpp"
 
 using namespace OpenMD;
 
@@ -326,6 +327,9 @@ int main(int argc, char* argv[]){
   } else if (args_info.rnemdrt_given) {
     analyser = new RNEMDRTheta(info, dumpFileName, sele1,
                                args_info.nbins_arg, args_info.nanglebins_arg);
+  } else if (args_info.nitrile_given) {
+    analyser = new NitrileFrequencyMap(info, dumpFileName, sele1,
+                                       args_info.nbins_arg);
   } else if (args_info.p_angle_given) {
     if (args_info.sele1_given) {     
       if (args_info.sele2_given) 
