@@ -45,6 +45,7 @@
 
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
+#include "primitives/Atom.hpp"
 #include "brains/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
@@ -106,6 +107,9 @@ namespace OpenMD {
     void setDampingAlpha( RealType alpha );
     void setReactionFieldDielectric( RealType dielectric );
     void ReciprocalSpaceSum(RealType &pot);
+
+    // Utility routine 
+    void getSitePotentials(Atom* a1, Atom* a2, bool excluded, RealType &spot1, RealType &spot2);
 
   private:
     void initialize();

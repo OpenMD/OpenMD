@@ -1556,4 +1556,120 @@ namespace OpenMD {
     }
     pot += kPot;  
   }
+
+  void Electrostatic::getSitePotentials(Atom* a1, Atom* a2, bool excluded, 
+                                        RealType &spot1, RealType &spot2) {
+
+    if (!initialized_) {
+      cerr << "initializing\n";
+      initialize();
+      cerr << "done\n";
+    }
+
+    const RealType mPoleConverter = 0.20819434; 
+
+    AtomType* atype1 = a1->getAtomType();
+    AtomType* atype2 = a2->getAtomType();
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+    data1 = ElectrostaticMap[Etids[atid1]];
+    data2 = ElectrostaticMap[Etids[atid2]];
+
+    Pa = 0.0;  // Site potential at site a
+    Pb = 0.0;  // Site potential at site b
+
+    Vector3d d = a2->getPos() - a1->getPos();
+    info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(d);
+    RealType rij = d.length();
+    // some variables we'll need independent of electrostatic type:
+
+    RealType ri = 1.0 /  rij;
+    rhat = d  * ri;
+      
+
+    if ((rij >= cutoffRadius_) || excluded) {
+      spot1 = 0.0;
+      spot2 = 0.0;
+      return;
+    }
+
+    // logicals
+
+    a_is_Charge = data1.is_Charge;
+    a_is_Dipole = data1.is_Dipole;
+    a_is_Quadrupole = data1.is_Quadrupole;
+    a_is_Fluctuating = data1.is_Fluctuating;
+
+    b_is_Charge = data2.is_Charge;
+    b_is_Dipole = data2.is_Dipole;
+    b_is_Quadrupole = data2.is_Quadrupole;
+    b_is_Fluctuating = data2.is_Fluctuating;
+
+    // Obtain all of the required radial function values from the
+    // spline structures:
+    
+
+    if (a_is_Charge || b_is_Charge) {
+      v01 = v01s->getValueAt(rij);
+    }
+    if (a_is_Dipole || b_is_Dipole) {
+      v11 = v11s->getValueAt(rij);
+      v11or = ri * v11;
+    }
+    if (a_is_Quadrupole || b_is_Quadrupole) {
+      v21 = v21s->getValueAt(rij);
+      v22 = v22s->getValueAt(rij);
+      v22or = ri * v22;
+    }      
+
+    if (a_is_Charge) {
+      C_a = data1.fixedCharge;
+      
+      if (a_is_Fluctuating) {
+        C_a += a1->getFlucQPos();
+      }
+      
+      Pb += C_a *  pre11_ * v01;      
+    }
+    
+    if (a_is_Dipole) {
+      D_a = a1->getDipole() * mPoleConverter;
+      rdDa = dot(rhat, D_a);
+      Pb +=  pre12_ * v11 * rdDa;      
+    }
+    
+    if (a_is_Quadrupole) {
+      Q_a = a1->getQuadrupole() * mPoleConverter;
+      trQa =  Q_a.trace();
+      Qar =   Q_a * rhat;
+      rdQar = dot(rhat, Qar);
+      Pb += pre14_ * (v21 * trQa + v22 * rdQar);      
+    }
+    
+    if (b_is_Charge) {
+      C_b = data2.fixedCharge;
+      
+      if (b_is_Fluctuating) 
+        C_b += a2->getFlucQPos();
+      
+      Pa += C_b *  pre11_ * v01;
+    }
+    
+    if (b_is_Dipole) {
+      D_b = a2->getDipole() * mPoleConverter;
+      rdDb = dot(rhat, D_b);
+      Pa += pre12_ * v11 * rdDb;
+    }
+    
+    if (b_is_Quadrupole) {
+      Q_a = a2->getQuadrupole() * mPoleConverter;
+      trQb =  Q_b.trace();
+      Qbr =   Q_b * rhat;
+      rdQbr = dot(rhat, Qbr);
+      Pa += pre14_ * (v21 * trQb + v22 * rdQbr);      
+    }
+
+    spot1 = Pa;
+    spot2 = Pb;
+  }
 }
