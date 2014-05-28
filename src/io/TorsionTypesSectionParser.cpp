@@ -54,7 +54,8 @@
 
 namespace OpenMD {
 
-  TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options) : options_(options){
+  TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options) : 
+    options_(options), trans180_(true) {
 
     setSectionName("TorsionTypes");
     stringToEnumMap_["GhostTorsion"] = ttGhostTorsion;
@@ -73,6 +74,10 @@ namespace OpenMD {
     StringTokenizer tokenizer(line);
     TorsionType* torsionType = NULL;
     
+    std::string torsionConvention = options_.getTorsionAngleConvention();
+    toUpper(torsionConvention);
+    trans180_ = torsionConvention.compare("180_IS_TRANS") == 0 ? true : false;
+
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 5) {
@@ -99,7 +104,10 @@ namespace OpenMD {
 	RealType k1 = tokenizer.nextTokenAsDouble();
 	RealType k0 = tokenizer.nextTokenAsDouble();
                 
-	torsionType = new CubicTorsionType(k3, k2, k1, k0);
+        if (trans180_)
+          torsionType = new CubicTorsionType( k3, k2,  k1, k0);
+        else 
+          torsionType = new CubicTorsionType(-k3, k2, -k1, k0);
       }
       break;
             
@@ -113,7 +121,10 @@ namespace OpenMD {
 	RealType k1 = tokenizer.nextTokenAsDouble();
 	RealType k0 = tokenizer.nextTokenAsDouble();
                 
-	torsionType = new CubicTorsionType(k3, k2, k1, k0);
+        if (trans180_)
+          torsionType = new CubicTorsionType( k3, k2,  k1, k0);
+        else 
+          torsionType = new CubicTorsionType(-k3, k2, -k1, k0);
       }
       break;
             
@@ -128,7 +139,12 @@ namespace OpenMD {
 	RealType k1 = tokenizer.nextTokenAsDouble();
 	RealType k0 = tokenizer.nextTokenAsDouble();
                 
-	torsionType = new QuarticTorsionType( k4, k3, k2, k1, k0);
+        if (trans180_)
+          torsionType = new QuarticTorsionType( k4,  k3, k2,  k1, k0);
+        else 
+          torsionType = new QuarticTorsionType( k4, -k3, k2, -k1, k0);
+
+
       }
       break;
 
@@ -146,8 +162,15 @@ namespace OpenMD {
                 
 	for (int i = 0; i < nPairs; ++i) {
 	  power = tokenizer.nextTokenAsInt();
+          bool isOdd = power % 2 == 0 ? false : true;
+
 	  coefficient = tokenizer.nextTokenAsDouble();
-	  ptt->setCoefficient(power, coefficient);
+
+          if (!trans180_ && isOdd)
+            coefficient = -coefficient;
+
+          ptt->setCoefficient(power, coefficient);
+          
 	}
       }
             
@@ -166,6 +189,13 @@ namespace OpenMD {
 	  currParam.kchi = tokenizer.nextTokenAsDouble();
 	  currParam.n = tokenizer.nextTokenAsInt();
 	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
+
+          bool isOdd = currParam.n % 2 == 0 ? false : true;
+          if (!trans180_) {           
+            currParam.delta = NumericConstant::PI - currParam.delta;
+            if (isOdd) currParam.kchi = -currParam.kchi;
+          }
+
           parameters.push_back(currParam);
 	}
 
@@ -184,7 +214,7 @@ namespace OpenMD {
 	RealType v2 = tokenizer.nextTokenAsDouble();
 	RealType v3 = tokenizer.nextTokenAsDouble();
         
-	torsionType = new OplsTorsionType(v1, v2, v3);
+	torsionType = new OplsTorsionType(v1, v2, v3, trans180_);
       }
 
       break;
@@ -200,7 +230,7 @@ namespace OpenMD {
 	RealType c1 = tokenizer.nextTokenAsDouble();
 	RealType c2 = tokenizer.nextTokenAsDouble();
 	RealType c3 = tokenizer.nextTokenAsDouble();
-	torsionType = new TrappeTorsionType(c0, c1, c2, c3);
+	torsionType = new TrappeTorsionType(c0, c1, c2, c3, trans180_);
       }
 
       break;
@@ -225,6 +255,10 @@ namespace OpenMD {
 
         // convert to radians
 	RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
+
+        if (!trans180_)
+          phi0 = NumericConstant::PI - phi0;
+
 	torsionType = new HarmonicTorsionType(d0, phi0);
       }
 
