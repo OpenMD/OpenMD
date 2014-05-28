@@ -245,16 +245,16 @@ namespace OpenMD {
         // however.  To match our other force field files
         // (particularly for bends): 
         //
-        // d0 should be read in kcal / mol / degrees^2
         // phi0 should be read in degrees
+        // d0 should be read in kcal / mol / degrees^2
 
-        RealType degreesPerRadian = 180.0 * NumericConstant::PI;
-
-        // convert to kcal / mol / radians^2
-	RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
+        RealType degreesPerRadian = 180.0 / NumericConstant::PI;
 
         // convert to radians
 	RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
+        
+        // convert to kcal / mol / radians^2
+	RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
 
         if (!trans180_)
           phi0 = NumericConstant::PI - phi0;
