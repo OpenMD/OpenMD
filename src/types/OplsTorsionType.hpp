@@ -80,7 +80,7 @@ namespace OpenMD {
     
   public:
     
-    OplsTorsionType(RealType v1, RealType v2, RealType v3) :  
+    OplsTorsionType(RealType v1, RealType v2, RealType v3, bool trans180) :  
       PolynomialTorsionType(), v1_(v1), v2_(v2), v3_(v3) {
       
       //convert OPLS Torsion Type to Polynomial Torsion type
@@ -88,11 +88,12 @@ namespace OpenMD {
       RealType c1 = 0.5 * (v1 - 3.0 * v3);
       RealType c2 = -v2;
       RealType c3 = 2.0 * v3;
-      // Early debugging attempt:
-      // c0 = c0/2;
-      // c1 = c1/2;
-      // c2 = c2/2;
-      // c3 = c3/2;
+      
+      if (!trans180) {
+        c1 = -c1;
+        c3 = -c3;
+      }
+               
       setCoefficient(0, c0);
       setCoefficient(1, c1);
       setCoefficient(2, c2);

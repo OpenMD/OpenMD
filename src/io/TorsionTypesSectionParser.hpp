@@ -78,6 +78,7 @@ namespace OpenMD {
 
     std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
     ForceFieldOptions& options_;
+    bool trans180_;
   };
 
 

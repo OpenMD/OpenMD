@@ -87,7 +87,7 @@ namespace OpenMD {
     
   public:
     
-    TrappeTorsionType(RealType c0, RealType c1, RealType c2, RealType c3) :  
+    TrappeTorsionType(RealType c0, RealType c1, RealType c2, RealType c3, bool trans180) :  
       PolynomialTorsionType(), c0_(c0), c1_(c1), c2_(c2), c3_(c3) {
 
       //convert Trappe Torsion Type to Polynomial Torsion type
@@ -96,7 +96,12 @@ namespace OpenMD {
       RealType b1 = c1 - 3.0 * c3;
       RealType b2 = -2.0 * c2;
       RealType b3 = 4.0 * c3;
-      
+
+      if (!trans180) {
+        b1 = -b1;
+        b3 = -b3;
+      }
+
       setCoefficient(0, b0);
       setCoefficient(1, b1);
       setCoefficient(2, b2);
