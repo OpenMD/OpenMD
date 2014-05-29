@@ -94,11 +94,16 @@ namespace OpenMD {
     void setChiTolerance(RealType tol) {
       chiTolerance_ = tol;
     }
+
         
   protected:
     virtual void moveA();
 
     virtual void moveB();
+
+    virtual void evolveChiA();
+
+    virtual void evolveChiB();
 
     virtual void doUpdateSizes() ;
 
@@ -114,6 +119,10 @@ namespace OpenMD {
 
     std::vector<Vector3d> oldVel_;
     std::vector<Vector3d> oldJi_;
+
+    RealType prevChi_;
+    RealType oldChi_;
+    RealType oldChiInt_;
   };
 
 
