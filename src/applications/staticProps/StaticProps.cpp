@@ -79,6 +79,7 @@
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
+#include "applications/staticProps/MultipoleSum.hpp"
 
 using namespace OpenMD;
 
@@ -239,6 +240,17 @@ int main(int argc, char* argv[]){
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  } else if (args_info.multipole_given){
+    if (args_info.rcut_given) {
+      analyser = new MultipoleSum(info, dumpFileName, sele1, 
+					args_info.rcut_arg);
+    } else {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating Multipole Sums");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
