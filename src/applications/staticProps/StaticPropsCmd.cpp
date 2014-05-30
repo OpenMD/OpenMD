@@ -93,6 +93,7 @@ const char *gengetopt_args_info_help[] = {
   "      --rnemdr                  shell-resolved RNEMD statistics (temperature, \n                                  density, angular velocity)",
   "      --rnemdrt                 shell and angle-resolved RNEMD statistics \n                                  (temperature, density, angular velocity)",
   "      --nitrile                 electrostatic potential to frequency map based \n                                  on the Cho nitrile fits",
+  "  -m, --multipole               average multipole moment contained within a \n                                  cutoff sphere",
     0
 };
 
@@ -176,6 +177,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->rnemdr_given = 0 ;
   args_info->rnemdrt_given = 0 ;
   args_info->nitrile_given = 0 ;
+  args_info->multipole_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -286,6 +288,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->rnemdr_help = gengetopt_args_info_help[54] ;
   args_info->rnemdrt_help = gengetopt_args_info_help[55] ;
   args_info->nitrile_help = gengetopt_args_info_help[56] ;
+  args_info->multipole_help = gengetopt_args_info_help[57] ;
   
 }
 
@@ -548,6 +551,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "rnemdrt", 0, 0 );
   if (args_info->nitrile_given)
     write_into_file(outfile, "nitrile", 0, 0 );
+  if (args_info->multipole_given)
+    write_into_file(outfile, "multipole", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -631,6 +636,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->rnemdr_given = 0 ;
   args_info->rnemdrt_given = 0 ;
   args_info->nitrile_given = 0 ;
+  args_info->multipole_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -932,10 +938,11 @@ cmdline_parser_internal (
         { "rnemdr",	0, NULL, 0 },
         { "rnemdrt",	0, NULL, 0 },
         { "nitrile",	0, NULL, 0 },
+        { "multipole",	0, NULL, 'm' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:c:z:gpsdQ", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:c:z:gpsdQm", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -1130,6 +1137,21 @@ cmdline_parser_internal (
               &(local_args_info.tet_param_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "tet_param", 'Q',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'm':	/* average multipole moment contained within a cutoff sphere.  */
+        
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->multipole_given),
+              &(local_args_info.multipole_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "multipole", 'm',
               additional_error))
             goto failure;
         
