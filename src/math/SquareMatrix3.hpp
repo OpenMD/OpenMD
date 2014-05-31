@@ -569,6 +569,9 @@ namespace OpenMD {
   typedef SquareMatrix3<RealType> Mat3x3d;
   typedef SquareMatrix3<RealType> RotMat3x3d;
 
+  const Mat3x3d M3Zero(0.0);
+
+
 } //namespace OpenMD
 #endif // MATH_SQUAREMATRIX_HPP
 
