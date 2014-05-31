@@ -86,6 +86,10 @@ namespace OpenMD {
     std::vector<RealType> dipoleHist(nRBins_, 0.0); 
     std::vector<RealType> qpoleHist(nRBins_, 0.0); 
     std::vector<int> lengthCount(nRBins_, 0);
+    std::vector<Vector3d> totalDipole; 
+    std::vector<Mat3x3d> totalQpole; 
+    Vector3d dipole(0.0);
+    Mat3x3d qpole;
 
 
     DumpReader reader(info_, dumpFilename_);    
@@ -113,8 +117,10 @@ namespace OpenMD {
       
         pos1 = sd1->getPos();
 
-        std::vector<Vector3d> totalDipole(nRBins_, V3Zero); 
-        std::vector<Mat3x3d> totalQpole(nRBins_, Mat3x3d(0.0)); 
+        totalDipole.clear();
+        totalDipole.resize(nRBins_, V3Zero); 
+        totalQpole.clear();
+        totalQpole.resize(nRBins_, M3Zero); 
 
         for (mol = info_->beginMolecule(miter); mol != NULL; 
              mol = info_->nextMolecule(miter)) {
@@ -127,11 +133,11 @@ namespace OpenMD {
 
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(ri);
-
+            
+            dipole = V3Zero;
+            qpole = M3Zero;
             AtomType* atype2 = atom->getAtomType();
             MultipoleAdapter ma2 = MultipoleAdapter(atype2);
-            Vector3d dipole(0.0);
-            Mat3x3d qpole(0.0);
 
             if (ma2.isDipole()) 
               dipole = atom->getDipole();
@@ -158,9 +164,14 @@ namespace OpenMD {
       }
     }
     
-    for (int j = 0; j < nRBins_; j++) {                    
-      aveDlength_[j] = dipoleHist[j] / RealType(lengthCount[j]);
-      aveQlength_[j] = qpoleHist[j] / RealType(lengthCount[j]);
+    for (int j = 0; j < nRBins_; j++) {
+      if (lengthCount[j] > 0) {
+        aveDlength_[j] = dipoleHist[j] / RealType(lengthCount[j]);
+        aveQlength_[j] = qpoleHist[j] / RealType(lengthCount[j]);
+      } else {
+        aveDlength_[j] = 0.0;
+        aveQlength_[j] = 0.0;
+     }
     }
     writeOut();
   }
@@ -171,10 +182,10 @@ namespace OpenMD {
     ofstream os(getOutputFileName().c_str());
     os << "#multipole sum\n";
     os<< "#selection1: (" << selectionScript1_ << ")\t";
-    os << "#r\taveDlength\aveQlength\n";    
+    os << "#r\taveDlength\taveQlength\n";    
 
     for (unsigned int i = 0; i < nRBins_; ++i) {
-      RealType r = deltaR_ * (i + 0.5);
+      RealType r = deltaR_ * i;
       os << r << "\t" << aveDlength_[i] << "\t" << aveQlength_[i] << "\n";
     }
 
