@@ -245,17 +245,8 @@ int main(int argc, char* argv[]){
       simError();
     }
   } else if (args_info.multipole_given){
-    if (args_info.rcut_given) {
-      analyser = new MultipoleSum(info, dumpFileName, sele1, 
-					args_info.rcut_arg);
-    } else {
-      sprintf( painCave.errMsg,
-	       "A cutoff radius (rcut) must be specified when calculating Multipole Sums");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
+    analyser = new MultipoleSum(info, dumpFileName, sele1, 
+                                maxLen, args_info.nbins_arg);
   } else if (args_info.tet_param_given) {
     if (args_info.rcut_given) {	  
       analyser = new TetrahedralityParam(info, dumpFileName, sele1, 

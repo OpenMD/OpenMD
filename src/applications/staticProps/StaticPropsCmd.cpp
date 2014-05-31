@@ -93,7 +93,7 @@ const char *gengetopt_args_info_help[] = {
   "      --rnemdr                  shell-resolved RNEMD statistics (temperature, \n                                  density, angular velocity)",
   "      --rnemdrt                 shell and angle-resolved RNEMD statistics \n                                  (temperature, density, angular velocity)",
   "      --nitrile                 electrostatic potential to frequency map based \n                                  on the Cho nitrile fits",
-  "  -m, --multipole               average multipole moment contained within a \n                                  cutoff sphere",
+  "  -m, --multipole               average multipole moments contained within \n                                  cutoff spheres as a function of radius",
     0
 };
 
@@ -1141,7 +1141,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'm':	/* average multipole moment contained within a cutoff sphere.  */
+        case 'm':	/* average multipole moments contained within cutoff spheres as a function of radius.  */
         
           if (args_info->staticProps_group_counter && override)
             reset_group_staticProps (args_info);

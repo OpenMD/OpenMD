@@ -64,4 +64,4 @@ groupoption "rnemdz"    -       "slab-resolved RNEMD statistics (temperature, de
 groupoption "rnemdr"    -       "shell-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"
 groupoption "rnemdrt"   -       "shell and angle-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"
 groupoption "nitrile"   -       "electrostatic potential to frequency map based on the Cho nitrile fits" group="staticProps"
-groupoption "multipole" m       "average multipole moment contained within a cutoff sphere" group="staticProps"
+groupoption "multipole" m       "average multipole moments contained within cutoff spheres as a function of radius" group="staticProps"

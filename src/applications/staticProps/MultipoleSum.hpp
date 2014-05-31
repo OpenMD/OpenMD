@@ -51,16 +51,19 @@ namespace OpenMD {
     
   public:
     MultipoleSum(SimInfo* info, const std::string& filename, 
-                 const std::string& sele1, RealType rCut);
+                 const std::string& sele1, RealType rmax, int nrbins);
         
   private:
 
     virtual void process();
     virtual void writeOut();
 
-    RealType rcut_;
-    RealType aveDlength_;
-    RealType aveQlength_;
+    int nRBins_;
+    RealType deltaR_;                
+    RealType rMax_;
+    std::vector<RealType> aveDlength_; 
+    std::vector<RealType> aveQlength_; 
+
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;
     SelectionManager seleMan1_;    
