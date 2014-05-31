@@ -53,8 +53,8 @@
 namespace OpenMD {
 
   MultipoleSum::MultipoleSum(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, RealType rCut)
-    : StaticAnalyser(info, filename), rcut_(rCut), selectionScript1_(sele1), 
+                             const std::string& sele1, RealType rmax, int nrbins)
+    : StaticAnalyser(info, filename), rMax_(rmax), nRBins_(nrbins), selectionScript1_(sele1), 
       evaluator1_(info), seleMan1_(info)  {
     setOutputName(getPrefix(filename) + ".multipoleSum");
     
@@ -63,6 +63,12 @@ namespace OpenMD {
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
+    
+    aveDlength_.clear();
+    aveDlength_.resize(nRBins_, 0.0);
+    aveQlength_.clear();
+    aveQlength_.resize(nRBins_, 0.0 );
+    deltaR_ = rMax_ / nRBins_;
   }
 
   void MultipoleSum::process() {
@@ -74,12 +80,13 @@ namespace OpenMD {
     vector<Atom*>::iterator aiter;
     Atom* atom;
     StuntDouble* sd1;
-    RealType dipoleLengthSum(0.0);
-    RealType qpoleLengthSum(0.0);
-    int lengthCount(0);
     int i1;
+    Vector3d pos1;
     Vector3d ri;
-                    
+    std::vector<RealType> dipoleHist(nRBins_, 0.0); 
+    std::vector<RealType> qpoleHist(nRBins_, 0.0); 
+    std::vector<int> lengthCount(nRBins_, 0);
+
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -97,23 +104,17 @@ namespace OpenMD {
         }
       }      
 
+      if  (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      }
+
       for (sd1 = seleMan1_.beginSelected(i1); sd1 != NULL; 
            sd1 = seleMan1_.nextSelected(i1)) {
       
-        Vector3d pos1 = sd1->getPos();
-        Vector3d totalDipole(0.0);
-        Mat3x3d totalQpole(0.0);
+        pos1 = sd1->getPos();
 
-        AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
-        MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-
-      
-        if (ma1.isDipole()) {
-          totalDipole += sd1->getDipole();
-        }
-        if (ma1.isQuadrupole()) {
-          totalQpole += sd1->getQuadrupole();
-        }
+        std::vector<Vector3d> totalDipole(nRBins_, V3Zero); 
+        std::vector<Mat3x3d> totalQpole(nRBins_, Mat3x3d(0.0)); 
 
         for (mol = info_->beginMolecule(miter); mol != NULL; 
              mol = info_->nextMolecule(miter)) {
@@ -126,36 +127,42 @@ namespace OpenMD {
 
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(ri);
-         
-            if (ri.length() < rcut_) {
 
-              AtomType* atype2 = atom->getAtomType();
-              MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+            AtomType* atype2 = atom->getAtomType();
+            MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+            Vector3d dipole(0.0);
+            Mat3x3d qpole(0.0);
 
-              if (ma2.isDipole()) {
-                totalDipole += atom->getDipole();
-              }
-              if (ma2.isQuadrupole()) {
-                totalQpole += atom->getQuadrupole();
-              }
+            if (ma2.isDipole()) 
+              dipole = atom->getDipole();
+            if (ma2.isQuadrupole()) 
+              qpole = atom->getQuadrupole();
 
+            RealType distance = ri.length();
+            int maxBin = int(distance / deltaR_);
+            for (int j = 0; j <= maxBin; j++) {              
+                totalDipole[j] += dipole;
+                totalQpole[j] += qpole;
             }
           }
         }
-        RealType dipoleLength = totalDipole.length();
-        RealType Qtrace = totalQpole.trace();
-        RealType Qddot = doubleDot(totalQpole, totalQpole);
-        RealType qpoleLength =  2.0*(3.0*Qddot - Qtrace*Qtrace);
-        dipoleLengthSum += dipoleLength;
-        qpoleLengthSum += qpoleLength;
-        lengthCount += 1;
+        for (int j = 0; j < nRBins_; j++) {              
+          RealType dipoleLength = totalDipole[j].length();
+          RealType Qtrace = totalQpole[j].trace();
+          RealType Qddot = doubleDot(totalQpole[j], totalQpole[j]);
+          RealType qpoleLength =  2.0*(3.0*Qddot - Qtrace*Qtrace);
+          dipoleHist[j] += dipoleLength;
+          qpoleHist[j] += qpoleLength;
+          lengthCount[j] += 1;
+        }
       }
     }
     
-    aveDlength_ = dipoleLengthSum / RealType(lengthCount);
-    aveQlength_ = qpoleLengthSum / RealType(lengthCount);
+    for (int j = 0; j < nRBins_; j++) {                    
+      aveDlength_[j] = dipoleHist[j] / RealType(lengthCount[j]);
+      aveQlength_[j] = qpoleHist[j] / RealType(lengthCount[j]);
+    }
     writeOut();
-
   }
 
 
@@ -164,9 +171,12 @@ namespace OpenMD {
     ofstream os(getOutputFileName().c_str());
     os << "#multipole sum\n";
     os<< "#selection1: (" << selectionScript1_ << ")\t";
-    os << "#rcut\taveDlength\aveQlength\n";    
+    os << "#r\taveDlength\aveQlength\n";    
 
-    os << rcut_ << "\t" << aveDlength_ << "\t" << aveQlength_ << "\n";    
+    for (unsigned int i = 0; i < nRBins_; ++i) {
+      RealType r = deltaR_ * (i + 0.5);
+      os << r << "\t" << aveDlength_[i] << "\t" << aveQlength_[i] << "\n";
+    }
 
   }
 }

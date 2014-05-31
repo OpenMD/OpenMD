@@ -141,7 +141,7 @@ struct gengetopt_args_info
   const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *nitrile_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
-  const char *multipole_help; /**< @brief average multipole moment contained within a cutoff sphere help description.  */
+  const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
