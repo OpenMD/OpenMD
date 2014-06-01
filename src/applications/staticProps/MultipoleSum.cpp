@@ -142,12 +142,15 @@ namespace OpenMD {
               qpole = atom->getQuadrupole();
 
             RealType distance = ri.length();
-            int maxBin = int(distance / deltaR_);
-
-            for (int j = 0; j <= std::min(nRBins_,maxBin); j++) {              
-              totalDipole[j] += dipole;
-              totalQpole[j] += qpole;
-            }           
+            int bin = int(distance / deltaR_);
+            // this multipole is contained within the cutoff spheres that are 
+            // larger than the bin:
+            if (bin < nRBins_) {
+              for (int j = bin; j < nRBins_; j++) {              
+                totalDipole[j] += dipole;
+                totalQpole[j] += qpole;
+              }           
+            }
           }
         }
         for (int j = 0; j < nRBins_; j++) {              
