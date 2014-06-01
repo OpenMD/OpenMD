@@ -65,6 +65,7 @@
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
 #include "applications/dynamicProps/BondCorrFunc.hpp"
+#include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
 
 using namespace OpenMD;
 
@@ -151,6 +152,8 @@ int main(int argc, char* argv[]){
     corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.momentum_given){
     corrFunc = new MomentumCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+  } else if (args_info.freqfluccorr_given){
+    corrFunc = new FreqFlucCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.lcorr_given) {
     int order;
     if (args_info.order_given)
