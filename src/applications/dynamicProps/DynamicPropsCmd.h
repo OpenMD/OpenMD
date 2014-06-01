@@ -75,6 +75,7 @@ struct gengetopt_args_info
   const char *momentum_help; /**< @brief Helfand momentum for viscosity help description.  */
   const char *stresscorr_help; /**< @brief Stress tensor correlation function help description.  */
   const char *bondcorr_help; /**< @brief Bond extension correlation function help description.  */
+  const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -100,6 +101,7 @@ struct gengetopt_args_info
   unsigned int momentum_given ;	/**< @brief Whether momentum was given.  */
   unsigned int stresscorr_given ;	/**< @brief Whether stresscorr was given.  */
   unsigned int bondcorr_given ;	/**< @brief Whether bondcorr was given.  */
+  unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
