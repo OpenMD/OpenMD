@@ -40,7 +40,6 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include <algorithm>
 #include <fstream>
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "primitives/Atom.hpp"
@@ -59,7 +58,6 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".multipoleSum");
     
     evaluator1_.loadScriptString(sele1);
-    
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
@@ -88,9 +86,8 @@ namespace OpenMD {
     std::vector<int> lengthCount(nRBins_, 0);
     std::vector<Vector3d> totalDipole; 
     std::vector<Mat3x3d> totalQpole; 
-    Vector3d dipole(0.0);
+    Vector3d dipole;
     Mat3x3d qpole;
-
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -146,10 +143,11 @@ namespace OpenMD {
 
             RealType distance = ri.length();
             int maxBin = int(distance / deltaR_);
-            for (int j = 0; j <= maxBin; j++) {              
-                totalDipole[j] += dipole;
-                totalQpole[j] += qpole;
-            }
+
+            for (int j = 0; j <= std::min(nRBins_,maxBin); j++) {              
+              totalDipole[j] += dipole;
+              totalQpole[j] += qpole;
+            }           
           }
         }
         for (int j = 0; j < nRBins_; j++) {              
@@ -181,14 +179,14 @@ namespace OpenMD {
 
     ofstream os(getOutputFileName().c_str());
     os << "#multipole sum\n";
-    os<< "#selection1: (" << selectionScript1_ << ")\t";
+    os << "#selection1: (" << selectionScript1_ << ")\t";
     os << "#r\taveDlength\taveQlength\n";    
 
     for (unsigned int i = 0; i < nRBins_; ++i) {
       RealType r = deltaR_ * i;
       os << r << "\t" << aveDlength_[i] << "\t" << aveQlength_[i] << "\n";
     }
-
+    os.close();
   }
 }
 

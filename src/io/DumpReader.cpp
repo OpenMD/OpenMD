@@ -105,7 +105,7 @@ namespace OpenMD {
     if (worldRank == 0) { 
 #endif
 
-      inFile_->~istream(); 
+      delete inFile_; 
       
 #ifdef IS_MPI 
       
