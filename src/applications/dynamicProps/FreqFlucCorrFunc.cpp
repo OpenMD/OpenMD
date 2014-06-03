@@ -46,18 +46,22 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-  FreqFlucCorrFunc::FreqFlucCorrFunc(SimInfo* info, const std::string& filename, 
-                                     const std::string& sele1, const std::string& sele2, 
+  FreqFlucCorrFunc::FreqFlucCorrFunc(SimInfo* info, const std::string& filename,
+                                     const std::string& sele1, 
+                                     const std::string& sele2, 
                                      long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2,  DataStorage::dslElectricField | 
-                           DataStorage::dslAmat | DataStorage::dslDipole, memSize){
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2,  
+                           DataStorage::dslElectricField | 
+                           DataStorage::dslAmat | DataStorage::dslDipole, 
+                           memSize){
     
     setCorrFuncType("FreqFluc Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ffcorr");
     
   }
 
-  RealType FreqFlucCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  RealType FreqFlucCorrFunc::calcCorrVal(int frame1, int frame2, 
+                                         StuntDouble* sd1,  StuntDouble* sd2) {
 
     Vector3d e1;    
     Vector3d u1;
@@ -161,6 +165,7 @@ namespace OpenMD {
           count++;
         }
       }
+      bsMan_->unloadBlock(i);
     }
 
     mean_ = sum / RealType(count);
