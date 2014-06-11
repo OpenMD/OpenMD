@@ -371,7 +371,7 @@ namespace OpenMD {
       atid1 = atype1->getIdent();
       for (jt = it; jt != simTypes.end(); ++jt) {
         atype2 = (*jt);
-        atid1 = atype1->getIdent();
+        atid2 = atype2->getIdent();
         
         if (interactions_[atid1][atid2].size() == 0) {
           sprintf( painCave.errMsg,
