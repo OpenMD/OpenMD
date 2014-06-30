@@ -660,6 +660,7 @@ src/applications/utilities/mdSplit
 src/applications/utilities/principalAxisCalculator
 src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
+src/applications/utilities/stat2dielectric
 src/applications/utilities/waterRotator
 src/applications/utilities/waterReplacer
 )
