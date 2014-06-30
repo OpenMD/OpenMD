@@ -1,0 +1,158 @@
+#!@PYTHON_EXECUTABLE@
+"""program that accumulates the static dielectric constant from a stat file.
+
+Accumulates the static dielectric constant from an OpenMD stat file
+that has the SYSTEM_DIPOLE added to the statFileFormat.
+
+Usage: stat2dielectric 
+
+Options:
+  -h, --help              show this help
+  -f, --stat-file=...     use specified stat file
+  -o, --output-file=...   use specified output (.dielectric) file
+
+To use this, the OpenMD file for the run should specify:
+
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|SYSTEM_DIPOLE";
+
+This will compute the total system dipole and place it in the final
+three columns of the stat file.  This program looks for the time in
+column 1, the temperature in column 5, the volume in column 7, and the
+dipole vector in the last 3 columns of the stat file.
+
+Example:
+   stat2dielectric -f stockmayer.stat -o stockmayer.dielectric
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision:  $"
+__date__ = "$Date:  $"
+
+__copyright__ = "Copyright (c) 2014 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+
+def usage():
+    print __doc__
+
+def readStatFile(statFileName):
+    global time
+    global temperature
+    global volume
+    global boxDipole
+    time = []
+    temperature = []
+    volume = []
+    boxDipole = []
+
+    statFile = open(statFileName, 'r')
+    line = statFile.readline()
+
+    print "reading File"
+    line = statFile.readline()
+    while 1:
+        L = line.split()
+
+        time.append(float(L[0]))
+        temperature.append(float(L[4]))
+        volume.append(float(L[6]))
+        dipX = float(L[-3])
+        dipY = float(L[-2])
+        dipZ = float(L[-1])
+        boxDipole.append([dipX, dipY, dipZ])
+                       
+        line = statFile.readline()
+        if not line: break
+        
+    statFile.close()
+    
+def computeAverages(outFileName):
+
+    M2 = 0.0
+    M = 0.0
+    Dx = 0.0
+    Dy = 0.0
+    Dz = 0.0
+    Temp = 0.0
+    Vol = 0.0
+    
+    print "computing Averages"
+    outFile = open(outFileName, 'w')
+
+    for i in range(len(time)):
+
+        dipX = boxDipole[i][0]
+        dipY = boxDipole[i][1]
+        dipZ = boxDipole[i][2]
+
+        length2 = dipX*dipX + dipY*dipY + dipZ*dipZ
+
+        Dx += dipX
+        Dy += dipY
+        Dz += dipZ
+        Mx = Dx / float(1+i)
+        My = Dy / float(1+i)
+        Mz = Dz / float(1+i)
+
+        M2 += length2
+        M += math.sqrt(length2)
+        Mavg = Mx*Mx + My*My + Mz*Mz;
+        Mavg2 = M / float(1+i)
+        M2avg = M2 / float(1+i)
+
+        Temp += temperature[i]
+        Vol += volume[i] * 1E-30
+        n2 = float(1+i)*float(1+i)
+
+        dielectric1 = 1.0 + 2.7267411E33*(M2avg - Mavg)*n2/(Temp*Vol)
+        dielectric2 = 1.0 + 2.7267411E33*(M2avg - Mavg2*Mavg2)*n2/(Temp*Vol)
+        outFile.write("%lf\t%lf\t%lf\n" % (time[i], dielectric1, dielectric2))
+
+    outFile.close()
+
+
+def main(argv):
+    global haveStatFileName
+    global haveOutputFileName
+    
+    haveStatFileName = False
+    haveOutputFileName = False
+ 
+    try:                                
+        opts, args = getopt.getopt(argv, "hf:o:", ["help", "stat-file=", "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()
+        elif opt in ("-f", "--stat-file"): 
+            statFileName = arg
+            haveStatFileName = True
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            haveOutputFileName = True
+    if (not haveStatFileName):
+        usage() 
+        print "No stat file was specified"
+        sys.exit()
+    if (not haveOutputFileName):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+        
+    readStatFile(statFileName)
+    computeAverages(outputFileName)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
