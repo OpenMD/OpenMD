@@ -1,8 +1,24 @@
 #!@PYTHON_EXECUTABLE@
-"""program that accumulates the static dielectric constant from a stat file.
+"""A script that computes the static dielectric constant
 
 Accumulates the static dielectric constant from an OpenMD stat file
-that has the SYSTEM_DIPOLE added to the statFileFormat.
+that has been run with the SYSTEM_DIPOLE added to the statFileFormat.
+
+This assumes the fluctuation formula appropriate for conducting
+boundaries:
+
+                    <M^2> - <M>^2
+        eps = 1 + -----------------
+                  3 kB <T> <V> eps0
+   
+        eps:  dielectric constant
+        M:    total dipole moment of the box
+        <V>:  average volume of the box
+        <T>:  average temperature
+        eps0: vacuum permittivity
+        kB:   Boltzmann constant
+
+See M. Neumann, O. Steinhauser, and G. S. Pawley, Mol. Phys. 52, 97 (1984).
 
 Usage: stat2dielectric 
 
@@ -15,10 +31,10 @@ To use this, the OpenMD file for the run should specify:
 
 statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|SYSTEM_DIPOLE";
 
-This will compute the total system dipole and place it in the final
-three columns of the stat file.  This program looks for the time in
-column 1, the temperature in column 5, the volume in column 7, and the
-dipole vector in the last 3 columns of the stat file.
+This line will get OpenMD to compute the total system dipole and place
+it in the final three columns of the stat file.  The stat2dielectric
+script looks for the temperature in column 5, the volume in column 7,
+and the dipole vector in the last 3 columns of the stat file.
 
 Example:
    stat2dielectric -f stockmayer.stat -o stockmayer.dielectric
@@ -73,6 +89,13 @@ def readStatFile(statFileName):
     
 def computeAverages(outFileName):
 
+    # permittivity in C^2 N^-1 m^-2
+    eps0 = 8.854187817620E-12
+    # Boltzmann constant in J / K
+    kB = 1.380648E-23
+    # Convert angstroms^3 to m^3
+    a3tom3 = 1.0E-30
+
     M2 = 0.0
     M = 0.0
     Dx = 0.0
@@ -81,7 +104,7 @@ def computeAverages(outFileName):
     Temp = 0.0
     Vol = 0.0
     
-    print "computing Averages"
+    print "computing Dielectrics"
     outFile = open(outFileName, 'w')
 
     for i in range(len(time)):
@@ -91,26 +114,32 @@ def computeAverages(outFileName):
         dipZ = boxDipole[i][2]
 
         length2 = dipX*dipX + dipY*dipY + dipZ*dipZ
+        M2 += length2
+        M2avg = M2 / float(1+i)
 
         Dx += dipX
         Dy += dipY
         Dz += dipZ
+
+        # the average of each of the three components of the box dipole
         Mx = Dx / float(1+i)
         My = Dy / float(1+i)
         Mz = Dz / float(1+i)
+        Mavg = Mx*Mx + My*My + Mz*Mz
 
-        M2 += length2
+        # the average of the box dipole vector length
         M += math.sqrt(length2)
-        Mavg = Mx*Mx + My*My + Mz*Mz;
         Mavg2 = M / float(1+i)
-        M2avg = M2 / float(1+i)
 
         Temp += temperature[i]
-        Vol += volume[i] * 1E-30
-        n2 = float(1+i)*float(1+i)
+        Tavg = Temp / float(1+i)
+        
+        Vol += volume[i] * a3tom3
+        Vavg = Vol / float(1+i)
 
-        dielectric1 = 1.0 + 2.7267411E33*(M2avg - Mavg)*n2/(Temp*Vol)
-        dielectric2 = 1.0 + 2.7267411E33*(M2avg - Mavg2*Mavg2)*n2/(Temp*Vol)
+        dielectric1 = 1.0 + (M2avg - Mavg) / (3.0*eps0*kB*Tavg*Vavg)
+        dielectric2 = 1.0 + (M2avg - Mavg2*Mavg2) / (3.0*eps0*kB*Tavg*Vavg)
+
         outFile.write("%lf\t%lf\t%lf\n" % (time[i], dielectric1, dielectric2))
 
     outFile.close()
