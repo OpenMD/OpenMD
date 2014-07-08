@@ -97,7 +97,7 @@ def readStatFile(statFileName):
         
     statFile.close()
     
-def computeAverages(outFileName):
+def computeAverages(outFileName, Q):
 
     # permittivity in C^2 N^-1 m^-2
     eps0 = 8.854187817620E-12
