@@ -7,11 +7,11 @@ that has been run with the SYSTEM_DIPOLE added to the statFileFormat.
 This assumes the fluctuation formula appropriate for conducting
 boundaries:
 
-                    <M^2> - <M>^2
-        eps = 1 + -----------------
-                  3 kB <T> <V> eps0
+                     <M^2> - <M>^2
+        epsA = 1 + -----------------
+                   3 kB <T> <V> eps0
    
-        eps:  dielectric constant
+        epsA: dielectric constant
         M:    total dipole moment of the box
         <V>:  average volume of the box
         <T>:  average temperature
@@ -20,12 +20,22 @@ boundaries:
 
 See M. Neumann, O. Steinhauser, and G. S. Pawley, Mol. Phys. 52, 97 (1984).
 
+Also, optionally applies a correction factor as follows:
+
+                ((Q + 2) (epsA - 1) + 3)
+          eps = ------------------------
+                ((Q - 1) (epsA - 1) + 3)
+
+Where Q depends on the method used to compute the electrostatic interaction.
+See M. Neumann and O. Steinhauser, Chem. Phys. Lett. 95, 417 (1983))
+
 Usage: stat2dielectric 
 
 Options:
   -h, --help              show this help
   -f, --stat-file=...     use specified stat file
   -o, --output-file=...   use specified output (.dielectric) file
+  -q, --Q-value=...       use the specified Q value to correct the dielectric
 
 To use this, the OpenMD file for the run should specify:
 
@@ -137,10 +147,14 @@ def computeAverages(outFileName):
         Vol += volume[i] * a3tom3
         Vavg = Vol / float(1+i)
 
-        dielectric1 = 1.0 + (M2avg - Mavg) / (3.0*eps0*kB*Tavg*Vavg)
-        dielectric2 = 1.0 + (M2avg - Mavg2*Mavg2) / (3.0*eps0*kB*Tavg*Vavg)
+        d1 = 1.0 + (M2avg - Mavg) / (3.0*eps0*kB*Tavg*Vavg)
+        d2 = 1.0 + (M2avg - Mavg2*Mavg2) / (3.0*eps0*kB*Tavg*Vavg)
 
-        outFile.write("%lf\t%lf\t%lf\n" % (time[i], dielectric1, dielectric2))
+
+        corrected1 = ((Q+2.0)*(d1 - 1.0) + 3.0)/((Q-1.0) * (d1 - 1.0) + 3.0)
+        corrected2 = ((Q+2.0)*(d2 - 1.0) + 3.0)/((Q-1.0) * (d2 - 1.0) + 3.0)
+        
+        outFile.write("%lf\t%lf\t%lf\t%lf\t%lf\n" % (time[i], d1, d2, corrected1, corrected2))
 
     outFile.close()
 
@@ -148,12 +162,14 @@ def computeAverages(outFileName):
 def main(argv):
     global haveStatFileName
     global haveOutputFileName
+    global haveQValue
     
     haveStatFileName = False
     haveOutputFileName = False
+    haveQValue = False
  
     try:                                
-        opts, args = getopt.getopt(argv, "hf:o:", ["help", "stat-file=", "output-file="]) 
+        opts, args = getopt.getopt(argv, "hq:f:o:", ["help", "Q-value=", "stat-file=", "output-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -161,6 +177,9 @@ def main(argv):
         if opt in ("-h", "--help"):      
             usage()                     
             sys.exit()
+        elif opt in ("-q", "--Q-value="): 
+            Q = float(arg)
+            haveQValue = True
         elif opt in ("-f", "--stat-file"): 
             statFileName = arg
             haveStatFileName = True
@@ -175,9 +194,13 @@ def main(argv):
         usage()
         print "No output file was specified"
         sys.exit()
-        
+    
+    
     readStatFile(statFileName)
-    computeAverages(outputFileName)
+    if (not haveQValue):
+        computeAverages(outputFileName, 1.0)
+    else:
+        computeAverages(outputFileName, Q)
 
 
 if __name__ == "__main__":
