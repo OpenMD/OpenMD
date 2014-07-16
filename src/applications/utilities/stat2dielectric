@@ -147,14 +147,27 @@ def computeAverages(outFileName, Q):
         Vol += volume[i] * a3tom3
         Vavg = Vol / float(1+i)
 
-        d1 = 1.0 + (M2avg - Mavg) / (3.0*eps0*kB*Tavg*Vavg)
-        d2 = 1.0 + (M2avg - Mavg2*Mavg2) / (3.0*eps0*kB*Tavg*Vavg)
+        x1 = (M2avg - Mavg) / (9.0*eps0*kB*Tavg*Vavg)
+        x2 = (M2avg - Mavg2*Mavg2) / (9.0*eps0*kB*Tavg*Vavg)       
 
+        # Clausius-Mossotti
+        d1 = (2.0 * x1 + 1.0) / (1.0 - x1)
+        d2 = (2.0 * x2 + 1.0) / (1.0 - x2)
 
-        corrected1 = ((Q+2.0)*(d1 - 1.0) + 3.0)/((Q-1.0) * (d1 - 1.0) + 3.0)
-        corrected2 = ((Q+2.0)*(d2 - 1.0) + 3.0)/((Q-1.0) * (d2 - 1.0) + 3.0)
+        # Conducting boundary conditions
+        d3 = 1.0 + 3.0*x1 
+        d4 = 1.0 + 3.0*x2 
         
-        outFile.write("%lf\t%lf\t%lf\t%lf\t%lf\n" % (time[i], d1, d2, corrected1, corrected2))
+        #d1 = 1.0 + (M2avg - Mavg) / (3.0*eps0*kB*Tavg*Vavg)
+        #d2 = 1.0 + (M2avg - Mavg2*Mavg2) / (3.0*eps0*kB*Tavg*Vavg)
+
+        corrected1 = ((Q+2.0)*(d3 - 1.0) + 3.0)/((Q-1.0) * (d3 - 1.0) + 3.0)
+        corrected2 = ((Q+2.0)*(d4 - 1.0) + 3.0)/((Q-1.0) * (d4 - 1.0) + 3.0)
+
+        #corrected1 = (1.0 + 2.0*x1 + Q*x1)/(1.0 - x1 - Q*x1)
+        #corrected2 = (1.0 + 2.0*x2 + Q*x2)/(1.0 - x2 - Q*x2)
+        
+        outFile.write("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n" % (time[i], x1, x2, d1, d2, d3, d4, corrected1, corrected2))
 
     outFile.close()
 
