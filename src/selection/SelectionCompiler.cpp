@@ -52,7 +52,7 @@ namespace OpenMD {
     lineNumbers.clear();
     lineIndices.clear();
     aatokenCompiled.clear();
-        
+
     if (internalCompile()) {
       return true;
     }
@@ -374,7 +374,7 @@ namespace OpenMD {
       return false;
     }
     cchToken = ichT - ichToken;
-    return isInteger(script.substr(ichToken, ichT).c_str());
+    return isInteger(script.substr(ichToken, cchToken).c_str());
   }
 
   bool SelectionCompiler::lookingAtLookupToken() {
