@@ -181,10 +181,12 @@ namespace OpenMD {
 
     virtual void loadEta() = 0;
     virtual void saveEta() = 0;
-            
+    RealType chiTolerance;    
+        
+
+  protected:    
     int maxIterNum_;
 
-    RealType chiTolerance;    
   };
 
 }      //end namespace OpenMD

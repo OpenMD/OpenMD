@@ -53,6 +53,7 @@
 #include "integrators/NPTsz.hpp"
 #include "integrators/NPAT.hpp"
 #include "integrators/NPrT.hpp"
+#include "integrators/NPA.hpp"
 #include "integrators/NgammaT.hpp"
 #include "integrators/LangevinDynamics.hpp"
 #if defined(HAVE_QHULL)
@@ -80,6 +81,7 @@ namespace OpenMD {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPA>("NPA"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPGT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NgammaT>("NGT"));
