@@ -254,6 +254,7 @@ src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
 src/integrators/LDForceManager.cpp
 src/integrators/NgammaT.cpp
+src/integrators/NPA.cpp
 src/integrators/NPAT.cpp
 src/integrators/NPrT.cpp
 src/integrators/NPT.cpp

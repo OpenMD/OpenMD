@@ -204,6 +204,7 @@ namespace OpenMD {
                    isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || 
                    isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || 
                    isEqualIgnoreCase("NPTsz") || isEqualIgnoreCase("NPAT")  || 
+                   isEqualIgnoreCase("NPA") || 
                    isEqualIgnoreCase("LANGEVINDYNAMICS") || 
                    isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || 
                    isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") || 
