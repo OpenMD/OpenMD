@@ -62,6 +62,8 @@ const char *gengetopt_args_info_help[] = {
   "      --begin=INT               begin internal index",
   "      --end=INT                 end internal index",
   "      --radius=DOUBLE           nanoparticle radius",
+  "  -v, --voxelSize=DOUBLE        voxel size (angstroms)",
+  "      --gaussWidth=DOUBLE       Gaussian width (angstroms)",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --ior                     icosahedral bond order parameter as a function \n                                  of radius (--rcut must be specified)",
@@ -89,6 +91,7 @@ const char *gengetopt_args_info_help[] = {
   "      --rodlength               length of nanorod",
   "  -Q, --tet_param               tetrahedrality order parameter (Qk)",
   "      --tet_param_z             spatially-resolved tetrahedrality order \n                                  parameter Qk(z)",
+  "      --tet_param_xyz           volume-resolved tetrahedrality order parameter \n                                  Qk(x,y,z).  (voxelSize, rcut, and gaussWidth \n                                  must be specified)",
   "      --rnemdz                  slab-resolved RNEMD statistics (temperature, \n                                  density, velocity)",
   "      --rnemdr                  shell-resolved RNEMD statistics (temperature, \n                                  density, angular velocity)",
   "      --rnemdrt                 shell and angle-resolved RNEMD statistics \n                                  (temperature, density, angular velocity)",
@@ -147,6 +150,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->begin_given = 0 ;
   args_info->end_given = 0 ;
   args_info->radius_given = 0 ;
+  args_info->voxelSize_given = 0 ;
+  args_info->gaussWidth_given = 0 ;
   args_info->bo_given = 0 ;
   args_info->ior_given = 0 ;
   args_info->for_given = 0 ;
@@ -173,6 +178,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
+  args_info->tet_param_xyz_given = 0 ;
   args_info->rnemdz_given = 0 ;
   args_info->rnemdr_given = 0 ;
   args_info->rnemdrt_given = 0 ;
@@ -224,6 +230,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->begin_orig = NULL;
   args_info->end_orig = NULL;
   args_info->radius_orig = NULL;
+  args_info->voxelSize_orig = NULL;
+  args_info->gaussWidth_orig = NULL;
   
 }
 
@@ -258,37 +266,40 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->begin_help = gengetopt_args_info_help[23] ;
   args_info->end_help = gengetopt_args_info_help[24] ;
   args_info->radius_help = gengetopt_args_info_help[25] ;
-  args_info->bo_help = gengetopt_args_info_help[27] ;
-  args_info->ior_help = gengetopt_args_info_help[28] ;
-  args_info->for_help = gengetopt_args_info_help[29] ;
-  args_info->bad_help = gengetopt_args_info_help[30] ;
-  args_info->count_help = gengetopt_args_info_help[31] ;
-  args_info->gofr_help = gengetopt_args_info_help[32] ;
-  args_info->gofz_help = gengetopt_args_info_help[33] ;
-  args_info->r_theta_help = gengetopt_args_info_help[34] ;
-  args_info->r_omega_help = gengetopt_args_info_help[35] ;
-  args_info->r_z_help = gengetopt_args_info_help[36] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[37] ;
-  args_info->gxyz_help = gengetopt_args_info_help[38] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[39] ;
-  args_info->p2_help = gengetopt_args_info_help[40] ;
-  args_info->rp2_help = gengetopt_args_info_help[41] ;
-  args_info->scd_help = gengetopt_args_info_help[42] ;
-  args_info->density_help = gengetopt_args_info_help[43] ;
-  args_info->slab_density_help = gengetopt_args_info_help[44] ;
-  args_info->p_angle_help = gengetopt_args_info_help[45] ;
-  args_info->hxy_help = gengetopt_args_info_help[46] ;
-  args_info->rho_r_help = gengetopt_args_info_help[47] ;
-  args_info->angle_r_help = gengetopt_args_info_help[48] ;
-  args_info->hullvol_help = gengetopt_args_info_help[49] ;
-  args_info->rodlength_help = gengetopt_args_info_help[50] ;
-  args_info->tet_param_help = gengetopt_args_info_help[51] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[52] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[53] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[54] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[55] ;
-  args_info->nitrile_help = gengetopt_args_info_help[56] ;
-  args_info->multipole_help = gengetopt_args_info_help[57] ;
+  args_info->voxelSize_help = gengetopt_args_info_help[26] ;
+  args_info->gaussWidth_help = gengetopt_args_info_help[27] ;
+  args_info->bo_help = gengetopt_args_info_help[29] ;
+  args_info->ior_help = gengetopt_args_info_help[30] ;
+  args_info->for_help = gengetopt_args_info_help[31] ;
+  args_info->bad_help = gengetopt_args_info_help[32] ;
+  args_info->count_help = gengetopt_args_info_help[33] ;
+  args_info->gofr_help = gengetopt_args_info_help[34] ;
+  args_info->gofz_help = gengetopt_args_info_help[35] ;
+  args_info->r_theta_help = gengetopt_args_info_help[36] ;
+  args_info->r_omega_help = gengetopt_args_info_help[37] ;
+  args_info->r_z_help = gengetopt_args_info_help[38] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[39] ;
+  args_info->gxyz_help = gengetopt_args_info_help[40] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[41] ;
+  args_info->p2_help = gengetopt_args_info_help[42] ;
+  args_info->rp2_help = gengetopt_args_info_help[43] ;
+  args_info->scd_help = gengetopt_args_info_help[44] ;
+  args_info->density_help = gengetopt_args_info_help[45] ;
+  args_info->slab_density_help = gengetopt_args_info_help[46] ;
+  args_info->p_angle_help = gengetopt_args_info_help[47] ;
+  args_info->hxy_help = gengetopt_args_info_help[48] ;
+  args_info->rho_r_help = gengetopt_args_info_help[49] ;
+  args_info->angle_r_help = gengetopt_args_info_help[50] ;
+  args_info->hullvol_help = gengetopt_args_info_help[51] ;
+  args_info->rodlength_help = gengetopt_args_info_help[52] ;
+  args_info->tet_param_help = gengetopt_args_info_help[53] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[54] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[55] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[56] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[57] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[58] ;
+  args_info->nitrile_help = gengetopt_args_info_help[59] ;
+  args_info->multipole_help = gengetopt_args_info_help[60] ;
   
 }
 
@@ -404,6 +415,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->begin_orig));
   free_string_field (&(args_info->end_orig));
   free_string_field (&(args_info->radius_orig));
+  free_string_field (&(args_info->voxelSize_orig));
+  free_string_field (&(args_info->gaussWidth_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -491,6 +504,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "end", args_info->end_orig, 0);
   if (args_info->radius_given)
     write_into_file(outfile, "radius", args_info->radius_orig, 0);
+  if (args_info->voxelSize_given)
+    write_into_file(outfile, "voxelSize", args_info->voxelSize_orig, 0);
+  if (args_info->gaussWidth_given)
+    write_into_file(outfile, "gaussWidth", args_info->gaussWidth_orig, 0);
   if (args_info->bo_given)
     write_into_file(outfile, "bo", 0, 0 );
   if (args_info->ior_given)
@@ -543,6 +560,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "tet_param", 0, 0 );
   if (args_info->tet_param_z_given)
     write_into_file(outfile, "tet_param_z", 0, 0 );
+  if (args_info->tet_param_xyz_given)
+    write_into_file(outfile, "tet_param_xyz", 0, 0 );
   if (args_info->rnemdz_given)
     write_into_file(outfile, "rnemdz", 0, 0 );
   if (args_info->rnemdr_given)
@@ -632,6 +651,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
+  args_info->tet_param_xyz_given = 0 ;
   args_info->rnemdz_given = 0 ;
   args_info->rnemdr_given = 0 ;
   args_info->rnemdrt_given = 0 ;
@@ -908,6 +928,8 @@ cmdline_parser_internal (
         { "begin",	1, NULL, 0 },
         { "end",	1, NULL, 0 },
         { "radius",	1, NULL, 0 },
+        { "voxelSize",	1, NULL, 'v' },
+        { "gaussWidth",	1, NULL, 0 },
         { "bo",	0, NULL, 0 },
         { "ior",	0, NULL, 0 },
         { "for",	0, NULL, 0 },
@@ -934,6 +956,7 @@ cmdline_parser_internal (
         { "rodlength",	0, NULL, 0 },
         { "tet_param",	0, NULL, 'Q' },
         { "tet_param_z",	0, NULL, 0 },
+        { "tet_param_xyz",	0, NULL, 0 },
         { "rnemdz",	0, NULL, 0 },
         { "rnemdr",	0, NULL, 0 },
         { "rnemdrt",	0, NULL, 0 },
@@ -942,7 +965,7 @@ cmdline_parser_internal (
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:c:z:gpsdQm", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:c:z:v:gpsdQm", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -1062,6 +1085,18 @@ cmdline_parser_internal (
               &(local_args_info.zoffset_given), optarg, 0, "0", ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
               "zoffset", 'z',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'v':	/* voxel size (angstroms).  */
+        
+        
+          if (update_arg( (void *)&(args_info->voxelSize_arg), 
+               &(args_info->voxelSize_orig), &(args_info->voxelSize_given),
+              &(local_args_info.voxelSize_given), optarg, 0, 0, ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "voxelSize", 'v',
               additional_error))
             goto failure;
         
@@ -1364,6 +1399,20 @@ cmdline_parser_internal (
                 &(local_args_info.radius_given), optarg, 0, 0, ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "radius", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Gaussian width (angstroms).  */
+          else if (strcmp (long_options[option_index].name, "gaussWidth") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->gaussWidth_arg), 
+                 &(args_info->gaussWidth_orig), &(args_info->gaussWidth_given),
+                &(local_args_info.gaussWidth_given), optarg, 0, 0, ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "gaussWidth", '-',
                 additional_error))
               goto failure;
           
@@ -1721,6 +1770,23 @@ cmdline_parser_internal (
                 &(local_args_info.tet_param_z_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "tet_param_z", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified).  */
+          else if (strcmp (long_options[option_index].name, "tet_param_xyz") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->tet_param_xyz_given),
+                &(local_args_info.tet_param_xyz_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "tet_param_xyz", '-',
                 additional_error))
               goto failure;
           
