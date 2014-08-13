@@ -77,6 +77,7 @@
 #include "applications/staticProps/AngleR.hpp"
 #include "applications/staticProps/TetrahedralityParam.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
+#include "applications/staticProps/TetrahedralityParamXYZ.hpp"
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
@@ -271,6 +272,35 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+  } else if (args_info.tet_param_xyz_given) {
+    if (!args_info.rcut_given) {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating"
+               " Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    if (!args_info.voxelSize_given) {
+      sprintf( painCave.errMsg,
+	       "A voxel size must be specified when calculating"
+               " volume-resolved Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    if (!args_info.gaussWidth_given) {
+      sprintf( painCave.errMsg,
+	       "A gaussian width must be specified when calculating"
+               " volume-resolved Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    analyser = new TetrahedralityParamXYZ(info, dumpFileName, sele1, sele2,
+                                          args_info.rcut_arg, 
+                                          args_info.voxelSize_arg,
+                                          args_info.gaussWidth_arg);
   } else if (args_info.ior_given){
     if (args_info.rcut_given) {
       analyser = new IcosahedralOfR(info, dumpFileName, sele1, 

@@ -111,6 +111,12 @@ struct gengetopt_args_info
   double radius_arg;	/**< @brief nanoparticle radius.  */
   char * radius_orig;	/**< @brief nanoparticle radius original value given at command line.  */
   const char *radius_help; /**< @brief nanoparticle radius help description.  */
+  double voxelSize_arg;	/**< @brief voxel size (angstroms).  */
+  char * voxelSize_orig;	/**< @brief voxel size (angstroms) original value given at command line.  */
+  const char *voxelSize_help; /**< @brief voxel size (angstroms) help description.  */
+  double gaussWidth_arg;	/**< @brief Gaussian width (angstroms).  */
+  char * gaussWidth_orig;	/**< @brief Gaussian width (angstroms) original value given at command line.  */
+  const char *gaussWidth_help; /**< @brief Gaussian width (angstroms) help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -137,6 +143,7 @@ struct gengetopt_args_info
   const char *rodlength_help; /**< @brief length of nanorod help description.  */
   const char *tet_param_help; /**< @brief tetrahedrality order parameter (Qk) help description.  */
   const char *tet_param_z_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
+  const char *tet_param_xyz_help; /**< @brief volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified) help description.  */
   const char *rnemdz_help; /**< @brief slab-resolved RNEMD statistics (temperature, density, velocity) help description.  */
   const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
@@ -169,6 +176,8 @@ struct gengetopt_args_info
   unsigned int begin_given ;	/**< @brief Whether begin was given.  */
   unsigned int end_given ;	/**< @brief Whether end was given.  */
   unsigned int radius_given ;	/**< @brief Whether radius was given.  */
+  unsigned int voxelSize_given ;	/**< @brief Whether voxelSize was given.  */
+  unsigned int gaussWidth_given ;	/**< @brief Whether gaussWidth was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */
@@ -195,6 +204,7 @@ struct gengetopt_args_info
   unsigned int rodlength_given ;	/**< @brief Whether rodlength was given.  */
   unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
   unsigned int tet_param_z_given ;	/**< @brief Whether tet_param_z was given.  */
+  unsigned int tet_param_xyz_given ;	/**< @brief Whether tet_param_xyz was given.  */
   unsigned int rnemdz_given ;	/**< @brief Whether rnemdz was given.  */
   unsigned int rnemdr_given ;	/**< @brief Whether rnemdr was given.  */
   unsigned int rnemdrt_given ;	/**< @brief Whether rnemdrt was given.  */

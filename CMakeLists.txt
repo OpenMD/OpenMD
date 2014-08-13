@@ -566,6 +566,7 @@ src/applications/staticProps/SpatialStatistics.cpp
 src/applications/staticProps/StaticProps.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
+src/applications/staticProps/TetrahedralityParamXYZ.cpp
 src/applications/staticProps/TwoDGofR.cpp
 src/applications/staticProps/StaticPropsCmd.cpp
 )
