@@ -125,6 +125,10 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
 
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
+
       if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }
@@ -220,9 +224,10 @@ namespace OpenMD {
       for (int i = 0; i < nBins_(0); ++i) {
         for(int j = 0; j < nBins_(1); ++j) {
           for(int k = 0; k < nBins_(2); ++k) {
-            Vector3d pos = Vector3d(i, j, k) * voxelSize_;
+            Vector3d pos = Vector3d(i, j, k) * voxelSize_ - halfBox;
             for(qiter = qvals.begin(); qiter != qvals.end(); ++qiter) {
               Vector3d d = pos - (*qiter).first;
+              currentSnapshot_->wrapVector(d);
               RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
               RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
               RealType weight = exp(exponent) / denom;
@@ -237,23 +242,47 @@ namespace OpenMD {
   }
   
   void TetrahedralityParamXYZ::writeQxyz() {
+
+    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+
     // normalize by total weight in voxel:
     for (unsigned int i = 0; i < hist_.size(); ++i) { 
       for(unsigned int j = 0; j < hist_[i].size(); ++j) { 
         for(unsigned int k = 0;k < hist_[i][j].size(); ++k) {
-          hist_[i][j][k] /= count_[i][j][k];
+          hist_[i][j][k] = hist_[i][j][k] / count_[i][j][k];
         }
       }
     }
 
     std::ofstream qXYZstream(outputFilename_.c_str());
     if (qXYZstream.is_open()) {
+      qXYZstream <<  "# AmiraMesh ASCII 1.0\n\n";
+      qXYZstream <<  "# Dimensions in x-, y-, and z-direction\n";
+      qXYZstream <<  "  define Lattice " << hist_.size() << " " << hist_[0].size() << " " << hist_[0][0].size() << "\n";
+      
+      qXYZstream <<  "Parameters {\n";
+      qXYZstream <<  "    CoordType \"uniform\",\n";
+      qXYZstream <<  "    # BoundingBox is xmin xmax ymin ymax zmin zmax\n";
+      qXYZstream <<  "    BoundingBox 0.0 " << hmat(0,0) << 
+	" 0.0 " << hmat(1,1) << 
+	" 0.0 " << hmat(2,2) << "\n";
+      qXYZstream <<  "}\n";
+      
+      qXYZstream <<  "Lattice { double ScalarField } = @1\n";
+      
+      qXYZstream <<  "@1\n";
 
-      for (unsigned int i = 0; i < hist_.size(); ++i) { 
-        for(unsigned int j = 0; j < hist_[i].size(); ++j) { 
-          for(unsigned int k = 0;k < hist_[i][j].size(); ++k) {
-            qXYZstream.write(reinterpret_cast<char *>( &hist_[i][j][k] ),
-                             sizeof( hist_[i][j][k] ));
+      int xsize = hist_.size();
+      int ysize = hist_[0].size();
+      int zsize = hist_[0][0].size();
+      
+      for (unsigned int k = 0; k < zsize; ++k) { 
+        for(unsigned int j = 0; j < ysize; ++j) { 
+          for(unsigned int i = 0; i < xsize; ++i) {
+	    qXYZstream << hist_[i][j][k] << " ";
+
+            //qXYZstream.write(reinterpret_cast<char *>( &hist_[i][j][k] ),
+	    // sizeof( hist_[i][j][k] ));
           }
         }
       }
