@@ -56,7 +56,8 @@ namespace OpenMD {
                                                  const std::string& filename, 
                                                  const std::string& sele1,
                                                  const std::string& sele2,
-                                                 RealType rCut, RealType voxelSize,
+                                                 RealType rCut, 
+                                                 RealType voxelSize,
                                                  RealType gaussWidth) 
     : StaticAnalyser(info, filename), selectionScript1_(sele1), 
       evaluator1_(info), seleMan1_(info), selectionScript2_(sele2), 
@@ -114,11 +115,16 @@ namespace OpenMD {
     RealType cospsi;
     RealType Qk;
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
-    std::vector<std::pair<Vector3d, RealType> > qvals;
-    std::vector<std::pair<Vector3d, RealType> >::iterator qiter;
+    //std::vector<std::pair<Vector3d, RealType> > qvals;
+    //std::vector<std::pair<Vector3d, RealType> >::iterator qiter;
     int isd1;
     int isd2;
 
+
+    int kMax = int(5.0 * gaussWidth_ / voxelSize_);
+    int kSqLim = kMax*kMax;
+    cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = " << kMax << " kSqLim = " << kSqLim << "\n";
+    
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
 
@@ -146,7 +152,7 @@ namespace OpenMD {
         }
       }
       
-      qvals.clear();
+      //qvals.clear();
 
       // outer loop is over the selected StuntDoubles:
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
@@ -217,26 +223,59 @@ namespace OpenMD {
         if (nang > 0) {
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(rk);
-          qvals.push_back(std::make_pair(rk, Qk));
-        }  
-      }
+          //qvals.push_back(std::make_pair(rk, Qk));
+          
+          Vector3d pos = rk + halfBox;
 
-      for (int i = 0; i < nBins_(0); ++i) {
-        for(int j = 0; j < nBins_(1); ++j) {
-          for(int k = 0; k < nBins_(2); ++k) {
-            Vector3d pos = Vector3d(i, j, k) * voxelSize_ - halfBox;
-            for(qiter = qvals.begin(); qiter != qvals.end(); ++qiter) {
-              Vector3d d = pos - (*qiter).first;
-              currentSnapshot_->wrapVector(d);
-              RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
-              RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
-              RealType weight = exp(exponent) / denom;
-              count_[i][j][k] += weight;
-              hist_[i][j][k] += weight * (*qiter).second;
+
+          Vector3i whichVoxel(int(pos[0] / voxelSize_), 
+                              int(pos[1] / voxelSize_), 
+                              int(pos[2] / voxelSize_));
+          
+          for (int l = -kMax; l <= kMax; l++) {
+            for (int m = -kMax; m <= kMax; m++) {
+              for (int n = -kMax; n <= kMax; n++) {
+                int kk = l*l + m*m + n*n;
+                if(kk <= kSqLim) {
+
+                  int ll = (whichVoxel[0] + l) % nBins_(0);
+                  ll = ll < 0 ? nBins_(0) + ll : ll;
+                  int mm = (whichVoxel[1] + m) % nBins_(1);
+                  mm = mm < 0 ? nBins_(1) + mm : mm;
+                  int nn = (whichVoxel[2] + n) % nBins_(2);
+                  nn = nn < 0 ? nBins_(2) + nn : nn;
+
+                  Vector3d bPos = Vector3d(ll,mm,nn) * voxelSize_ - halfBox;
+                  Vector3d d = bPos - rk;
+                  currentSnapshot_->wrapVector(d);
+                  RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
+                  RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
+                  RealType weight = exp(exponent) / denom;
+                  count_[ll][mm][nn] += weight;
+                  hist_[ll][mm][nn] += weight * Qk;
+                }
+              }
             }
           }
         }
       }
+
+      // for (int i = 0; i < nBins_(0); ++i) {
+      //   for(int j = 0; j < nBins_(1); ++j) {
+      //     for(int k = 0; k < nBins_(2); ++k) {
+      //       Vector3d pos = Vector3d(i, j, k) * voxelSize_ - halfBox;
+      //       for(qiter = qvals.begin(); qiter != qvals.end(); ++qiter) {
+      //         Vector3d d = pos - (*qiter).first;
+      //         currentSnapshot_->wrapVector(d);
+      //         RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
+      //         RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
+      //         RealType weight = exp(exponent) / denom;
+      //         count_[i][j][k] += weight;
+      //         hist_[i][j][k] += weight * (*qiter).second;
+      //       }
+      //     }
+      //   }
+      // }
     }
     writeQxyz();
   }

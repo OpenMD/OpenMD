@@ -263,7 +263,6 @@ namespace OpenMD {
     
     RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
                                                               myDerivC)*sigmai;      
-    
     (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
     *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
     
