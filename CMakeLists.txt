@@ -111,7 +111,6 @@ else()
 endif()
 
 #Look for QHULL Libraries
-SET(QHULL_USE_STATIC 1)
 find_package(Qhull)
 IF(QHULL_FOUND)
   SET(HAVE_QHULL 1)
