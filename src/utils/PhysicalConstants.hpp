@@ -55,6 +55,11 @@ namespace OpenMD {
     
     const RealType pressureConvert = 1.63882576e8; // converts amu*fs^-2*Ang^-1 -> atm
 
+    //! \name chargeFieldConvert Converts electron-volts to kcal/mol
+    const RealType chargeFieldConvert = 23.0609; 
+    //! \name dipoleFieldConvert  Converts Debye*Volts/Angstroms to kcal/mol
+    const RealType dipoleFieldConvert = 4.8018969509; 
+
     /* 
      *  surfaceTensionConvert   
      *    multiplies standard input file units of 

@@ -225,7 +225,12 @@ namespace OpenMD {
         evaluator.loadScriptString(objectSelection);
         seleMan.setSelectionSet(evaluator.evaluate());        
         int selectionCount = seleMan.getSelectionCount();
-        
+
+#ifdef IS_MPI    
+        MPI_Allreduce(MPI_IN_PLACE, &selectionCount, 1, MPI_INT, MPI_SUM, 
+                      MPI_COMM_WORLD);
+#endif
+                
         sprintf(painCave.errMsg,
                 "Restraint Info: The specified restraint objectSelection,\n"
                 "\t\t%s\n"
@@ -314,16 +319,15 @@ namespace OpenMD {
   void RestraintForceManager::calcForces(){
 
     ForceManager::calcForces();    
-    RealType restPot_local, restPot;
+    RealType restPot(0.0);
 
-    restPot_local = doRestraints(1.0);
+    restPot = doRestraints(1.0);
 
 #ifdef IS_MPI    
-    MPI_Allreduce(&restPot_local, &restPot, 1, 
-                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-#else
-    restPot = restPot_local;
+    MPI_Allreduce(MPI_IN_PLACE, &restPot, 1, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
 #endif
+
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     RealType pot = currSnapshot_->getLongRangePotential();
     pot += restPot;
@@ -411,12 +415,11 @@ namespace OpenMD {
         index++;
       }
       
-      unscaledPotential_ += mRest->getUnscaledPotential();
-
-      restInfo = mRest->getRestraintInfo();
+      unscaledPotential_ += mRest->getUnscaledPotential();      
 
       // only collect data on restraints that we're going to print:
       if (mRest->getPrintRestraint()) 
+        restInfo = mRest->getRestraintInfo();
         restInfo_.push_back(restInfo);
     }
 
@@ -476,10 +479,9 @@ namespace OpenMD {
 
       unscaledPotential_ += oRest->getUnscaledPotential();
 
-      restInfo = oRest->getRestraintInfo();
-
       // only collect data on restraints that we're going to print:
       if (oRest->getPrintRestraint()) 
+        restInfo = oRest->getRestraintInfo();      
         restInfo_.push_back(restInfo);
     }
 

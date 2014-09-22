@@ -56,40 +56,56 @@ namespace OpenMD {
   RestWriter::RestWriter(SimInfo* info, const std::string& filename, 
                          std::vector<Restraint*> restraints ) : 
     info_(info){
-    createRestFile_ = true;
+
+    std::vector<Restraint*>::const_iterator resti;
+
+    createRestFile_ = false;  
+
+#ifdef IS_MPI    
+    MPI_Status* istatus;
+#endif
     
+    int printAny = 0;
+    for(resti=restraints.begin(); resti != restraints.end(); ++resti){
+      if ((*resti)->getPrintRestraint()) {
+        printAny = 1;
+      }
+    }
+    
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &printAny, 1, MPI_INT, MPI_SUM, 
+                  MPI_COMM_WORLD);
+#endif
+
+    if (printAny) createRestFile_ = true;
+
 #ifdef IS_MPI
     if(worldRank == 0){
 #endif
   
-      output_ = new std::ofstream(filename.c_str());
- 
-      if(!output_){
-        sprintf( painCave.errMsg,
-                 "Could not open %s for restraint output.\n", 
-                 filename.c_str());
-        painCave.isFatal = 1;
-        simError();
+      if (createRestFile_) {
+        output_ = new std::ofstream(filename.c_str());
+        
+        if(!output_){
+          sprintf( painCave.errMsg,
+                   "Could not open %s for restraint output.\n", 
+                   filename.c_str());
+          painCave.isFatal = 1;
+          simError();
+        }
       }
-
+        
 #ifdef IS_MPI
     }
 #endif // is_mpi
 
 
-#ifdef IS_MPI
-    MPI_Status* istatus;
-#endif
-    
 #ifndef IS_MPI
          
-    (*output_) << "#time\t";
-
-    std::vector<Restraint*>::const_iterator resti;
+    if (createRestFile_) (*output_) << "#time\t";
 
     for(resti=restraints.begin(); resti != restraints.end(); ++resti){
       if ((*resti)->getPrintRestraint()) {
-        
         std::string myName = (*resti)->getRestraintName();
         int myType = (*resti)->getRestraintType();
         
@@ -109,18 +125,15 @@ namespace OpenMD {
       }
     }
 
-    (*output_) << "\n";
-    (*output_).flush();
+    if (createRestFile_) (*output_) << "\n";
+    if (createRestFile_) (*output_).flush();
     
 #else
     
     std::string buffer;
 
-    std::vector<Restraint*>::const_iterator resti;
-
     for(resti=restraints.begin(); resti != restraints.end(); ++resti){
       if ((*resti)->getPrintRestraint()) {
-        
         std::string myName = (*resti)->getRestraintName();
         int myType = (*resti)->getRestraintType();
 
@@ -145,8 +158,8 @@ namespace OpenMD {
     const int masterNode = 0;
     
     if (worldRank == masterNode) {
-      (*output_) << "#time\t";
-      (*output_) << buffer;
+      if (createRestFile_) (*output_) << "#time\t";
+      if (createRestFile_) (*output_) << buffer;
       
       int nProc;
       MPI_Comm_size( MPI_COMM_WORLD, &nProc);
@@ -163,11 +176,11 @@ namespace OpenMD {
         } else {
           MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD,
                    istatus);
-          (*output_) << recvBuffer;
+          if (createRestFile_) (*output_) << recvBuffer;
           delete [] recvBuffer;
         }
       }	
-      (*output_).flush();
+       if (createRestFile_) (*output_).flush();
     } else {
       int sendBufferLength = buffer.size() + 1;
       MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
@@ -186,19 +199,24 @@ namespace OpenMD {
 #endif
     
 #ifndef IS_MPI
-    (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+     if (createRestFile_)  (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
     
     // output some information about the molecules
     std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;
     std::map<int, Restraint::RealPair>::const_iterator j;
     
-    for( i = restInfo.begin(); i != restInfo.end(); ++i){
-      for(j = (*i).begin(); j != (*i).end(); ++j){                
-        (*output_) << "\t" << (j->second).first << "\t" << (j->second).second;
-      }
-      (*output_) << std::endl;
+    cerr << "risize = " << restInfo.size() << "\n";
+
+    if ( createRestFile_ ) {
+      
+      for( i = restInfo.begin(); i != restInfo.end(); ++i){        
+        for(j = (*i).begin(); j != (*i).end(); ++j){                
+          (*output_) << "\t" << (j->second).first << "\t" << (j->second).second;
+        }
+        (*output_) << std::endl;
+      }      
+      (*output_).flush();
     }
-    (*output_).flush();
 #else
     std::string buffer, first, second;
     std::stringstream ss;
@@ -206,50 +224,56 @@ namespace OpenMD {
     std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;
     std::map<int, Restraint::RealPair>::const_iterator j;
     
-    for( i = restInfo.begin(); i != restInfo.end(); ++i){
-      for(j = (*i).begin(); j != (*i).end(); ++j){
-        ss.clear(); 
-        ss << (j->second).first;
-        ss >> first;
-        ss.clear();
-        ss << (j->second).second;
-        ss >> second;
-        buffer += ("\t" + first + "\t" + second);       
+    if ( createRestFile_ ) {
+      for( i = restInfo.begin(); i != restInfo.end(); ++i){
+        
+        for(j = (*i).begin(); j != (*i).end(); ++j){
+          ss.clear(); 
+          ss << (j->second).first;
+          ss >> first;
+          ss.clear();
+          ss << (j->second).second;
+          ss >> second;
+          buffer += ("\t" + first + "\t" + second);       
+        }
+        buffer += "\n";     
       }
-      buffer += "\n";     
     }
     
     const int masterNode = 0;
     
-    if (worldRank == masterNode) {
-      (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
-      (*output_) << buffer;
+    if (createRestFile_) {
+      if (worldRank == masterNode) {
+        
+        (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+        (*output_) << buffer;
       
-      int nProc;
-      MPI_Comm_size( MPI_COMM_WORLD, &nProc);
-      for (int i = 1; i < nProc; ++i) {
-        
-        // receive the length of the string buffer that was
-        // prepared by processor i
-        
-        int recvLength;
-        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, istatus);
-        char* recvBuffer = new char[recvLength];
-        if (recvBuffer == NULL) {
-        } else {
-          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD,
-                   istatus);
-          (*output_) << recvBuffer;
+        int nProc;
+        MPI_Comm_size( MPI_COMM_WORLD, &nProc);
+        for (int i = 1; i < nProc; ++i) {
           
-          delete [] recvBuffer;
-        }
-      }	
-      (*output_).flush();
-    } else {
-      int sendBufferLength = buffer.size() + 1;
-      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-      MPI_Send((void *)buffer.c_str(), sendBufferLength, 
-               MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+          // receive the length of the string buffer that was
+          // prepared by processor i
+          
+          int recvLength;
+          MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, istatus);
+          char* recvBuffer = new char[recvLength];
+          if (recvBuffer == NULL) {
+          } else {
+            MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD,
+                     istatus);
+            if (createRestFile_) (*output_) << recvBuffer;
+            
+            delete [] recvBuffer;
+          }
+        }	
+        (*output_).flush();
+      } else {
+        int sendBufferLength = buffer.size() + 1;
+        MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+        MPI_Send((void *)buffer.c_str(), sendBufferLength, 
+                 MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+      }
     }
 #endif // is_mpi
   }

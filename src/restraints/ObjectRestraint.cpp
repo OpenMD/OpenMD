@@ -55,7 +55,7 @@ namespace OpenMD {
 
       pot_ = p;
       force_ = frc * scaleFactor_;
-      restInfo_[rtDisplacement] = std::make_pair(r,p);
+      if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r,p);
     }
   }
     
@@ -87,7 +87,7 @@ namespace OpenMD {
         p = kTwist_ * (1.0 - cos(dTwist) );
         pot_ += p;
         tBody -= dVdtwist * V3Z;
-        restInfo_[rtTwist] = std::make_pair(twistAngle, p);
+        if (printRest_) restInfo_[rtTwist] = std::make_pair(twistAngle, p);
       }
 
       if (restType_ & rtSwingX){
@@ -96,7 +96,7 @@ namespace OpenMD {
         p = 0.25 * kSwingX_ * (1.0 - cos(2.0 * dSwingX));
         pot_ += p;
         tBody -= dVdswingX * V3X;
-        restInfo_[rtSwingX] = std::make_pair(swingX, p);
+        if (printRest_) restInfo_[rtSwingX] = std::make_pair(swingX, p);
       }
 
       if (restType_ & rtSwingY){
@@ -105,7 +105,7 @@ namespace OpenMD {
         p = 0.25 * kSwingY_ * (1.0 - cos(2.0 * dSwingY));
         pot_ += p;
         tBody -= dVdswingY * V3Y;
-        restInfo_[rtSwingY] = std::make_pair(swingY, p);
+        if (printRest_) restInfo_[rtSwingY] = std::make_pair(swingY, p);
       }
 
       Vector3d tLab = A.transpose() * tBody;      

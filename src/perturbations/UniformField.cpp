@@ -39,50 +39,63 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#include "perturbations/ElectricField.hpp"
+
+#include "perturbations/UniformField.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "primitives/Molecule.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "utils/PhysicalConstants.hpp"
 
 namespace OpenMD {
-
-  ElectricField::ElectricField(SimInfo* info) : info_(info), 
-						doElectricField(false), 
-						doParticlePot(false),
-						initialized(false) {
+  
+  UniformField::UniformField(SimInfo* info) : info_(info), 
+                                            doUniformField(false), 
+                                            doParticlePot(false),
+                                            initialized(false) {
     simParams = info_->getSimParams();
   }
-
-  void ElectricField::initialize() {
+  
+  void UniformField::initialize() {
     if (simParams->haveElectricField()) {
-      doElectricField = true;
+      doUniformField = true;
       EF = simParams->getElectricField();
+    }   
+    if (simParams->haveUniformField()) {
+      doUniformField = true;
+      EF = simParams->getUniformField();
     }   
     int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
     if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
     initialized = true;
   }
+  
+  void UniformField::applyPerturbation() {
 
-  void ElectricField::applyPerturbation() {
     if (!initialized) initialize();
 
     SimInfo::MoleculeIterator i;
     Molecule::AtomIterator  j;
     Molecule* mol;
     Atom* atom;
+    AtomType* atype;
     potVec longRangePotential(0.0);
-    Vector3d dip;
-    Vector3d trq;
-    Vector3d EFfrc;				
-    Vector3d pos;
 
-    if (doElectricField) {
-      const RealType chrgToKcal = 23.0609;
-      const RealType debyeToKcal = 4.8018969509;
-      RealType pot;
-      RealType fieldPot = 0.0;
+    RealType C;
+    Vector3d D;
+    RealType U;
+    RealType fPot;
+    Vector3d t;
+    Vector3d f;
+    Vector3d r;
+
+    bool isCharge;
+
+    if (doUniformField) {
+
+      U = 0.0;
+      fPot = 0.0;
 
       for (mol = info_->beginMolecule(i); mol != NULL; 
            mol = info_->nextMolecule(i)) {      
@@ -90,66 +103,71 @@ namespace OpenMD {
 	for (atom = mol->beginAtom(j); atom != NULL;
 	     atom = mol->nextAtom(j)) {
 
-	  bool isCharge = false;
-	  RealType chrg = 0.0;
+          isCharge = false;
+	  C = 0.0;
           
-          AtomType* atype = atom->getAtomType();
+          atype = atom->getAtomType();
 
           // ad-hoc choice of the origin for potential calculation and
           // fluctuating charge force:
-          pos = atom->getPos();
+
+          r = atom->getPos();
           
           if (atype->isElectrostatic()) {
-            atom->addElectricField(EF * chrgToKcal);
+            atom->addElectricField(EF * PhysicalConstants::chargeFieldConvert);
           }
           
 	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
 	  if ( fca.isFixedCharge() ) {
 	    isCharge = true;
-	    chrg = fca.getCharge();
+	    C = fca.getCharge();
 	  }
 	  
           FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
           if ( fqa.isFluctuatingCharge() ) {
 	    isCharge = true;
-            chrg += atom->getFlucQPos();
-            atom->addFlucQFrc( dot(pos,EF) * chrgToKcal );
+            C += atom->getFlucQPos();
+            atom->addFlucQFrc( dot(r, EF) 
+                               * PhysicalConstants::chargeFieldConvert );
           }
 	  
 	  if (isCharge) {
-	    EFfrc = EF*chrg;
-	    EFfrc *= chrgToKcal;
-	    atom->addFrc(EFfrc);
-	    pot = -dot(pos, EFfrc);
+	    f = EF * C * PhysicalConstants::chargeFieldConvert;
+	    atom->addFrc(f);
+	    U = -dot(r, f);
+
 	    if (doParticlePot) {      
-	      atom->addParticlePot(pot);
+	      atom->addParticlePot(U);
 	    }
-	    fieldPot += pot;
+	    fPot += U;
 	  }
 	    
-	  MultipoleAdapter ma = MultipoleAdapter(atype);
+          MultipoleAdapter ma = MultipoleAdapter(atype);
 	  if (ma.isDipole() ) {
-            Vector3d dipole = atom->getDipole();
-	    dipole *= debyeToKcal;
 
-	    trq = cross(dipole, EF);
-	    atom->addTrq(trq);
+            D = atom->getDipole() * PhysicalConstants::dipoleFieldConvert;
+            
+	    t = cross(D, EF);
+	    atom->addTrq(t);
 
-	    pot = -dot(dipole, EF);
+	    U = -dot(D, EF);
+
 	    if (doParticlePot) {      
-	      atom->addParticlePot(pot);
+	      atom->addParticlePot(U);
 	    }
-	    fieldPot += pot;
+	    fPot += U;
 	  }
 	}
       }
+
 #ifdef IS_MPI
-      MPI_Allreduce(MPI_IN_PLACE, &fieldPot, 1, MPI_REALTYPE, 
+      MPI_Allreduce(MPI_IN_PLACE, &fPot, 1, MPI_REALTYPE, 
                     MPI_SUM, MPI_COMM_WORLD);
 #endif
+
       Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
       longRangePotential = snap->getLongRangePotentials();
-      longRangePotential[ELECTROSTATIC_FAMILY] += fieldPot;
+      longRangePotential[ELECTROSTATIC_FAMILY] += fPot;
       snap->setLongRangePotential(longRangePotential);
     }
   }

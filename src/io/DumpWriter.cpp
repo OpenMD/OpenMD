@@ -398,6 +398,7 @@ namespace OpenMD {
       
       for (int i = 1; i < nProc; ++i) {
         // tell processor i to start sending us data:
+
         MPI_Bcast(&i, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
 
         // receive the length of the string buffer that was
@@ -427,6 +428,7 @@ namespace OpenMD {
         MPI_Bcast(&myturn, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
         if (myturn == worldRank){
           // send the length of our buffer:
+
           MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
 
           // send our buffer:
