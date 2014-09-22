@@ -338,7 +338,7 @@ src/primitives/StuntDouble.cpp
 src/primitives/ShortRangeInteraction.cpp
 src/primitives/Torsion.cpp
 src/primitives/UreyBradleyBend.cpp
-src/perturbations/ElectricField.cpp
+src/perturbations/UniformField.cpp
 src/restraints/MolecularRestraint.cpp
 src/restraints/ObjectRestraint.cpp
 src/selection/HullFinder.cpp

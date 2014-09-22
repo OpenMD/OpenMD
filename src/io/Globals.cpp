@@ -91,6 +91,10 @@ namespace OpenMD {
     DefineOptionalParameter(SurfaceTension, "surfaceTension");
     DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
     DefineOptionalParameter(ElectricField, "electricField");
+    DefineOptionalParameter(UniformField, "uniformField");
+    //DefineOptionalParameter(PeriodicField, "periodicField");
+    //DefineOptionalParameter(PeriodicFieldStrength, "periodicFieldStrength");
+    
 
     DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
     DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
@@ -182,6 +186,7 @@ namespace OpenMD {
     deprecatedKeywords_.insert("minimizerGTol");
     deprecatedKeywords_.insert("minimizerLSTol");
     deprecatedKeywords_.insert("minimizerLSMaxIter");
+    deprecatedKeywords_.insert("electricField");
 
     
   }

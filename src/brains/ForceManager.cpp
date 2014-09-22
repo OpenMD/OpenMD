@@ -57,7 +57,7 @@
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "perturbations/ElectricField.hpp"
+#include "perturbations/UniformField.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
 
 #include <cstdio>
@@ -405,9 +405,9 @@ namespace OpenMD {
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
 
-      // We want to delay the cutoffs until after the interaction
-      // manager has set up the atom-atom interactions so that we can
-      // query them for suggested cutoff values
+      //! We want to delay the cutoffs until after the interaction
+      //! manager has set up the atom-atom interactions so that we can
+      //! query them for suggested cutoff values
       setupCutoffs();
 
       info_->prepareTopology();      
@@ -423,14 +423,14 @@ namespace OpenMD {
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     
-    // Force fields can set options on how to scale van der Waals and
-    // electrostatic interactions for atoms connected via bonds, bends
-    // and torsions in this case the topological distance between
-    // atoms is:
-    // 0 = topologically unconnected
-    // 1 = bonded together 
-    // 2 = connected via a bend
-    // 3 = connected via a torsion
+    //! Force fields can set options on how to scale van der Waals and
+    //! electrostatic interactions for atoms connected via bonds, bends
+    //! and torsions in this case the topological distance between
+    //! atoms is:
+    //! 0 = topologically unconnected
+    //! 1 = bonded together 
+    //! 2 = connected via a bend
+    //! 3 = connected via a torsion
     
     vdwScale_.reserve(4);
     fill(vdwScale_.begin(), vdwScale_.end(), 0.0);
@@ -448,8 +448,8 @@ namespace OpenMD {
     electrostaticScale_[2] = fopts.getelectrostatic13scale();
     electrostaticScale_[3] = fopts.getelectrostatic14scale();    
     
-    if (info_->getSimParams()->haveElectricField()) {
-      ElectricField* eField = new ElectricField(info_);
+    if (info_->getSimParams()->haveUniformField()) {
+      UniformField* eField = new UniformField(info_);
       perturbations_.push_back(eField);
     }
 

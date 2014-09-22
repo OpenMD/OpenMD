@@ -69,7 +69,8 @@ namespace OpenMD {
 
     typedef std::pair<RealType, RealType> RealPair;
 
-    Restraint() : twist0_(0.0), swingX0_(0.0), swingY0_(0.0), restType_(0) {
+    Restraint() : twist0_(0.0), swingX0_(0.0), swingY0_(0.0), restType_(0), 
+                  printRest_(false) {
     }
     
     virtual ~Restraint() {}
@@ -95,25 +96,25 @@ namespace OpenMD {
     void setDisplacementForceConstant(RealType kDisp) { 
       kDisp_ = kDisp; 
       restType_ |= rtDisplacement;
-      restInfo_[rtDisplacement] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtDisplacement] = std::make_pair(0.0, 0.0);
     }
     
     void setTwistForceConstant(RealType kTwist) { 
       kTwist_ = kTwist/4;
       restType_ |= rtTwist; 
-      restInfo_[rtTwist] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtTwist] = std::make_pair(0.0, 0.0);
     }
     
     void setSwingXForceConstant(RealType kSwingX) { 
       kSwingX_ = kSwingX; 
       restType_ |= rtSwingX; 
-      restInfo_[rtSwingX] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtSwingX] = std::make_pair(0.0, 0.0);
     }
 
     void setSwingYForceConstant(RealType kSwingY) { 
       kSwingY_ = kSwingY; 
       restType_ |= rtSwingY; 
-      restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
     }
     
     /* restraint angles are measured relative to the ideal structure, 
@@ -123,19 +124,19 @@ namespace OpenMD {
     void setRestrainedTwistAngle(RealType twist0) { 
       twist0_ = twist0; 
       restType_ |= rtTwist; 
-      restInfo_[rtTwist] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtTwist] = std::make_pair(0.0, 0.0);
     }
     
     void setRestrainedSwingXAngle(RealType swingX0) { 
       swingX0_ = swingX0; 
       restType_ |= rtSwingX; 
-      restInfo_[rtSwingX] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtSwingX] = std::make_pair(0.0, 0.0);
     }
 
     void setRestrainedSwingYAngle(RealType swingY0) { 
       swingY0_ = swingY0; 
       restType_ |= rtSwingY; 
-      restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
+      if (printRest_) restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
     }
     
     void setPrintRestraint(bool printRest) {

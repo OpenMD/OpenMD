@@ -40,22 +40,38 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef PERTURBATIONS_ELECTRICFIELD_HPP
-#define PERTURBATIONS_ELECTRICFIELD_HPP
+
+/*! \file perturbations/UniformField.hpp
+    \brief Uniform Electric Field perturbation
+*/
+
+#ifndef PERTURBATIONS_UNIFORMFIELD_HPP
+#define PERTURBATIONS_UNIFORMFIELD_HPP
 
 #include "perturbations/Perturbation.hpp"
 #include "brains/SimInfo.hpp"
 
 namespace OpenMD {
    
-  /**
-   * @class ElectricFieldForceManager 
-   * Perturbation for external Electric Field forces and torques.
-   */
-  class ElectricField : public Perturbation {
+  //! Applies a uniform (vector) electric field to the system
+  /*! The field is applied as an external perturbation.  The user specifies
+
+  \code{.unparsed}
+    uniformField = (ex, ey, ez);
+  \endcode 
+    
+    in the .md file where the values of ex, ey, and ez are in units of
+    \f$ V / \AA \f$
+
+   The external field applies a force on charged atoms, \f$ \mathbf{F}
+   = C \mathbf{E} \f$.  For dipolar atoms, the field applies both a
+   potential, \f$ U = - \mathbf{D} \cdot \mathbf{E} \f$ and a torque,
+   \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E} \f$.
+  */ 
+  class UniformField : public Perturbation {
     
   public:
-    ElectricField(SimInfo* info);
+    UniformField(SimInfo* info);
     
   protected:
     virtual void initialize();
@@ -63,7 +79,7 @@ namespace OpenMD {
     
   private:
     bool initialized;
-    bool doElectricField;
+    bool doUniformField;
     bool doParticlePot;
     Globals* simParams;
     SimInfo* info_;
