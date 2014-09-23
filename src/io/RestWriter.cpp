@@ -205,8 +205,6 @@ namespace OpenMD {
     std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;
     std::map<int, Restraint::RealPair>::const_iterator j;
     
-    cerr << "risize = " << restInfo.size() << "\n";
-
     if ( createRestFile_ ) {
       
       for( i = restInfo.begin(); i != restInfo.end(); ++i){        
