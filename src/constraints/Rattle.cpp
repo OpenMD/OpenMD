@@ -223,13 +223,14 @@ namespace OpenMD {
     RealType rabsq = consPair->getConsDistSquare();
     RealType diffsq = rabsq - pabsq;
 
+
     // the original rattle code from alan tidesley
     if (fabs(diffsq) > (consTolerance_ * rabsq * 2)){
     
       Vector3d oldPosA = consElem1->getPrevPos();
       Vector3d oldPosB = consElem2->getPrevPos();      
 
-      Vector3d rab = oldPosA - oldPosB;    
+      Vector3d rab = oldPosA - oldPosB;          
 
       currentSnapshot_->wrapVector(rab);
 

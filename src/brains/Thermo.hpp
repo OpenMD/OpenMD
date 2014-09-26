@@ -73,6 +73,10 @@ namespace OpenMD {
 
     /** \brief accumulate and return the simulation box dipole moment in C*m */
     Vector3d getSystemDipole(); 
+
+    /** \brief accumulate and return the simulation box dipole moment in debye Angstroms */
+    Mat3x3d getSystemQuadrupole();
+
     Vector3d getHeatFlux();
     
     /** \brief Returns the center of the mass of the whole system.*/

@@ -418,6 +418,74 @@ namespace OpenMD {
     return snap->getSystemDipole();
   }
 
+
+  Mat3x3d Thermo::getSystemQuadrupole() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasSystemQuadrupole) {
+      SimInfo::MoleculeIterator miter;
+      vector<Atom*>::iterator aiter;
+      Molecule* mol;
+      Atom* atom;
+      RealType charge;
+      Vector3d ri(0.0);
+      Vector3d dipole(0.0);
+      Mat3x3d qpole(0.0);
+      
+      RealType chargeToC = 1.60217733e-19;
+      RealType angstromToM = 1.0e-10;
+      RealType debyeToCm = 3.33564095198e-30;
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
+        
+        for (atom = mol->beginAtom(aiter); atom != NULL;
+             atom = mol->nextAtom(aiter)) {
+
+          ri = atom->getPos();
+          snap->wrapVector(ri);
+          ri *= angstromToM;
+          
+          charge = 0.0;
+          
+          FixedChargeAdapter fca = FixedChargeAdapter(atom->getAtomType());
+          if ( fca.isFixedCharge() ) {
+            charge = fca.getCharge();
+          }
+          
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atom->getAtomType());
+          if ( fqa.isFluctuatingCharge() ) {
+            charge += atom->getFlucQPos();
+          }
+          
+          charge *= chargeToC;
+          
+          qpole += 0.5 * charge * outProduct(ri, ri);
+
+          MultipoleAdapter ma = MultipoleAdapter(atom->getAtomType());
+          
+          if ( ma.isDipole() ) {
+            dipole = atom->getDipole() * debyeToCm;
+            qpole += 0.5 * outProduct( dipole, ri );
+          }
+
+          if ( ma.isQuadrupole() ) {
+            qpole += atom->getQuadrupole() * debyeToCm * angstromToM;           
+          }
+        }
+      }
+         
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, qpole.getArrayPointer(),
+                    9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+#endif
+      
+      snap->setSystemQuadrupole(qpole);
+    }
+    
+    return snap->getSystemQuadrupole();
+  }
+
   // Returns the Heat Flux Vector for the system
   Vector3d Thermo::getHeatFlux(){
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();

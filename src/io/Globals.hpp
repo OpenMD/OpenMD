@@ -128,6 +128,7 @@ namespace OpenMD {
     DeclareParameter(FrozenBufferRadius, RealType);
     DeclareParameter(LangevinBufferRadius, RealType);
     DeclareParameter(AccumulateBoxDipole, bool);
+    DeclareParameter(AccumulateBoxQuadrupole, bool);
     DeclareParameter(NeighborListNeighbors, int);
     DeclareParameter(UseMultipleTemperatureMethod, bool);
     DeclareParameter(MTM_Ce, RealType);

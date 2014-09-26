@@ -435,6 +435,9 @@ namespace OpenMD{
     bool getCalcBoxDipole() {
       return calcBoxDipole_;
     }
+    bool getCalcBoxQuadrupole() {
+      return calcBoxQuadrupole_;
+    }
 
     bool getUseAtomicVirial() {
       return useAtomicVirial_;
@@ -504,9 +507,6 @@ namespace OpenMD{
     /** fill up the simtype struct and other simulation-related variables */
     void setupSimVariables();
 
-
-    /** Determine if we need to accumulate the simulation box dipole */
-    void setupAccumulateBoxDipole();
 
     /** Calculates the number of degress of freedom in the whole system */
     void calcNdf();
@@ -680,6 +680,8 @@ namespace OpenMD{
     
     bool calcBoxDipole_; /**< flag to indicate whether or not we calculate 
                             the simulation box dipole moment */
+    bool calcBoxQuadrupole_; /**< flag to indicate whether or not we calculate 
+                                the simulation box quadrupole moment */
     
     bool useAtomicVirial_; /**< flag to indicate whether or not we use 
                               Atomic Virials to calculate the pressure */

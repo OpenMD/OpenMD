@@ -130,7 +130,8 @@ namespace OpenMD {
     frameData.pressure = 0.0;        
     frameData.temperature = 0.0;
     frameData.pressureTensor = Mat3x3d(0.0);   
-    frameData.systemDipole = Vector3d(0.0);            
+    frameData.systemDipole = Vector3d(0.0);
+    frameData.systemQuadrupole = Mat3x3d(0.0);
     frameData.convectiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
     frameData.electronicTemperature = 0.0;
     frameData.COM = V3Zero;             
@@ -154,6 +155,7 @@ namespace OpenMD {
     hasCOMw = false;
     hasPressureTensor = false;    
     hasSystemDipole = false;      
+    hasSystemQuadrupole = false;
     hasConvectiveHeatFlux = false;  
     hasInertiaTensor = false;
     hasGyrationalVolume = false;   
@@ -600,6 +602,15 @@ namespace OpenMD {
   void Snapshot::setSystemDipole(const Vector3d& bd) {    
     hasSystemDipole = true;
     frameData.systemDipole = bd;
+  }
+
+  Mat3x3d Snapshot::getSystemQuadrupole() {
+    return frameData.systemQuadrupole;
+  }
+
+  void Snapshot::setSystemQuadrupole(const Mat3x3d& bq) {    
+    hasSystemQuadrupole = true;
+    frameData.systemQuadrupole = bq;
   }
 
   void Snapshot::setThermostat(const pair<RealType, RealType>& thermostat) {

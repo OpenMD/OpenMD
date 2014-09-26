@@ -78,8 +78,8 @@ namespace OpenMD {
     nAtoms_(0), nBonds_(0), nBends_(0), nTorsions_(0), nInversions_(0), 
     nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
     nConstraints_(0), nFluctuatingCharges_(0), sman_(NULL), 
-    topologyDone_(false), calcBoxDipole_(false), useAtomicVirial_(true),
-    hasNGlobalConstraints_(false) {    
+    topologyDone_(false), calcBoxDipole_(false), calcBoxQuadrupole_(false),
+    useAtomicVirial_(true), hasNGlobalConstraints_(false) {    
     
     MoleculeStamp* molStamp;
     int nMolWithSameStamp;
@@ -821,6 +821,13 @@ namespace OpenMD {
     if ( simParams_->haveAccumulateBoxDipole() ) 
       if ( simParams_->getAccumulateBoxDipole() ) {
 	calcBoxDipole_ = true;       
+      }
+    // we only call setAccumulateBoxQuadrupole if the accumulateBoxQuadrupole
+    // parameter is true
+    calcBoxQuadrupole_ = false;
+    if ( simParams_->haveAccumulateBoxQuadrupole() ) 
+      if ( simParams_->getAccumulateBoxQuadrupole() ) {
+	calcBoxQuadrupole_ = true;       
       }
     
     set<AtomType*>::iterator i;
