@@ -162,6 +162,8 @@ namespace OpenMD {
                                             false);
     DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, 
                                             "accumulateBoxDipole", false);
+    DefineOptionalParameterWithDefaultValue(AccumulateBoxQuadrupole, 
+                                            "accumulateBoxQuadrupole", false);
     DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", 
                                             false);
     DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", 

@@ -281,6 +281,14 @@ namespace OpenMD {
     data_[SYSTEM_DIPOLE] = system_dipole;
     statsMap_["SYSTEM_DIPOLE"] =  SYSTEM_DIPOLE;
 
+    StatsData system_quadrupole;
+    system_quadrupole.units =  "C*m*m";
+    system_quadrupole.title =  "System Quadrupole";
+    system_quadrupole.dataType = "Mat3x3d";
+    system_quadrupole.accumulator = new MatrixAccumulator();
+    data_[SYSTEM_QUADRUPOLE] = system_quadrupole;
+    statsMap_["SYSTEM_QUADRUPOLE"] =  SYSTEM_QUADRUPOLE;
+
     StatsData tagged_pair_distance;
     tagged_pair_distance.units =  "Ang";
     tagged_pair_distance.title =  "Tagged_Pair_Distance";
@@ -376,6 +384,14 @@ namespace OpenMD {
       statsMask_.set(SYSTEM_DIPOLE);
     }
 
+    // Why do we have both of these?
+    if (simParams->getAccumulateBoxQuadrupole()) {
+      statsMask_.set(SYSTEM_QUADRUPOLE);
+    }
+    if (info_->getCalcBoxQuadrupole()){
+      statsMask_.set(SYSTEM_QUADRUPOLE);
+    }
+
     if (simParams->havePrintHeatFlux()) {
       if (simParams->getPrintHeatFlux()){
         statsMask_.set(HEATFLUX);
@@ -467,6 +483,9 @@ namespace OpenMD {
           break;
         case SYSTEM_DIPOLE:
           dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getSystemDipole());
+          break;
+        case SYSTEM_QUADRUPOLE:
+          dynamic_cast<MatrixAccumulator *>(data_[i].accumulator)->add(thermo.getSystemQuadrupole());
           break;
         case HEATFLUX:
           dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getHeatFlux());

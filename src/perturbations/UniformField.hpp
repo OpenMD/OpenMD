@@ -57,11 +57,22 @@ namespace OpenMD {
   /*! The field is applied as an external perturbation.  The user specifies
 
   \code{.unparsed}
-    uniformField = (ex, ey, ez);
+    uniformField = (a, b, c);
   \endcode 
     
-    in the .md file where the values of ex, ey, and ez are in units of
+    in the .md file where the values of a, b, and c are in units of
     \f$ V / \AA \f$
+
+    The electrostatic potential corresponding to this uniform field is
+
+    \f$ \phi(\mathbf{r})  = - a x - b y - c z \f$
+
+    which grows unbounded and is not periodic.  For these reasons,
+    care should be taken in using a Uniform field with point charges.
+
+    The field itself is 
+
+    \f$ \mathbf{E} = \left( \array{c} a \\ b \\ c \end{array} \right) \f$
 
    The external field applies a force on charged atoms, \f$ \mathbf{F}
    = C \mathbf{E} \f$.  For dipolar atoms, the field applies both a

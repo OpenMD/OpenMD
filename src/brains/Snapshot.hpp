@@ -98,6 +98,7 @@ namespace OpenMD{
     Mat3x3d  stressTensor;        /**< stress tensor */
     Mat3x3d  pressureTensor;      /**< pressure tensor */
     Vector3d systemDipole;        /**< total system dipole moment */
+    Mat3x3d  systemQuadrupole;    /**< total system quadrupole moment */
     Vector3d conductiveHeatFlux;  /**< heat flux vector (conductive only) */
     Vector3d convectiveHeatFlux;  /**< heat flux vector (convective only) */
     RealType conservedQuantity;   /**< anything conserved by the integrator */
@@ -232,6 +233,9 @@ namespace OpenMD{
     Vector3d getSystemDipole();
     void     setSystemDipole(const Vector3d& bd);
 
+    Mat3x3d  getSystemQuadrupole();
+    void     setSystemQuadrupole(const Mat3x3d& bq);
+
     pair<RealType, RealType> getThermostat();
     void setThermostat(const pair<RealType, RealType>& thermostat);
 
@@ -273,7 +277,8 @@ namespace OpenMD{
     bool hasCOMvel;
     bool hasCOMw;
     bool hasPressureTensor;    
-    bool hasSystemDipole;    
+    bool hasSystemDipole;
+    bool hasSystemQuadrupole;
     bool hasConvectiveHeatFlux;
     bool hasInertiaTensor;
     bool hasGyrationalVolume;
