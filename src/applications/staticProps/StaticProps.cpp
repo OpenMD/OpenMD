@@ -98,6 +98,7 @@ int main(int argc, char* argv[]){
   std::string dumpFileName = args_info.input_arg;
   std::string sele1;
   std::string sele2;
+  std::string sele3;
   
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"
@@ -128,6 +129,11 @@ int main(int argc, char* argv[]){
       sele2 = sele1;
     }
   }
+
+  // check the third selection argument, which is only set if
+  // requested by the user
+
+  if (args_info.sele3_given) sele3 = args_info.sele3_arg;
 
   bool batchMode;
   if (args_info.scd_given){
@@ -184,14 +190,27 @@ int main(int argc, char* argv[]){
     analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen, 
 			  args_info.nbins_arg, args_info.nbins_z_arg);
   } else if (args_info.r_theta_given) {
-    analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
-			      args_info.nbins_arg, args_info.nanglebins_arg);
+    if (args_info.sele3_given) 
+      analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, sele3, maxLen,
+                                args_info.nbins_arg, args_info.nanglebins_arg);
+    else 
+      analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
+                                args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.r_omega_given) {
-    analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, 
-			      args_info.nbins_arg, args_info.nanglebins_arg);
+    if (args_info.sele3_given) 
+      analyser  = new GofROmega(info, dumpFileName, sele1, sele2, sele3, maxLen,
+                                args_info.nbins_arg, args_info.nanglebins_arg);
+    else 
+      analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen,
+                                args_info.nbins_arg, args_info.nanglebins_arg);
+
   } else if (args_info.theta_omega_given) {
-    analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
-			      args_info.nanglebins_arg);
+    if (args_info.sele3_given) 
+      analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, sele3,
+                                args_info.nanglebins_arg);
+    else
+      analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
+                                args_info.nanglebins_arg);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
       analyser= new GofXyz(info, dumpFileName, sele1, sele2,
@@ -342,7 +361,6 @@ int main(int argc, char* argv[]){
                                         args_info.molname_arg, 
 					args_info.begin_arg, args_info.end_arg);
     } else{
-      std::string sele3 = args_info.sele3_arg;
       analyser  = new SCDOrderParameter(info, dumpFileName, 
                                         sele1, sele2, sele3);
     }

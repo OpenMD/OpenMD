@@ -48,21 +48,118 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
+  
+  GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, 
+                       const std::string& sele1, 
+		       const std::string& sele2, 
+                       RealType len, int nrbins, int nangleBins)
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), 
+      nRBins_(nrbins), nAngleBins_(nangleBins), evaluator3_(info), 
+      seleMan3_(info), doSele3_(false) {
+    
+    deltaR_ = len_ /(double) nRBins_;
+    deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
+    histogram_.resize(nRBins_);
+    avgGofr_.resize(nRBins_);
+    for (int i = 0 ; i < nRBins_; ++i) {
+      histogram_[i].resize(nAngleBins_);
+      avgGofr_[i].resize(nAngleBins_);
+    }
+  }
+  
+  GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, 
+                       const std::string& sele1, 
+		       const std::string& sele2, 
+                       const std::string& sele3,
+                       RealType len, int nrbins, int nangleBins)
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), 
+      nRBins_(nrbins), nAngleBins_(nangleBins), selectionScript3_(sele3),
+      evaluator3_(info), seleMan3_(info), doSele3_(true) {
 
-  GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, 
-		       const std::string& sele2, RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins), nAngleBins_(nangleBins){
-
-      deltaR_ = len_ /(double) nRBins_;
-      deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
-      histogram_.resize(nRBins_);
-      avgGofr_.resize(nRBins_);
-      for (int i = 0 ; i < nRBins_; ++i) {
-        histogram_[i].resize(nAngleBins_);
-        avgGofr_[i].resize(nAngleBins_);
-      }
+    deltaR_ = len_ /(double) nRBins_;
+    deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
+    histogram_.resize(nRBins_);
+    avgGofr_.resize(nRBins_);
+    for (int i = 0 ; i < nRBins_; ++i) {
+      histogram_[i].resize(nAngleBins_);
+      avgGofr_[i].resize(nAngleBins_);
     }
 
+    evaluator3_.loadScriptString(sele3);      
+    if (!evaluator3_.isDynamic()) {
+      seleMan3_.setSelectionSet(evaluator3_.evaluate());
+    }
+
+  }
+  
+  void GofRAngle::processNonOverlapping( SelectionManager& sman1, 
+                                         SelectionManager& sman2) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    StuntDouble* sd3;
+    int i;    
+    int j;
+    int k;
+    
+    // This is the same as a non-overlapping pairwise loop structure:
+    // for (int i = 0;  i < ni ; ++i ) {
+    //   for (int j = 0; j < nj; ++j) {} 
+    // }
+
+    if (doSele3_) {
+      if  (evaluator3_.isDynamic()) {
+        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+      }
+      if (sman1.getSelectionCount() != seleMan3_.getSelectionCount() ) {
+        RadialDistrFunc::processNonOverlapping( sman1, sman2 );
+      }
+
+      for (sd1 = sman1.beginSelected(i), sd3 = seleMan3_.beginSelected(k); 
+           sd1 != NULL && sd3 != NULL; 
+           sd1 = sman1.nextSelected(i), sd3 = seleMan3_.nextSelected(k)) {
+        for (sd2 = sman2.beginSelected(j); sd2 != NULL; 
+             sd2 = sman2.nextSelected(j)) {
+          collectHistogram(sd1, sd2, sd3);
+        }
+      }
+    } else {
+      RadialDistrFunc::processNonOverlapping( sman1, sman2 );
+    }
+  }
+
+  void GofRAngle::processOverlapping( SelectionManager& sman) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    StuntDouble* sd3;
+    int i;    
+    int j;
+    int k;
+
+    // This is the same as a pairwise loop structure:
+    // for (int i = 0;  i < n-1 ; ++i ) {
+    //   for (int j = i + 1; j < n; ++j) {} 
+    // }
+    
+    if (doSele3_) {
+      if  (evaluator3_.isDynamic()) {
+        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+      }
+      if (sman.getSelectionCount() != seleMan3_.getSelectionCount() ) {
+        RadialDistrFunc::processOverlapping( sman);
+      }
+      for (sd1 = sman.beginSelected(i), sd3 = seleMan3_.beginSelected(k); 
+           sd1 != NULL && sd3 != NULL; 
+           sd1 = sman.nextSelected(i), sd3 = seleMan3_.nextSelected(k)) {
+        for (j  = i, sd2 = sman.nextSelected(j); sd2 != NULL; 
+             sd2 = sman.nextSelected(j)) {
+          collectHistogram(sd1, sd2, sd3);
+        }            
+      }
+    } else {
+      RadialDistrFunc::processOverlapping( sman);
+    }    
+  }
+  
 
   void GofRAngle::preProcess() {
     for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
@@ -87,7 +184,8 @@ namespace OpenMD {
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
-      RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      RealType volSlice = ( rUpper * rUpper * rUpper ) - 
+        ( rLower * rLower * rLower );
       RealType nIdeal = volSlice * pairConstant;
 
       for (unsigned int j = 0; j < histogram_[i].size(); ++j){
@@ -122,14 +220,55 @@ namespace OpenMD {
     }
   }
 
+  void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
+                                   StuntDouble* sd3) {
+
+    if (sd1 == sd2) {
+      return;
+    }
+
+    Vector3d p1 = sd1->getPos();
+    Vector3d p3 = sd3->getPos();
+
+    Vector3d c = 0.5 * (p1 + p3);
+    Vector3d r13 = p3 - p1;
+
+    Vector3d r12 = sd2->getPos() - c;
+  
+    if (usePeriodicBoundaryConditions_) {
+      currentSnapshot_->wrapVector(r12);
+      currentSnapshot_->wrapVector(r13);
+    }
+    
+    RealType distance = r12.length();
+    int whichRBin = int(distance / deltaR_);
+
+    if (distance <= len_) {
+
+      RealType cosAngle = evaluateAngle(sd1, sd2, sd3);
+      RealType halfBin = (nAngleBins_ - 1) * 0.5;
+      int whichThetaBin = int(halfBin * (cosAngle + 1.0));
+      ++histogram_[whichRBin][whichThetaBin];
+        
+      ++npairs_;
+    }
+  }
+
   void GofRAngle::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#radial distribution function\n";
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
-      rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
+      rdfStream <<  "selection2: (" << selectionScript2_ << ")";
+      if (doSele3_) {
+        rdfStream << "\tselection3: (" << selectionScript3_ << ")\n";
+      } else {
+        rdfStream << "\n";
+      }
+      rdfStream << "#nRBins = " << nRBins_ << "\tmaxLen = " 
+                << len_ << "\tdeltaR = " << deltaR_ <<"\n";
+      rdfStream << "#nAngleBins =" << nAngleBins_ << "\tdeltaCosAngle = " 
+                << deltaCosAngle_ << "\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	// RealType r = deltaR_ * (i + 0.5);
 
@@ -142,7 +281,8 @@ namespace OpenMD {
       }
         
     } else {
-      sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n", 
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }
@@ -162,6 +302,14 @@ namespace OpenMD {
 
     Vector3d vec;    
     
+    if (!sd1->isDirectional()) {
+      sprintf(painCave.errMsg, 
+              "GofRTheta: attempted to use a non-directional object: %s\n", 
+              sd1->getType().c_str());
+      painCave.isFatal = 1;
+      simError();  
+    }
+
     if (sd1->isAtom()) {
       AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
       MultipoleAdapter ma1 = MultipoleAdapter(atype1);
@@ -179,8 +327,37 @@ namespace OpenMD {
     return dot(r12, vec);
   }
 
+  RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
+                                    StuntDouble* sd3) {
+    Vector3d p1 = sd1->getPos();
+    Vector3d p3 = sd3->getPos();
+
+    Vector3d c = 0.5 * (p1 + p3);
+    Vector3d r13 = p3 - p1;
+
+    Vector3d r12 = sd2->getPos() - c;
+  
+    if (usePeriodicBoundaryConditions_) {
+      currentSnapshot_->wrapVector(r12);
+      currentSnapshot_->wrapVector(r13);
+    }
+
+    r12.normalize();
+    r13.normalize();
+          
+    return dot(r12, r13);
+  }
+
   RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d v1, v2;
+
+    if (!sd1->isDirectional()) {
+      sprintf(painCave.errMsg, 
+              "GofROmega: attempted to use a non-directional object: %s\n", 
+              sd1->getType().c_str());
+      painCave.isFatal = 1;
+      simError();  
+    }
 
     if (sd1->isAtom()){
       AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
@@ -193,6 +370,14 @@ namespace OpenMD {
       v1 = sd1->getA().transpose() * V3Z;
     }
     
+    if (!sd2->isDirectional()) {
+      sprintf(painCave.errMsg, 
+              "GofROmega attempted to use a non-directional object: %s\n", 
+              sd2->getType().c_str());
+      painCave.isFatal = 1;
+      simError();  
+    }
+
     if (sd2->isAtom()) {
       AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
       MultipoleAdapter ma2 = MultipoleAdapter(atype2);
@@ -210,7 +395,40 @@ namespace OpenMD {
     return dot(v1, v2);
   }
 
+  RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
+                                    StuntDouble* sd3) {
 
+    Vector3d v1;
+    Vector3d v2;
+    
+    v1 = sd3->getPos() - sd1->getPos();
+    if (usePeriodicBoundaryConditions_) 
+      currentSnapshot_->wrapVector(v1);
+    
+    if (!sd2->isDirectional()) {
+      sprintf(painCave.errMsg, 
+              "GofROmega: attempted to use a non-directional object: %s\n", 
+              sd2->getType().c_str());
+      painCave.isFatal = 1;
+      simError();  
+    }
+
+    if (sd2->isAtom()) {
+      AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
+      MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+           
+      if (ma2.isDipole() )
+        v2 = sd2->getDipole();
+      else 
+        v2 = sd2->getA().transpose() * V3Z;
+    } else {
+      v2 = sd2->getA().transpose() * V3Z;
+    }
+      
+    v1.normalize();
+    v2.normalize();
+    return dot(v1, v2);
+  }
 }
 
 

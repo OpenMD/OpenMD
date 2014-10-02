@@ -48,7 +48,13 @@ namespace OpenMD {
   class GofRAngle : public RadialDistrFunc {
     
   public:
-    GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nangleBins);
+    GofRAngle(SimInfo* info, const std::string& filename, 
+              const std::string& sele1, const std::string& sele2, 
+              RealType len, int nrbins, int nangleBins);
+    GofRAngle(SimInfo* info, const std::string& filename, 
+              const std::string& sele1, const std::string& sele2, 
+              const std::string& sele3, 
+              RealType len, int nrbins, int nangleBins);
 
     int getNRBins() {
       return nRBins_; 
@@ -63,19 +69,31 @@ namespace OpenMD {
   private:
 
     virtual void preProcess();
+    virtual void processNonOverlapping( SelectionManager& sman1,
+                                        SelectionManager& sman2);
+    virtual void processOverlapping( SelectionManager& sman );
+
     virtual void initializeHistogram();
     virtual void processHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
+                                  StuntDouble* sd3);
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
-
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
+                                   StuntDouble* sd3) = 0;
     virtual void writeRdf();
+
 
     RealType deltaCosAngle_;
     int nAngleBins_;
     RealType len_;
     int nRBins_;
     RealType deltaR_;
+
+    bool doSele3_;
+    std::string selectionScript3_;
+    SelectionManager seleMan3_;
+    SelectionEvaluator evaluator3_;
         
     std::vector<std::vector<int> > histogram_;
     std::vector<std::vector<RealType> > avgGofr_;
@@ -85,26 +103,51 @@ namespace OpenMD {
 
   class GofRTheta : public GofRAngle {
   public:
-    GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nangleBins)
+    GofRTheta(SimInfo* info, const std::string& filename, 
+              const std::string& sele1, const std::string& sele2, 
+              RealType len, int nrbins, int nangleBins)
       : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
+	setOutputName(getPrefix(filename) + ".gofrt");
+      }
+    GofRTheta(SimInfo* info, const std::string& filename, 
+              const std::string& sele1, const std::string& sele2,
+              const std::string& sele3,
+              RealType len, int nrbins, int nangleBins)
+      : GofRAngle (info, filename, sele1, sele2, sele3, len, nrbins, 
+                   nangleBins) {
 	setOutputName(getPrefix(filename) + ".gofrt");
       }
         
   private:
 
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
+                                   StuntDouble* sd3);        
   };
 
 
   class GofROmega : public GofRAngle {
   public:
-    GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nangleBins)
+    GofROmega(SimInfo* info, const std::string& filename, 
+              const std::string& sele1, const std::string& sele2, 
+              RealType len, int nrbins, int nangleBins)
       : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
+	setOutputName(getPrefix(filename) + ".gofro");
+      }
+    GofROmega(SimInfo* info, const std::string& filename, 
+              const std::string& sele1, const std::string& sele2,
+              const std::string& sele3,
+              RealType len, int nrbins, int nangleBins)
+      : GofRAngle (info, filename, sele1, sele2, sele3, len, nrbins, 
+                   nangleBins) {
 	setOutputName(getPrefix(filename) + ".gofro");
       }
     
   private:
-    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);     
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
+                                   StuntDouble* sd3);        
+   
   };
 
 }
