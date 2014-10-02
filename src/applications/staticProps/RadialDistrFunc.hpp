@@ -58,7 +58,8 @@ namespace OpenMD {
    */
   class RadialDistrFunc : public StaticAnalyser {
   public:
-    RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+    RadialDistrFunc(SimInfo* info, const std::string& filename, 
+                    const std::string& sele1, const std::string& sele2);
 
     virtual ~RadialDistrFunc() {}
         
@@ -70,6 +71,9 @@ namespace OpenMD {
 
     virtual void preProcess() {}
     virtual void postProcess() {}
+    virtual void processNonOverlapping(SelectionManager& sman1, 
+                                       SelectionManager& sman2);
+    virtual void processOverlapping(SelectionManager& sman);
 
     int getNPairs() { return nPairs_;}
         
@@ -78,28 +82,25 @@ namespace OpenMD {
     std::string selectionScript1_;
     std::string selectionScript2_;
     int nProcessed_;
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;
+    SelectionManager sele1_minus_common_;
+    SelectionManager sele2_minus_common_;
+    SelectionManager common_;        
         
   private:
 
     virtual void initializeHistogram() {}
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
     virtual void processHistogram() {}
-    void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
-    void processOverlapping(SelectionManager& sman);
 
     virtual void validateSelection1(SelectionManager& sman) {}
     virtual void validateSelection2(SelectionManager& sman) {}
     virtual void writeRdf() = 0;
-
         
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
-
-    SelectionManager sele1_minus_common_;
-    SelectionManager sele2_minus_common_;
-    SelectionManager common_;        
     int nPairs_;
   };
 
