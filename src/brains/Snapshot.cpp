@@ -454,6 +454,7 @@ namespace OpenMD {
     if (!hasPotentialEnergy) {
       frameData.potentialEnergy = this->getLongRangePotential();
       frameData.potentialEnergy += this->getShortRangePotential();
+      frameData.potentialEnergy += this->getRestraintPotential();
       hasPotentialEnergy = true;
     }
     return frameData.potentialEnergy;

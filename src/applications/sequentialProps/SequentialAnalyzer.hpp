@@ -39,39 +39,80 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
+#ifndef APPLICATIONS_SEQUENTIALPROPS_SEQUENTIALANALYZER_HPP
+#define APPLICATIONS_SEQUENTIALPROPS_SEQUENTIALANALYZER_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include <string>
+#include <vector>
+
+#include "brains/SimInfo.hpp"
+#include "brains/BlockSnapshotManager.hpp"
+
+#include "primitives/StuntDouble.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+
 namespace OpenMD {
 
-  class VCorrFunc : public ParticleTimeCorrFunc {
+  /**
+   * @class SequentialAnalyzer SequentialAnalyzer.hpp "applications/sequentialProps/SequentialAnalyzer"
+   * @brief Base class for Sequence Analyzer
+   */
+ 
+  class SequentialAnalyzer {
   public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
+    SequentialAnalyzer(SimInfo* info, const std::string& filename) : 
+      info_(info), currentSnapshot_(NULL), dumpFilename_(filename), 
+      step_(1)  {}
+    
+    virtual ~SequentialAnalyzer(){ }    
+    virtual void doSequence();
+
+    void setOutputName(const std::string& filename) {
+      outputFilename_ = filename;
+    }
+
+    const std::string& getOutputFileName() const {
+      return outputFilename_;
+    }
+
+    void setStep(int step) {
+      assert(step > 0);
+      step_ = step;    
+    }
+
+    int getStep() { return step_; }
+
+    const std::string& getSequenceType() const {
+      return sequenceType_;
+    }
+
+    void setSequenceType(const std::string& type) {
+      sequenceType_ = type;
+    }
+
+    void setExtraInfo(const std::string& extra) {
+      extra_ = extra;
+    }
+
+  protected:
+    virtual void preSequence() {}        
+    virtual void postSequence() {}
+    virtual void writeSequence();
+    virtual void doFrame() = 0;
+
+    SimInfo* info_;
+    Snapshot* currentSnapshot_;
+    std::string dumpFilename_;        
+    std::string outputFilename_;
+    int step_;
+    int storageLayout_;
+    std::vector<RealType> times_;
+    std::vector<RealType> values_;
+    std::string sequenceType_;
+    std::string extra_;
+
+
   };
-
-  class VCorrFuncZ : public VCorrFunc {
-  public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-  class VCorrFuncR : public VCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-
 }
 #endif

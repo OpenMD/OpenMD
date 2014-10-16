@@ -49,6 +49,8 @@ const char *gengetopt_args_info_help[] = {
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   rmsd",
   "  -v, --vcorr                   velocity correlation function",
+  "      --vcorrZ                  velocity correlation function along z-axis",
+  "      --vcorrR                  velocity correlation function projected \n                                  radially",
   "  -d, --dcorr                   dipole correlation function",
   "  -l, --lcorr                   Lengendre correlation function",
   "      --lcorrZ                  Lengendre correlation function binned by Z",
@@ -100,6 +102,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->vcorr_given = 0 ;
+  args_info->vcorrZ_given = 0 ;
+  args_info->vcorrR_given = 0 ;
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
   args_info->lcorrZ_given = 0 ;
@@ -153,19 +157,21 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->selecorr_help = gengetopt_args_info_help[10] ;
   args_info->rcorr_help = gengetopt_args_info_help[11] ;
   args_info->vcorr_help = gengetopt_args_info_help[12] ;
-  args_info->dcorr_help = gengetopt_args_info_help[13] ;
-  args_info->lcorr_help = gengetopt_args_info_help[14] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[15] ;
-  args_info->cohZ_help = gengetopt_args_info_help[16] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[17] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[18] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[19] ;
-  args_info->drcorr_help = gengetopt_args_info_help[20] ;
-  args_info->helfandEcorr_help = gengetopt_args_info_help[21] ;
-  args_info->momentum_help = gengetopt_args_info_help[22] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[23] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[24] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[25] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[13] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[14] ;
+  args_info->dcorr_help = gengetopt_args_info_help[15] ;
+  args_info->lcorr_help = gengetopt_args_info_help[16] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[17] ;
+  args_info->cohZ_help = gengetopt_args_info_help[18] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[19] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[20] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[21] ;
+  args_info->drcorr_help = gengetopt_args_info_help[22] ;
+  args_info->helfandEcorr_help = gengetopt_args_info_help[23] ;
+  args_info->momentum_help = gengetopt_args_info_help[24] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[25] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[26] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[27] ;
   
 }
 
@@ -320,6 +326,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "rcorr", 0, 0 );
   if (args_info->vcorr_given)
     write_into_file(outfile, "vcorr", 0, 0 );
+  if (args_info->vcorrZ_given)
+    write_into_file(outfile, "vcorrZ", 0, 0 );
+  if (args_info->vcorrR_given)
+    write_into_file(outfile, "vcorrR", 0, 0 );
   if (args_info->dcorr_given)
     write_into_file(outfile, "dcorr", 0, 0 );
   if (args_info->lcorr_given)
@@ -402,6 +412,8 @@ reset_group_dynamicProps(struct gengetopt_args_info *args_info)
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->vcorr_given = 0 ;
+  args_info->vcorrZ_given = 0 ;
+  args_info->vcorrR_given = 0 ;
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
   args_info->lcorrZ_given = 0 ;
@@ -668,6 +680,8 @@ cmdline_parser_internal (
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "vcorr",	0, NULL, 'v' },
+        { "vcorrZ",	0, NULL, 0 },
+        { "vcorrR",	0, NULL, 0 },
         { "dcorr",	0, NULL, 'd' },
         { "lcorr",	0, NULL, 'l' },
         { "lcorrZ",	0, NULL, 0 },
@@ -923,6 +937,40 @@ cmdline_parser_internal (
                 &(local_args_info.order_given), optarg, 0, 0, ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "order", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* velocity correlation function along z-axis.  */
+          else if (strcmp (long_options[option_index].name, "vcorrZ") == 0)
+          {
+          
+            if (args_info->dynamicProps_group_counter && override)
+              reset_group_dynamicProps (args_info);
+            args_info->dynamicProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->vcorrZ_given),
+                &(local_args_info.vcorrZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "vcorrZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* velocity correlation function projected radially.  */
+          else if (strcmp (long_options[option_index].name, "vcorrR") == 0)
+          {
+          
+            if (args_info->dynamicProps_group_counter && override)
+              reset_group_dynamicProps (args_info);
+            args_info->dynamicProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->vcorrR_given),
+                &(local_args_info.vcorrR_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "vcorrR", '-',
                 additional_error))
               goto failure;
           

@@ -195,6 +195,7 @@ Dump2XYZ
 simpleBuilder 
 StaticProps 
 DynamicProps
+SequentialProps
 randomBuilder 
 nanoparticleBuilder 
 thermalizer 
@@ -535,6 +536,13 @@ src/applications/hydrodynamics/ShapeBuilder.cpp
 src/applications/hydrodynamics/HydroCmd.cpp
 )
 
+set (SEQUENTIALPROPSSOURCE
+src/applications/sequentialProps/DensityAnalyzer.cpp
+src/applications/sequentialProps/SequentialAnalyzer.cpp
+src/applications/sequentialProps/SequentialProps.cpp
+src/applications/sequentialProps/SequentialPropsCmd.cpp
+)
+
 set (STATICPROPSSOURCE 
 src/applications/staticProps/AngleR.cpp
 src/applications/staticProps/BondAngleDistribution.cpp
@@ -622,6 +630,8 @@ add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Hydro openmd_single openmd_core openmd_single openmd_core)
 add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(StaticProps openmd_single openmd_core openmd_single openmd_core)
+add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(SequentialProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanoparticleBuilder openmd_single openmd_core openmd_single openmd_core openmd_single)
 add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
@@ -717,6 +727,7 @@ INSTALL(TARGETS
         simpleBuilder 
         StaticProps 
         DynamicProps
+        SequentialProps
         randomBuilder 
         nanoparticleBuilder 
         nanorodBuilder

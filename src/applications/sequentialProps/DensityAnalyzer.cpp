@@ -39,39 +39,44 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include <algorithm>
+#include <functional>
+#include "applications/sequentialProps/DensityAnalyzer.hpp"
+#include "utils/simError.h"
+#include "io/DumpReader.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/NumericConstant.hpp"
 namespace OpenMD {
 
-  class VCorrFunc : public ParticleTimeCorrFunc {
-  public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
+  DensityAnalyzer::DensityAnalyzer(SimInfo* info, const std::string& filename, 
+                                   const std::string& sele)
+    : SequentialAnalyzer(info, filename), selectionScript_(sele), 
+      evaluator_(info), seleMan_(info)   {
+    
+    setOutputName(getPrefix(filename) + ".dens");
+    
+    evaluator_.loadScriptString(sele);
+    
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }            
+  }
+
+  void DensityAnalyzer::doFrame() {
+    Molecule* mol;
+    RigidBody* rb;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    
+    if (evaluator_.isDynamic()) {
+	seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
         
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-  class VCorrFuncZ : public VCorrFunc {
-  public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-  class VCorrFuncR : public VCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-
+    unsigned int count = seleMan_.getSelectionCount();
+    
+    values_.push_back( count );
+  }
 }
-#endif
+
+
