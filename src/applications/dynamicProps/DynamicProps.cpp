@@ -144,6 +144,10 @@ int main(int argc, char* argv[]){
     corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
+  } else if (args_info.vcorrZ_given) {
+    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2, memSize); 
+  } else if (args_info.vcorrR_given) {
+    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2, memSize); 
   } else if (args_info.bondcorr_given) {
     corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize); 
   } else if (args_info.helfandEcorr_given){

@@ -152,34 +152,31 @@ namespace OpenMD {
 
       if (restType_ & rtTwist){
         dTwist = twistAngle - twist0_;
-        dVdtwist = kTwist_ * sin(dTwist) ;
-        p = kTwist_ * (1.0 - cos(dTwist) ) ;
+        /// dVdtwist = kTwist_ * sin(dTwist) ;
+        /// p = kTwist_ * (1.0 - cos(dTwist) ) ;
+        dVdtwist = kTwist_ * dTwist;
+        p = 0.5 * kTwist_ * dTwist * dTwist;
         pot_ += p;
         tBody -= dVdtwist * V3Z;
         if (printRest_) restInfo_[rtTwist] = std::make_pair(twistAngle, p);
       }
 
-//       if (restType_ & rtSwing){
-//         dSwing = swingAngle - swing0_;
-//         dVdswing = kSwing_ * 2.0 * sin(2.0 * dSwing);
-//         p = kSwing_ * (1.0 - cos(2.0 * dSwing));
-//         pot_ += p;
-//         tBody -= dVdswing * swingAxis;
-//         restInfo_[rtSwing] = std::make_pair(swingAngle, p);
-//       }
-
       if (restType_ & rtSwingX){
         dSwingX = swingX - swingX0_;
-        dVdswingX = kSwingX_ * 2.0 * sin(2.0 * dSwingX);
-        p = kSwingX_ * (1.0 - cos(2.0 * dSwingX));
+        /// dVdswingX = kSwingX_ * 2.0 * sin(2.0 * dSwingX);
+        /// p = kSwingX_ * (1.0 - cos(2.0 * dSwingX));
+        dVdswingX = kSwingX_ * dSwingX;        
+        p = 0.5 * kSwingX_ * dSwingX * dSwingX;
         pot_ += p;
         tBody -= dVdswingX * V3X;
         if (printRest_) restInfo_[rtSwingX] = std::make_pair(swingX, p);
       }
       if (restType_ & rtSwingY){
         dSwingY = swingY - swingY0_;
-        dVdswingY = kSwingY_ * 2.0 * sin(2.0 * dSwingY);
-        p = kSwingY_ * (1.0 - cos(2.0 * dSwingY));
+        /// dVdswingY = kSwingY_ * 2.0 * sin(2.0 * dSwingY);
+        /// p = kSwingY_ * (1.0 - cos(2.0 * dSwingY));
+        dVdswingY = kSwingY_ * dSwingY;        
+        p = 0.5 * kSwingX_ * dSwingY * dSwingY;
         pot_ += p;
         tBody -= dVdswingY * V3Y;
         if (printRest_) restInfo_[rtSwingY] = std::make_pair(swingY, p);

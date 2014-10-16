@@ -43,21 +43,85 @@
 #include "applications/dynamicProps/VCorrFunc.hpp"
 
 namespace OpenMD {
-  VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslVelocity, memSize){
+  VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, 
+                       const std::string& sele1, const std::string& sele2, 
+                       long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, 
+                           DataStorage::dslVelocity, memSize){
+    
+    setCorrFuncType("Velocity Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".vcorr");
+    
+  }
 
-      setCorrFuncType("Velocity Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".vcorr");
+  VCorrFuncZ::VCorrFuncZ(SimInfo* info, const std::string& filename, 
+                         const std::string& sele1, const std::string& sele2,
+                         long long int memSize)
+    : VCorrFunc(info, filename, sele1, sele2, memSize){
 
-    }
+    setCorrFuncType("Velocity Correlation Function projected along z axis");
+    setOutputName(getPrefix(dumpFilename_) + ".vcorrz");
 
-  RealType VCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getVel(frame1);
+  }
+  VCorrFuncR::VCorrFuncR(SimInfo* info, const std::string& filename, 
+                         const std::string& sele1, const std::string& sele2,
+                         long long int memSize)
+    : VCorrFunc(info, filename, sele1, sele2, memSize){
+
+    // Turn on COM calculation in block snapshot
+    bool ncp = true;
+    bsMan_->needCOMprops(ncp);
+    
+    setCorrFuncType("Velocity Correlation Function (radial projection)");
+    setOutputName(getPrefix(dumpFilename_) + ".vcorrr");
+      
+  }
+
+  RealType VCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  
+                                  StuntDouble* sd2) {
+    Vector3d v1 = sd1->getVel(frame1);
     Vector3d v2 = sd2->getVel(frame2);
-
-    //return dot(v1, v2)/dot(v1,v1);
+    
     return dot(v1, v2);
   }
 
+
+  RealType VCorrFuncZ::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  
+                                  StuntDouble* sd2) {
+    Vector3d v1 = sd1->getVel(frame1);
+    Vector3d v2 = sd2->getVel(frame2);
+    
+    return v1.z() * v2.z();
+  }
+  
+  RealType VCorrFuncR::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  
+                                  StuntDouble* sd2) {
+
+    Vector3d coord_t0;
+    Vector3d coord_t;
+
+    Vector3d r1 = sd1->getPos(frame1);
+    Vector3d r2 = sd2->getPos(frame2);
+
+    Vector3d com1 = sd1->getCOM(frame1);
+    Vector3d com2 = sd2->getCOM(frame2);
+
+    Vector3d v1 = sd1->getVel(frame1);
+    Vector3d v2 = sd2->getVel(frame2);
+    
+    coord_t0 = r1 - com1;
+    coord_t  = r2 - com2;
+
+    coord_t0.normalize();
+    coord_t.normalize();
+
+    // project velocity vectors onto the radial vectors:
+
+    RealType v1r = dot(v1, coord_t0);
+    RealType v2r = dot(v2, coord_t);
+
+    return v1r*v2r;
+
+  }
 }
 

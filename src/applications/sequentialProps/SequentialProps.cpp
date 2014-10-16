@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2014 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,39 +39,86 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
+ 
+#include <iostream>
+#include <fstream>
+#include <string>
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
-namespace OpenMD {
+#include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
+#include "utils/StringUtils.hpp"
+#include "utils/simError.h"
 
-  class VCorrFunc : public ParticleTimeCorrFunc {
-  public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
+#include "applications/sequentialProps/SequentialPropsCmd.h"
+#include "applications/sequentialProps/SequentialAnalyzer.hpp"
+#include "applications/sequentialProps/DensityAnalyzer.hpp"
 
-  class VCorrFuncZ : public VCorrFunc {
-  public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
+using namespace OpenMD;
 
-  class VCorrFuncR : public VCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
+int main(int argc, char* argv[]){
+  
+  gengetopt_args_info args_info;
 
+  //parse the command line option
+  if (cmdline_parser (argc, argv, &args_info) != 0) {
+    exit(1) ;
+  }
 
+  //get the dumpfile name and meta-data file name
+  std::string dumpFileName = args_info.input_arg;
+    
+  std::string sele1;
+  std::string sele2;
+  
+  // check the first selection argument, or set it to the environment
+  // variable, or failing that, set it to "select all"
+  
+  if (args_info.sele1_given) {
+    sele1 = args_info.sele1_arg;
+  } else {
+    char*  sele1Env= getenv("SELECTION1");
+    if (sele1Env) {
+      sele1 = sele1Env;
+    } else {
+      sele1 = "select all";
+    }
+  }
+  
+  // check the second selection argument, or set it to the environment
+  // variable, or failing that, set it to the first selection
+  
+  if (args_info.sele2_given) {
+    sele2 = args_info.sele2_arg;
+  } else {
+    char* sele2Env = getenv("SELECTION2");
+    if (sele2Env) {
+      sele2 = sele2Env;            
+    } else { 
+      //If sele2 is not specified, then the default behavior
+      //should be what is already intended for sele1
+      sele2 = sele1;
+    }
+  }
+
+  //parse md file and set up the system
+  SimCreator creator;
+  SimInfo* info = creator.createSim(dumpFileName, false);
+
+  SequentialAnalyzer* analyzer;
+  if(args_info.density_given){
+    analyzer = new DensityAnalyzer(info, dumpFileName, sele1);
+  }
+
+  if (args_info.output_given) {
+    analyzer->setOutputName(args_info.output_arg);
+  }
+
+  analyzer->doSequence();
+
+  delete analyzer;    
+  delete info;
+
+  return 0;   
 }
-#endif
+
+

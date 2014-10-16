@@ -39,39 +39,31 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
+#ifndef APPLICATIONS_SEQUENTIALPROPS_DENSITYANALYZER_HPP
+#define APPLICATIONS_SEQUENTIALPROPS_DENSITYANALYZER_HPP
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+using namespace std;
 namespace OpenMD {
-
-  class VCorrFunc : public ParticleTimeCorrFunc {
+  
+  class DensityAnalyzer : public SequentialAnalyzer{
   public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
+    DensityAnalyzer(SimInfo* info, const std::string& filename, 
+                    const std::string& sele);
+
+    virtual void doFrame();
+    
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
+           
+    std::string selectionScript_;
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;      
   };
-
-  class VCorrFuncZ : public VCorrFunc {
-  public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-  class VCorrFuncR : public VCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-
 }
+
 #endif
+
+
+

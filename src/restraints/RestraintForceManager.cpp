@@ -329,9 +329,6 @@ namespace OpenMD {
 #endif
 
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType pot = currSnapshot_->getLongRangePotential();
-    pot += restPot;
-    currSnapshot_->setLongRangePotential(pot);
     currSnapshot_->setRestraintPotential(restPot);
 
     //write out forces and current positions of restrained molecules    
