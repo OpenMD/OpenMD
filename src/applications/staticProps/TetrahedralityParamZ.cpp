@@ -235,7 +235,9 @@ namespace OpenMD {
       qZstream << "#z\tQk\n";
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType z = zAve * (i+0.5) / sliceQ_.size();
-        qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
+        if (sliceCount_[i] != 0) {
+          qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
+        }
       }
       
     } else {      
