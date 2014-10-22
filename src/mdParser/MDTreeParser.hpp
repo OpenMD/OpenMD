@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20140107): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20131114): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -62,7 +62,7 @@ public:
 	);
 	protected: int  intConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	protected: RealType  floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: vector<RealType>  doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void moleculestatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -74,7 +74,6 @@ public:
 	public: void fragmentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	public: vector<RealType>  doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: vector<int>  inttuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bendstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -84,6 +83,7 @@ public:
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constraintstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{

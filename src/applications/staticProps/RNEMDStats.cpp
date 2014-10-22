@@ -327,7 +327,18 @@ namespace OpenMD {
     bool hasAngularMomentumFluxVector = rnemdParams->haveAngularMomentumFluxVector();
     
     if (hasAngularMomentumFluxVector) {
-      fluxVector_ = rnemdParams->getAngularMomentumFluxVector();
+      std::vector<RealType> amf = rnemdParams->getAngularMomentumFluxVector();
+      if (amf.size() != 3) {
+        sprintf(painCave.errMsg,
+                "RNEMDRTheta: Incorrect number of parameters specified for angularMomentumFluxVector.\n"
+                "\tthere should be 3 parameters, but %lu were specified.\n", 
+                amf.size());
+        painCave.isFatal = 1;
+        simError();      
+      }
+      fluxVector_.x() = amf[0];
+      fluxVector_.y() = amf[1];
+      fluxVector_.z() = amf[2];
     } else {
       
       std::string fluxStr = rnemdParams->getFluxType();

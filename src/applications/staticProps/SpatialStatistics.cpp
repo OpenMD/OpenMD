@@ -360,7 +360,18 @@ namespace OpenMD {
     bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
     
     if (hasCoordinateOrigin) {
-      coordinateOrigin_ = rnemdParams->getCoordinateOrigin();
+        std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
+        if (co.size() != 3) {
+          sprintf(painCave.errMsg,
+                  "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
+                  "\tthere should be 3 parameters, but %lu were specified.\n", 
+                  co.size());
+          painCave.isFatal = 1;
+          simError();      
+        }
+        coordinateOrigin_.x() = co[0];
+        coordinateOrigin_.y() = co[1];
+        coordinateOrigin_.z() = co[2];
     } else {
       coordinateOrigin_ = V3Zero;
     }

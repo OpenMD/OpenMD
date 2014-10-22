@@ -100,8 +100,29 @@ namespace OpenMD {
 
     EF_ = V3Zero;
 
-    if (info_->getSimParams()->haveElectricField())
-      EF_ = info_->getSimParams()->getElectricField();
+    std::vector<RealType> ef;
+    bool efSpec = false;
+
+    if (info_->getSimParams()->haveElectricField()) {
+      efSpec = true;
+      ef = info_->getSimParams()->getElectricField();            
+    }   
+    if (info_->getSimParams()->haveUniformField()) {
+      efSpec = true;
+      ef = info_->getSimParams()->getUniformField();
+    }  
+    if (efSpec) {
+      if (ef.size() != 3) {
+        sprintf(painCave.errMsg,
+                "NitrileFrequencyMap: Incorrect number of parameters specified for uniformField.\n"
+                "\tthere should be 3 parameters, but %lu were specified.\n", ef.size());
+        painCave.isFatal = 1;
+        simError();      
+      }
+      EF_.x() = ef[0];
+      EF_.y() = ef[1];
+      EF_.z() = ef[2];
+    }
 
     excludesForAtom.clear();
     excludesForAtom.resize(nAtoms);

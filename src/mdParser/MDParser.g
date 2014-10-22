@@ -195,11 +195,21 @@ floatConst
           NUM_FLOAT | NUM_DOUBLE
         ;
 
+
+/* 
 protected
 vectorConst
     : 
         LPAREN^ doubleNumber COMMA doubleNumber COMMA doubleNumber RPAREN
     ;
+*/
+
+protected
+vectorConst
+    :
+        LPAREN^ doubleNumberTuple RPAREN
+    ;
+
 
 class MDLexer extends Lexer;
 

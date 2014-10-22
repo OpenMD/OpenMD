@@ -291,7 +291,18 @@ namespace OpenMD {
       kineticFlux_ = 0.0;
     }
     if (hasMomentumFluxVector) {
-      momentumFluxVector_ = rnemdParams->getMomentumFluxVector();
+      std::vector<RealType> mf = rnemdParams->getMomentumFluxVector();
+      if (mf.size() != 3) {
+          sprintf(painCave.errMsg,
+                  "RNEMD: Incorrect number of parameters specified for momentumFluxVector.\n"
+                  "\tthere should be 3 parameters, but %lu were specified.\n", 
+                  mf.size());
+          painCave.isFatal = 1;
+          simError();      
+      }
+      momentumFluxVector_.x() = mf[0];
+      momentumFluxVector_.y() = mf[1];
+      momentumFluxVector_.z() = mf[2];
     } else {
       momentumFluxVector_ = V3Zero;
       if (hasMomentumFlux) {
@@ -317,7 +328,18 @@ namespace OpenMD {
         }
       }
       if (hasAngularMomentumFluxVector) {
-        angularMomentumFluxVector_ = rnemdParams->getAngularMomentumFluxVector();
+        std::vector<RealType> amf = rnemdParams->getAngularMomentumFluxVector();
+        if (amf.size() != 3) {
+          sprintf(painCave.errMsg,
+                  "RNEMD: Incorrect number of parameters specified for angularMomentumFluxVector.\n"
+                  "\tthere should be 3 parameters, but %lu were specified.\n", 
+                  amf.size());
+          painCave.isFatal = 1;
+          simError();      
+        }
+        angularMomentumFluxVector_.x() = amf[0];
+        angularMomentumFluxVector_.y() = amf[1];
+        angularMomentumFluxVector_.z() = amf[2];
       } else {
         angularMomentumFluxVector_ = V3Zero;
         if (hasAngularMomentumFlux) {
@@ -348,7 +370,18 @@ namespace OpenMD {
       }
 
       if (hasCoordinateOrigin) {
-        coordinateOrigin_ = rnemdParams->getCoordinateOrigin();
+        std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
+        if (co.size() != 3) {
+          sprintf(painCave.errMsg,
+                  "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
+                  "\tthere should be 3 parameters, but %lu were specified.\n", 
+                  co.size());
+          painCave.isFatal = 1;
+          simError();      
+        }
+        coordinateOrigin_.x() = co[0];
+        coordinateOrigin_.y() = co[1];
+        coordinateOrigin_.z() = co[2];
       } else {
         coordinateOrigin_ = V3Zero;
       }
@@ -1755,7 +1788,9 @@ namespace OpenMD {
 #if defined(HAVE_QHULL)
         ConvexHull* surfaceMeshA = new ConvexHull();
         surfaceMeshA->computeHull(aSites);
+        cerr << "flag1\n";
         areaA = surfaceMeshA->getArea();
+        cerr << "Flag2 " << areaA << "\n";
         delete surfaceMeshA;
 #else
         sprintf( painCave.errMsg,

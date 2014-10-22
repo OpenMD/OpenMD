@@ -54,9 +54,9 @@ namespace OpenMD {
     DeclareParameter(ExchangeTime, RealType);
     DeclareParameter(KineticFlux, RealType);
     DeclareParameter(MomentumFlux, RealType);
-    DeclareParameter(MomentumFluxVector, Vector3d);
+    DeclareParameter(MomentumFluxVector, std::vector<RealType> );
     DeclareParameter(AngularMomentumFlux, RealType);
-    DeclareParameter(AngularMomentumFluxVector, Vector3d);
+    DeclareParameter(AngularMomentumFluxVector, std::vector<RealType> );
     DeclareParameter(SlabWidth, RealType);
     DeclareParameter(SlabACenter, RealType);
     DeclareParameter(SlabBCenter, RealType);
@@ -64,7 +64,7 @@ namespace OpenMD {
     DeclareParameter(SphereBRadius, RealType);
     DeclareParameter(SelectionA, std::string);
     DeclareParameter(SelectionB, std::string);
-    DeclareParameter(CoordinateOrigin, Vector3d);
+    DeclareParameter(CoordinateOrigin, std::vector<RealType> );
     DeclareParameter(OutputFileName, std::string);
     DeclareParameter(OutputBins, int);
     DeclareParameter(OutputBinWidth, RealType);
