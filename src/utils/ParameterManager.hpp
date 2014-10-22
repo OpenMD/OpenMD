@@ -37,12 +37,6 @@
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  ParameterManager.hpp
- *
- *  Created by Charles F. Vardeman II on 11/16/05.
- *  @author  Charles F. Vardeman II 
- *  @version $Id$
  *
  */
 
@@ -159,33 +153,25 @@ struct ParameterTraits<std::pair<int, int> >{
   static std::string getParamType() { return "std::pair<int, int>";}    
 };
 
-//OpenMD's internal Vector3d
+
 template<>                     
-struct ParameterTraits<OpenMD::Vector3d >{
-  typedef OpenMD::Vector3d  RepType;
+struct ParameterTraits<std::vector<RealType> >{
+  typedef std::vector<RealType>  RepType;
   template<typename T> static bool    convert(T, RepType&){return false;} 
   template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
   static bool convert(RepType v, RepType& r)            {r=v; return true;}
   static bool convert(std::string v, RepType& r) { 
     std::cerr << "calling tokenizer\n";
     OpenMD::StringTokenizer tokenizer(v," ();,\t\n\r");
-    if (tokenizer.countTokens() == 3) {
-      RealType v1 = tokenizer.nextTokenAsDouble();
-      RealType v2 = tokenizer.nextTokenAsDouble();
-      RealType v3 = tokenizer.nextTokenAsDouble();
-      r = OpenMD::Vector3d(v1, v2, v3);
-      return true;
-    } else {
-      sprintf(painCave.errMsg, 
-              "ParameterManager Error: "
-              "Incorrect number of tokens to make a Vector3!\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();    
+    unsigned int size = tokenizer.countTokens();
+    r = std::vector<RealType>( size, 0.0 );
+    for (unsigned int i = 0; i < size; i++) {
+      RealType v = tokenizer.nextTokenAsDouble();
+      r[i] = v;
     }
-    return false;
+    return true;
   }
-  static std::string getParamType() { return "OpenMD::Vector3d";}    
+  static std::string getParamType() {return "std::vector<RealType>"; }
 };
 
 
@@ -205,7 +191,7 @@ public:
   virtual bool setData(unsigned long int) = 0;
   virtual bool setData(RealType) = 0;
   virtual bool setData(std::pair<int, int>) = 0;
-  virtual bool setData(OpenMD::Vector3d) = 0;
+  virtual bool setData(std::vector<RealType>) = 0;
   virtual std::string getParamType() = 0;
 protected:
   std::string keyword_;
@@ -224,24 +210,20 @@ public:
   virtual bool setData(std::string sval) {
     return internalSetData<std::string>(sval);
   }
-
   virtual bool setData(int ival) {
     return internalSetData<int>(ival);
   }
-
   virtual bool setData(unsigned long int lival) {
     return internalSetData<unsigned long int>(lival);
   }
-  
   virtual bool setData(RealType dval) {
     return internalSetData<RealType>(dval);
   }
-
   virtual bool setData(std::pair<int, int> pval) {
     return internalSetData<std::pair<int, int> >(pval);
   }
-  virtual bool setData(OpenMD::Vector3d pval) {
-    return internalSetData<OpenMD::Vector3d >(pval);
+  virtual bool setData(std::vector<RealType> pval) {
+    return internalSetData<std::vector<RealType> >(pval);
   }
   
   virtual std::string getParamType() { return ParameterTraits<ParamType>::getParamType();}

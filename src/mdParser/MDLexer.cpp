@@ -1,4 +1,4 @@
-/* $ANTLR 2.7.7 (20140107): "MDParser.g" -> "MDLexer.cpp"$ */
+/* $ANTLR 2.7.7 (20131114): "MDParser.g" -> "MDLexer.cpp"$ */
 #include "MDLexer.hpp"
 #include <antlr/CharBuffer.hpp>
 #include <antlr/TokenStreamException.hpp>
@@ -482,7 +482,7 @@ void MDLexer::mWhitespace(bool _createToken) {
 		
 		}
 		if ( inputState->guessing==0 ) {
-#line 264 "MDParser.g"
+#line 274 "MDParser.g"
 			newline();
 #line 488 "MDLexer.cpp"
 		}
@@ -510,7 +510,7 @@ void MDLexer::mWhitespace(bool _createToken) {
 		
 		}
 		if ( inputState->guessing==0 ) {
-#line 269 "MDParser.g"
+#line 279 "MDParser.g"
 			printf("CPP_parser.g continuation line detected\n");
 			deferredNewline();
 #line 517 "MDLexer.cpp"
@@ -524,7 +524,7 @@ void MDLexer::mWhitespace(bool _createToken) {
 	}
 	}
 	if ( inputState->guessing==0 ) {
-#line 272 "MDParser.g"
+#line 282 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP;
 #line 530 "MDLexer.cpp"
 	}
@@ -550,7 +550,7 @@ void MDLexer::mComment(bool _createToken) {
 		else if ((LA(1) == 0xa /* '\n' */  || LA(1) == 0xd /* '\r' */ )) {
 			mEndOfLine(false);
 			if ( inputState->guessing==0 ) {
-#line 279 "MDParser.g"
+#line 289 "MDParser.g"
 				deferredNewline();
 #line 556 "MDLexer.cpp"
 			}
@@ -569,7 +569,7 @@ void MDLexer::mComment(bool _createToken) {
 	} // ( ... )*
 	match("*/");
 	if ( inputState->guessing==0 ) {
-#line 282 "MDParser.g"
+#line 292 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP;
 #line 575 "MDLexer.cpp"
 	}
@@ -631,7 +631,7 @@ void MDLexer::mCPPComment(bool _createToken) {
 	} // ( ... )*
 	mEndOfLine(false);
 	if ( inputState->guessing==0 ) {
-#line 288 "MDParser.g"
+#line 298 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP; newline();
 #line 637 "MDLexer.cpp"
 	}
@@ -651,7 +651,7 @@ void MDLexer::mPREPROC_DIRECTIVE(bool _createToken) {
 	match('#' /* charlit */ );
 	mLineDirective(false);
 	if ( inputState->guessing==0 ) {
-#line 295 "MDParser.g"
+#line 305 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP; newline();
 #line 657 "MDLexer.cpp"
 	}
@@ -671,7 +671,7 @@ void MDLexer::mLineDirective(bool _createToken) {
 	ANTLR_USE_NAMESPACE(antlr)RefToken sl;
 	
 	if ( inputState->guessing==0 ) {
-#line 301 "MDParser.g"
+#line 311 "MDParser.g"
 		
 		deferredLineCount = 0;
 		
@@ -713,7 +713,7 @@ void MDLexer::mLineDirective(bool _createToken) {
 	mDecimal(true);
 	n=_returnToken;
 	if ( inputState->guessing==0 ) {
-#line 306 "MDParser.g"
+#line 316 "MDParser.g"
 		setLine(OpenMD::lexi_cast<int>(n->getText()) - 1);
 #line 719 "MDLexer.cpp"
 	}
@@ -736,7 +736,7 @@ void MDLexer::mLineDirective(bool _createToken) {
 	sl=_returnToken;
 	}
 	if ( inputState->guessing==0 ) {
-#line 308 "MDParser.g"
+#line 318 "MDParser.g"
 		std::string filename = sl->getText().substr(1,sl->getText().length()-2); observer->notify(filename);
 #line 742 "MDLexer.cpp"
 	}
@@ -866,7 +866,7 @@ void MDLexer::mStringLiteral(bool _createToken) {
 			
 			}
 			if ( inputState->guessing==0 ) {
-#line 348 "MDParser.g"
+#line 358 "MDParser.g"
 				deferredNewline();
 #line 872 "MDLexer.cpp"
 			}
@@ -1344,7 +1344,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 	ANTLR_USE_NAMESPACE(antlr)RefToken f2;
 	ANTLR_USE_NAMESPACE(antlr)RefToken f3;
 	ANTLR_USE_NAMESPACE(antlr)RefToken f4;
-#line 441 "MDParser.g"
+#line 451 "MDParser.g"
 	
 			bool isDecimal = false;
 			ANTLR_USE_NAMESPACE(antlr)RefToken t = ANTLR_USE_NAMESPACE(antlr)nullToken;
@@ -1389,7 +1389,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 	{
 		match('.' /* charlit */ );
 		if ( inputState->guessing==0 ) {
-#line 448 "MDParser.g"
+#line 458 "MDParser.g"
 			_ttype = DOT;
 #line 1395 "MDLexer.cpp"
 		}
@@ -1422,7 +1422,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 				mFLOAT_SUFFIX(true);
 				f1=_returnToken;
 				if ( inputState->guessing==0 ) {
-#line 449 "MDParser.g"
+#line 459 "MDParser.g"
 					t=f1;
 #line 1428 "MDLexer.cpp"
 				}
@@ -1432,7 +1432,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 			
 			}
 			if ( inputState->guessing==0 ) {
-#line 450 "MDParser.g"
+#line 460 "MDParser.g"
 				
 									if ( t &&
 										  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
@@ -1469,7 +1469,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 		{
 			match('0' /* charlit */ );
 			if ( inputState->guessing==0 ) {
-#line 462 "MDParser.g"
+#line 472 "MDParser.g"
 				isDecimal = true;
 #line 1475 "MDLexer.cpp"
 			}
@@ -1617,7 +1617,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 			_loop174:;
 			} // ( ... )*
 			if ( inputState->guessing==0 ) {
-#line 479 "MDParser.g"
+#line 489 "MDParser.g"
 				isDecimal=true;
 #line 1623 "MDLexer.cpp"
 			}
@@ -1650,7 +1650,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 			}
 			}
 			if ( inputState->guessing==0 ) {
-#line 481 "MDParser.g"
+#line 491 "MDParser.g"
 				_ttype = NUM_LONG;
 #line 1656 "MDLexer.cpp"
 			}
@@ -1664,7 +1664,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 					mFLOAT_SUFFIX(true);
 					f3=_returnToken;
 					if ( inputState->guessing==0 ) {
-#line 486 "MDParser.g"
+#line 496 "MDParser.g"
 						t=f3;
 #line 1670 "MDLexer.cpp"
 					}
@@ -1701,7 +1701,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 					mFLOAT_SUFFIX(true);
 					f2=_returnToken;
 					if ( inputState->guessing==0 ) {
-#line 485 "MDParser.g"
+#line 495 "MDParser.g"
 						t=f2;
 #line 1707 "MDLexer.cpp"
 					}
@@ -1715,7 +1715,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 				mFLOAT_SUFFIX(true);
 				f4=_returnToken;
 				if ( inputState->guessing==0 ) {
-#line 487 "MDParser.g"
+#line 497 "MDParser.g"
 					t=f4;
 #line 1721 "MDLexer.cpp"
 				}
@@ -1726,7 +1726,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 			
 			}
 			if ( inputState->guessing==0 ) {
-#line 489 "MDParser.g"
+#line 499 "MDParser.g"
 				
 									if ( t &&
 										  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||

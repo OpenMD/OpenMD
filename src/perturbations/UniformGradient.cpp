@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2014 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "perturbations/UniformField.hpp"
+#include "perturbations/UniformGradient.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
@@ -50,42 +50,46 @@
 
 namespace OpenMD {
   
-  UniformField::UniformField(SimInfo* info) : info_(info), 
-                                            doUniformField(false), 
+  UniformGradient::UniformGradient(SimInfo* info) : info_(info), 
+                                            doUniformGradient(false), 
                                             doParticlePot(false),
                                             initialized(false) {
     simParams = info_->getSimParams();
   }
   
-  void UniformField::initialize() {
+  void UniformGradient::initialize() {
+    if (simParams->haveUniformGradient()) {
+      doUniformGradient = true;
+      std::vector<RealType> pv = simParams->getUniformGradient();            
+      if (pv.size() != 5) {
+        sprintf(painCave.errMsg,
+                "UniformGradient: Incorrect number of parameters specified.\n"
+                "\tthere should be 5 parameters, but %lu were specified.\n", pv.size());
+        painCave.isFatal = 1;
+        simError();      
+      }
+      pars_.a = pv[0];
+      pars_.b = pv[1];
+      pars_.c = pv[2];
+      pars_.alpha = pv[3];
+      pars_.beta = pv[4];
 
-    std::vector<RealType> ef;
-
-    if (simParams->haveElectricField()) {
-      doUniformField = true;
-      ef = simParams->getElectricField();            
+      Grad_(0,0) = pars_.alpha;
+      Grad_(0,1) = pars_.a;
+      Grad_(0,2) = pars_.b;
+      Grad_(1,0) = Grad_(0,1);
+      Grad_(1,1) = pars_.beta;
+      Grad_(1,2) = pars_.c;
+      Grad_(2,0) = Grad_(0,2);
+      Grad_(2,1) = Grad_(1,2);
+      Grad_(2,2) = - (Grad_(0,0) + Grad_(1,1));
     }   
-    if (simParams->haveUniformField()) {
-      doUniformField = true;
-      ef = simParams->getUniformField();
-    }   
-    if (ef.size() != 3) {
-      sprintf(painCave.errMsg,
-              "UniformField: Incorrect number of parameters specified.\n"
-              "\tthere should be 3 parameters, but %lu were specified.\n", ef.size());
-      painCave.isFatal = 1;
-      simError();      
-    }
-    EF.x() = ef[0];
-    EF.y() = ef[1];
-    EF.z() = ef[2];
-
     int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
     if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
     initialized = true;
   }
   
-  void UniformField::applyPerturbation() {
+  void UniformGradient::applyPerturbation() {
 
     if (!initialized) initialize();
 
@@ -98,15 +102,19 @@ namespace OpenMD {
 
     RealType C;
     Vector3d D;
+    Mat3x3d Q;
+
     RealType U;
     RealType fPot;
     Vector3d t;
     Vector3d f;
+
     Vector3d r;
+    Vector3d EF;
 
     bool isCharge;
 
-    if (doUniformField) {
+    if (doUniformGradient) {
 
       U = 0.0;
       fPot = 0.0;
@@ -122,10 +130,8 @@ namespace OpenMD {
           
           atype = atom->getAtomType();
 
-          // ad-hoc choice of the origin for potential calculation and
-          // fluctuating charge force:
-
           r = atom->getPos();
+          EF = Grad_ * r;
           
           if (atype->isElectrostatic()) {
             atom->addElectricField(EF * PhysicalConstants::chargeFieldConvert);
@@ -148,8 +154,8 @@ namespace OpenMD {
 	  if (isCharge) {
 	    f = EF * C * PhysicalConstants::chargeFieldConvert;
 	    atom->addFrc(f);
-	    U = -dot(r, f);
 
+	    U = -dot(r, f);
 	    if (doParticlePot) {      
 	      atom->addParticlePot(U);
 	    }
@@ -158,19 +164,33 @@ namespace OpenMD {
 	    
           MultipoleAdapter ma = MultipoleAdapter(atype);
 	  if (ma.isDipole() ) {
-
             D = atom->getDipole() * PhysicalConstants::dipoleFieldConvert;
             
+            f = D * Grad_;
+            atom->addFrc(f);
+
 	    t = cross(D, EF);
 	    atom->addTrq(t);
 
 	    U = -dot(D, EF);
-
 	    if (doParticlePot) {      
 	      atom->addParticlePot(U);
 	    }
 	    fPot += U;
 	  }
+
+          if (ma.isQuadrupole() ) {
+            Q = atom->getQuadrupole() * PhysicalConstants::dipoleFieldConvert;
+            
+            t = 2.0 * mCross(Q, Grad_);
+            atom->addTrq(t);
+
+            U = -doubleDot(Q, Grad_);
+	    if (doParticlePot) {      
+	      atom->addParticlePot(U);
+	    }
+	    fPot += U;
+          }
 	}
       }
 

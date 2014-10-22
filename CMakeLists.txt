@@ -340,6 +340,7 @@ src/primitives/ShortRangeInteraction.cpp
 src/primitives/Torsion.cpp
 src/primitives/UreyBradleyBend.cpp
 src/perturbations/UniformField.cpp
+src/perturbations/UniformGradient.cpp
 src/restraints/MolecularRestraint.cpp
 src/restraints/ObjectRestraint.cpp
 src/selection/HullFinder.cpp

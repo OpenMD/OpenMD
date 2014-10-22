@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2014 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -41,62 +41,90 @@
  */
  
 
-/*! \file perturbations/UniformField.hpp
-    \brief Uniform Electric Field perturbation
+/*! \file perturbations/UniformGradient.hpp
+    \brief Uniform Electric Field Gradient perturbation
 */
 
-#ifndef PERTURBATIONS_UNIFORMFIELD_HPP
-#define PERTURBATIONS_UNIFORMFIELD_HPP
+#ifndef PERTURBATIONS_UNIFORMGRADIENT_HPP
+#define PERTURBATIONS_UNIFORMGRADIENT_HPP
 
 #include "perturbations/Perturbation.hpp"
 #include "brains/SimInfo.hpp"
 
 namespace OpenMD {
+
+  struct UniGradPars {
+    RealType a;
+    RealType b;
+    RealType c;
+    RealType alpha;
+    RealType beta;
+  };
    
-  //! Applies a uniform (vector) electric field to the system
-  /*! The field is applied as an external perturbation.  The user specifies
+  //! Applies a uniform electric field gradient to the system
+  /*! The gradient is applied as an external perturbation.  The user specifies
 
   \code{.unparsed}
-    uniformField = (a, b, c);
+    uniformGradient = (a, b, c, alpha, beta);
   \endcode 
     
-    in the .md file where the values of a, b, and c are in units of
-    \f$ V / \AA \f$
+    in the .md file where the values of a, b, c, alpha, beta are in units of
+    \f$ V / \AA^2 \f$
 
-    The electrostatic potential corresponding to this uniform field is
+    The electrostatic potential corresponding to this uniform gradient is
 
-    \f$ \phi(\mathbf{r})  = - a x - b y - c z \f$
+    \f$ \phi(\mathbf{r})  = - a x y - b x z - c y z - \alpha x^2 / 2 - \beta y^2 / 2 + (\alpha + \beta) z^2 / 2 \f$
 
     which grows unbounded and is not periodic.  For these reasons,
-    care should be taken in using a Uniform field with point charges.
+    care should be taken in using a Uniform Gradient with point charges.
 
-    The field itself is 
+    The corresponding field is:
 
-    \f$ \mathbf{E} = \left( \array{c} a \\ b \\ c \end{array} \right) \f$
+    \f$ \mathbf{E} = \left( \array{c} \alpha x + a y + b z  \\ a x + \beta y + c z \\ b x + c y - (\alpha + \beta) z \end{array} \right) \f$
 
-   The external field applies a force on charged atoms, \f$ \mathbf{F}
-   = C \mathbf{E} \f$.  For dipolar atoms, the field applies both a
-   potential, \f$ U = - \mathbf{D} \cdot \mathbf{E} \f$ and a torque,
-   \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E} \f$.
-  */ 
-  class UniformField : public Perturbation {
+    The field also grows unbounded and is not periodic.  For these reasons,
+    care should be taken in using a Uniform Gradient with point dipoles.
+
+    The corresponding field gradient is:
+
+    \f$ \nabla \mathbf{E} = \left( \array{ccc} \alpha & a & b \\ a & \beta & c \\ b & c & -(\alpha + \beta) \end{array} \right) \f$
+
+    which is uniform everywhere.
+
+    The uniform field gradient applies a force on charged atoms, 
+    \f$ \mathbf{F} = C \mathbf{E}(\mathbf{r}) \f$.  
+    For dipolar atoms, the gradient applies both a potential, 
+    \f$ U = -\mathbf{D} \cdot \mathbf{E}(\mathbf{r}) \f$, a force, 
+    \f$ \mathbf{F} = \mathbf{D} \cdot \nabla \mathbf{E} \f$, and a torque,
+    \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E}(\mathbf{r}) \f$.
     
+    For quadrupolar atoms, the uniform field gradient exerts a potential, 
+    \f$ U = - \mathsf{Q}:\nabla \mathbf{E} $\f, and a torque 
+    \f$ \mathbf{F} = 2 \mathsf{Q} \times \nabla \mathbf{E} \f$
+    
+  */ 
+  class UniformGradient : public Perturbation {
+    
+
   public:
-    UniformField(SimInfo* info);
+    UniformGradient(SimInfo* info);
     
   protected:
     virtual void initialize();
     virtual void applyPerturbation();
     
   private:
-   bool initialized;
-    bool doUniformField;
+    bool initialized;
+    bool doUniformGradient;
     bool doParticlePot;
     Globals* simParams;
     SimInfo* info_;
-    Vector3d EF;
+    UniGradPars pars_;
+    Mat3x3d Grad_;
+    Vector3d v1_, v2_, v3_;
   };
-  
+
+
 } //end namespace OpenMD
 #endif
 

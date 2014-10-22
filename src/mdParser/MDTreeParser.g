@@ -51,20 +51,18 @@ constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
 {
     int ival;
     RealType dval, x, y, z;
-    Vector3d dvec;
+    std::vector<RealType> dvec;
 }    
     : ival=intConst {blockStack.top()->assign(id->getText(), ival);}
     | dval=floatConst {blockStack.top()->assign(id->getText(), dval);}
-    | #(LPAREN x=doubleNumber COMMA y=doubleNumber COMMA z=doubleNumber RPAREN) 
-        {   dvec.x() = x; 
-            dvec.y() = y; 
-            dvec.z() = z; 
-            blockStack.top()->assign(id->getText(), dvec);
-        }
     | str1:ID {blockStack.top()->assign(id->getText(), str1->getText());}
     | str2:StringLiteral {std::string s =  str2->getText();
             s = s.substr(1, s.length()-2);
             blockStack.top()->assign(id->getText(),s);
+        }
+    | #(LPAREN dvec=doubleNumberTuple RPAREN) 
+        { 
+            blockStack.top()->assign(id->getText(), dvec);
         }
     ;
             

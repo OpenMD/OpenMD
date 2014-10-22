@@ -141,8 +141,10 @@ namespace OpenMD {
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
-    DeclareParameter(UniformField, OpenMD::Vector3d);
-    DeclareParameter(ElectricField, OpenMD::Vector3d);
+    DeclareParameter(UniformField, std::vector<RealType> );
+    DeclareParameter(UniformGradient, std::vector<RealType> );
+
+    DeclareParameter(ElectricField, std::vector<RealType> );
     DeclareParameter(ConstraintTime, RealType);
 
   public:
