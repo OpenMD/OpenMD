@@ -327,293 +327,292 @@ namespace OpenMD {
           break;
         }
       }
-      if (hasAngularMomentumFluxVector) {
-        std::vector<RealType> amf = rnemdParams->getAngularMomentumFluxVector();
-        if (amf.size() != 3) {
-          sprintf(painCave.errMsg,
-                  "RNEMD: Incorrect number of parameters specified for angularMomentumFluxVector.\n"
-                  "\tthere should be 3 parameters, but %lu were specified.\n", 
-                  amf.size());
-          painCave.isFatal = 1;
-          simError();      
-        }
-        angularMomentumFluxVector_.x() = amf[0];
-        angularMomentumFluxVector_.y() = amf[1];
-        angularMomentumFluxVector_.z() = amf[2];
-      } else {
-        angularMomentumFluxVector_ = V3Zero;
-        if (hasAngularMomentumFlux) {
-          RealType angularMomentumFlux = rnemdParams->getAngularMomentumFlux();
-          switch (rnemdFluxType_) {
-          case rnemdLx:
-            angularMomentumFluxVector_.x() = angularMomentumFlux;
-            break;
-          case rnemdLy:
-            angularMomentumFluxVector_.y() = angularMomentumFlux;
-            break;
-          case rnemdLz:
-            angularMomentumFluxVector_.z() = angularMomentumFlux;
-            break;
-          case rnemdKeLx:
-            angularMomentumFluxVector_.x() = angularMomentumFlux;
-            break;
-          case rnemdKeLy:
-            angularMomentumFluxVector_.y() = angularMomentumFlux;
-            break;
-          case rnemdKeLz:
-            angularMomentumFluxVector_.z() = angularMomentumFlux;
-            break;
-          default:
-            break;
-          }
-        }        
+    }
+    if (hasAngularMomentumFluxVector) {
+      std::vector<RealType> amf = rnemdParams->getAngularMomentumFluxVector();
+      if (amf.size() != 3) {
+        sprintf(painCave.errMsg,
+                "RNEMD: Incorrect number of parameters specified for angularMomentumFluxVector.\n"
+                "\tthere should be 3 parameters, but %lu were specified.\n", 
+                amf.size());
+        painCave.isFatal = 1;
+        simError();      
       }
-
-      if (hasCoordinateOrigin) {
-        std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
-        if (co.size() != 3) {
-          sprintf(painCave.errMsg,
-                  "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
-                  "\tthere should be 3 parameters, but %lu were specified.\n", 
-                  co.size());
-          painCave.isFatal = 1;
-          simError();      
-        }
-        coordinateOrigin_.x() = co[0];
-        coordinateOrigin_.y() = co[1];
-        coordinateOrigin_.z() = co[2];
-      } else {
-        coordinateOrigin_ = V3Zero;
-      }
-
-      // do some sanity checking
-
-      int selectionCount = seleMan_.getSelectionCount();
-
-      int nIntegrable = info->getNGlobalIntegrableObjects();
-
-      if (selectionCount > nIntegrable) {
-        sprintf(painCave.errMsg, 
-                "RNEMD: The current objectSelection,\n"
-                "\t\t%s\n"
-                "\thas resulted in %d selected objects.  However,\n"
-                "\tthe total number of integrable objects in the system\n"
-                "\tis only %d.  This is almost certainly not what you want\n"
-                "\tto do.  A likely cause of this is forgetting the _RB_0\n"
-                "\tselector in the selection script!\n", 
-                rnemdObjectSelection_.c_str(), 
-                selectionCount, nIntegrable);
-        painCave.isFatal = 0;
-        painCave.severity = OPENMD_WARNING;
-        simError();
-      }
-
-      areaAccumulator_ = new Accumulator();
-
-      nBins_ = rnemdParams->getOutputBins();
-      binWidth_ = rnemdParams->getOutputBinWidth();
-
-      data_.resize(RNEMD::ENDINDEX);
-      OutputData z;
-      z.units =  "Angstroms";
-      z.title =  "Z";
-      z.dataType = "RealType";
-      z.accumulator.reserve(nBins_);
-      for (int i = 0; i < nBins_; i++) 
-        z.accumulator.push_back( new Accumulator() );
-      data_[Z] = z;
-      outputMap_["Z"] =  Z;
-
-      OutputData r;
-      r.units =  "Angstroms";
-      r.title =  "R";
-      r.dataType = "RealType";
-      r.accumulator.reserve(nBins_);
-      for (int i = 0; i < nBins_; i++) 
-        r.accumulator.push_back( new Accumulator() );
-      data_[R] = r;
-      outputMap_["R"] =  R;
-
-      OutputData temperature;
-      temperature.units =  "K";
-      temperature.title =  "Temperature";
-      temperature.dataType = "RealType";
-      temperature.accumulator.reserve(nBins_);
-      for (int i = 0; i < nBins_; i++) 
-        temperature.accumulator.push_back( new Accumulator() );
-      data_[TEMPERATURE] = temperature;
-      outputMap_["TEMPERATURE"] =  TEMPERATURE;
-
-      OutputData velocity;
-      velocity.units = "angstroms/fs";
-      velocity.title =  "Velocity";  
-      velocity.dataType = "Vector3d";
-      velocity.accumulator.reserve(nBins_);
-      for (int i = 0; i < nBins_; i++) 
-        velocity.accumulator.push_back( new VectorAccumulator() );
-      data_[VELOCITY] = velocity;
-      outputMap_["VELOCITY"] = VELOCITY;
-
-      OutputData angularVelocity;
-      angularVelocity.units = "angstroms^2/fs";
-      angularVelocity.title =  "AngularVelocity";  
-      angularVelocity.dataType = "Vector3d";
-      angularVelocity.accumulator.reserve(nBins_);
-      for (int i = 0; i < nBins_; i++) 
-        angularVelocity.accumulator.push_back( new VectorAccumulator() );
-      data_[ANGULARVELOCITY] = angularVelocity;
-      outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
-
-      OutputData density;
-      density.units =  "g cm^-3";
-      density.title =  "Density";
-      density.dataType = "RealType";
-      density.accumulator.reserve(nBins_);
-      for (int i = 0; i < nBins_; i++) 
-        density.accumulator.push_back( new Accumulator() );
-      data_[DENSITY] = density;
-      outputMap_["DENSITY"] =  DENSITY;
-
-      if (hasOutputFields) {
-        parseOutputFileFormat(rnemdParams->getOutputFields());
-      } else {
-        if (usePeriodicBoundaryConditions_)
-          outputMask_.set(Z);
-        else
-          outputMask_.set(R);
+      angularMomentumFluxVector_.x() = amf[0];
+      angularMomentumFluxVector_.y() = amf[1];
+      angularMomentumFluxVector_.z() = amf[2];
+    } else {
+      angularMomentumFluxVector_ = V3Zero;
+      if (hasAngularMomentumFlux) {
+        RealType angularMomentumFlux = rnemdParams->getAngularMomentumFlux();
         switch (rnemdFluxType_) {
-        case rnemdKE:
-        case rnemdRotKE:
-        case rnemdFullKE:
-          outputMask_.set(TEMPERATURE);
-          break;
-        case rnemdPx:
-        case rnemdPy:
-          outputMask_.set(VELOCITY);
-          break;
-        case rnemdPz:        
-        case rnemdPvector:
-          outputMask_.set(VELOCITY);
-          outputMask_.set(DENSITY);
-          break;
         case rnemdLx:
+          angularMomentumFluxVector_.x() = angularMomentumFlux;
+          break;
         case rnemdLy:
+          angularMomentumFluxVector_.y() = angularMomentumFlux;
+          break;
         case rnemdLz:
-        case rnemdLvector:
-          outputMask_.set(ANGULARVELOCITY);
+          angularMomentumFluxVector_.z() = angularMomentumFlux;
           break;
         case rnemdKeLx:
+          angularMomentumFluxVector_.x() = angularMomentumFlux;
+          break;
         case rnemdKeLy:
+          angularMomentumFluxVector_.y() = angularMomentumFlux;
+          break;
         case rnemdKeLz:
-        case rnemdKeLvector:
-          outputMask_.set(TEMPERATURE);
-          outputMask_.set(ANGULARVELOCITY);
-          break;
-        case rnemdKePx:
-        case rnemdKePy:
-          outputMask_.set(TEMPERATURE);
-          outputMask_.set(VELOCITY);
-          break;
-        case rnemdKePvector:
-          outputMask_.set(TEMPERATURE);
-          outputMask_.set(VELOCITY);
-          outputMask_.set(DENSITY);        
+          angularMomentumFluxVector_.z() = angularMomentumFlux;
           break;
         default:
           break;
         }
+      }        
+    }
+
+    if (hasCoordinateOrigin) {
+      std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
+      if (co.size() != 3) {
+        sprintf(painCave.errMsg,
+                "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
+                "\tthere should be 3 parameters, but %lu were specified.\n", 
+                co.size());
+        painCave.isFatal = 1;
+        simError();      
       }
-      
-      if (hasOutputFileName) {
-        rnemdFileName_ = rnemdParams->getOutputFileName();
-      } else {
-        rnemdFileName_ = getPrefix(info->getFinalConfigFileName()) + ".rnemd";
-      }          
-
-      exchangeTime_ = rnemdParams->getExchangeTime();
-
-      Snapshot* currentSnap_ = info->getSnapshotManager()->getCurrentSnapshot();
-      // total exchange sums are zeroed out at the beginning:
-
-      kineticExchange_ = 0.0;
-      momentumExchange_ = V3Zero;
-      angularMomentumExchange_ = V3Zero;
-
-      std::ostringstream selectionAstream;
-      std::ostringstream selectionBstream;
+      coordinateOrigin_.x() = co[0];
+      coordinateOrigin_.y() = co[1];
+      coordinateOrigin_.z() = co[2];
+    } else {
+      coordinateOrigin_ = V3Zero;
+    }
     
-      if (hasSelectionA_) {
-        selectionA_ = rnemdParams->getSelectionA();
+    // do some sanity checking
+    
+    int selectionCount = seleMan_.getSelectionCount();    
+    int nIntegrable = info->getNGlobalIntegrableObjects();
+    if (selectionCount > nIntegrable) {
+      sprintf(painCave.errMsg, 
+              "RNEMD: The current objectSelection,\n"
+              "\t\t%s\n"
+              "\thas resulted in %d selected objects.  However,\n"
+              "\tthe total number of integrable objects in the system\n"
+              "\tis only %d.  This is almost certainly not what you want\n"
+              "\tto do.  A likely cause of this is forgetting the _RB_0\n"
+              "\tselector in the selection script!\n", 
+              rnemdObjectSelection_.c_str(), 
+              selectionCount, nIntegrable);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+    }
+    
+    areaAccumulator_ = new Accumulator();
+    
+    nBins_ = rnemdParams->getOutputBins();
+    binWidth_ = rnemdParams->getOutputBinWidth();
+    
+    data_.resize(RNEMD::ENDINDEX);
+    OutputData z;
+    z.units =  "Angstroms";
+    z.title =  "Z";
+    z.dataType = "RealType";
+    z.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      z.accumulator.push_back( new Accumulator() );
+    data_[Z] = z;
+    outputMap_["Z"] =  Z;
+    
+    OutputData r;
+    r.units =  "Angstroms";
+    r.title =  "R";
+    r.dataType = "RealType";
+    r.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      r.accumulator.push_back( new Accumulator() );
+    data_[R] = r;
+    outputMap_["R"] =  R;
+    
+    OutputData temperature;
+    temperature.units =  "K";
+    temperature.title =  "Temperature";
+    temperature.dataType = "RealType";
+    temperature.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      temperature.accumulator.push_back( new Accumulator() );
+    data_[TEMPERATURE] = temperature;
+    outputMap_["TEMPERATURE"] =  TEMPERATURE;
+    
+    OutputData velocity;
+    velocity.units = "angstroms/fs";
+    velocity.title =  "Velocity";  
+    velocity.dataType = "Vector3d";
+    velocity.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      velocity.accumulator.push_back( new VectorAccumulator() );
+    data_[VELOCITY] = velocity;
+    outputMap_["VELOCITY"] = VELOCITY;
+    
+    OutputData angularVelocity;
+    angularVelocity.units = "angstroms^2/fs";
+    angularVelocity.title =  "AngularVelocity";  
+    angularVelocity.dataType = "Vector3d";
+    angularVelocity.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      angularVelocity.accumulator.push_back( new VectorAccumulator() );
+    data_[ANGULARVELOCITY] = angularVelocity;
+    outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
+    
+    OutputData density;
+    density.units =  "g cm^-3";
+    density.title =  "Density";
+    density.dataType = "RealType";
+    density.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      density.accumulator.push_back( new Accumulator() );
+    data_[DENSITY] = density;
+    outputMap_["DENSITY"] =  DENSITY;
+    
+    if (hasOutputFields) {
+      parseOutputFileFormat(rnemdParams->getOutputFields());
+    } else {
+      if (usePeriodicBoundaryConditions_)
+        outputMask_.set(Z);
+      else
+        outputMask_.set(R);
+      switch (rnemdFluxType_) {
+      case rnemdKE:
+      case rnemdRotKE:
+      case rnemdFullKE:
+        outputMask_.set(TEMPERATURE);
+        break;
+      case rnemdPx:
+      case rnemdPy:
+        outputMask_.set(VELOCITY);
+        break;
+      case rnemdPz:        
+      case rnemdPvector:
+        outputMask_.set(VELOCITY);
+        outputMask_.set(DENSITY);
+        break;
+      case rnemdLx:
+      case rnemdLy:
+      case rnemdLz:
+      case rnemdLvector:
+        outputMask_.set(ANGULARVELOCITY);
+        break;
+      case rnemdKeLx:
+      case rnemdKeLy:
+      case rnemdKeLz:
+      case rnemdKeLvector:
+        outputMask_.set(TEMPERATURE);
+        outputMask_.set(ANGULARVELOCITY);
+        break;
+      case rnemdKePx:
+      case rnemdKePy:
+        outputMask_.set(TEMPERATURE);
+        outputMask_.set(VELOCITY);
+        break;
+      case rnemdKePvector:
+        outputMask_.set(TEMPERATURE);
+        outputMask_.set(VELOCITY);
+        outputMask_.set(DENSITY);        
+        break;
+      default:
+        break;
+      }
+    }
+    
+    if (hasOutputFileName) {
+      rnemdFileName_ = rnemdParams->getOutputFileName();
+    } else {
+      rnemdFileName_ = getPrefix(info->getFinalConfigFileName()) + ".rnemd";
+    }          
+    
+    exchangeTime_ = rnemdParams->getExchangeTime();
+    
+    Snapshot* currentSnap_ = info->getSnapshotManager()->getCurrentSnapshot();
+    // total exchange sums are zeroed out at the beginning:
+    
+    kineticExchange_ = 0.0;
+    momentumExchange_ = V3Zero;
+    angularMomentumExchange_ = V3Zero;
+    
+    std::ostringstream selectionAstream;
+    std::ostringstream selectionBstream;
+    
+    if (hasSelectionA_) {
+      selectionA_ = rnemdParams->getSelectionA();
+    } else {
+      if (usePeriodicBoundaryConditions_) {     
+        Mat3x3d hmat = currentSnap_->getHmat();
+        
+        if (hasSlabWidth) 
+          slabWidth_ = rnemdParams->getSlabWidth();
+        else
+          slabWidth_ = hmat(2,2) / 10.0;
+        
+        if (hasSlabACenter) 
+          slabACenter_ = rnemdParams->getSlabACenter();
+        else 
+          slabACenter_ = 0.0;
+        
+        selectionAstream << "select wrappedz > " 
+                         << slabACenter_ - 0.5*slabWidth_ 
+                         <<  " && wrappedz < "
+                         << slabACenter_ + 0.5*slabWidth_;
+        selectionA_ = selectionAstream.str();
       } else {
-        if (usePeriodicBoundaryConditions_) {     
-          Mat3x3d hmat = currentSnap_->getHmat();
-        
-          if (hasSlabWidth) 
-            slabWidth_ = rnemdParams->getSlabWidth();
-          else
-            slabWidth_ = hmat(2,2) / 10.0;
-        
-          if (hasSlabACenter) 
-            slabACenter_ = rnemdParams->getSlabACenter();
-          else 
-            slabACenter_ = 0.0;
-        
-          selectionAstream << "select wrappedz > " 
-                           << slabACenter_ - 0.5*slabWidth_ 
-                           <<  " && wrappedz < "
-                           << slabACenter_ + 0.5*slabWidth_;
-          selectionA_ = selectionAstream.str();
-        } else {
-          if (hasSphereARadius) 
-            sphereARadius_ = rnemdParams->getSphereARadius();
-          else {
-            // use an initial guess to the size of the inner slab to be 1/10 the
-            // radius of an approximately spherical hull:
-            Thermo thermo(info);
-            RealType hVol = thermo.getHullVolume();
-            sphereARadius_ = 0.1 * pow((3.0 * hVol / (4.0 * M_PI)), 1.0/3.0);
-          }
-          selectionAstream << "select r < " << sphereARadius_;
-          selectionA_ = selectionAstream.str();
+        if (hasSphereARadius) 
+          sphereARadius_ = rnemdParams->getSphereARadius();
+        else {
+          // use an initial guess to the size of the inner slab to be 1/10 the
+          // radius of an approximately spherical hull:
+          Thermo thermo(info);
+          RealType hVol = thermo.getHullVolume();
+          sphereARadius_ = 0.1 * pow((3.0 * hVol / (4.0 * M_PI)), 1.0/3.0);
         }
+        selectionAstream << "select r < " << sphereARadius_;
+        selectionA_ = selectionAstream.str();
       }
+    }
     
-      if (hasSelectionB_) {
-        selectionB_ = rnemdParams->getSelectionB();
-
+    if (hasSelectionB_) {
+      selectionB_ = rnemdParams->getSelectionB();
+      
+    } else {
+      if (usePeriodicBoundaryConditions_) {     
+        Mat3x3d hmat = currentSnap_->getHmat();
+        
+        if (hasSlabWidth) 
+          slabWidth_ = rnemdParams->getSlabWidth();
+        else
+          slabWidth_ = hmat(2,2) / 10.0;
+        
+        if (hasSlabBCenter) 
+          slabBCenter_ = rnemdParams->getSlabBCenter();
+        else 
+          slabBCenter_ = hmat(2,2) / 2.0;
+        
+        selectionBstream << "select wrappedz > " 
+                         << slabBCenter_ - 0.5*slabWidth_ 
+                         <<  " && wrappedz < "
+                         << slabBCenter_ + 0.5*slabWidth_;
+        selectionB_ = selectionBstream.str();
       } else {
-        if (usePeriodicBoundaryConditions_) {     
-          Mat3x3d hmat = currentSnap_->getHmat();
-        
-          if (hasSlabWidth) 
-            slabWidth_ = rnemdParams->getSlabWidth();
-          else
-            slabWidth_ = hmat(2,2) / 10.0;
-        
-          if (hasSlabBCenter) 
-            slabBCenter_ = rnemdParams->getSlabBCenter();
-          else 
-            slabBCenter_ = hmat(2,2) / 2.0;
-        
-          selectionBstream << "select wrappedz > " 
-                           << slabBCenter_ - 0.5*slabWidth_ 
-                           <<  " && wrappedz < "
-                           << slabBCenter_ + 0.5*slabWidth_;
+        if (hasSphereBRadius_) {
+          sphereBRadius_ = rnemdParams->getSphereBRadius();
+          selectionBstream << "select r > " << sphereBRadius_;
           selectionB_ = selectionBstream.str();
         } else {
-          if (hasSphereBRadius_) {
-            sphereBRadius_ = rnemdParams->getSphereBRadius();
-            selectionBstream << "select r > " << sphereBRadius_;
-            selectionB_ = selectionBstream.str();
-          } else {
-            selectionB_ = "select hull";
-            BisHull_ = true;
-            hasSelectionB_ = true;
-          }
+          selectionB_ = "select hull";
+          BisHull_ = true;
+          hasSelectionB_ = true;
         }
       }
     }
-
+  
+  
     // object evaluator:
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -1776,7 +1775,6 @@ namespace OpenMD {
         areaA = evaluatorA_.getSurfaceArea();
       else {
          
-        cerr << "selection A did not have surface area, recomputing\n";
         int isd;
         StuntDouble* sd;
         vector<StuntDouble*> aSites;
@@ -1788,9 +1786,7 @@ namespace OpenMD {
 #if defined(HAVE_QHULL)
         ConvexHull* surfaceMeshA = new ConvexHull();
         surfaceMeshA->computeHull(aSites);
-        cerr << "flag1\n";
         areaA = surfaceMeshA->getArea();
-        cerr << "Flag2 " << areaA << "\n";
         delete surfaceMeshA;
 #else
         sprintf( painCave.errMsg,
@@ -1819,7 +1815,6 @@ namespace OpenMD {
       if (evaluatorB_.hasSurfaceArea()) 
         areaB = evaluatorB_.getSurfaceArea();
       else {
-        cerr << "selection B did not have surface area, recomputing\n";
 
         int isd;
         StuntDouble* sd;
@@ -1910,7 +1905,7 @@ namespace OpenMD {
   void RNEMD::collectData() {
     if (!doRNEMD_) return;
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    
+
     // collectData can be called more frequently than the doRNEMD, so use the 
     // computed area from the last exchange time:
     RealType area = getDividingArea();
@@ -2025,7 +2020,7 @@ namespace OpenMD {
         }
       }
     }
-    
+
 #ifdef IS_MPI
 
     for (int i = 0; i < nBins_; i++) {
@@ -2132,7 +2127,7 @@ namespace OpenMD {
         painCave.severity = OPENMD_ERROR;
         simError();            
       }
-    }   
+    }
   }
   
   void RNEMD::writeOutputFile() {
