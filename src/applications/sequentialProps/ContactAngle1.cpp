@@ -121,17 +121,23 @@ namespace OpenMD {
       vector<RealType> realRoots = poly.FindRealRoots();
 
       RealType ct;
-      std::cerr << "nRealRoots = " << realRoots.size() << "\n";
       
       vector<RealType>::iterator ri;
-      vector<pair<RealType,RealType> > rps;
+
+
+      RealType maxct = -1.0;
       for (ri = realRoots.begin(); ri !=realRoots.end(); ++ri) {
         ct = *ri;
         if (ct > 1.0)  ct = 1.0;
         if (ct < -1.0) ct = -1.0;
+
+        // use the largest magnitude of ct that it finds:
+        if (ct > maxct) {
+          maxct = ct;
+        }                  
       }
       
-      values_.push_back( acos(ct)*(180.0/M_PI) );
+      values_.push_back( acos(maxct)*(180.0/M_PI) );
     }
   }    
 }
