@@ -51,7 +51,8 @@
 
 #include "applications/sequentialProps/SequentialPropsCmd.h"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
-#include "applications/sequentialProps/DensityAnalyzer.hpp"
+#include "applications/sequentialProps/CenterOfMass.hpp"
+#include "applications/sequentialProps/ContactAngle1.hpp"
 
 using namespace OpenMD;
 
@@ -105,8 +106,31 @@ int main(int argc, char* argv[]){
   SimInfo* info = creator.createSim(dumpFileName, false);
 
   SequentialAnalyzer* analyzer;
-  if(args_info.density_given){
-    analyzer = new DensityAnalyzer(info, dumpFileName, sele1);
+  if(args_info.com_given){
+    analyzer = new CenterOfMass(info, dumpFileName, sele1);
+  } else if(args_info.ca1_given){
+    RealType solidZ;
+    if (args_info.referenceZ_given)
+        solidZ = args_info.referenceZ_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--referenceZ must be set if --ca1 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    RealType dropletR;
+    if (args_info.dropletR_given)
+        dropletR = args_info.dropletR_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--dropletR must be set if --ca1 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    analyzer = new ContactAngle1(info, dumpFileName, sele1, solidZ, dropletR);
   }
 
   if (args_info.output_given) {

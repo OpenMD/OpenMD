@@ -54,7 +54,15 @@ struct gengetopt_args_info
   int nbins_arg;	/**< @brief Number of bins (default='100').  */
   char * nbins_orig;	/**< @brief Number of bins original value given at command line.  */
   const char *nbins_help; /**< @brief Number of bins help description.  */
-  const char *density_help; /**< @brief selection correlation function help description.  */
+  double referenceZ_arg;	/**< @brief Reference z-height of solid surface.  */
+  char * referenceZ_orig;	/**< @brief Reference z-height of solid surface original value given at command line.  */
+  const char *referenceZ_help; /**< @brief Reference z-height of solid surface help description.  */
+  double dropletR_arg;	/**< @brief Droplet radius in angstroms.  */
+  char * dropletR_orig;	/**< @brief Droplet radius in angstroms original value given at command line.  */
+  const char *dropletR_help; /**< @brief Droplet radius in angstroms help description.  */
+  const char *com_help; /**< @brief selection center of mass help description.  */
+  const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
+  const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -63,7 +71,11 @@ struct gengetopt_args_info
   unsigned int sele1_given ;	/**< @brief Whether sele1 was given.  */
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
-  unsigned int density_given ;	/**< @brief Whether density was given.  */
+  unsigned int referenceZ_given ;	/**< @brief Whether referenceZ was given.  */
+  unsigned int dropletR_given ;	/**< @brief Whether dropletR was given.  */
+  unsigned int com_given ;	/**< @brief Whether com was given.  */
+  unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
+  unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

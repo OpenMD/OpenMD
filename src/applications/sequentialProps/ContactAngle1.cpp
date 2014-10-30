@@ -42,87 +42,98 @@
 
 #include <algorithm>
 #include <functional>
-#include "applications/sequentialProps/SequentialAnalyzer.hpp"
+#include "applications/sequentialProps/ContactAngle1.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "math/Polynomial.hpp"
+
 namespace OpenMD {
 
-  void SequentialAnalyzer::doSequence() {
-
-    preSequence();
-
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
+  ContactAngle1::ContactAngle1(SimInfo* info, const std::string& filename, 
+                               const std::string& sele, RealType solidZ,
+                               RealType dropletRadius)
+    : SequentialAnalyzer(info, filename), selectionScript_(sele), 
+      evaluator_(info), seleMan_(info), solidZ_(solidZ),
+      dropletRadius_(dropletRadius)  {
     
-    DumpReader reader(info_, dumpFilename_); 
-    int nFrames = reader.getNFrames();
-  
-    storageLayout_ = info_->getStorageLayout();
-
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      times_.push_back( currentSnapshot_->getTime() );
-      
-      if (storageLayout_ & DataStorage::dslPosition) {
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-          
-          //change the positions of atoms which belong to the rigidbodies
-          for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-               rb = mol->nextRigidBody(rbIter)) {
-            rb->updateAtoms();
-          }
-        }        
-      }
-      
-      if (storageLayout_ & DataStorage::dslVelocity) {
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-          
-          //change the positions of atoms which belong to the rigidbodies
-          for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-             rb = mol->nextRigidBody(rbIter)) {
-            rb->updateAtomVel();
-          }
-        }      
-      }    
-            
-      doFrame();
-    }   
-
-    postSequence();
-    writeSequence();   
+    setOutputName(getPrefix(filename) + ".ca1");
+    
+    evaluator_.loadScriptString(sele);
+    
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }            
   }
-  
-  void SequentialAnalyzer::writeSequence() {
-    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
 
-    if (ofs.is_open()) {
-
-      ofs << "#" << getSequenceType() << "\n";
-      ofs << "#extra information: " << extra_ << "\n";
-      ofs << "#time\tvalue\n";
-
-      for (unsigned int i = 0; i < times_.size(); ++i) {
-        ofs << times_[i] << "\t" << values_[i] << "\n";
-      }
-      
-    } else {
-      sprintf(painCave.errMsg,
-              "SequentialAnalyzer::writeSequence Error: fail to open %s\n", 
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();        
+  void ContactAngle1::doFrame() {
+    StuntDouble* sd;
+    int i;
+    
+    if (evaluator_.isDynamic()) {
+	seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
-    ofs.close();    
-  }
 
+
+    RealType mtot = 0.0;
+    Vector3d com(V3Zero);
+    RealType mass;
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL;
+         sd = seleMan_.nextSelected(i)) {      
+      mass = sd->getMass();
+      mtot += mass;
+      com += sd->getPos() * mass;
+    }
+
+    com /= mtot;
+
+    RealType dz = com.z() - solidZ_;
+
+    if (dz < 0.0) {
+      sprintf(painCave.errMsg, 
+              "ContactAngle1: Z-center of mass of selection, %lf, was\n"
+              "\tlocated below the solid reference plane, %lf\n",
+              com.z(), solidZ_);
+      painCave.isFatal = 1;
+      painCave.severity = OPENMD_ERROR;
+      simError();
+    }
+
+    if (dz > dropletRadius_) {
+      values_.push_back(180.0);
+    } else {
+    
+      RealType k = pow(2.0, -4.0/3.0) * dropletRadius_;
+      
+      RealType z2 = dz*dz;
+      RealType z3 = z2 * dz;
+      RealType k2 = k*k;
+      RealType k3 = k2*k;
+      
+      Polynomial<RealType> poly;
+      poly.setCoefficient(4,      z3 +      k3);
+      poly.setCoefficient(3,  8.0*z3 +  8.0*k3);
+      poly.setCoefficient(2, 24.0*z3 + 18.0*k3);
+      poly.setCoefficient(1, 32.0*z3          );
+      poly.setCoefficient(0, 16.0*z3 - 27.0*k3);
+      vector<RealType> realRoots = poly.FindRealRoots();
+
+      RealType ct;
+      std::cerr << "nRealRoots = " << realRoots.size() << "\n";
+      
+      vector<RealType>::iterator ri;
+      vector<pair<RealType,RealType> > rps;
+      for (ri = realRoots.begin(); ri !=realRoots.end(); ++ri) {
+        ct = *ri;
+        if (ct > 1.0)  ct = 1.0;
+        if (ct < -1.0) ct = -1.0;
+      }
+      
+      values_.push_back( acos(ct)*(180.0/M_PI) );
+    }
+  }    
 }
 
 

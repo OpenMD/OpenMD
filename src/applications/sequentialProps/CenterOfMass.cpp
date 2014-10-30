@@ -42,14 +42,14 @@
 
 #include <algorithm>
 #include <functional>
-#include "applications/sequentialProps/DensityAnalyzer.hpp"
+#include "applications/sequentialProps/CenterOfMass.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
 namespace OpenMD {
 
-  DensityAnalyzer::DensityAnalyzer(SimInfo* info, const std::string& filename, 
+  CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename, 
                                    const std::string& sele)
     : SequentialAnalyzer(info, filename), selectionScript_(sele), 
       evaluator_(info), seleMan_(info)   {
@@ -63,20 +63,59 @@ namespace OpenMD {
     }            
   }
 
-  void DensityAnalyzer::doFrame() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
+  void CenterOfMass::doFrame() {
+    StuntDouble* sd;
+    int i;
     
     if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-        
-    unsigned int count = seleMan_.getSelectionCount();
+
+
+    RealType mtot = 0.0;
+    Vector3d com(V3Zero);
+    RealType mass;
     
-    values_.push_back( count );
+    for (sd = seleMan_.beginSelected(i); sd != NULL;
+         sd = seleMan_.nextSelected(i)) {      
+      mass = sd->getMass();
+      mtot += mass;
+      com += sd->getPos() * mass;
+    }
+
+    com /= mtot;
+        
+    values_.push_back( com );
   }
+  
+  void CenterOfMass::writeSequence() {
+    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+    
+    if (ofs.is_open()) {
+
+      ofs << "#" << getSequenceType() << "\n";
+      ofs << "#extra information: " << extra_ << "\n";
+      ofs << "#time\tvalue\n";
+
+      for (unsigned int i = 0; i < times_.size(); ++i) {
+        ofs << times_[i]
+            << "\t" << values_[i].x()
+            << "\t" << values_[i].y()
+            << "\t" << values_[i].z()
+            << "\n";
+      }
+      
+    } else {
+      sprintf(painCave.errMsg,
+              "CenterOfMass::writeSequence Error: fail to open %s\n", 
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();        
+    }
+    
+    ofs.close();    
+  }
+
 }
 
 

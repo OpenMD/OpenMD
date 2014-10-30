@@ -39,8 +39,8 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_SEQUENTIALPROPS_DENSITYANALYZER_HPP
-#define APPLICATIONS_SEQUENTIALPROPS_DENSITYANALYZER_HPP
+#ifndef APPLICATIONS_SEQUENTIALPROPS_CENTEROFMASS_HPP
+#define APPLICATIONS_SEQUENTIALPROPS_CENTEROFMASS_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
@@ -48,18 +48,21 @@
 using namespace std;
 namespace OpenMD {
   
-  class DensityAnalyzer : public SequentialAnalyzer{
+  class CenterOfMass : public SequentialAnalyzer{
   public:
-    DensityAnalyzer(SimInfo* info, const std::string& filename, 
+    CenterOfMass(SimInfo* info, const std::string& filename, 
                     const std::string& sele);
 
     virtual void doFrame();
+
+    virtual void writeSequence();
     
   private:
-           
+   
     std::string selectionScript_;
     SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;      
+    SelectionEvaluator evaluator_;
+    std::vector<Vector3d> values_;
   };
 }
 

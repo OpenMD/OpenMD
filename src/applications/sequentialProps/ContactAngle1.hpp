@@ -39,66 +39,36 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#ifndef APPLICATIONS_SEQUENTIALPROPS_CONTACTANGLE1_HPP
+#define APPLICATIONS_SEQUENTIALPROPS_CONTACTANGLE1_HPP
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
+using namespace std;
 namespace OpenMD {
-
-  ParticleTimeCorrFunc::ParticleTimeCorrFunc(SimInfo * info, 
-                                             const std::string & filename, 
-					     const std :: string & sele1, 
-                                             const std :: string & sele2,
-                                             int storageLayout,
-                                             long long int memSize) 
-    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize){
-    
-    
-    nSelected_ =   seleMan1_.getSelectionCount();  
-    assert(  nSelected_ == seleMan2_.getSelectionCount());
-  }
   
-  void ParticleTimeCorrFunc::correlateFrames(int frame1, int frame2) {
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
+  class ContactAngle1 : public SequentialAnalyzer{
+  public:
+    ContactAngle1(SimInfo* info, const std::string& filename, 
+                  const std::string& sele, RealType solidZ,
+                  RealType dropletRadius);
 
-    RealType time1 = snapshot1->getTime();
-    RealType time2 = snapshot2->getTime();
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
+    virtual void doFrame();
     
-    int id1, id2;
+  private:
 
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j); 
-         sd1 != NULL && sd2 != NULL;
-	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j) ) {
-      
-      id1 = sd1->getGlobalIndex();
-      id2 = sd2->getGlobalIndex();
-
-      // If the selections are dynamic, they might not have the same
-      // objects in both frames, so we need to roll either of the
-      // selections until we have the same particle to correlate.
-
-      while (id1 < id2) {
-        sd1 = seleMan1_.nextSelected(i);
-        id1 = sd1->getGlobalIndex();
-      }
-      while (id2 < id1) {
-        sd2 = seleMan2_.nextSelected(j);
-        id2 = sd2->getGlobalIndex();
-      }
-      
-      RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
-
-      histogram_[timeBin] += corrVal;
-      count_[timeBin]++;
-      
-    }
-  }    
+    RealType solidZ_;
+    RealType dropletRadius_;
+    
+    std::string selectionScript_;
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+    
+  };
 }
+
+#endif
+
+
+

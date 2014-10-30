@@ -43,14 +43,19 @@ const char *gengetopt_args_info_help[] = {
   "      --sele1=selection script  select first stuntdouble set",
   "      --sele2=selection script  select second stuntdouble set (if sele2 is not \n                                  set, use script from sele1)",
   "  -n, --nbins=INT               Number of bins  (default=`100')",
+  "  -z, --referenceZ=DOUBLE       Reference z-height of solid surface",
+  "  -r, --dropletR=DOUBLE         Droplet radius in angstroms",
   "\n Group: sequentialProps\n   an option of this group is required",
-  "  -d, --density                 selection correlation function",
+  "  -c, --com                     selection center of mass",
+  "      --ca1                     contact angle of selection (using center of \n                                  mass)",
+  "      --ca2                     contact angle of selection (using density \n                                  profile)",
     0
 };
 
 typedef enum {ARG_NO
   , ARG_STRING
   , ARG_INT
+  , ARG_DOUBLE
 } cmdline_parser_arg_type;
 
 static
@@ -78,7 +83,11 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
   args_info->nbins_given = 0 ;
-  args_info->density_given = 0 ;
+  args_info->referenceZ_given = 0 ;
+  args_info->dropletR_given = 0 ;
+  args_info->com_given = 0 ;
+  args_info->ca1_given = 0 ;
+  args_info->ca2_given = 0 ;
   args_info->sequentialProps_group_counter = 0 ;
 }
 
@@ -96,6 +105,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->sele2_orig = NULL;
   args_info->nbins_arg = 100;
   args_info->nbins_orig = NULL;
+  args_info->referenceZ_orig = NULL;
+  args_info->dropletR_orig = NULL;
   
 }
 
@@ -111,7 +122,11 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->sele1_help = gengetopt_args_info_help[4] ;
   args_info->sele2_help = gengetopt_args_info_help[5] ;
   args_info->nbins_help = gengetopt_args_info_help[6] ;
-  args_info->density_help = gengetopt_args_info_help[8] ;
+  args_info->referenceZ_help = gengetopt_args_info_help[7] ;
+  args_info->dropletR_help = gengetopt_args_info_help[8] ;
+  args_info->com_help = gengetopt_args_info_help[10] ;
+  args_info->ca1_help = gengetopt_args_info_help[11] ;
+  args_info->ca2_help = gengetopt_args_info_help[12] ;
   
 }
 
@@ -204,6 +219,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->sele2_arg));
   free_string_field (&(args_info->sele2_orig));
   free_string_field (&(args_info->nbins_orig));
+  free_string_field (&(args_info->referenceZ_orig));
+  free_string_field (&(args_info->dropletR_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -253,8 +270,16 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "sele2", args_info->sele2_orig, 0);
   if (args_info->nbins_given)
     write_into_file(outfile, "nbins", args_info->nbins_orig, 0);
-  if (args_info->density_given)
-    write_into_file(outfile, "density", 0, 0 );
+  if (args_info->referenceZ_given)
+    write_into_file(outfile, "referenceZ", args_info->referenceZ_orig, 0);
+  if (args_info->dropletR_given)
+    write_into_file(outfile, "dropletR", args_info->dropletR_orig, 0);
+  if (args_info->com_given)
+    write_into_file(outfile, "com", 0, 0 );
+  if (args_info->ca1_given)
+    write_into_file(outfile, "ca1", 0, 0 );
+  if (args_info->ca2_given)
+    write_into_file(outfile, "ca2", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -308,7 +333,9 @@ reset_group_sequentialProps(struct gengetopt_args_info *args_info)
   if (! args_info->sequentialProps_group_counter)
     return;
   
-  args_info->density_given = 0 ;
+  args_info->com_given = 0 ;
+  args_info->ca1_given = 0 ;
+  args_info->ca2_given = 0 ;
 
   args_info->sequentialProps_group_counter = 0;
 }
@@ -469,6 +496,9 @@ int update_arg(void *field, char **orig_field,
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
+  case ARG_DOUBLE:
+    if (val) *((double *)field) = strtod (val, &stop_char);
+    break;
   case ARG_STRING:
     if (val) {
       string_field = (char **)field;
@@ -484,6 +514,7 @@ int update_arg(void *field, char **orig_field,
   /* check numeric conversion */
   switch(arg_type) {
   case ARG_INT:
+  case ARG_DOUBLE:
     if (val && !(stop_char && *stop_char == '\0')) {
       fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
       return 1; /* failure */
@@ -557,11 +588,15 @@ cmdline_parser_internal (
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
         { "nbins",	1, NULL, 'n' },
-        { "density",	0, NULL, 'd' },
+        { "referenceZ",	1, NULL, 'z' },
+        { "dropletR",	1, NULL, 'r' },
+        { "com",	0, NULL, 'c' },
+        { "ca1",	0, NULL, 0 },
+        { "ca2",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:n:d", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:z:r:c", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -613,17 +648,41 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'd':	/* selection correlation function.  */
+        case 'z':	/* Reference z-height of solid surface.  */
+        
+        
+          if (update_arg( (void *)&(args_info->referenceZ_arg), 
+               &(args_info->referenceZ_orig), &(args_info->referenceZ_given),
+              &(local_args_info.referenceZ_given), optarg, 0, 0, ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "referenceZ", 'z',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'r':	/* Droplet radius in angstroms.  */
+        
+        
+          if (update_arg( (void *)&(args_info->dropletR_arg), 
+               &(args_info->dropletR_orig), &(args_info->dropletR_given),
+              &(local_args_info.dropletR_given), optarg, 0, 0, ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "dropletR", 'r',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* selection center of mass.  */
         
           if (args_info->sequentialProps_group_counter && override)
             reset_group_sequentialProps (args_info);
           args_info->sequentialProps_group_counter += 1;
         
           if (update_arg( 0 , 
-               0 , &(args_info->density_given),
-              &(local_args_info.density_given), optarg, 0, 0, ARG_NO,
+               0 , &(args_info->com_given),
+              &(local_args_info.com_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
-              "density", 'd',
+              "com", 'c',
               additional_error))
             goto failure;
         
@@ -654,6 +713,40 @@ cmdline_parser_internal (
                 &(local_args_info.sele2_given), optarg, 0, 0, ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "sele2", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* contact angle of selection (using center of mass).  */
+          else if (strcmp (long_options[option_index].name, "ca1") == 0)
+          {
+          
+            if (args_info->sequentialProps_group_counter && override)
+              reset_group_sequentialProps (args_info);
+            args_info->sequentialProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ca1_given),
+                &(local_args_info.ca1_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ca1", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* contact angle of selection (using density profile).  */
+          else if (strcmp (long_options[option_index].name, "ca2") == 0)
+          {
+          
+            if (args_info->sequentialProps_group_counter && override)
+              reset_group_sequentialProps (args_info);
+            args_info->sequentialProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ca2_given),
+                &(local_args_info.ca2_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ca2", '-',
                 additional_error))
               goto failure;
           
