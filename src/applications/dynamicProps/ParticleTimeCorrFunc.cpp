@@ -66,22 +66,39 @@ namespace OpenMD {
     RealType time2 = snapshot2->getTime();
 
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-    count_[timeBin] += nSelected_;    
 
     int i;
     int j;
     StuntDouble* sd1;
     StuntDouble* sd2;
-
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-	 sd1 != NULL && sd2 != NULL;
-	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
-
-      RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
-      histogram_[timeBin] += corrVal;    
-    }
     
-  }
+    int id1, id2;
 
+    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j); 
+         sd1 != NULL, sd2 != NULL;
+	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j) ) {
+      
+      id1 = sd1->getGlobalIndex();
+      id2 = sd2->getGlobalIndex();
+
+      // If the selections are dynamic, they might not have the same
+      // objects in both frames, so we need to roll either of the
+      // selections until we have the same particle to correlate.
+
+      while (id1 < id2) {
+        sd1 = seleMan1_.nextSelected(i);
+        id1 = sd1->getGlobalIndex();
+      }
+      while (id2 < id1) {
+        sd2 = seleMan2_.nextSelected(j);
+        id2 = sd2->getGlobalIndex();
+      }
+      
+      RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
+
+      histogram_[timeBin] += corrVal;
+      count_[timeBin]++;
+      
+    }
+  }    
 }
-
