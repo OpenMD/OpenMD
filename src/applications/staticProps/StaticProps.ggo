@@ -68,3 +68,4 @@ groupoption "rnemdr"    -       "shell-resolved RNEMD statistics (temperature, d
 groupoption "rnemdrt"   -       "shell and angle-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"
 groupoption "nitrile"   -       "electrostatic potential to frequency map based on the Cho nitrile fits" group="staticProps"
 groupoption "multipole" m       "average multipole moments contained within cutoff spheres as a function of radius" group="staticProps"
+groupoption "surfDiffusion" -	"X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion" group="staticProps"
