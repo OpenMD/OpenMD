@@ -219,7 +219,7 @@ namespace OpenMD {
 
     for(int k = 0; k < maxIterNum_; k++) {
       index = 0;
-      instTemp = thermo.getTemperature();
+      //instTemp = thermo.getTemperature();
 
       // evolve chi another half step using the temperature at t + dt/2
       

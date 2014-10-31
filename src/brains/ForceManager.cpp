@@ -843,6 +843,20 @@ namespace OpenMD {
                 } else {
                   interactionMan_->doPair(idat);
                   fDecomp_->unpackInteractionData(idat, atom1, atom2);
+		  /*
+		  if(atom1 == 971){
+		    cerr << "972: " << *(idat.dVdFQ1) << "\n";
+		  }
+		  if(atom2 == 971){
+		    cerr << "972: " << *(idat.dVdFQ2) << "\n";
+		  }
+		  if(atom1 == 766){
+		    cerr << "767: " << *(idat.dVdFQ1) << "\n";
+		  }
+		  if(atom2 == 766){
+		    cerr << "767: " << *(idat.dVdFQ2) << "\n";
+		  }
+		  */
                   vij += vpair;
                   fij += f1;
                   stressTensor -= outProduct( *(idat.d), f1);
@@ -945,7 +959,17 @@ namespace OpenMD {
     if (info_->requiresSelfCorrection()) {
       for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) { 
         fDecomp_->fillSelfData(sdat, atom1);
+	/*	
+	if(atom1 == 971 || atom1 == 766 || atom1 == 898){
+	  cout << "atom id: " << atom1 << "\tsdat.dVdFQ: " << *(sdat.dVdFQ) << "\n";
+	}
+	*/
         interactionMan_->doSelfCorrection(sdat);
+	/*
+	if(atom1 == 971 || atom1 == 766 || atom1 == 898){
+	  cout << "\tsdat.dVdFQ: " << *(sdat.dVdFQ) << "\n";
+	}
+	*/
       }
     }
 

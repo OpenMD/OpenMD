@@ -139,7 +139,9 @@ namespace OpenMD {
   void Morse::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
-    
+ 
+    //cerr << "In Morse::calcForce\n";
+   
     MorseInteractionData &mixer = MixingMap[Mtids[idat.atid1]][Mtids[idat.atid2]];
 
     RealType myPot = 0.0;
@@ -171,7 +173,7 @@ namespace OpenMD {
     
     switch(variant) {
     case mtShifted : {
-      
+      //cerr << "Morse Type Shifted\n";
       myPot  = De * (expfnc2  - 2.0 * expfnc);
       myDeriv   = 2.0 * De * beta * (expfnc - expfnc2);
       
@@ -190,18 +192,22 @@ namespace OpenMD {
       break;
     }
     case mtRepulsive : {
-        
+      //cerr << "Morse Type Repulsive\n";
       myPot  = De * expfnc2;
       myDeriv  = -2.0 * De * beta * expfnc2;
       
       if (idat.shiftedPot) {
+	//cerr << "shifted potentional\n";
         myPotC = De * expfnc2C;
         myDerivC = 0.0;
       } else if (idat.shiftedForce) {
+	//cerr << "shifted force\n";
         myPotC = De * expfnc2C;
+	//cerr << "myPotC initial: " << myPotC << "\n";
         myDerivC = -2.0 * De * beta * expfnc2C;
         myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut));
       } else {
+	//cerr << "nothing\n";
         myPotC = 0.0;
         myDerivC = 0.0;
       }
@@ -209,6 +215,7 @@ namespace OpenMD {
       break;
     }
     case mtUnknown: {
+      //cerr << "Morse Type Unknown\n";
       // don't know what to do so don't do anything
       break;
     }
@@ -222,8 +229,19 @@ namespace OpenMD {
 
     
     (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    //cerr << "Before force assigned: " << *(idat.f1) << "\n";
     *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
-    
+
+    /*
+    cerr << "myPot: " << myPot << "\n";
+    cerr << "myDeriv: " << myDeriv << "\n";
+    cerr << "myPotC: " << myPotC << "\n";
+    cerr << "myDerivC: " << myDerivC << "\n";
+    cerr << "idat.rij: " << *(idat.rij) << "\n";
+    cerr << "idat.d: " << *(idat.d) << "\n";
+    cerr << "dudr: " << dudr << "\n";
+    cerr << "After force: " << *(idat.f1) << "\n\n";
+    */
     return;    
   }
 

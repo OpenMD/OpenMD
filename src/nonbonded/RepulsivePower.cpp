@@ -140,7 +140,7 @@ namespace OpenMD {
   void RepulsivePower::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
-
+    
     RPInteractionData &mixer = MixingMap[RPtids[idat.atid1]][RPtids[idat.atid2]];
     RealType sigmai = mixer.sigmai;
     RealType epsilon = mixer.epsilon;

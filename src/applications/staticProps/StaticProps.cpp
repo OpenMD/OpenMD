@@ -81,6 +81,7 @@
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
+#include "applications/staticProps/SurfaceDiffusion.hpp"
 
 using namespace OpenMD;
 
@@ -414,6 +415,8 @@ int main(int argc, char* argv[]){
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
 		       args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
+  }else if (args_info.surfDiffusion_given){
+    analyser = new SurfaceDiffusion(info, dumpFileName, sele1, maxLen);
   }else if (args_info.rho_r_given) {
     if (args_info.radius_given){
       analyser = new RhoR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg,args_info.radius_arg);

@@ -573,6 +573,7 @@ src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp
 src/applications/staticProps/SpatialStatistics.cpp
 src/applications/staticProps/StaticProps.cpp
+src/applications/staticProps/SurfaceDiffusion.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
 src/applications/staticProps/TetrahedralityParamXYZ.cpp

@@ -149,6 +149,7 @@ struct gengetopt_args_info
   const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *nitrile_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
   const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
+  const char *surfDiffusion_help; /**< @brief X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -210,9 +211,8 @@ struct gengetopt_args_info
   unsigned int rnemdrt_given ;	/**< @brief Whether rnemdrt was given.  */
   unsigned int nitrile_given ;	/**< @brief Whether nitrile was given.  */
   unsigned int multipole_given ;	/**< @brief Whether multipole was given.  */
+  unsigned int surfDiffusion_given ;	/**< @brief Whether surfDiffusion was given.  */
 
-  char **inputs ; /**< @brief unamed options (options without names) */
-  unsigned inputs_num ; /**< @brief unamed options number */
   int staticProps_group_counter; /**< @brief Counter for group staticProps */
 } ;
 

@@ -425,7 +425,7 @@ namespace OpenMD {
     
     int& sHash = sHash_[sdat.atid];
 
-    if ((sHash & EAM_INTERACTION) != 0) eam_->calcFunctional(sdat);
+    if ((sHash & EAM_INTERACTION) != 0)  eam_->calcFunctional(sdat);
     if ((sHash & SC_INTERACTION) != 0)  sc_->calcFunctional(sdat);
 
     // set<NonBondedInteraction*>::iterator it;

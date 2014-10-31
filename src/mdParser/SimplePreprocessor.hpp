@@ -87,7 +87,7 @@ class SimplePreprocessor {
             //}
             int lineNo = startingLine;
             os << "#line " << lineNo << " \"" << filename << "\"\n";
-            const int bufferSize = 1024;
+            const int bufferSize = 8192;
             char buffer[bufferSize];
             while(myStream.getline(buffer, bufferSize)) {
               ++lineNo;

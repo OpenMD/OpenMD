@@ -107,10 +107,9 @@ namespace OpenMD {
       zj = r <= ea2.getRcut() ? z2->getValueAt(r) : 0.0;
 
       phi = pre11_ * (zi * zj) / r;
-
+      
       phivals.push_back(phi);
     }
-      
     CubicSpline* cs = new CubicSpline();
     cs->addPoints(rvals, phivals);
     return cs;
@@ -309,7 +308,6 @@ namespace OpenMD {
   void EAM::calcFunctional(SelfData &sdat) {
     
     if (!initialized_) initialize();
-
     EAMAtomData &data1 = EAMdata[ EAMtids[sdat.atid] ];
             
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho), *(sdat.dfrhodrho) );
@@ -333,7 +331,6 @@ namespace OpenMD {
 
     int eamtid1 = EAMtids[idat.atid1];
     int eamtid2 = EAMtids[idat.atid2];
-    
     EAMAtomData &data1 = EAMdata[eamtid1];
     EAMAtomData &data2 = EAMdata[eamtid2];
     
@@ -341,6 +338,7 @@ namespace OpenMD {
     
     RealType rci = data1.rcut;
     RealType rcj = data2.rcut;
+
     
     RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
     RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
@@ -358,10 +356,8 @@ namespace OpenMD {
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
     }
-
     switch(mixMeth_) {
     case eamJohnson:
-      
       if ( *(idat.rij) < rci) {
         phab = phab + 0.5 * (rhb / rha) * pha;
         dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
@@ -375,16 +371,12 @@ namespace OpenMD {
         dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
       }
-      
       break;
-      
     case eamDaw:
-      
       if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
         MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij), 
                                                                   phab, dvpdr);
       }
-      
       break;
     case eamUnknown:
     default:
