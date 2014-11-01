@@ -174,7 +174,7 @@ namespace OpenMD {
     *(idat.vpair) += pot_temp;
     
     RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
-                                                              myDerivC)*sigmai;      
+                                                              myDerivC)*sigmai;
     
     (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
     *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
@@ -182,7 +182,8 @@ namespace OpenMD {
     return;
   }
 
-  void RepulsivePower::getNRepulsionFunc(const RealType &r, int &n, RealType &pot, RealType &deriv) {
+  void RepulsivePower::getNRepulsionFunc(const RealType &r, int &n,
+                                         RealType &pot, RealType &deriv) {
 
     RealType ri = 1.0 / r;
     RealType rin = pow(ri, n);

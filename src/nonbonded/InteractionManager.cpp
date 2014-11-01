@@ -98,8 +98,9 @@ namespace OpenMD {
     AtomType* atype2;
     int atid1, atid2;
 
-    // We only need to worry about the types that are actually in the simulation:
-
+    // We only need to worry about the types that are actually in the
+    // simulation:
+    
     set<AtomType*> atypes = info_->getSimulatedAtomTypes();
 
     lj_->setSimulatedAtomTypes(atypes);
@@ -512,7 +513,8 @@ namespace OpenMD {
     for (it = interactions_[*atid][*atid].begin(); 
          it != interactions_[*atid][*atid].end();
          ++it)
-      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype, atype)));   
+      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype,
+                                                                     atype)));
     return cutoff;    
   }
 
@@ -526,7 +528,8 @@ namespace OpenMD {
     
     for (it = interactions_[atid][atid].begin(); 
          it != interactions_[atid][atid].end(); ++it)
-      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype, atype)));   
+      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype,
+                                                                     atype)));
     return cutoff;    
   }
 } //end namespace OpenMD
