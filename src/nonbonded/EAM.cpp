@@ -310,7 +310,8 @@ namespace OpenMD {
     if (!initialized_) initialize();
     EAMAtomData &data1 = EAMdata[ EAMtids[sdat.atid] ];
             
-    data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho), *(sdat.dfrhodrho) );
+    data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
+                                      *(sdat.dfrhodrho) );
 
     (*(sdat.pot))[METALLIC_FAMILY] += *(sdat.frho);
     if (sdat.doParticlePot) {
@@ -363,9 +364,7 @@ namespace OpenMD {
         dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
                              pha*((drhb/rha) - (rhb*drha/rha/rha)));
       }
-      
-      
-      
+                 
       if ( *(idat.rij) < rcj) {
         phab = phab + 0.5 * (rha / rhb) * phb;
         dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
@@ -397,7 +396,6 @@ namespace OpenMD {
     
     *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
 
-        
     if (idat.doParticlePot) {
       // particlePot is the difference between the full potential and
       // the full potential without the presence of a particular
@@ -415,12 +413,9 @@ namespace OpenMD {
         - *(idat.frho1);
     }
     
-    (*(idat.pot))[METALLIC_FAMILY] += phab;
-    
-    *(idat.vpair) += phab;
-  
-    return;
-    
+    (*(idat.pot))[METALLIC_FAMILY] += phab;    
+    *(idat.vpair) += phab;  
+    return;    
   }
 
   RealType EAM::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {

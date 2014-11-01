@@ -85,15 +85,17 @@ namespace OpenMD {
       // objects in both frames, so we need to roll either of the
       // selections until we have the same particle to correlate.
 
-      while (id1 < id2) {
+      while (id1 < id2 && sd1 != NULL) {
         sd1 = seleMan1_.nextSelected(i);
-        id1 = sd1->getGlobalIndex();
+        if (sd1 != NULL) id1 = sd1->getGlobalIndex();
       }
-      while (id2 < id1) {
+      while (id2 < id1 && sd2 != NULL) {
         sd2 = seleMan2_.nextSelected(j);
-        id2 = sd2->getGlobalIndex();
+        if (sd2 != NULL) id2 = sd2->getGlobalIndex();
       }
-      
+     
+      if (sd1 == NULL || sd2 == NULL) break;
+ 
       RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
 
       histogram_[timeBin] += corrVal;

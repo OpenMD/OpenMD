@@ -84,7 +84,8 @@ namespace OpenMD {
   class SpatialStatistics : public StaticAnalyser {
     
   public:
-    SpatialStatistics(SimInfo* info, const string& filename, const string& sele, int nbins);    
+    SpatialStatistics(SimInfo* info, const string& filename,
+                      const string& sele, int nbins);    
     ~SpatialStatistics();
 
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
@@ -112,7 +113,8 @@ namespace OpenMD {
   
   class SlabStatistics : public SpatialStatistics {
   public: 
-    SlabStatistics(SimInfo* info, const string& filename, const string& sele, int nbins);
+    SlabStatistics(SimInfo* info, const string& filename,
+                   const string& sele, int nbins);
     virtual ~SlabStatistics();
 
     virtual int getBin(Vector3d pos);
@@ -126,7 +128,8 @@ namespace OpenMD {
 
   class ShellStatistics : public SpatialStatistics {
   public: 
-    ShellStatistics(SimInfo* info, const string& filename, const string& sele, int nbins);
+    ShellStatistics(SimInfo* info, const string& filename, const string& sele,
+                    int nbins);
     virtual ~ShellStatistics();
     virtual int getBin(Vector3d pos);
 

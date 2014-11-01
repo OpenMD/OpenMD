@@ -213,12 +213,10 @@ namespace OpenMD {
     }
     }
     
-
     RealType pot_temp = *(idat.vdwMult) * (myPot - myPotC);
     *(idat.vpair) += pot_temp;
     
     RealType dudr = *(idat.sw) * *(idat.vdwMult) * (myDeriv - myDerivC);
-
     
     (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
     *(idat.f1) = *(idat.d) * dudr / *(idat.rij);

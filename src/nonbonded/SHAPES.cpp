@@ -263,43 +263,38 @@ namespace OpenMD {
       // sin(theta) is near 0.0:
 
       RealType sti2 = 1.0 - cti*cti;
+      RealType proji;
+      Vector3d dcpidr, dcpidu, dspidr, dspidu;
       if (fabs(sti2) < 1.0e-12) {
-        RealType proji = sqrt(r * 1.0e-12);
-        Vector3d dcpidx(1.0 / proji,
-                        0.0,
+        proji = sqrt(r * 1.0e-12);
+        dcpidr = Vector3d( 1.0 / proji, 0.0,         0.0);         
+        dcpidu = Vector3d( xi / proji,  0.0,         0.0);
+        dspidr = Vector3d( 0.0,         1.0 / proji, 0.0);
+        dspidu = Vector3d (0.0,         yi / proji,  0.0);
+      } else {
+        proji = sqrt(xi2 + yi2);
+        RealType proji3 = proji*proji*proji;
+        dcpidr = Vector3d(1.0_dp / proji - xi2 / proji3,
+                          - xi * yi / proji3,
+                          0.0);
+        dcpidu = Vector3d( xi / proji - (xi2 * xi) / proji3,
+                           - (xi * yi2) / proji3,
+                           0.0);
+        dspidr = Vector3d(- xi * yi / proji3,
+                          1.0_dp / proji - yi2 / proji3,
+                          0.0);
+        dspidu = Vector3d(- (yi * xi2) / proji3,
+                          yi / proji - (yi2 * yi) / proji3,
+                          0.0);
+      }
 
-                        // pickup the ball here!
-                        
-        dcpidx = 1.0_dp / proji
-          dcpidy = 0.0_dp
-          dcpidux = xi / proji
-          dcpiduy = 0.0_dp
-          dspidx = 0.0_dp
-          dspidy = 1.0_dp / proji
-          dspidux = 0.0_dp
-          dspiduy = yi / proji
-       else
-          proji = sqrt(xi2 + yi2)
-          proji3 = proji*proji*proji
-          dcpidx = 1.0_dp / proji - xi2 / proji3
-          dcpidy = - xi * yi / proji3
-          dcpidux = xi / proji - (xi2 * xi) / proji3
-          dcpiduy = - (xi * yi2) / proji3
-          dspidx = - xi * yi / proji3
-          dspidy = 1.0_dp / proji - yi2 / proji3
-          dspidux = - (yi * xi2) / proji3
-          dspiduy = yi / proji - (yi2 * yi) / proji3
-       endif
-
-       cpi = xi / proji
-       dcpidz = 0.0_dp
-       dcpiduz = 0.0_dp
-
-       spi = yi / proji
-       dspidz = 0.0_dp
-       dspiduz = 0.0_dp
-
-
+      cpi = xi / proji;
+      dcpidr.z() = 0.0;
+      dcpidu.z() = 0.0;
+      
+      spi = yi / proji;
+      dspidr.z() = 0.0;
+      dspidu.z() = 0.0;
 
 
     RealType sigma0 = mixer.sigma0;

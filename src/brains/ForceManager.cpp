@@ -394,9 +394,6 @@ namespace OpenMD {
     switcher_->setSwitch(rSwitch_, rCut_);
   }
 
-
-
-  
   void ForceManager::initialize() {
 
     if (!info_->isTopologyDone()) {
@@ -741,7 +738,8 @@ namespace OpenMD {
     idat.f1 = &f1;
     idat.sw = &sw;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
-    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE || cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
+    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE ||
+                         cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
     idat.doParticlePot = doParticlePot_;
     idat.doElectricField = doElectricField_;
     idat.doSitePotential = doSitePotential_;
@@ -765,7 +763,7 @@ namespace OpenMD {
       }
 
       for (vector<pair<int, int> >::iterator it = neighborList_.begin(); 
-             it != neighborList_.end(); ++it) {
+           it != neighborList_.end(); ++it) {
                 
         cg1 = (*it).first;
         cg2 = (*it).second;
@@ -958,7 +956,7 @@ namespace OpenMD {
     curSnapshot->setLongRangePotential(longRangePotential);
     
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
-                                         *(fDecomp_->getExcludedPotential()));
+                                       *(fDecomp_->getExcludedPotential()));
 
   }
 
@@ -994,37 +992,37 @@ namespace OpenMD {
     
     if (info_->getSimParams()->getUseLongRangeCorrections()) {
       /*
-      RealType vol = curSnapshot->getVolume();
-      RealType Elrc(0.0);
-      RealType Wlrc(0.0);
+        RealType vol = curSnapshot->getVolume();
+        RealType Elrc(0.0);
+        RealType Wlrc(0.0);
 
-      set<AtomType*>::iterator i;
-      set<AtomType*>::iterator j;
+        set<AtomType*>::iterator i;
+        set<AtomType*>::iterator j;
     
-      RealType n_i, n_j;
-      RealType rho_i, rho_j;
-      pair<RealType, RealType> LRI;
+        RealType n_i, n_j;
+        RealType rho_i, rho_j;
+        pair<RealType, RealType> LRI;
       
-      for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
+        for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
         n_i = RealType(info_->getGlobalCountOfType(*i));
         rho_i = n_i /  vol;
         for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
-          n_j = RealType(info_->getGlobalCountOfType(*j));
-          rho_j = n_j / vol;
+        n_j = RealType(info_->getGlobalCountOfType(*j));
+        rho_j = n_j / vol;
           
-          LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+        LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
 
-          Elrc += n_i   * rho_j * LRI.first;
-          Wlrc -= rho_i * rho_j * LRI.second;
+        Elrc += n_i   * rho_j * LRI.first;
+        Wlrc -= rho_i * rho_j * LRI.second;
         }
-      }
-      Elrc *= 2.0 * NumericConstant::PI;
-      Wlrc *= 2.0 * NumericConstant::PI;
+        }
+        Elrc *= 2.0 * NumericConstant::PI;
+        Wlrc *= 2.0 * NumericConstant::PI;
 
-      RealType lrp = curSnapshot->getLongRangePotential();
-      curSnapshot->setLongRangePotential(lrp + Elrc);
-      stressTensor += Wlrc * SquareMatrix3<RealType>::identity();
-      curSnapshot->setStressTensor(stressTensor);
+        RealType lrp = curSnapshot->getLongRangePotential();
+        curSnapshot->setLongRangePotential(lrp + Elrc);
+        stressTensor += Wlrc * SquareMatrix3<RealType>::identity();
+        curSnapshot->setStressTensor(stressTensor);
       */
      
     }
