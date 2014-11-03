@@ -58,32 +58,88 @@ namespace OpenMD {
   }
   
   void UniformGradient::initialize() {
-    if (simParams->haveUniformGradient()) {
-      doUniformGradient = true;
-      std::vector<RealType> pv = simParams->getUniformGradient();            
-      if (pv.size() != 5) {
+
+    bool haveA = false;
+    bool haveB = false;
+    bool haveG = false;
+    
+    if (simParams->haveUniformGradientDirection1()) {
+      std::vector<RealType> d1 = simParams->getUniformGradientDirection1();
+      if (d1.size() != 3) {
         sprintf(painCave.errMsg,
-                "UniformGradient: Incorrect number of parameters specified.\n"
-                "\tthere should be 5 parameters, but %lu were specified.\n", pv.size());
+                "uniformGradientDirection1: Incorrect number of parameters\n"
+                "\tspecified. There should be 3 parameters, but %lu were\n"
+                "\tspecified.\n", d1.size());
         painCave.isFatal = 1;
         simError();      
       }
-      pars_.a = pv[0];
-      pars_.b = pv[1];
-      pars_.c = pv[2];
-      pars_.alpha = pv[3];
-      pars_.beta = pv[4];
+      a_.x() = d1[0];
+      a_.y() = d1[1];
+      a_.z() = d1[2];
 
-      Grad_(0,0) = pars_.alpha;
-      Grad_(0,1) = pars_.a;
-      Grad_(0,2) = pars_.b;
+      a_.normalize();
+      haveA = true;      
+    }
+    
+    if (simParams->haveUniformGradientDirection2()) {
+      std::vector<RealType> d2 = simParams->getUniformGradientDirection2();
+      if (d2.size() != 3) {
+        sprintf(painCave.errMsg,
+                "uniformGradientDirection2: Incorrect number of parameters\n"
+                "\tspecified. There should be 3 parameters, but %lu were\n"
+                "\tspecified.\n", d2.size());
+        painCave.isFatal = 1;
+        simError();      
+      }
+      b_.x() = d2[0];
+      b_.y() = d2[1];
+      b_.z() = d2[2];
+
+      b_.normalize();
+      haveB = true;      
+    }
+
+    if (simParams->haveUniformGradientStrength()) {
+      g_ = simParams->getUniformGradientStrength();
+      haveG = true;
+    }
+
+    if (haveA && haveB && haveG) {
+      doUniformGradient = true;
+      cpsi_ = dot(a_, b_);
+      
+      Grad_(0,0) = 2.0 * (a_.x()*b_.x() - cpsi_ / 3.0);
+      Grad_(0,1) = a_.x()*b_.y() + a_.y()*b_.x();
+      Grad_(0,2) = a_.x()*b_.z() + a_.z()*b_.x();
       Grad_(1,0) = Grad_(0,1);
-      Grad_(1,1) = pars_.beta;
-      Grad_(1,2) = pars_.c;
+      Grad_(1,1) = 2.0 * (a_.y()*b_.y() - cpsi_ / 3.0);
+      Grad_(1,2) = a_.y()*b_.z() + a_.z()*b_.y();
       Grad_(2,0) = Grad_(0,2);
       Grad_(2,1) = Grad_(1,2);
-      Grad_(2,2) = - (Grad_(0,0) + Grad_(1,1));
-    }   
+      Grad_(2,2) = 2.0 * (a_.z()*b_.z() - cpsi_ / 3.0);
+
+      Grad_ *= g_ / 2.0;
+    } else {
+      if (!haveA) {
+        sprintf(painCave.errMsg,
+                "UniformGradient: uniformGradientDirection1 not specified.\n");
+        painCave.isFatal = 1;
+        simError();
+      }
+      if (!haveB) {
+        sprintf(painCave.errMsg,
+                "UniformGradient: uniformGradientDirection2 not specified.\n");
+        painCave.isFatal = 1;
+        simError();
+      }
+      if (!haveG) {
+        sprintf(painCave.errMsg,
+                "UniformGradient: uniformGradientStrength not specified.\n");
+        painCave.isFatal = 1;
+        simError();
+      }
+    }    
+    
     int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
     if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
     initialized = true;

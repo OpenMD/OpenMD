@@ -92,7 +92,9 @@ namespace OpenMD {
     DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
     DefineOptionalParameter(ElectricField, "electricField");
     DefineOptionalParameter(UniformField, "uniformField");
-    DefineOptionalParameter(UniformGradient, "uniformGradient");
+    DefineOptionalParameter(UniformGradientStrength, "uniformGradientStrength");
+    DefineOptionalParameter(UniformGradientDirection1, "uniformGradientDirection1");
+    DefineOptionalParameter(UniformGradientDirection2, "uniformGradientDirection2");
     //DefineOptionalParameter(PeriodicField, "periodicField");
     //DefineOptionalParameter(PeriodicFieldStrength, "periodicFieldStrength");
     

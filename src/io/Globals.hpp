@@ -142,7 +142,9 @@ namespace OpenMD {
     DeclareParameter(Alpha, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
     DeclareParameter(UniformField, std::vector<RealType> );
-    DeclareParameter(UniformGradient, std::vector<RealType> );
+    DeclareParameter(UniformGradientStrength, RealType );
+    DeclareParameter(UniformGradientDirection1, std::vector<RealType> );
+    DeclareParameter(UniformGradientDirection2, std::vector<RealType> );
 
     DeclareParameter(ElectricField, std::vector<RealType> );
     DeclareParameter(ConstraintTime, RealType);
