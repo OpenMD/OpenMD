@@ -138,17 +138,20 @@ namespace OpenMD {
       }
     }
 
-    for (unsigned int i = 0; i < histo.size(); ++i) {
-      RealType ther = dr * (i + 0.5);
-      for(unsigned int j = 0; j < histo[i].size(); ++j) {
-        if (histo[i][j] <= threshDens_) {
-          RealType thez = dz * (j + 0.5);
-          cerr << ther << "\t" << thez << "\n";
-          break;
+    for (unsigned int j = 0; j < nZBins_;  ++j) {
+      RealType thez = dz * (j + 0.5);
+      bool aboveThresh = false;
+      for (unsigned int i = 0; i < nRBins_;  ++i) {
+        RealType ther = dr * (i + 0.5);
+        if (histo[i][j] >= threshDens_) aboveThresh = true;
+
+        if (aboveThresh && (histo[i][j] <= threshDens_)) {
+          cerr << thez << "\t" << ther << "\n";
+          break;         
         }
       }
     }
-
+    
     // values_.push_back( acos(maxct)*(180.0/M_PI) );
     
   }   
