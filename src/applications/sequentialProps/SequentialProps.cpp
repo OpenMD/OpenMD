@@ -53,6 +53,7 @@
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 #include "applications/sequentialProps/CenterOfMass.hpp"
 #include "applications/sequentialProps/ContactAngle1.hpp"
+#include "applications/sequentialProps/ContactAngle2.hpp"
 
 using namespace OpenMD;
 
@@ -131,6 +132,31 @@ int main(int argc, char* argv[]){
     }
 
     analyzer = new ContactAngle1(info, dumpFileName, sele1, solidZ, dropletR);
+  } else if(args_info.ca2_given){
+    RealType solidZ;
+    if (args_info.referenceZ_given)
+        solidZ = args_info.referenceZ_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--referenceZ must be set if --ca2 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    RealType threshDens;
+    if (args_info.threshDens_given)
+        threshDens = args_info.threshDens_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--threshDens must be set if --ca1 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ,
+                                 threshDens, args_info.nbins_arg,
+                                 args_info.nbins_z_arg);
   }
 
   if (args_info.output_given) {

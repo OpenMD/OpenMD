@@ -42,9 +42,11 @@ const char *gengetopt_args_info_help[] = {
   "  -o, --output=filename         output file name",
   "      --sele1=selection script  select first stuntdouble set",
   "      --sele2=selection script  select second stuntdouble set (if sele2 is not \n                                  set, use script from sele1)",
-  "  -n, --nbins=INT               Number of bins  (default=`100')",
+  "  -b, --nbins=INT               number of bins (general purpose)  \n                                  (default=`100')",
+  "      --nbins_z=INT             number of bins in z axis  (default=`100')",
   "  -z, --referenceZ=DOUBLE       Reference z-height of solid surface",
   "  -r, --dropletR=DOUBLE         Droplet radius in angstroms",
+  "      --threshDens=DOUBLE       Threshold Density in g/cm^3",
   "\n Group: sequentialProps\n   an option of this group is required",
   "  -c, --com                     selection center of mass",
   "      --ca1                     contact angle of selection (using center of \n                                  mass)",
@@ -83,8 +85,10 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
   args_info->nbins_given = 0 ;
+  args_info->nbins_z_given = 0 ;
   args_info->referenceZ_given = 0 ;
   args_info->dropletR_given = 0 ;
+  args_info->threshDens_given = 0 ;
   args_info->com_given = 0 ;
   args_info->ca1_given = 0 ;
   args_info->ca2_given = 0 ;
@@ -105,8 +109,11 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->sele2_orig = NULL;
   args_info->nbins_arg = 100;
   args_info->nbins_orig = NULL;
+  args_info->nbins_z_arg = 100;
+  args_info->nbins_z_orig = NULL;
   args_info->referenceZ_orig = NULL;
   args_info->dropletR_orig = NULL;
+  args_info->threshDens_orig = NULL;
   
 }
 
@@ -122,11 +129,13 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->sele1_help = gengetopt_args_info_help[4] ;
   args_info->sele2_help = gengetopt_args_info_help[5] ;
   args_info->nbins_help = gengetopt_args_info_help[6] ;
-  args_info->referenceZ_help = gengetopt_args_info_help[7] ;
-  args_info->dropletR_help = gengetopt_args_info_help[8] ;
-  args_info->com_help = gengetopt_args_info_help[10] ;
-  args_info->ca1_help = gengetopt_args_info_help[11] ;
-  args_info->ca2_help = gengetopt_args_info_help[12] ;
+  args_info->nbins_z_help = gengetopt_args_info_help[7] ;
+  args_info->referenceZ_help = gengetopt_args_info_help[8] ;
+  args_info->dropletR_help = gengetopt_args_info_help[9] ;
+  args_info->threshDens_help = gengetopt_args_info_help[10] ;
+  args_info->com_help = gengetopt_args_info_help[12] ;
+  args_info->ca1_help = gengetopt_args_info_help[13] ;
+  args_info->ca2_help = gengetopt_args_info_help[14] ;
   
 }
 
@@ -219,8 +228,10 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->sele2_arg));
   free_string_field (&(args_info->sele2_orig));
   free_string_field (&(args_info->nbins_orig));
+  free_string_field (&(args_info->nbins_z_orig));
   free_string_field (&(args_info->referenceZ_orig));
   free_string_field (&(args_info->dropletR_orig));
+  free_string_field (&(args_info->threshDens_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -270,10 +281,14 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "sele2", args_info->sele2_orig, 0);
   if (args_info->nbins_given)
     write_into_file(outfile, "nbins", args_info->nbins_orig, 0);
+  if (args_info->nbins_z_given)
+    write_into_file(outfile, "nbins_z", args_info->nbins_z_orig, 0);
   if (args_info->referenceZ_given)
     write_into_file(outfile, "referenceZ", args_info->referenceZ_orig, 0);
   if (args_info->dropletR_given)
     write_into_file(outfile, "dropletR", args_info->dropletR_orig, 0);
+  if (args_info->threshDens_given)
+    write_into_file(outfile, "threshDens", args_info->threshDens_orig, 0);
   if (args_info->com_given)
     write_into_file(outfile, "com", 0, 0 );
   if (args_info->ca1_given)
@@ -587,16 +602,18 @@ cmdline_parser_internal (
         { "output",	1, NULL, 'o' },
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
-        { "nbins",	1, NULL, 'n' },
+        { "nbins",	1, NULL, 'b' },
+        { "nbins_z",	1, NULL, 0 },
         { "referenceZ",	1, NULL, 'z' },
         { "dropletR",	1, NULL, 'r' },
+        { "threshDens",	1, NULL, 0 },
         { "com",	0, NULL, 'c' },
         { "ca1",	0, NULL, 0 },
         { "ca2",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:n:z:r:c", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:b:z:r:c", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -636,14 +653,14 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'n':	/* Number of bins.  */
+        case 'b':	/* number of bins (general purpose).  */
         
         
           if (update_arg( (void *)&(args_info->nbins_arg), 
                &(args_info->nbins_orig), &(args_info->nbins_given),
               &(local_args_info.nbins_given), optarg, 0, "100", ARG_INT,
               check_ambiguity, override, 0, 0,
-              "nbins", 'n',
+              "nbins", 'b',
               additional_error))
             goto failure;
         
@@ -713,6 +730,34 @@ cmdline_parser_internal (
                 &(local_args_info.sele2_given), optarg, 0, 0, ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "sele2", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* number of bins in z axis.  */
+          else if (strcmp (long_options[option_index].name, "nbins_z") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->nbins_z_arg), 
+                 &(args_info->nbins_z_orig), &(args_info->nbins_z_given),
+                &(local_args_info.nbins_z_given), optarg, 0, "100", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "nbins_z", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Threshold Density in g/cm^3.  */
+          else if (strcmp (long_options[option_index].name, "threshDens") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->threshDens_arg), 
+                 &(args_info->threshDens_orig), &(args_info->threshDens_given),
+                &(local_args_info.threshDens_given), optarg, 0, 0, ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "threshDens", '-',
                 additional_error))
               goto failure;
           
