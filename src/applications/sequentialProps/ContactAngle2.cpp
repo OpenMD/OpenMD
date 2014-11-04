@@ -284,12 +284,7 @@ namespace OpenMD {
     if (fabs(zCen) > rDrop) {
       ca = 180.0;
     } else {
-    
-      if (zCen >= 0.0) {
-        ca = 90.0 + asin(zCen/rDrop)*(180.0/M_PI);
-      } else {
-        ca = 90 - asin(zCen/rDrop)*(180.0/M_PI);
-      }
+      ca = 90.0 + asin(zCen/rDrop)*(180.0/M_PI);
     }
 
     values_.push_back( ca );
