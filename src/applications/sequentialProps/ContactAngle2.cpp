@@ -48,7 +48,7 @@
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
 #include "utils/PhysicalConstants.hpp"
-#include "math/Polynomial.hpp"
+#include "math/Eigenvalue.hpp"
 
 namespace OpenMD {
 
@@ -58,7 +58,7 @@ namespace OpenMD {
     : SequentialAnalyzer(info, filename), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), solidZ_(solidZ),
       threshDens_(threshDens), nRBins_(nrbins), nZBins_(nzbins) {
-    
+
     setOutputName(getPrefix(filename) + ".ca2");
     
     evaluator_.loadScriptString(sele);
@@ -77,15 +77,14 @@ namespace OpenMD {
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     RealType len = std::min(hmat(0, 0), hmat(1, 1));
     RealType zLen = hmat(2,2);
+
     RealType dr = len / (RealType) nRBins_;
     RealType dz = zLen / (RealType) nZBins_;
 
     std::vector<std::vector<RealType> > histo;
     histo.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
-      histo[i].resize(nZBins_);
-    }
     for (unsigned int i = 0; i < histo.size(); ++i){
+      histo[i].resize(nZBins_);
       std::fill(histo[i].begin(), histo[i].end(), 0.0);
     }      
         
@@ -115,14 +114,16 @@ namespace OpenMD {
     for (sd = seleMan_.beginSelected(i); sd != NULL;
          sd = seleMan_.nextSelected(i)) {      
       pos = sd->getPos() - com;
-      
+
+      // r goes from zero upwards
       r = sqrt(pow(pos.x(), 2) + pow(pos.y(), 2));
-      z = pos.z() - solidZ_;
-      
+      // z is possibly symmetric around 0
+      z = pos.z();
+          
       int whichRBin = int(r / dr);
-      int whichZBin = int(z/ dz);
+      int whichZBin = int( (zLen/2.0 + z) / dz);
       
-      if ((r <= len) && (z <= zLen)) 
+      if ((whichRBin < nRBins_) && (whichZBin >= 0) && (whichZBin < nZBins_)) 
         histo[whichRBin][whichZBin] += sd->getMass();
       
     }
@@ -133,26 +134,165 @@ namespace OpenMD {
       RealType rU = rL + dr;
       RealType volSlice = NumericConstant::PI * dz * (( rU*rU ) - ( rL*rL ));
 
-      for (unsigned int j = 0; j < histo[i].size(); ++j){
+      for (unsigned int j = 0; j < histo[i].size(); ++j) {
         histo[i][j] *= PhysicalConstants::densityConvert / volSlice;
       }
     }
 
+    std::vector<Vector<RealType, 2> > points;
+    points.clear();
+    
     for (unsigned int j = 0; j < nZBins_;  ++j) {
-      RealType thez = dz * (j + 0.5);
+
+      // The z coordinates were measured relative to the selection
+      // center of mass.  However, we're interested in the elevation
+      // above the solid surface.  Also, the binning was done around
+      // zero with enough bins to cover the zLength of the box:
+      
+      RealType thez =  com.z() - solidZ_  - zLen/2.0 + dz * (j + 0.5);
       bool aboveThresh = false;
+      bool foundThresh = false;
+      int rloc = 0;
+      
       for (unsigned int i = 0; i < nRBins_;  ++i) {
         RealType ther = dr * (i + 0.5);
         if (histo[i][j] >= threshDens_) aboveThresh = true;
 
         if (aboveThresh && (histo[i][j] <= threshDens_)) {
-          cerr << thez << "\t" << ther << "\n";
-          break;         
+          rloc = i;
+          foundThresh = true;
+          aboveThresh = false;
         }
+
+      }
+      if (foundThresh) {
+        Vector<RealType,2> point;
+        point[0] = dr*(rloc+0.5);
+        point[1] = thez;
+        points.push_back( point );       
+      }      
+    }
+
+    int numPoints = points.size();
+
+    // Compute the average of the data points.
+    Vector<RealType, 2> average = points[0];
+    int i0;
+    for (i0 = 1; i0 < numPoints; ++i0) {
+      average += points[i0];
+    }
+    RealType invNumPoints = ((RealType)1)/(RealType)numPoints;
+    average *= invNumPoints;
+    
+    DynamicRectMatrix<RealType> mat(4, 4);
+    int row, col;
+    for (row = 0; row < 4; ++row) {
+      for (col = 0; col < 4; ++col){
+        mat(row,col) = 0.0;        
       }
     }
+    for (int i = 0; i < numPoints; ++i) {
+      RealType x = points[i][0];
+      RealType y = points[i][1];
+      RealType x2 = x*x;
+      RealType y2 = y*y;
+      RealType xy = x*y;
+      RealType r2 = x2+y2;
+      RealType xr2 = x*r2;
+      RealType yr2 = y*r2;
+      RealType r4 = r2*r2;
+
+      mat(0,1) += x;
+      mat(0,2) += y;
+      mat(0,3) += r2;
+      mat(1,1) += x2;
+      mat(1,2) += xy;
+      mat(1,3) += xr2;
+      mat(2,2) += y2;
+      mat(2,3) += yr2;
+      mat(3,3) += r4;
+    }
+    mat(0,0) = (RealType)numPoints;
+
+    for (row = 0; row < 4; ++row) {
+      for (col = 0; col < row; ++col) {
+        mat(row,col) = mat(col,row);
+      }
+    }
+
+    for (row = 0; row < 4; ++row) {
+      for (col = 0; col < 4; ++col) {
+        mat(row,col) *= invNumPoints;
+      }
+    }
+
+    JAMA::Eigenvalue<RealType> eigensystem(mat);
+    DynamicRectMatrix<RealType> evects(4, 4);
+    DynamicVector<RealType> evals(4);
+
+    eigensystem.getRealEigenvalues(evals);
+    eigensystem.getV(evects);
+
+    DynamicVector<RealType> evector = evects.getColumn(0);
+    RealType inv = ((RealType)1)/evector[3];  // beware zero divide
+    RealType coeff[3];
+    for (row = 0; row < 3; ++row) {
+      coeff[row] = inv*evector[row];
+    }
+
+    Vector<RealType, 2> center;
     
-    // values_.push_back( acos(maxct)*(180.0/M_PI) );
+    center[0] = -((RealType)0.5)*coeff[1];
+    center[1] = -((RealType)0.5)*coeff[2];
+    RealType radius = sqrt(fabs(center[0]*center[0] + center[1]*center[1]
+                                - coeff[0]));
+    RealType ev0 =  fabs(evals[0]);
+
+    int i1;
+    for (i1 = 0; i1 < 100; ++i1) {
+      // Update the iterates.
+      Vector<RealType, 2> current = center;
+      
+      // Compute average L, dL/da, dL/db.
+      RealType lenAverage = (RealType)0;
+      Vector<RealType, 2> derLenAverage = Vector<RealType, 2>(0.0);
+      for (i0 = 0; i0 < numPoints; ++i0) {
+        Vector<RealType, 2> diff = points[i0] - center;
+        RealType length = diff.length();
+        if (length > 1e-6) {
+          lenAverage += length;
+          RealType invLength = ((RealType)1)/length;
+          derLenAverage -= invLength*diff;
+        }
+      }
+      lenAverage *= invNumPoints;
+      derLenAverage *= invNumPoints;
+
+      center = average + lenAverage*derLenAverage;
+      radius = lenAverage;
+
+      Vector<RealType, 2> diff = center - current;
+      if (fabs(diff[0]) <= 1e-6 &&  fabs(diff[1]) <= 1e-6) {
+        break;
+      }
+    }
+
+    RealType zCen = center[1];
+    RealType rDrop = radius;
+    RealType ca;
+
+    if (fabs(zCen) > rDrop) {
+      ca = 180.0;
+    } else {
+    
+      if (zCen >= 0.0) {
+        ca = 90.0 + asin(zCen/rDrop)*(180.0/M_PI);
+      } else {
+        ca = 90 - asin(zCen/rDrop)*(180.0/M_PI);
+      }
+    }
+
+    values_.push_back( ca );
     
   }   
 }
