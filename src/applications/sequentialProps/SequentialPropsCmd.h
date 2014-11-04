@@ -51,15 +51,21 @@ struct gengetopt_args_info
   char * sele2_arg;	/**< @brief select second stuntdouble set (if sele2 is not set, use script from sele1).  */
   char * sele2_orig;	/**< @brief select second stuntdouble set (if sele2 is not set, use script from sele1) original value given at command line.  */
   const char *sele2_help; /**< @brief select second stuntdouble set (if sele2 is not set, use script from sele1) help description.  */
-  int nbins_arg;	/**< @brief Number of bins (default='100').  */
-  char * nbins_orig;	/**< @brief Number of bins original value given at command line.  */
-  const char *nbins_help; /**< @brief Number of bins help description.  */
+  int nbins_arg;	/**< @brief number of bins (general purpose) (default='100').  */
+  char * nbins_orig;	/**< @brief number of bins (general purpose) original value given at command line.  */
+  const char *nbins_help; /**< @brief number of bins (general purpose) help description.  */
+  int nbins_z_arg;	/**< @brief number of bins in z axis (default='100').  */
+  char * nbins_z_orig;	/**< @brief number of bins in z axis original value given at command line.  */
+  const char *nbins_z_help; /**< @brief number of bins in z axis help description.  */
   double referenceZ_arg;	/**< @brief Reference z-height of solid surface.  */
   char * referenceZ_orig;	/**< @brief Reference z-height of solid surface original value given at command line.  */
   const char *referenceZ_help; /**< @brief Reference z-height of solid surface help description.  */
   double dropletR_arg;	/**< @brief Droplet radius in angstroms.  */
   char * dropletR_orig;	/**< @brief Droplet radius in angstroms original value given at command line.  */
   const char *dropletR_help; /**< @brief Droplet radius in angstroms help description.  */
+  double threshDens_arg;	/**< @brief Threshold Density in g/cm^3.  */
+  char * threshDens_orig;	/**< @brief Threshold Density in g/cm^3 original value given at command line.  */
+  const char *threshDens_help; /**< @brief Threshold Density in g/cm^3 help description.  */
   const char *com_help; /**< @brief selection center of mass help description.  */
   const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
@@ -71,8 +77,10 @@ struct gengetopt_args_info
   unsigned int sele1_given ;	/**< @brief Whether sele1 was given.  */
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
+  unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int referenceZ_given ;	/**< @brief Whether referenceZ was given.  */
   unsigned int dropletR_given ;	/**< @brief Whether dropletR was given.  */
+  unsigned int threshDens_given ;	/**< @brief Whether threshDens was given.  */
   unsigned int com_given ;	/**< @brief Whether com was given.  */
   unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */

@@ -13,9 +13,11 @@ option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string  typestr="selection script"      no
-option  "nbins"         n       "Number of bins" int default="100" no
+option  "nbins"         b       "number of bins (general purpose)"                              int     default="100"           no
+option  "nbins_z"       -       "number of bins in z axis"                              int     default="100"           no
 option  "referenceZ"    z       "Reference z-height of solid surface" double no
 option  "dropletR"      r       "Droplet radius in angstroms"  double no
+option  "threshDens"    -       "Threshold Density in g/cm^3"  double no
 defgroup "sequentialProps" groupdesc=" an option of this group is required" yes
 groupoption "com"       c       "selection center of mass" group="sequentialProps"
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
