@@ -51,7 +51,8 @@ namespace OpenMD {
   class ContactAngle2 : public SequentialAnalyzer{
   public:
     ContactAngle2(SimInfo* info, const std::string& filename, 
-                  const std::string& sele, RealType solidZ, RealType threshDens,
+                  const std::string& sele, RealType solidZ,
+                  RealType threshDens, RealType bufferLength,
                   int nrbins, int nZBins);
 
     virtual void doFrame();
@@ -60,6 +61,7 @@ namespace OpenMD {
 
     RealType solidZ_;
     RealType threshDens_;
+    RealType bufferLength_;
     int nRBins_;
     int nZBins_;
     

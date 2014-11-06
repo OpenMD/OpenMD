@@ -148,14 +148,24 @@ int main(int argc, char* argv[]){
         threshDens = args_info.threshDens_arg;
     else {
       sprintf( painCave.errMsg,
-               "--threshDens must be set if --ca1 is used\n");
+               "--threshDens must be set if --ca2 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    RealType bufferLength;
+    if (args_info.bufferLength_given)
+        bufferLength = args_info.bufferLength_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--bufferLength must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
 
     analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ,
-                                 threshDens, args_info.nbins_arg,
+                                 threshDens, bufferLength, args_info.nbins_arg,
                                  args_info.nbins_z_arg);
   }
 

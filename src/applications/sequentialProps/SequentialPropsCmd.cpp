@@ -47,6 +47,7 @@ const char *gengetopt_args_info_help[] = {
   "  -z, --referenceZ=DOUBLE       Reference z-height of solid surface",
   "  -r, --dropletR=DOUBLE         Droplet radius in angstroms",
   "      --threshDens=DOUBLE       Threshold Density in g/cm^3",
+  "      --bufferLength=DOUBLE     Buffer length in angstroms",
   "\n Group: sequentialProps\n   an option of this group is required",
   "  -c, --com                     selection center of mass",
   "      --ca1                     contact angle of selection (using center of \n                                  mass)",
@@ -89,6 +90,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->referenceZ_given = 0 ;
   args_info->dropletR_given = 0 ;
   args_info->threshDens_given = 0 ;
+  args_info->bufferLength_given = 0 ;
   args_info->com_given = 0 ;
   args_info->ca1_given = 0 ;
   args_info->ca2_given = 0 ;
@@ -114,6 +116,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->referenceZ_orig = NULL;
   args_info->dropletR_orig = NULL;
   args_info->threshDens_orig = NULL;
+  args_info->bufferLength_orig = NULL;
   
 }
 
@@ -133,9 +136,10 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->referenceZ_help = gengetopt_args_info_help[8] ;
   args_info->dropletR_help = gengetopt_args_info_help[9] ;
   args_info->threshDens_help = gengetopt_args_info_help[10] ;
-  args_info->com_help = gengetopt_args_info_help[12] ;
-  args_info->ca1_help = gengetopt_args_info_help[13] ;
-  args_info->ca2_help = gengetopt_args_info_help[14] ;
+  args_info->bufferLength_help = gengetopt_args_info_help[11] ;
+  args_info->com_help = gengetopt_args_info_help[13] ;
+  args_info->ca1_help = gengetopt_args_info_help[14] ;
+  args_info->ca2_help = gengetopt_args_info_help[15] ;
   
 }
 
@@ -232,6 +236,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->referenceZ_orig));
   free_string_field (&(args_info->dropletR_orig));
   free_string_field (&(args_info->threshDens_orig));
+  free_string_field (&(args_info->bufferLength_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -289,6 +294,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dropletR", args_info->dropletR_orig, 0);
   if (args_info->threshDens_given)
     write_into_file(outfile, "threshDens", args_info->threshDens_orig, 0);
+  if (args_info->bufferLength_given)
+    write_into_file(outfile, "bufferLength", args_info->bufferLength_orig, 0);
   if (args_info->com_given)
     write_into_file(outfile, "com", 0, 0 );
   if (args_info->ca1_given)
@@ -607,6 +614,7 @@ cmdline_parser_internal (
         { "referenceZ",	1, NULL, 'z' },
         { "dropletR",	1, NULL, 'r' },
         { "threshDens",	1, NULL, 0 },
+        { "bufferLength",	1, NULL, 0 },
         { "com",	0, NULL, 'c' },
         { "ca1",	0, NULL, 0 },
         { "ca2",	0, NULL, 0 },
@@ -758,6 +766,20 @@ cmdline_parser_internal (
                 &(local_args_info.threshDens_given), optarg, 0, 0, ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "threshDens", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Buffer length in angstroms.  */
+          else if (strcmp (long_options[option_index].name, "bufferLength") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->bufferLength_arg), 
+                 &(args_info->bufferLength_orig), &(args_info->bufferLength_given),
+                &(local_args_info.bufferLength_given), optarg, 0, 0, ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "bufferLength", '-',
                 additional_error))
               goto failure;
           
