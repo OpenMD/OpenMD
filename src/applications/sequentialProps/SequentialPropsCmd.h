@@ -66,6 +66,9 @@ struct gengetopt_args_info
   double threshDens_arg;	/**< @brief Threshold Density in g/cm^3.  */
   char * threshDens_orig;	/**< @brief Threshold Density in g/cm^3 original value given at command line.  */
   const char *threshDens_help; /**< @brief Threshold Density in g/cm^3 help description.  */
+  double bufferLength_arg;	/**< @brief Buffer length in angstroms.  */
+  char * bufferLength_orig;	/**< @brief Buffer length in angstroms original value given at command line.  */
+  const char *bufferLength_help; /**< @brief Buffer length in angstroms help description.  */
   const char *com_help; /**< @brief selection center of mass help description.  */
   const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
@@ -81,6 +84,7 @@ struct gengetopt_args_info
   unsigned int referenceZ_given ;	/**< @brief Whether referenceZ was given.  */
   unsigned int dropletR_given ;	/**< @brief Whether dropletR was given.  */
   unsigned int threshDens_given ;	/**< @brief Whether threshDens was given.  */
+  unsigned int bufferLength_given ;	/**< @brief Whether bufferLength was given.  */
   unsigned int com_given ;	/**< @brief Whether com was given.  */
   unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */

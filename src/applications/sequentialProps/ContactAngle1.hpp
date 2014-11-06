@@ -47,7 +47,34 @@
 
 using namespace std;
 namespace OpenMD {
-  
+
+  /// Calculates the contact angle of a droplet with a surface
+  /// using a spherical cap approximation for the droplet.
+
+  /**  The position of the spherical cap relative to the surface plane
+       is determined by the center-of-mass position of the selection,
+       and this method assumes a uniform density in the droplet.  The
+       angle of intersection between the surface of the spherical cap
+       and the plane defines the contact angle, which is related to
+       the center of mass height by:
+
+       \f$ z_\mathrm{cm} = (2)^{-4/3} R_0 \left(
+       \frac{1-\cos\theta}{2+\cos\theta}\right)^{1/3)
+       \frac{3+\cos\theta}{2+\cos\theta} \f$
+
+       where \f$z_\mathrm{cm}\f$ is measured relative to the planar
+       surface, and \f$R_0\f$ is the radius of the free spherical
+       droplet.
+
+       This method was first proposed in:
+
+       J. Hautman and M.L. Klein, Phys. Rev. Lett. 67(13), 1763 (1991).
+       DOI: 10.1103/PhysRevLett.67.1763
+
+       This Analyzer requires statement of the reference height of the
+       solid surface, solidZ, and \f$R_0\f$, the dropletRadius.
+ 
+  */ 
   class ContactAngle1 : public SequentialAnalyzer{
   public:
     ContactAngle1(SimInfo* info, const std::string& filename, 

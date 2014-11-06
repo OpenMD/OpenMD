@@ -54,10 +54,12 @@ namespace OpenMD {
 
   ContactAngle2::ContactAngle2(SimInfo* info, const std::string& filename, 
                                const std::string& sele, RealType solidZ,
-                               RealType threshDens, int nrbins, int nzbins)
+                               RealType threshDens, RealType bufferLength,
+                               int nrbins, int nzbins)
     : SequentialAnalyzer(info, filename), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), solidZ_(solidZ),
-      threshDens_(threshDens), nRBins_(nrbins), nZBins_(nzbins) {
+      threshDens_(threshDens), bufferLength_(bufferLength),
+      nRBins_(nrbins), nZBins_(nzbins) {
 
     setOutputName(getPrefix(filename) + ".ca2");
     
@@ -169,7 +171,10 @@ namespace OpenMD {
         Vector<RealType,2> point;
         point[0] = dr*(rloc+0.5);
         point[1] = thez;
-        points.push_back( point );       
+
+        if (thez > bufferLength_) {
+          points.push_back( point );
+        }
       }      
     }
 
