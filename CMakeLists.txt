@@ -679,6 +679,7 @@ src/applications/utilities/stat2visco
 src/applications/utilities/stat2dielectric
 src/applications/utilities/waterRotator
 src/applications/utilities/waterReplacer
+src/applications/utilities/vcorr2spectrum
 )
 
 IF(PYTHON_EXECUTABLE)
