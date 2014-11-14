@@ -98,18 +98,6 @@ ELSE(OPENBABEL2_FOUND)
   MESSAGE(STATUS "No OpenBabel found - will not build atom2md")
 ENDIF(OPENBABEL2_FOUND)
 
-find_package(Eigen3)
-if(EIGEN3_FOUND)
-  add_definitions(-DHAVE_EIGEN -DHAVE_EIGEN3)
-  include_directories(${EIGEN3_INCLUDE_DIR})
-else()
-  find_package(Eigen2) # find and setup Eigen2
-  if(EIGEN2_FOUND)
-    add_definitions (-DHAVE_EIGEN)
-    include_directories(${EIGEN2_INCLUDE_DIR})
-  endif()
-endif()
-
 #Look for QHULL Libraries
 find_package(Qhull)
 IF(QHULL_FOUND)
