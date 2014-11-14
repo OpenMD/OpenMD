@@ -119,33 +119,38 @@ def readFile(mdFileName):
                         myIndex = int(L[0])
                         indices.append(myIndex)
                         pvqj.append(L[1])
+                        i = 2
                         if 'p' in L[1]:                              
-                            x = float(L[2])
-                            y = float(L[3])
-                            z = float(L[4])                            
+                            x = float(L[i])
+                            y = float(L[i+1])
+                            z = float(L[i+2])                            
                             p.append([x, y, z])
+                            i = i+3
                         else:
                             p.append([0.0, 0.0, 0.0])
                         if 'v' in L[1]:                              
-                            vx = float(L[5])                                
-                            vy = float(L[6])
-                            vz = float(L[7])
+                            vx = float(L[i])                                
+                            vy = float(L[i+1])
+                            vz = float(L[i+2])
                             v.append([vx, vy, vz])
+                            i = i+3
                         else:
                             v.append([0.0, 0.0, 0.0])
                         if 'q' in L[1]:
-                            qw = float(L[8])
-                            qx = float(L[9])
-                            qy = float(L[10])
-                            qz = float(L[11])
+                            qw = float(L[i])
+                            qx = float(L[i+1])
+                            qy = float(L[i+2])
+                            qz = float(L[i+3])
                             q.append([qw, qx, qy, qz])
+                            i = i+4
                         else:
                             q.append([0.0, 0.0, 0.0, 0.0])
                         if 'j' in L[1]:
-                            jx = float(L[12])
-                            jy = float(L[13])
-                            jz = float(L[14])
+                            jx = float(L[i])
+                            jy = float(L[i+1])
+                            jz = float(L[i+2])
                             j.append([jx, jy, jz])
+                            i = i+3
                         else:
                             j.append([0.0, 0.0, 0.0])
                                                
