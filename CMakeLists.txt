@@ -176,6 +176,12 @@ ELSE(PYTHON_EXECUTABLE)
   MESSAGE(STATUS "Failed to find python - some scripts will not be made")
 ENDIF(PYTHON_EXECUTABLE)
 
+FIND_PACKAGE(NumPy)
+IF(NOT NUMPY_FOUND)
+  MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
+ENDIF(NOT NUMPY_FOUND)
+
+
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/config.h.cmake"
   "${PROJECT_BINARY_DIR}/config.h"
@@ -665,7 +671,7 @@ src/applications/atom2md/openmdformat.cpp
 ENDIF (OPENBABEL2_FOUND)
 
 
-set(PY_FILES
+set(PYNONUMPY_FILES
 src/applications/hydrodynamics/diffExplainer
 src/applications/utilities/affineScale
 src/applications/utilities/dumpConverter
@@ -673,14 +679,24 @@ src/applications/utilities/md-solvator
 src/applications/utilities/md2md
 src/applications/utilities/mdSplit
 src/applications/utilities/mdShrink
-src/applications/utilities/principalAxisCalculator
 src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
 src/applications/utilities/stat2dielectric
 src/applications/utilities/waterRotator
-src/applications/utilities/waterReplacer
-src/applications/utilities/vcorr2spectrum
 )
+
+set(PYNUMPY_FILES
+src/applications/utilities/pack2md
+src/applications/utilities/principalAxisCalculator
+src/applications/utilities/vcorr2spectrum
+src/applications/utilities/waterReplacer
+)
+
+IF(NUMPY_FOUND) 
+  set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES})
+ELSE(NUMPY_FOUND)
+  set(PY_FILES ${PYNONUMPY_FILES})
+ENDIF(NUMPY_FOUND)
 
 IF(PYTHON_EXECUTABLE)
   IF(WIN32)
