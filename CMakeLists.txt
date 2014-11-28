@@ -35,7 +35,7 @@ include(CheckCXXSymbolExists)
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
-set (VERSION_MINOR "2")
+set (VERSION_MINOR "3")
 set (VERSION_TINY "0")  
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -349,7 +349,9 @@ src/selection/SelectionSet.cpp
 src/types/AtomStamp.cpp
 src/types/AtomType.cpp
 src/types/BendStamp.cpp
+src/types/BendTypeParser.cpp
 src/types/BondStamp.cpp
+src/types/BondTypeParser.cpp
 src/types/CharmmTorsionType.cpp
 src/types/Component.cpp
 src/types/ConstraintStamp.cpp
@@ -362,6 +364,7 @@ src/types/FragmentStamp.cpp
 src/types/GayBerneAdapter.cpp
 src/types/ImproperCosineInversionType.cpp
 src/types/InversionStamp.cpp
+src/types/InversionTypeParser.cpp
 src/types/LennardJonesAdapter.cpp
 src/types/MoleculeStamp.cpp
 src/types/MultipoleAdapter.cpp
@@ -373,6 +376,7 @@ src/types/ShapeAtomType.cpp
 src/types/StickyAdapter.cpp
 src/types/SuttonChenAdapter.cpp
 src/types/TorsionStamp.cpp
+src/types/TorsionTypeParser.cpp
 src/types/ZconsStamp.cpp
 src/utils/ElementsTable.cpp
 src/utils/MoLocator.cpp

@@ -40,28 +40,60 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_BENDTYPESSECTIONPARSER_HPP
-#define IO_BENDTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
-namespace OpenMD {
+#ifndef TYPES_INVERSIONTYPEPARSER_HPP
+#define TYPES_INVERSIONTYPEPARSER_HPP
 
+#include <map>
+#include <vector>
+#include "types/InversionType.hpp"
+
+namespace OpenMD {
+  
   /**
-   * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
+   * @class InversionTypeParser InversionTypeParser.hpp "types/InversionTypeParser.hpp"
    */
-  class BendTypesSectionParser : public SectionParser {
-  public:
-    BendTypesSectionParser(ForceFieldOptions& options);
-            
+  class InversionTypeParser {
+  public:    
+    InversionTypeParser();
+    InversionType* parseLine(const std::string& line);
+    InversionType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
+
   private:
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
+
+
+    // Inversion types vary by force field:  In this description,
+    // I is the central atom, while J, K, and L are atoms directly 
+    // bonded to I (but not to each other):
+
+    // Amber uses a special bond (IL) as the hinge between the planes
+    // IJL and IKL (the central atom I & peripheral atom L are common
+    // in both planes).  It then applies a cosine series much like
+    // other torsional forms.
+
+    // Gromacs & Charmm use an improper torsion that is harmonic
+    // in the angle between the IJK and JKL planes (Central atom is I, but
+    // this atom appears in only one of the plane definitions.
+
+    // MM2 and Tripos use a planarity definition of the central atom (I)
+    // distance from the plane made by the other three atoms (JKL).
+
+    // The Dreiding force field uses a complicated umbrella inversion 
+    // form.
+
+
+    enum InversionTypeEnum{
+      itImproperCosine,
+      itHarmonic,
+      itCentralAtomHeight,
+      itAmberImproper,
+      itDreiding,
+      itUnknown
+    };
+
+    InversionTypeEnum getInversionTypeEnum(const std::string& str);
+    std::map<std::string, InversionTypeEnum> stringToEnumMap_;
   };
 
+}
 
-} //namespace OpenMD
-
-#endif //IO_BENDTYPESSECTIONPARSER_HPP
-
-
-
+#endif

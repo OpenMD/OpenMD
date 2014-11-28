@@ -42,9 +42,10 @@ RNEMD {
 	useRNEMD = "false";
 	objectSelection = "select SPCE_RB_0 or Au";
 	exchangeTime = 200;
-	exchangeType = "KineticScale";
-	nBins = 20;
-	targetFlux = 0.0e-5;
+        method = "NIVS";
+        fluxType = "KE";
+	outputBins = 20;
+	kineticFlux = 0.0e-5;
 }
   </MetaData>
   <Snapshot>

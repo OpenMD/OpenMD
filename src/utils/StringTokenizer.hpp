@@ -89,7 +89,8 @@ namespace OpenMD {
      * @note this is still a little bit java like implementation. Pure c++ one should use TokenIterator.
      * Boost's tokenizer class is one of them 
      */
-    StringTokenizer(std::string::const_iterator& first, std::string::const_iterator& last,
+    StringTokenizer(std::string::const_iterator& first,
+                    std::string::const_iterator& last,
 		    const std::string & delim = " ;\t\n\r");
 
     /**
@@ -180,6 +181,11 @@ namespace OpenMD {
      * @return all of the tokens
      */
     std::vector<std::string> getAllTokens();
+    /** 
+     * Returns the remaining unparsed string
+     * @return the remaining unparsed string
+     */
+    std::string getRemainingString();
   private:
 
     /**

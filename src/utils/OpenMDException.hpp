@@ -42,13 +42,22 @@
 
 #ifndef UTILS_OPENMDEXCEPTION_HPP
 #define UTILS_OPENMDEXCEPTION_HPP
+
+#include <exception>
+
 namespace OpenMD {
 
-  class OpenMDException {
+  class OpenMDException : public std::exception {
   public:
     OpenMDException() : msg_("") {}
-    OpenMDException(const std::string &msg) : msg_(msg) {}
-    const std::string getMessage() {return msg_;}
+    explicit OpenMDException(const std::string &msg) : msg_(msg) {};
+
+    ~OpenMDException() throw() {}
+
+    const char * what () const throw ()
+    {
+      return msg_.c_str();
+    }
   private:    
     std::string msg_;
     

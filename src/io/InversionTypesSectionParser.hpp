@@ -42,7 +42,6 @@
  
 #ifndef IO_INVERSIONTYPESSECTIONPARSER_HPP
 #define IO_INVERSIONTYPESSECTIONPARSER_HPP
-#include <map>
 #include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
 
@@ -52,13 +51,10 @@ namespace OpenMD {
    * @class InversionTypesSectionParser InversionTypesSectionParser.hpp "io/InversionTypesSectionParser.hpp"
    */
   class InversionTypesSectionParser : public SectionParser {
-  public:
-
-            
+  public:            
     InversionTypesSectionParser(ForceFieldOptions& options);
+    
   private:
-
-
     // Inversion types vary by force field:  In this description,
     // I is the central atom, while J, K, and L are atoms directly 
     // bonded to I (but not to each other):
@@ -78,21 +74,7 @@ namespace OpenMD {
     // The Dreiding force field uses a complicated umbrella inversion 
     // form.
 
-
-    enum InversionTypeEnum{
-      itImproperCosine,
-      itHarmonic,
-      itCentralAtomHeight,
-      itAmberImproper,
-      itDreiding,
-      itUnknown
-    };
-
-    InversionTypeEnum getInversionTypeEnum(const std::string& str);
-            
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
-    std::map<std::string, InversionTypeEnum> stringToEnumMap_;
     ForceFieldOptions& options_;
   };
 

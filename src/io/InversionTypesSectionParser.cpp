@@ -39,39 +39,33 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#include "utils/NumericConstant.hpp"
+
 #include "io/InversionTypesSectionParser.hpp"
-#include "types/InversionType.hpp"
-#include "types/ImproperCosineInversionType.hpp"
-#include "types/HarmonicInversionType.hpp"
-// #include "types/CentralAtomHeightInversionType.hpp"
-// #include "types/DreidingInversionType.hpp"
-#include "types/AmberImproperTorsionType.hpp"
-#include "types/PolynomialInversionType.hpp"
+#include "types/InversionTypeParser.hpp"
 #include "brains/ForceField.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
   
   InversionTypesSectionParser::InversionTypesSectionParser(ForceFieldOptions& options) : options_(options){
     
     setSectionName("InversionTypes");
-    stringToEnumMap_["AmberImproper"] = itAmberImproper;
-    stringToEnumMap_["ImproperCosine"] = itImproperCosine;
-    stringToEnumMap_["Harmonic"] = itHarmonic;
-    stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
-    stringToEnumMap_["Dreiding"] = itDreiding;
   }
   
   void InversionTypesSectionParser::parseLine(ForceField& ff,
 					      const std::string& line, 
 					      int lineNo){
     StringTokenizer tokenizer(line);
+    InversionTypeParser itParser;
     InversionType* inversionType = NULL;
     
     int nTokens = tokenizer.countTokens();
     
     if (nTokens < 5) {
+      sprintf(painCave.errMsg, "InversionTypesSectionParser Error: Not enough tokens at line %d\n",
+              lineNo);
+      painCave.isFatal = 1;
+      simError();
       return;
     }
     
@@ -79,110 +73,25 @@ namespace OpenMD {
     std::string at2 = tokenizer.nextToken();
     std::string at3 = tokenizer.nextToken();
     std::string at4 = tokenizer.nextToken();
-    InversionTypeEnum it = getInversionTypeEnum(tokenizer.nextToken());
+    std::string remainder = tokenizer.getRemainingString();
 
-    nTokens -= 5;
-
-    switch(it) {
-      
-    case InversionTypesSectionParser::itImproperCosine :
-
-      if (nTokens < 3 || nTokens % 3 != 0) {
-
-      } else {
-        int nSets = nTokens / 3;
-  
-        std::vector<ImproperCosineInversionParameter> parameters;             
-        for (int i = 0; i < nSets; ++i) {
-          ImproperCosineInversionParameter currParam;
-          currParam.kchi = tokenizer.nextTokenAsDouble();
-          currParam.n = tokenizer.nextTokenAsInt();
-	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
-          parameters.push_back(currParam);
-        }
-
-        inversionType = new ImproperCosineInversionType(parameters);
-
-      }
-    break;
-
-    case InversionTypesSectionParser::itAmberImproper:
-            
-      if (nTokens < 1) {
-
-      } else {
-	RealType v2 = tokenizer.nextTokenAsDouble();
-        
-	inversionType = new AmberImproperTorsionType(v2);
-      }
-
-      break;
-            
-    case InversionTypesSectionParser::itHarmonic :
-      if (nTokens < 2) {
-	
-      } else {
-        // Most inversion don't have specific angle information since
-        // they are cosine polynomials.  This one is different,
-        // however.  To match our other force field files
-        // (particularly for bends): 
-        //
-        // d0 should be read in kcal / mol / degrees^2
-        // phi0 should be read in degrees
-
-        RealType degreesPerRadian = 180.0 / NumericConstant::PI;
-
-        // convert to kcal / mol / radians^2
-        RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
-
-        // convert to radians
-        RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
-        inversionType = new HarmonicInversionType(d0, phi0);
-      }
-      break;
-
-      /*             
-    case InversionTypesSectionParser::itCentralAtomHeight :
-      if (nTokens < 1) {
-	
-      } else {
-	
-	RealType k = tokenizer.nextTokenAsDouble();
-        
-	inversionType = new CentralAtomHeightInversionType(k);
-      }
-      break;                 
-    case InversionTypesSectionParser::itDreiding :
-      if (nTokens < 3) {
-	
-      } else {
-	
-	RealType k = tokenizer.nextTokenAsDouble();
-        
-	inversionType = new CentralAtomHeightInversionType(k);
-      }
-      break;                 
-      */
-    case InversionTypesSectionParser::itUnknown :
-    default:
-      
-      break;
-      
+    try {
+      inversionType = itParser.parseLine(remainder);
     }
-    
+    catch( OpenMDException e ) {
+      
+      sprintf(painCave.errMsg, "InversionTypesSectionParser Error: %s "
+              "at line %d\n",
+              e.what(), lineNo);
+      painCave.isFatal = 1;
+      simError();
+    }
+        
     if (inversionType != NULL) {
       ff.addInversionType(at1, at2, at3, at4, inversionType);
     }
 
   }
-  
-  InversionTypesSectionParser::InversionTypeEnum InversionTypesSectionParser::getInversionTypeEnum(const std::string& str) {
-    std::map<std::string, InversionTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-    
-    return i == stringToEnumMap_.end() ? InversionTypesSectionParser::itUnknown : i->second;
-  }
-  
 } //end namespace OpenMD
 
 

@@ -40,47 +40,41 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "utils/NumericConstant.hpp" 
 #include "io/TorsionTypesSectionParser.hpp"
-#include "types/TorsionType.hpp"
-#include "types/CubicTorsionType.hpp"
-#include "types/QuarticTorsionType.hpp"
-#include "types/PolynomialTorsionType.hpp"
-#include "types/CharmmTorsionType.hpp"
-#include "types/OplsTorsionType.hpp"
-#include "types/TrappeTorsionType.hpp"
-#include "types/HarmonicTorsionType.hpp"
+#include "types/TorsionTypeParser.hpp"
 #include "brains/ForceField.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
 
   TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options) : 
-    options_(options), trans180_(true) {
+    options_(options) {
 
     setSectionName("TorsionTypes");
-    stringToEnumMap_["GhostTorsion"] = ttGhostTorsion;
-    stringToEnumMap_["Cubic"] = ttCubic;
-    stringToEnumMap_["Quartic"] = ttQuartic;
-    stringToEnumMap_["Polynomial"] = ttPolynomial;
-    stringToEnumMap_["Charmm"] =  ttCharmm;
-    stringToEnumMap_["Opls"] =  ttOpls;
-    stringToEnumMap_["Trappe"] =  ttTrappe;
-    stringToEnumMap_["Harmonic"] =  ttHarmonic;
   }
 
   void TorsionTypesSectionParser::parseLine(ForceField& ff,
 					    const std::string& line, 
 					    int lineNo){
     StringTokenizer tokenizer(line);
+    TorsionTypeParser ttParser;
     TorsionType* torsionType = NULL;
     
     std::string torsionConvention = options_.getTorsionAngleConvention();
     toUpper(torsionConvention);
-    trans180_ = torsionConvention.compare("180_IS_TRANS") == 0 ? true : false;
 
+    if (torsionConvention.compare("180_IS_TRANS") == 0)
+      ttParser.Trans180();
+    else
+      ttParser.Cis180();
+  
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 5) {
+      sprintf(painCave.errMsg, "TorsionTypesSectionParser Error: Not enough tokens at line %d\n",
+              lineNo);
+      painCave.isFatal = 1;
+      simError();
       return;
     }
     
@@ -88,202 +82,25 @@ namespace OpenMD {
     std::string at2 = tokenizer.nextToken();
     std::string at3 = tokenizer.nextToken();
     std::string at4 = tokenizer.nextToken();
-    TorsionTypeEnum tt = getTorsionTypeEnum(tokenizer.nextToken());
+    std::string remainder = tokenizer.getRemainingString();
 
-    nTokens -= 5;
-
-    switch(tt) {
-
-    case TorsionTypesSectionParser::ttGhostTorsion:
-      if (nTokens < 4) {
-
-      } else {
-
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-        if (trans180_)
-          torsionType = new CubicTorsionType( k3, k2,  k1, k0);
-        else 
-          torsionType = new CubicTorsionType(-k3, k2, -k1, k0);
-      }
-      break;
-            
-    case TorsionTypesSectionParser::ttCubic :
-      if (nTokens < 4) {
-
-      } else {
-
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-        if (trans180_)
-          torsionType = new CubicTorsionType( k3, k2,  k1, k0);
-        else 
-          torsionType = new CubicTorsionType(-k3, k2, -k1, k0);
-      }
-      break;
-            
-    case TorsionTypesSectionParser::ttQuartic:
-      if (nTokens < 5) {
-
-      } else {
-
-	RealType k4 = tokenizer.nextTokenAsDouble();
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-        if (trans180_)
-          torsionType = new QuarticTorsionType( k4,  k3, k2,  k1, k0);
-        else 
-          torsionType = new QuarticTorsionType( k4, -k3, k2, -k1, k0);
-
-
-      }
-      break;
-
-        
-    case TorsionTypesSectionParser::ttPolynomial:
-      if (nTokens < 2 || nTokens % 2 != 0) {
-
-      } else {
-	int nPairs = nTokens / 2;
-	int power;
-	RealType coefficient;
-	torsionType = new PolynomialTorsionType();
-
-        PolynomialTorsionType* ptt = dynamic_cast<PolynomialTorsionType*>(torsionType); 
-                
-	for (int i = 0; i < nPairs; ++i) {
-	  power = tokenizer.nextTokenAsInt();
-          bool isOdd = power % 2 == 0 ? false : true;
-
-	  coefficient = tokenizer.nextTokenAsDouble();
-
-          if (!trans180_ && isOdd)
-            coefficient = -coefficient;
-
-          ptt->setCoefficient(power, coefficient);
-          
-	}
-      }
-            
-      break;
-             
-    case TorsionTypesSectionParser::ttCharmm:
-            
-      if (nTokens < 3 || nTokens % 3 != 0) {
-
-      } else {
-	int nSets = nTokens / 3;
-  
-        std::vector<CharmmTorsionParameter> parameters;             
-	for (int i = 0; i < nSets; ++i) {
-          CharmmTorsionParameter currParam;
-	  currParam.kchi = tokenizer.nextTokenAsDouble();
-	  currParam.n = tokenizer.nextTokenAsInt();
-	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
-
-          bool isOdd = currParam.n % 2 == 0 ? false : true;
-          if (!trans180_) {           
-            currParam.delta = NumericConstant::PI - currParam.delta;
-            if (isOdd) currParam.kchi = -currParam.kchi;
-          }
-
-          parameters.push_back(currParam);
-	}
-
-	torsionType = new CharmmTorsionType(parameters);
-
-      }
-
-      break;
-
-    case TorsionTypesSectionParser::ttOpls:
-            
-      if (nTokens < 3) {
-
-      } else {
-	RealType v1 = tokenizer.nextTokenAsDouble();
-	RealType v2 = tokenizer.nextTokenAsDouble();
-	RealType v3 = tokenizer.nextTokenAsDouble();
-        
-	torsionType = new OplsTorsionType(v1, v2, v3, trans180_);
-      }
-
-      break;
-            
-
-    case TorsionTypesSectionParser::ttTrappe:
-            
-      if (nTokens < 4) {
-
-      } else {
-
-	RealType c0 = tokenizer.nextTokenAsDouble();
-	RealType c1 = tokenizer.nextTokenAsDouble();
-	RealType c2 = tokenizer.nextTokenAsDouble();
-	RealType c3 = tokenizer.nextTokenAsDouble();
-	torsionType = new TrappeTorsionType(c0, c1, c2, c3, trans180_);
-      }
-
-      break;
-
-    case TorsionTypesSectionParser::ttHarmonic:
-            
-      if (nTokens < 2) {
-
-      } else {
-        // Most torsions don't have specific angle information since
-        // they are cosine polynomials.  This one is different,
-        // however.  To match our other force field files
-        // (particularly for bends): 
-        //
-        // phi0 should be read in degrees
-        // d0 should be read in kcal / mol / degrees^2
-
-        RealType degreesPerRadian = 180.0 / NumericConstant::PI;
-
-        // convert to radians
-	RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
-        
-        // convert to kcal / mol / radians^2
-	RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
-
-        if (!trans180_)
-          phi0 = NumericConstant::PI - phi0;
-
-	torsionType = new HarmonicTorsionType(d0, phi0);
-      }
-
-      break;
-            
-    case TorsionTypesSectionParser::ttUnknown :
-    default:
-
-      break;
-            
+    try {
+      torsionType = ttParser.parseLine(remainder);
+    }
+    catch( OpenMDException e ) {
+      
+      sprintf(painCave.errMsg, "TorsionTypesSectionParser Error: %s "
+              "at line %d\n",
+              e.what(), lineNo);
+      painCave.isFatal = 1;
+      simError();
     }
 
     if (torsionType != NULL) {
       ff.addTorsionType(at1, at2, at3, at4, torsionType);
     }
 
-  }
-
-  TorsionTypesSectionParser::TorsionTypeEnum TorsionTypesSectionParser::getTorsionTypeEnum(const std::string& str) {
-    std::map<std::string, TorsionTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-    
-    return i == stringToEnumMap_.end() ? TorsionTypesSectionParser::ttUnknown : i->second;
-  }
-  
+  }  
 } //end namespace OpenMD
 
 

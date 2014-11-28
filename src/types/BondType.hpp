@@ -49,6 +49,8 @@
 
 #ifndef TYPES_BONDTYPE_HPP
 #define TYPES_BONDTYPE_HPP
+#include "config.h"
+
 
 namespace OpenMD {
   

@@ -40,28 +40,41 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_BENDTYPESSECTIONPARSER_HPP
-#define IO_BENDTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_BONDTYPEPARSER_HPP
+#define TYPES_BONDTYPEPARSER_HPP
+
+#include <map>
+#include <vector>
+#include "types/BondType.hpp"
+
 namespace OpenMD {
 
   /**
-   * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
+   * @class BondTypeParser BondTypeParser.hpp "types/BondTypeParser.hpp"
    */
-  class BendTypesSectionParser : public SectionParser {
+  class BondTypeParser {
   public:
-    BendTypesSectionParser(ForceFieldOptions& options);
+    BondTypeParser();
+    BondType* parseLine(const std::string& line);
+    BondType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
             
   private:
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
+
+    enum BondTypeEnum{
+      btFixed,
+      btHarmonic,
+      btCubic,
+      btQuartic,
+      btPolynomial,
+      btMorse,
+      btUnknown
+    };
+            
+    BondTypeEnum getBondTypeEnum(const std::string& str);  
+    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
   };
+} 
 
-
-} //namespace OpenMD
-
-#endif //IO_BENDTYPESSECTIONPARSER_HPP
-
+#endif
 
 
