@@ -228,7 +228,7 @@ namespace OpenMD {
     catch (OpenMDException& e) {
       sprintf(painCave.errMsg, 
               "%s\n",
-              e.getMessage().c_str());
+              e.what());
       painCave.isFatal = 1;
       simError();
     }

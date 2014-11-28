@@ -49,6 +49,7 @@
 
 #ifndef TYPES_BENDTYPE_HPP
 #define TYPES_BENDTYPE_HPP
+#include "config.h"
 
 namespace OpenMD {
   

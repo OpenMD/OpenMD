@@ -52,21 +52,21 @@ namespace OpenMD {
     : tokenString_(str), delim_(delim), returnTokens_(false),
       currentPos_(tokenString_.begin()), end_(tokenString_.end()){
 
-    }
+  }
 
   StringTokenizer::StringTokenizer(std::string::const_iterator& first, std::string::const_iterator& last,
 				   const std::string & delim)  
     : tokenString_(first, last) , delim_(delim), returnTokens_(false),
       currentPos_(tokenString_.begin()), end_(tokenString_.end()) {
 
-    }
+  }
 
   StringTokenizer::StringTokenizer(const std::string&str, const std::string&delim,
 				   bool returnTokens)
     : tokenString_(str), delim_(delim), returnTokens_(returnTokens),
       currentPos_(tokenString_.begin()), end_(tokenString_.end()) {
 
-    }
+  }
 
   bool StringTokenizer::isDelimiter(const char c) {
     return delim_.find(c) == std::string::npos ? false : true;
@@ -114,7 +114,8 @@ namespace OpenMD {
     } else {
       std::string::const_iterator i = currentPos_;
 
-      //walk through the remaining string to check whether it contains non-delimeter or not
+      //walk through the remaining string to check whether it contains
+      //non-delimeter or not
       while(i != end_ && isDelimiter(*i)) {
 	++i;
       }
@@ -206,13 +207,13 @@ namespace OpenMD {
     return result;    
   }
 
- std::vector<std::string>  StringTokenizer::getAllTokens() {
+  std::vector<std::string>  StringTokenizer::getAllTokens() {
     std::vector<std::string> tokens;
     while (hasMoreTokens()) {
-        tokens.push_back(nextToken());
+      tokens.push_back(nextToken());
     }
     return tokens;
- }
+  }
   void StringTokenizer::convertFortranNumber(std::string& fortranNumber) {
     std::string::iterator i;
     for(i = fortranNumber.begin(); i != fortranNumber.end(); ++i) {
@@ -222,5 +223,20 @@ namespace OpenMD {
     }
   }
 
+  std::string  StringTokenizer::getRemainingString() {
+    std::string result;
+    std::string::const_iterator tmpIter = currentPos_;
+    if(tmpIter != end_) {
+      std::insert_iterator<std::string> insertIter(result, result.begin());
+      
+      while (tmpIter != end_) {
+	*insertIter++ = *tmpIter++;
+      }
+    }
+    
+    return result;
+  }
+
+  
 }//end namespace OpenMD
 

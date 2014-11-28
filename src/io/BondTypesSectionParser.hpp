@@ -42,7 +42,6 @@
  
 #ifndef IO_BONDTYPESSECTIONPARSER_HPP
 #define IO_BONDTYPESSECTIONPARSER_HPP
-#include <map>
 #include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
 namespace OpenMD {
@@ -54,23 +53,8 @@ namespace OpenMD {
   public:
     BondTypesSectionParser(ForceFieldOptions& options);
             
-  private:
-
-    enum BondTypeEnum{
-      btFixed,
-      btHarmonic,
-      btCubic,
-      btQuartic,
-      btPolynomial,
-      btMorse,
-      btUnknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    BondTypeEnum getBondTypeEnum(const std::string& str);  
-
-    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
+  private:            
+    void parseLine(ForceField& ff, const std::string& line, int lineNo);  
     ForceFieldOptions& options_;
   };
 

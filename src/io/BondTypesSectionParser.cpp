@@ -41,149 +41,46 @@
  */
  
 #include "io/BondTypesSectionParser.hpp"
-#include "types/FixedBondType.hpp"
-#include "types/HarmonicBondType.hpp"
-#include "types/CubicBondType.hpp"
-#include "types/QuarticBondType.hpp"
-#include "types/PolynomialBondType.hpp"
-#include "types/MorseBondType.hpp"
+#include "types/BondTypeParser.hpp"
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   BondTypesSectionParser::BondTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("BondTypes");
-
-    stringToEnumMap_["Fixed"] =  btFixed;                
-    stringToEnumMap_["Harmonic"] =  btHarmonic;                                
-    stringToEnumMap_["Cubic"] = btCubic;
-    stringToEnumMap_["Quartic"] = btQuartic;
-    stringToEnumMap_["Polynomial"] = btPolynomial;
-    stringToEnumMap_["Morse"] = btMorse;
   }
 
-  void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void BondTypesSectionParser::parseLine(ForceField& ff,
+                                         const std::string& line,
+                                         int lineNo) {
     StringTokenizer tokenizer(line);
+    BondTypeParser btParser;        
     BondType* bondType = NULL;
     int nTokens = tokenizer.countTokens();
-
+    
     if (nTokens < 4) {
-      sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+      sprintf(painCave.errMsg,
+              "BondTypesSectionParser Error: Not enough tokens at line %d\n",
 	      lineNo);
       painCave.isFatal = 1;
       simError();
     }
     
     std::string at1 = tokenizer.nextToken();
-    std::string at2 = tokenizer.nextToken();
-    BondTypeEnum bt = getBondTypeEnum(tokenizer.nextToken());
-    RealType b0 = tokenizer.nextTokenAsDouble();
-    nTokens -= 4;
-
-    //switch is a maintain nightmare
-    switch(bt) {
-    case btFixed :
-      bondType = new FixedBondType(b0);
-      break;
-            
-    case btHarmonic :
-      if (nTokens < 1) {
-	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-	RealType kb = tokenizer.nextTokenAsDouble();
-	bondType = new HarmonicBondType(b0, kb);
-      }
-
-      break;
-
-    case btCubic :
-      if (nTokens < 4) {
-	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-	bondType = new CubicBondType(b0, k3, k2, k1, k0);
-      }
-      break;
-            
-    case btQuartic :
-      if (nTokens < 5) {
-
-	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-
-      } else {
-
-	b0 = tokenizer.nextTokenAsDouble();
-	RealType k4 = tokenizer.nextTokenAsDouble();
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-	bondType = new QuarticBondType(b0, k4, k3, k2, k1, k0);
-      }
-      break;
-
-    case btPolynomial :
-      if (nTokens < 2 || nTokens % 2 != 0) {
-	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-
-      } else {
-	int nPairs = nTokens / 2;
-	int power;
-	RealType coefficient;
-	PolynomialBondType* pbt = new PolynomialBondType(b0);
-                
-	for (int i = 0; i < nPairs; ++i) {
-	  power = tokenizer.nextTokenAsInt();
-	  coefficient = tokenizer.nextTokenAsDouble();
-	  pbt->setCoefficient(power, coefficient);
-	}
-      }
-            
-      break;
-
-    case btMorse :
-      if (nTokens < 2) {
-	sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-        RealType D = tokenizer.nextTokenAsDouble();
-        RealType beta = tokenizer.nextTokenAsDouble();
-        bondType = new MorseBondType(b0, D, beta);
-      }
-      break;
-            
-
-    case btUnknown :
-    default:
-      sprintf(painCave.errMsg, "BondTypesSectionParser Error: Unknown Bond Type at line %d\n",
-	      lineNo);
+    std::string at2 = tokenizer.nextToken(); 
+    std::string remainder = tokenizer.getRemainingString();
+   
+    try {
+      bondType = btParser.parseLine(remainder);
+    }
+    catch( OpenMDException e ) {
+      
+      sprintf(painCave.errMsg, "BondTypesSectionParser Error: %s "
+              "at line %d\n",
+              e.what(), lineNo);
       painCave.isFatal = 1;
       simError();
-
-      break;
-            
     }
 
     if (bondType != NULL) {
@@ -191,13 +88,5 @@ namespace OpenMD {
     }
 
   }
-
-  BondTypesSectionParser::BondTypeEnum BondTypesSectionParser::getBondTypeEnum(const std::string& str) {
-    std::map<std::string, BondTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-
-    return i == stringToEnumMap_.end() ? btUnknown : i->second;
-  }
-
-} //end namespace OpenMD
+}
 

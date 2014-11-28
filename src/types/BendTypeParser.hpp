@@ -40,28 +40,44 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_BENDTYPESSECTIONPARSER_HPP
-#define IO_BENDTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_BENDTYPEPARSER_HPP
+#define TYPES_BENDTYPEPARSER_HPP
+#include <map>
+#include <vector>
+#include "types/BendType.hpp"
+
+
 namespace OpenMD {
 
   /**
-   * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
+   * @class BendTypeParser BendTypeParser.hpp "types/BendTypeParser.hpp"
    */
-  class BendTypesSectionParser : public SectionParser {
+  class BendTypeParser {
   public:
-    BendTypesSectionParser(ForceFieldOptions& options);
-            
+    BendTypeParser();
+    BendType* parseLine(const std::string& line);
+    BendType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
+        
   private:
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
+
+    enum BendTypeEnum{
+      btHarmonic,
+      btGhostBend,
+      btUreyBradley,
+      btCubic,
+      btQuartic,
+      btPolynomial,
+      btCosine,
+      btUnknown
+    };
+            
+    BendTypeEnum getBendTypeEnum(const std::string& str);  
+
+    std::map<std::string, BendTypeEnum> stringToEnumMap_;  
   };
+}
 
-
-} //namespace OpenMD
-
-#endif //IO_BENDTYPESSECTIONPARSER_HPP
+#endif
 
 
 

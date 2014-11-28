@@ -42,7 +42,6 @@
  
 #ifndef IO_TORSIONTYPESSECTIONPARSER_HPP
 #define IO_TORSIONTYPESSECTIONPARSER_HPP
-#include <map>
 #include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
 
@@ -52,33 +51,12 @@ namespace OpenMD {
    * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
    */
   class TorsionTypesSectionParser : public SectionParser {
-  public:
-
-            
+  public:            
     TorsionTypesSectionParser(ForceFieldOptions& options);
+
   private:
-
-
-    enum TorsionTypeEnum{
-      ttGhostTorsion,
-      ttCubic,
-      ttQuartic,
-      ttPolynomial,
-      ttCharmm,
-      ttOpls,
-      ttTrappe,
-      ttHarmonic,
-      ttUnknown
-    };
-
-    TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
-            
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
-
-    std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
     ForceFieldOptions& options_;
-    bool trans180_;
   };
 
 

@@ -40,28 +40,45 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_BENDTYPESSECTIONPARSER_HPP
-#define IO_BENDTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_TORSIONTYPEPARSER_HPP
+#define TYPES_TORSIONTYPEPARSER_HPP
+#include <map>
+#include <vector>
+#include "types/TorsionType.hpp"
+
+
 namespace OpenMD {
 
   /**
-   * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
+   * @class TorsionTypeParser TorsionTypeParser.hpp "types/TorsionTypeParser.hpp"
    */
-  class BendTypesSectionParser : public SectionParser {
-  public:
-    BendTypesSectionParser(ForceFieldOptions& options);
-            
+  class TorsionTypeParser {
+  public:            
+    TorsionTypeParser();
+    void Trans180() {trans180_ = true;}
+    void Cis180() {trans180_ = false;}
+    TorsionType* parseLine(const std::string& line);
+    TorsionType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
+
   private:
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
+
+    enum TorsionTypeEnum{
+      ttGhostTorsion,
+      ttCubic,
+      ttQuartic,
+      ttPolynomial,
+      ttCharmm,
+      ttOpls,
+      ttTrappe,
+      ttHarmonic,
+      ttUnknown
+    };
+
+    TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
+            
+    std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
+    bool trans180_;
   };
+}
 
-
-} //namespace OpenMD
-
-#endif //IO_BENDTYPESSECTIONPARSER_HPP
-
-
-
+#endif

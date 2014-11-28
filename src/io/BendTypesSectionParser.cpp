@@ -40,32 +40,20 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "utils/NumericConstant.hpp" 
 #include "io/BendTypesSectionParser.hpp"
-#include "types/HarmonicBendType.hpp"
-#include "types/UreyBradleyBendType.hpp"
-#include "types/CubicBendType.hpp"
-#include "types/QuarticBendType.hpp"
-#include "types/PolynomialBendType.hpp"
-#include "types/CosineBendType.hpp"
+#include "types/BendTypeParser.hpp"
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   BendTypesSectionParser::BendTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("BendTypes");
-
-    stringToEnumMap_["Harmonic"] =  btHarmonic;       
-    stringToEnumMap_["GhostBend"] =  btGhostBend;                
-    stringToEnumMap_["UreyBradley"] =  btUreyBradley;                    
-    stringToEnumMap_["Cubic"] = btCubic;
-    stringToEnumMap_["Quartic"] = btQuartic;
-    stringToEnumMap_["Polynomial"] = btPolynomial;    
-    stringToEnumMap_["Cosine"] = btCosine;    
   }
 
   void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
+    BendTypeParser btParser;
     BendType* bendType = NULL;
 
     int nTokens = tokenizer.countTokens();
@@ -81,144 +69,25 @@ namespace OpenMD {
     std::string at1 = tokenizer.nextToken();
     std::string at2 = tokenizer.nextToken();
     std::string at3 = tokenizer.nextToken();
-    BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-    RealType theta0 = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
-    nTokens -= 5;
+    std::string remainder = tokenizer.getRemainingString();
 
-    //switch is a maintain nightmare
-    switch(bt) {
-            
-    case btHarmonic :
-            
-      if (nTokens < 1) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-	bendType = new HarmonicBendType(theta0, ktheta);
-      }
-      break;
-    case btGhostBend :
-      if (nTokens < 1) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-	bendType = new HarmonicBendType(theta0, ktheta);                
-      }
-      break;            
-
-    case btUreyBradley :
-      if (nTokens < 3) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-	RealType s0 =  tokenizer.nextTokenAsDouble();
-	RealType kub = tokenizer.nextTokenAsDouble();
-	bendType = new UreyBradleyBendType(theta0, ktheta, s0, kub);                
-      }
-      break; 
-            
-    case btCubic :
-      if (nTokens < 4) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-	bendType = new CubicBendType(theta0, k3, k2, k1, k0);
-      }
-      break;
-            
-    case btQuartic :
-      if (nTokens < 5) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-	RealType k4 = tokenizer.nextTokenAsDouble();
-	RealType k3 = tokenizer.nextTokenAsDouble();
-	RealType k2 = tokenizer.nextTokenAsDouble();
-	RealType k1 = tokenizer.nextTokenAsDouble();
-	RealType k0 = tokenizer.nextTokenAsDouble();
-                
-	bendType = new QuarticBendType(theta0, k4, k3, k2, k1, k0);
-      }
-      break;
-
-    case btPolynomial :
-      if (nTokens < 2 || nTokens % 2 != 0) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-	int nPairs = nTokens / 2;
-	int power;
-	RealType coefficient;
-	PolynomialBendType* pbt = new PolynomialBendType(theta0);
-                
-	for (int i = 0; i < nPairs; ++i) {
-	  power = tokenizer.nextTokenAsInt();
-	  coefficient = tokenizer.nextTokenAsDouble();
-	  pbt->setCoefficient(power, coefficient);
-	}
-      }
-            
-      break;
-
-    case btCosine :
-            
-      if (nTokens < 1) {
-	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      } else {
-
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-	bendType = new CosineBendType(theta0, ktheta);
-      }
-      break;
-
-    case btUnknown :
-    default:
-      sprintf(painCave.errMsg, "BendTypesSectionParser Error: Unknown Bond Type at line %d\n",
-	      lineNo);
+    try {
+      bendType = btParser.parseLine(remainder);
+    }
+    catch( OpenMDException e ) {
+      
+      sprintf(painCave.errMsg, "BendTypesSectionParser Error: %s "
+              "at line %d\n",
+              e.what(), lineNo);
       painCave.isFatal = 1;
       simError();
-      break;
-            
     }
 
     if (bendType != NULL) {
       ff.addBendType(at1, at2, at3, bendType);
     }
+    
   }
-
-  BendTypesSectionParser::BendTypeEnum BendTypesSectionParser::getBendTypeEnum(const std::string& str) {
-    std::map<std::string, BendTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-
-    return i == stringToEnumMap_.end() ? btUnknown : i->second;
-  }
-
 } //end namespace OpenMD
 
 
