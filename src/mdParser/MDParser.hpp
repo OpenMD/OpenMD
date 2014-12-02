@@ -91,10 +91,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 60;
+	static const int NUM_TOKENS = 78;
 #else
 	enum {
-		NUM_TOKENS = 60
+		NUM_TOKENS = 78
 	};
 #endif
 	
@@ -132,6 +132,18 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_15;
 	static const unsigned long _tokenSet_16_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_16;
+	static const unsigned long _tokenSet_17_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_17;
+	static const unsigned long _tokenSet_18_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_18;
+	static const unsigned long _tokenSet_19_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_19;
+	static const unsigned long _tokenSet_20_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_20;
+	static const unsigned long _tokenSet_21_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_21;
+	static const unsigned long _tokenSet_22_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_22;
 };
 
 #endif /*INC_MDParser_hpp_*/

@@ -49,7 +49,7 @@
 
 namespace OpenMD {
   AtomStamp::AtomStamp(int index) : havePos_(false), haveOrt_(false),  
-                                    index_(index) {
+                                    hasOverride_(false), index_(index) {
     DefineParameter(Type, "type");
   }
 

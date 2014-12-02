@@ -59,7 +59,7 @@ namespace OpenMD {
        the center of mass height by:
 
        \f$ z_\mathrm{cm} = (2)^{-4/3} R_0 \left(
-       \frac{1-\cos\theta}{2+\cos\theta}\right)^{1/3)
+       \frac{1-\cos\theta}{2+\cos\theta}\right)^{1/3}
        \frac{3+\cos\theta}{2+\cos\theta} \f$
 
        where \f$z_\mathrm{cm}\f$ is measured relative to the planar

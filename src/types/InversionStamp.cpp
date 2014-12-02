@@ -46,7 +46,7 @@
 #include "types/InversionStamp.hpp"
 namespace OpenMD {
   
-  InversionStamp::InversionStamp() {
+  InversionStamp::InversionStamp(): hasOverride_(false) {
   }
   
   InversionStamp::~InversionStamp() {    

@@ -56,6 +56,10 @@
 #include "primitives/GhostTorsion.hpp"
 #include "types/AtomType.hpp"
 #include "types/FixedBondType.hpp"
+#include "types/BondTypeParser.hpp"
+#include "types/BendTypeParser.hpp"
+#include "types/TorsionTypeParser.hpp"
+#include "types/InversionTypeParser.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
 
@@ -96,7 +100,7 @@ namespace OpenMD {
     int nBonds = molStamp->getNBonds();
 
     for (int i = 0; i < nBonds; ++i) {
-      currentBondStamp = molStamp->getBondStamp(i);
+      currentBondStamp = molStamp->getBondStamp(i);        
       bond = createBond(ff, mol, currentBondStamp, localIndexMan);
       mol->addBond(bond);
     }
@@ -304,7 +308,8 @@ namespace OpenMD {
   Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, 
                                     BondStamp* stamp,
                                     LocalIndexManager* localIndexMan) {
-    BondType* bondType;
+    BondTypeParser btParser;        
+    BondType* bondType = NULL;
     Atom* atomA;
     Atom* atomB;
     
@@ -312,17 +317,34 @@ namespace OpenMD {
     atomB = mol->getAtomAt(stamp->getB());
     
     assert( atomA && atomB);
-    
-    bondType = ff->getBondType(atomA->getType(), atomB->getType());
 
-    if (bondType == NULL) {
-      sprintf(painCave.errMsg, "Can not find Matching Bond Type for[%s, %s]",
-	      atomA->getType().c_str(),
-	      atomB->getType().c_str());
-      
-      painCave.isFatal = 1;
-      simError();
+    if (stamp->hasOverride()) {
+
+      try {
+        bondType = btParser.parseTypeAndPars(stamp->getOverrideType(),
+                                             stamp->getOverridePars() );
+      }
+      catch( OpenMDException e) {
+        sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
+                "for molecule %s\n",
+                e.what(), mol->getType().c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
+
+    } else {
+      bondType = ff->getBondType(atomA->getType(), atomB->getType());
+
+      if (bondType == NULL) {
+        sprintf(painCave.errMsg, "Can not find Matching Bond Type for[%s, %s]",
+                atomA->getType().c_str(),
+                atomB->getType().c_str());
+        
+        painCave.isFatal = 1;
+        simError();
+      }
     }
+    
     Bond* bond = new Bond(atomA, atomB, bondType);
 
     //set the local index of this bond, the global index will be set later
@@ -342,34 +364,55 @@ namespace OpenMD {
   Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, 
                                     BendStamp* stamp,
                                     LocalIndexManager* localIndexMan) {
-    Bend* bend = NULL; 
-    std::vector<int> bendAtoms = stamp->getMembers(); 
+    BendTypeParser btParser;
+    BendType* bendType = NULL;
+    Bend* bend = NULL;
+    
+    std::vector<int> bendAtoms = stamp->getMembers();
     if (bendAtoms.size() == 3) {
       Atom* atomA = mol->getAtomAt(bendAtoms[0]);
       Atom* atomB = mol->getAtomAt(bendAtoms[1]);
       Atom* atomC = mol->getAtomAt(bendAtoms[2]);
       
-      assert( atomA && atomB && atomC);
-      
-      BendType* bendType = ff->getBendType(atomA->getType().c_str(), 
-                                           atomB->getType().c_str(), 
-                                           atomC->getType().c_str());
-      
-      if (bendType == NULL) {
-        sprintf(painCave.errMsg, 
-                "Can not find Matching Bend Type for[%s, %s, %s]",
-                atomA->getType().c_str(),
-                atomB->getType().c_str(),
-                atomC->getType().c_str());
+      assert( atomA && atomB && atomC );
+
+      if (stamp->hasOverride()) {
         
-        painCave.isFatal = 1;
-        simError();
+        try {
+          bendType = btParser.parseTypeAndPars(stamp->getOverrideType(),
+                                               stamp->getOverridePars() );
+        }
+        catch( OpenMDException e) {
+          sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
+                  "for molecule %s\n",
+                  e.what(), mol->getType().c_str() );
+          painCave.isFatal = 1;
+          simError();
+        }
+      } else {
+        
+        bendType = ff->getBendType(atomA->getType().c_str(), 
+                                             atomB->getType().c_str(), 
+                                             atomC->getType().c_str());
+      
+        if (bendType == NULL) {
+          sprintf(painCave.errMsg, 
+                  "Can not find Matching Bend Type for[%s, %s, %s]",
+                  atomA->getType().c_str(),
+                  atomB->getType().c_str(),
+                  atomC->getType().c_str());
+          
+          painCave.isFatal = 1;
+          simError();
+        }
       }
       
       bend = new Bend(atomA, atomB, atomC, bendType);
+      
     } else if ( bendAtoms.size() == 2 && stamp->haveGhostVectorSource()) {
       int ghostIndex = stamp->getGhostVectorSource();
-      int normalIndex = ghostIndex != bendAtoms[0] ? bendAtoms[0] : bendAtoms[1]; 
+      int normalIndex = ghostIndex != bendAtoms[0] ?
+        bendAtoms[0] : bendAtoms[1]; 
       Atom* normalAtom = mol->getAtomAt(normalIndex) ;        
       DirectionalAtom* ghostAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(ghostIndex));
       if (ghostAtom == NULL) {
@@ -377,33 +420,50 @@ namespace OpenMD {
 	painCave.isFatal = 1;
 	simError();
       }
-                
-      BendType* bendType = ff->getBendType(normalAtom->getType(), ghostAtom->getType(), "GHOST");
 
-      if (bendType == NULL) {
-	sprintf(painCave.errMsg, 
-                "Can not find Matching Bend Type for[%s, %s, %s]",
-		normalAtom->getType().c_str(),
-		ghostAtom->getType().c_str(),
-		"GHOST");
-
-	painCave.isFatal = 1;
-	simError();
+      if (stamp->hasOverride()) {
+        
+        try {
+          bendType = btParser.parseTypeAndPars(stamp->getOverrideType(),
+                                               stamp->getOverridePars() );
+        }
+        catch( OpenMDException e) {
+          sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
+                  "for molecule %s\n",
+                  e.what(), mol->getType().c_str() );
+          painCave.isFatal = 1;
+          simError();
+        }
+      } else {
+      
+        bendType = ff->getBendType(normalAtom->getType(), ghostAtom->getType(),
+                                   "GHOST");
+        
+        if (bendType == NULL) {
+          sprintf(painCave.errMsg, 
+                  "Can not find Matching Bend Type for[%s, %s, %s]",
+                  normalAtom->getType().c_str(),
+                  ghostAtom->getType().c_str(),
+                  "GHOST");
+          
+          painCave.isFatal = 1;
+          simError();
+        }
       }
       
       bend = new GhostBend(normalAtom, ghostAtom, bendType);       
       
     } 
-
+    
     //set the local index of this bend, the global index will be set later
     bend->setLocalIndex(localIndexMan->getNextBendIndex());
-
+    
     // The rule for naming a bend is: MoleculeName_Bend_Integer
     // The first part is the name of the molecule
     // The second part is always fixed as "Bend"
     // The third part is the index of the bend defined in meta-data file
     // For example, Butane_Bend_0 is a valid Bend name in a butane molecule
-
+    
     std::string s = OpenMD_itoa(mol->getNBends(), 10);
     bend->setName(mol->getType() + "_Bend_" + s.c_str());    
     return bend;
@@ -413,7 +473,10 @@ namespace OpenMD {
                                           TorsionStamp* stamp,
                                           LocalIndexManager* localIndexMan) {
 
+    TorsionTypeParser ttParser;
+    TorsionType* torsionType = NULL;
     Torsion* torsion = NULL;
+
     std::vector<int> torsionAtoms = stamp->getMembers();
     if (torsionAtoms.size() < 3) {
 	return torsion;
@@ -426,27 +489,43 @@ namespace OpenMD {
     if (torsionAtoms.size() == 4) {
       Atom* atomD = mol->getAtomAt(torsionAtoms[3]);
 
-      assert(atomA && atomB && atomC && atomD);
+      assert(atomA && atomB && atomC && atomD );
+
+      if (stamp->hasOverride()) {
         
-      TorsionType* torsionType = ff->getTorsionType(atomA->getType(), 
-                                                    atomB->getType(), 
-						    atomC->getType(), 
-                                                    atomD->getType());
-      if (torsionType == NULL) {
-	sprintf(painCave.errMsg, 
-                "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-		atomA->getType().c_str(),
-		atomB->getType().c_str(),
-		atomC->getType().c_str(),
-		atomD->getType().c_str());
+        try {
+          torsionType = ttParser.parseTypeAndPars(stamp->getOverrideType(),
+                                                  stamp->getOverridePars() );
+        }
+        catch( OpenMDException e) {
+          sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
+                  "for molecule %s\n",
+                  e.what(), mol->getType().c_str() );
+          painCave.isFatal = 1;
+          simError();
+        }
+      } else {
+
         
-	painCave.isFatal = 1;
-	simError();
+        torsionType = ff->getTorsionType(atomA->getType(), 
+                                         atomB->getType(), 
+                                         atomC->getType(), 
+                                         atomD->getType());
+        if (torsionType == NULL) {
+          sprintf(painCave.errMsg, 
+                  "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                  atomA->getType().c_str(),
+                  atomB->getType().c_str(),
+                  atomC->getType().c_str(),
+                  atomD->getType().c_str());
+          
+          painCave.isFatal = 1;
+          simError();
+        }
       }
       
       torsion = new Torsion(atomA, atomB, atomC, atomD, torsionType);       
-    }
-    else {
+    } else {
       
       DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(stamp->getGhostVectorSource()));
       if (dAtom == NULL) {
@@ -454,21 +533,37 @@ namespace OpenMD {
 	painCave.isFatal = 1;
 	simError();
       }        
-      
-      TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
-						    atomC->getType(), "GHOST");
-      
-      if (torsionType == NULL) {
-	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-		atomA->getType().c_str(),
-		atomB->getType().c_str(),
-		atomC->getType().c_str(),
-		"GHOST");
+
+      if (stamp->hasOverride()) {
         
-	painCave.isFatal = 1;
-	simError();
-      }
+        try {
+          torsionType = ttParser.parseTypeAndPars(stamp->getOverrideType(),
+                                                  stamp->getOverridePars() );
+        }
+        catch( OpenMDException e) {
+          sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
+                  "for molecule %s\n",
+                  e.what(), mol->getType().c_str() );
+          painCave.isFatal = 1;
+          simError();
+        }
+      } else {              
+        torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
+                                         atomC->getType(), "GHOST");
       
+        if (torsionType == NULL) {
+          sprintf(painCave.errMsg,
+                  "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                  atomA->getType().c_str(),
+                  atomB->getType().c_str(),
+                  atomC->getType().c_str(),
+                  "GHOST");
+          
+          painCave.isFatal = 1;
+          simError();
+        }
+      }
+
       torsion = new GhostTorsion(atomA, atomB, dAtom, torsionType);               
     }
 
@@ -490,8 +585,11 @@ namespace OpenMD {
   Inversion* MoleculeCreator::createInversion(ForceField* ff, Molecule* mol, 
                                               InversionStamp* stamp,
                                               LocalIndexManager* localIndexMan) {
-    
+
+    InversionTypeParser itParser;
+    InversionType* inversionType = NULL;
     Inversion* inversion = NULL;
+    
     int center = stamp->getCenter();
     std::vector<int> satellites = stamp->getSatellites();
     if (satellites.size() != 3) {
@@ -504,32 +602,49 @@ namespace OpenMD {
     Atom* atomD = mol->getAtomAt(satellites[2]);
       
     assert(atomA && atomB && atomC && atomD);
-    
-    InversionType* inversionType = ff->getInversionType(atomA->getType(), 
-                                                        atomB->getType(), 
-                                                        atomC->getType(), 
-                                                        atomD->getType());
 
-    if (inversionType == NULL) {
-      sprintf(painCave.errMsg, "No Matching Inversion Type for[%s, %s, %s, %s]\n"
-              "\t(May not be a problem: not all inversions are parametrized)\n",
-              atomA->getType().c_str(),
-              atomB->getType().c_str(),
-              atomC->getType().c_str(),
-              atomD->getType().c_str());
+    if (stamp->hasOverride()) {
       
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();
-      return NULL;
+      try {
+        inversionType = itParser.parseTypeAndPars(stamp->getOverrideType(),
+                                                  stamp->getOverridePars() );
+      }
+      catch( OpenMDException e) {
+        sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
+                "for molecule %s\n",
+                e.what(), mol->getType().c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
     } else {
       
+      inversionType = ff->getInversionType(atomA->getType(), 
+                                           atomB->getType(), 
+                                           atomC->getType(), 
+                                           atomD->getType());
+      
+      if (inversionType == NULL) {
+        sprintf(painCave.errMsg,
+                "No Matching Inversion Type for[%s, %s, %s, %s]\n"
+                "\t(May not be a problem: not all inversions are parametrized)\n",
+                atomA->getType().c_str(),
+                atomB->getType().c_str(),
+                atomC->getType().c_str(),
+                atomD->getType().c_str());
+        
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
+      }
+    }
+    if (inversionType != NULL) {
+      
       inversion = new Inversion(atomA, atomB, atomC, atomD, inversionType);
-
+      
       // set the local index of this inversion, the global index will
       // be set later
       inversion->setLocalIndex(localIndexMan->getNextInversionIndex());
-
+      
       // The rule for naming an inversion is: MoleculeName_Inversion_Integer
       // The first part is the name of the molecule
       // The second part is always fixed as "Inversion"
@@ -540,6 +655,8 @@ namespace OpenMD {
       std::string s = OpenMD_itoa(mol->getNInversions(), 10);
       inversion->setName(mol->getType() + "_Inversion_" + s.c_str());
       return inversion;
+    } else {
+      return NULL;
     }
   }
   

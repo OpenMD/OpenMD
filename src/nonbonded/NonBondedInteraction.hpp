@@ -91,6 +91,7 @@ namespace OpenMD {
    */
   struct InteractionData {
     //pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
+    /*@{*/
     int atid1;                /**< atomType ident for atom 1 */
     int atid2;                /**< atomType ident for atom 2 */
     Vector3d* d;              /**< interatomic vector (already wrapped into box) */
@@ -138,6 +139,7 @@ namespace OpenMD {
     RealType* skippedCharge2; /**< charge skipped on atom2 in pairwise interaction loop with atom1 */
     RealType* sPot1;           /**< site potential on first atom */
     RealType* sPot2;           /**< site potential on second atom */
+    /*@}*/
   };
   
   /** 
@@ -153,6 +155,7 @@ namespace OpenMD {
    */
   struct SelfData {
     //AtomType* atype;        /**< pointer to AtomType of the atom */
+    /*@{*/
     int atid;               /**< atomType ident for the atom */
     Vector3d* dipole;       /**< pointer to dipole vector of the atom */
     Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */
@@ -167,6 +170,7 @@ namespace OpenMD {
     RealType* dfrhodrho;    /**< derivative of density functional for atom */
     RealType* flucQ;	    /**< current value of atom's fluctuating charge */
     RealType* flucQfrc;	    /**< fluctuating charge derivative */
+    /*@}*/
   };
   
     

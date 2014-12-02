@@ -467,6 +467,7 @@ namespace OpenMD {
           if ( ma.isDipole() ) {
             dipole = atom->getDipole() * debyeToCm;
             qpole += 0.5 * outProduct( dipole, ri );
+            qpole += 0.5 * outProduct( ri, dipole );
           }
 
           if ( ma.isQuadrupole() ) {

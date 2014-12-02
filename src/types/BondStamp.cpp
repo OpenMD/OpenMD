@@ -46,7 +46,7 @@
 #include "types/BondStamp.hpp"
 namespace OpenMD {
   
-  BondStamp::BondStamp() {
+  BondStamp::BondStamp(): hasOverride_(false) {
   }
   
   BondStamp::~BondStamp() {    

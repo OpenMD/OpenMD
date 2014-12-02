@@ -293,7 +293,7 @@ namespace OpenMD {
             if (!getAtomStamp(ghostIndex)->haveOrientation()) {
               
               oss <<  "Error in Molecule " << getName() << 
-                ": ghost atom must be a directioanl atom\n"; 
+                ": ghost atom must be a directional atom\n"; 
               throw OpenMDException(oss.str());
             }
           } else {

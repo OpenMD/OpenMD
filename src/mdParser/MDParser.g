@@ -25,28 +25,46 @@ options
 
 tokens
 {
-  COMPONENT   = "component";
-  MOLECULE    = "molecule";
-  ZCONSTRAINT = "zconstraint";
-  RESTRAINT   = "restraint";
-  ATOM        = "atom";
-  BOND        = "bond";
-  BEND        = "bend";
-  TORSION     = "torsion";
-  INVERSION   = "inversion";
-  RIGIDBODY   = "rigidBody";
-  CUTOFFGROUP = "cutoffGroup";
-  CONSTRAINT  = "constraint";
-  DISTANCE    = "distance";
-  FRAGMENT    = "fragment";
-  MEMBERS     = "members";
-  CENTER      = "center";
-  SATELLITES  = "satellites";
-  POSITION    = "position";
-  ORIENTATION = "orientation";
-  FLUCQ       = "flucQ";
-  RNEMD       = "RNEMD";
-  MINIMIZER   = "minimizer";
+  COMPONENT         = "component";
+  MOLECULE          = "molecule";
+  ZCONSTRAINT       = "zconstraint";
+  RESTRAINT         = "restraint";
+  ATOM              = "atom";
+  BOND              = "bond";
+  BEND              = "bend";
+  TORSION           = "torsion";
+  INVERSION         = "inversion";
+  RIGIDBODY         = "rigidBody";
+  CUTOFFGROUP       = "cutoffGroup";
+  CONSTRAINT        = "constraint";
+  DISTANCE          = "distance";
+  FRAGMENT          = "fragment";
+  MEMBERS           = "members";
+  CENTER            = "center";
+  SATELLITES        = "satellites";
+  POSITION          = "position";
+  ORIENTATION       = "orientation";
+  FLUCQ             = "flucQ";
+  RNEMD             = "RNEMD";
+  MINIMIZER         = "minimizer";
+  FIXED             = "Fixed";
+  HARMONIC          = "Harmonic";
+  CUBIC             = "Cubic";
+  QUARTIC           = "Quartic";
+  POLYNOMIAL        = "Polynomial";
+  MORSE             = "Morse";
+  GHOSTBEND         = "GhostBend";
+  UREYBRADLEY       = "UreyBradley";
+  COSINE            = "Cosine";
+  GHOSTTORSION      = "GhostTorsion";
+  CHARMM            = "Charmm";
+  OPLS              = "Opls";
+  TRAPPE            = "Trappe";
+  AMBERIMPROPER     = "AmberImproper";
+  IMPROPERCOSINE    = "ImproperCosine";
+  CENTRALATOMHEIGHT = "CentralAtomHeight";
+  DREIDING          = "Dreiding";
+  CHARGE            = "charge";
   ENDBLOCK;
 }
 
@@ -111,89 +129,118 @@ atomblock : ATOM^ LBRACKET! intConst RBRACKET! LCURLY! (atomstatement)* RCURLY {
           ;
 
 atomstatement : assignment
-              | POSITION^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
-              | ORIENTATION^  LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
-              ;
+    | POSITION^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | ORIENTATION^  LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | CHARGE^ LPAREN! floatConst RPAREN! SEMICOLON!
+    ;
 
                       
 bondblock : BOND^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(bondstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
           ;
 
 bondstatement : assignment
-              | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
-              ;
+    | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+    | FIXED^ LPAREN! floatConst RPAREN! SEMICOLON!
+    | HARMONIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | CUBIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | QUARTIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | POLYNOMIAL^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | MORSE^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!        
+    ;
 
 bendblock : BEND^ (LBRACKET! intConst! RBRACKET!)? LCURLY!  (bendstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
           ;
 
 bendstatement : assignment
-              | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
-              ;
+    | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+    | HARMONIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | GHOSTBEND^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | UREYBRADLEY^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | CUBIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | QUARTIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | POLYNOMIAL^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | COSINE^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!            
+    ;
 
 torsionblock  : TORSION^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(torsionstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
           ;
 
 torsionstatement  : assignment
-              | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
-              ;
+    | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+    | GHOSTTORSION^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | CUBIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | QUARTIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | POLYNOMIAL^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | CHARMM^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | OPLS^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | TRAPPE^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | HARMONIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    ;
 
 inversionblock  : INVERSION^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(inversionstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
-          ;
+    ;
 
 inversionstatement  : assignment
-              | CENTER^ LPAREN! intConst RPAREN! SEMICOLON!
-              | SATELLITES^ LPAREN! inttuple RPAREN! SEMICOLON!
-              ;
+    | CENTER^ LPAREN! intConst RPAREN! SEMICOLON!
+    | SATELLITES^ LPAREN! inttuple RPAREN! SEMICOLON!
+    | AMBERIMPROPER^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | IMPROPERCOSINE^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | HARMONIC^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | CENTRALATOMHEIGHT^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    | DREIDING^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+    ;
 
 rigidbodyblock  : RIGIDBODY^  LBRACKET! intConst RBRACKET! LCURLY!(rigidbodystatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
                 ;
 
 rigidbodystatement  : assignment
-              | MEMBERS^ LPAREN!  inttuple  RPAREN! SEMICOLON!
-              ;
+    | MEMBERS^ LPAREN!  inttuple  RPAREN! SEMICOLON!
+    ;
 
 cutoffgroupblock  : CUTOFFGROUP^ (LBRACKET! intConst! RBRACKET!)? LCURLY! (cutoffgroupstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
-                  ;
+    ;
 
 cutoffgroupstatement  : assignment
-              | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
-              ;
+    | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+    ;
 
 fragmentblock : FRAGMENT^ LBRACKET! intConst RBRACKET! LCURLY! (fragmentstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
-              ;
+    ;
 
 fragmentstatement : assignment
-              ;
+    ;
 
 constraintblock : CONSTRAINT^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(constraintstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
-          ;
+    ;
 
 constraintstatement : assignment
-              | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
-              ;
+    | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+    ;
+    
 
-              
 doubleNumberTuple   : doubleNumber (COMMA! doubleNumber)* 
-              ;
-                          
+    ;
+
 inttuple      : intConst (COMMA! intConst)*
-              ;
-              
+    ;
+
 protected
 intConst
-        :  NUM_INT | NUM_LONG
-        ;
+    :
+        NUM_INT | NUM_LONG
+    ;
 
 protected
-doubleNumber  :  
-                (intConst | floatConst)
-              ;
+doubleNumber
+    :
+    (intConst | floatConst)
+    ;
               
 protected
 floatConst
-        : 
-          NUM_FLOAT | NUM_DOUBLE
-        ;
+   : 
+   NUM_FLOAT | NUM_DOUBLE
+   ;
 
 
 /* 

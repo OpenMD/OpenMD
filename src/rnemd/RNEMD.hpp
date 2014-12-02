@@ -40,14 +40,6 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file RNEMD.hpp
- * @author gezelter
- * @date 03/13/2009
- * @time 15:56pm
- * @version 1.0
- */
-
 #ifndef INTEGRATORS_RNEMD_HPP
 #define INTEGRATORS_RNEMD_HPP
 #include "brains/SimInfo.hpp"

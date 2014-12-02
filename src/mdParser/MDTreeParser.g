@@ -7,32 +7,32 @@ using namespace std;
 using namespace OpenMD;
 }
 options
-  {
-  language = "Cpp";
-  }
-                     
+{
+    language = "Cpp";
+}   
+
 class MDTreeParser extends TreeParser;
 
 options
 {
-        k = 1;
-        importVocab = MD;
+    k = 1;
+    importVocab = MD;
 }
 {
-  public:
+    public:
     Globals* walkTree(ANTLR_USE_NAMESPACE(antlr)RefAST tree)
     {
-      currConf = new Globals;
-      blockStack.push(currConf);
-      mdfile(tree);
-      return currConf;
+        currConf = new Globals;
+        blockStack.push(currConf);
+        mdfile(tree);
+        return currConf;
     }
-  private:
+    private:
     Globals* currConf;
     stack<DataHolder*> blockStack;    
 }
 mdfile  : (statement)* {blockStack.top()->validate(); blockStack.pop();}
-        ;
+    ;
 
 statement : assignment
     | componentblock
@@ -45,8 +45,8 @@ statement : assignment
     ;
 
 assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
-            ;
-            
+    ;
+
 constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
 {
     int ival;
@@ -65,117 +65,137 @@ constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
             blockStack.top()->assign(id->getText(), dvec);
         }
     ;
-            
+
 
 componentblock  : #(COMPONENT  {Component* currComponet = new Component(); blockStack.push(currComponet);}
-                      (assignment)* 
-                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addComponent(currComponet);}
-                ;
-    
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addComponent(currComponet);}
+    ;
+
 zconstraintblock  : #(ZCONSTRAINT {ZConsStamp* currZConsStamp = new ZConsStamp(); blockStack.push(currZConsStamp);}
-                        (assignment)* 
-                         ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addZConsStamp(currZConsStamp);}
-                  ;
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addZConsStamp(currZConsStamp);}
+    ;
 
 restraintblock  : #(RESTRAINT {RestraintStamp* currRestraintStamp = new RestraintStamp(); blockStack.push(currRestraintStamp);}
-                        (assignment)* 
-                         ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRestraintStamp(currRestraintStamp);}
-                  ;
-  
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRestraintStamp(currRestraintStamp);}
+    ;
+
 flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new FluctuatingChargeParameters(); blockStack.push(flucQpars);}
-                      (assignment)* 
-                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addFluctuatingChargeParameters(flucQpars);}
-                ;
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addFluctuatingChargeParameters(flucQpars);}
+    ;
 
 rnemdblock  : #(RNEMD  {RNEMDParameters* rnemdPars = new RNEMDParameters(); blockStack.push(rnemdPars);}
-                      (assignment)* 
-                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRNEMDParameters(rnemdPars);}
-                ;
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRNEMDParameters(rnemdPars);}
+    ;
 
 minimizerblock  : #(MINIMIZER  {MinimizerParameters* minimizerPars = new MinimizerParameters(); blockStack.push(minimizerPars);}
-                      (assignment)* 
-                       ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addMinimizerParameters(minimizerPars);}
-                ;
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addMinimizerParameters(minimizerPars);}
+    ;
 
 
 moleculeblock : #(MOLECULE {MoleculeStamp* currMoleculeStamp = new MoleculeStamp(); blockStack.push(currMoleculeStamp);}
-                    (moleculestatement)* 
-                     ENDBLOCK ) {blockStack.top()->validate(); blockStack.pop(); currConf->addMoleculeStamp(currMoleculeStamp);}
-              ;
+            (moleculestatement)* 
+            ENDBLOCK ) {blockStack.top()->validate(); blockStack.pop(); currConf->addMoleculeStamp(currMoleculeStamp);}
+    ;
 
 moleculestatement : assignment
-                  | atomblock
-                  | bondblock
-                  | bendblock
-                  | torsionblock
-                  | inversionblock
-                  | rigidbodyblock
-                  | cutoffgroupblock
-                  | fragmentblock
-                  | constraintblock
-                  ;
+    | atomblock
+    | bondblock
+    | bendblock
+    | torsionblock
+    | inversionblock
+    | rigidbodyblock
+    | cutoffgroupblock
+    | fragmentblock
+    | constraintblock
+    ;
 
 atomblock 
 {
-  int index;
+    int index;
 }
-          : #(ATOM index=intConst {AtomStamp* currAtomStamp = new AtomStamp(index); blockStack.push(currAtomStamp);} 
-                  (atomstatement)* 
-                  ENDBLOCK ) {
-                                blockStack.top()->validate();
-                                blockStack.pop(); 
-                                MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
-                                currMoleculeStamp->addAtomStamp(currAtomStamp); 
-                             }
-          ;
+    : #(ATOM index=intConst {AtomStamp* currAtomStamp = new AtomStamp(index); blockStack.push(currAtomStamp);} 
+            (atomstatement)* 
+            ENDBLOCK ) {
+            blockStack.top()->validate();
+            blockStack.pop(); 
+            MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
+            currMoleculeStamp->addAtomStamp(currAtomStamp); 
+        }
+    ;
 
 atomstatement 
 {
-vector<RealType> dvec;
-AtomStamp* currAtomStamp =  static_cast<AtomStamp*>(blockStack.top());
-
+    vector<RealType> dvec;
+    RealType rval;
+    AtomStamp* currAtomStamp =  static_cast<AtomStamp*>(blockStack.top());
+    
 }
-              : assignment
-              | #(POSITION dvec=doubleNumberTuple) {currAtomStamp->setPosition(dvec);}
-              | #(ORIENTATION dvec=doubleNumberTuple) {currAtomStamp->setOrientation(dvec);}
-              ;
+    : assignment
+    | #(POSITION dvec=doubleNumberTuple) {currAtomStamp->setPosition(dvec);}
+    | #(ORIENTATION dvec=doubleNumberTuple) {currAtomStamp->setOrientation(dvec);}
+    | #(CHARGE rval=doubleNumber) {currAtomStamp->overrideCharge(rval);}        
+    ;
 
-                      
-bondblock : #(BOND {BondStamp* currBondStamp = new BondStamp(); blockStack.push(currBondStamp);}
-                (bondstatement)* 
-                 ENDBLOCK )  {
-                                blockStack.pop(); 
-                                MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
-                                currMoleculeStamp->addBondStamp(currBondStamp); 
-                             }
-          ;
+
+bondblock 
+    : #(BOND {BondStamp* currBondStamp = new BondStamp(); blockStack.push(currBondStamp);}
+            (bondstatement)* 
+            ENDBLOCK )  {
+            blockStack.top()->validate();
+            blockStack.pop(); 
+            MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
+            currMoleculeStamp->addBondStamp(currBondStamp); 
+        }   
+    ;
 
 bondstatement 
 {
-  vector<int> ivec;
-  BondStamp* currBondStamp = static_cast<BondStamp*>(blockStack.top());
+    vector<int> ivec;
+    RealType rval;
+    vector<RealType> dvec;
+    BondStamp* currBondStamp = static_cast<BondStamp*>(blockStack.top());
 }
-              : assignment
-              | #(MEMBERS ivec=inttuple) {currBondStamp->setMembers(ivec);}
-              ;
+    : assignment
+    | #(MEMBERS ivec=inttuple) {currBondStamp->setMembers(ivec);}
+    | #(FIXED rval=doubleNumber) {currBondStamp->overrideType("Fixed", rval);}
+    | #(HARMONIC dvec=doubleNumberTuple) {currBondStamp->overrideType("Harmonic", dvec);}
+    | #(CUBIC dvec=doubleNumberTuple) {currBondStamp->overrideType("Cubic", dvec);}
+    | #(QUARTIC dvec=doubleNumberTuple) {currBondStamp->overrideType("Quartic", dvec);}
+    | #(POLYNOMIAL dvec=doubleNumberTuple) {currBondStamp->overrideType("Polynomial", dvec);}
+    | #(MORSE dvec=doubleNumberTuple) {currBondStamp->overrideType("Morse", dvec);}
+    ;
 
 bendblock : #(BEND {BendStamp* currBendStamp = new BendStamp(); blockStack.push(currBendStamp);}
                   (bendstatement)* 
                    ENDBLOCK)  {
-                                blockStack.top()->validate();
-                                blockStack.pop(); 
-                                MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
-                                currMoleculeStamp->addBendStamp(currBendStamp); 
-                             }
-          ;
-
+            blockStack.top()->validate();
+            blockStack.pop(); 
+            MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
+            currMoleculeStamp->addBendStamp(currBendStamp); 
+        }
+        ;
+    
 bendstatement 
 {
-  vector<int> ivec;
-  BendStamp* currBendStamp = static_cast<BendStamp*>(blockStack.top());
+    vector<int> ivec;
+    vector<RealType> dvec;
+    BendStamp* currBendStamp = static_cast<BendStamp*>(blockStack.top());
 }
-              : assignment
-              | #(MEMBERS ivec=inttuple) {currBendStamp->setMembers(ivec);}
+    : assignment
+    | #(MEMBERS ivec=inttuple) {currBendStamp->setMembers(ivec);}
+    | #(HARMONIC dvec=doubleNumberTuple) {currBendStamp->overrideType("Harmonic", dvec);}
+    | #(GHOSTBEND dvec=doubleNumberTuple) {currBendStamp->overrideType("GhostBend", dvec);}
+    | #(UREYBRADLEY dvec=doubleNumberTuple) {currBendStamp->overrideType("UreyBradley", dvec);}
+    | #(CUBIC dvec=doubleNumberTuple) {currBendStamp->overrideType("Cubic", dvec);}
+    | #(QUARTIC dvec=doubleNumberTuple) {currBendStamp->overrideType("Quartic", dvec);}
+    | #(POLYNOMIAL dvec=doubleNumberTuple) {currBendStamp->overrideType("Polynomial", dvec);}
+    | #(COSINE dvec=doubleNumberTuple) {currBendStamp->overrideType("Cosine", dvec);}
               ;
 
 torsionblock  : #(TORSION {TorsionStamp* currTorsionStamp = new TorsionStamp(); blockStack.push(currTorsionStamp);}
@@ -191,10 +211,20 @@ torsionblock  : #(TORSION {TorsionStamp* currTorsionStamp = new TorsionStamp(); 
 torsionstatement
 {
   vector<int> ivec;
+  vector<RealType> dvec;
   TorsionStamp* currTorsionStamp = static_cast<TorsionStamp*>(blockStack.top());
 }  
               : assignment
-              | #(MEMBERS ivec=inttuple) {currTorsionStamp->setMembers(ivec);}
+    | #(MEMBERS ivec=inttuple) {currTorsionStamp->setMembers(ivec);}
+    | #(GHOSTTORSION dvec=doubleNumberTuple) {currTorsionStamp->overrideType("GhostTorsion", dvec);}
+    | #(CUBIC dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Cubic", dvec);}
+    | #(QUARTIC dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Quartic", dvec);}
+    | #(POLYNOMIAL dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Polynomial", dvec);}
+    | #(CHARMM dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Charmm", dvec);}
+    | #(OPLS dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Opls", dvec);}
+    | #(TRAPPE dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Trappe", dvec);}
+    | #(HARMONIC dvec=doubleNumberTuple) {currTorsionStamp->overrideType("Harmonic", dvec);}
+
               ;
 
 inversionblock  : #(INVERSION {InversionStamp* currInversionStamp = new InversionStamp(); blockStack.push(currInversionStamp);}
@@ -211,11 +241,18 @@ inversionstatement
 {
   int icent;
   vector<int> ivec;
+  vector<RealType> dvec;
   InversionStamp* currInversionStamp = static_cast<InversionStamp*>(blockStack.top());
-}  
-              : assignment
-              | #(CENTER icent=intConst) {currInversionStamp->setCenter(icent);}
-              | #(SATELLITES ivec=inttuple) {currInversionStamp->setSatellites(ivec);}
+}
+ : assignment
+    | #(CENTER icent=intConst) {currInversionStamp->setCenter(icent);}
+    | #(SATELLITES ivec=inttuple) {currInversionStamp->setSatellites(ivec);}
+    | #(AMBERIMPROPER dvec=doubleNumberTuple) {currInversionStamp->overrideType("AmberImproper", dvec);}
+    | #(IMPROPERCOSINE dvec=doubleNumberTuple) {currInversionStamp->overrideType("ImproperCosine", dvec);}
+    | #(HARMONIC dvec=doubleNumberTuple) {currInversionStamp->overrideType("Harmonic", dvec);}
+    | #(CENTRALATOMHEIGHT dvec=doubleNumberTuple) {currInversionStamp->overrideType("CentralAtomHeight", dvec);}
+    | #(DREIDING dvec=doubleNumberTuple) {currInversionStamp->overrideType("Dreiding", dvec);}
+
               ;
 
 rigidbodyblock

@@ -19,15 +19,15 @@ class CUSTOM_API MDTreeParser : public ANTLR_USE_NAMESPACE(antlr)TreeParser, pub
 {
 #line 21 "MDTreeParser.g"
 
-  public:
+    public:
     Globals* walkTree(ANTLR_USE_NAMESPACE(antlr)RefAST tree)
     {
-      currConf = new Globals;
-      blockStack.push(currConf);
-      mdfile(tree);
-      return currConf;
+        currConf = new Globals;
+        blockStack.push(currConf);
+        mdfile(tree);
+        return currConf;
     }
-  private:
+    private:
     Globals* currConf;
     stack<DataHolder*> blockStack;    
 #line 22 "MDTreeParser.hpp"
@@ -74,6 +74,7 @@ public:
 	public: void fragmentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: vector<int>  inttuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bendstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -83,7 +84,6 @@ public:
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constraintstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{
@@ -96,10 +96,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 60;
+	static const int NUM_TOKENS = 78;
 #else
 	enum {
-		NUM_TOKENS = 60
+		NUM_TOKENS = 78
 	};
 #endif
 	
@@ -107,6 +107,16 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_0;
 	static const unsigned long _tokenSet_1_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_1;
+	static const unsigned long _tokenSet_2_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_2;
+	static const unsigned long _tokenSet_3_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_3;
+	static const unsigned long _tokenSet_4_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_4;
+	static const unsigned long _tokenSet_5_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_5;
+	static const unsigned long _tokenSet_6_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_6;
 };
 
 #endif /*INC_MDTreeParser_hpp_*/

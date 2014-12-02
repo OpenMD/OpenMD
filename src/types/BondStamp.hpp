@@ -65,18 +65,41 @@ namespace OpenMD {
         std::ostringstream oss;
         oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
         throw OpenMDException(oss.str());
-      }
-      
-      
+      }           
     }
     
+    void overrideType(std::string type, RealType pars) {
+      orType_ = type;
+      orPars_.push_back(pars);
+      hasOverride_ = true;
+    }
+
+    void overrideType(std::string type, std::vector<RealType> pars) {
+      orType_ = type;
+      orPars_ = pars;
+      hasOverride_ = true;
+    }
+        
     int getA() {return a;} 
     int getB() {return b;}
     virtual void validate();
 
+    bool hasOverride() { return hasOverride_; }
+    std::string getOverrideType() {
+      return orType_;
+    }
+
+    std::vector<RealType> getOverridePars() {
+      return orPars_;
+    }        
+
   private:
     int a;
     int b;
+    bool hasOverride_;
+    std::string orType_;
+    std::vector<RealType> orPars_;
+
   };  
 }
 #endif
