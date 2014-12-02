@@ -40,14 +40,6 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
   
-/**
- * @file Stats.hpp
- * @author tlin
- * @date 11/04/2004
- * @time 23:56am
- * @version 1.0
- */
-
 #ifndef BRAINS_STATS_HPP
 #define BRAINS_STATS_HPP
 

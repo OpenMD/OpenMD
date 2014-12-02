@@ -83,7 +83,7 @@ namespace OpenMD {
 
     The corresponding field is:
 
-    \f$ \mathbf{E} = \frac{g}{2} \left( 
+    \f$ \mathbf{E} = \frac{g}{2} \left( \begin{array}{c} 
     2\left(a_1 b_1 - \frac{\cos\psi}{3}\right) x +  (a_1 b_2 + a_2 b_1) y 
     + (a_1 b_3 + a_3 b_1) z  \\ 
     (a_2 b_1 + a_1 b_2)  x + 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) y 
@@ -96,7 +96,7 @@ namespace OpenMD {
 
     The corresponding field gradient is:
 
-    \f$ \nabla \mathbf{E} = \frac{g}{2} \left( \array{ccc}  
+    \f$ \nabla \mathbf{E} = \frac{g}{2} \left( \begin{array}{ccc}  
     2\left(a_1 b_1 - \frac{\cos\psi}{3}\right)  &  
     (a_1 b_2 + a_2 b_1) & (a_1 b_3 + a_3 b_1) \\
     (a_2 b_1 + a_1 b_2)  & 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) & 
@@ -114,7 +114,7 @@ namespace OpenMD {
     \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E}(\mathbf{r}) \f$.
     
     For quadrupolar atoms, the uniform field gradient exerts a potential, 
-    \f$ U = - \mathsf{Q}:\nabla \mathbf{E} $\f, and a torque 
+    \f$ U = - \mathsf{Q}:\nabla \mathbf{E} \f$, and a torque 
     \f$ \mathbf{F} = 2 \mathsf{Q} \times \nabla \mathbf{E} \f$
     
   */ 

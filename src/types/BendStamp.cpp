@@ -46,7 +46,7 @@
 #include "types/BendStamp.hpp"
 namespace OpenMD {
   
-  BendStamp::BendStamp() {
+  BendStamp::BendStamp(): hasOverride_(false) {
     DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
   }
   

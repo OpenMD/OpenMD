@@ -71,10 +71,27 @@ namespace OpenMD {
       members_.push_back(tuple.third);
       members_.push_back(tuple.fourth);            
     }
+    void overrideType(std::string type, std::vector<RealType> pars) {
+      orType_ = type;
+      orPars_ = pars;
+      hasOverride_ = true;
+    }
     virtual void validate();
-    
+    bool hasOverride() { return hasOverride_; }
+    std::string getOverrideType() {
+      return orType_;
+    }
+
+    std::vector<RealType> getOverridePars() {
+      return orPars_;
+    }        
+
   private:   
     std::vector<int> members_;
+    bool hasOverride_;
+    std::string orType_;
+    std::vector<RealType> orPars_;
+
   };
 }
 #endif

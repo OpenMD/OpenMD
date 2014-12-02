@@ -88,11 +88,19 @@ namespace OpenMD {
     void addBond(int bondIndex) {bonds_.push_back(bondIndex);}
     void addBondedAtom(int atomIndex) {bondedAtoms_.insert(atomIndex);}
     int getBondCount() { return bonds_.size(); }
+    void overrideCharge(RealType c){
+      orCharge_ = c;
+      hasOverride_ = true;
+    }
+
+    bool hasOverride() {return hasOverride_;}
   private:
     Vector3d position_;
     Vector3d orientation_;
+    RealType orCharge_;
     bool havePos_;
     bool haveOrt_;
+    bool hasOverride_;
     int index_;
     std::vector<int> bonds_;
     std::set<int> bondedAtoms_;

@@ -46,7 +46,7 @@
 #include "types/TorsionStamp.hpp"
 namespace OpenMD {
   
-  TorsionStamp::TorsionStamp() {
+  TorsionStamp::TorsionStamp(): hasOverride_(false) {
     DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
   }
   

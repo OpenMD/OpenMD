@@ -72,7 +72,7 @@ namespace OpenMD {
 
     The field itself is 
 
-    \f$ \mathbf{E} = \left( \array{c} a \\ b \\ c \end{array} \right) \f$
+    \f$ \mathbf{E} = \left( \begin{array}{c} a \\ b \\ c \end{array} \right) \f$
 
    The external field applies a force on charged atoms, \f$ \mathbf{F}
    = C \mathbf{E} \f$.  For dipolar atoms, the field applies both a
