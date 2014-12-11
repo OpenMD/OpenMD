@@ -785,7 +785,11 @@ namespace OpenMD {
       }
     }
 
-    if (simParams->getOutputElectricField() | simParams->haveElectricField()) {
+    if (simParams->getOutputElectricField() |
+        simParams->haveElectricField() | simParams->haveUniformField() |
+        simParams->haveUniformGradientStrength() |
+        simParams->haveUniformGradientDirection1() |
+        simParams->haveUniformGradientDirection2() ) {
       storageLayout |= DataStorage::dslElectricField;
     }
 
