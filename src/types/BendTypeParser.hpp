@@ -44,6 +44,7 @@
 #define TYPES_BENDTYPEPARSER_HPP
 #include <map>
 #include <vector>
+#include <string>
 #include "types/BendType.hpp"
 
 

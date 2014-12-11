@@ -48,6 +48,7 @@
 #include "types/PolynomialBondType.hpp"
 #include "types/MorseBondType.hpp"
 #include "utils/StringTokenizer.hpp"
+#include "utils/StringUtils.hpp"
 #include "utils/OpenMDException.hpp"
 
 namespace OpenMD {
@@ -69,7 +70,7 @@ namespace OpenMD {
     std::vector<RealType>::iterator it;
     for (it = pars.begin(); it != pars.end(); ++it) {
       line.append("\t");
-      line.append( std::to_string(*it) );      
+      line.append( OpenMD::to_string(*it) );      
     }
 
     return parseLine( line );    
