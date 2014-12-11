@@ -146,6 +146,13 @@ namespace OpenMD {
     return ret;
   }
 
+  template <typename T>
+  std::string to_string(T value) {
+    std::ostringstream os ;
+    os << value ;
+    return os.str() ;
+  }
+
   bool isInteger(const std::string& str);
   
   std::string OpenMD_itoa(int value, unsigned int base = 10);

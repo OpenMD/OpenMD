@@ -44,6 +44,7 @@
 #define TYPES_TORSIONTYPEPARSER_HPP
 #include <map>
 #include <vector>
+#include <string>
 #include "types/TorsionType.hpp"
 
 

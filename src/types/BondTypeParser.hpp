@@ -45,6 +45,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 #include "types/BondType.hpp"
 
 namespace OpenMD {
