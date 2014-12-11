@@ -58,6 +58,7 @@
 #include "primitives/Inversion.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "perturbations/UniformField.hpp"
+#include "perturbations/UniformGradient.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
 
 #include <cstdio>
@@ -449,7 +450,13 @@ namespace OpenMD {
       UniformField* eField = new UniformField(info_);
       perturbations_.push_back(eField);
     }
-
+    if (info_->getSimParams()->haveUniformGradientStrength() ||
+        info_->getSimParams()->haveUniformGradientDirection1() ||
+        info_->getSimParams()->haveUniformGradientDirection2() ) {
+      UniformGradient* eGrad = new UniformGradient(info_);
+      perturbations_.push_back(eGrad);
+    }
+    
     usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     
     fDecomp_->distributeInitialData();

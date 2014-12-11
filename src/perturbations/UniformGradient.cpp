@@ -119,6 +119,7 @@ namespace OpenMD {
       Grad_(2,2) = 2.0 * (a_.z()*b_.z() - cpsi_ / 3.0);
 
       Grad_ *= g_ / 2.0;
+
     } else {
       if (!haveA) {
         sprintf(painCave.errMsg,
