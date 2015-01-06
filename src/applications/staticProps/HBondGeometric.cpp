@@ -81,6 +81,8 @@ namespace OpenMD {
     nHBonds_.resize(nBins_);
     nDonor_.resize(nBins_);
     nAcceptor_.resize(nBins_);
+
+    initializeHistogram();
   }
 
   HBondGeometric::~HBondGeometric() {
@@ -96,8 +98,6 @@ namespace OpenMD {
     nSelected_ = 0;
   }
   
-   
-
   void HBondGeometric::process() {
     Molecule* mol;
     StuntDouble* sd1;
