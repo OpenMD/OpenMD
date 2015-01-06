@@ -18,6 +18,7 @@ option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
 option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
+option  "thetacut"      -       "cutoff angle (thetacut)"                               double                          no
 option  "dz"            -       "slab width (dz)"                                       double                          no
 option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option	"zlength"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
@@ -69,3 +70,4 @@ groupoption "rnemdrt"   -       "shell and angle-resolved RNEMD statistics (temp
 groupoption "nitrile"   -       "electrostatic potential to frequency map based on the Cho nitrile fits" group="staticProps"
 groupoption "multipole" m       "average multipole moments contained within cutoff spheres as a function of radius" group="staticProps"
 groupoption "surfDiffusion" -	"X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion" group="staticProps"
+groupoption "hbond"     -       "Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified)" group="staticProps"
