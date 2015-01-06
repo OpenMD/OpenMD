@@ -82,6 +82,7 @@
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/SurfaceDiffusion.hpp"
+#include "applications/staticProps/HBondGeometric.hpp"
 
 using namespace OpenMD;
 
@@ -433,6 +434,28 @@ int main(int argc, char* argv[]){
     analyser = new NanoLength(info, dumpFileName, sele1);
   } else if (args_info.angle_r_given) {
     analyser = new AngleR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg);
+  } else if (args_info.hbond_given){
+    if (args_info.rcut_given) {
+      if (args_info.thetacut_given) {
+        
+        analyser = new HBondGeometric(info, dumpFileName, sele1, sele2,
+                                      args_info.rcut_arg,
+                                      args_info.thetacut_arg,
+                                      args_info.nbins_arg);
+      } else {
+        sprintf( painCave.errMsg,
+                 "A cutoff angle (thetacut) must be specified when calculating Hydrogen Bonding Statistics");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating Hydrogen Bonding Statistics");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }    
   }
   
   if (args_info.output_given) {

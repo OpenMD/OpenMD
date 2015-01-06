@@ -66,6 +66,9 @@ struct gengetopt_args_info
   double rcut_arg;	/**< @brief cutoff radius (rcut).  */
   char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
+  double thetacut_arg;	/**< @brief cutoff angle (thetacut).  */
+  char * thetacut_orig;	/**< @brief cutoff angle (thetacut) original value given at command line.  */
+  const char *thetacut_help; /**< @brief cutoff angle (thetacut) help description.  */
   double dz_arg;	/**< @brief slab width (dz).  */
   char * dz_orig;	/**< @brief slab width (dz) original value given at command line.  */
   const char *dz_help; /**< @brief slab width (dz) help description.  */
@@ -150,6 +153,7 @@ struct gengetopt_args_info
   const char *nitrile_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
   const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
   const char *surfDiffusion_help; /**< @brief X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion help description.  */
+  const char *hbond_help; /**< @brief Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -162,6 +166,7 @@ struct gengetopt_args_info
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
+  unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
   unsigned int dz_given ;	/**< @brief Whether dz was given.  */
   unsigned int length_given ;	/**< @brief Whether length was given.  */
   unsigned int zlength_given ;	/**< @brief Whether zlength was given.  */
@@ -212,7 +217,10 @@ struct gengetopt_args_info
   unsigned int nitrile_given ;	/**< @brief Whether nitrile was given.  */
   unsigned int multipole_given ;	/**< @brief Whether multipole was given.  */
   unsigned int surfDiffusion_given ;	/**< @brief Whether surfDiffusion was given.  */
+  unsigned int hbond_given ;	/**< @brief Whether hbond was given.  */
 
+  char **inputs ; /**< @brief unamed options (options without names) */
+  unsigned inputs_num ; /**< @brief unamed options number */
   int staticProps_group_counter; /**< @brief Counter for group staticProps */
 } ;
 

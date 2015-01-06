@@ -36,76 +36,69 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
+ *  Created by J. Daniel Gezelter on 09/26/06
+ *  @author  J. Daniel Gezelter 
+ *  @version $Id: BondOrderParameter.hpp 1442 2010-05-10 17:28:26Z gezelter $
+ *
  */
- 
-#ifndef VISITOR_ATOMDATA_HPP
-#define VISITOR_ATOMDATA_HPP
-#include <string>
-#include <vector>
 
-#include "utils/GenericData.hpp"
-#include "math/Vector3.hpp"
+#ifndef APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
+#define APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
-  struct AtomInfo {
-    AtomInfo() : hasCharge(false), hasVector(false), hasVelocity(false), 
-                 hasForce(false), hasElectricField(false), 
-                 pos(V3Zero), vec(V3Zero), vel(V3Zero), frc(V3Zero), 
-                 charge(0.0), eField(V3Zero) {}
-    
-    std::string atomTypeName;
-    Vector3d pos;
-    Vector3d vec;  
-    Vector3d vel;  
-    Vector3d frc;  
-    Vector3d eField;
-    RealType charge;
-    bool hasCharge;
-    bool hasVector;
-    bool hasVelocity;
-    bool hasForce;
-    bool hasElectricField;
-  };
-
-  class AtomData : public GenericData{
+  /**
+   * @class HBondGeometric
+   * @brief Hydrogen Bonding statistics using geometric criteria
+   *
+   * Computes hydrogen bonding statistics using structural information:
+   *
+   *   "Hydrogen-bond dynamics for the extended simple point-carge
+   *   model of water" by F. W. Starr, J. K. Nielsen, and
+   *   H. E. Stanley, Phys. Rev. E 62(1), 579-587 (2000).
+   *
+   */
+  class HBondGeometric : public StaticAnalyser {
   public:
 
-    AtomData(const std::string& id = "ATOMDATA") : GenericData(id) {}
+    HBondGeometric(SimInfo* info, const std::string& filename, 
+                   const std::string& sele1, const std::string& sele2,
+                   double rCut, double thetaCut,
+                   int nbins);
+    
+    virtual ~HBondGeometric();
+    virtual void process();
+   
+  private:
+    virtual void initializeHistogram();
+    virtual void collectHistogram(int nHB, int nD, int nA);    
+    void writeHistogram();
 
-    ~AtomData() {
-      std::vector<AtomInfo*>::iterator i;
-      AtomInfo* atomInfo;
-
-      for(atomInfo = beginAtomInfo(i); atomInfo; atomInfo  = nextAtomInfo(i)) {
-	delete atomInfo;
-      }
-      data.clear();
-    }
-        
-    void addAtomInfo(AtomInfo* info) {data.push_back(info);}
-
-    void clearAllAtomInfo();
-
-    AtomInfo* beginAtomInfo(std::vector<AtomInfo*>::iterator& i){
-      i = data.begin();
-      return i != data.end()? *i : NULL;
-    }
-
-    AtomInfo* nextAtomInfo(std::vector<AtomInfo*>::iterator& i){
-      ++i;
-      return i != data.end()? *i: NULL;
-    }
-
-    std::vector<AtomInfo*> getData() {return data;}
-
-    int getSize() {return data.size();}
-
-  protected:
-
-    std::vector<AtomInfo*> data;
+    Snapshot* currentSnapshot_;
+    std::string selectionScript1_;
+    SelectionManager seleMan1_;    
+    SelectionEvaluator evaluator1_;
+    std::string selectionScript2_;
+    SelectionManager seleMan2_;    
+    SelectionEvaluator evaluator2_;
+    ForceField* ff_;
+                
+    RealType rCut_;
+    RealType thetaCut_;
+    int frameCounter_;
+    int nBins_;
+   
+    std::vector<int> nHBonds_;
+    std::vector<int> nDonor_;
+    std::vector<int> nAcceptor_;
+    int nSelected_;
   };
 }
-#endif //VISITOR_ATOMDATA_HPP
+
+#endif
+
