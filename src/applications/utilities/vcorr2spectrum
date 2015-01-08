@@ -63,7 +63,7 @@ def computeSpectrum(outFileName):
     vnew = []
 
     # the speed of light in cm / fs
-    c = 2.99792458 
+    c = 2.99792458e-5
     
     # symmetrize arrays
 
@@ -85,7 +85,7 @@ def computeSpectrum(outFileName):
 
     outFile = open(outFileName, 'w')
 
-    freqScale = timestep * (tnew[-1]-tnew[0]) / c
+    freqScale = 1.0 / c
     dfreq = (freq[1]-freq[0]) * freqScale
     s = 0.0
     
