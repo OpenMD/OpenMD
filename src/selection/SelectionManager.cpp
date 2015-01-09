@@ -41,7 +41,6 @@
  */
 
 #include "selection/SelectionManager.hpp"
-#include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
 namespace OpenMD {
   SelectionManager::SelectionManager(SimInfo* info) : info_(info){
@@ -50,12 +49,14 @@ namespace OpenMD {
     nObjects_.push_back(info_->getNGlobalBends());
     nObjects_.push_back(info_->getNGlobalTorsions());
     nObjects_.push_back(info_->getNGlobalInversions());
+    nObjects_.push_back(info_->getNGlobalMolecules());
 
     stuntdoubles_.resize(nObjects_[STUNTDOUBLE]);
     bonds_.resize(nObjects_[BOND]);
     bends_.resize(nObjects_[BEND]);
     torsions_.resize(nObjects_[TORSION]);
     inversions_.resize(nObjects_[INVERSION]);
+    molecules_.resize(nObjects_[MOLECULE]);
     
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
@@ -75,6 +76,7 @@ namespace OpenMD {
         
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
+      molecules_[mol->getGlobalIndex()] = mol;
       
       for(atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {
@@ -201,6 +203,26 @@ namespace OpenMD {
   Inversion* SelectionManager::nextUnSelectedInversion(int& i) {
     i = ss_.bitsets_[INVERSION].nextOffBit(i);
     return i == -1 ? NULL : inversions_[i];
+  }
+  
+  Molecule* SelectionManager::beginSelectedMolecule(int& i) {
+    i = ss_.bitsets_[MOLECULE].firstOnBit();
+    return i == -1 ? NULL : molecules_[i];
+  }
+
+  Molecule* SelectionManager::nextSelectedMolecule(int& i) {
+    i = ss_.bitsets_[MOLECULE].nextOnBit(i);
+    return i == -1 ? NULL : molecules_[i];
+  }
+
+  Molecule* SelectionManager::beginUnselectedMolecule(int& i){
+    i = ss_.bitsets_[MOLECULE].firstOffBit();
+    return i == -1 ? NULL : molecules_[i];
+  }
+
+  Molecule* SelectionManager::nextUnSelectedMolecule(int& i) {
+    i = ss_.bitsets_[MOLECULE].nextOffBit(i);
+    return i == -1 ? NULL : molecules_[i];
   }
 
   SelectionManager operator| (const SelectionManager& sman1, 

@@ -60,7 +60,8 @@ namespace OpenMD {
     BEND = 2,            /**< Bends */
     TORSION = 3,         /**< Torsions */
     INVERSION = 4,       /**< Inversions */
-    N_SELECTIONTYPES = 5
+    MOLECULE = 5,        /**< Molecules */
+    N_SELECTIONTYPES = 6
   };
 
   class SelectionSet {

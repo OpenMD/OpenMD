@@ -99,22 +99,27 @@ namespace OpenMD {
   }
   
   void HBondGeometric::process() {
-    Molecule* mol;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
+    Molecule* mol1;
+    Molecule* mol2;
     RigidBody* rb1;
-    RigidBody* rb2;
+    Molecule::HBondDonor* hbd1;
+    Molecule::HBondDonor* hbd2;
+    std::vector<Molecule::HBondDonor*>::iterator hbdi;
+    std::vector<Molecule::HBondDonor*>::iterator hbdj;
+    std::vector<Atom*>::iterator hbai;
+    std::vector<Atom*>::iterator hbaj;
+    Atom* hba1;
+    Atom* hba2;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::IntegrableObjectIterator ioi;
+    Vector3d dPos;
+    Vector3d aPos;
+    Vector3d hPos;
+    Vector3d DH;
+    Vector3d DA;
+    RealType DAdist, DHdist, theta, ctheta;
     int ii, jj;
-    std::string rbName;
-    std::vector<Atom *> atoms1;
-    std::vector<Atom *> atoms2;
-    std::vector<Atom *>::iterator ai1;
-    std::vector<Atom *>::iterator ai2;
-    Vector3d O1pos, O2pos;
-    Vector3d H1apos, H1bpos, H2apos, H2bpos;
     int nHB, nA, nD;
 
     DumpReader reader(info_, dumpFilename_);    
@@ -128,10 +133,10 @@ namespace OpenMD {
      
       // update the positions of atoms which belong to the rigidbodies
       
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-        for (rb1 = mol->beginRigidBody(rbIter); rb1 != NULL; 
-             rb1 = mol->nextRigidBody(rbIter)) {
+      for (mol1 = info_->beginMolecule(mi); mol1 != NULL; 
+           mol1 = info_->nextMolecule(mi)) {
+        for (rb1 = mol1->beginRigidBody(rbIter); rb1 != NULL; 
+             rb1 = mol1->nextRigidBody(rbIter)) {
           rb1->updateAtoms();
         }        
       }           
@@ -143,136 +148,84 @@ namespace OpenMD {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
       }
       
-      for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; sd1 = seleMan1_.nextSelected(ii)) {
-        if (sd1->isRigidBody()) {
-          rb1 = dynamic_cast<RigidBody*>(sd1);
-          atoms1 = rb1->getAtoms();
-          
-          int nH = 0;
-          int nO = 0;
-          
-          for (ai1 = atoms1.begin(); ai1 != atoms1.end(); ++ai1) {
-            std::string atName =  (*ai1)->getType();
-            // query the force field for the AtomType associated with this
-            // atomTypeName:
-            AtomType* at = ff_->getAtomType(atName);
-            // get the chain of base types for this atom type:
-            std::vector<AtomType*> ayb = at->allYourBase();
-            // use the last type in the chain of base types for the name:
-            std::string bn = ayb[ayb.size()-1]->getName();
-            
-            bool isH = bn.compare("H") == 0 ? true : false;
-            bool isO = bn.compare("O") == 0 ? true : false;
-            
-            if (isO && nO == 0) {
-              O1pos = (*ai1)->getPos();
-              nO++;
-            }
-            if (isH) {
-              if (nH == 0) {
-                H1apos =  (*ai1)->getPos();
-              }
-              if (nH == 1) {
-                H1bpos =  (*ai1)->getPos();
-              }
-              nH++;
-            }
-          }
-        }
+      for (mol1 = seleMan1_.beginSelectedMolecule(ii);
+           mol1 != NULL; mol1 = seleMan1_.nextSelectedMolecule(ii)) {
 
-
+        // We're collecting statistics on the molecules in selection 1:
         nHB = 0;
         nA = 0;
         nD = 0;
         
-        for (sd2 = seleMan2_.beginSelected(jj); sd2 != NULL; sd2 = seleMan2_.nextSelected(jj)) {
+        for (mol2 = seleMan2_.beginSelectedMolecule(jj);
+             mol2 != NULL; mol2 = seleMan2_.nextSelectedMolecule(jj)) {
+          
+          // loop over the possible donors in molecule 1:
+          for (hbd1 = mol1->beginHBondDonor(hbdi); hbd1 != NULL;
+               hbd1 = mol1->nextHBondDonor(hbdi)) {
+            dPos = hbd1->donorAtom->getPos();
+            hPos = hbd1->donatedHydrogen->getPos();
+            DH = hPos - dPos; 
+            currentSnapshot_->wrapVector(DH);
+            DHdist = DH.length();
 
-          if (sd1 == sd2) continue;
-           
-          if (sd2->isRigidBody()) {
-            rb2 = dynamic_cast<RigidBody*>(sd2);
-            atoms2 = rb2->getAtoms();
-            
-            int nH = 0;
-            int nO = 0;
-            
-            for (ai2 = atoms2.begin(); ai2 != atoms2.end(); ++ai2) {
-              std::string atName =  (*ai2)->getType();
-              // query the force field for the AtomType associated with this
-              // atomTypeName:
-              AtomType* at = ff_->getAtomType(atName);
-              // get the chain of base types for this atom type:
-              std::vector<AtomType*> ayb = at->allYourBase();
-              // use the last type in the chain of base types for the name:
-              std::string bn = ayb[ayb.size()-1]->getName();
-              
-              bool isH = bn.compare("H") == 0 ? true : false;
-              bool isO = bn.compare("O") == 0 ? true : false;
+            // loop over the possible acceptors in molecule 2:
+            for (hba2 = mol2->beginHBondAcceptor(hbaj); hba2 != NULL;
+                 hba2 = mol2->nextHBondAcceptor(hbaj)) {
+              aPos = hba2->getPos();
+              DA = aPos - dPos;              
+              currentSnapshot_->wrapVector(DA);
+              DAdist = DA.length();
 
-              if (isO && nO == 0) {
-                O2pos = (*ai2)->getPos();
-                  nO++;
-              }
-              if (isH) {
-                if (nH == 0) {
-                  H2apos =  (*ai2)->getPos();
+              // Distance criteria: are the donor and acceptor atoms
+              // close enough?
+              if (DAdist < rCut_) {
+
+                ctheta = dot(DH, DA) / (DHdist * DAdist);
+                theta = acos(ctheta) * 180.0 / M_PI;
+
+                // Angle criteria: are the D-H and D-A and vectors close?
+                if (theta < thetaCut_) {
+                  // molecule 1 is a Hbond donor:
+                  nHB++;
+                  nD++;
                 }
-                if (nH == 1) {
-                  H2bpos =  (*ai2)->getPos();
-                }
-                nH++;
-              }
-            }
-            
-            // Do our testing:
-            Vector3d Odiff = O2pos - O1pos;
-            currentSnapshot_->wrapVector(Odiff);
-            RealType Odist = Odiff.length();
-            if (Odist < rCut_) {
-              // OH vectors:
-              Vector3d HO1a = H1apos - O1pos;
-              Vector3d HO1b = H1bpos - O1pos;
-              Vector3d HO2a = H2apos - O2pos;
-              Vector3d HO2b = H2bpos - O2pos;
-              // wrapped in case a molecule is split across boundaries:
-              currentSnapshot_->wrapVector(HO1a);
-              currentSnapshot_->wrapVector(HO1b);
-              currentSnapshot_->wrapVector(HO2a);
-              currentSnapshot_->wrapVector(HO2a);
-              // cos thetas:
-              RealType ctheta1a = dot(HO1a, Odiff) / (Odist * HO1a.length());
-              RealType ctheta1b = dot(HO1b, Odiff) / (Odist * HO1b.length());
-              RealType ctheta2a = dot(HO2a, -Odiff) / (Odist * HO2a.length());
-              RealType ctheta2b = dot(HO2b, -Odiff) / (Odist * HO2b.length());
-
-              RealType theta1a = acos(ctheta1a) * 180.0 / M_PI;
-              RealType theta1b = acos(ctheta1b) * 180.0 / M_PI;
-              RealType theta2a = acos(ctheta2a) * 180.0 / M_PI;
-              RealType theta2b = acos(ctheta2b) * 180.0 / M_PI;
-
-              if (theta1a < thetaCut_) {
-                // molecule 1 is a Hbond donor:
-                nHB++;
-                nD++;
-              }
-              if (theta1b < thetaCut_) {
-                // molecule 1 is a Hbond donor:
-                nHB++;
-                nD++;
-              }
-              if (theta2a < thetaCut_) {
-                // molecule 1 is a Hbond acceptor:
-                nHB++;
-                nA++;
-              }
-              if (theta2b < thetaCut_) {
-                // molecule 1 is a Hbond acceptor:
-                nHB++;
-                nA++;
-              }
+              }            
             }            
           }
-        }
+
+          // now loop over the possible acceptors in molecule 1:
+          for (hba1 = mol1->beginHBondAcceptor(hbai); hba1 != NULL;
+               hba1 = mol1->nextHBondAcceptor(hbai)) {
+            aPos = hba1->getPos();
+            
+            // loop over the possible donors in molecule 2:
+            for (hbd2 = mol2->beginHBondDonor(hbdj); hbd2 != NULL;
+               hbd2 = mol2->nextHBondDonor(hbdj)) {
+              dPos = hbd2->donorAtom->getPos();
+
+              DA = aPos - dPos;
+              currentSnapshot_->wrapVector(DA);
+              DAdist = DA.length();
+              
+              // Distance criteria: are the donor and acceptor atoms
+              // close enough?
+              if (DAdist < rCut_) {
+                hPos = hbd2->donatedHydrogen->getPos();
+                DH = hPos - dPos; 
+                currentSnapshot_->wrapVector(DH);
+                DHdist = DH.length();
+                ctheta = dot(DH, DA) / (DHdist * DAdist);
+                theta = acos(ctheta) * 180.0 / M_PI;
+                // Angle criteria: are the D-H and D-A and vectors close?
+                if (theta < thetaCut_) {
+                  // molecule 1 is a Hbond acceptor:
+                  nHB++;
+                  nA++;
+                }                
+              }
+            }
+          }
+        }                 
         collectHistogram(nHB, nA, nD);
       }
     }
@@ -291,17 +244,20 @@ namespace OpenMD {
   void HBondGeometric::writeHistogram() {
         
     std::ofstream osq(getOutputFileName().c_str());
-    cerr << "nSelected = " << nSelected_ << "\n";
 
     if (osq.is_open()) {
       
       osq << "# HydrogenBonding Statistics\n";
       osq << "# selection1: (" << selectionScript1_ << ")"
           << "\tselection2: (" << selectionScript2_ <<  ")\n";
-      osq << "# p(nHBonds)\tp(nAcceptor)\tp(nDonor)\n";
+      osq << "# molecules in selection1: " << nSelected_ << "\n";
+      osq << "# nHBonds\tnAcceptor\tnDonor\tp(nHBonds)\tp(nAcceptor)\tp(nDonor)\n";
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         osq << i;
+        osq << "\t" << nHBonds_[i];
+        osq << "\t" << nAcceptor_[i];
+        osq << "\t" << nDonor_[i];
 	osq << "\t" << (RealType) (nHBonds_[i]) / nSelected_;
         osq << "\t" << (RealType) (nAcceptor_[i]) / nSelected_;
         osq << "\t" << (RealType) (nDonor_[i]) / nSelected_;

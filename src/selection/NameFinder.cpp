@@ -60,6 +60,8 @@ namespace OpenMD {
     nObjects_.push_back(info_->getNGlobalBends());
     nObjects_.push_back(info_->getNGlobalTorsions());
     nObjects_.push_back(info_->getNGlobalInversions());
+    nObjects_.push_back(info_->getNGlobalMolecules());
+    
     loadNames();
   }
 
@@ -93,6 +95,7 @@ namespace OpenMD {
            
       std::string molName = mol->getMoleculeName();
       TreeNode* molNode = createNode(root_, molName);
+      molNode->bs.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
         
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	std::string atomName = atom->getType();

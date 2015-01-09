@@ -64,6 +64,7 @@ namespace OpenMD {
     std::vector<Bend*> bends_;
     std::vector<Torsion*> torsions_;
     std::vector<Inversion*> inversions_;
+    std::vector<Molecule*> molecules_;
     vector<int> nObjects_;
 
     Hull* surfaceMesh_;

@@ -49,6 +49,7 @@ namespace OpenMD {
     nObjects_.push_back(info_->getNGlobalBends());
     nObjects_.push_back(info_->getNGlobalTorsions());
     nObjects_.push_back(info_->getNGlobalInversions());
+    nObjects_.push_back(info_->getNGlobalMolecules());
 
     selectionSets_.resize(info_->getNGlobalMolecules());
     init();
@@ -76,6 +77,7 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
            
       SelectionSet ss(nObjects_);
+      ss.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
 
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	ss.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
