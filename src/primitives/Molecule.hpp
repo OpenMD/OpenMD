@@ -63,16 +63,22 @@
 #include "primitives/CutoffGroup.hpp"
 #include "utils/PropertyMap.hpp"
 
+
 namespace OpenMD{
 
   class Constraint;
-
+  
   /**
    * @class Molecule Molecule.hpp "primitives/Molecule.hpp"
    * @brief
    */
   class Molecule {
   public:
+
+    struct HBondDonor {
+      Atom* donorAtom;
+      Atom* donatedHydrogen;
+    };
 
     typedef std::vector<Atom*>::iterator AtomIterator;
     typedef std::vector<Bond*>::iterator BondIterator;
@@ -85,7 +91,9 @@ namespace OpenMD{
     typedef std::vector<ConstraintPair*>::iterator ConstraintPairIterator;
     typedef std::vector<ConstraintElem*>::iterator ConstraintElemIterator;
     typedef std::vector<Atom*>::iterator FluctuatingChargeIterator;
-    
+    typedef std::vector<HBondDonor*>::iterator HBondDonorIterator;
+    typedef std::vector<Atom*>::iterator HBondAcceptorIterator;
+
     Molecule(int stampId, int globalIndex, const std::string& molName, int region);
     virtual ~Molecule();
 
@@ -209,6 +217,15 @@ namespace OpenMD{
     unsigned int getNFluctuatingCharges() {
       return fluctuatingCharges_.size();
     }
+    /** Returns the total number of Hydrogen Bond donors in this molecule */
+    unsigned int getNHBondDonors() {
+      return hBondDonors_.size();
+    }
+    
+    /** Returns the total number of Hydrogen Bond acceptors in this molecule */
+    unsigned int getNHBondAcceptors() {
+      return hBondAcceptors_.size();
+    }
 
     Atom* getAtomAt(unsigned int i) {
       assert(i < atoms_.size());
@@ -331,6 +348,26 @@ namespace OpenMD{
       return (i == fluctuatingCharges_.end()) ? NULL : *i;    
     }
 
+    HBondDonor* beginHBondDonor(std::vector<HBondDonor*>::iterator& i) {
+      i = hBondDonors_.begin();
+      return (i == hBondDonors_.end()) ? NULL : *i;
+    }
+    
+    HBondDonor* nextHBondDonor(std::vector<HBondDonor*>::iterator& i) {
+      ++i;
+      return (i == hBondDonors_.end()) ? NULL : *i;    
+    }
+    
+    Atom* beginHBondAcceptor(std::vector<Atom*>::iterator& i) {
+      i = hBondAcceptors_.begin();
+      return (i == hBondAcceptors_.end()) ? NULL : *i;
+    }
+    
+    Atom* nextHBondAcceptor(std::vector<Atom*>::iterator& i) {
+      ++i;
+      return (i == hBondAcceptors_.end()) ? NULL : *i;    
+    }
+
         
     /** 
      * Returns the total potential energy of short range interaction
@@ -341,8 +378,22 @@ namespace OpenMD{
     /** get total mass of this molecule */        
     RealType getMass();
     
-    /** return the center of mass of this molecule */
+    /**
+     * Returns the current center of mass position of this molecule.
+     *
+     * @return the center of mass position of this molecule.
+     */    
     Vector3d getCom();
+    
+    /**
+     * Returns the center of mass position of this molecule in
+     * specified snapshot
+     *
+     * @return the center of mass position of this molecule
+     * @param snapshotNo
+     */    
+    Vector3d getCom(int snapshotNo);
+
     
     /** Moves the center of this molecule */
     void moveCom(const Vector3d& delta);
@@ -409,6 +460,9 @@ namespace OpenMD{
     std::vector<ConstraintPair*> constraintPairs_;
     std::vector<ConstraintElem*> constraintElems_;
     std::vector<Atom*> fluctuatingCharges_;
+    std::vector<HBondDonor*> hBondDonors_;
+    std::vector<Atom*> hBondAcceptors_;
+    
     int stampId_;
     int region_;
     std::string moleculeName_;

@@ -49,6 +49,7 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
@@ -57,8 +58,7 @@ namespace OpenMD {
   public:
     SelectionManager(SimInfo* info);
 
-    void addSelection(StuntDouble* sd) {
-      
+    void addSelection(StuntDouble* sd) {      
       ss_.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
     }
     void addSelection(Bond* b) {
@@ -72,6 +72,9 @@ namespace OpenMD {
     }
     void addSelection(Inversion* i) {
       ss_.bitsets_[INVERSION].setBitOn(i->getGlobalIndex());
+    }
+    void addSelection(Molecule* m) {
+      ss_.bitsets_[MOLECULE].setBitOn(m->getGlobalIndex());
     }
         
     void addSelectionSet(const SelectionSet& bs) {
@@ -89,11 +92,14 @@ namespace OpenMD {
     void addInversionSelectionSet(const SelectionSet& bs) {
       ss_.bitsets_[INVERSION] |= bs.bitsets_[INVERSION];
     }
+    void addMoleculeSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[MOLECULE] |= bs.bitsets_[MOLECULE];
+    }
 
     bool isEmpty() {
       return ss_.bitsets_[STUNTDOUBLE].none() && ss_.bitsets_[BOND].none() 
         && ss_.bitsets_[BEND].none()  && ss_.bitsets_[TORSION].none() 
-        && ss_.bitsets_[INVERSION].none();
+        && ss_.bitsets_[INVERSION].none() && ss_.bitsets_[MOLECULE].none();
     }
 
     void setSelectionSet(const SelectionSet& bs) {
@@ -115,6 +121,9 @@ namespace OpenMD {
     }
     void setInversionSelectionSet(const SelectionSet& bs) {
       ss_.bitsets_[INVERSION] = bs.bitsets_[INVERSION];           
+    }
+    void setMoleculeSelectionSet(const SelectionSet& bs) {
+      ss_.bitsets_[MOLECULE] = bs.bitsets_[MOLECULE];           
     }
 
     std::vector<int> getSelectionCounts() {
@@ -139,6 +148,9 @@ namespace OpenMD {
     }
     int getInversionSelectionCount() {
       return ss_.bitsets_[INVERSION].countBits();
+    }
+    int getMoleculeSelectionCount() {
+      return ss_.bitsets_[MOLECULE].countBits();
     }
     
     SelectionSet getSelectionSet() {
@@ -178,6 +190,10 @@ namespace OpenMD {
       ss_.bitsets_[INVERSION].clearAll();
       ss_.bitsets_[INVERSION].setBitOn(i->getGlobalIndex());
     }
+    void setSelection(Molecule* m) {
+      ss_.bitsets_[MOLECULE].clearAll();
+      ss_.bitsets_[MOLECULE].setBitOn(m->getGlobalIndex());
+    }
 
     void toggleSelection(StuntDouble* sd) {
       ss_.bitsets_[STUNTDOUBLE].flip(sd->getGlobalIndex());
@@ -193,6 +209,9 @@ namespace OpenMD {
     }
     void toggleSelection(Inversion* i) {
       ss_.bitsets_[INVERSION].flip(i->getGlobalIndex());
+    }
+    void toggleSelection(Molecule* m) {
+      ss_.bitsets_[MOLECULE].flip(m->getGlobalIndex());
     }
 
     void toggleSelection() {
@@ -225,6 +244,9 @@ namespace OpenMD {
     void clearSelection(Inversion* i) {
       ss_.bitsets_[INVERSION].setBitOff(i->getGlobalIndex());
     }
+    void clearSelection(Molecule* m) {
+      ss_.bitsets_[MOLECULE].setBitOff(m->getGlobalIndex());
+    }
 
     bool isSelected(StuntDouble* sd) {
       return ss_.bitsets_[STUNTDOUBLE][sd->getGlobalIndex()];
@@ -240,6 +262,9 @@ namespace OpenMD {
     }
     bool isSelected(Inversion* i) {
       return ss_.bitsets_[INVERSION][i->getGlobalIndex()];
+    }
+    bool isSelected(Molecule* m) {
+      return ss_.bitsets_[MOLECULE][m->getGlobalIndex()];
     }
 
     StuntDouble* beginSelected(int& i);
@@ -266,6 +291,11 @@ namespace OpenMD {
     Inversion* nextSelectedInversion(int& i);
     Inversion* beginUnselectedInversion(int& i);
     Inversion* nextUnSelectedInversion(int& i);
+
+    Molecule* beginSelectedMolecule(int& i);
+    Molecule* nextSelectedMolecule(int& i);
+    Molecule* beginUnselectedMolecule(int& i);
+    Molecule* nextUnSelectedMolecule(int& i);
 
     SelectionManager& operator&= (const SelectionManager &sman) {
       for (int i = 0; i < N_SELECTIONTYPES; i++) 
@@ -305,6 +335,7 @@ namespace OpenMD {
     std::vector<Bend*> bends_;
     std::vector<Torsion*> torsions_;
     std::vector<Inversion*> inversions_;
+    std::vector<Molecule*> molecules_;
   };
 
 }

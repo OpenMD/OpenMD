@@ -55,12 +55,14 @@ namespace OpenMD {
     nObjects_.push_back(info_->getNGlobalBends());
     nObjects_.push_back(info_->getNGlobalTorsions());
     nObjects_.push_back(info_->getNGlobalInversions());
+    nObjects_.push_back(info_->getNGlobalMolecules());
 
     stuntdoubles_.resize(nObjects_[STUNTDOUBLE]);
     bonds_.resize(nObjects_[BOND]);
     bends_.resize(nObjects_[BEND]);
     torsions_.resize(nObjects_[TORSION]);
     inversions_.resize(nObjects_[INVERSION]);
+    molecules_.resize(nObjects_[MOLECULE]);
     
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
@@ -80,7 +82,9 @@ namespace OpenMD {
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-        
+
+      molecules_[mol->getGlobalIndex()] = mol;
+      
       for(atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {
 	stuntdoubles_[atom->getGlobalIndex()] = atom;
@@ -162,6 +166,13 @@ namespace OpenMD {
       centerPos = center->getPos();
 #endif
       
+      for (unsigned int j = 0; j < molecules_.size(); ++j) {
+	Vector3d r =centerPos - molecules_[j]->getCom();
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[MOLECULE].setBitOn(j);
+	}
+      }
       for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos();
 	currSnapshot->wrapVector(r);
@@ -271,6 +282,14 @@ namespace OpenMD {
       center = stuntdoubles_[i];
       centerPos = center->getPos(frame);
 #endif
+      for (unsigned int j = 0; j < molecules_.size(); ++j) {
+	Vector3d r =centerPos - molecules_[j]->getCom(frame);
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.bitsets_[MOLECULE].setBitOn(j);
+	}
+      }
+      
       for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
 	Vector3d r =centerPos - stuntdoubles_[j]->getPos(frame);
 	currSnapshot->wrapVector(r);

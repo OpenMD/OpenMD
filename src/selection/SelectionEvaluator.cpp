@@ -63,6 +63,7 @@ namespace OpenMD {
     nObjects.push_back(info->getNGlobalBends());
     nObjects.push_back(info->getNGlobalTorsions());
     nObjects.push_back(info->getNGlobalInversions());
+    nObjects.push_back(info->getNGlobalMolecules());    
   }
   
   bool SelectionEvaluator::loadScript(const std::string& filename, 
@@ -756,7 +757,8 @@ namespace OpenMD {
       for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
            inversion = mol->nextInversion(inversionIter)) {
         ss.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
-      }   
+      }
+      ss.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
     }
 
     return ss;

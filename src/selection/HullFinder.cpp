@@ -53,12 +53,14 @@ namespace OpenMD {
     nObjects_.push_back(info_->getNGlobalBends());
     nObjects_.push_back(info_->getNGlobalTorsions());
     nObjects_.push_back(info_->getNGlobalInversions());
+    nObjects_.push_back(info_->getNGlobalMolecules());
 
     stuntdoubles_.resize(nObjects_[STUNTDOUBLE]);
     bonds_.resize(nObjects_[BOND]);
     bends_.resize(nObjects_[BEND]);
     torsions_.resize(nObjects_[TORSION]);
     inversions_.resize(nObjects_[INVERSION]);
+    molecules_.resize(nObjects_[MOLECULE]);
     
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ioi;
@@ -80,7 +82,9 @@ namespace OpenMD {
 
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-        
+
+      molecules_[mol->getGlobalIndex()] = mol;
+      
       // Hull is constructed from all known integrable objects.
       for (sd = mol->beginIntegrableObject(ioi);
            sd != NULL;
