@@ -197,18 +197,14 @@ namespace OpenMD {
       std::vector<AtomType*> ayb = at->allYourBase();
       // use the last type in the chain of base types for the name:
       std::string bn = ayb[ayb.size()-1]->getName();
+      
+      if (bn.compare("O")==0 || bn.compare("N")==0 || bn.compare("F")==0)
+        hBondAcceptors_.push_back( atom );
 
-      int obanum = etab.GetAtomicNum(bn.c_str());
-      if (obanum != 0) {
-        RealType eneg = etab.GetElectroNeg(obanum);
-        if (eneg > 3.01) {
-          hBondAcceptors_.push_back( atom );
-        }
-      }
     }
-
-    // find electronegative atoms that are either bonded to hydrogens or are
-    // present in the same rigid bodies:
+    
+    // find electronegative atoms that are either bonded to
+    // hydrogens or are present in the same rigid bodies:
     
     for (bond = beginBond(bi); bond != NULL; bond = nextBond(bi)) {
       Atom* atom1 = bond->getAtomA();
@@ -221,65 +217,58 @@ namespace OpenMD {
       // use the last type in the chain of base types for the name:
       std::string bn1 = ayb1[ayb1.size()-1]->getName();
       std::string bn2 = ayb2[ayb2.size()-1]->getName();
-      int obanum1 = etab.GetAtomicNum(bn1.c_str());
-      int obanum2 = etab.GetAtomicNum(bn2.c_str());
-
-      if (obanum1 == 1) {               
-        if (obanum2 != 0) {
-          RealType eneg = etab.GetElectroNeg(obanum2);
-          if (eneg > 3.01) {
-            HBondDonor* donor = new HBondDonor();
-            donor->donorAtom = atom2;
-            donor->donatedHydrogen = atom1;
-            hBondDonors_.push_back( donor );
-          }
+      
+      if (bn1.compare("H")==0) {
+        if (bn2.compare("O")==0 || bn2.compare("N")==0
+            || bn2.compare("F")==0) {
+          HBondDonor* donor = new HBondDonor();
+          donor->donorAtom = atom2;
+          donor->donatedHydrogen = atom1;
+          hBondDonors_.push_back( donor );
         }
       }
-      if (obanum2 == 1) {
-        if (obanum1 != 0) {
-          RealType eneg = etab.GetElectroNeg(obanum1);
-          if (eneg > 3.01) {
-            HBondDonor* donor = new HBondDonor();
-            donor->donorAtom = atom1;
-            donor->donatedHydrogen = atom2;
+      if (bn2.compare("H")==0) {
+        if (bn1.compare("O")==0 || bn1.compare("N")==0
+            || bn1.compare("F")==0) {
+          HBondDonor* donor = new HBondDonor();
+          donor->donorAtom = atom1;
+          donor->donatedHydrogen = atom2;
             hBondDonors_.push_back( donor );
-          }
         }
-      }
+      } 
     }
-
-    for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
-      for(atom1 = rb->beginAtom(ai); atom1 != NULL; atom1 = rb->nextAtom(ai)) {
+    
+    for (rb = beginRigidBody(rbIter); rb != NULL;
+         rb = nextRigidBody(rbIter)) {
+      for(atom1 = rb->beginAtom(ai); atom1 != NULL;
+          atom1 = rb->nextAtom(ai)) {
         AtomType* at1 = atom1->getAtomType();
         // get the chain of base types for this atom type:
         std::vector<AtomType*> ayb1 = at1->allYourBase();
         // use the last type in the chain of base types for the name:
         std::string bn1 = ayb1[ayb1.size()-1]->getName();
-        int obanum1 = etab.GetAtomicNum(bn1.c_str());
-        if (obanum1 != 0) {
-          RealType eneg = etab.GetElectroNeg(obanum1);
-          if (eneg > 3.01) {
-            for(atom2 = rb->beginAtom(aj); atom2 != NULL;
-                atom2 = rb->nextAtom(aj)) {
-              AtomType* at2 = atom2->getAtomType();
-              // get the chain of base types for this atom type:              
-              std::vector<AtomType*> ayb2 = at2->allYourBase();
-              // use the last type in the chain of base types for the name:
-              std::string bn2 = ayb2[ayb2.size()-1]->getName();
-              int obanum2 = etab.GetAtomicNum(bn2.c_str());
-              if (obanum2 == 1) {
-                HBondDonor* donor = new HBondDonor();
-                donor->donorAtom = atom1;
-                donor->donatedHydrogen = atom2;
-                hBondDonors_.push_back( donor );
-              }
+        
+        if (bn1.compare("O")==0 || bn1.compare("N")==0
+            || bn1.compare("F")==0) {
+          for(atom2 = rb->beginAtom(aj); atom2 != NULL;
+              atom2 = rb->nextAtom(aj)) {
+            AtomType* at2 = atom2->getAtomType();
+            // get the chain of base types for this atom type:              
+            std::vector<AtomType*> ayb2 = at2->allYourBase();
+            // use the last type in the chain of base types for the name:
+            std::string bn2 = ayb2[ayb2.size()-1]->getName();
+            if (bn2.compare("H")==0) {              
+              HBondDonor* donor = new HBondDonor();
+              donor->donorAtom = atom1;
+              donor->donatedHydrogen = atom2;
+              hBondDonors_.push_back( donor );
             }
           }
         }
       }
-    }           
+    }
   }
-
+  
   RealType Molecule::getMass() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
