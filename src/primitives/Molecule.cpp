@@ -53,7 +53,7 @@
 #include "primitives/Molecule.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
-#include "utils/ElementsTable.hpp"
+#include "utils/StringUtils.hpp"
 
 namespace OpenMD {
   Molecule::Molecule(int stampId, int globalIndex, const std::string& molName, 
@@ -196,11 +196,12 @@ namespace OpenMD {
       // get the chain of base types for this atom type:
       std::vector<AtomType*> ayb = at->allYourBase();
       // use the last type in the chain of base types for the name:
-      std::string bn = ayb[ayb.size()-1]->getName();
-      
-      if (bn.compare("O")==0 || bn.compare("N")==0 || bn.compare("F")==0)
-        hBondAcceptors_.push_back( atom );
+      std::string bn = UpperCase(ayb[ayb.size()-1]->getName());
 
+        if (bn.compare("O")==0 || bn.compare("N")==0
+            || bn.compare("F")==0) 
+          hBondAcceptors_.push_back( atom );
+      
     }
     
     // find electronegative atoms that are either bonded to
@@ -215,8 +216,8 @@ namespace OpenMD {
       std::vector<AtomType*> ayb1 = at1->allYourBase();
       std::vector<AtomType*> ayb2 = at2->allYourBase();
       // use the last type in the chain of base types for the name:
-      std::string bn1 = ayb1[ayb1.size()-1]->getName();
-      std::string bn2 = ayb2[ayb2.size()-1]->getName();
+      std::string bn1 = UpperCase(ayb1[ayb1.size()-1]->getName());
+      std::string bn2 = UpperCase(ayb2[ayb2.size()-1]->getName());
       
       if (bn1.compare("H")==0) {
         if (bn2.compare("O")==0 || bn2.compare("N")==0
@@ -246,7 +247,7 @@ namespace OpenMD {
         // get the chain of base types for this atom type:
         std::vector<AtomType*> ayb1 = at1->allYourBase();
         // use the last type in the chain of base types for the name:
-        std::string bn1 = ayb1[ayb1.size()-1]->getName();
+        std::string bn1 = UpperCase(ayb1[ayb1.size()-1]->getName());
         
         if (bn1.compare("O")==0 || bn1.compare("N")==0
             || bn1.compare("F")==0) {
@@ -256,7 +257,7 @@ namespace OpenMD {
             // get the chain of base types for this atom type:              
             std::vector<AtomType*> ayb2 = at2->allYourBase();
             // use the last type in the chain of base types for the name:
-            std::string bn2 = ayb2[ayb2.size()-1]->getName();
+            std::string bn2 = UpperCase(ayb2[ayb2.size()-1]->getName());
             if (bn2.compare("H")==0) {              
               HBondDonor* donor = new HBondDonor();
               donor->donorAtom = atom1;
