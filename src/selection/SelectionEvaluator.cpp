@@ -335,6 +335,8 @@ namespace OpenMD {
     for (mol = info->beginMolecule(mi); mol != NULL; 
          mol = info->nextMolecule(mi)) {
 
+      compareProperty(mol, bs, property, comparator, comparisonValue);
+
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	compareProperty(atom, bs, property, comparator, comparisonValue);
       }
@@ -364,6 +366,8 @@ namespace OpenMD {
 
     for (mol = info->beginMolecule(mi); mol != NULL; 
          mol = info->nextMolecule(mi)) {
+
+      compareProperty(mol, bs, property, comparator, comparisonValue, frame);
 
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	compareProperty(atom, bs, property, comparator, comparisonValue, frame);
@@ -460,6 +464,160 @@ namespace OpenMD {
     
   }
 
+  void SelectionEvaluator::compareProperty(Molecule* mol, SelectionSet& bs, 
+                                           int property, int comparator, 
+                                           float comparisonValue) {
+    RealType propertyValue = 0.0;
+    Vector3d pos;
+
+    switch (property) {
+    case Token::mass:
+      propertyValue = mol->getMass();
+      break;
+    case Token::charge:
+      {
+        Molecule::AtomIterator ai;
+        Atom* atom;
+        for (atom = mol->beginAtom(ai); atom != NULL;
+             atom = mol->nextAtom(ai)) {
+          propertyValue+=  getCharge(atom);
+        }
+      }
+      break;
+    case Token::x:
+      propertyValue = mol->getCom().x();
+      break;
+    case Token::y:
+      propertyValue = mol->getCom().y();
+      break;
+    case Token::z:
+      propertyValue = mol->getCom().z();
+      break;
+    case Token::wrappedX:    
+      pos = mol->getCom();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.x();
+      break;
+    case Token::wrappedY:
+      pos = mol->getCom();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.y();
+      break;
+    case Token::wrappedZ:
+      pos = mol->getCom();
+      info->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      propertyValue = pos.z();
+      break;
+    case Token::r:
+      propertyValue = mol->getCom().length();
+      break;
+    default:
+      unrecognizedMoleculeProperty(property);
+    }
+    
+    bool match = false;
+    switch (comparator) {
+    case Token::opLT:
+      match = propertyValue < comparisonValue;
+      break;
+    case Token::opLE:
+      match = propertyValue <= comparisonValue;
+      break;
+    case Token::opGE:
+      match = propertyValue >= comparisonValue;
+      break;
+    case Token::opGT:
+      match = propertyValue > comparisonValue;
+      break;
+    case Token::opEQ:
+      match = propertyValue == comparisonValue;
+      break;
+    case Token::opNE:
+      match = propertyValue != comparisonValue;
+      break;
+    }
+    
+    if (match) 
+      bs.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());    
+  }
+
+  void SelectionEvaluator::compareProperty(Molecule* mol, SelectionSet& bs, 
+                                           int property, int comparator, 
+                                           float comparisonValue, int frame) {
+    RealType propertyValue = 0.0;
+    Vector3d pos;
+    switch (property) {
+    case Token::mass:
+      propertyValue = mol->getMass();
+      break;
+    case Token::charge:
+      {
+        Molecule::AtomIterator ai;
+        Atom* atom;
+        for (atom = mol->beginAtom(ai); atom != NULL;
+             atom = mol->nextAtom(ai)) {
+          propertyValue+=  getCharge(atom,frame);
+        }
+      }      
+      break;
+    case Token::x:
+      propertyValue = mol->getCom(frame).x();
+      break;
+    case Token::y:
+      propertyValue = mol->getCom(frame).y();
+      break;
+    case Token::z:
+      propertyValue = mol->getCom(frame).z();
+      break;
+    case Token::wrappedX:    
+      pos = mol->getCom(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.x();
+      break;
+    case Token::wrappedY:
+      pos = mol->getCom(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.y();
+      break;
+    case Token::wrappedZ:
+      pos = mol->getCom(frame);
+      info->getSnapshotManager()->getSnapshot(frame)->wrapVector(pos);
+      propertyValue = pos.z();
+      break;
+
+    case Token::r:
+      propertyValue = mol->getCom(frame).length();
+      break;
+    default:
+      unrecognizedMoleculeProperty(property);
+    }
+        
+    bool match = false;
+    switch (comparator) {
+    case Token::opLT:
+      match = propertyValue < comparisonValue;
+      break;
+    case Token::opLE:
+      match = propertyValue <= comparisonValue;
+      break;
+    case Token::opGE:
+      match = propertyValue >= comparisonValue;
+      break;
+    case Token::opGT:
+      match = propertyValue > comparisonValue;
+      break;
+    case Token::opEQ:
+      match = propertyValue == comparisonValue;
+      break;
+    case Token::opNE:
+      match = propertyValue != comparisonValue;
+      break;
+    }
+    if (match) 
+      bs.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
+    
+    
+  }
   void SelectionEvaluator::compareProperty(StuntDouble* sd, SelectionSet& bs, 
                                            int property, int comparator, 
                                            float comparisonValue, int frame) {
@@ -541,6 +699,7 @@ namespace OpenMD {
     
   }
 
+  
   void SelectionEvaluator::withinInstruction(const Token& instruction, 
                                              SelectionSet& bs){
     

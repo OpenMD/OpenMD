@@ -147,6 +147,8 @@ namespace OpenMD {
     SelectionSet comparatorInstruction(const Token& instruction, int frame); 
     void compareProperty(StuntDouble* sd, SelectionSet& bs, int property, int comparator, float comparisonValue);
     void compareProperty(StuntDouble* sd, SelectionSet& bs, int property, int comparator, float comparisonValue, int frame);
+    void compareProperty(Molecule* mol, SelectionSet& bs, int property, int comparator, float comparisonValue);
+    void compareProperty(Molecule* mol, SelectionSet& bs, int property, int comparator, float comparisonValue, int frame);
     SelectionSet nameInstruction(const std::string& name);
     SelectionSet indexInstruction(const boost::any& value);
     SelectionSet expression(const std::vector<Token>& tokens, int pc);
@@ -175,6 +177,10 @@ namespace OpenMD {
 
     void unrecognizedAtomProperty(int property){
       evalError("unrecognized atom property");
+    }
+    
+    void unrecognizedMoleculeProperty(int property){
+      evalError("unrecognized molecule property");
     }
 
     void unrecognizedIdentifier(const std::string& identifier) {
