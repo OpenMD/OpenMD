@@ -1812,9 +1812,9 @@ namespace OpenMD {
     }
 
     if (hasSelectionB_) {
-      if (evaluatorB_.hasSurfaceArea()) 
+      if (evaluatorB_.hasSurfaceArea()) {
         areaB = evaluatorB_.getSurfaceArea();
-      else {
+      } else {
 
         int isd;
         StuntDouble* sd;

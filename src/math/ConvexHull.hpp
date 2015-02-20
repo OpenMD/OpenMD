@@ -71,7 +71,7 @@ namespace OpenMD {
     void computeHull( std::vector<StuntDouble*> bodydoubles );
 
     /* Total area of Hull*/
-    RealType getArea(){return area_;}
+    RealType getArea(){ return area_;}
 
     /* Total Volume enclosed by Hull */
     RealType getVolume(){ return volume_; } 
@@ -80,12 +80,14 @@ namespace OpenMD {
     void printHull(const std::string& geomFileName);
 
   protected:
-    RealType volume_;
-    RealType area_;
-    int dim_;
     const std::string options_;
+    int dim_;
     
   private:
+    // These variables are private so that each new hull returns
+    // information about itself.
+    RealType volume_;
+    RealType area_;
     std::vector<Triangle> Triangles_;
   };
 }
