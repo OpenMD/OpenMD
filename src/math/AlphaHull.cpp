@@ -213,8 +213,8 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   
   
   int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
-  //Insert all the sample points, because, even with alpha=0, the alpha shape/alpha complex will
-  //contain them.
+  //Insert all the sample points, because, even with alpha=0, the
+  //alpha shape/alpha complex will contain them.
 
   //  tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
   
@@ -242,18 +242,21 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   FORALLfacet_(qh facet_list) {
     numFacets++;
     if (!facet->upperdelaunay) {
-      //For all facets (that are tetrahedrons)calculate the radius of the empty circumsphere considering 
-      //the distance between the circumcenter and a vertex of the facet
+      //For all facets (that are tetrahedrons)calculate the radius of
+      //the empty circumsphere considering the distance between the
+      //circumcenter and a vertex of the facet
       vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
       double* center = facet->center;
       double radius =  qh_pointdist(vertex->point,center,dim_);
       
       if (radius>alpha_) // if the facet is not good consider the ridges
         {
-          //if calculating the alphashape, unmark the facet ('good' is used as 'marked'). 
+          //if calculating the alphashape, unmark the facet ('good' is
+          //used as 'marked').
           facet->good=false;
           
-          //Compute each ridge (triangle) once and test the cironference radius with alpha
+          //Compute each ridge (triangle) once and test the
+          //cironference radius with alpha
           facet->visitid= qh visit_id;
           qh_makeridges(facet);
           ridgeT *ridge, **ridgep;
@@ -276,18 +279,21 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
             }
           }
 
-          //If calculating the alphashape, mark the facet('good' is used as 'marked'). 
-          //This facet will have some triangles hidden by the facet's neighbor.
+          //If calculating the alphashape, mark the facet('good' is
+          //used as 'marked').  This facet will have some triangles
+          //hidden by the facet's neighbor.
           if(goodTriangles==4)
             facet->good=true;
           
         }
-      else //the facet is good. Put all the triangles of the tetrahedron in the mesh
+      else //the facet is good. Put all the triangles of the
+           //tetrahedron in the mesh
         {
           //Compute each ridge (triangle) once
           facet->visitid= qh visit_id;
-          //If calculating the alphashape, mark the facet('good' is used as 'marked').
-          //This facet will have some triangles hidden by the facet's neighbor.
+          //If calculating the alphashape, mark the facet('good' is
+          //used as 'marked').  This facet will have some triangles
+          //hidden by the facet's neighbor.
           facet->good=true;
           qh_makeridges(facet);
           ridgeT *ridge, **ridgep;
@@ -302,7 +308,8 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   }
   //assert(numFacets== qh num_facets);
   
-  //Filter the triangles (only the ones on the boundary of the alpha complex) and build the mesh
+  //Filter the triangles (only the ones on the boundary of the alpha
+  //complex) and build the mesh
 
   int ridgesCount=0;
   
@@ -359,14 +366,12 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       Vector3d normal = face.getUnitNormal();
       RealType offset =  ((0.0-p[0][0])*normal[0] + (0.0-p[0][1])*normal[1] + (0.0-p[0][2])*normal[2]);
       RealType dist =  normal[0] * interiorPoint[0] + normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
-     cout << "Dist and normal and area are: " << normal << endl;
       volume_ += dist *area/qh hull_dim;
       
       Triangles_.push_back(face);
     }
   }
 
-  cout << "Volume is: " << volume_ << endl; 
 
 //assert(pm.cm.fn == ridgesCount);
 /*

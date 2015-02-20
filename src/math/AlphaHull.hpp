@@ -60,7 +60,6 @@
 #include <vector>
 #include <string>
 
-using namespace std;
 namespace OpenMD {
   class AlphaHull : public Hull {
   public:
@@ -68,7 +67,7 @@ namespace OpenMD {
     AlphaHull(RealType alpha);    
     virtual ~AlphaHull(){};
     
-    void computeHull( vector<StuntDouble*> bodydoubles );
+    void computeHull( std::vector<StuntDouble*> bodydoubles );
     
     /* Total area of Hull*/
     RealType getArea(){ return area_; }
@@ -80,14 +79,17 @@ namespace OpenMD {
     void printHull(const std::string& geomFileName);
     
   protected:
-    RealType volume_;
-    RealType area_;
     int dim_;
     RealType alpha_;
     const std::string options_;
     
   private:
-    vector<Triangle> Triangles_;
+    // These variables are private so that each new hull returns
+    // information about itself.
+    RealType volume_;
+    RealType area_;
+    std::vector<Triangle> Triangles_;
+
   };
 }
 #endif

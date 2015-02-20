@@ -508,6 +508,7 @@ src/applications/dynamicProps/LegendreCorrFunc.cpp
 src/applications/dynamicProps/LegendreCorrFuncZ.cpp
 src/applications/dynamicProps/cOHz.cpp
 src/applications/dynamicProps/MomentumCorrFunc.cpp
+src/applications/dynamicProps/MultipassCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
 src/applications/dynamicProps/RadialRCorrFunc.cpp
