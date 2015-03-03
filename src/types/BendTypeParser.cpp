@@ -186,8 +186,6 @@ namespace OpenMD {
     case btUnknown :
     default:
       throw OpenMDException("BendTypeParser: Unknown Bend Type");
-      break;
-            
     }
 
     return bendType;
