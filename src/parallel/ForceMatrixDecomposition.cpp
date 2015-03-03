@@ -436,15 +436,16 @@ namespace OpenMD {
 
 
   void ForceMatrixDecomposition::distributeData()  {
+   
+#ifdef IS_MPI
+
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
-
+    
     bool needsCG = true;
     if(info_->getNCutoffGroups() != info_->getNAtoms())
       needsCG = false;
-   
-#ifdef IS_MPI
-    
+
     // gather up the atomic positions
     AtomPlanVectorRow->gather(snap_->atomData.position, 
                               atomRowData.position);
