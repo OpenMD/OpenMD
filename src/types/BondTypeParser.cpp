@@ -169,8 +169,6 @@ namespace OpenMD {
     case btUnknown :
     default:
       throw OpenMDException("BondTypeParser: Unknown Bond Type");
-      break;
-            
     }
     
     return bondType;

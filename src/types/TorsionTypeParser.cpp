@@ -267,8 +267,6 @@ namespace OpenMD {
     case ttUnknown :
     default:
       throw OpenMDException("TorsionTypeParser: Unknown Torsion Type");
-      break;
-            
     }
     return torsionType;
   }

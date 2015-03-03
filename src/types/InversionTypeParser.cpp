@@ -172,8 +172,6 @@ namespace OpenMD {
     case itUnknown :
     default:
       throw OpenMDException("InversionTypeParser: Unknown Inversion Type");    
-      break;
-      
     }
     return inversionType;
   }
