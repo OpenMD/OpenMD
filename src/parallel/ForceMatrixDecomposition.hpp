@@ -67,10 +67,9 @@ namespace OpenMD {
     void collectData();
 
     // neighbor list routines
-    void buildNeighborList(vector<pair<int, int> >& neighborList);
+    void buildNeighborList(vector<int>& neighborList, vector<int>& point);
 
     // group bookkeeping
-    void getGroupCutoffs(int &cg1, int &cg2, RealType &rcut, RealType &rcutsq, RealType &rlistsq);
     Vector3d& getGroupVelocityColumn(int cg2);
 
     // Group->atom bookkeeping
@@ -96,12 +95,10 @@ namespace OpenMD {
     Vector3d& getAtomVelocityColumn(int atom2);
 
     // filling interaction blocks with pointers
-    void fillInteractionData(InteractionData &idat, int atom1, int atom2);
+    void fillInteractionData(InteractionData &idat, int atom1, int atom2, bool newAtom1 = true);
     void unpackInteractionData(InteractionData &idat, int atom1, int atom2);
 
-  private: 
-    void createGtypeCutoffMap();
-
+  private:     
     int nLocal_;
     int nGroups_;
     vector<int> AtomLocalToGlobal;
@@ -164,11 +161,6 @@ public:
     vector<int> cgColToGlobal;
 
 private:
-    vector<RealType> groupCutoffRow;
-    vector<RealType> groupCutoffCol;
-    vector<int> groupColToGtype;
-    vector<int> groupRowToGtype;
-
     vector<vector<int> > cellListRow_;
     vector<vector<int> > cellListCol_;
 

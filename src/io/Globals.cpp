@@ -192,8 +192,7 @@ namespace OpenMD {
     deprecatedKeywords_.insert("minimizerLSTol");
     deprecatedKeywords_.insert("minimizerLSMaxIter");
     deprecatedKeywords_.insert("electricField");
-
-    
+    deprecatedKeywords_.insert("cutoffPolicy");
   }
 
   Globals::~Globals() {
@@ -248,17 +247,16 @@ namespace OpenMD {
                    isEqualIgnoreCase("SHIFTED_FORCE") || 
                    isEqualIgnoreCase("TAYLOR_SHIFTED") ||
                    isEqualIgnoreCase("EWALD_FULL"));
-    CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || 
-                   isEqualIgnoreCase("MAX") || 
-                   isEqualIgnoreCase("TRADITIONAL"));
     CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || 
-                   isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || 
+                   isEqualIgnoreCase("HARD") ||
+                   isEqualIgnoreCase("SWITCHED") || 
                    isEqualIgnoreCase("SHIFTED_POTENTIAL") || 
                    isEqualIgnoreCase("SHIFTED_FORCE") || 
                    isEqualIgnoreCase("REACTION_FIELD") || 
                    isEqualIgnoreCase("TAYLOR_SHIFTED"));
     CheckParameter(ElectrostaticScreeningMethod, 
-                   isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
+                   isEqualIgnoreCase("UNDAMPED") ||
+                   isEqualIgnoreCase("DAMPED")); 
     CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || 
                    isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
     CheckParameter(OrthoBoxTolerance, isPositive());  

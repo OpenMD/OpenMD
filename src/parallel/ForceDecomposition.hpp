@@ -46,14 +46,11 @@
 #include "brains/SimInfo.hpp"
 #include "brains/SnapshotManager.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "nonbonded/Cutoffs.hpp"
 #include "nonbonded/InteractionManager.hpp"
 #include "utils/Tuple.hpp"
 
 using namespace std;
-namespace OpenMD {
-  
-  typedef tuple3<RealType, RealType, RealType> groupCutoffs;
+namespace OpenMD { 
 
   /**
    * @class ForceDecomposition 
@@ -113,14 +110,11 @@ namespace OpenMD {
 
     // neighbor list routines
     virtual bool checkNeighborList();
-    virtual void buildNeighborList(vector<pair<int, int> >& neighborList) = 0;
+    virtual void buildNeighborList(vector<int>& neighborList, vector<int>& point) = 0;
 
-    // how to handle cutoffs:
-    void setCutoffPolicy(CutoffPolicy cp) {cutoffPolicy_ = cp;}
-    void setUserCutoff(RealType rcut) {userCutoff_ = rcut; userChoseCutoff_ = true; }
-
+    void setCutoffRadius(RealType rCut);
+    
     // group bookkeeping
-    virtual void getGroupCutoffs(int &cg1, int &cg2, RealType &rcut, RealType &rcutsq, RealType &rlistsq) = 0;
     virtual Vector3d& getGroupVelocityColumn(int atom2) = 0;
 
     // Group->atom bookkeeping
@@ -147,7 +141,7 @@ namespace OpenMD {
     virtual Vector3d& getAtomVelocityColumn(int atom2) = 0;
 
     // filling interaction blocks with pointers
-    virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
+    virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2, bool newAtom1 = true) = 0;
     virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
 
     virtual void fillSelfData(SelfData &sdat, int atom1);
@@ -165,8 +159,10 @@ namespace OpenMD {
     int storageLayout_;
     bool needVelocities_;
     bool usePeriodicBoundaryConditions_;
-    RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
-    RealType largestRcut_;
+    RealType skinThickness_;   /**< Verlet neighbor list skin thickness */
+    RealType rCut_;
+    RealType rList_;
+    RealType rListSq_;
 
     vector<int> idents;
     vector<int> regions;
@@ -194,16 +190,6 @@ namespace OpenMD {
     Vector3i nCells_;
     vector<vector<int> > cellList_;
     vector<Vector3d> saved_CG_positions_;
-
-    bool userChoseCutoff_;
-    RealType userCutoff_;
-    CutoffPolicy cutoffPolicy_;
-
-    //map<pair<int, int>, tuple3<RealType, RealType, RealType> > gTypeCutoffMap;
-    vector<vector<RealType> > GrCut;
-    vector<vector<RealType> > GrCutSq;
-    vector<vector<RealType> > GrlistSq;
-
   };    
 }
 #endif

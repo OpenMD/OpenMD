@@ -33,6 +33,15 @@ include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
 
+if ( CMAKE_COMPILER_IS_GNUCC )
+    # set_property( TARGET main APPEND_STRING PROPERTY COMPILE_FLAGS -Wall )
+    add_definitions("-Wall")
+endif ( CMAKE_COMPILER_IS_GNUCC )
+if ( MSVC )
+    # set_property( TARGET main APPEND_STRING PROPERTY COMPILE_FLAGS /W3 )
+    add_definitions("/W3")
+endif ( MSVC )
+
 # OpenMD version number.
 set (VERSION_MAJOR "2")
 set (VERSION_MINOR "3")

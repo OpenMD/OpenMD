@@ -54,12 +54,6 @@ namespace OpenMD {
     EWALD_FULL
   };
 
-  enum CutoffPolicy {
-    MIX,
-    MAX,
-    TRADITIONAL
-  };
-
 }
 
 #endif

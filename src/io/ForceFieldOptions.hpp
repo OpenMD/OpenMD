@@ -56,7 +56,6 @@ namespace OpenMD {
     DeclareParameter(DistanceMixingRule, std::string);
     DeclareParameter(DistanceType, std::string);
     DeclareParameter(EnergyMixingRule, std::string);
-    DeclareParameter(CutoffPolicy, std::string);
     DeclareParameter(EnergyUnitScaling, RealType);
     DeclareParameter(MetallicEnergyUnitScaling, RealType);
     DeclareParameter(DistanceUnitScaling, RealType);
@@ -83,7 +82,6 @@ namespace OpenMD {
       CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
       CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("hhg")));
       CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180_is_trans")) || isEqualIgnoreCase(std::string("0_is_trans")));
-      CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
       CheckParameter(EAMMixingMethod, isEqualIgnoreCase(std::string("JOHNSON")) || isEqualIgnoreCase(std::string("DAW")));
    }
     

@@ -57,21 +57,34 @@ namespace OpenMD {
     void addPoint(const RealType xp, const RealType yp);
     void addPoints(const vector<RealType>& xps, const vector<RealType>& yps);
     RealType getValueAt(const RealType& t);
-    pair<RealType, RealType> getValueAndDerivativeAt(const RealType& t);
     pair<RealType, RealType> getLimits();
     void getValueAt(const RealType& t, RealType& v);
     void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
     
   private:
     void generate();
+    std::vector<int> sort_permutation(std::vector<RealType>& v);
+    std::vector<RealType> apply_permutation(std::vector<RealType> const& v,
+                                            std::vector<int> const& p);
+    
     bool isUniform;
     bool generated;
     RealType dx, dt, yval, dydx;
     int n, j;
-    vector<pair<RealType, RealType> > data_;
+    vector<RealType> x_;
+    vector<RealType> y_;
     vector<RealType> b;
     vector<RealType> c;
     vector<RealType> d;    
+  };
+
+  class Comparator{
+    std::vector<RealType>& _v;
+  public:
+    Comparator(std::vector<RealType>& v) : _v(v) {}
+    bool operator()(size_t i, size_t j){
+      return _v[i] < _v[j];
+    }
   };
 }
 
