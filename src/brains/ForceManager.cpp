@@ -626,7 +626,6 @@ namespace OpenMD {
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
-    int jstart, jend;
 
     //calculate the center of mass of cutoff group
 
@@ -659,8 +658,6 @@ namespace OpenMD {
     RealType electroMult, vdwMult;
     RealType vij;
     Vector3d fij, fg, f1;
-    tuple3<RealType, RealType, RealType> cuts;
-    RealType rCut, rCutSq, rListSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
     vector<int> atomListColumn, atomListRow;
@@ -725,7 +722,7 @@ namespace OpenMD {
         }
       }
 
-      for (unsigned int cg1 = 0; cg1 < point_.size() - 1; cg1++) {
+      for (cg1 = 0; cg1 < point_.size() - 1; cg1++) {
         
         atomListRow = fDecomp_->getAtomsInGroupRow(cg1);        
         newAtom1 = true;
