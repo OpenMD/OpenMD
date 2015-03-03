@@ -105,16 +105,18 @@ namespace OpenMD {
 
     SwitchingFunctionType sft_;/**< Type of switching function in use */
     RealType rCut_;            /**< cutoff radius for non-bonded interactions */
+    RealType rCutSq_;
     RealType rSwitch_;         /**< inner radius of switching function */
     CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
-    CutoffPolicy cutoffPolicy_;/**< Cutoff Policy for non-bonded interactions */
 
     set<AtomType*> atomTypes_;
     vector<pair<AtomType*, AtomType*> > interactions_;
     map<Bend*, BendDataSet> bendDataSets;
     map<Torsion*, TorsionDataSet> torsionDataSets;
     map<Inversion*, InversionDataSet> inversionDataSets;
-    vector<pair<int, int> > neighborList_;
+    //vector<pair<int, int> > neighborList_;
+    vector<int> neighborList_;
+    vector<int> point_;
 
     vector<RealType> vdwScale_;
     vector<RealType> electrostaticScale_;

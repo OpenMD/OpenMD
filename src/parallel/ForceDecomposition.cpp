@@ -55,7 +55,6 @@ namespace OpenMD {
     sman_ = info_->getSnapshotManager();
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
-    userChoseCutoff_ = false;
 
     usePeriodicBoundaryConditions_ = info->getSimParams()->getUsePeriodicBoundaryConditions();
 
@@ -98,9 +97,14 @@ namespace OpenMD {
     cellOffsets_.push_back( Vector3i(1, -1,1) );
   }
 
+  void ForceDecomposition::setCutoffRadius(RealType rcut) {
+    rCut_ = rcut;
+    rList_ = rCut_ + skinThickness_;
+    rListSq_ = rList_ * rList_;
+  }
+
   void ForceDecomposition::fillSelfData(SelfData &sdat, int atom1) {
 
-    //sdat.atype = atypesLocal[atom1];
     sdat.atid = idents[atom1];
 
     sdat.pot = &embeddingPot;
@@ -148,14 +152,15 @@ namespace OpenMD {
   }
 
   bool ForceDecomposition::checkNeighborList() {
-
+    RealType st2 = pow( skinThickness_ / 2.0, 2);
     int nGroups = snap_->cgData.position.size();
     if (needVelocities_) 
-      snap_->cgData.setStorageLayout(DataStorage::dslPosition | DataStorage::dslVelocity);
+      snap_->cgData.setStorageLayout(DataStorage::dslPosition |
+                                     DataStorage::dslVelocity);
     
     // if we have changed the group identities or haven't set up the
     // saved positions we automatically will need a neighbor list update:
-
+    
     if ( saved_CG_positions_.size() != nGroups ) return true;
 
     RealType dispmax = 0.0;
@@ -163,8 +168,7 @@ namespace OpenMD {
 
     for (int i = 0; i < nGroups; i++) {
       disp = snap_->cgData.position[i]  - saved_CG_positions_[i];
-      for (int j = 0; j < 3; j++)
-        dispmax = max( abs(disp[j]), dispmax);
+      dispmax = max(dispmax, disp.lengthSquare());
     }
 
 #ifdef IS_MPI
@@ -172,14 +176,7 @@ namespace OpenMD {
                   MPI_COMM_WORLD);
 #endif
 
-    // a conservative test of list skin crossings
-    dispmax = 2.0 * sqrt (3.0 * dispmax * dispmax);
-
-
-    if (dispmax > skinThickness_) 
-      return (dispmax > skinThickness_);   
-
-    return false;
+    return (dispmax > st2) ? true : false;
   }
 
   void ForceDecomposition::addToHeatFlux(Vector3d hf) {

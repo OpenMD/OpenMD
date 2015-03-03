@@ -50,10 +50,7 @@ namespace OpenMD {
 
   ForceMatrixDecomposition::ForceMatrixDecomposition(SimInfo* info, InteractionManager* iMan) : ForceDecomposition(info, iMan) {
 
-    // In a parallel computation, row and colum scans must visit all
-    // surrounding cells (not just the 14 upper triangular blocks that
-    // are used when the processor can see all pairs)
-#ifdef IS_MPI
+    // Row and colum scans must visit all surrounding cells
     cellOffsets_.clear();
     cellOffsets_.push_back( Vector3i(-1,-1,-1) );
     cellOffsets_.push_back( Vector3i( 0,-1,-1) );
@@ -82,7 +79,6 @@ namespace OpenMD {
     cellOffsets_.push_back( Vector3i(-1, 1, 1) );
     cellOffsets_.push_back( Vector3i( 0, 1, 1) );
     cellOffsets_.push_back( Vector3i( 1, 1, 1) );
-#endif    
   }
 
 
@@ -306,202 +302,9 @@ namespace OpenMD {
           groupList_[i].push_back(j);
         }
       }      
-    }
-
-
-    createGtypeCutoffMap();
-
+    }    
   }
-   
-  void ForceMatrixDecomposition::createGtypeCutoffMap() {
     
-    GrCut.clear();
-    GrCutSq.clear();
-    GrlistSq.clear();
-
-    RealType tol = 1e-6;
-    largestRcut_ = 0.0;
-    int atid;
-    set<AtomType*> atypes = info_->getSimulatedAtomTypes();
-    
-    map<int, RealType> atypeCutoff;
-      
-    for (set<AtomType*>::iterator at = atypes.begin(); 
-         at != atypes.end(); ++at){
-      atid = (*at)->getIdent();
-      if (userChoseCutoff_) 
-        atypeCutoff[atid] = userCutoff_;
-      else
-        atypeCutoff[atid] = interactionMan_->getSuggestedCutoffRadius(*at);
-    }
-    
-    vector<RealType> gTypeCutoffs;
-    // first we do a single loop over the cutoff groups to find the
-    // largest cutoff for any atypes present in this group.
-#ifdef IS_MPI
-    vector<RealType> groupCutoffRow(nGroupsInRow_, 0.0);
-    groupRowToGtype.resize(nGroupsInRow_);
-    for (int cg1 = 0; cg1 < nGroupsInRow_; cg1++) {
-      vector<int> atomListRow = getAtomsInGroupRow(cg1);
-      for (vector<int>::iterator ia = atomListRow.begin(); 
-           ia != atomListRow.end(); ++ia) {            
-        int atom1 = (*ia);
-        atid = identsRow[atom1];
-        if (atypeCutoff[atid] > groupCutoffRow[cg1]) {
-          groupCutoffRow[cg1] = atypeCutoff[atid];
-        }
-      }
-
-      bool gTypeFound = false;
-      for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
-        if (abs(groupCutoffRow[cg1] - gTypeCutoffs[gt]) < tol) {
-          groupRowToGtype[cg1] = gt;
-          gTypeFound = true;
-        } 
-      }
-      if (!gTypeFound) {
-        gTypeCutoffs.push_back( groupCutoffRow[cg1] );
-        groupRowToGtype[cg1] = gTypeCutoffs.size() - 1;
-      }
-      
-    }
-    vector<RealType> groupCutoffCol(nGroupsInCol_, 0.0);
-    groupColToGtype.resize(nGroupsInCol_);
-    for (int cg2 = 0; cg2 < nGroupsInCol_; cg2++) {
-      vector<int> atomListCol = getAtomsInGroupColumn(cg2);
-      for (vector<int>::iterator jb = atomListCol.begin(); 
-           jb != atomListCol.end(); ++jb) {            
-        int atom2 = (*jb);
-        atid = identsCol[atom2];
-        if (atypeCutoff[atid] > groupCutoffCol[cg2]) {
-          groupCutoffCol[cg2] = atypeCutoff[atid];
-        }
-      }
-      bool gTypeFound = false;
-      for (int gt = 0; gt < gTypeCutoffs.size(); gt++) {
-        if (abs(groupCutoffCol[cg2] - gTypeCutoffs[gt]) < tol) {
-          groupColToGtype[cg2] = gt;
-          gTypeFound = true;
-        } 
-      }
-      if (!gTypeFound) {
-        gTypeCutoffs.push_back( groupCutoffCol[cg2] );
-        groupColToGtype[cg2] = gTypeCutoffs.size() - 1;
-      }
-    }
-#else
-
-    vector<RealType> groupCutoff(nGroups_, 0.0);
-    groupToGtype.resize(nGroups_);
-    for (int cg1 = 0; cg1 < nGroups_; cg1++) {
-      groupCutoff[cg1] = 0.0;
-      vector<int> atomList = getAtomsInGroupRow(cg1);
-      for (vector<int>::iterator ia = atomList.begin(); 
-           ia != atomList.end(); ++ia) {            
-        int atom1 = (*ia);
-        atid = idents[atom1];
-        if (atypeCutoff[atid] > groupCutoff[cg1]) 
-          groupCutoff[cg1] = atypeCutoff[atid];
-      }
-      
-      bool gTypeFound = false;
-      for (unsigned int gt = 0; gt < gTypeCutoffs.size(); gt++) {
-        if (abs(groupCutoff[cg1] - gTypeCutoffs[gt]) < tol) {
-          groupToGtype[cg1] = gt;
-          gTypeFound = true;
-        } 
-      }
-      if (!gTypeFound) {      
-        gTypeCutoffs.push_back( groupCutoff[cg1] );
-        groupToGtype[cg1] = gTypeCutoffs.size() - 1;
-      }      
-    }
-#endif
-
-    // Now we find the maximum group cutoff value present in the simulation
-
-    RealType groupMax = *max_element(gTypeCutoffs.begin(), 
-                                     gTypeCutoffs.end());
-
-#ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &groupMax, 1, MPI_REALTYPE, 
-                  MPI_MAX, MPI_COMM_WORLD);
-#endif
-    
-    RealType tradRcut = groupMax;
-
-    GrCut.resize( gTypeCutoffs.size() );
-    GrCutSq.resize( gTypeCutoffs.size() );
-    GrlistSq.resize( gTypeCutoffs.size() );
-
-
-    for (unsigned int i = 0; i < gTypeCutoffs.size();  i++) {
-      GrCut[i].resize( gTypeCutoffs.size() , 0.0);
-      GrCutSq[i].resize( gTypeCutoffs.size(), 0.0 );
-      GrlistSq[i].resize( gTypeCutoffs.size(), 0.0 );
-
-      for (unsigned int j = 0; j < gTypeCutoffs.size();  j++) {       
-        RealType thisRcut;
-        switch(cutoffPolicy_) {
-        case TRADITIONAL:
-          thisRcut = tradRcut;
-          break;
-        case MIX:
-          thisRcut = 0.5 * (gTypeCutoffs[i] + gTypeCutoffs[j]);
-          break;
-        case MAX:
-          thisRcut = max(gTypeCutoffs[i], gTypeCutoffs[j]);
-          break;
-        default:
-          sprintf(painCave.errMsg,
-                  "ForceMatrixDecomposition::createGtypeCutoffMap " 
-                  "hit an unknown cutoff policy!\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-          break;
-        }
-
-        GrCut[i][j] = thisRcut;
-        if (thisRcut > largestRcut_) largestRcut_ = thisRcut;
-        GrCutSq[i][j] = thisRcut * thisRcut;
-        GrlistSq[i][j] = pow(thisRcut + skinThickness_, 2);
-
-        // pair<int,int> key = make_pair(i,j);
-        // gTypeCutoffMap[key].first = thisRcut;
-        // gTypeCutoffMap[key].third = pow(thisRcut + skinThickness_, 2);
-        // sanity check
-        
-        if (userChoseCutoff_) {
-          if (abs(GrCut[i][j] - userCutoff_) > 0.0001) {
-            sprintf(painCave.errMsg,
-                    "ForceMatrixDecomposition::createGtypeCutoffMap " 
-                    "user-specified rCut (%lf) does not match computed group Cutoff\n", userCutoff_);
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();            
-          }
-        }
-      }
-    }
-  }
-
-  void ForceMatrixDecomposition::getGroupCutoffs(int &cg1, int &cg2, RealType &rcut, RealType &rcutsq, RealType &rlistsq) {
-    int i, j;   
-#ifdef IS_MPI
-    i = groupRowToGtype[cg1];
-    j = groupColToGtype[cg2];
-#else
-    i = groupToGtype[cg1];
-    j = groupToGtype[cg2];
-#endif    
-    rcut = GrCut[i][j];
-    rcutsq = GrCutSq[i][j];
-    rlistsq = GrlistSq[i][j];
-    return;
-    //return gTypeCutoffMap[make_pair(i,j)];
-  }
-
   int ForceMatrixDecomposition::getTopologicalDistance(int atom1, int atom2) {
     for (unsigned int j = 0; j < toposForAtom[atom1].size(); j++) {
       if (toposForAtom[atom1][j] == atom2) 
@@ -635,6 +438,11 @@ namespace OpenMD {
   void ForceMatrixDecomposition::distributeData()  {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
+
+    bool needsCG = true;
+    if(info_->getNCutoffGroups() != info_->getNAtoms())
+      needsCG = false;
+   
 #ifdef IS_MPI
     
     // gather up the atomic positions
@@ -645,21 +453,24 @@ namespace OpenMD {
     
     // gather up the cutoff group positions
 
-    cgPlanVectorRow->gather(snap_->cgData.position, 
-                            cgRowData.position);
-
-    cgPlanVectorColumn->gather(snap_->cgData.position, 
-                               cgColData.position);
-
+    if (needsCG) {
+      cgPlanVectorRow->gather(snap_->cgData.position, 
+                              cgRowData.position);
+      
+      cgPlanVectorColumn->gather(snap_->cgData.position, 
+                                 cgColData.position);
+    }
 
 
     if (needVelocities_) {
       // gather up the atomic velocities
       AtomPlanVectorColumn->gather(snap_->atomData.velocity, 
                                    atomColData.velocity);
-      
-      cgPlanVectorColumn->gather(snap_->cgData.velocity, 
-                                 cgColData.velocity);
+
+      if (needsCG) {        
+        cgPlanVectorColumn->gather(snap_->cgData.velocity, 
+                                   cgColData.velocity);
+      }
     }
 
     
@@ -1196,13 +1007,138 @@ namespace OpenMD {
 
     // filling interaction blocks with pointers
   void ForceMatrixDecomposition::fillInteractionData(InteractionData &idat, 
-                                                     int atom1, int atom2) {
+                                                     int atom1, int atom2,
+                                                     bool newAtom1) {
 
     idat.excluded = excludeAtomPair(atom1, atom2);
-   
+
+    if (newAtom1) {
+      
 #ifdef IS_MPI
-    //idat.atypes = make_pair( atypesRow[atom1], atypesCol[atom2]);
-    idat.atid1 = identsRow[atom1];
+      idat.atid1 = identsRow[atom1];
+      idat.atid2 = identsCol[atom2];
+      
+      if (regionsRow[atom1] >= 0 && regionsCol[atom2] >= 0) {
+        idat.sameRegion = (regionsRow[atom1] == regionsCol[atom2]);
+      } else {
+        idat.sameRegion = false;
+      }
+      
+      if (storageLayout_ & DataStorage::dslAmat) {
+        idat.A1 = &(atomRowData.aMat[atom1]);
+        idat.A2 = &(atomColData.aMat[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslTorque) {
+        idat.t1 = &(atomRowData.torque[atom1]);
+        idat.t2 = &(atomColData.torque[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslDipole) {
+        idat.dipole1 = &(atomRowData.dipole[atom1]);
+        idat.dipole2 = &(atomColData.dipole[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslQuadrupole) {
+        idat.quadrupole1 = &(atomRowData.quadrupole[atom1]);
+        idat.quadrupole2 = &(atomColData.quadrupole[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslDensity) {
+        idat.rho1 = &(atomRowData.density[atom1]);
+        idat.rho2 = &(atomColData.density[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslFunctional) {
+        idat.frho1 = &(atomRowData.functional[atom1]);
+        idat.frho2 = &(atomColData.functional[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+        idat.dfrho1 = &(atomRowData.functionalDerivative[atom1]);
+        idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslParticlePot) {
+        idat.particlePot1 = &(atomRowData.particlePot[atom1]);
+        idat.particlePot2 = &(atomColData.particlePot[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslSkippedCharge) {              
+        idat.skippedCharge1 = &(atomRowData.skippedCharge[atom1]);
+        idat.skippedCharge2 = &(atomColData.skippedCharge[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslFlucQPosition) {              
+        idat.flucQ1 = &(atomRowData.flucQPos[atom1]);
+        idat.flucQ2 = &(atomColData.flucQPos[atom2]);
+      }
+      
+#else
+      
+      idat.atid1 = idents[atom1];
+      idat.atid2 = idents[atom2];
+      
+      if (regions[atom1] >= 0 && regions[atom2] >= 0) {
+        idat.sameRegion = (regions[atom1] == regions[atom2]);
+      } else {
+        idat.sameRegion = false;
+      }
+      
+      if (storageLayout_ & DataStorage::dslAmat) {
+        idat.A1 = &(snap_->atomData.aMat[atom1]);
+        idat.A2 = &(snap_->atomData.aMat[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslTorque) {
+        idat.t1 = &(snap_->atomData.torque[atom1]);
+        idat.t2 = &(snap_->atomData.torque[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslDipole) {
+        idat.dipole1 = &(snap_->atomData.dipole[atom1]);
+        idat.dipole2 = &(snap_->atomData.dipole[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslQuadrupole) {
+        idat.quadrupole1 = &(snap_->atomData.quadrupole[atom1]);
+        idat.quadrupole2 = &(snap_->atomData.quadrupole[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslDensity) {     
+        idat.rho1 = &(snap_->atomData.density[atom1]);
+        idat.rho2 = &(snap_->atomData.density[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslFunctional) {
+        idat.frho1 = &(snap_->atomData.functional[atom1]);
+        idat.frho2 = &(snap_->atomData.functional[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+        idat.dfrho1 = &(snap_->atomData.functionalDerivative[atom1]);
+        idat.dfrho2 = &(snap_->atomData.functionalDerivative[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslParticlePot) {
+        idat.particlePot1 = &(snap_->atomData.particlePot[atom1]);
+        idat.particlePot2 = &(snap_->atomData.particlePot[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslSkippedCharge) {
+        idat.skippedCharge1 = &(snap_->atomData.skippedCharge[atom1]);
+        idat.skippedCharge2 = &(snap_->atomData.skippedCharge[atom2]);
+      }
+      
+      if (storageLayout_ & DataStorage::dslFlucQPosition) {              
+        idat.flucQ1 = &(snap_->atomData.flucQPos[atom1]);
+        idat.flucQ2 = &(snap_->atomData.flucQPos[atom2]);
+      }
+#endif
+      
+    } else {
+      // atom1 is not new, so don't bother updating properties of that atom:
+#ifdef IS_MPI
     idat.atid2 = identsCol[atom2];
 
     if (regionsRow[atom1] >= 0 && regionsCol[atom2] >= 0) {
@@ -1212,59 +1148,46 @@ namespace OpenMD {
     }
 
     if (storageLayout_ & DataStorage::dslAmat) {
-      idat.A1 = &(atomRowData.aMat[atom1]);
       idat.A2 = &(atomColData.aMat[atom2]);
     }
     
     if (storageLayout_ & DataStorage::dslTorque) {
-      idat.t1 = &(atomRowData.torque[atom1]);
       idat.t2 = &(atomColData.torque[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDipole) {
-      idat.dipole1 = &(atomRowData.dipole[atom1]);
       idat.dipole2 = &(atomColData.dipole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslQuadrupole) {
-      idat.quadrupole1 = &(atomRowData.quadrupole[atom1]);
       idat.quadrupole2 = &(atomColData.quadrupole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {
-      idat.rho1 = &(atomRowData.density[atom1]);
       idat.rho2 = &(atomColData.density[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslFunctional) {
-      idat.frho1 = &(atomRowData.functional[atom1]);
       idat.frho2 = &(atomColData.functional[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      idat.dfrho1 = &(atomRowData.functionalDerivative[atom1]);
       idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslParticlePot) {
-      idat.particlePot1 = &(atomRowData.particlePot[atom1]);
       idat.particlePot2 = &(atomColData.particlePot[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslSkippedCharge) {              
-      idat.skippedCharge1 = &(atomRowData.skippedCharge[atom1]);
       idat.skippedCharge2 = &(atomColData.skippedCharge[atom2]);
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQPosition) {              
-      idat.flucQ1 = &(atomRowData.flucQPos[atom1]);
+    if (storageLayout_ & DataStorage::dslFlucQPosition) {
       idat.flucQ2 = &(atomColData.flucQPos[atom2]);
     }
 
-#else
-    
-    //idat.atypes = make_pair( atypesLocal[atom1], atypesLocal[atom2]);
-    idat.atid1 = idents[atom1];
+#else   
     idat.atid2 = idents[atom2];
 
     if (regions[atom1] >= 0 && regions[atom2] >= 0) {
@@ -1274,60 +1197,51 @@ namespace OpenMD {
     }
 
     if (storageLayout_ & DataStorage::dslAmat) {
-      idat.A1 = &(snap_->atomData.aMat[atom1]);
       idat.A2 = &(snap_->atomData.aMat[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslTorque) {
-      idat.t1 = &(snap_->atomData.torque[atom1]);
       idat.t2 = &(snap_->atomData.torque[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDipole) {
-      idat.dipole1 = &(snap_->atomData.dipole[atom1]);
       idat.dipole2 = &(snap_->atomData.dipole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslQuadrupole) {
-      idat.quadrupole1 = &(snap_->atomData.quadrupole[atom1]);
       idat.quadrupole2 = &(snap_->atomData.quadrupole[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {     
-      idat.rho1 = &(snap_->atomData.density[atom1]);
       idat.rho2 = &(snap_->atomData.density[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslFunctional) {
-      idat.frho1 = &(snap_->atomData.functional[atom1]);
       idat.frho2 = &(snap_->atomData.functional[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      idat.dfrho1 = &(snap_->atomData.functionalDerivative[atom1]);
       idat.dfrho2 = &(snap_->atomData.functionalDerivative[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslParticlePot) {
-      idat.particlePot1 = &(snap_->atomData.particlePot[atom1]);
       idat.particlePot2 = &(snap_->atomData.particlePot[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslSkippedCharge) {
-      idat.skippedCharge1 = &(snap_->atomData.skippedCharge[atom1]);
       idat.skippedCharge2 = &(snap_->atomData.skippedCharge[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslFlucQPosition) {              
-      idat.flucQ1 = &(snap_->atomData.flucQPos[atom1]);
       idat.flucQ2 = &(snap_->atomData.flucQPos[atom2]);
     }
 
 #endif
+    }
   }
-
   
-  void ForceMatrixDecomposition::unpackInteractionData(InteractionData &idat, int atom1, int atom2) {    
+  void ForceMatrixDecomposition::unpackInteractionData(InteractionData &idat,
+                                                       int atom1, int atom2) {  
 #ifdef IS_MPI
     pot_row[atom1] += RealType(0.5) *  *(idat.pot);
     pot_col[atom2] += RealType(0.5) *  *(idat.pot);
@@ -1390,17 +1304,23 @@ namespace OpenMD {
   /*
    * buildNeighborList
    *
-   * first element of pair is row-indexed CutoffGroup
-   * second element of pair is column-indexed CutoffGroup
+   * Constructs the Verlet neighbor list for a force-matrix
+   * decomposition.  In this case, each processor is responsible for
+   * row-site interactions with column-sites. 
+   *
+   * neighborList is returned as a packed array of neighboring
+   * column-ordered CutoffGroups.  The starting position in
+   * neighborList for each row-ordered CutoffGroup is given by the
+   * returned vector point.
    */
-  void ForceMatrixDecomposition::buildNeighborList(vector<pair<int,int> >& neighborList) {
-    
+  void ForceMatrixDecomposition::buildNeighborList(vector<int>& neighborList,
+                                                   vector<int>& point) {
     neighborList.clear();
-    groupCutoffs cuts;
+    point.clear();
+    int len = 0;
+    
     bool doAllPairs = false;
 
-    RealType rList_ = (largestRcut_ + skinThickness_);
-    RealType rcut, rcutsq, rlistsq;
     Snapshot* snap_ = sman_->getCurrentSnapshot();
     Mat3x3d box;
     Mat3x3d invBox;
@@ -1412,8 +1332,10 @@ namespace OpenMD {
 #ifdef IS_MPI
     cellListRow_.clear();
     cellListCol_.clear();
+    point.resize(nGroupsInRow_+1);
 #else
     cellList_.clear();
+    point.resize(nGroups_+1);
 #endif
     
     if (!usePeriodicBoundaryConditions_) {
@@ -1424,16 +1346,30 @@ namespace OpenMD {
       invBox = snap_->getInvHmat();
     }
     
-    Vector3d boxX = box.getColumn(0);
-    Vector3d boxY = box.getColumn(1);
-    Vector3d boxZ = box.getColumn(2);
+    Vector3d A = box.getColumn(0);
+    Vector3d B = box.getColumn(1);
+    Vector3d C = box.getColumn(2);
+
+    // Required for triclinic cells
+    Vector3d AxB = cross(A, B);
+    Vector3d BxC = cross(B, C);
+    Vector3d CxA = cross(C, A);
+
+    // unit vectors perpendicular to the faces of the triclinic cell:
+    AxB.normalize();
+    BxC.normalize();
+    CxA.normalize();
+
+    // A set of perpendicular lengths in triclinic cells:
+    RealType Wa = abs(dot(A, BxC));
+    RealType Wb = abs(dot(B, CxA));
+    RealType Wc = abs(dot(C, AxB));
     
-    nCells_.x() = int( boxX.length() / rList_ );
-    nCells_.y() = int( boxY.length() / rList_ );
-    nCells_.z() = int( boxZ.length() / rList_ );
+    nCells_.x() = int( Wa / rList_ );
+    nCells_.y() = int( Wb / rList_ );
+    nCells_.z() = int( Wc / rList_ );
     
     // handle small boxes where the cell offsets can end up repeating cells
-    
     if (nCells_.x() < 3) doAllPairs = true;
     if (nCells_.y() < 3) doAllPairs = true;
     if (nCells_.z() < 3) doAllPairs = true;
@@ -1448,6 +1384,7 @@ namespace OpenMD {
 #endif
     
     if (!doAllPairs) {
+      
 #ifdef IS_MPI
       
       for (int i = 0; i < nGroupsInRow_; i++) {
@@ -1506,7 +1443,7 @@ namespace OpenMD {
         // add this cutoff group to the list of groups in this cell;
         cellListCol_[cellIndex].push_back(i);
       }
-      
+            
 #else
       for (int i = 0; i < nGroups_; i++) {
         rs = snap_->cgData.position[i];
@@ -1539,126 +1476,152 @@ namespace OpenMD {
 
 #endif
 
-      for (int m1z = 0; m1z < nCells_.z(); m1z++) {
-        for (int m1y = 0; m1y < nCells_.y(); m1y++) {
-          for (int m1x = 0; m1x < nCells_.x(); m1x++) {
-            Vector3i m1v(m1x, m1y, m1z);
-            int m1 = Vlinear(m1v, nCells_);
-            
-            for (vector<Vector3i>::iterator os = cellOffsets_.begin();
-                 os != cellOffsets_.end(); ++os) {
-              
-              Vector3i m2v = m1v + (*os);
-             
-
-              if (m2v.x() >= nCells_.x()) {
-                m2v.x() = 0;           
-              } else if (m2v.x() < 0) {
-                m2v.x() = nCells_.x() - 1; 
-              }
-              
-              if (m2v.y() >= nCells_.y()) {
-                m2v.y() = 0;           
-              } else if (m2v.y() < 0) {
-                m2v.y() = nCells_.y() - 1; 
-              }
-              
-              if (m2v.z() >= nCells_.z()) {
-                m2v.z() = 0;           
-              } else if (m2v.z() < 0) {
-                m2v.z() = nCells_.z() - 1; 
-              }
-
-              int m2 = Vlinear (m2v, nCells_);
-              
 #ifdef IS_MPI
-              for (vector<int>::iterator j1 = cellListRow_[m1].begin(); 
-                   j1 != cellListRow_[m1].end(); ++j1) {
-                for (vector<int>::iterator j2 = cellListCol_[m2].begin(); 
-                     j2 != cellListCol_[m2].end(); ++j2) {
-                  
-                  // In parallel, we need to visit *all* pairs of row
-                  // & column indicies and will divide labor in the
-                  // force evaluation later.
-                  dr = cgColData.position[(*j2)] - cgRowData.position[(*j1)];
-                  if (usePeriodicBoundaryConditions_) {
-                    snap_->wrapVector(dr);
-                  }
-                  getGroupCutoffs( (*j1), (*j2), rcut, rcutsq, rlistsq );
-                  if (dr.lengthSquare() < rlistsq) {
-                    neighborList.push_back(make_pair((*j1), (*j2)));
-                  }                  
-                }
-              }
+      for (int j1 = 0; j1 < nGroupsInRow_; j1++) {
+        rs = cgRowData.position[j1];
 #else
-              for (vector<int>::iterator j1 = cellList_[m1].begin(); 
-                   j1 != cellList_[m1].end(); ++j1) {
-                for (vector<int>::iterator j2 = cellList_[m2].begin(); 
-                     j2 != cellList_[m2].end(); ++j2) {
-     
-                  // Always do this if we're in different cells or if
-                  // we're in the same cell and the global index of
-                  // the j2 cutoff group is greater than or equal to
-                  // the j1 cutoff group.  Note that Rappaport's code
-                  // has a "less than" conditional here, but that
-                  // deals with atom-by-atom computation.  OpenMD
-                  // allows atoms within a single cutoff group to
-                  // interact with each other.
 
-                  if (m2 != m1 || (*j2) >= (*j1) ) {
-
-                    dr = snap_->cgData.position[(*j2)] - snap_->cgData.position[(*j1)];
-                    if (usePeriodicBoundaryConditions_) {
-                      snap_->wrapVector(dr);
-                    }
-                    getGroupCutoffs( (*j1), (*j2), rcut, rcutsq, rlistsq );
-                    if (dr.lengthSquare() < rlistsq) {
-                      neighborList.push_back(make_pair((*j1), (*j2)));
-                    }
-                  }
-                }
-              }
+      for (int j1 = 0; j1 < nGroups_; j1++) {
+        rs = snap_->cgData.position[j1];
 #endif
-            }
-          }
+        point[j1] = len;
+        
+        // scaled positions relative to the box vectors
+        scaled = invBox * rs;
+        
+        // wrap the vector back into the unit box by subtracting integer box 
+        // numbers
+        for (int j = 0; j < 3; j++) {
+          scaled[j] -= roundMe(scaled[j]);
+          scaled[j] += 0.5;
+          // Handle the special case when an object is exactly on the
+          // boundary (a scaled coordinate of 1.0 is the same as
+          // scaled coordinate of 0.0)
+          if (scaled[j] >= 1.0) scaled[j] -= 1.0;
         }
-      }
+        
+        // find xyz-indices of cell that cutoffGroup is in.
+        whichCell.x() = nCells_.x() * scaled.x();
+        whichCell.y() = nCells_.y() * scaled.y();
+        whichCell.z() = nCells_.z() * scaled.z();
+        
+        // find single index of this cell:
+        int m1 = Vlinear(whichCell, nCells_);
+
+        for (vector<Vector3i>::iterator os = cellOffsets_.begin();
+             os != cellOffsets_.end(); ++os) {
+              
+          Vector3i m2v = whichCell + (*os);
+
+          if (m2v.x() >= nCells_.x()) {
+            m2v.x() = 0;           
+          } else if (m2v.x() < 0) {
+            m2v.x() = nCells_.x() - 1; 
+          }
+          
+          if (m2v.y() >= nCells_.y()) {
+            m2v.y() = 0;           
+          } else if (m2v.y() < 0) {
+            m2v.y() = nCells_.y() - 1; 
+          }
+          
+          if (m2v.z() >= nCells_.z()) {
+            m2v.z() = 0;           
+          } else if (m2v.z() < 0) {
+            m2v.z() = nCells_.z() - 1; 
+          }
+          int m2 = Vlinear (m2v, nCells_);                                      
+#ifdef IS_MPI
+          for (vector<int>::iterator j2 = cellListCol_[m2].begin(); 
+               j2 != cellListCol_[m2].end(); ++j2) {
+            
+            // In parallel, we need to visit *all* pairs of row
+            // & column indicies and will divide labor in the
+            // force evaluation later.
+            dr = cgColData.position[(*j2)] - rs;
+            if (usePeriodicBoundaryConditions_) {
+              snap_->wrapVector(dr);
+            }
+            if (dr.lengthSquare() < rListSq_) {
+              neighborList.push_back( (*j2) );
+              ++len;
+            }                 
+          }        
+#else
+          for (vector<int>::iterator j2 = cellList_[m2].begin(); 
+               j2 != cellList_[m2].end(); ++j2) {
+          
+            // Always do this if we're in different cells or if
+            // we're in the same cell and the global index of
+            // the j2 cutoff group is greater than or equal to
+            // the j1 cutoff group.  Note that Rappaport's code
+            // has a "less than" conditional here, but that
+            // deals with atom-by-atom computation.  OpenMD
+            // allows atoms within a single cutoff group to
+            // interact with each other.
+            
+            if ( (*j2) >= j1 ) {
+              
+              dr = snap_->cgData.position[(*j2)] - rs;
+              if (usePeriodicBoundaryConditions_) {
+                snap_->wrapVector(dr);
+              }
+              if ( dr.lengthSquare() < rListSq_) {
+                neighborList.push_back( (*j2) );
+                ++len;
+              }
+            }
+          }                
+#endif
+        }
+      }      
     } else {
       // branch to do all cutoff group pairs
 #ifdef IS_MPI
       for (int j1 = 0; j1 < nGroupsInRow_; j1++) {
+        point[j1] = len;
+        rs = cgRowData.position[j1];
         for (int j2 = 0; j2 < nGroupsInCol_; j2++) {    
-          dr = cgColData.position[j2] - cgRowData.position[j1];
+          dr = cgColData.position[j2] - rs;
           if (usePeriodicBoundaryConditions_) {
             snap_->wrapVector(dr);
           }
-          getGroupCutoffs( j1, j2, rcut, rcutsq, rlistsq);
-          if (dr.lengthSquare() < rlistsq) {
-            neighborList.push_back(make_pair(j1, j2));
+          if (dr.lengthSquare() < rListSq_) {
+            neighborList.push_back( j2 );
+            ++len;
           }
         }
       }      
 #else
       // include all groups here.
       for (int j1 = 0; j1 < nGroups_; j1++) {
+        point[j1] = len;
+        rs = snap_->cgData.position[j1];
         // include self group interactions j2 == j1
         for (int j2 = j1; j2 < nGroups_; j2++) {
-          dr = snap_->cgData.position[j2] - snap_->cgData.position[j1];
+          dr = snap_->cgData.position[j2] - rs;
           if (usePeriodicBoundaryConditions_) {
             snap_->wrapVector(dr);
           }
-          getGroupCutoffs( j1, j2, rcut, rcutsq, rlistsq );
-          if (dr.lengthSquare() < rlistsq) {
-            neighborList.push_back(make_pair(j1, j2));
+          if (dr.lengthSquare() < rListSq_) {
+            neighborList.push_back( j2 );
+            ++len;
           }
         }    
       }
 #endif
     }
-      
+
+#ifdef IS_MPI
+    point[nGroupsInRow_] = len;
+#else
+    point[nGroups_] = len;
+#endif
+  
     // save the local cutoff group positions for the check that is
     // done on each loop:
     saved_CG_positions_.clear();
+    saved_CG_positions_.reserve(nGroups_);
     for (int i = 0; i < nGroups_; i++)
       saved_CG_positions_.push_back(snap_->cgData.position[i]);
   }

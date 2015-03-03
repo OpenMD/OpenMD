@@ -82,11 +82,11 @@ namespace OpenMD {
 
     std::vector<Atom*> getAtoms() { return cutoffAtomList; }
     RealType getMass() {
-      std::vector<Atom *>::iterator i;
       
       if (!haveTotalMass) {
-	totalMass = 0;
+	totalMass = 0.0;
         
+        std::vector<Atom *>::iterator i;
 	for(Atom* atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
 	  RealType mass = atom->getMass();
 	  totalMass += mass;
@@ -99,35 +99,29 @@ namespace OpenMD {
     }
     
     void updateCOM() {
-      std::vector<Atom *>::iterator i;
-      Atom * atom;
 
-      DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
-      int storageLayout = data.getStorageLayout();
-     
-      totalMass = getMass();
-      
+      DataStorage& data = snapshotMan_->getCurrentSnapshot()->*storage_;
+      bool needsVel = (data.getStorageLayout() & DataStorage::dslVelocity);
+
       if (cutoffAtomList.size() == 1) {
-        data.position[localIndex_] = beginAtom(i)->getPos();
+        data.position[localIndex_] = cutoffAtomList[0]->getPos();
+        if (needsVel)
+          data.velocity[localIndex_] = cutoffAtomList[0]->getVel();
       } else {
+        std::vector<Atom *>::iterator i;
+        Atom * atom;
+        RealType totalMass = getMass();
         data.position[localIndex_] = V3Zero;
+        if (needsVel) data.velocity[localIndex_] = V3Zero;
+        
 	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
           data.position[localIndex_] += atom->getMass() * atom->getPos();
-	}        
-	data.position[localIndex_] /= totalMass;
-      }
-
-      if (storageLayout & DataStorage::dslVelocity) {
-        if (cutoffAtomList.size() == 1) {
-          data.velocity[localIndex_] = beginAtom(i)->getVel();
-        } else {
-          data.velocity[localIndex_] = V3Zero;
-          for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+          if (needsVel)
             data.velocity[localIndex_] += atom->getMass() * atom->getVel();
-          }        
-          data.velocity[localIndex_] /= totalMass;
-        }
-      }
+	}     
+	data.position[localIndex_] /= totalMass;
+        if (needsVel) data.velocity[localIndex_] /= totalMass;          
+      }      
     }
 
 

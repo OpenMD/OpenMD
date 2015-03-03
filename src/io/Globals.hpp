@@ -111,7 +111,6 @@ namespace OpenMD {
     DeclareParameter(DampingAlpha, RealType);
     DeclareParameter(Dielectric, RealType);
     DeclareParameter(CutoffMethod, std::string);
-    DeclareParameter(CutoffPolicy, std::string);
     DeclareParameter(SwitchingFunctionType, std::string);
     DeclareParameter(CompressDumpFile, bool);
     DeclareParameter(OutputForceVector, bool);

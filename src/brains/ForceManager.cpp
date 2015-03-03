@@ -88,8 +88,7 @@ namespace OpenMD {
   /**
    * setupCutoffs
    *
-   * Sets the values of cutoffRadius, switchingRadius, cutoffMethod,
-   * and cutoffPolicy
+   * Sets the values of cutoffRadius, switchingRadius, and cutoffMethod
    *
    * cutoffRadius : realType
    *  If the cutoffRadius was explicitly set, use that value.
@@ -103,10 +102,6 @@ namespace OpenMD {
    *                        SHIFTED_POTENTIAL, or EWALD_FULL)
    *      If cutoffMethod was explicitly set, use that choice.
    *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
-   *
-   * cutoffPolicy : (one of MIX, MAX, TRADITIONAL)
-   *      If cutoffPolicy was explicitly set, use that choice.
-   *      If cutoffPolicy was not explicitly set, use TRADITIONAL
    *
    * switchingRadius : realType
    *  If the cutoffMethod was set to SWITCHED:
@@ -164,8 +159,9 @@ namespace OpenMD {
       }
     }
 
-    fDecomp_->setUserCutoff(rCut_);
+    fDecomp_->setCutoffRadius(rCut_);
     interactionMan_->setCutoffRadius(rCut_);
+    rCutSq_ = rCut_ * rCut_;
 
     map<string, CutoffMethod> stringToCutoffMethod;
     stringToCutoffMethod["HARD"] = HARD;
@@ -275,47 +271,6 @@ namespace OpenMD {
         }
       }
     }
-
-    map<string, CutoffPolicy> stringToCutoffPolicy;
-    stringToCutoffPolicy["MIX"] = MIX;
-    stringToCutoffPolicy["MAX"] = MAX;
-    stringToCutoffPolicy["TRADITIONAL"] = TRADITIONAL;    
-
-    string cutPolicy;
-    if (forceFieldOptions_.haveCutoffPolicy()){
-      cutPolicy = forceFieldOptions_.getCutoffPolicy();
-    }else if (simParams_->haveCutoffPolicy()) {
-      cutPolicy = simParams_->getCutoffPolicy();
-    }
-
-    if (!cutPolicy.empty()){
-      toUpper(cutPolicy);
-      map<string, CutoffPolicy>::iterator i;
-      i = stringToCutoffPolicy.find(cutPolicy);
-
-      if (i == stringToCutoffPolicy.end()) {
-        sprintf(painCave.errMsg,
-                "ForceManager::setupCutoffs: Could not find chosen cutoffPolicy %s\n"
-                "\tShould be one of: "
-                "MIX, MAX, or TRADITIONAL\n",
-                cutPolicy.c_str());
-        painCave.isFatal = 1;
-        painCave.severity = OPENMD_ERROR;
-        simError();
-      } else {
-        cutoffPolicy_ = i->second;
-      }
-    } else {
-      sprintf(painCave.errMsg,
-              "ForceManager::setupCutoffs: No value was set for the cutoffPolicy.\n"
-              "\tOpenMD will use TRADITIONAL.\n");
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();
-      cutoffPolicy_ = TRADITIONAL;        
-    }
-
-    fDecomp_->setCutoffPolicy(cutoffPolicy_);
         
     // create the switching function object:
 
@@ -671,7 +626,7 @@ namespace OpenMD {
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
-
+    int jstart, jend;
 
     //calculate the center of mass of cutoff group
 
@@ -679,8 +634,8 @@ namespace OpenMD {
     Molecule* mol;
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
-
-    if(info_->getNCutoffGroups() > 0){      
+    
+    if(info_->getNCutoffGroups() != info_->getNAtoms()){
       for (mol = info_->beginMolecule(mi); mol != NULL; 
            mol = info_->nextMolecule(mi)) {
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
@@ -723,12 +678,13 @@ namespace OpenMD {
     Vector3d eField2(0.0);
     RealType sPot1(0.0);
     RealType sPot2(0.0);
+    bool newAtom1;
                    
     vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
     
-    idat.rcut = &rCut;
+    idat.rcut = &rCut_;
     idat.vdwMult = &vdwMult;
     idat.electroMult = &electroMult;
     idat.pot = &workPot;
@@ -765,176 +721,178 @@ namespace OpenMD {
         if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
-          fDecomp_->buildNeighborList(neighborList_);
+          fDecomp_->buildNeighborList(neighborList_, point_);
         }
       }
 
-      for (vector<pair<int, int> >::iterator it = neighborList_.begin(); 
-           it != neighborList_.end(); ++it) {
-                
-        cg1 = (*it).first;
-        cg2 = (*it).second;
+      for (unsigned int cg1 = 0; cg1 < point_.size() - 1; cg1++) {
         
-        fDecomp_->getGroupCutoffs(cg1, cg2, rCut, rCutSq, rListSq);
+        atomListRow = fDecomp_->getAtomsInGroupRow(cg1);        
+        newAtom1 = true;
+        
+        for (int m2 = point_[cg1]; m2 < point_[cg1+1]; m2++) {
 
-        d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
-
-        // already wrapped in the getIntergroupVector call:
-        // curSnapshot->wrapVector(d_grp);        
-        rgrpsq = d_grp.lengthSquare();
-
-        if (rgrpsq < rCutSq) {
-          if (iLoop == PAIR_LOOP) {
-            vij = 0.0;
-            fij.zero();
-            eField1.zero();
-            eField2.zero();
-            sPot1 = 0.0;
-            sPot2 = 0.0;
-          }
+          cg2 = neighborList_[m2];
           
-          in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
-                                                     rgrp); 
-
-          atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
-          atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
-
-          if (doHeatFlux_)
-            gvel2 = fDecomp_->getGroupVelocityColumn(cg2);
-
-          for (ia = atomListRow.begin(); 
-               ia != atomListRow.end(); ++ia) {            
-            atom1 = (*ia);
-
-            for (jb = atomListColumn.begin(); 
-                 jb != atomListColumn.end(); ++jb) {              
-              atom2 = (*jb);
-
-              if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
-
-                vpair = 0.0;
-                workPot = 0.0;
-                exPot = 0.0;
-                f1.zero();
-		dVdFQ1 = 0.0;
-		dVdFQ2 = 0.0;
-
-                fDecomp_->fillInteractionData(idat, atom1, atom2);
-
-                topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
-                vdwMult = vdwScale_[topoDist];
-                electroMult = electrostaticScale_[topoDist];
-
-                if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                  idat.d = &d_grp;
-                  idat.r2 = &rgrpsq;
-                  if (doHeatFlux_)
-                    vel2 = gvel2;
-                } else {
-                  d = fDecomp_->getInteratomicVector(atom1, atom2);
-                  curSnapshot->wrapVector( d );
-                  r2 = d.lengthSquare();
-                  idat.d = &d;
-                  idat.r2 = &r2;
-                  if (doHeatFlux_)
-                    vel2 = fDecomp_->getAtomVelocityColumn(atom2);
-                }
-               
-                r = sqrt( *(idat.r2) );
-                idat.rij = &r;
-
-                if (iLoop == PREPAIR_LOOP) {
-                  interactionMan_->doPrePair(idat);
-                } else {
-                  interactionMan_->doPair(idat);
-                  fDecomp_->unpackInteractionData(idat, atom1, atom2);
-                  vij += vpair;
-                  fij += f1;
-                  stressTensor -= outProduct( *(idat.d), f1);
-                  if (doHeatFlux_) 
-                    fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
-                }
-              }
+          d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
+        
+          // already wrapped in the getIntergroupVector call:
+          // curSnapshot->wrapVector(d_grp);        
+          rgrpsq = d_grp.lengthSquare();
+          
+          if (rgrpsq < rCutSq_) {
+            if (iLoop == PAIR_LOOP) {
+              vij = 0.0;
+              fij.zero();
+              eField1.zero();
+              eField2.zero();
+              sPot1 = 0.0;
+              sPot2 = 0.0;
             }
-          }
-
-          if (iLoop == PAIR_LOOP) {
-            if (in_switching_region) {
-              swderiv = vij * dswdr / rgrp;
-              fg = swderiv * d_grp;
-              fij += fg;
-
-              if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                if (!fDecomp_->skipAtomPair(atomListRow[0], 
-                                            atomListColumn[0], 
-                                            cg1, cg2)) {
-                  stressTensor -= outProduct( *(idat.d), fg);
-                  if (doHeatFlux_)
-                    fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
-                }                
-              }
-          
-              for (ia = atomListRow.begin(); 
-                   ia != atomListRow.end(); ++ia) {            
-                atom1 = (*ia);                
-                mf = fDecomp_->getMassFactorRow(atom1);
-                // fg is the force on atom ia due to cutoff group's
-                // presence in switching region
-                fg = swderiv * d_grp * mf;
-                fDecomp_->addForceToAtomRow(atom1, fg);
-                if (atomListRow.size() > 1) {
-                  if (info_->usesAtomicVirial()) {
-                    // find the distance between the atom
-                    // and the center of the cutoff group:
-                    dag = fDecomp_->getAtomToGroupVectorRow(atom1, cg1);
-                    stressTensor -= outProduct(dag, fg);
-                    if (doHeatFlux_)
-                      fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
-                  }
-                }
-              }
+            
+            in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
+                                                       rgrp); 
+            
+            atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
+            
+            if (doHeatFlux_)
+              gvel2 = fDecomp_->getGroupVelocityColumn(cg2);
+            
+            for (ia = atomListRow.begin(); 
+                 ia != atomListRow.end(); ++ia) {            
+              atom1 = (*ia);
+              
               for (jb = atomListColumn.begin(); 
                    jb != atomListColumn.end(); ++jb) {              
                 atom2 = (*jb);
-                mf = fDecomp_->getMassFactorColumn(atom2);
-                // fg is the force on atom jb due to cutoff group's
-                // presence in switching region
-                fg = -swderiv * d_grp * mf;
-                fDecomp_->addForceToAtomColumn(atom2, fg);
-
-                if (atomListColumn.size() > 1) {
-                  if (info_->usesAtomicVirial()) {
-                    // find the distance between the atom
-                    // and the center of the cutoff group:
-                    dag = fDecomp_->getAtomToGroupVectorColumn(atom2, cg2);
-                    stressTensor -= outProduct(dag, fg);
+                
+                if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
+                  
+                  vpair = 0.0;
+                  workPot = 0.0;
+                  exPot = 0.0;
+                  f1.zero();
+                  dVdFQ1 = 0.0;
+                  dVdFQ2 = 0.0;
+                  
+                  fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
+                  
+                  topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
+                  vdwMult = vdwScale_[topoDist];
+                  electroMult = electrostaticScale_[topoDist];
+                  
+                  if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
+                    idat.d = &d_grp;
+                    idat.r2 = &rgrpsq;
                     if (doHeatFlux_)
-                      fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
+                      vel2 = gvel2;
+                  } else {
+                    d = fDecomp_->getInteratomicVector(atom1, atom2);
+                    curSnapshot->wrapVector( d );
+                    r2 = d.lengthSquare();
+                    idat.d = &d;
+                    idat.r2 = &r2;
+                    if (doHeatFlux_)
+                      vel2 = fDecomp_->getAtomVelocityColumn(atom2);
+                  }
+                  
+                  r = sqrt( *(idat.r2) );
+                  idat.rij = &r;
+                  
+                  if (iLoop == PREPAIR_LOOP) {
+                    interactionMan_->doPrePair(idat);
+                  } else {
+                    interactionMan_->doPair(idat);
+                    fDecomp_->unpackInteractionData(idat, atom1, atom2);
+                    vij += vpair;
+                    fij += f1;
+                    stressTensor -= outProduct( *(idat.d), f1);
+                    if (doHeatFlux_) 
+                      fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
                   }
                 }
               }
             }
-            //if (!info_->usesAtomicVirial()) {
-            //  stressTensor -= outProduct(d_grp, fij);
-            //  if (doHeatFlux_)
-            //     fDecomp_->addToHeatFlux( d_grp * dot(fij, vel2));
-            //}
+            
+            if (iLoop == PAIR_LOOP) {
+              if (in_switching_region) {
+                swderiv = vij * dswdr / rgrp;
+                fg = swderiv * d_grp;
+                fij += fg;
+                
+                if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
+                  if (!fDecomp_->skipAtomPair(atomListRow[0], 
+                                              atomListColumn[0], 
+                                              cg1, cg2)) {
+                  stressTensor -= outProduct( *(idat.d), fg);
+                  if (doHeatFlux_)
+                    fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                  }                
+                }
+                
+                for (ia = atomListRow.begin(); 
+                     ia != atomListRow.end(); ++ia) {            
+                  atom1 = (*ia);                
+                  mf = fDecomp_->getMassFactorRow(atom1);
+                  // fg is the force on atom ia due to cutoff group's
+                  // presence in switching region
+                  fg = swderiv * d_grp * mf;
+                  fDecomp_->addForceToAtomRow(atom1, fg);
+                  if (atomListRow.size() > 1) {
+                    if (info_->usesAtomicVirial()) {
+                      // find the distance between the atom
+                      // and the center of the cutoff group:
+                      dag = fDecomp_->getAtomToGroupVectorRow(atom1, cg1);
+                      stressTensor -= outProduct(dag, fg);
+                      if (doHeatFlux_)
+                        fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
+                    }
+                  }
+                }
+                for (jb = atomListColumn.begin(); 
+                     jb != atomListColumn.end(); ++jb) {              
+                  atom2 = (*jb);
+                  mf = fDecomp_->getMassFactorColumn(atom2);
+                  // fg is the force on atom jb due to cutoff group's
+                  // presence in switching region
+                  fg = -swderiv * d_grp * mf;
+                  fDecomp_->addForceToAtomColumn(atom2, fg);
+                  
+                  if (atomListColumn.size() > 1) {
+                    if (info_->usesAtomicVirial()) {
+                      // find the distance between the atom
+                      // and the center of the cutoff group:
+                      dag = fDecomp_->getAtomToGroupVectorColumn(atom2, cg2);
+                      stressTensor -= outProduct(dag, fg);
+                      if (doHeatFlux_)
+                        fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
+                    }
+                  }
+                }
+              }
+              //if (!info_->usesAtomicVirial()) {
+              //  stressTensor -= outProduct(d_grp, fij);
+              //  if (doHeatFlux_)
+              //     fDecomp_->addToHeatFlux( d_grp * dot(fij, vel2));
+              //}
+            }
           }
         }
+        newAtom1 = false;
       }
-
+        
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {
-
+          
           fDecomp_->collectIntermediateData();
-
+          
           for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
-
+          
           fDecomp_->distributeIntermediateData();
-
+          
         }
       }
     }

@@ -45,16 +45,19 @@
 #include <cassert>
 #include <cstdio>
 #include <algorithm>
+#include <numeric>
 
 using namespace OpenMD;
 using namespace std;
 
 CubicSpline::CubicSpline() : generated(false), isUniform(true) {
-  data_.clear();
+  x_.clear();
+  y_.clear();
 }
 
 void CubicSpline::addPoint(const RealType xp, const RealType yp) {
-  data_.push_back(make_pair(xp, yp));
+  x_.push_back(xp);
+  y_.push_back(yp);
 }
 
 void CubicSpline::addPoints(const vector<RealType>& xps, 
@@ -62,8 +65,10 @@ void CubicSpline::addPoints(const vector<RealType>& xps,
   
   assert(xps.size() == yps.size());
   
-  for (unsigned int i = 0; i < xps.size(); i++) 
-    data_.push_back(make_pair(xps[i], yps[i]));
+  for (unsigned int i = 0; i < xps.size(); i++){
+    x_.push_back(xps[i]);
+    y_.push_back(yps[i]);
+  }
 }
 
 void CubicSpline::generate() { 
@@ -71,18 +76,18 @@ void CubicSpline::generate() {
   //
   // class values constructed:
   //   n   = number of data_ points.
-  //   x   = vector of independent variable values 
-  //   y   = vector of dependent variable values
-  //   b   = vector of S'(x[i]) values.
-  //   c   = vector of S"(x[i])/2 values.
-  //   d   = vector of S'''(x[i]+)/6 values (i < n).
+  //   x_  = vector of independent variable values 
+  //   y_  = vector of dependent variable values
+  //   b   = vector of S'(x_[i]) values.
+  //   c   = vector of S"(x_[i])/2 values.
+  //   d   = vector of S'''(x_[i]+)/6 values (i < n).
   // Local variables:   
  
   RealType fp1, fpn, h, p;
   
   // make sure the sizes match
   
-  n = data_.size();  
+  n = x_.size();  
   b.resize(n);
   c.resize(n);
   d.resize(n);
@@ -92,35 +97,38 @@ void CubicSpline::generate() {
   bool sorted = true;
   
   for (int i = 1; i < n; i++) {
-    if ( (data_[i].first - data_[i-1].first ) <= 0.0 ) sorted = false;
+    if ( (x_[i] - x_[i-1] ) <= 0.0 ) sorted = false;
   }
   
   // sort if necessary
   
-  if (!sorted) sort(data_.begin(), data_.end());  
+  if (!sorted) {
+    vector<int> p = sort_permutation(x_);
+    x_ = apply_permutation(x_, p);
+    y_ = apply_permutation(y_, p);
+  }
+  
   
   // Calculate coefficients for the tridiagonal system: store
   // sub-diagonal in B, diagonal in D, difference quotient in C.  
   
-  b[0] = data_[1].first - data_[0].first;
-  c[0] = (data_[1].second - data_[0].second) / b[0];
+  b[0] = x_[1] - x_[0];
+  c[0] = (y_[1] - y_[0]) / b[0];
   
   if (n == 2) {
 
     // Assume the derivatives at both endpoints are zero. Another
     // assumption could be made to have a linear interpolant between
     // the two points.  In that case, the b coefficients below would be
-    // (data_[1].second - data_[0].second) / (data_[1].first - data_[0].first)
+    // (y_[1] - y_[0]) / (x_[1] - x_[0])
     // and the c and d coefficients would both be zero.
     b[0] = 0.0;
-    c[0] = -3.0 * pow((data_[1].second - data_[0].second) /
-                      (data_[1].first-data_[0].first), 2);
-    d[0] = -2.0 * pow((data_[1].second - data_[0].second) / 
-                      (data_[1].first-data_[0].first), 3);
+    c[0] = -3.0 * pow((y_[1] - y_[0]) / (x_[1] - x_[0]), 2);
+    d[0] = -2.0 * pow((y_[1] - y_[0]) / (x_[1] - x_[0]), 3);
     b[1] = b[0];
     c[1] = 0.0;
     d[1] = 0.0;
-    dx = 1.0 / (data_[1].first - data_[0].first);
+    dx = 1.0 / (x_[1] - x_[0]);
     isUniform = true;
     generated = true;
     return;
@@ -129,9 +137,9 @@ void CubicSpline::generate() {
   d[0] = 2.0 * b[0];
   
   for (int i = 1; i < n-1; i++) {
-    b[i] = data_[i+1].first - data_[i].first;
+    b[i] = x_[i+1] - x_[i];
     if ( fabs( b[i] - b[0] ) / b[0] > 1.0e-5) isUniform = false;
-    c[i] = (data_[i+1].second - data_[i].second) / b[i];
+    c[i] = (y_[i+1] - y_[i]) / b[i];
     d[i] = 2.0 * (b[i] + b[i-1]);
   }
   
@@ -143,14 +151,14 @@ void CubicSpline::generate() {
   fp1 = c[0] - b[0]*(c[1] - c[0])/(b[0] + b[1]);
   if (n > 3) fp1 = fp1 + b[0]*((b[0] + b[1]) * (c[2] - c[1]) / 
                                (b[1] + b[2]) - 
-                               c[1] + c[0]) / (data_[3].first - data_[0].first);
+                               c[1] + c[0]) / (x_[3] - x_[0]);
   
   fpn = c[n-2] + b[n-2]*(c[n-2] - c[n-3])/(b[n-3] + b[n-2]);
   
   if (n > 3)  fpn = fpn + b[n-2] * 
                 (c[n-2] - c[n-3] - (b[n-3] + b[n-2]) * 
                  (c[n-3] - c[n-4])/(b[n-3] + b[n-4])) /
-                (data_[n-1].first - data_[n-4].first);
+                (x_[n-1] - x_[n-4]);
   
   // Calculate the right hand side and store it in C.
   
@@ -175,14 +183,14 @@ void CubicSpline::generate() {
   // Calculate the coefficients defining the spline.
   
   for (int i = 0; i < n-1; i++) {
-    h = data_[i+1].first - data_[i].first;
+    h = x_[i+1] - x_[i];
     d[i] = (c[i+1] - c[i]) / (3.0 * h);
-    b[i] = (data_[i+1].second - data_[i].second)/h - h * (c[i] + h * d[i]);
+    b[i] = (y_[i+1] - y_[i])/h - h * (c[i] + h * d[i]);
   }
   
   b[n-1] = b[n-2] + h * (2.0 * c[n-2] + h * 3.0 * d[n-2]);
   
-  if (isUniform) dx = 1.0 / (data_[1].first - data_[0].first); 
+  if (isUniform) dx = 1.0 / (x_[1] - x_[0]); 
   
   generated = true;
   return;
@@ -198,22 +206,22 @@ RealType CubicSpline::getValueAt(const RealType& t) {
   
   if (!generated) generate();
   
-  assert(t >= data_.front().first);
-  assert(t <= data_.back().first);
+  assert(t >= x_.front());
+  assert(t <= x_.back());
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
 
   if (isUniform) {    
     
-    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
+    j = max(0, min(n-1, int((t - x_[0]) * dx)));   
 
   } else { 
 
     j = n-1;
     
     for (int i = 0; i < n; i++) {
-      if ( t < data_[i].first ) {
+      if ( t < x_[i] ) {
         j = i-1;
         break;
       }      
@@ -222,8 +230,8 @@ RealType CubicSpline::getValueAt(const RealType& t) {
   
   //  Evaluate the cubic polynomial.
   
-  dt = t - data_[j].first;
-  return data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));  
+  dt = t - x_[j];
+  return y_[j] + dt*(b[j] + dt*(c[j] + dt*d[j]));  
 }
 
 
@@ -237,22 +245,22 @@ void CubicSpline::getValueAt(const RealType& t, RealType& v) {
   
   if (!generated) generate();
   
-  assert(t >= data_.front().first);
-  assert(t <= data_.back().first);
+  assert(t >= x_.front());
+  assert(t <= x_.back());
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
 
   if (isUniform) {    
     
-    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
+    j = max(0, min(n-1, int((t - x_[0]) * dx)));   
 
   } else { 
 
     j = n-1;
     
     for (int i = 0; i < n; i++) {
-      if ( t < data_[i].first ) {
+      if ( t < x_[i] ) {
         j = i-1;
         break;
       }      
@@ -261,56 +269,13 @@ void CubicSpline::getValueAt(const RealType& t, RealType& v) {
   
   //  Evaluate the cubic polynomial.
   
-  dt = t - data_[j].first;
-  v = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));  
-}
-
-
-pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(const RealType& t){
-  // Evaluate the spline and first derivative at t using coefficients 
-  //
-  // Input parameters
-  //   t = point where spline is to be evaluated.
-  // Output:
-  //   pair containing value of spline at t and first derivative at t
-
-  if (!generated) generate();
-  
-  assert(t >= data_.front().first);
-  assert(t <= data_.back().first);
-
-  //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
-  //  to t.
-
-  if (isUniform) {    
-    
-    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
-
-  } else { 
-
-    j = n-1;
-    
-    for (int i = 0; i < n; i++) {
-      if ( t < data_[i].first ) {
-        j = i-1;
-        break;
-      }      
-    }
-  }
-  
-  //  Evaluate the cubic polynomial.
-  
-  dt = t - data_[j].first;
-
-  yval = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
-  dydx = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]); 
-
-  return make_pair(yval, dydx);
+  dt = t - x_[j];
+  v = y_[j] + dt*(b[j] + dt*(c[j] + dt*d[j]));  
 }
 
 pair<RealType, RealType> CubicSpline::getLimits(){
   if (!generated) generate();
-  return make_pair( data_.front().first, data_.back().first );
+  return make_pair( x_.front(), x_.back() );
 }
 
 void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v, 
@@ -322,22 +287,22 @@ void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v,
 
   if (!generated) generate();
   
-  assert(t >= data_.front().first);
-  assert(t <= data_.back().first);
+  assert(t >= x_.front());
+  assert(t <= x_.back());
 
   //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
   //  to t.
 
   if (isUniform) {    
     
-    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
+    j = max(0, min(n-1, int((t - x_[0]) * dx)));   
 
   } else { 
 
     j = n-1;
     
     for (int i = 0; i < n; i++) {
-      if ( t < data_[i].first ) {
+      if ( t < x_[i] ) {
         j = i-1;
         break;
       }      
@@ -346,8 +311,25 @@ void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v,
   
   //  Evaluate the cubic polynomial.
   
-  dt = t - data_[j].first;
+  dt = t - x_[j];
 
-  v = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
+  v = y_[j] + dt*(b[j] + dt*(c[j] + dt*d[j]));
   dv = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]); 
+}
+
+std::vector<int> CubicSpline::sort_permutation(std::vector<RealType>& v) {
+  std::vector<int> p(v.size());
+  std::iota(p.begin(), p.end(), 0);
+  std::sort(p.begin(), p.end(), OpenMD::Comparator(v) );
+  return p;
+}
+
+std::vector<RealType> CubicSpline::apply_permutation(std::vector<RealType> const& v,
+                                                     std::vector<int> const& p) { 
+  int n = p.size();
+  std::vector<double> sorted_vec(n);
+  for (int i = 0; i < n; ++i) {
+    sorted_vec[i] = v[p[i]];
+  }
+  return sorted_vec;
 }
