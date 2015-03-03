@@ -85,9 +85,9 @@ namespace OpenMD {
 
     \f$ \mathbf{E} = \frac{g}{2} \left( \begin{array}{c} 
     2\left(a_1 b_1 - \frac{\cos\psi}{3}\right) x +  (a_1 b_2 + a_2 b_1) y 
-    + (a_1 b_3 + a_3 b_1) z  \\ 
+    + (a_1 b_3 + a_3 b_1) z  \\
     (a_2 b_1 + a_1 b_2)  x + 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) y 
-    + (a_2 b_3 + a_3 b_2) z \\ 
+    + (a_2 b_3 + a_3 b_2) z \\
     (a_3 b_1 + a_1 b_3) x +  (a_3 b_2 + a_2 b_3) y 
     + 2 \left(a_3 b_3 - \frac{\cos\psi}{3}\right) z \end{array} \right) \f$
 
@@ -100,7 +100,7 @@ namespace OpenMD {
     2\left(a_1 b_1 - \frac{\cos\psi}{3}\right)  &  
     (a_1 b_2 + a_2 b_1) & (a_1 b_3 + a_3 b_1) \\
     (a_2 b_1 + a_1 b_2)  & 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) & 
-    (a_2 b_3 + a_3 b_2) \\  
+    (a_2 b_3 + a_3 b_2) \\
     (a_3 b_1 + a_1 b_3) & (a_3 b_2 + a_2 b_3) & 
     2 \left(a_3 b_3 - \frac{\cos\psi}{3}\right) \end{array} \right) \f$
 
