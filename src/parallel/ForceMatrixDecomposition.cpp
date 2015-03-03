@@ -833,8 +833,8 @@ namespace OpenMD {
 #endif
   }
   
-  inline Vector3d ForceMatrixDecomposition::getIntergroupVector(int cg1,
-                                                                int cg2){
+  Vector3d ForceMatrixDecomposition::getIntergroupVector(int cg1,
+                                                         int cg2){
 
     Vector3d d;
 #ifdef IS_MPI
@@ -913,8 +913,8 @@ namespace OpenMD {
 
   }
     
-  inline Vector3d ForceMatrixDecomposition::getInteratomicVector(int atom1,
-                                                                 int atom2){
+  Vector3d ForceMatrixDecomposition::getInteratomicVector(int atom1,
+                                                          int atom2){
     Vector3d d;
     
 #ifdef IS_MPI
