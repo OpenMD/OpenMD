@@ -447,7 +447,7 @@ void MDTreeParser::constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 #line 50 "MDTreeParser.g"
 	
 	int ival;
-	RealType dval, x, y, z;
+	RealType dval;
 	std::vector<RealType> dvec;
 	
 #line 454 "MDTreeParser.cpp"

@@ -513,10 +513,11 @@ namespace OpenMD {
    * data structures.
    */
   void ForceMatrixDecomposition::collectIntermediateData() {
+#ifdef IS_MPI
+
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
-#ifdef IS_MPI
-    
+
     if (storageLayout_ & DataStorage::dslDensity) {
       
       AtomPlanRealRow->scatter(atomRowData.density, 
@@ -551,9 +552,10 @@ namespace OpenMD {
    * row and column-indexed data structures
    */
   void ForceMatrixDecomposition::distributeIntermediateData() {
+#ifdef IS_MPI
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
-#ifdef IS_MPI
+
     if (storageLayout_ & DataStorage::dslFunctional) {
       AtomPlanRealRow->gather(snap_->atomData.functional, 
                               atomRowData.functional);
@@ -572,9 +574,10 @@ namespace OpenMD {
   
   
   void ForceMatrixDecomposition::collectData() {
+#ifdef IS_MPI
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
-#ifdef IS_MPI    
+
     int n = snap_->atomData.force.size();
     vector<Vector3d> frc_tmp(n, V3Zero);
     
@@ -782,10 +785,11 @@ namespace OpenMD {
    * functional) loops onto local data structures.
    */
   void ForceMatrixDecomposition::collectSelfData() {
+
+#ifdef IS_MPI
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
 
-#ifdef IS_MPI
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = embeddingPot[ii];
       RealType ploc2 = 0.0;
@@ -801,8 +805,6 @@ namespace OpenMD {
 #endif
     
   }
-
-
 
   int& ForceMatrixDecomposition::getNAtomsInRow() {   
 #ifdef IS_MPI
@@ -831,9 +833,10 @@ namespace OpenMD {
 #endif
   }
   
-  Vector3d ForceMatrixDecomposition::getIntergroupVector(int cg1, int cg2){
+  inline Vector3d ForceMatrixDecomposition::getIntergroupVector(int cg1,
+                                                                int cg2){
+
     Vector3d d;
-    
 #ifdef IS_MPI
     d = cgColData.position[cg2] - cgRowData.position[cg1];
 #else
@@ -863,8 +866,8 @@ namespace OpenMD {
   }
 
 
-  Vector3d ForceMatrixDecomposition::getAtomToGroupVectorRow(int atom1, int cg1){
-
+  Vector3d ForceMatrixDecomposition::getAtomToGroupVectorRow(int atom1,
+                                                             int cg1) {
     Vector3d d;
     
 #ifdef IS_MPI
@@ -878,7 +881,8 @@ namespace OpenMD {
     return d;    
   }
   
-  Vector3d ForceMatrixDecomposition::getAtomToGroupVectorColumn(int atom2, int cg2){
+  Vector3d ForceMatrixDecomposition::getAtomToGroupVectorColumn(int atom2,
+                                                                int cg2) {
     Vector3d d;
     
 #ifdef IS_MPI
@@ -909,7 +913,8 @@ namespace OpenMD {
 
   }
     
-  Vector3d ForceMatrixDecomposition::getInteratomicVector(int atom1, int atom2){
+  inline Vector3d ForceMatrixDecomposition::getInteratomicVector(int atom1,
+                                                                 int atom2){
     Vector3d d;
     
 #ifdef IS_MPI
@@ -931,7 +936,8 @@ namespace OpenMD {
    * We need to exclude some overcounted interactions that result from
    * the parallel decomposition.
    */
-  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1, int cg2) {
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2,
+                                              int cg1, int cg2) {
     int unique_id_1, unique_id_2;
         
 #ifdef IS_MPI
