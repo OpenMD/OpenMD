@@ -319,7 +319,15 @@ void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v,
 
 std::vector<int> CubicSpline::sort_permutation(std::vector<RealType>& v) {
   std::vector<int> p(v.size());
-  std::iota(p.begin(), p.end(), 0);
+
+  // 6 lines to replace std::iota(p.begin(), p.end(), 0);
+  int value = 0;
+  std::vector<int>::iterator i;
+  for (i = p.begin(); i != p.end(); ++i) {
+    (*i) = value;
+    ++value;
+  }
+  
   std::sort(p.begin(), p.end(), OpenMD::Comparator(v) );
   return p;
 }
