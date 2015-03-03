@@ -50,7 +50,7 @@ assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID
 constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
 {
     int ival;
-    RealType dval, x, y, z;
+    RealType dval;
     std::vector<RealType> dvec;
 }    
     : ival=intConst {blockStack.top()->assign(id->getText(), ival);}

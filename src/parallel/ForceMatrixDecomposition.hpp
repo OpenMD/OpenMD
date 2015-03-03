@@ -81,8 +81,8 @@ namespace OpenMD {
     RealType& getMassFactorColumn(int atom2);
 
     // spatial data
-    Vector3d getIntergroupVector(int cg1, int cg2);
-    Vector3d getInteratomicVector(int atom1, int atom2);
+    inline Vector3d getIntergroupVector(int cg1, int cg2);
+    inline Vector3d getInteratomicVector(int atom1, int atom2);
        
     // atom bookkeeping
     int& getNAtomsInRow();
