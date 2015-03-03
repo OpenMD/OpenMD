@@ -1244,8 +1244,8 @@ GLU-CG                  0.0136
 GLU-HG                  -0.0425
 GLU-CD                  0.8054
 GLU-OE                  -0.8188
-GLU-OE2                 -0.8188
-GLU-HE2                  0.4641
+#GLU-OE2                 -0.8188
+#GLU-HE2                  0.4641
 GLN-N                   -0.4157
 GLN-CA                  -0.0031
 GLN-C                   0.5973
