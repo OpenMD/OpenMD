@@ -95,15 +95,10 @@ namespace OpenMD {
       
       //  Calculate the cross products and distances
       Vector3d A = cross(r31, r43);
-      RealType rA = A.length();
       Vector3d B = cross(r43, r23);
-      RealType rB = B.length();
-      //Vector3d C = cross(r23, A);
-      //RealType rC = C.length();
       
       A.normalize();
       B.normalize();
-      //C.normalize();
       
       //  Calculate the sin and cos
       RealType cos_phi = dot(A, B) ;

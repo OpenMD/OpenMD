@@ -68,8 +68,9 @@
 using namespace std;
 namespace OpenMD {
   
-  ForceManager::ForceManager(SimInfo * info) : info_(info), switcher_(NULL),
-                                               initialized_(false) {
+  ForceManager::ForceManager(SimInfo * info) : info_(info), 
+                                               initialized_(false),
+                                               switcher_(NULL) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
