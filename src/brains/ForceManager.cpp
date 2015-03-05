@@ -68,8 +68,7 @@
 using namespace std;
 namespace OpenMD {
   
-  ForceManager::ForceManager(SimInfo * info) : info_(info), 
-                                               initialized_(false),
+  ForceManager::ForceManager(SimInfo * info) : initialized_(false), info_(info),
                                                switcher_(NULL) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
@@ -116,7 +115,6 @@ namespace OpenMD {
   void ForceManager::setupCutoffs() {
     
     Globals* simParams_ = info_->getSimParams();
-    ForceFieldOptions& forceFieldOptions_ = forceField_->getForceFieldOptions();
     int mdFileVersion;
     rCut_ = 0.0; //Needs a value for a later max() call;   
     
@@ -723,7 +721,7 @@ namespace OpenMD {
         }
       }
 
-      for (cg1 = 0; cg1 < point_.size() - 1; cg1++) {
+      for (cg1 = 0; cg1 < int(point_.size()) - 1; cg1++) {
         
         atomListRow = fDecomp_->getAtomsInGroupRow(cg1);        
         newAtom1 = true;

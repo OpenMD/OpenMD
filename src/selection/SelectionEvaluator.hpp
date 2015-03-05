@@ -97,8 +97,8 @@ namespace OpenMD {
     }
 
     std::string getLine() {
-      int ichBegin = lineIndices[pc];
-      int ichEnd;
+      std::size_t ichBegin = lineIndices[pc];
+      std::size_t ichEnd;
       if ((ichEnd = script.find('\r', ichBegin)) == std::string::npos &&
 	  (ichEnd = script.find('\n', ichBegin)) == std::string::npos) {
 	ichEnd = script.size();
