@@ -55,12 +55,12 @@ namespace OpenMD {
 
   }
 
-  DataStorage::DataStorage(int size, int storageLayout) : size_(size){
+  DataStorage::DataStorage(std::size_t size, int storageLayout) : size_(size){
     setStorageLayout(storageLayout);
     resize(size);
   }
 
-  int DataStorage::getSize() {
+  std::size_t DataStorage::getSize() {
 
     if (storageLayout_ & dslPosition && position.size() != size_) {
       //error
@@ -156,7 +156,7 @@ namespace OpenMD {
 
   }
 
-  void DataStorage::resize(int newSize) {
+  void DataStorage::resize(std::size_t newSize) {
 
     if (storageLayout_ & dslPosition) {
       internalResize(position, newSize);
@@ -233,7 +233,7 @@ namespace OpenMD {
     size_ = newSize;
   }
 
-  void DataStorage::reserve(int size) {
+  void DataStorage::reserve(std::size_t size) {
     if (storageLayout_ & dslPosition) {
       position.reserve(size);
     } 
@@ -307,7 +307,7 @@ namespace OpenMD {
     }
   }
 
-  void DataStorage::copy(int source, int num, int target) {
+  void DataStorage::copy(int source, std::size_t num, std::size_t target) {
     if (num + target > size_ ) {
       //error
     }
@@ -483,8 +483,8 @@ namespace OpenMD {
   }    
 
   template<typename T>
-  void DataStorage::internalResize(std::vector<T>& v, int newSize){
-    int oldSize = v.size();
+  void DataStorage::internalResize(std::vector<T>& v, std::size_t newSize){
+    std::size_t oldSize = v.size();
 
     if (oldSize == newSize) {
       return;
@@ -499,7 +499,8 @@ namespace OpenMD {
   }
 
   template<typename T>
-  void DataStorage::internalCopy(std::vector<T>& v, int source,  int num, int target) {
+  void DataStorage::internalCopy(std::vector<T>& v, int source,
+                                 std::size_t num, std::size_t target) {
     typename std::vector<T>::iterator first;
     typename std::vector<T>::iterator last;
     typename std::vector<T>::iterator result;
@@ -516,8 +517,8 @@ namespace OpenMD {
     std::copy(first, last, result);
   }
 
-  int DataStorage::getBytesPerStuntDouble(int layout) {
-    int bytes = 0;
+  std::size_t DataStorage::getBytesPerStuntDouble(int layout) {
+    std::size_t  bytes = 0;
     if (layout & dslPosition) {
       bytes += sizeof(Vector3d);
     }

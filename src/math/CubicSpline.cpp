@@ -50,7 +50,7 @@
 using namespace OpenMD;
 using namespace std;
 
-CubicSpline::CubicSpline() : generated(false), isUniform(true) {
+CubicSpline::CubicSpline() : isUniform(true), generated(false) {
   x_.clear();
   y_.clear();
 }

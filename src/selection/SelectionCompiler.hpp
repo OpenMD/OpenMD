@@ -242,7 +242,7 @@ namespace OpenMD {
 
     std::vector<Token> ltokenPostfix;
     std::vector<Token> atokenInfix;
-    int itokenInfix;
+    std::size_t itokenInfix;
 
     //std::vector<Token> compiledTokens_;
   };

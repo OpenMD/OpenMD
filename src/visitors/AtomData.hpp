@@ -51,10 +51,10 @@
 namespace OpenMD {
 
   struct AtomInfo {
-    AtomInfo() : hasCharge(false), hasVector(false), hasVelocity(false), 
-                 hasForce(false), hasElectricField(false), 
-                 pos(V3Zero), vec(V3Zero), vel(V3Zero), frc(V3Zero), 
-                 charge(0.0), eField(V3Zero) {}
+    AtomInfo() : pos(V3Zero), vec(V3Zero), vel(V3Zero), frc(V3Zero),
+                 eField(V3Zero), charge(0.0),
+                 hasCharge(false), hasVector(false), hasVelocity(false), 
+                 hasForce(false), hasElectricField(false) {}
     
     std::string atomTypeName;
     Vector3d pos;

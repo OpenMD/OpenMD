@@ -245,7 +245,6 @@ namespace OpenMD {
     readSet(whichFrame); 
 
     if (needCOMprops_) {
-      Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
       Thermo thermo(info_);
       Vector3d com;
 

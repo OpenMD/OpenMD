@@ -253,7 +253,6 @@ namespace OpenMD {
     std::string mdRawData;
     int metaDataBlockStart = -1;
     int metaDataBlockEnd = -1;
-    int i, j;
     streamoff mdOffset;
     int mdFileVersion;
 
@@ -294,13 +293,13 @@ namespace OpenMD {
       mdFile_.getline(buffer, bufferSize);
       ++lineNo;
       std::string line = trimLeftCopy(buffer);
-      i = CaseInsensitiveFind(line, "<OpenMD");
-      if (static_cast<size_t>(i) == string::npos) {
+      std::size_t i = CaseInsensitiveFind(line, "<OpenMD");
+      if (i == string::npos) {
         // try the older file strings to see if that works:
         i = CaseInsensitiveFind(line, "<OOPSE");
       }
       
-      if (static_cast<size_t>(i) == string::npos) {
+      if (i == string::npos) {
         // still no luck!
         sprintf(painCave.errMsg, 
                 "SimCreator: File: %s is not a valid OpenMD file!\n", 
@@ -335,13 +334,13 @@ namespace OpenMD {
         
         std::string line = trimLeftCopy(buffer);
         if (metaDataBlockStart == -1) {
-          i = CaseInsensitiveFind(line, "<MetaData>");
+          std::size_t i = CaseInsensitiveFind(line, "<MetaData>");
           if (i != string::npos) {
             metaDataBlockStart = lineNo;
             mdOffset = mdFile_.tellg();
           }
         } else {
-          i = CaseInsensitiveFind(line, "</MetaData>");
+          std::size_t i = CaseInsensitiveFind(line, "</MetaData>");
           if (i != string::npos) {
             metaDataBlockEnd = lineNo;
           }
@@ -374,8 +373,9 @@ namespace OpenMD {
       for (int i = 0; i < metaDataBlockEnd - metaDataBlockStart - 1; ++i) {
         mdFile_.getline(buffer, bufferSize);
         std::string line = trimLeftCopy(buffer);
-        j = CaseInsensitiveFind(line, "## Last run using OpenMD Version");
-        if (static_cast<size_t>(j) != string::npos) {
+        std::size_t j = CaseInsensitiveFind(line,
+                                            "## Last run using OpenMD Version");
+        if (j != string::npos) {
           foundVersion = true;
           mdRawData += version;
         } else {
@@ -833,8 +833,10 @@ namespace OpenMD {
     int beginBendIndex;
     int beginTorsionIndex;
     int beginInversionIndex;
+#ifdef IS_MPI
     int nGlobalAtoms = info->getNGlobalAtoms();
     int nGlobalRigidBodies = info->getNGlobalRigidBodies();
+#endif
     
     beginAtomIndex = 0;
     // The rigid body indices begin immediately after the atom indices:

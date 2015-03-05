@@ -136,9 +136,6 @@ namespace OpenMD {
 
   void LJ::addType(AtomType* atomType){
     LennardJonesAdapter lja1 = LennardJonesAdapter(atomType);
-
-    RealType sigma1 = lja1.getSigma();
-    RealType epsilon1 = lja1.getEpsilon();
     
     // add it to the map:
     int atid = atomType->getIdent();

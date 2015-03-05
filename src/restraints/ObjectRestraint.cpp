@@ -69,9 +69,6 @@ namespace OpenMD {
       Vector3d tBody(0.0);
       
       RotMat3x3d temp = A * refA_.transpose();
-
-      Vector3d euler = temp.toEulerAngles();
-
       Quat4d quat = temp.toQuaternion();
 
       RealType twistAngle;

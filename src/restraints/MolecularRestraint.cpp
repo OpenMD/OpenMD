@@ -135,9 +135,6 @@ namespace OpenMD {
       RotMat3x3d Atrans = v * w_tr.transpose();
       RotMat3x3d A = Atrans.transpose();
 
-      Vector3d eularAngles = A.toEulerAngles();
-
-
       RealType twistAngle;
       Vector3d swingAxis;
 
