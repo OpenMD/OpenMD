@@ -625,7 +625,6 @@ namespace OpenMD {
   }
 
   void ZconstraintForceManager::updateZPos(){
-    RealType curTime = currSnapshot_->getTime();
     std::list<ZconstraintMol>::iterator i;
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
       i->param.zTargetPos += zconsGap_;     
