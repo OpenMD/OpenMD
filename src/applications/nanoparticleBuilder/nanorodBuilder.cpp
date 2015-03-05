@@ -406,7 +406,7 @@ int main(int argc, char *argv []) {
 
   int l = 0;
 
-  for (unsigned int i = 0; i < nComponents; i++){
+  for (int i = 0; i < nComponents; i++){
     locator = new MoLocator(NewInfo->getMoleculeStamp(i), 
                             NewInfo->getForceField());
     
@@ -422,7 +422,7 @@ int main(int argc, char *argv []) {
         }
       }
     } else {
-      for (unsigned int n = 0; n < nMol.at(i); n++) {
+      for (int n = 0; n < nMol.at(i); n++) {
         mol = NewInfo->getMoleculeByGlobalIndex(l);
         locator->placeMol(sites[ids[l]], orientations[ids[l]], mol);
         l++;
