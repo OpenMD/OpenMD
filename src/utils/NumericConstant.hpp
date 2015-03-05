@@ -49,11 +49,10 @@
 
 #ifndef UTILS_NUMERICCONSTANT_HPP
 #define UTILS_NUMERICCONSTANT_HPP
-
 #include "config.h"
+
 #include <cmath>
 #include <limits>
-#include "config.h"
 
 namespace OpenMD {
 

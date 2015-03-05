@@ -101,7 +101,8 @@ namespace OpenMD {
     void updateCOM() {
 
       DataStorage& data = snapshotMan_->getCurrentSnapshot()->*storage_;
-      bool needsVel = (data.getStorageLayout() & DataStorage::dslVelocity);
+      bool needsVel = false;
+      if (data.getStorageLayout() & DataStorage::dslVelocity) needsVel = true;
 
       if (cutoffAtomList.size() == 1) {
         data.position[localIndex_] = cutoffAtomList[0]->getPos();
