@@ -654,13 +654,13 @@ namespace OpenMD {
 
     StuntDouble* sd;
 
-    RealType min_val;
+    RealType min_val(0.0);
     int min_found = 0;   
-    StuntDouble* min_sd;
+    StuntDouble* min_sd = NULL;
 
-    RealType max_val;
+    RealType max_val(0.0);
     int max_found = 0;
-    StuntDouble* max_sd;
+    StuntDouble* max_sd = NULL;
 
     for (sd = seleManA_.beginSelected(selei); sd != NULL; 
          sd = seleManA_.nextSelected(selei)) {
@@ -1020,7 +1020,6 @@ namespace OpenMD {
     int selej;
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType time = currentSnap_->getTime();	 
     Mat3x3d hmat = currentSnap_->getHmat();
 
     StuntDouble* sd;
@@ -1468,7 +1467,6 @@ namespace OpenMD {
     int selej;
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType time = currentSnap_->getTime();	 
     Mat3x3d hmat = currentSnap_->getHmat();
 
     StuntDouble* sd;
