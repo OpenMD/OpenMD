@@ -88,14 +88,14 @@ namespace OpenMD {
     };
 
     DataStorage();
-    DataStorage(int size, int storageLayout = 0);
+    DataStorage(std::size_t size, int storageLayout = 0);
     /** return the size of this DataStorage. */
-    int getSize();
+    std::size_t getSize();
     /**
      * Changes the size of this DataStorage.
      * @param newSize new size of this DataStorage
      */
-    void resize(int newSize);
+    void resize(std::size_t newSize);
     /**
      * Reallocates memory manually. 
      *
@@ -104,7 +104,7 @@ namespace OpenMD {
      * then it is usually more efficient to allocate that memory all
      * at once.
      */
-    void reserve(int size);
+    void reserve(std::size_t size);
     /**
      * Copies data inside DataStorage class.
      *
@@ -116,7 +116,7 @@ namespace OpenMD {
      * @param num number of element to be moved
      * @param target
      */
-    void copy(int source, int num, int target);
+    void copy(int source, std::size_t num, std::size_t target);
     /** Returns the storage layout  */
     int getStorageLayout();
     /** Sets the storage layout  */
@@ -143,7 +143,7 @@ namespace OpenMD {
     vector<RealType> flucQFrc;        /** fluctuating charge forces */
     vector<RealType> sitePotential;   /** electrostatic site potentials */
 
-    static int getBytesPerStuntDouble(int layout);
+    static std::size_t getBytesPerStuntDouble(int layout);
 
   private:
 
@@ -152,12 +152,12 @@ namespace OpenMD {
     RealType* internalGetArrayPointer(vector<RealType>& v);
             
     template<typename T>
-    void internalResize(std::vector<T>& v, int newSize);
+    void internalResize(std::vector<T>& v, std::size_t newSize);
 
     template<typename T>
-    void internalCopy(std::vector<T>& v, int source,  int num, int target);
+    void internalCopy(std::vector<T>& v, int source, std::size_t num, std::size_t target);
             
-    int size_;
+    std::size_t size_;
     int storageLayout_;
 
   };

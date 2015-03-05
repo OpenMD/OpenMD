@@ -212,7 +212,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   qh_setvoronoi_all();
   
   
-  int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
+  // int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
   //Insert all the sample points, because, even with alpha=0, the
   //alpha shape/alpha complex will contain them.
 
@@ -364,7 +364,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       RealType area = face.getArea();
       area_ += area;
       Vector3d normal = face.getUnitNormal();
-      RealType offset =  ((0.0-p[0][0])*normal[0] + (0.0-p[0][1])*normal[1] + (0.0-p[0][2])*normal[2]);
+      // RealType offset =  ((0.0-p[0][0])*normal[0] + (0.0-p[0][1])*normal[1] + (0.0-p[0][2])*normal[2]);
       RealType dist =  normal[0] * interiorPoint[0] + normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
       volume_ += dist *area/qh hull_dim;
       

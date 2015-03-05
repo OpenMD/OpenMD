@@ -57,7 +57,7 @@ namespace OpenMD {
       return true;
     }
       
-    int icharEnd;
+    std::size_t icharEnd;
     if ((icharEnd = script.find('\r', ichCurrentCommand)) == std::string::npos &&
         (icharEnd = script.find('\n', ichCurrentCommand)) == std::string::npos) {
       icharEnd = script.size();

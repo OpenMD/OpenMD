@@ -1512,9 +1512,6 @@ namespace OpenMD {
         whichCell.y() = nCells_.y() * scaled.y();
         whichCell.z() = nCells_.z() * scaled.z();
         
-        // find single index of this cell:
-        int m1 = Vlinear(whichCell, nCells_);
-
         for (vector<Vector3i>::iterator os = cellOffsets_.begin();
              os != cellOffsets_.end(); ++os) {
               

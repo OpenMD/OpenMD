@@ -171,11 +171,11 @@ namespace OpenMD {
     RealType barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
 
     Mat3x3d hmat = snap->getHmat();
-    RealType hz = hmat(2, 2);
     RealType area = hmat(0,0) * hmat(1, 1);
 
-    RealType conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-      barostat_kinetic + barostat_potential - surfaceTension * area/ PhysicalConstants::energyConvert;
+    RealType conservedQuantity = totalEnergy + thermostat_kinetic
+      + thermostat_potential + barostat_kinetic + barostat_potential
+      - surfaceTension * area/ PhysicalConstants::energyConvert;
 
     return conservedQuantity;
 

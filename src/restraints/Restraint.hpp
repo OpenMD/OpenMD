@@ -69,8 +69,8 @@ namespace OpenMD {
 
     typedef std::pair<RealType, RealType> RealPair;
 
-    Restraint() : twist0_(0.0), swingX0_(0.0), swingY0_(0.0), restType_(0), 
-                  printRest_(false) {
+    Restraint() : twist0_(0.0), swingX0_(0.0), swingY0_(0.0), 
+                  printRest_(false), restType_(0) {
     }
     
     virtual ~Restraint() {}
