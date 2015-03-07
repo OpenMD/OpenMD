@@ -655,7 +655,7 @@ namespace OpenMD {
     Vector3d d_grp, dag, d, gvel2, vel2;
     RealType rgrpsq, rgrp, r2, r;
     RealType electroMult, vdwMult;
-    RealType vij;
+    RealType vij(0.0);
     Vector3d fij, fg, f1;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;

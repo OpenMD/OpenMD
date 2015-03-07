@@ -50,7 +50,8 @@
 namespace OpenMD {
 
   FluctuatingChargeConstraints::FluctuatingChargeConstraints(SimInfo* info) : 
-    info_(info), constrainRegions_(false), hasFlucQ_(false), initialized_(false) {
+    info_(info), initialized_(false), hasFlucQ_(false),
+    constrainRegions_(false) {
   }
 
   void FluctuatingChargeConstraints::initialize(){

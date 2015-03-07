@@ -66,11 +66,12 @@
 namespace OpenMD {
   
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
-                                  forceField_(NULL), info_(NULL), 
                                   haveCutoffRadius_(false),
                                   haveDampingAlpha_(false), 
                                   haveDielectric_(false),
-                                  haveElectroSplines_(false)
+                                  haveElectroSplines_(false),
+                                  info_(NULL), forceField_(NULL)
+                                  
   {
     flucQ_ = new FluctuatingChargeForces(info_);
   }
