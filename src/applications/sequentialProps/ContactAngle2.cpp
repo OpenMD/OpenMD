@@ -125,10 +125,8 @@ namespace OpenMD {
       int whichRBin = int(r / dr);
       int whichZBin = int( (zLen/2.0 + z) / dz);
       
-      if ((whichRBin < nRBins_) && (whichZBin >= 0) && (whichZBin < nZBins_)) {
-        std::size_t i = static_cast<std::size_t>(whichRBin);
-        std::size_t j = static_cast<std::size_t>(whichZBin);
-        histo[i][j] += sd->getMass();
+      if ((whichRBin < int(nRBins_)) && (whichZBin >= 0) && (whichZBin < int(nZBins_))) {
+        histo[whichRBin][whichZBin] += sd->getMass();
       }
       
     }

@@ -35,13 +35,10 @@ include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
 
-message(STATUS "Compiler flag = ${CMAKE_COMPILER_IS_GNUCXX}")
 if ( CMAKE_COMPILER_IS_GNUCXX )
-    # set_property( TARGET main APPEND_STRING PROPERTY COMPILE_FLAGS -Wall )
     add_definitions("-Wall")
 endif ( CMAKE_COMPILER_IS_GNUCXX )
 if ( MSVC )
-    # set_property( TARGET main APPEND_STRING PROPERTY COMPILE_FLAGS /W3 )
     add_definitions("/W3")
 endif ( MSVC )
 

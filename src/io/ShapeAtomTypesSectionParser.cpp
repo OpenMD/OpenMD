@@ -164,7 +164,7 @@ namespace OpenMD {
             painCave.isFatal = 1;
             simError();  
           } else {
-            int junk = tokenInfo.nextTokenAsInt();
+            tokenInfo.skipToken();
             at->setMass( tokenInfo.nextTokenAsDouble() );
             DirectionalAdapter da = DirectionalAdapter(at);
             Mat3x3d I;

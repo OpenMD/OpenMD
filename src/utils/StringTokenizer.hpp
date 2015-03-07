@@ -126,6 +126,12 @@ namespace OpenMD {
      */
     std::string nextToken();
 
+    /**
+     * Skips the next token from this string tokenizer.
+     * @exception NoSuchElementException if there are no more tokens in this tokenizer's string
+     */
+    void skipToken();
+
     //actually, nextToken Can be template function
     //template <typename ReturnType>
     //ReturnType nextToken();
