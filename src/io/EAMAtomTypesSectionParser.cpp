@@ -114,8 +114,8 @@ namespace OpenMD {
       StringTokenizer tokenizer1(buffer);
         
       if (tokenizer1.countTokens() >= 4) {
-	int junk = tokenizer1.nextTokenAsInt();
-	RealType mass = tokenizer1.nextTokenAsDouble();
+        tokenizer1.skipToken(); // skip the atomic number
+        tokenizer1.skipToken(); // skip the mass
 	latticeConstant = tokenizer1.nextTokenAsDouble();
 	lattice = tokenizer1.nextToken();
       }else {

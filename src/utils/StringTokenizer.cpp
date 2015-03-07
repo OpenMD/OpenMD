@@ -149,6 +149,25 @@ namespace OpenMD {
     return result;
   }
 
+  void StringTokenizer::skipToken() {
+
+    if(currentPos_ != end_) {
+      while( currentPos_ != end_ && isDelimiter(*currentPos_)) {
+
+	if (returnTokens_) {
+	  *currentPos_++;
+          return;
+	}
+            
+	++currentPos_;
+      }
+
+      while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
+	*currentPos_++;
+      }
+    }
+  }
+
   bool StringTokenizer::nextTokenAsBool() {
     std::string token = nextToken();
     std::istringstream iss(token);
