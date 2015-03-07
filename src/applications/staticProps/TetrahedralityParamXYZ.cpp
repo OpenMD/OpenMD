@@ -59,10 +59,10 @@ namespace OpenMD {
                                                  RealType rCut, 
                                                  RealType voxelSize,
                                                  RealType gaussWidth) 
-    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
-      evaluator1_(info), seleMan1_(info), selectionScript2_(sele2), 
-      evaluator2_(info), seleMan2_(info), rCut_(rCut), voxelSize_(voxelSize),
-      gaussWidth_(gaussWidth) {
+    : StaticAnalyser(info, filename), 
+      selectionScript1_(sele1), selectionScript2_(sele2), 
+      seleMan1_(info),  seleMan2_(info), evaluator1_(info), evaluator2_(info),
+      rCut_(rCut), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -123,7 +123,8 @@ namespace OpenMD {
 
     int kMax = int(5.0 * gaussWidth_ / voxelSize_);
     int kSqLim = kMax*kMax;
-    cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = " << kMax << " kSqLim = " << kSqLim << "\n";
+    cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = " 
+	 << kMax << " kSqLim = " << kSqLim << "\n";
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -297,7 +298,8 @@ namespace OpenMD {
     if (qXYZstream.is_open()) {
       qXYZstream <<  "# AmiraMesh ASCII 1.0\n\n";
       qXYZstream <<  "# Dimensions in x-, y-, and z-direction\n";
-      qXYZstream <<  "  define Lattice " << hist_.size() << " " << hist_[0].size() << " " << hist_[0][0].size() << "\n";
+      qXYZstream <<  "  define Lattice " << hist_.size() << " " 
+		 << hist_[0].size() << " " << hist_[0][0].size() << "\n";
       
       qXYZstream <<  "Parameters {\n";
       qXYZstream <<  "    CoordType \"uniform\",\n";
@@ -311,13 +313,9 @@ namespace OpenMD {
       
       qXYZstream <<  "@1\n";
 
-      int xsize = hist_.size();
-      int ysize = hist_[0].size();
-      int zsize = hist_[0][0].size();
-      
-      for (unsigned int k = 0; k < zsize; ++k) { 
-        for(unsigned int j = 0; j < ysize; ++j) { 
-          for(unsigned int i = 0; i < xsize; ++i) {
+      for (std::size_t k = 0; k < hist_[0][0].size(); ++k) { 
+        for(std::size_t j = 0; j < hist_[0].size(); ++j) { 
+          for(std::size_t i = 0; i < hist_.size(); ++i) {
 	    qXYZstream << hist_[i][j][k] << " ";
 
             //qXYZstream.write(reinterpret_cast<char *>( &hist_[i][j][k] ),

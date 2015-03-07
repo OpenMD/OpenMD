@@ -52,8 +52,8 @@ namespace OpenMD {
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1)
   : StaticAnalyser(info, filename), doVect_(true), doOffset_(false),
-    selectionScript1_(sele1), evaluator1_(info), 
-    evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+    selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
+    evaluator1_(info), evaluator2_(info) {
     
     setOutputName(getPrefix(filename) + ".p2");
     
@@ -63,8 +63,8 @@ namespace OpenMD {
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1, const string& sele2)
   : StaticAnalyser(info, filename), doVect_(false), doOffset_(false),
-    selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), 
-    evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+    selectionScript1_(sele1), selectionScript2_(sele2), seleMan1_(info), 
+    seleMan2_(info), evaluator1_(info), evaluator2_(info) {
     
     setOutputName(getPrefix(filename) + ".p2");
     
@@ -75,8 +75,8 @@ namespace OpenMD {
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1, int seleOffset)
   : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
-    seleOffset_(seleOffset), selectionScript1_(sele1), evaluator1_(info), 
-    evaluator2_(info), seleMan1_(info), seleMan2_(info) {
+    selectionScript1_(sele1), seleMan1_(info), seleMan2_(info), 
+    evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
     
     setOutputName(getPrefix(filename) + ".p2");
     
@@ -205,7 +205,7 @@ namespace OpenMD {
 
       Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
       
-      int which;
+      int which(-1);
       RealType maxEval = 0.0;
       for(int k = 0; k< 3; k++){
         if(fabs(eigenvalues[k]) > maxEval){

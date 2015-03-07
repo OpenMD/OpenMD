@@ -83,7 +83,7 @@ namespace OpenBabel
     vector<bool> used(fragmentLists.size(), 0);
     vector<vector<int> > molecules;
     vector<int> indices;
-    for(int i =0; i < used.size(); ++i) {
+    for(std::size_t i =0; i < used.size(); ++i) {
       if (used[i]) 
         continue;
 
@@ -92,7 +92,7 @@ namespace OpenBabel
       sameMolTypes.push_back(i);
       indices.insert(indices.end(), fragmentLists[i].begin(), 
                      fragmentLists[i].end());
-      for (int j = i + 1;j < used.size(); ++j) {
+      for (std::size_t j = i + 1; j < used.size(); ++j) {
         if (used[j])
           continue;
                 

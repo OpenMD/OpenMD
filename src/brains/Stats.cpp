@@ -45,7 +45,7 @@
 
 namespace OpenMD {
 
-  Stats::Stats(SimInfo* info) : isInit_(false), info_(info) {   
+  Stats::Stats(SimInfo* info) : info_(info), isInit_(false) {
 
     if (!isInit_) {
       init();

@@ -48,13 +48,14 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 
-
 namespace OpenMD {
 
   MultipoleSum::MultipoleSum(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, RealType rmax, int nrbins)
-    : StaticAnalyser(info, filename), rMax_(rmax), nRBins_(nrbins), selectionScript1_(sele1), 
-      evaluator1_(info), seleMan1_(info)  {
+                             const std::string& sele1, RealType rmax, 
+			     int nrbins)
+    : StaticAnalyser(info, filename), nRBins_(nrbins), rMax_(rmax),
+      selectionScript1_(sele1), seleMan1_(info), evaluator1_(info) {
+    
     setOutputName(getPrefix(filename) + ".multipoleSum");
     
     evaluator1_.loadScriptString(sele1);
@@ -66,6 +67,12 @@ namespace OpenMD {
     aveDlength_.resize(nRBins_, 0.0);
     aveQlength_.clear();
     aveQlength_.resize(nRBins_, 0.0 );
+    aveDcount_.clear();
+    aveDcount_.resize(nRBins_, 0.0);
+    aveQcount_.clear();
+    aveQcount_.resize(nRBins_, 0.0 );
+    aveDproj_.clear();
+    aveDproj_.resize(nRBins_, 0.0);
     deltaR_ = rMax_ / nRBins_;
   }
 
@@ -86,6 +93,9 @@ namespace OpenMD {
     std::vector<int> lengthCount(nRBins_, 0);
     std::vector<Vector3d> totalDipole; 
     std::vector<Mat3x3d> totalQpole; 
+    std::vector<int> dipoleCount; 
+    std::vector<int> qpoleCount; 
+    std::vector<RealType> dipoleProjection;
     Vector3d dipole;
     Mat3x3d qpole;
 
@@ -98,7 +108,7 @@ namespace OpenMD {
       
       for (mol = info_->beginMolecule(mi); mol != NULL; 
            mol = info_->nextMolecule(mi)) {
-        //change the positions of atoms which belong to the rigidbodies
+        // change the positions of atoms which belong to the rigidbodies
         for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
              rb = mol->nextRigidBody(rbIter)) {
           rb->updateAtoms();
@@ -116,8 +126,14 @@ namespace OpenMD {
 
         totalDipole.clear();
         totalDipole.resize(nRBins_, V3Zero); 
+        dipoleCount.clear();
+        dipoleCount.resize(nRBins_, 0); 
         totalQpole.clear();
         totalQpole.resize(nRBins_, M3Zero); 
+        qpoleCount.clear();
+        qpoleCount.resize(nRBins_, 0); 
+	dipoleProjection.clear();
+	dipoleProjection.resize(nRBins_, 0.0);
 
         for (mol = info_->beginMolecule(miter); mol != NULL; 
              mol = info_->nextMolecule(miter)) {
@@ -142,52 +158,71 @@ namespace OpenMD {
               qpole = atom->getQuadrupole();
 
             RealType distance = ri.length();
-            int bin = int(distance / deltaR_);
+	    std::size_t bin = int(distance / deltaR_);
             // this multipole is contained within the cutoff spheres that are 
             // larger than the bin:
             if (bin < nRBins_) {
-              for (int j = bin; j < nRBins_; j++) {              
+              for (std::size_t j = bin; j < nRBins_; j++) {              
                 totalDipole[j] += dipole;
+                dipoleCount[j]++;
                 totalQpole[j] += qpole;
+                qpoleCount[j]++;
               }           
             }
           }
         }
-        for (int j = 0; j < nRBins_; j++) {              
+	Vector3d myDipole = sd1->getDipole();
+	  
+        for (std::size_t j = 0; j < nRBins_; j++) {              
+	  RealType myProjection = dot(myDipole, totalDipole[j]) / myDipole.length();
+
           RealType dipoleLength = totalDipole[j].length();
           RealType Qtrace = totalQpole[j].trace();
           RealType Qddot = doubleDot(totalQpole[j], totalQpole[j]);
           RealType qpoleLength =  2.0*(3.0*Qddot - Qtrace*Qtrace);
           dipoleHist[j] += dipoleLength;
           qpoleHist[j] += qpoleLength;
+          aveDcount_[j] += dipoleCount[j];
+          aveQcount_[j] += qpoleCount[j];
           lengthCount[j] += 1;
+	  dipoleProjection[j] += myProjection;
         }
       }
     }
     
-    for (int j = 0; j < nRBins_; j++) {
+    int nSelected = seleMan1_.getSelectionCount();
+    for (std::size_t j = 0; j < nRBins_; j++) {
       if (lengthCount[j] > 0) {
         aveDlength_[j] = dipoleHist[j] / RealType(lengthCount[j]);
         aveQlength_[j] = qpoleHist[j] / RealType(lengthCount[j]);
+        aveDcount_[j] /= RealType(nSelected) ;
+        aveQcount_[j] /= RealType(nSelected) ;
+	aveDproj_[j] = dipoleProjection[j] / RealType(lengthCount[j]);
       } else {
         aveDlength_[j] = 0.0;
         aveQlength_[j] = 0.0;
+        aveDcount_[j] = 0.0;
+        aveQcount_[j] = 0.0;
+	aveDproj_[j] = 0.0;
      }
     }
     writeOut();
   }
-
 
   void MultipoleSum::writeOut() {
 
     ofstream os(getOutputFileName().c_str());
     os << "#multipole sum\n";
     os << "#selection1: (" << selectionScript1_ << ")\t";
-    os << "#r\taveDlength\taveQlength\n";    
-
-    for (unsigned int i = 0; i < nRBins_; ++i) {
+    os << "#r\taveDlength\taveDdensity\taveDproj\taveQlength\taveQdensity\n";
+    
+    for (std::size_t i = 0; i < nRBins_; ++i) {
       RealType r = deltaR_ * i;
-      os << r << "\t" << aveDlength_[i] << "\t" << aveQlength_[i] << "\n";
+      os << r << "\t" << aveDlength_[i] << "\t" 
+         << aveDlength_[i] / aveDcount_[i] << "\t"
+	 << aveDproj_[i] << "\t" 
+         << aveQlength_[i] << "\t"
+         << aveQlength_[i] / aveQcount_[i] << "\n";
     }
     os.close();
   }

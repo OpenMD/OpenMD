@@ -68,12 +68,14 @@
 using namespace std;
 namespace OpenMD {
   
-  RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info), 
-                                evaluatorA_(info), seleManA_(info), 
-                                commonA_(info), evaluatorB_(info), 
-                                seleManB_(info), commonB_(info), 
-                                hasData_(false), hasDividingArea_(false),
-                                usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {
+  RNEMD::RNEMD(SimInfo* info) : info_(info), 
+				evaluator_(info_), seleMan_(info_), 
+                                evaluatorA_(info_), seleManA_(info_), 
+				evaluatorB_(info_), seleManB_(info_), 
+				commonA_(info_), commonB_(info_), 
+				usePeriodicBoundaryConditions_(info_->getSimParams()->getUsePeriodicBoundaryConditions()),
+                                hasDividingArea_(false),
+				hasData_(false) {
 
     trialCount_ = 0;
     failTrialCount_ = 0;
@@ -674,7 +676,7 @@ namespace OpenMD {
       
       RealType mass = sd->getMass();
       Vector3d vel = sd->getVel();
-      RealType value;
+      RealType value(0.0);
       
       switch(rnemdFluxType_) {
       case rnemdKE :
@@ -735,7 +737,7 @@ namespace OpenMD {
       
       RealType mass = sd->getMass();
       Vector3d vel = sd->getVel();
-      RealType value;
+      RealType value(0.0);
       
       switch(rnemdFluxType_) {
       case rnemdKE :
@@ -1146,7 +1148,7 @@ namespace OpenMD {
     RealType px = Pcx / Phx;
     RealType py = Pcy / Phy;
     RealType pz = Pcz / Phz;
-    RealType c, x, y, z;
+    RealType c(0.0), x(0.0), y(0.0), z(0.0);
     bool successfulScale = false;
     if ((rnemdFluxType_ == rnemdFullKE) ||
 	(rnemdFluxType_ == rnemdRotKE)) {
@@ -1216,7 +1218,8 @@ namespace OpenMD {
 	}
       }
     } else {
-      RealType a000, a110, c0, a001, a111, b01, b11, c1;
+      RealType a000(0.0), a110(0.0), c0(0.0);
+      RealType a001(0.0), a111(0.0), b01(0.0), b11(0.0), c1(0.0);
       switch(rnemdFluxType_) {
       case rnemdKE :
 	/* used hotBin coeff's & only scale x & y dimensions
@@ -1319,7 +1322,7 @@ namespace OpenMD {
       vector<pair<RealType,RealType> > rps;
       for (ri = realRoots.begin(); ri !=realRoots.end(); ++ri) {
 	r2 = *ri;
-	//check if FindRealRoots() give the right answer
+	// Check to see if FindRealRoots() gave the right answer:
 	if ( fabs(u0 + r2 * (u1 + r2 * (u2 + r2 * (u3 + r2 * u4)))) > 1e-6 ) {
 	  sprintf(painCave.errMsg, 
 		  "RNEMD Warning: polynomial solve seems to have an error!");
@@ -1327,7 +1330,7 @@ namespace OpenMD {
 	  simError();
 	  failRootCount_++;
 	}
-	//might not be useful w/o rescaling coefficients
+	// Might not be useful w/o rescaling coefficients
 	alpha0 = -c0 - a110 * r2 * r2;
 	if (alpha0 >= 0.0) {
 	  r1 = sqrt(alpha0 / a000);
@@ -1342,13 +1345,14 @@ namespace OpenMD {
 	  }
 	}
       }
-      // Consider combining together the solving pair part w/ the searching
-      // best solution part so that we don't need the pairs vector
+      // Consider combining together the part for solving for the pair
+      // w/ the searching for the best solution part so that we don't
+      // need the pairs vector:
       if (!rps.empty()) {
 	RealType smallestDiff = HONKING_LARGE_VALUE;
-	RealType diff;
-	pair<RealType,RealType> bestPair = make_pair(1.0, 1.0);
-	vector<pair<RealType,RealType> >::iterator rpi;
+	RealType diff(0.0);
+	std::pair<RealType,RealType> bestPair = std::make_pair(1.0, 1.0);
+	std::vector<std::pair<RealType,RealType> >::iterator rpi;
 	for (rpi = rps.begin(); rpi != rps.end(); ++rpi) {
 	  r1 = (*rpi).first;
 	  r2 = (*rpi).second;

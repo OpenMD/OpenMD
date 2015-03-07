@@ -52,8 +52,8 @@ using namespace std;
 
 namespace OpenMD {
 
-  RepulsivePower::RepulsivePower() : name_("RepulsivePower"), 
-                                     initialized_(false), forceField_(NULL) {}
+  RepulsivePower::RepulsivePower() : initialized_(false), forceField_(NULL), 
+				     name_("RepulsivePower") {}
   
   void RepulsivePower::initialize() {    
 

@@ -342,11 +342,11 @@ namespace OpenMD {
     std::vector<Molecule*>::const_iterator rm;
     GenericData* data;
     Molecule::IntegrableObjectIterator ioi;
-    MolecularRestraint* mRest;
+    MolecularRestraint* mRest = NULL;
     StuntDouble* sd;
 
     std::vector<StuntDouble*>::const_iterator ro;
-    ObjectRestraint* oRest;
+    ObjectRestraint* oRest = NULL;
 
     std::map<int, Restraint::RealPair> restInfo;
 

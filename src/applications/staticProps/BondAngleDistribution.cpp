@@ -57,8 +57,8 @@ namespace OpenMD {
                                                const string& filename, 
                                                const string& sele, 
                                                double rCut, int nbins) 
-  : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), 
-    seleMan_(info) {
+    : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info), 
+      evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".bad");
     
@@ -72,8 +72,8 @@ namespace OpenMD {
     rCut_ = rCut;
     nBins_ = nbins;
 
-
     // Theta can take values from 0 to 180    
+
     deltaTheta_ = (180.0) / nBins_;
     histogram_.resize(nBins_);
   }

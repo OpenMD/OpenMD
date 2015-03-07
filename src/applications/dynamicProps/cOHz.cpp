@@ -132,8 +132,8 @@ namespace OpenMD {
     // Vectors w1 & w2 are the second OH bond vector in frames 1 & 2
     // respectively.  Here we assume SPC/E geometry.
 
-    Vector3d v1x = sd1->getA(frame1).getRow(0);
-    Vector3d v2x = sd2->getA(frame2).getRow(0);
+    // Vector3d v1x = sd1->getA(frame1).getRow(0);
+    // Vector3d v2x = sd2->getA(frame2).getRow(0);
 
     Vector3d v1y = sd1->getA(frame1).getRow(1);
     Vector3d v2y = sd2->getA(frame2).getRow(1);

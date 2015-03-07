@@ -84,7 +84,7 @@ RealType SphericalHarmonic::LegendreP(int l,int m, RealType x) {
     printf("LegendreP: m < 0: l = %d\tm = %d\tx = %lf\n", l, m, x);
     return std::numeric_limits <RealType>:: quiet_NaN();
   } else {
-    RealType temp1, temp2, temp3, temp4, temp5;
+    RealType temp1, temp2(0.0), temp3, temp4, temp5;
     temp3=1.0;
     
     if (m>0) {

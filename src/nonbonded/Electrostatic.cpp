@@ -264,7 +264,7 @@ namespace OpenMD {
     
     RealType b0c, b1c, b2c, b3c, b4c, b5c;
     RealType db0c_1, db0c_2, db0c_3, db0c_4, db0c_5;
-    RealType a2, expTerm, invArootPi;
+    RealType a2, expTerm, invArootPi(0.0);
     
     RealType r = cutoffRadius_;
     RealType r2 = r * r;
@@ -1165,7 +1165,7 @@ namespace OpenMD {
     bool i_is_Quadrupole = data.is_Quadrupole;
     bool i_is_Fluctuating = data.is_Fluctuating;
     RealType C_a = data.fixedCharge;   
-    RealType self(0.0), preVal, DdD, trQ, trQQ;
+    RealType self(0.0), preVal, DdD(0.0), trQ, trQQ;
 
     if (i_is_Dipole) {
       DdD = data.dipole.lengthSquare();

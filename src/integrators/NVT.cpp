@@ -47,7 +47,8 @@
 
 namespace OpenMD {
 
-  NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6), maxIterNum_(4) {
+  NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), maxIterNum_(4),
+			    chiTolerance_(1e-6) {
 
     Globals* simParams = info_->getSimParams();
 

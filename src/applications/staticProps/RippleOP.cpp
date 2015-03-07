@@ -48,11 +48,12 @@
 #include "types/MultipoleAdapter.hpp"
 namespace OpenMD {
 
-
-  RippleOP::RippleOP(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : StaticAnalyser(info, filename),
-      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info){
+  
+  RippleOP::RippleOP(SimInfo* info, const std::string& filename, 
+		     const std::string& sele1, const std::string& sele2)
+    : StaticAnalyser(info, filename), 
+      selectionScript1_(sele1), selectionScript2_(sele2), 
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) { 
     
     setOutputName(getPrefix(filename) + ".rp2");
     
@@ -124,29 +125,35 @@ namespace OpenMD {
       int nTail=0;
       RealType sumZ = 0.0;
       
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
 	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	     rb = mol->nextRigidBody(rbIter)) {
 	  rb->updateAtoms();
 	}
       }      
 
-      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; sd3 = seleMan2_.nextSelected(i1)) {
+      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
+	   sd3 = seleMan2_.nextSelected(i1)) {
 	Vector3d pos1 = sd3->getPos();
         if (usePeriodicBoundaryConditions_)
           currentSnapshot_->wrapVector(pos1);
 	sd3->setPos(pos1);
       }
 
-      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; sd3 = seleMan2_.nextSelected(i1)) {
+      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
+	   sd3 = seleMan2_.nextSelected(i1)) {
 	Vector3d pos1 = sd3->getPos();
 	sumZ += pos1.z();
       }
       RealType avgZ = sumZ / (RealType) nMolecules;
       
-      Mat3x3d orderTensorHeadUpper(0.0), orderTensorTail(0.0), orderTensorHeadLower(0.0);
-      //      for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-      for (j1 = seleMan1_.beginSelected(i1); j1 != NULL; j1 = seleMan1_.nextSelected(i1)) {
+      Mat3x3d orderTensorHeadUpper(0.0);
+      Mat3x3d orderTensorTail(0.0);
+      Mat3x3d orderTensorHeadLower(0.0);
+      for (j1 = seleMan1_.beginSelected(i1); j1 != NULL; 
+	   j1 = seleMan1_.nextSelected(i1)) {
 	Vector3d pos = j1->getPos();
         if (usePeriodicBoundaryConditions_)
           currentSnapshot_->wrapVector(pos);
@@ -173,7 +180,8 @@ namespace OpenMD {
 	orderTensorHeadUpper +=outProduct(vecHeadUpper, vecHeadUpper);
 	orderTensorHeadLower +=outProduct(vecHeadLower, vecHeadLower);
       }
-      for (j2 = seleMan2_.beginSelected(i1); j2 != NULL; j2 = seleMan2_.nextSelected(i1)) {
+      for (j2 = seleMan2_.beginSelected(i1); j2 != NULL; 
+	   j2 = seleMan2_.nextSelected(i1)) {
         // The lab frame vector corresponding to the body-fixed 
         // z-axis is simply the second column of A.transpose()
         // or, identically, the second row of A itself.
@@ -192,12 +200,14 @@ namespace OpenMD {
       orderTensorTail -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
       
       Vector3d eigenvaluesHeadUpper, eigenvaluesHeadLower, eigenvaluesTail;
-      Mat3x3d eigenvectorsHeadUpper, eigenvectorsHeadLower, eigenvectorsTail;    
-      Mat3x3d::diagonalize(orderTensorHeadUpper, eigenvaluesHeadUpper, eigenvectorsHeadUpper);
-      Mat3x3d::diagonalize(orderTensorHeadLower, eigenvaluesHeadLower, eigenvectorsHeadLower);
+      Mat3x3d eigenvectorsHeadUpper, eigenvectorsHeadLower, eigenvectorsTail;
+      Mat3x3d::diagonalize(orderTensorHeadUpper, eigenvaluesHeadUpper, 
+			   eigenvectorsHeadUpper);
+      Mat3x3d::diagonalize(orderTensorHeadLower, eigenvaluesHeadLower, 
+			   eigenvectorsHeadLower);
       Mat3x3d::diagonalize(orderTensorTail, eigenvaluesTail, eigenvectorsTail);
       
-      int whichUpper, whichLower, whichTail;
+      int whichUpper(-1), whichLower(-1), whichTail(-1);
       RealType maxEvalUpper = 0.0;
       RealType maxEvalLower = 0.0;
       RealType maxEvalTail = 0.0;
@@ -223,7 +233,7 @@ namespace OpenMD {
       }
       RealType p2Tail = 1.5 * maxEvalTail;
       
-      //the eigen vector is already normalized in SquareMatrix3::diagonalize
+      //the eigenvector is already normalized in SquareMatrix3::diagonalize
       Vector3d directorHeadUpper = eigenvectorsHeadUpper.getColumn(whichUpper);
       if (directorHeadUpper[0] < 0) {
 	directorHeadUpper.negate();

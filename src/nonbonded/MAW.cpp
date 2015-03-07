@@ -51,7 +51,7 @@ using namespace std;
 
 namespace OpenMD {
 
-  MAW::MAW() : name_("MAW"), initialized_(false), forceField_(NULL) {}
+  MAW::MAW() : initialized_(false), forceField_(NULL), name_("MAW") {}
   
   void MAW::initialize() {    
 

@@ -96,7 +96,8 @@ namespace OpenMD {
     frames_ = 0;
     nProcessed_ = nFrames/step_;
 
-    //positions_ and moBool_ are 2D arrays, need the second dimension filled as well
+    // positions_ and moBool_ are 2D arrays, need the second dimension
+    // filled as well
     for(int i = 0; i < selectionCount_; i++){
       moBool_[i].resize(nFrames);
       positions_[i].resize(nFrames);
@@ -105,35 +106,38 @@ namespace OpenMD {
     int iterator;
     int index = 0; 
     /* Loop over all frames storing the positions in a vec< vec<pos> >
-     * At the end, positions.length() should equal seleMan1_.size() or w/e
-     * And positions[index].length() should equal nFrames (or nFrames/istep)
+     * At the end, positions.length() should equal seleMan1_.size() or
+     * w/e And positions[index].length() should equal nFrames (or
+     * nFrames/istep)
      */
     for(int istep = 0; istep < nFrames; istep += step_){
       frames_++;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for(mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)){
+      for(mol = info_->beginMolecule(mi); mol != NULL; 
+	  mol = info_->nextMolecule(mi)){
 	//change the positions of atoms which belong to the rigidbodies
-	for(rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)){
+	for(rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	    rb = mol->nextRigidBody(rbIter)){
 	  rb->updateAtoms();
 	}
       }
       
-      index = 0; //count over atoms since iterators aren't the most friendly for such plebian things
-      for(sd = seleMan1_.beginSelected(iterator); sd != NULL; sd = seleMan1_.nextSelected(iterator)){
+      index = 0; // count over atoms since iterators aren't the most
+		 // friendly for such plebian things
+      for(sd = seleMan1_.beginSelected(iterator); sd != NULL; 
+	  sd = seleMan1_.nextSelected(iterator)){
 	Vector3d pos = sd->getPos();
 	positions_[index][istep] = pos;
 	index++;
       }      
     }
 
-
     cout << "Position Array size: " << positions_.size() << "\n";
     cout << "Frames analyzed: " << positions_[0].size() << "\n";
       
-
-    for(int i = 0; i < positions_.size(); i++){
+    for(std::size_t i = 0; i < positions_.size(); i++){
       int frameIndex = positions_[i].size();
       for(int j = 1; j < frameIndex; j++){
 	Vector3d posF1 = positions_[i][j-1];
@@ -152,13 +156,14 @@ namespace OpenMD {
     } 
 
     int mobileAtomCount = 0;
-    for(int i = 0; i < moBool_.size(); i++){
+    for(std::size_t i = 0; i < moBool_.size(); i++){
       int frameIndex = moBool_[i].size();
       bool mobileAtom = false;
       for(int j = 0; j < frameIndex; j++){
 	mobileAtom = mobileAtom || moBool_[i][j];
       }
-      moBool_[i][0] = mobileAtom; //is true if any value later in the array is true, false otherwise
+      moBool_[i][0] = mobileAtom; // is true if any value later in the
+				  // array is true, false otherwise
       if(mobileAtom){
 	mobileAtomCount++;
       }
@@ -166,13 +171,14 @@ namespace OpenMD {
 
     cout << "Mobile atom count: " << mobileAtomCount << "\n";
 
-    //Here I shrink the size of the arrays, why look through 3888, when you only need ~800.
-    //Additionally, all of these are mobile at some point in time, the others aren't, dead weight and
-    //memory 
+    // Here I shrink the size of the arrays, why look through 3888,
+    // when you only need ~800.  Additionally, all of these are mobile
+    // at some point in time, the others aren't, dead weight and
+    // memory
     positions2_.resize(mobileAtomCount);
     moBool2_.resize(mobileAtomCount);
     int pos2index = 0;
-    for(int i = 0; i < positions_.size(); i++){
+    for(std::size_t i = 0; i < positions_.size(); i++){
       int frameCount = positions_[i].size();
       if(moBool_[i][0]){
 	for(int j = 0; j < frameCount; j++){
@@ -200,12 +206,12 @@ namespace OpenMD {
     diffStream.open(outputFilename_.c_str());
     diffStream << "#X&Y diffusion amounts\n";
     diffStream << "#singleMoveDistance_: " << singleMoveDistance_ << "\n";
-
     diffStream << "#Number of mobile atoms: " << positions2_.size() << "\n";
-
     diffStream << "#time, <x(t)-x(0)>, <y(t)-y(0)>, <r(t)-r(0)>\n";
-    for(int i = 0; i < xHist_.size(); i++){
-      diffStream << i << ", " << xHist_[i] << ", " << yHist_[i] << ", " << rHist_[i] << "\n";
+
+    for(std::size_t i = 0; i < xHist_.size(); i++){
+      diffStream << i << ", " << xHist_[i] << ", " << yHist_[i] << ", " 
+		 << rHist_[i] << "\n";
     }
     diffStream.close();
 
@@ -231,15 +237,19 @@ namespace OpenMD {
     //loop over particles
     // loop over frames starting at j
     //  loop over frames starting at k = j (time shift of 0)
-    for(int i = 0; i < positions2_.size(); i++){
-      int frames = positions2_[i].size() - 1; //for counting properly, otherwise moBool2_[i][j+1] will
-      // go over  
+    for(std::size_t i = 0; i < positions2_.size(); i++){
+      int frames = positions2_[i].size() - 1; // for counting
+					      // properly, otherwise
+					      // moBool2_[i][j+1] will
+					      // go over
       for(int j = 0; j < frames; j++){
-	//if the particle is mobile between j and j + 1, then count it for all timeShifts
+	// if the particle is mobile between j and j + 1, then count
+	// it for all timeShifts
 	if(moBool2_[i][j+1]){
-	  for(int k = j; k < positions2_[0].size(); k++){
+	  for(std::size_t k = j; k < positions2_[0].size(); k++){
 	    //<x(t)-x(0)>  <y(t)-y(0)>  <r(t)-r(0)>
-	    //The positions stored are not wrapped, thus I don't need to worry about pbc	  
+	    //The positions stored are not wrapped, thus I don't need
+	    //to worry about pbc	  
 	    //Mean square displacement
 	    //So I do want the squared distances
 	  
@@ -265,7 +275,7 @@ namespace OpenMD {
     }
     cout << "X, Y, R calculated\n";
 
-    for(int i = 0; i < xHist_.size(); i++){
+    for(std::size_t i = 0; i < xHist_.size(); i++){
       xHist_[i] = xHist_[i]/(count_[i]);
       yHist_[i] = yHist_[i]/(count_[i]);
       rHist_[i] = rHist_[i]/(count_[i]);

@@ -54,8 +54,9 @@ namespace OpenMD {
                                            const std::string& filename, 
                                            const std::string& sele1, 
                                            int nbins)
-    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
-      evaluator1_(info), seleMan1_(info), nBins_(nbins), info_(info) {
+    : StaticAnalyser(info, filename), info_(info), 
+      selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_),
+      nBins_(nbins) {
     
     setOutputName(getPrefix(filename) + ".freqs");
     
@@ -162,7 +163,7 @@ namespace OpenMD {
     Atom* atom2;
     StuntDouble* sd1;
     int ii, sdID, molID, sdID2;
-    RealType li;
+    RealType li(0.0);
     RealType sPot, s1, s2;
     RealType freqShift;
     std::string name;
@@ -226,7 +227,8 @@ namespace OpenMD {
 
         sPot = sd1->getSitePotential();
         
-        // Subtract out the contribution from every other site on this molecule:
+        // Subtract out the contribution from every other site on this
+        // molecule:
         for(atom2 = mol->beginAtom(ai2); atom2 != NULL; 
             atom2 = mol->nextAtom(ai2)) {  
 

@@ -54,8 +54,8 @@ namespace OpenMD {
                                    const std::string& sele2)
     : StaticAnalyser(info, filename), selectionScript1_(sele1), 
       selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info), common_(info), 
-      sele1_minus_common_(info), sele2_minus_common_(info) {
+      seleMan1_(info), seleMan2_(info), sele1_minus_common_(info), 
+      sele2_minus_common_(info), common_(info) {
           
       evaluator1_.loadScriptString(sele1);
       evaluator2_.loadScriptString(sele2);

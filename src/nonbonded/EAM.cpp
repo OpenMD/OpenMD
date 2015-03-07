@@ -51,8 +51,9 @@
 
 namespace OpenMD {
 
-  EAM::EAM() : name_("EAM"), initialized_(false), forceField_(NULL), 
-               mixMeth_(eamJohnson), eamRcut_(0.0), haveCutoffRadius_(false) {}
+  EAM::EAM() : initialized_(false), haveCutoffRadius_(false), 
+	       forceField_(NULL), eamRcut_(0.0), mixMeth_(eamJohnson), 
+	       name_("EAM") {}
   
   CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {   
     EAMAdapter ea1 = EAMAdapter(atomType1);

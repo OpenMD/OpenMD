@@ -53,11 +53,11 @@
 using namespace OpenMD;
 
 
-Triangle::Triangle() : HaveNormal_(false), HaveUnitNormal_(false), HaveCentroid_(false),
-                       HaveArea_(false), area_(0.0), normal_(V3Zero), 
-		       centroid_(V3Zero), facetVelocity_(V3Zero), mass_(0.0),
-		       a_(V3Zero), b_(V3Zero), c_(V3Zero){
-}
+Triangle::Triangle() :  normal_(V3Zero), centroid_(V3Zero), area_(0.0), 
+			mass_(0.0), facetVelocity_(V3Zero), 
+			a_(V3Zero), b_(V3Zero), c_(V3Zero),
+			HaveArea_(false), HaveNormal_(false), 
+			HaveUnitNormal_(false), HaveCentroid_(false) {}
 
 void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3){
   vertices_[0] = P1;

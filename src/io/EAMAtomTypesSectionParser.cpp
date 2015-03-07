@@ -97,15 +97,15 @@ namespace OpenMD {
 
     // The second line contains atomic number, atomic mass, a lattice
     // constant and lattice type
-    RealType latticeConstant; 
+    RealType latticeConstant(0.0); 
     string lattice;
 
     // The third line is nrho, drho, nr, dr and rcut 
-    int nrho;
-    RealType drho;
-    int nr;
-    RealType dr;
-    RealType rcut;
+    int nrho(0);
+    RealType drho(0.0);
+    int nr(0);
+    RealType dr(0.0);
+    RealType rcut(0.0);
     vector<RealType> F;
     vector<RealType> Z;
     vector<RealType> rho;

@@ -51,16 +51,16 @@
 #include "math/Eigenvalue.hpp"
 
 namespace OpenMD {
-
+  
   ContactAngle2::ContactAngle2(SimInfo* info, const std::string& filename, 
                                const std::string& sele, RealType solidZ,
                                RealType threshDens, RealType bufferLength,
                                int nrbins, int nzbins)
-    : SequentialAnalyzer(info, filename), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info), solidZ_(solidZ),
-      threshDens_(threshDens), bufferLength_(bufferLength),
-      nRBins_(nrbins), nZBins_(nzbins) {
-
+  : SequentialAnalyzer(info, filename), solidZ_(solidZ), 
+    threshDens_(threshDens), bufferLength_(bufferLength), nRBins_(nrbins), 
+    nZBins_(nzbins), selectionScript_(sele), seleMan_(info), 
+    evaluator_(info) {
+    
     setOutputName(getPrefix(filename) + ".ca2");
     
     evaluator_.loadScriptString(sele);
@@ -122,8 +122,8 @@ namespace OpenMD {
       // z is possibly symmetric around 0
       z = pos.z();
           
-      int whichRBin = int(r / dr);
-      int whichZBin = int( (zLen/2.0 + z) / dz);
+      std::size_t whichRBin = int(r / dr);
+      std::size_t whichZBin = int( (zLen/2.0 + z) / dz);
       
       if ((whichRBin < nRBins_) && (whichZBin >= 0) && (whichZBin < nZBins_)) 
         histo[whichRBin][whichZBin] += sd->getMass();
@@ -156,8 +156,8 @@ namespace OpenMD {
       bool foundThresh = false;
       int rloc = 0;
       
-      for (unsigned int i = 0; i < nRBins_;  ++i) {
-        RealType ther = dr * (i + 0.5);
+      for (std::size_t i = 0; i < nRBins_;  ++i) {
+
         if (histo[i][j] >= threshDens_) aboveThresh = true;
 
         if (aboveThresh && (histo[i][j] <= threshDens_)) {
@@ -251,7 +251,6 @@ namespace OpenMD {
     center[1] = -((RealType)0.5)*coeff[2];
     RealType radius = sqrt(fabs(center[0]*center[0] + center[1]*center[1]
                                 - coeff[0]));
-    RealType ev0 =  fabs(evals[0]);
 
     int i1;
     for (i1 = 0; i1 < 100; ++i1) {

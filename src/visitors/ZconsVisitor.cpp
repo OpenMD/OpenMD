@@ -47,8 +47,9 @@
 #include "types/ZconsStamp.hpp"
 namespace OpenMD {
 
-  ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), info_(info), zconsReader_(NULL){
-
+  ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), 
+					      zconsReader_(NULL), info_(info){
+    
     visitorName = "ZConsVisitor";
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Globals* simParam = info_->getSimParams();

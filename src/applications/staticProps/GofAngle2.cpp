@@ -48,13 +48,12 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-
+  
   GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, 
                        const std::string& sele1, 
 		       const std::string& sele2, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
-      evaluator3_(info), 
-      seleMan3_(info), doSele3_(false) {
+  : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
+    doSele3_(false), seleMan3_(info), evaluator3_(info) {
     
     setOutputName(getPrefix(filename) + ".gto");
     
@@ -67,17 +66,17 @@ namespace OpenMD {
       avgGofr_[i].resize(nAngleBins_);
     }   
   }
-
+  
   GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, 
                        const std::string& sele1, 
 		       const std::string& sele2, 
                        const std::string& sele3, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
-      evaluator3_(info), selectionScript3_(sele3),
-      seleMan3_(info), doSele3_(true) {
+  : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
+    doSele3_(true), seleMan3_(info), evaluator3_(info), 
+    selectionScript3_(sele3) {
     
     setOutputName(getPrefix(filename) + ".gto");
-
+    
     deltaCosAngle_ = 2.0 / nAngleBins_;
     
     histogram_.resize(nAngleBins_);

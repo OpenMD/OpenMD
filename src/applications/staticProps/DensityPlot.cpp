@@ -51,14 +51,17 @@
 
 namespace OpenMD {
 
-
-  DensityPlot::DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info), 
-      cmSelectionScript_(cmSele), cmEvaluator_(info), cmSeleMan_(info),     
-      len_(len), nRBins_(nrbins), halfLen_(len/2)     {
+  
+  DensityPlot::DensityPlot(SimInfo* info, const std::string& filename, 
+			   const std::string& sele, const std::string& cmSele,
+			   RealType len, int nrbins) 
+    : StaticAnalyser(info, filename), 
+      len_(len), halfLen_(len/2), nRBins_(nrbins),
+      selectionScript_(sele), seleMan_(info), evaluator_(info), 
+      cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
 
     setOutputName(getPrefix(filename) + ".density");
-
+    
     deltaR_ = len_ /nRBins_;  
     histogram_.resize(nRBins_);
     density_.resize(nRBins_);
@@ -74,9 +77,7 @@ namespace OpenMD {
     cmEvaluator_.loadScriptString(cmSele);
     if (!cmEvaluator_.isDynamic()) {
       cmSeleMan_.setSelectionSet(cmEvaluator_.evaluate());
-    }
-    
-    
+    }    
   }
 
   void DensityPlot::process() {
@@ -91,9 +92,11 @@ namespace OpenMD {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	     rb = mol->nextRigidBody(rbIter)) {
           rb->updateAtoms();
         }
         
@@ -112,11 +115,13 @@ namespace OpenMD {
       Mat3x3d hmat = currentSnapshot_->getHmat();
       RealType slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
       int k; 
-      for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; sd = seleMan_.nextSelected(k)) {
+      for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; 
+	   sd = seleMan_.nextSelected(k)) {
 
 
         if (!sd->isAtom()) {
-          sprintf( painCave.errMsg, "Can not calculate electron density if it is not atom\n");
+          sprintf( painCave.errMsg, 
+		   "Can not calculate electron density if it is not atom\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError(); 
@@ -166,7 +171,8 @@ namespace OpenMD {
     }
   
     int nProcessed = nFrames /step_;
-    std::transform(density_.begin(), density_.end(), density_.begin(), std::bind2nd(std::divides<RealType>(), nProcessed));  
+    std::transform(density_.begin(), density_.end(), density_.begin(), 
+		   std::bind2nd(std::divides<RealType>(), nProcessed));  
     writeDensity();
         
 
@@ -178,7 +184,8 @@ namespace OpenMD {
     int i;
     Vector3d newOrigin(0.0);
     RealType totalMass = 0.0;
-    for (StuntDouble* sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+    for (StuntDouble* sd = seleMan_.beginSelected(i); sd != NULL; 
+	 sd = seleMan_.nextSelected(i)) {
       RealType mass = sd->getMass();
       totalMass += mass;
       newOrigin += sd->getPos() * mass;        
@@ -193,13 +200,15 @@ namespace OpenMD {
       ofs << "#g(x, y, z)\n";
       ofs << "#selection: (" << selectionScript_ << ")\n";
       ofs << "#cmSelection:(" << cmSelectionScript_ << ")\n";
-      ofs << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "\tdeltaR = " << deltaR_ <<"\n";
+      ofs << "#nRBins = " << nRBins_ << "\t maxLen = " 
+	  << len_ << "\tdeltaR = " << deltaR_ <<"\n";
       for (unsigned int i = 0; i < histogram_.size(); ++i) {
         ofs << i*deltaR_ - halfLen_ <<"\t" << density_[i]<< std::endl;
       }        
     } else {
 
-      sprintf(painCave.errMsg, "DensityPlot: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "DensityPlot: unable to open %s\n", 
+	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }

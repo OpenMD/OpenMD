@@ -48,29 +48,31 @@
 #include "types/MultipoleAdapter.hpp"
 
 namespace OpenMD {
-
-  GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2), evaluator3_(info), seleMan3_(info), len_(len), halfLen_(len/2), nRBins_(nrbins) {
-      setOutputName(getPrefix(filename) + ".gxyz");
-
-      evaluator3_.loadScriptString(sele3);
-      if (!evaluator3_.isDynamic()) {
-        seleMan3_.setSelectionSet(evaluator3_.evaluate());
-      }    
-
-      deltaR_ =  len_ / nRBins_;
+  
+  GofXyz::GofXyz(SimInfo* info, const std::string& filename, 
+		 const std::string& sele1, const std::string& sele2, 
+		 const std::string& sele3, RealType len, int nrbins)
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), 
+      halfLen_(len/2), nRBins_(nrbins), evaluator3_(info), seleMan3_(info) {
     
-      histogram_.resize(nRBins_);
-      for (int i = 0 ; i < nRBins_; ++i) {
-        histogram_[i].resize(nRBins_);
-        for(int j = 0; j < nRBins_; ++j) {
-	  histogram_[i][j].resize(nRBins_);
-        }
-      }   
-   
-    }
-
-
+    setOutputName(getPrefix(filename) + ".gxyz");
+    
+    evaluator3_.loadScriptString(sele3);
+    if (!evaluator3_.isDynamic()) {
+      seleMan3_.setSelectionSet(evaluator3_.evaluate());
+    }    
+    
+    deltaR_ =  len_ / nRBins_;
+    
+    histogram_.resize(nRBins_);
+    for (int i = 0 ; i < nRBins_; ++i) {
+      histogram_[i].resize(nRBins_);
+      for(int j = 0; j < nRBins_; ++j) {
+	histogram_[i][j].resize(nRBins_);
+      }
+    }    
+  }
+  
   void GofXyz::preProcess() {
     for (int i = 0 ; i < nRBins_; ++i) {
       histogram_[i].resize(nRBins_);
@@ -79,22 +81,24 @@ namespace OpenMD {
       }
     }   
   }
-
-
+  
+  
   void GofXyz::initializeHistogram() {
-    //calculate the center of mass of the molecule of selected stuntdouble in selection1
-
+    // Calculate the center of mass of the molecule of selected
+    // StuntDouble in selection1
+    
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }    
 
     assert(seleMan1_.getSelectionCount() == seleMan3_.getSelectionCount());
     
-    //dipole direction of selection3 and position of selection3 will be used to determine the y-z plane
-    //v1 = s3 -s1, 
-    //z = origin.dipole
-    //x = v1 X z
-    //y = z X x 
+    // The Dipole direction of selection3 and position of selection3 will
+    // be used to determine the y-z plane
+    // v1 = s3 -s1, 
+    // z = origin.dipole
+    // x = v1 X z
+    // y = z X x 
     rotMats_.clear();
 
     int i;
@@ -169,19 +173,21 @@ namespace OpenMD {
       //rdfStream << "#g(x, y, z)\n";
       //rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       //rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
+      //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " 
+      //          << len_ << "deltaR = " << deltaR_ <<"\n";
       for (unsigned int i = 0; i < histogram_.size(); ++i) { 
 	for(unsigned int j = 0; j < histogram_[i].size(); ++j) { 
 	  for(unsigned int k = 0;k < histogram_[i][j].size(); ++k) {
-	    rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ),
-                            sizeof(histogram_[i][j][k] ));
+	    rdfStream.write(reinterpret_cast<char *>( &histogram_[i][j][k] ),
+                            sizeof( histogram_[i][j][k] ));
 	  }
 	}
       }
         
     } else {
 
-      sprintf(painCave.errMsg, "GofXyz: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "GofXyz: unable to open %s\n", 
+	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }

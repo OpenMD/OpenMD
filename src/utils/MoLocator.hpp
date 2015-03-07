@@ -70,7 +70,7 @@ namespace OpenMD {
 
     ForceField* myFF;
     std::vector<Vector3d> refCoords;
-    int nIntegrableObjects;
+    unsigned int nIntegrableObjects;
   };
 }
 #endif

@@ -94,8 +94,8 @@ namespace OpenMD {
     std::string selectionScript1_;
     std::string selectionScript2_;
     SelectionManager seleMan1_;
-    SelectionEvaluator evaluator1_;
     SelectionManager seleMan2_;
+    SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
 
     RealType rCut_;

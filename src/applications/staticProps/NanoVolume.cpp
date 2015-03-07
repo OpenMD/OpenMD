@@ -61,11 +61,11 @@ using namespace OpenMD;
 NanoVolume::NanoVolume(SimInfo* info,
                        const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), 
-    seleMan_(info) {
-
+  : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info),
+    evaluator_(info) {
+  
   setOutputName(getPrefix(filename) + ".avol");
-
+  
   osq.open(getOutputFileName().c_str());
   
   evaluator_.loadScriptString(sele);

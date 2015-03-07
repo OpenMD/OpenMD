@@ -53,9 +53,9 @@ namespace OpenMD {
                        const std::string& sele1, 
 		       const std::string& sele2, 
                        RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), 
-      nRBins_(nrbins), nAngleBins_(nangleBins), evaluator3_(info), 
-      seleMan3_(info), doSele3_(false) {
+    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
+      len_(len), nRBins_(nrbins), 
+      doSele3_(false), seleMan3_(info), evaluator3_(info) {
     
     deltaR_ = len_ /(double) nRBins_;
     deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
@@ -72,9 +72,9 @@ namespace OpenMD {
 		       const std::string& sele2, 
                        const std::string& sele3,
                        RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), 
-      nRBins_(nrbins), nAngleBins_(nangleBins), selectionScript3_(sele3),
-      evaluator3_(info), seleMan3_(info), doSele3_(true) {
+    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins),
+      len_(len), nRBins_(nrbins), doSele3_(true), selectionScript3_(sele3),
+      seleMan3_(info), evaluator3_(info) {
 
     deltaR_ = len_ /(double) nRBins_;
     deltaCosAngle_ = 2.0 / (double)nAngleBins_;    

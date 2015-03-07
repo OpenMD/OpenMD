@@ -112,12 +112,12 @@ namespace OpenMD{
       int nProc;
       int myRank;
 
-      MPI_Comm_size( MPI_COMM_WORLD, &nProc);
-      MPI_Comm_rank( MPI_COMM_WORLD, &myRank);
+      MPI_Comm_size( MPI_COMM_WORLD, &nProc );
+      MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
       
       int nColumnsMax = (int) sqrt(RealType(nProc));
 
-      int nColumns;
+      int nColumns(0);
       for (int i = 1; i < nColumnsMax + 1; i++) {
         if (nProc % i == 0) nColumns = i;        
       }

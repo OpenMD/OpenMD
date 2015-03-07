@@ -52,7 +52,7 @@ namespace OpenMD {
   CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename, 
                                    const std::string& sele)
     : SequentialAnalyzer(info, filename), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info)   {
+      seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".dens");
     

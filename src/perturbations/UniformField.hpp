@@ -89,7 +89,7 @@ namespace OpenMD {
     virtual void applyPerturbation();
     
   private:
-   bool initialized;
+    bool initialized;
     bool doUniformField;
     bool doParticlePot;
     Globals* simParams;

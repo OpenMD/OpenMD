@@ -57,9 +57,10 @@ namespace OpenMD {
                                              const std::string& sele1,
                                              const std::string& sele2,
                                              double rCut, int nzbins) 
-    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
-      evaluator1_(info), seleMan1_(info), selectionScript2_(sele2), 
-      evaluator2_(info), seleMan2_(info), nZBins_(nzbins) {
+    : StaticAnalyser(info, filename), 
+      selectionScript1_(sele1), selectionScript2_(sele2), 
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
+      nZBins_(nzbins) {
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {

@@ -63,7 +63,7 @@
 using namespace OpenMD;
 using namespace std;
 
-ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull FA Qt Pp") {
+ConvexHull::ConvexHull() : Hull(), options_("qhull FA Qt Pp"), dim_(3) {
 }
 
 void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) { 

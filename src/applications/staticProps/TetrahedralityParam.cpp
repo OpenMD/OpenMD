@@ -56,10 +56,12 @@ namespace OpenMD {
   TetrahedralityParam::TetrahedralityParam(SimInfo* info, 
                                            const std::string& filename, 
                                            const std::string& sele,
-                                           double rCut, int nbins) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
+                                           double rCut, int nbins) : 
+    StaticAnalyser(info, filename), selectionScript_(sele), 
+    seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".q");
-
+    
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -134,7 +136,7 @@ namespace OpenMD {
       }           
             
 
-       // outer loop is over the selected StuntDoubles:
+      // outer loop is over the selected StuntDoubles:
 
       for (sd = seleMan_.beginSelected(isd); sd != NULL; 
            sd = seleMan_.nextSelected(isd)) {
@@ -174,7 +176,8 @@ namespace OpenMD {
 	// Sort the vector using predicate and std::sort
 	std::sort(myNeighbors.begin(), myNeighbors.end());
 
-	//std::cerr << myNeighbors.size() <<  " neighbors within " << rCut_  << " A" << " \n";
+	//std::cerr << myNeighbors.size() <<  " neighbors within " 
+	//          << rCut_  << " A" << " \n";
 	
 	// Use only the 4 closest neighbors to do the rest of the work:
 	
@@ -206,7 +209,8 @@ namespace OpenMD {
 
 	    //std::cerr << "cos(psi) = " << cospsi << " \n";
 
-	    // Calculates scaled Qk for each molecule using calculated angles from 4 or fewer nearest neighbors.
+	    // Calculates scaled Qk for each molecule using calculated
+	    // angles from 4 or fewer nearest neighbors.
 	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
 	    //std::cerr<<Qk<<"\t"<<nang<<endl;
 	  }
@@ -215,35 +219,38 @@ namespace OpenMD {
 	if (nang > 0) {
 	  collectHistogram(Qk);
 
-	// Saves positions of StuntDoubles & neighbors with distorted coordination (low Qk value)
-	if ((Qk < 0.55) && (Qk > 0.45)) {
-	  //std::cerr<<Distorted_.size()<<endl;
-	  Distorted_.push_back(sd);
-	  //std::cerr<<Distorted_.size()<<endl;
-	  dposition = sd->getPos();
-	  //std::cerr << "distorted position \t" << dposition << "\n";
-	}
+	  // Saves positions of StuntDoubles & neighbors with distorted
+	  // coordination (low Qk value)
+	  if ((Qk < 0.55) && (Qk > 0.45)) {
+	    //std::cerr<<Distorted_.size()<<endl;
+	    Distorted_.push_back(sd);
+	    //std::cerr<<Distorted_.size()<<endl;
+	    dposition = sd->getPos();
+	    //std::cerr << "distorted position \t" << dposition << "\n";
+	  }
 
-	// Saves positions of StuntDoubles & neighbors with tetrahedral coordination (high Qk value)
-	if (Qk > 0.05) { 
+	  // Saves positions of StuntDoubles & neighbors with
+	  // tetrahedral coordination (high Qk value)
+	  if (Qk > 0.05) { 
 
-	  Tetrahedral_.push_back(sd);
+	    Tetrahedral_.push_back(sd);
 
-	  tposition = sd->getPos();
-	  //std::cerr << "tetrahedral position \t" << tposition << "\n";
-	}
+	    tposition = sd->getPos();
+	    //std::cerr << "tetrahedral position \t" << tposition << "\n";
+	  }
 
-	//std::cerr<<Tetrahedral_.size()<<endl;
-
-
+	  //std::cerr<<Tetrahedral_.size()<<endl;
+       
 	}
 
       }
     }
     
     writeOrderParameter();
-    std::cerr << "number of distorted StuntDoubles = " << Distorted_.size() << "\n";
-    std::cerr << "number of tetrahedral StuntDoubles = " << Tetrahedral_.size() << "\n";
+    std::cerr << "number of distorted StuntDoubles = " 
+	      << Distorted_.size() << "\n";
+    std::cerr << "number of tetrahedral StuntDoubles = " 
+	      << Tetrahedral_.size() << "\n";
   }
         
   void TetrahedralityParam::collectHistogram(RealType Qk) {
@@ -293,59 +300,50 @@ namespace OpenMD {
 
     if (nFrames == 1) {
 
-    std::vector<StuntDouble*>::iterator iter;
-    std::ofstream osd((getOutputFileName() + "dxyz").c_str());
+      std::vector<StuntDouble*>::iterator iter;
+      std::ofstream osd((getOutputFileName() + "dxyz").c_str());
 
-    if (osd.is_open()) {
+      if (osd.is_open()) {
 
-      osd << Distorted_.size() << "\n";
-
-      osd << "1000000.00000000;    34.52893134     0.00000000     0.00000000;     0.00000000    34.52893134     0.00000000;     0.00000000     0.00000000    34.52893134" << "\n";
+	osd << Distorted_.size() << "\n";
+	osd << "\n";
       
-      for (iter = Distorted_.begin(); iter != Distorted_.end(); ++iter) {
-	Vector3d position;
-	position = (*iter)->getPos();
-	osd << "O  " << "\t";
+	for (iter = Distorted_.begin(); iter != Distorted_.end(); ++iter) {
+	  Vector3d position;
+	  position = (*iter)->getPos();
+	  osd << "O  " << "\t";
 	  for (unsigned int z = 0; z < position.size(); z++) {
 	    osd << position[z] << "  " << "\t";
 	  }
 	  osd << "\n";
+	}
+	osd.close();
       }
-      osd.close();
-    }
 
 
-    std::ofstream ost((getOutputFileName() + "txyz").c_str());
+      std::ofstream ost((getOutputFileName() + "txyz").c_str());
     
-    if (ost.is_open()) {
+      if (ost.is_open()) {
 
-      ost << Tetrahedral_.size() << "\n";
-
-      ost << "1000000.00000000;    34.52893134     0.00000000     0.00000000;     0.00000000    34.52893134     0.00000000;     0.00000000     0.00000000    34.52893134" << "\n";
+	ost << Tetrahedral_.size() << "\n";
+	ost << "\n";
       
-      for (iter = Tetrahedral_.begin(); iter != Tetrahedral_.end(); ++iter) {
+	for (iter = Tetrahedral_.begin(); iter != Tetrahedral_.end(); ++iter) {
+	  Vector3d position;
+	  position = (*iter)->getPos();
 
-	Vector3d position;
-
-	position = (*iter)->getPos();
-
-	ost << "O  " << "\t";
+	  ost << "O  " << "\t";
 
 	  for (unsigned int z = 0; z < position.size(); z++) {
-
 	    ost << position[z] << "  " << "\t";
 	  }
-
 	  ost << "\n";
-
+	}
+	ost.close();
       }
-
-      ost.close();
     }
-    
   }
 }
-}
-      
+
 
 

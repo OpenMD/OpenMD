@@ -96,20 +96,17 @@ namespace OpenMD {
   void MoLocator::calcRef( void ){
     AtomStamp* currAtomStamp;
     RigidBodyStamp* rbStamp;
-    unsigned int nAtoms; 
-    int nRigidBodies;
     std::vector<RealType> mass;
     Vector3d coor;
     Vector3d refMolCom;  
-    int nAtomsInRb;
     RealType totMassInRb;
     RealType currAtomMass;
     RealType molMass;
     
-    nAtoms= myStamp->getNAtoms();
-    nRigidBodies = myStamp->getNRigidBodies();
+    std::size_t nAtoms= myStamp->getNAtoms();
+    std::size_t nRigidBodies = myStamp->getNRigidBodies();
     
-    for(unsigned int i = 0; i < nAtoms; i++){
+    for(std::size_t i = 0; i < nAtoms; i++){
       
       currAtomStamp = myStamp->getAtomStamp(i);
       
@@ -140,17 +137,17 @@ namespace OpenMD {
       }
     }
     
-    for(int i = 0; i < nRigidBodies; i++){
+    for(std::size_t i = 0; i < nRigidBodies; i++){
       
       rbStamp = myStamp->getRigidBodyStamp(i);
-      nAtomsInRb = rbStamp->getNMembers();
+      std::size_t nAtomsInRb = rbStamp->getNMembers();
       
       coor.x() = 0.0;
       coor.y() = 0.0;
       coor.z() = 0.0;
       totMassInRb = 0.0;
       
-      for(int j = 0; j < nAtomsInRb; j++){
+      for(std::size_t j = 0; j < nAtomsInRb; j++){
         
         currAtomStamp = myStamp->getAtomStamp(rbStamp->getMemberAt(j));
         currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);
@@ -173,7 +170,7 @@ namespace OpenMD {
     refMolCom.y() = 0;
     refMolCom.z() = 0;
     
-    for(int i = 0; i < nIntegrableObjects; i++){
+    for(std::size_t i = 0; i < nIntegrableObjects; i++){
       refMolCom += refCoords[i] * mass[i];
       molMass += mass[i];
     }
@@ -182,7 +179,7 @@ namespace OpenMD {
     
     //move the reference center of mass to (0,0,0) and adjust the
     //reference coordinate of the integrabel objects
-    for(int i = 0; i < nIntegrableObjects; i++)
+    for(std::size_t i = 0; i < nIntegrableObjects; i++)
       refCoords[i] -= refMolCom;
   }
   
@@ -190,7 +187,7 @@ namespace OpenMD {
     RealType mass;
     AtomType* atomType= myFF->getAtomType(at);
     if (atomType != NULL) {
-      mass =     atomType->getMass();
+      mass = atomType->getMass();
     } else {
       mass = 0.0;
       std::cerr << "Can not find AtomType: " << at << std::endl;
@@ -203,7 +200,7 @@ namespace OpenMD {
     RealType totMass = 0;
     nAtoms = molStamp->getNAtoms();
     
-    for(unsigned int i = 0; i < nAtoms; i++) {
+    for(std::size_t i = 0; i < nAtoms; i++) {
       AtomStamp *currAtomStamp = molStamp->getAtomStamp(i);
       totMass += getAtomMass(currAtomStamp->getType(), myFF);         
     }

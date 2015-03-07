@@ -50,10 +50,10 @@
 
 namespace OpenMD {
   
-  UniformField::UniformField(SimInfo* info) : info_(info), 
-                                            doUniformField(false), 
-                                            doParticlePot(false),
-                                            initialized(false) {
+  UniformField::UniformField(SimInfo* info) : initialized(false), 
+					      doUniformField(false), 
+					      doParticlePot(false),
+					      info_(info) {
     simParams = info_->getSimParams();
   }
   

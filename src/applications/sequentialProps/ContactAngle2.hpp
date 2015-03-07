@@ -62,8 +62,8 @@ namespace OpenMD {
     RealType solidZ_;
     RealType threshDens_;
     RealType bufferLength_;
-    int nRBins_;
-    int nZBins_;
+    std::size_t nRBins_;
+    std::size_t nZBins_;
     
     std::string selectionScript_;
     SelectionManager seleMan_;

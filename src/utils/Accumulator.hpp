@@ -59,6 +59,7 @@ namespace OpenMD {
     virtual size_t count()  {
       return Count_;
     }
+    virtual ~BaseAccumulator() {};
   protected:
     size_t Count_;
 
@@ -79,6 +80,8 @@ namespace OpenMD {
     Accumulator() : BaseAccumulator() {
       this->clear();
     }
+    
+    ~Accumulator() {};
 
     /**
      * Accumulate another value

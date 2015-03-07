@@ -137,7 +137,7 @@ int main(int argc, char* argv[]){
 
   if (args_info.sele3_given) sele3 = args_info.sele3_arg;
 
-  bool batchMode;
+  bool batchMode(false);
   if (args_info.scd_given){
     if (args_info.sele1_given && 
         args_info.sele2_given && args_info.sele3_given) {
@@ -169,7 +169,7 @@ int main(int argc, char* argv[]){
   SimInfo* info = creator.createSim(dumpFileName);
 
   RealType maxLen;
-  RealType zmaxLen;
+  RealType zmaxLen(0.0);
   if (args_info.length_given) {
     maxLen = args_info.length_arg;
     if (args_info.zlength_given){

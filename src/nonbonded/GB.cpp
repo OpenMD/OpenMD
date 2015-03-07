@@ -88,7 +88,8 @@ namespace OpenMD {
    */
 
 
-  GB::GB() : name_("GB"), initialized_(false), mu_(2.0), nu_(1.0), forceField_(NULL) {}
+  GB::GB() : initialized_(false), name_("GB"), forceField_(NULL),
+	     mu_(2.0), nu_(1.0) {}
     
   void GB::initialize() {    
     
@@ -139,7 +140,7 @@ namespace OpenMD {
     GBtids[atid] = gbtid;
     MixingMap[gbtid].resize( nGB_ );
     
-    RealType d1, l1, eX1, eS1, eE1, dw1;
+    RealType d1(0.0), l1(0.0), eX1(0.0), eS1(0.0), eE1(0.0), dw1(0.0);
     
     LennardJonesAdapter lja1 = LennardJonesAdapter(atomType);
     GayBerneAdapter gba1 = GayBerneAdapter(atomType);
@@ -178,7 +179,7 @@ namespace OpenMD {
 
       LennardJonesAdapter lja2 = LennardJonesAdapter(atype2);
       GayBerneAdapter gba2 = GayBerneAdapter(atype2);
-      RealType d2, l2, eX2, eS2, eE2, dw2;
+      RealType d2(0.0), l2(0.0), eX2(0.0), eS2(0.0), eE2(0.0), dw2(0.0);
       
       if (gba2.isGayBerne()) {
         d2 = gba2.getD();

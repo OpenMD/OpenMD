@@ -75,16 +75,16 @@ namespace OpenMD {
     
     void setRegion(int r) { region_ = r; }
     int  getRegion(){ return region_; }
-    int  getNAtoms() { return atomStamps_.size(); }
-    int  getNBonds() { return bondStamps_.size(); }
-    int  getNBends() { return bendStamps_.size(); }
-    int  getNTorsions() { return torsionStamps_.size(); }
-    int  getNInversions() { return inversionStamps_.size(); }
-    int  getNRigidBodies() { return rigidBodyStamps_.size(); }
-    int  getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
-    int  getNConstraints() { return constraintStamps_.size(); }
+    std::size_t getNAtoms() { return atomStamps_.size(); }
+    std::size_t getNBonds() { return bondStamps_.size(); }
+    std::size_t getNBends() { return bendStamps_.size(); }
+    std::size_t getNTorsions() { return torsionStamps_.size(); }
+    std::size_t getNInversions() { return inversionStamps_.size(); }
+    std::size_t getNRigidBodies() { return rigidBodyStamps_.size(); }
+    std::size_t getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
+    std::size_t getNConstraints() { return constraintStamps_.size(); }
     int  getNIntegrable() { return nintegrable_;}
-    int  getNFreeAtoms() { return freeAtoms_.size(); }
+    std::size_t  getNFreeAtoms() { return freeAtoms_.size(); }
     virtual void validate();
     
     AtomStamp* getAtomStamp(int index) { return atomStamps_[index]; }

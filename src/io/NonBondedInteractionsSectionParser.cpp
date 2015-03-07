@@ -78,7 +78,7 @@ namespace OpenMD {
     
     NonBondedInteractionTypeEnum nbit = getNonBondedInteractionTypeEnum(itype);
     nTokens -= 3;
-    NonBondedInteractionType* interactionType;
+    NonBondedInteractionType* interactionType = NULL;
     
     //switch is a nightmare to maintain
     switch(nbit) {

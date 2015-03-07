@@ -56,8 +56,8 @@ namespace OpenMD {
                                  const std::string& sele2,
                                  double rCut, double thetaCut, int nbins) :
     StaticAnalyser(info, filename),
-    selectionScript1_(sele1), evaluator1_(info), seleMan1_(info),
-    selectionScript2_(sele2), evaluator2_(info), seleMan2_(info){
+    selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
+    selectionScript2_(sele2), seleMan2_(info), evaluator2_(info) {
     
     setOutputName(getPrefix(filename) + ".hbg");
 

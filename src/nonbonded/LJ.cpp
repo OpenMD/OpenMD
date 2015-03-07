@@ -51,7 +51,7 @@
 
 namespace OpenMD {
 
-  LJ::LJ() : name_("LJ"), initialized_(false), forceField_(NULL) {}
+  LJ::LJ() : initialized_(false), forceField_(NULL), name_("LJ") {}
 
   RealType LJ::getSigma(AtomType* atomType1, AtomType* atomType2) {
 
@@ -135,7 +135,6 @@ namespace OpenMD {
 
 
   void LJ::addType(AtomType* atomType){
-    LennardJonesAdapter lja1 = LennardJonesAdapter(atomType);
     
     // add it to the map:
     int atid = atomType->getIdent();
@@ -177,7 +176,8 @@ namespace OpenMD {
     }      
   }
   
-  void LJ::addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon){
+  void LJ::addExplicitInteraction(AtomType* atype1, AtomType* atype2, 
+				  RealType sigma, RealType epsilon){
     
     LJInteractionData mixer;
     mixer.sigma = sigma;

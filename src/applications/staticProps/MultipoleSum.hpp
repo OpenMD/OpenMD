@@ -58,11 +58,14 @@ namespace OpenMD {
     virtual void process();
     virtual void writeOut();
 
-    int nRBins_;
+    std::size_t nRBins_;
     RealType deltaR_;                
     RealType rMax_;
     std::vector<RealType> aveDlength_; 
     std::vector<RealType> aveQlength_; 
+    std::vector<RealType> aveDcount_; 
+    std::vector<RealType> aveQcount_; 
+    std::vector<RealType> aveDproj_;
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;

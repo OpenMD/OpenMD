@@ -184,7 +184,7 @@ namespace OpenMD {
     createConstraintPair(mol);
 
     //create non-bonded constraintPairs
-    for (int i = 0; i < molStamp->getNConstraints(); ++i) {
+    for (std::size_t i = 0; i < molStamp->getNConstraints(); ++i) {
       ConstraintStamp* cStamp = molStamp->getConstraintStamp(i);
       Atom* atomA;
       Atom* atomB;
@@ -193,8 +193,11 @@ namespace OpenMD {
       atomB = mol->getAtomAt(cStamp->getB());
       assert( atomA && atomB );
       
-      RealType distance;
       bool printConstraintForce = false;
+
+      if (cStamp->havePrintConstraintForce()) {
+        printConstraintForce = cStamp->getPrintConstraintForce();
+      }
 
       if (!cStamp->haveConstrainedDistance()) {
         sprintf(painCave.errMsg,
@@ -203,18 +206,14 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();      
       } else {
-        distance = cStamp->getConstrainedDistance();
-      }
-
-      if (cStamp->havePrintConstraintForce()) {
-        printConstraintForce = cStamp->getPrintConstraintForce();
-      }
-    
-      ConstraintElem* consElemA = new ConstraintElem(atomA);
-      ConstraintElem* consElemB = new ConstraintElem(atomB);
-      ConstraintPair* cPair = new ConstraintPair(consElemA, consElemB, distance,
-                                                 printConstraintForce);
-      mol->addConstraintPair(cPair);
+        RealType distance = cStamp->getConstrainedDistance();
+	ConstraintElem* consElemA = new ConstraintElem(atomA);
+	ConstraintElem* consElemB = new ConstraintElem(atomB);
+	ConstraintPair* cPair = new ConstraintPair(consElemA, consElemB, 
+						   distance,
+						   printConstraintForce);
+	mol->addConstraintPair(cPair);
+      }   
     }
 
     // now create the constraint elements:
@@ -228,7 +227,7 @@ namespace OpenMD {
       mol->setConstrainTotalCharge( molStamp->getConstrainTotalCharge() );
     }
 
-    //the construction of this molecule is finished
+    // The construction of this molecule is finished:
     mol->complete();
     
     return mol;

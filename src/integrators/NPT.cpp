@@ -63,7 +63,8 @@
 namespace OpenMD {
 
   NPT::NPT(SimInfo* info) :
-    VelocityVerletIntegrator(info), chiTolerance(1e-6), etaTolerance(1e-6), maxIterNum_(4) {
+    VelocityVerletIntegrator(info), etaTolerance(1e-6), chiTolerance(1e-6), 
+    maxIterNum_(4) {
 
       Globals* simParams = info_->getSimParams();
     

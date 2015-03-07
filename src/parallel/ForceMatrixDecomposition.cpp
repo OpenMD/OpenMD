@@ -686,12 +686,12 @@ namespace OpenMD {
     AtomPlanPotRow->scatter(pot_row, pot_temp);
     AtomPlanPotRow->scatter(expot_row, expot_temp);
 
-    for (int ii = 0;  ii < pot_temp.size(); ii++ ) 
+    for (std::size_t ii = 0;  ii < pot_temp.size(); ii++ ) 
       pairwisePot += pot_temp[ii];
 
-    for (int ii = 0;  ii < expot_temp.size(); ii++ ) 
+    for (std::size_t ii = 0;  ii < expot_temp.size(); ii++ ) 
       excludedPot += expot_temp[ii];
-        
+    
     if (storageLayout_ & DataStorage::dslParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
       // embedding contribution is added in each of the low level
@@ -714,12 +714,12 @@ namespace OpenMD {
     AtomPlanPotColumn->scatter(pot_col, pot_temp);    
     AtomPlanPotColumn->scatter(expot_col, expot_temp);    
     
-    for (int ii = 0;  ii < pot_temp.size(); ii++ )
+    for (std::size_t ii = 0;  ii < pot_temp.size(); ii++ )
       pairwisePot += pot_temp[ii];    
 
-    for (int ii = 0;  ii < expot_temp.size(); ii++ )
+    for (std::size_t ii = 0;  ii < expot_temp.size(); ii++ )
       excludedPot += expot_temp[ii];    
-
+    
     if (storageLayout_ & DataStorage::dslParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
       // embedding contribution is added in each of the low level
