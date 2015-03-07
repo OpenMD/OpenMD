@@ -153,7 +153,6 @@ int main(int argc, char *argv []) {
 
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
-  Globals* simParams = oldInfo->getSimParams();
 
   // Calculate lattice constant (in Angstroms)
 

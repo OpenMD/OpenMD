@@ -62,7 +62,7 @@ namespace OpenMD {
     createRestFile_ = false;  
 
 #ifdef IS_MPI    
-    MPI_Status* istatus;
+    MPI_Status* istatus = NULL;
 #endif
     
     int printAny = 0;
@@ -195,11 +195,11 @@ namespace OpenMD {
   void RestWriter::writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo) {
     
 #ifdef IS_MPI
-    MPI_Status* istatus;
+    MPI_Status* istatus = NULL;
 #endif
     
 #ifndef IS_MPI
-     if (createRestFile_)  (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+    if (createRestFile_)  (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
     
     // output some information about the molecules
     std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;

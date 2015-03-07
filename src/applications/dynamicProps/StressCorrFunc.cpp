@@ -157,9 +157,6 @@ namespace OpenMD {
     // count array set to zero
     std::fill(count_.begin(), count_.end(), 0);
 
-    // We'll need the force manager to compute forces for the average pressure
-    ForceManager* forceMan = new ForceManager(info_);
-
     // We'll need thermo to compute the pressures from the virial
     Thermo* thermo =  new Thermo(info_);
 
@@ -177,9 +174,6 @@ namespace OpenMD {
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
       for (int j = block1.first; j < block1.second; ++j) {
 
-	// go snapshot-by-snapshot through this block:
-        Snapshot* snap = bsMan_->getSnapshot(j);
-       
         // update the positions and velocities of the atoms belonging
         // to rigid bodies:
 

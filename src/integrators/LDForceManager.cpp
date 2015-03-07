@@ -52,7 +52,9 @@
 
 namespace OpenMD {
 
-  LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info), forceTolerance_(1e-6), maxIterNum_(4) {
+  LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info), 
+						  maxIterNum_(4), 
+						  forceTolerance_(1e-6) {
     simParams = info->getSimParams();
     veloMunge = new Velocitizer(info);
 

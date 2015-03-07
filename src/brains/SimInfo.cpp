@@ -70,16 +70,17 @@ namespace OpenMD {
   
   SimInfo::SimInfo(ForceField* ff, Globals* simParams) : 
     forceField_(ff), simParams_(simParams), 
-    ndf_(0), fdf_local(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
+    nAtoms_(0), nBonds_(0), nBends_(0), nTorsions_(0), nInversions_(0), 
+    nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
+    nConstraints_(0), nFluctuatingCharges_(0),     
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0), 
     nGlobalFluctuatingCharges_(0), nGlobalBonds_(0), nGlobalBends_(0), 
     nGlobalTorsions_(0), nGlobalInversions_(0), nGlobalConstraints_(0),
-    nAtoms_(0), nBonds_(0), nBends_(0), nTorsions_(0), nInversions_(0), 
-    nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
-    nConstraints_(0), nFluctuatingCharges_(0), sman_(NULL), 
-    topologyDone_(false), calcBoxDipole_(false), calcBoxQuadrupole_(false),
-    useAtomicVirial_(true), hasNGlobalConstraints_(false) {    
+    hasNGlobalConstraints_(false),
+    ndf_(0), fdf_local(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
+    sman_(NULL), topologyDone_(false), calcBoxDipole_(false), 
+    calcBoxQuadrupole_(false), useAtomicVirial_(true) {    
     
     MoleculeStamp* molStamp;
     int nMolWithSameStamp;

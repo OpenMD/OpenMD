@@ -53,11 +53,9 @@
 
 namespace OpenMD {
 
-
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
     : info(si), nameFinder(info), distanceFinder(info), hullFinder(info),
-      indexFinder(info), hasSurfaceArea_(false),
-      isLoaded_(false){    
+      indexFinder(info), isLoaded_(false), hasSurfaceArea_(false) {
     nObjects.push_back(info->getNGlobalAtoms() + info->getNGlobalRigidBodies());
     nObjects.push_back(info->getNGlobalBonds());
     nObjects.push_back(info->getNGlobalBends());
@@ -694,11 +692,9 @@ namespace OpenMD {
       break;
     }
     if (match) 
-      bs.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
-
-    
+      bs.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());    
   }
-
+  
   
   void SelectionEvaluator::withinInstruction(const Token& instruction, 
                                              SelectionSet& bs){

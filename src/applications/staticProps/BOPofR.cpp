@@ -59,7 +59,7 @@ namespace OpenMD {
                  const std::string& sele, double rCut, int nbins, 
                  RealType len) : StaticAnalyser(info, filename), 
                                  selectionScript_(sele), 
-                                 evaluator_(info), seleMan_(info) {
+                                 seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".bo");
     

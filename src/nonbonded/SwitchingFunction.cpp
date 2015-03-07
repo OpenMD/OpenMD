@@ -50,8 +50,9 @@
 using namespace std;
 namespace OpenMD {
 
-  SwitchingFunction::SwitchingFunction() : np_(150), haveSpline_(false), 
-                                           isCubic_(true), functionType_(cubic) {
+  SwitchingFunction::SwitchingFunction() : functionType_(cubic), 
+					   haveSpline_(false), isCubic_(true), 
+					   np_(150) {
     switchSpline_ = new CubicSpline();
   }
 

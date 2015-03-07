@@ -52,7 +52,7 @@ using namespace std;
 
 namespace OpenMD {
 
-  Morse::Morse() : name_("Morse"), initialized_(false), forceField_(NULL) {}
+  Morse::Morse() : initialized_(false), forceField_(NULL), name_("Morse") {}
   
   void Morse::initialize() {    
 

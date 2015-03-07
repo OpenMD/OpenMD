@@ -391,7 +391,7 @@ namespace OpenMD {
   }
 
   void RigidBody::updateAtomVel() {
-    Mat3x3d skewMat;;
+    Mat3x3d skewMat;
 
     Vector3d ji = getJ();
     Mat3x3d I =  getI();
@@ -489,25 +489,26 @@ namespace OpenMD {
       Vector3d ji = getJ();
       Mat3x3d I =  getI();
 
-      skewMat(0, 0) =0;
-      skewMat(0, 1) = ji[2] /I(2, 2);
-      skewMat(0, 2) = -ji[1] /I(1, 1);
+      skewMat(0, 0) =  0;
+      skewMat(0, 1) =  ji[2] / I(2, 2);
+      skewMat(0, 2) = -ji[1] / I(1, 1);
 
-      skewMat(1, 0) = -ji[2] /I(2, 2);
-      skewMat(1, 1) = 0;
-      skewMat(1, 2) = ji[0]/I(0, 0);
+      skewMat(1, 0) = -ji[2] / I(2, 2);
+      skewMat(1, 1) =  0;
+      skewMat(1, 2) =  ji[0]/ I(0, 0);
 
-      skewMat(2, 0) =ji[1] /I(1, 1);
-      skewMat(2, 1) = -ji[0]/I(0, 0);
-      skewMat(2, 2) = 0;
+      skewMat(2, 0) =  ji[1] / I(1, 1);
+      skewMat(2, 1) = -ji[0] / I(0, 0);
+      skewMat(2, 2) =  0;
 
       velRot = (getA() * skewMat).transpose() * ref;
 
-      vel =getVel() + velRot;
+      vel = getVel() + velRot;
       return true;
         
     } else {
-      std::cerr << index << " is an invalid index, current rigid body contains " 
+      std::cerr << index 
+		<< " is an invalid index, current rigid body contains " 
 		<< atoms_.size() << "atoms" << std::endl;
       return false;
     }

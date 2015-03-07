@@ -49,11 +49,12 @@
 
 namespace OpenMD {
   Integrator::Integrator(SimInfo* info) 
-    : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), 
-      needReset(false), velocitizer_(NULL), needVelocityScaling(false), 
-      rnemd_(NULL), useRNEMD(false), rotAlgo_(NULL), flucQ_(NULL), 
-      rattle_(NULL), dumpWriter(NULL), statWriter(NULL), thermo(info),
-      snap(info->getSnapshotManager()->getCurrentSnapshot()) {
+    : info_(info), forceMan_(NULL), rotAlgo_(NULL), flucQ_(NULL), 
+      rattle_(NULL), velocitizer_(NULL), rnemd_(NULL), 
+      needPotential(false), needStress(false), 
+      needReset(false),  needVelocityScaling(false), 
+      useRNEMD(false), dumpWriter(NULL), statWriter(NULL), thermo(info_),
+      snap(info_->getSnapshotManager()->getCurrentSnapshot()) {
     
     simParams = info->getSimParams();
     

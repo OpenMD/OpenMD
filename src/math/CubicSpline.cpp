@@ -83,7 +83,8 @@ void CubicSpline::generate() {
   //   d   = vector of S'''(x_[i]+)/6 values (i < n).
   // Local variables:   
  
-  RealType fp1, fpn, h, p;
+  RealType fp1, fpn, p;
+  RealType h(0.0);
   
   // make sure the sizes match
   

@@ -54,9 +54,9 @@ namespace OpenMD {
   ContactAngle1::ContactAngle1(SimInfo* info, const std::string& filename, 
                                const std::string& sele, RealType solidZ,
                                RealType dropletRadius)
-    : SequentialAnalyzer(info, filename), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info), solidZ_(solidZ),
-      dropletRadius_(dropletRadius)  {
+  : SequentialAnalyzer(info, filename), solidZ_(solidZ),
+    dropletRadius_(dropletRadius), selectionScript_(sele), 
+    seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".ca1");
     

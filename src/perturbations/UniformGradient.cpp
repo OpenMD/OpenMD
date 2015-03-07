@@ -50,10 +50,10 @@
 
 namespace OpenMD {
   
-  UniformGradient::UniformGradient(SimInfo* info) : info_(info), 
-                                            doUniformGradient(false), 
-                                            doParticlePot(false),
-                                            initialized(false) {
+  UniformGradient::UniformGradient(SimInfo* info) : initialized(false),
+						    doUniformGradient(false), 
+						    doParticlePot(false),
+						    info_(info) {
     simParams = info_->getSimParams();
   }
   

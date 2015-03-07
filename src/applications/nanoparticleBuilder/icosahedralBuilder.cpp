@@ -90,8 +90,8 @@ int main(int argc, char *argv []) {
   std::string outputFileName;
   
   MoLocator* locator;
-  RealType latticeConstant;
-  int nShells;
+  RealType latticeConstant(0.0);
+  int nShells(-1);
 
   DumpWriter *writer;
   
@@ -140,7 +140,6 @@ int main(int argc, char *argv []) {
   /* parse md file and set up the system */
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
-  Globals* simParams = oldInfo->getSimParams();
 
   vector<Vector3d> Points;
   if (args_info.ico_given){

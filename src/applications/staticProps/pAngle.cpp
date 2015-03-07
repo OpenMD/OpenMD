@@ -54,10 +54,10 @@ namespace OpenMD {
   
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, int nthetabins)
-    : StaticAnalyser(info, filename), selectionScript1_(sele1),  
-      evaluator1_(info),  evaluator2_(info), seleMan1_(info), seleMan2_(info), 
-      nThetaBins_(nthetabins),
-      doVect_(true), doOffset_(false) {
+    : StaticAnalyser(info, filename), doVect_(true), doOffset_(false), 
+      selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info),  evaluator2_(info), 
+      nThetaBins_(nthetabins) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
 
@@ -73,10 +73,10 @@ namespace OpenMD {
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, const std::string& sele2, 
                  int nthetabins)
-    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
-      selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info), nThetaBins_(nthetabins),
-      doVect_(false), doOffset_(false) {
+    : StaticAnalyser(info, filename), doVect_(false), doOffset_(false),
+      selectionScript1_(sele1), selectionScript2_(sele2), 
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
+      nThetaBins_(nthetabins) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
 
@@ -96,10 +96,10 @@ namespace OpenMD {
 
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, int seleOffset, int nthetabins)
-    : StaticAnalyser(info, filename), selectionScript1_(sele1),  
-      evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info),
-      nThetaBins_(nthetabins), seleOffset_(seleOffset), 
-      doVect_(false), doOffset_(true), doOffset2_(false) {
+    : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
+      doOffset2_(false), selectionScript1_(sele1),  
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
+      seleOffset_(seleOffset),  nThetaBins_(nthetabins) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
     
@@ -115,11 +115,11 @@ namespace OpenMD {
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, int seleOffset, int seleOffset2,
                  int nthetabins)
-    : StaticAnalyser(info, filename), selectionScript1_(sele1),  
-      evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info),
-      nThetaBins_(nthetabins), seleOffset_(seleOffset), 
-      seleOffset2_(seleOffset2),
-      doVect_(false), doOffset_(true), doOffset2_(true) {
+    : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
+      doOffset2_(true), selectionScript1_(sele1),  
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
+      seleOffset_(seleOffset), seleOffset2_(seleOffset2),
+      nThetaBins_(nthetabins) {
     
     setOutputName(getPrefix(filename) + ".pAngle");
     
@@ -182,9 +182,7 @@ namespace OpenMD {
           // only do this if the stunt double actually has a vector associated
           // with it
           if (sd1->isDirectional()) {
-            Vector3d vec = sd1->getA().getColumn(2);
-            RealType distance = r1.length();
-            
+            Vector3d vec = sd1->getA().getColumn(2);            
             vec.normalize();
             r1.normalize();
             RealType cosangle = dot(r1, vec);

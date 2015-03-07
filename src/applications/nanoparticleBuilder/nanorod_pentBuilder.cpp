@@ -216,7 +216,7 @@ int main(int argc, char *argv []) {
     orientations.push_back(Vector3d(0.0));
   }
 
-  std::vector<int> vacancyTargets;
+  std::vector<std::size_t> vacancyTargets;
   vector<bool> isVacancy;
   
   Vector3d myLoc;
@@ -270,9 +270,9 @@ int main(int argc, char *argv []) {
         simError();
 
         isVacancy.clear();
-        for (unsigned int i = 0; i < sites.size(); i++) {
+        for (std::size_t i = 0; i < sites.size(); i++) {
           bool vac = false;
-          for (unsigned int j = 0; j < vacancyTargets.size(); j++) {
+          for (std::size_t j = 0; j < vacancyTargets.size(); j++) {
             if (i == vacancyTargets[j]) vac = true;
           }
           isVacancy.push_back(vac);

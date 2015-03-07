@@ -53,11 +53,13 @@
 
 using namespace MATPACK;
 namespace OpenMD {
-
+  
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
                                          const std::string& filename, 
                                          const std::string& sele,
-                                         double rCut, int nbins) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
+                                         double rCut, int nbins) 
+    : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info),
+      evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".bo");
 

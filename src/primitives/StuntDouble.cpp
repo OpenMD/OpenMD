@@ -53,13 +53,10 @@ namespace OpenMD {
 
   StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) : 
     objType_(objType), storage_(storage), snapshotMan_(NULL),    
-    linear_(false), linearAxis_(-1), globalIndex_(-1), localIndex_(-1), 
-    globalIntegrableObjectIndex_(-1){
-    }
+    linear_(false), linearAxis_(-1), globalIndex_(-1), 
+    globalIntegrableObjectIndex_(-1), localIndex_(-1) {}
 
-  StuntDouble::~StuntDouble() {
-
-  }
+  StuntDouble::~StuntDouble() {}
 
   void StuntDouble::zeroForcesAndTorques() {    
     int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();

@@ -120,7 +120,7 @@ int main(int argc, char *argv []) {
   vector<Vector3d> orientations = nanoParticle.getOrientations();
 
 
-  std::vector<int> vacancyTargets;
+  std::vector<std::size_t> vacancyTargets;
   vector<bool> isVacancy;
   
   Vector3d myLoc;
@@ -131,7 +131,8 @@ int main(int argc, char *argv []) {
 
   if (args_info.vacancyPercent_given) {
     if (args_info.vacancyPercent_arg < 0.0 || args_info.vacancyPercent_arg > 100.0) {
-      sprintf(painCave.errMsg, "vacancyPercent was set to a non-sensical value.");
+      sprintf(painCave.errMsg, 
+	      "vacancyPercent was set to a non-sensical value.");
       painCave.isFatal = 1;
       simError();
     } else {
@@ -150,7 +151,7 @@ int main(int argc, char *argv []) {
       }
       if (vIR >= 0.0 && vOR <= particleRadius && vOR >= vIR) {
         
-        for (unsigned int i = 0; i < sites.size(); i++) {
+        for (std::size_t i = 0; i < sites.size(); i++) {
           myLoc = sites[i];
           myR = myLoc.length();
           if (myR >= vIR && myR <= vOR) {
@@ -171,9 +172,9 @@ int main(int argc, char *argv []) {
         simError();
 
         isVacancy.clear();
-        for (unsigned int i = 0; i < sites.size(); i++) {
+        for (std::size_t i = 0; i < sites.size(); i++) {
           bool vac = false;
-          for (unsigned int j = 0; j < vacancyTargets.size(); j++) {
+          for (std::size_t j = 0; j < vacancyTargets.size(); j++) {
             if (i == vacancyTargets[j]) vac = true;
           }
           isVacancy.push_back(vac);
@@ -189,7 +190,7 @@ int main(int argc, char *argv []) {
   }
 
   /* Get number of lattice sites */
-  int nSites = sites.size() - vacancyTargets.size();
+  std::size_t nSites = sites.size() - vacancyTargets.size();
 
   std::vector<Component*> components = simParams->getComponents();
   std::vector<RealType> molFractions;
@@ -270,7 +271,8 @@ int main(int argc, char *argv []) {
       totalFraction += molFractions.at(i);
     }
     if (abs(totalFraction - 1.0) > 1e-6) {
-      sprintf(painCave.errMsg, "The sum of molFractions was not close enough to 1.0");
+      sprintf(painCave.errMsg, 
+	      "The sum of molFractions was not close enough to 1.0");
       painCave.isFatal = 1;
       simError();
     }
@@ -284,14 +286,15 @@ int main(int argc, char *argv []) {
     
     // recompute actual mol fractions and perform final sanity check:
     
-    int totalMolecules = 0;
+    std::size_t totalMolecules = 0;
     for (int i=0; i < nComponents; i++) {
       molFractions[i] = (RealType)(nMol.at(i))/(RealType)nSites;
       totalMolecules += nMol.at(i);
     }
     
     if (totalMolecules != nSites) {
-      sprintf(painCave.errMsg, "Computed total number of molecules is not equal "
+      sprintf(painCave.errMsg, 
+	      "Computed total number of molecules is not equal "
               "to the number of lattice sites!");
       painCave.isFatal = 1;
       simError();
@@ -300,12 +303,14 @@ int main(int argc, char *argv []) {
 
     for (unsigned int i = 0; i < shellRadii.size(); i++) {
       if (shellRadii.at(i) > particleRadius + 1e-6 ) {
-        sprintf(painCave.errMsg, "One of the shellRadius values exceeds the particle Radius.");
+        sprintf(painCave.errMsg, 
+		"One of the shellRadius values exceeds the particle Radius.");
         painCave.isFatal = 1;
         simError();
       } 
       if (shellRadii.at(i) <= 0.0 ) {
-        sprintf(painCave.errMsg, "One of the shellRadius values is smaller than zero!");
+        sprintf(painCave.errMsg, 
+		"One of the shellRadius values is smaller than zero!");
         painCave.isFatal = 1;
         simError();
       }

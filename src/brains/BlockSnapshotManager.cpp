@@ -53,8 +53,9 @@ namespace OpenMD {
 					     int storageLayout,
                                              long long int memSize,
                                              int blockCapacity) 
-    : SnapshotManager(storageLayout), info_(info), memSize_(memSize), 
-      blockCapacity_(blockCapacity), activeBlocks_(blockCapacity_, -1), 
+    : SnapshotManager(storageLayout), info_(info), 
+      blockCapacity_(blockCapacity), memSize_(memSize), 
+      activeBlocks_(blockCapacity_, -1), 
       activeRefCount_(blockCapacity_, 0) {
 
       nAtoms_ = info->getNGlobalAtoms();
@@ -163,26 +164,29 @@ namespace OpenMD {
 
   bool BlockSnapshotManager::loadBlock(int block) {
     std::vector<int>::iterator i = findActiveBlock(block);
-    bool loadSuccess;
+    bool loadSuccess(false);
     if (i != activeBlocks_.end()) {
-      //if block is already in memory, just increast the reference count
+      // If the block is already in memory, just increase the
+      // reference count:
       ++activeRefCount_[i - activeBlocks_.begin()];
       loadSuccess = true;
     } else if (getNActiveBlocks() < blockCapacity_){
-      //if number of active blocks is less than the block capacity, just load it
+      // If the number of active blocks is less than the block
+      // capacity, just load the block:
       internalLoad(block);
       loadSuccess = true;
     } else if ( hasZeroRefBlock() ) {
-      //if already reach the block capacity, need to unload a block with 0 reference
+      // If we have already reached the block capacity, we need to
+      // unload a block with 0 references:
       int zeroRefBlock = getFirstZeroRefBlock();
       assert(zeroRefBlock != -1);
       internalUnload(zeroRefBlock);
       internalLoad(block);
     } else {
-      //reach the capacity and all blocks in memory are not zero reference
+      // We have reached capacity and all blocks in memory are have
+      // non-zero references:
       loadSuccess = false;
-    }
-    
+    }    
     return loadSuccess;
   }
 

@@ -176,9 +176,6 @@ namespace OpenMD {
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
       for (int j = block1.first; j < block1.second; ++j) {
 
-	// go snapshot-by-snapshot through this block:
-        Snapshot* snap = bsMan_->getSnapshot(j);
-       
         // update the positions and velocities of the atoms belonging
         // to rigid bodies:
 

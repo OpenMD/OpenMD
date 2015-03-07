@@ -52,7 +52,7 @@
 using namespace std;
 namespace OpenMD {
   
-  Sticky::Sticky() : name_("Sticky"), initialized_(false), forceField_(NULL) {}
+  Sticky::Sticky() : initialized_(false), forceField_(NULL), name_("Sticky") {}
     
   void Sticky::initialize() {    
     Stypes.clear();

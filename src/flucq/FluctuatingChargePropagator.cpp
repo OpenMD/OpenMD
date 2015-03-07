@@ -56,7 +56,7 @@ using namespace QuantLib;
 namespace OpenMD {
 
   FluctuatingChargePropagator::FluctuatingChargePropagator(SimInfo* info) : 
-    info_(info), hasFlucQ_(false), forceMan_(NULL), initialized_(false) {
+    info_(info), forceMan_(NULL), hasFlucQ_(false), initialized_(false) {
     
     Globals* simParams = info_->getSimParams();
     fqParams_ = simParams->getFluctuatingChargeParameters();    

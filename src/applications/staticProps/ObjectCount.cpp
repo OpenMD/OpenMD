@@ -52,7 +52,7 @@ namespace OpenMD {
   ObjectCount::ObjectCount(SimInfo* info, const std::string& filename, 
                            const std::string& sele)
     : StaticAnalyser(info, filename), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info)   {
+      seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".counts");
     
@@ -63,55 +63,55 @@ namespace OpenMD {
     }            
   }
 
-void ObjectCount::process() {
-  Molecule* mol;
-  RigidBody* rb;
-  SimInfo::MoleculeIterator mi;
-  Molecule::RigidBodyIterator rbIter;
+  void ObjectCount::process() {
+    Molecule* mol;
+    RigidBody* rb;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
   
-  counts_.clear();
-  counts_.resize(10, 0);
-  DumpReader reader(info_, dumpFilename_);    
-  int nFrames = reader.getNFrames();
-  unsigned long int nsum = 0;
-  unsigned long int n2sum = 0;
+    counts_.clear();
+    counts_.resize(10, 0);
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    unsigned long int nsum = 0;
+    unsigned long int n2sum = 0;
 
-  for (int i = 0; i < nFrames; i += step_) {
-    reader.readFrame(i);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    for (int i = 0; i < nFrames; i += step_) {
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtoms();        
-      }      
-    }
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
+	//change the positions of atoms which belong to the rigidbodies
+	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	     rb = mol->nextRigidBody(rbIter)) {
+	  rb->updateAtoms();        
+	}      
+      }
     
-    if (evaluator_.isDynamic()) {
+      if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
+      }
         
-    unsigned int count = seleMan_.getSelectionCount();
+      unsigned int count = seleMan_.getSelectionCount();
 
-    if (counts_.size() <= count)  {
-      counts_.resize(count, 0);
+      if (counts_.size() <= count)  {
+	counts_.resize(count, 0);
+      }
+
+      counts_[count]++;
+
+      nsum += count;
+      n2sum += count * count;
     }
-
-    counts_[count]++;
-
-    nsum += count;
-    n2sum += count * count;
-  }
    
-  int nProcessed = nFrames /step_;
+    int nProcessed = nFrames /step_;
 
-  nAvg = nsum / nProcessed;
-  n2Avg = n2sum / nProcessed;
-  sDev = sqrt(n2Avg - nAvg*nAvg);
-  writeCounts();   
-}
+    nAvg = nsum / nProcessed;
+    n2Avg = n2sum / nProcessed;
+    sDev = sqrt(n2Avg - nAvg*nAvg);
+    writeCounts();   
+  }
   
   void ObjectCount::writeCounts() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
@@ -128,7 +128,8 @@ void ObjectCount::process() {
       
     } else {
       
-      sprintf(painCave.errMsg, "ObjectCount: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "ObjectCount: unable to open %s\n", 
+	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }

@@ -127,9 +127,10 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-  TimeCorrFunc* corrFunc;
+  TimeCorrFunc* corrFunc = NULL;
   if(args_info.sdcorr_given){
-    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, 
+					memSize);
   } else if (args_info.selecorr_given){
     corrFunc = new SelectionCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.dcorr_given){
@@ -141,7 +142,8 @@ int main(int argc, char* argv[]){
   } else if (args_info.thetacorr_given) {
     corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.drcorr_given) {
-    corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2,
+					memSize);
   } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
   } else if (args_info.vcorrZ_given) {
@@ -159,7 +161,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.freqfluccorr_given){
     corrFunc = new FreqFlucCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.lcorr_given) {
-    int order;
+    int order(0);
     if (args_info.order_given)
         order = args_info.order_arg;
     else {
@@ -170,9 +172,10 @@ int main(int argc, char* argv[]){
       simError();
     }
         
-    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order, memSize); 
+    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order, 
+				    memSize); 
   } else if (args_info.lcorrZ_given) {
-    int order;
+    int order(0);
     if (args_info.order_given)
         order = args_info.order_arg;
     else {
@@ -183,10 +186,11 @@ int main(int argc, char* argv[]){
       simError();
     }
         
-    corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order, args_info.nzbins_arg, memSize); 
+    corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order, 
+				     args_info.nzbins_arg, memSize); 
 
   } else if (args_info.cohZ_given) {
-    int order;
+    int order(0);
     if (args_info.order_given)
         order = args_info.order_arg;
     else {
@@ -197,7 +201,8 @@ int main(int argc, char* argv[]){
       simError();
     }
         
-    corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, args_info.nzbins_arg, memSize); 
+    corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, 
+			args_info.nzbins_arg, memSize); 
 
   }
 

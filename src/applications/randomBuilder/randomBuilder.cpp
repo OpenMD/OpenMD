@@ -168,18 +168,18 @@ int main(int argc, char *argv []) {
   std::vector<RealType> molFractions;
   std::vector<RealType> molecularMasses;
   std::vector<int> nMol;
-  int nComponents = components.size();
-
+  std::size_t nComponents = components.size();
+  
   if (nComponents == 1) {
     molFractions.push_back(1.0);    
   } else {
     if (args_info.molFraction_given == nComponents) {
-      for (int i = 0; i < nComponents; i++) {
+      for (std::size_t i = 0; i < nComponents; i++) {
         molFractions.push_back(args_info.molFraction_arg[i]);
       }
     } else if (args_info.molFraction_given == nComponents-1) {
       RealType remainingFraction = 1.0;
-      for (int i = 0; i < nComponents-1; i++) {
+      for (std::size_t i = 0; i < nComponents-1; i++) {
         molFractions.push_back(args_info.molFraction_arg[i]);
         remainingFraction -= molFractions[i];
       }
@@ -196,7 +196,7 @@ int main(int argc, char *argv []) {
   
   RealType totalFraction = 0.0;
 
-  for (int i = 0; i < nComponents; i++) {
+  for (std::size_t i = 0; i < nComponents; i++) {
     if (molFractions.at(i) < 0.0) {
       sprintf(painCave.errMsg, "One of the requested molFractions was"
               " less than zero!");
@@ -218,7 +218,7 @@ int main(int argc, char *argv []) {
   }
 
   int remaining = nSites;
-  for (int i=0; i < nComponents-1; i++) {    
+  for (std::size_t i=0; i < nComponents-1; i++) {    
     nMol.push_back(int((RealType)nSites * molFractions.at(i)));
     remaining -= nMol.at(i);
   }
@@ -228,7 +228,7 @@ int main(int argc, char *argv []) {
 
   int totalMolecules = 0;
   RealType totalMass = 0.0;
-  for (int i=0; i < nComponents; i++) {
+  for (std::size_t i=0; i < nComponents; i++) {
     molFractions[i] = (RealType)(nMol.at(i))/(RealType)nSites;
     totalMolecules += nMol.at(i);
     molecularMasses.push_back(MoLocator::getMolMass(oldInfo->getMoleculeStamp(i),
@@ -314,12 +314,12 @@ int main(int argc, char *argv []) {
   // Randomize a vector of ints:
 
   vector<int> ids;
-  for (unsigned int i = 0; i < sites.size(); i++) ids.push_back(i);
+  for (std::size_t i = 0; i < sites.size(); i++) ids.push_back(i);
   std::random_shuffle(ids.begin(), ids.end());
 
   Molecule* mol;
   int l = 0;
-  for (int i = 0; i < nComponents; i++){
+  for (std::size_t i = 0; i < nComponents; i++){
     locator = new MoLocator(newInfo->getMoleculeStamp(i), 
                             newInfo->getForceField());
     for (int n = 0; n < nMol.at(i); n++) {
@@ -368,7 +368,7 @@ void createMdFile(const std::string&oldMdFileName,
   
   oldMdFile.getline(buffer, MAXLEN);
  
-  unsigned int i = 0;
+  std::size_t i = 0;
   while (!oldMdFile.eof()) {
     
     //correct molecule number

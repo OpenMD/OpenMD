@@ -153,7 +153,7 @@ namespace OpenMD {
 
   bool ForceDecomposition::checkNeighborList() {
     RealType st2 = pow( skinThickness_ / 2.0, 2);
-    int nGroups = snap_->cgData.position.size();
+    std::size_t nGroups = snap_->cgData.position.size();
     if (needVelocities_) 
       snap_->cgData.setStorageLayout(DataStorage::dslPosition |
                                      DataStorage::dslVelocity);
@@ -166,7 +166,7 @@ namespace OpenMD {
     RealType dispmax = 0.0;
     Vector3d disp;    
 
-    for (int i = 0; i < nGroups; i++) {
+    for (std::size_t i = 0; i < nGroups; i++) {
       disp = snap_->cgData.position[i]  - saved_CG_positions_[i];
       dispmax = max(dispmax, disp.lengthSquare());
     }

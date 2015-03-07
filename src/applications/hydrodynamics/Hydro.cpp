@@ -109,8 +109,8 @@ int main(int argc, char* argv[]){
   identMat(2,2) = 1.0;
 
   Globals* simParams = info->getSimParams();
-  RealType temperature;
-  RealType viscosity;
+  RealType temperature(0.0);
+  RealType viscosity(0.0);
 
   if (simParams->haveViscosity()) {
     viscosity = simParams->getViscosity();

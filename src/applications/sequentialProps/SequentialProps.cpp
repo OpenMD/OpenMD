@@ -106,11 +106,11 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-  SequentialAnalyzer* analyzer;
+  SequentialAnalyzer* analyzer = NULL;
   if(args_info.com_given){
     analyzer = new CenterOfMass(info, dumpFileName, sele1);
   } else if(args_info.ca1_given){
-    RealType solidZ;
+    RealType solidZ(0.0);
     if (args_info.referenceZ_given)
         solidZ = args_info.referenceZ_arg;
     else {
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-    RealType dropletR;
+    RealType dropletR(0.0);
     if (args_info.dropletR_given)
         dropletR = args_info.dropletR_arg;
     else {
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]){
 
     analyzer = new ContactAngle1(info, dumpFileName, sele1, solidZ, dropletR);
   } else if(args_info.ca2_given){
-    RealType solidZ;
+    RealType solidZ(0.0);
     if (args_info.referenceZ_given)
         solidZ = args_info.referenceZ_arg;
     else {
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-    RealType threshDens;
+    RealType threshDens(0.0);
     if (args_info.threshDens_given)
         threshDens = args_info.threshDens_arg;
     else {
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-    RealType bufferLength;
+    RealType bufferLength(0.0);
     if (args_info.bufferLength_given)
         bufferLength = args_info.bufferLength_arg;
     else {

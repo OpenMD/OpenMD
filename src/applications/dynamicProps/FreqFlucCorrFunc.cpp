@@ -131,21 +131,21 @@ namespace OpenMD {
     std::cerr << "preCorrelating to compute mean values\n";
     // dump files can be enormous, so read them in block-by-block:
     int nblocks = bsMan_->getNBlocks();
-    bool firsttime = true;
+
     for (int i = 0; i < nblocks; ++i) {
       bsMan_->loadBlock(i);
       assert(bsMan_->isBlockActive(i));      
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
       for (int j = block1.first; j < block1.second; ++j) {
 
-        // go snapshot-by-snapshot through this block:
-        Snapshot* snap = bsMan_->getSnapshot(j);
-        
         // update the positions and velocities of the atoms belonging
         // to rigid bodies:
         
         updateFrame(j);        
-        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; sd1 = seleMan1_.nextSelected(ii)) {
+
+        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
+	     sd1 = seleMan1_.nextSelected(ii)) {
+
           e1 = sd1->getElectricField(j);
           
           if (sd1->isRigidBody()) {

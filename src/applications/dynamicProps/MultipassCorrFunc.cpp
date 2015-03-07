@@ -49,14 +49,11 @@ namespace OpenMD {
   MultipassCorrFunc::MultipassCorrFunc(SimInfo* info, const string& filename, 
                                        const string& sele1, const string& sele2,
                                        int storageLayout)
-    : info_(info), storageLayout_(storageLayout),
-      dumpFilename_(filename), selectionScript1_(sele1), 
-      selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-      seleMan1_(info), seleMan2_(info) {
+    : storageLayout_(storageLayout), info_(info), dumpFilename_(filename),
+      seleMan1_(info_), seleMan2_(info_), 
+      selectionScript1_(sele1), selectionScript2_(sele2), 
+      evaluator1_(info_), evaluator2_(info_) { 
     
-    int nAtoms = info->getNGlobalAtoms();
-    int nRigidBodies = info->getNGlobalRigidBodies();
-
     // Request maximum needed storage for the simulation (including of
     // whatever was passed down by the individual correlation
     // function).
@@ -89,7 +86,6 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();  
     }
-
   }
 
   void MultipassCorrFunc::preCorrelate() {

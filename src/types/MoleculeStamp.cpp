@@ -153,7 +153,7 @@ namespace OpenMD {
     for(unsigned int i = 0; i < atom2Rigidbody.size(); ++i) {
       atom2Rigidbody[i] = -1 - int(i);
     }
-    for (int i = 0; i < getNRigidBodies(); ++i) {
+    for (std::size_t i = 0; i < getNRigidBodies(); ++i) {
       RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
       std::vector<int> members = rbStamp->getMembers();
       for(std::vector<int>::iterator j = members.begin(); 
@@ -174,7 +174,7 @@ namespace OpenMD {
     checkConstraints();
     
     int nrigidAtoms = 0;
-    for (int i = 0; i < getNRigidBodies(); ++i) {
+    for (std::size_t i = 0; i < getNRigidBodies(); ++i) {
       RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
       nrigidAtoms += rbStamp->getNMembers();
     }
@@ -199,7 +199,7 @@ namespace OpenMD {
     std::ostringstream oss;
     //make sure index is not out of range
     int natoms = getNAtoms();
-    for(int i = 0; i < getNBonds(); ++i) {
+    for(std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       if (bondStamp->getA() > natoms-1 ||  bondStamp->getA() < 0 || 
           bondStamp->getB() > natoms-1 || bondStamp->getB() < 0 || 
@@ -213,7 +213,7 @@ namespace OpenMD {
     
     //make sure bonds are unique
     std::set<std::pair<int, int> > allBonds;
-    for(int i = 0; i < getNBonds(); ++i) {
+    for(std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp= getBondStamp(i);        
       std::pair<int, int> bondPair(bondStamp->getA(), bondStamp->getB());
       //make sure bondTuple.first is always less than or equal to
@@ -234,7 +234,7 @@ namespace OpenMD {
     }
     
     //make sure atoms belong to same rigidbody do not bond to each other
-    for(int i = 0; i < getNBonds(); ++i) {
+    for(std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       if (atom2Rigidbody[bondStamp->getA()] == atom2Rigidbody[bondStamp->getB()]) {
         
@@ -249,7 +249,7 @@ namespace OpenMD {
   
   void MoleculeStamp::checkBends() {
     std::ostringstream oss;
-    for(int i = 0; i < getNBends(); ++i) {
+    for(std::size_t i = 0; i < getNBends(); ++i) {
       BendStamp* bendStamp = getBendStamp(i);
       std::vector<int> bendAtoms =  bendStamp->getMembers();
       std::vector<int>::iterator j =std::find_if(bendAtoms.begin(), 
@@ -281,7 +281,7 @@ namespace OpenMD {
             ": ghostVectorSouce is missing\n";
           throw OpenMDException(oss.str());
         }else{
-          int ghostIndex = bendStamp->getGhostVectorSource();
+	  std::size_t ghostIndex = bendStamp->getGhostVectorSource();
           if (ghostIndex < getNAtoms()) {
             if (std::find(bendAtoms.begin(), bendAtoms.end(), 
                           ghostIndex) == bendAtoms.end()) {
@@ -309,7 +309,7 @@ namespace OpenMD {
       }
     }
     
-    for(int i = 0; i < getNBends(); ++i) {
+    for(std::size_t i = 0; i < getNBends(); ++i) {
       BendStamp* bendStamp = getBendStamp(i);
       std::vector<int> bendAtoms =  bendStamp->getMembers();
       std::vector<int> rigidSet(getNRigidBodies(), 0);
@@ -330,7 +330,7 @@ namespace OpenMD {
     
     std::set<IntTuple3> allBends;
     std::set<IntTuple3>::iterator iter;
-    for(int i = 0; i < getNBends(); ++i) {
+    for(std::size_t i = 0; i < getNBends(); ++i) {
       BendStamp* bendStamp= getBendStamp(i);
       std::vector<int> bend = bendStamp->getMembers();
       if (bend.size() == 2) {
@@ -373,7 +373,7 @@ namespace OpenMD {
       }
     }
     
-    for (int i = 0; i < getNBonds(); ++i) {
+    for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       int a = bondStamp->getA();
       int b = bondStamp->getB();
@@ -423,7 +423,7 @@ namespace OpenMD {
   
   void MoleculeStamp::checkTorsions() {
     std::ostringstream oss;
-    for(int i = 0; i < getNTorsions(); ++i) {
+    for(std::size_t i = 0; i < getNTorsions(); ++i) {
       TorsionStamp* torsionStamp = getTorsionStamp(i);
       std::vector<int> torsionAtoms =  torsionStamp ->getMembers();
       std::vector<int>::iterator j =std::find_if(torsionAtoms.begin(), 
@@ -446,7 +446,7 @@ namespace OpenMD {
       }        
     }
     
-    for(int i = 0; i < getNTorsions(); ++i) {
+    for(std::size_t i = 0; i < getNTorsions(); ++i) {
       TorsionStamp* torsionStamp = getTorsionStamp(i);
       std::vector<int> torsionAtoms =  torsionStamp->getMembers();
       std::vector<int> rigidSet(getNRigidBodies(), 0);
@@ -466,7 +466,7 @@ namespace OpenMD {
     
     std::set<IntTuple4> allTorsions;
     std::set<IntTuple4>::iterator iter;
-    for(int i = 0; i < getNTorsions(); ++i) {
+    for(std::size_t i = 0; i < getNTorsions(); ++i) {
       TorsionStamp* torsionStamp= getTorsionStamp(i);
       std::vector<int> torsion = torsionStamp->getMembers();
       if (torsion.size() == 3) {
@@ -494,7 +494,7 @@ namespace OpenMD {
       }
     }
     
-    for (int i = 0; i < getNBonds(); ++i) {
+    for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       int b = bondStamp->getA();
       int c = bondStamp->getB();
@@ -540,7 +540,7 @@ namespace OpenMD {
     // first we automatically find the other three atoms that 
     // are satellites of an inversion center:
 
-    for(int i = 0; i < getNInversions(); ++i) {
+    for(std::size_t i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp = getInversionStamp(i);
       int center = inversionStamp->getCenter();
       std::vector<int> satellites;
@@ -549,7 +549,7 @@ namespace OpenMD {
       // so, don't add the satellites as they are already there.
 
       if (inversionStamp->getNSatellites() != 3) {        
-        for (int j = 0; j < getNBonds(); ++j) {
+        for (std::size_t j = 0; j < getNBonds(); ++j) {
           BondStamp* bondStamp = getBondStamp(j);
           int a = bondStamp->getA();
           int b = bondStamp->getB();
@@ -576,7 +576,7 @@ namespace OpenMD {
     
     // then we do some sanity checking on the inversions:
     
-    for(int i = 0; i < getNInversions(); ++i) {
+    for(std::size_t i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp = getInversionStamp(i);
 
       std::vector<int> inversionAtoms =  inversionStamp->getSatellites();
@@ -607,7 +607,7 @@ namespace OpenMD {
     
 
 
-    for(int i = 0; i < getNInversions(); ++i) {
+    for(std::size_t i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp = getInversionStamp(i);
       std::vector<int> inversionAtoms =  inversionStamp->getSatellites();
       inversionAtoms.push_back(inversionStamp->getCenter());
@@ -618,9 +618,11 @@ namespace OpenMD {
         if (rigidbodyIndex >= 0) {
           ++rigidSet[rigidbodyIndex];
           if (rigidSet[rigidbodyIndex] > 3) {
-            oss << "Error in Molecule " << getName() << ": inversion centered on atom " << 
-              inversionStamp->getCenter() << " has four atoms that belong to same rigidbody " << 
-              rigidbodyIndex << "\n";  
+            oss << "Error in Molecule " << getName() 
+		<< ": inversion centered on atom " 
+		<< inversionStamp->getCenter()
+		<< " has four atoms that belong to same rigidbody " 
+		<< rigidbodyIndex << "\n";  
             throw OpenMDException(oss.str());
           }
         }
@@ -629,7 +631,7 @@ namespace OpenMD {
 
     std::set<IntTuple4> allInversions;
     std::set<IntTuple4>::iterator iter;
-    for(int i = 0; i < getNInversions(); ++i) {
+    for(std::size_t i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp= getInversionStamp(i);
       int cent = inversionStamp->getCenter();
       std::vector<int> inversion = inversionStamp->getSatellites();
@@ -668,7 +670,7 @@ namespace OpenMD {
     // exactly three bonds to it.  Not all inversion centers have
     // potentials associated with them.    
     
-    for (int i = 0; i < getNAtoms(); ++i) {
+    for (std::size_t i = 0; i < getNAtoms(); ++i) {
       AtomStamp* ai = getAtomStamp(i);
       if (ai->getBondCount() == 3) {
         AtomStamp::AtomIter ai2;
@@ -720,7 +722,7 @@ namespace OpenMD {
       throw OpenMDException(oss.str());
     }
     
-    for (int i = 0; i < getNRigidBodies(); ++i) {
+    for (std::size_t i = 0; i < getNRigidBodies(); ++i) {
       RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
       std::vector<int> rigidAtoms =  rbStamp ->getMembers();
       std::vector<int>::iterator j =std::find_if(rigidAtoms.begin(), 
@@ -743,7 +745,7 @@ namespace OpenMD {
       freeAtoms_.push_back( (*ai)->getIndex() );
     }
 
-    for(int i = 0; i < getNCutoffGroups(); ++i) {
+    for(std::size_t i = 0; i < getNCutoffGroups(); ++i) {
       CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
       std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
       std::vector<int>::iterator j =std::find_if(cutoffGroupAtoms.begin(), 
@@ -786,7 +788,7 @@ namespace OpenMD {
     std::ostringstream oss;
     //make sure index is not out of range
     int natoms = getNAtoms();
-    for(int i = 0; i < getNConstraints(); ++i) {
+    for(std::size_t i = 0; i < getNConstraints(); ++i) {
       ConstraintStamp* constraintStamp = getConstraintStamp(i);
       if (constraintStamp->getA() > natoms-1 ||  constraintStamp->getA() < 0 || 
           constraintStamp->getB() > natoms-1 || constraintStamp->getB() < 0 || 
@@ -801,7 +803,7 @@ namespace OpenMD {
     
     //make sure constraints are unique
     std::set<std::pair<int, int> > allConstraints;
-    for(int i = 0; i < getNConstraints(); ++i) {
+    for(std::size_t i = 0; i < getNConstraints(); ++i) {
       ConstraintStamp* constraintStamp= getConstraintStamp(i);        
       std::pair<int, int> constraintPair(constraintStamp->getA(), 
                                          constraintStamp->getB());
@@ -824,7 +826,7 @@ namespace OpenMD {
     
     // make sure atoms belong to same rigidbody are not constrained to
     // each other
-    for(int i = 0; i < getNConstraints(); ++i) {
+    for(std::size_t i = 0; i < getNConstraints(); ++i) {
       ConstraintStamp* constraintStamp = getConstraintStamp(i);
       if (atom2Rigidbody[constraintStamp->getA()] == atom2Rigidbody[constraintStamp->getB()]) {
         
@@ -840,7 +842,7 @@ namespace OpenMD {
   
   void MoleculeStamp::fillBondInfo() {
     
-    for (int i = 0; i < getNBonds(); ++i) {
+    for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       int a = bondStamp->getA();
       int b = bondStamp->getB();
