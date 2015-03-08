@@ -119,8 +119,8 @@ int main(int argc, char* argv[]){
       "  | [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).              |\n"<<
       "  | [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). |\n"<<
       "  | [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                   |\n"<<
-      "  | [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141 134109 (2014).     |\n"<<
-      "  | [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141 134110 (2014).     |\n"<<
+      "  | [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).    |\n"<<
+      "  | [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).    |\n"<<
       "  +--------------------------------------------------------------------------+\n"<<
       "\n";
     
