@@ -199,6 +199,8 @@ namespace OpenMD {
     if (simParams->getRNEMDParameters()->getUseRNEMD()) {
       rnemd_->writeOutputFile();
     }
+    progressBar->setStatus(runTime, runTime);
+    progressBar->update();
  
     delete dumpWriter;
     delete statWriter;
