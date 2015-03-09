@@ -39,12 +39,6 @@ GNU General Public License for more details.
 #include "utils/simError.h"
 #include "io/ifstrstream.hpp"
 
-#ifdef _MSC_VER
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
-#endif
-
-
 #ifdef WIN32
 #define FILE_SEP_CHAR "\\"
 #else

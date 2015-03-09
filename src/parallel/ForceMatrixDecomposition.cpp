@@ -1508,9 +1508,9 @@ namespace OpenMD {
         }
         
         // find xyz-indices of cell that cutoffGroup is in.
-        whichCell.x() = nCells_.x() * scaled.x();
-        whichCell.y() = nCells_.y() * scaled.y();
-        whichCell.z() = nCells_.z() * scaled.z();
+        whichCell.x() = int(nCells_.x() * scaled.x());
+        whichCell.y() = int(nCells_.y() * scaled.y());
+        whichCell.z() = int(nCells_.z() * scaled.z());
         
         for (vector<Vector3i>::iterator os = cellOffsets_.begin();
              os != cellOffsets_.end(); ++os) {

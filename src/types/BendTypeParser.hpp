@@ -47,7 +47,6 @@
 #include <string>
 #include "types/BendType.hpp"
 
-
 namespace OpenMD {
 
   /**

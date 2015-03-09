@@ -50,7 +50,6 @@
 #ifndef UTILS_NUMERICCONSTANT_HPP
 #define UTILS_NUMERICCONSTANT_HPP
 #include "config.h"
-
 #include <cmath>
 #include <limits>
 

@@ -40,9 +40,9 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-
-#include "types/TorsionTypeParser.hpp"
+// MSVC has an odd bug that requires NumericConstant to come first:
 #include "utils/NumericConstant.hpp" 
+#include "types/TorsionTypeParser.hpp"
 #include "types/CubicTorsionType.hpp"
 #include "types/QuarticTorsionType.hpp"
 #include "types/PolynomialTorsionType.hpp"

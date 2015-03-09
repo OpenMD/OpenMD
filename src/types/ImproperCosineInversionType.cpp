@@ -40,8 +40,8 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include "config.h"
-#include <algorithm>
 #include <cmath> 
+#include <algorithm>
 #include "types/ImproperCosineInversionType.hpp"
 #include "utils/NumericConstant.hpp"
 #include "math/ChebyshevT.hpp"

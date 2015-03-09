@@ -141,7 +141,7 @@ namespace OpenMD {
         RealType coupling = tokenizer.nextTokenAsDouble();
         nTokens -= 2;
         int nStates = nTokens / 2;
-        RealType charge;
+        int charge;
         RealType ionizationEnergy;
         for (int i = 0; i < nStates; ++i) {
           charge = tokenizer.nextTokenAsInt();
