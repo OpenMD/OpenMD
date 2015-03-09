@@ -39,9 +39,9 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-
-#include "types/BendTypeParser.hpp"
+// MSVC has an odd bug that requires NumericConstant to come first:
 #include "utils/NumericConstant.hpp" 
+#include "types/BendTypeParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "types/HarmonicBendType.hpp"
 #include "types/UreyBradleyBendType.hpp"

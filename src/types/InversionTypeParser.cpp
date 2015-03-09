@@ -40,8 +40,9 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "types/InversionTypeParser.hpp"
+// MSVC has an odd bug that requires NumericConstant to come first:
 #include "utils/NumericConstant.hpp"
+#include "types/InversionTypeParser.hpp"
 #include "types/ImproperCosineInversionType.hpp"
 #include "types/HarmonicInversionType.hpp"
 #include "types/AmberImproperTorsionType.hpp"

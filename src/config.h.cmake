@@ -14,6 +14,9 @@
 
 #ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#pragma warning( disable : 4996 )
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
 #endif
 
 /* Is defined if the qhull library is available. */
