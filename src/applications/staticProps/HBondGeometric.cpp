@@ -112,7 +112,6 @@ namespace OpenMD {
     Atom* hba2;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    Molecule::IntegrableObjectIterator ioi;
     Vector3d dPos;
     Vector3d aPos;
     Vector3d hPos;
