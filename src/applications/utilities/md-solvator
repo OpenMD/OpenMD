@@ -1,9 +1,11 @@
 #!@PYTHON_EXECUTABLE@
 """MD Solvator
 
-Opens two md files, one with a solute structure and one with a solvent structure.
-Deletes any solvent molecules that overlap with solute molecules and produces a md file.
-The md file is bare and must be edited to run properly in OpenMD.
+Opens two md files, one with a solute structure and one with a solvent
+structure.  Deletes any solvent molecules that overlap with solute
+molecules and produces a new combined md file.  The md file must be
+edited to run properly in OpenMD.  Note that the two boxes must have
+identical box geometries (specified on the Hmat line).
 
 Usage: md-solvator
 
@@ -13,11 +15,13 @@ Options:
   -v,  --solvent=...       use specified meta-data (.md) file as the solvent
   -r,  --rcut=...          specify the cutoff radius for deleting solvent
   -o,  --output-file=...   use specified output (.md) file
-  -n,  --nSoluteAtoms=...  Number of atoms in solute molecule, default is 1 atom.
-  -p,  --nSolventAtoms=... Number of atoms in solvent molecule, default is 1 atom. 
+  -n,  --nSoluteAtoms=...  Number of atoms in solute molecule,
+                           default is 1 atom.
+  -p,  --nSolventAtoms=... Number of atoms in solvent molecule,
+                           default is 1 atom. 
 
 Example:
-   md-solvator -u frosty.md -v tepid.md --nSoluteAtoms=3 --nSolventAtoms=3 -r 4.0 -o lukewarm.md
+   md-solvator -u solute.md -v solvent.md -n 3 -p 3 -r 4.0 -o combined.md
 
 """
 
@@ -89,7 +93,7 @@ def readFile1(mdFileName):
     mdFile.seek(0)
     line = mdFile.readline()
 
-    print "reading MetaData"
+    print "reading solute MetaData"
     while 1:
         if '<MetaData>' in line:
             while 2:
@@ -108,13 +112,13 @@ def readFile1(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-    print "reading Snapshot"
+    print "reading solute Snapshot"
     line = mdFile.readline()
     while 1:
         if '<Snapshot>' in line:
             line = mdFile.readline()
             while 1:
-                print "reading FrameData"
+                print "reading solute FrameData"
                 if '<FrameData>' in line:
                     while 2:
                         frameData1.append(line)
@@ -132,11 +136,9 @@ def readFile1(mdFileName):
                             Hmat1.append([Hxx, Hxy, Hxz])
                             Hmat1.append([Hyx, Hyy, Hyz])
                             Hmat1.append([Hzx, Hzy, Hzz])
-                            print Hmat1
                             BoxInv1.append(1.0/Hxx)
                             BoxInv1.append(1.0/Hyy)
                             BoxInv1.append(1.0/Hzz)
-                            print BoxInv1
                         line = mdFile.readline()
                         if '</FrameData>' in line:
                             frameData1.append(line)
@@ -197,7 +199,7 @@ def readFile2(mdFileName):
         
     mdFile.seek(0)
     line = mdFile.readline()
-    print "reading MetaData"
+    print "reading solvent MetaData"
     while 1:
         if '<MetaData>' in line:                            
             while 2:
@@ -213,13 +215,13 @@ def readFile2(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-    print "reading Snapshot"
+    print "reading solvent Snapshot"
     line = mdFile.readline()
     while 1:
         if '<Snapshot>' in line:
             line = mdFile.readline()
             while 1:
-                print "reading FrameData"
+                print "reading solvent FrameData"
                 if '<FrameData>' in line:
                     while 2:
                         frameData2.append(line)
@@ -237,11 +239,9 @@ def readFile2(mdFileName):
                             Hmat2.append([Hxx, Hxy, Hxz])
                             Hmat2.append([Hyx, Hyy, Hyz])
                             Hmat2.append([Hzx, Hzy, Hzz])
-                            print Hmat2
                             BoxInv2.append(1.0/Hxx)
                             BoxInv2.append(1.0/Hyy)
                             BoxInv2.append(1.0/Hzz)
-                            print BoxInv2
                         line = mdFile.readline()
                         if '</FrameData>' in line:
                             frameData2.append(line)
@@ -329,6 +329,25 @@ def writeFile(outputFileName):
     outputFile.write("  </Snapshot>\n")
     outputFile.write("</OpenMD>\n")
     outputFile.close()
+
+def checkBoxes():
+    boxTolerance = 1.0e-3
+    maxDiff = 0.0
+    for i in range(3):
+        for j in range(3):
+            diff = math.fabs( Hmat1[i][j] - Hmat2[i][j])
+            if (diff > maxDiff):
+               maxDiff = diff
+    if (maxDiff > boxTolerance):
+       print "The solute and solvent boxes have different geometries:"
+       print "                     Solute           |                   Solvent"
+       print " -------------------------------------|------------------------------------"
+       for i in range(3):
+           print( "|  %10.4g %10.4g %10.4g   |  %10.4g %10.4g %10.4g  |" % (Hmat1[i][0], Hmat1[i][1], Hmat1[i][2], Hmat2[i][0], Hmat2[i][1], Hmat2[i][2]))
+
+       print " -------------------------------------|------------------------------------"
+       sys.exit()
+
     
 def roundMe(x):
     if (x >= 0.0):
@@ -376,7 +395,6 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
 
     rcut2 = rcut*rcut
     nextMol = 0
-    print len(indices1),len(indices2)
     for i in range(0,len(indices2),nSolventAtoms):
         keepThisMolecule = 1
         for atom1 in range (i, (i+nSolventAtoms)):
@@ -486,6 +504,7 @@ def main(argv):
 
     readFile1(mdFileName1)
     readFile2(mdFileName2)
+    checkBoxes()
     removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms)
     writeFile(outputFileName)
 
