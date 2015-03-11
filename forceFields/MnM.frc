@@ -193,8 +193,6 @@ EP_TIP5P 	-0.241
 end ChargeAtomTypes
 
 begin MultipoleAtomTypes
-// OpenMD currently only supports charge-charge, charge-dipole, 
-// dipole-dipole, and charge-quadrupole interactions.
 // Dipoles may be either traditional point-dipoles or split-dipoles.
 // possible formats for a multipolar atom type are:
 //
