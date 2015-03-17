@@ -52,6 +52,7 @@ namespace OpenMD {
   public:
     ContactAngle2(SimInfo* info, const std::string& filename, 
                   const std::string& sele, RealType solidZ,
+                  RealType centroidX, RealType centroidY,
                   RealType threshDens, RealType bufferLength,
                   int nrbins, int nZBins);
 
@@ -60,6 +61,8 @@ namespace OpenMD {
   private:
 
     RealType solidZ_;
+    RealType centroidX_;
+    RealType centroidY_;
     RealType threshDens_;
     RealType bufferLength_;
     std::size_t nRBins_;
