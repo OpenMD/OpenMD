@@ -15,6 +15,8 @@ option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection scrip
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string  typestr="selection script"      no
 option  "nbins"         b       "number of bins (general purpose)"                              int     default="100"           no
 option  "nbins_z"       -       "number of bins in z axis"                              int     default="100"           no
+option  "centroidX"     x       "Location of droplet centroid in x" double no
+option  "centroidY"     y       "Location of droplet centroid in y" double no
 option  "referenceZ"    z       "Reference z-height of solid surface" double no
 option  "dropletR"      r       "Droplet radius in angstroms"  double no
 option  "threshDens"    -       "Threshold Density in g/cm^3"  double no

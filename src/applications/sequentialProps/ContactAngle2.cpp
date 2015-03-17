@@ -54,12 +54,14 @@ namespace OpenMD {
   
   ContactAngle2::ContactAngle2(SimInfo* info, const std::string& filename, 
                                const std::string& sele, RealType solidZ,
+                               RealType centroidX, RealType centroidY,
                                RealType threshDens, RealType bufferLength,
                                int nrbins, int nzbins)
-  : SequentialAnalyzer(info, filename), solidZ_(solidZ), 
-    threshDens_(threshDens), bufferLength_(bufferLength), nRBins_(nrbins), 
-    nZBins_(nzbins), selectionScript_(sele), seleMan_(info), 
-    evaluator_(info) {
+    : SequentialAnalyzer(info, filename), solidZ_(solidZ),
+      centroidX_(centroidX), centroidY_(centroidY),
+      threshDens_(threshDens), bufferLength_(bufferLength), nRBins_(nrbins), 
+      nZBins_(nzbins), selectionScript_(sele), seleMan_(info), 
+      evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".ca2");
     
@@ -95,18 +97,20 @@ namespace OpenMD {
     }
     
 
-    RealType mtot = 0.0;
-    Vector3d com(V3Zero);
-    RealType mass;
+    // RealType mtot = 0.0;
+    // Vector3d com(V3Zero);
+    // RealType mass;
     
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
-      mass = sd->getMass();
-      mtot += mass;
-      com += sd->getPos() * mass;
-    }
+    // for (sd = seleMan_.beginSelected(i); sd != NULL;
+    //      sd = seleMan_.nextSelected(i)) {      
+    //   mass = sd->getMass();
+    //   mtot += mass;
+    //   com += sd->getPos() * mass;
+    // }
 
-    com /= mtot;
+    // com /= mtot;
+
+    Vector3d com(centroidX_, centroidY_, solidZ_);
 
     // now that we have the centroid, we can make cylindrical density maps
     Vector3d pos;

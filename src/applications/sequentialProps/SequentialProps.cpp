@@ -143,6 +143,26 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+    RealType centroidX(0.0);
+    if (args_info.centroidX_given)
+        centroidX = args_info.centroidX_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--centroidX must be set if --ca2 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    RealType centroidY(0.0);
+    if (args_info.centroidY_given)
+        centroidY = args_info.centroidY_arg;
+    else {
+      sprintf( painCave.errMsg,
+               "--centroidY must be set if --ca2 is used\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
     RealType threshDens(0.0);
     if (args_info.threshDens_given)
         threshDens = args_info.threshDens_arg;
@@ -164,7 +184,7 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ,
+    analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ, centroidX, centroidY,
                                  threshDens, bufferLength, args_info.nbins_arg,
                                  args_info.nbins_z_arg);
   }

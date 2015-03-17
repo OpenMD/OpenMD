@@ -57,6 +57,12 @@ struct gengetopt_args_info
   int nbins_z_arg;	/**< @brief number of bins in z axis (default='100').  */
   char * nbins_z_orig;	/**< @brief number of bins in z axis original value given at command line.  */
   const char *nbins_z_help; /**< @brief number of bins in z axis help description.  */
+  double centroidX_arg;	/**< @brief Location of droplet centroid in x.  */
+  char * centroidX_orig;	/**< @brief Location of droplet centroid in x original value given at command line.  */
+  const char *centroidX_help; /**< @brief Location of droplet centroid in x help description.  */
+  double centroidY_arg;	/**< @brief Location of droplet centroid in y.  */
+  char * centroidY_orig;	/**< @brief Location of droplet centroid in y original value given at command line.  */
+  const char *centroidY_help; /**< @brief Location of droplet centroid in y help description.  */
   double referenceZ_arg;	/**< @brief Reference z-height of solid surface.  */
   char * referenceZ_orig;	/**< @brief Reference z-height of solid surface original value given at command line.  */
   const char *referenceZ_help; /**< @brief Reference z-height of solid surface help description.  */
@@ -81,6 +87,8 @@ struct gengetopt_args_info
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
+  unsigned int centroidX_given ;	/**< @brief Whether centroidX was given.  */
+  unsigned int centroidY_given ;	/**< @brief Whether centroidY was given.  */
   unsigned int referenceZ_given ;	/**< @brief Whether referenceZ was given.  */
   unsigned int dropletR_given ;	/**< @brief Whether dropletR was given.  */
   unsigned int threshDens_given ;	/**< @brief Whether threshDens was given.  */
