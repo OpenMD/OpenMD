@@ -4,8 +4,8 @@
 #include "utils/Revision.hpp"
 
 extern "C" { 
-const char g_REVISION[] = SVN_REV;
+/* for use with Subversion: */
+/* const char g_REVISION[] = SVN_REV; */
 
-/* for when we convert to git: */
-/* const char g_REVISION[] = GIT_SHA1; */
+const char g_REVISION[] = GIT_SHA1;
 }
