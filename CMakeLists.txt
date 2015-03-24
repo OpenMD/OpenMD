@@ -2,7 +2,9 @@
 project(OpenMD CXX)
 cmake_minimum_required(VERSION 2.8.5)
 
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+# SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -44,7 +46,7 @@ endif ( MSVC )
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
-set (VERSION_MINOR "3")
+set (VERSION_MINOR "4")
 set (VERSION_TINY "0")  
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -78,20 +80,34 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   "Single directory for all static libraries."
   )
 
-FIND_PACKAGE(Subversion)
-IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  MESSAGE(STATUS "Current revision is ${Project_WC_REVISION}")
-  Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
-  SET(SVN_REV ${Project_WC_REVISION})
-  SET(GENERATELOGS "${PROJECT_SOURCE_DIR}/doc/svn2cl")
-  ADD_CUSTOM_TARGET(ChangeLog
-     COMMAND ${GENERATELOGS} "--group-by-day" "--include-rev"
-     "--linelen=78" "--output=${PROJECT_BINARY_DIR}/ChangeLog" "${PROJECT_SOURCE_DIR}"
-  )
-ELSE()
-  SET(SVN_REV Release)
-ENDIF()
+find_package(Git)
+if(GIT_FOUND) 
+  include(GetGitRevisionDescription)
+  get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+  MESSAGE(STATUS "Current revision is ${GIT_SHA1}")
+  macro(make_release_tarball targetname releasename)
+    add_custom_target(${targetname} COMMAND ${GIT_EXECUTABLE} archive --prefix="${releasename}/" --format=tar HEAD --output "${releasename}.tar")
+  endmacro()
+  make_release_tarball("openmd_release" "openmd-${VERSION_MAJOR}.${VERSION_MINOR}")
+else()
+  SET(GIT_SHA1 Release)
+endif()
+  
+
+#FIND_PACKAGE(Subversion)
+#IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
+  #Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+  #MESSAGE(STATUS "Current revision is ${Project_WC_REVISION}")
+  #Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
+  #SET(SVN_REV ${Project_WC_REVISION})
+  #SET(GENERATELOGS "${PROJECT_SOURCE_DIR}/doc/svn2cl")
+  #ADD_CUSTOM_TARGET(ChangeLog
+     #COMMAND ${GENERATELOGS} "--group-by-day" "--include-rev"
+     #"--linelen=78" "--output=${PROJECT_BINARY_DIR}/ChangeLog" "${PROJECT_SOURCE_DIR}"
+  #)
+#ELSE()
+  #SET(SVN_REV Release)
+#ENDIF()
 
 check_include_file_cxx(conio.h      HAVE_CONIO_H)
 check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
@@ -721,6 +737,7 @@ ENDIF(PYTHON_EXECUTABLE)
 set(PERL_FILES
 src/applications/utilities/solvator
 src/applications/utilities/waterBoxer
+doc/git2cl
 )
 
 IF(PERL_FOUND)
