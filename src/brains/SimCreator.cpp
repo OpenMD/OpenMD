@@ -258,18 +258,17 @@ namespace OpenMD {
 
     // Create a string for embedding the version information in the MetaData
     std::string version;
-    version.assign("## Last run using OpenMD Version: ");
+    version.assign("## Last run using OpenMD version: ");
     version.append(OPENMD_VERSION_MAJOR);
     version.append(".");
     version.append(OPENMD_VERSION_MINOR);
+    version.append(",");
 
-    std::string svnrev(g_REVISION, strnlen(g_REVISION, 20));
-    //convert a macro from compiler to a string in c++
-    // STR_DEFINE(svnrev, SVN_REV );
-    version.append(" Revision: ");
+    std::string rev(g_REVISION, strnlen(g_REVISION, 40));
+    version.append(" revision: ");
     // If there's no SVN revision, just call this the RELEASE revision.
-    if (!svnrev.empty()) {
-      version.append(svnrev);
+    if (!rev.empty()) {
+      version.append(rev);
     } else {
       version.append("RELEASE");
     }
