@@ -92,8 +92,8 @@ EOF
 %doc %{_defaultdocdir}/%{name}/LICENSE
 %doc %{_defaultdocdir}/%{name}/README
 
-%{_datadir}/%{name}-%{version}/samples/*
-%{_datadir}/%{name}-%{version}/forceFields/*
+%{_datadir}/%{name}/samples/*
+%{_datadir}/%{name}/forceFields/*
 
 %files devel
 %defattr(644,root,root,755)
