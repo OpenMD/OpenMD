@@ -206,6 +206,13 @@ configure_file(
 
 include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/src")
 
+configure_file (
+  "${PROJECT_SOURCE_DIR}/cmake/openmd.spec.in"
+  "${PROJECT_SOURCE_DIR}/openmd.spec"
+  @ONLY
+  )
+
+
 #Add executables for build
 set (PROGRAMS 
 openmd
