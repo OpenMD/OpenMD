@@ -7,10 +7,10 @@ License:	BSD
 URL:		http://openmd.org
 Source0:	http://openmd.org/releases/openmd-%{version}.tar.gz
 
-BuildRequires:	subversion, cmake, perl
+BuildRequires:	git, cmake, perl, numpy
 BuildRequires:	fftw-devel, openbabel-devel, openmpi-devel
 BuildRequires:	qhull-devel, zlib-devel
-BuildRequires:	eigen3-devel doxygen
+BuildRequires:	doxygen
 #Requires:	
 
 %description
