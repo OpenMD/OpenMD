@@ -1,0 +1,110 @@
+Name:		openmd	
+Version:	@VERSION_MAJOR@.@VERSION_MINOR@
+Release:	0%{?dist}
+Summary:	OpenMD is an open source molecular dynamics engine
+Group:		System Environment/Libraries
+License:	BSD
+URL:		http://openmd.org
+Source0:	http://openmd.org/releases/openmd-%{version}.tar.gz
+
+BuildRequires:	subversion, cmake, perl
+BuildRequires:	fftw-devel, openbabel-devel, openmpi-devel
+BuildRequires:	qhull-devel, zlib-devel
+BuildRequires:	eigen3-devel doxygen
+#Requires:	
+
+%description
+OpenMD is an open source molecular dynamics engine which is 
+capable of efficiently simulating liquids, proteins, nanoparticles, interfaces, 
+and other complex systems using atom types with orientational degrees of 
+freedom (e.g. “sticky” atoms, point dipoles, and coarse-grained assemblies). 
+Proteins, zeolites, lipids, transition metals (bulk, flat interfaces, and 
+nanoparticles) have all been simulated using force fields included with the 
+code. OpenMD works on parallel computers using the Message Passing 
+Interface (MPI), and comes with a number of analysis and utility programs 
+that are easy to use and modify. An OpenMD simulation is specified using 
+a very simple meta-data language that is easy to learn.
+
+%package devel
+Summary:        Header files for openmd
+Group:          Development/Libraries
+Requires:       %{name} = %{version}-%{release}
+
+%description devel
+Header files for openmd.
+
+
+%prep
+%setup -q
+
+%build
+if [ -f /etc/modulefiles/mpi/openmpi-x86_64 ];then
+    module add mpi/openmpi-x86_64
+else
+    module add openmpi-x86_64
+fi
+export CXX=$MPI_BIN/mpic++
+%cmake .
+make %{?_smp_mflags}
+
+%install
+#rm -rf $rpm_build_root
+#make install destdir=$rpm_build_root
+rm -rf %{buildroot}
+make install DESTDIR=%{buildroot}
+mv %{buildroot}/usr/lib %{buildroot}/usr/lib64
+mkdir -p %{buildroot}/usr/share/doc/%{name}-%{version}
+mkdir -p %{buildroot}/usr/share/%{name}-%{version}
+mv %{buildroot}/usr/doc/OpenMDmanual.pdf %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/AUTHORS %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/INSTALL %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/LICENSE %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/README %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/samples %{buildroot}/usr/share/%{name}/samples
+mv %{buildroot}/usr/forceFields %{buildroot}/usr/share/%{name}/forceFields
+mkdir -p %{buildroot}%{_sysconfdir}/profile.d/
+
+# create headers for openmd-devel
+for d in $(find src -name "*.h*" -exec dirname '{}' \; | sort | uniq -c --check-chars 40 | awk '{print $2}'); do mkdir -p %{buildroot}/usr/${d/src/include\/openmd\/}; cp -f $d/*.h* %{buildroot}/usr/${d/src/include\/openmd} ;done
+cp -f config.h %{buildroot}/usr/include/openmd/
+rm -f %{buildroot}/usr/include/openmd/config.h.cmake
+
+cat <<'EOF' > %{buildroot}%{_sysconfdir}/profile.d/openmd.sh
+#!/bin/bash
+
+export FORCE_PARAM_PATH=%{_datadir}/%{name}/forceFields/
+
+EOF
+
+#%check
+#ctest
+
+%files
+%{_bindir}/*
+%{_libdir}/*
+
+%{_sysconfdir}/profile.d/openmd.sh
+
+#%docdir %{_defaultdocdir}/%{name}-%{version}
+%doc %{_defaultdocdir}/%{name}/OpenMDmanual.pdf
+%doc %{_defaultdocdir}/%{name}/AUTHORS
+%doc %{_defaultdocdir}/%{name}/INSTALL
+%doc %{_defaultdocdir}/%{name}/LICENSE
+%doc %{_defaultdocdir}/%{name}/README
+
+%{_datadir}/%{name}-%{version}/samples/*
+%{_datadir}/%{name}-%{version}/forceFields/*
+
+%files devel
+%defattr(644,root,root,755)
+%{_includedir}/
+
+
+%changelog
+* Wed Mar 25 2015 Martin Vala <mvala@saske.sk> - 2.3-3
+- Fixed FORCE_PARAM_PATH
+
+* Wed Mar 25 2015 Martin Vala <mvala@saske.sk> - 2.3-2
+- OpenMD 2.3 release
+
+
