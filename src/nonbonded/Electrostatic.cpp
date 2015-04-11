@@ -1458,7 +1458,7 @@ namespace OpenMD {
                                
                 if (data.is_Charge) {
                   C = data.fixedCharge;
-                  if (atom->isFluctuatingCharge()) C += atom->getFlucQPos();
+                  if (data.is_Fluctuating) C += atom->getFlucQPos();
                   ckc[i] = C * ckr[i];
                   cks[i] = C * skr[i];
                 }
@@ -1537,7 +1537,7 @@ namespace OpenMD {
                
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
 
-                if (atom->isFluctuatingCharge()) { 
+                if (data.is_Fluctuating) { 
                   atom->addFlucQFrc( - 2.0 * rvol * qtrq2 );
                 }
                   

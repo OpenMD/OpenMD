@@ -9,7 +9,7 @@ a (lattice constant)  = 5.65 Angstroms
 q^2 / (4 pi e0 a)     = 58.77233   kcal / mol
 M q^2 / (4 pi e0 a)   = 102.708173 kcal / mol
 
-The file NaCl.md contains 8000 ions, so the total electrostatic energy
+The file NaCl.omd contains 8000 ions, so the total electrostatic energy
 of the perfect crystal in this file should be:
 
 V_electrostatic = -821665.38  kcal / mol

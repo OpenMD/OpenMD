@@ -60,7 +60,7 @@ namespace OpenMD {
     uniformField = (a, b, c);
   \endcode 
     
-    in the .md file where the values of a, b, and c are in units of
+    in the .omd file where the values of a, b, and c are in units of
     \f$ V / \AA \f$
 
     The electrostatic potential corresponding to this uniform field is

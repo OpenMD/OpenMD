@@ -11,7 +11,7 @@ Usage: affineScale
 
 Options:
   -h,  --help             show this help
-  -m,  --meta-data=...    use specified meta-data (.md, .eor) file
+  -m,  --meta-data=...    use specified meta-data (.omd, .eor) file
   -o,  --output-file=...  use specified output file
   -x,  --newX=...         scale the system to a new x dimension
   -y,  --newY=...         scale the system to a new y dimension
@@ -19,7 +19,7 @@ Options:
   -v,  --newV=...         scale the system to a new volume
 
 Example:
-  affineScale -m lipidSystem.md -o scaledSystem.md -v 77000.0
+  affineScale -m lipidSystem.omd -o scaledSystem.omd -v 77000.0
 
 """
 

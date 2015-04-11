@@ -5,9 +5,9 @@ import os
 import subprocess
 import logging
 
-fraw_list = []#List of all .md files found (even the includes).
-fmd_list = []#List of all config .md files that can be run (not the includes).
-fmd_base_list = []#List of the names of the .md files that can be run.
+fraw_list = []#List of all .omd files found (even the includes).
+fmd_list = []#List of all config .omd files that can be run (not the includes).
+fmd_base_list = []#List of the names of the .omd files that can be run.
 
 dir_cwd = ""#Current working directory.
 dir_openmd = ""#Absolute path for openmd
@@ -37,11 +37,11 @@ def setupDirectories():
 	os.environ["FORCE_PARAM_PATH"] = forcefld_path
 	
 """
-Function checks if the sample_file and validate_file (.md files) have the same
+Function checks if the sample_file and validate_file (.omd files) have the same
 statusTime = interval time for the stats file.
 @author Samuel Njoroge
-@param string sample_file - .md file that is being run.
-@param string validate_file - .md file the result is being compared to.
+@param string sample_file - .omd file that is being run.
+@param string validate_file - .omd file the result is being compared to.
 @return boolean
 """
 def validate_md_time(sample_file, validate_file):
@@ -106,9 +106,9 @@ def validate_md_time(sample_file, validate_file):
   return False
   
 """
-Function checks if an .md config file and not an include file.
+Function checks if an .omd config file and not an include file.
 @author Samuel Njoroge
-@param string file - .md file name
+@param string file - .omd file name
 @return boolean
 """
 def file_is_md(filename):
@@ -192,7 +192,7 @@ def compare(fExpected, fNew, epsilon = 0.00001, ignore_sign=False):
 	return False#diffs == 0
 	
 """
-Function scans the directory for .md config files which will be run for
+Function scans the directory for .omd config files which will be run for
 testing.
 @author Samuel Njoroge
 """
@@ -211,10 +211,10 @@ def scanForMdFiles():
 				paths.append(os.path.abspath(p + "/" + np))
 				
 	for f in fraw_list:
-		if (".md" in f) and (not ".svn" in f) and file_is_md(f):
+		if (".omd" in f) and (not ".svn" in f) and file_is_md(f):
 			fmd_list.append(f)
 			temp = os.path.basename(f)
-			temp = temp.replace(".md",'')
+			temp = temp.replace(".omd",'')
 			fmd_base_list.append(temp)
 		
 """

@@ -6,17 +6,16 @@ correct values are being computed.  The central atom in each
 cluster is a copper atom, so the proper way to run the tests would
 be a command like:
 
-  $(OPENMD_HOME)/bin/StaticProps --bo -i bcc.md --rcut=9 --sele1="select Cu"
+  $(OPENMD_HOME)/bin/StaticProps --bo -i bcc.omd --rcut=9 --sele1="select Cu"
 
 legend:
 
-  hcp.md = Hexagonal Close Packed structure
-  bcc.md = Body Centered Cubic structure
-  fcc.md = Face Centered Cubic structure
-  sc.md  = Simple Cubic structure
-  icosahedron.md  = Icosahedral cluster
-  surface_icosahedron.md = Half of a Icosahedral Cluster approximating a nanoparticle surface atom
-  tet.md  = Tetrahedral cluster
+  hcp.omd                 = Hexagonal Close Packed structure
+  bcc.omd                 = Body Centered Cubic structure
+  fcc.omd                 = Face Centered Cubic structure
+  sc.omd                  = Simple Cubic structure
+  icosahedron.omd         = Icosahedral cluster
+  surface_icosahedron.omd = Half of a Icosahedral Cluster approximating a nanoparticle surface atom
+  tet.omd                 = Tetrahedral cluster
 
-(Cu atoms are located at (0,0,0), and Au atoms
-surround Cu in the clusters.)
+(Cu atoms are located at (0,0,0), and Au atoms surround Cu in the clusters.)

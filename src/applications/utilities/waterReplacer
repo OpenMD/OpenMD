@@ -10,11 +10,11 @@ Usage: waterReplacer
 Options:
   -h, --help              show this help
   -x,                     use the specified input (.xyz) file
-  -o, --output-file=...   use specified output (.md) file
+  -o, --output-file=...   use specified output (.omd) file
 
 
 Example:
-   waterReplacer -x basal.xyz -o basal.md
+   waterReplacer -x basal.xyz -o basal.omd
 
 """
 

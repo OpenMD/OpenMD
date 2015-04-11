@@ -62,7 +62,7 @@ namespace OpenMD {
     uniformGradientDirection2 = (b1, b2, b3);
   \endcode 
     
-    in the .md file where the two direction vectors, \f$ \mathbf{a} \f$ 
+    in the .omd file where the two direction vectors, \f$ \mathbf{a} \f$ 
     and \f$ \mathbf{b} \f$ are unit vectors, and the value of \f$ g \f$ 
     is in units of \f$ V / \AA^2 \f$
 

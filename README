@@ -12,7 +12,7 @@ analysis and utility programs that are easy to use and modify. An
 OpenMD simulation is specified using a very simple meta-data language
 that is easy to learn.
 
-Simulations are started in OpenMD using a single Molecular Dynamics (.md) 
+Simulations are started in OpenMD using a single Molecular Dynamics (.omd) 
 file.  These files must start with the <OpenMD> tag and must have two 
 sections:
 

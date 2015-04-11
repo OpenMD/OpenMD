@@ -55,7 +55,7 @@ energies are:
 E here is an energy density, so it must be multiplied by the total
 volume of the box.
 
-For example, the A_sc_001.md sample has a 8000 dipoles (1 Debye each)
+For example, the A_sc_001.omd sample has a 8000 dipoles (1 Debye each)
 in a (40 angstrom)^3 box with a lattice spacing of 2 angstroms, so the
 resulting energy is:
 

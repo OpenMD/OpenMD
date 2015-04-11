@@ -10,11 +10,11 @@ Options:
   -h, --help              show this help
   -m, --meta-data=...     use specified meta-data (.md) file
   -c, --config-file=...   use specified configuration (.in, .eor, .dump) file
-  -o, --output-file=...   use specified output (.opmd) file
+  -o, --output-file=...   use specified output (.omd) file
 
 
 Example:
-   dumpConverter -m Ar.md -c Ar.dump -o Ar.opmd
+   dumpConverter -m Ar.md -c Ar.dump -o Ar.omd
 
 """
 

@@ -8,12 +8,12 @@ Usage: waterRotator
 
 Options:
   -h, --help              show this help
-  -m, --meta-data=...     use specified meta-data (.md) file
-  -o, --output-file=...   use specified output (.md) file
+  -m, --meta-data=...     use specified meta-data (.omd) file
+  -o, --output-file=...   use specified output (.omd) file
 
 
 Example:
-   waterRotator -m basal.md -o basal.new.md
+   waterRotator -m basal.omd -o basal.new.omd
 
 """
 

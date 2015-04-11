@@ -1,18 +1,18 @@
 #!@PYTHON_EXECUTABLE@
-"""MD File Splitter
+"""OMD File Splitter
 
-Splits MD file frames into seperate md files
+Splits MD file frames into seperate omd files
 
 Usage: mdSplit
 
 Options:
   -h, --help              show this help
-  -m, --meta-data=...     use specified meta-data (.md) file
+  -m, --meta-data=...     use specified meta-data (.omd) file
   -s, --split-frame=...   split every n frames
 
 
 Example:
-   mdSplit -m Ar.md 
+   mdSplit -m Ar.omd 
 
 """
 

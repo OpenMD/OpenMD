@@ -11,11 +11,11 @@ Options:
   -h, --help              show this help
   -x,                     use the specified packmol (.xyz) file
   -r, --rigid-body=...    use this xyz structure as the rigid body
-  -o, --output-file=...   use specified output (.md) file
+  -o, --output-file=...   use specified output (.omd) file
 
 
 Example:
-   pack2md -x tolueneBox.xyz -r singleToluene.xyz -o tolueneBox.md
+   pack2md -x tolueneBox.xyz -r singleToluene.xyz -o tolueneBox.omd
 
 """
 

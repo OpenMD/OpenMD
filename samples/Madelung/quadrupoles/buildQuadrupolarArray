@@ -24,7 +24,7 @@ if the dipoles are contained in a plane perpendicular to the dipole
 direction that passes through the dipole.
 
 Example:
-   buildQuadrupolarArray -l fcc -c 5 -n 3 -o FCC.md
+   buildQuadrupolarArray -l fcc -c 5 -n 3 -o FCC.omd
 
 """
 

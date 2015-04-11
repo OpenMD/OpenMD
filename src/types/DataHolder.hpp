@@ -75,7 +75,7 @@ namespace OpenMD {
       } else if (deprecatedKeywords_.find(keyword) != 
                  deprecatedKeywords_.end()){
         std::cout << keyword << 
-          " has been deprecated in OpenMD.  Please update your .md file.\n";
+          " has been deprecated in OpenMD.  Please update your .omd file.\n";
       } else {
         std::stringstream ss;
         ss << keyword << " is not a recognized keyword.\n";

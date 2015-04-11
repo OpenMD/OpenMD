@@ -96,7 +96,7 @@ int main(int argc, char *argv []) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .md file name was specified "
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
@@ -362,7 +362,7 @@ int main(int argc, char *argv []) {
   
   outputFileName = args_info.output_arg;
    
-  //creat new .md file on fly which corrects the number of molecule     
+  //creat new .omd file on fly which corrects the number of molecule     
   createMdFile(inputFileName, outputFileName, nMol);
   
   delete oldInfo;
@@ -449,7 +449,7 @@ void createMdFile(const std::string&oldMdFileName,
   const int MAXLEN = 65535;
   char buffer[MAXLEN];
   
-  //create new .md file based on old .md file
+  //create new .omd file based on old .omd file
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
   oldMdFile.getline(buffer, MAXLEN);

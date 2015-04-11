@@ -9,7 +9,7 @@ Usage: md2md
 
 Options:
   -h,  --help             show this help
-  -m,  --meta-data=...    use specified meta-data (.md, .eor) file
+  -m,  --meta-data=...    use specified meta-data (.omd, .eor) file
   -o,  --output-file=...  use specified output file
   -x,  --repeatX=...      make the system repeat in the x direction
   -y,  --repeatY=...      make the system repeat in the y direction
@@ -19,7 +19,7 @@ Options:
   -v,  --translateZ=...   translate all z coordinates by some amount
 
 Example:
-  md2md -m lipidSystem.md -o bigLipidSystem.md -x 2 -y 2 -z 1 -v 35.0
+  md2md -m lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0
 
 """
 

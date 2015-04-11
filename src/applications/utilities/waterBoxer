@@ -36,7 +36,7 @@ if ($opt_h){
     print "usage: waterBoxer [-hmrv] [-d density] [-l lattice] [-n # waters]\n";
     print "\t[-o file name] [-w water name] \n\n";
     print "  -h : show this message\n";
-    print "  -m : print out a water.md file (file with all water models)\n";
+    print "  -m : print out a water.inc file (file with all water models)\n";
     print "  -r : randomize orientations\n";
     print "  -v : verbose output\n\n";
     print "  -d real    : density in g/cm^3\n";
@@ -46,7 +46,7 @@ if ($opt_h){
     print "  -n integer : # of water molecules\n";
     print "                 (default: 500)\n";
     print "  -o char    : output file name\n";
-    print "                 (default: freshWater.md)\n";
+    print "                 (default: freshWater.omd)\n";
     print "  -w char    : name of the water stunt double\n";
     print "                 (default: SPCE)\n";
     print "  -x real    : dimension of the box along the x direction\n";
@@ -56,7 +56,7 @@ if ($opt_h){
     print "      than the derived box length for a given density and\n";
     print "      number of molecules.\n\n";
     print "Example:\n";
-    die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF -o ssdrfWater.md\n";
+    die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF -o ssdrfWater.omd\n";
 }
 
 # set some variables to be used in the code
@@ -64,10 +64,10 @@ if (defined($opt_o)){
   $fileName = $opt_o;
   $nothingSelected = 0;
 } else {
-    $fileName = 'freshWater.md';
+    $fileName = 'freshWater.omd';
 }
 if ($opt_m){
-  die "Error: $fileName cannot be \"water.md\"\n       Please choose a different name\n" if $fileName eq 'water.md';
+  die "Error: $fileName cannot be \"water.inc\"\n       Please choose a different name\n" if $fileName eq 'water.inc';
   $waterFileHandle = 'WATERMD';
   $nothingSelected = 0;
 } else {
@@ -95,7 +95,7 @@ if (defined($opt_w)){
 validateWater();
 if ($invalidWater == 1){
   print "Warning: \'$waterName\' is not a recognized water model name.\n";
-  print "         Use the \'-m\' option to generate a \'water.md\' with the\n";
+  print "         Use the \'-m\' option to generate a \'water.inc\' with the\n";
   print "         recognized water model geometries.\n\n"; 
 }
 if ($waterName eq 'DPD') {
@@ -297,7 +297,7 @@ print "The water box \"$fileName\" was generated.\n";
 
 if ($opt_m){
   printWaterMD();
-  print "The file \"water.md\" was generated for inclusion in \"$fileName\"\n";
+  print "The file \"water.inc\" was generated for inclusion in \"$fileName\"\n";
 }
 
 if ($nothingSelected == 1) {
@@ -356,7 +356,7 @@ sub printMetaData {
 
 # print the water model or includes
   if ($opt_m){
-    print OUTFILE "#include \"water.md\"";
+    print OUTFILE "#include \"water.inc\"";
   } else {
     printWaterModel();
   }
@@ -419,10 +419,10 @@ print OUTFILE
 }
 
 sub printWaterMD {
-  open(WATERMD, ">./water.md") || die "Error: can't open file water.md\n";
+  open(WATERMD, ">./water.inc") || die "Error: can't open file water.inc\n";
   $waterFileHandle = 'WATERMD';
 
-  print WATERMD "#ifndef _WATER_MD_\n#define _WATER_MD_\n";
+  print WATERMD "#ifndef _WATER_INC_\n#define _WATER_INC_\n";
   printCl();
   printNa();
   printSSD_E();

@@ -119,9 +119,9 @@ namespace OpenBabel
     string OutputFileName = pConv->GetInFilename();
     size_t pos = OutputFileName.rfind(".");
     if(pos!=string::npos)
-      OutputFileName = OutputFileName.substr(0, pos) + ".md";       
+      OutputFileName = OutputFileName.substr(0, pos) + ".omd";       
     else
-      OutputFileName += ".md";
+      OutputFileName += ".omd";
     
     ofstream ofs(OutputFileName.c_str());
     if(!ofs) {
@@ -218,7 +218,7 @@ namespace OpenBabel
       
       if (molIsWater) {
         // water include files define all of the known water types
-        os << "#include \"water.md\";\n";
+        os << "#include \"water.omd\";\n";
         pmol->SetTitle("HOH");
       } else {
 

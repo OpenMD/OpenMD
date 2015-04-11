@@ -306,7 +306,7 @@ void ConvexHull::printHull(const string& geomFileName) {
 #endif
     FILE *newGeomFile;
     
-    //create new .md file based on old .md file
+    //create new .omd file based on old .omd file
     newGeomFile = fopen(geomFileName.c_str(), "w");
     qh_findgood_all(qh facet_list);
     for (int i = 0; i < qh_PRINTEND; i++)

@@ -13,7 +13,7 @@ Options:
 
 
 Example:
-   mdShrink -s 10 -m long.md  -o short.md 
+   mdShrink -s 10 -m long.dump  -o short.dump
 
 """
 

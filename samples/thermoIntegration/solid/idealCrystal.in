@@ -1,7 +1,7 @@
 <OpenMD version=1>
   <MetaData>
 
-#include "water.md"
+#include "water.inc"
 
 component{
   type = "SSD_E";

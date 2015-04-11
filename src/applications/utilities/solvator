@@ -13,7 +13,7 @@
 use Getopt::Std;
 
 $d2tolerance = 7.5625; #distance to start cutting
-$fileName = 'solvatedSystem.md';
+$fileName = 'solvatedSystem.omd';
 $startSnap = 0;
 $startFrame = 0;
 $startStunts = 0;
@@ -37,15 +37,15 @@ if ($opt_h){
   print "  -h : show this message\n\n";
   print "  -d real : overlap removal distance\n";
   print "                 (default: 2.75 ang)\n";
-  print "  -i char : solvent input file (OpenMD .md file)\n";
+  print "  -i char : solvent input file (OpenMD .omd file)\n";
   print "  -n char : name for the solute\n";
   print "                 (default: SOLUTE)\n";
-  print "  -o char : carved solvent output file (OpenMD .md format)\n";
-  print "                 (default: 'solvatedSystem.md')\n";
+  print "  -o char : carved solvent output file (OpenMD .omd format)\n";
+  print "                 (default: 'solvatedSystem.omd')\n";
   print "  -p char : solute input file (pdb)\n";
   print "  -x char : solute input file (xyz)\n\n";
   print "Example:\n";
-  die   "   solvator -i myWater.md -p mySolute.pdb -o mySystem.md\n";
+  die   "   solvator -i myWater.omd -p mySolute.pdb -o mySystem.omd\n";
 }
 
 # set some variables to be used in the code

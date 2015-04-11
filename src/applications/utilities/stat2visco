@@ -110,7 +110,7 @@ def readStatFile(statFileName):
                 print "pressure tensor in columns 9-17 of the .stat file"
                 print
                 print "You may need to set the statFileFormat string"
-                print "explicitly in your .md file when running OpenMD."
+                print "explicitly in your .omd file when running OpenMD."
                 print "Consult the OpenMD documentation for more details."
                 sys.exit()
                 

@@ -11,17 +11,17 @@ Usage: md-solvator
 
 Options:
   -h,  --help              show this help
-  -u,  --solute=...        use specified meta-data (.md) file as the solute
-  -v,  --solvent=...       use specified meta-data (.md) file as the solvent
+  -u,  --solute=...        use specified meta-data (.omd) file as the solute
+  -v,  --solvent=...       use specified meta-data (.omd) file as the solvent
   -r,  --rcut=...          specify the cutoff radius for deleting solvent
-  -o,  --output-file=...   use specified output (.md) file
+  -o,  --output-file=...   use specified output (.omd) file
   -n,  --nSoluteAtoms=...  Number of atoms in solute molecule,
                            default is 1 atom.
   -p,  --nSolventAtoms=... Number of atoms in solvent molecule,
                            default is 1 atom. 
 
 Example:
-   md-solvator -u solute.md -v solvent.md -n 3 -p 3 -r 4.0 -o combined.md
+   md-solvator -u solute.omd -v solvent.omd -n 3 -p 3 -r 4.0 -o combined.omd
 
 """
 

@@ -54,7 +54,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".gofrz");
 
     deltaR_ = len_ / (double) nRBins_;
-    deltaZ_ = zLen_ / (double)nZBins_;    // for solvated_NVT.md4
+    deltaZ_ = zLen_ / (double)nZBins_; 
 
     histogram_.resize(nRBins_);
     avgGofr_.resize(nRBins_);

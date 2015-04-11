@@ -9,12 +9,12 @@ from numpy import *
 statfile = open("statfile", "w")
 for i in range(5, 20):
 	o = open("output_verynew",'w')
-	for line in open("B_bcc_001.md"):
+	for line in open("B_bcc_001.omd"):
 		line = line.replace("cutoffRadius = "+"%.1f"%i,"cutoffRadius = "+"%.1f"%(i+1))
 		o.write(line)
 	o.close()
-	subprocess.call(['mv','output_verynew', 'B_bcc_001.md'])
-	subprocess.call(['../../../build/bin/openmd', 'B_bcc_001.md'])
+	subprocess.call(['mv','output_verynew', 'B_bcc_001.omd'])
+	subprocess.call(['../../../build/bin/openmd', 'B_bcc_001.omd'])
 	f = open("B_bcc_001.stat")
 	f.next()
 	for line in f:
