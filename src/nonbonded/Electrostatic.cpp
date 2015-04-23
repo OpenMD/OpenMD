@@ -1177,7 +1177,6 @@ namespace OpenMD {
       flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ),  
                                  (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY], 
                                  *(sdat.flucQfrc) );
-
     }
 
     switch (summationMethod_) {
@@ -1562,9 +1561,7 @@ namespace OpenMD {
                                         RealType &spot1, RealType &spot2) {
 
     if (!initialized_) {
-      cerr << "initializing\n";
       initialize();
-      cerr << "done\n";
     }
 
     const RealType mPoleConverter = 0.20819434; 

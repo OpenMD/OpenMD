@@ -86,6 +86,8 @@ namespace OpenMD{
     Molecule* mol;
     StuntDouble* sd;    
     int index = 0;
+
+    info_->getSnapshotManager()->advance();
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
@@ -149,8 +151,24 @@ namespace OpenMD{
 
     Vector3d pos;
     Vector3d eulerAngle;
+
+    int ndf(0);
+
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+      
+      for (sd = mol->beginIntegrableObject(j);  sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
+        
+        ndf += 3;
+
+        if (sd->isDirectional())  {
+          ndf += 3;
+        }
+      }
+    }
     
-    DynamicVector<RealType> xinit(info_->getNdfLocal(), 0.0);
+    DynamicVector<RealType> xinit(ndf, 0.0);
 
     int index = 0;
     

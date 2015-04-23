@@ -100,6 +100,7 @@ const char *gengetopt_args_info_help[] = {
   "  -m, --multipole               average multipole moments contained within \n                                  cutoff spheres as a function of radius",
   "      --surfDiffusion           X, Y, and R (surface diffusion if Z exposed and \n                                  bulk immobile) diffusion",
   "      --hbond                   Hydrogen Bonding statistics using geometric \n                                  criteria (rcut and thetacut must be \n                                  specified)",
+  "      --potDiff                 potential energy difference when charge on \n                                  selection is set to zero",
     0
 };
 
@@ -190,6 +191,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->multipole_given = 0 ;
   args_info->surfDiffusion_given = 0 ;
   args_info->hbond_given = 0 ;
+  args_info->potDiff_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -310,6 +312,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->multipole_help = gengetopt_args_info_help[61] ;
   args_info->surfDiffusion_help = gengetopt_args_info_help[62] ;
   args_info->hbond_help = gengetopt_args_info_help[63] ;
+  args_info->potDiff_help = gengetopt_args_info_help[64] ;
   
 }
 
@@ -589,6 +592,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "surfDiffusion", 0, 0 );
   if (args_info->hbond_given)
     write_into_file(outfile, "hbond", 0, 0 );
+  if (args_info->potDiff_given)
+    write_into_file(outfile, "potDiff", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -676,6 +681,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->multipole_given = 0 ;
   args_info->surfDiffusion_given = 0 ;
   args_info->hbond_given = 0 ;
+  args_info->potDiff_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -984,6 +990,7 @@ cmdline_parser_internal (
         { "multipole",	0, NULL, 'm' },
         { "surfDiffusion",	0, NULL, 0 },
         { "hbond",	0, NULL, 0 },
+        { "potDiff",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1925,6 +1932,23 @@ cmdline_parser_internal (
                 &(local_args_info.hbond_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "hbond", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* potential energy difference when charge on selection is set to zero.  */
+          else if (strcmp (long_options[option_index].name, "potDiff") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->potDiff_given),
+                &(local_args_info.potDiff_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "potDiff", '-',
                 additional_error))
               goto failure;
           

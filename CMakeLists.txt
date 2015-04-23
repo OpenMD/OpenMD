@@ -597,6 +597,7 @@ src/applications/staticProps/NanoVolume.cpp
 src/applications/staticProps/NitrileFrequencyMap.cpp
 src/applications/staticProps/ObjectCount.cpp
 src/applications/staticProps/P2OrderParameter.cpp
+src/applications/staticProps/PotDiff.cpp
 src/applications/staticProps/pAngle.cpp
 src/applications/staticProps/RadialDistrFunc.cpp
 src/applications/staticProps/RhoR.cpp

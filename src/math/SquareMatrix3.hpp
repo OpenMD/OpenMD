@@ -185,11 +185,25 @@ namespace OpenMD {
         this->data_[1][2] = -v1;
         this->data_[2][0] = -v2;
         this->data_[2][1] = v1;
-        this->data_[2][2] = 0;
-        
-        
+        this->data_[2][2] = 0;               
     }
 
+    /**
+     * Uses Rodrigues' rotation formula for a rotation matrix.
+     * @param axis the axis to rotate around
+     * @param angle the angle to rotate (in radians)
+     */
+    void axisAngle(Vector3d axis, RealType angle) {
+      axis.normalize();
+      RealType ct = cos(angle);
+      RealType st = sin(angle);
+
+      *this = ct * SquareMatrix3<Real>::identity();
+      *this += st * SquareMatrix3<Real>::setupSkewMat(axis);
+      *this += (1-ct) * SquareMatrix3<Real>::outProduct(axis, axis);      
+    }
+
+    
 
     /**
      * Returns the quaternion from this rotation matrix

@@ -71,3 +71,4 @@ groupoption "nitrile"   -       "electrostatic potential to frequency map based 
 groupoption "multipole" m       "average multipole moments contained within cutoff spheres as a function of radius" group="staticProps"
 groupoption "surfDiffusion" -	"X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion" group="staticProps"
 groupoption "hbond"     -       "Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified)" group="staticProps"
+groupoption "potDiff"   -       "potential energy difference when charge on selection is set to zero"  group="staticProps"

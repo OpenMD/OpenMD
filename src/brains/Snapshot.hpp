@@ -78,6 +78,7 @@ namespace OpenMD{
     RealType torsionPotential;    /**< dihedral (torsion angle) contribution to the potential */
     RealType inversionPotential;  /**< inversion (planarity) contribution to the potential */
     potVec   lrPotentials;        /**< breakdown of long-range potentials by family */
+    RealType selfPotential;       /**< potential energy of self interactions */
     potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
     RealType restraintPotential;  /**< potential energy of restraints */
     RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
@@ -188,6 +189,9 @@ namespace OpenMD{
 
     void     setReciprocalPotential(const RealType rp);
     RealType getReciprocalPotential();
+
+    void     setSelfPotential(const RealType sp);
+    RealType getSelfPotential();
     
     void     setExcludedPotentials(const potVec exPot);
     potVec   getExcludedPotentials();

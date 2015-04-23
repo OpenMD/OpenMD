@@ -154,6 +154,7 @@ struct gengetopt_args_info
   const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
   const char *surfDiffusion_help; /**< @brief X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion help description.  */
   const char *hbond_help; /**< @brief Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified) help description.  */
+  const char *potDiff_help; /**< @brief potential energy difference when charge on selection is set to zero help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -218,6 +219,7 @@ struct gengetopt_args_info
   unsigned int multipole_given ;	/**< @brief Whether multipole was given.  */
   unsigned int surfDiffusion_given ;	/**< @brief Whether surfDiffusion was given.  */
   unsigned int hbond_given ;	/**< @brief Whether hbond was given.  */
+  unsigned int potDiff_given ;	/**< @brief Whether potDiff was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

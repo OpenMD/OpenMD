@@ -83,6 +83,8 @@
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/SurfaceDiffusion.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
+#include "applications/staticProps/PotDiff.hpp"
+
 
 using namespace OpenMD;
 
@@ -455,8 +457,11 @@ int main(int argc, char* argv[]){
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-    }    
+    }
+  } else if (args_info.potDiff_given) {
+    analyser = new PotDiff(info, dumpFileName, sele1);
   }
+
   
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);
