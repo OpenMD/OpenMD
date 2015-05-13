@@ -61,6 +61,8 @@ namespace OpenMD {
       DefineOptionalParameter(electrostatic12scale, "electrostatic-12-scale");
       DefineOptionalParameter(electrostatic13scale, "electrostatic-13-scale");
       DefineOptionalParameter(electrostatic14scale, "electrostatic-14-scale");
+      DefineOptionalParameterWithDefaultValue(BondForceConstantScaling, "BondForceConstantScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(BendForceConstantScaling, "BendForceConstantScaling", 1.0);
 
       // DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
       // DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);

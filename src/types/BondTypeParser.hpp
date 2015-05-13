@@ -56,7 +56,7 @@ namespace OpenMD {
   class BondTypeParser {
   public:
     BondTypeParser();
-    BondType* parseLine(const std::string& line);
+    BondType* parseLine(const std::string& line, RealType kScale);
     BondType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
             
   private:

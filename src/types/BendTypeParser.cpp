@@ -74,11 +74,11 @@ namespace OpenMD {
       line.append("\t");
       line.append( OpenMD::to_string(*it) );      
     }
-    
-    return parseLine( line );    
+    // Assume all overrides know about our functional forms:
+    return parseLine( line , 1.0 );    
   }
 
-  BendType* BendTypeParser::parseLine(const std::string& line) {
+  BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
     
     StringTokenizer tokenizer(line);
     BendType* bendType = NULL;
@@ -102,6 +102,7 @@ namespace OpenMD {
       } else {
 
 	RealType ktheta = tokenizer.nextTokenAsDouble();
+        ktheta *= kScale;
 	bendType = new HarmonicBendType(theta0, ktheta);
       }
       break;
@@ -110,6 +111,7 @@ namespace OpenMD {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
 	RealType ktheta = tokenizer.nextTokenAsDouble();
+        ktheta *= kScale;
 	bendType = new HarmonicBendType(theta0, ktheta);                
       }
       break;            

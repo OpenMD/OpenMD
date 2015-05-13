@@ -72,12 +72,12 @@ namespace OpenMD {
       line.append("\t");
       line.append( OpenMD::to_string(*it) );      
     }
-
-    return parseLine( line );    
+    // assume all override know about our functional forms:
+    return parseLine( line, 1.0 );    
   }
 
   
-  BondType* BondTypeParser::parseLine(const std::string& line) {
+  BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
     
     StringTokenizer tokenizer(line);
     BondType* bondType = NULL;
@@ -102,6 +102,7 @@ namespace OpenMD {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
 	RealType kb = tokenizer.nextTokenAsDouble();
+        kb *= kScale;
 	bondType = new HarmonicBondType(b0, kb);
       }
       break;

@@ -55,7 +55,7 @@ namespace OpenMD {
   class BendTypeParser {
   public:
     BendTypeParser();
-    BendType* parseLine(const std::string& line);
+    BendType* parseLine(const std::string& line, RealType kScale);
     BendType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
         
   private:

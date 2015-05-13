@@ -70,9 +70,10 @@ namespace OpenMD {
     std::string at1 = tokenizer.nextToken();
     std::string at2 = tokenizer.nextToken(); 
     std::string remainder = tokenizer.getRemainingString();
+    RealType kScale = options_.getBondForceConstantScaling();
    
     try {
-      bondType = btParser.parseLine(remainder);
+      bondType = btParser.parseLine(remainder, kScale);
     }
     catch( OpenMDException e ) {
       

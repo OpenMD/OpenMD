@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -48,33 +48,32 @@
 namespace OpenMD {
 
   class MultipoleSum : public StaticAnalyser {
-    
+
   public:
-    MultipoleSum(SimInfo* info, const std::string& filename, 
+    MultipoleSum(SimInfo* info, const std::string& filename,
                  const std::string& sele1, RealType rmax, int nrbins);
-        
+
   private:
 
     virtual void process();
     virtual void writeOut();
 
     std::size_t nRBins_;
-    RealType deltaR_;                
+    RealType deltaR_;
     RealType rMax_;
-    std::vector<RealType> aveDlength_; 
-    std::vector<RealType> aveQlength_; 
-    std::vector<RealType> aveDcount_; 
-    std::vector<RealType> aveQcount_; 
+    std::vector<RealType> aveDlength_;
+    std::vector<RealType> aveQlength_;
+    std::vector<RealType> aveDcount_;
+    std::vector<RealType> aveQcount_;
     std::vector<RealType> aveDproj_;
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;
-    SelectionManager seleMan1_;    
-    SelectionEvaluator evaluator1_;           
+    SelectionManager seleMan1_;
+    SelectionEvaluator evaluator1_;
 
   };
 
 
 }
 #endif
-

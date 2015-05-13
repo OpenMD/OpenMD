@@ -70,9 +70,11 @@ namespace OpenMD {
     std::string at2 = tokenizer.nextToken();
     std::string at3 = tokenizer.nextToken();
     std::string remainder = tokenizer.getRemainingString();
+    RealType kScale = options_.getBendForceConstantScaling();
+        
 
     try {
-      bendType = btParser.parseLine(remainder);
+      bendType = btParser.parseLine(remainder, kScale);
     }
     catch( OpenMDException e ) {
       

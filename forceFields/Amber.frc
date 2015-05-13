@@ -1,7 +1,9 @@
 begin Options
       Name                    "Amber"
-      vdW-14-scale            0.5         
-      electrostatic-14-scale  0.83333333333333333
+      vdW-14-scale             0.5         
+      electrostatic-14-scale   0.83333333333333333
+      BondForceConstantScaling 2.0
+      BendForceConstantScaling 2.0
 end Options
 
 begin BaseAtomTypes

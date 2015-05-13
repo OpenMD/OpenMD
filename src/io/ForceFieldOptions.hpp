@@ -64,6 +64,8 @@ namespace OpenMD {
     DeclareParameter(vdw12scale, RealType);
     DeclareParameter(vdw13scale, RealType);
     DeclareParameter(vdw14scale, RealType);
+    DeclareParameter(BondForceConstantScaling, RealType);
+    DeclareParameter(BendForceConstantScaling, RealType);
     DeclareParameter(electrostatic12scale, RealType);
     DeclareParameter(electrostatic13scale, RealType);
     DeclareParameter(electrostatic14scale, RealType);
