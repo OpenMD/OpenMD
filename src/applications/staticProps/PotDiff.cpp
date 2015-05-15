@@ -109,8 +109,6 @@ namespace OpenMD {
     diff_.clear();
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
-    RealType dsum = 0;
-    RealType d2sum = 0;
 
     // We'll need the force manager to compute the potential
     
@@ -175,8 +173,6 @@ namespace OpenMD {
       info_->getSnapshotManager()->advance();
     }
    
-    int nProcessed = nFrames / step_;
-
     writeDiff();   
   }
   
