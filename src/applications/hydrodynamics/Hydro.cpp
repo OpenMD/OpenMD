@@ -84,8 +84,10 @@ int main(int argc, char* argv[]){
   if (args_info.input_given){
     dumpFileName = args_info.input_arg;
   } else {
-    std::cerr << "Does not have input file name" << std::endl;
-    exit(1);
+    strcpy( painCave.errMsg,
+            "No input file name was specified.\n" );
+    painCave.isFatal = 1;
+    simError();
   }
   
   if (args_info.output_given){

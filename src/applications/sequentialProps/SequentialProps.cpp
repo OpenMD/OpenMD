@@ -184,7 +184,8 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ, centroidX, centroidY,
+    analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ, centroidX,
+                                 centroidY,
                                  threshDens, bufferLength, args_info.nbins_arg,
                                  args_info.nbins_z_arg);
   }

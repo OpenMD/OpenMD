@@ -86,8 +86,10 @@ int main(int argc, char* argv[]){
   if (args_info.input_given){
     dumpFileName = args_info.input_arg;
   } else {
-    cerr << "Does not have input file name" << endl;
-    exit(1);
+    strcpy( painCave.errMsg,
+            "No input file name was specified.\n" );
+    painCave.isFatal = 1;
+    simError();
   }
   
   if (args_info.output_given){
@@ -138,8 +140,9 @@ int main(int argc, char* argv[]){
   
   if (args_info.basetype_flag) {
     AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
-    compositeVisitor->addVisitor(atomNameVisitor, 550);    
-    cout << compositeVisitor->toString();
+    compositeVisitor->addVisitor(atomNameVisitor, 550);
+    // When debugging visitors, you may find this helpful:
+    //    cout << compositeVisitor->toString();
   }
   
   //create ZconsVisitor
@@ -181,9 +184,10 @@ int main(int argc, char* argv[]){
                                                        args_info.refsele_arg),
                                  250); 
   } else if (args_info.refsele_given || args_info.originsele_given) {
-    cerr << "Both of --refsele and --originsele should appear by pair" 
-         << endl;
-    exit(1);
+    strcpy( painCave.errMsg,
+            "The --refsele and --originsele arguments should appear together.\n" );
+    painCave.isFatal = 1;
+    simError();
   }
   
   //create xyzVisitor

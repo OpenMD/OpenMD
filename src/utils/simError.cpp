@@ -103,12 +103,18 @@ int simError( void ) {
     }
 #endif
     
-    strcat(errorMsg, ":\n\t");
-    
-    strncat(errorMsg, painCave.errMsg, strlen(painCave.errMsg));
-    
+    strcat(errorMsg, ":\n\t");    
+    strncat(errorMsg, painCave.errMsg, strlen(painCave.errMsg));    
     strcat(errorMsg, "\n");
-    fprintf(stderr, "%s", errorMsg);
+    
+    switch( painCave.severity ) {
+    case OPENMD_WARNING:
+    case OPENMD_INFO:
+      fprintf(stdout, "%s", errorMsg);
+      break;
+    default:
+      fprintf(stderr, "%s", errorMsg);
+    }
     
 #ifdef IS_MPI
     if (painCave.isEventLoop) 

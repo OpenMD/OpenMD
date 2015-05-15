@@ -250,8 +250,9 @@ int main(int argc, char *argv []) {
 
   delete writer;
 
-  sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
-          "generated.\n", outputFileName.c_str());
+  sprintf(painCave.errMsg,
+          "A new OpenMD file called \"%s\" has been generated.\n",
+          outputFileName.c_str());
   painCave.isFatal = 0;
   painCave.severity = OPENMD_INFO;
   simError();

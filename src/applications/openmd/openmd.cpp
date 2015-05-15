@@ -92,7 +92,7 @@ int main(int argc, char* argv[]){
 #ifdef IS_MPI
   if( worldRank == 0 ){
 #endif
-    std::cerr << 
+    std::cout << 
       "  +--------------------------------------------------------------------------+\n"<<
       "  |    ____                    __  ___ ____                                  |\n"<<
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
@@ -123,7 +123,8 @@ int main(int argc, char* argv[]){
       "\n";
     
     if( argc < 2 ){
-      strcpy( painCave.errMsg, "Error, a meta-data file is needed to run.\n" );
+      strcpy( painCave.errMsg,
+              "No meta-data file was specified on the command line.\n" );
       painCave.isFatal = 1;
       simError();
     }
