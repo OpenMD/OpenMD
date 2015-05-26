@@ -53,6 +53,7 @@
 #include "applications/dynamicProps/SelectionCorrFunc.hpp"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
+#include "applications/dynamicProps/RCorrFuncZ.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
@@ -144,6 +145,9 @@ int main(int argc, char* argv[]){
   } else if (args_info.drcorr_given) {
     corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2,
 					memSize);
+  } else if (args_info.rcorrZ_given) {
+    corrFunc = new RCorrFuncZ(info, dumpFileName, sele1, sele2,
+                              args_info.nzbins_arg, memSize); 
   } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
   } else if (args_info.vcorrZ_given) {

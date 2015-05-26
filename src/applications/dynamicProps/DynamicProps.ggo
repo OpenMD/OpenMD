@@ -19,6 +19,7 @@ option  "memory"        m       "Available memory (defaults to 2G)" string  type
 defgroup "dynamicProps" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"  s       "selection correlation function" group="dynamicProps"
 groupoption "rcorr"     r       "rmsd" group="dynamicProps"
+groupoption "rcorrZ" 	-	"rmsd binned by Z" group="dynamicProps"
 groupoption "vcorr" 	v	"velocity correlation function" group="dynamicProps"
 groupoption "vcorrZ" 	-	"velocity correlation function along z-axis" group="dynamicProps"
 groupoption "vcorrR" 	-	"velocity correlation function projected radially" group="dynamicProps"

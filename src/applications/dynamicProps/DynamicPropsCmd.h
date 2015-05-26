@@ -62,6 +62,7 @@ struct gengetopt_args_info
   const char *memory_help; /**< @brief Available memory (defaults to 2G) help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief rmsd help description.  */
+  const char *rcorrZ_help; /**< @brief rmsd binned by Z help description.  */
   const char *vcorr_help; /**< @brief velocity correlation function help description.  */
   const char *vcorrZ_help; /**< @brief velocity correlation function along z-axis help description.  */
   const char *vcorrR_help; /**< @brief velocity correlation function projected radially help description.  */
@@ -90,6 +91,7 @@ struct gengetopt_args_info
   unsigned int memory_given ;	/**< @brief Whether memory was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
+  unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
   unsigned int vcorr_given ;	/**< @brief Whether vcorr was given.  */
   unsigned int vcorrZ_given ;	/**< @brief Whether vcorrZ was given.  */
   unsigned int vcorrR_given ;	/**< @brief Whether vcorrR was given.  */

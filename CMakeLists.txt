@@ -545,6 +545,7 @@ src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
 src/applications/dynamicProps/RadialRCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
+src/applications/dynamicProps/RCorrFuncZ.cpp
 src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp
 src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
