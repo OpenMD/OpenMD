@@ -1629,4 +1629,21 @@ namespace OpenMD {
     for (int i = 0; i < nGroups_; i++)
       saved_CG_positions_.push_back(snap_->cgData.position[i]);
   }
+    
+    
+    int ForceMatrixDecomposition::getGlobalIDRow(int atom1) {
+#ifdef IS_MPI
+      return AtomRowToGlobal[atom1];
+#else
+      return atom1;
+#endif
+    }
+
+    int ForceMatrixDecomposition::getGlobalIDCol(int atom2) {
+#ifdef IS_MPI
+      return AtomColToGlobal[atom2];
+#else
+      return atom2;
+#endif
+    }
 } //end namespace OpenMD

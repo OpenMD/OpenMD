@@ -148,6 +148,8 @@ namespace OpenMD {
     DeclareParameter(ElectricField, std::vector<RealType> );
     DeclareParameter(ConstraintTime, RealType);
 
+    DeclareParameter(PotentialSelection, std::string);
+
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);

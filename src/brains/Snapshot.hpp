@@ -82,6 +82,7 @@ namespace OpenMD{
     potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
     RealType restraintPotential;  /**< potential energy of restraints */
     RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
+    potVec   selectionPotentials; /**< potential of selected stuntDoubles */
     RealType xyArea;              /**< XY area of this frame */
     RealType volume;              /**< total volume of this frame */
     RealType pressure;            /**< pressure of this frame */
@@ -201,6 +202,9 @@ namespace OpenMD{
 
     void     setRawPotential(const RealType rp);
     RealType getRawPotential();
+
+    void     setSelectionPotentials(const potVec selPot);
+    potVec   getSelectionPotentials();
 
     RealType getPotentialEnergy();
     RealType getKineticEnergy();

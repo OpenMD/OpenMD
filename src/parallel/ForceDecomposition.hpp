@@ -135,6 +135,8 @@ namespace OpenMD {
     virtual vector<int>& getExcludesForAtom(int atom1) = 0;
     virtual bool skipAtomPair(int atom1, int atom2, int cg1, int cg2) = 0;
     virtual bool excludeAtomPair(int atom1, int atom2) = 0;
+    virtual int getGlobalIDRow(int atom1) = 0;
+    virtual int getGlobalIDCol(int atom2) = 0;
     virtual int getTopologicalDistance(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
@@ -170,6 +172,7 @@ namespace OpenMD {
     potVec embeddingPot;
     potVec excludedPot;
     potVec excludedSelfPot;
+    potVec selectedPot;
 
     /** 
      * The topological distance between two atomic sites is handled

@@ -120,7 +120,8 @@ namespace OpenMD {
     DefineOptionalParameter(Alpha, "alpha");
     DefineOptionalParameter(ConstraintTime, "constraintTime");
 
-  
+    DefineOptionalParameter(PotentialSelection, "potentialSelection");
+    
     DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, 
                                             "usePeriodicBoundaryConditions", 
                                             true);

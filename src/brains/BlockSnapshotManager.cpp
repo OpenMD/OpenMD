@@ -95,7 +95,8 @@ namespace OpenMD {
       for (int i = 0; i < nblocks; ++i) {
         blocks_.push_back(SnapshotBlock(i*nSnapshotPerBlock_, (i+1)*nSnapshotPerBlock_));    
       }
-      //the last block may not have nSnapshotPerBlock frames, we need to consider this special situation
+      //the last block may not have nSnapshotPerBlock frames, we need
+      //to consider this special situation
       blocks_.back().second = nframes_;
 
       snapshots_.insert(snapshots_.begin(), nframes_, static_cast<Snapshot*>(NULL));   
@@ -227,7 +228,6 @@ namespace OpenMD {
   }
 
   void BlockSnapshotManager::internalUnload(int block) {
-    std::cerr << "called internal unload for block "<< block << "\n";
     for (int i = blocks_[block].first; i < blocks_[block].second; ++i) {
       delete snapshots_[i];
       snapshots_[i] = NULL;

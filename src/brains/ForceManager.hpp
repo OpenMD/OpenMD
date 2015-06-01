@@ -58,6 +58,8 @@
 #include "perturbations/Perturbation.hpp"
 #include "parallel/ForceDecomposition.hpp"
 #include "brains/Thermo.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 #define PREPAIR_LOOP 0
 #define PAIR_LOOP 1
@@ -124,6 +126,12 @@ namespace OpenMD {
     Mat3x3d stressTensor;
 
     vector<Perturbation*> perturbations_;
+
+    bool doPotentialSelection_;
+    string selectionScript_;
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+
   };
 } 
 #endif //BRAINS_FORCEMANAGER_HPP

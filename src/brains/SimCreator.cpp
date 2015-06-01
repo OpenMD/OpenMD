@@ -146,7 +146,6 @@ namespace OpenMD {
       observer.setLexer(&lexer);
       observer.setParser(&parser);
       lexer.setObserver(&observer);
-    
       antlr::ASTFactory factory;
       parser.initializeASTFactory(factory);
       parser.setASTFactory(&factory);
@@ -161,44 +160,50 @@ namespace OpenMD {
       
     catch(antlr::MismatchedCharException& e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s %s:%d:%d\n",
-              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+              "Mismatched Character: %s in file %s at line %d, column %d\n",
+              e.getMessage().c_str(), e.getFilename().c_str(),
+              e.getLine(), e.getColumn());
       painCave.isFatal = 1;
       simError();           
     }
     catch(antlr::MismatchedTokenException &e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s %s:%d:%d\n",
-              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+              "Mismatched Token: %s in file %s at line %d, column %d\n",
+              e.getMessage().c_str(), e.getFilename().c_str(),
+              e.getLine(), e.getColumn());
       painCave.isFatal = 1;
       simError();   
     }
     catch(antlr::NoViableAltForCharException &e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s %s:%d:%d\n",
-              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+              "No Viable Alternative for Character: %s in file %s at line %d, "
+              "column %d\n",
+              e.getMessage().c_str(), e.getFilename().c_str(),
+              e.getLine(), e.getColumn());
       painCave.isFatal = 1;
       simError();   
     }
     catch(antlr::NoViableAltException &e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s %s:%d:%d\n",
-              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+              "No Viable Alternative: %s in file %s at line %d, column %d\n",
+              e.getMessage().c_str(), e.getFilename().c_str(),
+              e.getLine(), e.getColumn());
       painCave.isFatal = 1;
       simError();   
     }
       
     catch(antlr::TokenStreamRecognitionException& e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s %s:%d:%d\n",
-              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+              "Token Stream Recognition: %s in file %s at line %d, column %d\n",
+              e.getMessage().c_str(), e.getFilename().c_str(),
+              e.getLine(), e.getColumn());
       painCave.isFatal = 1;
       simError();   
     }
 	
     catch(antlr::TokenStreamIOException& e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s\n",
+              "Token Stream IO exception: %s\n",
               e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
@@ -206,21 +211,22 @@ namespace OpenMD {
 	
     catch(antlr::TokenStreamException& e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s\n",
+              "Token Stream exception: %s\n",
               e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     }        
     catch (antlr::RecognitionException& e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s %s:%d:%d\n",
-              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+              "Recognition exception: %s in file %s at line %d, column %d\n",
+              e.getMessage().c_str(), e.getFilename().c_str(),
+              e.getLine(), e.getColumn());
       painCave.isFatal = 1;
       simError();          
     }
     catch (antlr::CharStreamException& e) {
       sprintf(painCave.errMsg, 
-              "parser exception: %s\n",
+              "Character Stream exception: %s\n",
               e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();        

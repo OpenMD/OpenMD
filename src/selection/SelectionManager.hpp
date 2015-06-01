@@ -248,6 +248,10 @@ namespace OpenMD {
       ss_.bitsets_[MOLECULE].setBitOff(m->getGlobalIndex());
     }
 
+
+    bool isGlobalIDSelected(int globalIndex) {
+      return ss_.bitsets_[STUNTDOUBLE][globalIndex];
+    }      
     bool isSelected(StuntDouble* sd) {
       return ss_.bitsets_[STUNTDOUBLE][sd->getGlobalIndex()];
     }

@@ -184,8 +184,6 @@ namespace OpenMD {
       } 
     }
 
-    //    std::cout << Itmp << std::endl;
-
     //diagonalize 
     Vector3d evals;
     Mat3x3d::diagonalize(Itmp, evals, sU_);
@@ -457,8 +455,11 @@ namespace OpenMD {
       pos = getPos() + ref;
       return true;
     } else {
-      std::cerr << index << " is an invalid index, current rigid body contains " 
-		<< atoms_.size() << "atoms" << std::endl;
+      sprintf( painCave.errMsg,
+               "%d is an invalid index. The current rigid body contans %lu atoms.\n",
+               index, atoms_.size() );      
+      painCave.isFatal = 0;
+      simError();
       return false;
     }    
   }
@@ -472,8 +473,11 @@ namespace OpenMD {
       pos = getPos() + ref;
       return true;
     } else {
-      std::cerr << "Atom " << atom->getGlobalIndex() 
-		<<" does not belong to Rigid body "<< getGlobalIndex() << std::endl; 
+      sprintf( painCave.errMsg,
+               "Atom %d does not belong to rigid body %d.\n",
+               atom->getGlobalIndex(), getGlobalIndex()  );      
+      painCave.isFatal = 0;
+      simError();
       return false;
     }
   }
@@ -507,9 +511,11 @@ namespace OpenMD {
       return true;
         
     } else {
-      std::cerr << index 
-		<< " is an invalid index, current rigid body contains " 
-		<< atoms_.size() << "atoms" << std::endl;
+      sprintf( painCave.errMsg,
+               "Index %d is an invalid index, the current rigid body contains %lu atoms.\n",
+               index, atoms_.size()  );      
+      painCave.isFatal = 0;
+      simError();
       return false;
     }
   }
@@ -521,8 +527,11 @@ namespace OpenMD {
     if (i != atoms_.end()) {
       return getAtomVel(vel, i - atoms_.begin());
     } else {
-      std::cerr << "Atom " << atom->getGlobalIndex() 
-		<<" does not belong to Rigid body "<< getGlobalIndex() << std::endl;    
+      sprintf( painCave.errMsg,
+               "Atom %d does not belong to rigid body %d.\n",
+               atom->getGlobalIndex(), getGlobalIndex()  );      
+      painCave.isFatal = 0;
+      simError();
       return false;
     }    
   }
@@ -533,8 +542,11 @@ namespace OpenMD {
       coor = refCoords_[index];
       return true;
     } else {
-      std::cerr << index << " is an invalid index, current rigid body contains " 
-		<< atoms_.size() << "atoms" << std::endl;
+      sprintf( painCave.errMsg,
+               "Index %d is an invalid index, the current rigid body contains %lu atoms.\n",
+               index, atoms_.size()  );      
+      painCave.isFatal = 0;
+      simError();
       return false;
     }
 
@@ -548,8 +560,11 @@ namespace OpenMD {
       coor = refCoords_[i - atoms_.begin()];
       return true;
     } else {
-      std::cerr << "Atom " << atom->getGlobalIndex() 
-		<<" does not belong to Rigid body "<< getGlobalIndex() << std::endl;    
+      sprintf( painCave.errMsg,
+               "Atom %d does not belong to rigid body %d.\n",
+               atom->getGlobalIndex(), getGlobalIndex()  );      
+      painCave.isFatal = 0;
+      simError();
       return false;
     }
 

@@ -69,7 +69,7 @@ using namespace std;
 namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : initialized_(false), info_(info),
-                                               switcher_(NULL) {
+                                               switcher_(NULL), seleMan_(info), evaluator_(info) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
@@ -414,6 +414,17 @@ namespace OpenMD {
     usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     
     fDecomp_->distributeInitialData();
+
+    doPotentialSelection_ = false;
+    if (info_->getSimParams()->havePotentialSelection()) {
+      doPotentialSelection_ = true;
+      selectionScript_ = info_->getSimParams()->getPotentialSelection();
+      evaluator_.loadScriptString(selectionScript_);
+      if (!evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+    }
+
     
     initialized_ = true;
     
@@ -452,6 +463,8 @@ namespace OpenMD {
     potVec zeroPot(0.0);
     snap->setLongRangePotential(zeroPot);
     snap->setExcludedPotentials(zeroPot);
+    if (doPotentialSelection_)
+      snap->setSelectionPotentials(zeroPot);
 
     snap->setRestraintPotential(0.0);
     snap->setRawPotential(0.0);
@@ -477,11 +490,18 @@ namespace OpenMD {
         }
       }      
     }
-    
+
     // Zero out the stress tensor
     stressTensor *= 0.0;
     // Zero out the heatFlux
-    fDecomp_->setHeatFlux( Vector3d(0.0) );    
+    fDecomp_->setHeatFlux( Vector3d(0.0) );
+
+    if (doPotentialSelection_) {
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+    }
+    
   }
   
   void ForceManager::shortRangeInteractions() {
@@ -501,6 +521,7 @@ namespace OpenMD {
     RealType bendPotential = 0.0;
     RealType torsionPotential = 0.0;
     RealType inversionPotential = 0.0;
+    potVec selectionPotential(0.0);
 
     //calculate short range interactions    
     for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -516,6 +537,12 @@ namespace OpenMD {
            bond = mol->nextBond(bondIter)) {
         bond->calcForce(doParticlePot_);
         bondPotential += bond->getPotential();
+        if (doPotentialSelection_) {
+          if (seleMan_.isSelected(bond->getAtomA()) ||
+              seleMan_.isSelected(bond->getAtomB()) ) {
+            selectionPotential[BONDED_FAMILY] += bond->getPotential();
+          }
+        }
       }
 
       for (bend = mol->beginBend(bendIter); bend != NULL; 
@@ -542,6 +569,13 @@ namespace OpenMD {
           i->second.deltaV =  fabs(i->second.curr.potential -  
                                    i->second.prev.potential);
         }
+        if (doPotentialSelection_) {
+          if (seleMan_.isSelected(bend->getAtomA()) ||
+              seleMan_.isSelected(bend->getAtomB()) ||
+              seleMan_.isSelected(bend->getAtomC()) ) {
+            selectionPotential[BONDED_FAMILY] += bend->getPotential();
+          }
+        }
       }
       
       for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
@@ -564,7 +598,16 @@ namespace OpenMD {
           i->second.curr.potential = currTorsionPot;
           i->second.deltaV =  fabs(i->second.curr.potential -  
                                    i->second.prev.potential);
-        }      
+        }
+        if (doPotentialSelection_) {
+          if (seleMan_.isSelected(torsion->getAtomA()) ||
+              seleMan_.isSelected(torsion->getAtomB()) ||
+              seleMan_.isSelected(torsion->getAtomC()) ||
+              seleMan_.isSelected(torsion->getAtomD()) ) {
+            selectionPotential[BONDED_FAMILY] += torsion->getPotential();
+          }
+        }
+
       }      
       
       for (inversion = mol->beginInversion(inversionIter); 
@@ -588,7 +631,15 @@ namespace OpenMD {
           i->second.curr.potential = currInversionPot;
           i->second.deltaV =  fabs(i->second.curr.potential -  
                                    i->second.prev.potential);
-        }      
+        }
+        if (doPotentialSelection_) {
+          if (seleMan_.isSelected(inversion->getAtomA()) ||
+              seleMan_.isSelected(inversion->getAtomB()) ||
+              seleMan_.isSelected(inversion->getAtomC()) ||
+              seleMan_.isSelected(inversion->getAtomD()) ) {
+            selectionPotential[BONDED_FAMILY] += inversion->getPotential();
+          }
+        }
       }      
     }
 
@@ -605,6 +656,9 @@ namespace OpenMD {
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &inversionPotential, 1, 
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &selectionPotential[BONDED_FAMILY], 1, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
 #endif
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -613,6 +667,7 @@ namespace OpenMD {
     curSnapshot->setBendPotential(bendPotential);
     curSnapshot->setTorsionPotential(torsionPotential);
     curSnapshot->setInversionPotential(inversionPotential);
+    curSnapshot->setSelectionPotentials(selectionPotential);
     
     // RealType shortRangePotential = bondPotential + bendPotential + 
     //   torsionPotential +  inversionPotential;    
@@ -670,11 +725,13 @@ namespace OpenMD {
     RealType reciprocalPotential(0.0);
     potVec workPot(0.0);
     potVec exPot(0.0);
+    potVec selectionPotential(0.0);
     Vector3d eField1(0.0);
     Vector3d eField2(0.0);
     RealType sPot1(0.0);
     RealType sPot2(0.0);
     bool newAtom1;
+    int gid1, gid2;
                    
     vector<int>::iterator ia, jb;
 
@@ -758,9 +815,19 @@ namespace OpenMD {
                  ia != atomListRow.end(); ++ia) {            
               atom1 = (*ia);
               
+              if (doPotentialSelection_) {
+                gid1 = fDecomp_->getGlobalIDRow(atom1);
+                idat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+              }
+              
               for (jb = atomListColumn.begin(); 
                    jb != atomListColumn.end(); ++jb) {              
                 atom2 = (*jb);
+                
+                if (doPotentialSelection_) {
+                  gid2 = fDecomp_->getGlobalIDCol(atom2);
+                  idat.isSelected |= seleMan_.isGlobalIDSelected(gid2);
+                }               
                 
                 if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
                   
@@ -801,6 +868,7 @@ namespace OpenMD {
                     interactionMan_->doPair(idat);
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
                     vij += vpair;
+                    if (doPotentialSelection_ && idat.isSelected) selectionPotential += vpair;
                     fij += f1;
                     stressTensor -= outProduct( *(idat.d), f1);
                     if (doHeatFlux_) 

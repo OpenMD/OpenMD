@@ -62,7 +62,8 @@ namespace OpenMD {
     ELECTROSTATIC_FAMILY = 2,  /**< Coulombic and point-multipole interactions */
     METALLIC_FAMILY = 3,       /**< Transition metal interactions involving electron density */
     HYDROGENBONDING_FAMILY = 4,/**< Short-range directional interactions */
-    N_INTERACTION_FAMILIES = 5
+    BONDED_FAMILY = 5,         /**< directly bonded 1-2, 1-3, or 1-4 interactions */
+    N_INTERACTION_FAMILIES = 6
   };
 
   /**
@@ -90,7 +91,6 @@ namespace OpenMD {
    * members are utilized by any given interaction.
    */
   struct InteractionData {
-    //pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
     /*@{*/
     int atid1;                /**< atomType ident for atom 1 */
     int atid2;                /**< atomType ident for atom 2 */
@@ -112,6 +112,7 @@ namespace OpenMD {
     bool doParticlePot;       /**< should we bother with the particle pot? */
     bool doElectricField;     /**< should we bother with the electric field? */
     bool doSitePotential;     /**< should we bother with electrostatic site potential */
+    bool isSelected;          /**< one of the particles has been selected for selection potential */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
     Vector3d* f1;             /**< force between the two atoms */
@@ -170,6 +171,7 @@ namespace OpenMD {
     RealType* dfrhodrho;    /**< derivative of density functional for atom */
     RealType* flucQ;	    /**< current value of atom's fluctuating charge */
     RealType* flucQfrc;	    /**< fluctuating charge derivative */
+    bool isSelected;        /**< this site has been selected for selection potential */
     /*@}*/
   };
   

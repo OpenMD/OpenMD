@@ -494,6 +494,14 @@ namespace OpenMD {
     return frameData.rawPotential;
   }
 
+  void Snapshot::setSelectionPotentials(potVec selPot) {
+    frameData.selectionPotentials = selPot;
+  }
+
+  potVec Snapshot::getSelectionPotentials() {
+    return frameData.selectionPotentials;
+  }
+
   RealType Snapshot::getTranslationalKineticEnergy() {
     return frameData.translationalKinetic;
   }

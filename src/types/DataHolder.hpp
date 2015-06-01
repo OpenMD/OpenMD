@@ -74,8 +74,12 @@ namespace OpenMD {
         }
       } else if (deprecatedKeywords_.find(keyword) != 
                  deprecatedKeywords_.end()){
-        std::cout << keyword << 
-          " has been deprecated in OpenMD.  Please update your .omd file.\n";
+        sprintf(painCave.errMsg,
+                "%s keyword has been deprecated in OpenMD. Please update your .omd file.\n",
+                keyword.c_str() );
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_WARNING;
+        simError();
       } else {
         std::stringstream ss;
         ss << keyword << " is not a recognized keyword.\n";

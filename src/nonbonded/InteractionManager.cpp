@@ -41,6 +41,10 @@
  */
  
 #include "nonbonded/InteractionManager.hpp"
+#include "types/LennardJonesInteractionType.hpp"
+#include "types/MorseInteractionType.hpp"
+#include "types/RepulsivePowerInteractionType.hpp"
+#include "types/MAWInteractionType.hpp"
 
 namespace OpenMD {
 
@@ -117,7 +121,7 @@ namespace OpenMD {
     set<AtomType*>::iterator at;
 
     for (at = atypes.begin(); at != atypes.end(); ++at) {
-          
+
       atype1 = *at;
       atid1 = atype1->getIdent();
       iHash_[atid1].resize(nTypes);
@@ -228,6 +232,9 @@ namespace OpenMD {
             }
             interactions_[atid1][atid2].insert(lj_);
             iHash_[atid1][atid2] |= LJ_INTERACTION;
+            LennardJonesInteractionType* ljit = dynamic_cast<LennardJonesInteractionType*>(nbiType);
+            lj_->addExplicitInteraction(atype1, atype2, ljit->getSigma(),
+                                        ljit->getEpsilon());
             vdwExplicit = true;
           }
           
@@ -255,6 +262,10 @@ namespace OpenMD {
             }
             interactions_[atid1][atid2].insert(morse_);
             iHash_[atid1][atid2] |= MORSE_INTERACTION;
+            MorseInteractionType* mit = dynamic_cast<MorseInteractionType*>(nbiType);
+            morse_->addExplicitInteraction(atype1, atype2, mit->getD(),
+                                           mit->getR(), mit->getBeta(),
+                                           mit->getInteractionType());
             vdwExplicit = true;
           }
 
@@ -282,6 +293,13 @@ namespace OpenMD {
             }
             interactions_[atid1][atid2].insert(repulsivePower_);
             iHash_[atid1][atid2] |= REPULSIVEPOWER_INTERACTION;
+            RepulsivePowerInteractionType* rpit = dynamic_cast<RepulsivePowerInteractionType*>(nbiType);
+            
+            repulsivePower_->addExplicitInteraction(atype1, atype2,
+                                                    rpit->getSigma(),
+                                                    rpit->getEpsilon(),
+                                                    rpit->getNrep());
+
             vdwExplicit = true;
           }
           
@@ -354,6 +372,10 @@ namespace OpenMD {
             }
             interactions_[atid1][atid2].insert(maw_);
             iHash_[atid1][atid2] |= MAW_INTERACTION;
+            MAWInteractionType* mit = dynamic_cast<MAWInteractionType*>(nbiType);
+            maw_->addExplicitInteraction(atype1, atype2, mit->getD(),
+                                         mit->getBeta(), mit->getR(),
+                                         mit->getCA1(), mit->getCB1());
             vdwExplicit = true;
           }        
         }

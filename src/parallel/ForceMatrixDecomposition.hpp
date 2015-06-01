@@ -90,6 +90,8 @@ namespace OpenMD {
     vector<int>& getExcludesForAtom(int atom1); 
     bool skipAtomPair(int atom1, int atom2, int cg1, int cg2);
     bool excludeAtomPair(int atom1, int atom2);
+    int getGlobalIDRow(int atom1);
+    int getGlobalIDCol(int atom1);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);
     Vector3d& getAtomVelocityColumn(int atom2);
