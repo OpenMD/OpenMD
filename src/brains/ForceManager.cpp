@@ -953,8 +953,10 @@ namespace OpenMD {
           fDecomp_->collectIntermediateData();
           
           for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
-            gid1 = fDecomp_->getGlobalID(atom1);
-            sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+            if (doPotentialSelection_) {              
+              gid1 = fDecomp_->getGlobalID(atom1);
+              sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+            }
 
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
@@ -976,8 +978,10 @@ namespace OpenMD {
         
     if (info_->requiresSelfCorrection()) {
       for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
-        gid1 = fDecomp_->getGlobalID(atom1);
-        sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+        if (doPotentialSelection_) {          
+          gid1 = fDecomp_->getGlobalID(atom1);
+          sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+        }
             
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
@@ -994,9 +998,13 @@ namespace OpenMD {
     
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                        *(fDecomp_->getExcludedPotential()));
-
-    curSnapshot->setSelectionPotentials(*(fDecomp_->getSelectedSelfPotential())+
-                                        *(fDecomp_->getSelectedPotential()));
+    
+    if (doPotentialSelection_) {              
+      selectionPotential  = curSnapshot->getSelectionPotentials();
+      selectionPotential += *(fDecomp_->getSelectedSelfPotential());
+      selectionPotential += *(fDecomp_->getSelectedPotential());
+      curSnapshot->setSelectionPotentials(selectionPotential);
+    }
   }
 
   void ForceManager::postCalculation() {
