@@ -106,7 +106,9 @@ namespace OpenMD {
     virtual potVec* getEmbeddingPotential() { return &embeddingPot; }
     virtual potVec* getPairwisePotential() { return &pairwisePot; }
     virtual potVec* getExcludedPotential() { return &excludedPot; }
+    virtual potVec* getSelectedPotential() { return &selectedPot; }
     virtual potVec* getExcludedSelfPotential() { return &excludedSelfPot; }
+    virtual potVec* getSelectedSelfPotential() { return &selectedSelfPot; }
 
     // neighbor list routines
     virtual bool checkNeighborList();
@@ -137,6 +139,8 @@ namespace OpenMD {
     virtual bool excludeAtomPair(int atom1, int atom2) = 0;
     virtual int getGlobalIDRow(int atom1) = 0;
     virtual int getGlobalIDCol(int atom2) = 0;
+    virtual int getGlobalID(int atom1) = 0;
+    
     virtual int getTopologicalDistance(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
@@ -173,6 +177,8 @@ namespace OpenMD {
     potVec excludedPot;
     potVec excludedSelfPot;
     potVec selectedPot;
+    potVec selectedSelfPot;
+
 
     /** 
      * The topological distance between two atomic sites is handled

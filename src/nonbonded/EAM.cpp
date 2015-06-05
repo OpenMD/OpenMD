@@ -315,6 +315,9 @@ namespace OpenMD {
                                       *(sdat.dfrhodrho) );
 
     (*(sdat.pot))[METALLIC_FAMILY] += *(sdat.frho);
+    if (sdat.isSelected)
+      (*(sdat.selePot))[METALLIC_FAMILY] += *(sdat.frho);
+
     if (sdat.doParticlePot) {
       *(sdat.particlePot) += *(sdat.frho);
     }
@@ -414,7 +417,10 @@ namespace OpenMD {
         - *(idat.frho1);
     }
     
-    (*(idat.pot))[METALLIC_FAMILY] += phab;    
+    (*(idat.pot))[METALLIC_FAMILY] += phab;
+    if (idat.isSelected)
+      (*(idat.selePot))[METALLIC_FAMILY] += phab;
+
     *(idat.vpair) += phab;  
     return;    
   }

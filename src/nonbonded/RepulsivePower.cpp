@@ -177,6 +177,9 @@ namespace OpenMD {
                                                               myDerivC)*sigmai;
     
     (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    if (idat.isSelected)
+      (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+
     *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
     
     return;

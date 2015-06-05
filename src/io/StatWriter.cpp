@@ -135,6 +135,8 @@ namespace OpenMD {
             writeReal(i);
           else if (stats_->getDataType(i) == "Vector3d")
             writeVector(i);
+          else if (stats_->getDataType(i) == "potVec")
+            writePotVec(i);
           else if (stats_->getDataType(i) == "Mat3x3d")
             writeMatrix(i);
           else {
@@ -184,6 +186,28 @@ namespace OpenMD {
       simError();
     } else {
       statfile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
+    }
+  }
+
+  void StatWriter::writePotVec(int i) {
+
+    potVec s = stats_->getPotVecData(i);
+
+    bool foundError = false;
+
+    for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
+      if (isinf(s[j]) || isnan(s[j])) foundError = true;
+    }
+    if (foundError) {
+      sprintf( painCave.errMsg,
+               "StatWriter detected a numerical error writing: %s",
+               stats_->getTitle(i).c_str());
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
+        statfile_ << "\t" << s[j];
+      }
     }
   }
 

@@ -60,6 +60,8 @@ namespace OpenMD {
     RealType getRotationalKinetic(); // the rotational kinetic energy 
     RealType getKinetic(); // the total kinetic energy 
     RealType getPotential(); // the total potential energy
+    potVec getSelectionPotentials(); // the potential energy of a selection
+        
     RealType getTotalEnergy(); // gets the total energy
 
     RealType getTemperature(); // Gives the instant temp. in K

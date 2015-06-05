@@ -94,6 +94,7 @@ namespace OpenMD {
       COM,
       COM_VELOCITY,
       ANGULAR_MOMENTUM,
+      POTENTIAL_SELECTION,
       ENDINDEX  //internal use
     };
 
@@ -123,6 +124,7 @@ namespace OpenMD {
     int       getIntData(int index);
     RealType  getRealData(int index);
     Vector3d  getVectorData(int index);
+    potVec    getPotVecData(int index);
     Mat3x3d   getMatrixData(int index);
     
   private:

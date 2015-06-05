@@ -172,6 +172,15 @@ namespace OpenMD {
     return snap->getPotentialEnergy();
   }
 
+  potVec Thermo::getSelectionPotentials() {
+
+    // ForceManager computes the selection potentials and stores them
+    // in the Snapshot.  All we have to do is report them.
+
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    return snap->getSelectionPotentials();
+  }
+
   RealType Thermo::getTotalEnergy() {
 
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();

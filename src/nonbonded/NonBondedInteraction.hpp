@@ -113,6 +113,7 @@ namespace OpenMD {
     bool doElectricField;     /**< should we bother with the electric field? */
     bool doSitePotential;     /**< should we bother with electrostatic site potential */
     bool isSelected;          /**< one of the particles has been selected for selection potential */
+    potVec* selePot;          /**< potential energies of the selected sites */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
     Vector3d* f1;             /**< force between the two atoms */
@@ -172,6 +173,7 @@ namespace OpenMD {
     RealType* flucQ;	    /**< current value of atom's fluctuating charge */
     RealType* flucQfrc;	    /**< fluctuating charge derivative */
     bool isSelected;        /**< this site has been selected for selection potential */
+    potVec* selePot;       /**< potential energy of the selected site */
     /*@}*/
   };
   

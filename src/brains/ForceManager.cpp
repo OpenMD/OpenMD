@@ -742,8 +742,10 @@ namespace OpenMD {
     idat.electroMult = &electroMult;
     idat.pot = &workPot;
     idat.excludedPot = &exPot;
-    sdat.pot = fDecomp_->getEmbeddingPotential();
+    idat.selePot = &selectionPotential;
+    sdat.pot = fDecomp_->getEmbeddingPotential();    
     sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
+    sdat.selePot = fDecomp_->getSelectedSelfPotential();
     idat.vpair = &vpair;
     idat.dVdFQ1 = &dVdFQ1;
     idat.dVdFQ2 = &dVdFQ2;
@@ -834,6 +836,7 @@ namespace OpenMD {
                   vpair = 0.0;
                   workPot = 0.0;
                   exPot = 0.0;
+                  selectionPotential = 0.0;
                   f1.zero();
                   dVdFQ1 = 0.0;
                   dVdFQ2 = 0.0;
@@ -868,7 +871,6 @@ namespace OpenMD {
                     interactionMan_->doPair(idat);
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
                     vij += vpair;
-                    if (doPotentialSelection_ && idat.isSelected) selectionPotential += vpair;
                     fij += f1;
                     stressTensor -= outProduct( *(idat.d), f1);
                     if (doHeatFlux_) 
@@ -951,6 +953,9 @@ namespace OpenMD {
           fDecomp_->collectIntermediateData();
           
           for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
+            gid1 = fDecomp_->getGlobalID(atom1);
+            sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
@@ -970,7 +975,10 @@ namespace OpenMD {
     }
         
     if (info_->requiresSelfCorrection()) {
-      for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) { 
+      for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
+        gid1 = fDecomp_->getGlobalID(atom1);
+        sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+            
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
       }
@@ -987,6 +995,8 @@ namespace OpenMD {
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                        *(fDecomp_->getExcludedPotential()));
 
+    curSnapshot->setSelectionPotentials(*(fDecomp_->getSelectedSelfPotential())+
+                                        *(fDecomp_->getSelectedPotential()));
   }
 
   void ForceManager::postCalculation() {

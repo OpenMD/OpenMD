@@ -146,7 +146,8 @@ int main(int argc, char* argv[]){
   MinimizerParameters* miniPars = simParams->getMinimizerParameters();
 
   if (miniPars->getUseMinimizer() && simParams->haveEnsemble()) {
-    sprintf(painCave.errMsg, "Ensemble keyword can not co-exist with useMinimizer = \"true\" in the minimizer block\n");
+    sprintf(painCave.errMsg,
+            "Ensemble keyword can not co-exist with useMinimizer = \"true\" in the minimizer block\n");
     painCave.isFatal = 1;
     simError();        
   }
@@ -156,7 +157,8 @@ int main(int argc, char* argv[]){
     OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
 
     if (myMinimizer == NULL) {
-      sprintf(painCave.errMsg, "Optimization Factory can not create %s OptimizationMethod\n",
+      sprintf(painCave.errMsg,
+              "Optimization Factory can not create %s OptimizationMethod\n",
 	      miniPars->getMethod().c_str());
       painCave.isFatal = 1;
       simError();
@@ -188,7 +190,8 @@ int main(int argc, char* argv[]){
     Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(toUpperCopy(simParams->getEnsemble()), info);
  
     if (myIntegrator == NULL) {
-      sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
+      sprintf(painCave.errMsg,
+              "Integrator Factory can not create %s Integrator\n",
 	      simParams->getEnsemble().c_str());
       painCave.isFatal = 1;
       simError();
@@ -202,7 +205,8 @@ int main(int argc, char* argv[]){
     }
 
     // Restraints
-    if (simParams->getUseRestraints() && !simParams->getUseThermodynamicIntegration()) {
+    if (simParams->getUseRestraints() &&
+        !simParams->getUseThermodynamicIntegration()) {
       ForceManager* fman = new RestraintForceManager(info);
       myIntegrator->setForceManager(fman);
     }
@@ -217,7 +221,8 @@ int main(int argc, char* argv[]){
     myIntegrator->integrate();
     delete myIntegrator;
   }else {
-    sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
+    sprintf(painCave.errMsg,
+            "Integrator Factory can not create %s Integrator\n",
             simParams->getEnsemble().c_str());
     painCave.isFatal = 1;
     simError();

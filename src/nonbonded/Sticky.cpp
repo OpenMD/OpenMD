@@ -308,6 +308,10 @@ namespace OpenMD {
       
       *(idat.vpair) += RealType(0.5)*(v0*s*w + v0p*sp*wp);
       (*(idat.pot))[HYDROGENBONDING_FAMILY] += RealType(0.5)*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
+      if (idat.isSelected)
+        (*(idat.selePot))[HYDROGENBONDING_FAMILY] += 0.5 * (v0*s*w +
+                                                            v0p*sp*wp)* *(idat.sw);
+
       
       // do the torques first since they are easy:
       // remember that these are still in the body-fixed axes

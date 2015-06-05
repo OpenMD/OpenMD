@@ -345,6 +345,14 @@ namespace OpenMD {
     data_[ANGULAR_MOMENTUM] = angMom;
     statsMap_["ANGULAR_MOMENTUM"] =  ANGULAR_MOMENTUM;
 
+    StatsData potSelection;
+    potSelection.units =  "kcal/mol";
+    potSelection.title =  "Selection Potentials";
+    potSelection.dataType = "potVec";
+    potSelection.accumulator = new PotVecAccumulator();
+    data_[POTENTIAL_SELECTION] = potSelection;
+    statsMap_["POTENTIAL_SELECTION"] =  POTENTIAL_SELECTION;
+
     // Now, set some defaults in the mask:
 
     Globals* simParams = info_->getSimParams();
@@ -390,13 +398,16 @@ namespace OpenMD {
       }
     }    
     
-    
-    if (simParams->haveTaggedAtomPair() && simParams->havePrintTaggedPairDistance()) {
+    if (simParams->haveTaggedAtomPair() &&
+        simParams->havePrintTaggedPairDistance()) {
       if (simParams->getPrintTaggedPairDistance()) {
         statsMask_.set(TAGGED_PAIR_DISTANCE);
       }
     }
     
+    if (simParams->havePotentialSelection()) {
+      statsMask_.set(POTENTIAL_SELECTION);
+    }      
   }
 
   void Stats::parseStatFileFormat(const std::string& format) {
@@ -548,6 +559,10 @@ namespace OpenMD {
         case ANGULAR_MOMENTUM:
           dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getAngularMomentum());
           break;
+        case POTENTIAL_SELECTION:
+          dynamic_cast<PotVecAccumulator *>(data_[i].accumulator)->add(thermo.getSelectionPotentials());
+          break;
+
           /*
         case SHADOWH:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getShadowHamiltionian());
@@ -577,6 +592,12 @@ namespace OpenMD {
     assert(index >=0 && index < ENDINDEX);
     Vector3d value;
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator)->getLastValue(value);
+    return value;
+  }
+  potVec Stats::getPotVecData(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    potVec value;
+    dynamic_cast<PotVecAccumulator*>(data_[index].accumulator)->getLastValue(value);
     return value;
   }
   Mat3x3d Stats::getMatrixData(int index) {

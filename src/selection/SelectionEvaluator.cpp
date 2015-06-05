@@ -831,7 +831,7 @@ namespace OpenMD {
       pc = 0;
       instructionDispatchLoop(bs);
     }
-    return bs;
+    return bs.parallelReduce();
   }
 
   SelectionSet SelectionEvaluator::evaluate(int frame) {

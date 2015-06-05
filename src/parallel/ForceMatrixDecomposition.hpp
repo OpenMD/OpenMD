@@ -92,6 +92,7 @@ namespace OpenMD {
     bool excludeAtomPair(int atom1, int atom2);
     int getGlobalIDRow(int atom1);
     int getGlobalIDCol(int atom1);
+    int getGlobalID(int atom1);
     void addForceToAtomRow(int atom1, Vector3d fg);
     void addForceToAtomColumn(int atom2, Vector3d fg);
     Vector3d& getAtomVelocityColumn(int atom2);
@@ -145,6 +146,9 @@ namespace OpenMD {
 
     vector<potVec> expot_row;
     vector<potVec> expot_col;
+
+    vector<potVec> selepot_row;
+    vector<potVec> selepot_col;
 
     vector<int> identsRow;
     vector<int> identsCol;

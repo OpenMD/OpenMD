@@ -109,6 +109,7 @@ namespace OpenMD {
 
     sdat.pot = &embeddingPot;
     sdat.excludedPot = &excludedSelfPot;
+    sdat.selePot = &selectedSelfPot;
 
     if (storageLayout_ & DataStorage::dslDipole) {
       sdat.dipole = &(snap_->atomData.dipole[atom1]);

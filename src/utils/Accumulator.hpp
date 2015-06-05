@@ -46,6 +46,7 @@
 #include <cmath>
 #include <cassert>
 #include "math/Vector3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 
 namespace OpenMD {
 
@@ -374,6 +375,191 @@ namespace OpenMD {
 
   };
 
+  class PotVecAccumulator : public BaseAccumulator {
+    
+    typedef potVec ElementType;
+    typedef potVec ResultType;
+    
+  public:
+    PotVecAccumulator() : BaseAccumulator() {
+      this->clear();
+    }
+
+    /**
+     * Accumulate another value
+     */
+    void add(ElementType const& val) {
+      Count_++;
+      RealType len(0.0);
+      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
+        Avg_[i]  += (val[i]       - Avg_[i] ) / Count_;
+        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
+        Val_[i]   = val[i];
+        len += val[i]*val[i];
+      }
+      len = sqrt(len);
+      AvgLen_  += (len       - AvgLen_ ) / Count_;
+      AvgLen2_ += (len * len - AvgLen2_) / Count_;
+
+      if (Count_ <= 1) {
+        Max_ = len;
+        Min_ = len;
+      } else {
+        Max_ = len > Max_ ? len : Max_;
+        Min_ = len < Min_ ? len : Min_;
+      }
+    }
+
+    /**
+     * reset the Accumulator to the empty state
+     */
+    void clear() {
+      Count_ = 0;
+      const Vector<RealType,N_INTERACTION_FAMILIES> potVecZero(0.0);
+      Avg_ = potVecZero;
+      Avg2_ = potVecZero;
+      Val_ = potVecZero;
+      AvgLen_   = 0;
+      AvgLen2_  = 0;
+    }
+    
+    /**
+     * return the most recently added value
+     */
+    void getLastValue(ElementType &ret) {
+      ret = Val_;
+      return;
+    }
+    
+    /**
+     * compute the Mean
+     */
+    void getAverage(ResultType &ret) {
+      assert(Count_ != 0);
+      ret = Avg_;
+      return;
+    }
+    
+    /**
+     * compute the Variance
+     */
+    void getVariance(ResultType &ret) {
+      assert(Count_ != 0);
+      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
+        ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
+      }
+      return;
+    }
+    
+    /**
+     * compute error of average value
+     */
+    void getStdDev(ResultType &ret) {
+      assert(Count_ != 0);
+      ResultType var;
+      this->getVariance(var);
+      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {        
+        ret[i] = sqrt(var[i]);
+      }
+      return;
+    }
+
+    /**
+     * return the 95% confidence interval:
+     *
+     * That is returns c, such that we have 95% confidence that the
+     * true mean is within 2c of the Average (x):
+     *
+     *   x - c <= true mean <= x + c
+     *
+     */
+    void get95percentConfidenceInterval(ResultType &ret) {
+      assert(Count_ != 0);
+      ResultType sd;
+      this->getStdDev(sd);
+      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {        
+        ret[i] = 1.960 * sd[i] / sqrt(RealType(Count_));
+      }
+      return;
+    }
+
+    /**
+     * return the largest length
+     */
+    void getMaxLength(RealType &ret) {
+      assert(Count_ != 0);
+      ret = Max_;
+      return;
+    }
+
+    /**
+     * return the smallest length
+     */
+    void getMinLength(RealType &ret) {
+      assert(Count_ != 0);
+      ret = Min_;
+      return;
+    }
+
+    /**
+     * return the largest length
+     */
+    void getAverageLength(RealType &ret) {
+      assert(Count_ != 0);
+      ret = AvgLen_;
+      return;
+    }
+
+    /**
+     * compute the Variance of the length
+     */
+    void getLengthVariance(RealType &ret) {
+      assert(Count_ != 0);      
+      ret= (AvgLen2_ - AvgLen_ * AvgLen_);
+      return;
+    }
+    
+    /**
+     * compute error of average value
+     */
+    void getLengthStdDev(RealType &ret) {
+      assert(Count_ != 0);
+      RealType var;
+      this->getLengthVariance(var);
+      ret = sqrt(var);
+      return;
+    }
+
+    /**
+     * return the 95% confidence interval:
+     *
+     * That is returns c, such that we have 95% confidence that the
+     * true mean is within 2c of the Average (x):
+     *
+     *   x - c <= true mean <= x + c
+     *
+     */
+    void getLength95percentConfidenceInterval(ResultType &ret) {
+      assert(Count_ != 0);
+      RealType sd;
+      this->getLengthStdDev(sd);
+      ret = 1.960 * sd / sqrt(RealType(Count_));
+      return;
+    }
+
+
+  private:
+    ResultType Val_;
+    ResultType Avg_;
+    ResultType Avg2_;
+    RealType AvgLen_;
+    RealType AvgLen2_;
+    RealType Min_;
+    RealType Max_;
+
+  };
+
+  
   class MatrixAccumulator : public BaseAccumulator {
     
     typedef Mat3x3d ElementType;

@@ -67,7 +67,8 @@ namespace OpenMD {
 
   const char * progressSpinner_ = "|/-\\";
 
-  ProgressBar::ProgressBar() : value_(0.0), maximum_(-1.0), iteration_(0), start_(time(NULL)) {
+  ProgressBar::ProgressBar() : value_(0.0), maximum_(-1.0), iteration_(0),
+                               start_(time(NULL)) {
   }
   
   void ProgressBar::clear() {

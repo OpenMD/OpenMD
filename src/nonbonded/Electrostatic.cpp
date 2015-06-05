@@ -1126,6 +1126,9 @@ namespace OpenMD {
       
       *(idat.vpair) += U;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
+      if (idat.isSelected)
+        (*(idat.selePot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
+         
       *(idat.f1) += F * *(idat.sw);
       
       if (a_is_Dipole || a_is_Quadrupole) 
@@ -1142,6 +1145,9 @@ namespace OpenMD {
       *(idat.vpair) += indirect_Pot;      
       (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] +=  excluded_Pot;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
+      if (idat.isSelected)
+        (*(idat.selePot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
+
       *(idat.f1) += *(idat.sw) * indirect_F;
       
       if (a_is_Dipole || a_is_Quadrupole) 
@@ -1188,10 +1194,15 @@ namespace OpenMD {
         // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
         preVal = pre11_ * preRF_ * C_a * C_a;
         (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
+        if (sdat.isSelected)
+          (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_;
+
       }
 
       if (i_is_Dipole) {
         (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
+        if (sdat.isSelected)
+          (*(sdat.selePot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
       }
       
       break;
@@ -1211,7 +1222,10 @@ namespace OpenMD {
         if (i_is_Charge)
           self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
       }
-      (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;      
+      (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
+      if (sdat.isSelected)
+        (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += self;
+
       break;
     default:
       break;
