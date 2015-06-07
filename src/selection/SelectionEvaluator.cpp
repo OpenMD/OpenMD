@@ -345,7 +345,7 @@ namespace OpenMD {
       }
     }
 
-    return bs;
+    return bs.parallelReduce();
   }
 
   SelectionSet SelectionEvaluator::comparatorInstruction(const Token& instruction, int frame) {
@@ -377,7 +377,7 @@ namespace OpenMD {
       }
     }
 
-    return bs;
+    return bs.parallelReduce();
   }
 
   void SelectionEvaluator::compareProperty(StuntDouble* sd, SelectionSet& bs, 
@@ -790,13 +790,13 @@ namespace OpenMD {
       } else if (i->second.type() ==  typeid(std::vector<Token>)){
 	bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
 	i->second =  bs; /**@todo fixme */
-	return bs;
+	return bs.parallelReduce();
       }
     } else {
       unrecognizedIdentifier(variable);
     }
     
-    return bs;
+    return bs.parallelReduce();
   }
   
   SelectionSet SelectionEvaluator::nameInstruction(const std::string& name){    
@@ -840,7 +840,7 @@ namespace OpenMD {
       pc = 0;
       instructionDispatchLoop(bs, frame);
     }
-    return bs;
+    return bs.parallelReduce();
   }
 
   SelectionSet SelectionEvaluator::indexInstruction(const boost::any& value) {
@@ -864,7 +864,7 @@ namespace OpenMD {
       }
     }
 
-    return bs;
+    return bs.parallelReduce();
   }
 
   SelectionSet SelectionEvaluator::allInstruction() {
@@ -925,7 +925,7 @@ namespace OpenMD {
     bs = hullFinder.findHull();
     surfaceArea_ = hullFinder.getSurfaceArea();
     hasSurfaceArea_ = true;
-    return bs;
+    return bs.parallelReduce();
   }
 
 
@@ -934,7 +934,7 @@ namespace OpenMD {
     
     bs = hullFinder.findHull(frame);
 
-    return bs;
+    return bs.parallelReduce();
   }
 
   RealType SelectionEvaluator::getCharge(Atom* atom) {
