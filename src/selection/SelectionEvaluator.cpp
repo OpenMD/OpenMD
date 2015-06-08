@@ -700,7 +700,7 @@ namespace OpenMD {
                                              SelectionSet& bs){
     
     boost::any withinSpec = instruction.value;
-    float distance;
+    float distance(0.0);
     if (withinSpec.type() == typeid(float)){
       distance = boost::any_cast<float>(withinSpec);
     } else if (withinSpec.type() == typeid(int)) {
@@ -717,7 +717,7 @@ namespace OpenMD {
                                              SelectionSet& bs, int frame){
     
     boost::any withinSpec = instruction.value;
-    float distance;
+    float distance(0.0);
     if (withinSpec.type() == typeid(float)){
       distance = boost::any_cast<float>(withinSpec);
     } else if (withinSpec.type() == typeid(int)) {
