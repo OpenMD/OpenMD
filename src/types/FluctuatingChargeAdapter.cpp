@@ -121,7 +121,7 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->coupling;
   }
-  vector<pair<int, RealType> > FluctuatingChargeAdapter::getDiabaticStates() {
+  vector<pair<RealType, RealType> > FluctuatingChargeAdapter::getDiabaticStates() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->diabaticStates;
   }
@@ -173,7 +173,7 @@ namespace OpenMD {
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType curvature,
                                                        RealType coupling,
-                                 vector<pair<int, RealType> > diabaticStates) {
+                             vector<pair<RealType, RealType> > diabaticStates) {
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }

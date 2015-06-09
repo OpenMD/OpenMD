@@ -136,7 +136,7 @@ namespace OpenMD {
         simError();
 
       } else {
-        std::vector<std::pair<int, RealType> > diabaticStates;
+        std::vector<std::pair<RealType, RealType> > diabaticStates;
         RealType curvature = tokenizer.nextTokenAsDouble();
         RealType coupling = tokenizer.nextTokenAsDouble();
         nTokens -= 2;
@@ -144,7 +144,7 @@ namespace OpenMD {
         int charge;
         RealType ionizationEnergy;
         for (int i = 0; i < nStates; ++i) {
-          charge = tokenizer.nextTokenAsInt();
+          charge = tokenizer.nextTokenAsDouble();
           ionizationEnergy = tokenizer.nextTokenAsDouble();
           diabaticStates.push_back( std::make_pair( charge, ionizationEnergy ));
         }

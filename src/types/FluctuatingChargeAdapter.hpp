@@ -60,7 +60,7 @@ namespace OpenMD {
     RealType slaterZeta;   /** off-diagonal Slater exponent */
     RealType curvature;    /** multiple minima curvature for charge states */
     RealType coupling;     /** multiple minima EVB coupling for charge states */
-    vector<pair<int, RealType> > diabaticStates; /** multiple minima diabats */
+    vector<pair<RealType, RealType> > diabaticStates; /** multiple minima diabats */
   };
   typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;   
 
@@ -71,7 +71,7 @@ namespace OpenMD {
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, int slaterN, RealType slaterZeta);
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, int slaterN);
 
-    void makeFluctuatingCharge(RealType chargeMass, RealType curvature, RealType coupling, vector<pair<int, RealType> > diabaticStates);
+    void makeFluctuatingCharge(RealType chargeMass, RealType curvature, RealType coupling, vector<pair<RealType, RealType> > diabaticStates);
     
     bool isFluctuatingCharge();
     bool hasMultipleMinima();
@@ -82,7 +82,7 @@ namespace OpenMD {
     RealType getSlaterZeta();
     RealType getCoupling();
     RealType getCurvature();
-    vector<pair<int, RealType> > getDiabaticStates();
+    vector<pair<RealType, RealType> > getDiabaticStates();
 
   private:
     AtomType* at_;
