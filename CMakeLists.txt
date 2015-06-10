@@ -374,7 +374,6 @@ src/selection/IndexFinder.cpp
 src/selection/NameFinder.cpp
 src/selection/SelectionCompiler.cpp
 src/selection/SelectionEvaluator.cpp
-src/selection/SelectionManager.cpp
 src/selection/SelectionToken.cpp
 src/selection/TokenMap.cpp
 src/selection/SelectionSet.cpp
@@ -465,6 +464,7 @@ src/parallel/ForceMatrixDecomposition.cpp
 src/restraints/RestraintForceManager.cpp
 src/restraints/ThermoIntegrationForceManager.cpp
 src/selection/DistanceFinder.cpp
+src/selection/SelectionManager.cpp
 src/utils/ProgressBar.cpp
 src/utils/simError.cpp
 src/utils/OpenMDBitSet.cpp

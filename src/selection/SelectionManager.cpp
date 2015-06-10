@@ -106,13 +106,37 @@ namespace OpenMD {
   }
 
   StuntDouble* SelectionManager::beginSelected(int& i) {
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+      if (ss_.bitsets_[STUNTDOUBLE][i]) {
+        // check that this processor owns this stuntdouble
+        if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[STUNTDOUBLE].firstOnBit();
     return i == -1 ? NULL : stuntdoubles_[i];
+#endif
   }
 
   StuntDouble* SelectionManager::nextSelected(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+      if (ss_.bitsets_[STUNTDOUBLE][i]) {
+        // check that this processor owns this stuntdouble
+        if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[STUNTDOUBLE].nextOnBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
+#endif
   }
 
   StuntDouble* SelectionManager::beginUnselected(int& i){
