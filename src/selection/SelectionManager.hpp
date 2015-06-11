@@ -271,35 +271,67 @@ namespace OpenMD {
       return ss_.bitsets_[MOLECULE][m->getGlobalIndex()];
     }
 
+    /**
+     * Finds the first selected StuntDouble in the selection.  In
+     * parallel, this is the first selected StuntDouble that is the
+     * responsibility of the local processor, and not the first
+     * StuntDouble in the global selection.
+     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @param i iterator used to keep track of the selection
+     */
     StuntDouble* beginSelected(int& i);
+    /**
+     * Finds the next selected StuntDouble in the selection.  In
+     * parallel, this is the next selected StuntDouble that is the
+     * responsibility of the local processor, and not the next
+     * StuntDouble in the global selection.
+     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @param i iterator used to keep track of the selection
+     */
     StuntDouble* nextSelected(int& i);
+    /**
+     * Finds the first unselected StuntDouble.  In
+     * parallel, this is the first unselected StuntDouble that is the
+     * responsibility of the local processor, and not the first
+     * StuntDouble in the global unselected pool.
+     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @param i iterator used to keep track of the selection
+     */
     StuntDouble* beginUnselected(int& i);
-    StuntDouble* nextUnSelected(int& i);
+    /**
+     * Finds the next unselected StuntDouble.  In
+     * parallel, this is the next unselected StuntDouble that is the
+     * responsibility of the local processor, and not the next
+     * StuntDouble in the global unselected pool.
+     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @param i iterator used to keep track of the selection
+     */
+    StuntDouble* nextUnselected(int& i);
 
     Bond* beginSelectedBond(int& i);
     Bond* nextSelectedBond(int& i);
     Bond* beginUnselectedBond(int& i);
-    Bond* nextUnSelectedBond(int& i);
+    Bond* nextUnselectedBond(int& i);
 
     Bend* beginSelectedBend(int& i);
     Bend* nextSelectedBend(int& i);
     Bend* beginUnselectedBend(int& i);
-    Bend* nextUnSelectedBend(int& i);
+    Bend* nextUnselectedBend(int& i);
 
     Torsion* beginSelectedTorsion(int& i);
     Torsion* nextSelectedTorsion(int& i);
     Torsion* beginUnselectedTorsion(int& i);
-    Torsion* nextUnSelectedTorsion(int& i);
+    Torsion* nextUnselectedTorsion(int& i);
 
     Inversion* beginSelectedInversion(int& i);
     Inversion* nextSelectedInversion(int& i);
     Inversion* beginUnselectedInversion(int& i);
-    Inversion* nextUnSelectedInversion(int& i);
+    Inversion* nextUnselectedInversion(int& i);
 
     Molecule* beginSelectedMolecule(int& i);
     Molecule* nextSelectedMolecule(int& i);
     Molecule* beginUnselectedMolecule(int& i);
-    Molecule* nextUnSelectedMolecule(int& i);
+    Molecule* nextUnselectedMolecule(int& i);
 
     SelectionManager& operator&= (const SelectionManager &sman) {
       for (int i = 0; i < N_SELECTIONTYPES; i++) 

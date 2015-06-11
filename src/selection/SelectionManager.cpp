@@ -140,13 +140,37 @@ namespace OpenMD {
   }
 
   StuntDouble* SelectionManager::beginUnselected(int& i){
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+      if (!ss_.bitsets_[STUNTDOUBLE][i]) {
+        // check that this processor owns this stuntdouble
+        if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[STUNTDOUBLE].firstOffBit();
     return i == -1 ? NULL : stuntdoubles_[i];
+#endif
   }
 
-  StuntDouble* SelectionManager::nextUnSelected(int& i) {
+  StuntDouble* SelectionManager::nextUnselected(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+      if (!ss_.bitsets_[STUNTDOUBLE][i]) {
+        // check that this processor owns this stuntdouble
+        if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[STUNTDOUBLE].nextOffBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
+#endif
   }
 
   Bond* SelectionManager::beginSelectedBond(int& i) {
@@ -164,7 +188,7 @@ namespace OpenMD {
     return i == -1 ? NULL : bonds_[i];
   }
 
-  Bond* SelectionManager::nextUnSelectedBond(int& i) {
+  Bond* SelectionManager::nextUnselectedBond(int& i) {
     i = ss_.bitsets_[BOND].nextOffBit(i);
     return i == -1 ? NULL : bonds_[i];
   }
@@ -184,7 +208,7 @@ namespace OpenMD {
     return i == -1 ? NULL : bends_[i];
   }
 
-  Bend* SelectionManager::nextUnSelectedBend(int& i) {
+  Bend* SelectionManager::nextUnselectedBend(int& i) {
     i = ss_.bitsets_[BEND].nextOffBit(i);
     return i == -1 ? NULL : bends_[i];
   }
@@ -204,7 +228,7 @@ namespace OpenMD {
     return i == -1 ? NULL : torsions_[i];
   }
 
-  Torsion* SelectionManager::nextUnSelectedTorsion(int& i) {
+  Torsion* SelectionManager::nextUnselectedTorsion(int& i) {
     i = ss_.bitsets_[TORSION].nextOffBit(i);
     return i == -1 ? NULL : torsions_[i];
   }
@@ -224,7 +248,7 @@ namespace OpenMD {
     return i == -1 ? NULL : inversions_[i];
   }
 
-  Inversion* SelectionManager::nextUnSelectedInversion(int& i) {
+  Inversion* SelectionManager::nextUnselectedInversion(int& i) {
     i = ss_.bitsets_[INVERSION].nextOffBit(i);
     return i == -1 ? NULL : inversions_[i];
   }
@@ -244,7 +268,7 @@ namespace OpenMD {
     return i == -1 ? NULL : molecules_[i];
   }
 
-  Molecule* SelectionManager::nextUnSelectedMolecule(int& i) {
+  Molecule* SelectionManager::nextUnselectedMolecule(int& i) {
     i = ss_.bitsets_[MOLECULE].nextOffBit(i);
     return i == -1 ? NULL : molecules_[i];
   }
