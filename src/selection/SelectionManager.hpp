@@ -274,7 +274,7 @@ namespace OpenMD {
     /**
      * Finds the first selected StuntDouble in the selection.  In
      * parallel, this is the first selected StuntDouble that is the
-     * responsibility of the local processor, and not the first
+     * responsibility of the local processor, not the first
      * StuntDouble in the global selection.
      * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
      * @param i iterator used to keep track of the selection
@@ -283,7 +283,7 @@ namespace OpenMD {
     /**
      * Finds the next selected StuntDouble in the selection.  In
      * parallel, this is the next selected StuntDouble that is the
-     * responsibility of the local processor, and not the next
+     * responsibility of the local processor, not the next
      * StuntDouble in the global selection.
      * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
      * @param i iterator used to keep track of the selection
@@ -292,7 +292,7 @@ namespace OpenMD {
     /**
      * Finds the first unselected StuntDouble.  In
      * parallel, this is the first unselected StuntDouble that is the
-     * responsibility of the local processor, and not the first
+     * responsibility of the local processor, not the first
      * StuntDouble in the global unselected pool.
      * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
      * @param i iterator used to keep track of the selection
@@ -301,36 +301,177 @@ namespace OpenMD {
     /**
      * Finds the next unselected StuntDouble.  In
      * parallel, this is the next unselected StuntDouble that is the
-     * responsibility of the local processor, and not the next
+     * responsibility of the local processor, not the next
      * StuntDouble in the global unselected pool.
      * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
      * @param i iterator used to keep track of the selection
      */
     StuntDouble* nextUnselected(int& i);
-
+    /**
+     * Finds the first selected Bond in the selection.  In parallel,
+     * this is the first selected Bond that is the responsibility of
+     * the local processor, not the first Bond in the global
+     * selection.
+     * @return a pointer to the Bond object, returns NULL if no Bond was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bond* beginSelectedBond(int& i);
+    /**
+     * Finds the next selected Bond in the selection.  In parallel,
+     * this is the next selected Bond that is the responsibility of
+     * the local processor, not the next Bond in the global selection.
+     * @return a pointer to the Bond object, returns NULL if no Bond was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bond* nextSelectedBond(int& i);
+    /**
+     * Finds the first unselected Bond.  In parallel, this is the
+     * first unselected Bond that is the responsibility of the local
+     * processor, not the first Bond in the global unselected pool.
+     * @return a pointer to the Bond object, returns NULL if no Bond was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bond* beginUnselectedBond(int& i);
+    /**
+     * Finds the next unselected Bond.  In parallel, this is the
+     * next unselected Bond that is the responsibility of the local
+     * processor, not the next Bond in the global unselected pool.
+     * @return a pointer to the Bond object, returns NULL if no Bond was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bond* nextUnselectedBond(int& i);
 
+    /**
+     * Finds the first selected Bend in the selection.  In parallel,
+     * this is the first selected Bend that is the responsibility of
+     * the local processor, not the first Bend in the global
+     * selection.
+     * @return a pointer to the Bend object, returns NULL if no Bend was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bend* beginSelectedBend(int& i);
+    /**
+     * Finds the next selected Bend in the selection.  In parallel,
+     * this is the next selected Bend that is the responsibility of
+     * the local processor, not the next Bend in the global selection.
+     * @return a pointer to the Bend object, returns NULL if no Bend was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bend* nextSelectedBend(int& i);
+    /**
+     * Finds the first unselected Bend.  In parallel, this is the
+     * first unselected Bend that is the responsibility of the local
+     * processor, not the first Bend in the global unselected pool.
+     * @return a pointer to the Bend object, returns NULL if no Bend was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bend* beginUnselectedBend(int& i);
+    /**
+     * Finds the next unselected Bend.  In parallel, this is the
+     * next unselected Bend that is the responsibility of the local
+     * processor, not the next Bend in the global unselected pool.
+     * @return a pointer to the Bend object, returns NULL if no Bend was found.
+     * @param i iterator used to keep track of the selection
+     */
     Bend* nextUnselectedBend(int& i);
-
+    /**
+     * Finds the first selected Torsion in the selection.  In parallel,
+     * this is the first selected Torsion that is the responsibility of
+     * the local processor, not the first Torsion in the global
+     * selection.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Torsion* beginSelectedTorsion(int& i);
+    /**
+     * Finds the next selected Torsion in the selection.  In parallel,
+     * this is the next selected Torsion that is the responsibility of
+     * the local processor, not the next Torsion in the global selection.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Torsion* nextSelectedTorsion(int& i);
+    /**
+     * Finds the first unselected Torsion.  In parallel, this is the
+     * first unselected Torsion that is the responsibility of the local
+     * processor, not the first Torsion in the global unselected pool.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Torsion* beginUnselectedTorsion(int& i);
+    /**
+     * Finds the next unselected Torsion.  In parallel, this is the
+     * next unselected Torsion that is the responsibility of the local
+     * processor, not the next Torsion in the global unselected pool.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Torsion* nextUnselectedTorsion(int& i);
-
+    /**
+     * Finds the first selected Inversion in the selection.  In parallel,
+     * this is the first selected Inversion that is the responsibility of
+     * the local processor, not the first Inversion in the global
+     * selection.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Inversion* beginSelectedInversion(int& i);
+    /**
+     * Finds the next selected Inversion in the selection.  In parallel,
+     * this is the next selected Inversion that is the responsibility of
+     * the local processor, not the next Inversion in the global selection.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Inversion* nextSelectedInversion(int& i);
+    /**
+     * Finds the first unselected Inversion.  In parallel, this is the
+     * first unselected Inversion that is the responsibility of the local
+     * processor, not the first Inversion in the global unselected pool.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Inversion* beginUnselectedInversion(int& i);
+    /**
+     * Finds the next unselected Inversion.  In parallel, this is the
+     * next unselected Inversion that is the responsibility of the local
+     * processor, not the next Inversion in the global unselected pool.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @param i iterator used to keep track of the selection
+     */
     Inversion* nextUnselectedInversion(int& i);
-
+    /**
+     * Finds the first selected Molecule in the selection.  In parallel,
+     * this is the first selected Molecule that is the responsibility of
+     * the local processor, not the first Molecule in the global
+     * selection.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @param i iterator used to keep track of the selection
+     */
     Molecule* beginSelectedMolecule(int& i);
+    /**
+     * Finds the next selected Molecule in the selection.  In parallel,
+     * this is the next selected Molecule that is the responsibility of
+     * the local processor, not the next Molecule in the global selection.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @param i iterator used to keep track of the selection
+     */
     Molecule* nextSelectedMolecule(int& i);
+    /**
+     * Finds the first unselected Molecule.  In parallel, this is the
+     * first unselected Molecule that is the responsibility of the local
+     * processor, not the first Molecule in the global unselected pool.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @param i iterator used to keep track of the selection
+     */
     Molecule* beginUnselectedMolecule(int& i);
+    /**
+     * Finds the next unselected Molecule.  In parallel, this is the
+     * next unselected Molecule that is the responsibility of the local
+     * processor, not the next Molecule in the global unselected pool.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @param i iterator used to keep track of the selection
+     */
     Molecule* nextUnselectedMolecule(int& i);
 
     SelectionManager& operator&= (const SelectionManager &sman) {

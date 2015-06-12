@@ -44,7 +44,8 @@
 #include "brains/SimInfo.hpp"
 namespace OpenMD {
   SelectionManager::SelectionManager(SimInfo* info) : info_(info){
-    nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
+    nObjects_.push_back(info_->getNGlobalAtoms()+
+                        info_->getNGlobalRigidBodies());
     nObjects_.push_back(info_->getNGlobalBonds());
     nObjects_.push_back(info_->getNGlobalBends());
     nObjects_.push_back(info_->getNGlobalTorsions());
@@ -174,105 +175,347 @@ namespace OpenMD {
   }
 
   Bond* SelectionManager::beginSelectedBond(int& i) {
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[BOND].size()) {
+      if (ss_.bitsets_[BOND][i]) {
+        // check that this processor owns this bond
+        if (bonds_[i] != NULL) return bonds_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[BOND].firstOnBit();
     return i == -1 ? NULL : bonds_[i];
+#endif
   }
 
   Bond* SelectionManager::nextSelectedBond(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[BOND].size()) {
+      if (ss_.bitsets_[BOND][i]) {
+        // check that this processor owns this bond
+        if (bonds_[i] != NULL) return bonds_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[BOND].nextOnBit(i);
     return i == -1 ? NULL : bonds_[i];
+#endif
   }
 
   Bond* SelectionManager::beginUnselectedBond(int& i){
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[BOND].size()) {
+      if (!ss_.bitsets_[BOND][i]) {
+        // check that this processor owns this bond
+        if (bonds_[i] != NULL) return bonds_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[BOND].firstOffBit();
     return i == -1 ? NULL : bonds_[i];
+#endif
   }
 
   Bond* SelectionManager::nextUnselectedBond(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[BOND].size()) {
+      if (!ss_.bitsets_[BOND][i]) {
+        // check that this processor owns this bond
+        if (bonds_[i] != NULL) return bonds_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[BOND].nextOffBit(i);
     return i == -1 ? NULL : bonds_[i];
+#endif
   }
 
+
   Bend* SelectionManager::beginSelectedBend(int& i) {
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[BEND].size()) {
+      if (ss_.bitsets_[BEND][i]) {
+        // check that this processor owns this bend
+        if (bends_[i] != NULL) return bends_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[BEND].firstOnBit();
     return i == -1 ? NULL : bends_[i];
+#endif
   }
 
   Bend* SelectionManager::nextSelectedBend(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[BEND].size()) {
+      if (ss_.bitsets_[BEND][i]) {
+        // check that this processor owns this bend
+        if (bends_[i] != NULL) return bends_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[BEND].nextOnBit(i);
     return i == -1 ? NULL : bends_[i];
+#endif
   }
 
   Bend* SelectionManager::beginUnselectedBend(int& i){
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[BEND].size()) {
+      if (!ss_.bitsets_[BEND][i]) {
+        // check that this processor owns this bend
+        if (bends_[i] != NULL) return bends_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[BEND].firstOffBit();
     return i == -1 ? NULL : bends_[i];
+#endif
   }
 
   Bend* SelectionManager::nextUnselectedBend(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[BEND].size()) {
+      if (!ss_.bitsets_[BEND][i]) {
+        // check that this processor owns this bend
+        if (bends_[i] != NULL) return bends_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[BEND].nextOffBit(i);
     return i == -1 ? NULL : bends_[i];
+#endif
   }
 
   Torsion* SelectionManager::beginSelectedTorsion(int& i) {
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[TORSION].size()) {
+      if (ss_.bitsets_[TORSION][i]) {
+        // check that this processor owns this torsion
+        if (torsions_[i] != NULL) return torsions_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[TORSION].firstOnBit();
     return i == -1 ? NULL : torsions_[i];
+#endif
   }
 
   Torsion* SelectionManager::nextSelectedTorsion(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[TORSION].size()) {
+      if (ss_.bitsets_[TORSION][i]) {
+        // check that this processor owns this torsion
+        if (torsions_[i] != NULL) return torsions_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[TORSION].nextOnBit(i);
     return i == -1 ? NULL : torsions_[i];
+#endif
   }
 
   Torsion* SelectionManager::beginUnselectedTorsion(int& i){
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[TORSION].size()) {
+      if (!ss_.bitsets_[TORSION][i]) {
+        // check that this processor owns this torsion
+        if (torsions_[i] != NULL) return torsions_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[TORSION].firstOffBit();
     return i == -1 ? NULL : torsions_[i];
+#endif
   }
 
   Torsion* SelectionManager::nextUnselectedTorsion(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[TORSION].size()) {
+      if (!ss_.bitsets_[TORSION][i]) {
+        // check that this processor owns this torsion
+        if (torsions_[i] != NULL) return torsions_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[TORSION].nextOffBit(i);
     return i == -1 ? NULL : torsions_[i];
+#endif
   }
 
+
   Inversion* SelectionManager::beginSelectedInversion(int& i) {
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[INVERSION].size()) {
+      if (ss_.bitsets_[INVERSION][i]) {
+        // check that this processor owns this inversion
+        if (inversions_[i] != NULL) return inversions_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[INVERSION].firstOnBit();
     return i == -1 ? NULL : inversions_[i];
+#endif
   }
 
   Inversion* SelectionManager::nextSelectedInversion(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[INVERSION].size()) {
+      if (ss_.bitsets_[INVERSION][i]) {
+        // check that this processor owns this inversion
+        if (inversions_[i] != NULL) return inversions_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[INVERSION].nextOnBit(i);
     return i == -1 ? NULL : inversions_[i];
+#endif
   }
 
   Inversion* SelectionManager::beginUnselectedInversion(int& i){
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[INVERSION].size()) {
+      if (!ss_.bitsets_[INVERSION][i]) {
+        // check that this processor owns this inversion
+        if (inversions_[i] != NULL) return inversions_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[INVERSION].firstOffBit();
     return i == -1 ? NULL : inversions_[i];
+#endif
   }
 
   Inversion* SelectionManager::nextUnselectedInversion(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[INVERSION].size()) {
+      if (!ss_.bitsets_[INVERSION][i]) {
+        // check that this processor owns this inversion
+        if (inversions_[i] != NULL) return inversions_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[INVERSION].nextOffBit(i);
     return i == -1 ? NULL : inversions_[i];
+#endif
   }
   
   Molecule* SelectionManager::beginSelectedMolecule(int& i) {
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[MOLECULE].size()) {
+      if (ss_.bitsets_[MOLECULE][i]) {
+        // check that this processor owns this molecule
+        if (molecules_[i] != NULL) return molecules_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[MOLECULE].firstOnBit();
     return i == -1 ? NULL : molecules_[i];
+#endif
   }
 
   Molecule* SelectionManager::nextSelectedMolecule(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[MOLECULE].size()) {
+      if (ss_.bitsets_[MOLECULE][i]) {
+        // check that this processor owns this molecule
+        if (molecules_[i] != NULL) return molecules_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[MOLECULE].nextOnBit(i);
     return i == -1 ? NULL : molecules_[i];
+#endif
   }
 
   Molecule* SelectionManager::beginUnselectedMolecule(int& i){
+#ifdef IS_MPI
+    i = 0;
+    while (i < ss_.bitsets_[MOLECULE].size()) {
+      if (!ss_.bitsets_[MOLECULE][i]) {
+        // check that this processor owns this molecule
+        if (molecules_[i] != NULL) return molecules_[i];
+      }
+      ++i;
+    }
+    return NULL;   
+#else
     i = ss_.bitsets_[MOLECULE].firstOffBit();
     return i == -1 ? NULL : molecules_[i];
+#endif
   }
 
   Molecule* SelectionManager::nextUnselectedMolecule(int& i) {
+#ifdef IS_MPI
+    ++i;
+    while (i < ss_.bitsets_[MOLECULE].size()) {
+      if (!ss_.bitsets_[MOLECULE][i]) {
+        // check that this processor owns this molecule
+        if (molecules_[i] != NULL) return molecules_[i];
+      }
+      ++i;
+    }
+    return NULL;
+#else
     i = ss_.bitsets_[MOLECULE].nextOffBit(i);
     return i == -1 ? NULL : molecules_[i];
+#endif
   }
-
+  
   SelectionManager operator| (const SelectionManager& sman1, 
                               const SelectionManager& sman2) {
     SelectionManager result(sman1);
