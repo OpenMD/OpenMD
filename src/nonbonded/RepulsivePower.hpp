@@ -63,7 +63,7 @@ namespace OpenMD {
   public:    
     RepulsivePower();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon, int nRep);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}

@@ -15,7 +15,7 @@ ensemble = NVT;
 targetTemp = 1;
 tauThermostat = 30;
 forceField = "DUFF";
-forceFieldFileName = "DUFF2.frc";
+forceFieldFileName = "DUFF.frc";
 
 cutoffRadius = 20.0;
 switchingRadius = 18.0;
