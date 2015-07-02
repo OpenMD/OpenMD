@@ -69,7 +69,7 @@ namespace OpenMD {
   public:    
     GB();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}

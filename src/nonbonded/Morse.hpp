@@ -64,7 +64,7 @@ namespace OpenMD {
   public:    
     Morse();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType Re, RealType beta, MorseType mt);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}

@@ -75,7 +75,7 @@ namespace OpenMD {
   public:    
     EAM();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
     void calcDensity(InteractionData &idat);
