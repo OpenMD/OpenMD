@@ -181,6 +181,7 @@ namespace OpenMD {
 	}
       }//end for(iter->first())
 
+      errorCheckPoint();
 
       for (mol = info_->beginMolecule(mi); mol != NULL; 
            mol = info_->nextMolecule(mi)) {
@@ -202,6 +203,8 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();    
     }
+    
+    errorCheckPoint();
   }
 
   int Rattle::constraintPairA(ConstraintPair* consPair){
