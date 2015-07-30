@@ -84,6 +84,7 @@ namespace OpenMD {
     virtual void writeRdf();
 
 
+  protected:
     RealType deltaCosAngle_;
     int nAngleBins_;
     RealType len_;
@@ -119,7 +120,7 @@ namespace OpenMD {
       }
         
   private:
-
+    virtual void processHistogram();
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
                                    StuntDouble* sd3);        

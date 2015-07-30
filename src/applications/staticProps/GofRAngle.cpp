@@ -194,6 +194,27 @@ namespace OpenMD {
     }
 
   }
+  
+  void GofRTheta::processHistogram() {
+    int nPairs = getNPairs();
+    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity = nPairs /volume;
+    RealType pairConstant = ( 2.0 * NumericConstant::PI * pairDensity ) /
+      (3.0 * (double)nAngleBins_ );
+
+    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
+
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice = ( rUpper * rUpper * rUpper ) - 
+        ( rLower * rLower * rLower );
+      RealType nIdeal = volSlice * pairConstant;
+
+      for (unsigned int j = 0; j < histogram_[i].size(); ++j){
+	avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
+      }
+    }
+  }
 
   void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
