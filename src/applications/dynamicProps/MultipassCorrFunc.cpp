@@ -109,7 +109,8 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     StuntDouble* sd;
 
-    int index, isd1, isd2;
+    int isd1, isd2;
+    unsigned int index;
    
     sprintf(painCave.errMsg,
             "MultipassCorrFunc Notification: Starting pre-correlate scan\n");
