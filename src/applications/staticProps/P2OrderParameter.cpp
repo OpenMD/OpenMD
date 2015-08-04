@@ -120,7 +120,8 @@ namespace OpenMD {
         for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
              sd1 = seleMan1_.nextSelected(ii)) {
           if (sd1->isDirectional()) {
-            Vector3d vec = sd1->getA().getColumn(2);
+            Vector3d vec = sd1->getA().getRow(2);
+            
             vec.normalize();
             orderTensor += outProduct(vec, vec);
             vecCount++;
