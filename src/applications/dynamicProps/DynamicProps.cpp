@@ -67,6 +67,8 @@
 #include "applications/dynamicProps/cOHz.hpp"
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
+#include "applications/dynamicProps/HBondJump.hpp"
+
 
 using namespace OpenMD;
 
@@ -128,7 +130,7 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-  TimeCorrFunc* corrFunc = NULL;
+  DynamicProperty* corrFunc = NULL;
   if(args_info.sdcorr_given){
     corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, 
 					memSize);
@@ -149,11 +151,11 @@ int main(int argc, char* argv[]){
     corrFunc = new RCorrFuncZ(info, dumpFileName, sele1, sele2,
                               args_info.nzbins_arg, memSize); 
   } else if (args_info.vcorr_given) {
-    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
+    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
   } else if (args_info.vcorrZ_given) {
-    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2, memSize); 
+    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2); 
   } else if (args_info.vcorrR_given) {
-    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2, memSize); 
+    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2); 
   } else if (args_info.bondcorr_given) {
     corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize); 
   } else if (args_info.helfandEcorr_given){
@@ -208,16 +210,40 @@ int main(int argc, char* argv[]){
     corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, 
 			args_info.nzbins_arg, memSize); 
 
+  } else if (args_info.jumptime_given) {
+    if (args_info.rcut_given) {
+      if (args_info.thetacut_given) {
+        
+        corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
+                                 args_info.rcut_arg,
+                                 args_info.thetacut_arg); 
+      } else {
+        sprintf( painCave.errMsg,
+                 "A cutoff angle (thetacut) must be specified when calculating "
+                 "Hydrogen Bond Jump Time");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Hydrogen Bond Jump Time");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   }
-
 
   if (args_info.output_given) {
     corrFunc->setOutputName(args_info.output_arg);
   }
 
 
+  cerr << "calling doCorrelate\n";
   corrFunc->doCorrelate();
 
+  cerr << "done\n";
   delete corrFunc;    
   delete info;
 

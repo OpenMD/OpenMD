@@ -93,7 +93,7 @@ namespace OpenMD{
     int getStorageLayout() {
       return storageLayout_;
     }
-
+    
   private:
     int storageLayout_;
 

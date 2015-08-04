@@ -60,6 +60,12 @@ struct gengetopt_args_info
   char * memory_arg;	/**< @brief Available memory (defaults to 2G) (default='2G').  */
   char * memory_orig;	/**< @brief Available memory (defaults to 2G) original value given at command line.  */
   const char *memory_help; /**< @brief Available memory (defaults to 2G) help description.  */
+  double rcut_arg;	/**< @brief cutoff radius (rcut).  */
+  char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
+  const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
+  double thetacut_arg;	/**< @brief cutoff angle (thetacut).  */
+  char * thetacut_orig;	/**< @brief cutoff angle (thetacut) original value given at command line.  */
+  const char *thetacut_help; /**< @brief cutoff angle (thetacut) help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief rmsd help description.  */
   const char *rcorrZ_help; /**< @brief rmsd binned by Z help description.  */
@@ -79,6 +85,7 @@ struct gengetopt_args_info
   const char *stresscorr_help; /**< @brief Stress tensor correlation function help description.  */
   const char *bondcorr_help; /**< @brief Bond extension correlation function help description.  */
   const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
+  const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -89,6 +96,8 @@ struct gengetopt_args_info
   unsigned int order_given ;	/**< @brief Whether order was given.  */
   unsigned int nzbins_given ;	/**< @brief Whether nzbins was given.  */
   unsigned int memory_given ;	/**< @brief Whether memory was given.  */
+  unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
+  unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
@@ -108,6 +117,7 @@ struct gengetopt_args_info
   unsigned int stresscorr_given ;	/**< @brief Whether stresscorr was given.  */
   unsigned int bondcorr_given ;	/**< @brief Whether bondcorr was given.  */
   unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */
+  unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

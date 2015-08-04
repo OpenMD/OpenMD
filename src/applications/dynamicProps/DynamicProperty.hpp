@@ -39,47 +39,34 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_DYNAMICPROPERTY_HPP
+#define APPLICATIONS_DYNAMICPROPS_DYNAMICPROPERTY_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include <string>
+#include "brains/SimInfo.hpp"
+
 namespace OpenMD {
 
-  class VCorrFunc : public MultipassCorrFunc {
+  /**
+   * @class DynamicProperty DynamicProperty.hpp "applications/dynamicProps/DynamicProperty"
+   * @brief Base class for Dynamic properties
+   */
+ 
+  class DynamicProperty {
   public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
-  private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual int computeProperty2(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<Vector3d> > velocities_;
+    DynamicProperty(){ }
+    virtual ~DynamicProperty(){ }    
+    virtual void doCorrelate() = 0;
+
+    void setOutputName(const std::string& filename) {
+      outputFilename_ = filename;
+    }
+    const std::string& getOutputFileName() const {
+      return outputFilename_;
+    }
+
+  protected:
+    std::string outputFilename_;       
   };
-
-  class VCorrFuncZ : public MultipassCorrFunc {
-  public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
-  private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual int computeProperty2(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<RealType> > velocities_;
-         
-  };
-
-  class VCorrFuncR : public MultipassCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
-  private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual int computeProperty2(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<RealType> > velocities_;
-    
-  };
-
-
 }
 #endif

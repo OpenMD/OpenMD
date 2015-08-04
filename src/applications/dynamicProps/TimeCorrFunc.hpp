@@ -45,6 +45,7 @@
 #include <string>
 #include <vector>
 
+#include "applications/dynamicProps/DynamicProperty.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/BlockSnapshotManager.hpp"
 
@@ -59,24 +60,14 @@ namespace OpenMD {
    * @brief Base class for Correlation function
    */
  
-  class TimeCorrFunc {
+  class TimeCorrFunc : public DynamicProperty {
   public:
     TimeCorrFunc(SimInfo* info, const std::string& filename, 
 		 const std::string& sele1, const std::string& sele2,
                  int storageLayout, long long int memSize);
     
     virtual ~TimeCorrFunc(){ }    
-    void doCorrelate();
-
-
-    void setOutputName(const std::string& filename) {
-      outputFilename_ = filename;
-    }
-
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
-
+    virtual void doCorrelate();
 
     const std::string& getCorrFuncType() const {
       return corrFuncType_;
@@ -127,9 +118,6 @@ namespace OpenMD {
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
  
-
-    std::string outputFilename_;
-
     std::string corrFuncType_;
     std::string extra_;
   };

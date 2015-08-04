@@ -60,8 +60,7 @@ namespace OpenMD {
 
     storageLayout_ = info->getStorageLayout() | storageLayout;
 
-    DumpReader reader(info_, dumpFilename_);    
-    
+    reader_ = new DumpReader(info_, dumpFilename_);    
     evaluator1_.loadScriptString(selectionScript1_);
     evaluator2_.loadScriptString(selectionScript2_);
     
@@ -82,10 +81,25 @@ namespace OpenMD {
       deltaTime_ = simParams->getSampleTime();
     } else {
       sprintf(painCave.errMsg,
-              "MultipassCorrFunc::writeCorrelate Error: can not figure out deltaTime\n");
+              "MultipassCorrFunc Error: can not figure out deltaTime\n");
       painCave.isFatal = 1;
       simError();  
     }
+
+    sprintf(painCave.errMsg,
+            "MultipassCorrFunc Notification: Scanning for Frames\n");
+    painCave.isFatal = 0;
+    painCave.severity=OPENMD_INFO;
+    simError();  
+
+    nFrames_ = reader_->getNFrames();
+    nTimeBins_ = nFrames_;
+    histogram_.resize(nTimeBins_);
+    count_.resize(nTimeBins_);
+
+    times_.resize(nFrames_);
+    sele1ToIndex_.resize(nFrames_);
+    sele2ToIndex_.resize(nFrames_);
   }
 
   void MultipassCorrFunc::preCorrelate() {
@@ -96,17 +110,15 @@ namespace OpenMD {
     StuntDouble* sd;
 
     int index, isd1, isd2;
-    
-    fill(histogram_.begin(), histogram_.end(), 0.0);
-    fill(count_.begin(), count_.end(), 0);
-
-    DumpReader reader(info_, dumpFilename_);    
-
-    nFrames_ = reader.getNFrames();
-    times_.resize(nFrames_);
+   
+    sprintf(painCave.errMsg,
+            "MultipassCorrFunc Notification: Starting pre-correlate scan\n");
+    painCave.isFatal = 0;
+    painCave.severity=OPENMD_INFO;
+    simError();  
     
     for (int istep = 0; istep < nFrames_; istep++) {
-      reader.readFrame(istep);
+      reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       times_[istep] = currentSnapshot_->getTime();
 
@@ -117,6 +129,18 @@ namespace OpenMD {
              rb = mol->nextRigidBody(rbIter)) {
           rb->updateAtoms();
         }
+      }
+      
+      if (storageLayout_ & DataStorage::dslVelocity) {
+        for (mol = info_->beginMolecule(mi); mol != NULL; 
+             mol = info_->nextMolecule(mi)) {
+          
+          //change the positions of atoms which belong to the rigidbodies
+          for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+               rb = mol->nextRigidBody(rbIter)) {
+            rb->updateAtomVel();
+          }
+        }      
       }
       
       if (evaluator1_.isDynamic()) {
@@ -130,27 +154,54 @@ namespace OpenMD {
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
 
-        sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
-        index = sele1ToIndex_[istep].size();
-        computeProperty1(istep, sd, index);
+        index = computeProperty1(istep, sd);        
+        if (index == sele1ToIndex_[istep].size()) {
+          sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
+        } else {
+          sele1ToIndex_[istep].resize(index+1);
+          sele1ToIndex_[istep][index] = sd->getGlobalIndex();
+        }
+
       }
       
       for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
-           sd = seleMan2_.nextSelected(isd2)) {
-
-        sele2ToIndex_[istep].push_back(sd->getGlobalIndex());
-        index = sele2ToIndex_[istep].size();
+           sd = seleMan2_.nextSelected(isd2)) {        
                 
-        computeProperty2(istep, sd, index);
+        index = computeProperty2(istep, sd); 
+        if (index == sele2ToIndex_[istep].size()) {
+          sele2ToIndex_[istep].push_back(sd->getGlobalIndex());
+        } else {
+          sele2ToIndex_[istep].resize(index+1);
+          sele2ToIndex_[istep][index] = sd->getGlobalIndex();
+        }
+
       }
-    }     
+    }
   }
 
   
   void MultipassCorrFunc::doCorrelate() {
+    
+    painCave.isFatal = 0;
+    painCave.severity=OPENMD_INFO;
+    sprintf(painCave.errMsg,
+            "MultipassCorrFunc: Starting pre-correlate scan\n");
+    simError();
     preCorrelate();
-    correlation();   
+
+    sprintf(painCave.errMsg,
+            "MultipassCorrFunc: Calculating correlation function\n");
+    simError();
+    correlation();
+
+    sprintf(painCave.errMsg,
+            "MultipassCorrFunc: Doing post-correlation calculations\n");
+    simError();
     postCorrelate();
+    
+    sprintf(painCave.errMsg,
+            "MultipassCorrFunc: Writing output\n");
+    simError();
     writeCorrelate();
   }
 
@@ -160,8 +211,13 @@ namespace OpenMD {
 
     std::vector<int>::iterator i1;
     std::vector<int>::iterator i2;
+    RealType corrVal(0.0);
 
-    
+    for (int i =0 ; i < nTimeBins_; ++i) {
+      histogram_[i] = 0.0;
+      count_[i] = 0;
+    }
+
     for (int i = 0; i < nFrames_; ++i) {
 
       RealType time1 = times_[i];
@@ -206,10 +262,10 @@ namespace OpenMD {
           
           if ( i1 == s1.end() || i2 == s2.end() ) break;
 
-          RealType corrVal = calcCorrVal(i, j, *i1, *i2);
+          corrVal = calcCorrVal(i, j, *i1, *i2);
           histogram_[timeBin] += corrVal;
           count_[timeBin]++;
-          
+         
         }
       }
     }

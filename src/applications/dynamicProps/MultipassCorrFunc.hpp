@@ -45,6 +45,7 @@
 #include <string>
 #include <vector>
 
+#include "applications/dynamicProps/DynamicProperty.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/StuntDouble.hpp"
@@ -58,22 +59,14 @@ namespace OpenMD {
    * @brief Base class for Correlation function that reads the dump file to pre-process into more manageable data units
    */
  
-  class MultipassCorrFunc {
+  class MultipassCorrFunc : public DynamicProperty {
   public:
     MultipassCorrFunc(SimInfo* info, const std::string& filename, 
                       const std::string& sele1, const std::string& sele2,
                       int storageLayout);
     
     virtual ~MultipassCorrFunc(){ }    
-    void doCorrelate();
-
-    void setOutputName(const std::string& filename) {
-      outputFilename_ = filename;
-    }
-
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
+    virtual void doCorrelate();
 
     const std::string& getCorrFuncType() const {
       return corrFuncType_;
@@ -93,8 +86,8 @@ namespace OpenMD {
     virtual void correlation();
     virtual void postCorrelate();
     virtual void updateFrame(int frame);
-    virtual void computeProperty1(int frame, StuntDouble* sd, int index) = 0;
-    virtual void computeProperty2(int frame, StuntDouble* sd, int index) = 0;
+    virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
+    virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
 
     int storageLayout_;
@@ -107,11 +100,11 @@ namespace OpenMD {
     std::vector<RealType> times_;
         
     SimInfo* info_;
+    DumpReader* reader_;
     std::string dumpFilename_;        
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;
-    
-  private:
+
     virtual void writeCorrelate();
     virtual void validateSelection(const SelectionManager& seleMan) {}
 
@@ -122,8 +115,6 @@ namespace OpenMD {
         
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
- 
-    std::string outputFilename_;
 
     std::string corrFuncType_;
     std::string extra_;

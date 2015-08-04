@@ -39,47 +39,29 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_HBONDJUMP_HPP
+#define APPLICATIONS_DYNAMICPROPS_HBONDJUMP_HPP
 
 #include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class VCorrFunc : public MultipassCorrFunc {
+  class HBondJump : public MultipassCorrFunc {
   public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
+    HBondJump(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double rCut, double thetaCut);
         
   private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual int computeProperty2(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<Vector3d> > velocities_;
-  };
+    virtual void preCorrelate();
+    virtual void correlation();
+    virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
+    virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
 
-  class VCorrFuncZ : public MultipassCorrFunc {
-  public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
-  private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual int computeProperty2(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<RealType> > velocities_;
-         
+    std::vector<int> indices_;
+    std::vector<std::vector<std::vector<int> > > bondList_;
+    RealType rCut_;
+    RealType thetaCut_;
   };
-
-  class VCorrFuncR : public MultipassCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
-  private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual int computeProperty2(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<RealType> > velocities_;
-    
-  };
-
 
 }
 #endif
+
