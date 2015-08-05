@@ -239,14 +239,10 @@ int main(int argc, char* argv[]){
     corrFunc->setOutputName(args_info.output_arg);
   }
 
-
-  cerr << "calling doCorrelate\n";
   corrFunc->doCorrelate();
-
-  cerr << "done\n";
+  
   delete corrFunc;    
   delete info;
-
   return 0;   
 }
 

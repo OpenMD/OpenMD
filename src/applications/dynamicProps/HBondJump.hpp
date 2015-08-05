@@ -57,7 +57,7 @@ namespace OpenMD {
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
 
     std::vector<int> indices_;
-    std::vector<std::vector<std::vector<int> > > bondList_;
+    std::vector<std::vector<std::set<int> > > bondList_;
     RealType rCut_;
     RealType thetaCut_;
   };

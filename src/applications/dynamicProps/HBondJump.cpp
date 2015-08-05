@@ -53,6 +53,9 @@ namespace OpenMD {
     
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
+
+    //nFrames_ is initialized in MultipassCorrFunc:
+    bondList_.resize(nFrames_);
   }
   
   void HBondJump::preCorrelate() {
@@ -79,20 +82,6 @@ namespace OpenMD {
     int hInd, aInd, index;
     std::vector<int>::iterator ind;
    
-    reader_ = new DumpReader(info_, dumpFilename_);    
-
-    nFrames_ = reader_->getNFrames();
-    times_.resize(nFrames_);
-    bondList_.resize(nFrames_);
-    histogram_.resize(nFrames_);
-    count_.resize(nFrames_);
-    bondList_.resize(nFrames_);
-    sele1ToIndex_.resize(nFrames_);
-    sele2ToIndex_.resize(nFrames_);
-
-    fill(histogram_.begin(), histogram_.end(), 0.0);
-    fill(count_.begin(), count_.end(), 0);
-
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -114,9 +103,6 @@ namespace OpenMD {
       if (evaluator2_.isDynamic()) {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
       }      
-
-      sele1ToIndex_[istep].resize(seleMan1_.getSelectionCount());
-      sele2ToIndex_[istep].resize(seleMan2_.getSelectionCount());
 
       bondList_[istep].resize(seleMan2_.getSelectionCount());
       
@@ -164,7 +150,7 @@ namespace OpenMD {
                   }
 
                   aInd = hba2->getGlobalIndex();
-                  bondList_[istep][index].push_back(aInd);                  
+                  bondList_[istep][index].insert(aInd);                  
                 }
               }            
             }            
@@ -205,7 +191,7 @@ namespace OpenMD {
                   } else {
                     index = std::distance(indices_.begin(), ind);
                   }
-                  bondList_[istep][index].push_back(aInd);
+                  bondList_[istep][index].insert(aInd);
                 }                
               }
             }
@@ -217,12 +203,10 @@ namespace OpenMD {
   
   
   void HBondJump::correlation() {
-    std::vector<int> s1;
-    std::vector<int> s2;
-    
     std::vector<int>::iterator i1;
-    std::vector<int>::iterator i2;
-
+    std::set<int>::iterator ki;
+    std::set<int>::iterator kj;
+          
     RealType corrVal;
     
     for (int i = 0; i < nFrames_; ++i) {
@@ -251,8 +235,7 @@ namespace OpenMD {
 
         for (i1 = indices_.begin(); i1 != indices_.end(); ++i1) {
 
-          std::vector<int>::iterator ki, kj;
-          corrVal = 0;
+          corrVal = 0.0;
           
           for (ki = bondList_[i][*i1].begin();
                ki != bondList_[i][*i1].end(); ++ki) {
@@ -263,8 +246,9 @@ namespace OpenMD {
               if ( *ki == *kj ) corrVal += 1;
             }
           }
+          
           histogram_[timeBin] += corrVal;
-          count_[timeBin]++;                  
+          count_[timeBin] += bondList_[i][*i1].size();
         }
       }
     }

@@ -87,7 +87,7 @@ namespace OpenMD {
     }
 
     sprintf(painCave.errMsg,
-            "MultipassCorrFunc Notification: Scanning for Frames\n");
+            "MultipassCorrFunc: Scanning for frames\n");
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
     simError();  
@@ -113,7 +113,7 @@ namespace OpenMD {
     unsigned int index;
    
     sprintf(painCave.errMsg,
-            "MultipassCorrFunc Notification: Starting pre-correlate scan\n");
+            "MultipassCorrFunc: Starting pre-correlate scan\n");
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
     simError();  
