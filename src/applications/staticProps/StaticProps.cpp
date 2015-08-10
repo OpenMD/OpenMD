@@ -182,39 +182,55 @@ int main(int argc, char* argv[]){
     maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
     zmaxLen = hmat(2,2);    
   }    
+
+  RealType nanglebins, nrbins;
+  // in case we override nbins with nrbins:
+  if (args_info.nrbins_given) {
+    nrbins = args_info.nrbins_arg;
+  } else {
+    nrbins = args_info.nbins_arg;
+  }
+  // in case we override nbins with nrbins:
+  if (args_info.nanglebins_given) {
+    nanglebins = args_info.nanglebins_arg;
+  } else {
+    nanglebins = args_info.nbins_arg;
+  }
   
   StaticAnalyser* analyser;
+  
+                                       
   if (args_info.gofr_given){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, 
-		       args_info.nbins_arg);        
+		       nrbins);        
   } else if (args_info.gofz_given) {
     analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen,
 		       args_info.nbins_arg);
   } else if (args_info.r_z_given) {
     analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen, 
-			  args_info.nbins_arg, args_info.nbins_z_arg);
+			  nrbins, args_info.nbins_z_arg);
   } else if (args_info.r_theta_given) {
     if (args_info.sele3_given) 
       analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, sele3, maxLen,
-                                args_info.nbins_arg, args_info.nanglebins_arg);
+                                nrbins, nanglebins);
     else 
       analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
-                                args_info.nbins_arg, args_info.nanglebins_arg);
+                                nrbins, nanglebins);
   } else if (args_info.r_omega_given) {
     if (args_info.sele3_given) 
       analyser  = new GofROmega(info, dumpFileName, sele1, sele2, sele3, maxLen,
-                                args_info.nbins_arg, args_info.nanglebins_arg);
+                                nrbins, nanglebins);
     else 
       analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen,
-                                args_info.nbins_arg, args_info.nanglebins_arg);
+                                nrbins, nanglebins);
 
   } else if (args_info.theta_omega_given) {
     if (args_info.sele3_given) 
       analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, sele3,
-                                args_info.nanglebins_arg);
+                                nanglebins);
     else
       analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
-                                args_info.nanglebins_arg);
+                                nanglebins);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
       analyser= new GofXyz(info, dumpFileName, sele1, sele2,
@@ -229,7 +245,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.twodgofr_given){
     if (args_info.dz_given) {
       analyser= new TwoDGofR(info, dumpFileName, sele1, sele2, maxLen, 
-			     args_info.dz_arg, args_info.nbins_arg);        
+			     args_info.dz_arg, nrbins);        
     } else {
       sprintf( painCave.errMsg,
 	       "A slab width (dz) must be specified when calculating TwoDGofR");
@@ -328,7 +344,7 @@ int main(int argc, char* argv[]){
     if (args_info.rcut_given) {
       analyser = new IcosahedralOfR(info, dumpFileName, sele1, 
                                     args_info.rcut_arg,
-                                    args_info.nbins_arg, maxLen);
+                                    nrbins, maxLen);
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
@@ -339,7 +355,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.for_given){
     if (args_info.rcut_given) {
       analyser = new FCCOfR(info, dumpFileName, sele1, args_info.rcut_arg,
-			    args_info.nbins_arg, maxLen);
+			    nrbins, maxLen);
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
@@ -378,10 +394,9 @@ int main(int argc, char* argv[]){
   } else if (args_info.rnemdz_given) {
     analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.rnemdr_given) {
-    analyser = new RNEMDR(info, dumpFileName, sele1, args_info.nbins_arg);
+    analyser = new RNEMDR(info, dumpFileName, sele1, nrbins);
   } else if (args_info.rnemdrt_given) {
-    analyser = new RNEMDRTheta(info, dumpFileName, sele1,
-                               args_info.nbins_arg, args_info.nanglebins_arg);
+    analyser = new RNEMDRTheta(info, dumpFileName, sele1, nrbins, nanglebins);
   } else if (args_info.nitrile_given) {
     analyser = new NitrileFrequencyMap(info, dumpFileName, sele1,
                                        args_info.nbins_arg);
@@ -422,7 +437,8 @@ int main(int argc, char* argv[]){
     analyser = new SurfaceDiffusion(info, dumpFileName, sele1, maxLen);
   }else if (args_info.rho_r_given) {
     if (args_info.radius_given){
-      analyser = new RhoR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg,args_info.radius_arg);
+      analyser = new RhoR(info, dumpFileName, sele1, maxLen, nrbins,
+                          args_info.radius_arg);
     }else{
       sprintf( painCave.errMsg,
 	       "A particle radius (radius) must be specified when calculating Rho(r)");
@@ -435,7 +451,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.rodlength_given) {
     analyser = new NanoLength(info, dumpFileName, sele1);
   } else if (args_info.angle_r_given) {
-    analyser = new AngleR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg);
+    analyser = new AngleR(info, dumpFileName, sele1, maxLen, nrbins);
   } else if (args_info.hbond_given){
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {

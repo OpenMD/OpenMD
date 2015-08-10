@@ -45,6 +45,7 @@ const char *gengetopt_args_info_help[] = {
   "  -x, --nbins_x=INT             number of bins in x axis  (default=`100')",
   "  -y, --nbins_y=INT             number of bins in y axis  (default=`100')",
   "      --nbins_z=INT             number of bins in z axis  (default=`100')",
+  "  -r, --nrbins=INT              number of radial bins (usually duplicates \n                                  functionality of nbins)  (default=`100')",
   "  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')",
   "  -c, --rcut=DOUBLE             cutoff radius (rcut)",
   "      --thetacut=DOUBLE         cutoff angle (thetacut)",
@@ -137,6 +138,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->nbins_x_given = 0 ;
   args_info->nbins_y_given = 0 ;
   args_info->nbins_z_given = 0 ;
+  args_info->nrbins_given = 0 ;
   args_info->nanglebins_given = 0 ;
   args_info->rcut_given = 0 ;
   args_info->thetacut_given = 0 ;
@@ -213,6 +215,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->nbins_y_orig = NULL;
   args_info->nbins_z_arg = 100;
   args_info->nbins_z_orig = NULL;
+  args_info->nrbins_arg = 100;
+  args_info->nrbins_orig = NULL;
   args_info->nanglebins_arg = 50;
   args_info->nanglebins_orig = NULL;
   args_info->rcut_orig = NULL;
@@ -258,61 +262,62 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->nbins_x_help = gengetopt_args_info_help[6] ;
   args_info->nbins_y_help = gengetopt_args_info_help[7] ;
   args_info->nbins_z_help = gengetopt_args_info_help[8] ;
-  args_info->nanglebins_help = gengetopt_args_info_help[9] ;
-  args_info->rcut_help = gengetopt_args_info_help[10] ;
-  args_info->thetacut_help = gengetopt_args_info_help[11] ;
-  args_info->dz_help = gengetopt_args_info_help[12] ;
-  args_info->length_help = gengetopt_args_info_help[13] ;
-  args_info->zlength_help = gengetopt_args_info_help[14] ;
-  args_info->zoffset_help = gengetopt_args_info_help[15] ;
-  args_info->sele1_help = gengetopt_args_info_help[16] ;
-  args_info->sele2_help = gengetopt_args_info_help[17] ;
-  args_info->sele3_help = gengetopt_args_info_help[18] ;
-  args_info->refsele_help = gengetopt_args_info_help[19] ;
-  args_info->comsele_help = gengetopt_args_info_help[20] ;
-  args_info->seleoffset_help = gengetopt_args_info_help[21] ;
-  args_info->seleoffset2_help = gengetopt_args_info_help[22] ;
-  args_info->molname_help = gengetopt_args_info_help[23] ;
-  args_info->begin_help = gengetopt_args_info_help[24] ;
-  args_info->end_help = gengetopt_args_info_help[25] ;
-  args_info->radius_help = gengetopt_args_info_help[26] ;
-  args_info->voxelSize_help = gengetopt_args_info_help[27] ;
-  args_info->gaussWidth_help = gengetopt_args_info_help[28] ;
-  args_info->bo_help = gengetopt_args_info_help[30] ;
-  args_info->ior_help = gengetopt_args_info_help[31] ;
-  args_info->for_help = gengetopt_args_info_help[32] ;
-  args_info->bad_help = gengetopt_args_info_help[33] ;
-  args_info->count_help = gengetopt_args_info_help[34] ;
-  args_info->gofr_help = gengetopt_args_info_help[35] ;
-  args_info->gofz_help = gengetopt_args_info_help[36] ;
-  args_info->r_theta_help = gengetopt_args_info_help[37] ;
-  args_info->r_omega_help = gengetopt_args_info_help[38] ;
-  args_info->r_z_help = gengetopt_args_info_help[39] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[40] ;
-  args_info->gxyz_help = gengetopt_args_info_help[41] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[42] ;
-  args_info->p2_help = gengetopt_args_info_help[43] ;
-  args_info->rp2_help = gengetopt_args_info_help[44] ;
-  args_info->scd_help = gengetopt_args_info_help[45] ;
-  args_info->density_help = gengetopt_args_info_help[46] ;
-  args_info->slab_density_help = gengetopt_args_info_help[47] ;
-  args_info->p_angle_help = gengetopt_args_info_help[48] ;
-  args_info->hxy_help = gengetopt_args_info_help[49] ;
-  args_info->rho_r_help = gengetopt_args_info_help[50] ;
-  args_info->angle_r_help = gengetopt_args_info_help[51] ;
-  args_info->hullvol_help = gengetopt_args_info_help[52] ;
-  args_info->rodlength_help = gengetopt_args_info_help[53] ;
-  args_info->tet_param_help = gengetopt_args_info_help[54] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[55] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[56] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[57] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[58] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[59] ;
-  args_info->nitrile_help = gengetopt_args_info_help[60] ;
-  args_info->multipole_help = gengetopt_args_info_help[61] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[62] ;
-  args_info->hbond_help = gengetopt_args_info_help[63] ;
-  args_info->potDiff_help = gengetopt_args_info_help[64] ;
+  args_info->nrbins_help = gengetopt_args_info_help[9] ;
+  args_info->nanglebins_help = gengetopt_args_info_help[10] ;
+  args_info->rcut_help = gengetopt_args_info_help[11] ;
+  args_info->thetacut_help = gengetopt_args_info_help[12] ;
+  args_info->dz_help = gengetopt_args_info_help[13] ;
+  args_info->length_help = gengetopt_args_info_help[14] ;
+  args_info->zlength_help = gengetopt_args_info_help[15] ;
+  args_info->zoffset_help = gengetopt_args_info_help[16] ;
+  args_info->sele1_help = gengetopt_args_info_help[17] ;
+  args_info->sele2_help = gengetopt_args_info_help[18] ;
+  args_info->sele3_help = gengetopt_args_info_help[19] ;
+  args_info->refsele_help = gengetopt_args_info_help[20] ;
+  args_info->comsele_help = gengetopt_args_info_help[21] ;
+  args_info->seleoffset_help = gengetopt_args_info_help[22] ;
+  args_info->seleoffset2_help = gengetopt_args_info_help[23] ;
+  args_info->molname_help = gengetopt_args_info_help[24] ;
+  args_info->begin_help = gengetopt_args_info_help[25] ;
+  args_info->end_help = gengetopt_args_info_help[26] ;
+  args_info->radius_help = gengetopt_args_info_help[27] ;
+  args_info->voxelSize_help = gengetopt_args_info_help[28] ;
+  args_info->gaussWidth_help = gengetopt_args_info_help[29] ;
+  args_info->bo_help = gengetopt_args_info_help[31] ;
+  args_info->ior_help = gengetopt_args_info_help[32] ;
+  args_info->for_help = gengetopt_args_info_help[33] ;
+  args_info->bad_help = gengetopt_args_info_help[34] ;
+  args_info->count_help = gengetopt_args_info_help[35] ;
+  args_info->gofr_help = gengetopt_args_info_help[36] ;
+  args_info->gofz_help = gengetopt_args_info_help[37] ;
+  args_info->r_theta_help = gengetopt_args_info_help[38] ;
+  args_info->r_omega_help = gengetopt_args_info_help[39] ;
+  args_info->r_z_help = gengetopt_args_info_help[40] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[41] ;
+  args_info->gxyz_help = gengetopt_args_info_help[42] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[43] ;
+  args_info->p2_help = gengetopt_args_info_help[44] ;
+  args_info->rp2_help = gengetopt_args_info_help[45] ;
+  args_info->scd_help = gengetopt_args_info_help[46] ;
+  args_info->density_help = gengetopt_args_info_help[47] ;
+  args_info->slab_density_help = gengetopt_args_info_help[48] ;
+  args_info->p_angle_help = gengetopt_args_info_help[49] ;
+  args_info->hxy_help = gengetopt_args_info_help[50] ;
+  args_info->rho_r_help = gengetopt_args_info_help[51] ;
+  args_info->angle_r_help = gengetopt_args_info_help[52] ;
+  args_info->hullvol_help = gengetopt_args_info_help[53] ;
+  args_info->rodlength_help = gengetopt_args_info_help[54] ;
+  args_info->tet_param_help = gengetopt_args_info_help[55] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[56] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[57] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[58] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[59] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[60] ;
+  args_info->nitrile_help = gengetopt_args_info_help[61] ;
+  args_info->multipole_help = gengetopt_args_info_help[62] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[63] ;
+  args_info->hbond_help = gengetopt_args_info_help[64] ;
+  args_info->potDiff_help = gengetopt_args_info_help[65] ;
   
 }
 
@@ -405,6 +410,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->nbins_x_orig));
   free_string_field (&(args_info->nbins_y_orig));
   free_string_field (&(args_info->nbins_z_orig));
+  free_string_field (&(args_info->nrbins_orig));
   free_string_field (&(args_info->nanglebins_orig));
   free_string_field (&(args_info->rcut_orig));
   free_string_field (&(args_info->thetacut_orig));
@@ -484,6 +490,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "nbins_y", args_info->nbins_y_orig, 0);
   if (args_info->nbins_z_given)
     write_into_file(outfile, "nbins_z", args_info->nbins_z_orig, 0);
+  if (args_info->nrbins_given)
+    write_into_file(outfile, "nrbins", args_info->nrbins_orig, 0);
   if (args_info->nanglebins_given)
     write_into_file(outfile, "nanglebins", args_info->nanglebins_orig, 0);
   if (args_info->rcut_given)
@@ -936,6 +944,7 @@ cmdline_parser_internal (
         { "nbins_x",	1, NULL, 'x' },
         { "nbins_y",	1, NULL, 'y' },
         { "nbins_z",	1, NULL, 0 },
+        { "nrbins",	1, NULL, 'r' },
         { "nanglebins",	1, NULL, 'a' },
         { "rcut",	1, NULL, 'c' },
         { "thetacut",	1, NULL, 0 },
@@ -994,7 +1003,7 @@ cmdline_parser_internal (
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:c:z:v:gpsdQm", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:r:a:c:z:v:gpsdQm", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -1078,6 +1087,18 @@ cmdline_parser_internal (
               &(local_args_info.nbins_y_given), optarg, 0, "100", ARG_INT,
               check_ambiguity, override, 0, 0,
               "nbins_y", 'y',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'r':	/* number of radial bins (usually duplicates functionality of nbins).  */
+        
+        
+          if (update_arg( (void *)&(args_info->nrbins_arg), 
+               &(args_info->nrbins_orig), &(args_info->nrbins_given),
+              &(local_args_info.nrbins_given), optarg, 0, "100", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "nrbins", 'r',
               additional_error))
             goto failure;
         

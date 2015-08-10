@@ -16,6 +16,7 @@ option	"nbins"    	b       "number of bins (general purpose)"				int	default="10
 option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		no
 option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
 option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
+option	"nrbins"    	r       "number of radial bins (usually duplicates functionality of nbins)"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
 option  "thetacut"      -       "cutoff angle (thetacut)"                               double                          no
