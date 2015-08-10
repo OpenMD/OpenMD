@@ -804,7 +804,6 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, 
                   &snap_->frameData.conductiveHeatFlux[0], 3, 
                   MPI_REALTYPE, MPI_SUM, col);
-
 #endif
 
   }

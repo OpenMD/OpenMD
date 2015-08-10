@@ -144,7 +144,7 @@ namespace OpenMD {
 	  sd->setJ(ji);
         }
       }
-
+      
     }
     
     flucQ_->moveA();

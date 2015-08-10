@@ -52,7 +52,7 @@ namespace OpenMD {
     : storageLayout_(storageLayout), info_(info), dumpFilename_(filename),
       seleMan1_(info_), seleMan2_(info_), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
-      evaluator1_(info_), evaluator2_(info_) { 
+      evaluator1_(info_), evaluator2_(info_), autoCorrFunc_(false) { 
     
     // Request maximum needed storage for the simulation (including of
     // whatever was passed down by the individual correlation
@@ -61,21 +61,24 @@ namespace OpenMD {
     storageLayout_ = info->getStorageLayout() | storageLayout;
 
     reader_ = new DumpReader(info_, dumpFilename_);    
+
+    uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
+
     evaluator1_.loadScriptString(selectionScript1_);
-    evaluator2_.loadScriptString(selectionScript2_);
-    
     //if selection is static, we only need to evaluate it once
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
       validateSelection(seleMan1_);
     }
-    
-    if (!evaluator2_.isDynamic()) {
-      seleMan2_.setSelectionSet(evaluator2_.evaluate());
-      validateSelection(seleMan2_);
+   
+    if (uniqueSelections_) { 
+      evaluator2_.loadScriptString(selectionScript2_);
+      if (!evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        validateSelection(seleMan2_);
+      }
     }
     
-    /**@todo Fix Me */
     Globals* simParams = info_->getSimParams();
     if (simParams->haveSampleTime()){
       deltaTime_ = simParams->getSampleTime();
@@ -86,8 +89,7 @@ namespace OpenMD {
       simError();  
     }
 
-    sprintf(painCave.errMsg,
-            "MultipassCorrFunc: Scanning for frames\n");
+    sprintf(painCave.errMsg, "Scanning for frames.");
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
     simError();  
@@ -99,7 +101,9 @@ namespace OpenMD {
 
     times_.resize(nFrames_);
     sele1ToIndex_.resize(nFrames_);
-    sele2ToIndex_.resize(nFrames_);
+    if (uniqueSelections_) {
+      sele2ToIndex_.resize(nFrames_);
+    }
   }
 
   void MultipassCorrFunc::preCorrelate() {
@@ -107,22 +111,12 @@ namespace OpenMD {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    StuntDouble* sd;
-
-    int isd1, isd2;
-    unsigned int index;
-   
-    sprintf(painCave.errMsg,
-            "MultipassCorrFunc: Starting pre-correlate scan\n");
-    painCave.isFatal = 0;
-    painCave.severity=OPENMD_INFO;
-    simError();  
     
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       times_[istep] = currentSnapshot_->getTime();
-
+      
       // update the positions of atoms which belong to the rigidbodies
       for (mol = info_->beginMolecule(mi); mol != NULL;
            mol = info_->nextMolecule(mi)) {
@@ -142,77 +136,80 @@ namespace OpenMD {
             rb->updateAtomVel();
           }
         }      
-      }
-      
-      if (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-      }
-      
-      if (evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
       }      
+      computeFrame(istep);
+    }
+  }
 
-      for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
-           sd = seleMan1_.nextSelected(isd1)) {
+  void MultipassCorrFunc::computeFrame(int istep) {
+    StuntDouble* sd;
 
-        index = computeProperty1(istep, sd);        
-        if (index == sele1ToIndex_[istep].size()) {
-          sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
-        } else {
-          sele1ToIndex_[istep].resize(index+1);
-          sele1ToIndex_[istep][index] = sd->getGlobalIndex();
-        }
+    int isd1, isd2;
+    int index;
+       
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+    
+    if (uniqueSelections_ && evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }      
+    
+    for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
+         sd = seleMan1_.nextSelected(isd1)) {
 
+      index = computeProperty1(istep, sd);        
+      if (index == sele1ToIndex_[istep].size()) {
+        sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
+      } else {
+        sele1ToIndex_[istep].resize(index+1);
+        sele1ToIndex_[istep][index] = sd->getGlobalIndex();
       }
       
+    }
+   
+    if (uniqueSelections_) { 
       for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
            sd = seleMan2_.nextSelected(isd2)) {        
-                
-        index = computeProperty2(istep, sd); 
+
+        if (autoCorrFunc_) {
+          index = computeProperty1(istep, sd);
+        } else {
+          index = computeProperty2(istep, sd);
+        }
         if (index == sele2ToIndex_[istep].size()) {
           sele2ToIndex_[istep].push_back(sd->getGlobalIndex());
         } else {
           sele2ToIndex_[istep].resize(index+1);
           sele2ToIndex_[istep][index] = sd->getGlobalIndex();
         }
-
       }
     }
   }
-
+    
   
   void MultipassCorrFunc::doCorrelate() {
     
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
-    sprintf(painCave.errMsg,
-            "MultipassCorrFunc: Starting pre-correlate scan\n");
+    sprintf(painCave.errMsg, "Starting pre-correlate scan.");
     simError();
     preCorrelate();
 
-    sprintf(painCave.errMsg,
-            "MultipassCorrFunc: Calculating correlation function\n");
+    sprintf(painCave.errMsg, "Calculating correlation function.");
     simError();
     correlation();
 
-    sprintf(painCave.errMsg,
-            "MultipassCorrFunc: Doing post-correlation calculations\n");
+    sprintf(painCave.errMsg, "Doing post-correlation calculations.");
     simError();
     postCorrelate();
     
-    sprintf(painCave.errMsg,
-            "MultipassCorrFunc: Writing output\n");
+    sprintf(painCave.errMsg, "Writing output.");
     simError();
     writeCorrelate();
   }
 
   void MultipassCorrFunc::correlation() {
-    std::vector<int> s1;
-    std::vector<int> s2;
-
-    std::vector<int>::iterator i1;
-    std::vector<int>::iterator i2;
-    RealType corrVal(0.0);
 
     for (int i =0 ; i < nTimeBins_; ++i) {
       histogram_[i] = 0.0;
@@ -222,7 +219,6 @@ namespace OpenMD {
     for (int i = 0; i < nFrames_; ++i) {
 
       RealType time1 = times_[i];
-      s1 = sele1ToIndex_[i];
       
       for(int j  = i; j < nFrames_; ++j) {
 
@@ -242,38 +238,53 @@ namespace OpenMD {
           simError();  
         }
         
-        int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
-        s2 = sele2ToIndex_[j];
-
-        for (i1 = s1.begin(), i2 = s2.begin();
-             i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
-          
-          // If the selections are dynamic, they might not have the
-          // same objects in both frames, so we need to roll either of
-          // the selections until we have the same object to
-          // correlate.
-          
-          while ( *i1 < *i2 && i1 != s1.end()) {
-            ++i1;
-          }
-          
-          while ( *i2 < *i1 && i2 != s2.end() ) {
-            ++i2;
-          }
-          
-          if ( i1 == s1.end() || i2 == s2.end() ) break;
-
-          corrVal = calcCorrVal(i, j, *i1, *i2);
-          histogram_[timeBin] += corrVal;
-          count_[timeBin]++;
-         
-        }
+        int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);
+        correlateFrames(i,j, timeBin);
       }
     }
   }
+ 
+  void MultipassCorrFunc::correlateFrames(int frame1, int frame2, int timeBin) {
+    std::vector<int> s1;
+    std::vector<int> s2;
 
+    std::vector<int>::iterator i1;
+    std::vector<int>::iterator i2;
 
-  
+    RealType corrVal(0.0);
+
+    s1 = sele1ToIndex_[frame1];
+
+    if (uniqueSelections_) 
+       s2 = sele2ToIndex_[frame2];
+    else
+       s2 = sele1ToIndex_[frame2];
+
+    for (i1 = s1.begin(), i2 = s2.begin();
+         i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
+      
+      // If the selections are dynamic, they might not have the
+      // same objects in both frames, so we need to roll either of
+      // the selections until we have the same object to
+      // correlate.
+
+      while ( *i1 < *i2 && i1 != s1.end()) {
+        ++i1;
+      }
+      
+      while ( *i2 < *i1 && i2 != s2.end() ) {
+        ++i2;
+      }
+          
+      if ( i1 == s1.end() || i2 == s2.end() ) break;
+
+      corrVal = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
+      histogram_[timeBin] += corrVal;
+      count_[timeBin]++;
+      
+    }
+  }
+
   void MultipassCorrFunc::postCorrelate() {
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
@@ -283,40 +294,6 @@ namespace OpenMD {
       }
     }
   }
-
-
-  void MultipassCorrFunc::updateFrame(int frame){
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
-    /** @todo need improvement */    
-    if (storageLayout_ & DataStorage::dslPosition) {
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-
-        //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-             rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtoms(frame);
-        }
-      }        
-    }
-
-    if (storageLayout_ & DataStorage::dslVelocity) {
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-        
-        //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-             rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtomVel(frame);
-        }
-      }      
-    }    
-  }
-
-
 
   void MultipassCorrFunc::writeCorrelate() {
     ofstream ofs(outputFilename_.c_str());

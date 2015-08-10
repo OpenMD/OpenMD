@@ -433,11 +433,10 @@ namespace OpenMD {
   void ForceManager::calcForces() {
     
     if (!initialized_) initialize();
-    
-    preCalculation();   
+    preCalculation();
     shortRangeInteractions();
     longRangeInteractions();
-    postCalculation();    
+    postCalculation();
   }
   
   void ForceManager::preCalculation() {
@@ -658,7 +657,6 @@ namespace OpenMD {
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &selectionPotential[BONDED_FAMILY], 1, 
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    
 #endif
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();

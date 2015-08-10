@@ -121,16 +121,17 @@ namespace OpenMD {
   
     initialize();
   
-    while (snap->getTime() < runTime) { 
-      preStep();    
-      integrateStep();    
-      postStep();      
+    while (snap->getTime() < runTime) {
+      preStep();
+      integrateStep();
+      postStep();
     }  
     finalize();
   }
 
 
   void VelocityVerletIntegrator::preStep() {
+    
     RealType difference = snap->getTime() + dt - currStatus;
   
     if (difference > 0 || fabs(difference) < OpenMD::epsilon) {
@@ -141,7 +142,6 @@ namespace OpenMD {
 
   void VelocityVerletIntegrator::postStep() {
 
-   
     if (needVelocityScaling) {
       if (snap->getTime() >= currThermal) {
 	velocitizer_->velocitize(targetScalingTemp);
@@ -209,8 +209,8 @@ namespace OpenMD {
     statWriter = NULL;
   }
 
-  void VelocityVerletIntegrator::integrateStep() { 
-  
+  void VelocityVerletIntegrator::integrateStep() {
+
     moveA();
     calcForce();
     moveB();

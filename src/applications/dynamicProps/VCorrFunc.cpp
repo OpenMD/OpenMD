@@ -45,10 +45,10 @@
 namespace OpenMD {
   VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, 
                        const std::string& sele1, const std::string& sele2)
-    : MultipassCorrFunc(info, filename, sele1, sele2, 
-                        DataStorage::dslVelocity | DataStorage::dslAmat | 
-                        DataStorage::dslAngularMomentum){
-
+    : AutoCorrFunc(info, filename, sele1, sele2, 
+                   DataStorage::dslVelocity | DataStorage::dslAmat | 
+                   DataStorage::dslAngularMomentum){
+    
     setCorrFuncType("Velocity Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".vcorr");
 
@@ -57,19 +57,19 @@ namespace OpenMD {
 
   VCorrFuncZ::VCorrFuncZ(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2)
-    : MultipassCorrFunc(info, filename, sele1, sele2, 
-                        DataStorage::dslPosition | DataStorage::dslVelocity |
-                        DataStorage::dslAmat | DataStorage::dslAngularMomentum){
-
+    : AutoCorrFunc(info, filename, sele1, sele2, 
+                   DataStorage::dslPosition | DataStorage::dslVelocity |
+                   DataStorage::dslAmat | DataStorage::dslAngularMomentum){
+    
     setCorrFuncType("Velocity Correlation Function projected along z axis");
     setOutputName(getPrefix(dumpFilename_) + ".vcorrz");
     velocities_.resize(nFrames_);
   }
   VCorrFuncR::VCorrFuncR(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2)
-    : MultipassCorrFunc(info, filename, sele1, sele2, 
-                        DataStorage::dslPosition | DataStorage::dslVelocity |
-                        DataStorage::dslAmat | DataStorage::dslAngularMomentum){
+    : AutoCorrFunc(info, filename, sele1, sele2, 
+                   DataStorage::dslPosition | DataStorage::dslVelocity |
+                   DataStorage::dslAmat | DataStorage::dslAngularMomentum){
     
     // Turn on COM calculation in reader:
     bool ncp = true;
@@ -83,20 +83,12 @@ namespace OpenMD {
     velocities_[frame].push_back( sd->getVel() );
     return velocities_[frame].size() - 1;
   }
-  int VCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    velocities_[frame].push_back( sd->getVel() );
-    return velocities_[frame].size() - 1;
-  }
   RealType VCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType v2 = dot( velocities_[frame1][id1] , velocities_[frame2][id2]);
     return v2;
   }
 
   int VCorrFuncZ::computeProperty1(int frame, StuntDouble* sd) {
-    velocities_[frame].push_back( sd->getVel().z() );
-    return velocities_[frame].size() - 1;
-  }
-  int VCorrFuncZ::computeProperty2(int frame, StuntDouble* sd) {
     velocities_[frame].push_back( sd->getVel().z() );
     return velocities_[frame].size() - 1;
   }
@@ -111,20 +103,13 @@ namespace OpenMD {
     coord_t.normalize();
       
     // project velocity vectors onto the radial vectors:
-    velocities_[frame].push_back( dot(sd->getVel(), coord_t) );
-    return velocities_[frame].size() - 1;
-  }
-  int VCorrFuncR::computeProperty2(int frame, StuntDouble* sd) {
-    // get the radial vector from the frame's center of mass:
-    Vector3d coord_t = sd->getPos() - sd->getCOM();
-    coord_t.normalize();
-      
-    // project velocity vectors onto the radial vectors:
-    velocities_[frame].push_back( dot(sd->getVel(), coord_t) );
+    RealType vel = dot(sd->getVel(), coord_t);
+    velocities_[frame].push_back( vel );
     return velocities_[frame].size() - 1;
   }
   RealType VCorrFuncR::calcCorrVal(int frame1, int frame2, int id1, int id2) {
-    RealType v2 = velocities_[frame1][id1] * velocities_[frame2][id2];
+    RealType v2;
+    v2  = velocities_[frame1][id1] * velocities_[frame2][id2];
     return v2;
   }
 }

@@ -43,6 +43,10 @@
 #include "constraints/Rattle.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
 
   Rattle::Rattle(SimInfo* info) : info_(info), maxConsIteration_(10), 
@@ -123,7 +127,7 @@ namespace OpenMD {
     Molecule::ConstraintElemIterator cei;
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
-    
+
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
       for (consElem = mol->beginConstraintElem(cei); consElem != NULL; 
@@ -134,10 +138,10 @@ namespace OpenMD {
     }
     
     //main loop of constraint algorithm
-    bool done = false;
+    int done = 0;
     int iteration = 0;
     while(!done && iteration < maxConsIteration_){
-      done = true;
+      done = 1;
 
       //loop over every constraint pair
 
@@ -145,7 +149,6 @@ namespace OpenMD {
            mol = info_->nextMolecule(mi)) {
 	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
              consPair = mol->nextConstraintPair(cpi)) {
-
 
 	  //dispatch constraint algorithm
 	  if(consPair->isMoved()) {
@@ -162,7 +165,7 @@ namespace OpenMD {
 	      break;
 	    case consSuccess:
 	      // constrain the pair by moving two elements
-	      done = false;
+	      done = 0;
 	      consPair->getConsElem1()->setMoving(true);
 	      consPair->getConsElem2()->setMoving(true);
 	      break;
@@ -181,6 +184,10 @@ namespace OpenMD {
 	}
       }//end for(iter->first())
 
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, &done, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+#endif
+      
       errorCheckPoint();
 
       for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -191,7 +198,6 @@ namespace OpenMD {
 	  consElem->setMoving(false);
 	}
       }
-
       iteration++;
     }//end while
 

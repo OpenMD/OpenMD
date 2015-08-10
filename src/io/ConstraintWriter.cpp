@@ -113,7 +113,7 @@ namespace OpenMD {
     //do MPI_ALLREDUCE to exchange the total number of constraints:
     MPI_Allreduce(MPI_IN_PLACE, &nConstraints[0], nproc, MPI_INT, MPI_SUM, 
                   MPI_COMM_WORLD);
-
+    
     MPI_Status ierr;
     int atom1, atom2, doPrint;
     RealType force;
