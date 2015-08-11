@@ -97,7 +97,6 @@ namespace OpenMD {
     std::vector<int> count_;
     std::vector<RealType> times_;
     bool uniqueSelections_;
-    bool autoCorrFunc_;
         
     SimInfo* info_;
     DumpReader* reader_;
@@ -115,6 +114,8 @@ namespace OpenMD {
         
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
+
+    bool autoCorrFunc_;
 
     std::string corrFuncType_;
     std::string extra_;

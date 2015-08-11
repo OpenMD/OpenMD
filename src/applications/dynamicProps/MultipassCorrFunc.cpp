@@ -145,7 +145,7 @@ namespace OpenMD {
     StuntDouble* sd;
 
     int isd1, isd2;
-    int index;
+    unsigned int index;
        
     if (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
