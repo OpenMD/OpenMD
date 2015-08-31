@@ -10,6 +10,7 @@ Options:
   -h, --help              show this help
   -f, --vcorr-file=...    use specified vcorr file
   -o, --output-file=...   use specified output (.pspect) file
+  -n, --normalize         normalize the power spectrum
 
 Example:
    vcorr2spectrum -f stockmayer.vcorr -o stockmayer.pspect
@@ -56,7 +57,7 @@ def readVcorrFile(vcorrFileName):
         
     vcorrFile.close()
     
-def computeSpectrum(outFileName):
+def computeSpectrum(outFileName, normalize):
     global tnew
     global vnew
     tnew = []
@@ -93,8 +94,10 @@ def computeSpectrum(outFileName):
         s = s + np.abs(spect[i])*dfreq
     
     for i in range(n/2):
-         outFile.write("%lf\t%lf\n" % (freq[i] * freqScale, np.abs(spect[i])/s))
-
+        if normalize:
+            outFile.write("%lf\t%lf\n" % (freq[i] * freqScale, np.abs(spect[i])/s))
+        else:
+            outFile.write("%lf\t%lf\n" % (freq[i] * freqScale, np.abs(spect[i])))
     outFile.close()
     
 def main(argv):
@@ -104,9 +107,10 @@ def main(argv):
     haveVcorrFileName = False
     haveOutputFileName = False
     haveQValue = False
+    normalize = False
  
     try:                                
-        opts, args = getopt.getopt(argv, "hf:o:", ["help", "Q-value=", "vcorr-file=", "output-file="]) 
+        opts, args = getopt.getopt(argv, "hnf:o:", ["help", "normalize", "vcorr-file=", "output-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -120,6 +124,8 @@ def main(argv):
         elif opt in ("-o", "--output-file"): 
             outputFileName = arg
             haveOutputFileName = True
+        elif opt in ("-n", "--normalize"):
+             normalize = True
     if (not haveVcorrFileName):
         usage() 
         print "No vcorr file was specified"
@@ -131,7 +137,7 @@ def main(argv):
     
     
     readVcorrFile(vcorrFileName)
-    computeSpectrum(outputFileName)
+    computeSpectrum(outputFileName, normalize)
 
 
 if __name__ == "__main__":
