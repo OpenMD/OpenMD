@@ -268,11 +268,11 @@ namespace OpenMD {
       // the selections until we have the same object to
       // correlate.
 
-      while ( *i1 < *i2 && i1 != s1.end()) {
+      while ( i1 != s1.end() && *i1 < *i2 ) {
         ++i1;
       }
       
-      while ( *i2 < *i1 && i2 != s2.end() ) {
+      while ( i2 != s2.end() && *i2 < *i1 ) {
         ++i2;
       }
           
