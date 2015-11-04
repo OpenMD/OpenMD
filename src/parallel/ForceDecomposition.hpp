@@ -103,7 +103,7 @@ namespace OpenMD {
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
     virtual void collectSelfData() = 0;
-    virtual potVec* getEmbeddingPotential() { return &embeddingPot; }
+    virtual potVec* getSelfPotential() { return &selfPot; }
     virtual potVec* getPairwisePotential() { return &pairwisePot; }
     virtual potVec* getExcludedPotential() { return &excludedPot; }
     virtual potVec* getSelectedPotential() { return &selectedPot; }
@@ -173,7 +173,7 @@ namespace OpenMD {
     vector<int> idents;
     vector<int> regions;
     potVec pairwisePot;
-    potVec embeddingPot;
+    potVec selfPot;
     potVec excludedPot;
     potVec excludedSelfPot;
     potVec selectedPot;

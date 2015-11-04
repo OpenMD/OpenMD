@@ -297,7 +297,7 @@ namespace OpenMD {
     *(sdat.frho) = u;
     *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
 
-    (*(sdat.pot))[METALLIC_FAMILY] += u;
+    (*(sdat.selfPot))[METALLIC_FAMILY] += u;
     if (sdat.isSelected)
       (*(sdat.selePot))[METALLIC_FAMILY] += u;
 

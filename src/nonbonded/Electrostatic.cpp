@@ -1181,7 +1181,7 @@ namespace OpenMD {
       C_a += *(sdat.flucQ);
 
       flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ),  
-                                 (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY], 
+                                 (*(sdat.selfPot))[ELECTROSTATIC_FAMILY], 
                                  *(sdat.flucQfrc) );
     }
 
@@ -1193,14 +1193,14 @@ namespace OpenMD {
         // Molecular Dynamics Simulation with Friedman’s Image Charge
         // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
         preVal = pre11_ * preRF_ * C_a * C_a;
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
+        (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
         if (sdat.isSelected)
           (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_;
 
       }
 
       if (i_is_Dipole) {
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
+        (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
         if (sdat.isSelected)
           (*(sdat.selePot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
       }
@@ -1222,7 +1222,7 @@ namespace OpenMD {
         if (i_is_Charge)
           self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
       }
-      (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
+      (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += self;
       if (sdat.isSelected)
         (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += self;
 

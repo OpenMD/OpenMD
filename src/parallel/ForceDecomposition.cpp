@@ -107,7 +107,7 @@ namespace OpenMD {
 
     sdat.atid = idents[atom1];
 
-    sdat.pot = &embeddingPot;
+    sdat.selfPot = &selfPot;
     sdat.excludedPot = &excludedSelfPot;
     sdat.selePot = &selectedSelfPot;
 

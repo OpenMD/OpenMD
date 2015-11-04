@@ -741,7 +741,7 @@ namespace OpenMD {
     idat.pot = &workPot;
     idat.excludedPot = &exPot;
     idat.selePot = &selectionPotential;
-    sdat.pot = fDecomp_->getEmbeddingPotential();    
+    sdat.selfPot = fDecomp_->getSelfPotential();    
     sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
     sdat.selePot = fDecomp_->getSelectedSelfPotential();
     idat.vpair = &vpair;
@@ -989,7 +989,7 @@ namespace OpenMD {
     // collects single-atom information
     fDecomp_->collectSelfData();
 
-    longRangePotential = *(fDecomp_->getEmbeddingPotential()) + 
+    longRangePotential = *(fDecomp_->getSelfPotential()) + 
       *(fDecomp_->getPairwisePotential());
 
     curSnapshot->setLongRangePotential(longRangePotential);

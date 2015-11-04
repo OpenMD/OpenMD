@@ -162,7 +162,7 @@ namespace OpenMD {
     Vector3d* dipole;       /**< pointer to dipole vector of the atom */
     Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
-    potVec* pot;            /**< total potential */
+    potVec* selfPot;        /**< total potential (including embedding energy) */
     potVec* excludedPot;    /**< potential energy excluded from the overall calculation */
     bool doParticlePot;     /**< should we bother with the particle pot? */
     RealType* particlePot;  /**< contribution to potential from this particle */
