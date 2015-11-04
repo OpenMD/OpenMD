@@ -1228,7 +1228,7 @@ namespace OpenMD {
         if (i_is_Charge) {
           self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
           if (i_is_Fluctuating) {
-            *(sdat.flucQfrc) -= selfMult2_ * pre14_ * 2.0 * trQ;
+            *(sdat.flucQfrc) += selfMult2_ * pre14_ * 2.0 * trQ;
           }
         }
       }
