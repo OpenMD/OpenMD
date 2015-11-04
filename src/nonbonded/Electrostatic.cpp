@@ -1194,9 +1194,11 @@ namespace OpenMD {
         // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
         preVal = pre11_ * preRF_ * C_a * C_a;
         (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
+        if (i_is_Fluctuating) {
+          *(sdat.flucQfrc) += pre11_ * preRF_ * C_a / cutoffRadius_;
+        }
         if (sdat.isSelected)
-          (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_;
-
+          (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_; 
       }
 
       if (i_is_Dipole) {
@@ -1214,7 +1216,7 @@ namespace OpenMD {
       if (i_is_Charge) {
         self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));
         if (i_is_Fluctuating) {
-          *(sdat.flucQfrc) -= 2.0 * C_a * selfMult1_ * pre11_;
+          *(sdat.flucQfrc) -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
         }
       }
       if (i_is_Dipole) 
@@ -1223,8 +1225,12 @@ namespace OpenMD {
         trQ = data.quadrupole.trace();
         trQQ = (data.quadrupole * data.quadrupole).trace();
         self += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
-        if (i_is_Charge)
+        if (i_is_Charge) {
           self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
+          if (i_is_Fluctuating) {
+            *(sdat.flucQfrc) -= selfMult2_ * pre14_ * 2.0 * trQ;
+          }
+        }
       }
       (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += self;
       if (sdat.isSelected)
