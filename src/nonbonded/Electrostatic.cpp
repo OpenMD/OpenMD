@@ -1211,8 +1211,12 @@ namespace OpenMD {
     case esm_SHIFTED_POTENTIAL:
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
-      if (i_is_Charge) 
-        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));      
+      if (i_is_Charge) {
+        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));
+        if (i_is_Fluctuating) {
+          *(sdat.flucQfrc) -= 2.0 * C_a * selfMult1_ * pre11_;
+        }
+      }
       if (i_is_Dipole) 
         self += selfMult2_ * pre22_ * DdD;      
       if (i_is_Quadrupole) {
