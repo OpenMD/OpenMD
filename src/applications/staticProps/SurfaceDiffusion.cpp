@@ -245,7 +245,7 @@ namespace OpenMD {
       for(int j = 0; j < frames; j++){
 	// if the particle is mobile between j and j + 1, then count
 	// it for all timeShifts
-	if(moBool2_[i][j+1]){
+	//if(moBool2_[i][j+1]){
 	  for(std::size_t k = j; k < positions2_[0].size(); k++){
 	    //<x(t)-x(0)>  <y(t)-y(0)>  <r(t)-r(0)>
 	    //The positions stored are not wrapped, thus I don't need
@@ -270,7 +270,7 @@ namespace OpenMD {
 	    rHist_[timeShift] += rDist;
 	    count_[timeShift]++;
 	  }
-	}
+	//}
       }
     }
     cout << "X, Y, R calculated\n";
