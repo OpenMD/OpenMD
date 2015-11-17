@@ -186,7 +186,7 @@ namespace OpenMD {
         // z-axis is simply the second column of A.transpose()
         // or, identically, the second row of A itself.
 
-	Vector3d vecTail = j2->getA().getRow(2);
+	Vector3d vecTail = j2->getA().transpose()*V3Z;
 	orderTensorTail +=outProduct(vecTail, vecTail);
 	nTail++;
       }

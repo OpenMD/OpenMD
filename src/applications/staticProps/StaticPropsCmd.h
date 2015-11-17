@@ -60,6 +60,9 @@ struct gengetopt_args_info
   int nbins_z_arg;	/**< @brief number of bins in z axis (default='100').  */
   char * nbins_z_orig;	/**< @brief number of bins in z axis original value given at command line.  */
   const char *nbins_z_help; /**< @brief number of bins in z axis help description.  */
+  int nrbins_arg;	/**< @brief number of radial bins (usually duplicates functionality of nbins) (default='100').  */
+  char * nrbins_orig;	/**< @brief number of radial bins (usually duplicates functionality of nbins) original value given at command line.  */
+  const char *nrbins_help; /**< @brief number of radial bins (usually duplicates functionality of nbins) help description.  */
   int nanglebins_arg;	/**< @brief number of bins for cos(angle) (default='50').  */
   char * nanglebins_orig;	/**< @brief number of bins for cos(angle) original value given at command line.  */
   const char *nanglebins_help; /**< @brief number of bins for cos(angle) help description.  */
@@ -165,6 +168,7 @@ struct gengetopt_args_info
   unsigned int nbins_x_given ;	/**< @brief Whether nbins_x was given.  */
   unsigned int nbins_y_given ;	/**< @brief Whether nbins_y was given.  */
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
+  unsigned int nrbins_given ;	/**< @brief Whether nrbins was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */

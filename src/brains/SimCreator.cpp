@@ -332,7 +332,10 @@ namespace OpenMD {
           }
         }
       }
-            
+
+
+      bool startFound(false);
+      bool endFound(false);
       //scan through the input stream and find MetaData tag        
       while(mdFile_.getline(buffer, bufferSize)) {
         ++lineNo;
@@ -342,14 +345,17 @@ namespace OpenMD {
           std::size_t i = CaseInsensitiveFind(line, "<MetaData>");
           if (i != string::npos) {
             metaDataBlockStart = lineNo;
+            startFound = true;
             mdOffset = mdFile_.tellg();
           }
         } else {
           std::size_t i = CaseInsensitiveFind(line, "</MetaData>");
           if (i != string::npos) {
             metaDataBlockEnd = lineNo;
+            endFound = true;
           }
         }
+        if (startFound && endFound) break;
       }
 
       if (metaDataBlockStart == -1) {

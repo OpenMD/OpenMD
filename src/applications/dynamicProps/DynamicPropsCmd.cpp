@@ -27,7 +27,6 @@
 #include <getopt.h>
 #endif
 
-
 #include "DynamicPropsCmd.h"
 
 const char *gengetopt_args_info_purpose = "";
@@ -46,6 +45,8 @@ const char *gengetopt_args_info_help[] = {
   "      --order=INT               Lengendre Polynomial Order",
   "  -z, --nzbins=INT              Number of Z bins  (default=`100')",
   "  -m, --memory=memory specification\n                                Available memory (defaults to 2G)  \n                                  (default=`2G')",
+  "  -c, --rcut=DOUBLE             cutoff radius (rcut)",
+  "      --thetacut=DOUBLE         cutoff angle (thetacut)",
   "\n Group: dynamicProps\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   rmsd",
@@ -66,12 +67,14 @@ const char *gengetopt_args_info_help[] = {
   "      --stresscorr              Stress tensor correlation function",
   "  -b, --bondcorr                Bond extension correlation function",
   "  -f, --freqfluccorr            Frequency Fluctuation correlation function",
+  "  -j, --jumptime                Hydrogen bond jump time correlation function",
     0
 };
 
 typedef enum {ARG_NO
   , ARG_STRING
   , ARG_INT
+  , ARG_DOUBLE
 } cmdline_parser_arg_type;
 
 static
@@ -101,6 +104,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->order_given = 0 ;
   args_info->nzbins_given = 0 ;
   args_info->memory_given = 0 ;
+  args_info->rcut_given = 0 ;
+  args_info->thetacut_given = 0 ;
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->rcorrZ_given = 0 ;
@@ -120,6 +125,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->stresscorr_given = 0 ;
   args_info->bondcorr_given = 0 ;
   args_info->freqfluccorr_given = 0 ;
+  args_info->jumptime_given = 0 ;
   args_info->dynamicProps_group_counter = 0 ;
 }
 
@@ -140,6 +146,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->nzbins_orig = NULL;
   args_info->memory_arg = gengetopt_strdup ("2G");
   args_info->memory_orig = NULL;
+  args_info->rcut_orig = NULL;
+  args_info->thetacut_orig = NULL;
   
 }
 
@@ -157,25 +165,28 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->order_help = gengetopt_args_info_help[6] ;
   args_info->nzbins_help = gengetopt_args_info_help[7] ;
   args_info->memory_help = gengetopt_args_info_help[8] ;
-  args_info->selecorr_help = gengetopt_args_info_help[10] ;
-  args_info->rcorr_help = gengetopt_args_info_help[11] ;
-  args_info->rcorrZ_help = gengetopt_args_info_help[12] ;
-  args_info->vcorr_help = gengetopt_args_info_help[13] ;
-  args_info->vcorrZ_help = gengetopt_args_info_help[14] ;
-  args_info->vcorrR_help = gengetopt_args_info_help[15] ;
-  args_info->dcorr_help = gengetopt_args_info_help[16] ;
-  args_info->lcorr_help = gengetopt_args_info_help[17] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[18] ;
-  args_info->cohZ_help = gengetopt_args_info_help[19] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[20] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[21] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[22] ;
-  args_info->drcorr_help = gengetopt_args_info_help[23] ;
-  args_info->helfandEcorr_help = gengetopt_args_info_help[24] ;
-  args_info->momentum_help = gengetopt_args_info_help[25] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[26] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[27] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[28] ;
+  args_info->rcut_help = gengetopt_args_info_help[9] ;
+  args_info->thetacut_help = gengetopt_args_info_help[10] ;
+  args_info->selecorr_help = gengetopt_args_info_help[12] ;
+  args_info->rcorr_help = gengetopt_args_info_help[13] ;
+  args_info->rcorrZ_help = gengetopt_args_info_help[14] ;
+  args_info->vcorr_help = gengetopt_args_info_help[15] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[16] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[17] ;
+  args_info->dcorr_help = gengetopt_args_info_help[18] ;
+  args_info->lcorr_help = gengetopt_args_info_help[19] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[20] ;
+  args_info->cohZ_help = gengetopt_args_info_help[21] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[22] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[23] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[24] ;
+  args_info->drcorr_help = gengetopt_args_info_help[25] ;
+  args_info->helfandEcorr_help = gengetopt_args_info_help[26] ;
+  args_info->momentum_help = gengetopt_args_info_help[27] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[28] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[29] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[30] ;
+  args_info->jumptime_help = gengetopt_args_info_help[31] ;
   
 }
 
@@ -271,6 +282,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->nzbins_orig));
   free_string_field (&(args_info->memory_arg));
   free_string_field (&(args_info->memory_orig));
+  free_string_field (&(args_info->rcut_orig));
+  free_string_field (&(args_info->thetacut_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -324,6 +337,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "nzbins", args_info->nzbins_orig, 0);
   if (args_info->memory_given)
     write_into_file(outfile, "memory", args_info->memory_orig, 0);
+  if (args_info->rcut_given)
+    write_into_file(outfile, "rcut", args_info->rcut_orig, 0);
+  if (args_info->thetacut_given)
+    write_into_file(outfile, "thetacut", args_info->thetacut_orig, 0);
   if (args_info->selecorr_given)
     write_into_file(outfile, "selecorr", 0, 0 );
   if (args_info->rcorr_given)
@@ -362,6 +379,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bondcorr", 0, 0 );
   if (args_info->freqfluccorr_given)
     write_into_file(outfile, "freqfluccorr", 0, 0 );
+  if (args_info->jumptime_given)
+    write_into_file(outfile, "jumptime", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -434,6 +453,7 @@ reset_group_dynamicProps(struct gengetopt_args_info *args_info)
   args_info->stresscorr_given = 0 ;
   args_info->bondcorr_given = 0 ;
   args_info->freqfluccorr_given = 0 ;
+  args_info->jumptime_given = 0 ;
 
   args_info->dynamicProps_group_counter = 0;
 }
@@ -594,6 +614,9 @@ int update_arg(void *field, char **orig_field,
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
+  case ARG_DOUBLE:
+    if (val) *((double *)field) = strtod (val, &stop_char);
+    break;
   case ARG_STRING:
     if (val) {
       string_field = (char **)field;
@@ -609,6 +632,7 @@ int update_arg(void *field, char **orig_field,
   /* check numeric conversion */
   switch(arg_type) {
   case ARG_INT:
+  case ARG_DOUBLE:
     if (val && !(stop_char && *stop_char == '\0')) {
       fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
       return 1; /* failure */
@@ -684,6 +708,8 @@ cmdline_parser_internal (
         { "order",	1, NULL, 0 },
         { "nzbins",	1, NULL, 'z' },
         { "memory",	1, NULL, 'm' },
+        { "rcut",	1, NULL, 'c' },
+        { "thetacut",	1, NULL, 0 },
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "rcorrZ",	0, NULL, 0 },
@@ -703,10 +729,11 @@ cmdline_parser_internal (
         { "stresscorr",	0, NULL, 0 },
         { "bondcorr",	0, NULL, 'b' },
         { "freqfluccorr",	0, NULL, 'f' },
+        { "jumptime",	0, NULL, 'j' },
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVi:o:z:m:srvdlMpbf", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:z:m:c:srvdlMpbfj", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -766,6 +793,18 @@ cmdline_parser_internal (
               &(local_args_info.memory_given), optarg, 0, "2G", ARG_STRING,
               check_ambiguity, override, 0, 0,
               "memory", 'm',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* cutoff radius (rcut).  */
+        
+        
+          if (update_arg( (void *)&(args_info->rcut_arg), 
+               &(args_info->rcut_orig), &(args_info->rcut_given),
+              &(local_args_info.rcut_given), optarg, 0, 0, ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "rcut", 'c',
               additional_error))
             goto failure;
         
@@ -905,6 +944,21 @@ cmdline_parser_internal (
             goto failure;
         
           break;
+        case 'j':	/* Hydrogen bond jump time correlation function.  */
+        
+          if (args_info->dynamicProps_group_counter && override)
+            reset_group_dynamicProps (args_info);
+          args_info->dynamicProps_group_counter += 1;
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->jumptime_given),
+              &(local_args_info.jumptime_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "jumptime", 'j',
+              additional_error))
+            goto failure;
+        
+          break;
 
         case 0:	/* Long option with no short option */
           /* select first stuntdouble set.  */
@@ -945,6 +999,20 @@ cmdline_parser_internal (
                 &(local_args_info.order_given), optarg, 0, 0, ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "order", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* cutoff angle (thetacut).  */
+          else if (strcmp (long_options[option_index].name, "thetacut") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->thetacut_arg), 
+                 &(args_info->thetacut_orig), &(args_info->thetacut_given),
+                &(local_args_info.thetacut_given), optarg, 0, 0, ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "thetacut", '-',
                 additional_error))
               goto failure;
           

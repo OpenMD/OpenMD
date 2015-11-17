@@ -42,18 +42,51 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class RCorrFunc : public ParticleTimeCorrFunc {
+  class RCorrFunc : public AutoCorrFunc {
   public:
-    RCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
+    RCorrFunc(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2);
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
-
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<Vector3d> > positions_;
   };
+
+  class RCorrFuncZ : public AutoCorrFunc {
+  public:
+    RCorrFuncZ(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2, int nZbins);
+  private:
+    virtual void computeFrame(int frame);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2, int timeBin);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) { return -1; }
+    virtual void postCorrelate();
+    virtual void writeCorrelate();
+
+    std::vector<std::vector<Vector3d> > positions_;
+    std::vector<std::vector<int> > zBins_;
+    std::vector<std::vector<RealType> > histograms_;
+    std::vector<std::vector<int> > counts_;
+    Mat3x3d hmat_;
+    RealType halfBoxZ_;
+    int nZBins_;
+  };
+
+  class RCorrFuncR : public AutoCorrFunc {
+  public:
+    RCorrFuncR(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2);           
+  private:
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<RealType> > positions_;    
+  };
+
 
 }
 #endif
-

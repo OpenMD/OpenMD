@@ -42,34 +42,39 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class VCorrFunc : public ParticleTimeCorrFunc {
+  class VCorrFunc : public AutoCorrFunc {
   public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
+    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<Vector3d> > velocities_;
+  };
+
+  class VCorrFuncZ : public AutoCorrFunc {
+  public:
+    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
+        
+  private:
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<RealType> > velocities_;
          
   };
 
-  class VCorrFuncZ : public VCorrFunc {
+  class VCorrFuncR : public AutoCorrFunc {
   public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
+    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
-  };
-
-  class VCorrFuncR : public VCorrFunc {
-  public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
-         
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<RealType> > velocities_;
+    
   };
 
 

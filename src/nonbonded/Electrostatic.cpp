@@ -1181,7 +1181,7 @@ namespace OpenMD {
       C_a += *(sdat.flucQ);
 
       flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ),  
-                                 (*(sdat.excludedPot))[ELECTROSTATIC_FAMILY], 
+                                 (*(sdat.selfPot))[ELECTROSTATIC_FAMILY], 
                                  *(sdat.flucQfrc) );
     }
 
@@ -1193,14 +1193,16 @@ namespace OpenMD {
         // Molecular Dynamics Simulation with Friedman’s Image Charge
         // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
         preVal = pre11_ * preRF_ * C_a * C_a;
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
+        (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
+        if (i_is_Fluctuating) {
+          *(sdat.flucQfrc) += pre11_ * preRF_ * C_a / cutoffRadius_;
+        }
         if (sdat.isSelected)
-          (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_;
-
+          (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_; 
       }
 
       if (i_is_Dipole) {
-        (*(sdat.pot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
+        (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
         if (sdat.isSelected)
           (*(sdat.selePot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
       }
@@ -1211,18 +1213,26 @@ namespace OpenMD {
     case esm_SHIFTED_POTENTIAL:
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
-      if (i_is_Charge) 
-        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));      
+      if (i_is_Charge) {
+        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));
+        if (i_is_Fluctuating) {
+          *(sdat.flucQfrc) -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
+        }
+      }
       if (i_is_Dipole) 
         self += selfMult2_ * pre22_ * DdD;      
       if (i_is_Quadrupole) {
         trQ = data.quadrupole.trace();
         trQQ = (data.quadrupole * data.quadrupole).trace();
         self += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
-        if (i_is_Charge)
+        if (i_is_Charge) {
           self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
+          if (i_is_Fluctuating) {
+            *(sdat.flucQfrc) += selfMult2_ * pre14_ * 2.0 * trQ;
+          }
+        }
       }
-      (*(sdat.pot))[ELECTROSTATIC_FAMILY] += self;
+      (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += self;
       if (sdat.isSelected)
         (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += self;
 

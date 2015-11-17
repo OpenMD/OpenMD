@@ -61,7 +61,7 @@ ASTFactory::~ASTFactory()
 	{
 		if( *i != &default_factory_descriptor )
 			delete *i;
-		i++;
+		++i;
 	}
 }
 
@@ -126,7 +126,7 @@ RefAST ASTFactory::create(const ANTLR_USE_NAMESPACE(std)string& type_name, ANTLR
 			t->initialize(infile);
 			return t;
 		}
-		fact++;
+		++fact;
 	}
 
 	string error = "ASTFactory::create: Unknown AST type '" + type_name + "'";

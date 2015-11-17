@@ -210,8 +210,15 @@ namespace OpenMD {
       
       //  Cleaver paper uses sqrt of squares to get sigma0 for
       //  mixed interactions.
+      ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
+      string DistanceMix = fopts.getDistanceMixingRule();
+      toUpper(DistanceMix);
+
+      if (DistanceMix == "ARITHMETIC") 
+        mixer1.sigma0 = 0.5* (d1 + d2);
+      else 
+        mixer1.sigma0 = sqrt(d1*d1 + d2*d2);
       
-      mixer1.sigma0 = sqrt(d1*d1 + d2*d2);
       mixer1.xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2);
       mixer1.xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1);
       mixer1.x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) /
@@ -363,7 +370,6 @@ namespace OpenMD {
     *(idat.t1) += (dUda * rxu1 - dUdg * uxu) * *(idat.sw);
     *(idat.t2) += (dUdb * rxu2 + dUdg * uxu) * *(idat.sw);
     *(idat.vpair) += U;
-
     return;
 
   }

@@ -111,7 +111,7 @@ namespace OpenMD {
         eig.getEigenvalues( eigenvalues );
         eig.getEigenvectors( eigenvectors );
 
-        potential += eigenvalues(0.0);
+        potential += eigenvalues(0);
         for (int i = 0; i < nDiabats; i++) {
           // all of the couplings are constant, so the condon
           // approximation and Hellmann-Feynman let us obtain the

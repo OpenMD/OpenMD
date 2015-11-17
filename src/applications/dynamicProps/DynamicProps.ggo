@@ -16,6 +16,8 @@ option  "sele2"         -       "select second stuntdouble set (if sele2 is not 
 option  "order"         -       "Lengendre Polynomial Order"  int  no
 option  "nzbins"        z       "Number of Z bins" int default="100" no
 option  "memory"        m       "Available memory (defaults to 2G)" string  typestr="memory specification" default="2G" no
+option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
+option  "thetacut"      -       "cutoff angle (thetacut)"                               double                          no
 defgroup "dynamicProps" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"  s       "selection correlation function" group="dynamicProps"
 groupoption "rcorr"     r       "rmsd" group="dynamicProps"
@@ -36,3 +38,4 @@ groupoption "momentum"   p      "Helfand momentum for viscosity" group="dynamicP
 groupoption "stresscorr" -      "Stress tensor correlation function" group="dynamicProps"
 groupoption "bondcorr"   b      "Bond extension correlation function" group="dynamicProps"
 groupoption "freqfluccorr" f    "Frequency Fluctuation correlation function" group="dynamicProps"
+groupoption "jumptime"   j      "Hydrogen bond jump time correlation function" group = "dynamicProps"

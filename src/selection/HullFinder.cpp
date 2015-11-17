@@ -129,7 +129,9 @@ namespace OpenMD {
   }
 
   HullFinder::~HullFinder() {
+#ifdef HAVE_QHULL
     delete surfaceMesh_;
+#endif
   }
 
   SelectionSet HullFinder::findHull() {

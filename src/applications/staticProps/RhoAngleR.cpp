@@ -101,13 +101,13 @@ namespace OpenMD {
 	// only do this if the stunt double actually has a vector associated
 	// with it
 	if (sd->isDirectional()) {
-	  Vector3d dipole = sd->getA().getColumn(2);
-	  // std::cerr << "pos = " << pos << " dipole = " << dipole << "\n";
+	  Vector3d uz = sd->getA().transpose() * V3Z;
+	  // std::cerr << "pos = " << pos << " uz = " << uz << "\n";
 	  RealType distance = r1.length();
 	  
-	  dipole.normalize();
+	  uz.normalize();
 	  r1.normalize();
-	  RealType cosangle = dot(r1, dipole);
+	  RealType cosangle = dot(r1, uz);
 	  
 	  if (distance < len_) {
 	    int whichBin = distance / deltaR_;

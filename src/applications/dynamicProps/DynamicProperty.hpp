@@ -39,23 +39,34 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_RADIALRCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_RADIALRCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_DYNAMICPROPERTY_HPP
+#define APPLICATIONS_DYNAMICPROPS_DYNAMICPROPERTY_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
-
+#include <string>
+#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
 
-  class RadialRCorrFunc : public ParticleTimeCorrFunc {
+  /**
+   * @class DynamicProperty DynamicProperty.hpp "applications/dynamicProps/DynamicProperty"
+   * @brief Base class for Dynamic properties
+   */
+ 
+  class DynamicProperty {
   public:
-    RadialRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-  private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
+    DynamicProperty(){ }
+    virtual ~DynamicProperty(){ }    
+    virtual void doCorrelate() = 0;
 
+    void setOutputName(const std::string& filename) {
+      outputFilename_ = filename;
+    }
+    const std::string& getOutputFileName() const {
+      return outputFilename_;
+    }
 
+  protected:
+    std::string outputFilename_;       
   };
-
 }
 #endif
-

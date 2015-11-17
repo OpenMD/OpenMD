@@ -314,7 +314,7 @@ namespace OpenMD {
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
                                       *(sdat.dfrhodrho) );
 
-    (*(sdat.pot))[METALLIC_FAMILY] += *(sdat.frho);
+    (*(sdat.selfPot))[METALLIC_FAMILY] += *(sdat.frho);
     if (sdat.isSelected)
       (*(sdat.selePot))[METALLIC_FAMILY] += *(sdat.frho);
 

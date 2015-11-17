@@ -182,7 +182,7 @@ namespace OpenMD {
           // only do this if the stunt double actually has a vector associated
           // with it
           if (sd1->isDirectional()) {
-            Vector3d vec = sd1->getA().getColumn(2);            
+            Vector3d vec = sd1->getA().transpose()*V3Z;
             vec.normalize();
             r1.normalize();
             RealType cosangle = dot(r1, vec);

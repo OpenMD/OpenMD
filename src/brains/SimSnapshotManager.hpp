@@ -73,7 +73,7 @@ namespace OpenMD{
     virtual int getCapacity();
 
     virtual void setCapacity(int capacity);
-            
+
   private:
     SimInfo* info_;
   };

@@ -36,69 +36,29 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). 
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#include "applications/staticProps/HBondGeometric.hpp"
-#include "utils/simError.h"
-#include "io/DumpReader.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
 
-#include <vector>
+#include "applications/dynamicProps/HBondJump.hpp"
+#include <algorithm>
 
 namespace OpenMD {
-
-  HBondGeometric::HBondGeometric(SimInfo* info, 
-                                 const std::string& filename, 
-                                 const std::string& sele1,
-                                 const std::string& sele2,
-                                 double rCut, double thetaCut, int nbins) :
-    StaticAnalyser(info, filename),
-    selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
-    selectionScript2_(sele2), seleMan2_(info), evaluator2_(info) {
+  HBondJump::HBondJump(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, const std::string& sele2,
+                       double rCut, double thetaCut)
+    : MultipassCorrFunc(info, filename, sele1, sele2,
+                        DataStorage::dslPosition | DataStorage::dslAmat ),
+      rCut_(rCut), thetaCut_(thetaCut) {
     
-    setOutputName(getPrefix(filename) + ".hbg");
+    setCorrFuncType("HBondJump");
+    setOutputName(getPrefix(dumpFilename_) + ".jump");
 
-    ff_ = info_->getForceField();
-
-    evaluator1_.loadScriptString(sele1);
-    if (!evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }
-    evaluator2_.loadScriptString(sele2);
-    if (!evaluator2_.isDynamic()) {
-      seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    }
-
-    // Set up cutoff values:
-
-    rCut_ = rCut;
-    thetaCut_ = thetaCut;
-    nBins_ = nbins;
-
-    nHBonds_.resize(nBins_);
-    nDonor_.resize(nBins_);
-    nAcceptor_.resize(nBins_);
-
-    initializeHistogram();
-  }
-
-  HBondGeometric::~HBondGeometric() {
-    nHBonds_.clear();
-    nDonor_.clear();
-    nAcceptor_.clear(); 
+    //nFrames_ is initialized in MultipassCorrFunc:
+    bondList_.resize(nFrames_);
   }
   
-  void HBondGeometric::initializeHistogram() {
-    std::fill(nHBonds_.begin(),   nHBonds_.end(),   0);
-    std::fill(nDonor_.begin(),    nDonor_.end(),    0);
-    std::fill(nAcceptor_.begin(), nAcceptor_.end(), 0);
-    nSelected_ = 0;
-  }
-  
-  void HBondGeometric::process() {
+  void HBondJump::preCorrelate() {
     Molecule* mol1;
     Molecule* mol2;
     RigidBody* rb1;
@@ -119,41 +79,35 @@ namespace OpenMD {
     Vector3d DA;
     RealType DAdist, DHdist, theta, ctheta;
     int ii, jj;
-    int nHB, nA, nD;
-
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
+    int hInd, aInd, index;
+    std::vector<int>::iterator ind;
+   
+    for (int istep = 0; istep < nFrames_; istep++) {
+      reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-     
+      times_[istep] = currentSnapshot_->getTime();
+
       // update the positions of atoms which belong to the rigidbodies
-      
-      for (mol1 = info_->beginMolecule(mi); mol1 != NULL; 
+      for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
            mol1 = info_->nextMolecule(mi)) {
-        for (rb1 = mol1->beginRigidBody(rbIter); rb1 != NULL; 
+        for (rb1 = mol1->beginRigidBody(rbIter); rb1 != NULL;
              rb1 = mol1->nextRigidBody(rbIter)) {
           rb1->updateAtoms();
-        }        
-      }           
+        }
+      }
       
-      if  (evaluator1_.isDynamic()) {
+      if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }
-      if  (evaluator2_.isDynamic()) {
+      
+      if (evaluator2_.isDynamic()) {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
-      }
+      }      
+
+      bondList_[istep].resize(seleMan2_.getSelectionCount());
       
       for (mol1 = seleMan1_.beginSelectedMolecule(ii);
            mol1 != NULL; mol1 = seleMan1_.nextSelectedMolecule(ii)) {
-
-        // We're collecting statistics on the molecules in selection 1:
-        nHB = 0;
-        nA = 0;
-        nD = 0;
         
         for (mol2 = seleMan2_.beginSelectedMolecule(jj);
              mol2 != NULL; mol2 = seleMan2_.nextSelectedMolecule(jj)) {
@@ -161,7 +115,7 @@ namespace OpenMD {
           // loop over the possible donors in molecule 1:
           for (hbd1 = mol1->beginHBondDonor(hbdi); hbd1 != NULL;
                hbd1 = mol1->nextHBondDonor(hbdi)) {
-            dPos = hbd1->donorAtom->getPos();
+            dPos = hbd1->donorAtom->getPos(); 
             hPos = hbd1->donatedHydrogen->getPos();
             DH = hPos - dPos; 
             currentSnapshot_->wrapVector(DH);
@@ -185,8 +139,18 @@ namespace OpenMD {
                 // Angle criteria: are the D-H and D-A and vectors close?
                 if (theta < thetaCut_) {
                   // molecule 1 is a Hbond donor:
-                  nHB++;
-                  nD++;
+                  hInd = hbd1->donatedHydrogen->getGlobalIndex();
+
+                  ind = std::find(indices_.begin(), indices_.end(), hInd);
+                  if (ind == indices_.end()) {
+                    index = indices_.size();
+                    indices_.push_back(hInd);
+                  } else {
+                    index = std::distance(indices_.begin(), ind);
+                  }
+
+                  aInd = hba2->getGlobalIndex();
+                  bondList_[istep][index].insert(aInd);                  
                 }
               }            
             }            
@@ -218,61 +182,75 @@ namespace OpenMD {
                 // Angle criteria: are the D-H and D-A and vectors close?
                 if (theta < thetaCut_) {
                   // molecule 1 is a Hbond acceptor:
-                  nHB++;
-                  nA++;
+                  hInd = hbd2->donatedHydrogen->getGlobalIndex();
+                  aInd = hba1->getGlobalIndex();
+                  ind = std::find(indices_.begin(), indices_.end(), hInd);
+                  if (ind == indices_.end()) {
+                    index = indices_.size();
+                    indices_.push_back(hInd);
+                  } else {
+                    index = std::distance(indices_.begin(), ind);
+                  }
+                  bondList_[istep][index].insert(aInd);
                 }                
               }
             }
           }
-        }                 
-        collectHistogram(nHB, nA, nD);
+        }
       }
-    }
-    writeHistogram();
+    }   
   }
- 
-        
-  void HBondGeometric::collectHistogram(int nHB, int nA, int nD) {
-    nHBonds_[nHB] += 1;
-    nAcceptor_[nA] += 1;
-    nDonor_[nD] += 1;
-    nSelected_++;
-  }
+  
+  
+  void HBondJump::correlation() {
+    std::vector<int>::iterator i1;
+    std::set<int>::iterator ki;
+    std::set<int>::iterator kj;
+          
+    RealType corrVal;
+    
+    for (int i = 0; i < nFrames_; ++i) {
 
-
-  void HBondGeometric::writeHistogram() {
-        
-    std::ofstream osq(getOutputFileName().c_str());
-
-    if (osq.is_open()) {
+      RealType time1 = times_[i];           
       
-      osq << "# HydrogenBonding Statistics\n";
-      osq << "# selection1: (" << selectionScript1_ << ")"
-          << "\tselection2: (" << selectionScript2_ <<  ")\n";
-      osq << "# molecules in selection1: " << nSelected_ << "\n";
-      osq << "# nHBonds\tnAcceptor\tnDonor\tp(nHBonds)\tp(nAcceptor)\tp(nDonor)\n";
-      // Normalize by number of frames and write it out:
-      for (int i = 0; i < nBins_; ++i) {
-        osq << i;
-        osq << "\t" << nHBonds_[i];
-        osq << "\t" << nAcceptor_[i];
-        osq << "\t" << nDonor_[i];
-	osq << "\t" << (RealType) (nHBonds_[i]) / nSelected_;
-        osq << "\t" << (RealType) (nAcceptor_[i]) / nSelected_;
-        osq << "\t" << (RealType) (nDonor_[i]) / nSelected_;
-        osq << "\n";
+      for(int j  = i; j < nFrames_; ++j) {
+
+        // Perform a sanity check on the actual configuration times to
+        // make sure the configurations are spaced the same amount the
+        // sample time said they were spaced:
+               
+        RealType time2 = times_[j];
+
+        if ( fabs( (time2 - time1) - (j-i)*deltaTime_ ) > 1.0e-4 ) {
+          sprintf(painCave.errMsg,
+                  "HBondJump::correlation Error: sampleTime (%f)\n"
+                  "\tin %s does not match actual time-spacing between\n"
+                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+          painCave.isFatal = 1;
+          simError();  
+        }
+        
+        int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
+
+        for (i1 = indices_.begin(); i1 != indices_.end(); ++i1) {
+
+          corrVal = 0.0;
+          
+          for (ki = bondList_[i][*i1].begin();
+               ki != bondList_[i][*i1].end(); ++ki) {
+            
+            for (kj = bondList_[j][*i1].begin();
+                 kj != bondList_[j][*i1].end(); ++kj) {
+              
+              if ( *ki == *kj ) corrVal += 1;
+            }
+          }
+          
+          histogram_[timeBin] += corrVal;
+          count_[timeBin] += bondList_[i][*i1].size();
+        }
       }
-      osq.close();
-      
-    } else {
-      sprintf(painCave.errMsg, "HBondGeometric: unable to open %s\n", 
-              (getOutputFileName() + "q").c_str());
-      painCave.isFatal = 1;
-      simError();  
     }
   }
 }
-
-      
-
-

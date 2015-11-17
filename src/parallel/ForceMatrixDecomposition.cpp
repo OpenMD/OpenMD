@@ -318,7 +318,7 @@ namespace OpenMD {
 
   void ForceMatrixDecomposition::zeroWorkArrays() {
     pairwisePot = 0.0;
-    embeddingPot = 0.0;
+    selfPot = 0.0;
     excludedPot = 0.0;
     excludedSelfPot = 0.0;
     selectedPot = 0.0;
@@ -804,7 +804,6 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, 
                   &snap_->frameData.conductiveHeatFlux[0], 3, 
                   MPI_REALTYPE, MPI_SUM, col);
-
 #endif
 
   }
@@ -820,10 +819,10 @@ namespace OpenMD {
     storageLayout_ = sman_->getStorageLayout();
 
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = embeddingPot[ii];
+      RealType ploc1 = selfPot[ii];
       RealType ploc2 = 0.0;
       MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      embeddingPot[ii] = ploc2;
+      selfPot[ii] = ploc2;
     }    
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = excludedSelfPot[ii];
@@ -1319,9 +1318,9 @@ namespace OpenMD {
 
     if (idat.doParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
-      // embedding contribution is added in each of the low level
-      // non-bonded routines.  In parallel, this calculation is done
-      // in collectData, not in unpackInteractionData.
+      // self and embedding contribution is added in each of the low
+      // level non-bonded routines.  In parallel, this calculation is
+      // done in collectData, not in unpackInteractionData.
       snap_->atomData.particlePot[atom1] += *(idat.vpair) * *(idat.sw);
       snap_->atomData.particlePot[atom2] += *(idat.vpair) * *(idat.sw);
     }

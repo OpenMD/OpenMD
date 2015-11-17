@@ -39,28 +39,27 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_RCORRFUNCZ_HPP
-#define APPLICATIONS_DYNAMICPROPS_RCORRFUNCZ_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_HBONDJUMP_HPP
+#define APPLICATIONS_DYNAMICPROPS_HBONDJUMP_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class RCorrFuncZ : public ParticleTimeCorrFunc {
+  class HBondJump : public MultipassCorrFunc {
   public:
-    RCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int nZbins, long long int memSize);   
+    HBondJump(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double rCut, double thetaCut);
         
   private:
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) { return 0.0; }
-    virtual void writeCorrelate();
-
-  protected:
     virtual void preCorrelate();
-    virtual void postCorrelate();
-    vector<vector<RealType> > histogram_;
-    vector<vector<int> > counts_;
-    int nZBins_;
+    virtual void correlation();
+    virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
+    virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
 
+    std::vector<int> indices_;
+    std::vector<std::vector<std::set<int> > > bondList_;
+    RealType rCut_;
+    RealType thetaCut_;
   };
 
 }

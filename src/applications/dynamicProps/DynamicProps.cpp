@@ -53,11 +53,9 @@
 #include "applications/dynamicProps/SelectionCorrFunc.hpp"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
-#include "applications/dynamicProps/RCorrFuncZ.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
-#include "applications/dynamicProps/RadialRCorrFunc.hpp"
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
@@ -67,6 +65,8 @@
 #include "applications/dynamicProps/cOHz.hpp"
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
+#include "applications/dynamicProps/HBondJump.hpp"
+
 
 using namespace OpenMD;
 
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-  TimeCorrFunc* corrFunc = NULL;
+  DynamicProperty* corrFunc = NULL;
   if(args_info.sdcorr_given){
     corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, 
 					memSize);
@@ -137,9 +137,9 @@ int main(int argc, char* argv[]){
   } else if (args_info.dcorr_given){
     corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.rcorr_given) {
-    corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.r_rcorr_given) {
-    corrFunc = new RadialRCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new RCorrFuncR(info, dumpFileName, sele1, sele2);
   } else if (args_info.thetacorr_given) {
     corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.drcorr_given) {
@@ -147,13 +147,13 @@ int main(int argc, char* argv[]){
 					memSize);
   } else if (args_info.rcorrZ_given) {
     corrFunc = new RCorrFuncZ(info, dumpFileName, sele1, sele2,
-                              args_info.nzbins_arg, memSize); 
+                              args_info.nzbins_arg); 
   } else if (args_info.vcorr_given) {
-    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2, memSize); 
+    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
   } else if (args_info.vcorrZ_given) {
-    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2, memSize); 
+    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2); 
   } else if (args_info.vcorrR_given) {
-    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2, memSize); 
+    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2); 
   } else if (args_info.bondcorr_given) {
     corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize); 
   } else if (args_info.helfandEcorr_given){
@@ -196,7 +196,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.cohZ_given) {
     int order(0);
     if (args_info.order_given)
-        order = args_info.order_arg;
+      order = args_info.order_arg;
     else {
       sprintf( painCave.errMsg,
                "--order must be set if --cohZ is set\n");
@@ -208,19 +208,52 @@ int main(int argc, char* argv[]){
     corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, 
 			args_info.nzbins_arg, memSize); 
 
+  } else if (args_info.jumptime_given) {
+    if (args_info.rcut_given) {
+      if (args_info.thetacut_given) {
+        
+        int order(0);
+        if (args_info.order_given)
+          order = args_info.order_arg;
+        else {
+          sprintf( painCave.errMsg,
+                   "--order must be specified when calculating Hydrogen Bond "
+                   "Jump Statistics\n");
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal = 1;
+          simError();
+        }
+/*
+        corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
+                                 args_info.rcut_arg,
+                                 args_info.thetacut_arg, order); 
+*/
+      } else {
+        sprintf( painCave.errMsg,
+                 "A cutoff angle (thetacut) must be specified when calculating "
+                 "Hydrogen Bond Jump Statistics");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Hydrogen Bond Jump Statistics");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   }
-
 
   if (args_info.output_given) {
     corrFunc->setOutputName(args_info.output_arg);
   }
 
-
   corrFunc->doCorrelate();
-
+  
   delete corrFunc;    
   delete info;
-
   return 0;   
 }
 

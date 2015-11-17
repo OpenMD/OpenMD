@@ -43,6 +43,10 @@
 #include "constraints/Shake.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
 
   Shake::Shake(SimInfo* info) : info_(info), maxConsIteration_(10), 
@@ -125,10 +129,10 @@ namespace OpenMD {
     }
     
     //main loop of constraint algorithm
-    bool done = false;
+    int done = 0;
     int iteration = 0;
     while(!done && iteration < maxConsIteration_){
-      done = true;
+      done = 1;
 
       //loop over every constraint pair
 
@@ -153,7 +157,7 @@ namespace OpenMD {
 	      break;
 	    case consSuccess:
 	      // constrain the pair by moving two elements
-	      done = false;
+	      done = 0;
 	      consPair->getConsElem1()->setMoving(true);
 	      consPair->getConsElem2()->setMoving(true);
 	      break;
@@ -172,6 +176,11 @@ namespace OpenMD {
 	}
       }//end for(iter->first())
 
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, &done, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+#endif
+
+      errorCheckPoint();
 
       for (mol = info_->beginMolecule(mi); mol != NULL; 
            mol = info_->nextMolecule(mi)) {
@@ -193,6 +202,8 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();    
     }
+    
+    errorCheckPoint();
   }
 
   /**

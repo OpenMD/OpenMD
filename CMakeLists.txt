@@ -265,8 +265,6 @@ src/brains/Register.cpp
 src/brains/SimSnapshotManager.cpp
 src/brains/Snapshot.cpp
 src/brains/Stats.cpp
-src/constraints/Shake.cpp
-src/constraints/Rattle.cpp
 src/hydrodynamics/Ellipsoid.cpp
 src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/Sphere.cpp
@@ -376,7 +374,6 @@ src/selection/SelectionCompiler.cpp
 src/selection/SelectionEvaluator.cpp
 src/selection/SelectionToken.cpp
 src/selection/TokenMap.cpp
-src/selection/SelectionSet.cpp
 src/types/AtomStamp.cpp
 src/types/AtomType.cpp
 src/types/BendStamp.cpp
@@ -443,6 +440,8 @@ src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp
 src/brains/Thermo.cpp
 src/constraints/ZconstraintForceManager.cpp
+src/constraints/Rattle.cpp
+src/constraints/Shake.cpp
 src/flucq/FluctuatingChargeConstraints.cpp
 src/flucq/FluctuatingChargeObjectiveFunction.cpp
 src/flucq/FluctuatingChargeForces.cpp
@@ -465,6 +464,7 @@ src/restraints/RestraintForceManager.cpp
 src/restraints/ThermoIntegrationForceManager.cpp
 src/selection/DistanceFinder.cpp
 src/selection/SelectionManager.cpp
+src/selection/SelectionSet.cpp
 src/utils/ProgressBar.cpp
 src/utils/simError.cpp
 src/utils/OpenMDBitSet.cpp
@@ -536,6 +536,7 @@ src/applications/dynamicProps/DynamicProps.cpp
 src/applications/dynamicProps/EnergyCorrFunc.cpp
 src/applications/dynamicProps/FrameTimeCorrFunc.cpp
 src/applications/dynamicProps/FreqFlucCorrFunc.cpp
+# src/applications/dynamicProps/HBondJump.cpp
 src/applications/dynamicProps/LegendreCorrFunc.cpp
 src/applications/dynamicProps/LegendreCorrFuncZ.cpp
 src/applications/dynamicProps/cOHz.cpp
@@ -543,9 +544,7 @@ src/applications/dynamicProps/MomentumCorrFunc.cpp
 src/applications/dynamicProps/MultipassCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
-src/applications/dynamicProps/RadialRCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
-src/applications/dynamicProps/RCorrFuncZ.cpp
 src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp
 src/applications/dynamicProps/SystemDipoleCorrFunc.cpp

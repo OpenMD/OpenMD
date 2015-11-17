@@ -68,7 +68,8 @@
 namespace OpenMD { 
    
   DumpReader::DumpReader(SimInfo* info, const std::string& filename) 
-    : info_(info), filename_(filename), isScanned_(false), nframes_(0), needCOMprops_(false) { 
+    : info_(info), filename_(filename), isScanned_(false), nframes_(0),
+      needCOMprops_(false) { 
     
 #ifdef IS_MPI 
     
@@ -151,8 +152,8 @@ namespace OpenMD {
         if (line.find("<Snapshot>")!= std::string::npos) {
           if (foundOpenSnapshotTag) {
             sprintf(painCave.errMsg, 
-                    "DumpReader:<Snapshot> is multiply nested at line %d in %s \n", lineNo, 
-                    filename_.c_str()); 
+                    "DumpReader:<Snapshot> is multiply nested at line %d "
+                    "in %s \n", lineNo, filename_.c_str()); 
             painCave.isFatal = 1; 
             simError();           
           }
@@ -163,16 +164,16 @@ namespace OpenMD {
         } else if (line.find("</Snapshot>") != std::string::npos){
           if (!foundOpenSnapshotTag) {
             sprintf(painCave.errMsg, 
-                    "DumpReader:</Snapshot> appears before <Snapshot> at line %d in %s \n", lineNo, 
-                    filename_.c_str()); 
+                    "DumpReader:</Snapshot> appears before <Snapshot> at "
+                    "line %d in %s \n", lineNo, filename_.c_str()); 
             painCave.isFatal = 1; 
             simError(); 
           }
           
           if (foundClosedSnapshotTag) {
             sprintf(painCave.errMsg, 
-                    "DumpReader:</Snapshot> appears multiply nested at line %d in %s \n", lineNo, 
-                    filename_.c_str()); 
+                    "DumpReader:</Snapshot> appears multiply nested at "
+                    "line %d in %s \n", lineNo, filename_.c_str()); 
             painCave.isFatal = 1; 
             simError(); 
           }
@@ -182,11 +183,11 @@ namespace OpenMD {
         prevPos = currPos;
       }
       
-      // only found <Snapshot> for the last frame means the file is corrupted, we should discard
-      // it and give a warning message
+      // only found <Snapshot> for the last frame means the file is
+      // corrupted, we should discard it and give a warning message
       if (foundOpenSnapshotTag) {
         sprintf(painCave.errMsg, 
-                "DumpReader: last frame in %s is invalid\n", filename_.c_str()); 
+                "DumpReader: last frame in %s is invalid\n", filename_.c_str());
         painCave.isFatal = 0; 
         simError();       
         framePos_.pop_back();
@@ -196,7 +197,8 @@ namespace OpenMD {
       
       if (nframes_ == 0) {
         sprintf(painCave.errMsg, 
-                "DumpReader: %s does not contain a valid frame\n", filename_.c_str()); 
+                "DumpReader: %s does not contain a valid frame\n",
+                filename_.c_str()); 
         painCave.isFatal = 1; 
         simError();      
       }
@@ -299,7 +301,8 @@ namespace OpenMD {
       char * recvBuffer = new char[sendBufferSize+1];
       assert(recvBuffer);
       recvBuffer[sendBufferSize] = '\0';
-      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode,
+                MPI_COMM_WORLD);
       sstream.str(recvBuffer);
       delete [] recvBuffer;
     }      
@@ -426,10 +429,12 @@ namespace OpenMD {
              q[3] = tokenizer.nextTokenAsDouble(); 
               
              RealType qlen = q.length(); 
-             if (qlen < OpenMD::epsilon) { //check quaternion is not equal to 0 
+             if (qlen < OpenMD::epsilon) { //check quaternion is not
+                                           //equal to 0
                 
                sprintf(painCave.errMsg, 
-                       "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
+                       "DumpReader Error: initial quaternion error "
+                       "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
                painCave.isFatal = 1; 
                simError(); 
                 
@@ -518,7 +523,8 @@ namespace OpenMD {
         }
         default: {
                sprintf(painCave.errMsg, 
-                       "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
+                       "DumpReader Error: %s is an unrecognized type\n",
+                       type.c_str()); 
                painCave.isFatal = 1; 
                simError(); 
           break;   
@@ -627,7 +633,7 @@ namespace OpenMD {
       }
       default: {
         sprintf(painCave.errMsg, 
-                "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
+                "DumpReader Error: %s is an unrecognized type\n", type.c_str());
         painCave.isFatal = 1; 
         simError(); 
         break;   
@@ -744,14 +750,11 @@ namespace OpenMD {
         s->setBarostat(eta); 
       } else {
         sprintf(painCave.errMsg, 
-                "DumpReader Error: %s is an invalid property in <FrameData>\n", propertyName.c_str()); 
+                "DumpReader Error: %s is an invalid property in <FrameData>\n",
+                propertyName.c_str()); 
         painCave.isFatal = 0; 
         simError();         
-      }
-      
+      } 
     }
-
-  }
-
-   
+  }   
 }//end namespace OpenMD 
