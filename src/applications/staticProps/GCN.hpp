@@ -73,6 +73,7 @@ namespace OpenMD {
     int regions_;
     int selectionCount_;
     int bins_;
+    int hBins_;
 
     string filename_;
     

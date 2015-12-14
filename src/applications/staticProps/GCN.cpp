@@ -68,8 +68,8 @@ namespace OpenMD {
       nnMax_ = 12.0;
       solShell_ = 3.3;
       cout << "Bins per integer: " << bins_ << "\n";
-      bins_ = bins_*nnMax_; //temporary so 0.0 to 12.0 by 0.1
-      cout << "Bins: " << bins_ << "\n";
+      hBins_ = bins_*(nnMax_+2); //temporary so 0.0 to 12.0 by 0.1
+      cout << "Bins: " << hBins_ << "\n";
       cout << "ZRegions: " << regions_ << "\n";
     }
 
@@ -135,7 +135,7 @@ namespace OpenMD {
       histogram_[i].resize(regions_);
       for(int j = 0; j < regions_; j++){
 	//histogram_[i].resize(selectionCount_);
-	histogram_[i][j].resize(bins_);
+	histogram_[i][j].resize(hBins_);
       }
     }
 
@@ -216,7 +216,9 @@ namespace OpenMD {
     }    
     cout << "^ First 10 indices\n";
     cout << "selection Count: " << selectionCount_ << "\n";
-
+    
+    cout << "MaxZ: " << maxZ[0] << "\tMin Z: " << minZ[0] << "\n";
+    cout << "DeltaZ: " << (maxZ[0] - minZ[0]) << "\tzShift: " << (maxZ[0] - minZ[0])/regions_ << "\n";
     double regionShift = 0.0;
     int binIndex = 0; 
     RealType gcn = 0.0;
@@ -248,11 +250,45 @@ namespace OpenMD {
 	regionIndex = int((zPos[istep][i] - minZ[istep])/regionShift);
 	if(regionIndex >= regions_){
 	  regionIndex = regions_ - 1;
-	  cout << (zPos[istep][i] - minZ[istep])/regionShift << "\n";
+	  //cout << (zPos[istep][i] - minZ[istep])/regionShift << "\n";
 	}
 	binIndex = int(gcn*10);
 	histogram_[istep][regionIndex][binIndex] += 1;
       }
     }
+
+
+    //Normalize?
+
+
+
+    std::ofstream gcnStream;
+    setOutputName(getPrefix(filename_) + ".gcn");
+    gcnStream.open(outputFilename_.c_str());
+    gcnStream << "#Generalized Coordinate Number\n";
+    gcnStream << "#Selection Count: " << selectionCount_ << "\n";
+    
+    RealType binValue = 0.0;
+
+    for(int istep = 0; istep < nFrames; istep++){
+      gcnStream << "#Frame " << istep << "\n";
+      gcnStream << "#Region ";
+      for(int r = 0; r < regions_; r++){
+	cout << (r*regionShift + minZ[istep]) << " to " << (r*regionShift + minZ[istep] + regionShift) << "\n";
+	gcnStream << r << " ";
+      }
+      gcnStream << "\n";
+      for(int n = 0; n < histogram_[istep][0].size(); n++){
+	binValue = n/(1.0*bins_);
+	gcnStream << binValue << "    ";
+	for(int r = 0; r < regions_; r++){
+	  gcnStream << (histogram_[istep][r][n]/(selectionCount_*1.0)) << "    ";
+	}
+	gcnStream << "\n";
+      }
+    }
+
+    gcnStream.close();
+    
   }
 }
