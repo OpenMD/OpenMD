@@ -82,6 +82,7 @@
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/SurfaceDiffusion.hpp"
+#include "applications/staticProps/GCN.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/PotDiff.hpp"
 
@@ -433,7 +434,10 @@ int main(int argc, char* argv[]){
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
 		       args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
-  }else if (args_info.surfDiffusion_given){
+  }else if(args_info.gcn_given){
+    analyser = new GCN(info, dumpFileName, sele1, args_info.nbins_arg, args_info.nbins_z_arg);
+  }
+  else if (args_info.surfDiffusion_given){
     analyser = new SurfaceDiffusion(info, dumpFileName, sele1, maxLen);
   }else if (args_info.rho_r_given) {
     if (args_info.radius_given){
