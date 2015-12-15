@@ -176,7 +176,7 @@ namespace OpenMD {
 	if(zPos[istep][mapIndex1] < minZ[istep]){
 	  minZ[istep] = zPos[istep][mapIndex1];
 	}
-	if(zPos[istep][mapIndex2] > maxZ[istep]){
+	if(zPos[istep][mapIndex1] > maxZ[istep]){
 	  maxZ[istep] = zPos[istep][mapIndex1];
 	}
 	mapIndex2 = 0;
@@ -211,10 +211,6 @@ namespace OpenMD {
     }
     cout << "Filled nearestNeighbors_ and listNN_\n\n";
     
-    for(int test = 0; test < 10; test++){
-      cout << "\tGlobal Index: " << indexMapping_[0][test] << "\t" << test << "\t" << nearestNeighbors_[0][test] << "\n";
-    }    
-    cout << "^ First 10 indices\n";
     cout << "selection Count: " << selectionCount_ << "\n";
     
     cout << "MaxZ: " << maxZ[0] << "\tMin Z: " << minZ[0] << "\n";
