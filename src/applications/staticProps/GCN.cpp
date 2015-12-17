@@ -169,7 +169,7 @@ namespace OpenMD {
       for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL; sd1 = seleMan1_.nextSelected(iterator1)){
 	mapIndex1 = globalToLocal_[sd1->getGlobalIndex()];
 	if(mapIndex1 == -1){
-	  cerr << "mapindex1: -1\n"
+	  cerr << "mapindex1: -1\n";
 	}
 	gcn = 0.0;
 	for(int i = 0; i < listNN_[mapIndex1].size(); i++){
