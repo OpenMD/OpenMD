@@ -435,7 +435,7 @@ int main(int argc, char* argv[]){
 		       args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
   }else if(args_info.gcn_given){
-    analyser = new GCN(info, dumpFileName, sele1, args_info.nbins_arg, args_info.nbins_z_arg);
+    analyser = new GCN(info, dumpFileName, sele1, sele2, args_info.nbins_arg);
   }
   else if (args_info.surfDiffusion_given){
     analyser = new SurfaceDiffusion(info, dumpFileName, sele1, maxLen);

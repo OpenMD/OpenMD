@@ -53,13 +53,10 @@ namespace OpenMD {
   class GCN : public StaticAnalyser {
     
   public:
-    GCN(SimInfo* info, const std::string& filename, const std::string& sele, int bins, int zRegions);
+    GCN(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int bins);
 
     virtual ~GCN();
 
-    int getRegions() {
-      return regions_; 
-    }
 
         
   private:
@@ -67,11 +64,15 @@ namespace OpenMD {
     virtual void process();
 
 
-    std::string selectionScript_;
-    SelectionEvaluator evaluator_;
+    std::string sele1_;
+    std::string sele2_;
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
     SelectionManager seleMan1_;
+    SelectionManager seleMan2_;
     int regions_;
-    int selectionCount_;
+    int selectionCount1_;
+    int selectionCount2_;
     int bins_;
     int hBins_;
 
@@ -79,10 +80,10 @@ namespace OpenMD {
     
     RealType nnMax_;
     RealType solShell_;
-    std::vector< std::vector<int> > nearestNeighbors_;
-    std::vector< std::vector< std::vector<int> > > listNN_;
-    std::vector< std::vector< std::vector<RealType> > > histogram_;
-    std::vector< std::vector<int> > indexMapping_;
+    std::vector<int> nearestNeighbors_;
+    std::vector< std::vector<int> > listNN_;
+    std::vector<RealType>  histogram_;
+    std::vector<int> globalToLocal_;
   };
 
 }
