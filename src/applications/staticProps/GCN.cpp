@@ -91,37 +91,23 @@ namespace OpenMD {
     StuntDouble* sd2;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    
     std::ofstream gcnStream;
     setOutputName(getPrefix(filename_) + ".gcn");
     gcnStream.open(outputFilename_.c_str());
-
     
     DumpReader reader(info_, dumpFilename_);
+    
     int nFrames = reader.getNFrames();
-
-  
-
     int iterator1;
     int iterator2;
     int mapIndex1 = 0;
     int mapIndex2 = 0;
-    int regionIndex = 0;
     int tempIndex = 0;
     int binIndex = 0;
-    double regionShift = 0.0;
     RealType gcn = 0.0;
     RealType binValue = 0.0;
 
     gcnStream << "#Generalized Coordinate Number\n";
-    /* Arrays are sized correctly
-     * Histogram[frames][regions][bins]
-     * nearestNeighbors[selectionCount] ([0] = 9, [1] = 12, [globalIndex] = nn)
-     * listNN[selectionCount][0-13] ([0] ?= 199, [1] = 252, [2] = globalIndex of nn
-     *
-     * method, loop over listNN and use listNN_[i][0] as index into nearestNeigbhors_[frames][listNN_[frames][i][j]] when calculating gcn
-     */
-
     //First have to calculate nearestNeighbors and listNN
     
     for(int istep = 0; istep < nFrames; istep += step_){
@@ -143,17 +129,15 @@ namespace OpenMD {
 	selectionCount2_ = seleMan2_.getSelectionCount();
       }
 
-
       globalToLocal_.clear();
-      globalToLocal_.resize(info_->getNGlobalAtoms());
+      globalToLocal_.resize(info_->getNGlobalAtoms(),-1);
       listNN_.clear();
       listNN_.resize(selectionCount2_);
       nearestNeighbors_.clear();
-      nearestNeighbors_.resize(selectionCount2_);
+      nearestNeighbors_.resize(selectionCount2_, 0);
       histogram_.clear();
-      histogram_.resize(hBins_);
+      histogram_.resize(hBins_, 0.0);
       
-
       mapIndex1 = 0;
       for(sd1 = seleMan2_.beginSelected(iterator1); sd1 != NULL; sd1 = seleMan2_.nextSelected(iterator1)){
 	globalToLocal_[sd1->getGlobalIndex()] = mapIndex1;
@@ -184,6 +168,9 @@ namespace OpenMD {
       // Fill up the histogram with gcn values
       for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL; sd1 = seleMan1_.nextSelected(iterator1)){
 	mapIndex1 = globalToLocal_[sd1->getGlobalIndex()];
+	if(mapIndex1 == -1){
+	  cerr << "mapindex1: -1\n"
+	}
 	gcn = 0.0;
 	for(int i = 0; i < listNN_[mapIndex1].size(); i++){
 	  tempIndex = listNN_[mapIndex1][i];
@@ -194,60 +181,13 @@ namespace OpenMD {
 	histogram_[binIndex] += 1;
 
       }
-    
       gcnStream << "#Selection Count: " << selectionCount1_ << "\n";
       gcnStream << "#Frame " << istep << "\n";
       for(int n = 0; n < histogram_.size(); n++){
 	binValue = n/(1.0*bins_);
 	gcnStream << binValue << "  " << (histogram_[n]/(selectionCount1_*1.0)) << "\n";
       } 
-
-      /*      
-      for(int i = 0; i < selectionCount_; i++){
-	gcn = 0.0;
-	for(int j = 0; j < listNN_[i].size(); j++){
-	  tempIndex = listNN_[i][j];
-	  if(tempIndex > selectionCount_){
-	    for(int k = 0; k < listNN_[i].size(); k++){
-	      cout << "\t" << listNN_[i][k] << "\n";
-	    }
-	    cout << "istep: " << istep << "\tatom: " << i << "\tsize: " << listNN_[i].size() << "\n";
-	  }
-	  gcn += nearestNeighbors_[tempIndex];
-	}
-	gcn = gcn / nnMax_;
-	regionIndex = int((zPos[i] - minZ)/regionShift);
-	if(regionIndex >= regions_){
-	  regionIndex = regions_ - 1;
-	}
-	binIndex = int(gcn*bins_);
-	histogram_[istep][regionIndex][binIndex] += 1;
-      }
-      */
-    
-    
-
-    /*
-    for(int istep = 0; istep < nFrames; istep++){
-      gcnStream << "#Frame " << istep << "\n";
-      gcnStream << "#Region ";
-      for(int r = 0; r < regions_; r++){
-	cout << (r*regionShift + minZ) << " to " << (r*regionShift + minZ + regionShift) << "\n";
-	gcnStream << r << " ";
-      }
-      gcnStream << "\n";
-      for(int n = 0; n < histogram_[istep][0].size(); n++){
-	binValue = n/(1.0*bins_);
-	gcnStream << binValue << "    ";
-	for(int r = 0; r < regions_; r++){
-	  gcnStream << (histogram_[istep][r][n]/(selectionCount_*1.0)) << "    ";
-	}
-	gcnStream << "\n";
-      }
-    }
-    */
     }   
-  gcnStream.close();
-    
+    gcnStream.close();
   }
 }
