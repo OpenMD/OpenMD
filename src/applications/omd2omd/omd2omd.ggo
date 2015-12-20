@@ -1,0 +1,32 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# invoke with the following two commands:
+#    gengetopt < omd2omd.ggo --file-name=omd2omdCmd --unamed-opts
+#    mv omd2omdCmd.c omd2omdCmd.cpp
+
+package "omd2omd"
+version "1.0"
+purpose
+"MetaData file remapper
+
+Takes a MetaData file and maps all StuntDoubles back to the periodic box.
+Will optionally replicate the system in the three box directions, or 
+translate every object in the box and before writing out a new MetaData file.
+
+Example:
+  omd2omd -m lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0
+"
+
+# Options
+option	"meta-data"	m	"use specified meta-data (.omd, .eor) file"             string	typestr="filename" 	yes
+option	"output-file"	o	"use specified output file"				string	typestr="filename"	no
+option	"repeatX"	x	"make the system repeat in the x direction"		int	default="1"		no
+option	"repeatY"	y	"make the system repeat in the y direction"		int	default="1"		no
+option	"repeatZ"	z	"make the system repeat in the z direction"		int	default="1"		no
+option  "translateX"    t       "translate all x coordinates by some amount"            double  default="0.0"           no
+option  "translateY"    u       "translate all y coordinates by some amount"            double  default="0.0"           no
+option  "translateZ"    v       "translate all z coordinates by some amount"            double  default="0.0"           no

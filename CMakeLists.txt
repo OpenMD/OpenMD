@@ -527,6 +527,11 @@ src/applications/dump2Xyz/Dump2XYZ.cpp
 src/applications/dump2Xyz/Dump2XYZCmd.cpp
 )
 
+set (OMD2OMDSOURCE 
+src/applications/omd2omd/omd2omd.cpp
+src/applications/omd2omd/omd2omdCmd.cpp
+)
+
 set (DYNAMICPROPSSOURCE 
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CrossTimeCorrFunc.cpp
@@ -589,6 +594,7 @@ src/applications/staticProps/GofRAngle.cpp
 src/applications/staticProps/GofRZ.cpp
 src/applications/staticProps/GofXyz.cpp
 src/applications/staticProps/GofZ.cpp
+src/applications/staticProps/GCN.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
 src/applications/staticProps/MultipoleSum.cpp
@@ -665,6 +671,8 @@ add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Hydro openmd_single openmd_core openmd_single openmd_core)
+add_executable(omd2omd ${OMD2OMDSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(omd2omd openmd_single openmd_core openmd_single openmd_core)
 add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(StaticProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
