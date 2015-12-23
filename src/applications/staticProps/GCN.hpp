@@ -65,11 +65,13 @@ namespace OpenMD {
 
 
     std::string sele1_;
-    std::string sele2_;
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
     SelectionManager seleMan1_;
+    SelectionEvaluator evaluator1_;
+
+    std::string sele2_;
     SelectionManager seleMan2_;
+    SelectionEvaluator evaluator2_;
+
     int regions_;
     int selectionCount1_;
     int selectionCount2_;

@@ -172,7 +172,7 @@ namespace OpenMD {
 	  cerr << "mapindex1: -1\n";
 	}
 	gcn = 0.0;
-	for(int i = 0; i < listNN_[mapIndex1].size(); i++){
+	for(unsigned int i = 0; i < listNN_[mapIndex1].size(); i++){
 	  tempIndex = listNN_[mapIndex1][i];
 	  gcn += nearestNeighbors_[tempIndex];
 	}
@@ -183,7 +183,7 @@ namespace OpenMD {
       }
       gcnStream << "#Selection Count: " << selectionCount1_ << "\n";
       gcnStream << "#Frame " << istep << "\n";
-      for(int n = 0; n < histogram_.size(); n++){
+      for(unsigned int n = 0; n < histogram_.size(); n++){
 	binValue = n/(1.0*bins_);
 	gcnStream << binValue << "  " << (histogram_[n]/(selectionCount1_*1.0)) << "\n";
       } 
