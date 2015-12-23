@@ -39,12 +39,12 @@ struct gengetopt_args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  char * meta_data_arg;	/**< @brief use specified meta-data (.omd, .eor) file.  */
-  char * meta_data_orig;	/**< @brief use specified meta-data (.omd, .eor) file original value given at command line.  */
-  const char *meta_data_help; /**< @brief use specified meta-data (.omd, .eor) file help description.  */
-  char * output_file_arg;	/**< @brief use specified output file.  */
-  char * output_file_orig;	/**< @brief use specified output file original value given at command line.  */
-  const char *output_file_help; /**< @brief use specified output file help description.  */
+  char * input_arg;	/**< @brief use specified input (.omd, .dump, .eor) file.  */
+  char * input_orig;	/**< @brief use specified input (.omd, .dump, .eor) file original value given at command line.  */
+  const char *input_help; /**< @brief use specified input (.omd, .dump, .eor) file help description.  */
+  char * output_arg;	/**< @brief use specified output file.  */
+  char * output_orig;	/**< @brief use specified output file original value given at command line.  */
+  const char *output_help; /**< @brief use specified output file help description.  */
   int repeatX_arg;	/**< @brief make the system repeat in the x direction (default='1').  */
   char * repeatX_orig;	/**< @brief make the system repeat in the x direction original value given at command line.  */
   const char *repeatX_help; /**< @brief make the system repeat in the x direction help description.  */
@@ -66,8 +66,8 @@ struct gengetopt_args_info
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
-  unsigned int meta_data_given ;	/**< @brief Whether meta-data was given.  */
-  unsigned int output_file_given ;	/**< @brief Whether output-file was given.  */
+  unsigned int input_given ;	/**< @brief Whether input was given.  */
+  unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int repeatX_given ;	/**< @brief Whether repeatX was given.  */
   unsigned int repeatY_given ;	/**< @brief Whether repeatY was given.  */
   unsigned int repeatZ_given ;	/**< @brief Whether repeatZ was given.  */

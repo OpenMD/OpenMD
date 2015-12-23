@@ -86,6 +86,7 @@ namespace OpenMD {
     int l, m, n;
     Vector3d vdrift;
     RealType vbar;
+    RealType jbar;
     /**@todo refactor kb */
     const RealType kb = 8.31451e-7; // kb in amu, angstroms, fs, etc.
     RealType av2;
@@ -128,14 +129,14 @@ namespace OpenMD {
 	    n = (l + 2) % 3;
 	    
 	    aJ[l] = 0.0;
-	    vbar = sqrt(2.0 * kebar * I(m, m));
-	    aJ[m] = vbar * randNumGen_->randNorm(0.0, 1.0);
-	    vbar = sqrt(2.0 * kebar * I(n, n));
-	    aJ[n] = vbar * randNumGen_->randNorm(0.0, 1.0);
+	    jbar = sqrt(2.0 * kebar * I(m, m));
+	    aJ[m] = jbar * randNumGen_->randNorm(0.0, 1.0);
+	    jbar = sqrt(2.0 * kebar * I(n, n));
+	    aJ[n] = jbar * randNumGen_->randNorm(0.0, 1.0);
 	  } else {
 	    for( int k = 0; k < 3; k++ ) {
-	      vbar = sqrt(2.0 * kebar * I(k, k));
-	      aJ[k] = vbar *randNumGen_->randNorm(0.0, 1.0);
+	      jbar = sqrt(2.0 * kebar * I(k, k));
+	      aJ[k] = jbar *randNumGen_->randNorm(0.0, 1.0);
 	    }
 	  }
 	  

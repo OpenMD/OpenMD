@@ -18,12 +18,12 @@ Will optionally replicate the system in the three box directions, or
 translate every object in the box and before writing out a new MetaData file.
 
 Example:
-  omd2omd -m lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0
+  omd2omd -i lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0
 "
 
 # Options
-option	"meta-data"	m	"use specified meta-data (.omd, .eor) file"             string	typestr="filename" 	yes
-option	"output-file"	o	"use specified output file"				string	typestr="filename"	no
+option	"input"         i	"use specified input (.omd, .dump, .eor) file"          string	typestr="filename" 	yes
+option	"output"	o	"use specified output file"				string	typestr="filename"	yes
 option	"repeatX"	x	"make the system repeat in the x direction"		int	default="1"		no
 option	"repeatY"	y	"make the system repeat in the y direction"		int	default="1"		no
 option	"repeatZ"	z	"make the system repeat in the z direction"		int	default="1"		no

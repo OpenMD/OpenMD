@@ -29,23 +29,23 @@
 
 #include "omd2omdCmd.h"
 
-const char *gengetopt_args_info_purpose = "MetaData file remapper\n\nTakes a MetaData file and maps all StuntDoubles back to the periodic box.\nWill optionally replicate the system in the three box directions, or \ntranslate every object in the box and before writing out a new MetaData file.\n\nExample:\n  omd2omd -m lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0\n";
+const char *gengetopt_args_info_purpose = "MetaData file remapper\n\nTakes a MetaData file and maps all StuntDoubles back to the periodic box.\nWill optionally replicate the system in the three box directions, or \ntranslate every object in the box and before writing out a new MetaData file.\n\nExample:\n  omd2omd -i lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0\n";
 
 const char *gengetopt_args_info_usage = "Usage: omd2omd [OPTIONS]... [FILES]...";
 
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help                  Print help and exit",
-  "  -V, --version               Print version and exit",
-  "  -m, --meta-data=filename    use specified meta-data (.omd, .eor) file",
-  "  -o, --output-file=filename  use specified output file",
-  "  -x, --repeatX=INT           make the system repeat in the x direction  \n                                (default=`1')",
-  "  -y, --repeatY=INT           make the system repeat in the y direction  \n                                (default=`1')",
-  "  -z, --repeatZ=INT           make the system repeat in the z direction  \n                                (default=`1')",
-  "  -t, --translateX=DOUBLE     translate all x coordinates by some amount  \n                                (default=`0.0')",
-  "  -u, --translateY=DOUBLE     translate all y coordinates by some amount  \n                                (default=`0.0')",
-  "  -v, --translateZ=DOUBLE     translate all z coordinates by some amount  \n                                (default=`0.0')",
+  "  -h, --help               Print help and exit",
+  "  -V, --version            Print version and exit",
+  "  -i, --input=filename     use specified input (.omd, .dump, .eor) file",
+  "  -o, --output=filename    use specified output file",
+  "  -x, --repeatX=INT        make the system repeat in the x direction  \n                             (default=`1')",
+  "  -y, --repeatY=INT        make the system repeat in the y direction  \n                             (default=`1')",
+  "  -z, --repeatZ=INT        make the system repeat in the z direction  \n                             (default=`1')",
+  "  -t, --translateX=DOUBLE  translate all x coordinates by some amount  \n                             (default=`0.0')",
+  "  -u, --translateY=DOUBLE  translate all y coordinates by some amount  \n                             (default=`0.0')",
+  "  -v, --translateZ=DOUBLE  translate all z coordinates by some amount  \n                             (default=`0.0')",
     0
 };
 
@@ -75,8 +75,8 @@ void clear_given (struct gengetopt_args_info *args_info)
 {
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
-  args_info->meta_data_given = 0 ;
-  args_info->output_file_given = 0 ;
+  args_info->input_given = 0 ;
+  args_info->output_given = 0 ;
   args_info->repeatX_given = 0 ;
   args_info->repeatY_given = 0 ;
   args_info->repeatZ_given = 0 ;
@@ -89,10 +89,10 @@ static
 void clear_args (struct gengetopt_args_info *args_info)
 {
   FIX_UNUSED (args_info);
-  args_info->meta_data_arg = NULL;
-  args_info->meta_data_orig = NULL;
-  args_info->output_file_arg = NULL;
-  args_info->output_file_orig = NULL;
+  args_info->input_arg = NULL;
+  args_info->input_orig = NULL;
+  args_info->output_arg = NULL;
+  args_info->output_orig = NULL;
   args_info->repeatX_arg = 1;
   args_info->repeatX_orig = NULL;
   args_info->repeatY_arg = 1;
@@ -115,8 +115,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
 
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
-  args_info->meta_data_help = gengetopt_args_info_help[2] ;
-  args_info->output_file_help = gengetopt_args_info_help[3] ;
+  args_info->input_help = gengetopt_args_info_help[2] ;
+  args_info->output_help = gengetopt_args_info_help[3] ;
   args_info->repeatX_help = gengetopt_args_info_help[4] ;
   args_info->repeatY_help = gengetopt_args_info_help[5] ;
   args_info->repeatZ_help = gengetopt_args_info_help[6] ;
@@ -206,10 +206,10 @@ static void
 cmdline_parser_release (struct gengetopt_args_info *args_info)
 {
   unsigned int i;
-  free_string_field (&(args_info->meta_data_arg));
-  free_string_field (&(args_info->meta_data_orig));
-  free_string_field (&(args_info->output_file_arg));
-  free_string_field (&(args_info->output_file_orig));
+  free_string_field (&(args_info->input_arg));
+  free_string_field (&(args_info->input_orig));
+  free_string_field (&(args_info->output_arg));
+  free_string_field (&(args_info->output_orig));
   free_string_field (&(args_info->repeatX_orig));
   free_string_field (&(args_info->repeatY_orig));
   free_string_field (&(args_info->repeatZ_orig));
@@ -255,10 +255,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "help", 0, 0 );
   if (args_info->version_given)
     write_into_file(outfile, "version", 0, 0 );
-  if (args_info->meta_data_given)
-    write_into_file(outfile, "meta-data", args_info->meta_data_orig, 0);
-  if (args_info->output_file_given)
-    write_into_file(outfile, "output-file", args_info->output_file_orig, 0);
+  if (args_info->input_given)
+    write_into_file(outfile, "input", args_info->input_orig, 0);
+  if (args_info->output_given)
+    write_into_file(outfile, "output", args_info->output_orig, 0);
   if (args_info->repeatX_given)
     write_into_file(outfile, "repeatX", args_info->repeatX_orig, 0);
   if (args_info->repeatY_given)
@@ -387,9 +387,15 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
   FIX_UNUSED (additional_error);
 
   /* checks for required options */
-  if (! args_info->meta_data_given)
+  if (! args_info->input_given)
     {
-      fprintf (stderr, "%s: '--meta-data' ('-m') option required%s\n", prog_name, (additional_error ? additional_error : ""));
+      fprintf (stderr, "%s: '--input' ('-i') option required%s\n", prog_name, (additional_error ? additional_error : ""));
+      error = 1;
+    }
+  
+  if (! args_info->output_given)
+    {
+      fprintf (stderr, "%s: '--output' ('-o') option required%s\n", prog_name, (additional_error ? additional_error : ""));
       error = 1;
     }
   
@@ -555,8 +561,8 @@ cmdline_parser_internal (
       static struct option long_options[] = {
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
-        { "meta-data",	1, NULL, 'm' },
-        { "output-file",	1, NULL, 'o' },
+        { "input",	1, NULL, 'i' },
+        { "output",	1, NULL, 'o' },
         { "repeatX",	1, NULL, 'x' },
         { "repeatY",	1, NULL, 'y' },
         { "repeatZ",	1, NULL, 'z' },
@@ -566,7 +572,7 @@ cmdline_parser_internal (
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVm:o:x:y:z:t:u:v:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:x:y:z:t:u:v:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -582,14 +588,14 @@ cmdline_parser_internal (
           cmdline_parser_free (&local_args_info);
           exit (EXIT_SUCCESS);
 
-        case 'm':	/* use specified meta-data (.omd, .eor) file.  */
+        case 'i':	/* use specified input (.omd, .dump, .eor) file.  */
         
         
-          if (update_arg( (void *)&(args_info->meta_data_arg), 
-               &(args_info->meta_data_orig), &(args_info->meta_data_given),
-              &(local_args_info.meta_data_given), optarg, 0, 0, ARG_STRING,
+          if (update_arg( (void *)&(args_info->input_arg), 
+               &(args_info->input_orig), &(args_info->input_given),
+              &(local_args_info.input_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
-              "meta-data", 'm',
+              "input", 'i',
               additional_error))
             goto failure;
         
@@ -597,11 +603,11 @@ cmdline_parser_internal (
         case 'o':	/* use specified output file.  */
         
         
-          if (update_arg( (void *)&(args_info->output_file_arg), 
-               &(args_info->output_file_orig), &(args_info->output_file_given),
-              &(local_args_info.output_file_given), optarg, 0, 0, ARG_STRING,
+          if (update_arg( (void *)&(args_info->output_arg), 
+               &(args_info->output_orig), &(args_info->output_given),
+              &(local_args_info.output_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
-              "output-file", 'o',
+              "output", 'o',
               additional_error))
             goto failure;
         

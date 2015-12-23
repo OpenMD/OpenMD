@@ -71,20 +71,20 @@ int main(int argc, char* argv[]){
   }
   
   //get the dumpfile name and meta-data file name
-  if (args_info.meta_data_given){
-    dumpFileName = args_info.meta_data_arg;
+  if (args_info.input_given){
+    dumpFileName = args_info.input_arg;
   } else {
     strcpy( painCave.errMsg,
-            "No meta-data file was specified.\n" );
+            "No input file name was specified.\n" );
     painCave.isFatal = 1;
     simError();
   }
   
-  if (args_info.output_file_given){
-    outFileName = args_info.output_file_arg;
+  if (args_info.output_given){
+    outFileName = args_info.output_arg;
   } else {
     strcpy( painCave.errMsg,
-            "No output file file was specified.\n" );
+            "No output file name was specified.\n" );
     painCave.isFatal = 1;
     simError();
   }
@@ -144,7 +144,6 @@ int main(int argc, char* argv[]){
   Vector3d oldPos;
   Vector3d newPos;
   
-       
   for (int i = 0; i < nframes; i++){
     cerr << "frame = " << i << "\n";
     dumpReader->readFrame(i);        
