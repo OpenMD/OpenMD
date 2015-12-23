@@ -100,6 +100,7 @@ const char *gengetopt_args_info_help[] = {
   "      --nitrile                 electrostatic potential to frequency map based \n                                  on the Cho nitrile fits",
   "  -m, --multipole               average multipole moments contained within \n                                  cutoff spheres as a function of radius",
   "      --surfDiffusion           X, Y, and R (surface diffusion if Z exposed and \n                                  bulk immobile) diffusion",
+  "      --gcn                     Generalized Coordinate Number",
   "      --hbond                   Hydrogen Bonding statistics using geometric \n                                  criteria (rcut and thetacut must be \n                                  specified)",
   "      --potDiff                 potential energy difference when charge on \n                                  selection is set to zero",
     0
@@ -192,6 +193,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->nitrile_given = 0 ;
   args_info->multipole_given = 0 ;
   args_info->surfDiffusion_given = 0 ;
+  args_info->gcn_given = 0 ;
   args_info->hbond_given = 0 ;
   args_info->potDiff_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
@@ -316,8 +318,9 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->nitrile_help = gengetopt_args_info_help[61] ;
   args_info->multipole_help = gengetopt_args_info_help[62] ;
   args_info->surfDiffusion_help = gengetopt_args_info_help[63] ;
-  args_info->hbond_help = gengetopt_args_info_help[64] ;
-  args_info->potDiff_help = gengetopt_args_info_help[65] ;
+  args_info->gcn_help = gengetopt_args_info_help[64] ;
+  args_info->hbond_help = gengetopt_args_info_help[65] ;
+  args_info->potDiff_help = gengetopt_args_info_help[66] ;
   
 }
 
@@ -598,6 +601,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "multipole", 0, 0 );
   if (args_info->surfDiffusion_given)
     write_into_file(outfile, "surfDiffusion", 0, 0 );
+  if (args_info->gcn_given)
+    write_into_file(outfile, "gcn", 0, 0 );
   if (args_info->hbond_given)
     write_into_file(outfile, "hbond", 0, 0 );
   if (args_info->potDiff_given)
@@ -688,6 +693,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->nitrile_given = 0 ;
   args_info->multipole_given = 0 ;
   args_info->surfDiffusion_given = 0 ;
+  args_info->gcn_given = 0 ;
   args_info->hbond_given = 0 ;
   args_info->potDiff_given = 0 ;
 
@@ -998,6 +1004,7 @@ cmdline_parser_internal (
         { "nitrile",	0, NULL, 0 },
         { "multipole",	0, NULL, 'm' },
         { "surfDiffusion",	0, NULL, 0 },
+        { "gcn",	0, NULL, 0 },
         { "hbond",	0, NULL, 0 },
         { "potDiff",	0, NULL, 0 },
         { 0,  0, 0, 0 }
@@ -1936,6 +1943,23 @@ cmdline_parser_internal (
                 &(local_args_info.surfDiffusion_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "surfDiffusion", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Generalized Coordinate Number.  */
+          else if (strcmp (long_options[option_index].name, "gcn") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->gcn_given),
+                &(local_args_info.gcn_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "gcn", '-',
                 additional_error))
               goto failure;
           

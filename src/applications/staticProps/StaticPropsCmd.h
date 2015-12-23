@@ -156,6 +156,7 @@ struct gengetopt_args_info
   const char *nitrile_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
   const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
   const char *surfDiffusion_help; /**< @brief X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion help description.  */
+  const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
   const char *hbond_help; /**< @brief Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified) help description.  */
   const char *potDiff_help; /**< @brief potential energy difference when charge on selection is set to zero help description.  */
   
@@ -222,6 +223,7 @@ struct gengetopt_args_info
   unsigned int nitrile_given ;	/**< @brief Whether nitrile was given.  */
   unsigned int multipole_given ;	/**< @brief Whether multipole was given.  */
   unsigned int surfDiffusion_given ;	/**< @brief Whether surfDiffusion was given.  */
+  unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
   unsigned int hbond_given ;	/**< @brief Whether hbond was given.  */
   unsigned int potDiff_given ;	/**< @brief Whether potDiff was given.  */
 
