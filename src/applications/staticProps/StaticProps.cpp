@@ -435,7 +435,16 @@ int main(int argc, char* argv[]){
 		       args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
   }else if(args_info.gcn_given){
-    analyser = new GCN(info, dumpFileName, sele1, sele2, args_info.nbins_arg);
+    if (args_info.rcut_given) {      
+      analyser = new GCN(info, dumpFileName, sele1, sele2,                                       args_info.rcut_arg, args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\tGeneralized Coordinate Number");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   }
   else if (args_info.surfDiffusion_given){
     analyser = new SurfaceDiffusion(info, dumpFileName, sele1, maxLen);

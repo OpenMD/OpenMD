@@ -48,41 +48,44 @@
 
 namespace OpenMD {
 
-  GCN::GCN(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int bins):
+  GCN::GCN(SimInfo* info, const std::string& filename,
+           const std::string& sele1, const std::string& sele2,
+           RealType rCut, int bins):
     StaticAnalyser(info, filename),
     sele1_(sele1), seleMan1_(info), evaluator1_(info),
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
+    
+    setOutputName(getPrefix(filename) + ".gcn");
 
-      evaluator1_.loadScriptString(sele1);
-      if (!evaluator1_.isDynamic()) {
-       seleMan1_.setSelectionSet(evaluator1_.evaluate());
-       selectionCount1_ = seleMan1_.getSelectionCount();
-     }
-     evaluator2_.loadScriptString(sele2);
-     if (!evaluator2_.isDynamic()) {
-       seleMan2_.setSelectionSet(evaluator2_.evaluate());
-       selectionCount2_ = seleMan2_.getSelectionCount();
-     }
-
-
-      filename_ = filename;
-      bins_ = bins; //Treat bins as division, bins per single integer
-
-      setOutputName(getPrefix(filename) + ".gcn");
-
-      nnMax_ = 12.0;
-      solShell_ = 3.3;
-      cout << "Bins per integer: " << bins_ << "\n";
-      hBins_ = bins_*(nnMax_+2); //temporary so 0.0 to 12.0 by 0.1
-      cout << "Bins: " << hBins_ << "\n";
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      selectionCount1_ = seleMan1_.getSelectionCount();
+    }
+    evaluator2_.loadScriptString(sele2);
+    if (!evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      selectionCount2_ = seleMan2_.getSelectionCount();
     }
 
+    bins_ = bins; //Treat bins as division, bins per single integer
 
-  GCN::~GCN(){
+    setOutputName(getPrefix(filename) + ".gcn");
 
-
+    rCut_ = rCut;
+    nnMax_ = 12;
+    cout << "Bins per integer: " << bins_ << "\n";
+    hBins_ = bins_ * (nnMax_ + 2);
+    cout << "Bins: " << hBins_ << "\n";
   }
 
+  GCN::~GCN() {
+    globalToLocal_.clear();
+    histogram_.clear();
+    for (unsigned int i = 0; i < listNN_.size(); i++)         
+      listNN_[i].clear();
+    listNN_.clear();
+  }
 
   void GCN::process() {
     Molecule* mol;
@@ -91,103 +94,111 @@ namespace OpenMD {
     StuntDouble* sd2;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    std::ofstream gcnStream;
-    setOutputName(getPrefix(filename_) + ".gcn");
-    gcnStream.open(outputFilename_.c_str());
     
     DumpReader reader(info_, dumpFilename_);
-    
     int nFrames = reader.getNFrames();
+    
     int iterator1;
     int iterator2;
-    int mapIndex1 = 0;
-    int mapIndex2 = 0;
-    int tempIndex = 0;
-    int binIndex = 0;
-    RealType gcn = 0.0;
-    RealType binValue = 0.0;
+    unsigned int mapIndex1(0);
+    unsigned int mapIndex2(0);
+    unsigned int tempIndex(0);
+    int binIndex(0);
+    RealType gcn(0.0);
+    RealType binValue(0.0);
+    Vector3d pos1;
+    Vector3d pos2;
+    Vector3d diff;
+    RealType distance;
 
-    gcnStream << "#Generalized Coordinate Number\n";
-    //First have to calculate nearestNeighbors and listNN
+    std::ofstream os(getOutputFileName().c_str());
+    os << "#Generalized Coordinate Number\n";
+    
+    //First have to calculate lists of nearest neighbors (listNN_):
     
     for(int istep = 0; istep < nFrames; istep += step_){
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
-      for(mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)){
-	for(rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)){
+      for(mol = info_->beginMolecule(mi); mol != NULL;
+          mol = info_->nextMolecule(mi)){
+	for(rb = mol->beginRigidBody(rbIter); rb != NULL;
+            rb = mol->nextRigidBody(rbIter)){
 	  rb->updateAtoms();
 	}
       }
 
-      if  (evaluator1_.isDynamic()) {
+      if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
 	selectionCount1_ = seleMan1_.getSelectionCount();
       }
-      if  (evaluator2_.isDynamic()) {
+      if (evaluator2_.isDynamic()) {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
 	selectionCount2_ = seleMan2_.getSelectionCount();
       }
 
       globalToLocal_.clear();
       globalToLocal_.resize(info_->getNGlobalAtoms(),-1);
+      for (unsigned int i = 0; i < listNN_.size(); i++)         
+        listNN_[i].clear();
       listNN_.clear();
       listNN_.resize(selectionCount2_);
-      nearestNeighbors_.clear();
-      nearestNeighbors_.resize(selectionCount2_, 0);
       histogram_.clear();
       histogram_.resize(hBins_, 0.0);
-      
+
       mapIndex1 = 0;
-      for(sd1 = seleMan2_.beginSelected(iterator1); sd1 != NULL; sd1 = seleMan2_.nextSelected(iterator1)){
+      for(sd1 = seleMan2_.beginSelected(iterator1); sd1 != NULL;
+          sd1 = seleMan2_.nextSelected(iterator1)){
 	globalToLocal_[sd1->getGlobalIndex()] = mapIndex1;
+        pos1 = sd1->getPos();
 
 	mapIndex2 = 0;
- 	for(sd2 = seleMan2_.beginSelected(iterator2); sd2 != NULL; sd2 = seleMan2_.nextSelected(iterator2)){
-	  if(mapIndex1 >= mapIndex2){
-	  
-	  }else{
-	    Vector3d pos1 = sd1->getPos();
-	    Vector3d pos2 = sd2->getPos();
-	    Vector3d diff = pos2-pos1;
+ 	for(sd2 = seleMan2_.beginSelected(iterator2); sd2 != NULL;
+            sd2 = seleMan2_.nextSelected(iterator2)){
+	  if(mapIndex1 < mapIndex2){
+            pos2 = sd2->getPos();
+            diff = pos2 - pos1;
 	    if(usePeriodicBoundaryConditions_){
 	      currentSnapshot_->wrapVector(diff);
 	    }
-	    double distance = diff.length();
-	    if(distance < solShell_){
+            distance = diff.length();
+	    if(distance < rCut_){
+              listNN_[mapIndex1].push_back(mapIndex2);
 	      listNN_[mapIndex2].push_back(mapIndex1);
-	      listNN_[mapIndex1].push_back(mapIndex2);
-	      nearestNeighbors_[mapIndex1] += 1;
-	      nearestNeighbors_[mapIndex2] += 1;
 	    }
 	  }
 	  mapIndex2++;
 	}
 	mapIndex1++;
-      }	
+      }
+      
       // Fill up the histogram with gcn values
-      for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL; sd1 = seleMan1_.nextSelected(iterator1)){
+      for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
+          sd1 = seleMan1_.nextSelected(iterator1)){
 	mapIndex1 = globalToLocal_[sd1->getGlobalIndex()];
 	if(mapIndex1 == -1){
 	  cerr << "mapindex1: -1\n";
 	}
 	gcn = 0.0;
 	for(unsigned int i = 0; i < listNN_[mapIndex1].size(); i++){
+          // tempIndex is the index of one of i's nearest neighbors
 	  tempIndex = listNN_[mapIndex1][i];
-	  gcn += nearestNeighbors_[tempIndex];
+	  gcn += listNN_[tempIndex].size();
 	}
 	gcn = gcn / nnMax_;
 	binIndex = int(gcn*bins_);
 	histogram_[binIndex] += 1;
-
       }
-      gcnStream << "#Selection Count: " << selectionCount1_ << "\n";
-      gcnStream << "#Frame " << istep << "\n";
+      
+      os << "#Selection Count: " << selectionCount1_ << "\n";
+      os << "#Frame " << istep << "\n";
       for(unsigned int n = 0; n < histogram_.size(); n++){
 	binValue = n/(1.0*bins_);
-	gcnStream << binValue << "  " << (histogram_[n]/(selectionCount1_*1.0)) << "\n";
+	os << binValue << "\t"
+           << (histogram_[n]/(selectionCount1_*1.0))
+           << "\n";
       } 
     }   
-    gcnStream.close();
+    os.close();
   }
 }
