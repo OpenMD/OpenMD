@@ -78,9 +78,7 @@ namespace OpenMD {
     
     int nnMax_;
     RealType rCut_;
-    std::vector<std::vector<int> > listNN_;
     std::vector<RealType>  histogram_;
-    std::vector<int> globalToLocal_;
   };
 
 }

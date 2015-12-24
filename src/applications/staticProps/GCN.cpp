@@ -80,14 +80,15 @@ namespace OpenMD {
   }
 
   GCN::~GCN() {
-    globalToLocal_.clear();
     histogram_.clear();
-    for (unsigned int i = 0; i < listNN_.size(); i++)         
-      listNN_[i].clear();
-    listNN_.clear();
   }
 
   void GCN::process() {
+    SelectionManager common(info_);
+    
+    std::vector<std::vector<int> > listNN;
+    std::vector<int> globalToLocal;
+
     Molecule* mol;
     RigidBody* rb;
     StuntDouble* sd1;
@@ -137,34 +138,41 @@ namespace OpenMD {
 	selectionCount2_ = seleMan2_.getSelectionCount();
       }
 
-      globalToLocal_.clear();
-      globalToLocal_.resize(info_->getNGlobalAtoms(),-1);
-      for (unsigned int i = 0; i < listNN_.size(); i++)         
-        listNN_[i].clear();
-      listNN_.clear();
-      listNN_.resize(selectionCount2_);
+      // We need a common selection set:
+      common = seleMan1_ | seleMan2_;
+      int commonCount = common.getSelectionCount();
+
+      globalToLocal.clear();
+      globalToLocal.resize(info_->getNGlobalAtoms(),-1);
+      for (unsigned int i = 0; i < listNN.size(); i++)         
+        listNN[i].clear();
+      listNN.clear();
+      listNN.resize(commonCount);
       histogram_.clear();
       histogram_.resize(hBins_, 0.0);
 
       mapIndex1 = 0;
-      for(sd1 = seleMan2_.beginSelected(iterator1); sd1 != NULL;
-          sd1 = seleMan2_.nextSelected(iterator1)){
-	globalToLocal_[sd1->getGlobalIndex()] = mapIndex1;
+      for(sd1 = common.beginSelected(iterator1); sd1 != NULL;
+          sd1 = common.nextSelected(iterator1)) {
+        
+	globalToLocal[sd1->getGlobalIndex()] = mapIndex1;
+
         pos1 = sd1->getPos();
 
 	mapIndex2 = 0;
- 	for(sd2 = seleMan2_.beginSelected(iterator2); sd2 != NULL;
-            sd2 = seleMan2_.nextSelected(iterator2)){
-	  if(mapIndex1 < mapIndex2){
+ 	for(sd2 = common.beginSelected(iterator2); sd2 != NULL;
+            sd2 = common.nextSelected(iterator2)) {
+          
+	  if (mapIndex1 < mapIndex2) {
             pos2 = sd2->getPos();
             diff = pos2 - pos1;
-	    if(usePeriodicBoundaryConditions_){
+	    if (usePeriodicBoundaryConditions_) {
 	      currentSnapshot_->wrapVector(diff);
 	    }
             distance = diff.length();
-	    if(distance < rCut_){
-              listNN_[mapIndex1].push_back(mapIndex2);
-	      listNN_[mapIndex2].push_back(mapIndex1);
+	    if (distance < rCut_) {
+              listNN[mapIndex1].push_back(mapIndex2);
+	      listNN[mapIndex2].push_back(mapIndex1);
 	    }
 	  }
 	  mapIndex2++;
@@ -175,12 +183,13 @@ namespace OpenMD {
       // Fill up the histogram with gcn values
       for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
           sd1 = seleMan1_.nextSelected(iterator1)){
-	mapIndex1 = globalToLocal_[sd1->getGlobalIndex()];
+            
+	mapIndex1 = globalToLocal[sd1->getGlobalIndex()];
 	gcn = 0.0;
-	for(unsigned int i = 0; i < listNN_[mapIndex1].size(); i++){
+	for(unsigned int i = 0; i < listNN[mapIndex1].size(); i++){
           // tempIndex is the index of one of i's nearest neighbors
-	  tempIndex = listNN_[mapIndex1][i];
-	  gcn += listNN_[tempIndex].size();
+	  tempIndex = listNN[mapIndex1][i];
+	  gcn += listNN[tempIndex].size();
 	}
 	gcn = gcn / nnMax_;
 	binIndex = int(gcn*bins_);
