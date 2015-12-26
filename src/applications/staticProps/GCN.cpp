@@ -75,7 +75,7 @@ namespace OpenMD {
     rCut_ = rCut;
     nnMax_ = 12;
     cout << "Bins per integer: " << bins_ << "\n";
-    hBins_ = bins_ * (nnMax_ + 2);
+    hBins_ = bins_ * (nnMax_ * 1.5);
     cout << "Bins: " << hBins_ << "\n";
   }
 
@@ -145,7 +145,7 @@ namespace OpenMD {
       globalToLocal.clear();
       globalToLocal.resize(info_->getNGlobalAtoms(),-1);
       for (unsigned int i = 0; i < listNN.size(); i++)         
-        listNN[i].clear();
+        listNN.at(i).clear();
       listNN.clear();
       listNN.resize(commonCount);
       histogram_.clear();
@@ -155,7 +155,7 @@ namespace OpenMD {
       for(sd1 = common.beginSelected(iterator1); sd1 != NULL;
           sd1 = common.nextSelected(iterator1)) {
         
-	globalToLocal[sd1->getGlobalIndex()] = mapIndex1;
+	globalToLocal.at(sd1->getGlobalIndex()) = mapIndex1;
 
         pos1 = sd1->getPos();
 
@@ -171,8 +171,8 @@ namespace OpenMD {
 	    }
             distance = diff.length();
 	    if (distance < rCut_) {
-              listNN[mapIndex1].push_back(mapIndex2);
-	      listNN[mapIndex2].push_back(mapIndex1);
+              listNN.at(mapIndex1).push_back(mapIndex2);
+	      listNN.at(mapIndex2).push_back(mapIndex1);
 	    }
 	  }
 	  mapIndex2++;
@@ -184,16 +184,21 @@ namespace OpenMD {
       for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
           sd1 = seleMan1_.nextSelected(iterator1)){
             
-	mapIndex1 = globalToLocal[sd1->getGlobalIndex()];
+	mapIndex1 = globalToLocal.at(sd1->getGlobalIndex());
 	gcn = 0.0;
-	for(unsigned int i = 0; i < listNN[mapIndex1].size(); i++){
+	for(unsigned int i = 0; i < listNN.at(mapIndex1).size(); i++){
           // tempIndex is the index of one of i's nearest neighbors
-	  tempIndex = listNN[mapIndex1][i];
-	  gcn += listNN[tempIndex].size();
+	  tempIndex = listNN.at(mapIndex1).at(i);
+	  gcn += listNN.at(tempIndex).size();
 	}
-	gcn = gcn / nnMax_;
-	binIndex = int(gcn*bins_);
-	histogram_[binIndex] += 1;
+
+        gcn = gcn / nnMax_;
+        binIndex = int(gcn*bins_);
+        if (binIndex < histogram_.size()) {
+          histogram_.at(binIndex) += 1;
+        } else {
+          cerr << "In frame " <<  istep <<  ", object " << sd1->getGlobalIndex() << " has GCN value = " << gcn << "\n";
+        }
       }
       
       os << "#Selection Count: " << selectionCount1_ << "\n";
@@ -201,7 +206,7 @@ namespace OpenMD {
       for(unsigned int n = 0; n < histogram_.size(); n++){
 	binValue = n/(1.0*bins_);
 	os << binValue << "\t"
-           << (histogram_[n]/(selectionCount1_*1.0))
+           << (histogram_.at(n)/(selectionCount1_*1.0))
            << "\n";
       } 
     }   

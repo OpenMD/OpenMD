@@ -436,7 +436,8 @@ int main(int argc, char* argv[]){
 #endif
   }else if(args_info.gcn_given){
     if (args_info.rcut_given) {      
-      analyser = new GCN(info, dumpFileName, sele1, sele2,                                       args_info.rcut_arg, args_info.nbins_arg);
+      analyser = new GCN(info, dumpFileName, sele1, sele2,
+                         args_info.rcut_arg, args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
                "A cutoff radius (rcut) must be specified when calculating\n"
