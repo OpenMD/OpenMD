@@ -50,6 +50,24 @@
 
 namespace OpenMD {
 
+  /**
+   * @class GCN
+   * @brief Generalized Coordinate Number
+   *
+   * Computes a frame-by-frame distribution of generalized coordinate
+   * numbers as described in:
+   *
+   *   "Finding optimal surface sites on heterogeneous catalysts by
+   *    counting nearest neighbors," by F. Calle-Vallejo et al.,
+   *    Science 350(6257) pp. 185-189 (2015).
+   *    http://dx.doi.org/10.1126/science.aab3501
+   *
+   * Note that extra parameters mussed be declared: 
+   *
+   *   rCut = cutoff radius for finding lists of nearest neighbors
+   *   sele1 = selection of StuntDoubles used for the GCN distribution
+   *   sele2 = selection of StuntDoubles used for nearest neighbor computation
+   */
   class GCN : public StaticAnalyser {
     
   public:

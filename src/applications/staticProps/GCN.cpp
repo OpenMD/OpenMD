@@ -74,9 +74,9 @@ namespace OpenMD {
 
     rCut_ = rCut;
     nnMax_ = 12;
-    cout << "Bins per integer: " << bins_ << "\n";
+    // Overestimate the histogram size (still protected in process
+    // function below):
     hBins_ = bins_ * (nnMax_ * 1.5);
-    cout << "Bins: " << hBins_ << "\n";
   }
 
   GCN::~GCN() {
@@ -197,7 +197,8 @@ namespace OpenMD {
         if (binIndex < histogram_.size()) {
           histogram_.at(binIndex) += 1;
         } else {
-          cerr << "In frame " <<  istep <<  ", object " << sd1->getGlobalIndex() << " has GCN value = " << gcn << "\n";
+          cerr << "In frame " <<  istep <<  ", object "
+               << sd1->getGlobalIndex() << " has GCN value = " << gcn << "\n";
         }
       }
       
