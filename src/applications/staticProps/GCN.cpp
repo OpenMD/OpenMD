@@ -104,7 +104,7 @@ namespace OpenMD {
     unsigned int mapIndex1(0);
     unsigned int mapIndex2(0);
     unsigned int tempIndex(0);
-    int binIndex(0);
+    unsigned int binIndex(0);
     RealType gcn(0.0);
     RealType binValue(0.0);
     Vector3d pos1;
