@@ -49,7 +49,7 @@
 #include <map>
 #include <fstream>
 
-#include "applications/simpleBuilder/simpleBuilderCmd.h"
+#include "simpleBuilderCmd.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
 #include "lattice/Lattice.hpp"

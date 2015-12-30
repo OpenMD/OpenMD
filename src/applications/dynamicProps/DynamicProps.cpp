@@ -48,8 +48,9 @@
 #include "brains/SimInfo.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 
-#include "applications/dynamicProps/DynamicPropsCmd.h"
+#include "DynamicPropsCmd.hpp"
 #include "applications/dynamicProps/SelectionCorrFunc.hpp"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
@@ -67,17 +68,19 @@
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
 #include "applications/dynamicProps/HBondJump.hpp"
 
-
 using namespace OpenMD;
 
 int main(int argc, char* argv[]){
-  
-  gengetopt_args_info args_info;
+
+  struct gengetopt_args_info args_info;
 
   //parse the command line option
+
   if (cmdline_parser (argc, argv, &args_info) != 0) {
+    cmdline_parser_print_help();
     exit(1) ;
   }
+    
 
   //get the dumpfile name and meta-data file name
   std::string dumpFileName = args_info.input_arg;

@@ -49,7 +49,7 @@
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
-#include "applications/sequentialProps/SequentialPropsCmd.h"
+#include "SequentialPropsCmd.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 #include "applications/sequentialProps/CenterOfMass.hpp"
 #include "applications/sequentialProps/ContactAngle1.hpp"

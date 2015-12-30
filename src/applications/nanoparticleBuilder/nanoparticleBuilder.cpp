@@ -52,7 +52,7 @@
 
 #include "config.h"
 #include "shapedLatticeSpherical.hpp"
-#include "nanoparticleBuilderCmd.h"
+#include "nanoparticleBuilderCmd.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
 #include "lattice/Lattice.hpp"

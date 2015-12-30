@@ -57,7 +57,7 @@
 
 #include "config.h"
 #include "shapedLatticePentRod.hpp"
-#include "nanorod_pentBuilderCmd.h"
+#include "nanorod_pentBuilderCmd.hpp"
 #include "shapedLatticeRod.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"

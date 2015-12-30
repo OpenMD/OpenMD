@@ -44,7 +44,7 @@
 #include <fstream>
 #include <string>
 
-#include "applications/hydrodynamics/HydroCmd.h"
+#include "HydroCmd.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModelCreator.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModelFactory.hpp"

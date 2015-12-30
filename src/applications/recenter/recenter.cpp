@@ -49,7 +49,7 @@
 #include <map>
 #include <fstream>
 
-#include "applications/recenter/recenterCmd.h"
+#include "recenterCmd.hpp"
 #include "brains/Thermo.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"

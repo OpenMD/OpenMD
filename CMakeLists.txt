@@ -92,22 +92,8 @@ if(GIT_FOUND)
 else()
   SET(GIT_SHA1 Release)
 endif()
-  
 
-#FIND_PACKAGE(Subversion)
-#IF ( Subversion_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.svn )
-  #Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  #MESSAGE(STATUS "Current revision is ${Project_WC_REVISION}")
-  #Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
-  #SET(SVN_REV ${Project_WC_REVISION})
-  #SET(GENERATELOGS "${PROJECT_SOURCE_DIR}/doc/svn2cl")
-  #ADD_CUSTOM_TARGET(ChangeLog
-     #COMMAND ${GENERATELOGS} "--group-by-day" "--include-rev"
-     #"--linelen=78" "--output=${PROJECT_BINARY_DIR}/ChangeLog" "${PROJECT_SOURCE_DIR}"
-  #)
-#ELSE()
-  #SET(SVN_REV Release)
-#ENDIF()
+find_package(GenGetOpt REQUIRED)
 
 check_include_file_cxx(conio.h      HAVE_CONIO_H)
 check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
@@ -204,6 +190,77 @@ configure_file(
   "${PROJECT_BINARY_DIR}/Revision.cpp"
 )
 
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/dump2Xyz/Dump2XYZ.ggo.in"
+  "${PROJECT_BINARY_DIR}/Dump2XYZ.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/dynamicProps/DynamicProps.ggo.in"
+  "${PROJECT_BINARY_DIR}/DynamicProps.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/hydrodynamics/Hydro.ggo.in"
+  "${PROJECT_BINARY_DIR}/Hydro.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/nanoparticleBuilder/icosahedralBuilder.ggo.in"
+  "${PROJECT_BINARY_DIR}/icosahedralBuilder.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/nanoparticleBuilder/nanoparticleBuilder.ggo.in"
+  "${PROJECT_BINARY_DIR}/nanoparticleBuilder.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/nanoparticleBuilder/nanorodBuilder.ggo.in"
+  "${PROJECT_BINARY_DIR}/nanorodBuilder.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/nanoparticleBuilder/nanorod_pentBuilder.ggo.in"
+  "${PROJECT_BINARY_DIR}/nanorod_pentBuilder.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/omd2omd/omd2omd.ggo.in"
+  "${PROJECT_BINARY_DIR}/omd2omd.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/randomBuilder/randomBuilder.ggo.in"
+  "${PROJECT_BINARY_DIR}/randomBuilder.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/recenter/recenter.ggo.in"
+  "${PROJECT_BINARY_DIR}/recenter.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/sequentialProps/SequentialProps.ggo.in"
+  "${PROJECT_BINARY_DIR}/SequentialProps.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/simpleBuilder/simpleBuilder.ggo.in"
+  "${PROJECT_BINARY_DIR}/simpleBuilder.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/staticProps/StaticProps.ggo.in"
+  "${PROJECT_BINARY_DIR}/StaticProps.ggo"
+  @ONLY
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/applications/thermalizer/thermalizer.ggo.in"
+  "${PROJECT_BINARY_DIR}/thermalizer.ggo"
+  @ONLY
+)
+
 include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/src")
 
 configure_file (
@@ -211,7 +268,6 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/openmd.spec"
   @ONLY
   )
-
 
 #Add executables for build
 set (PROGRAMS 
@@ -522,16 +578,22 @@ target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel ope
 )
 ENDIF (MPI_FOUND)
 
+set(DUMP2XYZ_GGO_SOURCE "${PROJECT_BINARY_DIR}/Dump2XYZ.ggo")
+ADD_GENGETOPT_FILES(${DUMP2XYZ_GGO_SOURCE} DUMP2XYZCMD)
 set (DUMP2XYZSOURCE 
 src/applications/dump2Xyz/Dump2XYZ.cpp
-src/applications/dump2Xyz/Dump2XYZCmd.cpp
+${DUMP2XYZCMD}
 )
 
+set(OMD2OMD_GGO_SOURCE "${PROJECT_BINARY_DIR}/omd2omd.ggo")
+ADD_GENGETOPT_FILES(${OMD2OMD_GGO_SOURCE} OMD2OMDCMD)
 set (OMD2OMDSOURCE 
 src/applications/omd2omd/omd2omd.cpp
-src/applications/omd2omd/omd2omdCmd.cpp
+${OMD2OMDCMD}
 )
 
+set(DYNAMICPROPS_GGO_SOURCE "${PROJECT_BINARY_DIR}/DynamicProps.ggo")
+ADD_GENGETOPT_FILES(${DYNAMICPROPS_GGO_SOURCE} DYNAMICPROPSCMD)
 set (DYNAMICPROPSSOURCE 
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CrossTimeCorrFunc.cpp
@@ -557,9 +619,11 @@ src/applications/dynamicProps/ThetaCorrFunc.cpp
 src/applications/dynamicProps/TimeCorrFunc.cpp
 src/applications/dynamicProps/VCorrFunc.cpp
 src/applications/dynamicProps/BondCorrFunc.cpp
-src/applications/dynamicProps/DynamicPropsCmd.cpp
+${DYNAMICPROPSCMD}
 )
 
+set(HYDRO_GGO_SOURCE "${PROJECT_BINARY_DIR}/Hydro.ggo")
+ADD_GENGETOPT_FILES(${HYDRO_GGO_SOURCE} HYDROCMD)
 set (HYDROSOURCE 
 src/applications/hydrodynamics/AnalyticalModel.cpp
 src/applications/hydrodynamics/ApproximationModel.cpp
@@ -570,18 +634,22 @@ src/applications/hydrodynamics/HydrodynamicsModel.cpp
 src/applications/hydrodynamics/HydrodynamicsModelFactory.cpp
 src/applications/hydrodynamics/RoughShell.cpp
 src/applications/hydrodynamics/ShapeBuilder.cpp
-src/applications/hydrodynamics/HydroCmd.cpp
+${HYDROCMD}
 )
 
+set(SEQUENTIALPROPS_GGO_SOURCE "${PROJECT_BINARY_DIR}/SequentialProps.ggo")
+ADD_GENGETOPT_FILES(${SEQUENTIALPROPS_GGO_SOURCE} SEQUENTIALPROPSCMD)
 set (SEQUENTIALPROPSSOURCE
 src/applications/sequentialProps/CenterOfMass.cpp
 src/applications/sequentialProps/ContactAngle1.cpp
 src/applications/sequentialProps/ContactAngle2.cpp
 src/applications/sequentialProps/SequentialAnalyzer.cpp
 src/applications/sequentialProps/SequentialProps.cpp
-src/applications/sequentialProps/SequentialPropsCmd.cpp
+${SEQUENTIALPROPSCMD}
 )
 
+set(STATICPROPS_GGO_SOURCE "${PROJECT_BINARY_DIR}/StaticProps.ggo")
+ADD_GENGETOPT_FILES(${STATICPROPS_GGO_SOURCE} STATICPROPSCMD)
 set (STATICPROPSSOURCE 
 src/applications/staticProps/AngleR.cpp
 src/applications/staticProps/BondAngleDistribution.cpp
@@ -618,51 +686,67 @@ src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
 src/applications/staticProps/TetrahedralityParamXYZ.cpp
 src/applications/staticProps/TwoDGofR.cpp
-src/applications/staticProps/StaticPropsCmd.cpp
+${STATICPROPSCMD}
 )
 
+set(NANOPARTICLEBUILDER_GGO_SOURCE "${PROJECT_BINARY_DIR}/nanoparticleBuilder.ggo")
+ADD_GENGETOPT_FILES(${NANOPARTICLEBUILDER_GGO_SOURCE} NANOPARTICLEBUILDERCMD)
 set (NANOPARTICLEBUILDERSOURCE 
 src/applications/nanoparticleBuilder/nanoparticleBuilder.cpp
 src/applications/nanoparticleBuilder/shapedLatticeSpherical.cpp
-src/applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
+${NANOPARTICLEBUILDERCMD}
 )
 
+set(NANORODBUILDER_GGO_SOURCE "${PROJECT_BINARY_DIR}/nanorodBuilder.ggo")
+ADD_GENGETOPT_FILES(${NANORODBUILDER_GGO_SOURCE} NANORODBUILDERCMD)
 set (NANORODBUILDERSOURCE 
 src/applications/nanoparticleBuilder/nanorodBuilder.cpp
 src/applications/nanoparticleBuilder/shapedLatticeRod.cpp
 src/applications/nanoparticleBuilder/shapedLatticeEllipsoid.cpp
-src/applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
+${NANORODBUILDERCMD}
 )
 
+set(NANORODPENTBUILDER_GGO_SOURCE "${PROJECT_BINARY_DIR}/nanorod_pentBuilder.ggo")
+ADD_GENGETOPT_FILES(${NANORODPENTBUILDER_GGO_SOURCE} NANORODPENTBUILDERCMD)
 set (NANOROD_PENTBUILDERSOURCE 
 src/applications/nanoparticleBuilder/nanorod_pentBuilder.cpp
-src/applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
 src/applications/nanoparticleBuilder/shapedLatticePentRod.cpp
+${NANORODPENTBUILDERCMD}
 )
 
+set(ICOSAHEDRALBUILDER_GGO_SOURCE "${PROJECT_BINARY_DIR}/icosahedralBuilder.ggo")
+ADD_GENGETOPT_FILES(${ICOSAHEDRALBUILDER_GGO_SOURCE} ICOSAHEDRALBUILDERCMD)
 set (ICOSAHEDRALBUILDERSOURCE 
 src/applications/nanoparticleBuilder/icosahedralBuilder.cpp
-src/applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp
+${ICOSAHEDRALBUILDERCMD}
 )
 
+set(RANDOMBUILDER_GGO_SOURCE "${PROJECT_BINARY_DIR}/randomBuilder.ggo")
+ADD_GENGETOPT_FILES(${RANDOMBUILDER_GGO_SOURCE} RANDOMBUILDERCMD)
 set (RANDOMBUILDERSOURCE
 src/applications/randomBuilder/randomBuilder.cpp
-src/applications/randomBuilder/randomBuilderCmd.cpp
+${RANDOMBUILDERCMD}
 )
 
+set(SIMPLEBUILDER_GGO_SOURCE "${PROJECT_BINARY_DIR}/simpleBuilder.ggo")
+ADD_GENGETOPT_FILES(${SIMPLEBUILDER_GGO_SOURCE} SIMPLEBUILDERCMD)
 set(SIMPLEBUILDERSOURCE 
 src/applications/simpleBuilder/simpleBuilder.cpp
-src/applications/simpleBuilder/simpleBuilderCmd.cpp
+${SIMPLEBUILDERCMD}
 )
 
+set(THERMALIZER_GGO_SOURCE "${PROJECT_BINARY_DIR}/thermalizer.ggo")
+ADD_GENGETOPT_FILES(${THERMALIZER_GGO_SOURCE} THERMALIZERCMD)
 set(THERMALIZERSOURCE 
 src/applications/thermalizer/thermalizer.cpp
-src/applications/thermalizer/thermalizerCmd.cpp
+${THERMALIZERCMD}
 )
 
+set(RECENTER_GGO_SOURCE "${PROJECT_BINARY_DIR}/recenter.ggo")
+ADD_GENGETOPT_FILES(${RECENTER_GGO_SOURCE} RECENTERCMD)
 set(RECENTERSOURCE 
 src/applications/recenter/recenter.cpp
-src/applications/recenter/recenterCmd.cpp
+${RECENTERCMD}
 )
 
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})

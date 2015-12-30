@@ -47,19 +47,27 @@ namespace OpenMD {
 
   class HBondJump : public MultipassCorrFunc {
   public:
-    HBondJump(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double rCut, double thetaCut);
-        
+    HBondJump(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2, double rCut,
+              double thetaCut, int order);
+    
   private:
-    virtual void preCorrelate();
     virtual void correlation();
+    virtual void computeFrame(int istep);
+    
     virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
     virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
-
-    std::vector<int> indices_;
-    std::vector<std::vector<std::set<int> > > bondList_;
+    
+    std::vector<std::vector<std::set<int> > > hBondSet_;
+    std::vector<std::vector<int> > donors_;
+    std::vector<std::vector<int> > acceptors_;
+    std::vector<std::vector<Vector3d> > rOO_;
+    std::vector<std::vector<RealType> > rOHprojection_;
+    
     RealType rCut_;
     RealType thetaCut_;
+    int order_;
   };
 
 }

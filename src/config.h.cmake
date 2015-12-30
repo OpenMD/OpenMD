@@ -19,6 +19,12 @@
 #define strcasecmp _stricmp
 #endif
 
+#ifdef WIN32
+#include "utils/wingetopt.h"
+#else
+#include <getopt.h>
+#endif
+
 /* Is defined if the qhull library is available. */
 
 #cmakedefine HAVE_QHULL 1

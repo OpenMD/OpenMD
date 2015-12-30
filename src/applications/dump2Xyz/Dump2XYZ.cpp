@@ -44,7 +44,7 @@
 #include <fstream>
 #include <string>
 
-#include "applications/dump2Xyz/Dump2XYZCmd.h"
+#include "Dump2XYZCmd.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"

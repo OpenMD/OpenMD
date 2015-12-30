@@ -56,7 +56,7 @@
 #include "config.h"
 #include "shapedLatticeRod.hpp"
 #include "shapedLatticeEllipsoid.hpp"
-#include "nanorodBuilderCmd.h"
+#include "nanorodBuilderCmd.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
 #include "lattice/Lattice.hpp"

@@ -1,12 +1,29 @@
-# Input file for gengetopt --generates cmdline.c and cmdline.h
-# for parsing command line arguments useing getopt and getoptlong.
-# gengetopt is available from:
-#  http://www.gnu.org/software/gengetopt/gengetopt.html
-# invoke with:
-# gengetopt < StaticProps.ggo --file-name=StaticPropsCmd --unamed-opts
+# Input file for gengetopt. This file generates StaticPropsCmd.cpp and 
+# StaticPropsCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=StaticPropsCmd --c-extension=cpp --header-extension=hpp"
 
 package "StaticProps"
-version "1.00"
+version "(OpenMD @VERSION_MAJOR@.@VERSION_MINOR@ Revision @GIT_SHA1@)"
+
+purpose
+"Computes properties which are averaged over some or all of the
+configurations that are contained within a dump file. The most common
+example of a static property that can be computed is the pair
+distribution function between atoms of type A and other atoms of type
+B, gAB(r).
+
+Example:
+   StaticProps -i tp4.dump --gofr --sele1=\"select O*\" --sele2=\"select O*\"
+   
+This command computes the oxygen-oxygen pair distribution function,
+gOO(r), from a file named tp4.dump"
 
 # Options
 option	"input"		i	"input dump file"					string	typestr="filename" 	yes

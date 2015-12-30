@@ -1,9 +1,16 @@
-# Input file for gengetopt --generates cmdline.c and cmdline.h
-# for parsing command line arguments useing getopt and getoptlong.
-# gengetopt is available from:
-#  http://www.gnu.org/software/gengetopt/gengetopt.html
+# Input file for gengetopt. This file generates nanoparticleBuilderCmd.cpp and 
+# nanoparticleBuilderCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=nanoparticleBuilderCmd --c-extension=cpp --header-extension=hpp"
+
 package "nanoparticleBuilder"
-version "1.0"
+version "(OpenMD @VERSION_MAJOR@.@VERSION_MINOR@ Revision @GIT_SHA1@)"
 purpose "Builds spherical random or core-shell nanoparticles and outputs an OpenMD startup file"
 
 # Options

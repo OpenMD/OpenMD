@@ -41,7 +41,7 @@
  */
 
 #include "config.h"
-#include "icosahedralBuilderCmd.h"
+#include "icosahedralBuilderCmd.hpp"
 #include "utils/MoLocator.hpp"
 #include "utils/Tuple.hpp"
 #include "brains/SimInfo.hpp"

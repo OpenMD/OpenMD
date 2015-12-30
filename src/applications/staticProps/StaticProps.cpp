@@ -49,7 +49,7 @@
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
 
-#include "applications/staticProps/StaticPropsCmd.h"
+#include "StaticPropsCmd.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "applications/staticProps/GofR.hpp"
 #include "applications/staticProps/GofZ.hpp"

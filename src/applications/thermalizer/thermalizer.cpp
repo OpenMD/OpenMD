@@ -56,7 +56,7 @@
 #include <map>
 #include <fstream>
 
-#include "applications/thermalizer/thermalizerCmd.h"
+#include "thermalizerCmd.hpp"
 #include "integrators/Velocitizer.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"

@@ -56,7 +56,7 @@
 #include <map>
 #include <fstream>
 
-#include "applications/randomBuilder/randomBuilderCmd.h"
+#include "randomBuilderCmd.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
 #include "lattice/Lattice.hpp"

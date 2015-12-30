@@ -44,7 +44,7 @@
 #include <fstream>
 #include <string>
 
-#include "applications/omd2omd/omd2omdCmd.h"
+#include "omd2omdCmd.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
