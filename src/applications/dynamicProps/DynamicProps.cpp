@@ -212,41 +212,24 @@ int main(int argc, char* argv[]){
 			args_info.nzbins_arg, memSize); 
 
   } else if (args_info.jumptime_given) {
-    if (args_info.rcut_given) {
-      if (args_info.thetacut_given) {
-        
-        int order(0);
-        if (args_info.order_given)
-          order = args_info.order_arg;
-        else {
-          sprintf( painCave.errMsg,
-                   "--order must be specified when calculating Hydrogen Bond "
-                   "Jump Statistics\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        }
-/*
-        corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
-                                 args_info.rcut_arg,
-                                 args_info.thetacut_arg, order); 
-*/
-      } else {
-        sprintf( painCave.errMsg,
-                 "A cutoff angle (thetacut) must be specified when calculating "
-                 "Hydrogen Bond Jump Statistics");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
-    } else {
+    int order(0);
+    if (args_info.order_given)
+      order = args_info.order_arg;
+    else {
       sprintf( painCave.errMsg,
-               "A cutoff radius (rcut) must be specified when calculating "
-               "Hydrogen Bond Jump Statistics");
+               "--order must be specified when calculating Hydrogen Bond "
+               "Jump Statistics\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
+    
+    corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
+                             args_info.OOcut_arg,
+                             args_info.thetacut_arg,
+                             args_info.OHcut_arg,
+                             order); 
+    
   }
 
   if (args_info.output_given) {

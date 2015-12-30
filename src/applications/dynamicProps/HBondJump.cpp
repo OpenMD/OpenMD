@@ -49,15 +49,16 @@ namespace OpenMD {
                        double OOcut, double thetaCut, double OHcut, int order)
     : MultipassCorrFunc(info, filename, sele1, sele2,
                         DataStorage::dslPosition | DataStorage::dslAmat ),
-      OOCut_(OOCut), thetaCut_(thetaCut), OHCut_(OHcut), order_(order) {
+      OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut), order_(order) {
     
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
 
     //nFrames_ is initialized in MultipassCorrFunc:
-    donors_.resize(nFrames_);
-    hBondSet_.resize(nFrames_);
-    acceptors_.resize(nFrames_);
+    GIDtoDonor_.resize(nFrames_);
+    DonorToGID_.resize(nFrames_);
+    acceptor_.resize(nFrames_);
+    acceptorStartFrame_.resize(nFrames_);
     rOO_.resize(nFrames_);
     rOHprojection_.resize(nFrames_);
   }
@@ -74,12 +75,11 @@ namespace OpenMD {
     Vector3d hPos;
     Vector3d DH;
     Vector3d DA;
+    Vector3d HA;
     Vector3d uDA;
-    RealType DAdist, DHdist, DHprojection, theta, ctheta;
+    RealType DAdist, DHdist, HAdist, DHprojection, theta, ctheta;
     int ii, jj;
-    int dInd, aInd, index;
-
-    index = 0;
+    int hInd, aInd, index, index2;
   
     for (mol1 = seleMan1_.beginSelectedMolecule(ii);
          mol1 != NULL; mol1 = seleMan1_.nextSelectedMolecule(ii)) {
@@ -117,23 +117,36 @@ namespace OpenMD {
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {
                 // molecule 1 is a Hbond donor:
-                dInd = hbd->donorAtom->getGlobalIndex();
                 aInd = hba->getGlobalIndex();
+                hInd = hbd->donatedHydrogen->getGlobalIndex();
 
-                std::set<int> bondPair;
-                bondPair.insert(dInd);
-                bondPair.insert(aInd);
+                index = acceptor_[istep].size();
+                GIDtoDonor_[istep][hInd] = index;
 
-                index = hBondSet_[istep].size();
-                hBondSet_[istep].push_back(bondPair);
-                
-                donors_[istep].push_back(dInd);
-                acceptors_[istep].push_back(aInd);
+                acceptor_[istep].push_back(aInd);
+                DonorToGID_[istep].push_back(hInd);
 
+                // Look at previous step to see if we need to update
+                // acceptor start times:
+
+                if (istep == 0)
+                  acceptorStartFrame_[istep].push_back(istep);
+                else {
+                  // find out index on previous step:
+                  index2 = GIDtoDonor_[istep-1][hInd];
+                  if (acceptor_[istep-1][index2] == aInd) {
+                    // same acceptor means copy previous start time:
+                    acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
+                  } else {
+                    // new acceptor means new start time:
+                    acceptorStartFrame_[istep].push_back(istep);
+                  }
+                }
+               
                 Vector3d uDA = DA / DAdist;
                 rOO_[istep].push_back( uDA );
                 DHprojection = dot( uDA, DH);
-                rOHprojection_[istep].push_back(DHprojection);
+                rOHprojection_[istep].push_back(DHprojection);                
               }
             }            
           }            
@@ -170,18 +183,32 @@ namespace OpenMD {
               if (theta < thetaCut_ && HAdist < OHCut_) {
                 
                 // molecule 1 is a Hbond acceptor:
-                dInd = hbd->donorAtom->getGlobalIndex();
                 aInd = hba->getGlobalIndex();
+                hInd = hbd->donatedHydrogen->getGlobalIndex();
 
-                std::set<int> bondPair;
-                bondPair.insert(dInd);
-                bondPair.insert(aInd);
-
-                index = hBondSet_[istep].size();
-                hBondSet_[istep].push_back(bondPair);
+                index = acceptor_[istep].size();
+                GIDtoDonor_[istep][hInd] = index;
                 
-                donors_[istep].push_back(dInd);
-                acceptors_[istep].push_back(aInd);
+                acceptor_[istep].push_back(aInd);
+                DonorToGID_[istep].push_back(hInd);
+
+
+                // Look at previous step to see if we need to update
+                // acceptor start times:
+
+                if (istep == 0)
+                  acceptorStartFrame_[istep].push_back(istep);
+                else {
+                  // find out index on previous step:
+                  index2 = GIDtoDonor_[istep-1][hInd];
+                  if (acceptor_[istep-1][index2] == aInd) {
+                    // same acceptor means copy previous start time:
+                    acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
+                  } else {
+                    // new acceptor means new start time:
+                    acceptorStartFrame_[istep].push_back(istep);
+                  }
+                }
 
                 Vector3d uDA = DA / DAdist;
                 rOO_[istep].push_back( uDA );
@@ -197,18 +224,19 @@ namespace OpenMD {
   
   
   void HBondJump::correlation() {
-    std::vector<std::set<int> > s1;
-    std::vector<std::set<int> > s2;
+    std::vector<int> s1;
+    std::vector<int> s2;
 
-    std::vector<std::set<int> >::iterator i1;
-    std::vector<std::set<int> >::iterator i2;
+    std::vector<int>::iterator i1;
+    std::vector<int>::iterator i2;
           
     RealType corrVal;
+    int index1, index2, count;
     
     for (int i = 0; i < nFrames_; ++i) {
 
       RealType time1 = times_[i];           
-      s1 = hBondSet_[i];
+      s1 = DonorToGID_[i];
       
       for(int j  = i; j < nFrames_; ++j) {
 
@@ -229,7 +257,10 @@ namespace OpenMD {
         }
         
         int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
-        s2 = hBondSet_[j];
+        s2 = DonorToGID_[j];
+
+        corrVal = 0.0;
+        count = 0;
 
         for (i1 = s1.begin(), i2 = s2.begin();
              i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
@@ -252,21 +283,17 @@ namespace OpenMD {
           index1 = i1 - s1.begin();
           index2 = i2 - s2.begin();
           
-
-          corrVal = 0.0;
           
-          for (ki = hBondSet_[i][*i1].begin();
-               ki != hBondSet_[i][*i1].end(); ++ki) {
-            
-            for (kj = hBondSet_[j][*i1].begin();
-                 kj != hBondSet_[j][*i1].end(); ++kj) {
-              
-              if ( *ki == *kj ) corrVal += 1;
-            }
+          if (acceptor_[i][index1] == acceptor_[j][index2]) {
+            count++;
+            if (acceptorStartFrame_[j][index2] > i) 
+              corrVal += 0;
+            else 
+              corrVal += 1.0;            
           }
-          
+                    
           histogram_[timeBin] += corrVal;
-          count_[timeBin] += hBondSet_[i][*i1].size();
+          count_[timeBin] += count;
         }
       }
     }

@@ -603,7 +603,7 @@ src/applications/dynamicProps/DynamicProps.cpp
 src/applications/dynamicProps/EnergyCorrFunc.cpp
 src/applications/dynamicProps/FrameTimeCorrFunc.cpp
 src/applications/dynamicProps/FreqFlucCorrFunc.cpp
-# src/applications/dynamicProps/HBondJump.cpp
+src/applications/dynamicProps/HBondJump.cpp
 src/applications/dynamicProps/LegendreCorrFunc.cpp
 src/applications/dynamicProps/LegendreCorrFuncZ.cpp
 src/applications/dynamicProps/cOHz.cpp
