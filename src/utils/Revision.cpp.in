@@ -3,6 +3,7 @@
 #define OPENMD_VERSION "@VERSION_MAJOR@.@VERSION_MINOR@"
 
 #include "utils/Revision.hpp"
+#include <string.h>
 
 extern "C" { 
   const char version[] = OPENMD_VERSION;
