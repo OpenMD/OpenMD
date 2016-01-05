@@ -54,6 +54,7 @@
 #include "applications/sequentialProps/CenterOfMass.hpp"
 #include "applications/sequentialProps/ContactAngle1.hpp"
 #include "applications/sequentialProps/ContactAngle2.hpp"
+#include "applications/sequentialProps/GCNSeq.hpp"
 
 using namespace OpenMD;
 
@@ -108,7 +109,19 @@ int main(int argc, char* argv[]){
 
   SequentialAnalyzer* analyzer = NULL;
   if(args_info.com_given){
-    analyzer = new CenterOfMass(info, dumpFileName, sele1);
+    analyzer = new CenterOfMass(info, dumpFileName, sele1, sele2);
+  } else if(args_info.gcn_given){
+    if (args_info.rcut_given) {      
+      analyzer = new GCNSeq(info, dumpFileName, sele1, sele2,
+                            args_info.rcut_arg, args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\tGeneralized Coordinate Number");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }   
   } else if(args_info.ca1_given){
     RealType solidZ(0.0);
     if (args_info.referenceZ_given)
@@ -131,7 +144,8 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    analyzer = new ContactAngle1(info, dumpFileName, sele1, solidZ, dropletR);
+    analyzer = new ContactAngle1(info, dumpFileName, sele1, sele2, solidZ,
+                                 dropletR);
   } else if(args_info.ca2_given){
     RealType solidZ(0.0);
     if (args_info.referenceZ_given)
@@ -184,10 +198,9 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    analyzer = new ContactAngle2(info, dumpFileName, sele1, solidZ, centroidX,
-                                 centroidY,
-                                 threshDens, bufferLength, args_info.nbins_arg,
-                                 args_info.nbins_z_arg);
+    analyzer = new ContactAngle2(info, dumpFileName, sele1, sele2, solidZ,
+                                 centroidX, centroidY, threshDens, bufferLength,
+                                 args_info.nbins_arg, args_info.nbins_z_arg);
   }
 
   if (args_info.output_given) {

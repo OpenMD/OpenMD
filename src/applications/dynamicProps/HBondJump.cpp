@@ -54,6 +54,14 @@ namespace OpenMD {
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
 
+    std::stringstream params;
+    params << " OOcut = " << OOCut_
+           << ", thetacut = " << thetaCut_
+           << ", OHcut = " << OHCut_
+           << ", order = " << order_;    
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+    
     //nFrames_ is initialized in MultipassCorrFunc:
     GIDtoDonor_.resize(nFrames_);
     DonorToGID_.resize(nFrames_);
@@ -80,7 +88,22 @@ namespace OpenMD {
     RealType DAdist, DHdist, HAdist, DHprojection, theta, ctheta;
     int ii, jj;
     int hInd, aInd, index, index2;
-  
+
+    // Map of atomic global IDs to donor atoms:
+    GIDtoDonor_[istep].resize( info_->getNGlobalAtoms(), -1);
+
+    if (!uniqueSelections_) {
+      seleMan2_ = seleMan1_;
+    }
+    
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+    
+    if (uniqueSelections_ && evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }      
+
     for (mol1 = seleMan1_.beginSelectedMolecule(ii);
          mol1 != NULL; mol1 = seleMan1_.nextSelectedMolecule(ii)) {
       

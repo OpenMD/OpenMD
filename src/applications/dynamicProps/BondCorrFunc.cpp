@@ -47,7 +47,7 @@ namespace OpenMD {
                              const std::string& sele1, long long int memSize)
     : InteractionTimeCorrFunc(info, filename, sele1, 
                               DataStorage::dslPosition, memSize){
-
+    
       setCorrFuncType("Bond Correlation Function");
       setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
       nSelectedBonds_ =   seleMan1_.getBondSelectionCount();  
@@ -76,7 +76,8 @@ namespace OpenMD {
     }    
   }
 
-  RealType BondCorrFunc::calcCorrVal(int frame1, int frame2, ShortRangeInteraction* sri) {
+  RealType BondCorrFunc::calcCorrVal(int frame1, int frame2,
+                                     ShortRangeInteraction* sri) {
     bond = dynamic_cast<Bond*>(sri);
     re = bond->getBondType()->getEquilibriumBondLength();
     val1 = bond->getValue(frame1) - re;

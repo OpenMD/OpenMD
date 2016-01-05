@@ -46,6 +46,7 @@
  
 #include "applications/staticProps/BOPofR.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
@@ -62,7 +63,8 @@ namespace OpenMD {
                                  seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".bo");
-    
+    setAnalysisType("Bond Order Parameter(r)");
+
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -74,6 +76,13 @@ namespace OpenMD {
     nBins_ = nbins;
     len_ = len;
     
+    std::stringstream params;
+    params << " rcut = " << rCut_
+           << ", len = " << len_
+           << ", nbins = " << nBins_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+
     deltaR_ = len_/nBins_;
     RCount_.resize(nBins_);
     WofR_.resize(nBins_);
@@ -326,6 +335,7 @@ namespace OpenMD {
                                                                    filename, 
                                                                    sele, rCut,
                                                                    nbins, len) {
+    setAnalysisType("Icosahedral Bond Order Parameter(r)");    
   }
 
   void IcosahedralOfR::collectHistogram(std::vector<RealType> q, 
@@ -349,7 +359,9 @@ namespace OpenMD {
   FCCOfR::FCCOfR(SimInfo* info, const std::string& filename, 
                  const std::string& sele, double rCut, 
                  int nbins, RealType len) : BOPofR(info, filename, sele, rCut,
-                                                   nbins, len) {}
+                                                   nbins, len) {
+    setAnalysisType("FCC Bond Order Parameter(r)");
+  }
   
   
   void FCCOfR::collectHistogram(std::vector<RealType> q, 
@@ -368,10 +380,16 @@ namespace OpenMD {
   }
   
   void IcosahedralOfR::writeOrderParameter() {
-    
+    Revision rev; 
     std::ofstream osq((getOutputFileName() + "qr").c_str());
 
     if (osq.is_open()) {
+      osq << "# " << getAnalysisType() << "\n";
+      osq << "# OpenMD " << rev.getFullRevision() << "\n";
+      osq << "# " << rev.getBuildDate() << "\n";
+      osq << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        osq << "# parameters: " << paramString_ << "\n";
       
       // Normalize by number of frames and write it out:
       
@@ -390,7 +408,7 @@ namespace OpenMD {
       osq.close();
       
     } else {
-      sprintf(painCave.errMsg, "BOPofR: unable to open %s\n", 
+      sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n", 
               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();  
@@ -399,6 +417,13 @@ namespace OpenMD {
     std::ofstream osw((getOutputFileName() + "wr").c_str());
     
     if (osw.is_open()) {
+      osw << "# " << getAnalysisType() << "\n";
+      osw << "# OpenMD " << rev.getFullRevision() << "\n";
+      osw << "# " << rev.getBuildDate() << "\n";
+      osw << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        osw << "# parameters: " << paramString_ << "\n";
+
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Rval = deltaR_ * (i + 0.5);               
@@ -414,7 +439,7 @@ namespace OpenMD {
       
       osw.close();
     } else {
-      sprintf(painCave.errMsg, "BOPofR: unable to open %s\n", 
+      sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n", 
               (getOutputFileName() + "w").c_str());
       painCave.isFatal = 1;
       simError();  
@@ -427,6 +452,14 @@ namespace OpenMD {
     std::ofstream osw((getOutputFileName() + "wr").c_str());
     
     if (osw.is_open()) {
+      Revision rev;
+      osw << "# " << getAnalysisType() << "\n";
+      osw << "# OpenMD " << rev.getFullRevision() << "\n";
+      osw << "# " << rev.getBuildDate() << "\n";
+      osw << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        osw << "# parameters: " << paramString_ << "\n";
+
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Rval = deltaR_ * (i + 0.5);               
@@ -442,7 +475,7 @@ namespace OpenMD {
       
       osw.close();
     } else {
-      sprintf(painCave.errMsg, "BOPofR: unable to open %s\n", 
+      sprintf(painCave.errMsg, "FCCOfR: unable to open %s\n", 
               (getOutputFileName() + "w").c_str());
       painCave.isFatal = 1;
       simError();  

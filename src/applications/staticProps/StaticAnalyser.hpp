@@ -50,7 +50,9 @@ namespace OpenMD {
 
   class StaticAnalyser{
   public:
-    StaticAnalyser(SimInfo* info, const std::string& filename) : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {}
+    StaticAnalyser(SimInfo* info, const std::string& filename) :
+      info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1),
+      usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {}
     virtual ~StaticAnalyser() {}
     virtual void process()=0;
 
@@ -68,6 +70,18 @@ namespace OpenMD {
     }
 
     int getStep() { return step_;}
+    
+    const std::string& getAnalysisType() const {
+      return analysisType_;
+    }
+
+    void setAnalysisType(const std::string& type) {
+      analysisType_ = type;
+    }
+    
+    void setParameterString(const std::string& params) {
+      paramString_ = params;
+    }
 
   protected:
     SimInfo* info_;
@@ -76,7 +90,8 @@ namespace OpenMD {
     std::string outputFilename_;
     int step_;
     bool usePeriodicBoundaryConditions_;
+    std::string analysisType_;
+    std::string paramString_;
   };
-
 }
 #endif

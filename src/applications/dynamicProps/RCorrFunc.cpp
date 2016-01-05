@@ -41,6 +41,8 @@
  */
 
 #include "applications/dynamicProps/RCorrFunc.hpp"
+#include "utils/Revision.hpp"
+#include <sstream>
 
 namespace OpenMD {
   RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, 
@@ -62,10 +64,16 @@ namespace OpenMD {
 
     setCorrFuncType("Mean Square Displacement binned by Z");
     setOutputName(getPrefix(dumpFilename_) + ".rcorrZ");
+
     positions_.resize(nFrames_);
     zBins_.resize(nFrames_);
     nZBins_ = nZbins;
- 
+
+    std::stringstream params;
+    params << " nzbins = " << nZBins_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+
     histograms_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
     for (int i = 0; i < nTimeBins_; i++) {
@@ -93,11 +101,11 @@ namespace OpenMD {
     positions_[frame].push_back( sd->getPos() );
     return positions_[frame].size() - 1;
   }
+  
   RealType RCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
     return diff.lengthSquare();
   }
-
 
   void RCorrFuncZ::computeFrame(int istep) {
     hmat_ = currentSnapshot_->getHmat();
@@ -226,11 +234,16 @@ namespace OpenMD {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
-
-      ofs << "#" << getCorrFuncType() << "\n";
-      ofs << "#selection script1: \"" << selectionScript1_ ;
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      ofs << "#extra information: " << extra_ << "\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
       ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -252,8 +265,7 @@ namespace OpenMD {
     }
     ofs.close();    
   }
-
-
+  
   int RCorrFuncR::computeProperty1(int frame, StuntDouble* sd) {
     // get the radial vector from the frame's center of mass:
     Vector3d coord_t = sd->getPos() - sd->getCOM();
@@ -261,6 +273,7 @@ namespace OpenMD {
     positions_[frame].push_back( coord_t.length() );
     return positions_[frame].size() - 1;
   }
+  
   RealType RCorrFuncR::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType dr;
     dr  = positions_[frame2][id2] - positions_[frame1][id1];

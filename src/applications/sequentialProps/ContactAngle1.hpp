@@ -41,8 +41,6 @@
  */
 #ifndef APPLICATIONS_SEQUENTIALPROPS_CONTACTANGLE1_HPP
 #define APPLICATIONS_SEQUENTIALPROPS_CONTACTANGLE1_HPP
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 using namespace std;
@@ -78,20 +76,14 @@ namespace OpenMD {
   class ContactAngle1 : public SequentialAnalyzer{
   public:
     ContactAngle1(SimInfo* info, const std::string& filename, 
-                  const std::string& sele, RealType solidZ,
-                  RealType dropletRadius);
+                  const std::string& sele1, const std::string& sele2,
+                  RealType solidZ, RealType dropletRadius);
 
-    virtual void doFrame();
+    virtual void doFrame(int frame);
     
   private:
-
     RealType solidZ_;
-    RealType dropletRadius_;
-    
-    std::string selectionScript_;
-    SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;
-    
+    RealType dropletRadius_;       
   };
 }
 

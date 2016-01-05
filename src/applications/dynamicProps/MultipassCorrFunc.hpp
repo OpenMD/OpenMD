@@ -73,8 +73,8 @@ namespace OpenMD {
       corrFuncType_ = type;
     }
 
-    void setExtraInfo(const std::string& extra) {
-      extra_ = extra;
+    void setParameterString(const std::string& params) {
+      paramString_ = params;
     }
             
   protected:
@@ -118,7 +118,7 @@ namespace OpenMD {
     bool autoCorrFunc_;
 
     std::string corrFuncType_;
-    std::string extra_;
+    std::string paramString_;
 
     std::vector<std::vector<int> > sele1ToIndex_;
     std::vector<std::vector<int> > sele2ToIndex_;

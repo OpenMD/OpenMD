@@ -43,6 +43,8 @@
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
 #include "math/LegendrePolynomial.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
+#include <sstream>
 
 namespace OpenMD {
   LegendreCorrFuncZ::LegendreCorrFuncZ(SimInfo* info, 
@@ -56,6 +58,12 @@ namespace OpenMD {
 
       setCorrFuncType("Legendre Correlation Function of Z");
       setOutputName(getPrefix(dumpFilename_) + ".lcorrZ");
+      std::stringstream params;
+      params << " order = " << order
+             << ", nzbins = " << nZBins_;
+      const std::string paramString = params.str();
+      setParameterString( paramString );
+
       histogram_.resize(nTimeBins_);
       counts_.resize(nTimeBins_);
       for (int i = 0; i < nTimeBins_; i++) {
@@ -117,9 +125,8 @@ namespace OpenMD {
     }
   }
 
-
-
-  Vector3d LegendreCorrFuncZ::calcCorrVals(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  Vector3d LegendreCorrFuncZ::calcCorrVals(int frame1, int frame2,
+                                           StuntDouble* sd1, StuntDouble* sd2) {
     
     // The lab frame vector corresponding to the body-fixed 
     // z-axis is simply the second column of A.transpose()
@@ -146,10 +153,12 @@ namespace OpenMD {
   void LegendreCorrFuncZ::validateSelection(const SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
       if (!sd->isDirectionalAtom()) {
 	sprintf(painCave.errMsg,
-                "LegendreCorrFunc::validateSelection Error: selected atoms are not Directional\n");
+                "LegendreCorrFunc::validateSelection Error: "
+                "selected atoms are not Directional\n");
 	painCave.isFatal = 1;
 	simError();        
       }
@@ -161,8 +170,16 @@ namespace OpenMD {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#" << getCorrFuncType() << "\n";
       ofs << "#time\tPn(costheta_z)\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -177,7 +194,8 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "LegendreCorrFuncZ::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "LegendreCorrFuncZ::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }

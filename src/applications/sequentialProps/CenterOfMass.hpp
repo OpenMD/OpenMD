@@ -41,8 +41,6 @@
  */
 #ifndef APPLICATIONS_SEQUENTIALPROPS_CENTEROFMASS_HPP
 #define APPLICATIONS_SEQUENTIALPROPS_CENTEROFMASS_HPP
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 using namespace std;
@@ -51,17 +49,12 @@ namespace OpenMD {
   class CenterOfMass : public SequentialAnalyzer{
   public:
     CenterOfMass(SimInfo* info, const std::string& filename, 
-                    const std::string& sele);
+                 const std::string& sele1, const std::string& sele2);
 
-    virtual void doFrame();
-
+    virtual void doFrame(int frame);
     virtual void writeSequence();
     
   private:
-   
-    std::string selectionScript_;
-    SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;
     std::vector<Vector3d> values_;
   };
 }

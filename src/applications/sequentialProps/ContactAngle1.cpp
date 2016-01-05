@@ -42,6 +42,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <sstream>
 #include "applications/sequentialProps/ContactAngle1.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
@@ -52,41 +53,42 @@
 namespace OpenMD {
 
   ContactAngle1::ContactAngle1(SimInfo* info, const std::string& filename, 
-                               const std::string& sele, RealType solidZ,
+                               const std::string& sele1,
+                               const std::string& sele2, RealType solidZ,
                                RealType dropletRadius)
-  : SequentialAnalyzer(info, filename), solidZ_(solidZ),
-    dropletRadius_(dropletRadius), selectionScript_(sele), 
-    seleMan_(info), evaluator_(info) {
+    : SequentialAnalyzer(info, filename, sele1, sele2), solidZ_(solidZ),
+      dropletRadius_(dropletRadius) {
     
     setOutputName(getPrefix(filename) + ".ca1");
+
+    std::stringstream params;
+    params << " solid Z = " << solidZ_
+           << ", droplet radius = " << dropletRadius_;
     
-    evaluator_.loadScriptString(sele);
-    
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }            
+    const std::string paramString = params.str();
+    setParameterString( paramString );
   }
 
-  void ContactAngle1::doFrame() {
+  void ContactAngle1::doFrame(int frame) {
     StuntDouble* sd;
     int i;
     
-    if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-
-
+    
+    
     RealType mtot = 0.0;
     Vector3d com(V3Zero);
     RealType mass;
     
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {      
       mass = sd->getMass();
       mtot += mass;
       com += sd->getPos() * mass;
     }
-
+    
     com /= mtot;
 
     RealType dz = com.z() - solidZ_;

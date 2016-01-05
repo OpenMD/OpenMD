@@ -42,6 +42,7 @@
 
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "utils/PhysicalConstants.hpp"
+#include "utils/Revision.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 
@@ -77,66 +78,46 @@ namespace OpenMD {
        
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
 
-    //std::cerr << "times = " << time1 << " " << time2 << "\n";
-    //std::cerr << "vols = " << vol1 << " " << vol2 << "\n";
-
     int i;
     int j;
 
     StuntDouble* sd1;
 
     Mat3x3d actionTensor1(0.0);
-    //std::cerr << "at1 = " << actionTensor1 << "\n";
     Mat3x3d actionTensor2(0.0);
-    //std::cerr << "at2 = " << actionTensor2 << "\n";
 
     for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
          sd1 = seleMan1_.nextSelected(i)) {
-      //std::cerr << "found a SD\n";
+
       Vector3d r1 = sd1->getPos(frame1);
-      //std::cerr << "r1 = " << r1 << "\n";
       Vector3d v1 = sd1->getVel(frame1);
-      //std::cerr << "v1 = " << v1 << "\n";
       Vector3d r2 = sd1->getPos(frame2);
-      //std::cerr << "r2 = " << r2 << "\n";
       Vector3d v2 = sd1->getVel(frame2);
-      //std::cerr << "v2 = " << v2 << "\n";
-
+      
       RealType m = sd1->getMass();
-
-      //std::cerr << "m = " << m << "\n";
 
       actionTensor1 += m*outProduct(r1, v1);
       actionTensor2 += m*outProduct(r2, v2);
     }
 
     actionTensor1 /= vol1;
-    //std::cerr << "at1 = " << actionTensor1 << "\n";
     actionTensor2 /= vol2;
-    //std::cerr << "at2 = " << actionTensor2 << "\n";
 
-    Mat3x3d corrTensor(0.0);
-    //std::cerr << "ct = " << corrTensor << "\n";
+    Mat3x3d corrTensor(0.0);    
     RealType thisTerm;
 
     for (i = 0; i < 3; i++) {
-      for (j = 0; j < 3; j++) {
-       
-        //std::cerr << "i, j = " << i << " " << j << "\n"; 
+      for (j = 0; j < 3; j++) {      
         if (i == j) {
-          thisTerm = (actionTensor2(i, j) - actionTensor1(i, j) - avePress_ *(time2-time1));
-          std::cerr << "at1, at2 = " << actionTensor1(i,j) << " " << actionTensor2(i,j) << " p = " << avePress_ << "\n";
+          thisTerm = (actionTensor2(i, j) - actionTensor1(i, j)
+                      - avePress_ *(time2-time1));
         } else {
           thisTerm = (actionTensor2(i, j) - actionTensor1(i, j));
-        }
-        
-        //std::cerr << "thisTerm = " << thisTerm << "\n"; 
+        }        
         corrTensor(i, j) += thisTerm * thisTerm;
       }
     }
 
-    //std::cerr << "ct = " << corrTensor << "\n";
-    //std::cerr << "hist = " << histogram_[timeBin] << "\n";
     histogram_[timeBin] += corrTensor;    
     count_[timeBin]++;    
     
@@ -149,7 +130,6 @@ namespace OpenMD {
       }
     }
   }
-
 
   void StressCorrFunc::preCorrelate() {
     // Fill the histogram with empty 3x3 matrices:
@@ -168,7 +148,6 @@ namespace OpenMD {
     // dump files can be enormous, so read them in block-by-block:
     int nblocks = bsMan_->getNBlocks();
     for (int i = 0; i < nblocks; ++i) {
-      std::cerr << "block = " << i << "\n";
       bsMan_->loadBlock(i);
       assert(bsMan_->isBlockActive(i));      
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
@@ -192,7 +171,6 @@ namespace OpenMD {
 
     avePress_ = pSum / ( PhysicalConstants::pressureConvert * (RealType)nsamp);
     aveVol_ = vSum / (RealType)nsamp;
-    std::cout << "pAve = " << avePress_ << " vAve = " << aveVol_ << "\n";
   }   
 
 
@@ -200,8 +178,17 @@ namespace OpenMD {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
+      
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#" << getCorrFuncType() << "\n";
       ofs << "#time\tcorrTensor\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -219,12 +206,11 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "StressCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "StressCorrFunc::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }
-
     ofs.close();    
   }
-
 }

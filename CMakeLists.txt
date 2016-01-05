@@ -1,6 +1,6 @@
 # Top level cmake script for OpenMD. 
 project(OpenMD CXX)
-cmake_minimum_required(VERSION 2.8.5)
+cmake_minimum_required(VERSION 2.8.11)
 
 # SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
@@ -92,6 +92,22 @@ if(GIT_FOUND)
 else()
   SET(GIT_SHA1 Release)
 endif()
+
+macro(LONG_TODAY RESULT)
+  set(MONTHS ";Jan;Feb;Mar;Apr;May;Jun;Jul;Aug;Sep;Oct;Nov;Dec")
+  set(DAYS_OF_WEEK "Sun;Mon;Tue;Wed;Thu;Fri;Sat")
+
+  string(TIMESTAMP DOW "%w")
+  list(GET DAYS_OF_WEEK "${DOW}" DOW)
+  string(TIMESTAMP M "%m")
+  list(GET MONTHS "${M}" MON)
+  string(TIMESTAMP D "%d")
+  string(TIMESTAMP TIME "%H:%M:%S")
+  string(TIMESTAMP Y "%Y")
+  set(${RESULT} "${DOW} ${MON} ${D} ${TIME} ${Y}")
+endmacro()
+
+LONG_TODAY(BUILD_DATE)
 
 find_package(GenGetOpt REQUIRED)
 
@@ -643,6 +659,7 @@ set (SEQUENTIALPROPSSOURCE
 src/applications/sequentialProps/CenterOfMass.cpp
 src/applications/sequentialProps/ContactAngle1.cpp
 src/applications/sequentialProps/ContactAngle2.cpp
+src/applications/sequentialProps/GCNSeq.cpp
 src/applications/sequentialProps/SequentialAnalyzer.cpp
 src/applications/sequentialProps/SequentialProps.cpp
 ${SEQUENTIALPROPSCMD}
@@ -910,7 +927,8 @@ INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
 
 message( STATUS)
 message( STATUS "========== OpenMD Build Information ==========")
-message( STATUS "Current revision ........... = ${SVN_REV}")
+message( STATUS "Current revision ........... = ${GIT_SHA1}")
+message( STATUS "Current date/time .......... = ${BUILD_DATE}")
 message( STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
 message( STATUS "==============================================")
 message( STATUS "CMAKE_BUILD_TYPE ........... = ${CMAKE_BUILD_TYPE}")

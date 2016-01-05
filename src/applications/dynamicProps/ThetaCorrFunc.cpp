@@ -44,18 +44,22 @@
 
 
 namespace OpenMD {
-  ThetaCorrFunc::ThetaCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition, memSize){
+  ThetaCorrFunc::ThetaCorrFunc(SimInfo* info, const std::string& filename,
+                               const std::string& sele1,
+                               const std::string& sele2, long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2,
+                           DataStorage::dslPosition, memSize){
 
       setCorrFuncType("ThetaCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".tcorr");
 
-// Turn on COM calculation in block snapshot
+      // Turn on COM calculation in block snapshot
       bool ncp = true;
       bsMan_->needCOMprops(ncp);
     }
 
-  RealType ThetaCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
+  RealType ThetaCorrFunc::calcCorrVal(int frame1, int frame2,
+                                      StuntDouble* sd1, StuntDouble* sd2) {
     RealType r0;
     RealType rt;
     RealType csth;
@@ -76,5 +80,4 @@ namespace OpenMD {
     csth = dot(coord_t0,coord_t)/(r0*rt);
     return csth;
   }
-
 }

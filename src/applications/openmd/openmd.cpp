@@ -77,17 +77,8 @@ int main(int argc, char* argv[]){
 #endif
    
   initSimError();           // the error handler
-  //srand48( 1337 );          // the random number generator.
-
-  std::string rev(g_REVISION, strnlen(g_REVISION, 40));
-
-  std::string revision;
-
-  if (!rev.empty()) {
-     revision.assign("  Revision: " + rev );
-  }
-
-  revision.resize(53,' ');
+  
+  Revision r;
 
 #ifdef IS_MPI
   if( worldRank == 0 ){
@@ -98,12 +89,12 @@ int main(int argc, char* argv[]){
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
       "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
       "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2015 by the     |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2016 by the     |\n"<<
       "  |     /_/                                   University of Notre Dame.      |\n"<<
       "  |           http://openmd.org                                              |\n"<<
       "  |                                                                          |\n"<<
-      "  |    Version " << OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR
-              << revision << "      |\n"<<
+      "  |   " << r.getFullRevision() << "       |\n" <<
+      "  |               " << r.getBuildDate() <<  "                       |\n" <<
       "  |                                                                          |\n"<<
       "  | OpenMD is an OpenScience project.  All source code is available for any  |\n"<<
       "  | use whatsoever under a BSD-style license.                                |\n"<<

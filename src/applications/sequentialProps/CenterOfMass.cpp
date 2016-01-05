@@ -44,47 +44,40 @@
 #include <functional>
 #include "applications/sequentialProps/CenterOfMass.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
 namespace OpenMD {
-
+  
   CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename, 
-                                   const std::string& sele)
-    : SequentialAnalyzer(info, filename), selectionScript_(sele), 
-      seleMan_(info), evaluator_(info) {
+                             const std::string& sele1, const std::string& sele2)
+    : SequentialAnalyzer(info, filename, sele1, sele2) {
     
-    setOutputName(getPrefix(filename) + ".dens");
-    
-    evaluator_.loadScriptString(sele);
-    
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }            
+    setOutputName(getPrefix(filename) + ".dens");    
   }
-
-  void CenterOfMass::doFrame() {
+  
+  void CenterOfMass::doFrame(int frame) {
     StuntDouble* sd;
     int i;
     
-    if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-
-
+        
     RealType mtot = 0.0;
     Vector3d com(V3Zero);
     RealType mass;
     
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {      
       mass = sd->getMass();
       mtot += mass;
       com += sd->getPos() * mass;
     }
-
+    
     com /= mtot;
-        
+    
     values_.push_back( com );
   }
   
@@ -92,11 +85,19 @@ namespace OpenMD {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     
     if (ofs.is_open()) {
-
-      ofs << "#" << getSequenceType() << "\n";
-      ofs << "#extra information: " << extra_ << "\n";
+      
+      Revision r;
+      
+      ofs << "# " << getSequenceType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      
       ofs << "#time\tvalue\n";
-
+      
       for (unsigned int i = 0; i < times_.size(); ++i) {
         ofs << times_[i]
             << "\t" << values_[i].x()
@@ -107,7 +108,7 @@ namespace OpenMD {
       
     } else {
       sprintf(painCave.errMsg,
-              "CenterOfMass::writeSequence Error: fail to open %s\n", 
+              "CenterOfMass::writeSequence Error: failed to open %s\n", 
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();        
@@ -115,7 +116,4 @@ namespace OpenMD {
     
     ofs.close();    
   }
-
 }
-
-

@@ -44,11 +44,36 @@
 #include <functional>
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+
 namespace OpenMD {
 
+  SequentialAnalyzer::SequentialAnalyzer(SimInfo* info,
+                                         const std::string& filename,
+                                         const std::string& sele1,
+                                         const std::string& sele2) : 
+    info_(info), currentSnapshot_(NULL), dumpFilename_(filename),
+    seleMan1_(info), selectionScript1_(sele1), evaluator1_(info),
+    seleMan2_(info), selectionScript2_(sele1), evaluator2_(info),
+    step_(1)  {
+
+    paramString_.clear();
+    
+    evaluator1_.loadScriptString(selectionScript1_);
+    evaluator2_.loadScriptString(selectionScript2_);
+    
+    //if selections are static, we only need to evaluate them once
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+    if (!evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }
+  }
+  
   void SequentialAnalyzer::doSequence() {
 
     preSequence();
@@ -63,8 +88,8 @@ namespace OpenMD {
   
     storageLayout_ = info_->getStorageLayout();
 
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (frame_ = 0; frame_ < nFrames; frame_ += step_) {
+      reader.readFrame(frame_);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       times_.push_back( currentSnapshot_->getTime() );
       
@@ -90,9 +115,15 @@ namespace OpenMD {
             rb->updateAtomVel();
           }
         }      
-      }    
+      }
+      if (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      }
+      if (evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      }
             
-      doFrame();
+      doFrame(frame_);
     }   
 
     postSequence();
@@ -103,9 +134,17 @@ namespace OpenMD {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
 
     if (ofs.is_open()) {
-
-      ofs << "#" << getSequenceType() << "\n";
-      ofs << "#extra information: " << extra_ << "\n";
+      
+      Revision r;
+      
+      ofs << "# " << getSequenceType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      
       ofs << "#time\tvalue\n";
 
       for (unsigned int i = 0; i < times_.size(); ++i) {
@@ -114,7 +153,7 @@ namespace OpenMD {
       
     } else {
       sprintf(painCave.errMsg,
-              "SequentialAnalyzer::writeSequence Error: fail to open %s\n", 
+              "SequentialAnalyzer::writeSequence Error: failed to open %s\n", 
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();        

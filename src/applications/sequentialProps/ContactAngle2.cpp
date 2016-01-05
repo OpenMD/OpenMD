@@ -42,6 +42,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <sstream>
 #include "applications/sequentialProps/ContactAngle2.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
@@ -53,26 +54,32 @@
 namespace OpenMD {
   
   ContactAngle2::ContactAngle2(SimInfo* info, const std::string& filename, 
-                               const std::string& sele, RealType solidZ,
+                               const std::string& sele1,
+                               const std::string& sele2, RealType solidZ,
                                RealType centroidX, RealType centroidY,
                                RealType threshDens, RealType bufferLength,
                                int nrbins, int nzbins)
-    : SequentialAnalyzer(info, filename), solidZ_(solidZ),
+    : SequentialAnalyzer(info, filename, sele1, sele2), solidZ_(solidZ),
       centroidX_(centroidX), centroidY_(centroidY),
       threshDens_(threshDens), bufferLength_(bufferLength), nRBins_(nrbins), 
-      nZBins_(nzbins), selectionScript_(sele), seleMan_(info), 
-      evaluator_(info) {
+      nZBins_(nzbins) {
     
     setOutputName(getPrefix(filename) + ".ca2");
-    
-    evaluator_.loadScriptString(sele);
-    
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }            
+
+    std::stringstream params;
+    params << " referenceZ = " << solidZ_
+           << ", centroid = (" << centroidX_ << ", " << centroidY_ << ")"
+           << ", threshDens = " << threshDens_
+           << ", bufferLength = " << bufferLength_
+           << ", nbins = " << nRBins_
+           << ", nbins_z = " << nZBins_;
+
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+
   }
 
-  void ContactAngle2::doFrame() {
+  void ContactAngle2::doFrame(int frame) {
     StuntDouble* sd;
     int i;
 
@@ -92,24 +99,10 @@ namespace OpenMD {
       std::fill(histo[i].begin(), histo[i].end(), 0.0);
     }      
         
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
     
-
-    // RealType mtot = 0.0;
-    // Vector3d com(V3Zero);
-    // RealType mass;
-    
-    // for (sd = seleMan_.beginSelected(i); sd != NULL;
-    //      sd = seleMan_.nextSelected(i)) {      
-    //   mass = sd->getMass();
-    //   mtot += mass;
-    //   com += sd->getPos() * mass;
-    // }
-
-    // com /= mtot;
-
     Vector3d com(centroidX_, centroidY_, solidZ_);
 
     // now that we have the centroid, we can make cylindrical density maps
@@ -117,8 +110,8 @@ namespace OpenMD {
     RealType r;
     RealType z;
     
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {      
       pos = sd->getPos() - com;
 
       // r goes from zero upwards
@@ -129,7 +122,8 @@ namespace OpenMD {
       int whichRBin = int(r / dr);
       int whichZBin = int( (zLen/2.0 + z) / dz);
       
-      if ((whichRBin < int(nRBins_)) && (whichZBin >= 0) && (whichZBin < int(nZBins_))) {
+      if ((whichRBin < int(nRBins_)) && (whichZBin >= 0)
+          && (whichZBin < int(nZBins_))) {
         histo[whichRBin][whichZBin] += sd->getMass();
       }
       
@@ -296,8 +290,7 @@ namespace OpenMD {
       ca = 90.0 + asin(zCen/rDrop)*(180.0/M_PI);
     }
 
-    values_.push_back( ca );
-    
+    values_.push_back( ca );    
   }   
 }
 

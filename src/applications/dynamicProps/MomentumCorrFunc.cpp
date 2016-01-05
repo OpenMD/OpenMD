@@ -52,27 +52,28 @@
 
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
 #include "utils/PhysicalConstants.hpp"
+#include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
   // We need all of the positions, velocities, etc. so that we can
   // recalculate pressures and actions on the fly:
-  MomentumCorrFunc::MomentumCorrFunc(SimInfo* info, const std::string& filename, 
-				 const std::string& sele1, 
-				 const std::string& sele2,
-                                 long long int memSize)
+  MomentumCorrFunc::MomentumCorrFunc(SimInfo* info, const std::string& filename,
+                                     const std::string& sele1, 
+                                     const std::string& sele2,
+                                     long long int memSize)
     : FrameTimeCorrFunc(info, filename, sele1, sele2, 
 			DataStorage::dslPosition | 
 			DataStorage::dslVelocity,
 			memSize){
-
-      setCorrFuncType("MomentumCorrFunc");
-      setOutputName(getPrefix(dumpFilename_) + ".momcorr");
-      histogram_.resize(nTimeBins_); 
-      count_.resize(nTimeBins_);
-    }
-
+    
+    setCorrFuncType("MomentumCorrFunc");
+    setOutputName(getPrefix(dumpFilename_) + ".momcorr");
+    histogram_.resize(nTimeBins_); 
+    count_.resize(nTimeBins_);
+  }
+  
   void MomentumCorrFunc::correlateFrames(int frame1, int frame2) {
     SimInfo::MoleculeIterator mi1;
     SimInfo::MoleculeIterator mi2;
@@ -152,14 +153,11 @@ namespace OpenMD {
                                            
             thisAtom2++;                    
           }
-        }
-        
+        }        
         thisAtom1++;
       } 
-    }
-    
-    count_[timeBin]++;
-    
+    }    
+    count_[timeBin]++;    
   }
 
   void MomentumCorrFunc::postCorrelate() {
@@ -177,14 +175,20 @@ namespace OpenMD {
     std::fill(count_.begin(), count_.end(), 0);
   }
   
-
-
   void MomentumCorrFunc::writeCorrelate() {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#" << getCorrFuncType() << "\n";
       ofs << "#time\tcorrTensor\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -202,14 +206,12 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "MomentumCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "MomentumCorrFunc::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }
-
     ofs.close();    
-    
   }
-
 }
 

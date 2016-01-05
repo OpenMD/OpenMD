@@ -27,7 +27,10 @@ option  "referenceZ"    z       "Reference z-height of solid surface" double no
 option  "dropletR"      r       "Droplet radius in angstroms"  double no
 option  "threshDens"    -       "Threshold Density in g/cm^3"  double no
 option  "bufferLength"  -       "Buffer length in angstroms"   double no
+option  "rcut"          -       "cutoff radius (rcut)"         double no
 defgroup "sequentialProps" groupdesc=" an option of this group is required" yes
 groupoption "com"       c       "selection center of mass" group="sequentialProps"
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
 groupoption "ca2"       -       "contact angle of selection (using density profile)" group="sequentialProps"
+groupoption "gcn"       -       "Generalized Coordinate Number" group="sequentialProps"
+

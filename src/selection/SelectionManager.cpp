@@ -58,7 +58,7 @@ namespace OpenMD {
     torsions_.resize(nObjects_[TORSION]);
     inversions_.resize(nObjects_[INVERSION]);
     molecules_.resize(nObjects_[MOLECULE]);
-    
+
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
     Molecule::RigidBodyIterator rbIter;

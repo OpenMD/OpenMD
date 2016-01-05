@@ -71,9 +71,11 @@ namespace OpenMD {
     int j;
     StuntDouble* sd1;
     StuntDouble* sd2;
-    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; sd1 = seleMan1_.nextSelected(i)) {
+    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
+         sd1 = seleMan1_.nextSelected(i)) {
 
-      for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
+      for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL;
+           sd2 = seleMan2_.nextSelected(j)) {
 	RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
 	histogram_[timeBin] += corrVal;    
       }            

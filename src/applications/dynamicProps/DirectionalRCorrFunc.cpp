@@ -41,10 +41,16 @@
  */
 
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
-  DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition, memSize){
+  DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, 
+                                             const std::string& filename,
+                                             const std::string& sele1,
+                                             const std::string& sele2,
+                                             long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2,
+                           DataStorage::dslPosition, memSize){
 
       setCorrFuncType("DirectionalRCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".drcorr");
@@ -96,7 +102,9 @@ namespace OpenMD {
   }
 
 
-  Vector3d DirectionalRCorrFunc::calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
+  Vector3d DirectionalRCorrFunc::calcCorrVals(int frame1, int frame2,
+                                              StuntDouble* sd1,
+                                              StuntDouble* sd2) {
     Vector3d r1 = sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
 
@@ -119,8 +127,15 @@ namespace OpenMD {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
-
-      ofs << "#" << getCorrFuncType() << "\n";
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tr2\trparallel\trperpendicular\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -132,13 +147,12 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "DirectionalRCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "DirectionalRCorrFunc::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }
     
     ofs.close();    
   }
-
-
 }

@@ -43,19 +43,29 @@
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
 #include "math/LegendrePolynomial.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
+#include <sstream>
 
 namespace OpenMD {
-  LegendreCorrFunc::LegendreCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat, memSize){
+  LegendreCorrFunc::LegendreCorrFunc(SimInfo* info,
+                                     const std::string& filename,
+                                     const std::string& sele1,
+                                     const std::string& sele2,
+                                     int order, long long int memSize)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat,
+                           memSize){
 
       setCorrFuncType("Legendre Correlation Function");
       setOutputName(getPrefix(dumpFilename_) + ".lcorr");
+
+      std::stringstream params;
+      params << " order = " << order;
+      const std::string paramString = params.str();
+      setParameterString( paramString );
+
       histogram_.resize(nTimeBins_); 
       count_.resize(nTimeBins_);
       nSelected_ =   seleMan1_.getSelectionCount();  
-      std::cout << "sele1 = " << sele1 << "\n";
-      std::cout << "sele2 = " << sele2 << "\n";
-      std::cout << "nSelected = " << nSelected_ << "\n";
       assert(  nSelected_ == seleMan2_.getSelectionCount());
 
       LegendrePolynomial polynomial(order);
@@ -105,7 +115,8 @@ namespace OpenMD {
 
 
 
-  Vector3d LegendreCorrFunc::calcCorrVals(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  Vector3d LegendreCorrFunc::calcCorrVals(int frame1, int frame2,
+                                          StuntDouble* sd1,  StuntDouble* sd2) {
     
     // The lab frame vector corresponding to the body-fixed 
     // z-axis is simply the second column of A.transpose()
@@ -132,10 +143,12 @@ namespace OpenMD {
   void LegendreCorrFunc::validateSelection(const SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
       if (!sd->isDirectionalAtom()) {
 	sprintf(painCave.errMsg,
-                "LegendreCorrFunc::validateSelection Error: selected atoms are not Directional\n");
+                "LegendreCorrFunc::validateSelection Error: "
+                "selected atoms are not Directional\n");
 	painCave.isFatal = 1;
 	simError();        
       }
@@ -147,8 +160,16 @@ namespace OpenMD {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
-
-      ofs << "#" << getCorrFuncType() << "\n";
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      
       ofs << "#time\tPn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -160,7 +181,8 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "LegendreCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "LegendreCorrFunc::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }

@@ -44,22 +44,24 @@
 
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "utils/PhysicalConstants.hpp"
+#include "utils/Revision.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
   // Just need the dipole of the system for each frame
-  SystemDipoleCorrFunc::SystemDipoleCorrFunc(SimInfo* info, const std::string& filename, 
-				 const std::string& sele1, 
-				 const std::string& sele2,
-                                 long long int memSize)
+  SystemDipoleCorrFunc::SystemDipoleCorrFunc(SimInfo* info,
+                                             const std::string& filename, 
+                                             const std::string& sele1, 
+                                             const std::string& sele2,
+                                             long long int memSize)
     : FrameTimeCorrFunc(info, filename, sele1, sele2, 
 			DataStorage::dslPosition | 
 			DataStorage::dslVelocity |
 			DataStorage::dslParticlePot,
 			memSize){
-
+    
       setCorrFuncType("SystemDipoleCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".sysdipcorr");
       histogram_.resize(nTimeBins_); 
@@ -108,8 +110,16 @@ namespace OpenMD {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#" << getCorrFuncType() << "\n";
       ofs << "#time\tnormalizedTau\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -119,13 +129,11 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "SystemDipoleCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "SystemDipoleCorrFunc::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }
-
     ofs.close();    
-    
   }
-
 }

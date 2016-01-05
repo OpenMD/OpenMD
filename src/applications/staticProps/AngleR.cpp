@@ -41,35 +41,45 @@
  */
 
 /* Calculates Angle(R) for DirectionalAtoms*/
+
 #include <algorithm>
 #include <fstream>
+#include <sstream>
+#include <math.h>
+
 #include "applications/staticProps/AngleR.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/Thermo.hpp"
-#include <math.h>
 
 namespace OpenMD {
 
-     
-  AngleR::AngleR(SimInfo* info, const std::string& filename, const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
-    
-    
+  AngleR::AngleR(SimInfo* info, const std::string& filename,
+                 const std::string& sele, RealType len, int nrbins)
+    : StaticAnalyser(info, filename), selectionScript_(sele),
+      evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
+        
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
-    
+        
     deltaR_ = len_ /nRBins_;
     
     histogram_.resize(nRBins_);
     count_.resize(nRBins_);
     avgAngleR_.resize(nRBins_);
+    
+    setAnalysisType("radial density function Angle(r)");
     setOutputName(getPrefix(filename) + ".AngleR");
+    std::stringstream params;
+    params << " len = " << len_
+           << ", nrbins = " << nRBins_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
   }
   
 
@@ -139,7 +149,7 @@ namespace OpenMD {
       else 
 	avgAngleR_[i] = 0.0;
 
-    std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i] << "\n";  
+      std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i] << "\n";  
     }
 
   }
@@ -147,23 +157,33 @@ namespace OpenMD {
  
 
   void AngleR::writeAngleR() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#radial density function Angle(r)\n";
-      rdfStream << "#r\tcorrValue\n";
+    std::ofstream ofs(outputFilename_.c_str());
+    if (ofs.is_open()) {
+      
+      Revision rev;
+      
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << rev.getFullRevision() << "\n";
+      ofs << "# " << rev.getBuildDate() << "\n";
+      ofs << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
+      ofs << "#r\tcorrValue\n";
       for (unsigned int i = 0; i < avgAngleR_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
-	rdfStream << r << "\t" << avgAngleR_[i] << "\n";
+	ofs << r << "\t" << avgAngleR_[i] << "\n";
       }
         
     } else {
 
-      sprintf(painCave.errMsg, "AngleR: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "AngleR: unable to open %s\n",
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }
 
-    rdfStream.close();
+    ofs.close();
   }
 
 }

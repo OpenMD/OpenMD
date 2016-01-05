@@ -46,6 +46,7 @@
  
 #include "applications/staticProps/BondAngleDistribution.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
@@ -59,7 +60,8 @@ namespace OpenMD {
                                                double rCut, int nbins) 
     : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info), 
       evaluator_(info) {
-    
+
+    setAnalysisType("Bond Angle Distribution");
     setOutputName(getPrefix(filename) + ".bad");
     
     evaluator_.loadScriptString(sele);
@@ -67,10 +69,16 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
     
-    // Set up cutoff radius and order of the Legendre Polynomial:
+    // Set up cutoff radius:
 
     rCut_ = rCut;
     nBins_ = nbins;
+
+    std::stringstream params;
+    params << " rcut = " << rCut_
+           << ", nbins = " << nBins_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
 
     // Theta can take values from 0 to 180    
 
@@ -186,40 +194,47 @@ namespace OpenMD {
               histogram_[whichBin] += 2;
             }
           }           
-	      }
+        }
       }
     }
-    
     
     writeBondAngleDistribution();    
   }
   
 
   void BondAngleDistribution::writeBondAngleDistribution() {
-    
-    std::ofstream osbad(getOutputFileName().c_str());
-
 
     RealType norm = (RealType)nTotBonds_*((RealType)nTotBonds_-1.0)/2.0;
-    if (osbad.is_open()) {
+    
+    std::ofstream ofs(getOutputFileName().c_str());
+
+    if (ofs.is_open()) {
+            
+      Revision r;
       
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script: \"" << selectionScript_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Thetaval = i * deltaTheta_;               
-        osbad << Thetaval;        
-        osbad << "\t" << (RealType)histogram_[i]/norm/frameCounter_;
-        
-        osbad << "\n";
+        ofs << Thetaval;        
+        ofs << "\t" << (RealType)histogram_[i]/norm/frameCounter_;        
+        ofs << "\n";
       }
-
-      osbad.close();
-
+      
+      ofs.close();
+      
     } else {
       sprintf(painCave.errMsg, "BondAngleDistribution: unable to open %s\n", 
               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();  
     }
-       
+    
   }
-    }
+}

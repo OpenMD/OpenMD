@@ -46,7 +46,7 @@ namespace OpenMD {
 
   InteractionTimeCorrFunc::InteractionTimeCorrFunc(SimInfo * info, 
                                              const std::string & filename, 
-					     const std :: string & sele1, 
+					     const std::string & sele1, 
                                              int storageLayout,
                                              long long int memSize) 
     : TimeCorrFunc(info, filename, sele1, sele1, storageLayout, memSize){

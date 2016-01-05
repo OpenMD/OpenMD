@@ -42,7 +42,9 @@
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
+
 using namespace std;
 namespace OpenMD {
 
@@ -236,11 +238,16 @@ namespace OpenMD {
     ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
-
-      ofs << "#" << getCorrFuncType() << "\n";
-      ofs << "#selection script1: \"" << selectionScript1_ ;
+      
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      ofs << "#extra information: " << extra_ << "\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {

@@ -39,52 +39,59 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+#ifndef APPLICATIONS_STATICPROPS_GCNSEQ_HPP
+#define APPLICATIONS_STATICPROPS_GCNSEQ_HPP
 
-#include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "primitives/Atom.hpp"
-#include "types/MultipoleAdapter.hpp"
-#include "utils/simError.h"
+#include <string>
+#include <vector>
+#include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 namespace OpenMD {
-  DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
-                                 const std::string& sele1,
-                                 const std::string& sele2,
-                                 long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2,
-                           DataStorage::dslAmat | DataStorage::dslDipole,
-                           memSize) {
-      setCorrFuncType("Dipole Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".dcorr");
-  }
-  
-  RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2,
-                                       StuntDouble* sd1,  StuntDouble* sd2) {
+
+  /**
+   * @class GCNSeq
+   * @brief Generalized Coordinate Number Sequence
+   *
+   * Computes a frame-by-frame sequence of distributions of
+   * generalized coordinate numbers as described in:
+   *
+   *   "Finding optimal surface sites on heterogeneous catalysts by
+   *    counting nearest neighbors," by F. Calle-Vallejo et al.,
+   *    Science 350(6257) pp. 185-189 (2015).
+   *    http://dx.doi.org/10.1126/science.aab3501
+   *
+   * Note that extra parameters mussed be declared: 
+   *
+   *   rCut = cutoff radius for finding lists of nearest neighbors
+   *   sele1 = selection of StuntDoubles used for the GCN distribution
+   *   sele2 = selection of StuntDoubles used for nearest neighbor computation
+   */
+  class GCNSeq : public SequentialAnalyzer {
     
-    Vector3d v1 = sd1->getDipole(frame1);
-    Vector3d v2 = sd2->getDipole(frame2);
+  public:
+    GCNSeq(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2, RealType rCut, int bins);
 
-    return dot(v1, v2)/(v1.length()*v2.length());
-  }
+    virtual ~GCNSeq();
+    virtual void doFrame(int istep);
+    virtual void writeSequence();
+    
+  private:
 
+    int selectionCount1_;
+    int selectionCount2_;
+    int bins_;
+    bool usePBC_;
 
-  void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; 
-         sd = seleMan1_.nextSelected(i)) {
+    string filename_;
+    
+    int nnMax_;
+    RealType rCut_;
+    RealType delta_;
+    
+    std::vector<int> count_;
+    std::vector<std::vector<RealType> >  histogram_;
+  };
 
-      AtomType* at = static_cast<Atom*>(sd)->getAtomType();
-      MultipoleAdapter ma = MultipoleAdapter(at);
-
-      if (!ma.isDipole()) {
-	sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
-                "\tnot have a dipole\n");
-	painCave.isFatal = 1;
-	simError();        
-      }
-    }    
-  }
 }
-
-
+#endif

@@ -43,9 +43,11 @@
  *  @version $Id$
  *
  */
- 
+
+#include <sstream>
 #include "applications/staticProps/BondOrderParameter.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
@@ -61,6 +63,7 @@ namespace OpenMD {
     : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info),
       evaluator_(info) {
     
+    setAnalysisType("Bond Order Parameters");
     setOutputName(getPrefix(filename) + ".bo");
 
     evaluator_.loadScriptString(sele);
@@ -72,6 +75,13 @@ namespace OpenMD {
 
     rCut_ = rCut;
     nBins_ = nbins;
+    
+    std::stringstream params;
+    params << " rcut = " << rCut_
+           << ", nbins = " << nBins_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+
     Qcount_.resize(lMax_+1);
     Wcount_.resize(lMax_+1);
 
@@ -362,7 +372,8 @@ namespace OpenMD {
         Wcount_[l]++;      
       } else {
         sprintf( painCave.errMsg,
-                 "Re[w_hat] value (%lf) outside reasonable range\n", real(what[l]));
+                 "Re[w_hat] value (%lf) outside reasonable range\n",
+                 real(what[l]));
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();  
@@ -374,14 +385,18 @@ namespace OpenMD {
 
   void BondOrderParameter::writeOrderParameter(std::vector<RealType> Q, 
                                                std::vector<ComplexType> What) {
-    
+    Revision rev; 
     std::ofstream osq((getOutputFileName() + "q").c_str());
 
     if (osq.is_open()) {
+
+      osq << "# " << getAnalysisType() << "\n";
+      osq << "# OpenMD " << rev.getFullRevision() << "\n";
+      osq << "# " << rev.getBuildDate() << "\n";
+      osq << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        osq << "# parameters: " << paramString_ << "\n";
       
-      osq << "# Bond Order Parameters\n";
-      osq << "# selection: (" << selectionScript_ << ")\n";
-      osq << "# \n";
       for (int l = 0; l <= lMax_; l++) {
         osq << "# <Q_" << l << ">: " << Q[l] << "\n";
       }
@@ -391,7 +406,8 @@ namespace OpenMD {
         osq << Qval;
         for (int l = 0; l <= lMax_; l++) {
 
-          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)]/(RealType)Qcount_[l]/deltaQ_;
+          osq << "\t"
+              << (RealType)Q_histogram_[std::make_pair(i,l)]/(RealType)Qcount_[l]/deltaQ_;
         }
         osq << "\n";
       }
@@ -408,11 +424,16 @@ namespace OpenMD {
     std::ofstream osw((getOutputFileName() + "w").c_str());
 
     if (osw.is_open()) {
-      osw << "# Bond Order Parameters\n";
-      osw << "# selection: (" << selectionScript_ << ")\n";
-      osw << "# \n";
+      osq << "# " << getAnalysisType() << "\n";
+      osq << "# OpenMD " << rev.getFullRevision() << "\n";
+      osq << "# " << rev.getBuildDate() << "\n";
+      osq << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        osq << "# parameters: " << paramString_ << "\n";
+
       for (int l = 0; l <= lMax_; l++) {
-        osw << "# <W_" << l << ">: " << real(What[l]) << "\t" << imag(What[l]) << "\n";
+        osw << "# <W_" << l << ">: " << real(What[l]) << "\t"
+            << imag(What[l]) << "\n";
       }
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {

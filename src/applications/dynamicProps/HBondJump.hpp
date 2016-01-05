@@ -63,7 +63,6 @@ namespace OpenMD {
     std::vector<std::vector<int> > DonorToGID_;
     std::vector<std::vector<int> > acceptor_;
     std::vector<std::vector<int> > acceptorStartFrame_;
-    std::vector<int> count_;
     std::vector<std::vector<Vector3d> > rOO_;
     std::vector<std::vector<RealType> > rOHprojection_;
     

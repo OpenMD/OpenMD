@@ -77,8 +77,8 @@ namespace OpenMD {
       corrFuncType_ = type;
     }
 
-    void setExtraInfo(const std::string& extra) {
-      extra_ = extra;
+    void setParameterString(const std::string& params) {
+      paramString_ = params;
     }
             
   protected:
@@ -97,8 +97,18 @@ namespace OpenMD {
     int storageLayout_;
     long long int memSize_;
     std::string dumpFilename_;        
+
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;          
+
+    std::string selectionScript1_;
+    std::string selectionScript2_;
+
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+ 
+    std::string corrFuncType_;
+    std::string paramString_;
 
     BlockSnapshotManager* bsMan_;       
         
@@ -112,14 +122,7 @@ namespace OpenMD {
     virtual void validateSelection(const SelectionManager& seleMan) {}
 
 
-    std::string selectionScript1_;
-    std::string selectionScript2_;
         
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
- 
-    std::string corrFuncType_;
-    std::string extra_;
   };
 
 }

@@ -42,20 +42,33 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "applications/staticProps/GCN.hpp"
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
 
   GCN::GCN(SimInfo* info, const std::string& filename,
            const std::string& sele1, const std::string& sele2,
            RealType rCut, int bins):
-    StaticAnalyser(info, filename),
+    StaticAnalyser(info, filename), rCut_(rCut), bins_(bins),
     sele1_(sele1), seleMan1_(info), evaluator1_(info),
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
-    
+
+    setAnalysisType("Generalized Coordination Number Distribution");
     setOutputName(getPrefix(filename) + ".gcn");
+    nnMax_ = 12;
+    RealType binMax_ = nnMax_ * 1.5;
+    delta_ = binMax_ / bins_;
+    
+    std::stringstream params;
+    params << " rcut = " << rCut_
+           << ", nbins = " << bins_
+           << ", max neighbors = " << nnMax_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -67,16 +80,6 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
       selectionCount2_ = seleMan2_.getSelectionCount();
     }
-
-    bins_ = bins; //Treat bins as division, bins per single integer
-
-    setOutputName(getPrefix(filename) + ".gcn");
-
-    rCut_ = rCut;
-    nnMax_ = 12;
-    // Overestimate the histogram size (still protected in process
-    // function below):
-    hBins_ = bins_ * (nnMax_ * 1.5);
   }
 
   GCN::~GCN() {
@@ -96,25 +99,25 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
     
     int iterator1;
     int iterator2;
     unsigned int mapIndex1(0);
     unsigned int mapIndex2(0);
     unsigned int tempIndex(0);
-    unsigned int binIndex(0);
+    unsigned int whichBin(0);
     RealType gcn(0.0);
-    RealType binValue(0.0);
     Vector3d pos1;
     Vector3d pos2;
     Vector3d diff;
     RealType distance;
 
-    std::ofstream os(getOutputFileName().c_str());
-    os << "#Generalized Coordinate Number\n";
-    
+    histogram_.clear();
+    histogram_.resize(bins_, 0.0);
+
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+
     //First have to calculate lists of nearest neighbors (listNN_):
     
     for(int istep = 0; istep < nFrames; istep += step_){
@@ -143,13 +146,12 @@ namespace OpenMD {
       int commonCount = common.getSelectionCount();
 
       globalToLocal.clear();
-      globalToLocal.resize(info_->getNGlobalAtoms(),-1);
+      globalToLocal.resize(info_->getNGlobalAtoms() +
+                           info_->getNGlobalRigidBodies(), -1);
       for (unsigned int i = 0; i < listNN.size(); i++)         
         listNN.at(i).clear();
       listNN.clear();
       listNN.resize(commonCount);
-      histogram_.clear();
-      histogram_.resize(hBins_, 0.0);
 
       mapIndex1 = 0;
       for(sd1 = common.beginSelected(iterator1); sd1 != NULL;
@@ -166,9 +168,8 @@ namespace OpenMD {
 	  if (mapIndex1 < mapIndex2) {
             pos2 = sd2->getPos();
             diff = pos2 - pos1;
-	    if (usePeriodicBoundaryConditions_) {
-	      currentSnapshot_->wrapVector(diff);
-	    }
+	    if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(diff);
             distance = diff.length();
 	    if (distance < rCut_) {
               listNN.at(mapIndex1).push_back(mapIndex2);
@@ -193,24 +194,50 @@ namespace OpenMD {
 	}
 
         gcn = gcn / nnMax_;
-        binIndex = int(gcn*bins_);
-        if (binIndex < histogram_.size()) {
-          histogram_.at(binIndex) += 1;
+        whichBin = int(gcn / delta_);
+        if (whichBin < histogram_.size()) {
+          histogram_[whichBin] += 1;
         } else {
           cerr << "In frame " <<  istep <<  ", object "
                << sd1->getGlobalIndex() << " has GCN value = " << gcn << "\n";
         }
       }
+      count_ += selectionCount1_;
+    }
+
+    for(unsigned int n = 0; n < histogram_.size(); n++){
+      if (count_ > 0) 
+        histogram_[n] /= count_;
+      else
+        histogram_[n] = 0.0;               
+    } 
+   
+    writeData();
+  }
+
+  void GCN::writeData() {
+    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+    
+    if (ofs.is_open()) {
       
-      os << "#Selection Count: " << selectionCount1_ << "\n";
-      os << "#Frame " << istep << "\n";
+      Revision r;
+      RealType binValue(0.0);
+      
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << sele1_ ;
+      ofs << "\"\tselection script2: \"" << sele2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      
       for(unsigned int n = 0; n < histogram_.size(); n++){
-	binValue = n/(1.0*bins_);
-	os << binValue << "\t"
-           << (histogram_.at(n)/(selectionCount1_*1.0))
-           << "\n";
+        binValue = n * delta_;
+        ofs << binValue << "\t"
+            << histogram_[n]
+            << "\n";
       } 
     }   
-    os.close();
+    ofs.close();
   }
 }

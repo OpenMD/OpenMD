@@ -54,8 +54,8 @@ namespace OpenMD {
    * @class GCN
    * @brief Generalized Coordinate Number
    *
-   * Computes a frame-by-frame distribution of generalized coordinate
-   * numbers as described in:
+   * Computes a distribution of generalized coordinate numbers as
+   * described in:
    *
    *   "Finding optimal surface sites on heterogeneous catalysts by
    *    counting nearest neighbors," by F. Calle-Vallejo et al.,
@@ -78,6 +78,7 @@ namespace OpenMD {
     virtual void process();
     
   private:
+    void writeData();
 
     std::string sele1_;
     SelectionManager seleMan1_;
@@ -90,12 +91,14 @@ namespace OpenMD {
     int selectionCount1_;
     int selectionCount2_;
     int bins_;
-    int hBins_;
 
     string filename_;
     
     int nnMax_;
     RealType rCut_;
+    RealType delta_;
+
+    int count_;
     std::vector<RealType>  histogram_;
   };
 

@@ -47,7 +47,6 @@
 
 #include "brains/SimInfo.hpp"
 #include "brains/BlockSnapshotManager.hpp"
-
 #include "primitives/StuntDouble.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
@@ -61,11 +60,10 @@ namespace OpenMD {
  
   class SequentialAnalyzer {
   public:
-    SequentialAnalyzer(SimInfo* info, const std::string& filename) : 
-      info_(info), currentSnapshot_(NULL), dumpFilename_(filename), 
-      step_(1)  {}
+    SequentialAnalyzer(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, const std::string& sele2);
     
-    virtual ~SequentialAnalyzer(){ }    
+    virtual ~SequentialAnalyzer(){ }
     virtual void doSequence();
 
     void setOutputName(const std::string& filename) {
@@ -91,28 +89,37 @@ namespace OpenMD {
       sequenceType_ = type;
     }
 
-    void setExtraInfo(const std::string& extra) {
-      extra_ = extra;
+    void setParameterString(const std::string& params) {
+      paramString_ = params;
     }
 
   protected:
     virtual void preSequence() {}        
     virtual void postSequence() {}
     virtual void writeSequence();
-    virtual void doFrame() = 0;
+    virtual void doFrame(int frame) = 0;
 
     SimInfo* info_;
     Snapshot* currentSnapshot_;
     std::string dumpFilename_;        
     std::string outputFilename_;
     int step_;
+    int frame_;
     int storageLayout_;
     std::vector<RealType> times_;
     std::vector<RealType> values_;
+    
     std::string sequenceType_;
-    std::string extra_;
-
-
+    std::string paramString_;
+    
+    std::string selectionScript1_;
+    SelectionManager seleMan1_;
+    SelectionEvaluator evaluator1_;
+    
+    std::string selectionScript2_;
+    SelectionManager seleMan2_;
+    SelectionEvaluator evaluator2_;
+    
   };
 }
 #endif

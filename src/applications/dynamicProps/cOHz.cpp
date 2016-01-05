@@ -43,6 +43,8 @@
 #include "applications/dynamicProps/cOHz.hpp"
 #include "math/LegendrePolynomial.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
+#include <sstream>
 
 namespace OpenMD {
   COHZ::COHZ(SimInfo* info, 
@@ -55,6 +57,12 @@ namespace OpenMD {
                            DataStorage::dslAmat, memSize), nZBins_(nZbins) {
 
       setCorrFuncType("Legendre Correlation Function for OH bond vector of Z");
+      std::stringstream params;
+      params << " order = " << order
+             << ", nzbins = " << nZBins_;
+      const std::string paramString = params.str();
+      setParameterString( paramString );
+
       setOutputName1(getPrefix(dumpFilename_) + ".cohZ");
       setOutputName2(getPrefix(dumpFilename_) + ".lcorrZ");
       histogram_.resize(nTimeBins_);
@@ -97,8 +105,7 @@ namespace OpenMD {
       Vector3d corrVals = calcCorrVals(frame1, frame2, sd1, sd2);
       histogram_[timeBin][zBin] += corrVals; 
       counts_[timeBin][zBin]++;
-    }
-    
+    }    
   }
 
   void COHZ::postCorrelate() {
@@ -118,7 +125,8 @@ namespace OpenMD {
     }
   }
 
-  Vector3d COHZ::calcCorrVals(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  Vector3d COHZ::calcCorrVals(int frame1, int frame2, StuntDouble* sd1,
+                              StuntDouble* sd2) {
     
     // Vectors v1x, v1y, and v1z are the body-fixed axes on the
     // molecule in frame 1 in the laboratory frame.
@@ -160,24 +168,33 @@ namespace OpenMD {
   void COHZ::validateSelection(const SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
       if (!sd->isDirectionalAtom()) {
 	sprintf(painCave.errMsg,
-                "LegendreCorrFunc::validateSelection Error: selected atoms are not Directional\n");
+                "LegendreCorrFunc::validateSelection Error: "
+                "selected atoms are not Directional\n");
 	painCave.isFatal = 1;
 	simError();        
       }
     }
-    
   }
 
   void COHZ::writeCorrelate() {
     std::ofstream ofs1(getOutputFileName1().c_str());
     std::ofstream ofs2(getOutputFileName2().c_str());
-
+    Revision r;
+      
     if (ofs1.is_open()) {
+      
+      ofs1 << "# " << getCorrFuncType() << "\n";
+      ofs1 << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs1 << "# " << r.getBuildDate() << "\n";
+      ofs1 << "# selection script1: \"" << selectionScript1_ ;
+      ofs1 << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs1 << "# parameters: " << paramString_ << "\n";
 
-      ofs1 << "#" << getCorrFuncType() << "\n";
       ofs1 << "#time\tPn(costheta_z)\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -192,7 +209,8 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "cOHz::writeCorrelate Error: fail to open %s\n", getOutputFileName1().c_str());
+              "cOHz::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName1().c_str());
       painCave.isFatal = 1;
       simError();        
     }
@@ -200,7 +218,14 @@ namespace OpenMD {
 
     if (ofs2.is_open()) {
 
-      ofs2 << "#" << getCorrFuncType() << "\n";
+      ofs2 << "# " << getCorrFuncType() << "\n";
+      ofs2 << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs2 << "# " << r.getBuildDate() << "\n";
+      ofs2 << "# selection script1: \"" << selectionScript1_ ;
+      ofs2 << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs2 << "# parameters: " << paramString_ << "\n";
+      
       ofs2 << "#time\tPn(costheta_z)\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -215,7 +240,8 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "cOHz::writeCorrelate Error: fail to open %s\n", getOutputFileName2().c_str());
+              "cOHz::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName2().c_str());
       painCave.isFatal = 1;
       simError();        
     }

@@ -54,6 +54,7 @@
 
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
 #include "utils/PhysicalConstants.hpp"
+#include "utils/Revision.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 
@@ -211,7 +212,8 @@ namespace OpenMD {
         
         for (mol = info_->beginMolecule(mi); mol != NULL; 
              mol = info_->nextMolecule(mi)) {
-          for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+          for(atom = mol->beginAtom(ai); atom != NULL;
+              atom = mol->nextAtom(ai)) {
             RealType mass = atom->getMass();
             Vector3d vel = atom->getVel(j);
             RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
@@ -243,14 +245,19 @@ namespace OpenMD {
     
   }
   
-
-
   void EnergyCorrFunc::writeCorrelate() {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
-
-      ofs << "#" << getCorrFuncType() << "\n";
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tK_x\tK_y\tK_z\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
@@ -262,7 +269,8 @@ namespace OpenMD {
             
     } else {
       sprintf(painCave.errMsg,
-              "EnergyCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "EnergyCorrFunc::writeCorrelate Error: fail to open %s\n",
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }
@@ -270,5 +278,4 @@ namespace OpenMD {
     ofs.close();    
     
   }
-
 }

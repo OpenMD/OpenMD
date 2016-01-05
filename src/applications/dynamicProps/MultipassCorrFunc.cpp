@@ -42,7 +42,9 @@
 
 #include "applications/dynamicProps/MultipassCorrFunc.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
+
 using namespace std;
 namespace OpenMD {
 
@@ -96,8 +98,8 @@ namespace OpenMD {
 
     nFrames_ = reader_->getNFrames();
     nTimeBins_ = nFrames_;
-    histogram_.resize(nTimeBins_);
-    count_.resize(nTimeBins_);
+    histogram_.resize(nTimeBins_, 0.0);
+    count_.resize(nTimeBins_, 0);
 
     times_.resize(nFrames_);
     sele1ToIndex_.resize(nFrames_);
@@ -300,10 +302,15 @@ namespace OpenMD {
 
     if (ofs.is_open()) {
 
-      ofs << "#" << getCorrFuncType() << "\n";
-      ofs << "#selection script1: \"" << selectionScript1_ ;
+      Revision r;
+      
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      ofs << "#extra information: " << extra_ << "\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
