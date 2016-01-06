@@ -42,10 +42,12 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "applications/staticProps/GofAngle2.hpp"
 #include "primitives/Atom.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
   
@@ -54,11 +56,18 @@ namespace OpenMD {
 		       const std::string& sele2, int nangleBins)
   : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
     doSele3_(false), seleMan3_(info), evaluator3_(info) {
-    
+
+    setAnalysisType("Radial Distribution Function");
     setOutputName(getPrefix(filename) + ".gto");
     
     deltaCosAngle_ = 2.0 / nAngleBins_;
-    
+
+    std::stringstream params;
+    params << " nAngleBins = " << nAngleBins_
+           << ", deltaCosAngle = " << deltaCosAngle_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );    
+
     histogram_.resize(nAngleBins_);
     avgGofr_.resize(nAngleBins_);
     for (int i = 0 ; i < nAngleBins_; ++i) {
@@ -294,26 +303,31 @@ namespace OpenMD {
   }
 
   void GofAngle2::writeRdf() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#radial distribution function\n";
-      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream << "selection2: (" << selectionScript2_ << ")";
+    std::ofstream ofs(outputFilename_.c_str());
+    if (ofs.is_open()) {
+      Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"";
       if (doSele3_) {
-        rdfStream << "\tselection3: (" << selectionScript3_ << ")\n";
+        ofs << "\tselection script3: \"" << selectionScript3_ << "\"\n";
       } else {
-        rdfStream << "\n";
+        ofs << "\n";
       }
-      rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = "
-                << deltaCosAngle_ << "\n";
+
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	// RealType cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
         
 	for(unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
 	  // RealType cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
-	  rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
+	  ofs <<avgGofr_[i][j]/nProcessed_ << "\t";
 	}
-	rdfStream << "\n";
+	ofs << "\n";
       }
         
     } else {
@@ -324,7 +338,7 @@ namespace OpenMD {
       simError();  
     }
 
-    rdfStream.close();
+    ofs.close();
   }
 
 }

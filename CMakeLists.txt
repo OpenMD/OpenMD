@@ -290,15 +290,17 @@ set (PROGRAMS
 openmd
 openmd_MPI
 Dump2XYZ 
-simpleBuilder 
 StaticProps 
 DynamicProps
 SequentialProps
+simpleBuilder 
 randomBuilder 
 nanoparticleBuilder 
+nanorodBuilder 
+nanorod_pentBuilder 
+omd2omd
 thermalizer 
 recenter
-atom2md 
 Hydro)
 
 set(SOURCE
@@ -881,15 +883,16 @@ INSTALL(TARGETS
         openmd_single
         openmd
         Dump2XYZ 
-        simpleBuilder 
         StaticProps 
         DynamicProps
         SequentialProps
+        simpleBuilder 
         randomBuilder 
         nanoparticleBuilder 
+        icosahedralBuilder
         nanorodBuilder
         nanorod_pentBuilder
-        icosahedralBuilder
+        omd2omd
         thermalizer 
         recenter
         Hydro
