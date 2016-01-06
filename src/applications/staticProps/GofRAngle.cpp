@@ -42,10 +42,12 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "applications/staticProps/GofRAngle.hpp"
 #include "primitives/Atom.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
   
@@ -65,6 +67,17 @@ namespace OpenMD {
       histogram_[i].resize(nAngleBins_);
       avgGofr_[i].resize(nAngleBins_);
     }
+
+    setAnalysisType("Radial Distribution Function");
+
+    std::stringstream params;
+    params << " nRBins = " << nRBins_
+           << ", maxLen = " << len_
+           << ", deltaR = " << deltaR_
+           << ", nAngleBins = " << nAngleBins_
+           << ", deltaCosAngle = " << deltaCosAngle_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );    
   }
   
   GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, 
@@ -276,29 +289,32 @@ namespace OpenMD {
   }
 
   void GofRAngle::writeRdf() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#radial distribution function\n";
-      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream <<  "selection2: (" << selectionScript2_ << ")";
+    std::ofstream ofs(outputFilename_.c_str());
+    if (ofs.is_open()) {
+      Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"";
       if (doSele3_) {
-        rdfStream << "\tselection3: (" << selectionScript3_ << ")\n";
+        ofs << "\tselection script3: \"" << selectionScript3_ << "\"\n";
       } else {
-        rdfStream << "\n";
+        ofs << "\n";
       }
-      rdfStream << "#nRBins = " << nRBins_ << "\tmaxLen = " 
-                << len_ << "\tdeltaR = " << deltaR_ <<"\n";
-      rdfStream << "#nAngleBins =" << nAngleBins_ << "\tdeltaCosAngle = " 
-                << deltaCosAngle_ << "\n";
+
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	// RealType r = deltaR_ * (i + 0.5);
 
 	for(unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
 	  // RealType cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
-	  rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
+	  ofs << avgGofr_[i][j]/nProcessed_ << "\t";
 	}
 
-	rdfStream << "\n";
+	ofs << "\n";
       }
         
     } else {
@@ -308,7 +324,7 @@ namespace OpenMD {
       simError();  
     }
 
-    rdfStream.close();
+    ofs.close();
   }
 
   RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {

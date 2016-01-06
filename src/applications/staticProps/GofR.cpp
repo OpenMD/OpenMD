@@ -42,22 +42,32 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "applications/staticProps/GofR.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
 
-  GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins)
+  GofR::GofR(SimInfo* info, const std::string& filename,
+             const std::string& sele1, const std::string& sele2,
+             RealType len, int nrbins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
 
-      deltaR_ = len_ /nRBins_;
+    setAnalysisType("Radial Distribution Function");
+    setOutputName(getPrefix(filename) + ".gofr");
+
+    deltaR_ = len_ /nRBins_;
     
-      histogram_.resize(nRBins_);
-      avgGofr_.resize(nRBins_);
-
-      setOutputName(getPrefix(filename) + ".gofr");
-    }
-
+    histogram_.resize(nRBins_);
+    avgGofr_.resize(nRBins_);
+    std::stringstream params;
+    params << " len = " << len_
+           << ", nrbins = " << nRBins_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+  }
+  
 
   void GofR::preProcess() {
     std::fill(avgGofr_.begin(), avgGofr_.end(), 0.0);    
@@ -109,25 +119,30 @@ namespace OpenMD {
 
 
   void GofR::writeRdf() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#radial distribution function\n";
-      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      rdfStream << "#r\tcorrValue\n";
+    std::ofstream ofs(outputFilename_.c_str());
+    if (ofs.is_open()) {
+      Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
+      ofs << "#r\tcorrValue\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
-	rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
+	ofs << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
       }
     } else {
-
-      sprintf(painCave.errMsg, "GofR: unable to open %s\n", outputFilename_.c_str());
+      
+      sprintf(painCave.errMsg, "GofR: unable to open %s\n",
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }
-
-    rdfStream.close();
+    ofs.close();
   }
-
 }
 
