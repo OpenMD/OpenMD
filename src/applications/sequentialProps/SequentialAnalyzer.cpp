@@ -57,7 +57,7 @@ namespace OpenMD {
                                          const std::string& sele2) : 
     info_(info), currentSnapshot_(NULL), dumpFilename_(filename),
     seleMan1_(info), selectionScript1_(sele1), evaluator1_(info),
-    seleMan2_(info), selectionScript2_(sele1), evaluator2_(info),
+    seleMan2_(info), selectionScript2_(sele2), evaluator2_(info),
     step_(1)  {
 
     paramString_.clear();
