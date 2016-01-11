@@ -61,10 +61,10 @@
 
 #include "config.h"
 #include <cmath>
+#include <limits>
 #include <cstdlib>
 #include <iostream>
 #include "math/Factorials.hpp"
-#include "utils/NumericConstant.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP
 #define NONBONDED_SLATERINTEGRALS_HPP
@@ -216,7 +216,7 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
 	
   // First compute the two-electron component
   RealType sSTOCoulInt_ = 0.;
-  if (std::fabs(x) < OpenMD::NumericConstant::epsilon) // Pathological case
+  if (std::fabs(x) < std::numeric_limits<RealType>::epsilon()) // Pathological case
     {
 
       // This solution for the one-center coulomb integrals comes from 

@@ -80,8 +80,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MATH_LU_HPP
 #define MATH_LU_HPP
 
-#include "utils/NumericConstant.hpp"
-
 namespace OpenMD {
 
 /**
@@ -135,14 +133,14 @@ bool invertMatrix(MatrixType& A, MatrixType& AI)
  */
 
 template<class MatrixType>
-bool invertMatrix(MatrixType& A , MatrixType& AI, int size,
+bool invertMatrix(MatrixType& A , MatrixType& AI, unsigned int size,
                           int *tmp1Size, typename MatrixType::ElemPoinerType tmp2Size)
 {
   if (A.getNRow() != A.getNCol() || A.getNRow() != AI.getNRow() || A.getNCol() != AI.getNCol() || A.getNRow() != size) {
     return false;
   }
   
-  int i, j;
+  unsigned int i, j;
 
   //
   // Factor matrix; then begin solving for inverse one column at a time.
@@ -246,7 +244,7 @@ int LUFactorLinearSystem(MatrixType& A, int *index, int size,
     //
     index[j] = maxI;
 
-    if ( fabs(A(j, j)) <= OpenMD::NumericConstant::epsilon ) {
+    if ( fabs(A(j, j)) <= std::numeric_limits<RealType>::epsilon() ) {
       //vtkGenericWarningMacro(<<"Unable to factor linear system");
       return false;
       }

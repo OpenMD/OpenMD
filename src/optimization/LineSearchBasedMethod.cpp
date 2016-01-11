@@ -22,7 +22,6 @@
 #include "optimization/Problem.hpp"
 #include "optimization/LineSearch.hpp"
 #include "optimization/Armijo.hpp"
-#include "utils/NumericConstant.hpp"
 
 using namespace OpenMD;
 namespace QuantLib {
@@ -95,7 +94,7 @@ namespace QuantLib {
 
                 fnew = P.functionValue();
                 fdiff = 2.0*std::fabs(fnew-fold) /
-                    (std::fabs(fnew) + std::fabs(fold) + NumericConstant::epsilon);
+                    (std::fabs(fnew) + std::fabs(fold) + std::numeric_limits<RealType>::epsilon());
 
                 if (fdiff < ftol ||
                     endCriteria.checkMaxIterations(iterationNumber_, ecType)) {
