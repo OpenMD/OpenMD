@@ -81,12 +81,8 @@ namespace OpenMD {
     std::vector<std::vector<int> > listNN;
     std::vector<int> globalToLocal;
 
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd1;
     StuntDouble* sd2;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
         
     int iterator1;
     int iterator2;
