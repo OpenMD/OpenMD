@@ -100,7 +100,7 @@ namespace OpenMD {
 
       if (myType.compare("MOLECULAR")==0){
 
-        int molIndex;
+        int molIndex(-1);
         Vector3d refCom;
 
         if (!stamp[i]->haveMolIndex()) {

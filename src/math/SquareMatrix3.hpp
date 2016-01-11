@@ -51,10 +51,10 @@
 #include "config.h"
 #include <cmath>
 #include <vector>
+#include <limits>
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"
 #include "Vector3.hpp"
-#include "utils/NumericConstant.hpp"
 namespace OpenMD {
 
   template<typename Real>
@@ -216,7 +216,7 @@ namespace OpenMD {
       Real ad1, ad2, ad3;    
       t = this->data_[0][0] + this->data_[1][1] + this->data_[2][2] + 1.0;
 
-      if( t > NumericConstant::epsilon ){
+      if( t > std::numeric_limits<RealType>::epsilon() ){
 
 	s = 0.5 / sqrt( t );
 	q[0] = 0.25 / s;
