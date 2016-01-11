@@ -209,7 +209,7 @@ namespace OpenMD {
                                    int timeBin) {
 
     int zBin1 = zBins_[frame1][id1];
-    int zBin2 = zBins_[frame2][id2];
+    int zBin2 = zBins_[frame2][id2];    
     
     if (zBin1 == zBin2) {
       Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];

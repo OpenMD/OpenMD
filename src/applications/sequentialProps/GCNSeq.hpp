@@ -78,16 +78,14 @@ namespace OpenMD {
     
   private:
 
+    RealType rCut_;    
+    int bins_;
+    
+    bool usePBC_;    
+    int nnMax_;
+    RealType delta_;
     int selectionCount1_;
     int selectionCount2_;
-    int bins_;
-    bool usePBC_;
-
-    string filename_;
-    
-    int nnMax_;
-    RealType rCut_;
-    RealType delta_;
     
     std::vector<int> count_;
     std::vector<std::vector<RealType> >  histogram_;

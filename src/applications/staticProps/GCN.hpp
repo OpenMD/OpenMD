@@ -80,6 +80,9 @@ namespace OpenMD {
   private:
     void writeData();
 
+    RealType rCut_;
+    int bins_;
+    
     std::string sele1_;
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
@@ -89,15 +92,9 @@ namespace OpenMD {
     SelectionEvaluator evaluator2_;
 
     int selectionCount1_;
-    int selectionCount2_;
-    int bins_;
-
-    string filename_;
-    
+    int selectionCount2_;    
     int nnMax_;
-    RealType rCut_;
     RealType delta_;
-
     int count_;
     std::vector<RealType>  histogram_;
   };

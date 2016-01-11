@@ -101,25 +101,25 @@ namespace OpenMD {
 
     SimInfo* info_;
     Snapshot* currentSnapshot_;
-    std::string dumpFilename_;        
-    std::string outputFilename_;
+    std::string dumpFilename_;
+
+    SelectionManager seleMan1_;
+    std::string selectionScript1_;
+    SelectionEvaluator evaluator1_;
+
+    SelectionManager seleMan2_;
+    std::string selectionScript2_;
+    SelectionEvaluator evaluator2_;
+
     int step_;
+    
+    std::string outputFilename_;
     int frame_;
     int storageLayout_;
     std::vector<RealType> times_;
-    std::vector<RealType> values_;
-    
+    std::vector<RealType> values_;    
     std::string sequenceType_;
-    std::string paramString_;
-    
-    std::string selectionScript1_;
-    SelectionManager seleMan1_;
-    SelectionEvaluator evaluator1_;
-    
-    std::string selectionScript2_;
-    SelectionManager seleMan2_;
-    SelectionEvaluator evaluator2_;
-    
+    std::string paramString_;    
   };
 }
 #endif
