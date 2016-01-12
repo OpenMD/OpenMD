@@ -248,19 +248,16 @@ namespace OpenMD {
   
   void HBondJump::correlation() {
     std::vector<int> s1;
-    std::vector<int> s2;
-
     std::vector<int>::iterator i1;
-    std::vector<int>::iterator i2;
-          
+
     RealType corrVal;
-    int index1, index2, count;
-    
+    int index1, index2, count, gid;
+
     for (int i = 0; i < nFrames_; ++i) {
 
       RealType time1 = times_[i];           
       s1 = DonorToGID_[i];
-      
+            
       for(int j  = i; j < nFrames_; ++j) {
 
         // Perform a sanity check on the actual configuration times to
@@ -280,44 +277,39 @@ namespace OpenMD {
         }
         
         int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
-        s2 = DonorToGID_[j];
 
         corrVal = 0.0;
-        count = 0;
+        count = s1.size();
 
-        for (i1 = s1.begin(), i2 = s2.begin();
-             i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
-          
-          // Hydrogen bonds are dynamic, so they might not have the
-          // same donors indices present in both frames, so we need to
-          // roll either of the donor lists until we have the same
-          // donor to correlate.
-          
-          while ( *i1 < *i2 && i1 != s1.end()) {
-            ++i1;
-          }
-          
-          while ( *i2 < *i1 && i2 != s2.end() ) {
-            ++i2;
-          }
-          
-          if ( i1 == s1.end() || i2 == s2.end() ) break;
+        // loop over the H-bond donors found in frame i:
+        
+        for (i1 = s1.begin(); i1 != s1.end(); ++i1) {
 
-          index1 = i1 - s1.begin();
-          index2 = i2 - s2.begin();
+          // gid is the global ID of H-bond donor index1 in frame i:
+          gid = *i1;
           
+          index1 = GIDtoDonor_[i][gid];
           
-          if (acceptor_[i][index1] == acceptor_[j][index2]) {
-            count++;
-            if (acceptorStartFrame_[j][index2] > i) 
-              corrVal += 0;
-            else 
-              corrVal += 1.0;            
-          }
-                    
-          histogram_[timeBin] += corrVal;
-          count_[timeBin] += count;
-        }
+          // find matching donor in frame j:
+          index2 = GIDtoDonor_[j][gid];
+
+          // sometimes the donor doesn't have a Hydrogen bond in a
+          // given frame, so the index will default to -1:
+          
+          if (index1 < 0 || index2 < 0) break;
+
+          // the Laage-Hynes "absorbing boundaries" mean that not only
+          // do the acceptors have to match, but any time we have a
+          // different start frame, the bond is considered a different
+          // bond:
+          
+          if (acceptor_[i][index1] == acceptor_[j][index2])
+            if (acceptorStartFrame_[i][index1] == acceptorStartFrame_[j][index2])
+              corrVal += 1;
+        
+        }          
+        histogram_[timeBin] += corrVal;
+        count_[timeBin] += count;        
       }
     }
   }
