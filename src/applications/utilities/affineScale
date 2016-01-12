@@ -120,28 +120,41 @@ def readFile(mdFileName):
                         myIndex = int(L[0])
                         indices.append(myIndex)
                         pvqj.append(L[1])
-                        x = float(L[2])
-                        y = float(L[3])
-                        z = float(L[4])
-                        p.append([x, y, z])
-			wrap.append([0,0,0])
-                        vx = float(L[5])
-                        vy = float(L[6])
-                        vz = float(L[7])
-                        v.append([vx, vy, vz])
-                        if 'pvqj' in L[1]:
-                            qw = float(L[8])
-                            qx = float(L[9])
-                            qy = float(L[10])
-                            qz = float(L[11])
+                        i = 2
+                        if 'p' in L[1]:                              
+                            x = float(L[i])
+                            y = float(L[i+1])
+                            z = float(L[i+2])                            
+                            p.append([x, y, z])
+                            i = i+3
+                        else:
+                            p.append([0.0, 0.0, 0.0])
+                        if 'v' in L[1]:                              
+                            vx = float(L[i])                                
+                            vy = float(L[i+1])
+                            vz = float(L[i+2])
+                            v.append([vx, vy, vz])
+                            i = i+3
+                        else:
+                            v.append([0.0, 0.0, 0.0])
+                        if 'q' in L[1]:
+                            qw = float(L[i])
+                            qx = float(L[i+1])
+                            qy = float(L[i+2])
+                            qz = float(L[i+3])
                             q.append([qw, qx, qy, qz])
-                            jx = float(L[12])
-                            jy = float(L[13])
-                            jz = float(L[14])
-                            j.append([jx, jy, jz])
+                            i = i+4
                         else:
                             q.append([0.0, 0.0, 0.0, 0.0])
+                        if 'j' in L[1]:
+                            jx = float(L[i])
+                            jy = float(L[i+1])
+                            jz = float(L[i+2])
+                            j.append([jx, jy, jz])
+                            i = i+3
+                        else:
                             j.append([0.0, 0.0, 0.0])
+                        wrap.append([0,0,0])
                                                
                         line = mdFile.readline()
                         if '</StuntDoubles>' in line:
@@ -155,7 +168,7 @@ def readFile(mdFileName):
 def writeFile(outputFileName,repeatX,repeatY,repeatZ):
     outputFile = open(outputFileName, 'w')
 
-    outputFile.write("<OpenMD version=1>\n");
+    outputFile.write("<OpenMD version=2>\n");
 
     print "writing MetaData"
     for metaline in metaData:
@@ -200,12 +213,15 @@ def writeFile(outputFileName,repeatX,repeatY,repeatZ):
                     myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
                     myP.append(p[i][2] + ii*Hmat[0][2] + jj*Hmat[1][2] + kk*Hmat[2][2])
                         
-                    if (pvqj[i] == 'pv'):
-                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
+                    if (pvqj[i] == 'p'):
+                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2]))
+                    elif (pvqj[i] == 'pv'):
+                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
+                    elif (pvqj[i] == 'pq'):
+                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], q[i][0], q[i][1], q[i][2], q[i][3]))
                     elif (pvqj[i] == 'pvqj'):
                         outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
                     whichSD = whichSD + 1
-
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")
     outputFile.write("</OpenMD>\n")
