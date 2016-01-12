@@ -6,9 +6,6 @@
 #define OPENMD_VERSION_MINOR "${VERSION_MINOR}"
 #define OPENMD_VERSION_TINY  "${VERSION_TINY}"
 
-#define CMDLINE_PARSER_VERSION "(OpenMD ${VERSION_MAJOR}.${VERSION_MINOR} Revision ${GIT_SHA1})"
-
-
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)
 
