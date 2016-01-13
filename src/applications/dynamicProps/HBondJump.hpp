@@ -58,7 +58,8 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
     virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
-
+    virtual void postCorrelate();
+    
     std::vector<std::vector<int> > GIDtoDonor_;
     std::vector<std::vector<int> > DonorToGID_;
     std::vector<std::vector<int> > acceptor_;

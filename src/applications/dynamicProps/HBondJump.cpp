@@ -296,21 +296,43 @@ namespace OpenMD {
           // sometimes the donor doesn't have a Hydrogen bond in a
           // given frame, so the index will default to -1:
           
-          if (index1 < 0 || index2 < 0) break;
+          if ( index2 < 0 ) {
+            // no Hbond in the second frame, so that H-bond has jumped
+            corrVal += 1;
+          } else {
 
-          // the Laage-Hynes "absorbing boundaries" mean that not only
-          // do the acceptors have to match, but any time we have a
-          // different start frame, the bond is considered a different
-          // bond:
-          
-          if (acceptor_[i][index1] == acceptor_[j][index2])
-            if (acceptorStartFrame_[i][index1] == acceptorStartFrame_[j][index2])
+            if (acceptor_[i][index1] != acceptor_[j][index2]) {
+              // different acceptor so nA(0) . nB(t) = 1
               corrVal += 1;
-        
+            } else {
+              // same acceptor, but we need to look at the start frames
+              // for these H-bonds to make sure it is the same H-bond:
+              if (acceptorStartFrame_[i][index1] != acceptorStartFrame_[j][index2]) {
+                // different start frame, so this is considered a
+                // different H-bond:
+                corrVal += 1;
+              } else {
+                // same start frame, so this is considered the same H-bond:
+                corrVal += 0;
+              }
+            }
+          }
         }          
         histogram_[timeBin] += corrVal;
-        count_[timeBin] += count;        
+        count_[timeBin] += count;
       }
     }
   }
+
+    void HBondJump::postCorrelate() {
+    for (int i =0 ; i < nTimeBins_; ++i) {
+      if (count_[i] > 0) {
+	histogram_[i] /= count_[i];
+      } else {
+        histogram_[i] = 0;
+      }
+      histogram_[i] = 1.0 - histogram_[i];
+    }
+  }
+
 }
