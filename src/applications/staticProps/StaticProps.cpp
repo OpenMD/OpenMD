@@ -85,6 +85,7 @@
 #include "applications/staticProps/GCN.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/PotDiff.hpp"
+#include "applications/staticProps/TetrahedralityHBMatrix.hpp"
 
 
 using namespace OpenMD;
@@ -308,6 +309,22 @@ int main(int argc, char* argv[]){
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  } else if (args_info.tet_hb_given) {
+    if (args_info.rcut_given) {	  
+      analyser = new TetrahedralityHBMatrix(info, dumpFileName, sele1,
+                                            args_info.rcut_arg,
+                                            args_info.OOcut_arg,
+                                            args_info.thetacut_arg,
+                                            args_info.OHcut_arg,
+                                            args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating "
+               " Tetrahedrality Hydrogen Bonding Matrix");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
