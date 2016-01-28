@@ -36,7 +36,9 @@ option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
 option	"nrbins"    	r       "number of radial bins (usually duplicates functionality of nbins)"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
-option  "thetacut"      -       "cutoff angle (thetacut)"                               double                          no
+option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             no
+option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              no
+option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            no
 option  "dz"            -       "slab width (dz)"                                       double                          no
 option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option	"zlength"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
@@ -91,3 +93,4 @@ groupoption "surfDiffusion" -	"X, Y, and R (surface diffusion if Z exposed and b
 groupoption "gcn"           -   "Generalized Coordinate Number" group="staticProps"
 groupoption "hbond"     -       "Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified)" group="staticProps"
 groupoption "potDiff"   -       "potential energy difference when charge on selection is set to zero"  group="staticProps"
+groupoption "tet_hb"    -       "hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules" group="staticProps"
