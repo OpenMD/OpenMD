@@ -815,7 +815,6 @@ src/applications/hydrodynamics/diffExplainer
 src/applications/utilities/affineScale
 src/applications/utilities/dumpConverter
 src/applications/utilities/md-solvator
-src/applications/utilities/md2md
 src/applications/utilities/mdSplit
 src/applications/utilities/mdShrink
 src/applications/utilities/stat2thcond
