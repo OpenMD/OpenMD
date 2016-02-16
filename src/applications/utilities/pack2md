@@ -269,7 +269,7 @@ def findRBs():
 
         if (numpy.linalg.det(v) * numpy.linalg.det(w) < 0.0):
             is_reflection = true
-        else
+        else:
             is_reflection = false
             
         if (is_reflection):
