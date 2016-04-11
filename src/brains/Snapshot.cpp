@@ -70,6 +70,7 @@ namespace OpenMD {
     frameData.torsionPotential = 0.0;   
     frameData.inversionPotential = 0.0; 
     frameData.lrPotentials = potVec(0.0);
+    frameData.surfacePotential = 0.0;
     frameData.reciprocalPotential = 0.0;
     frameData.selfPotential = 0.0;
     frameData.excludedPotentials = potVec(0.0); 
@@ -105,6 +106,7 @@ namespace OpenMD {
     frameData.torsionPotential = 0.0;   
     frameData.inversionPotential = 0.0; 
     frameData.lrPotentials = potVec(0.0);
+    frameData.surfacePotential = 0.0;    
     frameData.reciprocalPotential = 0.0;
     frameData.selfPotential = 0.0;
     frameData.excludedPotentials = potVec(0.0); 
@@ -425,6 +427,14 @@ namespace OpenMD {
     return frameData.shortRangePotential;
   }
 
+  void Snapshot::setSurfacePotential(RealType sp){
+    frameData.surfacePotential = sp;
+  }
+
+  RealType Snapshot::getSurfacePotential() {
+    return frameData.surfacePotential;
+  }
+
   void Snapshot::setReciprocalPotential(RealType rp){
     frameData.reciprocalPotential = rp;
   }
@@ -451,6 +461,7 @@ namespace OpenMD {
         frameData.longRangePotential += frameData.lrPotentials[i];
       }
       frameData.longRangePotential += frameData.reciprocalPotential;
+      frameData.longRangePotential += frameData.surfacePotential;
       hasLongRangePotential = true;
     }   
     return frameData.longRangePotential;

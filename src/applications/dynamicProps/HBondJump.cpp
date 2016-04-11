@@ -119,6 +119,9 @@ namespace OpenMD {
           currentSnapshot_->wrapVector(DH);
           DHdist = DH.length();
           
+          hInd = hbd->donatedHydrogen->getGlobalIndex();
+          aInd = -1;
+          
           // loop over the possible acceptors in molecule 2:
           for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
                hba = mol2->nextHBondAcceptor(hbai)) {
@@ -140,51 +143,56 @@ namespace OpenMD {
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {
                 // molecule 1 is a Hbond donor:
-                aInd = hba->getGlobalIndex();
-                hInd = hbd->donatedHydrogen->getGlobalIndex();
-
-                index = acceptor_[istep].size();
-                GIDtoDonor_[istep][hInd] = index;
-
-                acceptor_[istep].push_back(aInd);
-                DonorToGID_[istep].push_back(hInd);
-
-                // Look at previous step to see if we need to update
-                // acceptor start times:
-
-                if (istep == 0)
-                  acceptorStartFrame_[istep].push_back(istep);
-                else {
-                  // find out index on previous step:
-                  index2 = GIDtoDonor_[istep-1][hInd];
-                  if (acceptor_[istep-1][index2] == aInd) {
-                    // same acceptor means copy previous start time:
-                    acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
-                  } else {
-                    // new acceptor means new start time:
-                    acceptorStartFrame_[istep].push_back(istep);
-                  }
-                }
-               
+                aInd = hba->getGlobalIndex();               
                 Vector3d uDA = DA / DAdist;
                 rOO_[istep].push_back( uDA );
                 DHprojection = dot( uDA, DH);
                 rOHprojection_[istep].push_back(DHprojection);                
               }
             }            
-          }            
+          }
+
+          index = acceptor_[istep].size();
+          GIDtoDonor_[istep][hInd] = index;
+          
+          acceptor_[istep].push_back(aInd);
+          DonorToGID_[istep].push_back(hInd);
+          
+          // Look at previous step to see if we need to update
+          // acceptor start times:
+          
+          if (istep == 0)
+            acceptorStartFrame_[istep].push_back(istep);
+          else {
+            // find out index on previous step:
+            index2 = GIDtoDonor_[istep-1][hInd];
+            if (acceptor_[istep-1][index2] == aInd || aInd == -1) {
+              // Same acceptor (or none) means we use previous start time:
+              acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
+            } else {
+              // new acceptor means new start time:
+              acceptorStartFrame_[istep].push_back(istep);
+              
+            }
+          }
         }
 
-        // now loop over the possible acceptors in molecule 1:
-        for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
-             hba = mol1->nextHBondAcceptor(hbai)) {
-          aPos = hba->getPos();
+        // loop over the possible donors in molecule 2:
+        for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
+             hbd = mol2->nextHBondDonor(hbdi)) {
+          dPos = hbd->donorAtom->getPos(); 
+          hPos = hbd->donatedHydrogen->getPos();
+          DH = hPos - dPos; 
+          currentSnapshot_->wrapVector(DH);
+          DHdist = DH.length();
           
-          // loop over the possible donors in molecule 2:
-          for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
-               hbd = mol2->nextHBondDonor(hbdi)) {
-            dPos = hbd->donorAtom->getPos();
-            
+          hInd = hbd->donatedHydrogen->getGlobalIndex();
+          aInd = -1;
+          
+          // loop over the possible acceptors in molecule 1:
+          for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
+               hba = mol1->nextHBondAcceptor(hbai)) {
+            aPos = hba->getPos();
             DA = aPos - dPos;
             currentSnapshot_->wrapVector(DA);
             DAdist = DA.length();
@@ -192,57 +200,51 @@ namespace OpenMD {
             // Distance criteria: are the donor and acceptor atoms
             // close enough?
             if (DAdist < OOCut_) {
-              hPos = hbd->donatedHydrogen->getPos();
               HA = aPos - hPos;
               currentSnapshot_->wrapVector(HA);
               HAdist = HA.length();
 
-              DH = hPos - dPos; 
-              currentSnapshot_->wrapVector(DH);
-              DHdist = DH.length();
               ctheta = dot(DH, DA) / (DHdist * DAdist);
-              theta = acos(ctheta) * 180.0 / M_PI;              
+              theta = acos(ctheta) * 180.0 / M_PI;
+              
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {
-                
-                // molecule 1 is a Hbond acceptor:
-                aInd = hba->getGlobalIndex();
-                hInd = hbd->donatedHydrogen->getGlobalIndex();
-
-                index = acceptor_[istep].size();
-                GIDtoDonor_[istep][hInd] = index;
-                
-                acceptor_[istep].push_back(aInd);
-                DonorToGID_[istep].push_back(hInd);
-
-
-                // Look at previous step to see if we need to update
-                // acceptor start times:
-
-                if (istep == 0)
-                  acceptorStartFrame_[istep].push_back(istep);
-                else {
-                  // find out index on previous step:
-                  index2 = GIDtoDonor_[istep-1][hInd];
-                  if (acceptor_[istep-1][index2] == aInd) {
-                    // same acceptor means copy previous start time:
-                    acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
-                  } else {
-                    // new acceptor means new start time:
-                    acceptorStartFrame_[istep].push_back(istep);
-                  }
-                }
-
+                // molecule 1 is a Hbond donor:
+                aInd = hba->getGlobalIndex();               
                 Vector3d uDA = DA / DAdist;
                 rOO_[istep].push_back( uDA );
                 DHprojection = dot( uDA, DH);
-                rOHprojection_[istep].push_back(DHprojection);
-              }                
+                rOHprojection_[istep].push_back(DHprojection);                
+              }
+            }            
+          }
+
+          index = acceptor_[istep].size();
+          GIDtoDonor_[istep][hInd] = index;
+          
+          acceptor_[istep].push_back(aInd);
+          DonorToGID_[istep].push_back(hInd);
+          
+          // Look at previous step to see if we need to update
+          // acceptor start times:
+          
+          if (istep == 0)
+            acceptorStartFrame_[istep].push_back(istep);
+          else {
+            // find out index on previous step:
+            index2 = GIDtoDonor_[istep-1][hInd];
+            if (acceptor_[istep-1][index2] == aInd || aInd == -1) {
+              // Same acceptor (or none) means we use previous start time:
+              acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
+            } else {
+              // new acceptor means new start time:
+              acceptorStartFrame_[istep].push_back(istep);
+              
             }
           }
-        }
+        }        
       }
-    }     
+    }
   }
   
   
@@ -301,8 +303,11 @@ namespace OpenMD {
             corrVal += 1;
           } else {
 
-            if (acceptor_[i][index1] != acceptor_[j][index2]) {
+            if (acceptor_[i][index1] != acceptor_[j][index2] &&
+                acceptor_[i][index1] != -1 &&
+                acceptor_[j][index2] != -1) {
               // different acceptor so nA(0) . nB(t) = 1
+              // (-1 condition means that no acceptor was found)
               corrVal += 1;
             } else {
               // same acceptor, but we need to look at the start frames

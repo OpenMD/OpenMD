@@ -721,6 +721,7 @@ namespace OpenMD {
     RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
     RealType reciprocalPotential(0.0);
+    RealType surfacePotential(0.0);
     potVec workPot(0.0);
     potVec exPot(0.0);
     potVec selectionPotential(0.0);
@@ -970,8 +971,10 @@ namespace OpenMD {
     fDecomp_->collectData();
     if (cutoffMethod_ == EWALD_FULL) {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
-
       curSnapshot->setReciprocalPotential(reciprocalPotential);
+
+      interactionMan_->doSurfaceTerm(surfacePotential);
+      curSnapshot->setSurfacePotential(surfacePotential);
     }
         
     if (info_->requiresSelfCorrection()) {
