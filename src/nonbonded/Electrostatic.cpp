@@ -1329,12 +1329,12 @@ namespace OpenMD {
             info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
             atom->addFlucQFrc( eConverter * twoPiOverThreeV * 2.0 * dot(r, netDipole) );
           }
-          atom->addFrc( eConverter * twoPiOverThreeV * 2.0 * C * netDipole );
+          atom->addFrc( - eConverter * twoPiOverThreeV * 2.0 * C * netDipole );
         }
         
         if (data.is_Dipole) {
           D = atom->getDipole() * mPoleConverter;
-          t = eConverter * twoPiOverThreeV * 2.0 * cross(D, netDipole);
+          t = - eConverter * twoPiOverThreeV * 2.0 * cross(D, netDipole);
           atom->addTrq(t);
         }
       }

@@ -530,8 +530,9 @@ namespace OpenMD {
           break;
         case RECIPROCAL_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getReciprocalPotential());
+          break;
         case SURFACE_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getReciprocalPotential());
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getSurfacePotential());
           break;
         case SHORT_RANGE_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getShortRangePotential());
