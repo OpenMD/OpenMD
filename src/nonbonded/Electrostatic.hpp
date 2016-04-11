@@ -106,6 +106,7 @@ namespace OpenMD {
     void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
     void setDampingAlpha( RealType alpha );
     void setReactionFieldDielectric( RealType dielectric );
+    void calcSurfaceTerm(RealType& pot);
     void ReciprocalSpaceSum(RealType &pot);
 
     // Utility routine 

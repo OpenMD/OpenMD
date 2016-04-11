@@ -1159,8 +1159,7 @@ namespace OpenMD {
     return;
   }
     
-  void Electrostatic::calcSelfCorrection(SelfData &sdat) {
-
+  void Electrostatic::calcSelfCorrection(SelfData &sdat) {    
     if (!initialized_) initialize();
 
     ElectrostaticAtomData data = ElectrostaticMap[Etids[sdat.atid]];
@@ -1214,7 +1213,7 @@ namespace OpenMD {
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
       if (i_is_Charge) {
-        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));
+        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));        
         if (i_is_Fluctuating) {
           *(sdat.flucQfrc) -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
         }
@@ -1232,6 +1231,9 @@ namespace OpenMD {
           }
         }
       }
+
+
+      
       (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += self;
       if (sdat.isSelected)
         (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += self;
@@ -1241,6 +1243,103 @@ namespace OpenMD {
       break;
     }
   }
+
+
+  void Electrostatic::calcSurfaceTerm(RealType& pot) {
+    SimInfo::MoleculeIterator mi;
+    Molecule::AtomIterator ai;
+    int i;
+    RealType C;
+    Vector3d r;    
+    Vector3d D;
+    Vector3d t;
+    Vector3d netDipole(0.0);
+    int atid;
+    ElectrostaticAtomData data;
+   
+    const RealType mPoleConverter = 0.20819434; // converts from the
+                                                // internal units of
+                                                // Debye (for dipoles)
+                                                // or Debye-angstroms
+                                                // (for quadrupoles) to
+                                                // electron angstroms or
+                                                // electron-angstroms^2
+    
+    const RealType eConverter = 332.0637778; // convert the
+                                             // Charge-Charge
+                                             // electrostatic
+                                             // interactions into kcal /
+                                             // mol assuming distances
+                                             // are measured in
+                                             // angstroms.
+    
+    if (!initialized_) initialize();
+
+    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {  
+
+        i = atom->getLocalIndex();
+        int atid = atom->getAtomType()->getIdent();
+        data = ElectrostaticMap[Etids[atid]];
+        
+        if (data.is_Charge) {
+          C = data.fixedCharge;         
+          if (data.is_Fluctuating) C += atom->getFlucQPos();
+
+          r = atom->getPos();
+          info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
+          
+          netDipole += C * r;
+        }
+        
+        if (data.is_Dipole) {
+          D = atom->getDipole() * mPoleConverter;
+          netDipole += D;
+        }
+      }
+    }
+
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, netDipole.getArrayPointer(), 3, 
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    Vector3d box = hmat.diagonals();
+
+    RealType twoPiOverThreeV = 2.0 * M_PI / (3.0 * box.x() * box.y() * box.z());
+    pot +=  eConverter * twoPiOverThreeV * netDipole.lengthSquare();
+  
+
+    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+      for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {  
+
+        i = atom->getLocalIndex();
+        int atid = atom->getAtomType()->getIdent();
+        data = ElectrostaticMap[Etids[atid]];
+        
+        if (data.is_Charge) {
+          C = data.fixedCharge;         
+          if (data.is_Fluctuating) {
+            r = atom->getPos();
+            info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
+            atom->addFlucQFrc( eConverter * twoPiOverThreeV * 2.0 * dot(r, netDipole) );
+          }
+          atom->addFrc( eConverter * twoPiOverThreeV * 2.0 * C * netDipole );
+        }
+        
+        if (data.is_Dipole) {
+          D = atom->getDipole() * mPoleConverter;
+          t = eConverter * twoPiOverThreeV * 2.0 * cross(D, netDipole);
+          atom->addTrq(t);
+        }
+      }
+    }
+  }        
   
   RealType Electrostatic::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     // This seems to work moderately well as a default.  There's no

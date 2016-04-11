@@ -94,20 +94,17 @@ namespace OpenMD {
     RealType OOCut_;
     RealType thetaCut_;
     RealType OHCut_;
-    int nBins_;
-    int count_;
+    unsigned int nBins_;
+    unsigned int count_;
     
     int frameCounter_;
     RealType MinQ_;
     RealType MaxQ_;
     RealType deltaQ_;
 
-    std::vector<int> GIDtoDonor_;
-    std::vector<int> DonorToGID_;
-    std::vector<int> acceptor_;
     std::vector<RealType> Q_;
     
-    std::vector<std::vector<int> > Q_histogram_;
+    std::vector<std::vector<unsigned int> > Q_histogram_;
   };
 }
 

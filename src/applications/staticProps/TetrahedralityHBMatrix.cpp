@@ -115,14 +115,11 @@ namespace OpenMD {
     Molecule* moli;
     Molecule* molj;
     RigidBody* rb;
-    int myIndex;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    Molecule::IntegrableObjectIterator ioi;
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj, dposition, tposition;
-    RealType r;
-    RealType cospsi;
+    RealType r, cospsi;
     std::vector<Molecule::HBondDonor*>::iterator hbdi;
     Molecule::HBondDonor* hbd;
     std::vector<Atom*>::iterator hbai;
@@ -134,21 +131,16 @@ namespace OpenMD {
     Vector3d DA;
     Vector3d HA;
     Vector3d uDA;
-    RealType DAdist, DHdist, HAdist, DHprojection, theta, ctheta;
-    int ii, jj;
-    int hInd, aInd, index;
-    RealType Qk, q1, q2;
+    RealType DAdist, DHdist, HAdist, theta, ctheta, Qk, q1, q2;
     std::vector<std::pair<RealType,Molecule*> > myNeighbors;
-    int isd, index1, index2;
+    int myIndex, ii, jj, index1, index2;
     
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
-      frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
       Q_.clear();

@@ -12,9 +12,8 @@ analysis and utility programs that are easy to use and modify. An
 OpenMD simulation is specified using a very simple meta-data language
 that is easy to learn.
 
-Simulations are started in OpenMD using a single Molecular Dynamics (.omd) 
-file.  These files must start with the <OpenMD> tag and must have two 
-sections:
+Simulations are started in OpenMD using a single Molecular Dynamics (.omd)
+file.  These files must start with the <OpenMD> tag and must have two sections:
 
   1) a C-based <MetaData> section, and 
 
@@ -29,20 +28,19 @@ What you need to compile and use OpenMD:
  1) A good C++ compiler.  We've built and tested OpenMD on the
     following architecture & compiler combinations:
 
-    Architecture                CXX    Notes
-    -------------------------   ----   ----------------------
-    Mac OS X 10.10 (intel)      c++    (Apple LLVM version 6.0, Open MPI 1.7.5)
-    Mac OS X 10.10 (intel)      g++    (GNU version 4.8.3)
-    Mac OS X 10.10 (intel)      icpc   (Intel version 14.0.2)
-    Linux (Ubuntu 13 – x86_64)	g++    (GNU version 4.8.1, Open MPI 1.4.5)
-    Linux (RHEL 6.6 - x86_64)   icpc   (Intel version 14.0, Open MPI 1.6.5)
-    Linux (RHEL 6.6 - x86_64)   pgCC   (Portland Group version 14.6)
+  Architecture                  CXX  Notes
+  -------------------------     ---- ----------------------
+  Mac OS X 10.11 (intel)        c++  (Apple LLVM version 7.0.2, Open MPI 1.10.2)
+  Mac OS X 10.11 (intel)        g++  (GNU version 5.3.0)
+  Linux (Ubuntu 14.04 – x86_64) g++  (GNU version 4.8.4, Open MPI 1.6.5)
+  Linux (RHEL 6.7 - x86_64)     icpc (Intel version 14.0, Open MPI 1.6.5)
+  Linux (RHEL 6.7 - x86_64)     pgCC (Portland Group version 14.6, MPICH 3.1.2)
 
     OpenMD uses features in the standard template library (STL). Most
     (but not all) C++ compilers support these features.
 
  2) CMake, a cross-platform build system which is available at
-    http://www.cmake.org     Most Linux and some Unix distributions
+    http://www.cmake.org    Most Linux and some Unix distributions
     provide CMake as a standard package. If not, please download it,
     and make sure you get a recent version. Mac OS X users can either
     download the CMake installer or install it from the command line
