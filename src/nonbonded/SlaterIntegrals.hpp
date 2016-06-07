@@ -64,6 +64,7 @@
 #include <limits>
 #include <cstdlib>
 #include <iostream>
+#include <algorithm>
 #include "math/Factorials.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP
@@ -85,7 +86,7 @@ template <typename T> inline T mod(T x, T m)
  *   \frac{\alpha^\nu}{\nu!}
  * \f]
  * @param n - principal quantum number
- * @param a - Slater exponent 
+ * @param a - Slater exponent
  * @return the value of Rosen's A integral
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
@@ -112,12 +113,12 @@ inline RealType RosenA(int n, RealType a)
  *  compute integrals involving Slater-type orbitals of s symmetry.
  * \f[
  *  B_n(\alpha) = \int_{-1}^1 x^n e^{-\alpha x} dx
- *              = \frac{n!}{\alpha^{n+1}} 
+ *              = \frac{n!}{\alpha^{n+1}}
  *                \sum_{\nu=0}^n \frac{e^\alpha(-\alpha)^\nu
  *                  - e^{-\alpha} \alpha^\nu}{\nu!}
  * \f]
  * @param n - principal quantum number
- * @param alpha - Slater exponent 
+ * @param alpha - Slater exponent
  * @return the value of Rosen's B integral
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
@@ -128,7 +129,7 @@ inline RealType RosenB(int n, RealType alpha) {
     {
       RealType Term = 1.;
       bool IsPositive = true;
-		
+
       // These two expressions are (up to constant factors) equivalent
       // to computing the hyperbolic sine and cosine of a respectively
       // The series consists of adding up these terms in an alternating fashion
@@ -178,7 +179,7 @@ inline RealType RosenD(int m, int n, int p)
       printf("Error, arguments exceed maximum factorial computed %d > %d\n", m+n+p, maxFact);
       ::exit(0);
     }
-	
+
   RealType RosenD_ = 0;
   for (int k=max(p-m,0); k<=min(n,p); k++)
     {
@@ -206,26 +207,26 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
   RealType x, K2;
   RealType Factor1, Factor2, Term, OneElectronTerm;
   RealType eps, epsi;
-	
+
   // To speed up calculation, we terminate loop once contributions
   // to integral fall below the bound, epsilon
   RealType epsilon = 0.;
 
   // x is the argument of the auxiliary RosenA and RosenB functions
   x = 2. * a * R;
-	
+
   // First compute the two-electron component
   RealType sSTOCoulInt_ = 0.;
   if (std::fabs(x) < std::numeric_limits<RealType>::epsilon()) // Pathological case
     {
 
-      // This solution for the one-center coulomb integrals comes from 
+      // This solution for the one-center coulomb integrals comes from
       // Yoshiyuki Hase, Computers & Chemistry 9(4), pp. 285-287 (1985).
-      
+
       RealType Term1 = fact[2*m - 1] / pow(2*a, 2*m);
       RealType Term2 = 0.;
       for (int nu = 1; nu <= 2*n; nu++) {
-        Term2 += nu * pow(2*b, 2*n - nu) * fact[2*(m+n)-nu-1] / 
+        Term2 += nu * pow(2*b, 2*n - nu) * fact[2*(m+n)-nu-1] /
           (fact[2*n-nu]*2*n * pow(2*(a+b), 2*(m+n)-nu));
       }
       sSTOCoulInt_ = pow(2*a, 2*m+1) * (Term1 - Term2) / fact[2*m];
@@ -322,12 +323,12 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
 inline RealType sSTOOvInt(RealType a, RealType b, int m, int n, RealType R)
 {
   RealType Factor, Term, eps;
-	
+
   // To speed up calculation, we terminate loop once contributions
   // to integral fall below the bound, epsilon
   RealType epsilon = 0.;
   RealType sSTOOvInt_ = 0.;
-	
+
   if (a == b)
     {
       Factor = pow(a*R, m+n+1)/sqrt(fact[2*m]*fact[2*n]);
@@ -397,7 +398,7 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
   RealType x;
   // x is the argument of the auxiliary RosenA and RosenB functions
   x = 2. * a * R;
-	
+
   // First compute the two-electron component
   RealType sSTOCoulIntGrad_ = 0.;
   if (x==0) // Pathological case
@@ -467,7 +468,7 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
   return sSTOCoulIntGrad_;
 }
 
-/** 
+/**
  * @brief Computes gradient of overlap integral with respect to the interatomic diatance
  *   Computes the derivative of the overlap integral over two Slater-type orbitals of s symmetry.
  * @param a: Slater zeta exponent of first atom in inverse Bohr (au)
@@ -479,11 +480,11 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
  * @note Derived in QTPIE research notes, May 15 2007
  */
 inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n, RealType R)
-{	
+{
   // Calculate first term
   RealType sSTOOvIntGrad_ = (m+n+1.)/R * sSTOOvInt(a, b, m, n, R);
-	
-  // Calculate remaining terms; answers depend on exponents 
+
+  // Calculate remaining terms; answers depend on exponents
   RealType TheSum = 0.;
   RealType x = a * R;
   if (a == b)
@@ -518,8 +519,8 @@ inline RealType getSTOZeta(int n, RealType hardness)
   //  by its value at a very small distance epsilon
   //  since the exact R = 0 case has not be programmed
   RealType epsilon = 1.0e-8;
-  
-  // Assign orbital exponent  
+
+  // Assign orbital exponent
   return pow(sSTOCoulInt(1., 1., n, n, epsilon) / hardness, -1./(3. + 2.*n));
 }
 

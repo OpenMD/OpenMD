@@ -32,16 +32,16 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include "config.h"
-#include <cstdio> 
+#include <cstdio>
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
 #include "nonbonded/SlaterIntegrals.hpp"
@@ -51,11 +51,11 @@ namespace OpenMD {
   bool FluctuatingChargeAdapter::isFluctuatingCharge() {
     return at_->hasProperty(FQtypeID);
   }
-  
+
   FluctuatingAtypeParameters* FluctuatingChargeAdapter::getFluctuatingChargeParam() {
-    
+
     if (!isFluctuatingCharge()) {
-      sprintf( painCave.errMsg,               
+      sprintf( painCave.errMsg,
                "FluctuatingChargeAdapter::getFluctuatingChargeParam was passed an atomType (%s)\n"
                "\tthat does not appear to be a fluctuating charge atom.\n",
                at_->getName().c_str());
@@ -63,61 +63,68 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
+
     GenericData* data = at_->getPropertyByName(FQtypeID);
     if (data == NULL) {
-      sprintf( painCave.errMsg, 
+      sprintf( painCave.errMsg,
                "FluctuatingChargeAdapter::getFluctuatingChargeParam could not find fluctuating charge\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
-      simError(); 
+      simError();
     }
-    
+
     FluctuatingAtypeData* fqData = dynamic_cast<FluctuatingAtypeData*>(data);
     if (fqData == NULL) {
       sprintf( painCave.errMsg,
                "FluctuatingChargeAdapter::getFluctuatingChargeParam could not convert\n"
-               "\tGenericData to FluctuatingAtypeData for atom type %s\n", 
+               "\tGenericData to FluctuatingAtypeData for atom type %s\n",
                at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
-      simError();          
+      simError();
     }
-    
+
     return fqData->getData();
   }
-  
+
   bool FluctuatingChargeAdapter::hasMultipleMinima() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->hasMultipleMinima;
   }
-    
-  RealType FluctuatingChargeAdapter::getChargeMass() {    
+  bool FluctuatingChargeAdapter::isMetallic() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->isMetallic;
+  }
+  RealType FluctuatingChargeAdapter::getChargeMass() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->chargeMass;
   }
-  RealType FluctuatingChargeAdapter::getElectronegativity() {    
+  RealType FluctuatingChargeAdapter::getElectronegativity() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->electronegativity;
   }
-  RealType FluctuatingChargeAdapter::getHardness() {    
+  RealType FluctuatingChargeAdapter::getHardness() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->hardness;
   }
-  int FluctuatingChargeAdapter::getSlaterN() {    
+  int FluctuatingChargeAdapter::getSlaterN() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->slaterN;
   }
-  RealType FluctuatingChargeAdapter::getSlaterZeta() {    
+  int FluctuatingChargeAdapter::getNValence() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->nValence;
+  }
+  RealType FluctuatingChargeAdapter::getSlaterZeta() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->slaterZeta;
   }
-  RealType FluctuatingChargeAdapter::getCurvature() {    
+  RealType FluctuatingChargeAdapter::getCurvature() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->curvature;
   }
-  RealType FluctuatingChargeAdapter::getCoupling() {    
+  RealType FluctuatingChargeAdapter::getCoupling() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->coupling;
   }
@@ -125,17 +132,17 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->diabaticStates;
   }
-  
+
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType electronegativity,
                                                        RealType hardness,
                                                        int slaterN,
                                                        RealType slaterZeta) {
-    
+
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }
-    
+
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
     fqParam->hasMultipleMinima = false;
@@ -144,7 +151,7 @@ namespace OpenMD {
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
     fqParam->slaterZeta = slaterZeta;
-    
+
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 
@@ -166,7 +173,7 @@ namespace OpenMD {
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
     fqParam->slaterZeta = getSTOZeta(slaterN, hardness);
-        
+
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 
@@ -177,7 +184,7 @@ namespace OpenMD {
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }
-    
+
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
     fqParam->hasMultipleMinima = true;
@@ -189,4 +196,24 @@ namespace OpenMD {
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       int nValence,
+                                                       RealType curvature,
+                                                       RealType coupling,
+                             vector<pair<RealType, RealType> > diabaticStates) {
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = true;
+
+    fqParam->isMetallic = true;
+    fqParam->nValence = nValence;
+    fqParam->curvature = curvature;
+    fqParam->coupling = coupling;
+    fqParam->diabaticStates = diabaticStates;
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
 }

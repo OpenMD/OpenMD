@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -47,15 +47,16 @@
 #include "nonbonded/EAM.hpp"
 #include "utils/simError.h"
 #include "types/NonBondedInteractionType.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 
 
 namespace OpenMD {
 
-  EAM::EAM() : initialized_(false), haveCutoffRadius_(false), 
-	       forceField_(NULL), eamRcut_(0.0), mixMeth_(eamJohnson), 
+  EAM::EAM() : initialized_(false), haveCutoffRadius_(false),
+	       forceField_(NULL), eamRcut_(0.0), mixMeth_(eamJohnson),
 	       name_("EAM") {}
-  
-  CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {   
+
+  CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {
     EAMAdapter ea1 = EAMAdapter(atomType1);
     EAMAdapter ea2 = EAMAdapter(atomType2);
     CubicSpline* z1 = ea1.getZ();
@@ -70,7 +71,7 @@ namespace OpenMD {
     // make the r grid:
 
     // we need phi out to the largest value we'll encounter in the radial space;
-    
+
     RealType rmax = 0.0;
     rmax = max(rmax, ea1.getRcut());
     rmax = max(rmax, ea1.getNr() * ea1.getDr());
@@ -80,7 +81,7 @@ namespace OpenMD {
 
     // use the smallest dr (finest grid) to build our grid:
 
-    RealType dr = min(ea1.getDr(), ea2.getDr()); 
+    RealType dr = min(ea1.getDr(), ea2.getDr());
 
     int nr = int(rmax/dr + 0.5);
 
@@ -108,7 +109,7 @@ namespace OpenMD {
       zj = r <= ea2.getRcut() ? z2->getValueAt(r) : 0.0;
 
       phi = pre11_ * (zi * zj) / r;
-      
+
       phivals.push_back(phi);
     }
     CubicSpline* cs = new CubicSpline();
@@ -121,26 +122,26 @@ namespace OpenMD {
     haveCutoffRadius_ = true;
   }
 
-  void EAM::initialize() { 
+  void EAM::initialize() {
     // set up the mixing method:
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     string EAMMixMeth = fopts.getEAMMixingMethod();
     toUpper(EAMMixMeth);
-   
-    if (EAMMixMeth == "JOHNSON") 
-      mixMeth_ = eamJohnson;    
+
+    if (EAMMixMeth == "JOHNSON")
+      mixMeth_ = eamJohnson;
     else if (EAMMixMeth == "DAW")
       mixMeth_ = eamDaw;
     else
       mixMeth_ = eamUnknown;
-      
+
     // find all of the EAM atom Types:
     EAMtypes.clear();
     EAMtids.clear();
     EAMdata.clear();
     MixingMap.clear();
     nEAM_ = 0;
-    
+
     EAMtids.resize( forceField_->getNAtomType(), -1);
 
     set<AtomType*>::iterator at;
@@ -153,42 +154,42 @@ namespace OpenMD {
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isEAM()) addType(*at);
     }
-    
+
     // find all of the explicit EAM interactions (setfl):
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     NonBondedInteractionType* nbt;
 
-    for (nbt = nbiTypes->beginType(j); nbt != NULL; 
+    for (nbt = nbiTypes->beginType(j); nbt != NULL;
          nbt = nbiTypes->nextType(j)) {
-      
+
       if (nbt->isEAM()) {
-        
+
         pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
-        
+
         GenericData* data = nbt->getPropertyByName("EAM");
         if (data == NULL) {
           sprintf( painCave.errMsg, "EAM::rebuildMixingMap could not find\n"
-                   "\tEAM parameters for %s - %s interaction.\n", 
+                   "\tEAM parameters for %s - %s interaction.\n",
                    atypes.first->getName().c_str(),
                    atypes.second->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
-          simError(); 
+          simError();
         }
-        
+
         EAMMixingData* eamData = dynamic_cast<EAMMixingData*>(data);
         if (eamData == NULL) {
           sprintf( painCave.errMsg,
                    "EAM::rebuildMixingMap could not convert GenericData to\n"
-                   "\tEAMMixingData for %s - %s interaction.\n", 
+                   "\tEAMMixingData for %s - %s interaction.\n",
                    atypes.first->getName().c_str(),
                    atypes.second->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
-          simError();          
+          simError();
         }
-        
+
         EAMMixingParam eamParam = eamData->getData();
 
         vector<RealType> phiAB = eamParam.phi;
@@ -197,10 +198,10 @@ namespace OpenMD {
 
         addExplicitInteraction(atypes.first, atypes.second, dr, nr, phiAB);
       }
-    }  
+    }
     initialized_ = true;
   }
-      
+
 
 
   void EAM::addType(AtomType* atomType){
@@ -212,12 +213,20 @@ namespace OpenMD {
     eamAtomData.F = ea.getF();
     eamAtomData.Z = ea.getZ();
     eamAtomData.rcut = ea.getRcut();
-      
+
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+    if (fqa.isFluctuatingCharge()) {
+      if (fqa.isMetallic()) {
+        eamAtomData.isFluctuatingCharge = true;
+        eamAtomData.nValence = fqa.getNValence();
+      }
+    }
+
     // add it to the map:
     int atid = atomType->getIdent();
     int eamtid = EAMtypes.size();
 
-    pair<set<int>::iterator,bool> ret;    
+    pair<set<int>::iterator,bool> ret;
     ret = EAMtypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
@@ -225,19 +234,19 @@ namespace OpenMD {
                atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
-      simError();         
+      simError();
     }
 
 
     EAMtids[atid] = eamtid;
     EAMdata[eamtid] = eamAtomData;
     MixingMap[eamtid].resize(nEAM_);
-    
+
     // Now, iterate over all known types and add to the mixing map:
-    
+
     std::set<int>::iterator it;
     for( it = EAMtypes.begin(); it != EAMtypes.end(); ++it) {
-      
+
       int eamtid2 = EAMtids[ (*it) ];
       AtomType* atype2 = forceField_->getAtomType( (*it) );
 
@@ -247,19 +256,19 @@ namespace OpenMD {
       mixer.explicitlySet = false;
 
       MixingMap[eamtid2].resize( nEAM_ );
-      
+
       MixingMap[eamtid][eamtid2] = mixer;
       if (eamtid2 != eamtid) {
         MixingMap[eamtid2][eamtid] = mixer;
       }
-    }      
+    }
     return;
   }
-  
-  void EAM::addExplicitInteraction(AtomType* atype1, AtomType* atype2, 
+
+  void EAM::addExplicitInteraction(AtomType* atype1, AtomType* atype2,
                                    RealType dr, int nr,
                                    vector<RealType> phiVals) {
-    
+
     // in case these weren't already in the map
     addType(atype1);
     addType(atype2);
@@ -277,40 +286,50 @@ namespace OpenMD {
 
     int eamtid1 = EAMtids[ atype1->getIdent() ];
     int eamtid2 = EAMtids[ atype2->getIdent() ];
-    
+
     MixingMap[eamtid1][eamtid2] = mixer;
     if (eamtid2 != eamtid1) {
       MixingMap[eamtid2][eamtid1] = mixer;
-    }    
+    }
     return;
   }
 
   void EAM::calcDensity(InteractionData &idat) {
-    
+
+
     if (!initialized_) initialize();
-    
+
     EAMAtomData &data1 = EAMdata[EAMtids[idat.atid1]];
     EAMAtomData &data2 = EAMdata[EAMtids[idat.atid2]];
 
-    if (haveCutoffRadius_) 
+    if (haveCutoffRadius_)
       if ( *(idat.rij) > eamRcut_) return;
-    
+
     if ( *(idat.rij) < data1.rcut) {
-      *(idat.rho2) += data1.rho->getValueAt( *(idat.rij));
+      RealType m = 1.0;
+      if (data1.isFluctuatingCharge) {
+        m = 1.0 - *(idat.flucQ1) / RealType(data1.nValence);
+      }
+      *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij));
     }
-      
+
+
     if ( *(idat.rij) < data2.rcut) {
-      *(idat.rho1) += data2.rho->getValueAt( *(idat.rij));
+      RealType m = 1.0;
+      if (data2.isFluctuatingCharge) {
+        m = 1.0 - *(idat.flucQ2) / RealType(data2.nValence);
+      }
+      *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
-    
-    return;  
+
+    return;
   }
-  
+
   void EAM::calcFunctional(SelfData &sdat) {
-    
+
     if (!initialized_) initialize();
     EAMAtomData &data1 = EAMdata[ EAMtids[sdat.atid] ];
-            
+
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
                                       *(sdat.dfrhodrho) );
 
@@ -325,37 +344,37 @@ namespace OpenMD {
     return;
   }
 
- 
+
   void EAM::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
 
-    if (haveCutoffRadius_) 
+    if (haveCutoffRadius_)
       if ( *(idat.rij) > eamRcut_) return;
-   
+
 
     int eamtid1 = EAMtids[idat.atid1];
     int eamtid2 = EAMtids[idat.atid2];
     EAMAtomData &data1 = EAMdata[eamtid1];
     EAMAtomData &data2 = EAMdata[eamtid2];
-    
+
     // get type-specific cutoff radii
-    
+
     RealType rci = data1.rcut;
     RealType rcj = data2.rcut;
 
-    
+
     RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
     RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
     RealType phab(0.0), dvpdr(0.0);
     RealType drhoidr, drhojdr, dudr;
-    
+
     if ( *(idat.rij) < rci) {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
     }
-    
+
     if ( *(idat.rij) < rcj) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
@@ -365,39 +384,39 @@ namespace OpenMD {
     case eamJohnson:
       if ( *(idat.rij) < rci) {
         phab = phab + 0.5 * (rhb / rha) * pha;
-        dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
+        dvpdr = dvpdr + 0.5*((rhb/rha)*dpha +
                              pha*((drhb/rha) - (rhb*drha/rha/rha)));
       }
-                 
+
       if ( *(idat.rij) < rcj) {
         phab = phab + 0.5 * (rha / rhb) * phb;
-        dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
+        dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb +
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
       }
       break;
     case eamDaw:
       if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
-        MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij), 
+        MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij),
                                                                   phab, dvpdr);
       }
       break;
     case eamUnknown:
     default:
-      
+
       sprintf(painCave.errMsg,
               "EAM::calcForce hit a mixing method it doesn't know about!\n"
               );
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
-      simError();        
-      
+      simError();
+
     }
-    
+
     drhoidr = drha;
     drhojdr = drhb;
-    
-    dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr; 
-    
+
+    dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr;
+
     *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
 
     if (idat.doParticlePot) {
@@ -409,24 +428,32 @@ namespace OpenMD {
       // need to recompute the density at atom2 assuming atom1 didn't
       // contribute.  This then requires recomputing the density
       // functional for atom2 as well.
-      
-      *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha ) 
+
+      *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha )
         - *(idat.frho2);
-      
-      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
+
+      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb)
         - *(idat.frho1);
     }
-    
+
     (*(idat.pot))[METALLIC_FAMILY] += phab;
     if (idat.isSelected)
       (*(idat.selePot))[METALLIC_FAMILY] += phab;
 
-    *(idat.vpair) += phab;  
-    return;    
+    *(idat.vpair) += phab;
+
+    if (data1.isFluctuatingCharge) {
+      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / RealType(data1.nValence);
+    }
+    if (data2.isFluctuatingCharge) {
+      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / RealType(data2.nValence);
+    }
+
+    return;
   }
 
   RealType EAM::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
-    if (!initialized_) initialize();   
+    if (!initialized_) initialize();
 
     RealType cut = 0.0;
 
@@ -434,7 +461,7 @@ namespace OpenMD {
     int atid2 = atypes.second->getIdent();
     int eamtid1 = EAMtids[atid1];
     int eamtid2 = EAMtids[atid2];
-    
+
     if (eamtid1 != -1) {
       EAMAtomData data1 = EAMdata[eamtid1];
       cut = data1.rcut;
@@ -445,8 +472,7 @@ namespace OpenMD {
       if (data2.rcut > cut)
         cut = data2.rcut;
     }
-    
+
     return cut;
   }
 }
-

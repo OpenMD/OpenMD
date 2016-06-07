@@ -54,10 +54,15 @@ namespace OpenMD{
     forceMan_->calcForces();
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    potVec pot = curSnapshot->getLongRangePotentials();
+    // potVec pot = curSnapshot->getLongRangePotentials();
+    // With fluctuating metallic types, the electrostatic potential doesn't
+    // include all of the contributions from the fluctuating charges, so we
+    // need to include all of the long range potential contributions:
+    RealType pot = curSnapshot->getLongRangePotential();
+    // Excluded potential still is electrostatic only:
     potVec exPot = curSnapshot->getExcludedPotentials();  
   
-    return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
+    return pot + exPot[ELECTROSTATIC_FAMILY];
   }
   
   void FluctuatingChargeObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
@@ -81,10 +86,15 @@ namespace OpenMD{
     getGrad(grad); 
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    potVec pot = curSnapshot->getLongRangePotentials();
+    // potVec pot = curSnapshot->getLongRangePotentials();
+    // With fluctuating metallic types, the electrostatic potential doesn't
+    // include all of the contributions from the fluctuating charges, so we
+    // need to include all of the long range potential contributions:
+    RealType pot = curSnapshot->getLongRangePotential();
+    // Excluded potential still is electrostatic only:
     potVec exPot = curSnapshot->getExcludedPotentials();    
 
-    return pot[ELECTROSTATIC_FAMILY] + exPot[ELECTROSTATIC_FAMILY];
+    return pot + exPot[ELECTROSTATIC_FAMILY];
   }
   
   void FluctuatingChargeObjectiveFunction::setCoor(const DynamicVector<RealType> &x) const {

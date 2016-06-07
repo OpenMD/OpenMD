@@ -32,19 +32,21 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
+#include "config.h"
+
 #define _LARGEFILE_SOURCE64
 #define _FILE_OFFSET_BITS 64
+
 #ifdef _MSC_VER
-#define isnan(x) _isnan((x))
-#define isinf(x) (!_finite(x) && !_isnan(x))
+#include <amp_math.h>
 #endif
 
 #include "io/StatWriter.hpp"
@@ -54,17 +56,17 @@
 using namespace std;
 
 namespace OpenMD {
-  
+
   StatWriter::StatWriter( const std::string& filename, Stats* stats) : stats_(stats){
-    
+
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif // is_mpi
-      
+
       statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc );
-    
+
       if( !statfile_ ){
-      
+
 	sprintf( painCave.errMsg,
 		 "Could not open \"%s\" for stat output.\n",
 		 filename.c_str());
@@ -73,7 +75,7 @@ namespace OpenMD {
       }
 
       writeTitle();
-    
+
 #ifdef IS_MPI
     }
 
@@ -100,7 +102,7 @@ namespace OpenMD {
 
   void StatWriter::writeTitle() {
 
-    Stats::StatsBitSet mask = stats_->getStatsMask();    
+    Stats::StatsBitSet mask = stats_->getStatsMask();
 
 #ifdef IS_MPI
     if(worldRank == 0 ){
@@ -110,7 +112,7 @@ namespace OpenMD {
       statfile_ << "#";
       for (unsigned int i = 0; i <mask.size(); ++i) {
 	if (mask[i]) {
-	  statfile_ << "\t" << stats_->getTitle(i) << 
+	  statfile_ << "\t" << stats_->getTitle(i) <<
             "(" << stats_->getUnits(i) << ")";
 	}
       }
@@ -118,11 +120,11 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     }
-#endif // is_mpi    
+#endif // is_mpi
   }
 
   void StatWriter::writeStat() {
-    
+
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif // is_mpi
@@ -148,7 +150,7 @@ namespace OpenMD {
           }
         }
       }
-            
+
       statfile_ << std::endl;
       statfile_.flush();
 
@@ -170,15 +172,15 @@ namespace OpenMD {
                stats_->getTitle(i).c_str());
       painCave.isFatal = 1;
       simError();
-    }    
+    }
   }
 
   void StatWriter::writeVector(int i) {
 
     Vector3d s = stats_->getVectorData(i);
-    if (isinf(s[0]) || isnan(s[0]) || 
-        isinf(s[1]) || isnan(s[1]) || 
-        isinf(s[2]) || isnan(s[2]) ) {      
+    if (isinf(s[0]) || isnan(s[0]) ||
+        isinf(s[1]) || isnan(s[1]) ||
+        isinf(s[2]) || isnan(s[2]) ) {
       sprintf( painCave.errMsg,
                "StatWriter detected a numerical error writing: %s",
                stats_->getTitle(i).c_str());
@@ -217,7 +219,7 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
-        if (isinf(s(i,j)) || isnan(s(i,j))) {      
+        if (isinf(s(i,j)) || isnan(s(i,j))) {
           sprintf( painCave.errMsg,
                    "StatWriter detected a numerical error writing: %s",
                    stats_->getTitle(i).c_str());
@@ -228,5 +230,5 @@ namespace OpenMD {
         }
       }
     }
-  }    
+  }
 }

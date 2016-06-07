@@ -78,46 +78,55 @@ namespace OpenMD {
       RealType k = data.curvature;
       RealType c = data.coupling;
 
-      if (nDiabats == 2){
+      if (nDiabats == 1) {
         RealType q1 = data.diabaticStates[0].first;
         RealType e1 = data.diabaticStates[0].second;
-        RealType q2 = data.diabaticStates[1].first;
-        RealType e2 = data.diabaticStates[1].second;
-
         RealType v1 = e1 + 0.5 * k * (charge-q1)*(charge-q1);
         RealType v1p = k*(charge-q1);
-        RealType v2 = e2 + 0.5 * k * (charge-q2)*(charge-q2);
-        RealType v2p = k*(charge-q2);
-        potential += (v1 + v2 - sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
-        force -= (v1p + v2p - ((v1 - v2) * (v1p - v2p)) /
-                  sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
+        potential +=  v1;
+        force -= v1p;
       } else {
-        DynamicVector<RealType> diagonals(nDiabats);
-        DynamicVector<RealType> subdiagonals(nDiabats, c);
-        DynamicVector<RealType> vp(nDiabats);
-        DynamicVector<RealType> eigenvalues(nDiabats);
-        DynamicRectMatrix<RealType> eigenvectors(nDiabats, nDiabats);
-        RealType q;
-        RealType e; 
+        if (nDiabats == 2){
+          RealType q1 = data.diabaticStates[0].first;
+          RealType e1 = data.diabaticStates[0].second;
+          RealType q2 = data.diabaticStates[1].first;
+          RealType e2 = data.diabaticStates[1].second;
+          
+          RealType v1 = e1 + 0.5 * k * (charge-q1)*(charge-q1);
+          RealType v1p = k*(charge-q1);
+          RealType v2 = e2 + 0.5 * k * (charge-q2)*(charge-q2);
+          RealType v2p = k*(charge-q2);
+          potential += (v1 + v2 - sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
+          force -= (v1p + v2p - ((v1 - v2) * (v1p - v2p)) /
+                    sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
+        } else {
+          DynamicVector<RealType> diagonals(nDiabats);
+          DynamicVector<RealType> subdiagonals(nDiabats, c);
+          DynamicVector<RealType> vp(nDiabats);
+          DynamicVector<RealType> eigenvalues(nDiabats);
+          DynamicRectMatrix<RealType> eigenvectors(nDiabats, nDiabats);
+          RealType q;
+          RealType e; 
+          
+          for (int i = 0; i < nDiabats; i++) {
+            q = data.diabaticStates[i].first;
+            e = data.diabaticStates[i].second;
+            diagonals(i) = e + 0.5 * k * (charge-q)*(charge-q);
+            vp(i) = k*(charge-q);
+          }
+          
+          RealSymmetricTridiagonal<RealType> eig(diagonals, subdiagonals);
+          eig.getEigenvalues( eigenvalues );
+          eig.getEigenvectors( eigenvectors );
 
-        for (int i = 0; i < nDiabats; i++) {
-          q = data.diabaticStates[i].first;
-          e = data.diabaticStates[i].second;
-          diagonals(i) = e + 0.5 * k * (charge-q)*(charge-q);
-          vp(i) = k*(charge-q);
+          potential += eigenvalues(0);
+          for (int i = 0; i < nDiabats; i++) {
+            // all of the couplings are constant, so the condon
+            // approximation and Hellmann-Feynman let us obtain the
+            // forces easily:
+            force -= pow(eigenvectors(0, i), 2) * vp(i);
+          }              
         }
-
-        RealSymmetricTridiagonal<RealType> eig(diagonals, subdiagonals);
-        eig.getEigenvalues( eigenvalues );
-        eig.getEigenvectors( eigenvectors );
-
-        potential += eigenvalues(0);
-        for (int i = 0; i < nDiabats; i++) {
-          // all of the couplings are constant, so the condon
-          // approximation and Hellmann-Feynman let us obtain the
-          // forces easily:
-          force -= pow(eigenvectors(0, i), 2) * vp(i);
-        }              
       }
     } else {
       RealType Jii = data.hardness;

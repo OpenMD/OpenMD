@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -53,13 +53,14 @@ namespace OpenMD {
   FluctuatingChargeAtomTypesSectionParser::FluctuatingChargeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
     setSectionName("FluctuatingChargeAtomTypes");
 
-    stringToEnumMap_["Hardness"] =  fqtHardness;                
+    stringToEnumMap_["Hardness"] =  fqtHardness;
     stringToEnumMap_["MultipleMinima"] =  fqtMultipleMinima;
+    stringToEnumMap_["Metal"] =  fqtMetal;
 
   }
 
   void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
-                                                          const string& line, 
+                                                          const string& line,
                                                           int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();
@@ -84,9 +85,9 @@ namespace OpenMD {
 	  RealType charge = 0.0;
 	  fca.makeFixedCharge(charge);
 	}
-        
+
       } else {
-      sprintf(painCave.errMsg, 
+      sprintf(painCave.errMsg,
               "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
               "has not been created yet\n", atomTypeName.c_str());
       painCave.isFatal = 1;
@@ -96,7 +97,7 @@ namespace OpenMD {
 
     RealType chargeMass = tokenizer.nextTokenAsDouble();
     FluctuatingTypeEnum fqt = getFluctuatingTypeEnum(tokenizer.nextToken());
-    
+
     nTokens -= 3;
 
     switch(fqt) {
@@ -106,7 +107,7 @@ namespace OpenMD {
       // self charge potential defined by electronegativity and
       // hardness.  On molecular structures, the slater-type overlap
       // integral is used to compute the hardness.
-      
+
       // atomTypeName, chargeMass, Hardness, electronegativity,
       //   hardness (Jii), slaterN, slaterZeta
 
@@ -122,7 +123,7 @@ namespace OpenMD {
         int slaterN = tokenizer.nextTokenAsInt();
         RealType slaterZeta = tokenizer.nextTokenAsDouble();
 
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);        
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         fqa.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
       }
       break;
@@ -148,20 +149,51 @@ namespace OpenMD {
           ionizationEnergy = tokenizer.nextTokenAsDouble();
           diabaticStates.push_back( std::make_pair( charge, ionizationEnergy ));
         }
-        
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);        
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         fqa.makeFluctuatingCharge(chargeMass, curvature, coupling, diabaticStates);
       }
       break;
+
+      case fqtMetal:
+        if (nTokens < 5 || nTokens % 2 != 1) {
+          sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
+                  "Not enough tokens at line %d\n",
+                  lineNo);
+          painCave.isFatal = 1;
+          simError();
+        } else {
+          int nValence = tokenizer.nextTokenAsInt();
+          nTokens -= 1;
+
+          std::vector<std::pair<RealType, RealType> > diabaticStates;
+          RealType curvature = tokenizer.nextTokenAsDouble();
+          RealType coupling = tokenizer.nextTokenAsDouble();
+          nTokens -= 2;
+          int nStates = nTokens / 2;
+          RealType charge;
+          RealType ionizationEnergy;
+          for (int i = 0; i < nStates; ++i) {
+            charge = tokenizer.nextTokenAsDouble();
+            ionizationEnergy = tokenizer.nextTokenAsDouble();
+            diabaticStates.push_back( std::make_pair( charge, ionizationEnergy ));
+          }
+
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+          fqa.makeFluctuatingCharge(chargeMass, nValence, curvature, coupling, diabaticStates);
+        }
+        break;
+
+
     case fqtUnknown:
     default:
       sprintf(painCave.errMsg, "FluctuatingChargeAtomTypesSectionParser Error: "
-              "Unknown Bond Type at line %d\n",
+              "Unknown Fluctuating Charge Type at line %d\n",
               lineNo);
       painCave.isFatal = 1;
       simError();
       break;
-            
+
     }
   }
 

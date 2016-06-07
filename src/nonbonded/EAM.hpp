@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifndef NONBONDED_EAM_HPP
 #define NONBONDED_EAM_HPP
 
@@ -56,23 +56,26 @@ namespace OpenMD {
     CubicSpline* F;
     CubicSpline* Z;
     RealType rcut;
+    int nValence;
+    bool isFluctuatingCharge;
   };
-  
+
+
   struct EAMInteractionData {
     CubicSpline* phi;
     RealType rcut;
     bool explicitlySet;
   };
-  
+
   enum EAMMixingMethod{
     eamJohnson,
     eamDaw,
     eamUnknown
   };
-  
+
   class EAM : public MetallicInteraction {
-    
-  public:    
+
+  public:
     EAM();
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
@@ -87,9 +90,9 @@ namespace OpenMD {
     void setCutoffRadius( RealType rCut );
 
   private:
-    void initialize();  
+    void initialize();
     CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
-    
+
     bool initialized_;
     bool haveCutoffRadius_;
     set<int> EAMtypes;         /**< The set of AtomType idents that are EAM types */
@@ -102,11 +105,11 @@ namespace OpenMD {
     set<AtomType*> simTypes_;
     RealType pre11_;
     RealType eamRcut_;
-    EAMMixingMethod mixMeth_;    
+    EAMMixingMethod mixMeth_;
     string name_;
-    
+
   };
 }
 
-                               
+
 #endif

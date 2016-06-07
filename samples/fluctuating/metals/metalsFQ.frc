@@ -1,0 +1,38 @@
+begin BaseAtomTypes
+Au	196.97
+Ag	107.87
+Cu	63.550
+Ni	58.710
+Pd	106.40
+Pt	195.09
+end BaseAtomTypes
+
+begin EAMAtomTypes
+Au	Au.u3.funcfl
+Ag	Ag.u3.funcfl
+Cu	Cu.u3.funcfl
+Ni	Ni.u3.funcfl
+Pd	Pd.u3.funcfl
+Pt	Pt.u3.funcfl
+end EAMAtomTypes
+
+begin AtomTypes
+//name	baseatomtype
+Au_FQ   Au
+Ag_FQ   Ag
+Cu_FQ   Cu
+Ni_FQ   Ni
+Pd_FQ   Pd
+Pt_FQ   Pt
+end AtomTypes
+
+begin FluctuatingChargeAtomTypes
+// Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
+// this code and the Rick, Stuart, and Berne paper
+//Name  chargeMass (fs^2 kcal/e^2 mol) multipleMinima  curvature coupling 0 energy 1 energy ...
+Au_FQ 400.0 Metal 11 14.304 0.0  0.0 0.0
+Ag_FQ 400.0 Metal 11 11.808 0.0  0.0 0.0
+Cu_FQ 400.0 Metal 11 11.534 0.0  0.0 0.0
+Pd_FQ 400.0 Metal 10 13.030 0.0  0.0 0.0
+Pt_FQ 400.0 Metal 10 130.030 0.0  0.0 0.0
+end FluctuatingChargeAtomTypes

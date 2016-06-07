@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifndef TYPES_FLUCTUATINGCHARGEADAPTER_HPP
 #define TYPES_FLUCTUATINGCHARGEADAPTER_HPP
 
@@ -54,6 +54,8 @@ namespace OpenMD {
   struct FluctuatingAtypeParameters {
     RealType chargeMass;
     bool hasMultipleMinima;
+    bool isMetallic;
+    int nValence;          /** number of electrons in valence shell */
     RealType electronegativity; /** (relative) electronegativity */
     RealType hardness;     /** diagonal "Coulomb" Jii */
     int slaterN;           /** principal quantum number for Slater orbitals */
@@ -62,7 +64,7 @@ namespace OpenMD {
     RealType coupling;     /** multiple minima EVB coupling for charge states */
     vector<pair<RealType, RealType> > diabaticStates; /** multiple minima diabats */
   };
-  typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;   
+  typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;
 
   class FluctuatingChargeAdapter {
   public:
@@ -70,15 +72,17 @@ namespace OpenMD {
 
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, int slaterN, RealType slaterZeta);
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity, RealType hardness, int slaterN);
-
     void makeFluctuatingCharge(RealType chargeMass, RealType curvature, RealType coupling, vector<pair<RealType, RealType> > diabaticStates);
-    
+    void makeFluctuatingCharge(RealType chargeMass, int nValence, RealType curvature, RealType coupling, vector<pair<RealType, RealType> > diabaticStates);
+
     bool isFluctuatingCharge();
+    bool isMetallic();
     bool hasMultipleMinima();
     RealType getChargeMass();
     RealType getElectronegativity();
     RealType getHardness();
     int getSlaterN();
+    int getNValence();
     RealType getSlaterZeta();
     RealType getCoupling();
     RealType getCurvature();
@@ -86,7 +90,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    FluctuatingAtypeParameters* getFluctuatingChargeParam();    
+    FluctuatingAtypeParameters* getFluctuatingChargeParam();
   };
 }
 #endif
