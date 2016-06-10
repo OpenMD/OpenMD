@@ -80,11 +80,10 @@ namespace OpenMD {
 
 
   void Kirkwood::processHistogram() {
-
+    int nSelected1 = seleMan1_.getSelectionCount();
     for(unsigned int i = 0 ; i < histogram_.size(); ++i){
-      avgKirkwood_[i] += histogram_[i];    
+      avgKirkwood_[i] += histogram_[i] / nSelected1;    
     }
-
   }
 
   void Kirkwood::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
