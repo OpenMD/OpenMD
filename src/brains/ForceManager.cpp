@@ -973,8 +973,8 @@ namespace OpenMD {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
       curSnapshot->setReciprocalPotential(reciprocalPotential);
 
-      interactionMan_->doSurfaceTerm(surfacePotential);
-      curSnapshot->setSurfacePotential(surfacePotential);
+      // interactionMan_->doSurfaceTerm(surfacePotential);
+      // curSnapshot->setSurfacePotential(surfacePotential);
     }
         
     if (info_->requiresSelfCorrection()) {

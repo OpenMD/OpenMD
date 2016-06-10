@@ -86,6 +86,7 @@
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/PotDiff.hpp"
 #include "applications/staticProps/TetrahedralityHBMatrix.hpp"
+#include "applications/staticProps/Kirkwood.hpp"
 
 
 using namespace OpenMD;
@@ -507,8 +508,13 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.potDiff_given) {
     analyser = new PotDiff(info, dumpFileName, sele1);
+  } else if (args_info.kirkwood_given) {
+    analyser= new Kirkwood(info, dumpFileName, sele1, sele2, maxLen, 
+                           nrbins);
+  } else if (args_info.kirkwoodQ_given) {
+    analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen, 
+                                      nrbins);
   }
-
   
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);

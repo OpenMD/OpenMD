@@ -684,6 +684,7 @@ src/applications/staticProps/GofZ.cpp
 src/applications/staticProps/GCN.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
+src/applications/staticProps/Kirkwood.cpp
 src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp
