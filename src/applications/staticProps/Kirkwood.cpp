@@ -214,7 +214,7 @@ namespace OpenMD {
       trQ1 = Q1.trace();
        
       if (ma2.isQuadrupole()) {
-        Q2 = sd1->getQuadrupole();      
+        Q2 = sd2->getQuadrupole();      
         trQ2 = Q2.trace();
         Q2dQ2 = doubleDot(Q2, Q2);
         Q2 /= sqrt(3.0 * Q2dQ2 - trQ2*trQ2);
