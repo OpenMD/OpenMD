@@ -1248,7 +1248,6 @@ namespace OpenMD {
   void Electrostatic::calcSurfaceTerm(RealType& pot) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
-    int i;
     RealType C;
     Vector3d r;    
     Vector3d D;
@@ -1280,8 +1279,7 @@ namespace OpenMD {
       for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {  
 
-        i = atom->getLocalIndex();
-        int atid = atom->getAtomType()->getIdent();
+        atid = atom->getAtomType()->getIdent();
         data = ElectrostaticMap[Etids[atid]];
         
         if (data.is_Charge) {
@@ -1318,8 +1316,7 @@ namespace OpenMD {
       for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {  
 
-        i = atom->getLocalIndex();
-        int atid = atom->getAtomType()->getIdent();
+        atid = atom->getAtomType()->getIdent();
         data = ElectrostaticMap[Etids[atid]];
         
         if (data.is_Charge) {

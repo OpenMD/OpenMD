@@ -104,7 +104,7 @@ namespace OpenMD {
     AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();          
 
     MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-    MultipoleAdapter ma2 = MultipoleAdapter(atype1);
+    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
 
     Vector3d d1(0.0);
     Vector3d d2(0.0);
@@ -187,7 +187,7 @@ namespace OpenMD {
     AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();          
 
     MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-    MultipoleAdapter ma2 = MultipoleAdapter(atype1);
+    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
 
     Mat3x3d Q1(0.0);
     Mat3x3d Q2(0.0);
@@ -195,7 +195,6 @@ namespace OpenMD {
     RealType trQ2(0.0);
     RealType Q1dQ1(0.0);
     RealType Q2dQ2(0.0);
-    RealType Q1dQ2(0.0);
     
     RealType quadrupoleProduct(0.0);
 
