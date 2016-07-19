@@ -76,7 +76,6 @@ namespace OpenMD {
     RealType getVolume(){ return volume_; } 
     
     vector<Triangle> getMesh(){ return Triangles_; }
-    void printHull(const std::string& geomFileName);
     
   protected:
     int dim_;
@@ -89,7 +88,6 @@ namespace OpenMD {
     RealType volume_;
     RealType area_;
     std::vector<Triangle> Triangles_;
-
   };
 }
 #endif

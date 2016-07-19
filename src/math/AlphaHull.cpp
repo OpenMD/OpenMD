@@ -70,7 +70,13 @@ AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha),
 }
 
 void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) { 
- 
+
+#ifdef HAVE_QHULL_REENTRANT
+  qhT qh_qh;
+  qhT *qh= &qh_qh;
+  QHULL_LIB_CHECK
+#endif
+  
   int numpoints = bodydoubles.size();
   
   Triangles_.clear();
@@ -79,8 +85,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   facetT *facet, *neighbor;
   pointT *interiorPoint;
   int curlong, totlong;
-  
-  
+    
   vector<double> ptArray(numpoints*dim_);
   
   // Copy the positon vector into a points vector for qhull.
@@ -99,15 +104,31 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   
   /* compute the hull for our local points (or all the points for single
      processor versions) */
+#ifdef HAVE_QHULL_REENTRANT
+  qh_init_A(qh, NULL, NULL, stderr, 0, NULL);
+  int exitcode= setjmp(qh->errexit);
+  if (!exitcode) {
+    qh->NOerrexit = False;
+    qh_initflags(qh, const_cast<char *>(options_.c_str()));
+    qh_init_B(qh, &ptArray[0], numpoints, dim_, ismalloc);
+    qh_qhull(qh);
+    exitcode= qh_ERRnone;
+    qh->NOerrexit= True;
+  } else {
+    sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
+    painCave.isFatal = 1;
+    simError();
+  }
+#else
   if (qh_new_qhull(dim_, numpoints, &ptArray[0], ismalloc,
-                   const_cast<char *>(options_.c_str()), NULL, stderr)) {
-    
+                   const_cast<char *>(options_.c_str()), NULL, stderr)) {    
     sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
     
   } //qh_new_qhull
-  
+#endif
+
   
 #ifdef IS_MPI
   //If we are doing the mpi version, set up some vectors for data communication
@@ -132,7 +153,11 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   FORALLvertices{
     localHullSites++;
     
+#ifdef HAVE_QHULL_REENTRANT
+    int idx = qh_pointid(qh, vertex->point);
+#else
     int idx = qh_pointid(vertex->point);
+#endif
     
     indexMap.push_back(idx);
 
@@ -186,8 +211,13 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
                  &displacements[0], MPI_DOUBLE, MPI_COMM_WORLD);
   
   // Free previous hull
+#ifdef HAVE_QHULL_REENTRANT
+  qh_freeqhull(qh, !qh_ALL);
+  qh_memfreeshort(qh, &curlong, &totlong);
+#else
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
+#endif
   if (curlong || totlong) {
     sprintf(painCave.errMsg, "AlphaHull: qhull internal warning:\n"
             "\tdid not free %d bytes of long memory (%d pieces)", 
@@ -196,21 +226,39 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     simError();
   }
   
+#ifdef HAVE_QHULL_REENTRANT
+  qh_init_A(qh, NULL, NULL, stderr, 0, NULL);
+  exitcode= setjmp(qh->errexit);
+  if (!exitcode) {
+    qh->NOerrexit = False;
+    qh_initflags(qh, const_cast<char *>(options_.c_str()));
+    qh_init_B(qh, &globalCoords[0], globalHullSites, dim_, ismalloc);
+    qh_qhull(qh);
+    exitcode= qh_ERRnone;
+    qh->NOerrexit= True;
+  } else {
+    sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
+    painCave.isFatal = 1;
+    simError();
+  }
+#else  
   if (qh_new_qhull(dim_, globalHullSites, &globalCoords[0], ismalloc,
                    const_cast<char *>(options_.c_str()), NULL, stderr)){
-    
     sprintf(painCave.errMsg, 
             "AlphaHull: Qhull failed to compute global convex hull");
     painCave.isFatal = 1;
-    simError();
-        
+    simError();        
   } //qh_new_qhull
+#endif    
 
 #endif
 
   //Set facet->center as the Voronoi center
+#ifdef HAVE_QHULL_REENTRANT
+  qh_setvoronoi_all(qh);
+#else
   qh_setvoronoi_all();
-  
+#endif
   
   // int convexNumVert = qh_setsize(qh_facetvertices (qh facet_list, NULL, false));
   //Insert all the sample points, because, even with alpha=0, the
@@ -233,13 +281,24 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   }
   */
   //Set of alpha complex triangles for alphashape filtering
-  setT* set= qh_settemp(4* qh num_facets); 
-  
-  qh visit_id++;
-  int numFacets=0;
   vector<vector <int> > facetlist;
+  int numFacets=0;
+
+#ifdef HAVE_QHULL_REENTRANT
+  setT* set= qh_settemp(qh, 4* qh->num_facets); 
+  qh->visit_id++;
+  interiorPoint = qh->interior_point;  
+#else
+  setT* set= qh_settemp(4* qh num_facets); 
+  qh visit_id++;
   interiorPoint = qh interior_point;
+#endif
+
+#ifdef HAVE_QHULL_REENTRANT
+  FORALLfacet_(qh->facet_list) {
+#else  
   FORALLfacet_(qh facet_list) {
+#endif
     numFacets++;
     if (!facet->upperdelaunay) {
       //For all facets (that are tetrahedrons)calculate the radius of
@@ -248,7 +307,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       vertexT* vertex = (vertexT *)(facet->vertices->e[0].p);
       double* center = facet->center;
       double radius =  qh_pointdist(vertex->point,center,dim_);
-      
+
       if (radius>alpha_) // if the facet is not good consider the ridges
         {
           //if calculating the alphashape, unmark the facet ('good' is
@@ -257,13 +316,22 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
           
           //Compute each ridge (triangle) once and test the
           //cironference radius with alpha
+#ifdef HAVE_QHULL_REENTRANT
+          facet->visitid= qh->visit_id;
+          qh_makeridges(qh, facet);
+#else
           facet->visitid= qh visit_id;
           qh_makeridges(facet);
+#endif
           ridgeT *ridge, **ridgep;
           int goodTriangles=0;
           FOREACHridge_(facet->ridges) {
             neighbor= otherfacet_(ridge, facet);
-            if (( neighbor->visitid != qh visit_id)){ 			
+#ifdef HAVE_QHULL_REENTRANT
+            if (( neighbor->visitid != qh->visit_id)){
+#else
+            if (( neighbor->visitid != qh visit_id)){
+#endif
               //Calculate the radius of the circumference 
               pointT* p0 = ((vertexT*) (ridge->vertices->e[0].p))->point;
               pointT* p1 = ((vertexT*) (ridge->vertices->e[1].p))->point;
@@ -274,7 +342,11 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
               if(radius <=alpha_){
                 goodTriangles++;
                 //save the triangle (ridge) for subsequent filtering
-                qh_setappend(&set, ridge); 
+#ifdef HAVE_QHULL_REENTRANT
+                qh_setappend(qh, &set, ridge);
+#else
+                qh_setappend(&set, ridge);
+#endif
               }
             }
           }
@@ -290,18 +362,32 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
            //tetrahedron in the mesh
         {
           //Compute each ridge (triangle) once
+#ifdef HAVE_QHULL_REENTRANT
+          facet->visitid= qh->visit_id;
+#else          
           facet->visitid= qh visit_id;
+#endif
           //If calculating the alphashape, mark the facet('good' is
           //used as 'marked').  This facet will have some triangles
           //hidden by the facet's neighbor.
           facet->good=true;
+#ifdef HAVE_QHULL_REENTRANT
+          qh_makeridges(qh, facet);
+#else          
           qh_makeridges(facet);
+#endif
           ridgeT *ridge, **ridgep;
           FOREACHridge_(facet->ridges) {
             neighbor= otherfacet_(ridge, facet);
+#ifdef HAVE_QHULL_REENTRANT
+            if ((neighbor->visitid != qh->visit_id)){
+              qh_setappend(qh, &set, ridge);
+            }
+#else            
             if ((neighbor->visitid != qh visit_id)){
-                 qh_setappend(&set, ridge);
-            }	
+              qh_setappend(&set, ridge);
+            }
+#endif
           }
         }
     }
@@ -337,8 +423,17 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       
       int ver = 0;
       vector<int> virtexlist;
+      
+#ifdef HAVE_QHULL_REENTRANT
+      FOREACHvertex_i_(qh, ridge->vertices){
+#else
       FOREACHvertex_i_(ridge->vertices){
+#endif
+#ifdef HAVE_QHULL_REENTRANT
+        int id = qh_pointid(qh, vertex->point);
+#else
         int id = qh_pointid(vertex->point);
+#endif
         p[ver][0] = vertex->point[0];
         p[ver][1] = vertex->point[1];
         p[ver][2] = vertex->point[2];
@@ -366,7 +461,11 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       Vector3d normal = face.getUnitNormal();
       // RealType offset =  ((0.0-p[0][0])*normal[0] + (0.0-p[0][1])*normal[1] + (0.0-p[0][2])*normal[2]);
       RealType dist =  normal[0] * interiorPoint[0] + normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
+#ifdef HAVE_QHULL_REENTRANT
+      volume_ += dist *area/qh->hull_dim;
+#else      
       volume_ += dist *area/qh hull_dim;
+#endif
       
       Triangles_.push_back(face);
     }
@@ -464,9 +563,13 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // qh_getarea(qh facet_list);
   //volume_ = qh totvol;
   // area_ = qh totarea;
-
+#ifdef HAVE_QHULL_REENTRANT
+  qh_freeqhull(qh, !qh_ALL);
+  qh_memfreeshort(qh, &curlong, &totlong);  
+#else
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
+#endif
   if (curlong || totlong) {
     sprintf(painCave.errMsg, "AlphaHull: qhull internal warning:\n"
             "\tdid not free %d bytes of long memory (%d pieces)", 
@@ -476,24 +579,32 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   }
 }
 
-void AlphaHull::printHull(const string& geomFileName) {
+// void AlphaHull::printHull(const string& geomFileName) {
   
-#ifdef IS_MPI
-  if (worldRank == 0)  {
-#endif
-    FILE *newGeomFile;
+// #ifdef IS_MPI
+//   if (worldRank == 0)  {
+// #endif
+//     FILE *newGeomFile;
     
-    //create new .omd file based on old .omd file
-    newGeomFile = fopen(geomFileName.c_str(), "w");
-    qh_findgood_all(qh facet_list);
-    for (int i = 0; i < qh_PRINTEND; i++)
-      qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
+//     //create new .omd file based on old .omd file
+//     newGeomFile = fopen(geomFileName.c_str(), "w");
+// #ifdef HAVE_QHULL_REENTRANT
+//     qh_findgood_all(qh, qh->facet_list);
+// #else
+//     qh_findgood_all(qh facet_list);
+// #endif
+//     for (int i = 0; i < qh_PRINTEND; i++)
+// #ifdef HAVE_QHULL_REENTRANT
+//       qh_printfacets(qh, newGeomFile, qh->PRINTout[i], qh->facet_list, NULL, !qh_ALL);
+// #else
+//       qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
+// #endif
     
-    fclose(newGeomFile);
-#ifdef IS_MPI
-  }
-#endif  
-}
+//     fclose(newGeomFile);
+// #ifdef IS_MPI
+//   }
+// #endif  
+// }
 
   double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim){
     coordT a = qh_pointdist(p0,p1,dim);

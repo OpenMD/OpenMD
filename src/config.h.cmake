@@ -28,6 +28,7 @@
 /* Is defined if the qhull library is available. */
 
 #cmakedefine HAVE_QHULL 1
+#cmakedefine HAVE_QHULL_REENTRANT 1
 #cmakedefine HAVE_QHULL_2011 1
 #ifdef DISABLE_QHULL
 #undef HAVE_QHULL

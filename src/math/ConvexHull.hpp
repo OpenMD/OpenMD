@@ -60,7 +60,6 @@
 #include <vector>
 #include <string>
 
-
 namespace OpenMD {
   class ConvexHull : public Hull {
   public:
@@ -77,7 +76,6 @@ namespace OpenMD {
     RealType getVolume(){ return volume_; } 
 
     std::vector<Triangle> getMesh(){return Triangles_;}
-    void printHull(const std::string& geomFileName);
 
   protected:
     const std::string options_;

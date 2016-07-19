@@ -32,15 +32,15 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-/* Simple wrapper include file to get the right header files for qhull. 
+/* Simple wrapper include file to get the right header files for qhull.
  */
 
 #include <config.h>
@@ -50,14 +50,14 @@
 #define MATH_QHULL_HPP
 
 #if defined __GNUC__
-#  pragma GCC system_header 
+#  pragma GCC system_header
 #endif
 
 /*
 
   If the qhull library is dynamically linked, we need one of these two,
   but the qh_QHpointer=0 option appears to work well.
- 
+
   qh_QHpointer  = 1     access globals via a pointer to allocated memory
                         enables qh_saveqhull() and qh_restoreqhull()
 
@@ -65,12 +65,24 @@
                         only one instance of qhull() can be active at a time
 */
 
-#ifdef qh_QHpointer
+#ifndef HAVE_QHULL_REENTRANT 
+#ifdef qh_QHpointer 
 #define qh_QHpointer 0
+#endif
 #endif
 
 extern "C"
 {
+#ifdef HAVE_QHULL_REENTRANT
+#  include "libqhull_r/libqhull_r.h"
+#  include "libqhull_r/mem_r.h"
+#  include "libqhull_r/qset_r.h"
+#  include "libqhull_r/geom_r.h"
+#  include "libqhull_r/merge_r.h"
+#  include "libqhull_r/poly_r.h"
+#  include "libqhull_r/io_r.h"
+#  include "libqhull_r/stat_r.h"
+#else
 #ifdef HAVE_QHULL_2011
 #  include "libqhull/libqhull.h"
 #  include "libqhull/mem.h"
@@ -90,8 +102,8 @@ extern "C"
 #  include "qhull/io.h"
 #  include "qhull/stat.h"
 #endif
+#endif
 }
 
 #endif
 #endif
-
