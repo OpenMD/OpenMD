@@ -91,6 +91,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // Copy the positon vector into a points vector for qhull.
   vector<StuntDouble*>::iterator SD;
   int i = 0;
+
   for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
     Vector3d pos = (*SD)->getPos();      
     ptArray[dim_ * i] = pos.x();
@@ -112,6 +113,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     qh_initflags(qh, const_cast<char *>(options_.c_str()));
     qh_init_B(qh, &ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull(qh);
+    qh_check_output(qh);
     exitcode= qh_ERRnone;
     qh->NOerrexit= True;
   } else {
@@ -120,13 +122,20 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     simError();
   }
 #else
-  if (qh_new_qhull(dim_, numpoints, &ptArray[0], ismalloc,
-                   const_cast<char *>(options_.c_str()), NULL, stderr)) {    
+  qh_init_A(NULL, NULL, stderr, 0, NULL);
+  int exitcode= setjmp(qh errexit);
+  if (!exitcode) {
+    qh_initflags(const_cast<char *>(options_.c_str()));
+    qh_init_B(&ptArray[0], numpoints, dim_, ismalloc);
+    qh_qhull();
+    qh_check_output();
+    exitcode= qh_ERRnone;
+    qh NOerrexit= True;
+  } else {
     sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
-    
-  } //qh_new_qhull
+  }
 #endif
 
   
@@ -234,6 +243,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     qh_initflags(qh, const_cast<char *>(options_.c_str()));
     qh_init_B(qh, &globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull(qh);
+    qh_check_output(qh);
     exitcode= qh_ERRnone;
     qh->NOerrexit= True;
   } else {
@@ -241,14 +251,22 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     painCave.isFatal = 1;
     simError();
   }
-#else  
-  if (qh_new_qhull(dim_, globalHullSites, &globalCoords[0], ismalloc,
-                   const_cast<char *>(options_.c_str()), NULL, stderr)){
-    sprintf(painCave.errMsg, 
-            "AlphaHull: Qhull failed to compute global convex hull");
+#else   
+  qh_init_A(NULL, NULL, stderr, 0, NULL);
+  exitcode= setjmp(qh errexit);
+  if (!exitcode) {
+    qh NOerrexit = False;
+    qh_initflags(const_cast<char *>(options_.c_str()));
+    qh_init_B(&globalCoords[0], globalHullSites, dim_, ismalloc);
+    qh_qhull();
+    qh_check_output();
+    exitcode= qh_ERRnone;
+    qh NOerrexit= True;
+  } else {
+    sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
-    simError();        
-  } //qh_new_qhull
+    simError();
+  }
 #endif    
 
 #endif

@@ -67,7 +67,7 @@
 
 #ifndef HAVE_QHULL_REENTRANT 
 #ifdef qh_QHpointer 
-#define qh_QHpointer 0
+#define qh_QHpointer 1
 #endif
 #endif
 
