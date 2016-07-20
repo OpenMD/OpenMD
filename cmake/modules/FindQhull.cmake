@@ -35,7 +35,7 @@ if(QHULL_USE_STATIC)
   set(QHULL_DEBUG_NAME qhullstatic_d)
 else(QHULL_USE_STATIC)
   # prefer reentrant, then pointer (qh_QHpointer = 1) version, then
-  # static object (qh_QHpointer = 0)
+  # static object (qh_QHpointer = 0) or unknown
   set(QHULL_RELEASE_NAME qhull_r qhull${QHULL_MAJOR_VERSION}_r qhull_r${QHULL_MAJOR_VERSION} 
                          qhull_p qhull${QHULL_MAJOR_VERSION}_p qhull_p${QHULL_MAJOR_VERSION} 
                          qhull qhull${QHULL_MAJOR_VERSION})
@@ -100,8 +100,7 @@ if(QHULL_LIBRARY)
         set(HAVE_QHULL_REENTRANT_LIB OFF)
         set(HAVE_QHULL_POINTER_LIB ON)
     else()
-        set(HAVE_QHULL_REENTRANT_LIB OFF)
-        # could still be pointer version of library - we don't know
+        # could still be pointer or reentrant version of library - we don't know
     endif()
 endif(QHULL_LIBRARY)
 
@@ -120,15 +119,17 @@ if(QHULL_FOUND)
     set(HAVE_QHULL_REENTRANT ON)
   endif(HAVE_QHULL_REENTRANT_HEADERS AND HAVE_QHULL_REENTRANT_LIB)
 
-  if(NOT QHULL_USE_STATIC AND NOT QHULL_USE_REENTRANT AND NOT HAVE_QHULL_REENTRANT)
-    if(HAVE_QHULL_POINTER_LIB)
-      add_definitions("-Dqh_QHpointer=1")
-    else()
-      add_definitions("-Dqh_QHpointer=0")
-      if(MSVC)
-        add_definitions("-Dqh_QHpointer_dllimport")      
-      endif(MSVC)
-    endif(HAVE_QHULL_POINTER_LIB)
-  endif(NOT QHULL_USE_STATIC AND NOT QHULL_USE_REENTRANT AND NOT HAVE_QHULL_REENTRANT)
+  if (QHULL_USE_STATIC)
+    add_definitions("-Dqh_QHpointer=0")
+    if(MSVC)
+      add_definitions("-Dqh_QHpointer_dllimport")
+    endif(MSVC)
+  endif(QHULL_USE_STATIC)
+
+  if(NOT HAVE_QHULL_REENTRANT AND NOT QHULL_USE_STATIC)
+    #possibly a dangerous assumption that if we don't have the reentrant headers and libs and 
+    #if we also don't request static, then we want the pointer version:
+    add_definitions("-Dqh_QHpointer=1")
+  endif(NOT HAVE_QHULL_REENTRANT AND NOT QHULL_USE_STATIC)
   message(STATUS "QHULL found (include: ${QHULL_INCLUDE_DIRS}, lib: ${QHULL_LIBRARIES})")
 endif(QHULL_FOUND)
