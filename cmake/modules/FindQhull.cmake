@@ -9,14 +9,39 @@
 # If QHULL_USE_STATIC is specified then look for static libraries ONLY else
 # look for shared ones
 
-set(QHULL_MAJOR_VERSION 7)
+find_program(QHULL_BINARY qhull PATHS ${QHULL_ROOT}/bin)
+
+if(QHULL_BINARY STREQUAL "QHULL_BINARY-NOTFOUND")
+    set(QHULL_FOUND FALSE)
+else()
+    set(QHULL_FOUND TRUE)
+    execute_process(COMMAND "${QHULL_BINARY}" OUTPUT_VARIABLE _QHULL_OUT)
+    string(REGEX MATCH "([0-9]+\\.[0-9]+)" QHULL_VERSION "${_QHULL_OUT}")
+endif()
+
+# qhull Versions
+if(${QHULL_VERSION} STREQUAL "2003.1")
+    set(QHULL_MAJOR_VERSION "4")
+elseif(${QHULL_VERSION} VERSION_GREATER "2009" AND ${QHULL_VERSION} VERSION_LESS "2010")
+    set(QHULL_MAJOR_VERSION  "5")
+elseif(${QHULL_VERSION} VERSION_GREATER "2010" AND ${QHULL_VERSION} VERSION_LESS "2015" )
+    set(QHULL_MAJOR_VERSION  "6")
+elseif(${QHULL_VERSION} VERSION_GREATER "2015")
+    set(QHULL_MAJOR_VERSION  "7")
+endif()
 
 if(QHULL_USE_STATIC)
   set(QHULL_RELEASE_NAME qhullstatic)
   set(QHULL_DEBUG_NAME qhullstatic_d)
 else(QHULL_USE_STATIC)
-  set(QHULL_RELEASE_NAME qhull_r qhull${QHULL_MAJOR_VERSION}_r qhull_r${QHULL_MAJOR_VERSION} qhull qhull${QHULL_MAJOR_VERSION})
-  set(QHULL_DEBUG_NAME qhull_rd qhull${QHULL_MAJOR_VERSION}_rd qhull_rd${QHULL_MAJOR_VERSION} qhull${QHULL_MAJOR_VERSION}_d qhull_d${QHULL_MAJOR_VERSION})
+  # prefer reentrant, then pointer (qh_QHpointer = 1) version, then
+  # static object (qh_QHpointer = 0)
+  set(QHULL_RELEASE_NAME qhull_r qhull${QHULL_MAJOR_VERSION}_r qhull_r${QHULL_MAJOR_VERSION} 
+                         qhull_p qhull${QHULL_MAJOR_VERSION}_p qhull_p${QHULL_MAJOR_VERSION} 
+                         qhull qhull${QHULL_MAJOR_VERSION})
+  set(QHULL_DEBUG_NAME qhull_rd qhull${QHULL_MAJOR_VERSION}_rd qhull_rd${QHULL_MAJOR_VERSION} 
+                       qhull_pd qhull${QHULL_MAJOR_VERSION}_pd qhull_pd${QHULL_MAJOR_VERSION} 
+                       qhull_d qhull${QHULL_MAJOR_VERSION}_d qhull_d${QHULL_MAJOR_VERSION})
 endif(QHULL_USE_STATIC)
 
 find_file(QHULL_HEADER
@@ -68,12 +93,15 @@ endif(NOT QHULL_LIBRARY_DEBUG)
 
 if(QHULL_LIBRARY)
     get_filename_component(qhull_library ${QHULL_LIBRARY} NAME_WE)
-    if("${qhull_library}" STREQUAL "libqhull_r")
+    if("${qhull_library}" MATCHES "libqhull[a-zA-Z0-9]*_[a-zA-Z0-9]*r[a-zA-Z0-9]*")
         set(HAVE_QHULL_REENTRANT_LIB ON)
-    elseif("${qhull_library}" STREQUAL "libqhull_rd")
-        set(HAVE_QHULL_REENTRANT_LIB ON)
+        set(HAVE_QHULL_POINTER_LIB OFF)
+    elseif("${qhull_library}" MATCHES "libqhull[a-zA-Z0-9]*_[a-zA-Z0-9]*p[a-zA-Z0-9]*")
+        set(HAVE_QHULL_REENTRANT_LIB OFF)
+        set(HAVE_QHULL_POINTER_LIB ON)
     else()
         set(HAVE_QHULL_REENTRANT_LIB OFF)
+        # could still be pointer version of library - we don't know
     endif()
 endif(QHULL_LIBRARY)
 
@@ -93,11 +121,14 @@ if(QHULL_FOUND)
   endif(HAVE_QHULL_REENTRANT_HEADERS AND HAVE_QHULL_REENTRANT_LIB)
 
   if(NOT QHULL_USE_STATIC AND NOT QHULL_USE_REENTRANT AND NOT HAVE_QHULL_REENTRANT)
-    message(STATUS "Dynamic, but not reentrant Qhull, adding definition for qh_QHpointer")
-    add_definitions("-Dqh_QHpointer")
-    if(MSVC)
-      add_definitions("-Dqh_QHpointer_dllimport")
-    endif(MSVC)
+    if(HAVE_QHULL_POINTER_LIB)
+      add_definitions("-Dqh_QHpointer=1")
+    else()
+      add_definitions("-Dqh_QHpointer=0")
+      if(MSVC)
+        add_definitions("-Dqh_QHpointer_dllimport")      
+      endif(MSVC)
+    endif(HAVE_QHULL_POINTER_LIB)
   endif(NOT QHULL_USE_STATIC AND NOT QHULL_USE_REENTRANT AND NOT HAVE_QHULL_REENTRANT)
   message(STATUS "QHULL found (include: ${QHULL_INCLUDE_DIRS}, lib: ${QHULL_LIBRARIES})")
 endif(QHULL_FOUND)

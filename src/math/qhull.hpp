@@ -53,24 +53,6 @@
 #  pragma GCC system_header
 #endif
 
-/*
-
-  If the qhull library is dynamically linked, we need one of these two,
-  but the qh_QHpointer=0 option appears to work well.
-
-  qh_QHpointer  = 1     access globals via a pointer to allocated memory
-                        enables qh_saveqhull() and qh_restoreqhull()
-
-                = 0     qh_qh and qh_qhstat are static data structures
-                        only one instance of qhull() can be active at a time
-*/
-
-#ifndef HAVE_QHULL_REENTRANT 
-#ifdef qh_QHpointer 
-#define qh_QHpointer 1
-#endif
-#endif
-
 extern "C"
 {
 #ifdef HAVE_QHULL_REENTRANT
