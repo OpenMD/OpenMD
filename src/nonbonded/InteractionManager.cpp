@@ -62,7 +62,7 @@ namespace OpenMD {
     eam_ = new EAM();
     sc_ = new SC();
     electrostatic_ = new Electrostatic();
-    maw_ = new MAW();
+    maw_ = new MAW();   
   }
 
   InteractionManager::~InteractionManager() {
@@ -71,6 +71,7 @@ namespace OpenMD {
     delete sticky_;
     delete morse_;
     delete repulsivePower_;
+    delete mie_;
     delete eam_;
     delete sc_;
     delete electrostatic_;
@@ -93,6 +94,7 @@ namespace OpenMD {
     electrostatic_->setForceField(forceField_);
     maw_->setForceField(forceField_);
     repulsivePower_->setForceField(forceField_);
+    mie_->setForceField(forceField_);
 
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     int nTypes = atomTypes->size();
@@ -119,6 +121,7 @@ namespace OpenMD {
     electrostatic_->setSimulatedAtomTypes(atypes);
     maw_->setSimulatedAtomTypes(atypes);
     repulsivePower_->setSimulatedAtomTypes(atypes);
+    mie_->setSimulatedAtomTypes(atypes);
 
     set<AtomType*>::iterator at;
 
@@ -174,10 +177,14 @@ namespace OpenMD {
         atype2 = (*it2).second;
         atid2 = atype2->getIdent();
 
+        cerr << "doing types" << atype1->getName() << " with " << atype2->getName() << "\n";
+
         iHash_[atid1][atid2] = 0;
 
         if (atype1->isLennardJones() && atype2->isLennardJones()) {
           interactions_[atid1][atid2].insert(lj_);
+          cerr << "interactions size = " << interactions_[atid1][atid2].size() << "\n";
+
           iHash_[atid1][atid2] |= LJ_INTERACTION;
         }
         if (atype1->isElectrostatic() && atype2->isElectrostatic() ) {
@@ -324,31 +331,32 @@ namespace OpenMD {
               painCave.isFatal = 1;
               simError();
             }
-            // We found an explicit RepulsivePower interaction.
+            // We found an explicit Mie interaction.
             // override all other vdw entries for this pair of atom types:
             set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
-            interactions_[atid1][atid2].insert(repulsivePower_);
+            interactions_[atid1][atid2].insert(mie_);
             iHash_[atid1][atid2] |= MIE_INTERACTION;
             MieInteractionType* mit = dynamic_cast<MieInteractionType*>(nbiType);
-
+            
             mie_->addExplicitInteraction(atype1, atype2,
                                          mit->getSigma(),
                                          mit->getEpsilon(),
                                          mit->getNrep(),
                                          mit->getMatt());
-
+            
             vdwExplicit = true;
           }
-
-
+          
           if (nbiType->isEAM()) {
             // We found an explicit EAM interaction.
             // override all other metallic entries for this pair of atom types:
