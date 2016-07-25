@@ -1,0 +1,29 @@
+# Input file for gengetopt. This file generates simpleBuilderCmd.cpp and 
+# simpleBuilderCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=simpleBuilderCmd --c-extension=cpp --header-extension=hpp"
+
+package "simpleBuilder"
+version "" 
+
+purpose
+"Creates simple lattice structures. It requires an initial, but
+skeletal OpenMD file to specify the components that are to be placed
+on the lattice. The total number of placed molecules will be shown at
+the top of the configuration file that is generated, and that number
+may not match the original meta-data file, so a new meta-data file is
+also generated which matches the lattice structure."
+
+# Options
+
+option "output"        o  "Output file name" string yes
+option "density"       -  "density (g/cm^3)" double yes
+option "nx"            -  "number of unit cells in x" int yes 
+option "ny"            -  "number of unit cells in y" int yes
+option "nz"            -  "number of unit cells in z" int yes

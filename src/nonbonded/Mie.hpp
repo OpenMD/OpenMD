@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,42 +40,57 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef NONBONDED_MIE_HPP
+#define NONBONDED_MIE_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "types/AtomType.hpp"
+#include "brains/ForceField.hpp"
+#include "math/Vector3.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  class NonBondedInteractionsSectionParser : public SectionParser {
-  public:
-    NonBondedInteractionsSectionParser(ForceFieldOptions& options);
-            
-  private:
-
-    enum NonBondedInteractionTypeEnum{
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      RepulsivePower,
-      Mie,
-      MAW,
-      Buckingham,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
-    
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
+  struct MieInteractionData {
+    RealType sigma;
+    RealType epsilon;
+    RealType sigmai;
+    int nRep;
+    int mAtt;
+    RealType nmScale;
   };
 
+  class Mie : public VanDerWaalsInteraction {
+    
+  public:    
+    Mie();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon, int nRep, int mAtt);
+    virtual void calcForce(InteractionData &idat);
+    virtual string getName() {return name_;}
+    virtual int getHash() { return MIE_INTERACTION; }
+    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
+    
+  private:
+    void initialize();
+    void getMieFunc(const RealType &r, int &n, int &m, RealType &pot, RealType &deriv);
 
-} //namespace OpenMD
+    bool initialized_;
 
+    set<int> MieTypes;                  /**< The set of AtomType idents that are Mie types */
+    vector<int> MieTids;                /**< The mapping from AtomType ident -> Mie type ident */
+    vector<vector<MieInteractionData> > MixingMap;  /**< The mixing
+                                                       parameters
+                                                       between two Mie
+                                                       types */
+
+    ForceField* forceField_;    
+    set<AtomType*> simTypes_;
+    string name_;
+    
+  };
+}
+
+                               
 #endif
-
-

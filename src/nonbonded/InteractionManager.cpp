@@ -44,6 +44,7 @@
 #include "types/LennardJonesInteractionType.hpp"
 #include "types/MorseInteractionType.hpp"
 #include "types/RepulsivePowerInteractionType.hpp"
+#include "types/MieInteractionType.hpp"
 #include "types/MAWInteractionType.hpp"
 
 namespace OpenMD {
@@ -57,6 +58,7 @@ namespace OpenMD {
     sticky_ = new Sticky();
     morse_ = new Morse();
     repulsivePower_ = new RepulsivePower();
+    mie_ = new Mie();
     eam_ = new EAM();
     sc_ = new SC();
     electrostatic_ = new Electrostatic();
@@ -307,6 +309,41 @@ namespace OpenMD {
                                                     rpit->getSigma(),
                                                     rpit->getEpsilon(),
                                                     rpit->getNrep());
+
+            vdwExplicit = true;
+          }
+
+          if (nbiType->isMie()) {
+            if (vdwExplicit) {
+              sprintf( painCave.errMsg,
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
+              painCave.severity = OPENMD_ERROR;
+              painCave.isFatal = 1;
+              simError();
+            }
+            // We found an explicit RepulsivePower interaction.
+            // override all other vdw entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[atid1][atid2].begin();
+                 it != interactions_[atid1][atid2].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == VANDERWAALS_FAMILY) {
+                interactions_[atid1][atid2].erase(*it);
+                iHash_[atid1][atid2] ^= (*it)->getHash();
+              }
+            }
+            interactions_[atid1][atid2].insert(repulsivePower_);
+            iHash_[atid1][atid2] |= MIE_INTERACTION;
+            MieInteractionType* mit = dynamic_cast<MieInteractionType*>(nbiType);
+
+            mie_->addExplicitInteraction(atype1, atype2,
+                                         mit->getSigma(),
+                                         mit->getEpsilon(),
+                                         mit->getNrep(),
+                                         mit->getMatt());
 
             vdwExplicit = true;
           }

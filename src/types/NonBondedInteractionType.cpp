@@ -57,6 +57,7 @@ namespace OpenMD {
     nbitp.is_EAM = false;
     nbitp.is_SC = false;
     nbitp.is_RepulsivePower = false;
+    nbitp.is_Mie = false;
     atomTypes_.first = NULL;
     atomTypes_.second = NULL;
   }
@@ -142,6 +143,14 @@ namespace OpenMD {
   
   void NonBondedInteractionType::setRepulsivePower() {
     nbitp.is_RepulsivePower = true;
+  }
+
+  bool NonBondedInteractionType::isMie() {
+    return nbitp.is_Mie;
+  }
+  
+  void NonBondedInteractionType::setMie() {
+    nbitp.is_Mie = true;
   }
 
 }

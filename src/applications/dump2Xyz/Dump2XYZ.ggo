@@ -1,0 +1,38 @@
+# Input file for gengetopt. This file generates Dump2XYZCmd.cpp and 
+# Dump2XYZCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=Dump2XYZCmd --c-extension=cpp --header-extension=hpp"
+
+package "Dump2XYZ"
+version ""
+purpose
+"Converts an OpenMD dump file into a file suitable for viewing in a
+molecular dynamics viewer like Jmol or VMD"
+
+# Options
+option	"input"		i	"input dump file"                                       string	typestr="filename" 	yes
+option	"output"	o	"output file name"					string	typestr="filename"	no
+option	"frame"		n	"print every n frame"					int	default="1"		no
+option	"water"		w	"skip the the waters"					flag				off
+option	"periodicBox"	m	"map to the periodic box"				flag				off
+option  "zconstraint"	z	"replace the atom types of zconstraint molecules"	flag				off
+option	"rigidbody"	r	"add a pseudo COM atom to rigidbody"			flag				off
+option	"watertype"	t	"replace the atom type of water model"			flag				on
+option	"selection"	s	"general selection syntax"                              string	typestr="selection script"	no 
+option  "originsele"    -       "select origin"                                         string  typestr="selection script"     no 
+option	"refsele"	-	"select reference"					string  typestr="selection script"     no
+option	"repeatX"	-	"The number of images to repeat in the x direction"	int	default="0"		no
+option	"repeatY"	-	"The number of images to repeat in the y direction"	int	default="0"		no
+option	"repeatZ"	-	"The number of images to repeat in the z direction"	int	default="0"		no
+option	"basetype"	b	"Convert to base atom type"				flag				off
+option  "velocities"    v       "Print velocities in xyz file"                          flag                            off
+option  "forces"        f       "Print forces xyz file"                                 flag                            off
+option  "vectors"       u       "Print vectors (dipoles, etc) in xyz file"              flag                            off
+option  "charges"       c       "Print charges in xyz file"                             flag                            off
+option  "efield"        e       "Print electric field vector in xyz file"               flag                            off

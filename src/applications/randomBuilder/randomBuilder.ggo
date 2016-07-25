@@ -1,0 +1,23 @@
+# Input file for gengetopt. This file generates randomBuilderCmd.cpp and 
+# randomBuilderCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=randomBuilderCmd --c-extension=cpp --header-extension=hpp"
+
+package "randomBuilder"
+version "" 
+
+
+# Options
+
+option "output"        o  "Output file name" string yes
+option "density"       -  "density (g/cm^3)" double yes
+option "nx"            -  "number of unit cells in x" int yes 
+option "ny"            -  "number of unit cells in y" int yes
+option "nz"            -  "number of unit cells in z" int yes
+option "molFraction"   -  "(Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file." double no multiple

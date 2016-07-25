@@ -61,6 +61,7 @@ namespace OpenMD {
     bool is_EAM;
     bool is_SC;
     bool is_RepulsivePower;
+    bool is_Mie;
   } NonBondedInteractionTypeProperties;
 
   /**
@@ -88,6 +89,8 @@ namespace OpenMD {
     bool isMetal();
     void setRepulsivePower();
     bool isRepulsivePower();
+    void setMie();
+    bool isMie();
     
     void setAtomTypes(std::pair<AtomType*, AtomType*> ats);
     std::pair<AtomType*, AtomType*> getAtomTypes();

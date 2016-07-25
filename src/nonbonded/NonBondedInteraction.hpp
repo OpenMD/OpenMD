@@ -80,6 +80,7 @@ namespace OpenMD {
   const static int MORSE_INTERACTION          = (1 << 6);
   const static int REPULSIVEPOWER_INTERACTION = (1 << 7);
   const static int MAW_INTERACTION            = (1 << 8);
+  const static int MIE_INTERACTION            = (1 << 9);
 
   typedef Vector<RealType, N_INTERACTION_FAMILIES> potVec;
 

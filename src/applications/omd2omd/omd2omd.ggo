@@ -1,0 +1,31 @@
+# Input file for gengetopt. This file generates omd2omdCmd.cpp and 
+# omd2omdCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-version --no-handle-help --no-handle-error --include-getopt --show-required --unamed-opts --file-name=omd2omdCmd --c-extension=cpp --header-extension=hpp"
+
+package "omd2omd"
+version "" 
+
+purpose
+"Takes a MetaData file and maps all StuntDoubles back to the periodic box.
+Will optionally replicate the system in the three box directions, or 
+translate every object in the box and before writing out a new MetaData file.
+
+Example:
+  omd2omd -i lipidSystem.omd -o bigLipidSystem.omd -x 2 -y 2 -z 1 -v 35.0"
+
+# Options
+option	"input"         i	"use specified input (.omd, .dump, .eor) file"          string	typestr="filename" 	yes
+option	"output"	o	"use specified output file"				string	typestr="filename"	yes
+option	"repeatX"	x	"make the system repeat in the x direction"		int	default="1"		no
+option	"repeatY"	y	"make the system repeat in the y direction"		int	default="1"		no
+option	"repeatZ"	z	"make the system repeat in the z direction"		int	default="1"		no
+option  "translateX"    t       "translate all x coordinates by some amount"            double  default="0.0"           no
+option  "translateY"    u       "translate all y coordinates by some amount"            double  default="0.0"           no
+option  "translateZ"    v       "translate all z coordinates by some amount"            double  default="0.0"           no

@@ -46,6 +46,7 @@
 #include "types/MAWInteractionType.hpp"
 #include "types/LennardJonesInteractionType.hpp"
 #include "types/RepulsivePowerInteractionType.hpp"
+#include "types/MieInteractionType.hpp"
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
@@ -58,6 +59,7 @@ namespace OpenMD {
     stringToEnumMap_["LennardJones"] = LennardJones;
     stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
     stringToEnumMap_["RepulsivePower"] = RepulsivePower;
+    stringToEnumMap_["Mie"] = Mie;
     
   }
   
@@ -149,7 +151,23 @@ namespace OpenMD {
         RealType sigma = tokenizer.nextTokenAsDouble();
         RealType epsilon = tokenizer.nextTokenAsDouble();
         int nRep = tokenizer.nextTokenAsInt();
-        interactionType = new RepulsivePowerInteractionType(sigma, epsilon, nRep);
+        interactionType = new RepulsivePowerInteractionType(sigma, epsilon,
+                                                            nRep);
+      }
+      break;
+
+    case Mie :
+      if (nTokens < 4) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType sigma = tokenizer.nextTokenAsDouble();
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        int nRep = tokenizer.nextTokenAsInt();
+        int mAtt = tokenizer.nextTokenAsInt();
+        interactionType = new MieInteractionType(sigma, epsilon, nRep, mAtt);
       }
       break;
       

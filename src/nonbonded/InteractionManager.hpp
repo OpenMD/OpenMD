@@ -54,6 +54,7 @@
 #include "nonbonded/Electrostatic.hpp"
 #include "nonbonded/MAW.hpp"
 #include "nonbonded/RepulsivePower.hpp"
+#include "nonbonded/Mie.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 #include "flucq/FluctuatingChargeForces.hpp"
 
@@ -101,6 +102,7 @@ namespace OpenMD {
     Morse* morse_;
     Electrostatic* electrostatic_;
     RepulsivePower* repulsivePower_;
+    Mie* mie_;
     MAW* maw_;
     FluctuatingChargeForces* flucq_;
     

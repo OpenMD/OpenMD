@@ -1,0 +1,26 @@
+# Input file for gengetopt. This file generates nanoparticleBuilderCmd.cpp and 
+# nanoparticleBuilderCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=nanoparticleBuilderCmd --c-extension=cpp --header-extension=hpp"
+
+package "nanoparticleBuilder"
+version "" 
+
+purpose "Builds spherical random or core-shell nanoparticles and outputs an OpenMD startup file"
+
+# Options
+
+option "output"             o  "Output file name" string yes
+option "latticeConstant"    -  "Lattice spacing in Angstroms for cubic lattice." double yes
+option "radius"             -  "Nanoparticle radius in Angstroms" double yes
+option "shellRadius"        -  "Radius containing within it only molecules of a specific component. Specified for each component > 1 in the template file." double no multiple
+option "molFraction"        -  "Builds a multi-component random alloy nanoparticle. A mole Fraction must be specified for each component > 1 in the template file." double no multiple
+option "vacancyPercent"     -  "Percentage of atoms to remove from within vacancy range" double no
+option "vacancyInnerRadius" -  "Radius arround core-shell where vacancies should be located." double no
+option "vacancyOuterRadius" -  "Radius arround core-shell where vacancies should be located." double no

@@ -1,0 +1,19 @@
+# Input file for gengetopt. This file generates recenter.cpp and 
+# recenter.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=recenterCmd --c-extension=cpp --header-extension=hpp"
+
+package "recenter"
+version "" 
+
+purpose "Moves all integrable objects in an OpenMD file so that the center of mass is at the origin."
+
+# Options
+
+option "output"        o  "Output file name" string yes

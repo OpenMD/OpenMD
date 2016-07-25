@@ -1,0 +1,63 @@
+# Input file for gengetopt. This file generates DynamicPropsCmd.cpp and 
+# DynamicPropsCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=DynamicPropsCmd --c-extension=cpp --header-extension=hpp"
+
+package "DynamicProps"
+version "" 
+
+purpose
+"Computes a variety of time correlation functions from the
+configurations stored in a dump file. Typical examples of time
+correlation functions are the mean square displacement and the
+velocity autocorrelation functions. The selection syntax can be used
+to specify the StuntDoubles that will be used for the calculation. A
+general time correlation function can be thought of as:
+
+           C(t) =  < A(0) * B(t) >
+
+where A(t) and B(t) are time-dependent properties, and the < >
+indicates an average over the initial time and atoms (if A and B are
+properties of atoms).
+
+Example:
+  DynamicProps -i longRun.dump  --rcorr --sele1=\"select SPCE_RB_0\""
+# Options
+option	"input"		i	"input dump file"                           string typestr="filename"         yes
+option	"output"	o	"output file name"                          string typestr="filename"         no
+option	"sele1"		-	"select first stuntdouble set"	            string typestr="selection script" no
+option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string typestr="selection script"      no
+option  "order"         -       "Lengendre Polynomial Order"                int                               no
+option  "nzbins"        z       "Number of Z bins"                          int     default="100"             no
+option  "memory"        m       "Available memory (defaults to 2G)"         string  typestr="memory specification" default="2G" no
+option  "rcut"          c       "cutoff radius (angstroms)"                 double                            no
+option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             no
+option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              no
+option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            no
+defgroup "correlation function" groupdesc=" an option of this group is required" yes
+groupoption "selecorr"     s  "selection correlation function" group="correlation function"
+groupoption "rcorr"        r  "mean squared displacement" group="correlation function"
+groupoption "rcorrZ" 	   -  "mean squared displacement binned by Z" group="correlation function"
+groupoption "vcorr" 	   v  "velocity correlation function" group="correlation function"
+groupoption "vcorrZ" 	   -  "velocity correlation function along z-axis" group="correlation function"
+groupoption "vcorrR" 	   -  "velocity correlation function projected radially" group="correlation function"
+groupoption "dcorr"	   d  "dipole correlation function" group="correlation function"
+groupoption "lcorr"        l  "Lengendre correlation function" group="correlation function"
+groupoption "lcorrZ"       -  "Lengendre correlation function binned by Z" group="correlation function"
+groupoption "cohZ"         -  "Lengendre correlation function for OH bond vectors binned by Z" group="correlation function"
+groupoption "sdcorr"       M  "System dipole correlation function" group="correlation function"
+groupoption "r_rcorr"      -  "Radial msd" group="correlation function"
+groupoption "thetacorr"    -  "Angular msd" group="correlation function"
+groupoption "drcorr"       -  "Directional msd for particles with unit vectors" group="correlation function"
+groupoption "helfandEcorr" -  "Helfand moment for thermal conductvity" group="correlation function"
+groupoption "momentum"     p  "Helfand momentum for viscosity" group="correlation function"
+groupoption "stresscorr"   -  "Stress tensor correlation function" group="correlation function"
+groupoption "bondcorr"     b  "Bond extension correlation function" group="correlation function"
+groupoption "freqfluccorr" f  "Frequency Fluctuation correlation function" group="correlation function"
+groupoption "jumptime"     j  "Hydrogen bond jump time correlation function" group = "correlation function"

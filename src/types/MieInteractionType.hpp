@@ -40,42 +40,50 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_MIEINTERACTIONTYPE_HPP
+#define TYPES_MIEINTERACTIONTYPE_HPP
+
+#include "types/NonBondedInteractionType.hpp"
 
 namespace OpenMD {
-
-  class NonBondedInteractionsSectionParser : public SectionParser {
-  public:
-    NonBondedInteractionsSectionParser(ForceFieldOptions& options);
-            
-  private:
-
-    enum NonBondedInteractionTypeEnum{
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      RepulsivePower,
-      Mie,
-      MAW,
-      Buckingham,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
+  /**
+   * @class MieInteractionType 
+   *
+   * MieInteractionType is one of the basic interaction types.
+   * \f[ V =  \left(\frac{n}{n-m}\right) \left(\frac{n}{m}\right)^{m/(n-m)} \epsilon \left[\left( \sigma/r \right)^{n} - \left \sigma/r \right)^{m}\right] \f]
+   */
+  class MieInteractionType : public NonBondedInteractionType {
     
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
+  public:
+    
+    MieInteractionType(RealType mySigma, RealType myEpsilon, int myNrep, int myMatt) {
+      sigma = mySigma;
+      epsilon = myEpsilon;
+      nRep = myNrep;
+      mAtt = myMatt;
+      setMie();
+    }
+
+    RealType getSigma() {
+      return sigma;
+    }
+    
+    RealType getEpsilon() {
+      return epsilon;
+    }
+    
+    int getNrep() {
+      return nRep;
+    }
+    int getMatt() {
+      return mAtt;
+    }
+        
+  private:
+    RealType sigma;
+    RealType epsilon;    
+    int nRep;
+    int mAtt;
   };
-
-
-} //namespace OpenMD
-
+}
 #endif
-
-
