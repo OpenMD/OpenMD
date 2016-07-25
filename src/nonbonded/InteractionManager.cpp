@@ -124,6 +124,7 @@ namespace OpenMD {
     mie_->setSimulatedAtomTypes(atypes);
 
     set<AtomType*>::iterator at;
+    set<NonBondedInteraction*>::iterator it;
 
     for (at = atypes.begin(); at != atypes.end(); ++at) {
 
@@ -177,14 +178,10 @@ namespace OpenMD {
         atype2 = (*it2).second;
         atid2 = atype2->getIdent();
 
-        cerr << "doing types" << atype1->getName() << " with " << atype2->getName() << "\n";
-
         iHash_[atid1][atid2] = 0;
 
         if (atype1->isLennardJones() && atype2->isLennardJones()) {
           interactions_[atid1][atid2].insert(lj_);
-          cerr << "interactions size = " << interactions_[atid1][atid2].size() << "\n";
-
           iHash_[atid1][atid2] |= LJ_INTERACTION;
         }
         if (atype1->isElectrostatic() && atype2->isElectrostatic() ) {
@@ -238,13 +235,14 @@ namespace OpenMD {
           if (nbiType->isLennardJones()) {
             // We found an explicit Lennard-Jones interaction.
             // override all other vdw entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
             interactions_[atid1][atid2].insert(lj_);
@@ -268,13 +266,14 @@ namespace OpenMD {
             }
             // We found an explicit Morse interaction.
             // override all other vdw entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
             interactions_[atid1][atid2].insert(morse_);
@@ -299,13 +298,14 @@ namespace OpenMD {
             }
             // We found an explicit RepulsivePower interaction.
             // override all other vdw entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
             interactions_[atid1][atid2].insert(repulsivePower_);
@@ -333,7 +333,6 @@ namespace OpenMD {
             }
             // We found an explicit Mie interaction.
             // override all other vdw entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
             for(it = interactions_[atid1][atid2].begin();
                 it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
@@ -360,13 +359,14 @@ namespace OpenMD {
           if (nbiType->isEAM()) {
             // We found an explicit EAM interaction.
             // override all other metallic entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == METALLIC_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
             interactions_[atid1][atid2].insert(eam_);
@@ -387,13 +387,14 @@ namespace OpenMD {
             }
             // We found an explicit Sutton-Chen interaction.
             // override all other metallic entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == METALLIC_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
             interactions_[atid1][atid2].insert(sc_);
@@ -414,13 +415,14 @@ namespace OpenMD {
             }
             // We found an explicit MAW interaction.
             // override all other vdw entries for this pair of atom types:
-            set<NonBondedInteraction*>::iterator it;
-            for (it = interactions_[atid1][atid2].begin();
-                 it != interactions_[atid1][atid2].end(); ++it) {
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
               if (ifam == VANDERWAALS_FAMILY) {
-                interactions_[atid1][atid2].erase(*it);
                 iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
               }
             }
             interactions_[atid1][atid2].insert(maw_);
@@ -440,13 +442,13 @@ namespace OpenMD {
     // non-bonded interaction.  If not, just inform the user.
 
     set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
-    set<AtomType*>::iterator it, jt;
+    set<AtomType*>::iterator bt;
 
-    for (it = simTypes.begin(); it != simTypes.end(); ++it) {
-      atype1 = (*it);
+    for (at = simTypes.begin(); at != simTypes.end(); ++at) {
+      atype1 = (*at);
       atid1 = atype1->getIdent();
-      for (jt = it; jt != simTypes.end(); ++jt) {
-        atype2 = (*jt);
+      for (bt = at; bt != simTypes.end(); ++bt) {
+        atype2 = (*bt);
         atid2 = atype2->getIdent();
 
         if (interactions_[atid1][atid2].size() == 0) {
