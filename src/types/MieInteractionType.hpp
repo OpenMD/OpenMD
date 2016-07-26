@@ -50,7 +50,7 @@ namespace OpenMD {
    * @class MieInteractionType 
    *
    * MieInteractionType is one of the basic interaction types.
-   * \f[ V =  \left(\frac{n}{n-m}\right) \left(\frac{n}{m}\right)^{m/(n-m)} \epsilon \left[\left( \sigma/r \right)^{n} - \left \sigma/r \right)^{m}\right] \f]
+   * \f[ V =  \left(\frac{n}{n-m}\right) \left(\frac{n}{m}\right)^{m/(n-m)} \epsilon \left[\left( \frac{\sigma}{r} \right)^{n} - \left( \frac{\sigma}{r} \right)^{m}\right] \f]
    */
   class MieInteractionType : public NonBondedInteractionType {
     
