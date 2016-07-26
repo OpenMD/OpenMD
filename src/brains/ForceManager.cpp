@@ -769,7 +769,7 @@ namespace OpenMD {
       loopStart = PAIR_LOOP;
     }
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
-    
+
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
         if (update_nlist) {
@@ -783,7 +783,7 @@ namespace OpenMD {
         
         atomListRow = fDecomp_->getAtomsInGroupRow(cg1);        
         newAtom1 = true;
-        
+
         for (int m2 = point_[cg1]; m2 < point_[cg1+1]; m2++) {
 
           cg2 = neighborList_[m2];
@@ -945,7 +945,7 @@ namespace OpenMD {
         }
         newAtom1 = false;
       }
-        
+
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {
           
@@ -966,7 +966,7 @@ namespace OpenMD {
         }
       }
     }
-    
+
     // collects pairwise information
     fDecomp_->collectData();
     if (cutoffMethod_ == EWALD_FULL) {

@@ -7,7 +7,6 @@ begin Options
       EnergyMixingRule      Geometric
 //  energy unit are eV. Convert to kcal/mol
       MetallicEnergyUnitScaling     23.0605423
-      cutoffPolicy         MIX
 end Options
 
 begin BaseAtomTypes

@@ -264,7 +264,7 @@ namespace OpenMD {
       
       Mat3x3d tensor;
       RealType pressure;
-      
+
       tensor = getPressureTensor();
       
       pressure = PhysicalConstants::pressureConvert * 
@@ -309,10 +309,10 @@ namespace OpenMD {
       MPI_Allreduce(MPI_IN_PLACE, p_tens.getArrayPointer(), 9, 
                     MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
-      
+
       RealType volume = this->getVolume();
       Mat3x3d stressTensor = snap->getStressTensor();
-      
+
       pressureTensor =  (p_tens + 
                          PhysicalConstants::energyConvert * stressTensor)/volume;
       
@@ -320,8 +320,6 @@ namespace OpenMD {
     }
     return snap->getPressureTensor();
   }
-
-
 
 
   Vector3d Thermo::getSystemDipole() {

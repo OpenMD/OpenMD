@@ -12,6 +12,7 @@ S       32.0655
 O       15.9994
 H       1.0079
 Au      196.97
+SSD_E           18.0153
 end BaseAtomTypes
 
 begin AtomTypes    
@@ -53,9 +54,16 @@ SAu     S
 SH      S
 end AtomTypes
 
+begin DirectionalAtomTypes
+//Name          I_xx    I_yy    I_zz    (All moments in (amu*Ang^2)
+SSD_E           1.7696  0.6145  1.1550  
+end DirectionalAtomTypes                    
+
+
 begin LennardJonesAtomTypes
 //Name		epsilon(kcal/mol)  sigma(angstroms)	
 O_SPCE    	0.15532         3.16549
+SSD_E           0.152           3.035
 // From TraPPE-UA: JPCB, 109, 24100 and JCPB 102,2569
 CH4       	0.2941          3.73
 CH3       	0.1947          3.75
@@ -121,6 +129,7 @@ Au HA    LennardJones  2.746 0.0414
 //                               r0   D0      beta0
 Au	O_SPCE	ShiftedMorse	 3.70 0.0424  0.769
 Au	H_SPCE	RepulsiveMorse	-1.00 0.00850 0.769
+Au      SSD_E   MAW  2.68 0.6   1.33  0.95 -0.25
 end NonBondedInteractions
 
 begin ChargeAtomTypes
@@ -138,6 +147,15 @@ SH              -0.435
 HS               0.255
 CTS              0.06
 end ChargeAtomTypes
+
+begin MultipoleAtomTypes
+SSD_E   dq      0.0     0.0     0.0     2.42    -1.682  1.762   -0.08
+end MultipoleAtomTypes
+
+begin StickyAtomTypes
+//name  w0      v0 (kcal/mol)   v0p     rl (Ang)  ru    rlp     rup
+SSD_E   0.07715 3.90            3.90    2.40      3.80  2.75    3.35
+end StickyAtomTypes
 
 begin BondTypes
 // United-atom bond distances from TraPPE, Bond stretching force constants from 

@@ -10,7 +10,6 @@ component{
 
 
 forceField = "EAM";
-forceFieldVariant = "VC";
 targetTemp = 1000.0;
 
 
@@ -21,6 +20,7 @@ runTime = 1000.0;
 usePeriodicBoundaryConditions = "false";
 
 sampleTime = 50.0;
+statusTime = 1;
 
 thermalTime = 100.0;
 tempSet = "false";

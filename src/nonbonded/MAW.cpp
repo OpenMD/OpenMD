@@ -72,7 +72,26 @@ namespace OpenMD {
       if (nbt->isMAW()) {
         keys = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
+        if (at1 == NULL) {
+          sprintf( painCave.errMsg,
+                   "MAW::initialize could not find AtomType %s\n"
+                   "\tto for for %s - %s interaction.\n",
+                   keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }
+
         AtomType* at2 = forceField_->getAtomType(keys[1]);
+        if (at2 == NULL) {
+          sprintf( painCave.errMsg,
+                   "MAW::initialize could not find AtomType %s\n"
+                   "\tfor %s - %s nonbonded interaction.\n",
+                   keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }
 
         int atid1 = at1->getIdent();
         if (MAWtids[atid1] == -1) {

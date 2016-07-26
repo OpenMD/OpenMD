@@ -12,25 +12,16 @@ component{
   nMol = 1;
 }
 
-//minimizer = CG;
-//minimizerMaxIter = 5000;
-//minimizerWriteFreq = 1;
-//minimizerStepSize = 0.1;
+minimizer {
+  useMinimizer = true;
+  method = CG;
+  maxIterations = 5000;
+}
 
-ensemble = NVT;
-targetTemp = 10.0;
-tauThermostat = 1000.0;
-//tempSet = "true";
-//thermalTime = 100.0;
 forceField = "MnM";
-//electrostaticSummationMethod = "shifted_Force";
-//dielectric = 80.0;
+cutoffMethod = "shifted_force";
 cutoffRadius = 25.0;
-switchingRadius = 20.0;
-dt = 1;
-runTime = 1e4;
-sampleTime = 10;
-statusTime = 10;
+dampingAlpha = 0.1;
 
   </MetaData>
   <Snapshot>

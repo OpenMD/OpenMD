@@ -219,6 +219,8 @@ namespace OpenMD {
       if (fqa.isMetallic()) {
         eamAtomData.isFluctuatingCharge = true;
         eamAtomData.nValence = fqa.getNValence();
+      } else {
+        eamAtomData.isFluctuatingCharge = false;
       }
     }
 
@@ -294,30 +296,29 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcDensity(InteractionData &idat) {
-
+  void EAM::calcDensity(InteractionData &idat) {    
 
     if (!initialized_) initialize();
 
     EAMAtomData &data1 = EAMdata[EAMtids[idat.atid1]];
     EAMAtomData &data2 = EAMdata[EAMtids[idat.atid2]];
+    RealType m;
 
     if (haveCutoffRadius_)
       if ( *(idat.rij) > eamRcut_) return;
 
     if ( *(idat.rij) < data1.rcut) {
-      RealType m = 1.0;
+      m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m = 1.0 - *(idat.flucQ1) / RealType(data1.nValence);
-      }
+        m -= *(idat.flucQ1) / RealType(data1.nValence);
+      }      
       *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij));
     }
 
-
     if ( *(idat.rij) < data2.rcut) {
-      RealType m = 1.0;
+      m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m = 1.0 - *(idat.flucQ2) / RealType(data2.nValence);
+        m -= *(idat.flucQ2) / RealType(data2.nValence);
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
@@ -351,7 +352,6 @@ namespace OpenMD {
 
     if (haveCutoffRadius_)
       if ( *(idat.rij) > eamRcut_) return;
-
 
     int eamtid1 = EAMtids[idat.atid1];
     int eamtid2 = EAMtids[idat.atid2];
