@@ -20,7 +20,7 @@
    02/15/2012 - Ludvik Jerabek - Fixed _GETOPT_THROW definition missing in implementation file
    08/01/2012 - Ludvik Jerabek - Created separate functions for char and wchar_t characters so single dll can do both unicode and ansi
    10/15/2012 - Ludvik Jerabek - Modified to match latest GNU features
-   21/03/2013 - Isaias Lourenco - Suppressed C4273 warning in Visual Studio
+   06/19/2015 - Ludvik Jerabek - Fixed maximum option limitation caused by option_a (255) and option_w (65535) structure val variable
 
    **DISCLAIMER**
    THIS MATERIAL IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
@@ -39,17 +39,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
-#include "wingetopt.h"
+#include "getopt.h"
 
 #ifdef __cplusplus
 #define _GETOPT_THROW throw()
 #else
 #define _GETOPT_THROW
-#endif
-
-#ifdef _MSC_VER
-//Disable -> warning C4273: 'abc' : inconsistent dll linkage
-#pragma warning (disable : 4273)
 #endif
 
 int optind = 1;

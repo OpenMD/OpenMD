@@ -20,6 +20,7 @@
    02/15/2012 - Ludvik Jerabek - Fixed _GETOPT_THROW definition missing in implementation file
    08/01/2012 - Ludvik Jerabek - Created separate functions for char and wchar_t characters so single dll can do both unicode and ansi
    10/15/2012 - Ludvik Jerabek - Modified to match latest GNU features
+   06/19/2015 - Ludvik Jerabek - Fixed maximum option limitation caused by option_a (255) and option_w (65535) structure val variable
 
    **DISCLAIMER**
    THIS MATERIAL IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
@@ -92,7 +93,7 @@ struct option_a
   const char* name;
   int has_arg;
   int *flag;
-  char val;
+  int val;
 };
 extern _GETOPT_API char *optarg_a;
 extern _GETOPT_API int getopt_a(int argc, char *const *argv, const char *optstring) _GETOPT_THROW;
@@ -105,7 +106,7 @@ struct option_w
   const wchar_t* name;
   int has_arg;
   int *flag;
-  wchar_t val;
+  int val;
 };
 extern _GETOPT_API wchar_t *optarg_w;
 extern _GETOPT_API int getopt_w(int argc, wchar_t *const *argv, const wchar_t *optstring) _GETOPT_THROW;

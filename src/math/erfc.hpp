@@ -7,15 +7,14 @@
 #define MATH_ERFC_H
 
 /*
- * At least up to version 8 (VC++ 2005), Microsoft does not support the
- * standard C99 erf() and erfc() functions. For now we're including these
- * definitions for an MSVC compilation; if these are added later then
- * the #ifdef below should change to compare _MSC_VER with a particular
- * version level.
+ * Up to version 11 (VC++ 2012), Microsoft does not support the
+ * standard C99 erf() and erfc() functions so we have to fake them
+ * here.  These were added in version 12 (VC++ 2013), which sets
+ * _MSC_VER=1800 (VC11 has _MSC_VER=1700).
  */
 
 #ifdef _MSC_VER
-
+#if _MSC_VER <= 1700 // 1700 is VC11, 1800 is VC12 
 
 /***************************
 *   erf.cpp
@@ -86,6 +85,6 @@ static RealType erfc(RealType x)
     return one_sqrtpi*exp(-x*x)*q2;
 }
 
+#endif // _MSC_VER <= 1700
 #endif // _MSC_VER
-
 #endif

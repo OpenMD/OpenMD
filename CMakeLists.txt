@@ -9,7 +9,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 IF(WIN32)
-   ADD_DEFINITIONS(/D _CRT_SECURE_NO_WARNINGS)
+   ADD_DEFINITIONS(/D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
 if (NOT NO_PARALLEL)
@@ -45,7 +45,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
     add_definitions("-Wall")
 endif ( CMAKE_COMPILER_IS_GNUCXX )
 if ( MSVC )
-    add_definitions("/W3")
+    add_definitions("/W3 /DNOMINMAX")
 endif ( MSVC )
 
 # OpenMD version number.
