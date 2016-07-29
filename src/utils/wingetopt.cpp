@@ -39,7 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
-#include "getopt.h"
+#include "wingetopt.h"
 
 #ifdef __cplusplus
 #define _GETOPT_THROW throw()
