@@ -535,6 +535,7 @@ namespace OpenMD {
     if ((iHash & STICKY_INTERACTION) != 0)         sticky_->calcForce(idat);
     if ((iHash & MORSE_INTERACTION) != 0)          morse_->calcForce(idat);
     if ((iHash & REPULSIVEPOWER_INTERACTION) != 0) repulsivePower_->calcForce(idat);
+    if ((iHash & MIE_INTERACTION) != 0)            mie_->calcForce(idat);
     if ((iHash & EAM_INTERACTION) != 0)            eam_->calcForce(idat);
     if ((iHash & SC_INTERACTION) != 0)             sc_->calcForce(idat);
     if ((iHash & MAW_INTERACTION) != 0)            maw_->calcForce(idat);
