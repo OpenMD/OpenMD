@@ -186,7 +186,7 @@ int main(int argc, char* argv[]){
     zmaxLen = hmat(2,2);    
   }    
 
-  RealType nanglebins, nrbins;
+  int nanglebins, nrbins;
   // in case we override nbins with nrbins:
   if (args_info.nrbins_given) {
     nrbins = args_info.nrbins_arg;

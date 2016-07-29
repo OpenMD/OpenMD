@@ -45,7 +45,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
     add_definitions("-Wall")
 endif ( CMAKE_COMPILER_IS_GNUCXX )
 if ( MSVC )
-    add_definitions("/W3 /DNOMINMAX")
+    add_definitions("/W3 /DNOMINMAX /DSTATIC_GETOPT")
 endif ( MSVC )
 
 # OpenMD version number.
