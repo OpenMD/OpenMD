@@ -1,0 +1,266 @@
+#!@PYTHON_EXECUTABLE@
+
+__author__ = "Dan Gezelter (gezelter@nd.edu), Patrick Louden (plouden@nd.edu)"
+__copyright__ = "Copyright (c) 2016 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import argparse
+import textwrap
+import numpy as np
+from fractions import Fraction, gcd
+from argparse import RawDescriptionHelpFormatter
+
+def usage():
+    print __doc__
+
+def find_perpendiculars(hkl):
+    h = hkl[0]
+    k = hkl[1]
+    l = hkl[2]
+    if (h == 0 and k == 0 and l ==0):
+        print "All 3 indices of the facet are zero!"
+        sys.exit(2)
+
+    u1 = np.array([h,k,l])
+
+    # use 111 facet normal as v2 unless we want a slab exposing 111:
+    if (h==k and h==l):
+        v2 = np.array([1,0,0])
+    else:
+        v2 = np.array([1,1,1])
+
+    # Graham-Schmidt orthogonalization to find u2
+    u2 = v2 - u1 * (float(np.dot(v2,u1))/float(np.dot(u1,u1)))
+
+    # u3 should be perpendicular to both u1 and u2:
+    u3 = np.cross(u1,u2)
+
+    # find smallest integer representation of each of the Miller index
+    # planes:
+    u2Frac = [Fraction(u2[0]).limit_denominator(),
+              Fraction(u2[1]).limit_denominator(),
+              Fraction(u2[2]).limit_denominator()]
+    u2gcd = gcd(gcd(u2Frac[0],u2Frac[1]), u2Frac[2])
+    u2min = np.array([int(u2Frac[0]/u2gcd),
+                      int(u2Frac[1]/u2gcd),
+                      int(u2Frac[2]/u2gcd)])
+
+    u3Frac = [Fraction(u3[0]).limit_denominator(),
+              Fraction(u3[1]).limit_denominator(),
+              Fraction(u3[2]).limit_denominator()]
+    u3gcd = gcd(gcd(u3Frac[0],u3Frac[1]), u3Frac[2])
+    u3min = np.array([int(u3Frac[0]/u3gcd),
+                      int(u3Frac[1]/u3gcd),
+                      int(u3Frac[2]/u3gcd)])
+
+    print "Miller indices of perpendicular slices:", u2min, u3min, u1
+
+    # Construct rotation matrix between cubic coordinates and new coordinates:
+    xhatn = u2min / np.linalg.norm(u2min)
+    yhatn = u3min / np.linalg.norm(u3min)
+    zhatn = u1 / np.linalg.norm(u1)
+    rotMat = np.vstack((xhatn, yhatn, zhatn))
+
+    # Construct the vector of minimum repeat distances for these slices:
+    xmin = np.linalg.norm(u2min)
+    ymin = np.linalg.norm(u3min)
+    zmin = np.linalg.norm(u1)
+    minVec = np.array([xmin,ymin,zmin])
+
+    return (rotMat, minVec)
+
+def make_lattice(lattice, latticeConstant, rotMat, minVec, repeats, vacuum):
+    basis = {
+        "sc":  [np.array([0.0,0.0,0.0])],
+        "fcc": [np.array([0.0,0.0,0.0]), np.array([0.5,0.5,0.0]),
+                np.array([0.5,0.0,0.5]), np.array([0.0,0.5,0.5])],
+        "bcc": [np.array([0.0,0.0,0.0]), np.array([0.5,0.5,0.5])]
+    }
+    theBasis = basis.get(lattice)
+    coords=[]
+
+    rInv = np.transpose(rotMat)
+    boxCorner = np.array([0.0,0.0,0.0])
+    rMin = np.array([0.0,0.0,0.0])
+    rMax = np.array([0.0,0.0,0.0])
+    for i in range(2):
+        for j in range(2):
+            for k in range(2):
+                boxCorner[0] = i * minVec[0]*repeats[0]*latticeConstant
+                boxCorner[1] = j * minVec[1]*repeats[1]*latticeConstant
+                boxCorner[2] = k * minVec[2]*repeats[2]*latticeConstant
+                box = rInv.dot(boxCorner) / latticeConstant
+                for l in range(3):
+                    if (box[l] < rMin[l]):
+                        rMin[l] = box[l]
+                    if (box[l]>rMax[l]):
+                        rMax[l] = box[l]
+
+    eps = 1.0-3
+
+    for k in range(int(rMin[2])-2, int(rMax[2])+2):
+        for j in range(int(rMin[1])-2, int(rMax[1])+2):
+            for i in range(int(rMin[0])-2, int(rMax[0])+2):
+                cellOrigin = np.array([float(i),float(j), float(k)])
+                for l in range(len(theBasis)):
+                    pos = latticeConstant * (cellOrigin + theBasis[l])
+                    pos = rotMat.dot(pos)
+                    # slicing is in new coordinates with x,y, and z axes:
+                    if (pos[0] > -eps and pos[0] < boxCorner[0]-eps):
+                        if (pos[1] > -eps and pos[1] < boxCorner[1]-eps):
+                            if (pos[2] > -eps and pos[2] < boxCorner[2]-eps):
+                                coords.append(pos)
+
+    print "Generated slab has " +  str(len(coords)) + " atoms."
+
+    Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]]]
+
+    print "Generated slab has dimensions: ", boxCorner
+
+    # Wrap the coordinates so that the center of mass is located at
+    # the origin:
+    com = [0.0, 0.0, 0.0]
+    for i in  range(len(coords)):
+        for j in range(0,3):
+            com[j] = com[j] + coords[i][j]
+    for i in range(0,3):
+        com[i] = com[i] / float(len(coords))
+    for i in range(len(coords)):
+        for j in range(0,3):
+            coords[i][j] = coords[i][j] - com[j]
+
+    if (vacuum.lower() == "true"):
+        # Multiplying the z-dimenion by 3 so the resulting box
+        # contains 2/3 vacuum and 1/3 solid
+        Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]*3.0]]
+    else:
+        Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]]]
+
+
+    return coords,Hmat
+
+def write_xyz_file(outputFileName, coords, elementType):
+    outputFile = open(outputFileName, 'w')
+    outputFile.write("%d\n\n" % len(coords))
+    for i in range(len(coords)):
+        outputFile.write(elementType + " \t%f\t%f\t%f\n" %
+                         (coords[i][0], coords[i][1], coords[i][2]))
+    outputFile.close()
+    print "Generated XYZ file: " + outputFileName
+
+def write_omd_file(outputFileName, coords, elementType, Hmat):
+    outputFile = open(outputFileName, 'w')
+    outputFile.write("<OpenMD version=2>\n")
+    outputFile.write("  <MetaData> \n\n")
+    outputFile.write("molecule{ \n")
+    outputFile.write("  name = \"" + elementType + "\";\n\n")
+    outputFile.write("  atom[0]{\n")
+    outputFile.write("    type=\"" + elementType + "\";\n")
+    outputFile.write("    position( 0.0, 0.0, 0.0 );\n")
+    outputFile.write("  }\n")
+    outputFile.write("}\n\n")
+    outputFile.write("component{ \n")
+    outputFile.write("  type = \"" + elementType + "\";\n")
+    outputFile.write("  nMol = " + str(len(coords)) + ";\n")
+    outputFile.write("}\n\n")
+    outputFile.write("ensemble = NgammaT;\n")
+    outputFile.write("surfaceTension = 0.0;\n")
+    outputFile.write("forceField = \"MnM\";\n")
+    outputFile.write("cutoffRadius = 9.0; \n")
+    outputFile.write("cutoffMethod = \"shifted_force\";\n\n")
+    outputFile.write("targetTemp = 100.0;\n")
+    outputFile.write("tauThermostat = 4e3;\n")
+    outputFile.write("targetPressure = 1.0;\n")
+    outputFile.write("tauBarostat = 1e4;\n")
+    outputFile.write("tempSet = \"false\";\n")
+    outputFile.write("thermalTime = 1e3; \n\n")
+    outputFile.write("runTime = 1e4; \n")
+    outputFile.write("dt = 2.0; \n\n")
+    outputFile.write("sampleTime = 1000;\n")
+    outputFile.write("statusTime = 100;\n\n")
+    outputFile.write("printPressureTensor = \"true\";\n\n")
+    outputFile.write("  </MetaData>\n")
+    outputFile.write("  <Snapshot>\n")
+    outputFile.write("  <FrameData>\n")
+    outputFile.write("     Time: 0 \n")
+    outputFile.write("     Hmat: {{ %f, %f, %f }, { %f, %f, %f }, { %f, %f, %f }}\n" %
+                     (Hmat[0][0],Hmat[0][1],Hmat[0][2],Hmat[1][0],Hmat[1][1],
+                      Hmat[1][2],Hmat[2][0],Hmat[2][1],Hmat[2][2]))
+    outputFile.write("  Thermostat: 0.0, 0.0 \n")
+    outputFile.write("    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }} \n")
+    outputFile.write("    </FrameData>\n")
+    outputFile.write("    <StuntDoubles> \n")
+    for i in range(len(coords)):
+        outputFile.write("\t" + str(i) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
+                         ("pv", coords[i][0], coords[i][1], coords[i][2],
+                          "0.0", "0.0", "0.0"))
+    outputFile.write("    </StuntDoubles> \n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OpenMD>")
+    outputFile.close()
+    print "Generated OpenMD file: " + outputFileName
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description='OpenMD cubic lattice slab builder\nBuilds a slab of a cubic material (SC, FCC, or BCC) with a particular cut (hkl) facing the z-axis of the box.',
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog="Example: slabBuilder -l fcc -c 4.08 -f 5 5 7 -r 10 10 8 -e Au -v true -o 557Slab.omd -x 557Slab.xyz")
+    parser.add_argument("-l","--lattice=", action="store",
+                        choices=('sc','fcc','bcc'), dest="lattice", help="One of: sc, fcc, or bcc")
+    parser.add_argument("-c","--latticeConstant=", action="store", type=float,
+                        dest="latticeConstant", help="Lattice spacing in Angstroms")
+    parser.add_argument("-o","--omd-file=", action="store", dest="omdFileName",help="use specified output (.omd) file")
+    parser.add_argument("-x","--xyz-file=", action="store", dest="xyzFileName",help="use specified output (.xyz) file")
+    parser.add_argument("-f","--hkl", action="store", type=int, nargs=3,
+                        dest="hkl", help="expose this facet to the z axis (specify with three separate integers)")
+    parser.add_argument("-r","--repeats", action="store", type=int, nargs=3,
+                        dest="repeats",default=[1,1,1],help="how many lattice repeats in each of the 3 perpendicular directions (specify with three separate integers)")
+    parser.add_argument("-e","--elementType=", action="store",
+                        dest="elementType",help=" the element composing the lattice")
+    parser.add_argument("-v","--vacuum=",action="store",
+                        choices=('true','false'),dest="vacuum", default='true', help="true/false (Should the output file have vacuum in the z-dimension?)")
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(2)
+    args = parser.parse_args()
+
+    if (not args.lattice):
+        parser.error("No lattice was specified")
+
+    if (not args.latticeConstant):
+        parser.print_help()
+        parser.error("No lattice constant was specified")
+
+    if ((not args.omdFileName) and (not args.xyzFileName)):
+        parser.print_help()
+        parser.error("No output file was specified")
+
+    if (not args.hkl):
+        parser.print_help()
+        parser.error("No facet (hkl) was specified")
+
+    if (not args.repeats):
+        parser.print_help()
+        parser.error("No repeat was specified")
+
+    if (not args.elementType):
+        parser.print_help()
+        parser.error("No elementType specified")
+
+    (rotMat, minVec) = find_perpendiculars(args.hkl)
+    coords, Hmat = make_lattice(args.lattice, args.latticeConstant, rotMat,
+                                minVec, args.repeats, args.vacuum)
+
+    if (args.xyzFileName):
+        write_xyz_file(args.xyzFileName, coords, args.elementType)
+    if (args.omdFileName):
+        write_omd_file(args.omdFileName, coords, args.elementType, Hmat)
+
+if __name__ == "__main__":
+    #if len(sys.argv) == 1:
+        #parser.print_help()
+        #usage() # need to change to call argeparse stuffs
+        #sys.exit()
+    main(sys.argv[1:])
