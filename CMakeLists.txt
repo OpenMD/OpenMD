@@ -735,6 +735,8 @@ src/applications/utilities/pack2md
 src/applications/utilities/principalAxisCalculator
 src/applications/utilities/vcorr2spectrum
 src/applications/utilities/waterReplacer
+src/applications/utilities/waterReplacer
+src/applications/utilities/slabBuilder
 )
 
 IF(NUMPY_FOUND)
