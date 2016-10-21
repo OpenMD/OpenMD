@@ -1,0 +1,30 @@
+// This is the force field for the original van Beest, Kramer, van
+// Santen (BKS) model for Silicas and Aluminophosphates.  See:
+// van Beest, Kramer, and van Santen, Phys. Rev. Lett. 64(16),
+// pp. 1955-1958 (1990).
+
+begin Options
+      Name    BKS
+end Options
+
+begin BaseAtomTypes
+O    15.999
+Si   28.085
+Al   26.9815385
+P    30.973761998
+end BaseAtomTypes
+
+begin ChargeAtomTypes
+O   -1.2
+Si   2.4
+Al   1.4
+P    3.4
+end ChargeAtomTypes
+
+begin NonBondedInteractionTypes
+//Atoms Buckingham  Traditional    A (kcal/mol) B (Angstroms-1) C(kcal/mol/Angstrom^6)
+O   O   Buckingham  Traditional    32025.85802  2.76000         4035.59484
+Si  O   Buckingham  Traditional   415176.39808  4.87318         3079.46096
+Al  O   Buckingham  Traditional   369165.48132  4.79667         3010.92041
+P   O   Buckingham  Traditional   208333.7325   5.19098          458.42743
+end NonBondedInteractionTypes

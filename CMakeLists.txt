@@ -347,6 +347,7 @@ src/optimization/LineSearchBasedMethod.cpp
 src/optimization/SteepestDescent.cpp
 src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/optimization/MinimizerParameters.cpp
+src/nonbonded/Buckingham.cpp
 src/nonbonded/EAM.cpp
 src/nonbonded/GB.cpp
 src/nonbonded/InteractionManager.cpp

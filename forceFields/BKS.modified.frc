@@ -1,0 +1,40 @@
+// This is the force field for the modified van Beest, Kramer,
+// van Santen (BKS) model for Silicas.  See: Saika-Voivod, Sciortino,
+// Grande, and Poole, Phys. Rev. E 70, 061507 (2004).
+//
+// NB, we don't implement the switching from 7.7476 to 10
+// angstroms in the force field using the tabulated D, E, and F
+// parameters. If that behavior is desired, it can be done in the
+// simulation itself by specifying:
+// 
+// cutoffMethod = "switched";
+// switchingRadius = 7.7476;
+// cutoffRadius = 10.0;
+// switchingFunctionType = "FIFTH_ORDER_POLYNOMIAL";
+//
+// However for consistency with the electrostatic treatment,
+// we recommend using:
+//
+// cutoffMethod="shifted_force";
+// cutoffRadius = 10.0;
+// dampingAlpha = 0.25;
+
+begin Options
+      Name    BKS-modified
+end Options
+
+begin BaseAtomTypes
+O    15.999
+Si   28.085
+end BaseAtomTypes
+
+begin ChargeAtomTypes
+O   -1.2
+Si   2.4
+end ChargeAtomTypes
+
+begin NonBondedInteractionTypes
+//Atoms Buckingham  Modified    A (kcal/mol)   B (Angstroms-1) C(kcal/mol/Angstrom^6)  sigma (Angstroms)  epsilon (kcal/mol)
+O   O   Buckingham  Modified    32026.1137737  2.76000         4035.62718388           1.313635           0.07144038114
+Si  O   Buckingham  Modified   415179.721807   4.87318         3079.48551137           1.779239           0.02423780013
+end NonBondedInteractionTypes

@@ -58,6 +58,7 @@ namespace OpenMD {
     nbitp.is_SC = false;
     nbitp.is_RepulsivePower = false;
     nbitp.is_Mie = false;
+    nbitp.is_Buckingham = false;
     atomTypes_.first = NULL;
     atomTypes_.second = NULL;
   }
@@ -151,6 +152,15 @@ namespace OpenMD {
   
   void NonBondedInteractionType::setMie() {
     nbitp.is_Mie = true;
+  }
+
+
+  bool NonBondedInteractionType::isBuckingham() {
+    return nbitp.is_Buckingham;
+  }
+  
+  void NonBondedInteractionType::setBuckingham() {
+    nbitp.is_Buckingham = true;
   }
 
 }
