@@ -47,6 +47,7 @@
 #include "types/LennardJonesInteractionType.hpp"
 #include "types/RepulsivePowerInteractionType.hpp"
 #include "types/MieInteractionType.hpp"
+#include "types/BuckinghamInteractionType.hpp"
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
@@ -60,6 +61,7 @@ namespace OpenMD {
     stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
     stringToEnumMap_["RepulsivePower"] = RepulsivePower;
     stringToEnumMap_["Mie"] = Mie;
+    stringToEnumMap_["Buckingham"] = Buckingham;
     
   }
   
@@ -170,7 +172,41 @@ namespace OpenMD {
         interactionType = new MieInteractionType(sigma, epsilon, nRep, mAtt);
       }
       break;
-      
+
+    case Buckingham :
+      if (nTokens < 4) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        std::string btype = tokenizer.nextToken();
+        toUpper(btype);
+       
+        RealType A = tokenizer.nextTokenAsDouble();
+        RealType B = tokenizer.nextTokenAsDouble();
+        RealType C = tokenizer.nextTokenAsDouble();
+        RealType sigma = 0.0;
+        RealType epsilon = 0.0;
+        
+        if (btype.compare("MODIFIED")) {
+          sigma = tokenizer.nextTokenAsDouble();
+          epsilon = tokenizer.nextTokenAsDouble();
+          interactionType = new BuckinghamInteractionType(A, B, C, sigma, epsilon, btModified);                  
+
+        } else if(btype.compare("TRADITIONAL")) {
+          interactionType = new BuckinghamInteractionType(A, B, C, btTraditional);                  
+        } else {
+
+          sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Unknown Buckingham Type at line %d\n",
+                  lineNo);
+          painCave.isFatal = 1;
+          simError();
+        }
+        
+      }
+      break;
+
     case Unknown :
     default:
       sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Unknown Interaction Type at line %d\n",
