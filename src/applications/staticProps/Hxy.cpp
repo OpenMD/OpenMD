@@ -51,8 +51,10 @@
 #include <fstream>
 #include "applications/staticProps/Hxy.hpp"
 #include "utils/simError.h"
+#include "utils/PhysicalConstants.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "types/LennardJonesAdapter.hpp"
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
@@ -60,19 +62,36 @@
 
 namespace OpenMD {
   
-  Hxy::Hxy(SimInfo* info, const std::string& filename, const std::string& sele, int nbins_x, int nbins_y, int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), nBinsX_(nbins_x), nBinsY_(nbins_y), nbins_(nrbins){
+  Hxy::Hxy(SimInfo* info, const std::string& filename,
+           const std::string& sele, int nbins_x, int nbins_y, int nbins_z,
+           int nrbins)
+    : StaticAnalyser(info, filename), selectionScript_(sele),
+      evaluator_(info), seleMan_(info), nBinsX_(nbins_x), nBinsY_(nbins_y),
+      nBinsZ_(nbins_z), nbins_(nrbins){
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    gridsample_.resize(nBinsX_*nBinsY_);
-    gridZ_.resize(nBinsX_*nBinsY_);
-    mag.resize(nBinsX_*nBinsY_);
-    newmag.resize(nBinsX_*nBinsY_);     
+    // dens_ stores the local density, rho(x,y,z) on a 3-D grid
+    dens_.resize(nBinsX_);
+    // bin stores the upper and lower surface cutoff locations (z) for
+    // a column through grid location x,y
+    minHeight_.resize(nBinsX_);
+    maxHeight_.resize(nBinsX_);
 
+    for (unsigned int i = 0; i < nBinsX_; i++) {
+      dens_[i].resize(nBinsY_);
+      minHeight_[i].resize(nBinsY_);
+      maxHeight_[i].resize(nBinsY_);            
+      for (unsigned int j = 0; j < nBinsY_; j++) {
+        dens_[i][j].resize(nBinsZ_);
+      }
+    }
+    
+    mag.resize(nBinsX_*nBinsY_);
+    newmag.resize(nBinsX_*nBinsY_);
     sum_bin.resize(nbins_);
     avg_bin.resize(nbins_);
     errbin_sum.resize(nbins_);
@@ -89,72 +108,50 @@ namespace OpenMD {
   }
 
   Hxy::~Hxy(){
-      gridsample_.clear();
-      gridZ_.clear();
-      sum_bin.clear();
-      avg_bin.clear();
-      errbin_sum.clear();
-      errbin.clear();
-      sum_bin_sq.clear();
-      avg_bin_sq.clear();
-      errbin_sum_sq.clear();
-      errbin_sq.clear();
-      
-      for(unsigned int i=0; i < bin.size(); i++)
-	bin[i].clear();
-      for(unsigned int i=0; i < samples.size(); i++)
-	samples[i].clear();
-
-      mag.clear();
-      newmag.clear();
   }
 
   void Hxy::process() {
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
+    Molecule* mol;
+    RigidBody* rb;
+    StuntDouble* sd;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    int ii;
+
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
-    
     for(unsigned int k=0; k < bin.size(); k++)
       bin[k].resize(nFrames);
     for(unsigned int k=0; k < samples.size(); k++)
       samples[k].resize(nFrames);
 
-    RealType lenX_, lenY_;
-    RealType gridX_, gridY_;
-    RealType halfBoxX_, halfBoxY_;
-
-    RealType interpsum, value;
-    int ninterp, px, py, newp;
-    int newindex, index;
-    int new_i, new_j, new_index;
-
-    RealType freq_x, freq_y, zero_freq_x, zero_freq_y, freq;
-    RealType maxfreqx, maxfreqy, maxfreq;
-
-    int whichbin;
-
-    std::fill(sum_bin.begin(), sum_bin.end(), 0.0);
-    std::fill(avg_bin.begin(), avg_bin.end(), 0.0);
-    std::fill(errbin_sum.begin(), errbin_sum.end(), 0.0);
-    std::fill(errbin.begin(), errbin.end(), 0.0);
-    std::fill(sum_bin_sq.begin(), sum_bin_sq.end(), 0.0);
-    std::fill(avg_bin_sq.begin(), avg_bin_sq.end(), 0.0);
-    std::fill(errbin_sum_sq.begin(), errbin_sum_sq.end(), 0.0);
-    std::fill(errbin_sq.begin(), errbin_sq.end(), 0.0);
-    
-    for(unsigned int i=0; i < bin.size(); i++)
-      std::fill(bin[i].begin(), bin[i].end(), 0.0);
-    
-    for(unsigned int i=0; i < samples.size(); i++)
-      std::fill(samples[i].begin(), samples[i].end(), 0);
-    
     for (int istep = 0; istep < nFrames; istep += step_) {
-      
+
+      for (unsigned int i = 0; i < nBinsX_; i++) {
+        std::fill(minHeight_[i].begin(), minHeight_[i].end(), 0.0);
+        std::fill(maxHeight_[i].begin(), maxHeight_[i].end(), 0.0);
+        for (unsigned int j = 0; j < nBinsY_; j++) {
+          std::fill(dens_[i][j].begin(), dens_[i][j].end(), 0.0);
+        }
+      }
+                 
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
       
-      Mat3x3d hmat = currentSnapshot_->getHmat();
+      // update the positions of atoms which belong to the rigidbodies
+      
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+             rb = mol->nextRigidBody(rbIter)) {
+          rb->updateAtoms();
+        }        
+      }                       
       
 #ifdef HAVE_FFTW3_H
       fftw_plan p;
@@ -173,122 +170,92 @@ namespace OpenMD {
       p = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
 #endif
 
-      std::fill(gridsample_.begin(), gridsample_.end(), 0);
-      std::fill(gridZ_.begin(), gridZ_.end(), 0.0);
-      std::fill(mag.begin(), mag.end(), 0.0);
-      std::fill(newmag.begin(), newmag.end(), 0.0);
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      RealType lenX_ = hmat(0,0);
+      RealType lenY_ = hmat(1,1);
+      RealType lenZ_ = hmat(2,2);
+      
+      RealType voxelSize = lenX_*lenY_*lenZ_ /
+        RealType(nBinsX_*nBinsY_*nBinsZ_);
 
-      int i, j;   
-      
-      StuntDouble* sd;
-      
-      lenX_ = hmat(0,0);
-      lenY_ = hmat(1,1);
-      
-      gridX_ = lenX_ /(nBinsX_);
-      gridY_ = lenY_ /(nBinsY_);
-      
-      halfBoxX_ = lenX_ / 2.0;      
-      halfBoxY_ = lenY_ / 2.0;      
-      
-      if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
+      RealType x, y, z;
+            
+      for (sd = seleMan_.beginSelected(ii); sd != NULL;
+           sd = seleMan_.nextSelected(ii)) {
+
+        if (sd->isAtom()) {
+          Atom* atom = static_cast<Atom*>(sd);
+          Vector3d pos = sd->getPos();
+          LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
+          RealType mass = sd->getMass();
+          RealType sigma = lja.getSigma() * 0.5;
+          RealType sigma2 = sigma * sigma;
+
+          for (unsigned int i = 0; i < nBinsX_; i++) {
+            x = lenX_ * (RealType(i) / RealType(nBinsX_) );
+            
+            for (unsigned int j = 0; j < nBinsY_; j++) {
+              y = lenY_ * (RealType(j) / RealType(nBinsY_));
+              
+              for (unsigned int k = 0; k < nBinsZ_; k++) {
+                z = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+                
+                Vector3d r = Vector3d(x, y, z) - pos;
+                
+                if (usePeriodicBoundaryConditions_)
+                  currentSnapshot_->wrapVector(r);
+                
+                RealType dist = r.length();
+                RealType density = mass * exp(-dist*dist/(sigma2*2.0)) /
+                  (voxelSize * sqrt(2.0*NumericConstant::PI*sigma2));
+                dens_[i][j][k] += PhysicalConstants::densityConvert * density;
+              }
+            }
+          }
+        }
+      }
+
+      RealType maxDens(0.0);
+      for (unsigned int i = 0; i < nBinsX_; i++) {
+        for (unsigned int j = 0; j < nBinsY_; j++) {
+          for (unsigned int k = 0; k < nBinsZ_; k++) {
+            std::cout << dens_[i][j][k] << "\t";
+            if (dens_[i][j][k] > maxDens) maxDens = dens_[i][j][k];
+          }
+          std::cout << "\n";
+        }
+        std::cout << "\n";
       }
       
-      //wrap the stuntdoubles into a cell     
-      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
-	Vector3d pos = sd->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-	sd->setPos(pos);
-      } 
+      RealType threshold = maxDens / 2.0;
+
+      std::cerr << "threshold = " << threshold << "\n";
       
-      //determine which atom belongs to which grid
-      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
-	Vector3d pos = sd->getPos();
-	//int binNo = (pos.z() /deltaR_) - 1;
-	int binNoX = (int) ((pos.x() + halfBoxX_) / gridX_);
-	int binNoY = (int) ((pos.y() + halfBoxY_) / gridY_);
-	//std::cout << "pos.z = " << pos.z() << " halfBoxZ_ = " << halfBoxZ_ << " deltaR_ = "  << deltaR_ << " binNo = " << binNo << "\n";
-	gridZ_[binNoX*nBinsY_+binNoY] += pos.z();
-	gridsample_[binNoX*nBinsY_+binNoY]++;
-      }
-      
-      // FFT stuff depends on nx and ny, so delay allocation until we have
-      // that information
-      
-      for(i = 0; i < nBinsX_; i++){
-	for(j = 0; j < nBinsY_; j++){
-	  newindex = i * nBinsY_ + j;
-	  if(gridsample_[newindex] > 0){
-	    gridZ_[newindex] = gridZ_[newindex] / (RealType)gridsample_[newindex];
-	  }
-	}
-      }
-      
-      for (i=0; i< nBinsX_; i++) {
-	for(j=0; j< nBinsY_; j++) {
-	  newindex = i*nBinsY_ + j;
-	  if (gridsample_[newindex] == 0) {
-	    // interpolate from surrounding points:
-	    
-	    interpsum = 0.0;
-	    ninterp = 0;
-	    
-	    //point1 = bottom;
-	    
-	    px = i;
-	    py = j - 1;
-	    newp = px*nBinsY_ + py;
-	    if ((py >= 0) && (gridsample_[newp] > 0)) {
-	      interpsum += gridZ_[newp];
-	      ninterp++;
-	    } 
-	    
-	    //point2 = top;
-	    
-	    px = i;
-	    py = j + 1;
-	    newp = px*nBinsY_ + py;
-	    if ((py < nBinsY_) && (gridsample_[newp] > 0)) {
-	      interpsum += gridZ_[newp];
-	      ninterp++;
-	    } 
-	    
-	    //point3 = left;
-	    
-	    px = i - 1;
-	    py = j;
-	    newp = px*nBinsY_ + py;
-	    if ((px >= 0) && (gridsample_[newp] > 0)) {
-	      interpsum += gridZ_[newp];
-	      ninterp++;
-	    }
-	    
-	    //point4 = right;
-	    
-	    px = i + 1;
-	    py = j;
-	    newp = px*nBinsY_ + py;
-	    if ( (px < nBinsX_ ) && ( gridsample_[newp] > 0 )) { 
-              interpsum += gridZ_[newp];
-              ninterp++;
+      for (unsigned int i = 0; i < nBinsX_; i++) {        
+        for (unsigned int j = 0; j < nBinsY_; j++) {
+          bool lowFound = false;
+          for (unsigned int k = 0; k < nBinsZ_; k++) {
+            if (!lowFound && dens_[i][j][k] > threshold) {
+              minHeight_[i][j] = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+              lowFound = true;
             } 
-	
-	    value = interpsum / (RealType)ninterp;
-	    
-	    gridZ_[newindex] = value;
-	  }
-	}
+            if (lowFound && dens_[i][j][k] < threshold) {
+              maxHeight_[i][j] = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+            }                         
+          }
+        }
       }
-      
-      for (i=0; i < nBinsX_; i++) {
-	for (j=0; j < nBinsY_; j++) {
+
+     
+      int newindex;
+      for (unsigned int i=0; i < nBinsX_; i++) {
+	for (unsigned int j=0; j < nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
-	  
-	  c_re(in[newindex]) = gridZ_[newindex];
+          //std::cout << maxHeight_[i][j] << "\t";
+	  c_re(in[newindex]) = maxHeight_[i][j];
 	  c_im(in[newindex]) = 0.0;
-	} 
+	}
+        //std::cout << "\n";
       }
 
 #ifdef HAVE_FFTW3_H
@@ -297,8 +264,8 @@ namespace OpenMD {
       fftwnd_one(p, in, out);
 #endif
       
-      for (i=0; i< nBinsX_; i++) {
-	for(j=0; j< nBinsY_; j++) {
+      for (unsigned int i=0; i< nBinsX_; i++) {
+	for(unsigned int j=0; j< nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
 	  mag[newindex] = pow(c_re(out[newindex]),2) + pow(c_im(out[newindex]),2);
 	}
@@ -312,18 +279,19 @@ namespace OpenMD {
       fftw_free(out);
       fftw_free(in);
 
-      for (i=0; i< (nBinsX_/2); i++) {
-	for(j=0; j< (nBinsY_/2); j++) {
-	  index = i*nBinsY_ + j;
-	  new_i = i + (nBinsX_/2);
-	  new_j = j + (nBinsY_/2);
-	  new_index = new_i*nBinsY_ + new_j;
+      int index, new_i, new_j, new_index;
+      for (unsigned int i=0; i< (nBinsX_/2); i++) {
+	for(unsigned int j=0; j< (nBinsY_/2); j++) {
+          index = i*nBinsY_ + j;
+          new_i = i + (nBinsX_/2);
+          new_j = j + (nBinsY_/2);
+          new_index = new_i*nBinsY_ + new_j;
 	  newmag[new_index] = mag[index];
 	}
       }
       
-      for (i=(nBinsX_/2); i< nBinsX_; i++) {
-	for(j=0; j< (nBinsY_/2); j++) {
+      for (unsigned int i=(nBinsX_/2); i< nBinsX_; i++) {
+	for(unsigned int j=0; j< (nBinsY_/2); j++) {
 	  index = i*nBinsY_ + j;
 	  new_i = i - (nBinsX_/2);
 	  new_j = j + (nBinsY_/2);
@@ -332,8 +300,8 @@ namespace OpenMD {
 	}
       }
       
-      for (i=0; i< (nBinsX_/2); i++) {
-	for(j=(nBinsY_/2); j< nBinsY_; j++) {
+      for (unsigned int i=0; i< (nBinsX_/2); i++) {
+	for(unsigned int j=(nBinsY_/2); j< nBinsY_; j++) {
 	  index = i*nBinsY_ + j;
 	  new_i = i + (nBinsX_/2);
 	  new_j = j - (nBinsY_/2);
@@ -342,8 +310,8 @@ namespace OpenMD {
 	}
       }
       
-      for (i=(nBinsX_/2); i< nBinsX_; i++) {
-	for(j=(nBinsY_/2); j< nBinsY_; j++) {
+      for (unsigned int i=(nBinsX_/2); i< nBinsX_; i++) {
+	for(unsigned int j=(nBinsY_/2); j< nBinsY_; j++) {
 	  index = i*nBinsY_ + j;
 	  new_i = i - (nBinsX_/2);
 	  new_j = j - (nBinsY_/2);
@@ -352,28 +320,28 @@ namespace OpenMD {
 	}
       }
     
-      maxfreqx = 1.0 / gridX_;
-      maxfreqy = 1.0 / gridY_;
+      RealType maxfreqx = RealType(nBinsX_) / lenX_;
+      RealType maxfreqy = RealType(nBinsY_) / lenY_;
       
       //  printf("%lf\t%lf\t%lf\t%lf\n", dx, dy, maxfreqx, maxfreqy);
       
-      maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
-      dfreq = maxfreq/(RealType)(nbins_-1);
+      RealType maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
+      RealType dfreq = maxfreq/(RealType)(nbins_-1);
     
       //printf("%lf\n", dfreq);
       
-      zero_freq_x = nBinsX_/2; 
-      zero_freq_y = nBinsY_/2; 
+      int zero_freq_x = nBinsX_/2; 
+      int zero_freq_y = nBinsY_/2; 
       
-      for (i=0; i< nBinsX_; i++) {
-	for(j=0; j< nBinsY_; j++) {
+      for (int i=0; i< nBinsX_; i++) {
+	for(int j=0; j< nBinsY_; j++) {
 	  
-	  freq_x = (RealType)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
-	  freq_y = (RealType)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
+	  RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
+	  RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
 	  
-	  freq = sqrt(freq_x*freq_x + freq_y*freq_y);
+	  RealType freq = sqrt(freq_x*freq_x + freq_y*freq_y);
 	  
-	  whichbin = (int) (freq / dfreq);
+	  unsigned int whichbin = (unsigned int) (freq / dfreq);
 	  newindex = i*nBinsY_ + j;
 	  //	printf("%d %d %lf %lf\n", whichbin, newindex, freq, dfreq);
 	  bin[whichbin][istep] += newmag[newindex];
@@ -381,15 +349,15 @@ namespace OpenMD {
 	}
       }
       
-      for ( i = 0; i < nbins_; i++) {
+      for (unsigned int i = 0; i < nbins_; i++) {
 	if ( samples[i][istep] > 0) {
 	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (RealType)samples[i][istep]) / (RealType)nBinsX_ / (RealType)nBinsY_;
 	}
       }    
     }
 
-    for (int i = 0; i < nbins_; i++) {
-      for (int j = 0; j < nFrames; j++) {
+    for (unsigned int i = 0; i < nbins_; i++) {
+      for (unsigned int j = 0; j < nFrames; j++) {
 	sum_bin[i] += bin[i][j];
 	sum_bin_sq[i] += bin[i][j] * bin[i][j];
       }
@@ -419,7 +387,7 @@ namespace OpenMD {
 
       for (int i = 0; i < nbins_; ++i) {
 	if ( avg_bin[i] > 0 ){
-	  rdfStream << (RealType)i * dfreq << "\t"
+	  rdfStream << (RealType)i * dfreq_ << "\t"
                     <<pow(avg_bin[i], 2)<<"\t"
 	            <<errbin_sq[i]<<"\t"
 	            <<avg_bin[i]<<"\t"

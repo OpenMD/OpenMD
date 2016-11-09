@@ -450,7 +450,8 @@ int main(int argc, char* argv[]){
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
-		       args_info.nbins_y_arg, args_info.nbins_arg);
+		       args_info.nbins_y_arg, args_info.nbins_z_arg,
+                       args_info.nbins_arg);
 #endif
   }else if(args_info.gcn_given){
     if (args_info.rcut_given) {      
