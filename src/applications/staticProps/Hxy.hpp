@@ -71,20 +71,9 @@ namespace OpenMD {
   class Hxy : public StaticAnalyser {
     
   public:
-    Hxy(SimInfo* info, const std::string& filename, const std::string& sele, int nbins_x, int nbins_y, int nrbins);
-    virtual ~Hxy();
-    int getnbins() {
-      return nbins_; 
-    }
-    
-    int getnBinsX() {
-      return nBinsX_;
-    }
-    
-    int getnBinsY() {
-      return nBinsY_;
-    }
-    
+    Hxy(SimInfo* info, const std::string& filename, const std::string& sele,
+        int nbins_x, int nbins_y, int nbins_z, int nrbins);
+    virtual ~Hxy();        
     virtual void process();
     
   private:
@@ -100,17 +89,18 @@ namespace OpenMD {
     
     int nBinsX_;
     int nBinsY_;
+    int nBinsZ_;
     int nbins_; 
-    RealType dfreq;
-    
-    std::vector<RealType> gridZ_;
-    std::vector<int> gridsample_;
-    std::vector< std::vector<RealType> > bin;
-    std::vector< std::vector<int> > samples;
+    RealType dfreq_;
 
+    std::vector<std::vector<std::vector<RealType> > > dens_;
+    std::vector<std::vector<RealType> > minHeight_;
+    std::vector<std::vector<RealType> > maxHeight_;    
+    std::vector<RealType> mag, newmag;
     std::vector<RealType> sum_bin, sum_bin_sq, avg_bin, avg_bin_sq;
     std::vector<RealType> errbin_sum, errbin_sum_sq, errbin, errbin_sq;
-    std::vector<RealType> mag, newmag;
+    std::vector< std::vector<RealType> > bin;
+    std::vector< std::vector<int> > samples;
 
   };
   
