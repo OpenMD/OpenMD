@@ -52,6 +52,7 @@
 #include "applications/staticProps/Hxy.hpp"
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
+#include "utils/Utility.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/LennardJonesAdapter.hpp"
@@ -90,8 +91,10 @@ namespace OpenMD {
       }
     }
     
-    mag.resize(nBinsX_*nBinsY_);
-    newmag.resize(nBinsX_*nBinsY_);
+    mag1.resize(nBinsX_*nBinsY_);
+    newmag1.resize(nBinsX_*nBinsY_);
+    mag2.resize(nBinsX_*nBinsY_);
+    newmag2.resize(nBinsX_*nBinsY_);
     sum_bin.resize(nbins_);
     avg_bin.resize(nbins_);
     errbin_sum.resize(nbins_);
@@ -154,31 +157,44 @@ namespace OpenMD {
       }                       
       
 #ifdef HAVE_FFTW3_H
-      fftw_plan p;
+      fftw_plan p1, p2;
 #else
-      fftwnd_plan p;
+      fftwnd_plan p1, p2;
 #endif
-      fftw_complex *in, *out;
+      fftw_complex *in1, *in2, *out1, *out2;
       
-      in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
-      out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
+      in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
+      out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
+      in2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
+      out2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
 
 #ifdef HAVE_FFTW3_H
-      p = fftw_plan_dft_2d(nBinsX_, nBinsY_, in, out, 
+      p1 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in1, out1, 
+                           FFTW_FORWARD, FFTW_ESTIMATE); 
+      p2 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in2, out2, 
                            FFTW_FORWARD, FFTW_ESTIMATE); 
 #else
-      p = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
+      p1 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
+      p2 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
 #endif
 
       Mat3x3d hmat = currentSnapshot_->getHmat();
+      Mat3x3d invBox = currentSnapshot_->getInvHmat();
       RealType lenX_ = hmat(0,0);
       RealType lenY_ = hmat(1,1);
       RealType lenZ_ = hmat(2,2);
-      
-      RealType voxelSize = lenX_*lenY_*lenZ_ /
-        RealType(nBinsX_*nBinsY_*nBinsZ_);
 
-      RealType x, y, z;
+      Vector3d hbox = Vector3d(lenX_/2.0, lenY_/2.0, lenZ_/2.0);
+     
+      RealType x, y, z, dx, dy, dz;
+      RealType sigma, rcut;
+      int di, dj, dk, ibin, jbin, kbin, igrid, jgrid, kgrid;
+      div_t result;
+      Vector3d scaled;
+      
+      dx = lenX_ / nBinsX_;
+      dy = lenY_ / nBinsY_;
+      dz = lenZ_ / nBinsZ_;
             
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
            sd = seleMan_.nextSelected(ii)) {
@@ -187,28 +203,63 @@ namespace OpenMD {
           Atom* atom = static_cast<Atom*>(sd);
           Vector3d pos = sd->getPos();
           LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
-          RealType mass = sd->getMass();
-          RealType sigma = lja.getSigma() * 0.5;
-          RealType sigma2 = sigma * sigma;
+          // For SPC/E water, this yields the Willard-Chandler
+          // distance of 2.4 Angstroms:
+          //sigma = lja.getSigma() * 0.758176459;
+          sigma = lja.getSigma() * 0.5;
+          rcut = 3.0 * sigma;
 
-          for (unsigned int i = 0; i < nBinsX_; i++) {
-            x = lenX_ * (RealType(i) / RealType(nBinsX_) );
+          // scaled positions relative to the box vectors
+          scaled = invBox * pos;
+          // wrap the vector back into the unit box by subtracting
+          // integer box numbers
+          for (int j = 0; j < 3; j++) {
+            scaled[j] -= roundMe(scaled[j]);
+            scaled[j] += 0.5;
+            // Handle the special case when an object is exactly on
+            // the boundary (a scaled coordinate of 1.0 is the same as
+            // scaled coordinate of 0.0)
+            if (scaled[j] >= 1.0) scaled[j] -= 1.0;
+          }
+          // find ijk-indices of voxel that atom is in.
+          ibin = nBinsX_ * scaled.x();
+          jbin = nBinsY_ * scaled.y();
+          kbin = nBinsZ_ * scaled.z();
+                   
+          di = (int) (rcut * nBinsX_ / lenX_);
+          dj = (int) (rcut * nBinsY_ / lenY_);
+          dk = (int) (rcut * nBinsZ_ / lenZ_);
+                    
+          for (int i = -di; i <= di; i++) {
+
+            igrid = ibin + i;
+            while (igrid >= nBinsX_) {igrid -= nBinsX_;}
+            while (igrid < 0) {igrid += nBinsX_;}
+                        
+            x = lenX_ * (RealType(igrid) / RealType(nBinsX_) );
             
-            for (unsigned int j = 0; j < nBinsY_; j++) {
-              y = lenY_ * (RealType(j) / RealType(nBinsY_));
+            for (int j = -dj; j <= dj; j++) {
+              jgrid = jbin + j;
+              while (jgrid >= nBinsY_) {jgrid -= nBinsY_;}
+              while (jgrid < 0) {jgrid += nBinsY_;}
               
-              for (unsigned int k = 0; k < nBinsZ_; k++) {
-                z = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+              y = lenY_ * (RealType(jgrid) / RealType(nBinsY_));
+              
+              for (int k = -dk; k <= dk; k++) {
+                kgrid = kbin + k;
+                while (kgrid >= nBinsZ_) {kgrid -= nBinsZ_;}
+                while (kgrid < 0) {kgrid += nBinsZ_;}
+
+                z = lenZ_ * (RealType(kgrid) / RealType(nBinsZ_));
+
                 
-                Vector3d r = Vector3d(x, y, z) - pos;
+                Vector3d r = Vector3d(x, y, z) - (pos + hbox);
                 
                 if (usePeriodicBoundaryConditions_)
                   currentSnapshot_->wrapVector(r);
                 
                 RealType dist = r.length();
-                RealType density = mass * exp(-dist*dist/(sigma2*2.0)) /
-                  (voxelSize * sqrt(2.0*NumericConstant::PI*sigma2));
-                dens_[i][j][k] += PhysicalConstants::densityConvert * density;
+                dens_[igrid][jgrid][kgrid] += getDensity(dist, sigma, rcut);
               }
             }
           }
@@ -219,18 +270,16 @@ namespace OpenMD {
       for (unsigned int i = 0; i < nBinsX_; i++) {
         for (unsigned int j = 0; j < nBinsY_; j++) {
           for (unsigned int k = 0; k < nBinsZ_; k++) {
-            std::cout << dens_[i][j][k] << "\t";
+            //std::cout << dens_[i][j][k] << "\t";
             if (dens_[i][j][k] > maxDens) maxDens = dens_[i][j][k];
           }
-          std::cout << "\n";
+          //std::cout << "\n";
         }
-        std::cout << "\n";
+        //std::cout << "\n";
       }
       
       RealType threshold = maxDens / 2.0;
 
-      std::cerr << "threshold = " << threshold << "\n";
-      
       for (unsigned int i = 0; i < nBinsX_; i++) {        
         for (unsigned int j = 0; j < nBinsY_; j++) {
           bool lowFound = false;
@@ -246,38 +295,61 @@ namespace OpenMD {
         }
       }
 
+      RealType minBar = 0.0;
+      RealType maxBar = 0.0;
+      int count = 0;
+      for (unsigned int i = 0; i < nBinsX_; i++) {        
+        for (unsigned int j = 0; j < nBinsY_; j++) {
+          minBar += minHeight_[i][j];
+          maxBar += maxHeight_[i][j];
+          count++;
+        }
+      }           
+      minBar /= count;
+      maxBar /= count;
      
       int newindex;
       for (unsigned int i=0; i < nBinsX_; i++) {
 	for (unsigned int j=0; j < nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
           //std::cout << maxHeight_[i][j] << "\t";
-	  c_re(in[newindex]) = maxHeight_[i][j];
-	  c_im(in[newindex]) = 0.0;
+	  c_re(in1[newindex]) = maxHeight_[i][j] - maxBar;
+	  c_im(in1[newindex]) = 0.0;
+	  c_re(in2[newindex]) = minHeight_[i][j] - minBar;
+	  c_im(in2[newindex]) = 0.0;
 	}
         //std::cout << "\n";
       }
 
 #ifdef HAVE_FFTW3_H
-      fftw_execute(p);
+      fftw_execute(p1);
+      fftw_execute(p2);
 #else
-      fftwnd_one(p, in, out);
+      fftwnd_one(p1, in1, out1);
+      fftwnd_one(p2, in2, out2);
 #endif
       
       for (unsigned int i=0; i< nBinsX_; i++) {
 	for(unsigned int j=0; j< nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
-	  mag[newindex] = pow(c_re(out[newindex]),2) + pow(c_im(out[newindex]),2);
+	  mag1[newindex] = pow(c_re(out1[newindex]),2) +
+            pow(c_im(out1[newindex]),2);
+	  mag2[newindex] = pow(c_re(out2[newindex]),2) +
+            pow(c_im(out2[newindex]),2);
 	}
       }
 
 #ifdef HAVE_FFTW3_H
-      fftw_destroy_plan(p);
+      fftw_destroy_plan(p1);
+      fftw_destroy_plan(p2);
 #else
-      fftwnd_destroy_plan(p);
+      fftwnd_destroy_plan(p1);
+      fftwnd_destroy_plan(p2);
 #endif      
-      fftw_free(out);
-      fftw_free(in);
+      fftw_free(out1);
+      fftw_free(in1);
+      fftw_free(out2);
+      fftw_free(in2);
 
       int index, new_i, new_j, new_index;
       for (unsigned int i=0; i< (nBinsX_/2); i++) {
@@ -286,7 +358,8 @@ namespace OpenMD {
           new_i = i + (nBinsX_/2);
           new_j = j + (nBinsY_/2);
           new_index = new_i*nBinsY_ + new_j;
-	  newmag[new_index] = mag[index];
+	  newmag1[new_index] = mag1[index];
+	  newmag2[new_index] = mag2[index];
 	}
       }
       
@@ -296,7 +369,8 @@ namespace OpenMD {
 	  new_i = i - (nBinsX_/2);
 	  new_j = j + (nBinsY_/2);
 	  new_index = new_i*nBinsY_ + new_j;
-	  newmag[new_index] = mag[index];
+	  newmag1[new_index] = mag1[index];
+	  newmag2[new_index] = mag2[index];
 	}
       }
       
@@ -306,7 +380,8 @@ namespace OpenMD {
 	  new_i = i + (nBinsX_/2);
 	  new_j = j - (nBinsY_/2);
 	  new_index = new_i*nBinsY_ + new_j;
-	  newmag[new_index] = mag[index];
+	  newmag1[new_index] = mag1[index];
+	  newmag2[new_index] = mag2[index];
 	}
       }
       
@@ -316,42 +391,42 @@ namespace OpenMD {
 	  new_i = i - (nBinsX_/2);
 	  new_j = j - (nBinsY_/2);
 	  new_index = new_i*nBinsY_ + new_j;
-	  newmag[new_index] = mag[index];
+	  newmag1[new_index] = mag1[index];
+	  newmag2[new_index] = mag2[index];
 	}
       }
     
       RealType maxfreqx = RealType(nBinsX_) / lenX_;
       RealType maxfreqy = RealType(nBinsY_) / lenY_;
       
-      //  printf("%lf\t%lf\t%lf\t%lf\n", dx, dy, maxfreqx, maxfreqy);
-      
       RealType maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
-      RealType dfreq = maxfreq/(RealType)(nbins_-1);
-    
-      //printf("%lf\n", dfreq);
-      
+      dfreq_ = maxfreq/(RealType)(nbins_-1);
+          
       int zero_freq_x = nBinsX_/2; 
       int zero_freq_y = nBinsY_/2; 
       
       for (int i=0; i< nBinsX_; i++) {
 	for(int j=0; j< nBinsY_; j++) {
-	  
 	  RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
 	  RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
 	  
 	  RealType freq = sqrt(freq_x*freq_x + freq_y*freq_y);
 	  
-	  unsigned int whichbin = (unsigned int) (freq / dfreq);
+	  unsigned int whichbin = (unsigned int) (freq / dfreq_);
 	  newindex = i*nBinsY_ + j;
-	  //	printf("%d %d %lf %lf\n", whichbin, newindex, freq, dfreq);
-	  bin[whichbin][istep] += newmag[newindex];
-	  samples[whichbin][istep]++;
+
+          std::cout << newmag2[newindex] << "\t";
+	  bin[whichbin][istep] += newmag1[newindex] + newmag2[newindex];
+	  samples[whichbin][istep] += 2;
 	}
+        std::cout << "\n";
       }
       
       for (unsigned int i = 0; i < nbins_; i++) {
 	if ( samples[i][istep] > 0) {
-	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (RealType)samples[i][istep]) / (RealType)nBinsX_ / (RealType)nBinsY_;
+	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] /
+                                     (RealType)samples[i][istep]) /
+            (RealType)nBinsX_ / (RealType)nBinsY_;
 	}
       }    
     }
@@ -405,4 +480,15 @@ namespace OpenMD {
 
   }
   
+  RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
+    RealType sigma2 = sigma*sigma;
+    RealType dens = exp(-r*r/(sigma2*2.0)) /
+      (pow(2.0*NumericConstant::PI*sigma2, 3));
+    RealType dcut = exp(-rcut*rcut/(sigma2*2.0)) /
+      (pow(2.0*NumericConstant::PI*sigma2, 3));
+    if (r < rcut) 
+      return dens - dcut;
+    else
+      return 0.0;
+  }
 }
