@@ -79,6 +79,7 @@ namespace OpenMD {
   private:
     
     virtual void printSpectrum();
+    RealType getDensity(RealType dist, RealType sigma, RealType rcut);
         
     Snapshot* currentSnapshot_;
     
@@ -96,7 +97,8 @@ namespace OpenMD {
     std::vector<std::vector<std::vector<RealType> > > dens_;
     std::vector<std::vector<RealType> > minHeight_;
     std::vector<std::vector<RealType> > maxHeight_;    
-    std::vector<RealType> mag, newmag;
+    std::vector<RealType> mag1, newmag1;
+    std::vector<RealType> mag2, newmag2;
     std::vector<RealType> sum_bin, sum_bin_sq, avg_bin, avg_bin_sq;
     std::vector<RealType> errbin_sum, errbin_sum_sq, errbin, errbin_sq;
     std::vector< std::vector<RealType> > bin;
