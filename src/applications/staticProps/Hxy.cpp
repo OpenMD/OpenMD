@@ -279,18 +279,59 @@ namespace OpenMD {
       }
       
       RealType threshold = maxDens / 2.0;
+      RealType z0, z1, h0, h1;
 
       for (unsigned int i = 0; i < nBinsX_; i++) {        
         for (unsigned int j = 0; j < nBinsY_; j++) {
-          bool lowFound = false;
-          for (unsigned int k = 0; k < nBinsZ_; k++) {
-            if (!lowFound && dens_[i][j][k] > threshold) {
-              minHeight_[i][j] = lenZ_ * (RealType(k) / RealType(nBinsZ_));
-              lowFound = true;
-            } 
-            if (lowFound && dens_[i][j][k] < threshold) {
-              maxHeight_[i][j] = lenZ_ * (RealType(k) / RealType(nBinsZ_));
-            }                         
+
+          // There are two cases if we are periodic in z and the
+          // density is localized in z.  Either we're starting below
+          // the isodensity, or above it:
+          //      ______             _______        ______
+          // ____/      \_____ or:          \______/
+          //          
+          // In either case, there are two crossings of the
+          // isodensity.
+          
+          if (dens_[i][j][0] < threshold) {
+            bool minFound = false;
+            for (unsigned int k = 0; k < nBinsZ_-1; k++) {
+
+              z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+              z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
+              h0 = dens_[i][j][k];
+              h1 = dens_[i][j][k+1];
+              
+              if (h0 < threshold && h1 > threshold && !minFound) {
+                // simple linear interpolation to find the height:
+                minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+                minFound = true;
+              }
+              if (h0 > threshold && h1 < threshold && minFound) {
+                // simple linear interpolation to find the height:
+                maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+              }
+            }
+            
+          } else {
+            bool maxFound = false;
+            for (unsigned int k = 0; k < nBinsZ_-1; k++) {
+
+              z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+              z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
+              h0 = dens_[i][j][k];
+              h1 = dens_[i][j][k+1];
+              
+              if (h0 > threshold && h1 < threshold && !maxFound) {
+                // simple linear interpolation to find the height:
+                maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+                maxFound = true;
+              }
+              if (h0 < threshold && h1 > threshold && maxFound) {
+                // simple linear interpolation to find the height:
+                minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+              }
+            }
           }
         }
       }
@@ -307,12 +348,13 @@ namespace OpenMD {
       }           
       minBar /= count;
       maxBar /= count;
-     
+
+      std::cerr << "bottomSurf = " << minBar << "\ttopSurf = " << maxBar << "\n";
       int newindex;
       for (unsigned int i=0; i < nBinsX_; i++) {
 	for (unsigned int j=0; j < nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
-          //std::cout << maxHeight_[i][j] << "\t";
+          //std::cout << minHeight_[i][j] << "\t";
 	  c_re(in1[newindex]) = maxHeight_[i][j] - maxBar;
 	  c_im(in1[newindex]) = 0.0;
 	  c_re(in2[newindex]) = minHeight_[i][j] - minBar;
@@ -395,7 +437,7 @@ namespace OpenMD {
 	  newmag2[new_index] = mag2[index];
 	}
       }
-    
+  
       RealType maxfreqx = RealType(nBinsX_) / lenX_;
       RealType maxfreqy = RealType(nBinsY_) / lenY_;
       
@@ -415,7 +457,7 @@ namespace OpenMD {
 	  unsigned int whichbin = (unsigned int) (freq / dfreq_);
 	  newindex = i*nBinsY_ + j;
 
-          std::cout << newmag2[newindex] << "\t";
+          std::cout << newmag1[newindex] << "\t";
 	  bin[whichbin][istep] += newmag1[newindex] + newmag2[newindex];
 	  samples[whichbin][istep] += 2;
 	}

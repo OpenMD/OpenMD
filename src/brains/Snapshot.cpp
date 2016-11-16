@@ -138,9 +138,11 @@ namespace OpenMD {
     frameData.systemQuadrupole = Mat3x3d(0.0);
     frameData.convectiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
     frameData.electronicTemperature = 0.0;
+    frameData.netCharge = 0.0;
+    frameData.chargeMomentum = 0.0;
     frameData.COM = V3Zero;             
     frameData.COMvel = V3Zero;          
-    frameData.COMw = V3Zero;  
+    frameData.COMw = V3Zero; 
 
     hasTotalEnergy = false;         
     hasTranslationalKineticEnergy = false;       
@@ -154,6 +156,8 @@ namespace OpenMD {
     hasPressure = false;       
     hasTemperature = false;    
     hasElectronicTemperature = false;
+    hasNetCharge = false;
+    hasChargeMomentum = false;
     hasCOM = false;
     hasCOMvel = false;
     hasCOMw = false;
@@ -574,6 +578,24 @@ namespace OpenMD {
   void Snapshot::setElectronicTemperature(RealType eTemp) {
     hasElectronicTemperature = true;
     frameData.electronicTemperature = eTemp;
+  }
+  
+  RealType Snapshot::getNetCharge() {
+    return frameData.netCharge;
+  }
+  
+  void Snapshot::setNetCharge(RealType nChg) {
+    hasNetCharge = true;
+    frameData.netCharge = nChg;
+  }
+
+  RealType Snapshot::getChargeMomentum() {
+    return frameData.chargeMomentum;
+  }
+
+  void Snapshot::setChargeMomentum(RealType cMom) {
+    hasChargeMomentum = true;
+    frameData.chargeMomentum = cMom;
   }
 
   RealType Snapshot::getPressure() {
