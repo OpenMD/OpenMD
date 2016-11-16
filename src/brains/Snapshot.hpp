@@ -90,6 +90,8 @@ namespace OpenMD{
     RealType temperature;         /**< temperature of this frame */
     pair<RealType, RealType> thermostat;    /**< thermostat variables */
     RealType electronicTemperature; /**< temperature of the electronic degrees of freedom */
+    RealType netCharge;           /**< total net charge in the system */
+    RealType chargeMomentum;      /**< total charge momentum in the system */
     pair<RealType, RealType> electronicThermostat; /**< thermostat variables for electronic degrees of freedom */
     Mat3x3d  barostat;            /**< barostat matrix */
     Vector3d COM;                 /**< location of system center of mass */
@@ -225,6 +227,10 @@ namespace OpenMD{
     void     setTemperature(const RealType temp);
     RealType getElectronicTemperature();
     void     setElectronicTemperature(const RealType eTemp);
+    RealType getNetCharge();
+    void     setNetCharge(const RealType nChg);
+    RealType getChargeMomentum();
+    void     setChargeMomentum(const RealType cMom);
     RealType getPressure();
     void     setPressure(const RealType pressure);
 
@@ -285,6 +291,8 @@ namespace OpenMD{
     bool hasPressure;       
     bool hasTemperature;    
     bool hasElectronicTemperature;
+    bool hasNetCharge;
+    bool hasChargeMomentum;
     bool hasCOM;             
     bool hasCOMvel;
     bool hasCOMw;

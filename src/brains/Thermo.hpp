@@ -66,6 +66,8 @@ namespace OpenMD {
 
     RealType getTemperature(); // Gives the instant temp. in K
     RealType getElectronicTemperature(); // gives the instant electronic temperature in K
+    RealType getNetCharge(); // gives the total net charge on the system
+    RealType getChargeMomentum(); // gives the instantaneous charge momentum in kcal fs / e / mol
 
     RealType getPressure(); // gives the instant pressure in atm;
 

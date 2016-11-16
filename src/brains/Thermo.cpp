@@ -250,6 +250,90 @@ namespace OpenMD {
     return snap->getElectronicTemperature();
   }
 
+    RealType Thermo::getNetCharge() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasNetCharge) {
+      
+      SimInfo::MoleculeIterator miter;
+      vector<Atom*>::iterator aiter;
+      Molecule* mol;
+      Atom* atom;    
+      RealType charge;
+      RealType netCharge(0.0);
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
+        
+        for (atom = mol->beginAtom(aiter); atom != NULL;
+             atom = mol->nextAtom(aiter)) {
+          
+          charge = 0.0;
+          
+          FixedChargeAdapter fca = FixedChargeAdapter(atom->getAtomType());
+          if ( fca.isFixedCharge() ) {
+            charge = fca.getCharge();
+          }
+          
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atom->getAtomType());
+          if ( fqa.isFluctuatingCharge() ) {
+            charge += atom->getFlucQPos();
+          }
+
+          netCharge += charge;
+                    
+        }
+      }
+    
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, &netCharge, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+#endif
+     
+      snap->setNetCharge(netCharge);
+    }
+
+    return snap->getNetCharge();
+  }
+
+
+    RealType Thermo::getChargeMomentum() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (!snap->hasChargeMomentum) {
+      
+      SimInfo::MoleculeIterator miter;
+      vector<Atom*>::iterator iiter;
+      Molecule* mol;
+      Atom* atom;    
+      RealType cvel;
+      RealType cmass;
+      RealType momentum(0.0);
+      
+      for (mol = info_->beginMolecule(miter); mol != NULL; 
+           mol = info_->nextMolecule(miter)) {
+        
+        for (atom = mol->beginFluctuatingCharge(iiter); atom != NULL; 
+             atom = mol->nextFluctuatingCharge(iiter)) {
+          
+          cmass = atom->getChargeMass();
+          cvel = atom->getFlucQVel();
+          
+          momentum += cmass * cvel;
+          
+        }
+      }
+    
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, &momentum, 1, MPI_REALTYPE, 
+                    MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+      snap->setChargeMomentum(momentum);
+    }
+
+    return snap->getChargeMomentum();
+  }
 
   RealType Thermo::getVolume() { 
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();

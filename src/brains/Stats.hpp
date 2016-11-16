@@ -96,6 +96,8 @@ namespace OpenMD {
       COM_VELOCITY,
       ANGULAR_MOMENTUM,
       POTENTIAL_SELECTION,
+      NET_CHARGE,
+      CHARGE_MOMENTUM,
       ENDINDEX  //internal use
     };
 

@@ -361,6 +361,22 @@ namespace OpenMD {
     data_[POTENTIAL_SELECTION] = potSelection;
     statsMap_["POTENTIAL_SELECTION"] =  POTENTIAL_SELECTION;
 
+    StatsData netCharge;
+    electronic_temperature.units = "e";
+    electronic_temperature.title =  "Net Charge";  
+    electronic_temperature.dataType = "RealType";
+    electronic_temperature.accumulator = new Accumulator();
+    data_[NET_CHARGE] = netCharge;
+    statsMap_["NET_CHARGE"] = NET_CHARGE;
+
+    StatsData chargeMomentum;
+    electronic_temperature.units = "kcal fs / e / mol";
+    electronic_temperature.title =  "Charge Momentum";  
+    electronic_temperature.dataType = "RealType";
+    electronic_temperature.accumulator = new Accumulator();
+    data_[CHARGE_MOMENTUM] = chargeMomentum;
+    statsMap_["CHARGE_MOMENTUM"] = CHARGE_MOMENTUM;
+
     // Now, set some defaults in the mask:
 
     Globals* simParams = info_->getSimParams();
@@ -573,6 +589,12 @@ namespace OpenMD {
         case POTENTIAL_SELECTION:
           dynamic_cast<PotVecAccumulator *>(data_[i].accumulator)->add(thermo.getSelectionPotentials());
           break;
+        case NET_CHARGE:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getNetCharge());
+          break; 
+        case CHARGE_MOMENTUM:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getChargeMomentum());
+          break; 
 
           /*
         case SHADOWH:
