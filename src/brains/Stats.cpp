@@ -362,18 +362,18 @@ namespace OpenMD {
     statsMap_["POTENTIAL_SELECTION"] =  POTENTIAL_SELECTION;
 
     StatsData netCharge;
-    electronic_temperature.units = "e";
-    electronic_temperature.title =  "Net Charge";  
-    electronic_temperature.dataType = "RealType";
-    electronic_temperature.accumulator = new Accumulator();
+    netCharge.units = "e";
+    netCharge.title =  "Net Charge";  
+    netCharge.dataType = "RealType";
+    netCharge.accumulator = new Accumulator();
     data_[NET_CHARGE] = netCharge;
     statsMap_["NET_CHARGE"] = NET_CHARGE;
 
     StatsData chargeMomentum;
-    electronic_temperature.units = "kcal fs / e / mol";
-    electronic_temperature.title =  "Charge Momentum";  
-    electronic_temperature.dataType = "RealType";
-    electronic_temperature.accumulator = new Accumulator();
+    chargeMomentum.units = "kcal fs / e / mol";
+    chargeMomentum.title =  "Charge Momentum";  
+    chargeMomentum.dataType = "RealType";
+    chargeMomentum.accumulator = new Accumulator();
     data_[CHARGE_MOMENTUM] = chargeMomentum;
     statsMap_["CHARGE_MOMENTUM"] = CHARGE_MOMENTUM;
 
