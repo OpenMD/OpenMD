@@ -189,7 +189,7 @@ namespace OpenMD {
       RealType x, y, z, dx, dy, dz;
       RealType sigma, rcut;
       int di, dj, dk, ibin, jbin, kbin;
-      unsigned int igrid, jgrid, kgrid;
+      int igrid, jgrid, kgrid;
       Vector3d scaled;
       
       dx = lenX_ / nBinsX_;
