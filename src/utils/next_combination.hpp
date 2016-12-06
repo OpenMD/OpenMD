@@ -120,7 +120,7 @@ namespace OpenMD {
       RandomAccessIterator raIter;
       if (j - iterContainer.begin() < 0) { //reaches the last combination of current size
 	//half open range
-	if (last  - first + 1  == iterContainer.size()) {
+	if (last  - first + 1  == int(iterContainer.size())) {
 	  //if the current size equals to total number, done
 	  return false;
 	} else {
