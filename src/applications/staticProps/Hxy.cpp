@@ -188,8 +188,8 @@ namespace OpenMD {
      
       RealType x, y, z, dx, dy, dz;
       RealType sigma, rcut;
-      int di, dj, dk, ibin, jbin, kbin, igrid, jgrid, kgrid;
-      div_t result;
+      int di, dj, dk, ibin, jbin, kbin;
+      unsigned int igrid, jgrid, kgrid;
       Vector3d scaled;
       
       dx = lenX_ / nBinsX_;
@@ -226,9 +226,9 @@ namespace OpenMD {
           jbin = nBinsY_ * scaled.y();
           kbin = nBinsZ_ * scaled.z();
                    
-          di = (int) (rcut * nBinsX_ / lenX_);
-          dj = (int) (rcut * nBinsY_ / lenY_);
-          dk = (int) (rcut * nBinsZ_ / lenZ_);
+          di = (int) (rcut / dx);
+          dj = (int) (rcut / dy);
+          dk = (int) (rcut / dz);
                     
           for (int i = -di; i <= di; i++) {
 
@@ -447,8 +447,8 @@ namespace OpenMD {
       int zero_freq_x = nBinsX_/2; 
       int zero_freq_y = nBinsY_/2; 
       
-      for (int i=0; i< nBinsX_; i++) {
-	for(int j=0; j< nBinsY_; j++) {
+      for (unsigned int i=0; i< nBinsX_; i++) {
+	for(unsigned int j=0; j< nBinsY_; j++) {
 	  RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
 	  RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
 	  
@@ -474,7 +474,7 @@ namespace OpenMD {
     }
 
     for (unsigned int i = 0; i < nbins_; i++) {
-      for (unsigned int j = 0; j < nFrames; j++) {
+      for (unsigned int j = 0; j < unsigned(nFrames); j++) {
 	sum_bin[i] += bin[i][j];
 	sum_bin_sq[i] += bin[i][j] * bin[i][j];
       }
@@ -502,7 +502,7 @@ namespace OpenMD {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
 
-      for (int i = 0; i < nbins_; ++i) {
+      for (unsigned int i = 0; i < nbins_; ++i) {
 	if ( avg_bin[i] > 0 ){
 	  rdfStream << (RealType)i * dfreq_ << "\t"
                     <<pow(avg_bin[i], 2)<<"\t"

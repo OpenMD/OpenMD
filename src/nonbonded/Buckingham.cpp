@@ -298,7 +298,11 @@ namespace OpenMD {
     
     if ( btid1 == -1 || btid2 == -1) return 0.0;
     else {      
-      BuckinghamInteractionData mixer = MixingMap[btid1][btid2];
+      // Uncomment if we ever want to query the simulated atoms types
+      // for a suggested cutoff:
+      //
+      // BuckinghamInteractionData mixer = MixingMap[btid1][btid2];
+      //
       // suggested cutoff for most implementations of the BKS potential are
       // around 1 nm (10 angstroms):
       return 10.0;

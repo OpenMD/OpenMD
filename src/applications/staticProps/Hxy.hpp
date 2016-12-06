@@ -88,10 +88,10 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     
-    int nBinsX_;
-    int nBinsY_;
-    int nBinsZ_;
-    int nbins_; 
+    unsigned int nBinsX_;
+    unsigned int nBinsY_;
+    unsigned int nBinsZ_;
+    unsigned int nbins_; 
     RealType dfreq_;
 
     std::vector<std::vector<std::vector<RealType> > > dens_;

@@ -415,9 +415,10 @@ namespace OpenMD {
       unscaledPotential_ += mRest->getUnscaledPotential();      
 
       // only collect data on restraints that we're going to print:
-      if (mRest->getPrintRestraint()) 
+      if (mRest->getPrintRestraint()) {
         restInfo = mRest->getRestraintInfo();
-        restInfo_.push_back(restInfo);
+	restInfo_.push_back(restInfo);
+      }
     }
 
     for(ro=restrainedObjs_.begin(); ro != restrainedObjs_.end(); ++ro){
@@ -477,9 +478,10 @@ namespace OpenMD {
       unscaledPotential_ += oRest->getUnscaledPotential();
 
       // only collect data on restraints that we're going to print:
-      if (oRest->getPrintRestraint()) 
+      if (oRest->getPrintRestraint()) {
         restInfo = oRest->getRestraintInfo();      
         restInfo_.push_back(restInfo);
+      }
     }
 
     return unscaledPotential_ * scalingFactor;
