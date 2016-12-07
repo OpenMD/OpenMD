@@ -54,7 +54,7 @@ namespace OpenMD {
   
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, int nthetabins)
-    : StaticAnalyser(info, filename), doVect_(true), doOffset_(false), 
+    : StaticAnalyser(info, filename, nthetabins), doVect_(true), doOffset_(false), 
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info),  evaluator2_(info), 
       nThetaBins_(nthetabins) {
@@ -73,7 +73,7 @@ namespace OpenMD {
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, const std::string& sele2, 
                  int nthetabins)
-    : StaticAnalyser(info, filename), doVect_(false), doOffset_(false),
+    : StaticAnalyser(info, filename, nthetabins), doVect_(false), doOffset_(false),
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       nThetaBins_(nthetabins) {
@@ -96,7 +96,7 @@ namespace OpenMD {
 
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, int seleOffset, int nthetabins)
-    : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
+    : StaticAnalyser(info, filename, nthetabins), doVect_(false), doOffset_(true), 
       doOffset2_(false), selectionScript1_(sele1),  
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       seleOffset_(seleOffset),  nThetaBins_(nthetabins) {
@@ -115,7 +115,7 @@ namespace OpenMD {
   pAngle::pAngle(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, int seleOffset, int seleOffset2,
                  int nthetabins)
-    : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
+    : StaticAnalyser(info, filename, nthetabins), doVect_(false), doOffset_(true), 
       doOffset2_(true), selectionScript1_(sele1),  
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       seleOffset_(seleOffset), seleOffset2_(seleOffset2),
@@ -141,6 +141,8 @@ namespace OpenMD {
     StuntDouble* sd2;
     int ii; 
     int jj;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
 
     Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    

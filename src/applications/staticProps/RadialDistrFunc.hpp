@@ -59,7 +59,7 @@ namespace OpenMD {
   class RadialDistrFunc : public StaticAnalyser {
   public:
     RadialDistrFunc(SimInfo* info, const std::string& filename, 
-                    const std::string& sele1, const std::string& sele2);
+                    const std::string& sele1, const std::string& sele2, unsigned int nbins);
 
     virtual ~RadialDistrFunc() {}
         

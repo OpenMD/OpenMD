@@ -54,25 +54,25 @@ namespace OpenMD {
   GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, 
                        const std::string& sele1, 
 		       const std::string& sele2, int nangleBins)
-  : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
-    doSele3_(false), seleMan3_(info), evaluator3_(info) {
+    : RadialDistrFunc(info, filename, sele1, sele2, nangleBins), 
+      doSele3_(false), seleMan3_(info), evaluator3_(info) {
 
     setAnalysisType("Radial Distribution Function");
     setOutputName(getPrefix(filename) + ".gto");
     
-    deltaCosAngle_ = 2.0 / nAngleBins_;
+    deltaCosAngle_ = 2.0 / nBins_;
 
     std::stringstream params;
-    params << " nAngleBins = " << nAngleBins_
+    params << " nAngleBins = " << nBins_
            << ", deltaCosAngle = " << deltaCosAngle_;
     const std::string paramString = params.str();
     setParameterString( paramString );    
 
-    histogram_.resize(nAngleBins_);
-    avgGofr_.resize(nAngleBins_);
-    for (int i = 0 ; i < nAngleBins_; ++i) {
-      histogram_[i].resize(nAngleBins_);
-      avgGofr_[i].resize(nAngleBins_);
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (int i = 0 ; i < nBins_; ++i) {
+      histogram_[i].resize(nBins_);
+      avgGofr_[i].resize(nBins_);
     }   
   }
   
@@ -80,19 +80,19 @@ namespace OpenMD {
                        const std::string& sele1, 
 		       const std::string& sele2, 
                        const std::string& sele3, int nangleBins)
-  : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
-    doSele3_(true), seleMan3_(info), evaluator3_(info), 
-    selectionScript3_(sele3) {
+    : RadialDistrFunc(info, filename, sele1, sele2, nangleBins),
+      doSele3_(true), seleMan3_(info), evaluator3_(info), 
+      selectionScript3_(sele3) {
     
     setOutputName(getPrefix(filename) + ".gto");
     
-    deltaCosAngle_ = 2.0 / nAngleBins_;
+    deltaCosAngle_ = 2.0 / nBins_;
     
-    histogram_.resize(nAngleBins_);
-    avgGofr_.resize(nAngleBins_);
-    for (int i = 0 ; i < nAngleBins_; ++i) {
-      histogram_[i].resize(nAngleBins_);
-      avgGofr_[i].resize(nAngleBins_);
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (int i = 0 ; i < nBins_; ++i) {
+      histogram_[i].resize(nBins_);
+      avgGofr_[i].resize(nBins_);
     }    
     evaluator3_.loadScriptString(sele3);      
     if (!evaluator3_.isDynamic()) {
@@ -190,7 +190,8 @@ namespace OpenMD {
   }
 
   void GofAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
-
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
     if (sd1 == sd2) {
       return;
     }
@@ -241,7 +242,7 @@ namespace OpenMD {
     RealType cosAngle1 = dot(r12, dipole1);
     RealType cosAngle2 = dot(dipole1, dipole2);
 
-    RealType halfBin = (nAngleBins_ - 1) * 0.5;
+    RealType halfBin = (nBins_ - 1) * 0.5;
     int angleBin1 = int(halfBin * (cosAngle1 + 1.0));
     int angleBin2 = int(halfBin * (cosAngle2 + 1.0));
 
@@ -251,6 +252,7 @@ namespace OpenMD {
 
   void GofAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
                                    StuntDouble* sd3) {
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     if (sd1 == sd2) {
       return;
@@ -293,7 +295,7 @@ namespace OpenMD {
     RealType cosAngle1 = dot(r12, r13);
     RealType cosAngle2 = dot(r13, dipole2);
 
-    RealType halfBin = (nAngleBins_ - 1) * 0.5;
+    RealType halfBin = (nBins_ - 1) * 0.5;
     int angleBin1 = int(halfBin * (cosAngle1 + 1.0));
     int angleBin2 = int(halfBin * (cosAngle2 + 1.0));
 

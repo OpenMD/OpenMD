@@ -151,7 +151,7 @@ namespace OpenMD {
 
   SCDOrderParameter::SCDOrderParameter(SimInfo* info, const std::string& filename,
                                        const std::string& sele1, const std::string& sele2, const std::string& sele3)
-    : StaticAnalyser(info, filename) {
+    : StaticAnalyser(info, filename, 1) {
 
     setOutputName(getPrefix(filename) + ".scd");
 
@@ -163,7 +163,7 @@ namespace OpenMD {
 
   SCDOrderParameter::SCDOrderParameter(SimInfo* info, const std::string& filename,
                                        const std::string& molname, int beginIndex, int endIndex)
-    : StaticAnalyser(info, filename) {
+    : StaticAnalyser(info, filename, 1) {
 
     setOutputName(getPrefix(filename) + ".scd");
 

@@ -61,7 +61,7 @@
 namespace OpenMD {
   
   SurfaceDiffusion::SurfaceDiffusion(SimInfo* info, const std::string& filename, const std::string& sele, RealType len)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan1_(info){
+    : StaticAnalyser(info, filename, 1), selectionScript_(sele),  evaluator_(info), seleMan1_(info){
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -90,6 +90,7 @@ namespace OpenMD {
     StuntDouble* sd;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

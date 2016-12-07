@@ -57,7 +57,7 @@ namespace OpenMD {
                                            const std::string& filename, 
                                            const std::string& sele,
                                            double rCut, int nbins) : 
-    StaticAnalyser(info, filename), selectionScript_(sele), 
+    StaticAnalyser(info, filename, nbins), selectionScript_(sele), 
     seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".q");
@@ -70,7 +70,6 @@ namespace OpenMD {
     // Set up cutoff radius:
 
     rCut_ = rCut;
-    nBins_ = nbins;
 
     Q_histogram_.resize(nBins_);
 
@@ -78,7 +77,7 @@ namespace OpenMD {
 
     MinQ_ = 0.0;
     MaxQ_ = 1.1;
-    deltaQ_ = (MaxQ_ - MinQ_) / nbins;
+    deltaQ_ = (MaxQ_ - MinQ_) / nBins_;
 
   }
 
@@ -108,6 +107,7 @@ namespace OpenMD {
     RealType Qk;
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

@@ -56,7 +56,7 @@ namespace OpenMD {
 
   PotDiff::PotDiff(SimInfo* info, const std::string& filename, 
                    const std::string& sele)
-    : StaticAnalyser(info, filename), selectionScript_(sele), 
+    : StaticAnalyser(info, filename, 1), selectionScript_(sele), 
       seleMan_(info), evaluator_(info) {
     
     StuntDouble* sd;

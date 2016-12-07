@@ -66,9 +66,9 @@ namespace OpenMD {
   Hxy::Hxy(SimInfo* info, const std::string& filename,
            const std::string& sele, int nbins_x, int nbins_y, int nbins_z,
            int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),
+    : StaticAnalyser(info, filename, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), nBinsX_(nbins_x), nBinsY_(nbins_y),
-      nBinsZ_(nbins_z), nbins_(nrbins){
+      nBinsZ_(nbins_z) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -95,17 +95,37 @@ namespace OpenMD {
     newmag1.resize(nBinsX_*nBinsY_);
     mag2.resize(nBinsX_*nBinsY_);
     newmag2.resize(nBinsX_*nBinsY_);
-    sum_bin.resize(nbins_);
-    avg_bin.resize(nbins_);
-    errbin_sum.resize(nbins_);
-    errbin.resize(nbins_);
-    sum_bin_sq.resize(nbins_);
-    avg_bin_sq.resize(nbins_);
-    errbin_sum_sq.resize(nbins_);
-    errbin_sq.resize(nbins_);
+    
+    // Pre-load an OutputData     
+    freq_= new OutputData;
+    freq_->units =  "Angstroms^-1";
+    freq_->title =  "Spatial Frequency";
+    freq_->dataType = odtReal;
+    freq_->dataHandling = odhAverage;
+    freq_->accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      freq_->accumulator.push_back( new Accumulator() );
+    data_.push_back(freq_);
 
-    bin.resize(nbins_);
-    samples.resize(nbins_);
+    top_= new OutputData;
+    top_->units =  "Angstroms";
+    top_->title =  "Hxy (Upper surface)";
+    top_->dataType = odtReal;
+    top_->dataHandling = odhAverage;
+    top_->accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      top_->accumulator.push_back( new Accumulator() );
+    data_.push_back(top_);
+    
+    bottom_= new OutputData;
+    bottom_->units =  "Angstroms";
+    bottom_->title =  "Hxy (Lower surface)";
+    bottom_->dataType = odtReal;
+    bottom_->dataHandling = odhAverage;
+    bottom_->accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      bottom_->accumulator.push_back( new Accumulator() );
+    data_.push_back(bottom_);
 
     setOutputName(getPrefix(filename) + ".Hxy");
   }
@@ -121,14 +141,11 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     int ii;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
-    for(unsigned int k=0; k < bin.size(); k++)
-      bin[k].resize(nFrames);
-    for(unsigned int k=0; k < samples.size(); k++)
-      samples[k].resize(nFrames);
 
     for (int istep = 0; istep < nFrames; istep += step_) {
 
@@ -193,7 +210,7 @@ namespace OpenMD {
       Vector3d scaled;
       
       dx = lenX_ / nBinsX_;
-      dy = lenY_ / nBinsY_;
+       dy = lenY_ / nBinsY_;
       dz = lenZ_ / nBinsZ_;
             
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
@@ -442,7 +459,7 @@ namespace OpenMD {
       RealType maxfreqy = RealType(nBinsY_) / lenY_;
       
       RealType maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
-      dfreq_ = maxfreq/(RealType)(nbins_-1);
+      dfreq_ = maxfreq/(RealType)(nBins_-1);
           
       int zero_freq_x = nBinsX_/2; 
       int zero_freq_y = nBinsY_/2; 
@@ -455,40 +472,22 @@ namespace OpenMD {
 	  RealType freq = sqrt(freq_x*freq_x + freq_y*freq_y);
 	  
 	  unsigned int whichbin = (unsigned int) (freq / dfreq_);
+          
 	  newindex = i*nBinsY_ + j;
 
           std::cout << newmag1[newindex] << "\t";
-	  bin[whichbin][istep] += newmag1[newindex] + newmag2[newindex];
-	  samples[whichbin][istep] += 2;
+          
+          dynamic_cast<Accumulator*>(counts_->accumulator[whichbin])->add(1);
+          dynamic_cast<Accumulator*>(freq_->accumulator[whichbin])->add(freq);
+          dynamic_cast<Accumulator *>(top_->accumulator[whichbin])->add(newmag1[newindex]);
+          dynamic_cast<Accumulator *>(bottom_->accumulator[whichbin])->add(newmag2[newindex]);
+          
 	}
-        std::cout << "\n";
       }
       
-      for (unsigned int i = 0; i < nbins_; i++) {
-	if ( samples[i][istep] > 0) {
-	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] /
-                                     (RealType)samples[i][istep]) /
-            (RealType)nBinsX_ / (RealType)nBinsY_;
-	}
-      }    
     }
 
-    for (unsigned int i = 0; i < nbins_; i++) {
-      for (unsigned int j = 0; j < unsigned(nFrames); j++) {
-	sum_bin[i] += bin[i][j];
-	sum_bin_sq[i] += bin[i][j] * bin[i][j];
-      }
-      avg_bin[i] = sum_bin[i] / (RealType)nFrames;
-      avg_bin_sq[i] = sum_bin_sq[i] / (RealType)nFrames;
-      for (int j = 0; j < nFrames; j++) {
-	errbin_sum[i] += pow((bin[i][j] - avg_bin[i]), 2);
-	errbin_sum_sq[i] += pow((bin[i][j] * bin[i][j] - avg_bin_sq[i]), 2);
-      }
-      errbin[i] = sqrt( errbin_sum[i] / (RealType)nFrames );
-      errbin_sq[i] = sqrt( errbin_sum_sq[i] / (RealType)nFrames );
-    }
-
-    printSpectrum();
+    writeOutput();
 
 #else
     sprintf(painCave.errMsg, "Hxy: FFTW support was not compiled in!\n");
@@ -498,30 +497,7 @@ namespace OpenMD {
 #endif
   }
     
-  void Hxy::printSpectrum() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-
-      for (unsigned int i = 0; i < nbins_; ++i) {
-	if ( avg_bin[i] > 0 ){
-	  rdfStream << (RealType)i * dfreq_ << "\t"
-                    <<pow(avg_bin[i], 2)<<"\t"
-	            <<errbin_sq[i]<<"\t"
-	            <<avg_bin[i]<<"\t"
-	            <<errbin[i]<<"\n";
-	}
-      }
-    } else {
-      
-      sprintf(painCave.errMsg, "Hxy: unable to open %s\n", outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }
-
-    rdfStream.close();
-
-  }
-  
+   
   RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;
     RealType dens = exp(-r*r/(sigma2*2.0)) /
@@ -533,4 +509,7 @@ namespace OpenMD {
     else
       return 0.0;
   }
+
+
+
 }

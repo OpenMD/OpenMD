@@ -55,7 +55,7 @@ namespace OpenMD {
                                  const std::string& sele1,
                                  const std::string& sele2,
                                  double rCut, double thetaCut, int nbins) :
-    StaticAnalyser(info, filename),
+    StaticAnalyser(info, filename, nbins),
     selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
     selectionScript2_(sele2), seleMan2_(info), evaluator2_(info) {
     
@@ -76,8 +76,7 @@ namespace OpenMD {
 
     rCut_ = rCut;
     thetaCut_ = thetaCut;
-    nBins_ = nbins;
-
+    
     nHBonds_.resize(nBins_);
     nDonor_.resize(nBins_);
     nAcceptor_.resize(nBins_);

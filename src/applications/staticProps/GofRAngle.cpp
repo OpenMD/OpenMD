@@ -55,15 +55,14 @@ namespace OpenMD {
                        const std::string& sele1, 
 		       const std::string& sele2, 
                        RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins), 
-      len_(len), nRBins_(nrbins), 
-      doSele3_(false), seleMan3_(info), evaluator3_(info) {
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), nAngleBins_(nangleBins), 
+      len_(len), doSele3_(false), seleMan3_(info), evaluator3_(info) {
     
-    deltaR_ = len_ /(double) nRBins_;
+    deltaR_ = len_ /(double) nBins_;
     deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
-    histogram_.resize(nRBins_);
-    avgGofr_.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nAngleBins_);
       avgGofr_[i].resize(nAngleBins_);
     }
@@ -71,7 +70,7 @@ namespace OpenMD {
     setAnalysisType("Radial Distribution Function");
 
     std::stringstream params;
-    params << " nRBins = " << nRBins_
+    params << " nBins = " << nBins_
            << ", maxLen = " << len_
            << ", deltaR = " << deltaR_
            << ", nAngleBins = " << nAngleBins_
@@ -85,15 +84,15 @@ namespace OpenMD {
 		       const std::string& sele2, 
                        const std::string& sele3,
                        RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins),
-      len_(len), nRBins_(nrbins), doSele3_(true), selectionScript3_(sele3),
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), nAngleBins_(nangleBins),
+      len_(len), doSele3_(true), selectionScript3_(sele3),
       seleMan3_(info), evaluator3_(info) {
 
-    deltaR_ = len_ /(double) nRBins_;
+    deltaR_ = len_ /(double) nBins_;
     deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
-    histogram_.resize(nRBins_);
-    avgGofr_.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nAngleBins_);
       avgGofr_[i].resize(nAngleBins_);
     }
@@ -234,6 +233,8 @@ namespace OpenMD {
     if (sd1 == sd2) {
       return;
     }
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
@@ -260,6 +261,7 @@ namespace OpenMD {
     if (sd1 == sd2) {
       return;
     }
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     Vector3d p1 = sd1->getPos();
     Vector3d p3 = sd3->getPos();
@@ -328,6 +330,8 @@ namespace OpenMD {
   }
 
   RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
@@ -366,6 +370,8 @@ namespace OpenMD {
 
   RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
                                     StuntDouble* sd3) {
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Vector3d p1 = sd1->getPos();
     Vector3d p3 = sd3->getPos();
 
@@ -434,6 +440,7 @@ namespace OpenMD {
 
   RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
                                     StuntDouble* sd3) {
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     Vector3d v1;
     Vector3d v2;

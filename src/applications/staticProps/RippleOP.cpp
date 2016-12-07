@@ -51,7 +51,7 @@ namespace OpenMD {
   
   RippleOP::RippleOP(SimInfo* info, const std::string& filename, 
 		     const std::string& sele1, const std::string& sele2)
-    : StaticAnalyser(info, filename), 
+    : StaticAnalyser(info, filename, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) { 
     
@@ -111,7 +111,8 @@ namespace OpenMD {
     StuntDouble* j1;
     StuntDouble* j2;
     StuntDouble* sd3;
-  
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+      
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
 

@@ -52,24 +52,14 @@ namespace OpenMD {
   
   SpatialStatistics::SpatialStatistics(SimInfo* info, const string& filename, 
                                        const string& sele, int nbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info),
-      seleMan_(info), nBins_(nbins){
+    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),  evaluator_(info),
+      seleMan_(info) {
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
-    // Pre-load an OutputData for the count of objects:
-    counts_ = new OutputData;
-    counts_->units =  "objects";
-    counts_->title =  "Objects";
-    counts_->dataType = odtReal;
-    counts_->dataHandling = odhTotal;
-    counts_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
-      counts_->accumulator.push_back( new Accumulator() );
-    
+        
     setOutputName(getPrefix(filename) + ".spst");
   }
 
@@ -145,166 +135,7 @@ namespace OpenMD {
   }
   
 
-  void SpatialStatistics::writeOutput() {
-    
-    vector<OutputData*>::iterator i;
-    OutputData* outputData;
-    
-    ofstream outStream(outputFilename_.c_str());
-    if (outStream.is_open()) {
-      
-      //write title
-      outStream << "# SPATIAL STATISTICS\n";
-      outStream << "#";
-      
-      for(outputData = beginOutputData(i); outputData; 
-          outputData = nextOutputData(i)) {
-        outStream << "\t" << outputData->title << 
-          "(" << outputData->units << ")";
-        // add some extra tabs for column alignment
-        if (outputData->dataType == odtVector3) outStream << "\t\t";
-      }
-      
-      outStream << std::endl;
-      
-      outStream.precision(8);
-      
-      for (int j = 0; j < nBins_; j++) {        
-        
-        int counts = counts_->accumulator[j]->count();
-
-        if (counts > 0) {
-          for(outputData = beginOutputData(i); outputData; 
-              outputData = nextOutputData(i)) {
-            
-            int n = outputData->accumulator[j]->count();
-            if (n != 0) {
-              writeData( outStream, outputData, j );
-            }
-          }
-          outStream << std::endl;
-        }
-      }
-        
-      outStream << "#######################################################\n";
-      outStream << "# 95% confidence intervals in those quantities follow:\n";
-      outStream << "#######################################################\n";
-      
-      for (int j = 0; j < nBins_; j++) {
-        int counts = counts_->accumulator[j]->count();
-        if (counts > 0) {
-          
-          outStream << "#";
-          for(outputData = beginOutputData(i); outputData; 
-              outputData = nextOutputData(i)) {
-            
-            int n = outputData->accumulator[j]->count();
-            if (n != 0) {
-              writeErrorBars( outStream, outputData, j );
-            }
-          }
-          outStream << std::endl;
-        }
-      }
-      
-      outStream.flush();
-      outStream.close();      
-      
-    } else {      
-      sprintf(painCave.errMsg, "SpatialStatistics: unable to open %s\n", 
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }   
-  }
   
-  
-  void SpatialStatistics::writeData(ostream& os, OutputData* dat, 
-                                    unsigned int bin) {
-    assert(int(bin) < nBins_);
-    int n = dat->accumulator[bin]->count();
-    if (n == 0) return;
-
-    if( dat->dataType == odtReal ) {
-      RealType r;
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
-      if (isinf(r) || isnan(r) ) {      
-        sprintf( painCave.errMsg,
-                 "SpatialStatistics detected a numerical error writing:\n"
-                 "\t%s for bin %u",
-                 dat->title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      }
-      if (dat->dataHandling == odhTotal) r *= dat->accumulator[bin]->count();
-      os << "\t" << r;      
-
-    } else if ( dat->dataType == odtVector3 ) {
-      Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
-      if (isinf(v[0]) || isnan(v[0]) || 
-          isinf(v[1]) || isnan(v[1]) || 
-          isinf(v[2]) || isnan(v[2]) ) {      
-        sprintf( painCave.errMsg,
-                 "SpatialStatistics detected a numerical error writing:\n"
-                 "\t%s for bin %u",
-                 dat->title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      }
-      if (dat->dataHandling == odhTotal) v *= dat->accumulator[bin]->count();
-      os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
-    }
-  }
-
-  void SpatialStatistics::writeErrorBars(ostream& os, OutputData* dat, 
-                                    unsigned int bin) {
-    assert(int(bin) < nBins_);
-    int n = dat->accumulator[bin]->count();
-    if (n == 0) return;
-
-    if( dat->dataType == odtReal ) {
-      RealType r;
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(r);      
-      if (isinf(r) || isnan(r) ) {      
-        sprintf( painCave.errMsg,
-                 "SpatialStatistics detected a numerical error writing:\n"
-                 "\tstandard deviation of %s for bin %u",
-                 dat->title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      }
-      if (dat->dataHandling == odhTotal) r *= dat->accumulator[bin]->count();
-      os << "\t" << r;      
-
-    } else if ( dat->dataType == odtVector3 ) {
-      Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(v);
-      if (isinf(v[0]) || isnan(v[0]) || 
-          isinf(v[1]) || isnan(v[1]) || 
-          isinf(v[2]) || isnan(v[2]) ) {      
-        sprintf( painCave.errMsg,
-                 "SpatialStatistics detected a numerical error writing:\n"
-                 "\tstandard deviation of %s for bin %u",
-                 dat->title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      }
-      if (dat->dataHandling == odhTotal) v *= dat->accumulator[bin]->count();
-      os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
-    }
-  }
-  
-  
-  OutputData* SpatialStatistics::beginOutputData(vector<OutputData*>::iterator& i) {
-    i = data_.begin();
-    return i != data_.end()? *i : NULL;
-  }
-
-  OutputData* SpatialStatistics::nextOutputData(vector<OutputData*>::iterator& i){
-    ++i;
-    return i != data_.end()? *i: NULL;
-  }
 
 
   SlabStatistics::SlabStatistics(SimInfo* info, const string& filename, 

@@ -66,6 +66,8 @@
 #endif
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+#include "utils/Accumulator.hpp"
+
 namespace OpenMD {
   
   class Hxy : public StaticAnalyser {
@@ -78,9 +80,8 @@ namespace OpenMD {
     
   private:
     
-    virtual void printSpectrum();
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
-        
+
     Snapshot* currentSnapshot_;
     
     int nProcessed_;
@@ -91,7 +92,6 @@ namespace OpenMD {
     unsigned int nBinsX_;
     unsigned int nBinsY_;
     unsigned int nBinsZ_;
-    unsigned int nbins_; 
     RealType dfreq_;
 
     std::vector<std::vector<std::vector<RealType> > > dens_;
@@ -99,11 +99,10 @@ namespace OpenMD {
     std::vector<std::vector<RealType> > maxHeight_;    
     std::vector<RealType> mag1, newmag1;
     std::vector<RealType> mag2, newmag2;
-    std::vector<RealType> sum_bin, sum_bin_sq, avg_bin, avg_bin_sq;
-    std::vector<RealType> errbin_sum, errbin_sum_sq, errbin, errbin_sq;
-    std::vector< std::vector<RealType> > bin;
-    std::vector< std::vector<int> > samples;
 
+    OutputData* freq_;
+    OutputData* top_;
+    OutputData* bottom_;
   };
   
 }

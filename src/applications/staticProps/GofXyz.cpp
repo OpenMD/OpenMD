@@ -52,8 +52,8 @@ namespace OpenMD {
   GofXyz::GofXyz(SimInfo* info, const std::string& filename, 
 		 const std::string& sele1, const std::string& sele2, 
 		 const std::string& sele3, RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), 
-      halfLen_(len/2), nRBins_(nrbins), evaluator3_(info), seleMan3_(info) {
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), 
+      halfLen_(len/2), evaluator3_(info), seleMan3_(info) {
     
     setOutputName(getPrefix(filename) + ".gxyz");
     
@@ -62,21 +62,21 @@ namespace OpenMD {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }    
     
-    deltaR_ =  len_ / nRBins_;
+    deltaR_ =  len_ / nBins_;
     
-    histogram_.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
-      histogram_[i].resize(nRBins_);
-      for(int j = 0; j < nRBins_; ++j) {
-	histogram_[i][j].resize(nRBins_);
+    histogram_.resize(nBins_);
+    for (int i = 0 ; i < nBins_; ++i) {
+      histogram_[i].resize(nBins_);
+      for(int j = 0; j < nBins_; ++j) {
+	histogram_[i][j].resize(nBins_);
       }
     }    
   }
   
   void GofXyz::preProcess() {
-    for (int i = 0 ; i < nRBins_; ++i) {
-      histogram_[i].resize(nRBins_);
-      for(int j = 0; j < nRBins_; ++j) {
+    for (int i = 0 ; i < nBins_; ++i) {
+      histogram_[i].resize(nBins_);
+      for(int j = 0; j < nBins_; ++j) {
 	std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
       }
     }   
@@ -92,7 +92,8 @@ namespace OpenMD {
     }    
 
     assert(seleMan1_.getSelectionCount() == seleMan3_.getSelectionCount());
-    
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+        
     // The Dipole direction of selection3 and position of selection3 will
     // be used to determine the y-z plane
     // v1 = s3 -s1, 
@@ -143,6 +144,7 @@ namespace OpenMD {
   }
 
   void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
@@ -159,9 +161,9 @@ namespace OpenMD {
     int ybin = int( (newR12.y() + halfLen_) / deltaR_);
     int zbin = int( (newR12.z() + halfLen_) / deltaR_);
 
-    if (xbin < nRBins_ && xbin >=0 &&
-        ybin < nRBins_ && ybin >= 0 &&
-        zbin < nRBins_ && zbin >=0 ) {
+    if (xbin < nBins_ && xbin >=0 &&
+        ybin < nBins_ && ybin >= 0 &&
+        zbin < nBins_ && zbin >=0 ) {
       ++histogram_[xbin][ybin][zbin];
     }
     
@@ -173,7 +175,7 @@ namespace OpenMD {
       //rdfStream << "#g(x, y, z)\n";
       //rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       //rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " 
+      //rdfStream << "#nRBins = " << nBins_ << "\t maxLen = " 
       //          << len_ << "deltaR = " << deltaR_ <<"\n";
       for (unsigned int i = 0; i < histogram_.size(); ++i) { 
 	for(unsigned int j = 0; j < histogram_[i].size(); ++j) { 

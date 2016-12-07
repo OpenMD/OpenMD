@@ -52,18 +52,18 @@ namespace OpenMD {
   GofR::GofR(SimInfo* info, const std::string& filename,
              const std::string& sele1, const std::string& sele2,
              RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
 
     setAnalysisType("Radial Distribution Function");
     setOutputName(getPrefix(filename) + ".gofr");
 
-    deltaR_ = len_ /nRBins_;
+    deltaR_ = len_ /nBins_;
     
-    histogram_.resize(nRBins_);
-    avgGofr_.resize(nRBins_);
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
     std::stringstream params;
     params << " len = " << len_
-           << ", nrbins = " << nRBins_;
+           << ", nrbins = " << nBins_;
     const std::string paramString = params.str();
     setParameterString( paramString );
   }
@@ -103,6 +103,8 @@ namespace OpenMD {
       return;
     }
     
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;

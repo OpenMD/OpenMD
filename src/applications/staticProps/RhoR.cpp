@@ -55,7 +55,7 @@ namespace OpenMD {
 
      
   RhoR::RhoR(SimInfo* info, const std::string& filename, const std::string& sele, RealType len, int nrbins, RealType particleR)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
+    : StaticAnalyser(info, filename, nrbins), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len) {
     
     
     evaluator_.loadScriptString(sele);
@@ -64,10 +64,10 @@ namespace OpenMD {
     }
     
     
-    deltaR_ = len_ /nRBins_;
+    deltaR_ = len_ /nBins_;
     
-    histogram_.resize(nRBins_);
-    avgRhoR_.resize(nRBins_);
+    histogram_.resize(nBins_);
+    avgRhoR_.resize(nBins_);
     particleR_ = particleR;
     setOutputName(getPrefix(filename) + ".RhoR");
   }

@@ -59,7 +59,7 @@ namespace OpenMD {
                                                  RealType rCut, 
                                                  RealType voxelSize,
                                                  RealType gaussWidth) 
-    : StaticAnalyser(info, filename), 
+    : StaticAnalyser(info, filename, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info),  seleMan2_(info), evaluator1_(info), evaluator2_(info),
       rCut_(rCut), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
@@ -119,6 +119,7 @@ namespace OpenMD {
     //std::vector<std::pair<Vector3d, RealType> >::iterator qiter;
     int isd1;
     int isd2;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
 
     int kMax = int(5.0 * gaussWidth_ / voxelSize_);

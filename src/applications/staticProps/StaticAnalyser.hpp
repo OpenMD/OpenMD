@@ -45,21 +45,43 @@
 #include <string>
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
+#include "utils/Accumulator.hpp"
 
 namespace OpenMD {
+  enum OutputDataType {
+    odtReal,
+    odtVector3,
+    odtArray2d,
+    odtUnknownDataType
+  };
+  
+  enum OutputDataHandling {
+    odhAverage,
+    odhTotal,
+    odhLastValue,
+    odhUnknownDataHandling
+  };
+  
+  struct OutputData {
+    string title;
+    string units;
+    OutputDataType dataType;
+    OutputDataHandling dataHandling;
+    vector<BaseAccumulator*> accumulator;
+    vector<vector<BaseAccumulator*> > accumulatorArray2d;
+  };
 
   class StaticAnalyser{
   public:
-    StaticAnalyser(SimInfo* info, const std::string& filename) :
-      info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1),
-      usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {}
+    StaticAnalyser(SimInfo* info, const std::string& filename, unsigned int nbins);
+    
     virtual ~StaticAnalyser() {}
     virtual void process()=0;
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
     }
-        
+    
     const std::string& getOutputFileName() const {
       return outputFilename_;
     }
@@ -84,14 +106,23 @@ namespace OpenMD {
     }
 
   protected:
+    void writeOutput();
+    void writeData(ostream& os, OutputData* dat, unsigned int bin);
+    void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    OutputData* beginOutputData(vector<OutputData*>::iterator& i);
+    OutputData* nextOutputData(vector<OutputData*>::iterator& i);
+
     SimInfo* info_;
-    Snapshot* currentSnapshot_;
     std::string dumpFilename_;        
     std::string outputFilename_;
     int step_;
-    bool usePeriodicBoundaryConditions_;
     std::string analysisType_;
     std::string paramString_;
+    
+    unsigned int nBins_;
+    OutputData* counts_;
+    vector<OutputData*> data_;
+
   };
 }
 #endif

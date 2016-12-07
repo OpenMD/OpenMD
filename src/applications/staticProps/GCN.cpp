@@ -53,7 +53,7 @@ namespace OpenMD {
   GCN::GCN(SimInfo* info, const std::string& filename,
            const std::string& sele1, const std::string& sele2,
            RealType rCut, int bins):
-    StaticAnalyser(info, filename), rCut_(rCut), bins_(bins),
+    StaticAnalyser(info, filename, bins), rCut_(rCut), bins_(bins),
     sele1_(sele1), seleMan1_(info), evaluator1_(info),
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
 
@@ -98,8 +98,10 @@ namespace OpenMD {
     StuntDouble* sd2;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    
-    
+
+    Snapshot* currentSnapshot_;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     int iterator1;
     int iterator2;
     unsigned int mapIndex1(0);

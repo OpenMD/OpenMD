@@ -59,7 +59,7 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info, const std::string& filename,
                  const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),
+    : StaticAnalyser(info, filename, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
         
     evaluator_.loadScriptString(sele);

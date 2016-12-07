@@ -55,7 +55,7 @@ namespace OpenMD {
   DensityPlot::DensityPlot(SimInfo* info, const std::string& filename, 
 			   const std::string& sele, const std::string& cmSele,
 			   RealType len, int nrbins) 
-    : StaticAnalyser(info, filename), 
+    : StaticAnalyser(info, filename, nrbins), 
       len_(len), halfLen_(len/2), nRBins_(nrbins),
       selectionScript_(sele), seleMan_(info), evaluator_(info), 
       cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
@@ -85,6 +85,7 @@ namespace OpenMD {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
