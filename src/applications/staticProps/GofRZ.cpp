@@ -49,16 +49,16 @@ namespace OpenMD {
 
   GofRZ::GofRZ(SimInfo* info, const std::string& filename, const std::string& sele1, 
                const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), zLen_(zlen), nRBins_(nrbins), nZBins_(nZBins){
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), zLen_(zlen), nZBins_(nZBins){
 
     setOutputName(getPrefix(filename) + ".gofrz");
 
-    deltaR_ = len_ / (double) nRBins_;
+    deltaR_ = len_ / (double) nBins_;
     deltaZ_ = zLen_ / (double)nZBins_; 
 
-    histogram_.resize(nRBins_);
-    avgGofr_.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nZBins_);
       avgGofr_[i].resize(nZBins_);
     } 
@@ -101,6 +101,8 @@ namespace OpenMD {
     if (sd1 == sd2) {
       return;
     }
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
@@ -130,7 +132,7 @@ namespace OpenMD {
       rdfStream << "#radial distribution function\n";
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
+      rdfStream << "#nBins = " << nBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
       rdfStream << "#nZBins =" << nZBins_ << "\t deltaZ = " << deltaZ_ << "\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
         // RealType r = deltaR_ * (i + 0.5);

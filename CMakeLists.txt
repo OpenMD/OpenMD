@@ -623,6 +623,7 @@ src/applications/staticProps/RippleOP.cpp
 src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp
 src/applications/staticProps/SpatialStatistics.cpp
+src/applications/staticProps/StaticAnalyser.cpp
 src/applications/staticProps/StaticProps.cpp
 src/applications/staticProps/SurfaceDiffusion.cpp
 src/applications/staticProps/TetrahedralityHBMatrix.cpp

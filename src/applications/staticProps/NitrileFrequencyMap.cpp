@@ -54,9 +54,8 @@ namespace OpenMD {
                                            const std::string& filename, 
                                            const std::string& sele1, 
                                            int nbins)
-    : StaticAnalyser(info, filename), info_(info), 
-      selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_),
-      nBins_(nbins) {
+    : StaticAnalyser(info, filename, nbins), info_(info), 
+      selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_) {
     
     setOutputName(getPrefix(filename) + ".freqs");
     

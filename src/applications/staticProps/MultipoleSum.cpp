@@ -53,7 +53,7 @@ namespace OpenMD {
   MultipoleSum::MultipoleSum(SimInfo* info, const std::string& filename, 
                              const std::string& sele1, RealType rmax, 
 			     int nrbins)
-    : StaticAnalyser(info, filename), nRBins_(nrbins), rMax_(rmax),
+    : StaticAnalyser(info, filename, nrbins), nRBins_(nrbins), rMax_(rmax),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info) {
     
     setOutputName(getPrefix(filename) + ".multipoleSum");
@@ -98,6 +98,7 @@ namespace OpenMD {
     std::vector<RealType> dipoleProjection;
     Vector3d dipole;
     Mat3x3d qpole;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

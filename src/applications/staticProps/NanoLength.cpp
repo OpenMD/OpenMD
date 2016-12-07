@@ -54,7 +54,7 @@ bool pairComparator( const evIndex& l, const evIndex& r) {
 NanoLength::NanoLength(SimInfo* info,
                        const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info),
+  : StaticAnalyser(info, filename, 1), selectionScript_(sele), seleMan_(info),
     evaluator_(info) {
   
   setOutputName(getPrefix(filename) + ".length");

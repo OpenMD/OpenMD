@@ -60,9 +60,9 @@ namespace OpenMD {
                                                  double rCut, double OOcut,
                                                  double thetaCut, double OHcut,
                                                  int nbins) : 
-    StaticAnalyser(info, filename), selectionScript_(sele), 
+    StaticAnalyser(info, filename, nbins), selectionScript_(sele), 
     seleMan_(info), evaluator_(info), rCut_(rCut),  OOCut_(OOcut),
-    thetaCut_(thetaCut), OHCut_(OHcut), nBins_(nbins) {
+    thetaCut_(thetaCut), OHCut_(OHcut) {
 
     setAnalysisType("Tetrahedrality HBond Matrix");   
     setOutputName(getPrefix(filename) + ".hbq");
@@ -135,6 +135,7 @@ namespace OpenMD {
     std::vector<std::pair<RealType,Molecule*> > myNeighbors;
     int myIndex, ii, jj, index1, index2;
     
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

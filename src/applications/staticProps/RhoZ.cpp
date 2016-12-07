@@ -55,7 +55,7 @@
 namespace OpenMD {
   
   RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), nZBins_(nzbins){
+    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele),  evaluator_(info), seleMan_(info) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -64,8 +64,8 @@ namespace OpenMD {
     
     // fixed number of bins
 
-    sliceSDLists_.resize(nZBins_);
-    density_.resize(nZBins_);
+    sliceSDLists_.resize(nBins_);
+    density_.resize(nBins_);
     
     setOutputName(getPrefix(filename) + ".RhoZ");
   }
@@ -76,6 +76,7 @@ namespace OpenMD {
     StuntDouble* sd;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -93,11 +94,11 @@ namespace OpenMD {
       }
 
       int i;    
-      for (i=0; i < nZBins_; i++) {
+      for (i=0; i < nBins_; i++) {
         sliceSDLists_[i].clear();
       }
 
-      RealType sliceVolume = currentSnapshot_->getVolume() /nZBins_;
+      RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
       Mat3x3d hmat = currentSnapshot_->getHmat();
       zBox_.push_back(hmat(2,2));
       
@@ -119,12 +120,12 @@ namespace OpenMD {
       for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
-        int binNo = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+        int binNo = int(nBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
         sliceSDLists_[binNo].push_back(sd);
       }
 
       //loop over the slices to calculate the densities
-      for (i = 0; i < nZBins_; i++) {
+      for (i = 0; i < nBins_; i++) {
         RealType totalMass = 0;
         for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
           totalMass += sliceSDLists_[i][k]->getMass();

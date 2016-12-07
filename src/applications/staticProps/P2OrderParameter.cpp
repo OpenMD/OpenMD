@@ -51,7 +51,7 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1)
-  : StaticAnalyser(info, filename), doVect_(true), doOffset_(false),
+    : StaticAnalyser(info, filename, 1), doVect_(true), doOffset_(false),
     selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
     evaluator1_(info), evaluator2_(info) {
     
@@ -62,9 +62,9 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1, const string& sele2)
-  : StaticAnalyser(info, filename), doVect_(false), doOffset_(false),
-    selectionScript1_(sele1), selectionScript2_(sele2), seleMan1_(info), 
-    seleMan2_(info), evaluator1_(info), evaluator2_(info) {
+    : StaticAnalyser(info, filename,1 ), doVect_(false), doOffset_(false),
+      selectionScript1_(sele1), selectionScript2_(sele2), seleMan1_(info), 
+      seleMan2_(info), evaluator1_(info), evaluator2_(info) {
     
     setOutputName(getPrefix(filename) + ".p2");
     
@@ -74,7 +74,7 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
                                      const string& sele1, int seleOffset)
-  : StaticAnalyser(info, filename), doVect_(false), doOffset_(true), 
+    : StaticAnalyser(info, filename, 1), doVect_(false), doOffset_(true), 
     selectionScript1_(sele1), seleMan1_(info), seleMan2_(info), 
     evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
     
@@ -93,7 +93,8 @@ namespace OpenMD {
     int ii; 
     int jj;
     int vecCount;
- 
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
 

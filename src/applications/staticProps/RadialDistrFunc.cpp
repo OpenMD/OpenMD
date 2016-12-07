@@ -51,8 +51,9 @@ namespace OpenMD {
   RadialDistrFunc::RadialDistrFunc(SimInfo* info, 
                                    const std::string& filename, 
                                    const std::string& sele1, 
-                                   const std::string& sele2)
-    : StaticAnalyser(info, filename), selectionScript1_(sele1), 
+                                   const std::string& sele2,
+                                   unsigned int nbins)
+    : StaticAnalyser(info, filename, nbins), selectionScript1_(sele1), 
       selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
       seleMan1_(info), seleMan2_(info), sele1_minus_common_(info), 
       sele2_minus_common_(info), common_(info) {

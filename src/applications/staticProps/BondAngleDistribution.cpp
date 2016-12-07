@@ -58,7 +58,7 @@ namespace OpenMD {
                                                const string& filename, 
                                                const string& sele, 
                                                double rCut, int nbins) 
-    : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info), 
+    : StaticAnalyser(info, filename, nbins), selectionScript_(sele), seleMan_(info), 
       evaluator_(info) {
 
     setAnalysisType("Bond Angle Distribution");
@@ -72,7 +72,6 @@ namespace OpenMD {
     // Set up cutoff radius:
 
     rCut_ = rCut;
-    nBins_ = nbins;
 
     std::stringstream params;
     params << " rcut = " << rCut_
@@ -110,6 +109,8 @@ namespace OpenMD {
     RealType r;    
     int nBonds;    
     int i;
+
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

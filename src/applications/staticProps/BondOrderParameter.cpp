@@ -60,7 +60,7 @@ namespace OpenMD {
                                          const std::string& filename, 
                                          const std::string& sele,
                                          double rCut, int nbins) 
-    : StaticAnalyser(info, filename), selectionScript_(sele), seleMan_(info),
+    : StaticAnalyser(info, filename, nbins), selectionScript_(sele), seleMan_(info),
       evaluator_(info) {
     
     setAnalysisType("Bond Order Parameters");
@@ -74,7 +74,6 @@ namespace OpenMD {
     // Set up cutoff radius and order of the Legendre Polynomial:
 
     rCut_ = rCut;
-    nBins_ = nbins;
     
     std::stringstream params;
     params << " rcut = " << rCut_
@@ -182,6 +181,7 @@ namespace OpenMD {
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
     int i;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();

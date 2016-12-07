@@ -57,10 +57,9 @@ namespace OpenMD {
                                              const std::string& sele1,
                                              const std::string& sele2,
                                              double rCut, int nzbins) 
-    : StaticAnalyser(info, filename), 
+    : StaticAnalyser(info, filename, nzbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
-      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
-      nZBins_(nzbins) {
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -75,8 +74,8 @@ namespace OpenMD {
     rCut_ = rCut;
 
     // fixed number of bins
-    sliceQ_.resize(nZBins_);
-    sliceCount_.resize(nZBins_);    
+    sliceQ_.resize(nBins_);
+    sliceCount_.resize(nBins_);    
     std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
     
@@ -107,6 +106,8 @@ namespace OpenMD {
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd1;
     int isd2;
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -207,7 +208,7 @@ namespace OpenMD {
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(rk);
           
-          int binNo = int(nZBins_ * (halfBoxZ_ + rk.z()) / hmat(2,2));
+          int binNo = int(nBins_ * (halfBoxZ_ + rk.z()) / hmat(2,2));
           sliceQ_[binNo] += Qk;
           sliceCount_[binNo] += 1;
         }  

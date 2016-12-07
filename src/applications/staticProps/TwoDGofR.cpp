@@ -48,14 +48,14 @@
 namespace OpenMD {
 
   TwoDGofR::TwoDGofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, RealType dz, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
 
-      deltaR_ = len_ /nRBins_;
+      deltaR_ = len_ /nBins_;
 
       deltaZ_ = dz;
     
-      histogram_.resize(nRBins_);
-      avgTwoDGofR_.resize(nRBins_);
+      histogram_.resize(nBins_);
+      avgTwoDGofR_.resize(nBins_);
 
       setOutputName(getPrefix(filename) + ".TwoDGofR");
     }
@@ -98,7 +98,8 @@ namespace OpenMD {
     if (sd1 == sd2) {
       return;
     }
-    
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;

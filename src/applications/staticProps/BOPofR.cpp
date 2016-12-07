@@ -58,7 +58,7 @@ namespace OpenMD {
 
   BOPofR::BOPofR(SimInfo* info, const std::string& filename, 
                  const std::string& sele, double rCut, int nbins, 
-                 RealType len) : StaticAnalyser(info, filename), 
+                 RealType len) : StaticAnalyser(info, filename, nbins), 
                                  selectionScript_(sele), 
                                  seleMan_(info), evaluator_(info) {
     
@@ -73,7 +73,6 @@ namespace OpenMD {
     // Set up cutoff radius and order of the Legendre Polynomial:
     
     rCut_ = rCut;
-    nBins_ = nbins;
     len_ = len;
     
     std::stringstream params;
@@ -195,7 +194,8 @@ namespace OpenMD {
     int nBonds;
     SphericalHarmonic sphericalHarmonic;
     int i;
-    
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;

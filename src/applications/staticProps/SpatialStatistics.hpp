@@ -57,30 +57,7 @@
 
 using namespace std;
 namespace OpenMD {
-  
-  enum OutputDataType {
-    odtReal,
-    odtVector3,
-    odtArray2d,
-    odtUnknownDataType
-  };
-
-  enum OutputDataHandling {
-    odhAverage,
-    odhTotal,
-    odhLastValue,
-    odhUnknownDataHandling
-  };
-
-  struct OutputData {
-    string title;
-    string units;
-    OutputDataType dataType;
-    OutputDataHandling dataHandling;
-    vector<BaseAccumulator*> accumulator;
-    vector<vector<BaseAccumulator*> > accumulatorArray2d;
-  };
-
+ 
   class SpatialStatistics : public StaticAnalyser {
     
   public:
@@ -93,22 +70,14 @@ namespace OpenMD {
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos)=0;
     virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
-    virtual void writeOutput();
     
   protected:
-    OutputData* beginOutputData(vector<OutputData*>::iterator& i);
-    OutputData* nextOutputData(vector<OutputData*>::iterator& i);
-    void writeData(ostream& os, OutputData* dat, unsigned int bin);
-    void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
 
     Snapshot* currentSnapshot_;    
     int nProcessed_;
     string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;    
-    int nBins_; 
-    OutputData* counts_;
-    vector<OutputData*> data_;
   };
   
   class SlabStatistics : public SpatialStatistics {
