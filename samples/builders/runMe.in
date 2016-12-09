@@ -184,3 +184,30 @@ ${OPENMD_HOME}/bin/Dump2XYZ -i gold_deca_300.omd
 ${OPENMD_HOME}/bin/icosahedralBuilder --ino --columnAtoms=100 --twinAtoms=5 --shells=10 -d 4.08 -o penta_rod.omd gold.omd
 ${OPENMD_HOME}/bin/thermalizer -o gold_penta_rod_300.omd -t 300 penta_rod.omd
 ${OPENMD_HOME}/bin/Dump2XYZ -i gold_penta_rod_300.omd
+#
+#Example 14:
+# Builds a cuboctahedral particle from the <MetaData> block in gold.omd
+# using a 10 unit cells, and a lattice constant of 4.08 angstroms.
+# Places the output (which can be used to start an OpenMD job) in 
+# cuboctahedron.omd 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+${OPENMD_HOME}/bin/icosahedralBuilder --cuboctahedron --lattice="FCC" --unitCells=10 -d 4.08 -o cuboctahedron.omd gold.omd
+${OPENMD_HOME}/bin/thermalizer -o cuboctahedron_300.omd -t 300 cuboctahedron.omd
+${OPENMD_HOME}/bin/Dump2XYZ -i cuboctahedron_300.omd
+#
+#Example 15:
+# Builds a truncated cube particle from the <MetaData> block in
+# gold.omd using a 10 unit cells, 4 truncated {111} planes, and a lattice
+# constant of 4.08 angstroms.
+# Places the output (which can be used to start an OpenMD job) in 
+# truncatedCube.omd 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+${OPENMD_HOME}/bin/icosahedralBuilder --truncatedCube --lattice="FCC" --unitCells=10 -d 4.08 -o truncatedCube.omd gold.omd
+${OPENMD_HOME}/bin/thermalizer -o truncatedCube_300.omd -t 300 truncatedCube.omd
+${OPENMD_HOME}/bin/Dump2XYZ -i truncatedCube_300.omd

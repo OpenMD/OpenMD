@@ -432,6 +432,7 @@ src/visitors/RigidBodyVisitor.cpp
 src/visitors/ZconsVisitor.cpp
 src/rnemd/RNEMDParameters.cpp
 src/clusters/Icosahedron.cpp
+src/clusters/Cuboctahedron.cpp
 src/clusters/Decahedron.cpp
 )
 
