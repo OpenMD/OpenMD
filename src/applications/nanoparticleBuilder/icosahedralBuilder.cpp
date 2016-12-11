@@ -170,7 +170,7 @@ int main(int argc, char *argv []) {
     Points = csd->getPoints();
   } else if (args_info.cuboctahedron_given || args_info.truncatedCube_given) {
     std::string lattice;
-    int unitCells;
+    int unitCells = 0;
     if (args_info.lattice_given) {    
       lattice = args_info.lattice_arg;
     } else  {   
