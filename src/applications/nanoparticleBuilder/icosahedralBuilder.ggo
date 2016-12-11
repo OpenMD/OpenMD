@@ -26,7 +26,7 @@ file is also generated which matches the lattice structure."
 option "output"              o  "Output file name" string yes
 option "shells"              n  "Nanoparticle shells" int no
 option "latticeConstant"     d  "Lattice spacing in Angstroms for cubic lattice." double no
-option "lattice"             l  "Lattice Type" string values="FCC","BCC" no
+option "lattice"             l  "Lattice Type" string values="FCC","BCC","SC" no
 option "columnAtoms"         c  "Number of atoms along central column (Decahedron only)" int no
 option "twinAtoms"           t  "Number of atoms along twin boundary (Decahedron only)" int no
 option "truncatedPlanes"     p  "Number of truncated planes (Curling-stone Decahedra and Truncated Cubes only)" int no

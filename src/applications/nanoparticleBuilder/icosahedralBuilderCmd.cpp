@@ -38,7 +38,7 @@ const char *gengetopt_args_info_help[] = {
   "  -o, --output=STRING           Output file name (mandatory)",
   "  -n, --shells=INT              Nanoparticle shells",
   "  -d, --latticeConstant=DOUBLE  Lattice spacing in Angstroms for cubic lattice.",
-  "  -l, --lattice=STRING          Lattice Type  (possible values=\"FCC\",\n                                  \"BCC\")",
+  "  -l, --lattice=STRING          Lattice Type  (possible values=\"FCC\",\n                                  \"BCC\", \"SC\")",
   "  -c, --columnAtoms=INT         Number of atoms along central column\n                                  (Decahedron only)",
   "  -t, --twinAtoms=INT           Number of atoms along twin boundary (Decahedron\n                                  only)",
   "  -p, --truncatedPlanes=INT     Number of truncated planes (Curling-stone\n                                  Decahedra and Truncated Cubes only)",
@@ -72,7 +72,7 @@ cmdline_parser_internal (int argc, char **argv, struct gengetopt_args_info *args
 static int
 cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
 
-const char *cmdline_parser_lattice_values[] = {"FCC", "BCC", 0}; /*< Possible values for lattice. */
+const char *cmdline_parser_lattice_values[] = {"FCC", "BCC", "SC", 0}; /*< Possible values for lattice. */
 
 static char *
 gengetopt_strdup (const char *s);
