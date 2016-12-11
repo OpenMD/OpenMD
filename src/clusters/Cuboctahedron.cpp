@@ -63,7 +63,10 @@ namespace OpenMD {
     if (lattice == "BCC") {
       Basis.push_back( Vector3d(0.0, 0.0, 0.0) );
       Basis.push_back( Vector3d(0.5, 0.5, 0.5) );
+    } else if (lattice == "SC") {
+      Basis.push_back( Vector3d(0.0, 0.0, 0.0) );
     } else {
+      // Default is FCC:
       Basis.push_back( Vector3d(0.0, 0.0, 0.0) );
       Basis.push_back( Vector3d(0.5, 0.5, 0.0) );
       Basis.push_back( Vector3d(0.5, 0.0, 0.5) );
@@ -73,6 +76,7 @@ namespace OpenMD {
   }
   
   Cuboctahedron::~Cuboctahedron() {
+    Basis.clear();
     Points.clear();
   }
 

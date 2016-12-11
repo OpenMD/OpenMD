@@ -40,8 +40,8 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-/*! \file Decahedron.hpp
-    \brief Decahedron cluster structure generator
+/*! \file Cuboctahedron.hpp
+    \brief Cuboctahedron cluster structure generator
 */
 
 /* Original copyright & license text:
