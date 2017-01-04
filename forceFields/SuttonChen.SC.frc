@@ -1,11 +1,11 @@
-// This is the forcefield file for the Sutton-Chen formulation of the Finnis-Sinclair metallic potential
-// See Rafii-Tabar and Chen Phil. Mag. Letters. 63(1991), 217-224 for alloy formulation for SC varient
+// This is the force field file for the Sutton-Chen formulation of the Finnis-Sinclair metallic potential
+// See Rafii-Tabar and Chen, Phil. Mag. Letters. 63(1991), 217-224 for an alloy formulation variant
 
 begin Options
       Name                  SC
       DistanceMixingRule    Geometric
       EnergyMixingRule      Geometric
-//  energy unit are eV. Convert to kcal/mol
+      //  energy units below are eV. Convert to kcal/mol in OpenMD
       EnergyUnitScaling     0.02306054
 end Options
 

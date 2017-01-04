@@ -3,6 +3,12 @@
 ! There is only a section for AtomTypes which defines mass and the name
 ! of the file which contains the rho(r), phi(r) and F[rho] functions.
 
+begin Options
+      Name                  EAMVC
+      // energies in funcfl files are in eV. Convert to kcal/mol
+      MetallicEnergyUnitScaling     23.0605423
+end Options
+
 begin BaseAtomTypes
 Al	 26.98
 Au	196.97
@@ -14,11 +20,11 @@ Pt	195.09
 end BaseAtomTypes
 
 begin EAMAtomTypes
-Al	Al.VC.funcfl
-Au	Au.VC.funcfl
-Ag	Ag.VC.funcfl
-Cu	Cu.VC.funcfl
-Ni	Ni.VC.funcfl
-Pd	Pd.VC.funcfl
-Pt	Pt.VC.funcfl
+Al	funcfl	Al.VC.funcfl
+Au	funcfl	Au.VC.funcfl
+Ag	funcfl	Ag.VC.funcfl
+Cu	funcfl	Cu.VC.funcfl
+Ni	funcfl	Ni.VC.funcfl
+Pd	funcfl	Pd.VC.funcfl
+Pt	funcfl	Pt.VC.funcfl
 end EAMAtomTypes
