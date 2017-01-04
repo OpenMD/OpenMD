@@ -60,6 +60,7 @@ namespace OpenMD {
     pair<RealType, RealType> getLimits();
     void getValueAt(const RealType& t, RealType& v);
     void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
+    RealType getSpacing();
     
   private:
     void generate();

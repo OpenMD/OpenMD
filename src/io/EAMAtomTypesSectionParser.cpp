@@ -49,45 +49,104 @@
 using namespace std;
 namespace OpenMD {
 
-  EAMAtomTypesSectionParser::EAMAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
+  EAMAtomTypesSectionParser::EAMAtomTypesSectionParser(ForceFieldOptions& options) :
+    options_(options){
     setSectionName("EAMAtomTypes");
   }
 
   void EAMAtomTypesSectionParser::parseLine(ForceField& ff,
                                             const string& line, int lineNo){
 
+    eus_ = options_.getMetallicEnergyUnitScaling();
+    dus_ = options_.getDistanceUnitScaling();            
+
     StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
 
     if (tokenizer.countTokens() >= 2) {
       string atomTypeName = tokenizer.nextToken();
-      string potentialParamFile = tokenizer.nextToken();
-
+      string eamParameterType = tokenizer.nextToken();
+      nTokens -= 2;
       AtomType* atomType = ff.getAtomType(atomTypeName);      
       if (atomType != NULL) {        
 
         EAMAdapter ea = EAMAdapter(atomType);
-        parseEAMParamFile(ff, ea, potentialParamFile, atomType->getIdent());                                                    
-      } else {
-	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Can not find AtomType [%s]\n",
-                atomTypeName.c_str());
-	painCave.isFatal = 1;
-	simError();  
-      }
+        toUpper(eamParameterType);
         
+        if (eamParameterType == "FUNCFL") {
+          string potentialParamFile = tokenizer.nextToken();
+          parseEAMfuncflFile(ff, ea, potentialParamFile, atomType->getIdent());
+        } else if(eamParameterType == "ZHOU") {
+          if (nTokens < 20) {
+            sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                    "Not enough tokens at line %d\n", lineNo);
+            painCave.isFatal = 1;
+            simError();
+          } else {
+            std::string lattice = tokenizer.nextToken();
+            toUpper(lattice);
+
+            RealType re         = dus_ * tokenizer.nextTokenAsDouble();
+            RealType latticeConstant;
+            // default to FCC if we don't specify HCP or BCC:
+            if (lattice == "HCP") 
+              latticeConstant = re;
+            else if (lattice == "BCC")
+              latticeConstant = 2.0 * re / sqrt(3.0);
+            else
+              latticeConstant = 2.0 * re / sqrt(2.0);
+            
+            RealType fe         = tokenizer.nextTokenAsDouble();
+            RealType rhoe       = tokenizer.nextTokenAsDouble();
+            RealType alpha      = tokenizer.nextTokenAsDouble();
+            RealType beta       = tokenizer.nextTokenAsDouble();
+            RealType A          = eus_ * tokenizer.nextTokenAsDouble();
+            RealType B          = eus_ * tokenizer.nextTokenAsDouble();
+            RealType kappa      = tokenizer.nextTokenAsDouble();
+            RealType lambda     = tokenizer.nextTokenAsDouble();
+            std::vector<RealType> Fn;
+            Fn.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            Fn.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            Fn.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            Fn.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            std::vector<RealType> F;
+            F.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            F.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            F.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            F.push_back(eus_ * tokenizer.nextTokenAsDouble());
+            RealType eta        = tokenizer.nextTokenAsDouble();
+            RealType Fe         = eus_ * tokenizer.nextTokenAsDouble();
+            ea.makeEAM(latticeConstant, lattice, re, fe, rhoe, alpha, beta, A,
+                       B, kappa, lambda, Fn, F, eta, Fe, false);
+          }
+        
+        } else {
+          sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: %s "
+                  "is not a recognized EAM type\n", eamParameterType.c_str()); 
+          painCave.isFatal = 1; 
+          simError();     
+        }
+        
+      } else {
+        sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                "Can not find AtomType [%s]\n", atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();  
+      }
+      
     } else {
-      sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
+      sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+              "Not enough tokens at line %d\n", lineNo);
       painCave.isFatal = 1;
       simError();    
-    }
-            
+    }    
   }
 
-  void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, 
-                                                    EAMAdapter ea, 
-						    const string& potentialParamFile, 
-                                                    int ident) {
-
+  void EAMAtomTypesSectionParser::parseEAMfuncflFile(ForceField& ff, 
+                                                     EAMAdapter ea, 
+                                                     const string& potentialParamFile, 
+                                                     int ident) {
+    
     ifstrstream* ppfStream = ff.openForceFieldFile(potentialParamFile);
     const int bufferSize = 65535;
     char buffer[bufferSize];
@@ -97,6 +156,8 @@ namespace OpenMD {
 
     // The second line contains atomic number, atomic mass, a lattice
     // constant and lattice type
+    int atomicNumber;
+    RealType atomicMass;
     RealType latticeConstant(0.0); 
     string lattice;
 
@@ -114,18 +175,18 @@ namespace OpenMD {
       StringTokenizer tokenizer1(buffer);
         
       if (tokenizer1.countTokens() >= 4) {
-        tokenizer1.skipToken(); // skip the atomic number
-        tokenizer1.skipToken(); // skip the mass
-	latticeConstant = tokenizer1.nextTokenAsDouble();
+        atomicNumber = tokenizer1.nextTokenAsInt();
+        atomicMass = tokenizer1.nextTokenAsDouble();
+	latticeConstant = tokenizer1.nextTokenAsDouble() * dus_;
 	lattice = tokenizer1.nextToken();
       }else {
-	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
+	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                "Not enough tokens\n");
 	painCave.isFatal = 1;
 	simError();  
       }
     }
-  
-    
+   
     if (ppfStream->getline(buffer, bufferSize)) {
       StringTokenizer tokenizer2(buffer);
       
@@ -133,13 +194,14 @@ namespace OpenMD {
 	nrho = tokenizer2.nextTokenAsInt();
 	drho = tokenizer2.nextTokenAsDouble();
         nr = tokenizer2.nextTokenAsInt();
-	dr = tokenizer2.nextTokenAsDouble();
-	rcut = tokenizer2.nextTokenAsDouble();
-      }else {
+	dr = tokenizer2.nextTokenAsDouble() * dus_;
+	rcut = tokenizer2.nextTokenAsDouble() * dus_;
+      } else {
         
-	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
+	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                "Not enough tokens\n");
 	painCave.isFatal = 1;
-	simError();            
+	simError();
         
       }
     } 
@@ -147,9 +209,14 @@ namespace OpenMD {
     parseEAMArray(*ppfStream, F,   nrho);    
     parseEAMArray(*ppfStream, Z,   nr);
     parseEAMArray(*ppfStream, rho, nr);
-    
-    ea.makeEAM(latticeConstant, nrho, drho, nr, dr, rcut, Z, rho, F);
 
+    // Convert to kcal/mol using energy unit scaling in force field:
+    std::transform(F.begin(), F.end(), F.begin(),
+                   std::bind1st(std::multiplies<RealType>(), eus_));
+    
+    ea.makeEAM(latticeConstant, lattice, nrho, drho, nr, dr, rcut, Z, rho,
+               F, true);
+    
     delete ppfStream;
   }
 
@@ -159,7 +226,6 @@ namespace OpenMD {
     
     const int dataPerLine = 5;
     if (num % dataPerLine != 0) {
-
     }
 
     int nlinesToRead = num / dataPerLine;
@@ -176,21 +242,23 @@ namespace OpenMD {
 	  array.push_back(tokenizer.nextTokenAsDouble());
 	}
       } else {
-	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
+	sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                "Not enough tokens\n");
 	painCave.isFatal = 1;
 	simError();  
       }
       ++lineCount;
     }
-
+    
     if (lineCount < nlinesToRead) {
-      sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough lines to read\n");
+      sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+              "Not enough lines to read\n");
       painCave.isFatal = 1;
       simError();          
     }
     
   }
-
-
+  
+  
 } //end namespace OpenMD
 

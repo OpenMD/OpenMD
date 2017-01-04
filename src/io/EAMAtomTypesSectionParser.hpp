@@ -58,11 +58,14 @@ namespace OpenMD {
             
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    void parseEAMParamFile(ForceField& ff, EAMAdapter ea, const std::string& potentialParamFile, int iden);
-    void parseEAMArray(std::istream& input, std::vector<RealType>& array, int num);
+    void parseEAMfuncflFile(ForceField& ff, EAMAdapter ea,
+                            const std::string& potentialParamFile, int iden);
+    void parseEAMArray(std::istream& input, std::vector<RealType>& array,
+                       int num);
     ForceFieldOptions& options_;
+    RealType eus_; // Energy unit scaling
+    RealType dus_; // Distance unit scaling
   };
-
 
 } //namespace OpenMD
 

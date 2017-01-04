@@ -62,12 +62,12 @@ namespace OpenMD {
     if (tokenizer.countTokens() >= 2) {
       std::string optionName = tokenizer.nextToken();
       std::string optionValue = tokenizer.nextToken();
-      
+
       options_.setData(optionName, optionValue);
       
     } else {
-      sprintf(painCave.errMsg, "OptionSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
+      sprintf(painCave.errMsg, "OptionSectionParser Error: "
+              "Not enough tokens at line %d\n", lineNo);
       painCave.isFatal = 1;
       simError();    
     }

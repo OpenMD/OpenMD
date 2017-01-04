@@ -279,6 +279,13 @@ pair<RealType, RealType> CubicSpline::getLimits(){
   return make_pair( x_.front(), x_.back() );
 }
 
+RealType CubicSpline::getSpacing(){
+  if (!generated) generate();
+  assert(isUniform);
+  if (isUniform) return 1.0/dx;
+  else return 0.0;
+}
+
 void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v, 
                                           RealType &dv) {
   // Evaluate the spline and first derivative at t using coefficients 

@@ -91,6 +91,11 @@ namespace OpenMD {
     return eamParam->latticeConstant;
   }
 
+  std::string EAMAdapter::getLatticeType() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->latticeType;
+  }
+
   int EAMAdapter::getNrho() {    
     EAMAtypeParameters* eamParam = getEAMParam();
     return eamParam->nrho;
@@ -115,8 +120,65 @@ namespace OpenMD {
     EAMAtypeParameters* eamParam = getEAMParam();
     return eamParam->rcut;
   }
+
+  RealType EAMAdapter::getRe() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->re;
+  }
+  RealType EAMAdapter::get_fe() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->fe;
+  }
+  RealType EAMAdapter::getRhoe() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->rhoe;
+  }
+  RealType EAMAdapter::getAlpha() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->alpha;
+  }
+  RealType EAMAdapter::getBeta() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->beta;
+  }
+  RealType EAMAdapter::getA() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->A;
+  }
+  RealType EAMAdapter::getB() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->B;
+  }
+  RealType EAMAdapter::getKappa() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->kappa;
+  }
+  RealType EAMAdapter::getLambda() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->lambda;
+  }
+  std::vector<RealType> EAMAdapter::getFn() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->Fn;
+  }
+  std::vector<RealType> EAMAdapter::getF() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->F;
+  }
+  RealType EAMAdapter::getEta() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->eta;
+  }
+  RealType EAMAdapter::getFe() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->Fe;
+  }
+  bool EAMAdapter::hasSplines() {    
+    EAMAtypeParameters* eamParam = getEAMParam();
+    return eamParam->hasSplines;
+  }
   
-  CubicSpline* EAMAdapter::getZ() {    
+  CubicSpline* EAMAdapter::getZSpline() {    
     EAMAtypeParameters* eamParam = getEAMParam();
     int nr = eamParam->nr;
     RealType dr = eamParam->dr;
@@ -129,7 +191,7 @@ namespace OpenMD {
     return cs;
   }
 
-  CubicSpline* EAMAdapter::getRho() {    
+  CubicSpline* EAMAdapter::getRhoSpline() {    
     EAMAtypeParameters* eamParam = getEAMParam();
     int nr = eamParam->nr;
     RealType dr = eamParam->dr;
@@ -142,27 +204,26 @@ namespace OpenMD {
     return cs;
   }
 
-  CubicSpline* EAMAdapter::getF() {    
+  CubicSpline* EAMAdapter::getFSpline() {    
     EAMAtypeParameters* eamParam = getEAMParam();
     int nrho = eamParam->nrho;
     RealType drho = eamParam->drho;
     vector<RealType> rhovals;
-    vector<RealType> scaledF;
     
     for (int i = 0; i < nrho; i++) {
       rhovals.push_back(RealType(i) * drho);
-      scaledF.push_back( eamParam->F[i] * 23.06054 );
     }
       
     CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rhovals, scaledF);
+    cs->addPoints(rhovals, eamParam->F);
     return cs;
   }
 
-  void EAMAdapter::makeEAM(RealType latticeConstant, int nrho, RealType drho, 
+  void EAMAdapter::makeEAM(RealType latticeConstant, std::string latticeType,
+                           int nrho, RealType drho, 
                            int nr, RealType dr, RealType rcut,
                            vector<RealType> Z, vector<RealType> rho, 
-                           vector<RealType> F) {
+                           vector<RealType> F, bool hasSplines) {
 
     if (isEAM()){
       at_->removeProperty(EAMtypeID);
@@ -170,6 +231,7 @@ namespace OpenMD {
 
     EAMAtypeParameters* eamParam = new EAMAtypeParameters();
     eamParam->latticeConstant = latticeConstant;
+    eamParam->latticeType = latticeType;
     eamParam->nrho = nrho;
     eamParam->drho = drho;
     eamParam->nr = nr;
@@ -178,7 +240,50 @@ namespace OpenMD {
     eamParam->Z = Z;
     eamParam->rho = rho;
     eamParam->F = F;
+    eamParam->hasSplines = hasSplines;
     
     at_->addProperty(new EAMAtypeData(EAMtypeID, eamParam));
   }
+
+  void EAMAdapter::makeEAM(RealType latticeConstant, std::string latticeType,
+                           RealType re,
+                           RealType fe,
+                           RealType rhoe,
+                           RealType alpha,
+                           RealType beta,
+                           RealType A,
+                           RealType B,
+                           RealType kappa,
+                           RealType lambda,
+                           std::vector<RealType> Fn,
+                           std::vector<RealType> F,
+                           RealType eta,
+                           RealType Fe,
+                           bool hasSplines){ 
+    
+    if (isEAM()){
+      at_->removeProperty(EAMtypeID);
+    }
+    
+    EAMAtypeParameters* eamParam = new EAMAtypeParameters();
+    eamParam->latticeConstant = latticeConstant;
+    eamParam->latticeType = latticeType;
+    eamParam->re = re;
+    eamParam->fe = fe;
+    eamParam->rhoe = rhoe;
+    eamParam->alpha = alpha;
+    eamParam->beta = beta;
+    eamParam->A = A;
+    eamParam->B = B;
+    eamParam->kappa = kappa;
+    eamParam->lambda = lambda;
+    eamParam->Fn = Fn;
+    eamParam->F = F;
+    eamParam->eta = eta;
+    eamParam->Fe = Fe;
+    eamParam->hasSplines = hasSplines;
+
+    at_->addProperty(new EAMAtypeData(EAMtypeID, eamParam));
+  }
+
 }
