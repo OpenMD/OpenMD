@@ -242,7 +242,7 @@ namespace OpenMD {
       for(unsigned int n = 0; n < histogram_.size(); n++){
         binValue = n * delta_;
         ofs << binValue << "\t"
-            << histogram_[n]
+            << histogram_[n] / delta_
             << "\n";
       } 
     }   
