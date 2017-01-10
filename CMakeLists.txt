@@ -605,7 +605,7 @@ src/applications/staticProps/GofRAngle.cpp
 src/applications/staticProps/GofRZ.cpp
 src/applications/staticProps/GofXyz.cpp
 src/applications/staticProps/GofZ.cpp
-src/applications/staticProps/GCN.cpp
+src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
 src/applications/staticProps/Kirkwood.cpp

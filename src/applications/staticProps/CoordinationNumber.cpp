@@ -43,22 +43,25 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include "applications/staticProps/GCN.hpp"
+#include "applications/staticProps/CoordinationNumber.hpp"
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
 
-  GCN::GCN(SimInfo* info, const std::string& filename,
-           const std::string& sele1, const std::string& sele2,
-           RealType rCut, int bins):
+  CoordinationNumber::CoordinationNumber(SimInfo* info,
+                                         const std::string& filename,
+                                         const std::string& sele1,
+                                         const std::string& sele2,
+                                         RealType rCut, int bins):
     StaticAnalyser(info, filename, bins), rCut_(rCut), bins_(bins),
     sele1_(sele1), seleMan1_(info), evaluator1_(info),
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
 
-    setAnalysisType("Generalized Coordination Number Distribution");
-    setOutputName(getPrefix(filename) + ".gcn");
+    setAnalysisType("Coordination Number Distribution");
+    setOutputName(getPrefix(filename) + ".cn");
+    
     nnMax_ = 12;
     RealType binMax_ = nnMax_ * 1.5;
     delta_ = binMax_ / bins_;
@@ -66,7 +69,7 @@ namespace OpenMD {
     std::stringstream params;
     params << " rcut = " << rCut_
            << ", nbins = " << bins_
-           << ", max neighbors = " << nnMax_;
+           << ", nnMax = " << nnMax_;
     const std::string paramString = params.str();
     setParameterString( paramString );
 
@@ -82,11 +85,11 @@ namespace OpenMD {
     }
   }
 
-  GCN::~GCN() {
+  CoordinationNumber::~CoordinationNumber() {
     histogram_.clear();
   }
 
-  void GCN::process() {
+  void CoordinationNumber::process() {
     SelectionManager common(info_);
     
     std::vector<std::vector<int> > listNN;
@@ -100,7 +103,8 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
 
     Snapshot* currentSnapshot_;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    bool usePeriodicBoundaryConditions_ =
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     int iterator1;
     int iterator2;
@@ -108,7 +112,7 @@ namespace OpenMD {
     unsigned int mapIndex2(0);
     unsigned int tempIndex(0);
     unsigned int whichBin(0);
-    RealType gcn(0.0);
+    RealType cn(0.0);
     Vector3d pos1;
     Vector3d pos2;
     Vector3d diff;
@@ -154,15 +158,15 @@ namespace OpenMD {
         listNN.at(i).clear();
       listNN.clear();
       listNN.resize(commonCount);
-
+      
       mapIndex1 = 0;
       for(sd1 = common.beginSelected(iterator1); sd1 != NULL;
           sd1 = common.nextSelected(iterator1)) {
         
 	globalToLocal.at(sd1->getGlobalIndex()) = mapIndex1;
-
+        
         pos1 = sd1->getPos();
-
+        
 	mapIndex2 = 0;
  	for(sd2 = common.beginSelected(iterator2); sd2 != NULL;
             sd2 = common.nextSelected(iterator2)) {
@@ -188,20 +192,18 @@ namespace OpenMD {
           sd1 = seleMan1_.nextSelected(iterator1)){
             
 	mapIndex1 = globalToLocal.at(sd1->getGlobalIndex());
-	gcn = 0.0;
-	for(unsigned int i = 0; i < listNN.at(mapIndex1).size(); i++){
-          // tempIndex is the index of one of i's nearest neighbors
-	  tempIndex = listNN.at(mapIndex1).at(i);
-	  gcn += listNN.at(tempIndex).size();
-	}
 
-        gcn = gcn / nnMax_;
-        whichBin = int(gcn / delta_);
+        cn = computeCoordination(mapIndex1, listNN);        
+        whichBin = int(cn / delta_);
+        
         if (whichBin < histogram_.size()) {
           histogram_[whichBin] += 1;
         } else {
-          cerr << "In frame " <<  istep <<  ", object "
-               << sd1->getGlobalIndex() << " has GCN value = " << gcn << "\n";
+          sprintf(painCave.errMsg, "Coordination Number: Error: "
+                  "In frame, %d, object %d has CN %lf outside of range max.\n",
+                  istep, sd1->getGlobalIndex(), cn );
+          painCave.isFatal = 1;
+          simError();  
         }
       }
       count_ += selectionCount1_;
@@ -217,7 +219,12 @@ namespace OpenMD {
     writeData();
   }
 
-  void GCN::writeData() {
+  RealType CoordinationNumber::computeCoordination(int a,
+                                                   vector<vector<int> > nl) {
+    return RealType(nl.at(a).size());
+  }  
+    
+  void CoordinationNumber::writeData() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     
     if (ofs.is_open()) {
@@ -241,5 +248,59 @@ namespace OpenMD {
       } 
     }   
     ofs.close();
+  }
+
+  SCN::SCN(SimInfo* info,
+           const std::string& filename,
+           const std::string& sele1,
+           const std::string& sele2,
+           RealType rCut, int bins):
+    CoordinationNumber(info, filename, sele1, sele2, rCut, bins) {
+    setOutputName(getPrefix(filename) + ".scn");
+    setAnalysisType("Secondary Coordination Number");
+  }
+  
+  SCN::~SCN() {
+  }
+ 
+  RealType SCN::computeCoordination(int a, vector<vector<int> > nl) {
+    RealType scn = 0.0;
+    int b;
+    
+    if (nl.at(a).size() != 0) {
+      for(unsigned int i = 0; i < nl.at(a).size(); i++){
+        // b is the index of one of i's nearest neighbors
+        b = nl.at(a).at(i);
+        scn += nl.at(b).size();
+      }
+      return scn / RealType(nl.at(a).size());
+    } else {
+      return 0.0;
+    }
+    
+  }
+
+  GCN::GCN(SimInfo* info,
+           const std::string& filename,
+           const std::string& sele1,
+           const std::string& sele2,
+           RealType rCut, int bins):
+    CoordinationNumber(info, filename, sele1, sele2, rCut, bins) {
+    setOutputName(getPrefix(filename) + ".gcn");
+    setAnalysisType("Generalized Coordination Number");
+  }
+
+  GCN::~GCN() {
+  }
+
+  RealType GCN::computeCoordination(int a, vector<vector<int> > nl) {
+    RealType gcn = 0.0;
+    int b;
+    for(unsigned int i = 0; i < nl.at(a).size(); i++){
+      // b is the index of one of i's nearest neighbors
+      b = nl.at(a).at(i);
+      gcn += nl.at(b).size();
+    }
+    return gcn / RealType(nnMax_);
   }
 }
