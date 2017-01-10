@@ -54,8 +54,10 @@
 #include "primitives/Molecule.hpp"
 namespace OpenMD {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins)
-    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele),  evaluator_(info), seleMan_(info) {
+  RhoZ::RhoZ(SimInfo* info, const std::string& filename, 
+	     const std::string& sele, int nzbins)
+    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele), 
+      evaluator_(info), seleMan_(info) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -76,7 +78,10 @@ namespace OpenMD {
     StuntDouble* sd;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    int ii;
+
+    bool usePeriodicBoundaryConditions_ = 
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -86,15 +91,16 @@ namespace OpenMD {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	     rb = mol->nextRigidBody(rbIter)) {
           rb->updateAtoms();
         }
       }
 
-      int i;    
-      for (i=0; i < nBins_; i++) {
+      for (unsigned int i = 0; i < nBins_; i++) {
         sliceSDLists_[i].clear();
       }
 
@@ -109,7 +115,8 @@ namespace OpenMD {
       }
       
       //wrap the stuntdoubles into a cell      
-      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
+	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         if (usePeriodicBoundaryConditions_)
           currentSnapshot_->wrapVector(pos);
@@ -117,7 +124,8 @@ namespace OpenMD {
       }
       
       //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
+	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
         int binNo = int(nBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
@@ -125,7 +133,7 @@ namespace OpenMD {
       }
 
       //loop over the slices to calculate the densities
-      for (i = 0; i < nBins_; i++) {
+      for (unsigned int i = 0; i < nBins_; i++) {
         RealType totalMass = 0;
         for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
           totalMass += sliceSDLists_[i][k]->getMass();
@@ -163,7 +171,8 @@ namespace OpenMD {
       
     } else {
       
-      sprintf(painCave.errMsg, "RhoZ: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "RhoZ: unable to open %s\n", 
+	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }

@@ -124,7 +124,7 @@ namespace OpenMD {
     if (distance < len_) {
       int whichBin = int(distance / deltaR_);
       // each dipole pair contributes to all of the radii that contain it.
-      for (int i = whichBin; i < nBins_; i++) {
+      for (unsigned int i = whichBin; i < nBins_; i++) {
         histogram_[i] += dotProduct;
       }
     }
@@ -229,7 +229,7 @@ namespace OpenMD {
     if (distance < len_) {
       int whichBin = int(distance / deltaR_);
       // each dipole pair contributes to all of the radii that contain it.
-      for (int i = whichBin; i < nBins_; i++) {
+      for (unsigned int i = whichBin; i < nBins_; i++) {
         histogram_[i] += quadrupoleProduct;
       }
     }
