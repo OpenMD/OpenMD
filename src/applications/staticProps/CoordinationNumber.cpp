@@ -110,7 +110,6 @@ namespace OpenMD {
     int iterator2;
     unsigned int mapIndex1(0);
     unsigned int mapIndex2(0);
-    unsigned int tempIndex(0);
     unsigned int whichBin(0);
     RealType cn(0.0);
     Vector3d pos1;

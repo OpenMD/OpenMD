@@ -380,11 +380,7 @@ namespace OpenMD {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
       RealType rhoe = ea.getRhoe();
-      RealType A = ea.getA();
-      RealType B = ea.getB();
-      RealType alpha = ea.getAlpha();
       RealType beta = ea.getBeta();
-      RealType kappa = ea.getKappa();
       RealType lambda = ea.getLambda();
       std::vector<RealType> Fn = ea.getFn();
       std::vector<RealType> F = ea.getF();

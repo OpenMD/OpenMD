@@ -65,18 +65,18 @@ namespace OpenMD {
     deltaR_ =  len_ / nBins_;
     
     histogram_.resize(nBins_);
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nBins_);
-      for(int j = 0; j < nBins_; ++j) {
+      for(unsigned int j = 0; j < nBins_; ++j) {
 	histogram_[i][j].resize(nBins_);
       }
     }    
   }
   
   void GofXyz::preProcess() {
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nBins_);
-      for(int j = 0; j < nBins_; ++j) {
+      for(unsigned int j = 0; j < nBins_; ++j) {
 	std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
       }
     }   
@@ -161,9 +161,9 @@ namespace OpenMD {
     int ybin = int( (newR12.y() + halfLen_) / deltaR_);
     int zbin = int( (newR12.z() + halfLen_) / deltaR_);
 
-    if (xbin < nBins_ && xbin >=0 &&
-        ybin < nBins_ && ybin >= 0 &&
-        zbin < nBins_ && zbin >=0 ) {
+    if (xbin < int(nBins_) && xbin >=0 &&
+        ybin < int(nBins_) && ybin >= 0 &&
+        zbin < int(nBins_) && zbin >=0 ) {
       ++histogram_[xbin][ybin][zbin];
     }
     

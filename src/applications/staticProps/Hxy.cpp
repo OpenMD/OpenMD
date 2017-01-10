@@ -103,7 +103,7 @@ namespace OpenMD {
     freq_->dataType = odtReal;
     freq_->dataHandling = odhAverage;
     freq_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       freq_->accumulator.push_back( new Accumulator() );
     data_.push_back(freq_);
 
@@ -113,7 +113,7 @@ namespace OpenMD {
     top_->dataType = odtReal;
     top_->dataHandling = odhAverage;
     top_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       top_->accumulator.push_back( new Accumulator() );
     data_.push_back(top_);
     
@@ -123,7 +123,7 @@ namespace OpenMD {
     bottom_->dataType = odtReal;
     bottom_->dataHandling = odhAverage;
     bottom_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       bottom_->accumulator.push_back( new Accumulator() );
     data_.push_back(bottom_);
 
@@ -250,21 +250,21 @@ namespace OpenMD {
           for (int i = -di; i <= di; i++) {
 
             igrid = ibin + i;
-            while (igrid >= nBinsX_) {igrid -= nBinsX_;}
+            while (igrid >= int(nBinsX_)) {igrid -= nBinsX_;}
             while (igrid < 0) {igrid += nBinsX_;}
                         
             x = lenX_ * (RealType(igrid) / RealType(nBinsX_) );
             
             for (int j = -dj; j <= dj; j++) {
               jgrid = jbin + j;
-              while (jgrid >= nBinsY_) {jgrid -= nBinsY_;}
+              while (jgrid >= int(nBinsY_)) {jgrid -= nBinsY_;}
               while (jgrid < 0) {jgrid += nBinsY_;}
               
               y = lenY_ * (RealType(jgrid) / RealType(nBinsY_));
               
               for (int k = -dk; k <= dk; k++) {
                 kgrid = kbin + k;
-                while (kgrid >= nBinsZ_) {kgrid -= nBinsZ_;}
+                while (kgrid >= int(nBinsZ_)) {kgrid -= nBinsZ_;}
                 while (kgrid < 0) {kgrid += nBinsZ_;}
 
                 z = lenZ_ * (RealType(kgrid) / RealType(nBinsZ_));
