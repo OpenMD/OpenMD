@@ -122,6 +122,7 @@ namespace OpenMD {
 
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
+    count_ = 0;
 
     //First have to calculate lists of nearest neighbors (listNN_):
     
@@ -186,7 +187,8 @@ namespace OpenMD {
 	mapIndex1++;
       }
       
-      // Fill up the histogram with gcn values
+      // Fill up the histogram with cn values
+
       for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
           sd1 = seleMan1_.nextSelected(iterator1)){
             
@@ -195,7 +197,7 @@ namespace OpenMD {
         cn = computeCoordination(mapIndex1, listNN);        
         whichBin = int(cn / delta_);
         
-        if (whichBin < histogram_.size()) {
+        if (whichBin < histogram_.size() && whichBin >= 0) {
           histogram_[whichBin] += 1;
         } else {
           sprintf(painCave.errMsg, "Coordination Number: Error: "
@@ -210,11 +212,11 @@ namespace OpenMD {
 
     for(unsigned int n = 0; n < histogram_.size(); n++){
       if (count_ > 0) 
-        histogram_[n] /= count_;
+        histogram_[n] /= RealType(count_);
       else
         histogram_[n] = 0.0;               
     } 
-   
+  
     writeData();
   }
 
