@@ -34,7 +34,7 @@ namespace OpenBabel
     //Register this format type ID
     OpenMDFormat() 
     {      
-      OBConversion::RegisterFormat("md",this);
+      OBConversion::RegisterFormat("omd",this);
     }
     
     virtual const char* Description() //required
@@ -45,10 +45,10 @@ namespace OpenBabel
     };
     
     virtual const char* SpecificationURL()
-    {return "http://www.openmd.org";}; //optional
+    {return "http://openmd.org";}; //optional
     
     virtual const char* GetMIMEType() 
-    {return "chemical/x-md"; };
+    {return "chemical/x-omd"; };
     
     virtual unsigned int Flags() 
     { 
