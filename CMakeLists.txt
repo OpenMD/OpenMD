@@ -126,7 +126,7 @@ IF(OPENBABEL2_FOUND)
   include_directories(${OPENBABEL2_INCLUDE_DIR})
   # link libraries are added only for targets that need them.
 ELSE(OPENBABEL2_FOUND)
-  MESSAGE(STATUS "No OpenBabel found - will not build atom2md")
+  MESSAGE(STATUS "No OpenBabel found - will not build atom2omd")
 ENDIF(OPENBABEL2_FOUND)
 
 #Look for QHULL Libraries
@@ -710,13 +710,13 @@ add_executable(recenter ${RECENTERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(recenter openmd_single openmd_core openmd_single openmd_core openmd_single)
 
 if (OPENBABEL2_FOUND)
-set (ATOM2MDSOURCE
-src/applications/atom2md/atom2md.cpp
-src/applications/atom2md/openmdformat.cpp
+set (ATOM2OMDSOURCE
+src/applications/atom2omd/atom2omd.cpp
+src/applications/atom2omd/openmdformat.cpp
 )
-  add_executable(atom2md ${ATOM2MDSOURCE} ${GETOPT_SOURCE})
-  target_link_libraries(atom2md openmd_single openmd_core openmd_single openmd_core ${OPENBABEL2_LIBRARIES})
-  INSTALL(TARGETS atom2md RUNTIME DESTINATION bin
+  add_executable(atom2omd ${ATOM2OMDSOURCE} ${GETOPT_SOURCE})
+  target_link_libraries(atom2omd openmd_single openmd_core openmd_single openmd_core ${OPENBABEL2_LIBRARIES})
+  INSTALL(TARGETS atom2omd RUNTIME DESTINATION bin
           PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 ENDIF (OPENBABEL2_FOUND)
 
