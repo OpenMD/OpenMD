@@ -110,7 +110,6 @@ namespace OpenMD {
     Molecule::FluctuatingChargeIterator  j;
     Molecule* mol;
     Atom* atom;
-    int index;
     RealType cfrc, cvel, cmass;
 
     for (mol = info_->beginMolecule(i); mol != NULL; 
