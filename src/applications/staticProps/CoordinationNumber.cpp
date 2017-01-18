@@ -197,7 +197,7 @@ namespace OpenMD {
         cn = computeCoordination(mapIndex1, listNN);        
         whichBin = int(cn / delta_);
         
-        if (whichBin < histogram_.size() && whichBin >= 0) {
+        if (whichBin < histogram_.size()) {
           histogram_[whichBin] += 1;
         } else {
           sprintf(painCave.errMsg, "Coordination Number: Error: "

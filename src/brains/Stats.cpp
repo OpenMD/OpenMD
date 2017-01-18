@@ -153,6 +153,14 @@ namespace OpenMD {
     data_[ROTATIONAL_KINETIC] = rotational_kinetic;
     statsMap_["ROTATIONAL_KINETIC"] =  ROTATIONAL_KINETIC;
 
+    StatsData electronic_kinetic;
+    electronic_kinetic.units =  "kcal/mol";
+    electronic_kinetic.title =  "Electronic Kinetic";
+    electronic_kinetic.dataType = "RealType";
+    electronic_kinetic.accumulator = new Accumulator();
+    data_[ELECTRONIC_KINETIC] = electronic_kinetic;
+    statsMap_["ELECTRONIC_KINETIC"] =  ELECTRONIC_KINETIC;
+
     StatsData long_range_potential;
     long_range_potential.units =  "kcal/mol";
     long_range_potential.title =  "Long Range Potential";
@@ -434,6 +442,12 @@ namespace OpenMD {
     }      
   }
 
+  int Stats::getPrecision() {
+    Globals* simParams = info_->getSimParams();
+    int statFilePrecision = simParams->getStatFilePrecision();
+    return statFilePrecision;
+  }
+
   void Stats::parseStatFileFormat(const std::string& format) {
     StringTokenizer tokenizer(format, " ,;|\t\n\r");
 
@@ -528,6 +542,9 @@ namespace OpenMD {
           break;
         case ROTATIONAL_KINETIC:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getRotationalKinetic());
+          break;
+        case ELECTRONIC_KINETIC:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicKinetic());
           break;
         case LONG_RANGE_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotential());

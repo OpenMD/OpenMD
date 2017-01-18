@@ -120,6 +120,7 @@ namespace OpenMD {
     DeclareParameter(OutputSitePotential, bool);
     DeclareParameter(SkinThickness, RealType);
     DeclareParameter(StatFileFormat, std::string);    
+    DeclareParameter(StatFilePrecision, int);    
     DeclareParameter(HydroPropFile, std::string);
     DeclareParameter(Viscosity, RealType);
     DeclareParameter(BeadSize, RealType);  

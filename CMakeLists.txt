@@ -278,6 +278,7 @@ src/hydrodynamics/Sphere.cpp
 src/integrators/DLM.cpp
 src/flucq/FluctuatingChargeLangevin.cpp
 src/flucq/FluctuatingChargeParameters.cpp
+src/flucq/FluctuatingChargeNVE.cpp
 src/flucq/FluctuatingChargeNVT.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
