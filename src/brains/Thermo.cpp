@@ -220,7 +220,6 @@ namespace OpenMD {
       RealType cvel;
       RealType cmass;
       RealType kinetic(0.0);
-      RealType eTemp;
       
       for (mol = info_->beginMolecule(miter); mol != NULL; 
            mol = info_->nextMolecule(miter)) {
