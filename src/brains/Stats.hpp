@@ -70,6 +70,7 @@ namespace OpenMD {
       CONSERVED_QUANTITY,             
       TRANSLATIONAL_KINETIC,
       ROTATIONAL_KINETIC,
+      ELECTRONIC_KINETIC,
       LONG_RANGE_POTENTIAL,   
       VANDERWAALS_POTENTIAL,
       ELECTROSTATIC_POTENTIAL,      
@@ -114,6 +115,7 @@ namespace OpenMD {
     Stats(SimInfo* info);
     virtual ~Stats();
     void parseStatFileFormat(const std::string& format);
+    int getPrecision();
     void collectStats();
 
     StatsBitSet  getStatsMask();

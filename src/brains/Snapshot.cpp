@@ -127,6 +127,7 @@ namespace OpenMD {
     frameData.totalEnergy = 0.0;     
     frameData.translationalKinetic = 0.0;   
     frameData.rotationalKinetic = 0.0;   
+    frameData.electronicKinetic = 0.0;   
     frameData.kineticEnergy = 0.0;   
     frameData.potentialEnergy = 0.0; 
     frameData.shortRangePotential = 0.0;
@@ -147,6 +148,7 @@ namespace OpenMD {
     hasTotalEnergy = false;         
     hasTranslationalKineticEnergy = false;       
     hasRotationalKineticEnergy = false;       
+    hasElectronicKineticEnergy = false;       
     hasKineticEnergy = false;       
     hasShortRangePotential = false;
     hasLongRangePotential = false;
@@ -525,6 +527,10 @@ namespace OpenMD {
     return frameData.rotationalKinetic;
   }
 
+  RealType Snapshot::getElectronicKineticEnergy() {
+    return frameData.electronicKinetic;
+  }
+
   RealType Snapshot::getKineticEnergy() {
     return frameData.kineticEnergy;
   }
@@ -537,6 +543,11 @@ namespace OpenMD {
   void Snapshot::setRotationalKineticEnergy(RealType rke) {
     hasRotationalKineticEnergy = true;
     frameData.rotationalKinetic = rke;
+  }
+
+  void Snapshot::setElectronicKineticEnergy(RealType eke) {
+    hasElectronicKineticEnergy = true;
+    frameData.electronicKinetic = eke;
   }
 
   void Snapshot::setKineticEnergy(RealType ke) {

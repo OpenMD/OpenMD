@@ -68,6 +68,7 @@ namespace OpenMD{
     RealType totalEnergy;         /**< total energy of this frame */
     RealType translationalKinetic; /**< translational kinetic energy of this frame */
     RealType rotationalKinetic;   /**< rotational kinetic energy of this frame */
+    RealType electronicKinetic;   /**< electronic kinetic energy of this frame */
     RealType kineticEnergy;       /**< kinetic energy of this frame */
     RealType potentialEnergy;     /**< potential energy of this frame */
     RealType shortRangePotential; /**< short-range contributions to the potential*/
@@ -216,9 +217,11 @@ namespace OpenMD{
     RealType getKineticEnergy();
     RealType getTranslationalKineticEnergy();
     RealType getRotationalKineticEnergy();
+    RealType getElectronicKineticEnergy();
     void     setKineticEnergy(const RealType ke);
     void     setTranslationalKineticEnergy(const RealType tke);
     void     setRotationalKineticEnergy(const RealType rke);
+    void     setElectronicKineticEnergy(const RealType eke);
     RealType getTotalEnergy();
     void     setTotalEnergy(const RealType te);
     RealType getConservedQuantity();
@@ -282,6 +285,7 @@ namespace OpenMD{
     bool hasTotalEnergy;         
     bool hasTranslationalKineticEnergy;    
     bool hasRotationalKineticEnergy;    
+    bool hasElectronicKineticEnergy;    
     bool hasKineticEnergy;    
     bool hasShortRangePotential;
     bool hasLongRangePotential;
