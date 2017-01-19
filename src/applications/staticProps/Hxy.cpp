@@ -111,7 +111,7 @@ namespace OpenMD {
     top_->units =  "Angstroms";
     top_->title =  "Hxy (Upper surface)";
     top_->dataType = odtReal;
-    top_->dataHandling = odhAverage;
+    top_->dataHandling = odhMax;
     top_->accumulator.reserve(nBins_);
     for (int i = 0; i < nBins_; i++) 
       top_->accumulator.push_back( new Accumulator() );
@@ -121,7 +121,7 @@ namespace OpenMD {
     bottom_->units =  "Angstroms";
     bottom_->title =  "Hxy (Lower surface)";
     bottom_->dataType = odtReal;
-    bottom_->dataHandling = odhAverage;
+    bottom_->dataHandling = odhMax;
     bottom_->accumulator.reserve(nBins_);
     for (int i = 0; i < nBins_; i++) 
       bottom_->accumulator.push_back( new Accumulator() );
@@ -142,6 +142,7 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     int ii;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    std::cerr << "usePeriodicBoundaryConditions_ = " << usePeriodicBoundaryConditions_ << "\n";
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -172,6 +173,8 @@ namespace OpenMD {
           rb->updateAtoms();
         }        
       }                       
+
+
       
 #ifdef HAVE_FFTW3_H
       fftw_plan p1, p2;
@@ -210,24 +213,41 @@ namespace OpenMD {
       Vector3d scaled;
       
       dx = lenX_ / nBinsX_;
-       dy = lenY_ / nBinsY_;
+      dy = lenY_ / nBinsY_;
       dz = lenZ_ / nBinsZ_;
-            
+      
+      std::cerr << "len vec = " << lenX_ << "\t" << lenY_ << "\t" << lenZ_ << "\n";
+      std::cerr << "dLen vec = " << dx << "\t" << dy << "\t" << dz << "\n";
+      int iprint = 1;
+
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
            sd = seleMan_.nextSelected(ii)) {
+
+	//if (sd->isRigidBody()) std::cerr << "is rigid body\n";
+	//if (sd->isAtom()) std::cerr << "is atom\n";
 
         if (sd->isAtom()) {
           Atom* atom = static_cast<Atom*>(sd);
           Vector3d pos = sd->getPos();
+	  //std::cerr << "pos = " << pos << "\n";
           LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
           // For SPC/E water, this yields the Willard-Chandler
           // distance of 2.4 Angstroms:
-          //sigma = lja.getSigma() * 0.758176459;
-          sigma = lja.getSigma() * 0.5;
+          sigma = lja.getSigma() * 0.758176459;
           rcut = 3.0 * sigma;
+	  
+	  if (iprint == 1) {
+	    std::cerr << "sigma = " << sigma << "\n";
+	    std::cerr << "rcut = " << rcut << "\n";
+	    iprint = 0;
+	  }
 
           // scaled positions relative to the box vectors
-          scaled = invBox * pos;
+	  //  -> the atom's position in numbers of box lengths (more accurately box vectors)
+          scaled = invBox * pos ;
+	  //std::cerr << "pos = " << pos << "\n";
+	  //std::cerr << "invBox = " << invBox << "\n";
+	  //std::cerr << "scaled = " << scaled << "\n";
           // wrap the vector back into the unit box by subtracting
           // integer box numbers
           for (int j = 0; j < 3; j++) {
@@ -246,36 +266,33 @@ namespace OpenMD {
           di = (int) (rcut / dx);
           dj = (int) (rcut / dy);
           dk = (int) (rcut / dz);
-                    
-          for (int i = -di; i <= di; i++) {
+                
+	  //std::cerr << "d(ijk) = " << "\t" << di << "\t" << dj << "\t" << dk << "\n";
+	  // di = 55, dj = 55, dk = 129
 
+          for (int i = -di; i <= di; i++) {
             igrid = ibin + i;
-            while (igrid >= nBinsX_) {igrid -= nBinsX_;}
-            while (igrid < 0) {igrid += nBinsX_;}
+            while (igrid >= int(nBinsX_)) { igrid -= int(nBinsX_); }
+            while (igrid < 0) { igrid += int(nBinsX_); }
                         
-            x = lenX_ * (RealType(igrid) / RealType(nBinsX_) );
+            x = lenX_ * (RealType(i) / RealType(nBinsX_) );
             
             for (int j = -dj; j <= dj; j++) {
               jgrid = jbin + j;
-              while (jgrid >= nBinsY_) {jgrid -= nBinsY_;}
-              while (jgrid < 0) {jgrid += nBinsY_;}
+              while (jgrid >= int(nBinsY_)) {jgrid -= int(nBinsY_);}
+              while (jgrid < 0) {jgrid += int(nBinsY_);}
               
-              y = lenY_ * (RealType(jgrid) / RealType(nBinsY_));
+              y = lenY_ * (RealType(j) / RealType(nBinsY_));
               
               for (int k = -dk; k <= dk; k++) {
                 kgrid = kbin + k;
-                while (kgrid >= nBinsZ_) {kgrid -= nBinsZ_;}
-                while (kgrid < 0) {kgrid += nBinsZ_;}
+                while (kgrid >= int(nBinsZ_)) {kgrid -= int(nBinsZ_);}
+                while (kgrid < 0) {kgrid += int(nBinsZ_);}
 
-                z = lenZ_ * (RealType(kgrid) / RealType(nBinsZ_));
-
+                z = lenZ_ * (RealType(k) / RealType(nBinsZ_));
                 
-                Vector3d r = Vector3d(x, y, z) - (pos + hbox);
-                
-                if (usePeriodicBoundaryConditions_)
-                  currentSnapshot_->wrapVector(r);
-                
-                RealType dist = r.length();
+		RealType dist = sqrt(x*x + y*y + z*z);
+	    
                 dens_[igrid][jgrid][kgrid] += getDensity(dist, sigma, rcut);
               }
             }
@@ -287,16 +304,15 @@ namespace OpenMD {
       for (unsigned int i = 0; i < nBinsX_; i++) {
         for (unsigned int j = 0; j < nBinsY_; j++) {
           for (unsigned int k = 0; k < nBinsZ_; k++) {
-            //std::cout << dens_[i][j][k] << "\t";
             if (dens_[i][j][k] > maxDens) maxDens = dens_[i][j][k];
           }
-          //std::cout << "\n";
         }
-        //std::cout << "\n";
       }
       
       RealType threshold = maxDens / 2.0;
       RealType z0, z1, h0, h1;
+      std::cerr << "maxDens = " << "\t" << maxDens << "\n";
+      std::cerr << "threshold value = " << "\t" << threshold << "\n";
 
       for (unsigned int i = 0; i < nBinsX_; i++) {        
         for (unsigned int j = 0; j < nBinsY_; j++) {
@@ -309,11 +325,14 @@ namespace OpenMD {
           //          
           // In either case, there are two crossings of the
           // isodensity.
+
+	  bool minFound = false;
+	  bool maxFound = false;
           
           if (dens_[i][j][0] < threshold) {
-            bool minFound = false;
-            for (unsigned int k = 0; k < nBinsZ_-1; k++) {
 
+            for (unsigned int k = 0; k < nBinsZ_-1; k++) {
+	      
               z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
               z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
               h0 = dens_[i][j][k];
@@ -327,11 +346,11 @@ namespace OpenMD {
               if (h0 > threshold && h1 < threshold && minFound) {
                 // simple linear interpolation to find the height:
                 maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+		maxFound = true;
               }
-            }
+            }	    
             
           } else {
-            bool maxFound = false;
             for (unsigned int k = 0; k < nBinsZ_-1; k++) {
 
               z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
@@ -348,16 +367,17 @@ namespace OpenMD {
                 // simple linear interpolation to find the height:
                 minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
               }
-            }
-          }
-        }
+	    }
+	  }
+	}
       }
-
+      
       RealType minBar = 0.0;
       RealType maxBar = 0.0;
       int count = 0;
       for (unsigned int i = 0; i < nBinsX_; i++) {        
         for (unsigned int j = 0; j < nBinsY_; j++) {
+	  //if (minHeight_[i][j] < 0.0) std::cerr << "minHeight[i][j] = " << "\t" << minHeight_[i][j] << "\n";
           minBar += minHeight_[i][j];
           maxBar += maxHeight_[i][j];
           count++;
@@ -368,16 +388,19 @@ namespace OpenMD {
 
       std::cerr << "bottomSurf = " << minBar << "\ttopSurf = " << maxBar << "\n";
       int newindex;
+      //RealType Lx = 10.0;
+      //RealType Ly = 10.0;
       for (unsigned int i=0; i < nBinsX_; i++) {
 	for (unsigned int j=0; j < nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
-          //std::cout << minHeight_[i][j] << "\t";
+          //if(minHeight_[i][j] < 0.0) std::cerr << minHeight_[i][j] << "\t";
 	  c_re(in1[newindex]) = maxHeight_[i][j] - maxBar;
+	  //c_re(in1[newindex]) = 2.0*cos(2.0*NumericConstant::PI*i/Lx/Ly);
 	  c_im(in1[newindex]) = 0.0;
-	  c_re(in2[newindex]) = minHeight_[i][j] - minBar;
+	  c_re(in2[newindex]) = minHeight_[i][j] - minBar; //this was the original line.
+	  //c_re(in2[newindex]) = 1.0*cos(2.0*NumericConstant::PI*i/Lx/Ly);
 	  c_im(in2[newindex]) = 0.0;
 	}
-        //std::cout << "\n";
       }
 
 #ifdef HAVE_FFTW3_H
@@ -391,10 +414,10 @@ namespace OpenMD {
       for (unsigned int i=0; i< nBinsX_; i++) {
 	for(unsigned int j=0; j< nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
-	  mag1[newindex] = pow(c_re(out1[newindex]),2) +
-            pow(c_im(out1[newindex]),2);
-	  mag2[newindex] = pow(c_re(out2[newindex]),2) +
-            pow(c_im(out2[newindex]),2);
+	  mag1[newindex] = sqrt(pow(c_re(out1[newindex]),2) +
+				pow(c_im(out1[newindex]),2)) / (RealType(nBinsX_ * nBinsY_));
+	  mag2[newindex] = sqrt(pow(c_re(out2[newindex]),2) +
+				pow(c_im(out2[newindex]),2)) / (RealType(nBinsX_ * nBinsY_));
 	}
       }
 
@@ -453,35 +476,42 @@ namespace OpenMD {
 	  newmag1[new_index] = mag1[index];
 	  newmag2[new_index] = mag2[index];
 	}
+      } 
+
+      /*
+      for (unsigned int i=0; i< nBinsX_; i++) {
+        for(unsigned int j=0; j< nBinsY_; j++) {
+          newindex = i*nBinsY_ + j;
+	  std::cout << newmag1[newindex] << "\t";
+        }
+	std::cout << "\n";
       }
-  
+      */
+
       RealType maxfreqx = RealType(nBinsX_) / lenX_;
       RealType maxfreqy = RealType(nBinsY_) / lenY_;
       
       RealType maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
       dfreq_ = maxfreq/(RealType)(nBins_-1);
-          
+ 
       int zero_freq_x = nBinsX_/2; 
-      int zero_freq_y = nBinsY_/2; 
+      int zero_freq_y = nBinsY_/2;
       
-      for (unsigned int i=0; i< nBinsX_; i++) {
-	for(unsigned int j=0; j< nBinsY_; j++) {
-	  RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
-	  RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
-	  
+      for (int i=0; i< (int)nBinsX_; i++) {
+	for(int j=0; j< (int)nBinsY_; j++) {
+	  RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx / (RealType)nBinsX_;
+	  RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy / (RealType)nBinsY_;
+
 	  RealType freq = sqrt(freq_x*freq_x + freq_y*freq_y);
 	  
 	  unsigned int whichbin = (unsigned int) (freq / dfreq_);
           
 	  newindex = i*nBinsY_ + j;
 
-          std::cout << newmag1[newindex] << "\t";
-          
           dynamic_cast<Accumulator*>(counts_->accumulator[whichbin])->add(1);
           dynamic_cast<Accumulator*>(freq_->accumulator[whichbin])->add(freq);
           dynamic_cast<Accumulator *>(top_->accumulator[whichbin])->add(newmag1[newindex]);
           dynamic_cast<Accumulator *>(bottom_->accumulator[whichbin])->add(newmag2[newindex]);
-          
 	}
       }
       
@@ -509,7 +539,4 @@ namespace OpenMD {
     else
       return 0.0;
   }
-
-
-
 }
