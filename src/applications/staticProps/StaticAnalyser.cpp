@@ -75,7 +75,7 @@ namespace OpenMD {
       //ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-
+      ofs << "#";
       for(outputData = beginOutputData(i); outputData; 
           outputData = nextOutputData(i)) {
         ofs << "\t" << outputData->title << 
@@ -145,7 +145,11 @@ namespace OpenMD {
 
     if( dat->dataType == odtReal ) {
       RealType r;
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
+      if (dat->dataHandling == odhMax) {
+	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);      
+      } else {
+	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
+      }
       if (isinf(r) || isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
@@ -159,7 +163,7 @@ namespace OpenMD {
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
+      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);     
       if (isinf(v[0]) || isnan(v[0]) || 
           isinf(v[1]) || isnan(v[1]) || 
           isinf(v[2]) || isnan(v[2]) ) {      
