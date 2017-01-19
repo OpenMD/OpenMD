@@ -59,6 +59,7 @@ namespace OpenMD {
     odhAverage,
     odhTotal,
     odhLastValue,
+    odhMax,
     odhUnknownDataHandling
   };
   
@@ -106,9 +107,9 @@ namespace OpenMD {
     }
 
   protected:
-    void writeOutput();
-    void writeData(ostream& os, OutputData* dat, unsigned int bin);
-    void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeOutput();
+    virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
     OutputData* beginOutputData(vector<OutputData*>::iterator& i);
     OutputData* nextOutputData(vector<OutputData*>::iterator& i);
 
