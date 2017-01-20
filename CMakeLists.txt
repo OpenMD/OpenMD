@@ -630,6 +630,7 @@ src/applications/staticProps/StaticProps.cpp
 src/applications/staticProps/SurfaceDiffusion.cpp
 src/applications/staticProps/TetrahedralityHBMatrix.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
+src/applications/staticProps/TetrahedralityParamDens.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
 src/applications/staticProps/TetrahedralityParamXYZ.cpp
 src/applications/staticProps/TwoDGofR.cpp

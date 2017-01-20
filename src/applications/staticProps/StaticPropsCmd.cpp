@@ -92,6 +92,7 @@ const char *gengetopt_args_info_help[] = {
   "      --rodlength               length of nanorod",
   "  -Q, --tet_param               tetrahedrality order parameter (Qk)",
   "      --tet_param_z             spatially-resolved tetrahedrality order\n                                  parameter Qk(z)",
+  "      --tet_param_dens          spatially-resolved tetrahedrality order\n                                  parameter Qk(z)",
   "      --tet_param_xyz           volume-resolved tetrahedrality order parameter\n                                  Qk(x,y,z).  (voxelSize, rcut, and gaussWidth\n                                  must be specified)",
   "      --rnemdz                  slab-resolved RNEMD statistics (temperature,\n                                  density, velocity)",
   "      --rnemdr                  shell-resolved RNEMD statistics (temperature,\n                                  density, angular velocity)",
@@ -192,6 +193,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
+  args_info->tet_param_dens_given = 0 ;
   args_info->tet_param_xyz_given = 0 ;
   args_info->rnemdz_given = 0 ;
   args_info->rnemdr_given = 0 ;
@@ -329,21 +331,22 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->rodlength_help = gengetopt_args_info_help[56] ;
   args_info->tet_param_help = gengetopt_args_info_help[57] ;
   args_info->tet_param_z_help = gengetopt_args_info_help[58] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[59] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[60] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[61] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[62] ;
-  args_info->nitrile_help = gengetopt_args_info_help[63] ;
-  args_info->multipole_help = gengetopt_args_info_help[64] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[65] ;
-  args_info->cn_help = gengetopt_args_info_help[66] ;
-  args_info->scn_help = gengetopt_args_info_help[67] ;
-  args_info->gcn_help = gengetopt_args_info_help[68] ;
-  args_info->hbond_help = gengetopt_args_info_help[69] ;
-  args_info->potDiff_help = gengetopt_args_info_help[70] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[71] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[72] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[73] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[59] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[60] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[61] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[62] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[63] ;
+  args_info->nitrile_help = gengetopt_args_info_help[64] ;
+  args_info->multipole_help = gengetopt_args_info_help[65] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[66] ;
+  args_info->cn_help = gengetopt_args_info_help[67] ;
+  args_info->scn_help = gengetopt_args_info_help[68] ;
+  args_info->gcn_help = gengetopt_args_info_help[69] ;
+  args_info->hbond_help = gengetopt_args_info_help[70] ;
+  args_info->potDiff_help = gengetopt_args_info_help[71] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[72] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[73] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[74] ;
   
 }
 
@@ -619,6 +622,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "tet_param", 0, 0 );
   if (args_info->tet_param_z_given)
     write_into_file(outfile, "tet_param_z", 0, 0 );
+  if (args_info->tet_param_dens_given)
+    write_into_file(outfile, "tet_param_dens", 0, 0 );
   if (args_info->tet_param_xyz_given)
     write_into_file(outfile, "tet_param_xyz", 0, 0 );
   if (args_info->rnemdz_given)
@@ -728,6 +733,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
+  args_info->tet_param_dens_given = 0 ;
   args_info->tet_param_xyz_given = 0 ;
   args_info->rnemdz_given = 0 ;
   args_info->rnemdr_given = 0 ;
@@ -1625,6 +1631,7 @@ cmdline_parser_internal (
         { "rodlength",	0, NULL, 0 },
         { "tet_param",	0, NULL, 'Q' },
         { "tet_param_z",	0, NULL, 0 },
+        { "tet_param_dens",	0, NULL, 0 },
         { "tet_param_xyz",	0, NULL, 0 },
         { "rnemdz",	0, NULL, 0 },
         { "rnemdr",	0, NULL, 0 },
@@ -2527,6 +2534,23 @@ cmdline_parser_internal (
                 &(local_args_info.tet_param_z_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "tet_param_z", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* spatially-resolved tetrahedrality order parameter Qk(z).  */
+          else if (strcmp (long_options[option_index].name, "tet_param_dens") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->tet_param_dens_given),
+                &(local_args_info.tet_param_dens_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "tet_param_dens", '-',
                 additional_error))
               goto failure;
           
