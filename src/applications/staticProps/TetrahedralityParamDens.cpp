@@ -219,7 +219,7 @@ namespace OpenMD {
         if (nang > 0) {
           int binNo = int((Qk - MinQ_) / deltaQ_);
 
-	  if (binNo < sliceCount_.size() && binNo >= 0 ) {
+	  if (binNo < int(sliceCount_.size()) && binNo >= 0 ) {
 	    sliceCount_[binNo] += 1;
 	  } else {
 	    std::cerr << "binNo = " << binNo << " Qk = " << Qk << "\n";

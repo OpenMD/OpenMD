@@ -204,8 +204,6 @@ namespace OpenMD {
       RealType lenY_ = hmat(1,1);
       RealType lenZ_ = hmat(2,2);
 
-      Vector3d hbox = Vector3d(lenX_/2.0, lenY_/2.0, lenZ_/2.0);
-     
       RealType x, y, z, dx, dy, dz;
       RealType sigma, rcut;
       int di, dj, dk, ibin, jbin, kbin;
