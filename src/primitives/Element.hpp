@@ -38,19 +38,34 @@ namespace OpenMD{
   class Element {
   public:
     Element()    {}
-    Element(int num, const char *sym, RealType rcov, RealType rvdw,
-            int maxbo, RealType mass, RealType elNeg, RealType ionize,
-            RealType elAffin, RealType red, RealType green, RealType blue,
-            std::string name) :
+    /** Constructor
+        @param num     Atomic number
+        @param sym     Elemental symbol (maximum 3 characters)
+        @param ARENeg  Allred-Rochow electronegativity
+        @param rcov    Covalent radius (in Angstrom)
+        @param rvdw    van der Waals radius (in Angstrom)
+        @param maxbo   Maximum bonding valence
+        @param mass    Atomic mass (in amu)
+        @param elNeg   Electronegativity (in Pauling units)
+        @param ionize  Ionization potential (in eV)
+        @param elAffin Electron affinity (in eV)
+        @param red     RGB value for a suggest visualization color (0 .. 1)
+        @param green   RGB value for a suggest visualization color (0 .. 1)
+        @param blue    RGB value for a suggest visualization color (0 .. 1)
+        @param name Full IUPAC name
+    **/
+    Element(int num, const char *sym, RealType ARENeg, RealType rcov,
+            RealType rvdw, int maxbo, RealType mass, RealType elNeg,
+            RealType ionize, RealType elAffin, RealType red, RealType green,
+            RealType blue, std::string name) :
       num_(num), name_(name), Rcov_(rcov), Rvdw_(rvdw), mass_(mass), 
-      elNeg_(elNeg), ionize_(ionize), elAffinity_(elAffin), 
+      elNeg_(elNeg), ARENeg_(ARENeg), ionize_(ionize), elAffinity_(elAffin), 
       red_(red), green_(green), blue_(blue),
       maxbonds_(maxbo)
     {
       strncpy(symbol_, sym, 3);
     }
-    
-    
+        
     /**
      * Returns the atomic number of this element
      * @return the atomic number of this element
@@ -108,6 +123,14 @@ namespace OpenMD{
     }
 
     /**
+     * Returns the Allred-Rochow electronegativity for this element
+     * @return the Allred-Rochow electronegativity for this element
+     */
+    RealType GetAllredRochowElectroNeg() {
+      return(ARENeg_);  
+    }
+
+    /**
      * Returns the ionization potential (in eV) of this element
      * @return the ionization potential (in eV) of this element
      */
@@ -159,7 +182,7 @@ namespace OpenMD{
     int num_;
     char symbol_[3];
     std::string name_;
-    RealType Rcov_, Rvdw_, mass_, elNeg_, ionize_, elAffinity_;
+    RealType Rcov_, Rvdw_, mass_, elNeg_, ARENeg_, ionize_, elAffinity_;
     RealType red_, green_, blue_;
     int maxbonds_;
     

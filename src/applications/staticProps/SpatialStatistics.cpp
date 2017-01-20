@@ -161,7 +161,7 @@ namespace OpenMD {
     RealType z;
 
     hmat_ = currentSnapshot_->getHmat();
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(2,2);
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }

@@ -103,7 +103,7 @@ namespace OpenMD {
     freq_->dataType = odtReal;
     freq_->dataHandling = odhAverage;
     freq_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       freq_->accumulator.push_back( new Accumulator() );
     data_.push_back(freq_);
 
@@ -113,7 +113,7 @@ namespace OpenMD {
     top_->dataType = odtReal;
     top_->dataHandling = odhMax;
     top_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       top_->accumulator.push_back( new Accumulator() );
     data_.push_back(top_);
     
@@ -123,7 +123,7 @@ namespace OpenMD {
     bottom_->dataType = odtReal;
     bottom_->dataHandling = odhMax;
     bottom_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       bottom_->accumulator.push_back( new Accumulator() );
     data_.push_back(bottom_);
 

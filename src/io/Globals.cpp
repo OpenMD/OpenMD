@@ -160,7 +160,9 @@ namespace OpenMD {
                                             1.0);
     DefineOptionalParameterWithDefaultValue(StatFileFormat, 
                                             "statFileFormat", 
-                                            "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
+                                            "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");
+    DefineOptionalParameterWithDefaultValue(StatFilePrecision, 
+                                            "statFilePrecision", 8);   
     DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, 
                                             "useSphericalBoundaryConditions", 
                                             false);
@@ -271,7 +273,8 @@ namespace OpenMD {
     CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || 
                    isEqualIgnoreCase("AlphaShape")); 
     CheckParameter(Alpha, isPositive()); 
-  
+    CheckParameter(StatFilePrecision, isPositive()); 
+
     for(std::vector<Component*>::iterator i = components_.begin(); 
         i != components_.end(); ++i) {
       if (!(*i)->findMoleculeStamp(moleculeStamps_)) {

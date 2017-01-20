@@ -66,18 +66,19 @@ namespace OpenMD {
       delete *i;
   }
   
-  void ElementsTable::ParseLine(const char *line) {
+  void ElementsTable::ParseLine(const char *buffer) {
     int num, maxbonds;
-    char symbol[6];
+    char symbol[4];
     char name[256];
-    RealType Rcov,Rvdw,mass, elNeg, ionize, elAffin;
+    RealType Rcov,Rvdw,mass, elNeg, ARENeg, ionize, elAffin;
     RealType red, green, blue;
-
+    
     // skip comment line (at the top)
-    if (line[0] != '#')  {
-      sscanf(line,"%d %5s %lf %*f %lf %d %lf %lf %lf %lf %lf %lf %lf %255s",
+    if (buffer[0] != '#')  {
+      sscanf(buffer,"%d %3s %lf %lf %*f %lf %d %lf %lf %lf %lf %lf %lf %lf %255s",
              &num,
              symbol,
+             &ARENeg,
              &Rcov,
              &Rvdw,
              &maxbonds,
@@ -89,10 +90,10 @@ namespace OpenMD {
              &green,
              &blue,
              name);
-    
-      Element *ele = new Element(num, symbol, Rcov, Rvdw, maxbonds, mass, 
-                                 elNeg, ionize, elAffin, red, green, blue, 
-                                 name);
+      
+      Element *ele = new Element(num, symbol, ARENeg, Rcov, Rvdw, maxbonds,
+                                 mass, elNeg, ionize, elAffin,
+                                 red, green, blue, name);
       elements_.push_back(ele);
 
     }
@@ -109,7 +110,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return("\0");
     
     return(elements_[atomicnum]->GetSymbol());
@@ -119,7 +120,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0);
     
     return(elements_[atomicnum]->GetMaxBonds());
@@ -129,17 +130,27 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0.0);
     
     return(elements_[atomicnum]->GetElectroNeg());
+  }
+
+  RealType ElementsTable::GetAllredRochowElectroNeg(int atomicnum) {
+    if (!init_)
+      Init();
+    
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
+      return(0.0);
+
+    return(elements_[atomicnum]->GetAllredRochowElectroNeg());
   }
   
   RealType ElementsTable::GetIonization(int atomicnum) {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0.0);
     
     return(elements_[atomicnum]->GetIonization());
@@ -150,7 +161,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0.0);
 
     return(elements_[atomicnum]->GetElectronAffinity());
@@ -163,7 +174,7 @@ namespace OpenMD {
     std::vector <RealType> colors;
     colors.reserve(3);
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size())) {
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size())) {
       colors.push_back(0.0);
       colors.push_back(0.0);
       colors.push_back(0.0);
@@ -181,7 +192,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return("Unknown");
     
     return(elements_[atomicnum]->GetName());
@@ -191,7 +202,7 @@ namespace OpenMD {
     if (!init_)
       Init();
 
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0.0);
 
     return(elements_[atomicnum]->GetVdwRad());
@@ -202,7 +213,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(1.0);
     
     rad = elements_[atomicnum]->GetCovalentRad();
@@ -220,7 +231,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(1.95);
     
     rad = elements_[atomicnum]->GetVdwRad();
@@ -237,7 +248,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0.0);
     
     return(elements_[atomicnum]->GetCovalentRad());
@@ -247,7 +258,7 @@ namespace OpenMD {
     if (!init_)
       Init();
     
-    if (atomicnum < 0 || atomicnum > static_cast<int>(elements_.size()))
+    if (atomicnum < 0 || atomicnum >= static_cast<int>(elements_.size()))
       return(0.0);
     
     return(elements_[atomicnum]->GetMass());
@@ -258,25 +269,59 @@ namespace OpenMD {
     return GetAtomicNum(sym, temp);
   }
 
-  int ElementsTable::GetAtomicNum(const char *sym, int &iso) {
+  int ElementsTable::GetAtomicNum(const char *identifier, int &iso) {
     if (!init_)
       Init();
     
+    // Compare to symbol    
     std::vector<Element*>::iterator i;
     for (i = elements_.begin();i != elements_.end(); ++i)
-      if (!strncasecmp(sym,(*i)->GetSymbol(),2))
+      if (!strncasecmp(identifier,(*i)->GetSymbol(),3))
         return((*i)->GetAtomicNum());
 
-    if (strcasecmp(sym, "D") == 0) {
+    // Compare to IUPAC name (an abbreviated name will also work if 5
+    // letters or more)
+    int numCharsToTest = std::max<int>(strlen(identifier), 5);
+    for (i = elements_.begin();i != elements_.end();++i)
+      if (strncasecmp(identifier,(*i)->GetName().c_str(),numCharsToTest) == 0)
+        return((*i)->GetAtomicNum());
+    
+    if (strcasecmp(identifier, "D") == 0 ||
+        (strcasecmp(identifier, "Deuterium") == 0) ) {
       iso = 2;
       return(1);
-    } else if (strcasecmp(sym, "T") == 0) {
+    } else if (strcasecmp(identifier, "T") == 0 ||
+               (strcasecmp(identifier, "Tritium") == 0) ) {
       iso = 3;
       return(1);
-    } else 
+    } else if (strcasecmp(identifier, "Hl") == 0) {
+      // ligand hydrogen -- found in some CIF PR#3048959.
+      sprintf( painCave.errMsg,
+               "ElementsTable warning.\n"
+               "\tCannot understand the element label %s\n"
+               "\tGuessing it's hydrogen\n", identifier);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();            
+      return(1);
+    } else
       iso = 0;
+
+    if(identifier[0]!='*') {
+      sprintf( painCave.errMsg,
+               "ElementsTable warning.\n"
+               "\tCannot understand the element label %s\n", identifier);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();            
+    }
     return(0);
   }
+
+  int ElementsTable::GetAtomicNum(std::string name, int &iso) {
+    return GetAtomicNum(name.c_str(), iso);
+  }
+
 
   void ElementsTable::Init() {
     if (init_)
@@ -284,66 +329,55 @@ namespace OpenMD {
     init_ = true;
     
     std::string buffer, subbuffer;
-    ifstrstream ifs1, ifs2, ifs3, ifs4, *ifsP;
+    ifstrstream ifs;
+    char charBuffer[BUFF_SIZE];
+
     // First, look for an environment variable
     if (getenv(envvar_.c_str()) != NULL) {
       buffer = getenv(envvar_.c_str());
       buffer += FILE_SEP_CHAR;
-      
-
-
-
+     
       if (!subdir_.empty()) {
         subbuffer = buffer;
         subbuffer += subdir_;
         subbuffer += FILE_SEP_CHAR;
       }
-      
-
-      
+            
       buffer += filename_;
       subbuffer += filename_;
-
+    }
+    
+    ifs.clear();
+    ifs.open(subbuffer.c_str());
+    
+    if( !(&ifs)->is_open() ) {
       
-      ifs1.open(subbuffer.c_str());
-      ifsP= &ifs1;
-      if (!(ifsP->is_open())) {
-        ifs2.open(buffer.c_str());
-        ifsP = &ifs2;
+      ifs.clear();
+      ifs.open(buffer.c_str());
+      
+      if ( !(&ifs)->is_open() ) {
+        sprintf( painCave.errMsg,
+                 "ElementsTable error.\n"
+                 "\tunable to open datafile %s \n", filename_.c_str());
+        painCave.isFatal = 0;
+        simError();
       }
-      
-    } else {
+    }
+    
+    if (ifs) {      
+      while(ifs.getline(charBuffer,BUFF_SIZE))
+        ParseLine(charBuffer);
+    }
+    
+    if (ifs)
+      ifs.close();
+    
+    if (GetSize() == 0) {
       sprintf( painCave.errMsg,
                "ElementsTable error.\n"
-               "\tunable to open datafile %s \n", filename_.c_str());
+               "\tCannot initialize database %s \n", filename_.c_str());
       painCave.isFatal = 0;
-      simError();
-    }
-      
-
-    if ((*ifsP)) {
-      char charBuffer[BUFF_SIZE];
-      while(ifsP->getline(charBuffer,BUFF_SIZE))
-        ParseLine(charBuffer);
-      
-      if (ifs1)
-	ifs1.close();
-      if (ifs2)
-	ifs2.close();
-      if (ifs3)
-	ifs3.close();
-      if (ifs4)
-	ifs4.close();
-      
-      if (GetSize() == 0) {
-	sprintf( painCave.errMsg,
-		 "ElementsTable error.\n"
-		 "\tCannot initialize database %s \n", filename_.c_str());
-	painCave.isFatal = 0;
-	simError();
-      }
-    
-    }
-  
+      simError();       
+    } 
   }
 }

@@ -55,7 +55,7 @@ namespace OpenMD {
     counts_->dataType = odtReal;
     counts_->dataHandling = odhTotal;
     counts_->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       counts_->accumulator.push_back( new Accumulator() );     
   }
   
@@ -88,7 +88,7 @@ namespace OpenMD {
       
       ofs.precision(8);
       
-      for (int j = 0; j < nBins_; j++) {        
+      for (unsigned int j = 0; j < nBins_; j++) {        
         
         int counts = counts_->accumulator[j]->count();
 
@@ -109,7 +109,7 @@ namespace OpenMD {
       ofs << "# 95% confidence intervals in those quantities follow:\n";
       ofs << "#######################################################\n";
       
-      for (int j = 0; j < nBins_; j++) {
+      for (unsigned int j = 0; j < nBins_; j++) {
         int counts = counts_->accumulator[j]->count();
         if (counts > 0) {
           

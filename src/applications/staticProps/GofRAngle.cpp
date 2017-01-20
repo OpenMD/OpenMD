@@ -62,7 +62,7 @@ namespace OpenMD {
     deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
     histogram_.resize(nBins_);
     avgGofr_.resize(nBins_);
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nAngleBins_);
       avgGofr_[i].resize(nAngleBins_);
     }
@@ -92,7 +92,7 @@ namespace OpenMD {
     deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
     histogram_.resize(nBins_);
     avgGofr_.resize(nBins_);
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nAngleBins_);
       avgGofr_[i].resize(nAngleBins_);
     }

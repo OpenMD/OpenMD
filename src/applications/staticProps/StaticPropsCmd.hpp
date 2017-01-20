@@ -162,7 +162,9 @@ struct gengetopt_args_info
   const char *nitrile_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
   const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
   const char *surfDiffusion_help; /**< @brief X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion help description.  */
-  const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
+  const char *cn_help; /**< @brief Coordination Number Distribution help description.  */
+  const char *scn_help; /**< @brief Secondary Coordination Number Distribution help description.  */
+  const char *gcn_help; /**< @brief Generalized Coordination Number Distribution help description.  */
   const char *hbond_help; /**< @brief Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified) help description.  */
   const char *potDiff_help; /**< @brief potential energy difference when charge on selection is set to zero help description.  */
   const char *tet_hb_help; /**< @brief hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules help description.  */
@@ -234,6 +236,8 @@ struct gengetopt_args_info
   unsigned int nitrile_given ;	/**< @brief Whether nitrile was given.  */
   unsigned int multipole_given ;	/**< @brief Whether multipole was given.  */
   unsigned int surfDiffusion_given ;	/**< @brief Whether surfDiffusion was given.  */
+  unsigned int cn_given ;	/**< @brief Whether cn was given.  */
+  unsigned int scn_given ;	/**< @brief Whether scn was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
   unsigned int hbond_given ;	/**< @brief Whether hbond was given.  */
   unsigned int potDiff_given ;	/**< @brief Whether potDiff was given.  */
@@ -356,31 +360,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
  * @param args_info the structure to deallocate
  */
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
-
-/**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
 
 /**
  * Checks that all the required options were specified

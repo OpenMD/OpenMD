@@ -58,6 +58,7 @@ namespace OpenMD {
 
     RealType getTranslationalKinetic(); // the translational kinetic energy 
     RealType getRotationalKinetic(); // the rotational kinetic energy 
+    RealType getElectronicKinetic(); // the electronic kinetic energy 
     RealType getKinetic(); // the total kinetic energy 
     RealType getPotential(); // the total potential energy
     potVec getSelectionPotentials(); // the potential energy of a selection

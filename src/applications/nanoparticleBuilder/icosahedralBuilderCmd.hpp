@@ -48,34 +48,46 @@ struct gengetopt_args_info
   double latticeConstant_arg;	/**< @brief Lattice spacing in Angstroms for cubic lattice..  */
   char * latticeConstant_orig;	/**< @brief Lattice spacing in Angstroms for cubic lattice. original value given at command line.  */
   const char *latticeConstant_help; /**< @brief Lattice spacing in Angstroms for cubic lattice. help description.  */
+  char * lattice_arg;	/**< @brief Lattice Type.  */
+  char * lattice_orig;	/**< @brief Lattice Type original value given at command line.  */
+  const char *lattice_help; /**< @brief Lattice Type help description.  */
   int columnAtoms_arg;	/**< @brief Number of atoms along central column (Decahedron only).  */
   char * columnAtoms_orig;	/**< @brief Number of atoms along central column (Decahedron only) original value given at command line.  */
   const char *columnAtoms_help; /**< @brief Number of atoms along central column (Decahedron only) help description.  */
   int twinAtoms_arg;	/**< @brief Number of atoms along twin boundary (Decahedron only).  */
   char * twinAtoms_orig;	/**< @brief Number of atoms along twin boundary (Decahedron only) original value given at command line.  */
   const char *twinAtoms_help; /**< @brief Number of atoms along twin boundary (Decahedron only) help description.  */
-  int truncatedPlanes_arg;	/**< @brief Number of truncated planes (Curling-stone Decahedron only).  */
-  char * truncatedPlanes_orig;	/**< @brief Number of truncated planes (Curling-stone Decahedron only) original value given at command line.  */
-  const char *truncatedPlanes_help; /**< @brief Number of truncated planes (Curling-stone Decahedron only) help description.  */
+  int truncatedPlanes_arg;	/**< @brief Number of truncated planes (Curling-stone Decahedra and Truncated Cubes only).  */
+  char * truncatedPlanes_orig;	/**< @brief Number of truncated planes (Curling-stone Decahedra and Truncated Cubes only) original value given at command line.  */
+  const char *truncatedPlanes_help; /**< @brief Number of truncated planes (Curling-stone Decahedra and Truncated Cubes only) help description.  */
+  int unitCells_arg;	/**< @brief Number of unit cell (Cuboctahedron and Truncated Cube only).  */
+  char * unitCells_orig;	/**< @brief Number of unit cell (Cuboctahedron and Truncated Cube only) original value given at command line.  */
+  const char *unitCells_help; /**< @brief Number of unit cell (Cuboctahedron and Truncated Cube only) help description.  */
   const char *ico_help; /**< @brief Create an Icosahedral cluster help description.  */
   const char *deca_help; /**< @brief Create a regualar Decahedral cluster help description.  */
   const char *ino_help; /**< @brief Create an Ino Decahedral cluster help description.  */
   const char *marks_help; /**< @brief Create a Marks Decahedral cluster help description.  */
   const char *stone_help; /**< @brief Create a Curling-stone Decahedral cluster help description.  */
+  const char *cuboctahedron_help; /**< @brief Create a regular Cuboctahedron (requires lattice) help description.  */
+  const char *truncatedCube_help; /**< @brief Create a Truncated Cube (requires lattice) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int shells_given ;	/**< @brief Whether shells was given.  */
   unsigned int latticeConstant_given ;	/**< @brief Whether latticeConstant was given.  */
+  unsigned int lattice_given ;	/**< @brief Whether lattice was given.  */
   unsigned int columnAtoms_given ;	/**< @brief Whether columnAtoms was given.  */
   unsigned int twinAtoms_given ;	/**< @brief Whether twinAtoms was given.  */
   unsigned int truncatedPlanes_given ;	/**< @brief Whether truncatedPlanes was given.  */
+  unsigned int unitCells_given ;	/**< @brief Whether unitCells was given.  */
   unsigned int ico_given ;	/**< @brief Whether ico was given.  */
   unsigned int deca_given ;	/**< @brief Whether deca was given.  */
   unsigned int ino_given ;	/**< @brief Whether ino was given.  */
   unsigned int marks_given ;	/**< @brief Whether marks was given.  */
   unsigned int stone_given ;	/**< @brief Whether stone was given.  */
+  unsigned int cuboctahedron_given ;	/**< @brief Whether cuboctahedron was given.  */
+  unsigned int truncatedCube_given ;	/**< @brief Whether truncatedCube was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -194,31 +206,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
 
 /**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
-
-/**
  * Checks that all the required options were specified
  * @param args_info the structure to check
  * @param prog_name the name of the program that will be used to print
@@ -227,6 +214,8 @@ int cmdline_parser_config_file (const char *filename,
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_lattice_values[];  /**< @brief Possible values for lattice. */
 
 
 #ifdef __cplusplus

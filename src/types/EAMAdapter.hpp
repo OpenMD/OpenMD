@@ -47,40 +47,105 @@
 #include "types/AtomType.hpp"
 #include "math/CubicSpline.hpp"
 
-using namespace std;
 namespace OpenMD {
 
   string const EAMtypeID = "EAM";
-
+  
   struct EAMAtypeParameters {
-    RealType latticeConstant;         
+    // This first set is for parameters read from DYNAMO 86 funcfl files:
+    RealType latticeConstant;  
+    std::string latticeType;
+    int atomicNumber;
+    RealType atomicMass;
     int nrho;
     RealType drho;
     int nr;
     RealType dr;
     RealType rcut;
-    vector<RealType> Z;   // Z(r) 
-    vector<RealType> rho; // rho(r)
-    vector<RealType> F;   // F[rho] 
+    std::vector<RealType> Z;   // Z(r) 
+    std::vector<RealType> rho; // rho(r)
+    std::vector<RealType> F;   // F[rho]
+    // This set is for parameters for the parameterization of EAM described in:
+    // Acta mater 49, 4005 (2001), and X. W. Zhou, R. A. Johnson, and
+    // H. N. G. Wadley, Phys. Rev. B, 69, 144113 (2004).
+    RealType re;
+    RealType fe;
+    RealType rhoe;
+    RealType alpha;
+    RealType beta;
+    RealType A;
+    RealType B;
+    RealType kappa;
+    RealType lambda;
+    std::vector<RealType> Fn;
+    // std::vector<RealType> F;  (re-use the F vector defined above)
+    RealType eta;
+    RealType Fe;
+    bool hasSplines;
   };
+
   typedef SimpleTypeData<EAMAtypeParameters*> EAMAtypeData;
 
   class EAMAdapter {
   public:
     EAMAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeEAM(RealType latticeConstant, int nrho, RealType drho, int nr, RealType dr, RealType rcut, vector<RealType> Z, vector<RealType> rho, vector<RealType> F);
+    void makeEAM(RealType latticeConstant,
+                 std::string latticeType,
+                 int nrho,
+                 RealType drho,
+                 int nr,
+                 RealType dr,
+                 RealType rcut,
+                 std::vector<RealType> Z,
+                 std::vector<RealType> rho,
+                 std::vector<RealType> F,
+                 bool hasSplines);
+
+    void makeEAM(RealType latticeConstant,
+                 std::string latticeType,
+                 RealType re,
+                 RealType fe,
+                 RealType rhoe,
+                 RealType alpha,
+                 RealType beta,
+                 RealType A,
+                 RealType B,
+                 RealType kappa,
+                 RealType lambda,
+                 std::vector<RealType> Fn,
+                 std::vector<RealType> F,
+                 RealType eta,
+                 RealType Fe,
+                 bool hasSplines);
     
+
     bool isEAM();    
     RealType getLatticeConstant();
+    std::string getLatticeType();
     int getNr();
     RealType getDr();
     int getNrho();
     RealType getDrho();
     RealType getRcut();
-    CubicSpline* getZ();
-    CubicSpline* getRho();
-    CubicSpline* getF();
+    RealType getRe();
+    RealType get_fe();
+    RealType getRhoe();
+    RealType getAlpha();
+    RealType getBeta();
+    RealType getA();
+    RealType getB();
+    RealType getKappa();
+    RealType getLambda();
+    std::vector<RealType> getFn();
+    std::vector<RealType> getF();  
+    RealType getEta();
+    RealType getFe();
+    bool hasSplines();
+
+    CubicSpline* getZSpline();
+    CubicSpline* getRhoSpline();
+    CubicSpline* getFSpline();
 
   private:
     AtomType* at_;

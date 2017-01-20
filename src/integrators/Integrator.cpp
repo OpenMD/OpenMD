@@ -44,6 +44,7 @@
 #include "integrators/Integrator.hpp"
 #include "integrators/DLM.hpp"
 #include "flucq/FluctuatingChargeLangevin.hpp"
+#include "flucq/FluctuatingChargeNVE.hpp"
 #include "flucq/FluctuatingChargeNVT.hpp"
 #include "utils/simError.h"
 
@@ -148,6 +149,8 @@ namespace OpenMD {
       std::string prop = toUpperCopy(simParams->getFluctuatingChargeParameters()->getPropagator());
       if (prop.compare("NVT")==0){
          flucQ_ = new FluctuatingChargeNVT(info);
+      } else if (prop.compare("NVE")==0) {
+         flucQ_ = new FluctuatingChargeNVE(info);
       } else if (prop.compare("LANGEVIN")==0) {
          flucQ_ = new FluctuatingChargeLangevin(info);
       } else {

@@ -130,7 +130,8 @@ namespace OpenMD {
 #endif // is_mpi
 
       Stats::StatsBitSet mask = stats_->getStatsMask();
-      statfile_.precision(8);
+      statfile_.precision( stats_->getPrecision() );
+
       for (unsigned int i = 0; i < mask.size(); ++i) {
 	if (mask[i]) {
           if (stats_->getDataType(i) == "RealType")
@@ -163,6 +164,7 @@ namespace OpenMD {
   void StatWriter::writeReal(int i) {
 
     RealType s = stats_->getRealData(i);
+
 
     if (! isinf(s) && ! isnan(s)) {
       statfile_ << "\t" << s;

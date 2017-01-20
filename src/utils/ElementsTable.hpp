@@ -110,6 +110,12 @@ namespace OpenMD {
      */
     int GetAtomicNum(const char *str, int &iso);
     /**
+     * @return the atomic number matching the element symbol passed
+     * or 0 if not defined. 
+     * @param name the element name
+     */
+    int GetAtomicNum(std::string name, int &iso);
+    /**
      * @return the element symbol matching the atomic number passed
      * @param atomicnum the atomic number of the element
      */
@@ -153,6 +159,11 @@ namespace OpenMD {
      * @param atomicnum the atomic number of the element
      */
     RealType GetElectroNeg(int atomicnum);
+    /**
+     * @return the Allred-Rochow electronegativity for this element
+     * @param atomicnum the atomic number of the element
+     */
+    RealType GetAllredRochowElectroNeg(int atomicnum);
     /**
      * @return the ionization potential (in eV) for this element
      * @param atomicnum the atomic number of the element
