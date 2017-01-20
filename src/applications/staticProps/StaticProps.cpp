@@ -78,6 +78,7 @@
 #include "applications/staticProps/TetrahedralityParam.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
 #include "applications/staticProps/TetrahedralityParamXYZ.hpp"
+#include "applications/staticProps/TetrahedralityParamDens.hpp"
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
@@ -290,6 +291,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.multipole_given){
     analyser = new MultipoleSum(info, dumpFileName, sele1, 
                                 maxLen, args_info.nbins_arg);
+    
   } else if (args_info.tet_param_given) {
     if (args_info.rcut_given) {	  
       analyser = new TetrahedralityParam(info, dumpFileName, sele1, 
@@ -302,6 +304,7 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+    
   } else if (args_info.tet_param_z_given) {
     if (args_info.rcut_given) {	  
       analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
@@ -310,6 +313,19 @@ int main(int argc, char* argv[]){
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+  } else if (args_info.tet_param_dens_given) {
+    if (args_info.rcut_given) {
+      analyser = new TetrahedralityParamDens(info, dumpFileName, sele1, sele2,
+					     args_info.rcut_arg,
+					     args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
