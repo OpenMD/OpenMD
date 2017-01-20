@@ -49,6 +49,7 @@
 #include "io/DumpWriter.hpp"
 #include "clusters/Icosahedron.hpp"
 #include "clusters/Decahedron.hpp"
+#include "clusters/Cuboctahedron.hpp"
 
 using namespace OpenMD;
 using namespace std;
@@ -110,7 +111,8 @@ int main(int argc, char *argv []) {
     simError();
   }
 
-  if (args_info.shells_given) {   
+  if (args_info.shells_given ||
+      (args_info.cuboctahedron_given || args_info.truncatedCube_given) ) {   
     nShells = args_info.shells_arg;    
     if( nShells < 0 ) {
       sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
@@ -157,15 +159,45 @@ int main(int argc, char *argv []) {
     int twinAtoms = args_info.twinAtoms_arg;
     Decahedron* marks = new Decahedron(columnAtoms, nShells, twinAtoms);
     Points = marks->getPoints();
-  }
-  else if (args_info.stone_given) {
+  } else if (args_info.stone_given) {
     int columnAtoms = args_info.columnAtoms_arg;    
     int twinAtoms = args_info.twinAtoms_arg;
     int truncatedPlanes = args_info.truncatedPlanes_arg;
-    CurlingStoneDecahedron* csd = new CurlingStoneDecahedron(columnAtoms, nShells, twinAtoms, truncatedPlanes);
+    CurlingStoneDecahedron* csd = new CurlingStoneDecahedron(columnAtoms,
+                                                             nShells,
+                                                             twinAtoms,
+                                                             truncatedPlanes);
     Points = csd->getPoints();
+  } else if (args_info.cuboctahedron_given || args_info.truncatedCube_given) {
+    std::string lattice;
+    int unitCells = 0;
+    if (args_info.lattice_given) {    
+      lattice = args_info.lattice_arg;
+    } else  {   
+      sprintf(painCave.errMsg, "icosahedralBuilder: No lattice type given.");
+      painCave.isFatal = 1;
+      cmdline_parser_print_help();
+      simError();
+    }
+    if (args_info.unitCells_given) {    
+      unitCells = args_info.unitCells_arg;
+    } else  {   
+      sprintf(painCave.errMsg, "icosahedralBuilder: Must specify unit cells.");
+      painCave.isFatal = 1;
+      cmdline_parser_print_help();
+      simError();
+    }
+    if (args_info.truncatedCube_given) {
+      int truncatedPlanes = args_info.truncatedPlanes_arg;
+      TruncatedCube* tc = new TruncatedCube(lattice, unitCells,
+                                            truncatedPlanes);
+      Points = tc->getPoints();
+    } else {
+      RegularCuboctahedron* rc = new RegularCuboctahedron(lattice, unitCells);
+      Points = rc->getPoints();
+    }
   }
-
+  
   outputFileName = args_info.output_arg;
    
   // create a new .omd file on fly which corrects the number of

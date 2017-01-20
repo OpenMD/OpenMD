@@ -58,7 +58,7 @@ namespace OpenMD {
 
     histogram_.resize(nBins_);
     avgGofr_.resize(nBins_);
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nZBins_);
       avgGofr_[i].resize(nZBins_);
     } 

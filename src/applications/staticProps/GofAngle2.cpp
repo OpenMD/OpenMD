@@ -70,7 +70,7 @@ namespace OpenMD {
 
     histogram_.resize(nBins_);
     avgGofr_.resize(nBins_);
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nBins_);
       avgGofr_[i].resize(nBins_);
     }   
@@ -90,7 +90,7 @@ namespace OpenMD {
     
     histogram_.resize(nBins_);
     avgGofr_.resize(nBins_);
-    for (int i = 0 ; i < nBins_; ++i) {
+    for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nBins_);
       avgGofr_[i].resize(nBins_);
     }    

@@ -82,7 +82,7 @@
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/SurfaceDiffusion.hpp"
-#include "applications/staticProps/GCN.hpp"
+#include "applications/staticProps/CoordinationNumber.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/PotDiff.hpp"
 #include "applications/staticProps/TetrahedralityHBMatrix.hpp"
@@ -453,14 +453,23 @@ int main(int argc, char* argv[]){
 		       args_info.nbins_y_arg, args_info.nbins_z_arg,
                        args_info.nbins_arg);
 #endif
-  }else if(args_info.gcn_given){
-    if (args_info.rcut_given) {      
-      analyser = new GCN(info, dumpFileName, sele1, sele2,
-                         args_info.rcut_arg, args_info.nbins_arg);
+  }else if(args_info.cn_given || args_info.scn_given || args_info.gcn_given){
+    if (args_info.rcut_given) {
+      if (args_info.cn_given) {
+        analyser = new CoordinationNumber(info, dumpFileName, sele1, sele2,
+                                          args_info.rcut_arg,
+                                          args_info.nbins_arg);
+      } else if (args_info.scn_given) {
+        analyser = new SCN(info, dumpFileName, sele1, sele2,
+                           args_info.rcut_arg, args_info.nbins_arg);
+      } else if (args_info.gcn_given) {
+        analyser = new GCN(info, dumpFileName, sele1, sele2,
+                           args_info.rcut_arg, args_info.nbins_arg);
+      }
     } else {
       sprintf( painCave.errMsg,
                "A cutoff radius (rcut) must be specified when calculating\n"
-               "\tGeneralized Coordinate Number");
+               "\t Coordination Numbers");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();

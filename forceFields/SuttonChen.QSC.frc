@@ -1,12 +1,12 @@
-// This is the forcefield file for the Sutton-Chen formulation of the Finnis-Sinclair metallic potential
-// Useing the quantum corrections due to Kimura, Qi, Cagin and Goddard. For example see
-// PHYSICAL REVIEW B 59 (5): 3468-3473 FEB 1 1999 
+// This is the force field file for the Sutton-Chen formulation of the Finnis-Sinclair metallic potential
+// Using the quantum corrections due to Kimura, Qi, Cagin and Goddard.
+// See: PHYSICAL REVIEW B 59 (5): 3468-3473 FEB 1 1999 
 
 begin Options
       Name                   SCQSC
       DistanceMixingRule     Arithmetic
       EnergyMixingRule       Geometric
-//  energy unit are eV. Convert to kcal/mol
+      // energy units below are in eV. Convert to kcal/mol in OpenMD
       MetallicEnergyUnitScaling      23.0605423
 end Options
 

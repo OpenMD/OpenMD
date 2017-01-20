@@ -60,7 +60,7 @@ namespace OpenMD {
     temperature->dataType = odtReal;
     temperature->dataHandling = odhAverage;
     temperature->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       temperature->accumulator.push_back( new Accumulator() );
     data_.push_back(temperature);
     
@@ -70,7 +70,7 @@ namespace OpenMD {
     velocity->dataType = odtVector3;
     velocity->dataHandling = odhAverage;
     velocity->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       velocity->accumulator.push_back( new VectorAccumulator() );
     data_.push_back(velocity);
     
@@ -80,7 +80,7 @@ namespace OpenMD {
     density->dataType = odtReal;
     density->dataHandling = odhAverage;
     density->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       density->accumulator.push_back( new Accumulator() );
     data_.push_back(density);
   }
@@ -89,7 +89,7 @@ namespace OpenMD {
     RealType z;
 
     hmat_ = currentSnapshot_->getHmat();
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(2,2);
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
@@ -159,7 +159,7 @@ namespace OpenMD {
       }
     }
     
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
 
       if (binDof[i] > 0) {
         RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
@@ -192,7 +192,7 @@ namespace OpenMD {
     temperature->dataType = odtReal;
     temperature->dataHandling = odhAverage;
     temperature->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       temperature->accumulator.push_back( new Accumulator() );
     data_.push_back(temperature);
     
@@ -202,7 +202,7 @@ namespace OpenMD {
     angularVelocity->dataType = odtVector3;
     angularVelocity->dataHandling = odhAverage;
     angularVelocity->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       angularVelocity->accumulator.push_back( new VectorAccumulator() );
     data_.push_back(angularVelocity);
     
@@ -212,7 +212,7 @@ namespace OpenMD {
     density->dataType = odtReal;
     density->dataHandling = odhAverage;
     density->accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       density->accumulator.push_back( new Accumulator() );
     data_.push_back(density);
   }
@@ -256,7 +256,7 @@ namespace OpenMD {
       // figure out where that object is:
       int bin = getBin( sd->getPos() );   
 
-      if (bin >= 0 && bin < nBins_)  {
+      if (bin >= 0 && bin < int(nBins_))  {
 
         Vector3d rPos = sd->getPos() - coordinateOrigin_;
         Vector3d vel = sd->getVel();      
@@ -295,7 +295,7 @@ namespace OpenMD {
       }
     }
     
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       RealType rinner = (RealType)i * binWidth_;
       RealType router = (RealType)(i+1) * binWidth_;
       if (binDof[i] > 0) {
@@ -361,7 +361,7 @@ namespace OpenMD {
     angularVelocity->dataType = odtArray2d;
     angularVelocity->dataHandling = odhAverage;
     angularVelocity->accumulatorArray2d.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       angularVelocity->accumulatorArray2d[i].reserve(nAngleBins_);
       for (int j = 0 ; j < nAngleBins_; j++) {       
         angularVelocity->accumulatorArray2d[i][j] = new Accumulator();
@@ -422,7 +422,7 @@ namespace OpenMD {
       // figure out where that object is:
       std::pair<int,int> bins = getBins( sd->getPos() );   
 
-      if (bins.first >= 0 && bins.first < nBins_)  {
+      if (bins.first >= 0 && bins.first < int(nBins_))  {
         if (bins.second >= 0 && bins.second < nAngleBins_) {
 
           Vector3d rPos = sd->getPos() - coordinateOrigin_;
@@ -444,7 +444,7 @@ namespace OpenMD {
     }
   
     
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       for (int j = 0; j < nAngleBins_; j++) {
 
         if (binCount[i][j] > 0) {
@@ -481,7 +481,7 @@ namespace OpenMD {
       
       outStream.precision(8);
       
-      for (int j = 0; j < nBins_; j++) {        
+      for (unsigned int j = 0; j < nBins_; j++) {        
         
         int counts = counts_->accumulator[j]->count();
 

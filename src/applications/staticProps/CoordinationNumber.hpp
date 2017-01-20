@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2017 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,8 +39,8 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_STATICPROPS_GCN_HPP
-#define APPLICATIONS_STATICPROPS_GCN_HPP
+#ifndef APPLICATIONS_STATICPROPS_COORDINATIONNUMBER_HPP
+#define APPLICATIONS_STATICPROPS_COORDINATIONNUMBER_HPP
 
 #include <string>
 #include <vector>
@@ -48,38 +48,35 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
+using namespace std;
 namespace OpenMD {
 
   /**
-   * @class GCN
-   * @brief Generalized Coordinate Number
+   * @class Coordination Number
+   * @brief Coordination Number
    *
-   * Computes a distribution of generalized coordinate numbers as
-   * described in:
+   * Computes a distribution of coordination numbers defined as the number of
+   * atoms in Selection 2 that are within rCut of the atom in Selection 1.
    *
-   *   "Finding optimal surface sites on heterogeneous catalysts by
-   *    counting nearest neighbors," by F. Calle-Vallejo et al.,
-   *    Science 350(6257) pp. 185-189 (2015).
-   *    http://dx.doi.org/10.1126/science.aab3501
-   *
-   * Note that extra parameters mussed be declared: 
+   * Note that extra parameters must be declared:
    *
    *   rCut = cutoff radius for finding lists of nearest neighbors
-   *   sele1 = selection of StuntDoubles used for the GCN distribution
+   *   sele1 = selection of StuntDoubles used for the distribution
    *   sele2 = selection of StuntDoubles used for nearest neighbor computation
    */
-  class GCN : public StaticAnalyser {
+  class CoordinationNumber : public StaticAnalyser {
     
   public:
-    GCN(SimInfo* info, const std::string& filename, const std::string& sele1,
-        const std::string& sele2, RealType rCut, int bins);
+    CoordinationNumber(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, const std::string& sele2,
+                       RealType rCut, int bins);
 
-    virtual ~GCN();
+    virtual ~CoordinationNumber();
     virtual void process();
-    
-  private:
-    void writeData();
+    virtual void writeData();
 
+  protected:
+    virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
     RealType rCut_;
     int bins_;
     
@@ -92,11 +89,51 @@ namespace OpenMD {
     SelectionEvaluator evaluator2_;
 
     int selectionCount1_;
-    int selectionCount2_;    
+    int selectionCount2_;
     int nnMax_;
     RealType delta_;
     int count_;
     std::vector<RealType>  histogram_;
+  };
+
+  /**
+   * @class SCN
+   * @brief Secondary Coordinate Number
+   *
+   * Computes a distribution of secondary coordination numbers where
+   * each atom is assigned the mean coordination number of the
+   * neighboring atoms.
+   */
+  class SCN : public CoordinationNumber {
+    
+  public:
+    SCN(SimInfo* info, const std::string& filename, const std::string& sele1,
+        const std::string& sele2, RealType rCut, int bins);
+
+    virtual ~SCN();
+    virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
+  };
+    
+  /**
+   * @class GCN
+   * @brief Generalized Coordinate Number
+   *
+   * Computes a distribution of generalized coordinate numbers as
+   * described in:
+   *
+   *   "Finding optimal surface sites on heterogeneous catalysts by
+   *    counting nearest neighbors," by F. Calle-Vallejo et al.,
+   *    Science 350(6257) pp. 185-189 (2015).
+   *    http://dx.doi.org/10.1126/science.aab3501
+   */
+  class GCN : public CoordinationNumber {
+    
+  public:
+    GCN(SimInfo* info, const std::string& filename, const std::string& sele1,
+        const std::string& sele2, RealType rCut, int bins);
+
+    virtual ~GCN();
+    virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
   };
 
 }

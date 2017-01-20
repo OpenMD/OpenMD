@@ -158,6 +158,7 @@ namespace OpenMD {
 
     if (!snap->hasKineticEnergy) {
       RealType ke = getTranslationalKinetic() + getRotationalKinetic();
+      
       snap->setKineticEnergy(ke);
     }
     return snap->getKineticEnergy();
@@ -207,10 +208,10 @@ namespace OpenMD {
     return snap->getTemperature();
   }
 
-  RealType Thermo::getElectronicTemperature() {
+  RealType Thermo::getElectronicKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    if (!snap->hasElectronicTemperature) {
+    
+    if (!snap->hasElectronicKineticEnergy) {
       
       SimInfo::MoleculeIterator miter;
       vector<Atom*>::iterator iiter;
@@ -219,7 +220,6 @@ namespace OpenMD {
       RealType cvel;
       RealType cmass;
       RealType kinetic(0.0);
-      RealType eTemp;
       
       for (mol = info_->beginMolecule(miter); mol != NULL; 
            mol = info_->nextMolecule(miter)) {
@@ -234,25 +234,38 @@ namespace OpenMD {
           
         }
       }
-    
+      
 #ifdef IS_MPI
       MPI_Allreduce(MPI_IN_PLACE, &kinetic, 1, MPI_REALTYPE, 
                     MPI_SUM, MPI_COMM_WORLD);
 #endif
-
+      
       kinetic *= 0.5;
-      eTemp =  (2.0 * kinetic) / 
-        (info_->getNFluctuatingCharges() * PhysicalConstants::kb );            
-     
+      
+      snap->setElectronicKineticEnergy(kinetic);
+    }
+    
+    return snap->getElectronicKineticEnergy();
+  }
+  
+  RealType Thermo::getElectronicTemperature() {
+    
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (!snap->hasElectronicTemperature) {
+      
+      RealType eTemp = ( 2.0 * this->getElectronicKinetic() ) 
+        / (info_->getNFluctuatingCharges()* PhysicalConstants::kb );
+      
       snap->setElectronicTemperature(eTemp);
     }
-
+    
     return snap->getElectronicTemperature();
   }
-
-    RealType Thermo::getNetCharge() {
+  
+  RealType Thermo::getNetCharge() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-
+    
     if (!snap->hasNetCharge) {
       
       SimInfo::MoleculeIterator miter;

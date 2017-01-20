@@ -80,10 +80,31 @@ namespace OpenMD {
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addType(AtomType* atomType);
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
+                                RealType dr, int nr,
+                                std::vector<RealType> phiAB);
+    
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
+                                std::string latticeType,
+                                RealType re, RealType alpha, RealType beta,
+                                RealType A, RealType B, RealType kappa,
+                                RealType lambda);
+
+    RealType fastPower(RealType x, int y);
+    RealType precomputePhi(RealType r, RealType re, RealType A, RealType B,
+                           RealType alpha, RealType beta, RealType kappa,
+                           RealType lambda);
+    RealType precomputeRho(RealType r, RealType re, RealType fe,
+                           RealType beta, RealType lambda);
+    RealType precomputeFunctional(RealType rho, RealType rhoe,
+                                  std::vector<RealType> Fn,
+                                  std::vector<RealType> F, RealType Fe,
+                                  RealType eta);
+
     void calcDensity(InteractionData &idat);
     void calcFunctional(SelfData &sdat);
     void calcForce(InteractionData &idat);
+    
     virtual string getName() { return name_; }
     virtual int getHash() { return EAM_INTERACTION; }
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*,AtomType*> atypes);
