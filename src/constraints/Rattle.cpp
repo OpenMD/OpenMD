@@ -278,7 +278,7 @@ namespace OpenMD {
       consElem2->setVel(velB);
       
       // report the constraint force back to the constraint pair:
-      consPair->setConstraintForce(gab);
+      consPair->setConstraintForce(2.0 * delta.length() / dt_);
       return consSuccess;
     }
     else
@@ -319,9 +319,10 @@ namespace OpenMD {
       
       velB -= rmb * delta;
       consElem2->setVel(velB);
-
+      
       // report the constraint force back to the constraint pair:
-      consPair->setConstraintForce(gab);
+      
+      consPair->setConstraintForce(2.0 * delta.length() / dt_);
       return consSuccess;
     }
     else

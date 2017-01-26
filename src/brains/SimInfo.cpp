@@ -294,7 +294,6 @@ namespace OpenMD {
     // nZconstraints_ is global, as are the 3 COM translations for the 
     // entire system:
     ndf_ = ndf_ - 3 - nZconstraint_;
-
   }
 
   int SimInfo::getFdf() {

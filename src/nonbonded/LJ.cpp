@@ -244,13 +244,14 @@ namespace OpenMD {
   }
  
   void LJ::calcForce(InteractionData &idat) {
+
     if (!initialized_) initialize();
     
     LJInteractionData &mixer = MixingMap[LJtids[idat.atid1]][LJtids[idat.atid2]];
 
     RealType sigmai = mixer.sigmai;
     RealType epsilon = mixer.epsilon;
-    
+
     RealType ros;
     RealType rcos;
     RealType myPot = 0.0;

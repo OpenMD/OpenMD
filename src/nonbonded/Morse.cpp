@@ -158,7 +158,6 @@ namespace OpenMD {
   void Morse::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
- 
    
     MorseInteractionData &mixer = MixingMap[Mtids[idat.atid1]][Mtids[idat.atid2]];
 
