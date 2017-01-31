@@ -75,6 +75,8 @@ namespace OpenMD {
     bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
     RealType getConsDistSquare() {return dist2;}
     void setConstraintForce(RealType frc) { force_ = frc; }
+    void addConstraintForce(RealType frc) { force_ += frc;}
+    void resetConstraintForce() {force_ = 0.0; }
     RealType getConstraintForce() { return force_; }
     bool getPrintForce() {return printForce_;}
 

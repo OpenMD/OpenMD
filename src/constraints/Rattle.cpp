@@ -133,7 +133,11 @@ namespace OpenMD {
       for (consElem = mol->beginConstraintElem(cei); consElem != NULL; 
            consElem = mol->nextConstraintElem(cei)) {
 	consElem->setMoved(true);
-	consElem->setMoving(false);
+	consElem->setMoving(false);       
+      }
+      for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; 
+           consPair = mol->nextConstraintPair(cpi)) {
+        consPair->resetConstraintForce();
       }
     }
     
@@ -221,7 +225,7 @@ namespace OpenMD {
     Vector3d posA = consElem1->getPos();
     Vector3d posB = consElem2->getPos();
 
-    Vector3d pab = posA -posB;   
+    Vector3d pab = posA - posB;   
 
     //periodic boundary condition
 
@@ -232,9 +236,8 @@ namespace OpenMD {
     RealType rabsq = consPair->getConsDistSquare();
     RealType diffsq = rabsq - pabsq;
 
-
     // the original rattle code from alan tidesley
-    if (fabs(diffsq) > (consTolerance_ * rabsq * 2)){
+    if (fabs(diffsq) > (consTolerance_ * rabsq * 2.0)){
     
       Vector3d oldPosA = consElem1->getPrevPos();
       Vector3d oldPosB = consElem2->getPrevPos();      
@@ -278,12 +281,11 @@ namespace OpenMD {
       consElem2->setVel(velB);
       
       // report the constraint force back to the constraint pair:
-      consPair->setConstraintForce(2.0 * delta.length() / dt_);
+      consPair->addConstraintForce(2.0 * delta.length() / dt_);
       return consSuccess;
-    }
-    else
+    } else {
       return consAlready;
-  
+    }  
   }
 
 
@@ -311,9 +313,8 @@ namespace OpenMD {
 
     RealType gab = -rvab / ((rma + rmb) * consPair->getConsDistSquare());
 
-    if (fabs(gab) > consTolerance_){
-      Vector3d delta = rab * gab;
-      
+    if (fabs(gab) > consTolerance_) {
+      Vector3d delta = rab * gab;      
       velA += rma * delta;
       consElem1->setVel(velA);
       
@@ -322,12 +323,11 @@ namespace OpenMD {
       
       // report the constraint force back to the constraint pair:
       
-      consPair->setConstraintForce(2.0 * delta.length() / dt_);
+      consPair->addConstraintForce(2.0 * delta.length() / dt_);
       return consSuccess;
-    }
-    else
+    } else {
       return consAlready;
-
+    }
   }
 
 }
