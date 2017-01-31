@@ -43,6 +43,7 @@
 #include "constraints/Rattle.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
+#include <cmath>
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
@@ -284,7 +285,7 @@ namespace OpenMD {
       
       // report the constraint force back to the constraint pair:
       Vector3d fcons = 2.0 * delta / dt_;
-      RealType proj = std::copysign(fcons.length(), dot(fcons, rab));
+      RealType proj = copysign(fcons.length(), dot(fcons, rab));
       
       consPair->addConstraintForce(proj);
       return consSuccess;
@@ -329,7 +330,7 @@ namespace OpenMD {
       // report the constraint force back to the constraint pair:
 
       Vector3d fcons = 2.0 * delta / dt_;
-      RealType proj = std::copysign(fcons.length(), dot(fcons, rab));
+      RealType proj = copysign(fcons.length(), dot(fcons, rab));
       
       consPair->addConstraintForce(proj);
       return consSuccess;
