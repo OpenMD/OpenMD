@@ -279,9 +279,14 @@ namespace OpenMD {
       Vector3d velB = consElem2->getVel();
       velB -= rmb * delta;
       consElem2->setVel(velB);
+
+      
       
       // report the constraint force back to the constraint pair:
-      consPair->addConstraintForce(2.0 * delta.length() / dt_);
+      Vector3d fcons = 2.0 * delta / dt_;
+      RealType proj = std::copysign(fcons.length(), dot(fcons, rab));
+      
+      consPair->addConstraintForce(proj);
       return consSuccess;
     } else {
       return consAlready;
@@ -322,8 +327,11 @@ namespace OpenMD {
       consElem2->setVel(velB);
       
       // report the constraint force back to the constraint pair:
+
+      Vector3d fcons = 2.0 * delta / dt_;
+      RealType proj = std::copysign(fcons.length(), dot(fcons, rab));
       
-      consPair->addConstraintForce(2.0 * delta.length() / dt_);
+      consPair->addConstraintForce(proj);
       return consSuccess;
     } else {
       return consAlready;
