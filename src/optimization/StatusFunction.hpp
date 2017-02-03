@@ -9,13 +9,16 @@ namespace OpenMD {
   class StatusFunction {
   public:
     virtual ~StatusFunction() {}
-    virtual void writeStatus(int functionCount, int gradientCount, const DynamicVector<RealType>& x, RealType f) { std::cerr << "doing status\n"; }    
+    virtual void writeStatus(int functionCount, int gradientCount,
+                             const DynamicVector<RealType>& x, RealType f) {
+    }
   };
-
+  
   //! No status
   class NoStatus : public StatusFunction {
   public:
-    virtual void writeStatus(int functionCount, int gradientCount, const DynamicVector<RealType>& x, RealType f) {};
+    virtual void writeStatus(int functionCount, int gradientCount,
+                             const DynamicVector<RealType>& x, RealType f) {};
   };
 
   class DumpStatusFunction : public StatusFunction {
@@ -30,10 +33,11 @@ namespace OpenMD {
       stats->setStatsMask(mask);
       statWriter = new StatWriter(info_->getStatFileName(), stats);
     }
-    virtual void writeStatus(int functionCount, int gradientCount, const DynamicVector<RealType>& x, RealType f) {
+    
+    virtual void writeStatus(int functionCount, int gradientCount,
+                             const DynamicVector<RealType>& x, RealType f) {
       Snapshot* curSnapshot =info_->getSnapshotManager()->getCurrentSnapshot();
-      curSnapshot->setTime(functionCount);         
-
+      curSnapshot->setTime(functionCount);
       stats->collectStats();
       statWriter->writeStat();
 
@@ -51,7 +55,5 @@ namespace OpenMD {
     DumpWriter* dumpWriter;
     StatWriter* statWriter;    
   };
-                             
-  
 }
 #endif

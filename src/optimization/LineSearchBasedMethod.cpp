@@ -76,6 +76,7 @@ namespace QuantLib {
                 // Updates
                 // New point
                 x_ = lineSearch_->lastX();
+                P.setCurrentValue(x_);
                 // New function value
                 fold = P.functionValue();
                 P.setFunctionValue(lineSearch_->lastFunctionValue());
@@ -99,11 +100,10 @@ namespace QuantLib {
                 if (fdiff < ftol ||
                     endCriteria.checkMaxIterations(iterationNumber_, ecType)) {
                     endCriteria.checkStationaryFunctionValue(0.0, 0.0,
-                        maxStationaryStateIterations_, ecType);
+                                                             maxStationaryStateIterations_, ecType);
                     endCriteria.checkMaxIterations(iterationNumber_, ecType);
                     return ecType;
                 }
-
                 P.setCurrentValue(x_);      // update problem current value
                 ++iterationNumber_;         // Increase iteration number
                 first_time = false;

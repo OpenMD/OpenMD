@@ -119,7 +119,13 @@ namespace QuantLib {
     // inline definitions
     inline RealType Problem::value(const DynamicVector<RealType>& x) {
         ++functionEvaluation_;
-        return objectiveFunction_.value(x);
+        functionValue_ = objectiveFunction_.value(x);
+        statusFunction_.writeStatus(functionEvaluation_, 
+                                    gradientEvaluation_, 
+                                    currentValue_,
+                                    functionValue_);        
+        
+        return functionValue_;
     }
     
     inline void Problem::gradient(DynamicVector<RealType>& grad_f,
@@ -132,7 +138,12 @@ namespace QuantLib {
                                               const DynamicVector<RealType>& x) {
         ++functionEvaluation_;
         ++gradientEvaluation_;
-        return objectiveFunction_.valueAndGradient(grad_f, x);
+        functionValue_ = objectiveFunction_.valueAndGradient(grad_f, x);
+        statusFunction_.writeStatus(functionEvaluation_, 
+                                    gradientEvaluation_, 
+                                    currentValue_,
+                                    functionValue_);        
+        return functionValue_;
     }
     
     inline void Problem::reset() {

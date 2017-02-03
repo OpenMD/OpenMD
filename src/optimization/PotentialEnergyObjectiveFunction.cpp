@@ -46,7 +46,7 @@ namespace OpenMD{
 
   PotentialEnergyObjectiveFunction::PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan)
     : info_(info), forceMan_(forceMan), thermo(info) {   
-    shake_ = new Shake(info_);    
+    shake_ = new Shake(info_);
   }
   
 

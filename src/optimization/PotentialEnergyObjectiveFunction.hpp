@@ -48,6 +48,7 @@
 #include "brains/Thermo.hpp"
 #include "constraints/Shake.hpp"
 
+
 using namespace QuantLib;
 namespace OpenMD {
   class PotentialEnergyObjectiveFunction : public ObjectiveFunction {
