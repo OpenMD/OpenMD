@@ -65,7 +65,7 @@ namespace OpenMD {
     BONDED_FAMILY = 5,         /**< directly bonded 1-2, 1-3, or 1-4 interactions */
     N_INTERACTION_FAMILIES = 6
   };
-
+    
   /**
    * Boolean flags for the iHash_ and sHash_ data structures. These
    * are used to greatly increase the speed of looking up the

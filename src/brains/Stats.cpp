@@ -42,6 +42,8 @@
   
 #include "brains/Stats.hpp"
 #include "brains/Thermo.hpp"
+#include <sstream>
+#include <iomanip>
 
 namespace OpenMD {
 
@@ -195,7 +197,7 @@ namespace OpenMD {
 
     StatsData hydrogenbonding_potential;
     hydrogenbonding_potential.units =  "kcal/mol";
-    hydrogenbonding_potential.title =  "Hydrogen Bonding Potential";    
+    hydrogenbonding_potential.title =  "Hydrogen Bonding Pot.";    
     hydrogenbonding_potential.dataType = "RealType";
     hydrogenbonding_potential.accumulator = new Accumulator();
     data_[HYDROGENBONDING_POTENTIAL] = hydrogenbonding_potential;
@@ -203,7 +205,7 @@ namespace OpenMD {
 
     StatsData reciprocal_potential;
     reciprocal_potential.units =  "kcal/mol";
-    reciprocal_potential.title =  "Reciprocal Space Potential";    
+    reciprocal_potential.title =  "Reciprocal Space Pot.";    
     reciprocal_potential.dataType = "RealType";
     reciprocal_potential.accumulator = new Accumulator();
     data_[RECIPROCAL_POTENTIAL] = reciprocal_potential;
@@ -274,15 +276,15 @@ namespace OpenMD {
     statsMap_["RESTRAINT_POTENTIAL"] =  RESTRAINT_POTENTIAL;
 
     StatsData pressure_tensor;
-    pressure_tensor.units =  "amu*fs^-2*Ang^-1";
-    pressure_tensor.title =  "Ptensor";
+    pressure_tensor.units =  "amu/fs^2/A";
+    pressure_tensor.title =  "Pressure Tensor";
     pressure_tensor.dataType = "Mat3x3d";
     pressure_tensor.accumulator = new MatrixAccumulator();
     data_[PRESSURE_TENSOR] = pressure_tensor;
     statsMap_["PRESSURE_TENSOR"] =  PRESSURE_TENSOR;
 
     StatsData system_dipole;
-    system_dipole.units =  "C*m";
+    system_dipole.units =  "C m";
     system_dipole.title =  "System Dipole";
     system_dipole.dataType = "Vector3d";
     system_dipole.accumulator = new VectorAccumulator();
@@ -290,7 +292,7 @@ namespace OpenMD {
     statsMap_["SYSTEM_DIPOLE"] =  SYSTEM_DIPOLE;
 
     StatsData system_quadrupole;
-    system_quadrupole.units =  "C*m*m";
+    system_quadrupole.units =  "C m^2";
     system_quadrupole.title =  "System Quadrupole";
     system_quadrupole.dataType = "Mat3x3d";
     system_quadrupole.accumulator = new MatrixAccumulator();
@@ -298,8 +300,8 @@ namespace OpenMD {
     statsMap_["SYSTEM_QUADRUPOLE"] =  SYSTEM_QUADRUPOLE;
 
     StatsData tagged_pair_distance;
-    tagged_pair_distance.units =  "Ang";
-    tagged_pair_distance.title =  "Tagged_Pair_Distance";
+    tagged_pair_distance.units =  "A";
+    tagged_pair_distance.title =  "Tagged Pair Distance";
     tagged_pair_distance.dataType = "RealType";
     tagged_pair_distance.accumulator = new Accumulator();
     data_[TAGGED_PAIR_DISTANCE] = tagged_pair_distance;
@@ -314,7 +316,7 @@ namespace OpenMD {
     statsMap_["SHADOWH"] =  SHADOWH;
 
     StatsData helfandmoment;
-    helfandmoment.units =  "Ang*kcal/mol";
+    helfandmoment.units =  "A*kcal/mol";
     helfandmoment.title =  "Thermal Helfand Moment";
     helfandmoment.dataType = "Vector3d";
     helfandmoment.accumulator = new VectorAccumulator();
@@ -347,7 +349,7 @@ namespace OpenMD {
 
     StatsData comVel;
     comVel.units =  "A/fs";
-    comVel.title =  "Center of Mass Velocity";
+    comVel.title =  "COM Velocity";
     comVel.dataType = "Vector3d";
     comVel.accumulator = new VectorAccumulator();
     data_[COM_VELOCITY] = comVel;
@@ -656,7 +658,69 @@ namespace OpenMD {
     dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getLastValue(value);
     return value;
   }
- 
+
+  int Stats::getIntAverage(int index) { 
+    assert(index >=0 && index < ENDINDEX);
+    RealType value;
+    dynamic_cast<Accumulator *>(data_[index].accumulator)->getAverage(value);
+    return (int) value;
+  }
+  RealType Stats::getRealAverage(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    RealType value(0.0);
+    dynamic_cast<Accumulator *>(data_[index].accumulator)->getAverage(value);
+    return value;
+  }
+  Vector3d Stats::getVectorAverage(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    Vector3d value;
+    dynamic_cast<VectorAccumulator*>(data_[index].accumulator)->getAverage(value);
+    return value;
+  }
+  potVec Stats::getPotVecAverage(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    potVec value;
+    dynamic_cast<PotVecAccumulator*>(data_[index].accumulator)->getAverage(value);
+    return value;
+  }
+  Mat3x3d Stats::getMatrixAverage(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    Mat3x3d value;
+    dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getAverage(value);
+    return value;
+  }
+  
+  int Stats::getIntError(int index) { 
+    assert(index >=0 && index < ENDINDEX);
+    RealType value;
+    dynamic_cast<Accumulator *>(data_[index].accumulator)->get95percentConfidenceInterval(value);
+    return (int) value;
+  }
+  RealType Stats::getRealError(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    RealType value(0.0);
+    dynamic_cast<Accumulator *>(data_[index].accumulator)->get95percentConfidenceInterval(value);
+    return value;
+  }
+  Vector3d Stats::getVectorError(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    Vector3d value;
+    dynamic_cast<VectorAccumulator*>(data_[index].accumulator)->get95percentConfidenceInterval(value);
+    return value;
+  }
+  potVec Stats::getPotVecError(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    potVec value;
+    dynamic_cast<PotVecAccumulator*>(data_[index].accumulator)->get95percentConfidenceInterval(value);
+    return value;
+  }
+  Mat3x3d Stats::getMatrixError(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    Mat3x3d value;
+    dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->get95percentConfidenceInterval(value);
+    return value;
+  }
+
   Stats::StatsBitSet Stats::getStatsMask() {
     return statsMask_;
   }
@@ -665,6 +729,127 @@ namespace OpenMD {
   }
   void Stats::setStatsMask(Stats::StatsBitSet mask) {
     statsMask_ = mask;
+  }
+
+  std::string Stats::getStatsReport() {
+    std::stringstream report;
+
+    int nSamp = dynamic_cast<Accumulator *>(data_[TIME].accumulator)->count();
+
+    report <<
+      "################################################################################\n" <<
+      "# Status Report:                                                               #\n";
+    report << "# " << setw(22) << "Total Time:" << setw(12) << getRealData(TIME);
+    report << " " << setw(17) << left << getUnits(TIME) << "                         #\n";
+    report << "# " << right << setw(22) << "Number of Samples:" << setw(12) << nSamp;
+    report << "                                           #\n";
+
+    for (unsigned int i = 0; i < statsMask_.size(); ++i) {
+      if (statsMask_[i] && i != TIME) {
+
+        if (getDataType(i) == "RealType") {
+          report << "# " << right << setw(21) << getTitle(i) << ":";
+          report << right << setw(12) << getRealAverage(i);
+          report << " \u00B1 " << left << setw(12) << getRealError(i);
+          report << " " << left << setw(17) << getUnits(i) << "          #" << std::endl;
+
+        }
+        else if (getDataType(i) == "Vector3d") {
+          Vector3d s = getVectorAverage(i);
+          Vector3d e = getVectorError(i);
+
+          report << "#                       ";
+          report << "\u23A1" << right << setw(12) << s(0) << "\u23A4   ";
+          report << "\u23A1" << right <<  setw(12) << e(0) << "\u23A4                        #" << std::endl;
+
+          report << "# " << right << setw(21) << getTitle(i) << ":";
+
+          report << "\u23A2" << right << setw(12) << s(1) << "\u23A5 \u00B1 ";
+          report << "\u23A2" << right << setw(12) << e(1) << "\u23A5 ";
+          report << left << setw(17) << getUnits(i) << "      #" << std::endl;
+          
+          report << "#                       ";
+          report << "\u23A3" << right << setw(12) << s(2) << "\u23A6   ";
+          report << "\u23A3" << right <<  setw(12) << e(2) << "\u23A6                        #" << std::endl;
+
+        }
+        else if (getDataType(i) == "potVec") {
+          potVec s = getPotVecAverage(i);
+          potVec e = getPotVecError(i);
+
+          report << "# " << right << setw(21) << getTitle(i);
+          report <<":                                                       #" << std::endl;
+
+          for (unsigned int j = 1; j < N_INTERACTION_FAMILIES; j++) {
+            switch (j) {
+            case VANDERWAALS_FAMILY:
+              report << "# " << right << setw(22) << "van der Waals:";
+              break;
+            case ELECTROSTATIC_FAMILY:
+              report << "# " << right << setw(22) << "Electrostatic:";
+              break;
+            case METALLIC_FAMILY:
+              report << "# " << right << setw(22) << "Metallic:";
+              break;
+            case HYDROGENBONDING_FAMILY:
+              report << "# " << right << setw(22) << "Hydrogen Bonding:";
+              break;
+            case BONDED_FAMILY:
+              report << "# " << right << setw(22) << "Bonded (1-2,1-3,1-4):";
+              break;
+            default:
+              report << "# " << right << setw(22) << "Unknown:";
+              break;
+            }
+            report << right << setw(12) << s[j];
+            report << " \u00B1 " << left << setw(12) << e[j];
+            report << " " << left << setw(17) << getUnits(i) << "          #" << std::endl;
+          }
+          
+        }
+        else if (getDataType(i) == "Mat3x3d") {
+          Mat3x3d s = getMatrixAverage(i);
+          Mat3x3d e = getMatrixError(i);
+
+          report << "#                       ";
+          report << "\u23A1" << right << setw(12) << s(0,0) << " ";
+          report << right << setw(12) << s(0,1) << " ";
+          report << right << setw(12) << s(0,2) << "\u23A4               #" << std::endl;
+
+          report << "# " << right << setw(21) << getTitle(i) << ":";
+
+          report << "\u23A2" << right << setw(12) << s(1,0) << " ";
+          report << right << setw(12) << s(1,1) << " ";
+          report << right << setw(12) << s(1,2) << "\u23A5 ";
+          report << left <<  setw(14) << getUnits(i) << "#" << std::endl;
+          
+          report << "#                       ";
+          report << "\u23A3" << right << setw(12) << s(2,0) << " ";
+          report << right << setw(12) << s(2,1) << " ";
+          report << right << setw(12) << s(2,2) << "\u23A6               #" << std::endl;
+
+          report << "#                                 ";
+          report << "\u23A1" << right << setw(12) << e(0,0) << " ";
+          report << right << setw(12) << e(0,1) << " ";
+          report << right << setw(12) << e(0,2) << "\u23A4     #" << std::endl;
+
+          report << "#                                \u00B1";
+
+          report << "\u23A2" << right << setw(12) << e(1,0) << " ";
+          report << right << setw(12) << e(1,1) << " ";
+          report << right << setw(12) << e(1,2) << "\u23A5     #" << std::endl;
+
+          report << "#                                 ";
+          report << "\u23A3" << right << setw(12) << e(2,0) << " ";
+          report << right << setw(12) << e(2,1) << " ";
+          report << right << setw(12) << e(2,2) << "\u23A6     #" << std::endl;
+
+        }
+      }
+    }
+    report << "################################################################################\n";
+
+    return report.str();
   }
 
 }
