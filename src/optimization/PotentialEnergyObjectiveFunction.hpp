@@ -47,6 +47,7 @@
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "constraints/Shake.hpp"
+#include "flucq/FluctuatingChargeConstraints.hpp"
 
 
 using namespace QuantLib;
@@ -57,8 +58,10 @@ namespace OpenMD {
     PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan);
 
     RealType value(const DynamicVector<RealType>& x);
-    void gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
-    RealType valueAndGradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
+    void gradient(DynamicVector<RealType>& grad,
+                  const DynamicVector<RealType>& x);
+    RealType valueAndGradient(DynamicVector<RealType>& grad,
+                              const DynamicVector<RealType>& x);
 
     DynamicVector<RealType> setInitialCoords();
 
@@ -73,8 +76,10 @@ namespace OpenMD {
     SimInfo* info_;
     ForceManager* forceMan_;
     Shake* shake_;
+    FluctuatingChargeConstraints* fqConstraints_;
     Thermo thermo;
     bool usingRattle_;
+    bool hasFlucQ_;
   };
 }
 #endif

@@ -143,6 +143,7 @@ namespace OpenMD {
   }
   
   std::vector<RealType> DirectionalAtom::getGrad() {
+
     std::vector<RealType> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
@@ -194,7 +195,7 @@ namespace OpenMD {
       grad[4] -= torque[j]*etheta[j];
       grad[5] -= torque[j]*epsi[j];      
     }
-    
+
     return grad;
   }    
   

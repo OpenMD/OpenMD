@@ -47,14 +47,22 @@ namespace OpenMD{
   PotentialEnergyObjectiveFunction::PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan)
     : info_(info), forceMan_(forceMan), thermo(info) {   
     shake_ = new Shake(info_);
+    
+    if (info_->usesFluctuatingCharges()) {
+      if (info_->getNFluctuatingCharges() > 0) {
+        hasFlucQ_ = true;
+        fqConstraints_ = new FluctuatingChargeConstraints(info_);
+        bool cr = info_->getSimParams()->getFluctuatingChargeParameters()->getConstrainRegions();    
+        fqConstraints_->setConstrainRegions(cr);
+      }
+    }    
   }
-  
-
   
   RealType PotentialEnergyObjectiveFunction::value(const DynamicVector<RealType>& x) {
     setCoor(x);
     shake_->constraintR();
     forceMan_->calcForces();
+    if (hasFlucQ_) fqConstraints_->applyConstraints();
     shake_->constraintF();
     return thermo.getPotential();
   }
@@ -64,6 +72,7 @@ namespace OpenMD{
     setCoor(x);       
     shake_->constraintR();
     forceMan_->calcForces();
+    if (hasFlucQ_) fqConstraints_->applyConstraints();
     shake_->constraintF();
     getGrad(grad);
   }
@@ -73,6 +82,7 @@ namespace OpenMD{
     setCoor(x);
     shake_->constraintR();
     forceMan_->calcForces();
+    if (hasFlucQ_) fqConstraints_->applyConstraints();
     shake_->constraintF();
     getGrad(grad); 
     return thermo.getPotential();
@@ -82,9 +92,11 @@ namespace OpenMD{
     Vector3d position;
     Vector3d eulerAngle;
     SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
+    Molecule::IntegrableObjectIterator j;
+    Molecule::AtomIterator ai;
     Molecule* mol;
-    StuntDouble* sd;    
+    StuntDouble* sd;
+    Atom* atom;
     int index = 0;
 
     info_->getSnapshotManager()->advance();
@@ -111,18 +123,31 @@ namespace OpenMD{
           if (sd->isRigidBody()) {
             RigidBody* rb = static_cast<RigidBody*>(sd);
             rb->updateAtoms();
-          }        
-
+          }
         }
       }
-    }    
+    }
+
+    if (hasFlucQ_) {
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+             atom = mol->nextFluctuatingCharge(ai)) {
+          
+          atom->setFlucQPos(x[index++]);
+        }
+      }
+    }
   }
   
   void PotentialEnergyObjectiveFunction::getGrad(DynamicVector<RealType> &grad) {
     SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
+    Molecule::IntegrableObjectIterator j;
+    Molecule::AtomIterator ai;
     Molecule* mol;
-    StuntDouble* sd;    
+    StuntDouble* sd;
+    Atom* atom;
     std::vector<RealType> myGrad;
     
     int index = 0;
@@ -138,16 +163,29 @@ namespace OpenMD{
         for (size_t k = 0; k < myGrad.size(); ++k) {   
           grad[index++] = myGrad[k];
         }
+      }
+    }
 
-      }            
-    }         
+    if (hasFlucQ_) {
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+             atom = mol->nextFluctuatingCharge(ai)) {
+          
+          grad[index++] = -atom->getFlucQFrc();
+        }
+      }
+    }        
   }
 
   DynamicVector<RealType> PotentialEnergyObjectiveFunction::setInitialCoords() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
+    Molecule::AtomIterator ai;
     Molecule* mol;
-    StuntDouble* sd;    
+    StuntDouble* sd;
+    Atom* atom;
 
     Vector3d pos;
     Vector3d eulerAngle;
@@ -161,9 +199,21 @@ namespace OpenMD{
            sd = mol->nextIntegrableObject(j)) {
         
         ndf += 3;
-
+        
         if (sd->isDirectional())  {
           ndf += 3;
+        }
+      }
+    }
+
+    if (hasFlucQ_) {      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+             atom = mol->nextFluctuatingCharge(ai)) {
+          
+          ndf++;
         }
       }
     }
@@ -183,7 +233,7 @@ namespace OpenMD{
         xinit[index++] = pos[0];
         xinit[index++] = pos[1];
         xinit[index++] = pos[2];
-                
+        
         if (sd->isDirectional()) {
           eulerAngle = sd->getEuler();
           xinit[index++] = eulerAngle[0];
@@ -193,6 +243,20 @@ namespace OpenMD{
 
       }
     }
+
+    if (hasFlucQ_) {      
+      
+      for (mol = info_->beginMolecule(i); mol != NULL; 
+           mol = info_->nextMolecule(i)) {
+        
+        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+             atom = mol->nextFluctuatingCharge(ai)) {
+          
+          xinit[index++] = atom->getFlucQPos();
+        }
+      }
+    }
+      
     return xinit;
   }
 }

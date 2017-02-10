@@ -61,14 +61,16 @@ namespace OpenMD {
   }    
   
   std::vector<RealType> Atom::getGrad() {
-    std::vector<RealType> grad(3);
+
+    std::vector<RealType> grad(3, 0.0);
+
     Vector3d force= getFrc();
     
     grad[0] = -force[0];
     grad[1] = -force[1];
     grad[2] = -force[2];
-    
-    return grad;
+
+    return grad;         
   }    
   
   void Atom::accept(BaseVisitor* v) {
