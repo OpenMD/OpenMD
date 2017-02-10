@@ -610,6 +610,7 @@ src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
 src/applications/staticProps/Kirkwood.cpp
+src/applications/staticProps/VectorField.cpp
 src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp
