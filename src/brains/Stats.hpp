@@ -117,6 +117,7 @@ namespace OpenMD {
     void parseStatFileFormat(const std::string& format);
     int getPrecision();
     void collectStats();
+    std::string getStatsReport();
 
     StatsBitSet  getStatsMask();
     StatsMapType getStatsMap();
@@ -131,7 +132,19 @@ namespace OpenMD {
     Vector3d  getVectorData(int index);
     potVec    getPotVecData(int index);
     Mat3x3d   getMatrixData(int index);
-    
+
+    int       getIntAverage(int index);
+    RealType  getRealAverage(int index);
+    Vector3d  getVectorAverage(int index);
+    potVec    getPotVecAverage(int index);
+    Mat3x3d   getMatrixAverage(int index);
+
+    int       getIntError(int index);
+    RealType  getRealError(int index);
+    Vector3d  getVectorError(int index);
+    potVec    getPotVecError(int index);
+    Mat3x3d   getMatrixError(int index);
+
   private:
     SimInfo* info_;
     void init();

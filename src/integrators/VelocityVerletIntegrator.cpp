@@ -201,6 +201,8 @@ namespace OpenMD {
     }
     progressBar->setStatus(runTime, runTime);
     progressBar->update();
+
+    std::cout << stats->getStatsReport();
  
     delete dumpWriter;
     delete statWriter;

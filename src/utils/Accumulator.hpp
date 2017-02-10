@@ -135,6 +135,7 @@ namespace OpenMD {
     void getVariance(ResultType &ret)  {
       assert(Count_ != 0);
       ret = (Avg2_ - Avg_  * Avg_);
+      if (ret < 0.0) ret = 0.0;
       return;
     }
     
@@ -263,6 +264,7 @@ namespace OpenMD {
       assert(Count_ != 0);
       for (unsigned int i =0; i < 3; i++) {
         ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
+        if (ret[i] < 0.0) ret[i] = 0.0;
       }
       return;
     }
@@ -332,6 +334,7 @@ namespace OpenMD {
     void getLengthVariance(RealType &ret) {
       assert(Count_ != 0);      
       ret= (AvgLen2_ - AvgLen_ * AvgLen_);
+      if (ret < 0.0) ret = 0.0;
       return;
     }
     
@@ -447,6 +450,7 @@ namespace OpenMD {
       assert(Count_ != 0);
       for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
         ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
+        if (ret[i] < 0.0) ret[i] = 0.0;
       }
       return;
     }
@@ -516,6 +520,7 @@ namespace OpenMD {
     void getLengthVariance(RealType &ret) {
       assert(Count_ != 0);      
       ret= (AvgLen2_ - AvgLen_ * AvgLen_);
+      if (ret < 0.0) ret = 0.0;
       return;
     }
     
@@ -619,6 +624,7 @@ namespace OpenMD {
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {          
           ret(i,j) = (Avg2_(i,j) - Avg_(i,j)  * Avg_(i,j));
+          if ( ret(i,j) < 0.0 ) ret(i,j) = 0.0;
         }
       }
       return;
