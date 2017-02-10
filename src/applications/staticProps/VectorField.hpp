@@ -71,7 +71,11 @@ namespace OpenMD {
 
     Vector3i nBins_;
     std::vector<std::vector<std::vector<RealType> > > count_;
-    std::vector<std::vector<std::vector<RealType> > > hist_;
+    std::vector<std::vector<std::vector<Vector3d > > > hist_;
+    //std::vector<std::vector<std::vector<RealType> > > count_;
+    //std::vector<std::vector<std::vector<RealType> > > hist_;
+
+
   };
 }
 #endif

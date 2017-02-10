@@ -71,6 +71,11 @@ namespace OpenMD {
     nBins_(1) = int(hmat(1,1) / voxelSize);
     nBins_(2) = int(hmat(2,2) / voxelSize);
 
+
+    Vector3d V3Zero(0.0 , 0.0, 0.0);
+    //Build the vector field histogram and count histogram, 
+    // fill the vector field with the zero vector and
+    // fill the count histogram with int(0).
     hist_.resize(nBins_(0));
     count_.resize(nBins_(0));
     for (int i = 0 ; i < nBins_(0); ++i) {
@@ -79,11 +84,13 @@ namespace OpenMD {
       for(int j = 0; j < nBins_(1); ++j) {
         hist_[i][j].resize(nBins_(2));
         count_[i][j].resize(nBins_(2));
-        std::fill(hist_[i][j].begin(), hist_[i][j].end(), 0.0);
-        std::fill(count_[i][j].begin(), count_[i][j].end(), 0.0);
+	for(int k = 0; k < nBins_(2); k++){
+	  hist_[i][j][k] = V3Zero;
+	  count_[i][j][k] = 0.0;
+	}
       }
     }
-    
+
     setOutputName(getPrefix(filename) + ".vectorField");
   }
   
@@ -102,15 +109,15 @@ namespace OpenMD {
     RealType r;
     int isd1;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
+    
     int kMax = int(5.0 * gaussWidth_ / voxelSize_);
     int kSqLim = kMax*kMax;
     cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = "
          << kMax << " kSqLim = " << kSqLim << "\n";
-
+    
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
-
+    
     // loop over frames of the .dump file
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -118,7 +125,9 @@ namespace OpenMD {
       
       Mat3x3d hmat = currentSnapshot_->getHmat();
       Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
-
+      Mat3x3d invBox = currentSnapshot_->getInvHmat();
+     
+      
       if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }
@@ -137,58 +146,56 @@ namespace OpenMD {
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
 
-	//Get the position of the sd, wrap back to the box
-	Vector3d pos = sd->getPos();
-	
-	if (usePeriodicBoundaryConditions_) 
-	  currentSnapshot_->wrapVector(pos); 
-	sd->setPos(pos);
-
 	//Get the velocity of the sd
-        Vector3d vel = sd->getVel();
-   
-	cout << "sd positions = " << pos << " sd velocities = " << vel << "\n";
-
-
-	//Now add the velocity vector to the appropriate voxel
-	Vector3d newPos = pos + halfBox; // <- not sure about this line, in the Tet.Param.XYZ file but I don't understand it yet.
+	Vector3d vel = sd->getVel();
 	
-	Vector3i whichVoxel(int(newPos[0] / voxelSize_),
-			    int(newPos[1] / voxelSize_),
-			    int(newPos[2] / voxelSize_));
+	
+	//Get the position of the sd
+	Vector3d pos = sd->getPos();
+       
+	
+	//Wrap the sd back into the box, positions now range from (-boxl/2, boxl/2)
+	if (usePeriodicBoundaryConditions_){ 
+	  currentSnapshot_->wrapVector(pos); 
+	  sd->setPos(pos);
+	}
 
-	for (int l = -kMax; l <= kMax; l++) {
-	  for (int m = -kMax; m <= kMax; m++) {
-	    for (int n = -kMax; n <= kMax; n++) {
-	      int kk = l*l + m*m + n*n;
-	      if(kk <= kSqLim) {
+	//Convert to a scaled position vector, range (-1/2, 1/2)
+	// want range to be (0,1), so add 1/2
+	Vector3d sPos = invBox * pos;
+	for (int i = 0; i < 3; i++) {
+	  sPos(i) = sPos(i) + 0.5;
+	  //Treat the case where the sd is found on the edge of the box 
+	  if (sPos(i) >= 1.0) sPos(i) = sPos(i) - 1.0;
+	}
+	
+	
+	//To determine which bins the sd belongs to,  
+	// multiply scaled position by nBins
+	int xbin = int( sPos.x() * nBins_(0) );
+	int ybin = int( sPos.y() * nBins_(1) ); 
+	int zbin = int( sPos.z() * nBins_(2) );
+	
 
-		int ll = (whichVoxel[0] + l) % nBins_(0); //x-dim (voxel# + gaussian width to voxel size ratio thing) % nBins
-		ll = ll < 0 ? nBins_(0) + ll : ll; //wrapping ll to be positive
-		int mm = (whichVoxel[1] + m) % nBins_(1);
-		mm = mm < 0 ? nBins_(1) + mm : mm;
-		int nn = (whichVoxel[2] + n) % nBins_(2);
-		nn = nn < 0 ? nBins_(2) + nn : nn;
+	//Test to see if I get back pos from bin#s
+	//cout << "pos = " << pos << "\n";
+	//cout << "xbin/nBins = " << float(xbin) / float(nBins_(0)) << "\n";
 
-		Vector3d bPos = Vector3d(ll,mm,nn) * voxelSize_ - halfBox;
-		Vector3d d = bPos - pos;
-		currentSnapshot_->wrapVector(d);
-		//RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
-		//RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
-		//RealType weight = exp(exponent) / denom;
-		//count_[ll][mm][nn] += weight;
-		//hist_[ll][mm][nn] += weight * Qk;
-	      }
+	
+	//add the velocity of the sd to the current total
+	if ( (xbin < int(nBins_(0))) && (xbin >= 0) ){ 
+	  if ( (ybin < int(nBins_(1))) && (ybin >= 0) ){
+	    if ( (zbin < int(nBins_(2))) && (zbin >= 0) ){
+	      hist_[xbin][ybin][zbin] = hist_[xbin][ybin][zbin] + vel;
+	      ++count_[xbin][ybin][zbin]; 
 	    }
 	  }
 	}
-
-
-        
+	    
+      }// seleMan_1        	    
+    }// dumpFile frames
     writeVectorField();
-      }
-    }
-  }
+  }//Process 
   
 
   void VectorField::writeVectorField() {
@@ -197,7 +204,7 @@ namespace OpenMD {
     
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
 
-    // normalize by total weight in voxel:                                                                    
+    // normalize by total number of elements in each voxel:                                                                    
     for (unsigned int i = 0; i < hist_.size(); ++i) {
       for(unsigned int j = 0; j < hist_[i].size(); ++j) {
         for(unsigned int k = 0;k < hist_[i][j].size(); ++k) {
@@ -210,7 +217,7 @@ namespace OpenMD {
     if (VectorFieldstream.is_open()) {
       VectorFieldstream <<  "# Vector Field output file format (x,y,z) (Vx,Vy,Vz)\n";
       VectorFieldstream <<  "# where (x,y,z) is the location of the center of the voxel and (Vx,Vy,Vz) is the \n";
-      VectorFieldstream <<  "  average velocity vector for that voxel. \n";
+      VectorFieldstream <<  "# average velocity vector for that voxel. \n";
       
       // for (std::size_t k = 0; k < hist_[0][0].size(); ++k) {
       //   for(std::size_t j = 0; j < hist_[0].size(); ++j) {
@@ -223,7 +230,8 @@ namespace OpenMD {
       //   }
       // }
       
-    }    
-  }
-  
+    } //if:VectorFieldstream    
+
+  }//writeVectorField() 
+
 } //openmd
