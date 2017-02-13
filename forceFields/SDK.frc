@@ -35,7 +35,6 @@
 //   ionic liquids: a coarse grained molecular dynamics simulation study,"
 //   Soft Matter, 2007,3, 1395-1400, DOI: 10.1039/B710801J
 
-
 begin Options
       Name    SDK
       BondForceConstantScaling 2.0
@@ -66,9 +65,9 @@ NC4	73.14	// (CH3)3N+-CH2−
 OA	31.03	// HOCH2-
 EO	44.05	// -CH2OCH2-
 EOT	45.06	// CH3-O-CH2-
-BER	18.0165	// one quarter of a benzene
-PHR     // for phenol and p-cresol
-XYR     // for phenol
+BER	19.5284	// one quarter of a benzene
+PHR     35.5278 // for phenol and p-cresol
+XYR     33.5552	// for p-xylene and p-cresol
 SO3	80.06	// SO3-
 CAM	38.05	// -C(CH)2 (half a substituted aromatic ring)
 CMT	41.07	// -CH2CHCH2- (branched at CH)
@@ -80,8 +79,8 @@ CT3	42.08	// CH3CHCH2-
 CT4	57.11	// CH3CH2CH2CH2-
 CAX     53.08   // half a para-xylene CH3C-(CH)2
 CAT     39.06   // half a benzene (CH)3
-I1	35.5513	// contains 2.5 C atoms and 2.5 H atoms
-I2	34.5433	// contains 2.5 C atoms and 3.5 H atoms
+I1	35.5513	// contains 1.5 C atoms and 3.5 H atoms and 1 N atom
+I2	34.5433	// contains 1.5 C atoms and 2.5 H atoms and 1 N atom
 I3	26.0378	// contains 2 C atoms and 2 H atoms
 PF	144.96	// PF6- (for IL simulations)
 end BaseAtomTypes
@@ -191,12 +190,8 @@ end BondTypes
 
 begin BendTypes
 BER	BER	BER	Harmonic	90.0    30.0
-BER	XYR	BER	Harmonic	58.0    30.0
 BER	PHR	BER	Harmonic	58.0    30.0
-XYR	BER	BER	Harmonic	106.0   30.0
-PHR	BER	BER	Harmonic	106.0   30.0
-XYR	BER	XYR	Harmonic	122.0   30.0
-XYR	BER	PHR	Harmonic	122.0   30.0
+BER	XYR	BER	Harmonic	58.0    30.0
 CAM	CAM	CM4	Harmonic	169.9	90
 CAM	CAM	CMT	Harmonic	169.9	99.5
 CAM	CAM	CMY	Harmonic	169.9	99.5
@@ -226,99 +221,101 @@ CM	CM	CM	Harmonic	173.0	1.190
 CM	CM	CT	Harmonic	175.0	1.190 
 CM	CM	EO	Harmonic	172.0	1.500 
 CM	CMD2	CM	SDK	        110.0000 6.0000	4.5060	0.4200	9	6
-CM	EO	CM	Harmonic	171.0	1.800                       
-CM	EO	EO	Harmonic	146.0	3.200                       
-CM3	CM3	CM3	Harmonic	180	1.22                        
+CM	EO	CM	Harmonic	171.0	1.800
+CM	EO	EO	Harmonic	146.0	3.200
+CM3	CM3	CM3	Harmonic	180	1.22
 CM4	CM3	CM3	Harmonic	183	1.1      
 CMD2	CM	CM	SDK	        161.0000 1.9000	4.2555	0.3120	9	6
-CMT	CM3	CT2	Harmonic	180	1.1                         
-CMT	CM3	CT3	Harmonic	180	1.13                        
-CMT	CM3	CT4	Harmonic	180	1                           
-CMY	CM3	CM3	Harmonic	182	1.1                         
-CT	CM	CT	Harmonic	175.5	1.093                       
-CT	CMD2	CT	Harmonic	116.0	7.700                        
-CT	EO	EO	Harmonic	145.0	2.200                       
+CMT	CM3	CT2	Harmonic	180	1.1
+CMT	CM3	CT3	Harmonic	180	1.13
+CMT	CM3	CT4	Harmonic	180	1  
+CMY	CM3	CM3	Harmonic	182	1.1
+CT	CM	CT	Harmonic	175.5	1.093
+CT	CMD2	CT	Harmonic	116.0	7.700
+CT	EO	EO	Harmonic	145.0	2.200
 CT2	CM	CM	SDK	        172.0000 1.6000	4.3635	0.3620	9	6
-CT2	CM	CT	Harmonic	172.0	1.600                        
-CT2	CM	CT2	Harmonic	173.0	1.700                       
-CT2	CM	EO	Harmonic	178.0	1.300                       
-CT2	CM	OA	Harmonic	166.0	1.800                       
-CT2	CM3	CM3	Harmonic	179	1.44                        
-CT2	CM3	CT2	Harmonic	180	1.5                         
-CT2	CM4	CTB	Harmonic	93.6	5.5                         
-CT2	CM4	CTC	Harmonic	96	5.45                        
-CT2	CMD2	CT2	Harmonic	110.0	12.000                       
-CT2	CMT	CM3	Harmonic	185	2                           
-CT2	CMT	CT2	Harmonic	155	2.19                        
-CT2	CMT	CT3	Harmonic	158.5	1.95                        
-CT2	CMT	CT4	Harmonic	157.9	1.93                        
-CT2	CMT	CTB	Harmonic	129.6	2.95                        
-CT2	CMT	CTC	Harmonic	128	3.15                        
-CT2	CMT	CTY	Harmonic	136	4.3                         
-CT2	CMY	CMY	Harmonic	127.1	4                           
-CT2	CMY	CTB	Harmonic	120	3.05                        
-CT2	CMY	CTC	Harmonic	120	3.1                         
-CT2	EO	CT2	Harmonic	165.0	2.600                       
-CT3	CM3	CM3	Harmonic	180.1	1.23                        
-CT3	CM3	CT2	Harmonic	180	1.35                        
-CT3	CM3	CT3	Harmonic	181	1.2                         
-CT3	CM4	CTB	Harmonic	94.9	5.12                        
-CT3	CM4	CTC	Harmonic	97.9	4.8                         
-CT3	CMT	CM3	Harmonic	185	1.7                         
-CT3	CMT	CT3	Harmonic	158.6	2                           
-CT3	CMT	CT4	Harmonic	158.5	1.9                         
-CT3	CMT	CTB	Harmonic	133.9	2.75                        
-CT3	CMT	CTC	Harmonic	130.5	3                           
-CT3	CMY	CTB	Harmonic	121	2.75                        
-CT3	CMY	CTC	Harmonic	121	2.9                         
-CT4	CM3	CM3	Harmonic	180	1.2                         
-CT4	CM3	CT3	Harmonic	182	1.2                         
-CT4	CM3	CT4	Harmonic	181	1                           
-CT4	CMT	CM3	Harmonic	175	2                           
-CT4	CMT	CTB	Harmonic	133.8	2.7                         
-CT4	CMT	CTC	Harmonic	132.3	2.8                         
-CTY	CM3	CT2	Harmonic	160	4.1                         
-CTY	CM3	CT3	Harmonic	162	3                           
-CTY	CM3	CT4	Harmonic	164	2.5                         
-EO	EO	EO	Harmonic	132.0	3.400                       
-EO	EO	EOT	Harmonic	135.0	3.500                       
-EO	EO	OA	Harmonic	131.0	3.000                       
+CT2	CM	CT	Harmonic	172.0	1.600
+CT2	CM	CT2	Harmonic	173.0	1.700
+CT2	CM	EO	Harmonic	178.0	1.300
+CT2	CM	OA	Harmonic	166.0	1.800
+CT2	CM3	CM3	Harmonic	179	1.44
+CT2	CM3	CT2	Harmonic	180	1.5
+CT2	CM4	CTB	Harmonic	93.6	5.5
+CT2	CM4	CTC	Harmonic	96	5.45
+CT2	CMD2	CT2	Harmonic	110.0	12.000
+CT2	CMT	CM3	Harmonic	185	2  
+CT2	CMT	CT2	Harmonic	155	2.19
+CT2	CMT	CT3	Harmonic	158.5	1.95
+CT2	CMT	CT4	Harmonic	157.9	1.93
+CT2	CMT	CTB	Harmonic	129.6	2.95
+CT2	CMT	CTC	Harmonic	128	3.15
+CT2	CMT	CTY	Harmonic	136	4.3
+CT2	CMY	CMY	Harmonic	127.1	4  
+CT2	CMY	CTB	Harmonic	120	3.05
+CT2	CMY	CTC	Harmonic	120	3.1
+CT2	EO	CT2	Harmonic	165.0	2.600
+CT3	CM3	CM3	Harmonic	180.1	1.23
+CT3	CM3	CT2	Harmonic	180	1.35
+CT3	CM3	CT3	Harmonic	181	1.2
+CT3	CM4	CTB	Harmonic	94.9	5.12
+CT3	CM4	CTC	Harmonic	97.9	4.8
+CT3	CMT	CM3	Harmonic	185	1.7
+CT3	CMT	CT3	Harmonic	158.6	2  
+CT3	CMT	CT4	Harmonic	158.5	1.9
+CT3	CMT	CTB	Harmonic	133.9	2.75
+CT3	CMT	CTC	Harmonic	130.5	3  
+CT3	CMY	CTB	Harmonic	121	2.75
+CT3	CMY	CTC	Harmonic	121	2.9
+CT4	CM3	CM3	Harmonic	180	1.2
+CT4	CM3	CT3	Harmonic	182	1.2
+CT4	CM3	CT4	Harmonic	181	1  
+CT4	CMT	CM3	Harmonic	175	2  
+CT4	CMT	CTB	Harmonic	133.8	2.7
+CT4	CMT	CTC	Harmonic	132.3	2.8
+CTY	CM3	CT2	Harmonic	160	4.1
+CTY	CM3	CT3	Harmonic	162	3  
+CTY	CM3	CT4	Harmonic	164	2.5
+EO	EO	EO	Harmonic	132.0	3.400
+EO	EO	EOT	Harmonic	135.0	3.500
+EO	EO	OA	Harmonic	131.0	3.000
 EOT	EO	EOT	Harmonic	134.0	3.500                      
 EST1	CM	CM	SDK	        178.0000 1.0000	4.4030	0.4700	9	6
 EST1	GL	EST2	SDK	        95.0000  1.0000 4.3000	0.4950  9	6
 EST2	CM	CM	SDK	        178.0000 1.0000	4.4030	0.4700	9	6
 GL	EST1	CM	SDK	        168.0000 0.8000	4.5060	0.4200	9	6
 GL	EST2	CM	SDK	        172.0000 0.8000	4.5060	0.4200	9	6
-I1	I2	CM	Harmonic	143.82	4.91                         
-I1	I2	I3	Harmonic	51.22	932.5                        
-I1	I3	I2	Harmonic	81.88	433.26                       
-I2	CM	CM	Harmonic	170.17	2.21                         
-I3	I1	I2	Harmonic	50.39	748.7                        
-I3	I2	CM	Harmonic	147.83	1.40                         
-NC	PH	CM	Harmonic	112.0	3.300                        
+I1	I2	CM	Harmonic	143.82	4.91
+I1	I2	I3	Harmonic	51.22	932.5
+I1	I3	I2	Harmonic	81.88	433.26
+I2	CM	CM	Harmonic	170.17	2.21
+I3	I1	I2	Harmonic	50.39	748.7
+I3	I2	CM	Harmonic	147.83	1.40
+NC	PH	CM	Harmonic	112.0	3.300
 NC	PH	GL	SDK	        112.0000 3.1000	4.6200	0.6500	9	6
-NH	PHE	GL	Harmonic	102.0	4.000                        
-OA	EO	CT2	Harmonic	146.0	4.000                       
-OA	EO	OA	Harmonic	131.0	6.600                       
-PH	CM	CM	Harmonic	178.0	1.100                        
+NH	PHE	GL	Harmonic	102.0	4.000
+OA	EO	CT2	Harmonic	146.0	4.000
+OA	EO	OA	Harmonic	131.0	6.600
+PH	CM	CM	Harmonic	178.0	1.100
 PH	GL	EST1	SDK	        124.0000 1.4000	4.5500	0.5000	9	6
 PH	GL	EST2	SDK	        138.0000 2.0000	4.5500	0.5000	9	6
 PHE	GL	EST1	Harmonic	124.0	1.400	
 PHE	GL	EST2	Harmonic	138.0	2.000	
+PHR	BER	BER	Harmonic	106.0   30.0
 SO3	CAM	CAM	Harmonic	177.6	101
 SO3	CAM	CAX	Harmonic	177	105
 SO3	CM3	CM3	Harmonic	175	1.6
 SO3	CM3	CT2	Harmonic	175	1.8
 SO3	CM3	CT3	Harmonic	175	1.6
-SO3	CM3	CT3	Harmonic	175	1.6
 SO3	CM3	CT4	Harmonic	175	1.6
+XYR	BER	BER	Harmonic	106.0   30.0
+XYR	BER	PHR	Harmonic	122.0   30.0
+XYR	BER	XYR	Harmonic	122.0   30.0
 end BendTypes
 
 begin NonBondedInteractionTypes
 BER	BER	Mie	3.8000	0.1750	9	6	
 BER	CM	Mie	4.1530	0.3100	9	6	
 BER	CMD2 	Mie	3.9025	0.1768	9	6
-BER     CT      Mie     4.193   0.3000  9       6
 BER	CT2	Mie	4.0105	0.2370	9	6	
 BER	EST1 	Mie	4.0500	0.2240	9	6	
 BER	EST2 	Mie	4.0500	0.2240	9	6	
@@ -326,15 +323,9 @@ BER	GL	Mie	4.1530	0.2711	9	6
 BER	NC	Mie	4.7750	0.1987	9	6	
 BER	PH	Mie	4.6000	0.3997	9	6	
 BER	W	Mie	4.0850	0.3200	9	6
+BER     CT      Mie     4.193   0.3000  9       6
 BER     PHR     Mie     3.650   0.3102  9       6
 BER     XYR     Mie     3.900   0.2370  9       6
-PHR     PHR     Mie     3.500   0.5500  9       6
-PHR     XYR     Mie     3.750   0.4195  9       6
-PHR     W       Mie     3.935   0.680   9       6
-PHR     CT      Mie     4.043   0.2000  9       6
-XYR     XYR     Mie     4.000   0.3200  9       6
-XYR     W       Mie     4.185   0.480   9       6
-XYR     CT      Mie     4.293   0.5400  9       6
 CAM	CAM	Mie	4.8	0.2	9	6
 CAM	CM3	Mie	4.65	0.295	9	6
 CAM	CM4	Mie	4.96	0.2966	9	6
@@ -507,6 +498,10 @@ PHE	EST2	Mie 	4.5500	0.500	9	6
 PHE	GL	Mie 	4.7500	0.300	9	6
 PHE	PHE	Mie 	4.6000	1.400	9	6
 PHE	W	Mie	4.0300	1.000	12      4	
+PHR     CT      Mie     4.043   0.2000  9       6
+PHR     PHR     Mie     3.500   0.5500  9       6
+PHR     W       Mie     3.935   0.680   9       6
+PHR     XYR     Mie     3.750   0.4195  9       6
 SO3	CAM	Mie	4.9	0.1264	9	6
 SO3	CAX	Mie	4.865	0.2	9	6
 SO3	CM3	Mie	4.75	0.1865	9	6
@@ -550,5 +545,8 @@ W	CTC	Mie	4.476	0.364	12	4
 W	CTY	Mie	4.624	0.334	12	4
 W	EO	Mie	4.3100	0.5700	12	4	
 W	OA	Mie	3.9500	0.7000	12	4	
-W	W	Mie	4.3710	0.8950	12	4		
+W	W	Mie	4.3710	0.8950	12	4
+XYR     CT      Mie     4.293   0.5400  9       6
+XYR     W       Mie     4.185   0.480   9       6
+XYR     XYR     Mie     4.000   0.3200  9       6		
 end NonBondedInteractionTypes
