@@ -1,0 +1,554 @@
+// This is a force field file for the Shinoda, DeVane, Klein (SDK)
+// coarse grained model for lipids, surfactants, benzene, fullerenes, and
+// ionic liquids. See:
+//
+//   Wataru Shinoda, Russell DeVane, and Michael L Klein, "Zwitterionic
+//   Lipid Assemblies: Molecular Dynamics Studies of Monolayers,
+//   Bilayers, and Vesicles Using a New Coarse Grain Force Field,"
+//   J. Phys. Chem. B, 2010, 114 (20), pp 6836–6849
+//   DOI: 10.1021/jp9107206
+//
+//   Wataru Shinoda, Russell DeVane, and Michael L. Klein,
+//   "Coarse-grained force field for ionic surfactants," Soft Matter,
+//   2011,7, 6178-6186, DOI: 10.1039/C1SM05173C
+//
+//   Wataru Shinoda, Russell DeVane, Michael L Klein, "Multi-property
+//   fitting and parameterization of a coarse grained model for
+//   aqueous surfactants," Molecular Simulation 33(1-2), 27-36 (2007),
+//   DOI: 10.1080/08927020601054050 
+//
+//   Russell DeVane, Arben Jusufi, Wataru Shinoda, Chi-cheng Chiu,
+//   Steven O. Nielsen, Preston B. Moore, and Michael L. Klein,
+//   "Parametrization and Application of a Coarse Grained Force Field for
+//   Benzene/Fullerene Interactions with Lipids," J. Phys. Chem. B, 2010,
+//   114 (49), pp 16364–16372, DOI: 10.1021/jp1070264
+//
+//   Xibing He, Wataru Shinoda, Russell DeVane, Kelly L. Anderson, 
+//   Michael L. Klein, "Paramaterization of a coarse-grained model for
+//   linear alkylbenzene sulfonate surfactants and molecular dynamics
+//   studies of their self-assembly in aqueous solution," Chemical Physics
+//   Letters Volume 487, Issues 1–3, 25 February 2010, Pages 71–76, 
+//   DOI: 10.1016/j.cplett.2010.01.029
+//
+//   B. Lokegowda Bhargava, Russell Devane, Michael L. Klein and
+//   Sundaram Balasubramanian, "Nanoscale organization in room temperature
+//   ionic liquids: a coarse grained molecular dynamics simulation study,"
+//   Soft Matter, 2007,3, 1395-1400, DOI: 10.1039/B710801J
+
+
+begin Options
+      Name    SDK
+      BondForceConstantScaling 2.0
+      BendForceConstantScaling 2.0
+      DistanceMixingRule arithmetic
+      EnergyMixingRule geometric
+      vdW-12-scale 0.0
+      vdW-13-scale 
+end Options
+
+begin BaseAtomTypes
+NC	87.1647	// −CH2CH2−N−(CH3)3 (+1)
+NH	45.085	// −CH2CH2−NH3 (+1)
+PH	94.9716	// −PO4−(−1)
+PHE	94.9716	// −PO4−(−1) (for PE headgroup)
+GL	41.0725	// −CH2CH−CH2−
+EST1	58.0358	// −CH2CO2− (in the sn-2 chain)
+EST2	46.03	// −H2CO2− (in the sn-1 chain) ? 58.0358 in JPC paper
+CMD2	26.0378	// −HC═CH− (cis)
+CM	42.0804	// −CH2CH2CH2−
+CT	43.0853	// CH3CH2CH2−
+CT2	29.0615	// CH3CH2−
+W	54.0460	// (H2O)3
+SOD	77.04	// Na+(H2O)3
+CLA	71.48	// Cl−(H2O)2
+SO4	96.06	// SO4−
+NC4	73.14	// (CH3)3N+-CH2−
+OA	31.03	// HOCH2-
+EO	44.05	// -CH2OCH2-
+EOT	45.06	// CH3-O-CH2-
+BER	18.0165	// one quarter of a benzene
+PHR     // for phenol and p-cresol
+XYR     // for phenol
+SO3	80.06	// SO3-
+CAM	38.05	// -C(CH)2 (half a substituted aromatic ring)
+CMT	41.07	// -CH2CHCH2- (branched at CH)
+CMY	42.08	// -CH2CHCH3 (branched at CH)
+CM4	56.11	// -CH2CHCH2CH3 (branched at CH)
+CM3	42.08	// -CH2CH2CH2-
+CT2	29.06	// CH3CH2- 
+CT3	42.08	// CH3CHCH2- 
+CT4	57.11	// CH3CH2CH2CH2-
+CAX     53.08   // half a para-xylene CH3C-(CH)2
+CAT     39.06   // half a benzene (CH)3
+I1	35.5513	// contains 2.5 C atoms and 2.5 H atoms
+I2	34.5433	// contains 2.5 C atoms and 3.5 H atoms
+I3	26.0378	// contains 2 C atoms and 2 H atoms
+PF	144.96	// PF6- (for IL simulations)
+end BaseAtomTypes
+
+begin AtomTypes
+CTB	CT2
+CTC	CT3
+end AtomTypes
+
+begin ChargeAtomTypes
+NC	+1 
+NH	+1 
+PH	-1 
+PHE	-1
+SOD	+1
+CLA	-1
+SO4	-1
+NC4	+1
+I1	0.356
+I2	0.292
+I3	0.152
+PF	-0.8
+end ChargeAtomTypes
+
+begin BondTypes
+BER	BER	Harmonic	2.00    40.0	
+BER	PHR	Harmonic	2.60    40.0	
+BER	XYR	Harmonic	2.60    40.0	
+CAM	CAM	Harmonic	1.91	345
+CAM	CM3	Harmonic	2.96	9.4
+CAM	CMT	Harmonic	2.392	92.5
+CAM	CMY	Harmonic	2.39	92.5
+CAM	CT2	Harmonic	2.416	92
+CAM	CT3	Harmonic	3	8.03
+CAM	CT4	Harmonic	3.535	6
+CAM	CTY	Harmonic	2.445	108
+CAT	CAM	Harmonic	1.947	190
+CAT	CAT	Harmonic	1.985	106.5
+CAX	CAM	Harmonic	2.485	190
+CAX	CAT	Harmonic	2.524	92.6
+CAX	CAX	Harmonic	3.06	81
+CM	CM	Harmonic	3.6400	6.1600 
+CM	CT	Harmonic	3.65	6.160 
+CM	EO	Harmonic	3.56	7.100 
+CM	OA	Harmonic	3.01	7.500 
+CM3	CM3	Harmonic	3.651	6.2
+CM3	CMT	Harmonic	3.55	6
+CM4	CM3	Harmonic	3.57	6
+CM4	CT2	Harmonic	3.552	5
+CM4	CT3	Harmonic	4.109	3.78
+CM4	CTB	Harmonic	2.794	8.75
+CM4	CTC	Harmonic	3.403	6.8
+CMD2	CM	Harmonic	3.0300	8.0000 
+CMT	CT2	Harmonic	3.071	8.7
+CMT	CT3	Harmonic	3.637	6.02
+CMT	CT4	Harmonic	4.16	4.8
+CMT	CTB	Harmonic	2.524	34
+CMT	CTC	Harmonic	3.136	18
+CMT	CTY	Harmonic	2.5	59.4
+CMY	CM3	Harmonic	3.58	6
+CMY	CMY	Harmonic	2.43	58
+CMY	CT2	Harmonic	3.06	9.75
+CMY	CT3	Harmonic	3.65	6.5
+CMY	CTB	Harmonic	2.525	36.5
+CMY	CTC	Harmonic	3.1	19.85
+CT	CMD2	Harmonic	3.09	8.00
+CT	CT	Harmonic	3.71	6.955 
+CT	EO	Harmonic	3.61	7.100 
+CT	OA	Harmonic	3.05	6.955 
+CT2	CM	Harmonic	3.1300	9.0000 
+CT2	CM3	Harmonic	3.13	9.6
+CT2	CT3	Harmonic	3.16	9.5
+CT2	EO	Harmonic	3.07	10.000 
+CT2	OA	Harmonic	2.53	14.000
+CT3	CM3	Harmonic	3.691	6.2
+CT3	CT3	Harmonic	3.71	6.955
+CT4	CM3	Harmonic	4.23	5
+CT4	CT2	Harmonic	3.72	6
+CT4	CT3	Harmonic	4.27	4.5
+CT4	CT4	Harmonic	4.785	3.4
+CTY	CM3	Harmonic	3.13	20
+CTY	CT2	Harmonic	2.552	39
+CTY	CT3	Harmonic	3.16	18
+CTY	CT4	Harmonic	3.73	12
+CTY	CTY	Harmonic	2.565	42.1
+EO	EO	Harmonic	3.28	4.900 
+EO	OA	Harmonic	2.79	15.000 
+EOT	EO	Harmonic	3.34	5.400 
+EOT	EOT	Harmonic	3.33	5.500 
+EST1	CM	Harmonic	3.5500	4.7000 
+EST2	CM	Harmonic	3.6100	5.1000
+GL	EST1	Harmonic	2.8800  30.0000 
+GL	EST2	Harmonic	3.4800	8.4000 
+I1	I2	Harmonic	2.97	179.54	
+I1	I3	Harmonic	2.30	223.75	
+I2	CM	Harmonic	3.225	7.98	
+I2	I3	Harmonic	2.27	230.65	
+NC	PH	Harmonic	4.2500	4.8000 
+NH	PHE	Harmonic	3.60	9.40
+OA	OA	Harmonic	2.16	63.000 
+PH	CM	Harmonic	3.69    12.00
+PH	GL	Harmonic	3.5200	8.9000 
+PHE	GL	Harmonic	3.52	8.90
+SO3	CAM	Harmonic	2.522	138.5
+SO3	CM3	Harmonic	3.065	11
+end BondTypes
+
+begin BendTypes
+BER	BER	BER	Harmonic	90.0    30.0
+BER	XYR	BER	Harmonic	58.0    30.0
+BER	PHR	BER	Harmonic	58.0    30.0
+XYR	BER	BER	Harmonic	106.0   30.0
+PHR	BER	BER	Harmonic	106.0   30.0
+XYR	BER	XYR	Harmonic	122.0   30.0
+XYR	BER	PHR	Harmonic	122.0   30.0
+CAM	CAM	CM4	Harmonic	169.9	90
+CAM	CAM	CMT	Harmonic	169.9	99.5
+CAM	CAM	CMY	Harmonic	169.9	99.5
+CAM	CAM	CT2	Harmonic	163.3	48.5
+CAM	CAM	CT3	Harmonic	162	20
+CAM	CAM	CTY	Harmonic	170.1	94
+CAM	CM3	CM3	Harmonic	157.6	2.7
+CAM	CM3	CT2	Harmonic	152.6	3.8
+CAM	CM3	CT3	Harmonic	157	2.7
+CAM	CM3	CT4	Harmonic	160	2.15
+CAM	CM4	CM3	Harmonic	111	0.8
+CAM	CMT	CM3	Harmonic	159	0.75
+CAM	CMT	CT2	Harmonic	100	0.75
+CAM	CMT	CT3	Harmonic	150	0.75
+CAM	CMT	CT4	Harmonic	154	0.9
+CAM	CMY	CM3	Harmonic	104	0.8
+CAT	CAM	CM3	Harmonic	161.4	20.9
+CAT	CAM	CT2	Harmonic	163.5	50
+CAT	CAM	CT3	Harmonic	160.8	19
+CAT	CAM	CT4	Harmonic	157.5	10.5
+CAT	CAM	CTY	Harmonic	170.4	79
+CAX	CAM	CT2	Harmonic	163.8	47
+CAX	CAM	CT3	Harmonic	160.7	19.5
+CAX	CAM	CT4	Harmonic	158	11
+CAX	CAM	CTY	Harmonic	170.3	80
+CM	CM	CM	Harmonic	173.0	1.190 
+CM	CM	CT	Harmonic	175.0	1.190 
+CM	CM	EO	Harmonic	172.0	1.500 
+CM	CMD2	CM	SDK	        110.0000 6.0000	4.5060	0.4200	9	6
+CM	EO	CM	Harmonic	171.0	1.800                       
+CM	EO	EO	Harmonic	146.0	3.200                       
+CM3	CM3	CM3	Harmonic	180	1.22                        
+CM4	CM3	CM3	Harmonic	183	1.1      
+CMD2	CM	CM	SDK	        161.0000 1.9000	4.2555	0.3120	9	6
+CMT	CM3	CT2	Harmonic	180	1.1                         
+CMT	CM3	CT3	Harmonic	180	1.13                        
+CMT	CM3	CT4	Harmonic	180	1                           
+CMY	CM3	CM3	Harmonic	182	1.1                         
+CT	CM	CT	Harmonic	175.5	1.093                       
+CT	CMD2	CT	Harmonic	116.0	7.700                        
+CT	EO	EO	Harmonic	145.0	2.200                       
+CT2	CM	CM	SDK	        172.0000 1.6000	4.3635	0.3620	9	6
+CT2	CM	CT	Harmonic	172.0	1.600                        
+CT2	CM	CT2	Harmonic	173.0	1.700                       
+CT2	CM	EO	Harmonic	178.0	1.300                       
+CT2	CM	OA	Harmonic	166.0	1.800                       
+CT2	CM3	CM3	Harmonic	179	1.44                        
+CT2	CM3	CT2	Harmonic	180	1.5                         
+CT2	CM4	CTB	Harmonic	93.6	5.5                         
+CT2	CM4	CTC	Harmonic	96	5.45                        
+CT2	CMD2	CT2	Harmonic	110.0	12.000                       
+CT2	CMT	CM3	Harmonic	185	2                           
+CT2	CMT	CT2	Harmonic	155	2.19                        
+CT2	CMT	CT3	Harmonic	158.5	1.95                        
+CT2	CMT	CT4	Harmonic	157.9	1.93                        
+CT2	CMT	CTB	Harmonic	129.6	2.95                        
+CT2	CMT	CTC	Harmonic	128	3.15                        
+CT2	CMT	CTY	Harmonic	136	4.3                         
+CT2	CMY	CMY	Harmonic	127.1	4                           
+CT2	CMY	CTB	Harmonic	120	3.05                        
+CT2	CMY	CTC	Harmonic	120	3.1                         
+CT2	EO	CT2	Harmonic	165.0	2.600                       
+CT3	CM3	CM3	Harmonic	180.1	1.23                        
+CT3	CM3	CT2	Harmonic	180	1.35                        
+CT3	CM3	CT3	Harmonic	181	1.2                         
+CT3	CM4	CTB	Harmonic	94.9	5.12                        
+CT3	CM4	CTC	Harmonic	97.9	4.8                         
+CT3	CMT	CM3	Harmonic	185	1.7                         
+CT3	CMT	CT3	Harmonic	158.6	2                           
+CT3	CMT	CT4	Harmonic	158.5	1.9                         
+CT3	CMT	CTB	Harmonic	133.9	2.75                        
+CT3	CMT	CTC	Harmonic	130.5	3                           
+CT3	CMY	CTB	Harmonic	121	2.75                        
+CT3	CMY	CTC	Harmonic	121	2.9                         
+CT4	CM3	CM3	Harmonic	180	1.2                         
+CT4	CM3	CT3	Harmonic	182	1.2                         
+CT4	CM3	CT4	Harmonic	181	1                           
+CT4	CMT	CM3	Harmonic	175	2                           
+CT4	CMT	CTB	Harmonic	133.8	2.7                         
+CT4	CMT	CTC	Harmonic	132.3	2.8                         
+CTY	CM3	CT2	Harmonic	160	4.1                         
+CTY	CM3	CT3	Harmonic	162	3                           
+CTY	CM3	CT4	Harmonic	164	2.5                         
+EO	EO	EO	Harmonic	132.0	3.400                       
+EO	EO	EOT	Harmonic	135.0	3.500                       
+EO	EO	OA	Harmonic	131.0	3.000                       
+EOT	EO	EOT	Harmonic	134.0	3.500                      
+EST1	CM	CM	SDK	        178.0000 1.0000	4.4030	0.4700	9	6
+EST1	GL	EST2	SDK	        95.0000  1.0000 4.3000	0.4950  9	6
+EST2	CM	CM	SDK	        178.0000 1.0000	4.4030	0.4700	9	6
+GL	EST1	CM	SDK	        168.0000 0.8000	4.5060	0.4200	9	6
+GL	EST2	CM	SDK	        172.0000 0.8000	4.5060	0.4200	9	6
+I1	I2	CM	Harmonic	143.82	4.91                         
+I1	I2	I3	Harmonic	51.22	932.5                        
+I1	I3	I2	Harmonic	81.88	433.26                       
+I2	CM	CM	Harmonic	170.17	2.21                         
+I3	I1	I2	Harmonic	50.39	748.7                        
+I3	I2	CM	Harmonic	147.83	1.40                         
+NC	PH	CM	Harmonic	112.0	3.300                        
+NC	PH	GL	SDK	        112.0000 3.1000	4.6200	0.6500	9	6
+NH	PHE	GL	Harmonic	102.0	4.000                        
+OA	EO	CT2	Harmonic	146.0	4.000                       
+OA	EO	OA	Harmonic	131.0	6.600                       
+PH	CM	CM	Harmonic	178.0	1.100                        
+PH	GL	EST1	SDK	        124.0000 1.4000	4.5500	0.5000	9	6
+PH	GL	EST2	SDK	        138.0000 2.0000	4.5500	0.5000	9	6
+PHE	GL	EST1	Harmonic	124.0	1.400	
+PHE	GL	EST2	Harmonic	138.0	2.000	
+SO3	CAM	CAM	Harmonic	177.6	101
+SO3	CAM	CAX	Harmonic	177	105
+SO3	CM3	CM3	Harmonic	175	1.6
+SO3	CM3	CT2	Harmonic	175	1.8
+SO3	CM3	CT3	Harmonic	175	1.6
+SO3	CM3	CT3	Harmonic	175	1.6
+SO3	CM3	CT4	Harmonic	175	1.6
+end BendTypes
+
+begin NonBondedInteractionTypes
+BER	BER	Mie	3.8000	0.1750	9	6	
+BER	CM	Mie	4.1530	0.3100	9	6	
+BER	CMD2 	Mie	3.9025	0.1768	9	6
+BER     CT      Mie     4.193   0.3000  9       6
+BER	CT2	Mie	4.0105	0.2370	9	6	
+BER	EST1 	Mie	4.0500	0.2240	9	6	
+BER	EST2 	Mie	4.0500	0.2240	9	6	
+BER	GL	Mie	4.1530	0.2711	9	6	
+BER	NC	Mie	4.7750	0.1987	9	6	
+BER	PH	Mie	4.6000	0.3997	9	6	
+BER	W	Mie	4.0850	0.3200	9	6
+BER     PHR     Mie     3.650   0.3102  9       6
+BER     XYR     Mie     3.900   0.2370  9       6
+PHR     PHR     Mie     3.500   0.5500  9       6
+PHR     XYR     Mie     3.750   0.4195  9       6
+PHR     W       Mie     3.935   0.680   9       6
+PHR     CT      Mie     4.043   0.2000  9       6
+XYR     XYR     Mie     4.000   0.3200  9       6
+XYR     W       Mie     4.185   0.480   9       6
+XYR     CT      Mie     4.293   0.5400  9       6
+CAM	CAM	Mie	4.8	0.2	9	6
+CAM	CM3	Mie	4.65	0.295	9	6
+CAM	CM4	Mie	4.96	0.2966	9	6
+CAM	CMT	Mie	4.79	0.228	9	6
+CAM	CMY	Mie	4.83	0.2408	9	6
+CAM	CT2	Mie	4.515	0.2458	9	6
+CAM	CT3	Mie	4.69	0.3063	9	6
+CAM	CT4	Mie	4.756	0.3644	9	6
+CAM	CTY	Mie	4.839	0.2676	9	6
+CAT	CAM	Mie	4.62	0.2683	9	6
+CAT	CAT	Mie	4.44	0.36	9	6
+CAT	CM3	Mie	4.47	0.3957	9	6
+CAT	CT2	Mie	4.335	0.3297	9	6
+CAT	CT3	Mie	4.51	0.4109	9	6
+CAT	CT4	Mie	4.576	0.4855	9	6
+CAT	CTY	Mie	4.659	0.359	9	6
+CAX	CAM	Mie	4.768	0.3169	9	6
+CAX	CAT	Mie	4.588	0.4251	9	6
+CAX	CAX	Mie	4.735	0.502	9	6
+CAX	CT2	Mie	4.483	0.3894	9	6
+CAX	CT3	Mie	4.57	0.52	9	6
+CAX	CT4	Mie	4.73	0.64	9	6
+CAX	CTY	Mie	4.807	0.424	9	6
+CLA	CLA	Mie	4.371	0.35	12	4
+CLA	W	Mie	4.371	0.895	12	4
+CM	CM	Mie	4.5060	0.4200	9	6	
+CM	CT	Mie	4.5455	0.4440	9	6	
+CM	OA	Mie	3.9870	0.3650	9	6	
+CM	PF	Mie	4.9030	0.4274	9	6	
+CM3	CM3	Mie	4.5	0.435	9	6
+CM3	CT3	Mie	4.54	0.4517	9	6
+CM4	CM3	Mie	4.81	0.4374	9	6
+CM4	CM4	Mie	5.12	0.44	9	6
+CM4	CT2	Mie	4.675	0.3645	9	6
+CM4	CT3	Mie	4.85	0.4543	9	6
+CM4	CTB	Mie	4.675	0.3645	9	6
+CM4	CTC	Mie	4.85	0.4543	9	6
+CMD2	CM	Mie	4.2555	0.3120	9	6	
+CMD2	CMD2 	Mie	4.0050	0.2320	9	6	
+CMD2	CT	Mie 	4.2950	0.330	9	6
+CMD2	CT2	Mie	4.1130	0.2690	9	6	
+CMD2	EST1 	Mie	4.0050	0.4400	9	6	
+CMD2	EST2 	Mie	4.0050	0.4400	9	6	
+CMD2	GL	Mie	4.2555	0.3120	9	6	
+CMD2	W	Mie	4.1880	0.2700	12      4	
+CMT	CM3	Mie	4.64	0.3363	9	6
+CMT	CMT	Mie	4.78	0.26	9	6
+CMT	CT2	Mie	4.505	0.2802	9	6
+CMT	CT3	Mie	4.68	0.3492	9	6
+CMT	CT4	Mie	4.8	0.42	9	6
+CMT	CTB	Mie	4.505	0.2802	9	6
+CMT	CTC	Mie	4.68	0.3492	9	6
+CMT	CTY	Mie	4.878	0.312	9	6
+CMY	CM3	Mie	4.68	0.3552	9	6
+CMY	CMY	Mie	4.86	0.29	9	6
+CMY	CT2	Mie	4.545	0.2959	9	6
+CMY	CT3	Mie	4.72	0.3688	9	6
+CMY	CTB	Mie	4.545	0.2959	9	6
+CMY	CTC	Mie	4.72	0.3688	9	6
+CT	CM	Mie	4.5455	0.4440	9	6	
+CT	CT	Mie	4.5850	0.4690	9	6	
+CT	OA	Mie	4.0330	0.4372	9	6	
+CT	PF	Mie	4.9430	0.4801	9	6	
+CT2	CM	Mie	4.3635	0.3620	9	6	
+CT2	CM3	Mie	4.365	0.3624	9	6
+CT2	CT	Mie 	4.4030	0.383	9	6
+CT2	CT2	Mie	4.2210	0.3120	9	6	
+CT2	CT3	Mie	4.405	0.3763	9	6
+CT2	CTB	Mie	4.23	0.302	9	6
+CT2	CTC	Mie	4.405	0.3763	9	6
+CT2	OA	Mie	3.8400	0.3800	9	6
+CT3	CT3	Mie	4.58	0.469	9	6
+CT3	CTC	Mie	4.58	0.469	9	6
+CT4	CM3	Mie	4.686	0.5227	9	6
+CT4	CT2	Mie	4.551	0.4355	9	6
+CT4	CT3	Mie	4.726	0.5427	9	6
+CT4	CT4	Mie	4.872	0.628	9	6
+CT4	CTB	Mie	4.551	0.4355	9	6
+CT4	CTC	Mie	4.726	0.5427	9	6
+CTB	CT3	Mie	4.405	0.3763	9	6
+CTB	CTB	Mie	4.23	0.302	9	6
+CTB	CTC	Mie	4.405	0.3763	9	6
+CTC	CTC	Mie	4.58	0.469	9	6
+CTY	CM3	Mie	4.689	0.4046	9	6
+CTY	CT2	Mie	4.554	0.3288	9	6
+CTY	CT3	Mie	4.729	0.42	9	6
+CTY	CT4	Mie	4.86	0.515	9	6
+CTY	CTY	Mie	4.878	0.358	9	6
+EO	CM	Mie	4.2740	0.3770	9	6	
+EO	CT	Mie	4.3400	0.4100	9	6	
+EO	CT2	Mie	4.1400	0.3700	9	6	
+EO	EO	Mie	4.2500	0.4050	9	6	
+EO	EOT	Mie	4.2500	0.4200	9	6	
+EO	OA	Mie	3.8900	0.4400	9	6	
+EOT	EOT	Mie	4.2500	0.4370	9	6	
+EST1	CM	Mie	4.4030	0.4700	9	6	
+EST1	CT	Mie 	4.4425	0.470	9	6
+EST1	CT2	Mie	4.2605	0.3900	9	6	
+EST1	EST1 	Mie	4.3000	0.4950	9	6	
+EST1	EST2 	Mie	4.3000	0.4950	9	6	
+EST1	NC	Mie	4.4750	0.7500	9	6	
+EST1	PH	Mie	4.5500	0.5000	9	6	
+EST1	W	Mie	4.2900	0.8200	12      4	
+EST2	CM	Mie	4.4030	0.4700	9	6	
+EST2	CT	Mie 	4.4425	0.470	9	6
+EST2	CT2	Mie	4.2605	0.3900	9	6	
+EST2	EST2 	Mie	4.3000	0.4950	9	6	
+EST2	NC	Mie	4.4750	0.7500	9	6	
+EST2	PH	Mie	4.5500	0.5000	9	6	
+EST2	W	Mie	4.2900	0.8200	12      4	
+GL	CM	Mie	4.5060	0.4200	9	6	
+GL	CT	Mie 	4.5455	0.444	9	6
+GL	CT2	Mie	4.3635	0.3620	9	6	
+GL	EST1 	Mie	4.4030	0.4700	9	6	
+GL	EST2 	Mie	4.4030	0.4700	9	6	
+GL	GL	Mie	4.5060	0.4200	9	6	
+GL	NC	Mie	4.6200	0.6500	9	6	
+GL	PH	Mie	4.7500	0.3000	9	6	
+GL	W	Mie	4.4385	0.6400	12      4	
+I1	CM	Mie	4.3000	0.3483	9	6	
+I1	CT	Mie	4.3400	0.3914	9	6	
+I1	I1	Mie	4.1000	0.3757	9	6	
+I1	I2	Mie	4.0500	0.3604	9	6	
+I1	I3	Mie	4.0500	0.2740	9	6	
+I1	PF	Mie	5.1000	0.0857	9	6	
+I2	CM	Mie	4.3000	0.3341	9	6	
+I2	CT	Mie	4.3400	0.3754	9	6	
+I2	I2	Mie	4.1000	0.3457	9	6	
+I2	I3	Mie	4.0500	0.2628	9	6	
+I2	PF	Mie	5.1000	0.0857	9	6	
+I3	CM	Mie	3.7600	0.2540	9	6	
+I3	CT	Mie	3.8000	0.2854	9	6	
+I3	I3	Mie	3.6000	0.1998	9	6	
+I3	PF	Mie	4.8500	0.1989	9	6	
+NC	CM	Mie	5.1280	0.4000	9	6	
+NC	CMD2 	Mie	4.8775	0.3500	9	6	
+NC	CT	Mie 	5.1675	0.420	9	6
+NC	CT2	Mie	4.9855	0.3200	9	6	
+NC	NC	Mie	5.7500	0.7000	9	6	
+NC	NH	Mie 	5.1750	0.880	9	6
+NC	PH	Mie	4.2000	1.1500	9	6	
+NC	PHE	Mie 	4.2000	1.150	9	6
+NC	W	Mie	4.6100	0.9000	12      4	
+NH	CM	Mie 	4.5530	0.330	9	6
+NH	CMD2	Mie 	4.3025	0.300	9	6
+NH	CT	Mie 	4.5925	0.340	9	6
+NH	CT2	Mie 	4.4105	0.320	9	6
+NH	EST1	Mie 	4.1100	0.850	9	6
+NH	EST2	Mie 	4.1100	0.850	9	6
+NH	GL	Mie 	4.1900	0.750	9	6
+NH	NH	Mie 	4.6000	1.100	9	6
+NH	PH	Mie 	3.8000	1.200	9	6
+NH	PHE	Mie 	3.8000	1.200	9	6
+NH	W	Mie	3.9500	0.800	12      4
+OA	OA	Mie	3.7130	0.4491	9	6	
+PF	PF	Mie	5.2000	0.5656	9	6
+PH	CM	Mie	4.9530	0.3000	9	6	
+PH	CMD2 	Mie	4.7025	0.3000	9	6	
+PH	CT	Mie 	4.9925	0.320	9	6
+PH	CT2	Mie	4.8105	0.2800	9	6	
+PH	PH	Mie	5.4000	1.4000	9	6	
+PH	PHE	Mie 	5.0000	1.400	9	6
+PH	W	Mie	4.0300	1.0000	12      4	
+PHE	CM	Mie 	4.9530	0.300	9	6
+PHE	CMD2	Mie 	4.7025	0.300	9	6
+PHE	CT	Mie 	4.9925	0.320	9	6
+PHE	CT2	Mie 	4.8105	0.280	9	6
+PHE	EST1	Mie 	4.5500	0.500	9	6
+PHE	EST2	Mie 	4.5500	0.500	9	6
+PHE	GL	Mie 	4.7500	0.300	9	6
+PHE	PHE	Mie 	4.6000	1.400	9	6
+PHE	W	Mie	4.0300	1.000	12      4	
+SO3	CAM	Mie	4.9	0.1264	9	6
+SO3	CAX	Mie	4.865	0.2	9	6
+SO3	CM3	Mie	4.75	0.1865	9	6
+SO3	CM4	Mie	5.06	0.1876	9	6
+SO3	CMT	Mie	4.89	0.1442	9	6
+SO3	CMY	Mie	4.93	0.1523	9	6
+SO3	CT2	Mie	4.615	0.1554	9	6
+SO3	CT3	Mie	4.79	0.1937	9	6
+SO3	CT4	Mie	4.936	0.2241	9	6
+SO3	CTY	Mie	4.939	0.1692	9	6
+SO3	SO3	Mie	5	0.5	9	6
+SO3	SOD	Mie	4	0.7	12	4
+SO3	W	Mie	4.1	1.1	12	4
+SOD	CAM	Mie	4.586	0.33	12	4
+SOD	CAX	Mie	4.551	0.445	12	4
+SOD	CLA	Mie	4.371	0.895	12	4
+SOD	CM3	Mie	4.436	0.36	12	4
+SOD	CM4	Mie	4.746	0.37	12	4
+SOD	CMT	Mie	4.576	0.286	12	4
+SOD	CMY	Mie	4.616	0.296	12	4
+SOD	CT2	Mie	4.3	0.283	12	4
+SOD	CT3	Mie	4.476	0.364	12	4
+SOD	CT4	Mie	4.622	0.433	12	4
+SOD	CTY	Mie	4.624	0.334	12	4
+SOD	SOD	Mie	4.371	0.35	12	4
+SOD	W	Mie	4.371	0.895	12	4
+W	CAM	Mie	4.586	0.33	12	4
+W	CAT	Mie	4.406	0.37	12	4
+W	CAX	Mie	4.553	0.445	12	4
+W	CM	Mie	4.4385	0.3400	12      4	
+W	CM3	Mie	4.436	0.36	12	4
+W	CM4	Mie	4.746	0.37	12	4
+W	CMT	Mie	4.576	0.286	12	4
+W	CMY	Mie	4.616	0.296	12	4
+W	CT	Mie	4.4780	0.3600	12	4	
+W	CT2	Mie	4.2960	0.2900	12	4	
+W	CT3	Mie	4.476	0.364	12	4
+W	CT4	Mie	4.622	0.433	12	4
+W	CTB	Mie	4.3	0.283	12	4
+W	CTC	Mie	4.476	0.364	12	4
+W	CTY	Mie	4.624	0.334	12	4
+W	EO	Mie	4.3100	0.5700	12	4	
+W	OA	Mie	3.9500	0.7000	12	4	
+W	W	Mie	4.3710	0.8950	12	4		
+end NonBondedInteractionTypes
