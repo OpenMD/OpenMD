@@ -43,7 +43,7 @@ begin Options
       DistanceMixingRule arithmetic
       EnergyMixingRule geometric
       vdW-12-scale 0.0
-      vdW-13-scale 
+      vdW-13-scale 0.0
 end Options
 
 begin BaseAtomTypes
