@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2017 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,45 +39,37 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#ifndef TYPES_BONDTYPEPARSER_HPP
-#define TYPES_BONDTYPEPARSER_HPP
 
-#include <map>
-#include <vector>
-#include <string>
-#include "types/BondType.hpp"
+#ifndef TYPES_SDKBENDTYPE_HPP
+#define TYPES_SDKBENDTYPE_HPP
+
+#include "types/HarmonicBendType.hpp"
+#include "types/ShiftedMieBondType.hpp"
 
 namespace OpenMD {
-
   /**
-   * @class BondTypeParser BondTypeParser.hpp "types/BondTypeParser.hpp"
+   * @class SDKBendType 
+   *
    */
-  class BondTypeParser {
+  class SDKBendType : public HarmonicBendType {
+    
   public:
-    BondTypeParser();
-    BondType* parseLine(const std::string& line, RealType kScale);
-    BondType* parseTypeAndPars(const std::string& type,
-                               std::vector<RealType> pars);
-            
-  private:
-
-    enum BondTypeEnum{
-      btFixed,
-      btHarmonic,
-      btCubic,
-      btQuartic,
-      btPolynomial,
-      btMorse,
-      btShiftedMie,
-      btUnknown
-    };
-            
-    BondTypeEnum getBondTypeEnum(const std::string& str);  
-    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
-  };
-} 
-
-#endif
+    
+    SDKBendType(RealType theta0, RealType ktheta, RealType sigma, 
+                RealType epsilon, int nRep, int mAtt) :
+      HarmonicBendType(theta0, ktheta),
+      smbt_(ShiftedMieBondType(sigma, epsilon, nRep, mAtt)){
+    }    
+    
+    ShiftedMieBondType* getShiftedMieBondType() {
+      return &smbt_;
+    }
+                
+  private:    
+    ShiftedMieBondType smbt_;
+    
+  };  
+}
+#endif 
 
 

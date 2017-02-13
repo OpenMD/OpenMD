@@ -56,7 +56,8 @@ namespace OpenMD {
   public:
     BendTypeParser();
     BendType* parseLine(const std::string& line, RealType kScale);
-    BendType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
+    BendType* parseTypeAndPars(const std::string& type,
+                               std::vector<RealType> pars);
         
   private:
 
@@ -68,6 +69,7 @@ namespace OpenMD {
       btQuartic,
       btPolynomial,
       btCosine,
+      btSDK,
       btUnknown
     };
             

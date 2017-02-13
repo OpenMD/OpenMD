@@ -49,6 +49,7 @@
 #include "types/QuarticBendType.hpp"
 #include "types/PolynomialBendType.hpp"
 #include "types/CosineBendType.hpp"
+#include "types/SDKBendType.hpp"
 #include "utils/OpenMDException.hpp"
 #include "utils/StringUtils.hpp"
 
@@ -61,7 +62,8 @@ namespace OpenMD {
     stringToEnumMap_["Cubic"] = btCubic;
     stringToEnumMap_["Quartic"] = btQuartic;
     stringToEnumMap_["Polynomial"] = btPolynomial;    
-    stringToEnumMap_["Cosine"] = btCosine;    
+    stringToEnumMap_["Cosine"] = btCosine;
+    stringToEnumMap_["SDK"] = btSDK;
   }
   
   BendType* BendTypeParser::parseTypeAndPars(const std::string& type,
@@ -78,7 +80,8 @@ namespace OpenMD {
     return parseLine( line , 1.0 );    
   }
 
-  BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
+  BendType* BendTypeParser::parseLine(const std::string& line,
+                                      RealType kScale) {
     
     StringTokenizer tokenizer(line);
     BendType* bendType = NULL;
@@ -184,7 +187,20 @@ namespace OpenMD {
 	bendType = new CosineBendType(theta0, ktheta);
       }
       break;
-
+      
+    case btSDK :
+      if (nTokens < 5) {
+        throw OpenMDException("BendTypeParser: Not enough tokens");
+      } else {
+	RealType ktheta = tokenizer.nextTokenAsDouble();
+	RealType sigma =  tokenizer.nextTokenAsDouble();
+	RealType epsilon = tokenizer.nextTokenAsDouble();
+        int nRep = tokenizer.nextTokenAsInt();
+        int mAtt = tokenizer.nextTokenAsInt();
+	bendType = new SDKBendType(theta0, ktheta, sigma, epsilon, nRep, mAtt);
+      }
+      break; 
+      
     case btUnknown :
     default:
       throw OpenMDException("BendTypeParser: Unknown Bend Type");

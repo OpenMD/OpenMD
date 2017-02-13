@@ -40,44 +40,23 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_BONDTYPEPARSER_HPP
-#define TYPES_BONDTYPEPARSER_HPP
-
-#include <map>
-#include <vector>
-#include <string>
-#include "types/BondType.hpp"
+#include "primitives/SDKBend.hpp"
 
 namespace OpenMD {
-
-  /**
-   * @class BondTypeParser BondTypeParser.hpp "types/BondTypeParser.hpp"
-   */
-  class BondTypeParser {
-  public:
-    BondTypeParser();
-    BondType* parseLine(const std::string& line, RealType kScale);
-    BondType* parseTypeAndPars(const std::string& type,
-                               std::vector<RealType> pars);
-            
-  private:
-
-    enum BondTypeEnum{
-      btFixed,
-      btHarmonic,
-      btCubic,
-      btQuartic,
-      btPolynomial,
-      btMorse,
-      btShiftedMie,
-      btUnknown
-    };
-            
-    BondTypeEnum getBondTypeEnum(const std::string& str);  
-    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
-  };
-} 
-
-#endif
-
-
+  SDKBend::SDKBend(Atom* atom1, Atom* atom2, Atom* atom3, SDKBendType* bt) 
+    : Bend(atom1, atom2, atom3, bt), bond_(NULL){
+    bond_ = new Bond(atom1, atom3, bt->getShiftedMieBondType());
+  }
+  
+  SDKBend::~SDKBend() {
+    delete bond_;
+  }
+  
+  void SDKBend::calcForce(RealType& angle, bool doParticlePot) {
+    Bend::calcForce(angle, doParticlePot);
+    bond_->calcForce(doParticlePot);
+    if (doParticlePot) {
+      atoms_[1]->addParticlePot(bond_->getPotential());
+    }
+  }  
+}

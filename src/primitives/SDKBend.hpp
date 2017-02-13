@@ -40,44 +40,30 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_BONDTYPEPARSER_HPP
-#define TYPES_BONDTYPEPARSER_HPP
+#ifndef PRIMITIVES_SDKBEND_HPP
+#define PRIMITIVES_SDKBEND_HPP
 
-#include <map>
-#include <vector>
-#include <string>
-#include "types/BondType.hpp"
+#include "primitives/Bond.hpp"
+#include "primitives/Bend.hpp"
+#include "types/SDKBendType.hpp"
 
 namespace OpenMD {
 
-  /**
-   * @class BondTypeParser BondTypeParser.hpp "types/BondTypeParser.hpp"
-   */
-  class BondTypeParser {
+  class SDKBend : public Bend {
   public:
-    BondTypeParser();
-    BondType* parseLine(const std::string& line, RealType kScale);
-    BondType* parseTypeAndPars(const std::string& type,
-                               std::vector<RealType> pars);
-            
-  private:
+    SDKBend(Atom* atom1, Atom* atom2, Atom* atom3, SDKBendType* bt);
+    virtual ~SDKBend();
+    virtual void calcForce(RealType& angle, bool doParticlePot);
 
-    enum BondTypeEnum{
-      btFixed,
-      btHarmonic,
-      btCubic,
-      btQuartic,
-      btPolynomial,
-      btMorse,
-      btShiftedMie,
-      btUnknown
-    };
-            
-    BondTypeEnum getBondTypeEnum(const std::string& str);  
-    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
+  protected:
+    virtual SDKBendType* getSDKBendType() {
+      return static_cast<SDKBendType*> (bendType_);
+    }
+        
+  private:
+    Bond* bond_;
   };
-} 
+
+}
 
 #endif
-
-

@@ -47,6 +47,7 @@
 #include "types/QuarticBondType.hpp"
 #include "types/PolynomialBondType.hpp"
 #include "types/MorseBondType.hpp"
+#include "types/ShiftedMieBondType.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/OpenMDException.hpp"
@@ -60,6 +61,7 @@ namespace OpenMD {
     stringToEnumMap_["Quartic"] = btQuartic;
     stringToEnumMap_["Polynomial"] = btPolynomial;
     stringToEnumMap_["Morse"] = btMorse;
+    stringToEnumMap_["ShiftedMie"] = btShiftedMie;    
   }
 
   BondType* BondTypeParser::parseTypeAndPars(const std::string& type,
@@ -72,35 +74,40 @@ namespace OpenMD {
       line.append("\t");
       line.append( OpenMD::to_string(*it) );      
     }
-    // assume all override know about our functional forms:
+    // assume all overrides know about our functional forms:
     return parseLine( line, 1.0 );    
   }
 
   
-  BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
+  BondType* BondTypeParser::parseLine(const std::string& line,
+                                      RealType kScale) {
     
     StringTokenizer tokenizer(line);
     BondType* bondType = NULL;
     int nTokens = tokenizer.countTokens();
 
-    if (nTokens < 2) {
+    if (nTokens < 1) {
       throw OpenMDException("BondTypeParser: Not enough tokens");
     }
     
     BondTypeEnum bt = getBondTypeEnum(tokenizer.nextToken());
-    RealType b0 = tokenizer.nextTokenAsDouble();
-    nTokens -= 2;
+    nTokens -= 1;
 
-    //switch is a nightmare to maintain
     switch(bt) {
     case btFixed :
-      bondType = new FixedBondType(b0);
-      break;
-            
-    case btHarmonic :
       if (nTokens < 1) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
+        RealType b0 = tokenizer.nextTokenAsDouble();
+        bondType = new FixedBondType(b0);
+      }
+      break;
+            
+    case btHarmonic :
+      if (nTokens < 2) {
+        throw OpenMDException("BondTypeParser: Not enough tokens");
+      } else {
+        RealType b0 = tokenizer.nextTokenAsDouble();
 	RealType kb = tokenizer.nextTokenAsDouble();
         kb *= kScale;
 	bondType = new HarmonicBondType(b0, kb);
@@ -108,10 +115,10 @@ namespace OpenMD {
       break;
 
     case btCubic :
-      if (nTokens < 4) {
+      if (nTokens < 5) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
-
+        RealType b0 = tokenizer.nextTokenAsDouble();      
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();
 	RealType k1 = tokenizer.nextTokenAsDouble();
@@ -122,25 +129,29 @@ namespace OpenMD {
       break;
             
     case btQuartic :
-      if (nTokens < 5) {
+      if (nTokens < 6) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
-
-	b0 = tokenizer.nextTokenAsDouble();
-	RealType k4 = tokenizer.nextTokenAsDouble();
+        
+        RealType b0 = tokenizer.nextTokenAsDouble();
+        RealType k4 = tokenizer.nextTokenAsDouble();
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();
 	RealType k1 = tokenizer.nextTokenAsDouble();
 	RealType k0 = tokenizer.nextTokenAsDouble();
-                
+        
 	bondType = new QuarticBondType(b0, k4, k3, k2, k1, k0);
       }
       break;
 
     case btPolynomial :
-      if (nTokens < 2 || nTokens % 2 != 0) {
+            
+      if (nTokens < 3 || nTokens % 2 != 1) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
+        RealType b0 = tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+
 	int nPairs = nTokens / 2;
 	int power;
 	RealType coefficient;
@@ -156,16 +167,30 @@ namespace OpenMD {
       break;
 
     case btMorse :
-      if (nTokens < 2) {
+      if (nTokens < 3) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
-
+        RealType b0 = tokenizer.nextTokenAsDouble();
         RealType D = tokenizer.nextTokenAsDouble();
         RealType beta = tokenizer.nextTokenAsDouble();
         bondType = new MorseBondType(b0, D, beta);
       }
       break;
-            
+
+    case btShiftedMie :
+      if (nTokens < 4) {
+        throw OpenMDException("BondTypeParser: Not enough tokens");
+      } else {
+
+        RealType sigma = tokenizer.nextTokenAsDouble();
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        int nRep = tokenizer.nextTokenAsInt();
+        int mAtt = tokenizer.nextTokenAsInt();
+        
+        bondType = new ShiftedMieBondType(sigma, epsilon, nRep, mAtt);
+      }
+      break;
+
 
     case btUnknown :
     default:
