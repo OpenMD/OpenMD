@@ -53,7 +53,7 @@ namespace OpenMD {
   class VectorField : public StaticAnalyser{
   public:
     VectorField(SimInfo* info, const std::string& filename, 
-		const std::string& sele1, RealType voxelSize, RealType gaussWidth);
+		const std::string& sele1, RealType voxelSize);
 
     virtual ~VectorField();
     virtual void process();
@@ -67,7 +67,6 @@ namespace OpenMD {
     SelectionEvaluator evaluator1_;
 
     RealType voxelSize_;
-    RealType gaussWidth_;
 
     Vector3i nBins_;
     std::vector<std::vector<std::vector<RealType> > > count_;

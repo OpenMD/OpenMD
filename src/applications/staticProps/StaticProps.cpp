@@ -541,7 +541,7 @@ int main(int argc, char* argv[]){
     analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen, 
                                       nrbins);
   } else if (args_info.vectorfield_given) {
-    analyser = new VectorField(info, dumpFileName, sele1, args_info.voxelSize_arg, args_info.gaussWidth_arg);
+    analyser = new VectorField(info, dumpFileName, sele1, args_info.voxelSize_arg);
   }
 
   if (args_info.output_given) {

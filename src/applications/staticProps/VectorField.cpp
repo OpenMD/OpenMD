@@ -55,10 +55,10 @@ namespace OpenMD {
   VectorField::VectorField(SimInfo* info,  
                            const std::string& filename, 
 			   const std::string& sele1,
-			   RealType voxelSize, RealType gaussWidth) 
+			   RealType voxelSize) 
     : StaticAnalyser(info, filename, 1), 
       selectionScript1_(sele1),  
-      seleMan1_(info), evaluator1_(info), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
+      seleMan1_(info), evaluator1_(info), voxelSize_(voxelSize){
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -104,16 +104,9 @@ namespace OpenMD {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    Vector3d vec;
-    Vector3d ri, rj, rk, rik, rkj;
-    RealType r;
     int isd1;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    
-    int kMax = int(5.0 * gaussWidth_ / voxelSize_);
-    int kSqLim = kMax*kMax;
-    cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = "
-         << kMax << " kSqLim = " << kSqLim << "\n";
+
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
