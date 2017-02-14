@@ -43,6 +43,7 @@ begin Options
       EnergyMixingRule geometric
       vdW-12-scale 0.0
       vdW-13-scale 0.0
+      vdW-14-scale 1.0
 end Options
 
 begin BaseAtomTypes

@@ -256,21 +256,23 @@ namespace OpenMD {
         phb = 0.0;
         phab = 0.0;
 
-        if ( r < ea1.getRcut() ) {
+        // rcut values are derived parameters if no splines are pre-set:
+        
+        if ( r < data1.rcut ) {
           rha = data1.rho->getValueAt(r);
           pha = precomputePhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
         }
-        if ( r < ea2.getRcut() ) {
+        if ( r < data2.rcut ) {
           rhb = data2.rho->getValueAt(r);
           phb = precomputePhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
         }
 
-        if ( r < ea1.getRcut() )
+        if ( r < data1.rcut )
           phab = phab + 0.5 * (rhb / rha) * pha;
-        if ( r < ea2.getRcut() )
+        if ( r < data2.rcut )
           phab = phab + 0.5 * (rha / rhb) * phb;
 
-        phivals.push_back(phab);
+        phivals.push_back(phab);                
       }
       cs->addPoints(rvals, phivals);
     }
@@ -431,6 +433,7 @@ namespace OpenMD {
         rho = RealType(i)*drho;
         rhovals.push_back(rho);
         funcvals.push_back( precomputeFunctional(rho, rhoe, Fn, F, Fe, eta) );
+
       }
 
       eamAtomData.F = new CubicSpline();
