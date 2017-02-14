@@ -159,7 +159,7 @@ namespace OpenMD {
 	  currentSnapshot_->wrapVector(pos); 
 	  sd->setPos(pos);
 	}
-
+	
 	//Convert to a scaled position vector, range (-1/2, 1/2)
 	// want range to be (0,1), so add 1/2
 	Vector3d sPos = invBox * pos;
@@ -175,12 +175,7 @@ namespace OpenMD {
 	int xbin = int( sPos.x() * nBins_(0) );
 	int ybin = int( sPos.y() * nBins_(1) ); 
 	int zbin = int( sPos.z() * nBins_(2) );
-	
-
-	//Test to see if I get back pos from bin#s
-	//cout << "pos = " << pos << "\n";
-	//cout << "xbin/nBins = " << float(xbin) / float(nBins_(0)) << "\n";
-
+       
 	
 	//add the velocity of the sd to the current total
 	if ( (xbin < int(nBins_(0))) && (xbin >= 0) ){ 
@@ -203,12 +198,14 @@ namespace OpenMD {
     // where (x,y,z) is the location of the center of the voxel, and (u,v,w) is the velocity vector
     
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-
+    
     // normalize by total number of elements in each voxel:                                                                    
-    for (unsigned int i = 0; i < hist_.size(); ++i) {
+    for(unsigned int i = 0; i < hist_.size(); ++i) {
       for(unsigned int j = 0; j < hist_[i].size(); ++j) {
-        for(unsigned int k = 0;k < hist_[i][j].size(); ++k) {
-          hist_[i][j][k] = hist_[i][j][k] / count_[i][j][k];
+        for(unsigned int k = 0; k < hist_[i][j].size(); ++k) {
+	  if (count_[i][j][k] > 0.0) {
+	      hist_[i][j][k] = hist_[i][j][k] / count_[i][j][k];
+	  }
 	}
       }
     }
@@ -219,16 +216,15 @@ namespace OpenMD {
       VectorFieldstream <<  "# where (x,y,z) is the location of the center of the voxel and (Vx,Vy,Vz) is the \n";
       VectorFieldstream <<  "# average velocity vector for that voxel. \n";
       
-      // for (std::size_t k = 0; k < hist_[0][0].size(); ++k) {
-      //   for(std::size_t j = 0; j < hist_[0].size(); ++j) {
-      //     for(std::size_t i = 0; i < hist_.size(); ++i) {
-      //       qXYZstream << hist_[i][j][k] << " ";
-      //       qXYZstream.write(reinterpret_cast<char *>( &hist_[i][j][k] ),                                     
-      //       sizeof( hist_[i][j][k] ));     
+
+      for (std::size_t k = 0; k < hist_[0][0].size(); ++k) {
+	for(std::size_t j = 0; j < hist_[0].size(); ++j) {
+	  for(std::size_t i = 0; i < hist_.size(); ++i) {
+	    VectorFieldstream << float(hmat(0,0)* (float(i)/nBins_(0) - 0.5)) <<  "\t" << float(hmat(1,1) * (float(j)/nBins_(1) - 0.5)) << "\t" <<  float(hmat(2,2) * (float(k)/nBins_(2) - 0.5)) << "\t" << float(hist_[i][j][k](0)) << "\t" << float(hist_[i][j][k](1)) << "\t" << float(hist_[i][j][k](2)) << "\n";
       
-      //     }
-      //   }
-      // }
+	  }
+	}
+      }
       
     } //if:VectorFieldstream    
 
