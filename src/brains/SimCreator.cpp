@@ -333,7 +333,6 @@ namespace OpenMD {
         }
       }
 
-
       bool startFound(false);
       bool endFound(false);
       //scan through the input stream and find MetaData tag        
@@ -438,7 +437,8 @@ namespace OpenMD {
       if (pos != std::string::npos) {
         forcefieldFileName.insert(pos, variant);
       } else {
-        //If the default force field file name does not containt .frc suffix, just append the .variant
+        // If the default force field file name does not containt .frc suffix,
+        // just append the .variant
         forcefieldFileName.append(variant);
       }
     } 
@@ -484,7 +484,8 @@ namespace OpenMD {
     //atoms before they get created.
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
-    for (mol= info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    for (mol= info->beginMolecule(mi); mol != NULL;
+         mol = info->nextMolecule(mi)) {
       info->addInteractionPairs(mol);
     }
     
@@ -512,14 +513,12 @@ namespace OpenMD {
       info->setFinalConfigFileName(prefix + ".eor");
       info->setDumpFileName(prefix + ".dump");
       info->setStatFileName(prefix + ".stat");
+      info->setReportFileName(prefix + ".report");
       info->setRestFileName(prefix + ".zang");
       
-#ifdef IS_MPI
-      
-    }
-    
-#endif
-    
+#ifdef IS_MPI      
+    }    
+#endif    
   }
   
 #ifdef IS_MPI
@@ -528,8 +527,7 @@ namespace OpenMD {
     int nProcessors;
     std::vector<int> atomsPerProc;
     int nGlobalMols = info->getNGlobalMolecules();
-    std::vector<int> molToProcMap(nGlobalMols, -1); // default to an
-                                                    // error
+    std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error
                                                     // condition:
     
     MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);    
@@ -557,7 +555,6 @@ namespace OpenMD {
     }else {
       myRandom = new SeqRandNumGen();
     }   
-    
     
     a = 3.0 * nGlobalMols / info->getNGlobalAtoms();
     
@@ -600,7 +597,7 @@ namespace OpenMD {
             sprintf(painCave.errMsg,
                     "There have been 100 attempts to assign molecule %d to an\n"
                     "\tunderworked processor, but there's no good place to\n"
-                    "\tleave it.  OpenMD is assigning it at random to processor %d.\n",
+                    "\tleave it. OpenMD is assigning it at random to processor %d.\n",
                     i, which_proc);
            
             painCave.isFatal = 0;
@@ -674,8 +671,7 @@ namespace OpenMD {
     
     for(int i = 0; i < info->getNGlobalMolecules(); i++) {
       
-#ifdef IS_MPI
-      
+#ifdef IS_MPI      
       if (info->getMolToProc(i) == worldRank) {
 #endif
         
@@ -687,13 +683,10 @@ namespace OpenMD {
         
         info->addMolecule(mol);
         
-#ifdef IS_MPI
-        
-      }
-      
-#endif
-      
-    } //end for(int i=0)   
+#ifdef IS_MPI        
+      }      
+#endif      
+    }
   }
     
   int SimCreator::computeStorageLayout(SimInfo* info) {
@@ -910,7 +903,8 @@ namespace OpenMD {
 
         beginAtomIndex += stamp->getNAtoms();
         beginRigidBodyIndex += stamp->getNRigidBodies();
-        beginCutoffGroupIndex += stamp->getNCutoffGroups() + stamp->getNFreeAtoms();
+        beginCutoffGroupIndex += stamp->getNCutoffGroups()
+          + stamp->getNFreeAtoms();
         beginBondIndex += stamp->getNBonds();
         beginBendIndex += stamp->getNBends();
         beginTorsionIndex += stamp->getNTorsions();
@@ -928,9 +922,8 @@ namespace OpenMD {
            cg = mol->nextCutoffGroup(ci)) {        
         for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
           globalGroupMembership[atom->getGlobalIndex()] = cg->getGlobalIndex();
-        }
-        
-      }       
+        }        
+      }
     }
    
 #ifdef IS_MPI    
@@ -988,7 +981,8 @@ namespace OpenMD {
 #ifdef IS_MPI
     std::vector<int> numIntegrableObjectsPerMol(info->getNGlobalMolecules(), 0);
     MPI_Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
-      info->getNGlobalMolecules(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+                  info->getNGlobalMolecules(),
+                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #else
     std::vector<int> numIntegrableObjectsPerMol = nIOPerMol;
 #endif    
@@ -1018,7 +1012,8 @@ namespace OpenMD {
     
   }
   
-  void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
+  void SimCreator::loadCoordinates(SimInfo* info,
+                                   const std::string& mdFileName) {
     
     DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
@@ -1037,6 +1032,6 @@ namespace OpenMD {
     info->getSnapshotManager()->advance();
   }
   
-} //end namespace OpenMD
+}
 
 

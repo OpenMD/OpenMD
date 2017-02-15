@@ -202,7 +202,7 @@ namespace OpenMD {
     progressBar->setStatus(runTime, runTime);
     progressBar->update();
 
-    std::cout << stats->getStatsReport();
+    statWriter->writeStatReport();
  
     delete dumpWriter;
     delete statWriter;
@@ -232,6 +232,7 @@ namespace OpenMD {
     
     stats = new Stats(info_);
     statWriter = new StatWriter(info_->getStatFileName(), stats);
+    statWriter->setReportFileName(info_->getReportFileName());
     
     return statWriter;
   }

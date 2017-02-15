@@ -52,17 +52,19 @@
 #include "io/StatWriter.hpp"
 #include "brains/Stats.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 
 using namespace std;
 
 namespace OpenMD {
 
-  StatWriter::StatWriter( const std::string& filename, Stats* stats) : stats_(stats){
-
+  StatWriter::StatWriter( const std::string& filename, Stats* stats) :
+    stats_(stats){
+    
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif // is_mpi
-
+      
       statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc );
 
       if( !statfile_ ){
@@ -74,6 +76,22 @@ namespace OpenMD {
 	simError();
       }
 
+      // Create the string for embedding the version information in the MetaData
+      version.assign("## Last run using OpenMD version: ");
+      version.append(OPENMD_VERSION_MAJOR);
+      version.append(".");
+      version.append(OPENMD_VERSION_MINOR);
+      version.append(",");
+      
+      std::string rev(revision, strnlen(revision, 40));
+      version.append(" revision: ");
+      // If there's no SVN revision, just call this the RELEASE revision.
+      if (!rev.empty()) {
+        version.append(rev);
+      } else {
+        version.append("RELEASE");
+      }
+      
       writeTitle();
 
 #ifdef IS_MPI
@@ -108,6 +126,8 @@ namespace OpenMD {
     if(worldRank == 0 ){
 #endif // is_mpi
 
+      // write revision
+      statfile_ << version << std::endl;
       //write title
       statfile_ << "#";
       for (unsigned int i = 0; i <mask.size(); ++i) {
@@ -232,5 +252,29 @@ namespace OpenMD {
         }
       }
     }
+  }
+  
+  void StatWriter::writeStatReport() {
+#ifdef IS_MPI
+    if(worldRank == 0 ){
+#endif      
+      reportfile_.open(reportFileName_.c_str(),
+                       std::ios::out | std::ios::trunc );
+      
+      if( !reportfile_ ){        
+        sprintf( painCave.errMsg,
+                 "Could not open \"%s\" for report output.\n",
+                 reportFileName_.c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      reportfile_ << stats_->getStatsReport();
+      std::cout << stats_->getStatsReport();        
+      reportfile_.close();
+      
+#ifdef IS_MPI
+    }
+#endif
   }
 }

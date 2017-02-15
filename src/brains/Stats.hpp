@@ -153,5 +153,5 @@ namespace OpenMD {
     StatsBitSet statsMask_;
     StatsMapType statsMap_;
   };
-} //end namespace OpenMD
-#endif //BRAINS_STATS_HPP
+}
+#endif

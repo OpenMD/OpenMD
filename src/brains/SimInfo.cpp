@@ -285,7 +285,7 @@ namespace OpenMD {
 #ifdef IS_MPI
     MPI_Allreduce(&ndf_local, &ndf_, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&nfq_local, &nGlobalFluctuatingCharges_, 1,
-      MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #else
     ndf_ = ndf_local;
     nGlobalFluctuatingCharges_ = nfq_local;
@@ -420,7 +420,8 @@ namespace OpenMD {
       } else {
         set<int> oneAtomSet;
         oneAtomSet.insert(sd->getGlobalIndex());
-        atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(), oneAtomSet));        
+        atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(),
+                                                          oneAtomSet));        
       }
     }  
 
@@ -573,7 +574,8 @@ namespace OpenMD {
       } else {
         set<int> oneAtomSet;
         oneAtomSet.insert(sd->getGlobalIndex());
-        atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(), oneAtomSet));        
+        atomGroups.insert(map<int, set<int> >::value_type(sd->getGlobalIndex(),
+                                                          oneAtomSet));        
       }
     }  
 
@@ -800,15 +802,15 @@ namespace OpenMD {
 
   int getGlobalCountOfType(AtomType* atype) {
     /*
-    set<AtomType*> atypes = getSimulatedAtomTypes();
-    map<AtomType*, int> counts_;
+      set<AtomType*> atypes = getSimulatedAtomTypes();
+      map<AtomType*, int> counts_;
 
-    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+      for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
       for(atom = mol->beginAtom(ai); atom != NULL;
-          atom = mol->nextAtom(ai)) {
-	atom->getAtomType();
+      atom = mol->nextAtom(ai)) {
+      atom->getAtomType();
       }      
-    }    
+      }    
     */
     return 0;
   }

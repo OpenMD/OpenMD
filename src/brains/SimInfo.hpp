@@ -401,6 +401,14 @@ namespace OpenMD{
     void setStatFileName(const string& fileName) {
       statFileName_ = fileName;
     }
+    
+    string getReportFileName() {
+      return reportFileName_;
+    }
+    
+    void setReportFileName(const string& fileName) {
+      reportFileName_ = fileName;
+    }
         
     string getRestFileName() {
       return restFileName_;
@@ -672,6 +680,7 @@ namespace OpenMD{
     string finalConfigFileName_;
     string dumpFileName_;
     string statFileName_;
+    string reportFileName_;
     string restFileName_;
 
     bool topologyDone_;  /** flag to indicate whether the topology has

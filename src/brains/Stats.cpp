@@ -616,12 +616,12 @@ namespace OpenMD {
           break; 
 
           /*
-        case SHADOWH:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getShadowHamiltionian());
-          break;
-        case HELFANDMOMENT:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getHelfandMoment());
-          break;
+            case SHADOWH:
+            dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getShadowHamiltionian());
+            break;
+            case HELFANDMOMENT:
+            dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getHelfandMoment());
+            break;
           */
         }
       }
@@ -739,9 +739,11 @@ namespace OpenMD {
     report <<
       "################################################################################\n" <<
       "# Status Report:                                                               #\n";
-    report << "# " << setw(22) << "Total Time:" << setw(12) << getRealData(TIME);
+    report << "# " << setw(22) << "Total Time:";
+    report << setw(12) << getRealData(TIME);
     report << " " << setw(17) << left << getUnits(TIME) << "                         #\n";
-    report << "# " << right << setw(22) << "Number of Samples:" << setw(12) << nSamp;
+    report << "# " << right << setw(22) << "Number of Samples:";
+    report << setw(12) << nSamp;
     report << "                                           #\n";
 
     for (unsigned int i = 0; i < statsMask_.size(); ++i) {
@@ -751,7 +753,8 @@ namespace OpenMD {
           report << "# " << right << setw(21) << getTitle(i) << ":";
           report << right << setw(12) << getRealAverage(i);
           report << " \u00B1 " << left << setw(12) << getRealError(i);
-          report << " " << left << setw(17) << getUnits(i) << "          #" << std::endl;
+          report << " " << left << setw(17) << getUnits(i);
+          report << "          #" << std::endl;
 
         }
         else if (getDataType(i) == "Vector3d") {
@@ -760,17 +763,20 @@ namespace OpenMD {
 
           report << "#                       ";
           report << "\u23A1" << right << setw(12) << s(0) << "\u23A4   ";
-          report << "\u23A1" << right <<  setw(12) << e(0) << "\u23A4                        #" << std::endl;
+          report << "\u23A1" << right <<  setw(12) << e(0);
+          report << "\u23A4                        #" << std::endl;
 
           report << "# " << right << setw(21) << getTitle(i) << ":";
 
           report << "\u23A2" << right << setw(12) << s(1) << "\u23A5 \u00B1 ";
           report << "\u23A2" << right << setw(12) << e(1) << "\u23A5 ";
-          report << left << setw(17) << getUnits(i) << "      #" << std::endl;
+          report << left << setw(17) << getUnits(i) << "      #";
+          report << std::endl;
           
           report << "#                       ";
           report << "\u23A3" << right << setw(12) << s(2) << "\u23A6   ";
-          report << "\u23A3" << right <<  setw(12) << e(2) << "\u23A6                        #" << std::endl;
+          report << "\u23A3" << right <<  setw(12) << e(2);
+          report << "\u23A6                        #" << std::endl;
 
         }
         else if (getDataType(i) == "potVec") {
@@ -778,7 +784,8 @@ namespace OpenMD {
           potVec e = getPotVecError(i);
 
           report << "# " << right << setw(21) << getTitle(i);
-          report <<":                                                       #" << std::endl;
+          report << ":                                                       #";
+          report << std::endl;
 
           for (unsigned int j = 1; j < N_INTERACTION_FAMILIES; j++) {
             switch (j) {
@@ -803,7 +810,8 @@ namespace OpenMD {
             }
             report << right << setw(12) << s[j];
             report << " \u00B1 " << left << setw(12) << e[j];
-            report << " " << left << setw(17) << getUnits(i) << "          #" << std::endl;
+            report << " " << left << setw(17) << getUnits(i) << "          #";
+            report << std::endl;
           }
           
         }
@@ -814,7 +822,8 @@ namespace OpenMD {
           report << "#                       ";
           report << "\u23A1" << right << setw(12) << s(0,0) << " ";
           report << right << setw(12) << s(0,1) << " ";
-          report << right << setw(12) << s(0,2) << "\u23A4               #" << std::endl;
+          report << right << setw(12) << s(0,2) << "\u23A4               #";
+          report << std::endl;
 
           report << "# " << right << setw(21) << getTitle(i) << ":";
 
@@ -826,23 +835,27 @@ namespace OpenMD {
           report << "#                       ";
           report << "\u23A3" << right << setw(12) << s(2,0) << " ";
           report << right << setw(12) << s(2,1) << " ";
-          report << right << setw(12) << s(2,2) << "\u23A6               #" << std::endl;
+          report << right << setw(12) << s(2,2) << "\u23A6               #";
+          report << std::endl;
 
           report << "#                                 ";
           report << "\u23A1" << right << setw(12) << e(0,0) << " ";
           report << right << setw(12) << e(0,1) << " ";
-          report << right << setw(12) << e(0,2) << "\u23A4     #" << std::endl;
+          report << right << setw(12) << e(0,2) << "\u23A4     #";
+          report << std::endl;
 
           report << "#                                \u00B1";
 
           report << "\u23A2" << right << setw(12) << e(1,0) << " ";
           report << right << setw(12) << e(1,1) << " ";
-          report << right << setw(12) << e(1,2) << "\u23A5     #" << std::endl;
+          report << right << setw(12) << e(1,2) << "\u23A5     #";
+          report << std::endl;
 
           report << "#                                 ";
           report << "\u23A3" << right << setw(12) << e(2,0) << " ";
           report << right << setw(12) << e(2,1) << " ";
-          report << right << setw(12) << e(2,2) << "\u23A6     #" << std::endl;
+          report << right << setw(12) << e(2,2) << "\u23A6     #";
+          report << std::endl;
 
         }
       }

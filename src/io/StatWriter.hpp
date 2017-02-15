@@ -60,6 +60,8 @@ namespace OpenMD {
     ~StatWriter();
 
     void writeStat();
+    void writeStatReport();
+    void setReportFileName(const std::string& rfn){ reportFileName_ = rfn; }
             
   private:
     void writeTitle();
@@ -69,6 +71,9 @@ namespace OpenMD {
     void writeMatrix(int i);
         
     std::ofstream statfile_;
+    std::ofstream reportfile_;
+    std::string reportFileName_;
+    std::string version;
     Stats* stats_;
   };
 }
