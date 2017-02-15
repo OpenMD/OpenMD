@@ -213,39 +213,26 @@ namespace OpenMD {
       dx = lenX_ / nBinsX_;
       dy = lenY_ / nBinsY_;
       dz = lenZ_ / nBinsZ_;
-      
-      std::cerr << "len vec = " << lenX_ << "\t" << lenY_ << "\t" << lenZ_ << "\n";
-      std::cerr << "dLen vec = " << dx << "\t" << dy << "\t" << dz << "\n";
-      int iprint = 1;
+
 
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
            sd = seleMan_.nextSelected(ii)) {
 
-	//if (sd->isRigidBody()) std::cerr << "is rigid body\n";
-	//if (sd->isAtom()) std::cerr << "is atom\n";
 
         if (sd->isAtom()) {
           Atom* atom = static_cast<Atom*>(sd);
           Vector3d pos = sd->getPos();
-	  //std::cerr << "pos = " << pos << "\n";
           LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
           // For SPC/E water, this yields the Willard-Chandler
           // distance of 2.4 Angstroms:
           sigma = lja.getSigma() * 0.758176459;
           rcut = 3.0 * sigma;
 	  
-	  if (iprint == 1) {
-	    std::cerr << "sigma = " << sigma << "\n";
-	    std::cerr << "rcut = " << rcut << "\n";
-	    iprint = 0;
-	  }
 
           // scaled positions relative to the box vectors
 	  //  -> the atom's position in numbers of box lengths (more accurately box vectors)
           scaled = invBox * pos ;
-	  //std::cerr << "pos = " << pos << "\n";
-	  //std::cerr << "invBox = " << invBox << "\n";
-	  //std::cerr << "scaled = " << scaled << "\n";
+	  
           // wrap the vector back into the unit box by subtracting
           // integer box numbers
           for (int j = 0; j < 3; j++) {
@@ -265,8 +252,6 @@ namespace OpenMD {
           dj = (int) (rcut / dy);
           dk = (int) (rcut / dz);
                 
-	  //std::cerr << "d(ijk) = " << "\t" << di << "\t" << dj << "\t" << dk << "\n";
-	  // di = 55, dj = 55, dk = 129
 
           for (int i = -di; i <= di; i++) {
             igrid = ibin + i;

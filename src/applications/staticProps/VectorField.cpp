@@ -49,6 +49,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <math.h>
 
 using namespace std;
 namespace OpenMD {
@@ -73,20 +74,20 @@ namespace OpenMD {
 
 
     Vector3d V3Zero(0.0 , 0.0, 0.0);
-    //Build the vector field histogram and count histogram, 
+    //Build the vector field histogram and dens histogram, 
     // fill the vector field with the zero vector and
-    // fill the count histogram with int(0).
-    hist_.resize(nBins_(0));
-    count_.resize(nBins_(0));
+    // fill the dens histogram with int(0).
+    vectorField_.resize(nBins_(0));
+    dens_.resize(nBins_(0));
     for (int i = 0 ; i < nBins_(0); ++i) {
-      hist_[i].resize(nBins_(1));
-      count_[i].resize(nBins_(1));
+      vectorField_[i].resize(nBins_(1));
+      dens_[i].resize(nBins_(1));
       for(int j = 0; j < nBins_(1); ++j) {
-        hist_[i][j].resize(nBins_(2));
-        count_[i][j].resize(nBins_(2));
+        vectorField_[i][j].resize(nBins_(2));
+        dens_[i][j].resize(nBins_(2));
 	for(int k = 0; k < nBins_(2); k++){
-	  hist_[i][j][k] = V3Zero;
-	  count_[i][j][k] = 0.0;
+	  vectorField_[i][j][k] = V3Zero;
+	  dens_[i][j][k] = 0.0;
 	}
       }
     }
@@ -119,12 +120,30 @@ namespace OpenMD {
       Mat3x3d hmat = currentSnapshot_->getHmat();
       Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
       Mat3x3d invBox = currentSnapshot_->getInvHmat();
-     
+      RealType lenX_ = hmat(0,0);
+      RealType lenY_ = hmat(1,1);
+      RealType lenZ_ = hmat(2,2);
+
+      RealType x, y, z, dx, dy, dz;
+      RealType sigma, rcut;
+      int di, dj, dk, ibin, jbin, kbin;
+      int igrid, jgrid, kgrid;
+      Vector3d scaled;
+
+      // d(x,y,z) = the width of each bin
+      dx = lenX_ / nBins_(0);
+      dy = lenY_ / nBins_(1);
+      dz = lenZ_ / nBins_(2);
       
+      // sigma will be used in the gaussian weighting of the
+      // vectorField
+      sigma = sqrt( dx*dx + dy*dy + dz*dz );
+      rcut = 3.0 * sigma;
+
       if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }
-            
+      
       // update the positions of atoms which belong to the rigidbodies
       for (mol = info_->beginMolecule(mi); mol != NULL;
            mol = info_->nextMolecule(mi)) {
@@ -138,10 +157,9 @@ namespace OpenMD {
       //Loop over the selected StuntDoubles:
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
-
+	
 	//Get the velocity of the sd
 	Vector3d vel = sd->getVel();
-	
 	
 	//Get the position of the sd
 	Vector3d pos = sd->getPos();
@@ -155,36 +173,67 @@ namespace OpenMD {
 	
 	//Convert to a scaled position vector, range (-1/2, 1/2)
 	// want range to be (0,1), so add 1/2
-	Vector3d sPos = invBox * pos;
-	for (int i = 0; i < 3; i++) {
-	  sPos(i) = sPos(i) + 0.5;
-	  //Treat the case where the sd is found on the edge of the box 
-	  if (sPos(i) >= 1.0) sPos(i) = sPos(i) - 1.0;
+	Vector3d scaled = invBox * pos;
+
+	// wrap the vector back into the unit box by subtracting                                                                                                                                                       
+	// integer box numbers                                                                                                                                                                                         
+	for (int j = 0; j < 3; j++) {
+	  scaled[j] -= roundMe(scaled[j]);
+	  scaled[j] += 0.5;
+	  // Handle the special case when an object is exactly on                                                                                                                                                      
+	  // the boundary (a scaled coordinate of 1.0 is the same as                                                                                                                                                   
+	  // scaled coordinate of 0.0)                                                                                                                                                                                 
+	  if (scaled[j] >= 1.0) scaled[j] -= 1.0;
 	}
+
+	//find ijk-indices of voxel that atom is in,
+	// multiply scaled positions by nBins
+	ibin = nBins_(0) * scaled.x();
+	jbin = nBins_(1) * scaled.y();
+	kbin = nBins_(2) * scaled.z();
+	
+	// di = the magnitude of distance (in x-dimension) that we 
+	// should loop through to add the velocity density to.
+	di = (int) (rcut / dx);
+	dj = (int) (rcut / dy);
+	dk = (int) (rcut / dz);
 	
 	
-	//To determine which bins the sd belongs to,  
-	// multiply scaled position by nBins
-	int xbin = int( sPos.x() * nBins_(0) );
-	int ybin = int( sPos.y() * nBins_(1) ); 
-	int zbin = int( sPos.z() * nBins_(2) );
-       
-	
-	//add the velocity of the sd to the current total
-	if ( (xbin < int(nBins_(0))) && (xbin >= 0) ){ 
-	  if ( (ybin < int(nBins_(1))) && (ybin >= 0) ){
-	    if ( (zbin < int(nBins_(2))) && (zbin >= 0) ){
-	      hist_[xbin][ybin][zbin] = hist_[xbin][ybin][zbin] + vel;
-	      ++count_[xbin][ybin][zbin]; 
-	    }
-	  }
-	}
+	for (int i = -di; i <= di; i++) {
+	  igrid = ibin + i;
+	  while (igrid >= int(nBins_(0))) { igrid -= int(nBins_(0)); }
+	  while (igrid < 0) { igrid += int(nBins_(0)); }
+	  
+	  x = lenX_ * (RealType(i) / RealType(nBins_(0)) );
+	  
+	  for (int j = -dj; j <= dj; j++) {
+	    jgrid = jbin + j;
+	    while (jgrid >= int(nBins_(1))) {jgrid -= int(nBins_(1));}
+	    while (jgrid < 0) {jgrid += int(nBins_(1));}
 	    
+	    y = lenY_ * (RealType(j) / RealType(nBins_(1)));
+	    
+	    for (int k = -dk; k <= dk; k++) {
+	      kgrid = kbin + k;
+	      while (kgrid >= int(nBins_(2))) {kgrid -= int(nBins_(2));}
+	      while (kgrid < 0) {kgrid += int(nBins_(2));}
+	      
+	      z = lenZ_ * (RealType(k) / RealType(nBins_(2)));
+	      
+	      RealType dist = sqrt(x*x + y*y + z*z);
+	      
+	      dens_[igrid][jgrid][kgrid] += getDensity(dist, sigma, rcut);
+	      vectorField_[igrid][jgrid][kgrid] += dens_[igrid][jgrid][kgrid] * vel;
+	    }//k loop
+	  }//j loop
+	} //i loop
+    
+    
       }// seleMan_1        	    
     }// dumpFile frames
     writeVectorField();
-  }//Process 
-  
+    
+  }// void VectorField::process()
 
   void VectorField::writeVectorField() {
     // Need to write the output file as (x \t y \t z \t u \t v \t w \n) format
@@ -193,11 +242,11 @@ namespace OpenMD {
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     
     // normalize by total number of elements in each voxel:                                                                    
-    for(unsigned int i = 0; i < hist_.size(); ++i) {
-      for(unsigned int j = 0; j < hist_[i].size(); ++j) {
-        for(unsigned int k = 0; k < hist_[i][j].size(); ++k) {
-	  if (count_[i][j][k] > 0.0) {
-	      hist_[i][j][k] = hist_[i][j][k] / count_[i][j][k];
+    for(unsigned int i = 0; i < vectorField_.size(); ++i) {
+      for(unsigned int j = 0; j < vectorField_[i].size(); ++j) {
+        for(unsigned int k = 0; k < vectorField_[i][j].size(); ++k) {
+	  if (dens_[i][j][k] > 0.0) {
+	      vectorField_[i][j][k] = vectorField_[i][j][k] / dens_[i][j][k];
 	  }
 	}
       }
@@ -209,11 +258,10 @@ namespace OpenMD {
       VectorFieldstream <<  "# where (x,y,z) is the location of the center of the voxel and (Vx,Vy,Vz) is the \n";
       VectorFieldstream <<  "# average velocity vector for that voxel. \n";
       
-
-      for (std::size_t k = 0; k < hist_[0][0].size(); ++k) {
-	for(std::size_t j = 0; j < hist_[0].size(); ++j) {
-	  for(std::size_t i = 0; i < hist_.size(); ++i) {
-	    VectorFieldstream << float(hmat(0,0)* (float(i)/nBins_(0) - 0.5)) <<  "\t" << float(hmat(1,1) * (float(j)/nBins_(1) - 0.5)) << "\t" <<  float(hmat(2,2) * (float(k)/nBins_(2) - 0.5)) << "\t" << float(hist_[i][j][k](0)) << "\t" << float(hist_[i][j][k](1)) << "\t" << float(hist_[i][j][k](2)) << "\n";
+      for (std::size_t k = 0; k < vectorField_[0][0].size(); ++k) {
+	for(std::size_t j = 0; j < vectorField_[0].size(); ++j) {
+	  for(std::size_t i = 0; i < vectorField_.size(); ++i) {
+	    VectorFieldstream << float(hmat(0,0)* (float(i)/nBins_(0) - 0.5)) <<  "\t" << float(hmat(1,1) * (float(j)/nBins_(1) - 0.5)) << "\t" <<  float(hmat(2,2) * (float(k)/nBins_(2) - 0.5)) << "\t" << float(vectorField_[i][j][k](0)) << "\t" << float(vectorField_[i][j][k](1)) << "\t" << float(vectorField_[i][j][k](2)) << "\n";
       
 	  }
 	}
@@ -222,5 +270,18 @@ namespace OpenMD {
     } //if:VectorFieldstream    
 
   }//writeVectorField() 
+
+  RealType VectorField::getDensity(RealType r, RealType sigma, RealType rcut) {
+    RealType sigma2 = sigma*sigma;
+    RealType dens = exp(-r*r/(sigma2*2.0)) /
+      (pow(2.0*NumericConstant::PI*sigma2, 3));
+    RealType dcut = exp(-rcut*rcut/(sigma2*2.0)) /
+      (pow(2.0*NumericConstant::PI*sigma2, 3));
+    if (r < rcut)
+      return dens - dcut;
+    else
+      return 0.0;
+  }
+
 
 } //openmd

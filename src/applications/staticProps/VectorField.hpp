@@ -60,6 +60,7 @@ namespace OpenMD {
     
   private:
     void writeVectorField();
+    RealType getDensity(RealType dist, RealType sigma, RealType rcut);
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;
@@ -69,8 +70,8 @@ namespace OpenMD {
     RealType voxelSize_;
 
     Vector3i nBins_;
-    std::vector<std::vector<std::vector<RealType> > > count_;
-    std::vector<std::vector<std::vector<Vector3d > > > hist_;
+    std::vector<std::vector<std::vector<RealType> > > dens_;
+    std::vector<std::vector<std::vector<Vector3d > > > vectorField_;
 
 
   };
