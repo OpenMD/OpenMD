@@ -269,6 +269,40 @@ namespace OpenMD {
       
     } //if:VectorFieldstream    
 
+    string tab = "     ";
+    string pythonFilename = outputFilename_ + ".py";
+    std::ofstream pythonScriptStream(pythonFilename.c_str());
+    if (pythonScriptStream.is_open()) {
+      pythonScriptStream << "#!/opt/local/bin/python\n\n";
+      pythonScriptStream << "__author__ = \"Patrick Louden (plouden@nd.edu)\" \n";
+      pythonScriptStream << "__copyright__ = \"Copyright (c) 2016 by the University of Notre Dame\" \n";
+      pythonScriptStream << "__license__ = \"OpenMD\"\n\n";
+      pythonScriptStream << "import numpy as np\n";
+      pythonScriptStream << "from mayavi.mlab import * \n\n";
+      pythonScriptStream << "def plotVectorField(inputFileName): \n";
+      pythonScriptStream << tab + "inputFile = open(inputFileName, 'r') \n";
+      pythonScriptStream << tab + "x = np.array([]) \n";
+      pythonScriptStream << tab + "y = np.array([]) \n";
+      pythonScriptStream << tab + "z = np.array([]) \n";
+      pythonScriptStream << tab + "vx = np.array([]) \n";
+      pythonScriptStream << tab + "vy = np.array([]) \n";
+      pythonScriptStream << tab + "vz = np.array([]) \n\n";
+      pythonScriptStream << tab + "for line in inputFile:\n";
+      pythonScriptStream << tab + tab + "if line.split()[0] != \"#\": \n";
+      pythonScriptStream << tab + tab + tab + "x = np.append(x, float(line.strip().split()[0])) \n";
+      pythonScriptStream << tab + tab + tab + "y = np.append(y, float(line.strip().split()[1])) \n";
+      pythonScriptStream << tab + tab + tab + "z = np.append(z, float(line.strip().split()[2])) \n";
+      pythonScriptStream << tab + tab + tab + "vx = np.append(vx, float(line.strip().split()[3])) \n";
+      pythonScriptStream << tab + tab + tab + "vy = np.append(vy, float(line.strip().split()[4])) \n";
+      pythonScriptStream << tab + tab + tab + "vz = np.append(vz, float(line.strip().split()[5])) \n\n";
+      pythonScriptStream << tab + "obj = quiver3d(x, y, z, vx, vy, vz, line_width=2, scale_factor=3) \n";
+      pythonScriptStream << tab + "return obj \n\n";
+      pythonScriptStream << "plotVectorField(\"";
+      pythonScriptStream << outputFilename_.c_str();
+      pythonScriptStream << "\")";
+    }// pythonScriptStream
+
+
   }//writeVectorField() 
 
   RealType VectorField::getDensity(RealType r, RealType sigma, RealType rcut) {
