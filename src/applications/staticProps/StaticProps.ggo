@@ -99,4 +99,4 @@ groupoption "potDiff"   -       "potential energy difference when charge on sele
 groupoption "tet_hb"    -       "hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules" group="staticProps"
 groupoption "kirkwood"  k       "distance-dependent Kirkwood factor" group="staticProps"
 groupoption "kirkwoodQ" -       "distance-dependent Kirkwood factor for quadrupoles" group="staticProps"
-groupoption "vectorfield" -	"computes an average vector field" group="staticProps"
+groupoption "field" -   	"computes an average scalar field" group="staticProps"

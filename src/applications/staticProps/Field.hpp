@@ -41,8 +41,9 @@
  * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
  */
 
-#ifndef APPLICATIONS_STATICPROPS_VECTORFIELD_HPP
-#define APPLICATIONS_STATICPROPS_VECTORFIELD_HPP
+#ifndef APPLICATIONS_STATICPROPS_FIELD_HPP
+#define APPLICATIONS_STATICPROPS_FIELD_HPP
+
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
@@ -50,31 +51,68 @@
 
 namespace OpenMD {
 
-  class VectorField : public StaticAnalyser{
+
+  // Field class should default to a scalar field
+  class Field : public StaticAnalyser{
+  public:
+    Field(SimInfo* info, const std::string& filename, 
+	  const std::string& sele, RealType voxelSize);
+    
+    ~Field(); // default deconstructor
+    virtual void process();
+    //virtual void processFrame(int frame);
+    //virtual int getBin(Vector3d pos)=0;
+    //virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
+    
+  protected:
+    void writeField();
+    RealType getDensity(RealType dist, RealType sigma, RealType rcut);
+    
+    Snapshot* currentSnapshot_;
+    int nProcessed_;
+    string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+    
+    RealType voxelSize_;
+    Vector3i nBins_;
+    RealType nObjects_;
+    
+    std::vector<std::vector<std::vector<RealType> > > dens_;
+    std::vector<std::vector<std::vector<RealType > > > field_;
+  };
+
+
+
+  
+  
+  //subclass VectorField
+  class VectorField : public Field{
   public:
     VectorField(SimInfo* info, const std::string& filename, 
-		const std::string& sele1, RealType voxelSize);
-
-    virtual ~VectorField();
+		const std::string& sele, RealType voxelSize);
+    
+    virtual ~VectorField(); //default deconstructor
     virtual void process();
     
-  private:
+  protected:
     void writeVectorField();
-    RealType getDensity(RealType dist, RealType sigma, RealType rcut);
+    RealType getVectorDensity(RealType dist, RealType sigma, RealType rcut);
 
-    Snapshot* currentSnapshot_;
-    std::string selectionScript1_;
-    SelectionManager seleMan1_;
-    SelectionEvaluator evaluator1_;
+     Snapshot* currentSnapshot_;
+    int nProcessed_;
+    string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
 
     RealType voxelSize_;
-
     Vector3i nBins_;
+    RealType nObjects_;
+    
     std::vector<std::vector<std::vector<RealType> > > dens_;
     std::vector<std::vector<std::vector<Vector3d > > > vectorField_;
-
-
   };
+  
 }
 #endif
 

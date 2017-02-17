@@ -88,7 +88,7 @@
 #include "applications/staticProps/PotDiff.hpp"
 #include "applications/staticProps/TetrahedralityHBMatrix.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
-#include "applications/staticProps/VectorField.hpp"
+#include "applications/staticProps/Field.hpp"
 
 using namespace OpenMD;
 
@@ -540,8 +540,8 @@ int main(int argc, char* argv[]){
   } else if (args_info.kirkwoodQ_given) {
     analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen, 
                                       nrbins);
-  } else if (args_info.vectorfield_given) {
-    analyser = new VectorField(info, dumpFileName, sele1, args_info.voxelSize_arg);
+  } else if (args_info.field_given) {
+    analyser = new Field(info, dumpFileName, sele1, args_info.voxelSize_arg);
   }
 
   if (args_info.output_given) {

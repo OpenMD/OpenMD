@@ -171,7 +171,7 @@ struct gengetopt_args_info
   const char *tet_hb_help; /**< @brief hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules help description.  */
   const char *kirkwood_help; /**< @brief distance-dependent Kirkwood factor help description.  */
   const char *kirkwoodQ_help; /**< @brief distance-dependent Kirkwood factor for quadrupoles help description.  */
-  const char *vectorfield_help; /**< @brief computes the average vector field. */
+  const char *field_help; /**< @brief computes the average scalar field. */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -247,7 +247,7 @@ struct gengetopt_args_info
   unsigned int tet_hb_given ;	/**< @brief Whether tet_hb was given.  */
   unsigned int kirkwood_given ;	/**< @brief Whether kirkwood was given.  */
   unsigned int kirkwoodQ_given ;	/**< @brief Whether kirkwoodQ was given.  */
-  unsigned int vectorfield_given ;     /**<brief Whether vectorfield was given.  */
+  unsigned int field_given ;     /**<brief Whether field was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

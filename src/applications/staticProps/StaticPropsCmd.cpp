@@ -108,7 +108,7 @@ const char *gengetopt_args_info_help[] = {
   "      --tet_hb                  hydrogen bond statistics binned by\n                                  tetrahedrality of donor and acceptor\n                                  molecules",
   "  -k, --kirkwood                distance-dependent Kirkwood factor",
   "      --kirkwoodQ               distance-dependent Kirkwood factor for\n                                  quadrupoles",
-  "      --vectorfield             average vector field",
+  "      --field                   average scalar field",
     0
 };
 
@@ -210,7 +210,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->tet_hb_given = 0 ;
   args_info->kirkwood_given = 0 ;
   args_info->kirkwoodQ_given = 0 ;
-  args_info->vectorfield_given = 0 ;
+  args_info->field_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -349,7 +349,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->tet_hb_help = gengetopt_args_info_help[72] ;
   args_info->kirkwood_help = gengetopt_args_info_help[73] ;
   args_info->kirkwoodQ_help = gengetopt_args_info_help[74] ;
-  args_info->vectorfield_help = gengetopt_args_info_help[75] ;
+  args_info->field_help = gengetopt_args_info_help[75] ;
   
 }
 
@@ -657,8 +657,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "kirkwood", 0, 0 );
   if (args_info->kirkwoodQ_given)
     write_into_file(outfile, "kirkwoodQ", 0, 0 );
-  if (args_info->vectorfield_given)
-    write_into_file(outfile, "vectorfield", 0, 0 );
+  if (args_info->field_given)
+    write_into_file(outfile, "field", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -754,7 +754,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->tet_hb_given = 0 ;
   args_info->kirkwood_given = 0 ;
   args_info->kirkwoodQ_given = 0 ;
-  args_info->vectorfield_given = 0 ;
+  args_info->field_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -1653,7 +1653,7 @@ cmdline_parser_internal (
         { "tet_hb",	0, NULL, 0 },
         { "kirkwood",	0, NULL, 'k' },
         { "kirkwoodQ",	0, NULL, 0 },
-	{ "vectorfield",      0, NULL, 0 },
+	{ "field",      0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -2783,8 +2783,8 @@ cmdline_parser_internal (
               goto failure;
           
           }
-	  /* spatially-resolved vector field.  */
-          else if (strcmp (long_options[option_index].name, "vectorfield") == 0)
+	  /* spatially-resolved scalar field.  */
+          else if (strcmp (long_options[option_index].name, "field") == 0)
 	  {
 
 	    if (args_info->staticProps_group_counter && override)
@@ -2792,10 +2792,10 @@ cmdline_parser_internal (
 	    args_info->staticProps_group_counter += 1;
 
 	    if (update_arg( 0 ,
-	         0 , &(args_info->vectorfield_given),
-		&(local_args_info.vectorfield_given), optarg, 0, 0, ARG_NO,
+	         0 , &(args_info->field_given),
+		&(local_args_info.field_given), optarg, 0, 0, ARG_NO,
 		check_ambiguity, override, 0, 0,
-		"vectorfield", '-',
+		"field", '-',
 	        additional_error))
 	      goto failure;
 
