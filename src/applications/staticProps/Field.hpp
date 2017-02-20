@@ -59,10 +59,11 @@ namespace OpenMD {
 	  const std::string& sele, RealType voxelSize);
     
     ~Field(); // default deconstructor
+    
     virtual void process();
+    virtual void processFrame(int frame);
     virtual RealType getScalar(StuntDouble* sd) = 0;
-    //virtual void processFrame(int frame);
-    //virtual int getBin(Vector3d pos)=0;
+    //virtual int getBin(Vector3d pos)=0; //should implement this so we can do spherical systems
     //virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
     
   protected:

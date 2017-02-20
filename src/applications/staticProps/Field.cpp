@@ -97,9 +97,22 @@ namespace OpenMD {
   Field::~Field() {
  
   }
+ void Field::process() {
+
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames/step_;
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(istep);
+    }
+    writeOutput();
+  }
 
   
-  void Field::process() {
+  void Field::processFrame(int istep) {
     Molecule* mol;
     StuntDouble* sd;
     RigidBody* rb;
@@ -113,131 +126,121 @@ namespace OpenMD {
     int di, dj, dk, ibin, jbin, kbin;
     int igrid, jgrid, kgrid;
     Vector3d scaled;
-    
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    
-    // loop over frames of the .dump file
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
-      Mat3x3d invBox = currentSnapshot_->getInvHmat();
-      RealType volume = currentSnapshot_->getVolume();
-      RealType lenX_ = hmat(0,0);
-      RealType lenY_ = hmat(1,1);
-      RealType lenZ_ = hmat(2,2);
-
-      // d(x,y,z) = the width of each bin
-      dx = lenX_ / nBins_(0);
-      dy = lenY_ / nBins_(1);
-      dz = lenZ_ / nBins_(2);
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
+    Mat3x3d invBox = currentSnapshot_->getInvHmat();
+    RealType volume = currentSnapshot_->getVolume();
+    RealType lenX_ = hmat(0,0);
+    RealType lenY_ = hmat(1,1);
+    RealType lenZ_ = hmat(2,2);
+    
+    // d(x,y,z) = the width of each bin
+    dx = lenX_ / nBins_(0);
+    dy = lenY_ / nBins_(1);
+    dz = lenZ_ / nBins_(2);
+    
+    // reff will be used in the gaussian weighting of the
+    // should be based on r_{effective}
+    RealType reffective = pow( (volume / nObjects_), 1./3.);
+    rcut = 3.0 * reffective;
+    
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    // update the positions of atoms which belong to the rigidbodies
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+	 mol = info_->nextMolecule(mi)) {
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
+	   rb = mol->nextRigidBody(rbIter)) {
+	rb->updateAtoms();
+      }
+    }
+    
+    
+    //Loop over the selected StuntDoubles:
+    for (sd = seleMan_.beginSelected(isd); sd != NULL;
+	 sd = seleMan_.nextSelected(isd)) {
       
-      // reff will be used in the gaussian weighting of the
-      // should be based on r_{effective}
-      RealType reffective = pow( (volume / nObjects_), 1./3.);
-      rcut = 3.0 * reffective;
-
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
+      /* Here is where abstraction might need to happen, or templating:
+	 the goal is to be able to querry some scalar property here, to be 
+	 accumulated into the histogram of voxels.
+	 
+	 RealType scalarVal = sd->getScalarVal();
+      */
+      RealType scalarVal = getScalar(sd);
+      
+      //Get the position of the sd
+      Vector3d pos = sd->getPos();
+      
+      
+      //Wrap the sd back into the box, positions now range from
+      // (-boxl/2, boxl/2)
+      if (usePeriodicBoundaryConditions_){ 
+	currentSnapshot_->wrapVector(pos); 
+	sd->setPos(pos);
       }
       
-      // update the positions of atoms which belong to the rigidbodies
-      for (mol = info_->beginMolecule(mi); mol != NULL;
-           mol = info_->nextMolecule(mi)) {
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL;
-             rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtoms();
-	}
-      }
-	  
+      //Convert to a scaled position vector, range (-1/2, 1/2)
+      // want range to be (0,1), so add 1/2
+      Vector3d scaled = invBox * pos;
       
-      //Loop over the selected StuntDoubles:
-      for (sd = seleMan_.beginSelected(isd); sd != NULL;
-           sd = seleMan_.nextSelected(isd)) {
-
-	/* Here is where abstraction might need to happen, or templating:
-	   the goal is to be able to querry some scalar property here, to be 
-	   accumulated into the histogram of voxels.
-	   
-	   RealType scalarVal = sd->getScalarVal();
-	*/
-	RealType scalarVal = getScalar(sd);
+      // wrap the vector back into the unit box by subtracting                
+      // integer box numbers                                                  
+      for (int j = 0; j < 3; j++) {
+	scaled[j] -= roundMe(scaled[j]);
+	scaled[j] += 0.5;
+	// Handle the special case when an object is exactly on               
+	// the boundary (a scaled coordinate of 1.0 is the same as            
+	// scaled coordinate of 0.0)                                          
+	if (scaled[j] >= 1.0) scaled[j] -= 1.0;
+      }
+      
+      //find ijk-indices of voxel that atom is in,
+      // multiply scaled positions by nBins
+      ibin = nBins_(0) * scaled.x();
+      jbin = nBins_(1) * scaled.y();
+      kbin = nBins_(2) * scaled.z();
+      
+      // di = the magnitude of distance (in x-dimension) that we 
+      // should loop through to add the velocity density to.
+      di = (int) (rcut / dx);
+      dj = (int) (rcut / dy);
+      dk = (int) (rcut / dz);
+      
+      
+      for (int i = -di; i <= di; i++) {
+	igrid = ibin + i;
+	while (igrid >= int(nBins_(0))) { igrid -= int(nBins_(0)); }
+	while (igrid < 0) { igrid += int(nBins_(0)); }
 	
-	//Get the position of the sd
-	Vector3d pos = sd->getPos();
-       
+	x = lenX_ * (RealType(i) / RealType(nBins_(0)) );
 	
-	//Wrap the sd back into the box, positions now range from
-	// (-boxl/2, boxl/2)
-	if (usePeriodicBoundaryConditions_){ 
-	  currentSnapshot_->wrapVector(pos); 
-	  sd->setPos(pos);
-	}
-	
-	//Convert to a scaled position vector, range (-1/2, 1/2)
-	// want range to be (0,1), so add 1/2
-	Vector3d scaled = invBox * pos;
-
-	// wrap the vector back into the unit box by subtracting                
-	// integer box numbers                                                  
-	for (int j = 0; j < 3; j++) {
-	  scaled[j] -= roundMe(scaled[j]);
-	  scaled[j] += 0.5;
-	  // Handle the special case when an object is exactly on               
-	  // the boundary (a scaled coordinate of 1.0 is the same as            
-	  // scaled coordinate of 0.0)                                          
-	  if (scaled[j] >= 1.0) scaled[j] -= 1.0;
-	}
-
-	//find ijk-indices of voxel that atom is in,
-	// multiply scaled positions by nBins
-	ibin = nBins_(0) * scaled.x();
-	jbin = nBins_(1) * scaled.y();
-	kbin = nBins_(2) * scaled.z();
-	
-	// di = the magnitude of distance (in x-dimension) that we 
-	// should loop through to add the velocity density to.
-	di = (int) (rcut / dx);
-	dj = (int) (rcut / dy);
-	dk = (int) (rcut / dz);
-	
-	
-	for (int i = -di; i <= di; i++) {
-	  igrid = ibin + i;
-	  while (igrid >= int(nBins_(0))) { igrid -= int(nBins_(0)); }
-	  while (igrid < 0) { igrid += int(nBins_(0)); }
+	for (int j = -dj; j <= dj; j++) {
+	  jgrid = jbin + j;
+	  while (jgrid >= int(nBins_(1))) {jgrid -= int(nBins_(1));}
+	  while (jgrid < 0) {jgrid += int(nBins_(1));}
 	  
-	  x = lenX_ * (RealType(i) / RealType(nBins_(0)) );
+	  y = lenY_ * (RealType(j) / RealType(nBins_(1)));
 	  
-	  for (int j = -dj; j <= dj; j++) {
-	    jgrid = jbin + j;
-	    while (jgrid >= int(nBins_(1))) {jgrid -= int(nBins_(1));}
-	    while (jgrid < 0) {jgrid += int(nBins_(1));}
+	  for (int k = -dk; k <= dk; k++) {
+	    kgrid = kbin + k;
+	    while (kgrid >= int(nBins_(2))) {kgrid -= int(nBins_(2));}
+	    while (kgrid < 0) {kgrid += int(nBins_(2));}
 	    
-	    y = lenY_ * (RealType(j) / RealType(nBins_(1)));
+	    z = lenZ_ * (RealType(k) / RealType(nBins_(2)));
 	    
-	    for (int k = -dk; k <= dk; k++) {
-	      kgrid = kbin + k;
-	      while (kgrid >= int(nBins_(2))) {kgrid -= int(nBins_(2));}
-	      while (kgrid < 0) {kgrid += int(nBins_(2));}
-	      
-	      z = lenZ_ * (RealType(k) / RealType(nBins_(2)));
-	      
-	      RealType dist = sqrt(x*x + y*y + z*z);
-	      
-	      dens_[igrid][jgrid][kgrid] += getDensity(dist, reff, rcut);
-	      field_[igrid][jgrid][kgrid] += dens_[igrid][jgrid][kgrid] * scalarVal;
-	    }//k loop
-	  }//j loop
-	} //i loop
-    
-    
-      }// seleMan_        	    
-    }// dumpFile frames
-    writeField();
+	    RealType dist = sqrt(x*x + y*y + z*z);
+	    
+	    dens_[igrid][jgrid][kgrid] += getDensity(dist, reff, rcut);
+	    field_[igrid][jgrid][kgrid] += dens_[igrid][jgrid][kgrid] * scalarVal;
+	  }//k loop
+	}//j loop
+      } //i loop
+      
+      
+    }// seleMan_        	    
     
   }// void Field::process()
 
