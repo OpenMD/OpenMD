@@ -540,8 +540,8 @@ int main(int argc, char* argv[]){
   } else if (args_info.kirkwoodQ_given) {
     analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen, 
                                       nrbins);
-  } else if (args_info.field_given) {
-    analyser = new Field(info, dumpFileName, sele1, args_info.voxelSize_arg);
+  } else if (args_info.densityfield_given) {
+    analyser = new DensityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
   }
 
   if (args_info.output_given) {

@@ -97,7 +97,8 @@ namespace OpenMD {
   Field::~Field() {
  
   }
-    
+
+  
   void Field::process() {
     Molecule* mol;
     StuntDouble* sd;
@@ -107,6 +108,11 @@ namespace OpenMD {
     int isd;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
+    RealType x, y, z, dx, dy, dz;
+    RealType reff, rcut;
+    int di, dj, dk, ibin, jbin, kbin;
+    int igrid, jgrid, kgrid;
+    Vector3d scaled;
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -123,12 +129,6 @@ namespace OpenMD {
       RealType lenX_ = hmat(0,0);
       RealType lenY_ = hmat(1,1);
       RealType lenZ_ = hmat(2,2);
-
-      RealType x, y, z, dx, dy, dz;
-      RealType reff, rcut;
-      int di, dj, dk, ibin, jbin, kbin;
-      int igrid, jgrid, kgrid;
-      Vector3d scaled;
 
       // d(x,y,z) = the width of each bin
       dx = lenX_ / nBins_(0);
@@ -164,7 +164,7 @@ namespace OpenMD {
 	   
 	   RealType scalarVal = sd->getScalarVal();
 	*/
-	RealType scalarVal = 0.0;
+	RealType scalarVal = getScalar(sd);
 	
 	//Get the position of the sd
 	Vector3d pos = sd->getPos();
@@ -323,6 +323,23 @@ namespace OpenMD {
 
 
 
+  //Scalar Field subclasses
+  DensityField:: DensityField(SimInfo* info, const std::string& filename,
+			      const std::string& sele1, RealType voxelSize) :
+    Field(info, filename, sele1, voxelSize) {
+
+
+  }
+
+  DensityField::~DensityField() {
+  }
+
+  RealType DensityField::getScalar(StuntDouble* sd) {
+    return sd->getMass();
+  }
+
+ 
+  
 
 
 

@@ -52,14 +52,15 @@
 namespace OpenMD {
 
 
-  // Field class should default to a scalar field
   class Field : public StaticAnalyser{
+    
   public:
     Field(SimInfo* info, const std::string& filename, 
 	  const std::string& sele, RealType voxelSize);
     
     ~Field(); // default deconstructor
     virtual void process();
+    virtual RealType getScalar(StuntDouble* sd) = 0;
     //virtual void processFrame(int frame);
     //virtual int getBin(Vector3d pos)=0;
     //virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
@@ -83,10 +84,34 @@ namespace OpenMD {
   };
 
 
+  // subClasses of Field
+  class DensityField : public Field {
+  public:
+    DensityField(SimInfo* info, const std::string& filename,
+                const std::string& sele1, RealType voxelSize);
+    ~DensityField();
+    
+    virtual RealType getScalar(StuntDouble* sd);
+  };
+  /*
+   class ChargeDensityField : public Field {
+    ChargeDensityField(SimInfo* info, const std::string& filename,
+                const std::string& sele1, RealType voxelSize);
+    virtual void getScalar(StuntDouble* sd) { return sd->getCharge(); }
+  };
+  
+  // Might be tricky here, since I don't think temperature can be probed per molecules...
+   class TemperatureField : public Field {
+    TemperatureField(SimInfo* info, const std::string& filename,
+                const std::string& sele1, RealType voxelSize);
+    virtual void getScalar(StuntDouble* sd) { return sd->getVel(); }
+  };
 
+  */
   
   
-  //subclass VectorField
+  
+  //subclass of Field : VectorField
   class VectorField : public Field{
   public:
     VectorField(SimInfo* info, const std::string& filename, 
@@ -94,6 +119,7 @@ namespace OpenMD {
     
     virtual ~VectorField(); //default deconstructor
     virtual void process();
+    virtual void getVector(StuntDouble* sd) = 0;
     
   protected:
     void writeVectorField();
@@ -112,6 +138,23 @@ namespace OpenMD {
     std::vector<std::vector<std::vector<RealType> > > dens_;
     std::vector<std::vector<std::vector<Vector3d > > > vectorField_;
   };
+
+  /*
+  // subClasses of VectorField
+  class VelocityVectorField : public VectorField {
+    VelocityVectorField(SimInfo* info, const std::string& filename,
+			const std::string& sele1, RealType voxelSize);
+    virtual void getVector(StuntDouble* sd) { return sd->getVel(); }
+  };
+
+  
+  class DipoleVectorField : public VectorField {
+    VelocityVectorField(SimInfo* info, const std::string& filename,
+			const std::string& sele1, RealType voxelSize);
+    virtual void getVector(StuntDouble* sd) { return sd->getDipole(); }
+  };
+
+  */
   
 }
 #endif
