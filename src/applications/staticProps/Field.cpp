@@ -238,12 +238,15 @@ namespace OpenMD {
 	  }//k loop
 	}//j loop
       } //i loop
-      
-      
+          
     }// seleMan_        	    
     
   }// void Field::process()
 
+
+
+
+  
   void Field::writeField() {
     // Need to write the output file as (x \t y \t z \t <scalar>) format
     // where (x,y,z) is the location of the center of the voxel, and <scalar>
