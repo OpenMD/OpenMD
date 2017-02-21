@@ -52,7 +52,9 @@
 namespace OpenMD {
 
 
+  template<class T>
   class Field : public StaticAnalyser{
+    typedef T valueType;
     
   public:
     Field(SimInfo* info, const std::string& filename, 
@@ -62,100 +64,60 @@ namespace OpenMD {
     
     virtual void process();
     virtual void processFrame(int frame);
-    virtual RealType getScalar(StuntDouble* sd) = 0;
-    //virtual int getBin(Vector3d pos)=0; //should implement this so we can do spherical systems
-    //virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
+    virtual void postProcess();
+    virtual valueType getValue(StuntDouble* sd) = 0;
+    void writeField();
     
   protected:
-    void writeField();
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
     
-    Snapshot* currentSnapshot_;
+    Snapshot* snap_;
     int nProcessed_;
     string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
+    bool usePeriodicBoundaryConditions_;
+    RealType rcut_;
     
     RealType voxelSize_;
     Vector3i nBins_;
-    RealType nObjects_;
     
     std::vector<std::vector<std::vector<RealType> > > dens_;
-    std::vector<std::vector<std::vector<RealType > > > field_;
+    std::vector<std::vector<std::vector<T > > > field_;
   };
 
-
-  // subClasses of Field
-  class DensityField : public Field {
+  class DensityField : public Field<RealType> {
   public:
     DensityField(SimInfo* info, const std::string& filename,
-                const std::string& sele1, RealType voxelSize);
+                 const std::string& sele1, RealType voxelSize);
     ~DensityField();
     
-    virtual RealType getScalar(StuntDouble* sd);
-  };
-  /*
-   class ChargeDensityField : public Field {
-    ChargeDensityField(SimInfo* info, const std::string& filename,
-                const std::string& sele1, RealType voxelSize);
-    virtual void getScalar(StuntDouble* sd) { return sd->getCharge(); }
+    virtual RealType getValue(StuntDouble* sd);
   };
   
-  // Might be tricky here, since I don't think temperature can be probed per molecules...
-   class TemperatureField : public Field {
-    TemperatureField(SimInfo* info, const std::string& filename,
-                const std::string& sele1, RealType voxelSize);
-    virtual void getScalar(StuntDouble* sd) { return sd->getVel(); }
-  };
-
-  */
   
-  
-  
-  //subclass of Field : VectorField
-  class VectorField : public Field{
+  class ChargeField : public Field<RealType> {
   public:
-    VectorField(SimInfo* info, const std::string& filename, 
-		const std::string& sele, RealType voxelSize);
-    
-    virtual ~VectorField(); //default deconstructor
-    virtual void process();
-    virtual void getVector(StuntDouble* sd) = 0;
-    
-  protected:
-    void writeVectorField();
-    RealType getVectorDensity(RealType dist, RealType sigma, RealType rcut);
-
-     Snapshot* currentSnapshot_;
-    int nProcessed_;
-    string selectionScript_;
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
-
-    RealType voxelSize_;
-    Vector3i nBins_;
-    RealType nObjects_;
-    
-    std::vector<std::vector<std::vector<RealType> > > dens_;
-    std::vector<std::vector<std::vector<Vector3d > > > vectorField_;
+    ChargeField(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, RealType voxelSize);
+    virtual RealType getValue(StuntDouble* sd);
   };
-
-  /*
-  // subClasses of VectorField
-  class VelocityVectorField : public VectorField {
-    VelocityVectorField(SimInfo* info, const std::string& filename,
-			const std::string& sele1, RealType voxelSize);
-    virtual void getVector(StuntDouble* sd) { return sd->getVel(); }
-  };
-
   
-  class DipoleVectorField : public VectorField {
-    VelocityVectorField(SimInfo* info, const std::string& filename,
+  
+  class VelocityField : public Field<Vector3d> {
+  public:
+    VelocityField(SimInfo* info, const std::string& filename,
 			const std::string& sele1, RealType voxelSize);
-    virtual void getVector(StuntDouble* sd) { return sd->getDipole(); }
+    virtual Vector3d getValue(StuntDouble* sd);
   };
-
-  */
+  
+  
+  class DipoleField : public Field<Vector3d> {
+  public:
+    DipoleField(SimInfo* info, const std::string& filename,
+                const std::string& sele1, RealType voxelSize);
+    virtual Vector3d getValue(StuntDouble* sd);
+  };
   
 }
 #endif
