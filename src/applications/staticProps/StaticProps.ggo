@@ -100,3 +100,4 @@ groupoption "tet_hb"    -       "hydrogen bond statistics binned by tetrahedrali
 groupoption "kirkwood"  k       "distance-dependent Kirkwood factor" group="staticProps"
 groupoption "kirkwoodQ" -       "distance-dependent Kirkwood factor for quadrupoles" group="staticProps"
 groupoption "densityfield" -   	"computes an average density field" group="staticProps"
+groupoption "velocityfield" -   "computes an average velocity field" group="staticProps"

@@ -379,18 +379,29 @@ namespace OpenMD {
       pss << t + "x = np.array([]) \n";
       pss << t + "y = np.array([]) \n";
       pss << t + "z = np.array([]) \n";
-      pss << t + "vx = np.array([]) \n";
-      pss << t + "vy = np.array([]) \n";
-      pss << t + "vz = np.array([]) \n\n";
+      if (typeid(T) == typeid(int)) {
+	pss << t + "scalarVal = np.array([]) \n\n";
+      }
+      if (typeid(T) == typeid(Vector3d)) {
+	pss << t + "vectorVal.x = np.array([]) \n";
+	pss << t + "vectorVal.y = np.array([]) \n";
+	pss << t + "vectorVal.z = np.array([]) \n\n";
+      }
       pss << t + "for line in inputFile:\n";
       pss << t + t + "if line.split()[0] != \"#\": \n";
       pss << t + t + t + "x = np.append(x, float(line.strip().split()[0])) \n";
       pss << t + t + t + "y = np.append(y, float(line.strip().split()[1])) \n";
       pss << t + t + t + "z = np.append(z, float(line.strip().split()[2])) \n";
-      pss << t + t + t + "vx = np.append(vx, float(line.strip().split()[3])) \n";
-      pss << t + t + t + "vy = np.append(vy, float(line.strip().split()[4])) \n";
-      pss << t + t + t + "vz = np.append(vz, float(line.strip().split()[5])) \n\n";
-      pss << t + "obj = quiver3d(x, y, z, vx, vy, vz, line_width=2, scale_factor=3) \n";        
+       if (typeid(T) == typeid(int)) {
+	pss << t + t + t + "scalarVal = np.append(scalarVal, float(line.strip().split()[3])) \n\n";
+	pss << t + "obj = quiver3d(x, y, z, scalarVal, line_width=2, scale_factor=3) \n"; 
+      }
+      if (typeid(T) == typeid(Vector3d)) {
+	pss << t + t + t + "vectorVal.x = np.append(vectorVal.x, float(line.strip().split()[3])) \n";
+	pss << t + t + t + "vectorVal.y = np.append(vectorVal.y, float(line.strip().split()[4])) \n";
+	pss << t + t + t + "vextorVal.z = np.append(vectorVal.z, float(line.strip().split()[5])) \n\n";
+	pss << t + "obj = quiver3d(x, y, z, vectorVal.x, vectorVal.y, vectorVal.z, line_width=2, scale_factor=3) \n";
+      }
       pss << t + "return obj \n\n";
       pss << "plotField(\"";
       pss << outputFilename_.c_str();

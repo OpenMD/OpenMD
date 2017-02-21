@@ -109,6 +109,7 @@ const char *gengetopt_args_info_help[] = {
   "  -k, --kirkwood                distance-dependent Kirkwood factor",
   "      --kirkwoodQ               distance-dependent Kirkwood factor for\n                                  quadrupoles",
   "      --densityfield            computes an average density field",
+  "      --velocityfield           computes an average velocity field",
     0
 };
 
@@ -211,6 +212,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->kirkwood_given = 0 ;
   args_info->kirkwoodQ_given = 0 ;
   args_info->densityfield_given = 0 ;
+  args_info->velocityfield_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -350,6 +352,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->kirkwood_help = gengetopt_args_info_help[73] ;
   args_info->kirkwoodQ_help = gengetopt_args_info_help[74] ;
   args_info->densityfield_help = gengetopt_args_info_help[75] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[76] ;
   
 }
 
@@ -659,6 +662,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "kirkwoodQ", 0, 0 );
   if (args_info->densityfield_given)
     write_into_file(outfile, "densityfield", 0, 0 );
+  if (args_info->velocityfield_given)
+    write_into_file(outfile, "velocityfield", 0, 0 );
 
   i = EXIT_SUCCESS;
   return i;
@@ -754,6 +759,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->kirkwood_given = 0 ;
   args_info->kirkwoodQ_given = 0 ;
   args_info->densityfield_given = 0 ;
+  args_info->velocityfield_given = 0 ;
   args_info->staticProps_group_counter = 0;
 }
 
@@ -1653,6 +1659,7 @@ cmdline_parser_internal (
         { "kirkwoodQ",	0, NULL, 0 },
 	{ "field",      0, NULL, 0 },
 	{ "densityfield",      0, NULL, 0 },
+	{ "velocityfield",      0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -2782,7 +2789,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-	   /* spatially-resolved scalar field.  */
+	   /* spatially-resolved density field.  */
           else if (strcmp (long_options[option_index].name, "densityfield") == 0)
 	  {
 
@@ -2799,7 +2806,24 @@ cmdline_parser_internal (
 	      goto failure;
 
 	  }
-          
+	   /* spatially-resolved velocity field.  */
+          else if (strcmp (long_options[option_index].name, "velocityfield") == 0)
+	  {
+
+	    if (args_info->staticProps_group_counter && override)
+	      reset_group_staticProps (args_info);
+	    args_info->staticProps_group_counter += 1;
+
+	    if (update_arg( 0 ,
+	         0 , &(args_info->velocityfield_given),
+		&(local_args_info.velocityfield_given), optarg, 0, 0, ARG_NO,
+		check_ambiguity, override, 0, 0,
+		"velocityfield", '-',
+	        additional_error))
+	      goto failure;
+
+	  }
+	  
           break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */

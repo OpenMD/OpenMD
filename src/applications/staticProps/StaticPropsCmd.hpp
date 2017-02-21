@@ -172,6 +172,7 @@ struct gengetopt_args_info
   const char *kirkwood_help; /**< @brief distance-dependent Kirkwood factor help description.  */
   const char *kirkwoodQ_help; /**< @brief distance-dependent Kirkwood factor for quadrupoles help description.  */
   const char *densityfield_help; /**< @brief computes the average density field. */
+  const char *velocityfield_help; /**< @brief computes the average velocity field. */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -248,6 +249,7 @@ struct gengetopt_args_info
   unsigned int kirkwood_given ;	/**< @brief Whether kirkwood was given.  */
   unsigned int kirkwoodQ_given ;	/**< @brief Whether kirkwoodQ was given.  */
   unsigned int densityfield_given ;     /**<brief Whether field was given.  */
+  unsigned int velocityfield_given ;     /**<brief Whether field was given.  */
   
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

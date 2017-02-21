@@ -542,6 +542,8 @@ int main(int argc, char* argv[]){
                                       nrbins);
   } else if (args_info.densityfield_given) {
     analyser = new DensityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
+  } else if (args_info.velocityfield_given) {
+    analyser = new VelocityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
   }
 
   if (args_info.output_given) {
