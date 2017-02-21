@@ -54,7 +54,6 @@ namespace OpenMD {
 
   template<class T>
   class Field : public StaticAnalyser{
-    typedef T valueType;
     
   public:
     Field(SimInfo* info, const std::string& filename, 
@@ -65,8 +64,10 @@ namespace OpenMD {
     virtual void process();
     virtual void processFrame(int frame);
     virtual void postProcess();
-    virtual valueType getValue(StuntDouble* sd) = 0;
-    void writeField();
+    virtual T getValue(StuntDouble* sd) = 0;
+    virtual void writeField();
+    virtual std::string writeValue(T v);
+    virtual void writeVisualizationScript();
     
   protected:
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
@@ -78,6 +79,7 @@ namespace OpenMD {
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
     RealType rcut_;
+    RealType reffective_;
     
     RealType voxelSize_;
     Vector3i nBins_;

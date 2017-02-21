@@ -48,12 +48,14 @@
 
 #include "applications/staticProps/Field.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
+#include "primitives/RigidBody.hpp"
 
 
 using namespace std;
@@ -85,7 +87,17 @@ namespace OpenMD {
       box = snap_->getHmat();
       invBox = snap_->getInvHmat();
     }
-    
+
+    // reff will be used in the gaussian weighting of the
+    // should be based on r_{effective}
+    snap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    if (nSelected == 0) {
+      reffective_ = 2.0 * voxelSize;
+    } else {
+      reffective_ = pow( (snap_->getVolume() / nSelected), 1./3.);
+    }
+    rcut_ = 3.0 * reffective_;    
+
     Vector3d A = box.getColumn(0);
     Vector3d B = box.getColumn(1);
     Vector3d C = box.getColumn(2);
@@ -120,7 +132,7 @@ namespace OpenMD {
         dens_[i][j].resize(nBins_.z());
 
         std::fill(dens_[i][j].begin(), dens_[i][j].end(), 0.0);
-        std::fill(field_[i][j].begin(), field_[i][j].end(), valueType(0));
+        std::fill(field_[i][j].begin(), field_[i][j].end(), T(0));
 
       }
     }
@@ -146,6 +158,7 @@ namespace OpenMD {
     }
     postProcess();    
     writeField();
+    writeVisualizationScript();
   }
 
   template<class T>
@@ -158,7 +171,7 @@ namespace OpenMD {
     int igrid, jgrid, kgrid;
     Vector3d scaled;
     RealType x, y, z;
-    RealType weight, reffective, Wa, Wb, Wc;
+    RealType weight, Wa, Wb, Wc;
 
     if (!usePeriodicBoundaryConditions_) {
       box = snap_->getBoundingBox();
@@ -166,8 +179,7 @@ namespace OpenMD {
     } else {
       box = snap_->getHmat();
       invBox = snap_->getInvHmat();
-    }
-    
+    }    
     Vector3d A = box.getColumn(0);
     Vector3d B = box.getColumn(1);
     Vector3d C = box.getColumn(2);
@@ -206,11 +218,6 @@ namespace OpenMD {
     }
     int nSelected = seleMan_.getSelectionCount();
     
-    // reff will be used in the gaussian weighting of the
-    // should be based on r_{effective}
-
-    reffective = pow( (snap_->getVolume() / nSelected), 1./3.);
-    rcut_ = 3.0 * reffective;
     
     // di = the magnitude of distance (in x-dimension) that we 
     // should loop through to add the density to.
@@ -278,7 +285,7 @@ namespace OpenMD {
 	    
 	    RealType dist = sqrt(x*x + y*y + z*z);
 
-            weight = getDensity(dist, reffective, rcut_);
+            weight = getDensity(dist, reffective_, rcut_);
 	    dens_[igrid][jgrid][kgrid] += weight;
             field_[igrid][jgrid][kgrid] += weight*getValue(sd);
             
@@ -314,95 +321,56 @@ namespace OpenMD {
     }
   }
 
-  template <>
-  void Field<RealType>::writeField() {    
+  template<class T>
+  void Field<T>::writeField() {    
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    Vector3d scaled(0.0);
+
     
     std::ofstream fs(outputFilename_.c_str());
     if (fs.is_open()) {
-
-      fs << "# Field output file format (x,y,z) <scalar> \n";
-      fs << "# where (x,y,z) is the location of the center of the voxel\n";
-      fs << "# and <scalar> is the average value for that voxel.\n";
       
+      Revision r;
+      fs << "# " << getAnalysisType() << "\n";
+      fs << "# OpenMD " << r.getFullRevision() << "\n";
+      fs << "# " << r.getBuildDate() << "\n";
+      fs << "# selection script: \"" << selectionScript_ << "\"\n";
+      fs << "#\n";
+      fs << "# Vector Field output file format has coordinates of the center\n";
+      fs << "# of the voxel followed by the value of field (either vector or\n";
+      fs << "# scalar).\n";
+
       for (std::size_t k = 0; k < field_[0][0].size(); ++k) {
+        scaled.z() = RealType(k)/nBins_.z() - 0.5;
 	for(std::size_t j = 0; j < field_[0].size(); ++j) {
+          scaled.y() = RealType(j)/nBins_.y() - 0.5;
 	  for(std::size_t i = 0; i < field_.size(); ++i) {
+            scaled.y() = RealType(j)/nBins_.y() - 0.5;
+
+            Vector3d voxelLoc = hmat * scaled;
+
+            fs << voxelLoc.x() << "\t";
+            fs << voxelLoc.y() << "\t";
+            fs << voxelLoc.z() << "\t";
             
-	    fs << float(hmat(0,0) * (float(i)/nBins_(0) - 0.5)) << "\t";
-            fs << float(hmat(1,1) * (float(j)/nBins_(1) - 0.5)) << "\t";
-            fs << float(hmat(2,2) * (float(k)/nBins_(2) - 0.5)) << "\t";
-            fs << float(field_[i][j][k]);
+            fs << writeValue( field_[i][j][k] );
+
             fs << std::endl;            
 	  }
 	}
       }      
-    }    
-
-    string t = "     ";
-    string pythonFilename = outputFilename_ + ".py";
-    std::ofstream pss(pythonFilename.c_str());
-    if (pss.is_open()) {
-      pss << "#!/opt/local/bin/python\n\n";
-      pss << "__author__ = \"Patrick Louden (plouden@nd.edu)\" \n";
-      pss << "__copyright__ = \"Copyright (c) 2016 by the University of Notre Dame\" \n";
-      pss << "__license__ = \"OpenMD\"\n\n";
-      pss << "import numpy as np\n";
-      pss << "from mayavi.mlab import * \n\n";
-      pss << "def plotField(inputFileName): \n";
-      pss << t + "inputFile = open(inputFileName, 'r') \n";
-      pss << t + "x = np.array([]) \n";
-      pss << t + "y = np.array([]) \n";
-      pss << t + "z = np.array([]) \n";
-      pss << t + "scalar = np.array([]) \n\n";
-      pss << t + "for line in inputFile:\n";
-      pss << t + t + "if line.split()[0] != \"#\": \n";
-      pss << t + t + t + "x = np.append(x, float(line.strip().split()[0])) \n";
-      pss << t + t + t + "y = np.append(y, float(line.strip().split()[1])) \n";
-      pss << t + t + t + "z = np.append(z, float(line.strip().split()[2])) \n";
-      pss << t + t + t + "scalar = np.append(scalar, float(line.strip().split()[3])) \n\n";
-      pss << t + "obj = quiver3d(x, y, z, scalar, line_width=2, scale_factor=3) \n";
-      pss << t + "return obj \n\n";
-      pss << "plotField(\"";
-      pss << outputFilename_.c_str();
-      pss << "\")";
     }
   }
 
-  template <>
-  void Field<Vector3d>::writeField() {    
-    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    
-    std::ofstream fs(outputFilename_.c_str());
-    if (fs.is_open()) {
-      
-      fs << "# Vector Field output file format (x,y,z) (Vx,Vy,Vz)\n";
-      fs << "# where (x,y,z) is the location of the center of the voxel\n";
-      fs << "# and (Vx,Vy,Vz) is the average vector for that voxel.\n";
-      
-      for (std::size_t k = 0; k < field_[0][0].size(); ++k) {
-	for(std::size_t j = 0; j < field_[0].size(); ++j) {
-	  for(std::size_t i = 0; i < field_.size(); ++i) {
-            
-	    fs << float(hmat(0,0) * (float(i)/nBins_(0) - 0.5)) << "\t";
-            fs << float(hmat(1,1) * (float(j)/nBins_(1) - 0.5)) << "\t";
-            fs << float(hmat(2,2) * (float(k)/nBins_(2) - 0.5)) << "\t";
-            fs << float(field_[i][j][k](0)) << "\t";
-            fs << float(field_[i][j][k](1)) << "\t";
-            fs << float(field_[i][j][k](2));
-            fs << std::endl;            
-	  }
-	}
-      }      
-    }    
-    
+  template<class T>
+  void Field<T>::writeVisualizationScript() {
     string t = "     ";
     string pythonFilename = outputFilename_ + ".py";
     std::ofstream pss(pythonFilename.c_str());
     if (pss.is_open()) {
       pss << "#!/opt/local/bin/python\n\n";
       pss << "__author__ = \"Patrick Louden (plouden@nd.edu)\" \n";
-      pss << "__copyright__ = \"Copyright (c) 2016 by the University of Notre Dame\" \n";
+      pss << "__copyright__ = \"Copyright (c) 2017 by the University of Notre Dame\" \n";
       pss << "__license__ = \"OpenMD\"\n\n";
       pss << "import numpy as np\n";
       pss << "from mayavi.mlab import * \n\n";
@@ -430,6 +398,34 @@ namespace OpenMD {
     }
   }
 
+  template <>
+  std::string Field<RealType>::writeValue(RealType v) {
+    std::stringstream str;
+    if (isinf(v) || isnan(v)) {      
+      sprintf( painCave.errMsg,
+               "Field detected a numerical error.\n");
+        painCave.isFatal = 1;
+        simError();
+    }
+    str << v;
+    return str.str();      
+  }
+
+  template <>
+  std::string Field<Vector3d>::writeValue(Vector3d v) {
+    std::stringstream str;
+    if (isinf(v[0]) || isnan(v[0]) || 
+        isinf(v[1]) || isnan(v[1]) || 
+        isinf(v[2]) || isnan(v[2]) ) {      
+      sprintf( painCave.errMsg,
+               "Field detected a numerical error.\n");
+        painCave.isFatal = 1;
+        simError();
+    }
+    str << v[0] << "\t" << v[1] << "\t" << v[2];
+    return str.str();      
+  }
+  
   DensityField::DensityField(SimInfo* info, const std::string& filename,
                              const std::string& sele1, RealType voxelSize) :
     Field<RealType>(info, filename, sele1, voxelSize) {
@@ -485,9 +481,39 @@ namespace OpenMD {
   }
   
   Vector3d DipoleField::getValue(StuntDouble* sd) {
-    Vector3d dipoleVector(0.0);      
-    if (static_cast<Atom*>(sd)->isDipole()) {
-      dipoleVector += static_cast<Atom*>(sd)->getDipole();
+    const RealType eAtoDebye = 4.8032045444;
+    Vector3d dipoleVector(0.0);
+    
+    if (sd->isDirectionalAtom()) {
+      dipoleVector += static_cast<DirectionalAtom*>(sd)->getDipole();
+    }
+
+    if (sd->isRigidBody()) {
+      RigidBody* rb = static_cast<RigidBody*>(sd);
+      Vector3d com = rb->getPos();
+      Atom* atom;
+      RigidBody::AtomIterator ai;
+      for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+        RealType charge(0.0);
+        AtomType* atomType = atom->getAtomType();
+
+        FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+        if ( fca.isFixedCharge() ) {
+          charge = fca.getCharge();
+        }
+        
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+        if ( fqa.isFluctuatingCharge() ) {
+          charge += atom->getFlucQPos();
+        }
+        
+        Vector3d pos = atom->getPos();        
+        dipoleVector += pos * charge * eAtoDebye;
+
+        if (atom->isDipole()) {
+          dipoleVector += atom->getDipole();
+        }
+      }
     }
     return dipoleVector;
   }
