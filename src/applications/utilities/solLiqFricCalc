@@ -226,7 +226,7 @@ def main(argv):
     parser = argparse.ArgumentParser(
         description='OpenMD solid/liquid kinetic friction coefficient calculator for orthorhombic systems.',
         #formatter_class=RawDescriptionHelpFormatter,
-        epilog="Example: kappaCalc -i shearSim.rnemd -o shearSim.vfit -z1 30.4 -z2 75.6 -w 4.5 -Vs 1.2e-5 -Vl 1.0e-6 -m 2.2e-6 -d 2")
+        epilog="Example: solLiqFricCalc -i shearSim.rnemd -o shearSim.vfit -z1 30.4 -z2 75.6 -w 4.5 -Vs 1.2e-5 -Vl 1.0e-6 -m 2.2e-6 -d 2")
     parser.add_argument("-i","--rnemd-file=", action="store", dest="rnemdFileName", help="use specified input (.rnemd) file")
     parser.add_argument("-o","--vfit-file=", action="store", dest="vfitFileName", help="use specified output (.vfit) file")
     parser.add_argument("-z1","--lowerGibbsZ=", action="store", type=float, dest="z1", help="the location of the lower Gibbs dividing surface")
