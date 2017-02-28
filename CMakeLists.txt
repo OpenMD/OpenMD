@@ -743,6 +743,7 @@ src/applications/utilities/vcorr2spectrum
 src/applications/utilities/waterReplacer
 src/applications/utilities/waterReplacer
 src/applications/utilities/slabBuilder
+src/applications/utilities/solLiqFricCalc
 )
 
 IF(NUMPY_FOUND)
