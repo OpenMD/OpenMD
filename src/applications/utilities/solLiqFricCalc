@@ -36,7 +36,7 @@ def rnemdExtractor(rnemdFileName):
     while True:
         line = rnemdFile.readline()
         if not line: break
-        if "Actual flux:" in line:
+        if "Actual flux:" in line or "actual flux:" in line:
             rnemdFile.readline()
             line = rnemdFile.readline()
             rnemdJzP = np.array([[float(line.split()[4][:-1])],[float(line.split()[5][:-1])],[float(line.split()[6])]])
