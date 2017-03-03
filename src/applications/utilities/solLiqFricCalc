@@ -181,7 +181,8 @@ def writeOutputFile(outputFileName, rnemdFileName, popt):
        outFile.write("# Obtained optomized parameters \n")
        outFile.write("# Vs \t\t\t Z1 \t\t Z2 \t\t m \t\t\t w \t\t Vl \n")
        outFile.write("# " + str(popt[0]) + "\t" + str(popt[1]) + "\t" + str(popt[2]) + "\t" + str(popt[3]) + "\t" + str(popt[4]) + "\t" + str(popt[5]) + "\n#\n#\n")
-
+       if (float(popt[0]) < float(popt[5]):
+               outFile.write("# WARNING Vs < Vl \n#\n")
 def writeOutputLambda(outputFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambda1, shearRate):
     outFile = open(outputFileName,"a")
     outFile.write("#   The interfacial friction coefficient, lambda, was calculated by \n")
@@ -239,7 +240,7 @@ def main(argv):
     parser.add_argument("-m", "--liquidSlope=", action="store", type=float, dest="m", help="the initial estimate of the slope in the liquid")
     parser.add_argument("-d","--toDelete=", action="store", default=0,type=int, dest="toDel", help="the number of data points to be deleted from the beginning and end of the velocity profile. (default=0)")
     parser.add_argument("-s","--sigma=", action="store", default=3.16549, type=float, dest="sigma", help="the molecular diameter of the liquid (default=3.16549)")
-    #parser.add_argument("-f","--convFactor=", action="store", default=2.19723, type=float, dest="convFactor", help="the conversion factor between widths obtained by fits and broader widths (default=2.19723 gives 90%-10% width)")
+    parser.add_argument("-f","--convFactor=", action="store", default=2.19723, type=float, dest="convFactor", help="the conversion factor between widths obtained by fits and broader widths (default=2.19723 gives 90%-10% width)")
     parser.add_argument("-t","--useWidth", action="store", default=False, type=bool, dest="useWidth", help="use provided width for deltaV calculation? (default=false)")
 
 
