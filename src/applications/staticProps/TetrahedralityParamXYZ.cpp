@@ -145,15 +145,6 @@ namespace OpenMD {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
       }
       
-      // update the positions of atoms which belong to the rigidbodies
-      for (mol = info_->beginMolecule(mi); mol != NULL;
-           mol = info_->nextMolecule(mi)) {
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL;
-             rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtoms();
-        }
-      }
-      
       //qvals.clear();
 
       // outer loop is over the selected StuntDoubles:

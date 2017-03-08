@@ -110,16 +110,6 @@ namespace OpenMD {
 	seleMan2_.setSelectionSet(evaluator2_.evaluate());
 	validateSelection2(seleMan2_);
       }
-
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-
-	// Change the positions of atoms which belong to the RigidBodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-             rb = mol->nextRigidBody(rbIter)) {
-	  rb->updateAtoms();
-	}
-      }
         
       initializeHistogram();
         

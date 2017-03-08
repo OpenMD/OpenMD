@@ -109,7 +109,6 @@ namespace OpenMD {
     particleEnergies1 = E_a_[frame1];
     particleEnergies2 = E_a_[frame2];
 
-    updateFrame(frame1);       
     atomPositions1.clear();
     for (mol1 = info_->beginMolecule(mi1); mol1 != NULL; 
          mol1 = info_->nextMolecule(mi1)) {
@@ -118,7 +117,7 @@ namespace OpenMD {
         atomPositions1.push_back(atom1->getPos(frame1));
       }
     }
-    updateFrame(frame2);       
+
     atomPositions2.clear();
     for (mol2 = info_->beginMolecule(mi2); mol2 != NULL; 
          mol2 = info_->nextMolecule(mi2)) {
@@ -199,11 +198,6 @@ namespace OpenMD {
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
       for (int j = block1.first; j < block1.second; ++j) {
 
-        // update the positions and velocities of the atoms belonging
-        // to rigid bodies:
-        
-        updateFrame(j);        
-        
 	// do the forces:
         
         forceMan->calcForces(); 

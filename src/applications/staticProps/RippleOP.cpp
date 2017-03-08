@@ -126,15 +126,6 @@ namespace OpenMD {
       int nTail=0;
       RealType sumZ = 0.0;
       
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-	   mol = info_->nextMolecule(mi)) {
-	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-	     rb = mol->nextRigidBody(rbIter)) {
-	  rb->updateAtoms();
-	}
-      }      
-
       for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
 	   sd3 = seleMan2_.nextSelected(i1)) {
 	Vector3d pos1 = sd3->getPos();

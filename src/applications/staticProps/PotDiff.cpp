@@ -122,15 +122,6 @@ namespace OpenMD {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-	   mol = info_->nextMolecule(mi)) {
-	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-	     rb = mol->nextRigidBody(rbIter)) {
-	  rb->updateAtoms();        
-	}      
-      }
-
       for (sd = seleMan_.beginSelected(j); sd != NULL;
            sd = seleMan_.nextSelected(j)) {
         if (!selectionWasFlucQ_[j])  {

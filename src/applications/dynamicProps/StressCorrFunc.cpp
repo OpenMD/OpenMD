@@ -153,11 +153,6 @@ namespace OpenMD {
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
       for (int j = block1.first; j < block1.second; ++j) {
 
-        // update the positions and velocities of the atoms belonging
-        // to rigid bodies:
-
-        updateFrame(j);
-
 	// do the forces:
 	//forceMan->calcForces(true, true);
 	// call thermo to get the pressure and volume.

@@ -115,15 +115,6 @@ namespace OpenMD {
       frames_++;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-      for(mol = info_->beginMolecule(mi); mol != NULL; 
-	  mol = info_->nextMolecule(mi)){
-	//change the positions of atoms which belong to the rigidbodies
-	for(rb = mol->beginRigidBody(rbIter); rb != NULL; 
-	    rb = mol->nextRigidBody(rbIter)){
-	  rb->updateAtoms();
-	}
-      }
       
       index = 0; // count over atoms since iterators aren't the most
 		 // friendly for such plebian things

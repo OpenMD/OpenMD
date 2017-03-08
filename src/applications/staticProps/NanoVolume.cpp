@@ -106,17 +106,7 @@ void NanoVolume::process() {
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
-    // update the positions of atoms which belong to the rigid bodies
-    
-    for (mol = info_->beginMolecule(mi); mol != NULL;
-	 mol = info_->nextMolecule(mi)) {
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
-	   rb = mol->nextRigidBody(rbIter)) {	
-	rb->updateAtoms();
-      }
-    }
-    
+        
     // outer loop is over the selected StuntDoubles:
     
     for (sd = seleMan_.beginSelected(i); sd != NULL;
@@ -124,7 +114,7 @@ void NanoVolume::process() {
       theAtoms_.push_back(sd);      
     }
     
-    /* variant below for signle atoms, not StuntDoubles:
+    /* variant below for single atoms, not StuntDoubles:
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
       for (atom = mol->beginAtom(ai); atom != NULL; 

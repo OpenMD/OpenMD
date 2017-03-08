@@ -138,11 +138,6 @@ namespace OpenMD {
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
       for (int j = block1.first; j < block1.second; ++j) {
 
-        // update the positions and velocities of the atoms belonging
-        // to rigid bodies:
-        
-        updateFrame(j);        
-
         for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
 	     sd1 = seleMan1_.nextSelected(ii)) {
 

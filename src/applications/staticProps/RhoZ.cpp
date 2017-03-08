@@ -91,15 +91,6 @@ namespace OpenMD {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-	   mol = info_->nextMolecule(mi)) {
-        //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-	     rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtoms();
-        }
-      }
-
       for (unsigned int i = 0; i < nBins_; i++) {
         sliceSDLists_[i].clear();
       }

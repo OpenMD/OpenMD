@@ -137,10 +137,7 @@ namespace OpenMD {
     jend = snapshotBlock2.second;
 
     for (int i = snapshotBlock1.first; i < snapshotBlock1.second; ++i) {
-               
-      //update the position or velocity of the atoms belong to rigid bodies
-      updateFrame(i);
-
+      
       if (evaluator1_.isDynamic()) {
         seleMan1_.clearSelection();
         seleMan1_.setSelectionSet(evaluator1_.evaluate(i));
@@ -174,8 +171,6 @@ namespace OpenMD {
           simError();  
         }
 
-	//update the position or velocity of the atoms belong to rigid bodies
-	updateFrame(j);
         if (evaluator2_.isDynamic()) {
           seleMan2_.clearSelection();
           seleMan2_.setSelectionSet(evaluator2_.evaluate(j));
@@ -185,38 +180,6 @@ namespace OpenMD {
       }
     }
   }
-
-  void TimeCorrFunc::updateFrame(int frame){
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
-    /** @todo need improvement */    
-    if (storageLayout_ & DataStorage::dslPosition) {
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-	   mol = info_->nextMolecule(mi)) {
-
-	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-	     rb = mol->nextRigidBody(rbIter)) {
-	  rb->updateAtoms(frame);
-	}
-      }        
-    }
-
-    if (storageLayout_ & DataStorage::dslVelocity) {
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-	   mol = info_->nextMolecule(mi)) {
-	
-	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-	     rb = mol->nextRigidBody(rbIter)) {
-	  rb->updateAtomVel(frame);
-	}
-      }      
-    }    
-  }
-
 
   void TimeCorrFunc::preCorrelate() {
     fill(histogram_.begin(), histogram_.end(), 0.0);

@@ -71,8 +71,7 @@ namespace OpenMD {
     : info_(info), filename_(filename), isScanned_(false), nframes_(0),
       needCOMprops_(false) { 
     
-#ifdef IS_MPI 
-    
+#ifdef IS_MPI     
     if (worldRank == 0) { 
 #endif 
       
@@ -87,13 +86,10 @@ namespace OpenMD {
 	simError(); 
       } 
       
-#ifdef IS_MPI 
-      
-    } 
-    
+#ifdef IS_MPI       
+    }     
     strcpy(checkPointMsg, "Dump file opened for reading successfully."); 
-    errorCheckPoint(); 
-    
+    errorCheckPoint();     
 #endif 
     
     return; 
@@ -101,20 +97,16 @@ namespace OpenMD {
   
   DumpReader::~DumpReader() { 
     
-#ifdef IS_MPI 
-    
+#ifdef IS_MPI     
     if (worldRank == 0) { 
 #endif
 
       delete inFile_; 
       
-#ifdef IS_MPI 
-      
-    } 
-    
+#ifdef IS_MPI       
+    }     
     strcpy(checkPointMsg, "Dump file closed successfully."); 
-    errorCheckPoint(); 
-    
+    errorCheckPoint();     
 #endif 
     
     return; 
@@ -133,8 +125,7 @@ namespace OpenMD {
     std::streampos prevPos;
     std::streampos  currPos; 
     
-#ifdef IS_MPI 
-    
+#ifdef IS_MPI     
     if (worldRank == 0) { 
 #endif // is_mpi 
       
@@ -202,11 +193,10 @@ namespace OpenMD {
         painCave.isFatal = 1; 
         simError();      
       }
+      
 #ifdef IS_MPI 
-    } 
-     
-    MPI_Bcast(&nframes_, 1, MPI_INT, 0, MPI_COMM_WORLD); 
-    
+    }      
+    MPI_Bcast(&nframes_, 1, MPI_INT, 0, MPI_COMM_WORLD);    
 #endif // is_mpi 
     
     isScanned_ = true; 
@@ -269,8 +259,8 @@ namespace OpenMD {
     inFile_->seekg(framePos_[whichFrame]); 
 
     std::istream& inputStream = *inFile_;     
-
-#else 
+#else
+    
     int masterNode = 0;
     std::stringstream sstream;
     if (worldRank == masterNode) {
@@ -343,7 +333,6 @@ namespace OpenMD {
   } 
    
   void DumpReader::parseDumpLine(const std::string& line) { 
-
        
     StringTokenizer tokenizer(line); 
     int nTokens; 
@@ -398,140 +387,151 @@ namespace OpenMD {
     for(int i = 0; i < size; ++i) {
       switch(type[i]) {
         
-        case 'p': {
-            Vector3d pos;
-            pos[0] = tokenizer.nextTokenAsDouble(); 
-            pos[1] = tokenizer.nextTokenAsDouble(); 
-            pos[2] = tokenizer.nextTokenAsDouble(); 
-            if (needPos_) { 
-              sd->setPos(pos); 
-            }             
-            break;
-        }
-        case 'v' : {
-            Vector3d vel;
-            vel[0] = tokenizer.nextTokenAsDouble(); 
-            vel[1] = tokenizer.nextTokenAsDouble(); 
-            vel[2] = tokenizer.nextTokenAsDouble(); 
-            if (needVel_) { 
-              sd->setVel(vel); 
-            } 
-            break;
-        }
-
-        case 'q' : {
-           Quat4d q;
-           if (sd->isDirectional()) { 
-              
-             q[0] = tokenizer.nextTokenAsDouble(); 
-             q[1] = tokenizer.nextTokenAsDouble(); 
-             q[2] = tokenizer.nextTokenAsDouble(); 
-             q[3] = tokenizer.nextTokenAsDouble(); 
-              
-             RealType qlen = q.length(); 
-             if (qlen < OpenMD::epsilon) { //check quaternion is not
-                                           //equal to 0
-                
-               sprintf(painCave.errMsg, 
-                       "DumpReader Error: initial quaternion error "
-                       "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
-               painCave.isFatal = 1; 
-               simError(); 
-                
-             }  
-              
-             q.normalize(); 
-             if (needQuaternion_) {            
-               sd->setQ(q); 
-             }               
-           }            
-           break;
-        }  
-        case 'j' : {
-          Vector3d ji;
-          if (sd->isDirectional()) {
-             ji[0] = tokenizer.nextTokenAsDouble(); 
-             ji[1] = tokenizer.nextTokenAsDouble(); 
-             ji[2] = tokenizer.nextTokenAsDouble(); 
-             if (needAngMom_) { 
-               sd->setJ(ji); 
-             } 
-          }
-          break;
-        }  
-        case 'f': {
-
-          Vector3d force;
-          force[0] = tokenizer.nextTokenAsDouble(); 
-          force[1] = tokenizer.nextTokenAsDouble(); 
-          force[2] = tokenizer.nextTokenAsDouble();           
-          sd->setFrc(force); 
-          break;
-        }
-        case 't' : {
-
-           Vector3d torque;
-           torque[0] = tokenizer.nextTokenAsDouble(); 
-           torque[1] = tokenizer.nextTokenAsDouble(); 
-           torque[2] = tokenizer.nextTokenAsDouble();           
-           sd->setTrq(torque);          
-           break;
-        }
-        case 'u' : {
-
-           RealType particlePot;
-           particlePot = tokenizer.nextTokenAsDouble(); 
-           sd->setParticlePot(particlePot);          
-           break;
-        }
-        case 'c' : {
-
-           RealType flucQPos;
-           flucQPos = tokenizer.nextTokenAsDouble(); 
-           sd->setFlucQPos(flucQPos);          
-           break;
-        }
-        case 'w' : {
-
-           RealType flucQVel;
-           flucQVel = tokenizer.nextTokenAsDouble(); 
-           sd->setFlucQVel(flucQVel);          
-           break;
-        }
-        case 'g' : {
-
-           RealType flucQFrc;
-           flucQFrc = tokenizer.nextTokenAsDouble(); 
-           sd->setFlucQFrc(flucQFrc);          
-           break;
-        }
-        case 'e' : {
-
-           Vector3d eField;
-           eField[0] = tokenizer.nextTokenAsDouble(); 
-           eField[1] = tokenizer.nextTokenAsDouble(); 
-           eField[2] = tokenizer.nextTokenAsDouble();           
-           sd->setElectricField(eField);          
-           break;
-        }
-        case 's' : {
-
-           RealType sPot;
-           sPot = tokenizer.nextTokenAsDouble(); 
-           sd->setSitePotential(sPot);          
-           break;
-        }
-        default: {
-               sprintf(painCave.errMsg, 
-                       "DumpReader Error: %s is an unrecognized type\n",
-                       type.c_str()); 
-               painCave.isFatal = 1; 
-               simError(); 
-          break;   
-        }
-
+      case 'p': {
+        Vector3d pos;
+        pos[0] = tokenizer.nextTokenAsDouble(); 
+        pos[1] = tokenizer.nextTokenAsDouble(); 
+        pos[2] = tokenizer.nextTokenAsDouble(); 
+        if (needPos_) { 
+          sd->setPos(pos); 
+        }             
+        break;
       }
+      case 'v' : {
+        Vector3d vel;
+        vel[0] = tokenizer.nextTokenAsDouble(); 
+        vel[1] = tokenizer.nextTokenAsDouble(); 
+        vel[2] = tokenizer.nextTokenAsDouble(); 
+        if (needVel_) { 
+          sd->setVel(vel); 
+        } 
+        break;
+      }
+
+      case 'q' : {
+        Quat4d q;
+        if (sd->isDirectional()) { 
+              
+          q[0] = tokenizer.nextTokenAsDouble(); 
+          q[1] = tokenizer.nextTokenAsDouble(); 
+          q[2] = tokenizer.nextTokenAsDouble(); 
+          q[3] = tokenizer.nextTokenAsDouble(); 
+              
+          RealType qlen = q.length(); 
+          if (qlen < OpenMD::epsilon) { //check quaternion is not
+            //equal to 0
+                
+            sprintf(painCave.errMsg, 
+                    "DumpReader Error: initial quaternion error "
+                    "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
+            painCave.isFatal = 1; 
+            simError(); 
+                
+          }  
+              
+          q.normalize(); 
+          if (needQuaternion_) {            
+            sd->setQ(q); 
+          }               
+        }            
+        break;
+      }  
+      case 'j' : {
+        Vector3d ji;
+        if (sd->isDirectional()) {
+          ji[0] = tokenizer.nextTokenAsDouble(); 
+          ji[1] = tokenizer.nextTokenAsDouble(); 
+          ji[2] = tokenizer.nextTokenAsDouble(); 
+          if (needAngMom_) { 
+            sd->setJ(ji); 
+          } 
+        }
+        break;
+      }  
+      case 'f': {
+
+        Vector3d force;
+        force[0] = tokenizer.nextTokenAsDouble(); 
+        force[1] = tokenizer.nextTokenAsDouble(); 
+        force[2] = tokenizer.nextTokenAsDouble();           
+        sd->setFrc(force); 
+        break;
+      }
+      case 't' : {
+
+        Vector3d torque;
+        torque[0] = tokenizer.nextTokenAsDouble(); 
+        torque[1] = tokenizer.nextTokenAsDouble(); 
+        torque[2] = tokenizer.nextTokenAsDouble();           
+        sd->setTrq(torque);          
+        break;
+      }
+      case 'u' : {
+
+        RealType particlePot;
+        particlePot = tokenizer.nextTokenAsDouble(); 
+        sd->setParticlePot(particlePot);          
+        break;
+      }
+      case 'c' : {
+
+        RealType flucQPos;
+        flucQPos = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQPos(flucQPos);          
+        break;
+      }
+      case 'w' : {
+
+        RealType flucQVel;
+        flucQVel = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQVel(flucQVel);          
+        break;
+      }
+      case 'g' : {
+
+        RealType flucQFrc;
+        flucQFrc = tokenizer.nextTokenAsDouble(); 
+        sd->setFlucQFrc(flucQFrc);          
+        break;
+      }
+      case 'e' : {
+
+        Vector3d eField;
+        eField[0] = tokenizer.nextTokenAsDouble(); 
+        eField[1] = tokenizer.nextTokenAsDouble(); 
+        eField[2] = tokenizer.nextTokenAsDouble();           
+        sd->setElectricField(eField);          
+        break;
+      }
+      case 's' : {
+
+        RealType sPot;
+        sPot = tokenizer.nextTokenAsDouble(); 
+        sd->setSitePotential(sPot);          
+        break;
+      }
+      default: {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: %s is an unrecognized type\n",
+                type.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+        break;   
+      }
+
+      }      
     }
+    if (sd->isRigidBody()) {
+      RigidBody* rb = static_cast<RigidBody*>(sd);
+      if (needPos_) {
+        // This should let us use various atom-based selections even
+        // if we have only rigid bodies:
+        rb->updateAtoms();
+      }
+      if (needVel_) {
+        rb->updateAtomVel();
+      }
+    }    
   } 
    
 
@@ -564,7 +564,6 @@ namespace OpenMD {
      * we've got data on the integrable object itself.  If there is an
      * integer, we're parsing data for a site on a rigid body.
      */
-
     std::string indexTest = tokenizer.peekNextToken();
     std::istringstream i(indexTest);
     int siteIndex;
@@ -639,11 +638,11 @@ namespace OpenMD {
         break;   
       }
       }
-    }    
+    }
   } 
   
   
-    void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
     
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
@@ -736,7 +735,7 @@ namespace OpenMD {
         thermostat.first = tokenizer.nextTokenAsDouble();
         thermostat.second = tokenizer.nextTokenAsDouble();
         s->setThermostat(thermostat); 
-     } else if (propertyName == "Barostat") {
+      } else if (propertyName == "Barostat") {
         Mat3x3d eta;
         eta(0, 0) = tokenizer.nextTokenAsDouble(); 
         eta(0, 1) = tokenizer.nextTokenAsDouble(); 

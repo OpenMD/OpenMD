@@ -163,19 +163,7 @@ namespace OpenMD {
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }
-      
-      // update the positions of atoms which belong to the rigidbodies
-      
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-             rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtoms();
-        }        
-      }                       
-
-
-      
+            
 #ifdef HAVE_FFTW3_H
       fftw_plan p1, p2;
 #else

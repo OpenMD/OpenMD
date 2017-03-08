@@ -117,28 +117,7 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      times_[istep] = currentSnapshot_->getTime();
-      
-      // update the positions of atoms which belong to the rigidbodies
-      for (mol = info_->beginMolecule(mi); mol != NULL;
-           mol = info_->nextMolecule(mi)) {
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL;
-             rb = mol->nextRigidBody(rbIter)) {
-          rb->updateAtoms();
-        }
-      }
-      
-      if (storageLayout_ & DataStorage::dslVelocity) {
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-          
-          //change the positions of atoms which belong to the rigidbodies
-          for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-               rb = mol->nextRigidBody(rbIter)) {
-            rb->updateAtomVel();
-          }
-        }      
-      }      
+      times_[istep] = currentSnapshot_->getTime();      
       computeFrame(istep);
     }
   }

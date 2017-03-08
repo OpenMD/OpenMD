@@ -108,17 +108,6 @@ namespace OpenMD {
     vector<RealType> binKE(nBins_, 0.0);
     vector<unsigned int> binDof(nBins_, 0);
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      // change the positions of atoms which belong to the rigidbodies
-      
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtomVel();
-      }
-    }
-   
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
@@ -233,17 +222,6 @@ namespace OpenMD {
     vector<RealType> binKE(nBins_, 0.0);
     vector<int> binDof(nBins_, 0);
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      // change the positions of atoms which belong to the rigidbodies
-      
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtomVel();
-      }
-    }
-   
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
@@ -398,18 +376,7 @@ namespace OpenMD {
     vector<vector<Mat3x3d> >  binI;
     vector<vector<Vector3d> > binL;
     vector<vector<int> > binCount;
-    
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      // change the positions of atoms which belong to the rigidbodies
-      
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtomVel();
-      }
-    }
-   
+       
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }

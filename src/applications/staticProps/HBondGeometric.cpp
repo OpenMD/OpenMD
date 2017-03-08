@@ -129,16 +129,6 @@ namespace OpenMD {
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
      
-      // update the positions of atoms which belong to the rigidbodies
-      
-      for (mol1 = info_->beginMolecule(mi); mol1 != NULL; 
-           mol1 = info_->nextMolecule(mi)) {
-        for (rb1 = mol1->beginRigidBody(rbIter); rb1 != NULL; 
-             rb1 = mol1->nextRigidBody(rbIter)) {
-          rb1->updateAtoms();
-        }        
-      }           
-      
       if  (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }

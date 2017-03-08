@@ -100,7 +100,6 @@ namespace OpenMD {
        
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
 
-    updateFrame(frame1);       
     atomPositions1.clear();
     for (mol1 = info_->beginMolecule(mi1); mol1 != NULL; 
          mol1 = info_->nextMolecule(mi1)) {
@@ -110,7 +109,7 @@ namespace OpenMD {
         atomVelocity1.push_back(atom1->getVel(frame1));
       }
     }
-    updateFrame(frame2);       
+
     atomPositions2.clear();
     for (mol2 = info_->beginMolecule(mi2); mol2 != NULL; 
          mol2 = info_->nextMolecule(mi2)) {

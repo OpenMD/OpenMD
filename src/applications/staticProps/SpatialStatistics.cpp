@@ -52,8 +52,8 @@ namespace OpenMD {
   
   SpatialStatistics::SpatialStatistics(SimInfo* info, const string& filename, 
                                        const string& sele, int nbins)
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),  evaluator_(info),
-      seleMan_(info) {
+    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
+      evaluator_(info), seleMan_(info) {
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -99,18 +99,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     int i;
-    
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      // change the positions of atoms which belong to the rigidbodies
-      
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-        rb->updateAtoms();
-      }
-    }
-    
+        
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }

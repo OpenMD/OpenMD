@@ -85,7 +85,6 @@ namespace OpenMD {
         
     virtual void preCorrelate();        
     virtual void postCorrelate();
-    virtual void updateFrame(int frame);
 
     RealType deltaTime_;
     int nTimeBins_;
