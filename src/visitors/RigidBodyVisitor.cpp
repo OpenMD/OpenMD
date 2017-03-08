@@ -148,7 +148,8 @@ namespace OpenMD {
   void RBCOMVisitor::visit(RigidBody* rb){
     AtomData* atomData;
     AtomInfo* atomInfo;
-    Vector3d pos = rb->getPos();
+    Vector3d pos;
+    pos = rb->getPos();
 
     atomInfo = new AtomInfo;
     atomInfo->atomTypeName = "X";
