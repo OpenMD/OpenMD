@@ -72,8 +72,9 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
 
-    // Set up cutoff values:
 
+    // Set up cutoff values:
+    nBins_ = nbins;
     rCut_ = rCut;
     thetaCut_ = thetaCut;
     
