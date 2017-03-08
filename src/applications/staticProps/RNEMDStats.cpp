@@ -108,21 +108,6 @@ namespace OpenMD {
     vector<RealType> binKE(nBins_, 0.0);
     vector<unsigned int> binDof(nBins_, 0);
     
-<<<<<<< HEAD
-=======
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      // change the positions of atoms which belong to the rigidbodies
-      
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-	rb->updateAtoms();
-        rb->updateAtomVel();
-      }
-    }
-   
->>>>>>> 07dbf496190b30138334c65978db00e347362563
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
