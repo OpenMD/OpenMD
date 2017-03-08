@@ -50,7 +50,7 @@
 #ifndef MATH_SPHERICALHARMONIC_HPP
 #define MATH_SPHERICALHARMONIC_HPP
 
-#include <string.h>
+#include <cstring>
 #include <cmath>
 #include <complex>
 #include "config.h"

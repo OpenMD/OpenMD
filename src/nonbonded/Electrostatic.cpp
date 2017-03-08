@@ -44,11 +44,11 @@
 #include <mpi.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
-
+#include <cstdio>
+#include <cstring>
 #include <cmath>
 #include <numeric>
+
 #include "nonbonded/Electrostatic.hpp"
 #include "utils/simError.h"
 #include "types/NonBondedInteractionType.hpp"

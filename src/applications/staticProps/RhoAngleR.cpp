@@ -47,7 +47,7 @@
 #include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include <math.h>
+#include <cmath>
 
 namespace OpenMD {
 

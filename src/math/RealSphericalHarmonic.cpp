@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 #include <limits>
 #include "math/RealSphericalHarmonic.hpp"

@@ -49,6 +49,10 @@
 
 #include <algorithm>
 #include <fstream>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
 #include "applications/staticProps/Hxy.hpp"
 #include "utils/simError.h"
 #include "utils/PhysicalConstants.hpp"
@@ -56,10 +60,6 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/LennardJonesAdapter.hpp"
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-#include<math.h>
 
 namespace OpenMD {
   

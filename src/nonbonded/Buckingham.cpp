@@ -40,10 +40,10 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include <stdio.h>
-#include <string.h>
-
+#include <cstdio>
+#include <cstring>
 #include <cmath>
+
 #include "nonbonded/Buckingham.hpp"
 #include "utils/simError.h"
 #include "types/BuckinghamInteractionType.hpp"

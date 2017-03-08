@@ -43,7 +43,7 @@
 #ifndef UTILS_UTILITY_HPP
 #define UTILS_UTILITY_HPP
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include "config.h"
 #include "utils/next_combination.hpp"
 

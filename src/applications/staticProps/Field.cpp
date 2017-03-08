@@ -44,7 +44,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-#include <math.h>
+#include <cmath>
 
 #include "applications/staticProps/Field.hpp"
 #include "utils/simError.h"

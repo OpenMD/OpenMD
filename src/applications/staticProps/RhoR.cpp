@@ -49,7 +49,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/Thermo.hpp"
-#include <math.h>
+#include <cmath>
 
 namespace OpenMD {
 

@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include <math.h>
+#include <cmath>
 
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"

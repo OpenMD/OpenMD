@@ -41,7 +41,7 @@
  */
 
 #include "clusters/Cuboctahedron.hpp"
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include "utils/CaseConversion.hpp"
 

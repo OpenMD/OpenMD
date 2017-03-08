@@ -31,7 +31,7 @@ GNU General Public License for more details.
 #ifndef PRIMITIVES_ELEMENT_HPP
 #define PRIMITIVES_ELEMENT_HPP
 #include <string>
-#include <string.h>
+#include <cstring>
 #include "config.h"
 
 namespace OpenMD{

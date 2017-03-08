@@ -27,7 +27,7 @@
 // ============================================================================
 
 #include <iostream>
-#include <string.h>  // for memcpy
+#include <cstring>  // for memcpy
 #include "io/gzstream.hpp"
 
 namespace OpenMD {

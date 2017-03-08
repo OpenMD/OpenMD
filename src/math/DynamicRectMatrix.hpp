@@ -49,7 +49,6 @@
 
 #ifndef MATH_DYNAMICRECTMATRIX_HPP
 #define MATH_DYNAMICRECTMATRIX_HPP
-#include <math.h>
 #include <cmath>
 #include "math/DynamicVector.hpp"
 

@@ -41,7 +41,7 @@
  */
 
 #include "config.h"
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 #include <limits>
 #include "math/SphericalHarmonic.hpp"

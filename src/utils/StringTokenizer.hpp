@@ -51,7 +51,7 @@
 #define UTIL_STRINGTOKENIZER_HPP
 
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 #include "config.h"
 namespace OpenMD {

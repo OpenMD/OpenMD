@@ -51,11 +51,11 @@
 #include <sys/stat.h> 
  
 #include <iostream> 
-#include <math.h> 
+#include <cmath> 
  
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <string.h> 
+#include <cstdio> 
+#include <cstdlib> 
+#include <cstring> 
  
 #include "io/DumpReader.hpp" 
 #include "primitives/Molecule.hpp" 

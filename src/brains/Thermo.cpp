@@ -44,7 +44,7 @@
 #include <mpi.h>
 #endif //is_mpi
  
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include "brains/Thermo.hpp"

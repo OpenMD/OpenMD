@@ -45,7 +45,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 
 #include "applications/staticProps/AngleR.hpp"
 #include "utils/simError.h"

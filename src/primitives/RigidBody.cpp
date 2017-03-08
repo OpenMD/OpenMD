@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include "primitives/RigidBody.hpp"
 #include "utils/simError.h"
 #include "utils/NumericConstant.hpp"

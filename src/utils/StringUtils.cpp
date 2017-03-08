@@ -42,7 +42,7 @@
 
 #include "config.h"
 #include <algorithm> 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cctype>
 #include <cstdlib>
 #include <string>

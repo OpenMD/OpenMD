@@ -47,13 +47,13 @@
 #include <sys/types.h> 
 #include <sys/stat.h> 
  
-#include <math.h> 
+#include <cmath> 
 #include <string>
 #include <sstream>
 #include <iostream> 
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <string.h> 
+#include <cstdio> 
+#include <cstdlib> 
+#include <cstring> 
  
 #include "io/RestReader.hpp" 
 #include "primitives/Molecule.hpp" 

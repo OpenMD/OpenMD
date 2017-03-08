@@ -49,7 +49,6 @@
 
 #ifndef MATH_RECTMATRIX_HPP
 #define MATH_RECTMATRIX_HPP
-#include <math.h>
 #include <cmath>
 #include "Vector.hpp"
 

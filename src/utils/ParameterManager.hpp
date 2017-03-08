@@ -46,7 +46,7 @@
 #include <iostream>
 #include <cstdio>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 #include <string>
 #include <map>

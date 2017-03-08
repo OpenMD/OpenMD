@@ -53,7 +53,6 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-#include <math.h>
 #include <algorithm>
 #include <vector>
 
