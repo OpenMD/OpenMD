@@ -115,6 +115,7 @@ namespace OpenMD {
       
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
+	rb->updateAtoms();
         rb->updateAtomVel();
       }
     }
@@ -240,6 +241,7 @@ namespace OpenMD {
       
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
+	rb->updateAtoms();
         rb->updateAtomVel();
       }
     }
@@ -406,6 +408,7 @@ namespace OpenMD {
       
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
+	rb->updateAtoms();
         rb->updateAtomVel();
       }
     }
