@@ -186,7 +186,7 @@ namespace OpenMD {
     RealType s = stats_->getRealData(i);
 
 
-    if (! isinf(s) && ! isnan(s)) {
+    if (! std::isinf(s) && ! std::isnan(s)) {
       statfile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
@@ -200,9 +200,9 @@ namespace OpenMD {
   void StatWriter::writeVector(int i) {
 
     Vector3d s = stats_->getVectorData(i);
-    if (isinf(s[0]) || isnan(s[0]) ||
-        isinf(s[1]) || isnan(s[1]) ||
-        isinf(s[2]) || isnan(s[2]) ) {
+    if (std::isinf(s[0]) || std::isnan(s[0]) ||
+        std::isinf(s[1]) || std::isnan(s[1]) ||
+        std::isinf(s[2]) || std::isnan(s[2]) ) {
       sprintf( painCave.errMsg,
                "StatWriter detected a numerical error writing: %s",
                stats_->getTitle(i).c_str());
@@ -220,7 +220,7 @@ namespace OpenMD {
     bool foundError = false;
 
     for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
-      if (isinf(s[j]) || isnan(s[j])) foundError = true;
+      if (std::isinf(s[j]) || std::isnan(s[j])) foundError = true;
     }
     if (foundError) {
       sprintf( painCave.errMsg,
@@ -241,7 +241,7 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
-        if (isinf(s(i,j)) || isnan(s(i,j))) {
+        if (std::isinf(s(i,j)) || std::isnan(s(i,j))) {
           sprintf( painCave.errMsg,
                    "StatWriter detected a numerical error writing: %s",
                    stats_->getTitle(i).c_str());

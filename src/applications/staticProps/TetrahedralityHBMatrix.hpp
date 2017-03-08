@@ -83,7 +83,7 @@ namespace OpenMD {
   private:
     virtual void initializeHistogram();
     virtual void collectHistogram(RealType q1, RealType q2);    
-    void writeData();
+    void writeOutput();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;

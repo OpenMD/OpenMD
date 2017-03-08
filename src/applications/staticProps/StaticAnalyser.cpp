@@ -150,7 +150,7 @@ namespace OpenMD {
       } else {
 	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
       }
-      if (isinf(r) || isnan(r) ) {      
+      if (std::isinf(r) || std::isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\t%s for bin %u",
@@ -164,9 +164,9 @@ namespace OpenMD {
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
       dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);     
-      if (isinf(v[0]) || isnan(v[0]) || 
-          isinf(v[1]) || isnan(v[1]) || 
-          isinf(v[2]) || isnan(v[2]) ) {      
+      if (std::isinf(v[0]) || std::isnan(v[0]) || 
+          std::isinf(v[1]) || std::isnan(v[1]) || 
+          std::isinf(v[2]) || std::isnan(v[2]) ) {      
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\t%s for bin %u",
@@ -188,7 +188,7 @@ namespace OpenMD {
     if( dat->dataType == odtReal ) {
       RealType r;
       dynamic_cast<Accumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(r);      
-      if (isinf(r) || isnan(r) ) {      
+      if (std::isinf(r) || std::isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\tstandard deviation of %s for bin %u",
@@ -202,9 +202,9 @@ namespace OpenMD {
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
       dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(v);
-      if (isinf(v[0]) || isnan(v[0]) || 
-          isinf(v[1]) || isnan(v[1]) || 
-          isinf(v[2]) || isnan(v[2]) ) {      
+      if (std::isinf(v[0]) || std::isnan(v[0]) || 
+          std::isinf(v[1]) || std::isnan(v[1]) || 
+          std::isinf(v[2]) || std::isnan(v[2]) ) {      
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\tstandard deviation of %s for bin %u",

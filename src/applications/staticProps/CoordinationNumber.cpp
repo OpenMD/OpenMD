@@ -205,7 +205,7 @@ namespace OpenMD {
         histogram_[n] = 0.0;               
     } 
   
-    writeData();
+    writeOutput();
   }
 
   RealType CoordinationNumber::computeCoordination(int a,
@@ -213,7 +213,7 @@ namespace OpenMD {
     return RealType(nl.at(a).size());
   }  
     
-  void CoordinationNumber::writeData() {
+  void CoordinationNumber::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     
     if (ofs.is_open()) {

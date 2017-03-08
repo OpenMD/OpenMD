@@ -2317,7 +2317,7 @@ namespace OpenMD {
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getAverage(s);
     
-    if (! isinf(s) && ! isnan(s)) {
+    if (! std::isinf(s) && ! std::isnan(s)) {
       rnemdFile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
@@ -2340,9 +2340,9 @@ namespace OpenMD {
     if (count == 0) return;
 
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getAverage(s);
-    if (isinf(s[0]) || isnan(s[0]) || 
-        isinf(s[1]) || isnan(s[1]) || 
-        isinf(s[2]) || isnan(s[2]) ) {      
+    if (std::isinf(s[0]) || std::isnan(s[0]) || 
+        std::isinf(s[1]) || std::isnan(s[1]) || 
+        std::isinf(s[2]) || std::isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
                "RNEMD detected a numerical error writing: %s for bin %u",
                data_[index].title.c_str(), bin);
@@ -2365,7 +2365,7 @@ namespace OpenMD {
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->get95percentConfidenceInterval(s);
     
-    if (! isinf(s) && ! isnan(s)) {
+    if (! std::isinf(s) && ! std::isnan(s)) {
       rnemdFile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
@@ -2387,9 +2387,9 @@ namespace OpenMD {
     if (count == 0) return;
 
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->get95percentConfidenceInterval(s);
-    if (isinf(s[0]) || isnan(s[0]) || 
-        isinf(s[1]) || isnan(s[1]) || 
-        isinf(s[2]) || isnan(s[2]) ) {      
+    if (std::isinf(s[0]) || std::isnan(s[0]) || 
+        std::isinf(s[1]) || std::isnan(s[1]) || 
+        std::isinf(s[2]) || std::isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
                "RNEMD detected a numerical error writing: %s std. dev. for bin %u",
                data_[index].title.c_str(), bin);

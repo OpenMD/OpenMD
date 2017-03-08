@@ -314,7 +314,7 @@ namespace OpenMD {
         }           
       }            
     }
-    writeData();
+    writeOutput();
   }
         
   void TetrahedralityHBMatrix::collectHistogram(RealType q1, RealType q2) {
@@ -333,7 +333,7 @@ namespace OpenMD {
     }
   }
 
-  void TetrahedralityHBMatrix::writeData() {
+  void TetrahedralityHBMatrix::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       Revision r;

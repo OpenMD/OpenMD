@@ -396,7 +396,7 @@ namespace OpenMD {
   template <>
   std::string Field<RealType>::writeValue(RealType v) {
     std::stringstream str;
-    if (isinf(v) || isnan(v)) {      
+    if (std::isinf(v) || std::isnan(v)) {      
       sprintf( painCave.errMsg,
                "Field detected a numerical error.\n");
         painCave.isFatal = 1;
@@ -409,9 +409,9 @@ namespace OpenMD {
   template <>
   std::string Field<Vector3d>::writeValue(Vector3d v) {
     std::stringstream str;
-    if (isinf(v[0]) || isnan(v[0]) || 
-        isinf(v[1]) || isnan(v[1]) || 
-        isinf(v[2]) || isnan(v[2]) ) {      
+    if (std::isinf(v[0]) || std::isnan(v[0]) || 
+        std::isinf(v[1]) || std::isnan(v[1]) || 
+        std::isinf(v[2]) || std::isnan(v[2]) ) {      
       sprintf( painCave.errMsg,
                "Field detected a numerical error.\n");
         painCave.isFatal = 1;

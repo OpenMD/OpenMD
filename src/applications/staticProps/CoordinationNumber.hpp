@@ -73,7 +73,7 @@ namespace OpenMD {
 
     virtual ~CoordinationNumber();
     virtual void process();
-    virtual void writeData();
+    virtual void writeOutput();
 
   protected:
     virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
