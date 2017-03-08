@@ -73,11 +73,7 @@ namespace OpenMD {
   }
 
   void RhoZ::process() {
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     int ii;
 
     bool usePeriodicBoundaryConditions_ = 

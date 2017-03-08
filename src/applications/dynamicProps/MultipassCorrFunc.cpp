@@ -109,10 +109,6 @@ namespace OpenMD {
   }
 
   void MultipassCorrFunc::preCorrelate() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
@@ -120,6 +116,7 @@ namespace OpenMD {
       times_[istep] = currentSnapshot_->getTime();      
       computeFrame(istep);
     }
+
   }
 
   void MultipassCorrFunc::computeFrame(int istep) {

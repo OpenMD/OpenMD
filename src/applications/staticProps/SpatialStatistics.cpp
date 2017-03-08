@@ -93,11 +93,7 @@ namespace OpenMD {
 
 
   void SpatialStatistics::processFrame(int istep) {
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     int i;
         
     if (evaluator_.isDynamic()) {

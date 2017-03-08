@@ -101,7 +101,6 @@ namespace OpenMD {
   void HBondGeometric::process() {
     Molecule* mol1;
     Molecule* mol2;
-    RigidBody* rb1;
     Molecule::HBondDonor* hbd1;
     Molecule::HBondDonor* hbd2;
     std::vector<Molecule::HBondDonor*>::iterator hbdi;
@@ -110,8 +109,6 @@ namespace OpenMD {
     std::vector<Atom*>::iterator hbaj;
     Atom* hba1;
     Atom* hba2;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     Vector3d dPos;
     Vector3d aPos;
     Vector3d hPos;

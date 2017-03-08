@@ -100,15 +100,11 @@ namespace OpenMD {
   }
     
   void TetrahedralityParamXYZ::process() {
-    Molecule* mol;
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
     StuntDouble* sdj;
-    RigidBody* rb;
     int myIndex;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj;
     RealType r;

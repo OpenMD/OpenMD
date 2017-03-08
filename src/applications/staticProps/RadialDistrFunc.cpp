@@ -87,10 +87,6 @@ namespace OpenMD {
     }
 
   void RadialDistrFunc::process() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     
     preProcess();
     

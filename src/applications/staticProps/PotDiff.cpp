@@ -99,10 +99,6 @@ namespace OpenMD {
   }
   
   void PotDiff::process() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     StuntDouble* sd;
     int j;
   

@@ -95,10 +95,8 @@ namespace OpenMD {
     StuntDouble* sd2;
     StuntDouble* sdi;
     StuntDouble* sdj;
-    RigidBody* rb;
     int myIndex;
     SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     Molecule::IntegrableObjectIterator ioi;
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj, dposition, tposition;

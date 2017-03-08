@@ -95,12 +95,7 @@ namespace OpenMD {
     }
     volume_ = currentSnapshot_->getVolume();
 
-
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     int i;
 
     vector<RealType> binMass(nBins_, 0.0);
@@ -209,11 +204,7 @@ namespace OpenMD {
 
   void RNEMDR::processFrame(int istep) {
 
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     int i;
 
     vector<RealType> binMass(nBins_, 0.0);
@@ -366,11 +357,7 @@ namespace OpenMD {
 
   void RNEMDRTheta::processFrame(int istep) {
 
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     int i;
 
     vector<vector<Mat3x3d> >  binI;

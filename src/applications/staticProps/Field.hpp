@@ -75,8 +75,8 @@ namespace OpenMD {
     Snapshot* snap_;
     int nProcessed_;
     string selectionScript_;
-    SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
     bool usePeriodicBoundaryConditions_;
     RealType rcut_;
     RealType reffective_;

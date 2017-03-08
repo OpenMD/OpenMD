@@ -84,10 +84,6 @@ namespace OpenMD {
   }
 
   void P2OrderParameter::process() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii; 

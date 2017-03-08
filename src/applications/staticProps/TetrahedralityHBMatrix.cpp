@@ -109,14 +109,11 @@ namespace OpenMD {
   }
   
   void TetrahedralityHBMatrix::process() {
-    Molecule* mol;
     Molecule* mol1;
     Molecule* mol2;
     Molecule* moli;
     Molecule* molj;
-    RigidBody* rb;
     SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     Vector3d vec;
     Vector3d ri, rj, rk, rik, rkj, dposition, tposition;
     RealType r, cospsi;

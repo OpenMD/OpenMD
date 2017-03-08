@@ -69,10 +69,6 @@ NanoLength::NanoLength(SimInfo* info,
     }
 
 void NanoLength::process() {
-  Molecule* mol;
-  RigidBody* rb;
-  SimInfo::MoleculeIterator mi;
-  Molecule::RigidBodyIterator rbIter;
   StuntDouble* sd;
   Vector3d vec;
   int i;

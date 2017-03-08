@@ -81,10 +81,7 @@ namespace OpenMD {
   }
 
   void DensityPlot::process() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
+
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    

@@ -153,11 +153,9 @@ namespace OpenMD {
 
   void NitrileFrequencyMap::process() {
     Molecule* mol;
-    RigidBody* rb;
     Atom* atom;
     AtomType* atype;
     SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     Molecule::AtomIterator ai2;
     Atom* atom2;
     StuntDouble* sd1;

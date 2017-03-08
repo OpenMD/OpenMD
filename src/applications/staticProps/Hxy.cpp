@@ -135,11 +135,7 @@ namespace OpenMD {
 
   void Hxy::process() {
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     int ii;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     std::cerr << "usePeriodicBoundaryConditions_ = " << usePeriodicBoundaryConditions_ << "\n";

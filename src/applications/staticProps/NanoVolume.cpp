@@ -77,10 +77,6 @@ NanoVolume::NanoVolume(SimInfo* info,
 
 void NanoVolume::process() {
 #if defined(HAVE_QHULL)
-  Molecule* mol;
-  RigidBody* rb;
-  SimInfo::MoleculeIterator mi;
-  Molecule::RigidBodyIterator rbIter;
   StuntDouble* sd;
   Vector3d vec;
   int i;

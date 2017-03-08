@@ -78,9 +78,6 @@ namespace OpenMD {
 
   void MultipoleSum::process() {
     Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     SimInfo::MoleculeIterator miter;
     vector<Atom*>::iterator aiter;
     Atom* atom;

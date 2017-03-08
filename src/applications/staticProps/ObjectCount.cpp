@@ -64,10 +64,6 @@ namespace OpenMD {
   }
 
   void ObjectCount::process() {
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
   
     counts_.clear();
     counts_.resize(10, 0);

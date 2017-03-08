@@ -14,7 +14,7 @@
  *    documentation and/or other materials provided with the
  *    distribution.
  *
- * This software is provided "AS IS," without a warranty of any
+ * this software is provided "AS IS," without a warranty of any
  * kind. All express or implied conditions, representations and
  * warranties, including any implied warranty of merchantability,
  * fitness for a particular purpose or non-infringement, are hereby
@@ -198,17 +198,10 @@ namespace OpenMD {
     Wa = abs(dot(A, BxC));
     Wb = abs(dot(B, CxA));
     Wc = abs(dot(C, AxB));
-    
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
-    
+        
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    int nSelected = seleMan_.getSelectionCount();
-    
     
     // di = the magnitude of distance (in x-dimension) that we 
     // should loop through to add the density to.
@@ -492,7 +485,6 @@ namespace OpenMD {
 
     if (sd->isRigidBody()) {
       RigidBody* rb = static_cast<RigidBody*>(sd);
-      Vector3d com = rb->getPos();
       Atom* atom;
       RigidBody::AtomIterator ai;
       for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {

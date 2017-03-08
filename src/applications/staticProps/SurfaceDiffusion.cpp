@@ -85,11 +85,7 @@ namespace OpenMD {
   }
 
   void SurfaceDiffusion::process() {
-    Molecule* mol;
-    RigidBody* rb;
     StuntDouble* sd;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);    

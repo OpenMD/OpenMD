@@ -78,11 +78,6 @@ namespace OpenMD {
 
     preSequence();
 
-    Molecule* mol;
-    RigidBody* rb;
-    SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
-    
     DumpReader reader(info_, dumpFilename_); 
     int nFrames = reader.getNFrames();
   

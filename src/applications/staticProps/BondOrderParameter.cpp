@@ -158,10 +158,8 @@ namespace OpenMD {
   void BondOrderParameter::process() {
     Molecule* mol;
     Atom* atom;
-    RigidBody* rb;
     int myIndex;
     SimInfo::MoleculeIterator mi;
-    Molecule::RigidBodyIterator rbIter;
     Molecule::AtomIterator ai;
     StuntDouble* sd;
     Vector3d vec;
