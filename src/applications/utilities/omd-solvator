@@ -1,18 +1,18 @@
 #!@PYTHON_EXECUTABLE@
-"""MD Solvator
+"""OMD Solvator
 
-Opens two md files, one with a solute structure and one with a solvent
-structure.  Deletes any solvent molecules that overlap with solute
-molecules and produces a new combined md file.  The md file must be
-edited to run properly in OpenMD.  Note that the two boxes must have
-identical box geometries (specified on the Hmat line).
+Opens two omd files, one with a solute structure and one with a
+solvent structure.  Deletes any solvent molecules that overlap with
+solute molecules and produces a new combined omd file.  The output omd
+file must be edited to run properly in OpenMD.  Note that the two
+boxes must have identical box geometries (specified on the Hmat line).
 
-Usage: md-solvator
+Usage: omd-solvator
 
 Options:
   -h,  --help              show this help
-  -u,  --solute=...        use specified meta-data (.omd) file as the solute
-  -v,  --solvent=...       use specified meta-data (.omd) file as the solvent
+  -u,  --solute=...        use specified OpenMD (.omd) file as the solute
+  -v,  --solvent=...       use specified OpenMD (.omd) file as the solvent
   -r,  --rcut=...          specify the cutoff radius for deleting solvent
   -o,  --output-file=...   use specified output (.omd) file
   -n,  --nSoluteAtoms=...  Number of atoms in solute molecule,
@@ -21,7 +21,7 @@ Options:
                            default is 1 atom. 
 
 Example:
-   md-solvator -u solute.omd -v solvent.omd -n 3 -p 3 -r 4.0 -o combined.omd
+   omd-solvator -u solute.omd -v solvent.omd -n 3 -p 3 -r 4.0 -o combined.omd
 
 """
 
@@ -477,12 +477,12 @@ def main(argv):
 
     if (_haveMDFileName1 != 1):
         usage() 
-        print "No meta-data file was specified for the solute"
+        print "No OpenMD (omd) file was specified for the solute"
         sys.exit()
 
     if (_haveMDFileName2 != 1):
         usage() 
-        print "No meta-data file was specified for the solvent"
+        print "No OpenMD (omd) file was specified for the solvent"
         sys.exit()
 
     if (_haveOutputFileName != 1):

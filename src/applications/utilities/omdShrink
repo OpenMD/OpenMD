@@ -1,25 +1,23 @@
 #!@PYTHON_EXECUTABLE@
-"""OMD File Splitter
+"""OpenMD File Trimmer
 
-Splits MD file frames into seperate omd files
+Skips every n frames of an OpenMD dump file and loads it into new dump file
 
 Usage: mdSplit
 
 Options:
   -h, --help              show this help
-  -m, --meta-data=...     use specified meta-data (.omd) file
+  -m, --meta-data=...     use specified OpenMD (.dump) file
+  -o, --output-file=...   use specified output file
   -s, --split-frame=...   split every n frames
 
 
 Example:
-   mdSplit -m Ar.omd 
+   omdShrink -s 10 -m long.dump  -o short.dump
 
 """
 
-__author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision$"
-__date__ = "$Date$"
-__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__copyright__ = "Copyright (c) 2014 by the University of Notre Dame"
 __license__ = "OpenMD"
 
 import sys
@@ -27,28 +25,21 @@ import getopt
 import string
 import os
 
-
 _haveMDFileName = 0
+_haveOutFileName = 0
 _haveSplitFrame = 0
-
 
 def usage():
     print __doc__
 
-
-def splitFile(mdFileName,skipFrameNumber):
+def shrinkFile(mdFileName,outputFileName,skipFrameNumber):
     mdFile = open(mdFileName, 'r')
-
-    (filepath, filename) = os.path.split(mdFileName)
-   
-    (outfilePrefix,ext)  = os.path.splitext(filename)
-
-    
+    outFile = open(outputFileName, 'w')
     
     metaDataFrame = []
     haveMetaData = 0
     haveMetaDataEnd = 0
-# Find OpenMD version info first
+    # Find OpenMD version info first
     line = mdFile.readline()
     while 1:
         if '<OOPSE version=' in line or '<OpenMD version=' in line:
@@ -56,7 +47,7 @@ def splitFile(mdFileName,skipFrameNumber):
             break
         line = mdFile.readline()
 
-# Rewind file and find start of MetaData block
+        # Rewind file and find start of MetaData block
 
     mdFile.seek(0)
     breakLoop = False
@@ -75,6 +66,15 @@ def splitFile(mdFileName,skipFrameNumber):
             break
         line = mdFile.readline()
 
+    outFile.write(OpenMDversion)
+    for metaline in metaDataFrame:
+        if 'sampleTime' in metaline:
+            metasplit = metaline.split()
+            sampleTime = float(metasplit[2].strip(';'))
+            newSampleTime = sampleTime * int(skipFrameNumber)
+            outFile.write('sampleTime = %10d;\n' % (newSampleTime))
+        else:
+            outFile.write(metaline)
 
     mdFile.seek(0)
     framePos = 0
@@ -85,26 +85,21 @@ def splitFile(mdFileName,skipFrameNumber):
             foundFrames += 1
             division,remainder=divmod(foundFrames,int(skipFrameNumber))
             if (remainder == 0):
-		outfilename = outfilePrefix + "_" + "%04d" % foundFrames + ext
-                outFile = open(outfilename,'w')
-                outFile.write(OpenMDversion)
-                for metaline in metaDataFrame:
-                    outFile.write(metaline)
                 while not '</Snapshot>' in line:
                     outFile.write(line)
                     line = mdFile.readline()
                 outFile.write(line)
-                outFile.write("</OpenMD>")
-                outFile.close()
         line = mdFile.readline()
         if not line: break
-    
+        
+    outFile.write("</OpenMD>")
+    outFile.close()
     mdFile.close()
 
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hm:s:", ["help", "meta-data=","split-frame", ""]) 
+        opts, args = getopt.getopt(argv, "hm:o:s:", ["help", "meta-data=","output-file=","split-frame", ""]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -116,19 +111,27 @@ def main(argv):
             mdFileName = arg
             global _haveMDFileName
             _haveMDFileName = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            global _haveOutFileName
+            _haveOutFileName = 1
         elif opt in ("-s", "--split-frame"): 
             skipFrameNumber = arg
             global _haveSplitFrame
             _haveSplitFrame = 1
     if (_haveMDFileName != 1):
         usage() 
-        print "No meta-data file was specified"
+        print "No OpenMD input file was specified"
+        sys.exit()
+    if (_haveOutFileName != 1):
+        usage() 
+        print "No output file was specified"
         sys.exit()
     if (_haveSplitFrame != 1):
         usage() 
         print "Frames to split was not specified"
         sys.exit()
-    splitFile(mdFileName,skipFrameNumber);
+    shrinkFile(mdFileName,outputFileName,skipFrameNumber);
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

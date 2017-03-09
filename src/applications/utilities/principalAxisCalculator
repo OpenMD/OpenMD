@@ -1,10 +1,10 @@
 #!@PYTHON_EXECUTABLE@
 """principalAxisCalculator
 
-Opens an XYZ file and computes the moments of inertia and principal axes
-for the structure in the XYZ file.  Optionally rotate the structure so that
-the long axis (that with the smallest eigenvalue) is pointing along the
-z-axis.
+Opens an XYZ file and computes the moments of inertia and principal
+axes for the structure in the XYZ file.  Optionally rotates the
+structure so that the long axis (that with the smallest eigenvalue) is
+pointing along the z-axis.
 
 Usage: principalAxisCalculator
 
@@ -20,8 +20,6 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision$"
-__date__ = "$Date$"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OpenMD"
 

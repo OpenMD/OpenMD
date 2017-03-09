@@ -724,26 +724,25 @@ ENDIF (OPENBABEL2_FOUND)
 
 
 set(PYNONUMPY_FILES
-src/applications/hydrodynamics/diffExplainer
 src/applications/utilities/affineScale
 src/applications/utilities/dumpConverter
-src/applications/utilities/md-solvator
-src/applications/utilities/mdSplit
-src/applications/utilities/mdShrink
+src/applications/utilities/omd-solvator
+src/applications/utilities/omdSplit
+src/applications/utilities/omdShrink
+src/applications/utilities/stat2dielectric
 src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
-src/applications/utilities/stat2dielectric
+src/applications/hydrodynamics/diffExplainer
 src/applications/utilities/waterRotator
 )
 
 set(PYNUMPY_FILES
-src/applications/utilities/pack2md
+src/applications/utilities/pack2omd
 src/applications/utilities/principalAxisCalculator
-src/applications/utilities/vcorr2spectrum
-src/applications/utilities/waterReplacer
-src/applications/utilities/waterReplacer
 src/applications/utilities/slabBuilder
 src/applications/utilities/solLiqFricCalc
+src/applications/utilities/vcorr2spectrum
+src/applications/utilities/waterReplacer
 )
 
 IF(NUMPY_FOUND)

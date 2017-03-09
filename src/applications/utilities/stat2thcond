@@ -23,9 +23,6 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1665 $"
-__date__ = "$Date: 2011-12-08 15:25:26 -0400 (Thu, 9 December 2011) $"
-
 __copyright__ = "Copyright (c) 2007 by the University of Notre Dame"
 __license__ = "OpenMD"
 

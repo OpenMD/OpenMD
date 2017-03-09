@@ -1,8 +1,8 @@
 #!@PYTHON_EXECUTABLE@
 """Water Replacer
 
-Finds atomistic waters in an xyz file and generates a meta-data file
-with center of mass and orientational coordinates for rigid body
+Finds atomistic waters in an xyz file and generates an OpenMD (omd)
+file with center of mass and orientational coordinates for rigid body
 waters.
 
 Usage: waterReplacer
@@ -19,8 +19,6 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1646 $"
-__date__ = "$Date: 2011-09-26 09:30:00 -0400 (Mon, 26 Sep 2011) $"
 __copyright__ = "Copyright (c) 2011 by the University of Notre Dame"
 __license__ = "OpenMD"
 

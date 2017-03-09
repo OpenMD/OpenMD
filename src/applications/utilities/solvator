@@ -4,8 +4,6 @@
 # deletes overlapping molecules
 
 # author    = "Chris Fennell
-# version   = "$Revision$"
-# date      = "$Date$"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OpenMD"
 

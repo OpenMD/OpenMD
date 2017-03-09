@@ -1,11 +1,11 @@
 #!@PYTHON_EXECUTABLE@
-"""MetaData affine scaling transform
+"""OpenMD affine scaling transform
 
-Takes a MetaData file and scales both the periodic box and the
+Takes an OpenMD file and scales both the periodic box and the
 coordinates of all StuntDoubles in the system by the same amount.
 
-You can either specify a new volume scaling for isotropic scaling,
-or specify one (or more) of the coordinates for non-isotropic scaling.
+You can either specify a new volume scaling for isotropic scaling, or
+specify one (or more) of the coordinates for non-isotropic scaling.
 
 Usage: affineScale
 
@@ -24,8 +24,6 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision$"
-__date__ = "$Date$"
 __copyright__ = "Copyright (c) 2009 by the University of Notre Dame"
 __license__ = "OpenMD"
 

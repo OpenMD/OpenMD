@@ -2,10 +2,10 @@
 """Packmol RigidBody Replacer
 
 Finds atomistic rigid bodies in a packmol-generated xyz file and
-generates a meta-data file with center of mass and orientational
+generates an OpenMD (omd) file with center of mass and orientational
 coordinates for rigid bodies.
 
-Usage: pack2md
+Usage: pack2omd
 
 Options:
   -h, --help              show this help
@@ -15,13 +15,11 @@ Options:
 
 
 Example:
-   pack2md -x tolueneBox.xyz -r singleToluene.xyz -o tolueneBox.omd
+   pack2omd -x tolueneBox.xyz -r singleToluene.xyz -o tolueneBox.omd
 
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1646 $"
-__date__ = "$Date: 2011-09-26 09:30:00 -0400 (Mon, 26 Sep 2011) $"
 __copyright__ = "Copyright (c) 2011 by the University of Notre Dame"
 __license__ = "OpenMD"
 
