@@ -49,7 +49,7 @@
 #include <map>
 #include <fstream>
 
-#include "utils/argparse.hpp"
+#include "applications/recenter/recenterCmd.hpp"
 #include "brains/Thermo.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"
@@ -61,33 +61,22 @@
 using namespace std;
 using namespace OpenMD;
 
-int main(int argc, const char**argv) {
-
-  // make a new ArgumentParser
-  ArgumentParser parser;
-
-  parser.appName("recenter");
-  // add some arguments to search for
-  parser.addArgument("-o", "--output", 1, true);
-  parser.addFinalArgument("input", 1, true);
-  parser.addArgument("-h", "--help", 0);
-
-  // parse the command-line arguments - throws if invalid format
-  parser.parse(argc, argv);
+int main(int argc, char *argv []) {
 
   registerLattice();
-    
+
+  gengetopt_args_info args_info;
+
   std::string inputFileName;
   std::string outputFileName;
 
-  if (parser.exists("help")) {
-    std::cerr << parser.usage() << std::endl;
-    exit(0);
-  }
-  
+  // parse command line arguments
+  if (cmdline_parser(argc, argv, &args_info) != 0)
+    exit(1);
+
   //get input file name
-  if (parser.count("input"))
-    inputFileName = parser.retrieve<string>("input");
+  if (args_info.inputs_num)
+    inputFileName = args_info.inputs[0];
   else {
     sprintf(painCave.errMsg, "No input file name was specified "
             "on the command line");
@@ -95,7 +84,7 @@ int main(int argc, const char**argv) {
     painCave.isFatal = 1;
     simError();
   }
-  
+
   //parse md file and set up the system
 
   SimCreator creator;
@@ -103,7 +92,8 @@ int main(int argc, const char**argv) {
   DumpReader reader(info, inputFileName);
   // very important step:
   info->update();
-  outputFileName = parser.retrieve<string>("output");
+
+  outputFileName = args_info.output_arg;
 
   if (!outputFileName.compare(inputFileName)) {
     sprintf(painCave.errMsg,

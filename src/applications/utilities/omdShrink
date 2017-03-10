@@ -3,7 +3,7 @@
 
 Skips every n frames of an OpenMD dump file and loads it into new dump file
 
-Usage: mdSplit
+Usage: omdShrink
 
 Options:
   -h, --help              show this help
