@@ -72,7 +72,7 @@ def rnemdExtractor(rnemdFileName):
 
 
 
-def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel):    
+def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel, outputFileName):    
     rnemdVx = np.array([]).reshape(0,1)
     rnemdVy = np.array([]).reshape(0,1)
     
@@ -91,12 +91,27 @@ def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel)
         rnemdZPos = np.delete(rnemdZPos, len(rnemdZPos)-1)
 
 
-    #curve_fit(function to fit too, x-data, y-data, [initial guess of param 1, initial guess of param 2,...] 
+    #curve_fit(function to fit to, x-data, y-data, [initial guess of param 1, initial guess of param 2,...] 
     if (jzType == 0):
         popt, pcov = curve_fit(func, rnemdZPos, rnemdVx, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
     elif (jzType == 1):
          popt, pcov = curve_fit(func, rnemdZPos, rnemdVy, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
     
+
+    #write out the raw data and the fit for visual inspection of quality of fit
+    print "Writing out fit file"
+    fitFileName = outputFileName + "FIT"
+    fitFile = open(fitFileName,"w")
+    fitFile.write("# zPosition     <V_{i}>     fit value" + "\n")
+    for i in range(0, len(rnemdZPos)):
+          y = func(rnemdZPos[i], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+	  if (jzType == 0):
+             fitFile.write(str(rnemdZPos[i]) + "\t" +  str(rnemdVx[i]) + "\t" + str(y) + "\n")
+	  elif (jzType == 1):
+	     fitFile.write(str(rnemdZPos[i]) + "\t" +  str(rnemdVy[i]) + "\t" + str(y) + "\n") 
+
+
+
     #print "popt = ", popt
     return (popt, pcov)
 
@@ -165,6 +180,7 @@ def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth):
     
     return (zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, k1, k2)
 
+	  
 
 def writeOutputFile(outputFileName, rnemdFileName, popt):
        outFile = open(outputFileName,"w")
@@ -290,7 +306,7 @@ def main(argv):
 
     #Call functions here, pass appropriate variables.
     (rnemdJzP, jzType, rnemdZPos, rnemdV) = rnemdExtractor(args.rnemdFileName)
-    (popt, pcov) = velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, args.Vs, args.l, args.u, args.m, args.w, args.Vl, args.toDel)
+    (popt, pcov) = velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, args.Vs, args.l, args.u, args.m, args.w, args.Vl, args.toDel, args.vfitFileName)
 
     (shearRate) = calcShearRate(jzType, rnemdZPos, rnemdV)
     (zLiq, zSol, delta, lambda1) = lambdaCalc(rnemdJzP, jzType, popt, args.sigma, args.convFactor)
@@ -299,7 +315,6 @@ def main(argv):
     writeOutputFile(args.vfitFileName, args.rnemdFileName, popt)
     writeOutputLambda(args.vfitFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambda1, shearRate)
     writeOutputKappa(args.vfitFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, kappa1, kappa2, popt, shearRate)
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
