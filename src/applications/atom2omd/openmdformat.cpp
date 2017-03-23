@@ -237,7 +237,8 @@ namespace OpenBabel
             resName = r->GetName();
           
           if (resName.compare("NULL") ==0 || 
-              resName.compare("LIG") == 0 || 
+              resName.compare("LIG") == 0 ||
+              resName.compare("UNL") == 0 ||
               resName.compare("UNK") == 0) {
             // Either couldn't find a residue at all or couldn't find a
             // reasonable residue name to use.  We'll punt and use
