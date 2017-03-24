@@ -43,7 +43,8 @@
 #include "primitives/UreyBradleyBend.hpp"
 
 namespace OpenMD {
-  UreyBradleyBend::UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt) 
+  UreyBradleyBend::UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3,
+                                   UreyBradleyBendType* bt) 
     : Bend(atom1, atom2, atom3, bt), bond_(NULL){
       bond_ = new Bond(atom1, atom3, bt->getHarmonicBondType());
     }

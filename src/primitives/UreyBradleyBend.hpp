@@ -59,7 +59,8 @@ namespace OpenMD {
 
   class UreyBradleyBend : public Bend {
   public:
-    UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt);
+    UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3,
+                    UreyBradleyBendType* bt);
     virtual ~UreyBradleyBend();
     virtual void calcForce(RealType& angle, bool doParticlePot);
 

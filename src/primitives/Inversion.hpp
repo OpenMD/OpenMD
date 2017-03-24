@@ -74,7 +74,8 @@ namespace OpenMD {
     using ShortRangeInteraction::getValue;
     using ShortRangeInteraction::getPrevValue;
 
-    Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, InversionType* it);
+    Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4,
+              InversionType* it);
     virtual ~Inversion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
         
@@ -90,9 +91,12 @@ namespace OpenMD {
       Vector3d pos4 = atoms_[3]->getPos(snapshotNo);
       
       Vector3d r31 = pos1 - pos3;
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r31);
       Vector3d r23 = pos3 - pos2;
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r23);
       Vector3d r43 = pos3 - pos4;
-      
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r43);
+
       //  Calculate the cross products and distances
       Vector3d A = cross(r31, r43);
       Vector3d B = cross(r43, r23);

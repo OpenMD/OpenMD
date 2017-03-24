@@ -53,11 +53,13 @@ namespace OpenMD {
     Vector3d pos3 = atoms_[2]->getPos();
     
     Vector3d r21 = pos1 - pos2;
+    snapshotMan_->getCurrentSnapshot()->wrapVector(r21);
     RealType d21 = r21.length();
     
     RealType d21inv = 1.0 / d21;
     
     Vector3d r23 = pos3 - pos2;
+    snapshotMan_->getCurrentSnapshot()->wrapVector(r23);
     RealType d23 = r23.length();
     
     RealType d23inv = 1.0 / d23;

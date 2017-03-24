@@ -59,7 +59,9 @@ namespace OpenMD {
     Vector3d pos3 = ghostAtom->getPos();
     
     Vector3d r21 = pos1 - pos2;
+    snapshotMan_->getCurrentSnapshot()->wrapVector(r21);
     Vector3d r32 = pos2 - pos3;
+    snapshotMan_->getCurrentSnapshot()->wrapVector(r32);
     Vector3d r43 = ghostAtom->getA().transpose().getColumn(2);
     
     //  Calculate the cross products and distances

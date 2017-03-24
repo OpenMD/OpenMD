@@ -57,79 +57,82 @@ namespace OpenMD {
       blockCapacity_(blockCapacity), memSize_(memSize), 
       activeBlocks_(blockCapacity_, -1), 
       activeRefCount_(blockCapacity_, 0) {
-
-      nAtoms_ = info->getNGlobalAtoms();
-      nRigidBodies_ = info->getNGlobalRigidBodies();
-      nCutoffGroups_ = info->getNCutoffGroups();
-
-      // eliminate suspect calls to figure out free memory:
-      // RealType physMem = physmem_total();
-      // RealType rssMem = residentMem();
-      // RealType avaliablePhysMem = physMem - rssMem;
     
-      int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
-      int bytesPerCutoffGroup = DataStorage::getBytesPerStuntDouble(DataStorage::dslPosition);
+    nAtoms_ = info->getNGlobalAtoms();
+    nRigidBodies_ = info->getNGlobalRigidBodies();
+    nCutoffGroups_ = info->getNCutoffGroups();
+    usePBC_ = info->getSimParams()->getUsePeriodicBoundaryConditions();
 
-      int bytesPerFrameData = Snapshot::getFrameDataSize();
-      int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble 
-	+ nCutoffGroups_ * bytesPerCutoffGroup 
-        + bytesPerFrameData;
-
-      // total number of frames that can fit in memory
-      //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
-      RealType frameCapacity = (RealType) memSize_ / (RealType) bytesPerFrame;
-
-      // number of frames in each block given the need to hold multiple blocks 
-      // in memory at the same time:
-      nSnapshotPerBlock_ = int(frameCapacity) / blockCapacity_;
-      if (nSnapshotPerBlock_ <= 0) {
-       std::cerr << "not enough memory to hold two configs!" << std::endl;
-      }
-      reader_ = new DumpReader(info, filename);
-      nframes_ = reader_->getNFrames();
-      int nblocks = nframes_ / nSnapshotPerBlock_;
-      if (nframes_ % int(nSnapshotPerBlock_) != 0) {
-        ++nblocks;
-      }  
+    // eliminate suspect calls to figure out free memory:
+    // RealType physMem = physmem_total();
+    // RealType rssMem = residentMem();
+    // RealType avaliablePhysMem = physMem - rssMem;
     
-      for (int i = 0; i < nblocks; ++i) {
-        blocks_.push_back(SnapshotBlock(i*nSnapshotPerBlock_, (i+1)*nSnapshotPerBlock_));    
-      }
-      //the last block may not have nSnapshotPerBlock frames, we need
-      //to consider this special situation
-      blocks_.back().second = nframes_;
+    int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
+    int bytesPerCutoffGroup = DataStorage::getBytesPerStuntDouble(DataStorage::dslPosition);
 
-      snapshots_.insert(snapshots_.begin(), nframes_, static_cast<Snapshot*>(NULL));   
+    int bytesPerFrameData = Snapshot::getFrameDataSize();
+    int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble 
+      + nCutoffGroups_ * bytesPerCutoffGroup 
+      + bytesPerFrameData;
 
-      std::cout << "-----------------------------------------------------"
-                << std::endl;
-      std::cout << "BlockSnapshotManager memory report:" << std::endl;
-      std::cout << "\n";
-      // std::cout << "  Physical Memory available:\t" << (unsigned long)physMem <<  " bytes" <<std::endl;
-      //std::cout << "     Resident Memory in use:\t" << (unsigned long)rssMem << " bytes" <<std::endl;
-      //std::cout << "Memory available for OpenMD:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
-      std::cout << "Memory requested for OpenMD:\t" 
-                << (unsigned long)memSize_ << " bytes" << std::endl;
-      std::cout << "        Bytes per FrameData:\t" 
-                << (unsigned long)bytesPerFrameData << std::endl;
-      std::cout << "      Bytes per StuntDouble:\t" 
-                << (unsigned long)bytesPerStuntDouble << std::endl;
-      std::cout << "     Bytes per Cutoff Group:\t" 
-                << (unsigned long)bytesPerCutoffGroup << std::endl;
-      std::cout << "            Bytes per Frame:\t" 
-                << (unsigned long)bytesPerFrame << std::endl;
-      std::cout << "             Frame Capacity:\t"
-                << (unsigned long)frameCapacity << std::endl;
-      std::cout << "       Frames in trajectory:\t" 
-                << (unsigned long)nframes_ << std::endl;
-      std::cout << "        Snapshots per Block:\t" 
-                << (unsigned long)nSnapshotPerBlock_ << std::endl;
-      std::cout << "     Total number of Blocks:\t" 
-                << (unsigned long)nblocks << std::endl;
-      std::cout << "-----------------------------------------------------"
-                << std::endl;
-    
+    // total number of frames that can fit in memory
+    //RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
+    RealType frameCapacity = (RealType) memSize_ / (RealType) bytesPerFrame;
+
+    // number of frames in each block given the need to hold multiple blocks 
+    // in memory at the same time:
+    nSnapshotPerBlock_ = int(frameCapacity) / blockCapacity_;
+    if (nSnapshotPerBlock_ <= 0) {
+      std::cerr << "not enough memory to hold two configs!" << std::endl;
     }
+    reader_ = new DumpReader(info, filename);
+    nframes_ = reader_->getNFrames();
+    int nblocks = nframes_ / nSnapshotPerBlock_;
+    if (nframes_ % int(nSnapshotPerBlock_) != 0) {
+      ++nblocks;
+    }  
+    
+    for (int i = 0; i < nblocks; ++i) {
+      blocks_.push_back(SnapshotBlock(i*nSnapshotPerBlock_,
+                                      (i+1)*nSnapshotPerBlock_));    
+    }
+    //the last block may not have nSnapshotPerBlock frames, we need
+    //to consider this special situation
+    blocks_.back().second = nframes_;
+
+    snapshots_.insert(snapshots_.begin(), nframes_,
+                      static_cast<Snapshot*>(NULL));   
+
+    std::cout << "-----------------------------------------------------"
+              << std::endl;
+    std::cout << "BlockSnapshotManager memory report:" << std::endl;
+    std::cout << "\n";
+    // std::cout << "  Physical Memory available:\t" << (unsigned long)physMem <<  " bytes" <<std::endl;
+    //std::cout << "     Resident Memory in use:\t" << (unsigned long)rssMem << " bytes" <<std::endl;
+    //std::cout << "Memory available for OpenMD:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
+    std::cout << "Memory requested for OpenMD:\t" 
+              << (unsigned long)memSize_ << " bytes" << std::endl;
+    std::cout << "        Bytes per FrameData:\t" 
+              << (unsigned long)bytesPerFrameData << std::endl;
+    std::cout << "      Bytes per StuntDouble:\t" 
+              << (unsigned long)bytesPerStuntDouble << std::endl;
+    std::cout << "     Bytes per Cutoff Group:\t" 
+              << (unsigned long)bytesPerCutoffGroup << std::endl;
+    std::cout << "            Bytes per Frame:\t" 
+              << (unsigned long)bytesPerFrame << std::endl;
+    std::cout << "             Frame Capacity:\t"
+              << (unsigned long)frameCapacity << std::endl;
+    std::cout << "       Frames in trajectory:\t" 
+              << (unsigned long)nframes_ << std::endl;
+    std::cout << "        Snapshots per Block:\t" 
+              << (unsigned long)nSnapshotPerBlock_ << std::endl;
+    std::cout << "     Total number of Blocks:\t" 
+              << (unsigned long)nblocks << std::endl;
+    std::cout << "-----------------------------------------------------"
+              << std::endl;
+    
+  }
 
 
   BlockSnapshotManager::~BlockSnapshotManager() {
@@ -146,7 +149,7 @@ namespace OpenMD {
     }
   }
 
-   Snapshot* BlockSnapshotManager::getSnapshot(int id) { 
+  Snapshot* BlockSnapshotManager::getSnapshot(int id) { 
     currentSnapshot_ = snapshots_[id]; 
     return snapshots_[id]; 
   }
@@ -154,10 +157,12 @@ namespace OpenMD {
   int BlockSnapshotManager::getNActiveBlocks() {
 #ifdef __RWSTD   
     int count = 0;
-    std::count_if(activeBlocks_.begin(), activeBlocks_.end(), std::bind2nd(std::not_equal_to<int>(), -1), count);
+    std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
+                  std::bind2nd(std::not_equal_to<int>(), -1), count);
     return count;
 #else
-    return std::count_if(activeBlocks_.begin(), activeBlocks_.end(), std::bind2nd(std::not_equal_to<int>(), -1));
+    return std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
+                         std::bind2nd(std::not_equal_to<int>(), -1));
 #endif
   }
 
@@ -239,24 +244,28 @@ namespace OpenMD {
   }
 
   bool BlockSnapshotManager::hasZeroRefBlock(){
-    return std::find(activeRefCount_.begin(), activeRefCount_.end(), 0) != activeRefCount_.end() ?  true : false;
+    return std::find(activeRefCount_.begin(), activeRefCount_.end(), 0)
+      != activeRefCount_.end() ?  true : false;
   }
-
+  
   int BlockSnapshotManager::getFirstZeroRefBlock(){
-    std::vector<int>::iterator i = std::find(activeRefCount_.begin(), activeRefCount_.end(), 0);
-    return i != activeRefCount_.end() ? activeBlocks_[i - activeRefCount_.begin()] : -1;
+    std::vector<int>::iterator i = std::find(activeRefCount_.begin(),
+                                             activeRefCount_.end(), 0);
+    return i != activeRefCount_.end() ?
+      activeBlocks_[i - activeRefCount_.begin()] : -1;
   }
 
   std::vector<int> BlockSnapshotManager::getActiveBlocks() {
     std::vector<int> result;
-    OpenMD::copy_if(activeBlocks_.begin(), activeBlocks_.end(), std::back_inserter(result), 
-		   std::bind2nd(std::not_equal_to<int>(), -1));
+    OpenMD::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
+                    std::back_inserter(result), 
+                    std::bind2nd(std::not_equal_to<int>(), -1));
     return result;    
   }
 
   Snapshot* BlockSnapshotManager::loadFrame(int frame){
     Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_, 
-                                      getStorageLayout());
+                                      getStorageLayout(), usePBC_);
     snapshot->setID(frame);
     snapshot->clearDerivedProperties();
     

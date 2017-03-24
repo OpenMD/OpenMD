@@ -88,9 +88,11 @@ namespace OpenMD {
       Vector3d pos3 = atoms_[2]->getPos(snapshotNo);
       
       Vector3d r21 = pos1 - pos2;
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r21);
       RealType d21 = r21.length();
       
       Vector3d r23 = pos3 - pos2;
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r23);
       RealType d23 = r23.length();
       
       RealType cosTheta = dot(r21, r23) / (d21 * d23);

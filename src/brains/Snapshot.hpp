@@ -64,6 +64,7 @@ namespace OpenMD{
     Mat3x3d  invHmat;             /**< the inverse of the Hmat matrix */
     Mat3x3d  bBox;                /**< axes of a bounding box in matrix form */
     Mat3x3d  invBbox;             /**< the inverse of the bounding box */
+    bool     usePBC;              /**< are we using a periodic box? */
     bool     orthoRhombic;        /**< is this an orthorhombic periodic box? */
     RealType totalEnergy;         /**< total energy of this frame */
     RealType translationalKinetic; /**< translational kinetic energy of this frame */
@@ -121,8 +122,8 @@ namespace OpenMD{
   class Snapshot {
 
   public:            
-    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups);
-    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, int storageLayout);    
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, bool usePBC);
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, int storageLayout, bool usePBC);    
     /** Returns the id of this Snapshot */
     int      getID();
     /** Sets the id of this Snapshot */

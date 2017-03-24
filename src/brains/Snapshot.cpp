@@ -55,7 +55,8 @@
 
 namespace OpenMD {
 
-  Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups) : 
+  Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups,
+                     bool usePBC) : 
     atomData(nAtoms), rigidbodyData(nRigidbodies),
     cgData(nCutoffGroups, DataStorage::dslPosition), 
     orthoTolerance_(1e-6) {
@@ -64,7 +65,8 @@ namespace OpenMD {
     frameData.currentTime = 0;     
     frameData.hmat = Mat3x3d(0.0);             
     frameData.invHmat = Mat3x3d(0.0);          
-    frameData.orthoRhombic = false;        
+    frameData.orthoRhombic = false;
+    frameData.usePBC = usePBC;
     frameData.bondPotential = 0.0;      
     frameData.bendPotential = 0.0;      
     frameData.torsionPotential = 0.0;   
@@ -88,7 +90,7 @@ namespace OpenMD {
   }
   
   Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
-                     int storageLayout) : 
+                     int storageLayout, bool usePBC) : 
     atomData(nAtoms, storageLayout), 
     rigidbodyData(nRigidbodies, storageLayout),
     cgData(nCutoffGroups, DataStorage::dslPosition),
@@ -100,7 +102,8 @@ namespace OpenMD {
     frameData.invHmat = Mat3x3d(0.0);      
     frameData.bBox = Mat3x3d(0.0);             
     frameData.invBbox = Mat3x3d(0.0);
-    frameData.orthoRhombic = false;        
+    frameData.orthoRhombic = false;
+    frameData.usePBC = usePBC;
     frameData.bondPotential = 0.0;      
     frameData.bendPotential = 0.0;      
     frameData.torsionPotential = 0.0;   
@@ -203,7 +206,7 @@ namespace OpenMD {
     return cgData.getSize();
   }
 
-    /** Returns the number of bytes in a FrameData structure */
+  /** Returns the number of bytes in a FrameData structure */
   int Snapshot::getFrameDataSize() {
     return sizeof(FrameData);
   }
@@ -223,8 +226,10 @@ namespace OpenMD {
     bool oldOrthoRhombic = frameData.orthoRhombic;
     
     RealType smallDiag = fabs(frameData.hmat(0, 0));
-    if(smallDiag > fabs(frameData.hmat(1, 1))) smallDiag = fabs(frameData.hmat(1, 1));
-    if(smallDiag > fabs(frameData.hmat(2, 2))) smallDiag = fabs(frameData.hmat(2, 2));    
+    if(smallDiag > fabs(frameData.hmat(1, 1)))
+      smallDiag = fabs(frameData.hmat(1, 1));
+    if(smallDiag > fabs(frameData.hmat(2, 2)))
+      smallDiag = fabs(frameData.hmat(2, 2));    
     RealType tol = smallDiag * orthoTolerance_;
 
     frameData.orthoRhombic = true;
@@ -319,6 +324,8 @@ namespace OpenMD {
 
   /** Wrap a vector according to periodic boundary conditions */
   void Snapshot::wrapVector(Vector3d& pos) {
+
+    if ( !frameData.usePBC ) return;
     
     if( !frameData.orthoRhombic ) {
       Vector3d scaled = frameData.invHmat * pos;
@@ -684,7 +691,8 @@ namespace OpenMD {
     return frameData.thermostat;
   }
 
-  void Snapshot::setElectronicThermostat(const pair<RealType, RealType>& eTherm) {
+  void Snapshot::setElectronicThermostat(const pair<RealType,
+                                         RealType>& eTherm) {
     frameData.electronicThermostat = eTherm;
   }
 

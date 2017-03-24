@@ -56,17 +56,16 @@
 #include <limits>
 
 namespace OpenMD {
-struct TorsionData {
+  struct TorsionData {
     RealType angle;
     RealType potential;
-};
+  };
 
-struct TorsionDataSet {
+  struct TorsionDataSet {
     RealType deltaV;
     TorsionData prev;
     TorsionData curr;
-};
-
+  };
 
   /**
    * @class Torsion Torsion.hpp "types/Torsion.hpp"
@@ -76,7 +75,8 @@ struct TorsionDataSet {
     using ShortRangeInteraction::getValue;
     using ShortRangeInteraction::getPrevValue;
 
-    Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
+    Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4,
+            TorsionType* tt);
     virtual ~Torsion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
                 
@@ -87,9 +87,12 @@ struct TorsionDataSet {
       Vector3d pos4 = atoms_[3]->getPos(snapshotNo);
       
       Vector3d r21 = pos1 - pos2;
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r21);
       Vector3d r32 = pos2 - pos3;
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r32);
       Vector3d r43 = pos3 - pos4;
-      
+      snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r43);
+
       //  Calculate the cross products and distances
       Vector3d A = cross(r21, r32);
       RealType rA = A.length();

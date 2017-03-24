@@ -75,6 +75,7 @@ namespace OpenMD {
       Vector3d force;
       
       r12 = atoms_[1]->getPos() - atoms_[0]->getPos();
+      snapshotMan_->getCurrentSnapshot()->wrapVector(r12);
       len = r12.length();            
       bondType_->calcForce(len,  potential_, dvdr);
       
@@ -90,6 +91,7 @@ namespace OpenMD {
     
     RealType getValue(int snap) {
       Vector3d r12 = atoms_[1]->getPos(snap) - atoms_[0]->getPos(snap);
+      snapshotMan_->getSnapshot(snap)->wrapVector(r12);
       return r12.length();            
     }
 
