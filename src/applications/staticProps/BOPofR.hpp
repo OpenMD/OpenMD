@@ -57,7 +57,8 @@ namespace OpenMD {
   class BOPofR : public StaticAnalyser{
   public:
     BOPofR(SimInfo* info, const std::string& filename, 
-           const std::string& sele, double rCut, int nbins, RealType len);
+           const std::string& sele, double rCut, unsigned int nbins,
+           RealType len);
     
     virtual ~BOPofR();
     virtual void process();
@@ -77,7 +78,6 @@ namespace OpenMD {
     RealType rCut_;
     static const int lMax_ = 6;
     int frameCounter_;
-    int nBins_;
     RealType len_;
     RealType deltaR_;
     
@@ -94,7 +94,7 @@ namespace OpenMD {
   class IcosahedralOfR : public BOPofR {
   public:
     IcosahedralOfR(SimInfo* info, const std::string& filename, 
-                   const std::string& sele, double rCut, int nbins, 
+                   const std::string& sele, double rCut, unsigned int nbins, 
                    RealType len);
 
     virtual void collectHistogram(std::vector<RealType> q, 
@@ -106,7 +106,8 @@ namespace OpenMD {
   class FCCOfR : public BOPofR {
   public:
     FCCOfR(SimInfo* info, const std::string& filename, 
-           const std::string& sele, double rCut, int nbins, RealType len);
+           const std::string& sele, double rCut, unsigned int nbins,
+           RealType len);
 
     virtual void collectHistogram(std::vector<RealType> q, 
                                   std::vector<ComplexType> what, 

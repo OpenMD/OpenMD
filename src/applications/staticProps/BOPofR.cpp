@@ -57,7 +57,7 @@ using namespace MATPACK;
 namespace OpenMD {
 
   BOPofR::BOPofR(SimInfo* info, const std::string& filename, 
-                 const std::string& sele, double rCut, int nbins, 
+                 const std::string& sele, double rCut, unsigned int nbins, 
                  RealType len) : StaticAnalyser(info, filename, nbins), 
                                  selectionScript_(sele), 
                                  seleMan_(info), evaluator_(info) {
@@ -319,17 +319,15 @@ namespace OpenMD {
 
   IcosahedralOfR::IcosahedralOfR(SimInfo* info, const std::string& filename, 
                                  const std::string& sele, double rCut, 
-                                 int nbins, RealType len) : BOPofR(info, 
-                                                                   filename, 
-                                                                   sele, rCut,
-                                                                   nbins, len) {
-    setAnalysisType("Icosahedral Bond Order Parameter(r)");    
+                                 unsigned int nbins, RealType len) :
+    BOPofR(info, filename, sele, rCut, nbins, len) {
+    
+    setAnalysisType("Icosahedral Bond Order Parameter(r)");
   }
 
   void IcosahedralOfR::collectHistogram(std::vector<RealType> q, 
                                         std::vector<ComplexType> what, 
                                         RealType distCOM) {
-    
     if ( distCOM < len_){
       // Figure out where this distance goes...
       int whichBin = int(distCOM / deltaR_);
@@ -346,8 +344,8 @@ namespace OpenMD {
 
   FCCOfR::FCCOfR(SimInfo* info, const std::string& filename, 
                  const std::string& sele, double rCut, 
-                 int nbins, RealType len) : BOPofR(info, filename, sele, rCut,
-                                                   nbins, len) {
+                 unsigned int nbins, RealType len) :
+    BOPofR(info, filename, sele, rCut, nbins, len) {
     setAnalysisType("FCC Bond Order Parameter(r)");
   }
   
