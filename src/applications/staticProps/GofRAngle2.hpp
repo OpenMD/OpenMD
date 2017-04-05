@@ -68,10 +68,10 @@ namespace OpenMD {
     virtual void processHistogram();
     virtual void writeRdf();
 
+    unsigned int nAngleBins_;
     RealType len_;
     RealType deltaR_;
     
-    int nAngleBins_;
     RealType deltaCosAngle_;
 
     bool doSele3_;

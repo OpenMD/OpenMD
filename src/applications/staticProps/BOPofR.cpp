@@ -87,7 +87,7 @@ namespace OpenMD {
     WofR_.resize(nBins_);
     QofR_.resize(nBins_);
 
-    for (int i = 0; i < nBins_; i++){
+    for (unsigned int i = 0; i < nBins_; i++){
       RCount_[i] = 0;
       WofR_[i] = 0;
       QofR_[i] = 0;
@@ -157,7 +157,7 @@ namespace OpenMD {
 
   
   void BOPofR::initializeHistogram() {
-    for (int i = 0; i < nBins_; i++){
+    for (unsigned int i = 0; i < nBins_; i++){
       RCount_[i] = 0;
       WofR_[i] = 0;
       QofR_[i] = 0;
@@ -379,7 +379,7 @@ namespace OpenMD {
       
       // Normalize by number of frames and write it out:
       
-      for (int i = 0; i < nBins_; ++i) {
+      for (unsigned int i = 0; i < nBins_; ++i) {
         RealType Rval = (i + 0.5) * deltaR_;               
         osq << Rval;
         if (RCount_[i] == 0){
@@ -411,7 +411,7 @@ namespace OpenMD {
         osw << "# parameters: " << paramString_ << "\n";
 
       // Normalize by number of frames and write it out:
-      for (int i = 0; i < nBins_; ++i) {
+      for (unsigned int i = 0; i < nBins_; ++i) {
         RealType Rval = deltaR_ * (i + 0.5);               
         osw << Rval;
         if (RCount_[i] == 0){
@@ -447,7 +447,7 @@ namespace OpenMD {
         osw << "# parameters: " << paramString_ << "\n";
 
       // Normalize by number of frames and write it out:
-      for (int i = 0; i < nBins_; ++i) {
+      for (unsigned int i = 0; i < nBins_; ++i) {
         RealType Rval = deltaR_ * (i + 0.5);               
         osw << Rval;
         if (RCount_[i] == 0){
