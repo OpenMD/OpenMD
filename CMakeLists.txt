@@ -603,6 +603,7 @@ src/applications/staticProps/DensityPlot.cpp
 src/applications/staticProps/GofAngle2.cpp
 src/applications/staticProps/GofR.cpp
 src/applications/staticProps/GofRAngle.cpp
+src/applications/staticProps/GofRAngle2.cpp
 src/applications/staticProps/GofRZ.cpp
 src/applications/staticProps/GofXyz.cpp
 src/applications/staticProps/GofZ.cpp
