@@ -140,6 +140,7 @@ struct gengetopt_args_info
   const char *r_omega_help; /**< @brief g(r, cos(omega)) help description.  */
   const char *r_z_help; /**< @brief g(r, z) help description.  */
   const char *theta_omega_help; /**< @brief g(cos(theta), cos(omega)) help description.  */
+  const char *r_theta_omega_help; /**< @brief g(r, cos(theta), cos(omega)) help description.  */
   const char *gxyz_help; /**< @brief g(x, y, z) help description.  */
   const char *twodgofr_help; /**< @brief 2D g(r) (Slab width --dz must be specified) help description.  */
   const char *p2_help; /**< @brief p2 order parameter (--sele1 must be specified, --sele2 is optional) help description.  */
@@ -171,8 +172,8 @@ struct gengetopt_args_info
   const char *tet_hb_help; /**< @brief hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules help description.  */
   const char *kirkwood_help; /**< @brief distance-dependent Kirkwood factor help description.  */
   const char *kirkwoodQ_help; /**< @brief distance-dependent Kirkwood factor for quadrupoles help description.  */
-  const char *densityfield_help; /**< @brief computes the average density field. */
-  const char *velocityfield_help; /**< @brief computes the average velocity field. */
+  const char *densityfield_help; /**< @brief computes an average density field help description.  */
+  const char *velocityfield_help; /**< @brief computes an average velocity field help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -217,6 +218,7 @@ struct gengetopt_args_info
   unsigned int r_omega_given ;	/**< @brief Whether r_omega was given.  */
   unsigned int r_z_given ;	/**< @brief Whether r_z was given.  */
   unsigned int theta_omega_given ;	/**< @brief Whether theta_omega was given.  */
+  unsigned int r_theta_omega_given ;	/**< @brief Whether r_theta_omega was given.  */
   unsigned int gxyz_given ;	/**< @brief Whether gxyz was given.  */
   unsigned int twodgofr_given ;	/**< @brief Whether twodgofr was given.  */
   unsigned int p2_given ;	/**< @brief Whether p2 was given.  */
@@ -248,9 +250,9 @@ struct gengetopt_args_info
   unsigned int tet_hb_given ;	/**< @brief Whether tet_hb was given.  */
   unsigned int kirkwood_given ;	/**< @brief Whether kirkwood was given.  */
   unsigned int kirkwoodQ_given ;	/**< @brief Whether kirkwoodQ was given.  */
-  unsigned int densityfield_given ;     /**<brief Whether field was given.  */
-  unsigned int velocityfield_given ;     /**<brief Whether field was given.  */
-  
+  unsigned int densityfield_given ;	/**< @brief Whether densityfield was given.  */
+  unsigned int velocityfield_given ;	/**< @brief Whether velocityfield was given.  */
+
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
   int staticProps_group_counter; /**< @brief Counter for group staticProps */
