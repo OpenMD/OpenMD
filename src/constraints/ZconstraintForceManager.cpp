@@ -83,8 +83,9 @@ namespace OpenMD {
     else{
       zconsTol_ = 0.01;
       sprintf(painCave.errMsg,
-	      "ZconstraintForceManager Warning: Tolerance for z-constraint method is not specified.\n"
-	      "\tOpenMD will use a default value of %f.\n"
+	      "ZconstraintForceManager Warning: Tolerance for z-constraint "
+              "method is not specified.\n"
+              "\tOpenMD will use a default value of %f.\n"
 	      "\tTo set the tolerance, use the zconsTol variable.\n",
 	      zconsTol_);
       painCave.isFatal = 0;
@@ -111,7 +112,7 @@ namespace OpenMD {
     if (simParam->haveZconsUsingSMD()){
       usingSMD_ = simParam->getZconsUsingSMD();
     }else {
-      usingSMD_ =false;
+      usingSMD_ = false;
     }
     
     zconsOutput_ = getPrefix(info_->getFinalConfigFileName()) + ".fz";
@@ -126,7 +127,8 @@ namespace OpenMD {
     } else {
       targetTemp = 298.0;
     }
-    RealType zforceConstant = PhysicalConstants::kb * targetTemp / (halfOfLargestBox * halfOfLargestBox);
+    RealType zforceConstant = PhysicalConstants::kb * targetTemp /
+      (halfOfLargestBox * halfOfLargestBox);
          
     int nZconstraints = simParam->getNZconsStamps();
     std::vector<ZConsStamp*> stamp = simParam->getZconsStamps();
@@ -250,8 +252,7 @@ namespace OpenMD {
     // Zero out the velocities of center of mass of unconstrained
     // molecules and the velocities of center of mass of every single
     // z-constrained molecueles
-    zeroVelocity();
-    
+    zeroVelocity();    
     currZconsTime_ = currSnapshot_->getTime();
   }
 
@@ -383,7 +384,6 @@ namespace OpenMD {
 
     // Zero out the forces of z-contrained molecules
     totalFZ = 0.0;
-
 
     // Calculate the total z-contrained force of the fixed
     // z-contrained molecules

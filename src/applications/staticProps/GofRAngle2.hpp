@@ -80,7 +80,7 @@ namespace OpenMD {
     std::string selectionScript3_;
         
     std::vector<std::vector<std::vector<int> > > histogram_;
-    std::vector<std::vector<std::vector<int> > > avgGofr_;
+    std::vector<std::vector<std::vector<RealType> > > avgGofr_;
   };
 
 }

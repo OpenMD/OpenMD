@@ -63,7 +63,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".grto");
 
     deltaR_ = len_ /(double) nBins_;
-    deltaCosAngle_ = 2.0 / nBins_;
+    deltaCosAngle_ = 2.0 / nAngleBins_;
 
     std::stringstream params;
     params << " nBins = " << nBins_
@@ -99,7 +99,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".grto");
     
     deltaR_ = len_ /(double) nBins_;
-    deltaCosAngle_ = 2.0 / nBins_;
+    deltaCosAngle_ = 2.0 / nAngleBins_;
 
     std::stringstream params;
     params << " nBins = " << nBins_
@@ -197,16 +197,14 @@ namespace OpenMD {
 
 
   void GofRAngle2::preProcess() {
-
     for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
       for (unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
-        std::fill(avgGofr_[i][j].begin(), avgGofr_[i][j].end(), 0);
+        std::fill(avgGofr_[i][j].begin(), avgGofr_[i][j].end(), 0.0);
       }
     }
   }
 
   void GofRAngle2::initializeHistogram() {
-
     for (unsigned int i = 0; i < histogram_.size(); ++i) {
       for (unsigned int j = 0; j < histogram_.size(); ++j) {        
         std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
@@ -231,7 +229,7 @@ namespace OpenMD {
 
       for(unsigned int j = 0 ; j < histogram_[i].size(); ++j){       
         for (unsigned int k = 0; k < histogram_[i][j].size(); ++k){
-          avgGofr_[i][j][k] += histogram_[i][j][k] / nIdeal;    
+          avgGofr_[i][j][k] += RealType(histogram_[i][j][k]) / nIdeal;    
         }
       }
     }
@@ -254,12 +252,7 @@ namespace OpenMD {
     int whichRBin = int(distance / deltaR_);
 
     if (distance <= len_) {
-
-      AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
-      AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
-      MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-      MultipoleAdapter ma2 = MultipoleAdapter(atype2);
-
+      
       if (!sd1->isDirectional()) {
         sprintf(painCave.errMsg, 
                 "GofAngle2: attempted to use a non-directional object: %s\n", 
@@ -277,16 +270,32 @@ namespace OpenMD {
       }
 
       Vector3d dipole1, dipole2;
-      if (ma1.isDipole())         
-        dipole1 = sd1->getDipole();
-      else
+
+      if (sd1->isAtom()) {
+        
+        AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
+        MultipoleAdapter ma1 = MultipoleAdapter(atype1);        
+        if (ma1.isDipole())         
+          dipole1 = sd1->getDipole();
+        else
+          dipole1 = sd1->getA().transpose() * V3Z;
+        
+      } else {
         dipole1 = sd1->getA().transpose() * V3Z;
-      
-      if (ma2.isDipole())         
-        dipole2 = sd2->getDipole();
-      else
+      }
+        
+      if (sd2->isAtom()) {
+
+        AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
+        MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+        if (ma2.isDipole())         
+          dipole2 = sd2->getDipole();
+        else
+          dipole2 = sd2->getA().transpose() * V3Z;
+      } else {
         dipole2 = sd2->getA().transpose() * V3Z;
-    
+      }
+
       r12.normalize();
       dipole1.normalize();    
       dipole2.normalize();    
@@ -339,14 +348,21 @@ namespace OpenMD {
         simError();  
       }
 
-      AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
-      MultipoleAdapter ma2 = MultipoleAdapter(atype2);
-      
       Vector3d dipole2;
-      if (ma2.isDipole())         
-        dipole2 = sd2->getDipole();
-      else
+
+      if (sd2->isAtom()) {
+        AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
+        MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+      
+        if (ma2.isDipole())         
+          dipole2 = sd2->getDipole();
+        else
+          dipole2 = sd2->getA().transpose() * V3Z;
+        
+      } else {
+        // Rigid Body:
         dipole2 = sd2->getA().transpose() * V3Z;
+      }
       
       dipole2.normalize();    
       
