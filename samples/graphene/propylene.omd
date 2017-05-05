@@ -1,0 +1,11 @@
+molecule {
+  name = "propylene";
+  atom[0] { type = "CHene"; position( -3.92128, 5.51478, -0.16389);}
+  atom[1] { type = "CH2ene"; position( -5.23457, 5.29396, -0.02745);}
+  atom[2] { type = "CH3"; position( -2.8668, 4.49221, 0.10566);}
+
+  bond { members(0, 1); }
+  bond { members(0, 2); }
+
+}
+

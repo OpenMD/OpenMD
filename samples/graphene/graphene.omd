@@ -21,6 +21,19 @@ runTime = 1e4;
 sampleTime = 500;
 statusTime = 10;
 
+zconsTime = 1;
+zconsTol = 0.01; 
+
+zconstraint{
+  molIndex =0;
+  kRatio = 0.5;
+}
+zconstraint{
+  molIndex =1;
+  kRatio = 0.5;
+}
+
+
   </MetaData>
   <Snapshot>
     <FrameData>

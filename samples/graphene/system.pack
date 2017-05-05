@@ -1,0 +1,28 @@
+#
+# Graphene Box
+#
+
+# Every atom from all molecules will be at least 4.5 Angstroms 
+# away from each other at the final configuration.
+
+tolerance 4.5 
+
+# Coordinate file types will be in xyz format (keyword not required for
+# pdb file format, but required for tinker, xyz or moldy).
+
+filetype xyz
+
+# The output xyz file
+
+output system.xyz
+
+# There will be 2 sections below, 
+#  1) bottom sheet of graphene                 z = 0
+#  2) upper sheet of graphene                  z = 20
+
+# Pack propylene  molecules between the graphene layers.
+ 
+structure propylene.xyz 
+  number 30
+  inside box 2. 2. 3. 20. 40. 17.
+end structure  

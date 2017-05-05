@@ -56,6 +56,7 @@
 #include "applications/staticProps/GofRZ.hpp"
 #include "applications/staticProps/GofRAngle.hpp"
 #include "applications/staticProps/GofAngle2.hpp"
+#include "applications/staticProps/GofRAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/TwoDGofR.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
@@ -235,6 +236,13 @@ int main(int argc, char* argv[]){
     else
       analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
                                 nanglebins);
+  } else if (args_info.r_theta_omega_given) {
+    if (args_info.sele3_given) 
+      analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2, sele3,
+                                 maxLen, nrbins, nanglebins);
+    else
+      analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2, 
+                                 maxLen, nrbins, nanglebins);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
       analyser= new GofXyz(info, dumpFileName, sele1, sele2,

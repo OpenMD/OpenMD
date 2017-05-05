@@ -39,76 +39,49 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#ifndef CONSTRAINTS_ZCONSTRAINTFORCEMANAGER_HPP
-#define CONSTRAINTS_ZCONSTRAINTFORCEMANAGER_HPP
-#include <list>
-#include <string>
-#include <vector>
-#include "brains/ForceManager.hpp"
-#include "constraints/ZconsStruct.hpp"
-#include "io/ZConsWriter.hpp"
+#ifndef APPLICATIONS_STATICPROPS_GOFRANGLE2_HPP
+#define APPLICATIONS_STATICPROPS_GOFRANGLE2_HPP
+
+#include "applications/staticProps/RadialDistrFunc.hpp"
 namespace OpenMD {
 
-  class ZconstraintForceManager : public ForceManager {
+  class GofRAngle2 : public RadialDistrFunc {
+    
   public:
-    ZconstraintForceManager(SimInfo* info);
-    ~ZconstraintForceManager();
-        
-    virtual void calcForces();
-
-    RealType getZConsTime() { return zconsTime_; }
-    std::string getZConsOutput() { return zconsOutput_; }    
-
-    void update();
-    virtual void init();
+    GofRAngle2(SimInfo* info, const std::string& filename, 
+               const std::string& sele1, const std::string& sele2, 
+               RealType len, int nrbins, int nangleBins);
+    GofRAngle2(SimInfo* info, const std::string& filename, 
+               const std::string& sele1, const std::string& sele2, 
+               const std::string& sele3,
+               RealType len, int nrbins, int nangleBins);           
   private:
 
-    bool isZMol(Molecule* mol);
-    void thermalize(void);
+    virtual void preProcess();
+    virtual void processNonOverlapping( SelectionManager& sman1,
+                                        SelectionManager& sman2);
+    virtual void processOverlapping( SelectionManager& sman );
+    virtual void initializeHistogram();
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
+                                  StuntDouble* sd3);
+    virtual void processHistogram();
+    virtual void writeRdf();
 
-    void zeroVelocity();
-    void doZconstraintForce();
-    void doHarmonic();
-    bool checkZConsState();        
-    void updateZPos();
-    void updateCantPos();
-    void calcTotalMassMovingZMols();
-    bool haveMovingZMols();
-    bool haveFixedZMols();
-    RealType getZTargetPos(int index);        
-    RealType getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce) ;
-    RealType getZFOfMovingMols(Molecule* mol, RealType totalForce) ;
-    RealType getHFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce);
-    RealType getHFOfUnconsMols(Molecule* mol, RealType totalForce);        
+    unsigned int nAngleBins_;
+    RealType len_;
+    RealType deltaR_;
+    
+    RealType deltaCosAngle_;
 
-    std::list<ZconstraintMol> movingZMols_;/**<   moving zconstraint molecules*/
-    std::list<ZconstraintMol> fixedZMols_; /**< fixed zconstraint molecules*/
-    std::vector<Molecule*> unzconsMols_;   /**< free molecules*/
-
-    RealType zconsTime_;
-    std::string zconsOutput_;
-    RealType zconsTol_;
-    bool usingSMD_;
-    RealType zconsFixingTime_;  
-    RealType zconsGap_;
-    bool usingZconsGap_;
-    RealType dt_;
-
-    const static int whichDirection = 2;
-
-    std::map<int, ZconstraintParam> allZMolIndices_;
-
-    Snapshot* currSnapshot_;
-    RealType currZconsTime_;
-
-    RealType totMassMovingZMols_;
-    RealType totMassUnconsMols_;  /**< mass of unconstrained molecules
-                                     in the system (never changes) */
-
-    ZConsWriter* fzOut;
-    const RealType infiniteTime;
+    bool doSele3_;
+    SelectionManager seleMan3_;
+    SelectionEvaluator evaluator3_;
+    std::string selectionScript3_;
+        
+    std::vector<std::vector<std::vector<int> > > histogram_;
+    std::vector<std::vector<std::vector<RealType> > > avgGofr_;
   };
 
 }
-#endif 
+#endif

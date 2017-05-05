@@ -77,6 +77,7 @@ const char *gengetopt_args_info_help[] = {
   "      --r_omega                 g(r, cos(omega))",
   "      --r_z                     g(r, z)",
   "      --theta_omega             g(cos(theta), cos(omega))",
+  "      --r_theta_omega           g(r, cos(theta), cos(omega))",
   "      --gxyz                    g(x, y, z)",
   "      --twodgofr                2D g(r) (Slab width --dz must be specified)",
   "  -p, --p2                      p2 order parameter (--sele1 must be specified,\n                                  --sele2 is optional)",
@@ -180,6 +181,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->r_omega_given = 0 ;
   args_info->r_z_given = 0 ;
   args_info->theta_omega_given = 0 ;
+  args_info->r_theta_omega_given = 0 ;
   args_info->gxyz_given = 0 ;
   args_info->twodgofr_given = 0 ;
   args_info->p2_given = 0 ;
@@ -320,39 +322,40 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->r_omega_help = gengetopt_args_info_help[41] ;
   args_info->r_z_help = gengetopt_args_info_help[42] ;
   args_info->theta_omega_help = gengetopt_args_info_help[43] ;
-  args_info->gxyz_help = gengetopt_args_info_help[44] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[45] ;
-  args_info->p2_help = gengetopt_args_info_help[46] ;
-  args_info->rp2_help = gengetopt_args_info_help[47] ;
-  args_info->scd_help = gengetopt_args_info_help[48] ;
-  args_info->density_help = gengetopt_args_info_help[49] ;
-  args_info->slab_density_help = gengetopt_args_info_help[50] ;
-  args_info->p_angle_help = gengetopt_args_info_help[51] ;
-  args_info->hxy_help = gengetopt_args_info_help[52] ;
-  args_info->rho_r_help = gengetopt_args_info_help[53] ;
-  args_info->angle_r_help = gengetopt_args_info_help[54] ;
-  args_info->hullvol_help = gengetopt_args_info_help[55] ;
-  args_info->rodlength_help = gengetopt_args_info_help[56] ;
-  args_info->tet_param_help = gengetopt_args_info_help[57] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[58] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[59] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[60] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[61] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[62] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[63] ;
-  args_info->nitrile_help = gengetopt_args_info_help[64] ;
-  args_info->multipole_help = gengetopt_args_info_help[65] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[66] ;
-  args_info->cn_help = gengetopt_args_info_help[67] ;
-  args_info->scn_help = gengetopt_args_info_help[68] ;
-  args_info->gcn_help = gengetopt_args_info_help[69] ;
-  args_info->hbond_help = gengetopt_args_info_help[70] ;
-  args_info->potDiff_help = gengetopt_args_info_help[71] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[72] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[73] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[74] ;
-  args_info->densityfield_help = gengetopt_args_info_help[75] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[76] ;
+  args_info->r_theta_omega_help = gengetopt_args_info_help[44] ;
+  args_info->gxyz_help = gengetopt_args_info_help[45] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[46] ;
+  args_info->p2_help = gengetopt_args_info_help[47] ;
+  args_info->rp2_help = gengetopt_args_info_help[48] ;
+  args_info->scd_help = gengetopt_args_info_help[49] ;
+  args_info->density_help = gengetopt_args_info_help[50] ;
+  args_info->slab_density_help = gengetopt_args_info_help[51] ;
+  args_info->p_angle_help = gengetopt_args_info_help[52] ;
+  args_info->hxy_help = gengetopt_args_info_help[53] ;
+  args_info->rho_r_help = gengetopt_args_info_help[54] ;
+  args_info->angle_r_help = gengetopt_args_info_help[55] ;
+  args_info->hullvol_help = gengetopt_args_info_help[56] ;
+  args_info->rodlength_help = gengetopt_args_info_help[57] ;
+  args_info->tet_param_help = gengetopt_args_info_help[58] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[59] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[60] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[61] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[62] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[63] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[64] ;
+  args_info->nitrile_help = gengetopt_args_info_help[65] ;
+  args_info->multipole_help = gengetopt_args_info_help[66] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[67] ;
+  args_info->cn_help = gengetopt_args_info_help[68] ;
+  args_info->scn_help = gengetopt_args_info_help[69] ;
+  args_info->gcn_help = gengetopt_args_info_help[70] ;
+  args_info->hbond_help = gengetopt_args_info_help[71] ;
+  args_info->potDiff_help = gengetopt_args_info_help[72] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[73] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[74] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[75] ;
+  args_info->densityfield_help = gengetopt_args_info_help[76] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[77] ;
   
 }
 
@@ -598,6 +601,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "r_z", 0, 0 );
   if (args_info->theta_omega_given)
     write_into_file(outfile, "theta_omega", 0, 0 );
+  if (args_info->r_theta_omega_given)
+    write_into_file(outfile, "r_theta_omega", 0, 0 );
   if (args_info->gxyz_given)
     write_into_file(outfile, "gxyz", 0, 0 );
   if (args_info->twodgofr_given)
@@ -664,6 +669,7 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "densityfield", 0, 0 );
   if (args_info->velocityfield_given)
     write_into_file(outfile, "velocityfield", 0, 0 );
+  
 
   i = EXIT_SUCCESS;
   return i;
@@ -727,6 +733,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->r_omega_given = 0 ;
   args_info->r_z_given = 0 ;
   args_info->theta_omega_given = 0 ;
+  args_info->r_theta_omega_given = 0 ;
   args_info->gxyz_given = 0 ;
   args_info->twodgofr_given = 0 ;
   args_info->p2_given = 0 ;
@@ -760,6 +767,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->kirkwoodQ_given = 0 ;
   args_info->densityfield_given = 0 ;
   args_info->velocityfield_given = 0 ;
+
   args_info->staticProps_group_counter = 0;
 }
 
@@ -1626,6 +1634,7 @@ cmdline_parser_internal (
         { "r_omega",	0, NULL, 0 },
         { "r_z",	0, NULL, 0 },
         { "theta_omega",	0, NULL, 0 },
+        { "r_theta_omega",	0, NULL, 0 },
         { "gxyz",	0, NULL, 0 },
         { "twodgofr",	0, NULL, 0 },
         { "p2",	0, NULL, 'p' },
@@ -1657,9 +1666,8 @@ cmdline_parser_internal (
         { "tet_hb",	0, NULL, 0 },
         { "kirkwood",	0, NULL, 'k' },
         { "kirkwoodQ",	0, NULL, 0 },
-	{ "field",      0, NULL, 0 },
-	{ "densityfield",      0, NULL, 0 },
-	{ "velocityfield",      0, NULL, 0 },
+        { "densityfield",	0, NULL, 0 },
+        { "velocityfield",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -2364,6 +2372,23 @@ cmdline_parser_internal (
               goto failure;
           
           }
+          /* g(r, cos(theta), cos(omega)).  */
+          else if (strcmp (long_options[option_index].name, "r_theta_omega") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->r_theta_omega_given),
+                &(local_args_info.r_theta_omega_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "r_theta_omega", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* g(x, y, z).  */
           else if (strcmp (long_options[option_index].name, "gxyz") == 0)
           {
@@ -2774,7 +2799,7 @@ cmdline_parser_internal (
           }
           /* distance-dependent Kirkwood factor for quadrupoles.  */
           else if (strcmp (long_options[option_index].name, "kirkwoodQ") == 0)
-	  {
+          {
           
             if (args_info->staticProps_group_counter && override)
               reset_group_staticProps (args_info);
@@ -2789,41 +2814,41 @@ cmdline_parser_internal (
               goto failure;
           
           }
-	   /* spatially-resolved density field.  */
+          /* computes an average density field.  */
           else if (strcmp (long_options[option_index].name, "densityfield") == 0)
-	  {
-
-	    if (args_info->staticProps_group_counter && override)
-	      reset_group_staticProps (args_info);
-	    args_info->staticProps_group_counter += 1;
-
-	    if (update_arg( 0 ,
-	         0 , &(args_info->densityfield_given),
-		&(local_args_info.densityfield_given), optarg, 0, 0, ARG_NO,
-		check_ambiguity, override, 0, 0,
-		"densityfield", '-',
-	        additional_error))
-	      goto failure;
-
-	  }
-	   /* spatially-resolved velocity field.  */
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->densityfield_given),
+                &(local_args_info.densityfield_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "densityfield", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes an average velocity field.  */
           else if (strcmp (long_options[option_index].name, "velocityfield") == 0)
-	  {
-
-	    if (args_info->staticProps_group_counter && override)
-	      reset_group_staticProps (args_info);
-	    args_info->staticProps_group_counter += 1;
-
-	    if (update_arg( 0 ,
-	         0 , &(args_info->velocityfield_given),
-		&(local_args_info.velocityfield_given), optarg, 0, 0, ARG_NO,
-		check_ambiguity, override, 0, 0,
-		"velocityfield", '-',
-	        additional_error))
-	      goto failure;
-
-	  }
-	  
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->velocityfield_given),
+                &(local_args_info.velocityfield_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "velocityfield", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          
           break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
