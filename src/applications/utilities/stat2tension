@@ -21,10 +21,11 @@ def readStatFile(statFileName):
     Pzz = []
 
     statFile = open(statFileName, 'r')
-    line = statFile.readline()
-
+    
     print "reading File"
     line = statFile.readline()
+    while ("#" in line):
+        line = statFile.readline()
     while 1:
         L = line.split()
         if (len(L) > 16):
@@ -51,7 +52,7 @@ def readStatFile(statFileName):
         
     statFile.close()
     
-def computeAverages():
+def computeAverages(Lz):
     
     print "computing Averages"
 
@@ -61,7 +62,7 @@ def computeAverages():
     gamma2Sum = 0.0
     
     for i in range(len(Pzz)):
-        instaGamma = gammaConvert * (Lz * Pzz[i] - 0.5 * (Pxx[i] + Pyy[i]))
+        instaGamma = gammaConvert * Lz * (Pzz[i] - 0.5 * (Pxx[i] + Pyy[i]))
         gammaSum   = gammaSum + instaGamma
         gamma2Sum  = gamma2Sum + instaGamma * instaGamma
 
@@ -73,6 +74,7 @@ def computeAverages():
 
 
 def main(argv):
+
 
     parser = argparse.ArgumentParser(prog="stat2tension",
        formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -109,14 +111,14 @@ require two interfaces, so
 For more details: Vazquez, U.O.M., Shinoda, W., Moore, P.B. et al.
 J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
 ''',   
-       epilog="Example: stat2tension -f iceWater.stat -z 120.45")
+       epilog="Example: stat2tension -s iceWater.stat -z 120.45")
 
     parser.add_argument("-s", "--stat-file=",
                         action="store", required=True, dest="statFileName",
                         help="use specified stat (.stat) file")
 
     parser.add_argument("-z", "--box-length=",
-                        action="store", required=True, dest="Lz",
+                        action="store", required=True, dest="Lz",type=float,
                         help="dimension of the box in the normal (z) direction")
 
     if len(sys.argv) == 1:
@@ -132,8 +134,8 @@ J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
         parser.print_help()
         parser.error("No box z-length was specified")
         
-    readStatFile(statFileName);
-    computeAverages();
+    readStatFile(args.statFileName)
+    computeAverages(args.Lz)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
