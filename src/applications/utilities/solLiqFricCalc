@@ -197,6 +197,57 @@ def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, us
     
     return (zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, k1, k2)
 
+
+
+def secondDerivCalc(rnemdJzP, jzType, z1, z2, w, popt, useZLocations):
+    print "Performing second derivative kappa calculation"
+
+    if (useZLocations):
+        zLiq1 = z1 - 0.5*w
+        zSol1 = z1 + 0.5*w
+        vInt1 = func(z1, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+        zLiq2 = z2 + 0.5*w
+        zSol2 = z2 - 0.5*w
+        vInt2 = func(z2, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+    elif (not useZLocations):
+        zLiq1 = popt[1] - 0.5*w
+        zSol1 = popt[1] + 0.5*w
+        vInt1 = func(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+        zLiq2 = popt[2] + 0.5*w
+        zSol2 = popt[2] - 0.5*w
+        vInt2 = func(popt[2], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+    
+        # using the fit z1 and z2 values, the kappa's should be the same
+        #   due to the symmetric nature of the fit.
+    vLiq1 = func(zLiq1, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    vSol1 = func(zSol1, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+    vLiq2 = func(zLiq2, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    vSol2 = func(zSol2, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+
+    #Testing parameters
+    jzType = 0
+    rnemdJzP[0] = 1.0
+    vSol1 = 1.0
+    vInt1 = 1.0
+    vLiq1 = 1.0
+
+    if (jzType == 0):
+        momentumConduct1 = (4.0*rnemdJzP[0]) * (vSol1 - 2*vInt1 + vLiq1) / (vSol1*vSol1 - 2*vSol1*vLiq1 + vLiq1*vLiq1)
+        momentumConduct2 = (4.0*rnemdJzP[0]) * (vSol2 - 2*vInt2 + vLiq2) / (vSol2*vSol2 - 2*vSol2*vLiq2 + vLiq2*vLiq2)
+
+    elif (jzType == 1):
+        momentumConduct1 = (4.0*rnemdJzP[1]) * (vSol1 - 2*vInt1 + vLiq1) / (vSol1*vSol1 - 2*vSol1*vLiq1 + vLiq1*vLiq1)
+        momentumConduct2 = (4.0*rnemdJzP[1]) * (vSol2 - 2*vInt2 + vLiq2) / (vSol2*vSol2 - 2*vSol2*vLiq2 + vLiq2*vLiq2)
+
+    print "momentumConduct1 = " , momentumConduct1
+    print "momentumConduct2 = " , momentumConduct2
+
 	  
 
 def writeOutputFile(outputFileName, rnemdFileName, popt):
@@ -281,8 +332,8 @@ def main(argv):
     parser.add_argument("-t","--useWidth=", action="store", default=False, type=bool, dest="useWidth", help="use provided width for deltaV calculation? (default=false)")
     #parser.add_argument("-z","--useZLocations=", action="store", default=False, type=bool, dest="useZLocations", help="use provided z1 and z2 locations for calculations? (default=false)")
     
-    parser.add_argument("--useZLocations=", action="store_true", dest="useZLocations")
-    parser.add_argument("--no-useZLocations", action="store_false", dest="useZLocations")
+    parser.add_argument("--useZLocations=", action="store_true", dest="useZLocations", help="use the supplied z-locations z1 and z2 to calculate kappa")
+    parser.add_argument("--no-useZLocations=", action="store_false", dest="useZLocations", help="use the fit values for z1 and z2 in the kappa calculation")
     parser.set_defaults(useZLocations=True)
 
 
@@ -341,6 +392,9 @@ def main(argv):
     (shearRate) = calcShearRate(jzType, rnemdZPos, rnemdV)
     (zLiq, zSol, delta, lambda1) = lambdaCalc(rnemdJzP, jzType, popt, args.sigma, args.convFactor)
     (zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, kappa1, kappa2) = kappaCalc(rnemdJzP, jzType, args.z1, args.z2, args.w, popt, args.sigma, args.convFactor, args.useWidth, args.useZLocations)
+
+
+    secondDerivCalc(rnemdJzP, jzType, args.z1, args.z2, args.w, popt, args.useZLocations)
 
     writeOutputFile(args.vfitFileName, args.rnemdFileName, popt)
     writeOutputLambda(args.vfitFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambda1, shearRate)
