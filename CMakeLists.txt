@@ -731,6 +731,7 @@ src/applications/utilities/omd-solvator
 src/applications/utilities/omdSplit
 src/applications/utilities/omdShrink
 src/applications/utilities/stat2dielectric
+src/applications/utilities/stat2tension
 src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
 src/applications/hydrodynamics/diffExplainer

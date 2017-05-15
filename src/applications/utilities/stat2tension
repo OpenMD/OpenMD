@@ -1,0 +1,139 @@
+#!@PYTHON_EXECUTABLE@
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__copyright__ = "Copyright (c) 2017 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import string
+import math
+import argparse
+from argparse import RawDescriptionHelpFormatter
+
+def readStatFile(statFileName):
+
+    global Pxx
+    global Pyy
+    global Pzz
+        
+    Pxx = []
+    Pyy = []
+    Pzz = []
+
+    statFile = open(statFileName, 'r')
+    line = statFile.readline()
+
+    print "reading File"
+    line = statFile.readline()
+    while 1:
+        L = line.split()
+        if (len(L) > 16):
+            #
+            # OpenMD prints out the pressure tensor in units of amu*fs^-2*Ang^-1
+            #
+            Pxx.append(float(L[8]))
+            Pyy.append(float(L[12]))
+            Pzz.append(float(L[16]))
+        else:
+            print "Not enough columns are present in the .stat file"
+            print "to calculate the shear viscosity..."
+            print 
+            print "stat2tension expects to find all 9 elements of the"
+            print "pressure tensor in columns 9-17 of the .stat file"
+            print
+            print "You may need to set the statFileFormat string"
+            print "explicitly in your .omd file when running OpenMD."
+            print "Consult the OpenMD documentation for more details."
+            sys.exit()
+                
+        line = statFile.readline()
+        if not line: break
+        
+    statFile.close()
+    
+def computeAverages():
+    
+    print "computing Averages"
+
+    # converts amu fs^-2 to milli N / m  (a common surface tension unit)
+    gammaConvert = 1.660539040e6
+    gammaSum = 0.0
+    gamma2Sum = 0.0
+    
+    for i in range(len(Pzz)):
+        instaGamma = gammaConvert * (Lz * Pzz[i] - 0.5 * (Pxx[i] + Pyy[i]))
+        gammaSum   = gammaSum + instaGamma
+        gamma2Sum  = gamma2Sum + instaGamma * instaGamma
+
+    gammaAve = gammaSum / float(len(Pzz))
+    gammaSdev = math.sqrt(gamma2Sum / float(len(Pzz)) - math.pow(gammaAve,2))
+    gammaErr  = gammaSdev * 1.96 / math.sqrt(len(Pzz))
+
+    print "Average surface tension = %f +/- %f (mN/m)" % (gammaAve, gammaErr)
+
+
+def main(argv):
+
+    parser = argparse.ArgumentParser(prog="stat2tension",
+       formatter_class=argparse.RawDescriptionHelpFormatter,
+       description='''\
+This script accumulates the surface tension from an OpenMD stat file
+that has been run with PRESSURE_TENSOR added to the statFileFormat.
+
+This script assumes that the interface is normal to the z-axis, so
+
+  Pn = Pzz
+
+and that the tangential contributions are averaged over the remaining axes:
+
+  Pt(z) = (Pxx + Pyy) / 2
+
+The surface tension is defined using the normal and tangential components:
+
+  \gamma = \int_{-\infty}^{\infty} (Pn - Pt(z)) dz
+
+The tangential pressure is different from the normal pressure only in
+the vicinity of the interfaces, so the net surface tension for the
+system can be simplified:
+
+  \gamma = Lz (Pn - <Pt>)
+
+where <Pt> is the statistical average of the tangential pressure.
+
+In practice, many surface tension simulations comprise two regions,
+with one material in each region.  Periodic boundary conditions then
+require two interfaces, so
+
+  \gamma = Lz (Pn - <Pt>)
+
+For more details: Vazquez, U.O.M., Shinoda, W., Moore, P.B. et al.
+J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
+''',   
+       epilog="Example: stat2tension -f iceWater.stat -z 120.45")
+
+    parser.add_argument("-s", "--stat-file=",
+                        action="store", required=True, dest="statFileName",
+                        help="use specified stat (.stat) file")
+
+    parser.add_argument("-z", "--box-length=",
+                        action="store", required=True, dest="Lz",
+                        help="dimension of the box in the normal (z) direction")
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(2)
+    args = parser.parse_args()
+
+    if (not args.statFileName):
+        parser.print_help()
+        parser.error("No stat file name was specified")
+
+    if (not args.Lz):
+        parser.print_help()
+        parser.error("No box z-length was specified")
+        
+    readStatFile(statFileName);
+    computeAverages();
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
