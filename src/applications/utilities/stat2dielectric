@@ -74,10 +74,12 @@ def readStatFile(statFileName):
     boxDipole = []
 
     statFile = open(statFileName, 'r')
-    line = statFile.readline()
 
-    print "reading File"
+    print "reading File"    
     line = statFile.readline()
+    while ("#" in line):
+        line = statFile.readline()
+
     while 1:
         L = line.split()
 

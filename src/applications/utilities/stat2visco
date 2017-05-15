@@ -71,13 +71,16 @@ def readStatFile(statFileName):
         Pyz = []
 
     statFile = open(statFileName, 'r')
-    line = statFile.readline()
 
     print "reading File"
     pressSum = 0.0
     volSum = 0.0
     tempSum = 0.0
+    
     line = statFile.readline()
+    while ("#" in line):
+        line = statFile.readline()
+
     while 1:
         L = line.split()
         time.append(float(L[0]))
