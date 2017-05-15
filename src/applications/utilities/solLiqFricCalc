@@ -10,6 +10,7 @@ import datetime
 import argparse
 import textwrap
 import numpy as np
+import math
 from scipy.optimize import curve_fit
 from argparse import RawDescriptionHelpFormatter
 from scipy import stats
@@ -22,6 +23,9 @@ def func(x, Vs, Z1, Z2, m1, w, Vl):
     #return 0.5 * (2*Vl + m*(Z2-Z1) + (-Vl + Vs - m*(x-Z1))*np.tanh((x-Z1)/w) + (Vl - Vs - m*(x-Z2))*np.tanh((x-Z2)/w))
     #return (Vl + m*(x-Z1)) * (0.5*(1-np.tanh((x-Z1)/w))) + Vs*(0.5*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))) + (Vl-m*(x-Z2))*(0.5*(1+np.tanh((x-Z2)/w)))
     return  (Vl + m1*(x-Z1)) * (0.5*(1-np.tanh((x-Z1)/w))) + Vs*(0.5*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))) + (Vl-m1*(x-Z2))*(0.5*(1+np.tanh((x-Z2)/w)))
+
+def secondDeriv(x, Vs, Z1, Z2, m1, w, Vl):
+    return (math.pow(np.sech((x - Z1)/w),2)*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + math.pow(np.sech((x - Z2)/w),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w)))/math.pow(w,2)
 
 #This function reads in the .rnemd file and extracts the actual momentum flux, as well as the zPositions and the average velocities therein.
 def rnemdExtractor(rnemdFileName):
