@@ -12,10 +12,12 @@ from argparse import RawDescriptionHelpFormatter
 
 def readStatFile(statFileName):
 
+    global TimeStamp
     global Pxx
     global Pyy
     global Pzz
         
+    TimeStamp = []
     Pxx = []
     Pyy = []
     Pzz = []
@@ -32,6 +34,7 @@ def readStatFile(statFileName):
             #
             # OpenMD prints out the pressure tensor in units of amu*fs^-2*Ang^-1
             #
+            TimeStamp.append(float(L[0]))
             Pxx.append(float(L[8]))
             Pyy.append(float(L[12]))
             Pzz.append(float(L[16]))
@@ -52,9 +55,13 @@ def readStatFile(statFileName):
         
     statFile.close()
     
-def computeAverages(Lz):
+def computeAverages(Lz,outFileName):
     
     print "computing Averages"
+
+    outFile = open(outFileName, 'w')
+    outFile.write("# Time \t Surface Tension \n")
+
 
     # converts amu fs^-2 to milli N / m  (a common surface tension unit)
     gammaConvert = 1.660539040e6
@@ -62,9 +69,13 @@ def computeAverages(Lz):
     gamma2Sum = 0.0
     
     for i in range(len(Pzz)):
-        instaGamma = gammaConvert * Lz * (Pzz[i] - 0.5 * (Pxx[i] + Pyy[i]))
+        instaGamma = gammaConvert * Lz * 0.5 * (Pzz[i] - 0.5 * (Pxx[i] + Pyy[i]))
         gammaSum   = gammaSum + instaGamma
         gamma2Sum  = gamma2Sum + instaGamma * instaGamma
+        
+        gammaAve = gammaSum / float(i+1)
+        outFile.write(str(TimeStamp[i]) + "\t" + str(gammaAve) + "\n")
+
 
     gammaAve = gammaSum / float(len(Pzz))
     gammaSdev = math.sqrt(gamma2Sum / float(len(Pzz)) - math.pow(gammaAve,2))
@@ -111,7 +122,7 @@ require two interfaces, so
 For more details: Vazquez, U.O.M., Shinoda, W., Moore, P.B. et al.
 J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
 ''',   
-       epilog="Example: stat2tension -s iceWater.stat -z 120.45")
+       epilog="Example: stat2tension -s iceWater.stat -z 120.45 -o iceWater.tens")
 
     parser.add_argument("-s", "--stat-file=",
                         action="store", required=True, dest="statFileName",
@@ -120,6 +131,10 @@ J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
     parser.add_argument("-z", "--box-length=",
                         action="store", required=True, dest="Lz",type=float,
                         help="dimension of the box in the normal (z) direction")
+    parser.add_argument("-o", "--output-file=", 
+                        action="store", required=True, dest="outFileName",
+                        help="specified output (.tens) file")
+
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -133,9 +148,13 @@ J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
     if (not args.Lz):
         parser.print_help()
         parser.error("No box z-length was specified")
-        
+
+    if (not args.outFileName):
+        parser.print_help()
+        parser.error("No outpuf file name was specified")
+
     readStatFile(args.statFileName)
-    computeAverages(args.Lz)
+    computeAverages(args.Lz, args.outFileName)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
