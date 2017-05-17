@@ -15,17 +15,39 @@ from scipy.optimize import curve_fit
 from argparse import RawDescriptionHelpFormatter
 from scipy import stats
 
+
+
 def usage():
     print __doc__
 
 
+
+
+# Fit function we are optimizing data to
 def func(x, Vs, Z1, Z2, m1, w, Vl):
     #return 0.5 * (2*Vl + m*(Z2-Z1) + (-Vl + Vs - m*(x-Z1))*np.tanh((x-Z1)/w) + (Vl - Vs - m*(x-Z2))*np.tanh((x-Z2)/w))
     #return (Vl + m*(x-Z1)) * (0.5*(1-np.tanh((x-Z1)/w))) + Vs*(0.5*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))) + (Vl-m*(x-Z2))*(0.5*(1+np.tanh((x-Z2)/w)))
     return  (Vl + m1*(x-Z1)) * (0.5*(1-np.tanh((x-Z1)/w))) + Vs*(0.5*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))) + (Vl-m1*(x-Z2))*(0.5*(1+np.tanh((x-Z2)/w)))
 
+
+
+
+# Second derivative of the fit function
 def secondDeriv(x, Vs, Z1, Z2, m1, w, Vl):
-    return (math.pow(np.sech((x - Z1)/w),2)*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + math.pow(np.sech((x - Z2)/w),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w)))/math.pow(w,2)
+
+    #just breaking apart the function while error checking
+    a = (1.0/(np.cosh((x - Z1)/w)))*(1.0/(np.cosh((x - Z1)/w)))
+    b = (-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w))
+    c = (1.0/(np.cosh((x - Z2)/w)))*(1.0/(np.cosh((x - Z1)/w)))
+    d = (-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))/(w*w)
+
+    return (a*b + c*d)
+    #return (np.power(1.0/(np.cosh((x - Z1)/w),2)))*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + np.power(1.0/(np.cosh((x - Z2)/w)),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))/np.power(w,2)
+
+    #return (math.pow(np.sech((x - Z1)/w),2)*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + math.pow(np.sech((x - Z2)/w),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w)))/math.pow(w,2)
+
+
+
 
 #This function reads in the .rnemd file and extracts the actual momentum flux, as well as the zPositions and the average velocities therein.
 def rnemdExtractor(rnemdFileName):
@@ -77,6 +99,11 @@ def rnemdExtractor(rnemdFileName):
 
 
 
+
+
+
+
+
 def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel, outputFileName, useZLocations):    
     rnemdVx = np.array([]).reshape(0,1)
     rnemdVy = np.array([]).reshape(0,1)
@@ -120,6 +147,11 @@ def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel,
     return (popt, pcov)
 
 
+
+
+
+
+
 def calcShearRate(jzType, rnemdZPos, rnemdV):
     # jzType = 0 -> flux was in x-dimension                                                                                                                           # jzType = 1 -> flux was in y-dimension
     
@@ -133,6 +165,11 @@ def calcShearRate(jzType, rnemdZPos, rnemdV):
     shearRate = velSol - velLiq
     
     return (shearRate)
+
+
+
+
+
 
 def lambdaCalc(rnemdJzP, jzType, popt, sigma, convFactor):
     print "Performing lambda calculation"
@@ -152,6 +189,11 @@ def lambdaCalc(rnemdJzP, jzType, popt, sigma, convFactor):
     
 
     return (zLiq, zSol, delta, lambda1)
+
+
+
+
+
 
 def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, useZLocations):
     print "Performing kappa calculation"
@@ -203,7 +245,11 @@ def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, us
 
 
 
-def secondDerivCalc(rnemdJzP, jzType, z1, z2, w, popt, useZLocations):
+
+
+
+
+def secondDerivVelApprox(rnemdJzP, jzType, z1, z2, w, popt, useZLocations):
     print "Performing second derivative kappa calculation"
 
     if (useZLocations):
@@ -249,10 +295,15 @@ def secondDerivCalc(rnemdJzP, jzType, z1, z2, w, popt, useZLocations):
         momentumConduct1 = (4.0*rnemdJzP[1]) * (vSol1 - 2*vInt1 + vLiq1) / (vSol1*vSol1 - 2*vSol1*vLiq1 + vLiq1*vLiq1)
         momentumConduct2 = (4.0*rnemdJzP[1]) * (vSol2 - 2*vInt2 + vLiq2) / (vSol2*vSol2 - 2*vSol2*vLiq2 + vLiq2*vLiq2)
 
-    print "momentumConduct1 = " , momentumConduct1
-    print "momentumConduct2 = " , momentumConduct2
+    #print "momentumConduct1 = " , momentumConduct1
+    #print "momentumConduct2 = " , momentumConduct2
 
 	  
+
+
+
+
+
 
 def writeOutputFile(outputFileName, rnemdFileName, popt):
        outFile = open(outputFileName,"w")
@@ -272,6 +323,11 @@ def writeOutputFile(outputFileName, rnemdFileName, popt):
        outFile.write("# " + str(popt[0]) + "\t" + str(popt[1]) + "\t" + str(popt[2]) + "\t" + str(popt[3]) + "\t" + str(popt[4]) + "\t" + str(popt[5]) + "\t" + "\n#\n#\n")
        if (float(popt[0]) < float(popt[5])):
                outFile.write("# WARNING Vs < Vl \n#\n")
+
+
+
+
+
 def writeOutputLambda(outputFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambda1, shearRate):
     outFile = open(outputFileName,"a")
     outFile.write("#   The interfacial friction coefficient, lambda, was calculated by \n")
@@ -290,6 +346,11 @@ def writeOutputLambda(outputFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambd
     outFile.write("# " + str(shearRate) + "\t\t" + str(float(lambda1)) + "\n#\n")
     if (lambda1 < 0.0):
         outFile.write("# WARNING NEGATIVE LAMBDA VALUE FOUND \n#\n#\n")
+
+
+
+
+
 
 def writeOutputKappa(outputFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, kappa1, kappa2, popt, shearRate):
     outFile = open(outputFileName,"a")
@@ -315,6 +376,19 @@ def writeOutputKappa(outputFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zL
     if (kappa1 < 0.0 or kappa2 < 0.0):
         outFile.write("# WARNING NEGATIVE KAPPA VALUE FOUND \n")
 
+
+
+def writeOuputSecondDeriv(outputFileName, popt):
+    outFile = open(outputFileName,"a")
+
+    outFile.write("#\n#\n#")
+    outFile.write("# second derivative of fit at Z1 \n")
+    outFile.write("# Z1 location is " + str(popt[1]) + "\n")
+    outFile.write(str(secondDeriv(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+
+
+
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description='OpenMD solid/liquid kinetic friction coefficient calculator for orthorhombic systems.',
@@ -336,8 +410,8 @@ def main(argv):
     parser.add_argument("-t","--useWidth=", action="store", default=False, type=bool, dest="useWidth", help="use provided width for deltaV calculation? (default=false)")
     #parser.add_argument("-z","--useZLocations=", action="store", default=False, type=bool, dest="useZLocations", help="use provided z1 and z2 locations for calculations? (default=false)")
     
-    parser.add_argument("--useZLocations=", action="store_true", dest="useZLocations", help="use the supplied z-locations z1 and z2 to calculate kappa")
-    parser.add_argument("--no-useZLocations=", action="store_false", dest="useZLocations", help="use the fit values for z1 and z2 in the kappa calculation")
+    parser.add_argument("--useZLocations", action="store_true", dest="useZLocations", help="use the supplied z-locations z1 and z2 to calculate kappa")
+    parser.add_argument("--no-useZLocations", action="store_false", dest="useZLocations", help="use the fit values for z1 and z2 in the kappa calculation")
     parser.set_defaults(useZLocations=True)
 
 
@@ -385,24 +459,36 @@ def main(argv):
         parser.error("No initial estimate of the slope in the liquid velocity profile specified")
 
 
+
+
+
+
     #Call functions here, pass appropriate variables.
 
-    #extract rnemd data from (.rnemd) file
+
     (rnemdJzP, jzType, rnemdZPos, rnemdV) = rnemdExtractor(args.rnemdFileName)
-    #fit velocity profile and obtain fit parameters
-    print "args.useZLocations = ", args.useZLocations
     (popt, pcov) = velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, args.Vs, args.l, args.u, args.m, args.w, args.Vl, args.toDel, args.vfitFileName, args.useZLocations)
+    
+    
 
     (shearRate) = calcShearRate(jzType, rnemdZPos, rnemdV)
     (zLiq, zSol, delta, lambda1) = lambdaCalc(rnemdJzP, jzType, popt, args.sigma, args.convFactor)
     (zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, kappa1, kappa2) = kappaCalc(rnemdJzP, jzType, args.z1, args.z2, args.w, popt, args.sigma, args.convFactor, args.useWidth, args.useZLocations)
 
+    
 
-    secondDerivCalc(rnemdJzP, jzType, args.z1, args.z2, args.w, popt, args.useZLocations)
+    #secondDerivVelApprox(rnemdJzP, jzType, args.z1, args.z2, args.w, popt, args.useZLocations)
 
+
+    
     writeOutputFile(args.vfitFileName, args.rnemdFileName, popt)
     writeOutputLambda(args.vfitFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambda1, shearRate)
     writeOutputKappa(args.vfitFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, kappa1, kappa2, popt, shearRate)
+    
+    #def secondDeriv(x, Vs, Z1, Z2, m1, w, Vl):  
+    # need to pass popt[1] = Z1 = x to obtain secondDeriv at the Z1 location  
+    writeOuputSecondDeriv(args.vfitFileName, popt)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
