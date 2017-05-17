@@ -38,16 +38,27 @@ def secondDeriv(x, Vs, Z1, Z2, m1, w, Vl):
     #just breaking apart the function while error checking
     a = (1.0/(np.cosh((x - Z1)/w)))*(1.0/(np.cosh((x - Z1)/w)))
     b = (-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w))
-    c = (1.0/(np.cosh((x - Z2)/w)))*(1.0/(np.cosh((x - Z1)/w)))
-    d = (-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))/(w*w)
+    c = (1.0/(np.cosh((x - Z2)/w)))*(1.0/(np.cosh((x - Z2)/w)))
+    d = (-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))
+    e = (w*w)
 
-    return (a*b + c*d)
-    #return (np.power(1.0/(np.cosh((x - Z1)/w),2)))*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + np.power(1.0/(np.cosh((x - Z2)/w)),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))/np.power(w,2)
+    '''
+    print "a = ", a
+    print "np.power = ", np.power(1.0/np.cosh((x-Z1)/w),2)
+    print "b = ", b
+    print "np b = ", (-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w))
+    print "c = ", c
+    print "np c = ", np.power(1.0/np.cosh((x - Z2)/w),2)
+    print "d = ", d
+    print "np d = ", (-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))
+    print "e = ", e
+    print "np e = ", np.power(w,2)
+    '''
 
     #return (math.pow(np.sech((x - Z1)/w),2)*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + math.pow(np.sech((x - Z2)/w),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w)))/math.pow(w,2)
 
 
-
+    return (a*b + c*d)/e
 
 #This function reads in the .rnemd file and extracts the actual momentum flux, as well as the zPositions and the average velocities therein.
 def rnemdExtractor(rnemdFileName):
