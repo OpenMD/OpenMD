@@ -394,9 +394,42 @@ def writeOuputSecondDeriv(outputFileName, popt):
 
     outFile.write("#\n#\n#")
     outFile.write("# second derivative of fit at Z1 \n")
-    outFile.write("# Z1 location is " + str(popt[1]) + "\n")
+    outFile.write("# Z1 = \t " + str(popt[1]) + "\n")
+    outFile.write("# d^2fit/dz^2 |z1 \n")
     outFile.write(str(secondDeriv(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
+
+
+
+
+def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
+    outFile = open(outputFileName, "a")
+
+    viscosity = 0.88 # Jz(px) / (dVx/dz) from bulk SPC/E @ 225K
+
+    if (jzType == 0):
+        Fsl = rnemdJzP[0] + viscosity*popt[3]
+        #Cf = 1.0 + (2.0**viscosity*popt[3]/rnemdJzP[0])
+        print "Liquid-sim visco = ", viscosity
+        print "popt[3] = ", popt[3]
+        print "jz(px) = ", rnemdJzP[0]
+        print ""
+        print "popt[3] / rnemdJzP[0] = ", popt[3] / rnemdJzP[0]
+        print "viscosity*popt[3] / rnemdJzP[0] = ", viscosity*popt[3]/rnemdJzP[0]
+        print "this sim viscosity = ", rnemdJzP[0] / popt[3]
+        Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[0])
+        print "Cf = ", Cf
+    elif (jzType == 1):
+        Fsl = rnemdJzP[1] + viscosity*popt[3]
+        #Cf = 1.0 - (2.0*viscosity*popt[3]/rnemdJzP[1])
+        Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[1])
+
+    outFile.write("#\n#\n")
+    outFile.write("#  The Force matching method is reported here. We assume the system has come to steady state at which point the Fappl = sum(Ffric) \n")
+    outFile.write("#\t Fsl \t\t Cf \n")
+    outFile.write(str(float(Fsl)) + "\t" + str(float(Cf)) + "\n")
+
+    
 
 
 
@@ -500,6 +533,8 @@ def main(argv):
     # need to pass popt[1] = Z1 = x to obtain secondDeriv at the Z1 location  
     writeOuputSecondDeriv(args.vfitFileName, popt)
 
+    #def calcForceMethod()
+    writeOutputForceMethod(args.vfitFileName, rnemdJzP, jzType, popt) 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
