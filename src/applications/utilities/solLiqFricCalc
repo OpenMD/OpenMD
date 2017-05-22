@@ -23,12 +23,35 @@ def usage():
 
 
 
+
+# Trapezoidal sum for integrals
+def trapSum(A,B,fA,fB):
+    return 0.5*(B-A)*(fA+fB)
+
+
+
 # Fit function we are optimizing data to
 def func(x, Vs, Z1, Z2, m1, w, Vl):
-    #return 0.5 * (2*Vl + m*(Z2-Z1) + (-Vl + Vs - m*(x-Z1))*np.tanh((x-Z1)/w) + (Vl - Vs - m*(x-Z2))*np.tanh((x-Z2)/w))
-    #return (Vl + m*(x-Z1)) * (0.5*(1-np.tanh((x-Z1)/w))) + Vs*(0.5*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))) + (Vl-m*(x-Z2))*(0.5*(1+np.tanh((x-Z2)/w)))
     return  (Vl + m1*(x-Z1)) * (0.5*(1-np.tanh((x-Z1)/w))) + Vs*(0.5*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))) + (Vl-m1*(x-Z2))*(0.5*(1+np.tanh((x-Z2)/w)))
 
+
+
+# first derivative of the fitting function
+def firstDeriv(x, Vs, Z1, Z2, m1, w, Vl):
+    
+    ''' from Mathematica CForm
+((-0.5*Vl + 0.5*Vs - 0.5*m1*x + 0.5*m1*Z1)*Power(Sech((x - Z1)/w),2) + 
+     (0.5*Vl - 0.5*Vs - 0.5*m1*x + 0.5*m1*Z2)*Power(Sech((x - Z2)/w),2) + 
+     m1*w*(-0.5*Tanh((x - Z1)/w) - 0.5*Tanh((x - Z2)/w)))/w
+     '''
+
+    a = (-0.5*Vl + 0.5*Vs - 0.5*m1*x + 0.5*m1*Z1) * (1.0/np.cosh((x - Z1)/w)) * (1.0/np.cosh((x - Z1)/w))
+    b = (0.5*Vl - 0.5*Vs - 0.5*m1*x + 0.5*m1*Z2) * (1.0/np.cosh((x - Z2)/w)) * (1.0/np.cosh((x - Z2)/w))
+    c = m1*w*(-0.5*np.tanh((x - Z1)/w) - 0.5*np.tanh((x - Z2)/w))
+    d = w
+
+    result = (a+b+c)/d
+    return result
 
 
 
@@ -42,23 +65,18 @@ def secondDeriv(x, Vs, Z1, Z2, m1, w, Vl):
     d = (-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))
     e = (w*w)
 
-    '''
-    print "a = ", a
-    print "np.power = ", np.power(1.0/np.cosh((x-Z1)/w),2)
-    print "b = ", b
-    print "np b = ", (-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w))
-    print "c = ", c
-    print "np c = ", np.power(1.0/np.cosh((x - Z2)/w),2)
-    print "d = ", d
-    print "np d = ", (-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w))
-    print "e = ", e
-    print "np e = ", np.power(w,2)
-    '''
-
     #return (math.pow(np.sech((x - Z1)/w),2)*(-m1*w + (Vl - Vs + m1*x - m1*Z1)*np.tanh((x - Z1)/w)) + math.pow(np.sech((x - Z2)/w),2)*(-m1*w + (-Vl + Vs + m1*x - m1*Z2)*np.tanh((x - Z2)/w)))/math.pow(w,2)
 
 
     return (a*b + c*d)/e
+
+
+
+
+
+
+
+
 
 #This function reads in the .rnemd file and extracts the actual momentum flux, as well as the zPositions and the average velocities therein.
 def rnemdExtractor(rnemdFileName):
@@ -330,8 +348,15 @@ def writeOutputFile(outputFileName, rnemdFileName, popt):
        #outFile.write("#   m2 = slope of the velocity profile in the upper liquid region of the box \n")
        outFile.write("#   w = width of the interface \n#\n")
        outFile.write("# Obtained optomized parameters \n")
-       outFile.write("# Vs \t\t\t Z1 \t\t Z2 \t\t m1  \t\t w \t\t Vl \n")
-       outFile.write("# " + str(popt[0]) + "\t" + str(popt[1]) + "\t" + str(popt[2]) + "\t" + str(popt[3]) + "\t" + str(popt[4]) + "\t" + str(popt[5]) + "\t" + "\n#\n#\n")
+       outFile.write("# \t Vs = " + str(popt[0]) + "\n")
+       outFile.write("# \t Vl = " + str(popt[5]) + "\n")
+       outFile.write("# \t Z1 = " + str(popt[1]) + "\n")
+       outFile.write("# \t Z2 = " + str(popt[2]) + "\n")
+       outFile.write("# \t m = " + str(popt[3]) + "\n")
+       outFile.write("# \t w = " + str(popt[4]) + "\n")
+
+       #outFile.write("# Vs \t\t\t Z1 \t\t Z2 \t\t m1  \t\t w \t\t Vl \n")
+       #outFile.write("# " + str(popt[0]) + "\t" + str(popt[1]) + "\t" + str(popt[2]) + "\t" + str(popt[3]) + "\t" + str(popt[4]) + "\t" + str(popt[5]) + "\t" + "\n#\n#\n")
        if (float(popt[0]) < float(popt[5])):
                outFile.write("# WARNING Vs < Vl \n#\n")
 
@@ -382,8 +407,11 @@ def writeOutputKappa(outputFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zL
         outFile.write("# Jz(px) = " + str((float(rnemdJzP[0]))) + "\n#\n")
     elif (jzType == 1): 
         outFile.write("# Jz(py) = " + str((float(rnemdJzP[1]))) + "\n#\n")
-    outFile.write("# shear rate \t\t kappa1 \t\t kappa2 \n")
-    outFile.write(str(shearRate) + "\t" + str(float(kappa1)) + "\t\t" + str(float(kappa2)) + "\n")
+    outFile.write("# \t shear rate = " + str(shearRate) + "\n")
+    outFile.write("# \t kappa1 = " + str(kappa1) + "\n")
+    outFile.write("# \t kappa2 = " + str(kappa2) + "\n")
+    #outFile.write("# shear rate \t\t kappa1 \t\t kappa2 \n")
+    #outFile.write(str(shearRate) + "\t" + str(float(kappa1)) + "\t\t" + str(float(kappa2)) + "\n")
     if (kappa1 < 0.0 or kappa2 < 0.0):
         outFile.write("# WARNING NEGATIVE KAPPA VALUE FOUND \n")
 
@@ -442,6 +470,41 @@ def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
     outFile.write("#\t Fsl \t\t Cf \n")
     outFile.write(str(float(Fsl)) + "\t" + str(float(Cf)) + "\n")
 
+
+
+
+def writeOuputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound):
+    derivFileName = outputFileName + "DERIV"
+    derivFile = open(derivFileName, "w")
+
+    outFile = open(outputFileName, "a")
+
+    outFile.write("#\n#\n")
+    outFile.write("# The integral method makes no assumptions about the system having reached \n")
+    outFile.write("# a steady-state. \n")
+    outFile.write("# \t Cf = F_{fric} \ F_{appl} \n")
+    outFile.write("# \t    = 2* Integral[ (d^2u/dz^2) / (du/dz) dz]|^{solid}_{liquid} \n")
+    outFile.write("# Integral bounds: \n")
+    outFile.write("# \t lowerBound = " + str(lowerBound) + "\n")
+    outFile.write("# \t upperBound = " + str(upperBound) + "\n")
+    
+
+    integral = 0.0
+    xPos = lowerBound
+    deltaX = (upperBound - lowerBound)/1000
+    while (xPos < upperBound):
+        derivFile.write(str(xPos) + "\t" + str(func(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+
+        lowerTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+        upperTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+        dArea = trapSum(xPos, xPos + deltaX, lowerTerm, upperTerm)
+        integral = integral + dArea
+        xPos = xPos + deltaX
+    
+    integral = 2.0 * integral #due to the 2 interfaces present in systems
+
+    outFile.write("# Cf = " + str(integral) + "\n")
+    
     
 
 
@@ -470,6 +533,9 @@ def main(argv):
     parser.add_argument("--useZLocations", action="store_true", dest="useZLocations", help="use the supplied z-locations z1 and z2 to calculate kappa")
     parser.add_argument("--no-useZLocations", action="store_false", dest="useZLocations", help="use the fit values for z1 and z2 in the kappa calculation")
     parser.set_defaults(useZLocations=True)
+
+    parser.add_argument("--lowerBound", action="store", type=float, dest="lowerBound", help="lower bound of the integral for Cf calculation")
+    parser.add_argument("--upperBound",action="store", type=float,dest="upperBound", help="upper bound of the integral for Cf calculation")
 
 
     if len(sys.argv) == 1:
@@ -548,6 +614,9 @@ def main(argv):
 
     #def calcForceMethod()
     writeOutputForceMethod(args.vfitFileName, rnemdJzP, jzType, popt) 
+
+    
+    writeOuputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
