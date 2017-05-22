@@ -405,27 +405,40 @@ def writeOuputSecondDeriv(outputFileName, popt):
 def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
     outFile = open(outputFileName, "a")
 
+
+    outFile.write("#\n#\n")
+    outFile.write("#  The Force matching method is reported here. We assume the system has come to steady state at which point the Fappl = sum(Ffric) \n")
+    outFile.write("# \t Fsl = jz(p) + \eta * (dV/dz) \n")
+    outFile.write("# \t Cf = 0.5*[1 + \eta * (dV/dz) / jz(p)] \n")
+
     viscosity = 0.88 # Jz(px) / (dVx/dz) from bulk SPC/E @ 225K
 
     if (jzType == 0):
         Fsl = rnemdJzP[0] + viscosity*popt[3]
         #Cf = 1.0 + (2.0**viscosity*popt[3]/rnemdJzP[0])
-        print "Liquid-sim visco = ", viscosity
-        print "popt[3] = ", popt[3]
-        print "jz(px) = ", rnemdJzP[0]
-        print ""
-        print "popt[3] / rnemdJzP[0] = ", popt[3] / rnemdJzP[0]
-        print "viscosity*popt[3] / rnemdJzP[0] = ", viscosity*popt[3]/rnemdJzP[0]
-        print "this sim viscosity = ", rnemdJzP[0] / popt[3]
+        #print "Liquid-sim visco = ", viscosity
+        #print "popt[3] = ", popt[3]
+        #print "jz(px) = ", rnemdJzP[0]
+        #print ""
+        #print "popt[3] / rnemdJzP[0] = ", popt[3] / rnemdJzP[0]
+        #print "viscosity*popt[3] / rnemdJzP[0] = ", viscosity*popt[3]/rnemdJzP[0]
+        #print "this sim viscosity = ", rnemdJzP[0] / popt[3]
         Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[0])
         print "Cf = ", Cf
+        outFile.write("# jz(px) = " + str(float(rnemdJzP[0])) + "\n")
+        outFile.write("# \eta = " + str(viscosity) + "\n")
+        outFile.write("# (dVx/dz) = " + str(popt[3]) + "\n")
+
     elif (jzType == 1):
         Fsl = rnemdJzP[1] + viscosity*popt[3]
         #Cf = 1.0 - (2.0*viscosity*popt[3]/rnemdJzP[1])
         Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[1])
 
-    outFile.write("#\n#\n")
-    outFile.write("#  The Force matching method is reported here. We assume the system has come to steady state at which point the Fappl = sum(Ffric) \n")
+        outFile.write("# jz(py) = " + str(float(rnemdJzP[1])) + "\n")
+        outFile.write("# \eta = " + str(viscosity) + "\n")
+        outFile.write("# (dVy/dz) = " + str(popt[3]) + "\n")
+
+
     outFile.write("#\t Fsl \t\t Cf \n")
     outFile.write(str(float(Fsl)) + "\t" + str(float(Cf)) + "\n")
 
