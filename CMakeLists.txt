@@ -743,6 +743,7 @@ src/applications/utilities/pack2omd
 src/applications/utilities/principalAxisCalculator
 src/applications/utilities/slabBuilder
 src/applications/utilities/solLiqFricCalc
+src/applications/utilities/hbtetAnalyzer
 src/applications/utilities/vcorr2spectrum
 src/applications/utilities/waterReplacer
 )
