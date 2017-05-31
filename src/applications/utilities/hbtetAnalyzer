@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+__author__ = "Patrick Louden (plouden@nd.edu)"
+__copyright__ = "Copyright (c) 2016 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import os
+import datetime
+import argparse
+import textwrap
+import numpy as np
+from argparse import RawDescriptionHelpFormatter
+
+
+def usage():
+    print __doc__
+
+def HBcount(hbqFileName,hbqPSAFileName,qS,qL,boxl_x,boxl_y,boxl_z,nSnapshots):
+    hbCount = 0.0
+    nbins = 0.0
+    deltaQ = 0.0
+    hbqList = []
+    lthSum = 0.0 # low(q) to high(q) sum
+    htlSum = 0.0 # high(q) to low(q) sum
+    totSum = 0.0
+
+    # first let's extract the Hydrogen Bond count from the .hbq file
+    hbqFile = open(hbqFileName,"r")
+    for line in hbqFile:
+        if "#" in line:
+            if "parameters:" in line:
+                nbins = float(line.split()[16][:-1])
+                deltaQ = float(line.split()[19])
+            elif "Hydrogen Bond count:" in line:
+                hbCount = float(line.split()[4])
+        else:
+            # accumulate the matrix into a list for easy looping and summing
+            hbqList.append(line.split())
+
+
+    for i in range(0,len(hbqList[0])):
+        for j in range(0, len(hbqList[0])):
+            if ( (i*deltaQ) >= qS ) and ( (j*deltaQ) <= qL ):
+                htlSum = htlSum + float(hbqList[i][j])
+            elif ( (i*deltaQ) <= qL ) and ( (j*deltaQ) >= qS ):
+                lthSum = lthSum + float(hbqList[i][j])
+
+    totSum = htlSum + lthSum
+    normHBCount = (totSum * hbCount) / (boxl_x * boxl_y * boxl_z) / nSnapshots
+
+    hbqPSAFile = open(hbqPSAFileName,"w")
+    hbqPSAFile.write("qS = " + str(qS) + "\n")
+    hbqPSAFile.write("qL = " +str(qL) +"\n")
+    hbqPSAFile.write("boxl(x) = " + str(boxl_x) + "\n")
+    hbqPSAFile.write("boxl(y) = " + str(boxl_y) + "\n")
+    hbqPSAFile.write("boxl(z) = " + str(boxl_z) + "\n")
+    hbqPSAFile.write("nSnapshots = " + str(nSnapshots) + "\n")
+    hbqPSAFile.write("nbins = " + str(nbins) + "\n")
+    hbqPSAFile.write("deltaQ = " + str(deltaQ) + "\n")
+    hbqPSAFile.write("hbCount = " + str(hbCount) + "\n")
+    hbqPSAFile.write("htlSum = " + str(htlSum) + "\n")
+    hbqPSAFile.write("lthSum = " + str(lthSum) + "\n")
+    hbqPSAFile.write("The normalized per square Angstrom number of hydrogen bonds found is " + str(normHBCount) + "\n")
+
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description='OpenMD tetrahedral hydrogen-bond matrix analyzer.',
+        #formatter_class=RawDescriptionHelpFormatter,
+        epilog="Example: hbtetAnalyzer.py -i sim.hbq -o sim.hbqPSA -qS 0.91 -qL 0.75 -x 56.5 -y 43.3")
+    parser.add_argument("-i","--hbq-file=", action="store", dest="hbqFileName", help="use specified input (.hbq) file")
+    parser.add_argument("-o","--hbqPAS-file=", action="store", dest="hbqPSAFileName", help="use specified output (.hbqPSA) file")
+    parser.add_argument("-qS","--q(solid)=", action="store", type=float, dest="qS", help="the tetrahedral order parameter value at the solid surface")
+    parser.add_argument("-qL","--q(liquid)=", action="store", type=float, dest="qL", help="the tetrahedral order parameter value at the liquid surface")
+    parser.add_argument("-x","--boxl(x)=", action="store", type=float, dest="boxl_x", help="the x-dimension of the simulation box (Angstroms)")
+    parser.add_argument("-y","--boxl(y)=", action="store", type=float, dest="boxl_y", help="the y-dimension of the simulation box (Angstroms)")
+    parser.add_argument("-z","--boxl(z)=", action="store", type=float, dest="boxl_z", help="the z-dimension of the simulation box (Angstroms)")
+    parser.add_argument("-t","--nSnapshots=", action="store", type=float, dest="nSnapshots", help="the number of snapshots used to accumulate the (.hbq) file")
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(2)
+    args = parser.parse_args()
+
+    if (not args.hbqFileName):
+        parser.error("No input-file was specified")
+
+    if (not args.hbqPSAFileName):
+        parser.error("No output-file was specified")
+
+    if (not args.qS):
+        parser.print_help()
+        parser.error("No q(solid) was specified")
+        
+    if (not args.qL):
+        parser.print_help()
+        parser.error("No q(liquid) was specified")
+
+    if (not args.boxl_x):
+        parser.print_help()
+        parser.error("No x-dimension of the box was specified")
+
+    if (not args.boxl_y):
+        parser.print_help()
+        parser.error("No y-dimension of the box was specified")
+
+    if (not args.boxl_z):
+        parser.print_help()
+        parser.error("No z-dimension of the box was specified")
+
+    if (not args.nSnapshots):
+        parser.print_help()
+        parser.error("No nSnapshots specified")
+
+
+    #Call functions here, pass appropriate variables.
+    HBcount(args.hbqFileName,args.hbqPSAFileName,args.qS,args.qL,args.boxl_x,args.boxl_y,args.boxl_z,args.nSnapshots)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
