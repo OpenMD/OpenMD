@@ -134,7 +134,7 @@ def make_lattice(lattice, latticeConstant, rotMat, minVec, repeats, vacuum, char
         # Multiplying the z-dimenion by 3 so the resulting box              
         # contains 2/3 vacuum and 1/3 solid   
         if (chargedPlates.lower() == 'true'):
-            Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,(boxCorner[2]*3.0) + offSet]]
+            Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,(boxCorner[2]*3.0) + 2*offSet]]
         elif (chargedPlates.lower() == 'false'):
             Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]*3.0]]
     else:
@@ -247,7 +247,7 @@ def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
         #                 ("pv", plates[i][0], plates[i][1], plates[i][2],
         #                  "0.0", "0.0", "0.0"))
     if (len(plates) > 0):
-        outputFile.write("\t" + str(len(coords)) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("pvqj", plates[0][0], plates[0][1], plates[0][2],"0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0" ))
+        outputFile.write("\t" + str(len(coords)) + "\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("pvqj", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0" ))
     outputFile.write("    </StuntDoubles> \n")
     outputFile.write("  </Snapshot>\n")
     outputFile.write("</OpenMD>")
