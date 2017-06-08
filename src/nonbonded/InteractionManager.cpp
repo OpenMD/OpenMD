@@ -200,16 +200,13 @@ namespace OpenMD {
 
         // A special case for calculating local fields:
         if ( info_->getSimParams()->getOutputElectricField() ) {
-          if ( atype1->isElectrostatic() || atype1->isElectrostatic() ) {
+          if ( atype1->isElectrostatic() || atype2->isElectrostatic() ) {
 
             // The only exception is if both atoms are fluctuating charges:
             if ( !(atype1->isEAM() && atype1->isFluctuatingCharge() &&
                    atype2->isEAM() && atype2->isFluctuatingCharge()) ) { 
-              std::cerr << "going to do electrostatics for fields\n";
               interactions_[atid1][atid2].insert(electrostatic_);
               iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
-            } else {
-              std::cerr << "fluct-EAM exception to electrostatics for fields\n";
             }
             
           }
@@ -541,6 +538,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
 
     int& iHash = iHash_[idat.atid1][idat.atid2];
+    
 
     if ((iHash & ELECTROSTATIC_INTERACTION) != 0) electrostatic_->calcForce(idat);
 
