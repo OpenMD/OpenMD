@@ -44,6 +44,7 @@
 #define NONBONDED_EAM_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "nonbonded/Electrostatic.hpp"
 #include "types/EAMAdapter.hpp"
 #include "brains/ForceField.hpp"
 #include "math/Vector3.hpp"
@@ -72,12 +73,12 @@ namespace OpenMD {
     eamDaw,
     eamUnknown
   };
-
+  
   class EAM : public MetallicInteraction {
-
   public:
     EAM();
     void setForceField(ForceField *ff) {forceField_ = ff;};
+    void setElectrostatic(Electrostatic *el) { electrostatic_ = el;};
     void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
@@ -123,9 +124,12 @@ namespace OpenMD {
     int nEAM_;
 
     ForceField* forceField_;
+    Electrostatic* electrostatic_;
     set<AtomType*> simTypes_;
     RealType pre11_;
     RealType eamRcut_;
+    Vector3d rhat;
+
     EAMMixingMethod mixMeth_;
     string name_;
 

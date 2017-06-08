@@ -88,6 +88,7 @@ namespace OpenMD {
     gb_->setForceField(forceField_);
     sticky_->setForceField(forceField_);
     eam_->setForceField(forceField_);
+    eam_->setElectrostatic(electrostatic_);
     sc_->setForceField(forceField_);
     morse_->setForceField(forceField_);
     electrostatic_->setSimInfo(info_);
@@ -95,7 +96,7 @@ namespace OpenMD {
     maw_->setForceField(forceField_);
     repulsivePower_->setForceField(forceField_);
     mie_->setForceField(forceField_);
-
+    
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     int nTypes = atomTypes->size();
     sHash_.resize(nTypes);

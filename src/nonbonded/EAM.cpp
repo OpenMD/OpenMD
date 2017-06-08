@@ -49,12 +49,11 @@
 #include "types/NonBondedInteractionType.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 
-
 namespace OpenMD {
-
+  
   EAM::EAM() : initialized_(false), haveCutoffRadius_(false),
-	       forceField_(NULL), eamRcut_(0.0), mixMeth_(eamJohnson),
-	       name_("EAM") {}
+	       forceField_(NULL), electrostatic_(NULL), eamRcut_(0.0),
+               mixMeth_(eamJohnson), name_("EAM") {}
 
   RealType EAM::fastPower(RealType x, int y) {
     RealType temp;
@@ -654,6 +653,8 @@ namespace OpenMD {
     RealType drhoidr(0.0), drhojdr(0.0), dudr(0.0);
     RealType u, ui, up, uip;
 
+    rhat =  *(idat.d) / *(idat.rij);
+
     if ( *(idat.rij) < rci) {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
@@ -735,7 +736,7 @@ namespace OpenMD {
 
     dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr;
 
-    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+    *(idat.f1) += rhat * dudr;
 
     if (idat.doParticlePot) {
       // particlePot is the difference between the full potential and
@@ -760,6 +761,19 @@ namespace OpenMD {
 
     *(idat.vpair) += phab;
 
+    if (idat.doElectricField) {
+      // Borrow the appropriate field code we're using in Electrostatic:
+      RealType eff = electrostatic_->getFieldFunction( *(idat.rij) );
+      
+      if (data1.isFluctuatingCharge) {
+        *(idat.eField2) += qa * eff * rhat;
+      }
+      if (data2.isFluctuatingCharge) {
+        *(idat.eField1) += qb * eff * rhat;
+      }
+    }
+
+    
     if (data1.isFluctuatingCharge) {
       *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / RealType(data1.nValence);
     }
@@ -793,4 +807,5 @@ namespace OpenMD {
 
     return cut;
   }
+
 }

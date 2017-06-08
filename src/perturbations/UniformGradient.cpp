@@ -190,9 +190,7 @@ namespace OpenMD {
           r = atom->getPos();
           EF = Grad_ * r;
           
-          if (atype->isElectrostatic()) {
-            atom->addElectricField(EF * PhysicalConstants::chargeFieldConvert);
-          }
+          atom->addElectricField(EF * PhysicalConstants::chargeFieldConvert);
           
 	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
 	  if ( fca.isFixedCharge() ) {

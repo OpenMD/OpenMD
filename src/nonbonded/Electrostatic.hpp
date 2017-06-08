@@ -109,6 +109,9 @@ namespace OpenMD {
     void calcSurfaceTerm(RealType& pot);
     void ReciprocalSpaceSum(RealType &pot);
 
+    // Used by EAM to compute local fields:
+    RealType getFieldFunction(RealType r);
+
     // Utility routine 
     void getSitePotentials(Atom* a1, Atom* a2, bool excluded, RealType &spot1, RealType &spot2);
 
@@ -160,7 +163,7 @@ namespace OpenMD {
     RealType selfMult1_; 
     RealType selfMult2_;
     RealType selfMult4_;
-
+    
     CubicSpline* v01s;
     CubicSpline* v11s;
     CubicSpline* v21s;

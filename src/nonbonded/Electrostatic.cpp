@@ -1790,4 +1790,14 @@ namespace OpenMD {
     spot1 = Pa;
     spot2 = Pb;
   }
+
+  RealType Electrostatic::getFieldFunction(RealType r) {
+    if (!initialized_) {
+      initialize();
+    }
+    RealType v01, dv01;
+    v01s->getValueAndDerivativeAt(r, v01, dv01);
+    return dv01 * pre11_;
+  }
+  
 }
