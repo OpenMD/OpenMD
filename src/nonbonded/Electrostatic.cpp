@@ -759,9 +759,31 @@ namespace OpenMD {
   void Electrostatic::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
-    
-    data1 = ElectrostaticMap[Etids[idat.atid1]];
-    data2 = ElectrostaticMap[Etids[idat.atid2]];
+   
+    if (Etids[idat.atid1] != -1) { 
+      data1 = ElectrostaticMap[Etids[idat.atid1]];
+      a_is_Charge = data1.is_Charge;
+      a_is_Dipole = data1.is_Dipole;
+      a_is_Quadrupole = data1.is_Quadrupole;
+      a_is_Fluctuating = data1.is_Fluctuating;
+    } else {
+      a_is_Charge = false;
+      a_is_Dipole = false;
+      a_is_Quadrupole = false;
+      a_is_Fluctuating = false;
+    }
+    if (Etids[idat.atid2] != -1) { 
+      data2 = ElectrostaticMap[Etids[idat.atid2]];
+      b_is_Charge = data2.is_Charge;
+      b_is_Dipole = data2.is_Dipole;
+      b_is_Quadrupole = data2.is_Quadrupole;
+      b_is_Fluctuating = data2.is_Fluctuating;
+    } else {
+      b_is_Charge = false;
+      b_is_Dipole = false;
+      b_is_Quadrupole = false;
+      b_is_Fluctuating = false;
+    }
 
     U = 0.0;  // Potential
     F.zero();  // Force
@@ -788,18 +810,6 @@ namespace OpenMD {
     ri = 1.0 /  *(idat.rij);
     rhat =  *(idat.d)  * ri;
       
-    // logicals
-
-    a_is_Charge = data1.is_Charge;
-    a_is_Dipole = data1.is_Dipole;
-    a_is_Quadrupole = data1.is_Quadrupole;
-    a_is_Fluctuating = data1.is_Fluctuating;
-
-    b_is_Charge = data2.is_Charge;
-    b_is_Dipole = data2.is_Dipole;
-    b_is_Quadrupole = data2.is_Quadrupole;
-    b_is_Fluctuating = data2.is_Fluctuating;
-
     // Obtain all of the required radial function values from the
     // spline structures:
     
