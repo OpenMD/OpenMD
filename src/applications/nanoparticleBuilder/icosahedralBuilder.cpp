@@ -226,10 +226,15 @@ int main(int argc, char *argv []) {
   for (unsigned int n = 0; n < Points.size(); n++) {
     mol = NewInfo->getMoleculeByGlobalIndex(l);
 
-    // The polyhedra are built with a unit spacing between atoms,
-    // which in an FCC lattice should be multiplied by a / sqrt(2).
-    
-    Vector3d location = Points[n] * latticeConstant / sqrt(2.0);
+    Vector3d location;
+    if (args_info.cuboctahedron_given || args_info.truncatedCube_given) {
+      // The cubic structures are built with a unit spacing between cells
+      location = Points[n] * latticeConstant;
+    } else {
+      // The polyhedra are built with a unit spacing between atoms,
+      // which in an FCC lattice should be multiplied by a / sqrt(2).
+      location = Points[n] * latticeConstant / sqrt(2.0);
+    }
     Vector3d orientation = Vector3d(0, 0, 1.0);
     
     if (n == 0) {
