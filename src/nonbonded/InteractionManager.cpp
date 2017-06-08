@@ -197,6 +197,22 @@ namespace OpenMD {
             iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
           }
         }
+
+        // A special case for calculating local fields:
+        if ( info_->getSimParams()->getOutputElectricField() ) {
+          if ( atype1->isElectrostatic() || atype1->isElectrostatic() ) {
+
+            // The only exception is if both atoms are fluctuating charges:
+            if ( !(atype1->isEAM() && atype1->isFluctuatingCharge() &&
+                   atype2->isEAM() && atype2->isFluctuatingCharge()) ) { 
+              
+              interactions_[atid1][atid2].insert(electrostatic_);
+              iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
+            }
+            
+          }
+        }       
+        
         if (atype1->isSticky() && atype2->isSticky() ) {
           interactions_[atid1][atid2].insert(sticky_);
           iHash_[atid1][atid2] |= STICKY_INTERACTION;
