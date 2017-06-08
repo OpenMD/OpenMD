@@ -70,7 +70,7 @@ def find_perpendiculars(hkl):
 
     return (rotMat, minVec)
 
-def make_lattice(lattice, latticeConstant, rotMat, minVec, repeats, vacuum):
+def make_lattice(lattice, latticeConstant, rotMat, minVec, repeats, vacuum, chargedPlates, offSet):
     basis = {
         "sc":  [np.array([0.0,0.0,0.0])],
         "fcc": [np.array([0.0,0.0,0.0]), np.array([0.5,0.5,0.0]),
@@ -131,9 +131,12 @@ def make_lattice(lattice, latticeConstant, rotMat, minVec, repeats, vacuum):
             coords[i][j] = coords[i][j] - com[j]
 
     if (vacuum.lower() == "true"):
-        # Multiplying the z-dimenion by 3 so the resulting box
-        # contains 2/3 vacuum and 1/3 solid
-        Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]*3.0]]
+        # Multiplying the z-dimenion by 3 so the resulting box              
+        # contains 2/3 vacuum and 1/3 solid   
+        if (chargedPlates.lower() == 'true'):
+            Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,(boxCorner[2]*3.0) + 2*offSet]]
+        elif (chargedPlates.lower() == 'false'):
+            Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]*3.0]]
     else:
         Hmat = [[boxCorner[0],0,0], [0,boxCorner[1],0], [0,0,boxCorner[2]]]
 
@@ -141,7 +144,7 @@ def make_lattice(lattice, latticeConstant, rotMat, minVec, repeats, vacuum):
     return coords,Hmat
 
 
-def make_plates(coords, Hmat):
+def make_plates(coords, Hmat, kPoints, offSet):
 
     plates = []
 
@@ -153,21 +156,20 @@ def make_plates(coords, Hmat):
         if (coords[i][2] < minZ):
             minZ = coords[i][2]
 
-    offSet = 30
-
-    kPoints = 100
+    print "minZ = ", minZ
+    print "maxZ = ", maxZ
+    
     dx = Hmat[0][0]/kPoints
-    dy = Hmat[0][0]/kPoints
+    dy = Hmat[1][1]/kPoints
 
-
-    for i in range(0, kPoints):
-        for j in range(0, kPoints):
-            platePoint = [i*dx, j*dy, minZ - 30]
+    for i in range(0, int(kPoints)):
+        for j in range(0, int(kPoints)):
+            platePoint = [i*dx - (Hmat[0][0]/2.0), j*dy - (Hmat[1][1]/2.0), minZ - offSet]
             plates.append(platePoint)
 
-    for i in range(0, kPoints):
-        for j in range(0, kPoints):
-            platePoint = [i*dx,j*dy, maxZ + 30]
+    for i in range(0, int(kPoints)):
+        for j in range(0, int(kPoints)):
+            platePoint = [i*dx- (Hmat[0][0]/2.0), j*dy - (Hmat[1][1]/2.0), maxZ + offSet]
             plates.append(platePoint)
 
 
@@ -191,6 +193,8 @@ def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
     outputFile = open(outputFileName, 'w')
     outputFile.write("<OpenMD version=2>\n")
     outputFile.write("  <MetaData> \n\n")
+    if (len(plates) > 0):
+        outputFile.write("#include \"header.inc\" \n")
     outputFile.write("molecule{ \n")
     outputFile.write("  name = \"" + elementType + "\";\n\n")
     outputFile.write("  atom[0]{\n")
@@ -198,22 +202,14 @@ def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
     outputFile.write("    position( 0.0, 0.0, 0.0 );\n")
     outputFile.write("  }\n")
     outputFile.write("}\n\n")
-    if (len(plates) > 0):
-        outputFile.write("molecule{ \n")
-        outputFile.write("  name = \"Pt\";\n\n")
-        outputFile.write("  atom[0]{\n")
-        outputFile.write("    type= \"Pt\";\n")
-        outputFile.write("    position( 0.0, 0.0, 0.0 );\n")
-        outputFile.write("  }\n")
-        outputFile.write("}\n\n")
     outputFile.write("component{ \n")
     outputFile.write("  type = \"" + elementType + "\";\n")
     outputFile.write("  nMol = " + str(len(coords)) + ";\n")
     outputFile.write("}\n\n")
     if (len(plates) > 0):
         outputFile.write("component{ \n")
-        outputFile.write("  type = \"Pt\";\n")
-        outputFile.write("  nMol = " + str(len(plates)) + ";\n")
+        outputFile.write("  type = \"Plates\";\n")
+        outputFile.write("  nMol = " + str(1) + ";\n")
         outputFile.write("}\n\n")
     outputFile.write("ensemble = NgammaT;\n")
     outputFile.write("surfaceTension = 0.0;\n")
@@ -246,10 +242,12 @@ def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
         outputFile.write("\t" + str(i) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
                          ("pv", coords[i][0], coords[i][1], coords[i][2],
                           "0.0", "0.0", "0.0"))
-    for i in range(len(plates)):
-        outputFile.write("\t" + str(i+len(coords)) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
-                         ("pv", plates[i][0], plates[i][1], plates[i][2],
-                          "0.0", "0.0", "0.0"))
+    #for i in range(len(plates)):
+        #outputFile.write("\t" + str(i+len(coords)) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
+        #                 ("pv", plates[i][0], plates[i][1], plates[i][2],
+        #                  "0.0", "0.0", "0.0"))
+    if (len(plates) > 0):
+        outputFile.write("\t" + str(len(coords)) + "\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("pvqj", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0" ))
     outputFile.write("    </StuntDoubles> \n")
     outputFile.write("  </Snapshot>\n")
     outputFile.write("</OpenMD>")
@@ -257,15 +255,34 @@ def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
     print "Generated OpenMD file: " + outputFileName
 
 
-def writeHeaderFile(omdFileName,plates):
+def writeHeaderFile(plates):
     
-    if ("omd" in omdFileName):
-        headerFileName = omdFileName[:-3] + "inc"
-    elif ("omd" not in omdFileName):
-        headerFileName = omdFileName + ".inc"
+    headerFile = open("header.inc", 'w')
     
-    headerFile = open(headerFileName, 'w')
-    
+    headerFile.write("#ifndef _HEADER_INC_ \n")
+    headerFile.write("#define _HEADER_INC_ \n\n")
+    headerFile.write("molecule{ \n")
+    headerFile.write("  name = \"Plates\"; \n\n")
+    for i in range(0, len(plates)/2):
+        headerFile.write("  atom[" + str(i) +"]{ \n")
+        headerFile.write("    type = \"PosPlate\"; \n")
+        headerFile.write("    position( " + str(plates[i][0]) + ", " + str(plates[i][1]) + ", " +str(plates[i][2]) + "  ); \n")
+        headerFile.write("  } \n")
+    for i in range(len(plates)/2, len(plates)):
+        headerFile.write("  atom[" + str(i) +"]{ \n")
+        headerFile.write("    type = \"NegPlate\"; \n")
+        headerFile.write("    position( " + str(plates[i][0]) + ", " + str(plates[i][1]) + ", " +str(plates[i][2]) + "  ); \n")
+        headerFile.write("  } \n")
+    headerFile.write("   rigidBody[0]{ \n")
+    headerFile.write("     members(")
+    for i in range(0, len(plates)):
+        if (i < len(plates) - 1):
+            headerFile.write( str(i) + ", ")
+        elif (i == len(plates) -1):
+            headerFile.write( str(i) )
+    headerFile.write("); \n")
+    headerFile.write("  } \n } \n")
+    headerFile.write("#endif \n")
 
 
 
@@ -293,6 +310,8 @@ def main(argv):
                         choices=('true','false'),dest="vacuum", default='true', help="true/false (Should the output file have vacuum in the z-dimension?)")
     parser.add_argument("-q","--chargedPlates", action="store", 
                         dest="chargedPlates", choices=('true','false'), default='false', help="true/false (Should the output file include charged plates?)")
+    parser.add_argument("-k","--kPoints", action="store", dest="kPoints",type=float, default=20, help="number of points to use in the charged plates")
+    parser.add_argument("-s", "--offSet", action="store", dest="offSet", type=float, default=10, help="the distance the charged plates are from the surface")
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -322,13 +341,15 @@ def main(argv):
         parser.print_help()
         parser.error("No elementType specified")
 
+
     (rotMat, minVec) = find_perpendiculars(args.hkl)
     coords, Hmat = make_lattice(args.lattice, args.latticeConstant, rotMat,
-                                minVec, args.repeats, args.vacuum)
-    if (args.chargedPlates):
-        plates = make_plates(coords, Hmat)
-        writeHeaderFile(args.omdFileName, plates)
-    elif(not args.chargedPlates):
+                                minVec, args.repeats, args.vacuum, 
+                                args.chargedPlates, args.offSet)
+    if (args.chargedPlates.lower() == 'true'):
+        plates = make_plates(coords, Hmat, args.kPoints, args.offSet)
+        writeHeaderFile(plates)
+    elif(args.chargedPlates.lower() == 'false'):
         plates = []
 
     if (args.xyzFileName):

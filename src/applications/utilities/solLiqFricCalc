@@ -454,16 +454,17 @@ def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
         Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[1])
         outFile.write("# jz(py) = " + str(float(rnemdJzP[1])) + "\n")
         outFile.write("# \eta = " + str(viscosity) + "\n")
-        outFile.write("# (dVy/dz) = " + str(popt[3]) + "\n")
+        outFile.write("# (dVy/dz) = " + str(popt[3]) + "\n#\n")
 
 
-    outFile.write("#\t Fsl \t\t Cf \n")
-    outFile.write(str(float(Fsl)) + "\t" + str(float(Cf)) + "\n")
+    outFile.write("# Fsl = " + str(float(Fsl)) + "\n")
+    outFile.write("# Cf_{ForceMethod} = " + str(float(Cf)) + "\n")
+    
 
 
 
 
-def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound):
+def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound, boxlZ):
     derivFileName = outputFileName + "DERIV"
     derivFile = open(derivFileName, "w")
     derivFile.write("# xPos \t U \t dU/dz \t d^2U/dz^2 \t (d^2U/dz^2)\(dU/dz) \n")
@@ -483,18 +484,21 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
     integral = 0.0
     xPos = lowerBound
     deltaX = (upperBound - lowerBound)/1000
-    while (xPos < upperBound):
+    while (xPos < boxlZ):
         derivFile.write(str(xPos) + "\t" + str(func(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+        xPos = xPos + deltaX
 
-        #lowerTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5],popt[6]) / firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5],popt[6])
-        #upperTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5],popt[6]) / firstDeriv(xPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5],popt[6])
-        #dArea = trapSum(xPos, xPos + deltaX, lowerTerm, upperTerm)
-        #integral = integral + dArea
+    xPos = lowerBound
+    while (xPos < upperBound):
+        lowerTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+        upperTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+        dArea = trapSum(xPos, xPos + deltaX, lowerTerm, upperTerm)
+        integral = integral + dArea
         xPos = xPos + deltaX
     
-    #integral = 2.0 * integral #due to the 2 interfaces present in systems
+    integral = -2.0 * integral #due to the 2 interfaces present in systems
 
-    outFile.write("# Cf = " + str(integral) + "\n")
+    outFile.write("# Cf_{IntegralMethod} = " + str(integral) + "\n")
     
     
 
@@ -512,7 +516,7 @@ def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt):
 
     Cf = -2.0*secondDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
     
-    outFile.write("#\n# Cf = " + str(Cf) + "\n")
+    outFile.write("#\n# Cf_{SimpleMethod} = " + str(Cf) + "\n")
 
 
 
@@ -545,7 +549,7 @@ def main(argv):
     parser.add_argument("--lowerBound", action="store", type=float, dest="lowerBound", help="lower bound of the integral for Cf calculation")
     parser.add_argument("--upperBound",action="store", type=float,dest="upperBound", help="upper bound of the integral for Cf calculation")
     #parser.add_argument("--ms", action="store", type=float, dest="ms", help="slope of the velocity profile in the solid, should be close to zero.")
-
+    parser.add_argument("--boxlZ",action="store", dest="boxlZ", type=float, help="the box Z-dimension")
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(2)
@@ -624,7 +628,7 @@ def main(argv):
     writeOutputForceMethod(args.vfitFileName, rnemdJzP, jzType, popt) 
 
     
-    writeOutputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound)
+    writeOutputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound, args.boxlZ)
     writeOutputSimpleCfCalc(args.vfitFileName, rnemdJzP, jzType, popt)
 
 
