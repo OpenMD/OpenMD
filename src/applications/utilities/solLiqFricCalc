@@ -504,19 +504,34 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
 
 
 
-def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt):
+def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth):
     outFile = open(outputFileName, "a")
     outFile.write("#\n#\n#\n")
-    outFile.write("# Simple Cf Calculation \n")
+    outFile.write("# Simple Cf Calculation with fit width \n")
     outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z=Z1 / (du\dz)|z=Z1 \n")
     outFile.write("#\n# Parameters in calculation \n")
     outFile.write("#  w = " + str(popt[4]) + "\n")
     outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
     outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
-    Cf = -2.0*secondDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    Cf = -2.0*popt[4]*secondDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
     
-    outFile.write("#\n# Cf_{SimpleMethod} = " + str(Cf) + "\n")
+    outFile.write("#\n# Cf_{SimpleMethod_FitWidth} = " + str(Cf) + "\n")
+
+
+    # let's also calculate Cf_{SimpleMethod} with the width given by the user
+    outFile.write("#\n#\n#\n")
+    outFile.write("# Simple Cf Calculation with given width \n")
+    outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z=Z1 / (du\dz)|z=Z1 \n")
+    outFile.write("#\n# Parameters in calculation \n")
+    outFile.write("#  w = " + str(givenWidth) + "\n")
+    outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
+
+    Cf = -2.0*givenWidth*secondDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+
+    outFile.write("#\n# Cf_{SimpleMethod_GivenWidth} = " + str(Cf) + "\n")
+
 
 
 
@@ -629,7 +644,7 @@ def main(argv):
 
     
     writeOutputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound, args.boxlZ)
-    writeOutputSimpleCfCalc(args.vfitFileName, rnemdJzP, jzType, popt)
+    writeOutputSimpleCfCalc(args.vfitFileName, rnemdJzP, jzType, popt, args.w)
 
 
 if __name__ == "__main__":
