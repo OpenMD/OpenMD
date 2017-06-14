@@ -39,47 +39,23 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#include "applications/dynamicProps/CrossTimeCorrFunc.hpp"
+#ifndef APPLICATIONS_DYNAMICPROPS_MOMANGMOMCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_MOMANGMOMCORRFUNC_HPP
 
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo * info, 
-                                       const std::string & filename,
-				       const std :: string & sele1,
-                                       const std :: string & sele2, 
-                                       int storageLayout, long long int memSize)
-    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize) {
-    
-    nSelected1_ = seleMan1_.getSelectionCount();  
-    nSelected2_ = seleMan2_.getSelectionCount();  
-    nSelectedPairs_ = nSelected1_ * nSelected2_;
-  }
-  
-  void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
-
-    RealType time1 = snapshot1->getTime();
-    RealType time2 = snapshot2->getTime();
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-    count_[timeBin] += nSelectedPairs_ ;    
-
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
-         sd1 = seleMan1_.nextSelected(i)) {
-
-      for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL;
-           sd2 = seleMan2_.nextSelected(j)) {
-	RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
-	histogram_[timeBin] += corrVal;    
-      }            
-    }
-  }
-
+  class MomAngMomCorrFunc : public CrossCorrFunc {
+  public:
+    MomAngMomCorrFunc(SimInfo* info, const std::string& filename,
+                      const std::string& sele1, const std::string& sele2);   
+        
+  private:
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual int computeProperty2(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<Vector3d> > momenta_;
+    std::vector<std::vector<Vector3d> > js_;
+  };
 }
+#endif

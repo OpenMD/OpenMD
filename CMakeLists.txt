@@ -545,7 +545,6 @@ src/applications/omd2omd/omd2omdCmd.cpp
 
 set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
-src/applications/dynamicProps/CrossTimeCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/DynamicProps.cpp
@@ -557,6 +556,7 @@ src/applications/dynamicProps/LegendreCorrFunc.cpp
 src/applications/dynamicProps/LegendreCorrFuncZ.cpp
 src/applications/dynamicProps/cOHz.cpp
 src/applications/dynamicProps/MomentumCorrFunc.cpp
+src/applications/dynamicProps/MomAngMomCorrFunc.cpp
 src/applications/dynamicProps/MultipassCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/InteractionTimeCorrFunc.cpp

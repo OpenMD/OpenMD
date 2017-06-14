@@ -92,6 +92,7 @@ struct gengetopt_args_info
   const char *bondcorr_help; /**< @brief Bond extension correlation function help description.  */
   const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
   const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
+  const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -126,6 +127,7 @@ struct gengetopt_args_info
   unsigned int bondcorr_given ;	/**< @brief Whether bondcorr was given.  */
   unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */
   unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
+  unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -242,31 +244,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
  * @param args_info the structure to deallocate
  */
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
-
-/**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
 
 /**
  * Checks that all the required options were specified
