@@ -76,8 +76,28 @@ namespace OpenMD {
   
   RealType MomAngMomCorrFunc::calcCorrVal(int frame1, int frame2,
                                           int id1, int id2) {
-    RealType pj = dot( momenta_[frame1][id1] , js_[frame2][id2]);
+    RealType pj = dot( momenta_[frame1][id1] , js_[frame2][id2] );
     return pj;
   }
+
+  void MomAngMomCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+    
+    for (sd = seleMan.beginSelected(i); sd != NULL; 
+         sd = seleMan.nextSelected(i)) {
+
+      if (!sd->isDirectional()) {
+	sprintf(painCave.errMsg,
+                "MomAngMomCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a Directional object\n", sd->getGlobalIndex(),
+                sd->getType().c_str() );
+	painCave.isFatal = 1;
+	simError();        
+      }
+    }    
+  }
+
 }
 
