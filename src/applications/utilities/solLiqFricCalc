@@ -482,7 +482,7 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
     
 
     integral = 0.0
-    xPos = lowerBound
+    xPos = 0.0
     deltaX = (upperBound - lowerBound)/1000
     while (xPos < boxlZ):
         derivFile.write(str(xPos) + "\t" + str(func(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
