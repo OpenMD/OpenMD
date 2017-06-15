@@ -63,6 +63,7 @@
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
+#include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
@@ -156,7 +157,9 @@ int main(int argc, char* argv[]){
   } else if (args_info.vcorrZ_given) {
     corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2); 
   } else if (args_info.vcorrR_given) {
-    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2); 
+    corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2);
+  } else if (args_info.pjcorr_given){
+    corrFunc = new MomAngMomCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.bondcorr_given) {
     corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize); 
   } else if (args_info.helfandEcorr_given){

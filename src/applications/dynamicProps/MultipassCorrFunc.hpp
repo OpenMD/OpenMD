@@ -139,5 +139,19 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
   };
+  
+  class CrossCorrFunc : public MultipassCorrFunc {
+  public:
+    CrossCorrFunc(SimInfo* info, const std::string& filename,
+                  const std::string& sele1, const std::string& sele2,
+                  int storageLayout) :
+      MultipassCorrFunc(info, filename, sele1, sele2, storageLayout) {
+      autoCorrFunc_ = false;
+    }
+        
+  protected:
+    virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
+    virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
+  };
 }
 #endif
