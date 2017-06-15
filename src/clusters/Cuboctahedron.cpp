@@ -43,12 +43,17 @@
 #include "clusters/Cuboctahedron.hpp"
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include "utils/CaseConversion.hpp"
 
 using namespace std;
 
 namespace OpenMD {
 
+  bool pairCompare ( const pair<RealType, int>& l, const pair<RealType, int>& r) {
+    return l.first < r.first;
+  }
+  
   Cuboctahedron::Cuboctahedron(std::string lattice, int cells, int planes) :
     lattice_(lattice), L_(cells), M_(planes) {
     
@@ -82,18 +87,40 @@ namespace OpenMD {
 
   vector<Vector3d> Cuboctahedron::getPoints() {
 
+    // center of cluster
+    Vector3d c(0.5 * L_);
+
+    Vector3d d;
+    vector<Vector3d> rawPoints;       
+    vector<pair<RealType, int> > dists;
+    int idx;
+
     for (int i = 0; i < L_; i++) {
       for (int j = 0; j < L_; j++) {
         for (int k = 0; k < L_; k++) {
           for( vector<Vector3d>::iterator l = Basis.begin();
                l != Basis.end(); ++l ) {
             Vector3d point = (*l) + Vector3d(i, j, k);
-            if (inCluster( point ))
-              Points.push_back( point );
+            if (inCluster( point )) {
+              rawPoints.push_back( point );
+              d = point - c;
+              idx = dists.size();
+              dists.push_back( make_pair(d.lengthSquare(), idx) );
+            }
           }
         }
       }
     }
+
+    // Sort the atoms using distance from center of cluster:
+    
+    sort(dists.begin(), dists.end(), pairCompare);
+
+    for( vector<pair<RealType, int> >::iterator i = dists.begin();
+         i != dists.end(); ++i) {
+      Points.push_back( rawPoints[ (*i).second ] - c );
+    }
+        
     return Points;
   }
 
@@ -115,8 +142,8 @@ namespace OpenMD {
 
     Vector3d c = (r - Vector3d(0.5 * L_)).abs();
 
-    if ((c.x() <= 0.5*L_) && (c.y() <= 0.5*L_) && (c.z() <= 0.5*L_) &&
-        (c.x()+c.y()+c.z() <= M_))
+    if ((c.x() < 0.5*L_) && (c.y() < 0.5*L_) && (c.z() < 0.5*L_) &&
+        (c.x()+c.y()+c.z() < M_))
       return true;
     else
       return false;
