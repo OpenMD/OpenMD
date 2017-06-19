@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#! /usr/bin/env python
 
 __author__ = "Patrick Louden (plouden@nd.edu)"
 __copyright__ = "Copyright (c) 2016 by the University of Notre Dame"
@@ -11,7 +11,7 @@ import argparse
 import textwrap
 import numpy as np
 import math
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit,least_squares
 from argparse import RawDescriptionHelpFormatter
 from scipy import stats
 
@@ -39,7 +39,31 @@ def func(x, Vs, Z1, Z2, ml, w, Vl):
     '''
     
     return ( 0.5*(Vl+ml*(x-Z1))*(1.0-np.tanh((x-Z1)/w))+0.5*Vs*(np.tanh((x-Z1)/w)-np.tanh((x-Z2)/w))+0.5*(Vl-ml*(x-Z2))*(1.0+np.tanh((x-Z2)/w)) )
-    
+
+# Fit function we are optimizing data to
+def funcParab(x, Vs, Z1, Z2, ml, w, Vl):
+
+    y = np.empty_like (x)
+
+    k = 2.0 * (Vs - Vl - ml * (Z1-w)) / (w*w)
+
+    for i in range(len(x)):
+        xi = x[i]
+        if (xi < (Z1-w)):
+            yi = Vl + ml * xi
+        elif ((xi > Z1-w) and (xi < Z1) ):
+            yi = Vs - k * (xi - Z1)*(xi - Z1) / 2.0
+        elif ((xi > Z1) and (xi < Z2)):
+            yi = Vs
+        elif ((xi > Z2) and (xi < Z2 + w)):
+            yi = Vs - k * (xi - Z2)*(xi - Z2) / 2.0
+        else:
+            yi = Vs - k * w * w / 2.0 - ml * (xi - Z2 -w)
+        y[i] = yi
+
+    return y
+        
+
 
 
 # first derivative of the fitting function
@@ -64,8 +88,6 @@ def secondDeriv(x, Vs, Z1, Z2, ml, w, Vl):
     (-1.*Vl + 1.*Vs + 1.*m1*x - 1.*m1*Z2)*Tanh((x - Z2)/w)))/Power(w,2)
     '''
     
-    
-
     return ((1.0/np.cosh((x-Z1)/w))*(1.0/np.cosh((x-Z1)/w))*(-ml*w + 
         (Vl - Vs + ml*x - ml*Z1)*np.tanh((x - Z1)/w)) + 
      (1.0/np.cosh((x-Z2)/w))*(1.0/np.cosh((x-Z2)/w))*(-ml*w + 
@@ -85,7 +107,7 @@ def rnemdExtractor(rnemdFileName):
     if os.path.exists(rnemdFileName):
         rnemdFile = open(rnemdFileName,'r')
     else:
-        print 'Error: cannot open ' + rnemdFileName
+        #print 'Error: cannot open ' + rnemdFileName
         sys.exit(2)
 
     rnemdZPos = np.array([])
@@ -125,7 +147,7 @@ def rnemdExtractor(rnemdFileName):
         else:
             jzType = 1
 
-    print "Read in " + str(rnemdFileName)
+    #print "Read in " + str(rnemdFileName)
     return (rnemdJzP, jzType, rnemdZPos, rnemdV)
 
 
@@ -153,16 +175,16 @@ def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel,
         rnemdVy = np.delete(rnemdVy,len(rnemdVy)-1)
         rnemdZPos = np.delete(rnemdZPos, len(rnemdZPos)-1)
 
-
+    #Tanh fitting function...
     #curve_fit(function to fit to, x-data, y-data, [initial guess of param 1, initial guess of param 2,...] 
     if (jzType == 0):
-        popt, pcov = curve_fit(func, rnemdZPos, rnemdVx, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
+        popt, pcov = least_squares(func, rnemdZPos, rnemdVx, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
     elif (jzType == 1):
          popt, pcov = curve_fit(func, rnemdZPos, rnemdVy, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
     
 
     #write out the raw data and the fit for visual inspection of quality of fit
-    print "Writing out fit file"
+    #print "Writing out fit file"
     fitFileName = outputFileName + "FIT"
     fitFile = open(fitFileName,"w")
     fitFile.write("# zPosition     <V_{i}>     fit value" + "\n")
@@ -173,9 +195,19 @@ def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel,
 	  elif (jzType == 1):
 	     fitFile.write(str(rnemdZPos[i]) + "\t" +  str(rnemdVy[i]) + "\t" + str(y) + "\n") 
 
+    # Parabola fitting function...
+    #curve_fit(function to fit to, x-data, y-data, [initial guess of param 1, initial guess of param 2,...]
+    # funcParab(x, Vs, Z1, Z2, ml, w, Vl)
+    param_bounds = ([-np.inf,0.0,0.0,-np.inf,0.0,-np.inf], [np.inf,np.inf,np.inf,np.inf,np.inf,np.inf])
+    if (jzType == 0):
+        poptParab, pcovParab = curve_fit(funcParab, rnemdZPos, rnemdVx, [Vs,Z1,Z2,m,w,Vl],bounds=param_bounds,ftol=0.01)
+    elif (jzType == 1):
+         poptParab, pcovParab = curve_fit(funcParab, rnemdZPos, rnemdVy, [Vs,Z1,Z2,m,w,Vl],bounds=param_bounds,ftol=0.01)
+
+
 
     #print "popt = ", popt
-    return (popt, pcov)
+    return (popt, pcov, poptParab, pcovParab)
 
 
 
@@ -203,7 +235,7 @@ def calcShearRate(jzType, rnemdZPos, rnemdV):
 
 
 def lambdaCalc(rnemdJzP, jzType, popt, sigma, convFactor):
-    print "Performing lambda calculation"
+    #print "Performing lambda calculation"
     #popt = Vs, Z1, Z2, ml, w, Vl    
 
     zLiq = (popt[0] - popt[5]) / popt[3] + popt[1]
@@ -227,9 +259,9 @@ def lambdaCalc(rnemdJzP, jzType, popt, sigma, convFactor):
 
 
 def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, useZLocations):
-    print "Performing kappa calculation"
+    #print "Performing kappa calculation"
 
-    print "useZLocations = " , useZLocations
+    #print "useZLocations = " , useZLocations
 
     if (useZLocations):
         print "Using supplied locations of the interface for kappa"
@@ -281,7 +313,7 @@ def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, us
 
 
 def secondDerivVelApprox(rnemdJzP, jzType, z1, z2, w, popt, useZLocations):
-    print "Performing second derivative kappa calculation"
+    #print "Performing second derivative kappa calculation"
 
     if (useZLocations):
         zLiq1 = z1 - 0.5*w
@@ -464,7 +496,7 @@ def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
 
 
 
-def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound, boxlZ):
+def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound, boxlZ, poptParab):
     derivFileName = outputFileName + "DERIV"
     derivFile = open(derivFileName, "w")
     derivFile.write("# xPos \t U \t dU/dz \t d^2U/dz^2 \t (d^2U/dz^2)\(dU/dz) \n")
@@ -481,13 +513,47 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
     outFile.write("# \t upperBound = " + str(upperBound) + "\n")
     
 
-    integral = 0.0
+
+    # print out the derivatives for visual inspection
+    deltaX = boxlZ/1000
     xPos = 0.0
-    deltaX = (upperBound - lowerBound)/1000
     while (xPos < boxlZ):
         derivFile.write(str(xPos) + "\t" + str(func(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
         xPos = xPos + deltaX
 
+
+        '''
+    # Write out smooth porabola fit
+    x = np.array([])
+    xPos = 0.0
+    while (xPos < boxlZ):
+        x = np.append(x, np.array([xPos]))
+        xPos = xPos + deltaX
+
+    parabFileName = outputFileName + "Parab"
+    parabFile = open(parabFileName, "w")
+    parabY = funcParab(x, poptParab[0], poptParab[1], poptParab[2], poptParab[3], poptParab[4], poptParab[5])
+
+    for i in range(0, len(x)):
+        parabFile.write(str(x[i]) + "\t" + str(parabY[i]) + "\n")
+
+    #def funcParab(x, Vs, Z1, Z2, ml, w, Vl):
+    #k = 2.0 * (Vs - Vl - ml * (Z1-w)) / (w*w)
+    outFile.write("# Parabola Fitting Method \n")
+    outFile.write("#   Cf = 4kw\mu \n#\n")
+    outFile.write("# Parameters: \n")
+    k = 2.0 * (poptParab[0] - poptParab[5] - poptParab[3] * (poptParab[1] - poptParab[4])) / ( poptParab[4] * poptParab[4])
+    outFile.write("#   k = " + str(k) + "\n")
+    outFile.write("#   w = " + str(poptParab[4]) + "\n")
+    outFile.write("#   \mu = " + str(1) + "\n")
+    CfParab = 4.0 * k * 1.0 * poptParab[4]
+    outFile.write("# Cf_{Parab} = " + str(CfParab) + "\n")
+    '''
+
+
+    # calculate integral Cf
+    deltaX = (upperBound - lowerBound)/1000
+    integral = 0.0
     xPos = lowerBound
     while (xPos < upperBound):
         lowerTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
@@ -504,34 +570,97 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
 
 
 
-def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth):
+def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth, boxlZ, poptParab):
+
+      # Find the minimum of (d^2U/dz^2)                                           
+    xPos = 0.0
+    deltaX = boxlZ/1000
+    minUpp = 1e6
+    minUppXPos = 0.0
+    while (xPos < (boxlZ/2.0)):
+        if (secondDeriv(xPos,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+            < minUpp):
+            minUpp = secondDeriv(xPos,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+            minUppXPos = xPos
+        xPos = xPos + deltaX
+
+
     outFile = open(outputFileName, "a")
     outFile.write("#\n#\n#\n")
     outFile.write("# Simple Cf Calculation with fit width \n")
     outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z=Z1 / (du\dz)|z=Z1 \n")
     outFile.write("#\n# Parameters in calculation \n")
     outFile.write("#  w = " + str(popt[4]) + "\n")
-    outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
-    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
-    Cf = -2.0*popt[4]*secondDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    Cf = -2.0*popt[4]*secondDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
     
     outFile.write("#\n# Cf_{SimpleMethod_FitWidth} = " + str(Cf) + "\n")
 
+    '''
+    # Find the minimum of (d^2U/dz^2) 
+    xPos = 0.0
+    deltaX = boxlZ/1000
+    minUpp = 1e6
+    minUppXPos = 0.0
+    while (xPos < (boxlZ/2.0)):
+        if (secondDeriv(xPos,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+            < minUpp):
+            minUpp = secondDeriv(xPos,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+            minUppXPos = xPos
+        xPos = xPos + deltaX
+    '''
 
     # let's also calculate Cf_{SimpleMethod} with the width given by the user
     outFile.write("#\n#\n#\n")
     outFile.write("# Simple Cf Calculation with given width \n")
-    outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z=Z1 / (du\dz)|z=Z1 \n")
+    outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z_{min(U'')} / (du\dz)|z_{min(U'')} \n")
     outFile.write("#\n# Parameters in calculation \n")
     outFile.write("#  w = " + str(givenWidth) + "\n")
-    outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(popt[1], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
-    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
+    outFile.write("#  minUppxPos = " + str(minUppXPos) + "\n")
+    outFile.write("#  (d^2u\dz^2)|z_{min(U'')} = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du\dz)|z_{min(U'')} = " + str(firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
+    outFile.write("#  (d^2u/dz^2)/(du/dz) = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
-    Cf = -2.0*givenWidth*secondDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(popt[1],popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    Cf = -2.0*givenWidth*secondDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
 
     outFile.write("#\n# Cf_{SimpleMethod_GivenWidth} = " + str(Cf) + "\n")
 
+
+def ParabolaCf(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound, boxlZ, poptParab):
+
+
+    # Write out smooth porabola fit                                           
+    x = np.array([])
+    deltaX = boxlZ/1000
+    xPos = 0.0
+    while (xPos < boxlZ):
+        x = np.append(x, np.array([xPos]))
+        xPos = xPos + deltaX
+
+    parabFileName = outputFileName + "Parab"
+    parabFile = open(parabFileName, "w")
+    parabY = funcParab(x, poptParab[0], poptParab[1], poptParab[2], poptParab[3], poptParab[4], poptParab[5])
+
+    for i in range(0, len(x)):
+        parabFile.write(str(x[i]) + "\t" + str(parabY[i]) + "\n")
+
+
+    outFile = open(outputFileName, "a")
+    outFile.write("#\n#\n#\n")
+
+    #def funcParab(x, Vs, Z1, Z2, ml, w, Vl):                                  
+    #k = 2.0 * (Vs - Vl - ml * (Z1-w)) / (w*w)                                 
+    outFile.write("# Parabola Fitting Method \n")
+    outFile.write("#   Cf = 2 * k * w / ml \n#\n")
+    outFile.write("# Parameters: \n")
+    k = 2.0 * (poptParab[0] - poptParab[5] - poptParab[3] * (poptParab[1] - poptParab[4])) / ( poptParab[4] * poptParab[4])
+    outFile.write("#   k = " + str(k) + "\n")
+    outFile.write("#   w = " + str(poptParab[4]) + "\n")
+    outFile.write("#   ml = " + str(poptParab[3]) + "\n")
+    CfParab = 2.0 * k * poptParab[4] / poptParab[3]
+    outFile.write("# Cf_{Parab} = " + str(CfParab) + "\n")
 
 
 
@@ -617,7 +746,7 @@ def main(argv):
 
 
     (rnemdJzP, jzType, rnemdZPos, rnemdV) = rnemdExtractor(args.rnemdFileName)
-    (popt, pcov) = velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, args.Vs, args.l, args.u, args.m, args.w, args.Vl, args.toDel, args.vfitFileName, args.useZLocations)
+    (popt, pcov, poptParab, pcovParab) = velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, args.Vs, args.l, args.u, args.m, args.w, args.Vl, args.toDel, args.vfitFileName, args.useZLocations)
     
     
 
@@ -643,8 +772,11 @@ def main(argv):
     writeOutputForceMethod(args.vfitFileName, rnemdJzP, jzType, popt) 
 
     
-    writeOutputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound, args.boxlZ)
-    writeOutputSimpleCfCalc(args.vfitFileName, rnemdJzP, jzType, popt, args.w)
+    writeOutputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound, args.boxlZ, poptParab)
+    writeOutputSimpleCfCalc(args.vfitFileName, rnemdJzP, jzType, popt, args.w, args.boxlZ, poptParab)
+
+    ParabolaCf(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound,args.boxlZ, poptParab)
+
 
 
 if __name__ == "__main__":
