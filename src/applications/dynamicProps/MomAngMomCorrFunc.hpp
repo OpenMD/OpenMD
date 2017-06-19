@@ -54,6 +54,8 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual int computeProperty2(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void validateSelection(SelectionManager& seleMan);
+
     std::vector<std::vector<Vector3d> > momenta_;
     std::vector<std::vector<Vector3d> > js_;
   };

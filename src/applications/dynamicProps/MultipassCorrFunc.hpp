@@ -105,7 +105,7 @@ namespace OpenMD {
     SelectionManager seleMan2_;
 
     virtual void writeCorrelate();
-    virtual void validateSelection(const SelectionManager& seleMan) {}
+    virtual void validateSelection(SelectionManager& seleMan) {}
 
     Snapshot* currentSnapshot_;
     
