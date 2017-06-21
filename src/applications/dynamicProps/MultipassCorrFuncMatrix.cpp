@@ -40,7 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFuncMatrix.hpp"
 #include "utils/simError.h"
 #include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
@@ -48,7 +48,7 @@
 using namespace std;
 namespace OpenMD {
 
-  MultipassCorrFunc::MultipassCorrFunc(SimInfo* info, const string& filename,
+  MultipassCorrFuncMatrix::MultipassCorrFuncMatrix(SimInfo* info, const string& filename,
                                        const string& sele1, const string& sele2,
                                        int storageLayout)
     : storageLayout_(storageLayout), info_(info), dumpFilename_(filename),
@@ -86,7 +86,7 @@ namespace OpenMD {
       deltaTime_ = simParams->getSampleTime();
     } else {
       sprintf(painCave.errMsg,
-              "MultipassCorrFunc Error: can not figure out deltaTime\n");
+              "MultipassCorrFuncMatrix Error: can not figure out deltaTime\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -108,7 +108,7 @@ namespace OpenMD {
     }
   }
 
-  void MultipassCorrFunc::preCorrelate() {
+  void MultipassCorrFuncMatrix::preCorrelate() {
 
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
@@ -119,7 +119,7 @@ namespace OpenMD {
 
   }
 
-  void MultipassCorrFunc::computeFrame(int istep) {
+  void MultipassCorrFuncMatrix::computeFrame(int istep) {
     StuntDouble* sd;
 
     int isd1, isd2;
@@ -170,7 +170,7 @@ namespace OpenMD {
   }
 
 
-  void MultipassCorrFunc::doCorrelate() {
+  void MultipassCorrFuncMatrix::doCorrelate() {
 
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
@@ -191,10 +191,12 @@ namespace OpenMD {
     writeCorrelate();
   }
 
-  void MultipassCorrFunc::correlation() {
+  void MultipassCorrFuncMatrix::correlation() {
 
     for (int i =0 ; i < nTimeBins_; ++i) {
-      histogram_[i] = 0.0;
+      Mat3x3d Mat3Zero(0.0);//check this. To overwrite histogram with zeros
+      histogram_[i] = Mat3Zero;
+      //histogram_[i] = 0.0;
       count_[i] = 0;
     }
 
@@ -212,7 +214,7 @@ namespace OpenMD {
 
         if ( fabs( (time2 - time1) - (j-i)*deltaTime_ ) > 1.0e-4 ) {
           sprintf(painCave.errMsg,
-                  "MultipassCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
+                  "MultipassCorrFuncMatrix::correlateBlocks Error: sampleTime (%f)\n"
                   "\tin %s does not match actual time-spacing between\n"
                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
@@ -226,14 +228,14 @@ namespace OpenMD {
     }
   }
 
-  void MultipassCorrFunc::correlateFrames(int frame1, int frame2, int timeBin) {
+  void MultipassCorrFuncMatrix::correlateFrames(int frame1, int frame2, int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
 
     std::vector<int>::iterator i1;
     std::vector<int>::iterator i2;
 
-    RealType corrVal(0.0);
+    Mat3x3d corrValMatrix(0.0);//check this
 
     s1 = sele1ToIndex_[frame1];
 
@@ -260,24 +262,25 @@ namespace OpenMD {
 
       if ( i1 == s1.end() || i2 == s2.end() ) break;
 
-      corrVal = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
-      histogram_[timeBin] += corrVal;
+      corrValMatrix = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
+      histogram_[timeBin].add(corrValMatrix);//check this. changes values of this to this plus corrValMatrix
       count_[timeBin]++;
 
     }
   }
 
-  void MultipassCorrFunc::postCorrelate() {
+  void MultipassCorrFuncMatrix::postCorrelate() {
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
-	histogram_[i] /= count_[i];
+	histogram_[i].div(count_[i]);//divides matrix by count_[i]
       } else {
-        histogram_[i] = 0;
+        Mat3x3d Mat3Zero(0.0);//check this. To overwrite histogram with zeros
+        histogram_[i] = Mat3Zero;
       }
     }
   }
 
-  void MultipassCorrFunc::writeCorrelate() {
+  void MultipassCorrFuncMatrix::writeCorrelate() {
     ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
@@ -294,12 +297,18 @@ namespace OpenMD {
       ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
-	ofs << times_[i]-times_[0] << "\t" << histogram_[i] << "\n";
+	       ofs << times_[i]-times_[0] << "\t";
+         for (int j = 0; j < 3; j++) {
+           for (int k = 0; k < 3; k++) {
+             ofs << histogram_[i](j,k) << '\t';
+           }
+         }
+         ofs << '\n';
       }
 
     } else {
       sprintf(painCave.errMsg,
-	      "MultipassCorrFunc::writeCorrelate Error: fail to open %s\n",
+	      "MultipassCorrFuncMatrix::writeCorrelate Error: fail to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

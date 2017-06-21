@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -64,6 +64,7 @@
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
 #include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
+#include "applications/dynamicProps/ForTorCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
@@ -81,17 +82,17 @@ int main(int argc, char* argv[]){
     cmdline_parser_print_help();
     exit(1) ;
   }
-    
+
 
   //get the dumpfile name and meta-data file name
   std::string dumpFileName = args_info.input_arg;
-    
+
   std::string sele1;
   std::string sele2;
-  
+
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"
-  
+
   if (args_info.sele1_given) {
     sele1 = args_info.sele1_arg;
   } else {
@@ -102,17 +103,17 @@ int main(int argc, char* argv[]){
       sele1 = "select all";
     }
   }
-  
+
   // check the second selection argument, or set it to the environment
   // variable, or failing that, set it to the first selection
-  
+
   if (args_info.sele2_given) {
     sele2 = args_info.sele2_arg;
   } else {
     char* sele2Env = getenv("SELECTION2");
     if (sele2Env) {
-      sele2 = sele2Env;            
-    } else { 
+      sele2 = sele2Env;
+    } else {
       //If sele2 is not specified, then the default behavior
       //should be what is already intended for sele1
       sele2 = sele1;
@@ -126,7 +127,7 @@ int main(int argc, char* argv[]){
            "Amount of memory being used: %llu bytes\n", memSize);
   painCave.severity = OPENMD_INFO;
   painCave.isFatal = 0;
-  simError();     
+  simError();
 
   //parse md file and set up the system
   SimCreator creator;
@@ -134,7 +135,7 @@ int main(int argc, char* argv[]){
 
   DynamicProperty* corrFunc = NULL;
   if(args_info.sdcorr_given){
-    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2, 
+    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2,
 					memSize);
   } else if (args_info.selecorr_given){
     corrFunc = new SelectionCorrFunc(info, dumpFileName, sele1, sele2, memSize);
@@ -151,17 +152,19 @@ int main(int argc, char* argv[]){
 					memSize);
   } else if (args_info.rcorrZ_given) {
     corrFunc = new RCorrFuncZ(info, dumpFileName, sele1, sele2,
-                              args_info.nzbins_arg); 
+                              args_info.nzbins_arg);
   } else if (args_info.vcorr_given) {
-    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
+    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.vcorrZ_given) {
-    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2); 
+    corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2);
   } else if (args_info.vcorrR_given) {
     corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2);
   } else if (args_info.pjcorr_given){
     corrFunc = new MomAngMomCorrFunc(info, dumpFileName, sele1, sele2);
+  } else if (args_info.ftcorr_given){
+    corrFunc = new ForTorCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.bondcorr_given) {
-    corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize); 
+    corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize);
   } else if (args_info.helfandEcorr_given){
     corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.stresscorr_given){
@@ -181,9 +184,9 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-        
-    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order, 
-				    memSize); 
+
+    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order,
+				    memSize);
   } else if (args_info.lcorrZ_given) {
     int order(0);
     if (args_info.order_given)
@@ -195,9 +198,9 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-        
-    corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order, 
-				     args_info.nzbins_arg, memSize); 
+
+    corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order,
+				     args_info.nzbins_arg, memSize);
 
   } else if (args_info.cohZ_given) {
     int order(0);
@@ -210,9 +213,9 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-        
-    corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order, 
-			args_info.nzbins_arg, memSize); 
+
+    corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order,
+			args_info.nzbins_arg, memSize);
 
   } else if (args_info.jumptime_given) {
     int order(0);
@@ -226,13 +229,13 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-    
+
     corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
                              args_info.OOcut_arg,
                              args_info.thetacut_arg,
                              args_info.OHcut_arg,
-                             order); 
-    
+                             order);
+
   }
 
   if (args_info.output_given) {
@@ -240,10 +243,8 @@ int main(int argc, char* argv[]){
   }
 
   corrFunc->doCorrelate();
-  
-  delete corrFunc;    
+
+  delete corrFunc;
   delete info;
-  return 0;   
+  return 0;
 }
-
-

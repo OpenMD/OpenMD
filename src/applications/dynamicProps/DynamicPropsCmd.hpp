@@ -93,7 +93,8 @@ struct gengetopt_args_info
   const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
   const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
   const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
-  
+  const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
@@ -128,6 +129,7 @@ struct gengetopt_args_info
   unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */
   unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
   unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
+  unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -219,7 +221,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

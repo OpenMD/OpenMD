@@ -1,4 +1,4 @@
-# Input file for gengetopt. This file generates DynamicPropsCmd.cpp and 
+# Input file for gengetopt. This file generates DynamicPropsCmd.cpp and
 # DynamicPropsCmd.hpp for parsing command line arguments using getopt and
 # getoptlong.  gengetopt is available from:
 #
@@ -10,7 +10,7 @@
 args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=DynamicPropsCmd --c-extension=cpp --header-extension=hpp"
 
 package "DynamicProps"
-version "" 
+version ""
 
 purpose
 "Computes a variety of time correlation functions from the
@@ -62,3 +62,4 @@ groupoption "bondcorr"     b  "Bond extension correlation function" group="corre
 groupoption "freqfluccorr" f  "Frequency Fluctuation correlation function" group="correlation function"
 groupoption "jumptime"     j  "Hydrogen bond jump time correlation function" group = "correlation function"
 groupoption "pjcorr"       -  "Momentum - Angular Momentum cross correlation function" group = "correlation function"
+groupoption "ftcorr"       -  "Force - Torque cross correlation function" group = "correlation function"

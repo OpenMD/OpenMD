@@ -40,47 +40,42 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
+#include "applications/dynamicProps/ForTorCorrFunc.hpp"
+#include "math/SquareMatrix3.hpp"//may not be necessary
 
 namespace OpenMD {
-  MomAngMomCorrFunc::MomAngMomCorrFunc(SimInfo* info,
+  ForTorCorrFunc::ForTorCorrFunc(SimInfo* info,
                                        const std::string& filename,
                                        const std::string& sele1,
                                        const std::string& sele2)
-    : CrossCorrFunc(info, filename, sele1, sele2,
-                    DataStorage::dslVelocity | DataStorage::dslAmat |
-                    DataStorage::dslAngularMomentum){
+    : CrossCorrFuncMatrix(info, filename, sele1, sele2,
+                    DataStorage::dslForce | DataStorage::dslAmat |
+                    DataStorage::dslTorque){
 
-    setCorrFuncType("Momentum - Angular Momentum Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".pjcorr");
+    setCorrFuncType("Force - Torque Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".ftcorr");
 
-    momenta_.resize(nFrames_);
-    js_.resize(nFrames_);
+    forces_.resize(nFrames_);
+    torques_.resize(nFrames_);
   }
 
-  int MomAngMomCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    momenta_[frame].push_back( sd->getMass() * sd->getVel() );
-    return momenta_[frame].size() - 1;
+  int ForTorCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    forces_[frame].push_back( sd->getA() * sd->getFrc() );
+    return forces_[frame].size() - 1;
   }
 
-  int MomAngMomCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    // The lab frame vector corresponding to the body-fixed
-    // z-axis is simply the second column of A.transpose()
-    // or, identically, the second row of A itself.
-    Vector3d u = sd->getA().getRow(2);
-    Vector3d j = sd->getJ();
-
-    js_[frame].push_back( cross(j,u)  );
-    return js_[frame].size() - 1;
+  int ForTorCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+    torques_[frame].push_back( sd->getA() * sd->getTrq() );
+    return torques_[frame].size() - 1;
   }
 
-  RealType MomAngMomCorrFunc::calcCorrVal(int frame1, int frame2,
+  Mat3x3d ForTorCorrFunc::calcCorrVal(int frame1, int frame2,
                                           int id1, int id2) {
-    RealType pj = dot( momenta_[frame1][id1] , js_[frame2][id2] );
-    return pj;
+    Mat3x3d ft = outProduct( forces_[frame1][id1] , torques_[frame2][id2] );
+    return ft;
   }
 
-  void MomAngMomCorrFunc::validateSelection(SelectionManager& seleMan) {
+  void ForTorCorrFunc::validateSelection(SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;
 
@@ -89,7 +84,7 @@ namespace OpenMD {
 
       if (!sd->isDirectional()) {
 	sprintf(painCave.errMsg,
-                "MomAngMomCorrFunc::validateSelection Error: selection "
+                "ForTorCorrFunc::validateSelection Error: selection "
                 "%d (%s)\n"
                 "\t is not a Directional object\n", sd->getGlobalIndex(),
                 sd->getType().c_str() );

@@ -39,8 +39,8 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_MULTIPASSCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_MULTIPASSCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_MULTIPASSCORRFUNCMATRIX_HPP
+#define APPLICATIONS_DYNAMICPROPS_MULTIPASSCORRFUNCMATRIX_HPP
 
 #include <string>
 #include <vector>
@@ -56,13 +56,13 @@ namespace OpenMD {
 
   //! Computes a correlation function by scanning a trajectory once to precompute quantities to be correlated
 
-  class MultipassCorrFunc : public DynamicProperty {
+  class MultipassCorrFuncMatrix : public DynamicProperty {
   public:
-    MultipassCorrFunc(SimInfo* info, const std::string& filename,
+    MultipassCorrFuncMatrix(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2,
                       int storageLayout);
 
-    virtual ~MultipassCorrFunc(){ }
+    virtual ~MultipassCorrFuncMatrix(){ }
     virtual void doCorrelate();
 
     const std::string& getCorrFuncType() const {
@@ -86,14 +86,14 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
     virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
+    virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;//changed type of func
 
     int storageLayout_;
 
     RealType deltaTime_;
     int nTimeBins_;
     int nFrames_;
-    std::vector<RealType> histogram_;
+    std::vector<Mat3x3d> histogram_; //added vector for 3x3Mat. Maybe this doesnt have to be a vector since it just keeps adding
     std::vector<int> count_;
     std::vector<RealType> times_;
     bool uniqueSelections_;
@@ -126,12 +126,12 @@ namespace OpenMD {
   };
 
 
-  class AutoCorrFunc : public MultipassCorrFunc {
+  class AutoCorrFuncMatrix : public MultipassCorrFuncMatrix {
   public:
-    AutoCorrFunc(SimInfo* info, const std::string& filename,
+    AutoCorrFuncMatrix(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2,
                  int storageLayout) :
-      MultipassCorrFunc(info, filename, sele1, sele2, storageLayout) {
+      MultipassCorrFuncMatrix(info, filename, sele1, sele2, storageLayout) {
       autoCorrFunc_ = true;
     }
 
@@ -140,12 +140,12 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
   };
 
-  class CrossCorrFunc : public MultipassCorrFunc {
+  class CrossCorrFuncMatrix : public MultipassCorrFuncMatrix {
   public:
-    CrossCorrFunc(SimInfo* info, const std::string& filename,
+    CrossCorrFuncMatrix(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,
                   int storageLayout) :
-      MultipassCorrFunc(info, filename, sele1, sele2, storageLayout) {
+      MultipassCorrFuncMatrix(info, filename, sele1, sele2, storageLayout) {
       autoCorrFunc_ = false;
     }
 
