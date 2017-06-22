@@ -176,9 +176,14 @@ def make_plates(coords, Hmat, kPoints, offSet):
     return plates
 
 
-def write_xyz_file(outputFileName, coords, elementType, plates):
+def write_xyz_file(outputFileName, coords, elementType, Hmat, plates):
     outputFile = open(outputFileName, 'w')
     outputFile.write("%d\n\n" % (len(coords) + len(plates)))
+    outputFile.write("%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f\n" % 
+                     (0.00000,";",
+                      Hmat[0][0], Hmat[0][1], Hmat[0][2],";", 
+                      Hmat[1][0], Hmat[1][1], Hmat[1][2],";", 
+                      Hmat[2][0], Hmat[2][1], Hmat[2][2]))
     for i in range(len(coords)):
         outputFile.write(elementType + " \t%f\t%f\t%f\n" %
                          (coords[i][0], coords[i][1], coords[i][2]))
@@ -353,7 +358,7 @@ def main(argv):
         plates = []
 
     if (args.xyzFileName):
-        write_xyz_file(args.xyzFileName, coords, args.elementType, plates)
+        write_xyz_file(args.xyzFileName, coords, args.elementType, Hmat, plates)
     if (args.omdFileName):
         write_omd_file(args.omdFileName, coords, args.elementType, Hmat, plates)
 
