@@ -94,6 +94,8 @@ namespace OpenMD {
     int nTimeBins_;
     int nFrames_;
     std::vector<Mat3x3d> histogram_; //added vector for 3x3Mat. Maybe this doesnt have to be a vector since it just keeps adding
+    Vector3d sumForces_;//used to sum the forces and torques so that the average can be subtracted.
+    Vector3d sumTorques_;
     std::vector<int> count_;
     std::vector<RealType> times_;
     bool uniqueSelections_;

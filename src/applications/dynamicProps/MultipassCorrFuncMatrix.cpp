@@ -270,14 +270,21 @@ namespace OpenMD {
   }
 
   void MultipassCorrFuncMatrix::postCorrelate() {
+    sumForces_.div(nFrames_); //gets the average of the forces_
+    sumTorques_.div(nFrames_); //gets the average of the torques_
+    Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumTorques_);
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
-	histogram_[i].div(count_[i]);//divides matrix by count_[i]
+	       histogram_[i].div(count_[i]);//divides matrix by count_[i]
+         histogram_[i].sub(correlationOfAverages_);//the outerProduct correlation of the averages is subtracted from the correlation value
       } else {
         Mat3x3d Mat3Zero(0.0);//check this. To overwrite histogram with zeros
         histogram_[i] = Mat3Zero;
       }
     }
+
+
+
   }
 
   void MultipassCorrFuncMatrix::writeCorrelate() {
