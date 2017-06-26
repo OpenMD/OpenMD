@@ -146,12 +146,9 @@ namespace OpenMD {
   template<typename Real>
   class templatedCrossCorrFunc : public templatedMultipassCorrFunc<Real> {
   public:
-     templatedCrossCorrFunc<Real>(SimInfo* info, const std::string& filename,
+     templatedCrossCorrFunc(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,
-                  int storageLayout) :
-     templatedMultipassCorrFunc<Real>(info, filename, sele1, sele2, storageLayout) {
-      this->autoCorrFunc_ = false;
-    }
+                  int storageLayout);
 
   protected:
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;

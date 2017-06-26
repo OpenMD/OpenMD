@@ -94,7 +94,8 @@ struct gengetopt_args_info
   const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
   const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
   const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
-  const char *facorr_help; /**< @bried Force auto correlation function help description. */
+  const char *facorr_help; /**< @brief Force auto correlation function help description. */
+  const char *tfcorr_help; /**< @brief Torque - Force correlation function help description. */
 
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -131,7 +132,8 @@ struct gengetopt_args_info
   unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
   unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
   unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
-  unsigned int facorr_given ; /**< @bried Whether facorr was given. */
+  unsigned int facorr_given ; /**< @brief Whether facorr was given. */
+  unsigned int tfcorr_given ; /**< @brief Whether tfcorr was given. */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

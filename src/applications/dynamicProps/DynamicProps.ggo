@@ -64,3 +64,4 @@ groupoption "jumptime"     j  "Hydrogen bond jump time correlation function" gro
 groupoption "pjcorr"       -  "Momentum - Angular Momentum cross correlation function" group = "correlation function"
 groupoption "ftcorr"       -  "Force - Torque cross correlation function" group = "correlation function"
 groupoption "facorr"       -  "Force - Force auto correlation function" group = "correlation function"
+groupoption "tfcorr"       -  "Torque - Force Cross correlation function" group = "correlation function"

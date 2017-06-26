@@ -314,6 +314,15 @@ namespace OpenMD {
     ofs.close();
   }
 
+  //it is necessary to keep the constructor definitions here or the code wont be generated and linking issues will occur. Blame templating
+  template<typename Real>
+  templatedCrossCorrFunc<Real>::templatedCrossCorrFunc(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2,
+               int storageLayout) :
+  templatedMultipassCorrFunc<Real>(info, filename, sele1, sele2, storageLayout) {
+   this->autoCorrFunc_ = false;
+ }
+
   template<typename Real>
   templatedAutoCorrFunc<Real>::templatedAutoCorrFunc(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2,
@@ -324,6 +333,7 @@ namespace OpenMD {
 
 
 
-template class templatedAutoCorrFunc<Mat3x3d>;
+template class templatedAutoCorrFunc<Mat3x3d>; //this is needed to ensure that compiler generates code for Mat3x3d templated classes. Otherwise the compiler will forget and give linking issues when there is no code found
 template class templatedMultipassCorrFunc<Mat3x3d>;
+template class templatedCrossCorrFunc<Mat3x3d>;
 }
