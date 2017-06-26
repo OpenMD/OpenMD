@@ -68,8 +68,8 @@ const char *gengetopt_args_info_help[] = {
   "  -f, --freqfluccorr            Frequency Fluctuation correlation function",
   "  -j, --jumptime                Hydrogen bond jump time correlation function",
   "      --pjcorr                  Momentum - Angular Momentum cross correlation\n                                  function",
-  "      --ftcorr                  Force -Torque cross correlation function",
-
+  "      --ftcorr                  Force - Torque cross correlation function",
+  "      --facorr                  Force - Force auto correlation function",
     0
 };
 
@@ -132,6 +132,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->jumptime_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
+  args_info->facorr_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
 }
 
@@ -202,6 +203,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->jumptime_help = gengetopt_args_info_help[33] ;
   args_info->pjcorr_help = gengetopt_args_info_help[34] ;
   args_info->ftcorr_help = gengetopt_args_info_help[35] ;
+  args_info->facorr_help = gengetopt_args_info_help[36] ;
 
 
 }
@@ -410,6 +412,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "pjcorr", 0, 0 );
   if (args_info->ftcorr_given)
     write_into_file(outfile, "ftcorr", 0, 0 );
+  if (args_info->facorr_given)
+    write_into_file(outfile, "facorr", 0, 0 );
 
 
   i = EXIT_SUCCESS;
@@ -485,6 +489,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->jumptime_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
+  args_info->facorr_given = 0 ;
   args_info->correlation_function_group_counter = 0;
 }
 
@@ -1343,6 +1348,7 @@ cmdline_parser_internal (
         { "jumptime",	0, NULL, 'j' },
         { "pjcorr",	0, NULL, 0 },
         { "ftcorr",	0, NULL, 0 },
+        { "facorr",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1868,6 +1874,23 @@ cmdline_parser_internal (
                 &(local_args_info.ftcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "ftcorr", '-',
+                additional_error))
+              goto failure;
+
+          }
+
+          else if (strcmp (long_options[option_index].name, "facorr") == 0)
+          {
+
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+
+            if (update_arg( 0 ,
+                 0 , &(args_info->facorr_given),
+                &(local_args_info.facorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "facorr", '-',
                 additional_error))
               goto failure;
 
