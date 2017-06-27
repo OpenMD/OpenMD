@@ -67,6 +67,7 @@
 #include "applications/dynamicProps/ForTorCorrFunc.hpp"
 #include "applications/dynamicProps/ForceAutoCorrFunc.hpp"
 #include "applications/dynamicProps/TorForCorrFunc.hpp"
+#include "applications/dynamicProps/TorqueAutoCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
@@ -169,6 +170,8 @@ int main(int argc, char* argv[]){
     corrFunc = new ForceAutoCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.tfcorr_given){
     corrFunc = new TorForCorrFunc(info, dumpFileName, sele1, sele2);
+  } else if (args_info.tacorr_given){
+    corrFunc = new TorqueAutoCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.bondcorr_given) {
     corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize);
   } else if (args_info.helfandEcorr_given){

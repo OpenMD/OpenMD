@@ -96,6 +96,7 @@ struct gengetopt_args_info
   const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
   const char *facorr_help; /**< @brief Force auto correlation function help description. */
   const char *tfcorr_help; /**< @brief Torque - Force correlation function help description. */
+  const char *tacorr_help; /**< @brief Torque auto correlation function help description. */
 
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -134,6 +135,7 @@ struct gengetopt_args_info
   unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
   unsigned int facorr_given ; /**< @brief Whether facorr was given. */
   unsigned int tfcorr_given ; /**< @brief Whether tfcorr was given. */
+  unsigned int tacorr_given ; /**< @brief Whether tacorr was given. */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

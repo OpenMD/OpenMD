@@ -71,6 +71,7 @@ const char *gengetopt_args_info_help[] = {
   "      --ftcorr                  Force - Torque cross correlation function",
   "      --facorr                  Force - Force auto correlation function",
   "      --tfcorr                  Torque - Force cross correlation function",
+  "      --tacorr                  Torque Auto correlation function",
     0
 };
 
@@ -135,6 +136,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->ftcorr_given = 0 ;
   args_info->facorr_given = 0 ;
   args_info->tfcorr_given = 0 ;
+  args_info->tacorr_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
 }
 
@@ -207,6 +209,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->ftcorr_help = gengetopt_args_info_help[35] ;
   args_info->facorr_help = gengetopt_args_info_help[36] ;
   args_info->tfcorr_help = gengetopt_args_info_help[37] ;
+  args_info->tacorr_help = gengetopt_args_info_help[38] ;
 
 
 }
@@ -419,6 +422,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "facorr", 0, 0 );
   if (args_info->tfcorr_given)
     write_into_file(outfile, "tfcorr", 0, 0 );
+  if (args_info->tacorr_given)
+    write_into_file(outfile, "tacorr", 0, 0 );
 
 
   i = EXIT_SUCCESS;
@@ -496,6 +501,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->ftcorr_given = 0 ;
   args_info->facorr_given = 0 ;
   args_info->tfcorr_given = 0 ;
+  args_info->tacorr_given = 0 ;
   args_info->correlation_function_group_counter = 0;
 }
 
@@ -1356,6 +1362,7 @@ cmdline_parser_internal (
         { "ftcorr",	0, NULL, 0 },
         { "facorr",	0, NULL, 0 },
         { "tfcorr",	0, NULL, 0 },
+        { "tacorr",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1915,6 +1922,23 @@ cmdline_parser_internal (
                 &(local_args_info.tfcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "tfcorr", '-',
+                additional_error))
+              goto failure;
+
+          }
+
+          else if (strcmp (long_options[option_index].name, "tacorr") == 0)
+          {
+
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+
+            if (update_arg( 0 ,
+                 0 , &(args_info->tacorr_given),
+                &(local_args_info.tacorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "tacorr", '-',
                 additional_error))
               goto failure;
 

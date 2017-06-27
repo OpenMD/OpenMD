@@ -560,6 +560,7 @@ src/applications/dynamicProps/MomAngMomCorrFunc.cpp
 src/applications/dynamicProps/ForTorCorrFunc.cpp
 src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
+src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
 src/applications/dynamicProps/MultipassCorrFunc.cpp
 src/applications/dynamicProps/MultipassCorrFuncMatrix.cpp
 src/applications/dynamicProps/templatedMultipassCorrFunc.cpp
