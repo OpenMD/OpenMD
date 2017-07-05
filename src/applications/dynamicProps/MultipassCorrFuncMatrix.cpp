@@ -48,9 +48,11 @@
 using namespace std;
 namespace OpenMD {
 
-  MultipassCorrFuncMatrix::MultipassCorrFuncMatrix(SimInfo* info, const string& filename,
-                                       const string& sele1, const string& sele2,
-                                       int storageLayout)
+  MultipassCorrFuncMatrix::MultipassCorrFuncMatrix(SimInfo* info,
+                                                   const string& filename,
+                                                   const string& sele1,
+                                                   const string& sele2,
+                                                   int storageLayout)
     : storageLayout_(storageLayout), info_(info), dumpFilename_(filename),
       seleMan1_(info_), seleMan2_(info_),
       selectionScript1_(sele1), selectionScript2_(sele2),
@@ -194,9 +196,7 @@ namespace OpenMD {
   void MultipassCorrFuncMatrix::correlation() {
 
     for (int i =0 ; i < nTimeBins_; ++i) {
-      Mat3x3d Mat3Zero(0.0);//check this. To overwrite histogram with zeros
-      histogram_[i] = Mat3Zero;
-      //histogram_[i] = 0.0;
+      histogram_[i] = M3Zero;
       count_[i] = 0;
     }
 
@@ -228,7 +228,8 @@ namespace OpenMD {
     }
   }
 
-  void MultipassCorrFuncMatrix::correlateFrames(int frame1, int frame2, int timeBin) {
+  void MultipassCorrFuncMatrix::correlateFrames(int frame1, int frame2,
+                                                int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
 
@@ -263,7 +264,7 @@ namespace OpenMD {
       if ( i1 == s1.end() || i2 == s2.end() ) break;
 
       corrValMatrix = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
-      histogram_[timeBin].add(corrValMatrix);//check this. changes values of this to this plus corrValMatrix
+      histogram_[timeBin] += corrValMatrix; //check this. changes values of this to this plus corrValMatrix
       count_[timeBin]++;
 
     }
@@ -304,10 +305,10 @@ namespace OpenMD {
       ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
-	       ofs << times_[i]-times_[0] << "\t";
+	       ofs << times_[i]-times_[0];
          for (int j = 0; j < 3; j++) {
            for (int k = 0; k < 3; k++) {
-             ofs << histogram_[i](j,k) << '\t';
+             ofs << "\t" << histogram_[i](j,k);
            }
          }
          ofs << '\n';
