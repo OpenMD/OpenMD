@@ -45,12 +45,12 @@
 
 namespace OpenMD {
   ForTorCorrFunc::ForTorCorrFunc(SimInfo* info,
-                                       const std::string& filename,
-                                       const std::string& sele1,
-                                       const std::string& sele2)
+                                 const std::string& filename,
+                                 const std::string& sele1,
+                                 const std::string& sele2)
     : CrossCorrFuncMatrix(info, filename, sele1, sele2,
-                    DataStorage::dslForce | DataStorage::dslAmat |
-                    DataStorage::dslTorque){
+                          DataStorage::dslForce | DataStorage::dslAmat |
+                          DataStorage::dslTorque){
 
     setCorrFuncType("Force - Torque Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ftcorr");
@@ -70,9 +70,8 @@ namespace OpenMD {
   }
 
   Mat3x3d ForTorCorrFunc::calcCorrVal(int frame1, int frame2,
-                                          int id1, int id2) {
-    Mat3x3d ft = outProduct( forces_[frame1][id1] , torques_[frame2][id2] );
-    return ft;
+                                      int id1, int id2) {
+    return outProduct( forces_[frame1][id1] , torques_[frame2][id2] );
   }
 
   void ForTorCorrFunc::validateSelection(SelectionManager& seleMan) {
