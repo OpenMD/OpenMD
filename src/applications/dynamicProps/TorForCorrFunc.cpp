@@ -42,7 +42,7 @@
 
 #include "applications/dynamicProps/TorForCorrFunc.hpp"
 #include "utils/Revision.hpp"
-#include "math/SquareMatrix3.hpp"//may not be necessary
+
 
 namespace OpenMD {
     TorForCorrFunc::TorForCorrFunc(SimInfo* info,
@@ -53,186 +53,54 @@ namespace OpenMD {
                     DataStorage::dslForce | DataStorage::dslAmat |
                     DataStorage::dslTorque){
 
-    setCorrFuncType("Torque - Force Auto Correlation Function");
+    setCorrFuncType("Torque - Force Cross Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".tfcorr");
 
     forces_.resize(nFrames_);
     torques_.resize(nFrames_);
+
     sumForces_ = V3Zero;
     sumTorques_ = V3Zero;
+    forcesCount_ = 0;
+    torquesCount_ = 0;
   }
 
   int TorForCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
     torques_[frame].push_back( sd->getA() * sd->getTrq() );
-    sumTorques_.add(sd->getFrc());
+    sumTorques_ += sd->getFrc();
+    forcesCount_++;
     return torques_[frame].size() - 1;
   }
 
   int TorForCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
     forces_[frame].push_back( sd->getA() * sd->getFrc() );
-    sumForces_.add(sd->getFrc());
+    sumForces_ += sd->getFrc();
+    torquesCount_++;
     return forces_[frame].size() - 1;
   }
 
 
   Mat3x3d TorForCorrFunc::calcCorrVal(int frame1, int frame2,
                                           int id1, int id2) {
-    Mat3x3d tf = outProduct( torques_[frame1][id1] , forces_[frame2][id2] );
-    return tf;
+    return outProduct( torques_[frame1][id1] , forces_[frame2][id2] );
   }
 
-  void TorForCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
 
-    for (sd = seleMan.beginSelected(i); sd != NULL;
-         sd = seleMan.nextSelected(i)) {
-
-      if (!sd->isDirectional()) {
-	sprintf(painCave.errMsg,
-                "ForTorCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n", sd->getGlobalIndex(),
-                sd->getType().c_str() );
-	painCave.isFatal = 1;
-	simError();
-      }
-    }
-  }
-
-  void TorForCorrFunc::correlation() {
-      Mat3x3d Mat3Zero(0.0);
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      histogram_[i] = Mat3Zero;
-      count_[i] = 0;
-    }
-
-    for (int i = 0; i < nFrames_; ++i) {
-
-      RealType time1 = times_[i];
-
-      for(int j  = i; j < nFrames_; ++j) {
-
-        // Perform a sanity check on the actual configuration times to
-        // make sure the configurations are spaced the same amount the
-        // sample time said they were spaced:
-
-        RealType time2 = times_[j];
-
-        if ( fabs( (time2 - time1) - (j-i)*deltaTime_ ) > 1.0e-4 ) {
-          sprintf(painCave.errMsg,
-                  "MultipassCorrFuncMatrix::correlateBlocks Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
-          simError();
-        }
-
-        int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);
-        correlateFrames(i,j, timeBin);
-      }
-    }
-
-  }
 
   void TorForCorrFunc::postCorrelate() {
-    sumForces_.div(nFrames_); //gets the average of the forces_
-    sumTorques_.div(nFrames_);
+    sumForces_.div(forcesCount_); //gets the average of the forces_
+    sumTorques_.div(torquesCount_);
     Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumForces_);
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
-	       histogram_[i].div(count_[i]);//divides matrix by count_[i]
-         histogram_[i].sub(correlationOfAverages_);//the outerProduct correlation of the averages is subtracted from the correlation value
+	       histogram_[i] /= RealType(count_[i]);//divides matrix by count_[i]
+         histogram_[i] -= correlationOfAverages_;//the outerProduct correlation of the averages is subtracted from the correlation value
       } else {
-        Mat3x3d Mat3Zero(0.0);//check this. To overwrite histogram with zeros
-        histogram_[i] = Mat3Zero;
+      //  Mat3x3d Mat3Zero(0.0);//check this. To overwrite histogram with zeros
+        histogram_[i] = M3Zero;
       }
     }
 
   }
-
-  void TorForCorrFunc::correlateFrames(int frame1, int frame2, int timeBin) {
-    std::vector<int> s1;
-    std::vector<int> s2;
-
-    std::vector<int>::iterator i1;
-    std::vector<int>::iterator i2;
-
-    Mat3x3d corrValMatrix(0.0);//check this
-
-    s1 = sele1ToIndex_[frame1];
-
-    if (uniqueSelections_)
-       s2 = sele2ToIndex_[frame2];
-    else
-       s2 = sele1ToIndex_[frame2];
-
-    for (i1 = s1.begin(), i2 = s2.begin();
-         i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
-
-      // If the selections are dynamic, they might not have the
-      // same objects in both frames, so we need to roll either of
-      // the selections until we have the same object to
-      // correlate.
-
-      while ( i1 != s1.end() && *i1 < *i2 ) {
-        ++i1;
-      }
-
-      while ( i2 != s2.end() && *i2 < *i1 ) {
-        ++i2;
-      }
-
-      if ( i1 == s1.end() || i2 == s2.end() ) break;
-
-      corrValMatrix = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
-      histogram_[timeBin].add(corrValMatrix);//check this. changes values of this to this plus corrValMatrix
-      count_[timeBin]++;
-
-    }
-
-
-  }
-
-  void TorForCorrFunc::writeCorrelate() {
-    ofstream ofs(outputFilename_.c_str());
-
-    if (ofs.is_open()) {
-
-      Revision r;
-
-      ofs << "# " << getCorrFuncType() << "\n";
-      ofs << "# OpenMD " << r.getFullRevision() << "\n";
-      ofs << "# " << r.getBuildDate() << "\n";
-      ofs << "# selection script1: \"" << selectionScript1_ ;
-      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      if (!paramString_.empty())
-        ofs << "# parameters: " << paramString_ << "\n";
-      ofs << "#time\tcorrVal\n";
-
-      for (int i = 0; i < nTimeBins_; ++i) {
-	       ofs << times_[i]-times_[0] << "\t";
-         for (int j = 0; j < 3; j++) {
-           for (int k = 0; k < 3; k++) {
-             ofs << histogram_[i](j,k) << '\t';
-           }
-         }
-         ofs << '\n';
-      }
-
-    } else {
-      sprintf(painCave.errMsg,
-	      "MultipassCorrFuncMatrix::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    ofs.close();
-
-
-  }
-
 
 }

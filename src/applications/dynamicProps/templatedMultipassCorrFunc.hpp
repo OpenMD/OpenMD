@@ -56,7 +56,7 @@ namespace OpenMD {
 
   //! Computes a correlation function by scanning a trajectory once to precompute quantities to be correlated
 
-  template<typename Real>
+  template<typename T>
   class templatedMultipassCorrFunc : public DynamicProperty {
   public:
     templatedMultipassCorrFunc(SimInfo* info, const std::string& filename,
@@ -87,14 +87,14 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
     virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual Real calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
+    virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
 
     int storageLayout_;
 
     RealType deltaTime_;
     int nTimeBins_;
     int nFrames_;
-    std::vector<Real> histogram_;
+    std::vector<T> histogram_;
     std::vector<int> count_;
     std::vector<RealType> times_;
     bool uniqueSelections_;
@@ -106,7 +106,7 @@ namespace OpenMD {
     SelectionManager seleMan2_;
 
     virtual void writeCorrelate();
-    virtual void validateSelection(SelectionManager& seleMan) {}
+    virtual void validateSelection(SelectionManager& seleMan);
 
     Snapshot* currentSnapshot_;
 
@@ -126,8 +126,8 @@ namespace OpenMD {
 
   };
 
-  template<typename Real>
-  class templatedAutoCorrFunc : public templatedMultipassCorrFunc<Real> {
+  template<typename T>
+  class templatedAutoCorrFunc : public templatedMultipassCorrFunc<T> {
   public:
     templatedAutoCorrFunc(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2,
@@ -143,8 +143,8 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
   };
 
-  template<typename Real>
-  class templatedCrossCorrFunc : public templatedMultipassCorrFunc<Real> {
+  template<typename T>
+  class templatedCrossCorrFunc : public templatedMultipassCorrFunc<T> {
   public:
      templatedCrossCorrFunc(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,

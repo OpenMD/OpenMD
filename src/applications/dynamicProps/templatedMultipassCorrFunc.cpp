@@ -48,8 +48,8 @@
 using namespace std;
 namespace OpenMD {
 
-  template<typename Real>
-  templatedMultipassCorrFunc<Real>::templatedMultipassCorrFunc(SimInfo* info, const string& filename,
+  template<typename T>
+  templatedMultipassCorrFunc<T>::templatedMultipassCorrFunc(SimInfo* info, const string& filename,
                                        const string& sele1, const string& sele2,
                                        int storageLayout)
     : storageLayout_(storageLayout), info_(info), dumpFilename_(filename),
@@ -108,8 +108,8 @@ namespace OpenMD {
       sele2ToIndex_.resize(nFrames_);
     }
   }
-  template<typename Real> // we should check to see if this is needed for a member function that does not deal with the type
-  void templatedMultipassCorrFunc<Real>::preCorrelate() {
+  template<typename T> // we should check to see if this is needed for a member function that does not deal with the type
+  void templatedMultipassCorrFunc<T>::preCorrelate() {
 
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
@@ -119,8 +119,8 @@ namespace OpenMD {
     }
 
   }
-  template<typename Real>
-  void templatedMultipassCorrFunc<Real>::computeFrame(int istep) {
+  template<typename T>
+  void templatedMultipassCorrFunc<T>::computeFrame(int istep) {
     StuntDouble* sd;
 
     int isd1, isd2;
@@ -170,8 +170,8 @@ namespace OpenMD {
     }
   }
 
-  template<typename Real>
-  void templatedMultipassCorrFunc<Real>::doCorrelate() {
+  template<typename T>
+  void templatedMultipassCorrFunc<T>::doCorrelate() {
 
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
@@ -192,9 +192,9 @@ namespace OpenMD {
     writeCorrelate();
   }
 
-  template<typename Real>
-  void templatedMultipassCorrFunc<Real>::correlation() {
-    Real zeroType(0.0);
+  template<typename T>
+  void templatedMultipassCorrFunc<T>::correlation() {
+    T zeroType(0.0);
     for (int i =0 ; i < nTimeBins_; ++i) {
       histogram_[i] = zeroType;
       count_[i] = 0;
@@ -229,15 +229,15 @@ namespace OpenMD {
   }
 
 
-  template<typename Real>
-  void templatedMultipassCorrFunc<Real>::correlateFrames(int frame1, int frame2, int timeBin) {
+  template<typename T>
+  void templatedMultipassCorrFunc<T>::correlateFrames(int frame1, int frame2, int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
 
     std::vector<int>::iterator i1;
     std::vector<int>::iterator i2;
 
-    Real corrVal(0.0);
+    T corrVal(0.0);
 
     s1 = sele1ToIndex_[frame1];
 
@@ -282,8 +282,8 @@ namespace OpenMD {
     }
   }
 
-  template<typename Real>
-  void templatedMultipassCorrFunc<Real>::writeCorrelate() {
+  template<typename T>
+  void templatedMultipassCorrFunc<T>::writeCorrelate() {
     ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
@@ -314,20 +314,83 @@ namespace OpenMD {
     ofs.close();
   }
 
+
+  //Template specialization of writeCorrelate for Mat3x3d
+  template<>
+  void templatedMultipassCorrFunc<Mat3x3d>::writeCorrelate() {
+    ofstream ofs(outputFilename_.c_str());
+
+    if (ofs.is_open()) {
+
+      Revision r;
+
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#time\tcorrVal\n";
+
+      for (int i = 0; i < nTimeBins_; ++i) {
+         ofs << times_[i]-times_[0] << "\t";
+         for (int j = 0; j < 3; j++) {
+           for (int k = 0; k < 3; k++) {
+             ofs << histogram_[i](j,k) << '\t';
+           }
+         }
+         ofs << '\n';
+      }
+
+    } else {
+      sprintf(painCave.errMsg,
+        "MultipassCorrFuncMatrix::writeCorrelate Error: fail to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    ofs.close();
+
+
+  }
+
+
+  template<typename T>
+  void templatedMultipassCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+
+      if (!sd->isDirectional()) {
+  sprintf(painCave.errMsg,
+                "ForTorCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a Directional object\n", sd->getGlobalIndex(),
+                sd->getType().c_str() );
+  painCave.isFatal = 1;
+  simError();
+      }
+    }
+  }
+
   //it is necessary to keep the constructor definitions here or the code wont be generated and linking issues will occur. Blame templating
-  template<typename Real>
-  templatedCrossCorrFunc<Real>::templatedCrossCorrFunc(SimInfo* info, const std::string& filename,
+  template<typename T>
+  templatedCrossCorrFunc<T>::templatedCrossCorrFunc(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2,
                int storageLayout) :
-  templatedMultipassCorrFunc<Real>(info, filename, sele1, sele2, storageLayout) {
+  templatedMultipassCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
    this->autoCorrFunc_ = false;
  }
 
-  template<typename Real>
-  templatedAutoCorrFunc<Real>::templatedAutoCorrFunc(SimInfo* info, const std::string& filename,
+  template<typename T>
+  templatedAutoCorrFunc<T>::templatedAutoCorrFunc(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2,
                int storageLayout) :
-  templatedMultipassCorrFunc<Real>(info, filename, sele1, sele2, storageLayout) {
+  templatedMultipassCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
       this->autoCorrFunc_ = true;
   }
 
