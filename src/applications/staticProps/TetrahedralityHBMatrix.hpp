@@ -94,7 +94,6 @@ namespace OpenMD {
     RealType OOCut_;
     RealType thetaCut_;
     RealType OHCut_;
-    unsigned int nBins_;
     unsigned int count_;
     
     int frameCounter_;

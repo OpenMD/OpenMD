@@ -185,9 +185,9 @@ namespace OpenMD {
 	// Sort the vector using predicate and std::sort
 	std::sort(myNeighbors.begin(), myNeighbors.end());
 	
-	// Use only the 4 closest neighbors to do the rest of the work:
-	
-	int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+	// Use only the 4 closest neighbors to do the rest of the work:	
+	// int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+	int nbors = myNeighbors.size();
 	int nang = int (0.5 * (nbors * (nbors - 1)));
 
 	rk = mol1->getCom();
@@ -214,8 +214,8 @@ namespace OpenMD {
 	    cospsi = dot(rik,rkj);
             
 	    // Calculates scaled Qk for each molecule using calculated
-	    // angles from 4 or fewer nearest neighbors.
-	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
+	    // angles from the actual number of nearest neighbors.
+	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 9.0 / (4.0 * nang) );
 	  }
 	}
         
@@ -326,10 +326,10 @@ namespace OpenMD {
         Q_histogram_[bin1][bin2] += 1;
         count_++;
       } else {
-        cerr << "q2 = " << q2 << "\n";
+        // cerr << "q2 = " << q2 << "\n";
       }
     } else {
-      cerr << "q1 = " << q1 << "\n";
+      // cerr << "q1 = " << q1 << "\n";
     }
   }
 
