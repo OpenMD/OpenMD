@@ -52,10 +52,6 @@ namespace OpenMD {
                       const std::string& sele1, const std::string& sele2);
 
   private:
-
-
-
-
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual int computeProperty2(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
@@ -65,7 +61,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > torques_;
     Vector3d sumForces_;
     Vector3d sumTorques_;
-    RealType forcesCount_, torquesCount_;
+    int forcesCount_, torquesCount_;
   };
 }
 #endif

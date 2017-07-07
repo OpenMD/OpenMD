@@ -48,7 +48,7 @@ namespace OpenMD {
                                  const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2)
-    : CrossCorrFuncMatrix(info, filename, sele1, sele2,
+    : templatedCrossCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
                           DataStorage::dslForce | DataStorage::dslAmat |
                           DataStorage::dslTorque){
 
@@ -57,17 +57,29 @@ namespace OpenMD {
 
     forces_.resize(nFrames_);
     torques_.resize(nFrames_);
+
+    sumForces_ = V3Zero;
+    sumTorques_ = V3Zero;
+
+    forcesCount_ = 0;
+    torquesCount_ = 0;
+
+    propertyTemp = V3Zero;
   }
 
   int ForTorCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    forces_[frame].push_back( sd->getA() * sd->getFrc() );
-    sumForces_ += sd->getA() * sd->getFrc();
+    propertyTemp = sd->getA() * sd->getFrc();
+    forces_[frame].push_back(propertyTemp);
+    sumForces_ += propertyTemp;
+    forcesCount_++;
     return forces_[frame].size() - 1;
   }
 
   int ForTorCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    torques_[frame].push_back( sd->getA() * sd->getTrq() );
-    sumTorques_ += sd->getA() * sd->getTrq();
+    propertyTemp = sd->getA() * sd->getTrq();
+    torques_[frame].push_back(propertyTemp);
+    sumTorques_ += propertyTemp;
+    torquesCount_++;
     return torques_[frame].size() - 1;
   }
 
@@ -76,21 +88,16 @@ namespace OpenMD {
     return outProduct( forces_[frame1][id1] , torques_[frame2][id2] );
   }
 
-  void ForTorCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
-
-    for (sd = seleMan.beginSelected(i); sd != NULL;
-         sd = seleMan.nextSelected(i)) {
-
-      if (!sd->isDirectional()) {
-	sprintf(painCave.errMsg,
-                "ForTorCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n", sd->getGlobalIndex(),
-                sd->getType().c_str() );
-	painCave.isFatal = 1;
-	simError();
+  void ForTorCorrFunc::postCorrelate() {
+    sumForces_ /= RealType(forcesCount_); //gets the average of the forces_
+    sumTorques_ /= RealType(torquesCount_);
+    Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumTorques_);
+    for (int i =0 ; i < nTimeBins_; ++i) {
+      if (count_[i] > 0) {
+	       histogram_[i] /= RealType(count_[i]);//divides matrix by count_[i]
+         histogram_[i] -= correlationOfAverages_;//the outerProduct correlation of the averages is subtracted from the correlation value
+      } else {
+        histogram_[i] = M3Zero;
       }
     }
   }

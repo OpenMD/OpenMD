@@ -41,7 +41,7 @@
  */
 
 #include "applications/dynamicProps/TorForCorrFunc.hpp"
-#include "utils/Revision.hpp"
+
 
 
 namespace OpenMD {
@@ -88,8 +88,8 @@ namespace OpenMD {
 
 
   void TorForCorrFunc::postCorrelate() {
-    sumForces_.div(forcesCount_); //gets the average of the forces_
-    sumTorques_.div(torquesCount_);
+    sumForces_ /= RealType(forcesCount_); //gets the average of the forces_
+    sumTorques_ /= RealType(torquesCount_);
     Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumForces_);
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {

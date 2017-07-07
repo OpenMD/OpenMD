@@ -52,20 +52,13 @@ namespace OpenMD {
                       const std::string& sele1, const std::string& sele2);
 
   private:
-
-
-
-
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
-    virtual void validateSelection(SelectionManager& seleMan);
-    virtual void correlation();
     virtual void postCorrelate();
-    virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual void writeCorrelate();
 
     std::vector<std::vector<Vector3d> > torques_;
     Vector3d sumTorques_;
+    int torquesCount_;
   };
 }
 #endif

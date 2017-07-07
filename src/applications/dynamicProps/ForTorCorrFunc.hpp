@@ -42,11 +42,11 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_FORTORCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_FORTORCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFuncMatrix.hpp"
+#include "applications/dynamicProps/templatedMultipassCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ForTorCorrFunc : public CrossCorrFuncMatrix {
+  class ForTorCorrFunc : public templatedCrossCorrFunc<Mat3x3d> {
   public:
     ForTorCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2);
@@ -55,10 +55,17 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual int computeProperty2(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
-    virtual void validateSelection(SelectionManager& seleMan);
+    virtual void postCorrelate();
 
     std::vector<std::vector<Vector3d> > forces_;
     std::vector<std::vector<Vector3d> > torques_;
+
+    Vector3d sumForces_;
+    Vector3d sumTorques_;
+
+    int forcesCount_, torquesCount_;
+
+    Vector3d propertyTemp; //just a little experiment to see if it is faster. Used in computeProperty
   };
 }
 #endif
