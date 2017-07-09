@@ -64,6 +64,7 @@ namespace OpenMD {
   int TorqueAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
     torques_[frame].push_back( sd->getA() * sd->getTrq() );
     sumTorques_.add(sd->getTrq());
+    torquesCount_++;
     return torques_[frame].size() - 1;
   }
 
@@ -88,6 +89,6 @@ namespace OpenMD {
 
   }
 
-  
+
 
 }

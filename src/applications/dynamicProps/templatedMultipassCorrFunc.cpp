@@ -362,6 +362,10 @@ namespace OpenMD {
     StuntDouble* sd;
     int i;
 
+    if (getCorrFuncType() == "Force - Force Auto Correlation Function") { //If just running the faroce auto correaltion function the StuntDouble does not need to be directional.
+      return;
+    }
+
     for (sd = seleMan.beginSelected(i); sd != NULL;
          sd = seleMan.nextSelected(i)) {
 

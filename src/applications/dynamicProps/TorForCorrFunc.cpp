@@ -68,14 +68,14 @@ namespace OpenMD {
   int TorForCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
     torques_[frame].push_back( sd->getA() * sd->getTrq() );
     sumTorques_ += sd->getFrc();
-    forcesCount_++;
+    torquesCount_++;
     return torques_[frame].size() - 1;
   }
 
   int TorForCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
     forces_[frame].push_back( sd->getA() * sd->getFrc() );
     sumForces_ += sd->getFrc();
-    torquesCount_++;
+    forcesCount_++;
     return forces_[frame].size() - 1;
   }
 
