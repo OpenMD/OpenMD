@@ -178,8 +178,8 @@ def make_plates(coords, Hmat, kPoints, offSet):
 
 def write_xyz_file(outputFileName, coords, elementType, Hmat, plates):
     outputFile = open(outputFileName, 'w')
-    outputFile.write("%d\n\n" % (len(coords) + len(plates)))
-    outputFile.write("%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f\n" % 
+    outputFile.write("%d\n" % (len(coords) + len(plates)))
+    outputFile.write("\t%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f\n" % 
                      (0.00000,";",
                       Hmat[0][0], Hmat[0][1], Hmat[0][2],";", 
                       Hmat[1][0], Hmat[1][1], Hmat[1][2],";", 
