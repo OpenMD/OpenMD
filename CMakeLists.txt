@@ -562,8 +562,6 @@ src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
 src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
 src/applications/dynamicProps/MultipassCorrFunc.cpp
-src/applications/dynamicProps/MultipassCorrFuncMatrix.cpp
-src/applications/dynamicProps/templatedMultipassCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp

@@ -48,13 +48,13 @@ namespace OpenMD {
                                  const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2)
-    : templatedCrossCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
-                          DataStorage::dslForce | DataStorage::dslAmat |
-                          DataStorage::dslTorque){
-
+    : CrossCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
+                             DataStorage::dslForce | DataStorage::dslAmat |
+                             DataStorage::dslTorque){
+    
     setCorrFuncType("Force - Torque Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ftcorr");
-
+    
     forces_.resize(nFrames_);
     torques_.resize(nFrames_);
 
@@ -65,6 +65,25 @@ namespace OpenMD {
     torquesCount_ = 0;
 
     propertyTemp = V3Zero;
+  }
+  
+  void ForTorCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+      
+      if (!sd->isDirectional()) {
+        sprintf(painCave.errMsg,
+                "ForTorCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a Directional object\n", sd->getGlobalIndex(),
+                sd->getType().c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
   }
 
   int ForTorCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
@@ -89,13 +108,21 @@ namespace OpenMD {
   }
 
   void ForTorCorrFunc::postCorrelate() {
-    sumForces_ /= RealType(forcesCount_); //gets the average of the forces_
+    // Gets the average of the forces
+    sumForces_ /= RealType(forcesCount_);
+    
+    // Gets the average of the torques
     sumTorques_ /= RealType(torquesCount_);
+    
     Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumTorques_);
+
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
-	       histogram_[i] /= RealType(count_[i]);//divides matrix by count_[i]
-         histogram_[i] -= correlationOfAverages_;//the outerProduct correlation of the averages is subtracted from the correlation value
+        histogram_[i] /= RealType(count_[i]);
+
+        // The outerProduct correlation of the averages is subtracted
+        // from the correlation value:
+        histogram_[i] -= correlationOfAverages_;
       } else {
         histogram_[i] = M3Zero;
       }

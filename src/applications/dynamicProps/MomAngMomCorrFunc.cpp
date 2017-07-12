@@ -47,9 +47,9 @@ namespace OpenMD {
                                        const std::string& filename,
                                        const std::string& sele1,
                                        const std::string& sele2)
-    : CrossCorrFunc(info, filename, sele1, sele2,
-                    DataStorage::dslVelocity | DataStorage::dslAmat |
-                    DataStorage::dslAngularMomentum){
+    : CrossCorrFunc<RealType>(info, filename, sele1, sele2,
+                              DataStorage::dslVelocity | DataStorage::dslAmat |
+                              DataStorage::dslAngularMomentum){
 
     setCorrFuncType("Momentum - Angular Momentum Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".pjcorr");

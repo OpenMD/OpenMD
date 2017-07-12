@@ -45,7 +45,7 @@
 #include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class MomAngMomCorrFunc : public CrossCorrFunc {
+  class MomAngMomCorrFunc : public CrossCorrFunc<RealType> {
   public:
     MomAngMomCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2);   

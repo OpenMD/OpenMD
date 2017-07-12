@@ -42,23 +42,43 @@
 
 #include "applications/dynamicProps/TorqueAutoCorrFunc.hpp"
 #include "utils/Revision.hpp"
-#include "math/SquareMatrix3.hpp"//may not be necessary
+#include "math/SquareMatrix3.hpp"
 
 namespace OpenMD {
-    TorqueAutoCorrFunc::TorqueAutoCorrFunc(SimInfo* info,
-                                       const std::string& filename,
-                                       const std::string& sele1,
-                                       const std::string& sele2)
-    :templatedAutoCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
-                    DataStorage::dslForce | DataStorage::dslAmat |
-                    DataStorage::dslTorque){
-
+  TorqueAutoCorrFunc::TorqueAutoCorrFunc(SimInfo* info,
+                                         const std::string& filename,
+                                         const std::string& sele1,
+                                         const std::string& sele2)
+    :AutoCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
+                           DataStorage::dslForce |
+                           DataStorage::dslAmat |
+                           DataStorage::dslTorque){
+    
     setCorrFuncType("Torque Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".tacorr");
 
     torques_.resize(nFrames_);
     sumTorques_ = V3Zero;
     torquesCount_ = 0;
+  }
+  
+  void TorqueAutoCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+      
+      if (!sd->isDirectional()) {
+        sprintf(painCave.errMsg,
+                "TorqueAutoCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a Directional object\n", sd->getGlobalIndex(),
+                sd->getType().c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
   }
 
   int TorqueAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
@@ -68,27 +88,26 @@ namespace OpenMD {
     return torques_[frame].size() - 1;
   }
 
-
   Mat3x3d TorqueAutoCorrFunc::calcCorrVal(int frame1, int frame2,
                                           int id1, int id2) {
     return outProduct( torques_[frame1][id1] , torques_[frame2][id2] );
   }
 
-
   void TorqueAutoCorrFunc::postCorrelate() {
-    sumTorques_ /= RealType(torquesCount_); //gets the average of the forces_
+    // Gets the average of the torques
+    sumTorques_ /= RealType(torquesCount_);
+    
     Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumTorques_);
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
-	       histogram_[i] /= RealType(count_[i]);//divides matrix by count_[i]
-         histogram_[i] -= correlationOfAverages_;//the outerProduct correlation of the averages is subtracted from the correlation value
+        histogram_[i] /= RealType(count_[i]);
+        
+        // The outerProduct correlation of the averages is subtracted
+        // from the correlation value:
+        histogram_[i] -= correlationOfAverages_;
       } else {
         histogram_[i] = M3Zero;
       }
     }
-
   }
-
-
-
 }

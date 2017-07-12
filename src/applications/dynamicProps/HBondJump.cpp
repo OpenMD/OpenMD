@@ -47,8 +47,9 @@ namespace OpenMD {
   HBondJump::HBondJump(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2,
                        double OOcut, double thetaCut, double OHcut, int order)
-    : MultipassCorrFunc(info, filename, sele1, sele2,
-                        DataStorage::dslPosition | DataStorage::dslAmat ),
+    : MultipassCorrFunc<RealType>(info, filename, sele1, sele2,
+                                  DataStorage::dslPosition |
+                                  DataStorage::dslAmat ),
       OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut), order_(order) {
     
     setCorrFuncType("HBondJump");

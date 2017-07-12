@@ -42,25 +42,28 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_TORFORCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_TORFORCORRFUNC_HPP
 
-#include "applications/dynamicProps/templatedMultipassCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class TorForCorrFunc : public templatedCrossCorrFunc<Mat3x3d> {
+  class TorForCorrFunc : public CrossCorrFunc<Mat3x3d> {
   public:
     TorForCorrFunc(SimInfo* info, const std::string& filename,
-                      const std::string& sele1, const std::string& sele2);
-
+                   const std::string& sele1, const std::string& sele2);
+    
   private:
+    virtual void validateSelection(SelectionManager& seleMan);
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual int computeProperty2(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void postCorrelate();
-
+    
     std::vector<std::vector<Vector3d> > forces_;
     std::vector<std::vector<Vector3d> > torques_;
+    
     Vector3d sumForces_;
     Vector3d sumTorques_;
+    
     int forcesCount_, torquesCount_;
   };
 }

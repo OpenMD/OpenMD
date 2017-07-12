@@ -48,9 +48,12 @@
 using namespace std;
 namespace OpenMD {
 
-  MultipassCorrFunc::MultipassCorrFunc(SimInfo* info, const string& filename,
-                                       const string& sele1, const string& sele2,
-                                       int storageLayout)
+  template<typename T>
+  MultipassCorrFunc<T>::MultipassCorrFunc(SimInfo* info,
+                                          const string& filename,
+                                          const string& sele1,
+                                          const string& sele2,
+                                          int storageLayout)
     : storageLayout_(storageLayout), info_(info), dumpFilename_(filename),
       seleMan1_(info_), seleMan2_(info_),
       selectionScript1_(sele1), selectionScript2_(sele2),
@@ -98,7 +101,9 @@ namespace OpenMD {
 
     nFrames_ = reader_->getNFrames();
     nTimeBins_ = nFrames_;
-    histogram_.resize(nTimeBins_, 0.0);
+
+    T zeroType(0.0);
+    histogram_.resize(nTimeBins_, zeroType);
     count_.resize(nTimeBins_, 0);
 
     times_.resize(nFrames_);
@@ -107,8 +112,9 @@ namespace OpenMD {
       sele2ToIndex_.resize(nFrames_);
     }
   }
-
-  void MultipassCorrFunc::preCorrelate() {
+  
+  template<typename T> // we should check to see if this is needed for a member function that does not deal with the type
+  void MultipassCorrFunc<T>::preCorrelate() {
 
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
@@ -118,8 +124,9 @@ namespace OpenMD {
     }
 
   }
-
-  void MultipassCorrFunc::computeFrame(int istep) {
+  
+  template<typename T>
+  void MultipassCorrFunc<T>::computeFrame(int istep) {
     StuntDouble* sd;
 
     int isd1, isd2;
@@ -127,10 +134,12 @@ namespace OpenMD {
 
     if (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      validateSelection(seleMan1_);
     }
 
     if (uniqueSelections_ && evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      validateSelection(seleMan2_);
     }
 
     for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
@@ -169,8 +178,8 @@ namespace OpenMD {
     }
   }
 
-
-  void MultipassCorrFunc::doCorrelate() {
+  template<typename T>
+  void MultipassCorrFunc<T>::doCorrelate() {
 
     painCave.isFatal = 0;
     painCave.severity=OPENMD_INFO;
@@ -191,10 +200,11 @@ namespace OpenMD {
     writeCorrelate();
   }
 
-  void MultipassCorrFunc::correlation() {
-
+  template<typename T>
+  void MultipassCorrFunc<T>::correlation() {
+    T zeroType(0.0);
     for (int i =0 ; i < nTimeBins_; ++i) {
-      histogram_[i] = 0.0;
+      histogram_[i] = zeroType;
       count_[i] = 0;
     }
 
@@ -226,21 +236,24 @@ namespace OpenMD {
     }
   }
 
-  void MultipassCorrFunc::correlateFrames(int frame1, int frame2, int timeBin) {
+
+  template<typename T>
+  void MultipassCorrFunc<T>::correlateFrames(int frame1, int frame2,
+                                             int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
 
     std::vector<int>::iterator i1;
     std::vector<int>::iterator i2;
 
-    RealType corrVal(0.0);
+    T corrVal(0.0);
 
     s1 = sele1ToIndex_[frame1];
 
     if (uniqueSelections_)
-       s2 = sele2ToIndex_[frame2];
+      s2 = sele2ToIndex_[frame2];
     else
-       s2 = sele1ToIndex_[frame2];
+      s2 = sele1ToIndex_[frame2];
 
     for (i1 = s1.begin(), i2 = s2.begin();
          i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
@@ -266,18 +279,21 @@ namespace OpenMD {
 
     }
   }
-
-  void MultipassCorrFunc::postCorrelate() {
+  
+  template<typename T>
+  void MultipassCorrFunc<T>::postCorrelate() {
+    T zeroType(0.0);
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
 	histogram_[i] /= count_[i];
       } else {
-        histogram_[i] = 0;
+        histogram_[i] = zeroType;
       }
     }
   }
 
-  void MultipassCorrFunc::writeCorrelate() {
+  template<typename T>
+  void MultipassCorrFunc<T>::writeCorrelate() {
     ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
@@ -308,4 +324,117 @@ namespace OpenMD {
     ofs.close();
   }
 
+    //Template specialization of writeCorrelate for Vector3d
+  template<>
+  void MultipassCorrFunc<Vector3d>::writeCorrelate() {
+    ofstream ofs(outputFilename_.c_str());
+
+    if (ofs.is_open()) {
+
+      Revision r;
+
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#time\tcorrVal\n";
+
+      for (int i = 0; i < nTimeBins_; ++i) {
+        ofs << times_[i]-times_[0] << "\t";
+        for (int j = 0; j < 3; j++) {
+          ofs << histogram_[i](j) << '\t';        
+        }
+        ofs << '\n';
+      }
+      
+    } else {
+      sprintf(painCave.errMsg,
+              "MultipassCorrFunc::writeCorrelate Error: fail to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    ofs.close();
+  }
+
+
+  //Template specialization of writeCorrelate for Mat3x3d
+  template<>
+  void MultipassCorrFunc<Mat3x3d>::writeCorrelate() {
+    ofstream ofs(outputFilename_.c_str());
+
+    if (ofs.is_open()) {
+
+      Revision r;
+
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#time\tcorrVal\n";
+
+      for (int i = 0; i < nTimeBins_; ++i) {
+        ofs << times_[i]-times_[0] << "\t";
+        for (int j = 0; j < 3; j++) {
+          for (int k = 0; k < 3; k++) {
+            ofs << histogram_[i](j,k) << '\t';
+          }
+        }
+        ofs << '\n';
+      }
+
+    } else {
+      sprintf(painCave.errMsg,
+              "MultipassCorrFunc::writeCorrelate Error: fail to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    ofs.close();
+  }
+
+
+  template<typename T>
+  void MultipassCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
+    // punt on validating selection to the individual correlation functions
+  }
+
+  //it is necessary to keep the constructor definitions here or the code wont be generated and linking issues will occur. Blame templating
+  template<typename T>
+  CrossCorrFunc<T>::CrossCorrFunc(SimInfo* info, const std::string& filename,
+                                  const std::string& sele1,
+                                  const std::string& sele2,
+                                  int storageLayout) :
+    MultipassCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+    this->autoCorrFunc_ = false;
+  }
+  
+  template<typename T>
+  AutoCorrFunc<T>::AutoCorrFunc(SimInfo* info, const std::string& filename,
+                                const std::string& sele1,
+                                const std::string& sele2,
+                                int storageLayout) :
+    MultipassCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+    this->autoCorrFunc_ = true;
+  }
+  
+  template class AutoCorrFunc<RealType>; 
+  template class MultipassCorrFunc<RealType>;
+  template class CrossCorrFunc<RealType>;
+
+  template class AutoCorrFunc<Vector3d>; 
+  template class MultipassCorrFunc<Vector3d>;
+  template class CrossCorrFunc<Vector3d>;
+
+  template class AutoCorrFunc<Mat3x3d>; 
+  template class MultipassCorrFunc<Mat3x3d>;
+  template class CrossCorrFunc<Mat3x3d>;
 }

@@ -45,7 +45,7 @@
 #include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class RCorrFunc : public AutoCorrFunc {
+  class RCorrFunc : public AutoCorrFunc<RealType> {
   public:
     RCorrFunc(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2);
@@ -55,7 +55,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > positions_;
   };
 
-  class RCorrFuncZ : public AutoCorrFunc {
+  class RCorrFuncZ : public AutoCorrFunc<RealType> {
   public:
     RCorrFuncZ(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2, int nZbins);
@@ -77,7 +77,7 @@ namespace OpenMD {
     int nZBins_;
   };
 
-  class RCorrFuncR : public AutoCorrFunc {
+  class RCorrFuncR : public AutoCorrFunc<RealType> {
   public:
     RCorrFuncR(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2);           

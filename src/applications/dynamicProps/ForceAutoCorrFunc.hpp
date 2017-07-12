@@ -42,15 +42,15 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_FORCEAUTOCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_FORCEAUTOCORRFUNC_HPP
 
-#include "applications/dynamicProps/templatedMultipassCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ForceAutoCorrFunc : public templatedAutoCorrFunc<Mat3x3d> {
+  class ForceAutoCorrFunc : public AutoCorrFunc<Mat3x3d> {
   public:
     ForceAutoCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2);
-
+    
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);

@@ -42,50 +42,52 @@
 
 #include "applications/dynamicProps/ForceAutoCorrFunc.hpp"
 #include "utils/Revision.hpp"
-#include "math/SquareMatrix3.hpp"//may not be necessary
+#include "math/SquareMatrix3.hpp"
 
 namespace OpenMD {
-    ForceAutoCorrFunc::ForceAutoCorrFunc(SimInfo* info,
+  ForceAutoCorrFunc::ForceAutoCorrFunc(SimInfo* info,
                                        const std::string& filename,
                                        const std::string& sele1,
                                        const std::string& sele2)
-    :templatedAutoCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
-                    DataStorage::dslForce | DataStorage::dslAmat |
-                    DataStorage::dslTorque){
-
+    : AutoCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
+                            DataStorage::dslForce | DataStorage::dslAmat |
+                            DataStorage::dslTorque){
+    
     setCorrFuncType("Force - Force Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".facorr");
-
+    
     forces_.resize(nFrames_);
     sumForces_ = V3Zero;
     forcesCount_ = 0;
   }
-
+  
   int ForceAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
     forces_[frame].push_back( sd->getA() * sd->getFrc() );
-    sumForces_ += (sd->getFrc());
+    sumForces_ += sd->getFrc();
     forcesCount_++;
     return forces_[frame].size() - 1;
   }
 
   Mat3x3d ForceAutoCorrFunc::calcCorrVal(int frame1, int frame2,
-                                          int id1, int id2) {
+                                         int id1, int id2) {
     return outProduct( forces_[frame1][id1] , forces_[frame2][id2] );
   }
-
+  
   void ForceAutoCorrFunc::postCorrelate() {
-    sumForces_ /= RealType(forcesCount_); //gets the average of the forces_
+    // Gets the average of the forces_
+    sumForces_ /= RealType(forcesCount_);
+    
     Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumForces_);
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
-	       histogram_[i] /= RealType(count_[i]);//divides matrix by count_[i]
-         histogram_[i] -= correlationOfAverages_;//the outerProduct correlation of the averages is subtracted from the correlation value
+        histogram_[i] /= RealType(count_[i]);
+        
+        // The outerProduct correlation of the averages is subtracted
+        // from the correlation value
+        histogram_[i] -= correlationOfAverages_; 
       } else {
         histogram_[i] = M3Zero;
       }
-    }
-
+    }    
   }
-
-
 }

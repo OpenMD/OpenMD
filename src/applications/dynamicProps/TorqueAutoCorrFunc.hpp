@@ -42,16 +42,17 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_TORQUEAUTOCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_TORQUEAUTOCORRFUNC_HPP
 
-#include "applications/dynamicProps/templatedMultipassCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class TorqueAutoCorrFunc : public templatedAutoCorrFunc<Mat3x3d> {
+  class TorqueAutoCorrFunc : public AutoCorrFunc<Mat3x3d> {
   public:
     TorqueAutoCorrFunc(SimInfo* info, const std::string& filename,
-                      const std::string& sele1, const std::string& sele2);
+                       const std::string& sele1, const std::string& sele2);
 
   private:
+    virtual void validateSelection(SelectionManager& seleMan);    
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void postCorrelate();

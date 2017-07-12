@@ -45,7 +45,7 @@
 #include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  class HBondJump : public MultipassCorrFunc {
+  class HBondJump : public MultipassCorrFunc<RealType> {
   public:
     HBondJump(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2, double OOCut,

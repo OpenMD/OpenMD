@@ -56,23 +56,24 @@ namespace OpenMD {
 
   //! Computes a correlation function by scanning a trajectory once to precompute quantities to be correlated
 
+  template<typename T>
   class MultipassCorrFunc : public DynamicProperty {
   public:
     MultipassCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2,
                       int storageLayout);
-
+    
     virtual ~MultipassCorrFunc(){ }
     virtual void doCorrelate();
-
+    
     const std::string& getCorrFuncType() const {
       return corrFuncType_;
     }
-
+    
     void setCorrFuncType(const std::string& type) {
       corrFuncType_ = type;
     }
-
+    
     void setParameterString(const std::string& params) {
       paramString_ = params;
     }
@@ -83,17 +84,19 @@ namespace OpenMD {
     virtual void correlation();
     virtual void postCorrelate();
     virtual void computeFrame(int frame);
+    virtual void validateSelection(SelectionManager& seleMan);
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
     virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
+    virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
+    virtual void writeCorrelate();
 
     int storageLayout_;
 
     RealType deltaTime_;
     int nTimeBins_;
     int nFrames_;
-    std::vector<RealType> histogram_;
+    std::vector<T> histogram_;
     std::vector<int> count_;
     std::vector<RealType> times_;
     bool uniqueSelections_;
@@ -104,8 +107,6 @@ namespace OpenMD {
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;
 
-    virtual void writeCorrelate();
-    virtual void validateSelection(SelectionManager& seleMan) {}
 
     Snapshot* currentSnapshot_;
 
@@ -125,29 +126,24 @@ namespace OpenMD {
 
   };
 
-
-  class AutoCorrFunc : public MultipassCorrFunc {
+  template<typename T>
+  class AutoCorrFunc : public MultipassCorrFunc<T> {
   public:
     AutoCorrFunc(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2,
-                 int storageLayout) :
-      MultipassCorrFunc(info, filename, sele1, sele2, storageLayout) {
-      autoCorrFunc_ = true;
-    }
-
+                 int storageLayout);
+    
   protected:
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
   };
 
-  class CrossCorrFunc : public MultipassCorrFunc {
+  template<typename T>
+  class CrossCorrFunc : public MultipassCorrFunc<T> {
   public:
-    CrossCorrFunc(SimInfo* info, const std::string& filename,
-                  const std::string& sele1, const std::string& sele2,
-                  int storageLayout) :
-      MultipassCorrFunc(info, filename, sele1, sele2, storageLayout) {
-      autoCorrFunc_ = false;
-    }
+     CrossCorrFunc(SimInfo* info, const std::string& filename,
+                   const std::string& sele1, const std::string& sele2,
+                   int storageLayout);
 
   protected:
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;

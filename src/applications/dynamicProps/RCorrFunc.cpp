@@ -47,8 +47,8 @@
 namespace OpenMD {
   RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, 
                        const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc(info, filename, sele1, sele2, 
-                   DataStorage::dslPosition | DataStorage::dslAmat){
+    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
+                             DataStorage::dslPosition | DataStorage::dslAmat){
     
     setCorrFuncType("Mean Square Displacement");
     setOutputName(getPrefix(dumpFilename_) + ".rcorr");
@@ -59,8 +59,8 @@ namespace OpenMD {
   RCorrFuncZ::RCorrFuncZ(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2,
                          int nZbins)
-    : AutoCorrFunc(info, filename, sele1, sele2, 
-                   DataStorage::dslPosition | DataStorage::dslAmat){
+    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
+                             DataStorage::dslPosition | DataStorage::dslAmat){
 
     setCorrFuncType("Mean Square Displacement binned by Z");
     setOutputName(getPrefix(dumpFilename_) + ".rcorrZ");
@@ -86,8 +86,8 @@ namespace OpenMD {
   
   RCorrFuncR::RCorrFuncR(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc(info, filename, sele1, sele2, 
-                   DataStorage::dslPosition | DataStorage::dslAmat){
+    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
+                             DataStorage::dslPosition | DataStorage::dslAmat){
     
     // Turn on COM calculation in reader:
     bool ncp = true;
