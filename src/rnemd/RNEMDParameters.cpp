@@ -50,6 +50,7 @@ namespace OpenMD {
   RNEMDParameters::RNEMDParameters() { 
     DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
     DefineOptionalParameterWithDefaultValue(ObjectSelection, "objectSelection", "select all");
+
     DefineOptionalParameterWithDefaultValue(Method, "method", "VSS");
     DefineOptionalParameter(FluxType, "fluxType");
 
@@ -71,6 +72,7 @@ namespace OpenMD {
     DefineOptionalParameter(OutputFileName, "outputFileName");
     DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
     DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth", 2.0);
+    DefineOptionalParameter(OutputSelection, "outputSelection");
     DefineOptionalParameter(OutputFields, "outputFields");
   }
   

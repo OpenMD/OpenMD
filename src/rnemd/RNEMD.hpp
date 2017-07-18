@@ -146,6 +146,12 @@ namespace OpenMD {
     bool hasSelectionB_;                      
     bool hasSphereBRadius_;
 
+    // output selection for collecting data about a particular species:
+    string outputSelection_;
+    SelectionEvaluator outputEvaluator_;
+    SelectionManager outputSeleMan_;
+    bool hasOutputSelection_;
+
     bool usePeriodicBoundaryConditions_;
     bool hasDividingArea_;
     RealType dividingArea_;

@@ -49,6 +49,7 @@ namespace OpenMD {
   class RNEMDParameters : public DataHolder {
     DeclareParameter(UseRNEMD, bool);
     DeclareParameter(ObjectSelection, std::string);
+    DeclareParameter(OutputSelection, std::string);
     DeclareParameter(Method, std::string);
     DeclareParameter(FluxType, std::string);
     DeclareParameter(ExchangeTime, RealType);

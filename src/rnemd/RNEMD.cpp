@@ -72,7 +72,8 @@ namespace OpenMD {
 				evaluator_(info_), seleMan_(info_), 
                                 evaluatorA_(info_), seleManA_(info_), 
 				evaluatorB_(info_), seleManB_(info_), 
-				commonA_(info_), commonB_(info_), 
+				commonA_(info_), commonB_(info_),
+                                outputEvaluator_(info_), outputSeleMan_(info_),
 				usePeriodicBoundaryConditions_(info_->getSimParams()->getUsePeriodicBoundaryConditions()),
                                 hasDividingArea_(false),
 				hasData_(false) {
@@ -146,6 +147,13 @@ namespace OpenMD {
     bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
     bool hasOutputFileName = rnemdParams->haveOutputFileName();
     bool hasOutputFields = rnemdParams->haveOutputFields();
+
+    hasOutputSelection_ = rnemdParams->haveOutputSelection();
+    if (hasOutputSelection_) {
+      outputSelection_ = rnemdParams->getOutputSelection();
+    } else {
+      outputSelection_ = rnemdObjectSelection_;
+    }
     
     map<string, RNEMDMethod>::iterator i;
     i = stringToMethod_.find(methStr);
@@ -623,7 +631,10 @@ namespace OpenMD {
     seleManA_.setSelectionSet(evaluatorA_.evaluate());
     seleManB_.setSelectionSet(evaluatorB_.evaluate());
     commonA_ = seleManA_ & seleMan_;
-    commonB_ = seleManB_ & seleMan_;  
+    commonB_ = seleManB_ & seleMan_;
+
+    outputEvaluator_.loadScriptString(outputSelection_);
+    outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
   }
   
     
@@ -1916,7 +1927,7 @@ namespace OpenMD {
     Vector3d u = angularMomentumFluxVector_;
     u.normalize();
 
-    seleMan_.setSelectionSet(evaluator_.evaluate());
+    outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
 
     int selei(0);
     StuntDouble* sd;
@@ -1953,8 +1964,8 @@ namespace OpenMD {
       sd = mol->nextIntegrableObject(iiter))
     */
 
-    for (sd = seleMan_.beginSelected(selei); sd != NULL; 
-         sd = seleMan_.nextSelected(selei)) {     
+    for (sd = outputSeleMan_.beginSelected(selei); sd != NULL; 
+         sd = outputSeleMan_.nextSelected(selei)) {     
     
       Vector3d pos = sd->getPos();
 
@@ -2189,6 +2200,7 @@ namespace OpenMD {
                  << rnemdObjectSelection_ << "\";\n";
       rnemdFile_ << "#    selectionA = \"" << selectionA_ << "\";\n";
       rnemdFile_ << "#    selectionB = \"" << selectionB_ << "\";\n";
+      rnemdFile_ << "#    outputSelection = \"" << outputSelection_ << "\";\n";
       rnemdFile_ << "# }\n";
       rnemdFile_ << "#######################################################\n";
       rnemdFile_ << "# RNEMD report:\n";      
