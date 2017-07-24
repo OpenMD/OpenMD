@@ -150,6 +150,7 @@ int main(int argc, char* argv[]){
   StuntDouble* sdNew;
   RigidBody* rb;
   Mat3x3d oldHmat;
+  Mat3x3d rotHmat;
   Mat3x3d newHmat;
   Snapshot* oldSnap;
   Snapshot* newSnap;
@@ -166,7 +167,8 @@ int main(int argc, char* argv[]){
     newSnap->setTime( oldSnap->getTime() );
     
     oldHmat = oldSnap->getHmat();
-    newHmat = repeatD*oldHmat;
+    rotHmat = rotMatrix*oldHmat;
+    newHmat = repeatD*rotHmat;
     newSnap->setHmat(newHmat);
 
     newSnap->setThermostat( oldSnap->getThermostat() );
@@ -183,9 +185,9 @@ int main(int argc, char* argv[]){
             Vector3d trans = Vector3d(ii, jj, kk);
             for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
                  sd = mol->nextIntegrableObject(iiter)) {
-              oldPos = rotMatrix*sd->getPos() + translate;
+              oldPos = sd->getPos() + translate;
               oldSnap->wrapVector(oldPos);
-              newPos = oldPos + trans * oldHmat;
+              newPos = rotMatrix*oldPos + trans * oldHmat;
               sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos( newPos );
               sdNew->setVel( sd->getVel() );
