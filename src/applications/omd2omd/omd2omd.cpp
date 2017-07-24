@@ -89,9 +89,21 @@ int main(int argc, char* argv[]){
     simError();
   }
 
+  //convert the input angles to radians for computation
+  double phi = args_info.rotatePhi_arg * (NumericConstant::PI / 180.0);
+  double theta = args_info.rotateTheta_arg * (NumericConstant::PI / 180.0);
+  double psi = args_info.rotatePsi_arg * (NumericConstant::PI / 180.0);
+
+  Mat3x3d rotMatrix = Mat3x3d(0.0);
+  
+  rotMatrix.setupRotMat(phi, theta, psi);
+  
+  std::cout << "rotMatix = " << rotMatrix << endl;
+  
   Vector3i repeat = Vector3i(args_info.repeatX_arg,
                              args_info.repeatY_arg,
                              args_info.repeatZ_arg);
+  
   Mat3x3d repeatD = Mat3x3d(0.0);
   repeatD(0,0) = repeat.x();
   repeatD(1,1) = repeat.y();
@@ -171,7 +183,7 @@ int main(int argc, char* argv[]){
             Vector3d trans = Vector3d(ii, jj, kk);
             for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
                  sd = mol->nextIntegrableObject(iiter)) {
-              oldPos = sd->getPos() + translate;
+              oldPos = rotMatrix*sd->getPos() + translate;
               oldSnap->wrapVector(oldPos);
               newPos = oldPos + trans * oldHmat;
               sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);

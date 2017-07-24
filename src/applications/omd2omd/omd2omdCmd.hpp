@@ -63,6 +63,15 @@ struct gengetopt_args_info
   double translateZ_arg;	/**< @brief translate all z coordinates by some amount (default='0.0').  */
   char * translateZ_orig;	/**< @brief translate all z coordinates by some amount original value given at command line.  */
   const char *translateZ_help; /**< @brief translate all z coordinates by some amount help description.  */
+  double rotatePhi_arg;     /**< @brief rotate all coordinates about Euler angle Phi (default='0.0').  */
+  char * rotatePhi_orig;	/**< @brief rotate all coordinates about Euler angle Phi value given at command line.  */
+  const char *rotatePhi_help; /**< @brief rotate all coordinates about Euler angle Phi amount help description.  */
+  double rotateTheta_arg;     /**< @brief rotate all coordinates about Euler angle Theta (default='0.0').  */
+  char * rotateTheta_orig;	/**< @brief rotate all coordinates about Euler angle Theta original value given at command line.  */
+  const char *rotateTheta_help; /**< @brief rotate all coordinates about Euler angle Theta amount help description.  */
+  double rotatePsi_arg;     /**< @brief rotate all coordinates aboutEuler angle Psi (default='0.0').  */
+  char * rotatePsi_orig;	/**< @brief rotate all coordinates aboutEuler angle Psi original value given at command line.  */
+  const char *rotatePsi_help; /**< @brief rotate all coordinates about Euler angle Psi amount help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -74,6 +83,9 @@ struct gengetopt_args_info
   unsigned int translateX_given ;	/**< @brief Whether translateX was given.  */
   unsigned int translateY_given ;	/**< @brief Whether translateY was given.  */
   unsigned int translateZ_given ;	/**< @brief Whether translateZ was given.  */
+  unsigned int rotatePhi_given ;  /**< @bried Wether rotatePhi was given.  */
+  unsigned int rotateTheta_given ;  /**< @bried Wether rotateTheta was given.  */
+  unsigned int rotatePsi_given ;  /**< @bried Wether rotatePsi was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

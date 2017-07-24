@@ -29,3 +29,7 @@ option	"repeatZ"	z	"make the system repeat in the z direction"		int	default="1"	
 option  "translateX"    t       "translate all x coordinates by some amount"            double  default="0.0"           no
 option  "translateY"    u       "translate all y coordinates by some amount"            double  default="0.0"           no
 option  "translateZ"    v       "translate all z coordinates by some amount"            double  default="0.0"           no
+option	"rotatePhi"	p	"rotate all coordinates Euler angle Phi"	        double default="0.0"		no
+option	"rotateTheta"	q	"rotate all coordinates Euler angle Theta"              double default="0.0"		no
+option	"rotatePsi"	r	"rotate all coordinates Euler angle Psi"                double default="0.0"		no
+

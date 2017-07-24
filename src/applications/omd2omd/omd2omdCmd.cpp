@@ -43,6 +43,10 @@ const char *gengetopt_args_info_help[] = {
   "  -t, --translateX=DOUBLE  translate all x coordinates by some amount\n                             (default=`0.0')",
   "  -u, --translateY=DOUBLE  translate all y coordinates by some amount\n                             (default=`0.0')",
   "  -v, --translateZ=DOUBLE  translate all z coordinates by some amount\n                             (default=`0.0')",
+  "  -p, --rotatePhi=DOUBLE     rotate all coordinates about Euler angle Phi\n                         (default='0.0')",
+  "  -q, --rotateTheta=DOUBLE     rotate all coordinates about Euler angle Theta\n                     (default='0.0')",
+  "  -r, --rotatePsi=DOUBLE     rotate all coordinates about Euler angle Psi\n                         (default='0.0')",
+  
     0
 };
 
@@ -104,6 +108,9 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->translateX_given = 0 ;
   args_info->translateY_given = 0 ;
   args_info->translateZ_given = 0 ;
+  args_info->rotatePhi_given = 0 ;
+  args_info->rotateTheta_given = 0 ;
+  args_info->rotatePsi_given = 0 ;
 }
 
 static
@@ -126,7 +133,13 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->translateY_orig = NULL;
   args_info->translateZ_arg = 0.0;
   args_info->translateZ_orig = NULL;
-  
+  args_info->rotatePhi_arg = 0.0;
+  args_info->rotatePhi_orig = NULL;
+  args_info->rotateTheta_arg = 0.0;
+  args_info->rotateTheta_orig = NULL;
+  args_info->rotatePsi_arg = 0.0;
+  args_info->rotatePsi_orig = NULL;
+
 }
 
 static
@@ -144,6 +157,9 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->translateX_help = gengetopt_args_info_help[7] ;
   args_info->translateY_help = gengetopt_args_info_help[8] ;
   args_info->translateZ_help = gengetopt_args_info_help[9] ;
+  args_info->rotatePhi_help = gengetopt_args_info_help[10] ;
+  args_info->rotateTheta_help = gengetopt_args_info_help[11] ;
+  args_info->rotatePsi_help = gengetopt_args_info_help[12] ;
   
 }
 
@@ -240,6 +256,9 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->translateX_orig));
   free_string_field (&(args_info->translateY_orig));
   free_string_field (&(args_info->translateZ_orig));
+  free_string_field (&(args_info->rotatePhi_orig));
+  free_string_field (&(args_info->rotateTheta_orig));
+  free_string_field (&(args_info->rotatePsi_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -295,6 +314,13 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "translateY", args_info->translateY_orig, 0);
   if (args_info->translateZ_given)
     write_into_file(outfile, "translateZ", args_info->translateZ_orig, 0);
+  if (args_info->rotatePhi_given)
+    write_into_file(outfile, "rotatePhi", args_info->rotatePhi_orig, 0);
+  if (args_info->rotateTheta_given)
+    write_into_file(outfile, "rotateTheta", args_info->rotateTheta_orig, 0);
+  if (args_info->rotatePsi_given)
+    write_into_file(outfile, "rotatePsi", args_info->rotatePsi_orig, 0);
+
   
 
   i = EXIT_SUCCESS;
@@ -1172,6 +1198,9 @@ cmdline_parser_internal (
         { "translateX",	1, NULL, 't' },
         { "translateY",	1, NULL, 'u' },
         { "translateZ",	1, NULL, 'v' },
+	{ "rotatePhi",  1, NULL, 'p' },
+	{ "rotateTheta",1, NULL, 'q' },
+	{ "rotatePsi",  1, NULL, 'r' },
         { 0,  0, 0, 0 }
       };
 
@@ -1180,7 +1209,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:x:y:z:t:u:v:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:x:y:z:t:u:v:p:q:r:", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1311,6 +1340,42 @@ cmdline_parser_internal (
               &(local_args_info.translateZ_given), optarg, 0, "0.0", ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
               "translateZ", 'v',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'p':	/* rotate all coordinates about x axis by some amount.  */
+        
+        
+          if (update_arg( (void *)&(args_info->rotatePhi_arg), 
+               &(args_info->rotatePhi_orig), &(args_info->rotatePhi_given),
+              &(local_args_info.rotatePhi_given), optarg, 0, "0.0", ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "rotatePhi", 'p',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'q':	/* rotate all coordinates about y axis by some amount.  */
+        
+        
+          if (update_arg( (void *)&(args_info->rotateTheta_arg), 
+               &(args_info->rotateTheta_orig), &(args_info->rotateTheta_given),
+              &(local_args_info.rotateTheta_given), optarg, 0, "0.0", ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "rotateTheta", 'q',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'r':	/* rotate all coordinates about z axis by some amount.  */
+        
+        
+          if (update_arg( (void *)&(args_info->rotatePsi_arg), 
+               &(args_info->rotatePsi_orig), &(args_info->rotatePsi_given),
+              &(local_args_info.rotatePsi_given), optarg, 0, "0.0", ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "rotatePsi", 'r',
               additional_error))
             goto failure;
         
