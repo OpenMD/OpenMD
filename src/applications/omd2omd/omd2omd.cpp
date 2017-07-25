@@ -190,7 +190,7 @@ int main(int argc, char* argv[]){
               newPos = rotMatrix*oldPos + trans * oldHmat;
               sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos( newPos );
-              sdNew->setVel( sd->getVel() );
+	      sdNew->setVel( rotMatrix*sd->getVel() );
               if (sd->isDirectional()) {
                 sdNew->setA( sd->getA() );
                 sdNew->setJ( sd->getJ() );
