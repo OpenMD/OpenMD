@@ -52,6 +52,7 @@
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/simError.h"
+#include "math/Quaternion.hpp"
 
 using namespace OpenMD;
 
@@ -192,8 +193,10 @@ int main(int argc, char* argv[]){
               sdNew->setPos( newPos );
 	      sdNew->setVel( rotMatrix*sd->getVel() );
               if (sd->isDirectional()) {
-                sdNew->setA( sd->getA() );
-                sdNew->setJ( sd->getJ() );
+		Quat4d sdQuat = sd->getQ();
+		sdQuat.mul( rotMatrix.toQuaternion() );
+		sdNew->setQ( sdQuat );
+                sdNew->setJ( rotMatrix * sd->getJ() );
               }
               newIndex++;
             }
@@ -209,9 +212,11 @@ int main(int argc, char* argv[]){
       //change the positions of atoms which belong to the rigidbodies
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
-        
+	
+	
         rb->updateAtoms();
         rb->updateAtomVel();
+	
       }
     }
 
