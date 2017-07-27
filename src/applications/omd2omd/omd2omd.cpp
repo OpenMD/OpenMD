@@ -99,7 +99,7 @@ int main(int argc, char* argv[]){
   
   rotMatrix.setupRotMat(phi, theta, psi);
   
-  std::cout << "rotMatix = " << rotMatrix << endl;
+  //std::cout << "rotMatix = " << rotMatrix << endl;
   
   Vector3i repeat = Vector3i(args_info.repeatX_arg,
                              args_info.repeatY_arg,
