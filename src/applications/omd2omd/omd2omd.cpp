@@ -193,9 +193,21 @@ int main(int argc, char* argv[]){
               sdNew->setPos( newPos );
 	      sdNew->setVel( rotMatrix*sd->getVel() );
               if (sd->isDirectional()) {
-		Quat4d sdQuat = sd->getQ();
-		sdQuat.mul( rotMatrix.toQuaternion() );
-		sdNew->setQ( sdQuat );
+
+		Mat3x3d bodyRotMat = sd->getA();
+		bodyRotMat = bodyRotMat * rotMatrix.inverse();
+		sdNew->setA( bodyRotMat );
+		
+		//SquareMatrix<Real, 3> toRotationMatrix3()
+	       
+		//Quat4d sdQuat = sd->getQ();
+		//Quat4d rotQuat = rotMatrix.toQuaternion();
+		//std::cout << "rotMatrix as Quat = " << rotMatrix.toQuaternion() << endl;
+		//std::cout << "sdQuat pre rot = " << sdQuat << endl;
+		//std::cout << "rotMatrix to body = " << rotQuat.lab2Body() << endl;
+		//sdQuat.mul( rotMatrix.toQuaternion() );
+		//std::cout << "sdQuat post rot = " << sdQuat << endl;
+		//sdNew->setQ( sdQuat );
                 sdNew->setJ( rotMatrix * sd->getJ() );
               }
               newIndex++;
