@@ -65,6 +65,7 @@ namespace OpenMD {
     DeclareParameter(SphereBRadius, RealType);
     DeclareParameter(SelectionA, std::string);
     DeclareParameter(SelectionB, std::string);
+    DeclareParameter(DividingArea, RealType);
     DeclareParameter(CoordinateOrigin, std::vector<RealType> );
     DeclareParameter(OutputFileName, std::string);
     DeclareParameter(OutputBins, int);

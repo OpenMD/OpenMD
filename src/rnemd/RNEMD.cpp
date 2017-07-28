@@ -144,6 +144,10 @@ namespace OpenMD {
     bool hasSlabBCenter = rnemdParams->haveSlabBCenter();
     bool hasSphereARadius = rnemdParams->haveSphereARadius();
     hasSphereBRadius_ = rnemdParams->haveSphereBRadius();
+
+    hasDividingArea_ = rnemdParams->haveDividingArea();
+    dividingArea_ = rnemdParams->getDividingArea();
+    
     bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
     bool hasOutputFileName = rnemdParams->haveOutputFileName();
     bool hasOutputFields = rnemdParams->haveOutputFields();
@@ -1892,8 +1896,15 @@ namespace OpenMD {
     // flux = target flux
     // dividingArea = smallest dividing surface between the two regions
 
-    hasDividingArea_ = false;
-    RealType area = getDividingArea();
+    RealType area;
+    
+    if (info_->getSimParams()->getRNEMDParameters()->haveDividingArea()) {
+      hasDividingArea_ = true;
+      area = info_->getSimParams()->getRNEMDParameters()->getDividingArea();
+    } else {
+      hasDividingArea_ = false;
+      area = getDividingArea();
+    }
 
     kineticTarget_ = kineticFlux_ * exchangeTime_ * area;
     momentumTarget_ = momentumFluxVector_ * exchangeTime_ * area;
@@ -2117,7 +2128,10 @@ namespace OpenMD {
 
   void RNEMD::getStarted() {
     if (!doRNEMD_) return;
-    hasDividingArea_ = false;
+    if (info_->getSimParams()->getRNEMDParameters()->haveDividingArea())
+      hasDividingArea_ = true;
+    else
+      hasDividingArea_ = false;
     collectData();
     writeOutputFile();
   }

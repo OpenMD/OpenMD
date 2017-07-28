@@ -74,6 +74,7 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth", 2.0);
     DefineOptionalParameter(OutputSelection, "outputSelection");
     DefineOptionalParameter(OutputFields, "outputFields");
+    DefineOptionalParameter(DividingArea, "dividingArea");
   }
   
   RNEMDParameters::~RNEMDParameters() {    
