@@ -975,8 +975,8 @@ int update_arg(void *field, char **orig_field,
   int found;
   char **string_field;
   FIX_UNUSED (field);
+  FIX_UNUSED (stop_char);
 
-  stop_char = 0;
   found = 0;
 
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))

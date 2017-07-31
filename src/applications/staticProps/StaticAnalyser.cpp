@@ -139,7 +139,7 @@ namespace OpenMD {
     
   void StaticAnalyser::writeData(ostream& os, OutputData* dat, 
                                     unsigned int bin) {
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     int n = dat->accumulator[bin]->count();
     if (n == 0) return;
 
@@ -181,7 +181,7 @@ namespace OpenMD {
 
   void StaticAnalyser::writeErrorBars(ostream& os, OutputData* dat, 
                                     unsigned int bin) {
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     int n = dat->accumulator[bin]->count();
     if (n == 0) return;
 

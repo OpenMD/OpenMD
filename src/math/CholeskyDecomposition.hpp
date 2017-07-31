@@ -51,7 +51,7 @@ namespace OpenMD {
   template<class MatrixType>
   void CholeskyDecomposition(MatrixType& A, MatrixType& L) {
 
-    int n = A.getNRow();
+    unsigned int n = A.getNRow();
     assert(n == A.getNCol() && n == L.getNRow() && n == L.getNCol());
 
     bool isspd(true);  
@@ -59,12 +59,12 @@ namespace OpenMD {
       (numeric_limits<RealType>::epsilon())/100;
 
   
-    for(int j = 0; j < n; j++) {
+    for(unsigned int j = 0; j < n; j++) {
       RealType d(0.0);
-      for (int k = 0; k < j; k++) {
+      for (unsigned int k = 0; k < j; k++) {
         RealType s(0.0);
       
-        for (int i = 0; i < k; i++) {
+        for (unsigned int i = 0; i < k; i++) {
           s += L(k,i) * L(j,i);
         }
       
@@ -84,7 +84,7 @@ namespace OpenMD {
       d = A(j,j) - d;
       isspd = isspd && (d > eps);
       L(j,j) = sqrt(d > 0.0 ? d : 0.0);
-      for (int k = j+1; k < n; k++)  {
+      for (unsigned int k = j+1; k < n; k++)  {
         L(j,k) = 0.0;
       }
     }
