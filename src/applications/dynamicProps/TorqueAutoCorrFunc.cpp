@@ -82,8 +82,11 @@ namespace OpenMD {
   }
 
   int TorqueAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    torques_[frame].push_back( sd->getA() * sd->getTrq() );
-    sumTorques_.add(sd->getTrq());
+    Mat3x3d A = sd->getA();
+    Vector3d t = sd->getTrq();
+    propertyTemp = A * t;
+    torques_[frame].push_back( propertyTemp );
+    sumTorques_ += propertyTemp;
     torquesCount_++;
     return torques_[frame].size() - 1;
   }

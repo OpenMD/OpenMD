@@ -62,8 +62,11 @@ namespace OpenMD {
   }
   
   int ForceAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    forces_[frame].push_back( sd->getA() * sd->getFrc() );
-    sumForces_ += sd->getFrc();
+    Mat3x3d A = sd->getA();
+    Vector3d f = sd->getFrc();
+    propertyTemp = A * f;
+    forces_[frame].push_back( propertyTemp );
+    sumForces_ += propertyTemp;
     forcesCount_++;
     return forces_[frame].size() - 1;
   }

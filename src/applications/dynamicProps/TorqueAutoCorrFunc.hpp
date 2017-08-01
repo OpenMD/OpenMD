@@ -60,6 +60,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > torques_;
     Vector3d sumTorques_;
     int torquesCount_;
+    Vector3d propertyTemp; 
   };
 }
 #endif

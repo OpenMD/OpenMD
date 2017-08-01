@@ -65,6 +65,7 @@ namespace OpenMD {
     Vector3d sumTorques_;
     
     int forcesCount_, torquesCount_;
+    Vector3d propertyTemp; 
   };
 }
 #endif

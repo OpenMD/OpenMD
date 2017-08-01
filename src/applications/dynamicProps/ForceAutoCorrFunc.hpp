@@ -59,6 +59,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > forces_;
     Vector3d sumForces_;
     int forcesCount_;
+    Vector3d propertyTemp; 
   };
 }
 #endif
