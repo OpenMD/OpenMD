@@ -173,8 +173,6 @@ namespace OpenMD {
     std::vector<int>::iterator i1;
     std::vector<int>::iterator i2;
 
-    RealType corrVal(0.0);
-
     s1 = sele1ToIndex_[frame1];
 
     if (uniqueSelections_) 
@@ -200,8 +198,8 @@ namespace OpenMD {
           
       if ( i1 == s1.end() || i2 == s2.end() ) break;
 
-      corrVal = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(),
-                            timeBin);
+      calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(),
+                  timeBin);
     }
   }
   

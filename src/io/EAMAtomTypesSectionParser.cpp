@@ -46,6 +46,10 @@
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
 
+#ifndef FIX_UNUSED
+#define FIX_UNUSED(X) (void) (X) /* avoid warnings for unused params */
+#endif
+
 using namespace std;
 namespace OpenMD {
 
@@ -186,6 +190,9 @@ namespace OpenMD {
 	simError();  
       }
     }
+
+    FIX_UNUSED(atomicNumber);
+    FIX_UNUSED(atomicMass);
    
     if (ppfStream->getline(buffer, bufferSize)) {
       StringTokenizer tokenizer2(buffer);
