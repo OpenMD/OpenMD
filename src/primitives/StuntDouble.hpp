@@ -1199,24 +1199,24 @@ namespace OpenMD{
     }       
 
     /**
-     * Returns the previous charge force of this stuntDouble
-     * @return the charge force of this stuntDouble
+     * Returns the previous site potential of this stuntDouble
+     * @return the site potential of this stuntDouble
      */    
     RealType getPrevSitePotential() {
       return ((snapshotMan_->getPrevSnapshot())->*storage_).sitePotential[localIndex_];
     }
        
     /**
-     * Returns the current charge force of this stuntDouble
-     * @return the charge force of this stuntDouble
+     * Returns the current site potential of this stuntDouble
+     * @return the site potential of this stuntDouble
      */    
     RealType getSitePotential() {
       return ((snapshotMan_->getCurrentSnapshot())->*storage_).sitePotential[localIndex_];
     }
 
     /**
-     * Returns the charge force of this stuntDouble in specified snapshot
-     * @return the charge force of this stuntDouble
+     * Returns the site potential of this stuntDouble in specified snapshot
+     * @return the site potential of this stuntDouble
      * @param snapshotNo
      */    
     RealType getSitePotential(int snapshotNo) {
@@ -1224,8 +1224,8 @@ namespace OpenMD{
     }
 
     /**
-     * Sets  the previous charge force of this stuntDouble
-     * @param spot  new charge force 
+     * Sets  the previous site potential of this stuntDouble
+     * @param spot  new site potential 
      * @see #getSitePotential
      */         
     void setPrevSitePotential(RealType spot) {
@@ -1233,16 +1233,16 @@ namespace OpenMD{
     }
        
     /**
-     * Sets  the current charge force of this stuntDouble
-     * @param spot  new charge force 
+     * Sets  the current site potential of this stuntDouble
+     * @param spot  new site potential 
      */         
     void setSitePotential(RealType spot) {
       ((snapshotMan_->getCurrentSnapshot())->*storage_).sitePotential[localIndex_] = spot;
     }
 
     /**
-     * Sets  the charge force of this stuntDouble in specified snapshot
-     * @param spot charge force to be set 
+     * Sets  the site potential of this stuntDouble in specified snapshot
+     * @param spot site potential to be set 
      * @param snapshotNo 
      * @see #getSitePotential
      */         
@@ -1251,8 +1251,8 @@ namespace OpenMD{
     }
 
     /**
-     * Adds charge force into the previous charge force of this stuntDouble
-     * @param spot   charge force to be added 
+     * Adds site potential into the previous charge force of this stuntDouble
+     * @param spot   site potential to be added 
      * @see #getSitePotential
      */         
     void addPrevSitePotential(RealType spot) {
@@ -1260,16 +1260,16 @@ namespace OpenMD{
     }
        
     /**
-     * Adds charge force into the current charge force of this stuntDouble
-     * @param spot   charge force to be added 
+     * Adds site potential into the current charge force of this stuntDouble
+     * @param spot   site potential to be added 
      */         
     void addSitePotential(RealType spot) {
       ((snapshotMan_->getCurrentSnapshot())->*storage_).sitePotential[localIndex_] += spot;
     }
 
     /**
-     * Adds charge force into the charge force of this stuntDouble in specified snapshot
-     * @param spot charge force to be added
+     * Adds site potential into the site potential of this stuntDouble in specified snapshot
+     * @param spot site potential to be added
      * @param snapshotNo 
      * @see #getSitePotential
      */         
@@ -1277,6 +1277,84 @@ namespace OpenMD{
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).sitePotential[localIndex_] += spot;
     }       
 
+    /**
+     * Returns the previous density of this stuntDouble
+     * @return the density of this stuntDouble
+     */    
+    RealType getPrevDensity() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).density[localIndex_];
+    }
+       
+    /**
+     * Returns the current density of this stuntDouble
+     * @return the density of this stuntDouble
+     */    
+    RealType getDensity() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).density[localIndex_];
+    }
+
+    /**
+     * Returns the density of this stuntDouble in specified snapshot
+     * @return the density of this stuntDouble
+     * @param snapshotNo
+     */    
+    RealType getDensity(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).density[localIndex_];
+    }
+
+    /**
+     * Sets  the previous density of this stuntDouble
+     * @param dens  new density 
+     * @see #getDensity
+     */         
+    void setPrevDensity(RealType dens) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).density[localIndex_] = dens;
+    }
+       
+    /**
+     * Sets  the current density of this stuntDouble
+     * @param dens  new density 
+     */         
+    void setDensity(RealType dens) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).density[localIndex_] = dens;
+    }
+
+    /**
+     * Sets  the density of this stuntDouble in specified snapshot
+     * @param dens density to be set 
+     * @param snapshotNo 
+     * @see #getDensity
+     */         
+    void setDensity(RealType dens, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).density[localIndex_] = dens;
+    }
+
+    /**
+     * Adds density into the previous charge force of this stuntDouble
+     * @param dens   density to be added 
+     * @see #getDensity
+     */         
+    void addPrevDensity(RealType dens) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).density[localIndex_] += dens;
+    }
+       
+    /**
+     * Adds density into the current charge force of this stuntDouble
+     * @param dens   density to be added 
+     */         
+    void addDensity(RealType dens) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).density[localIndex_] += dens;
+    }
+
+    /**
+     * Adds density into the density of this stuntDouble in specified snapshot
+     * @param dens density to be added
+     * @param snapshotNo 
+     * @see #getDensity
+     */         
+    void addDensity(RealType dens, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).density[localIndex_] += dens;
+    }       
 
 
     /** Set the force of this stuntDouble to zero */

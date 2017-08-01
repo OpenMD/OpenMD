@@ -156,6 +156,8 @@ namespace OpenMD {
                                             "outputFluctuatingCharges", false);
     DefineOptionalParameterWithDefaultValue(OutputSitePotential, 
                                             "outputSitePotential", false);
+    DefineOptionalParameterWithDefaultValue(OutputDensity, 
+                                            "outputDensity", false);
     DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 
                                             1.0);
     DefineOptionalParameterWithDefaultValue(StatFileFormat, 

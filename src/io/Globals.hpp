@@ -118,6 +118,7 @@ namespace OpenMD {
     DeclareParameter(OutputElectricField, bool);
     DeclareParameter(OutputFluctuatingCharges, bool);
     DeclareParameter(OutputSitePotential, bool);
+    DeclareParameter(OutputDensity, bool);
     DeclareParameter(SkinThickness, RealType);
     DeclareParameter(StatFileFormat, std::string);    
     DeclareParameter(StatFilePrecision, int);    

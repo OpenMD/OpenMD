@@ -74,9 +74,10 @@ namespace OpenMD {
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
     needSitePotential_ = simParams->getOutputSitePotential();
+    needDensity_       = simParams->getOutputDensity();
 
-    if (needParticlePot_ || needFlucQ_ || needElectricField_ ||
-        needSitePotential_) {
+    if ( needParticlePot_ || needFlucQ_ || needElectricField_ ||
+         needSitePotential_ || needDensity_ ) {
       doSiteData_ = true;
     } else {
       doSiteData_ = false;
@@ -125,9 +126,10 @@ namespace OpenMD {
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
     needSitePotential_ = simParams->getOutputSitePotential();
+    needDensity_       = simParams->getOutputDensity();
 
-    if (needParticlePot_ || needFlucQ_ || needElectricField_ ||
-        needSitePotential_) {
+    if ( needParticlePot_ || needFlucQ_ || needElectricField_ ||
+         needSitePotential_ || needDensity_ ) {
       doSiteData_ = true;
     } else {
       doSiteData_ = false;
@@ -164,8 +166,9 @@ namespace OpenMD {
 
   }
 
-  DumpWriter::DumpWriter(SimInfo* info, const std::string& filename, bool writeDumpFile)
-    : info_(info), filename_(filename){
+  DumpWriter::DumpWriter(SimInfo* info, const std::string& filename,
+                         bool writeDumpFile)
+    : info_(info), filename_(filename) {
 
     Globals* simParams = info->getSimParams();
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";
@@ -176,9 +179,10 @@ namespace OpenMD {
     needFlucQ_         = simParams->getOutputFluctuatingCharges();
     needElectricField_ = simParams->getOutputElectricField();
     needSitePotential_ = simParams->getOutputSitePotential();
+    needDensity_       = simParams->getOutputDensity();
 
     if (needParticlePot_ || needFlucQ_ || needElectricField_ ||
-        needSitePotential_) {
+        needSitePotential_ || needDensity_ ) {
       doSiteData_ = true;
     } else {
       doSiteData_ = false;
@@ -639,7 +643,8 @@ namespace OpenMD {
     return std::string(tempBuffer);
   }
 
-  std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex, int siteIndex) {
+  std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex,
+                                          int siteIndex) {
     int storageLayout = info_->getSnapshotManager()->getStorageLayout();
 
     std::string id;
@@ -752,6 +757,22 @@ namespace OpenMD {
       }
     }
 
+    if (needDensity_) {
+      if (storageLayout & DataStorage::dslDensity) {
+        type += "d";
+        RealType density = sd->getDensity();
+        if (std::isinf(density) || std::isnan(density)) {
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the density "
+                   " for object %s", id.c_str());
+          painCave.isFatal = 1;
+          simError();
+        }
+        sprintf(tempBuffer, " %13e", density);
+        line += tempBuffer;
+      }
+    }
+    
     sprintf(tempBuffer, "%s %7s %s\n", id.c_str(), type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }

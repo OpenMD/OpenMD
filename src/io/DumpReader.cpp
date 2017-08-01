@@ -510,6 +510,14 @@ namespace OpenMD {
         sd->setSitePotential(sPot);          
         break;
       }
+      case 'd' : {
+        
+        RealType density;
+        density = tokenizer.nextTokenAsDouble(); 
+        sd->setDensity(density);          
+        break;
+      }
+
       default: {
         sprintf(painCave.errMsg, 
                 "DumpReader Error: %s is an unrecognized type\n",
@@ -630,6 +638,13 @@ namespace OpenMD {
         sd->setSitePotential(sPot);          
         break;
       }
+      case 'd' : {
+        
+        RealType dens;
+        dens = tokenizer.nextTokenAsDouble(); 
+        sd->setDensity(dens);          
+        break;
+      }        
       default: {
         sprintf(painCave.errMsg, 
                 "DumpReader Error: %s is an unrecognized type\n", type.c_str());
