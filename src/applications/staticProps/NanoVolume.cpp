@@ -80,9 +80,10 @@ void NanoVolume::process() {
   StuntDouble* sd;
   Vector3d vec;
   int i;
-
-  AlphaHull* thishull = new AlphaHull(2.0);
-  //ConvexHull* thishull = new ConvexHull();
+  
+  // Do convex hull for now - alpha has issues with perfect structures
+  //AlphaHull* thishull = new AlphaHull(2.0);
+  ConvexHull* thishull = new ConvexHull();
   
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();
@@ -123,10 +124,11 @@ void NanoVolume::process() {
     // Generate convex hull for this frame.
     thishull->computeHull(theAtoms_);
     RealType volume = thishull->getVolume();
+    RealType surfaceArea = thishull->getArea();
 
     osq.precision(7);
     if (osq.is_open()){
-      osq << time << "\t" << volume << std::endl;      
+      osq << time << "\t" << volume << "\t"  << surfaceArea << std::endl;      
     }
   }
   osq.close();
