@@ -65,7 +65,7 @@ const char *gengetopt_args_info_help[] = {
   "      --radius=DOUBLE           nanoparticle radius",
   "  -v, --voxelSize=DOUBLE        voxel size (angstroms)",
   "      --gaussWidth=DOUBLE       Gaussian width (angstroms)",
-  "      --priviledgedAxis=STRING  which axis is special for spatial analysis\n                                  (default = z axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`z')",
+  "      --privilegedAxis=ENUM     which axis is special for spatial analysis\n                                  (default = z axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`z')",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --ior                     icosahedral bond order parameter as a function\n                                  of radius (--rcut must be specified)",
@@ -119,6 +119,7 @@ typedef enum {ARG_NO
   , ARG_STRING
   , ARG_INT
   , ARG_DOUBLE
+  , ARG_ENUM
 } cmdline_parser_arg_type;
 
 static
@@ -133,7 +134,7 @@ cmdline_parser_internal (int argc, char **argv, struct gengetopt_args_info *args
 static int
 cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
 
-const char *cmdline_parser_priviledgedAxis_values[] = {"x", "y", "z", 0}; /*< Possible values for priviledgedAxis. */
+const char *cmdline_parser_privilegedAxis_values[] = {"x", "y", "z", 0}; /*< Possible values for privilegedAxis. */
 
 static char *
 gengetopt_strdup (const char *s);
@@ -173,7 +174,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->radius_given = 0 ;
   args_info->voxelSize_given = 0 ;
   args_info->gaussWidth_given = 0 ;
-  args_info->priviledgedAxis_given = 0 ;
+  args_info->privilegedAxis_given = 0 ;
   args_info->bo_given = 0 ;
   args_info->ior_given = 0 ;
   args_info->for_given = 0 ;
@@ -275,8 +276,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->radius_orig = NULL;
   args_info->voxelSize_orig = NULL;
   args_info->gaussWidth_orig = NULL;
-  args_info->priviledgedAxis_arg = gengetopt_strdup ("z");
-  args_info->priviledgedAxis_orig = NULL;
+  args_info->privilegedAxis_arg = privilegedAxis_arg_z;
+  args_info->privilegedAxis_orig = NULL;
   
 }
 
@@ -317,7 +318,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->radius_help = gengetopt_args_info_help[29] ;
   args_info->voxelSize_help = gengetopt_args_info_help[30] ;
   args_info->gaussWidth_help = gengetopt_args_info_help[31] ;
-  args_info->priviledgedAxis_help = gengetopt_args_info_help[32] ;
+  args_info->privilegedAxis_help = gengetopt_args_info_help[32] ;
   args_info->bo_help = gengetopt_args_info_help[34] ;
   args_info->ior_help = gengetopt_args_info_help[35] ;
   args_info->for_help = gengetopt_args_info_help[36] ;
@@ -487,8 +488,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->radius_orig));
   free_string_field (&(args_info->voxelSize_orig));
   free_string_field (&(args_info->gaussWidth_orig));
-  free_string_field (&(args_info->priviledgedAxis_arg));
-  free_string_field (&(args_info->priviledgedAxis_orig));
+  free_string_field (&(args_info->privilegedAxis_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -629,8 +629,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "voxelSize", args_info->voxelSize_orig, 0);
   if (args_info->gaussWidth_given)
     write_into_file(outfile, "gaussWidth", args_info->gaussWidth_orig, 0);
-  if (args_info->priviledgedAxis_given)
-    write_into_file(outfile, "priviledgedAxis", args_info->priviledgedAxis_orig, cmdline_parser_priviledgedAxis_values);
+  if (args_info->privilegedAxis_given)
+    write_into_file(outfile, "privilegedAxis", args_info->privilegedAxis_orig, cmdline_parser_privilegedAxis_values);
   if (args_info->bo_given)
     write_into_file(outfile, "bo", 0, 0 );
   if (args_info->ior_given)
@@ -1567,6 +1567,9 @@ int update_arg(void *field, char **orig_field,
   case ARG_DOUBLE:
     if (val) *((double *)field) = strtod (val, &stop_char);
     break;
+  case ARG_ENUM:
+    if (val) *((int *)field) = found;
+    break;
   case ARG_STRING:
     if (val) {
       string_field = (char **)field;
@@ -1686,7 +1689,7 @@ cmdline_parser_internal (
         { "radius",	1, NULL, 0 },
         { "voxelSize",	1, NULL, 'v' },
         { "gaussWidth",	1, NULL, 0 },
-        { "priviledgedAxis",	1, NULL, 0 },
+        { "privilegedAxis",	1, NULL, 0 },
         { "bo",	0, NULL, 0 },
         { "ior",	0, NULL, 0 },
         { "for",	0, NULL, 0 },
@@ -2267,15 +2270,15 @@ cmdline_parser_internal (
           
           }
           /* which axis is special for spatial analysis (default = z axis).  */
-          else if (strcmp (long_options[option_index].name, "priviledgedAxis") == 0)
+          else if (strcmp (long_options[option_index].name, "privilegedAxis") == 0)
           {
           
           
-            if (update_arg( (void *)&(args_info->priviledgedAxis_arg), 
-                 &(args_info->priviledgedAxis_orig), &(args_info->priviledgedAxis_given),
-                &(local_args_info.priviledgedAxis_given), optarg, cmdline_parser_priviledgedAxis_values, "z", ARG_STRING,
+            if (update_arg( (void *)&(args_info->privilegedAxis_arg), 
+                 &(args_info->privilegedAxis_orig), &(args_info->privilegedAxis_given),
+                &(local_args_info.privilegedAxis_given), optarg, cmdline_parser_privilegedAxis_values, "z", ARG_ENUM,
                 check_ambiguity, override, 0, 0,
-                "priviledgedAxis", '-',
+                "privilegedAxis", '-',
                 additional_error))
               goto failure;
           

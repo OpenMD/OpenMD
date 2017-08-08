@@ -56,7 +56,7 @@ option  "end"           -       "end internal index"                            
 option  "radius"        -       "nanoparticle radius" double no
 option  "voxelSize"     v       "voxel size (angstroms)" double no
 option  "gaussWidth"    -       "Gaussian width (angstroms)" double no
-option  "priviledgedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" default="z" optional
+option  "privilegedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
 defgroup "staticProps" groupdesc=" an option of this group is required" yes
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"
 groupoption "ior"       -       "icosahedral bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"

@@ -202,15 +202,23 @@ int main(int argc, char* argv[]){
     nanglebins = args_info.nbins_arg;
   }
 
-  // convert priviledgedAxis to corresponding integer
+  // convert privilegedAxis to corresponding integer
   // x axis -> 0
   // y axis -> 1
   // z axis -> 2 (default)
-  int priviledgedAxis = 2;
-  if (args_info.priviledgedAxis_given){
-    if (strncmp(args_info.priviledgedAxis_arg,"x",1) == 0) priviledgedAxis = 0;
-    if (strncmp(args_info.priviledgedAxis_arg,"y",1) == 0) priviledgedAxis = 1;
-    if (strncmp(args_info.priviledgedAxis_arg,"z",1) == 0) priviledgedAxis = 2;
+
+  int privilegedAxis;
+  switch (args_info.privilegedAxis_arg) {
+  case privilegedAxis_arg_x:
+    privilegedAxis = 0;
+    break;
+  case privilegedAxis_arg_y:
+    privilegedAxis = 1;
+    break;
+  case privilegedAxis_arg_z:
+  default:
+    privilegedAxis = 2;
+    break;
   }
 
       
@@ -225,7 +233,7 @@ int main(int argc, char* argv[]){
 		       args_info.nbins_arg);
   } else if (args_info.r_z_given) {
     analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen, 
-			  nrbins, args_info.nbins_z_arg);
+			  nrbins, args_info.nbins_z_arg, privilegedAxis);
   } else if (args_info.r_theta_given) {
     if (args_info.sele3_given) 
       analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, sele3, maxLen,
@@ -330,7 +338,7 @@ int main(int argc, char* argv[]){
       analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
                                           args_info.rcut_arg, 
                                           args_info.nbins_arg,
-					  priviledgedAxis);
+					  privilegedAxis);
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");

@@ -106,6 +106,7 @@ namespace OpenMD {
     std::vector<RealType> sliceQ_;
     std::vector<int> sliceCount_;
     int axis_;
+    std::string axisLabel_;
   };
 }
 #endif

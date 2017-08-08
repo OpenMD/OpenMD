@@ -59,7 +59,8 @@ namespace OpenMD {
                                              double rCut, int nzbins, int axis) 
     : StaticAnalyser(info, filename, nzbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
-      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
+      axis_(axis) {
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -73,9 +74,19 @@ namespace OpenMD {
     // Set up cutoff radius:    
     rCut_ = rCut;
 
-    // Set priviledged axis
-    axis_ = axis;
-
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+    
     // fixed number of bins
     sliceQ_.resize(nBins_);
     sliceCount_.resize(nBins_);    
@@ -220,11 +231,13 @@ namespace OpenMD {
 
     std::ofstream qZstream(outputFilename_.c_str());
     if (qZstream.is_open()) {
-      qZstream << "#Tetrahedrality Parameters (z)\n";
+
+      qZstream << "#Tetrahedrality Parameters (" << axisLabel_ << ")\n";
+
       qZstream << "#nFrames:\t" << zBox_.size() << "\n";
       qZstream << "#selection 1: (" << selectionScript1_ << ")\n";
       qZstream << "#selection 2: (" << selectionScript2_ << ")\n";
-      qZstream << "#z\tQk\n";
+      qZstream << "#" << axisLabel_ << "\tQk\n";
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType z = zAve * (i+0.5) / sliceQ_.size();
         if (sliceCount_[i] != 0) {
