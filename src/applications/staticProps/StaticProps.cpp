@@ -201,7 +201,19 @@ int main(int argc, char* argv[]){
   } else {
     nanglebins = args_info.nbins_arg;
   }
-  
+
+  // convert priviledgedAxis to corresponding integer
+  // x axis -> 0
+  // y axis -> 1
+  // z axis -> 2 (default)
+  int priviledgedAxis = 2;
+  if (args_info.priviledgedAxis_given){
+    if (strncmp(args_info.priviledgedAxis_arg,"x",1) == 0) priviledgedAxis = 0;
+    if (strncmp(args_info.priviledgedAxis_arg,"y",1) == 0) priviledgedAxis = 1;
+    if (strncmp(args_info.priviledgedAxis_arg,"z",1) == 0) priviledgedAxis = 2;
+  }
+
+      
   StaticAnalyser* analyser;
   
                                        
@@ -318,7 +330,7 @@ int main(int argc, char* argv[]){
       analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
                                           args_info.rcut_arg, 
                                           args_info.nbins_arg,
-					  args_info.priviledgedAxis_arg);
+					  priviledgedAxis);
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
