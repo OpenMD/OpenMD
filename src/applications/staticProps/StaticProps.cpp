@@ -317,7 +317,8 @@ int main(int argc, char* argv[]){
     if (args_info.rcut_given) {	  
       analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
                                           args_info.rcut_arg, 
-                                          args_info.nbins_arg);
+                                          args_info.nbins_arg,
+					  args_info.priviledgedAxis_arg);
     } else {
       sprintf( painCave.errMsg,
 	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");

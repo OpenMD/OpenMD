@@ -129,6 +129,9 @@ struct gengetopt_args_info
   double gaussWidth_arg;	/**< @brief Gaussian width (angstroms).  */
   char * gaussWidth_orig;	/**< @brief Gaussian width (angstroms) original value given at command line.  */
   const char *gaussWidth_help; /**< @brief Gaussian width (angstroms) help description.  */
+  char * priviledgedAxis_arg;	/**< @brief which axis is special for spatial analysis (default = z axis) (default='z').  */
+  char * priviledgedAxis_orig;	/**< @brief which axis is special for spatial analysis (default = z axis) original value given at command line.  */
+  const char *priviledgedAxis_help; /**< @brief which axis is special for spatial analysis (default = z axis) help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -207,6 +210,7 @@ struct gengetopt_args_info
   unsigned int radius_given ;	/**< @brief Whether radius was given.  */
   unsigned int voxelSize_given ;	/**< @brief Whether voxelSize was given.  */
   unsigned int gaussWidth_given ;	/**< @brief Whether gaussWidth was given.  */
+  unsigned int priviledgedAxis_given ;	/**< @brief Whether priviledgedAxis was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */
@@ -378,6 +382,8 @@ void cmdline_parser_free (struct gengetopt_args_info *args_info);
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_priviledgedAxis_values[];  /**< @brief Possible values for priviledgedAxis. */
 
 
 #ifdef __cplusplus

@@ -82,7 +82,7 @@ namespace OpenMD {
   public:
     TetrahedralityParamZ(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2, 
-                         double rCut, int nzbins);
+                         double rCut, int nzbins, int axis=2);
     int getNZBins(){
       return nZBins_;
     }
@@ -105,6 +105,7 @@ namespace OpenMD {
     std::vector<RealType> zBox_;
     std::vector<RealType> sliceQ_;
     std::vector<int> sliceCount_;
+    int axis_;
   };
 }
 #endif

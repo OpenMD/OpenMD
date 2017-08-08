@@ -56,7 +56,7 @@ namespace OpenMD {
                                              const std::string& filename, 
                                              const std::string& sele1,
                                              const std::string& sele2,
-                                             double rCut, int nzbins) 
+                                             double rCut, int nzbins, int axis) 
     : StaticAnalyser(info, filename, nzbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
@@ -72,6 +72,9 @@ namespace OpenMD {
     
     // Set up cutoff radius:    
     rCut_ = rCut;
+
+    // Set priviledged axis
+    axis_ = axis;
 
     // fixed number of bins
     sliceQ_.resize(nBins_);
@@ -113,9 +116,9 @@ namespace OpenMD {
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
       Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(2,2));
+      zBox_.push_back(hmat(axis_,axis_));
       
-      RealType halfBoxZ_ = hmat(2,2) / 2.0;      
+      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
 
       if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -195,7 +198,7 @@ namespace OpenMD {
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(rk);
           
-          int binNo = int(nBins_ * (halfBoxZ_ + rk.z()) / hmat(2,2));
+          int binNo = int(nBins_ * (halfBoxZ_ + rk[axis_]) / hmat(axis_,axis_));
           sliceQ_[binNo] += Qk;
           sliceCount_[binNo] += 1;
         }  
