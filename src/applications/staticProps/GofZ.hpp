@@ -49,7 +49,7 @@ namespace OpenMD {
     
   public:
     GofZ(SimInfo* info, const std::string& filename, const std::string& sele1, 
-	 const std::string& sele2, RealType len, int nrbins);
+	 const std::string& sele2, RealType len, int nrbins, int axis=2);
 
     int getNRBins() {
       return nRBins_; 
@@ -75,6 +75,9 @@ namespace OpenMD {
         
     std::vector<int> histogram_;
     std::vector<RealType> avgGofz_;
+    int axis_;
+    std::string axisLabel_;
+
   };
 
 }

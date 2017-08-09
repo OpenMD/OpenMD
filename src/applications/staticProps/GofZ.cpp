@@ -47,8 +47,8 @@
 
 namespace OpenMD {
 
-  GofZ::GofZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
+  GofZ::GofZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int axis)
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), axis_(axis) {
 
       deltaZ_ = len_ /nBins_;
       rC_ = len_ / 2.0;
@@ -57,7 +57,22 @@ namespace OpenMD {
       avgGofz_.resize(nBins_);
 
       setOutputName(getPrefix(filename) + ".gofz");
-    }
+
+      // Set the axis label for the privileged axis
+      switch(axis_) {
+      case 0:
+	axisLabel_ = "x";
+	break;
+      case 1:
+	axisLabel_ = "y";
+	break;
+      case 2:
+      default:
+	axisLabel_ = "z";
+	break;
+      }
+      
+  }
 
 
   void GofZ::preProcess() {
@@ -102,11 +117,11 @@ namespace OpenMD {
       currentSnapshot_->wrapVector(r12);
 
     RealType distance = r12.length();
-    RealType z2 = r12.z()*r12.z();
+    RealType z2 = r12[axis_]*r12[axis_];
     RealType xydist = sqrt(distance*distance - z2);
 
     if (xydist < rC_) {
-      RealType thisZ = abs(r12.z());
+      RealType thisZ = abs(r12[axis_]);
       int whichBin = int(thisZ / deltaZ_);
       histogram_[whichBin] += 2;
     }
@@ -116,7 +131,7 @@ namespace OpenMD {
   void GofZ::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-      rdfStream << "#z-separation distribution function\n";
+      rdfStream << "#" << axisLabel_ << "-separation distribution function\n";
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#r\tcorrValue\n";
