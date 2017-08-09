@@ -51,7 +51,7 @@ namespace OpenMD {
   class RNEMDZ : public SlabStatistics {
     
   public:
-    RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);    
+    RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins, int axis=2);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
 
@@ -59,6 +59,8 @@ namespace OpenMD {
     OutputData* temperature;
     OutputData* velocity;
     OutputData* density;
+    int axis_;
+ 
   };
 
   class RNEMDR : public ShellStatistics {

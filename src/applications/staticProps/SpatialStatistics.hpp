@@ -83,7 +83,7 @@ namespace OpenMD {
   class SlabStatistics : public SpatialStatistics {
   public: 
     SlabStatistics(SimInfo* info, const string& filename,
-                   const string& sele, int nbins);
+                   const string& sele, int nbins, int axis);
     virtual ~SlabStatistics();
 
     virtual int getBin(Vector3d pos);
@@ -92,6 +92,8 @@ namespace OpenMD {
     OutputData* z_;
     Mat3x3d hmat_;
     RealType volume_;
+    int axis_;
+    std::string axisLabel_;
 
   };
 

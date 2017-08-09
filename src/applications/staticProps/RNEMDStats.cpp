@@ -49,9 +49,10 @@
 namespace OpenMD {
   
   RNEMDZ::RNEMDZ(SimInfo* info, const std::string& filename, 
-                 const std::string& sele, int nzbins)
-    : SlabStatistics(info, filename, sele, nzbins) {
-        
+                 const std::string& sele, int nzbins, int axis)
+    : SlabStatistics(info, filename, sele, nzbins, axis), axis_(axis) {
+
+    
     setOutputName(getPrefix(filename) + ".rnemdZ");
     
     temperature = new OutputData;
@@ -83,6 +84,7 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nBins_; i++) 
       density->accumulator.push_back( new Accumulator() );
     data_.push_back(density);
+
   }
 
   void RNEMDZ::processFrame(int istep) {
@@ -90,7 +92,7 @@ namespace OpenMD {
 
     hmat_ = currentSnapshot_->getHmat();
     for (unsigned int i = 0; i < nBins_; i++) {
-      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(2,2);
+      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
     volume_ = currentSnapshot_->getVolume();
