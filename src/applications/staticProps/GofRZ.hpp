@@ -48,37 +48,42 @@ namespace OpenMD {
     class GofRZ : public RadialDistrFunc {
     
     public:
-	GofRZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins);
+      GofRZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins, int axis=2);
 
-	int getNRBins() {
-	    return nRBins_; 
-	}
-    
-	RealType getLength() {
-	    return len_;
-	}
-
-	int getNZBins() {return nZBins_;}
-        
+      int getNRBins() {
+	return nRBins_; 
+      }
+      
+      RealType getLength() {
+	return len_;
+      }
+      
+      int getNZBins() {return nZBins_;}
+      
     private:
-
-	virtual void preProcess();
-	virtual void initializeHistogram();
-	virtual void processHistogram();
-	virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-
-	virtual void writeRdf();
-
-	RealType len_;
-	RealType zLen_;
-	int nRBins_;
-	RealType deltaR_;
-	int nZBins_;
-	RealType deltaZ_;
-        
-	std::vector<std::vector<int> > histogram_;
-	std::vector<std::vector<RealType> > avgGofr_;
-	int npairs_;
+      
+      virtual void preProcess();
+      virtual void initializeHistogram();
+      virtual void processHistogram();
+      virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+      
+      virtual void writeRdf();
+      
+      RealType len_;
+      RealType zLen_;
+      int nRBins_;
+      RealType deltaR_;
+      int nZBins_;
+      RealType deltaZ_;
+      
+      std::vector<std::vector<int> > histogram_;
+      std::vector<std::vector<RealType> > avgGofr_;
+      int npairs_;
+      int axis_;
+      std::string axisLabel_;
+      int xaxis_;
+      int yaxis_; 
+      
     };
 }
 #endif

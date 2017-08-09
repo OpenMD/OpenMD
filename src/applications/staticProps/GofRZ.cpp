@@ -48,8 +48,8 @@
 namespace OpenMD {
 
   GofRZ::GofRZ(SimInfo* info, const std::string& filename, const std::string& sele1, 
-               const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), zLen_(zlen), nZBins_(nZBins){
+               const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins, int axis)
+    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), zLen_(zlen), nZBins_(nZBins), axis_(axis){
 
     setOutputName(getPrefix(filename) + ".gofrz");
 
@@ -61,7 +61,25 @@ namespace OpenMD {
     for (unsigned int i = 0 ; i < nBins_; ++i) {
       histogram_[i].resize(nZBins_);
       avgGofr_[i].resize(nZBins_);
-    } 
+    }
+
+    // Compute complementary axes to the privileged axis
+    xaxis_ = (axis_ + 1) % 3;
+    yaxis_ = (axis_ + 2) % 3;
+
+    // Set the axis label for the privileged axis
+     switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
   }
 
   void GofRZ::preProcess() {
@@ -109,13 +127,13 @@ namespace OpenMD {
     if (usePeriodicBoundaryConditions_)
       currentSnapshot_->wrapVector(r12);
 
-    RealType distance = sqrt(pow(r12.x(), 2) + pow(r12.y(), 2));
+    RealType distance = sqrt(pow(r12[xaxis_], 2) + pow(r12[yaxis_], 2));
 
     int whichRBin = int(distance / deltaR_);
 
     if (distance <= len_) {
      
-      RealType Z = fabs(r12.z());
+      RealType Z = fabs(r12[axis_]);
 
       if (Z <= zLen_) {
         int whichZBin = int(Z / deltaZ_);
@@ -133,7 +151,7 @@ namespace OpenMD {
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#nBins = " << nBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
-      rdfStream << "#nZBins =" << nZBins_ << "\t deltaZ = " << deltaZ_ << "\n";
+      rdfStream << "#n" << axisLabel_ << "Bins =" << nZBins_ << "\t delta" << axisLabel_ << " = " << deltaZ_ << "\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
         // RealType r = deltaR_ * (i + 0.5);
 
