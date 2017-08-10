@@ -366,8 +366,8 @@ sub printMetaData {
   nMol = $nMol;
 }
 
-ensemble = NVE;
-forceField = \"Amber\";
+ensemble = NVT;
+forceField = \"Water\";
 electrostaticSummationMethod = \"shifted_force\";
 electrostaticScreeningMethod = \"damped\";
 cutoffRadius = $cutoff;
@@ -432,6 +432,7 @@ sub printWaterMD {
   printTRED();
   printTIP3P();
   printTIP4P();
+  printTIP4PIce();
   printTIP4PEw();
   printTIP5P();
   printTIP5PE();
@@ -600,6 +601,34 @@ sub printTIP4P {
   atom[3]{
     type = \"EP_TIP4P\";
     position( 0.0, 0.0, 0.08444 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3);
+  }
+
+}"
+}
+
+sub printTIP4PIce {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P-Ice\";
+  
+  atom[0]{
+    type = \"O_TIP4P-Ice\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP4P-Ice\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP4P-Ice\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P-Ice\";
+    position( 0.0, 0.0, 0.09214 );
   }
 
   rigidBody[0]{
@@ -801,6 +830,7 @@ sub validateWater {
   elsif ($waterName eq 'CG2')      { $waterCase = 14;   }
   elsif ($waterName eq 'SSDQ')     { $waterCase = 15;   }
   elsif ($waterName eq 'SSDQO')    { $waterCase = 16;   }
+  elsif ($waterName eq 'TIP4P-Ice'){ $waterCase = 17;	}
   else                             { $invalidWater = 1; }
 }
 
@@ -822,4 +852,5 @@ sub printWaterModel {
   elsif ($waterCase == 14) { printCG2();     }
   elsif ($waterCase == 15) { printSSDQ();    }
   elsif ($waterCase == 16) { printSSDQO();   }
+  elsif	($waterCase == 17) { printTIP4PIce();}
 }
