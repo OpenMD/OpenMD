@@ -434,10 +434,12 @@ sub printWaterMD {
   printTIP4P();
   printTIP4PIce();
   printTIP4PEw();
+  printTIP4P2005();
   printTIP5P();
   printTIP5PE();
   printSPCE();
   printSPC();
+  printSPCHW();
   printDPD();
   printCG2();
   print WATERMD "\n\n#endif";
@@ -666,6 +668,34 @@ sub printTIP4PEw {
 }"
 }
 
+sub printTIP4P2005 {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P-2005\";
+  
+  atom[0]{
+    type = \"O_TIP4P-2005\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP4P-2005\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP4P-2005\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P-2005\";
+    position( 0.0, 0.0, 0.08904 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3);
+  }
+
+}"
+}
+
 sub printTIP5P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP5P\";
@@ -778,6 +808,31 @@ print $waterFileHandle "\n\nmolecule{
 }"
 }
 
+
+sub printSPCHW {
+print $waterFileHandle "\n\nmolecule{
+  name = \"SPC-HW\";
+  
+  atom[0]{
+    type = \"O_SPC-HW\";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = \"D_SPC-HW\";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = \"D_SPC-HW\";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+  
+  rigidBody[0]{
+    members(0, 1, 2);
+  }
+
+}"
+}
+
 sub printDPD {
   print $waterFileHandle "\n\nmolecule{
   name = \"DPD\";
@@ -831,6 +886,8 @@ sub validateWater {
   elsif ($waterName eq 'SSDQ')     { $waterCase = 15;   }
   elsif ($waterName eq 'SSDQO')    { $waterCase = 16;   }
   elsif ($waterName eq 'TIP4P-Ice'){ $waterCase = 17;	}
+  elsif ($waterName eq 'TIP4P-2005'){ $switchCase = 18; }
+  elsif ($waterName eq 'SPC-HW')   { $waterCase == 19;	}
   else                             { $invalidWater = 1; }
 }
 
@@ -853,4 +910,6 @@ sub printWaterModel {
   elsif ($waterCase == 15) { printSSDQ();    }
   elsif ($waterCase == 16) { printSSDQO();   }
   elsif	($waterCase == 17) { printTIP4PIce();}
+  elsif($waterCase == 18)  { printTIP4P2005();}
+  elsif($waterCase == 19)  { printSPCHW();   }
 }
