@@ -124,12 +124,26 @@ namespace OpenMD {
 
 
   SlabStatistics::SlabStatistics(SimInfo* info, const string& filename, 
-                                 const string& sele, int nbins) : 
-    SpatialStatistics(info, filename, sele, nbins) {
+                                 const string& sele, int nbins, int axis) : 
+    SpatialStatistics(info, filename, sele, nbins), axis_(axis) {
+
+    // Set the axis label for the privileged axis
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
     
     z_ = new OutputData;
     z_->units =  "Angstroms";
-    z_->title =  "Z";
+    z_->title =  axisLabel_;
     z_->dataType = odtReal;
     z_->dataHandling = odhAverage;
     z_->accumulator.reserve(nbins);
@@ -162,7 +176,7 @@ namespace OpenMD {
     // Shift molecules by half a box to have bins start at 0
     // The modulo operator is used to wrap the case when we are 
     // beyond the end of the bins back to the beginning.
-    return int(nBins_ * (pos.z() / hmat_(2,2) + 0.5)) % nBins_;  
+    return int(nBins_ * (pos[axis_] / hmat_(axis_,axis_) + 0.5)) % nBins_;  
   }
 
   ShellStatistics::ShellStatistics(SimInfo* info, const string& filename, 

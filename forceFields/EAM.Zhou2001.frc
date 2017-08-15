@@ -14,12 +14,12 @@
 //      Science 46(3–4), pp. 329-377 (2001).
 //      http://dx.doi.org/10.1016/S0079-6425(00)00009-8
 //
-// Note that as of OpenMD version 2.5, we do not need precomputed
-// funcfl or setfl DYNAMO files - the splines for the electron density,
+// Note that as of OpenMD version 2.5, precomputed funcfl or setfl DYNAMO files
+// are not required - the splines for the electron density,
 // functional, and pair potentials are computed upon initialization.
 
 begin Options
-      Name                  EAMZHOU
+      Name                  EAMZHOU2001
       // energy units below are in eV. Convert to kcal/mol in OpenMD
       MetallicEnergyUnitScaling     23.0605423
       EAMMixingMethod	Johnson
@@ -36,7 +36,7 @@ Al       26.981538
 Pb      207.2
 Fe       55.845
 Mo       95.94
-Ta      180.94788  
+Ta      180.94788
 W       183.84
 Mg       24.3050
 Co       58.933195

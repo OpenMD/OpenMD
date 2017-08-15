@@ -456,7 +456,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.rnemdz_given) {
-    analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg);
+    analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
     analyser = new RNEMDR(info, dumpFileName, sele1, nrbins);
   } else if (args_info.rnemdrt_given) {

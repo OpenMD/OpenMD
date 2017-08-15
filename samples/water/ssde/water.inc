@@ -28,15 +28,6 @@ molecule{
     orientation( 0.0, 0.0, 0.0 );
   }
 }
-molecule{
-  name = "SSD_Q";
-  
-  atom[0]{
-    type = "SSD_Q";
-    position( 0.0, 0.0, 0.0 );
-    orientation( 0.0, 0.0, 0.0 );
-  }
-}
 
 molecule{
   name = "SSD_RF";
@@ -125,6 +116,31 @@ molecule{
   atom[3]{
     type = "EP_TIP4P";
     position( 0.0, 0.0, 0.08444 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}
+
+molecule{
+  name = "TIP4P-Ice";
+  
+  atom[0]{
+    type = "O_TIP4P-Ice";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP4P-Ice";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP4P-Ice";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP4P-Ice";
+    position( 0.0, 0.0, 0.09214 );
   }
   
   rigidBody[0]{    

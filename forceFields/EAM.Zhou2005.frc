@@ -1,0 +1,58 @@
+// This is the forcefield file for the Embedded Atom Method (EAM)
+// parameterized in:
+//
+//   X. W. Zhou and H. N. G. Wadley, J. Phys. Cond. Matter. 17 (2005) 3619-3635
+//
+// Note that as of OpenMD version 2.5, precomputed funcfl or setfl DYNAMO files
+// are not necessary - the splines for the electron density, functional, and
+// pair potentials are computed upon initialization.
+//
+// The parameters below ignore the ionic energies in the Zhou and Wadley paper,
+// which we're computing using fluctuating charge parameters.
+
+begin Options
+      Name                  EAMZHOU2005
+      // energy units below are in eV. Convert to kcal/mol in OpenMD
+      MetallicEnergyUnitScaling     23.0605423
+      EAMMixingMethod   Johnson
+end Options
+
+begin BaseAtomTypes
+Ni       58.710
+Al       26.981538
+Fe       55.845
+Co       58.933195
+O        15.9994
+end BaseAtomTypes
+
+begin EAMAtomTypes
+// Equlibrium distances (re) are in angstroms, density parameters (fe,rhoe) are
+// in eV/angstrom, while most others (alpha, beta, kappa, lambda, eta) are
+// dimensionless.  Spline parameters for the energy functional (Fn0, Fn1, Fn2,
+// Fn3, F0, F1, F2, F3-, F3+, Fe) are in eV
+//
+// Type     lat re (Å)  fe      ρe       ρs       α       β       A (eV)  B (eV)  κ       λ        Fn0     Fn1      Fn2     Fn3       F0   F1  F2       F3-      F3+     η       Fe
+Ni Zhou2005 FCC 2.48875 2.21149 30.37003 30.37137 8.38345 4.47117 0.42905 0.63353 0.44360 0.82066 -2.69351 -0.07644 0.24144 -2.37563 -2.70 0.0 0.26539 -0.15286  4.58568 1.01318 -2.70839
+Al Zhou2005 FCC 2.86392 1.20378 17.51747 19.90041 6.61317 3.52702 0.31487 0.36555 0.37985 0.75969 -2.80760 -0.30144 1.25856 -1.24760 -2.83 0.0 0.62225 -2.48824 -2.48824 0.78591 -2.82453
+Fe Zhou2005 BCC 2.48199 2.31453 24.59573 24.59573 9.81827 5.23641 0.39281 0.64624 0.17031 0.34061 -2.53499 -0.05960 0.19306 -2.28232 -2.54 0.0 0.20027 -0.14877  6.69465 1.18290 -2.55187
+Co Zhou2005 HCP 2.50598 2.31544 31.89166 31.89166 8.67963 4.62913 0.42138 0.64011 0.50000 1.00000 -2.54180 -0.21942 0.73338 -1.58901 -2.56 0.0 0.70585 -0.68714  3.09213 1.07702 -2.56584
+//
+// Oxygen is special - There are splines over a range of values:
+// Equlibrium distances (re) are in angstroms, density parameters (fe,
+// rhoe[*],rholimits[*]) are in eV/angstrom.  Most others (alpha, beta, kappa,
+// lambda, gamma, nu) are dimensionless. Spline parameters for the energy
+// functional (F[*]) are in eV
+// Type            re (Å)  fe      α       β       A (eV)  B (eV)  κ       λ       γ       ν       ρlimits                                 ρe[0]    ρe[1]    ρe[2]    ρe[3]    ρe[4]     F[0]                              F[1]                     F[2]                     F[3]                     F[4]
+O  Zhou2005Oxygen  3.64857 1.39478 5.44072 2.11725 0.34900 0.57438 0.08007 0.37457 2.11725 0.37457 0.0 54.62910 65.24078 66.56797 70.57748 54.62910 64.26953 66.21202 66.92391 74.23105 -1.56489 -1.39123 1.77199 1.59833 -1.58967 1.30636 9.81033 -1.54116 2.02821 6.56240 -1.51798 2.30979 7.69582 -1.19082 4.12936 10.32338
+end EAMAtomTypes
+
+begin NonBondedInteractions
+//Types       re (Å)  α       β       A (eV)  B (eV)  κ       λ
+O  O  EAMZhou 3.64857 5.44072 3.59746 0.34900 0.57438 0.08007 0.39310
+Al Ni EAMZhou 2.71579	8.00443	4.75970	0.44254	0.68349	0.63279	0.81777
+O  O  EAMZhou	3.64857	5.44072	3.59746	0.34900	0.57438	0.08007	0.39310
+O  Al EAMZhou	2.98520	8.49741	4.52114	0.09738	0.38121	0.18967	0.95234
+O  Ni EAMZhou	2.95732	7.96528	4.42411	0.13521	0.25332	0.47077	0.65524
+O  Co EAMZhou	2.59586	8.25224	4.37548	0.25714	0.34029	0.37419	0.50843
+O  Fe EAMZhou	3.07992	7.52309	4.13330	0.17108	0.39869	0.22335	0.34380
+end NonBondedInteractions

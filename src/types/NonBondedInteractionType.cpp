@@ -54,7 +54,8 @@ namespace OpenMD {
     nbitp.is_LennardJones = false;
     nbitp.is_Morse = false;
     nbitp.is_MAW = false;
-    nbitp.is_EAM = false;
+    nbitp.is_EAMTable = false;
+    nbitp.is_EAMZhou = false;
     nbitp.is_SC = false;
     nbitp.is_RepulsivePower = false;
     nbitp.is_Mie = false;
@@ -110,12 +111,20 @@ namespace OpenMD {
     return nbitp.is_Morse;
   }
   
-  void NonBondedInteractionType::setEAM() {
-    nbitp.is_EAM = true;
+  void NonBondedInteractionType::setEAMTable() {
+    nbitp.is_EAMTable = true;
   }
   
-  bool NonBondedInteractionType::isEAM() {
-    return nbitp.is_EAM;
+  bool NonBondedInteractionType::isEAMTable() {
+    return nbitp.is_EAMTable;
+  }
+  
+  void NonBondedInteractionType::setEAMZhou() {
+    nbitp.is_EAMZhou = true;
+  }
+  
+  bool NonBondedInteractionType::isEAMZhou() {
+    return nbitp.is_EAMZhou;
   }
   
   bool NonBondedInteractionType::isSC() {
@@ -135,7 +144,7 @@ namespace OpenMD {
   }
   
   bool NonBondedInteractionType::isMetal() {
-    return isSC() || isEAM();
+    return isSC() || isEAMTable() || isEAMZhou();
   }  
 
   bool NonBondedInteractionType::isRepulsivePower() {

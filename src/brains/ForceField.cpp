@@ -737,7 +737,17 @@ namespace OpenMD {
     }
     EAMAdapter ea = EAMAdapter(at);
     if (ea.isEAM()) {
-      rcut = max(rcut, ea.getRcut());
+      switch(ea.getEAMType()) {
+      case eamFuncfl:        
+        rcut = max(rcut, ea.getRcut());
+        break;
+      case eamZhou2001:
+      case eamZhou2004:
+        rcut = max(rcut, ea.getLatticeConstant() * sqrt(10.0) / 2.0);
+        break;
+      default:
+        break;
+      }        
     }
     SuttonChenAdapter sca = SuttonChenAdapter(at);
     if (sca.isSuttonChen()) {

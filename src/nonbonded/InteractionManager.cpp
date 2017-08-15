@@ -372,7 +372,7 @@ namespace OpenMD {
             vdwExplicit = true;
           }
           
-          if (nbiType->isEAM()) {
+          if (nbiType->isEAMTable() || nbiType->isEAMZhou() ) {
             // We found an explicit EAM interaction.
             // override all other metallic entries for this pair of atom types:
             for(it = interactions_[atid1][atid2].begin();
