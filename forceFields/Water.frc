@@ -1,0 +1,199 @@
+// This is the forceField file for all of the water models usable in OpenMD
+//
+//  SSD & SSD1 water models comes from: Chem. Phys. Lett. 376 (2003) 646-652
+//    M.L.Tan, J.T.Fischer, A.Chandra, B.R.Brooks, T.Ichiye
+//
+//  SPC & SPC/E water models available in: J. Phys. Chem. 91, 24, (1987) 6269
+//    H.J.C.Berendsen, J.R.Grigera, T.P.Straatsma
+//
+//  SPC-HW water model comes from: JCP 114, 18, 8064 (2001)
+//    J. Raul Grigera
+//
+//  TIP3P water model comes from: J. Chem. Phys. 79 (1983) 926-935
+//    W.L.Jorgensen, J.Chandrasekhar, J.D.Madura, R.W.Impey, M.L.Klein
+//
+//  TIP4P water model comes from: Mol. Phys. 56 (1985) 1382-1392
+//    W.L.Jorgensen and J.D.Madura
+//
+//  TIP4P/Ice water model comes from: JCP 122, 234511 (2005)
+//    J.L.F.Abascal, E.Sanz, R.Garcia Fernandex, C.Vega
+//
+//  TIP4P-EW water model comes from: J. Chem. Phys. 120 (2004) 9665-9678
+//    H.W.Horn, W.C.Swope, J.W.Pitera, J.D.Madura, T.J.Dick, G.L.Hura,
+//    T.Head-Gordon
+//
+//  TIP4P/2005 water model comes from: J.Chem.Phys. 123 (2005) 234505
+//    J.L.Abascal, C.Vega
+//
+//  TIP5P water model comes from: J.Chem.Phys. 112 (2000) 8910-8922
+//    M.W.Mahoney and W.L.Jorgensen
+//
+//  TIP5P/Ew water model comes from: J.Chem.Phys. 120 (2004) 6085-6093
+//    S.W.Rick
+//
+//  OPC water model comes from: J.Phys.Chem.Lett. 5, (2014) 3863-3871
+//    S.Izadi, R.Anandakrishnan, A.V.Onufriev
+//
+
+begin Options
+      Name	"Water"
+end Options
+
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+O		15.9994
+H		1.0079
+EP		0.0
+DIP         	9.00764		
+SSD		18.0153		
+SSD1        	18.0153 
+SSD_E       	18.0153
+SSD_RF      	18.0153
+TAP		18.0153
+TRED        	18.0153
+EP_TRED     	0.0
+O_DIP3P		15.9994			
+O_TIP3P		15.9994			
+O_TIP4P		15.9994
+O_TIP4P-Ice	15.9994
+O_TIP4P-Ew  	15.9994
+O_TIP4P-2005	15.9994
+O_TIP5P		15.9994	
+O_TIP5P-E	15.9994	
+O_SPCE		15.9994
+O_SPC		15.9994
+O_SPC-HW	15.9994
+O_OPC		15.9994
+H_DIP3P		1.0079
+H_TIP3P		1.0079
+H_TIP4P		1.0079
+H_TIP4P-Ice	1.0079
+H_TIP4P-Ew  	1.0079
+H_TIP4P-2005	1.0079
+H_TIP5P		1.0079
+H_SPCE		1.0079
+H_SPC		1.0079
+D_SPC-HW	2.0141
+H_OPC		1.0079
+EP_TIP4P	0.0
+EP_TIP4P-Ice	0.0
+EP_TIP4P-Ew 	0.0
+EP_TIP4P-2005	0.0
+EP_TIP5P	0.0
+EP_OPC		0.0
+end BaseAtomTypes
+
+begin ChargeAtomTypes
+//name			charge
+O_TIP3P                -0.834
+H_TIP3P		       0.417
+O_TIP3P			-0.834
+O_SPCE			-0.8476
+O_SPC			-0.82
+O_SPC-HW		-0.87
+H_TIP3P			0.417
+H_TIP4P			0.520
+H_TIP4P-Ice		0.5897
+H_TIP4P-Ew		0.52422
+H_TIP4P-2005		0.5564
+H_TIP5P			0.241
+H_SPCE			0.4238
+H_SPC			0.42
+D_SPC-HW		0.435
+H_OPC			0.6791
+EP_TIP4P		-1.040
+EP_TIP4P-Ice		-1.1794
+EP_TIP4P-Ew		-1.04844
+EP_TIP4P-2005		-1.1128
+EP_TIP5P		-0.241
+EP_OPC			-1.3582
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+//name		epsilon(kcal/mol)  sigma(Angstroms)
+SSD	  	0.152	    	3.051					
+SSD1      	0.152           3.016 
+SSD_E	 	0.152	        3.035
+SSD_RF    	0.152           3.019
+O_TIP3P         0.1521          3.15061 
+O_TIP4P         0.1550          3.15365
+O_TIP4P-Ice	0.210842	3.1668
+O_TIP4P-Ew      0.16275         3.16435
+O_TIP4P-2005	0.185207	3.1589
+O_TIP5P         0.16            3.12   
+O_TIP5P-E       0.178           3.097   
+O_SPCE          0.15532         3.16549
+O_SPC           0.15532         3.16549
+O_SPC-HW	0.15532		3.16549
+O_OPC		0.89036		3.16655		
+end LennardJonesAtomTypes
+
+begin DirectionalAtomTypes
+//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+H_DIP3P     	0       0       0
+DIP         	0.8202  0.8202  0
+SSD		1.7696	0.6145	1.1550  
+SSD1		1.7696	0.6145	1.1550  
+SSD_E		1.7696	0.6145	1.1550  
+SSD_RF		1.7696	0.6145	1.1550  
+TAP		1.7696  0.6145  1.1550
+TRED        	1.7696  0.6145  1.1550
+end DirectionalAtomTypes
+
+begin MultipoleAtomTypes
+// Dipoles may be either traditional point-dipoles or split-dipoles.
+// possible formats for a multipolar atom type are:
+//
+// Point-dipoles:
+// name d phi theta psi dipole_moment
+//
+// Split-dipoles:
+// name s phi theta psi dipole_moment splitdipole_distance
+//
+// Point-Quadrupoles:
+// name q phi theta psi Qxx Qyy Qzz
+//
+// Atoms with both dipole and quadrupole moments:
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+//
+// Atoms with both split dipoles and quadrupole moments:
+// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+//
+// Euler angles are given in zxz convention in units of degrees.
+//
+// Charges are given in units of electrons.
+//
+// Dipoles are given in units of Debyes.
+//
+// Split dipole distances are given in units of Angstroms.
+//  
+// Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
+//                                                           esu centi-barn)
+//
+H_DIP3P d       0.0     0.0     0.0     1.91
+DIP     d       0.0     0.0     0.0     1.91
+SSD_E   dq      0.0     0.0     0.0     2.42    -1.682  1.762   -0.08
+SSD_RF  dq      0.0     0.0     0.0     2.48    -1.682  1.762   -0.08
+SSD     dq      0.0     0.0     0.0     2.35    -1.682  1.762   -0.08
+SSD1    dq      0.0     0.0     0.0     2.35    -1.682  1.762   -0.08
+TAP	dq      0.0     0.0     0.0     2.12    -1.682  1.762   -0.08
+//TRED    q       0.0     0.0     0.0     -1.682  1.762   -0.08
+//PDIP	d       0.0     0.0     0.0     9.6064
+//HDP     s       0.0     0.0     0.0     20.6    4.63
+end MultipoleAtomTypes
+
+begin StickyAtomTypes
+//name  w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
+SSD_E	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD_RF	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD	0.07715	3.7284		3.7284	2.75	  3.35	2.75	4.0
+SSD1	0.07715	3.6613		3.6613	2.75	  3.35	2.75	4.0
+TRED    0.07715 4.22     	4.22    2.40	  4.00	2.40	4.0
+end StickyAtomTypes
+
+begin StickyPowerAtomTypes
+//name  w0	    v0 (kcal/mol)   v0p	    rl (Ang)  ru	rlp	    rup
+TAP	0.075	5.5		        0.25	2.75	  3.5	2.75	3.25
+end StickyPowerAtomTypes
+
+

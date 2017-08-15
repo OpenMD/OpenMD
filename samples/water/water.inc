@@ -174,6 +174,31 @@ molecule{
 }
 
 molecule{
+  name = "TIP4P-2005";
+  
+  atom[0]{
+    type = "O_TIP4P-2005";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP4P-2005";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP4P-2005";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP4P-2005";
+    position( 0.0, 0.0, 0.08904 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}
+
+molecule{
   name = "TIP5P";
   
   atom[0]{
@@ -265,6 +290,28 @@ molecule{
   }
   atom[2]{
     type = "H_SPC";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2);
+  }
+}
+
+
+molecule{
+  name = "SPC-HW";
+  
+  atom[0]{
+    type = "O_SPC-HW";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = "D_SPC-HW";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = "D_SPC-HW";
     position( 0.0, -0.81649, 0.51275 );
   }
   
