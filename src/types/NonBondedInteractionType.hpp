@@ -58,7 +58,8 @@ namespace OpenMD {
     bool is_LennardJones;
     bool is_Morse;
     bool is_MAW;
-    bool is_EAM;
+    bool is_EAMTable;
+    bool is_EAMZhou;
     bool is_SC;
     bool is_RepulsivePower;
     bool is_Mie;
@@ -83,8 +84,10 @@ namespace OpenMD {
     bool isMorse();
     void setMAW();
     bool isMAW();
-    void setEAM();
-    bool isEAM();
+    void setEAMTable();
+    bool isEAMTable();
+    void setEAMZhou();
+    bool isEAMZhou();
     bool isSC();
     void setSC();
     bool isMetal();
@@ -151,14 +154,6 @@ namespace OpenMD {
     PropertyMap properties_;
     
   };  
-
-  struct EAMMixingParam {
-    int nr;
-    RealType dr;
-    std::vector<RealType> phi; // phi(r)
-  };
-
-  typedef SimpleTypeData<EAMMixingParam> EAMMixingData;
 
 } //end namespace OpenMD
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP

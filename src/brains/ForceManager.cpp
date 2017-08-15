@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 /**
  * @file ForceManager.cpp
  * @author tlin
@@ -67,7 +67,7 @@
 
 using namespace std;
 namespace OpenMD {
-  
+
   ForceManager::ForceManager(SimInfo * info) : initialized_(false), info_(info),
                                                switcher_(NULL), seleMan_(info), evaluator_(info) {
     forceField_ = info_->getForceField();
@@ -78,13 +78,13 @@ namespace OpenMD {
 
   ForceManager::~ForceManager() {
     perturbations_.clear();
-    
+
     delete switcher_;
     delete interactionMan_;
     delete fDecomp_;
     delete thermo;
   }
-  
+
   /**
    * setupCutoffs
    *
@@ -98,7 +98,7 @@ namespace OpenMD {
    *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
    *      Use the maximum suggested value that was found.
    *
-   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, TAYLOR_SHIFTED, 
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, TAYLOR_SHIFTED,
    *                        SHIFTED_POTENTIAL, or EWALD_FULL)
    *      If cutoffMethod was explicitly set, use that choice.
    *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
@@ -113,16 +113,16 @@ namespace OpenMD {
    *      Set switchingRadius equal to cutoffRadius for safety.
    */
   void ForceManager::setupCutoffs() {
-    
+
     Globals* simParams_ = info_->getSimParams();
     int mdFileVersion;
-    rCut_ = 0.0; //Needs a value for a later max() call;   
-    
-    if (simParams_->haveMDfileVersion()) 
+    rCut_ = 0.0; //Needs a value for a later max() call;
+
+    if (simParams_->haveMDfileVersion())
       mdFileVersion = simParams_->getMDfileVersion();
     else
       mdFileVersion = 0;
-   
+
     // We need the list of simulated atom types to figure out cutoffs
     // as well as long range corrections.
 
@@ -132,7 +132,7 @@ namespace OpenMD {
 
     if (simParams_->haveCutoffRadius()) {
       rCut_ = simParams_->getCutoffRadius();
-    } else {      
+    } else {
       if (info_->usesElectrostaticAtoms()) {
         sprintf(painCave.errMsg,
                 "ForceManager::setupCutoffs: No value was set for the cutoffRadius.\n"
@@ -165,11 +165,11 @@ namespace OpenMD {
     map<string, CutoffMethod> stringToCutoffMethod;
     stringToCutoffMethod["HARD"] = HARD;
     stringToCutoffMethod["SWITCHED"] = SWITCHED;
-    stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
+    stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;
     stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
     stringToCutoffMethod["TAYLOR_SHIFTED"] = TAYLOR_SHIFTED;
     stringToCutoffMethod["EWALD_FULL"] = EWALD_FULL;
-  
+
     if (simParams_->haveCutoffMethod()) {
       string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
       map<string, CutoffMethod>::iterator i;
@@ -195,11 +195,11 @@ namespace OpenMD {
         painCave.isFatal = 0;
         painCave.severity = OPENMD_INFO;
         simError();
-        cutoffMethod_ = SHIFTED_FORCE;        
+        cutoffMethod_ = SHIFTED_FORCE;
       } else {
         // handle the case where the old file version was in play
         // (there should be no cutoffMethod, so we have to deduce it
-        // from other data).        
+        // from other data).
 
         sprintf(painCave.errMsg,
                 "ForceManager::setupCutoffs : DEPRECATED FILE FORMAT!\n"
@@ -210,15 +210,15 @@ namespace OpenMD {
                 "\tof the file so that it begins with <OpenMD version=2>\n");
         painCave.isFatal = 0;
         painCave.severity = OPENMD_WARNING;
-        simError();            
-                
+        simError();
+
         // The old file version tethered the shifting behavior to the
         // electrostaticSummationMethod keyword.
-        
+
         if (simParams_->haveElectrostaticSummationMethod()) {
           string myMethod = simParams_->getElectrostaticSummationMethod();
           toUpper(myMethod);
-        
+
           if (myMethod == "SHIFTED_POTENTIAL") {
             cutoffMethod_ = SHIFTED_POTENTIAL;
           } else if (myMethod == "SHIFTED_FORCE") {
@@ -228,8 +228,8 @@ namespace OpenMD {
           } else if (myMethod == "EWALD_FULL") {
             cutoffMethod_ = EWALD_FULL;
           }
-        
-          if (simParams_->haveSwitchingRadius()) 
+
+          if (simParams_->haveSwitchingRadius())
             rSwitch_ = simParams_->getSwitchingRadius();
 
           if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE" ||
@@ -242,43 +242,43 @@ namespace OpenMD {
                       "\tset to %s\n", myMethod.c_str());
               painCave.severity = OPENMD_WARNING;
               painCave.isFatal = 1;
-              simError();            
-            } 
+              simError();
+            }
           }
           if (abs(rCut_ - rSwitch_) < 0.0001) {
-            if (cutoffMethod_ == SHIFTED_FORCE) {              
+            if (cutoffMethod_ == SHIFTED_FORCE) {
               sprintf(painCave.errMsg,
-                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n" 
+                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
                       "\tcutoffRadius and switchingRadius are set to the\n"
                       "\tsame value.  OpenMD will use shifted force\n"
                       "\tpotentials instead of switching functions.\n");
               painCave.isFatal = 0;
               painCave.severity = OPENMD_WARNING;
-              simError();            
+              simError();
             } else {
               cutoffMethod_ = SHIFTED_POTENTIAL;
               sprintf(painCave.errMsg,
-                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n" 
+                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
                       "\tcutoffRadius and switchingRadius are set to the\n"
                       "\tsame value.  OpenMD will use shifted potentials\n"
                       "\tinstead of switching functions.\n");
               painCave.isFatal = 0;
               painCave.severity = OPENMD_WARNING;
-              simError();            
+              simError();
             }
           }
         }
       }
     }
-        
+
     // create the switching function object:
 
     switcher_ = new SwitchingFunction();
-   
+
     if (cutoffMethod_ == SWITCHED) {
       if (simParams_->haveSwitchingRadius()) {
         rSwitch_ = simParams_->getSwitchingRadius();
-        if (rSwitch_ > rCut_) {        
+        if (rSwitch_ > rCut_) {
           sprintf(painCave.errMsg,
                   "ForceManager::setupCutoffs: switchingRadius (%f) is larger "
                   "than the cutoffRadius(%f)\n", rSwitch_, rCut_);
@@ -286,7 +286,7 @@ namespace OpenMD {
           painCave.severity = OPENMD_ERROR;
           simError();
         }
-      } else {      
+      } else {
         rSwitch_ = 0.85 * rCut_;
         sprintf(painCave.errMsg,
                 "ForceManager::setupCutoffs: No value was set for the switchingRadius.\n"
@@ -303,7 +303,7 @@ namespace OpenMD {
         if (simParams_->haveSwitchingRadius()) {
           map<string, CutoffMethod>::const_iterator it;
           string theMeth;
-          for (it = stringToCutoffMethod.begin(); 
+          for (it = stringToCutoffMethod.begin();
                it != stringToCutoffMethod.end(); ++it) {
             if (it->second == cutoffMethod_) {
               theMeth = it->first;
@@ -321,7 +321,7 @@ namespace OpenMD {
       }
       rSwitch_ = rCut_;
     }
-    
+
     // Default to cubic switching function.
     sft_ = cubic;
     if (simParams_->haveSwitchingFunctionType()) {
@@ -333,16 +333,16 @@ namespace OpenMD {
         if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
           sft_ = fifth_order_poly;
         } else {
-          // throw error        
+          // throw error
           sprintf( painCave.errMsg,
                    "ForceManager::setupSwitching : Unknown switchingFunctionType. (Input file specified %s .)\n"
                    "\tswitchingFunctionType must be one of: "
-                   "\"cubic\" or \"fifth_order_polynomial\".", 
+                   "\"cubic\" or \"fifth_order_polynomial\".",
                    funcType.c_str() );
           painCave.isFatal = 1;
           painCave.severity = OPENMD_ERROR;
           simError();
-        }           
+        }
       }
     }
     switcher_->setSwitchType(sft_);
@@ -362,7 +362,7 @@ namespace OpenMD {
       //! query them for suggested cutoff values
       setupCutoffs();
 
-      info_->prepareTopology();      
+      info_->prepareTopology();
 
       doParticlePot_ = info_->getSimParams()->getOutputParticlePotential();
       doHeatFlux_ = info_->getSimParams()->getPrintHeatFlux();
@@ -370,20 +370,20 @@ namespace OpenMD {
 
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
-   
+
     }
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
-    
+
     //! Force fields can set options on how to scale van der Waals and
     //! electrostatic interactions for atoms connected via bonds, bends
     //! and torsions in this case the topological distance between
     //! atoms is:
     //! 0 = topologically unconnected
-    //! 1 = bonded together 
+    //! 1 = bonded together
     //! 2 = connected via a bend
     //! 3 = connected via a torsion
-    
+
     vdwScale_.reserve(4);
     fill(vdwScale_.begin(), vdwScale_.end(), 0.0);
 
@@ -394,12 +394,12 @@ namespace OpenMD {
     vdwScale_[1] = fopts.getvdw12scale();
     vdwScale_[2] = fopts.getvdw13scale();
     vdwScale_[3] = fopts.getvdw14scale();
-    
+
     electrostaticScale_[0] = 1.0;
     electrostaticScale_[1] = fopts.getelectrostatic12scale();
     electrostaticScale_[2] = fopts.getelectrostatic13scale();
-    electrostaticScale_[3] = fopts.getelectrostatic14scale();    
-    
+    electrostaticScale_[3] = fopts.getelectrostatic14scale();
+
     if (info_->getSimParams()->haveUniformField()) {
       UniformField* eField = new UniformField(info_);
       perturbations_.push_back(eField);
@@ -410,9 +410,9 @@ namespace OpenMD {
       UniformGradient* eGrad = new UniformGradient(info_);
       perturbations_.push_back(eGrad);
     }
-    
+
     usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    
+
     fDecomp_->distributeInitialData();
 
     doPotentialSelection_ = false;
@@ -425,20 +425,20 @@ namespace OpenMD {
       }
     }
 
-    
+
     initialized_ = true;
-    
+
   }
-  
+
   void ForceManager::calcForces() {
-    
+
     if (!initialized_) initialize();
     preCalculation();
     shortRangeInteractions();
     longRangeInteractions();
     postCalculation();
   }
-  
+
   void ForceManager::preCalculation() {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
@@ -448,10 +448,10 @@ namespace OpenMD {
     RigidBody* rb;
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
-    
+
     // forces and potentials are zeroed here, before any are
     // accumulated.
-    
+
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     snap->setBondPotential(0.0);
@@ -468,26 +468,26 @@ namespace OpenMD {
     snap->setRestraintPotential(0.0);
     snap->setRawPotential(0.0);
 
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
+    for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      for(atom = mol->beginAtom(ai); atom != NULL; 
+      for(atom = mol->beginAtom(ai); atom != NULL;
           atom = mol->nextAtom(ai)) {
 	atom->zeroForcesAndTorques();
       }
-      
+
       //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
            rb = mol->nextRigidBody(rbIter)) {
 	rb->zeroForcesAndTorques();
-      }        
-      
+      }
+
       if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
-        for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
+        for(cg = mol->beginCutoffGroup(ci); cg != NULL;
             cg = mol->nextCutoffGroup(ci)) {
           //calculate the center of mass of cutoff group
           cg->updateCOM();
         }
-      }      
+      }
     }
 
     // Zero out the stress tensor
@@ -500,9 +500,9 @@ namespace OpenMD {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }
     }
-    
+
   }
-  
+
   void ForceManager::shortRangeInteractions() {
     Molecule* mol;
     RigidBody* rb;
@@ -522,17 +522,17 @@ namespace OpenMD {
     RealType inversionPotential = 0.0;
     potVec selectionPotential(0.0);
 
-    //calculate short range interactions    
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
+    //calculate short range interactions
+    for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
 
       //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
            rb = mol->nextRigidBody(rbIter)) {
         rb->updateAtoms();
       }
 
-      for (bond = mol->beginBond(bondIter); bond != NULL; 
+      for (bond = mol->beginBond(bondIter); bond != NULL;
            bond = mol->nextBond(bondIter)) {
         bond->calcForce(doParticlePot_);
         bondPotential += bond->getPotential();
@@ -544,13 +544,13 @@ namespace OpenMD {
         }
       }
 
-      for (bend = mol->beginBend(bendIter); bend != NULL; 
+      for (bend = mol->beginBend(bendIter); bend != NULL;
            bend = mol->nextBend(bendIter)) {
-        
+
         RealType angle;
         bend->calcForce(angle, doParticlePot_);
-        RealType currBendPot = bend->getPotential();          
-         
+        RealType currBendPot = bend->getPotential();
+
         bendPotential += bend->getPotential();
         map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
         if (i == bendDataSets.end()) {
@@ -558,14 +558,14 @@ namespace OpenMD {
           dataSet.prev.angle = dataSet.curr.angle = angle;
           dataSet.prev.potential = dataSet.curr.potential = currBendPot;
           dataSet.deltaV = 0.0;
-          bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend, 
+          bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend,
                                                                   dataSet));
         }else {
           i->second.prev.angle = i->second.curr.angle;
           i->second.prev.potential = i->second.curr.potential;
           i->second.curr.angle = angle;
           i->second.curr.potential = currBendPot;
-          i->second.deltaV =  fabs(i->second.curr.potential -  
+          i->second.deltaV =  fabs(i->second.curr.potential -
                                    i->second.prev.potential);
         }
         if (doPotentialSelection_) {
@@ -576,8 +576,8 @@ namespace OpenMD {
           }
         }
       }
-      
-      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
+
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL;
            torsion = mol->nextTorsion(torsionIter)) {
         RealType angle;
         torsion->calcForce(angle, doParticlePot_);
@@ -595,7 +595,7 @@ namespace OpenMD {
           i->second.prev.potential = i->second.curr.potential;
           i->second.curr.angle = angle;
           i->second.curr.potential = currTorsionPot;
-          i->second.deltaV =  fabs(i->second.curr.potential -  
+          i->second.deltaV =  fabs(i->second.curr.potential -
                                    i->second.prev.potential);
         }
         if (doPotentialSelection_) {
@@ -607,10 +607,10 @@ namespace OpenMD {
           }
         }
 
-      }      
-      
-      for (inversion = mol->beginInversion(inversionIter); 
-	   inversion != NULL; 
+      }
+
+      for (inversion = mol->beginInversion(inversionIter);
+	   inversion != NULL;
            inversion = mol->nextInversion(inversionIter)) {
         RealType angle;
         inversion->calcForce(angle, doParticlePot_);
@@ -628,7 +628,7 @@ namespace OpenMD {
           i->second.prev.potential = i->second.curr.potential;
           i->second.curr.angle = angle;
           i->second.curr.potential = currInversionPot;
-          i->second.deltaV =  fabs(i->second.curr.potential -  
+          i->second.deltaV =  fabs(i->second.curr.potential -
                                    i->second.prev.potential);
         }
         if (doPotentialSelection_) {
@@ -639,7 +639,7 @@ namespace OpenMD {
             selectionPotential[BONDED_FAMILY] += inversion->getPotential();
           }
         }
-      }      
+      }
     }
 
 #ifdef IS_MPI
@@ -647,15 +647,15 @@ namespace OpenMD {
     // SystemDecomposition, but this is a better place than in
     // Thermo to do the collection.
 
-    MPI_Allreduce(MPI_IN_PLACE, &bondPotential, 1, MPI_REALTYPE, 
+    MPI_Allreduce(MPI_IN_PLACE, &bondPotential, 1, MPI_REALTYPE,
                   MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &bendPotential, 1, MPI_REALTYPE, 
+    MPI_Allreduce(MPI_IN_PLACE, &bendPotential, 1, MPI_REALTYPE,
                   MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &torsionPotential, 1, 
+    MPI_Allreduce(MPI_IN_PLACE, &torsionPotential, 1,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &inversionPotential, 1, 
+    MPI_Allreduce(MPI_IN_PLACE, &inversionPotential, 1,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &selectionPotential[BONDED_FAMILY], 1, 
+    MPI_Allreduce(MPI_IN_PLACE, &selectionPotential[BONDED_FAMILY], 1,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 
@@ -666,13 +666,13 @@ namespace OpenMD {
     curSnapshot->setTorsionPotential(torsionPotential);
     curSnapshot->setInversionPotential(inversionPotential);
     curSnapshot->setSelectionPotentials(selectionPotential);
-    
-    // RealType shortRangePotential = bondPotential + bendPotential + 
-    //   torsionPotential +  inversionPotential;    
+
+    // RealType shortRangePotential = bondPotential + bendPotential +
+    //   torsionPotential +  inversionPotential;
 
     // curSnapshot->setShortRangePotential(shortRangePotential);
   }
-  
+
   void ForceManager::longRangeInteractions() {
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -685,17 +685,17 @@ namespace OpenMD {
     Molecule* mol;
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
-    
+
     if(info_->getNCutoffGroups() != info_->getNAtoms()){
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
+      for (mol = info_->beginMolecule(mi); mol != NULL;
            mol = info_->nextMolecule(mi)) {
-        for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
+        for(cg = mol->beginCutoffGroup(ci); cg != NULL;
             cg = mol->nextCutoffGroup(ci)) {
           cg->updateCOM();
         }
-      }      
+      }
     } else {
-      // center of mass of the group is the same as position of the atom  
+      // center of mass of the group is the same as position of the atom
       // if cutoff group does not exist
       cgConfig->position = config->position;
       cgConfig->velocity = config->velocity;
@@ -703,7 +703,7 @@ namespace OpenMD {
 
     fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
-    
+
     int cg1, cg2, atom1, atom2, topoDist;
     Vector3d d_grp, dag, d, gvel2, vel2;
     RealType rgrpsq, rgrp, r2, r;
@@ -731,25 +731,25 @@ namespace OpenMD {
     RealType sPot2(0.0);
     bool newAtom1;
     int gid1, gid2;
-                   
+
     vector<int>::iterator ia, jb;
 
     int loopStart, loopEnd;
-    
+
     idat.rcut = &rCut_;
     idat.vdwMult = &vdwMult;
     idat.electroMult = &electroMult;
     idat.pot = &workPot;
     idat.excludedPot = &exPot;
     idat.selePot = &selectionPotential;
-    sdat.selfPot = fDecomp_->getSelfPotential();    
+    sdat.selfPot = fDecomp_->getSelfPotential();
     sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
     sdat.selePot = fDecomp_->getSelectedSelfPotential();
     idat.vpair = &vpair;
     idat.dVdFQ1 = &dVdFQ1;
     idat.dVdFQ2 = &dVdFQ2;
     idat.eField1 = &eField1;
-    idat.eField2 = &eField2; 
+    idat.eField2 = &eField2;
     idat.sPot1 = &sPot1;
     idat.sPot2 = &sPot2;
     idat.f1 = &f1;
@@ -761,7 +761,7 @@ namespace OpenMD {
     idat.doElectricField = doElectricField_;
     idat.doSitePotential = doSitePotential_;
     sdat.doParticlePot = doParticlePot_;
-    
+
     loopEnd = PAIR_LOOP;
     if (info_->requiresPrepair() ) {
       loopStart = PREPAIR_LOOP;
@@ -780,20 +780,20 @@ namespace OpenMD {
       }
 
       for (cg1 = 0; cg1 < int(point_.size()) - 1; cg1++) {
-        
-        atomListRow = fDecomp_->getAtomsInGroupRow(cg1);        
+
+        atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
         newAtom1 = true;
 
         for (int m2 = point_[cg1]; m2 < point_[cg1+1]; m2++) {
 
           cg2 = neighborList_[m2];
-          
+
           d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
-        
+
           // already wrapped in the getIntergroupVector call:
-          // curSnapshot->wrapVector(d_grp);        
+          // curSnapshot->wrapVector(d_grp);
           rgrpsq = d_grp.lengthSquare();
-          
+
           if (rgrpsq < rCutSq_) {
             if (iLoop == PAIR_LOOP) {
               vij = 0.0;
@@ -803,35 +803,35 @@ namespace OpenMD {
               sPot1 = 0.0;
               sPot2 = 0.0;
             }
-            
-            in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr, 
-                                                       rgrp); 
-            
+
+            in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr,
+                                                       rgrp);
+
             atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
-            
+
             if (doHeatFlux_)
               gvel2 = fDecomp_->getGroupVelocityColumn(cg2);
-            
-            for (ia = atomListRow.begin(); 
-                 ia != atomListRow.end(); ++ia) {            
+
+            for (ia = atomListRow.begin();
+                 ia != atomListRow.end(); ++ia) {
               atom1 = (*ia);
-              
+
               if (doPotentialSelection_) {
                 gid1 = fDecomp_->getGlobalIDRow(atom1);
                 idat.isSelected = seleMan_.isGlobalIDSelected(gid1);
               }
-              
-              for (jb = atomListColumn.begin(); 
-                   jb != atomListColumn.end(); ++jb) {              
+
+              for (jb = atomListColumn.begin();
+                   jb != atomListColumn.end(); ++jb) {
                 atom2 = (*jb);
-                
+
                 if (doPotentialSelection_) {
                   gid2 = fDecomp_->getGlobalIDCol(atom2);
                   idat.isSelected |= seleMan_.isGlobalIDSelected(gid2);
-                }               
-                
+                }
+
                 if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
-                  
+
                   vpair = 0.0;
                   workPot = 0.0;
                   exPot = 0.0;
@@ -839,13 +839,13 @@ namespace OpenMD {
                   f1.zero();
                   dVdFQ1 = 0.0;
                   dVdFQ2 = 0.0;
-                  
+
                   fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
-                  
+
                   topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
                   vdwMult = vdwScale_[topoDist];
                   electroMult = electrostaticScale_[topoDist];
-                  
+
                   if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                     idat.d = &d_grp;
                     idat.r2 = &rgrpsq;
@@ -860,10 +860,10 @@ namespace OpenMD {
                     if (doHeatFlux_)
                       vel2 = fDecomp_->getAtomVelocityColumn(atom2);
                   }
-                  
+
                   r = sqrt( *(idat.r2) );
                   idat.rij = &r;
-                  
+
                   if (iLoop == PREPAIR_LOOP) {
                     interactionMan_->doPrePair(idat);
                   } else {
@@ -872,32 +872,32 @@ namespace OpenMD {
                     vij += vpair;
                     fij += f1;
                     stressTensor -= outProduct( *(idat.d), f1);
-                    if (doHeatFlux_) 
+                    if (doHeatFlux_)
                       fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
                   }
                 }
               }
             }
-            
+
             if (iLoop == PAIR_LOOP) {
               if (in_switching_region) {
                 swderiv = vij * dswdr / rgrp;
                 fg = swderiv * d_grp;
                 fij += fg;
-                
+
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                  if (!fDecomp_->skipAtomPair(atomListRow[0], 
-                                              atomListColumn[0], 
+                  if (!fDecomp_->skipAtomPair(atomListRow[0],
+                                              atomListColumn[0],
                                               cg1, cg2)) {
                   stressTensor -= outProduct( *(idat.d), fg);
                   if (doHeatFlux_)
                     fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
-                  }                
+                  }
                 }
-                
-                for (ia = atomListRow.begin(); 
-                     ia != atomListRow.end(); ++ia) {            
-                  atom1 = (*ia);                
+
+                for (ia = atomListRow.begin();
+                     ia != atomListRow.end(); ++ia) {
+                  atom1 = (*ia);
                   mf = fDecomp_->getMassFactorRow(atom1);
                   // fg is the force on atom ia due to cutoff group's
                   // presence in switching region
@@ -914,15 +914,15 @@ namespace OpenMD {
                     }
                   }
                 }
-                for (jb = atomListColumn.begin(); 
-                     jb != atomListColumn.end(); ++jb) {              
+                for (jb = atomListColumn.begin();
+                     jb != atomListColumn.end(); ++jb) {
                   atom2 = (*jb);
                   mf = fDecomp_->getMassFactorColumn(atom2);
                   // fg is the force on atom jb due to cutoff group's
                   // presence in switching region
                   fg = -swderiv * d_grp * mf;
                   fDecomp_->addForceToAtomColumn(atom2, fg);
-                  
+
                   if (atomListColumn.size() > 1) {
                     if (info_->usesAtomicVirial()) {
                       // find the distance between the atom
@@ -948,11 +948,11 @@ namespace OpenMD {
 
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {
-          
+
           fDecomp_->collectIntermediateData();
-          
+
           for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
-            if (doPotentialSelection_) {              
+            if (doPotentialSelection_) {
               gid1 = fDecomp_->getGlobalID(atom1);
               sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
             }
@@ -960,9 +960,9 @@ namespace OpenMD {
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
-          
+
           fDecomp_->distributeIntermediateData();
-          
+
         }
       }
     }
@@ -976,14 +976,14 @@ namespace OpenMD {
       // interactionMan_->doSurfaceTerm(surfacePotential);
       curSnapshot->setSurfacePotential(surfacePotential);
     }
-        
+
     if (info_->requiresSelfCorrection()) {
       for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
-        if (doPotentialSelection_) {          
+        if (doPotentialSelection_) {
           gid1 = fDecomp_->getGlobalID(atom1);
           sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
         }
-            
+
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
       }
@@ -992,15 +992,15 @@ namespace OpenMD {
     // collects single-atom information
     fDecomp_->collectSelfData();
 
-    longRangePotential = *(fDecomp_->getSelfPotential()) + 
+    longRangePotential = *(fDecomp_->getSelfPotential()) +
       *(fDecomp_->getPairwisePotential());
 
     curSnapshot->setLongRangePotential(longRangePotential);
-    
+
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                        *(fDecomp_->getExcludedPotential()));
-    
-    if (doPotentialSelection_) {              
+
+    if (doPotentialSelection_) {
       selectionPotential  = curSnapshot->getSelectionPotentials();
       selectionPotential += *(fDecomp_->getSelectedSelfPotential());
       selectionPotential += *(fDecomp_->getSelectedPotential());
@@ -1020,24 +1020,24 @@ namespace OpenMD {
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-   
+
     // collect the atomic forces onto rigid bodies
-    
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
+
+    for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) { 
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
+           rb = mol->nextRigidBody(rbIter)) {
         Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
         stressTensor += rbTau;
       }
     }
-    
+
 #ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, stressTensor.getArrayPointer(), 9, 
+    MPI_Allreduce(MPI_IN_PLACE, stressTensor.getArrayPointer(), 9,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
     curSnapshot->setStressTensor(stressTensor);
-    
+
     if (info_->getSimParams()->getUseLongRangeCorrections()) {
       /*
         RealType vol = curSnapshot->getVolume();
@@ -1046,18 +1046,18 @@ namespace OpenMD {
 
         set<AtomType*>::iterator i;
         set<AtomType*>::iterator j;
-    
+
         RealType n_i, n_j;
         RealType rho_i, rho_j;
         pair<RealType, RealType> LRI;
-      
+
         for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
         n_i = RealType(info_->getGlobalCountOfType(*i));
         rho_i = n_i /  vol;
         for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
         n_j = RealType(info_->getGlobalCountOfType(*j));
         rho_j = n_j / vol;
-          
+
         LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
 
         Elrc += n_i   * rho_j * LRI.first;
@@ -1072,7 +1072,7 @@ namespace OpenMD {
         stressTensor += Wlrc * SquareMatrix3<RealType>::identity();
         curSnapshot->setStressTensor(stressTensor);
       */
-     
+
     }
   }
 }

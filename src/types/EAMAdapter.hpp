@@ -50,11 +50,26 @@
 namespace OpenMD {
 
   string const EAMtypeID = "EAM";
+  string const FuncflTypeID = "FUNCFL";
+  string const ZhouTypeID = "ZHOU";
+
+  enum EAMType{
+    eamFuncfl,
+    eamZhou2001,
+    eamZhou2004,
+    eamZhou2005,
+    eamZhou2005Oxygen,
+    eamUnknown
+  };
   
-  struct EAMAtypeParameters {
-    // This first set is for parameters read from DYNAMO 86 funcfl files:
-    RealType latticeConstant;  
+  struct EAMParameters {
+    EAMType eamType;
     std::string latticeType;
+    RealType latticeConstant;  
+  };
+  
+  struct FuncflParameters {
+    // This first set is for parameters read from DYNAMO 86 funcfl files:
     int atomicNumber;
     RealType atomicMass;
     int nrho;
@@ -65,9 +80,11 @@ namespace OpenMD {
     std::vector<RealType> Z;   // Z(r) 
     std::vector<RealType> rho; // rho(r)
     std::vector<RealType> F;   // F[rho]
-    // This set is for parameters for the parameterization of EAM described in:
-    // Acta mater 49, 4005 (2001), and X. W. Zhou, R. A. Johnson, and
-    // H. N. G. Wadley, Phys. Rev. B, 69, 144113 (2004).
+  };
+
+  struct ZhouParameters {
+    // This set is for parameters for the parameterization of EAM
+    // described in: Acta mater 49, 4005 (2001)
     RealType re;
     RealType fe;
     RealType rhoe;
@@ -77,57 +94,124 @@ namespace OpenMD {
     RealType B;
     RealType kappa;
     RealType lambda;
+    std::vector<RealType> F;
     std::vector<RealType> Fn;
-    // std::vector<RealType> F;  (re-use the F vector defined above)
     RealType eta;
     RealType Fe;
-    bool hasSplines;
+    // These additional parameters are for the parameterization of EAM
+    // described in: in: X. W. Zhou, R. A. Johnson, and
+    // H. N. G. Wadley, Phys. Rev. B, 69, 144113 (2004).
+    RealType rhos;
+    RealType rhol;
+    RealType rhoh;
+    // These additional parameters are for the parammeterization of
+    // EAM described in:  X. W. Zhou and H. N. G. Wadley,
+    // J. Phys. Condens. Matter 17 (2005) 3619-3635.
+    RealType F3minus;
+    RealType F3plus;
+    RealType gamma;
+    RealType nu;
+    std::vector<RealType> OrhoLimits;
+    std::vector<RealType> OrhoE;
+    std::vector<std::vector<RealType> > OF;
   };
 
-  typedef SimpleTypeData<EAMAtypeParameters*> EAMAtypeData;
+  typedef SimpleTypeData<EAMParameters*> EAMData;
+  typedef SimpleTypeData<FuncflParameters*> FuncflData;
+  typedef SimpleTypeData<ZhouParameters*> ZhouData;
 
   class EAMAdapter {
   public:
     EAMAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeEAM(RealType latticeConstant,
-                 std::string latticeType,
-                 int nrho,
-                 RealType drho,
-                 int nr,
-                 RealType dr,
-                 RealType rcut,
-                 std::vector<RealType> Z,
-                 std::vector<RealType> rho,
-                 std::vector<RealType> F,
-                 bool hasSplines);
+    void makeFuncfl(RealType latticeConstant,
+                    std::string latticeType,
+                    int nrho,
+                    RealType drho,
+                    int nr,
+                    RealType dr,
+                    RealType rcut,
+                    std::vector<RealType> Z,
+                    std::vector<RealType> rho,
+                    std::vector<RealType> F);
 
-    void makeEAM(RealType latticeConstant,
-                 std::string latticeType,
-                 RealType re,
-                 RealType fe,
-                 RealType rhoe,
-                 RealType alpha,
-                 RealType beta,
-                 RealType A,
-                 RealType B,
-                 RealType kappa,
-                 RealType lambda,
-                 std::vector<RealType> Fn,
-                 std::vector<RealType> F,
-                 RealType eta,
-                 RealType Fe,
-                 bool hasSplines);
+    void makeZhou2001(std::string latticeType,
+                      RealType re,
+                      RealType fe,
+                      RealType rhoe,
+                      RealType alpha,
+                      RealType beta,
+                      RealType A,
+                      RealType B,
+                      RealType kappa,
+                      RealType lambda,
+                      std::vector<RealType> Fn,
+                      std::vector<RealType> F,
+                      RealType eta,
+                      RealType Fe);
     
+    void makeZhou2004(std::string latticeType,
+                      RealType re,
+                      RealType fe,
+                      RealType rhoe,
+                      RealType rhos,
+                      RealType alpha,
+                      RealType beta,
+                      RealType A,
+                      RealType B,
+                      RealType kappa,
+                      RealType lambda,
+                      std::vector<RealType> Fn,
+                      std::vector<RealType> F,
+                      RealType eta,
+                      RealType Fe,
+                      RealType rhol,
+                      RealType rhoh);
+    
+    void makeZhou2005(std::string latticeType,
+                      RealType re,
+                      RealType fe,
+                      RealType rhoe,
+                      RealType rhos,
+                      RealType alpha,
+                      RealType beta,
+                      RealType A,
+                      RealType B,
+                      RealType kappa,
+                      RealType lambda,
+                      std::vector<RealType> Fn,
+                      std::vector<RealType> F,
+                      RealType F3minus,
+                      RealType F3plus,
+                      RealType eta,
+                      RealType Fe);
+    
+    void makeZhou2005Oxygen(RealType re,
+                            RealType fe,
+                            RealType alpha,
+                            RealType beta,
+                            RealType A,
+                            RealType B,
+                            RealType kappa,
+                            RealType lambda,
+                            RealType gamma,
+                            RealType nu,
+                            std::vector<RealType> OrhoLimits,
+                            std::vector<RealType> OrhoE,
+                            std::vector<std::vector<RealType> > OF);
 
-    bool isEAM();    
-    RealType getLatticeConstant();
+
+    bool isEAM();
+    bool hasSplines();
+    EAMType getEAMType();
     std::string getLatticeType();
+    RealType getLatticeConstant();
     int getNr();
     RealType getDr();
     int getNrho();
     RealType getDrho();
     RealType getRcut();
+    
     RealType getRe();
     RealType get_fe();
     RealType getRhoe();
@@ -137,19 +221,31 @@ namespace OpenMD {
     RealType getB();
     RealType getKappa();
     RealType getLambda();
+    RealType getGamma();
+    RealType getNu();
     std::vector<RealType> getFn();
-    std::vector<RealType> getF();  
+    std::vector<RealType> getF();
+    RealType getF3plus();
+    RealType getF3minus();
     RealType getEta();
     RealType getFe();
-    bool hasSplines();
-
+    RealType getRhos();
+    RealType getRhol();
+    RealType getRhoh();
+    std::vector<RealType> getOrhoLimits();
+    std::vector<RealType> getOrhoE();
+    std::vector<std::vector<RealType> > getOF();
+    
     CubicSpline* getZSpline();
     CubicSpline* getRhoSpline();
     CubicSpline* getFSpline();
 
   private:
     AtomType* at_;
-    EAMAtypeParameters*  getEAMParam();
+    EAMParameters*    getEAMParam();
+    FuncflParameters* getFuncflParam();
+    ZhouParameters*   getZhouParam();
+
   };
 }
 #endif

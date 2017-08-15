@@ -58,8 +58,8 @@ namespace OpenMD {
             
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    void parseEAMfuncflFile(ForceField& ff, EAMAdapter ea,
-                            const std::string& potentialParamFile, int iden);
+    void parseFuncflFile(ForceField& ff, EAMAdapter ea,
+                         const std::string& funcflFile, int iden);
     void parseEAMArray(std::istream& input, std::vector<RealType>& array,
                        int num);
     ForceFieldOptions& options_;

@@ -61,7 +61,6 @@ namespace OpenMD {
     bool isFluctuatingCharge;
   };
 
-
   struct EAMInteractionData {
     CubicSpline* phi;
     RealType rcut;
@@ -71,7 +70,7 @@ namespace OpenMD {
   enum EAMMixingMethod{
     eamJohnson,
     eamDaw,
-    eamUnknown
+    eamUnknownMix
   };
   
   class EAM : public MetallicInteraction {
@@ -86,22 +85,34 @@ namespace OpenMD {
                                 std::vector<RealType> phiAB);
     
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
-                                std::string latticeType,
                                 RealType re, RealType alpha, RealType beta,
                                 RealType A, RealType B, RealType kappa,
                                 RealType lambda);
 
     RealType fastPower(RealType x, int y);
-    RealType precomputePhi(RealType r, RealType re, RealType A, RealType B,
-                           RealType alpha, RealType beta, RealType kappa,
-                           RealType lambda);
-    RealType precomputeRho(RealType r, RealType re, RealType fe,
-                           RealType beta, RealType lambda);
-    RealType precomputeFunctional(RealType rho, RealType rhoe,
-                                  std::vector<RealType> Fn,
-                                  std::vector<RealType> F, RealType Fe,
-                                  RealType eta);
-
+    RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
+                     RealType alpha, RealType beta, RealType kappa,
+                     RealType lambda);
+    RealType ZhouRho(RealType r, RealType re, RealType fe,
+                     RealType beta, RealType lambda);
+    RealType Zhou2001Functional(RealType rho, RealType rhoe,
+                                std::vector<RealType> Fn,
+                                std::vector<RealType> F, RealType Fe,
+                                RealType eta);
+    RealType Zhou2004Functional(RealType rho, RealType rhoe, RealType rhos,
+                                std::vector<RealType> Fn,
+                                std::vector<RealType> F, RealType Fe,
+                                RealType eta, RealType rhol, RealType rhoh);
+    RealType Zhou2005Functional(RealType rho, RealType rhoe, RealType rhos,
+                                std::vector<RealType> Fn,
+                                std::vector<RealType> F,
+                                RealType F3plus, RealType F3minus,
+                                RealType Fe, RealType eta);
+    RealType Zhou2005OxygenFunctional(RealType rho,
+                                      std::vector<RealType> OrhoLimits,
+                                      std::vector<RealType> OrhoE,
+                                      std::vector<std::vector<RealType> > OF);
+                                      
     void calcDensity(InteractionData &idat);
     void calcFunctional(SelfData &sdat);
     void calcForce(InteractionData &idat);

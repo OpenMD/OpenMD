@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
@@ -50,7 +50,7 @@
 
 namespace OpenMD {
 
-  FluctuatingChargeForces::FluctuatingChargeForces(SimInfo* info) : 
+  FluctuatingChargeForces::FluctuatingChargeForces(SimInfo* info) :
     info_(info), initialized_(false) {
   }
 
@@ -60,14 +60,14 @@ namespace OpenMD {
     FQtids.resize( forceField_->getNAtomType(), -1);
 
     set<AtomType*>::iterator at;
-    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) 
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at)
       if ((*at)->isFluctuatingCharge()) addType(*at);
-    
+
     initialized_ = true;
   }
 
-  void FluctuatingChargeForces::getSelfInteraction(int atid, RealType charge, 
-                                                   RealType &potential, 
+  void FluctuatingChargeForces::getSelfInteraction(int atid, RealType charge,
+                                                   RealType &potential,
                                                    RealType &force) {
     if (!initialized_) initialize();
 
@@ -91,7 +91,7 @@ namespace OpenMD {
           RealType e1 = data.diabaticStates[0].second;
           RealType q2 = data.diabaticStates[1].first;
           RealType e2 = data.diabaticStates[1].second;
-          
+
           RealType v1 = e1 + 0.5 * k * (charge-q1)*(charge-q1);
           RealType v1p = k*(charge-q1);
           RealType v2 = e2 + 0.5 * k * (charge-q2)*(charge-q2);
@@ -106,15 +106,15 @@ namespace OpenMD {
           DynamicVector<RealType> eigenvalues(nDiabats);
           DynamicRectMatrix<RealType> eigenvectors(nDiabats, nDiabats);
           RealType q;
-          RealType e; 
-          
+          RealType e;
+
           for (int i = 0; i < nDiabats; i++) {
             q = data.diabaticStates[i].first;
             e = data.diabaticStates[i].second;
             diagonals(i) = e + 0.5 * k * (charge-q)*(charge-q);
             vp(i) = k*(charge-q);
           }
-          
+
           RealSymmetricTridiagonal<RealType> eig(diagonals, subdiagonals);
           eig.getEigenvalues( eigenvalues );
           eig.getEigenvectors( eigenvectors );
@@ -125,7 +125,7 @@ namespace OpenMD {
             // approximation and Hellmann-Feynman let us obtain the
             // forces easily:
             force -= pow(eigenvectors(0, i), 2) * vp(i);
-          }              
+          }
         }
       }
     } else {
@@ -142,12 +142,12 @@ namespace OpenMD {
     FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
     if (fqa.isFluctuatingCharge()) {
       if (fqa.hasMultipleMinima()) {
-        data.hasMultipleMinima = true;      
+        data.hasMultipleMinima = true;
         data.curvature = fqa.getCurvature();
         data.coupling = fqa.getCoupling();
         data.diabaticStates = fqa.getDiabaticStates();
       } else {
-        data.hasMultipleMinima = false;      
+        data.hasMultipleMinima = false;
         data.electronegativity = fqa.getElectronegativity();
         data.hardness = fqa.getHardness();
         data.slaterN = fqa.getSlaterN();
@@ -156,7 +156,7 @@ namespace OpenMD {
       int atid = atomType->getIdent();
       int fqtid = FQtypes.size();
 
-      pair<set<int>::iterator,bool> ret;    
+      pair<set<int>::iterator,bool> ret;
       ret = FQtypes.insert( atid );
       if (ret.second == false) {
         sprintf( painCave.errMsg,
@@ -165,7 +165,7 @@ namespace OpenMD {
                  atid );
         painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;
-        simError();         
+        simError();
       }
       FQtids[atid] = fqtid;
       FQMap.push_back(data);

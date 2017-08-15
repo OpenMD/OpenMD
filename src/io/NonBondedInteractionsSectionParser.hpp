@@ -62,6 +62,8 @@ namespace OpenMD {
       Mie,
       MAW,
       Buckingham,
+      EAMTable,
+      EAMZhou,
       Unknown
     };
             
@@ -71,6 +73,8 @@ namespace OpenMD {
     
     std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
     ForceFieldOptions& options_;
+    RealType eus_; // Energy unit scaling
+    RealType dus_; // Distance unit scaling
   };
 
 
