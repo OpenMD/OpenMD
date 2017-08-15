@@ -391,7 +391,6 @@ namespace OpenMD {
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     ForceField::NonBondedInteractionTypeContainer::KeyType keys;
     NonBondedInteractionType* nbt;
-    int eamtid1, eamtid2;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL;
          nbt = nbiTypes->nextType(j)) {
@@ -548,7 +547,6 @@ namespace OpenMD {
     case eamZhou2005Oxygen : {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
-      RealType rhoe = ea.getRhoe();
       RealType gamma = ea.getGamma();
       RealType nu = ea.getNu();
       std::vector<RealType> OrhoLimits = ea.getOrhoLimits();
