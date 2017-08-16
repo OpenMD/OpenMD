@@ -731,6 +731,7 @@ ENDIF (OPENBABEL2_FOUND)
 set(PYNONUMPY_FILES
 src/applications/utilities/affineScale
 src/applications/utilities/dumpConverter
+src/applications/utilities/funcflExtractor
 src/applications/utilities/omd-solvator
 src/applications/utilities/omdSplit
 src/applications/utilities/omdShrink
