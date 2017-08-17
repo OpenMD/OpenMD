@@ -242,9 +242,9 @@ namespace OpenMD {
       }
       
       // find xyz-indices of cell that stuntDouble is in.
-      ibin = nBins_.x() * scaled.x();
-      jbin = nBins_.y() * scaled.y();
-      kbin = nBins_.z() * scaled.z();
+      ibin = (int) (nBins_.x() * scaled.x());
+      jbin = (int) (nBins_.y() * scaled.y());
+      kbin = (int) (nBins_.z() * scaled.z());
       
       for (int i = -di; i <= di; i++) {
 	igrid = ibin + i;
