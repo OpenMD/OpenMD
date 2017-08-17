@@ -40,8 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-// MSVC has an odd bug that requires NumericConstant to come first:
-#include "utils/NumericConstant.hpp" 
+#include "utils/Constants.hpp" 
 #include "types/TorsionTypeParser.hpp"
 #include "types/CubicTorsionType.hpp"
 #include "types/QuarticTorsionType.hpp"
@@ -188,11 +187,11 @@ namespace OpenMD {
           CharmmTorsionParameter currParam;
 	  currParam.kchi = tokenizer.nextTokenAsDouble();
 	  currParam.n = tokenizer.nextTokenAsInt();
-	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
+	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * Constants::PI; //convert to rad
 
           bool isOdd = currParam.n % 2 == 0 ? false : true;
           if (!trans180_) {           
-            currParam.delta = NumericConstant::PI - currParam.delta;
+            currParam.delta = Constants::PI - currParam.delta;
             if (isOdd) currParam.kchi = -currParam.kchi;
           }
 
@@ -248,7 +247,7 @@ namespace OpenMD {
         // phi0 should be read in degrees
         // d0 should be read in kcal / mol / degrees^2
 
-        RealType degreesPerRadian = 180.0 / NumericConstant::PI;
+        RealType degreesPerRadian = 180.0 / Constants::PI;
 
         // convert to radians
 	RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
@@ -257,7 +256,7 @@ namespace OpenMD {
 	RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
 
         if (!trans180_)
-          phi0 = NumericConstant::PI - phi0;
+          phi0 = Constants::PI - phi0;
 
 	torsionType = new HarmonicTorsionType(d0, phi0);
       }

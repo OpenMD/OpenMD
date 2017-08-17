@@ -43,7 +43,6 @@
 
 
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
-#include "utils/PhysicalConstants.hpp"
 #include "utils/Revision.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"

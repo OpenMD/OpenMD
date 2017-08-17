@@ -45,7 +45,7 @@
 #include <fstream> 
 #include <iostream>
 #include "integrators/LangevinHullForceManager.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "math/ConvexHull.hpp"
 #include "math/AlphaHull.hpp"
 #include "math/Triangle.hpp"
@@ -138,7 +138,7 @@ namespace OpenMD {
     } else {
       // Convert pressure from atm -> amu/(fs^2*Ang)
       targetPressure_ = simParams->getTargetPressure() / 
-        PhysicalConstants::pressureConvert;
+        Constants::pressureConvert;
     }
     if (simParams->getUsePeriodicBoundaryConditions()) {
       sprintf(painCave.errMsg, 
@@ -151,7 +151,7 @@ namespace OpenMD {
     dt_ = simParams->getDt();
 
     if (doThermalCoupling_)
-      variance_ = 2.0 * PhysicalConstants::kb * targetTemp_ / dt_;
+      variance_ = 2.0 * Constants::kb * targetTemp_ / dt_;
 
     // Build a vector of integrable objects to determine if the are
     // surface atoms
@@ -223,13 +223,13 @@ namespace OpenMD {
 
       if (doPressureCoupling_) {
         extPressure = -unitNormal * (targetPressure_ * thisArea) /
-          PhysicalConstants::energyConvert;
+          Constants::energyConvert;
         langevinForce += extPressure;
       }
 
       if (doThermalCoupling_) {
         hydroTensor = thisTriangle.computeHydrodynamicTensor(viscosity_);      
-        hydroTensor *= PhysicalConstants::viscoConvert;
+        hydroTensor *= Constants::viscoConvert;
         CholeskyDecomposition(hydroTensor, S);
         randomForce = S * randNums[thisFacet++];
         dragForce = -hydroTensor * facetVel;

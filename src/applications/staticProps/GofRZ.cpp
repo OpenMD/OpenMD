@@ -104,7 +104,7 @@ namespace OpenMD {
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
-      RealType volSlice = NumericConstant::PI * deltaZ_ * (( rUpper * rUpper ) - ( rLower * rLower ));
+      RealType volSlice = Constants::PI * deltaZ_ * (( rUpper * rUpper ) - ( rLower * rLower ));
       RealType nIdeal = volSlice * pairDensity;
 
       for (unsigned int j = 0; j < histogram_[i].size(); ++j){

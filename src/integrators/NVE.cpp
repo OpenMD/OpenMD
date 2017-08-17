@@ -49,7 +49,7 @@
 
 #include "integrators/NVE.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
 
@@ -82,7 +82,7 @@ namespace OpenMD {
 	mass = sd->getMass();
                 
 	// velocity half step
-	vel += (dt2 /mass * PhysicalConstants::energyConvert) * frc;
+	vel += (dt2 /mass * Constants::energyConvert) * frc;
 
 	// position whole step
 	pos += dt * vel;
@@ -100,7 +100,7 @@ namespace OpenMD {
 
 	  ji = sd->getJ();
 
-	  ji += (dt2  * PhysicalConstants::energyConvert) * Tb;
+	  ji += (dt2  * Constants::energyConvert) * Tb;
 
 	  rotAlgo_->rotate(sd, ji, dt);
 
@@ -136,7 +136,7 @@ namespace OpenMD {
 	mass = sd->getMass();
                 
 	// velocity half step
-	vel += (dt2 /mass * PhysicalConstants::energyConvert) * frc;
+	vel += (dt2 /mass * Constants::energyConvert) * frc;
                 
 	sd->setVel(vel);
 
@@ -150,7 +150,7 @@ namespace OpenMD {
 
 	  ji = sd->getJ();
 
-	  ji += (dt2  * PhysicalConstants::energyConvert) * Tb;
+	  ji += (dt2  * Constants::energyConvert) * Tb;
 
 	  sd->setJ(ji);
 	}

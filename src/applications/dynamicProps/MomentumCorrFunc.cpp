@@ -51,7 +51,6 @@
   */
 
 #include "applications/dynamicProps/MomentumCorrFunc.hpp"
-#include "utils/PhysicalConstants.hpp"
 #include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
 

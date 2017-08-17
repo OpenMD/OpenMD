@@ -41,7 +41,7 @@
  */
 
 #include "hydrodynamics/Sphere.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "math/LU.hpp"
 
 namespace OpenMD {
@@ -72,8 +72,8 @@ namespace OpenMD {
   
   HydroProp* Sphere::getHydroProp(RealType viscosity, RealType temperature) {
     
-    RealType Xitt  = 6.0 * NumericConstant::PI * viscosity * radius_;
-    RealType Xirr = 8.0 * NumericConstant::PI * viscosity * radius_ * radius_ * radius_;
+    RealType Xitt  = 6.0 * Constants::PI * viscosity * radius_;
+    RealType Xirr = 8.0 * Constants::PI * viscosity * radius_ * radius_ * radius_;
 
     Mat6x6d Xi, XiCopy, D;
 
@@ -84,11 +84,11 @@ namespace OpenMD {
     Xi(4, 4) = Xirr;
     Xi(5, 5) = Xirr;
     
-    Xi *= PhysicalConstants::viscoConvert;
+    Xi *= Constants::viscoConvert;
     XiCopy = Xi;
 
     invertMatrix(XiCopy, D);
-    RealType kt = PhysicalConstants::kb * temperature; // in kcal mol^-1
+    RealType kt = Constants::kb * temperature; // in kcal mol^-1
     D *= kt;  // now in angstroms^2 fs^-1  (at least for Trans-trans)
 
     HydroProp* hprop = new HydroProp(V3Zero, Xi, D);

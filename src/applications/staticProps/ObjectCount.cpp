@@ -46,7 +46,7 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+
 namespace OpenMD {
 
   ObjectCount::ObjectCount(SimInfo* info, const std::string& filename, 

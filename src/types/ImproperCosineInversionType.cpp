@@ -43,7 +43,6 @@
 #include <cmath> 
 #include <algorithm>
 #include "types/ImproperCosineInversionType.hpp"
-#include "utils/NumericConstant.hpp"
 #include "math/ChebyshevT.hpp"
 #include "math/ChebyshevU.hpp"
 

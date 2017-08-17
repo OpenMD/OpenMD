@@ -45,7 +45,7 @@
 #include "integrators/IntegratorCreator.hpp"
 #include "integrators/NPTxyz.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 // Basic non-isotropic thermostating and barostating via the Melchionna
@@ -68,12 +68,12 @@ namespace OpenMD {
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
     // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*PhysicalConstants::kB *targetTemp;
+    NkBT = info_->getNGlobalIntegrableObjects()*Constants::kB *targetTemp;
 
     // fkBT is used because the thermostat operates on more degrees of freedom
     // than the barostat (when there are particles with orientational degrees
     // of freedom).  
-    fkBT = info_->getNdf()*PhysicalConstants::kB *targetTemp;        
+    fkBT = info_->getNdf()*Constants::kB *targetTemp;        
 
     RealType conservedQuantity;
     RealType totalEnergy;
@@ -86,17 +86,17 @@ namespace OpenMD {
     totalEnergy = thermo.getTotalEnergy();
 
     thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first 
-      / (2.0 * PhysicalConstants::energyConvert);
+      / (2.0 * Constants::energyConvert);
 
     thermostat_potential = fkBT* thermostat.second 
-      / PhysicalConstants::energyConvert;
+      / Constants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
 
-    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * PhysicalConstants::energyConvert);
+    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * Constants::energyConvert);
 
-    barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
+    barostat_potential = (targetPressure * thermo.getVolume() / Constants::pressureConvert) /Constants::energyConvert;
 
     conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
       barostat_kinetic + barostat_potential;

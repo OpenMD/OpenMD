@@ -43,11 +43,11 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
+#include "utils/Constants.hpp"
 #include "applications/sequentialProps/ContactAngle1.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
 #include "math/Polynomial.hpp"
 
 namespace OpenMD {
@@ -139,7 +139,7 @@ namespace OpenMD {
         }                  
       }
       
-      values_.push_back( acos(maxct)*(180.0/M_PI) );
+      values_.push_back( acos(maxct)*(180.0/Constants::PI) );
     }
   }    
 }

@@ -46,7 +46,6 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "utils/NumericConstant.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
 using namespace std;

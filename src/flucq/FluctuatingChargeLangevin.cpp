@@ -43,7 +43,7 @@
 #include "FluctuatingChargeLangevin.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 
 
 namespace OpenMD {
@@ -91,7 +91,7 @@ namespace OpenMD {
       }
     }
 
-    variance_ = 2.0 * PhysicalConstants::kb * targetTemp_ * drag_ / dt_;
+    variance_ = 2.0 * Constants::kb * targetTemp_ * drag_ / dt_;
   }
 
 

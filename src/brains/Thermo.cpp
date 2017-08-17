@@ -50,7 +50,7 @@
 #include "brains/Thermo.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
@@ -93,7 +93,7 @@ namespace OpenMD {
                     MPI_SUM, MPI_COMM_WORLD);
 #endif
       
-      kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+      kinetic = kinetic * 0.5 / Constants::energyConvert;
       
       
       snap->setTranslationalKineticEnergy(kinetic);
@@ -144,7 +144,7 @@ namespace OpenMD {
                     MPI_SUM, MPI_COMM_WORLD);
 #endif
       
-      kinetic = kinetic * 0.5 / PhysicalConstants::energyConvert;
+      kinetic = kinetic * 0.5 / Constants::energyConvert;
            
       snap->setRotationalKineticEnergy(kinetic);
     }
@@ -200,7 +200,7 @@ namespace OpenMD {
     if (!snap->hasTemperature) {
 
       RealType temperature = ( 2.0 * this->getKinetic() ) 
-        / (info_->getNdf()* PhysicalConstants::kb );
+        / (info_->getNdf()* Constants::kb );
 
       snap->setTemperature(temperature);
     }
@@ -255,7 +255,7 @@ namespace OpenMD {
     if (!snap->hasElectronicTemperature) {
       
       RealType eTemp = ( 2.0 * this->getElectronicKinetic() ) 
-        / (info_->getNFluctuatingCharges()* PhysicalConstants::kb );
+        / (info_->getNFluctuatingCharges()* Constants::kb );
       
       snap->setElectronicTemperature(eTemp);
     }
@@ -364,7 +364,7 @@ namespace OpenMD {
 
       tensor = getPressureTensor();
       
-      pressure = PhysicalConstants::pressureConvert * 
+      pressure = Constants::pressureConvert * 
         (tensor(0, 0) + tensor(1, 1) + tensor(2, 2)) / 3.0;
       
       snap->setPressure(pressure);
@@ -411,7 +411,7 @@ namespace OpenMD {
       Mat3x3d stressTensor = snap->getStressTensor();
 
       pressureTensor =  (p_tens + 
-                         PhysicalConstants::energyConvert * stressTensor)/volume;
+                         Constants::energyConvert * stressTensor)/volume;
       
       snap->setPressureTensor(pressureTensor);
     }
@@ -657,7 +657,7 @@ namespace OpenMD {
           potential = sd->getParticlePot();
         }
 
-        potential *= PhysicalConstants::energyConvert; // amu A^2/fs^2
+        potential *= Constants::energyConvert; // amu A^2/fs^2
         // The potential may not be a 1/2 factor
         eatom = (kinetic + potential)/2.0;  // amu A^2/fs^2
         heatFluxJc[0] += eatom*vel[0]; // amu A^3/fs^3
@@ -678,7 +678,7 @@ namespace OpenMD {
     // (kcal/mol * A/fs) * conversion => (amu A^3)/fs^3
 
     Vector3d heatFluxJv = currSnapshot->getConductiveHeatFlux() * 
-      PhysicalConstants::energyConvert;
+      Constants::energyConvert;
         
     // Correct for the fact the flux is 1/V (Jc + Jv)
     return (heatFluxJv + heatFluxJc) / this->getVolume(); // amu / fs^3 
@@ -1003,7 +1003,7 @@ namespace OpenMD {
       
       det = intTensor.determinant();
       sysconstants = geomCnst / (RealType)(info_->getNGlobalIntegrableObjects());
-      volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,geomCnst)*sqrt(det);
+      volume = 4.0/3.0*Constants::PI*pow(sysconstants,geomCnst)*sqrt(det);
 
       snap->setGyrationalVolume(volume);
     } 
@@ -1026,7 +1026,7 @@ namespace OpenMD {
       
       detI = intTensor.determinant();
       sysconstants = geomCnst/(RealType)(info_->getNGlobalIntegrableObjects());
-      volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,geomCnst)*sqrt(detI);
+      volume = 4.0/3.0*Constants::PI*pow(sysconstants,geomCnst)*sqrt(detI);
       snap->setGyrationalVolume(volume);
     } else {
       volume = snap->getGyrationalVolume();

@@ -53,7 +53,7 @@
 #include "math/Polynomial.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/Tuple.hpp"
 #include "brains/Thermo.hpp"
 #include "math/ConvexHull.hpp"
@@ -61,6 +61,9 @@
 #ifdef _MSC_VER
 #define isnan(x) _isnan((x))
 #define isinf(x) (!_finite(x) && !_isnan(x))
+#else
+#define isnan(x) std::isnan((x))
+#define isinf(x) std::isinf((x))
 #endif
 
 #define HONKING_LARGE_VALUE 1.0e10
@@ -300,7 +303,7 @@ namespace OpenMD {
       // convert the kcal / mol / Angstroms^2 / fs values in the md file 
       // into  amu / fs^3:
       kineticFlux_ = rnemdParams->getKineticFlux() 
-        * PhysicalConstants::energyConvert;
+        * Constants::energyConvert;
     } else {
       kineticFlux_ = 0.0;
     }
@@ -584,7 +587,7 @@ namespace OpenMD {
           // radius of an approximately spherical hull:
           Thermo thermo(info);
           RealType hVol = thermo.getHullVolume();
-          sphereARadius_ = 0.1 * pow((3.0 * hVol / (4.0 * M_PI)), 1.0/3.0);
+          sphereARadius_ = 0.1 * pow((3.0 * hVol / (4.0 * Constants::PI)), 1.0/3.0);
         }
         selectionAstream << "select r < " << sphereARadius_;
         selectionA_ = selectionAstream.str();
@@ -1824,7 +1827,7 @@ namespace OpenMD {
         // in non-periodic simulations, without explicitly setting
         // selections, the sphere radius sets the surface area of the
         // dividing surface:
-        areaA = 4.0 * M_PI * pow(sphereARadius_, 2);
+        areaA = 4.0 * Constants::PI * pow(sphereARadius_, 2);
       }
     }
 
@@ -1865,7 +1868,7 @@ namespace OpenMD {
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, but if a sphereBradius has been set, just use that:
-        areaB = 4.0 * M_PI * pow(sphereBRadius_, 2);
+        areaB = 4.0 * Constants::PI * pow(sphereBRadius_, 2);
       }
     }
       
@@ -2077,14 +2080,14 @@ namespace OpenMD {
     for (int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(2,2);
-        den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
+        den = binMass[i] * nBins_ * Constants::densityConvert 
           / currentSnap_->getVolume() ;
       } else {
         r = (((RealType)i + 0.5) * binWidth_);
         RealType rinner = (RealType)i * binWidth_;
         RealType router = (RealType)(i+1) * binWidth_;
-        den = binMass[i] * 3.0 * PhysicalConstants::densityConvert
-          / (4.0 * M_PI * (pow(router,3) - pow(rinner,3)));
+        den = binMass[i] * 3.0 * Constants::densityConvert
+          / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3)));
       }
       vel = binP[i] / binMass[i];
 
@@ -2094,8 +2097,8 @@ namespace OpenMD {
 
       if (binCount[i] > 0) {
         // only add values if there are things to add
-        temp = 2.0 * binKE[i] / (binDOF[i] * PhysicalConstants::kb *
-                                 PhysicalConstants::energyConvert);
+        temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
+                                 Constants::energyConvert);
         
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
           if(outputMask_[j]) {
@@ -2189,7 +2192,7 @@ namespace OpenMD {
       Vector3d JzL(V3Zero);
       if (time >= info_->getSimParams()->getDt()) {
         Jz = kineticExchange_ / (time * avgArea)
-          / PhysicalConstants::energyConvert;
+          / Constants::energyConvert;
         JzP = momentumExchange_ / (time * avgArea);
         JzL = angularMomentumExchange_ / (time * avgArea);
       }
@@ -2221,7 +2224,7 @@ namespace OpenMD {
       rnemdFile_ << "#      running time = " << time << " fs\n";
       rnemdFile_ << "# Target flux:\n";
       rnemdFile_ << "#           kinetic = " 
-                 << kineticFlux_ / PhysicalConstants::energyConvert 
+                 << kineticFlux_ / Constants::energyConvert 
                  << " (kcal/mol/A^2/fs)\n";
       rnemdFile_ << "#          momentum = " << momentumFluxVector_ 
                  << " (amu/A/fs^2)\n";
@@ -2229,7 +2232,7 @@ namespace OpenMD {
                  << " (amu/A^2/fs^2)\n";
       rnemdFile_ << "# Target one-time exchanges:\n";
       rnemdFile_ << "#          kinetic = " 
-                 << kineticTarget_ / PhysicalConstants::energyConvert 
+                 << kineticTarget_ / Constants::energyConvert 
                  << " (kcal/mol)\n";
       rnemdFile_ << "#          momentum = " << momentumTarget_ 
                  << " (amu*A/fs)\n";
@@ -2237,7 +2240,7 @@ namespace OpenMD {
                  << " (amu*A^2/fs)\n";
       rnemdFile_ << "# Actual exchange totals:\n";
       rnemdFile_ << "#          kinetic = " 
-                 << kineticExchange_ / PhysicalConstants::energyConvert 
+                 << kineticExchange_ / Constants::energyConvert 
                  << " (kcal/mol)\n";
       rnemdFile_ << "#          momentum = " << momentumExchange_ 
                  << " (amu*A/fs)\n";      
@@ -2343,7 +2346,7 @@ namespace OpenMD {
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->getAverage(s);
     
-    if (! std::isinf(s) && ! std::isnan(s)) {
+    if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
@@ -2366,9 +2369,9 @@ namespace OpenMD {
     if (count == 0) return;
 
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->getAverage(s);
-    if (std::isinf(s[0]) || std::isnan(s[0]) || 
-        std::isinf(s[1]) || std::isnan(s[1]) || 
-        std::isinf(s[2]) || std::isnan(s[2]) ) {      
+    if (isinf(s[0]) || isnan(s[0]) || 
+        isinf(s[1]) || isnan(s[1]) || 
+        isinf(s[2]) || isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
                "RNEMD detected a numerical error writing: %s for bin %u",
                data_[index].title.c_str(), bin);
@@ -2391,7 +2394,7 @@ namespace OpenMD {
     
     dynamic_cast<Accumulator *>(data_[index].accumulator[bin])->get95percentConfidenceInterval(s);
     
-    if (! std::isinf(s) && ! std::isnan(s)) {
+    if (! isinf(s) && ! isnan(s)) {
       rnemdFile_ << "\t" << s;
     } else{
       sprintf( painCave.errMsg,
@@ -2413,9 +2416,9 @@ namespace OpenMD {
     if (count == 0) return;
 
     dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])->get95percentConfidenceInterval(s);
-    if (std::isinf(s[0]) || std::isnan(s[0]) || 
-        std::isinf(s[1]) || std::isnan(s[1]) || 
-        std::isinf(s[2]) || std::isnan(s[2]) ) {      
+    if (isinf(s[0]) || isnan(s[0]) || 
+        isinf(s[1]) || isnan(s[1]) || 
+        isinf(s[2]) || isnan(s[2]) ) {      
       sprintf( painCave.errMsg,
                "RNEMD detected a numerical error writing: %s std. dev. for bin %u",
                data_[index].title.c_str(), bin);

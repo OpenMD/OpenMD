@@ -55,7 +55,6 @@
 #include <cmath>
 #include "applications/staticProps/Hxy.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
 #include "utils/Utility.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -362,10 +361,10 @@ namespace OpenMD {
 	  newindex = i*nBinsY_ + j;
           //if(minHeight_[i][j] < 0.0) std::cerr << minHeight_[i][j] << "\t";
 	  c_re(in1[newindex]) = maxHeight_[i][j] - maxBar;
-	  //c_re(in1[newindex]) = 2.0*cos(2.0*NumericConstant::PI*i/Lx/Ly);
+	  //c_re(in1[newindex]) = 2.0*cos(2.0*Constants::PI*i/Lx/Ly);
 	  c_im(in1[newindex]) = 0.0;
 	  c_re(in2[newindex]) = minHeight_[i][j] - minBar; //this was the original line.
-	  //c_re(in2[newindex]) = 1.0*cos(2.0*NumericConstant::PI*i/Lx/Ly);
+	  //c_re(in2[newindex]) = 1.0*cos(2.0*Constants::PI*i/Lx/Ly);
 	  c_im(in2[newindex]) = 0.0;
 	}
       }
@@ -498,9 +497,9 @@ namespace OpenMD {
   RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;
     RealType dens = exp(-r*r/(sigma2*2.0)) /
-      (pow(2.0*NumericConstant::PI*sigma2, 3));
+      (pow(2.0*Constants::PI*sigma2, 3));
     RealType dcut = exp(-rcut*rcut/(sigma2*2.0)) /
-      (pow(2.0*NumericConstant::PI*sigma2, 3));
+      (pow(2.0*Constants::PI*sigma2, 3));
     if (r < rcut) 
       return dens - dcut;
     else

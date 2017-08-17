@@ -40,18 +40,26 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef UTILS_PHYSICALCONSTANTS_HPP
-#define UTILS_PHYSICALCONSTANTS_HPP
+#ifndef UTILS_CONSTANTS_HPP
+#define UTILS_CONSTANTS_HPP
 #include "config.h"
+
+#ifdef _MSC_VER
+#include <math.h>
+#else
 #include <cmath>
+#endif
 
 namespace OpenMD {
 
-  namespace PhysicalConstants {
+  namespace Constants {
+    static const RealType PI = M_PI;
+    static const RealType TWO_PI = 2.0 * PI;
+
     const RealType kb = 1.9872156E-3; // boltzman's constant in kcal/(mol K)
     const RealType kB = 8.31451e-7;   // boltzmann constant amu*Ang^2*fs^-2/K
     const RealType energyConvert = 4.184E-4; // convert kcal/mol -> (amu A^2)/fs^2
-    const RealType rotationalEnergyConvert = energyConvert*2.0*M_PI;
+    const RealType rotationalEnergyConvert = energyConvert*TWO_PI;
     
     const RealType pressureConvert = 1.63882576e8; // converts amu*fs^-2*Ang^-1 -> atm
 

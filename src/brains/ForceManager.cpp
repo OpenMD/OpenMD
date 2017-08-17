@@ -1064,8 +1064,8 @@ namespace OpenMD {
         Wlrc -= rho_i * rho_j * LRI.second;
         }
         }
-        Elrc *= 2.0 * NumericConstant::PI;
-        Wlrc *= 2.0 * NumericConstant::PI;
+        Elrc *= 2.0 * Constants::PI;
+        Wlrc *= 2.0 * Constants::PI;
 
         RealType lrp = curSnapshot->getLongRangePotential();
         curSnapshot->setLongRangePotential(lrp + Elrc);

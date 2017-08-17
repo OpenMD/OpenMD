@@ -43,7 +43,7 @@
 #include "FluctuatingChargeNVT.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 
 
 namespace OpenMD {
@@ -211,13 +211,13 @@ namespace OpenMD {
     RealType chi = thermostat.first;
     RealType integralOfChidt = thermostat.second;
     RealType fkBT = info_->getNFluctuatingCharges() * 
-      PhysicalConstants::kB *targetTemp_;
+      Constants::kB *targetTemp_;
 
     RealType thermostat_kinetic = fkBT * tauThermostat_ * tauThermostat_ * 
-      chi * chi / (2.0 * PhysicalConstants::energyConvert);
+      chi * chi / (2.0 * Constants::energyConvert);
 
     RealType thermostat_potential = fkBT * integralOfChidt / 
-      PhysicalConstants::energyConvert;
+      Constants::energyConvert;
 
     return thermostat_kinetic + thermostat_potential;
   }

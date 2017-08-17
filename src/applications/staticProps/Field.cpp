@@ -51,7 +51,7 @@
 #include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
@@ -283,9 +283,9 @@ namespace OpenMD {
   RealType Field<T>::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;
     RealType dens = exp(-r*r/(sigma2*2.0)) /
-      (pow(2.0*NumericConstant::PI*sigma2, 3));
+      (pow(2.0*Constants::PI*sigma2, 3));
     RealType dcut = exp(-rcut*rcut/(sigma2*2.0)) /
-      (pow(2.0*NumericConstant::PI*sigma2, 3));
+      (pow(2.0*Constants::PI*sigma2, 3));
     if (r < rcut)
       return dens - dcut;
     else

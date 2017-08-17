@@ -411,7 +411,7 @@ namespace OpenMD {
 
       len = length();
                 
-      //if (len < OpenMD::NumericConstant::epsilon)
+      //if (len < OpenMD::Constants::epsilon)
       //  throw();
                 
       *this /= len;

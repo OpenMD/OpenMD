@@ -46,7 +46,7 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "types/LennardJonesAdapter.hpp"
 
 namespace OpenMD {
@@ -152,7 +152,7 @@ namespace OpenMD {
           }
               
           int which = int(wrappedZdist / deltaR_);
-          density_[which] += nelectron * exp(-zdist*zdist/(sigma2*2.0)) /(slabVolume* sqrt(2*NumericConstant::PI*sigma*sigma));
+          density_[which] += nelectron * exp(-zdist*zdist/(sigma2*2.0)) /(slabVolume* sqrt(2*Constants::PI*sigma*sigma));
               
         }            
       }        

@@ -48,8 +48,8 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
 #include "utils/Revision.hpp"
+#include "utils/Constants.hpp"
 #include <vector>
 
 namespace OpenMD {
@@ -257,7 +257,7 @@ namespace OpenMD {
                 HAdist = HA.length();
                 
                 ctheta = dot(DH, DA) / (DHdist * DAdist);
-                theta = acos(ctheta) * 180.0 / M_PI;
+                theta = acos(ctheta) * 180.0 / Constants::PI;
               
                 // Angle criteria: are the D-H and D-A and vectors close?
                 if (theta < thetaCut_ && HAdist < OHCut_) {
@@ -297,7 +297,7 @@ namespace OpenMD {
                 currentSnapshot_->wrapVector(DH);
                 DHdist = DH.length();
                 ctheta = dot(DH, DA) / (DHdist * DAdist);
-                theta = acos(ctheta) * 180.0 / M_PI;              
+                theta = acos(ctheta) * 180.0 / Constants::PI;              
                 // Angle criteria: are the D-H and D-A and vectors close?
                 if (theta < thetaCut_ && HAdist < OHCut_) {
                   // We have a hydrogen bond!

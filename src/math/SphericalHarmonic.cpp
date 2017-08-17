@@ -46,6 +46,7 @@
 #include <limits>
 #include "math/SphericalHarmonic.hpp"
 #include "utils/simError.h"
+#include "utils/Constants.hpp"
 
 using namespace OpenMD;
 
@@ -142,7 +143,7 @@ RealType SphericalHarmonic::Ptilde(int l,int m, RealType x){
     result = 0.;
   } else {
     RealType y=(RealType)(2.*l+1.)*Fact(l-m)/Fact(l+m);
-    result = mpow(m) * sqrt(y) * Legendre(l,m,x) / sqrt(4.0*M_PI);
+    result = mpow(m) * sqrt(y) * Legendre(l,m,x) / sqrt(4.0*Constants::PI);
   }
   return result;
 }

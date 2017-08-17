@@ -43,7 +43,7 @@
 #include <cmath>
 #include "primitives/RigidBody.hpp"
 #include "utils/simError.h"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 namespace OpenMD {
   
   RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData),
@@ -609,9 +609,9 @@ namespace OpenMD {
 	simError();
       }    
     
-      euler[0] = ats->getEulerPhi() * NumericConstant::PI /180.0;
-      euler[1] = ats->getEulerTheta() * NumericConstant::PI /180.0;
-      euler[2] = ats->getEulerPsi() * NumericConstant::PI /180.0;
+      euler[0] = ats->getEulerPhi() * Constants::PI /180.0;
+      euler[1] = ats->getEulerTheta() * Constants::PI /180.0;
+      euler[2] = ats->getEulerPsi() * Constants::PI /180.0;
 
       RotMat3x3d Atmp(euler);
       refOrients_.push_back(Atmp);

@@ -47,7 +47,7 @@
 #include "integrators/NPT.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 // Basic isotropic thermostating and barostating via the Melchionna
@@ -150,7 +150,7 @@ namespace OpenMD {
     
     instaTemp =thermo.getTemperature();
     press = thermo.getPressureTensor();
-    instaPress = PhysicalConstants::pressureConvert* (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
+    instaPress = Constants::pressureConvert* (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
     instaVol =thermo.getVolume();
 
     Vector3d  COM = thermo.getCom();
@@ -174,7 +174,7 @@ namespace OpenMD {
 
 	// velocity half step  (use chi from previous step here):
 
-	vel += dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
+	vel += dt2*Constants::energyConvert/mass* frc - dt2*sc;
 	sd->setVel(vel);
 
 	if (sd->isDirectional()) {
@@ -187,7 +187,7 @@ namespace OpenMD {
 
 	  ji = sd->getJ();
 
-	  ji += dt2*PhysicalConstants::energyConvert * Tb 
+	  ji += dt2*Constants::energyConvert * Tb 
             - dt2*thermostat.first* ji;
                 
 	  rotAlgo_->rotate(sd, ji, dt);
@@ -320,7 +320,7 @@ namespace OpenMD {
 
 	  // velocity half step
 	  vel = oldVel[index] 
-            + dt2*PhysicalConstants::energyConvert/mass* frc 
+            + dt2*Constants::energyConvert/mass* frc 
             - dt2*sc;
 
 	  sd->setVel(vel);
@@ -330,7 +330,7 @@ namespace OpenMD {
 	    Tb = sd->lab2Body(sd->getTrq());
 
 	    ji = oldJi[index] 
-              + dt2*PhysicalConstants::energyConvert*Tb 
+              + dt2*Constants::energyConvert*Tb 
               - dt2*thermostat.first*oldJi[index];
 
 	    sd->setJ(ji);

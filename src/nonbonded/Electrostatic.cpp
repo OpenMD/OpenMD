@@ -57,7 +57,7 @@
 #include "types/MultipoleAdapter.hpp"
 #include "io/Globals.hpp"
 #include "nonbonded/SlaterIntegrals.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "math/erfc.hpp"
 #include "math/SquareMatrix.hpp"
 #include "primitives/Molecule.hpp"
@@ -273,7 +273,7 @@ namespace OpenMD {
 
     if (screeningMethod_ == DAMPED) {      
       a2 = dampingAlpha_ * dampingAlpha_;
-      invArootPi = 1.0 / (dampingAlpha_ * sqrt(M_PI));    
+      invArootPi = 1.0 / (dampingAlpha_ * sqrt(Constants::PI));    
       expTerm = exp(-a2 * r2);
       // values of Smith's B_l functions at the cutoff radius:
       b0c = erfc(dampingAlpha_ * r) / r;
@@ -722,8 +722,8 @@ namespace OpenMD {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
           Jvals.push_back(sSTOCoulInt( a, b, m, n, rval * 
-                                       PhysicalConstants::angstromToBohr ) * 
-                          PhysicalConstants::hartreeToKcal );
+                                       Constants::angstromToBohr ) * 
+                          Constants::hartreeToKcal );
         }
         
         CubicSpline* J = new CubicSpline();
@@ -1317,7 +1317,7 @@ namespace OpenMD {
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     Vector3d box = hmat.diagonals();
 
-    RealType twoPiOverThreeV = 2.0 * M_PI / (3.0 * box.x() * box.y() * box.z());
+    RealType twoPiOverThreeV = 2.0 * Constants::PI / (3.0 * box.x() * box.y() * box.z());
     pot +=  eConverter * twoPiOverThreeV * netDipole.lengthSquare();
   
 
@@ -1382,7 +1382,7 @@ namespace OpenMD {
     Vector3d box = hmat.diagonals();
     RealType boxMax = box.max();
     
-    //int kMax = int(2.0 * M_PI / (pow(dampingAlpha_,2)*cutoffRadius_ * boxMax) );
+    //int kMax = int(2.0 * Constants::PI / (pow(dampingAlpha_,2)*cutoffRadius_ * boxMax) );
     int kMax = 7;
     int kSqMax = kMax*kMax + 2;
     
@@ -1391,11 +1391,11 @@ namespace OpenMD {
     int kSqLim = kSqMax;
     
     vector<RealType> AK(kSqLim+1, 0.0);
-    RealType xcl = 2.0 * M_PI / box.x();
-    RealType ycl = 2.0 * M_PI / box.y();
-    RealType zcl = 2.0 * M_PI / box.z();
-    RealType rcl = 2.0 * M_PI / boxMax;
-    RealType rvol = 2.0 * M_PI /(box.x() * box.y() * box.z());
+    RealType xcl = 2.0 * Constants::PI / box.x();
+    RealType ycl = 2.0 * Constants::PI / box.y();
+    RealType zcl = 2.0 * Constants::PI / box.z();
+    RealType rcl = 2.0 * Constants::PI / boxMax;
+    RealType rvol = 2.0 * Constants::PI /(box.x() * box.y() * box.z());
     
     if(dampingAlpha_ < 1.0e-12) return;
     
@@ -1428,7 +1428,7 @@ namespace OpenMD {
       ens[j].resize(nMax);
     }
     
-    Vector3d t( 2.0 * M_PI );
+    Vector3d t( 2.0 * Constants::PI );
     t.Vdiv(t, box);
 
     SimInfo::MoleculeIterator mi;

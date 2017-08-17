@@ -40,8 +40,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-// MSVC has an odd bug that requires NumericConstant to come first:
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "types/InversionTypeParser.hpp"
 #include "types/ImproperCosineInversionType.hpp"
 #include "types/HarmonicInversionType.hpp"
@@ -106,7 +105,7 @@ namespace OpenMD {
           ImproperCosineInversionParameter currParam;
           currParam.kchi = tokenizer.nextTokenAsDouble();
           currParam.n = tokenizer.nextTokenAsInt();
-	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
+	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * Constants::PI; //convert to rad
           parameters.push_back(currParam);
         }
         inversionType = new ImproperCosineInversionType(parameters);
@@ -137,7 +136,7 @@ namespace OpenMD {
         // d0 should be read in kcal / mol / degrees^2
         // phi0 should be read in degrees
 
-        RealType degreesPerRadian = 180.0 / NumericConstant::PI;
+        RealType degreesPerRadian = 180.0 / Constants::PI;
         
         // convert to kcal / mol / radians^2
         RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);

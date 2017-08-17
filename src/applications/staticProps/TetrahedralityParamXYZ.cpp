@@ -43,9 +43,9 @@
  
 #include "applications/staticProps/TetrahedralityParamXYZ.hpp"
 #include "utils/simError.h"
+#include "utils/Constants.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
 #include <vector>
 #include <algorithm>
 #include <fstream>
@@ -237,7 +237,7 @@ namespace OpenMD {
                   Vector3d bPos = Vector3d(ll,mm,nn) * voxelSize_ - halfBox;
                   Vector3d d = bPos - rk;
                   currentSnapshot_->wrapVector(d);
-                  RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
+                  RealType denom = pow(2.0 * sqrt(Constants::PI) * gaussWidth_, 3);
                   RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
                   RealType weight = exp(exponent) / denom;
                   count_[ll][mm][nn] += weight;
@@ -256,7 +256,7 @@ namespace OpenMD {
       //       for(qiter = qvals.begin(); qiter != qvals.end(); ++qiter) {
       //         Vector3d d = pos - (*qiter).first;
       //         currentSnapshot_->wrapVector(d);
-      //         RealType denom = pow(2.0 * sqrt(M_PI) * gaussWidth_, 3);
+      //         RealType denom = pow(2.0 * sqrt(Constants::PI) * gaussWidth_, 3);
       //         RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
       //         RealType weight = exp(exponent) / denom;
       //         count_[i][j][k] += weight;

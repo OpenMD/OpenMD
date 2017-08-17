@@ -43,8 +43,6 @@
 #include "FluctuatingChargeNVE.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
-
 
 namespace OpenMD {
 

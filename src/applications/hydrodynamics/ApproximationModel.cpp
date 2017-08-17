@@ -44,12 +44,13 @@
 #include "math/LU.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 #include "math/LU.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 /**
  * Reference:
@@ -101,12 +102,12 @@ namespace OpenMD {
               RealType sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
               Mat3x3d tmpMat;
               tmpMat = outProduct(Rij, Rij) / rij2;
-              RealType constant = 8.0 * NumericConstant::PI * viscosity * rij;
+              RealType constant = 8.0 * Constants::PI * viscosity * rij;
 	      RealType tmp1 = 1.0 + sumSigma2OverRij2/3.0;
 	      RealType tmp2 = 1.0 - sumSigma2OverRij2;
               Tij = (tmp1 * I + tmp2 * tmpMat ) / constant;
             }else {
-              RealType constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
+              RealType constant = 1.0 / (6.0 * Constants::PI * viscosity * beads[i].radius);
               Tij(0, 0) = constant;
               Tij(1, 1) = constant;
               Tij(2, 2) = constant;
@@ -135,7 +136,7 @@ namespace OpenMD {
     
     RealType volume = 0.0;
     for (std::vector<BeadParam>::iterator iter = beads.begin(); iter != beads.end(); ++iter) {
-      volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
+      volume += 4.0/3.0 * Constants::PI * pow((*iter).radius,3);
     }
     
     for (std::size_t i = 0; i < nbeads; ++i) {
@@ -153,9 +154,9 @@ namespace OpenMD {
     // add the volume correction
     Xiorr += (RealType(6.0) * viscosity * volume) * I;    
     
-    Xiott *= PhysicalConstants::viscoConvert;
-    Xiotr *= PhysicalConstants::viscoConvert;
-    Xiorr *= PhysicalConstants::viscoConvert;
+    Xiott *= Constants::viscoConvert;
+    Xiotr *= Constants::viscoConvert;
+    Xiorr *= Constants::viscoConvert;
     
     Mat3x3d tmp;
     Mat3x3d tmpInv;
@@ -203,14 +204,14 @@ namespace OpenMD {
     Dr6x6.getSubMatrix(0, 3, Drrt);
     Dr6x6.getSubMatrix(3, 0, Drtr);
     Dr6x6.getSubMatrix(3, 3, Drrr);
-    RealType kt = PhysicalConstants::kb * temperature ; // in kcal mol^-1
+    RealType kt = Constants::kb * temperature ; // in kcal mol^-1
     Drtt *= kt;
     Drrt *= kt;
     Drtr *= kt;
     Drrr *= kt;
-    //Xirtt *= PhysicalConstants::kb * temperature;
-    //Xirtr *= PhysicalConstants::kb * temperature;
-    //Xirrr *= PhysicalConstants::kb * temperature;
+    //Xirtt *= Constants::kb * temperature;
+    //Xirtr *= Constants::kb * temperature;
+    //Xirrr *= Constants::kb * temperature;
     
     Mat6x6d Xi, D;
 
@@ -274,12 +275,12 @@ namespace OpenMD {
           RealType sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
           Mat3x3d tmpMat;
           tmpMat = outProduct(Rij, Rij) / rij2;
-          RealType constant = 8.0 * NumericConstant::PI * viscosity * rij;
+          RealType constant = 8.0 * Constants::PI * viscosity * rij;
           RealType tmp1 = 1.0 + sumSigma2OverRij2/3.0;
 	  RealType tmp2 = 1.0 - sumSigma2OverRij2;
 	  Tij = (tmp1 * I + tmp2 * tmpMat ) / constant;
         }else {
-          RealType constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
+          RealType constant = 1.0 / (6.0 * Constants::PI * viscosity * beads[i].radius);
           Tij(0, 0) = constant;
           Tij(1, 1) = constant;
           Tij(2, 2) = constant;
@@ -308,7 +309,7 @@ namespace OpenMD {
 
     RealType volume = 0.0;
     for (std::vector<BeadParam>::iterator iter = beads.begin(); iter != beads.end(); ++iter) {
-      volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
+      volume += 4.0/3.0 * Constants::PI * pow((*iter).radius,3);
     }
     
     for (std::size_t i = 0; i < nbeads; ++i) {
@@ -325,11 +326,11 @@ namespace OpenMD {
     // add the volume correction here:
     Xirr += (RealType(6.0) * viscosity * volume) * I;    
     
-    Xitt *= PhysicalConstants::viscoConvert;
-    Xitr *= PhysicalConstants::viscoConvert;
-    Xirr *= PhysicalConstants::viscoConvert;
+    Xitt *= Constants::viscoConvert;
+    Xitr *= Constants::viscoConvert;
+    Xirr *= Constants::viscoConvert;
     
-    RealType kt = PhysicalConstants::kb * temperature; // in kcal mol^-1
+    RealType kt = Constants::kb * temperature; // in kcal mol^-1
     
     Mat3x3d Dott; //translational diffusion tensor at arbitrary origin O
     Mat3x3d Dorr; //rotational diffusion tensor at arbitrary origin O
@@ -402,8 +403,8 @@ namespace OpenMD {
 
 
     //Xidtt in units of kcal*fs*mol^-1*Ang^-2
-    //Xid /= PhysicalConstants::energyConvert;
-    Xid *= PhysicalConstants::kb * temperature;
+    //Xid /= Constants::energyConvert;
+    Xid *= Constants::kb * temperature;
 
     Mat6x6d Xi, D;
 

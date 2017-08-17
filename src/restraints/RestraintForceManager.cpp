@@ -52,7 +52,7 @@
 #include "restraints/ObjectRestraint.hpp"
 #include "io/RestReader.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/StringUtils.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
@@ -186,13 +186,13 @@ namespace OpenMD {
           rest->setSwingYForceConstant(stamp[i]->getSwingYSpringConstant());
         }
         if (stamp[i]->haveRestrainedTwistAngle()) {
-          rest->setRestrainedTwistAngle(stamp[i]->getRestrainedTwistAngle() * M_PI/180.0);
+          rest->setRestrainedTwistAngle(stamp[i]->getRestrainedTwistAngle() * Constants::PI/180.0);
         }
         if (stamp[i]->haveRestrainedSwingYAngle()) {
-          rest->setRestrainedSwingYAngle(stamp[i]->getRestrainedSwingYAngle() * M_PI/180.0);
+          rest->setRestrainedSwingYAngle(stamp[i]->getRestrainedSwingYAngle() * Constants::PI/180.0);
         }
         if (stamp[i]->haveRestrainedSwingXAngle()) {
-          rest->setRestrainedSwingXAngle(stamp[i]->getRestrainedSwingXAngle() * M_PI/180.0);
+          rest->setRestrainedSwingXAngle(stamp[i]->getRestrainedSwingXAngle() * Constants::PI/180.0);
         }
         if (stamp[i]->havePrint()) {
           rest->setPrintRestraint(stamp[i]->getPrint());

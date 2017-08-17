@@ -44,7 +44,7 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 
 #include <vector>
 
@@ -167,7 +167,7 @@ namespace OpenMD {
               if (DAdist < rCut_) {
 
                 ctheta = dot(DH, DA) / (DHdist * DAdist);
-                theta = acos(ctheta) * 180.0 / M_PI;
+                theta = acos(ctheta) * 180.0 / Constants::PI;
 
                 // Angle criteria: are the D-H and D-A and vectors close?
                 if (theta < thetaCut_) {
@@ -201,7 +201,7 @@ namespace OpenMD {
                 currentSnapshot_->wrapVector(DH);
                 DHdist = DH.length();
                 ctheta = dot(DH, DA) / (DHdist * DAdist);
-                theta = acos(ctheta) * 180.0 / M_PI;
+                theta = acos(ctheta) * 180.0 / Constants::PI;
                 // Angle criteria: are the D-H and D-A and vectors close?
                 if (theta < thetaCut_) {
                   // molecule 1 is a Hbond acceptor:

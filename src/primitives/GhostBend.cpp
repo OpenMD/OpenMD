@@ -44,6 +44,8 @@
 #include <cmath>
 #include "primitives/GhostBend.hpp"
 #include "primitives/DirectionalAtom.hpp"
+#include "utils/Constants.hpp"
+
 namespace OpenMD {
 
   /**@todo still a lot left to improve*/
@@ -103,7 +105,7 @@ namespace OpenMD {
       ghostAtom->addParticlePot(potential_);
     }
 
-    angle = theta /M_PI * 180.0;
+    angle = theta /Constants::PI * 180.0;
    
   }  
 } //end namespace OpenMD

@@ -47,7 +47,7 @@
 #include "constraints/ZconstraintForceManager.hpp"
 #include "integrators/Integrator.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/StringUtils.hpp"
 
 namespace OpenMD {
@@ -127,7 +127,7 @@ namespace OpenMD {
     } else {
       targetTemp = 298.0;
     }
-    RealType zforceConstant = PhysicalConstants::kb * targetTemp /
+    RealType zforceConstant = Constants::kb * targetTemp /
       (halfOfLargestBox * halfOfLargestBox);
          
     int nZconstraints = simParam->getNZconsStamps();

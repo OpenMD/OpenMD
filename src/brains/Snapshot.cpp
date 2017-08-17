@@ -48,7 +48,6 @@
  */
 
 #include "brains/Snapshot.hpp"
-#include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 #include "utils/Utility.hpp"
 #include <cstdio>

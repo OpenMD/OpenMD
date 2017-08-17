@@ -43,7 +43,7 @@
 #include "integrators/NVT.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
 
@@ -136,7 +136,7 @@ namespace OpenMD {
         mass = sd->getMass();
 
         // velocity half step (use chi from previous step here):
-        vel += dt2 *PhysicalConstants::energyConvert/mass*frc 
+        vel += dt2 *Constants::energyConvert/mass*frc 
           - dt2*thermostat.first*vel;
         
         // position whole step
@@ -154,7 +154,7 @@ namespace OpenMD {
 
 	  ji = sd->getJ();
 
-	  ji += dt2*PhysicalConstants::energyConvert*Tb 
+	  ji += dt2*Constants::energyConvert*Tb 
             - dt2*thermostat.first *ji;
 
 	  rotAlgo_->rotate(sd, ji, dt);
@@ -252,7 +252,7 @@ namespace OpenMD {
 	  // velocity half step
 
 	  vel = oldVel_[index] 
-            + dt2/mass*PhysicalConstants::energyConvert * frc 
+            + dt2/mass*Constants::energyConvert * frc 
             - dt2*thermostat.first*oldVel_[index];
             
 	  sd->setVel(vel);
@@ -263,7 +263,7 @@ namespace OpenMD {
 
 	    Tb =  sd->lab2Body(sd->getTrq());
 
-	    ji = oldJi_[index] + dt2*PhysicalConstants::energyConvert*Tb 
+	    ji = oldJi_[index] + dt2*Constants::energyConvert*Tb 
               - dt2*thermostat.first *oldJi_[index];
 
 	    sd->setJ(ji);
@@ -307,13 +307,13 @@ namespace OpenMD {
     RealType thermostat_kinetic;
     RealType thermostat_potential;
     
-    fkBT = info_->getNdf() *PhysicalConstants::kB *targetTemp_;
+    fkBT = info_->getNdf() *Constants::kB *targetTemp_;
 
     Energy = thermo.getTotalEnergy();
 
-    thermostat_kinetic = fkBT * tauThermostat_ * tauThermostat_ * thermostat.first * thermostat.first / (2.0 * PhysicalConstants::energyConvert);
+    thermostat_kinetic = fkBT * tauThermostat_ * tauThermostat_ * thermostat.first * thermostat.first / (2.0 * Constants::energyConvert);
 
-    thermostat_potential = fkBT * thermostat.second / PhysicalConstants::energyConvert;
+    thermostat_potential = fkBT * thermostat.second / Constants::energyConvert;
 
     conservedQuantity = Energy + thermostat_kinetic + thermostat_potential;
 

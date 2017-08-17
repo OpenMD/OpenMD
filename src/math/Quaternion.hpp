@@ -54,6 +54,7 @@
 
 #include "math/Vector3.hpp"
 #include "math/SquareMatrix.hpp"
+#include "utils/Constants.hpp"
 #define ISZERO(a,eps) ( (a)>-(eps) && (a)<(eps) )
 const RealType tiny=1.0e-6;     
 
@@ -446,7 +447,7 @@ namespace OpenMD{
       
       // First test if the swing is in the singularity:
 
-      if ( ISZERO(z(),tiny) && ISZERO(w(),tiny) ) { sx=sy=M_PI; tw=0; return; }
+      if ( ISZERO(z(),tiny) && ISZERO(w(),tiny) ) { sx=sy=Constants::PI; tw=0; return; }
 
       // Decompose into twist-swing by solving the equation:
       //
@@ -507,7 +508,7 @@ namespace OpenMD{
       // Decompose q into swing-twist using a similar development as
       // in function toTwistSwing
 
-      if ( ISZERO(z(),tiny) && ISZERO(w(),tiny) ) { sx=sy=M_PI; tw=0; }
+      if ( ISZERO(z(),tiny) && ISZERO(w(),tiny) ) { sx=sy=Constants::PI; tw=0; }
       
       Real qw, qx, qy, qz;
       if ( w() < 0 ){

@@ -41,7 +41,7 @@
  */
 
 #include "hydrodynamics/Ellipsoid.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "math/LU.hpp"
 
 namespace OpenMD {
@@ -105,7 +105,7 @@ namespace OpenMD {
       S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
     }
     
-    RealType pi = NumericConstant::PI;
+    RealType pi = Constants::PI;
     RealType XittA = 16.0 * pi * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
     RealType XittB = 32.0 * pi * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
     RealType XirrA = 32.0/3.0 * pi * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
@@ -121,11 +121,11 @@ namespace OpenMD {
     Xi(4,4) = XirrB;
     Xi(5,5) = XirrA;
 
-    Xi *= PhysicalConstants::viscoConvert;    
+    Xi *= Constants::viscoConvert;    
     
     XiCopy = Xi;
     invertMatrix(XiCopy, D);
-    RealType kt = PhysicalConstants::kb * temperature; // in kcal mol^-1
+    RealType kt = Constants::kb * temperature; // in kcal mol^-1
     D *= kt;
    
     HydroProp* hprop = new HydroProp(V3Zero, Xi, D);

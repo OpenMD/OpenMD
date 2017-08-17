@@ -42,7 +42,7 @@
  
 #include "io/MultipoleAtomTypesSectionParser.hpp"
 #include "brains/ForceField.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -86,9 +86,9 @@ namespace OpenMD {
 
       std::string atomTypeName = tokenizer.nextToken();    
       std::string multipoleType = tokenizer.nextToken();
-      RealType phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-      RealType theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-      RealType psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+      RealType phi = tokenizer.nextTokenAsDouble() * Constants::PI /180.0;
+      RealType theta = tokenizer.nextTokenAsDouble() * Constants::PI /180.0;
+      RealType psi = tokenizer.nextTokenAsDouble() * Constants::PI /180.0;
 
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType == NULL) {

@@ -47,7 +47,7 @@
 
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {

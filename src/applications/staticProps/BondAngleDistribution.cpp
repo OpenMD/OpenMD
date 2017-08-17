@@ -49,7 +49,7 @@
 #include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -172,7 +172,7 @@ namespace OpenMD {
               
               vec2.normalize();
 	      
-              RealType theta = acos(dot(vec1,vec2))*180.0/NumericConstant::PI;
+              RealType theta = acos(dot(vec1,vec2))*180.0/Constants::PI;
               
               
               if (theta > 180.0){

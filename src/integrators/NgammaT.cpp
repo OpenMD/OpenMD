@@ -45,7 +45,7 @@
 #include "integrators/IntegratorCreator.hpp"
 #include "integrators/NgammaT.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -58,7 +58,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     } else {
-      surfaceTension= simParams->getSurfaceTension()* PhysicalConstants::surfaceTensionConvert * PhysicalConstants::energyConvert;
+      surfaceTension= simParams->getSurfaceTension()* Constants::surfaceTensionConvert * Constants::energyConvert;
     }
 
   }
@@ -66,8 +66,8 @@ namespace OpenMD {
     Mat3x3d hmat = snap->getHmat();
     RealType hz = hmat(2, 2);
     RealType Axy = hmat(0,0) * hmat(1, 1);
-    RealType sx = -hz * (press(0, 0) - targetPressure/PhysicalConstants::pressureConvert);
-    RealType sy = -hz * (press(1, 1) - targetPressure/PhysicalConstants::pressureConvert);
+    RealType sx = -hz * (press(0, 0) - targetPressure/Constants::pressureConvert);
+    RealType sy = -hz * (press(1, 1) - targetPressure/Constants::pressureConvert);
     eta(0,0) -= dt2* Axy * (sx - surfaceTension) / (NkBT*tb2);
     eta(1,1) -= dt2* Axy * (sy - surfaceTension) / (NkBT*tb2);
     eta(2,2) = 0.0;
@@ -79,8 +79,8 @@ namespace OpenMD {
     RealType hz = hmat(2, 2);
     RealType Axy = hmat(0,0) * hmat(1, 1);
     prevEta = eta;
-    RealType sx = -hz * (press(0, 0) - targetPressure/PhysicalConstants::pressureConvert);
-    RealType sy = -hz * (press(1, 1) - targetPressure/PhysicalConstants::pressureConvert);
+    RealType sx = -hz * (press(0, 0) - targetPressure/Constants::pressureConvert);
+    RealType sy = -hz * (press(1, 1) - targetPressure/Constants::pressureConvert);
     eta(0,0) = oldEta(0, 0) - dt2 * Axy * (sx -surfaceTension) / (NkBT*tb2);
     eta(1,1) = oldEta(1, 1) - dt2 * Axy * (sy -surfaceTension) / (NkBT*tb2);
     eta(2,2) = 0.0;
@@ -148,34 +148,34 @@ namespace OpenMD {
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
     // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*PhysicalConstants::kB *targetTemp;
+    NkBT = info_->getNGlobalIntegrableObjects()*Constants::kB *targetTemp;
 
     // fkBT is used because the thermostat operates on more degrees of freedom
     // than the barostat (when there are particles with orientational degrees
     // of freedom).  
-    fkBT = info_->getNdf()*PhysicalConstants::kB *targetTemp;    
+    fkBT = info_->getNdf()*Constants::kB *targetTemp;    
     
 
     RealType totalEnergy = thermo.getTotalEnergy();
 
     RealType thermostat_kinetic = fkBT * tt2 * thermostat.first *
-      thermostat.first /(2.0 * PhysicalConstants::energyConvert);
+      thermostat.first /(2.0 * Constants::energyConvert);
 
-    RealType thermostat_potential = fkBT* thermostat.second / PhysicalConstants::energyConvert;
+    RealType thermostat_potential = fkBT* thermostat.second / Constants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     RealType trEta = tmp.trace();
     
-    RealType barostat_kinetic = NkBT * tb2 * trEta /(2.0 * PhysicalConstants::energyConvert);
+    RealType barostat_kinetic = NkBT * tb2 * trEta /(2.0 * Constants::energyConvert);
 
-    RealType barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
+    RealType barostat_potential = (targetPressure * thermo.getVolume() / Constants::pressureConvert) /Constants::energyConvert;
 
     Mat3x3d hmat = snap->getHmat();
     RealType area = hmat(0,0) * hmat(1, 1);
 
     RealType conservedQuantity = totalEnergy + thermostat_kinetic
       + thermostat_potential + barostat_kinetic + barostat_potential
-      - surfaceTension * area/ PhysicalConstants::energyConvert;
+      - surfaceTension * area/ Constants::energyConvert;
 
     return conservedQuantity;
 

@@ -43,6 +43,7 @@
 #include "clusters/Decahedron.hpp"
 #include <cmath>
 #include <algorithm>
+#include "utils/Constants.hpp"
 
 using namespace std;
 
@@ -57,7 +58,7 @@ namespace OpenMD {
     //
     // Initialize Basis vectors.
     //
-    const RealType phi = 2.0 * M_PI / 5.0;  // 72 degrees
+    const RealType phi = 2.0 * Constants::PI / 5.0;  // 72 degrees
     const RealType r3o2 = 0.5 * sqrt(3.0);
 
     Basis.push_back( Vector3d(  r3o2*cos(0.0*phi), r3o2*sin(0.0*phi),  0.0 ));

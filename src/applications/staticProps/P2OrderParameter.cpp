@@ -44,7 +44,7 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -223,7 +223,7 @@ namespace OpenMD {
             vecCount++;
           }
         }
-        angle = angle/(vecCount*NumericConstant::PI)*180.0;
+        angle = angle/(vecCount*Constants::PI)*180.0;
         
       } else {
         if (doOffset_) {
@@ -245,7 +245,7 @@ namespace OpenMD {
             angle += acos(dot(vec, director)) ;
             vecCount++;
           }
-          angle = angle / (vecCount * NumericConstant::PI) * 180.0;
+          angle = angle / (vecCount * Constants::PI) * 180.0;
 
         } else {
 
@@ -262,7 +262,7 @@ namespace OpenMD {
             angle += acos(dot(vec, director)) ;
             vecCount++;
           }
-          angle = angle / (vecCount * NumericConstant::PI) * 180.0;
+          angle = angle / (vecCount * Constants::PI) * 180.0;
         }
       }
 

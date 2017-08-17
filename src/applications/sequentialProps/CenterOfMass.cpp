@@ -47,7 +47,7 @@
 #include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+
 namespace OpenMD {
   
   CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename, 
