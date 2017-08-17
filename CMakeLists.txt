@@ -54,15 +54,19 @@ set (VERSION_MINOR "5")
 set (VERSION_TINY "0")
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  IF(WIN32)
-    SET(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/openmd"
-        CACHE PATH "OpenMD install prefix" FORCE)
-  ELSE(WIN32)
-    SET(CMAKE_INSTALL_PREFIX "/usr/local/openmd"
-        CACHE PATH "OpenMD install prefix" FORCE)
-  ENDIF(WIN32)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if (CMAKE_HOST_UNIX)
+    set (CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/openmd"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+  else (CMAKE_HOST_UNIX)
+    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+    set (CMAKE_INSTALL_PREFIX
+      "${CMAKE_GENERIC_PROGRAM_FILES}/OpenMD"
+      CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+    set (CMAKE_GENERIC_PROGRAM_FILES)
+  endif (CMAKE_HOST_UNIX)
+endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
 ADD_DEFINITIONS( -DFRC_PATH=${CMAKE_INSTALL_PREFIX}/forceFields )
 
 # ---------- Setup output Directories -------------------------
