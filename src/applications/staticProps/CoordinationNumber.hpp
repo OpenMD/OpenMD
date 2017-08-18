@@ -52,17 +52,17 @@ using namespace std;
 namespace OpenMD {
 
   /**
-   * @class Coordination Number
-   * @brief Coordination Number
+   * @class CoordinationNumber
+   * @brief CoordinationNumber
    *
    * Computes a distribution of coordination numbers defined as the number of
-   * atoms in Selection 2 that are within rCut of the atom in Selection 1.
+   * atoms in \a sele2 that are within \a rCut of the atom in \a sele1
    *
    * Note that extra parameters must be declared:
    *
-   *   rCut = cutoff radius for finding lists of nearest neighbors
-   *   sele1 = selection of StuntDoubles used for the distribution
-   *   sele2 = selection of StuntDoubles used for nearest neighbor computation
+   *   \param rCut cutoff radius for finding lists of nearest neighbors
+   *   \param sele1 selection of StuntDoubles used for the distribution
+   *   \param sele2 selection of StuntDoubles used for nearest neighbor computation
    */
   class CoordinationNumber : public StaticAnalyser {
     

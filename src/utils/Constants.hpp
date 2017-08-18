@@ -56,28 +56,28 @@ namespace OpenMD {
     static const RealType PI = M_PI;
     static const RealType TWO_PI = 2.0 * PI;
 
-    const RealType kb = 1.9872156E-3; // boltzman's constant in kcal/(mol K)
-    const RealType kB = 8.31451e-7;   // boltzmann constant amu*Ang^2*fs^-2/K
-    const RealType energyConvert = 4.184E-4; // convert kcal/mol -> (amu A^2)/fs^2
+    const RealType kb = 1.9872156E-3; //!< boltzman's constant in kcal/(mol K)
+    const RealType kB = 8.31451e-7;   //!< boltzmann constant amu*Ang^2*fs^-2/K
+    const RealType energyConvert = 4.184E-4; //!< convert kcal/mol -> (amu A^2)/fs^2
     const RealType rotationalEnergyConvert = energyConvert*TWO_PI;
     
-    const RealType pressureConvert = 1.63882576e8; // converts amu*fs^-2*Ang^-1 -> atm
+    const RealType pressureConvert = 1.63882576e8; //!< converts amu*fs^-2*Ang^-1 -> atm
 
     //! \name chargeFieldConvert Converts electron-volts to kcal/mol
     const RealType chargeFieldConvert = 23.0609; 
     //! \name dipoleFieldConvert  Converts Debye*Volts/Angstroms to kcal/mol
     const RealType dipoleFieldConvert = 4.8018969509; 
 
-    /* 
+    /** 
      *  surfaceTensionConvert   
      *    multiplies standard input file units of 
      *      surfaceTension (Newton / meter)
      *    returns values of
      *      kcal mol^-1 Angstrom^-2
      */
-    const RealType surfaceTensionConvert = 1.439326479; // convert N/m to kcal/mol*Ang^-2
+    const RealType surfaceTensionConvert = 1.439326479; //!< converts N/m to kcal/mol*Ang^-2
     
-    /* 
+    /**
      *  viscoConvert   
      *    used for products of:
      *      viscosity (Poise) * distance (Angstroms) * velocity (Angstrom / fs)
@@ -86,13 +86,13 @@ namespace OpenMD {
      */
     const RealType viscoConvert = 1.439326479e4; 
 
-    /*
+    /**
      *  densityConvert
      *    used for converting amu / Angstroms^3 into  g / cm^3
      */
     const RealType densityConvert = 1.66053886;
 
-    /* 
+    /** 
      *  thermalConductivityConvert   
      *    multiplies standard input file units of 
      *      themalConductivity (watts meter^-1 Kelvin^-1)  
@@ -101,7 +101,8 @@ namespace OpenMD {
      */
     const RealType thermalConductivityConvert = 1.439326479e-5; 
 
-    /* Atomic Units are used in the Slater overlap code, and we need
+    /**
+     * Atomic Units are used in the Slater overlap code, and we need
      * to get distances back and forth to angstroms and energies back 
      * and forth to kcal / mol 
      */

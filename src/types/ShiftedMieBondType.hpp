@@ -64,7 +64,7 @@ namespace OpenMD {
    * and
    \f[
    r_{s} = e^{\frac{m \log (\sigma )+\log (m)-n \log (\sigma )-\log (n)}{m-n}}
-   \]
+   \f]
    */
   class ShiftedMieBondType : public BondType {
     
