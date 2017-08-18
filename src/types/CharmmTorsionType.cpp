@@ -46,7 +46,6 @@
 #include <algorithm>
 
 #include "types/CharmmTorsionType.hpp"
-#include "utils/NumericConstant.hpp"
 #include "math/ChebyshevT.hpp"
 #include "math/ChebyshevU.hpp"
 

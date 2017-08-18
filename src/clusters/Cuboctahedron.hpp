@@ -101,7 +101,6 @@ namespace OpenMD{
     virtual vector<Vector3d> getPoints();
     
   protected:
-    bool inCluster110(Vector3d r);
     bool inCluster111(Vector3d r);
     bool inCluster   (Vector3d r);
 

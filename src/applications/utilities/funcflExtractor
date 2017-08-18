@@ -1,0 +1,127 @@
+#!@PYTHON_EXECUTABLE@
+"""Funcfl Extractor
+
+Opens an DYNAMO86 EAM funcfl file, parses the data and writes out
+separate files for F[rho], rho(r), and Z(r)
+
+Usage: funcflExtractor
+
+Options:
+  -h,  --help              show this help
+  -f,  --funcfl=...        use specified funcfl file for the data
+  -o,  --output-base=...   use specified name for the base of the output files
+
+Example:
+   funcflExtractor -f Au.u3.funcfl -o Au_u3
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__copyright__ = "Copyright (c) 2017 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+
+z = []
+rho = []
+fRho = []
+
+def usage():
+    print __doc__
+
+def readFuncflFile(funcflFileName):
+
+    eamFile = open(funcflFileName, 'r')
+    lines = eamFile.readlines()
+    eamFile.close()
+
+    lineNo = 0
+    tokensFound = 0
+
+    for l in lines:
+        lineNo = lineNo +1
+        if (lineNo == 3):
+            L = string.split(l)
+            nrho = int(L[0])
+            drho = float(L[1])
+            nR = int(L[2])
+            dR = float(L[3])
+            rcut = float(L[4])
+        if (lineNo > 3):
+            L = string.split(l)
+            for i in range(0, 5):
+                tokensFound = tokensFound + 1
+                if (tokensFound <= nrho):
+                    fRho.append(float(L[i]))
+                elif (tokensFound <= nrho+nR):
+                    z.append(float(L[i]))
+                else:
+                    rho.append(float(L[i]))
+
+    eamFile.close()
+    return (nrho, drho, nR, dR, rcut)
+
+def writeFiles(outputBaseName, nrho, drho, nR, dR, rcut):
+
+    fFile = open(outputBaseName + ".F.dat", 'w')
+    zFile = open(outputBaseName + ".Z.dat", 'w')
+    rhoFile = open(outputBaseName + ".rho.dat", 'w')
+                
+    for i in range(0, nR):
+        r = i*dR
+        zFile.write( "%f\t%f\n" % (r, z[i]))
+        rhoFile.write( "%f\t%f\n" % (r, rho[i]))
+
+
+    for i in range(0, nrho):
+        rhoVal = i * drho
+        fFile.write("%f\t%f\n" % (rhoVal, fRho[i]))
+
+    fFile.close()
+    zFile.close()
+    rhoFile.close()
+
+    
+def main(argv):
+    global haveFuncflFileName
+    global haveOutputBaseName
+
+    haveFuncflFileName = False
+    haveOutputBaseName = False
+ 
+    try:                                
+        opts, args = getopt.getopt(argv, "hf:o:", ["help",  "funcfl=", "output-base="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()
+        elif opt in ("-f", "--funcfl"): 
+            funcflFileName = arg
+            haveFuncflFileName = True
+        elif opt in ("-o", "--output-base"): 
+            outputBaseName = arg
+            haveOutputBaseName = True
+    if (not haveFuncflFileName):
+        usage() 
+        print "No funcfl file was specified"
+        sys.exit()
+    if (not haveOutputBaseName):
+        usage()
+        print "No output base name was specified"
+        sys.exit()
+
+    (nrho, drho, nR, dR, rcut) = readFuncflFile(funcflFileName)
+    writeFiles(outputBaseName, nrho, drho, nR, dR, rcut)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
+
+    

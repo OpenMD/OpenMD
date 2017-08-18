@@ -88,16 +88,17 @@ namespace OpenMD {
   vector<Vector3d> Cuboctahedron::getPoints() {
 
     // center of cluster
-    Vector3d c(0.5 * L_);
+
+    Vector3d c(0.0);
 
     Vector3d d;
     vector<Vector3d> rawPoints;       
     vector<pair<RealType, int> > dists;
     int idx;
 
-    for (int i = 0; i < L_; i++) {
-      for (int j = 0; j < L_; j++) {
-        for (int k = 0; k < L_; k++) {
+    for (int i = -L_; i <= L_; i++) {
+      for (int j = -L_; j <= L_; j++) {
+        for (int k = -L_; k <= L_; k++) {
           for( vector<Vector3d>::iterator l = Basis.begin();
                l != Basis.end(); ++l ) {
             Vector3d point = (*l) + Vector3d(i, j, k);
@@ -124,26 +125,13 @@ namespace OpenMD {
     return Points;
   }
 
-  bool Cuboctahedron::inCluster110( Vector3d r ) {
-
-    Vector3d c = (r - Vector3d(0.5 * L_)).abs();
-    
-    if ((c.x() > 0.5*L_) || (c.y() > 0.5*L_) || (c.z() > 0.5*L_)) {
-      return false;
-    }
-    if ((c.x()+c.y() > 0.5*M_) || (c.y()+c.z() > 0.5*M_) ||
-        (c.z()+c.y() > 0.5*M_)) {
-      return false;
-    }
-    return true;
-  }
-  
   bool Cuboctahedron::inCluster111( Vector3d r ) {
 
-    Vector3d c = (r - Vector3d(0.5 * L_)).abs();
+    Vector3d c = r.abs();
+    RealType rad = 0.5 * RealType(L_);
 
-    if ((c.x() < 0.5*L_) && (c.y() < 0.5*L_) && (c.z() < 0.5*L_) &&
-        (c.x()+c.y()+c.z() < M_))
+    if ((c.x() < rad) && (c.y() < rad) && (c.z() < rad) &&
+        (c.x()+c.y()+c.z() < RealType(M_) ))
       return true;
     else
       return false;

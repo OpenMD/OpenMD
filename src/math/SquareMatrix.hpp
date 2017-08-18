@@ -50,7 +50,6 @@
 #define MATH_SQUAREMATRIX_HPP 
 
 #include "math/RectMatrix.hpp"
-#include "utils/NumericConstant.hpp"
 
 namespace OpenMD {
 

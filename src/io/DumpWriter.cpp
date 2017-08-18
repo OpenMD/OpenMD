@@ -58,6 +58,9 @@
 #ifdef _MSC_VER
 #define isnan(x) _isnan((x))
 #define isinf(x) (!_finite(x) && !_isnan(x))
+#else
+#define isnan(x) std::isnan((x))
+#define isinf(x) std::isinf((x))
 #endif
 
 using namespace std;
@@ -246,7 +249,7 @@ namespace OpenMD {
 
     RealType currentTime = s->getTime();
 
-    if (std::isinf(currentTime) || std::isnan(currentTime)) {
+    if (isinf(currentTime) || isnan(currentTime)) {
       sprintf( painCave.errMsg,
                "DumpWriter detected a numerical error writing the time");
       painCave.isFatal = 1;
@@ -261,7 +264,7 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
-        if (std::isinf(hmat(i,j)) || std::isnan(hmat(i,j))) {
+        if (isinf(hmat(i,j)) || isnan(hmat(i,j))) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the box");
           painCave.isFatal = 1;
@@ -278,8 +281,8 @@ namespace OpenMD {
 
     pair<RealType, RealType> thermostat = s->getThermostat();
 
-    if (std::isinf(thermostat.first)  || std::isnan(thermostat.first) ||
-        std::isinf(thermostat.second) || std::isnan(thermostat.second)) {
+    if (isinf(thermostat.first)  || isnan(thermostat.first) ||
+        isinf(thermostat.second) || isnan(thermostat.second)) {
       sprintf( painCave.errMsg,
                "DumpWriter detected a numerical error writing the thermostat");
       painCave.isFatal = 1;
@@ -294,7 +297,7 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
-        if (std::isinf(eta(i,j)) || std::isnan(eta(i,j))) {
+        if (isinf(eta(i,j)) || isnan(eta(i,j))) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the barostat");
           painCave.isFatal = 1;
@@ -543,9 +546,9 @@ namespace OpenMD {
     Vector3d vel;
     pos = sd->getPos();
 
-    if (std::isinf(pos[0]) || std::isnan(pos[0]) ||
-        std::isinf(pos[1]) || std::isnan(pos[1]) ||
-        std::isinf(pos[2]) || std::isnan(pos[2]) ) {
+    if (isinf(pos[0]) || isnan(pos[0]) ||
+        isinf(pos[1]) || isnan(pos[1]) ||
+        isinf(pos[2]) || isnan(pos[2]) ) {
       sprintf( painCave.errMsg,
                "DumpWriter detected a numerical error writing the position"
                " for object %d", index);
@@ -555,9 +558,9 @@ namespace OpenMD {
 
     vel = sd->getVel();
 
-    if (std::isinf(vel[0]) || std::isnan(vel[0]) ||
-        std::isinf(vel[1]) || std::isnan(vel[1]) ||
-        std::isinf(vel[2]) || std::isnan(vel[2]) ) {
+    if (isinf(vel[0]) || isnan(vel[0]) ||
+        isinf(vel[1]) || isnan(vel[1]) ||
+        isinf(vel[2]) || isnan(vel[2]) ) {
       sprintf( painCave.errMsg,
                "DumpWriter detected a numerical error writing the velocity"
                " for object %d", index);
@@ -576,10 +579,10 @@ namespace OpenMD {
       Vector3d ji;
       q = sd->getQ();
 
-      if (std::isinf(q[0]) || std::isnan(q[0]) ||
-          std::isinf(q[1]) || std::isnan(q[1]) ||
-          std::isinf(q[2]) || std::isnan(q[2]) ||
-          std::isinf(q[3]) || std::isnan(q[3]) ) {
+      if (isinf(q[0]) || isnan(q[0]) ||
+          isinf(q[1]) || isnan(q[1]) ||
+          isinf(q[2]) || isnan(q[2]) ||
+          isinf(q[3]) || isnan(q[3]) ) {
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the quaternion"
                  " for object %d", index);
@@ -589,9 +592,9 @@ namespace OpenMD {
 
       ji = sd->getJ();
 
-      if (std::isinf(ji[0]) || std::isnan(ji[0]) ||
-          std::isinf(ji[1]) || std::isnan(ji[1]) ||
-          std::isinf(ji[2]) || std::isnan(ji[2]) ) {
+      if (isinf(ji[0]) || isnan(ji[0]) ||
+          isinf(ji[1]) || isnan(ji[1]) ||
+          isinf(ji[2]) || isnan(ji[2]) ) {
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the angular"
                  " momentum for object %d", index);
@@ -608,9 +611,9 @@ namespace OpenMD {
     if (needForceVector_) {
       type += "f";
       Vector3d frc = sd->getFrc();
-      if (std::isinf(frc[0]) || std::isnan(frc[0]) ||
-          std::isinf(frc[1]) || std::isnan(frc[1]) ||
-          std::isinf(frc[2]) || std::isnan(frc[2]) ) {
+      if (isinf(frc[0]) || isnan(frc[0]) ||
+          isinf(frc[1]) || isnan(frc[1]) ||
+          isinf(frc[2]) || isnan(frc[2]) ) {
         sprintf( painCave.errMsg,
                  "DumpWriter detected a numerical error writing the force"
                  " for object %d", index);
@@ -624,9 +627,9 @@ namespace OpenMD {
       if (sd->isDirectional()) {
         type += "t";
         Vector3d trq = sd->getTrq();
-        if (std::isinf(trq[0]) || std::isnan(trq[0]) ||
-            std::isinf(trq[1]) || std::isnan(trq[1]) ||
-            std::isinf(trq[2]) || std::isnan(trq[2]) ) {
+        if (isinf(trq[0]) || isnan(trq[0]) ||
+            isinf(trq[1]) || isnan(trq[1]) ||
+            isinf(trq[2]) || isnan(trq[2]) ) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the torque"
                    " for object %d", index);
@@ -664,7 +667,7 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslFlucQPosition) {
         type += "c";
         RealType fqPos = sd->getFlucQPos();
-        if (std::isinf(fqPos) || std::isnan(fqPos) ) {
+        if (isinf(fqPos) || isnan(fqPos) ) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the"
                    " fluctuating charge for object %s", id.c_str());
@@ -678,7 +681,7 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslFlucQVelocity) {
         type += "w";
         RealType fqVel = sd->getFlucQVel();
-        if (std::isinf(fqVel) || std::isnan(fqVel) ) {
+        if (isinf(fqVel) || isnan(fqVel) ) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the"
                    " fluctuating charge velocity for object %s", id.c_str());
@@ -693,7 +696,7 @@ namespace OpenMD {
         if (storageLayout & DataStorage::dslFlucQForce) {
           type += "g";
           RealType fqFrc = sd->getFlucQFrc();
-          if (std::isinf(fqFrc) || std::isnan(fqFrc) ) {
+          if (isinf(fqFrc) || isnan(fqFrc) ) {
             sprintf( painCave.errMsg,
                      "DumpWriter detected a numerical error writing the"
                      " fluctuating charge force for object %s", id.c_str());
@@ -710,9 +713,9 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslElectricField) {
         type += "e";
         Vector3d eField= sd->getElectricField();
-        if (std::isinf(eField[0]) || std::isnan(eField[0]) ||
-            std::isinf(eField[1]) || std::isnan(eField[1]) ||
-            std::isinf(eField[2]) || std::isnan(eField[2]) ) {
+        if (isinf(eField[0]) || isnan(eField[0]) ||
+            isinf(eField[1]) || isnan(eField[1]) ||
+            isinf(eField[2]) || isnan(eField[2]) ) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the electric"
                    " field for object %s", id.c_str());
@@ -729,7 +732,7 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslSitePotential) {
         type += "s";
         RealType sPot = sd->getSitePotential();
-        if (std::isinf(sPot) || std::isnan(sPot) ) {
+        if (isinf(sPot) || isnan(sPot) ) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the"
                    " site potential for object %s", id.c_str());
@@ -745,7 +748,7 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslParticlePot) {
         type += "u";
         RealType particlePot = sd->getParticlePot();
-        if (std::isinf(particlePot) || std::isnan(particlePot)) {
+        if (isinf(particlePot) || isnan(particlePot)) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the particle "
                    " potential for object %s", id.c_str());
@@ -761,7 +764,7 @@ namespace OpenMD {
       if (storageLayout & DataStorage::dslDensity) {
         type += "d";
         RealType density = sd->getDensity();
-        if (std::isinf(density) || std::isnan(density)) {
+        if (isinf(density) || isnan(density)) {
           sprintf( painCave.errMsg,
                    "DumpWriter detected a numerical error writing the density "
                    " for object %s", id.c_str());

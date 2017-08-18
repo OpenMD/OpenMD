@@ -45,7 +45,7 @@
 #include <fstream>
 #include "applications/staticProps/RhoR.hpp"
 #include "utils/simError.h"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/Thermo.hpp"
@@ -119,8 +119,8 @@ namespace OpenMD {
 
   void RhoR::processHistogram() {
 
-    RealType particleDensity =  3.0 * info_->getNGlobalMolecules() / (4.0 * NumericConstant::PI * pow(particleR_,3));
-    RealType pairConstant = ( 4.0 * NumericConstant::PI * particleDensity ) / 3.0;
+    RealType particleDensity =  3.0 * info_->getNGlobalMolecules() / (4.0 * Constants::PI * pow(particleR_,3));
+    RealType pairConstant = ( 4.0 * Constants::PI * particleDensity ) / 3.0;
 
     for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 

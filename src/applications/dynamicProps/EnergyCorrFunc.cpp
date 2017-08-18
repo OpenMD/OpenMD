@@ -53,7 +53,7 @@
 
 
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/Revision.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
@@ -211,7 +211,7 @@ namespace OpenMD {
             RealType mass = atom->getMass();
             Vector3d vel = atom->getVel(j);
             RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
-                                       vel[2]*vel[2]) / PhysicalConstants::energyConvert;
+                                       vel[2]*vel[2]) / Constants::energyConvert;
             RealType potential =  atom->getParticlePot(j);
             RealType eatom = (kinetic + potential)/2.0;
             particleEnergies.push_back(eatom);

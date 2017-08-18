@@ -83,7 +83,7 @@ namespace OpenMD {
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     RealType pairDensity = nPairs /volume * 2.0;
-    RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
+    RealType pairConstant = ( 4.0 * Constants::PI * pairDensity ) / 3.0;
 
     for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 

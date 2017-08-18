@@ -37,11 +37,7 @@
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by J. Daniel Gezelter on 09/26/06.
- *  @author  J. Daniel Gezelter
- *  @version $Id$
- *
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
 #include <sstream>
@@ -50,7 +46,7 @@
 #include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "math/Wigner3jm.hpp"
 
 using namespace MATPACK;
@@ -268,7 +264,7 @@ namespace OpenMD {
 
             q2[l] += norm(q[std::make_pair(l,m)]);
           }
-          q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
+          q_l[l] = sqrt(q2[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
         }
         
         // Find Third Order Invariant W_l
@@ -313,7 +309,7 @@ namespace OpenMD {
       for (int m = -l; m <= l; m++){
         Q2[l] += norm(QBar[std::make_pair(l,m)]);
       }
-      Q[l] = sqrt(Q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
+      Q[l] = sqrt(Q2[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
     }
     
     // Find Third Order Invariant W_l

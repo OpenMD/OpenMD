@@ -48,7 +48,6 @@
 #include "math/DynamicRectMatrix.hpp"
 #include "primitives/Molecule.hpp"
 #include "hydrodynamics/HydroProp.hpp"
-#include "utils/PhysicalConstants.hpp"
 
 namespace OpenMD {
   

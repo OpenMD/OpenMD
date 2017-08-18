@@ -79,7 +79,7 @@ namespace OpenMD {
     RealType volume = hmat(0,0) * hmat(1,1) * deltaZ_;
 
     RealType pairDensity = nPairs /volume * 2.0;
-    RealType pairConstant = (NumericConstant::PI * pairDensity);
+    RealType pairConstant = (Constants::PI * pairDensity);
 
     for(unsigned int i = 0 ; i < histogram_.size(); ++i){
 

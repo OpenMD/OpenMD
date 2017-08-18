@@ -43,7 +43,7 @@
 #include <iostream>
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "utils/ElementsTable.hpp"
@@ -214,7 +214,7 @@ namespace OpenMD {
         }
       }
     }
-    variance_ = 2.0 * PhysicalConstants::kb*simParams->getTargetTemp()/simParams->getDt();
+    variance_ = 2.0 * Constants::kb*simParams->getTargetTemp()/simParams->getDt();
   }  
 
   std::map<std::string, HydroProp*> LDForceManager::parseFrictionFile(const std::string& filename) {
@@ -317,10 +317,10 @@ namespace OpenMD {
             //estimate velocity at full-step using everything but friction forces:           
 
             frc = sd->getFrc();
-            Vector3d velStep = vel + (dt2_ /mass * PhysicalConstants::energyConvert) * frc;
+            Vector3d velStep = vel + (dt2_ /mass * Constants::energyConvert) * frc;
 
             Tb = sd->lab2Body(sd->getTrq());
-            Vector3d angMomStep = angMom + (dt2_ * PhysicalConstants::energyConvert) * Tb;                             
+            Vector3d angMomStep = angMom + (dt2_ * Constants::energyConvert) * Tb;                             
 
             Vector3d omegaLab;
             Vector3d vcdLab;
@@ -366,8 +366,8 @@ namespace OpenMD {
               
               // re-estimate velocities at full-step using friction forces:
               
-              velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * (frc + frictionForceLab);
-              angMomStep = angMom + (dt2_ * PhysicalConstants::energyConvert) * (Tb + frictionTorqueBody);
+              velStep = vel + (dt2_ / mass * Constants::energyConvert) * (frc + frictionForceLab);
+              angMomStep = angMom + (dt2_ * Constants::energyConvert) * (Tb + frictionTorqueBody);
 
               // check for convergence (if the vectors have converged, fdot and tdot will both be 1.0):
               
@@ -402,7 +402,7 @@ namespace OpenMD {
             //estimate velocity at full-step using everything but friction forces:           
 
             frc = sd->getFrc();
-            Vector3d velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * frc;
+            Vector3d velStep = vel + (dt2_ / mass * Constants::energyConvert) * frc;
 
             Vector3d frictionForce(0.0);
             Vector3d oldFF;  // used to test for convergence
@@ -417,7 +417,7 @@ namespace OpenMD {
 
               // re-estimate velocities at full-step using friction forces:
               
-              velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * (frc + frictionForce);
+              velStep = vel + (dt2_ / mass * Constants::energyConvert) * (frc + frictionForce);
 
               // check for convergence (if the vector has converged, fdot will be 1.0):
               

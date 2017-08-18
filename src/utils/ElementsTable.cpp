@@ -35,6 +35,7 @@ GNU General Public License for more details.
 #include <string>
 #include <fstream>
 #include <cstdlib>
+#include <algorithm>
 #include "utils/ElementsTable.hpp"
 #include "utils/simError.h"
 #include "io/ifstrstream.hpp"

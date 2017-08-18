@@ -47,8 +47,7 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "math/Eigenvalue.hpp"
 
 namespace OpenMD {
@@ -133,10 +132,10 @@ namespace OpenMD {
 
       RealType rL = i * dr;
       RealType rU = rL + dr;
-      RealType volSlice = NumericConstant::PI * dz * (( rU*rU ) - ( rL*rL ));
+      RealType volSlice = Constants::PI * dz * (( rU*rU ) - ( rL*rL ));
 
       for (unsigned int j = 0; j < histo[i].size(); ++j) {
-        histo[i][j] *= PhysicalConstants::densityConvert / volSlice;
+        histo[i][j] *= Constants::densityConvert / volSlice;
       }
     }
 
@@ -287,7 +286,7 @@ namespace OpenMD {
     if (fabs(zCen) > rDrop) {
       ca = 180.0;
     } else {
-      ca = 90.0 + asin(zCen/rDrop)*(180.0/M_PI);
+      ca = 90.0 + asin(zCen/rDrop)*(180.0/Constants::PI);
     }
 
     values_.push_back( ca );    

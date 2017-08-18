@@ -60,7 +60,7 @@
 // Not thread safe (unless auto-initialization is avoided and each thread has
 // its own MTRand object)
 
-#include <cassert>
+#include <assert.h>
 #include <iostream>
 #include <limits.h>
 #include <stdio.h>

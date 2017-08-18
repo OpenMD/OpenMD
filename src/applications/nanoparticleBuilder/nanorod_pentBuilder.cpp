@@ -68,6 +68,7 @@
 #include "io/DumpWriter.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "utils/StringUtils.hpp"
+#include "utils/Constants.hpp"
 
 using namespace std;
 using namespace OpenMD;
@@ -139,7 +140,7 @@ int main(int argc, char *argv []) {
   */
 
   //Rotates 45 degrees about z-axis
-  RotMat3x3d rotation45( 45.0 * M_PI / 180.0, 0.0, 0.0);
+  RotMat3x3d rotation45( 45.0 * Constants::PI / 180.0, 0.0, 0.0);
  
   /*rotation45[0][0] = sqrt(2)/2;
   rotation45[0][1] = -sqrt(2)/2;
@@ -152,7 +153,7 @@ int main(int argc, char *argv []) {
   rotation45[2][2] = 1;*/
 
   phi =  0.0;
-  theta = 72 * M_PI / 180.0;
+  theta = 72.0 * Constants::PI / 180.0;
   psi = 0.0;
 
   //Rotates 72 degrees about y-axis

@@ -44,6 +44,7 @@
 #include <cmath>
 
 #include "primitives/GhostTorsion.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
   
@@ -108,7 +109,7 @@ namespace OpenMD {
       ghostAtom->addParticlePot(potential_);
     }
 
-    angle = acos(cos_phi) /M_PI * 180.0;
+    angle = acos(cos_phi) /Constants::PI * 180.0;
   }
 }
 

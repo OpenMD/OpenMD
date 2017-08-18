@@ -302,10 +302,10 @@ namespace OpenMD {
 
       //wrap phi and psi, make sure they are in the range from 0 to 2*Pi
       if (phi < 0)
-	phi += 2.0 * M_PI;
+	phi += 2.0 * Constants::PI;
 
       if (psi < 0)
-	psi += 2.0 * M_PI;
+	psi += 2.0 * Constants::PI;
 
       myEuler[0] = phi;
       myEuler[1] = theta;

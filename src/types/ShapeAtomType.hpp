@@ -56,8 +56,6 @@
 #include "utils/GenericData.hpp"
 #include "utils/simError.h"
 
-using namespace std;
-
 namespace OpenMD {   
   class ShapeAtomType {
     
@@ -66,17 +64,17 @@ namespace OpenMD {
     ShapeAtomType(){ }
     ~ShapeAtomType();
     
-    vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
-    vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
-    vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
+    std::vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
+    std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
+    std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
     
-    void setContactFuncs(vector<RealSphericalHarmonic*> cf) {
+    void setContactFuncs(std::vector<RealSphericalHarmonic*> cf) {
       contactFuncs = cf;
     }
-    void setRangeFuncs(vector<RealSphericalHarmonic*> rf) {
+    void setRangeFuncs(std::vector<RealSphericalHarmonic*> rf) {
       rangeFuncs = rf;
     }
-    void setStrengthFuncs(vector<RealSphericalHarmonic*> sf) {
+    void setStrengthFuncs(std::vector<RealSphericalHarmonic*> sf) {
       strengthFuncs = sf;
     }
     
@@ -102,9 +100,9 @@ namespace OpenMD {
     RealType getStrengthValueAt(RealType costheta, RealType phi);
     
   private:    
-    vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
-    vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
-    vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
+    std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
+    std::vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
+    std::vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
   }; 
 
   typedef SimpleTypeData<ShapeAtomType*> ShapeAtypeData;  

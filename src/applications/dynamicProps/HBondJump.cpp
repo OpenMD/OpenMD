@@ -41,6 +41,7 @@
  */
 
 #include "applications/dynamicProps/HBondJump.hpp"
+#include "utils/Constants.hpp"
 #include <algorithm>
 
 namespace OpenMD {
@@ -139,7 +140,7 @@ namespace OpenMD {
               HAdist = HA.length();
 
               ctheta = dot(DH, DA) / (DHdist * DAdist);
-              theta = acos(ctheta) * 180.0 / M_PI;
+              theta = acos(ctheta) * 180.0 / Constants::PI;
               
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {
@@ -206,7 +207,7 @@ namespace OpenMD {
               HAdist = HA.length();
 
               ctheta = dot(DH, DA) / (DHdist * DAdist);
-              theta = acos(ctheta) * 180.0 / M_PI;
+              theta = acos(ctheta) * 180.0 / Constants::PI;
               
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {

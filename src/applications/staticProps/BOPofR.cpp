@@ -49,7 +49,7 @@
 #include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
+#include "utils/Constants.hpp"
 #include "math/Wigner3jm.hpp"
 #include "brains/Thermo.hpp"
 
@@ -285,7 +285,7 @@ namespace OpenMD {
             q[std::make_pair(l,m)] /= (RealType)nBonds;            
             q2[l] += norm(q[std::make_pair(l,m)]);
           }
-          q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
+          q_l[l] = sqrt(q2[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
         }
         
         // Find Third Order Invariant W_l

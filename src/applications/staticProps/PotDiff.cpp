@@ -48,7 +48,6 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/NumericConstant.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 

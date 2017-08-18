@@ -297,157 +297,98 @@ namespace OpenMD {
       dspidu.z() = 0.0;
 
 
-    RealType sigma0 = mixer.sigma0;
-    RealType dw     = mixer.dw;
-    RealType eps0   = mixer.eps0;  
-    RealType x2     = mixer.x2;    
-    RealType xa2    = mixer.xa2;   
-    RealType xai2   = mixer.xai2;  
-    RealType xp2    = mixer.xp2;   
-    RealType xpap2  = mixer.xpap2; 
-    RealType xpapi2 = mixer.xpapi2;
+      RealType sigma0 = mixer.sigma0;
+      RealType dw     = mixer.dw;
+      RealType eps0   = mixer.eps0;  
+      RealType x2     = mixer.x2;    
+      RealType xa2    = mixer.xa2;   
+      RealType xai2   = mixer.xai2;  
+      RealType xp2    = mixer.xp2;   
+      RealType xpap2  = mixer.xpap2; 
+      RealType xpapi2 = mixer.xpapi2;
 
-    Vector3d ul1 = A1.getRow(2);
-    Vector3d ul2 = A2.getRow(2);
+      Vector3d ul1 = A1.getRow(2);
+      Vector3d ul2 = A2.getRow(2);
 
-    RealType a, b, g;
+      RealType a, b, g;
 
 
-    if (i_is_LJ) {
-      a = 0.0;
-      ul1 = V3Zero;
-    } else {
-      a = dot(d, ul1);
+      if (i_is_LJ) {
+        a = 0.0;
+        ul1 = V3Zero;
+      } else {
+        a = dot(d, ul1);
+      }
+
+      if (j_is_LJ) {
+        b = 0.0;
+        ul2 = V3Zero;
+      } else {
+        b = dot(d, ul2);
+      }
+
+      if (i_is_LJ || j_is_LJ) 
+        g = 0.0;
+      else
+        g = dot(ul1, ul2);
+
+      RealType au = a / r;
+      RealType bu = b / r;
+    
+      RealType au2 = au * au;
+      RealType bu2 = bu * bu;
+      RealType g2 = g * g;
+    
+      RealType H  = (xa2 * au2 + xai2 * bu2 - 2.0*x2*au*bu*g)  / (1.0 - x2*g2);
+      RealType Hp = (xpap2*au2 + xpapi2*bu2 - 2.0*xp2*au*bu*g) / (1.0 - xp2*g2);
+
+      RealType sigma = sigma0 / sqrt(1.0 - H);
+      RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
+      RealType e2 = 1.0 - Hp;
+      RealType eps = eps0 * pow(e1,nu_) * pow(e2,mu_);
+      RealType BigR = dw*sigma0 / (r - sigma + dw*sigma0);
+    
+      RealType R3 = BigR*BigR*BigR;
+      RealType R6 = R3*R3;
+      RealType R7 = R6 * BigR;
+      RealType R12 = R6*R6;
+      RealType R13 = R6*R7;
+
+      RealType U = vdwMult * 4.0 * eps * (R12 - R6);
+
+      RealType s3 = sigma*sigma*sigma;
+      RealType s03 = sigma0*sigma0*sigma0;
+
+      RealType pref1 = - vdwMult * 8.0 * eps * mu_ * (R12 - R6) / (e2 * r);
+
+      RealType pref2 = vdwMult * 8.0 * eps * s3 * (6.0*R13 - 3.0*R7) /(dw*r*s03);
+
+      RealType dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 + H));
+    
+      RealType dUda = pref1 * (xpap2*au - xp2*bu*g) / (1.0 - xp2 * g2) 
+        + pref2 * (xa2 * au - x2 *bu*g) / (1.0 - x2 * g2);
+    
+      RealType dUdb = pref1 * (xpapi2*bu - xp2*au*g) / (1.0 - xp2 * g2) 
+        + pref2 * (xai2 * bu - x2 *au*g) / (1.0 - x2 * g2);
+
+      RealType dUdg = 4.0 * eps * nu_ * (R12 - R6) * x2 * g / (1.0 - x2*g2)
+        + 8.0 * eps * mu_ * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / 
+        (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
+        (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
+    
+
+      Vector3d rhat = d / r;   
+      Vector3d rxu1 = cross(d, ul1);
+      Vector3d rxu2 = cross(d, ul2);
+      Vector3d uxu = cross(ul1, ul2);
+    
+      pot += U*sw;
+      f1 += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
+      t1 += dUda * rxu1 - dUdg * uxu;
+      t2 += dUdb * rxu2 - dUdg * uxu;
+      vpair += U*sw;
+
+      return;
     }
-
-    if (j_is_LJ) {
-      b = 0.0;
-      ul2 = V3Zero;
-    } else {
-      b = dot(d, ul2);
-    }
-
-    if (i_is_LJ || j_is_LJ) 
-      g = 0.0;
-    else
-      g = dot(ul1, ul2);
-
-    RealType au = a / r;
-    RealType bu = b / r;
-    
-    RealType au2 = au * au;
-    RealType bu2 = bu * bu;
-    RealType g2 = g * g;
-    
-    RealType H  = (xa2 * au2 + xai2 * bu2 - 2.0*x2*au*bu*g)  / (1.0 - x2*g2);
-    RealType Hp = (xpap2*au2 + xpapi2*bu2 - 2.0*xp2*au*bu*g) / (1.0 - xp2*g2);
-
-    RealType sigma = sigma0 / sqrt(1.0 - H);
-    RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
-    RealType e2 = 1.0 - Hp;
-    RealType eps = eps0 * pow(e1,nu_) * pow(e2,mu_);
-    RealType BigR = dw*sigma0 / (r - sigma + dw*sigma0);
-    
-    RealType R3 = BigR*BigR*BigR;
-    RealType R6 = R3*R3;
-    RealType R7 = R6 * BigR;
-    RealType R12 = R6*R6;
-    RealType R13 = R6*R7;
-
-    RealType U = vdwMult * 4.0 * eps * (R12 - R6);
-
-    RealType s3 = sigma*sigma*sigma;
-    RealType s03 = sigma0*sigma0*sigma0;
-
-    RealType pref1 = - vdwMult * 8.0 * eps * mu_ * (R12 - R6) / (e2 * r);
-
-    RealType pref2 = vdwMult * 8.0 * eps * s3 * (6.0*R13 - 3.0*R7) /(dw*r*s03);
-
-    RealType dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 + H));
-    
-    RealType dUda = pref1 * (xpap2*au - xp2*bu*g) / (1.0 - xp2 * g2) 
-      + pref2 * (xa2 * au - x2 *bu*g) / (1.0 - x2 * g2);
-    
-    RealType dUdb = pref1 * (xpapi2*bu - xp2*au*g) / (1.0 - xp2 * g2) 
-      + pref2 * (xai2 * bu - x2 *au*g) / (1.0 - x2 * g2);
-
-    RealType dUdg = 4.0 * eps * nu_ * (R12 - R6) * x2 * g / (1.0 - x2*g2)
-      + 8.0 * eps * mu_ * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / 
-      (1.0 - xp2 * g2) / e2 + 8.0 * eps * s3 * (3.0 * R7 - 6.0 * R13) * 
-      (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
-    
-
-    Vector3d rhat = d / r;   
-    Vector3d rxu1 = cross(d, ul1);
-    Vector3d rxu2 = cross(d, ul2);
-    Vector3d uxu = cross(ul1, ul2);
-    
-    pot += U*sw;
-    f1 += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
-    t1 += dUda * rxu1 - dUdg * uxu;
-    t2 += dUdb * rxu2 - dUdg * uxu;
-    vpair += U*sw;
-
-    return;
-
-  }
-
-  void SHAPES::do_gb_pair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                      RealType *r2, RealType *sw, RealType *vdwMult,
-                      RealType *vpair, RealType *pot, RealType *A1,
-                      RealType *A2, RealType *f1, RealType *t1, RealType *t2) {
-    
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = SHAPESMap[*atid1];
-    AtomType* atype2 = SHAPESMap[*atid2];
-    
-    Vector3d disp(d);
-    Vector3d frc(f1);
-    Vector3d trq1(t1);
-    Vector3d trq2(t2);
-    RotMat3x3d Ai(A1);
-    RotMat3x3d Aj(A2);
-   
-    // Fortran has the opposite matrix ordering from c++, so we'll use 
-    // transpose here.  When we finish the conversion to C++, this wrapper 
-    // will disappear, as will the transpose below:
-
-    calcForce(atype1, atype2, disp, *r, *r2, *sw, *vdwMult, *vpair, *pot, 
-              Ai, Aj, frc, trq1, trq1);
-      
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
-    t1[0] = trq1.x();
-    t1[1] = trq1.y();
-    t1[2] = trq1.z();
-
-    t2[0] = trq2.x();
-    t2[1] = trq2.y();
-    t2[2] = trq2.z();
-
-    return;    
-  }
-}
-
-extern "C" {
-  
-#define fortranGetGayBerneCut FC_FUNC(getgaybernecut, GETGAYBERNECUT)
-#define fortranDoSHAPESPair FC_FUNC(do_gb_pair, DO_SHAPES_PAIR)
-  
-  RealType fortranGetGayBerneCut(int* atid) {
-    return OpenMD::SHAPES::Instance()->getGayBerneCut(*atid);
-  }
-
-  void fortranDoSHAPESPair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                       RealType *r2, RealType *sw, RealType *vdwMult, 
-                       RealType *vpair, RealType *pot, RealType *A1, 
-                       RealType *A2, RealType *f1, RealType *t1, RealType *t2){
-    
-    return OpenMD::SHAPES::Instance()->do_gb_pair(atid1, atid2, d, r, r2, sw,
-                                              vdwMult, vpair, pot, A1, A2, f1,
-                                              t1, t2);
-  }
+  } 
 }

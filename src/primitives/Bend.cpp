@@ -43,6 +43,7 @@
 #include "config.h"
 #include <cmath>
 #include "primitives/Bend.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
   
@@ -105,7 +106,7 @@ namespace OpenMD {
       atoms_[2]->addParticlePot(potential_);
     }
    
-    angle = theta /M_PI * 180.0;
+    angle = theta /Constants::PI * 180.0;
   }
 
 } //end namespace OpenMD

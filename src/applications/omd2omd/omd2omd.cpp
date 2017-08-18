@@ -52,6 +52,7 @@
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/simError.h"
+#include "utils/Constants.hpp"
 #include "math/Quaternion.hpp"
 
 using namespace OpenMD;
@@ -91,9 +92,9 @@ int main(int argc, char* argv[]){
   }
 
   //convert the input angles to radians for computation
-  double phi = args_info.rotatePhi_arg * (NumericConstant::PI / 180.0);
-  double theta = args_info.rotateTheta_arg * (NumericConstant::PI / 180.0);
-  double psi = args_info.rotatePsi_arg * (NumericConstant::PI / 180.0);
+  double phi = args_info.rotatePhi_arg * (Constants::PI / 180.0);
+  double theta = args_info.rotateTheta_arg * (Constants::PI / 180.0);
+  double psi = args_info.rotatePsi_arg * (Constants::PI / 180.0);
 
   Mat3x3d rotMatrix = Mat3x3d(0.0);
   

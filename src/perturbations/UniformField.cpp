@@ -46,7 +46,7 @@
 #include "types/MultipoleAdapter.hpp"
 #include "primitives/Molecule.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
   
@@ -127,7 +127,7 @@ namespace OpenMD {
 
           r = atom->getPos();
           
-          atom->addElectricField(EF * PhysicalConstants::chargeFieldConvert);
+          atom->addElectricField(EF * Constants::chargeFieldConvert);
                     
 	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
 	  if ( fca.isFixedCharge() ) {
@@ -140,11 +140,11 @@ namespace OpenMD {
 	    isCharge = true;
             C += atom->getFlucQPos();
             atom->addFlucQFrc( dot(r, EF) 
-                               * PhysicalConstants::chargeFieldConvert );
+                               * Constants::chargeFieldConvert );
           }
 	  
 	  if (isCharge) {
-	    f = EF * C * PhysicalConstants::chargeFieldConvert;
+	    f = EF * C * Constants::chargeFieldConvert;
 	    atom->addFrc(f);
 	    U = -dot(r, f);
 
@@ -157,7 +157,7 @@ namespace OpenMD {
           MultipoleAdapter ma = MultipoleAdapter(atype);
 	  if (ma.isDipole() ) {
 
-            D = atom->getDipole() * PhysicalConstants::dipoleFieldConvert;
+            D = atom->getDipole() * Constants::dipoleFieldConvert;
             
 	    t = cross(D, EF);
 	    atom->addTrq(t);

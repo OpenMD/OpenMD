@@ -41,7 +41,7 @@
  */
 
 #include "applications/dynamicProps/StressCorrFunc.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/Revision.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
@@ -164,7 +164,7 @@ namespace OpenMD {
       bsMan_->unloadBlock(i);
     }
 
-    avePress_ = pSum / ( PhysicalConstants::pressureConvert * (RealType)nsamp);
+    avePress_ = pSum / ( Constants::pressureConvert * (RealType)nsamp);
     aveVol_ = vSum / (RealType)nsamp;
   }   
 

@@ -44,7 +44,7 @@
 #include <fstream>
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
   
@@ -148,9 +148,9 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nBins_; i++) {
 
       if (binDof[i] > 0) {
-        RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
-                                          PhysicalConstants::energyConvert);
-        RealType den = binMass[i] * nBins_ * PhysicalConstants::densityConvert 
+        RealType temp = 2.0 * binKE[i] / (binDof[i] * Constants::kb *
+                                          Constants::energyConvert);
+        RealType den = binMass[i] * nBins_ * Constants::densityConvert 
           / volume_;
         Vector3d vel = binP[i] / binMass[i];
 
@@ -270,10 +270,10 @@ namespace OpenMD {
       RealType rinner = (RealType)i * binWidth_;
       RealType router = (RealType)(i+1) * binWidth_;
       if (binDof[i] > 0) {
-        RealType temp = 2.0 * binKE[i] / (binDof[i] * PhysicalConstants::kb *
-                                          PhysicalConstants::energyConvert);
-        RealType den = binMass[i] * 3.0 * PhysicalConstants::densityConvert
-          / (4.0 * M_PI * (pow(router,3) - pow(rinner,3))); 
+        RealType temp = 2.0 * binKE[i] / (binDof[i] * Constants::kb *
+                                          Constants::energyConvert);
+        RealType den = binMass[i] * 3.0 * Constants::densityConvert
+          / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3))); 
 
         Vector3d omega = binI[i].inverse() * binL[i];
  

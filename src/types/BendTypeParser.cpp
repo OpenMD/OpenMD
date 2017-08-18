@@ -39,8 +39,7 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-// MSVC has an odd bug that requires NumericConstant to come first:
-#include "utils/NumericConstant.hpp" 
+#include "utils/Constants.hpp" 
 #include "types/BendTypeParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "types/HarmonicBendType.hpp"
@@ -92,7 +91,7 @@ namespace OpenMD {
     }
 
     BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-    RealType theta0 = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
+    RealType theta0 = tokenizer.nextTokenAsDouble() / 180.0 * Constants::PI; //convert to rad
     nTokens -= 2;
 
     //switch is a nightmare to maintain

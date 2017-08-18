@@ -44,7 +44,6 @@
 #include <fstream>
 #include "applications/staticProps/AngleR.hpp"
 #include "utils/simError.h"
-#include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include <cmath>

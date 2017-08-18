@@ -45,7 +45,7 @@
 #include "integrators/IntegratorCreator.hpp"
 #include "integrators/NPA.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/PhysicalConstants.hpp"
+#include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -67,7 +67,7 @@ namespace OpenMD {
     
     instaTemp =thermo.getTemperature();
     press = thermo.getPressureTensor();
-    instaPress = PhysicalConstants::pressureConvert* (press(0, 0) + 
+    instaPress = Constants::pressureConvert* (press(0, 0) + 
                                                       press(1, 1) + 
                                                       press(2, 2)) / 3.0;
     instaVol =thermo.getVolume();
@@ -93,7 +93,7 @@ namespace OpenMD {
         
 	// velocity half step  (use chi from previous step here):
         
-	vel += dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
+	vel += dt2*Constants::energyConvert/mass* frc - dt2*sc;
 	sd->setVel(vel);
         
 	if (sd->isDirectional()) {
@@ -106,7 +106,7 @@ namespace OpenMD {
           
 	  ji = sd->getJ();
           
-	  ji += dt2*PhysicalConstants::energyConvert * Tb 
+	  ji += dt2*Constants::energyConvert * Tb 
             - dt2*thermostat.first* ji;
           
 	  rotAlgo_->rotate(sd, ji, dt);
@@ -218,7 +218,7 @@ namespace OpenMD {
         
         // velocity half step
         vel = oldVel[index] 
-          + dt2*PhysicalConstants::energyConvert/mass* frc 
+          + dt2*Constants::energyConvert/mass* frc 
           - dt2*sc;
         
         sd->setVel(vel);
@@ -228,7 +228,7 @@ namespace OpenMD {
           Tb = sd->lab2Body(sd->getTrq());
           
           ji = oldJi[index] 
-            + dt2*PhysicalConstants::energyConvert*Tb 
+            + dt2*Constants::energyConvert*Tb 
             - dt2*thermostat.first*oldJi[index];
           
           sd->setJ(ji);
@@ -246,7 +246,7 @@ namespace OpenMD {
 
   void NPA::evolveEtaA() {
 
-    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/PhysicalConstants::pressureConvert) / (NkBT*tb2);
+    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
     oldEta = eta;  
   }
 
@@ -254,7 +254,7 @@ namespace OpenMD {
 
     prevEta = eta;
     eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
-	    (press(2, 2) - targetPressure/PhysicalConstants::pressureConvert) / (NkBT*tb2);
+	    (press(2, 2) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
   }
 
   void NPA::calcVelScale(){
@@ -321,12 +321,12 @@ namespace OpenMD {
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
     // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*PhysicalConstants::kB *targetTemp;
+    NkBT = info_->getNGlobalIntegrableObjects()*Constants::kB *targetTemp;
 
     // fkBT is used because the thermostat operates on more degrees of freedom
     // than the barostat (when there are particles with orientational degrees
     // of freedom).  
-    fkBT = info_->getNdf()*PhysicalConstants::kB *targetTemp;    
+    fkBT = info_->getNdf()*Constants::kB *targetTemp;    
     
     RealType conservedQuantity;
     RealType totalEnergy;
@@ -344,9 +344,9 @@ namespace OpenMD {
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
     
-    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * PhysicalConstants::energyConvert);
+    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * Constants::energyConvert);
 
-    barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
+    barostat_potential = (targetPressure * thermo.getVolume() / Constants::pressureConvert) /Constants::energyConvert;
 
     conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
       barostat_kinetic + barostat_potential;

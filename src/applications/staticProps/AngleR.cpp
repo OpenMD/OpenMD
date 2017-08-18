@@ -50,7 +50,6 @@
 #include "applications/staticProps/AngleR.hpp"
 #include "utils/simError.h"
 #include "utils/Revision.hpp"
-#include "utils/NumericConstant.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/Thermo.hpp"
