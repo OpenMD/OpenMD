@@ -161,7 +161,6 @@ def computeCorrelations(outputFileName):
         # Precompute sum variables to aid integration.
         # The integral from t0 -> t0 + t  can be easily obtained
         # from the precomputed sum variables:  sum[t0+t] - sum[t0-1]
-        for i in range(1, len(time)):
 
         xSum = []
         xSum.append(Sx[0])
@@ -206,12 +205,10 @@ def computeCorrelations(outputFileName):
             eYcorr.append(yIntSum / float(len(time)-i))
             eZcorr.append(zIntSum / float(len(time)-i))
 
-
     outputFile = open(outputFileName, 'w')
     for i in range(len(time)):
-
         if doEinstein:
-            outputFile.write("%f\t%13e\n" % (time[i], 0.5 * preV * heatfluxConvert * heatfluxConvert * dtConvert * dtConvert * (eXcorr[i] + eYcorr[i] + eZcorr[i]))
+            outputFile.write("%f\t%13e\n" % (time[i], 0.5 * preV * heatfluxConvert * heatfluxConvert * dtConvert * dtConvert * (eXcorr[i] + eYcorr[i] + eZcorr[i])))
     outputFile.close()
 
 def main(argv):
