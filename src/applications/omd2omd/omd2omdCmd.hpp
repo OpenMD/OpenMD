@@ -83,9 +83,9 @@ struct gengetopt_args_info
   unsigned int translateX_given ;	/**< @brief Whether translateX was given.  */
   unsigned int translateY_given ;	/**< @brief Whether translateY was given.  */
   unsigned int translateZ_given ;	/**< @brief Whether translateZ was given.  */
-  unsigned int rotatePhi_given ;  /**< @bried Wether rotatePhi was given.  */
-  unsigned int rotateTheta_given ;  /**< @bried Wether rotateTheta was given.  */
-  unsigned int rotatePsi_given ;  /**< @bried Wether rotatePsi was given.  */
+  unsigned int rotatePhi_given ;  /**< @brief Wether rotatePhi was given.  */
+  unsigned int rotateTheta_given ;  /**< @brief Wether rotateTheta was given.  */
+  unsigned int rotatePsi_given ;  /**< @brief Wether rotatePsi was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

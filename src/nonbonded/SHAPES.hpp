@@ -66,6 +66,7 @@ namespace OpenMD {
     LJParam  getLJParam(AtomType* atomType);
     RealType getLJSigma(AtomType* atomType);
     RealType getLJEpsilon(AtomType* atomType);
+    RealType getGayBerneCut(int atid);
   
     bool initialized_;
     map<int, ShapeAtomType*> ShapesMap;
