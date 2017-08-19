@@ -73,8 +73,9 @@ namespace OpenMD {
     
     std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
     ForceFieldOptions& options_;
-    RealType eus_; // Energy unit scaling
-    RealType dus_; // Distance unit scaling
+    RealType meus_; //!< Metallic energy enit scaling
+    RealType eus_;  //!< Energy unit scaling
+    RealType dus_;  //!< Distance unit scaling
   };
 
 

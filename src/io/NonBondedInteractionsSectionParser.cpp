@@ -80,8 +80,9 @@ namespace OpenMD {
       simError();
     }
 
-    eus_ = options_.getMetallicEnergyUnitScaling();
-    dus_ = options_.getDistanceUnitScaling();
+    meus_ = options_.getMetallicEnergyUnitScaling();
+    eus_  = options_.getEnergyUnitScaling();
+    dus_  = options_.getDistanceUnitScaling();
 
     std::string at1 = tokenizer.nextToken();
     std::string at2 = tokenizer.nextToken();
@@ -225,8 +226,10 @@ namespace OpenMD {
         RealType re = dus_ * tokenizer.nextTokenAsDouble();
         RealType alpha = tokenizer.nextTokenAsDouble();
         RealType beta = tokenizer.nextTokenAsDouble();
-        RealType A = eus_ * tokenizer.nextTokenAsDouble();
-        RealType B = eus_ * tokenizer.nextTokenAsDouble();
+        // Because EAM is a metallic potential, we'll use the metallic
+        // unit scaling for these two parameters
+        RealType A = meus_ * tokenizer.nextTokenAsDouble();
+        RealType B = meus_ * tokenizer.nextTokenAsDouble();
         RealType kappa = tokenizer.nextTokenAsDouble();
         RealType lambda = tokenizer.nextTokenAsDouble();
 
