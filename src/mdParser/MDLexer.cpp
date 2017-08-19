@@ -10,6 +10,9 @@
 
 #line 1 "MDParser.g"
 #line 13 "MDLexer.cpp"
+
+#define FIX_UNUSED(X) (void) (X) /* avoid warnings for unused params */
+
 MDLexer::MDLexer(ANTLR_USE_NAMESPACE(std)istream& in)
 	: ANTLR_USE_NAMESPACE(antlr)CharScanner(new ANTLR_USE_NAMESPACE(antlr)CharBuffer(in),true)
 {
@@ -301,7 +304,7 @@ void MDLexer::mASSIGNEQUAL(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mCOLON(bool _createToken) {
@@ -315,7 +318,7 @@ void MDLexer::mCOLON(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mCOMMA(bool _createToken) {
@@ -329,7 +332,7 @@ void MDLexer::mCOMMA(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mQUESTIONMARK(bool _createToken) {
@@ -343,7 +346,7 @@ void MDLexer::mQUESTIONMARK(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mSEMICOLON(bool _createToken) {
@@ -357,7 +360,7 @@ void MDLexer::mSEMICOLON(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mLPAREN(bool _createToken) {
@@ -371,7 +374,7 @@ void MDLexer::mLPAREN(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mRPAREN(bool _createToken) {
@@ -385,7 +388,7 @@ void MDLexer::mRPAREN(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mLBRACKET(bool _createToken) {
@@ -399,7 +402,7 @@ void MDLexer::mLBRACKET(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mRBRACKET(bool _createToken) {
@@ -413,7 +416,7 @@ void MDLexer::mRBRACKET(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mLCURLY(bool _createToken) {
@@ -427,7 +430,7 @@ void MDLexer::mLCURLY(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mRCURLY(bool _createToken) {
@@ -441,7 +444,7 @@ void MDLexer::mRCURLY(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mWhitespace(bool _createToken) {
@@ -551,7 +554,7 @@ void MDLexer::mWhitespace(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mComment(bool _createToken) {
@@ -596,7 +599,7 @@ void MDLexer::mComment(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mEndOfLine(bool _createToken) {
@@ -624,7 +627,7 @@ void MDLexer::mEndOfLine(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mCPPComment(bool _createToken) {
@@ -658,7 +661,7 @@ void MDLexer::mCPPComment(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mPREPROC_DIRECTIVE(bool _createToken) {
@@ -678,7 +681,7 @@ void MDLexer::mPREPROC_DIRECTIVE(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mLineDirective(bool _createToken) {
@@ -790,7 +793,7 @@ void MDLexer::mLineDirective(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mSpace(bool _createToken) {
@@ -826,7 +829,7 @@ void MDLexer::mSpace(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mDecimal(bool _createToken) {
@@ -853,7 +856,7 @@ void MDLexer::mDecimal(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mStringLiteral(bool _createToken) {
@@ -907,7 +910,7 @@ void MDLexer::mStringLiteral(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mCharLiteral(bool _createToken) {
@@ -936,7 +939,7 @@ void MDLexer::mCharLiteral(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mEscape(bool _createToken) {
@@ -1091,7 +1094,7 @@ void MDLexer::mEscape(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mDigit(bool _createToken) {
@@ -1105,7 +1108,7 @@ void MDLexer::mDigit(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mVocabulary(bool _createToken) {
@@ -1119,7 +1122,7 @@ void MDLexer::mVocabulary(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mID(bool _createToken) {
@@ -1296,7 +1299,7 @@ void MDLexer::mID(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mHEX_DIGIT(bool _createToken) {
@@ -1351,7 +1354,7 @@ void MDLexer::mHEX_DIGIT(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mNUM_INT(bool _createToken) {
@@ -1775,7 +1778,7 @@ void MDLexer::mNUM_INT(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mEXPONENT(bool _createToken) {
@@ -1861,7 +1864,7 @@ void MDLexer::mEXPONENT(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 void MDLexer::mFLOAT_SUFFIX(bool _createToken) {
@@ -1900,7 +1903,7 @@ void MDLexer::mFLOAT_SUFFIX(bool _createToken) {
 	   _token->setText(text.substr(_begin, text.length()-_begin));
 	}
 	_returnToken = _token;
-	_saveIndex=0;
+	FIX_UNUSED(_saveIndex);
 }
 
 
