@@ -50,7 +50,7 @@ endif ( MSVC )
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")
-set (VERSION_MINOR "5")
+set (VERSION_MINOR "6")
 set (VERSION_TINY "0")
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -551,6 +551,7 @@ set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
+src/applications/dynamicProps/Displacement.cpp
 src/applications/dynamicProps/DynamicProps.cpp
 src/applications/dynamicProps/EnergyCorrFunc.cpp
 src/applications/dynamicProps/FrameTimeCorrFunc.cpp
@@ -631,6 +632,7 @@ src/applications/staticProps/pAngle.cpp
 src/applications/staticProps/RadialDistrFunc.cpp
 src/applications/staticProps/RhoR.cpp
 src/applications/staticProps/RhoZ.cpp
+src/applications/staticProps/RhoYZ.cpp
 src/applications/staticProps/RippleOP.cpp
 src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp

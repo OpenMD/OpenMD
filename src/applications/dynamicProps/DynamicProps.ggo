@@ -66,3 +66,5 @@ groupoption "ftcorr"       -  "Force - Torque cross correlation function" group 
 groupoption "facorr"       -  "Force - Force auto correlation function" group = "correlation function"
 groupoption "tfcorr"       -  "Torque - Force Cross correlation function" group = "correlation function"
 groupoption "tacorr"       -  "Torque auto correlation function" group = "correlation function"
+groupoption "disp"         -  "Displacement correlation function" group = "correlation function"
+groupoption "dispZ"        -  "Displacement correlation function binned by Z" group = "correlation function"

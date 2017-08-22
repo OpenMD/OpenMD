@@ -67,6 +67,7 @@
 #include "applications/staticProps/DensityPlot.hpp"
 #include "applications/staticProps/ObjectCount.hpp"
 #include "applications/staticProps/RhoZ.hpp"
+#include "applications/staticProps/RhoYZ.hpp"
 #include "applications/staticProps/pAngle.hpp"
 #include "applications/staticProps/BondAngleDistribution.hpp"
 #include "applications/staticProps/NanoVolume.hpp"
@@ -455,6 +456,8 @@ int main(int argc, char* argv[]){
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.pipe_density_given) {
+    analyser = new RhoYZ(info, dumpFileName, sele1, args_info.nbins_y_arg, args_info.nbins_arg);
   } else if (args_info.rnemdz_given) {
     analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {

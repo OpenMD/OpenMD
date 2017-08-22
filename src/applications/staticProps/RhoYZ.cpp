@@ -37,28 +37,25 @@
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by Charles F. Vardeman II on 11/26/05.
- *  @author  Charles F. Vardeman II 
- *  @version $Id$
- *
+ * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-/* Calculates Rho(Z) for density profile of liquid slab. */
+/* Calculates Rho(Y,Z) for density profile of liquid slab. */
 
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/RhoZ.hpp"
+#include "applications/staticProps/RhoYZ.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+
 namespace OpenMD {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, 
-	     const std::string& sele, int nzbins)
+  RhoYZ::RhoYZ(SimInfo* info, const std::string& filename, 
+               const std::string& sele, int nybins, int nzbins)
     : StaticAnalyser(info, filename, nzbins), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info) {
-
+      evaluator_(info), seleMan_(info), nYBins_(nybins) {
+    
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -66,13 +63,17 @@ namespace OpenMD {
     
     // fixed number of bins
 
-    sliceSDLists_.resize(nBins_);
-    density_.resize(nBins_);
-    
-    setOutputName(getPrefix(filename) + ".RhoZ");
+    sliceSDLists_.resize(nYBins_);
+    density_.resize(nYBins_);
+    for (unsigned int i = 0 ; i < nYBins_; ++i) {
+      sliceSDLists_[i].resize(nBins_);
+      density_[i].resize(nBins_);
+    }
+
+    setOutputName(getPrefix(filename) + ".RhoYZ");
   }
 
-  void RhoZ::process() {
+  void RhoYZ::process() {
     StuntDouble* sd;
     int ii;
 
@@ -87,14 +88,19 @@ namespace OpenMD {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (unsigned int i = 0; i < nBins_; i++) {
-        sliceSDLists_[i].clear();
+      for (unsigned int i = 0; i < nYBins_; i++) {
+        for (unsigned int j = 0; j < nBins_; j++) {          
+          sliceSDLists_[i][j].clear();
+        }
       }
 
-      RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
+      RealType sliceVolume = currentSnapshot_->getVolume() /(nYBins_ * nBins_);
       Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(2,2));
       
+      yBox_.push_back(hmat(1,1));
+      zBox_.push_back(hmat(2,2));
+
+      RealType halfBoxY_ = hmat(1,1) / 2.0;      
       RealType halfBoxZ_ = hmat(2,2) / 2.0;      
 
       if (evaluator_.isDynamic()) {
@@ -115,52 +121,68 @@ namespace OpenMD {
 	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
-        sliceSDLists_[binNo].push_back(sd);
+        int binNoY = int(nYBins_ * (halfBoxY_ + pos.y()) / hmat(1,1));
+        int binNoZ = int(nBins_  * (halfBoxZ_ + pos.z()) / hmat(2,2));
+        sliceSDLists_[binNoY][binNoZ].push_back(sd);
       }
 
       //loop over the slices to calculate the densities
-      for (unsigned int i = 0; i < nBins_; i++) {
-        RealType totalMass = 0;
-        for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
-          totalMass += sliceSDLists_[i][k]->getMass();
+      for (unsigned int i = 0; i < nYBins_; i++) {
+        for (unsigned int j = 0; j < nBins_; j++) {
+
+          RealType totalMass = 0;
+          for (unsigned int k = 0; k < sliceSDLists_[i][j].size(); ++k) {
+            totalMass += sliceSDLists_[i][j][k]->getMass();
+          }
+          density_[i][j] += totalMass/sliceVolume;
         }
-        density_[i] += totalMass/sliceVolume;
       }
     }
-    
+      
     writeDensity();
 
   }
   
   
   
-  void RhoZ::writeDensity() {
+  void RhoYZ::writeDensity() {
 
     // compute average box length:
     std::vector<RealType>::iterator j;
+    RealType ySum = 0.0;
+    for (j = yBox_.begin(); j != yBox_.end(); ++j) {
+      ySum += *j;       
+    }
     RealType zSum = 0.0;
     for (j = zBox_.begin(); j != zBox_.end(); ++j) {
       zSum += *j;       
     }
+
+    RealType yAve = ySum / yBox_.size();
     RealType zAve = zSum / zBox_.size();
+
 
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-      rdfStream << "#RhoZ\n";
+      rdfStream << "#RhoYZ\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#z\tdensity\n";
+      rdfStream << "#density (Y,Z)\n";
       for (unsigned int i = 0; i < density_.size(); ++i) {
-        RealType z = zAve * (i+0.5)/density_.size();
-        rdfStream << z << "\t"
-                  << Constants::densityConvert * density_[i] / nProcessed_
-                  << "\n";
+        RealType y = yAve * (i+0.5)/density_.size();
+        
+        for (unsigned int j = 0; j < density_[i].size(); ++j) {          
+          RealType z = zAve * (j+0.5)/density_[i].size();
+          
+          rdfStream << Constants::densityConvert * density_[i][j] / nProcessed_;
+          rdfStream << "\t";
+        }
+        rdfStream << "\n";
       }
       
     } else {
       
-      sprintf(painCave.errMsg, "RhoZ: unable to open %s\n", 
+      sprintf(painCave.errMsg, "RhoYZ: unable to open %s\n", 
 	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  

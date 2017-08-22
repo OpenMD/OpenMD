@@ -85,10 +85,11 @@ const char *gengetopt_args_info_help[] = {
   "      --rp2                     rp2 order parameter (--sele1 and --sele2 must\n                                  be specified)",
   "  -s, --scd                     scd order parameter (either --sele1, --sele2,\n                                  --sele3 are specified or --molname, --begin,\n                                  --end are specified)",
   "  -d, --density                 density plot",
-  "      --slab_density            slab density",
+  "      --slab_density            slab density, rho(z)",
+  "      --pipe_density            pipe density, rho(y, z)",
   "      --p_angle                 p(cos(theta)) (--sele1 must be specified,\n                                  --sele2 is optional)",
   "      --hxy                     hxy",
-  "      --rho_r                   rho of R",
+  "      --rho_r                   rho(R)",
   "      --angle_r                 angle of R",
   "      --hullvol                 hull volume of nanoparticle",
   "      --rodlength               length of nanorod",
@@ -194,6 +195,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
+  args_info->pipe_density_given = 0 ;
   args_info->p_angle_given = 0 ;
   args_info->hxy_given = 0 ;
   args_info->rho_r_given = 0 ;
@@ -338,32 +340,33 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->scd_help = gengetopt_args_info_help[50] ;
   args_info->density_help = gengetopt_args_info_help[51] ;
   args_info->slab_density_help = gengetopt_args_info_help[52] ;
-  args_info->p_angle_help = gengetopt_args_info_help[53] ;
-  args_info->hxy_help = gengetopt_args_info_help[54] ;
-  args_info->rho_r_help = gengetopt_args_info_help[55] ;
-  args_info->angle_r_help = gengetopt_args_info_help[56] ;
-  args_info->hullvol_help = gengetopt_args_info_help[57] ;
-  args_info->rodlength_help = gengetopt_args_info_help[58] ;
-  args_info->tet_param_help = gengetopt_args_info_help[59] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[60] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[61] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[62] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[63] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[64] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[65] ;
-  args_info->nitrile_help = gengetopt_args_info_help[66] ;
-  args_info->multipole_help = gengetopt_args_info_help[67] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[68] ;
-  args_info->cn_help = gengetopt_args_info_help[69] ;
-  args_info->scn_help = gengetopt_args_info_help[70] ;
-  args_info->gcn_help = gengetopt_args_info_help[71] ;
-  args_info->hbond_help = gengetopt_args_info_help[72] ;
-  args_info->potDiff_help = gengetopt_args_info_help[73] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[74] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[75] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[76] ;
-  args_info->densityfield_help = gengetopt_args_info_help[77] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[78] ;
+  args_info->pipe_density_help = gengetopt_args_info_help[53] ;
+  args_info->p_angle_help = gengetopt_args_info_help[54] ;
+  args_info->hxy_help = gengetopt_args_info_help[55] ;
+  args_info->rho_r_help = gengetopt_args_info_help[56] ;
+  args_info->angle_r_help = gengetopt_args_info_help[57] ;
+  args_info->hullvol_help = gengetopt_args_info_help[58] ;
+  args_info->rodlength_help = gengetopt_args_info_help[59] ;
+  args_info->tet_param_help = gengetopt_args_info_help[60] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[61] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[62] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[63] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[64] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[65] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[66] ;
+  args_info->nitrile_help = gengetopt_args_info_help[67] ;
+  args_info->multipole_help = gengetopt_args_info_help[68] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[69] ;
+  args_info->cn_help = gengetopt_args_info_help[70] ;
+  args_info->scn_help = gengetopt_args_info_help[71] ;
+  args_info->gcn_help = gengetopt_args_info_help[72] ;
+  args_info->hbond_help = gengetopt_args_info_help[73] ;
+  args_info->potDiff_help = gengetopt_args_info_help[74] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[75] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[76] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[77] ;
+  args_info->densityfield_help = gengetopt_args_info_help[78] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[79] ;
   
 }
 
@@ -669,6 +672,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "density", 0, 0 );
   if (args_info->slab_density_given)
     write_into_file(outfile, "slab_density", 0, 0 );
+  if (args_info->pipe_density_given)
+    write_into_file(outfile, "pipe_density", 0, 0 );
   if (args_info->p_angle_given)
     write_into_file(outfile, "p_angle", 0, 0 );
   if (args_info->hxy_given)
@@ -793,6 +798,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
+  args_info->pipe_density_given = 0 ;
   args_info->p_angle_given = 0 ;
   args_info->hxy_given = 0 ;
   args_info->rho_r_given = 0 ;
@@ -1709,6 +1715,7 @@ cmdline_parser_internal (
         { "scd",	0, NULL, 's' },
         { "density",	0, NULL, 'd' },
         { "slab_density",	0, NULL, 0 },
+        { "pipe_density",	0, NULL, 0 },
         { "p_angle",	0, NULL, 0 },
         { "hxy",	0, NULL, 0 },
         { "rho_r",	0, NULL, 0 },
@@ -2521,7 +2528,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* slab density.  */
+          /* slab density, rho(z).  */
           else if (strcmp (long_options[option_index].name, "slab_density") == 0)
           {
           
@@ -2534,6 +2541,23 @@ cmdline_parser_internal (
                 &(local_args_info.slab_density_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "slab_density", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* pipe density, rho(y, z).  */
+          else if (strcmp (long_options[option_index].name, "pipe_density") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->pipe_density_given),
+                &(local_args_info.pipe_density_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "pipe_density", '-',
                 additional_error))
               goto failure;
           
@@ -2572,7 +2596,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* rho of R.  */
+          /* rho(R).  */
           else if (strcmp (long_options[option_index].name, "rho_r") == 0)
           {
           

@@ -38,44 +38,46 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by Charles F. Vardeman II on 11/15/05.
+ *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
  *  @version $Id$
  *
  */
+#ifndef APPLICATIONS_STATICPROPS_RHOYZ_HPP
+#define APPLICATIONS_STATICPROPS_RHOYZ_HPP
 
-#include "io/OptionSectionParser.hpp"
-#include "types/AtomType.hpp"
-#include "brains/ForceField.hpp"
-#include "utils/simError.h"
-#include "utils/StringUtils.hpp"
+#include <string>
+#include <vector>
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
+
 namespace OpenMD {
-
-  OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("Options");        
-  }
   
-  void OptionSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  class RhoYZ : public StaticAnalyser {
     
-    StringTokenizer tokenizer(line);
-
-    if (tokenizer.countTokens() >= 2) {
-      std::string optionName = tokenizer.nextToken();
-      std::string optionValue = tokenizer.nextToken();
-
-      options_.setData(optionName, optionValue);
-      
-    } else {
-      sprintf(painCave.errMsg, "OptionSectionParser Error: "
-              "Not enough tokens at line %d\n", lineNo);
-      painCave.isFatal = 1;
-      simError();    
-    }
+  public:
+    RhoYZ(SimInfo* info, const std::string& filename, const std::string& sele, int nybins, int nzbins);
+    virtual void process();
     
-  }
+  private:
+    virtual void writeDensity();
+    Snapshot* currentSnapshot_;
+    
+    int nProcessed_;
+    std::string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+    
+    int nYBins_; 
+    std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
+    std::vector<RealType> yBox_;
+    std::vector<RealType> zBox_;
+    std::vector<std::vector<RealType> > density_;
+  };
+  
+}
+#endif
 
-  void OptionSectionParser::validateSection() {
-    options_.validateOptions();
-  }
 
-} //end namespace OpenMD  
+

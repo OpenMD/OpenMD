@@ -94,10 +94,12 @@ struct gengetopt_args_info
   const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
   const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
   const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
-  const char *facorr_help; /**< @brief Force auto correlation function help description. */
-  const char *tfcorr_help; /**< @brief Torque - Force correlation function help description. */
-  const char *tacorr_help; /**< @brief Torque auto correlation function help description. */
-
+  const char *facorr_help; /**< @brief Force - Force auto correlation function help description.  */
+  const char *tfcorr_help; /**< @brief Torque - Force Cross correlation function help description.  */
+  const char *tacorr_help; /**< @brief Torque auto correlation function help description.  */
+  const char *disp_help; /**< @brief Displacement correlation function help description.  */
+  const char *dispZ_help; /**< @brief Displacement correlation function binned by Z help description.  */
+  
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
@@ -133,9 +135,11 @@ struct gengetopt_args_info
   unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
   unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
   unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
-  unsigned int facorr_given ; /**< @brief Whether facorr was given. */
-  unsigned int tfcorr_given ; /**< @brief Whether tfcorr was given. */
-  unsigned int tacorr_given ; /**< @brief Whether tacorr was given. */
+  unsigned int facorr_given ;	/**< @brief Whether facorr was given.  */
+  unsigned int tfcorr_given ;	/**< @brief Whether tfcorr was given.  */
+  unsigned int tacorr_given ;	/**< @brief Whether tacorr was given.  */
+  unsigned int disp_given ;	/**< @brief Whether disp was given.  */
+  unsigned int dispZ_given ;	/**< @brief Whether dispZ was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -227,7 +231,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure
+ * Initializes all the fields a cmdline_parser_params structure 
  * to their default values
  * @param params the structure to initialize
  */

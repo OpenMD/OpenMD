@@ -36,46 +36,47 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by Charles F. Vardeman II on 11/15/05.
- *  @author  Charles F. Vardeman II 
- *  @version $Id$
- *
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+#ifndef APPLICATIONS_DYNAMICPROPS_DISPLACEMENT_HPP
+#define APPLICATIONS_DYNAMICPROPS_DISPLACEMENT_HPP
 
-#include "io/OptionSectionParser.hpp"
-#include "types/AtomType.hpp"
-#include "brains/ForceField.hpp"
-#include "utils/simError.h"
-#include "utils/StringUtils.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 namespace OpenMD {
 
-  OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("Options");        
-  }
-  
-  void OptionSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    
-    StringTokenizer tokenizer(line);
+  class Displacement : public AutoCorrFunc<Vector3d> {
+  public:
+    Displacement(SimInfo* info, const std::string& filename,
+                 const std::string& sele1, const std::string& sele2);
+  private:
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
+    std::vector<std::vector<Vector3d> > positions_;
+  };
 
-    if (tokenizer.countTokens() >= 2) {
-      std::string optionName = tokenizer.nextToken();
-      std::string optionValue = tokenizer.nextToken();
+  class DisplacementZ : public AutoCorrFunc<Vector3d> {
+  public:
+    DisplacementZ(SimInfo* info, const std::string& filename,
+                  const std::string& sele1, const std::string& sele2,
+                  int nZbins);
+  private:
+    virtual void computeFrame(int frame);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2, int timeBin);
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) { return Vector3d(-1.0); }
+    virtual void postCorrelate();
+    virtual void writeCorrelate();
 
-      options_.setData(optionName, optionValue);
-      
-    } else {
-      sprintf(painCave.errMsg, "OptionSectionParser Error: "
-              "Not enough tokens at line %d\n", lineNo);
-      painCave.isFatal = 1;
-      simError();    
-    }
-    
-  }
+    std::vector<std::vector<Vector3d> > positions_;
+    std::vector<std::vector<int> > zBins_;
+    std::vector<std::vector<Vector3d> > histograms_;
+    std::vector<std::vector<int> > counts_;
+    Mat3x3d hmat_;
+    RealType halfBoxZ_;
+    int nZBins_;
+  };
 
-  void OptionSectionParser::validateSection() {
-    options_.validateOptions();
-  }
-
-} //end namespace OpenMD  
+}
+#endif

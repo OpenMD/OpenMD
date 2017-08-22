@@ -72,6 +72,7 @@
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
 #include "applications/dynamicProps/HBondJump.hpp"
+#include "applications/dynamicProps/Displacement.hpp"
 
 using namespace OpenMD;
 
@@ -244,9 +245,13 @@ int main(int argc, char* argv[]){
                              args_info.thetacut_arg,
                              args_info.OHcut_arg,
                              order);
-
+  } else if (args_info.disp_given) {
+    corrFunc = new Displacement(info, dumpFileName, sele1, sele2);
+  } else if (args_info.dispZ_given) {
+    corrFunc = new DisplacementZ(info, dumpFileName, sele1, sele2,
+                                 args_info.nzbins_arg);
   }
-
+  
   if (args_info.output_given) {
     corrFunc->setOutputName(args_info.output_arg);
   }
