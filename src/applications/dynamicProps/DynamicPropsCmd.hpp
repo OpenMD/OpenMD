@@ -92,6 +92,7 @@ struct gengetopt_args_info
   const char *bondcorr_help; /**< @brief Bond extension correlation function help description.  */
   const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
   const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
+  const char *persistence_help; /**< @brief Hydrogen bond persistence correlation function help description.  */
   const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
   const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
   const char *facorr_help; /**< @brief Force - Force auto correlation function help description.  */
@@ -133,6 +134,7 @@ struct gengetopt_args_info
   unsigned int bondcorr_given ;	/**< @brief Whether bondcorr was given.  */
   unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */
   unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
+  unsigned int persistence_given ;	/**< @brief Whether persistence was given.  */
   unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
   unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
   unsigned int facorr_given ;	/**< @brief Whether facorr was given.  */

@@ -61,6 +61,7 @@ groupoption "stresscorr"   -  "Stress tensor correlation function" group="correl
 groupoption "bondcorr"     b  "Bond extension correlation function" group="correlation function"
 groupoption "freqfluccorr" f  "Frequency Fluctuation correlation function" group="correlation function"
 groupoption "jumptime"     j  "Hydrogen bond jump time correlation function" group = "correlation function"
+groupoption "persistence"  -  "Hydrogen bond persistence correlation function" group = "correlation function"
 groupoption "pjcorr"       -  "Momentum - Angular Momentum cross correlation function" group = "correlation function"
 groupoption "ftcorr"       -  "Force - Torque cross correlation function" group = "correlation function"
 groupoption "facorr"       -  "Force - Force auto correlation function" group = "correlation function"

@@ -67,6 +67,7 @@ const char *gengetopt_args_info_help[] = {
   "  -b, --bondcorr                Bond extension correlation function",
   "  -f, --freqfluccorr            Frequency Fluctuation correlation function",
   "  -j, --jumptime                Hydrogen bond jump time correlation function",
+  "      --persistence             Hydrogen bond persistence correlation function",
   "      --pjcorr                  Momentum - Angular Momentum cross correlation\n                                  function",
   "      --ftcorr                  Force - Torque cross correlation function",
   "      --facorr                  Force - Force auto correlation function",
@@ -134,6 +135,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->bondcorr_given = 0 ;
   args_info->freqfluccorr_given = 0 ;
   args_info->jumptime_given = 0 ;
+  args_info->persistence_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
   args_info->facorr_given = 0 ;
@@ -209,13 +211,14 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->bondcorr_help = gengetopt_args_info_help[31] ;
   args_info->freqfluccorr_help = gengetopt_args_info_help[32] ;
   args_info->jumptime_help = gengetopt_args_info_help[33] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[34] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[35] ;
-  args_info->facorr_help = gengetopt_args_info_help[36] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[37] ;
-  args_info->tacorr_help = gengetopt_args_info_help[38] ;
-  args_info->disp_help = gengetopt_args_info_help[39] ;
-  args_info->dispZ_help = gengetopt_args_info_help[40] ;
+  args_info->persistence_help = gengetopt_args_info_help[34] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[35] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[36] ;
+  args_info->facorr_help = gengetopt_args_info_help[37] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[38] ;
+  args_info->tacorr_help = gengetopt_args_info_help[39] ;
+  args_info->disp_help = gengetopt_args_info_help[40] ;
+  args_info->dispZ_help = gengetopt_args_info_help[41] ;
   
 }
 
@@ -419,6 +422,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "freqfluccorr", 0, 0 );
   if (args_info->jumptime_given)
     write_into_file(outfile, "jumptime", 0, 0 );
+  if (args_info->persistence_given)
+    write_into_file(outfile, "persistence", 0, 0 );
   if (args_info->pjcorr_given)
     write_into_file(outfile, "pjcorr", 0, 0 );
   if (args_info->ftcorr_given)
@@ -506,6 +511,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->bondcorr_given = 0 ;
   args_info->freqfluccorr_given = 0 ;
   args_info->jumptime_given = 0 ;
+  args_info->persistence_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
   args_info->facorr_given = 0 ;
@@ -1370,6 +1376,7 @@ cmdline_parser_internal (
         { "bondcorr",	0, NULL, 'b' },
         { "freqfluccorr",	0, NULL, 'f' },
         { "jumptime",	0, NULL, 'j' },
+        { "persistence",	0, NULL, 0 },
         { "pjcorr",	0, NULL, 0 },
         { "ftcorr",	0, NULL, 0 },
         { "facorr",	0, NULL, 0 },
@@ -1868,6 +1875,23 @@ cmdline_parser_internal (
                 &(local_args_info.stresscorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "stresscorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Hydrogen bond persistence correlation function.  */
+          else if (strcmp (long_options[option_index].name, "persistence") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->persistence_given),
+                &(local_args_info.persistence_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "persistence", '-',
                 additional_error))
               goto failure;
           
