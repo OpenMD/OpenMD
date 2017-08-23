@@ -147,33 +147,16 @@ namespace OpenMD {
   
   void RhoYZ::writeDensity() {
 
-    // compute average box length:
     std::vector<RealType>::iterator j;
-    RealType ySum = 0.0;
-    for (j = yBox_.begin(); j != yBox_.end(); ++j) {
-      ySum += *j;       
-    }
-    RealType zSum = 0.0;
-    for (j = zBox_.begin(); j != zBox_.end(); ++j) {
-      zSum += *j;       
-    }
-
-    RealType yAve = ySum / yBox_.size();
-    RealType zAve = zSum / zBox_.size();
-
-
     std::ofstream rdfStream(outputFilename_.c_str());
+
     if (rdfStream.is_open()) {
       rdfStream << "#RhoYZ\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#density (Y,Z)\n";
       for (unsigned int i = 0; i < density_.size(); ++i) {
-        RealType y = yAve * (i+0.5)/density_.size();
-        
         for (unsigned int j = 0; j < density_[i].size(); ++j) {          
-          RealType z = zAve * (j+0.5)/density_[i].size();
-          
           rdfStream << Constants::densityConvert * density_[i][j] / nProcessed_;
           rdfStream << "\t";
         }

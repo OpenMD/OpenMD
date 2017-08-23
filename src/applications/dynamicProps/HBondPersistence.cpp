@@ -85,9 +85,9 @@ namespace OpenMD {
     Vector3d DA;
     Vector3d HA;
     Vector3d uDA;
-    RealType DAdist, DHdist, HAdist, DHprojection, theta, ctheta;
+    RealType DAdist, DHdist, HAdist, theta, ctheta;
     int ii, jj;
-    int hInd, aInd, index, index2;
+    int hInd, aInd, index;
 
     // Map of atomic global IDs to donor atoms:
     GIDtoDonor_[istep].resize( info_->getNGlobalAtoms(), -1);

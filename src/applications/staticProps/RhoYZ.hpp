@@ -69,7 +69,7 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     
-    int nYBins_; 
+    unsigned int nYBins_; 
     std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
     std::vector<RealType> yBox_;
     std::vector<RealType> zBox_;
