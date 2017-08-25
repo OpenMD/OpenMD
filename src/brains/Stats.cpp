@@ -733,18 +733,36 @@ namespace OpenMD {
 
   std::string Stats::getStatsReport() {
     std::stringstream report;
+#if defined (_MSC_VER)
+    std::string pm = " +/- ";
+    std::string luc = "[";
+    std::string lex = "|";
+    std::string llc = "[";
+    std::string ruc = "]";
+    std::string rex = "|";
+    std::string rlc = "]";
+#else
+    std::string pm = "  \u00B1  ";
+    std::string luc = "\u23A1";
+    std::string lex = "\u23A2";
+    std::string llc = "\u23A3";
+    std::string ruc = "\u23A4";
+    std::string rex = "\u23A5";
+    std::string rlc = "\u23A6";
+#endif
 
     int nSamp = dynamic_cast<Accumulator *>(data_[TIME].accumulator)->count();
 
-    report <<
-      "################################################################################\n" <<
-      "# Status Report:                                                               #\n";
+    std::string head(79, '#');
+    report << head << std::endl;
+    report << "# Status Report:" << std::string(62, ' ') << "#" << std::endl;         
     report << "# " << setw(22) << "Total Time:";
     report << setw(12) << getRealData(TIME);
-    report << " " << setw(17) << left << getUnits(TIME) << "                         #\n";
+    report << " " << setw(17) << left << getUnits(TIME)
+           << "                        #" << std::endl;
     report << "# " << right << setw(22) << "Number of Samples:";
     report << setw(12) << nSamp;
-    report << "                                           #\n";
+    report << "                                          #" << std::endl;
 
     for (unsigned int i = 0; i < statsMask_.size(); ++i) {
       if (statsMask_[i] && i != TIME) {
@@ -752,9 +770,9 @@ namespace OpenMD {
         if (getDataType(i) == "RealType") {
           report << "# " << right << setw(21) << getTitle(i) << ":";
           report << right << setw(12) << getRealAverage(i);
-          report << " \u00B1 " << left << setw(12) << getRealError(i);
+          report << pm << left << setw(12) << getRealError(i);
           report << " " << left << setw(17) << getUnits(i);
-          report << "          #" << std::endl;
+          report << "       #" << std::endl;
 
         }
         else if (getDataType(i) == "Vector3d") {
@@ -762,21 +780,21 @@ namespace OpenMD {
           Vector3d e = getVectorError(i);
 
           report << "#                       ";
-          report << "\u23A1" << right << setw(12) << s(0) << "\u23A4   ";
-          report << "\u23A1" << right <<  setw(12) << e(0);
-          report << "\u23A4                        #" << std::endl;
+          report << luc << right << setw(12) << s(0) << ruc << "     ";
+          report << luc << right <<  setw(12) << e(0);
+          report << ruc << "                     #" << std::endl;
 
           report << "# " << right << setw(21) << getTitle(i) << ":";
 
-          report << "\u23A2" << right << setw(12) << s(1) << "\u23A5 \u00B1 ";
-          report << "\u23A2" << right << setw(12) << e(1) << "\u23A5 ";
-          report << left << setw(17) << getUnits(i) << "      #";
+          report << lex << right << setw(12) << s(1) << rex << pm;
+          report << lex << right << setw(12) << e(1) << rex << " ";
+          report << left << setw(17) << getUnits(i) << "   #";
           report << std::endl;
           
           report << "#                       ";
-          report << "\u23A3" << right << setw(12) << s(2) << "\u23A6   ";
-          report << "\u23A3" << right <<  setw(12) << e(2);
-          report << "\u23A6                        #" << std::endl;
+          report << llc << right << setw(12) << s(2) << rlc << "     ";
+          report << llc << right <<  setw(12) << e(2);
+          report << rlc << "                     #" << std::endl;
 
         }
         else if (getDataType(i) == "potVec") {
@@ -784,7 +802,7 @@ namespace OpenMD {
           potVec e = getPotVecError(i);
 
           report << "# " << right << setw(21) << getTitle(i);
-          report << ":                                                       #";
+          report << ":                                                      #";
           report << std::endl;
 
           for (unsigned int j = 1; j < N_INTERACTION_FAMILIES; j++) {
@@ -809,8 +827,8 @@ namespace OpenMD {
               break;
             }
             report << right << setw(12) << s[j];
-            report << " \u00B1 " << left << setw(12) << e[j];
-            report << " " << left << setw(17) << getUnits(i) << "          #";
+            report << pm << left << setw(12) << e[j];
+            report << " " << left << setw(17) << getUnits(i) << "       #";
             report << std::endl;
           }
           
@@ -820,47 +838,47 @@ namespace OpenMD {
           Mat3x3d e = getMatrixError(i);
 
           report << "#                       ";
-          report << "\u23A1" << right << setw(12) << s(0,0) << " ";
+          report << luc << right << setw(12) << s(0,0) << " ";
           report << right << setw(12) << s(0,1) << " ";
-          report << right << setw(12) << s(0,2) << "\u23A4               #";
+          report << right << setw(12) << s(0,2) << ruc << "              #";
           report << std::endl;
 
           report << "# " << right << setw(21) << getTitle(i) << ":";
 
-          report << "\u23A2" << right << setw(12) << s(1,0) << " ";
+          report << lex << right << setw(12) << s(1,0) << " ";
           report << right << setw(12) << s(1,1) << " ";
-          report << right << setw(12) << s(1,2) << "\u23A5 ";
-          report << left <<  setw(14) << getUnits(i) << "#" << std::endl;
+          report << right << setw(12) << s(1,2) << rex << " ";
+          report << left <<  setw(13) << getUnits(i) << "#" << std::endl;
           
           report << "#                       ";
-          report << "\u23A3" << right << setw(12) << s(2,0) << " ";
+          report << llc << right << setw(12) << s(2,0) << " ";
           report << right << setw(12) << s(2,1) << " ";
-          report << right << setw(12) << s(2,2) << "\u23A6               #";
+          report << right << setw(12) << s(2,2) << rlc << "              #";
           report << std::endl;
 
           report << "#                                 ";
-          report << "\u23A1" << right << setw(12) << e(0,0) << " ";
+          report << luc << right << setw(12) << e(0,0) << " ";
           report << right << setw(12) << e(0,1) << " ";
-          report << right << setw(12) << e(0,2) << "\u23A4     #";
+          report << right << setw(12) << e(0,2) << ruc << "    #";
           report << std::endl;
 
-          report << "#                                \u00B1";
+          report << "#                            " << pm ;
 
-          report << "\u23A2" << right << setw(12) << e(1,0) << " ";
+          report << lex << right << setw(12) << e(1,0) << " ";
           report << right << setw(12) << e(1,1) << " ";
-          report << right << setw(12) << e(1,2) << "\u23A5     #";
+          report << right << setw(12) << e(1,2) << rex << "    #";
           report << std::endl;
 
           report << "#                                 ";
-          report << "\u23A3" << right << setw(12) << e(2,0) << " ";
+          report << llc << right << setw(12) << e(2,0) << " ";
           report << right << setw(12) << e(2,1) << " ";
-          report << right << setw(12) << e(2,2) << "\u23A6     #";
+          report << right << setw(12) << e(2,2) << rlc << "    #";
           report << std::endl;
 
         }
       }
     }
-    report << "################################################################################\n";
+    report << head << std::endl;
 
     return report.str();
   }

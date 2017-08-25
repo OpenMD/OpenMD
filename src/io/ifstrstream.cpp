@@ -72,32 +72,47 @@ namespace OpenMD {
   
   /**
    * Explicit constructor
-   * @param filename String containing the name of the file to be opened
-   * @param mode Flags describing the requested i/o mode for the file,
+   * \param filename String containing the name of the file to be opened
+   * \param mode Flags describing the requested i/o mode for the file,
    * default value is ios_base::in
-   * @param checkFilename Flags indicating checking the file name in parallel
+   * \param checkFilename Flags indicating checking the file name in parallel
    */
 #ifdef IS_MPI
-  ifstrstream::ifstrstream(const char* filename, std::ios_base::openmode mode, bool checkFilename)
+  ifstrstream::ifstrstream(const char* filename,
+                           std::ios_base::openmode mode, bool checkFilename)
     :  std::basic_istream<char, std::char_traits<char> >(0),
     internalStringBuf_(), isRead(false) {
     this->init(&internalStringBuf_);
-    isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
+#if defined(_MSC_VER)
+    isRead =  internalOpen(filename,
+                           mode | std::ios_base::in | std::ios_base::binary,
+                           checkFilename);
+#else
+    isRead =  internalOpen(filename, mode | std::ios_base::in, checkFilename);
+#endif
   }
 #else
-  ifstrstream::ifstrstream(const char* filename, std::ios_base::openmode mode, bool checkFilename)
+  ifstrstream::ifstrstream(const char* filename,
+                           std::ios_base::openmode mode, bool checkFilename)
     :  std::basic_istream<char, std::char_traits<char> >(0),
     internalFileBuf_(), isRead(false) {
     
     this->init(&internalFileBuf_);
-    isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
+#if defined(_MSC_VER)
+    isRead =  internalOpen(filename,
+                           mode | std::ios_base::in | std::ios_base::binary,
+                           checkFilename);
+#else
+    isRead =  internalOpen(filename, mode | std::ios_base::in, checkFilename);
+#endif
   }
 #endif  
   /**
    * virtual destructor will close the file (in single mode) and clear
    * the stream buffer
    */
-  ifstrstream::~ifstrstream(){    close();
+  ifstrstream::~ifstrstream(){
+    close();
   }
   
   /**
@@ -106,20 +121,26 @@ namespace OpenMD {
    * file and broadcasts its content to the other slave nodes. After
    * broadcasting, all nodes fall back to stringstream (parallel
    * mode).
-   * @param filename String containing the name of the file to be opened
-   * @param mode Flags describing the requested i/o mode for the file
-   * @param checkFilename Flags indicating checking the file name in parallel
+   * \param filename String containing the name of the file to be opened
+   * \param mode Flags describing the requested i/o mode for the file
+   * \param checkFilename Flags indicating checking the file name in parallel
    */
-  void ifstrstream::open(const char* filename, std::ios_base::openmode mode, bool checkFilename){
-    
-    if (!isRead ) {
+  void ifstrstream::open(const char* filename,
+                         std::ios_base::openmode mode, bool checkFilename){
+ 
+    if (!isRead ) {      
+#if defined(_MSC_VER)      
+      isRead = internalOpen(filename, mode | std::ios_base::binary,
+                            checkFilename);
+#else
       isRead = internalOpen(filename, mode, checkFilename);
+#endif
     }
   }
 
   /**
    * Tests if the stream is currently associated with a valid buffer.
-   * @return true if a file has successfully been opened (single mode)
+   * \return true if a file has successfully been opened (single mode)
    * or the whole file has been read and spread among all of the
    * processors (parallel mode), otherwise false is returned
    */
@@ -149,7 +170,7 @@ namespace OpenMD {
   
   /**
    * Gets the stream buffer object associated with the stream
-   * @return A pointer to the stream buffer object(filebuf in single
+   * \return A pointer to the stream buffer object(filebuf in single
    * mode, stringbuf in parallel mode) associated with the stream.
    */
   std::basic_streambuf<char, std::char_traits<char> >*  ifstrstream::rdbuf() {
@@ -162,15 +183,16 @@ namespace OpenMD {
   
   /**
    * Internal function used to open the file 
-   * @return true if succesfully opens a file (single mode) or gets
+   * \return true if succesfully opens a file (single mode) or gets
    * the file content (parallel mode) otherwise return false
-   * @param filename String containing the name of the file to be opened
-   * @param mode Flags describing the requested i/o mode for the file
-   * @param checkFilename Flags indicating checking the file name in parallel
-   * @todo use try - catch syntax to make the program more readable
+   * \param filename String containing the name of the file to be opened
+   * \param mode Flags describing the requested i/o mode for the file
+   * \param checkFilename Flags indicating checking the file name in parallel
+   * \todo use try - catch syntax to make the program more readable
    */
-
-  bool ifstrstream::internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename){
+  bool ifstrstream::internalOpen(const char* filename,
+                                 std::ios_base::openmode mode,
+                                 bool checkFilename) {
     
 #ifdef IS_MPI         
     //int commStatus;

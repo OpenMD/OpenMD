@@ -768,17 +768,19 @@ namespace OpenMD {
 
   ifstrstream* ForceField::openForceFieldFile(const std::string& filename) {
     std::string forceFieldFilename(filename);
+    
     ifstrstream* ffStream = new ifstrstream();
     
-    //try to open the force filed file in current directory first    
-    ffStream->open(forceFieldFilename.c_str());
-    if(!ffStream->is_open()){
+    // Try to open the force field file in current directory first
+    ffStream->open( forceFieldFilename.c_str() );
 
+    if(!ffStream->is_open()){
+      
+      // If current directory does not contain the force field file,
+      // try to open it in ffPath_:
       forceFieldFilename = ffPath_ + "/" + forceFieldFilename;
       ffStream->open( forceFieldFilename.c_str() );
 
-      //if current directory does not contain the force field file,
-      //try to open it in the path        
       if(!ffStream->is_open()){
 
 	sprintf( painCave.errMsg,

@@ -89,25 +89,25 @@ namespace OpenMD {
 	    sectionNameStack.push(section);
  
 	    i = std::find_if(sectionParsers_.begin(), sectionParsers_.end(),
-                       SameSectionParserFunctor(section));
+                             SameSectionParserFunctor(section));
 	    if (i == sectionParsers_.end()){
 	      sprintf(painCave.errMsg, 
-                "SectionParserManager Error: Can not find corresponding "
-                "section parser for %s\n",
-                section.c_str());
+                      "SectionParserManager Error: Can not find corresponding "
+                      "section parser for %s\n",
+                      section.c_str());
 	      painCave.isFatal = 1;
 	      simError();                        
 	    } else {
 	      if (i->isActive) {
-          sprintf(painCave.errMsg, "SectionParserManager Error:find multiple %s "
-                  "section\n",
-                  section.c_str());
-          painCave.isFatal = 1;
-          simError();                        
+                sprintf(painCave.errMsg, 
+                        "SectionParserManager Error: Found multiple %s "
+                        "sections\n", section.c_str());
+                painCave.isFatal = 1;
+                simError();                        
 	      } else {                         
-          i->isActive = true;
-          i->lineNo = lineNo;
-          i->offset = input.tellg();
+                i->isActive = true;
+                i->lineNo = lineNo;
+                i->offset = input.tellg();
 	      }
 	    }
 	  } else if (keyword == "end") {
@@ -115,12 +115,12 @@ namespace OpenMD {
 	    if (sectionNameStack.top() == section) {
 	      sectionNameStack.pop();
 	    } else {
-	      sprintf(painCave.errMsg, "SectionParserManager Error: begin %s and end %s does not match at line %d\n",
-                sectionNameStack.top().c_str(), section.c_str(), lineNo);
+	      sprintf(painCave.errMsg, "SectionParserManager Error: begin %s "
+                      "and end %s do not match at line %d\n",
+                      sectionNameStack.top().c_str(), section.c_str(), lineNo);
 	      painCave.isFatal = 1;
 	      simError();
 	    }
-      
 	  } else {
 	    continue;
 	  }
@@ -130,7 +130,8 @@ namespace OpenMD {
     }
     
     if (!sectionNameStack.empty()) {
-      sprintf(painCave.errMsg, "SectionParserManager Error: stack is not empty\n");
+      sprintf(painCave.errMsg,
+              "SectionParserManager Error: Stack is not empty\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -138,15 +139,15 @@ namespace OpenMD {
     //invoke parser
     for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
       if (i->isActive) {
-        //C++ standard does not guarantee seekg  reset EOF, in that case, seekg will fail
-        //It is always a good idea to call clear() before seek
+        // C++ standard does not guarantee seekg resets EOF, in that
+        // case, seekg will fail. It is always a good idea to call
+        // clear() before seek
         input.clear();            
         input.seekg(i->offset);
         (i->sectionParser)->parse(input, ff, i->lineNo);
         (i->sectionParser)->validateSection();
       }
     }
-    
   }
   
   void SectionParserManager::push_front(SectionParser* sp) {
@@ -154,7 +155,7 @@ namespace OpenMD {
     i = findSectionParser(sp->getSectionName());
     if (i != sectionParsers_.end()) {
       std::cerr << sp->getSectionName() << " section parser already exists" 
-      << std::endl;
+                << std::endl;
       return;
     }
     
@@ -179,7 +180,7 @@ namespace OpenMD {
     i = findSectionParser(sp->getSectionName());
     if (i != sectionParsers_.end()) {
       std::cerr << sp->getSectionName() << " section parser already exists" 
-      << std::endl;
+                << std::endl;
       return;
     }
 
@@ -204,7 +205,7 @@ namespace OpenMD {
     i = findSectionParser(sp->getSectionName());
     if (i != sectionParsers_.end()) {
       std::cerr << sp->getSectionName() << " section parser already exists" 
-      << std::endl;
+                << std::endl;
     }
 
     SectionParserContext context;    
@@ -226,10 +227,8 @@ namespace OpenMD {
 	  sectionParsers_.insert(i, context);
 	  break;
 	}
-            
       }
     }
-
   }
 
 
@@ -240,8 +239,6 @@ namespace OpenMD {
         break;
       }
     }
-
     return i;
   }
-
 }
