@@ -168,7 +168,7 @@ def randomizeProtons(oxygenList):
 
     print "Randomizing protons, begin bucket brigades"
     # select random oxygen to start with and perform protonBucketBrigades.
-    for i in range(0, 1000):
+    for i in range(0, 5000):
         startingOxygenIndex = random.randint(0,len(oxygenList)-1)
         protonBucketBrigade(oxygenList,startingOxygenIndex)
         if (i%100 == 0):
@@ -202,14 +202,14 @@ def randomizeProtons(oxygenList):
 
     print "Attempting more protonBucketBridages starting with the deficient oxygens"
     print "starting with bulk undercoordinated oxygens"
-    for j in range(0, 200):
+    for j in range(0, 10):
         for i in range(0, len(bulkUnderCoord)):
             protonBucketBrigade(oxygenList, bulkUnderCoord[i])
         if (j%10 == 0):
             print "attempted", j, "brigades"
             
     print "moving onto surface undercoordinated oxygens"
-    for j in range(0, 200):        
+    for j in range(0, 10):        
         for i in range(0, len(surfUnderCoord)):
             protonBucketBrigade(oxygenList, surfUnderCoord[i])
         if (j%10 == 0):
@@ -250,12 +250,22 @@ def randomizeProtons(oxygenList):
     print "numDonors =", numDonors
     print "numAcceptors =", numAcceptors
 
-    
     for i in range(0, len(oxygenList)):
         oxygen = oxygenList[i]
-        if (oxygen.isSurface_ == 'false'):
+        
+        if (oxygen.isSurface == 'true'):
+            numBonds = len(oxygen.donors_) + len(oxygen.acceptors_)
+            if (numBonds < 3):
+                print '\nSurfDeficient'
+                print 'UCoxygen',i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
+                for i in range(0, len(oxygen.neighbors_)):
+                    nborOx = oxygenList[oxygen.neighbors_[i]]
+                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
+                    
+        elif (oxygen.isSurface_ == 'false'):
             if (len(oxygen.donors_) < 2):
                 print '\nDonorDeficient'
+                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
                 for i in range(0, len(oxygen.neighbors_)):
                     nborOx = oxygenList[oxygen.neighbors_[i]]
                     print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
@@ -265,6 +275,8 @@ def randomizeProtons(oxygenList):
                 for i in range(0, len(oxygen.neighbors_)):
                     nborOx = oxygenList[oxygen.neighbors_[i]]
                     print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
+
+                    
     
 def protonBucketBrigade(oxygenList,startOxygenIndex):
     # First we need to loop through and create a dummy set of the oxygen. These will be tested and incremented for Hbonds
