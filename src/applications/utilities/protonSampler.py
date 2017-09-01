@@ -536,6 +536,7 @@ def monteCarloMethod(oxygenList):
     
     print "Assigning all oxygens a random set of bonds now"
     #First we will assign all of the oxygens a random donor/acceptor set. We can end up with > 2 donors or acceptors here.
+    numProtons = 0
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
 
@@ -548,11 +549,12 @@ def monteCarloMethod(oxygenList):
                     oxygenA.donors_.append(oxygenA.neighbors_[j])
                     if (oxygenBIndex != -1):
                         oxygenList[oxygenA.neighbors_[j]].acceptors_.append(i)
-                if (rand > 0.5):
+                if (rand >= 0.5):
                     oxygenA.acceptors_.append(oxygenA.neighbors_[j])
                     if (oxygenBIndex != -1):    
                         oxygenList[oxygenA.neighbors_[j]].donors_.append(i)
-
+        numProtons = numProtons + len(oxygenA.donors_)
+    print "numProtons =", numProtons
                         
     numUnOr = 0
     for i in range(0, len(oxygenList)):
@@ -592,8 +594,8 @@ def monteCarloMethod(oxygenList):
         netDipole[i] = netDipole[i] / 2.0
     print "net dipole pre MC moves =", netDipole
 
-    totalCycles = 500
-    nBarCycles = totalCycles / 5.0
+    totalCycles = 100000
+    nBarCycles = totalCycles / 3.0
     for nCycles in range(0, totalCycles):
         #update kT(nCycles)
         kT = 10.0*np.exp(-nCycles/nBarCycles)
@@ -670,9 +672,9 @@ def monteCarloMethod(oxygenList):
     numUnOr = 0
     for i in range(0, len(oxygenList)):
         oxygen = oxygenList[i]
-        if (len(oxygen.donors_) < 2):
+        if (len(oxygen.donors_) < 2 and len(oxygen.acceptors_) < 2):
             numUnOr = numUnOr + 1
-    print "Post MC:", numUnOr, "oxygens with < 2 donors"
+    print "Post MC:", numUnOr, "oxygens with < 2 donors and < 2 acceptors"
 
         
         
@@ -718,10 +720,13 @@ def swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex):
         
 def addProtonsToDonors(oxygenList):
     print "Adding protons to the lattice"
-    
+
+    numProtons = 0
     protonList = []
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
+        numProtons = numProtons + len(oxygenA.donors_)
+        #Should be able to just scan all the donors_, if someone is their second donor, then another oxygen must have it.
         for j in range(0, len(oxygenA.donors_)):
             oxygenBIndex = oxygenA.donors_[j]
             
@@ -763,16 +768,24 @@ def addProtonsToDonors(oxygenList):
                         rVec = [xDisp,yDisp,zDisp]
                         aveVec = addVectors(aveVec,rVec)
 
+                #normalize aveVec, and multiply by (-1)
                 aveVec = normalize(aveVec)
                 for k in range(0, len(aveVec)):
                     aveVec[k] = -1.0 * aveVec[k]
 
+                xPos = oxygenA.getPos()[0][0] + aveVec[0]
+                yPos = oxygenA.getPos()[0][1] + aveVec[1]
+                zPos = oxygenA.getPos()[0][2] + aveVec[2]
+                protonVec = [xPos, yPos, zPos]
+                    
                 newProton = proton()
-                newProton.setPos(aveVec)
+                newProton.setPos(protonVec)
 
                 protonList.append(newProton)
-                
-                        
+
+    print "numProtons = ", numProtons
+    print "len(oxygenList) =",len(oxygenList)
+    print "len(protonList) =",len(protonList)
     return protonList
 
 
@@ -797,8 +810,8 @@ def computeQuats(oxygenList):
         # print DonatingTo[i]
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
-        print oxygenA.donors_
-        print oxygenA.acceptors_
+        #print oxygenA.donors_
+        #print oxygenA.acceptors_
         
         #myPos = positions[i]
 
@@ -998,6 +1011,8 @@ def main(argv):
     monteCarloMethod(oxygenList)
 
     protonList = addProtonsToDonors(oxygenList)
+    writeXYZfile(oxygenList,protonList,Hmat)
+    
     computeQuats(oxygenList)
     
     
