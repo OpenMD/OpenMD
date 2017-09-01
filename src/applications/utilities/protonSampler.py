@@ -538,39 +538,28 @@ def monteCarloMethod(oxygenList):
     #First we will assign all of the oxygens a random donor/acceptor set. We can end up with > 2 donors or acceptors here.
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
-        if (i == 1119):
-            print i, oxygenA.neighbors_, oxygenA.donors_, oxygenA.acceptors_, '\n'
 
         for j in range(0,len(oxygenA.neighbors_)):
             oxygenBIndex = oxygenA.neighbors_[j]
-            if (oxygenBIndex == 1119):
-                print i,j
 
             if (oxygenBIndex not in oxygenA.donors_ and oxygenBIndex not in oxygenA.acceptors_):
                 rand = random.uniform(0,1)
                 if (rand < 0.5):
                     oxygenA.donors_.append(oxygenA.neighbors_[j])
-                    oxygenList[oxygenA.neighbors_[j]].acceptors_.append(i)
+                    if (oxygenBIndex != -1):
+                        oxygenList[oxygenA.neighbors_[j]].acceptors_.append(i)
                 if (rand > 0.5):
-                        oxygenA.acceptors_.append(oxygenA.neighbors_[j])
+                    oxygenA.acceptors_.append(oxygenA.neighbors_[j])
+                    if (oxygenBIndex != -1):    
                         oxygenList[oxygenA.neighbors_[j]].donors_.append(i)
-            
-            #print "post", oxygenA.neighbors_, oxygenA.donors_, oxygenA.acceptors_
-
-
-                        *** Bug in the code above somewhere, oxygen no. 1119 has tons of donors and acceptors somethow ***
 
                         
     numUnOr = 0
     for i in range(0, len(oxygenList)):
         oxygen = oxygenList[i]
-        #print i, oxygen.donors_, oxygen.acceptors_
-        
-        numBonds = len(oxygen.donors_) + len(oxygen.acceptors_)
-        if (numBonds != 4):
-            print i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_, oxygen.isSurface_
+        if (len(oxygen.donors_) < 2):
             numUnOr = numUnOr + 1
-    print "there are", numUnOr, "under/over coordinated oxygens"
+    print "Pre MC:", numUnOr, "oxygens with < 2 donors_"
 
 
                         
@@ -603,7 +592,12 @@ def monteCarloMethod(oxygenList):
         netDipole[i] = netDipole[i] / 2.0
     print "net dipole pre MC moves =", netDipole
 
-    for nCycles in range(0, 1):
+    totalCycles = 500
+    nBarCycles = totalCycles / 5.0
+    for nCycles in range(0, totalCycles):
+        #update kT(nCycles)
+        kT = 10.0*np.exp(-nCycles/nBarCycles)
+        
 
         #Next we will perform MonteCarlo moves where we will flip the donors / acceptors
         for i in range(0, len(oxygenList)):
@@ -631,7 +625,7 @@ def monteCarloMethod(oxygenList):
                         oldDipole.append(-1.0 * rUnit[i])
                     
                     
-                EpreFlip = calcPairEnergy(oxygenA,oxygenB,netDipole)
+                EpreFlip = calcPairEnergy(oxygenA,oxygenB,netDipole,kT)
             
                 swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex)
 
@@ -655,11 +649,10 @@ def monteCarloMethod(oxygenList):
                 for i in range(0, len(netDipole)):
                     newNetDipole.append(netDipole[i] - oldDipole[i] + newDipole[i])
 
-                EpostFlip = calcPairEnergy(oxygenA,oxygenB,newNetDipole)
+                EpostFlip = calcPairEnergy(oxygenA,oxygenB,newNetDipole,kT)
 
 
                 #accept or reject move
-                kT = pow(10,-10)
                 deltaE = EpostFlip - EpreFlip
                 randNum = random.uniform(0,1)
 
@@ -669,75 +662,30 @@ def monteCarloMethod(oxygenList):
                 else:
                     swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex)
             
-            
-        print nCycles, EpreFlip, EpostFlip
+        if (nCycles%100 == 0):    
+            print nCycles, kT, netDipole
 
 
     #after MC cycles, let's check to see how many oxygens have the right number of donors/acceptors
     numUnOr = 0
     for i in range(0, len(oxygenList)):
         oxygen = oxygenList[i]
-        
-        numBonds = len(oxygen.donors_) + len(oxygen.acceptors_)
-        if (numBonds != 4):
+        if (len(oxygen.donors_) < 2):
             numUnOr = numUnOr + 1
-    print "there are", numUnOr, "under/over coordinated oxygens"
-
-    '''
-            numBonds = len(oxygen.donors_) + len(oxygen.acceptors_)
-            if (numBonds < 3):
-                print '\nSurfDeficient'
-                print 'UCoxygen',i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
-                for i in range(0, len(oxygen.neighbors_)):
-                    nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
-            elif (numBonds > 3):
-                print '\nSurfExcess'
-                print 'UCoxygen',i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
-                for i in range(0, len(oxygen.neighbors_)):
-                    nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
-                    
-        elif (oxygen.isSurface_ == 'false'):
-            if (len(oxygen.donors_) < 2):
-                print '\nDonorDeficient'
-                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
-                for i in range(0, len(oxygen.neighbors_)):
-                    nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
-            elif (len(oxygen.donors_) > 2):
-                print '\nDonorExcess'
-                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
-                for i in range(0, len(oxygen.neighbors_)):
-                    nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
-            if (len(oxygen.acceptors_) < 2):
-                print '\nAcceptorDeficient'
-                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
-                for i in range(0, len(oxygen.neighbors_)):
-                    nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
-            if (len(oxygen.acceptors_) > 2):
-                print '\nAcceptorExcess'
-                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
-                for i in range(0, len(oxygen.neighbors_)):
-                    nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
-    '''
-
+    print "Post MC:", numUnOr, "oxygens with < 2 donors"
 
         
         
-def calcPairEnergy(oxygenA, oxygenB, netDipole):
+def calcPairEnergy(oxygenA, oxygenB, netDipole,kT):
     #f = weighting for having 2 donors & 2 acceptors
     #g = weighting for zero-net dipole to the system
-    f = 20.0
-    g = 1.0
+    f = 1.0/kT
+    g = 1.0/kT
 
     oxAda = pow(len(oxygenA.donors_) - len(oxygenA.acceptors_),2.0)
     oxBda = pow(len(oxygenB.donors_) - len(oxygenB.acceptors_),2.0)
     
-    E = f*( oxAda + oxBda ) + g*(dot(netDipole,netDipole))
+    E = f*( oxAda + oxBda ) + g*(np.sqrt(dot(netDipole,netDipole)))
 
     return E
 
@@ -775,36 +723,56 @@ def addProtonsToDonors(oxygenList):
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
         for j in range(0, len(oxygenA.donors_)):
-            oxygenB = oxygenList[oxygenA.donors_[j]]
-
-            # place protons 1 unit vector away from the donating oxygen
-            # towards the accepting oxygen
-            xDisp = oxygenA.getPos()[0][0] - oxygenB.getPos()[0][0]
-            yDisp = oxygenA.getPos()[0][1] - oxygenB.getPos()[0][1]
-            zDisp = oxygenA.getPos()[0][2] - oxygenB.getPos()[0][2]
-
-            rVec = [xDisp,yDisp,zDisp]
-            rUnit = normalize(rVec)
-           
-            xPos = oxygenA.getPos()[0][0] + rUnit[0]
-            yPos = oxygenA.getPos()[0][1] + rUnit[1]
-            zPos = oxygenA.getPos()[0][2] + rUnit[2]
-            protonVec = [xPos, yPos, zPos]
+            oxygenBIndex = oxygenA.donors_[j]
             
-            newProton = proton()
-            newProton.setPos(protonVec)
-
-            protonList.append(newProton)
-
-        # assign a -1 for any surface atom missing a donor or acceptor,
-        # will reference the -1 when we compute quaternions.
-        if (oxygenA.isSurface_ == 'true'):
-            if (len(oxygenA.donors_) < 2):
-                oxygenA.donors_.append(-1)
-            elif (len(oxygenA.acceptors_) < 2):
-                oxygenA.acceptors_.append(-1)
-            #print oxygenA.donors_, oxygenA.acceptors_
+            if (oxygenBIndex != -1):
+                oxygenB = oxygenList[oxygenA.donors_[j]]
+                
+                # place protons 1 unit vector away from the donating oxygen
+                # towards the accepting oxygen
+                xDisp = oxygenA.getPos()[0][0] - oxygenB.getPos()[0][0]
+                yDisp = oxygenA.getPos()[0][1] - oxygenB.getPos()[0][1]
+                zDisp = oxygenA.getPos()[0][2] - oxygenB.getPos()[0][2]
+                
+                rVec = [xDisp,yDisp,zDisp]
+                rUnit = normalize(rVec)
             
+                xPos = oxygenA.getPos()[0][0] + rUnit[0]
+                yPos = oxygenA.getPos()[0][1] + rUnit[1]
+                zPos = oxygenA.getPos()[0][2] + rUnit[2]
+                protonVec = [xPos, yPos, zPos]
+                
+                newProton = proton()
+                newProton.setPos(protonVec)
+                
+                protonList.append(newProton)
+
+            elif (oxygenBIndex == -1):
+                # for the (-1) neigbors, we have to take the negatice of the average of the other 3 HBond vectors
+                aveVec = [0.0, 0.0, 0.0]
+                for k in range(0, len(oxygenA.neighbors_)):
+                    oxNeighIndex = oxygenA.neighbors_[k]
+
+                    if (oxNeighIndex != -1):
+                        oxygenB = oxygenList[oxygenA.donors_[j]]
+
+                        xDisp = oxygenA.getPos()[0][0] - oxygenB.getPos()[0][0]
+                        yDisp = oxygenA.getPos()[0][1] - oxygenB.getPos()[0][1]
+                        zDisp = oxygenA.getPos()[0][2] - oxygenB.getPos()[0][2]
+                    
+                        rVec = [xDisp,yDisp,zDisp]
+                        aveVec = addVectors(aveVec,rVec)
+
+                aveVec = normalize(aveVec)
+                for k in range(0, len(aveVec)):
+                    aveVec[k] = -1.0 * aveVec[k]
+
+                newProton = proton()
+                newProton.setPos(aveVec)
+
+                protonList.append(newProton)
+                
+                        
     return protonList
 
 
@@ -836,8 +804,9 @@ def computeQuats(oxygenList):
 
         #acceptor1 = DonatingTo[i][0]
         #acceptor2 = DonatingTo[i][1]
-        acceptor1 = oxygenA.donors_[0]
-        acceptor2 = oxygenA.donors_[1]
+
+        #acceptor1 = oxygenA.donors_[0]
+        #acceptor2 = oxygenA.donors_[1]
 
         
         '''
@@ -1024,12 +993,15 @@ def main(argv):
     
     (oxygenList, Hmat) = readInputFile(args.inputFileName)
     findNeighbors(oxygenList)
+
     #randomizeProtons(oxygenList)
-    #protonList = addProtonsToDonors(oxygenList)
-    #computeQuats(oxygenList)
     monteCarloMethod(oxygenList)
 
-    #writeXYZfile(oxygenList,protonList,Hmat)
+    protonList = addProtonsToDonors(oxygenList)
+    computeQuats(oxygenList)
+    
+    
+    writeXYZfile(oxygenList,protonList,Hmat)
     
 
 if __name__ == "__main__":
