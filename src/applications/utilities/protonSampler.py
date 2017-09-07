@@ -595,7 +595,7 @@ def monteCarloMethod(oxygenList):
     print "net dipole pre MC moves =", netDipole
 
     totalCycles = 100000
-    nBarCycles = totalCycles / 3.0
+    nBarCycles = totalCycles / 5.0
     for nCycles in range(0, totalCycles):
         #update kT(nCycles)
         kT = 10.0*np.exp(-nCycles/nBarCycles)
@@ -681,7 +681,7 @@ def monteCarloMethod(oxygenList):
 def calcPairEnergy(oxygenA, oxygenB, netDipole,kT):
     #f = weighting for having 2 donors & 2 acceptors
     #g = weighting for zero-net dipole to the system
-    f = 1.0/kT
+    f = 2.0/kT
     g = 1.0/kT
 
     oxAda = pow(len(oxygenA.donors_) - len(oxygenA.acceptors_),2.0)
@@ -979,7 +979,14 @@ def writeXYZfile(oxygenList, protonList,Hmat):
         outFile.write("%s\t%f\t%f\t%f\n" % ('H', protonA.getPos()[0], protonA.getPos()[1], protonA.getPos()[2]))
 
 
-    
+# This function writes out the oxygens with their neighbors, donors, and acceptors
+def writeOxygenfile(oxygenList):
+    outFile = open("oxygen.dat", "w")
+
+    for i in range(0, len(oxygenList)):
+        oxygenA = oxygenList[i]
+        outFile.write(str(i) + "\t" + str(oxygenA.neighbors_) + "\t" + str(oxygenA.donors_) + "\t" + str(oxygenA.acceptors_) + "\n")
+
 
 def main(argv):
     parser = argparse.ArgumentParser(
@@ -1012,6 +1019,7 @@ def main(argv):
 
     protonList = addProtonsToDonors(oxygenList)
     writeXYZfile(oxygenList,protonList,Hmat)
+    writeOxygenfile(oxygenList)
     
     computeQuats(oxygenList)
     
