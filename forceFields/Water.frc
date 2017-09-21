@@ -52,6 +52,7 @@ SSD_E       	18.0153
 SSD_RF      	18.0153
 TAP		18.0153
 TRED        	18.0153
+H_DIP3P		1.0079
 end BaseAtomTypes
 
 begin AtomTypes
@@ -84,7 +85,6 @@ H_SPCE                  HW
 H_SPC                   HW
 H_POL3                  HW
 H_OPC			HW
-H_DIP3P			HW
 D_SPC-HW		DW
 EP_TIP4P                EP
 EP_TIP4P-Ice		EP
@@ -141,8 +141,8 @@ O_OPC		0.89036		3.16655
 end LennardJonesAtomTypes
 
 begin DirectionalAtomTypes
-//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
-H_DIP3P     	0       0       0
+//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2))
+//H_DIP3P     	0       0       0
 DIP         	0.8202  0.8202  0
 SSD		1.7696	0.6145	1.1550  
 SSD1		1.7696	0.6145	1.1550  
