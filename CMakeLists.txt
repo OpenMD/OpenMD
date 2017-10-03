@@ -328,6 +328,8 @@ src/io/TorsionTypesSectionParser.cpp
 src/io/ZConsReader.cpp
 src/lattice/CubicLattice.cpp
 src/lattice/FCCLattice.cpp
+src/lattice/SCLattice.cpp
+src/lattice/BCCLattice.cpp
 src/lattice/Lattice.cpp
 src/lattice/LatticeFactory.cpp
 src/lattice/shapedLattice.cpp
@@ -628,12 +630,12 @@ src/applications/staticProps/NanoVolume.cpp
 src/applications/staticProps/NitrileFrequencyMap.cpp
 src/applications/staticProps/ObjectCount.cpp
 src/applications/staticProps/P2OrderParameter.cpp
+src/applications/staticProps/PipeDensity.cpp
 src/applications/staticProps/PotDiff.cpp
 src/applications/staticProps/pAngle.cpp
 src/applications/staticProps/RadialDistrFunc.cpp
 src/applications/staticProps/RhoR.cpp
 src/applications/staticProps/RhoZ.cpp
-src/applications/staticProps/RhoYZ.cpp
 src/applications/staticProps/RippleOP.cpp
 src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp

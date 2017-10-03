@@ -102,6 +102,15 @@ namespace OpenMD {
     const RealType thermalConductivityConvert = 1.439326479e-5; 
 
     /**
+     * currentConvert
+     *   multiplies standard input file units of 
+     *     electricalCurrent (Amperes)
+     *   returns values of:
+     *     electrons fs^-1
+     */
+    const RealType currentConvert = 1.60216021766208e-4;
+    
+    /**
      * Atomic Units are used in the Slater overlap code, and we need
      * to get distances back and forth to angstroms and energies back 
      * and forth to kcal / mol 

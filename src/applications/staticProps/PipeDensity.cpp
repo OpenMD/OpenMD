@@ -40,21 +40,22 @@
  * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-/* Calculates Rho(Y,Z) for density profile of liquid slab. */
+/* Calculates PipeDensity, rho(axis2,axis3) in the box */
 
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/RhoYZ.hpp"
+#include "applications/staticProps/PipeDensity.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 
 namespace OpenMD {
   
-  RhoYZ::RhoYZ(SimInfo* info, const std::string& filename, 
-               const std::string& sele, int nybins, int nzbins)
-    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info), nYBins_(nybins) {
+  PipeDensity::PipeDensity(SimInfo* info, const std::string& filename, 
+                           const std::string& sele, int nbins, int nbins2,
+                           int axis)
+    : StaticAnalyser(info, filename, nbins2), selectionScript_(sele), 
+      evaluator_(info), seleMan_(info), nBins2_(nbins), axis_(axis) {
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -63,17 +64,38 @@ namespace OpenMD {
     
     // fixed number of bins
 
-    sliceSDLists_.resize(nYBins_);
-    density_.resize(nYBins_);
-    for (unsigned int i = 0 ; i < nYBins_; ++i) {
+    sliceSDLists_.resize(nBins2_);
+    density_.resize(nBins2_);
+    for (unsigned int i = 0 ; i < nBins2_; ++i) {
       sliceSDLists_[i].resize(nBins_);
       density_[i].resize(nBins_);
     }
 
-    setOutputName(getPrefix(filename) + ".RhoYZ");
+    // Compute complementary axes to the privileged axis
+    xaxis_ = (axis_ + 1) % 3;
+    yaxis_ = (axis_ + 2) % 3;
+    
+    // Set the axis labels for the non-privileged axes
+    switch(axis_) {
+    case 0:
+      axisLabel1_ = "y";
+      axisLabel2_ = "z";
+      break;
+    case 1:
+      axisLabel1_ = "z";
+      axisLabel2_ = "x";            
+      break;
+    case 2:
+    default:
+      axisLabel1_ = "x";
+      axisLabel2_ = "y";
+      break;
+    }
+
+    setOutputName(getPrefix(filename) + ".PipeDensity");
   }
 
-  void RhoYZ::process() {
+  void PipeDensity::process() {
     StuntDouble* sd;
     int ii;
 
@@ -88,20 +110,20 @@ namespace OpenMD {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (unsigned int i = 0; i < nYBins_; i++) {
+      for (unsigned int i = 0; i < nBins2_; i++) {
         for (unsigned int j = 0; j < nBins_; j++) {          
           sliceSDLists_[i][j].clear();
         }
       }
 
-      RealType sliceVolume = currentSnapshot_->getVolume() /(nYBins_ * nBins_);
+      RealType sliceVolume = currentSnapshot_->getVolume() /(nBins2_ * nBins_);
       Mat3x3d hmat = currentSnapshot_->getHmat();
       
-      yBox_.push_back(hmat(1,1));
-      zBox_.push_back(hmat(2,2));
+      Box1_.push_back(hmat(xaxis_,xaxis_));
+      Box2_.push_back(hmat(yaxis_,yaxis_));
 
-      RealType halfBoxY_ = hmat(1,1) / 2.0;      
-      RealType halfBoxZ_ = hmat(2,2) / 2.0;      
+      RealType halfBox1_ = hmat(xaxis_,xaxis_) / 2.0;      
+      RealType halfBox2_ = hmat(yaxis_,yaxis_) / 2.0;      
 
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -121,13 +143,15 @@ namespace OpenMD {
 	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
-        int binNoY = int(nYBins_ * (halfBoxY_ + pos.y()) / hmat(1,1));
-        int binNoZ = int(nBins_  * (halfBoxZ_ + pos.z()) / hmat(2,2));
-        sliceSDLists_[binNoY][binNoZ].push_back(sd);
+        int binNo1 = int(nBins2_ * (halfBox1_ + pos[xaxis_]) /
+                         hmat(xaxis_,xaxis_));
+        int binNo2 = int(nBins_  * (halfBox2_ + pos[yaxis_]) /
+                         hmat(yaxis_,yaxis_));
+        sliceSDLists_[binNo1][binNo2].push_back(sd);
       }
 
       //loop over the slices to calculate the densities
-      for (unsigned int i = 0; i < nYBins_; i++) {
+      for (unsigned int i = 0; i < nBins2_; i++) {
         for (unsigned int j = 0; j < nBins_; j++) {
 
           RealType totalMass = 0;
@@ -142,19 +166,17 @@ namespace OpenMD {
     writeDensity();
 
   }
-  
-  
-  
-  void RhoYZ::writeDensity() {
+    
+  void PipeDensity::writeDensity() {
 
     std::vector<RealType>::iterator j;
     std::ofstream rdfStream(outputFilename_.c_str());
 
     if (rdfStream.is_open()) {
-      rdfStream << "#RhoYZ\n";
+      rdfStream << "#PipeDensity\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#density (Y,Z)\n";
+      rdfStream << "#density (" << axisLabel1_ << "," << axisLabel2_ << ")\n";
       for (unsigned int i = 0; i < density_.size(); ++i) {
         for (unsigned int j = 0; j < density_[i].size(); ++j) {          
           rdfStream << Constants::densityConvert * density_[i][j] / nProcessed_;
@@ -165,7 +187,7 @@ namespace OpenMD {
       
     } else {
       
-      sprintf(painCave.errMsg, "RhoYZ: unable to open %s\n", 
+      sprintf(painCave.errMsg, "PipeDensity: unable to open %s\n", 
 	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  

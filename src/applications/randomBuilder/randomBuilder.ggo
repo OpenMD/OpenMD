@@ -21,3 +21,4 @@ option "nx"            -  "number of unit cells in x" int yes
 option "ny"            -  "number of unit cells in y" int yes
 option "nz"            -  "number of unit cells in z" int yes
 option "molFraction"   -  "(Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file." double no multiple
+option "lattice"       l  "Lattice Type" string values="FCC","BCC","SC" no

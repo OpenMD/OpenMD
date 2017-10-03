@@ -70,6 +70,8 @@
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
+#include "lattice/SCLattice.hpp"
+#include "lattice/BCCLattice.hpp"
 
 using namespace QuantLib;
 namespace OpenMD {
@@ -103,6 +105,8 @@ namespace OpenMD {
 
   void registerLattice(){
     LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
+    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<SCLattice>("SC"));
+    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<BCCLattice>("BCC"));
   }
 
   void registerAll() {

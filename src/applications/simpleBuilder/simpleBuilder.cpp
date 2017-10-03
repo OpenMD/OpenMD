@@ -97,6 +97,9 @@ int main(int argc, char *argv []) {
 
   //get lattice type
   latticeType = "FCC";
+  if (args_info.lattice_given) {    
+    latticeType = args_info.lattice_arg;
+  }
 
   simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
     

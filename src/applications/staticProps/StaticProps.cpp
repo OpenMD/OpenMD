@@ -67,7 +67,7 @@
 #include "applications/staticProps/DensityPlot.hpp"
 #include "applications/staticProps/ObjectCount.hpp"
 #include "applications/staticProps/RhoZ.hpp"
-#include "applications/staticProps/RhoYZ.hpp"
+#include "applications/staticProps/PipeDensity.hpp"
 #include "applications/staticProps/pAngle.hpp"
 #include "applications/staticProps/BondAngleDistribution.hpp"
 #include "applications/staticProps/NanoVolume.hpp"
@@ -457,7 +457,25 @@ int main(int argc, char* argv[]){
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.pipe_density_given) {
-    analyser = new RhoYZ(info, dumpFileName, sele1, args_info.nbins_y_arg, args_info.nbins_arg);
+
+    switch (privilegedAxis) {
+    case 0:      
+      analyser = new PipeDensity(info, dumpFileName, sele1,
+                                 args_info.nbins_y_arg, args_info.nbins_z_arg,
+                                 privilegedAxis);
+      break;
+    case 1:
+      analyser = new PipeDensity(info, dumpFileName, sele1,
+                                 args_info.nbins_z_arg, args_info.nbins_x_arg,
+                                 privilegedAxis);      
+      break;
+    case 2:
+    default:
+      analyser = new PipeDensity(info, dumpFileName, sele1,
+                                 args_info.nbins_x_arg, args_info.nbins_y_arg,
+                                 privilegedAxis);            
+      break;
+    }
   } else if (args_info.rnemdz_given) {
     analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {

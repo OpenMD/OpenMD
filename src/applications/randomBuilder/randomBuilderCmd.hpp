@@ -59,6 +59,9 @@ struct gengetopt_args_info
   unsigned int molFraction_min; /**< @brief (Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file.'s minimum occurreces */
   unsigned int molFraction_max; /**< @brief (Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file.'s maximum occurreces */
   const char *molFraction_help; /**< @brief (Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file. help description.  */
+  char * lattice_arg;	/**< @brief Lattice Type.  */
+  char * lattice_orig;	/**< @brief Lattice Type original value given at command line.  */
+  const char *lattice_help; /**< @brief Lattice Type help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -68,6 +71,7 @@ struct gengetopt_args_info
   unsigned int ny_given ;	/**< @brief Whether ny was given.  */
   unsigned int nz_given ;	/**< @brief Whether nz was given.  */
   unsigned int molFraction_given ;	/**< @brief Whether molFraction was given.  */
+  unsigned int lattice_given ;	/**< @brief Whether lattice was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -185,31 +189,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
 
 /**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
-
-/**
  * Checks that all the required options were specified
  * @param args_info the structure to check
  * @param prog_name the name of the program that will be used to print
@@ -218,6 +197,8 @@ int cmdline_parser_config_file (const char *filename,
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_lattice_values[];  /**< @brief Possible values for lattice. */
 
 
 #ifdef __cplusplus

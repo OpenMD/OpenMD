@@ -27,3 +27,4 @@ option "density"       -  "density (g/cm^3)" double yes
 option "nx"            -  "number of unit cells in x" int yes 
 option "ny"            -  "number of unit cells in y" int yes
 option "nz"            -  "number of unit cells in z" int yes
+option "lattice"       l  "Lattice Type" string values="FCC","BCC","SC" no

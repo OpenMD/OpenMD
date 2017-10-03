@@ -86,7 +86,7 @@ const char *gengetopt_args_info_help[] = {
   "  -s, --scd                     scd order parameter (either --sele1, --sele2,\n                                  --sele3 are specified or --molname, --begin,\n                                  --end are specified)",
   "  -d, --density                 density plot",
   "      --slab_density            slab density, rho(z)",
-  "      --pipe_density            pipe density, rho(y, z)",
+  "      --pipe_density            pipe density, rho(axis1, axis2)",
   "      --p_angle                 p(cos(theta)) (--sele1 must be specified,\n                                  --sele2 is optional)",
   "      --hxy                     hxy",
   "      --rho_r                   rho(R)",
@@ -2545,7 +2545,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* pipe density, rho(y, z).  */
+          /* pipe density, rho(axis1, axis2).  */
           else if (strcmp (long_options[option_index].name, "pipe_density") == 0)
           {
           

@@ -77,7 +77,7 @@ groupoption "rp2"       -       "rp2 order parameter (--sele1 and --sele2 must b
 groupoption "scd"       s       "scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified)" group="staticProps"
 groupoption "density"   d       "density plot" group="staticProps"
 groupoption "slab_density" -    "slab density, rho(z)" group="staticProps"
-groupoption "pipe_density" -    "pipe density, rho(y, z)" group="staticProps"
+groupoption "pipe_density" -    "pipe density, rho(axis1, axis2)" group="staticProps"
 groupoption "p_angle"   -       "p(cos(theta)) (--sele1 must be specified, --sele2 is optional)" group="staticProps"
 groupoption "hxy"       -       "hxy" group="staticProps"
 groupoption "rho_r"     -       "rho(R)" group="staticProps"

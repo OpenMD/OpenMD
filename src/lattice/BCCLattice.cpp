@@ -36,48 +36,48 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by Charles F. Vardeman II on 11/26/05.
- *  @author  Charles F. Vardeman II 
- *  @version $Id$
- *
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_STATICPROPS_RHOYZ_HPP
-#define APPLICATIONS_STATICPROPS_RHOYZ_HPP
-
-#include <string>
-#include <vector>
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+ 
+#include "lattice/BCCLattice.hpp"
 
 namespace OpenMD {
+
+  BCCLattice::BCCLattice() : CubicLattice(){
+    nCellSites = 2;
+    cellSitesPos.resize(nCellSites);
+    cellSitesOrt.resize(nCellSites);
+    update();
+  }
+
+  void BCCLattice::update(){
+
+    RealType cellLenOver2;
+    RealType oneOverRoot3;
+
+    cellLenOver2  = 0.5 * latticeParam;
+    oneOverRoot3 = 1.0 / sqrt(3.0);
+
+    // Molecule 1
+    cellSitesPos[0][0] = 0.0; 
+    cellSitesPos[0][1] = 0.0;
+    cellSitesPos[0][2] = 0.0;
   
-  class RhoYZ : public StaticAnalyser {
-    
-  public:
-    RhoYZ(SimInfo* info, const std::string& filename, const std::string& sele, int nybins, int nzbins);
-    virtual void process();
-    
-  private:
-    virtual void writeDensity();
-    Snapshot* currentSnapshot_;
-    
-    int nProcessed_;
-    std::string selectionScript_;
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
-    
-    unsigned int nYBins_; 
-    std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
-    std::vector<RealType> yBox_;
-    std::vector<RealType> zBox_;
-    std::vector<std::vector<RealType> > density_;
-  };
-  
+    cellSitesOrt[0][0] = oneOverRoot3;
+    cellSitesOrt[0][1] = oneOverRoot3;
+    cellSitesOrt[0][2] = oneOverRoot3;
+
+    // Molecule 2  
+    cellSitesPos[1][0]   = cellLenOver2;
+    cellSitesPos[1][1]   = cellLenOver2;
+    cellSitesPos[1][2]   = cellLenOver2;
+
+    cellSitesOrt[1][0] = -oneOverRoot3;
+    cellSitesOrt[1][1] = -oneOverRoot3;
+    cellSitesOrt[1][2] = -oneOverRoot3;
+   
+  }
+
 }
-#endif
-
-
 
