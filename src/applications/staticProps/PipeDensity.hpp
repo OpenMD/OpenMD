@@ -72,13 +72,11 @@ namespace OpenMD {
     int axis_;
     std::string axisLabel1_;
     std::string axisLabel2_;
-    int xaxis_;
-    int yaxis_; 
+    int axis1_;
+    int axis2_; 
     
     unsigned int nBins2_; 
     std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
-    std::vector<RealType> Box1_;
-    std::vector<RealType> Box2_;
     std::vector<std::vector<RealType> > density_;
   };
   

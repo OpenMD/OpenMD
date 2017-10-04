@@ -72,8 +72,8 @@ namespace OpenMD {
     }
 
     // Compute complementary axes to the privileged axis
-    xaxis_ = (axis_ + 1) % 3;
-    yaxis_ = (axis_ + 2) % 3;
+    axis1_ = (axis_ + 1) % 3;
+    axis2_ = (axis_ + 2) % 3;
     
     // Set the axis labels for the non-privileged axes
     switch(axis_) {
@@ -118,12 +118,9 @@ namespace OpenMD {
 
       RealType sliceVolume = currentSnapshot_->getVolume() /(nBins2_ * nBins_);
       Mat3x3d hmat = currentSnapshot_->getHmat();
-      
-      Box1_.push_back(hmat(xaxis_,xaxis_));
-      Box2_.push_back(hmat(yaxis_,yaxis_));
 
-      RealType halfBox1_ = hmat(xaxis_,xaxis_) / 2.0;      
-      RealType halfBox2_ = hmat(yaxis_,yaxis_) / 2.0;      
+      RealType halfBox1_ = hmat(axis1_,axis1_) / 2.0;      
+      RealType halfBox2_ = hmat(axis2_,axis2_) / 2.0;      
 
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -143,10 +140,10 @@ namespace OpenMD {
 	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
-        int binNo1 = int(nBins2_ * (halfBox1_ + pos[xaxis_]) /
-                         hmat(xaxis_,xaxis_));
-        int binNo2 = int(nBins_  * (halfBox2_ + pos[yaxis_]) /
-                         hmat(yaxis_,yaxis_));
+        int binNo1 = int(nBins2_ * (halfBox1_ + pos[axis1_]) /
+                         hmat(axis1_,axis1_));
+        int binNo2 = int(nBins_  * (halfBox2_ + pos[axis2_]) /
+                         hmat(axis2_,axis2_));
         sliceSDLists_[binNo1][binNo2].push_back(sd);
       }
 
