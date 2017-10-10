@@ -106,10 +106,10 @@ namespace OpenMD {
 
     for (mol1 = seleMan1_.beginSelectedMolecule(ii);
          mol1 != NULL; mol1 = seleMan1_.nextSelectedMolecule(ii)) {
-      
+
       for (mol2 = seleMan2_.beginSelectedMolecule(jj);
            mol2 != NULL; mol2 = seleMan2_.nextSelectedMolecule(jj)) {
-        
+
         // loop over the possible donors in molecule 1:
         for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
              hbd = mol1->nextHBondDonor(hbdi)) {
@@ -142,18 +142,17 @@ namespace OpenMD {
               
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {
-                // molecule 1 is a Hbond donor:
-                aInd = hba->getGlobalIndex();               
+                // molecule 2 is a Hbond acceptor:
+                aInd = hba->getGlobalIndex();
+                
+                index = acceptor_[istep].size();
+                GIDtoDonor_[istep][hInd] = index;
+                
+                acceptor_[istep].push_back(aInd);
+                DonorToGID_[istep].push_back(hInd);
               }
             }            
-          }
-          
-          index = acceptor_[istep].size();
-          GIDtoDonor_[istep][hInd] = index;
-          
-          acceptor_[istep].push_back(aInd);
-          DonorToGID_[istep].push_back(hInd);
-          
+          }                    
         }
 
         // loop over the possible donors in molecule 2:
@@ -188,18 +187,16 @@ namespace OpenMD {
               
               // Angle criteria: are the D-H and D-A and vectors close?
               if (theta < thetaCut_ && HAdist < OHCut_) {
-                // molecule 1 is a Hbond donor:
-                aInd = hba->getGlobalIndex();               
+                // molecule 1 is a Hbond acceptor:
+                aInd = hba->getGlobalIndex();
+                index = acceptor_[istep].size();
+                GIDtoDonor_[istep][hInd] = index;
+                
+                acceptor_[istep].push_back(aInd);
+                DonorToGID_[istep].push_back(hInd);                
               }
             }            
-          }
-
-          index = acceptor_[istep].size();
-          GIDtoDonor_[istep][hInd] = index;
-          
-          acceptor_[istep].push_back(aInd);
-          DonorToGID_[istep].push_back(hInd);
-          
+          }          
         }        
       }
     }

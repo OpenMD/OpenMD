@@ -49,7 +49,7 @@ namespace OpenMD {
   public:
     HBondJump(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2, double OOCut,
-              double thetaCut, double OHCut, int order);
+              double thetaCut, double OHCut);
     
   private:
     virtual void correlation();
@@ -70,7 +70,6 @@ namespace OpenMD {
     RealType OOCut_;
     RealType thetaCut_;
     RealType OHCut_;
-    int order_;
   };
 
 }

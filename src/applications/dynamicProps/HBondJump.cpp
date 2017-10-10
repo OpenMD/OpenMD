@@ -47,11 +47,11 @@
 namespace OpenMD {
   HBondJump::HBondJump(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2,
-                       double OOcut, double thetaCut, double OHcut, int order)
+                       double OOcut, double thetaCut, double OHcut)
     : MultipassCorrFunc<RealType>(info, filename, sele1, sele2,
                                   DataStorage::dslPosition |
                                   DataStorage::dslAmat ),
-      OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut), order_(order) {
+      OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut) {
     
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
@@ -59,8 +59,7 @@ namespace OpenMD {
     std::stringstream params;
     params << " OOcut = " << OOCut_
            << ", thetacut = " << thetaCut_
-           << ", OHcut = " << OHCut_
-           << ", order = " << order_;    
+           << ", OHcut = " << OHCut_;    
     const std::string paramString = params.str();
     setParameterString( paramString );
     
@@ -149,33 +148,32 @@ namespace OpenMD {
                 Vector3d uDA = DA / DAdist;
                 rOO_[istep].push_back( uDA );
                 DHprojection = dot( uDA, DH);
-                rOHprojection_[istep].push_back(DHprojection);                
+                rOHprojection_[istep].push_back(DHprojection);
+
+                index = acceptor_[istep].size();
+                GIDtoDonor_[istep][hInd] = index;
+                
+                acceptor_[istep].push_back(aInd);
+                DonorToGID_[istep].push_back(hInd);
+                
+                // Look at previous step to see if we need to update
+                // acceptor start times:
+                
+                if (istep == 0)
+                  acceptorStartFrame_[istep].push_back(istep);
+                else {
+                  // find out index on previous step:
+                  index2 = GIDtoDonor_[istep-1][hInd];
+                  if (acceptor_[istep-1][index2] == aInd || aInd == -1) {
+                    // Same acceptor (or none) means we use previous start time:
+                    acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
+                  } else {
+                    // new acceptor means new start time:
+                    acceptorStartFrame_[istep].push_back(istep);              
+                  }
+                }
               }
             }            
-          }
-
-          index = acceptor_[istep].size();
-          GIDtoDonor_[istep][hInd] = index;
-          
-          acceptor_[istep].push_back(aInd);
-          DonorToGID_[istep].push_back(hInd);
-          
-          // Look at previous step to see if we need to update
-          // acceptor start times:
-          
-          if (istep == 0)
-            acceptorStartFrame_[istep].push_back(istep);
-          else {
-            // find out index on previous step:
-            index2 = GIDtoDonor_[istep-1][hInd];
-            if (acceptor_[istep-1][index2] == aInd || aInd == -1) {
-              // Same acceptor (or none) means we use previous start time:
-              acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
-            } else {
-              // new acceptor means new start time:
-              acceptorStartFrame_[istep].push_back(istep);
-              
-            }
           }
         }
 
@@ -216,37 +214,39 @@ namespace OpenMD {
                 Vector3d uDA = DA / DAdist;
                 rOO_[istep].push_back( uDA );
                 DHprojection = dot( uDA, DH);
-                rOHprojection_[istep].push_back(DHprojection);                
+                rOHprojection_[istep].push_back(DHprojection);
+                index = acceptor_[istep].size();
+                GIDtoDonor_[istep][hInd] = index;
+                
+                acceptor_[istep].push_back(aInd);
+                DonorToGID_[istep].push_back(hInd);
+                
+                // Look at previous step to see if we need to update
+                // acceptor start times:
+                
+                if (istep == 0)
+                  acceptorStartFrame_[istep].push_back(istep);
+                else {
+                  // find out index on previous step:
+                  index2 = GIDtoDonor_[istep-1][hInd];
+                  if (acceptor_[istep-1][index2] == aInd || aInd == -1) {
+                    // Same acceptor (or none) means we use previous start time:
+                    acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
+                  } else {
+                    // new acceptor means new start time:
+                    acceptorStartFrame_[istep].push_back(istep);
+                  }
+                }
               }
             }            
-          }
-
-          index = acceptor_[istep].size();
-          GIDtoDonor_[istep][hInd] = index;
-          
-          acceptor_[istep].push_back(aInd);
-          DonorToGID_[istep].push_back(hInd);
-          
-          // Look at previous step to see if we need to update
-          // acceptor start times:
-          
-          if (istep == 0)
-            acceptorStartFrame_[istep].push_back(istep);
-          else {
-            // find out index on previous step:
-            index2 = GIDtoDonor_[istep-1][hInd];
-            if (acceptor_[istep-1][index2] == aInd || aInd == -1) {
-              // Same acceptor (or none) means we use previous start time:
-              acceptorStartFrame_[istep].push_back(acceptorStartFrame_[istep-1][index2]);
-            } else {
-              // new acceptor means new start time:
-              acceptorStartFrame_[istep].push_back(istep);
-              
-            }
-          }
+          }                   
         }        
       }
     }
+    std::cerr << "Step : " << istep << "\n";
+    std::cerr << "found " << DonorToGID_[istep].size() << " donors\n";
+    std::cerr << "found " << acceptor_[istep].size() << " acceptors\n";
+    std::cerr << "found " << GIDtoDonor_[istep].size() << " GIDs\n";
   }
   
   
@@ -341,5 +341,4 @@ namespace OpenMD {
       histogram_[i] = 1.0 - histogram_[i];
     }
   }
-
 }

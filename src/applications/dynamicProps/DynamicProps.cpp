@@ -229,23 +229,10 @@ int main(int argc, char* argv[]){
 			args_info.nzbins_arg, memSize);
 
   } else if (args_info.jumptime_given) {
-    int order(0);
-    if (args_info.order_given)
-      order = args_info.order_arg;
-    else {
-      sprintf( painCave.errMsg,
-               "--order must be specified when calculating Hydrogen Bond "
-               "Jump Statistics\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
                              args_info.OOcut_arg,
                              args_info.thetacut_arg,
-                             args_info.OHcut_arg,
-                             order);
+                             args_info.OHcut_arg);
   } else if (args_info.persistence_given) {
     corrFunc = new HBondPersistence(info, dumpFileName, sele1, sele2,
                                     args_info.OOcut_arg,
