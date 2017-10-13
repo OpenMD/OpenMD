@@ -54,10 +54,7 @@ namespace OpenMD {
 
   void SCLattice::update(){
 
-    RealType cellLenOver2;
     RealType oneOverRoot3;
-
-    cellLenOver2  = 0.5 * latticeParam;
     oneOverRoot3 = 1.0 / sqrt(3.0);
 
     // Molecule 1
@@ -69,6 +66,5 @@ namespace OpenMD {
     cellSitesOrt[0][1] = oneOverRoot3;
     cellSitesOrt[0][2] = oneOverRoot3;
   }
-
 }
 

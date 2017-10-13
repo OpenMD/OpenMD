@@ -69,13 +69,13 @@ namespace OpenMD {
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
+    unsigned int nBins2_; 
     int axis_;
     std::string axisLabel1_;
     std::string axisLabel2_;
     int axis1_;
     int axis2_; 
     
-    unsigned int nBins2_; 
     std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
     std::vector<std::vector<RealType> > density_;
   };
