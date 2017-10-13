@@ -233,6 +233,11 @@ int main(int argc, char* argv[]){
                              args_info.OOcut_arg,
                              args_info.thetacut_arg,
                              args_info.OHcut_arg);
+  } else if (args_info.jumptimeZ_given) {
+    corrFunc = new HBondJumpZ(info, dumpFileName, sele1, sele2,
+                              args_info.OOcut_arg,
+                              args_info.thetacut_arg,
+                              args_info.OHcut_arg, args_info.nzbins_arg);
   } else if (args_info.persistence_given) {
     corrFunc = new HBondPersistence(info, dumpFileName, sele1, sele2,
                                     args_info.OOcut_arg,

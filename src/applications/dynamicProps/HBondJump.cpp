@@ -42,6 +42,8 @@
 
 #include "applications/dynamicProps/HBondJump.hpp"
 #include "utils/Constants.hpp"
+#include "utils/Revision.hpp"
+
 #include <algorithm>
 
 namespace OpenMD {
@@ -199,7 +201,7 @@ namespace OpenMD {
     }
   }
 
-    void HBondJump::postCorrelate() {
+  void HBondJump::postCorrelate() {
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
 	histogram_[i] /= count_[i];
@@ -484,6 +486,281 @@ namespace OpenMD {
       }
     }
   }
-}
+
+  HBondJumpZ::HBondJumpZ(SimInfo* info, const std::string& filename,
+                         const std::string& sele1, const std::string& sele2,
+                         double OOcut, double thetaCut, double OHcut,
+                         int nZBins)
+    : HBondJump(info, filename, sele1, sele2, OOcut, thetaCut, OHcut),
+      nZBins_(nZBins) {
+
+    setCorrFuncType("HBondJumpZ");
+    setOutputName(getPrefix(dumpFilename_) + ".jumpZ");
+
+    zbin_.resize(nFrames_);
+    histogram_.resize(nTimeBins_);
+    counts_.resize(nTimeBins_);
+    for (int i = 0; i < nTimeBins_; i++) {
+      histogram_[i].resize(nZBins_);
+      std::fill(histogram_[i].begin(), histogram_[i].end(), 0.0);
+      counts_[i].resize(nZBins_);
+      std::fill(counts_[i].begin(), counts_[i].end(), 0);
+    }
+  }
   
-                                
+  void HBondJumpZ::findHBonds( int frame ) {
+    Molecule* mol1;
+    Molecule* mol2;
+    SimInfo::MoleculeIterator mi, mj;
+    std::vector<Molecule::HBondDonor*>::iterator hbdi;
+    Molecule::HBondDonor* hbd;
+    std::vector<Atom*>::iterator hbai;
+    Atom* hba;
+    Vector3d dPos, hPos, aPos, pos;
+    int hInd, index, aInd, zBin;
+    
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    RealType halfBoxZ_ = hmat(2,2) / 2.0;      
+
+    // Register all the possible HBond donor hydrogens:
+    for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
+         mol1 = info_->nextMolecule(mi)) {
+      for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
+           hbd = mol1->nextHBondDonor(hbdi)) {
+        hInd = hbd->donatedHydrogen->getGlobalIndex();
+        index = registerHydrogen(frame, hInd);
+      }
+    }
+    
+    for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
+         mol1 = info_->nextMolecule(mi)) {
+      
+      for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
+           hbd = mol1->nextHBondDonor(hbdi)) {
+
+        hInd = hbd->donatedHydrogen->getGlobalIndex();
+        index = GIDtoH_[frame][hInd];
+        
+        dPos = hbd->donorAtom->getPos();
+        hPos = hbd->donatedHydrogen->getPos();
+
+        for (mj = mi, mol2 = info_->beginMolecule(mj); mol2 != NULL;
+             mol2 = info_->nextMolecule(mj)) {
+
+          for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
+               hba = mol2->nextHBondAcceptor(hbai)) {
+
+            aPos = hba->getPos();
+            
+            if (isHBond(dPos, hPos, aPos)) {
+              aInd = hba->getGlobalIndex();            
+              registerHydrogenBond(frame, index, hInd, aInd);
+              pos = hPos;
+              if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
+                currentSnapshot_->wrapVector(pos);
+              zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+              zbin_[frame][index] = zBin;              
+            }            
+          }
+        }
+      }
+      
+      for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
+           hba = mol1->nextHBondAcceptor(hbai)) {
+        
+        aPos = hba->getPos();
+        
+        for (mj = mi, mol2 = info_->beginMolecule(mj); mol2 != NULL;
+             mol2 = info_->nextMolecule(mj)) {
+          
+          for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
+               hbd = mol2->nextHBondDonor(hbdi)) {
+            
+            hInd = hbd->donatedHydrogen->getGlobalIndex();
+            // no need to register, just look up the index:
+            index = GIDtoH_[frame][hInd];
+            
+            dPos = hbd->donorAtom->getPos();
+            hPos = hbd->donatedHydrogen->getPos();
+            
+            if (isHBond(dPos, hPos, aPos)) {
+              aInd = hba->getGlobalIndex();            
+              registerHydrogenBond(frame, index, hInd, aInd);
+              pos = hPos;
+              if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
+                currentSnapshot_->wrapVector(pos);
+              zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+              zbin_[frame][index] = zBin;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  int HBondJumpZ::registerHydrogen(int frame, int hIndex) {
+    int index;
+    
+    // If this hydrogen wasn't already registered, register it:    
+    if (GIDtoH_[frame][hIndex] == -1) {      
+      index = hydrogen_[frame].size();
+      GIDtoH_[frame][hIndex] = index;
+      hydrogen_[frame].push_back(hIndex);
+      acceptor_[frame].push_back(-1);
+      selected_[frame].push_back(false);
+      zbin_[frame].push_back(-1);
+      
+      if (frame == 0) {
+        lastAcceptor_[frame].push_back(-1);
+        acceptorStartFrame_[frame].push_back(frame);
+      } else {
+        // Copy the last acceptor.            
+        int prevIndex = GIDtoH_[frame-1][hIndex];            
+        lastAcceptor_[frame].push_back(lastAcceptor_[frame-1][prevIndex]);
+        acceptorStartFrame_[frame].push_back(acceptorStartFrame_[frame-1][prevIndex]);
+      } 
+    } else {
+      // This hydrogen was already registered.  Just return the index:
+      index = GIDtoH_[frame][hIndex];      
+    }
+    return index;
+  }
+
+
+  void HBondJumpZ::correlation() {
+    std::vector<int> s1;
+    std::vector<int>::iterator i1;
+    RealType corrVal;
+    int index1, index2, count, gid, aInd1, aInd2, zBin;
+
+    for (int i = 0; i < nFrames_; ++i) {
+
+      RealType time1 = times_[i];           
+      s1 = hydrogen_[i];
+            
+      for(int j  = i; j < nFrames_; ++j) {
+
+        // Perform a sanity check on the actual configuration times to
+        // make sure the configurations are spaced the same amount the
+        // sample time said they were spaced:
+               
+        RealType time2 = times_[j];
+
+        if ( fabs( (time2 - time1) - (j-i)*deltaTime_ ) > 1.0e-4 ) {
+          sprintf(painCave.errMsg,
+                  "HBondJump::correlation Error: sampleTime (%f)\n"
+                  "\tin %s does not match actual time-spacing between\n"
+                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+          painCave.isFatal = 1;
+          simError();  
+        }
+        
+        int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
+
+        corrVal = 0.0;
+        count = 0;
+
+        // loop over the Hydrogens found in frame i:
+        
+        for (i1 = s1.begin(); i1 != s1.end(); ++i1) {
+
+          // gid is the global ID of Hydrogen index1 in frame i:
+          gid = *i1;          
+          index1 = GIDtoH_[i][gid];
+          
+          // find matching hydrogen in frame j:
+          index2 = GIDtoH_[j][gid];
+
+          if (selected_[i][index1]) {
+            zBin = zbin_[i][index1];
+            counts_[timeBin][zBin]++;
+
+            if (acceptor_[i][index1] == -1) {
+              aInd1 = lastAcceptor_[i][index1];
+            } else {
+              aInd1 = acceptor_[i][index1];
+            }
+
+            if (acceptor_[j][index2] == -1) {
+              aInd2 = lastAcceptor_[j][index2];
+            } else {
+              aInd2 = acceptor_[j][index2];
+            }
+          
+            //aInd1 = acceptor_[i][index1];
+            //aInd2 = acceptor_[j][index2];
+            
+            if (aInd1 != aInd2) {
+              // different acceptor so nA(0) . nB(t) = 1
+              histogram_[timeBin][zBin] += 1;
+            } else {
+              // same acceptor, but we need to look at the start frames
+              // for these H-bonds to make sure it is the same H-bond:
+              if (acceptorStartFrame_[i][index1] !=
+                  acceptorStartFrame_[j][index2]) {
+                // different start frame, so this is considered a
+                // different H-bond:
+                 histogram_[timeBin][zBin] += 1;
+              } else {
+                // same start frame, so this is considered the same H-bond:
+                 histogram_[timeBin][zBin] += 0;
+              }
+            }                        
+          }
+        }
+      }
+    }
+  }
+
+  
+  void HBondJumpZ::postCorrelate() {
+    for (int i =0 ; i < nTimeBins_; ++i) {
+      for (int j = 0; j < nZBins_; ++j) {
+        if (counts_[i][j] > 0) {
+          histogram_[i][j] /= counts_[i][j];
+        } else {
+          histogram_[i][j] = 0;
+        }
+        histogram_[i][j] = 1.0 - histogram_[i][j];
+      }
+    }
+  }
+  
+  void HBondJumpZ::writeCorrelate() {
+    ofstream ofs(outputFilename_.c_str());
+    
+    if (ofs.is_open()) {
+      
+      Revision r;
+
+      ofs << "# " << getCorrFuncType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_ ;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#time\tcorrVal\n";
+
+      for (int i = 0; i < nTimeBins_; ++i) {
+        ofs << times_[i]-times_[0];
+        
+        for (int j = 0; j < nZBins_; ++j) {          
+          ofs << "\t" << histogram_[i][j];
+        }
+        ofs << "\n";
+      }
+      
+    } else {
+      sprintf(painCave.errMsg,
+              "HBondJumpZ::writeCorrelate Error: fail to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    ofs.close();
+  }
+
+}

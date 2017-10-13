@@ -51,7 +51,7 @@ namespace OpenMD {
               const std::string& sele1, const std::string& sele2, double OOCut,
               double thetaCut, double OHCut);
     
-  private:
+  protected:
     virtual void correlation();
     virtual void computeFrame(int istep);
     virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
@@ -60,11 +60,10 @@ namespace OpenMD {
     
     virtual void postCorrelate();
 
-    int  registerHydrogen(int frame, int hIndex);
-    void findHBonds( int frame );
+    virtual int  registerHydrogen(int frame, int hIndex);
+    virtual void findHBonds( int frame );
     bool isHBond(Vector3d donorPos, Vector3d hPos, Vector3d acceptorPos);
     void registerHydrogenBond(int frame, int index, int hIndex, int aIndex);
-
     void processNonOverlapping(int frame, SelectionManager& sman1, 
                                SelectionManager& sman2);
     void processOverlapping(int frame, SelectionManager& sman);
@@ -85,6 +84,23 @@ namespace OpenMD {
     SelectionManager common_;    
   };
 
+  class HBondJumpZ : public HBondJump {
+  public:
+    HBondJumpZ(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2, double OOCut,
+               double thetaCut, double OHCut, int nZbins);
+    virtual int  registerHydrogen(int frame, int hIndex);
+    virtual void findHBonds( int frame );
+    virtual void correlation();
+    virtual void postCorrelate();
+    virtual void writeCorrelate();
+    
+  private:
+    std::vector<std::vector<RealType> > histogram_;
+    std::vector<std::vector<int> > counts_;
+    std::vector<std::vector<int> > zbin_;
+    int nZBins_;
+  };
 }
 #endif
 
