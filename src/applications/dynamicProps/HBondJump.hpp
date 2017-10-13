@@ -54,26 +54,27 @@ namespace OpenMD {
   private:
     virtual void correlation();
     virtual void computeFrame(int istep);
-    
     virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
     virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
-    virtual void postCorrelate();
-    virtual void processNonOverlapping(int frame, SelectionManager& sman1, 
-                                       SelectionManager& sman2);
-    virtual void processOverlapping(int frame, SelectionManager& sman);
-    void processMolecule(int frame, Molecule* mol1);
-    void processPair(int frame, Molecule* mol1, Molecule* mol2);
-
-    bool isHBond(Vector3d donorPos, Vector3d hPos, Vector3d acceptorPos);
-    int registerHydrogen(int frame, int hIndex);
-    void registerHydrogenBond(int frame, int index, int hIndex, int aIndex);
     
-    std::vector<std::vector<int> > GIDtoH_;
-    std::vector<std::vector<int> > hydrogen_;
-    std::vector<std::vector<int> > acceptor_;
-    std::vector<std::vector<int> > lastAcceptor_;
-    std::vector<std::vector<int> > acceptorStartFrame_;
+    virtual void postCorrelate();
+
+    int  registerHydrogen(int frame, int hIndex);
+    void findHBonds( int frame );
+    bool isHBond(Vector3d donorPos, Vector3d hPos, Vector3d acceptorPos);
+    void registerHydrogenBond(int frame, int index, int hIndex, int aIndex);
+
+    void processNonOverlapping(int frame, SelectionManager& sman1, 
+                               SelectionManager& sman2);
+    void processOverlapping(int frame, SelectionManager& sman);
+    
+    std::vector<std::vector<int> >  GIDtoH_;
+    std::vector<std::vector<int> >  hydrogen_;
+    std::vector<std::vector<int> >  acceptor_;
+    std::vector<std::vector<int> >  lastAcceptor_;
+    std::vector<std::vector<bool> > selected_;
+    std::vector<std::vector<int> >  acceptorStartFrame_;
     
     RealType OOCut_;
     RealType thetaCut_;

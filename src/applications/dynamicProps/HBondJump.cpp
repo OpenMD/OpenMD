@@ -51,8 +51,8 @@ namespace OpenMD {
     : MultipassCorrFunc<RealType>(info, filename, sele1, sele2,
                                   DataStorage::dslPosition |
                                   DataStorage::dslAmat ),
-    OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut), sele1_minus_common_(info), 
-      sele2_minus_common_(info), common_(info)  {
+    OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut),
+    sele1_minus_common_(info), sele2_minus_common_(info), common_(info)  {
     
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
@@ -66,11 +66,9 @@ namespace OpenMD {
 
     if (!uniqueSelections_) {
       seleMan2_ = seleMan1_;
-    }
-    
+    }    
     if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
-      // If all selections are static, we can precompute the number
-      // of real pairs.
+      // If all selections are static, we can pre-set the selections:
       common_ = seleMan1_ & seleMan2_;
       sele1_minus_common_ = seleMan1_ - common_;
       sele2_minus_common_ = seleMan2_ - common_;
@@ -82,41 +80,41 @@ namespace OpenMD {
     acceptor_.resize(nFrames_);
     lastAcceptor_.resize(nFrames_);
     acceptorStartFrame_.resize(nFrames_);
+    selected_.resize(nFrames_);
   }
   
   void HBondJump::computeFrame(int istep) {
 
-    // Map of atomic global IDs to donor atoms:
+    // Map of atomic global IDs to HBond donor hydrogens:
     GIDtoH_[istep].resize( info_->getNGlobalAtoms(), -1);
+    
+    // Find all of the HBonds in this frame
+    findHBonds(istep);
 
     if (!uniqueSelections_) {
       seleMan2_ = seleMan1_;
-    }
-    
+    }    
     if (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }
-    
+    }    
     if (uniqueSelections_ && evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
-
     if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
       common_ = seleMan1_ & seleMan2_;
       sele1_minus_common_ = seleMan1_ - common_;
       sele2_minus_common_ = seleMan2_ - common_;            
     }
-    
+
+    // Label the found HBonds as selected:
     processNonOverlapping(istep, sele1_minus_common_, seleMan2_);
     processNonOverlapping(istep, common_,             sele2_minus_common_);
     processOverlapping(   istep, common_);
-
   }
 
   void HBondJump::correlation() {
     std::vector<int> s1;
     std::vector<int>::iterator i1;
-
     RealType corrVal;
     int index1, index2, count, gid, aInd1, aInd2;
 
@@ -146,51 +144,54 @@ namespace OpenMD {
         int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
 
         corrVal = 0.0;
-        count = s1.size();
+        count = 0;
 
         // loop over the Hydrogens found in frame i:
         
         for (i1 = s1.begin(); i1 != s1.end(); ++i1) {
 
           // gid is the global ID of Hydrogen index1 in frame i:
-          gid = *i1;
-          
+          gid = *i1;          
           index1 = GIDtoH_[i][gid];
           
           // find matching hydrogen in frame j:
           index2 = GIDtoH_[j][gid];
 
-          if (acceptor_[i][index1] == -1) {
-            aInd1 = lastAcceptor_[i][index1];
-          } else {
-            aInd1 = acceptor_[i][index1];
-          }
+          if (selected_[i][index1]) {
+            count++;
 
-          if (acceptor_[j][index2] == -1) {
-            aInd2 = lastAcceptor_[j][index2];
-          } else {
-            aInd2 = acceptor_[j][index2];
-          }
+            if (acceptor_[i][index1] == -1) {
+              aInd1 = lastAcceptor_[i][index1];
+            } else {
+              aInd1 = acceptor_[i][index1];
+            }
+
+            if (acceptor_[j][index2] == -1) {
+              aInd2 = lastAcceptor_[j][index2];
+            } else {
+              aInd2 = acceptor_[j][index2];
+            }
           
-          //aInd1 = acceptor_[i][index1];
-          //aInd2 = acceptor_[j][index2];
-
-          if (aInd1 != aInd2) {
-            // different acceptor so nA(0) . nB(t) = 1
-            corrVal += 1;
-          } else {
-            // same acceptor, but we need to look at the start frames
-            // for these H-bonds to make sure it is the same H-bond:
-            if (acceptorStartFrame_[i][index1] !=
-                acceptorStartFrame_[j][index2]) {
-              // different start frame, so this is considered a
-              // different H-bond:
+            //aInd1 = acceptor_[i][index1];
+            //aInd2 = acceptor_[j][index2];
+            
+            if (aInd1 != aInd2) {
+              // different acceptor so nA(0) . nB(t) = 1
               corrVal += 1;
             } else {
-              // same start frame, so this is considered the same H-bond:
-              corrVal += 0;
+              // same acceptor, but we need to look at the start frames
+              // for these H-bonds to make sure it is the same H-bond:
+              if (acceptorStartFrame_[i][index1] !=
+                  acceptorStartFrame_[j][index2]) {
+                // different start frame, so this is considered a
+                // different H-bond:
+                corrVal += 1;
+              } else {
+                // same start frame, so this is considered the same H-bond:
+                corrVal += 0;
+              }
             }
-            }
+          }
         }
         histogram_[timeBin] += corrVal;
         count_[timeBin] += count;
@@ -213,42 +214,17 @@ namespace OpenMD {
                                          SelectionManager& sman2) {
     Molecule* mol1;
     Molecule* mol2;
-    int i;    
-    int j;
+    int i, j;    
     std::vector<Molecule::HBondDonor*>::iterator hbdi;
     Molecule::HBondDonor* hbd;
     std::vector<Atom*>::iterator hbai;
     Atom* hba;
-    Vector3d dPos, hPos, aPos;
     int hInd, index, aInd;
     
     // This is the same as a non-overlapping pairwise loop structure:
     // for (int i = 0;  i < ni ; ++i ) {
     //   for (int j = 0; j < nj; ++j) {} 
     // }
-
-    for (mol1 = sman1.beginSelectedMolecule(i); mol1 != NULL; 
-         mol1 = sman1.nextSelectedMolecule(i)) {
-
-      // loop over the possible donors in molecule 1:
-      for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
-           hbd = mol1->nextHBondDonor(hbdi)) {
-        hInd = hbd->donatedHydrogen->getGlobalIndex();
-        index = registerHydrogen(frame, hInd);
-      }
-    }
-
-    for (mol2 = sman2.beginSelectedMolecule(j); mol2 != NULL; 
-         mol2 = sman2.nextSelectedMolecule(j)) {
-
-      // loop over the possible donors in molecule 2:
-      for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
-           hbd = mol2->nextHBondDonor(hbdi)) {
-        hInd = hbd->donatedHydrogen->getGlobalIndex();
-        index = registerHydrogen(frame, hInd);
-      }
-    }
-
     
     for (mol1 = sman1.beginSelectedMolecule(i); mol1 != NULL; 
          mol1 = sman1.nextSelectedMolecule(i)) {
@@ -262,38 +238,31 @@ namespace OpenMD {
           
           hInd = hbd->donatedHydrogen->getGlobalIndex();
           index = GIDtoH_[frame][hInd];
-          
-          dPos = hbd->donorAtom->getPos();
-          hPos = hbd->donatedHydrogen->getPos();
+          aInd = acceptor_[frame][index];
                             
           for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
                hba = mol2->nextHBondAcceptor(hbai)) {
-            aPos = hba->getPos();
             
-            if (isHBond(dPos, hPos, aPos)) {
-              aInd = hba->getGlobalIndex();            
-              registerHydrogenBond(frame, index, hInd, aInd);
+            if (hba->getGlobalIndex() == aInd) {
+              selected_[frame][index] = true;
             }
           }
         }
+        
         // loop over the possible donors in molecule 2:
         for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
              hbd = mol2->nextHBondDonor(hbdi)) {
           
           hInd = hbd->donatedHydrogen->getGlobalIndex();
           index = GIDtoH_[frame][hInd];
-          
-          dPos = hbd->donorAtom->getPos();
-          hPos = hbd->donatedHydrogen->getPos();
+          aInd = acceptor_[frame][index];
                             
           for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
                hba = mol1->nextHBondAcceptor(hbai)) {
-            aPos = hba->getPos();
             
-            if (isHBond(dPos, hPos, aPos)) {
-              aInd = hba->getGlobalIndex();            
-              registerHydrogenBond(frame, index, hInd, aInd);
-            }
+            if (hba->getGlobalIndex() == aInd) {
+              selected_[frame][index] = true;
+            }            
           }
         }
       }        
@@ -303,33 +272,18 @@ namespace OpenMD {
   void HBondJump::processOverlapping( int frame, SelectionManager& sman) {
     Molecule* mol1;
     Molecule* mol2;
-    int i;    
-    int j;
+    int i, j;    
+
     std::vector<Molecule::HBondDonor*>::iterator hbdi;
     Molecule::HBondDonor* hbd;
     std::vector<Atom*>::iterator hbai;
     Atom* hba;
-    Vector3d dPos, hPos, aPos;
     int hInd, index, aInd;
 
     // This is the same as a pairwise loop structure:
     // for (int i = 0;  i < n-1 ; ++i ) {
     //   for (int j = i + 1; j < n; ++j) {} 
     // }
-
-    for (mol1 = sman.beginSelectedMolecule(i); mol1 != NULL; 
-         mol1 = sman.nextSelectedMolecule(i)) {
-
-      // loop over the possible donors in molecule 1:
-      for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
-           hbd = mol1->nextHBondDonor(hbdi)) {
-        hInd = hbd->donatedHydrogen->getGlobalIndex();
-        index = registerHydrogen(frame, hInd);
-      }
-    }
-      
-    // Because the selection is overlapping, all hydrogens are registered
-    // in the first loop over molecules:
     
     for (mol1 = sman.beginSelectedMolecule(i); mol1 != NULL; 
          mol1 = sman.nextSelectedMolecule(i)) {
@@ -340,18 +294,85 @@ namespace OpenMD {
 
         hInd = hbd->donatedHydrogen->getGlobalIndex();
         index = GIDtoH_[frame][hInd];
+        aInd = acceptor_[frame][index];
         
-        dPos = hbd->donorAtom->getPos();
-        hPos = hbd->donatedHydrogen->getPos();
-
         for (j  = i, mol2 = sman.nextSelectedMolecule(j); mol2 != NULL; 
              mol2 = sman.nextSelectedMolecule(j)) {
           
           for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
                hba = mol2->nextHBondAcceptor(hbai)) {
 
-            aPos = hba->getPos();
+            if (hba->getGlobalIndex() == aInd) {
+              selected_[frame][index] = true;
+            }
+          }
+        }
+      }
+      
+      for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
+           hba = mol1->nextHBondAcceptor(hbai)) {
 
+        aInd = hba->getGlobalIndex();
+        
+        for (j  = i, mol2 = sman.nextSelectedMolecule(j); mol2 != NULL; 
+             mol2 = sman.nextSelectedMolecule(j)) {
+          for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
+               hbd = mol2->nextHBondDonor(hbdi)) {
+            
+            hInd = hbd->donatedHydrogen->getGlobalIndex();
+            index = GIDtoH_[frame][hInd];
+
+            if (acceptor_[frame][index] == aInd) {
+              selected_[frame][index] = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void HBondJump::findHBonds( int frame ) {
+    Molecule* mol1;
+    Molecule* mol2;
+    SimInfo::MoleculeIterator mi, mj;
+    std::vector<Molecule::HBondDonor*>::iterator hbdi;
+    Molecule::HBondDonor* hbd;
+    std::vector<Atom*>::iterator hbai;
+    Atom* hba;
+    Vector3d dPos, hPos, aPos;
+    int hInd, index, aInd;
+
+
+    // Register all the possible HBond donor hydrogens:
+    for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
+         mol1 = info_->nextMolecule(mi)) {
+      for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
+           hbd = mol1->nextHBondDonor(hbdi)) {
+        hInd = hbd->donatedHydrogen->getGlobalIndex();
+        index = registerHydrogen(frame, hInd);
+      }
+    }
+    
+    for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
+         mol1 = info_->nextMolecule(mi)) {
+      
+      for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
+           hbd = mol1->nextHBondDonor(hbdi)) {
+
+        hInd = hbd->donatedHydrogen->getGlobalIndex();
+        index = GIDtoH_[frame][hInd];
+        
+        dPos = hbd->donorAtom->getPos();
+        hPos = hbd->donatedHydrogen->getPos();
+
+        for (mj = mi, mol2 = info_->beginMolecule(mj); mol2 != NULL;
+             mol2 = info_->nextMolecule(mj)) {
+
+          for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
+               hba = mol2->nextHBondAcceptor(hbai)) {
+
+            aPos = hba->getPos();
+            
             if (isHBond(dPos, hPos, aPos)) {
               aInd = hba->getGlobalIndex();            
               registerHydrogenBond(frame, index, hInd, aInd);
@@ -359,13 +380,15 @@ namespace OpenMD {
           }
         }
       }
+      
       for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
            hba = mol1->nextHBondAcceptor(hbai)) {
         
         aPos = hba->getPos();
         
-        for (j  = i, mol2 = sman.nextSelectedMolecule(j); mol2 != NULL; 
-             mol2 = sman.nextSelectedMolecule(j)) {
+        for (mj = mi, mol2 = info_->beginMolecule(mj); mol2 != NULL;
+             mol2 = info_->nextMolecule(mj)) {
+          
           for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
                hbd = mol2->nextHBondDonor(hbdi)) {
             
@@ -375,7 +398,7 @@ namespace OpenMD {
             
             dPos = hbd->donorAtom->getPos();
             hPos = hbd->donatedHydrogen->getPos();
-
+            
             if (isHBond(dPos, hPos, aPos)) {
               aInd = hba->getGlobalIndex();            
               registerHydrogenBond(frame, index, hInd, aInd);
@@ -385,7 +408,7 @@ namespace OpenMD {
       }
     }
   }
-
+  
 
   bool HBondJump::isHBond( Vector3d donorPos, Vector3d hydrogenPos,
                            Vector3d acceptorPos) {
@@ -418,15 +441,15 @@ namespace OpenMD {
 
 
   int HBondJump::registerHydrogen(int frame, int hIndex) {
-
     int index;
-    // If this hydrogen wasn't already registered, register it:
     
+    // If this hydrogen wasn't already registered, register it:    
     if (GIDtoH_[frame][hIndex] == -1) {      
       index = hydrogen_[frame].size();
       GIDtoH_[frame][hIndex] = index;
       hydrogen_[frame].push_back(hIndex);
       acceptor_[frame].push_back(-1);
+      selected_[frame].push_back(false);
       
       if (frame == 0) {
         lastAcceptor_[frame].push_back(-1);
