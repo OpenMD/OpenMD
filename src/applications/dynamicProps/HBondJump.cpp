@@ -630,8 +630,7 @@ namespace OpenMD {
   void HBondJumpZ::correlation() {
     std::vector<int> s1;
     std::vector<int>::iterator i1;
-    RealType corrVal;
-    int index1, index2, count, gid, aInd1, aInd2, zBin;
+    int index1, index2, gid, aInd1, aInd2, zBin;
 
     for (int i = 0; i < nFrames_; ++i) {
 
@@ -657,9 +656,6 @@ namespace OpenMD {
         }
         
         int timeBin = int ((time2 - time1) / deltaTime_ + 0.5);        
-
-        corrVal = 0.0;
-        count = 0;
 
         // loop over the Hydrogens found in frame i:
         
