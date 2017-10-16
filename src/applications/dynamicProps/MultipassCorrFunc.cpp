@@ -111,15 +111,23 @@ namespace OpenMD {
     if (uniqueSelections_) {
       sele2ToIndex_.resize(nFrames_);
     }
+
+    progressBar_ = new ProgressBar();
   }
   
   template<typename T> // we should check to see if this is needed for a member function that does not deal with the type
   void MultipassCorrFunc<T>::preCorrelate() {
 
+    progressBar_->clear();
+
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       times_[istep] = currentSnapshot_->getTime();
+
+      progressBar_->setStatus(istep+1, nFrames_);
+      progressBar_->update();
+
       computeFrame(istep);
     }
 
@@ -208,11 +216,18 @@ namespace OpenMD {
       count_[i] = 0;
     }
 
+    progressBar_->clear();
+    RealType samples = 0.5 * (nFrames_ + 1) * nFrames_;
+    int visited = 0;
+
     for (int i = 0; i < nFrames_; ++i) {
 
       RealType time1 = times_[i];
 
       for(int j  = i; j < nFrames_; ++j) {
+        visited++;
+        progressBar_->setStatus(visited, samples);
+        progressBar_->update();
 
         // Perform a sanity check on the actual configuration times to
         // make sure the configurations are spaced the same amount the
@@ -307,7 +322,10 @@ namespace OpenMD {
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-      ofs << "#time\tcorrVal\n";
+      if (!labelString_.empty())        
+        ofs << "#time\t" << labelString_ << "\n";
+      else
+        ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
 	ofs << times_[i]-times_[0] << "\t" << histogram_[i] << "\n";
@@ -340,7 +358,10 @@ namespace OpenMD {
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-      ofs << "#time\tcorrVal\n";
+      if (!labelString_.empty())        
+        ofs << "#time\t" << labelString_ << "\n";
+      else
+        ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0] << "\t";
@@ -378,7 +399,10 @@ namespace OpenMD {
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-      ofs << "#time\tcorrVal\n";
+      if (!labelString_.empty())        
+        ofs << "#time\t" << labelString_ << "\n";
+      else
+        ofs << "#time\tcorrVal\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0] << "\t";

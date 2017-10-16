@@ -51,6 +51,7 @@
 #include "primitives/StuntDouble.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include "utils/ProgressBar.hpp"
 
 namespace OpenMD {
 
@@ -78,6 +79,11 @@ namespace OpenMD {
       paramString_ = params;
     }
 
+    void setLabelString(const std::string& label) {
+      labelString_ = label;
+    }
+
+    
   protected:
 
     virtual void preCorrelate();
@@ -120,9 +126,12 @@ namespace OpenMD {
 
     std::string corrFuncType_;
     std::string paramString_;
+    std::string labelString_;
 
     std::vector<std::vector<int> > sele1ToIndex_;
     std::vector<std::vector<int> > sele2ToIndex_;
+
+    ProgressBar* progressBar_;
 
   };
 

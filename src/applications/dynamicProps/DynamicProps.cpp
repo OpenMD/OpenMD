@@ -128,11 +128,13 @@ int main(int argc, char* argv[]){
   // use the memory string to figure out how much memory we can use:
   char *end;
   long long int memSize = memparse(args_info.memory_arg, &end);
-  sprintf( painCave.errMsg,
-           "Amount of memory being used: %llu bytes\n", memSize);
-  painCave.severity = OPENMD_INFO;
-  painCave.isFatal = 0;
-  simError();
+
+  // We don't really need to print this out anymore:
+  // sprintf( painCave.errMsg,
+  //          "Amount of memory being used: %llu bytes\n", memSize);
+  // painCave.severity = OPENMD_INFO;
+  // painCave.isFatal = 0;
+  // simError();
 
   //parse md file and set up the system
   SimCreator creator;
@@ -196,8 +198,7 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order,
-				    memSize);
+    corrFunc = new LegendreCorrFunc(info, dumpFileName, sele1, sele2, order);
   } else if (args_info.lcorrZ_given) {
     int order(0);
     if (args_info.order_given)
@@ -211,7 +212,7 @@ int main(int argc, char* argv[]){
     }
 
     corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order,
-				     args_info.nzbins_arg, memSize);
+				     args_info.nzbins_arg);
 
   } else if (args_info.cohZ_given) {
     int order(0);

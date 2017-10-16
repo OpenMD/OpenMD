@@ -50,73 +50,33 @@ namespace OpenMD {
   LegendreCorrFunc::LegendreCorrFunc(SimInfo* info,
                                      const std::string& filename,
                                      const std::string& sele1,
-                                     const std::string& sele2,
-                                     int order, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat,
-                           memSize){
+                                     const std::string& sele2, int order)
+    : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2,
+                             DataStorage::dslAmat), order_(order) {
 
-      setCorrFuncType("Legendre Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".lcorr");
+    setCorrFuncType("Legendre Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".lcorr");
 
-      std::stringstream params;
-      params << " order = " << order;
-      const std::string paramString = params.str();
-      setParameterString( paramString );
-
-      histogram_.resize(nTimeBins_); 
-      count_.resize(nTimeBins_);
-      nSelected_ =   seleMan1_.getSelectionCount();  
-      assert(  nSelected_ == seleMan2_.getSelectionCount());
-
-      LegendrePolynomial polynomial(order);
-      legendre_ = polynomial.getLegendrePolynomial(order);
-    }
-
-  void LegendreCorrFunc::correlateFrames(int frame1, int frame2) {
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
-
-    RealType time1 = snapshot1->getTime();
-    RealType time2 = snapshot2->getTime();
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-    count_[timeBin] += nSelected_;    
-
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-         sd1 != NULL && sd2 != NULL;
-         sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
-
-      Vector3d corrVals = calcCorrVals(frame1, frame2, sd1, sd2);
-      histogram_[timeBin] += corrVals; 
-    }
+    std::stringstream params;
+    params << " order = " << order_;
+    const std::string paramString = params.str();
+    setParameterString( paramString );
     
+    setLabelString( "Pn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)" );
+    
+    LegendrePolynomial polynomial(order);
+    legendre_ = polynomial.getLegendrePolynomial(order);
+
+    rotMats_.resize(nFrames_);
   }
+  
+  int LegendreCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    rotMats_[frame].push_back( sd->getA() );
+    return rotMats_[frame].size() - 1;
+  } 
 
-  void LegendreCorrFunc::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      if (count_[i] > 0) {
-        histogram_[i] /= count_[i];
-      }
-    }
-  }
-
-  void LegendreCorrFunc::preCorrelate() {
-    // Fill the histogram with empty Vector3d:
-    std::fill(histogram_.begin(), histogram_.end(), Vector3d(0.0));
-    // count array set to zero
-    std::fill(count_.begin(), count_.end(), 0);
-  }
-
-
-
-  Vector3d LegendreCorrFunc::calcCorrVals(int frame1, int frame2,
-                                          StuntDouble* sd1,  StuntDouble* sd2) {
+  Vector3d LegendreCorrFunc::calcCorrVal(int frame1, int frame2,
+                                         int id1, int id2) {
     
     // The lab frame vector corresponding to the body-fixed 
     // z-axis is simply the second column of A.transpose()
@@ -124,23 +84,23 @@ namespace OpenMD {
     // Similar identites give the 0th and 1st rows of A for
     // the lab vectors associated with body-fixed x- and y- axes.
 
-    Vector3d v1x = sd1->getA(frame1).getRow(0);
-    Vector3d v2x = sd2->getA(frame2).getRow(0);
-    Vector3d v1y = sd1->getA(frame1).getRow(1);
-    Vector3d v2y = sd2->getA(frame2).getRow(1);
-    Vector3d v1z = sd1->getA(frame1).getRow(2);
-    Vector3d v2z = sd2->getA(frame2).getRow(2);
+    Vector3d v1x = rotMats_[frame1][id1].getRow(0);
+    Vector3d v1y = rotMats_[frame1][id1].getRow(1);    
+    Vector3d v1z = rotMats_[frame1][id1].getRow(2);
 
-    RealType uxprod = legendre_.evaluate(dot(v1x, v2x)/(v1x.length()*v2x.length()));
-    RealType uyprod = legendre_.evaluate(dot(v1y, v2y)/(v1y.length()*v2y.length()));
-    RealType uzprod = legendre_.evaluate(dot(v1z, v2z)/(v1z.length()*v2z.length()));
+    Vector3d v2x = rotMats_[frame2][id2].getRow(0);
+    Vector3d v2y = rotMats_[frame2][id2].getRow(1);    
+    Vector3d v2z = rotMats_[frame2][id2].getRow(2);
 
-    return Vector3d(uxprod, uyprod, uzprod);
+    RealType ux = legendre_.evaluate(dot(v1x, v2x)/(v1x.length()*v2x.length()));
+    RealType uy = legendre_.evaluate(dot(v1y, v2y)/(v1y.length()*v2y.length()));
+    RealType uz = legendre_.evaluate(dot(v1z, v2z)/(v1z.length()*v2z.length()));
 
+    return Vector3d(ux, uy, uz);
   }
 
 
-  void LegendreCorrFunc::validateSelection(const SelectionManager& seleMan) {
+  void LegendreCorrFunc::validateSelection(SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;    
     for (sd = seleMan1_.beginSelected(i); sd != NULL;
@@ -152,40 +112,6 @@ namespace OpenMD {
 	painCave.isFatal = 1;
 	simError();        
       }
-    }
-    
-  }
-
-  void LegendreCorrFunc::writeCorrelate() {
-    std::ofstream ofs(getOutputFileName().c_str());
-
-    if (ofs.is_open()) {
-      Revision r;
-      
-      ofs << "# " << getCorrFuncType() << "\n";
-      ofs << "# OpenMD " << r.getFullRevision() << "\n";
-      ofs << "# " << r.getBuildDate() << "\n";
-      ofs << "# selection script1: \"" << selectionScript1_ ;
-      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      if (!paramString_.empty())
-        ofs << "# parameters: " << paramString_ << "\n";
-      
-      ofs << "#time\tPn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)\n";
-
-      for (int i = 0; i < nTimeBins_; ++i) {
-        ofs << time_[i] << "\t" << 
-          histogram_[i](0) << "\t" <<
-          histogram_[i](1) << "\t" <<
-          histogram_[i](2) << "\t" << "\n";
-      }
-            
-    } else {
-      sprintf(painCave.errMsg,
-              "LegendreCorrFunc::writeCorrelate Error: fail to open %s\n",
-              getOutputFileName().c_str());
-      painCave.isFatal = 1;
-      simError();        
-    }
-    ofs.close();    
+    }    
   }
 }

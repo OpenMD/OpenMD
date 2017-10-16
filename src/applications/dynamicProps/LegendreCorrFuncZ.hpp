@@ -44,31 +44,35 @@
 
 #include "math/Polynomial.hpp"
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class LegendreCorrFuncZ : public ParticleTimeCorrFunc {
+  class LegendreCorrFuncZ : public AutoCorrFunc<Vector3d> {
   public:
-    LegendreCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, int nZbins, long long int memSize);   
+    LegendreCorrFuncZ(SimInfo* info, const std::string& filename,
+                      const std::string& sele1, const std::string& sele2,
+                      int order, int nZbins);   
 
   private:
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) { return 0.0; }
-    virtual Vector3d calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
+    virtual void validateSelection(SelectionManager& seleMan);
+    virtual void computeFrame(int frame);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual void postCorrelate();
     virtual void writeCorrelate();
 
-    virtual void validateSelection(const SelectionManager& seleMan);
     int order_;
     DoublePolynomial legendre_;
-
-  protected:
-    virtual void preCorrelate();
-    virtual void postCorrelate();
-    vector<vector<Vector3d> > histogram_;
-    vector<vector<int> > counts_;
     int nZBins_;
+    RealType boxZ_, halfBoxZ_;
+    
+    std::vector<std::vector<RotMat3x3d> > rotMats_;
+    std::vector<std::vector<Vector3d> > histogram_;
+    std::vector<std::vector<int> > counts_;
+    std::vector<std::vector<int> > zbin_;
   };
 
 }

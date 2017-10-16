@@ -51,7 +51,7 @@ namespace OpenMD {
     
     setCorrFuncType("Velocity Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".vcorr");
-
+    setLabelString( "<v(0).v(t)>" );
     velocities_.resize(nFrames_);
   }
 
@@ -65,6 +65,7 @@ namespace OpenMD {
     
     setCorrFuncType("Velocity Correlation Function projected along z axis");
     setOutputName(getPrefix(dumpFilename_) + ".vcorrz");
+    setLabelString( "<vz(0).vz(t)>" );
     velocities_.resize(nFrames_);
   }
   VCorrFuncR::VCorrFuncR(SimInfo* info, const std::string& filename, 
@@ -80,6 +81,7 @@ namespace OpenMD {
     reader_->setNeedCOMprops(ncp);    
     setCorrFuncType("Velocity Correlation Function (radial projection)");
     setOutputName(getPrefix(dumpFilename_) + ".vcorrr");
+    setLabelString( "<vr(0).vr(t)>" );
     velocities_.resize(nFrames_);
   }
 
