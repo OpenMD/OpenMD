@@ -152,6 +152,8 @@ namespace OpenMD {
 
     DeclareParameter(PotentialSelection, std::string);
 
+    DeclareParameter(PrivilegedAxis, std::string);
+
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);

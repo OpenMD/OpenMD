@@ -181,6 +181,8 @@ namespace OpenMD {
                                             false);
     DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
 
+    DefineOptionalParameterWithDefaultValue(PrivilegedAxis,"privilegedAxis","z");
+    
     deprecatedKeywords_.insert("nComponents");
     deprecatedKeywords_.insert("nZconstraints");
     deprecatedKeywords_.insert("initialConfig");
@@ -275,7 +277,10 @@ namespace OpenMD {
     CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || 
                    isEqualIgnoreCase("AlphaShape")); 
     CheckParameter(Alpha, isPositive()); 
-    CheckParameter(StatFilePrecision, isPositive()); 
+    CheckParameter(StatFilePrecision, isPositive());
+    CheckParameter(PrivilegedAxis,isEqualIgnoreCase("x") ||
+		   isEqualIgnoreCase("y") ||
+		   isEqualIgnoreCase("z"));
 
     for(std::vector<Component*>::iterator i = components_.begin(); 
         i != components_.end(); ++i) {
