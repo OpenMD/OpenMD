@@ -57,7 +57,7 @@ namespace OpenMD {
     CubicSpline* F;
     CubicSpline* Z;
     RealType rcut;
-    int nValence;
+    RealType nValence;
     bool isFluctuatingCharge;
   };
 
@@ -77,7 +77,7 @@ namespace OpenMD {
   public:
     EAM();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setElectrostatic(Electrostatic *el) { electrostatic_ = el;};
+    void setElectrostatic(Electrostatic *el) { electrostatic_ = el;};    
     void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
@@ -125,7 +125,7 @@ namespace OpenMD {
   private:
     void initialize();
     CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
-
+    
     bool initialized_;
     bool haveCutoffRadius_;
     set<int> EAMtypes;         /**< The set of AtomType idents that are EAM types */

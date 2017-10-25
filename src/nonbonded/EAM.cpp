@@ -52,8 +52,15 @@
 namespace OpenMD {
 
   EAM::EAM() : initialized_(false), haveCutoffRadius_(false),
-	       forceField_(NULL), electrostatic_(NULL), eamRcut_(0.0),
-               mixMeth_(eamJohnson), name_("EAM") {}
+	       forceField_(NULL), eamRcut_(0.0), electrostatic_(NULL),
+               mixMeth_(eamJohnson), name_("EAM") {
+    
+    // This prefactor converts charge-charge interactions into kcal /
+    // mol assuming distances are measured in angstroms and charges
+    // are measured in electrons. Matches the value in
+    // Electrostatics.cpp
+    pre11_ = 332.0637778;
+  }
 
   RealType EAM::fastPower(RealType x, int y) {
     RealType temp;
@@ -196,12 +203,6 @@ namespace OpenMD {
       CubicSpline* rho1 = ea1.getRhoSpline();
       CubicSpline* rho2 = ea2.getRhoSpline();
 
-      // Thise prefactors convert the charge-charge interactions into
-      // kcal / mol all were computed assuming distances are measured in
-      // angstroms Charge-Charge, assuming charges are measured in
-      // electrons.  Matches value in Electrostatics.cpp
-      pre11_ = 332.0637778;
-
       // make the r grid:
 
       // we need phi out to the largest value we'll encounter in the
@@ -302,21 +303,20 @@ namespace OpenMD {
       RealType rmax = 0.0;
       rmax = max(rmax, data1.rcut);
       rmax = max(rmax, data2.rcut);
+      rmax = max(rmax, eamRcut_);
 
       // use the smallest dr (finest grid) to build our grid:
 
       RealType dr = min(data1.rho->getSpacing(), data2.rho->getSpacing());
 
-      int nr = int(rmax/dr + 0.5);
+      int nr = int(rmax/dr + 1);
 
       for (int i = 0; i < nr; i++) rvals.push_back(RealType(i*dr));
 
       vector<RealType> phivals;
       RealType r;
 
-      phivals.push_back(0.0);
-
-      for (unsigned int i = 1; i < rvals.size(); i++ ) {
+      for (unsigned int i = 0; i < rvals.size(); i++ ) {
         r = rvals[i];
         rha = 0.0;
         rhb = 0.0;
@@ -341,13 +341,14 @@ namespace OpenMD {
           phab = phab + 0.5 * (rha / rhb) * phb;
 
         phivals.push_back(phab);
+
       }
       cs->addPoints(rvals, phivals);
     }
 
     return cs;
   }
-
+  
   void EAM::setCutoffRadius( RealType rCut ) {
     eamRcut_ = rCut;
     haveCutoffRadius_ = true;
@@ -493,8 +494,10 @@ namespace OpenMD {
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
-      int Nrho = 2000;
-      RealType rhomax = ZhouRho(0.0, re, fe, beta, lambda);
+      int Nrho = 3000;
+      RealType rhomax = max(800.0,
+                            max(2.0 * rhoe,
+                                ZhouRho(0.0, re, fe, beta, lambda)));
       RealType drho = rhomax/(RealType)(Nrho-1);
       RealType rho;
 
@@ -527,6 +530,7 @@ namespace OpenMD {
           rhovals.push_back(rho);
           funcvals.push_back( Zhou2004Functional(rho, rhoe, rhos, Fn, F, Fe,
                                                  eta, rhol, rhoh) );
+
         }
       } else if (et == eamZhou2005) {
         RealType rhos = ea.getRhos();
@@ -537,6 +541,7 @@ namespace OpenMD {
           rhovals.push_back(rho);
           funcvals.push_back( Zhou2005Functional(rho, rhoe, rhos, Fn, F,
                                                  F3plus,  F3minus, Fe, eta) );
+
         }
       }
 
@@ -558,8 +563,9 @@ namespace OpenMD {
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
-      int Nrho = 2000;
-      RealType rhomax = max(100.0, ZhouRho(0.0, re, fe, gamma, nu));
+      int Nrho = 3000;
+      RealType rhomax = max(800.0,
+                            ZhouRho(0.0, re, fe, gamma, nu));
       RealType drho = rhomax/(RealType)(Nrho-1);
       RealType rho;
 
@@ -637,6 +643,8 @@ namespace OpenMD {
     for( it = EAMtypes.begin(); it != EAMtypes.end(); ++it) {
 
       int eamtid2 = EAMtids[ (*it) ];
+      EAMAtomData &data2 = EAMdata[eamtid2];
+
       AtomType* atype2 = forceField_->getAtomType( (*it) );
 
       EAMInteractionData mixer;
@@ -717,6 +725,7 @@ namespace OpenMD {
     CubicSpline* cs = new CubicSpline();
     std::vector<RealType> rVals;
     std::vector<RealType> phiVals;
+    std::vector<RealType> jVals;
 
     int Nr = 2000;
     RealType r;
@@ -791,7 +800,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m -= *(idat.flucQ1) / RealType(data1.nValence);
+        m -= *(idat.flucQ1) / data1.nValence;
       }
       *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij) );
     }
@@ -799,7 +808,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m -= *(idat.flucQ2) / RealType(data2.nValence);
+        m -= *(idat.flucQ2) / data2.nValence;
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
@@ -853,12 +862,12 @@ namespace OpenMD {
     RealType u, ui, up, uip;
 
     if (data1.isFluctuatingCharge) {
-      Na = RealType(data1.nValence);
+      Na = data1.nValence;
       qa = *(idat.flucQ1);
       va = (1.0 - qa / Na);
     }
     if (data2.isFluctuatingCharge) {
-      Nb = RealType(data2.nValence);
+      Nb = data2.nValence;
       qb = *(idat.flucQ2);
       vb = (1.0 - qb / Nb);
     }
@@ -894,18 +903,20 @@ namespace OpenMD {
         if (data2.isFluctuatingCharge) {
           *(idat.dVdFQ2) -= 0.5 * (ui * pha) / (Nb*va);
         }
+        
       }
 
       if ( *(idat.rij) < rcj) {
         phab = phab + 0.5 * u * (va/vb) * phb;
         dvpdr = dvpdr + 0.5 * (va/vb) * (u * dphb + up * phb);
-
+        
         if (data1.isFluctuatingCharge) {
           *(idat.dVdFQ1) -= 0.5 * (u * phb) / (Na*vb);
         }
         if (data2.isFluctuatingCharge) {
           *(idat.dVdFQ2) += 0.5 * (u * va * phb) / (Nb * vb * vb);
         }
+
       }
       break;
     case eamDaw:
@@ -924,7 +935,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-
+    
     if ( *(idat.rij) < rci) {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
     }
@@ -953,7 +964,7 @@ namespace OpenMD {
       *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha )
         - *(idat.frho2);
 
-      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb)
+      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb )
         - *(idat.frho1);
     }
 
@@ -974,8 +985,7 @@ namespace OpenMD {
         *(idat.eField1) += qb * eff * rhat;
       }
     }
-
-
+    
     if (data1.isFluctuatingCharge) {
       *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / RealType(data1.nValence);
     }

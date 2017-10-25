@@ -889,8 +889,10 @@ namespace OpenMD {
     if (b_is_Charge) {
       C_b = data2.fixedCharge;
       
-      if (b_is_Fluctuating) 
-        C_b += *(idat.flucQ2);
+      if (b_is_Fluctuating) {
+        C_b += *(idat.flucQ2);                
+      }
+                
       
       if (idat.excluded) {
         *(idat.skippedCharge1) += C_b;
