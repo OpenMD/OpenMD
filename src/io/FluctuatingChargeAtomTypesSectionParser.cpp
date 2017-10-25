@@ -163,7 +163,7 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();
         } else {
-          int nValence = tokenizer.nextTokenAsInt();
+          RealType nValence = tokenizer.nextTokenAsDouble();
           nTokens -= 1;
 
           std::vector<std::pair<RealType, RealType> > diabaticStates;

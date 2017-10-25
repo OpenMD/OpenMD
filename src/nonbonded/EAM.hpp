@@ -57,7 +57,7 @@ namespace OpenMD {
     CubicSpline* F;
     CubicSpline* Z;
     RealType rcut;
-    int nValence;
+    RealType nValence;
     bool isFluctuatingCharge;
   };
 

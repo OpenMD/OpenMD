@@ -791,7 +791,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m -= *(idat.flucQ1) / RealType(data1.nValence);
+        m -= *(idat.flucQ1) / data1.nValence;
       }
       *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij) );
     }
@@ -799,7 +799,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m -= *(idat.flucQ2) / RealType(data2.nValence);
+        m -= *(idat.flucQ2) / data2.nValence;
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
@@ -853,12 +853,12 @@ namespace OpenMD {
     RealType u, ui, up, uip;
 
     if (data1.isFluctuatingCharge) {
-      Na = RealType(data1.nValence);
+      Na = data1.nValence;
       qa = *(idat.flucQ1);
       va = (1.0 - qa / Na);
     }
     if (data2.isFluctuatingCharge) {
-      Nb = RealType(data2.nValence);
+      Nb = data2.nValence;
       qb = *(idat.flucQ2);
       vb = (1.0 - qb / Nb);
     }
@@ -977,10 +977,10 @@ namespace OpenMD {
 
 
     if (data1.isFluctuatingCharge) {
-      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / RealType(data1.nValence);
+      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / data1.nValence;
     }
     if (data2.isFluctuatingCharge) {
-      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / RealType(data2.nValence);
+      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / data2.nValence;
     }
 
     return;

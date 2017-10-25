@@ -112,7 +112,7 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->slaterN;
   }
-  int FluctuatingChargeAdapter::getNValence() {
+  RealType FluctuatingChargeAdapter::getNValence() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->nValence;
   }
@@ -197,7 +197,7 @@ namespace OpenMD {
   }
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
-                                                       int nValence,
+                                                       RealType nValence,
                                                        RealType curvature,
                                                        RealType coupling,
                              vector<pair<RealType, RealType> > diabaticStates) {
