@@ -61,7 +61,7 @@ namespace OpenMD {
   class NPAT : public NPT{
   public:
 
-    NPAT ( SimInfo* info) : NPT(info) {}
+    NPAT ( SimInfo* info);
   protected:
 
     Mat3x3d eta;
@@ -85,9 +85,10 @@ namespace OpenMD {
     virtual void loadEta();
     virtual void saveEta();
             
-    Mat3x3d oldEta;
-    Mat3x3d prevEta;
-    Mat3x3d vScale;
+    Mat3x3d oldEta_;
+    Mat3x3d prevEta_;
+    Mat3x3d vScale_;
+    unsigned int axis_;
   };
 
 

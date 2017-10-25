@@ -49,39 +49,53 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
+
+  NPAT::NPAT(SimInfo* info) : NPT(info) {
+    Globals* simParams = info_->getSimParams();
+
+    // Default value of privilegedAxis is "z"
+    if (simParams->getPrivilegedAxis() == "x")
+      axis_ = 0;
+    else if (simParams->getPrivilegedAxis() == "y")
+      axis_ = 1;
+    else if (simParams->getPrivilegedAxis() == "z")
+      axis_ = 2;
+    
+  }
+
   
   void NPAT::evolveEtaA() {
 
-    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
-    oldEta = eta;  
+    eta(axis_,axis_) += dt2 *  instaVol * (press(axis_, axis_) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
+    oldEta_ = eta;  
   }
 
   void NPAT::evolveEtaB() {
 
-    prevEta = eta;
-    eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
-	    (press(2, 2) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
+    prevEta_ = eta;
+    eta(axis_,axis_) = oldEta_(axis_, axis_) + dt2 *  instaVol *
+	    (press(axis_, axis_) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
   }
 
   void NPAT::calcVelScale(){
 
     for (int i = 0; i < 3; i++ ) {
       for (int j = 0; j < 3; j++ ) {
-	vScale(i, j) = eta(i, j);
+	vScale_(i, j) = eta(i, j);
 
 	if (i == j) {
-	  vScale(i, j) += thermostat.first;
+	  vScale_(i, j) += thermostat.first;
 	}
       }
     }
   }
 
   void NPAT::getVelScaleA(Vector3d& sc, const Vector3d& vel){
-    sc = vScale * vel;
+    sc = vScale_ * vel;
   }
 
   void NPAT::getVelScaleB(Vector3d& sc, int index ) {
-    sc = vScale * oldVel[index];
+    sc = vScale_ * oldVel[index];
   }
 
   void NPAT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
@@ -103,7 +117,7 @@ namespace OpenMD {
       }
     }
     
-    scaleMat(2, 2) = exp(dt*eta(2, 2));
+    scaleMat(axis_, axis_) = exp(dt*eta(axis_, axis_));
     Mat3x3d hmat = snap->getHmat();
     hmat = hmat *scaleMat;
     snap->setHmat(hmat);
@@ -115,7 +129,7 @@ namespace OpenMD {
 
     sumEta = 0;
     for(i = 0; i < 3; i++) {
-      sumEta += pow(prevEta(i, i) - eta(i, i), 2);
+      sumEta += pow(prevEta_(i, i) - eta(i, i), 2);
     }
     
     diffEta = sqrt( sumEta / 3.0 );
