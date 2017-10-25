@@ -85,11 +85,11 @@ namespace OpenMD {
     virtual void loadEta();
     virtual void saveEta();
             
-    Mat3x3d oldEta;
-    Mat3x3d prevEta;
-    Mat3x3d vScale;
-    RealType surfaceTension;
-    string privilegedAxis;
+    Mat3x3d oldEta_;
+    Mat3x3d prevEta_;
+    Mat3x3d vScale_;
+    RealType surfaceTension_;
+    unsigned int axis_, axis1_, axis2_;
   };
 
 

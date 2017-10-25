@@ -58,54 +58,65 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     } else {
-      surfaceTension= simParams->getSurfaceTension()* Constants::surfaceTensionConvert * Constants::energyConvert;
-      privilegedAxis = simParams->getPrivilegedAxis();
+      surfaceTension_ = simParams->getSurfaceTension()* Constants::surfaceTensionConvert * Constants::energyConvert;
+
+      // Default value of privilegedAxis is "z"
+      if (simParams->getPrivilegedAxis() == "x")
+	axis_ = 0;
+      else if (simParams->getPrivilegedAxis() == "y")
+	axis_ = 1;
+      else if (simParams->getPrivilegedAxis() == "z")
+	axis_ = 2;
+	     
+      // Compute complementary axes to the privileged axis
+      axis1_ = (axis_ + 1) % 3;
+      axis2_ = (axis_ + 2) % 3;
       }
 
   }
   void NgammaT::evolveEtaA() {
     Mat3x3d hmat = snap->getHmat();
-    RealType hz = hmat(2, 2);
-    RealType Axy = hmat(0,0) * hmat(1, 1);
-    RealType sx = -hz * (press(0, 0) - targetPressure/Constants::pressureConvert);
-    RealType sy = -hz * (press(1, 1) - targetPressure/Constants::pressureConvert);
-    eta(0,0) -= dt2* Axy * (sx - surfaceTension) / (NkBT*tb2);
-    eta(1,1) -= dt2* Axy * (sy - surfaceTension) / (NkBT*tb2);
-    eta(2,2) = 0.0;
-    oldEta = eta;  
+    RealType hz = hmat(axis_, axis_);
+    RealType Axy = hmat(axis1_,axis1_) * hmat(axis2_, axis2_);
+    RealType sx = -hz * (press(axis1_, axis1_) - targetPressure/Constants::pressureConvert);
+    RealType sy = -hz * (press(axis2_, axis2_) - targetPressure/Constants::pressureConvert);
+    eta(axis1_,axis1_) -= dt2* Axy * (sx - surfaceTension_) / (NkBT*tb2);
+    eta(axis2_,axis2_) -= dt2* Axy * (sy - surfaceTension_) / (NkBT*tb2);
+    eta(axis_,axis_) = 0.0;
+    oldEta_ = eta;  
   }
 
   void NgammaT::evolveEtaB() {
     Mat3x3d hmat = snap->getHmat();
-    RealType hz = hmat(2, 2);
-    RealType Axy = hmat(0,0) * hmat(1, 1);
-    prevEta = eta;
-    RealType sx = -hz * (press(0, 0) - targetPressure/Constants::pressureConvert);
-    RealType sy = -hz * (press(1, 1) - targetPressure/Constants::pressureConvert);
-    eta(0,0) = oldEta(0, 0) - dt2 * Axy * (sx -surfaceTension) / (NkBT*tb2);
-    eta(1,1) = oldEta(1, 1) - dt2 * Axy * (sy -surfaceTension) / (NkBT*tb2);
-    eta(2,2) = 0.0;
+    RealType hz = hmat(axis_, axis_);
+    RealType Axy = hmat(axis1_,axis1_) * hmat(axis2_, axis2_);
+    prevEta_ = eta;
+    RealType sx = -hz * (press(axis1_, axis1_) - targetPressure/Constants::pressureConvert);
+    RealType sy = -hz * (press(axis2_, axis2_) - targetPressure/Constants::pressureConvert);
+    eta(axis_,axis_) = oldEta_(axis_, axis_) - dt2 * Axy * (sx -surfaceTension_) / (NkBT*tb2);
+    eta(axis2_,axis2_) = oldEta_(axis2_, axis2_) - dt2 * Axy * (sy -surfaceTension_) / (NkBT*tb2);
+    eta(axis_,axis_) = 0.0;
   }
 
   void NgammaT::calcVelScale(){
 
     for (int i = 0; i < 3; i++ ) {
       for (int j = 0; j < 3; j++ ) {
-	vScale(i, j) = eta(i, j);
+	vScale_(i, j) = eta(i, j);
 
 	if (i == j) {
-	  vScale(i, j) += thermostat.first;
+	  vScale_(i, j) += thermostat.first;
 	}
       }
     }
   }
 
   void NgammaT::getVelScaleA(Vector3d& sc, const Vector3d& vel){
-    sc = vScale * vel;
+    sc = vScale_ * vel;
   }
 
   void NgammaT::getVelScaleB(Vector3d& sc, int index ) {
-    sc = vScale * oldVel[index];
+    sc = vScale_ * oldVel[index];
   }
 
   void NgammaT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
@@ -118,9 +129,9 @@ namespace OpenMD {
   void NgammaT::scaleSimBox(){
     Mat3x3d scaleMat;
 
-    scaleMat(0, 0) = exp(dt*eta(0, 0));
-    scaleMat(1, 1) = exp(dt*eta(1, 1));    
-    scaleMat(2, 2) = exp(dt*eta(2, 2));
+    scaleMat(axis1_, axis1_) = exp(dt*eta(axis1_, axis1_));
+    scaleMat(axis2_, axis2_) = exp(dt*eta(axis2_, axis2_));    
+    scaleMat(axis_, axis_) = exp(dt*eta(axis_, axis_));
     Mat3x3d hmat = snap->getHmat();
     hmat = hmat *scaleMat;
     snap->setHmat(hmat);
@@ -133,7 +144,7 @@ namespace OpenMD {
 
     sumEta = 0;
     for(i = 0; i < 3; i++) {
-      sumEta += pow(prevEta(i, i) - eta(i, i), 2);
+      sumEta += pow(prevEta_(i, i) - eta(i, i), 2);
     }
     
     diffEta = sqrt( sumEta / 3.0 );
@@ -172,11 +183,11 @@ namespace OpenMD {
     RealType barostat_potential = (targetPressure * thermo.getVolume() / Constants::pressureConvert) /Constants::energyConvert;
 
     Mat3x3d hmat = snap->getHmat();
-    RealType area = hmat(0,0) * hmat(1, 1);
+    RealType area = hmat(axis1_,axis1_) * hmat(axis2_, axis2_);
 
     RealType conservedQuantity = totalEnergy + thermostat_kinetic
       + thermostat_potential + barostat_kinetic + barostat_potential
-      - surfaceTension * area/ Constants::energyConvert;
+      - surfaceTension_ * area/ Constants::energyConvert;
 
     return conservedQuantity;
 
