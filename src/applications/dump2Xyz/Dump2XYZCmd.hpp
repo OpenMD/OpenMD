@@ -88,6 +88,8 @@ struct gengetopt_args_info
   const char *charges_help; /**< @brief Print charges in xyz file help description.  */
   int efield_flag;	/**< @brief Print electric field vector in xyz file (default=off).  */
   const char *efield_help; /**< @brief Print electric field vector in xyz file help description.  */
+  int globalID_flag;	/**< @brief Print global ID in xyz file (default=off).  */
+  const char *globalID_help; /**< @brief Print global ID in xyz file help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -111,6 +113,7 @@ struct gengetopt_args_info
   unsigned int vectors_given ;	/**< @brief Whether vectors was given.  */
   unsigned int charges_given ;	/**< @brief Whether charges was given.  */
   unsigned int efield_given ;	/**< @brief Whether efield was given.  */
+  unsigned int globalID_given ;	/**< @brief Whether globalID was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -226,31 +229,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
  * @param args_info the structure to deallocate
  */
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
-
-/**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
 
 /**
  * Checks that all the required options were specified

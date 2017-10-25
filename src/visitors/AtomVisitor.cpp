@@ -95,12 +95,15 @@ namespace OpenMD {
     
     atomInfo = new AtomInfo;
     atomInfo->atomTypeName = atom->getType();
+    atomInfo->globalID = atom->getGlobalIndex();
     atomInfo->pos = atom->getPos();
     atomInfo->vel = atom->getVel();
     atomInfo->frc = atom->getFrc();
     atomInfo->vec = V3Zero;
     atomInfo->hasVelocity = true;
     atomInfo->hasForce = true;
+    atomInfo->hasGlobalID = true;
+
         
     FixedChargeAdapter fca = FixedChargeAdapter(atype);
     if ( fca.isFixedCharge() ) {
@@ -139,11 +142,14 @@ namespace OpenMD {
     
     atomInfo = new AtomInfo;
     atomInfo->atomTypeName = datom->getType();
+    atomInfo->globalID = datom->getGlobalIndex();
     atomInfo->pos = datom->getPos();
     atomInfo->vel = datom->getVel();
     atomInfo->frc = datom->getFrc();
     atomInfo->hasVelocity = true;
     atomInfo->hasForce = true;
+    atomInfo->hasGlobalID = true;
+
 
     FixedChargeAdapter fca = FixedChargeAdapter(atype);
     if ( fca.isFixedCharge() ) {

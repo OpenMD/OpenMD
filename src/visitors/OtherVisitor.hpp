@@ -123,6 +123,7 @@ namespace OpenMD {
     void doVectors(bool vec) {doVectors_ = vec;}
     void doCharges(bool chg) {doCharges_ = chg;}
     void doElectricFields(bool efl) {doElectricFields_ = efl;}
+    void doGlobalIDs(bool gid) {doGlobalIDs_ = gid;}
 
   protected:
     void internalVisit(StuntDouble* sd);
@@ -141,6 +142,7 @@ namespace OpenMD {
     bool doVectors_;
     bool doCharges_;
     bool doElectricFields_;
+    bool doGlobalIDs_;
   };
 
 

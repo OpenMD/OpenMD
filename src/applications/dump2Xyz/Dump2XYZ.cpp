@@ -76,6 +76,7 @@ int main(int argc, char* argv[]){
   bool printVec(false);
   bool printChrg(false);
   bool printField(false);
+  bool printGlobalID(false);
   
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
@@ -219,7 +220,11 @@ int main(int argc, char* argv[]){
     printField = true;
     xyzVisitor->doElectricFields(printField);
   }
-  
+  if(args_info.globalID_flag){
+    printGlobalID = true;
+    xyzVisitor->doGlobalIDs(printGlobalID);
+  }
+
   compositeVisitor->addVisitor(xyzVisitor, 200); 
   
   //create prepareVisitor

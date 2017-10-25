@@ -54,9 +54,10 @@ namespace OpenMD {
     AtomInfo() : pos(V3Zero), vec(V3Zero), vel(V3Zero), frc(V3Zero),
                  eField(V3Zero), charge(0.0),
                  hasCharge(false), hasVector(false), hasVelocity(false), 
-                 hasForce(false), hasElectricField(false) {}
+                 hasForce(false), hasElectricField(false), hasGlobalID(false) {}
     
     std::string atomTypeName;
+    int globalID;
     Vector3d pos;
     Vector3d vec;  
     Vector3d vel;  
@@ -68,6 +69,7 @@ namespace OpenMD {
     bool hasVelocity;
     bool hasForce;
     bool hasElectricField;
+    bool hasGlobalID;
   };
 
   class AtomData : public GenericData{

@@ -47,6 +47,7 @@
 namespace OpenMD {
 
   void LipidHeadVisitor::visit(RigidBody* rb){
+    int globalID;
     Vector3d pos;
     Vector3d u(0, 0, 1);
     Vector3d newVec;
@@ -59,6 +60,7 @@ namespace OpenMD {
     if(!canVisit(rb->getType()))
       return;
 
+    globalID = rb->getGlobalIndex();
     pos = rb->getPos();
     rotMatrix = rb->getA();
     //matVecMul3(rotMatrix, u, newVec);
@@ -86,6 +88,7 @@ namespace OpenMD {
 
     atomInfo = new AtomInfo;
     atomInfo->atomTypeName = "X";
+    atomInfo->globalID = globalID;
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];

@@ -36,3 +36,4 @@ option  "forces"        f       "Print forces xyz file"                         
 option  "vectors"       u       "Print vectors (dipoles, etc) in xyz file"              flag                            off
 option  "charges"       c       "Print charges in xyz file"                             flag                            off
 option  "efield"        e       "Print electric field vector in xyz file"               flag                            off
+option  "globalID"      g       "Print global ID in xyz file"                           flag                            off
