@@ -52,7 +52,7 @@
 namespace OpenMD {
 
   EAM::EAM() : initialized_(false), haveCutoffRadius_(false),
-	       forceField_(NULL), eamRcut_(0.0), electrostatic_(NULL),
+	       forceField_(NULL), electrostatic_(NULL), eamRcut_(0.0),
                mixMeth_(eamJohnson), name_("EAM") {
     
     // This prefactor converts charge-charge interactions into kcal /
@@ -643,8 +643,6 @@ namespace OpenMD {
     for( it = EAMtypes.begin(); it != EAMtypes.end(); ++it) {
 
       int eamtid2 = EAMtids[ (*it) ];
-      EAMAtomData &data2 = EAMdata[eamtid2];
-
       AtomType* atype2 = forceField_->getAtomType( (*it) );
 
       EAMInteractionData mixer;

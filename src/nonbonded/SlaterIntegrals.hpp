@@ -535,10 +535,8 @@ inline RealType getSTOZeta(int n, RealType hardness)
  */
 inline RealType sSTDCoulSF(RealType a, RealType b, RealType R, RealType Rc) {
   RealType a2 = a*a;
-  RealType a3 = a2*a;
   RealType a4 = a2*a2;
   RealType b2 = b*b;
-  RealType b3 = b2*b;
   RealType b4 = b2*b2;
   RealType apb = a+b;
   RealType a2b23 = pow(a2-b2,3);
