@@ -59,7 +59,8 @@ namespace OpenMD {
       simError();
     } else {
       surfaceTension= simParams->getSurfaceTension()* Constants::surfaceTensionConvert * Constants::energyConvert;
-    }
+      privilegedAxis = simParams->getPrivilegedAxis();
+      }
 
   }
   void NgammaT::evolveEtaA() {

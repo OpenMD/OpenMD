@@ -89,6 +89,7 @@ namespace OpenMD {
     Mat3x3d prevEta;
     Mat3x3d vScale;
     RealType surfaceTension;
+    string privilegedAxis;
   };
 
 
