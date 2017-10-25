@@ -186,31 +186,17 @@ namespace OpenMD {
           iHash_[atid1][atid2] |= LJ_INTERACTION;
         }
         if (atype1->isElectrostatic() && atype2->isElectrostatic() ) {
-          if (atype1->isEAM() && atype1->isFluctuatingCharge() &&
-              atype2->isEAM() && atype2->isFluctuatingCharge()) {
-              // special case where we let the EAM module handle the cross interactions
-              // for fluctuating charges (actually fluctuating densities)
-              interactions_[atid1][atid2].insert(eam_);
-              iHash_[atid1][atid2] |= EAM_INTERACTION;
-          } else {
-            interactions_[atid1][atid2].insert(electrostatic_);
-            iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
-          }
+          interactions_[atid1][atid2].insert(electrostatic_);
+          iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;          
         }
 
         // A special case for calculating local fields:
         if ( info_->getSimParams()->getOutputElectricField() ) {
           if ( atype1->isElectrostatic() || atype2->isElectrostatic() ) {
-
-            // The only exception is if both atoms are fluctuating charges:
-            if ( !(atype1->isEAM() && atype1->isFluctuatingCharge() &&
-                   atype2->isEAM() && atype2->isFluctuatingCharge()) ) { 
               interactions_[atid1][atid2].insert(electrostatic_);
-              iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;
-            }
-            
+              iHash_[atid1][atid2] |= ELECTROSTATIC_INTERACTION;              
           }
-        }       
+        }
         
         if (atype1->isSticky() && atype2->isSticky() ) {
           interactions_[atid1][atid2].insert(sticky_);
@@ -502,7 +488,7 @@ namespace OpenMD {
     if ((iHash & SC_INTERACTION) != 0)  sc_->calcDensity(idat);
 
     // set<NonBondedInteraction*>::iterator it;
-
+    //
     // for (it = interactions_[ idat.atypes ].begin();
     //      it != interactions_[ idat.atypes ].end(); ++it){
     //   if ((*it)->getFamily() == METALLIC_FAMILY) {
@@ -523,8 +509,9 @@ namespace OpenMD {
     if ((sHash & SC_INTERACTION) != 0)  sc_->calcFunctional(sdat);
 
     // set<NonBondedInteraction*>::iterator it;
-
-    // for (it = interactions_[atid1][atid2].begin(); it != interactions_[atid1][atid2].end(); ++it){
+    //
+    // for (it = interactions_[atid1][atid2].begin();
+    //      it != interactions_[atid1][atid2].end(); ++it){
     //   if ((*it)->getFamily() == METALLIC_FAMILY) {
     //     dynamic_cast<MetallicInteraction*>(*it)->calcFunctional(sdat);
     //   }
@@ -558,13 +545,10 @@ namespace OpenMD {
     if ((iHash & MAW_INTERACTION) != 0)            maw_->calcForce(idat);
 
     // set<NonBondedInteraction*>::iterator it;
-
+    //
     // for (it = interactions_[ idat.atypes ].begin();
     //      it != interactions_[ idat.atypes ].end(); ++it) {
-
-    //   // electrostatics still has to worry about indirect
-    //   // contributions from excluded pairs of atoms:
-
+    //
     //   if (!idat.excluded || (*it)->getFamily() == ELECTROSTATIC_FAMILY) {
     //     (*it)->calcForce(idat);
     //   }
@@ -579,11 +563,14 @@ namespace OpenMD {
 
     int& sHash = sHash_[sdat.atid];
 
-    if ((sHash & ELECTROSTATIC_INTERACTION) != 0) electrostatic_->calcSelfCorrection(sdat);
+    if ((sHash & ELECTROSTATIC_INTERACTION) != 0) {
+      electrostatic_->calcSelfCorrection(sdat);
+    }
 
     // set<NonBondedInteraction*>::iterator it;
-
-    // for (it = interactions_[atid1][atid2].begin(); it != interactions_[atid1][atid2].end(); ++it){
+    // 
+    // for (it = interactions_[atid1][atid2].begin();
+    //      it != interactions_[atid1][atid2].end(); ++it){
     //   if ((*it)->getFamily() == ELECTROSTATIC_FAMILY) {
     //     dynamic_cast<ElectrostaticInteraction*>(*it)->calcSelfCorrection(sdat);
     //   }
@@ -612,9 +599,10 @@ namespace OpenMD {
 
     for (it = interactions_[*atid][*atid].begin();
          it != interactions_[*atid][*atid].end();
-         ++it)
+         ++it) {
       cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype,
                                                                      atype)));
+    }
     return cutoff;
   }
 
@@ -627,9 +615,10 @@ namespace OpenMD {
     RealType cutoff = 0.0;
 
     for (it = interactions_[atid][atid].begin();
-         it != interactions_[atid][atid].end(); ++it)
+         it != interactions_[atid][atid].end(); ++it) {
       cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(make_pair(atype,
                                                                      atype)));
+    }
     return cutoff;
   }
 } //end namespace OpenMD

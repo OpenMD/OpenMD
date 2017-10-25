@@ -75,30 +75,44 @@ namespace OpenMD {
 
     if (data.hasMultipleMinima) {
       int nDiabats = data.diabaticStates.size();
-      RealType k = data.curvature;
       RealType c = data.coupling;
 
       if (nDiabats == 1) {
         RealType q1 = data.diabaticStates[0].first;
         RealType e1 = data.diabaticStates[0].second;
-        RealType v1 = e1 + 0.5 * k * (charge-q1)*(charge-q1);
-        RealType v1p = k*(charge-q1);
+        RealType k1 = data.diabaticStates[0].third;
+        RealType v1 = e1 + 0.5 * k1 * (charge-q1)*(charge-q1);
+        RealType v1p = k1*(charge-q1);
         potential +=  v1;
         force -= v1p;
       } else {
         if (nDiabats == 2){
           RealType q1 = data.diabaticStates[0].first;
           RealType e1 = data.diabaticStates[0].second;
+          RealType k1 = data.diabaticStates[0].third;
+
           RealType q2 = data.diabaticStates[1].first;
           RealType e2 = data.diabaticStates[1].second;
+          RealType k2 = data.diabaticStates[1].third;
 
-          RealType v1 = e1 + 0.5 * k * (charge-q1)*(charge-q1);
-          RealType v1p = k*(charge-q1);
-          RealType v2 = e2 + 0.5 * k * (charge-q2)*(charge-q2);
-          RealType v2p = k*(charge-q2);
-          potential += (v1 + v2 - sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
-          force -= (v1p + v2p - ((v1 - v2) * (v1p - v2p)) /
-                    sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
+          RealType v1 = e1 + 0.5 * k1 * (charge-q1)*(charge-q1);
+          RealType v1p = k1*(charge-q1);
+          RealType v2 = e2 + 0.5 * k2 * (charge-q2)*(charge-q2);
+          RealType v2p = k2*(charge-q2);
+
+          RealType ev1 = (v1 + v2 - sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
+          RealType ev2 = (v1 + v2 + sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
+
+          if (ev1 < ev2) {
+            potential += ev1;
+            force -= (v1p + v2p - ((v1 - v2) * (v1p - v2p)) /
+                      sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
+          } else {
+            potential += ev2;
+            force -= (v1p + v2p + ((v1 - v2) * (v1p - v2p)) /
+                      sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
+          }
+
         } else {
           DynamicVector<RealType> diagonals(nDiabats);
           DynamicVector<RealType> subdiagonals(nDiabats, c);
@@ -107,10 +121,12 @@ namespace OpenMD {
           DynamicRectMatrix<RealType> eigenvectors(nDiabats, nDiabats);
           RealType q;
           RealType e;
+          RealType k;
 
           for (int i = 0; i < nDiabats; i++) {
             q = data.diabaticStates[i].first;
             e = data.diabaticStates[i].second;
+            k = data.diabaticStates[i].third;
             diagonals(i) = e + 0.5 * k * (charge-q)*(charge-q);
             vp(i) = k*(charge-q);
           }
@@ -143,7 +159,6 @@ namespace OpenMD {
     if (fqa.isFluctuatingCharge()) {
       if (fqa.hasMultipleMinima()) {
         data.hasMultipleMinima = true;
-        data.curvature = fqa.getCurvature();
         data.coupling = fqa.getCoupling();
         data.diabaticStates = fqa.getDiabaticStates();
       } else {

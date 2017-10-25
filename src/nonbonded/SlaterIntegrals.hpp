@@ -66,6 +66,7 @@
 #include <iostream>
 #include <algorithm>
 #include "math/Factorials.hpp"
+#include "utils/Constants.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP
 #define NONBONDED_SLATERINTEGRALS_HPP
@@ -522,6 +523,79 @@ inline RealType getSTOZeta(int n, RealType hardness)
 
   // Assign orbital exponent
   return pow(sSTOCoulInt(1., 1., n, n, epsilon) / hardness, -1./(3. + 2.*n));
+}
+
+/** @brief Computes Coulomb integral analytically using s-type Slater-style densities under the shifted force approximation
+ * Computes the two-center Coulomb integral over Slater-type densities of s symmetry using a shifted force approximation
+ * @param a : Slater zeta exponent of first atom in inverse Angstroms
+ * @param b : Slater zeta exponent of second atom in inverse Angstroms
+ * @param R : internuclear distance in Angstroms
+ * @param Rc: internuclear cutoff distance in Angstroms
+ * @return value of the shifted-force Coulomb potential energy integral
+ */
+inline RealType sSTDCoulSF(RealType a, RealType b, RealType R, RealType Rc) {
+  RealType a2 = a*a;
+  RealType a3 = a2*a;
+  RealType a4 = a2*a2;
+  RealType b2 = b*b;
+  RealType b3 = b2*b;
+  RealType b4 = b2*b2;
+  RealType apb = a+b;
+  RealType a2b23 = pow(a2-b2,3);
+
+  RealType term1 = 2.0 * exp(R*apb) * a2b23;
+  RealType term2 =  exp(R*b) * b4 * (b2*(2.0+R*a) - a2*(6.0+R*a));
+  RealType term3 = -exp(R*a) * a4 * (a2*(2.0+R*b) - b2*(6.0+R*b));
+
+  RealType denom = 2.0 * R * a2b23;
+  RealType numer = exp(-R*apb)*(term1 + term2 + term3);
+
+  RealType S = numer / denom;
+  
+  term1 = 2.0 * exp(Rc*apb) * a2b23;
+  term2 =  exp(Rc*b) * b4 * (b2*(2.0+Rc*a) - a2*(6.0+Rc*a));
+  term3 = -exp(Rc*a) * a4 * (a2*(2.0+Rc*b) - b2*(6.0+Rc*b));
+
+  numer = exp(-Rc*apb)*(term1 + term2 + term3);
+  denom = 2.0 * Rc * pow(a2-b2,3);
+
+  RealType Sc = numer / denom;
+
+  term1 = -2.0 * exp(3*Rc*a + 4*Rc*b) * a2b23;
+  term2 = exp(2.0*Rc*(a + 2.0*b))*b4*(a2*(6.0 + Rc*a*(6.0 + Rc*a)) -
+                                      b2*(2.0 + Rc*a*(2.0 + Rc*a)));
+  term3 = exp(3.0*Rc*apb)*a4*(a2*(2.0 + Rc*b*(2.0 + Rc*b)) -
+                              b2*(6.0 + Rc*b*(6.0 + Rc*b)));
+  
+  numer = exp(-3.0*Rc*a - 4.0*Rc*b)*(term1 + term2 + term3);
+  denom = 2.0 * Rc * Rc * a2b23;
+  
+  RealType Scp = numer / denom;
+
+  return S - Sc - Scp*(R-Rc);
+  
+}
+
+/** @brief Computes Coulomb integral analytically using s-type Slater-style densities under the shifted force approximation
+ * Computes the two-center Coulomb integral over Slater-type densities of s symmetry using a shifted force approximation
+ * @param a : Slater zeta exponent of both atoms in inverse Angstroms
+ * @param R : internuclear distance in Angstroms
+ * @param Rc: internuclear cutoff distance in Angstroms
+ * @return value of the shifted-force Coulomb potential energy integral
+ */
+inline RealType sSTDCoulSF(RealType a, RealType R, RealType Rc) {
+
+  RealType poly =  (-48.0 + 48.0*exp(R*a)  - R*a*(33.0  + R*a*(9.0  + R*a )));
+  RealType polyc = (-48.0 + 48.0*exp(Rc*a) - Rc*a*(33.0 + Rc*a*(9.0 + Rc*a)));
+
+  RealType S =  exp(-R *a)*poly  / (48.0*R );
+  RealType Sc = exp(-Rc*a)*polyc / (48.0*Rc);
+
+  RealType poly2c = (48.0 - 48.0*exp(Rc*a) +
+                     Rc*a*(4.0 + Rc*a)*(12.0 + Rc*a*(3.0 + Rc*a)));
+  RealType Scp = exp(-Rc*a)*poly2c / (48.0*Rc*Rc);
+
+  return S - Sc - Scp*(R-Rc);
 }
 
 #endif

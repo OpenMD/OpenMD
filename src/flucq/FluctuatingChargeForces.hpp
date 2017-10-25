@@ -56,7 +56,7 @@ namespace OpenMD {
     RealType slaterZeta;
     RealType curvature;
     RealType coupling;
-    vector<pair<RealType, RealType> > diabaticStates;
+    vector<tuple3<RealType, RealType, RealType> > diabaticStates;
   };
 
   class FluctuatingChargeForces {

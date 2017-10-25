@@ -120,15 +120,11 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->slaterZeta;
   }
-  RealType FluctuatingChargeAdapter::getCurvature() {
-    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
-    return fqParam->curvature;
-  }
   RealType FluctuatingChargeAdapter::getCoupling() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->coupling;
   }
-  vector<pair<RealType, RealType> > FluctuatingChargeAdapter::getDiabaticStates() {
+  vector<tuple3<RealType, RealType, RealType> > FluctuatingChargeAdapter::getDiabaticStates() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->diabaticStates;
   }
@@ -178,9 +174,8 @@ namespace OpenMD {
   }
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
-                                                       RealType curvature,
                                                        RealType coupling,
-                             vector<pair<RealType, RealType> > diabaticStates) {
+                                                       vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }
@@ -188,8 +183,6 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
     fqParam->hasMultipleMinima = true;
-
-    fqParam->curvature = curvature;
     fqParam->coupling = coupling;
     fqParam->diabaticStates = diabaticStates;
 
@@ -198,9 +191,8 @@ namespace OpenMD {
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType nValence,
-                                                       RealType curvature,
                                                        RealType coupling,
-                             vector<pair<RealType, RealType> > diabaticStates) {
+                                                       vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }
@@ -208,12 +200,11 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
     fqParam->hasMultipleMinima = true;
-
     fqParam->isMetallic = true;
     fqParam->nValence = nValence;
-    fqParam->curvature = curvature;
     fqParam->coupling = coupling;
     fqParam->diabaticStates = diabaticStates;
+    
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 }
