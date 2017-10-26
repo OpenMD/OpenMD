@@ -171,9 +171,9 @@ namespace OpenMD {
 	       "\tscaleMat = [%lf\t%lf\t%lf]\n"
 	       "\t           [%lf\t%lf\t%lf]\n"
 	       "\t           [%lf\t%lf\t%lf]\n",
-	       scaleMat(axis1_, axis1_),scaleMat(axis1_, axis2_),scaleMat(axis1_, axis_),
-	       scaleMat(axis2_, axis1_),scaleMat(axis2_, axis2_),scaleMat(axis2_, axis_),
-	       scaleMat(axis_, axis1_),scaleMat(axis_, axis2_),scaleMat(axis_, axis_));
+	       scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
+	       scaleMat(1, 0),scaleMat(1, 1),scaleMat(1,2),
+	       scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2));
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
