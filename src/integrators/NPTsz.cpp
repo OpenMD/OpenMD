@@ -54,7 +54,26 @@ namespace OpenMD {
    * There is no known conserved quantity for the NPTsz integrator,
    * but we still compute the equivalent quantity from a fully
    * flexible constant pressure integrator.
-   */   
+   */
+
+
+  NPTsz::NPTsz(SimInfo* info) : NPTf(info) {
+    Globals* simParams = info_->getSimParams();
+    
+    // Default value of privilegedAxis is "z"
+    if (simParams->getPrivilegedAxis() == "x")
+      axis_ = 0;
+    else if (simParams->getPrivilegedAxis() == "y")
+      axis_ = 1;
+    else if (simParams->getPrivilegedAxis() == "z")
+      axis_ = 2;
+    
+    // Compute complementary axes to the privileged axis
+    axis1_ = (axis_ + 1) % 3;
+    axis2_ = (axis_ + 2) % 3;
+
+  }
+  
   RealType NPTsz::calcConservedQuantity(){
 
     thermostat = snap->getThermostat();
@@ -132,16 +151,16 @@ namespace OpenMD {
     }
 
     // scale x & y together:
-    scaleFactor = 0.5 * (exp(dt*eta(0,0)) + exp(dt*eta(1,1) ) );
-    scaleMat(0,0) = scaleFactor;
-    scaleMat(1,1) = scaleFactor;
+    scaleFactor = 0.5 * (exp(dt*eta(axis1_,axis1_)) + exp(dt*eta(axis2_,axis2_) ) );
+    scaleMat(axis1_,axis1_) = scaleFactor;
+    scaleMat(axis2_,axis2_) = scaleFactor;
 
     bigScale = scaleFactor;
     smallScale = scaleFactor;
 
     // scale z separately
-    scaleFactor = exp(dt * eta(2,2));
-    scaleMat(2,2) = scaleFactor;
+    scaleFactor = exp(dt * eta(axis_,axis_));
+    scaleMat(axis_,axis_) = scaleFactor;
     if (scaleFactor > bigScale) bigScale = scaleFactor;
     if (scaleFactor < smallScale) smallScale = scaleFactor;
 
@@ -152,9 +171,9 @@ namespace OpenMD {
 	       "\tscaleMat = [%lf\t%lf\t%lf]\n"
 	       "\t           [%lf\t%lf\t%lf]\n"
 	       "\t           [%lf\t%lf\t%lf]\n",
-	       scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
-	       scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
-	       scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2));
+	       scaleMat(axis1_, axis1_),scaleMat(axis1_, axis2_),scaleMat(axis1_, axis_),
+	       scaleMat(axis2_, axis1_),scaleMat(axis2_, axis2_),scaleMat(axis2_, axis_),
+	       scaleMat(axis_, axis1_),scaleMat(axis_, axis2_),scaleMat(axis_, axis_));
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();

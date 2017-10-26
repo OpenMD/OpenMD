@@ -56,12 +56,14 @@ namespace OpenMD {
    */   
   class NPTsz : public NPTf {
   public:
-    NPTsz(SimInfo * info) : NPTf(info) {}
+    NPTsz(SimInfo * info) ;
 
   private:            
     virtual void scaleSimBox();
     virtual RealType calcConservedQuantity();
     virtual void loadEta();
+
+    unsigned int axis_, axis1_, axis2_;
   };
 
 }
