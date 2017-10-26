@@ -1,0 +1,20 @@
+# Input file for gengetopt. This file generates thermalScalerCmd.cpp and 
+# thermalScalerCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=thermalScalerCmd --c-extension=cpp --header-extension=hpp"
+
+package "thermalScaler"
+version "" 
+
+purpose "Sets the temperature of a (.omd) file by scaling the kinetic energy of all molecules within the file."
+
+# Options
+
+option "output"        o  "Output file name" string yes
+option "temperature"   t  "temperature (K)" double yes
