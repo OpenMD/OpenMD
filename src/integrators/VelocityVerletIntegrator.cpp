@@ -85,7 +85,7 @@ namespace OpenMD {
     }
     
     if (needVelocityScaling) {
-      velocitizer_->velocitize(targetScalingTemp);
+      velocitizer_->randomize(targetScalingTemp);
     }
     
     dumpWriter = createDumpWriter();    
@@ -144,7 +144,7 @@ namespace OpenMD {
 
     if (needVelocityScaling) {
       if (snap->getTime() >= currThermal) {
-	velocitizer_->velocitize(targetScalingTemp);
+	velocitizer_->randomize(targetScalingTemp);
 	currThermal += thermalTime;
       }
     }

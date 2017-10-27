@@ -45,8 +45,8 @@
 
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
+#include "brains/Velocitizer.hpp"
 #include "primitives/Molecule.hpp"
-#include "integrators/Velocitizer.hpp"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
 #include "math/SeqRandNumGen.hpp"

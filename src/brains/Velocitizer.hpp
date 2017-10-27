@@ -40,40 +40,52 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file Velocitizer.hpp
- * @author tlin
- * @date 11/14/2004
- * @version 1.0
- */
-
-#ifndef INTEGRATORS_VELOCITIZER_HPP
-#define INTEGRATORS_VELOCITIZER_HPP
+#ifndef BRAINS_VELOCITIZER_HPP
+#define BRAINS_VELOCITIZER_HPP
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "math/RandNumGen.hpp"
 
 namespace OpenMD {
 
-  /**
-   * @class Velocitizer Velocitizer.hpp "integratos/Velocitizer.hpp"
-   * @todo document
+  //! Velocity-modifying routines.
+  /*
+    Provides functions that re-sample or re-scale the velocities.
+    These are particularly useful for setting initial configurations
+    to a desired temperature or re-scaling velocities to match a
+    desired energy.
    */
   class Velocitizer {
   public:
     Velocitizer(SimInfo* info);
     virtual ~Velocitizer();
-        
-    void velocitize(RealType temperature);
 
+    /** @brief Resamples velocities and angular momenta
+     * Resamples velocities and angular momenta from a Maxwell-Boltzmann 
+     * distribution.
+     * @param t : Temperature of the new distribution.
+     */    
+    void randomize(RealType t);
+
+    /** @brief Scales velocities and angular momenta by a scaling factor
+     * Rescales velocity (and angular momenta) by a scaling factor.
+     * @param s : Scaling factor (must be >= 0)
+     */
+    void scale(RealType s);
+
+    /** @brief Removes Center of Mass Drift Velocity
+     * Removes the center of mass drift velocity (required for accurate 
+     * calculations of diffusion).
+     */
     void removeComDrift();
-    /* 
-       Removes center of mass angular momemtum
+    
+    /** @brief Removes Center of Mass Angular momentum
+     * Removes the center of mass angular momentum (particularly useful in 
+     * non-periodic simulations).
      */
     void removeAngularDrift();
         
-  private:
-        
+  private:        
     SimInfo* info_;    
     Thermo thermo;
     RandNumGen* randNumGen_;
@@ -81,4 +93,4 @@ namespace OpenMD {
   };
 
 }
-#endif //INTEGRATORS_VELOCITIZER_HPP
+#endif //BRAINS_VELOCITIZER_HPP

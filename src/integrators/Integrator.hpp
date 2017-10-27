@@ -57,7 +57,7 @@
 #include "io/StatWriter.hpp"
 #include "integrators/RotationAlgorithm.hpp"
 #include "flucq/FluctuatingChargePropagator.hpp"
-#include "integrators/Velocitizer.hpp"
+#include "brains/Velocitizer.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "constraints/Rattle.hpp"
 

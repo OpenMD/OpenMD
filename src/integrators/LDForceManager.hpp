@@ -47,7 +47,7 @@
 #include "primitives/Molecule.hpp"
 #include "math/SeqRandNumGen.hpp"
 #include "hydrodynamics/Shape.hpp"
-#include "integrators/Velocitizer.hpp"
+#include "brains/Velocitizer.hpp"
 
 namespace OpenMD {
    

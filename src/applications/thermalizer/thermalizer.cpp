@@ -57,7 +57,7 @@
 #include <fstream>
 
 #include "thermalizerCmd.hpp"
-#include "integrators/Velocitizer.hpp"
+#include "brains/Velocitizer.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/SimCreator.hpp"
@@ -133,7 +133,7 @@ int main(int argc, char *argv []) {
 
   for (int istep = 0; istep < nFrames; istep++) {
     reader.readFrame(istep);
-    veloSet->velocitize(temperature);
+    veloSet->randomize(temperature);
     writer->writeDump();
   }
 

@@ -40,8 +40,9 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "integrators/Velocitizer.hpp"
+#include "brains/Velocitizer.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "utils/Constants.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 
@@ -78,8 +79,11 @@ namespace OpenMD {
   Velocitizer::~Velocitizer() {
     delete randNumGen_;
   }
-  
-  void Velocitizer::velocitize(RealType temperature) {
+
+  void Velocitizer::scale(RealType s) {
+  }
+      
+  void Velocitizer::randomize(RealType temperature) {
     Vector3d aVel;
     Vector3d aJ;
     Mat3x3d I;
@@ -87,8 +91,6 @@ namespace OpenMD {
     Vector3d vdrift;
     RealType vbar;
     RealType jbar;
-    /**@todo refactor kb */
-    const RealType kb = 8.31451e-7; // kb in amu, angstroms, fs, etc.
     RealType av2;
     RealType kebar;
     
@@ -99,7 +101,8 @@ namespace OpenMD {
     Molecule * mol;
     StuntDouble * sd;
 
-    kebar = kb * temperature * info_->getNdfRaw() / (2.0 * info_->getNdf());
+    kebar = Constants::kB * temperature * info_->getNdfRaw() /
+      (2.0 * info_->getNdf());
 
     for( mol = info_->beginMolecule(i); mol != NULL;
 	 mol = info_->nextMolecule(i) ) {

@@ -455,6 +455,7 @@ src/brains/ForceManager.cpp
 src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp
 src/brains/Thermo.cpp
+src/brains/Velocitizer.cpp
 src/constraints/ZconstraintForceManager.cpp
 src/constraints/Rattle.cpp
 src/constraints/Shake.cpp
@@ -464,7 +465,6 @@ src/flucq/FluctuatingChargeForces.cpp
 src/flucq/FluctuatingChargePropagator.cpp
 src/integrators/LangevinHullForceManager.cpp
 src/rnemd/RNEMD.cpp
-src/integrators/Velocitizer.cpp
 src/io/ConstraintWriter.cpp
 src/io/DumpReader.cpp
 src/io/DumpWriter.cpp
