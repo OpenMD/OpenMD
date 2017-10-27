@@ -63,15 +63,15 @@ struct gengetopt_args_info
   double translateZ_arg;	/**< @brief translate all z coordinates by some amount (default='0.0').  */
   char * translateZ_orig;	/**< @brief translate all z coordinates by some amount original value given at command line.  */
   const char *translateZ_help; /**< @brief translate all z coordinates by some amount help description.  */
-  double rotatePhi_arg;     /**< @brief rotate all coordinates about Euler angle Phi (default='0.0').  */
-  char * rotatePhi_orig;	/**< @brief rotate all coordinates about Euler angle Phi value given at command line.  */
-  const char *rotatePhi_help; /**< @brief rotate all coordinates about Euler angle Phi amount help description.  */
-  double rotateTheta_arg;     /**< @brief rotate all coordinates about Euler angle Theta (default='0.0').  */
-  char * rotateTheta_orig;	/**< @brief rotate all coordinates about Euler angle Theta original value given at command line.  */
-  const char *rotateTheta_help; /**< @brief rotate all coordinates about Euler angle Theta amount help description.  */
-  double rotatePsi_arg;     /**< @brief rotate all coordinates aboutEuler angle Psi (default='0.0').  */
-  char * rotatePsi_orig;	/**< @brief rotate all coordinates aboutEuler angle Psi original value given at command line.  */
-  const char *rotatePsi_help; /**< @brief rotate all coordinates about Euler angle Psi amount help description.  */
+  double rotatePhi_arg;	/**< @brief rotate all coordinates Euler angle Phi (default='0.0').  */
+  char * rotatePhi_orig;	/**< @brief rotate all coordinates Euler angle Phi original value given at command line.  */
+  const char *rotatePhi_help; /**< @brief rotate all coordinates Euler angle Phi help description.  */
+  double rotateTheta_arg;	/**< @brief rotate all coordinates Euler angle Theta (default='0.0').  */
+  char * rotateTheta_orig;	/**< @brief rotate all coordinates Euler angle Theta original value given at command line.  */
+  const char *rotateTheta_help; /**< @brief rotate all coordinates Euler angle Theta help description.  */
+  double rotatePsi_arg;	/**< @brief rotate all coordinates Euler angle Psi (default='0.0').  */
+  char * rotatePsi_orig;	/**< @brief rotate all coordinates Euler angle Psi original value given at command line.  */
+  const char *rotatePsi_help; /**< @brief rotate all coordinates Euler angle Psi help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -83,9 +83,9 @@ struct gengetopt_args_info
   unsigned int translateX_given ;	/**< @brief Whether translateX was given.  */
   unsigned int translateY_given ;	/**< @brief Whether translateY was given.  */
   unsigned int translateZ_given ;	/**< @brief Whether translateZ was given.  */
-  unsigned int rotatePhi_given ;  /**< @brief Wether rotatePhi was given.  */
-  unsigned int rotateTheta_given ;  /**< @brief Wether rotateTheta was given.  */
-  unsigned int rotatePsi_given ;  /**< @brief Wether rotatePsi was given.  */
+  unsigned int rotatePhi_given ;	/**< @brief Whether rotatePhi was given.  */
+  unsigned int rotateTheta_given ;	/**< @brief Whether rotateTheta was given.  */
+  unsigned int rotatePsi_given ;	/**< @brief Whether rotatePsi was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -201,31 +201,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
  * @param args_info the structure to deallocate
  */
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
-
-/**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
 
 /**
  * Checks that all the required options were specified

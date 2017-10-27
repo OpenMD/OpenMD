@@ -7,7 +7,7 @@
 # Note that the OpenMD build process automatically sets the version string
 # below.
 
-args "--no-handle-version --no-handle-help --no-handle-error --include-getopt --show-required --unamed-opts --file-name=omd2omdCmd --c-extension=cpp --header-extension=hpp"
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=omd2omdCmd --c-extension=cpp --header-extension=hpp"
 
 package "omd2omd"
 version "" 
