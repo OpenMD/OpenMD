@@ -7,7 +7,7 @@
 # Note that the OpenMD build process automatically sets the version string
 # below.
 
-args " --include-getopt --long-help --show-required --unamed-opts --file-name=thermalizerCmd --c-extension=cpp --header-extension=hpp"
+args "--include-getopt --long-help --show-required --unamed-opts --file-name=thermalizerCmd --c-extension=cpp --header-extension=hpp"
 
 package "thermalizer"
 version "" 
@@ -16,7 +16,8 @@ purpose "Two functionalities: 1. (-t) Resamples the velocities for all the integ
 
 # Options
 
-option "output"        o  "Output file name" string yes
-defgroup "thermalizer" groupdesc=" an option of this group is required" required
-groupoption "temperature"   t  "temperature (K)" double optional group="thermalizer"
-groupoption "energy"	       e  "energy (kcal/mol)" double optional group="thermalizer"
+option      "input"       i "Input file name"  optional string
+option      "output"      o "Output file name" required string
+defgroup    "thermalizer" groupdesc="One of these is required" required
+groupoption "temperature" t "temperature (K)"   double group="thermalizer"
+groupoption "energy"	  e "energy (kcal/mol)" double group="thermalizer"

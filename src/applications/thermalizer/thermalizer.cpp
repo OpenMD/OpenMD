@@ -40,13 +40,6 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-/**
- * @file thermalizer.cpp
- * @author Dan Gezelter
- * @date 09/20/2006
- * @version 1.0
- */
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -67,44 +60,37 @@
 #include "io/DumpWriter.hpp"
 #include "utils/StringUtils.hpp"
 
-using namespace std;
 using namespace OpenMD;
 
 int main(int argc, char *argv []) {
-
-  registerLattice();
     
   gengetopt_args_info args_info;
   std::string inputFileName;
   std::string outputFileName;
 
   // parse command line arguments
-  if (cmdline_parser(argc, argv, &args_info) != 0)
+  if (cmdline_parser(argc, argv, &args_info) != 0) {
+    cmdline_parser_print_help();
     exit(1);
-
-     
-  //get input file name
-  if (args_info.inputs_num){
-    inputFileName = args_info.inputs[0];
   }
-  else{
+
+  // get input file name
+  if (args_info.input_given) {
+    inputFileName = args_info.input_arg;
+  } else {
+    if (args_info.inputs_num){
+      inputFileName = args_info.inputs[0];
+    }
+    else{
       sprintf(painCave.errMsg,
-	      "No input file name was specified on the command line");
+              "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
-  
-  //Now that we have md file, parse md file and set up the system
-  SimCreator creator;
-  SimInfo* info = creator.createSim(inputFileName, true);
-  DumpReader reader(info, inputFileName);
- 
-  // very important step:
-  info->update();
-   
-    
-  //get output file name
+  }
+
+  // get output file name
   outputFileName = args_info.output_arg;
   
   if (!outputFileName.compare(inputFileName)) {
@@ -114,7 +100,22 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 1;
     simError();
   }
+  
+  // Now that we have an omd file, parse omd file and set up the system
+  SimCreator creator;
+  // This sets up the system and reads the last frame of the file:
+  SimInfo* info = creator.createSim(inputFileName, true);
+  // very important step:
+  info->update();
 
+  Thermo thermo(info);
+  // Need to call forceManager to calcForces before we can getPotential()
+  // and getKinetic()
+  ForceManager* forceMan = new ForceManager(info);         
+  forceMan->calcForces();        
+  RealType instPE = thermo.getPotential();
+  RealType instKE = thermo.getKinetic();
+  
   //Now that we have output file name, create DumpWriter
   DumpWriter* writer = new DumpWriter(info, outputFileName);
   if (writer == NULL) {
@@ -123,10 +124,8 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 1;
     simError();
   }
-
   
   Velocitizer* veloSet = new Velocitizer(info);
-
   
   // If resampling temperature, randomizer
   if (args_info.temperature_given) {
@@ -138,33 +137,17 @@ int main(int argc, char *argv []) {
       painCave.isFatal = 1;
       simError();
     }
-
-    int nFrames = reader.getNFrames();
     
-    for (int istep = 0; istep < nFrames; istep++) {
-      reader.readFrame(istep);
-      veloSet->randomize(temperature);
-      writer->writeDump();
-    }
-
+    veloSet->randomize(temperature);
   }
 
   // If scaling total energy (via kinetic energy), scale
   if (args_info.energy_given) {
-    RealType energy = args_info.energy_arg;
-    
-    Thermo thermo(info);
-    // Need to call forceManager to calcForces before we can getPotential()
-    // and getKinetic()
-    ForceManager* forceMan = new ForceManager(info);         
-    forceMan->calcForces();
-    
-    RealType instPE = thermo.getPotential();
-    RealType instKE = thermo.getKinetic();
+    RealType energy = args_info.energy_arg;       
     RealType epsilon = 1e-6;
     RealType lambda = 0.0;
 
-    if (energy < energy) {
+    if (energy < instPE) {
       sprintf(painCave.errMsg, "Energy must be > current potential energy.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
@@ -172,42 +155,23 @@ int main(int argc, char *argv []) {
     }
     else {
       if (instKE >= epsilon) {
-	lambda = pow( (energy - instPE) / instKE , 0.5);
-	
-	int nFrames = reader.getNFrames();
-	
-	for (int istep = 0; istep < nFrames; istep++) {
-	reader.readFrame(istep);
-	veloSet->scale(lambda);
-	writer->writeDump();
-	}
+	lambda = sqrt( (energy - instPE) / instKE );		
+        veloSet->scale(lambda);
       }
       // If the current kinetic energy is smaller than numerical zero,
       // we will sample velocities from a 10K distribution and then
       // subsequently scale from 10K to the desired energy.
       else {
-	int nFrames = reader.getNFrames();
-	
-	for (int istep = 0; istep < nFrames; istep++) {
-	reader.readFrame(istep);
-	veloSet->randomize(10.0);
-	writer->writeDump();
-	}
-	// Not sure if I need to update simInfo here or what, somehow
-	// need to know the new kinetic and total energy. Calc from prev.
-	// quantities and new?
-	
-
+        veloSet->randomize(10.0);
+        instKE = thermo.getKinetic();
+	lambda = sqrt( (energy - instPE) / instKE );		
+        veloSet->scale(lambda);
       }
-
     }
-      
   }
   
-
-    
+  writer->writeDump();    
   // deleting the writer will put the closing at the end of the dump file.
-
   delete writer;
 
   sprintf(painCave.errMsg,
