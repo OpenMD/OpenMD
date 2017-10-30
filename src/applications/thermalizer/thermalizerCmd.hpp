@@ -45,14 +45,19 @@ struct gengetopt_args_info
   double temperature_arg;	/**< @brief temperature (K).  */
   char * temperature_orig;	/**< @brief temperature (K) original value given at command line.  */
   const char *temperature_help; /**< @brief temperature (K) help description.  */
+  double energy_arg;	/**< @brief energy (kcal/mol).  */
+  char * energy_orig;	/**< @brief energy (kcal/mol) original value given at command line.  */
+  const char *energy_help; /**< @brief energy (kcal/mol) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int temperature_given ;	/**< @brief Whether temperature was given.  */
+  unsigned int energy_given ;	/**< @brief Whether energy was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
+  int thermalizer_group_counter; /**< @brief Counter for group thermalizer */
 } ;
 
 /** @brief The additional parameters to pass to parser functions */

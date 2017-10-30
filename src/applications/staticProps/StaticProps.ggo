@@ -26,38 +26,38 @@ This command computes the oxygen-oxygen pair distribution function,
 gOO(r), from a file named tp4.dump"
 
 # Options
-option	"input"		i	"input dump file"					string	typestr="filename" 	yes
-option	"output"	o	"output file name"					string	typestr="filename"	no
-option	"step"		n	"process every n frame"					int	default="1"		no
-option	"nbins"    	b       "number of bins (general purpose)"				int	default="100"		no
-option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		no
-option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
-option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
-option	"nrbins"    	r       "number of radial bins (usually duplicates functionality of nbins)"				int	default="100"		no
-option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no
-option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
-option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             no
-option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              no
-option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            no
-option  "dz"            -       "slab width (dz)"                                       double                          no
-option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no
-option	"zlength"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no
-option  "zoffset"       z       "Where to set the zero for the slab_density calculation"        double  default="0"     no
-option	"sele1"		-	"select the first stuntdouble set"	string	typestr="selection script"	no
-option  "sele2"         -       "select the second stuntdouble set" string  typestr="selection script"      no
-option  "sele3"         -       "select the third stuntdouble set" string  typestr="selection script"      no
-option  "refsele"       -       "select reference (use and only use with --gxyz)" string  typestr="selection script"     no
-option  "comsele"       -       "select stunt doubles for center-of-mass reference point" string typestr="selection script"  no
-option  "seleoffset"    -       "global index offset for a second object (used to define a vector between sites in molecule)" int no
-option  "seleoffset2"    -      "global index offset for a third object (used to define a vector between sites in molecule)" int no
-option  "molname"       -       "molecule name" string       no
-option  "begin"         -       "begin internal index"                                 int                  no
-option  "end"           -       "end internal index"                                 int                  no
-option  "radius"        -       "nanoparticle radius" double no
-option  "voxelSize"     v       "voxel size (angstroms)" double no
-option  "gaussWidth"    -       "Gaussian width (angstroms)" double no
+option	"input"		i	"input dump file"					string	typestr="filename" 	required
+option	"output"	o	"output file name"					string	typestr="filename"	optional
+option	"step"		n	"process every n frame"					int	default="1"		optional
+option	"nbins"    	b       "number of bins (general purpose)"				int	default="100"		optional
+option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		optional
+option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		optional
+option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		optional
+option	"nrbins"    	r       "number of radial bins (usually duplicates functionality of nbins)"				int	default="100"		optional
+option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		optional
+option  "rcut"          c       "cutoff radius (rcut)"                                  double                          optional
+option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             optional
+option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              optional
+option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            optional
+option  "dz"            -       "slab width (dz)"                                       double                          optional
+option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	optional
+option	"zlength"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	optional
+option  "zoffset"       z       "Where to set the zero for the slab_density calculation"        double  default="0"     optional
+option	"sele1"		-	"select the first stuntdouble set"	string	typestr="selection script"	optional
+option  "sele2"         -       "select the second stuntdouble set" string  typestr="selection script"      optional
+option  "sele3"         -       "select the third stuntdouble set" string  typestr="selection script"      optional
+option  "refsele"       -       "select reference (use and only use with --gxyz)" string  typestr="selection script"     optional
+option  "comsele"       -       "select stunt doubles for center-of-mass reference point" string typestr="selection script"  optional
+option  "seleoffset"    -       "global index offset for a second object (used to define a vector between sites in molecule)" int optional
+option  "seleoffset2"    -      "global index offset for a third object (used to define a vector between sites in molecule)" int optional
+option  "molname"       -       "molecule name" string       optional
+option  "begin"         -       "begin internal index"                                 int                  optional
+option  "end"           -       "end internal index"                                 int                  optional
+option  "radius"        -       "nanoparticle radius" double optional
+option  "voxelSize"     v       "voxel size (angstroms)" double optional
+option  "gaussWidth"    -       "Gaussian width (angstroms)" double optional
 option  "privilegedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
-defgroup "staticProps" groupdesc=" an option of this group is required" yes
+defgroup "staticProps" groupdesc=" an option of this group is required" required
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"
 groupoption "ior"       -       "icosahedral bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"
 groupoption "for"       -       "FCC bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"

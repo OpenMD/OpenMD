@@ -7,14 +7,16 @@
 # Note that the OpenMD build process automatically sets the version string
 # below.
 
-args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=thermalizerCmd --c-extension=cpp --header-extension=hpp"
+args " --include-getopt --long-help --show-required --unamed-opts --file-name=thermalizerCmd --c-extension=cpp --header-extension=hpp"
 
 package "thermalizer"
 version "" 
 
-purpose "Resamples the velocities for all the integrable objects in an OpenMD file from a Maxwell-Boltzmann distribution."
+purpose "Two functionalities: 1. (-t) Resamples the velocities for all the integrable objects in an OpenMD file from a Maxwell-Boltzmann distribution. 2. (-e) Scales the total energy of all integrable objects in an OpenMD file to a desired total energy."
 
 # Options
 
 option "output"        o  "Output file name" string yes
-option "temperature"   t  "temperature (K)" double yes
+defgroup "thermalizer" groupdesc=" an option of this group is required" required
+groupoption "temperature"   t  "temperature (K)" double optional group="thermalizer"
+groupoption "energy"	       e  "energy (kcal/mol)" double optional group="thermalizer"
