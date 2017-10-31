@@ -56,23 +56,22 @@
 
 namespace OpenMD {
   
-  Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo(info) {
+  Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo_(info) {
     
-
-    Globals * simParams = info->getSimParams();
+    globals_ = info->getSimParams();
     
 #ifndef IS_MPI
-    if (simParams->haveSeed()) {
-      int seedValue = simParams->getSeed();
+    if (globals_->haveSeed()) {
+      int seedValue = globals_->getSeed();
       randNumGen_ = new SeqRandNumGen(seedValue);
-    }else {
+    } else {
       randNumGen_ = new SeqRandNumGen();
     }    
 #else
-    if (simParams->haveSeed()) {
-      int seedValue = simParams->getSeed();
+    if (globals_->haveSeed()) {
+      int seedValue = globals_->getSeed();
       randNumGen_ = new ParallelRandNumGen(seedValue);
-    }else {
+    } else {
       randNumGen_ = new ParallelRandNumGen();
     }    
 #endif 
@@ -83,59 +82,41 @@ namespace OpenMD {
   }
 
   void Velocitizer::scale(RealType lambda) {
-   
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator j;
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
     Molecule * mol;
     StuntDouble * sd;
-    Vector3d vcom, aJ;
-    Mat3x3d I;
-    int l, m, n;
+    Vector3d v, j;
     
-    for( mol = info_->beginMolecule(i); mol != NULL;
-	 mol = info_->nextMolecule(i) ) {
-
-      for( sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j) ) {
-
-	vcom = sd->getVel();
-
-	// scale each component of the velocity by lambda
-	for (int i = 0; i < vcom.length(); i++) {
-	  vcom[i] = lambda * vcom[i];
-	}
-
-	sd->setVel(vcom);
-
+    for( mol = info_->beginMolecule(mi); mol != NULL;
+	 mol = info_->nextMolecule(mi) ) {
+      
+      for( sd = mol->beginIntegrableObject(ioi); sd != NULL;
+	   sd = mol->nextIntegrableObject(ioi) ) {
+        
+	v = sd->getVel();        
+        v *= lambda;
+	sd->setVel(v);
+        
 	if (sd->isDirectional()) {
-	  I = sd->getI();
-	  
-	  if (sd->isLinear()) {
-	    l = sd->linearAxis();
-	    m = (l + 1) % 3;
-	    n = (l + 2) % 3;
-	    
-	    aJ[l] = aJ[l];
-	    aJ[m] = lambda * aJ[m];
-	    aJ[n] = lambda * aJ[n];
-	  }
-	  else {
-	    for( int k = 0; k < 3; k++ ) {
-	      aJ[k] = lambda * aJ[k];
-	    }
-	  }
-	  
-	  sd->setJ(aJ);
-	}
-	
+          j = sd->getJ();
+          j *= lambda;
+	  sd->setJ(j);
+	}	
       }
     }
     
+    removeComDrift();
+    
+    // Remove angular drift if we are not using periodic boundary
+    // conditions:
+    
+    if(!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
   }
       
   void Velocitizer::randomize(RealType temperature) {
-    Vector3d aVel;
-    Vector3d aJ;
+    Vector3d v;
+    Vector3d j;
     Mat3x3d I;
     int l, m, n;
     Vector3d vdrift;
@@ -143,22 +124,20 @@ namespace OpenMD {
     RealType jbar;
     RealType av2;
     RealType kebar;
-    
-    Globals * simParams = info_->getSimParams();
-    
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator j;
+        
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
     Molecule * mol;
     StuntDouble * sd;
 
     kebar = Constants::kB * temperature * info_->getNdfRaw() /
       (2.0 * info_->getNdf());
 
-    for( mol = info_->beginMolecule(i); mol != NULL;
-	 mol = info_->nextMolecule(i) ) {
+    for( mol = info_->beginMolecule(mi); mol != NULL;
+	 mol = info_->nextMolecule(mi) ) {
 
-      for( sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j) ) {
+      for( sd = mol->beginIntegrableObject(ioi); sd != NULL;
+	   sd = mol->nextIntegrableObject(ioi) ) {
 	
 	// uses equipartition theory to solve for vbar in angstrom/fs
 	
@@ -169,9 +148,9 @@ namespace OpenMD {
 	// centered on vbar
 	
 	for( int k = 0; k < 3; k++ ) {
-	  aVel[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
+	  v[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
 	}
-	sd->setVel(aVel);
+	sd->setVel(v);
 	
 	if (sd->isDirectional()) {
 	  I = sd->getI();
@@ -181,19 +160,19 @@ namespace OpenMD {
 	    m = (l + 1) % 3;
 	    n = (l + 2) % 3;
 	    
-	    aJ[l] = 0.0;
+	    j[l] = 0.0;
 	    jbar = sqrt(2.0 * kebar * I(m, m));
-	    aJ[m] = jbar * randNumGen_->randNorm(0.0, 1.0);
+	    j[m] = jbar * randNumGen_->randNorm(0.0, 1.0);
 	    jbar = sqrt(2.0 * kebar * I(n, n));
-	    aJ[n] = jbar * randNumGen_->randNorm(0.0, 1.0);
+	    j[n] = jbar * randNumGen_->randNorm(0.0, 1.0);
 	  } else {
 	    for( int k = 0; k < 3; k++ ) {
 	      jbar = sqrt(2.0 * kebar * I(k, k));
-	      aJ[k] = jbar *randNumGen_->randNorm(0.0, 1.0);
+	      j[k] = jbar *randNumGen_->randNorm(0.0, 1.0);
 	    }
 	  }
 	  
-	  sd->setJ(aJ);
+	  sd->setJ(j);
 	}
       }
     }
@@ -203,26 +182,26 @@ namespace OpenMD {
     // Remove angular drift if we are not using periodic boundary
     // conditions:
 
-    if(!simParams->getUsePeriodicBoundaryConditions()) removeAngularDrift();    
+    if(!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
   }
     
   void Velocitizer::removeComDrift() {
     // Get the Center of Mass drift velocity.
-    Vector3d vdrift = thermo.getComVel();
+    Vector3d vdrift = thermo_.getComVel();
     
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator j;
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
     Molecule * mol;
     StuntDouble * sd;
     
     //  Corrects for the center of mass drift.
     // sums all the momentum and divides by total mass.
-    for( mol = info_->beginMolecule(i); mol != NULL;
-         mol = info_->nextMolecule(i) ) {
+    for( mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi) ) {
 
-      for( sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j) ) {
-
+      for( sd = mol->beginIntegrableObject(ioi); sd != NULL;
+	   sd = mol->nextIntegrableObject(ioi) ) {
+        
 	sd->setVel(sd->getVel() - vdrift);
 
       }
@@ -235,20 +214,20 @@ namespace OpenMD {
     Vector3d vdrift;
     Vector3d com; 
       
-    thermo.getComAll(com, vdrift);
+    thermo_.getComAll(com, vdrift);
          
     Mat3x3d inertiaTensor;
     Vector3d angularMomentum;
     Vector3d omega;
                
-    thermo.getInertiaTensor(inertiaTensor, angularMomentum);
+    thermo_.getInertiaTensor(inertiaTensor, angularMomentum);
 
     // We now need the inverse of the inertia tensor.
     inertiaTensor = inertiaTensor.inverse();
     omega = inertiaTensor * angularMomentum;
     
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator j;
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
     Molecule* mol;
     StuntDouble* sd;
     Vector3d tempComPos;
@@ -256,15 +235,14 @@ namespace OpenMD {
     // Corrects for the center of mass angular drift by summing all
     // the angular momentum and dividing by the total mass.
 
-    for( mol = info_->beginMolecule(i); mol != NULL;
-         mol = info_->nextMolecule(i) ) {
+    for( mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi) ) {
 
-      for( sd = mol->beginIntegrableObject(j); sd != NULL;
-           sd = mol->nextIntegrableObject(j) ) {
+      for( sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi) ) {
 
         tempComPos = sd->getPos() - com;
-        sd->setVel((sd->getVel() - vdrift) - cross(omega, tempComPos));
-        
+        sd->setVel((sd->getVel() - vdrift) - cross(omega, tempComPos));        
       }
     }   
   }   
