@@ -71,7 +71,7 @@ namespace OpenMD {
      * Rescales velocity (and angular momenta) by a scaling factor.
      * @param s : Scaling factor (must be >= 0)
      */
-    void scale(RealType s);
+    void scale(RealType lambda);
 
     /** @brief Removes Center of Mass Drift Velocity
      * Removes the center of mass drift velocity (required for accurate 

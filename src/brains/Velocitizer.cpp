@@ -41,10 +41,12 @@
  */
 
 #include "brains/Velocitizer.hpp"
+#include "brains/Thermo.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "utils/Constants.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
+
 
 #ifndef IS_MPI
 #include "math/SeqRandNumGen.hpp"
@@ -80,7 +82,55 @@ namespace OpenMD {
     delete randNumGen_;
   }
 
-  void Velocitizer::scale(RealType s) {
+  void Velocitizer::scale(RealType lambda) {
+   
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
+    Molecule * mol;
+    StuntDouble * sd;
+    Vector3d vcom, aJ;
+    Mat3x3d I;
+    int l, m, n;
+    
+    for( mol = info_->beginMolecule(i); mol != NULL;
+	 mol = info_->nextMolecule(i) ) {
+
+      for( sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j) ) {
+
+	vcom = sd->getVel();
+
+	// scale each component of the velocity by lambda
+	for (int i = 0; i < vcom.length(); i++) {
+	  vcom[i] = lambda * vcom[i];
+	}
+
+	sd->setVel(vcom);
+
+	if (sd->isDirectional()) {
+	  I = sd->getI();
+	  
+	  if (sd->isLinear()) {
+	    l = sd->linearAxis();
+	    m = (l + 1) % 3;
+	    n = (l + 2) % 3;
+	    
+	    aJ[l] = aJ[l];
+	    aJ[m] = lambda * aJ[m];
+	    aJ[n] = lambda * aJ[n];
+	  }
+	  else {
+	    for( int k = 0; k < 3; k++ ) {
+	      aJ[k] = lambda * aJ[k];
+	    }
+	  }
+	  
+	  sd->setJ(aJ);
+	}
+	
+      }
+    }
+    
   }
       
   void Velocitizer::randomize(RealType temperature) {
