@@ -91,6 +91,8 @@ namespace OpenMD {
     Vector3d vcom, aJ;
     Mat3x3d I;
     int l, m, n;
+
+    std::cerr << "V_lambda = " << lambda << endl;
     
     for( mol = info_->beginMolecule(i); mol != NULL;
 	 mol = info_->nextMolecule(i) ) {
@@ -99,14 +101,19 @@ namespace OpenMD {
 	   sd = mol->nextIntegrableObject(j) ) {
 
 	vcom = sd->getVel();
-
+	std::cerr << "vcom = " << vcom << endl;
+	
 	// scale each component of the velocity by lambda
-	for (int i = 0; i < vcom.length(); i++) {
+	for (int i = 0; i < vcom.size(); i++) {
 	  vcom[i] = lambda * vcom[i];
 	}
+	std::cerr << "vcom = " << vcom << endl;
 
 	sd->setVel(vcom);
 
+	std::cerr << "setVel = " << sd->getVel() << endl << endl;
+	std::cerr << "V_KE = " << thermo.getKinetic() << endl;
+	
 	if (sd->isDirectional()) {
 	  I = sd->getI();
 	  
