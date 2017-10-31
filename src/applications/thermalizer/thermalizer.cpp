@@ -109,17 +109,16 @@ int main(int argc, char *argv []) {
   info->update();
 
   Thermo thermo(info);
+  Velocitizer* veloSet = new Velocitizer(info);
   // Need to call forceManager to calcForces before we can getPotential()
   // and getKinetic()
   ForceManager* forceMan = new ForceManager(info);         
-  forceMan->calcForces();        
+  forceMan->calcForces();
+  veloSet->removeComDrift();
+  
   RealType instPE = thermo.getPotential();
   RealType instKE = thermo.getKinetic();
   RealType instE = thermo.getTotalEnergy();
-
-  std::cerr << "instPE = " << instPE << endl;
-  std::cerr << "instKE = " << instKE << endl;
-  std::cerr << "instE = " << instE << endl;
   
   //Now that we have output file name, create DumpWriter
   DumpWriter* writer = new DumpWriter(info, outputFileName);
@@ -129,8 +128,9 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 1;
     simError();
   }
+
+  info->getSnapshotManager()->advance();
   
-  Velocitizer* veloSet = new Velocitizer(info);
   
   // If resampling temperature, randomizer
   if (args_info.temperature_given) {
@@ -152,8 +152,6 @@ int main(int argc, char *argv []) {
     RealType epsilon = 1e-6;
     RealType lambda = 0.0;
 
-    std::cerr << "desired energy = " << energy << endl;
-
     if (energy < instPE) {
       sprintf(painCave.errMsg, "Energy must be > current potential energy.");
       painCave.severity = OPENMD_ERROR;
@@ -162,8 +160,7 @@ int main(int argc, char *argv []) {
     }
     else {
       if (instKE >= epsilon) {
-	lambda = sqrt( (energy - instPE) / instKE );
-	std::cerr << "lambda = " << lambda << endl;
+	lambda =  sqrt((energy - instPE) / instKE);
         veloSet->scale(lambda);
       }
       // If the current kinetic energy is smaller than numerical zero,
@@ -175,15 +172,6 @@ int main(int argc, char *argv []) {
 	lambda = sqrt( (energy - instPE) / instKE );		
         veloSet->scale(lambda);
       }
-
-      info->update();
-      forceMan->calcForces();  
-      RealType newKE = thermo.getKinetic();
-      RealType newPE = thermo.getPotential();
-      RealType newTE = thermo.getTotalEnergy();
-      std::cerr << "newPE = " << newPE << endl;
-      std::cerr << "newKE = " << newKE << endl;
-      std::cerr << "newTE = " << newTE << endl;
       
     }
   }

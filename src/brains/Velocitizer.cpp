@@ -93,11 +93,11 @@ namespace OpenMD {
       
       for( sd = mol->beginIntegrableObject(ioi); sd != NULL;
 	   sd = mol->nextIntegrableObject(ioi) ) {
-        
-	v = sd->getVel();        
+
+	v = sd->getVel();	
         v *= lambda;
 	sd->setVel(v);
-        
+
 	if (sd->isDirectional()) {
           j = sd->getJ();
           j *= lambda;
