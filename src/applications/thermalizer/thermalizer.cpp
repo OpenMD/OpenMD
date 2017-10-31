@@ -101,26 +101,30 @@ int main(int argc, char *argv []) {
     simError();
   }
   
-  // Now that we have an omd file, parse omd file and set up the system
+  // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
-  // This sets up the system and reads the last frame of the file:
   SimInfo* info = creator.createSim(inputFileName, true);
-  // very important step:
+  // communicate velocity information onto the atoms:
   info->update();
 
+  // Important utility classes for computing system properties:
   Thermo thermo(info);
   Velocitizer* veloSet = new Velocitizer(info);
-  // Need to call forceManager to calcForces before we can getPotential()
-  // and getKinetic()
-  ForceManager* forceMan = new ForceManager(info);         
-  forceMan->calcForces();
+  ForceManager* forceMan = new ForceManager(info);
+
+  // Just in case we were passed a system that is on the move:
   veloSet->removeComDrift();
+  forceMan->calcForces();
   
   RealType instPE = thermo.getPotential();
   RealType instKE = thermo.getKinetic();
   RealType instE = thermo.getTotalEnergy();
+
+  // Now that we have the information from the current frame, advance
+  // the snapshot to make a modified frame:
+  info->getSnapshotManager()->advance();
   
-  //Now that we have output file name, create DumpWriter
+  // Create DumpWriter to hold the modified frame:
   DumpWriter* writer = new DumpWriter(info, outputFileName);
   if (writer == NULL) {
     sprintf(painCave.errMsg, "error in creating DumpWriter");
@@ -129,10 +133,7 @@ int main(int argc, char *argv []) {
     simError();
   }
 
-  info->getSnapshotManager()->advance();
-  
-  
-  // If resampling temperature, randomizer
+  // If resampling temperature, we call the randomizer method:
   if (args_info.temperature_given) {
     RealType temperature = args_info.temperature_arg;
     
@@ -146,14 +147,15 @@ int main(int argc, char *argv []) {
     veloSet->randomize(temperature);
   }
 
-  // If scaling total energy (via kinetic energy), scale
+  // If scaling total energy, scale only the kinetic:
   if (args_info.energy_given) {
     RealType energy = args_info.energy_arg;       
     RealType epsilon = 1e-6;
     RealType lambda = 0.0;
 
     if (energy < instPE) {
-      sprintf(painCave.errMsg, "Energy must be > current potential energy.");
+      sprintf(painCave.errMsg,
+              "Energy must be larger than current potential energy.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
@@ -163,16 +165,15 @@ int main(int argc, char *argv []) {
 	lambda =  sqrt((energy - instPE) / instKE);
         veloSet->scale(lambda);
       }
-      // If the current kinetic energy is smaller than numerical zero,
-      // we will sample velocities from a 10K distribution and then
+      // If the current kinetic energy is close to zero, we will
+      // sample velocities from a 10K distribution and then
       // subsequently scale from 10K to the desired energy.
       else {
         veloSet->randomize(10.0);
         instKE = thermo.getKinetic();
 	lambda = sqrt( (energy - instPE) / instKE );		
         veloSet->scale(lambda);
-      }
-      
+      }      
     }
   }
   

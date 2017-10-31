@@ -54,7 +54,7 @@ namespace OpenMD {
     These are particularly useful for setting initial configurations
     to a desired temperature or re-scaling velocities to match a
     desired energy.
-   */
+  */
   class Velocitizer {
   public:
     Velocitizer(SimInfo* info);
