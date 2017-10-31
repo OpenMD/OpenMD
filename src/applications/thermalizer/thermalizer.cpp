@@ -118,7 +118,6 @@ int main(int argc, char *argv []) {
   
   RealType instPE = thermo.getPotential();
   RealType instKE = thermo.getKinetic();
-  RealType instE = thermo.getTotalEnergy();
 
   // Now that we have the information from the current frame, advance
   // the snapshot to make a modified frame:
