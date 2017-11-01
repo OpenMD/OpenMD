@@ -1,0 +1,125 @@
+#!@PYTHON_EXECUTABLE@
+
+__author__ = "Patrick Louden (plouden@nd.edu)"
+__copyright__ = "Copyright (c) 2017 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import os
+import datetime
+import argparse
+import textwrap
+import numpy as np
+import math
+from scipy.optimize import curve_fit
+from argparse import RawDescriptionHelpFormatter
+from scipy import stats
+
+
+
+def usage():
+    print __doc__
+    
+
+# Fit function we are optimizing data to
+def func(x, a, tau0, b, tau1, tau2):
+    ''' fit function
+    C2(z,t) = a*exp(-t/tau0) + b*exp(-t/tau1) + (1-a-b)*exp(-t/tau2)
+    '''
+    return ( a*np.exp(-x/tau0) + b*np.exp(-x/tau1) + (1-a-b)*np.exp(-x/tau2) )
+
+
+
+def lcorrzExtractor(lcorrzFileName, cutoffTime):
+    if os.path.exists(lcorrzFileName):
+        lcorrzFile = open(lcorrzFileName,'r')
+    else:
+        print 'Error: cannot open ' + lcorrzFile
+        sys.exit(2)
+
+    time = []
+    lcorrzArray = []
+    
+    while True:
+        line = lcorrzFile.readline()
+        if not line: break
+            
+        if ("#" in line):
+            pass
+        else:
+            tempArray = np.array([])
+            splitLine = line.strip().split()
+          
+            if (len(splitLine) > 0):
+                for i in range(0, len(splitLine)):
+                    if (i == 0):
+                        if (float(splitLine[0]) < float(cutoffTime)):
+                            time = np.append(time, float(splitLine[i]))
+                    else:
+                        if (float(splitLine[0]) < float(cutoffTime)):
+                            tempArray = np.append(tempArray, float(splitLine[i]))
+                if (len(tempArray > 0)):
+                    lcorrzArray.append(tempArray)
+    
+    lcorrzArray = np.asarray(lcorrzArray)
+    return (time, lcorrzArray)
+    
+
+
+def lcorrzFitter(time, lcorrzArray, tau0, tau1, tau2, a, b, cutoffTime, nbins, fitFileName):    
+
+    fitFile = open(fitFileName,"w")
+    fitFile.write("# bin no. \t a \t tau0 \t b \t tau1 \t tau2 \n")
+    
+    for i in range(0, int(nbins)):
+        lcorrzBin = np.array([])
+        
+        for j in range(0, len(lcorrzArray)):
+            lcorrzBin = np.append(lcorrzBin, lcorrzArray[j][i]) #This generates an array with all the data from one bin
+
+        popt, pcov = curve_fit(func, time, lcorrzBin,[a, tau0, b, tau1, tau2], ftol=0.01)   
+        fitFile.write( str(i) + "\t" + str(popt[0]) + "\t" + str(popt[1]) + "\t" + str(popt[2]) + "\t" + str(popt[3]) + "\t" + str(popt[4]) + "\n")
+    
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description='OpenMD lcorrZ fitting script.',
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog="Fit function: y = a*exp(-t/tau0) + b*exp(-t/tau1) + (1-a-b)*exp(-t/tau2) \nExample: lcorrzFit -i waterSim.lcorrZ -o waterSim.lcorrZFit")
+    parser.add_argument("-i","--rnemd-file=", action="store", dest="lcorrzFileName", help="use specified input (.lcorrz) file")
+    parser.add_argument("-o","--fit-file=", action="store", dest="fitFileName", help="use specified output (.fit) file")
+    parser.add_argument("-c","--cutoffTime=", action="store", dest="cutoffTime", help="specified time to truncate data at")
+    parser.add_argument("-n","--nbins=", action="store", dest="nbins", help="specified number of bins used in the lcorrz calculation")
+    parser.add_argument("-t0","--tau0=", action="store",default=1e2,type=float, dest="tau0", help="the fastest decay time")
+    parser.add_argument("-t1","--tau1=", action="store",default=1e3,type=float, dest="tau1", help="the middle decay time")
+    parser.add_argument("-t2","--tau2=", action="store",default=1e6,type=float, dest="tau2", help="the slow decay time")
+    parser.add_argument("-a","--a=", action="store", dest="a",default=0.25,type=float, help="fraction of contribution of slow motion to the overall decay")
+    parser.add_argument("-b","--b=", action="store", dest="b",default=0.25,type=float, help="fraction of contribution of middle motion to the overall decay")
+    
+    
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(2)
+    args = parser.parse_args()
+
+    if (not args.lcorrzFileName):
+        parser.print_help()
+        parser.error("No input-file was specified")
+
+    if (not args.fitFileName):
+        parser.print_help()
+        parser.error("No output-file was specified")
+
+    if (not args.nbins):
+        parser.print_help()
+        parser.error("No value for nbins was specified")
+
+    #Call functions here, pass appropriate variables.
+    (time, lcorrzArray) = lcorrzExtractor(args.lcorrzFileName, args.cutoffTime)
+    lcorrzFitter(time, lcorrzArray, args.tau0, args.tau1, args.tau2, args.a, args.b, args.cutoffTime, args.nbins, args.fitFileName)
+
+
+    
+if __name__ == "__main__":
+    main(sys.argv[1:])
