@@ -58,9 +58,9 @@ namespace OpenMD {
 
   RCorrFuncZ::RCorrFuncZ(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2,
-                         int nZbins)
+                         int nZbins, int axis)
     : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
-                             DataStorage::dslPosition | DataStorage::dslAmat){
+                             DataStorage::dslPosition | DataStorage::dslAmat),axis_(axis){
 
     setCorrFuncType("Mean Square Displacement binned by Z");
     setOutputName(getPrefix(dumpFilename_) + ".rcorrZ");
@@ -68,7 +68,20 @@ namespace OpenMD {
     positions_.resize(nFrames_);
     zBins_.resize(nFrames_);
     nZBins_ = nZbins;
-
+    
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+    
     std::stringstream params;
     params << " nzbins = " << nZBins_;
     const std::string paramString = params.str();
@@ -109,7 +122,7 @@ namespace OpenMD {
 
   void RCorrFuncZ::computeFrame(int istep) {
     hmat_ = currentSnapshot_->getHmat();
-    halfBoxZ_ = hmat_(2,2) / 2.0;      
+    halfBoxZ_ = hmat_(axis_,axis_) / 2.0;      
 
     StuntDouble* sd;
 
@@ -160,7 +173,7 @@ namespace OpenMD {
     if (info_->getSimParams()->getUsePeriodicBoundaryConditions()) {
       currentSnapshot_->wrapVector(pos);
     }    
-    int zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat_(2,2));
+    int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat_(axis_,axis_));
     zBins_[frame].push_back(zBin);
     
     return positions_[frame].size() - 1;
@@ -239,6 +252,7 @@ namespace OpenMD {
       ofs << "# " << r.getBuildDate() << "\n";
       ofs << "# selection script1: \"" << selectionScript1_ ;
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      ofs << "# privilegedAxis computed as " << axisLabel_ << " axis \n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 

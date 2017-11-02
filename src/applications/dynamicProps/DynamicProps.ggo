@@ -40,6 +40,7 @@ option  "rcut"          c       "cutoff radius (angstroms)"                 doub
 option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             optional
 option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              optional
 option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            optional
+option  "privilegedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
 defgroup "correlation function" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"     s  "selection correlation function" group="correlation function"
 groupoption "rcorr"        r  "mean squared displacement" group="correlation function"

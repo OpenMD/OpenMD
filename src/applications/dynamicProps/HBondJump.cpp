@@ -490,13 +490,26 @@ namespace OpenMD {
   HBondJumpZ::HBondJumpZ(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2,
                          double OOcut, double thetaCut, double OHcut,
-                         int nZBins)
+                         int nZBins, int axis)
     : HBondJump(info, filename, sele1, sele2, OOcut, thetaCut, OHcut),
-      nZBins_(nZBins) {
+      nZBins_(nZBins), axis_(axis) {
 
     setCorrFuncType("HBondJumpZ");
     setOutputName(getPrefix(dumpFilename_) + ".jumpZ");
 
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+    
     zbin_.resize(nFrames_);
     histogram_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
@@ -520,7 +533,7 @@ namespace OpenMD {
     int hInd, index, aInd, zBin;
     
     Mat3x3d hmat = currentSnapshot_->getHmat();
-    RealType halfBoxZ_ = hmat(2,2) / 2.0;      
+    RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
 
     // Register all the possible HBond donor hydrogens:
     for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
@@ -558,7 +571,7 @@ namespace OpenMD {
               pos = hPos;
               if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
                 currentSnapshot_->wrapVector(pos);
-              zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+              zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
               zbin_[frame][index] = zBin;              
             }            
           }
@@ -589,7 +602,7 @@ namespace OpenMD {
               pos = hPos;
               if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
                 currentSnapshot_->wrapVector(pos);
-              zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+              zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
               zbin_[frame][index] = zBin;
             }
           }
@@ -735,6 +748,7 @@ namespace OpenMD {
       ofs << "# " << r.getBuildDate() << "\n";
       ofs << "# selection script1: \"" << selectionScript1_ ;
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      ofs << "# privilegedAxis computed as " << axisLabel_ << " axis \n";	    
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tcorrVal\n";

@@ -51,10 +51,10 @@ namespace OpenMD {
                                        const std::string& filename, 
                                        const std::string& sele1, 
                                        const std::string& sele2, 
-                                       int order, int nZbins)
+                                       int order, int nZbins, int axis)
     : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2,
                              DataStorage::dslPosition |
-                             DataStorage::dslAmat ), nZBins_(nZbins) {
+                             DataStorage::dslAmat ), nZBins_(nZbins), axis_(axis) {
     
     setCorrFuncType("Legendre Correlation Function of Z");
     setOutputName(getPrefix(dumpFilename_) + ".lcorrZ");
@@ -67,7 +67,24 @@ namespace OpenMD {
 
     if (!uniqueSelections_) {
       seleMan2_ = seleMan1_;
-    }    
+    }
+
+    // Compute complementary axes to the privileged axis
+    xaxis_ = (axis_ + 1) % 3;
+    yaxis_ = (axis_ + 2) % 3;
+
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
 
     rotMats_.resize(nTimeBins_);
     zbin_.resize(nTimeBins_);
@@ -85,7 +102,7 @@ namespace OpenMD {
 
   void LegendreCorrFuncZ::computeFrame(int frame) {
     Mat3x3d hmat = currentSnapshot_ ->getHmat();
-    boxZ_ = hmat(2,2);
+    boxZ_ = hmat(axis_,axis_);
     halfBoxZ_ = boxZ_ / 2.0;      
 
     AutoCorrFunc<Vector3d>::computeFrame(frame);
@@ -99,7 +116,7 @@ namespace OpenMD {
     Vector3d pos = sd->getPos();
     if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
       currentSnapshot_->wrapVector(pos);
-    int zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / boxZ_);
+    int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / boxZ_);
     zbin_[frame].push_back(zBin);
     
     return rotMats_[frame].size() - 1;
@@ -108,13 +125,13 @@ namespace OpenMD {
   Vector3d LegendreCorrFuncZ::calcCorrVal(int frame1, int frame2,
                                           int id1, int id2) {
     
-    Vector3d v1x = rotMats_[frame1][id1].getRow(0);
-    Vector3d v1y = rotMats_[frame1][id1].getRow(1);    
-    Vector3d v1z = rotMats_[frame1][id1].getRow(2);
+    Vector3d v1x = rotMats_[frame1][id1].getRow(xaxis_);
+    Vector3d v1y = rotMats_[frame1][id1].getRow(yaxis_);    
+    Vector3d v1z = rotMats_[frame1][id1].getRow(axis_);
 
-    Vector3d v2x = rotMats_[frame2][id2].getRow(0);
-    Vector3d v2y = rotMats_[frame2][id2].getRow(1);    
-    Vector3d v2z = rotMats_[frame2][id2].getRow(2);
+    Vector3d v2x = rotMats_[frame2][id2].getRow(xaxis_);
+    Vector3d v2y = rotMats_[frame2][id2].getRow(yaxis_);    
+    Vector3d v2z = rotMats_[frame2][id2].getRow(axis_);
     
     RealType uxprod = legendre_.evaluate(dot(v1x, v2x)/(v1x.length()*v2x.length()));
     RealType uyprod = legendre_.evaluate(dot(v1y, v2y)/(v1y.length()*v2y.length()));
@@ -205,6 +222,7 @@ namespace OpenMD {
       ofs << "# " << r.getBuildDate() << "\n";
       ofs << "# selection script1: \"" << selectionScript1_ ;
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      ofs << "# privilegedAxis computed as " << axisLabel_ << " axis \n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 

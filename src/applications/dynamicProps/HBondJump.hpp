@@ -88,7 +88,7 @@ namespace OpenMD {
   public:
     HBondJumpZ(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2, double OOCut,
-               double thetaCut, double OHCut, int nZbins);
+               double thetaCut, double OHCut, int nZbins, int axis=2);
     virtual int  registerHydrogen(int frame, int hIndex);
     virtual void findHBonds( int frame );
     virtual void correlation();
@@ -100,6 +100,9 @@ namespace OpenMD {
     std::vector<std::vector<int> > counts_;
     std::vector<std::vector<int> > zbin_;
     int nZBins_;
+    int axis_;
+    std::string axisLabel_;
+
   };
 }
 #endif

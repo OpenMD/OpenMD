@@ -52,9 +52,9 @@ namespace OpenMD {
              const std::string& sele1, 
              const std::string& sele2, 
              int order, int nZbins,
-             long long int memSize)
+             long long int memSize, int axis)
     : ParticleTimeCorrFunc(info, filename, sele1, sele2, 
-                           DataStorage::dslAmat, memSize), nZBins_(nZbins) {
+                           DataStorage::dslAmat, memSize), nZBins_(nZbins), axis_(axis) {
 
       setCorrFuncType("Legendre Correlation Function for OH bond vector of Z");
       std::stringstream params;
@@ -71,6 +71,24 @@ namespace OpenMD {
         histogram_[i].resize(nZBins_);
         counts_[i].resize(nZBins_);
       }
+      
+      // Compute complementary axes to the privileged axis
+      xaxis_ = (axis_ + 1) % 3;
+      yaxis_ = (axis_ + 2) % 3;
+      
+      switch(axis_) {
+      case 0:
+	axisLabel_ = "x";
+	break;
+      case 1:
+	axisLabel_ = "y";
+	break;
+      case 2:
+      default:
+	axisLabel_ = "z";
+	break;
+      }
+
       LegendrePolynomial polynomial(order);
       legendre_ = polynomial.getLegendrePolynomial(order);
     }
@@ -81,7 +99,7 @@ namespace OpenMD {
     assert(snapshot1 && snapshot2);
 
     Mat3x3d hmat = snapshot1->getHmat();
-    RealType halfBoxZ_ = hmat(2,2) / 2.0;      
+    RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
 
     RealType time1 = snapshot1->getTime();
     RealType time2 = snapshot2->getTime();
@@ -100,7 +118,7 @@ namespace OpenMD {
       Vector3d pos = sd1->getPos();
       if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
         snapshot1->wrapVector(pos);
-      int zBin = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+      int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
 
       Vector3d corrVals = calcCorrVals(frame1, frame2, sd1, sd2);
       histogram_[timeBin][zBin] += corrVals; 
@@ -143,11 +161,11 @@ namespace OpenMD {
     // Vector3d v1x = sd1->getA(frame1).getRow(0);
     // Vector3d v2x = sd2->getA(frame2).getRow(0);
 
-    Vector3d v1y = sd1->getA(frame1).getRow(1);
-    Vector3d v2y = sd2->getA(frame2).getRow(1);
+    Vector3d v1y = sd1->getA(frame1).getRow(yaxis_);
+    Vector3d v2y = sd2->getA(frame2).getRow(yaxis_);
 
-    Vector3d v1z = sd1->getA(frame1).getRow(2);
-    Vector3d v2z = sd2->getA(frame2).getRow(2);
+    Vector3d v1z = sd1->getA(frame1).getRow(axis_);
+    Vector3d v2z = sd2->getA(frame2).getRow(axis_);
 
     Vector3d u1 = 0.81649 * v1y + 0.57736 * v1z;
     Vector3d u2 = 0.81649 * v2y + 0.57736 * v2z;
@@ -192,6 +210,7 @@ namespace OpenMD {
       ofs1 << "# " << r.getBuildDate() << "\n";
       ofs1 << "# selection script1: \"" << selectionScript1_ ;
       ofs1 << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      ofs1 << "# privilegedAxis computed as " << axisLabel_ << " axis \n";
       if (!paramString_.empty())
         ofs1 << "# parameters: " << paramString_ << "\n";
 
@@ -202,7 +221,7 @@ namespace OpenMD {
         ofs1 << time_[i];
 
         for (int j = 0; j < nZBins_; ++j) {          
-          ofs1 << "\t" << 0.5*(histogram_[i][j](1) +  histogram_[i][j](2));
+          ofs1 << "\t" << 0.5*(histogram_[i][j](yaxis_) +  histogram_[i][j](axis_));
         }
         ofs1 << "\n";
       }
@@ -223,6 +242,7 @@ namespace OpenMD {
       ofs2 << "# " << r.getBuildDate() << "\n";
       ofs2 << "# selection script1: \"" << selectionScript1_ ;
       ofs2 << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      ofs2 << "# privilegedAxis computed as " << axisLabel_ << " axis \n";
       if (!paramString_.empty())
         ofs2 << "# parameters: " << paramString_ << "\n";
       
@@ -233,7 +253,7 @@ namespace OpenMD {
         ofs2 << time_[i];
 
         for (int j = 0; j < nZBins_; ++j) {          
-          ofs2 << "\t" << histogram_[i][j](0);
+          ofs2 << "\t" << histogram_[i][j](xaxis_);
         }
         ofs2 << "\n";
       }

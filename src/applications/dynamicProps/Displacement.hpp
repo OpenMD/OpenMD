@@ -59,7 +59,7 @@ namespace OpenMD {
   public:
     DisplacementZ(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,
-                  int nZbins);
+                  int nZbins, int axis=2);
   private:
     virtual void computeFrame(int frame);
     virtual int computeProperty1(int frame, StuntDouble* sd);
@@ -76,6 +76,9 @@ namespace OpenMD {
     Mat3x3d hmat_;
     RealType halfBoxZ_;
     int nZBins_;
+    int axis_;
+    std::string axisLabel_;
+
   };
 
 }

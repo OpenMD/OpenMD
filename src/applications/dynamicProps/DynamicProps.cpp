@@ -125,6 +125,25 @@ int main(int argc, char* argv[]){
     }
   }
 
+  // convert privilegedAxis to corresponding integer
+  // x axis -> 0
+  // y axis -> 1
+  // z axis -> 2 (default)
+
+  int privilegedAxis;
+  switch (args_info.privilegedAxis_arg) {
+  case privilegedAxis_arg_x:
+    privilegedAxis = 0;
+    break;
+  case privilegedAxis_arg_y:
+    privilegedAxis = 1;
+    break;
+  case privilegedAxis_arg_z:
+  default:
+    privilegedAxis = 2;
+    break;
+  }
+  
   // use the memory string to figure out how much memory we can use:
   char *end;
   long long int memSize = memparse(args_info.memory_arg, &end);
@@ -159,7 +178,7 @@ int main(int argc, char* argv[]){
 					memSize);
   } else if (args_info.rcorrZ_given) {
     corrFunc = new RCorrFuncZ(info, dumpFileName, sele1, sele2,
-                              args_info.nzbins_arg);
+                              args_info.nzbins_arg, privilegedAxis);
   } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.vcorrZ_given) {
@@ -212,7 +231,7 @@ int main(int argc, char* argv[]){
     }
 
     corrFunc = new LegendreCorrFuncZ(info, dumpFileName, sele1, sele2, order,
-				     args_info.nzbins_arg);
+				     args_info.nzbins_arg, privilegedAxis);
 
   } else if (args_info.cohZ_given) {
     int order(0);
@@ -227,7 +246,7 @@ int main(int argc, char* argv[]){
     }
 
     corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order,
-			args_info.nzbins_arg, memSize);
+			args_info.nzbins_arg, memSize, privilegedAxis);
 
   } else if (args_info.jumptime_given) {
     corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,
@@ -238,7 +257,7 @@ int main(int argc, char* argv[]){
     corrFunc = new HBondJumpZ(info, dumpFileName, sele1, sele2,
                               args_info.OOcut_arg,
                               args_info.thetacut_arg,
-                              args_info.OHcut_arg, args_info.nzbins_arg);
+                              args_info.OHcut_arg, args_info.nzbins_arg, privilegedAxis);
   } else if (args_info.persistence_given) {
     corrFunc = new HBondPersistence(info, dumpFileName, sele1, sele2,
                                     args_info.OOcut_arg,
@@ -248,7 +267,7 @@ int main(int argc, char* argv[]){
     corrFunc = new Displacement(info, dumpFileName, sele1, sele2);
   } else if (args_info.dispZ_given) {
     corrFunc = new DisplacementZ(info, dumpFileName, sele1, sele2,
-                                 args_info.nzbins_arg);
+                                 args_info.nzbins_arg, privilegedAxis);
   }
   
   if (args_info.output_given) {

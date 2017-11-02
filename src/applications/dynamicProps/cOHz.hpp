@@ -51,7 +51,7 @@ namespace OpenMD {
 
   class COHZ : public ParticleTimeCorrFunc {
   public:
-    COHZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, int nZbins, long long int memSize);   
+    COHZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, int nZbins, long long int memSize, int axis=2);   
 
   private:
     virtual void correlateFrames(int frame1, int frame2);
@@ -86,6 +86,11 @@ namespace OpenMD {
     vector<vector<Vector3d> > histogram_;
     vector<vector<int> > counts_;
     int nZBins_;
+    int axis_;
+    int xaxis_;
+    int yaxis_; 
+    std::string axisLabel_;
+
     std::string outputFilename1_;
     std::string outputFilename2_;
 

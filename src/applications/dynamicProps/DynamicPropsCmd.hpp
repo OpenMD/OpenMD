@@ -34,6 +34,8 @@ extern "C" {
 #define CMDLINE_PARSER_VERSION ""
 #endif
 
+enum enum_privilegedAxis { privilegedAxis__NULL = -1, privilegedAxis_arg_x = 0, privilegedAxis_arg_y, privilegedAxis_arg_z };
+
 /** @brief Where the command line options are stored */
 struct gengetopt_args_info
 {
@@ -72,6 +74,9 @@ struct gengetopt_args_info
   double OHcut_arg;	/**< @brief Oxygen-Hydrogen cutoff radius (angstroms) (default='2.45').  */
   char * OHcut_orig;	/**< @brief Oxygen-Hydrogen cutoff radius (angstroms) original value given at command line.  */
   const char *OHcut_help; /**< @brief Oxygen-Hydrogen cutoff radius (angstroms) help description.  */
+  enum enum_privilegedAxis privilegedAxis_arg;	/**< @brief which axis is special for spatial analysis (default = z axis) (default='z').  */
+  char * privilegedAxis_orig;	/**< @brief which axis is special for spatial analysis (default = z axis) original value given at command line.  */
+  const char *privilegedAxis_help; /**< @brief which axis is special for spatial analysis (default = z axis) help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief mean squared displacement help description.  */
   const char *rcorrZ_help; /**< @brief mean squared displacement binned by Z help description.  */
@@ -115,6 +120,7 @@ struct gengetopt_args_info
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
   unsigned int OHcut_given ;	/**< @brief Whether OHcut was given.  */
+  unsigned int privilegedAxis_given ;	/**< @brief Whether privilegedAxis was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
@@ -262,6 +268,31 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
 
 /**
+ * The config file parser (deprecated version)
+ * @param filename the name of the config file
+ * @param args_info the structure where option information will be stored
+ * @param override whether to override possibly already present options
+ * @param initialize whether to initialize the option structure my_args_info
+ * @param check_required whether to check that all required options were provided
+ * @return 0 if everything went fine, NON 0 if an error took place
+ * @deprecated use cmdline_parser_config_file() instead
+ */
+int cmdline_parser_configfile (const char *filename,
+  struct gengetopt_args_info *args_info,
+  int override, int initialize, int check_required);
+
+/**
+ * The config file parser
+ * @param filename the name of the config file
+ * @param args_info the structure where option information will be stored
+ * @param params additional parameters for the parser
+ * @return 0 if everything went fine, NON 0 if an error took place
+ */
+int cmdline_parser_config_file (const char *filename,
+  struct gengetopt_args_info *args_info,
+  struct cmdline_parser_params *params);
+
+/**
  * Checks that all the required options were specified
  * @param args_info the structure to check
  * @param prog_name the name of the program that will be used to print
@@ -270,6 +301,8 @@ void cmdline_parser_free (struct gengetopt_args_info *args_info);
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_privilegedAxis_values[];  /**< @brief Possible values for privilegedAxis. */
 
 
 #ifdef __cplusplus

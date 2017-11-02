@@ -53,7 +53,7 @@ namespace OpenMD {
   public:
     LegendreCorrFuncZ(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2,
-                      int order, int nZbins);   
+                      int order, int nZbins, int axis=2);   
 
   private:
     virtual void validateSelection(SelectionManager& seleMan);
@@ -68,6 +68,10 @@ namespace OpenMD {
     DoublePolynomial legendre_;
     int nZBins_;
     RealType boxZ_, halfBoxZ_;
+    int axis_;
+    int xaxis_;
+    int yaxis_; 
+    std::string axisLabel_;
     
     std::vector<std::vector<RotMat3x3d> > rotMats_;
     std::vector<std::vector<Vector3d> > histogram_;
