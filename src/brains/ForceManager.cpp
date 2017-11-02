@@ -1075,4 +1075,775 @@ namespace OpenMD {
 
     }
   }
+
+  void ForceManager::calcSelectedForces(Molecule* mol1, Molecule* mol2) {
+    if (!initialized_) initialize();
+    selectedPreCalculation(mol1, mol2);
+    selectedShortRangeInteractions(mol1, mol2);
+    selectedLongRangeInteractions(mol1, mol2);
+    selectedPostCalculation(mol1, mol2);
+  }
+  
+  void ForceManager::selectedPreCalculation(Molecule* mol1, Molecule* mol2) {
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    Molecule::CutoffGroupIterator ci;
+    CutoffGroup* cg;
+
+    // forces and potentials are zeroed here, before any are
+    // accumulated.
+
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    snap->setBondPotential(0.0);
+    snap->setBendPotential(0.0);
+    snap->setTorsionPotential(0.0);
+    snap->setInversionPotential(0.0);
+
+    potVec zeroPot(0.0);
+    snap->setLongRangePotential(zeroPot);
+    snap->setExcludedPotentials(zeroPot);
+    if (doPotentialSelection_)
+      snap->setSelectionPotentials(zeroPot);
+
+    snap->setRestraintPotential(0.0);
+    snap->setRawPotential(0.0);
+
+    // First we zero out for mol1
+    for(atom = mol1->beginAtom(ai); atom != NULL;
+	atom = mol1->nextAtom(ai)){
+      atom->zeroForcesAndTorques();
+    } 
+    //change the positions of atoms which belong to the rigidbodies
+    for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
+	 rb = mol1->nextRigidBody(rbIter)) {
+      rb->zeroForcesAndTorques();
+    }
+    if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
+      for(cg = mol1->beginCutoffGroup(ci); cg != NULL;
+	  cg = mol1->nextCutoffGroup(ci)) {
+	//calculate the center of mass of cutoff group
+	cg->updateCOM();
+      }
+    }
+
+    // Next we zero out for mol2
+    for(atom = mol2->beginAtom(ai); atom != NULL;
+	atom = mol->nextAtom(ai)){
+      atom->zeroForcesAndTorques();
+    }
+    //change the positions of atoms which belong to the rigidbodies
+    for (rb = mol2->beginRigidBody(rbIter); rb != NULL;
+	 rb = mol2->nextRigidBody(rbIter)) {
+      rb->zeroForcesAndTorques();
+    }
+    if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
+      for(cg = mol2->beginCutoffGroup(ci); cg != NULL;
+	  cg = mol2->nextCutoffGroup(ci)) {
+	//calculate the center of mass of cutoff group
+	cg->updateCOM();
+      }
+    }
+      
+    // Zero out the stress tensor
+    stressTensor *= 0.0;
+    // Zero out the heatFlux
+    fDecomp_->setHeatFlux( Vector3d(0.0) );
+  }
+  
+  void ForceManager::selectedShortRangeInteractions(Molecule* mol1, Molecule* mol2) {
+    Molecule* mol;
+    RigidBody* rb;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    Inversion* inversion;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    Molecule::BondIterator bondIter;;
+    Molecule::BendIterator  bendIter;
+    Molecule::TorsionIterator  torsionIter;
+    Molecule::InversionIterator  inversionIter;
+    RealType bondPotential = 0.0;
+    RealType bendPotential = 0.0;
+    RealType torsionPotential = 0.0;
+    RealType inversionPotential = 0.0;
+    potVec selectionPotential(0.0);
+
+    
+    //First compute for mol1
+    for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
+	 rb = mol1->nextRigidBody(rbIter)) {
+      rb->updateAtoms();
+    }
+
+    for (bond = mol1->beginBond(bondIter); bond != NULL;
+	 bond = mol1->nextBond(bondIter)) {
+      bond->calcForce(doParticlePot_);
+      bondPotential += bond->getPotential();
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(bond->getAtomA()) ||
+	    seleMan_.isSelected(bond->getAtomB()) ) {
+	  selectionPotential[BONDED_FAMILY] += bond->getPotential();
+	}
+      }
+    }
+
+    for (bend = mol1->beginBend(bendIter); bend != NULL;
+	 bend = mol1->nextBend(bendIter)) {
+
+      RealType angle;
+      bend->calcForce(angle, doParticlePot_);
+      RealType currBendPot = bend->getPotential();
+
+      bendPotential += bend->getPotential();
+      map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
+      if (i == bendDataSets.end()) {
+	BendDataSet dataSet;
+	dataSet.prev.angle = dataSet.curr.angle = angle;
+	dataSet.prev.potential = dataSet.curr.potential = currBendPot;
+	dataSet.deltaV = 0.0;
+	bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend,
+								dataSet));
+      }else {
+	i->second.prev.angle = i->second.curr.angle;
+	i->second.prev.potential = i->second.curr.potential;
+	i->second.curr.angle = angle;
+	i->second.curr.potential = currBendPot;
+	i->second.deltaV =  fabs(i->second.curr.potential -
+				 i->second.prev.potential);
+      }
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(bend->getAtomA()) ||
+	    seleMan_.isSelected(bend->getAtomB()) ||
+	    seleMan_.isSelected(bend->getAtomC()) ) {
+	  selectionPotential[BONDED_FAMILY] += bend->getPotential();
+	}
+      }
+    }
+
+    for (torsion = mol1->beginTorsion(torsionIter); torsion != NULL;
+	 torsion = mol1->nextTorsion(torsionIter)) {
+      RealType angle;
+      torsion->calcForce(angle, doParticlePot_);
+      RealType currTorsionPot = torsion->getPotential();
+      torsionPotential += torsion->getPotential();
+      map<Torsion*, TorsionDataSet>::iterator i = torsionDataSets.find(torsion);
+      if (i == torsionDataSets.end()) {
+	TorsionDataSet dataSet;
+	dataSet.prev.angle = dataSet.curr.angle = angle;
+	dataSet.prev.potential = dataSet.curr.potential = currTorsionPot;
+	dataSet.deltaV = 0.0;
+	torsionDataSets.insert(map<Torsion*, TorsionDataSet>::value_type(torsion, dataSet));
+      }else {
+	i->second.prev.angle = i->second.curr.angle;
+	i->second.prev.potential = i->second.curr.potential;
+	i->second.curr.angle = angle;
+	i->second.curr.potential = currTorsionPot;
+	i->second.deltaV =  fabs(i->second.curr.potential -
+				 i->second.prev.potential);
+      }
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(torsion->getAtomA()) ||
+	    seleMan_.isSelected(torsion->getAtomB()) ||
+	    seleMan_.isSelected(torsion->getAtomC()) ||
+	    seleMan_.isSelected(torsion->getAtomD()) ) {
+	  selectionPotential[BONDED_FAMILY] += torsion->getPotential();
+	}
+      }
+      
+    }
+    
+    for (inversion = mol1->beginInversion(inversionIter);
+	 inversion != NULL;
+	 inversion = mol1->nextInversion(inversionIter)) {
+      RealType angle;
+      inversion->calcForce(angle, doParticlePot_);
+      RealType currInversionPot = inversion->getPotential();
+      inversionPotential += inversion->getPotential();
+      map<Inversion*, InversionDataSet>::iterator i = inversionDataSets.find(inversion);
+      if (i == inversionDataSets.end()) {
+	InversionDataSet dataSet;
+	dataSet.prev.angle = dataSet.curr.angle = angle;
+	dataSet.prev.potential = dataSet.curr.potential = currInversionPot;
+	dataSet.deltaV = 0.0;
+	inversionDataSets.insert(map<Inversion*, InversionDataSet>::value_type(inversion, dataSet));
+      }else {
+	i->second.prev.angle = i->second.curr.angle;
+	i->second.prev.potential = i->second.curr.potential;
+	i->second.curr.angle = angle;
+	i->second.curr.potential = currInversionPot;
+	i->second.deltaV =  fabs(i->second.curr.potential -
+				 i->second.prev.potential);
+      }
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(inversion->getAtomA()) ||
+	    seleMan_.isSelected(inversion->getAtomB()) ||
+	    seleMan_.isSelected(inversion->getAtomC()) ||
+	    seleMan_.isSelected(inversion->getAtomD()) ) {
+	  selectionPotential[BONDED_FAMILY] += inversion->getPotential();
+	}
+      }
+    }
+
+
+    //Next compute for mol2
+    for (rb = mol2->beginRigidBody(rbIter); rb != NULL;
+	 rb = mol2->nextRigidBody(rbIter)) {
+      rb->updateAtoms();
+    }
+
+    for (bond = mol2->beginBond(bondIter); bond != NULL;
+	 bond = mol2->nextBond(bondIter)) {
+      bond->calcForce(doParticlePot_);
+      bondPotential += bond->getPotential();
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(bond->getAtomA()) ||
+	    seleMan_.isSelected(bond->getAtomB()) ) {
+	  selectionPotential[BONDED_FAMILY] += bond->getPotential();
+	}
+      }
+    }
+
+    for (bend = mol2->beginBend(bendIter); bend != NULL;
+	 bend = mol2->nextBend(bendIter)) {
+
+      RealType angle;
+      bend->calcForce(angle, doParticlePot_);
+      RealType currBendPot = bend->getPotential();
+
+      bendPotential += bend->getPotential();
+      map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
+      if (i == bendDataSets.end()) {
+	BendDataSet dataSet;
+	dataSet.prev.angle = dataSet.curr.angle = angle;
+	dataSet.prev.potential = dataSet.curr.potential = currBendPot;
+	dataSet.deltaV = 0.0;
+	bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend,
+								dataSet));
+      }else {
+	i->second.prev.angle = i->second.curr.angle;
+	i->second.prev.potential = i->second.curr.potential;
+	i->second.curr.angle = angle;
+	i->second.curr.potential = currBendPot;
+	i->second.deltaV =  fabs(i->second.curr.potential -
+				 i->second.prev.potential);
+      }
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(bend->getAtomA()) ||
+	    seleMan_.isSelected(bend->getAtomB()) ||
+	    seleMan_.isSelected(bend->getAtomC()) ) {
+	  selectionPotential[BONDED_FAMILY] += bend->getPotential();
+	}
+      }
+    }
+
+    for (torsion = mol2->beginTorsion(torsionIter); torsion != NULL;
+	 torsion = mol2->nextTorsion(torsionIter)) {
+      RealType angle;
+      torsion->calcForce(angle, doParticlePot_);
+      RealType currTorsionPot = torsion->getPotential();
+      torsionPotential += torsion->getPotential();
+      map<Torsion*, TorsionDataSet>::iterator i = torsionDataSets.find(torsion);
+      if (i == torsionDataSets.end()) {
+	TorsionDataSet dataSet;
+	dataSet.prev.angle = dataSet.curr.angle = angle;
+	dataSet.prev.potential = dataSet.curr.potential = currTorsionPot;
+	dataSet.deltaV = 0.0;
+	torsionDataSets.insert(map<Torsion*, TorsionDataSet>::value_type(torsion, dataSet));
+      }else {
+	i->second.prev.angle = i->second.curr.angle;
+	i->second.prev.potential = i->second.curr.potential;
+	i->second.curr.angle = angle;
+	i->second.curr.potential = currTorsionPot;
+	i->second.deltaV =  fabs(i->second.curr.potential -
+				 i->second.prev.potential);
+      }
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(torsion->getAtomA()) ||
+	    seleMan_.isSelected(torsion->getAtomB()) ||
+	    seleMan_.isSelected(torsion->getAtomC()) ||
+	    seleMan_.isSelected(torsion->getAtomD()) ) {
+	  selectionPotential[BONDED_FAMILY] += torsion->getPotential();
+	}
+      }
+      
+    }
+    
+    for (inversion = mol2->beginInversion(inversionIter);
+	 inversion != NULL;
+	 inversion = mol2->nextInversion(inversionIter)) {
+      RealType angle;
+      inversion->calcForce(angle, doParticlePot_);
+      RealType currInversionPot = inversion->getPotential();
+      inversionPotential += inversion->getPotential();
+      map<Inversion*, InversionDataSet>::iterator i = inversionDataSets.find(inversion);
+      if (i == inversionDataSets.end()) {
+	InversionDataSet dataSet;
+	dataSet.prev.angle = dataSet.curr.angle = angle;
+	dataSet.prev.potential = dataSet.curr.potential = currInversionPot;
+	dataSet.deltaV = 0.0;
+	inversionDataSets.insert(map<Inversion*, InversionDataSet>::value_type(inversion, dataSet));
+      }else {
+	i->second.prev.angle = i->second.curr.angle;
+	i->second.prev.potential = i->second.curr.potential;
+	i->second.curr.angle = angle;
+	i->second.curr.potential = currInversionPot;
+	i->second.deltaV =  fabs(i->second.curr.potential -
+				 i->second.prev.potential);
+      }
+      if (doPotentialSelection_) {
+	if (seleMan_.isSelected(inversion->getAtomA()) ||
+	    seleMan_.isSelected(inversion->getAtomB()) ||
+	    seleMan_.isSelected(inversion->getAtomC()) ||
+	    seleMan_.isSelected(inversion->getAtomD()) ) {
+	  selectionPotential[BONDED_FAMILY] += inversion->getPotential();
+	}
+      }
+    }
+
+
+    
+#ifdef IS_MPI
+    // Collect from all nodes.  This should eventually be moved into a
+    // SystemDecomposition, but this is a better place than in
+    // Thermo to do the collection.
+
+    MPI_Allreduce(MPI_IN_PLACE, &bondPotential, 1, MPI_REALTYPE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &bendPotential, 1, MPI_REALTYPE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &torsionPotential, 1,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &inversionPotential, 1,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &selectionPotential[BONDED_FAMILY], 1,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    curSnapshot->setBondPotential(bondPotential);
+    curSnapshot->setBendPotential(bendPotential);
+    curSnapshot->setTorsionPotential(torsionPotential);
+    curSnapshot->setInversionPotential(inversionPotential);
+    curSnapshot->setSelectionPotentials(selectionPotential);
+
+    // RealType shortRangePotential = bondPotential + bendPotential +
+    //   torsionPotential +  inversionPotential;
+
+    // curSnapshot->setShortRangePotential(shortRangePotential);
+  }
+  
+  void ForceManager::selectedLongRangeInteractions(Molecule* mol1, Molecule* mol2) {
+    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    DataStorage* config = &(curSnapshot->atomData);
+    DataStorage* cgConfig = &(curSnapshot->cgData);
+
+    //calculate the center of mass of cutoff group
+
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::CutoffGroupIterator ci;
+    CutoffGroup* cg;
+
+    if(info_->getNCutoffGroups() != info_->getNAtoms()){
+      for(cg = mol1->beginCutoffGroup(ci); cg != NULL;
+	  cg = mol1->nextCutoffGroup(ci)) {
+	cg->updateCOM();
+      }
+    }
+    if(info_->getNCutoffGroups() != info_->getNAtoms()){
+      for(cg = mol2->beginCutoffGroup(ci); cg != NULL;
+	  cg = mol2->nextCutoffGroup(ci)) {
+	cg->updateCOM();
+      }
+    }else {
+      // center of mass of the group is the same as position of the atom
+      // if cutoff group does not exist
+      cgConfig->position = config->position;
+      cgConfig->velocity = config->velocity;
+    }
+
+    fDecomp_->zeroWorkArrays();
+    fDecomp_->distributeData();
+
+    int cg1, cg2, atom1, atom2, topoDist;
+    Vector3d d_grp, dag, d, gvel2, vel2;
+    RealType rgrpsq, rgrp, r2, r;
+    RealType electroMult, vdwMult;
+    RealType vij(0.0);
+    Vector3d fij, fg, f1;
+    bool in_switching_region;
+    RealType sw, dswdr, swderiv;
+    vector<int> atomListColumn, atomListRow;
+    InteractionData idat;
+    SelfData sdat;
+    RealType mf;
+    RealType vpair;
+    RealType dVdFQ1(0.0);
+    RealType dVdFQ2(0.0);
+    potVec longRangePotential(0.0);
+    RealType reciprocalPotential(0.0);
+    RealType surfacePotential(0.0);
+    potVec workPot(0.0);
+    potVec exPot(0.0);
+    potVec selectionPotential(0.0);
+    Vector3d eField1(0.0);
+    Vector3d eField2(0.0);
+    RealType sPot1(0.0);
+    RealType sPot2(0.0);
+    bool newAtom1;
+    int gid1, gid2;
+
+    vector<int>::iterator ia, jb;
+
+    int loopStart, loopEnd;
+
+    idat.rcut = &rCut_;
+    idat.vdwMult = &vdwMult;
+    idat.electroMult = &electroMult;
+    idat.pot = &workPot;
+    idat.excludedPot = &exPot;
+    idat.selePot = &selectionPotential;
+    sdat.selfPot = fDecomp_->getSelfPotential();
+    sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
+    sdat.selePot = fDecomp_->getSelectedSelfPotential();
+    idat.vpair = &vpair;
+    idat.dVdFQ1 = &dVdFQ1;
+    idat.dVdFQ2 = &dVdFQ2;
+    idat.eField1 = &eField1;
+    idat.eField2 = &eField2;
+    idat.sPot1 = &sPot1;
+    idat.sPot2 = &sPot2;
+    idat.f1 = &f1;
+    idat.sw = &sw;
+    idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
+    idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE ||
+                         cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
+    idat.doParticlePot = doParticlePot_;
+    idat.doElectricField = doElectricField_;
+    idat.doSitePotential = doSitePotential_;
+    sdat.doParticlePot = doParticlePot_;
+
+    loopEnd = PAIR_LOOP;
+    if (info_->requiresPrepair() ) {
+      loopStart = PREPAIR_LOOP;
+    } else {
+      loopStart = PAIR_LOOP;
+    }
+    for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
+
+      if (iLoop == loopStart) {
+        bool update_nlist = fDecomp_->checkNeighborList();
+        if (update_nlist) {
+          if (!usePeriodicBoundaryConditions_)
+            Mat3x3d bbox = thermo->getBoundingBox();
+          fDecomp_->buildNeighborList(neighborList_, point_);
+        }
+      }
+
+      for (cg1 = 0; cg1 < int(point_.size()) - 1; cg1++) {
+
+        atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
+        newAtom1 = true;
+
+        for (int m2 = point_[cg1]; m2 < point_[cg1+1]; m2++) {
+
+          cg2 = neighborList_[m2];
+
+          d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
+
+          // already wrapped in the getIntergroupVector call:
+          // curSnapshot->wrapVector(d_grp);
+          rgrpsq = d_grp.lengthSquare();
+
+          if (rgrpsq < rCutSq_) {
+            if (iLoop == PAIR_LOOP) {
+              vij = 0.0;
+              fij.zero();
+              eField1.zero();
+              eField2.zero();
+              sPot1 = 0.0;
+              sPot2 = 0.0;
+            }
+
+            in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr,
+                                                       rgrp);
+
+            atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
+
+            if (doHeatFlux_)
+              gvel2 = fDecomp_->getGroupVelocityColumn(cg2);
+
+            for (ia = atomListRow.begin();
+                 ia != atomListRow.end(); ++ia) {
+              atom1 = (*ia);
+
+              if (doPotentialSelection_) {
+                gid1 = fDecomp_->getGlobalIDRow(atom1);
+                idat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+              }
+
+              for (jb = atomListColumn.begin();
+                   jb != atomListColumn.end(); ++jb) {
+                atom2 = (*jb);
+
+                if (doPotentialSelection_) {
+                  gid2 = fDecomp_->getGlobalIDCol(atom2);
+                  idat.isSelected |= seleMan_.isGlobalIDSelected(gid2);
+                }
+
+                if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
+
+                  vpair = 0.0;
+                  workPot = 0.0;
+                  exPot = 0.0;
+                  selectionPotential = 0.0;
+                  f1.zero();
+                  dVdFQ1 = 0.0;
+                  dVdFQ2 = 0.0;
+
+                  fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
+
+                  topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
+                  vdwMult = vdwScale_[topoDist];
+                  electroMult = electrostaticScale_[topoDist];
+
+                  if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
+                    idat.d = &d_grp;
+                    idat.r2 = &rgrpsq;
+                    if (doHeatFlux_)
+                      vel2 = gvel2;
+                  } else {
+                    d = fDecomp_->getInteratomicVector(atom1, atom2);
+                    curSnapshot->wrapVector( d );
+                    r2 = d.lengthSquare();
+                    idat.d = &d;
+                    idat.r2 = &r2;
+                    if (doHeatFlux_)
+                      vel2 = fDecomp_->getAtomVelocityColumn(atom2);
+                  }
+
+                  r = sqrt( *(idat.r2) );
+                  idat.rij = &r;
+
+                  if (iLoop == PREPAIR_LOOP) {
+                    interactionMan_->doPrePair(idat);
+                  } else {
+                    interactionMan_->doPair(idat);
+                    fDecomp_->unpackInteractionData(idat, atom1, atom2);
+                    vij += vpair;
+                    fij += f1;
+                    stressTensor -= outProduct( *(idat.d), f1);
+                    if (doHeatFlux_)
+                      fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
+                  }
+                }
+              }
+            }
+
+            if (iLoop == PAIR_LOOP) {
+              if (in_switching_region) {
+                swderiv = vij * dswdr / rgrp;
+                fg = swderiv * d_grp;
+                fij += fg;
+
+                if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
+                  if (!fDecomp_->skipAtomPair(atomListRow[0],
+                                              atomListColumn[0],
+                                              cg1, cg2)) {
+                  stressTensor -= outProduct( *(idat.d), fg);
+                  if (doHeatFlux_)
+                    fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                  }
+                }
+
+                for (ia = atomListRow.begin();
+                     ia != atomListRow.end(); ++ia) {
+                  atom1 = (*ia);
+                  mf = fDecomp_->getMassFactorRow(atom1);
+                  // fg is the force on atom ia due to cutoff group's
+                  // presence in switching region
+                  fg = swderiv * d_grp * mf;
+                  fDecomp_->addForceToAtomRow(atom1, fg);
+                  if (atomListRow.size() > 1) {
+                    if (info_->usesAtomicVirial()) {
+                      // find the distance between the atom
+                      // and the center of the cutoff group:
+                      dag = fDecomp_->getAtomToGroupVectorRow(atom1, cg1);
+                      stressTensor -= outProduct(dag, fg);
+                      if (doHeatFlux_)
+                        fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
+                    }
+                  }
+                }
+                for (jb = atomListColumn.begin();
+                     jb != atomListColumn.end(); ++jb) {
+                  atom2 = (*jb);
+                  mf = fDecomp_->getMassFactorColumn(atom2);
+                  // fg is the force on atom jb due to cutoff group's
+                  // presence in switching region
+                  fg = -swderiv * d_grp * mf;
+                  fDecomp_->addForceToAtomColumn(atom2, fg);
+
+                  if (atomListColumn.size() > 1) {
+                    if (info_->usesAtomicVirial()) {
+                      // find the distance between the atom
+                      // and the center of the cutoff group:
+                      dag = fDecomp_->getAtomToGroupVectorColumn(atom2, cg2);
+                      stressTensor -= outProduct(dag, fg);
+                      if (doHeatFlux_)
+                        fDecomp_->addToHeatFlux( dag * dot(fg, vel2));
+                    }
+                  }
+                }
+              }
+              //if (!info_->usesAtomicVirial()) {
+              //  stressTensor -= outProduct(d_grp, fij);
+              //  if (doHeatFlux_)
+              //     fDecomp_->addToHeatFlux( d_grp * dot(fij, vel2));
+              //}
+            }
+          }
+        }
+        newAtom1 = false;
+      }
+
+      if (iLoop == PREPAIR_LOOP) {
+        if (info_->requiresPrepair()) {
+
+          fDecomp_->collectIntermediateData();
+
+          for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
+            if (doPotentialSelection_) {
+              gid1 = fDecomp_->getGlobalID(atom1);
+              sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+            }
+
+            fDecomp_->fillSelfData(sdat, atom1);
+            interactionMan_->doPreForce(sdat);
+          }
+
+          fDecomp_->distributeIntermediateData();
+
+        }
+      }
+    }
+
+    // collects pairwise information
+    fDecomp_->collectData();
+    if (cutoffMethod_ == EWALD_FULL) {
+      interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
+      curSnapshot->setReciprocalPotential(reciprocalPotential);
+
+      // interactionMan_->doSurfaceTerm(surfacePotential);
+      curSnapshot->setSurfacePotential(surfacePotential);
+    }
+
+    if (info_->requiresSelfCorrection()) {
+      for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
+        if (doPotentialSelection_) {
+          gid1 = fDecomp_->getGlobalID(atom1);
+          sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
+        }
+
+        fDecomp_->fillSelfData(sdat, atom1);
+        interactionMan_->doSelfCorrection(sdat);
+      }
+    }
+
+    // collects single-atom information
+    fDecomp_->collectSelfData();
+
+    longRangePotential = *(fDecomp_->getSelfPotential()) +
+      *(fDecomp_->getPairwisePotential());
+
+    curSnapshot->setLongRangePotential(longRangePotential);
+
+    curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
+                                       *(fDecomp_->getExcludedPotential()));
+
+    if (doPotentialSelection_) {
+      selectionPotential  = curSnapshot->getSelectionPotentials();
+      selectionPotential += *(fDecomp_->getSelectedSelfPotential());
+      selectionPotential += *(fDecomp_->getSelectedPotential());
+      curSnapshot->setSelectionPotentials(selectionPotential);
+    }
+  }
+  
+  void ForceManager::selectedPostCalculation(Molecule* mol1, Molecule* mol2) {
+    vector<Perturbation*>::iterator pi;
+    for (pi = perturbations_.begin(); pi != perturbations_.end(); ++pi) {
+      (*pi)->applyPerturbation();
+    }
+
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    // collect the atomic forces onto rigid bodies
+    
+    for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
+	 rb = mol1->nextRigidBody(rbIter)) {
+      Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
+      stressTensor += rbTau;
+    }
+
+    for (rb = mol2->beginRigidBody(rbIter); rb != NULL;
+	 rb = mol2->nextRigidBody(rbIter)) {
+      Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
+      stressTensor += rbTau;
+    }
+
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, stressTensor.getArrayPointer(), 9,
+                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+#endif
+    curSnapshot->setStressTensor(stressTensor);
+
+    if (info_->getSimParams()->getUseLongRangeCorrections()) {
+      /*
+        RealType vol = curSnapshot->getVolume();
+        RealType Elrc(0.0);
+        RealType Wlrc(0.0);
+
+        set<AtomType*>::iterator i;
+        set<AtomType*>::iterator j;
+
+        RealType n_i, n_j;
+        RealType rho_i, rho_j;
+        pair<RealType, RealType> LRI;
+
+        for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
+        n_i = RealType(info_->getGlobalCountOfType(*i));
+        rho_i = n_i /  vol;
+        for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
+        n_j = RealType(info_->getGlobalCountOfType(*j));
+        rho_j = n_j / vol;
+
+        LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+
+        Elrc += n_i   * rho_j * LRI.first;
+        Wlrc -= rho_i * rho_j * LRI.second;
+        }
+        }
+        Elrc *= 2.0 * Constants::PI;
+        Wlrc *= 2.0 * Constants::PI;
+
+        RealType lrp = curSnapshot->getLongRangePotential();
+        curSnapshot->setLongRangePotential(lrp + Elrc);
+        stressTensor += Wlrc * SquareMatrix3<RealType>::identity();
+        curSnapshot->setStressTensor(stressTensor);
+      */
+
+    }
+  }
+  
 }

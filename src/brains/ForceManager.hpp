@@ -81,6 +81,7 @@ namespace OpenMD {
     ForceManager(SimInfo * info);                          
     virtual ~ForceManager();
     virtual void calcForces();
+    virtual void calcSelectedForces(Molecule* mol1, Molecule* mol2);
     void initialize();
 
   protected: 
@@ -98,6 +99,11 @@ namespace OpenMD {
     virtual void longRangeInteractions();
     virtual void postCalculation();
 
+    virtual void selectedPreCalculation(Molecule* mol1, Molecule* mol2);        
+    virtual void selectedShortRangeInteractions(Molecule* mol1, Molecule* mol2);
+    virtual void selectedLongRangeInteractions(Molecule* mol1, Molecule* mol2);
+    virtual void selectedPostCalculation(Molecule* mol1, Molecule* mol2);
+    
     SimInfo* info_;        
     ForceField* forceField_;
     InteractionManager* interactionMan_;
