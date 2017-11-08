@@ -43,6 +43,7 @@
 #include "selection/HullFinder.hpp"
 #include "primitives/Molecule.hpp"
 #include "math/ConvexHull.hpp"
+#include "math/AlphaHull.hpp"
 
 namespace OpenMD {
 
@@ -128,6 +129,23 @@ namespace OpenMD {
 #endif
   }
 
+  AlphaHullFinder::AlphaHullFinder(SimInfo* info)
+    : HullFinder(info) {
+    delete surfaceMesh_;
+    
+#ifdef HAVE_QHULL
+    surfaceMesh_ = new AlphaHull(0.0);
+#endif
+  }
+
+  void AlphaHullFinder::setAlpha(RealType alpha) {
+    delete surfaceMesh_;
+    
+#ifdef HAVE_QHULL
+    surfaceMesh_ = new AlphaHull(alpha);
+#endif
+  }
+  
   HullFinder::~HullFinder() {
 #ifdef HAVE_QHULL
     delete surfaceMesh_;

@@ -141,6 +141,10 @@ namespace OpenMD {
 
     void withinInstruction(const Token& instruction, SelectionSet& bs);
     void withinInstruction(const Token& instruction, SelectionSet& bs, int frame);
+
+    SelectionSet alphaHullInstruction(const Token& instruction);
+    SelectionSet alphaHullInstruction(const Token& instruction, int frame);
+    
     SelectionSet allInstruction();
         
     SelectionSet comparatorInstruction(const Token& instruction); 
@@ -225,6 +229,7 @@ namespace OpenMD {
     NameFinder nameFinder;
     DistanceFinder distanceFinder;
     HullFinder hullFinder;
+    AlphaHullFinder alphaHullFinder;
     IndexFinder indexFinder;
     vector<int> nObjects;
 

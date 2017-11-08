@@ -71,6 +71,11 @@ namespace OpenMD {
     RealType surfaceArea_;
     std::vector<StuntDouble*> localSites_;
   };
-  
+
+  class AlphaHullFinder : public HullFinder {
+  public:
+    AlphaHullFinder(SimInfo* si);
+    void setAlpha(RealType alpha);    
+  };
 }
 #endif 

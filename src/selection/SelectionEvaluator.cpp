@@ -55,7 +55,8 @@ namespace OpenMD {
 
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
     : info(si), nameFinder(info), distanceFinder(info), hullFinder(info),
-      indexFinder(info), isLoaded_(false), hasSurfaceArea_(false) {
+      alphaHullFinder(info), indexFinder(info), isLoaded_(false),
+      hasSurfaceArea_(false) {
     nObjects.push_back(info->getNGlobalAtoms() + info->getNGlobalRigidBodies());
     nObjects.push_back(info->getNGlobalBonds());
     nObjects.push_back(info->getNGlobalBends());
@@ -210,6 +211,9 @@ namespace OpenMD {
       case Token::within:
         withinInstruction(instruction, stack.top());
         break;
+      case Token::alphahull:
+        stack.push(alphaHullInstruction(instruction));
+        break;
       case Token::hull:
           stack.push(hull());
         break;
@@ -281,6 +285,9 @@ namespace OpenMD {
       case Token::within:
         withinInstruction(instruction, stack.top(), frame);
         break;
+      case Token::alphahull:
+        stack.push(alphaHullInstruction(instruction, frame));
+        break;        
       case Token::hull:
         stack.push(hull(frame));
         break;
@@ -729,7 +736,51 @@ namespace OpenMD {
     
     bs = distanceFinder.find(bs, distance, frame);            
   }
-  
+
+  SelectionSet SelectionEvaluator::alphaHullInstruction(const Token& instruction){
+
+
+    SelectionSet bs = createSelectionSets();
+
+    boost::any alphaSpec = instruction.value;
+    float alpha(0.0);
+    if (alphaSpec.type() == typeid(float)){
+      alpha = boost::any_cast<float>(alphaSpec);
+    } else if (alphaSpec.type() == typeid(int)) {
+      alpha = boost::any_cast<int>(alphaSpec);    
+    } else {
+      evalError("casting error in alphaHullInstruction");
+      bs.clearAll();
+    }
+
+    alphaHullFinder.setAlpha(alpha);
+    bs = alphaHullFinder.findHull();
+    surfaceArea_ = alphaHullFinder.getSurfaceArea();
+    hasSurfaceArea_ = true;
+    return bs.parallelReduce();
+  }
+
+  SelectionSet SelectionEvaluator::alphaHullInstruction(const Token& instruction, int frame){
+    SelectionSet bs = createSelectionSets();
+
+    boost::any alphaSpec = instruction.value;
+    float alpha(0.0);
+    if (alphaSpec.type() == typeid(float)){
+      alpha = boost::any_cast<float>(alphaSpec);
+    } else if (alphaSpec.type() == typeid(int)) {
+      alpha = boost::any_cast<int>(alphaSpec);    
+    } else {
+      evalError("casting error in alphaHullInstruction");
+      bs.clearAll();
+    }
+    
+    alphaHullFinder.setAlpha(alpha);
+    bs = alphaHullFinder.findHull(frame);
+    surfaceArea_ = alphaHullFinder.getSurfaceArea();
+    hasSurfaceArea_ = true;
+    return bs.parallelReduce();
+  }
+
   void SelectionEvaluator::define() {
     assert(statement.size() >= 3);
     
@@ -936,7 +987,7 @@ namespace OpenMD {
 
     return bs.parallelReduce();
   }
-
+  
   RealType SelectionEvaluator::getCharge(Atom* atom) {
     RealType charge = 0.0;
     AtomType* atomType = atom->getAtomType();
