@@ -313,7 +313,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       double* center = qh_facetcenter(facet->vertices);
 #endif
       double radius = qh_pointdist(center, vertex->point, dim_-1);      
-      //If radius is bigger than alpha, remove tetra. 
+      //If radius is bigger than alpha, remove the tetrahedron
 
       if (radius > alpha_) {
           //if calculating the alphashape, unmark the facet ('good' is
@@ -373,9 +373,8 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
 #else          
           facet->visitid= qh visit_id;
 #endif
-          //If calculating the alphashape, mark the facet('good' is
-          //used as 'marked').  This facet will have some triangles
-          //hidden by the facet's neighbor.
+          //Mark the facet('good' is used as 'marked').  This facet
+          //will have some triangles hidden by the facet's neighbor.
           facet->good=true;
 #ifdef HAVE_QHULL_REENTRANT
           qh_makeridges(qh, facet);
@@ -403,11 +402,12 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   
   ridgeT *ridge, **ridgep;
   FOREACHridge_(set) {
-    if ((!ridge->top->good || !ridge->bottom->good || ridge->top->upperdelaunay || ridge->bottom->upperdelaunay)){
+    if ((!ridge->top->good || !ridge->bottom->good ||
+         ridge->top->upperdelaunay || ridge->bottom->upperdelaunay)){
       ridgesCount++;
       int vertex_n, vertex_i;
       Triangle face;
-            
+      
       Vector3d faceVel = V3Zero;
       Vector3d p[3];
       RealType faceMass = 0.0;
@@ -449,7 +449,8 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       RealType area = face.getArea();
       area_ += area;
       Vector3d normal = face.getUnitNormal();
-      RealType dist =  normal[0] * interiorPoint[0] + normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
+      RealType dist =  normal[0] * interiorPoint[0] +
+        normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
 #ifdef HAVE_QHULL_REENTRANT
       volume_ += dist *area/qh->hull_dim;
 #else      
