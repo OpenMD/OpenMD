@@ -1456,8 +1456,6 @@ namespace OpenMD {
 	  cg = mol1->nextCutoffGroup(ci)) {
 	cg->updateCOM();
       }
-    }
-    if(info_->getNCutoffGroups() != info_->getNAtoms()){
       for(cg = mol2->beginCutoffGroup(ci); cg != NULL;
 	  cg = mol2->nextCutoffGroup(ci)) {
 	cg->updateCOM();
@@ -1540,7 +1538,8 @@ namespace OpenMD {
 
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
-        if (update_nlist) {
+
+  if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
           fDecomp_->buildNeighborList(neighborList_, point_);
