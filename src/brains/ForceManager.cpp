@@ -1156,7 +1156,6 @@ namespace OpenMD {
   }
   
   void ForceManager::selectedShortRangeInteractions(Molecule* mol1, Molecule* mol2) {
-    Molecule* mol;
     RigidBody* rb;
     Bond* bond;
     Bend* bend;
@@ -1447,7 +1446,6 @@ namespace OpenMD {
     //calculate the center of mass of cutoff group
 
     SimInfo::MoleculeIterator mi;
-    Molecule* mol;
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
 
@@ -1782,7 +1780,6 @@ namespace OpenMD {
     }
 
     SimInfo::MoleculeIterator mi;
-    Molecule* mol;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();

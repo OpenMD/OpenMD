@@ -559,6 +559,9 @@ namespace OpenMD {
     case Token::within:
       return clauseWithin();
 
+    case Token::alphahull:
+      return clauseAlphaHull();
+
     case Token::asterisk:
     case Token::identifier:
       return clauseChemObjName();
@@ -647,6 +650,30 @@ namespace OpenMD {
     }
     
     return addTokenToPostfix(Token(Token::within, distance));
+  }
+
+  bool SelectionCompiler::clauseAlphaHull() {
+    tokenNext();                             // alphaHull
+    if (tokenNext().tok != Token::leftparen) {  // (
+      return leftParenthesisExpected();
+    }
+    
+    boost::any alpha;
+    Token tokenAlpha = tokenNext();       // alpha
+    switch(tokenAlpha.tok) {
+    case Token::integer:
+    case Token::decimal:
+      alpha = tokenAlpha.value;
+      break;
+    default:
+      return numberOrKeywordExpected();
+    }
+    
+    if (tokenNext().tok != Token::rightparen) { // )T
+      return rightParenthesisExpected();
+    }
+    
+    return addTokenToPostfix(Token(Token::alphahull, alpha));
   }
 
   bool SelectionCompiler::clauseChemObjName() {

@@ -142,6 +142,7 @@ namespace OpenMD {
     const static int none         = expression | 10;
     const static int name         = expression | 11;
     const static int hull         = expression | dynamic | 12;
+    const static int alphahull    = expression | dynamic | 13;
 
     // miguel 2005 01 01
     // these are used to demark the beginning and end of expressions

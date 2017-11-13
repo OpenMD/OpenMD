@@ -1,4 +1,5 @@
-/* Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
+/*
+ * Copyright (c) 2008,2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -31,21 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
- *  AlphaHull.hpp
- *
- *  Purpose: To calculate alphahull, hull volume using the QuickHull algorithm provided by QHull.
- *
- *  Created by Charles F. Vardeman II on 16 Dec 2009.
- *  @author  Charles F. Vardeman II
- *  @version $Id$
- *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).                 
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).              
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).             
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                  
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).   
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).   
  */
 
 #ifndef MATH_ALPHAHULL_HPP_
@@ -61,6 +55,26 @@
 #include <string>
 
 namespace OpenMD {
+
+  /**
+   * @class AlphaHull 
+   * @brief Compute alpha complex or alpha shape
+   *
+   * Builds the alpha shape (H. Edelsbrunner and P.Mucke,
+   * "Three-dimensional Alpha Shapes," ACM Trans. Graph. 13, 1994) from a
+   * set of atomic locations using the Qhull library,
+   * http://www.qhull.org/
+   *
+   * For a given value of \f$\alpha\f$, the \f$\alpha\f$-shape
+   * includes all of the tetrahedra in the Delaunay triangulation
+   * which have an empty circumsphere with radius equal or smaller
+   * than \f$\alpha\f$.  To carry out this calculation, all points are
+   * lifted to 4D so that each point is \f$(x, y, z, x^2+y^2+z^2)\f$.
+   * The convex hull is computed in 4D, and tetrahedral facets with
+   * circumsphere radii larger than alpha are removed.
+   *
+   *   \param alpha the circumsphere radius to test tetrahedra for elimination
+   */
   class AlphaHull : public Hull {
   public:
     

@@ -276,7 +276,7 @@ def readFile2(mdFileName):
                             jz = float(L[14])
                             angVels2.append([jx, jy, jz])
                         else:
-                            quaternions1.append([0.0, 0.0, 0.0, 0.0])
+                            quaternions2.append([0.0, 0.0, 0.0, 0.0])
                             angVels1.append([0.0, 0.0, 0.0])
 
                         line = mdFile.readline()

@@ -69,6 +69,7 @@ namespace OpenMD {
 
    clausePrimitive  ::= clauseComparator |
    clauseWithin |
+   clauseAlphaHull |
    clauseName |
    none | all |
    ( clauseOr )
@@ -140,6 +141,7 @@ namespace OpenMD {
     bool clauseNot();
     bool clausePrimitive();
     bool clauseWithin();
+    bool clauseAlphaHull();
     bool clauseComparator();
     bool clauseChemObjName();        
     bool clauseIndex();
