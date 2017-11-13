@@ -34,6 +34,8 @@
 //  OPC water model comes from: J.Phys.Chem.Lett. 5, (2014) 3863-3871
 //    S.Izadi, R.Anandakrishnan, A.V.Onufriev
 //
+//  NE6 water model comes from: J. Chem. Phys. Vol. 118, No. 16 (2003) 7401 
+//    H. Nada and J. van der Eerden
 
 begin Options
       Name	"Water"
@@ -45,6 +47,7 @@ O		15.9994
 H		1.0079
 D		2.0141
 EP		0.0
+LP		0.0
 DIP         	9.00764		
 SSD		18.0153		
 SSD1        	18.0153 
@@ -75,6 +78,7 @@ O_POL3                  OW
 O_OPC			OW
 O_SPC-HW		OW
 O_DIP3P			OW
+O_NE6			OW
 H_TIP3P                 HW
 H_TIP4P                 HW
 H_TIP4P-Ice		HW
@@ -85,6 +89,7 @@ H_SPCE                  HW
 H_SPC                   HW
 H_POL3                  HW
 H_OPC			HW
+H_NE6			HW
 D_SPC-HW		DW
 EP_TIP4P                EP
 EP_TIP4P-Ice		EP
@@ -93,6 +98,8 @@ EP_TIP4P-Ew             EP
 EP_TIP5P                EP
 EP_OPC			EP
 EP_TRED			EP
+EP_NE6			EP
+LP_NE6			LP
 end AtomTypes
 
 begin ChargeAtomTypes
@@ -113,12 +120,15 @@ H_SPCE			0.4238
 H_SPC			0.42
 D_SPC-HW		0.435
 H_OPC			0.6791
+H_NE6			0.477
 EP_TIP4P		-1.040
 EP_TIP4P-Ice		-1.1794
 EP_TIP4P-Ew		-1.04844
 EP_TIP4P-2005		-1.1128
 EP_TIP5P		-0.241
 EP_OPC			-1.3582
+EP_NE6			-0.866
+LP_NE6			-0.044
 end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
@@ -137,7 +147,9 @@ O_TIP5P-E       0.178           3.097
 O_SPCE          0.15532         3.16549
 O_SPC           0.15532         3.16549
 O_SPC-HW	0.15532		3.16549
-O_OPC		0.89036		3.16655		
+O_OPC		0.89036		3.16655
+O_NE6		0.170853052	3.115
+H_NE6		0.027585771	0.673
 end LennardJonesAtomTypes
 
 begin DirectionalAtomTypes

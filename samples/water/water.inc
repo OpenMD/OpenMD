@@ -257,6 +257,39 @@ molecule{
 }
 
 molecule{
+  name = "NE6";
+  
+  atom[0]{
+    type = "O_NE6";
+    position( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = "H_NE6";
+    position( 0.0, 0.576029, 0.79283665 );
+  }
+  atom[2]{
+    type = "H_NE6";
+    position( 0.0, -0.576029, 0.79283665 );
+  }
+  atom[3]{
+    type = "EP_NE6";
+    position( 0.0, 0.23, 0.0 );
+  }
+  atom[4]{
+    type = "LP_NE6";
+    position( 0.732813007, -0.50364843, 0.0  );
+  }
+  atom[5]{
+    type = "LP_NE6";
+    position( -0.732813007, -0.50364843, 0.0  );
+  }
+ 
+  rigidBody[0]{    
+    members(0, 1, 2, 3, 4, 5);
+  }
+}
+
+molecule{
   name = "SPCE";
   
   atom[0]{

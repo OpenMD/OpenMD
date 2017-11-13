@@ -437,6 +437,7 @@ sub printWaterMD {
   printTIP4P2005();
   printTIP5P();
   printTIP5PE();
+  printNE6();
   printSPCE();
   printSPC();
   printSPCHW();
@@ -760,6 +761,41 @@ sub printTIP5PE {
 }"
 }
 
+sub printNE6 {
+    print $waterFileHandle "\n\nmolecule{
+  name = \"NE6\";
+  
+  atom[0]{
+    type = \"O_NE6\";
+    position( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = \"H_NE6\";
+    position( 0.0, 0.576029, 0.79283665 );
+  }
+  atom[2]{
+    type = \"H_NE6\";
+    position( 0.0, -0.576029, 0.79283665 );
+  }
+  atom[3]{
+    type = \"EP_NE6\";
+    position( 0.0, 0.23, 0.0 );
+  }
+  atom[4]{
+    type = \"LP_NE6\";
+    position( 0.732813007, -0.50364843, 0.0  );
+  }
+  atom[5]{
+    type = \"LP_NE6\";
+    position( -0.732813007, -0.50364843, 0.0  );
+  }
+ 
+  rigidBody[0]{    
+    members(0, 1, 2, 3, 4, 5);
+  }
+}"
+}
+
 sub printSPCE {
 print $waterFileHandle "\n\nmolecule{
   name = \"SPCE\";
@@ -888,6 +924,7 @@ sub validateWater {
   elsif ($waterName eq 'TIP4P-Ice'){ $waterCase = 17;	}
   elsif ($waterName eq 'TIP4P-2005'){ $switchCase = 18; }
   elsif ($waterName eq 'SPC-HW')   { $waterCase == 19;	}
+  elsif ($waterName eq 'NE6')	   { $waterCase == 20;  }
   else                             { $invalidWater = 1; }
 }
 
@@ -910,6 +947,7 @@ sub printWaterModel {
   elsif ($waterCase == 15) { printSSDQ();    }
   elsif ($waterCase == 16) { printSSDQO();   }
   elsif	($waterCase == 17) { printTIP4PIce();}
-  elsif($waterCase == 18)  { printTIP4P2005();}
-  elsif($waterCase == 19)  { printSPCHW();   }
+  elsif ($waterCase == 18) { printTIP4P2005();}
+  elsif ($waterCase == 19) { printSPCHW();   }
+  elsif ($waterCase == 20) { printNE6();     }
 }
