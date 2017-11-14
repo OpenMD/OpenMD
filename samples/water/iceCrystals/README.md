@@ -5,6 +5,16 @@ The following proton-disordered ice-Ih crystals,
 
 were taken from the supporting information of "Unit cells for hexagonal ice" by J. A. Hayward and J. R. Reimers, JCP 106 (1997) 1518.
 
+
+The following structures are unit cells for proton-ordered ice-Ih crystals.
+
+HO-struct5.omd	HO-struct6.omd	HO-struct7.omd
+
+These structures come from Table 1. of "Quantum-Chemical and Force-Field Investigations of Ice Ih" by Thomas K. Hirsch and Lars Ojamae, J. Phys. Chem. B (2004) 108, 15856-15864. When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the basal surfaces.
+
+
+
+
 NOTE:
 These structures are ideal ice crystals, and should be gently equilibrated with whichever water model you choose. Depending on the model, these starting structures may be more or less favorable. A sample equilibration scheme might be as follows.
 
