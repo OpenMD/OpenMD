@@ -8,12 +8,15 @@ were taken from the supporting information of "Unit cells for hexagonal ice" by 
 
 The following structures are unit cells for proton-ordered ice-Ih crystals.
 
-HO-struct5.omd	HO-struct6.omd	HO-struct7.omd
+HO-struct1.omd		    HO-struct13.omd		HO-struct2.omd		HO-struct6.omd
+HO-struct10.omd		HO-struct14.omd		HO-struct3.omd		HO-struct7.omd
+HO-struct11.omd		HO-struct15.omd		HO-struct4.omd		HO-struct8.omd
+HO-struct12.omd		HO-struct16.omd		HO-struct5.omd		HO-struct9.omd
 
-These structures come from Table 1. of "Quantum-Chemical and Force-Field Investigations of Ice Ih" by Thomas K. Hirsch and Lars Ojamae, J. Phys. Chem. B (2004) 108, 15856-15864. When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the basal surfaces.
+These structures come from Table 1. of "Quantum-Chemical and Force-Field Investigations of Ice Ih" by Thomas K. Hirsch and Lars Ojamae, J. Phys. Chem. B (2004) 108, 15856-15864.
+HO-struct1.omd	is actually ice XI. When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the basal surfaces. 
 
-
-
+In order to generate larger crystals from these structures, use omd2omd with the -x -y -z flags to replicate these unit cells in the x, y, and z dimensions. Also, while you are unable to cleave the crystals with the current OpenMD software, you are able to rotate these crystals exposing the prismatic and secondary prismatic facets using the -p -q -r functionality of omd2omd.
 
 NOTE:
 These structures are ideal ice crystals, and should be gently equilibrated with whichever water model you choose. Depending on the model, these starting structures may be more or less favorable. A sample equilibration scheme might be as follows.
