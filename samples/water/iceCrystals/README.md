@@ -1,5 +1,6 @@
 # This directory contains unit cell and larger structures for simulations of ice crystals.
 
+##Proton-disordered ice crystals
 The following proton-disordered ice-Ih crystals,
 
 3x3x2-C2.omd	3x3x2-e.omd	3x3x2.omd	5x3x3.omd	6x4x4.omd
@@ -7,7 +8,7 @@ The following proton-disordered ice-Ih crystals,
 
 were taken from the supporting information of "Unit cells for hexagonal ice" by J. A. Hayward and J. R. Reimers, JCP 106 (1997) 1518.
 
-
+##Proton-ordered ice unit cells
 The following structures are unit cells for proton-ordered ice-Ih crystals.
 
 HO-struct1.omd		    HO-struct13.omd		HO-struct2.omd		HO-struct6.omd
@@ -20,6 +21,7 @@ HO-struct1.omd	is actually ice XI. When replicated, HO-struct6.omd and HO-struct
 
 In order to generate larger crystals from these structures, use omd2omd with the -x -y -z flags to replicate these unit cells in the x, y, and z dimensions. Also, while you are unable to cleave the crystals with the current OpenMD software, you are able to rotate these crystals exposing the prismatic and secondary prismatic facets using the -p -q -r functionality of omd2omd.
 
+##Sample equilibration scheme
 NOTE:
 These structures are ideal ice crystals, and should be gently equilibrated with whichever water model you choose. Depending on the model, these starting structures may be more or less favorable. A sample equilibration scheme might be as follows.
 
