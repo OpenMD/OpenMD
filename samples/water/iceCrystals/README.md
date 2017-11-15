@@ -37,8 +37,13 @@ The following structures are unit cells for proton-ordered ice-Ih crystals.
 + HO-struct16.omd
 
 These structures come from Table 1. of "Quantum-Chemical and Force-Field Investigations of Ice Ih" by Thomas K. Hirsch and Lars Ojamae, J. Phys. Chem. B (2004) 108, 15856-15864.
-HO-struct1.omd	is actually ice XI. When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the basal surfaces. 
 
+NOTE: HO-struct1.omd	is actually ice XI.
+
+When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the basal surfaces. 
+
+
+## Creating large ice crystals from these structures
 In order to generate larger crystals from these structures, use omd2omd with the -x -y -z flags to replicate these unit cells in the x, y, and z dimensions. Also, while you are unable to cleave the crystals with the current OpenMD software, you are able to rotate these crystals exposing the prismatic and secondary prismatic facets using the -p -q -r functionality of omd2omd.
 
 ## Sample equilibration scheme
