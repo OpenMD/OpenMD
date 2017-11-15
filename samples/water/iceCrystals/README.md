@@ -1,3 +1,5 @@
+# This directory contains unit cell and larger structures for simulations of ice crystals.
+
 The following proton-disordered ice-Ih crystals,
 
 3x3x2-C2.omd	3x3x2-e.omd	3x3x2.omd	5x3x3.omd	6x4x4.omd
