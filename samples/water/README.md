@@ -56,8 +56,14 @@ component block.
 
 ```
 
-Currently OpenMD does not support fluctuating charge water models,
-however, this feature is in development.
+Now, the same stuntDoubles will be treated as *TIP4P* water instead of
+*SPC/E* water. Of course, due to the change in potential you may have
+to re-equilibrate the system. However, no further changes need to be
+made.
+
+In addition to the ease of transferring between potentials, OpenMD
+also has a water system builder which generates OpenMD (.omd) files
+for you.
 
 ## waterBoxer
 
