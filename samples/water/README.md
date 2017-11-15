@@ -67,11 +67,12 @@ for you, **waterBoxer**.
 
 ## waterBoxer
 
-OpenMD also has a utility script to aide in the generation of water
-simulation cells. **waterBoxer** is a perl script which generates FCC
-lattices of water molecules at user-defined densities and system
-sizes. **waterBoxer** prints a helpful discription of how its use and
-functionalities when passed *-h*.
+ **waterBoxer** is a perl script which generates FCC lattices of water
+molecules at user-defined densities and system sizes. The user can
+specifiy which water model to generate a system of, or as described
+above, change the component block definition from the default once
+generated.  **waterBoxer** prints a helpful discription of how its use
+and functionalities when passed *-h*.
 
 
 # References
