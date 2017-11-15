@@ -24,7 +24,9 @@ hexagonal ice" by J. A. Hayward and J. R. Reimers, *J. Chem. Phys.*
 DOI: [10.1063/1.473300](https://doi.org/10.1063/1.473300)
 
 ## Proton-ordered ice unit cells
-The following structures are unit cells for proton-ordered ice-Ih crystals.
+
+The following structures are unit cells for proton-ordered ice-Ih
+crystals.
 
 + HO-struct1.omd
 + HO-struct2.omd
@@ -53,10 +55,11 @@ NOTE: HO-struct1.omd	is actually ice XI.
 When replicated, HO-struct6.omd and HO-struct7.omd create proton
 stripes on the basal surfaces.
 
-## Creating large ice crystals from these structures In order to
-generate larger crystals from these structures, use omd2omd with the
--x -y -z flags to replicate these unit cells in the x, y, and z
-dimensions.
+## Creating large ice crystals from these structures 
+
+In order to generate larger crystals from these structures, use
+omd2omd with the -x -y -z flags to replicate these unit cells in the
+x, y, and z dimensions.
 
 ```
 omd2omd -i HO-struct1.omd -o bigCrystal.omd -x 5 -y 3 -z 5
@@ -73,19 +76,19 @@ omd2omd -i bigCrystal.omd -o prismFace.omd -p 90 -q 90 -r 0
 
 ## Sample equilibration scheme
 
-NOTE: These structures are ideal ice crystals, and should be gently
+NOTE: These structures are ideal ice crystals, and should be *gently*
 equilibrated with whichever water model you choose. Depending on the
 model, these starting structures may be more or less favorable. A
-sample equilibration scheme might be as follows.
+sample equilibration scheme might be:
 
-1. Short NPTxyz at a low temperature, approximately 10 to 50 K, with
-   resetTime set to a small time, approximately 10 to 50 fs.
-2. Once the pressure tensor elements are about zero and the volume is
-   fluctuating around some average, affineScale the simulation cell to
-   the average volume. Turn resetTime off.
-3. Perform an NVT simulation with the targetTemperature at whatever
-   your desired temperature is.
-4. When the temperature is fluctuating about the average, and the
-   total energy is fluctuation about some average, thermalScale the
-   simulation cell to this average energy.
+1. Short NPTxyz run at a low temperature, approximately 10 to 50 K,
+   with resetTime set to a small time, approximately 10 to 50 fs.
+2. Once the pressure tensor elements are nearly zero and the volume is
+   oscillating around some average, use affineScale so scale the
+   simulation cell to the average volume. Turn resetTime off.
+3. Perform an NVT simulation with the targetTemperature set to your
+   desired temperature.
+4. When the temperature has reached the target, and the total energy
+   is oscillating around some average, use thermalizer to scale the
+   simulation energy to this average energy.
 5. You can now perform NVE simulations.
