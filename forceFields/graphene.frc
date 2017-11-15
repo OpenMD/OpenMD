@@ -1,0 +1,80 @@
+// This is the forcefield file for a simulation of propylene monomers
+// (UA) confined between graphene sheets (AA). Based partially on
+// OPLS-AA, and partially on TraPPE-UA
+//
+// Propylene parameters from: C.D. Wick, M.G. Martin, and J.I. Siepmann,
+// "Transferable potentials for phase equilibria. 4. United-atom description
+// of linear and branched alkenes and of alkylbenzenes,"
+// J. Phys. Chem. B, 104, 8008-8016 (2000).
+
+begin Options
+      Name                   = "graphene"
+end Options
+
+begin BaseAtomTypes
+//Name  mass(amu)
+C       12.0107
+H       1.0079
+end BaseAtomTypes
+
+begin AtomTypes
+//Name  BaseAtomType    [mass-override(amu)]
+CJ      C               12.0107      // opls_147, naphthalene fusion C9, charges removed
+HJ      H                1.0079      // opls_146, HA hydrogen benzene, charges removed
+// United-Atom SP3 carbons:
+CH3     C               15.04           
+// United-Atom SP2 carbons:
+CHene   C               13.02
+CH2ene  C               14.03
+end AtomTypes
+
+begin LennardJonesAtomTypes
+//Name          epsilon(kcal/mol)  sigma(angstroms)     
+CJ              0.070           3.55
+HJ              0.030           2.42
+// From TraPPE-UA: JPCB, 109, 24100 and JCPB 102,2569
+CH3             0.1947460018    3.750
+CH2ene          0.1689123485    3.675
+CHene           0.0933985927    3.730
+end LennardJonesAtomTypes
+
+begin BondTypes
+// Bond stretching force constants from 
+// OPLS-AA (k multiplied by 2 because of how we write harmonic potentials):
+// Atom1        Atom2   Harmonic        b0              k (kcal/mol)
+// V_Harmonic = 0.5 * k * (b - bo)^2
+CJ        CJ    Harmonic  1.4000   938.0   // TRP,TYR,PHE
+CJ        HJ    Harmonic  1.0800   734.0   // PHE, etc.
+CH2ene    CHene Harmonic  1.330   1098.0
+CH3       CHene Harmonic  1.540    634.0
+end BondTypes
+
+begin BendTypes
+// Harmonic
+// Atom1        Atom2   Atom3   Harmonic        Theta0  Ktheta
+// V_Harmonic = 0.5 * k * (Theta - Theta0)^2
+// Ktheta: kcal/mole/rad**2
+// Theta0: degrees
+CJ      CJ      CJ      Harmonic   120.000    126.0   // PHE(OL)
+CJ      CJ      HJ      Harmonic   120.000     70.0 
+HJ      CJ      HJ      Harmonic   117.000     70.0   // wlj from HC-CM-HC
+CH2ene  CHene   CH3     Harmonic   119.7      139.94
+end BendTypes
+
+begin TorsionTypes
+// All-atom parameters from OPLS-AA:
+// V_Opls = v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
+// units for v_n: kcal / mol
+// X is wildcard atom type:
+X       CJ      CJ      X       Opls            0.0             7.250           0.0
+HJ      CJ      CJ      HJ      Opls            0.0             7.250           0.0
+HJ      CJ      CJ      CJ      Opls            0.0             7.250           0.0
+CJ      CJ      CJ      CJ      Opls            0.0             7.250           0.0
+end TorsionTypes
+
+begin InversionTypes
+CJ      CJ      CJ      HJ      AmberImproper   1.100
+CJ      CJ      CJ      CJ      AmberImproper   1.100
+CJ      HJ      CJ      CJ      AmberImproper   1.100
+CJ      CJ      HJ      CJ      AmberImproper   1.100
+end InversionTypes
