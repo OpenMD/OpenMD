@@ -28,10 +28,9 @@ What you need to compile and use OpenMD:
  1) A good C++ compiler.  We've built and tested OpenMD on the
     following architecture & compiler combinations:
 
-| Architecture           | CXX            | Notes   |
-| --------------: | :--------: | ------: |
-
-
+ Architecture           | CXX            | Notes   
+ --------------: | :--------: | ------: 
+macOS 10.12 (intel) | c++ | (Apple LLVM version 8.1.0, Open MPI 1.10.3)
 
 
 
