@@ -1,28 +1,6 @@
 <OpenMD version=1>
   <MetaData>
-
-
-molecule{
-  name = "SPCE";
-  
-  atom[0]{
-    type = "O_SPCE";
-    position( 0.0, 0.0, -0.06461 );
-  }
-  atom[1]{
-    type = "H_SPCE";
-    position( 0.0, 0.81649, 0.51275 );
-  }
-  atom[2]{
-    type = "H_SPCE";
-    position( 0.0, -0.81649, 0.51275 );
-  }
-  
-  rigidBody[0]{
-    members(0, 1, 2);
-  }
-
-}
+#include "../water.inc"
 
 component{
   type = "SPCE";
