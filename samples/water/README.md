@@ -1,9 +1,7 @@
 # Water models in OpenMD
 
 OpenMD supports a large number of water models, only some of which
-have examples shown here. Currently OpenMD does not support
-fluctuating charge water models, however, this feature is in
-development.
+have examples shown here.
 
 ### Single site models
 + SSD, SSD-E, SSD-RF
@@ -30,6 +28,43 @@ simulation cells. **waterBoxer** is a perl script which generates FCC
 lattices of water molecules at user-defined densities and system
 sizes. **waterBoxer** prints a helpful discription of how its use and
 functionalities when passed *-h*.
+
+One of the powerful functionalities of OpenMD, is the separation
+between declaration of *components* and *stuntDoubles*. In every
+(.omd) file, a component block is used to specifiy what types of atoms
+or molecules the stuntDoubles correspond to.
+
+```
+	component{
+		type = "SPCE";
+		nMol = 256;
+	}
+
+```
+
+```
+    <StuntDoubles>
+         0    pvqj         -13.882269          -6.595441         -10.074898  8.730000e-04  7.358000e-03  2.248000e-03  7.861640e-01 -3.843370e-01 -3.681500e-01  3.141600e-01 -1.691600e-02  1.558000e-03  1.901000e-02
+         1    pvqj         -10.800233          -3.862809          -9.917968 -1.088300e-02  6.540000e-04  4.554000e-03  4.137720e-01 -7.080340e-01 -4.812670e-01 -3.096160e-01 -7.502000e-03  1.201400e-02  9.878000e-03
+         2    pvqj         -13.359152         -13.264782          -5.753301  3.626000e-03  3.221000e-03  1.990000e-04  5.155220e-01 -1.470710e-01 -5.520980e-01  6.385880e-01 -3.590000e-03 -1.001200e-02 -2.305800e-02
+ ```
+
+Due to this separation, a simulation of water with one model can be
+easily transformed into a simulation with a different water model
+(regardless of the number of potential sites) by simply changing the
+component block.
+
+```
+	component{
+		type = "TIP4P";
+		nMol = 256;
+	}
+
+```
+
+Currently OpenMD does not support fluctuating charge water models,
+however, this feature is in development.
+
 
 # References
 
