@@ -63,7 +63,7 @@ made.
 
 In addition to the ease of transferring between potentials, OpenMD
 also has a water system builder which generates OpenMD (.omd) files
-for you.
+for you, **waterBoxer**.
 
 ## waterBoxer
 
