@@ -14,7 +14,7 @@ Here we outline a variety of types of systems able to be constructed using **sim
 
 Note: to use simpleBuilder, you must have the *<MetaData>* section of an OpenMD (.omd) file as input. Examples of such *<MetaData>* sections are **one_component.omd**, **three_component.omd**, **gold.omd**, and **bimetallic.omd**.
 
-Examples of scripts available here are:
+## Examples of scripts available within **runMe.in** are:
 
 1. Builds an FCC lattice from the <MetaData> block in one_component.omd
 2. Builds an FCC lattice from the <MetaData> block in three_component.omd
