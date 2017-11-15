@@ -31,7 +31,9 @@ What you need to compile and use OpenMD:
  Architecture           | CXX            | Notes   
  --------------: | :--------: | ------: 
 macOS 10.12 (intel) | c++ | (Apple LLVM version 8.1.0, Open MPI 1.10.3)
-
+macOS 10.12 (intel) | g++ | (GNU version 6.3.0)
+Linux (Ubuntu 17.04 – x86\_64) | g++ | (GNU version 6.3.0, Open MPI 2.0.2)
+Linux (RHEL 7.3 - x86_64) |icpc | (Intel version 15.0, Open MPI 1.10.2)
 
 
   Architecture                  CXX  Notes
