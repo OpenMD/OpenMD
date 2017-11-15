@@ -28,15 +28,17 @@ in the "doc" directory.  Sample simulations are available in the
  1) A good C++ compiler.  We've built and tested OpenMD on the
     following architecture & compiler combinations:
 
- Architecture           | CXX            | Notes   
- --------------: | :--------: | ------: 
-macOS 10.12 (intel) | c++ | (Apple LLVM version 8.1.0, Open MPI 1.10.3)
-macOS 10.12 (intel) | g++ | (GNU version 6.3.0)
-Linux (Ubuntu 17.04 – x86\_64) | g++ | (GNU version 6.3.0, Open MPI 2.0.2)
-Linux (RHEL 7.3 - x86_64) |icpc | (Intel version 15.0, Open MPI 1.10.2)
 
-    OpenMD uses features in the standard template library (STL). Most
-    (but not all) C++ compilers support these features.
+|Architecture                 |  CXX | Notes                                   |
+|-----------------------------|:----:|-----------------------------------------|
+|macOS 10.13.1 (intel)        |  c++ | (Apple LLVM version 9.0, OpenMPI 1.10.3)|
+|macOS 10.13.1 (intel)        |  g++ | (GNU version 6.4.0)                     |
+|Linux (Ubuntu 17.04 - x86_64)|  g++ | (GNU version 6.3.0, OpenMPI 2.0.2)      |
+|Linux (RHEL 7.4 - x86_64)    | icpc | (Intel version 17.0.1, OpenMPI 2.1.1)   |
+
+
+    OpenMD uses features in the standard template library (STL). Most (but 
+    not all) C++ compilers support these features.
 
  2) CMake, a cross-platform build system which is available at
     http://www.cmake.org    Most Linux and some Unix distributions
