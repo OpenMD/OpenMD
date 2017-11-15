@@ -19,10 +19,22 @@ were taken from the supporting information of "Unit cells for hexagonal ice" by 
 ## Proton-ordered ice unit cells
 The following structures are unit cells for proton-ordered ice-Ih crystals.
 
-HO-struct1.omd		    HO-struct13.omd		HO-struct2.omd		HO-struct6.omd
-HO-struct10.omd		HO-struct14.omd		HO-struct3.omd		HO-struct7.omd
-HO-struct11.omd		HO-struct15.omd		HO-struct4.omd		HO-struct8.omd
-HO-struct12.omd		HO-struct16.omd		HO-struct5.omd		HO-struct9.omd
++ HO-struct1.omd
++ HO-struct2.omd
++ HO-struct3.omd
++ HO-struct4.omd
++ HO-struct5.omd
++ HO-struct6.omd
++ HO-struct7.omd
++ HO-struct8.omd
++ HO-struct9.omd
++ HO-struct10.omd
++ HO-struct11.omd
++ HO-struct12.omd
++ HO-struct3.omd
++ HO-struct14.omd
++ HO-struct15.omd
++ HO-struct16.omd
 
 These structures come from Table 1. of "Quantum-Chemical and Force-Field Investigations of Ice Ih" by Thomas K. Hirsch and Lars Ojamae, J. Phys. Chem. B (2004) 108, 15856-15864.
 HO-struct1.omd	is actually ice XI. When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the basal surfaces. 
