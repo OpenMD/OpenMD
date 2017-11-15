@@ -2,7 +2,17 @@
 
 Much of the magic outlined below is described in greater detail in **runMe.in** within this directory.
 
-Here we outline a variety of types of systems able to be constructed using **simpleBuilder**. Note: to use simpleBuilder, you must have the *<MetaData>* section of an OpenMD (.omd) file as input. Examples of such *<MetaData>* sections are **one_component.omd**, **three_component.omd**, **gold.omd**, and **bimetallic.omd**.
+Here we outline a variety of types of systems able to be constructed using **simpleBuilder**.
+
++ fcc lattices of a given unit cell
++ nanospheres
++ spherically-capped nanorods
++ pentagonal nanorods
++ icosohedra
++ cuboctaherda
++ truncated cube particles
+
+Note: to use simpleBuilder, you must have the *<MetaData>* section of an OpenMD (.omd) file as input. Examples of such *<MetaData>* sections are **one_component.omd**, **three_component.omd**, **gold.omd**, and **bimetallic.omd**.
 
 Examples of scripts available here are:
 
