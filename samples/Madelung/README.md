@@ -29,10 +29,14 @@ cutoffRadius = 28;
 dampingAlpha = 0.14159292;
 ```
 
-The resultant electrostatic potential is:  -821667.68 kcal / mol
+The resultant electrostatic potential is:
+
+```
+V_electrostatic = -821667.68 kcal / mol
+```
 
 To obtain values for the electrostatic potential in OpenMD, we add the
-ELECTROSTATIC_POTENTIAL keyword to the end of the statFileFormat:
+*ELECTROSTATIC_POTENTIAL* keyword to the end of the statFileFormat:
 
 ```
 	statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
