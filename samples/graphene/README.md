@@ -1,11 +1,13 @@
-This sample illustrates a simulation of united-atom (UA) propylene monomers
-confined between and all-atom (AA) representation of graphene sheets.  The force
-field is based partially on OPLS-AA, and partially on TraPPE-UA.
+This sample illustrates a simulation of united-atom (UA) propylene
+monomers confined between and all-atom (AA) representation of graphene
+sheets.  The force field is based partially on OPLS-AA, and partially
+on TraPPE-UA.
 
 Propylene parameters from: C.D. Wick, M.G. Martin, and J.I. Siepmann,
-"Transferable potentials for phase equilibria. 4. United-atom description of
-linear and branched alkenes and of alkylbenzenes," *J. Phys. Chem. B*, **104**,
-8008-8016 (2000).
+"Transferable potentials for phase equilibria. 4. United-atom
+description of linear and branched alkenes and of alkylbenzenes,"
+*J. Phys. Chem. B*, **104**, pp. 8008-8016 (2000).
+DOI: [10.1021/jp001044x](https://doi.org/10.1021/jp001044x)
 
 Note that the molecule definition in `graphene.inc` includes bonds that span the
 box boundaries.  If you want to extend to larger boxes, start with the molecule
@@ -15,12 +17,17 @@ the new box.
 Files included:
 
 1. `graphene.frc`: Force field file
-2. `graphene.inc`: Molecule definition include file for a graphene sheet (includes cross-box bonding, so assumes a particular box geometry)
-3. `graphene.raw.inc`: Molecule definition without the additional cross-box bonds. Contains unterminated sp<sup>2</sup> carbon atoms.
+2. `graphene.inc`: Molecule definition include file for a graphene
+   sheet (includes cross-box bonding, so assumes a particular box
+   geometry)
+3. `graphene.raw.inc`: Molecule definition without the additional
+   cross-box bonds. Contains unterminated sp<sup>2</sup> carbon atoms.
 4. `graphene.omd`: initial OpenMD file for starting a simulation
 5. `propylene.omd`: Molecule definition include file for the propylene monomers
 6. `propylene.xyz`: A skeletal propylene xyz file for use with Packmol
-7. `system.pack`: A [packmol](http://www.ime.unicamp.br/~martinez/packmol/) input script that places propylene molecules inside bounds of the graphene sheets.
+7. `system.pack`: A [packmol](http://www.ime.unicamp.br/~martinez/packmol/)
+   input script that places propylene molecules inside bounds of the
+   graphene sheets.
 
 To create the initial configurations, we typically run:
 
@@ -65,14 +72,14 @@ nMol = 23;
 
 forceField = "graphene";
 ensemble = NVT;
-cutoffMethod = "shifted_force";  
-electrostaticScreeningMethod = "damped";  
+cutoffMethod = "shifted_force";
+electrostaticScreeningMethod = "damped";
 cutoffRadius = 9;
-dampingAlpha = 0.2;  
-targetTemp = 300;  
-tauThermostat = 1000;  
+dampingAlpha = 0.2;
+targetTemp = 300;
+tauThermostat = 1000;
 dt = 1.0;
-runTime = 1e3;  
-sampleTime = 100;  
+runTime = 1e3;
+sampleTime = 100;
 statusTime = 10;
 ~~~~

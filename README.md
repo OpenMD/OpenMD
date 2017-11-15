@@ -13,7 +13,8 @@ OpenMD simulation is specified using a very simple meta-data language
 that is easy to learn.
 
 Simulations are started in OpenMD using a single Molecular Dynamics (.omd)
-file.  These files must start with the <OpenMD> tag and must have two sections:
+file.  These files must start with the <OpenMD> tag and must have two
+sections:
 
   1) a C-based <MetaData> section, and 
 
@@ -28,17 +29,15 @@ in the "doc" directory.  Sample simulations are available in the
  1) A good C++ compiler.  We've built and tested OpenMD on the
     following architecture & compiler combinations:
 
+| Architecture                   |  CXX | Notes                                     |
+|--------------------------------|:----:|-------------------------------------------|
+| macOS 10.13.1 (intel)          |  c++ | (Apple LLVM version 9.0, Open MPI 1.10.3) |
+| macOS 10.13.1 (intel)          |  g++ | (GNU version 6.4.0)                       |
+| Linux (Ubuntu 17.04 - x86\_64) |  g++ | (GNU version 6.3.0, Open MPI 2.0.2)       |
+| Linux (RHEL 7.4 - x86\_64)     | icpc | (Intel version 17.0.1, Open MPI 2.1.1)    |
 
-|Architecture                 |  CXX | Notes                                   |
-|-----------------------------|:----:|-----------------------------------------|
-|macOS 10.13.1 (intel)        |  c++ | (Apple LLVM version 9.0, OpenMPI 1.10.3)|
-|macOS 10.13.1 (intel)        |  g++ | (GNU version 6.4.0)                     |
-|Linux (Ubuntu 17.04 - x86_64)|  g++ | (GNU version 6.3.0, OpenMPI 2.0.2)      |
-|Linux (RHEL 7.4 - x86_64)    | icpc | (Intel version 17.0.1, OpenMPI 2.1.1)   |
-
-
-    OpenMD uses features in the standard template library (STL). Most (but 
-    not all) C++ compilers support these features.
+   OpenMD uses features in the standard template library (STL). Most (but 
+   not all) C++ compilers support these features.
 
  2) CMake, a cross-platform build system which is available at
     http://www.cmake.org    Most Linux and some Unix distributions
@@ -56,10 +55,10 @@ in the "doc" directory.  Sample simulations are available in the
  4) Other optional (but quite useful) libraries that will unlock some
     features of OpenMD:
 
-      + Open Babel:  http://openbabel.org
-      + Qhull:       http://www.qhull.org
-      + FFTW:        http://www.fftw.org
-      + Doxygen:     http://www.doxygen.org
+      + Open Babel:  [openbabel.org](http://openbabel.org)
+      + Qhull:       [www.qhull.org](http://www.qhull.org)
+      + FFTW:        [www.fftw.org](http://www.fftw.org)
+      + Doxygen:     [www.doxygen.org](http://www.doxygen.org)
 
  5) Some of the utility scripts depend on Python and Perl.  These
     interpreters are common installations on most flavors of Unix and

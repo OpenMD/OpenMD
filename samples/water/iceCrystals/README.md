@@ -1,10 +1,11 @@
 # Structures for simulating Ice-Ih
 
 This directory contains unit cell and larger structures for
-simulations of ice crystals.  Unless otherwise stated, these crystals
+simulations of ice crystals. Unless otherwise stated, these crystals
 are oriented such that the basal face is normal to the z-axis.
 
 ## Proton-disordered ice crystals
+
 The following proton-disordered ice-Ih crystals,
 
 + 3x3x2-C2.omd
@@ -45,7 +46,7 @@ crystals.
 + HO-struct15.omd
 + HO-struct16.omd
 
-These structures come from Table 1. of "Quantum-Chemical and
+These structures come from Table 1. in "Quantum-Chemical and
 Force-Field Investigations of Ice Ih" by Thomas K. Hirsch and Lars
 Ojamae, *J. Phys. Chem. B* **108**, 15856-15864 (2004).
 DOI: [10.1021/jp048434u](https://doi.org/10.1021/jp048434u)

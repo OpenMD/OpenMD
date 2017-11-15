@@ -3,7 +3,6 @@
 The sample in this directory provides a way of checking the value of
 the Madelung Energy for a perfect crystal of NaCl.  The relevant
 quantities are:
-
 ```
 M (Madelung constant) = 1.74756
 a (lattice constant)  = 5.65 Angstroms
@@ -13,7 +12,6 @@ M q^2 / (4 pi e0 a)   = 102.708173 kcal / mol
 
 The file NaCl.omd contains 8000 ions, so the total electrostatic energy
 of the perfect crystal in this file should be:
-
 ```
 V_electrostatic = -821665.38  kcal / mol
 ```
@@ -30,14 +28,12 @@ dampingAlpha = 0.14159292;
 ```
 
 The resultant electrostatic potential is:
-
 ```
 V_electrostatic = -821667.68 kcal / mol
 ```
 
 To obtain values for the electrostatic potential in OpenMD, we add the
-*ELECTROSTATIC_POTENTIAL* keyword to the end of the statFileFormat:
-
+`ELECTROSTATIC_POTENTIAL` keyword to the end of the statFileFormat:
 ```
-	statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
 ```

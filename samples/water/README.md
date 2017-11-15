@@ -23,7 +23,7 @@ have examples shown here.
 
 
 
-One of the powerful functionalities of OpenMD, is the separation
+One of the powerful functionalities of OpenMD is the separation
 between declaration of *components* and *stuntDoubles*. In every
 (.omd) file, a component block is used to specifiy what types of atoms
 or molecules the stuntDoubles correspond to.
@@ -67,7 +67,7 @@ for you, **waterBoxer**.
 
 ## waterBoxer
 
- **waterBoxer** is a perl script which generates FCC lattices of water
+**waterBoxer** is a perl script which generates FCC lattices of water
 molecules at user-defined densities and system sizes. The user can
 specifiy which water model to generate a system of, or as described
 above, change the component block definition from the default once
@@ -78,18 +78,18 @@ and functionalities when passed *-h*.
 # References
 
 | Water Model| Number of Sites | DOI  |
-| ---------:|:-------------:|----:|
-| SSD       | 1             |[10.1016/S0009-2614(03)01044-3](https://doi.org/10.1016/S0009-2614(03)01044-3) |
-| SSD/RF    | 1             |[10.1063/1.1697381](https://doi.org/10.1063/1.1697381) |
-| SSD/E     | 1             |[10.1063/1.1697381](https://doi.org/10.1063/1.1697381) |
-| SPC       | 3 |[10.1021/j100308a038](https://doi.org/10.1021/j100308a038) |
-| SPC-HW    | 3  |[10.1063/1.1359183](https://doi.org/10.1063/1.1359183) |
-| SPC/E     | 3  |[10.1021/j100308a038](https://doi.org/10.1021/j100308a038) |
-| TIP3P     | 3  |[10.1063/1.445869](https://doi.org/10.1063/1.445869) |
-| TIP4P     | 4  |[10.1063/1.445869](https://doi.org/10.1063/1.445869) |
-| TIP4P-Ew  | 4  |[10.1063/1.1683075](https://doi.org/10.1063/1.1683075) |
-| TIP4P/2005 | 4  |[10.1063/1.2121687](https://doi.org/10.1063/1.2121687) |
-| TIP4P/Ice | 4  |[10.1063/1.1931662](https://doi.org/10.1063/1.1931662) |
-| TIP5P     | 5  |[10.1063/1.481505](https://doi.org/10.1063/1.481505) |
-| TIP5P-E   | 5   |[10.1063/1.1652434](https://doi.org/10.1063/1.1652434) |
-| NE6       | 6 |[10.1063/1.1562610](https://doi.org/10.1063/1.1562610) |
+| ----------:|:---------------:|-----:|
+| SSD        | 1 |[10.1016/S0009-2614(03)01044-3](https://doi.org/10.1016/S0009-2614(03)01044-3) |
+| SSD/RF     | 1 |[10.1063/1.1697381](https://doi.org/10.1063/1.1697381)     |
+| SSD/E      | 1 |[10.1063/1.1697381](https://doi.org/10.1063/1.1697381)     |
+| SPC        | 3 |[10.1021/j100308a038](https://doi.org/10.1021/j100308a038) |
+| SPC-HW     | 3 |[10.1063/1.1359183](https://doi.org/10.1063/1.1359183)     |
+| SPC/E      | 3 |[10.1021/j100308a038](https://doi.org/10.1021/j100308a038) |
+| TIP3P      | 3 |[10.1063/1.445869](https://doi.org/10.1063/1.445869)       |
+| TIP4P      | 4 |[10.1063/1.445869](https://doi.org/10.1063/1.445869)       |
+| TIP4P-Ew   | 4 |[10.1063/1.1683075](https://doi.org/10.1063/1.1683075)     |
+| TIP4P/2005 | 4 |[10.1063/1.2121687](https://doi.org/10.1063/1.2121687)     |
+| TIP4P/Ice  | 4 |[10.1063/1.1931662](https://doi.org/10.1063/1.1931662)     |
+| TIP5P      | 5 |[10.1063/1.481505](https://doi.org/10.1063/1.481505)       |
+| TIP5P-E    | 5 |[10.1063/1.1652434](https://doi.org/10.1063/1.1652434)     |
+| NE6        | 6 |[10.1063/1.1562610](https://doi.org/10.1063/1.1562610)     |
