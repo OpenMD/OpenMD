@@ -3,22 +3,22 @@
 OpenMD supports a large number of water models, only some of which
 have examples shown here.
 
-## Single site models
+### Single site models
 + SSD, SSD-E, SSD-RF
 + SSDQ, SSDQO
 
-## Three site models
+### Three site models
 + SPC, SPC-HW
 + SPC/E
 + TIP3P
 
-## Fourt site models
+### Fourt site models
 + TIP4P, TIP4P-Ew, TIP4P/2005, TIP4P/Ice
 
-## Five site models
+### Five site models
 + TIP5P, TIP5P-E
 
-## Six site models
+### Six site models
 + NE6
 
 ## waterBoxer
