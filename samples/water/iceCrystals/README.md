@@ -1,10 +1,18 @@
 # This directory contains unit cell and larger structures for simulations of ice crystals.
-***
+
 ## Proton-disordered ice crystals
 The following proton-disordered ice-Ih crystals,
 
-3x3x2-C2.omd	3x3x2-e.omd	3x3x2.omd	5x3x3.omd	6x4x4.omd
-3x3x2-CH.omd	3x3x2-h.omd	4x3x2.omd	6x3x3.omd	9x5x1.omd
+1. 3x3x2-C2.omd
+2. 3x3x2-e.omd
+3. 3x3x2.omd
+4. 5x3x3.omd
+5. 6x4x4.omd
+6. 3x3x2-CH.omd
+7. 3x3x2-h.omd
+8. 4x3x2.omd
+9. 6x3x3.omd
+10. 9x5x1.omd
 
 were taken from the supporting information of "Unit cells for hexagonal ice" by J. A. Hayward and J. R. Reimers, JCP 106 (1997) 1518.
 
