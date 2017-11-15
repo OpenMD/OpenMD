@@ -1,4 +1,6 @@
 # This directory contains unit cell and larger structures for simulations of ice crystals.
+Unless otherwise stated, these crystals are oriented such that the basal face is normal to the z-axis.
+
 
 ## Proton-disordered ice crystals
 The following proton-disordered ice-Ih crystals,
@@ -53,7 +55,7 @@ omd2omd -i HO-struct1.omd -o bigCrystal.omd -x 5 -y 3 -z 5
 Also, while you are unable to cleave the crystals with the current OpenMD software, you are able to rotate these crystals exposing the prismatic and secondary prismatic facets using the -p -q -r functionality of omd2omd.
 
 ```
-omd2omd -i bigCrystal.omd -p 90 -q 90 -r 0
+omd2omd -i bigCrystal.omd -o prismFace.omd -p 90 -q 90 -r 0
 ```
 
 ## Sample equilibration scheme
