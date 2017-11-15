@@ -21,13 +21,7 @@ have examples shown here.
 ### Six site models
 + NE6
 
-## waterBoxer
 
-OpenMD also has a utility script to aide in the generation of water
-simulation cells. **waterBoxer** is a perl script which generates FCC
-lattices of water molecules at user-defined densities and system
-sizes. **waterBoxer** prints a helpful discription of how its use and
-functionalities when passed *-h*.
 
 One of the powerful functionalities of OpenMD, is the separation
 between declaration of *components* and *stuntDoubles*. In every
@@ -64,6 +58,14 @@ component block.
 
 Currently OpenMD does not support fluctuating charge water models,
 however, this feature is in development.
+
+## waterBoxer
+
+OpenMD also has a utility script to aide in the generation of water
+simulation cells. **waterBoxer** is a perl script which generates FCC
+lattices of water molecules at user-defined densities and system
+sizes. **waterBoxer** prints a helpful discription of how its use and
+functionalities when passed *-h*.
 
 
 # References
