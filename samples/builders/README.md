@@ -11,7 +11,7 @@ using **simpleBuilder**.
 + spherically-capped nanorods
 + pentagonal nanorods
 + icosohedra
-+ cuboctaherda
++ cuboctahedra
 + truncated cube particles
 
 Note: to use simpleBuilder, you must have the *<MetaData>* section of
