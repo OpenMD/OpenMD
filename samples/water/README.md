@@ -12,7 +12,7 @@ have examples shown here.
 + SPC/E
 + TIP3P
 
-### Fourt site models
+### Four site models
 + TIP4P, TIP4P-Ew, TIP4P/2005, TIP4P/Ice
 
 ### Five site models
