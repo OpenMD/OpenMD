@@ -23,7 +23,7 @@ Detailed descriptions of the structures of these files are available
 in the "doc" directory.  Sample simulations are available in the
 "samples" directory.
 
-What you need to compile and use OpenMD:
+## What you need to compile and use OpenMD:
 
  1) A good C++ compiler.  We've built and tested OpenMD on the
     following architecture & compiler combinations:
@@ -34,14 +34,6 @@ macOS 10.12 (intel) | c++ | (Apple LLVM version 8.1.0, Open MPI 1.10.3)
 macOS 10.12 (intel) | g++ | (GNU version 6.3.0)
 Linux (Ubuntu 17.04 – x86\_64) | g++ | (GNU version 6.3.0, Open MPI 2.0.2)
 Linux (RHEL 7.3 - x86_64) |icpc | (Intel version 15.0, Open MPI 1.10.2)
-
-
-  Architecture                  CXX  Notes
-  -------------------------     ---- ----------------------
-  macOS 10.12 (intel)           c++  (Apple LLVM version 8.1.0, Open MPI 1.10.3)
-  macOS 10.12 (intel)           g++  (GNU version 6.3.0)
-  Linux (Ubuntu 17.04 – x86_64) g++  (GNU version 6.3.0, Open MPI 2.0.2)
-  Linux (RHEL 7.3 - x86_64)     icpc (Intel version 15.0, Open MPI 1.10.2)
 
     OpenMD uses features in the standard template library (STL). Most
     (but not all) C++ compilers support these features.
@@ -62,16 +54,16 @@ Linux (RHEL 7.3 - x86_64) |icpc | (Intel version 15.0, Open MPI 1.10.2)
  4) Other optional (but quite useful) libraries that will unlock some
     features of OpenMD:
 
-      Open Babel:  http://openbabel.org
-      Qhull:       http://www.qhull.org
-      FFTW:        http://www.fftw.org
-      Doxygen:     http://www.doxygen.org
+      + Open Babel:  http://openbabel.org
+      + Qhull:       http://www.qhull.org
+      + FFTW:        http://www.fftw.org
+      + Doxygen:     http://www.doxygen.org
 
  5) Some of the utility scripts depend on Python and Perl.  These
     interpreters are common installations on most flavors of Unix and
     Mac OS X.
 
-INSTRUCTIONS
+## Instructions
 
  1) Get, build, and test the required pieces above.
  2) mkdir build
