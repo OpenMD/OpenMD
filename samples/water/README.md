@@ -1,7 +1,9 @@
 # Water models in OpenMD
 
 OpenMD supports a large number of water models, only some of which
-have examples shown here.
+have examples shown here. Currently OpenMD does not support
+fluctuating charge water models, however, this feature is in
+development. 
 
 ### Single site models
 + SSD, SSD-E, SSD-RF
