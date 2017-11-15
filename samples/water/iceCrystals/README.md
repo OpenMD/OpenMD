@@ -46,6 +46,10 @@ When replicated, HO-struct6.omd and HO-struct7.omd create proton stripes on the 
 ## Creating large ice crystals from these structures
 In order to generate larger crystals from these structures, use omd2omd with the -x -y -z flags to replicate these unit cells in the x, y, and z dimensions. Also, while you are unable to cleave the crystals with the current OpenMD software, you are able to rotate these crystals exposing the prismatic and secondary prismatic facets using the -p -q -r functionality of omd2omd.
 
+```
+omd2omd -i HO-struct1.omd -o bigCrystal.omd -x 5 -y 3 -z 5
+```
+
 ## Sample equilibration scheme
 NOTE:
 These structures are ideal ice crystals, and should be gently equilibrated with whichever water model you choose. Depending on the model, these starting structures may be more or less favorable. A sample equilibration scheme might be as follows.
