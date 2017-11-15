@@ -1,0 +1,45 @@
+<OpenMD version=2>
+  <MetaData>
+#include "aromatics.inc"
+
+
+component{
+  type = "toluene";
+	nMol = 1;
+}
+ensemble = NVT;
+surfaceTension = 0.0;
+forceField = "MnM";
+cutoffRadius = 9.0; 
+cutoffMethod = "shifted_force";
+
+targetTemp = 100.0;
+targetPressure = 1.0;
+tauBarostat = 1e4;
+tauThermostat = 1e3;
+
+tempSet = "false";
+thermalTime = 1e3; 
+
+runTime = 5e5; 
+dt = 2.0; 
+
+sampleTime = 1000;
+statusTime = 100;
+resetTime = 500;
+
+## Last run using OpenMD version: 2.6, revision: acf0826e7dd395ab09331c7ed3fa5a51ee425e58
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+        Time: 0
+        Hmat: {{ 6, 0, 0 }, { 0, 6, 0 }, { 0, 0, 6 }}
+  Thermostat: 0 , 0
+    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
+    <StuntDoubles>
+    0	pvqj	1.16521523     0.32866214     0.23923166	0.0	0.0	0.0	1.0	0.0	0.0	0.0	0.0	0.0	0.0
+    </StuntDoubles>
+  </Snapshot>
+</OpenMD>
+
