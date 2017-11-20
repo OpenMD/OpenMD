@@ -373,6 +373,7 @@ namespace OpenMD {
     os << "  </Snapshot>\n";
 
     os.flush();
+    os.rdbuf()->pubsync();
 #else
 
     const int masterNode = 0;
@@ -529,6 +530,7 @@ namespace OpenMD {
     if (worldRank == masterNode) {
       os << "  </Snapshot>\n";
       os.flush();
+      os.rdbuf()->pubsync();
     }
 
 #endif // is_mpi
