@@ -162,7 +162,7 @@ struct gengetopt_args_info
   const char *rodlength_help; /**< @brief length of nanorod help description.  */
   const char *tet_param_help; /**< @brief tetrahedrality order parameter (Qk) help description.  */
   const char *tet_param_z_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
-  const char *tet_param_dens_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
+  const char *tet_param_dens_help; /**< @brief computes density of the tetrahedrality order parameter Qk help description.  */
   const char *tet_param_xyz_help; /**< @brief volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified) help description.  */
   const char *rnemdz_help; /**< @brief slab-resolved RNEMD statistics (temperature, density, velocity) help description.  */
   const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
