@@ -118,7 +118,7 @@ namespace OpenMD {
   template<typename T>
   std::string toString(const T& v) {
     std::ostringstream oss;        
-    if (!oss << v) {
+    if (!(oss << v)) {
       std::cerr << "toString Error" << std::endl;
     }
     return oss.str();
