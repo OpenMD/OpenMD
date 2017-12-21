@@ -31,9 +31,9 @@ in the "doc" directory.  Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                     |
 |--------------------------------|:----:|-------------------------------------------|
-| macOS 10.13.1 (intel)          |  c++ | (Apple LLVM version 9.0, Open MPI 1.10.3) |
-| macOS 10.13.1 (intel)          |  g++ | (GNU version 6.4.0)                       |
-| Linux (Ubuntu 17.04 - x86\_64) |  g++ | (GNU version 6.3.0, Open MPI 2.0.2)       |
+| macOS 10.13.2 (intel)          |  c++ | (Apple LLVM version 9.0, Open MPI 3.0.0)  |
+| macOS 10.13.2 (intel)          |  g++ | (GNU version 6.4.0)                       |
+| Linux (Ubuntu 17.10 - x86\_64) |  g++ | (GNU version 7.2.0, Open MPI 2.1.1)       |
 | Linux (RHEL 7.4 - x86\_64)     | icpc | (Intel version 17.0.1, Open MPI 2.1.1)    |
 
    OpenMD uses features in the standard template library (STL). Most (but 
