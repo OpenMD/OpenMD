@@ -1,0 +1,46 @@
+<OpenMD version=2>
+  <MetaData>
+
+#include "air.inc"
+
+component{
+  type = "N2";
+  nMol = 390;
+}
+component{
+  type = "O2";
+  nMol = 105;
+}
+component{
+  type = "Ar";
+  nMol = 5;
+}
+
+forceField = "Air";
+targetTemp = 298;
+tauThermostat = 1e3;
+cutoffRadius = 14.0;
+dampingAlpha = 0.145;
+cutoffMethod = "SHIFTED_FORCE";
+
+ensemble = "NVT";
+dt = 1.0;
+runTime = 10000;
+
+sampleTime = 500;
+statusTime = 100;
+
+thermalTime = 1000.0;
+tempSet = "false";
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+        Time: 0
+        Hmat: {{ 100, 0, 0 }, { 0, 100, 0 }, { 0, 0, 100 }}
+  Thermostat: 0.0 , 0.0
+    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
+    <StuntDoubles>
+    </StuntDoubles>
+  </Snapshot>
+</OpenMD>

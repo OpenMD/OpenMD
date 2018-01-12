@@ -1,0 +1,60 @@
+// A simple force field for representing common constituents in air mixtures
+
+begin Options
+      Name                   = "Air"
+end Options
+
+begin BaseAtomTypes
+//Name  mass(amu)
+C	12.0107
+O       15.999
+H        1.00794
+N       14.0067
+He       4.002602
+Ne      20.1797         
+Ar      39.948          
+Kr      83.80
+X        0.0 
+end BaseAtomTypes
+
+begin AtomTypes    
+//Name	BaseAtomType	mass-override(amu)
+// TraPPE United-Atom model for methane: JPCB, 109, 24100 and JCPB 102,2569
+CH4	C	16.05	
+// SPC/E Water model: J. Phys. Chem., 1987, 91 (24), pp 6269–6271
+O_SPCE	O
+H_SPCE	H
+//TraPPE model for N2:  AIChE J. 47, 1676-1682 (2001).
+N_N2    N
+X_N2    X
+//TraPPE model for O2:  Theor. Chem. Acc. 115, 391-397 (2006).
+O_O2    O
+X_O2    X
+//TraPPE model for CO2:  AIChE J. 47, 1676-1682 (2001).
+C_CO2   C
+O_CO2   O
+end AtomTypes
+
+begin LennardJonesAtomTypes
+//Name		epsilon(kcal/mol)  sigma(angstroms)
+He              0.020269601874     2.28
+Ne              0.09339914589      2.72
+Ar              0.238068461226     3.41
+Kr              0.32590340268      3.83
+N_N2            0.0715393476       3.31
+O_O2            0.0973730009       3.02
+C_CO2           0.0536545107       2.80
+O_CO2           0.1569891239       3.05
+O_SPCE    	0.15532            3.16549
+CH4       	0.2941062068       3.73
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+// Name 	charge
+O_SPCE   	-0.8476
+H_SPCE    	 0.4238
+N               -0.482
+X_N2             0.964
+O_O2            -0.113
+X_O2             0.226
+end ChargeAtomTypes
