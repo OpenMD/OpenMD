@@ -1,28 +1,28 @@
 # Air models in OpenMD
 
 The files here can help set up some simple gas-phase simulations of
-the common components of air. Three site rigid body models for N~2~,
-O~2~, and CO~2~ are based on the TraPPE force field, while the SPC/E
-water model (also rigid) is included for simulating various humidity
-levels. Lennard-Jones parameters for various noble gases (Ar, He, Ne,
-Kr) are also included.
+the common components of air. Three site rigid body models for
+N<sub>2</sub>, O<sub>2</sub>, and CO<sub>2</sub> are based on the
+TraPPE force field, while the SPC/E water model (also rigid) is
+included for simulating various humidity levels. Lennard-Jones
+parameters for various noble gases (Ar, He, Ne, Kr) are also included.
 
 Note that if you want heat capacities at high temperatures, you would
 need to include vibrational motion for these molecules as well (not
 included in these parameters).
 
-Air has a density at sea level and at 15C of roughly 1.225 kg / m^3^
-(0.001225 g / cm^3^).  The components of dry air are
+Air has a density at sea level and at 15C of roughly 1.225 kg / m<sup>3</sup>
+(0.001225 g / cm<sup>3</sup>).  The components of dry air are
 
-| Gas   |  Fraction by Volume |
-|-------|---------------------|
-| N~2~  | 0.7809              |
-| O~2~  | 0.2095              |
-| Ar    | 0.00933             |
-| CO~2~ | 0.0003              |
-| Ne    | 0.000018            |
-| He    | 0.000005            |
-| Kr    | 0.000001            |
+| Gas            |  Fraction by Volume |
+|----------------|---------------------|
+| N<sub>2</sub>  | 0.7809              |
+| O<sub>2</sub>  | 0.2095              |
+| Ar             | 0.00933             |
+| CO<sub>2</sub> | 0.0003              |
+| Ne             | 0.000018            |
+| He             | 0.000005            |
+| Kr             | 0.000001            |
 
 
 ### Rigid Linear Models
@@ -38,7 +38,7 @@ Air has a density at sea level and at 15C of roughly 1.225 kg / m^3^
 The `air.inc` and `Air.frc` files contain parameters for most of the
 simple components of air.  To build a small box, one might start with
 the `mix.omd` which declares the three most prevalent components
-(N~2~, O~2~, and Ar).
+(N<sub>2</sub>, O<sub>2</sub>, and Ar).
 
 With all 3 of these files in this sample directory, you can make an air
 mixture using randomBuilder:
@@ -65,10 +65,10 @@ Dump2XYZ -i warm.dump -b -m
 
 | Molecular Model| Number of Sites | DOI  |
 | ----------:|:---------------:|-----:|
-| N~2~  | 3 |[10.1002/aic.690470719](https://doi.org/10.1002/aic.690470719) |
-| O~2~  | 3 |[10.1007/s00214-005-0073-1](https://doi.org/10.1007/s00214-005-0073-1) |
-| CO~2~ | 3 |[10.1002/aic.690470719](https://doi.org/10.1002/aic.690470719)     |
+| N<sub>2</sub>  | 3 |[10.1002/aic.690470719](https://doi.org/10.1002/aic.690470719) |
+| O<sub>2</sub>  | 3 |[10.1007/s00214-005-0073-1](https://doi.org/10.1007/s00214-005-0073-1) |
+| CO<sub>2</sub> | 3 |[10.1002/aic.690470719](https://doi.org/10.1002/aic.690470719)     |
 | SPC/E | 3 |[10.1021/j100308a038](https://doi.org/10.1021/j100308a038) |
-| CH~4~ | 1 |[10.1021/jp972543+](https://doi.org/10.1021/jp972543+) |
+| CH<sub>4</sub> | 1 |[10.1021/jp972543+](https://doi.org/10.1021/jp972543+) |
 | He, Ne, Ar, Kr | 1 | Maitland, G.C., Rigby, M., Smith, E.B., and Wakeham, W.A. (1981) *Intermolecular forces: their origin and determination*. Clarendon Press, Oxford. |
 
