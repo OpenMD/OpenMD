@@ -57,7 +57,7 @@ namespace OpenMD {
   class RhoZ : public StaticAnalyser {
     
   public:
-    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);
+    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins, int axis=2);
     
     int getNZBins() {
       return nZBins_; 
@@ -82,6 +82,9 @@ namespace OpenMD {
     std::vector<std::vector<StuntDouble*> > sliceSDLists_;
     std::vector<RealType> zBox_;
     std::vector<RealType> density_;
+    int axis_;
+    std::string axisLabel_;
+
   };
   
 }

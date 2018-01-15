@@ -455,7 +455,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.count_given) {
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
-    analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
+    analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {

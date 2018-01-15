@@ -55,9 +55,9 @@
 namespace OpenMD {
   
   RhoZ::RhoZ(SimInfo* info, const std::string& filename, 
-	     const std::string& sele, int nzbins)
+	     const std::string& sele, int nzbins, int axis)
     : StaticAnalyser(info, filename, nzbins), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info) {
+      evaluator_(info), seleMan_(info), axis_(axis) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -68,6 +68,20 @@ namespace OpenMD {
 
     sliceSDLists_.resize(nBins_);
     density_.resize(nBins_);
+
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+ 
     
     setOutputName(getPrefix(filename) + ".RhoZ");
   }
@@ -93,9 +107,9 @@ namespace OpenMD {
 
       RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
       Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(2,2));
+      zBox_.push_back(hmat(axis_,axis_));
       
-      RealType halfBoxZ_ = hmat(2,2) / 2.0;      
+      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
 
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -115,7 +129,7 @@ namespace OpenMD {
 	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+        int binNo = int(nBins_ * (halfBoxZ_ + pos.z()) / hmat(axis_,axis_));
         sliceSDLists_[binNo].push_back(sd);
       }
 
@@ -147,10 +161,10 @@ namespace OpenMD {
 
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-      rdfStream << "#RhoZ\n";
+      rdfStream << "#Rho(" << axisLabel_ << ")\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#z\tdensity\n";
+      rdfStream << "#" << axisLabel_ << "\tdensity\n";
       for (unsigned int i = 0; i < density_.size(); ++i) {
         RealType z = zAve * (i+0.5)/density_.size();
         rdfStream << z << "\t"
