@@ -129,7 +129,7 @@ namespace OpenMD {
 	   sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + sd[axis_]) / hmat(axis_,axis_));
+        int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
         sliceSDLists_[binNo].push_back(sd);
       }
 
