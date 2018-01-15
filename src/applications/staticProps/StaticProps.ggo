@@ -56,7 +56,8 @@ option  "end"           -       "end internal index"                            
 option  "radius"        -       "nanoparticle radius" double optional
 option  "voxelSize"     v       "voxel size (angstroms)" double optional
 option  "gaussWidth"    -       "Gaussian width (angstroms)" double optional
-option  "privilegedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
+option  "privilegedAxis" -      "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
+option  "privilegedAxis2" -     "which axis is special for spatial analysis (default = x axis)" values="x","y","z" enum default="x" optional
 defgroup "staticProps" groupdesc=" an option of this group is required" required
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"
 groupoption "ior"       -       "icosahedral bond order parameter as a function of radius (--rcut must be specified)" group="staticProps"
@@ -104,3 +105,4 @@ groupoption "kirkwood"  k       "distance-dependent Kirkwood factor" group="stat
 groupoption "kirkwoodQ" -       "distance-dependent Kirkwood factor for quadrupoles" group="staticProps"
 groupoption "densityfield" -   	"computes an average density field" group="staticProps"
 groupoption "velocityfield" -   "computes an average velocity field" group="staticProps"
+groupoption "velocityZ" -   	"computes an average two-dimensional velocity map" group="staticProps"

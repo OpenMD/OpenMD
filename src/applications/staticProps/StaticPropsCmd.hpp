@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 enum enum_privilegedAxis { privilegedAxis__NULL = -1, privilegedAxis_arg_x = 0, privilegedAxis_arg_y, privilegedAxis_arg_z };
+enum enum_privilegedAxis2 { privilegedAxis2__NULL = -1, privilegedAxis2_arg_x = 0, privilegedAxis2_arg_y, privilegedAxis2_arg_z };
 
 /** @brief Where the command line options are stored */
 struct gengetopt_args_info
@@ -134,6 +135,9 @@ struct gengetopt_args_info
   enum enum_privilegedAxis privilegedAxis_arg;	/**< @brief which axis is special for spatial analysis (default = z axis) (default='z').  */
   char * privilegedAxis_orig;	/**< @brief which axis is special for spatial analysis (default = z axis) original value given at command line.  */
   const char *privilegedAxis_help; /**< @brief which axis is special for spatial analysis (default = z axis) help description.  */
+  enum enum_privilegedAxis2 privilegedAxis2_arg;	/**< @brief which axis is special for spatial analysis (default = x axis) (default='x').  */
+  char * privilegedAxis2_orig;	/**< @brief which axis is special for spatial analysis (default = x axis) original value given at command line.  */
+  const char *privilegedAxis2_help; /**< @brief which axis is special for spatial analysis (default = x axis) help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -180,6 +184,7 @@ struct gengetopt_args_info
   const char *kirkwoodQ_help; /**< @brief distance-dependent Kirkwood factor for quadrupoles help description.  */
   const char *densityfield_help; /**< @brief computes an average density field help description.  */
   const char *velocityfield_help; /**< @brief computes an average velocity field help description.  */
+  const char *velocityZ_help; /**< @brief computes an average two-dimensional velocity map help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -214,6 +219,7 @@ struct gengetopt_args_info
   unsigned int voxelSize_given ;	/**< @brief Whether voxelSize was given.  */
   unsigned int gaussWidth_given ;	/**< @brief Whether gaussWidth was given.  */
   unsigned int privilegedAxis_given ;	/**< @brief Whether privilegedAxis was given.  */
+  unsigned int privilegedAxis2_given ;	/**< @brief Whether privilegedAxis2 was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */
@@ -260,6 +266,7 @@ struct gengetopt_args_info
   unsigned int kirkwoodQ_given ;	/**< @brief Whether kirkwoodQ was given.  */
   unsigned int densityfield_given ;	/**< @brief Whether densityfield was given.  */
   unsigned int velocityfield_given ;	/**< @brief Whether velocityfield was given.  */
+  unsigned int velocityZ_given ;	/**< @brief Whether velocityZ was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -413,6 +420,7 @@ int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
 
 extern const char *cmdline_parser_privilegedAxis_values[];  /**< @brief Possible values for privilegedAxis. */
+extern const char *cmdline_parser_privilegedAxis2_values[];  /**< @brief Possible values for privilegedAxis2. */
 
 
 #ifdef __cplusplus

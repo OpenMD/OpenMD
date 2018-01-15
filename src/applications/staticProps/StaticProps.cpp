@@ -91,6 +91,7 @@
 #include "applications/staticProps/TetrahedralityHBMatrix.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
 #include "applications/staticProps/Field.hpp"
+#include "applications/staticProps/VelocityZ.hpp"
 
 using namespace OpenMD;
 
@@ -222,6 +223,19 @@ int main(int argc, char* argv[]){
     break;
   }
 
+  int privilegedAxis2;
+  switch (args_info.privilegedAxis2_arg) {
+  case privilegedAxis2_arg_x:
+    privilegedAxis2 = 0;
+    break;
+  case privilegedAxis2_arg_y:
+    privilegedAxis2 = 1;
+    break;
+  case privilegedAxis2_arg_z:
+  default:
+    privilegedAxis2 = 2;
+    break;
+  }
       
   StaticAnalyser* analyser;
   
@@ -594,7 +608,45 @@ int main(int argc, char* argv[]){
     analyser = new DensityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
   } else if (args_info.velocityfield_given) {
     analyser = new VelocityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
-  }
+  } else if (args_info.velocityZ_given) {
+
+    switch (privilegedAxis) {
+    case 0:
+      if (privilegedAxis2 == 1) {
+	analyser = new VelocityZ(info, dumpFileName, sele1,
+                                 args_info.nbins_x_arg, args_info.nbins_y_arg,
+                                 privilegedAxis, privilegedAxis2);
+      } else if (privilegedAxis2 == 2) {
+	analyser = new VelocityZ(info, dumpFileName, sele1,
+                                 args_info.nbins_x_arg, args_info.nbins_z_arg,
+                                 privilegedAxis, privilegedAxis2);
+      }
+      break;
+    case 1:
+      if (privilegedAxis2 == 0) {
+	analyser = new VelocityZ(info, dumpFileName, sele1,
+				   args_info.nbins_y_arg, args_info.nbins_x_arg,
+				   privilegedAxis, privilegedAxis2);
+      } else if (privilegedAxis2 == 2) {
+	analyser = new VelocityZ(info, dumpFileName, sele1,
+				   args_info.nbins_y_arg, args_info.nbins_z_arg,
+				   privilegedAxis, privilegedAxis2);
+      }
+      break;
+    case 2:
+    default:
+      if (privilegedAxis2 == 0) {
+	analyser = new VelocityZ(info, dumpFileName, sele1,
+				   args_info.nbins_z_arg, args_info.nbins_x_arg,
+				   privilegedAxis, privilegedAxis2);
+      } else if (privilegedAxis2 == 1) {
+	analyser = new VelocityZ(info, dumpFileName, sele1,
+				   args_info.nbins_z_arg, args_info.nbins_y_arg,
+				   privilegedAxis, privilegedAxis2);
+      }
+      break;
+    }
+  } 
 
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);

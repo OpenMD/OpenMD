@@ -66,6 +66,7 @@ const char *gengetopt_args_info_help[] = {
   "  -v, --voxelSize=DOUBLE        voxel size (angstroms)",
   "      --gaussWidth=DOUBLE       Gaussian width (angstroms)",
   "      --privilegedAxis=ENUM     which axis is special for spatial analysis\n                                  (default = z axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`z')",
+  "      --privilegedAxis2=ENUM    which axis is special for spatial analysis\n                                  (default = x axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`x')",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --ior                     icosahedral bond order parameter as a function\n                                  of radius (--rcut must be specified)",
@@ -113,6 +114,7 @@ const char *gengetopt_args_info_help[] = {
   "      --kirkwoodQ               distance-dependent Kirkwood factor for\n                                  quadrupoles",
   "      --densityfield            computes an average density field",
   "      --velocityfield           computes an average velocity field",
+  "      --velocityZ               computes an average two-dimensional velocity\n                                  map",
     0
 };
 
@@ -160,6 +162,7 @@ free_cmd_list(void)
 
 
 const char *cmdline_parser_privilegedAxis_values[] = {"x", "y", "z", 0}; /*< Possible values for privilegedAxis. */
+const char *cmdline_parser_privilegedAxis2_values[] = {"x", "y", "z", 0}; /*< Possible values for privilegedAxis2. */
 
 static char *
 gengetopt_strdup (const char *s);
@@ -200,6 +203,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->voxelSize_given = 0 ;
   args_info->gaussWidth_given = 0 ;
   args_info->privilegedAxis_given = 0 ;
+  args_info->privilegedAxis2_given = 0 ;
   args_info->bo_given = 0 ;
   args_info->ior_given = 0 ;
   args_info->for_given = 0 ;
@@ -246,6 +250,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->kirkwoodQ_given = 0 ;
   args_info->densityfield_given = 0 ;
   args_info->velocityfield_given = 0 ;
+  args_info->velocityZ_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -304,6 +309,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->gaussWidth_orig = NULL;
   args_info->privilegedAxis_arg = privilegedAxis_arg_z;
   args_info->privilegedAxis_orig = NULL;
+  args_info->privilegedAxis2_arg = privilegedAxis2_arg_x;
+  args_info->privilegedAxis2_orig = NULL;
   
 }
 
@@ -345,52 +352,54 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->voxelSize_help = gengetopt_args_info_help[30] ;
   args_info->gaussWidth_help = gengetopt_args_info_help[31] ;
   args_info->privilegedAxis_help = gengetopt_args_info_help[32] ;
-  args_info->bo_help = gengetopt_args_info_help[34] ;
-  args_info->ior_help = gengetopt_args_info_help[35] ;
-  args_info->for_help = gengetopt_args_info_help[36] ;
-  args_info->bad_help = gengetopt_args_info_help[37] ;
-  args_info->count_help = gengetopt_args_info_help[38] ;
-  args_info->gofr_help = gengetopt_args_info_help[39] ;
-  args_info->gofz_help = gengetopt_args_info_help[40] ;
-  args_info->r_theta_help = gengetopt_args_info_help[41] ;
-  args_info->r_omega_help = gengetopt_args_info_help[42] ;
-  args_info->r_z_help = gengetopt_args_info_help[43] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[44] ;
-  args_info->r_theta_omega_help = gengetopt_args_info_help[45] ;
-  args_info->gxyz_help = gengetopt_args_info_help[46] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[47] ;
-  args_info->p2_help = gengetopt_args_info_help[48] ;
-  args_info->rp2_help = gengetopt_args_info_help[49] ;
-  args_info->scd_help = gengetopt_args_info_help[50] ;
-  args_info->density_help = gengetopt_args_info_help[51] ;
-  args_info->slab_density_help = gengetopt_args_info_help[52] ;
-  args_info->pipe_density_help = gengetopt_args_info_help[53] ;
-  args_info->p_angle_help = gengetopt_args_info_help[54] ;
-  args_info->hxy_help = gengetopt_args_info_help[55] ;
-  args_info->rho_r_help = gengetopt_args_info_help[56] ;
-  args_info->angle_r_help = gengetopt_args_info_help[57] ;
-  args_info->hullvol_help = gengetopt_args_info_help[58] ;
-  args_info->rodlength_help = gengetopt_args_info_help[59] ;
-  args_info->tet_param_help = gengetopt_args_info_help[60] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[61] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[62] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[63] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[64] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[65] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[66] ;
-  args_info->nitrile_help = gengetopt_args_info_help[67] ;
-  args_info->multipole_help = gengetopt_args_info_help[68] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[69] ;
-  args_info->cn_help = gengetopt_args_info_help[70] ;
-  args_info->scn_help = gengetopt_args_info_help[71] ;
-  args_info->gcn_help = gengetopt_args_info_help[72] ;
-  args_info->hbond_help = gengetopt_args_info_help[73] ;
-  args_info->potDiff_help = gengetopt_args_info_help[74] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[75] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[76] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[77] ;
-  args_info->densityfield_help = gengetopt_args_info_help[78] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[79] ;
+  args_info->privilegedAxis2_help = gengetopt_args_info_help[33] ;
+  args_info->bo_help = gengetopt_args_info_help[35] ;
+  args_info->ior_help = gengetopt_args_info_help[36] ;
+  args_info->for_help = gengetopt_args_info_help[37] ;
+  args_info->bad_help = gengetopt_args_info_help[38] ;
+  args_info->count_help = gengetopt_args_info_help[39] ;
+  args_info->gofr_help = gengetopt_args_info_help[40] ;
+  args_info->gofz_help = gengetopt_args_info_help[41] ;
+  args_info->r_theta_help = gengetopt_args_info_help[42] ;
+  args_info->r_omega_help = gengetopt_args_info_help[43] ;
+  args_info->r_z_help = gengetopt_args_info_help[44] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[45] ;
+  args_info->r_theta_omega_help = gengetopt_args_info_help[46] ;
+  args_info->gxyz_help = gengetopt_args_info_help[47] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[48] ;
+  args_info->p2_help = gengetopt_args_info_help[49] ;
+  args_info->rp2_help = gengetopt_args_info_help[50] ;
+  args_info->scd_help = gengetopt_args_info_help[51] ;
+  args_info->density_help = gengetopt_args_info_help[52] ;
+  args_info->slab_density_help = gengetopt_args_info_help[53] ;
+  args_info->pipe_density_help = gengetopt_args_info_help[54] ;
+  args_info->p_angle_help = gengetopt_args_info_help[55] ;
+  args_info->hxy_help = gengetopt_args_info_help[56] ;
+  args_info->rho_r_help = gengetopt_args_info_help[57] ;
+  args_info->angle_r_help = gengetopt_args_info_help[58] ;
+  args_info->hullvol_help = gengetopt_args_info_help[59] ;
+  args_info->rodlength_help = gengetopt_args_info_help[60] ;
+  args_info->tet_param_help = gengetopt_args_info_help[61] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[62] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[63] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[64] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[65] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[66] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[67] ;
+  args_info->nitrile_help = gengetopt_args_info_help[68] ;
+  args_info->multipole_help = gengetopt_args_info_help[69] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[70] ;
+  args_info->cn_help = gengetopt_args_info_help[71] ;
+  args_info->scn_help = gengetopt_args_info_help[72] ;
+  args_info->gcn_help = gengetopt_args_info_help[73] ;
+  args_info->hbond_help = gengetopt_args_info_help[74] ;
+  args_info->potDiff_help = gengetopt_args_info_help[75] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[76] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[77] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[78] ;
+  args_info->densityfield_help = gengetopt_args_info_help[79] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[80] ;
+  args_info->velocityZ_help = gengetopt_args_info_help[81] ;
   
 }
 
@@ -516,6 +525,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->voxelSize_orig));
   free_string_field (&(args_info->gaussWidth_orig));
   free_string_field (&(args_info->privilegedAxis_orig));
+  free_string_field (&(args_info->privilegedAxis2_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -658,6 +668,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "gaussWidth", args_info->gaussWidth_orig, 0);
   if (args_info->privilegedAxis_given)
     write_into_file(outfile, "privilegedAxis", args_info->privilegedAxis_orig, cmdline_parser_privilegedAxis_values);
+  if (args_info->privilegedAxis2_given)
+    write_into_file(outfile, "privilegedAxis2", args_info->privilegedAxis2_orig, cmdline_parser_privilegedAxis2_values);
   if (args_info->bo_given)
     write_into_file(outfile, "bo", 0, 0 );
   if (args_info->ior_given)
@@ -750,6 +762,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "densityfield", 0, 0 );
   if (args_info->velocityfield_given)
     write_into_file(outfile, "velocityfield", 0, 0 );
+  if (args_info->velocityZ_given)
+    write_into_file(outfile, "velocityZ", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -849,6 +863,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->kirkwoodQ_given = 0 ;
   args_info->densityfield_given = 0 ;
   args_info->velocityfield_given = 0 ;
+  args_info->velocityZ_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -1720,6 +1735,7 @@ cmdline_parser_internal (
         { "voxelSize",	1, NULL, 'v' },
         { "gaussWidth",	1, NULL, 0 },
         { "privilegedAxis",	1, NULL, 0 },
+        { "privilegedAxis2",	1, NULL, 0 },
         { "bo",	0, NULL, 0 },
         { "ior",	0, NULL, 0 },
         { "for",	0, NULL, 0 },
@@ -1766,6 +1782,7 @@ cmdline_parser_internal (
         { "kirkwoodQ",	0, NULL, 0 },
         { "densityfield",	0, NULL, 0 },
         { "velocityfield",	0, NULL, 0 },
+        { "velocityZ",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -2310,6 +2327,20 @@ cmdline_parser_internal (
                 &(local_args_info.privilegedAxis_given), optarg, cmdline_parser_privilegedAxis_values, "z", ARG_ENUM,
                 check_ambiguity, override, 0, 0,
                 "privilegedAxis", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* which axis is special for spatial analysis (default = x axis).  */
+          else if (strcmp (long_options[option_index].name, "privilegedAxis2") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->privilegedAxis2_arg), 
+                 &(args_info->privilegedAxis2_orig), &(args_info->privilegedAxis2_given),
+                &(local_args_info.privilegedAxis2_given), optarg, cmdline_parser_privilegedAxis2_values, "x", ARG_ENUM,
+                check_ambiguity, override, 0, 0,
+                "privilegedAxis2", '-',
                 additional_error))
               goto failure;
           
@@ -2973,6 +3004,23 @@ cmdline_parser_internal (
                 &(local_args_info.velocityfield_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "velocityfield", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes an average two-dimensional velocity map.  */
+          else if (strcmp (long_options[option_index].name, "velocityZ") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->velocityZ_given),
+                &(local_args_info.velocityZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "velocityZ", '-',
                 additional_error))
               goto failure;
           

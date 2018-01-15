@@ -650,6 +650,7 @@ src/applications/staticProps/TetrahedralityParamZ.cpp
 src/applications/staticProps/TetrahedralityParamXYZ.cpp
 src/applications/staticProps/TwoDGofR.cpp
 src/applications/staticProps/StaticPropsCmd.cpp
+src/applications/staticProps/VelocityZ.cpp
 )
 
 set (NANOPARTICLEBUILDERSOURCE
