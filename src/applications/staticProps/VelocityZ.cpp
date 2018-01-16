@@ -132,6 +132,7 @@ namespace OpenMD {
       RealType sliceVolume = currentSnapshot_->getVolume() /(nBins_ * nBins2_);
       Mat3x3d hmat = currentSnapshot_->getHmat();
 
+      
       RealType halfBox1_ = hmat(axis1_,axis1_) / 2.0;      
       RealType halfBox2_ = hmat(axis2_,axis2_) / 2.0;      
 
@@ -168,7 +169,9 @@ namespace OpenMD {
           for (unsigned int k = 0; k < sliceSDLists_[i][j].size(); ++k) {
             totalVelocity += sliceSDLists_[i][j][k]->getVel()[axis3_];
           }
-          velocity_[i][j] += totalVelocity/sliceVolume;
+          //velocity_[i][j] += totalVelocity/sliceVolume;
+	  if (sliceSDLists_[i][j].size() > 0)
+	    velocity_[i][j] += totalVelocity/sliceSDLists_[i][j].size();
         }
       }
     }
