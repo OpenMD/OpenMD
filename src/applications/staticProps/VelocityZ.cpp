@@ -103,11 +103,16 @@ namespace OpenMD {
 	axisLabel2_ = "y";
       break;
     }
-
     
     setOutputName(getPrefix(filename) + ".VelocityZ");
   }
 
+  VelocityZ::~VelocityZ() {
+    sliceSDLists_.clear();
+    velocity_.clear();
+    zBox_.clear();
+  }
+  
   void VelocityZ::process() {
     StuntDouble* sd;
     int ii;
@@ -131,6 +136,8 @@ namespace OpenMD {
 
       RealType sliceVolume = currentSnapshot_->getVolume() /(nBins_ * nBins2_);
       Mat3x3d hmat = currentSnapshot_->getHmat();
+
+      zBox_.push_back(hmat(axis1_,axis1_));
 
       
       RealType halfBox1_ = hmat(axis1_,axis1_) / 2.0;      
@@ -181,16 +188,28 @@ namespace OpenMD {
   }
     
   void VelocityZ::writeVelocity() {
+    
+     // compute average box length:
+    
+    RealType zSum = 0.0;
+    for (std::vector<RealType>::iterator j = zBox_.begin(); 
+         j != zBox_.end(); ++j) {
+      zSum += *j;       
+    }
+    RealType zAve = zSum / zBox_.size();
 
     std::vector<RealType>::iterator j;
     std::ofstream rdfStream(outputFilename_.c_str());
-
     if (rdfStream.is_open()) {
+      
       rdfStream << "#VelocityZ\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#velocity (" << axisLabel1_ << "," << axisLabel2_ << ")\n";
+
       for (unsigned int i = 0; i < velocity_.size(); ++i) {
+	RealType z = zAve * (i+0.5) / velocity_.size();
+	rdfStream << z << "\t";
         for (unsigned int j = 0; j < velocity_[i].size(); ++j) {          
           rdfStream << velocity_[i][j] / nProcessed_;
           rdfStream << "\t";

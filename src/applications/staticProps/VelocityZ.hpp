@@ -59,7 +59,9 @@ namespace OpenMD {
   public:
     VelocityZ(SimInfo* info, const std::string& filename,
 	      const std::string& sele, int nbins1, int nbins2, int axis1=2, int axis2=0);
+    
     virtual void process();
+    virtual ~VelocityZ();
     
   private:
     virtual void writeVelocity();
@@ -70,15 +72,18 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     unsigned int nBins2_;
-    int axis_;
+    RealType binWidth_;
     std::string axisLabel1_;
     std::string axisLabel2_;
+    int axis_;
     int axis1_;
     int axis2_;
     int axis3_;
-    
-    std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
+
+    std::vector<RealType> zBox_;
     std::vector<std::vector<RealType> > velocity_;
+    std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
+    
   };
   
 }
