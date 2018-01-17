@@ -68,11 +68,11 @@ namespace OpenMD {
        there are nBins2_ perpendicular to each slab of nBins_
     */
 
-    sliceSDLists_.resize(nBins_);
-    velocity_.resize(nBins_);
-    for (unsigned int i = 0 ; i < nBins_; ++i) {
-      sliceSDLists_[i].resize(nBins2_);
-      velocity_[i].resize(nBins2_);
+    sliceSDLists_.resize(nBins2_);
+    velocity_.resize(nBins2_);
+    for (unsigned int i = 0 ; i < nBins2_; ++i) {
+      sliceSDLists_[i].resize(nBins_);
+      velocity_[i].resize(nBins_);
     }
 
     // Compute complementary axis to the two privileged axis
@@ -128,8 +128,8 @@ namespace OpenMD {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (unsigned int i = 0; i < nBins_; i++) {
-        for (unsigned int j = 0; j < nBins2_; j++) {          
+      for (unsigned int i = 0; i < nBins2_; i++) {
+        for (unsigned int j = 0; j < nBins_; j++) {          
           sliceSDLists_[i][j].clear();
         }
       }
@@ -137,7 +137,7 @@ namespace OpenMD {
       RealType sliceVolume = currentSnapshot_->getVolume() /(nBins_ * nBins2_);
       Mat3x3d hmat = currentSnapshot_->getHmat();
 
-      zBox_.push_back(hmat(axis1_,axis1_));
+      zBox_.push_back(hmat(axis2_,axis2_));
 
       
       RealType halfBox1_ = hmat(axis1_,axis1_) / 2.0;      
@@ -165,12 +165,12 @@ namespace OpenMD {
                          hmat(axis1_,axis1_));
         int binNo2 = int(nBins2_  * (halfBox2_ + pos[axis2_]) /
                          hmat(axis2_,axis2_));
-        sliceSDLists_[binNo1][binNo2].push_back(sd);
+        sliceSDLists_[binNo2][binNo1].push_back(sd);
       }
 
       //loop over the slices to calculate the velocities
-      for (unsigned int i = 0; i < nBins_; i++) {
-        for (unsigned int j = 0; j < nBins2_; j++) {
+      for (unsigned int i = 0; i < nBins2_; i++) {
+        for (unsigned int j = 0; j < nBins_; j++) {
 
           RealType totalVelocity = 0;
           for (unsigned int k = 0; k < sliceSDLists_[i][j].size(); ++k) {
