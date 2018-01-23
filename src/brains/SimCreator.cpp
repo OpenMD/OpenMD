@@ -526,13 +526,13 @@ namespace OpenMD {
     RealType a;
     int nProcessors;
     std::vector<int> atomsPerProc;
-    int nGlobalMols = info->getNGlobalMolecules();
+    unsigned int nGlobalMols = info->getNGlobalMolecules();
     std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error
                                                     // condition:
     
     MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);    
     
-    if (nProcessors > nGlobalMols) {
+    if (nProcessors > (int)nGlobalMols) {
       sprintf(painCave.errMsg,
               "nProcessors (%d) > nMol (%d)\n"
               "\tThe number of processors is larger than\n"
@@ -567,7 +567,7 @@ namespace OpenMD {
       RealType precast = numerator / denominator;
       int nTarget = (int)(precast + 0.5);
       
-      for(int i = 0; i < nGlobalMols; i++) {
+      for(unsigned int i = 0; i < nGlobalMols; i++) {
 
         int done = 0;
         int loops = 0;
@@ -669,7 +669,7 @@ namespace OpenMD {
     MoleculeCreator molCreator;
     int stampId;
     
-    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
+    for(unsigned int i = 0; i < info->getNGlobalMolecules(); i++) {
       
 #ifdef IS_MPI      
       if (info->getMolToProc(i) == worldRank) {
@@ -692,7 +692,7 @@ namespace OpenMD {
   int SimCreator::computeStorageLayout(SimInfo* info) {
 
     Globals* simParams = info->getSimParams();
-    int nRigidBodies = info->getNGlobalRigidBodies();
+    unsigned int nRigidBodies = info->getNGlobalRigidBodies();
     set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
     set<AtomType*>::iterator i;
     bool hasDirectionalAtoms = false;
@@ -838,8 +838,8 @@ namespace OpenMD {
     int beginTorsionIndex;
     int beginInversionIndex;
 #ifdef IS_MPI
-    int nGlobalAtoms = info->getNGlobalAtoms();
-    int nGlobalRigidBodies = info->getNGlobalRigidBodies();
+    unsigned int nGlobalAtoms = info->getNGlobalAtoms();
+    unsigned int nGlobalRigidBodies = info->getNGlobalRigidBodies();
 #endif
     
     beginAtomIndex = 0;
@@ -851,7 +851,7 @@ namespace OpenMD {
     beginTorsionIndex = 0;
     beginInversionIndex = 0;
    
-    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
+    for(unsigned int i = 0; i < info->getNGlobalMolecules(); i++) {
       
 #ifdef IS_MPI      
       if (info->getMolToProc(i) == worldRank) {
@@ -990,7 +990,7 @@ namespace OpenMD {
     std::vector<int> startingIOIndexForMol(info->getNGlobalMolecules());
     
     int startingIndex = 0;
-    for (int i = 0; i < info->getNGlobalMolecules(); i++) {
+    for (unsigned int i = 0; i < info->getNGlobalMolecules(); i++) {
       startingIOIndexForMol[i] = startingIndex;
       startingIndex += numIntegrableObjectsPerMol[i];
     }

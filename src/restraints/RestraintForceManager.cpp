@@ -120,7 +120,7 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();      
         }
-        if (molIndex >= info_->getNGlobalMolecules()) {
+        if (molIndex >= (int)info_->getNGlobalMolecules()) {
           sprintf(painCave.errMsg,
                   "Restraint Error: A molecular restraint was specified with\n"
                   "\ta molIndex that was greater than the total number of molecules\n");
