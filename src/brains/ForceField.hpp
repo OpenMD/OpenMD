@@ -132,7 +132,7 @@ namespace OpenMD {
       wildCardAtomTypeName_ = wildCard;
     }
     
-    unsigned int getNAtomType() {
+    size_t getNAtomType() {
       return atomTypeCont_.size();
     }
 

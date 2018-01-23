@@ -2,6 +2,9 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#include <stdint.h>
+#include <limits.h>
+
 #define OPENMD_VERSION_MAJOR "${VERSION_MAJOR}"
 #define OPENMD_VERSION_MINOR "${VERSION_MINOR}"
 #define OPENMD_VERSION_TINY  "${VERSION_TINY}"

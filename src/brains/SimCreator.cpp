@@ -100,7 +100,7 @@ namespace OpenMD {
       // Create a preprocessor that preprocesses md file into an ostringstream
       std::stringstream ppStream;
 #ifdef IS_MPI            
-      int streamSize;
+      size_t streamSize;
       const int masterNode = 0;
 
       if (worldRank == masterNode) {

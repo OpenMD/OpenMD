@@ -202,7 +202,7 @@ namespace OpenMD {
       return j == foundTypes.end() ? NULL : j->second;
     }
 
-    unsigned int size() {
+    size_t size() {
       return data_.size();
     }
 
