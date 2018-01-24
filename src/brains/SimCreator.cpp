@@ -927,20 +927,10 @@ namespace OpenMD {
     }
    
 #ifdef IS_MPI    
-    // Since the globalGroupMembership has been zero filled and we've only
-    // poked values into the atoms we know, we can do an Allreduce
-    // to get the full globalGroupMembership array (We think).
-    // This would be prettier if we could use MPI_IN_PLACE like the MPI-2
-    // docs said we could.
-    std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
-    MPI_Allreduce(&globalGroupMembership[0], 
-                  &tmpGroupMembership[0], nGlobalAtoms,
+    MPI_Allreduce(MPI_IN_PLACE, &globalGroupMembership[0], nGlobalAtoms,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-
-    info->setGlobalGroupMembership(tmpGroupMembership);
-#else
-    info->setGlobalGroupMembership(globalGroupMembership);
 #endif
+    info->setGlobalGroupMembership(globalGroupMembership);
     
     //fill molMembership
     std::vector<int> globalMolMembership(info->getNGlobalAtoms() + 
@@ -958,16 +948,11 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-    std::vector<int> tmpMolMembership(info->getNGlobalAtoms() + 
-                                      info->getNGlobalRigidBodies(), 0);
-    MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
+    MPI_Allreduce(MPI_IN_PLACE, &globalMolMembership[0],
                   nGlobalAtoms + nGlobalRigidBodies,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    
-    info->setGlobalMolMembership(tmpMolMembership);
-#else
-    info->setGlobalMolMembership(globalMolMembership);
 #endif
+    info->setGlobalMolMembership(globalMolMembership);
 
     // nIOPerMol holds the number of integrable objects per molecule
     // here the molecules are listed by their global indices.
