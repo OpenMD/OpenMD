@@ -32,7 +32,7 @@ begin NonBondedInteractions
 //Types         re (Å)  α       β       A (eV)  B (eV)  κ       λ
 // O  O  EAMZhou   3.64857 5.44072 3.59746 0.34900 0.57438 0.08007 0.39310
 //Types   ShiftedMorse  r0  D0  β
-O O ShiftedMorse  1.085  13.1 2.6
+O O ShiftedMorse  1.05  17.9 2.4
 end NonBondedInteractions
 
 begin AtomTypes
