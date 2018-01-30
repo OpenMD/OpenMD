@@ -78,7 +78,7 @@ namespace OpenMD {
     vector<int> Mtids;         /**< The mapping from AtomType ident -> Morse type ident */
     vector<vector<MorseInteractionData> > MixingMap;  /**< The mixing parameters
                                                          between two Morse types */
-
+    int nM_;
     ForceField* forceField_;    
     set<AtomType*> simTypes_;
     string name_;
