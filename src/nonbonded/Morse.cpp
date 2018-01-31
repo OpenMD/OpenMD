@@ -59,17 +59,18 @@ namespace OpenMD {
     Mtypes.clear();
     Mtids.clear();
     MixingMap.clear();
+    nM_ = 0;
+    
     Mtids.resize( forceField_->getNAtomType(), -1);
 
     ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     ForceField::NonBondedInteractionTypeContainer::KeyType keys;
     NonBondedInteractionType* nbt;
-    int mtid1, mtid2;
 
     for (nbt = nbiTypes->beginType(j); nbt != NULL; 
          nbt = nbiTypes->nextType(j)) {
-      
+
       if (nbt->isMorse()) {
         keys = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
@@ -94,19 +95,6 @@ namespace OpenMD {
           simError();          
         }
 
-        int atid1 = at1->getIdent();
-        if (Mtids[atid1] == -1) {
-          mtid1 = Mtypes.size();
-          Mtypes.insert(atid1);
-          Mtids[atid1] = mtid1;         
-        }
-        int atid2 = at2->getIdent();
-        if (Mtids[atid2] == -1) {
-          mtid2 = Mtypes.size();
-          Mtypes.insert(atid2);
-          Mtids[atid2] = mtid2;
-        }
-    
         MorseInteractionType* mit = dynamic_cast<MorseInteractionType*>(nbt);
 
         if (mit == NULL) {
@@ -141,18 +129,40 @@ namespace OpenMD {
     mixer.beta = beta;
     mixer.variant = mt;
 
-    int mtid1 = Mtids[atype1->getIdent()];
-    int mtid2 = Mtids[atype2->getIdent()];
-    int nM = Mtypes.size();
-
-    MixingMap.resize(nM);
-    MixingMap[mtid1].resize(nM);
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
     
+    int mtid1, mtid2;
+
+    pair<set<int>::iterator,bool> ret;    
+    ret = Mtypes.insert( atid1 );
+    if (ret.second == false) {
+      // already had this type in the Mtypes list, just get the mtid:
+      mtid1 = Mtids[ atid1 ];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      mtid1 = nM_;
+      Mtids[atid1] = nM_;
+      nM_++;
+    }
+    ret = Mtypes.insert( atid2 );
+    if (ret.second == false) {
+      // already had this type in the Mtypes list, just get the mtid:
+      mtid2 = Mtids[ atid2 ];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      mtid2 = nM_;
+      Mtids[atid2] = nM_;
+      nM_++;
+    }
+
+    MixingMap.resize(nM_);
+    MixingMap[mtid1].resize(nM_);
     MixingMap[mtid1][mtid2] = mixer;
     if (mtid2 != mtid1) {
-      MixingMap[mtid2].resize(nM);
+      MixingMap[mtid2].resize(nM_);
       MixingMap[mtid2][mtid1] = mixer;
-    }    
+    }
   }
   
   void Morse::calcForce(InteractionData &idat) {

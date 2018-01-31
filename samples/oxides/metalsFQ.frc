@@ -2,6 +2,7 @@ begin Options
       Name                  metalsFQ
       // energies in funcfl files are in eV. Convert to kcal/mol
       MetallicEnergyUnitScaling     23.0605423
+      EnergyUnitScaling             23.0605423
       EAMMixingMethod   Johnson
 end Options
 
@@ -29,7 +30,9 @@ end EAMAtomTypes
 
 begin NonBondedInteractions
 //Types         re (Å)  α       β       A (eV)  B (eV)  κ       λ
-O  O  EAMZhou   3.64857 5.44072 3.59746 0.34900 0.57438 0.08007 0.39310
+// O  O  EAMZhou   3.64857 5.44072 3.59746 0.34900 0.57438 0.08007 0.39310
+//Types   ShiftedMorse  r0  D0  β
+O O ShiftedMorse  1.05  17.9 2.4
 end NonBondedInteractions
 
 begin AtomTypes
@@ -41,7 +44,7 @@ end AtomTypes
 begin FluctuatingChargeAtomTypes
 // Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
 // this code and the Rick, Stuart, and Berne paper
-//Name  chargeMass (fs^2 kcal/e^2 mol) multipleMinima  curvature coupling 0 energy 1 energy ...
-Pt_FQ 	400.0 Metal 10 332 0.0  0.0 0.0
-O_FQ 	400.0 Metal  6 150 0.0  0.0 0.0
+//Name  chargeMass (fs^2 kcal/e^2 mol) EAM  curvature coupling q0 u0 k0 q1 u1 k1 q2 u2 k2
+Pt_FQ 	400.0 EAM   10 332  0.0  0.0  0.0
+O_FQ 	400.0 EAM    6 3.0  0.0 0.0 429.2 -0.4 -33.694 878.118 -0.8 167.782 1327
 end FluctuatingChargeAtomTypes
