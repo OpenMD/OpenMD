@@ -244,7 +244,7 @@ namespace OpenMD {
         freqs_[molID] += freqShift;
       }
 
-      for (unsigned int i = 0; i < info_->getNGlobalMolecules(); ++i) {
+      for (int i = 0; i < info_->getNGlobalMolecules(); ++i) {
         int binNo = int(nBins_ * (freqs_[i] - minFreq_)/(maxFreq_-minFreq_));
 
         count_[binNo]++;

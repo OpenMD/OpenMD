@@ -133,7 +133,7 @@ namespace OpenMD {
       return ((snapshotMan_->getCurrentSnapshot())->*storage_).velocity[localIndex_];      
     }
     
-    size_t getNumAtom() {
+    int getNumAtom() {
       return cutoffAtomList.size();
     }
     

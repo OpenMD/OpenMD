@@ -366,7 +366,7 @@ namespace OpenMD {
     ndfTrans_local = 3 * nIntegrableObjects_ - nConstraints_;
 
 #ifdef IS_MPI
-    MPI_Allreduce(&ndfTrans_local, &ndfTrans_, 1, MPI_INT, MPI_SUM,
+    MPI_Allreduce(&ndfTrans_local, &ndfTrans_, 1, MPI_INT, MPI_SUM, 
                   MPI_COMM_WORLD);
 #else
     ndfTrans_ = ndfTrans_local;

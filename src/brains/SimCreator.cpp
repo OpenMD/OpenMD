@@ -100,7 +100,7 @@ namespace OpenMD {
       // Create a preprocessor that preprocesses md file into an ostringstream
       std::stringstream ppStream;
 #ifdef IS_MPI            
-      size_t streamSize;
+      int streamSize;
       const int masterNode = 0;
 
       if (worldRank == masterNode) {
@@ -526,13 +526,13 @@ namespace OpenMD {
     RealType a;
     int nProcessors;
     std::vector<int> atomsPerProc;
-    unsigned int nGlobalMols = info->getNGlobalMolecules();
+    int nGlobalMols = info->getNGlobalMolecules();
     std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error
                                                     // condition:
     
     MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);    
     
-    if (nProcessors > (int)nGlobalMols) {
+    if (nProcessors > nGlobalMols) {
       sprintf(painCave.errMsg,
               "nProcessors (%d) > nMol (%d)\n"
               "\tThe number of processors is larger than\n"
@@ -567,7 +567,7 @@ namespace OpenMD {
       RealType precast = numerator / denominator;
       int nTarget = (int)(precast + 0.5);
       
-      for(unsigned int i = 0; i < nGlobalMols; i++) {
+      for(int i = 0; i < nGlobalMols; i++) {
 
         int done = 0;
         int loops = 0;
@@ -669,7 +669,7 @@ namespace OpenMD {
     MoleculeCreator molCreator;
     int stampId;
     
-    for(unsigned int i = 0; i < info->getNGlobalMolecules(); i++) {
+    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
       
 #ifdef IS_MPI      
       if (info->getMolToProc(i) == worldRank) {
@@ -692,7 +692,7 @@ namespace OpenMD {
   int SimCreator::computeStorageLayout(SimInfo* info) {
 
     Globals* simParams = info->getSimParams();
-    unsigned int nRigidBodies = info->getNGlobalRigidBodies();
+    int nRigidBodies = info->getNGlobalRigidBodies();
     set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
     set<AtomType*>::iterator i;
     bool hasDirectionalAtoms = false;
@@ -838,8 +838,8 @@ namespace OpenMD {
     int beginTorsionIndex;
     int beginInversionIndex;
 #ifdef IS_MPI
-    unsigned int nGlobalAtoms = info->getNGlobalAtoms();
-    unsigned int nGlobalRigidBodies = info->getNGlobalRigidBodies();
+    int nGlobalAtoms = info->getNGlobalAtoms();
+    int nGlobalRigidBodies = info->getNGlobalRigidBodies();
 #endif
     
     beginAtomIndex = 0;
@@ -851,7 +851,7 @@ namespace OpenMD {
     beginTorsionIndex = 0;
     beginInversionIndex = 0;
    
-    for(unsigned int i = 0; i < info->getNGlobalMolecules(); i++) {
+    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
       
 #ifdef IS_MPI      
       if (info->getMolToProc(i) == worldRank) {
@@ -927,10 +927,20 @@ namespace OpenMD {
     }
    
 #ifdef IS_MPI    
-    MPI_Allreduce(MPI_IN_PLACE, &globalGroupMembership[0], nGlobalAtoms,
+    // Since the globalGroupMembership has been zero filled and we've only
+    // poked values into the atoms we know, we can do an Allreduce
+    // to get the full globalGroupMembership array (We think).
+    // This would be prettier if we could use MPI_IN_PLACE like the MPI-2
+    // docs said we could.
+    std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
+    MPI_Allreduce(&globalGroupMembership[0], 
+                  &tmpGroupMembership[0], nGlobalAtoms,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-#endif
+
+    info->setGlobalGroupMembership(tmpGroupMembership);
+#else
     info->setGlobalGroupMembership(globalGroupMembership);
+#endif
     
     //fill molMembership
     std::vector<int> globalMolMembership(info->getNGlobalAtoms() + 
@@ -948,11 +958,16 @@ namespace OpenMD {
     }
     
 #ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &globalMolMembership[0],
+    std::vector<int> tmpMolMembership(info->getNGlobalAtoms() + 
+                                      info->getNGlobalRigidBodies(), 0);
+    MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], 
                   nGlobalAtoms + nGlobalRigidBodies,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-#endif
+    
+    info->setGlobalMolMembership(tmpMolMembership);
+#else
     info->setGlobalMolMembership(globalMolMembership);
+#endif
 
     // nIOPerMol holds the number of integrable objects per molecule
     // here the molecules are listed by their global indices.
@@ -975,7 +990,7 @@ namespace OpenMD {
     std::vector<int> startingIOIndexForMol(info->getNGlobalMolecules());
     
     int startingIndex = 0;
-    for (unsigned int i = 0; i < info->getNGlobalMolecules(); i++) {
+    for (int i = 0; i < info->getNGlobalMolecules(); i++) {
       startingIOIndexForMol[i] = startingIndex;
       startingIndex += numIntegrableObjectsPerMol[i];
     }

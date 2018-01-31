@@ -53,7 +53,7 @@ namespace OpenMD {
     virtual ~TorsionStamp();
     
     int getMemberAt( int index ) {return members_.at(index);}
-    size_t getNMembers() {return members_.size();}
+    int getNMembers() {return members_.size();}
     std::vector<int> getMembers() {return members_;}
     void setMembers(const std::vector<int>& members) {
       members_ = members;

@@ -117,17 +117,17 @@ namespace OpenMD{
     bool removeMolecule(Molecule* mol);
 
     /** Returns the total number of molecules in the system. */
-    unsigned int getNGlobalMolecules() {
+    int getNGlobalMolecules() {
       return nGlobalMols_;
     }
 
     /** Returns the total number of atoms in the system. */
-    unsigned int getNGlobalAtoms() {
+    int getNGlobalAtoms() {
       return nGlobalAtoms_;
     }
 
     /** Returns the total number of cutoff groups in the system. */
-    unsigned int getNGlobalCutoffGroups() {
+    int getNGlobalCutoffGroups() {
       return nGlobalCutoffGroups_;
     }
 
@@ -136,7 +136,7 @@ namespace OpenMD{
      * rigid bodies plus the total number of atoms which do not belong
      * to the rigid bodies) in the system
      */
-    unsigned int getNGlobalIntegrableObjects() {
+    int getNGlobalIntegrableObjects() {
       return nGlobalIntegrableObjects_;
     }
 
@@ -145,7 +145,7 @@ namespace OpenMD{
      * rigid bodies plus the total number of atoms which do not belong
      * to the rigid bodies) in the system
      */
-    unsigned int getNGlobalRigidBodies() {
+    int getNGlobalRigidBodies() {
       return nGlobalRigidBodies_;
     }
 
@@ -177,7 +177,7 @@ namespace OpenMD{
      * Returns the number of local molecules.
      * @return the number of local molecules 
      */
-    size_t getNMolecules() {
+    int getNMolecules() {
       return molecules_.size();
     }
 
@@ -209,7 +209,7 @@ namespace OpenMD{
       return nInversions_;
     }
     /** Returns the number of local rigid bodies */        
-   unsigned int getNRigidBodies() {
+    unsigned int getNRigidBodies() {
       return nRigidBodies_;
     }
 
@@ -243,7 +243,7 @@ namespace OpenMD{
     Molecule* nextMolecule(MoleculeIterator& i);
 
     /** Returns the total number of fluctuating charges that are present */
-    unsigned int getNFluctuatingCharges() {
+    int getNFluctuatingCharges() {
       return nGlobalFluctuatingCharges_;
     }
 
@@ -337,7 +337,7 @@ namespace OpenMD{
     }
 
     /** Return the total number of the molecule stamps */
-    size_t getNMoleculeStamp() {
+    int getNMoleculeStamp() {
       return moleculeStamps_.size();
     }
     /**
@@ -425,7 +425,7 @@ namespace OpenMD{
       assert(ggm.size() == static_cast<size_t>(nGlobalAtoms_));
       globalGroupMembership_ = ggm;
     }
-    
+
     /** 
      * Sets GlobalMolMembership
      */        

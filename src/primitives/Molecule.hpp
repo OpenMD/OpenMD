@@ -169,61 +169,61 @@ namespace OpenMD{
     void complete();
     
     /** Returns the total number of atoms in this molecule */
-    size_t getNAtoms() {
+    unsigned int getNAtoms() {
       return atoms_.size();
     }
     
     /** Returns the total number of bonds in this molecule */        
-    size_t getNBonds(){
+    unsigned int getNBonds(){
       return bonds_.size();
     }
     
     /** Returns the total number of bends in this molecule */        
-    size_t getNBends() {
+    unsigned int getNBends() {
       return bends_.size();
     }
     
     /** Returns the total number of torsions in this molecule */        
-    size_t getNTorsions() {
+    unsigned int getNTorsions() {
       return torsions_.size();
     }
 
     /** Returns the total number of improper torsions in this molecule */
-    size_t getNInversions() {
+    unsigned int getNInversions() {
       return inversions_.size();
     }
     
     /** Returns the total number of rigid bodies in this molecule */        
-    size_t getNRigidBodies() {
+    unsigned int getNRigidBodies() {
       return rigidBodies_.size();
     }
     
     /** Returns the total number of integrable objects in this molecule */
-    size_t getNIntegrableObjects() {
+    unsigned int getNIntegrableObjects() {
       return integrableObjects_.size();
     }
     
     /** Returns the total number of cutoff groups in this molecule */
-    size_t getNCutoffGroups() {
+    unsigned int getNCutoffGroups() {
       return cutoffGroups_.size();
     }
     
     /** Returns the total number of constraints in this molecule */
-    size_t getNConstraintPairs() {
+    unsigned int getNConstraintPairs() {
       return constraintPairs_.size();
     }
 
     /** Returns the total number of fluctuating charges in this molecule */
-    size_t getNFluctuatingCharges() {
+    unsigned int getNFluctuatingCharges() {
       return fluctuatingCharges_.size();
     }
     /** Returns the total number of Hydrogen Bond donors in this molecule */
-    size_t getNHBondDonors() {
+    unsigned int getNHBondDonors() {
       return hBondDonors_.size();
     }
     
     /** Returns the total number of Hydrogen Bond acceptors in this molecule */
-    size_t getNHBondAcceptors() {
+    unsigned int getNHBondAcceptors() {
       return hBondAcceptors_.size();
     }
 

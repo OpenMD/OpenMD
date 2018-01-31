@@ -108,12 +108,13 @@ namespace OpenMD {
     MPI_Comm_size( MPI_COMM_WORLD, &nproc);
     MPI_Comm_rank( MPI_COMM_WORLD, &myNode);
     
+    std::vector<int> tmpNFixedZmols(nproc, 0);
     std::vector<int> nFixedZmolsInProc(nproc, 0);
-    nFixedZmolsInProc[myNode] = fixedZmols.size();
+    tmpNFixedZmols[myNode] = fixedZmols.size();
     
     //do MPI_ALLREDUCE to exchange the total number of atoms,
     //rigidbodies and cutoff groups
-    MPI_Allreduce(MPI_IN_PLACE, &nFixedZmolsInProc[0], 
+    MPI_Allreduce(&tmpNFixedZmols[0], &nFixedZmolsInProc[0], 
                   nproc, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     
     MPI_Status* ierr = NULL;

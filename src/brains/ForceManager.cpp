@@ -1086,6 +1086,7 @@ namespace OpenMD {
   
   void ForceManager::selectedPreCalculation(Molecule* mol1, Molecule* mol2) {
     SimInfo::MoleculeIterator mi;
+    Molecule* mol;
     Molecule::AtomIterator ai;
     Atom* atom;
     Molecule::RigidBodyIterator rbIter;
@@ -1132,7 +1133,7 @@ namespace OpenMD {
 
     // Next we zero out for mol2
     for(atom = mol2->beginAtom(ai); atom != NULL;
-	atom = mol2->nextAtom(ai)){
+	atom = mol->nextAtom(ai)){
       atom->zeroForcesAndTorques();
     }
     //change the positions of atoms which belong to the rigidbodies
