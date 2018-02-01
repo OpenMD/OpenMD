@@ -49,6 +49,7 @@
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/simError.h"
@@ -100,17 +101,16 @@ int main(int argc, char* argv[]){
   
   rotMatrix.setupRotMat(phi, theta, psi);
   
-  //std::cout << "rotMatix = " << rotMatrix << endl;
-  
   Vector3i repeat = Vector3i(args_info.repeatX_arg,
                              args_info.repeatY_arg,
                              args_info.repeatZ_arg);
-  
+
   Mat3x3d repeatD = Mat3x3d(0.0);
   repeatD(0,0) = repeat.x();
   repeatD(1,1) = repeat.y();
   repeatD(2,2) = repeat.z();
 
+  
   Vector3d translate = Vector3d(args_info.translateX_arg,
                                 args_info.translateY_arg,
                                 args_info.translateZ_arg);
@@ -158,6 +158,9 @@ int main(int argc, char* argv[]){
   Snapshot* newSnap;
   Vector3d oldPos;
   Vector3d newPos;
+  Vector3d COM;
+  Thermo thermo(oldInfo);
+
   
   for (int i = 0; i < nframes; i++){
     cerr << "frame = " << i << "\n";
@@ -176,6 +179,8 @@ int main(int argc, char* argv[]){
     newSnap->setThermostat( oldSnap->getThermostat() );
     newSnap->setBarostat( oldSnap->getBarostat() );
 
+    COM = thermo.getCom();
+
     int newIndex = 0;
     for (mol = oldInfo->beginMolecule(miter); mol != NULL; 
          mol = oldInfo->nextMolecule(miter)) {
@@ -187,35 +192,29 @@ int main(int argc, char* argv[]){
             Vector3d trans = Vector3d(ii, jj, kk);
             for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
                  sd = mol->nextIntegrableObject(iiter)) {
-              oldPos = sd->getPos() + translate;
-              oldSnap->wrapVector(oldPos);
-              newPos = rotMatrix*oldPos + trans * oldHmat;
-              sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
+	      oldPos = sd->getPos() - COM + translate;
+	      oldSnap->wrapVector(oldPos);
+	      newPos = rotMatrix*oldPos + trans * oldHmat;
+	      sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos( newPos );
 	      sdNew->setVel( rotMatrix*sd->getVel() );
+	      
               if (sd->isDirectional()) {
 
 		Mat3x3d bodyRotMat = sd->getA();
 		bodyRotMat = bodyRotMat * rotMatrix.inverse();
 		sdNew->setA( bodyRotMat );
 		
-		//SquareMatrix<Real, 3> toRotationMatrix3()
-	       
-		//Quat4d sdQuat = sd->getQ();
-		//Quat4d rotQuat = rotMatrix.toQuaternion();
-		//std::cout << "rotMatrix as Quat = " << rotMatrix.toQuaternion() << endl;
-		//std::cout << "sdQuat pre rot = " << sdQuat << endl;
-		//std::cout << "rotMatrix to body = " << rotQuat.lab2Body() << endl;
-		//sdQuat.mul( rotMatrix.toQuaternion() );
-		//std::cout << "sdQuat post rot = " << sdQuat << endl;
-		//sdNew->setQ( sdQuat );
-                sdNew->setJ( rotMatrix * sd->getJ() );
+		sdNew->setJ( rotMatrix * sd->getJ() );
               }
+	      
               newIndex++;
             }
+	    
           }
         }
-      }      
+      }
+      
     }
   
     //update atoms of rigidbody
