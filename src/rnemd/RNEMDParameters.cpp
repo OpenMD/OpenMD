@@ -75,6 +75,8 @@ namespace OpenMD {
     DefineOptionalParameter(OutputSelection, "outputSelection");
     DefineOptionalParameter(OutputFields, "outputFields");
     DefineOptionalParameter(DividingArea, "dividingArea");
+
+    DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis", "z");
   }
   
   RNEMDParameters::~RNEMDParameters() {    
@@ -106,6 +108,10 @@ namespace OpenMD {
                    isEqualIgnoreCase("KE+Pvector") ||
                    isEqualIgnoreCase("KE+Lvector")
                    );
+    CheckParameter(PrivilegedAxis, 
+                   isEqualIgnoreCase("x") ||  
+                   isEqualIgnoreCase("y")  ||
+                   isEqualIgnoreCase("z"));
   }
   
 }

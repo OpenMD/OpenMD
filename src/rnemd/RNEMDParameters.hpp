@@ -70,7 +70,8 @@ namespace OpenMD {
     DeclareParameter(OutputFileName, std::string);
     DeclareParameter(OutputBins, int);
     DeclareParameter(OutputBinWidth, RealType);
-    DeclareParameter(OutputFields, std::string);    
+    DeclareParameter(OutputFields, std::string);
+    DeclareParameter(PrivilegedAxis, std::string);
   public:
     RNEMDParameters();
     virtual ~RNEMDParameters();

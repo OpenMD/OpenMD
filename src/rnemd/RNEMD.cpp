@@ -112,11 +112,17 @@ namespace OpenMD {
     stringToFluxType_["KE+Lz"]  = rnemdKeLz;
     stringToFluxType_["KE+Lvector"]  = rnemdKeLvector;
 
+    stringToPrivilegedAxis_["x"] = rnemdX;
+    stringToPrivilegedAxis_["y"] = rnemdY;
+    stringToPrivilegedAxis_["z"] = rnemdZ; 
+
     runTime_ = simParams->getRunTime();
     statusTime_ = simParams->getStatusTime();
 
     const string methStr = rnemdParams->getMethod();
     bool hasFluxType = rnemdParams->haveFluxType();
+
+    const string privAxis = rnemdParams->getPrivilegedAxis();
 
     rnemdObjectSelection_ = rnemdParams->getObjectSelection();
 
@@ -192,6 +198,35 @@ namespace OpenMD {
       simError();
     }
 
+    map<string, RNEMDPrivilegedAxis>::iterator k;
+    k = stringToPrivilegedAxis_.find(privAxis);
+    if (k != stringToPrivilegedAxis_.end()) 
+      rnemdPrivilegedAxis_ = k->second;
+    else {
+      sprintf(painCave.errMsg, 
+              "RNEMD: The privileged axis,\n"
+              "\t\t%s is not one of the recognized\n"
+              "\taxes: x, y, or z\n",
+              privAxis.c_str());
+      painCave.isFatal = 1;
+      painCave.severity = OPENMD_ERROR;
+      simError();
+    }
+
+    switch(rnemdPrivilegedAxis_) {
+    case 0:
+      rnemdAxisLabel_ = "x";
+      break;
+    case 1:
+      rnemdAxisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      rnemdAxisLabel_ = "z";
+      break;
+    }
+
+    
     bool methodFluxMismatch = false;
     bool hasCorrectFlux = false;
     switch(rnemdMethod_) {
@@ -432,7 +467,7 @@ namespace OpenMD {
     data_.resize(RNEMD::ENDINDEX);
     OutputData z;
     z.units =  "Angstroms";
-    z.title =  "Z";
+    z.title =  rnemdAxisLabel_;
     z.dataType = "RealType";
     z.accumulator.reserve(nBins_);
     for (int i = 0; i < nBins_; i++) 
@@ -567,7 +602,7 @@ namespace OpenMD {
         if (hasSlabWidth) 
           slabWidth_ = rnemdParams->getSlabWidth();
         else
-          slabWidth_ = hmat(2,2) / 10.0;
+          slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
         
         if (hasSlabACenter) 
           slabACenter_ = rnemdParams->getSlabACenter();
@@ -604,12 +639,12 @@ namespace OpenMD {
         if (hasSlabWidth) 
           slabWidth_ = rnemdParams->getSlabWidth();
         else
-          slabWidth_ = hmat(2,2) / 10.0;
+          slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
         
         if (hasSlabBCenter) 
           slabBCenter_ = rnemdParams->getSlabBCenter();
         else 
-          slabBCenter_ = hmat(2,2) / 2.0;
+          slabBCenter_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
         
         selectionBstream << "select wrappedz > " 
                          << slabBCenter_ - 0.5*slabWidth_ 
@@ -1992,7 +2027,7 @@ namespace OpenMD {
         // Shift molecules by half a box to have bins start at 0
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
-        binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
+        binNo = int(nBins_ * (pos.z() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
         binNo = int(rPos.length() / binWidth_);
@@ -2079,7 +2114,7 @@ namespace OpenMD {
     RealType r;
     for (int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
-        z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(2,2);
+        z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_);
         den = binMass[i] * nBins_ * Constants::densityConvert 
           / currentSnap_->getVolume() ;
       } else {
@@ -2210,7 +2245,8 @@ namespace OpenMD {
         if ( (*fi).second == rnemdFluxType_) 
           rnemdFile_ << "#    fluxType  = \"" << (*fi).first << "\";\n";
       }
-      
+      if (usePeriodicBoundaryConditions_)
+	rnemdFile_ << "#    privilegedAxis = " << rnemdAxisLabel_ << ";\n";
       rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << ";\n";
 
       rnemdFile_ << "#    objectSelection = \"" 

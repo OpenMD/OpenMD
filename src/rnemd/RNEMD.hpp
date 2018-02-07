@@ -111,6 +111,12 @@ namespace OpenMD {
       ENDINDEX 
     };
 
+    enum RNEMDPrivilegedAxis {
+      rnemdX,
+      rnemdY,
+      rnemdZ
+    };
+
     struct OutputData {
       string title;
       string units;
@@ -125,8 +131,10 @@ namespace OpenMD {
 
     map<string, RNEMDMethod> stringToMethod_;
     map<string, RNEMDFluxType> stringToFluxType_;
+    map<string, RNEMDPrivilegedAxis> stringToPrivilegedAxis_;
     RNEMDMethod rnemdMethod_;
     RNEMDFluxType rnemdFluxType_;
+    RNEMDPrivilegedAxis rnemdPrivilegedAxis_;
 
     // object selection for specifying a particular species:
     string rnemdObjectSelection_;
@@ -167,6 +175,7 @@ namespace OpenMD {
     bool AisHull_;
     RealType areaB_;
     bool BisHull_;
+    string rnemdAxisLabel_;
 
     Vector3d coordinateOrigin_;
 
