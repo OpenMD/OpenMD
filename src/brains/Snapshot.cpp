@@ -78,6 +78,8 @@ namespace OpenMD {
     frameData.restraintPotential = 0.0; 
     frameData.rawPotential = 0.0;   
     frameData.xyArea = 0.0;
+    frameData.xzArea = 0.0;
+    frameData.yzArea = 0.0;
     frameData.volume = 0.0;          
     frameData.thermostat = make_pair(0.0, 0.0);
     frameData.electronicThermostat = make_pair(0.0, 0.0);
@@ -115,6 +117,8 @@ namespace OpenMD {
     frameData.restraintPotential = 0.0; 
     frameData.rawPotential = 0.0;       
     frameData.xyArea = 0.0;
+    frameData.xzArea = 0.0;
+    frameData.yzArea = 0.0;
     frameData.volume = 0.0;          
     frameData.thermostat = make_pair(0.0, 0.0);
     frameData.electronicThermostat = make_pair(0.0, 0.0);
@@ -156,6 +160,8 @@ namespace OpenMD {
     hasLongRangePotential = false;
     hasPotentialEnergy = false;   
     hasXYarea = false;
+    hasXZarea = false;
+    hasYZarea = false;
     hasVolume = false;         
     hasPressure = false;       
     hasTemperature = false;    
@@ -305,6 +311,26 @@ namespace OpenMD {
       hasXYarea = true;
     }
     return frameData.xyArea;
+  }
+
+  RealType Snapshot::getXZarea() {
+    if (!hasXZarea) {
+      Vector3d x = frameData.hmat.getColumn(0);
+      Vector3d z = frameData.hmat.getColumn(2);
+      frameData.xzArea = cross(x,z).length();
+      hasXZarea = true;
+    }
+    return frameData.xzArea;
+  }
+
+  RealType Snapshot::getYZarea() {
+    if (!hasYZarea) {
+      Vector3d y = frameData.hmat.getColumn(1);
+      Vector3d z = frameData.hmat.getColumn(2);
+      frameData.yzArea = cross(y,z).length();
+      hasYZarea = true;
+    }
+    return frameData.yzArea;
   }
 
   RealType Snapshot::getVolume() {

@@ -1857,7 +1857,12 @@ namespace OpenMD {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the x-y
         // area of the current box:
-        areaA = 2.0 * snap->getXYarea();
+	if (rnemdPrivilegedAxis_ == 0)
+	  areaA = 2.0 * snap->getYZarea();
+	if (rnemdPrivilegedAxis_ == 1)
+	  areaA = 2.0 * snap->getXZarea();
+	if (rnemdPrivilegedAxis_ == 2)
+	  areaA = 2.0 * snap->getXYarea();
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, the sphere radius sets the surface area of the
@@ -1899,7 +1904,12 @@ namespace OpenMD {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the x-y
         // area of the current box:
-        areaB = 2.0 * snap->getXYarea();
+	if (rnemdPrivilegedAxis_ == 0)
+	  areaB = 2.0 * snap->getYZarea();
+	if (rnemdPrivilegedAxis_ == 1)
+	  areaB = 2.0 * snap->getXZarea();
+	if (rnemdPrivilegedAxis_ == 2)
+	  areaB = 2.0 * snap->getXYarea();
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, but if a sphereBradius has been set, just use that:
@@ -2027,7 +2037,12 @@ namespace OpenMD {
         // Shift molecules by half a box to have bins start at 0
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
-        binNo = int(nBins_ * (pos.z() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
+	if (rnemdPrivilegedAxis_ == 0)
+	  binNo = int(nBins_ * (pos.x() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
+	if (rnemdPrivilegedAxis_ == 1)
+	  binNo = int(nBins_ * (pos.y() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
+	if (rnemdPrivilegedAxis_ == 2)
+	  binNo = int(nBins_ * (pos.z() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
         binNo = int(rPos.length() / binWidth_);

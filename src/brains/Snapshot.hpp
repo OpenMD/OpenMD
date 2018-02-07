@@ -87,6 +87,8 @@ namespace OpenMD{
     RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
     potVec   selectionPotentials; /**< potential of selected stuntDoubles */
     RealType xyArea;              /**< XY area of this frame */
+    RealType xzArea;              /**< XZ area of this frame */
+    RealType yzArea;              /**< YZ area of this frame */
     RealType volume;              /**< total volume of this frame */
     RealType pressure;            /**< pressure of this frame */
     RealType temperature;         /**< temperature of this frame */
@@ -158,6 +160,8 @@ namespace OpenMD{
             
     RealType getVolume();
     RealType getXYarea();
+    RealType getXZarea();
+    RealType getYZarea();
     void     setVolume(const RealType vol);
 
     /** Wrapping the vector according to periodic boundary condition*/
@@ -292,6 +296,8 @@ namespace OpenMD{
     bool hasLongRangePotential;
     bool hasPotentialEnergy;    
     bool hasXYarea;
+    bool hasXZarea;
+    bool hasYZarea;
     bool hasVolume;         
     bool hasPressure;       
     bool hasTemperature;    
