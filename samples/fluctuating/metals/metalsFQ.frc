@@ -1,44 +1,50 @@
 begin Options
-      Name                  EAM
+      Name                  metalsFQ
       // energies in funcfl files are in eV. Convert to kcal/mol
       MetallicEnergyUnitScaling     23.0605423
+      EnergyUnitScaling     23.0605423
+      EAMMixingMethod   Johnson
 end Options
 
 begin BaseAtomTypes
-Au	196.97
-Ag	107.87
-Cu	63.550
-Ni	58.710
-Pd	106.40
-Pt	195.09
+O        15.9994
+Pt      195.09
 end BaseAtomTypes
 
 begin EAMAtomTypes
-Au	funcfl	Au.u3.funcfl
-Ag	funcfl	Ag.u3.funcfl
-Cu	funcfl	Cu.u3.funcfl
-Ni	funcfl	Ni.u3.funcfl
-Pd	funcfl	Pd.u3.funcfl
-Pt	funcfl	Pt.u3.funcfl
+// Equlibrium distances (re) are in angstroms, density parameters (fe,rhoe) are
+// in eV/angstrom. Most others (alpha, beta, kappa, lambda, eta) are
+// dimensionless. Spline parameters for the energy functional (Fn0, Fn1, Fn2,
+// Fn3, F0, F1, F2, F3, Fe) are in eV.
+//
+// Type     lat re       fe       rhoe      rhos      alpha    beta     A        B        kappa    lambda    Fn0       Fn1      Fn1       Fn3      F0    F1 F2       F3        eta      Fe        rhol rhoh
+Pt Zhou2004 FCC 2.771916 2.336509 33.367564 35.205357 7.105782 3.78975  0.556398 0.696037 0.385255 0.77051  -1.455568 -2.149952 0.528491  1.222875 -4.17 0  3.010561 -2.420128 1.45     -4.145597 0.25 1.15
+// Oxygen is special - There are splines over a range of values:
+// Equlibrium distances (re) are in angstroms, density parameters (fe,
+// rhoe[*],rholimits[*]) are in eV/angstrom.  Most others (alpha, beta, kappa,
+// lambda, gamma, nu) are dimensionless. Spline parameters for the energy
+// functional (F[*]) are in eV
+// Type            re (Å)  fe      α       β       A (eV)  B (eV)  κ       λ       γ       ν       ρlimits                                 ρe[0]    ρe[1]    ρe[2]    ρe[3]    ρe[4]     F[0]                              F[1]                     F[2]                     F[3]                     F[4]
+O  Zhou2005Oxygen  3.64857 1.39478 5.44072 2.11725 0.34900 0.57438 0.08007 0.37457 2.11725 0.37457 0.0 54.62910 65.24078 66.56797 70.57748 54.62910 64.26953 66.21202 66.92391 74.23105 -1.56489 -1.39123 1.77199 1.59833 -1.58967 1.30636 9.81033 -1.54116 2.02821 6.56240 -1.51798 2.30979 7.69582 -1.19082 4.12936 10.32338
 end EAMAtomTypes
 
+begin NonBondedInteractions
+//Types         re (Å)  α       β       A (eV)  B (eV)  κ       λ
+// O  O  EAMZhou   3.64857 5.44072 3.59746 0.34900 0.57438 0.08007 0.39310
+//Types   ShiftedMorse  r0  D0  β
+O O ShiftedMorse  1.05  17.9 2.4
+end NonBondedInteractions
+
 begin AtomTypes
-//name	baseatomtype
-Au_FQ   Au
-Ag_FQ   Ag
-Cu_FQ   Cu
-Ni_FQ   Ni
-Pd_FQ   Pd
+//name baseatomtype
 Pt_FQ   Pt
+O_FQ    O
 end AtomTypes
 
 begin FluctuatingChargeAtomTypes
 // Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
 // this code and the Rick, Stuart, and Berne paper
-//Name  chargeMass (fs^2 kcal/e^2 mol) multipleMinima  curvature coupling 0 energy 1 energy ...
-Au_FQ 400.0 Metal 11 14.304 0.0  0.0 0.0
-Ag_FQ 400.0 Metal 11 11.808 0.0  0.0 0.0
-Cu_FQ 400.0 Metal 11 11.534 0.0  0.0 0.0
-Pd_FQ 400.0 Metal 10 13.030 0.0  0.0 0.0
-Pt_FQ 400.0 Metal 10 130.030 0.0  0.0 0.0
+//Name  chargeMass (fs^2 kcal/e^2 mol) EAM  nValence coupling  q0 u0 k0 q1 u1 k1 q2 u2 k2
+Pt_FQ 	40000.0 EAM   10 0.0  0.0 0.0 332.0
+O_FQ 	40000.0 EAM    6 3.0  0.0 0.0 429.2 -0.4 -33.694 878.118 -0.8 167.782 1327
 end FluctuatingChargeAtomTypes

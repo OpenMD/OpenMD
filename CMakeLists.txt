@@ -280,6 +280,7 @@ src/hydrodynamics/Ellipsoid.cpp
 src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/Sphere.cpp
 src/integrators/DLM.cpp
+src/flucq/FluctuatingChargeDamped.cpp
 src/flucq/FluctuatingChargeLangevin.cpp
 src/flucq/FluctuatingChargeParameters.cpp
 src/flucq/FluctuatingChargeNVE.cpp

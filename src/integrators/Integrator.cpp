@@ -43,6 +43,7 @@
 #include "brains/Snapshot.hpp"
 #include "integrators/Integrator.hpp"
 #include "integrators/DLM.hpp"
+#include "flucq/FluctuatingChargeDamped.hpp"
 #include "flucq/FluctuatingChargeLangevin.hpp"
 #include "flucq/FluctuatingChargeNVE.hpp"
 #include "flucq/FluctuatingChargeNVT.hpp"
@@ -145,6 +146,7 @@ namespace OpenMD {
     
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
+    
     if (simParams->getFluctuatingChargeParameters()->havePropagator()) {
       std::string prop = toUpperCopy(simParams->getFluctuatingChargeParameters()->getPropagator());
       if (prop.compare("NVT")==0){
@@ -153,6 +155,8 @@ namespace OpenMD {
          flucQ_ = new FluctuatingChargeNVE(info);
       } else if (prop.compare("LANGEVIN")==0) {
          flucQ_ = new FluctuatingChargeLangevin(info);
+      } else if (prop.compare("DAMPED")==0){
+         flucQ_ = new FluctuatingChargeDamped(info);         
       } else {
         sprintf(painCave.errMsg,
                 "Integrator Error: Unknown Fluctuating Charge propagator (%s) requested\n",
@@ -163,7 +167,7 @@ namespace OpenMD {
     flucQ_->setForceManager(forceMan_);
   }
   
-  Integrator::~Integrator(){
+    Integrator::~Integrator(){
     delete forceMan_;
     delete velocitizer_;
     delete rnemd_;

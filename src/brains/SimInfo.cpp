@@ -876,7 +876,7 @@ namespace OpenMD {
     
     requiresPrepair_ = usesMetallicAtoms_ ? true : false; 
     requiresSkipCorrection_ = usesElectrostaticAtoms_ ? true : false;
-    requiresSelfCorrection_ = usesElectrostaticAtoms_ ? true : false;    
+    requiresSelfCorrection_ = usesElectrostaticAtoms_ ? true : false;
   }
 
 

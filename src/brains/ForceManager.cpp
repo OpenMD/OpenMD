@@ -1036,6 +1036,7 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, stressTensor.getArrayPointer(), 9,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
+
     curSnapshot->setStressTensor(stressTensor);
 
     if (info_->getSimParams()->getUseLongRangeCorrections()) {

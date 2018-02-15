@@ -363,7 +363,7 @@ namespace OpenMD {
       RealType pressure;
 
       tensor = getPressureTensor();
-      
+
       pressure = Constants::pressureConvert * 
         (tensor(0, 0) + tensor(1, 1) + tensor(2, 2)) / 3.0;
       

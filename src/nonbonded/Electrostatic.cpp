@@ -759,7 +759,7 @@ namespace OpenMD {
   void Electrostatic::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
-   
+
     if (Etids[idat.atid1] != -1) { 
       data1 = ElectrostaticMap[Etids[idat.atid1]];
       a_is_Charge = data1.is_Charge;
@@ -1135,7 +1135,7 @@ namespace OpenMD {
     if (b_is_Fluctuating) *(idat.dVdFQ2) += dUdCb * *(idat.sw);
 
     if (!idat.excluded) {
-      
+
       *(idat.vpair) += U;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
       if (idat.isSelected)

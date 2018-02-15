@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,46 +40,60 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
+#ifndef INTEGRATORS_FLUCTUATINGCHARGEDAMPED_HPP
+#define INTEGRATORS_FLUCTUATINGCHARGEDAMPED_HPP
 
-#include "flucq/FluctuatingChargeParameters.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
 
 namespace OpenMD {
-  FluctuatingChargeParameters::FluctuatingChargeParameters() { 
-    DefineOptionalParameterWithDefaultValue(Propagator, "propagator", "Damped");
-    DefineOptionalParameterWithDefaultValue(Friction, "friction", 1600.0);    
-    DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-6);    
-    DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations",
-                                            100);    
-    DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
-    DefineOptionalParameterWithDefaultValue(TauThermostat, "tauThermostat",
-                                            10.0);
-    DefineOptionalParameterWithDefaultValue(DragCoefficient, "dragCoefficient",
-                                            0.01);
-    DefineOptionalParameterWithDefaultValue(ConstrainRegions,
-                                            "constrainRegions", false);
-  }
-  
-  FluctuatingChargeParameters::~FluctuatingChargeParameters() {    
-  }
-  
-  void FluctuatingChargeParameters::validate() {
-    CheckParameter(Propagator,
-                   isEqualIgnoreCase("Damped") ||
-                   isEqualIgnoreCase("NVT") ||
-                   isEqualIgnoreCase("Langevin") ||
-                   isEqualIgnoreCase("Minimizer") ||
-                   isEqualIgnoreCase("NVE") ||
-                   isEqualIgnoreCase("Exact")
-                   );
-    CheckParameter(Friction, isNonNegative());    
-    CheckParameter(Tolerance, isPositive());    
-    CheckParameter(MaxIterations, isPositive());    
-    CheckParameter(TargetTemp,  isNonNegative());
-    CheckParameter(TauThermostat, isPositive()); 
-    CheckParameter(DragCoefficient, isPositive()); 
-  }
-  
+
+  class FluctuatingChargeDamped : public FluctuatingChargePropagator {
+  public:
+    FluctuatingChargeDamped(SimInfo* info);
+    
+    RealType getDragCoefficient() {
+      return drag_;
+    }
+
+    void setDragCoefficient(RealType drag) {
+      drag_ = drag;
+    }
+
+    int getMaxIterationNumber() {
+      return maxIterNum_;
+    }
+        
+    void setMaxIterationNumber(int maxIter) {
+      maxIterNum_ = maxIter;
+    }
+
+    RealType getForceTolerance() {
+      return forceTolerance_;
+    }
+
+    void setForceTolerance(RealType tol) {
+      forceTolerance_ = tol;
+    }
+
+
+  private:
+    virtual void initialize();
+    virtual void moveA();
+    virtual void applyConstraints();
+    virtual void moveB();
+    virtual void updateSizes();
+    virtual RealType calcConservedQuantity();
+
+    int maxIterNum_;
+    RealType forceTolerance_;
+    RealType targetTemp_;
+    RealType drag_;
+    RealType dt2_;
+    RealType dt_;
+    
+    Snapshot* snap;
+  };
+
 }
+
+#endif 

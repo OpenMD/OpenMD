@@ -112,9 +112,9 @@ namespace OpenMD {
     };
 
     enum RNEMDPrivilegedAxis {
-      rnemdX,
-      rnemdY,
-      rnemdZ
+      rnemdX = 0,
+      rnemdY = 1,
+      rnemdZ = 2
     };
 
     struct OutputData {

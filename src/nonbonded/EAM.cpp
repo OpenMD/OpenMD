@@ -559,7 +559,7 @@ namespace OpenMD {
       std::vector<std::vector<RealType> > OF = ea.getOF();
 
       int Nr = 2000;
-      eamAtomData.rcut = 7.0;
+      eamAtomData.rcut = 6.0;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 

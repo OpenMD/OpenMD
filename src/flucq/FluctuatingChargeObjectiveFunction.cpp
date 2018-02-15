@@ -52,16 +52,14 @@ namespace OpenMD{
   RealType FluctuatingChargeObjectiveFunction::value(const DynamicVector<RealType>& x) {
     setCoor(x);
     forceMan_->calcForces();
+    fqConstraints_->applyConstraints();
 
+    RealType pot = thermo.getPotential();
+    
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    // potVec pot = curSnapshot->getLongRangePotentials();
-    // With fluctuating metallic types, the electrostatic potential doesn't
-    // include all of the contributions from the fluctuating charges, so we
-    // need to include all of the long range potential contributions:
-    RealType pot = curSnapshot->getLongRangePotential();
     // Excluded potential still is electrostatic only:
-    potVec exPot = curSnapshot->getExcludedPotentials();  
-  
+    potVec exPot = curSnapshot->getExcludedPotentials();
+    
     return pot + exPot[ELECTROSTATIC_FAMILY];
   }
   
@@ -79,20 +77,16 @@ namespace OpenMD{
                                                               const DynamicVector<RealType>& x) {
 
     setCoor(x);     
-
     forceMan_->calcForces();
     fqConstraints_->applyConstraints();
     
     getGrad(grad); 
 
+    RealType pot = thermo.getPotential();
+
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    // potVec pot = curSnapshot->getLongRangePotentials();
-    // With fluctuating metallic types, the electrostatic potential doesn't
-    // include all of the contributions from the fluctuating charges, so we
-    // need to include all of the long range potential contributions:
-    RealType pot = curSnapshot->getLongRangePotential();
     // Excluded potential still is electrostatic only:
-    potVec exPot = curSnapshot->getExcludedPotentials();    
+    potVec exPot = curSnapshot->getExcludedPotentials();
 
     return pot + exPot[ELECTROSTATIC_FAMILY];
   }
@@ -103,6 +97,8 @@ namespace OpenMD{
     Molecule* mol;
     Atom* atom;
     int index = 0;
+
+    info_->getSnapshotManager()->advance();
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
