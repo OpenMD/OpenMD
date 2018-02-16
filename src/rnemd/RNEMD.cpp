@@ -1855,14 +1855,19 @@ namespace OpenMD {
 
     } else {
       if (usePeriodicBoundaryConditions_) {
-        // in periodic boundaries, the surface area is twice the x-y
-        // area of the current box:
-	if (rnemdPrivilegedAxis_ == 0)
-	  areaA = 2.0 * snap->getYZarea();
-	if (rnemdPrivilegedAxis_ == 1)
+        // in periodic boundaries, the surface area is twice the 
+        // area of the current box, normal to the privileged axis:
+	switch(rnemdPrivilegedAxis_) {
+        case rnemdX:
+          areaA = 2.0 * snap->getYZarea();
+	  break;
+        case rnemdY:
 	  areaA = 2.0 * snap->getXZarea();
-	if (rnemdPrivilegedAxis_ == 2)
+	  break;
+        case rnemdZ:
+	default:
 	  areaA = 2.0 * snap->getXYarea();
+	}
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, the sphere radius sets the surface area of the
@@ -1902,14 +1907,19 @@ namespace OpenMD {
       
     } else {
       if (usePeriodicBoundaryConditions_) {
-        // in periodic boundaries, the surface area is twice the x-y
-        // area of the current box:
-	if (rnemdPrivilegedAxis_ == 0)
-	  areaB = 2.0 * snap->getYZarea();
-	if (rnemdPrivilegedAxis_ == 1)
+        // in periodic boundaries, the surface area is twice the 
+        // area of the current box, normal to the privileged axis:
+	switch(rnemdPrivilegedAxis_) {
+        case rnemdX:
+          areaB = 2.0 * snap->getYZarea();
+	  break;
+        case rnemdY:
 	  areaB = 2.0 * snap->getXZarea();
-	if (rnemdPrivilegedAxis_ == 2)
+	  break;
+        case rnemdZ:
+	default:
 	  areaB = 2.0 * snap->getXYarea();
+	}
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, but if a sphereBradius has been set, just use that:
@@ -2037,12 +2047,17 @@ namespace OpenMD {
         // Shift molecules by half a box to have bins start at 0
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
-	if (rnemdPrivilegedAxis_ == 0)
-	  binNo = int(nBins_ * (pos.x() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
-	if (rnemdPrivilegedAxis_ == 1)
-	  binNo = int(nBins_ * (pos.y() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
-	if (rnemdPrivilegedAxis_ == 2)
-	  binNo = int(nBins_ * (pos.z() / hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) + 0.5)) % nBins_;
+	switch(rnemdPrivilegedAxis_) {
+        case rnemdX:
+	  binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
+	  break;
+        case rnemdY:
+	  binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
+	  break;
+        case rnemdZ:
+	default:
+	  binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
+	}
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
         binNo = int(rPos.length() / binWidth_);
