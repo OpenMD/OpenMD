@@ -857,7 +857,6 @@ namespace OpenMD {
     RealType phab(0.0), dvpdr(0.0), Na(0.0), Nb(0.0), qa(0.0), qb(0.0);
     RealType va(1.0), vb(1.0);
     RealType drhoidr(0.0), drhojdr(0.0), dudr(0.0);
-    RealType u, ui, up, uip;
 
     if (data1.isFluctuatingCharge) {
       Na = data1.nValence;
@@ -886,36 +885,35 @@ namespace OpenMD {
 
     switch(mixMeth_) {
     case eamJohnson:
-      u = rha/rhb;
-      up = drha/rhb - rha*drhb/(rhb*rhb);
-      ui = rhb/rha;
-      uip = -up / (u*u);
 
       if ( *(idat.rij) < rci ) {
-        phab = phab + 0.5 * ui * (vb/va) * pha;
-        dvpdr = dvpdr + 0.5 * (vb/va) * (ui * dpha + uip * pha);
-
+        phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
+        dvpdr = dvpdr + 0.5 * (vb/va)* ((rhb/rha)*dpha +
+                                        pha*((drhb/rha) - (rhb*drha/rha/rha)));
+        
         if (data1.isFluctuatingCharge) {
-          *(idat.dVdFQ1) += 0.5 * (ui * vb * pha) / (Na * va * va);
+          *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
         }
         if (data2.isFluctuatingCharge) {
-          *(idat.dVdFQ2) -= 0.5 * (ui * pha) / (Nb*va);
+          *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
         }
         
       }
 
       if ( *(idat.rij) < rcj) {
-        phab = phab + 0.5 * u * (va/vb) * phb;
-        dvpdr = dvpdr + 0.5 * (va/vb) * (u * dphb + up * phb);
+        phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
+        dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
+                                         phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
         
         if (data1.isFluctuatingCharge) {
-          *(idat.dVdFQ1) -= 0.5 * (u * phb) / (Na*vb);
+          *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
         }
         if (data2.isFluctuatingCharge) {
-          *(idat.dVdFQ2) += 0.5 * (u * va * phb) / (Nb * vb * vb);
+          *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
         }
 
       }
+
       break;
     case eamDaw:
       if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
@@ -933,20 +931,13 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
-    if ( *(idat.rij) < rci) {
-      data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
-    }
-
-    if ( *(idat.rij) < rcj) {
-      data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
-    }
 
     drhoidr = drha;
     drhojdr = drhb;
 
     dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr;
-
+    
+    
     *(idat.f1) += rhat * dudr;
 
     if (idat.doParticlePot) {
