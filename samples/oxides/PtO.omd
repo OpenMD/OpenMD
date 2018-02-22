@@ -27,19 +27,26 @@ component{
   nMol = 1536;
 }
 
+flucQ {
+  propagator = "Damped";
+  dragCoefficient = 0.1;
+}
+
 targetTemp = 500.0;
 targetPressure = 1.0;
+
+outputFluctuatingCharges = "true";
 
 forceField = "metalsFQ";
 forceFieldFileName = "metalsFQ.frc";
 
 ensemble = "NVE";
-dt = 4.0;
-runTime = 2e3;
-cutoffRadius = 5.5;
+dt = 1.0;
+runTime = 1e2;
+cutoffRadius = 9;
 
-statusTime = 4;
-sampleTime = 100.0;
+statusTime = 1;
+sampleTime = 10.0;
 seed = 985456376;
 
 useInitialExtendedSystemState="false";

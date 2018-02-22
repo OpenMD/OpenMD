@@ -60,6 +60,7 @@ namespace OpenMD {
     DeclareParameter(MetallicEnergyUnitScaling, RealType);
     DeclareParameter(DistanceUnitScaling, RealType);
     DeclareParameter(AngleUnitScaling, RealType);
+    DeclareParameter(ChargeUnitScaling, RealType);
     DeclareParameter(TorsionAngleConvention, std::string);
     DeclareParameter(vdw12scale, RealType);
     DeclareParameter(vdw13scale, RealType);

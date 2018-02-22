@@ -1,8 +1,14 @@
 begin Options
       Name                  metalsFQ
-      // energies in funcfl files are in eV. Convert to kcal/mol
+      // energies in metallic force fields are usually in eV. Convert to kcal/mol:
       MetallicEnergyUnitScaling     23.0605423
+      // All of the other interactions (NonBonded, Fluctuating Charge)
+      // will also follow this eV convention
       EnergyUnitScaling     23.0605423
+      // measure charges in electrons:
+      ChargeUnitScaling     1.0
+      // measure distances in angstroms:
+      DistanceUnitScaling   1.0
       EAMMixingMethod   Johnson
 end Options
 
@@ -45,6 +51,6 @@ begin FluctuatingChargeAtomTypes
 // Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
 // this code and the Rick, Stuart, and Berne paper
 //Name  chargeMass (fs^2 kcal/e^2 mol) EAM  nValence coupling  q0 u0 k0 q1 u1 k1 q2 u2 k2
-Pt_FQ 	40000.0 EAM   10 0.0  0.0 0.0 332.0
-O_FQ 	40000.0 EAM    6 10.0  0.0 0.0 429.2 -0.4 -33.694 878.118 -0.8 167.782 1327
+Pt_FQ 	40000.0 EAM   10 0.0   0.0 0.0 14.4
+O_FQ 	40000.0 EAM    6 0.15  0.0 0.0 18.6119 -0.4 -1.4611105 38.07881 -0.8 7.275718 57.544
 end FluctuatingChargeAtomTypes

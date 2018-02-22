@@ -77,6 +77,10 @@ namespace OpenMD {
     }
 
     eus_  = options_.getEnergyUnitScaling();
+    cus_  = options_.getChargeUnitScaling();
+    dus_  = options_.getDistanceUnitScaling();
+    RealType chius = eus_ / cus_;
+    RealType curvus = eus_ / (cus_ * cus_);
 
     string atomTypeName = tokenizer.nextToken();
     AtomType* atomType = ff.getAtomType(atomTypeName);
@@ -123,10 +127,10 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType chi = tokenizer.nextTokenAsDouble();
-        RealType Jii = tokenizer.nextTokenAsDouble();
+        RealType chi = chius * tokenizer.nextTokenAsDouble();
+        RealType Jii = curvus * tokenizer.nextTokenAsDouble();
         int slaterN = tokenizer.nextTokenAsInt();
-        RealType slaterZeta = tokenizer.nextTokenAsDouble();
+        RealType slaterZeta = tokenizer.nextTokenAsDouble() / dus_;
 
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         fqa.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
@@ -144,14 +148,14 @@ namespace OpenMD {
 
       } else {
         std::vector<tuple3<RealType, RealType, RealType> > diabaticStates;
-        RealType curvature = tokenizer.nextTokenAsDouble();
-        RealType coupling = tokenizer.nextTokenAsDouble();
+        RealType curvature = curvus * tokenizer.nextTokenAsDouble();
+        RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
         nTokens -= 2;
         int nStates = nTokens / 3;
         RealType charge;
         RealType ionizationEnergy;
         for (int i = 0; i < nStates; ++i) {
-          charge = tokenizer.nextTokenAsDouble();
+          charge = cus_ * tokenizer.nextTokenAsDouble();
           ionizationEnergy = eus_ * tokenizer.nextTokenAsDouble();
           diabaticStates.push_back( make_tuple3( charge, ionizationEnergy,
                                                  curvature));
@@ -175,16 +179,16 @@ namespace OpenMD {
           nTokens -= 1;
 
           std::vector<tuple3<RealType, RealType, RealType> > diabaticStates;
-          RealType coupling = tokenizer.nextTokenAsDouble();
+          RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
           nTokens -= 1;
           int nStates = nTokens / 3;
           RealType charge;
           RealType ionizationEnergy;
           RealType curvature;
           for (int i = 0; i < nStates; ++i) {
-            charge = tokenizer.nextTokenAsDouble();
+            charge = cus_ * tokenizer.nextTokenAsDouble();
             ionizationEnergy = eus_ * tokenizer.nextTokenAsDouble();
-            curvature = tokenizer.nextTokenAsDouble();
+            curvature = curvus * tokenizer.nextTokenAsDouble();
             diabaticStates.push_back( make_tuple3( charge, ionizationEnergy,
                                                    curvature ));
           }

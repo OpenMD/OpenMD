@@ -68,6 +68,8 @@ namespace OpenMD {
     std::map<std::string, FluctuatingTypeEnum> stringToEnumMap_;
     ForceFieldOptions& options_;
     RealType eus_;  //!< Energy unit scaling
+    RealType cus_;  //!< Charge unit scaling
+    RealType dus_;  //!< Distance unit scaling
   };
 }
 
