@@ -833,7 +833,6 @@ namespace OpenMD {
     return;
   }
 
-
   void EAM::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
@@ -937,7 +936,6 @@ namespace OpenMD {
 
     dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr;
     
-    
     *(idat.f1) += rhat * dudr;
 
     if (idat.doParticlePot) {
@@ -963,18 +961,23 @@ namespace OpenMD {
 
     *(idat.vpair) += phab;
 
-    if (idat.doElectricField) {
-      // Borrow the appropriate field code we're using in Electrostatic:
-      RealType eff = electrostatic_->getFieldFunction( *(idat.rij) );
+    // fluctuating charges are now done in Electrostatic, so there's
+    // no need for this:
+    // if (idat.doElectricField) {
+    //   // Borrow the appropriate field code we're using in Electrostatic:
+    //   RealType eff = electrostatic_->getFieldFunction( *(idat.rij) );
 
-      if (data1.isFluctuatingCharge) {
-        *(idat.eField2) += qa * eff * rhat;
-      }
-      if (data2.isFluctuatingCharge) {
-        *(idat.eField1) += qb * eff * rhat;
-      }
-    }
-    
+    //   if (data1.isFluctuatingCharge) {
+    //     *(idat.eField2) += qa * eff * rhat;
+    //   }
+    //   if (data2.isFluctuatingCharge) {
+    //     *(idat.eField1) += qb * eff * rhat;
+    //   }
+    // }
+
+
+    // When densities are fluctuating, the functional depends on the
+    // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
       *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / data1.nValence;
     }

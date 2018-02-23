@@ -236,7 +236,7 @@ namespace OpenMD {
                                           doVelocities_(false), 
                                           doForces_(false), doVectors_(false),
                                           doCharges_(false), 
-                                          doElectricFields_(false) {
+                                          doElectricFields_(false), doGlobalIDs_(false) {
     this->info = info;
     visitorName = "XYZVisitor";
     
@@ -250,7 +250,7 @@ namespace OpenMD {
   XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
     BaseVisitor(), seleMan(info), evaluator(info), doPositions_(true),
     doVelocities_(false), doForces_(false), doVectors_(false),
-    doCharges_(false), doElectricFields_(false) {
+    doCharges_(false), doElectricFields_(false), doGlobalIDs_(false) {
     
     this->info = info;
     visitorName = "XYZVisitor";
