@@ -869,68 +869,80 @@ namespace OpenMD {
     }
 
     rhat =  *(idat.d) / *(idat.rij);
-
     if ( *(idat.rij) < rci) {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
     }
-
+    
     if ( *(idat.rij) < rcj) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
     }
-
-    switch(mixMeth_) {
-    case eamJohnson:
-
-      if ( *(idat.rij) < rci ) {
-        phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
-        dvpdr = dvpdr + 0.5 * (vb/va)* ((rhb/rha)*dpha +
-                                        pha*((drhb/rha) - (rhb*drha/rha/rha)));
+    
+    if (MixingMap[eamtid1][eamtid2].explicitlySet){
+      // explicitly set pair potentials override mixing rules:
+      if ( *(idat.rij) < MixingMap[eamtid1][eamtid2].rcut) {
         
-        if (data1.isFluctuatingCharge) {
-          *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
-        }
-        if (data2.isFluctuatingCharge) {
-          *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
+        CubicSpline* phi = MixingMap[eamtid1][eamtid2].phi;
+        phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
+        
+      }    
+    } else {
+      
+      switch(mixMeth_) {
+      case eamJohnson:
+        
+        if ( *(idat.rij) < rci ) {
+          phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
+          dvpdr = dvpdr + 0.5 * (vb/va)* ((rhb/rha)*dpha +
+                                          pha*((drhb/rha) -
+                                               (rhb*drha/rha/rha)));
+          
+          if (data1.isFluctuatingCharge) {
+            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
+          }
+          if (data2.isFluctuatingCharge) {
+            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
+          }
+          
         }
         
-      }
-
-      if ( *(idat.rij) < rcj) {
-        phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
-        dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
-                                         phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+        if ( *(idat.rij) < rcj) {
+          phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
+          dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
+                                           phb*((drha/rhb) -
+                                                (rha*drhb/rhb/rhb)));
+          
+          if (data1.isFluctuatingCharge) {
+            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
+          }
+          if (data2.isFluctuatingCharge) {
+            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
+          }
+          
+        }
         
-        if (data1.isFluctuatingCharge) {
-          *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
+        break;
+      case eamDaw:
+        if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
+          MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij),
+                                                                    phab, dvpdr);
         }
-        if (data2.isFluctuatingCharge) {
-          *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
-        }
-
+        break;
+      case eamUnknownMix:
+      default:
+        
+        sprintf(painCave.errMsg,
+                "EAM::calcForce hit a mixing method it doesn't know about!\n"
+                );
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
       }
-
-      break;
-    case eamDaw:
-      if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
-        MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij),
-                                                                  phab, dvpdr);
-      }
-      break;
-    case eamUnknownMix:
-    default:
-
-      sprintf(painCave.errMsg,
-              "EAM::calcForce hit a mixing method it doesn't know about!\n"
-              );
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
     }
-
+    
     drhoidr = drha;
     drhojdr = drhb;
 
