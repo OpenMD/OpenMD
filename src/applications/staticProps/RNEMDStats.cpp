@@ -146,7 +146,7 @@ namespace OpenMD {
     }
     
     for (unsigned int i = 0; i < nBins_; i++) {
-
+      
       if (binDof[i] > 0) {
         RealType temp = 2.0 * binKE[i] / (binDof[i] * Constants::kb *
                                           Constants::energyConvert);
