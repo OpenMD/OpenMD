@@ -61,6 +61,8 @@ namespace OpenMD {
     
     histogram_.resize(nBins_);
     avgGofr_.resize(nBins_);
+    sumGofr1_.resize(nBins_);
+    sumGofr2_.resize(nBins_);
     std::stringstream params;
     params << " len = " << len_
            << ", nrbins = " << nBins_;
@@ -70,7 +72,9 @@ namespace OpenMD {
   
 
   void GofR::preProcess() {
-    std::fill(avgGofr_.begin(), avgGofr_.end(), 0.0);    
+    std::fill(avgGofr_.begin(), avgGofr_.end(), 0.0);
+    std::fill(sumGofr1_.begin(), sumGofr1_.end(), 0.0);
+    std::fill(sumGofr2_.begin(), sumGofr2_.end(), 0.0);
   }
 
   void GofR::initializeHistogram() {
@@ -79,7 +83,7 @@ namespace OpenMD {
 
 
   void GofR::processHistogram() {
-
+    
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     RealType pairDensity = nPairs /volume * 2.0;
@@ -92,11 +96,32 @@ namespace OpenMD {
       RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
       RealType nIdeal = volSlice * pairConstant;
 
-      avgGofr_[i] += histogram_[i] / nIdeal;    
+      avgGofr_[i] += histogram_[i] / nIdeal;
     }
 
   }
 
+  void GofR::postProcess() {
+    
+    int nSelected1 = getNSelected1();
+    int nSelected2 = getNSelected2();
+    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType constant = ( 4.0 * Constants::PI ) / (3.0 * volume);
+
+    RealType sum = 0.0;
+    for(unsigned int i = 0; i < avgGofr_.size(); ++i){
+      
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+
+      sum += avgGofr_[i]*constant*(pow(rUpper,3)-pow(rLower,3));
+      sumGofr1_[i] = nSelected1 * sum;
+      sumGofr2_[i] = nSelected2 * sum;
+
+    }
+    
+  }
+  
   void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
@@ -132,10 +157,12 @@ namespace OpenMD {
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#r\tcorrValue\n";
+      ofs << "#r\tcorrValue\tcumulativeSum1\tcumulativeSum2\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
-	ofs << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
+	ofs << r << "\t" << avgGofr_[i]/nProcessed_ << "\t" <<
+	  sumGofr1_[i]/nProcessed_ << "\t" <<
+	  sumGofr2_[i]/nProcessed_ << "\n";
       }
     } else {
       

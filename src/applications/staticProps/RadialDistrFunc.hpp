@@ -76,6 +76,8 @@ namespace OpenMD {
     virtual void processOverlapping(SelectionManager& sman);
 
     int getNPairs() { return nPairs_;}
+    int getNSelected1() { return nSelected1_;}
+    int getNSelected2() { return nSelected2_;}
         
     Snapshot* currentSnapshot_;
 
@@ -102,6 +104,8 @@ namespace OpenMD {
     virtual void writeRdf() = 0;
         
     int nPairs_;
+    int nSelected1_;
+    int nSelected2_;
   };
 
 

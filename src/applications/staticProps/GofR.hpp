@@ -65,6 +65,7 @@ namespace OpenMD {
     virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void processHistogram();
+    virtual void postProcess();
 
     virtual void writeRdf();
 
@@ -74,6 +75,8 @@ namespace OpenMD {
         
     std::vector<int> histogram_;
     std::vector<RealType> avgGofr_;
+    std::vector<RealType> sumGofr1_;
+    std::vector<RealType> sumGofr2_;
   };
 
 }

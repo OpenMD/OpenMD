@@ -77,11 +77,11 @@ namespace OpenMD {
         sele1_minus_common_ = seleMan1_ - common_;
         sele2_minus_common_ = seleMan2_ - common_;      
 
-        int nSelected1 = seleMan1_.getSelectionCount();
-        int nSelected2 = seleMan2_.getSelectionCount();
+	nSelected1_ = seleMan1_.getSelectionCount();
+	nSelected2_ = seleMan2_.getSelectionCount();
         int nIntersect = common_.getSelectionCount();
         
-        nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;  
+        nPairs_ = nSelected1_ * nSelected2_ - (nIntersect +1) * nIntersect/2;  
       }
     
     }
@@ -134,11 +134,11 @@ namespace OpenMD {
 	common_ = seleMan1_ & seleMan2_;
 	sele1_minus_common_ = seleMan1_ - common_;
 	sele2_minus_common_ = seleMan2_ - common_;            
-	int nSelected1 = seleMan1_.getSelectionCount();
-	int nSelected2 = seleMan2_.getSelectionCount();
+	nSelected1_ = seleMan1_.getSelectionCount();
+	nSelected2_ = seleMan2_.getSelectionCount();
 	int nIntersect = common_.getSelectionCount();
             
-	nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;
+	nPairs_ = nSelected1_ * nSelected2_ - (nIntersect +1) * nIntersect/2;
       }
       
       processNonOverlapping(sele1_minus_common_, seleMan2_);
