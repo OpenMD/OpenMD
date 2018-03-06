@@ -40,11 +40,11 @@ forceFieldFileName = "metalsFQ.frc";
 
 ensemble = "NVE";
 dt = 1.0;
-runTime = 1e2;
-cutoffRadius = 9;
+runTime = 1;
+cutoffRadius = 12;
 
 statusTime = 1;
-sampleTime = 10.0;
+sampleTime = 1.0;
 seed = 985456376;
 
 useInitialExtendedSystemState="false";

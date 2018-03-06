@@ -853,20 +853,8 @@ namespace OpenMD {
     RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
     RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
 
-    RealType phab(0.0), dvpdr(0.0), Na(0.0), Nb(0.0), qa(0.0), qb(0.0);
-    RealType va(1.0), vb(1.0);
+    RealType phab(0.0), dvpdr(0.0);
     RealType drhoidr(0.0), drhojdr(0.0), dudr(0.0);
-
-    if (data1.isFluctuatingCharge) {
-      Na = data1.nValence;
-      qa = *(idat.flucQ1);
-      va = (1.0 - qa / Na);
-    }
-    if (data2.isFluctuatingCharge) {
-      Nb = data2.nValence;
-      qb = *(idat.flucQ2);
-      vb = (1.0 - qb / Nb);
-    }
 
     rhat =  *(idat.d) / *(idat.rij);
     if ( *(idat.rij) < rci) {
@@ -880,66 +868,56 @@ namespace OpenMD {
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
     }
-    
-    if (MixingMap[eamtid1][eamtid2].explicitlySet){
-      // explicitly set pair potentials override mixing rules:
+
+    bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
+    bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
+
+    if (hasFlucQ && !isExplicit && mixMeth_ == eamJohnson) {
+      RealType Na(0.0), Nb(0.0), qa(0.0), qb(0.0);
+      RealType va(1.0), vb(1.0);
+      
+      if (data1.isFluctuatingCharge) {
+        Na = data1.nValence;
+        qa = *(idat.flucQ1);
+        va = (1.0 - qa / Na);
+      }
+      if (data2.isFluctuatingCharge) {
+        Nb = data2.nValence;
+        qb = *(idat.flucQ2);
+        vb = (1.0 - qb / Nb);
+      }
+      
+      if ( *(idat.rij) < rci ) {
+        phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
+        dvpdr = dvpdr + 0.5 * (vb/va) * ((rhb/rha)*dpha +
+                                         pha*((drhb/rha) - (rhb*drha/rha/rha)));
+        
+        if (data1.isFluctuatingCharge) {
+          *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
+        }
+        if (data2.isFluctuatingCharge) {
+          *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
+        }        
+      }
+      
+      if ( *(idat.rij) < rcj) {
+        phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
+        dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
+                                         phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+        
+        if (data1.isFluctuatingCharge) {
+          *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
+        }
+        if (data2.isFluctuatingCharge) {
+          *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
+        }
+      }    
+      
+    } else {
       if ( *(idat.rij) < MixingMap[eamtid1][eamtid2].rcut) {
         
         CubicSpline* phi = MixingMap[eamtid1][eamtid2].phi;
         phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
-        
-      }    
-    } else {
-      
-      switch(mixMeth_) {
-      case eamJohnson:
-        
-        if ( *(idat.rij) < rci ) {
-          phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
-          dvpdr = dvpdr + 0.5 * (vb/va)* ((rhb/rha)*dpha +
-                                          pha*((drhb/rha) -
-                                               (rhb*drha/rha/rha)));
-          
-          if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
-          }
-          if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
-          }
-          
-        }
-        
-        if ( *(idat.rij) < rcj) {
-          phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
-          dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
-                                           phb*((drha/rhb) -
-                                                (rha*drhb/rhb/rhb)));
-          
-          if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
-          }
-          if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
-          }
-          
-        }
-        
-        break;
-      case eamDaw:
-        if ( *(idat.rij) <  MixingMap[eamtid1][eamtid2].rcut) {
-          MixingMap[eamtid1][eamtid2].phi->getValueAndDerivativeAt( *(idat.rij),
-                                                                    phab, dvpdr);
-        }
-        break;
-      case eamUnknownMix:
-      default:
-        
-        sprintf(painCave.errMsg,
-                "EAM::calcForce hit a mixing method it doesn't know about!\n"
-                );
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
       }
     }
     
@@ -972,21 +950,6 @@ namespace OpenMD {
       (*(idat.selePot))[METALLIC_FAMILY] += phab;
 
     *(idat.vpair) += phab;
-
-    // fluctuating charges are now done in Electrostatic, so there's
-    // no need for this:
-    // if (idat.doElectricField) {
-    //   // Borrow the appropriate field code we're using in Electrostatic:
-    //   RealType eff = electrostatic_->getFieldFunction( *(idat.rij) );
-
-    //   if (data1.isFluctuatingCharge) {
-    //     *(idat.eField2) += qa * eff * rhat;
-    //   }
-    //   if (data2.isFluctuatingCharge) {
-    //     *(idat.eField1) += qb * eff * rhat;
-    //   }
-    // }
-
 
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:

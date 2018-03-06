@@ -12,7 +12,7 @@ targetTemp = 500.0;
 targetPressure = 1.0;
 
 forceField = "EAM";
-forceFieldVariant="Zhou";
+forceFieldVariant="Zhou2004";
 
 ensemble = "NVE";
 dt = 4.0;
