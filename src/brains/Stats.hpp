@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-  
+
 #ifndef BRAINS_STATS_HPP
 #define BRAINS_STATS_HPP
 
@@ -58,7 +58,7 @@ namespace OpenMD {
   public:
     enum StatsIndex {
       BEGININDEX = 0,  //internal use
-      TIME = BEGININDEX,            
+      TIME = BEGININDEX,
       TOTAL_ENERGY,
       POTENTIAL_ENERGY,
       KINETIC_ENERGY,
@@ -67,13 +67,13 @@ namespace OpenMD {
       VOLUME,
       HULLVOLUME,
       GYRVOLUME,
-      CONSERVED_QUANTITY,             
+      CONSERVED_QUANTITY,
       TRANSLATIONAL_KINETIC,
       ROTATIONAL_KINETIC,
       ELECTRONIC_KINETIC,
-      LONG_RANGE_POTENTIAL,   
+      LONG_RANGE_POTENTIAL,
       VANDERWAALS_POTENTIAL,
-      ELECTROSTATIC_POTENTIAL,      
+      ELECTROSTATIC_POTENTIAL,
       METALLIC_POTENTIAL,
       HYDROGENBONDING_POTENTIAL,
       RECIPROCAL_POTENTIAL,
@@ -86,12 +86,13 @@ namespace OpenMD {
       RAW_POTENTIAL,
       RESTRAINT_POTENTIAL,
       PRESSURE_TENSOR,
+      STRESS_TENSOR,
       SYSTEM_DIPOLE,
       SYSTEM_QUADRUPOLE,
       TAGGED_PAIR_DISTANCE,
       SHADOWH,
       HELFANDMOMENT,
-      HEATFLUX,  
+      HEATFLUX,
       ELECTRONIC_TEMPERATURE,
       COM,
       COM_VELOCITY,
@@ -108,7 +109,7 @@ namespace OpenMD {
       string dataType;
       BaseAccumulator* accumulator;
     };
-    
+
     typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;
     typedef map<string, StatsIndex> StatsMapType;
 
@@ -123,7 +124,7 @@ namespace OpenMD {
     StatsMapType getStatsMap();
     void         setStatsMask(StatsBitSet mask);
 
-    string    getTitle(int index); 
+    string    getTitle(int index);
     string    getUnits(int index);
     string    getDataType(int index);
 
