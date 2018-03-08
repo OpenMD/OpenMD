@@ -287,7 +287,7 @@ namespace OpenMD {
     //stress tensor added
     StatsData stress_tensor;
     stress_tensor.units =  "amu/fs^2/A";
-    stress_tensor.title =  "STRESS Tensor";
+    stress_tensor.title =  "Stress Tensor";
     stress_tensor.dataType = "Mat3x3d";
     stress_tensor.accumulator = new MatrixAccumulator();
     data_[STRESS_TENSOR] = stress_tensor;
