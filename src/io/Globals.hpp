@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifndef IO_GLOBALS_HPP
 #define IO_GLOBALS_HPP
 
@@ -66,7 +66,7 @@ namespace OpenMD {
 
     Globals();
     virtual ~Globals();
-    
+
     DeclareParameter(ForceField, std::string);
     DeclareParameter(TargetTemp, RealType);
     DeclareParameter(Ensemble, std::string);
@@ -103,6 +103,7 @@ namespace OpenMD {
     DeclareParameter(ForceFieldFileName, std::string);
     DeclareParameter(SurfaceTension, RealType);
     DeclareParameter(PrintPressureTensor, bool);
+    DeclareParameter(PrintStressTensor, bool);
     DeclareParameter(PrintHeatFlux, bool);
     DeclareParameter(TaggedAtomPair, intPair);
     DeclareParameter(PrintTaggedPairDistance, bool);
@@ -120,11 +121,11 @@ namespace OpenMD {
     DeclareParameter(OutputSitePotential, bool);
     DeclareParameter(OutputDensity, bool);
     DeclareParameter(SkinThickness, RealType);
-    DeclareParameter(StatFileFormat, std::string);    
-    DeclareParameter(StatFilePrecision, int);    
+    DeclareParameter(StatFileFormat, std::string);
+    DeclareParameter(StatFilePrecision, int);
     DeclareParameter(HydroPropFile, std::string);
     DeclareParameter(Viscosity, RealType);
-    DeclareParameter(BeadSize, RealType);  
+    DeclareParameter(BeadSize, RealType);
     DeclareParameter(UseSphericalBoundaryConditions, bool);
     DeclareParameter(FrozenBufferRadius, RealType);
     DeclareParameter(LangevinBufferRadius, RealType);
@@ -135,8 +136,8 @@ namespace OpenMD {
     DeclareParameter(MTM_Ce, RealType);
     DeclareParameter(MTM_G, RealType);
     DeclareParameter(MTM_Io, RealType);
-    DeclareParameter(MTM_Sigma, RealType);    
-    DeclareParameter(MTM_R, RealType);    
+    DeclareParameter(MTM_Sigma, RealType);
+    DeclareParameter(MTM_R, RealType);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);
@@ -161,15 +162,15 @@ namespace OpenMD {
     bool addMoleculeStamp(MoleculeStamp* molStamp);
     int getNComponents() {return components_.size();}
     std::vector<Component*> getComponents() {return components_;}
-    Component* getComponentAt(int index) {return components_.at(index);}    
-    
+    Component* getComponentAt(int index) {return components_.at(index);}
+
     int getNZconsStamps() {return zconstraints_.size();}
     std::vector<ZConsStamp*> getZconsStamps() {return zconstraints_;}
-    ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}    
+    ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}
 
     int getNRestraintStamps() {return restraints_.size();}
     std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
-    RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}    
+    RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}
 
     bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
     FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
@@ -179,13 +180,13 @@ namespace OpenMD {
 
     bool addMinimizerParameters(MinimizerParameters* miniPars);
     MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
-    
+
     virtual void validate();
   private:
-    
+
     std::vector<Component*> components_;
-    std::vector<ZConsStamp*> zconstraints_;    
-    std::vector<RestraintStamp*> restraints_;    
+    std::vector<ZConsStamp*> zconstraints_;
+    std::vector<RestraintStamp*> restraints_;
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;

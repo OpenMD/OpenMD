@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -52,13 +52,13 @@
 
 namespace OpenMD {
   Globals::Globals() {
-  
+
     flucQpars_ = new FluctuatingChargeParameters();
     rnemdPars_ = new RNEMDParameters();
     minimizerPars_ = new MinimizerParameters();
 
     DefineParameter(ForceField, "forceField");
-    
+
     DefineOptionalParameter(TargetTemp, "targetTemp");
     DefineOptionalParameter(Ensemble, "ensemble");
     DefineOptionalParameter(Dt, "dt");
@@ -71,7 +71,7 @@ namespace OpenMD {
     DefineOptionalParameter(SwitchingRadius, "switchingRadius");
     DefineOptionalParameter(TempSet, "tempSet");
     DefineOptionalParameter(ThermalTime, "thermalTime");
-    DefineOptionalParameter(TargetPressure, "targetPressure");  
+    DefineOptionalParameter(TargetPressure, "targetPressure");
     DefineOptionalParameter(TauThermostat, "tauThermostat");
     DefineOptionalParameter(TauBarostat, "tauBarostat");
     DefineOptionalParameter(ZconsTime, "zconsTime");
@@ -81,15 +81,16 @@ namespace OpenMD {
     DefineOptionalParameter(ZconsGap, "zconsGap");
     DefineOptionalParameter(ZconsFixtime, "zconsFixtime");
     DefineOptionalParameter(ZconsUsingSMD, "zconsUsingSMD");
-    DefineOptionalParameter(ThermodynamicIntegrationLambda, 
+    DefineOptionalParameter(ThermodynamicIntegrationLambda,
                             "thermodynamicIntegrationLambda");
-    DefineOptionalParameter(ThermodynamicIntegrationK, 
+    DefineOptionalParameter(ThermodynamicIntegrationK,
                             "thermodynamicIntegrationK");
     DefineOptionalParameter(ForceFieldVariant, "forceFieldVariant");
     DefineOptionalParameter(ForceFieldFileName, "forceFieldFileName");
     DefineOptionalParameter(DampingAlpha, "dampingAlpha");
     DefineOptionalParameter(SurfaceTension, "surfaceTension");
     DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
+    DefineOptionalParameter(PrintStressTensor, "printStressTensor");
     DefineOptionalParameter(ElectricField, "electricField");
     DefineOptionalParameter(UniformField, "uniformField");
     DefineOptionalParameter(UniformGradientStrength, "uniformGradientStrength");
@@ -97,7 +98,7 @@ namespace OpenMD {
     DefineOptionalParameter(UniformGradientDirection2, "uniformGradientDirection2");
     //DefineOptionalParameter(PeriodicField, "periodicField");
     //DefineOptionalParameter(PeriodicFieldStrength, "periodicFieldStrength");
-    
+
 
     DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
     DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
@@ -108,9 +109,9 @@ namespace OpenMD {
     DefineOptionalParameter(FrozenBufferRadius, "frozenBufferRadius");
     DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
     DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
-    DefineOptionalParameter(UseMultipleTemperatureMethod, 
+    DefineOptionalParameter(UseMultipleTemperatureMethod,
                             "useMultipleTemperatureMethod");
-    DefineOptionalParameter(ElectrostaticSummationMethod, 
+    DefineOptionalParameter(ElectrostaticSummationMethod,
                             "electrostaticSummationMethod");
     DefineOptionalParameter(MTM_Ce, "MTM_Ce");
     DefineOptionalParameter(MTM_G, "MTM_G");
@@ -121,75 +122,75 @@ namespace OpenMD {
     DefineOptionalParameter(ConstraintTime, "constraintTime");
 
     DefineOptionalParameter(PotentialSelection, "potentialSelection");
-    
-    DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, 
-                                            "usePeriodicBoundaryConditions", 
+
+    DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions,
+                                            "usePeriodicBoundaryConditions",
                                             true);
-    DefineOptionalParameterWithDefaultValue(UseAtomicVirial, "useAtomicVirial", 
+    DefineOptionalParameterWithDefaultValue(UseAtomicVirial, "useAtomicVirial",
                                             true);
-    DefineOptionalParameterWithDefaultValue(UseLongRangeCorrections, 
+    DefineOptionalParameterWithDefaultValue(UseLongRangeCorrections,
                                             "useLongRangeCorrections", true);
-    DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", 
+    DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime",
                                             false);
-    DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, 
-                                            "useInitialExtendedSystemState", 
+    DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState,
+                                            "useInitialExtendedSystemState",
                                             false);
-    DefineOptionalParameterWithDefaultValue(OrthoBoxTolerance, 
-                                            "orthoBoxTolerance", 1E-6);  
-    DefineOptionalParameterWithDefaultValue(CutoffMethod, "cutoffMethod", 
+    DefineOptionalParameterWithDefaultValue(OrthoBoxTolerance,
+                                            "orthoBoxTolerance", 1E-6);
+    DefineOptionalParameterWithDefaultValue(CutoffMethod, "cutoffMethod",
                                             "SHIFTED_FORCE");
-    DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, 
-                                            "electrostaticScreeningMethod", 
+    DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod,
+                                            "electrostaticScreeningMethod",
                                             "DAMPED");
     DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
-    DefineOptionalParameterWithDefaultValue(CompressDumpFile, 
+    DefineOptionalParameterWithDefaultValue(CompressDumpFile,
                                             "compressDumpFile", false);
-    DefineOptionalParameterWithDefaultValue(PrintHeatFlux, "printHeatFlux", 
+    DefineOptionalParameterWithDefaultValue(PrintHeatFlux, "printHeatFlux",
                                             false);
-    DefineOptionalParameterWithDefaultValue(OutputForceVector, 
+    DefineOptionalParameterWithDefaultValue(OutputForceVector,
                                             "outputForceVector", false);
-    DefineOptionalParameterWithDefaultValue(OutputParticlePotential, 
+    DefineOptionalParameterWithDefaultValue(OutputParticlePotential,
                                             "outputParticlePotential", false);
-    DefineOptionalParameterWithDefaultValue(OutputElectricField, 
+    DefineOptionalParameterWithDefaultValue(OutputElectricField,
                                             "outputElectricField", false);
-    DefineOptionalParameterWithDefaultValue(OutputFluctuatingCharges, 
+    DefineOptionalParameterWithDefaultValue(OutputFluctuatingCharges,
                                             "outputFluctuatingCharges", false);
-    DefineOptionalParameterWithDefaultValue(OutputSitePotential, 
+    DefineOptionalParameterWithDefaultValue(OutputSitePotential,
                                             "outputSitePotential", false);
-    DefineOptionalParameterWithDefaultValue(OutputDensity, 
+    DefineOptionalParameterWithDefaultValue(OutputDensity,
                                             "outputDensity", false);
-    DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 
+    DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness",
                                             1.0);
-    DefineOptionalParameterWithDefaultValue(StatFileFormat, 
-                                            "statFileFormat", 
+    DefineOptionalParameterWithDefaultValue(StatFileFormat,
+                                            "statFileFormat",
                                             "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");
-    DefineOptionalParameterWithDefaultValue(StatFilePrecision, 
-                                            "statFilePrecision", 8);   
-    DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, 
-                                            "useSphericalBoundaryConditions", 
+    DefineOptionalParameterWithDefaultValue(StatFilePrecision,
+                                            "statFilePrecision", 8);
+    DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions,
+                                            "useSphericalBoundaryConditions",
                                             false);
-    DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, 
+    DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole,
                                             "accumulateBoxDipole", false);
-    DefineOptionalParameterWithDefaultValue(AccumulateBoxQuadrupole, 
+    DefineOptionalParameterWithDefaultValue(AccumulateBoxQuadrupole,
                                             "accumulateBoxQuadrupole", false);
-    DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", 
+    DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints",
                                             false);
-    DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", 
+    DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file",
                                             "idealCrystal.in");
-    DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, 
-                                            "useThermodynamicIntegration", 
+    DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration,
+                                            "useThermodynamicIntegration",
                                             false);
     DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
 
     DefineOptionalParameterWithDefaultValue(PrivilegedAxis,"privilegedAxis","z");
-    
+
     deprecatedKeywords_.insert("nComponents");
     deprecatedKeywords_.insert("nZconstraints");
     deprecatedKeywords_.insert("initialConfig");
     deprecatedKeywords_.insert("thermIntDistSpringConst");
     deprecatedKeywords_.insert("thermIntThetaSpringConst");
     deprecatedKeywords_.insert("thermIntOmegaSpringConst");
-    deprecatedKeywords_.insert("useSolidThermInt");  
+    deprecatedKeywords_.insert("useSolidThermInt");
     deprecatedKeywords_.insert("useLiquidThermInt");
     deprecatedKeywords_.insert("minimizerMaxIter");
     deprecatedKeywords_.insert("minimizerWriteFreq");
@@ -216,16 +217,16 @@ namespace OpenMD {
 
     CheckParameter(ForceField, isNotEmpty());
     CheckParameter(TargetTemp, isPositive());
-    CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || 
-                   isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || 
-                   isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || 
-                   isEqualIgnoreCase("NPTsz") || isEqualIgnoreCase("NPAT")  || 
-                   isEqualIgnoreCase("NPA") || 
-                   isEqualIgnoreCase("LANGEVINDYNAMICS") || 
-                   isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || 
-                   isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") || 
-                   isEqualIgnoreCase("NGT") || 
-                   isEqualIgnoreCase("LANGEVINHULL") || 
+    CheckParameter(Ensemble, isEqualIgnoreCase("NVE") ||
+                   isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") ||
+                   isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") ||
+                   isEqualIgnoreCase("NPTsz") || isEqualIgnoreCase("NPAT")  ||
+                   isEqualIgnoreCase("NPA") ||
+                   isEqualIgnoreCase("LANGEVINDYNAMICS") ||
+                   isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") ||
+                   isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") ||
+                   isEqualIgnoreCase("NGT") ||
+                   isEqualIgnoreCase("LANGEVINHULL") ||
                    isEqualIgnoreCase("LHULL") || isEqualIgnoreCase("SMIPD"));
     CheckParameter(Dt, isPositive());
     CheckParameter(RunTime, isPositive());
@@ -248,25 +249,25 @@ namespace OpenMD {
     CheckParameter(ThermodynamicIntegrationK, isPositive());
     CheckParameter(ForceFieldVariant, isNotEmpty());
     CheckParameter(ForceFieldFileName, isNotEmpty());
-    CheckParameter(CutoffMethod, isEqualIgnoreCase("HARD") || 
-                   isEqualIgnoreCase("SWITCHED") || 
-                   isEqualIgnoreCase("SHIFTED_POTENTIAL") || 
-                   isEqualIgnoreCase("SHIFTED_FORCE") || 
+    CheckParameter(CutoffMethod, isEqualIgnoreCase("HARD") ||
+                   isEqualIgnoreCase("SWITCHED") ||
+                   isEqualIgnoreCase("SHIFTED_POTENTIAL") ||
+                   isEqualIgnoreCase("SHIFTED_FORCE") ||
                    isEqualIgnoreCase("TAYLOR_SHIFTED") ||
                    isEqualIgnoreCase("EWALD_FULL"));
-    CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || 
+    CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") ||
                    isEqualIgnoreCase("HARD") ||
-                   isEqualIgnoreCase("SWITCHED") || 
-                   isEqualIgnoreCase("SHIFTED_POTENTIAL") || 
-                   isEqualIgnoreCase("SHIFTED_FORCE") || 
-                   isEqualIgnoreCase("REACTION_FIELD") || 
+                   isEqualIgnoreCase("SWITCHED") ||
+                   isEqualIgnoreCase("SHIFTED_POTENTIAL") ||
+                   isEqualIgnoreCase("SHIFTED_FORCE") ||
+                   isEqualIgnoreCase("REACTION_FIELD") ||
                    isEqualIgnoreCase("TAYLOR_SHIFTED"));
-    CheckParameter(ElectrostaticScreeningMethod, 
+    CheckParameter(ElectrostaticScreeningMethod,
                    isEqualIgnoreCase("UNDAMPED") ||
-                   isEqualIgnoreCase("DAMPED")); 
-    CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || 
+                   isEqualIgnoreCase("DAMPED"));
+    CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") ||
                    isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
-    CheckParameter(OrthoBoxTolerance, isPositive());  
+    CheckParameter(OrthoBoxTolerance, isPositive());
     CheckParameter(DampingAlpha,isNonNegative());
     CheckParameter(SkinThickness, isPositive());
     CheckParameter(Viscosity, isNonNegative());
@@ -274,25 +275,25 @@ namespace OpenMD {
     CheckParameter(FrozenBufferRadius, isPositive());
     CheckParameter(LangevinBufferRadius, isPositive());
     CheckParameter(NeighborListNeighbors, isPositive());
-    CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || 
-                   isEqualIgnoreCase("AlphaShape")); 
-    CheckParameter(Alpha, isPositive()); 
+    CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") ||
+                   isEqualIgnoreCase("AlphaShape"));
+    CheckParameter(Alpha, isPositive());
     CheckParameter(StatFilePrecision, isPositive());
     CheckParameter(PrivilegedAxis,isEqualIgnoreCase("x") ||
 		   isEqualIgnoreCase("y") ||
 		   isEqualIgnoreCase("z"));
 
-    for(std::vector<Component*>::iterator i = components_.begin(); 
+    for(std::vector<Component*>::iterator i = components_.begin();
         i != components_.end(); ++i) {
       if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
         std::ostringstream oss;
-        oss << "Globals Error: can not find molecule stamp for component " 
+        oss << "Globals Error: can not find molecule stamp for component "
             << (*i)->getType() << std::endl;
-        throw OpenMDException(oss.str());           
+        throw OpenMDException(oss.str());
       }
     }
   }
-  
+
   bool Globals::addComponent(Component* comp) {
     components_.push_back(comp);
     return true;
@@ -311,7 +312,7 @@ namespace OpenMD {
   bool Globals::addFluctuatingChargeParameters(FluctuatingChargeParameters* fqp) {
     if (flucQpars_ != NULL)
       delete flucQpars_;
-    
+
     flucQpars_ = fqp;
     return true;
   }
@@ -319,7 +320,7 @@ namespace OpenMD {
   bool Globals::addRNEMDParameters(RNEMDParameters* rnemdPars) {
     if (rnemdPars_ != NULL)
       delete rnemdPars_;
-    
+
     rnemdPars_ = rnemdPars;
     return true;
   }
@@ -327,7 +328,7 @@ namespace OpenMD {
   bool Globals::addMinimizerParameters(MinimizerParameters* miniPars) {
     if (minimizerPars_ != NULL)
       delete minimizerPars_;
-    
+
     minimizerPars_ = miniPars;
     return true;
   }
@@ -342,9 +343,9 @@ namespace OpenMD {
       ret = true;
     } else {
       std::ostringstream oss;
-      oss << "Globals Error: Molecule Stamp " << molStamp->getName() 
+      oss << "Globals Error: Molecule Stamp " << molStamp->getName()
           << "appears multiple times\n";
-      throw OpenMDException(oss.str());  
+      throw OpenMDException(oss.str());
     }
     return ret;
   }

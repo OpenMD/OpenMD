@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-  
+
 #include "brains/Stats.hpp"
 #include "brains/Thermo.hpp"
 #include <sstream>
@@ -56,7 +56,7 @@ namespace OpenMD {
   }
 
   void Stats::init() {
-   
+
     data_.resize(Stats::ENDINDEX);
 
     StatsData time;
@@ -74,7 +74,7 @@ namespace OpenMD {
     total_energy.accumulator = new Accumulator();
     data_[TOTAL_ENERGY] = total_energy;
     statsMap_["TOTAL_ENERGY"] =  TOTAL_ENERGY;
-   
+
     StatsData potential_energy;
     potential_energy.units =  "kcal/mol";
     potential_energy.title =  "Potential Energy";
@@ -107,6 +107,7 @@ namespace OpenMD {
     data_[PRESSURE] = pressure;
     statsMap_["PRESSURE"] =  PRESSURE;
 
+
     StatsData volume;
     volume.units =  "A^3";
     volume.title =  "Volume";
@@ -132,8 +133,8 @@ namespace OpenMD {
     statsMap_["GYRVOLUME"] =  GYRVOLUME;
 
     StatsData conserved_quantity;
-    conserved_quantity.units =  "kcal/mol";             
-    conserved_quantity.title =  "Conserved Quantity";             
+    conserved_quantity.units =  "kcal/mol";
+    conserved_quantity.title =  "Conserved Quantity";
     conserved_quantity.dataType = "RealType";
     conserved_quantity.accumulator = new Accumulator();
     data_[CONSERVED_QUANTITY] = conserved_quantity;
@@ -181,7 +182,7 @@ namespace OpenMD {
 
     StatsData electrostatic_potential;
     electrostatic_potential.units =  "kcal/mol";
-    electrostatic_potential.title =  "Electrostatic Potential";    
+    electrostatic_potential.title =  "Electrostatic Potential";
     electrostatic_potential.dataType = "RealType";
     electrostatic_potential.accumulator = new Accumulator();
     data_[ELECTROSTATIC_POTENTIAL] = electrostatic_potential;
@@ -189,7 +190,7 @@ namespace OpenMD {
 
     StatsData metallic_potential;
     metallic_potential.units =  "kcal/mol";
-    metallic_potential.title =  "Metallic Potential";    
+    metallic_potential.title =  "Metallic Potential";
     metallic_potential.dataType = "RealType";
     metallic_potential.accumulator = new Accumulator();
     data_[METALLIC_POTENTIAL] = metallic_potential;
@@ -197,7 +198,7 @@ namespace OpenMD {
 
     StatsData hydrogenbonding_potential;
     hydrogenbonding_potential.units =  "kcal/mol";
-    hydrogenbonding_potential.title =  "Hydrogen Bonding Pot.";    
+    hydrogenbonding_potential.title =  "Hydrogen Bonding Pot.";
     hydrogenbonding_potential.dataType = "RealType";
     hydrogenbonding_potential.accumulator = new Accumulator();
     data_[HYDROGENBONDING_POTENTIAL] = hydrogenbonding_potential;
@@ -205,7 +206,7 @@ namespace OpenMD {
 
     StatsData reciprocal_potential;
     reciprocal_potential.units =  "kcal/mol";
-    reciprocal_potential.title =  "Reciprocal Space Pot.";    
+    reciprocal_potential.title =  "Reciprocal Space Pot.";
     reciprocal_potential.dataType = "RealType";
     reciprocal_potential.accumulator = new Accumulator();
     data_[RECIPROCAL_POTENTIAL] = reciprocal_potential;
@@ -213,7 +214,7 @@ namespace OpenMD {
 
     StatsData surface_potential;
     surface_potential.units =  "kcal/mol";
-    surface_potential.title =  "Surface Potential";    
+    surface_potential.title =  "Surface Potential";
     surface_potential.dataType = "RealType";
     surface_potential.accumulator = new Accumulator();
     data_[SURFACE_POTENTIAL] = surface_potential;
@@ -242,7 +243,7 @@ namespace OpenMD {
     bend_potential.accumulator = new Accumulator();
     data_[BEND_POTENTIAL] = bend_potential;
     statsMap_["BEND_POTENTIAL"] =  BEND_POTENTIAL;
-    
+
     StatsData dihedral_potential;
     dihedral_potential.units =  "kcal/mol";
     dihedral_potential.title =  "Dihedral Potential";
@@ -282,6 +283,15 @@ namespace OpenMD {
     pressure_tensor.accumulator = new MatrixAccumulator();
     data_[PRESSURE_TENSOR] = pressure_tensor;
     statsMap_["PRESSURE_TENSOR"] =  PRESSURE_TENSOR;
+
+    //stress tensor added
+    StatsData stress_tensor;
+    stress_tensor.units =  "amu/fs^2/A";
+    stress_tensor.title =  "Stress Tensor";
+    stress_tensor.dataType = "Mat3x3d";
+    stress_tensor.accumulator = new MatrixAccumulator();
+    data_[STRESS_TENSOR] = stress_tensor;
+    statsMap_["STRESS_TENSOR"] =  STRESS_TENSOR;
 
     StatsData system_dipole;
     system_dipole.units =  "C m";
@@ -325,7 +335,7 @@ namespace OpenMD {
 
     StatsData heatflux;
     heatflux.units = "amu/fs^3";
-    heatflux.title =  "Heat Flux";  
+    heatflux.title =  "Heat Flux";
     heatflux.dataType = "Vector3d";
     heatflux.accumulator = new VectorAccumulator();
     data_[HEATFLUX] = heatflux;
@@ -333,7 +343,7 @@ namespace OpenMD {
 
     StatsData electronic_temperature;
     electronic_temperature.units = "K";
-    electronic_temperature.title =  "Electronic Temperature";  
+    electronic_temperature.title =  "Electronic Temperature";
     electronic_temperature.dataType = "RealType";
     electronic_temperature.accumulator = new Accumulator();
     data_[ELECTRONIC_TEMPERATURE] = electronic_temperature;
@@ -373,7 +383,7 @@ namespace OpenMD {
 
     StatsData netCharge;
     netCharge.units = "e";
-    netCharge.title =  "Net Charge";  
+    netCharge.title =  "Net Charge";
     netCharge.dataType = "RealType";
     netCharge.accumulator = new Accumulator();
     data_[NET_CHARGE] = netCharge;
@@ -381,7 +391,7 @@ namespace OpenMD {
 
     StatsData chargeMomentum;
     chargeMomentum.units = "kcal fs / e / mol";
-    chargeMomentum.title =  "Charge Momentum";  
+    chargeMomentum.title =  "Charge Momentum";
     chargeMomentum.dataType = "RealType";
     chargeMomentum.accumulator = new Accumulator();
     data_[CHARGE_MOMENTUM] = chargeMomentum;
@@ -395,19 +405,24 @@ namespace OpenMD {
 
     // if we're doing a thermodynamic integration, we'll want the raw
     // potential as well as the full potential:
-    
-    if (simParams->getUseThermodynamicIntegration()) 
+
+    if (simParams->getUseThermodynamicIntegration())
       statsMask_.set(RAW_POTENTIAL);
-    
+
     // if we've got restraints turned on, we'll also want a report of the
     // total harmonic restraints
     if (simParams->getUseRestraints()){
       statsMask_.set(RESTRAINT_POTENTIAL);
     }
-    
-    if (simParams->havePrintPressureTensor() && 
+
+    if (simParams->havePrintPressureTensor() &&
 	simParams->getPrintPressureTensor()){
       statsMask_.set(PRESSURE_TENSOR);
+    }
+
+    if (simParams->havePrintStressTensor() &&
+  simParams->getPrintStressTensor()){
+      statsMask_.set(STRESS_TENSOR);
     }
 
     // Why do we have both of these?
@@ -430,18 +445,18 @@ namespace OpenMD {
       if (simParams->getPrintHeatFlux()){
         statsMask_.set(HEATFLUX);
       }
-    }    
-    
+    }
+
     if (simParams->haveTaggedAtomPair() &&
         simParams->havePrintTaggedPairDistance()) {
       if (simParams->getPrintTaggedPairDistance()) {
         statsMask_.set(TAGGED_PAIR_DISTANCE);
       }
     }
-    
+
     if (simParams->havePotentialSelection()) {
       statsMask_.set(POTENTIAL_SELECTION);
-    }      
+    }
   }
 
   int Stats::getPrecision() {
@@ -465,9 +480,9 @@ namespace OpenMD {
                  "\tstatFileFormat keyword.\n", token.c_str() );
         painCave.isFatal = 0;
         painCave.severity = OPENMD_ERROR;
-        simError();            
+        simError();
       }
-    }   
+    }
   }
 
   Stats::~Stats() {
@@ -493,7 +508,7 @@ namespace OpenMD {
   void Stats::collectStats(){
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     Thermo thermo(info_);
-   
+
     for (unsigned int i = 0; i < statsMask_.size(); ++i) {
       if (statsMask_[i]) {
         switch (i) {
@@ -524,6 +539,11 @@ namespace OpenMD {
         case PRESSURE_TENSOR:
           dynamic_cast<MatrixAccumulator *>(data_[i].accumulator)->add(thermo.getPressureTensor());
           break;
+          //stress Tensor
+        case STRESS_TENSOR:
+          dynamic_cast<MatrixAccumulator *>(data_[i].accumulator)->add(snap->getStressTensor());
+          break;
+
         case SYSTEM_DIPOLE:
           dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getSystemDipole());
           break;
@@ -595,7 +615,7 @@ namespace OpenMD {
           break;
         case ELECTRONIC_TEMPERATURE:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getElectronicTemperature());
-          break; 
+          break;
         case COM:
           dynamic_cast<VectorAccumulator *>(data_[i].accumulator)->add(thermo.getCom());
           break;
@@ -610,10 +630,10 @@ namespace OpenMD {
           break;
         case NET_CHARGE:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getNetCharge());
-          break; 
+          break;
         case CHARGE_MOMENTUM:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getChargeMomentum());
-          break; 
+          break;
 
           /*
             case SHADOWH:
@@ -628,7 +648,7 @@ namespace OpenMD {
     }
   }
 
-  int Stats::getIntData(int index) { 
+  int Stats::getIntData(int index) {
     assert(index >=0 && index < ENDINDEX);
     RealType value;
     dynamic_cast<Accumulator *>(data_[index].accumulator)->getLastValue(value);
@@ -659,7 +679,7 @@ namespace OpenMD {
     return value;
   }
 
-  int Stats::getIntAverage(int index) { 
+  int Stats::getIntAverage(int index) {
     assert(index >=0 && index < ENDINDEX);
     RealType value;
     dynamic_cast<Accumulator *>(data_[index].accumulator)->getAverage(value);
@@ -689,8 +709,8 @@ namespace OpenMD {
     dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getAverage(value);
     return value;
   }
-  
-  int Stats::getIntError(int index) { 
+
+  int Stats::getIntError(int index) {
     assert(index >=0 && index < ENDINDEX);
     RealType value;
     dynamic_cast<Accumulator *>(data_[index].accumulator)->get95percentConfidenceInterval(value);
@@ -755,7 +775,7 @@ namespace OpenMD {
 
     std::string head(79, '#');
     report << head << std::endl;
-    report << "# Status Report:" << std::string(62, ' ') << "#" << std::endl;         
+    report << "# Status Report:" << std::string(62, ' ') << "#" << std::endl;
     report << "# " << setw(22) << "Total Time:";
     report << setw(12) << getRealData(TIME);
     report << " " << setw(17) << left << getUnits(TIME)
@@ -790,7 +810,7 @@ namespace OpenMD {
           report << lex << right << setw(12) << e(1) << rex << " ";
           report << left << setw(17) << getUnits(i) << "   #";
           report << std::endl;
-          
+
           report << "#                       ";
           report << llc << right << setw(12) << s(2) << rlc << "     ";
           report << llc << right <<  setw(12) << e(2);
@@ -831,7 +851,7 @@ namespace OpenMD {
             report << " " << left << setw(17) << getUnits(i) << "       #";
             report << std::endl;
           }
-          
+
         }
         else if (getDataType(i) == "Mat3x3d") {
           Mat3x3d s = getMatrixAverage(i);
@@ -849,7 +869,7 @@ namespace OpenMD {
           report << right << setw(12) << s(1,1) << " ";
           report << right << setw(12) << s(1,2) << rex << " ";
           report << left <<  setw(13) << getUnits(i) << "#" << std::endl;
-          
+
           report << "#                       ";
           report << llc << right << setw(12) << s(2,0) << " ";
           report << right << setw(12) << s(2,1) << " ";
