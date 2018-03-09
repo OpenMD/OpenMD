@@ -117,7 +117,7 @@ namespace OpenMD {
   protected:
 
     virtual void integrateStep() {
-      needStress= true;
+      needVirial = true;
       VelocityVerletIntegrator::integrateStep();
     }
 

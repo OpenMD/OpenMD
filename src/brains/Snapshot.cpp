@@ -84,7 +84,7 @@ namespace OpenMD {
     frameData.thermostat = make_pair(0.0, 0.0);
     frameData.electronicThermostat = make_pair(0.0, 0.0);
     frameData.barostat = Mat3x3d(0.0);              
-    frameData.stressTensor = Mat3x3d(0.0);              
+    frameData.virialTensor = Mat3x3d(0.0);              
     frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
 
     clearDerivedProperties();
@@ -123,7 +123,7 @@ namespace OpenMD {
     frameData.thermostat = make_pair(0.0, 0.0);
     frameData.electronicThermostat = make_pair(0.0, 0.0);
     frameData.barostat = Mat3x3d(0.0);              
-    frameData.stressTensor = Mat3x3d(0.0);              
+    frameData.virialTensor = Mat3x3d(0.0);              
     frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
 
     clearDerivedProperties();
@@ -660,12 +660,12 @@ namespace OpenMD {
     frameData.pressureTensor = pressureTensor;
   }
 
-  void Snapshot::setStressTensor(const Mat3x3d& stressTensor) {
-    frameData.stressTensor = stressTensor;
+  void Snapshot::setVirialTensor(const Mat3x3d& virialTensor) {
+    frameData.virialTensor = virialTensor;
   }
 
-  Mat3x3d  Snapshot::getStressTensor() {
-    return frameData.stressTensor;
+  Mat3x3d  Snapshot::getVirialTensor() {
+    return frameData.virialTensor;
   }
 
   void Snapshot::setConductiveHeatFlux(const Vector3d& chf) {

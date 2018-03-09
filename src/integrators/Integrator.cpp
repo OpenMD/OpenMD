@@ -53,7 +53,7 @@ namespace OpenMD {
   Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL), rotAlgo_(NULL), flucQ_(NULL), 
       rattle_(NULL), velocitizer_(NULL), rnemd_(NULL), 
-      needPotential(false), needStress(false), 
+      needPotential(false), needVirial(false), 
       needReset(false),  needVelocityScaling(false), 
       useRNEMD(false), dumpWriter(NULL), statWriter(NULL), thermo(info_),
       snap(info_->getSnapshotManager()->getCurrentSnapshot()) {

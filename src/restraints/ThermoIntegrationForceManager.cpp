@@ -133,10 +133,10 @@ namespace OpenMD {
     lrPot_ *= factor_;
     curSnapshot->setLongRangePotential(lrPot_);
     
-    // scale the pressure tensor
-    tempTau = curSnapshot->getStressTensor();
+    // scale the virial tensor
+    tempTau = curSnapshot->getVirialTensor();
     tempTau *= factor_;
-    curSnapshot->setStressTensor(tempTau);
+    curSnapshot->setVirialTensor(tempTau);
 
     // now, on to the applied restraining potentials (if needed):
     RealType restPot_local = 0.0;

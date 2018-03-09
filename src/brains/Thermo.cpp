@@ -408,10 +408,10 @@ namespace OpenMD {
 #endif
 
       RealType volume = this->getVolume();
-      Mat3x3d stressTensor = snap->getStressTensor();
+      Mat3x3d virialTensor = snap->getVirialTensor();
 
       pressureTensor =  (p_tens + 
-                         Constants::energyConvert * stressTensor)/volume;
+                         Constants::energyConvert * virialTensor)/volume;
       
       snap->setPressureTensor(pressureTensor);
     }

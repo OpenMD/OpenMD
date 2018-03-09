@@ -150,7 +150,7 @@ namespace OpenMD {
     RNEMD* rnemd_;
 
     bool needPotential;
-    bool needStress;
+    bool needVirial;
     bool needReset;    
     bool needVelocityScaling;
     RealType targetScalingTemp;

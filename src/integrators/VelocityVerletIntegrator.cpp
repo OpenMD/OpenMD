@@ -113,7 +113,7 @@ namespace OpenMD {
       currRNEMD = RNEMD_exchangeTime + snap->getTime();
     }
     needPotential = false;
-    needStress = false;       
+    needVirial = false;       
     
   }
  
@@ -136,7 +136,7 @@ namespace OpenMD {
   
     if (difference > 0 || fabs(difference) < OpenMD::epsilon) {
       needPotential = true;
-      needStress = true;   
+      needVirial = true;   
     }
   }
 
@@ -177,7 +177,7 @@ namespace OpenMD {
       progressBar->update();
 
       needPotential = false;
-      needStress = false;
+      needVirial = false;
       currStatus += statusTime;
     }
     

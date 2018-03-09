@@ -129,7 +129,7 @@ namespace OpenMD {
     vector<RealType> vdwScale_;
     vector<RealType> electrostaticScale_;
 
-    Mat3x3d stressTensor;
+    Mat3x3d virialTensor;
 
     vector<Perturbation*> perturbations_;
 

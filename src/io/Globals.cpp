@@ -90,7 +90,7 @@ namespace OpenMD {
     DefineOptionalParameter(DampingAlpha, "dampingAlpha");
     DefineOptionalParameter(SurfaceTension, "surfaceTension");
     DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
-    DefineOptionalParameter(PrintStressTensor, "printStressTensor");
+    DefineOptionalParameter(PrintVirialTensor, "printVirialTensor");
     DefineOptionalParameter(ElectricField, "electricField");
     DefineOptionalParameter(UniformField, "uniformField");
     DefineOptionalParameter(UniformGradientStrength, "uniformGradientStrength");

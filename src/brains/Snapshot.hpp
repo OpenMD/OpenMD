@@ -104,7 +104,7 @@ namespace OpenMD{
     Mat3x3d  inertiaTensor;       /**< inertia tensor for entire system */
     RealType gyrationalVolume;    /**< gyrational volume for entire system */
     RealType hullVolume;          /**< hull volume for entire system */
-    Mat3x3d  stressTensor;        /**< stress tensor */
+    Mat3x3d  virialTensor;        /**< virial tensor */
     Mat3x3d  pressureTensor;      /**< pressure tensor */
     Vector3d systemDipole;        /**< total system dipole moment */
     Mat3x3d  systemQuadrupole;    /**< total system quadrupole moment */
@@ -245,8 +245,8 @@ namespace OpenMD{
     Mat3x3d  getPressureTensor();
     void     setPressureTensor(const Mat3x3d& pressureTensor);
 
-    Mat3x3d  getStressTensor();
-    void     setStressTensor(const Mat3x3d& stressTensor);
+    Mat3x3d  getVirialTensor();
+    void     setVirialTensor(const Mat3x3d& virialTensor);
 
     Vector3d getConductiveHeatFlux();
     void     setConductiveHeatFlux(const Vector3d& chf);
