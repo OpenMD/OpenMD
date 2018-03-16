@@ -189,6 +189,27 @@ namespace OpenMD {
     }
 
     /**
+     * Sets this matrix to a symmetric tensor using Voigt Notation
+     * @param vt
+     */
+    void setupVoigtTensor(Vector<Real, 6> vt) {
+      setupVoigtTensor(vt[0], vt[1], vt[2], vt[3], vt[4], vt[5]);      
+    }
+    
+    void setupVoigtTensor(Real v1, Real v2, Real v3, Real v4, Real v5,
+                          Real v6) {
+      this->data_[0][0] = v1;
+      this->data_[1][1] = v2;
+      this->data_[2][2] = v3;
+      this->data_[1][2] = v4;
+      this->data_[2][1] = v4;
+      this->data_[0][2] = v5;
+      this->data_[2][0] = v5;
+      this->data_[0][1] = v6;
+      this->data_[1][0] = v6;
+    }
+         
+    /**
      * Uses Rodrigues' rotation formula for a rotation matrix.
      * @param axis the axis to rotate around
      * @param angle the angle to rotate (in radians)
@@ -313,6 +334,18 @@ namespace OpenMD {
 
       return myEuler;
     }
+
+    
+    Vector<Real, 6> toVoigtTensor() {
+      Vector<Real, 6> voigt;
+      voigt[0] = this->data_[0][0];
+      voigt[1] = this->data_[1][1];
+      voigt[2] = this->data_[2][2];
+      voigt[3] = 0.5 * (this->data_[1][2] + this->data_[2][1]);
+      voigt[4] = 0.5 * (this->data_[0][2] + this->data_[2][0]);
+      voigt[5] = 0.5 * (this->data_[0][1] + this->data_[1][0]);
+      return voigt;
+    }
             
     /** Returns the determinant of this matrix. */
     Real determinant() const {
@@ -332,7 +365,7 @@ namespace OpenMD {
             
     /**
      * Sets the value of this matrix to  the inversion of itself. 
-     * @note since simple algorithm can be applied to inverse the 3 by 3 matrix, we hide the 
+     * @note since simple algorithm can be applied to inverse the 3 by 3 matrix, we hide the  
      * implementation of inverse in SquareMatrix class
      */
     SquareMatrix3<Real>  inverse() const {

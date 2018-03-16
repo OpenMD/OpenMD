@@ -62,6 +62,7 @@ namespace OpenMD {
     const RealType rotationalEnergyConvert = energyConvert*TWO_PI;
     
     const RealType pressureConvert = 1.63882576e8; //!< converts amu*fs^-2*Ang^-1 -> atm
+    const RealType elasticConvert = 1.66053386e4; //!< converts amu*fs^-2*Ang^-1 -> GPa
 
     //! \name chargeFieldConvert Converts electron-volts to kcal/mol
     const RealType chargeFieldConvert = 23.0609; 
