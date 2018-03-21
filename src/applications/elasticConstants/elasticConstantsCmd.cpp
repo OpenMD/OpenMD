@@ -26,7 +26,7 @@
 
 const char *gengetopt_args_info_purpose = "Computes the general elastic constants that relate stress and strain for a\ngiven input configuration";
 
-const char *gengetopt_args_info_usage = "Usage: elasticConstants [-h|--help] [-V|--version] [-iSTRING|--input=STRING]\n         [-nINT|--npoints=INT] [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: elasticConstants [-h|--help] [-V|--version] [-iSTRING|--input=STRING]\n         [-nINT|--npoints=INT] [-dDOUBLE|--delta=DOUBLE] [FILES]...";
 
 const char *gengetopt_args_info_versiontext = "";
 
@@ -36,13 +36,15 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help          Print help and exit",
   "  -V, --version       Print version and exit",
   "  -i, --input=STRING  Input file name",
-  "  -n, --npoints=INT   number of points for fitting stress-strain relationship\n                        (default=`100')",
+  "  -n, --npoints=INT   number of points for fitting\n                        stress-strain relationship  (default=`20')",
+  "  -d, --delta=DOUBLE  size of relative volume changes for strains\n                        (default=`0.01')",
     0
 };
 
 typedef enum {ARG_NO
   , ARG_STRING
   , ARG_INT
+  , ARG_DOUBLE
 } cmdline_parser_arg_type;
 
 static
@@ -65,6 +67,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->version_given = 0 ;
   args_info->input_given = 0 ;
   args_info->npoints_given = 0 ;
+  args_info->delta_given = 0 ;
 }
 
 static
@@ -73,8 +76,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->input_arg = NULL;
   args_info->input_orig = NULL;
-  args_info->npoints_arg = 100;
+  args_info->npoints_arg = 20;
   args_info->npoints_orig = NULL;
+  args_info->delta_arg = 0.01;
+  args_info->delta_orig = NULL;
   
 }
 
@@ -87,6 +92,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->input_help = gengetopt_args_info_help[2] ;
   args_info->npoints_help = gengetopt_args_info_help[3] ;
+  args_info->delta_help = gengetopt_args_info_help[4] ;
   
 }
 
@@ -176,6 +182,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->input_arg));
   free_string_field (&(args_info->input_orig));
   free_string_field (&(args_info->npoints_orig));
+  free_string_field (&(args_info->delta_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -219,6 +226,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "input", args_info->input_orig, 0);
   if (args_info->npoints_given)
     write_into_file(outfile, "npoints", args_info->npoints_orig, 0);
+  if (args_info->delta_given)
+    write_into_file(outfile, "delta", args_info->delta_orig, 0);
   
 
   i = EXIT_SUCCESS;
@@ -980,6 +989,9 @@ int update_arg(void *field, char **orig_field,
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
+  case ARG_DOUBLE:
+    if (val) *((double *)field) = strtod (val, &stop_char);
+    break;
   case ARG_STRING:
     if (val) {
       string_field = (char **)field;
@@ -995,6 +1007,7 @@ int update_arg(void *field, char **orig_field,
   /* check numeric conversion */
   switch(arg_type) {
   case ARG_INT:
+  case ARG_DOUBLE:
     if (val && !(stop_char && *stop_char == '\0')) {
       fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
       return 1; /* failure */
@@ -1070,6 +1083,7 @@ cmdline_parser_internal (
         { "version",	0, NULL, 'V' },
         { "input",	1, NULL, 'i' },
         { "npoints",	1, NULL, 'n' },
+        { "delta",	1, NULL, 'd' },
         { 0,  0, 0, 0 }
       };
 
@@ -1078,7 +1092,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:n:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:n:d:", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1111,14 +1125,27 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'n':	/* number of points for fitting stress-strain relationship.  */
+        case 'n':	/* number of points for fitting
+        stress-strain relationship.  */
         
         
           if (update_arg( (void *)&(args_info->npoints_arg), 
                &(args_info->npoints_orig), &(args_info->npoints_given),
-              &(local_args_info.npoints_given), optarg, 0, "100", ARG_INT,
+              &(local_args_info.npoints_given), optarg, 0, "20", ARG_INT,
               check_ambiguity, override, 0, 0,
               "npoints", 'n',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'd':	/* size of relative volume changes for strains.  */
+        
+        
+          if (update_arg( (void *)&(args_info->delta_arg), 
+               &(args_info->delta_orig), &(args_info->delta_given),
+              &(local_args_info.delta_given), optarg, 0, "0.01", ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "delta", 'd',
               additional_error))
             goto failure;
         

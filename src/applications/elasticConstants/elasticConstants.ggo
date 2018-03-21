@@ -17,4 +17,6 @@ purpose "Computes the general elastic constants that relate stress and strain fo
 # Options
 
 option      "input"       i "Input file name"  optional string
-option      "npoints"     n "number of points for fitting stress-strain relationship" optional int default="100"
+option      "npoints"     n "number of points for fitting
+stress-strain relationship" optional int default="20"
+option      "delta"       d "size of relative volume changes for strains" optional double default="0.01"

@@ -73,96 +73,106 @@ using namespace OpenMD;
 #include <vector>
 #include <iomanip>
 
+void quadraticFit(const std::vector<RealType>& x,
+                  const std::vector<RealType>& y,
+                  RealType& a, RealType& b, RealType& c) {
 
-RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
-    const size_t n    = x.size();
-    const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
-    const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
-    const RealType s_xx = std::inner_product(x.begin(), x.end(), x.begin(), 0.0);
-    const RealType s_xy = std::inner_product(x.begin(), x.end(), y.begin(), 0.0);
-    const RealType a    = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
-    return a;
+  RealType s00 = RealType(x.size());
+  RealType s10(0.0), s20(0.0), s30(0.0), s40(0.0);
+  RealType s01(0.0), s11(0.0), s21(0.0);
+  
+  for (size_t i = 0; i < x.size(); i++) {
+    s10 += x[i];
+    s20 += pow(x[i], 2);
+    s30 += pow(x[i], 3);
+    s40 += pow(x[i], 4);
+    s01 += y[i];
+    s11 += x[i]*y[i];
+    s21 += pow(x[i], 2) * y[i];
+  }
+
+  RealType D = (s40 * (s20 * s00 - s10 * s10) - 
+                s30 * (s30 * s00 - s10 * s20) + 
+                s20 * (s30 * s10 - s20 * s20));
+  
+  a = (s21*(s20 * s00 - s10 * s10) - 
+       s11*(s30 * s00 - s10 * s20) + 
+       s01*(s30 * s10 - s20 * s20)) / D;
+
+  b = (s40*(s11 * s00 - s01 * s10) - 
+       s30*(s21 * s00 - s01 * s20) + 
+       s20*(s21 * s10 - s11 * s20)) / D;
+  
+  c = (s40*(s20 * s01 - s10 * s11) - 
+       s30*(s30 * s01 - s10 * s21) + 
+       s20*(s30 * s11 - s20 * s21)) / D;
+
+  return;
 }
 
 void writeMatrix(DynamicRectMatrix<RealType> M, std::string title, std::string units) {
-#if defined (_MSC_VER)
-    std::string pm = " +/- ";
-    std::string luc = "[";
-    std::string lex = "|";
-    std::string llc = "[";
-    std::string ruc = "]";
-    std::string rex = "|";
-    std::string rlc = "]";
-#else
-    std::string pm = "  \u00B1  ";
-    std::string luc = "\u23A1";
-    std::string lex = "\u23A2";
-    std::string llc = "\u23A3";
-    std::string ruc = "\u23A4";
-    std::string rex = "\u23A5";
-    std::string rlc = "\u23A6";
-#endif
 
-    std::cout << left << title << " (" << units << "):" << std::endl;
-    std::cout << std::endl;
+  std::cout << left << title << " (" << units << "):" << std::endl;
+  std::cout << std::endl;
     
-    std::cout << " ";
-    std::cout << luc << right << setw(12) << M(0,0) << " ";
-    std::cout << right << setw(12) << M(0,1) << " ";
-    std::cout << right << setw(12) << M(0,2) << " ";
-    std::cout << right << setw(12) << M(0,3) << " ";
-    std::cout << right << setw(12) << M(0,4) << " ";                
-    std::cout << right << setw(12) << M(0,5) << ruc;
-    std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << M(0,0) << " ";
+  std::cout << right << setw(12) << M(0,1) << " ";
+  std::cout << right << setw(12) << M(0,2) << " ";
+  std::cout << right << setw(12) << M(0,3) << " ";
+  std::cout << right << setw(12) << M(0,4) << " ";                
+  std::cout << right << setw(12) << M(0,5);
+  std::cout << std::endl;
 
-    std::cout << " ";
-    std::cout << lex << right << setw(12) << M(1,0) << " ";
-    std::cout << right << setw(12) << M(1,1) << " ";
-    std::cout << right << setw(12) << M(1,2) << " ";
-    std::cout << right << setw(12) << M(1,3) << " ";
-    std::cout << right << setw(12) << M(1,4) << " ";                
-    std::cout << right << setw(12) << M(1,5) << rex;
-    std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << M(1,0) << " ";
+  std::cout << right << setw(12) << M(1,1) << " ";
+  std::cout << right << setw(12) << M(1,2) << " ";
+  std::cout << right << setw(12) << M(1,3) << " ";
+  std::cout << right << setw(12) << M(1,4) << " ";                
+  std::cout << right << setw(12) << M(1,5);
+  std::cout << std::endl;
 
-    std::cout << " ";
-    std::cout << lex << right << setw(12) << M(2,0) << " ";
-    std::cout << right << setw(12) << M(2,1) << " ";
-    std::cout << right << setw(12) << M(2,2) << " ";
-    std::cout << right << setw(12) << M(2,3) << " ";
-    std::cout << right << setw(12) << M(2,4) << " ";
-    std::cout << right << setw(12) << M(2,5) << rex;
-    std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << M(2,0) << " ";
+  std::cout << right << setw(12) << M(2,1) << " ";
+  std::cout << right << setw(12) << M(2,2) << " ";
+  std::cout << right << setw(12) << M(2,3) << " ";
+  std::cout << right << setw(12) << M(2,4) << " ";
+  std::cout << right << setw(12) << M(2,5);
+  std::cout << std::endl;
 
-    std::cout << " ";
-    std::cout << lex << right << setw(12) << M(3,0) << " ";
-    std::cout << right << setw(12) << M(3,1) << " ";
-    std::cout << right << setw(12) << M(3,2) << " ";
-    std::cout << right << setw(12) << M(3,3) << " ";
-    std::cout << right << setw(12) << M(3,4) << " ";                
-    std::cout << right << setw(12) << M(3,5) << rex;
-    std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << M(3,0) << " ";
+  std::cout << right << setw(12) << M(3,1) << " ";
+  std::cout << right << setw(12) << M(3,2) << " ";
+  std::cout << right << setw(12) << M(3,3) << " ";
+  std::cout << right << setw(12) << M(3,4) << " ";                
+  std::cout << right << setw(12) << M(3,5);
+  std::cout << std::endl;
 
-    std::cout << " ";
-    std::cout << lex << right << setw(12) << M(4,0) << " ";
-    std::cout << right << setw(12) << M(4,1) << " ";
-    std::cout << right << setw(12) << M(4,2) << " ";
-    std::cout << right << setw(12) << M(4,3) << " ";
-    std::cout << right << setw(12) << M(4,4) << " ";                
-    std::cout << right << setw(12) << M(4,5) << rex;
-    std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << M(4,0) << " ";
+  std::cout << right << setw(12) << M(4,1) << " ";
+  std::cout << right << setw(12) << M(4,2) << " ";
+  std::cout << right << setw(12) << M(4,3) << " ";
+  std::cout << right << setw(12) << M(4,4) << " ";                
+  std::cout << right << setw(12) << M(4,5);
+  std::cout << std::endl;
     
-    std::cout << " ";
-    std::cout << llc << right << setw(12) << M(5,0) << " ";
-    std::cout << right << setw(12) << M(5,1) << " ";
-    std::cout << right << setw(12) << M(5,2) << " ";
-    std::cout << right << setw(12) << M(5,3) << " ";
-    std::cout << right << setw(12) << M(5,4) << " ";
-    std::cout << right << setw(12) << M(5,5) << rlc;
-    std::cout << std::endl;
-    std::cout << std::endl;    
+  std::cout << " ";
+  std::cout << right << setw(12) << M(5,0) << " ";
+  std::cout << right << setw(12) << M(5,1) << " ";
+  std::cout << right << setw(12) << M(5,2) << " ";
+  std::cout << right << setw(12) << M(5,3) << " ";
+  std::cout << right << setw(12) << M(5,4) << " ";
+  std::cout << right << setw(12) << M(5,5);
+  std::cout << std::endl;
+  std::cout << std::endl;    
 }
 
-void writeMaterialProperties(DynamicRectMatrix<RealType> C, DynamicRectMatrix<RealType> S) {
+void writeMaterialProperties(DynamicRectMatrix<RealType> C,
+                             DynamicRectMatrix<RealType> S) {
   
   RealType C11 = C(0,0);
   RealType C22 = C(1,1);
@@ -185,7 +195,7 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C, DynamicRectMatrix<Re
   RealType S66 = S(5,5);
 
 
-  // Materials Properties defined in:
+  // Material Properties defined in:
   //
   // "Charting the complete elastic properties of inorganic
   // crystalline compounds," Maarten de Jong, Wei Chen, Thomas
@@ -197,6 +207,15 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C, DynamicRectMatrix<Re
   // Scientific Data volume 2, Article number: 150009 (2015)
   // doi:10.1038/sdata.2015.9
   //
+  // And in
+  //
+  // "ELATE: an open-source online application for analysis and
+  // visualization of elastic tensors," Romain Gaillac, Pluton
+  // Pullumbi and François-Xavier Coudert,
+  //
+  // J. Phys.: Condens. Matter 28 275201 (2016)
+  // doi:10.1088/0953-8984/28/27/275201
+  
   // Bulk modulus (Voigt average):
   RealType Kv = ((C11+C22+C33) + 2.0*(C12+C23+C31)) / 9.0;
   // Bulk modulus (Reuss average):
@@ -235,7 +254,7 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C, DynamicRectMatrix<Re
   C11 = (C(0,0) + C(1,1) + C(2,2)) / 3.0;
   C12 = (C(0,1) + C(0,2) + C(1,2)) / 3.0;
   C44 = (C(3,3) + C(4,4) + C(5,5)) / 3.0;
-  S11 =  (S(0,0) + S(1,1) + S(2,2)) / 3.0;
+  S11 = (S(0,0) + S(1,1) + S(2,2)) / 3.0;
   S12 = (S(0,1) + S(0,2) + S(1,2)) / 3.0;
   S44 = (S(3,3) + S(4,4) + S(5,5)) / 3.0;
       
@@ -286,6 +305,7 @@ int main(int argc, char *argv []) {
 
 
   int nMax = args_info.npoints_arg;
+  RealType delta = args_info.delta_arg;
   
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
@@ -326,8 +346,9 @@ int main(int argc, char *argv []) {
   Vector<RealType, 6> stressRef = ptRef.toVoigtTensor();
     
   Vector<RealType, 6> stress(0.0);
-  Vector<RealType, 6> strain(0.0);
-  Mat3x3d epsilon(0.0);
+  Vector<RealType, 6> Fvoigt(0.0);
+  Mat3x3d F(0.0);  // Deformation Gradients
+  Mat3x3d E(0.0);  // Green-Lagrange Strain Tensor
 
   std::vector<std::vector<RealType> > stressStrain;
   stressStrain.resize(6);
@@ -339,39 +360,37 @@ int main(int argc, char *argv []) {
   SimInfo::MoleculeIterator miter;
   Molecule * mol;
   RealType de;
-  Vector3d delta; 
+  Vector3d dr;
+  RealType a, b, c;
   
   for (int i = 0; i < 6; i++) {
     
-    strain *= 0.0;
+    Fvoigt *= 0.0;
     strainValues.clear();
 
     for (int j=0; j < 6; j++) stressStrain[j].clear();
     
     for (int n = 0; n < nMax; n++) {
 
-      de = -0.005 + 0.01 * RealType(n) / RealType(nMax-1);
+      de = -0.5 * delta + delta * RealType(n) / RealType(nMax-1);
       strainValues.push_back(de);
-      
-      if (i > 2) {
-        strain[i] = 0.5 * de;
-      } else {
-        strain[i] = de;
-      }
-      
-      epsilon.setupVoigtTensor(strain);      
-      epsilon += SquareMatrix3<RealType>::identity();
+      Fvoigt[i] = de;
 
+      F.setupUpperTriangularVoigtTensor(Fvoigt);
+      F += SquareMatrix3<RealType>::identity();
+      
+      E = 0.5 * (F.transpose() * F - SquareMatrix3<RealType>::identity());
+      
       info->getSnapshotManager()->advance();      
       
       for (mol = info->beginMolecule(miter); mol != NULL; 
            mol = info->nextMolecule(miter)) {
         pos = mol->getCom();
-        delta = epsilon * pos;
-        mol->moveCom(delta - pos);
+        dr = F * pos;
+        mol->moveCom(dr - pos);
       }
 
-      Mat3x3d Hmat = epsilon * refHmat;
+      Mat3x3d Hmat = F * refHmat ;
       snap->setHmat(Hmat);
       
       shake->constraintR();
@@ -389,26 +408,66 @@ int main(int argc, char *argv []) {
       }
       
       info->getSnapshotManager()->resetToPrevious();
+
+      std::cerr << de;
+      for (int j = 0; j < 6; j++)
+        std::cerr << "\t" << stressStrain[j][n];
+      std::cerr << std::endl;
     }
+    std::cerr << "&" << std::endl;
+    
     for (int j = 0; j < 6; j++) {
-      C(i,j) = slope(strainValues, stressStrain[j]);
-    }
+      quadraticFit(strainValues, stressStrain[j], a, b, c);
+      switch(i) {
+      case 0:
+      case 1:
+      case 2:
+        C(j, i) += 2*a;
+        C(j, i) += b;
+        break;
+      case 3:
+        C(j, 2) += 2*a;
+        C(j, 3) += b;
+        break;
+      case 4:
+        C(j, 2) += 2*a;
+        C(j, 4) += b;
+        break;
+      case 5:
+        C(j, 1) += 2*a;
+        C(j, 5) += b;
+        break;
+      }
+    }        
   }
 
+  for (int i = 0; i < 6; i++) {
+    for (int j = 0; j < 6; j++) {
+      if (i == 0) {        
+        C(j, i) = C(j, i) / 2.0;
+      } else if (i == 1) {
+        C(j, i) = C(j, i) / 3.0;
+      } else if (i == 2) {
+        C(j, i) = C(j, i) / 4.0;
+      }
+    }
+  }
+       
   // Symmetrize C:
 
-  for (int i = 0; i < 5; i++) {
-    for (int j = i+1; j < 6; j++) {
-      RealType ctmp = 0.5 * (C(i,j) + C(j,i));
-      C(i,j) = ctmp;
-      C(j,i) = ctmp;      
-    }
-  }
+  // for (int i = 0; i < 5; i++) {
+  //   for (int j = i+1; j < 6; j++) {
+  //     RealType ctmp = 0.5 * (C(i,j) + C(j,i));
+  //     C(i,j) = ctmp;
+  //     C(j,i) = ctmp;      
+  //   }
+  // }
 
   // matrix is destroyed during inversion:
   DynamicRectMatrix<RealType> tmpMat(C);
   invertMatrix(tmpMat, S);
 
+  std::cout << "Paste into ELATE at http://progs.coudert.name/elate" << std::endl;
   writeMatrix(C, "Elastic Tensor", "GPa");
   writeMatrix(S, "Compliance Tensor", "GPa^-1");
   

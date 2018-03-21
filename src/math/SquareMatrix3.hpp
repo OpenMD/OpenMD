@@ -193,7 +193,7 @@ namespace OpenMD {
      * @param vt
      */
     void setupVoigtTensor(Vector<Real, 6> vt) {
-      setupVoigtTensor(vt[0], vt[1], vt[2], vt[3], vt[4], vt[5]);      
+      setupVoigtTensor(vt[0], vt[1], vt[2], vt[3], vt[4], vt[5]);
     }
     
     void setupVoigtTensor(Real v1, Real v2, Real v3, Real v4, Real v5,
@@ -207,6 +207,25 @@ namespace OpenMD {
       this->data_[2][0] = v5;
       this->data_[0][1] = v6;
       this->data_[1][0] = v6;
+    }
+    
+    /**
+     * Sets this matrix to an upper-triangular (asymmetric) tensor
+     * using Voigt Notation
+     * @param vt
+     */
+    void setupUpperTriangularVoigtTensor(Vector<Real, 6> vt) {
+      setupUpperTriangularVoigtTensor(vt[0], vt[1], vt[2], vt[3], vt[4], vt[5]);
+    }
+    
+    void setupUpperTriangularVoigtTensor(Real v1, Real v2, Real v3, Real v4,
+                                         Real v5, Real v6) {
+      this->data_[0][0] = v1;
+      this->data_[1][1] = v2;
+      this->data_[2][2] = v3;
+      this->data_[1][2] = v4;
+      this->data_[0][2] = v5;
+      this->data_[0][1] = v6;
     }
          
     /**
