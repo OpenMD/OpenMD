@@ -73,6 +73,16 @@ using namespace OpenMD;
 #include <vector>
 #include <iomanip>
 
+RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
+  const size_t n    = x.size();  
+  const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
+  const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
+  const RealType s_xx = std::inner_product(x.begin(), x.end(), x.begin(), 0.0);
+  const RealType s_xy = std::inner_product(x.begin(), x.end(), y.begin(), 0.0);
+  const RealType a    = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
+  return a;
+}
+
 void quadraticFit(const std::vector<RealType>& x,
                   const std::vector<RealType>& y,
                   RealType& a, RealType& b, RealType& c) {
@@ -346,13 +356,15 @@ int main(int argc, char *argv []) {
   Vector<RealType, 6> stressRef = ptRef.toVoigtTensor();
     
   Vector<RealType, 6> stress(0.0);
+  Vector<RealType, 6> strain(0.0);
   Vector<RealType, 6> Fvoigt(0.0);
   Mat3x3d F(0.0);  // Deformation Gradients
   Mat3x3d E(0.0);  // Green-Lagrange Strain Tensor
 
   std::vector<std::vector<RealType> > stressStrain;
   stressStrain.resize(6);
-  std::vector<RealType> strainValues;
+  std::vector<std::vector<RealType> > strainValues;
+  strainValues.resize(6);
   DynamicRectMatrix<RealType> C(6, 6, 0.0);
   DynamicRectMatrix<RealType> S(6, 6, 0.0);
   
@@ -366,14 +378,15 @@ int main(int argc, char *argv []) {
   for (int i = 0; i < 6; i++) {
     
     Fvoigt *= 0.0;
-    strainValues.clear();
 
-    for (int j=0; j < 6; j++) stressStrain[j].clear();
+    for (int j=0; j < 6; j++) {
+      stressStrain[j].clear();
+      strainValues[j].clear();
+    }
     
     for (int n = 0; n < nMax; n++) {
 
       de = -0.5 * delta + delta * RealType(n) / RealType(nMax-1);
-      strainValues.push_back(de);
       Fvoigt[i] = de;
 
       F.setupUpperTriangularVoigtTensor(Fvoigt);
@@ -402,72 +415,55 @@ int main(int argc, char *argv []) {
       pt.negate();
       pt *= Constants::elasticConvert;
       stress = pt.toVoigtTensor();
+      strain = E.toVoigtTensor();
+      
 
       for (int j = 0; j < 6; j++) {
         stressStrain[j].push_back(stress[j]);
+        strainValues[j].push_back(strain[j]);
       }
       
       info->getSnapshotManager()->resetToPrevious();
-
-      std::cerr << de;
-      for (int j = 0; j < 6; j++)
-        std::cerr << "\t" << stressStrain[j][n];
-      std::cerr << std::endl;
     }
-    std::cerr << "&" << std::endl;
     
     for (int j = 0; j < 6; j++) {
-      quadraticFit(strainValues, stressStrain[j], a, b, c);
       switch(i) {
       case 0:
       case 1:
       case 2:
-        C(j, i) += 2*a;
-        C(j, i) += b;
+        C(j, i) = slope(strainValues[i], stressStrain[j]);
         break;
       case 3:
-        C(j, 2) += 2*a;
-        C(j, 3) += b;
+        //C(j, 2) += 2*a;
+        C(j, i) = 0.5 * slope(strainValues[i], stressStrain[j]);
         break;
       case 4:
-        C(j, 2) += 2*a;
-        C(j, 4) += b;
+        //C(j, 2) += 2*a;
+        C(j, i) = 0.5 * slope(strainValues[i], stressStrain[j]);
         break;
       case 5:
-        C(j, 1) += 2*a;
-        C(j, 5) += b;
+        //C(j, 1) += 2*a;
+        C(j, i) = 0.5 * slope(strainValues[i], stressStrain[j]);
         break;
       }
     }        
   }
-
-  for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < 6; j++) {
-      if (i == 0) {        
-        C(j, i) = C(j, i) / 2.0;
-      } else if (i == 1) {
-        C(j, i) = C(j, i) / 3.0;
-      } else if (i == 2) {
-        C(j, i) = C(j, i) / 4.0;
-      }
-    }
-  }
        
   // Symmetrize C:
 
-  // for (int i = 0; i < 5; i++) {
-  //   for (int j = i+1; j < 6; j++) {
-  //     RealType ctmp = 0.5 * (C(i,j) + C(j,i));
-  //     C(i,j) = ctmp;
-  //     C(j,i) = ctmp;      
-  //   }
-  // }
+  for (int i = 0; i < 5; i++) {
+    for (int j = i+1; j < 6; j++) {
+      RealType ctmp = 0.5 * (C(i,j) + C(j,i));
+      C(i,j) = ctmp;
+      C(j,i) = ctmp;      
+    }
+  }
 
   // matrix is destroyed during inversion:
   DynamicRectMatrix<RealType> tmpMat(C);
   invertMatrix(tmpMat, S);
 
-  std::cout << "Paste into ELATE at http://progs.coudert.name/elate" << std::endl;
+  std::cout << "You can paste the elastic tensor into ELATE at http://progs.coudert.name/elate" << std::endl;
   writeMatrix(C, "Elastic Tensor", "GPa");
   writeMatrix(S, "Compliance Tensor", "GPa^-1");
   
