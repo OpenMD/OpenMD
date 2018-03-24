@@ -36,7 +36,7 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help          Print help and exit",
   "  -V, --version       Print version and exit",
   "  -i, --input=STRING  Input file name",
-  "  -n, --npoints=INT   number of points for fitting\n                        stress-strain relationship  (default=`20')",
+  "  -n, --npoints=INT   number of points for fitting\n                        stress-strain relationship  (default=`25')",
   "  -d, --delta=DOUBLE  size of relative volume changes for strains\n                        (default=`0.01')",
     0
 };
@@ -76,7 +76,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->input_arg = NULL;
   args_info->input_orig = NULL;
-  args_info->npoints_arg = 20;
+  args_info->npoints_arg = 25;
   args_info->npoints_orig = NULL;
   args_info->delta_arg = 0.01;
   args_info->delta_orig = NULL;
@@ -1131,7 +1131,7 @@ cmdline_parser_internal (
         
           if (update_arg( (void *)&(args_info->npoints_arg), 
                &(args_info->npoints_orig), &(args_info->npoints_given),
-              &(local_args_info.npoints_given), optarg, 0, "20", ARG_INT,
+              &(local_args_info.npoints_given), optarg, 0, "25", ARG_INT,
               check_ambiguity, override, 0, 0,
               "npoints", 'n',
               additional_error))

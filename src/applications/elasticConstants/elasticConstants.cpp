@@ -48,6 +48,10 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <algorithm>
+#include <numeric>
+#include <vector>
+#include <iomanip>
 
 #include "elasticConstantsCmd.hpp"
 #include "brains/Register.hpp"
@@ -65,15 +69,9 @@
 #include "math/LU.hpp"
 #include "math/DynamicRectMatrix.hpp"
 
-
 using namespace OpenMD;
-#include <algorithm>
-#include <iostream>
-#include <numeric>
-#include <vector>
-#include <iomanip>
 
-RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
+RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {  
   const size_t n    = x.size();  
   const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
   const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
@@ -83,6 +81,7 @@ RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
   return a;
 }
 
+// We might need this for Green-Lagrange strains
 void quadraticFit(const std::vector<RealType>& x,
                   const std::vector<RealType>& y,
                   RealType& a, RealType& b, RealType& c) {
@@ -120,7 +119,8 @@ void quadraticFit(const std::vector<RealType>& x,
   return;
 }
 
-void writeMatrix(DynamicRectMatrix<RealType> M, std::string title, std::string units) {
+void writeMatrix(DynamicRectMatrix<RealType> M, std::string title,
+                 std::string units) {
 
   std::cout << left << title << " (" << units << "):" << std::endl;
   std::cout << std::endl;
@@ -248,16 +248,33 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
   RealType Ev = 1.0/(1.0/(3.0*Gv) + 1.0/(9.0*Kv));
   RealType Er = 1.0/(1.0/(3.0*Gr) + 1.0/(9.0*Kr));
   RealType Eh = 1.0/(1.0/(3.0*Gh) + 1.0/(9.0*Kh));
- 
-  std::cout << "Bulk modulus (Voigt) = " << Kv << " GPa \n";
-  std::cout << "Bulk modulus (Reuss) = " << Kr << " GPa \n";
-  std::cout << "Bulk modulus (Hill) = " << Kh << " GPa \n";
-  std::cout << "Shear modulus (Voigt) = " << Gv << " GPa \n";
-  std::cout << "Shear modulus (Reuss) = " << Gr << " GPa \n";
-  std::cout << "Shear modulus (Hill) = " << Gh << " GPa \n";
-  std::cout << "Young\'s modulus (isotropic) = " << Ev << " " << Er << " " << Eh <<" GPa\n";
-  std::cout << "Universal elastic Anisotropy = " << Au << "\n";
-  std::cout << "Poisson\'s Ratio = "  << muv << " " << mur << " " << muh << "\n";
+
+  std::cout << "                              "
+            << setw(12) << "Voigt" << " "
+            << setw(12) << "Reuss" << " "
+            << setw(12) << "Hill\n";
+  std::cout << "Bulk modulus:                 "
+            << setw(12) << Kv << " "
+            << setw(12) << Kr << " "
+            << setw(12) << Kh << " (GPa)\n";
+
+  std::cout << "Shear modulus:                "
+            << setw(12) << Gv << " "
+            << setw(12) << Gr << " "
+            << setw(12) << Gh << " (GPa)\n";
+
+  std::cout << "Young\'s modulus (isotropic):  "
+            << setw(12) << Ev << " "
+            << setw(12) << Er << " "
+            << setw(12) << Eh << " (GPa)\n";
+
+  std::cout << "Poisson\'s Ratio:              "
+            << setw(12) << muv << " "
+            << setw(12) << mur << " "
+            << setw(12) << muh << "\n";
+  
+  std::cout << "Universal elastic Anisotropy: " << setw(12) << Au << "\n";
+
     
   // Assume a cubic crystal, and use symmetries:
 
@@ -272,7 +289,7 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
   RealType A1 = 2.0*C44 / (C11 - C12);
   RealType A2 = 2.0*(S11 - S12) / S44;
   
-  std::cout << "# Anisotropy factor = " << A1 << " " << A2 << "\n";
+  // std::cout << "Anisotropy factor = " << A1 << " " << A2 << "\n";
     
   // Effective Elastic constants for propagation in Cubic Crystals
   RealType kL_100 = C11;
@@ -359,7 +376,7 @@ int main(int argc, char *argv []) {
   Vector<RealType, 6> strain(0.0);
   Vector<RealType, 6> Fvoigt(0.0);
   Mat3x3d F(0.0);  // Deformation Gradients
-  Mat3x3d E(0.0);  // Green-Lagrange Strain Tensor
+  Mat3x3d E(0.0);  // Strain Tensor
 
   std::vector<std::vector<RealType> > stressStrain;
   stressStrain.resize(6);
@@ -386,14 +403,18 @@ int main(int argc, char *argv []) {
     
     for (int n = 0; n < nMax; n++) {
 
-      de = -0.5 * delta + delta * RealType(n) / RealType(nMax-1);
+      de = delta * ( RealType(n) / RealType(nMax-1)  - 0.5);
+      
       Fvoigt[i] = de;
 
-      F.setupUpperTriangularVoigtTensor(Fvoigt);
+      // We'll do this in the infinitessimal strain limit with a symmetric
+      // deformation gradient (F):
+      F.setupVoigtTensor(Fvoigt);
       F += SquareMatrix3<RealType>::identity();
-      
-      E = 0.5 * (F.transpose() * F - SquareMatrix3<RealType>::identity());
-      
+
+      // Infinitessimal strain tensor:
+      E = 0.5 * (F.transpose() + F) - SquareMatrix3<RealType>::identity();
+
       info->getSnapshotManager()->advance();      
       
       for (mol = info->beginMolecule(miter); mol != NULL; 
@@ -403,7 +424,7 @@ int main(int argc, char *argv []) {
         mol->moveCom(dr - pos);
       }
 
-      Mat3x3d Hmat = F * refHmat ;
+      Mat3x3d Hmat =  F * refHmat;
       snap->setHmat(Hmat);
       
       shake->constraintR();
@@ -416,7 +437,6 @@ int main(int argc, char *argv []) {
       pt *= Constants::elasticConvert;
       stress = pt.toVoigtTensor();
       strain = E.toVoigtTensor();
-      
 
       for (int j = 0; j < 6; j++) {
         stressStrain[j].push_back(stress[j]);
@@ -427,28 +447,14 @@ int main(int argc, char *argv []) {
     }
     
     for (int j = 0; j < 6; j++) {
-      switch(i) {
-      case 0:
-      case 1:
-      case 2:
+      if (i < 3) {
         C(j, i) = slope(strainValues[i], stressStrain[j]);
-        break;
-      case 3:
-        //C(j, 2) += 2*a;
+      } else {
         C(j, i) = 0.5 * slope(strainValues[i], stressStrain[j]);
-        break;
-      case 4:
-        //C(j, 2) += 2*a;
-        C(j, i) = 0.5 * slope(strainValues[i], stressStrain[j]);
-        break;
-      case 5:
-        //C(j, 1) += 2*a;
-        C(j, i) = 0.5 * slope(strainValues[i], stressStrain[j]);
-        break;
       }
     }        
   }
-       
+  
   // Symmetrize C:
 
   for (int i = 0; i < 5; i++) {
@@ -463,7 +469,8 @@ int main(int argc, char *argv []) {
   DynamicRectMatrix<RealType> tmpMat(C);
   invertMatrix(tmpMat, S);
 
-  std::cout << "You can paste the elastic tensor into ELATE at http://progs.coudert.name/elate" << std::endl;
+  std::cout << "You can paste the elastic tensor into ELATE at "
+            << "http://progs.coudert.name/elate" << std::endl;
   writeMatrix(C, "Elastic Tensor", "GPa");
   writeMatrix(S, "Compliance Tensor", "GPa^-1");
   

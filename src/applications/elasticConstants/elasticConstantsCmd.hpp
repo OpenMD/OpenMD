@@ -43,7 +43,7 @@ struct gengetopt_args_info
   char * input_orig;	/**< @brief Input file name original value given at command line.  */
   const char *input_help; /**< @brief Input file name help description.  */
   int npoints_arg;	/**< @brief number of points for fitting
-  stress-strain relationship (default='20').  */
+  stress-strain relationship (default='25').  */
   char * npoints_orig;	/**< @brief number of points for fitting
   stress-strain relationship original value given at command line.  */
   const char *npoints_help; /**< @brief number of points for fitting
