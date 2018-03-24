@@ -71,6 +71,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > positions_;
     std::vector<std::vector<int> > zBins_;
     std::vector<std::vector<RealType> > histograms_;
+    std::vector<std::vector<std::vector<RealType> > > idimHistograms_;
     std::vector<std::vector<int> > counts_;
     Mat3x3d hmat_;
     RealType halfBoxZ_;

@@ -89,11 +89,23 @@ namespace OpenMD {
 
     histograms_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
-    for (int i = 0; i < nTimeBins_; i++) {
+    
+    idimHistograms_.resize(3);
+    for (unsigned i = 0; i < idimHistograms_.size(); i++) {
+      idimHistograms_[i].resize(nTimeBins_);
+    }
+    for (unsigned int i = 0; i < nTimeBins_; i++) {
       histograms_[i].resize(nZBins_);
       counts_[i].resize(nZBins_);
+      
       std::fill(histograms_[i].begin(), histograms_[i].end(), 0.0);
       std::fill(counts_[i].begin(), counts_[i].end(), 0);
+
+      for (unsigned j = 0; j < 3; j++) {
+	idimHistograms_[j][i].resize(nZBins_);
+	std::fill(idimHistograms_[j][i].begin(), idimHistograms_[j][i].end(), 0.0);
+      }
+      
     }
   }
   
@@ -225,19 +237,31 @@ namespace OpenMD {
     if (zBin1 == zBin2) {
       Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
       histograms_[timeBin][zBin1] += diff.lengthSquare();
+
+      for (unsigned i = 0; i < 3; i++) {
+	RealType iDiff = positions_[frame2][id2][i] - positions_[frame1][id1][i];
+	idimHistograms_[i][timeBin][zBin1] += (iDiff * iDiff);
+      }
+      
       counts_[timeBin][zBin1]++;
     }
     return 0.0;
   }
   
   void RCorrFuncZ::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      for (int j = 0; j < nZBins_; ++j) {        
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
+      for (unsigned int j = 0; j < nZBins_; ++j) {        
         if (counts_[i][j] > 0) {
           histograms_[i][j] /= counts_[i][j];
+	  for (unsigned int k = 0; k < 3; k++){
+	    idimHistograms_[k][i][j] /= counts_[i][j];
+	  }
         } else {
           histograms_[i][j] = 0;
-        }
+	  for (unsigned int k = 0; k < 3; k++){
+	    idimHistograms_[k][i][j] = 0;
+	  }
+	}
       }
     }
   }
@@ -258,12 +282,48 @@ namespace OpenMD {
 
       ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs << times_[i] - times_[0];
 
-        for (int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
           ofs << "\t" << histograms_[i][j];
+        }
+        ofs << "\n";
+      }
+
+      ofs << "&\n#time\tcorrValXZ\n";
+      
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
+
+        ofs << times_[i] - times_[0];
+
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
+          ofs << "\t" << idimHistograms_[0][i][j];
+        }
+        ofs << "\n";
+      }
+
+      ofs << "&\n#time\tcorrValYZ\n";
+      
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
+
+        ofs << times_[i] - times_[0];
+
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
+          ofs << "\t" << idimHistograms_[1][i][j];
+        }
+        ofs << "\n";
+      }
+
+      ofs << "&\n#time\tcorrValZZ\n";
+      
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
+
+        ofs << times_[i] - times_[0];
+
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
+          ofs << "\t" << idimHistograms_[2][i][j];
         }
         ofs << "\n";
       }
