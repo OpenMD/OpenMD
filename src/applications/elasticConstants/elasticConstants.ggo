@@ -1,0 +1,22 @@
+# Input file for gengetopt. This file generates thermalizerCmd.cpp and 
+# thermalizerCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--include-getopt --long-help --show-required --unamed-opts --file-name=elasticConstantsCmd --c-extension=cpp --header-extension=hpp"
+
+package "elasticConstants"
+version "" 
+
+purpose "Computes the general elastic constants that relate stress and strain for a given input configuration"
+
+# Options
+
+option      "input"       i "Input file name"  optional string
+option      "npoints"     n "number of points for fitting
+stress-strain relationship" optional int default="25"
+option      "delta"       d "size of relative volume changes for strains" optional double default="0.01"

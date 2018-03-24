@@ -71,6 +71,8 @@ namespace OpenMD{
     }
             
     virtual bool advance() { return true; }
+    virtual bool resetToPrevious() { return true; }
+
 
     virtual Snapshot* getSnapshot(int id) = 0;
 

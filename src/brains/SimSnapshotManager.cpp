@@ -74,6 +74,14 @@ namespace OpenMD {
     return true;
   }
 
+  bool SimSnapshotManager::resetToPrevious() {
+    
+    int prevID = previousSnapshot_->getID();
+    *currentSnapshot_ = *previousSnapshot_;
+    currentSnapshot_->setID(prevID);
+    return true;
+  }
+
   Snapshot* SimSnapshotManager::getSnapshot(int id) {
     if (currentSnapshot_ != NULL && currentSnapshot_->getID() == id) {
       return currentSnapshot_;        
