@@ -47,7 +47,8 @@ tokens
   FLUCQ             = "flucQ";
   RNEMD             = "RNEMD";
   MINIMIZER         = "minimizer";
-  ANALYZER          = "analyzer";  
+  ANALYZER          = "analyzer";
+  NUDGEDELASTICBAND = "NEB";
   FIXED             = "Fixed";
   HARMONIC          = "Harmonic";
   CUBIC             = "Cubic";
@@ -82,6 +83,7 @@ statement : assignment
     | rnemdblock
     | minimizerblock
     | analyzerblock
+    | nudgedelasticbandblock
     ;
 
 assignment  : ID ASSIGNEQUAL^ constant SEMICOLON!
@@ -114,6 +116,10 @@ minimizerblock  : MINIMIZER^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDB
 
 analyzerblock  : ANALYZER^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;
+
+nudgedelasticbandblock  : NUDGEDELASTICBAND^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+    ;
+
 
 moleculeblock : MOLECULE^ LCURLY! (moleculestatement)*  RCURLY {#RCURLY->setType(ENDBLOCK);}
               ;

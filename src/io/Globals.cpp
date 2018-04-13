@@ -56,6 +56,7 @@ namespace OpenMD {
     flucQpars_ = new FluctuatingChargeParameters();
     rnemdPars_ = new RNEMDParameters();
     minimizerPars_ = new MinimizerParameters();
+    nebPars_ = new NudgedElasticBandParameters();
     analyzerPars_ = new AnalyzerParameters();
 
     DefineParameter(ForceField, "forceField");
@@ -211,6 +212,7 @@ namespace OpenMD {
     delete flucQpars_;
     delete rnemdPars_;
     delete minimizerPars_;
+    delete nebPars_;
     delete analyzerPars_;
   }
 
@@ -332,6 +334,14 @@ namespace OpenMD {
       delete minimizerPars_;
 
     minimizerPars_ = miniPars;
+    return true;
+  }
+
+  bool Globals::addNudgedElasticBandParameters(NudgedElasticBandParameters* nebPars) {
+    if (nebPars_ != NULL)
+      delete nebPars_;
+
+    nebPars_ = nebPars;
     return true;
   }
 

@@ -57,6 +57,7 @@
 #include "flucq/FluctuatingChargeParameters.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
+#include "optimization/NudgedElasticBandParameters.hpp"
 #include "analyzer/AnalyzerParameters.hpp"
 #include "utils/ParameterManager.hpp"
 
@@ -182,6 +183,9 @@ namespace OpenMD {
     bool addMinimizerParameters(MinimizerParameters* miniPars);
     MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
 
+    bool addNudgedElasticBandParameters(NudgedElasticBandParameters* nedPars);
+    NudgedElasticBandParameters* getNudgedElasticBandParameters() {return nebPars_;}
+    
     bool addAnalyzerParameters(AnalyzerParameters* analyzerPars);
     AnalyzerParameters* getAnalyzerParameters() {return analyzerPars_;}
 
@@ -197,6 +201,7 @@ namespace OpenMD {
     FluctuatingChargeParameters* flucQpars_;
     RNEMDParameters* rnemdPars_;
     MinimizerParameters* minimizerPars_;
+    NudgedElasticBandParameters* nebPars_;
     AnalyzerParameters* analyzerPars_;
 };
 }

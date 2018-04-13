@@ -43,6 +43,7 @@ statement : assignment
     | rnemdblock
     | minimizerblock
     | analyzerblock
+    | nudgedelasticbandblock
     ;
 
 assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
@@ -101,6 +102,11 @@ minimizerblock  : #(MINIMIZER  {MinimizerParameters* minimizerPars = new Minimiz
 analyzerblock  : #(ANALYZER  {AnalyzerParameters* analyzerPars = new AnalyzerParameters(); blockStack.push(analyzerPars);}
             (assignment)* 
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addAnalyzerParameters(analyzerPars);}
+    ;
+
+nudgedelasticbandblock  : #(NUDGEDELASTICBAND  {NudgedElasticBandParameters* nudgedElasticBandPars = new NudgedElasticBandParameters(); blockStack.push(nudgedElasticBandPars);}
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addNudgedElasticBandParameters(nudgedElasticBandPars);}
     ;
 
 
