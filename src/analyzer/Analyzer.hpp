@@ -40,64 +40,46 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @version 1.0
- */
+#ifndef INTEGRATORS_ANALYZER_HPP
+#define INTEGRATORS_ANALYZER_HPP
+#include "brains/SimInfo.hpp"
+#include "math/RandNumGen.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include <iostream>
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
-
+using namespace std;
 namespace OpenMD {
 
   /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
+   * @class Analyzer Analyzer.hpp "Analyzer/Analyzer.hpp"
+   * @brief 
+   *     
+   * Analyzer is a class which performs on-the-fly analytics of a system.
+   * This class allows users to specify analysis modules to be computed
+   * while the simulation is running, as opposed to post-processing methods
+   * traditionally done from the (.dump) file at the end of the simulation.
    */
-  class VelocityVerletIntegrator : public Integrator {
+
+  class Analyzer {
   public:
-    virtual ~VelocityVerletIntegrator();
-        
-  protected:
-
-    VelocityVerletIntegrator(SimInfo* info);
-    virtual void doIntegrate();
-    virtual void initialize();
-    virtual void preStep();
-    virtual void integrateStep();        
-    virtual void postStep();
-    virtual void finalize();
-    virtual void resetIntegrator() {}
+    Analyzer(SimInfo* info);
+    ~Analyzer();
     
-    RealType dt2;
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-    RealType currAnalyzer;
-        
-  private:
-        
-    virtual void calcForce();    
-    virtual void moveA() = 0;
-    virtual void moveB() = 0;
-    virtual RealType calcConservedQuantity() = 0;
-    virtual DumpWriter* createDumpWriter();
-    virtual StatWriter* createStatWriter();
+    void doAnalyzer();
+    void collectData();
+    void getStarted();
+    void parseOutputFileFormat(const std::string& format);
+    void writeOutputFile();
 
-    ProgressBar* progressBar;
+
+  private:
+    
+    SimInfo* info_;
+
+    bool doAnalyzer_;
+    RealType queryTime_;
 
   };
-
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+}
+#endif //INTEGRATORS_ANALYZER_HPP

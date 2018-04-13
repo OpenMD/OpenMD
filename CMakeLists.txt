@@ -440,6 +440,7 @@ src/visitors/ReplacementVisitor.cpp
 src/visitors/RigidBodyVisitor.cpp
 src/visitors/ZconsVisitor.cpp
 src/rnemd/RNEMDParameters.cpp
+src/analyzer/AnalyzerParameters.cpp
 src/clusters/Icosahedron.cpp
 src/clusters/Cuboctahedron.cpp
 src/clusters/Decahedron.cpp
@@ -467,6 +468,7 @@ src/flucq/FluctuatingChargeForces.cpp
 src/flucq/FluctuatingChargePropagator.cpp
 src/integrators/LangevinHullForceManager.cpp
 src/rnemd/RNEMD.cpp
+src/analyzer/Analyzer.cpp
 src/io/ConstraintWriter.cpp
 src/io/DumpReader.cpp
 src/io/DumpWriter.cpp

@@ -1,4 +1,4 @@
-/* $ANTLR 2.7.7 (20160304): "MDParser.g" -> "MDParser.cpp"$ */
+/* $ANTLR 2.7.7 (20171128): "MDParser.g" -> "MDParser.cpp"$ */
 #include "MDParser.hpp"
 #include <antlr/NoViableAltException.hpp>
 #include <antlr/SemanticException.hpp>
@@ -121,6 +121,13 @@ void MDParser::statement() {
 			statement_AST = currentAST.root;
 			break;
 		}
+		case ANALYZER:
+		{
+			analyzerblock();
+			astFactory->addASTChild( currentAST, returnAST );
+			statement_AST = currentAST.root;
+			break;
+		}
 		default:
 		{
 			throw ANTLR_USE_NAMESPACE(antlr)NoViableAltException(LT(1), getFilename());
@@ -188,9 +195,9 @@ void MDParser::componentblock() {
 		tmp6_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp6_AST);
 		match(RCURLY);
-#line 95 "MDParser.g"
+#line 97 "MDParser.g"
 		tmp6_AST->setType(ENDBLOCK);
-#line 194 "MDParser.cpp"
+#line 201 "MDParser.cpp"
 		componentblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -218,19 +225,19 @@ void MDParser::moleculeblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop27;
+				goto _loop30;
 			}
 			
 		}
-		_loop27:;
+		_loop30:;
 		} // ( ... )*
 		ANTLR_USE_NAMESPACE(antlr)RefAST tmp9_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 		tmp9_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp9_AST);
 		match(RCURLY);
-#line 113 "MDParser.g"
+#line 118 "MDParser.g"
 		tmp9_AST->setType(ENDBLOCK);
-#line 234 "MDParser.cpp"
+#line 241 "MDParser.cpp"
 		moleculeblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -268,9 +275,9 @@ void MDParser::zconstraintblock() {
 		tmp12_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp12_AST);
 		match(RCURLY);
-#line 98 "MDParser.g"
+#line 100 "MDParser.g"
 		tmp12_AST->setType(ENDBLOCK);
-#line 274 "MDParser.cpp"
+#line 281 "MDParser.cpp"
 		zconstraintblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -308,9 +315,9 @@ void MDParser::restraintblock() {
 		tmp15_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp15_AST);
 		match(RCURLY);
-#line 101 "MDParser.g"
+#line 103 "MDParser.g"
 		tmp15_AST->setType(ENDBLOCK);
-#line 314 "MDParser.cpp"
+#line 321 "MDParser.cpp"
 		restraintblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -348,9 +355,9 @@ void MDParser::flucqblock() {
 		tmp18_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp18_AST);
 		match(RCURLY);
-#line 104 "MDParser.g"
+#line 106 "MDParser.g"
 		tmp18_AST->setType(ENDBLOCK);
-#line 354 "MDParser.cpp"
+#line 361 "MDParser.cpp"
 		flucqblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -388,9 +395,9 @@ void MDParser::rnemdblock() {
 		tmp21_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp21_AST);
 		match(RCURLY);
-#line 107 "MDParser.g"
+#line 109 "MDParser.g"
 		tmp21_AST->setType(ENDBLOCK);
-#line 394 "MDParser.cpp"
+#line 401 "MDParser.cpp"
 		rnemdblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -428,9 +435,9 @@ void MDParser::minimizerblock() {
 		tmp24_AST = astFactory->create(LT(1));
 		astFactory->addASTChild(currentAST, tmp24_AST);
 		match(RCURLY);
-#line 110 "MDParser.g"
+#line 112 "MDParser.g"
 		tmp24_AST->setType(ENDBLOCK);
-#line 434 "MDParser.cpp"
+#line 441 "MDParser.cpp"
 		minimizerblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -438,6 +445,46 @@ void MDParser::minimizerblock() {
 		recover(ex,_tokenSet_2);
 	}
 	returnAST = minimizerblock_AST;
+}
+
+void MDParser::analyzerblock() {
+	returnAST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+	ANTLR_USE_NAMESPACE(antlr)ASTPair currentAST;
+	ANTLR_USE_NAMESPACE(antlr)RefAST analyzerblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+	
+	try {      // for error handling
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp25_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp25_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp25_AST);
+		match(ANALYZER);
+		match(LCURLY);
+		{ // ( ... )*
+		for (;;) {
+			if ((LA(1) == ID)) {
+				assignment();
+				astFactory->addASTChild( currentAST, returnAST );
+			}
+			else {
+				goto _loop27;
+			}
+			
+		}
+		_loop27:;
+		} // ( ... )*
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp27_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp27_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp27_AST);
+		match(RCURLY);
+#line 115 "MDParser.g"
+		tmp27_AST->setType(ENDBLOCK);
+#line 481 "MDParser.cpp"
+		analyzerblock_AST = currentAST.root;
+	}
+	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
+		reportError(ex);
+		recover(ex,_tokenSet_2);
+	}
+	returnAST = analyzerblock_AST;
 }
 
 void MDParser::constant() {
@@ -472,18 +519,18 @@ void MDParser::constant() {
 		}
 		case ID:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp25_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp25_AST = astFactory->create(LT(1));
-			astFactory->addASTChild(currentAST, tmp25_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp28_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp28_AST = astFactory->create(LT(1));
+			astFactory->addASTChild(currentAST, tmp28_AST);
 			match(ID);
 			constant_AST = currentAST.root;
 			break;
 		}
 		case StringLiteral:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp26_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp26_AST = astFactory->create(LT(1));
-			astFactory->addASTChild(currentAST, tmp26_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp29_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp29_AST = astFactory->create(LT(1));
+			astFactory->addASTChild(currentAST, tmp29_AST);
 			match(StringLiteral);
 			constant_AST = currentAST.root;
 			break;
@@ -510,18 +557,18 @@ void MDParser::intConst() {
 		switch ( LA(1)) {
 		case NUM_INT:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp27_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp27_AST = astFactory->create(LT(1));
-			astFactory->addASTChild(currentAST, tmp27_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp30_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp30_AST = astFactory->create(LT(1));
+			astFactory->addASTChild(currentAST, tmp30_AST);
 			match(NUM_INT);
 			intConst_AST = currentAST.root;
 			break;
 		}
 		case NUM_LONG:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp28_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp28_AST = astFactory->create(LT(1));
-			astFactory->addASTChild(currentAST, tmp28_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp31_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp31_AST = astFactory->create(LT(1));
+			astFactory->addASTChild(currentAST, tmp31_AST);
 			match(NUM_LONG);
 			intConst_AST = currentAST.root;
 			break;
@@ -548,18 +595,18 @@ void MDParser::floatConst() {
 		switch ( LA(1)) {
 		case NUM_FLOAT:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp29_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp29_AST = astFactory->create(LT(1));
-			astFactory->addASTChild(currentAST, tmp29_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp32_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp32_AST = astFactory->create(LT(1));
+			astFactory->addASTChild(currentAST, tmp32_AST);
 			match(NUM_FLOAT);
 			floatConst_AST = currentAST.root;
 			break;
 		}
 		case NUM_DOUBLE:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp30_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp30_AST = astFactory->create(LT(1));
-			astFactory->addASTChild(currentAST, tmp30_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp33_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp33_AST = astFactory->create(LT(1));
+			astFactory->addASTChild(currentAST, tmp33_AST);
 			match(NUM_DOUBLE);
 			floatConst_AST = currentAST.root;
 			break;
@@ -583,15 +630,15 @@ void MDParser::vectorConst() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST vectorConst_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp31_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp31_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp31_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp34_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp34_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp34_AST);
 		match(LPAREN);
 		doubleNumberTuple();
 		astFactory->addASTChild( currentAST, returnAST );
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp32_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp32_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp32_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp35_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp35_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp35_AST);
 		match(RPAREN);
 		vectorConst_AST = currentAST.root;
 	}
@@ -698,9 +745,9 @@ void MDParser::atomblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST atomblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp33_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp33_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp33_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp36_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp36_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp36_AST);
 		match(ATOM);
 		match(LBRACKET);
 		intConst();
@@ -714,19 +761,19 @@ void MDParser::atomblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop31;
+				goto _loop34;
 			}
 			
 		}
-		_loop31:;
+		_loop34:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp37_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp37_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp37_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp40_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp40_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp40_AST);
 		match(RCURLY);
-#line 128 "MDParser.g"
-		tmp37_AST->setType(ENDBLOCK);
-#line 730 "MDParser.cpp"
+#line 133 "MDParser.g"
+		tmp40_AST->setType(ENDBLOCK);
+#line 777 "MDParser.cpp"
 		atomblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -742,9 +789,9 @@ void MDParser::bondblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST bondblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp38_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp38_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp38_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp41_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp41_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp41_AST);
 		match(BOND);
 		{
 		switch ( LA(1)) {
@@ -773,19 +820,19 @@ void MDParser::bondblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop36;
+				goto _loop39;
 			}
 			
 		}
-		_loop36:;
+		_loop39:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp42_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp42_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp42_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp45_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp45_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp45_AST);
 		match(RCURLY);
-#line 138 "MDParser.g"
-		tmp42_AST->setType(ENDBLOCK);
-#line 789 "MDParser.cpp"
+#line 143 "MDParser.g"
+		tmp45_AST->setType(ENDBLOCK);
+#line 836 "MDParser.cpp"
 		bondblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -801,9 +848,9 @@ void MDParser::bendblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST bendblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp43_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp43_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp43_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp46_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp46_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp46_AST);
 		match(BEND);
 		{
 		switch ( LA(1)) {
@@ -832,19 +879,19 @@ void MDParser::bendblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop41;
+				goto _loop44;
 			}
 			
 		}
-		_loop41:;
+		_loop44:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp47_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp47_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp47_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp50_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp50_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp50_AST);
 		match(RCURLY);
-#line 151 "MDParser.g"
-		tmp47_AST->setType(ENDBLOCK);
-#line 848 "MDParser.cpp"
+#line 156 "MDParser.g"
+		tmp50_AST->setType(ENDBLOCK);
+#line 895 "MDParser.cpp"
 		bendblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -860,9 +907,9 @@ void MDParser::torsionblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST torsionblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp48_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp48_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp48_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp51_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp51_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp51_AST);
 		match(TORSION);
 		{
 		switch ( LA(1)) {
@@ -891,19 +938,19 @@ void MDParser::torsionblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop46;
+				goto _loop49;
 			}
 			
 		}
-		_loop46:;
+		_loop49:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp52_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp52_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp52_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp55_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp55_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp55_AST);
 		match(RCURLY);
-#line 165 "MDParser.g"
-		tmp52_AST->setType(ENDBLOCK);
-#line 907 "MDParser.cpp"
+#line 170 "MDParser.g"
+		tmp55_AST->setType(ENDBLOCK);
+#line 954 "MDParser.cpp"
 		torsionblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -919,9 +966,9 @@ void MDParser::inversionblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST inversionblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp53_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp53_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp53_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp56_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp56_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp56_AST);
 		match(INVERSION);
 		{
 		switch ( LA(1)) {
@@ -950,19 +997,19 @@ void MDParser::inversionblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop51;
+				goto _loop54;
 			}
 			
 		}
-		_loop51:;
+		_loop54:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp57_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp57_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp57_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp60_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp60_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp60_AST);
 		match(RCURLY);
-#line 180 "MDParser.g"
-		tmp57_AST->setType(ENDBLOCK);
-#line 966 "MDParser.cpp"
+#line 185 "MDParser.g"
+		tmp60_AST->setType(ENDBLOCK);
+#line 1013 "MDParser.cpp"
 		inversionblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -978,9 +1025,9 @@ void MDParser::rigidbodyblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST rigidbodyblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp58_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp58_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp58_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp61_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp61_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp61_AST);
 		match(RIGIDBODY);
 		match(LBRACKET);
 		intConst();
@@ -994,19 +1041,19 @@ void MDParser::rigidbodyblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop55;
+				goto _loop58;
 			}
 			
 		}
-		_loop55:;
+		_loop58:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp62_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp62_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp62_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp65_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp65_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp65_AST);
 		match(RCURLY);
-#line 193 "MDParser.g"
-		tmp62_AST->setType(ENDBLOCK);
-#line 1010 "MDParser.cpp"
+#line 198 "MDParser.g"
+		tmp65_AST->setType(ENDBLOCK);
+#line 1057 "MDParser.cpp"
 		rigidbodyblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -1022,9 +1069,9 @@ void MDParser::cutoffgroupblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST cutoffgroupblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp63_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp63_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp63_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp66_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp66_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp66_AST);
 		match(CUTOFFGROUP);
 		{
 		switch ( LA(1)) {
@@ -1053,19 +1100,19 @@ void MDParser::cutoffgroupblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop60;
+				goto _loop63;
 			}
 			
 		}
-		_loop60:;
+		_loop63:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp67_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp67_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp67_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp70_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp70_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp70_AST);
 		match(RCURLY);
-#line 200 "MDParser.g"
-		tmp67_AST->setType(ENDBLOCK);
-#line 1069 "MDParser.cpp"
+#line 205 "MDParser.g"
+		tmp70_AST->setType(ENDBLOCK);
+#line 1116 "MDParser.cpp"
 		cutoffgroupblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -1081,9 +1128,9 @@ void MDParser::fragmentblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST fragmentblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp68_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp68_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp68_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp71_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp71_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp71_AST);
 		match(FRAGMENT);
 		match(LBRACKET);
 		intConst();
@@ -1097,19 +1144,19 @@ void MDParser::fragmentblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop64;
+				goto _loop67;
 			}
 			
 		}
-		_loop64:;
+		_loop67:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp72_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp72_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp72_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp75_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp75_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp75_AST);
 		match(RCURLY);
-#line 207 "MDParser.g"
-		tmp72_AST->setType(ENDBLOCK);
-#line 1113 "MDParser.cpp"
+#line 212 "MDParser.g"
+		tmp75_AST->setType(ENDBLOCK);
+#line 1160 "MDParser.cpp"
 		fragmentblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -1125,9 +1172,9 @@ void MDParser::constraintblock() {
 	ANTLR_USE_NAMESPACE(antlr)RefAST constraintblock_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
 	try {      // for error handling
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp73_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp73_AST = astFactory->create(LT(1));
-		astFactory->makeASTRoot(currentAST, tmp73_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp76_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp76_AST = astFactory->create(LT(1));
+		astFactory->makeASTRoot(currentAST, tmp76_AST);
 		match(CONSTRAINT);
 		{
 		switch ( LA(1)) {
@@ -1156,19 +1203,19 @@ void MDParser::constraintblock() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop69;
+				goto _loop72;
 			}
 			
 		}
-		_loop69:;
+		_loop72:;
 		} // ( ... )*
-		ANTLR_USE_NAMESPACE(antlr)RefAST tmp77_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-		tmp77_AST = astFactory->create(LT(1));
-		astFactory->addASTChild(currentAST, tmp77_AST);
+		ANTLR_USE_NAMESPACE(antlr)RefAST tmp80_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+		tmp80_AST = astFactory->create(LT(1));
+		astFactory->addASTChild(currentAST, tmp80_AST);
 		match(RCURLY);
-#line 213 "MDParser.g"
-		tmp77_AST->setType(ENDBLOCK);
-#line 1172 "MDParser.cpp"
+#line 218 "MDParser.g"
+		tmp80_AST->setType(ENDBLOCK);
+#line 1219 "MDParser.cpp"
 		constraintblock_AST = currentAST.root;
 	}
 	catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& ex) {
@@ -1194,9 +1241,9 @@ void MDParser::atomstatement() {
 		}
 		case POSITION:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp78_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp78_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp78_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp81_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp81_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp81_AST);
 			match(POSITION);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1208,9 +1255,9 @@ void MDParser::atomstatement() {
 		}
 		case ORIENTATION:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp82_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp82_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp82_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp85_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp85_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp85_AST);
 			match(ORIENTATION);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1222,9 +1269,9 @@ void MDParser::atomstatement() {
 		}
 		case CHARGE:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp86_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp86_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp86_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp89_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp89_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp89_AST);
 			match(CHARGE);
 			match(LPAREN);
 			floatConst();
@@ -1263,11 +1310,11 @@ void MDParser::doubleNumberTuple() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop73;
+				goto _loop76;
 			}
 			
 		}
-		_loop73:;
+		_loop76:;
 		} // ( ... )*
 		doubleNumberTuple_AST = currentAST.root;
 	}
@@ -1294,9 +1341,9 @@ void MDParser::bondstatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp91_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp91_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp91_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp94_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp94_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp94_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1308,9 +1355,9 @@ void MDParser::bondstatement() {
 		}
 		case FIXED:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp95_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp95_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp95_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp98_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp98_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp98_AST);
 			match(FIXED);
 			match(LPAREN);
 			floatConst();
@@ -1322,9 +1369,9 @@ void MDParser::bondstatement() {
 		}
 		case HARMONIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp99_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp99_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp99_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp102_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp102_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp102_AST);
 			match(HARMONIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1336,9 +1383,9 @@ void MDParser::bondstatement() {
 		}
 		case CUBIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp103_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp103_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp103_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp106_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp106_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp106_AST);
 			match(CUBIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1350,9 +1397,9 @@ void MDParser::bondstatement() {
 		}
 		case QUARTIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp107_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp107_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp107_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp110_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp110_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp110_AST);
 			match(QUARTIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1364,9 +1411,9 @@ void MDParser::bondstatement() {
 		}
 		case POLYNOMIAL:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp111_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp111_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp111_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp114_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp114_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp114_AST);
 			match(POLYNOMIAL);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1378,9 +1425,9 @@ void MDParser::bondstatement() {
 		}
 		case MORSE:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp115_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp115_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp115_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp118_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp118_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp118_AST);
 			match(MORSE);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1419,11 +1466,11 @@ void MDParser::inttuple() {
 				astFactory->addASTChild( currentAST, returnAST );
 			}
 			else {
-				goto _loop76;
+				goto _loop79;
 			}
 			
 		}
-		_loop76:;
+		_loop79:;
 		} // ( ... )*
 		inttuple_AST = currentAST.root;
 	}
@@ -1450,9 +1497,9 @@ void MDParser::bendstatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp120_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp120_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp120_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp123_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp123_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp123_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1464,9 +1511,9 @@ void MDParser::bendstatement() {
 		}
 		case HARMONIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp124_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp124_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp124_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp127_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp127_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp127_AST);
 			match(HARMONIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1478,9 +1525,9 @@ void MDParser::bendstatement() {
 		}
 		case GHOSTBEND:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp128_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp128_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp128_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp131_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp131_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp131_AST);
 			match(GHOSTBEND);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1492,9 +1539,9 @@ void MDParser::bendstatement() {
 		}
 		case UREYBRADLEY:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp132_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp132_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp132_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp135_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp135_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp135_AST);
 			match(UREYBRADLEY);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1506,9 +1553,9 @@ void MDParser::bendstatement() {
 		}
 		case CUBIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp136_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp136_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp136_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp139_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp139_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp139_AST);
 			match(CUBIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1520,9 +1567,9 @@ void MDParser::bendstatement() {
 		}
 		case QUARTIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp140_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp140_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp140_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp143_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp143_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp143_AST);
 			match(QUARTIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1534,9 +1581,9 @@ void MDParser::bendstatement() {
 		}
 		case POLYNOMIAL:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp144_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp144_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp144_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp147_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp147_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp147_AST);
 			match(POLYNOMIAL);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1548,9 +1595,9 @@ void MDParser::bendstatement() {
 		}
 		case COSINE:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp148_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp148_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp148_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp151_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp151_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp151_AST);
 			match(COSINE);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1589,9 +1636,9 @@ void MDParser::torsionstatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp152_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp152_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp152_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp155_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp155_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp155_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1603,9 +1650,9 @@ void MDParser::torsionstatement() {
 		}
 		case GHOSTTORSION:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp156_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp156_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp156_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp159_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp159_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp159_AST);
 			match(GHOSTTORSION);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1617,9 +1664,9 @@ void MDParser::torsionstatement() {
 		}
 		case CUBIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp160_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp160_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp160_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp163_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp163_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp163_AST);
 			match(CUBIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1631,9 +1678,9 @@ void MDParser::torsionstatement() {
 		}
 		case QUARTIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp164_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp164_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp164_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp167_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp167_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp167_AST);
 			match(QUARTIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1645,9 +1692,9 @@ void MDParser::torsionstatement() {
 		}
 		case POLYNOMIAL:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp168_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp168_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp168_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp171_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp171_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp171_AST);
 			match(POLYNOMIAL);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1659,9 +1706,9 @@ void MDParser::torsionstatement() {
 		}
 		case CHARMM:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp172_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp172_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp172_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp175_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp175_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp175_AST);
 			match(CHARMM);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1673,9 +1720,9 @@ void MDParser::torsionstatement() {
 		}
 		case OPLS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp176_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp176_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp176_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp179_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp179_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp179_AST);
 			match(OPLS);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1687,9 +1734,9 @@ void MDParser::torsionstatement() {
 		}
 		case TRAPPE:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp180_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp180_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp180_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp183_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp183_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp183_AST);
 			match(TRAPPE);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1701,9 +1748,9 @@ void MDParser::torsionstatement() {
 		}
 		case HARMONIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp184_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp184_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp184_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp187_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp187_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp187_AST);
 			match(HARMONIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1742,9 +1789,9 @@ void MDParser::inversionstatement() {
 		}
 		case CENTER:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp188_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp188_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp188_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp191_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp191_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp191_AST);
 			match(CENTER);
 			match(LPAREN);
 			intConst();
@@ -1756,9 +1803,9 @@ void MDParser::inversionstatement() {
 		}
 		case SATELLITES:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp192_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp192_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp192_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp195_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp195_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp195_AST);
 			match(SATELLITES);
 			match(LPAREN);
 			inttuple();
@@ -1770,9 +1817,9 @@ void MDParser::inversionstatement() {
 		}
 		case AMBERIMPROPER:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp196_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp196_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp196_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp199_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp199_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp199_AST);
 			match(AMBERIMPROPER);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1784,9 +1831,9 @@ void MDParser::inversionstatement() {
 		}
 		case IMPROPERCOSINE:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp200_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp200_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp200_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp203_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp203_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp203_AST);
 			match(IMPROPERCOSINE);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1798,9 +1845,9 @@ void MDParser::inversionstatement() {
 		}
 		case HARMONIC:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp204_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp204_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp204_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp207_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp207_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp207_AST);
 			match(HARMONIC);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1812,9 +1859,9 @@ void MDParser::inversionstatement() {
 		}
 		case CENTRALATOMHEIGHT:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp208_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp208_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp208_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp211_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp211_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp211_AST);
 			match(CENTRALATOMHEIGHT);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1826,9 +1873,9 @@ void MDParser::inversionstatement() {
 		}
 		case DREIDING:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp212_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp212_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp212_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp215_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp215_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp215_AST);
 			match(DREIDING);
 			match(LPAREN);
 			doubleNumberTuple();
@@ -1867,9 +1914,9 @@ void MDParser::rigidbodystatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp216_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp216_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp216_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp219_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp219_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp219_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1908,9 +1955,9 @@ void MDParser::cutoffgroupstatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp220_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp220_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp220_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp223_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp223_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp223_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -1966,9 +2013,9 @@ void MDParser::constraintstatement() {
 		}
 		case MEMBERS:
 		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp224_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
-			tmp224_AST = astFactory->create(LT(1));
-			astFactory->makeASTRoot(currentAST, tmp224_AST);
+			ANTLR_USE_NAMESPACE(antlr)RefAST tmp227_AST = ANTLR_USE_NAMESPACE(antlr)nullAST;
+			tmp227_AST = astFactory->create(LT(1));
+			astFactory->makeASTRoot(currentAST, tmp227_AST);
 			match(MEMBERS);
 			match(LPAREN);
 			inttuple();
@@ -2030,7 +2077,7 @@ void MDParser::doubleNumber() {
 
 void MDParser::initializeASTFactory( ANTLR_USE_NAMESPACE(antlr)ASTFactory& factory )
 {
-	factory.setMaxNodeType(77);
+	factory.setMaxNodeType(78);
 }
 const char* MDParser::tokenNames[] = {
 	"<0>",
@@ -2059,6 +2106,7 @@ const char* MDParser::tokenNames[] = {
 	"\"flucQ\"",
 	"\"RNEMD\"",
 	"\"minimizer\"",
+	"\"analyzer\"",
 	"\"Fixed\"",
 	"\"Harmonic\"",
 	"\"Cubic\"",
@@ -2114,91 +2162,91 @@ const char* MDParser::tokenNames[] = {
 	0
 };
 
-const unsigned long MDParser::_tokenSet_0_data_[] = { 58720496UL, 8192UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_0_data_[] = { 125829360UL, 16384UL, 0UL, 0UL };
 // "component" "molecule" "zconstraint" "restraint" "flucQ" "RNEMD" "minimizer" 
-// ID 
+// "analyzer" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_0(_tokenSet_0_data_,4);
 const unsigned long MDParser::_tokenSet_1_data_[] = { 2UL, 0UL, 0UL, 0UL };
 // EOF 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_1(_tokenSet_1_data_,4);
-const unsigned long MDParser::_tokenSet_2_data_[] = { 58720498UL, 8192UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_2_data_[] = { 125829362UL, 16384UL, 0UL, 0UL };
 // EOF "component" "molecule" "zconstraint" "restraint" "flucQ" "RNEMD" 
-// "minimizer" ID 
+// "minimizer" "analyzer" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_2(_tokenSet_2_data_,4);
-const unsigned long MDParser::_tokenSet_3_data_[] = { 4294901746UL, 274431UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_3_data_[] = { 4294901746UL, 548863UL, 0UL, 0UL };
 // EOF "component" "molecule" "zconstraint" "restraint" "atom" "bond" "bend" 
 // "torsion" "inversion" "rigidBody" "cutoffGroup" "constraint" "fragment" 
 // "members" "center" "satellites" "position" "orientation" "flucQ" "RNEMD" 
-// "minimizer" "Fixed" "Harmonic" "Cubic" "Quartic" "Polynomial" "Morse" 
-// "GhostBend" "UreyBradley" "Cosine" "GhostTorsion" "Charmm" "Opls" "Trappe" 
-// "AmberImproper" "ImproperCosine" "CentralAtomHeight" "Dreiding" "charge" 
-// ID RCURLY 
+// "minimizer" "analyzer" "Fixed" "Harmonic" "Cubic" "Quartic" "Polynomial" 
+// "Morse" "GhostBend" "UreyBradley" "Cosine" "GhostTorsion" "Charmm" "Opls" 
+// "Trappe" "AmberImproper" "ImproperCosine" "CentralAtomHeight" "Dreiding" 
+// "charge" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_3(_tokenSet_3_data_,4);
-const unsigned long MDParser::_tokenSet_4_data_[] = { 196352UL, 8192UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_4_data_[] = { 196352UL, 16384UL, 0UL, 0UL };
 // "atom" "bond" "bend" "torsion" "inversion" "rigidBody" "cutoffGroup" 
 // "constraint" "fragment" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_4(_tokenSet_4_data_,4);
-const unsigned long MDParser::_tokenSet_5_data_[] = { 0UL, 32768UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_5_data_[] = { 0UL, 65536UL, 0UL, 0UL };
 // SEMICOLON 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_5(_tokenSet_5_data_,4);
-const unsigned long MDParser::_tokenSet_6_data_[] = { 0UL, 13664256UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_6_data_[] = { 0UL, 27328512UL, 0UL, 0UL };
 // SEMICOLON RBRACKET RPAREN COMMA 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_6(_tokenSet_6_data_,4);
-const unsigned long MDParser::_tokenSet_7_data_[] = { 0UL, 12615680UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_7_data_[] = { 0UL, 25231360UL, 0UL, 0UL };
 // SEMICOLON RPAREN COMMA 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_7(_tokenSet_7_data_,4);
-const unsigned long MDParser::_tokenSet_8_data_[] = { 196352UL, 270336UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_8_data_[] = { 196352UL, 540672UL, 0UL, 0UL };
 // "atom" "bond" "bend" "torsion" "inversion" "rigidBody" "cutoffGroup" 
 // "constraint" "fragment" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_8(_tokenSet_8_data_,4);
-const unsigned long MDParser::_tokenSet_9_data_[] = { 6291456UL, 10240UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_9_data_[] = { 6291456UL, 20480UL, 0UL, 0UL };
 // "position" "orientation" "charge" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_9(_tokenSet_9_data_,4);
-const unsigned long MDParser::_tokenSet_10_data_[] = { 4228120576UL, 8192UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_10_data_[] = { 4161011712UL, 16385UL, 0UL, 0UL };
 // "members" "Fixed" "Harmonic" "Cubic" "Quartic" "Polynomial" "Morse" 
 // ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_10(_tokenSet_10_data_,4);
-const unsigned long MDParser::_tokenSet_11_data_[] = { 2013528064UL, 8199UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_11_data_[] = { 4026793984UL, 16398UL, 0UL, 0UL };
 // "members" "Harmonic" "Cubic" "Quartic" "Polynomial" "GhostBend" "UreyBradley" 
 // "Cosine" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_11(_tokenSet_11_data_,4);
-const unsigned long MDParser::_tokenSet_12_data_[] = { 2013528064UL, 8312UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_12_data_[] = { 4026793984UL, 16624UL, 0UL, 0UL };
 // "members" "Harmonic" "Cubic" "Quartic" "Polynomial" "GhostTorsion" "Charmm" 
 // "Opls" "Trappe" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_12(_tokenSet_12_data_,4);
-const unsigned long MDParser::_tokenSet_13_data_[] = { 135790592UL, 10112UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_13_data_[] = { 270008320UL, 20224UL, 0UL, 0UL };
 // "center" "satellites" "Harmonic" "AmberImproper" "ImproperCosine" "CentralAtomHeight" 
 // "Dreiding" ID 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_13(_tokenSet_13_data_,4);
-const unsigned long MDParser::_tokenSet_14_data_[] = { 6291456UL, 272384UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_14_data_[] = { 6291456UL, 544768UL, 0UL, 0UL };
 // "position" "orientation" "charge" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_14(_tokenSet_14_data_,4);
-const unsigned long MDParser::_tokenSet_15_data_[] = { 0UL, 4194304UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_15_data_[] = { 0UL, 8388608UL, 0UL, 0UL };
 // RPAREN 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_15(_tokenSet_15_data_,4);
-const unsigned long MDParser::_tokenSet_16_data_[] = { 4228120576UL, 270336UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_16_data_[] = { 4161011712UL, 540673UL, 0UL, 0UL };
 // "members" "Fixed" "Harmonic" "Cubic" "Quartic" "Polynomial" "Morse" 
 // ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_16(_tokenSet_16_data_,4);
-const unsigned long MDParser::_tokenSet_17_data_[] = { 2013528064UL, 270343UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_17_data_[] = { 4026793984UL, 540686UL, 0UL, 0UL };
 // "members" "Harmonic" "Cubic" "Quartic" "Polynomial" "GhostBend" "UreyBradley" 
 // "Cosine" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_17(_tokenSet_17_data_,4);
-const unsigned long MDParser::_tokenSet_18_data_[] = { 2013528064UL, 270456UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_18_data_[] = { 4026793984UL, 540912UL, 0UL, 0UL };
 // "members" "Harmonic" "Cubic" "Quartic" "Polynomial" "GhostTorsion" "Charmm" 
 // "Opls" "Trappe" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_18(_tokenSet_18_data_,4);
-const unsigned long MDParser::_tokenSet_19_data_[] = { 135790592UL, 272256UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_19_data_[] = { 270008320UL, 544512UL, 0UL, 0UL };
 // "center" "satellites" "Harmonic" "AmberImproper" "ImproperCosine" "CentralAtomHeight" 
 // "Dreiding" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_19(_tokenSet_19_data_,4);
-const unsigned long MDParser::_tokenSet_20_data_[] = { 262144UL, 270336UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_20_data_[] = { 262144UL, 540672UL, 0UL, 0UL };
 // "members" ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_20(_tokenSet_20_data_,4);
-const unsigned long MDParser::_tokenSet_21_data_[] = { 0UL, 270336UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_21_data_[] = { 0UL, 540672UL, 0UL, 0UL };
 // ID RCURLY 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_21(_tokenSet_21_data_,4);
-const unsigned long MDParser::_tokenSet_22_data_[] = { 0UL, 12582912UL, 0UL, 0UL };
+const unsigned long MDParser::_tokenSet_22_data_[] = { 0UL, 25165824UL, 0UL, 0UL };
 // RPAREN COMMA 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDParser::_tokenSet_22(_tokenSet_22_data_,4);
 

@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20160304): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20171128): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -57,6 +57,7 @@ public:
 	public: void flucqblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void rnemdblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void minimizerblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void analyzerblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 		ANTLR_USE_NAMESPACE(antlr)RefAST id
 	);
@@ -96,10 +97,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 78;
+	static const int NUM_TOKENS = 79;
 #else
 	enum {
-		NUM_TOKENS = 78
+		NUM_TOKENS = 79
 	};
 #endif
 	

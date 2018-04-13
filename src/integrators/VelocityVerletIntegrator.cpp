@@ -101,6 +101,10 @@ namespace OpenMD {
     if (simParams->getRNEMDParameters()->getUseRNEMD())
       rnemd_->getStarted();
 
+    if (simParams->getAnalyzerParameters()->getUseAnalyzer())
+      analyzer_->getStarted();
+
+    
     statWriter->writeStat();
     
     currSample = sampleTime + snap->getTime();
@@ -111,6 +115,9 @@ namespace OpenMD {
     }
     if (simParams->getRNEMDParameters()->getUseRNEMD()){
       currRNEMD = RNEMD_exchangeTime + snap->getTime();
+    }
+    if (simParams->getAnalyzerParameters()->getUseAnalyzer()){
+      currAnalyzer = Analyzer_queryTime + snap->getTime();
     }
     needPotential = false;
     needVirial = false;       
@@ -155,6 +162,13 @@ namespace OpenMD {
       }
       rnemd_->collectData();
     }
+    if (useAnalyzer) {
+      if (snap->getTime() >= currAnalyzer) {
+	analyzer_->doAnalyzer();
+	currAnalyzer += Analyzer_queryTime;
+      }
+      analyzer_->collectData();
+    }
     
     if (snap->getTime() >= currSample) {
       dumpWriter->writeDumpAndEor();
@@ -169,6 +183,10 @@ namespace OpenMD {
 
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
 	rnemd_->writeOutputFile();
+      }
+
+      if (simParams->getAnalyzerParameters()->getUseAnalyzer()) {
+	analyzer_->writeOutputFile();
       }
 
       statWriter->writeStat();
@@ -198,6 +216,9 @@ namespace OpenMD {
     dumpWriter->writeEor();
     if (simParams->getRNEMDParameters()->getUseRNEMD()) {
       rnemd_->writeOutputFile();
+    }
+    if (simParams->getAnalyzerParameters()->getUseAnalyzer()) {
+      analyzer_->writeOutputFile();
     }
     progressBar->setStatus(runTime, runTime);
     progressBar->update();

@@ -59,6 +59,7 @@
 #include "flucq/FluctuatingChargePropagator.hpp"
 #include "brains/Velocitizer.hpp"
 #include "rnemd/RNEMD.hpp"
+#include "analyzer/Analyzer.hpp"
 #include "constraints/Rattle.hpp"
 
 namespace OpenMD {
@@ -127,6 +128,13 @@ namespace OpenMD {
       }
       rnemd_ = rnemd;
     }
+
+    void setAnalyzer(Analyzer* analyzer) {
+      if (analyzer_ != analyzer && analyzer_  != NULL) {
+	delete analyzer_;
+      }
+      analyzer_ = analyzer;
+    }
     
   protected:
 
@@ -148,6 +156,7 @@ namespace OpenMD {
     Rattle* rattle_;
     Velocitizer* velocitizer_;
     RNEMD* rnemd_;
+    Analyzer* analyzer_;
 
     bool needPotential;
     bool needVirial;
@@ -155,7 +164,8 @@ namespace OpenMD {
     bool needVelocityScaling;
     RealType targetScalingTemp;
 
-    bool useRNEMD;    
+    bool useRNEMD;
+    bool useAnalyzer;
     
     Stats* stats;
     DumpWriter* dumpWriter;
@@ -168,6 +178,7 @@ namespace OpenMD {
     RealType thermalTime;
     RealType resetTime;
     RealType RNEMD_exchangeTime;
+    RealType Analyzer_queryTime;
     RealType dt;
 
     Snapshot* snap; // During the integration, the address of snap Will not change

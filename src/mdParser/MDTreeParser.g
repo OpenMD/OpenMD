@@ -42,6 +42,7 @@ statement : assignment
     | flucqblock
     | rnemdblock
     | minimizerblock
+    | analyzerblock
     ;
 
 assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
@@ -95,6 +96,11 @@ rnemdblock  : #(RNEMD  {RNEMDParameters* rnemdPars = new RNEMDParameters(); bloc
 minimizerblock  : #(MINIMIZER  {MinimizerParameters* minimizerPars = new MinimizerParameters(); blockStack.push(minimizerPars);}
             (assignment)* 
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addMinimizerParameters(minimizerPars);}
+    ;
+
+analyzerblock  : #(ANALYZER  {AnalyzerParameters* analyzerPars = new AnalyzerParameters(); blockStack.push(analyzerPars);}
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addAnalyzerParameters(analyzerPars);}
     ;
 
 

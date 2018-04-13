@@ -52,10 +52,11 @@
 namespace OpenMD {
   Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL), rotAlgo_(NULL), flucQ_(NULL), 
-      rattle_(NULL), velocitizer_(NULL), rnemd_(NULL), 
+      rattle_(NULL), velocitizer_(NULL), rnemd_(NULL), analyzer_(NULL), 
       needPotential(false), needVirial(false), 
       needReset(false),  needVelocityScaling(false), 
-      useRNEMD(false), dumpWriter(NULL), statWriter(NULL), thermo(info_),
+      useRNEMD(false), useAnalyzer(false), dumpWriter(NULL),
+      statWriter(NULL), thermo(info_),
       snap(info_->getSnapshotManager()->getCurrentSnapshot()) {
     
     simParams = info->getSimParams();
@@ -143,6 +144,17 @@ namespace OpenMD {
         } 
       }
     }
+
+    if (simParams->getAnalyzerParameters()->haveUseAnalyzer()) {
+      if (simParams->getAnalyzerParameters()->getUseAnalyzer()) {
+        // Create a default a Analyzer.
+        analyzer_ = new Analyzer(info);
+        useAnalyzer = simParams->getAnalyzerParameters()->getUseAnalyzer();
+        if (simParams->getAnalyzerParameters()->haveQueryTime()) {
+          Analyzer_queryTime = simParams->getAnalyzerParameters()->getQueryTime();
+        } 
+      }
+    }
     
     rotAlgo_ = new DLM();
     rattle_ = new Rattle(info);
@@ -171,6 +183,7 @@ namespace OpenMD {
     delete forceMan_;
     delete velocitizer_;
     delete rnemd_;
+    delete analyzer_;
     delete flucQ_;
     delete rotAlgo_;
     delete rattle_;

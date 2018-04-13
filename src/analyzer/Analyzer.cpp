@@ -36,68 +36,89 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
- 
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @version 1.0
- */
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+#include <cmath>
+#include <sstream>
+#include <string>
 
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
+#include "analyzer/Analyzer.hpp"
+#include "math/Vector3.hpp"
+#include "math/Vector.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Polynomial.hpp"
+#include "primitives/Molecule.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "utils/Constants.hpp"
+#include "utils/Tuple.hpp"
+#include "brains/Thermo.hpp"
+#include "math/ConvexHull.hpp"
 
+#ifdef _MSC_VER
+#define isnan(x) _isnan((x))
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#else
+#define isnan(x) std::isnan((x))
+#define isinf(x) std::isinf((x))
+#endif
+
+#define HONKING_LARGE_VALUE 1.0e10
+
+using namespace std;
 namespace OpenMD {
+  
+  Analyzer::Analyzer(SimInfo* info) : info_(info){
 
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
-  class VelocityVerletIntegrator : public Integrator {
-  public:
-    virtual ~VelocityVerletIntegrator();
-        
-  protected:
+    Globals* simParams = info->getSimParams();
+    AnalyzerParameters* analyzerParams = simParams->getAnalyzerParameters();
 
-    VelocityVerletIntegrator(SimInfo* info);
-    virtual void doIntegrate();
-    virtual void initialize();
-    virtual void preStep();
-    virtual void integrateStep();        
-    virtual void postStep();
-    virtual void finalize();
-    virtual void resetIntegrator() {}
+    doAnalyzer_ = analyzerParams->getUseAnalyzer();
+    if (!doAnalyzer_) return;
+
+    queryTime_ = analyzerParams->getQueryTime();
+
+  }
     
-    RealType dt2;
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-    RealType currAnalyzer;
-        
-  private:
-        
-    virtual void calcForce();    
-    virtual void moveA() = 0;
-    virtual void moveB() = 0;
-    virtual RealType calcConservedQuantity() = 0;
-    virtual DumpWriter* createDumpWriter();
-    virtual StatWriter* createStatWriter();
+  Analyzer::~Analyzer() {
+    if (!doAnalyzer_) return;
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif
 
-    ProgressBar* progressBar;
+      
+#ifdef IS_MPI
+    }
+#endif
 
-  };
+  }
 
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+  
+  void Analyzer::doAnalyzer() {
+    if (!doAnalyzer_) return;
+  }
+  
+  
+  void Analyzer::collectData() {
+    if (!doAnalyzer_) return;
+  }
+  
+ 
+  void Analyzer::getStarted() {
+    if (!doAnalyzer_) return;
+  }
+  
+  void Analyzer::parseOutputFileFormat(const std::string& format) {
+    if (!doAnalyzer_) return;
+  }
+
+  void Analyzer::writeOutputFile() {
+    if (!doAnalyzer_) return;
+  }
+   
+    
+}
+

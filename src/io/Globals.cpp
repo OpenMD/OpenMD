@@ -56,6 +56,7 @@ namespace OpenMD {
     flucQpars_ = new FluctuatingChargeParameters();
     rnemdPars_ = new RNEMDParameters();
     minimizerPars_ = new MinimizerParameters();
+    analyzerPars_ = new AnalyzerParameters();
 
     DefineParameter(ForceField, "forceField");
 
@@ -210,6 +211,7 @@ namespace OpenMD {
     delete flucQpars_;
     delete rnemdPars_;
     delete minimizerPars_;
+    delete analyzerPars_;
   }
 
   void Globals::validate() {
@@ -330,6 +332,14 @@ namespace OpenMD {
       delete minimizerPars_;
 
     minimizerPars_ = miniPars;
+    return true;
+  }
+
+  bool Globals::addAnalyzerParameters(AnalyzerParameters* analyzerPars) {
+    if (analyzerPars_ != NULL)
+      delete analyzerPars_;
+
+    analyzerPars_ = analyzerPars;
     return true;
   }
 
