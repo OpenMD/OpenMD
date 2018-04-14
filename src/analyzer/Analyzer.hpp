@@ -74,11 +74,67 @@ namespace OpenMD {
 
 
   private:
-    
-    SimInfo* info_;
+   
+    enum AnalyzerMethod {
+      analyzerBo,
+      analyzerIor,
+      analyzerFor,
+      analyzerBad,
+      analyzerCount,
+      analyzerGofr,
+      analyzerGofz,
+      analyzerRTheta,
+      analyzerROmega,
+      analyzerRz,
+      analyzerThetaOmega,
+      analyzerRThetaOmega,
+      analyzerGxyz,
+      analyzerTwoDGofr,
+      analyzerP2,
+      analyzerSCD,
+      analyzerDensity,
+      analyzerSlabDensity,
+      analyzerPipeDensity,
+      analyzerPAngle,
+      analyzerHxy,
+      analyzerRhoR,
+      analyzerAngleR,
+      analyzerHullVol,
+      analyzerRodLength,
+      analyzerTetParam,
+      analyzerTetParamZ,
+      analyzerTetParamDens,
+      analyzerTetParamXYZ,
+      analyzerRNEMDz,
+      analyzerRNEMDr,
+      analyzerRNEMDrt,
+      analyzerNitrile,
+      analyzerMultipole,
+      analyzerSurfDiffusion,
+      analyzerCN,
+      analyzerSCN,
+      analyzerGCN,
+      analyzerHBond,
+      analyzerPotDiff,
+      analyzerTetHB,
+      analyzerKirkwood,
+      analyzerKirkwoodQ,
+      analyzerDensityField,
+      analyzerVelocityField,
+      analyzerVelocityZ
+    };
 
+    SimInfo* info_;
+    
+    map<string, AnalyzerMethod> stringToMethod_;
+    AnalyzerMethod analyzerMethod_;
+    
     bool doAnalyzer_;
     RealType queryTime_;
+
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+
 
   };
 }
