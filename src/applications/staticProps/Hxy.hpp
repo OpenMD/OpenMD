@@ -73,10 +73,11 @@ namespace OpenMD {
   class Hxy : public StaticAnalyser {
     
   public:
-    Hxy(SimInfo* info, const std::string& filename, const std::string& sele,
+    Hxy(SimInfo* info, const std::string& sele,
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
     virtual ~Hxy();        
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:
     

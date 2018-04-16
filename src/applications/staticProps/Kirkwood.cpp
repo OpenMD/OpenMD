@@ -50,10 +50,10 @@
 
 namespace OpenMD {
 
-  Kirkwood::Kirkwood(SimInfo* info, const std::string& filename,
+  Kirkwood::Kirkwood(SimInfo* info,
                      const std::string& sele1, const std::string& sele2,
                      RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
+    : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len) {
     
     setAnalysisType("Distance-dependent Kirkwood G-factor");
     setOutputName(getPrefix(filename) + ".kirkwood");
@@ -159,11 +159,10 @@ namespace OpenMD {
   }
 
   KirkwoodQuadrupoles::KirkwoodQuadrupoles(SimInfo* info,
-                                           const std::string& filename,
                                            const std::string& sele1,
                                            const std::string& sele2,
                                            RealType len, int nrbins)
-    : Kirkwood(info, filename, sele1, sele2, len, nrbins) {
+    : Kirkwood(info, sele1, sele2, len, nrbins) {
     
     setAnalysisType("Distance-dependent Kirkwood G-factor for quadrupoles");
     setOutputName(getPrefix(filename) + ".kirkwoodQ");

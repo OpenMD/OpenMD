@@ -70,12 +70,13 @@ namespace OpenMD {
 
   class SCDOrderParameter : public StaticAnalyser{
   public:
-    SCDOrderParameter(SimInfo* info, const std::string& filename, 
+    SCDOrderParameter(SimInfo* info, 
                       const std::string& sele1, const std::string& sele2, const std::string& sele3);
 
-    SCDOrderParameter(SimInfo* info, const std::string& filename, 
+    SCDOrderParameter(SimInfo* info, 
                       const std::string& molname, int beginIndex, int endIndex);
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
 
   private:
     void writeSCD();

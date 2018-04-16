@@ -62,9 +62,9 @@ using namespace std;
 namespace OpenMD {
 
   template<class T>
-  Field<T>::Field(SimInfo* info,const std::string& filename, 
+  Field<T>::Field(SimInfo* info, 
 	       const std::string& sele, RealType voxelSize) 
-    : StaticAnalyser(info, filename, 1), 
+    : StaticAnalyser(info, 1), 
       selectionScript_(sele),  
       seleMan_(info), evaluator_(info), voxelSize_(voxelSize){
     
@@ -145,7 +145,7 @@ namespace OpenMD {
   }
 
   template<class T>
-  void Field<T>::process() {
+  void Field<T>::processFrame(Snapshot* snap_) {
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -279,6 +279,11 @@ namespace OpenMD {
     }
   }  
 
+  template<class T>
+  void Field<T>::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+  
   template<class T>
   RealType Field<T>::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;
@@ -421,7 +426,7 @@ namespace OpenMD {
     return str.str();      
   }
   
-  DensityField::DensityField(SimInfo* info, const std::string& filename,
+  DensityField::DensityField(SimInfo* info,
                              const std::string& sele1, RealType voxelSize) :
     Field<RealType>(info, filename, sele1, voxelSize) {
     setOutputName(getPrefix(filename) + ".densityField");    
@@ -434,7 +439,7 @@ namespace OpenMD {
     return sd->getMass();
   }
   
-  ChargeField:: ChargeField(SimInfo* info, const std::string& filename,
+  ChargeField:: ChargeField(SimInfo* info,
                             const std::string& sele1, RealType voxelSize) :
     Field<RealType>(info, filename, sele1, voxelSize) {
     setOutputName(getPrefix(filename) + ".chargeField");    
@@ -459,7 +464,7 @@ namespace OpenMD {
   }
 
   
-  VelocityField::VelocityField(SimInfo* info, const std::string& filename,
+  VelocityField::VelocityField(SimInfo* info,
                                const std::string& sele1, RealType voxelSize) :
     Field<Vector3d>(info, filename, sele1, voxelSize) {
     setOutputName(getPrefix(filename) + ".velocityField");    
@@ -469,7 +474,7 @@ namespace OpenMD {
     return sd->getVel();
   }
 
-  DipoleField::DipoleField(SimInfo* info, const std::string& filename,
+  DipoleField::DipoleField(SimInfo* info,
                            const std::string& sele1, RealType voxelSize) :
     Field<Vector3d>(info, filename, sele1, voxelSize) {
     setOutputName(getPrefix(filename) + ".dipoleField");    

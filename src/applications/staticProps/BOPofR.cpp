@@ -56,7 +56,7 @@
 using namespace MATPACK;
 namespace OpenMD {
 
-  BOPofR::BOPofR(SimInfo* info, const std::string& filename, 
+  BOPofR::BOPofR(SimInfo* info, 
                  const std::string& sele, double rCut, unsigned int nbins, 
                  RealType len) : StaticAnalyser(info, filename, nbins), 
                                  selectionScript_(sele), 
@@ -165,7 +165,7 @@ namespace OpenMD {
   }
   
   
-  void BOPofR::process() {
+  void BOPofR::processFrame(Snapshot* snap_) {
     Molecule* mol;
     Atom* atom;
     int myIndex;
@@ -314,13 +314,16 @@ namespace OpenMD {
     
     writeOrderParameter();    
   }
-  
+
+  void BOPofR::processDump(const std::string& filename) {
+    // iteratively call processFrame to compute dump
+  }
 
 
-  IcosahedralOfR::IcosahedralOfR(SimInfo* info, const std::string& filename, 
+  IcosahedralOfR::IcosahedralOfR(SimInfo* info, 
                                  const std::string& sele, double rCut, 
                                  unsigned int nbins, RealType len) :
-    BOPofR(info, filename, sele, rCut, nbins, len) {
+    BOPofR(info, sele, rCut, nbins, len) {
     
     setAnalysisType("Icosahedral Bond Order Parameter(r)");
   }
@@ -342,10 +345,10 @@ namespace OpenMD {
     }      
   }
 
-  FCCOfR::FCCOfR(SimInfo* info, const std::string& filename, 
+  FCCOfR::FCCOfR(SimInfo* info, 
                  const std::string& sele, double rCut, 
                  unsigned int nbins, RealType len) :
-    BOPofR(info, filename, sele, rCut, nbins, len) {
+    BOPofR(info, sele, rCut, nbins, len) {
     setAnalysisType("FCC Bond Order Parameter(r)");
   }
   

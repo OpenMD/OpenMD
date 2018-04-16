@@ -51,9 +51,10 @@ namespace OpenMD {
   class RNEMDZ : public SlabStatistics {
     
   public:
-    RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins, int axis=2);    
+    RNEMDZ(SimInfo* info, const std::string& sele, int nzbins, int axis=2);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
+    void processDump(const std::string& filename);
 
   protected:
     OutputData* temperature;
@@ -66,9 +67,10 @@ namespace OpenMD {
   class RNEMDR : public ShellStatistics {
     
   public:
-    RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins);    
+    RNEMDR(SimInfo* info, const std::string& sele, int nrbins);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
+    void processDump(const std::string& filename);
 
   protected:
     OutputData* temperature;
@@ -79,9 +81,10 @@ namespace OpenMD {
   class RNEMDRTheta : public ShellStatistics {
     
   public:
-    RNEMDRTheta(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins, int nanglebins);    
+    RNEMDRTheta(SimInfo* info, const std::string& sele, int nrbins, int nanglebins);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
+    void processDump(const std::string& filename);
     std::pair<int,int> getBins(Vector3d pos);
     void writeOutput();
     

@@ -50,11 +50,10 @@
 
 namespace OpenMD {
   
-  NitrileFrequencyMap::NitrileFrequencyMap(SimInfo* info, 
-                                           const std::string& filename, 
+  NitrileFrequencyMap::NitrileFrequencyMap(SimInfo* info,
                                            const std::string& sele1, 
                                            int nbins)
-    : StaticAnalyser(info, filename, nbins), info_(info), 
+    : StaticAnalyser(info, nbins), info_(info), 
       selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_) {
     
     setOutputName(getPrefix(filename) + ".freqs");
@@ -151,7 +150,7 @@ namespace OpenMD {
     return false;
   }
 
-  void NitrileFrequencyMap::process() {
+  void NitrileFrequencyMap::processFrame(Snapshot* snap_) {
     Molecule* mol;
     Atom* atom;
     AtomType* atype;
@@ -254,6 +253,10 @@ namespace OpenMD {
     processHistogram();
     writeProbs();
     
+  }
+
+  void NitrileFrequencyMap::processDump(const std::string& filename) {
+    // call processFrame( snap );
   }
   
   void NitrileFrequencyMap::processHistogram() {

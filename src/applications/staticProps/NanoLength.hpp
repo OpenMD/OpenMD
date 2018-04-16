@@ -53,8 +53,9 @@ typedef std::pair<RealType, int> evIndex;
 namespace OpenMD {
   class NanoLength : public StaticAnalyser {
   public:
-    NanoLength(SimInfo* info, const std::string& filename, const std::string& sele);
-    virtual void process();
+    NanoLength(SimInfo* info, const std::string& sele);
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:    
     RealType getLength(std::vector<StuntDouble*> atoms);

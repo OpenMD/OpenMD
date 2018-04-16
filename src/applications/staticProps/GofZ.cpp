@@ -47,8 +47,8 @@
 
 namespace OpenMD {
 
-  GofZ::GofZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int axis)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), axis_(axis) {
+  GofZ::GofZ(SimInfo* info, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int axis)
+    : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len), axis_(axis) {
 
       deltaZ_ = len_ /nBins_;
       rC_ = len_ / 2.0;

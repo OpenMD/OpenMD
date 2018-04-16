@@ -51,10 +51,10 @@
 
 namespace OpenMD {
   
-  GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, 
+  GofAngle2::GofAngle2(SimInfo* info, 
                        const std::string& sele1, 
 		       const std::string& sele2, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nangleBins), 
+    : RadialDistrFunc(info, sele1, sele2, nangleBins), 
       doSele3_(false), seleMan3_(info), evaluator3_(info) {
 
     setAnalysisType("Radial Distribution Function");
@@ -76,11 +76,11 @@ namespace OpenMD {
     }   
   }
   
-  GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, 
+  GofAngle2::GofAngle2(SimInfo* info, 
                        const std::string& sele1, 
 		       const std::string& sele2, 
                        const std::string& sele3, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nangleBins),
+    : RadialDistrFunc(info, sele1, sele2, nangleBins),
       doSele3_(true), seleMan3_(info), evaluator3_(info), 
       selectionScript3_(sele3) {
     

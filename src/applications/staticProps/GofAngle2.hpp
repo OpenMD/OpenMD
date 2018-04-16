@@ -48,10 +48,10 @@ namespace OpenMD {
   class GofAngle2 : public RadialDistrFunc {
     
   public:
-    GofAngle2(SimInfo* info, const std::string& filename, 
+    GofAngle2(SimInfo* info, 
               const std::string& sele1, const std::string& sele2, 
               int nangleBins);
-    GofAngle2(SimInfo* info, const std::string& filename, 
+    GofAngle2(SimInfo* info, 
               const std::string& sele1, const std::string& sele2, 
               const std::string& sele3, int nangleBins);
    

@@ -51,11 +51,10 @@
 namespace OpenMD {
 
   CoordinationNumber::CoordinationNumber(SimInfo* info,
-                                         const std::string& filename,
-                                         const std::string& sele1,
+					 const std::string& sele1,
                                          const std::string& sele2,
                                          RealType rCut, int bins):
-    StaticAnalyser(info, filename, bins), rCut_(rCut), bins_(bins),
+    StaticAnalyser(info, bins), rCut_(rCut), bins_(bins),
     sele1_(sele1), seleMan1_(info), evaluator1_(info),
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
 
@@ -89,7 +88,7 @@ namespace OpenMD {
     histogram_.clear();
   }
 
-  void CoordinationNumber::process() {
+  void CoordinationNumber::processFrame(Snapshot* snap_) {
     SelectionManager common(info_);
     
     std::vector<std::vector<int> > listNN;
@@ -206,6 +205,10 @@ namespace OpenMD {
     } 
   
     writeOutput();
+  }
+
+  void CoordinationNumber::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
 
   RealType CoordinationNumber::computeCoordination(int a,

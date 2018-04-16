@@ -48,8 +48,7 @@ namespace OpenMD {
   class AngleR : public StaticAnalyser {
     
   public:    
-    AngleR(SimInfo* info, const std::string& filename,
-           const std::string& sele, RealType len, 
+    AngleR(SimInfo* info, const std::string& sele, RealType len, 
            int nrbins);
 
     int getNRBins() {
@@ -60,7 +59,8 @@ namespace OpenMD {
       return len_;
     }
         
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
 
   private:
     void processHistogram();

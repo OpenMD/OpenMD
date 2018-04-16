@@ -49,9 +49,9 @@
 namespace OpenMD {
 
   
-  RippleOP::RippleOP(SimInfo* info, const std::string& filename, 
+  RippleOP::RippleOP(SimInfo* info, 
 		     const std::string& sele1, const std::string& sele2)
-    : StaticAnalyser(info, filename, 1), 
+    : StaticAnalyser(info, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) { 
     
@@ -102,7 +102,7 @@ namespace OpenMD {
     
   }
   
-  void RippleOP::process() {
+  void RippleOP::processFrame(Snapshot* snap_) {
 
     StuntDouble* j1;
     StuntDouble* j2;
@@ -308,6 +308,10 @@ namespace OpenMD {
     
     writeP2();
     
+  }
+
+  void RippleOP::processDump(const std::string& filename){
+    // call processFrame( snap )
   }
   
   void RippleOP::writeP2() {

@@ -51,8 +51,8 @@
 namespace OpenMD {
 
      
-  AngleR::AngleR(SimInfo* info, const std::string& filename, const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
+  AngleR::AngleR(SimInfo* info, const std::string& sele, RealType len, int nrbins)
+    : StaticAnalyser(info), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
     
     
     evaluator_.loadScriptString(sele);
@@ -70,7 +70,7 @@ namespace OpenMD {
   }
   
 
-  void AngleR::process() {
+  void AngleR::processFrame(Snapshot* snap_) {
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -123,7 +123,9 @@ namespace OpenMD {
     writeAngleR();
   }
 
-
+  void AngleR::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
 
   void AngleR::processHistogram() {
 

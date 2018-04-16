@@ -45,8 +45,8 @@
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
-  StaticAnalyser::StaticAnalyser(SimInfo* info, const std::string& filename, unsigned int nbins) :
-    info_(info), dumpFilename_(filename), step_(1), nBins_(nbins) {
+  StaticAnalyser::StaticAnalyser(SimInfo* info, unsigned int nbins) :
+    info_(info), step_(1), nBins_(nbins) {
     
     // Pre-load an OutputData for the count of objects:
     counts_ = new OutputData;

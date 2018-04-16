@@ -49,10 +49,10 @@
 
 namespace OpenMD {
   
-  GofXyz::GofXyz(SimInfo* info, const std::string& filename, 
+  GofXyz::GofXyz(SimInfo* info,  
 		 const std::string& sele1, const std::string& sele2, 
 		 const std::string& sele3, RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len), 
+    : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len), 
       halfLen_(len/2), evaluator3_(info), seleMan3_(info) {
     
     setOutputName(getPrefix(filename) + ".gxyz");

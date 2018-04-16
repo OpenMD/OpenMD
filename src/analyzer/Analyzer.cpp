@@ -327,13 +327,21 @@ namespace OpenMD {
     //   }
     // }
 
+
+    RealType maxLen;
+    RealType zmaxLen(0.0);
+    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
+    zmaxLen = hmat(2,2);    
+    
+    
     
     StaticAnalyser* analyser;
     
     switch(analyzerMethod_) {
     case analyzerBo:
       if (hasSele1 && hasSele2 && hasLength && hasNRBins) {
-	//analyser= new GofR(info, sele1, sele2, maxLen, nrbins);
+	//analyser = new GofR(info, sele1, sele2, maxLen, nrbins);
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'gofr' requires the following specified\n"
@@ -869,17 +877,18 @@ namespace OpenMD {
   
   void Analyzer::doAnalyzer() {
     if (!doAnalyzer_) return;
+    // Here we call the StaticProps module on the single frame.
+    // We may need to pass information here so we can pass it to
+    //   writeOutputFile?
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    // analyzer_->processFrame(currentSnap_);
   }
   
-  
-  void Analyzer::collectData() {
-    if (!doAnalyzer_) return;
-  }
   
  
   void Analyzer::getStarted() {
     if (!doAnalyzer_) return;
-    collectData();
+    doAnalyzer();
     writeOutputFile();
   }
   
@@ -889,6 +898,8 @@ namespace OpenMD {
 
   void Analyzer::writeOutputFile() {
     if (!doAnalyzer_) return;
+    // Here we should call the writeOutput for the StaticProps modules.
+    // analyser_->writeOutputFile();
   }
    
     

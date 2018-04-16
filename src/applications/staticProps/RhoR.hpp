@@ -49,7 +49,7 @@ namespace OpenMD {
     
   public:
 
-    RhoR(SimInfo* info, const std::string& filename, const std::string& sele, RealType  len, 
+    RhoR(SimInfo* info, const std::string& sele, RealType  len, 
 	 int nrbins, RealType particleR);
 
     int getNRBins() {
@@ -60,7 +60,8 @@ namespace OpenMD {
       return len_;
     }
         
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
   private:
 
     void processHistogram();

@@ -48,7 +48,7 @@ namespace OpenMD {
   class Kirkwood : public RadialDistrFunc {
     
   public:
-    Kirkwood(SimInfo* info, const std::string& filename,
+    Kirkwood(SimInfo* info,
              const std::string& sele1, 
              const std::string& sele2, RealType len, int nrbins);
 
@@ -77,7 +77,7 @@ namespace OpenMD {
 
   class KirkwoodQuadrupoles : public Kirkwood {
   public:
-    KirkwoodQuadrupoles(SimInfo* info, const std::string& filename,
+    KirkwoodQuadrupoles(SimInfo* info, 
                         const std::string& sele1, 
                         const std::string& sele2, RealType len, int nrbins);
     

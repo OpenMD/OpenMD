@@ -48,7 +48,7 @@ namespace OpenMD {
   class GofR : public RadialDistrFunc {
     
   public:
-    GofR(SimInfo* info, const std::string& filename, const std::string& sele1, 
+    GofR(SimInfo* info,  const std::string& sele1, 
 	 const std::string& sele2, RealType len, int nrbins);
 
     int getNRBins() {

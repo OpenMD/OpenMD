@@ -50,9 +50,9 @@
 
 namespace OpenMD {
   
-  SpatialStatistics::SpatialStatistics(SimInfo* info, const string& filename, 
+  SpatialStatistics::SpatialStatistics(SimInfo* info, 
                                        const string& sele, int nbins)
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
+    : StaticAnalyser(info, nbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info) {
     
     evaluator_.loadScriptString(sele);
@@ -77,7 +77,7 @@ namespace OpenMD {
   }
 
 
-  void SpatialStatistics::process() {
+  void SpatialStatistics::processDump(const string& filename) {
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -123,9 +123,9 @@ namespace OpenMD {
   
 
 
-  SlabStatistics::SlabStatistics(SimInfo* info, const string& filename, 
+  SlabStatistics::SlabStatistics(SimInfo* info, 
                                  const string& sele, int nbins, int axis) : 
-    SpatialStatistics(info, filename, sele, nbins), axis_(axis) {
+    SpatialStatistics(info, sele, nbins), axis_(axis) {
 
     // Set the axis label for the privileged axis
     switch(axis_) {
@@ -179,9 +179,9 @@ namespace OpenMD {
     return int(nBins_ * (pos[axis_] / hmat_(axis_,axis_) + 0.5)) % nBins_;  
   }
 
-  ShellStatistics::ShellStatistics(SimInfo* info, const string& filename, 
+  ShellStatistics::ShellStatistics(SimInfo* info,  
                                    const string& sele, int nbins) : 
-    SpatialStatistics(info, filename, sele, nbins), coordinateOrigin_(V3Zero) {
+    SpatialStatistics(info, sele, nbins), coordinateOrigin_(V3Zero) {
     
     binWidth_ = 1.0;
 

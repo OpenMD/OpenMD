@@ -51,11 +51,10 @@
 namespace OpenMD {
 
   HBondGeometric::HBondGeometric(SimInfo* info, 
-                                 const std::string& filename, 
                                  const std::string& sele1,
                                  const std::string& sele2,
                                  double rCut, double thetaCut, int nbins) :
-    StaticAnalyser(info, filename, nbins),
+    StaticAnalyser(info, nbins),
     selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
     selectionScript2_(sele2), seleMan2_(info), evaluator2_(info) {
     
@@ -98,7 +97,7 @@ namespace OpenMD {
     nSelected_ = 0;
   }
   
-  void HBondGeometric::process() {
+  void HBondGeometric::processFrame(Snapshot* snap_) {
     Molecule* mol1;
     Molecule* mol2;
     Molecule::HBondDonor* hbd1;
@@ -217,7 +216,10 @@ namespace OpenMD {
     }
     writeHistogram();
   }
- 
+
+  void HBondGeometric::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
         
   void HBondGeometric::collectHistogram(int nHB, int nA, int nD) {
     nHBonds_[nHB] += 1;

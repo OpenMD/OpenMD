@@ -55,10 +55,11 @@ namespace OpenMD {
   class NitrileFrequencyMap : public StaticAnalyser {
     
   public:
-    NitrileFrequencyMap(SimInfo* info, const string& filename, 
+    NitrileFrequencyMap(SimInfo* info, 
                         const string& sele1, int nbins);
         
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const string& filename);
     
   private:
     bool excludeAtomPair(int atom1, int atom2);

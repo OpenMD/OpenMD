@@ -47,41 +47,44 @@
 
 namespace OpenMD {
 
-    class DensityPlot : public StaticAnalyser{
-        public:
-            DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
-            virtual void process();
-
-            int getNRBins() {
-              return nRBins_; 
-            }
-            
-            RealType getLength() {
-              return len_;
-            }
-        
-
-        private:
-            Vector3d calcNewOrigin();
-            
-            void writeDensity();            
-
-            Snapshot* currentSnapshot_;
-            RealType len_;
-            RealType halfLen_;
-            int nRBins_;
-            RealType deltaR_;                
-            std::vector<int> histogram_; 
-            std::vector<RealType> density_; 
-
-            std::string selectionScript_;
-            SelectionManager seleMan_;
-            SelectionEvaluator evaluator_;
-            std::string cmSelectionScript_;
-            SelectionManager cmSeleMan_;
-            SelectionEvaluator cmEvaluator_;
-
-            
+  class DensityPlot : public StaticAnalyser{
+    
+  public:
+    DensityPlot(SimInfo* info, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
+    
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
+    
+    int getNRBins() {
+      return nRBins_; 
+    }
+    
+    RealType getLength() {
+      return len_;
+    }
+    
+    
+  private:
+    Vector3d calcNewOrigin();
+    
+    void writeDensity();            
+    
+    Snapshot* currentSnapshot_;
+    RealType len_;
+    RealType halfLen_;
+    int nRBins_;
+    RealType deltaR_;                
+    std::vector<int> histogram_; 
+    std::vector<RealType> density_; 
+    
+    std::string selectionScript_;
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+    std::string cmSelectionScript_;
+    SelectionManager cmSeleMan_;
+    SelectionEvaluator cmEvaluator_;
+    
+    
     };
 }
 

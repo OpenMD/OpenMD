@@ -53,9 +53,9 @@
 
 namespace OpenMD {
 
-  PotDiff::PotDiff(SimInfo* info, const std::string& filename, 
+  PotDiff::PotDiff(SimInfo* info, 
                    const std::string& sele)
-    : StaticAnalyser(info, filename, 1), selectionScript_(sele), 
+    : StaticAnalyser(info, 1), selectionScript_(sele), 
       seleMan_(info), evaluator_(info) {
     
     StuntDouble* sd;
@@ -97,7 +97,7 @@ namespace OpenMD {
     info_->getSnapshotManager()->advance();
   }
   
-  void PotDiff::process() {
+  void PotDiff::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     int j;
   
@@ -160,6 +160,10 @@ namespace OpenMD {
     }
    
     writeDiff();   
+  }
+
+  void PotDiff::processDump(const std::string& filename); {
+    // call processFrame( snap )
   }
   
   void PotDiff::writeDiff() {

@@ -50,10 +50,10 @@
 
 namespace OpenMD {
 
-  MultipoleSum::MultipoleSum(SimInfo* info, const std::string& filename, 
+  MultipoleSum::MultipoleSum(SimInfo* info, 
                              const std::string& sele1, RealType rmax, 
 			     int nrbins)
-    : StaticAnalyser(info, filename, nrbins), nRBins_(nrbins), rMax_(rmax),
+    : StaticAnalyser(info, nrbins), nRBins_(nrbins), rMax_(rmax),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info) {
     
     setOutputName(getPrefix(filename) + ".multipoleSum");
@@ -76,7 +76,7 @@ namespace OpenMD {
     deltaR_ = rMax_ / nRBins_;
   }
 
-  void MultipoleSum::process() {
+  void MultipoleSum::processFrame(Snapshot* snap_) {
     Molecule* mol;
     SimInfo::MoleculeIterator miter;
     vector<Atom*>::iterator aiter;
@@ -198,6 +198,10 @@ namespace OpenMD {
     writeOut();
   }
 
+  void MultipoleSum::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+  
   void MultipoleSum::writeOut() {
 
     ofstream os(getOutputFileName().c_str());

@@ -49,10 +49,10 @@
 
 namespace OpenMD {
 
-  GofR::GofR(SimInfo* info, const std::string& filename,
+  GofR::GofR(SimInfo* info,
              const std::string& sele1, const std::string& sele2,
              RealType len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
+    : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len) {
 
     setAnalysisType("Radial Distribution Function");
     setOutputName(getPrefix(filename) + ".gofr");

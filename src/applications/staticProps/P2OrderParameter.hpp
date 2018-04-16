@@ -50,13 +50,14 @@ namespace OpenMD {
 
   class P2OrderParameter : public StaticAnalyser{
   public:    
-    P2OrderParameter(SimInfo* info, const string& filename,
+    P2OrderParameter(SimInfo* info,
                      const string& sele1);
-    P2OrderParameter(SimInfo* info, const string& filename, 
+    P2OrderParameter(SimInfo* info,
                      const string& sele1, const string& sele2);
-    P2OrderParameter(SimInfo* info, const string& filename, 
+    P2OrderParameter(SimInfo* info,  
                      const string& sele1, const int seleOffset);
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const string& filename);
     
   private:
     

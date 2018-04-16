@@ -54,9 +54,9 @@
 #include "primitives/Molecule.hpp"
 namespace OpenMD {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, 
+  RhoZ::RhoZ(SimInfo* info, 
 	     const std::string& sele, int nzbins, int axis)
-    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele), 
+    : StaticAnalyser(info, nzbins), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), axis_(axis) {
 
     evaluator_.loadScriptString(sele);
@@ -86,7 +86,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".RhoZ");
   }
 
-  void RhoZ::process() {
+  void RhoZ::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     int ii;
 
@@ -147,8 +147,10 @@ namespace OpenMD {
 
   }
   
-  
-  
+  void RhoZ::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+    
   void RhoZ::writeDensity() {
 
     // compute average box length:

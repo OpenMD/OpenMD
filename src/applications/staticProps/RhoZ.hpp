@@ -57,13 +57,14 @@ namespace OpenMD {
   class RhoZ : public StaticAnalyser {
     
   public:
-    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins, int axis=2);
+    RhoZ(SimInfo* info, const std::string& sele, int nzbins, int axis=2);
     
     int getNZBins() {
       return nZBins_; 
     }
     
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:
     

@@ -67,7 +67,6 @@ namespace OpenMD {
     ~Analyzer();
     
     void doAnalyzer();
-    void collectData();
     void getStarted();
     void parseOutputFileFormat(const std::string& format);
     void writeOutputFile();

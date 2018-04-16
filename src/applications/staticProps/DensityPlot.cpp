@@ -52,10 +52,10 @@
 namespace OpenMD {
 
   
-  DensityPlot::DensityPlot(SimInfo* info, const std::string& filename, 
+  DensityPlot::DensityPlot(SimInfo* info, 
 			   const std::string& sele, const std::string& cmSele,
 			   RealType len, int nrbins) 
-    : StaticAnalyser(info, filename, nrbins), 
+    : StaticAnalyser(info, nrbins), 
       len_(len), halfLen_(len/2), nRBins_(nrbins),
       selectionScript_(sele), seleMan_(info), evaluator_(info), 
       cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
@@ -80,7 +80,7 @@ namespace OpenMD {
     }    
   }
 
-  void DensityPlot::process() {
+  void DensityPlot::processFrame(Snapshot* snap_) {
 
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
@@ -165,6 +165,10 @@ namespace OpenMD {
         
 
   
+  }
+
+  void DensityPlot::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
 
   Vector3d DensityPlot::calcNewOrigin() {

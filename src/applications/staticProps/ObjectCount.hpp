@@ -50,8 +50,9 @@ namespace OpenMD {
   
   class ObjectCount : public StaticAnalyser{
   public:
-    ObjectCount(SimInfo* info, const std::string& filename, const std::string& sele);
-    virtual void process();
+    ObjectCount(SimInfo* info, const std::string& sele);
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:
     void writeCounts();

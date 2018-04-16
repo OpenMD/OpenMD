@@ -49,9 +49,9 @@
 
 namespace OpenMD {
 
-  ObjectCount::ObjectCount(SimInfo* info, const std::string& filename, 
+  ObjectCount::ObjectCount(SimInfo* info, 
                            const std::string& sele)
-    : StaticAnalyser(info, filename, 1), selectionScript_(sele), 
+    : StaticAnalyser(info, 1), selectionScript_(sele), 
       seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".counts");
@@ -63,7 +63,7 @@ namespace OpenMD {
     }            
   }
 
-  void ObjectCount::process() {
+  void ObjectCount::processFrame(Snapshot* snap_) {
   
     counts_.clear();
     counts_.resize(10, 0);
@@ -98,6 +98,10 @@ namespace OpenMD {
     n2Avg = n2sum / nProcessed;
     sDev = sqrt(n2Avg - nAvg*nAvg);
     writeCounts();   
+  }
+
+  void ObjectCount::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
   
   void ObjectCount::writeCounts() {

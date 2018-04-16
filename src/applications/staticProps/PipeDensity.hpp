@@ -57,9 +57,10 @@ namespace OpenMD {
   class PipeDensity : public StaticAnalyser {
     
   public:
-    PipeDensity(SimInfo* info, const std::string& filename,
+    PipeDensity(SimInfo* info,
                 const std::string& sele, int nbins, int nbins2, int axis=0);
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:
     virtual void writeDensity();

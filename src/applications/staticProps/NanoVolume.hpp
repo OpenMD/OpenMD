@@ -61,8 +61,10 @@
 namespace OpenMD {
   class NanoVolume : public StaticAnalyser {
   public:
-    NanoVolume(SimInfo* info, const std::string& filename, const std::string& sele);
-    virtual void process();
+    NanoVolume(SimInfo* info, const std::string& sele);
+    
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:    
     Snapshot* currentSnapshot_;

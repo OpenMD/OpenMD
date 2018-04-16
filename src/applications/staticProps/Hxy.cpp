@@ -62,10 +62,10 @@
 
 namespace OpenMD {
   
-  Hxy::Hxy(SimInfo* info, const std::string& filename,
+  Hxy::Hxy(SimInfo* info,
            const std::string& sele, int nbins_x, int nbins_y, int nbins_z,
            int nrbins)
-    : StaticAnalyser(info, filename, nrbins), selectionScript_(sele),
+    : StaticAnalyser(info, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), nBinsX_(nbins_x), nBinsY_(nbins_y),
       nBinsZ_(nbins_z) {
 
@@ -132,7 +132,7 @@ namespace OpenMD {
   Hxy::~Hxy(){
   }
 
-  void Hxy::process() {
+  void Hxy::processFrame(Snapshot* snap_) {
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
     StuntDouble* sd;
     int ii;
@@ -493,7 +493,11 @@ namespace OpenMD {
 #endif
   }
     
-   
+
+  void Hxy::processDump(const std::string& filename) {
+    // call processFrame( snap );
+  }
+  
   RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;
     RealType dens = exp(-r*r/(sigma2*2.0)) /

@@ -49,9 +49,9 @@
 using namespace std;
 namespace OpenMD {
 
-  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
+  P2OrderParameter::P2OrderParameter(SimInfo* info, 
                                      const string& sele1)
-    : StaticAnalyser(info, filename, 1), doVect_(true), doOffset_(false),
+    : StaticAnalyser(info, 1), doVect_(true), doOffset_(false),
     selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
     evaluator1_(info), evaluator2_(info) {
     
@@ -60,9 +60,9 @@ namespace OpenMD {
     evaluator1_.loadScriptString(sele1);
   }
 
-  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
+  P2OrderParameter::P2OrderParameter(SimInfo* info, 
                                      const string& sele1, const string& sele2)
-    : StaticAnalyser(info, filename,1 ), doVect_(false), doOffset_(false),
+    : StaticAnalyser(info,1 ), doVect_(false), doOffset_(false),
       selectionScript1_(sele1), selectionScript2_(sele2), seleMan1_(info), 
       seleMan2_(info), evaluator1_(info), evaluator2_(info) {
     
@@ -72,9 +72,9 @@ namespace OpenMD {
     evaluator2_.loadScriptString(sele2);    
   }
 
-  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
+  P2OrderParameter::P2OrderParameter(SimInfo* info, 
                                      const string& sele1, int seleOffset)
-    : StaticAnalyser(info, filename, 1), doVect_(false), doOffset_(true), 
+    : StaticAnalyser(info, 1), doVect_(false), doOffset_(true), 
     selectionScript1_(sele1), seleMan1_(info), seleMan2_(info), 
     evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
     
@@ -83,7 +83,7 @@ namespace OpenMD {
     evaluator1_.loadScriptString(sele1);
   }
 
-  void P2OrderParameter::process() {
+  void P2OrderParameter::processFrame(Snapshot* snap_) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii; 
@@ -279,6 +279,10 @@ namespace OpenMD {
     
   }
 
+  void P2OrderParameter::processDump(const string& filename) {
+    // call processFrame( snap )
+  }
+  
   void P2OrderParameter::writeP2() {
 
     ofstream os(getOutputFileName().c_str());

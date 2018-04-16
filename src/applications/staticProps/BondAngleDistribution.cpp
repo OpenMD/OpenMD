@@ -55,10 +55,9 @@ using namespace std;
 namespace OpenMD {
 
   BondAngleDistribution::BondAngleDistribution(SimInfo* info, 
-                                               const string& filename, 
                                                const string& sele, 
                                                double rCut, int nbins) 
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele), seleMan_(info), 
+    : StaticAnalyser(info, nbins), selectionScript_(sele), seleMan_(info), 
       evaluator_(info) {
 
     setAnalysisType("Bond Angle Distribution");
@@ -95,7 +94,7 @@ namespace OpenMD {
     }
   }
   
-  void BondAngleDistribution::process() {
+  void BondAngleDistribution::processFrame(Snapshot* snap_) {
     Molecule* mol;
     Atom* atom;
     int myIndex;
@@ -190,7 +189,11 @@ namespace OpenMD {
     writeBondAngleDistribution();    
   }
   
+  void BondAngleDistribution::processDump(const string& filename) {
+    // iteratively call processFrame( snapshot )
+  }
 
+  
   void BondAngleDistribution::writeBondAngleDistribution() {
 
     RealType norm = (RealType)nTotBonds_*((RealType)nTotBonds_-1.0)/2.0;

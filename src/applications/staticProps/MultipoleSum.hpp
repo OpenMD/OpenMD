@@ -50,12 +50,13 @@ namespace OpenMD {
   class MultipoleSum : public StaticAnalyser {
 
   public:
-    MultipoleSum(SimInfo* info, const std::string& filename,
+    MultipoleSum(SimInfo* info, 
                  const std::string& sele1, RealType rmax, int nrbins);
 
   private:
 
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     virtual void writeOut();
 
     std::size_t nRBins_;

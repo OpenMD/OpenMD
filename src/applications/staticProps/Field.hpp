@@ -56,13 +56,14 @@ namespace OpenMD {
   class Field : public StaticAnalyser{
     
   public:
-    Field(SimInfo* info, const std::string& filename, 
+    Field(SimInfo* info, 
 	  const std::string& sele, RealType voxelSize);
     
     ~Field(); // default deconstructor
     
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
     virtual void processFrame(int frame);
+    virtual void processDump(const std::string& filename);
     virtual void postProcess();
     virtual T getValue(StuntDouble* sd) = 0;
     virtual void writeField();
@@ -90,7 +91,7 @@ namespace OpenMD {
 
   class DensityField : public Field<RealType> {
   public:
-    DensityField(SimInfo* info, const std::string& filename,
+    DensityField(SimInfo* info,
                  const std::string& sele1, RealType voxelSize);
     ~DensityField();
     
@@ -100,7 +101,7 @@ namespace OpenMD {
   
   class ChargeField : public Field<RealType> {
   public:
-    ChargeField(SimInfo* info, const std::string& filename,
+    ChargeField(SimInfo* info,
                        const std::string& sele1, RealType voxelSize);
     virtual RealType getValue(StuntDouble* sd);
   };
@@ -108,7 +109,7 @@ namespace OpenMD {
   
   class VelocityField : public Field<Vector3d> {
   public:
-    VelocityField(SimInfo* info, const std::string& filename,
+    VelocityField(SimInfo* info,
 			const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
   };
@@ -116,7 +117,7 @@ namespace OpenMD {
   
   class DipoleField : public Field<Vector3d> {
   public:
-    DipoleField(SimInfo* info, const std::string& filename,
+    DipoleField(SimInfo* info,
                 const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
   };

@@ -61,12 +61,13 @@ namespace OpenMD {
   class SpatialStatistics : public StaticAnalyser {
     
   public:
-    SpatialStatistics(SimInfo* info, const string& filename,
+    SpatialStatistics(SimInfo* info,
                       const string& sele, int nbins);    
     ~SpatialStatistics();
 
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const string& filename);
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos)=0;
     virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
@@ -82,12 +83,13 @@ namespace OpenMD {
   
   class SlabStatistics : public SpatialStatistics {
   public: 
-    SlabStatistics(SimInfo* info, const string& filename,
+    SlabStatistics(SimInfo* info,
                    const string& sele, int nbins, int axis);
     virtual ~SlabStatistics();
 
     virtual int getBin(Vector3d pos);
     virtual void processFrame(int frame);
+    virtual void processDump(const string& filename);
   protected:
     OutputData* z_;
     Mat3x3d hmat_;
@@ -99,7 +101,7 @@ namespace OpenMD {
 
   class ShellStatistics : public SpatialStatistics {
   public: 
-    ShellStatistics(SimInfo* info, const string& filename, const string& sele,
+    ShellStatistics(SimInfo* info, const string& sele,
                     int nbins);
     virtual ~ShellStatistics();
     virtual int getBin(Vector3d pos);

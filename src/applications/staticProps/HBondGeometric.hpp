@@ -66,14 +66,15 @@ namespace OpenMD {
   class HBondGeometric : public StaticAnalyser {
   public:
 
-    HBondGeometric(SimInfo* info, const std::string& filename, 
+    HBondGeometric(SimInfo* info, 
                    const std::string& sele1, const std::string& sele2,
                    double rCut, double thetaCut,
                    int nbins);
     
     virtual ~HBondGeometric();
-    virtual void process();
-   
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
+    
   private:
     virtual void initializeHistogram();
     virtual void collectHistogram(int nHB, int nD, int nA);    

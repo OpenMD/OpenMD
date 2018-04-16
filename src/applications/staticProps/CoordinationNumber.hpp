@@ -67,12 +67,13 @@ namespace OpenMD {
   class CoordinationNumber : public StaticAnalyser {
     
   public:
-    CoordinationNumber(SimInfo* info, const std::string& filename,
+    CoordinationNumber(SimInfo* info,
                        const std::string& sele1, const std::string& sele2,
                        RealType rCut, int bins);
 
     virtual ~CoordinationNumber();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     virtual void writeOutput();
 
   protected:
@@ -107,7 +108,7 @@ namespace OpenMD {
   class SCN : public CoordinationNumber {
     
   public:
-    SCN(SimInfo* info, const std::string& filename, const std::string& sele1,
+    SCN(SimInfo* info, const std::string& sele1,
         const std::string& sele2, RealType rCut, int bins);
 
     virtual ~SCN();
@@ -129,7 +130,7 @@ namespace OpenMD {
   class GCN : public CoordinationNumber {
     
   public:
-    GCN(SimInfo* info, const std::string& filename, const std::string& sele1,
+    GCN(SimInfo* info, const std::string& sele1,
         const std::string& sele2, RealType rCut, int bins);
 
     virtual ~GCN();

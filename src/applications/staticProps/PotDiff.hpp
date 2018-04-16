@@ -59,9 +59,10 @@ namespace OpenMD {
   class PotDiff : public StaticAnalyser{
   public:
     //! Default constructor
-    PotDiff(SimInfo* info, const std::string& filename, const std::string& sele);
+    PotDiff(SimInfo* info, const std::string& sele);
     //! Process the data
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:
     //! Write the data

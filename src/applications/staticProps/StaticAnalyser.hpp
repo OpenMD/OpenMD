@@ -74,10 +74,11 @@ namespace OpenMD {
 
   class StaticAnalyser{
   public:
-    StaticAnalyser(SimInfo* info, const std::string& filename, unsigned int nbins);
+    StaticAnalyser(SimInfo* info, unsigned int nbins);
     
     virtual ~StaticAnalyser() {}
-    virtual void process()=0;
+    virtual void processFrame(Snapshot* snap_)=0;
+    virtual void processDump(const std::string& filename)=0;
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
@@ -114,7 +115,6 @@ namespace OpenMD {
     OutputData* nextOutputData(vector<OutputData*>::iterator& i);
 
     SimInfo* info_;
-    std::string dumpFilename_;        
     std::string outputFilename_;
     int step_;
     std::string analysisType_;

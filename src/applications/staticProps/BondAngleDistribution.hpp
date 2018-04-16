@@ -62,11 +62,12 @@ namespace OpenMD {
    */
   class BondAngleDistribution : public StaticAnalyser{
   public:
-    BondAngleDistribution(SimInfo* info, const std::string& filename, 
+    BondAngleDistribution(SimInfo* info, 
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondAngleDistribution();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename)
     
   private:
     virtual void initializeHistogram();

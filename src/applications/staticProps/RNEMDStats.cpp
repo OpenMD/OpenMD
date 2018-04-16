@@ -48,9 +48,9 @@
 
 namespace OpenMD {
   
-  RNEMDZ::RNEMDZ(SimInfo* info, const std::string& filename, 
+  RNEMDZ::RNEMDZ(SimInfo* info, 
                  const std::string& sele, int nzbins, int axis)
-    : SlabStatistics(info, filename, sele, nzbins, axis), axis_(axis) {
+    : SlabStatistics(info, sele, nzbins, axis), axis_(axis) {
 
     
     setOutputName(getPrefix(filename) + ".rnemdZ");
@@ -161,13 +161,17 @@ namespace OpenMD {
       }
     }
   }
+
+  void RNEMDZ::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
   
   void RNEMDZ::processStuntDouble(StuntDouble* sd, int bin) {
   }
 
-  RNEMDR::RNEMDR(SimInfo* info, const std::string& filename, 
+  RNEMDR::RNEMDR(SimInfo* info,  
                  const std::string& sele, int nrbins)
-    : ShellStatistics(info, filename, sele, nrbins) {
+    : ShellStatistics(info, sele, nrbins) {
         
 
     setOutputName(getPrefix(filename) + ".rnemdR");
@@ -285,13 +289,16 @@ namespace OpenMD {
     }
   }
 
+  void RNEMDR::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
 
   void RNEMDR::processStuntDouble(StuntDouble* sd, int bin) {
   }
   
-  RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename, 
+  RNEMDRTheta::RNEMDRTheta(SimInfo* info, 
                            const std::string& sele, int nrbins, int nangleBins)
-    : ShellStatistics(info, filename, sele, nrbins), nAngleBins_(nangleBins) {
+    : ShellStatistics(info, sele, nrbins), nAngleBins_(nangleBins) {
     
     Globals* simParams = info->getSimParams();
     RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
@@ -411,6 +418,10 @@ namespace OpenMD {
         }
       }
     }
+  }
+
+  void RNEMDRTheta::processDump(const std::string& filename) {
+    // call processFrame( snap );
   }
 
   void RNEMDRTheta::writeOutput() {

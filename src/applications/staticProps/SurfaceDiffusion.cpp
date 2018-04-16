@@ -60,8 +60,8 @@
 #include "primitives/Molecule.hpp"
 namespace OpenMD {
   
-  SurfaceDiffusion::SurfaceDiffusion(SimInfo* info, const std::string& filename, const std::string& sele, RealType len)
-    : StaticAnalyser(info, filename, 1), selectionScript_(sele),  evaluator_(info), seleMan1_(info){
+  SurfaceDiffusion::SurfaceDiffusion(SimInfo* info, const std::string& sele, RealType len)
+    : StaticAnalyser(info, 1), selectionScript_(sele),  evaluator_(info), seleMan1_(info){
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -84,7 +84,7 @@ namespace OpenMD {
   
   }
 
-  void SurfaceDiffusion::process() {
+  void SurfaceDiffusion::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
@@ -204,7 +204,11 @@ namespace OpenMD {
     diffStream.close();
 
   }
- 
+
+  void SurfaceDiffusion::processDump(const std::string& filename) {
+    // call processFrame
+  }
+  
   void SurfaceDiffusion::positionCorrelation(){
     RealType xDist = 0.0;
     RealType yDist = 0.0;

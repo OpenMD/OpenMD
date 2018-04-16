@@ -51,9 +51,8 @@ bool pairComparator( const evIndex& l, const evIndex& r) {
 }
 
 NanoLength::NanoLength(SimInfo* info,
-                       const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename, 1), selectionScript_(sele), seleMan_(info),
+  : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
     evaluator_(info) {
   
   setOutputName(getPrefix(filename) + ".length");
@@ -67,7 +66,7 @@ NanoLength::NanoLength(SimInfo* info,
   frameCounter_ = 0;
     }
 
-void NanoLength::process() {
+void NanoLength::processFrame(Snapshot* snap_) {
   StuntDouble* sd;
   Vector3d vec;
   int i;
@@ -107,7 +106,11 @@ void NanoLength::process() {
   }
   osq.close();
 }
-    
+
+void NanoLength::processDump(const std::string& filename) {
+  // call processFrame( snap )
+}
+
 RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
   Vector3d COM(0.0);
   RealType mass = 0.0;

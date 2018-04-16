@@ -149,9 +149,9 @@ namespace OpenMD {
 
   }
 
-  SCDOrderParameter::SCDOrderParameter(SimInfo* info, const std::string& filename,
+  SCDOrderParameter::SCDOrderParameter(SimInfo* info,
                                        const std::string& sele1, const std::string& sele2, const std::string& sele3)
-    : StaticAnalyser(info, filename, 1) {
+    : StaticAnalyser(info, 1) {
 
     setOutputName(getPrefix(filename) + ".scd");
 
@@ -161,9 +161,9 @@ namespace OpenMD {
     
   }
 
-  SCDOrderParameter::SCDOrderParameter(SimInfo* info, const std::string& filename,
+  SCDOrderParameter::SCDOrderParameter(SimInfo* info, 
                                        const std::string& molname, int beginIndex, int endIndex)
-    : StaticAnalyser(info, filename, 1) {
+    : StaticAnalyser(info, 1) {
 
     setOutputName(getPrefix(filename) + ".scd");
 
@@ -182,7 +182,7 @@ namespace OpenMD {
   }
 
 
-  void SCDOrderParameter::process() {
+  void SCDOrderParameter::processFrame(Snapshot* snap_) {
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -204,6 +204,10 @@ namespace OpenMD {
 
     writeSCD();
   
+  }
+
+  void SCDOrderParameter::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
 
   void SCDOrderParameter::writeSCD() {

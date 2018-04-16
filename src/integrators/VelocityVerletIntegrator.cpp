@@ -167,7 +167,6 @@ namespace OpenMD {
 	analyzer_->doAnalyzer();
 	currAnalyzer += Analyzer_queryTime;
       }
-      analyzer_->collectData();
     }
     
     if (snap->getTime() >= currSample) {

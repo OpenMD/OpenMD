@@ -58,13 +58,13 @@ namespace OpenMD {
    */
   class RadialDistrFunc : public StaticAnalyser {
   public:
-    RadialDistrFunc(SimInfo* info, const std::string& filename, 
+    RadialDistrFunc(SimInfo* info, 
                     const std::string& sele1, const std::string& sele2, unsigned int nbins);
 
     virtual ~RadialDistrFunc() {}
         
-    void process();        
-
+    void processFrame(Snapshot* snap_);        
+    void processDump(const std::string& filename);
 
         
   protected:

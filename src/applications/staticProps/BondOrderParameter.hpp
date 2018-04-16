@@ -86,11 +86,12 @@ namespace OpenMD {
    */
   class BondOrderParameter : public StaticAnalyser{
   public:
-    BondOrderParameter(SimInfo* info, const std::string& filename, 
+    BondOrderParameter(SimInfo* info, 
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondOrderParameter();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump(const std::string& filename);
     
   private:
     virtual void initializeHistogram();

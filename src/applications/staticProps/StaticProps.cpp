@@ -655,7 +655,7 @@ int main(int argc, char* argv[]){
     analyser->setStep(args_info.step_arg);
   }
   
-  analyser->process();
+  analyser->processDump();
   
   delete analyser;    
   delete info;

@@ -51,11 +51,11 @@
 
 namespace OpenMD {
   
-  GofRAngle2::GofRAngle2(SimInfo* info, const std::string& filename, 
+  GofRAngle2::GofRAngle2(SimInfo* info, 
                          const std::string& sele1, 
                          const std::string& sele2,
                          RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins),
+    : RadialDistrFunc(info, sele1, sele2, nrbins),
       nAngleBins_(nangleBins), len_(len),
       doSele3_(false), seleMan3_(info), evaluator3_(info) {
 
@@ -86,7 +86,7 @@ namespace OpenMD {
     }   
   }
   
-  GofRAngle2::GofRAngle2(SimInfo* info, const std::string& filename, 
+  GofRAngle2::GofRAngle2(SimInfo* info,  
                          const std::string& sele1, 
                          const std::string& sele2, 
                          const std::string& sele3,

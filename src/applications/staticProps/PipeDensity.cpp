@@ -51,10 +51,10 @@
 
 namespace OpenMD {
   
-  PipeDensity::PipeDensity(SimInfo* info, const std::string& filename, 
+  PipeDensity::PipeDensity(SimInfo* info, 
                            const std::string& sele, int nbins, int nbins2,
                            int axis)
-    : StaticAnalyser(info, filename, nbins2), selectionScript_(sele), 
+    : StaticAnalyser(info, nbins2), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), nBins2_(nbins), axis_(axis) {
     
     evaluator_.loadScriptString(sele);
@@ -95,7 +95,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".PipeDensity");
   }
 
-  void PipeDensity::process() {
+  void PipeDensity::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     int ii;
 
@@ -163,7 +163,11 @@ namespace OpenMD {
     writeDensity();
 
   }
-    
+
+  void PipeDensity::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+  
   void PipeDensity::writeDensity() {
 
     std::vector<RealType>::iterator j;

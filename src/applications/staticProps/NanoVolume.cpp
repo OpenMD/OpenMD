@@ -58,9 +58,8 @@
 using namespace OpenMD;
 
 NanoVolume::NanoVolume(SimInfo* info,
-                       const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename, 1), selectionScript_(sele), seleMan_(info),
+  : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
     evaluator_(info) {
   
   setOutputName(getPrefix(filename) + ".avol");
@@ -74,7 +73,7 @@ NanoVolume::NanoVolume(SimInfo* info,
   frameCounter_ = 0;
 }
 
-void NanoVolume::process() {
+void NanoVolume::processFrame(Snapshot* snap_) {
 #if defined(HAVE_QHULL)
   StuntDouble* sd;
   Vector3d vec;
@@ -138,4 +137,8 @@ void NanoVolume::process() {
   simError();  
 #endif
 
+}
+
+void NanoVolume::processDump(const std::string& filename) {
+  // call processFrame( snap );
 }

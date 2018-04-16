@@ -53,10 +53,9 @@ using namespace MATPACK;
 namespace OpenMD {
   
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
-                                         const std::string& filename, 
                                          const std::string& sele,
                                          double rCut, int nbins) 
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele), seleMan_(info),
+    : StaticAnalyser(info, nbins), selectionScript_(sele), seleMan_(info),
       evaluator_(info) {
     
     setAnalysisType("Bond Order Parameters");
@@ -151,7 +150,7 @@ namespace OpenMD {
     }
   }
 
-  void BondOrderParameter::process() {
+  void BondOrderParameter::processFrame(Snapshot* snap_) {
     Molecule* mol;
     Atom* atom;
     int myIndex;
@@ -332,6 +331,10 @@ namespace OpenMD {
     writeOrderParameter(Q, W_hat);    
   }
 
+  void BondOrderParameter::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+  
   void BondOrderParameter::collectHistogram(std::vector<RealType> q, 
                                             std::vector<ComplexType> what) {
 

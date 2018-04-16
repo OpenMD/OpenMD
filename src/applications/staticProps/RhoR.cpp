@@ -54,8 +54,8 @@
 namespace OpenMD {
 
      
-  RhoR::RhoR(SimInfo* info, const std::string& filename, const std::string& sele, RealType len, int nrbins, RealType particleR)
-    : StaticAnalyser(info, filename, nrbins), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len) {
+  RhoR::RhoR(SimInfo* info, const std::string& sele, RealType len, int nrbins, RealType particleR)
+    : StaticAnalyser(info, nrbins), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len) {
     
     
     evaluator_.loadScriptString(sele);
@@ -73,7 +73,7 @@ namespace OpenMD {
   }
   
 
-  void RhoR::process() {
+  void RhoR::processFrame(Snapshot* snap_) {
    
     Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);    
@@ -115,6 +115,9 @@ namespace OpenMD {
     writeRhoR();
   }
 
+  void RhoR::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
 
 
   void RhoR::processHistogram() {
