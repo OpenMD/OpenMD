@@ -61,7 +61,8 @@ namespace OpenMD {
       evaluator_(info) {
 
     setAnalysisType("Bond Angle Distribution");
-    setOutputName(getPrefix(filename) + ".bad");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".bad");
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -82,6 +83,8 @@ namespace OpenMD {
 
     deltaTheta_ = (180.0) / nBins_;
     histogram_.resize(nBins_);
+
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
   
   BondAngleDistribution::~BondAngleDistribution() {
@@ -92,6 +95,24 @@ namespace OpenMD {
     for (int bin = 0; bin < nBins_; bin++) {      
       histogram_[bin] = 0;
     }
+  }
+
+  
+  void BondAngleDistribution::processDump() {
+    string dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    frameCounter_ = 0;
+    
+    nTotBonds_ = 0;
+    
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    writeBondAngleDistribution();   
   }
   
   void BondAngleDistribution::processFrame(Snapshot* snap_) {
@@ -106,93 +127,74 @@ namespace OpenMD {
     RealType r;    
     int nBonds;    
     int i;
-
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-    
-    nTotBonds_ = 0;
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-            
-      // outer loop is over the selected StuntDoubles:
-
-      for (sd = seleMan_.beginSelected(i); sd != NULL; 
-           sd = seleMan_.nextSelected(i)) {
-
-        myIndex = sd->getGlobalIndex();
-        nBonds = 0;
-        bondvec.clear();
-        
-        // inner loop is over all other atoms in the system:
-        
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-          for (atom = mol->beginAtom(ai); atom != NULL; 
-               atom = mol->nextAtom(ai)) {
-
-            if (atom->getGlobalIndex() != myIndex) {
-
-              vec = sd->getPos() - atom->getPos();       
-
-              if (usePeriodicBoundaryConditions_) 
-                currentSnapshot_->wrapVector(vec);
-              
-              // Calculate "bonds" and make a pair list 
-              
-              r = vec.length();
-              
-              // Check to see if neighbor is in bond cutoff 
-              
-              if (r < rCut_) { 
-                // Add neighbor to bond list's
-                bondvec.push_back(vec);
-                nBonds++;
-                nTotBonds_++;
-              }  
-            }
-          }
-          
-          
-          for (int i = 0; i < nBonds-1; i++ ){
-            Vector3d vec1 = bondvec[i];
-            vec1.normalize();
-            for(int j = i+1; j < nBonds; j++){
-              Vector3d vec2 = bondvec[j];
-              
-              vec2.normalize();
-	      
-              RealType theta = acos(dot(vec1,vec2))*180.0/Constants::PI;
-              
-              
-              if (theta > 180.0){
-                theta = 360.0 - theta;
-              }
-              int whichBin = int(theta/deltaTheta_);
-              
-              histogram_[whichBin] += 2;
-            }
-          }           
-        }
-      }
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
     
-    writeBondAngleDistribution();    
+    // outer loop is over the selected StuntDoubles:
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+	 sd = seleMan_.nextSelected(i)) {
+      
+      myIndex = sd->getGlobalIndex();
+      nBonds = 0;
+      bondvec.clear();
+      
+      // inner loop is over all other atoms in the system:
+      
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
+	for (atom = mol->beginAtom(ai); atom != NULL; 
+	     atom = mol->nextAtom(ai)) {
+	  
+	  if (atom->getGlobalIndex() != myIndex) {
+	    
+	    vec = sd->getPos() - atom->getPos();       
+	    
+	    if (usePeriodicBoundaryConditions_) 
+	      currentSnapshot_->wrapVector(vec);
+	    
+	    // Calculate "bonds" and make a pair list 
+            
+	    r = vec.length();
+            
+	    // Check to see if neighbor is in bond cutoff 
+            
+	    if (r < rCut_) { 
+	      // Add neighbor to bond list's
+	      bondvec.push_back(vec);
+	      nBonds++;
+	      nTotBonds_++;
+	    }  
+	  }
+	}
+        
+        
+	for (int i = 0; i < nBonds-1; i++ ){
+	  Vector3d vec1 = bondvec[i];
+	  vec1.normalize();
+	  for(int j = i+1; j < nBonds; j++){
+	    Vector3d vec2 = bondvec[j];
+            
+	    vec2.normalize();
+	    
+	    RealType theta = acos(dot(vec1,vec2))*180.0/Constants::PI;
+            
+            
+	    if (theta > 180.0){
+	      theta = 360.0 - theta;
+	    }
+	    int whichBin = int(theta/deltaTheta_);
+            
+	    histogram_[whichBin] += 2;
+	  }
+	}           
+      }
+    }
   }
-  
-  void BondAngleDistribution::processDump(const string& filename) {
-    // iteratively call processFrame( snapshot )
-  }
-
+     
   
   void BondAngleDistribution::writeBondAngleDistribution() {
 

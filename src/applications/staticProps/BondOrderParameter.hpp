@@ -125,6 +125,19 @@ namespace OpenMD {
     RealType deltaW_;
     std::vector<int> Wcount_;
     std::map<std::pair<int,int>,int> W_histogram_;
+
+    std::map<std::pair<int,int>,ComplexType> q_;
+    std::vector<RealType> q_l_;
+    std::vector<RealType> q2_;
+    std::vector<ComplexType> w_;
+    std::vector<ComplexType> w_hat_;
+    std::map<std::pair<int,int>,ComplexType> QBar_;
+    std::vector<RealType> Q2_;
+    std::vector<RealType> Q_;
+    std::vector<ComplexType> W_;
+    std::vector<ComplexType> W_hat_;
+    int nBonds_, Nbonds_;
+
   };
 }
 

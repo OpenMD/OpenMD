@@ -44,45 +44,58 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 
-using namespace OpenMD;
-
-bool pairComparator( const evIndex& l, const evIndex& r) { 
-  return l.first < r.first; 
-}
-
-NanoLength::NanoLength(SimInfo* info,
-                       const std::string& sele)
-  : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
-    evaluator_(info) {
+namespace OpenMD {
   
-  setOutputName(getPrefix(filename) + ".length");
-  
-  osq.open(getOutputFileName().c_str());
-  
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
+  bool pairComparator( const evIndex& l, const evIndex& r) { 
+    return l.first < r.first; 
   }
-  frameCounter_ = 0;
-    }
-
-void NanoLength::processFrame(Snapshot* snap_) {
-  StuntDouble* sd;
-  Vector3d vec;
-  int i;
   
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  frameCounter_ = 0;
-
-  theAtoms_.reserve(info_->getNGlobalAtoms());
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    frameCounter_++;
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType time = currentSnapshot_->getTime();
+  NanoLength::NanoLength(SimInfo* info,
+			 const std::string& sele)
+    : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
+      evaluator_(info) {
     
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".length");
+    
+    osq.open(getOutputFileName().c_str());
+    
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    frameCounter_ = 0;
+  }
+
+  void NanoLength::~NanoLength() {
+    theAtoms_.clear();
+  }
+  
+  void NanoLength::processDump) {
+    string dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    frameCounter_ = 0;
+    
+    theAtoms_.reserve(info_->getNGlobalAtoms());
+    
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    osq_.close();
+  }
+  
+  
+  void NanoLength::processFrame(Snapshot* snap_) {
+    StuntDouble* sd;
+    Vector3d vec;
+    int i;
+      
+    RealType time = currentSnapshot_->getTime();
+      
     // Clear pos vector between each frame.
     theAtoms_.clear();
     
@@ -93,94 +106,89 @@ void NanoLength::processFrame(Snapshot* snap_) {
     // outer loop is over the selected StuntDoubles:
     
     for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
+	 sd = seleMan_.nextSelected(i)) {      
       theAtoms_.push_back(sd);      
     }
     
     RealType rodLength = getLength(theAtoms_);
     
-    osq.precision(7);
-    if (osq.is_open()){
-      osq << time << "\t" << rodLength << std::endl;      
+    osq_.precision(7);
+    if (osq_.is_open()){
+      osq_ << time << "\t" << rodLength << std::endl;      
     }
-  }
-  osq.close();
-}
-
-void NanoLength::processDump(const std::string& filename) {
-  // call processFrame( snap )
-}
-
-RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
-  Vector3d COM(0.0);
-  RealType mass = 0.0;
-  RealType mtmp;
-  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
-       i != atoms.end(); ++i) {
-    mtmp = (*i)->getMass();
-    mass += mtmp;
-    COM += (*i)->getPos() * mtmp;
-  }
-  COM /= mass;
+  } 
   
-  // Moment of Inertia calculation
-  Mat3x3d Itmp(0.0);    
-  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
-       i != atoms.end(); ++i) {
+  RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
+    Vector3d COM(0.0);
+    RealType mass = 0.0;
+    RealType mtmp;
+    for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
+	 i != atoms.end(); ++i) {
+      mtmp = (*i)->getMass();
+      mass += mtmp;
+      COM += (*i)->getPos() * mtmp;
+    }
+    COM /= mass;
     
-    Mat3x3d IAtom(0.0);  
-    mtmp = (*i)->getMass();
-    Vector3d delta = (*i)->getPos() - COM;
-    IAtom -= outProduct(delta, delta) * mtmp;
-    RealType r2 = delta.lengthSquare();
-    IAtom(0, 0) += mtmp * r2;
-    IAtom(1, 1) += mtmp * r2;
-    IAtom(2, 2) += mtmp * r2;
-    Itmp += IAtom;
+    // Moment of Inertia calculation
+    Mat3x3d Itmp(0.0);    
+    for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
+	 i != atoms.end(); ++i) {
+      
+      Mat3x3d IAtom(0.0);  
+      mtmp = (*i)->getMass();
+      Vector3d delta = (*i)->getPos() - COM;
+      IAtom -= outProduct(delta, delta) * mtmp;
+      RealType r2 = delta.lengthSquare();
+      IAtom(0, 0) += mtmp * r2;
+      IAtom(1, 1) += mtmp * r2;
+      IAtom(2, 2) += mtmp * r2;
+      Itmp += IAtom;
+    }
+    
+    //diagonalize 
+    Vector3d evals;
+    Mat3x3d evects;
+    Mat3x3d::diagonalize(Itmp, evals, evects);
+    
+    // we need to re-order the axes so that the smallest moment of
+    // inertia (which corresponds to the long axis of the rod) is
+    // along the z-axis. We'll just reverse the order of the three
+    // axes.  Python has an argsort function, but we had to invent our
+    // own:
+    
+    std::vector<evIndex> evals_prime;
+    for (int i = 0; i < 3; i++) 
+      evals_prime.push_back(std::make_pair(evals[i], i));
+    std::sort(evals_prime.begin(), evals_prime.end(), pairComparator);
+    
+    RotMat3x3d A;
+    Mat3x3d I;
+    
+    for (int i = 0; i < 3; i++) {
+      int index = evals_prime[2-i].second;
+      A.setColumn(i, evects.getColumn(index));
+      I(i,i) = evals[index];
+    }
+    
+    // now project the delta from the center of mass onto the long
+    // axis of the object
+    
+    Vector3d longAxis = A.getColumn(2);
+    RealType axisLength = longAxis.length();
+    RealType projmin = 0.0;
+    RealType projmax = 0.0;
+    
+    for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
+	 i != atoms.end(); ++i) {
+      Vector3d delta = (*i)->getPos() - COM;
+      RealType projection = dot(delta, longAxis) / axisLength;
+      if (projection > projmax) projmax = projection;
+      if (projection < projmin) projmin = projection;      
+    }
+    
+    return projmax - projmin;
   }
   
-  //diagonalize 
-  Vector3d evals;
-  Mat3x3d evects;
-  Mat3x3d::diagonalize(Itmp, evals, evects);
-  
-  // we need to re-order the axes so that the smallest moment of
-  // inertia (which corresponds to the long axis of the rod) is
-  // along the z-axis. We'll just reverse the order of the three
-  // axes.  Python has an argsort function, but we had to invent our
-  // own:
-  
-  std::vector<evIndex> evals_prime;
-  for (int i = 0; i < 3; i++) 
-    evals_prime.push_back(std::make_pair(evals[i], i));
-  std::sort(evals_prime.begin(), evals_prime.end(), pairComparator);
-  
-  RotMat3x3d A;
-  Mat3x3d I;
-  
-  for (int i = 0; i < 3; i++) {
-    int index = evals_prime[2-i].second;
-    A.setColumn(i, evects.getColumn(index));
-    I(i,i) = evals[index];
-  }
-  
-  // now project the delta from the center of mass onto the long
-  // axis of the object
-  
-  Vector3d longAxis = A.getColumn(2);
-  RealType axisLength = longAxis.length();
-  RealType projmin = 0.0;
-  RealType projmax = 0.0;
-  
-  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
-       i != atoms.end(); ++i) {
-    Vector3d delta = (*i)->getPos() - COM;
-    RealType projection = dot(delta, longAxis) / axisLength;
-    if (projection > projmax) projmax = projection;
-    if (projection < projmin) projmin = projection;      
-  }
-  
-  return projmax - projmin;
 }
-
-
+  

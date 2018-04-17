@@ -60,7 +60,8 @@ namespace OpenMD {
       selectionScript_(sele), seleMan_(info), evaluator_(info), 
       cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
 
-    setOutputName(getPrefix(filename) + ".density");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".density");
     
     deltaR_ = len_ /nRBins_;  
     histogram_.resize(nRBins_);
@@ -77,99 +78,106 @@ namespace OpenMD {
     cmEvaluator_.loadScriptString(cmSele);
     if (!cmEvaluator_.isDynamic()) {
       cmSeleMan_.setSelectionSet(cmEvaluator_.evaluate());
-    }    
-  }
-
-  void DensityPlot::processFrame(Snapshot* snap_) {
+    }
 
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
+  }
 
+  DensityPlot::~DensityPlot(){
+    histogram_.clear();
+    denisty_.clear();
+  }
+
+  
+  void DensityPlot::processDump() {
+    string dumpFileName_ = info->getDumpFileName();
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      
-      if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-
-      if (cmEvaluator_.isDynamic()) {
-	cmSeleMan_.setSelectionSet(cmEvaluator_.evaluate());
-      }
-
-      Vector3d origin = calcNewOrigin();
-
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      RealType slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
-      int k; 
-      for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; 
-	   sd = seleMan_.nextSelected(k)) {
-
-
-        if (!sd->isAtom()) {
-          sprintf( painCave.errMsg, 
-		   "Can not calculate electron density if it is not atom\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError(); 
-        }
-            
-        Atom* atom = static_cast<Atom*>(sd);
-        GenericData* data = atom->getAtomType()->getPropertyByName("nelectron");
-        if (data == NULL) {
-          sprintf( painCave.errMsg, "Can not find Parameters for nelectron\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError(); 
-        }
-            
-        DoubleGenericData* doubleData = dynamic_cast<DoubleGenericData*>(data);
-        if (doubleData == NULL) {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to DoubleGenericData\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();   
-        }
-            
-        RealType nelectron = doubleData->getData();
-        LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
-        RealType sigma = lja.getSigma() * 0.5;
-        RealType sigma2 = sigma * sigma;
-            
-        Vector3d pos = sd->getPos() - origin;
-        for (int j =0; j < nRBins_; ++j) {
-          Vector3d tmp(pos);
-          RealType zdist =j * deltaR_ - halfLen_;
-          tmp[2] += zdist;
-          if (usePeriodicBoundaryConditions_) 
-            currentSnapshot_->wrapVector(tmp);
-              
-          RealType wrappedZdist = tmp.z() + halfLen_;
-          if (wrappedZdist < 0.0 || wrappedZdist > len_) {
-            continue;
-          }
-              
-          int which = int(wrappedZdist / deltaR_);
-          density_[which] += nelectron * exp(-zdist*zdist/(sigma2*2.0)) /(slabVolume* sqrt(2*Constants::PI*sigma*sigma));
-              
-        }            
-      }        
+      processFrame(currentSnapshot_);
     }
-  
+    
     int nProcessed = nFrames /step_;
     std::transform(density_.begin(), density_.end(), density_.begin(), 
 		   std::bind2nd(std::divides<RealType>(), nProcessed));  
     writeDensity();
-        
+
+  }
 
   
-  }
+  void DensityPlot::processFrame(Snapshot* currentSnapshot_) {
 
-  void DensityPlot::processDump(const std::string& filename) {
-    // call processFrame( snap )
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    if (cmEvaluator_.isDynamic()) {
+      cmSeleMan_.setSelectionSet(cmEvaluator_.evaluate());
+    }
+
+    Vector3d origin = calcNewOrigin();
+    
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    RealType slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
+    int k; 
+    for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; 
+	 sd = seleMan_.nextSelected(k)) {
+      
+      
+      if (!sd->isAtom()) {
+	sprintf( painCave.errMsg, 
+		 "Can not calculate electron density if it is not atom\n");
+	painCave.severity = OPENMD_ERROR;
+	painCave.isFatal = 1;
+	simError(); 
+      }
+      
+      Atom* atom = static_cast<Atom*>(sd);
+      GenericData* data = atom->getAtomType()->getPropertyByName("nelectron");
+      if (data == NULL) {
+	sprintf( painCave.errMsg, "Can not find Parameters for nelectron\n");
+	painCave.severity = OPENMD_ERROR;
+	painCave.isFatal = 1;
+	simError(); 
+      }
+      
+      DoubleGenericData* doubleData = dynamic_cast<DoubleGenericData*>(data);
+      if (doubleData == NULL) {
+	sprintf( painCave.errMsg,
+		 "Can not cast GenericData to DoubleGenericData\n");
+	painCave.severity = OPENMD_ERROR;
+	painCave.isFatal = 1;
+	simError();   
+      }
+      
+      RealType nelectron = doubleData->getData();
+      LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
+      RealType sigma = lja.getSigma() * 0.5;
+      RealType sigma2 = sigma * sigma;
+      
+      Vector3d pos = sd->getPos() - origin;
+      for (int j =0; j < nRBins_; ++j) {
+	Vector3d tmp(pos);
+	RealType zdist =j * deltaR_ - halfLen_;
+	tmp[2] += zdist;
+	if (usePeriodicBoundaryConditions_) 
+	  currentSnapshot_->wrapVector(tmp);
+	
+	RealType wrappedZdist = tmp.z() + halfLen_;
+	if (wrappedZdist < 0.0 || wrappedZdist > len_) {
+	  continue;
+	}
+        
+	int which = int(wrappedZdist / deltaR_);
+	density_[which] += nelectron * exp(-zdist*zdist/(sigma2*2.0)) /(slabVolume* sqrt(2*Constants::PI*sigma*sigma));
+        
+      }            
+    }        
   }
+  
 
   Vector3d DensityPlot::calcNewOrigin() {
 

@@ -48,7 +48,7 @@ namespace OpenMD {
   class TwoDGofR : public RadialDistrFunc {
     
   public:
-    TwoDGofR(SimInfo* info, const std::string& filename, const std::string& sele1, 
+    TwoDGofR(SimInfo* info, const std::string& sele1, 
            const std::string& sele2, RealType len, RealType dz, int nrbins);
     
     int getNRBins() {

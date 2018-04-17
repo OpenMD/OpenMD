@@ -52,11 +52,10 @@
 
 namespace OpenMD {
 
-  TetrahedralityParam::TetrahedralityParam(SimInfo* info, 
-                                           const std::string& filename, 
+  TetrahedralityParam::TetrahedralityParam(SimInfo* info,  
                                            const std::string& sele,
                                            double rCut, int nbins) : 
-    StaticAnalyser(info, filename, nbins), selectionScript_(sele), 
+    StaticAnalyser(info, nbins), selectionScript_(sele), 
     seleMan_(info), evaluator_(info) {
     
     setOutputName(getPrefix(filename) + ".q");
@@ -88,7 +87,7 @@ namespace OpenMD {
     std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
   }
   
-  void TetrahedralityParam::process() {
+  void TetrahedralityParam::processFrame(Snapshot* snap_) {
     Molecule* mol;
     StuntDouble* sd;
     StuntDouble* sd2;
@@ -238,7 +237,11 @@ namespace OpenMD {
     std::cerr << "number of tetrahedral StuntDoubles = " 
 	      << Tetrahedral_.size() << "\n";
   }
-        
+
+  void TetrahedralityParam::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+  
   void TetrahedralityParam::collectHistogram(RealType Qk) {
 
     if (Qk > MinQ_ && Qk < MaxQ_) {

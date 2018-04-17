@@ -47,8 +47,8 @@
 
 namespace OpenMD {
 
-  TwoDGofR::TwoDGofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, RealType dz, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
+  TwoDGofR::TwoDGofR(SimInfo* info, const std::string& sele1, const std::string& sele2, RealType len, RealType dz, int nrbins)
+    : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len) {
 
       deltaR_ = len_ /nBins_;
 

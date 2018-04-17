@@ -73,7 +73,7 @@ namespace OpenMD {
     
     virtual ~HBondGeometric();
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     
   private:
     virtual void initializeHistogram();

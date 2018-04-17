@@ -80,7 +80,7 @@ namespace OpenMD {
    */
   class TetrahedralityParamDens : public StaticAnalyser{
   public:
-    TetrahedralityParamDens(SimInfo* info, const std::string& filename, 
+    TetrahedralityParamDens(SimInfo* info, 
 			    const std::string& sele1, const std::string& sele2, 
 			    double rCut, int ndensbins);
 
@@ -89,7 +89,8 @@ namespace OpenMD {
     }
 
     virtual ~TetrahedralityParamDens();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
     
   private:
     void writeQdens();

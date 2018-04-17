@@ -64,7 +64,8 @@ namespace OpenMD {
     NanoVolume(SimInfo* info, const std::string& sele);
     
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    void ~NanoVolume();
     
   private:    
     Snapshot* currentSnapshot_;
@@ -73,7 +74,7 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     std::vector<StuntDouble*> theAtoms_;
     int frameCounter_;
-    std::ofstream osq;   
+    std::ofstream osq_;   
   };
 }
 #endif /*NANOVOLUME_HPP_*/

@@ -54,13 +54,13 @@ namespace OpenMD {
   class pAngle : public StaticAnalyser {
     
   public:
-    pAngle(SimInfo* info, const string& filename, 
+    pAngle(SimInfo* info, 
            const string& sele1, int nzbins);
-    pAngle(SimInfo* info, const string& filename, 
+    pAngle(SimInfo* info, 
            const string& sele1, const string& sele2, int nzbins);
-    pAngle(SimInfo* info, const string& filename, 
+    pAngle(SimInfo* info, 
            const string& sele, const int seleOffset, int nzbins);
-    pAngle(SimInfo* info, const string& filename, 
+    pAngle(SimInfo* info,  
            const string& sele, const int seleOffset, const int seleOffset2, 
            int nzbins);
     
@@ -68,7 +68,9 @@ namespace OpenMD {
       return nThetaBins_; 
     }
     
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
+    virtual ~pAngle();
     
   private:
     

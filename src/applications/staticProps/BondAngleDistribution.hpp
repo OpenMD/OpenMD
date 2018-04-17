@@ -67,7 +67,7 @@ namespace OpenMD {
     
     virtual ~BondAngleDistribution();
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename)
+    virtual void processDump()
     
   private:
     virtual void initializeHistogram();
@@ -88,7 +88,18 @@ namespace OpenMD {
     std::vector<int> ThetaCount_;
     std::vector<int> histogram_;
     int nTotBonds_;
-   
+
+    std::map<std::pair<int,int>,ComplexType> q_;
+    std::vector<RealType> q_l_;
+    std::vector<RealType> q2_;
+    std::vector<ComplexType> w_;
+    std::vector<ComplexType> w_hat_;
+    std::map<std::pair<int,int>,ComplexType> QBar_;
+    std::vector<RealType> Q2_;
+    std::vector<RealType> Q_;
+    std::vector<ComplexType> W_;
+    std::vector<ComplexType> W_hat_;
+    int Nbonds_;
 
   };
 }

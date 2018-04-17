@@ -54,7 +54,7 @@ namespace OpenMD {
     RNEMDZ(SimInfo* info, const std::string& sele, int nzbins, int axis=2);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
-    void processDump(const std::string& filename);
+    void processDump();
 
   protected:
     OutputData* temperature;
@@ -70,7 +70,7 @@ namespace OpenMD {
     RNEMDR(SimInfo* info, const std::string& sele, int nrbins);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
-    void processDump(const std::string& filename);
+    void processDump();
 
   protected:
     OutputData* temperature;
@@ -84,7 +84,7 @@ namespace OpenMD {
     RNEMDRTheta(SimInfo* info, const std::string& sele, int nrbins, int nanglebins);    
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
-    void processDump(const std::string& filename);
+    void processDump();
     std::pair<int,int> getBins(Vector3d pos);
     void writeOutput();
     

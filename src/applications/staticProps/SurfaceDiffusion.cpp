@@ -205,7 +205,7 @@ namespace OpenMD {
 
   }
 
-  void SurfaceDiffusion::processDump(const std::string& filename) {
+  void SurfaceDiffusion::processDump() {
     // call processFrame
   }
   

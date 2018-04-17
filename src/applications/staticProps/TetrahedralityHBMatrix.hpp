@@ -73,12 +73,13 @@ namespace OpenMD {
    */
   class TetrahedralityHBMatrix : public StaticAnalyser{
   public:
-    TetrahedralityHBMatrix(SimInfo* info, const std::string& filename, 
+    TetrahedralityHBMatrix(SimInfo* info, 
                            const std::string& sele, double rCut, double OOCut,
                            double thetaCut, double OHCut, int nbins);
     
     virtual ~TetrahedralityHBMatrix();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
     
   private:
     virtual void initializeHistogram();

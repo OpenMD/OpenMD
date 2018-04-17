@@ -61,8 +61,9 @@ namespace OpenMD {
                  RealType len) : StaticAnalyser(info, filename, nbins), 
                                  selectionScript_(sele), 
                                  seleMan_(info), evaluator_(info) {
-    
-    setOutputName(getPrefix(filename) + ".bo");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".bo");
     setAnalysisType("Bond Order Parameter(r)");
 
     evaluator_.loadScriptString(sele);
@@ -128,7 +129,18 @@ namespace OpenMD {
 
     delete [] THRCOF;
     THRCOF = NULL;	
-	
+    
+    q_l_.resize(lMax_+1);
+    q2_.resize(lMax_+1);
+    w_.resize(lMax_+1);
+    w_hat_.resize(lMax_+1);
+
+    Q2_.resize(lMax_+1);
+    Q_.resize(lMax_+1);
+    W_.resize(lMax_+1);
+    W_hat_.resize(lMax_+1);
+
+    
   }
   
   BOPofR::~BOPofR() {
@@ -163,7 +175,25 @@ namespace OpenMD {
       QofR_[i] = 0;
     }
   }
-  
+
+
+  void BOPofR::processDump() {
+    string dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    frameCounter_ = 0;
+    
+    Thermo thermo(info_);
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    writeOrderParameter();     
+  }
+
   
   void BOPofR::processFrame(Snapshot* snap_) {
     Molecule* mol;
@@ -180,144 +210,112 @@ namespace OpenMD {
     RealType distCOM;
     Vector3d pos;
     Vector3d CenterOfMass;
-    std::map<std::pair<int,int>,ComplexType> q;
-    std::vector<RealType> q_l;
-    std::vector<RealType> q2;
-    std::vector<ComplexType> w;
-    std::vector<ComplexType> w_hat;
-    std::vector<RealType> Q2;
-    std::vector<RealType> Q;
-    std::vector<ComplexType> W;
-    std::vector<ComplexType> W_hat;
     int nBonds;
     SphericalHarmonic sphericalHarmonic;
     int i;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-
-    Thermo thermo(info_);
-
-    q_l.resize(lMax_+1);
-    q2.resize(lMax_+1);
-    w.resize(lMax_+1);
-    w_hat.resize(lMax_+1);
-
-    Q2.resize(lMax_+1);
-    Q.resize(lMax_+1);
-    W.resize(lMax_+1);
-    W_hat.resize(lMax_+1);
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      CenterOfMass = thermo.getCom();
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-
-      // outer loop is over the selected StuntDoubles:
-
-      for (sd = seleMan_.beginSelected(i); sd != NULL; 
-           sd = seleMan_.nextSelected(i)) {
-
-        myIndex = sd->getGlobalIndex();
-	
-        nBonds = 0;
-        
-        for (int l = 0; l <= lMax_; l++) {
-          for (int m = -l; m <= l; m++) {
-            q[std::make_pair(l,m)] = 0.0;
-          }
-        }
-	pos = sd->getPos();
-	rCOM = CenterOfMass - pos;
-	if (usePeriodicBoundaryConditions_) 
-	  currentSnapshot_->wrapVector(rCOM);
-        distCOM = rCOM.length();
-
-        // inner loop is over all other atoms in the system:
-        
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-          for (atom = mol->beginAtom(ai); atom != NULL; 
-               atom = mol->nextAtom(ai)) {
-
-            if (atom->getGlobalIndex() != myIndex) {
-              vec = pos - atom->getPos();       
-
-              if (usePeriodicBoundaryConditions_) 
-                currentSnapshot_->wrapVector(vec);
-              
-              // Calculate "bonds" and build Q_lm(r) where 
-              //      Q_lm = Y_lm(theta(r),phi(r))                
-              // The spherical harmonics are wrt any arbitrary coordinate
-              // system, we choose standard spherical coordinates 
-              
-              r = vec.length();
-              
-              // Check to see if neighbor is in bond cutoff 
-              
-              if (r < rCut_) { 
-                costheta = vec.z() / r; 
-                phi = atan2(vec.y(), vec.x());
-
-                for (int l = 0; l <= lMax_; l++) {
-                  sphericalHarmonic.setL(l);
-                  for(int m = -l; m <= l; m++){
-                    sphericalHarmonic.setM(m);
-                    q[std::make_pair(l,m)] += sphericalHarmonic.getValueAt(costheta, phi);
-                  }
-                }
-                nBonds++;
-              }  
-            }
-          }
-        }
-        
-        
-        for (int l = 0; l <= lMax_; l++) {
-          q2[l] = 0.0;
-          for (int m = -l; m <= l; m++){
-            q[std::make_pair(l,m)] /= (RealType)nBonds;            
-            q2[l] += norm(q[std::make_pair(l,m)]);
-          }
-          q_l[l] = sqrt(q2[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
-        }
-        
-        // Find Third Order Invariant W_l
     
-        for (int l = 0; l <= lMax_; l++) {
-          w[l] = 0.0;
-          for (int m1 = -l; m1 <= l; m1++) {
-            std::pair<int,int> lm = std::make_pair(l, m1);
-            for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
-              int m2 = m2Min[lm] + mmm;
-              int m3 = -m1-m2;
-              w[l] += w3j[lm][mmm] * q[lm] * 
-                q[std::make_pair(l,m2)] *  q[std::make_pair(l,m3)];
-            }
-          }
-          
-          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
-        }
-
-        collectHistogram(q_l, w_hat, distCOM);
-		
-        //  printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
-        
-      }
+    
+    CenterOfMass = thermo.getCom();
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
-    writeOrderParameter();    
-  }
 
-  void BOPofR::processDump(const std::string& filename) {
-    // iteratively call processFrame to compute dump
+    // outer loop is over the selected StuntDoubles:
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+	 sd = seleMan_.nextSelected(i)) {
+      
+      myIndex = sd->getGlobalIndex();
+      
+      nBonds = 0;
+        
+      for (int l = 0; l <= lMax_; l++) {
+	for (int m = -l; m <= l; m++) {
+	  q_[std::make_pair(l,m)] = 0.0;
+	}
+      }
+      pos = sd->getPos();
+      rCOM = CenterOfMass - pos;
+      if (usePeriodicBoundaryConditions_) 
+	currentSnapshot_->wrapVector(rCOM);
+      distCOM = rCOM.length();
+      
+      // inner loop is over all other atoms in the system:
+      
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
+	for (atom = mol->beginAtom(ai); atom != NULL; 
+	     atom = mol->nextAtom(ai)) {
+	  
+	  if (atom->getGlobalIndex() != myIndex) {
+	    vec = pos - atom->getPos();       
+	    
+	    if (usePeriodicBoundaryConditions_) 
+	      currentSnapshot_->wrapVector(vec);
+	    
+	    // Calculate "bonds" and build Q_lm(r) where 
+	    //      Q_lm = Y_lm(theta(r),phi(r))                
+	    // The spherical harmonics are wrt any arbitrary coordinate
+	    // system, we choose standard spherical coordinates 
+            
+	    r = vec.length();
+            
+	    // Check to see if neighbor is in bond cutoff 
+            
+	    if (r < rCut_) { 
+	      costheta = vec.z() / r; 
+	      phi = atan2(vec.y(), vec.x());
+	      
+	      for (int l = 0; l <= lMax_; l++) {
+		sphericalHarmonic.setL(l);
+		for(int m = -l; m <= l; m++){
+		  sphericalHarmonic.setM(m);
+		  q_[std::make_pair(l,m)] += sphericalHarmonic.getValueAt(costheta, phi);
+		}
+	      }
+	      nBonds++;
+	    }  
+	  }
+	}
+      }
+      
+      
+      for (int l = 0; l <= lMax_; l++) {
+	q2_[l] = 0.0;
+	for (int m = -l; m <= l; m++){
+	  q_[std::make_pair(l,m)] /= (RealType)nBonds;            
+	  q2_[l] += norm(q_[std::make_pair(l,m)]);
+	}
+	q_l_[l] = sqrt(q2_[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
+      }
+      
+      // Find Third Order Invariant W_l
+      
+      for (int l = 0; l <= lMax_; l++) {
+	w_[l] = 0.0;
+	for (int m1 = -l; m1 <= l; m1++) {
+	  std::pair<int,int> lm = std::make_pair(l, m1);
+	  for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
+	    int m2 = m2Min[lm] + mmm;
+	    int m3 = -m1-m2;
+	    w_[l] += w3j[lm][mmm] * q_[lm] * 
+	      q_[std::make_pair(l,m2)] *  q_[std::make_pair(l,m3)];
+	  }
+	}
+	
+	w_hat_[l] = w_[l] / pow(q2_[l], RealType(1.5));
+      }
+      
+      collectHistogram(q_l_, w_hat_, distCOM);
+      
+      //  printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
+      
+    }
   }
+  
+
 
 
   IcosahedralOfR::IcosahedralOfR(SimInfo* info, 

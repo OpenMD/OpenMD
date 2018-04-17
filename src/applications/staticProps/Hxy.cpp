@@ -126,25 +126,33 @@ namespace OpenMD {
       bottom_->accumulator.push_back( new Accumulator() );
     data_.push_back(bottom_);
 
-    setOutputName(getPrefix(filename) + ".Hxy");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefexFileName + ".Hxy");
+
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    std::cerr << "usePeriodicBoundaryConditions_ = " << usePeriodicBoundaryConditions_ << "\n";
   }
 
   Hxy::~Hxy(){
+    dens_.clear();
+    minHeight_.clear();
+    maxHeight_.clear();    
+    mag1.clear();
+    newmag1.clear();
+    mag2.clear();
+    newmag2.clear();
   }
 
-  void Hxy::processFrame(Snapshot* snap_) {
-#if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
-    StuntDouble* sd;
-    int ii;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    std::cerr << "usePeriodicBoundaryConditions_ = " << usePeriodicBoundaryConditions_ << "\n";
-
+  
+  void Hxy::processDump() {
+    string dumpFileName_ = info->getDumpFileName();
+    
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
-
+    
     for (int istep = 0; istep < nFrames; istep += step_) {
-
+      
       for (unsigned int i = 0; i < nBinsX_; i++) {
         std::fill(minHeight_[i].begin(), minHeight_[i].end(), 0.0);
         std::fill(maxHeight_[i].begin(), maxHeight_[i].end(), 0.0);
@@ -152,351 +160,344 @@ namespace OpenMD {
           std::fill(dens_[i][j].begin(), dens_[i][j].end(), 0.0);
         }
       }
-                 
+      
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-            
+      processFrame(currentSnapshot_);
+    }
+
+    writeOutput();
+  }
+
+  void Hxy::processFrame(Snapshot* snap_) {
+#if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
+    StuntDouble* sd;
+    int ii;
+    
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
 #ifdef HAVE_FFTW3_H
-      fftw_plan p1, p2;
+    fftw_plan p1, p2;
 #else
-      fftwnd_plan p1, p2;
+    fftwnd_plan p1, p2;
 #endif
-      fftw_complex *in1, *in2, *out1, *out2;
-      
-      in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
-      out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
-      in2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
-      out2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
-
+    fftw_complex *in1, *in2, *out1, *out2;
+    
+    in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
+    out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
+    in2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
+    out2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
+    
 #ifdef HAVE_FFTW3_H
-      p1 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in1, out1, 
-                           FFTW_FORWARD, FFTW_ESTIMATE); 
-      p2 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in2, out2, 
-                           FFTW_FORWARD, FFTW_ESTIMATE); 
+    p1 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in1, out1, 
+			  FFTW_FORWARD, FFTW_ESTIMATE); 
+    p2 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in2, out2, 
+			  FFTW_FORWARD, FFTW_ESTIMATE); 
 #else
-      p1 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
-      p2 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
+    p1 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
+    p2 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
 #endif
-
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      Mat3x3d invBox = currentSnapshot_->getInvHmat();
-      RealType lenX_ = hmat(0,0);
-      RealType lenY_ = hmat(1,1);
-      RealType lenZ_ = hmat(2,2);
-
-      RealType x, y, z, dx, dy, dz;
-      RealType sigma, rcut;
-      int di, dj, dk, ibin, jbin, kbin;
-      int igrid, jgrid, kgrid;
-      Vector3d scaled;
+    
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Mat3x3d invBox = currentSnapshot_->getInvHmat();
+    RealType lenX_ = hmat(0,0);
+    RealType lenY_ = hmat(1,1);
+    RealType lenZ_ = hmat(2,2);
+    
+    RealType x, y, z, dx, dy, dz;
+    RealType sigma, rcut;
+    int di, dj, dk, ibin, jbin, kbin;
+    int igrid, jgrid, kgrid;
+    Vector3d scaled;
+    
+    dx = lenX_ / nBinsX_;
+    dy = lenY_ / nBinsY_;
+    dz = lenZ_ / nBinsZ_;
+    
+    
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+	 sd = seleMan_.nextSelected(ii)) {
       
-      dx = lenX_ / nBinsX_;
-      dy = lenY_ / nBinsY_;
-      dz = lenZ_ / nBinsZ_;
-
-
-      for (sd = seleMan_.beginSelected(ii); sd != NULL;
-           sd = seleMan_.nextSelected(ii)) {
-
-
-        if (sd->isAtom()) {
-          Atom* atom = static_cast<Atom*>(sd);
-          Vector3d pos = sd->getPos();
-          LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
-          // For SPC/E water, this yields the Willard-Chandler
-          // distance of 2.4 Angstroms:
-          sigma = lja.getSigma() * 0.758176459;
-          rcut = 3.0 * sigma;
-	  
-
-          // scaled positions relative to the box vectors
-	  //  -> the atom's position in numbers of box lengths (more accurately box vectors)
-          scaled = invBox * pos ;
-	  
-          // wrap the vector back into the unit box by subtracting
-          // integer box numbers
-          for (int j = 0; j < 3; j++) {
-            scaled[j] -= roundMe(scaled[j]);
-            scaled[j] += 0.5;
-            // Handle the special case when an object is exactly on
-            // the boundary (a scaled coordinate of 1.0 is the same as
-            // scaled coordinate of 0.0)
-            if (scaled[j] >= 1.0) scaled[j] -= 1.0;
-          }
-          // find ijk-indices of voxel that atom is in.
-          ibin = nBinsX_ * scaled.x();
-          jbin = nBinsY_ * scaled.y();
-          kbin = nBinsZ_ * scaled.z();
-                   
-          di = (int) (rcut / dx);
-          dj = (int) (rcut / dy);
-          dk = (int) (rcut / dz);
-                
-
-          for (int i = -di; i <= di; i++) {
-            igrid = ibin + i;
-            while (igrid >= int(nBinsX_)) { igrid -= int(nBinsX_); }
-            while (igrid < 0) { igrid += int(nBinsX_); }
-                        
-            x = lenX_ * (RealType(i) / RealType(nBinsX_) );
-            
-            for (int j = -dj; j <= dj; j++) {
-              jgrid = jbin + j;
-              while (jgrid >= int(nBinsY_)) {jgrid -= int(nBinsY_);}
-              while (jgrid < 0) {jgrid += int(nBinsY_);}
-              
-              y = lenY_ * (RealType(j) / RealType(nBinsY_));
-              
-              for (int k = -dk; k <= dk; k++) {
-                kgrid = kbin + k;
-                while (kgrid >= int(nBinsZ_)) {kgrid -= int(nBinsZ_);}
-                while (kgrid < 0) {kgrid += int(nBinsZ_);}
-
-                z = lenZ_ * (RealType(k) / RealType(nBinsZ_));
-                
-		RealType dist = sqrt(x*x + y*y + z*z);
-	    
-                dens_[igrid][jgrid][kgrid] += getDensity(dist, sigma, rcut);
-              }
-            }
-          }
-        }
-      }
-
-      RealType maxDens(0.0);
-      for (unsigned int i = 0; i < nBinsX_; i++) {
-        for (unsigned int j = 0; j < nBinsY_; j++) {
-          for (unsigned int k = 0; k < nBinsZ_; k++) {
-            if (dens_[i][j][k] > maxDens) maxDens = dens_[i][j][k];
-          }
-        }
-      }
       
-      RealType threshold = maxDens / 2.0;
-      RealType z0, z1, h0, h1;
-      std::cerr << "maxDens = " << "\t" << maxDens << "\n";
-      std::cerr << "threshold value = " << "\t" << threshold << "\n";
-
-      for (unsigned int i = 0; i < nBinsX_; i++) {        
-        for (unsigned int j = 0; j < nBinsY_; j++) {
-
-          // There are two cases if we are periodic in z and the
-          // density is localized in z.  Either we're starting below
-          // the isodensity, or above it:
-          //      ______             _______        ______
-          // ____/      \_____ or:          \______/
-          //          
-          // In either case, there are two crossings of the
-          // isodensity.
-
-	  bool minFound = false;
-	  bool maxFound = false;
+      if (sd->isAtom()) {
+	Atom* atom = static_cast<Atom*>(sd);
+	Vector3d pos = sd->getPos();
+	LennardJonesAdapter lja = LennardJonesAdapter(atom->getAtomType());
+	// For SPC/E water, this yields the Willard-Chandler
+	// distance of 2.4 Angstroms:
+	sigma = lja.getSigma() * 0.758176459;
+	rcut = 3.0 * sigma;
+	
+	
+	// scaled positions relative to the box vectors
+	//  -> the atom's position in numbers of box lengths (more accurately box vectors)
+	scaled = invBox * pos ;
+	
+	// wrap the vector back into the unit box by subtracting
+	// integer box numbers
+	for (int j = 0; j < 3; j++) {
+	  scaled[j] -= roundMe(scaled[j]);
+	  scaled[j] += 0.5;
+	  // Handle the special case when an object is exactly on
+	  // the boundary (a scaled coordinate of 1.0 is the same as
+	  // scaled coordinate of 0.0)
+	  if (scaled[j] >= 1.0) scaled[j] -= 1.0;
+	}
+	// find ijk-indices of voxel that atom is in.
+	ibin = nBinsX_ * scaled.x();
+	jbin = nBinsY_ * scaled.y();
+	kbin = nBinsZ_ * scaled.z();
+        
+	di = (int) (rcut / dx);
+	dj = (int) (rcut / dy);
+	dk = (int) (rcut / dz);
+        
+	
+	for (int i = -di; i <= di; i++) {
+	  igrid = ibin + i;
+	  while (igrid >= int(nBinsX_)) { igrid -= int(nBinsX_); }
+	  while (igrid < 0) { igrid += int(nBinsX_); }
           
-          if (dens_[i][j][0] < threshold) {
-
-            for (unsigned int k = 0; k < nBinsZ_-1; k++) {
-	      
-              z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
-              z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
-              h0 = dens_[i][j][k];
-              h1 = dens_[i][j][k+1];
-              
-              if (h0 < threshold && h1 > threshold && !minFound) {
-                // simple linear interpolation to find the height:
-                minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
-                minFound = true;
-              }
-              if (h0 > threshold && h1 < threshold && minFound) {
-                // simple linear interpolation to find the height:
-                maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
-		maxFound = true;
-              }
-            }	    
+	  x = lenX_ * (RealType(i) / RealType(nBinsX_) );
+          
+	  for (int j = -dj; j <= dj; j++) {
+	    jgrid = jbin + j;
+	    while (jgrid >= int(nBinsY_)) {jgrid -= int(nBinsY_);}
+	    while (jgrid < 0) {jgrid += int(nBinsY_);}
             
-          } else {
-            for (unsigned int k = 0; k < nBinsZ_-1; k++) {
-
-              z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
-              z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
-              h0 = dens_[i][j][k];
-              h1 = dens_[i][j][k+1];
+	    y = lenY_ * (RealType(j) / RealType(nBinsY_));
+            
+	    for (int k = -dk; k <= dk; k++) {
+	      kgrid = kbin + k;
+	      while (kgrid >= int(nBinsZ_)) {kgrid -= int(nBinsZ_);}
+	      while (kgrid < 0) {kgrid += int(nBinsZ_);}
+	      
+	      z = lenZ_ * (RealType(k) / RealType(nBinsZ_));
               
-              if (h0 > threshold && h1 < threshold && !maxFound) {
-                // simple linear interpolation to find the height:
-                maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
-                maxFound = true;
-              }
-              if (h0 < threshold && h1 > threshold && maxFound) {
-                // simple linear interpolation to find the height:
-                minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
-              }
+	      RealType dist = sqrt(x*x + y*y + z*z);
+	      
+	      dens_[igrid][jgrid][kgrid] += getDensity(dist, sigma, rcut);
 	    }
 	  }
 	}
       }
-      
-      RealType minBar = 0.0;
-      RealType maxBar = 0.0;
-      int count = 0;
-      for (unsigned int i = 0; i < nBinsX_; i++) {        
-        for (unsigned int j = 0; j < nBinsY_; j++) {
-	  //if (minHeight_[i][j] < 0.0) std::cerr << "minHeight[i][j] = " << "\t" << minHeight_[i][j] << "\n";
-          minBar += minHeight_[i][j];
-          maxBar += maxHeight_[i][j];
-          count++;
-        }
-      }           
-      minBar /= count;
-      maxBar /= count;
-
-      std::cerr << "bottomSurf = " << minBar << "\ttopSurf = " << maxBar << "\n";
-      int newindex;
-      //RealType Lx = 10.0;
-      //RealType Ly = 10.0;
-      for (unsigned int i=0; i < nBinsX_; i++) {
-	for (unsigned int j=0; j < nBinsY_; j++) {
-	  newindex = i*nBinsY_ + j;
-          //if(minHeight_[i][j] < 0.0) std::cerr << minHeight_[i][j] << "\t";
-	  c_re(in1[newindex]) = maxHeight_[i][j] - maxBar;
-	  //c_re(in1[newindex]) = 2.0*cos(2.0*Constants::PI*i/Lx/Ly);
-	  c_im(in1[newindex]) = 0.0;
-	  c_re(in2[newindex]) = minHeight_[i][j] - minBar; //this was the original line.
-	  //c_re(in2[newindex]) = 1.0*cos(2.0*Constants::PI*i/Lx/Ly);
-	  c_im(in2[newindex]) = 0.0;
-	}
-      }
-
-#ifdef HAVE_FFTW3_H
-      fftw_execute(p1);
-      fftw_execute(p2);
-#else
-      fftwnd_one(p1, in1, out1);
-      fftwnd_one(p2, in2, out2);
-#endif
-      
-      for (unsigned int i=0; i< nBinsX_; i++) {
-	for(unsigned int j=0; j< nBinsY_; j++) {
-	  newindex = i*nBinsY_ + j;
-	  mag1[newindex] = sqrt(pow(c_re(out1[newindex]),2) +
-				pow(c_im(out1[newindex]),2)) / (RealType(nBinsX_ * nBinsY_));
-	  mag2[newindex] = sqrt(pow(c_re(out2[newindex]),2) +
-				pow(c_im(out2[newindex]),2)) / (RealType(nBinsX_ * nBinsY_));
-	}
-      }
-
-#ifdef HAVE_FFTW3_H
-      fftw_destroy_plan(p1);
-      fftw_destroy_plan(p2);
-#else
-      fftwnd_destroy_plan(p1);
-      fftwnd_destroy_plan(p2);
-#endif      
-      fftw_free(out1);
-      fftw_free(in1);
-      fftw_free(out2);
-      fftw_free(in2);
-
-      int index, new_i, new_j, new_index;
-      for (unsigned int i=0; i< (nBinsX_/2); i++) {
-	for(unsigned int j=0; j< (nBinsY_/2); j++) {
-          index = i*nBinsY_ + j;
-          new_i = i + (nBinsX_/2);
-          new_j = j + (nBinsY_/2);
-          new_index = new_i*nBinsY_ + new_j;
-	  newmag1[new_index] = mag1[index];
-	  newmag2[new_index] = mag2[index];
-	}
-      }
-      
-      for (unsigned int i=(nBinsX_/2); i< nBinsX_; i++) {
-	for(unsigned int j=0; j< (nBinsY_/2); j++) {
-	  index = i*nBinsY_ + j;
-	  new_i = i - (nBinsX_/2);
-	  new_j = j + (nBinsY_/2);
-	  new_index = new_i*nBinsY_ + new_j;
-	  newmag1[new_index] = mag1[index];
-	  newmag2[new_index] = mag2[index];
-	}
-      }
-      
-      for (unsigned int i=0; i< (nBinsX_/2); i++) {
-	for(unsigned int j=(nBinsY_/2); j< nBinsY_; j++) {
-	  index = i*nBinsY_ + j;
-	  new_i = i + (nBinsX_/2);
-	  new_j = j - (nBinsY_/2);
-	  new_index = new_i*nBinsY_ + new_j;
-	  newmag1[new_index] = mag1[index];
-	  newmag2[new_index] = mag2[index];
-	}
-      }
-      
-      for (unsigned int i=(nBinsX_/2); i< nBinsX_; i++) {
-	for(unsigned int j=(nBinsY_/2); j< nBinsY_; j++) {
-	  index = i*nBinsY_ + j;
-	  new_i = i - (nBinsX_/2);
-	  new_j = j - (nBinsY_/2);
-	  new_index = new_i*nBinsY_ + new_j;
-	  newmag1[new_index] = mag1[index];
-	  newmag2[new_index] = mag2[index];
-	}
-      } 
-
-      /*
-      for (unsigned int i=0; i< nBinsX_; i++) {
-        for(unsigned int j=0; j< nBinsY_; j++) {
-          newindex = i*nBinsY_ + j;
-	  std::cout << newmag1[newindex] << "\t";
-        }
-	std::cout << "\n";
-      }
-      */
-
-      RealType maxfreqx = RealType(nBinsX_) / lenX_;
-      RealType maxfreqy = RealType(nBinsY_) / lenY_;
-      
-      RealType maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
-      dfreq_ = maxfreq/(RealType)(nBins_-1);
- 
-      int zero_freq_x = nBinsX_/2; 
-      int zero_freq_y = nBinsY_/2;
-      
-      for (int i=0; i< (int)nBinsX_; i++) {
-	for(int j=0; j< (int)nBinsY_; j++) {
-	  RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx / (RealType)nBinsX_;
-	  RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy / (RealType)nBinsY_;
-
-	  RealType freq = sqrt(freq_x*freq_x + freq_y*freq_y);
-	  
-	  unsigned int whichbin = (unsigned int) (freq / dfreq_);
-          
-	  newindex = i*nBinsY_ + j;
-
-          dynamic_cast<Accumulator*>(counts_->accumulator[whichbin])->add(1);
-          dynamic_cast<Accumulator*>(freq_->accumulator[whichbin])->add(freq);
-          dynamic_cast<Accumulator *>(top_->accumulator[whichbin])->add(newmag1[newindex]);
-          dynamic_cast<Accumulator *>(bottom_->accumulator[whichbin])->add(newmag2[newindex]);
-	}
-      }
-      
     }
-
-    writeOutput();
-
+    
+    RealType maxDens(0.0);
+    for (unsigned int i = 0; i < nBinsX_; i++) {
+      for (unsigned int j = 0; j < nBinsY_; j++) {
+	for (unsigned int k = 0; k < nBinsZ_; k++) {
+	  if (dens_[i][j][k] > maxDens) maxDens = dens_[i][j][k];
+	}
+      }
+    }
+    
+    RealType threshold = maxDens / 2.0;
+    RealType z0, z1, h0, h1;
+    std::cerr << "maxDens = " << "\t" << maxDens << "\n";
+    std::cerr << "threshold value = " << "\t" << threshold << "\n";
+    
+    for (unsigned int i = 0; i < nBinsX_; i++) {        
+      for (unsigned int j = 0; j < nBinsY_; j++) {
+	
+	// There are two cases if we are periodic in z and the
+	// density is localized in z.  Either we're starting below
+	// the isodensity, or above it:
+	//      ______             _______        ______
+	// ____/      \_____ or:          \______/
+	//          
+	// In either case, there are two crossings of the
+	// isodensity.
+	
+	bool minFound = false;
+	bool maxFound = false;
+        
+	if (dens_[i][j][0] < threshold) {
+	  
+	  for (unsigned int k = 0; k < nBinsZ_-1; k++) {
+	    
+	    z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+	    z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
+	    h0 = dens_[i][j][k];
+	    h1 = dens_[i][j][k+1];
+            
+	    if (h0 < threshold && h1 > threshold && !minFound) {
+	      // simple linear interpolation to find the height:
+	      minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+	      minFound = true;
+	    }
+	    if (h0 > threshold && h1 < threshold && minFound) {
+	      // simple linear interpolation to find the height:
+	      maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+	      maxFound = true;
+	    }
+	  }	    
+          
+	} else {
+	  for (unsigned int k = 0; k < nBinsZ_-1; k++) {
+	    
+	    z0 = lenZ_ * (RealType(k) / RealType(nBinsZ_));
+	    z1 = lenZ_ * (RealType(k+1) / RealType(nBinsZ_));
+	    h0 = dens_[i][j][k];
+	    h1 = dens_[i][j][k+1];
+            
+	    if (h0 > threshold && h1 < threshold && !maxFound) {
+	      // simple linear interpolation to find the height:
+	      maxHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+	      maxFound = true;
+	    }
+	    if (h0 < threshold && h1 > threshold && maxFound) {
+	      // simple linear interpolation to find the height:
+	      minHeight_[i][j] = z0 + (z1-z0)*(threshold-h0)/(h1-h0);
+	    }
+	  }
+	}
+      }
+    }
+    
+    RealType minBar = 0.0;
+    RealType maxBar = 0.0;
+    int count = 0;
+    for (unsigned int i = 0; i < nBinsX_; i++) {        
+      for (unsigned int j = 0; j < nBinsY_; j++) {
+	//if (minHeight_[i][j] < 0.0) std::cerr << "minHeight[i][j] = " << "\t" << minHeight_[i][j] << "\n";
+	minBar += minHeight_[i][j];
+	maxBar += maxHeight_[i][j];
+	count++;
+      }
+    }           
+    minBar /= count;
+    maxBar /= count;
+    
+    std::cerr << "bottomSurf = " << minBar << "\ttopSurf = " << maxBar << "\n";
+    int newindex;
+    for (unsigned int i=0; i < nBinsX_; i++) {
+      for (unsigned int j=0; j < nBinsY_; j++) {
+	newindex = i*nBinsY_ + j;
+	c_re(in1[newindex]) = maxHeight_[i][j] - maxBar;
+	c_im(in1[newindex]) = 0.0;
+	c_re(in2[newindex]) = minHeight_[i][j] - minBar; 
+	c_im(in2[newindex]) = 0.0;
+      }
+    }
+    
+#ifdef HAVE_FFTW3_H
+    fftw_execute(p1);
+    fftw_execute(p2);
+#else
+    fftwnd_one(p1, in1, out1);
+    fftwnd_one(p2, in2, out2);
+#endif
+    
+    for (unsigned int i=0; i< nBinsX_; i++) {
+      for(unsigned int j=0; j< nBinsY_; j++) {
+	newindex = i*nBinsY_ + j;
+	mag1[newindex] = sqrt(pow(c_re(out1[newindex]),2) +
+			      pow(c_im(out1[newindex]),2)) / (RealType(nBinsX_ * nBinsY_));
+	mag2[newindex] = sqrt(pow(c_re(out2[newindex]),2) +
+			      pow(c_im(out2[newindex]),2)) / (RealType(nBinsX_ * nBinsY_));
+      }
+    }
+    
+#ifdef HAVE_FFTW3_H
+    fftw_destroy_plan(p1);
+    fftw_destroy_plan(p2);
+#else
+    fftwnd_destroy_plan(p1);
+    fftwnd_destroy_plan(p2);
+#endif      
+    fftw_free(out1);
+    fftw_free(in1);
+    fftw_free(out2);
+    fftw_free(in2);
+    
+    int index, new_i, new_j, new_index;
+    for (unsigned int i=0; i< (nBinsX_/2); i++) {
+      for(unsigned int j=0; j< (nBinsY_/2); j++) {
+	index = i*nBinsY_ + j;
+	new_i = i + (nBinsX_/2);
+	new_j = j + (nBinsY_/2);
+	new_index = new_i*nBinsY_ + new_j;
+	newmag1[new_index] = mag1[index];
+	newmag2[new_index] = mag2[index];
+      }
+    }
+    
+    for (unsigned int i=(nBinsX_/2); i< nBinsX_; i++) {
+      for(unsigned int j=0; j< (nBinsY_/2); j++) {
+	index = i*nBinsY_ + j;
+	new_i = i - (nBinsX_/2);
+	new_j = j + (nBinsY_/2);
+	new_index = new_i*nBinsY_ + new_j;
+	newmag1[new_index] = mag1[index];
+	newmag2[new_index] = mag2[index];
+      }
+    }
+    
+    for (unsigned int i=0; i< (nBinsX_/2); i++) {
+      for(unsigned int j=(nBinsY_/2); j< nBinsY_; j++) {
+	index = i*nBinsY_ + j;
+	new_i = i + (nBinsX_/2);
+	new_j = j - (nBinsY_/2);
+	new_index = new_i*nBinsY_ + new_j;
+	newmag1[new_index] = mag1[index];
+	newmag2[new_index] = mag2[index];
+      }
+    }
+    
+    for (unsigned int i=(nBinsX_/2); i< nBinsX_; i++) {
+      for(unsigned int j=(nBinsY_/2); j< nBinsY_; j++) {
+	index = i*nBinsY_ + j;
+	new_i = i - (nBinsX_/2);
+	new_j = j - (nBinsY_/2);
+	new_index = new_i*nBinsY_ + new_j;
+	newmag1[new_index] = mag1[index];
+	newmag2[new_index] = mag2[index];
+      }
+    } 
+    
+    
+    
+    RealType maxfreqx = RealType(nBinsX_) / lenX_;
+    RealType maxfreqy = RealType(nBinsY_) / lenY_;
+    
+    RealType maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
+    dfreq_ = maxfreq/(RealType)(nBins_-1);
+    
+    int zero_freq_x = nBinsX_/2; 
+    int zero_freq_y = nBinsY_/2;
+    
+    for (int i=0; i< (int)nBinsX_; i++) {
+      for(int j=0; j< (int)nBinsY_; j++) {
+	RealType freq_x = (RealType)(i - zero_freq_x)*maxfreqx / (RealType)nBinsX_;
+	RealType freq_y = (RealType)(j - zero_freq_y)*maxfreqy / (RealType)nBinsY_;
+	
+	RealType freq = sqrt(freq_x*freq_x + freq_y*freq_y);
+	
+	unsigned int whichbin = (unsigned int) (freq / dfreq_);
+        
+	newindex = i*nBinsY_ + j;
+	
+	dynamic_cast<Accumulator*>(counts_->accumulator[whichbin])->add(1);
+	dynamic_cast<Accumulator*>(freq_->accumulator[whichbin])->add(freq);
+	dynamic_cast<Accumulator *>(top_->accumulator[whichbin])->add(newmag1[newindex]);
+	dynamic_cast<Accumulator *>(bottom_->accumulator[whichbin])->add(newmag2[newindex]);
+      }
+    }
+    
+    
+    
 #else
     sprintf(painCave.errMsg, "Hxy: FFTW support was not compiled in!\n");
     painCave.isFatal = 1;
     simError();  
-
+    
 #endif
   }
     
 
-  void Hxy::processDump(const std::string& filename) {
-    // call processFrame( snap );
-  }
   
   RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;

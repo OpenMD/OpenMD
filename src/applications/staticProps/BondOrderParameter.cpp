@@ -59,13 +59,16 @@ namespace OpenMD {
       evaluator_(info) {
     
     setAnalysisType("Bond Order Parameters");
-    setOutputName(getPrefix(filename) + ".bo");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".bo");
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
+    
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     // Set up cutoff radius and order of the Legendre Polynomial:
 
     rCut_ = rCut;
@@ -91,6 +94,18 @@ namespace OpenMD {
     MinW_ = -1.1;
     MaxW_ = 1.1;
     deltaW_ = (MaxW_ - MinW_) / nbins;
+
+    q_l_.resize(lMax_+1);
+    q2_.resize(lMax_+1);
+    w_.resize(lMax_+1);
+    w_hat_.resize(lMax_+1);
+
+    Q2_.resize(lMax_+1);
+    Q_.resize(lMax_+1);
+    W_.resize(lMax_+1);
+    W_hat_.resize(lMax_+1);
+    Nbonds_ = 0;
+
 
     // Make arrays for Wigner3jm
     RealType* THRCOF = new RealType[2*lMax_+1];
@@ -150,7 +165,62 @@ namespace OpenMD {
     }
   }
 
-  void BondOrderParameter::processFrame(Snapshot* snap_) {
+  void BondOrderParameter::processDump() {
+    string dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    frameCounter_ = 0;
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+
+    /* 
+       The rest of the analysis (post dump loop) needs to go somewhere general
+    */
+         
+    // Normalize Qbar2
+    for (int l = 0; l <= lMax_; l++) {
+      for (int m = -l; m <= l; m++){
+        QBar_[std::make_pair(l,m)] /= Nbonds_;
+      }
+    }
+    
+    // Find second order invariant Q_l
+    
+    for (int l = 0; l <= lMax_; l++) {
+      Q2_[l] = 0.0;
+      for (int m = -l; m <= l; m++){
+        Q2_[l] += norm(QBar_[std::make_pair(l,m)]);
+      }
+      Q[l] = sqrt(Q2_[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
+    }
+    
+    // Find Third Order Invariant W_l
+    
+    for (int l = 0; l <= lMax_; l++) {
+      W_[l] = 0.0;
+      for (int m1 = -l; m1 <= l; m1++) {
+        std::pair<int,int> lm = std::make_pair(l, m1);
+        for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
+          int m2 = m2Min[lm] + mmm;
+          int m3 = -m1-m2;
+          W_[l] += w3j[lm][mmm] * QBar_[lm] * 
+            QBar_[std::make_pair(l,m2)] * QBar_[std::make_pair(l,m3)];
+        }
+      }
+      
+      W_hat_[l] = W_[l] / pow(Q2_[l], RealType(1.5));
+    }
+    
+    writeOrderParameter(Q, W_hat_);    
+  }
+
+  
+  void BondOrderParameter::processFrame(Snapshot* currentSnapshot_) {
     Molecule* mol;
     Atom* atom;
     int myIndex;
@@ -161,40 +231,9 @@ namespace OpenMD {
     RealType costheta;
     RealType phi;
     RealType r;
-    std::map<std::pair<int,int>,ComplexType> q;
-    std::vector<RealType> q_l;
-    std::vector<RealType> q2;
-    std::vector<ComplexType> w;
-    std::vector<ComplexType> w_hat;
-    std::map<std::pair<int,int>,ComplexType> QBar;
-    std::vector<RealType> Q2;
-    std::vector<RealType> Q;
-    std::vector<ComplexType> W;
-    std::vector<ComplexType> W_hat;
-    int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
     int i;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-
-    q_l.resize(lMax_+1);
-    q2.resize(lMax_+1);
-    w.resize(lMax_+1);
-    w_hat.resize(lMax_+1);
-
-    Q2.resize(lMax_+1);
-    Q.resize(lMax_+1);
-    W.resize(lMax_+1);
-    W_hat.resize(lMax_+1);
-    Nbonds = 0;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -206,7 +245,7 @@ namespace OpenMD {
            sd = seleMan_.nextSelected(i)) {
 
         myIndex = sd->getGlobalIndex();
-        nBonds = 0;
+        nBonds_ = 0;
         
         for (int l = 0; l <= lMax_; l++) {
           for (int m = -l; m <= l; m++) {
@@ -249,7 +288,7 @@ namespace OpenMD {
 
                   }
                 }
-                nBonds++;
+                nBonds_++;
               }  
             }
           }
@@ -257,83 +296,44 @@ namespace OpenMD {
         
         
         for (int l = 0; l <= lMax_; l++) {
-          q2[l] = 0.0;
+          q2_[l] = 0.0;
           for (int m = -l; m <= l; m++){
-            q[std::make_pair(l,m)] /= (RealType)nBonds; 
+            q[std::make_pair(l,m)] /= (RealType)nBonds_; 
 
-            q2[l] += norm(q[std::make_pair(l,m)]);
+            q2_[l] += norm(q[std::make_pair(l,m)]);
           }
-          q_l[l] = sqrt(q2[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
+          q_l_[l] = sqrt(q2_[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
         }
         
         // Find Third Order Invariant W_l
     
         for (int l = 0; l <= lMax_; l++) {
-          w[l] = 0.0;
+          w_[l] = 0.0;
           for (int m1 = -l; m1 <= l; m1++) {
             std::pair<int,int> lm = std::make_pair(l, m1);
             for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
               int m2 = m2Min[lm] + mmm;
               int m3 = -m1-m2;
-              w[l] += w3j[lm][mmm] * q[lm] * 
+              w_[l] += w3j[lm][mmm] * q[lm] * 
                 q[std::make_pair(l,m2)] *  q[std::make_pair(l,m3)];
             }
           }
           
-          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
+          w_hat_[l] = w_[l] / pow(q2_[l], RealType(1.5));
         }
 
-        collectHistogram(q_l, w_hat);
+        collectHistogram(q_l_, w_hat_);
         
-        Nbonds += nBonds;
+        Nbonds_ += nBonds_;
         for (int l = 0; l <= lMax_;  l++) {
           for (int m = -l; m <= l; m++) {
-            QBar[std::make_pair(l,m)] += (RealType)nBonds*q[std::make_pair(l,m)];
+            QBar_[std::make_pair(l,m)] += (RealType)nBonds_*q_[std::make_pair(l,m)];
           }
         }
       }
-    }
-      
-    // Normalize Qbar2
-    for (int l = 0; l <= lMax_; l++) {
-      for (int m = -l; m <= l; m++){
-        QBar[std::make_pair(l,m)] /= Nbonds;
-      }
-    }
     
-    // Find second order invariant Q_l
-    
-    for (int l = 0; l <= lMax_; l++) {
-      Q2[l] = 0.0;
-      for (int m = -l; m <= l; m++){
-        Q2[l] += norm(QBar[std::make_pair(l,m)]);
-      }
-      Q[l] = sqrt(Q2[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
-    }
-    
-    // Find Third Order Invariant W_l
-    
-    for (int l = 0; l <= lMax_; l++) {
-      W[l] = 0.0;
-      for (int m1 = -l; m1 <= l; m1++) {
-        std::pair<int,int> lm = std::make_pair(l, m1);
-        for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
-          int m2 = m2Min[lm] + mmm;
-          int m3 = -m1-m2;
-          W[l] += w3j[lm][mmm] * QBar[lm] * 
-            QBar[std::make_pair(l,m2)] * QBar[std::make_pair(l,m3)];
-        }
-      }
-      
-      W_hat[l] = W[l] / pow(Q2[l], RealType(1.5));
-    }
-    
-    writeOrderParameter(Q, W_hat);    
   }
 
-  void BondOrderParameter::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
   
   void BondOrderParameter::collectHistogram(std::vector<RealType> q, 
                                             std::vector<ComplexType> what) {

@@ -62,7 +62,7 @@ namespace OpenMD {
     PotDiff(SimInfo* info, const std::string& sele);
     //! Process the data
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     
   private:
     //! Write the data

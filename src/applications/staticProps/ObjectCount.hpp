@@ -52,7 +52,8 @@ namespace OpenMD {
   public:
     ObjectCount(SimInfo* info, const std::string& sele);
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    void ~ObjectCount();
     
   private:
     void writeCounts();
@@ -60,9 +61,12 @@ namespace OpenMD {
     Snapshot* currentSnapshot_;
        
     vector<int> counts_; 
-    RealType nAvg;
-    RealType n2Avg;
-    RealType sDev;
+    RealType nAvg_;
+    RealType n2Avg_;
+    RealType sDev_;
+    unsigned long int nsum_;
+    unsigned long int n2sum_;
+
        
     std::string selectionScript_;
     SelectionManager seleMan_;

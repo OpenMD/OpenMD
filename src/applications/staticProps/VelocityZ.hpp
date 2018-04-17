@@ -57,10 +57,11 @@ namespace OpenMD {
   class VelocityZ : public StaticAnalyser {
     
   public:
-    VelocityZ(SimInfo* info, const std::string& filename,
+    VelocityZ(SimInfo* info,
 	      const std::string& sele, int nbins1, int nbins2, int axis1=2, int axis2=0);
     
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
     virtual ~VelocityZ();
     
   private:

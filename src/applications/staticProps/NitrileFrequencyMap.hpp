@@ -59,7 +59,8 @@ namespace OpenMD {
                         const string& sele1, int nbins);
         
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const string& filename);
+    virtual void processDump();
+    void NitrileFrequencyMap();
     
   private:
     bool excludeAtomPair(int atom1, int atom2);

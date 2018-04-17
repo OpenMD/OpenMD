@@ -80,7 +80,7 @@ namespace OpenMD {
    */
   class TetrahedralityParamZ : public StaticAnalyser{
   public:
-    TetrahedralityParamZ(SimInfo* info, const std::string& filename, 
+    TetrahedralityParamZ(SimInfo* info, 
                          const std::string& sele1, const std::string& sele2, 
                          double rCut, int nzbins, int axis=2);
     int getNZBins(){
@@ -88,7 +88,8 @@ namespace OpenMD {
     }
 
     virtual ~TetrahedralityParamZ();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
     
   private:
     void writeQz();

@@ -62,7 +62,7 @@ namespace OpenMD {
     
     virtual ~BOPofR();
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     
   protected:
     virtual void initializeHistogram();
@@ -89,6 +89,16 @@ namespace OpenMD {
     std::vector<int> RCount_;
     std::vector<int> WofR_;
     std::vector<int> QofR_;
+
+    std::vector<RealType> q_l_;
+    std::vector<RealType> q2_;
+    std::vector<ComplexType> w_;
+    std::vector<ComplexType> w_hat_;
+    std::map<std::pair<int,int>,ComplexType> q_;
+    std::vector<RealType> Q2_;
+    std::vector<RealType> Q_;
+    std::vector<ComplexType> W_;
+    std::vector<ComplexType> W_hat_;
   };
 
 

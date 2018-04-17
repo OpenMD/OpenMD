@@ -59,7 +59,8 @@ namespace OpenMD {
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
 
     setAnalysisType("Coordination Number Distribution");
-    setOutputName(getPrefix(filename) + ".cn");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".cn");
     
     nnMax_ = 12;
     RealType binMax_ = nnMax_ * 1.5;
@@ -82,25 +83,53 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
       selectionCount2_ = seleMan2_.getSelectionCount();
     }
+
+    histogram_.clear();
+    histogram_.resize(bins_, 0.0);
+    bool usePeriodicBoundaryConditions_ =
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
   }
 
   CoordinationNumber::~CoordinationNumber() {
     histogram_.clear();
   }
 
+  
+  void CoordinationNumber::processDump(const std::string& filename) {
+    // call processFrame( snap )
+
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    count_ = 0;
+    
+    //First have to calculate lists of nearest neighbors (listNN_):
+    
+    for(int istep = 0; istep < nFrames; istep += step_){
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    
+    for(unsigned int n = 0; n < histogram_.size(); n++){
+      if (count_ > 0) 
+	histogram_[n] /= RealType(count_);
+      else
+	histogram_[n] = 0.0;               
+    } 
+    
+    writeOutput();
+  } 
+
+
+  
   void CoordinationNumber::processFrame(Snapshot* snap_) {
     SelectionManager common(info_);
     
     std::vector<std::vector<int> > listNN;
     std::vector<int> globalToLocal;
-
     StuntDouble* sd1;
     StuntDouble* sd2;
-
-    Snapshot* currentSnapshot_;
-    bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
     int iterator1;
     int iterator2;
     unsigned int mapIndex1(0);
@@ -112,105 +141,82 @@ namespace OpenMD {
     Vector3d diff;
     RealType distance;
 
-    histogram_.clear();
-    histogram_.resize(bins_, 0.0);
 
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
-    count_ = 0;
-
-    //First have to calculate lists of nearest neighbors (listNN_):
-    
-    for(int istep = 0; istep < nFrames; istep += step_){
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
-      if (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-	selectionCount1_ = seleMan1_.getSelectionCount();
-      }
-      if (evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
-	selectionCount2_ = seleMan2_.getSelectionCount();
-      }
-
-      // We need a common selection set:
-      common = seleMan1_ | seleMan2_;
-      int commonCount = common.getSelectionCount();
-
-      globalToLocal.clear();
-      globalToLocal.resize(info_->getNGlobalAtoms() +
-                           info_->getNGlobalRigidBodies(), -1);
-      for (unsigned int i = 0; i < listNN.size(); i++)         
-        listNN.at(i).clear();
-      listNN.clear();
-      listNN.resize(commonCount);
-      
-      mapIndex1 = 0;
-      for(sd1 = common.beginSelected(iterator1); sd1 != NULL;
-          sd1 = common.nextSelected(iterator1)) {
-        
-	globalToLocal.at(sd1->getGlobalIndex()) = mapIndex1;
-        
-        pos1 = sd1->getPos();
-        
-	mapIndex2 = 0;
- 	for(sd2 = common.beginSelected(iterator2); sd2 != NULL;
-            sd2 = common.nextSelected(iterator2)) {
-          
-	  if (mapIndex1 < mapIndex2) {
-            pos2 = sd2->getPos();
-            diff = pos2 - pos1;
-	    if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(diff);
-            distance = diff.length();
-	    if (distance < rCut_) {
-              listNN.at(mapIndex1).push_back(mapIndex2);
-	      listNN.at(mapIndex2).push_back(mapIndex1);
-	    }
-	  }
-	  mapIndex2++;
-	}
-	mapIndex1++;
-      }
-      
-      // Fill up the histogram with cn values
-
-      for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
-          sd1 = seleMan1_.nextSelected(iterator1)){
-            
-	mapIndex1 = globalToLocal.at(sd1->getGlobalIndex());
-
-        cn = computeCoordination(mapIndex1, listNN);        
-        whichBin = int(cn / delta_);
-        
-        if (whichBin < histogram_.size()) {
-          histogram_[whichBin] += 1;
-        } else {
-          sprintf(painCave.errMsg, "Coordination Number: Error: "
-                  "In frame, %d, object %d has CN %lf outside of range max.\n",
-                  istep, sd1->getGlobalIndex(), cn );
-          painCave.isFatal = 1;
-          simError();  
-        }
-      }
-      count_ += selectionCount1_;
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      selectionCount1_ = seleMan1_.getSelectionCount();
     }
-
-    for(unsigned int n = 0; n < histogram_.size(); n++){
-      if (count_ > 0) 
-        histogram_[n] /= RealType(count_);
-      else
-        histogram_[n] = 0.0;               
-    } 
+    if (evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      selectionCount2_ = seleMan2_.getSelectionCount();
+    }
+    
+    // We need a common selection set:
+    common = seleMan1_ | seleMan2_;
+    int commonCount = common.getSelectionCount();
+    
+    globalToLocal.clear();
+    globalToLocal.resize(info_->getNGlobalAtoms() +
+			 info_->getNGlobalRigidBodies(), -1);
+    for (unsigned int i = 0; i < listNN.size(); i++)         
+      listNN.at(i).clear();
+    listNN.clear();
+    listNN.resize(commonCount);
+    
+    mapIndex1 = 0;
+    for(sd1 = common.beginSelected(iterator1); sd1 != NULL;
+	sd1 = common.nextSelected(iterator1)) {
+      
+      globalToLocal.at(sd1->getGlobalIndex()) = mapIndex1;
+      
+      pos1 = sd1->getPos();
+      
+      mapIndex2 = 0;
+      for(sd2 = common.beginSelected(iterator2); sd2 != NULL;
+	  sd2 = common.nextSelected(iterator2)) {
+	
+	if (mapIndex1 < mapIndex2) {
+	  pos2 = sd2->getPos();
+	  diff = pos2 - pos1;
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(diff);
+	  distance = diff.length();
+	  if (distance < rCut_) {
+	    listNN.at(mapIndex1).push_back(mapIndex2);
+	    listNN.at(mapIndex2).push_back(mapIndex1);
+	  }
+	}
+	mapIndex2++;
+      }
+      mapIndex1++;
+    }
+    
+    // Fill up the histogram with cn values
+    
+    for(sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
+	sd1 = seleMan1_.nextSelected(iterator1)){
+      
+      mapIndex1 = globalToLocal.at(sd1->getGlobalIndex());
+      
+      cn = computeCoordination(mapIndex1, listNN);        
+      whichBin = int(cn / delta_);
+      
+      if (whichBin < histogram_.size()) {
+	histogram_[whichBin] += 1;
+      } else {
+	sprintf(painCave.errMsg, "Coordination Number: Error: "
+		"In frame, %d, object %d has CN %lf outside of range max.\n",
+		istep, sd1->getGlobalIndex(), cn );
+	painCave.isFatal = 1;
+	simError();  
+      }
+    }
+    count_ += selectionCount1_;
+  }
   
-    writeOutput();
-  }
-
-  void CoordinationNumber::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
-
+  
+  
   RealType CoordinationNumber::computeCoordination(int a,
                                                    vector<vector<int> > nl) {
     return RealType(nl.at(a).size());
@@ -243,12 +249,12 @@ namespace OpenMD {
   }
 
   SCN::SCN(SimInfo* info,
-           const std::string& filename,
            const std::string& sele1,
            const std::string& sele2,
            RealType rCut, int bins):
-    CoordinationNumber(info, filename, sele1, sele2, rCut, bins) {
-    setOutputName(getPrefix(filename) + ".scn");
+    CoordinationNumber(info, sele1, sele2, rCut, bins) {
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".scn");
     setAnalysisType("Secondary Coordination Number");
   }
   
@@ -273,12 +279,12 @@ namespace OpenMD {
   }
 
   GCN::GCN(SimInfo* info,
-           const std::string& filename,
            const std::string& sele1,
            const std::string& sele2,
            RealType rCut, int bins):
-    CoordinationNumber(info, filename, sele1, sele2, rCut, bins) {
-    setOutputName(getPrefix(filename) + ".gcn");
+    CoordinationNumber(info, sele1, sele2, rCut, bins) {
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".gcn");
     setAnalysisType("Generalized Coordination Number");
   }
 

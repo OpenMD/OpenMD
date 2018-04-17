@@ -52,11 +52,10 @@
 using namespace std;
 namespace OpenMD {
   TetrahedralityParamDens::TetrahedralityParamDens(SimInfo* info,  
-						   const std::string& filename, 
 						   const std::string& sele1,
 						   const std::string& sele2,
 						   double rCut, int ndensbins) 
-    : StaticAnalyser(info, filename, ndensbins), 
+    : StaticAnalyser(info, ndensbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       rCut_(rCut) {
@@ -89,7 +88,7 @@ namespace OpenMD {
     sliceCount_.clear();
   }
     
-  void TetrahedralityParamDens::process() {
+  void TetrahedralityParamDens::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -218,6 +217,10 @@ namespace OpenMD {
       }
     }
     writeQdens();
+  }
+
+  void TetrahedralityParamDens::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
   
   void TetrahedralityParamDens::writeQdens() {

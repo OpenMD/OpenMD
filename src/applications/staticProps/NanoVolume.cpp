@@ -55,44 +55,57 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 
-using namespace OpenMD;
+namespace OpenMD {
 
-NanoVolume::NanoVolume(SimInfo* info,
-                       const std::string& sele)
-  : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
-    evaluator_(info) {
-  
-  setOutputName(getPrefix(filename) + ".avol");
-  
-  osq.open(getOutputFileName().c_str());
-  
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
+  NanoVolume::NanoVolume(SimInfo* info,
+			 const std::string& sele)
+    : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
+      evaluator_(info) {
+    
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".avol");
+    
+    osq.open(getOutputFileName().c_str());
+    
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    frameCounter_ = 0;
   }
-  frameCounter_ = 0;
-}
 
-void NanoVolume::processFrame(Snapshot* snap_) {
+  void NanoVolume::~NanoVolume() {
+    theAtoms_.clear();
+  }
+  
+  void NanoVolume::processDump() {
+    string dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    frameCounter_ = 0;
+    
+    theAtoms_.reserve(info_->getNGlobalAtoms());
+    
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    osq_.close();
+  }
+  
+  
+  void NanoVolume::processFrame(Snapshot* currentSnapshot_) {
 #if defined(HAVE_QHULL)
-  StuntDouble* sd;
-  Vector3d vec;
-  int i;
-  
-  // Do convex hull for now - alpha has issues with perfect structures
-  //AlphaHull* thishull = new AlphaHull(2.0);
-  ConvexHull* thishull = new ConvexHull();
-  
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  frameCounter_ = 0;
-
-  theAtoms_.reserve(info_->getNGlobalAtoms());
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    frameCounter_++;
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    StuntDouble* sd;
+    Vector3d vec;
+    int i;
+    
+    // Do convex hull for now - alpha has issues with perfect structures
+    //AlphaHull* thishull = new AlphaHull(2.0);
+    ConvexHull* thishull = new ConvexHull();
+    
     RealType time = currentSnapshot_->getTime();
     
     // Clear pos vector between each frame.
@@ -101,44 +114,40 @@ void NanoVolume::processFrame(Snapshot* snap_) {
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-        
+    
     // outer loop is over the selected StuntDoubles:
     
     for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
+	 sd = seleMan_.nextSelected(i)) {      
       theAtoms_.push_back(sd);      
     }
     
     /* variant below for single atoms, not StuntDoubles:
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      for (atom = mol->beginAtom(ai); atom != NULL; 
-           atom = mol->nextAtom(ai)) {
-        theAtoms_.push_back(atom);
-      }
-    }
+       for (mol = info_->beginMolecule(mi); mol != NULL; 
+       mol = info_->nextMolecule(mi)) {
+       for (atom = mol->beginAtom(ai); atom != NULL; 
+       atom = mol->nextAtom(ai)) {
+       theAtoms_.push_back(atom);
+       }
+       }
     */
-
+    
     // Generate convex hull for this frame.
     thishull->computeHull(theAtoms_);
     RealType volume = thishull->getVolume();
     RealType surfaceArea = thishull->getArea();
-
-    osq.precision(7);
-    if (osq.is_open()){
-      osq << time << "\t" << volume << "\t"  << surfaceArea << std::endl;      
+    
+    osq_.precision(7);
+    if (osq_.is_open()){
+      osq_ << time << "\t" << volume << "\t"  << surfaceArea << std::endl;      
     }
-  }
-  osq.close();
-
+    
 #else
-  sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
-  painCave.isFatal = 1;
-  simError();  
+    sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
+    painCave.isFatal = 1;
+    simError();  
 #endif
-
-}
-
-void NanoVolume::processDump(const std::string& filename) {
-  // call processFrame( snap );
-}
+    
+  }
+  
+  

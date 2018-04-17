@@ -62,7 +62,7 @@ namespace OpenMD {
     virtual ~SurfaceDiffusion();
     
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     
   private:
     

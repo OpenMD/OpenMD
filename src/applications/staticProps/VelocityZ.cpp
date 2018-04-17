@@ -51,11 +51,11 @@
 
 namespace OpenMD {
   
-  VelocityZ::VelocityZ(SimInfo* info, const std::string& filename, 
+  VelocityZ::VelocityZ(SimInfo* info, 
                            const std::string& sele,
 		       int nbins1, int nbins2,
 		       int axis1, int axis2)
-    : StaticAnalyser(info, filename, nbins1), selectionScript_(sele), 
+    : StaticAnalyser(info, nbins1), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), nBins2_(nbins2), axis1_(axis1), axis2_(axis2) {
     
     evaluator_.loadScriptString(sele);
@@ -113,7 +113,7 @@ namespace OpenMD {
     zBox_.clear();
   }
   
-  void VelocityZ::process() {
+  void VelocityZ::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     int ii;
 
@@ -184,6 +184,10 @@ namespace OpenMD {
       
     writeVelocity();
 
+  }
+
+  void VelocityZ::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
     
   void VelocityZ::writeVelocity() {

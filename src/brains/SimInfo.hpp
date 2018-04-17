@@ -418,6 +418,14 @@ namespace OpenMD{
       restFileName_ = fileName;
     }
 
+    string getPrefixFileName() {
+      return prefixFileName_;
+    }
+
+    void setPrefixFileName(const string& fileName) {
+      prefixFileName_ = fileName;
+    }
+
     /** 
      * Sets GlobalGroupMembership
      */  
@@ -682,6 +690,7 @@ namespace OpenMD{
     string statFileName_;
     string reportFileName_;
     string restFileName_;
+    string prefixFileName_;
 
     bool topologyDone_;  /** flag to indicate whether the topology has
                              been scanned and all the relevant

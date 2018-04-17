@@ -58,7 +58,7 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info,
                  const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename, nrbins), selectionScript_(sele),
+    : StaticAnalyser(info, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
         
     evaluator_.loadScriptString(sele);
@@ -73,72 +73,79 @@ namespace OpenMD {
     avgAngleR_.resize(nRBins_);
     
     setAnalysisType("radial density function Angle(r)");
-    setOutputName(getPrefix(filename) + ".AngleR");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".AngleR");
     std::stringstream params;
     params << " len = " << len_
            << ", nrbins = " << nRBins_;
     const std::string paramString = params.str();
     setParameterString( paramString );
+
+    std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);     
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+
+  }
+
+  void AngleR::~AngleR(){
+    histogram_.clear();
+    avgAngleR_.clear();
+    count_.clear();
   }
   
-
-  void AngleR::processFrame(Snapshot* snap_) {
-    
+  void AngleR::processDump() {
+   
+    string dumpFileName_ = info->getDumpFileName();
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
     
-    std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);     
-    std::fill(histogram_.begin(), histogram_.end(), 0.0);
-    std::fill(count_.begin(), count_.end(), 0);
-    
     for (int istep = 0; istep < nFrames; istep += step_) {
-      
-      int i;    
-      StuntDouble* sd;
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Thermo thermo(info_);
-      Vector3d CenterOfMass = thermo.getCom();      
+      processFrame(currentSnapshot_);
       
-      
-      if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-      
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(i); sd != NULL;
-           sd = seleMan_.nextSelected(i)) {
-	Vector3d pos = sd->getPos();
-	Vector3d r1 = CenterOfMass - pos;
-	// only do this if the stunt double actually has a vector associated
-	// with it
-	if (sd->isDirectional()) {
-	  Vector3d uz = sd->getA().transpose() * V3Z;
-	  // std::cerr << "pos = " << pos << " uz = " << uz << "\n";
-	  RealType distance = r1.length();
-	  
-	  uz.normalize();
-	  r1.normalize();
-	  RealType cosangle = dot(r1, uz);
-	  
-	  if (distance < len_) {
-	    int whichBin = int(distance / deltaR_);
-	    histogram_[whichBin] += cosangle;
-	    count_[whichBin] += 1;
-	  }
-	}
-	
-      }
-
     }
-
     processHistogram(); 
     writeAngleR();
   }
-
-
-
+  
+  void AngleR::processFrame(Snapshot* snap_) {
+    
+    int i;    
+    StuntDouble* sd;
+    Thermo thermo(info_);
+    Vector3d CenterOfMass = thermo.getCom();      
+    
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    //determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(i); sd != NULL;
+	 sd = seleMan_.nextSelected(i)) {
+      Vector3d pos = sd->getPos();
+      Vector3d r1 = CenterOfMass - pos;
+      // only do this if the stunt double actually has a vector associated
+      // with it
+      if (sd->isDirectional()) {
+	Vector3d uz = sd->getA().transpose() * V3Z;
+	// std::cerr << "pos = " << pos << " uz = " << uz << "\n";
+	RealType distance = r1.length();
+	
+	uz.normalize();
+	r1.normalize();
+	RealType cosangle = dot(r1, uz);
+	
+	if (distance < len_) {
+	  int whichBin = int(distance / deltaR_);
+	  histogram_[whichBin] += cosangle;
+	  count_[whichBin] += 1;
+	}
+      } 
+    }
+  }
+  
   void AngleR::processHistogram() {
 
     for(unsigned int i = 0 ; i < histogram_.size(); ++i){
@@ -152,8 +159,6 @@ namespace OpenMD {
     }
 
   }
-
- 
 
   void AngleR::writeAngleR() {
     std::ofstream ofs(outputFilename_.c_str());
@@ -184,12 +189,6 @@ namespace OpenMD {
 
     ofs.close();
   }
-
-
-  void AngleR::processDump(const std::string& filename){
-    // loop through dumpfile and for each from call processFrame()
-  }
-
   
 }
 

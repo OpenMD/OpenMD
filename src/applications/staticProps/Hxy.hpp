@@ -77,7 +77,7 @@ namespace OpenMD {
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
     virtual ~Hxy();        
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     
   private:
     

@@ -55,12 +55,11 @@
 namespace OpenMD {
 
   TetrahedralityHBMatrix::TetrahedralityHBMatrix(SimInfo* info, 
-                                                 const std::string& filename, 
                                                  const std::string& sele,
                                                  double rCut, double OOcut,
                                                  double thetaCut, double OHcut,
                                                  int nbins) : 
-    StaticAnalyser(info, filename, nbins), selectionScript_(sele), 
+    StaticAnalyser(info, nbins), selectionScript_(sele), 
     seleMan_(info), evaluator_(info), rCut_(rCut),  OOCut_(OOcut),
     thetaCut_(thetaCut), OHCut_(OHcut) {
 
@@ -108,7 +107,7 @@ namespace OpenMD {
     }
   }
   
-  void TetrahedralityHBMatrix::process() {
+  void TetrahedralityHBMatrix::processFrame(Snapshot* snap_) {
     Molecule* mol1;
     Molecule* mol2;
     Molecule* moli;
@@ -333,6 +332,10 @@ namespace OpenMD {
     }
   }
 
+  void TetrahedralityHBMatrix::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+  
   void TetrahedralityHBMatrix::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {

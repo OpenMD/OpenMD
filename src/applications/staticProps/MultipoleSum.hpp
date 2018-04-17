@@ -52,11 +52,12 @@ namespace OpenMD {
   public:
     MultipoleSum(SimInfo* info, 
                  const std::string& sele1, RealType rmax, int nrbins);
+    virtual void ~MultipoleSum();
 
   private:
 
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     virtual void writeOut();
 
     std::size_t nRBins_;

@@ -51,12 +51,11 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info,  
-                                             const std::string& filename, 
+  TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info,   
                                              const std::string& sele1,
                                              const std::string& sele2,
                                              double rCut, int nzbins, int axis) 
-    : StaticAnalyser(info, filename, nzbins), 
+    : StaticAnalyser(info, nzbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       axis_(axis) {
@@ -101,7 +100,7 @@ namespace OpenMD {
     zBox_.clear();
   }
     
-  void TetrahedralityParamZ::process() {
+  void TetrahedralityParamZ::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -215,6 +214,10 @@ namespace OpenMD {
       }
     }
     writeQz();
+  }
+
+  void TetrahedralityParamZ::processDump(const std::string& filename){
+    // call processFrame( snap )
   }
   
   void TetrahedralityParamZ::writeQz() {

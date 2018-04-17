@@ -52,14 +52,13 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamXYZ::TetrahedralityParamXYZ(SimInfo* info,  
-                                                 const std::string& filename, 
+  TetrahedralityParamXYZ::TetrahedralityParamXYZ(SimInfo* info,
                                                  const std::string& sele1,
                                                  const std::string& sele2,
                                                  RealType rCut, 
                                                  RealType voxelSize,
                                                  RealType gaussWidth) 
-    : StaticAnalyser(info, filename, 1), 
+    : StaticAnalyser(info, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info),  seleMan2_(info), evaluator1_(info), evaluator2_(info),
       rCut_(rCut), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
@@ -99,7 +98,7 @@ namespace OpenMD {
   TetrahedralityParamXYZ::~TetrahedralityParamXYZ() {
   }
     
-  void TetrahedralityParamXYZ::process() {
+  void TetrahedralityParamXYZ::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -268,7 +267,12 @@ namespace OpenMD {
     }
     writeQxyz();
   }
-  
+
+  void TetrahedralityParamXYZ::processDump(const std::string& filename) {
+    // call processFrame( snap )
+  }
+
+    
   void TetrahedralityParamXYZ::writeQxyz() {
 
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();

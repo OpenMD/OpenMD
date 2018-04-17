@@ -82,11 +82,12 @@ namespace OpenMD {
    */
   class TetrahedralityParam : public StaticAnalyser{
   public:
-    TetrahedralityParam(SimInfo* info, const std::string& filename, 
+    TetrahedralityParam(SimInfo* info, 
 			const std::string& sele, double rCut, int nbins);
     
     virtual ~TetrahedralityParam();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
     
   private:
     virtual void initializeHistogram();

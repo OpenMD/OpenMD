@@ -52,9 +52,9 @@
 
 namespace OpenMD {
   
-  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+  pAngle::pAngle(SimInfo* info, 
                  const std::string& sele1, int nthetabins)
-    : StaticAnalyser(info, filename, nthetabins), doVect_(true), doOffset_(false), 
+    : StaticAnalyser(info, nthetabins), doVect_(true), doOffset_(false), 
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info),  evaluator2_(info), 
       nThetaBins_(nthetabins) {
@@ -70,10 +70,10 @@ namespace OpenMD {
     histogram_.resize(nThetaBins_); 
   }
 
-  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+  pAngle::pAngle(SimInfo* info, 
                  const std::string& sele1, const std::string& sele2, 
                  int nthetabins)
-    : StaticAnalyser(info, filename, nthetabins), doVect_(false), doOffset_(false),
+    : StaticAnalyser(info, nthetabins), doVect_(false), doOffset_(false),
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       nThetaBins_(nthetabins) {
@@ -94,9 +94,9 @@ namespace OpenMD {
     histogram_.resize(nThetaBins_); 
   }
 
-  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+  pAngle::pAngle(SimInfo* info,  
                  const std::string& sele1, int seleOffset, int nthetabins)
-    : StaticAnalyser(info, filename, nthetabins), doVect_(false), doOffset_(true), 
+    : StaticAnalyser(info, nthetabins), doVect_(false), doOffset_(true), 
       doOffset2_(false), selectionScript1_(sele1),  
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       seleOffset_(seleOffset),  nThetaBins_(nthetabins) {
@@ -112,10 +112,10 @@ namespace OpenMD {
     histogram_.resize(nThetaBins_);    
   }
 
-  pAngle::pAngle(SimInfo* info, const std::string& filename, 
+  pAngle::pAngle(SimInfo* info,
                  const std::string& sele1, int seleOffset, int seleOffset2,
                  int nthetabins)
-    : StaticAnalyser(info, filename, nthetabins), doVect_(false), doOffset_(true), 
+    : StaticAnalyser(info, nthetabins), doVect_(false), doOffset_(true), 
       doOffset2_(true), selectionScript1_(sele1),  
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       seleOffset_(seleOffset), seleOffset2_(seleOffset2),
@@ -131,8 +131,12 @@ namespace OpenMD {
     count_.resize(nThetaBins_);
     histogram_.resize(nThetaBins_);    
   }
+
+  pAngle::~pAngle() {
+    histogram_.clear();
+  }
   
-  void pAngle::process() {
+  void pAngle::processFrame(Snapshot* snap_) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii; 
@@ -274,6 +278,10 @@ namespace OpenMD {
     processHistogram();
     writeProbs();
     
+  }
+
+  void Andle::processDump(const std::string& filename) {
+    // call processFrame( snap )
   }
   
   void pAngle::processHistogram() {

@@ -55,8 +55,9 @@ namespace OpenMD {
                                            int nbins)
     : StaticAnalyser(info, nbins), info_(info), 
       selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_) {
-    
-    setOutputName(getPrefix(filename) + ".freqs");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".freqs");
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -138,8 +139,19 @@ namespace OpenMD {
     electrostatic_->setForceField(forceField_);
     electrostatic_->setSimulatedAtomTypes(atypes);
     electrostatic_->setCutoffRadius(rcut);
+
+
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+    
   }
 
+  void NitrileFrequencyMap::~NitrileFrequencyMap() {
+    histogram_.clear();
+    freqs_.clear();
+    excludesForAtom.clear();
+  }
+  
   bool NitrileFrequencyMap::excludeAtomPair(int atom1, int atom2) {
     
     for (vector<int>::iterator i = excludesForAtom[atom1].begin();
@@ -150,7 +162,24 @@ namespace OpenMD {
     return false;
   }
 
-  void NitrileFrequencyMap::processFrame(Snapshot* snap_) {
+  
+  void NitrileFrequencyMap::processDump(const std::string& filename) {
+    string dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    
+    nProcessed_ = nFrames/step_;
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+  }   
+    processHistogram();
+    writeProbs();
+  }
+
+  
+  void NitrileFrequencyMap::processFrame(Snapshot* currentSnapshot_) {
     Molecule* mol;
     Atom* atom;
     AtomType* atype;
@@ -167,96 +196,77 @@ namespace OpenMD {
     bool excluded;
     const RealType chrgToKcal = 23.0609;
 
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-
-    nProcessed_ = nFrames/step_;
-
-    std::fill(histogram_.begin(), histogram_.end(), 0.0);
-    std::fill(count_.begin(), count_.end(), 0);
+   
+    std::fill(freqs_.begin(), freqs_.end(), 0.0);
     
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-      std::fill(freqs_.begin(), freqs_.end(), 0.0);
-
-      if  (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-      }
-     
-      for (sd1 = seleMan1_.beginSelected(ii);
-           sd1 != NULL;
-           sd1 = seleMan1_.nextSelected(ii)) {
-        
-        sdID = sd1->getGlobalIndex();
-        molID = info_->getGlobalMolMembership(sdID);
-        mol = info_->getMoleculeByGlobalIndex(molID);
-
-        Vector3d CNcentroid = mol->getRigidBodyAt(2)->getPos();
-        Vector3d ra = sd1->getPos();
-
-        atom = dynamic_cast<Atom *>(sd1);
-        atype = atom->getAtomType();
-        name = atype->getName();
-        fi = frequencyMap_.find(name);
-        if ( fi != frequencyMap_.end() ) {
-          li = (*fi).second;
-        } else {
-          // throw error
-          sprintf( painCave.errMsg,
-                   "NitrileFrequencyMap::process: Unknown atype requested.\n"
-                   "\t(Selection specified %s .)\n",
-                   name.c_str() );
-          painCave.isFatal = 1;
-          simError();
-        }
-
-        sPot = sd1->getSitePotential();
-        
-        // Subtract out the contribution from every other site on this
-        // molecule:
-        for(atom2 = mol->beginAtom(ai2); atom2 != NULL; 
-            atom2 = mol->nextAtom(ai2)) {  
-
-          sdID2 = atom2->getGlobalIndex();
-          if (sdID == sdID2) {
-            excluded = true;
-          } else {
-            excluded = excludeAtomPair(sdID, sdID2);
-          }
-
-          electrostatic_->getSitePotentials(atom, atom2, excluded, s1, s2); 
-
-          sPot -= s1;
-        }
-
-        // Add the contribution from the electric field:
-
-        sPot += dot(EF_, ra - CNcentroid) * chrgToKcal ;
-
-        freqShift = sPot * li;
-
-        // convert the kcal/mol energies to wavenumbers:
-        freqShift *= 349.757;
-
-        freqs_[molID] += freqShift;
-      }
-
-      for (int i = 0; i < info_->getNGlobalMolecules(); ++i) {
-        int binNo = int(nBins_ * (freqs_[i] - minFreq_)/(maxFreq_-minFreq_));
-
-        count_[binNo]++;
-      }
+    if  (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-      
-    processHistogram();
-    writeProbs();
     
-  }
-
-  void NitrileFrequencyMap::processDump(const std::string& filename) {
-    // call processFrame( snap );
+    for (sd1 = seleMan1_.beginSelected(ii);
+	 sd1 != NULL;
+	 sd1 = seleMan1_.nextSelected(ii)) {
+      
+      sdID = sd1->getGlobalIndex();
+      molID = info_->getGlobalMolMembership(sdID);
+      mol = info_->getMoleculeByGlobalIndex(molID);
+      
+      Vector3d CNcentroid = mol->getRigidBodyAt(2)->getPos();
+      Vector3d ra = sd1->getPos();
+      
+      atom = dynamic_cast<Atom *>(sd1);
+      atype = atom->getAtomType();
+      name = atype->getName();
+      fi = frequencyMap_.find(name);
+      if ( fi != frequencyMap_.end() ) {
+	li = (*fi).second;
+      } else {
+	// throw error
+	sprintf( painCave.errMsg,
+		 "NitrileFrequencyMap::process: Unknown atype requested.\n"
+		 "\t(Selection specified %s .)\n",
+		 name.c_str() );
+	painCave.isFatal = 1;
+	simError();
+      }
+      
+      sPot = sd1->getSitePotential();
+      
+      // Subtract out the contribution from every other site on this
+      // molecule:
+      for(atom2 = mol->beginAtom(ai2); atom2 != NULL; 
+	  atom2 = mol->nextAtom(ai2)) {  
+	
+	sdID2 = atom2->getGlobalIndex();
+	if (sdID == sdID2) {
+	  excluded = true;
+	} else {
+	  excluded = excludeAtomPair(sdID, sdID2);
+	}
+	
+	electrostatic_->getSitePotentials(atom, atom2, excluded, s1, s2); 
+	
+	sPot -= s1;
+      }
+      
+      // Add the contribution from the electric field:
+      
+      sPot += dot(EF_, ra - CNcentroid) * chrgToKcal ;
+      
+      freqShift = sPot * li;
+      
+      // convert the kcal/mol energies to wavenumbers:
+      freqShift *= 349.757;
+      
+      freqs_[molID] += freqShift;
+    }
+    
+    for (int i = 0; i < info_->getNGlobalMolecules(); ++i) {
+      int binNo = int(nBins_ * (freqs_[i] - minFreq_)/(maxFreq_-minFreq_));
+      
+      count_[binNo]++;
+    }
+    
   }
   
   void NitrileFrequencyMap::processHistogram() {

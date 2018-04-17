@@ -73,7 +73,7 @@ namespace OpenMD {
 
     virtual ~CoordinationNumber();
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     virtual void writeOutput();
 
   protected:
@@ -88,6 +88,7 @@ namespace OpenMD {
     std::string sele2_;
     SelectionManager seleMan2_;
     SelectionEvaluator evaluator2_;
+    Snapshot* currentSnapshot_;
 
     int selectionCount1_;
     int selectionCount2_;

@@ -80,12 +80,13 @@ namespace OpenMD {
    */
   class TetrahedralityParamXYZ : public StaticAnalyser{
   public:
-    TetrahedralityParamXYZ(SimInfo* info, const std::string& filename, 
+    TetrahedralityParamXYZ(SimInfo* info, 
                            const std::string& sele1, const std::string& sele2, 
                            RealType rCut, RealType voxelSize, RealType gaussWidth);
 
     virtual ~TetrahedralityParamXYZ();
-    virtual void process();
+    virtual void processFrame(Snapshot* snap_);
+    virtual void processDump();
     
   private:
     void writeQxyz();

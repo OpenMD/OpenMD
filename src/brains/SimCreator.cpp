@@ -515,6 +515,7 @@ namespace OpenMD {
       info->setStatFileName(prefix + ".stat");
       info->setReportFileName(prefix + ".report");
       info->setRestFileName(prefix + ".zang");
+      info->setPrefixFileName(prefix);
       
 #ifdef IS_MPI      
     }    

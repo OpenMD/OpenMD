@@ -53,55 +53,62 @@ namespace OpenMD {
                            const std::string& sele)
     : StaticAnalyser(info, 1), selectionScript_(sele), 
       seleMan_(info), evaluator_(info) {
-    
-    setOutputName(getPrefix(filename) + ".counts");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".counts");
     
     evaluator_.loadScriptString(sele);
     
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
-    }            
-  }
-
-  void ObjectCount::processFrame(Snapshot* snap_) {
-  
+    }
     counts_.clear();
     counts_.resize(10, 0);
+  }
+
+  void ObjectCount::~ObjectCount() {
+    counts_.clear();
+  }
+
+  void ObjectCount::processDump() {
+    
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
-    unsigned long int nsum = 0;
-    unsigned long int n2sum = 0;
-
+    
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    
-      if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-        
-      unsigned int count = seleMan_.getSelectionCount();
-
-      if (counts_.size() <= count)  {
-	counts_.resize(count, 0);
-      }
-
-      counts_[count]++;
-
-      nsum += count;
-      n2sum += count * count;
+      processFrame(currentSnapshot_);
     }
-   
+    
     int nProcessed = nFrames /step_;
-
-    nAvg = nsum / nProcessed;
-    n2Avg = n2sum / nProcessed;
-    sDev = sqrt(n2Avg - nAvg*nAvg);
+    
+    nAvg_ = nsum / nProcessed;
+    n2Avg_ = n2sum / nProcessed;
+    sDev_ = sqrt(n2Avg_ - nAvg_*nAvg_);
     writeCounts();   
+    
   }
 
-  void ObjectCount::processDump(const std::string& filename) {
-    // call processFrame( snap )
+
+  void ObjectCount::processFrame(Snapshot* currentSnapshot_) {
+    nsum_ = 0;
+    n2sum_ = 0;
+     
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    unsigned int count = seleMan_.getSelectionCount();
+    
+    if (counts_.size() <= count)  {
+      counts_.resize(count, 0);
+    }
+    
+    counts_[count]++;
+    
+    nsum_ += count;
+    n2sum_ += count * count;
   }
   
   void ObjectCount::writeCounts() {
@@ -109,9 +116,9 @@ namespace OpenMD {
     if (ofs.is_open()) {
       ofs << "#counts\n";
       ofs << "#selection: (" << selectionScript_ << ")\n";
-      ofs << "# <N> = "<< nAvg << "\n";
-      ofs << "# <N^2> = " << n2Avg << "\n";
-      ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
+      ofs << "# <N> = "<< nAvg_ << "\n";
+      ofs << "# <N^2> = " << n2Avg_ << "\n";
+      ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev_ << "\n";
       ofs << "# N\tcounts[N]\n";
       for (unsigned int i = 0; i < counts_.size(); ++i) {
         ofs << i << "\t" << counts_[i] << "\n";
