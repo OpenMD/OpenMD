@@ -58,7 +58,7 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info,
                  const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, nrbins), selectionScript_(sele),
+    : NonSpatialStatistics(info, sele, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
         
     evaluator_.loadScriptString(sele);
@@ -73,7 +73,7 @@ namespace OpenMD {
     avgAngleR_.resize(nRBins_);
     
     setAnalysisType("radial density function Angle(r)");
-    string prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".AngleR");
     std::stringstream params;
     params << " len = " << len_
@@ -87,7 +87,7 @@ namespace OpenMD {
 
   }
 
-  void AngleR::~AngleR(){
+  AngleR::~AngleR(){
     histogram_.clear();
     avgAngleR_.clear();
     count_.clear();
@@ -95,8 +95,8 @@ namespace OpenMD {
   
   void AngleR::processDump() {
    
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
     
@@ -158,6 +158,10 @@ namespace OpenMD {
       std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i] << "\n";  
     }
 
+  }
+
+  void AngleR::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
 
   void AngleR::writeAngleR() {

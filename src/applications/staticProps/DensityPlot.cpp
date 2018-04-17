@@ -55,12 +55,12 @@ namespace OpenMD {
   DensityPlot::DensityPlot(SimInfo* info, 
 			   const std::string& sele, const std::string& cmSele,
 			   RealType len, int nrbins) 
-    : StaticAnalyser(info, nrbins), 
+    : NonSpatialStatistics(info, sele, nrbins), 
       len_(len), halfLen_(len/2), nRBins_(nrbins),
       selectionScript_(sele), seleMan_(info), evaluator_(info), 
       cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
 
-    string prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".density");
     
     deltaR_ = len_ /nRBins_;  
@@ -80,19 +80,19 @@ namespace OpenMD {
       cmSeleMan_.setSelectionSet(cmEvaluator_.evaluate());
     }
 
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     
   }
 
   DensityPlot::~DensityPlot(){
     histogram_.clear();
-    denisty_.clear();
+    density_.clear();
   }
 
   
   void DensityPlot::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
@@ -194,6 +194,10 @@ namespace OpenMD {
     return newOrigin;
   }
 
+  void DensityPlot::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+  
   void DensityPlot::writeDensity() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     if (ofs.is_open()) {

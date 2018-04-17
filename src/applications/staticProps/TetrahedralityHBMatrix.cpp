@@ -59,12 +59,13 @@ namespace OpenMD {
                                                  double rCut, double OOcut,
                                                  double thetaCut, double OHcut,
                                                  int nbins) : 
-    StaticAnalyser(info, nbins), selectionScript_(sele), 
+    NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), 
     seleMan_(info), evaluator_(info), rCut_(rCut),  OOCut_(OOcut),
     thetaCut_(thetaCut), OHCut_(OHcut) {
 
-    setAnalysisType("Tetrahedrality HBond Matrix");   
-    setOutputName(getPrefix(filename) + ".hbq");
+    setAnalysisType("Tetrahedrality HBond Matrix");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".hbq");
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -82,6 +83,8 @@ namespace OpenMD {
     MinQ_ = 0.0;
     MaxQ_ = 1.1;
     deltaQ_ = (MaxQ_ - MinQ_) / nBins_;
+
+    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     std::stringstream params;
     params << " rCut = " << rCut_
@@ -106,6 +109,11 @@ namespace OpenMD {
       std::fill(Q_histogram_[i].begin(), Q_histogram_[i].end(), 0);
     }
   }
+
+  void TetrahedralityHBMatrix::processDump() {
+    // call processFrame( snap )
+  }
+  
   
   void TetrahedralityHBMatrix::processFrame(Snapshot* snap_) {
     Molecule* mol1;
@@ -131,9 +139,9 @@ namespace OpenMD {
     std::vector<std::pair<RealType,Molecule*> > myNeighbors;
     int myIndex, ii, jj, index1, index2;
     
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    DumpReader reader(info_, dumpFilename_);    
+    
+    dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     for (int istep = 0; istep < nFrames; istep += step_) {
@@ -315,7 +323,11 @@ namespace OpenMD {
     }
     writeOutput();
   }
-        
+
+  void TetrahedralityHBMatrix::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+  
   void TetrahedralityHBMatrix::collectHistogram(RealType q1, RealType q2) {
 
     if (q1 > MinQ_ && q1 < MaxQ_) {     
@@ -332,9 +344,6 @@ namespace OpenMD {
     }
   }
 
-  void TetrahedralityHBMatrix::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
   
   void TetrahedralityHBMatrix::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());

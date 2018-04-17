@@ -58,7 +58,8 @@ namespace OpenMD {
       doSele3_(false), seleMan3_(info), evaluator3_(info) {
 
     setAnalysisType("Radial Distribution Function");
-    setOutputName(getPrefix(filename) + ".gto");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".gto");
     
     deltaCosAngle_ = 2.0 / nBins_;
 
@@ -83,8 +84,9 @@ namespace OpenMD {
     : RadialDistrFunc(info, sele1, sele2, nangleBins),
       doSele3_(true), seleMan3_(info), evaluator3_(info), 
       selectionScript3_(sele3) {
-    
-    setOutputName(getPrefix(filename) + ".gto");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".gto");
     
     deltaCosAngle_ = 2.0 / nBins_;
     

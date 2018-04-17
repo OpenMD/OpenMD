@@ -43,9 +43,10 @@
 #define APPLICATIONS_STATICPROPS_ANGLER_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 namespace OpenMD {
 
-  class AngleR : public StaticAnalyser {
+  class AngleR : public NonSpatialStatistics {
     
   public:    
     AngleR(SimInfo* info, const std::string& sele, RealType len, 
@@ -61,7 +62,8 @@ namespace OpenMD {
         
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
-    void ~AngleR;
+    virtual ~AngleR();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
   private:
     void processHistogram();

@@ -66,11 +66,12 @@
 #endif
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 #include "utils/Accumulator.hpp"
 
 namespace OpenMD {
   
-  class Hxy : public StaticAnalyser {
+  class Hxy : public NonSpatialStatistics {
     
   public:
     Hxy(SimInfo* info, const std::string& sele,
@@ -104,6 +105,8 @@ namespace OpenMD {
     OutputData* freq_;
     OutputData* top_;
     OutputData* bottom_;
+
+    bool usePeriodicBoundaryConditions_;
   };
   
 }

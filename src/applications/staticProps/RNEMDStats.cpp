@@ -52,8 +52,8 @@ namespace OpenMD {
                  const std::string& sele, int nzbins, int axis)
     : SlabStatistics(info, sele, nzbins, axis), axis_(axis) {
 
-    
-    setOutputName(getPrefix(filename) + ".rnemdZ");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".rnemdZ");
     
     temperature = new OutputData;
     temperature->units =  "K";
@@ -162,7 +162,7 @@ namespace OpenMD {
     }
   }
 
-  void RNEMDZ::processDump(const std::string& filename) {
+  void RNEMDZ::processDump() {
     // call processFrame( snap )
   }
   
@@ -173,8 +173,8 @@ namespace OpenMD {
                  const std::string& sele, int nrbins)
     : ShellStatistics(info, sele, nrbins) {
         
-
-    setOutputName(getPrefix(filename) + ".rnemdR");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".rnemdR");
     
     temperature = new OutputData;
     temperature->units =  "K";
@@ -289,7 +289,7 @@ namespace OpenMD {
     }
   }
 
-  void RNEMDR::processDump(const std::string& filename) {
+  void RNEMDR::processDump() {
     // call processFrame( snap )
   }
 
@@ -331,7 +331,8 @@ namespace OpenMD {
     
     fluxVector_.normalize();
 
-    setOutputName(getPrefix(filename) + ".rnemdRTheta");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".rnemdRTheta");
 
     angularVelocity = new OutputData;
     angularVelocity->units = "angstroms^2/fs";
@@ -420,7 +421,7 @@ namespace OpenMD {
     }
   }
 
-  void RNEMDRTheta::processDump(const std::string& filename) {
+  void RNEMDRTheta::processDump() {
     // call processFrame( snap );
   }
 

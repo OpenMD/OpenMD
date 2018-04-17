@@ -104,19 +104,21 @@ namespace OpenMD {
 
   class GofRTheta : public GofRAngle {
   public:
-    GofRTheta(SimInfo* info, const std::string& filename, 
+    GofRTheta(SimInfo* info, 
               const std::string& sele1, const std::string& sele2, 
               RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofrt");
+      : GofRAngle (info, sele1, sele2, len, nrbins, nangleBins) {
+      string prefixFileName = info->getPrefixFileName();
+	setOutputName(prefixFileName + ".gofrt");
       }
-    GofRTheta(SimInfo* info, const std::string& filename, 
+    GofRTheta(SimInfo* info, 
               const std::string& sele1, const std::string& sele2,
               const std::string& sele3,
               RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, sele3, len, nrbins, 
+      : GofRAngle (info,  sele1, sele2, sele3, len, nrbins, 
                    nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofrt");
+      string prefixFileName = info->getPrefixFileName();
+	setOutputName(prefixFileName + ".gofrt");
       }
         
   private:
@@ -129,19 +131,21 @@ namespace OpenMD {
 
   class GofROmega : public GofRAngle {
   public:
-    GofROmega(SimInfo* info, const std::string& filename, 
+    GofROmega(SimInfo* info, 
               const std::string& sele1, const std::string& sele2, 
               RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofro");
+      : GofRAngle (info, sele1, sele2, len, nrbins, nangleBins) {
+      string prefixFileName = info->getPrefixFileName();
+	setOutputName(prefixFileName + ".gofro");
       }
-    GofROmega(SimInfo* info, const std::string& filename, 
+    GofROmega(SimInfo* info, 
               const std::string& sele1, const std::string& sele2,
               const std::string& sele3,
               RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, sele3, len, nrbins, 
+      : GofRAngle (info, sele1, sele2, sele3, len, nrbins, 
                    nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofro");
+      string prefixFileName = info->getPrefixFileName();
+	setOutputName(prefixFileName + ".gofro");
       }
     
   private:

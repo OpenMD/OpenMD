@@ -46,17 +46,17 @@
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 typedef std::pair<RealType, int> evIndex;
 
 namespace OpenMD {
-  class NanoLength : public StaticAnalyser {
+  class NanoLength : public NonSpatialStatistics {
   public:
     NanoLength(SimInfo* info, const std::string& sele);
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
-    void ~NanoLength();
+    virtual ~NanoLength();
     
   private:    
     RealType getLength(std::vector<StuntDouble*> atoms);

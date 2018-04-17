@@ -57,11 +57,11 @@ namespace OpenMD {
   BondAngleDistribution::BondAngleDistribution(SimInfo* info, 
                                                const string& sele, 
                                                double rCut, int nbins) 
-    : StaticAnalyser(info, nbins), selectionScript_(sele), seleMan_(info), 
+    : NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), seleMan_(info), 
       evaluator_(info) {
 
     setAnalysisType("Bond Angle Distribution");
-    string prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".bad");
     
     evaluator_.loadScriptString(sele);
@@ -84,7 +84,7 @@ namespace OpenMD {
     deltaTheta_ = (180.0) / nBins_;
     histogram_.resize(nBins_);
 
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
   
   BondAngleDistribution::~BondAngleDistribution() {
@@ -99,8 +99,8 @@ namespace OpenMD {
 
   
   void BondAngleDistribution::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
     
@@ -194,7 +194,10 @@ namespace OpenMD {
       }
     }
   }
-     
+
+  void BondAngleDistribution::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   void BondAngleDistribution::writeBondAngleDistribution() {
 

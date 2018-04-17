@@ -51,10 +51,12 @@
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
+#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  class BOPofR : public StaticAnalyser{
+  class BOPofR : public NonSpatialStatistics{
   public:
     BOPofR(SimInfo* info, 
            const std::string& sele, double rCut, unsigned int nbins,
@@ -63,6 +65,7 @@ namespace OpenMD {
     virtual ~BOPofR();
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   protected:
     virtual void initializeHistogram();
@@ -81,6 +84,7 @@ namespace OpenMD {
     int frameCounter_;
     RealType len_;
     RealType deltaR_;
+    Thermo* thermo_;
     
     std::map<std::pair<int,int>,int> m2Min;
     std::map<std::pair<int,int>,int> m2Max;
@@ -111,6 +115,7 @@ namespace OpenMD {
     virtual void collectHistogram(std::vector<RealType> q, 
                                   std::vector<ComplexType> what, 
                                   RealType distCOM);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     virtual void writeOrderParameter();
   };
 
@@ -123,6 +128,7 @@ namespace OpenMD {
     virtual void collectHistogram(std::vector<RealType> q, 
                                   std::vector<ComplexType> what, 
                                   RealType distCOM);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     virtual void writeOrderParameter();
   };  
 }

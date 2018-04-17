@@ -55,7 +55,7 @@ namespace OpenMD {
 						   const std::string& sele1,
 						   const std::string& sele2,
 						   double rCut, int ndensbins) 
-    : StaticAnalyser(info, ndensbins), 
+    : NonSpatialStatistics(info, sele1, sele2, ndensbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       rCut_(rCut) {
@@ -87,6 +87,10 @@ namespace OpenMD {
   TetrahedralityParamDens::~TetrahedralityParamDens() {
     sliceCount_.clear();
   }
+
+  void TetrahedralityParamDens::processDump() {
+    // call processFrame( snap )
+  }
     
   void TetrahedralityParamDens::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
@@ -103,8 +107,8 @@ namespace OpenMD {
     int isd1;
     int isd2;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    DumpReader reader(info_, dumpFilename_);    
+    dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     for (int istep = 0; istep < nFrames; istep += step_) {
@@ -219,8 +223,8 @@ namespace OpenMD {
     writeQdens();
   }
 
-  void TetrahedralityParamDens::processDump(const std::string& filename) {
-    // call processFrame( snap )
+  void TetrahedralityParamDens::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
   
   void TetrahedralityParamDens::writeQdens() {

@@ -43,7 +43,7 @@
 #define APPLICATIONS_STATICPROPS_SCDRDERPARAMETER_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 #include "utils/Tuple.hpp"
 namespace OpenMD {
   class SCDElem {
@@ -54,6 +54,7 @@ namespace OpenMD {
     std::string getSelection2() const {return sele2_;}
     std::string getSelection3() const {return sele3_;}
     RealType calcSCD(Snapshot* snapshot);
+    virtual ~SCDElem();
             
   private:
             
@@ -68,7 +69,7 @@ namespace OpenMD {
   };
 
 
-  class SCDOrderParameter : public StaticAnalyser{
+  class SCDOrderParameter : public NonSpatialStatistics{
   public:
     SCDOrderParameter(SimInfo* info, 
                       const std::string& sele1, const std::string& sele2, const std::string& sele3);
@@ -76,15 +77,18 @@ namespace OpenMD {
     SCDOrderParameter(SimInfo* info, 
                       const std::string& molname, int beginIndex, int endIndex);
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    virtual ~SCDOrderParameter();
 
   private:
     void writeSCD();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
     std::vector<SCDElem> scdElems_;
     std::vector<RealType> scdParam_;
             
     Snapshot* currentSnapshot_;
+    int nProcessed_;
 
             
   };

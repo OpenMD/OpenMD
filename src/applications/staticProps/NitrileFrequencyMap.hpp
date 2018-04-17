@@ -46,13 +46,13 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 #include "nonbonded/Electrostatic.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 using namespace std;
 namespace OpenMD {
   
-  class NitrileFrequencyMap : public StaticAnalyser {
+  class NitrileFrequencyMap : public NonSpatialStatistics {
     
   public:
     NitrileFrequencyMap(SimInfo* info, 
@@ -60,7 +60,7 @@ namespace OpenMD {
         
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
-    void NitrileFrequencyMap();
+    virtual ~NitrileFrequencyMap();
     
   private:
     bool excludeAtomPair(int atom1, int atom2);

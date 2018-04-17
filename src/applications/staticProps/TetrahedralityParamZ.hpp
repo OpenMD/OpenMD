@@ -78,7 +78,7 @@ namespace OpenMD {
    *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParamZ : public StaticAnalyser{
+  class TetrahedralityParamZ : public SlabStatistics{
   public:
     TetrahedralityParamZ(SimInfo* info, 
                          const std::string& sele1, const std::string& sele2, 
@@ -90,6 +90,7 @@ namespace OpenMD {
     virtual ~TetrahedralityParamZ();
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     void writeQz();

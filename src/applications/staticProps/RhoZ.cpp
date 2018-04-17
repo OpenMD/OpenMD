@@ -56,7 +56,7 @@ namespace OpenMD {
   
   RhoZ::RhoZ(SimInfo* info, 
 	     const std::string& sele, int nzbins, int axis)
-    : StaticAnalyser(info, nzbins), selectionScript_(sele), 
+    : SlabStatistics(info, sele, nzbins, axis), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), axis_(axis) {
 
     evaluator_.loadScriptString(sele);
@@ -82,75 +82,84 @@ namespace OpenMD {
       break;
     }
  
-    
-    setOutputName(getPrefix(filename) + ".RhoZ");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".RhoZ");
+
+    usePeriodicBoundaryConditions_ = 
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
 
-  void RhoZ::processFrame(Snapshot* snap_) {
-    StuntDouble* sd;
-    int ii;
+  RhoZ::~RhoZ() {
+    sliceSDLists_.clear();
+    zBox_.clear();
+    density_.clear();
+  }
 
-    bool usePeriodicBoundaryConditions_ = 
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    DumpReader reader(info_, dumpFilename_);    
+  void RhoZ::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    writeDensity();
+  }
 
-      for (unsigned int i = 0; i < nBins_; i++) {
-        sliceSDLists_[i].clear();
-      }
+  
+  void RhoZ::processFrame(Snapshot* currentSnapshot_) {
+    StuntDouble* sd;
+    int ii;
 
-      RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(axis_,axis_));
-      
-      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
-
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-      
-      //wrap the stuntdoubles into a cell      
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	   sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-        sd->setPos(pos);
-      }
-      
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	   sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
-        sliceSDLists_[binNo].push_back(sd);
-      }
-
-      //loop over the slices to calculate the densities
-      for (unsigned int i = 0; i < nBins_; i++) {
-        RealType totalMass = 0;
-        for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
-          totalMass += sliceSDLists_[i][k]->getMass();
-        }
-        density_[i] += totalMass/sliceVolume;
-      }
+    for (unsigned int i = 0; i < nBins_; i++) {
+      sliceSDLists_[i].clear();
     }
     
-    writeDensity();
-
-  }
-  
-  void RhoZ::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
+    RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    zBox_.push_back(hmat(axis_,axis_));
     
+    RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
+    
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    //wrap the stuntdoubles into a cell      
+    for (sd = seleMan_.beginSelected(ii); sd != NULL; 
+	 sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      if (usePeriodicBoundaryConditions_)
+	currentSnapshot_->wrapVector(pos);
+      sd->setPos(pos);
+    }
+    
+    //determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(ii); sd != NULL; 
+	 sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      // shift molecules by half a box to have bins start at 0
+      int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
+      sliceSDLists_[binNo].push_back(sd);
+    }
+    
+    //loop over the slices to calculate the densities
+    for (unsigned int i = 0; i < nBins_; i++) {
+      RealType totalMass = 0;
+      for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
+	totalMass += sliceSDLists_[i][k]->getMass();
+      }
+      density_[i] += totalMass/sliceVolume;
+    }
+  }
+
+  void RhoZ::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+      
   void RhoZ::writeDensity() {
 
     // compute average box length:

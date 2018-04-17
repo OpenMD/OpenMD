@@ -55,7 +55,7 @@ namespace OpenMD {
                            const std::string& sele,
 		       int nbins1, int nbins2,
 		       int axis1, int axis2)
-    : StaticAnalyser(info, nbins1), selectionScript_(sele), 
+    : SlabStatistics(info, nbins1), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), nBins2_(nbins2), axis1_(axis1), axis2_(axis2) {
     
     evaluator_.loadScriptString(sele);
@@ -103,8 +103,12 @@ namespace OpenMD {
 	axisLabel2_ = "y";
       break;
     }
-    
-    setOutputName(getPrefix(filename) + ".VelocityZ");
+
+    prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".VelocityZ");
+
+    bool usePeriodicBoundaryConditions_ = 
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
 
   VelocityZ::~VelocityZ() {
@@ -112,15 +116,18 @@ namespace OpenMD {
     velocity_.clear();
     zBox_.clear();
   }
+
+  void VelocityZ::processDump() {
+    // call processFrame( snap )
+  }
+
   
   void VelocityZ::processFrame(Snapshot* snap_) {
     StuntDouble* sd;
     int ii;
 
-    bool usePeriodicBoundaryConditions_ = 
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    DumpReader reader(info_, dumpFilename_);    
+    dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
 
@@ -184,10 +191,6 @@ namespace OpenMD {
       
     writeVelocity();
 
-  }
-
-  void VelocityZ::processDump(const std::string& filename) {
-    // call processFrame( snap )
   }
     
   void VelocityZ::writeVelocity() {

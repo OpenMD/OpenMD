@@ -44,17 +44,18 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
 
-  class DensityPlot : public StaticAnalyser{
+  class DensityPlot : public NonSpatialStatistics{
     
   public:
     DensityPlot(SimInfo* info, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
     
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
-    virtual ~DensityPlots();
+    virtual ~DensityPlot();
     
     int getNRBins() {
       return nRBins_; 
@@ -67,6 +68,7 @@ namespace OpenMD {
     
   private:
     Vector3d calcNewOrigin();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
     void writeDensity();            
     
@@ -84,6 +86,7 @@ namespace OpenMD {
     std::string cmSelectionScript_;
     SelectionManager cmSeleMan_;
     SelectionEvaluator cmEvaluator_;
+    bool usePeriodicBoundaryConditions_;
     
     
     };

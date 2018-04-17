@@ -54,7 +54,7 @@ namespace OpenMD {
   PipeDensity::PipeDensity(SimInfo* info, 
                            const std::string& sele, int nbins, int nbins2,
                            int axis)
-    : StaticAnalyser(info, nbins2), selectionScript_(sele), 
+    : NonSpatialStatistics(info, sele, nbins2), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), nBins2_(nbins), axis_(axis) {
     
     evaluator_.loadScriptString(sele);
@@ -91,82 +91,90 @@ namespace OpenMD {
       axisLabel2_ = "y";
       break;
     }
-
-    setOutputName(getPrefix(filename) + ".PipeDensity");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".PipeDensity");
+    
+    usePeriodicBoundaryConditions_ = 
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
 
-  void PipeDensity::processFrame(Snapshot* snap_) {
-    StuntDouble* sd;
-    int ii;
+  PipeDensity::~PipeDensity() {
+    sliceSDLists_.clear();
+    density_.clear();
+  }
 
-    bool usePeriodicBoundaryConditions_ = 
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    DumpReader reader(info_, dumpFilename_);    
+  void PipeDensity::processDump() {
+    dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+     writeDensity();
+  }
 
-      for (unsigned int i = 0; i < nBins2_; i++) {
-        for (unsigned int j = 0; j < nBins_; j++) {          
-          sliceSDLists_[i][j].clear();
-        }
-      }
+  
+  void PipeDensity::processFrame(Snapshot* currentSnapshot_) {
+    StuntDouble* sd;
+    int ii;
 
-      RealType sliceVolume = currentSnapshot_->getVolume() /(nBins2_ * nBins_);
-      Mat3x3d hmat = currentSnapshot_->getHmat();
 
-      RealType halfBox1_ = hmat(axis1_,axis1_) / 2.0;      
-      RealType halfBox2_ = hmat(axis2_,axis2_) / 2.0;      
-
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-      
-      //wrap the stuntdoubles into a cell      
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	   sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-        sd->setPos(pos);
-      }
-      
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	   sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        // shift molecules by half a box to have bins start at 0
-        int binNo1 = int(nBins2_ * (halfBox1_ + pos[axis1_]) /
-                         hmat(axis1_,axis1_));
-        int binNo2 = int(nBins_  * (halfBox2_ + pos[axis2_]) /
-                         hmat(axis2_,axis2_));
-        sliceSDLists_[binNo1][binNo2].push_back(sd);
-      }
-
-      //loop over the slices to calculate the densities
-      for (unsigned int i = 0; i < nBins2_; i++) {
-        for (unsigned int j = 0; j < nBins_; j++) {
-
-          RealType totalMass = 0;
-          for (unsigned int k = 0; k < sliceSDLists_[i][j].size(); ++k) {
-            totalMass += sliceSDLists_[i][j][k]->getMass();
-          }
-          density_[i][j] += totalMass/sliceVolume;
-        }
+    for (unsigned int i = 0; i < nBins2_; i++) {
+      for (unsigned int j = 0; j < nBins_; j++) {          
+	sliceSDLists_[i][j].clear();
       }
     }
-      
-    writeDensity();
-
+    
+    RealType sliceVolume = currentSnapshot_->getVolume() /(nBins2_ * nBins_);
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    
+    RealType halfBox1_ = hmat(axis1_,axis1_) / 2.0;      
+    RealType halfBox2_ = hmat(axis2_,axis2_) / 2.0;      
+    
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    //wrap the stuntdoubles into a cell      
+    for (sd = seleMan_.beginSelected(ii); sd != NULL; 
+	 sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      if (usePeriodicBoundaryConditions_)
+	currentSnapshot_->wrapVector(pos);
+      sd->setPos(pos);
+    }
+    
+    //determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(ii); sd != NULL; 
+	 sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      // shift molecules by half a box to have bins start at 0
+      int binNo1 = int(nBins2_ * (halfBox1_ + pos[axis1_]) /
+		       hmat(axis1_,axis1_));
+      int binNo2 = int(nBins_  * (halfBox2_ + pos[axis2_]) /
+		       hmat(axis2_,axis2_));
+      sliceSDLists_[binNo1][binNo2].push_back(sd);
+    }
+    
+    //loop over the slices to calculate the densities
+    for (unsigned int i = 0; i < nBins2_; i++) {
+      for (unsigned int j = 0; j < nBins_; j++) {
+	
+	RealType totalMass = 0;
+	for (unsigned int k = 0; k < sliceSDLists_[i][j].size(); ++k) {
+	  totalMass += sliceSDLists_[i][j][k]->getMass();
+	}
+	density_[i][j] += totalMass/sliceVolume;
+      }
+    }
   }
+  
+  
 
-  void PipeDensity::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
   
   void PipeDensity::writeDensity() {
 

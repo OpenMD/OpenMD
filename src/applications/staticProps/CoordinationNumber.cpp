@@ -54,7 +54,7 @@ namespace OpenMD {
 					 const std::string& sele1,
                                          const std::string& sele2,
                                          RealType rCut, int bins):
-    StaticAnalyser(info, bins), rCut_(rCut), bins_(bins),
+    NonSpatialStatistics(info, sele1, sele2, bins), rCut_(rCut), bins_(bins),
     sele1_(sele1), seleMan1_(info), evaluator1_(info),
     sele2_(sele2), seleMan2_(info), evaluator2_(info) {
 
@@ -86,8 +86,8 @@ namespace OpenMD {
 
     histogram_.clear();
     histogram_.resize(bins_, 0.0);
-    bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ =
+      info->getSimParams()->getUsePeriodicBoundaryConditions();
     
   }
 
@@ -96,10 +96,9 @@ namespace OpenMD {
   }
 
   
-  void CoordinationNumber::processDump(const std::string& filename) {
-    // call processFrame( snap )
-
-    DumpReader reader(info_, dumpFilename_);
+  void CoordinationNumber::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);
     int nFrames = reader.getNFrames();
     count_ = 0;
     
@@ -206,8 +205,8 @@ namespace OpenMD {
 	histogram_[whichBin] += 1;
       } else {
 	sprintf(painCave.errMsg, "Coordination Number: Error: "
-		"In frame, %d, object %d has CN %lf outside of range max.\n",
-		istep, sd1->getGlobalIndex(), cn );
+		"Object %d has CN %lf outside of range max.\n",
+		sd1->getGlobalIndex(), cn );
 	painCave.isFatal = 1;
 	simError();  
       }
@@ -246,6 +245,10 @@ namespace OpenMD {
       } 
     }   
     ofs.close();
+  }
+
+  void CoordinationNumber::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
 
   SCN::SCN(SimInfo* info,

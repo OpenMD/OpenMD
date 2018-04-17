@@ -58,11 +58,11 @@ namespace OpenMD {
 
   BOPofR::BOPofR(SimInfo* info, 
                  const std::string& sele, double rCut, unsigned int nbins, 
-                 RealType len) : StaticAnalyser(info, filename, nbins), 
+                 RealType len) : NonSpatialStatistics(info, sele, nbins), 
                                  selectionScript_(sele), 
                                  seleMan_(info), evaluator_(info) {
 
-    string prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".bo");
     setAnalysisType("Bond Order Parameter(r)");
 
@@ -140,10 +140,13 @@ namespace OpenMD {
     W_.resize(lMax_+1);
     W_hat_.resize(lMax_+1);
 
+    thermo_ = new Thermo(info_);
+    frameCounter_ = 0;
     
   }
   
   BOPofR::~BOPofR() {
+    delete thermo_;
   /*
     std::cerr << "Freeing stuff" << std::endl;
     for (int l = 0; l <= lMax_; l++) {
@@ -178,12 +181,9 @@ namespace OpenMD {
 
 
   void BOPofR::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-    
-    Thermo thermo(info_);
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -217,7 +217,7 @@ namespace OpenMD {
 
     
     
-    CenterOfMass = thermo.getCom();
+    CenterOfMass = thermo_->getCom();
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
@@ -364,6 +364,14 @@ namespace OpenMD {
         WofR_[whichBin]++;
       }
     }      
+  }
+
+  void FCCOfR::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+
+  void IcosahedralOfR::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
   
   void IcosahedralOfR::writeOrderParameter() {

@@ -51,11 +51,12 @@ namespace OpenMD {
   
   RippleOP::RippleOP(SimInfo* info, 
 		     const std::string& sele1, const std::string& sele2)
-    : StaticAnalyser(info, 1), 
+    : NonSpatialStatistics(info, sele1, sele2, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) { 
-    
-    setOutputName(getPrefix(filename) + ".rp2");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".rp2");
     
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);
@@ -100,155 +101,28 @@ namespace OpenMD {
       sdPairs_.push_back(std::make_pair(sd1, sd2));
     }
     
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
   }
-  
-  void RippleOP::processFrame(Snapshot* snap_) {
 
-    StuntDouble* j1;
-    StuntDouble* j2;
-    StuntDouble* sd3;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-      
-    DumpReader reader(info_, dumpFilename_);    
+  RippleOP::~RippleOP() {
+    sdPairs_.clear();
+    orderParamsHeadUpper_.clear();
+    orderParamsHeadLower_.clear();
+    orderParamsTail_.clear();
+  }
+
+  void RippleOP::processDump(){
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
-
+    
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      int nMolecules = info_->getNGlobalMolecules();
-      int i1;
-      int nUpper=0;
-      int nLower=0;
-      int nTail=0;
-      RealType sumZ = 0.0;
-      
-      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
-	   sd3 = seleMan2_.nextSelected(i1)) {
-	Vector3d pos1 = sd3->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos1);
-	sd3->setPos(pos1);
-      }
-
-      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
-	   sd3 = seleMan2_.nextSelected(i1)) {
-	Vector3d pos1 = sd3->getPos();
-	sumZ += pos1.z();
-      }
-      RealType avgZ = sumZ / (RealType) nMolecules;
-      
-      Mat3x3d orderTensorHeadUpper(0.0);
-      Mat3x3d orderTensorTail(0.0);
-      Mat3x3d orderTensorHeadLower(0.0);
-      for (j1 = seleMan1_.beginSelected(i1); j1 != NULL; 
-	   j1 = seleMan1_.nextSelected(i1)) {
-	Vector3d pos = j1->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-	Vector3d vecHeadUpper;
-	if (pos.z() >= avgZ){
-          AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
-          MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-          if (ma1.isDipole())
-            vecHeadUpper = j1->getDipole();
-          else
-            vecHeadUpper = j1->getA().transpose()*V3Z;
-	  nUpper++;
-	}
-	Vector3d vecHeadLower;
-	if (pos.z() <= avgZ){
-          AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
-          MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-          if (ma1.isDipole())
-            vecHeadLower = j1->getDipole();
-          else
-            vecHeadLower = j1->getA().transpose() * V3Z;
-	  nLower++;
-	}
-	orderTensorHeadUpper +=outProduct(vecHeadUpper, vecHeadUpper);
-	orderTensorHeadLower +=outProduct(vecHeadLower, vecHeadLower);
-      }
-      for (j2 = seleMan2_.beginSelected(i1); j2 != NULL; 
-	   j2 = seleMan2_.nextSelected(i1)) {
-        // The lab frame vector corresponding to the body-fixed 
-        // z-axis is simply the second column of A.transpose()
-        // or, identically, the second row of A itself.
-
-	Vector3d vecTail = j2->getA().transpose()*V3Z;
-	orderTensorTail +=outProduct(vecTail, vecTail);
-	nTail++;
-      }
-      
-      orderTensorHeadUpper /= (RealType) nUpper;
-      orderTensorHeadLower /= (RealType) nLower;
-      orderTensorHeadUpper -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
-      orderTensorHeadLower -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
-      
-      orderTensorTail /= (RealType) nTail;
-      orderTensorTail -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
-      
-      Vector3d eigenvaluesHeadUpper, eigenvaluesHeadLower, eigenvaluesTail;
-      Mat3x3d eigenvectorsHeadUpper, eigenvectorsHeadLower, eigenvectorsTail;
-      Mat3x3d::diagonalize(orderTensorHeadUpper, eigenvaluesHeadUpper, 
-			   eigenvectorsHeadUpper);
-      Mat3x3d::diagonalize(orderTensorHeadLower, eigenvaluesHeadLower, 
-			   eigenvectorsHeadLower);
-      Mat3x3d::diagonalize(orderTensorTail, eigenvaluesTail, eigenvectorsTail);
-      
-      int whichUpper(-1), whichLower(-1), whichTail(-1);
-      RealType maxEvalUpper = 0.0;
-      RealType maxEvalLower = 0.0;
-      RealType maxEvalTail = 0.0;
-      for(int k = 0; k< 3; k++){
-	if(fabs(eigenvaluesHeadUpper[k]) > maxEvalUpper){
-	  whichUpper = k;
-	  maxEvalUpper = fabs(eigenvaluesHeadUpper[k]);
-	}
-      }
-      RealType p2HeadUpper = 1.5 * maxEvalUpper;
-      for(int k = 0; k< 3; k++){
-	if(fabs(eigenvaluesHeadLower[k]) > maxEvalLower){
-	  whichLower = k;
-	  maxEvalLower = fabs(eigenvaluesHeadLower[k]);
-	}
-      }
-      RealType p2HeadLower = 1.5 * maxEvalLower;
-      for(int k = 0; k< 3; k++){
-	if(fabs(eigenvaluesTail[k]) > maxEvalTail){
-	  whichTail = k;
-	  maxEvalTail = fabs(eigenvaluesTail[k]);
-	}
-      }
-      RealType p2Tail = 1.5 * maxEvalTail;
-      
-      //the eigenvector is already normalized in SquareMatrix3::diagonalize
-      Vector3d directorHeadUpper = eigenvectorsHeadUpper.getColumn(whichUpper);
-      if (directorHeadUpper[0] < 0) {
-	directorHeadUpper.negate();
-      }
-      Vector3d directorHeadLower = eigenvectorsHeadLower.getColumn(whichLower);
-      if (directorHeadLower[0] < 0) {
-	directorHeadLower.negate();
-      }
-      Vector3d directorTail = eigenvectorsTail.getColumn(whichTail);
-      if (directorTail[0] < 0) {
-	directorTail.negate();
-      }   
-
-      OrderParam paramHeadUpper, paramHeadLower, paramTail;
-      paramHeadUpper.p2 = p2HeadUpper;
-      paramHeadUpper.director = directorHeadUpper;
-      paramHeadLower.p2 = p2HeadLower;
-      paramHeadLower.director = directorHeadLower;
-      paramTail.p2 = p2Tail;
-      paramTail.director = directorTail;
-      
-      orderParamsHeadUpper_.push_back(paramHeadUpper);
-      orderParamsHeadLower_.push_back(paramHeadLower);
-      orderParamsTail_.push_back(paramTail);       
-      
+      processFrame(currentSnapshot_);
     }
-
+    
     OrderParam sumOPHeadUpper, errsumOPHeadUpper;
     OrderParam sumOPHeadLower, errsumOPHeadLower;
     OrderParam sumOPTail, errsumOPTail;
@@ -310,8 +184,151 @@ namespace OpenMD {
     
   }
 
-  void RippleOP::processDump(const std::string& filename){
-    // call processFrame( snap )
+
+  
+  void RippleOP::processFrame(Snapshot* currentSnapshot_) {
+
+    StuntDouble* j1;
+    StuntDouble* j2;
+    StuntDouble* sd3;
+    
+    int nMolecules = info_->getNGlobalMolecules();
+    int i1;
+    int nUpper=0;
+    int nLower=0;
+    int nTail=0;
+    RealType sumZ = 0.0;
+    
+    for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
+	 sd3 = seleMan2_.nextSelected(i1)) {
+      Vector3d pos1 = sd3->getPos();
+      if (usePeriodicBoundaryConditions_)
+	currentSnapshot_->wrapVector(pos1);
+      sd3->setPos(pos1);
+    }
+    
+    for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; 
+	 sd3 = seleMan2_.nextSelected(i1)) {
+      Vector3d pos1 = sd3->getPos();
+      sumZ += pos1.z();
+    }
+    RealType avgZ = sumZ / (RealType) nMolecules;
+    
+    Mat3x3d orderTensorHeadUpper(0.0);
+    Mat3x3d orderTensorTail(0.0);
+    Mat3x3d orderTensorHeadLower(0.0);
+    for (j1 = seleMan1_.beginSelected(i1); j1 != NULL; 
+	 j1 = seleMan1_.nextSelected(i1)) {
+      Vector3d pos = j1->getPos();
+      if (usePeriodicBoundaryConditions_)
+	currentSnapshot_->wrapVector(pos);
+      Vector3d vecHeadUpper;
+      if (pos.z() >= avgZ){
+	AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
+	MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+	if (ma1.isDipole())
+	  vecHeadUpper = j1->getDipole();
+	else
+	  vecHeadUpper = j1->getA().transpose()*V3Z;
+	nUpper++;
+      }
+      Vector3d vecHeadLower;
+      if (pos.z() <= avgZ){
+	AtomType* atype1 = static_cast<Atom*>(j1)->getAtomType();          
+	MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+	if (ma1.isDipole())
+	  vecHeadLower = j1->getDipole();
+	else
+	  vecHeadLower = j1->getA().transpose() * V3Z;
+	nLower++;
+      }
+      orderTensorHeadUpper +=outProduct(vecHeadUpper, vecHeadUpper);
+      orderTensorHeadLower +=outProduct(vecHeadLower, vecHeadLower);
+    }
+    for (j2 = seleMan2_.beginSelected(i1); j2 != NULL; 
+	 j2 = seleMan2_.nextSelected(i1)) {
+      // The lab frame vector corresponding to the body-fixed 
+      // z-axis is simply the second column of A.transpose()
+      // or, identically, the second row of A itself.
+      
+      Vector3d vecTail = j2->getA().transpose()*V3Z;
+      orderTensorTail +=outProduct(vecTail, vecTail);
+      nTail++;
+    }
+    
+    orderTensorHeadUpper /= (RealType) nUpper;
+    orderTensorHeadLower /= (RealType) nLower;
+    orderTensorHeadUpper -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+    orderTensorHeadLower -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+    
+    orderTensorTail /= (RealType) nTail;
+    orderTensorTail -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+    
+    Vector3d eigenvaluesHeadUpper, eigenvaluesHeadLower, eigenvaluesTail;
+    Mat3x3d eigenvectorsHeadUpper, eigenvectorsHeadLower, eigenvectorsTail;
+    Mat3x3d::diagonalize(orderTensorHeadUpper, eigenvaluesHeadUpper, 
+			 eigenvectorsHeadUpper);
+    Mat3x3d::diagonalize(orderTensorHeadLower, eigenvaluesHeadLower, 
+			 eigenvectorsHeadLower);
+    Mat3x3d::diagonalize(orderTensorTail, eigenvaluesTail, eigenvectorsTail);
+    
+    int whichUpper(-1), whichLower(-1), whichTail(-1);
+    RealType maxEvalUpper = 0.0;
+    RealType maxEvalLower = 0.0;
+    RealType maxEvalTail = 0.0;
+    for(int k = 0; k< 3; k++){
+      if(fabs(eigenvaluesHeadUpper[k]) > maxEvalUpper){
+	whichUpper = k;
+	maxEvalUpper = fabs(eigenvaluesHeadUpper[k]);
+      }
+    }
+    RealType p2HeadUpper = 1.5 * maxEvalUpper;
+    for(int k = 0; k< 3; k++){
+      if(fabs(eigenvaluesHeadLower[k]) > maxEvalLower){
+	whichLower = k;
+	maxEvalLower = fabs(eigenvaluesHeadLower[k]);
+      }
+    }
+    RealType p2HeadLower = 1.5 * maxEvalLower;
+    for(int k = 0; k< 3; k++){
+      if(fabs(eigenvaluesTail[k]) > maxEvalTail){
+	whichTail = k;
+	maxEvalTail = fabs(eigenvaluesTail[k]);
+      }
+    }
+    RealType p2Tail = 1.5 * maxEvalTail;
+    
+    //the eigenvector is already normalized in SquareMatrix3::diagonalize
+    Vector3d directorHeadUpper = eigenvectorsHeadUpper.getColumn(whichUpper);
+    if (directorHeadUpper[0] < 0) {
+      directorHeadUpper.negate();
+    }
+    Vector3d directorHeadLower = eigenvectorsHeadLower.getColumn(whichLower);
+    if (directorHeadLower[0] < 0) {
+      directorHeadLower.negate();
+    }
+    Vector3d directorTail = eigenvectorsTail.getColumn(whichTail);
+    if (directorTail[0] < 0) {
+      directorTail.negate();
+    }   
+    
+    OrderParam paramHeadUpper, paramHeadLower, paramTail;
+    paramHeadUpper.p2 = p2HeadUpper;
+    paramHeadUpper.director = directorHeadUpper;
+    paramHeadLower.p2 = p2HeadLower;
+    paramHeadLower.director = directorHeadLower;
+    paramTail.p2 = p2Tail;
+    paramTail.director = directorTail;
+    
+    orderParamsHeadUpper_.push_back(paramHeadUpper);
+    orderParamsHeadLower_.push_back(paramHeadLower);
+    orderParamsTail_.push_back(paramTail);       
+    
+  }
+
+
+  void RippleOP::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
   
   void RippleOP::writeP2() {

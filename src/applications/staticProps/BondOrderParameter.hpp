@@ -51,6 +51,7 @@
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
 
@@ -84,14 +85,15 @@ namespace OpenMD {
    * distributions of atomic \f[ q_{l} \f] and \f[ \hat{w}_{l} \f]
    * values are then placed in .boq and .bow files.
    */
-  class BondOrderParameter : public StaticAnalyser{
+  class BondOrderParameter : public NonSpatialStatistics{
   public:
     BondOrderParameter(SimInfo* info, 
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondOrderParameter();
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     virtual void initializeHistogram();
@@ -137,6 +139,7 @@ namespace OpenMD {
     std::vector<ComplexType> W_;
     std::vector<ComplexType> W_hat_;
     int nBonds_, Nbonds_;
+    bool usePeriodicBoundaryConditions_;
 
   };
 }

@@ -43,16 +43,17 @@
 #define APPLICATIONS_STATICPROPS_MULTIPOLESUM_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
 
-  class MultipoleSum : public StaticAnalyser {
+  class MultipoleSum : public NonSpatialStatistics {
 
   public:
     MultipoleSum(SimInfo* info, 
                  const std::string& sele1, RealType rmax, int nrbins);
-    virtual void ~MultipoleSum();
+    virtual ~MultipoleSum();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
   private:
 
@@ -73,6 +74,17 @@ namespace OpenMD {
     std::string selectionScript1_;
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
+    bool usePeriodicBoundaryConditions_;
+
+    std::vector<RealType> dipoleHist; 
+    std::vector<RealType> qpoleHist; 
+    std::vector<int> lengthCount;
+    std::vector<Vector3d> totalDipole; 
+    std::vector<Mat3x3d> totalQpole; 
+    std::vector<int> dipoleCount; 
+    std::vector<int> qpoleCount; 
+    std::vector<RealType> dipoleProjection;
+;
 
   };
 

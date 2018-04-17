@@ -55,10 +55,11 @@ namespace OpenMD {
   TetrahedralityParam::TetrahedralityParam(SimInfo* info,  
                                            const std::string& sele,
                                            double rCut, int nbins) : 
-    StaticAnalyser(info, nbins), selectionScript_(sele), 
+    NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), 
     seleMan_(info), evaluator_(info) {
-    
-    setOutputName(getPrefix(filename) + ".q");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".q");
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -86,6 +87,11 @@ namespace OpenMD {
   void TetrahedralityParam::initializeHistogram() {
     std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
   }
+
+   void TetrahedralityParam::processDump() {
+    // call processFrame( snap )
+  }
+ 
   
   void TetrahedralityParam::processFrame(Snapshot* snap_) {
     Molecule* mol;
@@ -104,8 +110,8 @@ namespace OpenMD {
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    DumpReader reader(info_, dumpFilename_);    
+    dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
 
@@ -238,8 +244,9 @@ namespace OpenMD {
 	      << Tetrahedral_.size() << "\n";
   }
 
-  void TetrahedralityParam::processDump(const std::string& filename) {
-    // call processFrame( snap )
+
+  void TetrahedralityParam::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
   
   void TetrahedralityParam::collectHistogram(RealType Qk) {
@@ -284,7 +291,7 @@ namespace OpenMD {
       simError();  
     }
 
-    DumpReader reader(info_, dumpFilename_);    
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     if (nFrames == 1) {

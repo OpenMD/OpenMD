@@ -71,7 +71,7 @@ namespace OpenMD {
    *    liquid water," by J.R. Errington and P.G. Debenedetti, Nature
    *    409, pp. 318-321 (2001).
    */
-  class TetrahedralityHBMatrix : public StaticAnalyser{
+  class TetrahedralityHBMatrix : public NonSpatialStatistics{
   public:
     TetrahedralityHBMatrix(SimInfo* info, 
                            const std::string& sele, double rCut, double OOCut,
@@ -85,6 +85,7 @@ namespace OpenMD {
     virtual void initializeHistogram();
     virtual void collectHistogram(RealType q1, RealType q2);    
     void writeOutput();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;

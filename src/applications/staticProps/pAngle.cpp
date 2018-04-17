@@ -54,12 +54,14 @@ namespace OpenMD {
   
   pAngle::pAngle(SimInfo* info, 
                  const std::string& sele1, int nthetabins)
-    : StaticAnalyser(info, nthetabins), doVect_(true), doOffset_(false), 
+    : ShellStatistics(info, sele1, nthetabins), doVect_(true),
+      doOffset_(false), 
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info),  evaluator2_(info), 
       nThetaBins_(nthetabins) {
-    
-    setOutputName(getPrefix(filename) + ".pAngle");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".pAngle");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -73,12 +75,14 @@ namespace OpenMD {
   pAngle::pAngle(SimInfo* info, 
                  const std::string& sele1, const std::string& sele2, 
                  int nthetabins)
-    : StaticAnalyser(info, nthetabins), doVect_(false), doOffset_(false),
+    : ShellStatistics(info, sele1, sele2, nthetabins), doVect_(false),
+      doOffset_(false),
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       nThetaBins_(nthetabins) {
-    
-    setOutputName(getPrefix(filename) + ".pAngle");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".pAngle");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -96,12 +100,14 @@ namespace OpenMD {
 
   pAngle::pAngle(SimInfo* info,  
                  const std::string& sele1, int seleOffset, int nthetabins)
-    : StaticAnalyser(info, nthetabins), doVect_(false), doOffset_(true), 
+    : ShellStatistics(info, sele1, nthetabins), doVect_(false),
+      doOffset_(true), 
       doOffset2_(false), selectionScript1_(sele1),  
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
       seleOffset_(seleOffset),  nThetaBins_(nthetabins) {
-    
-    setOutputName(getPrefix(filename) + ".pAngle");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".pAngle");
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -115,13 +121,15 @@ namespace OpenMD {
   pAngle::pAngle(SimInfo* info,
                  const std::string& sele1, int seleOffset, int seleOffset2,
                  int nthetabins)
-    : StaticAnalyser(info, nthetabins), doVect_(false), doOffset_(true), 
+    : ShellStatistics(info, sele1, nthetabins), doVect_(false),
+      doOffset_(true), 
       doOffset2_(true), selectionScript1_(sele1),  
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       seleOffset_(seleOffset), seleOffset2_(seleOffset2),
       nThetaBins_(nthetabins) {
-    
-    setOutputName(getPrefix(filename) + ".pAngle");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".pAngle");
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -135,6 +143,11 @@ namespace OpenMD {
   pAngle::~pAngle() {
     histogram_.clear();
   }
+
+  void pAngle::processDump() {
+    // call processFrame( snap )
+  }
+
   
   void pAngle::processFrame(Snapshot* snap_) {
     StuntDouble* sd1;
@@ -145,7 +158,8 @@ namespace OpenMD {
 
 
     Thermo thermo(info_);
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     nProcessed_ = nFrames/step_;
@@ -279,10 +293,6 @@ namespace OpenMD {
     writeProbs();
     
   }
-
-  void Andle::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
   
   void pAngle::processHistogram() {
     
@@ -294,7 +304,10 @@ namespace OpenMD {
       histogram_[i] = double(count_[i] / double(atot));
     }    
   }
-  
+
+  void pAngle::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   void pAngle::writeProbs() {
 

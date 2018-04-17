@@ -44,7 +44,7 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace OpenMD {
 
-  class AngleR : public StaticAnalyser {
+  class AngleR : public ShellStatistics {
     
   public:
 
@@ -60,7 +60,9 @@ namespace OpenMD {
     }
         
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    void ~AngleR();
+    
   private:
 
     void processHistogram();

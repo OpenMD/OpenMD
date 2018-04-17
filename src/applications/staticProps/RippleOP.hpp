@@ -43,17 +43,19 @@
 #define APPLICATIONS_STATICPROPS_RIPPLEOP_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
 
-  class RippleOP : public StaticAnalyser{
+  class RippleOP : public NonSpatialStatistics{
 
   public:
 
     RippleOP(SimInfo* info, const std::string& sele1, const std::string& sele2);
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    virtual ~RippleOP();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     
@@ -74,6 +76,7 @@ namespace OpenMD {
     std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
     std::vector<OrderParam> orderParamsHeadUpper_, orderParamsHeadLower_, orderParamsTail_;
     OrderParam avgOPHeadUpper, avgOPHeadLower, errOPHeadUpper, errOPHeadLower, avgOPTail, errOPTail;
+    bool usePeriodicBoundaryConditions_;
     
   };
 }

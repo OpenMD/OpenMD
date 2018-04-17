@@ -60,7 +60,8 @@ namespace OpenMD {
       doSele3_(false), seleMan3_(info), evaluator3_(info) {
 
     setAnalysisType("Radial Distribution Function");
-    setOutputName(getPrefix(filename) + ".grto");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".grto");
 
     deltaR_ = len_ /(double) nBins_;
     deltaCosAngle_ = 2.0 / nAngleBins_;
@@ -91,12 +92,13 @@ namespace OpenMD {
                          const std::string& sele2, 
                          const std::string& sele3,
                          RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins),
+    : RadialDistrFunc(info, sele1, sele2, nrbins),
       nAngleBins_(nangleBins), len_(len),
       doSele3_(true), seleMan3_(info), evaluator3_(info), 
       selectionScript3_(sele3) {
     
-    setOutputName(getPrefix(filename) + ".grto");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".grto");
     
     deltaR_ = len_ /(double) nBins_;
     deltaCosAngle_ = 2.0 / nAngleBins_;

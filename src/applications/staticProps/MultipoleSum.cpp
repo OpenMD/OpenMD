@@ -53,7 +53,7 @@ namespace OpenMD {
   MultipoleSum::MultipoleSum(SimInfo* info, 
                              const std::string& sele1, RealType rmax, 
 			     int nrbins)
-    : StaticAnalyser(info, nrbins), nRBins_(nrbins), rMax_(rmax),
+    : NonSpatialStatistics(info, sele1, nrbins), nRBins_(nrbins), rMax_(rmax),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info) {
 
     string prefixFileName = info->getPrefixFileName();
@@ -76,10 +76,10 @@ namespace OpenMD {
     aveDproj_.resize(nRBins_, 0.0);
     deltaR_ = rMax_ / nRBins_;
 
-     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
 
-  void MultipoleSum::~MultipoleSum() {
+  MultipoleSum::~MultipoleSum() {
     aveDlength_.clear();
     aveQlength_.clear();
     aveDcount_.clear();
@@ -88,8 +88,8 @@ namespace OpenMD {
   }
   
   void MultipoleSum::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
-        DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     for (int i = 0; i < nFrames; i += step_) {
@@ -131,14 +131,6 @@ namespace OpenMD {
     int i1;
     Vector3d pos1;
     Vector3d ri;
-    std::vector<RealType> dipoleHist(nRBins_, 0.0); 
-    std::vector<RealType> qpoleHist(nRBins_, 0.0); 
-    std::vector<int> lengthCount(nRBins_, 0);
-    std::vector<Vector3d> totalDipole; 
-    std::vector<Mat3x3d> totalQpole; 
-    std::vector<int> dipoleCount; 
-    std::vector<int> qpoleCount; 
-    std::vector<RealType> dipoleProjection;
     Vector3d dipole;
     Mat3x3d qpole;
 
@@ -217,7 +209,10 @@ namespace OpenMD {
       }
     }
   }
-  
+
+  void MultipoleSum::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   void MultipoleSum::writeOut() {
 

@@ -55,7 +55,8 @@ namespace OpenMD {
     : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len) {
 
     setAnalysisType("Radial Distribution Function");
-    setOutputName(getPrefix(filename) + ".gofr");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".gofr");
 
     deltaR_ = len_ /nBins_;
     

@@ -78,7 +78,7 @@ namespace OpenMD {
    *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParamDens : public StaticAnalyser{
+  class TetrahedralityParamDens : public NonSpatialStatistics{
   public:
     TetrahedralityParamDens(SimInfo* info, 
 			    const std::string& sele1, const std::string& sele2, 
@@ -91,6 +91,7 @@ namespace OpenMD {
     virtual ~TetrahedralityParamDens();
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     void writeQdens();

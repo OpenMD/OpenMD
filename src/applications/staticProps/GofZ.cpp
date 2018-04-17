@@ -56,7 +56,8 @@ namespace OpenMD {
       histogram_.resize(nBins_);
       avgGofz_.resize(nBins_);
 
-      setOutputName(getPrefix(filename) + ".gofz");
+      string prefixFileName = info->getPrefixFileName();
+      setOutputName(prefixFileName + ".gofz");
 
       // Set the axis label for the privileged axis
       switch(axis_) {

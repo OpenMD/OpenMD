@@ -43,12 +43,12 @@
 #define APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class P2OrderParameter : public StaticAnalyser{
+  class P2OrderParameter : public NonSpatialStatistics{
   public:    
     P2OrderParameter(SimInfo* info,
                      const string& sele1);
@@ -57,7 +57,9 @@ namespace OpenMD {
     P2OrderParameter(SimInfo* info,  
                      const string& sele1, const int seleOffset);
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const string& filename);
+    virtual void processDump();
+    virtual ~P2OrderParameter();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     

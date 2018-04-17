@@ -46,14 +46,14 @@
 
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
 
 
   template<class T>
-  class Field : public StaticAnalyser{
+  class Field : public NonSpatialStatistics{
     
   public:
     Field(SimInfo* info, 
@@ -63,7 +63,7 @@ namespace OpenMD {
     
     virtual void processFrame(Snapshot* snap_);
     virtual void processFrame(int frame);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
     virtual void postProcess();
     virtual T getValue(StuntDouble* sd) = 0;
     virtual void writeField();

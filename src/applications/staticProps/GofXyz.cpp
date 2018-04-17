@@ -54,8 +54,9 @@ namespace OpenMD {
 		 const std::string& sele3, RealType len, int nrbins)
     : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len), 
       halfLen_(len/2), evaluator3_(info), seleMan3_(info) {
-    
-    setOutputName(getPrefix(filename) + ".gxyz");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".gxyz");
     
     evaluator3_.loadScriptString(sele3);
     if (!evaluator3_.isDynamic()) {

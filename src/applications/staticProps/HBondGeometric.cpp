@@ -46,6 +46,7 @@
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 
+
 #include <vector>
 
 namespace OpenMD {
@@ -54,11 +55,11 @@ namespace OpenMD {
                                  const std::string& sele1,
                                  const std::string& sele2,
                                  double rCut, double thetaCut, int nbins) :
-    StaticAnalyser(info, nbins),
+    NonSpatialStatistics(info, sele1, sele2, nbins),
     selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
     selectionScript2_(sele2), seleMan2_(info), evaluator2_(info) {
 
-    string prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".hbg");
 
     ff_ = info_->getForceField();
@@ -99,8 +100,8 @@ namespace OpenMD {
   }
 
   void HBondGeometric::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
     

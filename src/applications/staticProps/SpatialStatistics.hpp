@@ -67,7 +67,7 @@ namespace OpenMD {
 
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const string& filename);
+    virtual void processDump();
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos)=0;
     virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
@@ -89,7 +89,7 @@ namespace OpenMD {
 
     virtual int getBin(Vector3d pos);
     virtual void processFrame(int frame);
-    virtual void processDump(const string& filename);
+    virtual void processDump();
   protected:
     OutputData* z_;
     Mat3x3d hmat_;
@@ -103,6 +103,8 @@ namespace OpenMD {
   public: 
     ShellStatistics(SimInfo* info, const string& sele,
                     int nbins);
+    ShellStatistics(SimInfo* info, const string& sele1,
+                    const string& sele2, int nbins);
     virtual ~ShellStatistics();
     virtual int getBin(Vector3d pos);
 

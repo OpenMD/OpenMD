@@ -64,7 +64,7 @@ namespace OpenMD {
     virtual ~RadialDistrFunc() {}
         
     void processFrame(Snapshot* snap_);        
-    void processDump(const std::string& filename);
+    void processDump();
 
         
   protected:

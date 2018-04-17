@@ -55,7 +55,7 @@ namespace OpenMD {
 
      
   RhoR::RhoR(SimInfo* info, const std::string& sele, RealType len, int nrbins, RealType particleR)
-    : StaticAnalyser(info, nrbins), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len) {
+    : ShellStatistics(info, sele, nrbins), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len) {
     
     
     evaluator_.loadScriptString(sele);
@@ -63,60 +63,68 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
     
-    
     deltaR_ = len_ /nBins_;
     
     histogram_.resize(nBins_);
     avgRhoR_.resize(nBins_);
     particleR_ = particleR;
-    setOutputName(getPrefix(filename) + ".RhoR");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".RhoR");
+
+    std::fill(avgRhoR_.begin(), avgRhoR_.end(), 0.0);     
+    std::fill(histogram_.begin(), histogram_.end(), 0);
+
   }
+
+  RhoR::~RhoR() {
+    histogram_.clear();
+    avgRhoR_.clear();
+  }
+
   
+  void RhoR::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames/step_;
+    
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    
+    processHistogram(); 
+    writeRhoR();
+    
+  }
+
 
   void RhoR::processFrame(Snapshot* snap_) {
    
     Thermo thermo(info_);
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
+      
+    int i;    
+    StuntDouble* sd;
+    Vector3d CenterOfMass = thermo.getCom();      
     
-    std::fill(avgRhoR_.begin(), avgRhoR_.end(), 0.0);     
-    std::fill(histogram_.begin(), histogram_.end(), 0);
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      
-      int i;    
-      StuntDouble* sd;
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d CenterOfMass = thermo.getCom();      
-      
-      if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-      
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
-	Vector3d pos = sd->getPos();
-	Vector3d r12 = CenterOfMass - pos;
-
-	RealType distance = r12.length();
-	
-	if (distance < len_) {
-	  int whichBin = int(distance / deltaR_);
-	  histogram_[whichBin] += 1;
-	}
-	
-      }
-
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-
-    processHistogram(); 
-    writeRhoR();
-  }
-
-  void RhoR::processDump(const std::string& filename) {
-    // call processFrame( snap )
+    
+    //determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+      Vector3d pos = sd->getPos();
+      Vector3d r12 = CenterOfMass - pos;
+      
+      RealType distance = r12.length();
+      
+      if (distance < len_) {
+	int whichBin = int(distance / deltaR_);
+	histogram_[whichBin] += 1;
+      } 
+    }
   }
 
 
@@ -137,7 +145,6 @@ namespace OpenMD {
 
   }
 
- 
 
   void RhoR::writeRhoR() {
     std::ofstream rdfStream(outputFilename_.c_str());

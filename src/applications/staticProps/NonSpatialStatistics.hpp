@@ -1,4 +1,5 @@
-/* Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
+/*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -37,44 +38,59 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *
- *  NanoVolume.hpp
- *
- *  Created by Charles F. Vardeman II on 14 Dec 2006.
- *  @author  Charles F. Vardeman II
- *  @version $Id$
+ *  Created by Charles F. Vardeman II on 11/26/05.
+ *  @author  Charles F. Vardeman II 
+ *  @version $Id: SlabStatistics.hpp 1850 2013-02-20 15:39:39Z gezelter $
  *
  */
-#ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
-#define APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
+#ifndef APPLICATIONS_STATICPROPS_NONSPATIALSTATISTICS_HPP
+#define APPLICATIONS_STATICPROPS_NONSPATIALSTATISTICS_HPP
+
+#include <string>
 #include <vector>
-#include "config.h"
-#include "math/Vector3.hpp"
+#include <fstream>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/NonSpatialStatistics.hpp"
+#include "utils/Accumulator.hpp"
 
-#ifdef HAVE_QHULL
-#include "math/ConvexHull.hpp"
+using namespace std;
+namespace OpenMD {
+ 
+  class NonSpatialStatistics : public StaticAnalyser {
+    
+  public:
+    NonSpatialStatistics(SimInfo* info,
+                      const string& sele, int nbins);
+    NonSpatialStatistics(SimInfo* info,
+			 const string& sele1,
+			 const string& sele2, int nbins);
+    NonSpatialStatistics(SimInfo* info,
+			 const string& sele1,
+			 const string& sele2,
+			 const string& sele3, int nbins);
+    ~NonSpatialStatistics();
+
+    void addOutputData(OutputData* dat) {data_.push_back(dat);}
+    virtual void processFrame(Snapshot* snap_);//unnecessary?
+    virtual void processDump();
+    virtual void processFrame(int frame);
+    virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
+    virtual int getBin(Vector3d pos);
+    
+  protected:
+
+    Snapshot* currentSnapshot_;    
+    int nProcessed_;
+    string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+    string dumpFileName_;
+  };
+   
+}
 #endif
 
-namespace OpenMD {
-  class NanoVolume : public NonSpatialStatistics {
-  public:
-    NanoVolume(SimInfo* info, const std::string& sele);
-    
-    virtual void processFrame(Snapshot* snap_);
-    virtual void processDump();
-    virtual ~NanoVolume();
-    
-  private:    
-    Snapshot* currentSnapshot_;
-    std::string selectionScript_;
-    SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;
-    std::vector<StuntDouble*> theAtoms_;
-    int frameCounter_;
-    std::ofstream osq_;   
-  };
-}
-#endif /*NANOVOLUME_HPP_*/
+
+

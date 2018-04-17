@@ -29,7 +29,7 @@ gOO(r), from a file named tp4.dump"
 option	"input"		i	"input dump file"					string	typestr="filename" 	required
 option	"output"	o	"output file name"					string	typestr="filename"	optional
 option	"step"		n	"process every n frame"					int	default="1"		optional
-option	"nbins"    	b       "number of bins (general purpose)"				int	default="100"		optional
+option	"nbins"    	b       "number of bins (general purpose)"				int	default="1"		optional
 option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		optional
 option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		optional
 option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		optional
@@ -94,7 +94,6 @@ groupoption "rnemdr"    -       "shell-resolved RNEMD statistics (temperature, d
 groupoption "rnemdrt"   -       "shell and angle-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"
 groupoption "nitrile"   -       "electrostatic potential to frequency map based on the Cho nitrile fits" group="staticProps"
 groupoption "multipole" m       "average multipole moments contained within cutoff spheres as a function of radius" group="staticProps"
-groupoption "surfDiffusion" -	"X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion" group="staticProps"
 groupoption "cn"           -    "Coordination Number Distribution" group="staticProps"
 groupoption "scn"           -   "Secondary Coordination Number Distribution" group="staticProps"
 groupoption "gcn"           -   "Generalized Coordination Number Distribution" group="staticProps"

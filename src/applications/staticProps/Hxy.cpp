@@ -65,7 +65,7 @@ namespace OpenMD {
   Hxy::Hxy(SimInfo* info,
            const std::string& sele, int nbins_x, int nbins_y, int nbins_z,
            int nrbins)
-    : StaticAnalyser(info, nrbins), selectionScript_(sele),
+    : NonSpatialStatistics(info, sele, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), nBinsX_(nbins_x), nBinsY_(nbins_y),
       nBinsZ_(nbins_z) {
 
@@ -126,10 +126,10 @@ namespace OpenMD {
       bottom_->accumulator.push_back( new Accumulator() );
     data_.push_back(bottom_);
 
-    string prefixFileName = info->getPrefixFileName();
-    setOutputName(prefexFileName + ".Hxy");
+    string prefixFileName = info_->getPrefixFileName();
+    setOutputName(prefixFileName + ".Hxy");
 
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     std::cerr << "usePeriodicBoundaryConditions_ = " << usePeriodicBoundaryConditions_ << "\n";
   }
 
@@ -145,9 +145,9 @@ namespace OpenMD {
 
   
   void Hxy::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
+    string dumpFileName_ = info_->getDumpFileName();
     
-    DumpReader reader(info_, dumpFilename_);    
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
     

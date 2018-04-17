@@ -52,13 +52,13 @@ namespace OpenMD {
   
   NanoLength::NanoLength(SimInfo* info,
 			 const std::string& sele)
-    : StaticAnalyser(info, 1), selectionScript_(sele), seleMan_(info),
+    : NonSpatialStatistics(info, sele, 1), selectionScript_(sele), seleMan_(info),
       evaluator_(info) {
     
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".length");
     
-    osq.open(getOutputFileName().c_str());
+    osq_.open(getOutputFileName().c_str());
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -67,13 +67,13 @@ namespace OpenMD {
     frameCounter_ = 0;
   }
 
-  void NanoLength::~NanoLength() {
+  NanoLength::~NanoLength() {
     theAtoms_.clear();
   }
   
-  void NanoLength::processDump) {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);
+  void NanoLength::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
     

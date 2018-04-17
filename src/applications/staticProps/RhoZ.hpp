@@ -50,11 +50,11 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/SpatialStatistics.hpp"
 
 namespace OpenMD {
   
-  class RhoZ : public StaticAnalyser {
+  class RhoZ : public SlabStatistics {
     
   public:
     RhoZ(SimInfo* info, const std::string& sele, int nzbins, int axis=2);
@@ -64,7 +64,9 @@ namespace OpenMD {
     }
     
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    virtual ~RhoZ();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     
@@ -86,6 +88,7 @@ namespace OpenMD {
     int axis_;
     std::string axisLabel_;
 
+    bool usePeriodicBoundaryConditions_;
   };
   
 }

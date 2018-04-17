@@ -43,9 +43,10 @@
 #define APPLICATIONS_STATICPROPS_RHOR_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/SpatialStatistics.hpp"
 namespace OpenMD {
 
-  class RhoR : public StaticAnalyser {
+  class RhoR : public ShellStatistics {
     
   public:
 
@@ -61,7 +62,9 @@ namespace OpenMD {
     }
         
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump(const std::string& filename);
+    virtual void processDump();
+    virtual ~RhoR();
+    
   private:
 
     void processHistogram();

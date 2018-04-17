@@ -55,11 +55,11 @@ namespace OpenMD {
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
                                          const std::string& sele,
                                          double rCut, int nbins) 
-    : StaticAnalyser(info, nbins), selectionScript_(sele), seleMan_(info),
+    : NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), seleMan_(info),
       evaluator_(info) {
     
     setAnalysisType("Bond Order Parameters");
-    string prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".bo");
 
     evaluator_.loadScriptString(sele);
@@ -68,7 +68,7 @@ namespace OpenMD {
     }
 
     
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
     // Set up cutoff radius and order of the Legendre Polynomial:
 
     rCut_ = rCut;
@@ -166,8 +166,8 @@ namespace OpenMD {
   }
 
   void BondOrderParameter::processDump() {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
 
@@ -196,7 +196,7 @@ namespace OpenMD {
       for (int m = -l; m <= l; m++){
         Q2_[l] += norm(QBar_[std::make_pair(l,m)]);
       }
-      Q[l] = sqrt(Q2_[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
+      Q_[l] = sqrt(Q2_[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
     }
     
     // Find Third Order Invariant W_l
@@ -216,7 +216,7 @@ namespace OpenMD {
       W_hat_[l] = W_[l] / pow(Q2_[l], RealType(1.5));
     }
     
-    writeOrderParameter(Q, W_hat_);    
+    writeOrderParameter(Q_, W_hat_);    
   }
 
   
@@ -249,7 +249,7 @@ namespace OpenMD {
         
         for (int l = 0; l <= lMax_; l++) {
           for (int m = -l; m <= l; m++) {
-            q[std::make_pair(l,m)] = 0.0;
+            q_[std::make_pair(l,m)] = 0.0;
           }
         }
         
@@ -284,7 +284,7 @@ namespace OpenMD {
                   sphericalHarmonic.setL(l);
                   for(int m = -l; m <= l; m++){
                     sphericalHarmonic.setM(m);
-                    q[std::make_pair(l,m)] += sphericalHarmonic.getValueAt(costheta, phi);
+                    q_[std::make_pair(l,m)] += sphericalHarmonic.getValueAt(costheta, phi);
 
                   }
                 }
@@ -298,9 +298,9 @@ namespace OpenMD {
         for (int l = 0; l <= lMax_; l++) {
           q2_[l] = 0.0;
           for (int m = -l; m <= l; m++){
-            q[std::make_pair(l,m)] /= (RealType)nBonds_; 
+            q_[std::make_pair(l,m)] /= (RealType)nBonds_; 
 
-            q2_[l] += norm(q[std::make_pair(l,m)]);
+            q2_[l] += norm(q_[std::make_pair(l,m)]);
           }
           q_l_[l] = sqrt(q2_[l] * 4.0 * Constants::PI / (RealType)(2*l + 1));
         }
@@ -314,8 +314,8 @@ namespace OpenMD {
             for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
               int m2 = m2Min[lm] + mmm;
               int m3 = -m1-m2;
-              w_[l] += w3j[lm][mmm] * q[lm] * 
-                q[std::make_pair(l,m2)] *  q[std::make_pair(l,m3)];
+              w_[l] += w3j[lm][mmm] * q_[lm] * 
+                q_[std::make_pair(l,m2)] *  q_[std::make_pair(l,m3)];
             }
           }
           
@@ -334,6 +334,9 @@ namespace OpenMD {
     
   }
 
+  void BondOrderParameter::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   void BondOrderParameter::collectHistogram(std::vector<RealType> q, 
                                             std::vector<ComplexType> what) {

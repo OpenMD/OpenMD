@@ -49,7 +49,11 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
-
+#include "applications/staticProps/NonSpatialStatistics.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/Constants.hpp"
+#include "math/Vector3.hpp"
+#include "math/SphericalHarmonic.hpp"
 
 namespace OpenMD {
 
@@ -60,19 +64,20 @@ namespace OpenMD {
    *  Comptes bond angle distribution for nearest neighbors.
    *BondAngleDistribution
    */
-  class BondAngleDistribution : public StaticAnalyser{
+  class BondAngleDistribution : public NonSpatialStatistics{
   public:
     BondAngleDistribution(SimInfo* info, 
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondAngleDistribution();
     virtual void processFrame(Snapshot* snap_);
-    virtual void processDump()
+    virtual void processDump();
     
   private:
     virtual void initializeHistogram();
        
     void writeBondAngleDistribution();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
@@ -100,6 +105,7 @@ namespace OpenMD {
     std::vector<ComplexType> W_;
     std::vector<ComplexType> W_hat_;
     int Nbonds_;
+    bool usePeriodicBoundaryConditions_;
 
   };
 }

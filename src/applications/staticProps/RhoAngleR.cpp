@@ -52,7 +52,7 @@ namespace OpenMD {
 
      
   AngleR::AngleR(SimInfo* info, const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
+    : ShellStatistics(info), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
     
     
     evaluator_.loadScriptString(sele);
@@ -66,35 +66,52 @@ namespace OpenMD {
     histogram_.resize(nRBins_);
     count_.resize(nRBins_);
     avgAngleR_.resize(nRBins_);
-    setOutputName(getPrefix(filename) + ".AngleR");
-  }
-  
+    
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".AngleR");
 
-  void AngleR::processFrame(Snapshot* snap_) {
-    
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
-    
     std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);     
     std::fill(histogram_.begin(), histogram_.end(), 0.0);
     std::fill(count_.begin(), count_.end(), 0);
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      
+
+  }
+
+  void AngleR::~AngleR() {
+    histogram_.clear();
+    avgAngleR_.clear();
+    count_.clear();	
+  }
+
+   void AngleR::processDump() {
+     dumpFileName_ = info->getDumpFileName();
+     DumpReader reader(info_, dumpFileName_);    
+     int nFrames = reader.getNFrames();
+     nProcessed_ = nFrames/step_;
+     
+     for (int istep = 0; istep < nFrames; istep += step_) {
+       reader.readFrame(istep);
+       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+       processFrame(currentSnapshot_);
+     }
+     processHistogram(); 
+     writeAngleR();
+   }
+
+
+  
+  void AngleR::processFrame(Snapshot* snap_) { 
       int i;    
       StuntDouble* sd;
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d CenterOfMass = info_->getCom();      
       
+      Vector3d CenterOfMass = info_->getCom();      
       
       if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
       }
       
       //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+      for (sd = seleMan_.beginSelected(i); sd != NULL;
+	   sd = seleMan_.nextSelected(i)) {
 	Vector3d pos = sd->getPos();
 	Vector3d r1 = CenterOfMass - pos;
 	// only do this if the stunt double actually has a vector associated
@@ -117,16 +134,9 @@ namespace OpenMD {
 	
       }
 
-    }
-
-    processHistogram(); 
-    writeAngleR();
   }
 
-  void AngleR::processDump(const std::string& filename) {
-    // call processFrame( snap )
-  }
-
+ 
   void AngleR::processHistogram() {
 
     for(int i = 0 ; i < histogram_.size(); ++i){
@@ -136,12 +146,12 @@ namespace OpenMD {
       else 
 	avgAngleR_[i] = 0.0;
 
-    std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i] << "\n";  
+    std::cerr << " count = " << count_[i]
+	      << " avgAngle = " << avgAngleR_[i] << "\n";  
     }
 
   }
 
- 
 
   void AngleR::writeAngleR() {
     std::ofstream rdfStream(outputFilename_.c_str());
@@ -155,7 +165,8 @@ namespace OpenMD {
         
     } else {
 
-      sprintf(painCave.errMsg, "AngleR: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "AngleR: unable to open %s\n",
+	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }

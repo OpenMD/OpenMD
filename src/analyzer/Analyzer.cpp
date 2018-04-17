@@ -92,7 +92,6 @@
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
-#include "applications/staticProps/SurfaceDiffusion.hpp"
 #include "applications/staticProps/CoordinationNumber.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/PotDiff.hpp"

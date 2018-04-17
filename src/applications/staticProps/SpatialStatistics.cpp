@@ -59,8 +59,9 @@ namespace OpenMD {
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-        
-    setOutputName(getPrefix(filename) + ".spst");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".spst");
   }
 
   SpatialStatistics::~SpatialStatistics() {
@@ -77,9 +78,9 @@ namespace OpenMD {
   }
 
 
-  void SpatialStatistics::processDump(const string& filename) {
-
-    DumpReader reader(info_, dumpFilename_);    
+  void SpatialStatistics::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
 
@@ -222,6 +223,50 @@ namespace OpenMD {
     }
   }
 
+  ShellStatistics::ShellStatistics(SimInfo* info,  
+                                   const string& sele1,
+				   const string& sele2, int nbins) : 
+    SpatialStatistics(info, sele1, nbins), coordinateOrigin_(V3Zero) {
+    
+    binWidth_ = 1.0;
+
+    Globals* simParams = info->getSimParams();
+    RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
+    bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
+    
+    if (hasCoordinateOrigin) {
+        std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
+        if (co.size() != 3) {
+          sprintf(painCave.errMsg,
+                  "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
+                  "\tthere should be 3 parameters, but %lu were specified.\n", 
+                  co.size());
+          painCave.isFatal = 1;
+          simError();      
+        }
+        coordinateOrigin_.x() = co[0];
+        coordinateOrigin_.y() = co[1];
+        coordinateOrigin_.z() = co[2];
+    } else {
+      coordinateOrigin_ = V3Zero;
+    }
+    
+    r_ = new OutputData;
+    r_->units =  "Angstroms";
+    r_->title =  "R";
+    r_->dataType = odtReal;
+    r_->dataHandling = odhAverage;
+    r_->accumulator.reserve(nbins);
+    for (int i = 0; i < nbins; i++)
+      r_->accumulator.push_back( new Accumulator() );    
+    data_.push_back(r_);
+
+    for (int i = 0; i < nbins; i++) {
+      RealType r = (((RealType)i + 0.5) * binWidth_);
+      dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
+    }
+  }
+  
   ShellStatistics::~ShellStatistics() {
   }
 

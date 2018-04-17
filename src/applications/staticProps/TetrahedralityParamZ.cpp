@@ -55,7 +55,7 @@ namespace OpenMD {
                                              const std::string& sele1,
                                              const std::string& sele2,
                                              double rCut, int nzbins, int axis) 
-    : StaticAnalyser(info, nzbins), 
+    : SlabStatistics(info, nzbins), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       axis_(axis) {
@@ -90,14 +90,19 @@ namespace OpenMD {
     sliceCount_.resize(nBins_);    
     std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
-    
-    setOutputName(getPrefix(filename) + ".Qz");
+
+    prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".Qz");
   }
   
   TetrahedralityParamZ::~TetrahedralityParamZ() {
     sliceQ_.clear();
     sliceCount_.clear();
     zBox_.clear();
+  }
+
+  void TetrahedralityParamZ::processDump(){
+    // call processFrame( snap )
   }
     
   void TetrahedralityParamZ::processFrame(Snapshot* snap_) {
@@ -116,8 +121,8 @@ namespace OpenMD {
     int isd2;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-
-    DumpReader reader(info_, dumpFilename_);    
+    dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     for (int istep = 0; istep < nFrames; istep += step_) {
@@ -216,8 +221,8 @@ namespace OpenMD {
     writeQz();
   }
 
-  void TetrahedralityParamZ::processDump(const std::string& filename){
-    // call processFrame( snap )
+  void TetrahedralityParamZ::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
   
   void TetrahedralityParamZ::writeQz() {

@@ -43,17 +43,17 @@
 #define APPLICATIONS_STATICPROPS_OBJECTCOUNT_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 using namespace std;
 namespace OpenMD {
   
-  class ObjectCount : public StaticAnalyser{
+  class ObjectCount : public NonSpatialStatistics{
   public:
     ObjectCount(SimInfo* info, const std::string& sele);
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
-    void ~ObjectCount();
+    virtual ~ObjectCount();
     
   private:
     void writeCounts();

@@ -49,9 +49,10 @@ namespace OpenMD {
 
   GofRZ::GofRZ(SimInfo* info, const std::string& sele1, 
                const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins, int axis)
-    : RadialDistrFunc(info, , sele1, sele2, nrbins), len_(len), zLen_(zlen), nZBins_(nZBins), axis_(axis){
+    : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len), zLen_(zlen), nZBins_(nZBins), axis_(axis){
 
-    setOutputName(getPrefix(filename) + ".gofrz");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".gofrz");
 
     deltaR_ = len_ / (double) nBins_;
     deltaZ_ = zLen_ / (double)nZBins_; 

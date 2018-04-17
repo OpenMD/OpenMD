@@ -48,7 +48,7 @@
 #define APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
 
@@ -63,7 +63,7 @@ namespace OpenMD {
    *   H. E. Stanley, Phys. Rev. E 62(1), 579-587 (2000).
    *
    */
-  class HBondGeometric : public StaticAnalyser {
+  class HBondGeometric : public NonSpatialStatistics {
   public:
 
     HBondGeometric(SimInfo* info, 

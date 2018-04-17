@@ -48,21 +48,23 @@
 #define APPLICATIONS_STATICPROPS_POTDIFF_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "brains/ForceManager.hpp"
 #include "utils/Accumulator.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
 
   //! Potential Energy differences with charges turned off.
   /*!  
    */
-  class PotDiff : public StaticAnalyser{
+  class PotDiff : public NonSpatialStatistics{
   public:
     //! Default constructor
     PotDiff(SimInfo* info, const std::string& sele);
     //! Process the data
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
+    virtual ~PotDiff();
     
   private:
     //! Write the data
@@ -81,6 +83,9 @@ namespace OpenMD {
     //! persistent SelectionEvaluator
     SelectionEvaluator evaluator_;
     std::vector<bool> selectionWasFlucQ_;
+    ForceManager* forceMan_;
+    Thermo* thermo_;
+    
   };
 }
 

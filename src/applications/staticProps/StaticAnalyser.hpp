@@ -78,7 +78,7 @@ namespace OpenMD {
     
     virtual ~StaticAnalyser() {}
     virtual void processFrame(Snapshot* snap_)=0;
-    virtual void processDump(const std::string& filename)=0;
+    virtual void processDump()=0;
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;

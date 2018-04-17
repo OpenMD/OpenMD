@@ -58,7 +58,7 @@ namespace OpenMD {
                                                  RealType rCut, 
                                                  RealType voxelSize,
                                                  RealType gaussWidth) 
-    : StaticAnalyser(info, 1), 
+    : NonSpatialStatistics(info, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info),  seleMan2_(info), evaluator1_(info), evaluator2_(info),
       rCut_(rCut), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
@@ -91,11 +91,15 @@ namespace OpenMD {
 
       }
     }   
-    
-    setOutputName(getPrefix(filename) + ".Qxyz");
+    prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".Qxyz");
   }
   
   TetrahedralityParamXYZ::~TetrahedralityParamXYZ() {
+  }
+
+  void TetrahedralityParamXYZ::processDump() {
+    // call processFrame( snap )
   }
     
   void TetrahedralityParamXYZ::processFrame(Snapshot* snap_) {
@@ -121,8 +125,9 @@ namespace OpenMD {
     int kSqLim = kMax*kMax;
     cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = " 
 	 << kMax << " kSqLim = " << kSqLim << "\n";
-    
-    DumpReader reader(info_, dumpFilename_);    
+
+    dumpFileName_ = info->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
     for (int istep = 0; istep < nFrames; istep += step_) {
@@ -268,11 +273,10 @@ namespace OpenMD {
     writeQxyz();
   }
 
-  void TetrahedralityParamXYZ::processDump(const std::string& filename) {
-    // call processFrame( snap )
+  void TetrahedralityParamXYZ::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
-
-    
+  
   void TetrahedralityParamXYZ::writeQxyz() {
 
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();

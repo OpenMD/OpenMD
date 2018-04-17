@@ -80,7 +80,7 @@ namespace OpenMD {
    *    arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParam : public StaticAnalyser{
+  class TetrahedralityParam : public NonSpatialStatistics{
   public:
     TetrahedralityParam(SimInfo* info, 
 			const std::string& sele, double rCut, int nbins);
@@ -88,6 +88,7 @@ namespace OpenMD {
     virtual ~TetrahedralityParam();
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     virtual void initializeHistogram();

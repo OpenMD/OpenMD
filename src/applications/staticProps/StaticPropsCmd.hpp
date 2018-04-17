@@ -51,7 +51,7 @@ struct gengetopt_args_info
   int step_arg;	/**< @brief process every n frame (default='1').  */
   char * step_orig;	/**< @brief process every n frame original value given at command line.  */
   const char *step_help; /**< @brief process every n frame help description.  */
-  int nbins_arg;	/**< @brief number of bins (general purpose) (default='100').  */
+  int nbins_arg;	/**< @brief number of bins (general purpose) (default='1').  */
   char * nbins_orig;	/**< @brief number of bins (general purpose) original value given at command line.  */
   const char *nbins_help; /**< @brief number of bins (general purpose) help description.  */
   int nbins_x_arg;	/**< @brief number of bins in x axis (default='100').  */
@@ -173,7 +173,6 @@ struct gengetopt_args_info
   const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *nitrile_help; /**< @brief electrostatic potential to frequency map based on the Cho nitrile fits help description.  */
   const char *multipole_help; /**< @brief average multipole moments contained within cutoff spheres as a function of radius help description.  */
-  const char *surfDiffusion_help; /**< @brief X, Y, and R (surface diffusion if Z exposed and bulk immobile) diffusion help description.  */
   const char *cn_help; /**< @brief Coordination Number Distribution help description.  */
   const char *scn_help; /**< @brief Secondary Coordination Number Distribution help description.  */
   const char *gcn_help; /**< @brief Generalized Coordination Number Distribution help description.  */
@@ -255,7 +254,6 @@ struct gengetopt_args_info
   unsigned int rnemdrt_given ;	/**< @brief Whether rnemdrt was given.  */
   unsigned int nitrile_given ;	/**< @brief Whether nitrile was given.  */
   unsigned int multipole_given ;	/**< @brief Whether multipole was given.  */
-  unsigned int surfDiffusion_given ;	/**< @brief Whether surfDiffusion was given.  */
   unsigned int cn_given ;	/**< @brief Whether cn was given.  */
   unsigned int scn_given ;	/**< @brief Whether scn was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */

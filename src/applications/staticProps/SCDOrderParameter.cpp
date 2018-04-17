@@ -119,6 +119,10 @@ namespace OpenMD {
 
   }
 
+  SCDElem::~SCDElem() {
+    tuples_.clear();
+  }
+
   RealType SCDElem::calcSCD(Snapshot* snapshot) {
     std::vector<SDTuple3>::iterator i;
     Vector3d normal(0.0, 0.0, 1.0);
@@ -151,9 +155,10 @@ namespace OpenMD {
 
   SCDOrderParameter::SCDOrderParameter(SimInfo* info,
                                        const std::string& sele1, const std::string& sele2, const std::string& sele3)
-    : StaticAnalyser(info, 1) {
+    : NonSpatialStatistics(info, sele1, sele2, sele3, 1) {
 
-    setOutputName(getPrefix(filename) + ".scd");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".scd");
 
     scdElems_.push_back(SCDElem(info, sele1, sele2, sele3));
     scdParam_.resize(scdElems_.size());
@@ -163,9 +168,10 @@ namespace OpenMD {
 
   SCDOrderParameter::SCDOrderParameter(SimInfo* info, 
                                        const std::string& molname, int beginIndex, int endIndex)
-    : StaticAnalyser(info, 1) {
+    : NonSpatialStatistics(info, molname, 1) {
 
-    setOutputName(getPrefix(filename) + ".scd");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".scd");
 
     assert(beginIndex >=0 && endIndex >=0 && beginIndex <= endIndex - 2);
     for (int i = beginIndex; i <= endIndex -2 ; ++i) {
@@ -181,35 +187,38 @@ namespace OpenMD {
     std::fill(scdParam_.begin(), scdParam_.end(), 0.0);
   }
 
+  SCDOrderParameter::~SCDOrderParameter() {
+    scdElems_.clear();
+    scdParam_.clear();
+  }
+  
 
-  void SCDOrderParameter::processFrame(Snapshot* snap_) {
-
-    DumpReader reader(info_, dumpFilename_);    
+  void SCDOrderParameter::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames /step_;
 
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-      for (std::size_t j = 0; j < scdElems_.size(); ++j) {
-        scdParam_[j] += scdElems_[j].calcSCD(currentSnapshot_);
-      }
-        
+      processFrame(currentSnapshot_);
     }
-
-    int nProcessed = nFrames /step_;
-    for (std::size_t j = 0; j < scdElems_.size(); ++j) {
-      scdParam_[j] /= nProcessed;
-    }
-
+    
     writeSCD();
+  }
   
+  void SCDOrderParameter::processFrame(Snapshot* currentSnapshot_) {
+    for (std::size_t j = 0; j < scdElems_.size(); ++j) {
+      scdParam_[j] += scdElems_[j].calcSCD(currentSnapshot_);
+    }
+    
   }
 
-  void SCDOrderParameter::processDump(const std::string& filename) {
-    // call processFrame( snap )
+  void SCDOrderParameter::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
-
+ 
   void SCDOrderParameter::writeSCD() {
 
     std::ofstream os(getOutputFileName().c_str());
@@ -222,7 +231,7 @@ namespace OpenMD {
     }
     
     for (std::size_t i = 0; i < scdElems_.size(); ++i) {
-      os <<  scdParam_[i]<< "\t";
+      os <<  scdParam_[i] / nProcessed_ << "\t";
     }
     os << std::endl;
   }

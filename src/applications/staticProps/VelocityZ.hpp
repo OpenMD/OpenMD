@@ -54,7 +54,7 @@
 
 namespace OpenMD {
   
-  class VelocityZ : public StaticAnalyser {
+  class VelocityZ : public SlabStatistics {
     
   public:
     VelocityZ(SimInfo* info,

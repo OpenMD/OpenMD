@@ -88,8 +88,8 @@ namespace OpenMD {
   void RadialDistrFunc::processFrame(Snapshot* snap_) {
     
     preProcess();
-    
-    DumpReader reader(info_, dumpFilename_);    
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames / step_;
 
@@ -153,7 +153,7 @@ namespace OpenMD {
     writeRdf();
   }
 
-  void RadialDistrFunc::processDump(const std::string& filename) {
+  void RadialDistrFunc::processDump() {
     // Call processFrame( snap )
   }
   

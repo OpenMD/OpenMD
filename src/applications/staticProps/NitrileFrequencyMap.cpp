@@ -53,7 +53,7 @@ namespace OpenMD {
   NitrileFrequencyMap::NitrileFrequencyMap(SimInfo* info,
                                            const std::string& sele1, 
                                            int nbins)
-    : StaticAnalyser(info, nbins), info_(info), 
+    : NonSpatialStatistics(info, sele1, nbins), info_(info), 
       selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_) {
 
     string prefixFileName = info->getPrefixFileName();
@@ -146,7 +146,7 @@ namespace OpenMD {
     
   }
 
-  void NitrileFrequencyMap::~NitrileFrequencyMap() {
+  NitrileFrequencyMap::~NitrileFrequencyMap() {
     histogram_.clear();
     freqs_.clear();
     excludesForAtom.clear();
@@ -163,9 +163,9 @@ namespace OpenMD {
   }
 
   
-  void NitrileFrequencyMap::processDump(const std::string& filename) {
-    string dumpFileName_ = info->getDumpFileName();
-    DumpReader reader(info_, dumpFilename_);    
+  void NitrileFrequencyMap::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     
     nProcessed_ = nFrames/step_;

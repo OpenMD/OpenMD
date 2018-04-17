@@ -51,7 +51,7 @@ namespace OpenMD {
 
   ObjectCount::ObjectCount(SimInfo* info, 
                            const std::string& sele)
-    : StaticAnalyser(info, 1), selectionScript_(sele), 
+    : NonSpatialStatistics(info, sele, 1), selectionScript_(sele), 
       seleMan_(info), evaluator_(info) {
 
     string prefixFileName = info->getPrefixFileName();
@@ -66,13 +66,13 @@ namespace OpenMD {
     counts_.resize(10, 0);
   }
 
-  void ObjectCount::~ObjectCount() {
+  ObjectCount::~ObjectCount() {
     counts_.clear();
   }
 
   void ObjectCount::processDump() {
     
-    DumpReader reader(info_, dumpFilename_);    
+    DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     
     for (int i = 0; i < nFrames; i += step_) {
@@ -83,8 +83,8 @@ namespace OpenMD {
     
     int nProcessed = nFrames /step_;
     
-    nAvg_ = nsum / nProcessed;
-    n2Avg_ = n2sum / nProcessed;
+    nAvg_ = nsum_ / nProcessed;
+    n2Avg_ = n2sum_ / nProcessed;
     sDev_ = sqrt(n2Avg_ - nAvg_*nAvg_);
     writeCounts();   
     

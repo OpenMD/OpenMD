@@ -46,7 +46,7 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -64,7 +64,7 @@ namespace OpenMD {
    *   \param sele1 selection of StuntDoubles used for the distribution
    *   \param sele2 selection of StuntDoubles used for nearest neighbor computation
    */
-  class CoordinationNumber : public StaticAnalyser {
+  class CoordinationNumber : public NonSpatialStatistics {
     
   public:
     CoordinationNumber(SimInfo* info,
@@ -75,6 +75,7 @@ namespace OpenMD {
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
     virtual void writeOutput();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
   protected:
     virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
@@ -96,6 +97,7 @@ namespace OpenMD {
     RealType delta_;
     int count_;
     std::vector<RealType>  histogram_;
+    bool usePeriodicBoundaryConditions_;
   };
 
   /**

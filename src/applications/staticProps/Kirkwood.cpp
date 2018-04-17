@@ -56,7 +56,8 @@ namespace OpenMD {
     : RadialDistrFunc(info, sele1, sele2, nrbins), len_(len) {
     
     setAnalysisType("Distance-dependent Kirkwood G-factor");
-    setOutputName(getPrefix(filename) + ".kirkwood");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".kirkwood");
     
     deltaR_ = len_ /nBins_;
     
@@ -165,7 +166,8 @@ namespace OpenMD {
     : Kirkwood(info, sele1, sele2, len, nrbins) {
     
     setAnalysisType("Distance-dependent Kirkwood G-factor for quadrupoles");
-    setOutputName(getPrefix(filename) + ".kirkwoodQ");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".kirkwoodQ");
   }
   
   void KirkwoodQuadrupoles::collectHistogram(StuntDouble* sd1,

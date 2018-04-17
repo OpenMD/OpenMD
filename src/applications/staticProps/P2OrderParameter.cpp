@@ -51,22 +51,25 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, 
                                      const string& sele1)
-    : StaticAnalyser(info, 1), doVect_(true), doOffset_(false),
+    : NonSpatialStatistics(info, sele1, 1), doVect_(true), doOffset_(false),
     selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
     evaluator1_(info), evaluator2_(info) {
-    
-    setOutputName(getPrefix(filename) + ".p2");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".p2");
     
     evaluator1_.loadScriptString(sele1);
   }
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, 
                                      const string& sele1, const string& sele2)
-    : StaticAnalyser(info,1 ), doVect_(false), doOffset_(false),
+    : NonSpatialStatistics(info, sele1, sele2, 1), doVect_(false),
+      doOffset_(false),
       selectionScript1_(sele1), selectionScript2_(sele2), seleMan1_(info), 
       seleMan2_(info), evaluator1_(info), evaluator2_(info) {
-    
-    setOutputName(getPrefix(filename) + ".p2");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".p2");
     
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);    
@@ -74,16 +77,35 @@ namespace OpenMD {
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, 
                                      const string& sele1, int seleOffset)
-    : StaticAnalyser(info, 1), doVect_(false), doOffset_(true), 
+    : NonSpatialStatistics(info, sele1, 1), doVect_(false), doOffset_(true), 
     selectionScript1_(sele1), seleMan1_(info), seleMan2_(info), 
     evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
-    
-    setOutputName(getPrefix(filename) + ".p2");
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".p2");
     
     evaluator1_.loadScriptString(sele1);
   }
 
-  void P2OrderParameter::processFrame(Snapshot* snap_) {
+  P2OrderParameter::~P2OrderParameter() {
+    orderParams_.clear();
+  }
+  
+  void P2OrderParameter::processDump() {
+    string dumpFileName_ = info_->getDumpFileName();
+    DumpReader reader(info_, dumpFileName_);    
+    int nFrames = reader.getNFrames();
+    
+    for (int i = 0; i < nFrames; i += step_) {
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      processFrame(currentSnapshot_);
+    }
+    writeP2();
+  }
+
+  
+  void P2OrderParameter::processFrame(Snapshot* currentSnapshot_) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii; 
@@ -91,12 +113,6 @@ namespace OpenMD {
     int vecCount;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
       Mat3x3d orderTensor(0.0);
       vecCount = 0;
@@ -150,8 +166,8 @@ namespace OpenMD {
           
           if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
             sprintf( painCave.errMsg,
-                     "In frame %d, the number of selected StuntDoubles are\n"
-                     "\tnot the same in --sele1 and sele2\n", i);
+                     "The number of selected StuntDoubles are\n"
+                     "\tnot the same in --sele1 and sele2\n");
             painCave.severity = OPENMD_INFO;
             painCave.isFatal = 0;
             simError();            
@@ -180,8 +196,8 @@ namespace OpenMD {
       
       if (vecCount == 0) {
           sprintf( painCave.errMsg,
-                   "In frame %d, the number of selected vectors was zero.\n"
-                   "\tThis will not give a meaningful order parameter.", i);
+                   "The number of selected vectors was zero.\n"
+                   "\tThis will not give a meaningful order parameter.");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();        
@@ -272,16 +288,13 @@ namespace OpenMD {
       param.angle = angle;
 
       orderParams_.push_back(param);       
-    
-    }
-    
-    writeP2();
-    
+     
   }
 
-  void P2OrderParameter::processDump(const string& filename) {
-    // call processFrame( snap )
+  void P2OrderParameter::processStuntDouble(StuntDouble* sd, int bin){
+    // Fill in later
   }
+
   
   void P2OrderParameter::writeP2() {
 

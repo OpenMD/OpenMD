@@ -46,12 +46,12 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/SpatialStatistics.hpp"
 
 using namespace std;
 namespace OpenMD {
   
-  class pAngle : public StaticAnalyser {
+  class pAngle : public ShellStatistics {
     
   public:
     pAngle(SimInfo* info, 
@@ -76,6 +76,7 @@ namespace OpenMD {
     
     void processHistogram();
     void writeProbs();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
         
     Snapshot* currentSnapshot_;
 

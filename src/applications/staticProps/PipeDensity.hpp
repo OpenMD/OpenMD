@@ -50,18 +50,18 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 
 namespace OpenMD {
   
-  class PipeDensity : public StaticAnalyser {
+  class PipeDensity : public NonSpatialStatistics {
     
   public:
     PipeDensity(SimInfo* info,
                 const std::string& sele, int nbins, int nbins2, int axis=0);
     virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
-    void ~PipeDensity();
+    virtual ~PipeDensity();
     
   private:
     virtual void writeDensity();
@@ -80,6 +80,8 @@ namespace OpenMD {
     
     std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
     std::vector<std::vector<RealType> > density_;
+
+    bool usePeriodicBoundaryConditions_;
   };
   
 }

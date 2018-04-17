@@ -84,7 +84,6 @@
 #include "applications/staticProps/RNEMDStats.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
-#include "applications/staticProps/SurfaceDiffusion.hpp"
 #include "applications/staticProps/CoordinationNumber.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/PotDiff.hpp"
@@ -560,9 +559,7 @@ int main(int argc, char* argv[]){
       simError();
     }
   }
-  else if (args_info.surfDiffusion_given){
-    analyser = new SurfaceDiffusion(info, sele1, maxLen);
-  }else if (args_info.rho_r_given) {
+  else if (args_info.rho_r_given) {
     if (args_info.radius_given){
       analyser = new RhoR(info, sele1, maxLen, nrbins,
                           args_info.radius_arg);
