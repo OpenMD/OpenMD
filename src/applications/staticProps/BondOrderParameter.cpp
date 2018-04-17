@@ -175,7 +175,7 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
 
     /* 
@@ -220,7 +220,7 @@ namespace OpenMD {
   }
 
   
-  void BondOrderParameter::processFrame(Snapshot* currentSnapshot_) {
+  void BondOrderParameter::processFrame(int istep) {
     Molecule* mol;
     Atom* atom;
     int myIndex;

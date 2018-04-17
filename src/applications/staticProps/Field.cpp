@@ -145,7 +145,7 @@ namespace OpenMD {
   }
 
   template<class T>
-  void Field<T>::processFrame(Snapshot* snap_) {
+  void Field<T>::process() {
     dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
@@ -439,6 +439,11 @@ namespace OpenMD {
   RealType DensityField::getValue(StuntDouble* sd) {
     return sd->getMass();
   }
+
+  void DensityField::processStuntDouble(StuntDouble* sd, int bin){
+    // Fill in later
+  }
+    
   
   ChargeField:: ChargeField(SimInfo* info,
                             const std::string& sele1, RealType voxelSize) :
@@ -465,6 +470,9 @@ namespace OpenMD {
     return charge;
   }
 
+  void ChargeField::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   VelocityField::VelocityField(SimInfo* info,
                                const std::string& sele1, RealType voxelSize) :
@@ -475,6 +483,10 @@ namespace OpenMD {
   
   Vector3d VelocityField::getValue(StuntDouble* sd) {
     return sd->getVel();
+  }
+
+  void VelocityField::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
 
   DipoleField::DipoleField(SimInfo* info,
@@ -520,4 +532,10 @@ namespace OpenMD {
     }
     return dipoleVector;
   }
+
+  void DipoleField::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+
+  
 } //openmd

@@ -76,7 +76,7 @@ namespace OpenMD {
 
     SCDOrderParameter(SimInfo* info, 
                       const std::string& molname, int beginIndex, int endIndex);
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~SCDOrderParameter();
 

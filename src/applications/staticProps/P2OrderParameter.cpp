@@ -96,16 +96,16 @@ namespace OpenMD {
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     writeP2();
   }
 
   
-  void P2OrderParameter::processFrame(Snapshot* currentSnapshot_) {
+  void P2OrderParameter::processFrame(int istep) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii; 

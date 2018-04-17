@@ -51,9 +51,11 @@ namespace OpenMD {
   class ObjectCount : public NonSpatialStatistics{
   public:
     ObjectCount(SimInfo* info, const std::string& sele);
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~ObjectCount();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    
     
   private:
     void writeCounts();

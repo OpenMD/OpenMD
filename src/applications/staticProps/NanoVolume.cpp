@@ -90,13 +90,13 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     osq_.close();
   }
   
   
-  void NanoVolume::processFrame(Snapshot* currentSnapshot_) {
+  void NanoVolume::processFrame(int istep) {
 #if defined(HAVE_QHULL)
     StuntDouble* sd;
     Vector3d vec;
@@ -148,6 +148,10 @@ namespace OpenMD {
     simError();  
 #endif
     
+  }
+
+  void NanoVolume::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
 
 }

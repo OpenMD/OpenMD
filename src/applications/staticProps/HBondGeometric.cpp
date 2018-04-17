@@ -109,13 +109,13 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }    
     writeHistogram();
   }
 
   
-  void HBondGeometric::processFrame(Snapshot* currentSnapshot_) {
+  void HBondGeometric::processFrame(int istep) {
     Molecule* mol1;
     Molecule* mol2;
     Molecule::HBondDonor* hbd1;
@@ -233,6 +233,10 @@ namespace OpenMD {
     nSelected_++;
   }
 
+  void HBondGeometric::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+    
 
   void HBondGeometric::writeHistogram() {
         

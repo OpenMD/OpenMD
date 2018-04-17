@@ -63,7 +63,7 @@ namespace OpenMD {
       return nZBins_; 
     }
     
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~RhoZ();
     virtual void processStuntDouble(StuntDouble* sd, int bin);

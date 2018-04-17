@@ -104,13 +104,13 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     writeDensity();
   }
 
   
-  void RhoZ::processFrame(Snapshot* currentSnapshot_) {
+  void RhoZ::processFrame(int istep) {
     StuntDouble* sd;
     int ii;
 

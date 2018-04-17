@@ -55,7 +55,7 @@ namespace OpenMD {
                                              const std::string& sele1,
                                              const std::string& sele2,
                                              double rCut, int nzbins, int axis) 
-    : SlabStatistics(info, nzbins), 
+    : SlabStatistics(info, sele1, sele2, nzbins, axis), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       axis_(axis) {
@@ -91,7 +91,7 @@ namespace OpenMD {
     std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
 
-    prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".Qz");
   }
   
@@ -105,7 +105,7 @@ namespace OpenMD {
     // call processFrame( snap )
   }
     
-  void TetrahedralityParamZ::processFrame(Snapshot* snap_) {
+  void TetrahedralityParamZ::processFrame(int istep) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -121,7 +121,7 @@ namespace OpenMD {
     int isd2;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    dumpFileName_ = info->getDumpFileName();
+    string dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 

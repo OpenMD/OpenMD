@@ -54,12 +54,13 @@ namespace OpenMD {
   class NanoLength : public NonSpatialStatistics {
   public:
     NanoLength(SimInfo* info, const std::string& sele);
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~NanoLength();
     
   private:    
     RealType getLength(std::vector<StuntDouble*> atoms);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;

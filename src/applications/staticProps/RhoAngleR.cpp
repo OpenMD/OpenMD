@@ -91,7 +91,7 @@ namespace OpenMD {
      for (int istep = 0; istep < nFrames; istep += step_) {
        reader.readFrame(istep);
        currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-       processFrame(currentSnapshot_);
+       processFrame(istep);
      }
      processHistogram(); 
      writeAngleR();
@@ -99,7 +99,7 @@ namespace OpenMD {
 
 
   
-  void AngleR::processFrame(Snapshot* snap_) { 
+  void AngleR::processFrame(int istep) { 
       int i;    
       StuntDouble* sd;
       

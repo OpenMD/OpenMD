@@ -50,7 +50,7 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/SpatialStatistics.hpp"
 
 namespace OpenMD {
   
@@ -60,12 +60,13 @@ namespace OpenMD {
     VelocityZ(SimInfo* info,
 	      const std::string& sele, int nbins1, int nbins2, int axis1=2, int axis2=0);
     
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~VelocityZ();
     
   private:
     virtual void writeVelocity();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     Snapshot* currentSnapshot_;
     
     int nProcessed_;
@@ -84,6 +85,8 @@ namespace OpenMD {
     std::vector<RealType> zBox_;
     std::vector<std::vector<RealType> > velocity_;
     std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
+
+    bool usePeriodicBoundaryConditions_;
     
   };
   

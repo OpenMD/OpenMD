@@ -58,7 +58,7 @@ namespace OpenMD {
     NitrileFrequencyMap(SimInfo* info, 
                         const string& sele1, int nbins);
         
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~NitrileFrequencyMap();
     
@@ -66,6 +66,8 @@ namespace OpenMD {
     bool excludeAtomPair(int atom1, int atom2);
     void processHistogram();
     void writeProbs();
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    
         
     SimInfo* info_;
     Snapshot* currentSnapshot_;

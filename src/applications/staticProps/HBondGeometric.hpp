@@ -72,10 +72,11 @@ namespace OpenMD {
                    int nbins);
     
     virtual ~HBondGeometric();
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     
   private:
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     virtual void initializeHistogram();
     virtual void collectHistogram(int nHB, int nD, int nA);    
     void writeHistogram();

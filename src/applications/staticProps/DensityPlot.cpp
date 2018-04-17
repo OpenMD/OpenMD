@@ -94,10 +94,10 @@ namespace OpenMD {
     string dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     
     int nProcessed = nFrames /step_;
@@ -108,7 +108,7 @@ namespace OpenMD {
   }
 
   
-  void DensityPlot::processFrame(Snapshot* currentSnapshot_) {
+  void DensityPlot::processFrame(int istep) {
 
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());

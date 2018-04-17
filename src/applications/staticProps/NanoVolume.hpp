@@ -63,11 +63,13 @@ namespace OpenMD {
   public:
     NanoVolume(SimInfo* info, const std::string& sele);
     
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~NanoVolume();
     
-  private:    
+  private:
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
     SelectionManager seleMan_;

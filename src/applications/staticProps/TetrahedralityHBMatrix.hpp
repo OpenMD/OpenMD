@@ -43,7 +43,7 @@
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYHBMATRIX_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -78,7 +78,7 @@ namespace OpenMD {
                            double thetaCut, double OHCut, int nbins);
     
     virtual ~TetrahedralityHBMatrix();
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     
   private:
@@ -106,6 +106,8 @@ namespace OpenMD {
     std::vector<RealType> Q_;
     
     std::vector<std::vector<unsigned int> > Q_histogram_;
+
+    bool usePeriodicBoundaryConditions_;
   };
 }
 

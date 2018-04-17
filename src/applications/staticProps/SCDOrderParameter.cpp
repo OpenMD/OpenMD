@@ -199,16 +199,16 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames /step_;
 
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     
     writeSCD();
   }
   
-  void SCDOrderParameter::processFrame(Snapshot* currentSnapshot_) {
+  void SCDOrderParameter::processFrame(int istep) {
     for (std::size_t j = 0; j < scdElems_.size(); ++j) {
       scdParam_[j] += scdElems_[j].calcSCD(currentSnapshot_);
     }

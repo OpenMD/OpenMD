@@ -117,10 +117,10 @@ namespace OpenMD {
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     
     OrderParam sumOPHeadUpper, errsumOPHeadUpper;
@@ -186,7 +186,7 @@ namespace OpenMD {
 
 
   
-  void RippleOP::processFrame(Snapshot* currentSnapshot_) {
+  void RippleOP::processFrame(int istep) {
 
     StuntDouble* j1;
     StuntDouble* j2;

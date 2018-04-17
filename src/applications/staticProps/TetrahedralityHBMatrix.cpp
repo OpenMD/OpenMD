@@ -84,7 +84,7 @@ namespace OpenMD {
     MaxQ_ = 1.1;
     deltaQ_ = (MaxQ_ - MinQ_) / nBins_;
 
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     std::stringstream params;
     params << " rCut = " << rCut_
@@ -115,7 +115,7 @@ namespace OpenMD {
   }
   
   
-  void TetrahedralityHBMatrix::processFrame(Snapshot* snap_) {
+  void TetrahedralityHBMatrix::processFrame(int istep) {
     Molecule* mol1;
     Molecule* mol2;
     Molecule* moli;
@@ -140,7 +140,7 @@ namespace OpenMD {
     int myIndex, ii, jj, index1, index2;
     
     
-    dumpFileName_ = info->getDumpFileName();
+    dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 

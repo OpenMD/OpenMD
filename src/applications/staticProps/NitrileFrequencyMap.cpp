@@ -172,14 +172,14 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
   }   
     processHistogram();
     writeProbs();
   }
 
   
-  void NitrileFrequencyMap::processFrame(Snapshot* currentSnapshot_) {
+  void NitrileFrequencyMap::processFrame(int istep) {
     Molecule* mol;
     Atom* atom;
     AtomType* atype;
@@ -268,6 +268,11 @@ namespace OpenMD {
     }
     
   }
+
+  void NitrileFrequencyMap::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+    
   
   void NitrileFrequencyMap::processHistogram() {
     

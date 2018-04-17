@@ -80,8 +80,8 @@ namespace OpenMD {
     // fixed number of bins
     sliceCount_.resize(nBins_);    
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
-    
-    setOutputName(getPrefix(filename) + ".Qdens");
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".Qdens");
   }
   
   TetrahedralityParamDens::~TetrahedralityParamDens() {
@@ -92,7 +92,7 @@ namespace OpenMD {
     // call processFrame( snap )
   }
     
-  void TetrahedralityParamDens::processFrame(Snapshot* snap_) {
+  void TetrahedralityParamDens::processFrame(int istep) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -107,7 +107,7 @@ namespace OpenMD {
     int isd1;
     int isd2;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    dumpFileName_ = info->getDumpFileName();
+    dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 

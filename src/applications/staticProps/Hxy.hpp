@@ -77,10 +77,11 @@ namespace OpenMD {
     Hxy(SimInfo* info, const std::string& sele,
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
     virtual ~Hxy();        
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     
   private:
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
 

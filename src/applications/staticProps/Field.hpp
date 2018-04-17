@@ -61,7 +61,6 @@ namespace OpenMD {
     
     ~Field(); // default deconstructor
     
-    virtual void processFrame(Snapshot* snap_);
     virtual void processFrame(int frame);
     virtual void processDump();
     virtual void postProcess();
@@ -69,6 +68,7 @@ namespace OpenMD {
     virtual void writeField();
     virtual std::string writeValue(T v);
     virtual void writeVisualizationScript();
+    virtual void process();
     
   protected:
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
@@ -96,6 +96,7 @@ namespace OpenMD {
     ~DensityField();
     
     virtual RealType getValue(StuntDouble* sd);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
   };
   
   
@@ -104,6 +105,7 @@ namespace OpenMD {
     ChargeField(SimInfo* info,
                        const std::string& sele1, RealType voxelSize);
     virtual RealType getValue(StuntDouble* sd);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
   };
   
   
@@ -112,6 +114,7 @@ namespace OpenMD {
     VelocityField(SimInfo* info,
 			const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
   };
   
   
@@ -120,6 +123,7 @@ namespace OpenMD {
     DipoleField(SimInfo* info,
                 const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
   };
   
 }

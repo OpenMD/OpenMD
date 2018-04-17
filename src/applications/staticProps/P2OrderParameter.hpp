@@ -56,7 +56,7 @@ namespace OpenMD {
                      const string& sele1, const string& sele2);
     P2OrderParameter(SimInfo* info,  
                      const string& sele1, const int seleOffset);
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~P2OrderParameter();
     virtual void processStuntDouble(StuntDouble* sd, int bin);

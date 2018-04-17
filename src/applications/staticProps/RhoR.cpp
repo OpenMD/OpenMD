@@ -92,7 +92,7 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     
     processHistogram(); 
@@ -101,7 +101,7 @@ namespace OpenMD {
   }
 
 
-  void RhoR::processFrame(Snapshot* snap_) {
+  void RhoR::processFrame(int frame) {
    
     Thermo thermo(info_);
       
@@ -145,6 +145,9 @@ namespace OpenMD {
 
   }
 
+  void RhoR::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
 
   void RhoR::writeRhoR() {
     std::ofstream rdfStream(outputFilename_.c_str());

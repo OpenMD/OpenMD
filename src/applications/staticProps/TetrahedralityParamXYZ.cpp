@@ -58,7 +58,7 @@ namespace OpenMD {
                                                  RealType rCut, 
                                                  RealType voxelSize,
                                                  RealType gaussWidth) 
-    : NonSpatialStatistics(info, 1), 
+    : NonSpatialStatistics(info, sele1, sele2, 1), 
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info),  seleMan2_(info), evaluator1_(info), evaluator2_(info),
       rCut_(rCut), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
@@ -91,7 +91,7 @@ namespace OpenMD {
 
       }
     }   
-    prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".Qxyz");
   }
   
@@ -102,7 +102,7 @@ namespace OpenMD {
     // call processFrame( snap )
   }
     
-  void TetrahedralityParamXYZ::processFrame(Snapshot* snap_) {
+  void TetrahedralityParamXYZ::processFrame(int istep) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -126,7 +126,7 @@ namespace OpenMD {
     cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = " 
 	 << kMax << " kSqLim = " << kSqLim << "\n";
 
-    dumpFileName_ = info->getDumpFileName();
+    string dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 

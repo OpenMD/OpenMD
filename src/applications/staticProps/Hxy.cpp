@@ -163,13 +163,13 @@ namespace OpenMD {
       
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
 
     writeOutput();
   }
 
-  void Hxy::processFrame(Snapshot* snap_) {
+  void Hxy::processFrame(int istep) {
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
     StuntDouble* sd;
     int ii;
@@ -497,7 +497,9 @@ namespace OpenMD {
 #endif
   }
     
-
+  void Hxy::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;

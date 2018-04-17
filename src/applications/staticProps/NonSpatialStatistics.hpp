@@ -73,7 +73,6 @@ namespace OpenMD {
     ~NonSpatialStatistics();
 
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
-    virtual void processFrame(Snapshot* snap_);//unnecessary?
     virtual void processDump();
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin)=0;

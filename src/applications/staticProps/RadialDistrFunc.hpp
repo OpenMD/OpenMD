@@ -63,7 +63,7 @@ namespace OpenMD {
 
     virtual ~RadialDistrFunc() {}
         
-    void processFrame(Snapshot* snap_);        
+    void processFrame(int frame);        
     void processDump();
 
         

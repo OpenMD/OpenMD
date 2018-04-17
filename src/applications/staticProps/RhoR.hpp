@@ -61,7 +61,7 @@ namespace OpenMD {
       return len_;
     }
         
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~RhoR();
     
@@ -71,6 +71,8 @@ namespace OpenMD {
 
     void writeRhoR();
 
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    
 
     Snapshot* currentSnapshot_;
 

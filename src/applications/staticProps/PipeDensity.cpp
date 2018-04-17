@@ -112,13 +112,13 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
      writeDensity();
   }
 
   
-  void PipeDensity::processFrame(Snapshot* currentSnapshot_) {
+  void PipeDensity::processFrame(int istep) {
     StuntDouble* sd;
     int ii;
 
@@ -174,7 +174,9 @@ namespace OpenMD {
   }
   
   
-
+  void PipeDensity::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   void PipeDensity::writeDensity() {
 

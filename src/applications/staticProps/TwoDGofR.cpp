@@ -57,7 +57,7 @@ namespace OpenMD {
       histogram_.resize(nBins_);
       avgTwoDGofR_.resize(nBins_);
 
-      prefixFileName = info->getPrefixFileName();
+      string prefixFileName = info->getPrefixFileName();
       setOutputName(prefixFileName + ".TwoDGofR");
     }
 

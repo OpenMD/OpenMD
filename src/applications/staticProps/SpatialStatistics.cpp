@@ -50,6 +50,7 @@
 
 namespace OpenMD {
   
+
   SpatialStatistics::SpatialStatistics(SimInfo* info, 
                                        const string& sele, int nbins)
     : StaticAnalyser(info, nbins), selectionScript_(sele),
@@ -64,6 +65,21 @@ namespace OpenMD {
     setOutputName(prefixFileName + ".spst");
   }
 
+  SpatialStatistics::SpatialStatistics(SimInfo* info, 
+                                       const string& sele1,
+				       const string& sele2, int nbins)
+    : StaticAnalyser(info, nbins), selectionScript_(sele1),
+      evaluator_(info), seleMan_(info) {
+    
+    evaluator_.loadScriptString(sele1);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".spst");
+  }
+  
   SpatialStatistics::~SpatialStatistics() {
     vector<OutputData*>::iterator i;
     OutputData* outputData;
@@ -153,6 +169,67 @@ namespace OpenMD {
     data_.push_back(z_);
   }
 
+  SlabStatistics::SlabStatistics(SimInfo* info, 
+                                 const string& sele1, const string& sele2,
+				 int nbins, int axis) : 
+    SpatialStatistics(info, sele1, sele2, nbins), axis_(axis) {
+
+    // Set the axis label for the privileged axis
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+    
+    z_ = new OutputData;
+    z_->units =  "Angstroms";
+    z_->title =  axisLabel_;
+    z_->dataType = odtReal;
+    z_->dataHandling = odhAverage;
+    z_->accumulator.reserve(nbins);
+    for (int i = 0; i < nbins; i++) 
+      z_->accumulator.push_back( new Accumulator() );
+    data_.push_back(z_);
+  }
+
+  SlabStatistics::SlabStatistics(SimInfo* info, 
+                                 const string& sele, int nbins,
+				 int axis1, int axis2) : 
+    SpatialStatistics(info, sele, nbins), axis_(axis1) {
+
+    // Set the axis label for the privileged axis
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+    
+    z_ = new OutputData;
+    z_->units =  "Angstroms";
+    z_->title =  axisLabel_;
+    z_->dataType = odtReal;
+    z_->dataHandling = odhAverage;
+    z_->accumulator.reserve(nbins);
+    for (int i = 0; i < nbins; i++) 
+      z_->accumulator.push_back( new Accumulator() );
+    data_.push_back(z_);
+  }
+
+  
   SlabStatistics::~SlabStatistics() {
   }
 
@@ -180,6 +257,10 @@ namespace OpenMD {
     return int(nBins_ * (pos[axis_] / hmat_(axis_,axis_) + 0.5)) % nBins_;  
   }
 
+  void SlabStatistics::processDump(){
+    // Fill in later
+  }
+  
   ShellStatistics::ShellStatistics(SimInfo* info,  
                                    const string& sele, int nbins) : 
     SpatialStatistics(info, sele, nbins), coordinateOrigin_(V3Zero) {
@@ -273,6 +354,10 @@ namespace OpenMD {
   int ShellStatistics::getBin(Vector3d pos) { 
     Vector3d rPos = pos - coordinateOrigin_;
     return int(rPos.length() / binWidth_);
+  }
+
+  void ShellStatistics::processDump() {
+    // Fill in later
   }
 }
 

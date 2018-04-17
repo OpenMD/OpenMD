@@ -91,7 +91,7 @@ namespace OpenMD {
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondOrderParameter();
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     

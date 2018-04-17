@@ -83,13 +83,13 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     osq_.close();
   }
   
   
-  void NanoLength::processFrame(Snapshot* snap_) {
+  void NanoLength::processFrame(int istep) {
     StuntDouble* sd;
     Vector3d vec;
     int i;
@@ -188,6 +188,10 @@ namespace OpenMD {
     }
     
     return projmax - projmin;
+  }
+
+  void NanoLength::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
   }
   
 }

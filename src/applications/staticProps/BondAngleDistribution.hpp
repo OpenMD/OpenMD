@@ -70,7 +70,7 @@ namespace OpenMD {
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondAngleDistribution();
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int istep);
     virtual void processDump();
     
   private:

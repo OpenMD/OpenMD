@@ -85,7 +85,7 @@ namespace OpenMD {
     
     }
 
-  void RadialDistrFunc::processFrame(Snapshot* snap_) {
+  void RadialDistrFunc::processFrame(int istep) {
     
     preProcess();
     string dumpFileName_ = info_->getDumpFileName();

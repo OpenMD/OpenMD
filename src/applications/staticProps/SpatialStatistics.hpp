@@ -62,11 +62,13 @@ namespace OpenMD {
     
   public:
     SpatialStatistics(SimInfo* info,
-                      const string& sele, int nbins);    
+                      const string& sele, int nbins);
+    SpatialStatistics(SimInfo* info,
+                      const string& sele1, const string& sele2,
+		      int nbins);    
     ~SpatialStatistics();
 
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
-    virtual void processFrame(Snapshot* snap_);
     virtual void processDump();
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos)=0;
@@ -85,6 +87,13 @@ namespace OpenMD {
   public: 
     SlabStatistics(SimInfo* info,
                    const string& sele, int nbins, int axis);
+    SlabStatistics(SimInfo* info,
+		   const string& sele1, const string& sele2,
+		   int nbins, int axis);
+    SlabStatistics(SimInfo* info,
+		   const string& sele, int nbins,
+		   int axis1, int axis2);
+    
     virtual ~SlabStatistics();
 
     virtual int getBin(Vector3d pos);
@@ -107,6 +116,7 @@ namespace OpenMD {
                     const string& sele2, int nbins);
     virtual ~ShellStatistics();
     virtual int getBin(Vector3d pos);
+    virtual void processDump();
 
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
     void setBinWidth(RealType bw) { binWidth_ = bw; }

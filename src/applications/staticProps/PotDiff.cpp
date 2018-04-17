@@ -116,15 +116,15 @@ namespace OpenMD {
     dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);
     int nFrames = reader.getNFrames();
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     writeDiff();   
   }
   
-  void PotDiff::processFrame(Snapshot* currentSnapshot_) {
+  void PotDiff::processFrame(int istep) {
     StuntDouble* sd;
     int j;
   
@@ -169,7 +169,10 @@ namespace OpenMD {
     
     info_->getSnapshotManager()->advance();
   }
-  
+
+  void PotDiff::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
   
   void PotDiff::writeDiff() {
     

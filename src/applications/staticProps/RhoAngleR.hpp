@@ -59,7 +59,7 @@ namespace OpenMD {
       return len_;
     }
         
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     void ~AngleR();
     

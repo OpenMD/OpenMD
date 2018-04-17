@@ -107,7 +107,7 @@ namespace OpenMD {
     for(int istep = 0; istep < nFrames; istep += step_){
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     
     for(unsigned int n = 0; n < histogram_.size(); n++){
@@ -122,7 +122,7 @@ namespace OpenMD {
 
 
   
-  void CoordinationNumber::processFrame(Snapshot* snap_) {
+  void CoordinationNumber::processFrame(int istep) {
     SelectionManager common(info_);
     
     std::vector<std::vector<int> > listNN;

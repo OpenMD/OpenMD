@@ -45,7 +45,7 @@
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMDENS_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "applications/staticProps/NonSpatialStatistics.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -89,7 +89,7 @@ namespace OpenMD {
     }
 
     virtual ~TetrahedralityParamDens();
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     

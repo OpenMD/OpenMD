@@ -93,7 +93,7 @@ namespace OpenMD {
   }
  
   
-  void TetrahedralityParam::processFrame(Snapshot* snap_) {
+  void TetrahedralityParam::processFrame(int istep) {
     Molecule* mol;
     StuntDouble* sd;
     StuntDouble* sd2;
@@ -110,7 +110,7 @@ namespace OpenMD {
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    dumpFileName_ = info->getDumpFileName();
+    dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;

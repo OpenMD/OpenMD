@@ -78,7 +78,7 @@ namespace OpenMD {
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(i);
     }
     
     int nProcessed = nFrames /step_;
@@ -91,7 +91,7 @@ namespace OpenMD {
   }
 
 
-  void ObjectCount::processFrame(Snapshot* currentSnapshot_) {
+  void ObjectCount::processFrame(int istep) {
     nsum_ = 0;
     n2sum_ = 0;
      
@@ -110,6 +110,11 @@ namespace OpenMD {
     nsum_ += count;
     n2sum_ += count * count;
   }
+
+  void ObjectCount::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+    
   
   void ObjectCount::writeCounts() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);

@@ -189,13 +189,13 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     writeOrderParameter();     
   }
 
   
-  void BOPofR::processFrame(Snapshot* snap_) {
+  void BOPofR::processFrame(int istep) {
     Molecule* mol;
     Atom* atom;
     int myIndex;

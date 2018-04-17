@@ -53,7 +53,7 @@ namespace OpenMD {
   public:
     DensityPlot(SimInfo* info, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
     
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~DensityPlot();
     

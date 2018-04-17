@@ -92,10 +92,10 @@ namespace OpenMD {
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
 
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
 
     /*
@@ -122,7 +122,7 @@ namespace OpenMD {
     writeOut();
   }
 
-  void MultipoleSum::processFrame(Snapshot* snap_) {
+  void MultipoleSum::processFrame(int istep) {
     Molecule* mol;
     SimInfo::MoleculeIterator miter;
     vector<Atom*>::iterator aiter;

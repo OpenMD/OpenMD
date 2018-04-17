@@ -52,7 +52,7 @@ namespace OpenMD {
   public:
 
     RippleOP(SimInfo* info, const std::string& sele1, const std::string& sele2);
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~RippleOP();
     virtual void processStuntDouble(StuntDouble* sd, int bin);

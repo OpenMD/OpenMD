@@ -63,7 +63,7 @@ namespace OpenMD {
            RealType len);
     
     virtual ~BOPofR();
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     

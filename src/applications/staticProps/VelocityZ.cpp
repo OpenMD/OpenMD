@@ -55,7 +55,7 @@ namespace OpenMD {
                            const std::string& sele,
 		       int nbins1, int nbins2,
 		       int axis1, int axis2)
-    : SlabStatistics(info, nbins1), selectionScript_(sele), 
+    : SlabStatistics(info, sele, nbins1, axis1, axis2), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), nBins2_(nbins2), axis1_(axis1), axis2_(axis2) {
     
     evaluator_.loadScriptString(sele);
@@ -104,10 +104,10 @@ namespace OpenMD {
       break;
     }
 
-    prefixFileName = info->getPrefixFileName();
+    string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".VelocityZ");
 
-    bool usePeriodicBoundaryConditions_ = 
+    usePeriodicBoundaryConditions_ = 
       info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
 
@@ -122,11 +122,11 @@ namespace OpenMD {
   }
 
   
-  void VelocityZ::processFrame(Snapshot* snap_) {
+  void VelocityZ::processFrame(int istep) {
     StuntDouble* sd;
     int ii;
 
-    dumpFileName_ = info->getDumpFileName();
+    string dumpFileName_ = info_->getDumpFileName();
     DumpReader reader(info_, dumpFileName_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
@@ -192,7 +192,11 @@ namespace OpenMD {
     writeVelocity();
 
   }
-    
+
+  void VelocityZ::processStuntDouble(StuntDouble* sd, int bin) {
+    // Fill in later
+  }
+  
   void VelocityZ::writeVelocity() {
     
      // compute average box length:

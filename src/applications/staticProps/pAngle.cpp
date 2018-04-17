@@ -149,7 +149,7 @@ namespace OpenMD {
   }
 
   
-  void pAngle::processFrame(Snapshot* snap_) {
+  void pAngle::processFrame(int istep) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii; 

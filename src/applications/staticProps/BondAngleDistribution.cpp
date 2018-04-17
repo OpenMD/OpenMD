@@ -110,12 +110,12 @@ namespace OpenMD {
       reader.readFrame(istep);
       frameCounter_++;
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(currentSnapshot_);
+      processFrame(istep);
     }
     writeBondAngleDistribution();   
   }
   
-  void BondAngleDistribution::processFrame(Snapshot* snap_) {
+  void BondAngleDistribution::processFrame(int istep) {
     Molecule* mol;
     Atom* atom;
     int myIndex;

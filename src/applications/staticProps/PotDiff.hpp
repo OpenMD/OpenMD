@@ -62,11 +62,12 @@ namespace OpenMD {
     //! Default constructor
     PotDiff(SimInfo* info, const std::string& sele);
     //! Process the data
-    virtual void processFrame(Snapshot* snap_);
+    virtual void processFrame(int frame);
     virtual void processDump();
     virtual ~PotDiff();
     
   private:
+    virtual void processStuntDouble(StuntDouble* sd, int bin);
     //! Write the data
     void writeDiff();
     //! pointer to current Snapshot
