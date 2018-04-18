@@ -162,9 +162,6 @@ namespace OpenMD {
     }
   }
 
-  void RNEMDZ::processDump() {
-    // call processFrame( snap )
-  }
   
   void RNEMDZ::processStuntDouble(StuntDouble* sd, int bin) {
   }
@@ -289,9 +286,6 @@ namespace OpenMD {
     }
   }
 
-  void RNEMDR::processDump() {
-    // call processFrame( snap )
-  }
 
   void RNEMDR::processStuntDouble(StuntDouble* sd, int bin) {
   }
@@ -421,9 +415,6 @@ namespace OpenMD {
     }
   }
 
-  void RNEMDRTheta::processDump() {
-    // call processFrame( snap );
-  }
 
   void RNEMDRTheta::writeOutput() {
     
