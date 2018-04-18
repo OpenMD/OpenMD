@@ -91,27 +91,15 @@ namespace OpenMD {
     nDonor_.clear();
     nAcceptor_.clear(); 
   }
+
+  void HBondGeometric::processDump(){
+  }
   
   void HBondGeometric::initializeHistogram() {
     std::fill(nHBonds_.begin(),   nHBonds_.end(),   0);
     std::fill(nDonor_.begin(),    nDonor_.end(),    0);
     std::fill(nAcceptor_.begin(), nAcceptor_.end(), 0);
     nSelected_ = 0;
-  }
-
-  void HBondGeometric::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }    
-    writeHistogram();
   }
 
   
@@ -238,7 +226,7 @@ namespace OpenMD {
   }
     
 
-  void HBondGeometric::writeHistogram() {
+  void HBondGeometric::writeOutput() {
         
     std::ofstream osq(getOutputFileName().c_str());
 

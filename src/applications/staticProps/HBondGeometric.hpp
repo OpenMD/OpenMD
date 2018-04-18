@@ -79,7 +79,7 @@ namespace OpenMD {
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     virtual void initializeHistogram();
     virtual void collectHistogram(int nHB, int nD, int nA);    
-    void writeHistogram();
+    void writeOutput();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;
