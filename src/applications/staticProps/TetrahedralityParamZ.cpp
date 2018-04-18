@@ -220,41 +220,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  // void TetrahedralityParamZ::writeOutput() {
 
-  //   // compute average box length:
-    
-  //   RealType zSum = 0.0;
-  //   for (std::vector<RealType>::iterator j = zBox_.begin(); 
-  //        j != zBox_.end(); ++j) {
-  //     zSum += *j;       
-  //   }
-  //   RealType zAve = zSum / zBox_.size();
-
-  //   std::ofstream qZstream(outputFilename_.c_str());
-  //   if (qZstream.is_open()) {
-
-  //     qZstream << "#Tetrahedrality Parameters (" << axisLabel_ << ")\n";
-
-  //     qZstream << "#nFrames:\t" << zBox_.size() << "\n";
-  //     qZstream << "#selection 1: (" << selectionScript1_ << ")\n";
-  //     qZstream << "#selection 2: (" << selectionScript2_ << ")\n";
-  //     qZstream << "#" << axisLabel_ << "\tQk\n";
-  //     for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
-  //       RealType z = zAve * (i+0.5) / sliceQ_.size();
-  //       if (sliceCount_[i] != 0) {
-  //         qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
-  //       }
-  //     }
-      
-  //   } else {      
-  //     sprintf(painCave.errMsg, "TetrahedralityParamZ: unable to open %s\n", 
-  //             outputFilename_.c_str());
-  //     painCave.isFatal = 1;
-  //     simError();  
-  //   }    
-  //   qZstream.close();
-  // }
 }
 
 
