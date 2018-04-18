@@ -64,7 +64,7 @@ namespace OpenMD {
     OutputData* outputData;
         
     ofstream ofs(outputFilename_.c_str());
-
+    std::cerr << outputFilename_ << endl;
     if (ofs.is_open()) {
       
       Revision r;
@@ -91,13 +91,13 @@ namespace OpenMD {
       for (unsigned int j = 0; j < nBins_; j++) {        
         
         int counts = counts_->accumulator[j]->count();
-
+	
         if (counts > 0) {
           for(outputData = beginOutputData(i); outputData; 
               outputData = nextOutputData(i)) {
             
             int n = outputData->accumulator[j]->count();
-            if (n != 0) {
+	    if (n != 0) {
               writeData( ofs, outputData, j );
             }
           }

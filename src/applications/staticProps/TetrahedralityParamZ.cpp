@@ -75,19 +75,6 @@ namespace OpenMD {
     // Set up cutoff radius:    
     rCut_ = rCut;
 
-    switch(axis_) {
-    case 0:
-      axisLabel_ = "x";
-      break;
-    case 1:
-      axisLabel_ = "y";
-      break;
-    case 2:
-    default:
-      axisLabel_ = "z";
-      break;
-    }
-
     tetrahedrality = new OutputData;
     tetrahedrality->units =  "Unitless";
     tetrahedrality->title =  "Tetrahedrality";
@@ -97,7 +84,6 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nBins_; i++) 
       tetrahedrality->accumulator.push_back( new Accumulator() );
     data_.push_back(tetrahedrality);
-
 
   }
   
@@ -122,21 +108,20 @@ namespace OpenMD {
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     RealType z;
-
-    Mat3x3d hmat = currentSnapshot_->getHmat();
+    hmat_ = currentSnapshot_->getHmat();
     for (unsigned int i = 0; i < nBins_; i++) {
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
-
+    
     vector<RealType> zBox(nBins_, 0.0);
     vector<RealType> sliceQ(nBins_, 0.0);
     vector<int> sliceCount(nBins_, 0);
 
       
-    zBox.push_back(hmat(axis_,axis_));
+    zBox.push_back(hmat_(axis_,axis_));
     
-    RealType halfBoxZ = hmat(axis_,axis_) / 2.0;      
+    RealType halfBoxZ = hmat_(axis_,axis_) / 2.0;      
     
     if (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -145,7 +130,6 @@ namespace OpenMD {
     if (evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
-    
     // outer loop is over the selected StuntDoubles:
     for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
 	 sd = seleMan1_.nextSelected(isd1)) {
@@ -216,20 +200,20 @@ namespace OpenMD {
 	if (usePeriodicBoundaryConditions_)
 	  currentSnapshot_->wrapVector(rk);
 	
-	int binNo = int(nBins_ * (halfBoxZ + rk[axis_]) / hmat(axis_,axis_));
+	int binNo = int(nBins_ * (halfBoxZ + rk[axis_]) / hmat_(axis_,axis_));
 	sliceQ[binNo] += Qk;
 	sliceCount[binNo] += 1;
       }  
     }
 
+    
     for (unsigned int i = 0; i < nBins_; i++) {
-      
       if (sliceCount[i] > 0) {
         RealType tetra = sliceQ[i] / sliceCount[i];
         dynamic_cast<Accumulator *>(tetrahedrality->accumulator[i])->add(tetra);
+	dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
       }
     }
-    
   }//processFrame
 
   void TetrahedralityParamZ::processStuntDouble(StuntDouble* sd, int bin) {

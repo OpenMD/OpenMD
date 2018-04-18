@@ -66,14 +66,22 @@ namespace OpenMD {
   }
 
   SpatialStatistics::SpatialStatistics(SimInfo* info, 
-                                       const string& sele1,
+                                       const string& sele,
 				       const string& sele2, int nbins)
-    : StaticAnalyser(info, nbins), selectionScript_(sele1),
+    : StaticAnalyser(info, nbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info) {
     
-    evaluator_.loadScriptString(sele1);
+    evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    SelectionEvaluator evaluator2(info);
+    SelectionManager seleMan2(info);
+
+     evaluator2.loadScriptString(sele2);
+    if (!evaluator2.isDynamic()) {
+      seleMan2.setSelectionSet(evaluator2.evaluate());
     }
 
     string prefixFileName = info->getPrefixFileName();

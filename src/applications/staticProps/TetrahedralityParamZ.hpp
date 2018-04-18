@@ -95,7 +95,6 @@ namespace OpenMD {
   protected:
     OutputData* tetrahedrality;
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript1_;
     std::string selectionScript2_;
     SelectionManager seleMan1_;
