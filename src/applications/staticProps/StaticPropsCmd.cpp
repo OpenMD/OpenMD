@@ -38,7 +38,7 @@ const char *gengetopt_args_info_help[] = {
   "  -i, --input=filename          input dump file (mandatory)",
   "  -o, --output=filename         output file name",
   "  -n, --step=INT                process every n frame  (default=`1')",
-  "  -b, --nbins=INT               number of bins (general purpose)  (default=`1')",
+  "  -b, --nbins=INT               number of bins (general purpose)\n                                  (default=`10')",
   "  -x, --nbins_x=INT             number of bins in x axis  (default=`100')",
   "  -y, --nbins_y=INT             number of bins in y axis  (default=`100')",
   "      --nbins_z=INT             number of bins in z axis  (default=`100')",
@@ -262,7 +262,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->output_orig = NULL;
   args_info->step_arg = 1;
   args_info->step_orig = NULL;
-  args_info->nbins_arg = 1;
+  args_info->nbins_arg = 10;
   args_info->nbins_orig = NULL;
   args_info->nbins_x_arg = 100;
   args_info->nbins_x_orig = NULL;
@@ -1846,7 +1846,7 @@ cmdline_parser_internal (
         
           if (update_arg( (void *)&(args_info->nbins_arg), 
                &(args_info->nbins_orig), &(args_info->nbins_given),
-              &(local_args_info.nbins_given), optarg, 0, "1", ARG_INT,
+              &(local_args_info.nbins_given), optarg, 0, "10", ARG_INT,
               check_ambiguity, override, 0, 0,
               "nbins", 'b',
               additional_error))

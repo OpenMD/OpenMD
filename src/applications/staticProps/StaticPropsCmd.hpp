@@ -51,7 +51,7 @@ struct gengetopt_args_info
   int step_arg;	/**< @brief process every n frame (default='1').  */
   char * step_orig;	/**< @brief process every n frame original value given at command line.  */
   const char *step_help; /**< @brief process every n frame help description.  */
-  int nbins_arg;	/**< @brief number of bins (general purpose) (default='1').  */
+  int nbins_arg;	/**< @brief number of bins (general purpose) (default='10').  */
   char * nbins_orig;	/**< @brief number of bins (general purpose) original value given at command line.  */
   const char *nbins_help; /**< @brief number of bins (general purpose) help description.  */
   int nbins_x_arg;	/**< @brief number of bins in x axis (default='100').  */

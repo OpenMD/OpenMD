@@ -69,36 +69,33 @@ namespace OpenMD {
     HBondGeometric(SimInfo* info, 
                    const std::string& sele1, const std::string& sele2,
                    double rCut, double thetaCut,
-                   int nbins);
+                   int nbins=10);
     
     virtual ~HBondGeometric();
     virtual void processFrame(int frame);
-    virtual void processDump();
+
+  protected:
+    OutputData* hBonds;
+    OutputData* nAcceptor;
+    OutputData* nDonor;
+    OutputData* nSelected;
     
   private:
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
-    virtual void initializeHistogram();
-    virtual void collectHistogram(int nHB, int nD, int nA);    
+    virtual void processStuntDouble(StuntDouble* sd, int bin);  
     void writeOutput();
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript1_;
     SelectionManager seleMan1_;    
     SelectionEvaluator evaluator1_;
     std::string selectionScript2_;
     SelectionManager seleMan2_;    
     SelectionEvaluator evaluator2_;
-    ForceField* ff_;
                 
     RealType rCut_;
     RealType thetaCut_;
     int frameCounter_;
     int nBins_;
    
-    std::vector<int> nHBonds_;
-    std::vector<int> nDonor_;
-    std::vector<int> nAcceptor_;
-    int nSelected_;
   };
 }
 

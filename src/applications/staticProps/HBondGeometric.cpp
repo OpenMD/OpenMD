@@ -45,6 +45,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
+#include "utils/Revision.hpp"
 
 
 #include <vector>
@@ -62,8 +63,6 @@ namespace OpenMD {
     string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".hbg");
 
-    ff_ = info_->getForceField();
-
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -73,35 +72,56 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
 
-
     // Set up cutoff values:
     nBins_ = nbins;
     rCut_ = rCut;
     thetaCut_ = thetaCut;
-    
-    nHBonds_.resize(nBins_);
-    nDonor_.resize(nBins_);
-    nAcceptor_.resize(nBins_);
 
-    initializeHistogram();
+
+    hBonds = new OutputData;
+    hBonds->units = "Unitless";
+    hBonds->title = "HBonds";
+    hBonds->dataType = odtReal;
+    hBonds->dataHandling = odhAverage;
+    hBonds->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      hBonds->accumulator.push_back( new Accumulator() );
+    data_.push_back(hBonds);
+  
+    nDonor = new OutputData;
+    nDonor->units = "Unitless";
+    nDonor->title = "HBonds";
+    nDonor->dataType = odtReal;
+    nDonor->dataHandling = odhAverage;
+    nDonor->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      nDonor->accumulator.push_back( new Accumulator() );
+    data_.push_back(nDonor);
+
+    nAcceptor = new OutputData;
+    nAcceptor->units = "Unitless";
+    nAcceptor->title = "HBonds";
+    nAcceptor->dataType = odtReal;
+    nAcceptor->dataHandling = odhAverage;
+    nAcceptor->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      nAcceptor->accumulator.push_back( new Accumulator() );
+    data_.push_back(nAcceptor);
+
+    nSelected = new OutputData;
+    nSelected->units = "Unitless";
+    nSelected->title = "No. of Objects";
+    nSelected->dataType = odtReal;
+    nSelected->dataHandling = odhTotal;
+    nSelected->accumulator.reserve(1);
+    nSelected->accumulator.push_back( new Accumulator() );
+    data_.push_back(nSelected);
+    
+    
   }
 
   HBondGeometric::~HBondGeometric() {
-    nHBonds_.clear();
-    nDonor_.clear();
-    nAcceptor_.clear(); 
   }
-
-  void HBondGeometric::processDump(){
-  }
-  
-  void HBondGeometric::initializeHistogram() {
-    std::fill(nHBonds_.begin(),   nHBonds_.end(),   0);
-    std::fill(nDonor_.begin(),    nDonor_.end(),    0);
-    std::fill(nAcceptor_.begin(), nAcceptor_.end(), 0);
-    nSelected_ = 0;
-  }
-
   
   void HBondGeometric::processFrame(int istep) {
     Molecule* mol1;
@@ -123,7 +143,12 @@ namespace OpenMD {
     int ii, jj;
     int nHB, nA, nD;
 
-     
+    std::vector<int> nHBonds_(nBins_, 0);
+    std::vector<int> nDonor_(nBins_, 0);
+    std::vector<int> nAcceptor_(nBins_, 0);
+    int nSelected_ = 0;
+
+    
     if  (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
@@ -208,55 +233,79 @@ namespace OpenMD {
 	    }
 	  }
 	}
-      }                 
-      collectHistogram(nHB, nA, nD);
+      }
+
+      dynamic_cast<Accumulator *>(hBonds->accumulator[nHB])->add(1);
+      dynamic_cast<Accumulator *>(nAcceptor->accumulator[nA])->add(1);
+      dynamic_cast<Accumulator *>(nDonor->accumulator[nD])->add(1);
+      dynamic_cast<Accumulator *>(nSelected->accumulator[0])->add(1);
     }
   }
   
         
-  void HBondGeometric::collectHistogram(int nHB, int nA, int nD) {
-    nHBonds_[nHB] += 1;
-    nAcceptor_[nA] += 1;
-    nDonor_[nD] += 1;
-    nSelected_++;
-  }
-
   void HBondGeometric::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
     
 
   void HBondGeometric::writeOutput() {
-        
-    std::ofstream osq(getOutputFileName().c_str());
 
-    if (osq.is_open()) {
+    vector<OutputData*>::iterator i;
+    OutputData* outputData;
+        
+    ofstream ofs(outputFilename_.c_str());
+    if (ofs.is_open()) {
       
-      osq << "# HydrogenBonding Statistics\n";
-      osq << "# selection1: (" << selectionScript1_ << ")"
-          << "\tselection2: (" << selectionScript2_ <<  ")\n";
-      osq << "# molecules in selection1: " << nSelected_ << "\n";
-      osq << "# nHBonds\tnAcceptor\tnDonor\tp(nHBonds)\tp(nAcceptor)\tp(nDonor)\n";
-      // Normalize by number of frames and write it out:
-      for (int i = 0; i < nBins_; ++i) {
-        osq << i;
-        osq << "\t" << nHBonds_[i];
-        osq << "\t" << nAcceptor_[i];
-        osq << "\t" << nDonor_[i];
-	osq << "\t" << (RealType) (nHBonds_[i]) / nSelected_;
-        osq << "\t" << (RealType) (nAcceptor_[i]) / nSelected_;
-        osq << "\t" << (RealType) (nDonor_[i]) / nSelected_;
-        osq << "\n";
+      Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#";
+      ofs << "nHBonds\tnAcceptor\tnDonor\tp(nHBonds)\tp(nAcceptor)\tp(nDonor)\n";
+      
+      ofs.precision(8);
+
+      int nHB;
+      int nA;
+      int nD;
+      int nSele;
+      RealType aveHB;
+      RealType aveA;
+      RealType aveD;
+      
+      for (unsigned int j = 0; j < nBins_; j++) {        
+       	  
+	nHB = hBonds->accumulator[j]->count();
+	nA = nAcceptor->accumulator[j]->count();
+	nD = nDonor->accumulator[j]->count();
+
+	nSele = nSelected->accumulator[0]->count() * nBins_;
+
+	aveHB = (RealType)nHB / nSele;
+	aveA = (RealType)nA / nSele;
+	aveD = (RealType)nD / nSele;
+	
+	ofs << j ;
+	ofs << "\t" << nHB;
+	ofs << "\t" << nA;
+	ofs << "\t" << nD;
+	ofs << "\t" << aveHB;
+	ofs << "\t" << aveA;
+	ofs << "\t" << aveD;
+	ofs << "\n";
+        
       }
-      osq.close();
-      
-    } else {
-      sprintf(painCave.errMsg, "HBondGeometric: unable to open %s\n", 
-              (getOutputFileName() + "q").c_str());
+    } else {      
+      sprintf(painCave.errMsg, "StaticAnalyser: unable to open %s\n", 
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }
   }
+
+  
 }
 
       

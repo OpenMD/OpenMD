@@ -64,7 +64,6 @@ namespace OpenMD {
     OutputData* outputData;
         
     ofstream ofs(outputFilename_.c_str());
-    std::cerr << outputFilename_ << endl;
     if (ofs.is_open()) {
       
       Revision r;
