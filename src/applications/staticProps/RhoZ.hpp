@@ -64,16 +64,13 @@ namespace OpenMD {
     }
     
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~RhoZ();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
+
+  protected:
+    OutputData* density;
     
   private:
-    
-    virtual void writeDensity();
-    
-    
-    Snapshot* currentSnapshot_;
     
     int nProcessed_;
     std::string selectionScript_;
@@ -82,9 +79,6 @@ namespace OpenMD {
     
     int nZBins_; 
     
-    std::vector<std::vector<StuntDouble*> > sliceSDLists_;
-    std::vector<RealType> zBox_;
-    std::vector<RealType> density_;
     int axis_;
     std::string axisLabel_;
 

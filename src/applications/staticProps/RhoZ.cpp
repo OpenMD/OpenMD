@@ -59,140 +59,86 @@ namespace OpenMD {
     : SlabStatistics(info, sele, nzbins, axis), selectionScript_(sele), 
       evaluator_(info), seleMan_(info), axis_(axis) {
 
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".RhoZ");
+    
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }       
-    
-    // fixed number of bins
 
-    sliceSDLists_.resize(nBins_);
-    density_.resize(nBins_);
-
-    switch(axis_) {
-    case 0:
-      axisLabel_ = "x";
-      break;
-    case 1:
-      axisLabel_ = "y";
-      break;
-    case 2:
-    default:
-      axisLabel_ = "z";
-      break;
-    }
+    density = new OutputData;
+    density->units =  "g cm^-3";
+    density->title =  "Density";
+    density->dataType = odtReal;
+    density->dataHandling = odhAverage;
+    density->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      density->accumulator.push_back( new Accumulator() );
+    data_.push_back(density);
  
-    string prefixFileName = info->getPrefixFileName();
-    setOutputName(prefixFileName + ".RhoZ");
-
     usePeriodicBoundaryConditions_ = 
       info_->getSimParams()->getUsePeriodicBoundaryConditions();
   }
 
   RhoZ::~RhoZ() {
-    sliceSDLists_.clear();
-    zBox_.clear();
-    density_.clear();
   }
-
-  void RhoZ::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    writeDensity();
-  }
-
   
   void RhoZ::processFrame(int istep) {
-    StuntDouble* sd;
-    int ii;
+    RealType z;
 
+    
+    hmat_ = currentSnapshot_->getHmat();
     for (unsigned int i = 0; i < nBins_; i++) {
-      sliceSDLists_[i].clear();
+      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
+      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
+    volume_ = currentSnapshot_->getVolume();
     
-    RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
-    Mat3x3d hmat = currentSnapshot_->getHmat();
-    zBox_.push_back(hmat(axis_,axis_));
-    
-    RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
-    
+    StuntDouble* sd;
+    int i;
+
+    vector<RealType> binMass(nBins_, 0.0);
+    vector<int> binDof(nBins_, 0);
+
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-    
-    //wrap the stuntdoubles into a cell      
-    for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	 sd = seleMan_.nextSelected(ii)) {
-      Vector3d pos = sd->getPos();
-      if (usePeriodicBoundaryConditions_)
-	currentSnapshot_->wrapVector(pos);
-      sd->setPos(pos);
-    }
-    
-    //determine which atom belongs to which slice
-    for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	 sd = seleMan_.nextSelected(ii)) {
-      Vector3d pos = sd->getPos();
-      // shift molecules by half a box to have bins start at 0
-      int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
-      sliceSDLists_[binNo].push_back(sd);
-    }
-    
-    //loop over the slices to calculate the densities
-    for (unsigned int i = 0; i < nBins_; i++) {
-      RealType totalMass = 0;
-      for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
-	totalMass += sliceSDLists_[i][k]->getMass();
+    } 
+
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+         sd = seleMan_.nextSelected(i)) {
+      
+      Vector3d pos = sd->getPos(); 
+      RealType m = sd->getMass();
+      
+      int bin = getBin(pos);      
+      
+      binMass[bin] += m;
+      binDof[bin] += 3;
+      
+      if (sd->isDirectional()) {
+	if (sd->isLinear()) {
+	  binDof[bin] += 2;
+	} else {
+	  binDof[bin] += 3;
+	}
       }
-      density_[i] += totalMass/sliceVolume;
     }
+    for (unsigned int i = 0; i < nBins_; i++) {
+      
+      if (binDof[i] > 0) {
+        RealType den = binMass[i] * nBins_ * Constants::densityConvert 
+          / volume_;
+        
+        dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
+        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+      }
+    }    
   }
 
   void RhoZ::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
-      
-  void RhoZ::writeDensity() {
-
-    // compute average box length:
-    std::vector<RealType>::iterator j;
-    RealType zSum = 0.0;
-    for (j = zBox_.begin(); j != zBox_.end(); ++j) {
-      zSum += *j;       
-    }
-    RealType zAve = zSum / zBox_.size();
-
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#Rho(" << axisLabel_ << ")\n";
-      rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << axisLabel_ << "\tdensity\n";
-      for (unsigned int i = 0; i < density_.size(); ++i) {
-        RealType z = zAve * (i+0.5)/density_.size();
-        rdfStream << z << "\t"
-                  << Constants::densityConvert * density_[i] / nProcessed_
-                  << "\n";
-      }
-      
-    } else {
-      
-      sprintf(painCave.errMsg, "RhoZ: unable to open %s\n", 
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }
-    
-    rdfStream.close();
-  }
-  
+        
 }
 
