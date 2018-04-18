@@ -257,9 +257,6 @@ namespace OpenMD {
     return int(nBins_ * (pos[axis_] / hmat_(axis_,axis_) + 0.5)) % nBins_;  
   }
 
-  void SlabStatistics::processDump(){
-    // Fill in later
-  }
   
   ShellStatistics::ShellStatistics(SimInfo* info,  
                                    const string& sele, int nbins) : 
@@ -356,8 +353,5 @@ namespace OpenMD {
     return int(rPos.length() / binWidth_);
   }
 
-  void ShellStatistics::processDump() {
-    // Fill in later
-  }
 }
 

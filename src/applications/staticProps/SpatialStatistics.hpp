@@ -98,7 +98,7 @@ namespace OpenMD {
 
     virtual int getBin(Vector3d pos);
     virtual void processFrame(int frame);
-    virtual void processDump();
+
   protected:
     OutputData* z_;
     Mat3x3d hmat_;
@@ -116,7 +116,7 @@ namespace OpenMD {
                     const string& sele2, int nbins);
     virtual ~ShellStatistics();
     virtual int getBin(Vector3d pos);
-    virtual void processDump();
+    
 
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
     void setBinWidth(RealType bw) { binWidth_ = bw; }
