@@ -316,7 +316,9 @@ namespace OpenMD {
   }
   
 
-
+  void BOPofR::processStuntDouble(StuntDouble* sd, int bin){
+    // fill in later
+  }
 
   IcosahedralOfR::IcosahedralOfR(SimInfo* info, 
                                  const std::string& sele, double rCut, 
