@@ -75,8 +75,8 @@ namespace OpenMD {
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
     virtual void processDump();
     virtual void processFrame(int frame);
-    virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
     virtual int getBin(Vector3d pos);
+    virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
     
   protected:
 

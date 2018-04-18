@@ -89,11 +89,11 @@ namespace OpenMD {
 
     virtual ~TetrahedralityParamZ();
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
-  private:
-    void writeQz();
+    
+  protected:
+    OutputData* tetrahedrality;
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;
@@ -104,9 +104,6 @@ namespace OpenMD {
     SelectionEvaluator evaluator2_;
     RealType rCut_;
     int nZBins_;
-    std::vector<RealType> zBox_;
-    std::vector<RealType> sliceQ_;
-    std::vector<int> sliceCount_;
     int axis_;
     std::string axisLabel_;
   };

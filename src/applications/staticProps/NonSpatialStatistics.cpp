@@ -181,11 +181,11 @@ namespace OpenMD {
   }
 
 
-   int NonSpatialStatistics::getBin(Vector3d pos) {
-    
-    return 1;  
+  int NonSpatialStatistics::getBin(Vector3d pos) {
+    unsigned int zero = 0;
+    return zero;  
   }
-
+  
   
   
 }

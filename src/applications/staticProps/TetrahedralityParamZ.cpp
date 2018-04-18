@@ -59,6 +59,9 @@ namespace OpenMD {
       selectionScript1_(sele1), selectionScript2_(sele2), 
       seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       axis_(axis) {
+
+    string prefixFileName = info->getPrefixFileName();
+    setOutputName(prefixFileName + ".Qz");
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -84,26 +87,23 @@ namespace OpenMD {
       axisLabel_ = "z";
       break;
     }
-    
-    // fixed number of bins
-    sliceQ_.resize(nBins_);
-    sliceCount_.resize(nBins_);    
-    std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
-    std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
 
-    string prefixFileName = info->getPrefixFileName();
-    setOutputName(prefixFileName + ".Qz");
+    tetrahedrality = new OutputData;
+    tetrahedrality->units =  "Unitless";
+    tetrahedrality->title =  "Tetrahedrality";
+    tetrahedrality->dataType = odtReal;
+    tetrahedrality->dataHandling = odhAverage;
+    tetrahedrality->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      tetrahedrality->accumulator.push_back( new Accumulator() );
+    data_.push_back(tetrahedrality);
+
+
   }
   
   TetrahedralityParamZ::~TetrahedralityParamZ() {
-    sliceQ_.clear();
-    sliceCount_.clear();
-    zBox_.clear();
   }
 
-  void TetrahedralityParamZ::processDump(){
-    // call processFrame( snap )
-  }
     
   void TetrahedralityParamZ::processFrame(int istep) {
     StuntDouble* sd;
@@ -121,145 +121,156 @@ namespace OpenMD {
     int isd2;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
+    RealType z;
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(axis_,axis_));
-      
-      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;      
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    for (unsigned int i = 0; i < nBins_; i++) {
+      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
+      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
+    }
 
-      if (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    vector<RealType> zBox(nBins_, 0.0);
+    vector<RealType> sliceQ(nBins_, 0.0);
+    vector<int> sliceCount(nBins_, 0);
+
+      
+    zBox.push_back(hmat(axis_,axis_));
+    
+    RealType halfBoxZ = hmat(axis_,axis_) / 2.0;      
+    
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+    
+    if (evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }
+    
+    // outer loop is over the selected StuntDoubles:
+    for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
+	 sd = seleMan1_.nextSelected(isd1)) {
+      
+      myIndex = sd->getGlobalIndex();
+      
+      Qk = 1.0;	  
+      myNeighbors.clear();       
+      
+      for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
+	   sd2 = seleMan2_.nextSelected(isd2)) {
+	
+	if (sd2->getGlobalIndex() != myIndex) {
+	  
+	  vec = sd->getPos() - sd2->getPos();       
+          
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(vec);
+	  
+	  r = vec.length();             
+          
+	  // Check to see if neighbor is in bond cutoff 
+          
+	  if (r < rCut_) {                
+	    myNeighbors.push_back(std::make_pair(r,sd2));
+	  }
+	}
       }
       
-      if (evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      // Sort the vector using predicate and std::sort
+      std::sort(myNeighbors.begin(), myNeighbors.end());
+      
+      // Use only the 4 closest neighbors to do the rest of the work:
+      
+      int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nang = int (0.5 * (nbors * (nbors - 1)));
+      
+      rk = sd->getPos();
+      
+      for (int i = 0; i < nbors-1; i++) {       
+	
+	sdi = myNeighbors[i].second;
+	ri = sdi->getPos();
+	rik = rk - ri;
+	if (usePeriodicBoundaryConditions_) 
+	  currentSnapshot_->wrapVector(rik);
+	
+	rik.normalize();
+        
+	for (int j = i+1; j < nbors; j++) {       
+	  
+	  sdj = myNeighbors[j].second;
+	  rj = sdj->getPos();
+	  rkj = rk - rj;
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(rkj);
+	  rkj.normalize();
+          
+	  cospsi = dot(rik,rkj);           
+          
+	  // Calculates scaled Qk for each molecule using calculated
+	  // angles from 4 or fewer nearest neighbors.
+	  Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
+	}
       }
       
-      // outer loop is over the selected StuntDoubles:
-      for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
-           sd = seleMan1_.nextSelected(isd1)) {
-        
-        myIndex = sd->getGlobalIndex();
-        
-        Qk = 1.0;	  
-        myNeighbors.clear();       
+      if (nang > 0) {
+	if (usePeriodicBoundaryConditions_)
+	  currentSnapshot_->wrapVector(rk);
+	
+	int binNo = int(nBins_ * (halfBoxZ + rk[axis_]) / hmat(axis_,axis_));
+	sliceQ[binNo] += Qk;
+	sliceCount[binNo] += 1;
+      }  
+    }
 
-        for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
-             sd2 = seleMan2_.nextSelected(isd2)) {
-          
-          if (sd2->getGlobalIndex() != myIndex) {
-            
-            vec = sd->getPos() - sd2->getPos();       
-            
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(vec);
-            
-            r = vec.length();             
-            
-            // Check to see if neighbor is in bond cutoff 
-            
-            if (r < rCut_) {                
-              myNeighbors.push_back(std::make_pair(r,sd2));
-            }
-          }
-        }
-        
-        // Sort the vector using predicate and std::sort
-        std::sort(myNeighbors.begin(), myNeighbors.end());
-        
-        // Use only the 4 closest neighbors to do the rest of the work:
-        
-        int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
-        int nang = int (0.5 * (nbors * (nbors - 1)));
-        
-        rk = sd->getPos();
-        
-        for (int i = 0; i < nbors-1; i++) {       
-          
-          sdi = myNeighbors[i].second;
-          ri = sdi->getPos();
-          rik = rk - ri;
-          if (usePeriodicBoundaryConditions_) 
-            currentSnapshot_->wrapVector(rik);
-          
-          rik.normalize();
-          
-          for (int j = i+1; j < nbors; j++) {       
-            
-            sdj = myNeighbors[j].second;
-            rj = sdj->getPos();
-            rkj = rk - rj;
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(rkj);
-            rkj.normalize();
-            
-            cospsi = dot(rik,rkj);           
-            
-            // Calculates scaled Qk for each molecule using calculated
-            // angles from 4 or fewer nearest neighbors.
-            Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
-          }
-        }
-        
-        if (nang > 0) {
-          if (usePeriodicBoundaryConditions_)
-            currentSnapshot_->wrapVector(rk);
-          
-          int binNo = int(nBins_ * (halfBoxZ_ + rk[axis_]) / hmat(axis_,axis_));
-          sliceQ_[binNo] += Qk;
-          sliceCount_[binNo] += 1;
-        }  
+    for (unsigned int i = 0; i < nBins_; i++) {
+      
+      if (sliceCount[i] > 0) {
+        RealType tetra = sliceQ[i] / sliceCount[i];
+        dynamic_cast<Accumulator *>(tetrahedrality->accumulator[i])->add(tetra);
       }
     }
-    writeQz();
-  }
+    
+  }//processFrame
 
   void TetrahedralityParamZ::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
   
-  void TetrahedralityParamZ::writeQz() {
+  // void TetrahedralityParamZ::writeOutput() {
 
-    // compute average box length:
+  //   // compute average box length:
     
-    RealType zSum = 0.0;
-    for (std::vector<RealType>::iterator j = zBox_.begin(); 
-         j != zBox_.end(); ++j) {
-      zSum += *j;       
-    }
-    RealType zAve = zSum / zBox_.size();
+  //   RealType zSum = 0.0;
+  //   for (std::vector<RealType>::iterator j = zBox_.begin(); 
+  //        j != zBox_.end(); ++j) {
+  //     zSum += *j;       
+  //   }
+  //   RealType zAve = zSum / zBox_.size();
 
-    std::ofstream qZstream(outputFilename_.c_str());
-    if (qZstream.is_open()) {
+  //   std::ofstream qZstream(outputFilename_.c_str());
+  //   if (qZstream.is_open()) {
 
-      qZstream << "#Tetrahedrality Parameters (" << axisLabel_ << ")\n";
+  //     qZstream << "#Tetrahedrality Parameters (" << axisLabel_ << ")\n";
 
-      qZstream << "#nFrames:\t" << zBox_.size() << "\n";
-      qZstream << "#selection 1: (" << selectionScript1_ << ")\n";
-      qZstream << "#selection 2: (" << selectionScript2_ << ")\n";
-      qZstream << "#" << axisLabel_ << "\tQk\n";
-      for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
-        RealType z = zAve * (i+0.5) / sliceQ_.size();
-        if (sliceCount_[i] != 0) {
-          qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
-        }
-      }
+  //     qZstream << "#nFrames:\t" << zBox_.size() << "\n";
+  //     qZstream << "#selection 1: (" << selectionScript1_ << ")\n";
+  //     qZstream << "#selection 2: (" << selectionScript2_ << ")\n";
+  //     qZstream << "#" << axisLabel_ << "\tQk\n";
+  //     for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
+  //       RealType z = zAve * (i+0.5) / sliceQ_.size();
+  //       if (sliceCount_[i] != 0) {
+  //         qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
+  //       }
+  //     }
       
-    } else {      
-      sprintf(painCave.errMsg, "TetrahedralityParamZ: unable to open %s\n", 
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }    
-    qZstream.close();
-  }
+  //   } else {      
+  //     sprintf(painCave.errMsg, "TetrahedralityParamZ: unable to open %s\n", 
+  //             outputFilename_.c_str());
+  //     painCave.isFatal = 1;
+  //     simError();  
+  //   }    
+  //   qZstream.close();
+  // }
 }
 
 
