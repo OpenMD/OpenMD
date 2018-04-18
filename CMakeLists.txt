@@ -616,6 +616,7 @@ src/applications/staticProps/AngleR.cpp
 src/applications/staticProps/BondAngleDistribution.cpp
 src/applications/staticProps/BondOrderParameter.cpp
 src/applications/staticProps/BOPofR.cpp
+src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/DensityPlot.cpp
 src/applications/staticProps/GofAngle2.cpp
 src/applications/staticProps/GofR.cpp
@@ -624,7 +625,6 @@ src/applications/staticProps/GofRAngle2.cpp
 src/applications/staticProps/GofRZ.cpp
 src/applications/staticProps/GofXyz.cpp
 src/applications/staticProps/GofZ.cpp
-src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
 src/applications/staticProps/Kirkwood.cpp
@@ -633,6 +633,7 @@ src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp
 src/applications/staticProps/NitrileFrequencyMap.cpp
+src/applications/staticProps/NonSpatialStatistics.cpp
 src/applications/staticProps/ObjectCount.cpp
 src/applications/staticProps/P2OrderParameter.cpp
 src/applications/staticProps/PipeDensity.cpp
@@ -645,16 +646,15 @@ src/applications/staticProps/RippleOP.cpp
 src/applications/staticProps/RNEMDStats.cpp
 src/applications/staticProps/SCDOrderParameter.cpp
 src/applications/staticProps/SpatialStatistics.cpp
-src/applications/staticProps/NonSpatialStatistics.cpp
 src/applications/staticProps/StaticAnalyser.cpp
 src/applications/staticProps/StaticProps.cpp
+src/applications/staticProps/StaticPropsCmd.cpp
 src/applications/staticProps/TetrahedralityHBMatrix.cpp
 src/applications/staticProps/TetrahedralityParam.cpp
 src/applications/staticProps/TetrahedralityParamDens.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
 src/applications/staticProps/TetrahedralityParamXYZ.cpp
 src/applications/staticProps/TwoDGofR.cpp
-src/applications/staticProps/StaticPropsCmd.cpp
 src/applications/staticProps/VelocityZ.cpp
 )
 
