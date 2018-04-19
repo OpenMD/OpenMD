@@ -71,7 +71,6 @@ namespace OpenMD {
     void processHistogram();
     void writeOutput();
 
-    int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
@@ -80,9 +79,6 @@ namespace OpenMD {
     int nRBins_;
     RealType deltaR_;
 
-    std::vector<RealType> histogram_;
-    std::vector<RealType> avgAngleR_;
-    std::vector<int> count_;	
   };
 
 }

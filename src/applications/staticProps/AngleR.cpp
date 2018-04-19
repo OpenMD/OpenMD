@@ -61,10 +61,6 @@ namespace OpenMD {
                  const std::string& sele, RealType len, int nrbins)
     : NonSpatialStatistics(info, sele, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
-
-    const std::string paramString = params.str();
-    setParameterString( paramString );
-
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -72,10 +68,6 @@ namespace OpenMD {
     }
         
     deltaR_ = len_ /nRBins_;
-    
-    histogram_.resize(nRBins_);
-    count_.resize(nRBins_);
-    avgAngleR_.resize(nRBins_);
     
     setAnalysisType("radial density function Angle(r)");
     string prefixFileName = info_->getPrefixFileName();
@@ -132,7 +124,7 @@ namespace OpenMD {
 	  int whichBin = int(distance / deltaR_);
 	  // update accumulators here
 	  dynamic_cast<Accumulator *>(angleR->accumulator[whichBin])->add(cosangle);
-	  dynamic_cast<Accumulator *>(count_->accumulator[whichBin])->add(1);
+	  
 	}
       } 
     }
@@ -155,16 +147,14 @@ namespace OpenMD {
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 
-      int nAngleR = 0;
       RealType aveAngleR = 0.0;	
       
       for (unsigned int j = 0; j < nRBins_; j++) {        
 	      	
-	nAngleR = angleR->accumulator[j]->count();
-	aveAngleR = angleR->accumulator[j]->getAverage(aveAngleR);	  
+	dynamic_cast<Accumulator*>(angleR->accumulator[j])->getAverage(aveAngleR);	  
 	  
 	RealType r = deltaR_ * (j + 0.5);
-	ofs << r << "\t" << avgAngleR_[j] << "\n";
+	ofs << r << "\t" << aveAngleR << "\n";
       }
         
     } else {
