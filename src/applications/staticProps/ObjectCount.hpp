@@ -52,15 +52,13 @@ namespace OpenMD {
   public:
     ObjectCount(SimInfo* info, const std::string& sele);
     virtual void processFrame(int frame);
-    virtual void processDump();
+    void processHistogram();
     virtual ~ObjectCount();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
     
   private:
-    void writeCounts();
-    
-    Snapshot* currentSnapshot_;
+    void writeOutput();
        
     vector<int> counts_; 
     RealType nAvg_;

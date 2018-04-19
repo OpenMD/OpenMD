@@ -70,24 +70,10 @@ namespace OpenMD {
     counts_.clear();
   }
 
-  void ObjectCount::processDump() {
-    
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(i);
-    }
-    
-    int nProcessed = nFrames /step_;
-    
-    nAvg_ = nsum_ / nProcessed;
-    n2Avg_ = n2sum_ / nProcessed;
+  void ObjectCount::processHistogram() {
+    nAvg_ = nsum_ / nProcessed_;
+    n2Avg_ = n2sum_ / nProcessed_;
     sDev_ = sqrt(n2Avg_ - nAvg_*nAvg_);
-    writeCounts();   
-    
   }
 
 
@@ -116,7 +102,7 @@ namespace OpenMD {
   }
     
   
-  void ObjectCount::writeCounts() {
+  void ObjectCount::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     if (ofs.is_open()) {
       ofs << "#counts\n";
