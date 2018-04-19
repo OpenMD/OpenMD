@@ -82,6 +82,8 @@ struct gengetopt_args_info
   const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
   const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
+  const char *nanolength_help; /**< @brief compute length of nanorod help description.  */
+  const char *nanovolume_help; /**< @brief compute volume and surface area of hull help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -102,6 +104,8 @@ struct gengetopt_args_info
   unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
+  unsigned int nanolength_given ;	/**< @brief Whether nanolength was given.  */
+  unsigned int nanovolume_given ;	/**< @brief Whether nanovolume was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

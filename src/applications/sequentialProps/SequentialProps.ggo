@@ -34,4 +34,6 @@ groupoption "com"       c       "selection center of mass" group="sequentialProp
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
 groupoption "ca2"       -       "contact angle of selection (using density profile)" group="sequentialProps"
 groupoption "gcn"       -       "Generalized Coordinate Number" group="sequentialProps"
+groupoption "nanolength"	-	"compute length of nanorod" group="sequentialProps"
+groupoption "nanovolume" - 	"compute volume and surface area of hull" group="sequentialProps"
 

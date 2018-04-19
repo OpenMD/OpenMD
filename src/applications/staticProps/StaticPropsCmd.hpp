@@ -162,8 +162,6 @@ struct gengetopt_args_info
   const char *hxy_help; /**< @brief hxy help description.  */
   const char *rho_r_help; /**< @brief rho(R) help description.  */
   const char *angle_r_help; /**< @brief angle of R help description.  */
-  const char *hullvol_help; /**< @brief hull volume of nanoparticle help description.  */
-  const char *rodlength_help; /**< @brief length of nanorod help description.  */
   const char *tet_param_help; /**< @brief tetrahedrality order parameter (Qk) help description.  */
   const char *tet_param_z_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
   const char *tet_param_dens_help; /**< @brief computes density of the tetrahedrality order parameter Qk help description.  */
@@ -243,8 +241,6 @@ struct gengetopt_args_info
   unsigned int hxy_given ;	/**< @brief Whether hxy was given.  */
   unsigned int rho_r_given ;	/**< @brief Whether rho_r was given.  */
   unsigned int angle_r_given ;	/**< @brief Whether angle_r was given.  */
-  unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
-  unsigned int rodlength_given ;	/**< @brief Whether rodlength was given.  */
   unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
   unsigned int tet_param_z_given ;	/**< @brief Whether tet_param_z was given.  */
   unsigned int tet_param_dens_given ;	/**< @brief Whether tet_param_dens was given.  */

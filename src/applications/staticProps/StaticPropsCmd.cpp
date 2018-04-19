@@ -92,8 +92,6 @@ const char *gengetopt_args_info_help[] = {
   "      --hxy                     hxy",
   "      --rho_r                   rho(R)",
   "      --angle_r                 angle of R",
-  "      --hullvol                 hull volume of nanoparticle",
-  "      --rodlength               length of nanorod",
   "  -Q, --tet_param               tetrahedrality order parameter (Qk)",
   "      --tet_param_z             spatially-resolved tetrahedrality order\n                                  parameter Qk(z)",
   "      --tet_param_dens          computes density of the tetrahedrality order\n                                  parameter Qk",
@@ -227,8 +225,6 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->hxy_given = 0 ;
   args_info->rho_r_given = 0 ;
   args_info->angle_r_given = 0 ;
-  args_info->hullvol_given = 0 ;
-  args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
   args_info->tet_param_dens_given = 0 ;
@@ -375,28 +371,26 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->hxy_help = gengetopt_args_info_help[56] ;
   args_info->rho_r_help = gengetopt_args_info_help[57] ;
   args_info->angle_r_help = gengetopt_args_info_help[58] ;
-  args_info->hullvol_help = gengetopt_args_info_help[59] ;
-  args_info->rodlength_help = gengetopt_args_info_help[60] ;
-  args_info->tet_param_help = gengetopt_args_info_help[61] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[62] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[63] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[64] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[65] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[66] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[67] ;
-  args_info->nitrile_help = gengetopt_args_info_help[68] ;
-  args_info->multipole_help = gengetopt_args_info_help[69] ;
-  args_info->cn_help = gengetopt_args_info_help[70] ;
-  args_info->scn_help = gengetopt_args_info_help[71] ;
-  args_info->gcn_help = gengetopt_args_info_help[72] ;
-  args_info->hbond_help = gengetopt_args_info_help[73] ;
-  args_info->potDiff_help = gengetopt_args_info_help[74] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[75] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[76] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[77] ;
-  args_info->densityfield_help = gengetopt_args_info_help[78] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[79] ;
-  args_info->velocityZ_help = gengetopt_args_info_help[80] ;
+  args_info->tet_param_help = gengetopt_args_info_help[59] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[60] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[61] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[62] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[63] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[64] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[65] ;
+  args_info->nitrile_help = gengetopt_args_info_help[66] ;
+  args_info->multipole_help = gengetopt_args_info_help[67] ;
+  args_info->cn_help = gengetopt_args_info_help[68] ;
+  args_info->scn_help = gengetopt_args_info_help[69] ;
+  args_info->gcn_help = gengetopt_args_info_help[70] ;
+  args_info->hbond_help = gengetopt_args_info_help[71] ;
+  args_info->potDiff_help = gengetopt_args_info_help[72] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[73] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[74] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[75] ;
+  args_info->densityfield_help = gengetopt_args_info_help[76] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[77] ;
+  args_info->velocityZ_help = gengetopt_args_info_help[78] ;
   
 }
 
@@ -715,10 +709,6 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "rho_r", 0, 0 );
   if (args_info->angle_r_given)
     write_into_file(outfile, "angle_r", 0, 0 );
-  if (args_info->hullvol_given)
-    write_into_file(outfile, "hullvol", 0, 0 );
-  if (args_info->rodlength_given)
-    write_into_file(outfile, "rodlength", 0, 0 );
   if (args_info->tet_param_given)
     write_into_file(outfile, "tet_param", 0, 0 );
   if (args_info->tet_param_z_given)
@@ -836,8 +826,6 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->hxy_given = 0 ;
   args_info->rho_r_given = 0 ;
   args_info->angle_r_given = 0 ;
-  args_info->hullvol_given = 0 ;
-  args_info->rodlength_given = 0 ;
   args_info->tet_param_given = 0 ;
   args_info->tet_param_z_given = 0 ;
   args_info->tet_param_dens_given = 0 ;
@@ -1754,8 +1742,6 @@ cmdline_parser_internal (
         { "hxy",	0, NULL, 0 },
         { "rho_r",	0, NULL, 0 },
         { "angle_r",	0, NULL, 0 },
-        { "hullvol",	0, NULL, 0 },
-        { "rodlength",	0, NULL, 0 },
         { "tet_param",	0, NULL, 'Q' },
         { "tet_param_z",	0, NULL, 0 },
         { "tet_param_dens",	0, NULL, 0 },
@@ -2674,40 +2660,6 @@ cmdline_parser_internal (
                 &(local_args_info.angle_r_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "angle_r", '-',
-                additional_error))
-              goto failure;
-          
-          }
-          /* hull volume of nanoparticle.  */
-          else if (strcmp (long_options[option_index].name, "hullvol") == 0)
-          {
-          
-            if (args_info->staticProps_group_counter && override)
-              reset_group_staticProps (args_info);
-            args_info->staticProps_group_counter += 1;
-          
-            if (update_arg( 0 , 
-                 0 , &(args_info->hullvol_given),
-                &(local_args_info.hullvol_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "hullvol", '-',
-                additional_error))
-              goto failure;
-          
-          }
-          /* length of nanorod.  */
-          else if (strcmp (long_options[option_index].name, "rodlength") == 0)
-          {
-          
-            if (args_info->staticProps_group_counter && override)
-              reset_group_staticProps (args_info);
-            args_info->staticProps_group_counter += 1;
-          
-            if (update_arg( 0 , 
-                 0 , &(args_info->rodlength_given),
-                &(local_args_info.rodlength_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "rodlength", '-',
                 additional_error))
               goto failure;
           

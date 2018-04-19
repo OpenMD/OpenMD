@@ -83,8 +83,6 @@ groupoption "p_angle"   -       "p(cos(theta)) (--sele1 must be specified, --sel
 groupoption "hxy"       -       "hxy" group="staticProps"
 groupoption "rho_r"     -       "rho(R)" group="staticProps"
 groupoption "angle_r"   -       "angle of R" group="staticProps"
-groupoption "hullvol"   -       "hull volume of nanoparticle" group="staticProps"
-groupoption "rodlength" -       "length of nanorod" group="staticProps"
 groupoption "tet_param" Q       "tetrahedrality order parameter (Qk)" group="staticProps"
 groupoption "tet_param_z" -     "spatially-resolved tetrahedrality order parameter Qk(z)" group="staticProps"
 groupoption "tet_param_dens" -  "computes density of the tetrahedrality order parameter Qk" group="staticProps"

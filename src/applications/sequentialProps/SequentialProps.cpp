@@ -55,6 +55,8 @@
 #include "applications/sequentialProps/ContactAngle1.hpp"
 #include "applications/sequentialProps/ContactAngle2.hpp"
 #include "applications/sequentialProps/GCNSeq.hpp"
+#include "applications/sequentialProps/NanoLength.hpp"
+#include "applications/sequentialProps/NanoVolume.hpp"
 
 using namespace OpenMD;
 
@@ -201,6 +203,10 @@ int main(int argc, char* argv[]){
     analyzer = new ContactAngle2(info, dumpFileName, sele1, sele2, solidZ,
                                  centroidX, centroidY, threshDens, bufferLength,
                                  args_info.nbins_arg, args_info.nbins_z_arg);
+  }else if(args_info.nanoLength_given){
+    // fill in later
+  }else if(args_info.nanoVolume_given){
+    // fill in later
   }
 
   if (args_info.output_given) {

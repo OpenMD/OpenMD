@@ -606,6 +606,8 @@ src/applications/sequentialProps/CenterOfMass.cpp
 src/applications/sequentialProps/ContactAngle1.cpp
 src/applications/sequentialProps/ContactAngle2.cpp
 src/applications/sequentialProps/GCNSeq.cpp
+src/applications/sequentialProps/NanoLength.cpp
+src/applications/sequentialProps/NanoVolume.cpp
 src/applications/sequentialProps/SequentialAnalyzer.cpp
 src/applications/sequentialProps/SequentialProps.cpp
 src/applications/sequentialProps/SequentialPropsCmd.cpp
@@ -630,8 +632,6 @@ src/applications/staticProps/HBondGeometric.cpp
 src/applications/staticProps/Kirkwood.cpp
 src/applications/staticProps/Field.cpp
 src/applications/staticProps/MultipoleSum.cpp
-src/applications/staticProps/NanoLength.cpp
-src/applications/staticProps/NanoVolume.cpp
 src/applications/staticProps/NitrileFrequencyMap.cpp
 src/applications/staticProps/NonSpatialStatistics.cpp
 src/applications/staticProps/ObjectCount.cpp
