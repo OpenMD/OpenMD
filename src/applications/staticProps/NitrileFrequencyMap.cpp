@@ -163,22 +163,6 @@ namespace OpenMD {
   }
 
   
-  void NitrileFrequencyMap::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    
-    nProcessed_ = nFrames/step_;
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-  }   
-    processHistogram();
-    writeProbs();
-  }
-
-  
   void NitrileFrequencyMap::processFrame(int istep) {
     Molecule* mol;
     Atom* atom;
@@ -285,7 +269,7 @@ namespace OpenMD {
     }    
   }
   
-  void NitrileFrequencyMap::writeProbs() {
+  void NitrileFrequencyMap::writeOutput() {
 
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {

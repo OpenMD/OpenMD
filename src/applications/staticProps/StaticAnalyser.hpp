@@ -109,6 +109,7 @@ namespace OpenMD {
 
   protected:
     virtual void writeOutput();
+    virtual void processHistogram();
     virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
     virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
     OutputData* beginOutputData(vector<OutputData*>::iterator& i);

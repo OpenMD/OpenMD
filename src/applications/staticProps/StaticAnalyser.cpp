@@ -226,4 +226,10 @@ namespace OpenMD {
     ++i;
     return i != data_.end()? *i: NULL;
   }
+  
+  void StaticAnalyser::processHistogram() {
+    // placeHolder for inherited functions
+  }
+  
 }
+

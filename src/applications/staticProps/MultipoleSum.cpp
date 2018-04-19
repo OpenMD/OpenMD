@@ -76,6 +76,10 @@ namespace OpenMD {
     aveDproj_.resize(nRBins_, 0.0);
     deltaR_ = rMax_ / nRBins_;
 
+    dipoleHist.resize(nRBins_, 0.0); 
+    qpoleHist.resize(nRBins_, 0.0); 
+    lengthCount.resize(nRBins_, 0);
+
     usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     std::cerr << "end of constructor" << endl;
@@ -190,7 +194,7 @@ namespace OpenMD {
 	RealType Qddot = doubleDot(totalQpole[j], totalQpole[j]);
 	RealType qpoleLength =  2.0*(3.0*Qddot - Qtrace*Qtrace);
 	std::cerr << "end of constructor" << endl;
-	dipoleHist[j] += qpole;
+	dipoleHist[j] += dipoleLength;
 	qpoleHist[j] += qpoleLength;
 	aveDcount_[j] += dipoleCount[j];
 	aveQcount_[j] += qpoleCount[j];

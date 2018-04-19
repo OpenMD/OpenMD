@@ -68,7 +68,6 @@ namespace OpenMD {
     OutputData* angleR;
     
   private:
-    void processHistogram();
     void writeOutput();
 
     std::string selectionScript_;

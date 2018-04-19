@@ -113,6 +113,7 @@ namespace OpenMD {
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       processFrame(istep);
     }
+    processHistogram();
     writeOutput();
   }
 
