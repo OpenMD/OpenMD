@@ -141,6 +141,7 @@ namespace OpenMD {
     }
     delete [] THRCOF;
     THRCOF = NULL;
+   
   }
   
   BondOrderParameter::~BondOrderParameter() {
@@ -165,19 +166,8 @@ namespace OpenMD {
     }
   }
 
-  void BondOrderParameter::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-
+  void BondOrderParameter::processHistogram() {
+    
     /* 
        The rest of the analysis (post dump loop) needs to go somewhere general
     */
@@ -215,8 +205,7 @@ namespace OpenMD {
       
       W_hat_[l] = W_[l] / pow(Q2_[l], RealType(1.5));
     }
-    
-    writeOrderParameter(Q_, W_hat_);    
+
   }
 
   
@@ -331,7 +320,6 @@ namespace OpenMD {
           }
         }
       }
-    
   }
 
   void BondOrderParameter::processStuntDouble(StuntDouble* sd, int bin) {
@@ -373,13 +361,10 @@ namespace OpenMD {
   }  
 
 
-  void BondOrderParameter::writeOrderParameter(std::vector<RealType> Q, 
-                                               std::vector<ComplexType> What) {
+  void BondOrderParameter::writeOutput() {
     Revision rev; 
     std::ofstream osq((getOutputFileName() + "q").c_str());
-
     if (osq.is_open()) {
-
       osq << "# " << getAnalysisType() << "\n";
       osq << "# OpenMD " << rev.getFullRevision() << "\n";
       osq << "# " << rev.getBuildDate() << "\n";
@@ -388,14 +373,13 @@ namespace OpenMD {
         osq << "# parameters: " << paramString_ << "\n";
       
       for (int l = 0; l <= lMax_; l++) {
-        osq << "# <Q_" << l << ">: " << Q[l] << "\n";
+        osq << "# <Q_" << l << ">: " << Q_[l] << "\n";
       }
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;               
         osq << Qval;
         for (int l = 0; l <= lMax_; l++) {
-
           osq << "\t"
               << (RealType)Q_histogram_[std::make_pair(i,l)]/(RealType)Qcount_[l]/deltaQ_;
         }
@@ -411,6 +395,7 @@ namespace OpenMD {
       simError();  
     }
 
+  
     std::ofstream osw((getOutputFileName() + "w").c_str());
 
     if (osw.is_open()) {
@@ -422,8 +407,8 @@ namespace OpenMD {
         osq << "# parameters: " << paramString_ << "\n";
 
       for (int l = 0; l <= lMax_; l++) {
-        osw << "# <W_" << l << ">: " << real(What[l]) << "\t"
-            << imag(What[l]) << "\n";
+        osw << "# <W_" << l << ">: " << real(W_hat_[l]) << "\t"
+            << imag(W_hat_[l]) << "\n";
       }
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
@@ -443,6 +428,6 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();  
     }
-       
+
   }
 }

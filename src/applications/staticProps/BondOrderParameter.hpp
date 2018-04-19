@@ -91,18 +91,16 @@ namespace OpenMD {
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondOrderParameter();
-    virtual void processFrame(int frame);
-    virtual void processDump();
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    void processFrame(int frame);
+    void processHistogram();
+    void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     virtual void initializeHistogram();
     virtual void collectHistogram(std::vector<RealType> q, 
                                   std::vector<ComplexType> what);    
-    void writeOrderParameter(std::vector<RealType> Q, 
-                             std::vector<ComplexType> What);
+    void writeOutput();
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript_;
     SelectionManager seleMan_;    
     SelectionEvaluator evaluator_;           
@@ -138,6 +136,7 @@ namespace OpenMD {
     std::vector<RealType> Q_;
     std::vector<ComplexType> W_;
     std::vector<ComplexType> W_hat_;
+    std::vector<ComplexType> What_;
     int nBonds_, Nbonds_;
     bool usePeriodicBoundaryConditions_;
 
