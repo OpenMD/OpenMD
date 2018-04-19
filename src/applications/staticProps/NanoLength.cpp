@@ -52,50 +52,32 @@ namespace OpenMD {
   
   NanoLength::NanoLength(SimInfo* info,
 			 const std::string& sele)
-    : NonSpatialStatistics(info, sele, 1), selectionScript_(sele), seleMan_(info),
-      evaluator_(info) {
+    : NonSpatialStatistics(info, sele, 1), selectionScript_(sele), seleMan_(info),evaluator_(info) {
     
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".length");
     
-    osq_.open(getOutputFileName().c_str());
+    ofs_.open(getOutputFileName().c_str());
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    frameCounter_ = 0;
+    
+    theAtoms_.reserve(info_->getNGlobalAtoms());
+    length_.clear();
+    time_.clear();
   }
 
   NanoLength::~NanoLength() {
     theAtoms_.clear();
-  }
-  
-  void NanoLength::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-    
-    theAtoms_.reserve(info_->getNGlobalAtoms());
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    osq_.close();
-  }
-  
+  }  
   
   void NanoLength::processFrame(int istep) {
     StuntDouble* sd;
     Vector3d vec;
     int i;
-      
-    RealType time = currentSnapshot_->getTime();
-      
+            
     // Clear pos vector between each frame.
     theAtoms_.clear();
     
@@ -111,11 +93,11 @@ namespace OpenMD {
     }
     
     RealType rodLength = getLength(theAtoms_);
+    length_.push_back(rodLength);
     
-    osq_.precision(7);
-    if (osq_.is_open()){
-      osq_ << time << "\t" << rodLength << std::endl;      
-    }
+    RealType currentTime = currentSnapshot_->getTime();
+    time_.push_back(currentTime);
+    
   } 
   
   RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
@@ -193,6 +175,15 @@ namespace OpenMD {
   void NanoLength::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
-  
+
+  void NanoLength::writeOutput() {
+    ofs_.precision(7);
+    if (ofs_.is_open()){
+      for (std::vector<int>::size_type i = 0; i != length_.size(); i++) {
+	ofs_ << time_[i] << "\t" << length_[i] << std::endl;      
+      }
+    }
+  }
+
 }
   

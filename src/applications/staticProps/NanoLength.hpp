@@ -55,20 +55,20 @@ namespace OpenMD {
   public:
     NanoLength(SimInfo* info, const std::string& sele);
     virtual void processFrame(int frame);
-    virtual void processDump();
+    void writeOutput();
     virtual ~NanoLength();
     
   private:    
     RealType getLength(std::vector<StuntDouble*> atoms);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     std::vector<StuntDouble*> theAtoms_;
-    int frameCounter_;    
-    std::ofstream osq_;
+    std::vector<RealType> time_;
+    std::vector<RealType> length_;
+    std::ofstream ofs_;
   };
 }
 #endif
