@@ -63,6 +63,14 @@ namespace OpenMD {
     string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".hbg");
 
+    std::stringstream params;
+    params << " rcut = " << rCut_
+           << ", thetaCut = " << thetaCut_
+           << ", nbins = " << nBins_;
+    paramString_ = params.str();
+    setParameterString( paramString_ );
+
+    
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -250,9 +258,6 @@ namespace OpenMD {
 
   void HBondGeometric::writeOutput() {
 
-    vector<OutputData*>::iterator i;
-    OutputData* outputData;
-        
     ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       
