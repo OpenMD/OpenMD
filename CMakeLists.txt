@@ -606,8 +606,6 @@ src/applications/sequentialProps/CenterOfMass.cpp
 src/applications/sequentialProps/ContactAngle1.cpp
 src/applications/sequentialProps/ContactAngle2.cpp
 src/applications/sequentialProps/GCNSeq.cpp
-src/applications/sequentialProps/NanoLength.cpp
-src/applications/sequentialProps/NanoVolume.cpp
 src/applications/sequentialProps/SequentialAnalyzer.cpp
 src/applications/sequentialProps/SequentialProps.cpp
 src/applications/sequentialProps/SequentialPropsCmd.cpp

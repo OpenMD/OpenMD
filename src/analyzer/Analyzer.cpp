@@ -78,8 +78,8 @@
 #include "applications/staticProps/PipeDensity.hpp"
 #include "applications/staticProps/pAngle.hpp"
 #include "applications/staticProps/BondAngleDistribution.hpp"
-#include "applications/staticProps/NanoVolume.hpp"
-#include "applications/staticProps/NanoLength.hpp"
+#include "applications/sequentialProps/NanoVolume.hpp"
+#include "applications/sequentialProps/NanoLength.hpp"
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
 #include "applications/staticProps/Hxy.hpp"
 #endif

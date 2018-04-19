@@ -203,9 +203,9 @@ int main(int argc, char* argv[]){
     analyzer = new ContactAngle2(info, dumpFileName, sele1, sele2, solidZ,
                                  centroidX, centroidY, threshDens, bufferLength,
                                  args_info.nbins_arg, args_info.nbins_z_arg);
-  }else if(args_info.nanoLength_given){
+  }else if(args_info.nanolength_given){
     // fill in later
-  }else if(args_info.nanoVolume_given){
+  }else if(args_info.nanovolume_given){
     // fill in later
   }
 

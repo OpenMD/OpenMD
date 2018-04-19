@@ -46,7 +46,7 @@
  *
  */
 
-#include "applications/staticProps/NanoVolume.hpp"
+#include "applications/sequentialProps/NanoVolume.hpp"
 #if defined(HAVE_QHULL)
 #include "math/ConvexHull.hpp"
 #include "math/AlphaHull.hpp"

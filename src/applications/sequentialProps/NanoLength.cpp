@@ -39,7 +39,7 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "applications/staticProps/NanoLength.hpp"
+#include "applications/sequentialProps/NanoLength.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
