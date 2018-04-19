@@ -54,6 +54,7 @@
 #include "utils/Constants.hpp"
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
+#include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 
@@ -70,16 +71,15 @@ namespace OpenMD {
                        const std::string& sele, double rCut, int nbins);
     
     virtual ~BondAngleDistribution();
-    virtual void processFrame(int istep);
-    virtual void processDump();
-    
-  private:
-    virtual void initializeHistogram();
-       
-    void writeBondAngleDistribution();
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    void processFrame(int istep);
+    void writeOutput();
 
-    Snapshot* currentSnapshot_;
+  protected:
+    OutputData* bonds;
+    
+  private:       
+    void processStuntDouble(StuntDouble* sd, int bin);
+
     std::string selectionScript_;
     SelectionManager seleMan_;    
     SelectionEvaluator evaluator_;           

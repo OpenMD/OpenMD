@@ -80,40 +80,28 @@ namespace OpenMD {
     setParameterString( paramString );
 
     // Theta can take values from 0 to 180    
-
     deltaTheta_ = (180.0) / nBins_;
-    histogram_.resize(nBins_);
 
+    bonds = new OutputData;
+    bonds->units =  "Unitless";
+    bonds->title =  "Ave Bonds";
+    bonds->dataType = odtReal;
+    bonds->dataHandling = odhAverage;
+    bonds->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      bonds->accumulator.push_back( new Accumulator() );
+    data_.push_back(bonds);
+    
     usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+    frameCounter_ = 0;
+    nTotBonds_ = 0;
+
   }
   
   BondAngleDistribution::~BondAngleDistribution() {
-    histogram_.clear();
   }
   
-  void BondAngleDistribution::initializeHistogram() {
-    for (int bin = 0; bin < nBins_; bin++) {      
-      histogram_[bin] = 0;
-    }
-  }
-
-  
-  void BondAngleDistribution::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-    
-    nTotBonds_ = 0;
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    writeBondAngleDistribution();   
-  }
   
   void BondAngleDistribution::processFrame(int istep) {
     Molecule* mol;
@@ -187,8 +175,7 @@ namespace OpenMD {
 	      theta = 360.0 - theta;
 	    }
 	    int whichBin = int(theta/deltaTheta_);
-            
-	    histogram_[whichBin] += 2;
+	    dynamic_cast<Accumulator* >(bonds->accumulator[whichBin])->add(2);
 	  }
 	}           
       }
@@ -199,7 +186,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void BondAngleDistribution::writeBondAngleDistribution() {
+  void BondAngleDistribution::writeOutput() {
 
     RealType norm = (RealType)nTotBonds_*((RealType)nTotBonds_-1.0)/2.0;
     
@@ -215,12 +202,20 @@ namespace OpenMD {
       ofs << "# selection script: \"" << selectionScript_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#theta\taveBonds\n";
 
+      int nBonds;
+      RealType aveBonds;
+      
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
-        RealType Thetaval = i * deltaTheta_;               
-        ofs << Thetaval;        
-        ofs << "\t" << (RealType)histogram_[i]/norm/frameCounter_;        
+        RealType Thetaval = i * deltaTheta_;
+	
+	nBonds = bonds->accumulator[i]->count();
+	aveBonds = (RealType)nBonds / norm;
+	
+	ofs << Thetaval;        
+        ofs << "\t" << aveBonds / nProcessed_;        
         ofs << "\n";
       }
       
