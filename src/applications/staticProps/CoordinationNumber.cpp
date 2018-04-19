@@ -61,7 +61,8 @@ namespace OpenMD {
     setAnalysisType("Coordination Number Distribution");
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".cn");
-    
+
+    count_ = 0;
     nnMax_ = 12;
     RealType binMax_ = nnMax_ * 1.5;
     delta_ = binMax_ / bins_;
@@ -96,28 +97,13 @@ namespace OpenMD {
   }
 
   
-  void CoordinationNumber::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);
-    int nFrames = reader.getNFrames();
-    count_ = 0;
-    
-    //First have to calculate lists of nearest neighbors (listNN_):
-    
-    for(int istep = 0; istep < nFrames; istep += step_){
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    
+  void CoordinationNumber::processHistogram() {  
     for(unsigned int n = 0; n < histogram_.size(); n++){
       if (count_ > 0) 
 	histogram_[n] /= RealType(count_);
       else
 	histogram_[n] = 0.0;               
     } 
-    
-    writeOutput();
   } 
 
 

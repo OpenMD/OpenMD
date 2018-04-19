@@ -73,8 +73,8 @@ namespace OpenMD {
 
     virtual ~CoordinationNumber();
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual void writeOutput();
+    virtual void processHistogram();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
   protected:
@@ -89,7 +89,6 @@ namespace OpenMD {
     std::string sele2_;
     SelectionManager seleMan2_;
     SelectionEvaluator evaluator2_;
-    Snapshot* currentSnapshot_;
 
     int selectionCount1_;
     int selectionCount2_;
