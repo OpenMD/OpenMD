@@ -71,30 +71,16 @@ namespace OpenMD {
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    frameCounter_ = 0;
+
+    theAtoms_.reserve(info_->getNGlobalAtoms());
+    time_.clear();
+    volume_.clear();
+  
   }
 
   NanoVolume::~NanoVolume() {
-    theAtoms_.clear();
   }
-  
-  void NanoVolume::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
     
-    theAtoms_.reserve(info_->getNGlobalAtoms());
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    osq_.close();
-  }
-  
   
   void NanoVolume::processFrame(int istep) {
 #if defined(HAVE_QHULL)
@@ -105,8 +91,6 @@ namespace OpenMD {
     // Do convex hull for now - alpha has issues with perfect structures
     //AlphaHull* thishull = new AlphaHull(2.0);
     ConvexHull* thishull = new ConvexHull();
-    
-    RealType time = currentSnapshot_->getTime();
     
     // Clear pos vector between each frame.
     theAtoms_.clear();
@@ -134,14 +118,16 @@ namespace OpenMD {
     
     // Generate convex hull for this frame.
     thishull->computeHull(theAtoms_);
-    RealType volume = thishull->getVolume();
-    RealType surfaceArea = thishull->getArea();
+
+    RealType currentVolume = thishull->getVolume();
+    volume_.push_back(currentVolume);
     
-    osq_.precision(7);
-    if (osq_.is_open()){
-      osq_ << time << "\t" << volume << "\t"  << surfaceArea << std::endl;      
-    }
+    RealType currentSurfaceArea = thishull->getArea();
+    surfaceArea_.push_back(currentSurfaceArea);
     
+    RealType currentTime = currentSnapshot_->getTime();
+    time_.push_back(currentTime);
+
 #else
     sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
     painCave.isFatal = 1;
@@ -154,6 +140,15 @@ namespace OpenMD {
     // Fill in later
   }
 
+  void NanoVolume::writeOutput() {
+    osq_.precision(7);
+    if (osq_.is_open()){
+      for (std::vector<int>::size_type i = 0; i != volume_.size(); i++) {
+	osq_ << time_[i] << "\t" << volume_[i]
+	     << "\t"  << surfaceArea_[i] << std::endl;  
+      }     
+    }
+  }
+
 }
-  
   
