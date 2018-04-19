@@ -91,19 +91,6 @@ namespace OpenMD {
     orderParams_.clear();
   }
   
-  void P2OrderParameter::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    writeP2();
-  }
-
   
   void P2OrderParameter::processFrame(int istep) {
     StuntDouble* sd1;
@@ -296,7 +283,7 @@ namespace OpenMD {
   }
 
   
-  void P2OrderParameter::writeP2() {
+  void P2OrderParameter::writeOutput() {
 
     ofstream os(getOutputFileName().c_str());
     os << "#radial distribution function\n";

@@ -57,7 +57,6 @@ namespace OpenMD {
     P2OrderParameter(SimInfo* info,  
                      const string& sele1, const int seleOffset);
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~P2OrderParameter();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
@@ -69,9 +68,7 @@ namespace OpenMD {
       RealType angle;
     };
             
-    void writeP2();
-    
-    Snapshot* currentSnapshot_;
+    void writeOutput();
     
     bool doVect_;
     bool doOffset_;
