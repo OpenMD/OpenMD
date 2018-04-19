@@ -44,17 +44,17 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
-#include "applications/staticProps/NonSpatialStatistics.hpp"
+#include "applications/staticProps/SpatialStatistics.hpp"
 
 namespace OpenMD {
 
-  class DensityPlot : public NonSpatialStatistics{
+  class DensityPlot : public ShellStatistics{
     
   public:
     DensityPlot(SimInfo* info, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
     
     virtual void processFrame(int frame);
-    virtual void processDump();
+    void processHistogram();
     virtual ~DensityPlot();
     
     int getNRBins() {
@@ -70,9 +70,9 @@ namespace OpenMD {
     Vector3d calcNewOrigin();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
-    void writeDensity();            
+    void writeOutput();            
     
-    Snapshot* currentSnapshot_;
+    
     RealType len_;
     RealType halfLen_;
     int nRBins_;

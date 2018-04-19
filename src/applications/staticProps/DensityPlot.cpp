@@ -55,7 +55,7 @@ namespace OpenMD {
   DensityPlot::DensityPlot(SimInfo* info, 
 			   const std::string& sele, const std::string& cmSele,
 			   RealType len, int nrbins) 
-    : NonSpatialStatistics(info, sele, nrbins), 
+    : ShellStatistics(info, sele, nrbins), 
       len_(len), halfLen_(len/2), nRBins_(nrbins),
       selectionScript_(sele), seleMan_(info), evaluator_(info), 
       cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
@@ -90,20 +90,9 @@ namespace OpenMD {
   }
 
   
-  void DensityPlot::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    
-    int nProcessed = nFrames /step_;
+  void DensityPlot::processHistogram() {
     std::transform(density_.begin(), density_.end(), density_.begin(), 
-		   std::bind2nd(std::divides<RealType>(), nProcessed));  
-    writeDensity();
+		   std::bind2nd(std::divides<RealType>(), nProcessed_));  
 
   }
 
@@ -198,7 +187,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void DensityPlot::writeDensity() {
+  void DensityPlot::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     if (ofs.is_open()) {
       ofs << "#g(x, y, z)\n";
