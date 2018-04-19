@@ -143,33 +143,16 @@ namespace OpenMD {
     newmag2.clear();
   }
 
-  
-  void Hxy::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      
-      for (unsigned int i = 0; i < nBinsX_; i++) {
-        std::fill(minHeight_[i].begin(), minHeight_[i].end(), 0.0);
-        std::fill(maxHeight_[i].begin(), maxHeight_[i].end(), 0.0);
-        for (unsigned int j = 0; j < nBinsY_; j++) {
-          std::fill(dens_[i][j].begin(), dens_[i][j].end(), 0.0);
-        }
-      }
-      
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-
-    writeOutput();
-  }
-
   void Hxy::processFrame(int istep) {
+
+    for (unsigned int i = 0; i < nBinsX_; i++) {
+      std::fill(minHeight_[i].begin(), minHeight_[i].end(), 0.0);
+      std::fill(maxHeight_[i].begin(), maxHeight_[i].end(), 0.0);
+      for (unsigned int j = 0; j < nBinsY_; j++) {
+	std::fill(dens_[i][j].begin(), dens_[i][j].end(), 0.0);
+      }
+    }
+    
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
     StuntDouble* sd;
     int ii;

@@ -78,14 +78,12 @@ namespace OpenMD {
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
     virtual ~Hxy();        
     virtual void processFrame(int frame);
-    virtual void processDump();
+    
     
   private:
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
-
-    Snapshot* currentSnapshot_;
     
     int nProcessed_;
     std::string selectionScript_;
