@@ -53,6 +53,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/Thermo.hpp"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
 
@@ -60,7 +61,11 @@ namespace OpenMD {
                  const std::string& sele, RealType len, int nrbins)
     : NonSpatialStatistics(info, sele, nrbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
-        
+
+    const std::string paramString = params.str();
+    setParameterString( paramString );
+
+    
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -78,37 +83,23 @@ namespace OpenMD {
     std::stringstream params;
     params << " len = " << len_
            << ", nrbins = " << nRBins_;
-    const std::string paramString = params.str();
-    setParameterString( paramString );
 
-    std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);     
-    std::fill(histogram_.begin(), histogram_.end(), 0.0);
-    std::fill(count_.begin(), count_.end(), 0);
+    angleR = new OutputData;
+    angleR->units = "Unitless";
+    angleR->title = "Angle R";
+    angleR->dataType = odtReal;
+    angleR->dataHandling = odhAverage;
+    angleR->accumulator.reserve(nRBins_);
+    for (unsigned int i = 0; i < nRBins_; i++) 
+      angleR->accumulator.push_back( new Accumulator() );
+    data_.push_back(angleR);
+
 
   }
 
   AngleR::~AngleR(){
-    histogram_.clear();
-    avgAngleR_.clear();
-    count_.clear();
   }
   
-  void AngleR::processDump() {
-   
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-      
-    }
-    processHistogram(); 
-    writeAngleR();
-  }
   
   void AngleR::processFrame(int istep) {
     
@@ -139,32 +130,19 @@ namespace OpenMD {
 	
 	if (distance < len_) {
 	  int whichBin = int(distance / deltaR_);
-	  histogram_[whichBin] += cosangle;
-	  count_[whichBin] += 1;
+	  // update accumulators here
+	  dynamic_cast<Accumulator *>(angleR->accumulator[whichBin])->add(cosangle);
+	  dynamic_cast<Accumulator *>(count_->accumulator[whichBin])->add(1);
 	}
       } 
     }
   }
   
-  void AngleR::processHistogram() {
-
-    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
-
-      if (count_[i] > 0)
-	avgAngleR_[i] += histogram_[i] / count_[i];    
-      else 
-	avgAngleR_[i] = 0.0;
-
-      std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i] << "\n";  
-    }
-
-  }
-
   void AngleR::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
 
-  void AngleR::writeAngleR() {
+  void AngleR::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       
@@ -177,20 +155,26 @@ namespace OpenMD {
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#r\tcorrValue\n";
-      for (unsigned int i = 0; i < avgAngleR_.size(); ++i) {
-	RealType r = deltaR_ * (i + 0.5);
-	ofs << r << "\t" << avgAngleR_[i] << "\n";
+      int nAngleR = 0;
+      RealType aveAngleR = 0.0;	
+      
+      for (unsigned int j = 0; j < nRBins_; j++) {        
+	      	
+	nAngleR = angleR->accumulator[j]->count();
+	aveAngleR = angleR->accumulator[j]->getAverage(aveAngleR);	  
+	  
+	RealType r = deltaR_ * (j + 0.5);
+	ofs << r << "\t" << avgAngleR_[j] << "\n";
       }
         
     } else {
-
+	
       sprintf(painCave.errMsg, "AngleR: unable to open %s\n",
-              outputFilename_.c_str());
+	      outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();  
     }
-
+    
     ofs.close();
   }
   

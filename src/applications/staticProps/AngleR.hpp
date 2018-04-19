@@ -61,15 +61,16 @@ namespace OpenMD {
     }
         
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~AngleR();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
+  protected:
+    OutputData* angleR;
+    
   private:
     void processHistogram();
-    void writeAngleR();
+    void writeOutput();
 
-    Snapshot* currentSnapshot_;
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
