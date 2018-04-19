@@ -83,17 +83,30 @@ namespace OpenMD {
     const std::string paramString = params.str();
     setParameterString( paramString );
 
-    deltaR_ = len_/nBins_;
-    RCount_.resize(nBins_);
-    WofR_.resize(nBins_);
-    QofR_.resize(nBins_);
 
-    for (unsigned int i = 0; i < nBins_; i++){
-      RCount_[i] = 0;
-      WofR_[i] = 0;
-      QofR_[i] = 0;
-    }
-    
+    deltaR_ = len_/nBins_;
+
+    WofR = new OutputData;
+    WofR->units =  "Unitless";
+    WofR->title =  "OrderParam";
+    WofR->dataType = odtReal;
+    WofR->dataHandling = odhAverage;
+    WofR->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      WofR->accumulator.push_back( new Accumulator() );
+    data_.push_back(WofR);
+
+    QofR = new OutputData;
+    QofR->units =  "Unitless";
+    QofR->title =  "OrderParam";
+    QofR->dataType = odtReal;
+    QofR->dataHandling = odhAverage;
+    QofR->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      QofR->accumulator.push_back( new Accumulator() );
+    data_.push_back(QofR);
+
+        
     // Make arrays for Wigner3jm
     RealType* THRCOF = new RealType[2*lMax_+1];
     // Variables for Wigner routine
@@ -171,29 +184,6 @@ namespace OpenMD {
   }
 
   
-  void BOPofR::initializeHistogram() {
-    for (unsigned int i = 0; i < nBins_; i++){
-      RCount_[i] = 0;
-      WofR_[i] = 0;
-      QofR_[i] = 0;
-    }
-  }
-
-
-  void BOPofR::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    writeOrderParameter();     
-  }
-
   
   void BOPofR::processFrame(int istep) {
     Molecule* mol;
@@ -334,13 +324,13 @@ namespace OpenMD {
     if ( distCOM < len_){
       // Figure out where this distance goes...
       int whichBin = int(distCOM / deltaR_);
-      RCount_[whichBin]++;
+      dynamic_cast<Accumulator* >(counts_->accumulator[whichBin])->add(1);
 
-      if(real(what[6]) < -0.15){      				
-        WofR_[whichBin]++;
+      if(real(what[6]) < -0.15){
+	dynamic_cast<Accumulator* >(WofR->accumulator[whichBin])->add(1);
       }
       if(q[6] > 0.5){
-      	QofR_[whichBin]++;
+	dynamic_cast<Accumulator* >(QofR->accumulator[whichBin])->add(1);
       }
     }      
   }
@@ -360,10 +350,10 @@ namespace OpenMD {
     if ( distCOM < len_){
       // Figure out where this distance goes...
       int whichBin = int(distCOM / deltaR_);
-      RCount_[whichBin]++;
+      dynamic_cast<Accumulator* >(counts_->accumulator[whichBin])->add(1);
 
-      if(real(what[4]) < -0.12){      				
-        WofR_[whichBin]++;
+      if(real(what[4]) < -0.12){
+	dynamic_cast<Accumulator* >(WofR->accumulator[whichBin])->add(1);
       }
     }      
   }
@@ -376,7 +366,8 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void IcosahedralOfR::writeOrderParameter() {
+  void IcosahedralOfR::writeOutput() {
+    
     Revision rev; 
     std::ofstream osq((getOutputFileName() + "qr").c_str());
 
@@ -387,19 +378,36 @@ namespace OpenMD {
       osq << "# selection script: \"" << selectionScript_  << "\"\n";
       if (!paramString_.empty())
         osq << "# parameters: " << paramString_ << "\n";
+      osq << "#r\tQ(r)\tW(r)\n";
       
       // Normalize by number of frames and write it out:
+
+      int nWR;
+      int nQR;
+      int nSele;
+      RealType aveWR;
+      RealType aveQR;
       
-      for (unsigned int i = 0; i < nBins_; ++i) {
-        RealType Rval = (i + 0.5) * deltaR_;               
-        osq << Rval;
-        if (RCount_[i] == 0){
+      for (unsigned int j = 0; j < nBins_; j++) {        
+       	  
+	nWR = WofR->accumulator[j]->count();
+	nQR = QofR->accumulator[j]->count();
+
+	nSele = counts_->accumulator[j]->count();
+
+	aveWR = (RealType)nWR / nSele;
+	aveQR = (RealType)nQR / nSele;
+
+	RealType Rval = (j + 0.5) * deltaR_;
+
+	osq << Rval;
+        if (nSele == 0){
           osq << "\t" << 0;
           osq << "\n";
         }else{
-          osq << "\t" << (RealType)QofR_[i]/(RealType)RCount_[i];        
+          osq << "\t" << aveQR << "\t" << aveWR;        
           osq << "\n";
-        }
+	}
       }
       
       osq.close();
@@ -409,74 +417,57 @@ namespace OpenMD {
               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();  
-    }
+    }    
     
-    std::ofstream osw((getOutputFileName() + "wr").c_str());
+  }
+  
+  void FCCOfR::writeOutput() {
     
-    if (osw.is_open()) {
-      osw << "# " << getAnalysisType() << "\n";
-      osw << "# OpenMD " << rev.getFullRevision() << "\n";
-      osw << "# " << rev.getBuildDate() << "\n";
-      osw << "# selection script: \"" << selectionScript_  << "\"\n";
-      if (!paramString_.empty())
-        osw << "# parameters: " << paramString_ << "\n";
+    Revision rev; 
+    std::ofstream osq((getOutputFileName() + "qr").c_str());
 
+    if (osq.is_open()) {
+      osq << "# " << getAnalysisType() << "\n";
+      osq << "# OpenMD " << rev.getFullRevision() << "\n";
+      osq << "# " << rev.getBuildDate() << "\n";
+      osq << "# selection script: \"" << selectionScript_  << "\"\n";
+      if (!paramString_.empty())
+        osq << "# parameters: " << paramString_ << "\n";
+      osq << "#r\tW(r)\n";
+      
       // Normalize by number of frames and write it out:
-      for (unsigned int i = 0; i < nBins_; ++i) {
-        RealType Rval = deltaR_ * (i + 0.5);               
-        osw << Rval;
-        if (RCount_[i] == 0){
-          osw << "\t" << 0;
-          osw << "\n";
+
+      int nWR;
+      int nSele;
+      RealType aveWR;
+      
+      for (unsigned int j = 0; j < nBins_; j++) {        
+       	  
+	nWR = WofR->accumulator[j]->count();
+
+	nSele = counts_->accumulator[j]->count();
+
+	aveWR = (RealType)nWR / nSele;
+
+	RealType Rval = (j + 0.5) * deltaR_;
+
+	osq << Rval;
+        if (nSele == 0){
+          osq << "\t" << 0;
+          osq << "\n";
         }else{
-          osw << "\t" << (RealType)WofR_[i]/(RealType)RCount_[i];
-          osw << "\n";
-        }
+          osq << "\t" << "\t" << aveWR;        
+          osq << "\n";
+	}
       }
       
-      osw.close();
+      osq.close();
+      
     } else {
       sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n", 
-              (getOutputFileName() + "w").c_str());
+              (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();  
-    
-    }
-	
-  }
-  void FCCOfR::writeOrderParameter() {
-    
-    std::ofstream osw((getOutputFileName() + "wr").c_str());
-    
-    if (osw.is_open()) {
-      Revision rev;
-      osw << "# " << getAnalysisType() << "\n";
-      osw << "# OpenMD " << rev.getFullRevision() << "\n";
-      osw << "# " << rev.getBuildDate() << "\n";
-      osw << "# selection script: \"" << selectionScript_  << "\"\n";
-      if (!paramString_.empty())
-        osw << "# parameters: " << paramString_ << "\n";
-
-      // Normalize by number of frames and write it out:
-      for (unsigned int i = 0; i < nBins_; ++i) {
-        RealType Rval = deltaR_ * (i + 0.5);               
-        osw << Rval;
-        if (RCount_[i] == 0){
-          osw << "\t" << 0;
-          osw << "\n";
-        }else{
-          osw << "\t" << (RealType)WofR_[i]/(RealType)RCount_[i];
-          osw << "\n";
-        }
-      }
-      
-      osw.close();
-    } else {
-      sprintf(painCave.errMsg, "FCCOfR: unable to open %s\n", 
-              (getOutputFileName() + "w").c_str());
-      painCave.isFatal = 1;
-      simError();  
-    
     }
 	
   }

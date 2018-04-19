@@ -53,6 +53,7 @@
 #include "math/SphericalHarmonic.hpp"
 #include "applications/staticProps/NonSpatialStatistics.hpp"
 #include "brains/Thermo.hpp"
+#include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 
@@ -64,17 +65,17 @@ namespace OpenMD {
     
     virtual ~BOPofR();
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   protected:
-    virtual void initializeHistogram();
     virtual void collectHistogram(std::vector<RealType> q, 
                                   std::vector<ComplexType> what, 
                                   RealType distCOM) = 0;
-    virtual void writeOrderParameter() = 0;
+    virtual void writeOutput() = 0;
 
-    Snapshot* currentSnapshot_;
+    OutputData* WofR;
+    OutputData* QofR;
+    
     std::string selectionScript_;
     SelectionManager seleMan_;    
     SelectionEvaluator evaluator_;           
@@ -90,10 +91,6 @@ namespace OpenMD {
     std::map<std::pair<int,int>,int> m2Max;
     std::map<std::pair<int,int>,std::vector<RealType> > w3j;
    
-    std::vector<int> RCount_;
-    std::vector<int> WofR_;
-    std::vector<int> QofR_;
-
     std::vector<RealType> q_l_;
     std::vector<RealType> q2_;
     std::vector<ComplexType> w_;
@@ -116,7 +113,7 @@ namespace OpenMD {
                                   std::vector<ComplexType> what, 
                                   RealType distCOM);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-    virtual void writeOrderParameter();
+    virtual void writeOutput();
   };
 
   class FCCOfR : public BOPofR {
@@ -129,7 +126,7 @@ namespace OpenMD {
                                   std::vector<ComplexType> what, 
                                   RealType distCOM);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-    virtual void writeOrderParameter();
+    virtual void writeOutput();
   };  
 }
 
