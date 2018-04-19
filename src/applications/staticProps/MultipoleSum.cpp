@@ -77,6 +77,8 @@ namespace OpenMD {
     deltaR_ = rMax_ / nRBins_;
 
     usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+    std::cerr << "end of constructor" << endl;
   }
 
   MultipoleSum::~MultipoleSum() {
@@ -87,22 +89,7 @@ namespace OpenMD {
     aveDproj_.clear();
   }
   
-  void MultipoleSum::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-
-    /*
-      Again need to find a way to normalize / post dump loop calculations
-      consistently across the modules.
-    */
-    
+  void MultipoleSum::processHistogram() {
     int nSelected = seleMan1_.getSelectionCount();
     for (std::size_t j = 0; j < nRBins_; j++) {
       if (lengthCount[j] > 0) {
@@ -119,10 +106,11 @@ namespace OpenMD {
 	aveDproj_[j] = 0.0;
      }
     }
-    writeOut();
+    std::cerr << "end of process hist" << endl;
   }
 
   void MultipoleSum::processFrame(int istep) {
+    std::cerr << "start of frame" << endl;
     Molecule* mol;
     SimInfo::MoleculeIterator miter;
     vector<Atom*>::iterator aiter;
@@ -191,30 +179,34 @@ namespace OpenMD {
 	  }
 	}
       }
+      std::cerr << "pre myDipole" << endl;
       Vector3d myDipole = sd1->getDipole();
       
       for (std::size_t j = 0; j < nRBins_; j++) {              
 	RealType myProjection = dot(myDipole, totalDipole[j]) / myDipole.length();
-	
+	std::cerr << "end of myproj" << endl;
 	RealType dipoleLength = totalDipole[j].length();
 	RealType Qtrace = totalQpole[j].trace();
 	RealType Qddot = doubleDot(totalQpole[j], totalQpole[j]);
 	RealType qpoleLength =  2.0*(3.0*Qddot - Qtrace*Qtrace);
-	dipoleHist[j] += dipoleLength;
+	std::cerr << "end of constructor" << endl;
+	dipoleHist[j] += qpole;
 	qpoleHist[j] += qpoleLength;
 	aveDcount_[j] += dipoleCount[j];
 	aveQcount_[j] += qpoleCount[j];
 	lengthCount[j] += 1;
 	dipoleProjection[j] += myProjection;
+	std::cerr << "end of dipole" << endl;
       }
     }
+    std::cerr << "end of framce" << endl;
   }
 
   void MultipoleSum::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
   
-  void MultipoleSum::writeOut() {
+  void MultipoleSum::writeOutput() {
 
     ofstream os(getOutputFileName().c_str());
     os << "#multipole sum\n";

@@ -53,13 +53,13 @@ namespace OpenMD {
     MultipoleSum(SimInfo* info, 
                  const std::string& sele1, RealType rmax, int nrbins);
     virtual ~MultipoleSum();
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    void processStuntDouble(StuntDouble* sd, int bin);
 
   private:
 
-    virtual void processFrame(int frame);
-    virtual void processDump();
-    virtual void writeOut();
+    void processFrame(int frame);
+    void writeOutput();
+    void processHistogram();
 
     std::size_t nRBins_;
     RealType deltaR_;
@@ -70,7 +70,6 @@ namespace OpenMD {
     std::vector<RealType> aveQcount_;
     std::vector<RealType> aveDproj_;
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript1_;
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
