@@ -228,63 +228,63 @@ namespace OpenMD {
 
     // Store parameters for analyses, again prevent redudant code.
     if (hasStep)
-      RealType step = analyzerParams->getStep();
+      step = analyzerParams->getStep();
     if (hasNBins)
-      RealType nbins = analyzerParams->getNBins();
+      nbins = analyzerParams->getNBins();
     if (hasNBinsX)
-      RealType nbinsX = analyzerParams->getNBinsX();
+      nbinsX = analyzerParams->getNBinsX();
     if (hasNBinsY)
-      RealType nbinsY = analyzerParams->getNBinsY();
+      nbinsY = analyzerParams->getNBinsY();
     if (hasNBinsZ)
-      RealType nbinsZ = analyzerParams->getNBinsZ();
+      nbinsZ = analyzerParams->getNBinsZ();
     if (hasNRBins)
-      RealType nrbins = analyzerParams->getNRBins();
+      nrbins = analyzerParams->getNRBins();
     if (hasNAngleBins)
-      RealType nAngleBins = analyzerParams->getNAngleBins();
+      nAngleBins = analyzerParams->getNAngleBins();
     if (hasRCut)
-      RealType rcut = analyzerParams->getRCut();
+      rcut = analyzerParams->getRCut();
     if (hasOOCut)
-      RealType ooCut = analyzerParams->getOOCut();
+      ooCut = analyzerParams->getOOCut();
     if (hasThetaCut)
-      RealType thetaCut = analyzerParams->getThetaCut();
+      thetaCut = analyzerParams->getThetaCut();
     if (hasOHCut)
-      RealType OHCut = analyzerParams->getOHCut();
+      OHCut = analyzerParams->getOHCut();
     if (hasDz)
-      RealType dz = analyzerParams->getDz();
+      dz = analyzerParams->getDz();
     if (hasLength)
-      RealType length = analyzerParams->getLength();
+      length = analyzerParams->getLength();
     if (hasZLength)
-      RealType zLength = analyzerParams->getZLength();
+      zLength = analyzerParams->getZLength();
     if (hasZOffSet)
-      RealType zOffSet = analyzerParams->getZOffSet();
+      zOffSet = analyzerParams->getZOffSet();
     if (hasSele1)
-      std::string sele1 = analyzerParams->getSele1();
+      sele1 = analyzerParams->getSele1();
     if (hasSele2)
-      std::string sele2 = analyzerParams->getSele2();
+      sele2 = analyzerParams->getSele2();
     if (hasSele3)
-      std::string sele3 = analyzerParams->getSele3();
+      sele3 = analyzerParams->getSele3();
     if (hasComSele)
-      std::string comSele = analyzerParams->getComSele();
+      comSele = analyzerParams->getComSele();
     if (hasSeleOffSet)
-      RealType seleOffSet = analyzerParams->getSeleOffSet();
+      seleOffSet = analyzerParams->getSeleOffSet();
     if (hasSeleOffSet2)
-      RealType seleOffSet2 = analyzerParams->getSeleOffSet2();
+      seleOffSet2 = analyzerParams->getSeleOffSet2();
     if (hasMolName)
-      std::string molName = analyzerParams->getMolName();
+      molName = analyzerParams->getMolName();
     if (hasBegin)
-      RealType begin = analyzerParams->getBegin();
+      begin = analyzerParams->getBegin();
     if (hasEnd)
-      RealType end = analyzerParams->getEnd();
+      end = analyzerParams->getEnd();
     if (hasRadius)
-      RealType radius = analyzerParams->getRadius();
+      radius = analyzerParams->getRadius();
     if (hasVoxelSize)
-      RealType voxelSize = analyzerParams->getVoxelSize();
+      voxelSize = analyzerParams->getVoxelSize();
     if (hasGaussWidth)
-      RealType gaussWidth = analyzerParams->getGaussWidth();
+      gaussWidth = analyzerParams->getGaussWidth();
     if (hasPrivilegedAxis)
-      std::string privilegedAxis = analyzerParams->getPrivilegedAxis();
+      privilegedAxis = analyzerParams->getPrivilegedAxis();
     if (hasPrivilegedAxis2)
-      std::string privilegedAxis2 = analyzerParams->getPrivilegedAxis2();
+      privilegedAxis2 = analyzerParams->getPrivilegedAxis2();
 
     
     // convert privilegedAxis to corresponding integer
@@ -326,12 +326,13 @@ namespace OpenMD {
     //   }
     // }
 
-
-    RealType maxLen;
-    RealType zmaxLen(0.0);
-    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
-    zmaxLen = hmat(2,2);    
+    if (!hasLength) {
+      hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+      maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
+      zmaxLen = hmat(2,2);
+      hasLength = true;
+    }
+    
     
     
     
@@ -340,7 +341,7 @@ namespace OpenMD {
     switch(analyzerMethod_) {
     case analyzerBo:
       if (hasSele1 && hasSele2 && hasLength && hasNRBins) {
-	//analyser = new GofR(info, sele1, sele2, maxLen, nrbins);
+	analyser = new GofR(info, sele1, sele2, maxLen, nrbins);
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'gofr' requires the following specified\n"

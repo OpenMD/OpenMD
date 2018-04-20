@@ -64,7 +64,7 @@ namespace OpenMD {
   class Analyzer {
   public:
     Analyzer(SimInfo* info);
-    ~Analyzer();
+    virtual ~Analyzer();
     
     void doAnalyzer();
     void getStarted();
@@ -135,6 +135,39 @@ namespace OpenMD {
     SelectionManager seleMan_;
 
 
+    RealType step;
+    RealType nbins;
+    RealType nbinsX;
+    RealType nbinsY;
+    RealType nbinsZ;
+    RealType nrbins;
+    RealType nAngleBins;
+    RealType rcut;
+    RealType ooCut;
+    RealType thetaCut;
+    RealType OHCut;
+    RealType dz;
+    RealType length;
+    RealType zLength;
+    RealType zOffSet;
+    std::string sele1;
+    std::string sele2;
+    std::string sele3;
+    std::string comSele;
+    RealType seleOffSet;
+    RealType seleOffSet2;
+    std::string molName;
+    RealType begin;
+    RealType end;
+    RealType radius;
+    RealType voxelSize;
+    RealType gaussWidth;
+    std::string privilegedAxis;
+    std::string privilegedAxis2;
+    RealType maxLen;
+    RealType zmaxLen;
+    Mat3x3d hmat;
+    
   };
 }
 #endif //INTEGRATORS_ANALYZER_HPP
