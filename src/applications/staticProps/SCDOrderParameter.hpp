@@ -77,19 +77,14 @@ namespace OpenMD {
     SCDOrderParameter(SimInfo* info, 
                       const std::string& molname, int beginIndex, int endIndex);
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~SCDOrderParameter();
 
   private:
-    void writeSCD();
+    void writeOutput();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
     std::vector<SCDElem> scdElems_;
     std::vector<RealType> scdParam_;
-            
-    Snapshot* currentSnapshot_;
-    int nProcessed_;
-
             
   };
 }

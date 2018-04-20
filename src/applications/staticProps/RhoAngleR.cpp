@@ -82,22 +82,6 @@ namespace OpenMD {
     count_.clear();	
   }
 
-   void AngleR::processDump() {
-     dumpFileName_ = info->getDumpFileName();
-     DumpReader reader(info_, dumpFileName_);    
-     int nFrames = reader.getNFrames();
-     nProcessed_ = nFrames/step_;
-     
-     for (int istep = 0; istep < nFrames; istep += step_) {
-       reader.readFrame(istep);
-       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-       processFrame(istep);
-     }
-     processHistogram(); 
-     writeAngleR();
-   }
-
-
   
   void AngleR::processFrame(int istep) { 
       int i;    
@@ -153,7 +137,7 @@ namespace OpenMD {
   }
 
 
-  void AngleR::writeAngleR() {
+  void AngleR::writeOutput() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#radial density function Angle(r)\n";

@@ -77,6 +77,8 @@ namespace OpenMD {
     // zeroing the number of molecules investigated counter
     count_ = 0;
 
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
     // fixed number of bins
     sliceCount_.resize(nBins_);    
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
@@ -88,9 +90,6 @@ namespace OpenMD {
     sliceCount_.clear();
   }
 
-  void TetrahedralityParamDens::processDump() {
-    // call processFrame( snap )
-  }
     
   void TetrahedralityParamDens::processFrame(int istep) {
     StuntDouble* sd;
@@ -106,128 +105,106 @@ namespace OpenMD {
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd1;
     int isd2;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
+     
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      
-      //Mat3x3d hmat = currentSnapshot_->getHmat();
-      //zBox_.push_back(hmat(2,2));
-      
-      //RealType halfBoxZ_ = hmat(2,2) / 2.0;      
-
-      if (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-      }
-      
-      if (evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
-      }
-      
-      // outer loop is over the selected StuntDoubles:
-      for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
-           sd = seleMan1_.nextSelected(isd1)) {
-        
-        myIndex = sd->getGlobalIndex();
-        
-        Qk = 1.0;	  
-        myNeighbors.clear();       
-
-        for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
-             sd2 = seleMan2_.nextSelected(isd2)) {
-          
-          if (sd2->getGlobalIndex() != myIndex) {
-            
-            vec = sd->getPos() - sd2->getPos();       
-            
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(vec);
-            
-            r = vec.length();             
-            
-            // Check to see if neighbor is in bond cutoff 
-            
-            if (r < rCut_) {                
-              myNeighbors.push_back(std::make_pair(r,sd2));
-	      if (myIndex == 513){
-		//std::cerr<< "sd2 index = " << sd2->getGlobalIndex() << "\n";
-	      }
-            }
-          }
-        }
-        
-        // Sort the vector using predicate and std::sort
-        std::sort(myNeighbors.begin(), myNeighbors.end());
-        
-        // Use only the 4 closest neighbors to do the rest of the work:
-        
-        int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
-        int nang = int (0.5 * (nbors * (nbors - 1)));
-        if (nang < 4) {
-	  //std::cerr << "nbors = " << nbors << " nang = " << nang << "\n";
-	}
-        rk = sd->getPos();
-        
-        for (int i = 0; i < nbors-1; i++) {       
-          
-          sdi = myNeighbors[i].second;
-          ri = sdi->getPos();
-          rik = rk - ri;
-          if (usePeriodicBoundaryConditions_) 
-            currentSnapshot_->wrapVector(rik);
-          
-          rik.normalize();
-          
-          for (int j = i+1; j < nbors; j++) {       
-            
-            sdj = myNeighbors[j].second;
-            rj = sdj->getPos();
-            rkj = rk - rj;
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(rkj);
-            rkj.normalize();
-            
-            cospsi = dot(rik,rkj);           
-            
-            // Calculates scaled Qk for each molecule using calculated
-            // angles from 4 or fewer nearest neighbors.
-            Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
-	    /*if (Qk < 0 ) { 
-	      std::cerr << "(pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang)" << (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang) << "\n";
-	      std::cerr << "Qk = " << Qk << " nang = " << nang <<  " nbors = " << nbors << "\n";
-	      std::cerr << "myIndex = " << myIndex << "\n";
-	      }*/
-          }
-        }
-        
-	// Based on the molecule's q value, populate the histogram.
-        if (nang > 0) {
-          int binNo = int((Qk - MinQ_) / deltaQ_);
-
-	  if (binNo < int(sliceCount_.size()) && binNo >= 0 ) {
-	    sliceCount_[binNo] += 1;
-	  } else {
-	    std::cerr << "binNo = " << binNo << " Qk = " << Qk << "\n";
-	    //std::cerr << "nbors = " << nbors << "\n";
-	  }
-
-	  //std::cout << "count = " << count_ << "\n";
-	  count_++;
-        }  
-      }
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    writeQdens();
+      
+    if (evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }
+      
+    // outer loop is over the selected StuntDoubles:
+    for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
+	 sd = seleMan1_.nextSelected(isd1)) {
+        
+      myIndex = sd->getGlobalIndex();
+        
+      Qk = 1.0;	  
+      myNeighbors.clear();       
+
+      for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
+	   sd2 = seleMan2_.nextSelected(isd2)) {
+          
+	if (sd2->getGlobalIndex() != myIndex) {
+            
+	  vec = sd->getPos() - sd2->getPos();       
+            
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(vec);
+            
+	  r = vec.length();             
+            
+	  // Check to see if neighbor is in bond cutoff 
+            
+	  if (r < rCut_) {                
+	    myNeighbors.push_back(std::make_pair(r,sd2));
+	    if (myIndex == 513){
+	    }
+	  }
+	}
+      }
+        
+      // Sort the vector using predicate and std::sort
+      std::sort(myNeighbors.begin(), myNeighbors.end());
+        
+      // Use only the 4 closest neighbors to do the rest of the work:
+        
+      int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nang = int (0.5 * (nbors * (nbors - 1)));
+      if (nang < 4) {
+      }
+      rk = sd->getPos();
+        
+      for (int i = 0; i < nbors-1; i++) {       
+          
+	sdi = myNeighbors[i].second;
+	ri = sdi->getPos();
+	rik = rk - ri;
+	if (usePeriodicBoundaryConditions_) 
+	  currentSnapshot_->wrapVector(rik);
+          
+	rik.normalize();
+          
+	for (int j = i+1; j < nbors; j++) {       
+            
+	  sdj = myNeighbors[j].second;
+	  rj = sdj->getPos();
+	  rkj = rk - rj;
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(rkj);
+	  rkj.normalize();
+            
+	  cospsi = dot(rik,rkj);           
+            
+	  // Calculates scaled Qk for each molecule using calculated
+	  // angles from 4 or fewer nearest neighbors.
+	  Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
+	}
+      }
+        
+      // Based on the molecule's q value, populate the histogram.
+      if (nang > 0) {
+	int binNo = int((Qk - MinQ_) / deltaQ_);
+
+	if (binNo < int(sliceCount_.size()) && binNo >= 0 ) {
+	  sliceCount_[binNo] += 1;
+	} else {
+	  std::cerr << "binNo = " << binNo << " Qk = " << Qk << "\n";
+	}
+
+	count_++;
+      }  
+    }
   }
+  
 
   void TetrahedralityParamDens::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
   
-  void TetrahedralityParamDens::writeQdens() {
+  void TetrahedralityParamDens::writeOutput() {
 
     std::ofstream qdensstream(outputFilename_.c_str());
     if (qdensstream.is_open()) {

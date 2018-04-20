@@ -59,19 +59,18 @@ namespace OpenMD {
 
       string prefixFileName = info->getPrefixFileName();
       setOutputName(prefixFileName + ".TwoDGofR");
+
+      std::fill(avgTwoDGofR_.begin(), avgTwoDGofR_.end(), 0.0);    
+	  
     }
 
-
-  void TwoDGofR::preProcess() {
-    std::fill(avgTwoDGofR_.begin(), avgTwoDGofR_.end(), 0.0);    
-  }
 
   void TwoDGofR::initializeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
   }
 
 
-  void TwoDGofR::processHistogram() {
+  void TwoDGofR::postProcess() {
 
     int nPairs = getNPairs();
 
@@ -116,7 +115,7 @@ namespace OpenMD {
   }
 
 
-  void TwoDGofR::writeRdf() {
+  void TwoDGofR::writeOutput() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#2D radial distribution function\n";

@@ -109,10 +109,6 @@ namespace OpenMD {
       std::fill(Q_histogram_[i].begin(), Q_histogram_[i].end(), 0);
     }
   }
-
-  void TetrahedralityHBMatrix::processDump() {
-    // call processFrame( snap )
-  }
   
   
   void TetrahedralityHBMatrix::processFrame(int istep) {
@@ -140,189 +136,180 @@ namespace OpenMD {
     int myIndex, ii, jj, index1, index2;
     
     
-    dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-      Q_.clear();
-      Q_.resize( info_->getNGlobalMolecules(), 0.0 );   
+    Q_.clear();
+    Q_.resize( info_->getNGlobalMolecules(), 0.0 );   
       
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
 
-      // outer loop is over the selected Molecules:
+    // outer loop is over the selected Molecules:
       
-      for (mol1 = seleMan_.beginSelectedMolecule(ii);
-           mol1 != NULL; mol1 = seleMan_.nextSelectedMolecule(ii)) {
+    for (mol1 = seleMan_.beginSelectedMolecule(ii);
+	 mol1 != NULL; mol1 = seleMan_.nextSelectedMolecule(ii)) {
 	
-        myIndex = mol1->getGlobalIndex();
+      myIndex = mol1->getGlobalIndex();
         
-	Qk = 1.0;
+      Qk = 1.0;
         
-	myNeighbors.clear();
+      myNeighbors.clear();
         
-        // inner loop is over all Molecules in the system:
+      // inner loop is over all Molecules in the system:
         
-        for (mol2 = info_->beginMolecule(mi); mol2 != NULL; 
-             mol2 = info_->nextMolecule(mi)) {
+      for (mol2 = info_->beginMolecule(mi); mol2 != NULL; 
+	   mol2 = info_->nextMolecule(mi)) {
           
-          if (mol2->getGlobalIndex() != myIndex) {
+	if (mol2->getGlobalIndex() != myIndex) {
             
-            vec = mol1->getCom() - mol2->getCom();       
+	  vec = mol1->getCom() - mol2->getCom();       
 	    
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(vec);
-            
-            r = vec.length();             
-            
-            // Check to see if neighbor is in bond cutoff 
-            
-            if (r < rCut_) { 
-              
-              myNeighbors.push_back(std::make_pair(r,mol2));
-            }
-          }
-        }      
-
-	// Sort the vector using predicate and std::sort
-	std::sort(myNeighbors.begin(), myNeighbors.end());
-	
-	// Use only the 4 closest neighbors to do the rest of the work:	
-	// int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
-	int nbors = myNeighbors.size();
-	int nang = int (0.5 * (nbors * (nbors - 1)));
-
-	rk = mol1->getCom();
-
-	for (int i = 0; i < nbors-1; i++) {	  
-
-	  moli = myNeighbors[i].second;
-	  ri = moli->getCom();
-	  rik = rk - ri;
 	  if (usePeriodicBoundaryConditions_) 
-	    currentSnapshot_->wrapVector(rik);
-	  
-	  rik.normalize();
-
-	  for (int j = i+1; j < nbors; j++) {	    
-
-	    molj = myNeighbors[j].second;
-	    rj = molj->getCom();
-	    rkj = rk - rj;
-	    if (usePeriodicBoundaryConditions_) 
-	      currentSnapshot_->wrapVector(rkj);
-	    rkj.normalize();
-	    
-	    cospsi = dot(rik,rkj);
+	    currentSnapshot_->wrapVector(vec);
             
-	    // Calculates scaled Qk for each molecule using calculated
-	    // angles from the actual number of nearest neighbors.
-	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 9.0 / (4.0 * nang) );
+	  r = vec.length();             
+            
+	  // Check to see if neighbor is in bond cutoff 
+            
+	  if (r < rCut_) { 
+              
+	    myNeighbors.push_back(std::make_pair(r,mol2));
 	  }
 	}
-        
-	if (nang > 0) {
-          Q_[myIndex] = Qk;
-          
-        }
-      }
-      // Now to scan for histogram:
+      }      
 
-      for (mol1 = seleMan_.beginSelectedMolecule(ii);
-           mol1 != NULL; mol1 = seleMan_.nextSelectedMolecule(ii)) {
+      // Sort the vector using predicate and std::sort
+      std::sort(myNeighbors.begin(), myNeighbors.end());
+	
+      // Use only the 4 closest neighbors to do the rest of the work:	
+      // int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nbors = myNeighbors.size();
+      int nang = int (0.5 * (nbors * (nbors - 1)));
+
+      rk = mol1->getCom();
+
+      for (int i = 0; i < nbors-1; i++) {	  
+
+	moli = myNeighbors[i].second;
+	ri = moli->getCom();
+	rik = rk - ri;
+	if (usePeriodicBoundaryConditions_) 
+	  currentSnapshot_->wrapVector(rik);
+	  
+	rik.normalize();
+
+	for (int j = i+1; j < nbors; j++) {	    
+
+	  molj = myNeighbors[j].second;
+	  rj = molj->getCom();
+	  rkj = rk - rj;
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(rkj);
+	  rkj.normalize();
+	    
+	  cospsi = dot(rik,rkj);
+            
+	  // Calculates scaled Qk for each molecule using calculated
+	  // angles from the actual number of nearest neighbors.
+	  Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 9.0 / (4.0 * nang) );
+	}
+      }
         
-        for (mol2 = seleMan_.beginSelectedMolecule(jj);
-             mol2 != NULL; mol2 = seleMan_.nextSelectedMolecule(jj)) {
+      if (nang > 0) {
+	Q_[myIndex] = Qk;
           
-          // loop over the possible donors in molecule 1:
-          for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
-               hbd = mol1->nextHBondDonor(hbdi)) {
-            dPos = hbd->donorAtom->getPos(); 
-            hPos = hbd->donatedHydrogen->getPos();
-            DH = hPos - dPos; 
-            currentSnapshot_->wrapVector(DH);
-            DHdist = DH.length();
-            
-            // loop over the possible acceptors in molecule 2:
-            for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
-                 hba = mol2->nextHBondAcceptor(hbai)) {
-              aPos = hba->getPos();
-              DA = aPos - dPos;
-              currentSnapshot_->wrapVector(DA);
-              DAdist = DA.length();
-              
-              // Distance criteria: are the donor and acceptor atoms
-              // close enough?
-              if (DAdist < OOCut_) {
-                HA = aPos - hPos;
-                currentSnapshot_->wrapVector(HA);
-                HAdist = HA.length();
-                
-                ctheta = dot(DH, DA) / (DHdist * DAdist);
-                theta = acos(ctheta) * 180.0 / Constants::PI;
-              
-                // Angle criteria: are the D-H and D-A and vectors close?
-                if (theta < thetaCut_ && HAdist < OHCut_) {
-                  // We have a hydrogen bond!                
-                  index1 = mol1->getGlobalIndex();
-                  index2 = mol2->getGlobalIndex();
-                  q1 = Q_[index1];
-                  q2 = Q_[index2];
-                  collectHistogram(q1, q2);                
-                }
-              }
-            }
-          }
-          // now loop over the possible acceptors in molecule 1:
-          for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
-               hba = mol1->nextHBondAcceptor(hbai)) {
-            aPos = hba->getPos();
-            
-            // loop over the possible donors in molecule 2:
-            for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
-                 hbd = mol2->nextHBondDonor(hbdi)) {
-              dPos = hbd->donorAtom->getPos();
-              
-              DA = aPos - dPos;
-              currentSnapshot_->wrapVector(DA);
-              DAdist = DA.length();
-              
-              // Distance criteria: are the donor and acceptor atoms
-              // close enough?
-              if (DAdist < OOCut_) {
-                hPos = hbd->donatedHydrogen->getPos();
-                HA = aPos - hPos;
-                currentSnapshot_->wrapVector(HA);
-                HAdist = HA.length();
-                
-                DH = hPos - dPos; 
-                currentSnapshot_->wrapVector(DH);
-                DHdist = DH.length();
-                ctheta = dot(DH, DA) / (DHdist * DAdist);
-                theta = acos(ctheta) * 180.0 / Constants::PI;              
-                // Angle criteria: are the D-H and D-A and vectors close?
-                if (theta < thetaCut_ && HAdist < OHCut_) {
-                  // We have a hydrogen bond!
-                  // keep these indexed by donor then acceptor:
-                  index1 = mol2->getGlobalIndex();
-                  index2 = mol1->getGlobalIndex();
-                  q1 = Q_[index1];
-                  q2 = Q_[index2];
-                  collectHistogram(q1, q2);
-                }
-              }
-            }
-          }
-        }           
-      }            
+      }
     }
-    writeOutput();
+    // Now to scan for histogram:
+
+    for (mol1 = seleMan_.beginSelectedMolecule(ii);
+	 mol1 != NULL; mol1 = seleMan_.nextSelectedMolecule(ii)) {
+        
+      for (mol2 = seleMan_.beginSelectedMolecule(jj);
+	   mol2 != NULL; mol2 = seleMan_.nextSelectedMolecule(jj)) {
+          
+	// loop over the possible donors in molecule 1:
+	for (hbd = mol1->beginHBondDonor(hbdi); hbd != NULL;
+	     hbd = mol1->nextHBondDonor(hbdi)) {
+	  dPos = hbd->donorAtom->getPos(); 
+	  hPos = hbd->donatedHydrogen->getPos();
+	  DH = hPos - dPos; 
+	  currentSnapshot_->wrapVector(DH);
+	  DHdist = DH.length();
+            
+	  // loop over the possible acceptors in molecule 2:
+	  for (hba = mol2->beginHBondAcceptor(hbai); hba != NULL;
+	       hba = mol2->nextHBondAcceptor(hbai)) {
+	    aPos = hba->getPos();
+	    DA = aPos - dPos;
+	    currentSnapshot_->wrapVector(DA);
+	    DAdist = DA.length();
+              
+	    // Distance criteria: are the donor and acceptor atoms
+	    // close enough?
+	    if (DAdist < OOCut_) {
+	      HA = aPos - hPos;
+	      currentSnapshot_->wrapVector(HA);
+	      HAdist = HA.length();
+                
+	      ctheta = dot(DH, DA) / (DHdist * DAdist);
+	      theta = acos(ctheta) * 180.0 / Constants::PI;
+              
+	      // Angle criteria: are the D-H and D-A and vectors close?
+	      if (theta < thetaCut_ && HAdist < OHCut_) {
+		// We have a hydrogen bond!                
+		index1 = mol1->getGlobalIndex();
+		index2 = mol2->getGlobalIndex();
+		q1 = Q_[index1];
+		q2 = Q_[index2];
+		collectHistogram(q1, q2);                
+	      }
+	    }
+	  }
+	}
+	// now loop over the possible acceptors in molecule 1:
+	for (hba = mol1->beginHBondAcceptor(hbai); hba != NULL;
+	     hba = mol1->nextHBondAcceptor(hbai)) {
+	  aPos = hba->getPos();
+            
+	  // loop over the possible donors in molecule 2:
+	  for (hbd = mol2->beginHBondDonor(hbdi); hbd != NULL;
+	       hbd = mol2->nextHBondDonor(hbdi)) {
+	    dPos = hbd->donorAtom->getPos();
+              
+	    DA = aPos - dPos;
+	    currentSnapshot_->wrapVector(DA);
+	    DAdist = DA.length();
+              
+	    // Distance criteria: are the donor and acceptor atoms
+	    // close enough?
+	    if (DAdist < OOCut_) {
+	      hPos = hbd->donatedHydrogen->getPos();
+	      HA = aPos - hPos;
+	      currentSnapshot_->wrapVector(HA);
+	      HAdist = HA.length();
+                
+	      DH = hPos - dPos; 
+	      currentSnapshot_->wrapVector(DH);
+	      DHdist = DH.length();
+	      ctheta = dot(DH, DA) / (DHdist * DAdist);
+	      theta = acos(ctheta) * 180.0 / Constants::PI;              
+	      // Angle criteria: are the D-H and D-A and vectors close?
+	      if (theta < thetaCut_ && HAdist < OHCut_) {
+		// We have a hydrogen bond!
+		// keep these indexed by donor then acceptor:
+		index1 = mol2->getGlobalIndex();
+		index2 = mol1->getGlobalIndex();
+		q1 = Q_[index1];
+		q2 = Q_[index2];
+		collectHistogram(q1, q2);
+	      }
+	    }
+	  }
+	}
+      }           
+    }            
   }
+  
 
   void TetrahedralityHBMatrix::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later

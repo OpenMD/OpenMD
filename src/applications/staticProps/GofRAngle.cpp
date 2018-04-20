@@ -186,7 +186,7 @@ namespace OpenMD {
     }
   }
 
-  void GofRAngle::processHistogram() {
+  void GofRAngle::postProcess() {
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     RealType pairDensity = nPairs /volume;
@@ -207,7 +207,7 @@ namespace OpenMD {
 
   }
   
-  void GofRTheta::processHistogram() {
+  void GofRTheta::postProcess() {
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     RealType pairDensity = nPairs /volume;
@@ -290,7 +290,7 @@ namespace OpenMD {
     }
   }
 
-  void GofRAngle::writeRdf() {
+  void GofRAngle::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       Revision r;

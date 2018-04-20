@@ -96,7 +96,7 @@ namespace OpenMD {
     }
   }
   
-  void GofRZ::processHistogram() {
+  void GofRZ::postProcess() {
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     RealType pairDensity = nPairs / volume * 2.0;
@@ -145,7 +145,7 @@ namespace OpenMD {
     }
   }
 
-  void GofRZ::writeRdf() {
+  void GofRZ::writeOutput() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#radial distribution function\n";

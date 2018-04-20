@@ -60,17 +60,13 @@ namespace OpenMD {
     }
         
     virtual void processFrame(int frame);
-    virtual void processDump();
     void ~AngleR();
     
   private:
 
     void processHistogram();
 
-    void writeAngleR();
-
-
-    Snapshot* currentSnapshot_;
+    void writeOutput();
 
     int nProcessed_;
     std::string selectionScript_;

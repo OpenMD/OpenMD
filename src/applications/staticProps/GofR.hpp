@@ -67,7 +67,7 @@ namespace OpenMD {
     virtual void processHistogram();
     virtual void postProcess();
 
-    virtual void writeRdf();
+    virtual void writeOutput();
 
     RealType len_;
     int nRBins_;

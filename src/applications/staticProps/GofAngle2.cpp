@@ -185,7 +185,7 @@ namespace OpenMD {
   }
 
 
-  void GofAngle2::processHistogram() {
+  void GofAngle2::postProcess() {
 
     //std::for_each(avgGofr_.begin(), avgGofr_.end(), std::plus<std::vector<int>>)
 
@@ -306,7 +306,7 @@ namespace OpenMD {
 
   }
 
-  void GofAngle2::writeRdf() {
+  void GofAngle2::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       Revision r;

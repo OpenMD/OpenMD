@@ -112,16 +112,7 @@ namespace OpenMD {
     orderParamsTail_.clear();
   }
 
-  void RippleOP::processDump(){
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
+  void RippleOP::processHistogram(){
     
     OrderParam sumOPHeadUpper, errsumOPHeadUpper;
     OrderParam sumOPHeadLower, errsumOPHeadLower;
@@ -179,8 +170,6 @@ namespace OpenMD {
       errsumOPTail.p2 += pow((orderParamsTail_[i].p2 - avgOPTail.p2), 2);
     }
     errOPTail.p2 = sqrt(errsumOPTail.p2 / (RealType)orderParamsTail_.size());
-    
-    writeP2();
     
   }
 
@@ -331,7 +320,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void RippleOP::writeP2() {
+  void RippleOP::writeOutput() {
     
     std::ofstream os(getOutputFileName().c_str());
     os<< "#selection1: (" << selectionScript1_ << ")\n";

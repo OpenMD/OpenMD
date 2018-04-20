@@ -74,14 +74,14 @@ namespace OpenMD {
     virtual void processOverlapping( SelectionManager& sman );
 
     virtual void initializeHistogram();
-    virtual void processHistogram();
+    virtual void postProcess();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
                                   StuntDouble* sd3);
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
                                    StuntDouble* sd3) = 0;
-    virtual void writeRdf();
+    virtual void writeOutput();
 
 
   protected:
@@ -122,7 +122,7 @@ namespace OpenMD {
       }
         
   private:
-    virtual void processHistogram();
+    virtual void postProcess();
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
                                    StuntDouble* sd3);        

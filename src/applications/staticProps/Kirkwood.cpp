@@ -80,7 +80,7 @@ namespace OpenMD {
   }
 
 
-  void Kirkwood::processHistogram() {
+  void Kirkwood::postProcess() {
     int nSelected1 = seleMan1_.getSelectionCount();
     for(unsigned int i = 0 ; i < histogram_.size(); ++i){
       avgKirkwood_[i] += histogram_[i] / nSelected1;    
@@ -132,7 +132,7 @@ namespace OpenMD {
   }
 
 
-  void Kirkwood::writeRdf() {
+  void Kirkwood::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       Revision r;

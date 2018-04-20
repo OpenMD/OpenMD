@@ -101,7 +101,6 @@ namespace OpenMD {
 
     virtual void validateSelection1(SelectionManager& sman) {}
     virtual void validateSelection2(SelectionManager& sman) {}
-    virtual void writeRdf() = 0;
         
     int nPairs_;
     int nSelected1_;

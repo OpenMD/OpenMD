@@ -63,15 +63,13 @@ namespace OpenMD {
     PotDiff(SimInfo* info, const std::string& sele);
     //! Process the data
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~PotDiff();
     
   private:
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     //! Write the data
-    void writeDiff();
-    //! pointer to current Snapshot
-    Snapshot* currentSnapshot_;
+    void writeOutput();
+
     //! computed potential energy differences
     std::vector<RealType> diff_;
     //! times pulled from the frame data

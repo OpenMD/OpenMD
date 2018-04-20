@@ -86,13 +86,11 @@ namespace OpenMD {
 
     virtual ~TetrahedralityParamXYZ();
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
-    void writeQxyz();
+    void writeOutput();
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript1_;
     std::string selectionScript2_;
     SelectionManager seleMan1_;

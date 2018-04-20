@@ -60,13 +60,11 @@ namespace OpenMD {
     PipeDensity(SimInfo* info,
                 const std::string& sele, int nbins, int nbins2, int axis=0);
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~PipeDensity();
     
   private:
-    virtual void writeDensity();
+    virtual void writeOutput();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-    Snapshot* currentSnapshot_;
     
     int nProcessed_;
     std::string selectionScript_;

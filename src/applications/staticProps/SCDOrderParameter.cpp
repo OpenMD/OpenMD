@@ -193,21 +193,6 @@ namespace OpenMD {
   }
   
 
-  void SCDOrderParameter::processDump() {
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames /step_;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    
-    writeSCD();
-  }
-  
   void SCDOrderParameter::processFrame(int istep) {
     for (std::size_t j = 0; j < scdElems_.size(); ++j) {
       scdParam_[j] += scdElems_[j].calcSCD(currentSnapshot_);
@@ -219,7 +204,7 @@ namespace OpenMD {
     // Fill in later
   }
  
-  void SCDOrderParameter::writeSCD() {
+  void SCDOrderParameter::writeOutput() {
 
     std::ofstream os(getOutputFileName().c_str());
     os << "#scd parameter\n";

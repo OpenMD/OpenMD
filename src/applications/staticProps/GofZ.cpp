@@ -85,7 +85,7 @@ namespace OpenMD {
   }
 
 
-  void GofZ::processHistogram() {
+  void GofZ::postProcess() {
 
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
@@ -129,7 +129,7 @@ namespace OpenMD {
   }
 
 
-  void GofZ::writeRdf() {
+  void GofZ::writeOutput() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#" << axisLabel_ << "-separation distribution function\n";

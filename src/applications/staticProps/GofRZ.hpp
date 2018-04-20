@@ -64,10 +64,10 @@ namespace OpenMD {
       
       virtual void preProcess();
       virtual void initializeHistogram();
-      virtual void processHistogram();
+      virtual void postProcess();
       virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
       
-      virtual void writeRdf();
+      virtual void writeOutput();
       
       RealType len_;
       RealType zLen_;

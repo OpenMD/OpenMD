@@ -71,12 +71,17 @@ namespace OpenMD {
     rCut_ = rCut;
 
     Q_histogram_.resize(nBins_);
+    Distorted_.clear();
+    Tetrahedral_.clear();
 
     // Q can take values from 0 to 1
 
     MinQ_ = 0.0;
     MaxQ_ = 1.1;
     deltaQ_ = (MaxQ_ - MinQ_) / nBins_;
+
+    usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    
 
   }
 
@@ -86,10 +91,6 @@ namespace OpenMD {
   
   void TetrahedralityParam::initializeHistogram() {
     std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
-  }
-
-   void TetrahedralityParam::processDump() {
-    // call processFrame( snap )
   }
  
   
@@ -109,139 +110,106 @@ namespace OpenMD {
     RealType Qk;
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd;
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    frameCounter_ = 0;
-
-    Distorted_.clear();
-    Tetrahedral_.clear();
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      frameCounter_++;
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+    
+    // outer loop is over the selected StuntDoubles:
+    
+    for (sd = seleMan_.beginSelected(isd); sd != NULL; 
+	 sd = seleMan_.nextSelected(isd)) {
       
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-
-      // outer loop is over the selected StuntDoubles:
-
-      for (sd = seleMan_.beginSelected(isd); sd != NULL; 
-           sd = seleMan_.nextSelected(isd)) {
+      myIndex = sd->getGlobalIndex();
+      Qk = 1.0;
+      
+      myNeighbors.clear();
+      
+      // inner loop is over all StuntDoubles in the system:
+      
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
 	
-        myIndex = sd->getGlobalIndex();
-	Qk = 1.0;
-
-	myNeighbors.clear();
-                
-        // inner loop is over all StuntDoubles in the system:
-        
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-
-          for (sd2 = mol->beginIntegrableObject(ioi); sd2 != NULL; 
-               sd2 = mol->nextIntegrableObject(ioi)) {
+	for (sd2 = mol->beginIntegrableObject(ioi); sd2 != NULL; 
+	     sd2 = mol->nextIntegrableObject(ioi)) {
+	  
+	  if (sd2->getGlobalIndex() != myIndex) {
 	    
-            if (sd2->getGlobalIndex() != myIndex) {
+	    vec = sd->getPos() - sd2->getPos();       
+	    
+	    if (usePeriodicBoundaryConditions_) 
+	      currentSnapshot_->wrapVector(vec);
+	    
+	    r = vec.length();             
+	    
+	    // Check to see if neighbor is in bond cutoff 
+            
+	    if (r < rCut_) { 
 	      
-              vec = sd->getPos() - sd2->getPos();       
-	      
-              if (usePeriodicBoundaryConditions_) 
-                currentSnapshot_->wrapVector(vec);
-	      
-              r = vec.length();             
-
-              // Check to see if neighbor is in bond cutoff 
-              
-              if (r < rCut_) { 
-		
-		myNeighbors.push_back(std::make_pair(r,sd2));
-	      }
+	      myNeighbors.push_back(std::make_pair(r,sd2));
 	    }
 	  }
 	}
-
-	// Sort the vector using predicate and std::sort
-	std::sort(myNeighbors.begin(), myNeighbors.end());
-
-	//std::cerr << myNeighbors.size() <<  " neighbors within " 
-	//          << rCut_  << " A" << " \n";
-	
-	// Use only the 4 closest neighbors to do the rest of the work:
-	
-	int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
-	int nang = int (0.5 * (nbors * (nbors - 1)));
-
-	rk = sd->getPos();
-	//std::cerr<<nbors<<endl;
-	for (int i = 0; i < nbors-1; i++) {	  
-
-	  sdi = myNeighbors[i].second;
-	  ri = sdi->getPos();
-	  rik = rk - ri;
-	  if (usePeriodicBoundaryConditions_) 
-	    currentSnapshot_->wrapVector(rik);
-	  
-	  rik.normalize();
-
-	  for (int j = i+1; j < nbors; j++) {	    
-
-	    sdj = myNeighbors[j].second;
-	    rj = sdj->getPos();
-	    rkj = rk - rj;
-	    if (usePeriodicBoundaryConditions_) 
-	      currentSnapshot_->wrapVector(rkj);
-	    rkj.normalize();
-	    
-	    cospsi = dot(rik,rkj);
-
-	    //std::cerr << "cos(psi) = " << cospsi << " \n";
-
-	    // Calculates scaled Qk for each molecule using calculated
-	    // angles from 4 or fewer nearest neighbors.
-	    Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
-	    //std::cerr<<Qk<<"\t"<<nang<<endl;
-	  }
-	}
-	//std::cerr<<nang<<endl;
-	if (nang > 0) {
-	  collectHistogram(Qk);
-
-	  // Saves positions of StuntDoubles & neighbors with distorted
-	  // coordination (low Qk value)
-	  if ((Qk < 0.55) && (Qk > 0.45)) {
-	    //std::cerr<<Distorted_.size()<<endl;
-	    Distorted_.push_back(sd);
-	    //std::cerr<<Distorted_.size()<<endl;
-	    dposition = sd->getPos();
-	    //std::cerr << "distorted position \t" << dposition << "\n";
-	  }
-
-	  // Saves positions of StuntDoubles & neighbors with
-	  // tetrahedral coordination (high Qk value)
-	  if (Qk > 0.05) { 
-
-	    Tetrahedral_.push_back(sd);
-
-	    tposition = sd->getPos();
-	    //std::cerr << "tetrahedral position \t" << tposition << "\n";
-	  }
-
-	  //std::cerr<<Tetrahedral_.size()<<endl;
-       
-	}
-
       }
+      
+      // Sort the vector using predicate and std::sort
+      std::sort(myNeighbors.begin(), myNeighbors.end());
+      
+      // Use only the 4 closest neighbors to do the rest of the work:
+      
+      int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nang = int (0.5 * (nbors * (nbors - 1)));
+      
+      rk = sd->getPos();
+      for (int i = 0; i < nbors-1; i++) {	  
+	
+	sdi = myNeighbors[i].second;
+	ri = sdi->getPos();
+	rik = rk - ri;
+	if (usePeriodicBoundaryConditions_) 
+	  currentSnapshot_->wrapVector(rik);
+	
+	rik.normalize();
+	
+	for (int j = i+1; j < nbors; j++) {	    
+	  
+	  sdj = myNeighbors[j].second;
+	  rj = sdj->getPos();
+	  rkj = rk - rj;
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(rkj);
+	  rkj.normalize();
+	  
+	  cospsi = dot(rik,rkj);
+	  
+	  
+	  // Calculates scaled Qk for each molecule using calculated
+	  // angles from 4 or fewer nearest neighbors.
+	  Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
+	}
+      }
+      if (nang > 0) {
+	collectHistogram(Qk);
+	
+	// Saves positions of StuntDoubles & neighbors with distorted
+	// coordination (low Qk value)
+	if ((Qk < 0.55) && (Qk > 0.45)) {
+	  Distorted_.push_back(sd);
+	  dposition = sd->getPos();
+	}
+	
+	// Saves positions of StuntDoubles & neighbors with
+	// tetrahedral coordination (high Qk value)
+	if (Qk > 0.05) { 
+	  
+	  Tetrahedral_.push_back(sd);
+	  
+	  tposition = sd->getPos();
+	}     
+      }
+      
+      
     }
-    
-    writeOrderParameter();
-    std::cerr << "number of distorted StuntDoubles = " 
-	      << Distorted_.size() << "\n";
-    std::cerr << "number of tetrahedral StuntDoubles = " 
-	      << Tetrahedral_.size() << "\n";
   }
 
 
@@ -259,7 +227,7 @@ namespace OpenMD {
   }    
 
 
-  void TetrahedralityParam::writeOrderParameter() {
+  void TetrahedralityParam::writeOutput() {
     
     int nSelected = 0;
 

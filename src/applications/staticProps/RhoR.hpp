@@ -62,19 +62,15 @@ namespace OpenMD {
     }
         
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~RhoR();
     
   private:
 
     void processHistogram();
-
-    void writeRhoR();
+    void writeOutput();
 
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
-
-    Snapshot* currentSnapshot_;
 
     int nProcessed_;
     std::string selectionScript_;

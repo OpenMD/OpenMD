@@ -97,10 +97,6 @@ namespace OpenMD {
   
   TetrahedralityParamXYZ::~TetrahedralityParamXYZ() {
   }
-
-  void TetrahedralityParamXYZ::processDump() {
-    // call processFrame( snap )
-  }
     
   void TetrahedralityParamXYZ::processFrame(int istep) {
     StuntDouble* sd;
@@ -126,158 +122,136 @@ namespace OpenMD {
     cerr << "gw = " << gaussWidth_ << " vS = " << voxelSize_ << " kMax = " 
 	 << kMax << " kSqLim = " << kSqLim << "\n";
 
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
+    
+   
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
 
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      Vector3d halfBox = Vector3d(hmat(0,0), hmat(1,1), hmat(2,2)) / 2.0;
-
-      if (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-      }
-      
-      if (evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
-      }
-      
-      //qvals.clear();
-
-      // outer loop is over the selected StuntDoubles:
-      for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
-           sd = seleMan1_.nextSelected(isd1)) {
-        
-        myIndex = sd->getGlobalIndex();
-        
-        Qk = 1.0;	  
-        myNeighbors.clear();       
-
-        for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
-             sd2 = seleMan2_.nextSelected(isd2)) {
-          
-          if (sd2->getGlobalIndex() != myIndex) {
-            
-            vec = sd->getPos() - sd2->getPos();       
-            
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(vec);
-            
-            r = vec.length();             
-            
-            // Check to see if neighbor is in bond cutoff 
-            
-            if (r < rCut_) {                
-              myNeighbors.push_back(std::make_pair(r,sd2));
-            }
-          }
-        }
-        
-        // Sort the vector using predicate and std::sort
-        std::sort(myNeighbors.begin(), myNeighbors.end());
-        
-        // Use only the 4 closest neighbors to do the rest of the work:
-        
-        int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
-        int nang = int (0.5 * (nbors * (nbors - 1)));
-        
-        rk = sd->getPos();
-        
-        for (int i = 0; i < nbors-1; i++) {       
-          
-          sdi = myNeighbors[i].second;
-          ri = sdi->getPos();
-          rik = rk - ri;
-          if (usePeriodicBoundaryConditions_) 
-            currentSnapshot_->wrapVector(rik);
-          
-          rik.normalize();
-          
-          for (int j = i+1; j < nbors; j++) {       
-            
-            sdj = myNeighbors[j].second;
-            rj = sdj->getPos();
-            rkj = rk - rj;
-            if (usePeriodicBoundaryConditions_) 
-              currentSnapshot_->wrapVector(rkj);
-            rkj.normalize();
-            
-            cospsi = dot(rik,rkj);           
-            
-            // Calculates scaled Qk for each molecule using calculated
-            // angles from 4 or fewer nearest neighbors.
-            Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
-          }
-        }
-        
-        if (nang > 0) {
-          if (usePeriodicBoundaryConditions_)
-            currentSnapshot_->wrapVector(rk);
-          //qvals.push_back(std::make_pair(rk, Qk));
-          
-          Vector3d pos = rk + halfBox;
-
-
-          Vector3i whichVoxel(int(pos[0] / voxelSize_), 
-                              int(pos[1] / voxelSize_), 
-                              int(pos[2] / voxelSize_));
-          
-          for (int l = -kMax; l <= kMax; l++) {
-            for (int m = -kMax; m <= kMax; m++) {
-              for (int n = -kMax; n <= kMax; n++) {
-                int kk = l*l + m*m + n*n;
-                if(kk <= kSqLim) {
-
-                  int ll = (whichVoxel[0] + l) % nBins_(0);
-                  ll = ll < 0 ? nBins_(0) + ll : ll;
-                  int mm = (whichVoxel[1] + m) % nBins_(1);
-                  mm = mm < 0 ? nBins_(1) + mm : mm;
-                  int nn = (whichVoxel[2] + n) % nBins_(2);
-                  nn = nn < 0 ? nBins_(2) + nn : nn;
-
-                  Vector3d bPos = Vector3d(ll,mm,nn) * voxelSize_ - halfBox;
-                  Vector3d d = bPos - rk;
-                  currentSnapshot_->wrapVector(d);
-                  RealType denom = pow(2.0 * sqrt(Constants::PI) * gaussWidth_, 3);
-                  RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
-                  RealType weight = exp(exponent) / denom;
-                  count_[ll][mm][nn] += weight;
-                  hist_[ll][mm][nn] += weight * Qk;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // for (int i = 0; i < nBins_(0); ++i) {
-      //   for(int j = 0; j < nBins_(1); ++j) {
-      //     for(int k = 0; k < nBins_(2); ++k) {
-      //       Vector3d pos = Vector3d(i, j, k) * voxelSize_ - halfBox;
-      //       for(qiter = qvals.begin(); qiter != qvals.end(); ++qiter) {
-      //         Vector3d d = pos - (*qiter).first;
-      //         currentSnapshot_->wrapVector(d);
-      //         RealType denom = pow(2.0 * sqrt(Constants::PI) * gaussWidth_, 3);
-      //         RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
-      //         RealType weight = exp(exponent) / denom;
-      //         count_[i][j][k] += weight;
-      //         hist_[i][j][k] += weight * (*qiter).second;
-      //       }
-      //     }
-      //   }
-      // }
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    writeQxyz();
+      
+    if (evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+    }
+      
+    //qvals.clear();
+
+    // outer loop is over the selected StuntDoubles:
+    for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
+	 sd = seleMan1_.nextSelected(isd1)) {
+        
+      myIndex = sd->getGlobalIndex();
+        
+      Qk = 1.0;	  
+      myNeighbors.clear();       
+
+      for (sd2 = seleMan2_.beginSelected(isd2); sd2 != NULL;
+	   sd2 = seleMan2_.nextSelected(isd2)) {
+          
+	if (sd2->getGlobalIndex() != myIndex) {
+            
+	  vec = sd->getPos() - sd2->getPos();       
+            
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(vec);
+            
+	  r = vec.length();             
+            
+	  // Check to see if neighbor is in bond cutoff 
+            
+	  if (r < rCut_) {                
+	    myNeighbors.push_back(std::make_pair(r,sd2));
+	  }
+	}
+      }
+        
+      // Sort the vector using predicate and std::sort
+      std::sort(myNeighbors.begin(), myNeighbors.end());
+        
+      // Use only the 4 closest neighbors to do the rest of the work:
+        
+      int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nang = int (0.5 * (nbors * (nbors - 1)));
+        
+      rk = sd->getPos();
+        
+      for (int i = 0; i < nbors-1; i++) {       
+          
+	sdi = myNeighbors[i].second;
+	ri = sdi->getPos();
+	rik = rk - ri;
+	if (usePeriodicBoundaryConditions_) 
+	  currentSnapshot_->wrapVector(rik);
+          
+	rik.normalize();
+          
+	for (int j = i+1; j < nbors; j++) {       
+            
+	  sdj = myNeighbors[j].second;
+	  rj = sdj->getPos();
+	  rkj = rk - rj;
+	  if (usePeriodicBoundaryConditions_) 
+	    currentSnapshot_->wrapVector(rkj);
+	  rkj.normalize();
+            
+	  cospsi = dot(rik,rkj);           
+            
+	  // Calculates scaled Qk for each molecule using calculated
+	  // angles from 4 or fewer nearest neighbors.
+	  Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
+	}
+      }
+        
+      if (nang > 0) {
+	if (usePeriodicBoundaryConditions_)
+	  currentSnapshot_->wrapVector(rk);
+	//qvals.push_back(std::make_pair(rk, Qk));
+          
+	Vector3d pos = rk + halfBox;
+
+
+	Vector3i whichVoxel(int(pos[0] / voxelSize_), 
+			    int(pos[1] / voxelSize_), 
+			    int(pos[2] / voxelSize_));
+          
+	for (int l = -kMax; l <= kMax; l++) {
+	  for (int m = -kMax; m <= kMax; m++) {
+	    for (int n = -kMax; n <= kMax; n++) {
+	      int kk = l*l + m*m + n*n;
+	      if(kk <= kSqLim) {
+
+		int ll = (whichVoxel[0] + l) % nBins_(0);
+		ll = ll < 0 ? nBins_(0) + ll : ll;
+		int mm = (whichVoxel[1] + m) % nBins_(1);
+		mm = mm < 0 ? nBins_(1) + mm : mm;
+		int nn = (whichVoxel[2] + n) % nBins_(2);
+		nn = nn < 0 ? nBins_(2) + nn : nn;
+
+		Vector3d bPos = Vector3d(ll,mm,nn) * voxelSize_ - halfBox;
+		Vector3d d = bPos - rk;
+		currentSnapshot_->wrapVector(d);
+		RealType denom = pow(2.0 * sqrt(Constants::PI) * gaussWidth_, 3);
+		RealType exponent = -dot(d,d) / pow(2.0*gaussWidth_, 2);
+		RealType weight = exp(exponent) / denom;
+		count_[ll][mm][nn] += weight;
+		hist_[ll][mm][nn] += weight * Qk;
+	      }
+	    }
+	  }
+	}
+      }
+    }
   }
+    
+  
 
   void TetrahedralityParamXYZ::processStuntDouble(StuntDouble* sd, int bin) {
     // Fill in later
   }
   
-  void TetrahedralityParamXYZ::writeQxyz() {
+  void TetrahedralityParamXYZ::writeOutput() {
 
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
 

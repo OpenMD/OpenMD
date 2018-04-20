@@ -69,16 +69,13 @@ namespace OpenMD {
     }
     
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~pAngle();
     
   private:
     
     void processHistogram();
-    void writeProbs();
+    void writeOutput();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-        
-    Snapshot* currentSnapshot_;
 
     bool doVect_;
     bool doOffset_;

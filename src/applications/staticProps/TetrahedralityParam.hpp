@@ -87,21 +87,19 @@ namespace OpenMD {
     
     virtual ~TetrahedralityParam();
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
     virtual void initializeHistogram();
     virtual void collectHistogram(RealType Qk);    
-    void writeOrderParameter();
+    void writeOutput();
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript_;
     SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
+    SelectionEvaluator evaluator_;
+    bool usePeriodicBoundaryConditions_;
             
     RealType rCut_;
-    int frameCounter_;
     int nBins_;
    
     RealType MinQ_;

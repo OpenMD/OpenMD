@@ -79,7 +79,6 @@ namespace OpenMD {
     
     virtual ~TetrahedralityHBMatrix();
     virtual void processFrame(int frame);
-    virtual void processDump();
     
   private:
     virtual void initializeHistogram();
@@ -87,7 +86,6 @@ namespace OpenMD {
     void writeOutput();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript_;
     SelectionManager seleMan_;    
     SelectionEvaluator evaluator_;           

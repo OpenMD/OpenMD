@@ -60,13 +60,11 @@ namespace OpenMD {
     }
     
   private:
-    
-    virtual void preProcess();
     virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-    virtual void processHistogram();
+    virtual void postProcess();
     
-    virtual void writeRdf();
+    virtual void writeOutput();
     
     RealType len_;
     int nRBins_;

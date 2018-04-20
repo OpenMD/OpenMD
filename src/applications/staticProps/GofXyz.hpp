@@ -64,7 +64,7 @@ namespace OpenMD {
     virtual void preProcess();
     void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-    virtual void writeRdf();
+    virtual void writeOutput();
         
     //virtual void validateSelection1(SelectionManager& sman);
         

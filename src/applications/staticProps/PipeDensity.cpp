@@ -103,20 +103,6 @@ namespace OpenMD {
     density_.clear();
   }
 
-  void PipeDensity::processDump() {
-    dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-     writeDensity();
-  }
-
   
   void PipeDensity::processFrame(int istep) {
     StuntDouble* sd;
@@ -178,7 +164,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void PipeDensity::writeDensity() {
+  void PipeDensity::writeOutput() {
 
     std::vector<RealType>::iterator j;
     std::ofstream rdfStream(outputFilename_.c_str());

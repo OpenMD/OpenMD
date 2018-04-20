@@ -53,19 +53,17 @@ namespace OpenMD {
 
     RippleOP(SimInfo* info, const std::string& sele1, const std::string& sele2);
     virtual void processFrame(int frame);
-    virtual void processDump();
-    virtual ~RippleOP();
+    void processHistogram();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-    
+     virtual ~RippleOP();
   private:
     
     struct OrderParam{
       RealType p2;
       Vector3d director;
     };            
-    void writeP2();
+    void writeOutput();
     
-    Snapshot* currentSnapshot_;
     
     std::string selectionScript1_;
     std::string selectionScript2_;

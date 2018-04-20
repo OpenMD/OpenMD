@@ -90,13 +90,11 @@ namespace OpenMD {
 
     virtual ~TetrahedralityParamDens();
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
   private:
-    void writeQdens();
+    void writeOutput();
 
-    Snapshot* currentSnapshot_;
     std::string selectionScript1_;
     std::string selectionScript2_;
     SelectionManager seleMan1_;
@@ -110,6 +108,7 @@ namespace OpenMD {
     RealType deltaQ_;
     unsigned int count_;
     std::vector<int> sliceCount_;
+    bool usePeriodicBoundaryConditions_;
   };
 }
 #endif

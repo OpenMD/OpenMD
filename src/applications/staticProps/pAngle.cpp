@@ -69,7 +69,10 @@ namespace OpenMD {
     }            
     
     count_.resize(nThetaBins_);
-    histogram_.resize(nThetaBins_); 
+    histogram_.resize(nThetaBins_);
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+
   }
 
   pAngle::pAngle(SimInfo* info, 
@@ -95,7 +98,10 @@ namespace OpenMD {
     }            
     
     count_.resize(nThetaBins_);
-    histogram_.resize(nThetaBins_); 
+    histogram_.resize(nThetaBins_);
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+
   }
 
   pAngle::pAngle(SimInfo* info,  
@@ -115,7 +121,10 @@ namespace OpenMD {
     }            
     
     count_.resize(nThetaBins_);
-    histogram_.resize(nThetaBins_);    
+    histogram_.resize(nThetaBins_);
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+
   }
 
   pAngle::pAngle(SimInfo* info,
@@ -137,16 +146,16 @@ namespace OpenMD {
     }            
     
     count_.resize(nThetaBins_);
-    histogram_.resize(nThetaBins_);    
+    histogram_.resize(nThetaBins_);
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+    
   }
 
   pAngle::~pAngle() {
     histogram_.clear();
   }
 
-  void pAngle::processDump() {
-    // call processFrame( snap )
-  }
 
   
   void pAngle::processFrame(int istep) {
@@ -155,142 +164,127 @@ namespace OpenMD {
     int ii; 
     int jj;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-
-    Thermo thermo(info_);
-    string dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);    
-    int nFrames = reader.getNFrames();
-
-    nProcessed_ = nFrames/step_;
-
-    std::fill(histogram_.begin(), histogram_.end(), 0.0);
-    std::fill(count_.begin(), count_.end(), 0);
     
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-      Vector3d CenterOfMass = thermo.getCom();      
-
-      if  (evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-      }
-      
-      if (doVect_) {
-
-        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
-             sd1 = seleMan1_.nextSelected(ii)) {
-          
-          Vector3d pos = sd1->getPos();
-          
-          Vector3d r1 = CenterOfMass - pos;
-          // only do this if the stunt double actually has a vector associated
-          // with it
-          if (sd1->isDirectional()) {
-            Vector3d vec = sd1->getA().transpose()*V3Z;
-            vec.normalize();
-            r1.normalize();
-            RealType cosangle = dot(r1, vec);
-            
-            int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
-            count_[binNo]++;
-          }
-        }
-      } else {
-        if (doOffset_) {
-          
-          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
-               sd1 = seleMan1_.nextSelected(ii)) {
-            
-            // This will require careful rewriting if StaticProps is
-            // ever parallelized.  For an example, see
-            // Thermo::getTaggedAtomPairDistance
-            Vector3d r1;
-            
-            if (doOffset2_) {
-              int sd1Aind = sd1->getGlobalIndex() + seleOffset2_;
-              StuntDouble* sd1A = info_->getIOIndexToIntegrableObject(sd1Aind);
-              r1 = CenterOfMass - sd1A->getPos();              
-            } else {
-              r1 = CenterOfMass - sd1->getPos();
-            }
-
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(r1);
+    Thermo thermo(info_);
 
 
-            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
-            sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
+    Vector3d CenterOfMass = thermo.getCom();      
 
-            Vector3d r2 = CenterOfMass - sd2->getPos();
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(r1);
-            
-            Vector3d rc = 0.5*(r1 + r2);
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(rc);
-            
-            Vector3d vec = r1-r2;
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(vec);
-            
-            rc.normalize();
-            vec.normalize();
-            RealType cosangle = dot(rc, vec);
-            int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
-            count_[binNo]++;
-          }        
-        } else {
-          
-          if  (evaluator2_.isDynamic()) {
-            seleMan2_.setSelectionSet(evaluator2_.evaluate());
-          }
-          
-          if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
-            sprintf( painCave.errMsg,
-                     "In frame %d, the number of selected StuntDoubles are\n"
-                     "\tnot the same in --sele1 and sele2\n", istep);
-            painCave.severity = OPENMD_INFO;
-            painCave.isFatal = 0;
-            simError();            
-          }
-          
-          for (sd1 = seleMan1_.beginSelected(ii), 
-                 sd2 = seleMan2_.beginSelected(jj);
-               sd1 != NULL && sd2 != NULL;
-               sd1 = seleMan1_.nextSelected(ii), 
-                 sd2 = seleMan2_.nextSelected(jj)) {
-            
-            Vector3d r1 = CenterOfMass - sd1->getPos();
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(r1);
-            
-            Vector3d r2 = CenterOfMass - sd2->getPos();
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(r1);
-          
-            Vector3d rc = 0.5*(r1 + r2);
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(rc);
-            
-            Vector3d vec = r1-r2;
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(vec);
-            
-            rc.normalize();
-            vec.normalize();
-            RealType cosangle = dot(rc, vec);
-            int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
-            count_[binNo]++;
-            
-          }
-        }
-      }
+    if  (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
       
-    processHistogram();
-    writeProbs();
+    if (doVect_) {
+
+      for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
+	   sd1 = seleMan1_.nextSelected(ii)) {
+          
+	Vector3d pos = sd1->getPos();
+          
+	Vector3d r1 = CenterOfMass - pos;
+	// only do this if the stunt double actually has a vector associated
+	// with it
+	if (sd1->isDirectional()) {
+	  Vector3d vec = sd1->getA().transpose()*V3Z;
+	  vec.normalize();
+	  r1.normalize();
+	  RealType cosangle = dot(r1, vec);
+            
+	  int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
+	  count_[binNo]++;
+	}
+      }
+    } else {
+      if (doOffset_) {
+          
+	for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+	     sd1 = seleMan1_.nextSelected(ii)) {
+            
+	  // This will require careful rewriting if StaticProps is
+	  // ever parallelized.  For an example, see
+	  // Thermo::getTaggedAtomPairDistance
+	  Vector3d r1;
+            
+	  if (doOffset2_) {
+	    int sd1Aind = sd1->getGlobalIndex() + seleOffset2_;
+	    StuntDouble* sd1A = info_->getIOIndexToIntegrableObject(sd1Aind);
+	    r1 = CenterOfMass - sd1A->getPos();              
+	  } else {
+	    r1 = CenterOfMass - sd1->getPos();
+	  }
+
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(r1);
+
+
+	  int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+	  sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
+
+	  Vector3d r2 = CenterOfMass - sd2->getPos();
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(r1);
+            
+	  Vector3d rc = 0.5*(r1 + r2);
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(rc);
+            
+	  Vector3d vec = r1-r2;
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(vec);
+            
+	  rc.normalize();
+	  vec.normalize();
+	  RealType cosangle = dot(rc, vec);
+	  int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
+	  count_[binNo]++;
+	}        
+      } else {
+          
+	if  (evaluator2_.isDynamic()) {
+	  seleMan2_.setSelectionSet(evaluator2_.evaluate());
+	}
+          
+	if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
+	  sprintf( painCave.errMsg,
+		   "In frame %d, the number of selected StuntDoubles are\n"
+		   "\tnot the same in --sele1 and sele2\n", istep);
+	  painCave.severity = OPENMD_INFO;
+	  painCave.isFatal = 0;
+	  simError();            
+	}
+          
+	for (sd1 = seleMan1_.beginSelected(ii), 
+	       sd2 = seleMan2_.beginSelected(jj);
+	     sd1 != NULL && sd2 != NULL;
+	     sd1 = seleMan1_.nextSelected(ii), 
+	       sd2 = seleMan2_.nextSelected(jj)) {
+            
+	  Vector3d r1 = CenterOfMass - sd1->getPos();
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(r1);
+            
+	  Vector3d r2 = CenterOfMass - sd2->getPos();
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(r1);
+          
+	  Vector3d rc = 0.5*(r1 + r2);
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(rc);
+            
+	  Vector3d vec = r1-r2;
+	  if (usePeriodicBoundaryConditions_)
+	    currentSnapshot_->wrapVector(vec);
+            
+	  rc.normalize();
+	  vec.normalize();
+	  RealType cosangle = dot(rc, vec);
+	  int binNo = int(nThetaBins_ * (1.0 + cosangle) / 2.0);
+	  count_[binNo]++;
+            
+	}
+      }
+    }
+    
     
   }
   
@@ -309,7 +303,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void pAngle::writeProbs() {
+  void pAngle::writeOutput() {
 
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {

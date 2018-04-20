@@ -83,7 +83,7 @@ namespace OpenMD {
   }
 
 
-  void GofR::processHistogram() {
+  void GofR::postProcess() {
     
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
@@ -102,7 +102,7 @@ namespace OpenMD {
 
   }
 
-  void GofR::postProcess() {
+  void GofR::processHistogram() {
     
     int nSelected1 = getNSelected1();
     int nSelected2 = getNSelected2();
@@ -146,7 +146,7 @@ namespace OpenMD {
   }
 
 
-  void GofR::writeRdf() {
+  void GofR::writeOutput() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       Revision r;

@@ -61,15 +61,12 @@ namespace OpenMD {
 	      const std::string& sele, int nbins1, int nbins2, int axis1=2, int axis2=0);
     
     virtual void processFrame(int frame);
-    virtual void processDump();
     virtual ~VelocityZ();
     
   private:
-    virtual void writeVelocity();
+    virtual void writeOutput();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-    Snapshot* currentSnapshot_;
     
-    int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;

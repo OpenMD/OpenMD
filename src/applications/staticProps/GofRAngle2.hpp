@@ -65,8 +65,8 @@ namespace OpenMD {
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
                                   StuntDouble* sd3);
-    virtual void processHistogram();
-    virtual void writeRdf();
+    virtual void postProcess();
+    virtual void writeOutput();
 
     unsigned int nAngleBins_;
     RealType len_;

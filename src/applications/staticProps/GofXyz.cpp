@@ -170,7 +170,7 @@ namespace OpenMD {
     
   }
 
-  void GofXyz::writeRdf() {
+  void GofXyz::writeOutput() {
     std::ofstream rdfStream(outputFilename_.c_str(), std::ios::binary);
     if (rdfStream.is_open()) {
       //rdfStream << "#g(x, y, z)\n";

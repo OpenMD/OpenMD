@@ -112,17 +112,6 @@ namespace OpenMD {
     selectionWasFlucQ_.clear();
   }
   
-  void PotDiff::processDump() {
-    dumpFileName_ = info_->getDumpFileName();
-    DumpReader reader(info_, dumpFileName_);
-    int nFrames = reader.getNFrames();
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
-    writeDiff();   
-  }
   
   void PotDiff::processFrame(int istep) {
     StuntDouble* sd;
@@ -174,7 +163,7 @@ namespace OpenMD {
     // Fill in later
   }
   
-  void PotDiff::writeDiff() {
+  void PotDiff::writeOutput() {
     
     RealType mu, sigma, m95;
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
