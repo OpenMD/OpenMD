@@ -58,7 +58,7 @@
 #include "rnemd/RNEMDParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
 #include "optimization/NudgedElasticBandParameters.hpp"
-#include "analyzer/AnalyzerParameters.hpp"
+#include "analysis/AnalyzerParameters.hpp"
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
