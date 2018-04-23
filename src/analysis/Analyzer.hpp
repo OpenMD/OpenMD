@@ -143,7 +143,7 @@ namespace OpenMD {
     RealType nbinsZ;
     RealType nrbins;
     RealType nAngleBins;
-    RealType rcut;
+    RealType rCut;
     RealType ooCut;
     RealType thetaCut;
     RealType OHCut;

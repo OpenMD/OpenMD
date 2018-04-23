@@ -348,19 +348,19 @@ namespace OpenMD {
 	simError();
       }
     case analyzerIor:
-      if (hasSele1 && hasSele2 && hasLength && hasNBins && hasPrivilegedAxis) {
+      if (hasSele1 && hasRCut && hasLength && hasNRBins) {
 	analyser_ = new IcosahedralOfR(info, sele1, rCut, nrbins, maxLen);
 	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'ior' requires the following specified\n"
-		"\tSele1, Sele2, Length, NBins, privilegedAxis\n");
+		"\tsele1, rcut, length, NRBins\n");
 	painCave.isFatal = 1;
 	painCave.severity = OPENMD_ERROR;
 	simError();
       }
     case analyzerFor:
-      if (hasSele1 && hasRCut && hasNRBins && hasLength && hasPrivilegedAxis) {
+      if (hasSele1 && hasRCut && hasNRBins && hasLength) {
 	analyser_ = new FCCOfR(info, sele1, rCut, nrbins, length);
 	break;
       } else {
@@ -411,7 +411,7 @@ namespace OpenMD {
       }
     case analyzerGofz:
       if (hasSele1 && hasSele2 && hasLength && hasNBins && hasPrivilegedAxis) {
-	analyser_ = new GofZ(info, sele1, sele2, length, nbins, privilegedAxis);
+	//analyser_ = new GofZ(info, sele1, sele2, length, nbins, privilegedAxis);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -450,7 +450,7 @@ namespace OpenMD {
     case analyzerRz:
       if (hasSele1 && hasSele2 && hasLength && hasNRBins && hasNBinsZ
 	  && hasPrivilegedAxis) {
-	analyser_ = new GofRZ(info, sele1, sele2, length, maxLength, nrbins, nbinsZ, privilegedAxis);
+	//analyser_ = new GofRZ(info, sele1, sele2, length, maxLen, nrbins, nbinsZ, privilegedAxis);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -462,7 +462,7 @@ namespace OpenMD {
       }
     case analyzerThetaOmega:
       if (hasSele1 && hasSele2 && hasSele3 && hasNAngleBins) {
-	anlyser_ = new GofAngle2(info, sele1, sele2, sele3, nagnlebins);
+	analyser_ = new GofAngle2(info, sele1, sele2, sele3, nAngleBins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -474,7 +474,7 @@ namespace OpenMD {
       }
     case analyzerRThetaOmega:
       if (hasSele1 && hasSele2 && hasSele3 && hasNRBins && hasNAngleBins) {
-	analyser_ = new GofRAngle2(info, sele1, sele2, sele3, maxLength, nrbins, nAngleBins);
+	analyser_ = new GofRAngle2(info, sele1, sele2, sele3, maxLen, nrbins, nAngleBins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -485,8 +485,8 @@ namespace OpenMD {
 	simError();
       }
     case analyzerGxyz:
-      if (hasSele1 && hasSele2 && hasNBins) {
-	analyser_ = new GofXyz(info, sele1, sele2, maxLength, nbins);
+      if (hasSele1 && hasSele2 && hasSele3 && hasNBins) {
+	analyser_ = new GofXyz(info, sele1, sele2, sele3, maxLen, nbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -498,7 +498,7 @@ namespace OpenMD {
       }
     case analyzerTwoDGofr:
       if (hasSele1 && hasSele2 && hasDz && hasNRBins) {
-	analyser_ = new TwoDGofR(indo, sele1, sele2, maxLength, dz, nrbins);
+	analyser_ = new TwoDGofR(info, sele1, sele2, maxLen, dz, nrbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -546,7 +546,7 @@ namespace OpenMD {
       }
     case analyzerDensity:
       if (hasSele1 && hasSele2 && hasNBins) {
-	analyser_ = new DensityPlot(info, sele1, sele2, maxLength, nbins);
+	analyser_ = new DensityPlot(info, sele1, sele2, maxLen, nbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -558,7 +558,7 @@ namespace OpenMD {
       }
     case analyzerSlabDensity:
       if (hasSele1 && hasNBins && hasPrivilegedAxis) {
-	analyser_ = new RhoZ(info, sele1, nbins, privilegedAxis);
+	//analyser_ = new RhoZ(info, sele1, nbins, privilegedAxis);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -611,7 +611,7 @@ namespace OpenMD {
 #endif
     case analyzerRhoR:
       if (hasSele1 && hasNRBins && hasRadius) {
-	analyser_ = new RhoR(info, sele1, maxLength, nrbins, radius);
+	analyser_ = new RhoR(info, sele1, maxLen, nrbins, radius);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -623,7 +623,7 @@ namespace OpenMD {
       }
     case analyzerAngleR:
       if (hasSele1 && hasNRBins) {
-	analyser_ = new AngleR(info, sele1, maxLength, nrbins);
+	analyser_ = new AngleR(info, sele1, maxLen, nrbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -635,7 +635,7 @@ namespace OpenMD {
       }
     case analyzerHullVol:
       if (hasSele1) {
-	analyser_ = new NanoVolume(info, sele1);
+	//analyser_ = new NanoVolume(info, sele1);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -647,7 +647,7 @@ namespace OpenMD {
       }
     case analyzerRodLength:
       if (hasSele1) {
-	analyser_ = new NanoLength(info, sele1);
+	//analyser_ = new NanoLength(info, sele1);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -671,7 +671,7 @@ namespace OpenMD {
       }
     case analyzerTetParamZ:
       if (hasSele1 && hasSele2 && hasRCut && hasNBins && hasPrivilegedAxis) {
-	analyser_ = new TetrahedralityParamZ(info, sele1, sele2, rCut, nbins, privilegedAxis);
+	//analyser_ = new TetrahedralityParamZ(info, sele1, sele2, rCut, nbins, privilegedAxis);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -707,7 +707,7 @@ namespace OpenMD {
       }
     case analyzerRNEMDz:
       if (hasSele1 && hasNBins && hasPrivilegedAxis) {
-	analyser_ = new RNEMDZ(info, sele1, nbins, privilegedAxis);
+	//analyser_ = new RNEMDZ(info, sele1, nbins, privilegedAxis);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -755,7 +755,7 @@ namespace OpenMD {
       }
     case analyzerMultipole:
       if (hasSele1 && hasNBins) {
-	analyser_ = new MultipoleSum(info, sele1, maxLength, nbins);
+	analyser_ = new MultipoleSum(info, sele1, maxLen, nbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -767,7 +767,7 @@ namespace OpenMD {
       }
     case analyzerSurfDiffusion:
       if (hasSele1) {
-	analyser_ = new SurfaceDiffusion(info, sele1, maxLength);
+	//analyser_ = new SurfaceDiffusion(info, sele1, maxLen);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -851,7 +851,7 @@ namespace OpenMD {
       }
     case analyzerKirkwood:
       if (hasSele1 && hasSele2 && hasNRBins) {
-	analyser_ = new Kirkwood(info, sele1, sele2, maxLength, nrbins);
+	analyser_ = new Kirkwood(info, sele1, sele2, maxLen, nrbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -863,7 +863,7 @@ namespace OpenMD {
       }
     case analyzerKirkwoodQ:
       if (hasSele1 && hasSele2 && hasNRBins) {
-	analyser_ = new KirkwoodQ(info, sele1, sele2, maxLength, nrbins);
+	analyser_ = new KirkwoodQuadrupoles(info, sele1, sele2, maxLen, nrbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
