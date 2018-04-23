@@ -242,7 +242,7 @@ namespace OpenMD {
     if (hasNAngleBins)
       nAngleBins = analyzerParams->getNAngleBins();
     if (hasRCut)
-      rcut = analyzerParams->getRCut();
+      rCut = analyzerParams->getRCut();
     if (hasOOCut)
       ooCut = analyzerParams->getOOCut();
     if (hasThetaCut)
@@ -336,8 +336,8 @@ namespace OpenMD {
     
     switch(analyzerMethod_) {
     case analyzerBo:
-      if (hasSele1 && hasSele2 && hasLength && hasNRBins) {
-	analyser_ = new Bo(info, sele1, sele2, maxLen, nrbins);
+      if (hasSele1 && hasRCut && hasNBins) {
+	analyser_ = new BondOrderParameter(info, sele1, rCut, nbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -349,7 +349,7 @@ namespace OpenMD {
       }
     case analyzerIor:
       if (hasSele1 && hasSele2 && hasLength && hasNBins && hasPrivilegedAxis) {
-	analyser_ = new Ior(info, sele1, sele2, length, nbins, privilegedAxis);
+	analyser_ = new IcosahedralOfR(info, sele1, rCut, nrbins, maxLen);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -361,7 +361,7 @@ namespace OpenMD {
       }
     case analyzerFor:
       if (hasSele1 && hasRCut && hasNRBins && hasLength && hasPrivilegedAxis) {
-	analyser_ = new FCCofR(info, sele1, rcut, nrbins, length);
+	analyser_ = new FCCOfR(info, sele1, rCut, nrbins, length);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -374,7 +374,7 @@ namespace OpenMD {
     case analyzerBad:
       std::cerr << "in analyzerBad" << endl;
       if (hasSele1 && hasRCut && hasNBins) {
-	analyser_ = new BondAngleDistribution(info, sele1, rcut, nbins);
+	analyser_ = new BondAngleDistribution(info, sele1, rCut, nbins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -424,7 +424,7 @@ namespace OpenMD {
     case analyzerRTheta:
       if (hasSele1 && hasSele2 && hasSele3 && hasLength && hasNRBins
 	  && hasNAngleBins) {
-	analyser_ = new GofRTheta(info, sele1, sele2, sele3, length, nrbins, nanglebins);
+	analyser_ = new GofRTheta(info, sele1, sele2, sele3, length, nrbins, nAngleBins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -437,7 +437,7 @@ namespace OpenMD {
     case analyzerROmega:
       if (hasSele1 && hasSele2 && hasSele3 && hasLength && hasNRBins
 	  && hasNAngleBins) {
-	analyser_ = new GofROmega(info, sele1, sele2, sele3, length, nrbins, nanglebins);
+	analyser_ = new GofROmega(info, sele1, sele2, sele3, length, nrbins, nAngleBins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -474,7 +474,7 @@ namespace OpenMD {
       }
     case analyzerRThetaOmega:
       if (hasSele1 && hasSele2 && hasSele3 && hasNRBins && hasNAngleBins) {
-	analyser_ = new GofRAngle2(info, sele1, sele2, sele3, maxLength, nrbins, nanglebins);
+	analyser_ = new GofRAngle2(info, sele1, sele2, sele3, maxLength, nrbins, nAngleBins);
 	break;
       } else {
 	sprintf(painCave.errMsg,
@@ -577,12 +577,15 @@ namespace OpenMD {
 	} else {
 	  if (hasSeleOffSet) {
 	    if (hasSeleOffSet2) {
-	      // analyser_ = new pAngle(info, sele1, seleOffSet, seleOffSet2, nbins);
+	      analyser_ = new pAngle(info, sele1, seleOffSet, seleOffSet2, nbins);
+	      break;
 	    } else {
-	      // analyser_ = new pAngle(info, sele1, seleOffSet, nbins);
+	      analyser_ = new pAngle(info, sele1, seleOffSet, nbins);
+	      break;
 	    }
 	  }
-	  // analyser_ = new pAngle(info, sele1, nbins);
+	  analyser_ = new pAngle(info, sele1, nbins);
+	  break;
 	}
       } else {
 	sprintf(painCave.errMsg,
@@ -595,7 +598,8 @@ namespace OpenMD {
     case analyzerHxy:
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
       if (hasSele1 && hasNBinsX && hasNBinsY && hasNBinsZ && hasNBins) {
-	// analyser_ = new Hxy(info, sele1, nbinsX, nbinsY, nbinsZ, nbins);
+	analyser_ = new Hxy(info, sele1, nbinsX, nbinsY, nbinsZ, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'hxy' requires the follwing specified\n"
@@ -607,7 +611,8 @@ namespace OpenMD {
 #endif
     case analyzerRhoR:
       if (hasSele1 && hasNRBins && hasRadius) {
-	// analyser_ = new RhoR(info, sele1, maxLength, nrbins, radius);
+	analyser_ = new RhoR(info, sele1, maxLength, nrbins, radius);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'rhor' requires the follwing specified\n"
@@ -618,7 +623,8 @@ namespace OpenMD {
       }
     case analyzerAngleR:
       if (hasSele1 && hasNRBins) {
-	// analyser_ = new AngleR(info, sele1, maxLength, nrbins);
+	analyser_ = new AngleR(info, sele1, maxLength, nrbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'angleR' requires the follwing specified\n"
@@ -629,7 +635,8 @@ namespace OpenMD {
       }
     case analyzerHullVol:
       if (hasSele1) {
-	// analyser_ = new NanoVolume(info, sele1);
+	analyser_ = new NanoVolume(info, sele1);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'hullVol' requires the follwing specified\n"
@@ -640,7 +647,8 @@ namespace OpenMD {
       }
     case analyzerRodLength:
       if (hasSele1) {
-	// analyser_ = new NanoLength(info, sele1);
+	analyser_ = new NanoLength(info, sele1);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'rodLength' requires the follwing specified\n"
@@ -651,7 +659,8 @@ namespace OpenMD {
       }
     case analyzerTetParam:
       if (hasSele1 && hasRCut && hasNBins) {
-	// analyser_ = new TetrahedralityParam(info, sele1, rcut, nbins);
+	analyser_ = new TetrahedralityParam(info, sele1, rCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'tetParam' requires the follwing specified\n"
@@ -662,7 +671,8 @@ namespace OpenMD {
       }
     case analyzerTetParamZ:
       if (hasSele1 && hasSele2 && hasRCut && hasNBins && hasPrivilegedAxis) {
-	// analyser_ = new TetrahedralityParamZ(info, sele1, sele2, rcut, nbins, privilegedAxis);
+	analyser_ = new TetrahedralityParamZ(info, sele1, sele2, rCut, nbins, privilegedAxis);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'tetParamZ' requires the follwing specified\n"
@@ -673,7 +683,8 @@ namespace OpenMD {
       }
     case analyzerTetParamDens:
       if (hasSele1 && hasSele2 && hasRCut && hasNBins) {
-	// analyser_ = new TetrahedralityParamDens(info, sele1, sele2, rcut, nbins);
+	analyser_ = new TetrahedralityParamDens(info, sele1, sele2, rCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'tetParamDens' requires the follwing specified\n"
@@ -684,7 +695,8 @@ namespace OpenMD {
       }
     case analyzerTetParamXYZ:
       if (hasSele1 && hasSele2 && hasRCut && hasVoxelSize && hasGaussWidth) {
-	// analyser_ = new TetrahedralityParamXYZ(info, sele1, sele2, rcut, voxelSize, gaussWidth);
+	analyser_ = new TetrahedralityParamXYZ(info, sele1, sele2, rCut, voxelSize, gaussWidth);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'pAngle' requires the follwing specified\n"
@@ -695,7 +707,8 @@ namespace OpenMD {
       }
     case analyzerRNEMDz:
       if (hasSele1 && hasNBins && hasPrivilegedAxis) {
-	// analyser_ = new RNEMDZ(info, sele1, nbins, privilegedAxis);
+	analyser_ = new RNEMDZ(info, sele1, nbins, privilegedAxis);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'rnemdz' requires the follwing specified\n"
@@ -706,7 +719,8 @@ namespace OpenMD {
       }
     case analyzerRNEMDr:
       if (hasSele1 && hasNRBins) {
-	// analyser_ = new RNEMDR(info, sele1, nrbins);
+	analyser_ = new RNEMDR(info, sele1, nrbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'rnemdR' requires the follwing specified\n"
@@ -717,7 +731,8 @@ namespace OpenMD {
       }
     case analyzerRNEMDrt:
       if (hasSele1 && hasNRBins && hasNAngleBins) {
-	// analyser_ = new RNEMDRTheta(info, sele1, nrbins, nanglebins);
+	analyser_ = new RNEMDRTheta(info, sele1, nrbins, nAngleBins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'rnemdRT' requires the follwing specified\n"
@@ -728,7 +743,8 @@ namespace OpenMD {
       }
     case analyzerNitrile:
       if (hasSele1 && hasNBins) {
-	// analyser_ = new NitrileFrequencyMap(info, sele1, nbins);
+	analyser_ = new NitrileFrequencyMap(info, sele1, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'nitrile' requires the follwing specified\n"
@@ -739,7 +755,8 @@ namespace OpenMD {
       }
     case analyzerMultipole:
       if (hasSele1 && hasNBins) {
-	// analyser_ = new MultipoleSum(info, sele1, maxLength, nbins);
+	analyser_ = new MultipoleSum(info, sele1, maxLength, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'multipole' requires the follwing specified\n"
@@ -750,7 +767,8 @@ namespace OpenMD {
       }
     case analyzerSurfDiffusion:
       if (hasSele1) {
-	// analyser_ = new SurfaceDiffusion(info, sele1, maxLength);
+	analyser_ = new SurfaceDiffusion(info, sele1, maxLength);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'surfDiffusion' requires the follwing specified\n"
@@ -761,7 +779,8 @@ namespace OpenMD {
       }
     case analyzerCN:
       if (hasSele1 && hasSele2 && hasRCut && hasNBins) {
-	// analyser_ = new CoordinationNumber(info, sele1, sele2, rcut, nbins);
+	analyser_ = new CoordinationNumber(info, sele1, sele2, rCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'cn' requires the follwing specified\n"
@@ -772,7 +791,8 @@ namespace OpenMD {
       }
     case analyzerSCN:
       if (hasSele1 && hasSele2 && hasRCut && hasNBins) {
-	// analyser_ = new SCN(info, sele1, sele2, rcut, nbins);
+	analyser_ = new SCN(info, sele1, sele2, rCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'scn' requires the follwing specified\n"
@@ -783,7 +803,8 @@ namespace OpenMD {
       }
     case analyzerGCN:
       if (hasSele1 && hasSele2 && hasRCut && hasNBins) {
-	// analyser_ = new GCN(info, sele1, sele2, rcut, nbins);
+	analyser_ = new GCN(info, sele1, sele2, rCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'gcn' requires the follwing specified\n"
@@ -794,7 +815,8 @@ namespace OpenMD {
       }
     case analyzerHBond:
       if (hasSele1 && hasSele2 && hasRCut && hasThetaCut && hasNBins) {
-	// analyser_ = new HBondGeometric(info, sele1, sele2, rcut, thetaCut, nbins);
+	analyser_ = new HBondGeometric(info, sele1, sele2, rCut, thetaCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'hbond' requires the follwing specified\n"
@@ -805,7 +827,8 @@ namespace OpenMD {
       }
     case analyzerPotDiff:
       if (hasSele1) {
-	// analyser_ = new PotDiff(info, sele1);
+	analyser_ = new PotDiff(info, sele1);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'potDiff' requires the follwing specified\n"
@@ -816,7 +839,8 @@ namespace OpenMD {
       }
     case analyzerTetHB:
       if (hasSele1 && hasRCut && hasOOCut && hasThetaCut && hasOHCut && hasNBins) {
-	// analyser_ = new TetrahedralityHBMatrix(info, sele1, rcut, ooCut, thetaCut, OHCut, nbins);
+	analyser_ = new TetrahedralityHBMatrix(info, sele1, rCut, ooCut, thetaCut, OHCut, nbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'hbtet' requires the follwing specified\n"
@@ -827,7 +851,8 @@ namespace OpenMD {
       }
     case analyzerKirkwood:
       if (hasSele1 && hasSele2 && hasNRBins) {
-	// analyser_ = new Kirkwood(info, sele1, sele2, maxLength, nrbins);
+	analyser_ = new Kirkwood(info, sele1, sele2, maxLength, nrbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'kirkwood' requires the follwing specified\n"
@@ -838,7 +863,8 @@ namespace OpenMD {
       }
     case analyzerKirkwoodQ:
       if (hasSele1 && hasSele2 && hasNRBins) {
-	// analyser_ = new KirkwoodQ(info, sele1, sele2, maxLength, nrbins);
+	analyser_ = new KirkwoodQ(info, sele1, sele2, maxLength, nrbins);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'kirkwoodQ' requires the follwing specified\n"
@@ -849,7 +875,8 @@ namespace OpenMD {
       }
     case analyzerDensityField:
       if (hasSele1 && hasVoxelSize) {
-	// analyser_ = new DensityField(info, sele1, voxelSize);
+	analyser_ = new DensityField(info, sele1, voxelSize);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'densityField' requires the follwing specified\n"
@@ -860,7 +887,8 @@ namespace OpenMD {
       }
     case analyzerVelocityField:
       if (hasSele1 && hasVoxelSize) {
-	// analyser_ = new VelocityField(info, sele1, voxelSize);
+	analyser_ = new VelocityField(info, sele1, voxelSize);
+	break;
       } else {
 	sprintf(painCave.errMsg,
 		"Analyzer: 'velocityField' requires the follwing specified\n"
