@@ -79,6 +79,8 @@ namespace OpenMD {
     virtual ~StaticAnalyser() {}
     virtual void processFrame(int frame)=0;
     virtual void processDump()=0;
+    virtual void writeOutput();
+
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
@@ -108,7 +110,6 @@ namespace OpenMD {
     }
 
   protected:
-    virtual void writeOutput();
     virtual void processHistogram();
     virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
     virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);

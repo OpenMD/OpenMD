@@ -46,6 +46,7 @@
 #include "math/RandNumGen.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include "analysis/StaticAnalyser.hpp"
 #include <iostream>
 
 using namespace std;
@@ -69,7 +70,7 @@ namespace OpenMD {
     void doAnalyzer();
     void getStarted();
     void parseOutputFileFormat(const std::string& format);
-    void writeOutputFile();
+    void writeOutput();
 
 
   private:
@@ -167,6 +168,8 @@ namespace OpenMD {
     RealType maxLen;
     RealType zmaxLen;
     Mat3x3d hmat;
+
+    StaticAnalyser* analyser_;
     
   };
 }

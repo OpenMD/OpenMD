@@ -122,16 +122,16 @@ namespace OpenMD {
   }
 
   NonSpatialStatistics::~NonSpatialStatistics() {
-    vector<OutputData*>::iterator i;
-    OutputData* outputData;
+    // vector<OutputData*>::iterator i;
+    // OutputData* outputData;
     
-    for(outputData = beginOutputData(i); outputData; 
-        outputData = nextOutputData(i)) {
-      delete outputData;
-    }
-    data_.clear();
+    // for(outputData = beginOutputData(i); outputData; 
+    //     outputData = nextOutputData(i)) {
+    //   delete outputData;
+    // }
+    // data_.clear();
 
-    delete counts_;
+    // delete counts_;
   }
 
   

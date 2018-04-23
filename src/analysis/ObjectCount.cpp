@@ -67,7 +67,7 @@ namespace OpenMD {
   }
 
   ObjectCount::~ObjectCount() {
-    counts_.clear();
+    //counts_.clear();
   }
 
   void ObjectCount::processHistogram() {

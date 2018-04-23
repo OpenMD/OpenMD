@@ -185,7 +185,7 @@ namespace OpenMD {
       }
 
       if (simParams->getAnalyzerParameters()->getUseAnalyzer()) {
-	analyzer_->writeOutputFile();
+	analyzer_->writeOutput();
       }
 
       statWriter->writeStat();
@@ -217,7 +217,7 @@ namespace OpenMD {
       rnemd_->writeOutputFile();
     }
     if (simParams->getAnalyzerParameters()->getUseAnalyzer()) {
-      analyzer_->writeOutputFile();
+      analyzer_->writeOutput();
     }
     progressBar->setStatus(runTime, runTime);
     progressBar->update();
