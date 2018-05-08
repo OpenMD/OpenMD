@@ -1,4 +1,4 @@
-// $ANTLR 2.7.7 (20171128): MDTreeParser.g -> MDTreeParserTokenTypes.txt$
+// $ANTLR 2.7.7 (20170929): MDTreeParser.g -> MDTreeParserTokenTypes.txt$
 MDTreeParser    // output token vocab name
 COMPONENT="component"=4
 MOLECULE="molecule"=5
@@ -76,4 +76,3 @@ Decimal=76
 HEX_DIGIT=77
 EXPONENT=78
 FLOAT_SUFFIX=79
-ANALYSIS=80

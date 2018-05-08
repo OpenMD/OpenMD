@@ -39,7 +39,6 @@ statement : assignment
     | moleculeblock
     | zconstraintblock
     | restraintblock
-    | analysisblock
     | flucqblock
     | rnemdblock
     | minimizerblock
@@ -85,11 +84,6 @@ restraintblock  : #(RESTRAINT {RestraintStamp* currRestraintStamp = new Restrain
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRestraintStamp(currRestraintStamp);}
     ;
 
-analysisblock  : #(ANALYSIS {AnalysisStamp* currAnalysisStamp = new AnalysisStamp(); blockStack.push(currAnalysisStamp);}
-            (assignment)* 
-            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addAnalysisStamp(currAnalysisStamp);}
-    ;
-
 flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new FluctuatingChargeParameters(); blockStack.push(flucQpars);}
             (assignment)* 
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addFluctuatingChargeParameters(flucQpars);}
@@ -105,9 +99,9 @@ minimizerblock  : #(MINIMIZER  {MinimizerParameters* minimizerPars = new Minimiz
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addMinimizerParameters(minimizerPars);}
     ;
 
-analyzerblock  : #(ANALYZER  {AnalyzerParameters* analyzerPars = new AnalyzerParameters(); blockStack.push(analyzerPars);}
+analyzerblock  : #(ANALYZER  {AnalyzerStamp* analyzerStamp = new AnalyzerStamp(); blockStack.push(analyzerStamp);}
             (assignment)* 
-            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addAnalyzerParameters(analyzerPars);}
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addAnalyzerStamp(analyzeStamp);}
     ;
 
 nudgedelasticbandblock  : #(NUDGEDELASTICBAND  {NudgedElasticBandParameters* nudgedElasticBandPars = new NudgedElasticBandParameters(); blockStack.push(nudgedElasticBandPars);}

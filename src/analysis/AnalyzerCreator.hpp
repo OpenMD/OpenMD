@@ -40,65 +40,36 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include "analysis/AnalysisFactory.hpp"
-#include "analysis/AnalysisCreator.hpp"
+#ifndef ANALYSIS_ANALYSISCREATOR_HPP 
+#define ANALYSIS_ANALYSISCREATOR_HPP
+
+#include <string>
+#include "analysis/Analyzer.hpp"
 
 namespace OpenMD {
 
-  //initialize instance of AnalysisFactory
-  AnalysisFactory* AnalysisFactory::instance_ = NULL;
-
-  AnalysisFactory::~AnalysisFactory() {
-    CreatorMapType::iterator i;
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      delete i->second;
-    }
-    creatorMap_.clear();
-  }
-
-  bool AnalysisFactory::registerAnalysis(AnalysisCreator* creator) {
-    return creatorMap_.insert(
-			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
-  }
-
-  bool AnalysisFactory::unregisterAnalysis(const std::string& id) {
-    return creatorMap_.erase(id) == 1;
-  }
-
-  /* QuantLib::AnalysisMethod* AnalysisFactory::createAnalysis(const std::string& id, SimInfo* info) {
-    CreatorMapType::iterator i = creatorMap_.find(id);
-    if (i != creatorMap_.end()) {
-      //invoke functor to create object
-      return (i->second)->create();
-    } else {
-      return NULL;
-    }
-  }
-  */
-  std::vector<std::string> AnalysisFactory::getIdents() {
-    IdentVectorType idents;
-    CreatorMapType::iterator i;
-
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      idents.push_back(i->first);
-    }
+  class Analyzer;
+  class SimInfo;
+  
+  class AnalyzerCreator {
+  public:
+    AnalyzerCreator(const std::string& ident) : ident_(ident) {}
+    virtual ~AnalyzerCreator() {}    
+    const std::string& getIdent() const { return ident_; }    
+    virtual Analyzer* create() const = 0;
     
-    return idents;
-  }
-
-  std::ostream& operator <<(std::ostream& o, AnalysisFactory& factory) {
-    AnalysisFactory::IdentVectorType idents;
-    AnalysisFactory::IdentVectorIterator i;
-
-    idents = factory.getIdents();
-
-    o << "Avaliable type identifiers in this factory: " << std::endl;
-    for (i = idents.begin(); i != idents.end(); ++i) {
-      o << *i << std::endl;
-    }
-
-    return o;
-  }
-
+  private:
+    std::string ident_;
+  };
+  
+  template<class ConcreteAnalyzer>
+  class AnalyzerBuilder : public AnalyzerCreator {
+  public:
+    AnalyzerBuilder(const std::string& ident) : AnalyzerCreator(ident) {}
+    virtual Analyzer* create() const {return new ConcreteAnalyzer();}
+  };
+  
 }
+
+#endif //ANALYZER_ANALYZERCREATOR_HPP
 

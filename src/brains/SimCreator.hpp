@@ -94,6 +94,8 @@ namespace OpenMD {
     /** create the molecules belong to current processor*/
     virtual void createMolecules(SimInfo* info);
 
+    virtual void createAnalyzers(SimInfo* info);
+
     /**
      * Figure out the data storage layout based on what kinds of
      * objects are being simulated

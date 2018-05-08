@@ -488,6 +488,8 @@ namespace OpenMD {
          mol = info->nextMolecule(mi)) {
       info->addInteractionPairs(mol);
     }
+
+    createAnalyzers(info);
     
     if (loadInitCoords)
       loadCoordinates(info, mdFileName);    
@@ -689,6 +691,48 @@ namespace OpenMD {
 #endif      
     }
   }
+
+  void SimCreator::createAnalyzers(SimInfo *info) {
+
+    Globals* simParams = info->getSimParams();
+    int nAnalyzerStamps = simParams->getNAnalyzerStamps();
+    std::vector<AnalyzerStamp*> stamp = simParams->getAnalyzerStamps();
+
+    for (int i = 0; i < nRestraintStamps; i++){
+
+      std::string myType = toUpperCopy(stamp[i]->getType());
+
+    AnalyzerCreator analyzerCreator;
+    int stampId;
+
+    //get the molecule stamp first
+    int stampId = info->getMoleculeStampId(i);
+    AnalyzerStamp * moleculeStamp = info->getMoleculeStamp(stampId);
+
+
+    
+    for(int i = 0; i < info->getNGlobalMolecules(); i++) {
+      
+#ifdef IS_MPI      
+      if (info->getMolToProc(i) == worldRank) {
+#endif
+        
+        stampId = info->getMoleculeStampId(i);
+        Molecule * mol = molCreator.createMolecule(info->getForceField(), 
+                                                   info->getMoleculeStamp(stampId),
+                                                   stampId, i, 
+                                                   info->getLocalIndexManager());
+        
+        info->addMolecule(mol);
+        
+#ifdef IS_MPI        
+      }      
+#endif      
+    }
+  }
+
+
+  
     
   int SimCreator::computeStorageLayout(SimInfo* info) {
 

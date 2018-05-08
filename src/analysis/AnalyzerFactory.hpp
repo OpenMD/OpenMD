@@ -40,42 +40,40 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef ANALYSIS_ANALYSISFACTORY_HPP
-#define ANALYSIS_ANALYSISFACTORY_HPP
+#ifndef ANALYZER_ANALYZERFACTORY_HPP
+#define ANALYZER_ANALYZERFACTORY_HPP
 #include <cassert>
 #include <map>
 #include <string>
 #include <vector>
 #include <iostream>
-//#include "optimization/Method.hpp"
 
-//using namespace QuantLib;
 namespace OpenMD {
 
   //forward declaration
-  class AnalysisCreator;
+  class AnalyzerCreator;
   class SimInfo;
   /**
-   * @class AnalysisFactory
-   * Factory pattern and Singleton Pattern are used to define an interface for creating an Optimization.
+   * @class AnalyzerFactory
+   * Factory pattern and Singleton Pattern are used to define an interface for creating an Analyzer.
    */
-  class AnalysisFactory {
+  class AnalyzerFactory {
   public:
                 
-    typedef std::map<std::string, AnalysisCreator*> CreatorMapType;
+    typedef std::map<std::string, AnalyzerCreator*> CreatorMapType;
     typedef std::vector<std::string> IdentVectorType;
     typedef std::vector<std::string>::iterator IdentVectorIterator;
 
-    ~AnalysisFactory();
+    ~AnalyzerFactory();
                     
     /**
-     * Returns an instance of Analysis factory
-     * @return an instance of Analysis factory
+     * Returns an instance of Analyzer factory
+     * @return an instance of Analyzer factory
      */        
-    static AnalysisFactory* getInstance() {
+    static AnalyzerFactory* getInstance() {
 
       if (instance_ == NULL) {
-	instance_ = new AnalysisFactory();
+	instance_ = new AnalyzerFactory();
       }
       return instance_;
             
@@ -86,7 +84,7 @@ namespace OpenMD {
      * @return true if registration is succeed, otherwise return false
      * @param creator the object responsible to create the concrete object 
      */
-    bool registerAnalysis(AnalysisCreator* creator);
+    bool registerAnalyzer(AnalyzerCreator* creator);
 
     /**
      * Unregisters the creator for the given type identifier. If the type identifier 
@@ -95,7 +93,7 @@ namespace OpenMD {
      * otherwise return false
      * @param id the identification of the concrete object
      */
-    bool unregisterAnalysis(const std::string& id);
+    bool unregisterAnalyzer(const std::string& id);
     /**
      * Looks up the type identifier in the internal map. If it is found, it invokes the
      * corresponding creator for the type identifier and returns its result. 
@@ -104,7 +102,7 @@ namespace OpenMD {
      * @param id the identification of the concrete object
      * @param info pointer to the SimInfo object
      */
-    //QuantLib::AnalysisMethod* createAnalysis(const std::string& id, SimInfo* info);
+    Analyzer* createAnalyzer(const std::string& id, SimInfo* info);
 
     /** 
      *  Returns all of the registed  type identifiers
@@ -113,15 +111,15 @@ namespace OpenMD {
     IdentVectorType getIdents();
         
   private:
-    AnalysisFactory() {}
+    AnalyzerFactory() {}
         
-    static AnalysisFactory* instance_;
+    static AnalyzerFactory* instance_;
     CreatorMapType creatorMap_;
   };
 
   /** write out all of the type identifiers to an output stream */
-  std::ostream& operator <<(std::ostream& o, AnalysisFactory& factory);
+  std::ostream& operator <<(std::ostream& o, AnalyzerFactory& factory);
 
 }//namespace OpenMD
-#endif //ANALYSIS_ANALYSISFACTORY_HPP
+#endif //ANALYZER_ANALYZERFACTORY_HPP
 

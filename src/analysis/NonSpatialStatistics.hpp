@@ -50,7 +50,7 @@
 #include <vector>
 #include <fstream>
 
-#include "analysis/StaticAnalyser.hpp"
+#include "analysis/Analyzer.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/Accumulator.hpp"
@@ -58,7 +58,7 @@
 using namespace std;
 namespace OpenMD {
  
-  class NonSpatialStatistics : public StaticAnalyser {
+  class NonSpatialStatistics : public Analyzer {
     
   public:
     NonSpatialStatistics(SimInfo* info,

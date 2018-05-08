@@ -8,8 +8,7 @@
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
+ * * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -39,138 +38,94 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#ifndef INTEGRATORS_ANALYZER_HPP
-#define INTEGRATORS_ANALYZER_HPP
+#ifndef ANALYSIS_ANALYZER_HPP
+#define ANALYSIS_ANALYZER_HPP
+
+#include <string>
 #include "brains/SimInfo.hpp"
-#include "math/RandNumGen.hpp"
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
-#include "analysis/StaticAnalyser.hpp"
-#include <iostream>
+#include "brains/Snapshot.hpp"
+#include "utils/Accumulator.hpp"
 
-using namespace std;
 namespace OpenMD {
+  enum OutputDataType {
+    odtReal,
+    odtVector3,
+    odtArray2d,
+    odtUnknownDataType
+  };
+  
+  enum OutputDataHandling {
+    odhAverage,
+    odhTotal,
+    odhLastValue,
+    odhMax,
+    odhUnknownDataHandling
+  };
+  
+  struct OutputData {
+    string title;
+    string units;
+    OutputDataType dataType;
+    OutputDataHandling dataHandling;
+    vector<BaseAccumulator*> accumulator;
+    vector<vector<BaseAccumulator*> > accumulatorArray2d;
+  };
 
-  /**
-   * @class Analyzer Analyzer.hpp "Analyzer/Analyzer.hpp"
-   * @brief 
-   *     
-   * Analyzer is a class which performs on-the-fly analytics of a system.
-   * This class allows users to specify analysis modules to be computed
-   * while the simulation is running, as opposed to post-processing methods
-   * traditionally done from the (.dump) file at the end of the simulation.
-   */
-
-  class Analyzer {
+  class Analyzer{
   public:
     Analyzer(SimInfo* info);
-    virtual ~Analyzer();
     
-    void doAnalyzer();
-    void getStarted();
-    void parseOutputFileFormat(const std::string& format);
-    void writeOutput();
+    virtual ~Analyzer() {}
+    virtual void processFrame(int frame)=0;
+    virtual void processDump()=0;
+    virtual void writeOutput();
 
+    void setNBins(int nbins) { nBins_ = nbins; }
 
-  private:
-   
-    enum AnalyzerMethod {
-      analyzerBo,
-      analyzerIor,
-      analyzerFor,
-      analyzerBad,
-      analyzerCount,
-      analyzerGofr,
-      analyzerGofz,
-      analyzerRTheta,
-      analyzerROmega,
-      analyzerRz,
-      analyzerThetaOmega,
-      analyzerRThetaOmega,
-      analyzerGxyz,
-      analyzerTwoDGofr,
-      analyzerP2,
-      analyzerSCD,
-      analyzerDensity,
-      analyzerSlabDensity,
-      analyzerPipeDensity,
-      analyzerPAngle,
-      analyzerHxy,
-      analyzerRhoR,
-      analyzerAngleR,
-      analyzerHullVol,
-      analyzerRodLength,
-      analyzerTetParam,
-      analyzerTetParamZ,
-      analyzerTetParamDens,
-      analyzerTetParamXYZ,
-      analyzerRNEMDz,
-      analyzerRNEMDr,
-      analyzerRNEMDrt,
-      analyzerNitrile,
-      analyzerMultipole,
-      analyzerSurfDiffusion,
-      analyzerCN,
-      analyzerSCN,
-      analyzerGCN,
-      analyzerHBond,
-      analyzerPotDiff,
-      analyzerTetHB,
-      analyzerKirkwood,
-      analyzerKirkwoodQ,
-      analyzerDensityField,
-      analyzerVelocityField,
-      analyzerVelocityZ
-    };
+    void setOutputName(const std::string& filename) {
+      outputFilename_ = filename;
+    }
+    
+    const std::string& getOutputFileName() const {
+      return outputFilename_;
+    }
+        
+    void setStep(int step) {
+      assert(step > 0);
+      step_ =step;    
+    }
+
+    int getStep() { return step_;}
+    
+    const std::string& getAnalysisType() const {
+      return analysisType_;
+    }
+
+    void setAnalysisType(const std::string& type) {
+      analysisType_ = type;
+    }
+    
+    void setParameterString(const std::string& params) {
+      paramString_ = params;
+    }
+
+  protected:
+    virtual void processHistogram();
+    virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    OutputData* beginOutputData(vector<OutputData*>::iterator& i);
+    OutputData* nextOutputData(vector<OutputData*>::iterator& i);
 
     SimInfo* info_;
+    std::string outputFilename_;
+    int step_;
+    std::string analysisType_;
+    std::string paramString_;
     
-    map<string, AnalyzerMethod> stringToMethod_;
-    AnalyzerMethod analyzerMethod_;
-    
-    bool doAnalyzer_;
-    RealType queryTime_;
+    unsigned int nBins_;
+    OutputData* counts_;
+    vector<OutputData*> data_;
 
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
-
-
-    RealType step;
-    RealType nbins;
-    RealType nbinsX;
-    RealType nbinsY;
-    RealType nbinsZ;
-    RealType nrbins;
-    RealType nAngleBins;
-    RealType rCut;
-    RealType ooCut;
-    RealType thetaCut;
-    RealType OHCut;
-    RealType dz;
-    RealType length;
-    RealType zLength;
-    RealType zOffSet;
-    std::string sele1;
-    std::string sele2;
-    std::string sele3;
-    std::string comSele;
-    RealType seleOffSet;
-    RealType seleOffSet2;
-    std::string molName;
-    RealType begin;
-    RealType end;
-    RealType radius;
-    RealType voxelSize;
-    RealType gaussWidth;
-    std::string privilegedAxis;
-    std::string privilegedAxis2;
-    RealType maxLen;
-    RealType zmaxLen;
-    Mat3x3d hmat;
-
-    StaticAnalyser* analyser_;
-    
   };
 }
-#endif //INTEGRATORS_ANALYZER_HPP
+#endif

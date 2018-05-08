@@ -39,93 +39,66 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef ANALYSIS_STATICANALYSER_HPP
-#define ANALYSIS_STATICANALYSER_HPP
-
-#include <string>
-#include "brains/SimInfo.hpp"
-#include "brains/Snapshot.hpp"
-#include "utils/Accumulator.hpp"
+ 
+#include "analyzer/AnalyzerFactory.hpp"
+#include "analyzer/AnalyzerCreator.hpp"
 
 namespace OpenMD {
-  enum OutputDataType {
-    odtReal,
-    odtVector3,
-    odtArray2d,
-    odtUnknownDataType
-  };
-  
-  enum OutputDataHandling {
-    odhAverage,
-    odhTotal,
-    odhLastValue,
-    odhMax,
-    odhUnknownDataHandling
-  };
-  
-  struct OutputData {
-    string title;
-    string units;
-    OutputDataType dataType;
-    OutputDataHandling dataHandling;
-    vector<BaseAccumulator*> accumulator;
-    vector<vector<BaseAccumulator*> > accumulatorArray2d;
-  };
 
-  class StaticAnalyser{
-  public:
-    StaticAnalyser(SimInfo* info, unsigned int nbins);
-    
-    virtual ~StaticAnalyser() {}
-    virtual void processFrame(int frame)=0;
-    virtual void processDump()=0;
-    virtual void writeOutput();
+  //initialize instance of AnalyzerFactory
+  AnalyzerFactory* AnalyzerFactory::instance_ = NULL;
 
+  AnalyzerFactory::~AnalyzerFactory() {
+    CreatorMapType::iterator i;
+    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+      delete i->second;
+    }
+    creatorMap_.clear();
+  }
 
-    void setOutputName(const std::string& filename) {
-      outputFilename_ = filename;
+  bool AnalyzerFactory::registerAnalyzer(AnalyzerCreator* creator) {
+    return creatorMap_.insert(
+			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
+  }
+
+  bool AnalyzerFactory::unregisterAnalyzer(const std::string& id) {
+    return creatorMap_.erase(id) == 1;
+  }
+
+  Analyzer* AnalyzerFactory::createAnalyzer(const std::string& id, SimInfo* info) {
+    CreatorMapType::iterator i = creatorMap_.find(id);
+    if (i != creatorMap_.end()) {
+      //invoke functor to create object
+      return (i->second)->create();
+    } else {
+      return NULL;
+    }
+  }
+ 
+  std::vector<std::string> AnalyzerFactory::getIdents() {
+    IdentVectorType idents;
+    CreatorMapType::iterator i;
+
+    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+      idents.push_back(i->first);
     }
     
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
-        
-    void setStep(int step) {
-      assert(step > 0);
-      step_ =step;    
-    }
+    return idents;
+  }
 
-    int getStep() { return step_;}
-    
-    const std::string& getAnalysisType() const {
-      return analysisType_;
-    }
+  std::ostream& operator <<(std::ostream& o, AnalyzerFactory& factory) {
+    AnalyzerFactory::IdentVectorType idents;
+    AnalyzerFactory::IdentVectorIterator i;
 
-    void setAnalysisType(const std::string& type) {
-      analysisType_ = type;
-    }
-    
-    void setParameterString(const std::string& params) {
-      paramString_ = params;
+    idents = factory.getIdents();
+
+    o << "Avaliable type identifiers in this factory: " << std::endl;
+    for (i = idents.begin(); i != idents.end(); ++i) {
+      o << *i << std::endl;
     }
 
-  protected:
-    virtual void processHistogram();
-    virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
-    OutputData* beginOutputData(vector<OutputData*>::iterator& i);
-    OutputData* nextOutputData(vector<OutputData*>::iterator& i);
+    return o;
+  }
 
-    SimInfo* info_;
-    std::string outputFilename_;
-    int step_;
-    std::string analysisType_;
-    std::string paramString_;
-    
-    unsigned int nBins_;
-    OutputData* counts_;
-    vector<OutputData*> data_;
-
-  };
 }
-#endif
+

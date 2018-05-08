@@ -54,12 +54,11 @@
 #include "types/ZconsStamp.hpp"
 #include "types/RestraintStamp.hpp"
 #include "types/MoleculeStamp.hpp"
-#include "types/AnalysisStamp.hpp"
 #include "flucq/FluctuatingChargeParameters.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
 #include "optimization/NudgedElasticBandParameters.hpp"
-#include "analysis/AnalyzerParameters.hpp"
+#include "analysis/AnalyzerStamp.hpp"
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
@@ -161,25 +160,25 @@ namespace OpenMD {
 
   public:
     bool addComponent(Component* comp);
-    bool addZConsStamp(ZConsStamp* zcons);
-    bool addRestraintStamp(RestraintStamp* rest);
-    bool addAnalysisStamp(AnalysisStamp* analysis);
-    bool addMoleculeStamp(MoleculeStamp* molStamp);
     int getNComponents() {return components_.size();}
     std::vector<Component*> getComponents() {return components_;}
     Component* getComponentAt(int index) {return components_.at(index);}
 
+    bool addZConsStamp(ZConsStamp* zcons);
     int getNZconsStamps() {return zconstraints_.size();}
     std::vector<ZConsStamp*> getZconsStamps() {return zconstraints_;}
     ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}
 
+    bool addRestraintStamp(RestraintStamp* rest);
     int getNRestraintStamps() {return restraints_.size();}
     std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
     RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}
+    bool addMoleculeStamp(MoleculeStamp* molStamp);
 
-    int getNAnalysisStamps() {return analysis_.size();}
-    std::vector<AnalysisStamp*> getAnalysisStamps() {return analysis_;}
-    AnalysisStamp* getAnalysisStampAt(int index) {return analysis_.at(index);}
+    bool addAnalyzerStamp(AnalyzerStamp* analyzer);
+    int getNAnalyzerStamps() {return analyzers_.size();}
+    std::vector<AnalyzerStamp*> getAnalyzerStamps() {return analyzers_;}
+    AnalyzerStamp* getAnalyzerStampAt(int index) {return analyzers_.at(index);}
     
     bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
     FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
@@ -191,11 +190,7 @@ namespace OpenMD {
     MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
 
     bool addNudgedElasticBandParameters(NudgedElasticBandParameters* nedPars);
-    NudgedElasticBandParameters* getNudgedElasticBandParameters() {return nebPars_;}
-    
-    bool addAnalyzerParameters(AnalyzerParameters* analyzerPars);
-    AnalyzerParameters* getAnalyzerParameters() {return analyzerPars_;}
-
+    NudgedElasticBandParameters* getNudgedElasticBandParameters() {return nebPars_;}   
     
     virtual void validate();
   private:
@@ -203,14 +198,13 @@ namespace OpenMD {
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;
     std::vector<RestraintStamp*> restraints_;
-    std::vector<AnalysisStamp*> analysis_;
+    std::vector<AnalyzerStamp*> analyzers_;
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;
     RNEMDParameters* rnemdPars_;
     MinimizerParameters* minimizerPars_;
     NudgedElasticBandParameters* nebPars_;
-    AnalyzerParameters* analyzerPars_;
 };
 }
 #endif

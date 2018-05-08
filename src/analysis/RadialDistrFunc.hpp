@@ -48,7 +48,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/Constants.hpp"
-#include "analysis/StaticAnalyser.hpp"
+#include "analysis/Analyzer.hpp"
 
 namespace OpenMD {
 
@@ -56,7 +56,7 @@ namespace OpenMD {
    * @class RadialDistrFunc
    * @brief Radial Distribution Function
    */
-  class RadialDistrFunc : public StaticAnalyser {
+  class RadialDistrFunc : public Analyzer {
   public:
     RadialDistrFunc(SimInfo* info, 
                     const std::string& sele1, const std::string& sele2, unsigned int nbins);

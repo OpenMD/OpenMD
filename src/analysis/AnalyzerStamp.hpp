@@ -40,19 +40,48 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_ANALYSISSTAMP_HPP
-#define TYPES_ANALYSISSTAMP_HPP
+#ifndef TYPES_ANALYZERSTAMP_HPP
+#define TYPES_ANALYZERSTAMP_HPP
 
 #include "types/DataHolder.hpp"
+
 namespace OpenMD {
-  class AnalysisStamp : public DataHolder {
-    DeclareParameter(Type, std::string);
-    DeclareParameter(ObjectSelection, std::string);
-    DeclareParameter(MolIndex, int);
-    DeclareParameter(Print, bool);
+  class AnalyzerStamp : public DataHolder {
+    DeclareParameter(UseAnalyzer, bool);
+    DeclareParameter(Method, std::string);
+    DeclareParameter(QueryTime, RealType);
+    DeclareParameter(NBins, RealType);
+    DeclareParameter(NBinsX, RealType);
+    DeclareParameter(NBinsY, RealType);
+    DeclareParameter(NBinsZ, RealType);
+    DeclareParameter(NRBins, RealType);
+    DeclareParameter(NAngleBins, RealType);
+    DeclareParameter(RCut, RealType);
+    DeclareParameter(OOCut, RealType);
+    DeclareParameter(ThetaCut, RealType);
+    DeclareParameter(OHCut, RealType);
+    DeclareParameter(Dz, RealType);
+    DeclareParameter(Length, RealType);
+    DeclareParameter(ZLength, RealType);
+    DeclareParameter(ZOffSet, RealType);
+    DeclareParameter(Sele1, std::string);
+    DeclareParameter(Sele2, std::string);
+    DeclareParameter(Sele3, std::string);
+    DeclareParameter(ComSele, std::string);
+    DeclareParameter(SeleOffSet, RealType);
+    DeclareParameter(SeleOffSet2, RealType);
+    DeclareParameter(MolName, std::string);
+    DeclareParameter(Begin, RealType);
+    DeclareParameter(End, RealType);
+    DeclareParameter(Radius, RealType);
+    DeclareParameter(VoxelSize, RealType);
+    DeclareParameter(GaussWidth, RealType);
+    DeclareParameter(PrivilegedAxis, std::string);
+    DeclareParameter(PrivilegedAxis2, std::string);
+    
   public:
-    AnalysisStamp();
-    virtual ~AnalysisStamp();
+    AnalyzerStamp();
+    virtual ~AnalyzerStamp();
     virtual void validate();
   };
 }

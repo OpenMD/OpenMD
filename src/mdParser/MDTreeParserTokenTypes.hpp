@@ -1,7 +1,7 @@
 #ifndef INC_MDTreeParserTokenTypes_hpp_
 #define INC_MDTreeParserTokenTypes_hpp_
 
-/* $ANTLR 2.7.7 (20171128): "MDTreeParser.g" -> "MDTreeParserTokenTypes.hpp"$ */
+/* $ANTLR 2.7.7 (20170929): "MDTreeParser.g" -> "MDTreeParserTokenTypes.hpp"$ */
 
 #ifndef CUSTOM_API
 # define CUSTOM_API
@@ -88,7 +88,6 @@ struct CUSTOM_API MDTreeParserTokenTypes {
 		HEX_DIGIT = 77,
 		EXPONENT = 78,
 		FLOAT_SUFFIX = 79,
-		ANALYSIS = 80,
 		NULL_TREE_LOOKAHEAD = 3
 	};
 #ifdef __cplusplus

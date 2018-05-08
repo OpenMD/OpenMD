@@ -54,8 +54,8 @@ namespace OpenMD {
   /** Register all lattice */
   void registerLattice();
 
-  /** Register all analysis */
-  void registerAnalysis();
+  /** Register all analyzers */
+  void registerAnalyzers();
 
   /** register force fields, integrators and optimizers */
   void registerAll();

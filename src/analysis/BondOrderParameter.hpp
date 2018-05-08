@@ -48,7 +48,7 @@
 #define ANALYSIS_BONDORDERPARAMETER_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "analysis/StaticAnalyser.hpp"
+#include "analysis/Analyzer.hpp"
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
 #include "analysis/NonSpatialStatistics.hpp"

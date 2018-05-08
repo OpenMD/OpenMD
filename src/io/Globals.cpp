@@ -57,7 +57,6 @@ namespace OpenMD {
     rnemdPars_ = new RNEMDParameters();
     minimizerPars_ = new MinimizerParameters();
     nebPars_ = new NudgedElasticBandParameters();
-    analyzerPars_ = new AnalyzerParameters();
 
     DefineParameter(ForceField, "forceField");
 
@@ -185,9 +184,6 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
 
     DefineOptionalParameterWithDefaultValue(PrivilegedAxis,"privilegedAxis","z");
-    DefineOptionalParameterWithDefaultValue(UseAnalysis, "useAnalysis",
-					    false);
-
 
     deprecatedKeywords_.insert("nComponents");
     deprecatedKeywords_.insert("nZconstraints");
@@ -212,12 +208,11 @@ namespace OpenMD {
     MemoryUtils::deletePointers(components_);
     MemoryUtils::deletePointers(zconstraints_);
     MemoryUtils::deletePointers(restraints_);
-    MemoryUtils::deletePointers(analysis_);
+    MemoryUtils::deletePointers(analyzers_);
     delete flucQpars_;
     delete rnemdPars_;
     delete minimizerPars_;
     delete nebPars_;
-    delete analyzerPars_;
   }
 
   void Globals::validate() {
@@ -317,8 +312,8 @@ namespace OpenMD {
     return true;
   }
 
-  bool Globals::addAnalysisStamp(AnalysisStamp* analysis) {
-    analysis_.push_back(analysis);
+  bool Globals::addAnalyzerStamp(AnalyzerStamp* analyzer) {
+    analyzers_.push_back(analyzer);
     return true;
   }
 
@@ -351,14 +346,6 @@ namespace OpenMD {
       delete nebPars_;
 
     nebPars_ = nebPars;
-    return true;
-  }
-
-  bool Globals::addAnalyzerParameters(AnalyzerParameters* analyzerPars) {
-    if (analyzerPars_ != NULL)
-      delete analyzerPars_;
-
-    analyzerPars_ = analyzerPars;
     return true;
   }
 
