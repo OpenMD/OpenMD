@@ -49,6 +49,7 @@ namespace OpenMD {
     DeclareParameter(Type, std::string);
     DeclareParameter(ObjectSelection, std::string);
     DeclareParameter(MolIndex, int);
+    DeclareParameter(Print, bool);
   public:
     AnalysisStamp();
     virtual ~AnalysisStamp();

@@ -51,6 +51,7 @@ namespace OpenMD {
 
     DefineOptionalParameter(MolIndex, "molIndex");
     DefineOptionalParameter(ObjectSelection, "objectSelection");
+    DefineOptionalParameterWithDefaultValue(Print, "print", true);
   }
   
   AnalysisStamp::~AnalysisStamp() {    
