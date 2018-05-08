@@ -47,7 +47,7 @@
 
 namespace OpenMD {
   AnalysisStamp::AnalysisStamp() {
-    DefineParameter(Type, "restraintType");
+    DefineParameter(Type, "analysisType");
 
     DefineOptionalParameter(MolIndex, "molIndex");
     DefineOptionalParameter(ObjectSelection, "objectSelection");
