@@ -39,26 +39,37 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+ 
+#ifndef ANALYSIS_ANALYSISCREATOR_HPP 
+#define ANALYSIS_ANALYSISCREATOR_HPP
 
-#include <cstdio>
-#include <cstring>
-
-#include "types/AnalysisStamp.hpp"
+#include <string>
+//#include "optimization/Method.hpp"
 
 namespace OpenMD {
-  AnalysisStamp::AnalysisStamp() {
-    DefineParameter(Type, "analysisType");
 
-    DefineOptionalParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(ObjectSelection, "objectSelection");
-  }
+  class AnalysisMethod;
+  class SimInfo;
   
-  AnalysisStamp::~AnalysisStamp() {    
-  }
+  class AnalysisCreator {
+  public:
+    AnalysisCreator(const std::string& ident) : ident_(ident) {}
+    virtual ~AnalysisCreator() {}    
+    const std::string& getIdent() const { return ident_; }    
+    //virtual QuantLib::AnalysisMethod* create() const = 0;
+    
+  private:
+    std::string ident_;
+  };
   
-  void AnalysisStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Analysis"));
-    CheckParameter(MolIndex, isNonNegative());
-  }
+  template<class ConcreteAnalysis>
+  class AnalysisBuilder : public AnalysisCreator {
+  public:
+    AnalysisBuilder(const std::string& ident) : AnalysisCreator(ident) {}
+    //virtual  QuantLib::AnalysisMethod* create() const {return new ConcreteAnalysis();}
+  };
+  
 }
+
+#endif //ANALYSIS_ANALYSISCREATOR_HPP
+

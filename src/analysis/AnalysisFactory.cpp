@@ -39,26 +39,66 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-
-#include <cstdio>
-#include <cstring>
-
-#include "types/AnalysisStamp.hpp"
+ 
+#include "analysis/AnalysisFactory.hpp"
+#include "analysis/AnalysisCreator.hpp"
 
 namespace OpenMD {
-  AnalysisStamp::AnalysisStamp() {
-    DefineParameter(Type, "analysisType");
 
-    DefineOptionalParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(ObjectSelection, "objectSelection");
+  //initialize instance of AnalysisFactory
+  AnalysisFactory* AnalysisFactory::instance_ = NULL;
+
+  AnalysisFactory::~AnalysisFactory() {
+    CreatorMapType::iterator i;
+    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+      delete i->second;
+    }
+    creatorMap_.clear();
   }
-  
-  AnalysisStamp::~AnalysisStamp() {    
+
+  bool AnalysisFactory::registerAnalysis(AnalysisCreator* creator) {
+    return creatorMap_.insert(
+			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
   }
-  
-  void AnalysisStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Analysis"));
-    CheckParameter(MolIndex, isNonNegative());
+
+  bool AnalysisFactory::unregisterAnalysis(const std::string& id) {
+    return creatorMap_.erase(id) == 1;
   }
+
+  /* QuantLib::AnalysisMethod* AnalysisFactory::createAnalysis(const std::string& id, SimInfo* info) {
+    CreatorMapType::iterator i = creatorMap_.find(id);
+    if (i != creatorMap_.end()) {
+      //invoke functor to create object
+      return (i->second)->create();
+    } else {
+      return NULL;
+    }
+  }
+  */
+  std::vector<std::string> AnalysisFactory::getIdents() {
+    IdentVectorType idents;
+    CreatorMapType::iterator i;
+
+    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+      idents.push_back(i->first);
+    }
+    
+    return idents;
+  }
+
+  std::ostream& operator <<(std::ostream& o, AnalysisFactory& factory) {
+    AnalysisFactory::IdentVectorType idents;
+    AnalysisFactory::IdentVectorIterator i;
+
+    idents = factory.getIdents();
+
+    o << "Avaliable type identifiers in this factory: " << std::endl;
+    for (i = idents.begin(); i != idents.end(); ++i) {
+      o << *i << std::endl;
+    }
+
+    return o;
+  }
+
 }
+
