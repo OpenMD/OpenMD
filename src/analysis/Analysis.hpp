@@ -39,27 +39,42 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#ifndef BRAINS_REGISTER_HPP 
-#define BRAINS_REGISTER_HPP
+#ifndef INTEGRATORS_ANALYSIS_HPP
+#define INTEGRATORS_ANALYSIS_HPP
+#include "brains/SimInfo.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include <iostream>
 
+using namespace std;
 namespace OpenMD {
 
-  /** Register all integrators*/
-  void registerIntegrators();
+  /**
+   * @class Analysis Analysis.hpp "analysis/Analysis.hpp"
+   * @brief 
+   *     
+   * Analysis is a light-weight class which performs on-the-fly analytics of 
+   * a system. This class acts as an interface for  users to specify analysis 
+   * modules to be computed while the simulation is running, as opposed to 
+   * post-processing methods traditionally done from the (.dump) file at the 
+   * end of the simulation.
+   */
 
-  /** Register all optimizers */
-  void registerOptimizers();
+  class Analysis {
+  public:
+    Analysis(SimInfo* info);
+    virtual ~Analysis();
 
-  /** Register all lattice */
-  void registerLattice();
+    // member functions to be overriden
+    virtual void processFrame()=0;
+    virtual void processStuntDouble()=0;
+    
 
-  /** Register all analysis */
-  void registerAnalysis();
-
-  /** register force fields, integrators and optimizers */
-  void registerAll();
-
+  private:
+    SimInfo* info_;
+    
+  
+    
+  };
 }
-#endif
-
+#endif //INTEGRATORS_ANALYSIS_HPP

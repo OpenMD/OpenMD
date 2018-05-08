@@ -29,6 +29,7 @@ tokens
   MOLECULE          = "molecule";
   ZCONSTRAINT       = "zconstraint";
   RESTRAINT         = "restraint";
+  ANALYSIS          = "analysis";
   ATOM              = "atom";
   BOND              = "bond";
   BEND              = "bend";
@@ -79,6 +80,7 @@ statement : assignment
     | moleculeblock
     | zconstraintblock
     | restraintblock
+    | analysisblock
     | flucqblock
     | rnemdblock
     | minimizerblock
@@ -104,6 +106,10 @@ zconstraintblock  : ZCONSTRAINT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(
 
 restraintblock  : RESTRAINT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
                   ;
+
+analysisblock  : ANALYSIS^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+                  ;
+
 
 flucqblock  : FLUCQ^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;

@@ -39,6 +39,7 @@ statement : assignment
     | moleculeblock
     | zconstraintblock
     | restraintblock
+    | analysisblock
     | flucqblock
     | rnemdblock
     | minimizerblock
@@ -82,6 +83,11 @@ zconstraintblock  : #(ZCONSTRAINT {ZConsStamp* currZConsStamp = new ZConsStamp()
 restraintblock  : #(RESTRAINT {RestraintStamp* currRestraintStamp = new RestraintStamp(); blockStack.push(currRestraintStamp);}
             (assignment)* 
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRestraintStamp(currRestraintStamp);}
+    ;
+
+analysisblock  : #(ANALYSIS {AnalysisStamp* currAnalysisStamp = new AnalysisStamp(); blockStack.push(currAnalysisStamp);}
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addAnalysisStamp(currAnalysisStamp);}
     ;
 
 flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new FluctuatingChargeParameters(); blockStack.push(flucQpars);}

@@ -51,6 +51,7 @@ public:
 	public: void moleculeblock();
 	public: void zconstraintblock();
 	public: void restraintblock();
+	public: void analysisblock();
 	public: void flucqblock();
 	public: void rnemdblock();
 	public: void minimizerblock();
@@ -93,10 +94,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 80;
+	static const int NUM_TOKENS = 81;
 #else
 	enum {
-		NUM_TOKENS = 80
+		NUM_TOKENS = 81
 	};
 #endif
 	

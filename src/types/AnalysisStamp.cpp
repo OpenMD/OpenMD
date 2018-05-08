@@ -39,27 +39,26 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
-#ifndef BRAINS_REGISTER_HPP 
-#define BRAINS_REGISTER_HPP
+
+#include <cstdio>
+#include <cstring>
+
+#include "types/AnalysisStamp.hpp"
 
 namespace OpenMD {
+  AnalysisStamp::AnalysisStamp() {
+    DefineParameter(Type, "restraintType");
 
-  /** Register all integrators*/
-  void registerIntegrators();
-
-  /** Register all optimizers */
-  void registerOptimizers();
-
-  /** Register all lattice */
-  void registerLattice();
-
-  /** Register all analysis */
-  void registerAnalysis();
-
-  /** register force fields, integrators and optimizers */
-  void registerAll();
-
+    DefineOptionalParameter(MolIndex, "molIndex");
+    DefineOptionalParameter(ObjectSelection, "objectSelection");
+  }
+  
+  AnalysisStamp::~AnalysisStamp() {    
+  }
+  
+  void AnalysisStamp::validate() {
+    DataHolder::validate();
+    CheckParameter(Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Molecular"));
+    // CheckParameter(MolIndex, isNonNegative());
+  }
 }
-#endif
-

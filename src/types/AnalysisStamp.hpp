@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,26 +40,19 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef BRAINS_REGISTER_HPP 
-#define BRAINS_REGISTER_HPP
+#ifndef TYPES_ANALYSISSTAMP_HPP
+#define TYPES_ANALYSISSTAMP_HPP
 
+#include "types/DataHolder.hpp"
 namespace OpenMD {
-
-  /** Register all integrators*/
-  void registerIntegrators();
-
-  /** Register all optimizers */
-  void registerOptimizers();
-
-  /** Register all lattice */
-  void registerLattice();
-
-  /** Register all analysis */
-  void registerAnalysis();
-
-  /** register force fields, integrators and optimizers */
-  void registerAll();
-
+  class AnalysisStamp : public DataHolder {
+    DeclareParameter(Type, std::string);
+    DeclareParameter(ObjectSelection, std::string);
+    DeclareParameter(MolIndex, int);
+  public:
+    AnalysisStamp();
+    virtual ~AnalysisStamp();
+    virtual void validate();
+  };
 }
 #endif
-

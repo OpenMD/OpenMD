@@ -88,6 +88,7 @@ struct CUSTOM_API MDTreeParserTokenTypes {
 		HEX_DIGIT = 77,
 		EXPONENT = 78,
 		FLOAT_SUFFIX = 79,
+		ANALYSIS = 80,
 		NULL_TREE_LOOKAHEAD = 3
 	};
 #ifdef __cplusplus

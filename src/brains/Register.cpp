@@ -73,6 +73,11 @@
 #include "lattice/SCLattice.hpp"
 #include "lattice/BCCLattice.hpp"
 
+// Do we still want to use a Factory to create and Register?
+#include "analysis/AnalysisFactory.hpp"
+#include "analysis/AnalysisCreator.hpp"
+
+
 using namespace QuantLib;
 namespace OpenMD {
 
@@ -107,6 +112,9 @@ namespace OpenMD {
     LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
     LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<SCLattice>("SC"));
     LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<BCCLattice>("BCC"));
+  }
+
+  void registerAnalysis() {
   }
 
   void registerAll() {

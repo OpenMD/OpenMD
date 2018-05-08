@@ -54,6 +54,7 @@
 #include "types/ZconsStamp.hpp"
 #include "types/RestraintStamp.hpp"
 #include "types/MoleculeStamp.hpp"
+#include "types/AnalysisStamp.hpp"
 #include "flucq/FluctuatingChargeParameters.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
@@ -142,6 +143,7 @@ namespace OpenMD {
     DeclareParameter(MTM_R, RealType);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
+    DeclareParameter(UseAnalysis, bool);
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
@@ -149,7 +151,7 @@ namespace OpenMD {
     DeclareParameter(UniformGradientStrength, RealType );
     DeclareParameter(UniformGradientDirection1, std::vector<RealType> );
     DeclareParameter(UniformGradientDirection2, std::vector<RealType> );
-
+        
     DeclareParameter(ElectricField, std::vector<RealType> );
     DeclareParameter(ConstraintTime, RealType);
 
@@ -161,6 +163,7 @@ namespace OpenMD {
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);
     bool addRestraintStamp(RestraintStamp* rest);
+    bool addAnalysisStamp(AnalysisStamp* analysis);
     bool addMoleculeStamp(MoleculeStamp* molStamp);
     int getNComponents() {return components_.size();}
     std::vector<Component*> getComponents() {return components_;}
@@ -174,6 +177,10 @@ namespace OpenMD {
     std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
     RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}
 
+    int getNAnalysisStamps() {return analysis_.size();}
+    std::vector<AnalysisStamp*> getAnalysisStamps() {return analysis_;}
+    AnalysisStamp* getAnalysisStampAt(int index) {return analysis_.at(index);}
+    
     bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
     FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
 
@@ -196,6 +203,7 @@ namespace OpenMD {
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;
     std::vector<RestraintStamp*> restraints_;
+    std::vector<AnalysisStamp*> analysis_;
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;

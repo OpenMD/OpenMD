@@ -185,6 +185,9 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
 
     DefineOptionalParameterWithDefaultValue(PrivilegedAxis,"privilegedAxis","z");
+    DefineOptionalParameterWithDefaultValue(UseAnalysis, "useAnalysis",
+					    false);
+
 
     deprecatedKeywords_.insert("nComponents");
     deprecatedKeywords_.insert("nZconstraints");
@@ -209,6 +212,7 @@ namespace OpenMD {
     MemoryUtils::deletePointers(components_);
     MemoryUtils::deletePointers(zconstraints_);
     MemoryUtils::deletePointers(restraints_);
+    MemoryUtils::deletePointers(analysis_);
     delete flucQpars_;
     delete rnemdPars_;
     delete minimizerPars_;
@@ -310,6 +314,11 @@ namespace OpenMD {
 
   bool Globals::addRestraintStamp(RestraintStamp* rest) {
     restraints_.push_back(rest);
+    return true;
+  }
+
+  bool Globals::addAnalysisStamp(AnalysisStamp* analysis) {
+    analysis_.push_back(analysis);
     return true;
   }
 
