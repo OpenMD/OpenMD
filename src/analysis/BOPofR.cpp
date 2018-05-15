@@ -56,10 +56,8 @@
 using namespace MATPACK;
 namespace OpenMD {
 
-  BOPofR::BOPofR(SimInfo* info, 
-                 const std::string& sele)
-    : NonSpatialStatistics(info, sele, nbins),  
-      seleMan_(info), evaluator_(info) {
+  BOPofR::BOPofR(SimInfo* info) : NonSpatialStatistics(info, sele, nbins),
+				  SingletType() {
     
     string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".bo");
@@ -333,7 +331,7 @@ namespace OpenMD {
   FCCOfR::FCCOfR(SimInfo* info, 
                  const std::string& sele, double rCut, 
                  unsigned int nbins, RealType len) :
-    BOPofR(info, sele, rCut, nbins, len) {
+    BOPofR(info) {
     setAnalysisType("FCC Bond Order Parameter(r)");
   }
   

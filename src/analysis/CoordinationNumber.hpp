@@ -47,6 +47,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -64,12 +65,10 @@ namespace OpenMD {
    *   \param sele1 selection of StuntDoubles used for the distribution
    *   \param sele2 selection of StuntDoubles used for nearest neighbor computation
    */
-  class CoordinationNumber : public NonSpatialStatistics {
+  class CoordinationNumber : public NonSpatialStatistics, public DoubletType {
     
   public:
-    CoordinationNumber(SimInfo* info,
-                       const std::string& sele1, const std::string& sele2,
-                       RealType rCut, int bins);
+    CoordinationNumber(SimInfo* info);
 
     virtual ~CoordinationNumber();
     virtual void processFrame(int frame);
@@ -77,18 +76,17 @@ namespace OpenMD {
     virtual void processHistogram();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
+    void setRCut(RealType rcut) { rCut_ = rcut; }
+    // more with nbins later..
+    void setNBins(unsigned int nbins) { bins_ = nbins; }
+
+    RealType getRCut() { return rCut_; }
+    int getNBins() { return bins_; }
+
   protected:
     virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
     RealType rCut_;
     int bins_;
-    
-    std::string sele1_;
-    SelectionManager seleMan1_;
-    SelectionEvaluator evaluator1_;
-
-    std::string sele2_;
-    SelectionManager seleMan2_;
-    SelectionEvaluator evaluator2_;
 
     int selectionCount1_;
     int selectionCount2_;

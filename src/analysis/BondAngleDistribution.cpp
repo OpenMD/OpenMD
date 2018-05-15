@@ -54,11 +54,8 @@
 using namespace std;
 namespace OpenMD {
 
-  BondAngleDistribution::BondAngleDistribution(SimInfo* info, 
-                                               const string& sele, 
-                                               double rCut, int nbins) 
-    : NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), seleMan_(info), 
-      evaluator_(info) {
+  BondAngleDistribution::BondAngleDistribution(SimInfo* info) 
+    : NonSpatialStatistics(info, sele, nbins), SingletType() {
 
     setAnalysisType("Bond Angle Distribution");
     string prefixFileName = info_->getPrefixFileName();
@@ -69,9 +66,6 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
     
-    // Set up cutoff radius:
-
-    rCut_ = rCut;
 
     std::stringstream params;
     params << " rcut = " << rCut_

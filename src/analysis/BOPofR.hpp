@@ -52,15 +52,15 @@
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "brains/Thermo.hpp"
 #include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 
-  class BOPofR : public NonSpatialStatistics{
+  class BOPofR : public NonSpatialStatistics, public SingletType {
   public:
-    BOPofR(SimInfo* info, 
-           const std::string& sele);
+    BOPofR(SimInfo* info);
     
     virtual ~BOPofR();
     virtual void processFrame(int frame);
@@ -81,10 +81,6 @@ namespace OpenMD {
 
     OutputData* WofR;
     OutputData* QofR;
-    
-    std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
             
     RealType rCut_;
     static const int lMax_ = 6;

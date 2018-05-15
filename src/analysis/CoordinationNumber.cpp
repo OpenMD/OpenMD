@@ -50,13 +50,8 @@
 
 namespace OpenMD {
 
-  CoordinationNumber::CoordinationNumber(SimInfo* info,
-					 const std::string& sele1,
-                                         const std::string& sele2,
-                                         RealType rCut, int bins):
-    NonSpatialStatistics(info, sele1, sele2, bins), rCut_(rCut), bins_(bins),
-    sele1_(sele1), seleMan1_(info), evaluator1_(info),
-    sele2_(sele2), seleMan2_(info), evaluator2_(info) {
+  CoordinationNumber::CoordinationNumber(SimInfo* info):
+    NonSpatialStatistics(info, sele1, sele2, bins), DoubletType() {
 
     setAnalysisType("Coordination Number Distribution");
     string prefixFileName = info->getPrefixFileName();

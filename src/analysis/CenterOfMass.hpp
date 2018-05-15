@@ -46,7 +46,7 @@
 using namespace std;
 namespace OpenMD {
   
-  class CenterOfMass : public SequentialAnalyzer{
+  class CenterOfMass : public SequentialAnalyzer, public DoubletType {
   public:
     CenterOfMass(SimInfo* info, const std::string& filename, 
                  const std::string& sele1, const std::string& sele2);

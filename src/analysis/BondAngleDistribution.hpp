@@ -49,6 +49,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "math/Vector3.hpp"
@@ -64,25 +65,28 @@ namespace OpenMD {
    *  Comptes bond angle distribution for nearest neighbors.
    *BondAngleDistribution
    */
-  class BondAngleDistribution : public NonSpatialStatistics{
+  class BondAngleDistribution : public NonSpatialStatistics,
+				public SingletType {
   public:
-    BondAngleDistribution(SimInfo* info, 
-                       const std::string& sele, double rCut, int nbins);
+    BondAngleDistribution(SimInfo* info);
     
     virtual ~BondAngleDistribution();
     void processFrame(int istep);
     void writeOutput();
 
+    
+    void setRCut(RealType rcut) { rCut_ = rcut; }
+    //More in nbins later..
+    void setNBins(unsigned int nbins) { nBins_ = nbins;}
+
+    RealType getRCut() { return rCut_; }
+    
   protected:
     OutputData* bonds;
     
   private:       
     void processStuntDouble(StuntDouble* sd, int bin);
 
-    std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
-            
     RealType rCut_;
     int frameCounter_;
     int nBins_;
