@@ -38,3 +38,36 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+#include "analysis/InteractionType.hpp"
+
+namespace OpenMD {
+  
+  InteractionType::InteractionType() {}
+  InteractionType::~InteractionType() {}
+
+  
+  SingletType::SingletType() : InteractionType() {
+    //Could pass info and call set functions in constructor? or external?
+  }
+  SingletType::~SingletType() {}
+
+  
+  DoubletType::DoubletType() : InteractionType() {
+    //Could pass info and call set functions in constructor? or external?
+  }
+  DoubletType::~DoubletType() {}
+
+
+  PairType::PairType() : InteractionType() {
+    //Could pass info and call set functions in constructor? or external?
+  }
+  PairType::~PairType() {}
+
+  
+  TripletType::TripletType() : InteractionType() {
+    //Could pass info and call set functions in constructor? or external?
+  }
+  TripletType::~TripletType() {}
+
+}
+    

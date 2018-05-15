@@ -55,13 +55,8 @@
 namespace OpenMD {
 
   TetrahedralityHBMatrix::TetrahedralityHBMatrix(SimInfo* info, 
-                                                 const std::string& sele,
-                                                 double rCut, double OOcut,
-                                                 double thetaCut, double OHcut,
                                                  int nbins) : 
-    NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), 
-    seleMan_(info), evaluator_(info), rCut_(rCut),  OOCut_(OOcut),
-    thetaCut_(thetaCut), OHCut_(OHcut) {
+    NonSpatialStatistics(info, sele, nbins), SingletType() {
 
     setAnalysisType("Tetrahedrality HBond Matrix");
     string prefixFileName = info->getPrefixFileName();

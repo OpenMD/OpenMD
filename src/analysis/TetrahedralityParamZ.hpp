@@ -46,6 +46,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/SpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -78,32 +79,27 @@ namespace OpenMD {
    *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParamZ : public SlabStatistics{
+  class TetrahedralityParamZ : public SlabStatistics, public DoubletType(){
   public:
     TetrahedralityParamZ(SimInfo* info, 
                          const std::string& sele1, const std::string& sele2, 
                          double rCut, int nzbins, int axis=2);
-    int getNZBins(){
-      return nZBins_;
-    }
-
+    
     virtual ~TetrahedralityParamZ();
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
+
+    void setNZBins(unsigned int nbins) { nZBins_ = nbins; }
+    void setRCut(RealType rcut) { rCut_ = rcut; }
+    void setAxis(unsigned int axis) { axis_ = axis; }
     
+    int getNZBins() { return nZBins_; }
+    RealType getRCut() { return rCut_;}
+    int getAxis() { return axis_; }
     
   protected:
     OutputData* tetrahedrality;
 
-    std::string selectionScript1_;
-    std::string selectionScript2_;
-    SelectionManager seleMan1_;
-    SelectionManager seleMan2_;
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
-    RealType rCut_;
-    int nZBins_;
-    int axis_;
     std::string axisLabel_;
   };
 }

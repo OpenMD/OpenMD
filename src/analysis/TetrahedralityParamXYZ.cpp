@@ -52,16 +52,8 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamXYZ::TetrahedralityParamXYZ(SimInfo* info,
-                                                 const std::string& sele1,
-                                                 const std::string& sele2,
-                                                 RealType rCut, 
-                                                 RealType voxelSize,
-                                                 RealType gaussWidth) 
-    : NonSpatialStatistics(info, sele1, sele2, 1), 
-      selectionScript1_(sele1), selectionScript2_(sele2), 
-      seleMan1_(info),  seleMan2_(info), evaluator1_(info), evaluator2_(info),
-      rCut_(rCut), voxelSize_(voxelSize), gaussWidth_(gaussWidth) {
+  TetrahedralityParamXYZ::TetrahedralityParamXYZ(SimInfo* info) 
+    : NonSpatialStatistics(info, sele1, sele2, 1), DoubletType() {
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {

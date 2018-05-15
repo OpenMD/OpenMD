@@ -54,9 +54,8 @@
 namespace OpenMD {
 
      
-  RhoR::RhoR(SimInfo* info, const std::string& sele, RealType len, int nrbins, RealType particleR)
-    : ShellStatistics(info, sele, nrbins), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len) {
-    
+  RhoR::RhoR(SimInfo* info) : ShellStatistics(info, sele, nrbins),
+			      SingletType() {    
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {

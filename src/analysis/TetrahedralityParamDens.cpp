@@ -52,13 +52,8 @@
 using namespace std;
 namespace OpenMD {
   TetrahedralityParamDens::TetrahedralityParamDens(SimInfo* info,  
-						   const std::string& sele1,
-						   const std::string& sele2,
 						   double rCut, int ndensbins) 
-    : NonSpatialStatistics(info, sele1, sele2, ndensbins), 
-      selectionScript1_(sele1), selectionScript2_(sele2), 
-      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info), 
-      rCut_(rCut) {
+    : NonSpatialStatistics(info, sele1, sele2, ndensbins), DoubletType() {
     
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {

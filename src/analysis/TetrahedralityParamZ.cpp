@@ -51,12 +51,8 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info,   
-                                             const std::string& sele1,
-                                             const std::string& sele2,
-                                             double rCut, int nzbins, int axis) 
-    : SlabStatistics(info, sele1, sele2, nzbins, axis) : Doublet(), 
-      axis_(axis) {
+  TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info) 
+    : SlabStatistics(info, sele1, sele2, nzbins, axis) : DoubletType() {
 
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".Qz");
@@ -70,8 +66,6 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
     
-    // Set up cutoff radius:    
-    rCut_ = rCut;
 
     tetrahedrality = new OutputData;
     tetrahedrality->units =  "Unitless";
@@ -162,7 +156,8 @@ namespace OpenMD {
       
       // Use only the 4 closest neighbors to do the rest of the work:
       
-      int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      //int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nbors = myNeighbors.size();
       int nang = int (0.5 * (nbors * (nbors - 1)));
       
       rk = sd->getPos();
@@ -190,7 +185,7 @@ namespace OpenMD {
           
 	  // Calculates scaled Qk for each molecule using calculated
 	  // angles from 4 or fewer nearest neighbors.
-	  Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
+	  Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 9.0 / (4.0 * nang) );         
 	}
       }
       

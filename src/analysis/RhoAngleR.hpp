@@ -42,6 +42,7 @@
 #define ANALYSIS_ANGLER_HPP
 
 #include "analysis/RadialDistrFunc.hpp"
+#include "analysis/InteractionType.hpp"
 namespace OpenMD {
 
   class AngleR : public ShellStatistics {

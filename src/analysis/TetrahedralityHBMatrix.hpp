@@ -44,6 +44,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -71,24 +72,29 @@ namespace OpenMD {
    *    liquid water," by J.R. Errington and P.G. Debenedetti, Nature
    *    409, pp. 318-321 (2001).
    */
-  class TetrahedralityHBMatrix : public NonSpatialStatistics{
+  class TetrahedralityHBMatrix : public NonSpatialStatistics,
+				 public SingletType {
   public:
-    TetrahedralityHBMatrix(SimInfo* info, 
-                           const std::string& sele, double rCut, double OOCut,
-                           double thetaCut, double OHCut, int nbins);
+    TetrahedralityHBMatrix(SimInfo* info, int nbins);
     
     virtual ~TetrahedralityHBMatrix();
     virtual void processFrame(int frame);
+
+    void setRCut(RealType rcut) { rCut_ = rcut; }
+    void setOOCut(RealType oocut) { OOCut_ = oocut; }
+    void setThetaCut(RealType thetacut) { thetaCut_ = thetacut; }
+    void setOHCut(RealType ohcut) { OHCut_ = ohcut; }
+
+    RealType getRCut() { return rCut_; }
+    RealType getOOCut() { return OOCut_; }
+    RealType getThetaCut() { return thetaCut_; }
+    RealType getOHCut() { return OHCut_; }
     
   private:
     virtual void initializeHistogram();
     virtual void collectHistogram(RealType q1, RealType q2);    
     void writeOutput();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-
-    std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
             
     RealType rCut_;
     RealType OOCut_;

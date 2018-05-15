@@ -51,37 +51,33 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/SpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 
 namespace OpenMD {
   
-  class RhoZ : public SlabStatistics {
+  class RhoZ : public SlabStatistics, public SingletType {
     
   public:
-    RhoZ(SimInfo* info, const std::string& sele, int nzbins, int axis=2);
-    
-    int getNZBins() {
-      return nZBins_; 
-    }
-    
+    RhoZ(SimInfo* info);
+        
     virtual void processFrame(int frame);
     virtual ~RhoZ();
     virtual void processStuntDouble(StuntDouble* sd, int bin);
-
+    
+    void setNZBins(unsigned int nzbins) { nZBins_ = nzbins; }
+    void setAxis(unsigned int axis) { axis_ = axis; }
+    
+    int getNZBins() { return nZBins_; }
+    int getAxis() { return axis_; }
+    
   protected:
     OutputData* density;
     
   private:
-    
     int nProcessed_;
-    std::string selectionScript_;
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
-    
     int nZBins_; 
-    
     int axis_;
     std::string axisLabel_;
-
     bool usePeriodicBoundaryConditions_;
   };
   

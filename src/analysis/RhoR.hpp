@@ -44,25 +44,25 @@
 
 #include "analysis/RadialDistrFunc.hpp"
 #include "analysis/SpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 namespace OpenMD {
 
-  class RhoR : public ShellStatistics {
+  class RhoR : public ShellStatistics, public SingletType {
     
   public:
 
-    RhoR(SimInfo* info, const std::string& sele, RealType  len, 
-	 int nrbins, RealType particleR);
+    RhoR(SimInfo* info);
 
-    int getNRBins() {
-      return nRBins_; 
-    }
-
-    RealType getLength() {
-      return len_;
-    }
-        
     virtual void processFrame(int frame);
     virtual ~RhoR();
+
+    void setNRBins(unsigned int nrbins) { nRBins_ = nrbins; }
+    void setLen(RealType len) { len_ = len; }
+    void setParticleR(RealType particleR) { particleR_ = particleR; }
+    
+    int getNRBins() { return nRBins_; }
+    RealType getLength() { return len_; }
+    RealType getParticleR() { return particleR_; }
     
   private:
 
@@ -71,13 +71,7 @@ namespace OpenMD {
 
     virtual void processStuntDouble(StuntDouble* sd, int bin);
     
-
     int nProcessed_;
-    std::string selectionScript_;
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
-
-
 
     RealType len_;
     int nRBins_;

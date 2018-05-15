@@ -52,23 +52,15 @@
 
 namespace OpenMD {
 
-  TetrahedralityParam::TetrahedralityParam(SimInfo* info,  
-                                           const std::string& sele,
-                                           double rCut, int nbins) : 
-    NonSpatialStatistics(info, sele, nbins), selectionScript_(sele), 
-    seleMan_(info), evaluator_(info) {
+  TetrahedralityParam::TetrahedralityParam(SimInfo* info) : 
+    NonSpatialStatistics(info, sele, nbins), SingletType() {
 
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".q");
     
-    evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-
-    // Set up cutoff radius:
-
-    rCut_ = rCut;
 
     Q_histogram_.resize(nBins_);
     Distorted_.clear();
@@ -155,9 +147,9 @@ namespace OpenMD {
       // Sort the vector using predicate and std::sort
       std::sort(myNeighbors.begin(), myNeighbors.end());
       
-      // Use only the 4 closest neighbors to do the rest of the work:
-      
-      int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      // Use only the 4 closest neighbors to do the rest of the work: 
+      //int nbors =  myNeighbors.size()> 4 ? 4 : myNeighbors.size();
+      int nbors = myNeighbors.size();
       int nang = int (0.5 * (nbors * (nbors - 1)));
       
       rk = sd->getPos();
@@ -185,7 +177,7 @@ namespace OpenMD {
 	  
 	  // Calculates scaled Qk for each molecule using calculated
 	  // angles from 4 or fewer nearest neighbors.
-	  Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);
+	  Qk = Qk - (pow(cospsi + 1.0 / 3.0, 2) * 9.0 / (4.0 * nang) );
 	}
       }
       if (nang > 0) {

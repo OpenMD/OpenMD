@@ -46,6 +46,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -78,29 +79,26 @@ namespace OpenMD {
    *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParamDens : public NonSpatialStatistics{
+  class TetrahedralityParamDens : public NonSpatialStatistics,
+				  public DoubletType {
   public:
-    TetrahedralityParamDens(SimInfo* info, 
-			    const std::string& sele1, const std::string& sele2, 
-			    double rCut, int ndensbins);
-
-    int getNDensBins(){
-      return nDensBins_;
-    }
+    TetrahedralityParamDens(SimInfo* info);
 
     virtual ~TetrahedralityParamDens();
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
+
+
+    void setNDensBins(unsigned int nbins) { nDensBins_ = nbins; }
+    void setRCut(RealType rCut) { rCut_ = rCut; }
+    
+    int getNDensBins() { return nDensBins_; }
+    RealType getRCut() { return rCut_; }
+
     
   private:
     void writeOutput();
 
-    std::string selectionScript1_;
-    std::string selectionScript2_;
-    SelectionManager seleMan1_;
-    SelectionManager seleMan2_;
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
     RealType rCut_;
     int nDensBins_;
     RealType MinQ_;

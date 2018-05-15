@@ -46,6 +46,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -78,25 +79,25 @@ namespace OpenMD {
    *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParamXYZ : public NonSpatialStatistics{
+  class TetrahedralityParamXYZ : public NonSpatialStatistics,
+				 public DoubletType {
   public:
-    TetrahedralityParamXYZ(SimInfo* info, 
-                           const std::string& sele1, const std::string& sele2, 
-                           RealType rCut, RealType voxelSize, RealType gaussWidth);
+    TetrahedralityParamXYZ(SimInfo* info);
 
     virtual ~TetrahedralityParamXYZ();
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
+
+    void setRCut(RealType rcut) { rCut_ = rcut; }
+    void setVoxelSize(RealType voxelSize) { voxelSize_ = voxelSize; }
+    void setGaussWidth(RealType gaussWidth) { gaussWidth_ = gaussWidth; }
+
+    RealType getRCut() { return rCut_; }
+    RealType getVoxelSize() { return voxelSize_; }
+    RealType getGaussWidth() { return gaussWidth_; }
     
   private:
     void writeOutput();
-
-    std::string selectionScript1_;
-    std::string selectionScript2_;
-    SelectionManager seleMan1_;
-    SelectionManager seleMan2_;
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
 
     RealType rCut_;
     RealType voxelSize_;

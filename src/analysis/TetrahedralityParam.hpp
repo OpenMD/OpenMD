@@ -49,6 +49,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
+#include "analysis/InteractionType.hpp"
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
@@ -80,23 +81,23 @@ namespace OpenMD {
    *    arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParam : public NonSpatialStatistics{
+  class TetrahedralityParam : public NonSpatialStatistics,
+			      public SingletType {
   public:
-    TetrahedralityParam(SimInfo* info, 
-			const std::string& sele, double rCut, int nbins);
+    TetrahedralityParam(SimInfo* info);
     
     virtual ~TetrahedralityParam();
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
+
+    void setRCut(double rCut) { rCut_ = rCut; }
+    void setNBins(int nbins) { nBins_ = nbins; }
     
   private:
     virtual void initializeHistogram();
     virtual void collectHistogram(RealType Qk);    
     void writeOutput();
 
-    std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;
     bool usePeriodicBoundaryConditions_;
             
     RealType rCut_;

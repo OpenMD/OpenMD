@@ -54,10 +54,8 @@
 #include "primitives/Molecule.hpp"
 namespace OpenMD {
   
-  RhoZ::RhoZ(SimInfo* info, 
-	     const std::string& sele, int nzbins, int axis)
-    : SlabStatistics(info, sele, nzbins, axis), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info), axis_(axis) {
+  RhoZ::RhoZ(SimInfo* info)
+    : SlabStatistics(info, sele, nzbins, axis), SingletType() {
 
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".RhoZ");
