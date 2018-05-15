@@ -38,43 +38,47 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
  */
-#ifndef ANALYSIS_ANGLER_HPP
-#define ANALYSIS_ANGLER_HPP
 
-#include "analysis/RadialDistrFunc.hpp"
-#include "analysis/NonSpatialStatistics.hpp"
-#include "analysis/InteractionType.hpp"
+#ifndef ANALYSIS_QLLTHICKNESS1_HPP
+#define ANALYSIS_QLLTHICKNESS1_HPP
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "analysis/SequentialAnalyzer.hpp"
+#include "math/Vector3.hpp"
+
 namespace OpenMD {
 
-  class AngleR : public NonSpatialStatistics, public SingletType {
+  /**
+   * @class QLLThickness1
+   * @brief QLLThickness1
+   *
+   * Computes the thickness of the QLL as determined by the local tetrahedral 
+   * order parameter Q as introduced in:
+   *
+   * "The Thickness of a Liquid Layer on the Free Surface of Ice as Obtained
+   * From Computer Simulation" by M. Conde, C. Vega, and A. Patrykiejew
+   * J. Chem. Phys, 2008, 129 (014702).
+   *
+   * The threshold q value (q_t) has the default of that for the 
+   * TIP4P/Ice model, q_t = 0.9076 as determined by Conde2008.
+   *
+   */
+  class QLLThickness1 : public SequentialAnalyzer{
+  public:
+    QLLThickness1(SimInfo* info, const std::string& filename, 
+                         const std::string& sele1, const std::string& sele2, 
+                         double rCut, RealType qt=0.9076);
     
-  public:    
-    AngleR(SimInfo* info, const std::string& sele, RealType len, 
-           int nrbins);
-
-    virtual ~AngleR();
-    virtual void processFrame(int frame);
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
-
-    void setNRBins(unsigned int nrbins) { nRBins_ = nrbins; }
-    void setLength(RealType len) { len_ = len; } 
-    
-    int getNRBins() { return nRBins_; }
-    RealType getLength() { return len_; }
-
-    
-  protected:
-    OutputData* angleR;
+    virtual ~QLLThickness1();
+    virtual void doFrame(int frame);
     
   private:
-    void writeOutput();
-
-    RealType len_;
-    int nRBins_;
-    RealType deltaR_;
-
+    RealType rCut_;
+    RealType qt_;
+    unsigned int nLiquid_;
   };
-
 }
 #endif
+

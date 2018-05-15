@@ -57,24 +57,19 @@ using namespace MATPACK;
 namespace OpenMD {
 
   BOPofR::BOPofR(SimInfo* info, 
-                 const std::string& sele, double rCut, unsigned int nbins, 
-                 RealType len) : NonSpatialStatistics(info, sele, nbins), 
-                                 selectionScript_(sele), 
-                                 seleMan_(info), evaluator_(info) {
-
+                 const std::string& sele)
+    : NonSpatialStatistics(info, sele, nbins),  
+      seleMan_(info), evaluator_(info) {
+    
     string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".bo");
     setAnalysisType("Bond Order Parameter(r)");
 
+    // need to deal with evaluator_
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
-    // Set up cutoff radius and order of the Legendre Polynomial:
-    
-    rCut_ = rCut;
-    len_ = len;
     
     std::stringstream params;
     params << " rcut = " << rCut_

@@ -41,7 +41,7 @@
  * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
  */
  
-#include "analysis/TetrahedralityParamZ.hpp"
+#include "analysis/QLLThickness1.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -51,45 +51,21 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info,   
-                                             const std::string& sele1,
-                                             const std::string& sele2,
-                                             double rCut, int nzbins, int axis) 
-    : SlabStatistics(info, sele1, sele2, nzbins, axis) : Doublet(), 
-      axis_(axis) {
-
-    string prefixFileName = info->getPrefixFileName();
-    setOutputName(prefixFileName + ".Qz");
-    
-    evaluator1_.loadScriptString(sele1);
-    if (!evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }
-    evaluator2_.loadScriptString(sele2);
-    if (!evaluator2_.isDynamic()) {
-      seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    }
-    
-    // Set up cutoff radius:    
-    rCut_ = rCut;
-
-    tetrahedrality = new OutputData;
-    tetrahedrality->units =  "Unitless";
-    tetrahedrality->title =  "Tetrahedrality";
-    tetrahedrality->dataType = odtReal;
-    tetrahedrality->dataHandling = odhAverage;
-    tetrahedrality->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
-      tetrahedrality->accumulator.push_back( new Accumulator() );
-    data_.push_back(tetrahedrality);
-
+  QLLThickness1::QLLThickness1(SimInfo* info,  
+			     const std::string& filename, 
+			     const std::string& sele1,
+			     const std::string& sele2,
+			     double rCut, double qt) 
+    : SequentialAnalyzer(info, filename, sele1, sele2),
+      qt_(qt), rCut_(rCut) {
+        
+    setOutputName(getPrefix(filename) + ".QLLThickness1");
   }
   
-  TetrahedralityParamZ::~TetrahedralityParamZ() {
+  QLLThickness1::~QLLThickness1() {
   }
-
     
-  void TetrahedralityParamZ::processFrame(int istep) {
+  void QLLThickness1::doFrame(int frame) {
     StuntDouble* sd;
     StuntDouble* sd2;
     StuntDouble* sdi;
@@ -105,22 +81,8 @@ namespace OpenMD {
     int isd2;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    RealType z;
-    hmat_ = currentSnapshot_->getHmat();
-    for (unsigned int i = 0; i < nBins_; i++) {
-      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
-      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
-    }
-    
-    vector<RealType> zBox(nBins_, 0.0);
-    vector<RealType> sliceQ(nBins_, 0.0);
-    vector<int> sliceCount(nBins_, 0);
-
+    nLiquid_ = 0;
       
-    zBox.push_back(hmat_(axis_,axis_));
-    
-    RealType halfBoxZ = hmat_(axis_,axis_) / 2.0;      
-    
     if (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
@@ -128,6 +90,7 @@ namespace OpenMD {
     if (evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
+    
     // outer loop is over the selected StuntDoubles:
     for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
 	 sd = seleMan1_.nextSelected(isd1)) {
@@ -193,33 +156,21 @@ namespace OpenMD {
 	  Qk -=  (pow(cospsi + 1.0 / 3.0, 2) * 2.25 / nang);            
 	}
       }
-      
+      //std::cout << "nang = " << nang << "\t" << "Qk = " << Qk << "\t" << "qt_ = " << qt_ << "\t" << "nLiquid_ = " << nLiquid_ << endl;
       if (nang > 0) {
-	if (usePeriodicBoundaryConditions_)
-	  currentSnapshot_->wrapVector(rk);
-	
-	int binNo = int(nBins_ * (halfBoxZ + rk[axis_]) / hmat_(axis_,axis_));
-	sliceQ[binNo] += Qk;
-	sliceCount[binNo] += 1;
-      }  
-    }
-
-    
-    for (unsigned int i = 0; i < nBins_; i++) {
-      if (sliceCount[i] > 0) {
-        RealType tetra = sliceQ[i] / sliceCount[i];
-        dynamic_cast<Accumulator *>(tetrahedrality->accumulator[i])->add(tetra);
-	dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+	if (Qk <= qt_) {
+	  nLiquid_ = nLiquid_ + 1;
+	}
       }
-    }
-  }//processFrame
-
-  void TetrahedralityParamZ::processStuntDouble(StuntDouble* sd, int bin) {
-    // Fill in later
-  }
+      
+    }//seleMan1
+    std::cout << frame << "\t" << nLiquid_ << endl;
+    values_.push_back(nLiquid_);
+    
+  } //doFrame
   
 
-}
+}//OpenMD
 
 
 

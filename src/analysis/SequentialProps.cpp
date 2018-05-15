@@ -57,6 +57,8 @@
 #include "analysis/GCNSeq.hpp"
 #include "analysis/NanoLength.hpp"
 #include "analysis/NanoVolume.hpp"
+#include "analysis/QLLThickness1.hpp"
+#include "analysis/QLLThickness2.hpp"
 
 using namespace OpenMD;
 
@@ -203,10 +205,34 @@ int main(int argc, char* argv[]){
     analyzer = new ContactAngle2(info, dumpFileName, sele1, sele2, solidZ,
                                  centroidX, centroidY, threshDens, bufferLength,
                                  args_info.nbins_arg, args_info.nbins_z_arg);
-  }else if(args_info.nanolength_given){
+  } else if(args_info.nanolength_given){
     // fill in later
-  }else if(args_info.nanovolume_given){
+  } else if(args_info.nanovolume_given){
     // fill in later
+  } else if(args_info.qllt1_given){
+    if (args_info.rcut_given) {      
+      analyzer = new QLLThickness1(info, dumpFileName, sele1,
+                            args_info.rcut_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\tGeneralized Coordinate Number");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }   
+  } else if(args_info.qllt2_given){
+    if (args_info.rcut_given) {      
+      analyzer = new QLLThickness2(info, dumpFileName, sele1,
+                            args_info.rcut_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\tGeneralized Coordinate Number");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }   
   }
 
   if (args_info.output_given) {

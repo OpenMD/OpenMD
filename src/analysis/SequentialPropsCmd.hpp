@@ -78,12 +78,17 @@ struct gengetopt_args_info
   double rcut_arg;	/**< @brief cutoff radius (rcut).  */
   char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
+  double qt_arg;	/**< @brief tetrahedrality (q) threshold value.  */
+  char * qt_orig;	/**< @brief tetrahedrality (q) threshold value original value given at command line.  */
+  const char *qt_help; /**< @brief tetrahedrality (q) threshold value help description.  */
   const char *com_help; /**< @brief selection center of mass help description.  */
   const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
   const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
   const char *nanolength_help; /**< @brief compute length of nanorod help description.  */
   const char *nanovolume_help; /**< @brief compute volume and surface area of hull help description.  */
+  const char *qllt1_help; /**< @brief compute the number of liquid-like water molecules with q_i < qt, q_i improperly scaled help description.  */
+  const char *qllt2_help; /**< @brief compute the number of liquid-like water molecules with q_i < qt, q_i properly scaled help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -100,12 +105,15 @@ struct gengetopt_args_info
   unsigned int threshDens_given ;	/**< @brief Whether threshDens was given.  */
   unsigned int bufferLength_given ;	/**< @brief Whether bufferLength was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
+  unsigned int qt_given ;	/**< @brief Whether qt was given.  */
   unsigned int com_given ;	/**< @brief Whether com was given.  */
   unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
   unsigned int nanolength_given ;	/**< @brief Whether nanolength was given.  */
   unsigned int nanovolume_given ;	/**< @brief Whether nanovolume was given.  */
+  unsigned int qllt1_given ;	/**< @brief Whether qllt1 was given.  */
+  unsigned int qllt2_given ;	/**< @brief Whether qllt2 was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

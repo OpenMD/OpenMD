@@ -8,8 +8,7 @@
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
+ * * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -39,42 +38,3 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef ANALYSIS_ANGLER_HPP
-#define ANALYSIS_ANGLER_HPP
-
-#include "analysis/RadialDistrFunc.hpp"
-#include "analysis/NonSpatialStatistics.hpp"
-#include "analysis/InteractionType.hpp"
-namespace OpenMD {
-
-  class AngleR : public NonSpatialStatistics, public SingletType {
-    
-  public:    
-    AngleR(SimInfo* info, const std::string& sele, RealType len, 
-           int nrbins);
-
-    virtual ~AngleR();
-    virtual void processFrame(int frame);
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
-
-    void setNRBins(unsigned int nrbins) { nRBins_ = nrbins; }
-    void setLength(RealType len) { len_ = len; } 
-    
-    int getNRBins() { return nRBins_; }
-    RealType getLength() { return len_; }
-
-    
-  protected:
-    OutputData* angleR;
-    
-  private:
-    void writeOutput();
-
-    RealType len_;
-    int nRBins_;
-    RealType deltaR_;
-
-  };
-
-}
-#endif

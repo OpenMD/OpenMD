@@ -29,6 +29,7 @@ option  "dropletR"      r       "Droplet radius in angstroms"  double no
 option  "threshDens"    -       "Threshold Density in g/cm^3"  double no
 option  "bufferLength"  -       "Buffer length in angstroms"   double no
 option  "rcut"          -       "cutoff radius (rcut)"         double no
+option	"qt"		-	"tetrahedrality (q) threshold value"  double	no
 defgroup "sequentialProps" groupdesc=" an option of this group is required" yes
 groupoption "com"       c       "selection center of mass" group="sequentialProps"
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
@@ -36,4 +37,5 @@ groupoption "ca2"       -       "contact angle of selection (using density profi
 groupoption "gcn"       -       "Generalized Coordinate Number" group="sequentialProps"
 groupoption "nanolength"	-	"compute length of nanorod" group="sequentialProps"
 groupoption "nanovolume" - 	"compute volume and surface area of hull" group="sequentialProps"
-
+groupoption "qllt1"	 -	"compute the number of liquid-like water molecules with q_i < qt, q_i improperly scaled" group="sequentialProps"
+groupoption "qllt2"	 -	"compute the number of liquid-like water molecules with q_i < qt, q_i properly scaled" group="sequentialProps"

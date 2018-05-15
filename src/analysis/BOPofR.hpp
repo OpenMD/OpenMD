@@ -48,7 +48,7 @@
 #define ANALYSIS_BOPOFR_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "analysis/StaticAnalyser.hpp"
+#include "analysis/Analyzer.hpp"
 #include "math/Vector3.hpp"
 #include "math/SphericalHarmonic.hpp"
 #include "analysis/NonSpatialStatistics.hpp"
@@ -60,12 +60,18 @@ namespace OpenMD {
   class BOPofR : public NonSpatialStatistics{
   public:
     BOPofR(SimInfo* info, 
-           const std::string& sele, double rCut, unsigned int nbins,
-           RealType len);
+           const std::string& sele);
     
     virtual ~BOPofR();
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
+
+    void setRCut(double rCut) { rCut_ = rCut; }
+    void setNBins(unsigned int nbins) { nBins_ = nbins; }
+    void setLen(double len) { len_ = len; }
+    //evaluator_.loadScriptString.. careful when to ccall
+    void setSeleScript(const std::string& sele) { selectionScript_(sele); }
+    
     
   protected:
     virtual void collectHistogram(std::vector<RealType> q, 

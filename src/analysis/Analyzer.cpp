@@ -45,8 +45,7 @@
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
-  Analyzer::Analyzer(SimInfo* info, unsigned int nbins) :
-    info_(info), step_(1), nBins_(nbins) {
+  Analyzer::Analyzer(SimInfo* info) : info_(info){
     
     // Pre-load an OutputData for the count of objects:
     counts_ = new OutputData;

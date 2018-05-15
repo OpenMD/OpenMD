@@ -59,8 +59,7 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info,
                  const std::string& sele, RealType len, int nrbins)
-    : NonSpatialStatistics(info, sele, nrbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins) {
+    : NonSpatialStatistics(info, sele, nrbins) : SingletType() {
     
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {

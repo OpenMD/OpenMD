@@ -77,8 +77,11 @@ namespace OpenMD {
     
     virtual ~Analyzer() {}
     virtual void processFrame(int frame)=0;
-    virtual void processDump()=0;
+    virtual void processDump();
     virtual void writeOutput();
+
+
+  
 
     void setNBins(int nbins) { nBins_ = nbins; }
 

@@ -48,6 +48,7 @@ const char *gengetopt_args_info_help[] = {
   "      --threshDens=DOUBLE       Threshold Density in g/cm^3",
   "      --bufferLength=DOUBLE     Buffer length in angstroms",
   "      --rcut=DOUBLE             cutoff radius (rcut)",
+  "      --qt=DOUBLE               tetrahedrality (q) threshold value",
   "\n Group: sequentialProps\n   an option of this group is required",
   "  -c, --com                     selection center of mass",
   "      --ca1                     contact angle of selection (using center of\n                                  mass)",
@@ -55,6 +56,8 @@ const char *gengetopt_args_info_help[] = {
   "      --gcn                     Generalized Coordinate Number",
   "      --nanolength              compute length of nanorod",
   "      --nanovolume              compute volume and surface area of hull",
+  "      --qllt1                   compute the number of liquid-like water\n                                  molecules with q_i < qt, q_i improperly\n                                  scaled",
+  "      --qllt2                   compute the number of liquid-like water\n                                  molecules with q_i < qt, q_i properly scaled",
     0
 };
 
@@ -121,12 +124,15 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->threshDens_given = 0 ;
   args_info->bufferLength_given = 0 ;
   args_info->rcut_given = 0 ;
+  args_info->qt_given = 0 ;
   args_info->com_given = 0 ;
   args_info->ca1_given = 0 ;
   args_info->ca2_given = 0 ;
   args_info->gcn_given = 0 ;
   args_info->nanolength_given = 0 ;
   args_info->nanovolume_given = 0 ;
+  args_info->qllt1_given = 0 ;
+  args_info->qllt2_given = 0 ;
   args_info->sequentialProps_group_counter = 0 ;
 }
 
@@ -153,6 +159,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->threshDens_orig = NULL;
   args_info->bufferLength_orig = NULL;
   args_info->rcut_orig = NULL;
+  args_info->qt_orig = NULL;
   
 }
 
@@ -176,12 +183,15 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->threshDens_help = gengetopt_args_info_help[12] ;
   args_info->bufferLength_help = gengetopt_args_info_help[13] ;
   args_info->rcut_help = gengetopt_args_info_help[14] ;
-  args_info->com_help = gengetopt_args_info_help[16] ;
-  args_info->ca1_help = gengetopt_args_info_help[17] ;
-  args_info->ca2_help = gengetopt_args_info_help[18] ;
-  args_info->gcn_help = gengetopt_args_info_help[19] ;
-  args_info->nanolength_help = gengetopt_args_info_help[20] ;
-  args_info->nanovolume_help = gengetopt_args_info_help[21] ;
+  args_info->qt_help = gengetopt_args_info_help[15] ;
+  args_info->com_help = gengetopt_args_info_help[17] ;
+  args_info->ca1_help = gengetopt_args_info_help[18] ;
+  args_info->ca2_help = gengetopt_args_info_help[19] ;
+  args_info->gcn_help = gengetopt_args_info_help[20] ;
+  args_info->nanolength_help = gengetopt_args_info_help[21] ;
+  args_info->nanovolume_help = gengetopt_args_info_help[22] ;
+  args_info->qllt1_help = gengetopt_args_info_help[23] ;
+  args_info->qllt2_help = gengetopt_args_info_help[24] ;
   
 }
 
@@ -285,6 +295,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->threshDens_orig));
   free_string_field (&(args_info->bufferLength_orig));
   free_string_field (&(args_info->rcut_orig));
+  free_string_field (&(args_info->qt_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -350,6 +361,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bufferLength", args_info->bufferLength_orig, 0);
   if (args_info->rcut_given)
     write_into_file(outfile, "rcut", args_info->rcut_orig, 0);
+  if (args_info->qt_given)
+    write_into_file(outfile, "qt", args_info->qt_orig, 0);
   if (args_info->com_given)
     write_into_file(outfile, "com", 0, 0 );
   if (args_info->ca1_given)
@@ -362,6 +375,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "nanolength", 0, 0 );
   if (args_info->nanovolume_given)
     write_into_file(outfile, "nanovolume", 0, 0 );
+  if (args_info->qllt1_given)
+    write_into_file(outfile, "qllt1", 0, 0 );
+  if (args_info->qllt2_given)
+    write_into_file(outfile, "qllt2", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -421,6 +438,8 @@ reset_group_sequentialProps(struct gengetopt_args_info *args_info)
   args_info->gcn_given = 0 ;
   args_info->nanolength_given = 0 ;
   args_info->nanovolume_given = 0 ;
+  args_info->qllt1_given = 0 ;
+  args_info->qllt2_given = 0 ;
 
   args_info->sequentialProps_group_counter = 0;
 }
@@ -1260,12 +1279,15 @@ cmdline_parser_internal (
         { "threshDens",	1, NULL, 0 },
         { "bufferLength",	1, NULL, 0 },
         { "rcut",	1, NULL, 0 },
+        { "qt",	1, NULL, 0 },
         { "com",	0, NULL, 'c' },
         { "ca1",	0, NULL, 0 },
         { "ca2",	0, NULL, 0 },
         { "gcn",	0, NULL, 0 },
         { "nanolength",	0, NULL, 0 },
         { "nanovolume",	0, NULL, 0 },
+        { "qllt1",	0, NULL, 0 },
+        { "qllt2",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1480,6 +1502,20 @@ cmdline_parser_internal (
               goto failure;
           
           }
+          /* tetrahedrality (q) threshold value.  */
+          else if (strcmp (long_options[option_index].name, "qt") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->qt_arg), 
+                 &(args_info->qt_orig), &(args_info->qt_given),
+                &(local_args_info.qt_given), optarg, 0, 0, ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "qt", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* contact angle of selection (using center of mass).  */
           else if (strcmp (long_options[option_index].name, "ca1") == 0)
           {
@@ -1561,6 +1597,40 @@ cmdline_parser_internal (
                 &(local_args_info.nanovolume_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "nanovolume", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* compute the number of liquid-like water molecules with q_i < qt, q_i improperly scaled.  */
+          else if (strcmp (long_options[option_index].name, "qllt1") == 0)
+          {
+          
+            if (args_info->sequentialProps_group_counter && override)
+              reset_group_sequentialProps (args_info);
+            args_info->sequentialProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->qllt1_given),
+                &(local_args_info.qllt1_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "qllt1", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* compute the number of liquid-like water molecules with q_i < qt, q_i properly scaled.  */
+          else if (strcmp (long_options[option_index].name, "qllt2") == 0)
+          {
+          
+            if (args_info->sequentialProps_group_counter && override)
+              reset_group_sequentialProps (args_info);
+            args_info->sequentialProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->qllt2_given),
+                &(local_args_info.qllt2_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "qllt2", '-',
                 additional_error))
               goto failure;
           
