@@ -61,6 +61,25 @@ namespace OpenMD {
       return Count_;
     }
     virtual ~BaseAccumulator() {};
+
+    virtual void add(RealType) = 0;
+    virtual void add(Vector3d) = 0;
+    virtual void add(potVec) = 0;
+    virtual void add(Mat3x3d) = 0;
+    virtual void getLastValue(RealType) = 0;
+    virtual void getLastValue(Vector3d) = 0;
+    virtual void getLastValue(potVec) = 0;
+    virtual void getLastValue(Mat3x3d) = 0;
+    virtual void getAverage(RealType) = 0;
+    virtual void getAverage(Vector3d) = 0;
+    virtual void getAverage(potVec) = 0;
+    virtual void getAverage(Mat3x3d) = 0;
+    virtual void getMax(RealType) = 0;
+    virtual void get95percentConfidenceInterval(RealType) = 0;
+    virtual void get95percentConfidenceInterval(Vector3d) = 0;
+    virtual void get95percentConfidenceInterval(potVec) = 0;
+    virtual void get95percentConfidenceInterval(Mat3x3d) = 0;
+
   protected:
     size_t Count_;
 
@@ -115,7 +134,7 @@ namespace OpenMD {
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret)  {
+    virtual void getLastValue(ElementType &ret)  {
       ret = Val_;
       return;
     }    
@@ -123,7 +142,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret)  {
+    virtual void getAverage(ResultType &ret)  {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -153,7 +172,7 @@ namespace OpenMD {
     /**
      * return the largest value
      */
-    void getMax(ElementType &ret)  {
+    virtual void getMax(ElementType &ret)  {
       assert(Count_ != 0);
       ret = Max_;
       return;
@@ -177,7 +196,7 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    virtual void get95percentConfidenceInterval(ResultType &ret) {
       assert(Count_ != 0);
       RealType sd;
       this->getStdDev(sd);
@@ -206,7 +225,7 @@ namespace OpenMD {
     /**
      * Accumulate another value
      */
-    void add(ElementType const& val) {
+    virtual void add(ElementType const& val) {
       Count_++;
       RealType len(0.0);
       for (unsigned int i =0; i < 3; i++) {
@@ -243,7 +262,7 @@ namespace OpenMD {
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret) {
+    virtual void getLastValue(ElementType &ret) {
       ret = Val_;
       return;
     }
@@ -251,7 +270,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret) {
+    virtual void getAverage(ResultType &ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -291,7 +310,7 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    virtual void get95percentConfidenceInterval(ResultType &ret) {
       assert(Count_ != 0);
       ResultType sd;
       this->getStdDev(sd);
@@ -391,7 +410,7 @@ namespace OpenMD {
     /**
      * Accumulate another value
      */
-    void add(ElementType const& val) {
+    virtual void add(ElementType const& val) {
       Count_++;
       RealType len(0.0);
       for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
@@ -429,7 +448,7 @@ namespace OpenMD {
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret) {
+    virtual void getLastValue(ElementType &ret) {
       ret = Val_;
       return;
     }
@@ -437,7 +456,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret) {
+    virtual void getAverage(ResultType &ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -477,7 +496,7 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    virtual void get95percentConfidenceInterval(ResultType &ret) {
       assert(Count_ != 0);
       ResultType sd;
       this->getStdDev(sd);
@@ -578,7 +597,7 @@ namespace OpenMD {
     /**
      * Accumulate another value
      */
-    void add(ElementType const& val) {
+    virtual void add(ElementType const& val) {
       Count_++;
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {          
@@ -602,7 +621,7 @@ namespace OpenMD {
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret) {
+    virtual void getLastValue(ElementType &ret) {
       ret = Val_;
       return;
     }
@@ -610,7 +629,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret) {
+    virtual void getAverage(ResultType &ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -654,7 +673,7 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    virtual void get95percentConfidenceInterval(ResultType &ret) {
       assert(Count_ != 0);
       Mat3x3d sd;
       this->getStdDev(sd);

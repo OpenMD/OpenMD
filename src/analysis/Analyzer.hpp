@@ -53,7 +53,7 @@ namespace OpenMD {
     odtArray2d,
     odtUnknownDataType
   };
-  
+
   enum OutputDataHandling {
     odhAverage,
     odhTotal,
@@ -72,18 +72,18 @@ namespace OpenMD {
   };
 
   class Analyzer{
-  public:
+  public:    
     Analyzer(SimInfo* info);
-    
     virtual ~Analyzer() {}
+
+    virtual void preProcess();
     virtual void processFrame(int frame)=0;
-    virtual void processDump();
-    virtual void writeOutput();
+    virtual void postProcess();
+    virtual void writeOutputFile();
+    virtual void writeToSequenceFile(int frame);
 
-
-  
-
-    void setNBins(int nbins) { nBins_ = nbins; }
+    void setNBins(int nbins);
+    
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
@@ -92,20 +92,13 @@ namespace OpenMD {
     const std::string& getOutputFileName() const {
       return outputFilename_;
     }
-        
-    void setStep(int step) {
-      assert(step > 0);
-      step_ =step;    
-    }
-
-    int getStep() { return step_;}
     
-    const std::string& getAnalysisType() const {
-      return analysisType_;
-    }
-
     void setAnalysisType(const std::string& type) {
       analysisType_ = type;
+    }
+
+    const std::string& getAnalysisType() const {
+      return analysisType_;
     }
     
     void setParameterString(const std::string& params) {
@@ -113,7 +106,6 @@ namespace OpenMD {
     }
 
   protected:
-    virtual void processHistogram();
     virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
     virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
     OutputData* beginOutputData(vector<OutputData*>::iterator& i);
@@ -121,14 +113,64 @@ namespace OpenMD {
 
     SimInfo* info_;
     std::string outputFilename_;
-    int step_;
     std::string analysisType_;
     std::string paramString_;
     
     unsigned int nBins_;
     OutputData* counts_;
     vector<OutputData*> data_;
+    bool initialized_;
+    bool nBinsSet_;
+  };
+
+  class ObjectAnalyzer : public Analyzer {
+  public:
+    ObjectAnalyzer(SimInfo* info);
+    ~ObjectAnalyzer();
+
+    virtual void setSelectionScript(std::string& sele1);
+    virtual void processFrame(int frame);
+    virtual void processStuntDouble(StuntDouble* sd)=0;
+
+  protected:
+    std::string selectionScript1_;
+    SelectionEvaluator evaluator1_;    
+    SelectionManager seleMan1_;
+
+  private:
+    virtual void validateSelection(SelectionManager& sman) {}
 
   };
+
+  class PairAnalyzer : public Analyzer {
+  public:
+    PairAnalyzer(SimInfo* info);
+    ~PairAnalyzer();
+
+    virtual void setSelectionScript1(std::string& sele1);
+    virtual void setSelectionScript2(std::string& sele2);
+
+    virtual void processFrame(int frame);
+    virtual void processNonOverlapping(SelectionManager& sman1, 
+                                       SelectionManager& sman2);
+    virtual void processOverlapping(SelectionManager& sman);
+
+  protected:
+    std::string selectionScript1_;
+    std::string selectionScript2_;
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+
+    SelectionManager seleMan1_;
+    SelectionManager seleMan2_;
+    SelectionManager sele1_minus_common_;
+    SelectionManager sele2_minus_common_;
+    SelectionManager common_;
+    
+  private:
+    virtual void validateSelection1(SelectionManager& sman) {}
+    virtual void validateSelection2(SelectionManager& sman) {}
+  };  
+
 }
 #endif

@@ -45,20 +45,35 @@
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
-  Analyzer::Analyzer(SimInfo* info) : info_(info){
-    
-    // Pre-load an OutputData for the count of objects:
-    counts_ = new OutputData;
-    counts_->units =  "objects";
-    counts_->title =  "Objects";
-    counts_->dataType = odtReal;
-    counts_->dataHandling = odhTotal;
-    counts_->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
-      counts_->accumulator.push_back( new Accumulator() );     
+  Analyzer::Analyzer(SimInfo* info) : info_(info), initialized_(false),
+                                      nBinsSet_(false);
+
+  void Analyzer::setNBins(int nbins) {
+    nBins_ = nbins;
+    nBinsSet_ = true;
   }
   
-  void Analyzer::writeOutput() {
+  Analyzer::initialize() {
+    if (nBinsSet_) {
+      // Pre-load an OutputData for the count of objects:
+      counts_ = new OutputData;
+      counts_->units =  "objects";
+      counts_->title =  "Objects";
+      counts_->dataType = odtReal;
+      counts_->dataHandling = odhTotal;
+      counts_->accumulator.reserve(nBins_);
+      for (unsigned int i = 0; i < nBins_; i++) 
+        counts_->accumulator.push_back( new Accumulator() );
+    } else {
+      sprintf(painCave.errMsg, "Analyzer: unable to initialize without nBins");
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+  
+  void Analyzer::writeOutputFile() {
+    if (!initialized_) initialize();
+    
     vector<OutputData*>::iterator i;
     OutputData* outputData;
         
@@ -69,8 +84,6 @@ namespace OpenMD {
       ofs << "# " << getAnalysisType() << "\n";
       ofs << "# OpenMD " << r.getFullRevision() << "\n";
       ofs << "# " << r.getBuildDate() << "\n";
-      //ofs << "# selection script1: \"" << selectionScript1_ ;
-      //ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#";
@@ -134,9 +147,66 @@ namespace OpenMD {
       simError();  
     }   
   }
+
+  void Analyzer::prepareSequenceFile() {
+    if (!initialized_) initialize();
     
+    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+    
+    if (ofs.is_open()) {
+      
+      Revision r;
+      
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+      ofs << "#time\t";
+      for(outputData = beginOutputData(i); outputData; 
+          outputData = nextOutputData(i)) {
+        ofs << "\t" << outputData->title << 
+          "(" << outputData->units << ")";
+        // add some extra tabs for column alignment
+        if (outputData->dataType == odtVector3) ofs << "\t\t";
+      }      
+      ofs << std::endl;
+    } else {
+      sprintf(painCave.errMsg,
+              "Analyzer::prepareSequenceFile Error: failed to open %s\n", 
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();        
+    }    
+  }
+
+  
+  void Analyzer::appendToSequenceFile(int frame) {
+      
+    if (ofs.is_open()) {      
+      ofs << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+      for(outputData = beginOutputData(i); outputData; 
+          outputData = nextOutputData(i)) {
+        for (unsigned int j = 0; j < nBins_; j++) {
+          writeData( ofs, outputData, j );
+        }
+      }
+      
+      ofs << std::endl;      
+    } else {
+      sprintf(painCave.errMsg,
+              "Analyzer::prepareSequenceFile Error: failed to open %s\n", 
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();        
+    }                    
+  }
+
+
+  
   void Analyzer::writeData(ostream& os, OutputData* dat, 
-                                    unsigned int bin) {
+                           unsigned int bin) {
+    if (!initialized_) initialize();
     assert(bin < nBins_);
     int n = dat->accumulator[bin]->count();
     if (n == 0) return;
@@ -144,9 +214,9 @@ namespace OpenMD {
     if( dat->dataType == odtReal ) {
       RealType r;
       if (dat->dataHandling == odhMax) {
-	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);      
+	dat->accumulator[bin]->getMax(r);      
       } else {
-	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
+	dat->accumulator[bin]->getAverage(r);      
       }
       if (std::isinf(r) || std::isnan(r) ) {      
         sprintf( painCave.errMsg,
@@ -161,7 +231,7 @@ namespace OpenMD {
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);     
+      dat->accumulator[bin]->getAverage(v);     
       if (std::isinf(v[0]) || std::isnan(v[0]) || 
           std::isinf(v[1]) || std::isnan(v[1]) || 
           std::isinf(v[2]) || std::isnan(v[2]) ) {      
@@ -179,13 +249,15 @@ namespace OpenMD {
 
   void Analyzer::writeErrorBars(ostream& os, OutputData* dat, 
                                     unsigned int bin) {
+    if (!initialized_) initialize();
+
     assert(bin < nBins_);
     int n = dat->accumulator[bin]->count();
     if (n == 0) return;
 
     if( dat->dataType == odtReal ) {
       RealType r;
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(r);      
+      dat->accumulator[bin]->get95percentConfidenceInterval(r);      
       if (std::isinf(r) || std::isnan(r) ) {      
         sprintf( painCave.errMsg,
                  "Analyzer detected a numerical error writing:\n"
@@ -199,7 +271,7 @@ namespace OpenMD {
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(v);
+      dat->accumulator[bin]->get95percentConfidenceInterval(v);
       if (std::isinf(v[0]) || std::isnan(v[0]) || 
           std::isinf(v[1]) || std::isnan(v[1]) || 
           std::isinf(v[2]) || std::isnan(v[2]) ) {      
@@ -226,7 +298,7 @@ namespace OpenMD {
     return i != data_.end()? *i: NULL;
   }
   
-  void Analyzer::processHistogram() {
+  void Analyzer::postProcess() {
     // placeHolder for inherited functions
   }
   
