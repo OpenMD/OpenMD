@@ -38,8 +38,11 @@ atypes = []
 positions = []
 metaData = []
 frameData = []
-RBPos = []
+RBpos = []
 RBQuats = []
+RBindices = []
+RBatypes = []
+RBpositions = []
 indices = []
 Hmat = []
 BoxInv = []
@@ -227,11 +230,17 @@ def calcMoments():
     return (COM, evals, evects)
 
 def findRBs():
+    ref_ = []
+    mov = []
 
     for i in range(len(RBindices)):
-        ref_[i] = numpy.array([RBpositions[i][0], RBpositions[i][1], RBpositions[i][2]], numpy.float)
+        ref_.append(numpy.array([RBpositions[i][0], RBpositions[i][1], RBpositions[i][2]], numpy.float))
+        mov.append(numpy.array([0,0,0], numpy.float))
 
     print "finding rigid bodies (assuming strict packmol ordering)"
+
+    nBodies =  int( len(indices) / len(RBindices))
+    print nBodies
     xyzIndex =  0    
 
     for j in range(nBodies):
@@ -243,6 +252,7 @@ def findRBs():
             myMass = mass_table[RBatypes[i]]
             mov_com = mov_com + myMass*mov[i]
             totalMass = totalMass + myMass
+            Eliminate.append(xyzIndex)
             xyzIndex = xyzIndex + 1
 
         mov_com = mov_com / totalMass
@@ -261,14 +271,14 @@ def findRBs():
             #   R(i,j) = sum(over n): y(n,i) * x(n,j)  
             #   where x(n) and y(n) are two vector sets   
 
-            R = R + numpy.linalg.outer(mov[n], ref_[n])
+            R = R + numpy.outer(mov[n], ref_[n])
 
         v, s, w = numpy.linalg.svd(R, full_matrices = True)
 
         if (numpy.linalg.det(v) * numpy.linalg.det(w) < 0.0):
-            is_reflection = true
+            is_reflection = True
         else:
-            is_reflection = false
+            is_reflection = False
             
         if (is_reflection):
             s[2] = -s[2]
@@ -310,7 +320,8 @@ def findRBs():
                 q[2] = (RotMat[1][2] + RotMat[2][1]) * s
                 q[3] = 0.25 / s
 
-                RBQuats.append(q)
+        RBQuats.append(q)
+
 
 
 def writeFile(outputFileName):
@@ -331,8 +342,8 @@ def writeFile(outputFileName):
     sdFormat = 'pvqj'
 
     index = 0
-    for i in range(len(RBPos)):
-        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, RBPos[i][0], RBPos[i][1], RBPos[i][2], 0.0, 0.0, 0.0, RBQuats[i][0], RBQuats[i][1], RBQuats[i][2], RBQuats[i][3], 0.0, 0.0, 0.0))
+    for i in range(len(RBpos)):
+        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, RBpos[i][0], RBpos[i][1], RBpos[i][2], 0.0, 0.0, 0.0, RBQuats[i][0], RBQuats[i][1], RBQuats[i][2], RBQuats[i][3], 0.0, 0.0, 0.0))
         index = index + 1
 
 
@@ -348,7 +359,7 @@ def writeFile(outputFileName):
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hx:o:", ["help", "xyz-file=", "output-file="]) 
+        opts, args = getopt.getopt(argv, "hr:x:o:", ["help", "rigid-body=", "xyz-file=", "output-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -380,10 +391,9 @@ def main(argv):
         usage()
         print "No output file was specified"
         sys.exit()
-    readRBFile(rbFileName)
-    
-    readFile(xyzFileName)
 
+    readRBFile(rbFileName)
+    readFile(xyzFileName)
     findRBs()
     writeFile(outputFileName)
 

@@ -38,14 +38,65 @@ _haveOutFileName = 0
 positions = []
 indices = []
 atypes = []
-Hmass = 1.0079
-Cmass = 12.011
-Omass = 15.999
-Nmass = 14.007
-Smass = 32.066
-Aumass = 196.466569
-Au1mass = 196.466569
-Au2mass =   0.5
+
+mass_table = {
+    'H': 1.00794,
+    'C': 12.0107,
+    'Cl': 35.453,
+    'O': 15.999,
+    'N': 14.007,
+    'S': 32.0655,
+    'Au': 196.466569,
+    'CH4': 16.05,           
+    'CH3': 15.04,           
+    'CH2': 14.03,           
+    'CH':  13.02,
+    'CHar': 13.02,
+    'CHa': 13.02,
+    'RCHar': 12.0107,
+    'RCH': 12.0107,    
+    'CH3S': 15.04,
+    'CH2S': 14.03,
+    'CHS': 13.02,
+    'CS': 12.0107,
+    'SYZ': 32.0655,
+    'SH': 32.0655,
+    'HS': 1.0079,
+    'S': 32.0655,
+    'SZ': 32.0655,
+    'SS': 32.0655, 
+    'SP': 32.0655,
+    'CS': 12.0107,
+    'SAu': 228.9807,
+    'SSD': 18.0153,         
+    'SSD1': 18.0153,
+    'SSD_E': 18.0153,
+    'SSD_RF': 18.0153,                 
+    'O_TIP3P': 15.9994,                 
+    'O_TIP4P': 15.9994,
+    'O_TIP4P-Ew': 15.9994,
+    'O_TIP5P': 15.9994,
+    'O_TIP5P-E': 15.9994, 
+    'O_SPCE': 15.9994,
+    'O_SPC': 15.9994,
+    'H_TIP3P':    1.0079,
+    'H_TIP4P':    1.0079,
+    'H_TIP4P-Ew': 1.0079,
+    'H_TIP5P':    1.0079,
+    'H_SPCE':     1.0079,
+    'H_SPC':      1.0079,
+    'EP_TIP4P':   0.0,
+    'EP_TIP4P-Ew':0.0,
+    'EP_TIP5P':   0.0,
+    'Ni':      58.710,
+    'Cu':      63.550,
+    'Rh':      102.90550,
+    'Pd':      106.42,
+    'Ag':      107.8682,
+    'Ir':      192.217,
+    'Pt':      195.09
+}
+
 
 def usage():
     print __doc__
@@ -88,25 +139,8 @@ def findCOM():
     totalMass = 0.0
 
     for i in range(0,len(indices)):
-        if (atypes[i] == "H"):
-            myMass = Hmass
-        elif (atypes[i] == "C"):
-            myMass = Cmass
-        elif (atypes[i] == "O"):
-            myMass = Omass
-        elif (atypes[i] == "N"):
-            myMass = Nmass
-        elif (atypes[i] == "S"):
-            myMass = Smass
-        elif (atypes[i] == "Au1"):
-            myMass = Au1mass
-        elif (atypes[i] == "Au2"):
-            myMass = Au2mass
-        elif (atypes[i] == "Au"):
-            myMass = Aumass
-        else:
-            print "unknown atom type! %s" % (atypes[i])
-        
+        myMass = mass_table[atypes[i]]
+
         Xcom = Xcom + myMass * positions[i][0]
         Ycom = Ycom + myMass * positions[i][1]
         Zcom = Zcom + myMass * positions[i][2]
@@ -129,24 +163,7 @@ def findMoments():
     I = numpy.zeros((3,3), numpy.float)
     
     for i in range(0,len(indices)):
-        if (atypes[i] == "H"):
-            myMass = Hmass
-        elif (atypes[i] == "C"):
-            myMass = Cmass
-        elif (atypes[i] == "O"):
-            myMass = Omass
-        elif (atypes[i] == "N"):
-            myMass = Nmass
-        elif (atypes[i] == "S"):
-            myMass = Smass
-        elif (atypes[i] == "Au1"):
-            myMass = Au1mass
-        elif (atypes[i] == "Au2"):
-            myMass = Au2mass
-        elif (atypes[i] == "Au"):
-            myMass = Aumass
-        else:
-            print "unknown atom type!"
+        myMass = mass_table[atypes[i]]
 
         dx = positions[i][0] - COM[0]
         dy = positions[i][1] - COM[1]
