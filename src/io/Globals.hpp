@@ -109,6 +109,7 @@ namespace OpenMD {
     DeclareParameter(PrintTaggedPairDistance, bool);
     DeclareParameter(ElectrostaticSummationMethod, std::string);
     DeclareParameter(ElectrostaticScreeningMethod, std::string);
+    DeclareParameter(UseSurfaceTerm, bool);
     DeclareParameter(DampingAlpha, RealType);
     DeclareParameter(Dielectric, RealType);
     DeclareParameter(CutoffMethod, std::string);

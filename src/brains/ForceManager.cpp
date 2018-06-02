@@ -227,6 +227,7 @@ namespace OpenMD {
             cutoffMethod_ = TAYLOR_SHIFTED;
           } else if (myMethod == "EWALD_FULL") {
             cutoffMethod_ = EWALD_FULL;
+            useSurfaceTerm_ = true;
           }
 
           if (simParams_->haveSwitchingRadius())
@@ -270,7 +271,7 @@ namespace OpenMD {
         }
       }
     }
-
+    
     // create the switching function object:
 
     switcher_ = new SwitchingFunction();
@@ -357,6 +358,8 @@ namespace OpenMD {
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
 
+      useSurfaceTerm_ = false;  // default, can be set by Ewald or directly
+
       //! We want to delay the cutoffs until after the interaction
       //! manager has set up the atom-atom interactions so that we can
       //! query them for suggested cutoff values
@@ -370,7 +373,9 @@ namespace OpenMD {
 
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
-
+      if (info_->getSimParams()->haveUseSurfaceTerm()) {
+        useSurfaceTerm_ = info_->getSimParams()->getUseSurfaceTerm();
+      }
     }
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
@@ -973,7 +978,9 @@ namespace OpenMD {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
       curSnapshot->setReciprocalPotential(reciprocalPotential);
 
-      // interactionMan_->doSurfaceTerm(surfacePotential);
+      if (useSurfaceTerm_) {
+        interactionMan_->doSurfaceTerm(surfacePotential);
+      }
       curSnapshot->setSurfacePotential(surfacePotential);
     }
 

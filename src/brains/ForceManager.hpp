@@ -92,6 +92,7 @@ namespace OpenMD {
     bool doHeatFlux_;
     bool doLongRangeCorrections_;
     bool usePeriodicBoundaryConditions_;
+    bool useSurfaceTerm_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
