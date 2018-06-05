@@ -286,19 +286,19 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
   S44 = (S(3,3) + S(4,4) + S(5,5)) / 3.0;
       
   // Anisotropy factor
-  RealType A1 = 2.0*C44 / (C11 - C12);
-  RealType A2 = 2.0*(S11 - S12) / S44;
+  // RealType A1 = 2.0*C44 / (C11 - C12);
+  // RealType A2 = 2.0*(S11 - S12) / S44;
   
   // std::cout << "Anisotropy factor = " << A1 << " " << A2 << "\n";
     
   // Effective Elastic constants for propagation in Cubic Crystals
-  RealType kL_100 = C11;
-  RealType kT_100 = C44;
-  RealType kL_110 = 0.5 * (C11 + C12 + 2.0*C44);
-  RealType kT1_110 = C44;
-  RealType kT2_110 = 0.5*(C11 - C12);
-  RealType kL_111 = (C11 + 2*C12 + 4*C44) / 3.0;
-  RealType kT_111 = (C11 - C12 + C44) / 3.0;
+  // RealType kL_100 = C11;
+  // RealType kT_100 = C44;
+  // RealType kL_110 = 0.5 * (C11 + C12 + 2.0*C44);
+  // RealType kT1_110 = C44;
+  // RealType kT2_110 = 0.5*(C11 - C12);
+  // RealType kL_111 = (C11 + 2*C12 + 4*C44) / 3.0;
+  // RealType kT_111 = (C11 - C12 + C44) / 3.0;
    
 }
 
@@ -337,7 +337,6 @@ int main(int argc, char *argv []) {
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, true);
-  Globals* simParams = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
   Velocitizer* veloSet = new Velocitizer(info);
 
@@ -350,12 +349,11 @@ int main(int argc, char *argv []) {
   
   Shake* shake = new Shake(info);
   bool hasFlucQ = false;
-  FluctuatingChargePropagator* flucQ;
+  FluctuatingChargePropagator* flucQ = new FluctuatingChargeDamped(info);
     
   if (info->usesFluctuatingCharges()) {
     if (info->getNFluctuatingCharges() > 0) {
       hasFlucQ = true;
-      flucQ = new FluctuatingChargeDamped(info);
       flucQ->setForceManager(forceMan);
       flucQ->initialize();
     }
@@ -370,7 +368,6 @@ int main(int argc, char *argv []) {
   Mat3x3d ptRef = thermo.getPressureTensor();
   ptRef.negate();
   ptRef *= Constants::elasticConvert;
-  Vector<RealType, 6> stressRef = ptRef.toVoigtTensor();
     
   Vector<RealType, 6> stress(0.0);
   Vector<RealType, 6> strain(0.0);
@@ -390,7 +387,6 @@ int main(int argc, char *argv []) {
   Molecule * mol;
   RealType de;
   Vector3d dr;
-  RealType a, b, c;
   
   for (int i = 0; i < 6; i++) {
     
