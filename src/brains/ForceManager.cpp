@@ -69,7 +69,9 @@ using namespace std;
 namespace OpenMD {
 
   ForceManager::ForceManager(SimInfo * info) : initialized_(false), info_(info),
-                                               switcher_(NULL), seleMan_(info), evaluator_(info) {
+                                               switcher_(NULL),
+                                               seleMan_(info),
+                                               evaluator_(info) {
     forceField_ = info_->getForceField();
     interactionMan_ = new InteractionManager();
     fDecomp_ = new ForceMatrixDecomposition(info_, interactionMan_);
@@ -777,6 +779,7 @@ namespace OpenMD {
 
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
+        
         if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
@@ -894,9 +897,9 @@ namespace OpenMD {
                   if (!fDecomp_->skipAtomPair(atomListRow[0],
                                               atomListColumn[0],
                                               cg1, cg2)) {
-                  virialTensor -= outProduct( *(idat.d), fg);
-                  if (doHeatFlux_)
-                    fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                    virialTensor -= outProduct( *(idat.d), fg);
+                    if (doHeatFlux_)
+                      fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
                   }
                 }
 
@@ -1545,7 +1548,7 @@ namespace OpenMD {
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
 
-  if (update_nlist) {
+        if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
           fDecomp_->buildNeighborList(neighborList_, point_);
@@ -1662,9 +1665,9 @@ namespace OpenMD {
                   if (!fDecomp_->skipAtomPair(atomListRow[0],
                                               atomListColumn[0],
                                               cg1, cg2)) {
-                  virialTensor -= outProduct( *(idat.d), fg);
-                  if (doHeatFlux_)
-                    fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                    virialTensor -= outProduct( *(idat.d), fg);
+                    if (doHeatFlux_)
+                      fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
                   }
                 }
 

@@ -314,7 +314,7 @@ namespace OpenMD {
     readFrameProperties(inputStream);
 
     //read StuntDoubles
-    readStuntDoubles(inputStream);     
+    int nSD = readStuntDoubles(inputStream);     
 
     inputStream.getline(buffer, bufferSize);
     line = buffer;
@@ -329,6 +329,15 @@ namespace OpenMD {
         painCave.isFatal = 1; 
         simError(); 
       }        
+    }
+
+    if (nSD != info_->getNGlobalIntegrableObjects()) {
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Number of parsed StuntDouble lines (%d)\n"
+              "\tis not the same as the expected number of Objects (%d)\n",
+              nSD,info_->getNGlobalIntegrableObjects() ); 
+      painCave.isFatal = 1; 
+      simError(); 
     }
   } 
    
@@ -657,7 +666,7 @@ namespace OpenMD {
   } 
   
   
-  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+  int DumpReader::readStuntDoubles(std::istream& inputStream) {
     
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
@@ -669,6 +678,8 @@ namespace OpenMD {
       simError(); 
     }
 
+    int nSD = 0;
+
     while(inputStream.getline(buffer, bufferSize)) {
       line = buffer;
       
@@ -677,8 +688,10 @@ namespace OpenMD {
       }
 
       parseDumpLine(line);
+      nSD++;
     }
-  
+
+    return nSD;
   }
 
   void  DumpReader::readSiteData(std::istream& inputStream) {

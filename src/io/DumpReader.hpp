@@ -84,7 +84,7 @@ namespace OpenMD {
     virtual void parseDumpLine(const std::string&); 
     virtual void parseSiteLine(const std::string&);  
     virtual void readFrameProperties(std::istream& inputStream);
-    void readStuntDoubles(std::istream& inputStream);
+    int readStuntDoubles(std::istream& inputStream);
     void readSiteData(std::istream& inputStream);
          
     SimInfo* info_; 
