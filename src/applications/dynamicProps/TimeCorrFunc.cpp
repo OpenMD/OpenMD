@@ -97,7 +97,7 @@ namespace OpenMD {
     count_.resize(nTimeBins_);
     time_.resize(nTimeBins_);
 
-    for (int i = 0; i < nTimeBins_; ++i) {
+    for (unsigned int i = 0; i < nTimeBins_; ++i) {
       time_[i] = i * deltaTime_;
     } 
   }
@@ -187,7 +187,7 @@ namespace OpenMD {
   }
 
   void TimeCorrFunc::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
 	histogram_[i] /= count_[i];
       } else {
@@ -213,7 +213,7 @@ namespace OpenMD {
         ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 	ofs << time_[i] << "\t" << histogram_[i] << "\n";
       }
             

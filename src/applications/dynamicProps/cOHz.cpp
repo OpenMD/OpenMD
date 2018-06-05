@@ -67,7 +67,7 @@ namespace OpenMD {
       setOutputName2(getPrefix(dumpFilename_) + ".lcorrZ");
       histogram_.resize(nTimeBins_);
       counts_.resize(nTimeBins_);
-      for (int i = 0; i < nTimeBins_; i++) {
+      for (unsigned int i = 0; i < nTimeBins_; i++) {
         histogram_[i].resize(nZBins_);
         counts_[i].resize(nZBins_);
       }
@@ -127,8 +127,8 @@ namespace OpenMD {
   }
 
   void COHZ::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      for (int j = 0; j < nZBins_; ++j) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
+      for (unsigned int j = 0; j < nZBins_; ++j) {
         if (counts_[i][j] > 0) {
           histogram_[i][j] /= counts_[i][j];
         }
@@ -137,7 +137,7 @@ namespace OpenMD {
   }
 
   void COHZ::preCorrelate() {
-    for (int i = 0; i < nTimeBins_; i++) {
+    for (unsigned int i = 0; i < nTimeBins_; i++) {
       std::fill(histogram_[i].begin(), histogram_[i].end(), Vector3d(0.0));
       std::fill(counts_[i].begin(), counts_[i].end(), 0);
     }
@@ -216,11 +216,11 @@ namespace OpenMD {
 
       ofs1 << "#time\tPn(costheta_z)\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs1 << time_[i];
 
-        for (int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
           ofs1 << "\t" << 0.5*(histogram_[i][j](yaxis_) +  histogram_[i][j](axis_));
         }
         ofs1 << "\n";
@@ -248,11 +248,11 @@ namespace OpenMD {
       
       ofs2 << "#time\tPn(costheta_z)\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs2 << time_[i];
 
-        for (int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
           ofs2 << "\t" << histogram_[i][j](xaxis_);
         }
         ofs2 << "\n";

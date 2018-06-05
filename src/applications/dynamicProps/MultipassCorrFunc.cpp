@@ -211,7 +211,7 @@ namespace OpenMD {
   template<typename T>
   void MultipassCorrFunc<T>::correlation() {
     T zeroType(0.0);
-    for (int i =0 ; i < nTimeBins_; ++i) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       histogram_[i] = zeroType;
       count_[i] = 0;
     }
@@ -298,7 +298,7 @@ namespace OpenMD {
   template<typename T>
   void MultipassCorrFunc<T>::postCorrelate() {
     T zeroType(0.0);
-    for (int i =0 ; i < nTimeBins_; ++i) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
 	histogram_[i] /= count_[i];
       } else {
@@ -327,7 +327,7 @@ namespace OpenMD {
       else
         ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 	ofs << times_[i]-times_[0] << "\t" << histogram_[i] << "\n";
       }
 
@@ -363,7 +363,7 @@ namespace OpenMD {
       else
         ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0] << "\t";
         for (int j = 0; j < 3; j++) {
           ofs << histogram_[i](j) << '\t';        
@@ -404,7 +404,7 @@ namespace OpenMD {
       else
         ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0] << "\t";
         for (int j = 0; j < 3; j++) {
           for (int k = 0; k < 3; k++) {

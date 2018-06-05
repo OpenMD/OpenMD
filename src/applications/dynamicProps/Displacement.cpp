@@ -91,7 +91,7 @@ namespace OpenMD {
 
     histograms_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
-    for (int i = 0; i < nTimeBins_; i++) {
+    for (unsigned int i = 0; i < nTimeBins_; i++) {
       histograms_[i].resize(nZBins_);
       counts_[i].resize(nZBins_);
       std::fill(histograms_[i].begin(), histograms_[i].end(), Vector3d(0.0));
@@ -220,8 +220,8 @@ namespace OpenMD {
   }
   
   void DisplacementZ::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      for (int j = 0; j < nZBins_; ++j) {        
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
+      for (unsigned int j = 0; j < nZBins_; ++j) {        
         if (counts_[i][j] > 0) {
           histograms_[i][j] /= counts_[i][j];
         } else {
@@ -247,11 +247,11 @@ namespace OpenMD {
 
       ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs << times_[i] - times_[0] << "\t";
         
-        for (int j = 0; j < nZBins_; ++j) {
+        for (unsigned int j = 0; j < nZBins_; ++j) {
           for (int k = 0; k < 3; k++) {
             ofs << histograms_[i][j](k) << '\t';
           }

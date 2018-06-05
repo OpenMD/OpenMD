@@ -124,7 +124,7 @@ namespace OpenMD {
   }
 
   void StressCorrFunc::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
         histogram_[i] /= count_[i];
       }
@@ -186,7 +186,7 @@ namespace OpenMD {
 
       ofs << "#time\tcorrTensor\txx\txy\txz\tyx\tyy\tyz\tzx\tzy\tzz\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs << time_[i] << "\t" << 
 	  histogram_[i](0,0) << "\t" <<
 	  histogram_[i](0,1) << "\t" <<

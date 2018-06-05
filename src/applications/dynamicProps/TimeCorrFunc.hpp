@@ -87,7 +87,7 @@ namespace OpenMD {
     virtual void postCorrelate();
 
     RealType deltaTime_;
-    int nTimeBins_;
+    unsigned int nTimeBins_;
     std::vector<RealType> histogram_;
     std::vector<int> count_;
     std::vector<RealType> time_;

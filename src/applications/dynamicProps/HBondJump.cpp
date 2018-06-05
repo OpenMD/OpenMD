@@ -202,7 +202,7 @@ namespace OpenMD {
   }
 
   void HBondJump::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
 	histogram_[i] /= count_[i];
       } else {
@@ -513,7 +513,7 @@ namespace OpenMD {
     zbin_.resize(nFrames_);
     histogram_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
-    for (int i = 0; i < nTimeBins_; i++) {
+    for (unsigned int i = 0; i < nTimeBins_; i++) {
       histogram_[i].resize(nZBins_);
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0.0);
       counts_[i].resize(nZBins_);
@@ -724,8 +724,8 @@ namespace OpenMD {
 
   
   void HBondJumpZ::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      for (int j = 0; j < nZBins_; ++j) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
+      for (unsigned int j = 0; j < nZBins_; ++j) {
         if (counts_[i][j] > 0) {
           histogram_[i][j] /= counts_[i][j];
         } else {
@@ -753,10 +753,10 @@ namespace OpenMD {
         ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#time\tcorrVal\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0];
         
-        for (int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
           ofs << "\t" << histogram_[i][j];
         }
         ofs << "\n";

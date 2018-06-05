@@ -100,7 +100,7 @@ namespace OpenMD {
     int storageLayout_;
 
     RealType deltaTime_;
-    int nTimeBins_;
+    unsigned int nTimeBins_;
     int nFrames_;
     std::vector<T> histogram_;
     std::vector<int> count_;

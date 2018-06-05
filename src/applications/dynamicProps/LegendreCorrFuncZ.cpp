@@ -90,7 +90,7 @@ namespace OpenMD {
     zbin_.resize(nTimeBins_);
     histogram_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
-    for (int i = 0; i < nTimeBins_; i++) {
+    for (unsigned int i = 0; i < nTimeBins_; i++) {
       histogram_[i].resize(nZBins_);
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0.0);
       counts_[i].resize(nZBins_);
@@ -186,8 +186,8 @@ namespace OpenMD {
 
 
   void LegendreCorrFuncZ::postCorrelate() {
-    for (int i =0 ; i < nTimeBins_; ++i) {
-      for (int j = 0; j < nZBins_; ++j) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
+      for (unsigned int j = 0; j < nZBins_; ++j) {
         if (counts_[i][j] > 0) {
           histogram_[i][j] /= counts_[i][j];
         }
@@ -228,11 +228,11 @@ namespace OpenMD {
 
       ofs << "#time\tPn(costheta_z)\n";
 
-      for (int i = 0; i < nTimeBins_; ++i) {
+      for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs << times_[i]-times_[0];
 
-        for (int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {          
           ofs << "\t" << histogram_[i][j](2);
         }
         ofs << "\n";

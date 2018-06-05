@@ -116,7 +116,7 @@ namespace OpenMD {
     sumTorques_ /= RealType(torquesCount_);
     
     Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumForces_);
-    for (int i =0 ; i < nTimeBins_; ++i) {
+    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
         
         histogram_[i] /= RealType(count_[i]);

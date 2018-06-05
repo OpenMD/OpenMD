@@ -75,7 +75,7 @@ namespace OpenMD {
     std::vector<std::vector<int> > counts_;
     Mat3x3d hmat_;
     RealType halfBoxZ_;
-    int nZBins_;
+    unsigned int nZBins_;
     int axis_;
     std::string axisLabel_;
 

@@ -99,7 +99,7 @@ namespace OpenMD {
     std::vector<std::vector<RealType> > histogram_;
     std::vector<std::vector<int> > counts_;
     std::vector<std::vector<int> > zbin_;
-    int nZBins_;
+    unsigned int nZBins_;
     int axis_;
     std::string axisLabel_;
 

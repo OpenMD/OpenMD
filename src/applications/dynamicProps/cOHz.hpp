@@ -85,7 +85,7 @@ namespace OpenMD {
     virtual void postCorrelate();
     vector<vector<Vector3d> > histogram_;
     vector<vector<int> > counts_;
-    int nZBins_;
+    unsigned int nZBins_;
     int axis_;
     int xaxis_;
     int yaxis_; 

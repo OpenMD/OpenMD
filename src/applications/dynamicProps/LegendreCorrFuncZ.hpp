@@ -66,7 +66,7 @@ namespace OpenMD {
 
     int order_;
     DoublePolynomial legendre_;
-    int nZBins_;
+    unsigned int nZBins_;
     RealType boxZ_, halfBoxZ_;
     int axis_;
     int xaxis_;
