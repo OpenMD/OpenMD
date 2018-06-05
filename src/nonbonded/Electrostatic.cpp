@@ -1327,6 +1327,7 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
       for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {  
+        atom->addElectricField( - eConverter * twoPiOverThreeV * 2.0 * netDipole );
 
         atid = atom->getAtomType()->getIdent();
         data = ElectrostaticMap[Etids[atid]];
@@ -1336,7 +1337,7 @@ namespace OpenMD {
           if (data.is_Fluctuating) {
             r = atom->getPos();
             info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
-            atom->addFlucQFrc( eConverter * twoPiOverThreeV * 2.0 * dot(r, netDipole) );
+            atom->addFlucQFrc( - eConverter * twoPiOverThreeV * 2.0 * dot(r, netDipole) );
           }
           atom->addFrc( - eConverter * twoPiOverThreeV * 2.0 * C * netDipole );
         }
