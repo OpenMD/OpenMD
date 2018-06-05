@@ -1175,7 +1175,7 @@ namespace OpenMD{
      * @param eField new electric field 
      * @see #getElectricField
      */         
-    void addPrevEelectricField(const Vector3d& eField) {
+    void addPrevElectricField(const Vector3d& eField) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).electricField[localIndex_] += eField;
     }
        
