@@ -47,13 +47,14 @@
 #include "analysis/InteractionType.hpp"
 namespace OpenMD {
 
-  class AngleR : public NonSpatialStatistics, public SingletType {
+  class AngleR : public ObjectAnalyzer {
     
   public:    
     AngleR(SimInfo* info, const std::string& sele, RealType len, 
            int nrbins);
 
     virtual ~AngleR();
+    virtual void setSelectionScript(std::string& sele1);
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 

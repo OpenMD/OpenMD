@@ -48,13 +48,15 @@
 using namespace std;
 namespace OpenMD {
   
-  class ObjectCount : public NonSpatialStatistics{
+  class ObjectCount : public ObjectAnalyzer {
   public:
-    ObjectCount(SimInfo* info, const std::string& sele);
+    ObjectCount(SimInfo* info);
+
+    virtual ~ObjectCount();
+    virtual void setSelectionScript(std::string* sele1);
     virtual void processFrame(int frame);
     void processHistogram();
-    virtual ~ObjectCount();
-    virtual void processStuntDouble(StuntDouble* sd, int bin);
+    virtual void processStuntDouble(StuntDouble* sd);
     
     
   private:
@@ -66,11 +68,6 @@ namespace OpenMD {
     RealType sDev_;
     unsigned long int nsum_;
     unsigned long int n2sum_;
-
-       
-    std::string selectionScript_;
-    SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;  
     
   };
 }

@@ -81,12 +81,13 @@ namespace OpenMD {
    *    arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParam : public NonSpatialStatistics,
-			      public SingletType {
+  class TetrahedralityParam : public ObjectAnalyzer {
   public:
     TetrahedralityParam(SimInfo* info);
     
     virtual ~TetrahedralityParam();
+    
+    virtual void setSelectionScript(std::string& sele1);
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 

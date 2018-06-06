@@ -58,20 +58,18 @@
 
 namespace OpenMD {
 
-  class BOPofR : public NonSpatialStatistics, public SingletType {
+  class BOPofR : public ObjectAnalyzer {
   public:
     BOPofR(SimInfo* info);
     
     virtual ~BOPofR();
+    virtual void setSelectionScript(std::string sele1);
     virtual void processFrame(int frame);
     virtual void processStuntDouble(StuntDouble* sd, int bin);
 
     void setRCut(double rCut) { rCut_ = rCut; }
     void setNBins(unsigned int nbins) { nBins_ = nbins; }
     void setLen(double len) { len_ = len; }
-    //evaluator_.loadScriptString.. careful when to ccall
-    void setSeleScript(const std::string& sele) { selectionScript_(sele); }
-    
     
   protected:
     virtual void collectHistogram(std::vector<RealType> q, 

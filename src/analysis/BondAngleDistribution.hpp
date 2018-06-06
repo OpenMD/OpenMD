@@ -65,15 +65,14 @@ namespace OpenMD {
    *  Comptes bond angle distribution for nearest neighbors.
    *BondAngleDistribution
    */
-  class BondAngleDistribution : public NonSpatialStatistics,
-				public SingletType {
+  class BondAngleDistribution : public ObjectAnalyzer {
   public:
     BondAngleDistribution(SimInfo* info);
     
     virtual ~BondAngleDistribution();
-    void processFrame(int istep);
-    void writeOutput();
-
+    virtual void setSelectionScript(std::string& sele1);
+    virtual void processFrame(int istep);
+    virtual void processStuntDouble(StuntDouble* sd); 
     
     void setRCut(RealType rcut) { rCut_ = rcut; }
     //More in nbins later..

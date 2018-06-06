@@ -55,17 +55,16 @@ using namespace std;
 namespace OpenMD {
 
   BondAngleDistribution::BondAngleDistribution(SimInfo* info) 
-    : NonSpatialStatistics(info, sele, nbins), SingletType() {
+    : ObjectAnalyzer(info), seleMan1_(info), evaluator1_(info) {
+
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
 
     setAnalysisType("Bond Angle Distribution");
     string prefixFileName = info_->getPrefixFileName();
-    setOutputName(prefixFileName + ".bad");
-    
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-    
+    setOutputName(prefixFileName + ".bad");    
 
     std::stringstream params;
     params << " rcut = " << rCut_
@@ -95,7 +94,10 @@ namespace OpenMD {
   
   BondAngleDistribution::~BondAngleDistribution() {
   }
-  
+
+  BondAngleDistribution::setSelectionScript(std::string& sele1){
+    selectionScript1_(sele1);    
+  }
   
   void BondAngleDistribution::processFrame(int istep) {
     Molecule* mol;

@@ -47,12 +47,15 @@
 
 namespace OpenMD {
 
-  class DensityPlot : public ShellStatistics{
+  class DensityPlot : public ShellStatistics, public ObjectAnalyzer{
     
   public:
-    DensityPlot(SimInfo* info, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
-    
+    DensityPlot(SimInfo* info, const std::string& sele1,
+		const std::string& cmSele, RealType len, int nrbins);
+
+    virtual void setSelectionScript(std::string& sele1);
     virtual void processFrame(int frame);
+    virtual void processStuntDouble(StuntDouble* sd);
     void processHistogram();
     virtual ~DensityPlot();
     
@@ -79,9 +82,6 @@ namespace OpenMD {
     std::vector<int> histogram_; 
     std::vector<RealType> density_; 
     
-    std::string selectionScript_;
-    SelectionManager seleMan_;
-    SelectionEvaluator evaluator_;
     std::string cmSelectionScript_;
     SelectionManager cmSeleMan_;
     SelectionEvaluator cmEvaluator_;

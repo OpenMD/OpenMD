@@ -56,17 +56,17 @@
 using namespace MATPACK;
 namespace OpenMD {
 
-  BOPofR::BOPofR(SimInfo* info) : NonSpatialStatistics(info, sele, nbins),
-				  SingletType() {
+  BOPofR::BOPofR(SimInfo* info) : ObjectAnalyzer(info),
+				  seleMan1_(info), evaluator1_(info) {
     
     string prefixFileName = info_->getPrefixFileName();
     setOutputName(prefixFileName + ".bo");
     setAnalysisType("Bond Order Parameter(r)");
 
     // need to deal with evaluator_
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
     
     std::stringstream params;
@@ -201,14 +201,14 @@ namespace OpenMD {
     
     
     CenterOfMass = thermo_->getCom();
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
     // outer loop is over the selected StuntDoubles:
     
-    for (sd = seleMan_.beginSelected(i); sd != NULL; 
-	 sd = seleMan_.nextSelected(i)) {
+    for (sd = seleMan1_.beginSelected(i); sd != NULL; 
+	 sd = seleMan1_.nextSelected(i)) {
       
       myIndex = sd->getGlobalIndex();
       

@@ -49,18 +49,18 @@
 
 namespace OpenMD {
 
-  ObjectCount::ObjectCount(SimInfo* info, 
-                           const std::string& sele)
-    : NonSpatialStatistics(info, sele, 1), selectionScript_(sele), 
-      seleMan_(info), evaluator_(info) {
+  ObjectCount::ObjectCount(SimInfo* info)
+    : ObjectAnalyzer(info), seleMan1_(info), evaluator1_(info) {
 
+    //Somehow we need sele1 so we can call setSelectionScript(sele1) ?
+    
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".counts");
     
-    evaluator_.loadScriptString(sele);
+    evaluator1_.loadScriptString(sele1);
     
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
     counts_.clear();
     counts_.resize(10, 0);
@@ -81,8 +81,8 @@ namespace OpenMD {
     nsum_ = 0;
     n2sum_ = 0;
      
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
     
     unsigned int count = seleMan_.getSelectionCount();
@@ -97,7 +97,7 @@ namespace OpenMD {
     n2sum_ += count * count;
   }
 
-  void ObjectCount::processStuntDouble(StuntDouble* sd, int bin) {
+  void ObjectCount::processStuntDouble(StuntDouble* sd) {
     // Fill in later
   }
     

@@ -52,7 +52,7 @@
 using namespace std;
 namespace OpenMD {
   TetrahedralityParamZ::TetrahedralityParamZ(SimInfo* info) 
-    : SlabStatistics(info, sele1, sele2, nzbins, axis) : DoubletType() {
+    : ObjectAnalyzer(info) {
 
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".Qz");

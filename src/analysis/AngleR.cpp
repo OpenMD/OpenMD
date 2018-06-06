@@ -59,12 +59,7 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info,
                  const std::string& sele, RealType len, int nrbins)
-    : NonSpatialStatistics(info, sele, nrbins) : SingletType() {
-    
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
+    : ObjectAnalyzer(info){
         
     deltaR_ = len_ /nRBins_;
     
@@ -90,9 +85,15 @@ namespace OpenMD {
 
   AngleR::~AngleR(){
   }
+
+  AngleR::setSelectionString(std::string& sele1){     
+    evaluator1_.loadScriptString(sele1);
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+    }
+  }
   
-  
-  void AngleR::processFrame(int istep) {
+  void AngleR::processFrame(int iframe) {
     
     int i;    
     StuntDouble* sd;
@@ -100,12 +101,12 @@ namespace OpenMD {
     Vector3d CenterOfMass = thermo.getCom();      
     
     if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
     
     //determine which atom belongs to which slice
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-	 sd = seleMan_.nextSelected(i)) {
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+	 sd = seleMan1_.nextSelected(i)) {
       Vector3d pos = sd->getPos();
       Vector3d r1 = CenterOfMass - pos;
       // only do this if the stunt double actually has a vector associated

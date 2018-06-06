@@ -53,11 +53,11 @@ namespace OpenMD {
 
   
   DensityPlot::DensityPlot(SimInfo* info, 
-			   const std::string& sele, const std::string& cmSele,
+			   const std::string& sele1, const std::string& cmSele,
 			   RealType len, int nrbins) 
-    : ShellStatistics(info, sele, nrbins), 
+    : ShellStatistics(info, sele1, nrbins), ObjectAnalyzer(info), 
       len_(len), halfLen_(len/2), nRBins_(nrbins),
-      selectionScript_(sele), seleMan_(info), evaluator_(info), 
+      selectionScript1_(sele1), seleMan1_(info), evaluator1_(info), 
       cmSelectionScript_(cmSele), cmSeleMan_(info), cmEvaluator_(info) {
 
     string prefixFileName = info_->getPrefixFileName();
@@ -69,10 +69,10 @@ namespace OpenMD {
     
     std::fill(histogram_.begin(), histogram_.end(), 0);  
     
-    evaluator_.loadScriptString(sele);
+    evaluator1_.loadScriptString(sele1);
 
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
     cmEvaluator_.loadScriptString(cmSele);
@@ -99,8 +99,8 @@ namespace OpenMD {
   
   void DensityPlot::processFrame(int istep) {
 
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
     if (cmEvaluator_.isDynamic()) {
@@ -112,8 +112,8 @@ namespace OpenMD {
     Mat3x3d hmat = currentSnapshot_->getHmat();
     RealType slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
     int k; 
-    for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; 
-	 sd = seleMan_.nextSelected(k)) {
+    for (StuntDouble* sd = seleMan1_.beginSelected(k); sd != NULL; 
+	 sd = seleMan1_.nextSelected(k)) {
       
       
       if (!sd->isAtom()) {
@@ -173,8 +173,8 @@ namespace OpenMD {
     int i;
     Vector3d newOrigin(0.0);
     RealType totalMass = 0.0;
-    for (StuntDouble* sd = seleMan_.beginSelected(i); sd != NULL; 
-	 sd = seleMan_.nextSelected(i)) {
+    for (StuntDouble* sd = seleMan1_.beginSelected(i); sd != NULL; 
+	 sd = seleMan1_.nextSelected(i)) {
       RealType mass = sd->getMass();
       totalMass += mass;
       newOrigin += sd->getPos() * mass;        

@@ -53,13 +53,13 @@
 namespace OpenMD {
 
   TetrahedralityParam::TetrahedralityParam(SimInfo* info) : 
-    NonSpatialStatistics(info, sele, nbins), SingletType() {
+    ObjectAnalyzer(info){
 
     string prefixFileName = info->getPrefixFileName();
     setOutputName(prefixFileName + ".q");
     
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
     Q_histogram_.resize(nBins_);
@@ -79,6 +79,9 @@ namespace OpenMD {
 
   TetrahedralityParam::~TetrahedralityParam() {
     Q_histogram_.clear(); 
+  }
+
+  TetrahedralityParam::setSelectionScript(std::string& sele1){
   }
   
   void TetrahedralityParam::initializeHistogram() {
@@ -103,14 +106,14 @@ namespace OpenMD {
     std::vector<std::pair<RealType,StuntDouble*> > myNeighbors;
     int isd;
     
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
     
     // outer loop is over the selected StuntDoubles:
     
-    for (sd = seleMan_.beginSelected(isd); sd != NULL; 
-	 sd = seleMan_.nextSelected(isd)) {
+    for (sd = seleMan1_.beginSelected(isd); sd != NULL; 
+	 sd = seleMan1_.nextSelected(isd)) {
       
       myIndex = sd->getGlobalIndex();
       Qk = 1.0;
