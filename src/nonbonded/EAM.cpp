@@ -849,6 +849,7 @@ namespace OpenMD {
 
     RealType rci = data1.rcut;
     RealType rcj = data2.rcut;
+    RealType rcij = MixingMap[eamtid1][eamtid2].rcut;
 
     RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
     RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
@@ -857,13 +858,13 @@ namespace OpenMD {
     RealType drhoidr(0.0), drhojdr(0.0), dudr(0.0);
 
     rhat =  *(idat.d) / *(idat.rij);
-    if ( *(idat.rij) < rci) {
+    if ( *(idat.rij) < rci && *(idat.rij) < rcij ) {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
     }
     
-    if ( *(idat.rij) < rcj) {
+    if ( *(idat.rij) < rcj && *(idat.rij) < rcij ) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
@@ -887,7 +888,7 @@ namespace OpenMD {
         vb = (1.0 - qb / Nb);
       }
       
-      if ( *(idat.rij) < rci ) {
+      if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
         phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
         dvpdr = dvpdr + 0.5 * (vb/va) * ((rhb/rha)*dpha +
                                          pha*((drhb/rha) - (rhb*drha/rha/rha)));
@@ -900,7 +901,7 @@ namespace OpenMD {
         }        
       }
       
-      if ( *(idat.rij) < rcj) {
+      if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
         phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
         dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
                                          phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
@@ -914,7 +915,7 @@ namespace OpenMD {
       }    
       
     } else {
-      if ( *(idat.rij) < MixingMap[eamtid1][eamtid2].rcut) {
+      if ( *(idat.rij) < rcij ) {
         
         CubicSpline* phi = MixingMap[eamtid1][eamtid2].phi;
         phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
