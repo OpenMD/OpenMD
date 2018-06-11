@@ -900,7 +900,6 @@ namespace OpenMD {
         // only do the field if we're not excluded:
         Ea += C_b *  pre11_ * dv01 * rhat;
         Pa += C_b *  pre11_ * v01;
-
       }
     }
     

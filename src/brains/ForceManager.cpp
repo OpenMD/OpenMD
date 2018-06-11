@@ -980,11 +980,11 @@ namespace OpenMD {
     if (cutoffMethod_ == EWALD_FULL) {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
       curSnapshot->setReciprocalPotential(reciprocalPotential);
+    }
 
-      if (useSurfaceTerm_) {
-        interactionMan_->doSurfaceTerm(surfacePotential);
-      }
-      curSnapshot->setSurfacePotential(surfacePotential);
+    if (useSurfaceTerm_) {
+       interactionMan_->doSurfaceTerm(surfacePotential);
+       curSnapshot->setSurfacePotential(surfacePotential);
     }
 
     if (info_->requiresSelfCorrection()) {
@@ -1748,7 +1748,7 @@ namespace OpenMD {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
       curSnapshot->setReciprocalPotential(reciprocalPotential);
 
-      // interactionMan_->doSurfaceTerm(surfacePotential);
+      interactionMan_->doSurfaceTerm(surfacePotential);
       curSnapshot->setSurfacePotential(surfacePotential);
     }
 
