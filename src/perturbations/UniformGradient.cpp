@@ -188,6 +188,8 @@ namespace OpenMD {
           atype = atom->getAtomType();
 
           r = atom->getPos();
+	  info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
+
           EF = Grad_ * r;
           
           atom->addElectricField(EF * Constants::chargeFieldConvert);

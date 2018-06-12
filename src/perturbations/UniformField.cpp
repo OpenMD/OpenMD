@@ -126,7 +126,8 @@ namespace OpenMD {
           // fluctuating charge force:
 
           r = atom->getPos();
-          
+          info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
+
           atom->addElectricField(EF * Constants::chargeFieldConvert);
                     
 	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
