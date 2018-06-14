@@ -82,7 +82,7 @@ namespace OpenMD {
     void doPair(InteractionData &idat);    
     void doSkipCorrection(InteractionData &idat);
     void doSelfCorrection(SelfData &sdat);
-    void doSurfaceTerm(RealType &surfacePot);
+    void doSurfaceTerm(bool slabGeometry, int axis, RealType &surfacePot);
     void doReciprocalSpaceSum(RealType &recipPot);
     void setCutoffRadius(RealType rCut);
     RealType getSuggestedCutoffRadius(int *atid1);   

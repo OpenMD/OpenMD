@@ -1256,7 +1256,8 @@ namespace OpenMD {
   }
 
 
-  void Electrostatic::calcSurfaceTerm(RealType& pot) {
+  void Electrostatic::calcSurfaceTerm(bool slabGeometry, int axis,
+                                      RealType& pot) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
     RealType C;
@@ -1315,18 +1316,27 @@ namespace OpenMD {
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 
-    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    Vector3d box = hmat.diagonals();
+    RealType V = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType prefactor;
 
-    RealType twoPiOverThreeV = 2.0 * Constants::PI / (3.0 * box.x() * box.y() * box.z());
-    pot +=  eConverter * twoPiOverThreeV * netDipole.lengthSquare();
+    if (slabGeometry) {
+      prefactor = 2.0 * Constants::PI / V;
+      // Compute complementary axes to the privileged axis
+      int axis1 = (axis + 1) % 3;
+      int axis2 = (axis + 2) % 3;
+      netDipole[axis1] = 0.0;
+      netDipole[axis2] = 0.0;
+    } else {
+      prefactor = 2.0 * Constants::PI / (3.0 * V);
+    }
+
+    pot +=  eConverter * prefactor * netDipole.lengthSquare();
   
-
     for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
       for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
           atom = mol->nextAtom(ai)) {  
-        atom->addElectricField( - eConverter * twoPiOverThreeV * 2.0 * netDipole );
+        atom->addElectricField( - eConverter * prefactor * 2.0 * netDipole );
 
         atid = atom->getAtomType()->getIdent();
         data = ElectrostaticMap[Etids[atid]];
@@ -1336,14 +1346,14 @@ namespace OpenMD {
           if (data.is_Fluctuating) {
             r = atom->getPos();
             info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
-            atom->addFlucQFrc( - eConverter * twoPiOverThreeV * 2.0 * dot(r, netDipole) );
+            atom->addFlucQFrc( - eConverter * prefactor * 2.0 * dot(r, netDipole) );
           }
-          atom->addFrc( - eConverter * twoPiOverThreeV * 2.0 * C * netDipole );
+          atom->addFrc( - eConverter * prefactor * 2.0 * C * netDipole );
         }
         
         if (data.is_Dipole) {
           D = atom->getDipole() * mPoleConverter;
-          t = - eConverter * twoPiOverThreeV * 2.0 * cross(D, netDipole);
+          t = - eConverter * prefactor * 2.0 * cross(D, netDipole);
           atom->addTrq(t);
         }
       }

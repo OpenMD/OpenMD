@@ -106,7 +106,7 @@ namespace OpenMD {
     void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
     void setDampingAlpha( RealType alpha );
     void setReactionFieldDielectric( RealType dielectric );
-    void calcSurfaceTerm(RealType& pot);
+    void calcSurfaceTerm(bool slabGeometry, int axis, RealType& pot);
     void ReciprocalSpaceSum(RealType &pot);
 
     // Used by EAM to compute local fields:

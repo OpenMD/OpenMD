@@ -579,9 +579,9 @@ namespace OpenMD {
     return;
   }
 
-  void InteractionManager::doSurfaceTerm(RealType &pot){
+  void InteractionManager::doSurfaceTerm(bool slabGeometry, int axis, RealType &pot){
     if (!initialized_) initialize();
-    electrostatic_->calcSurfaceTerm(pot);
+    electrostatic_->calcSurfaceTerm(slabGeometry, axis, pot);
   }
 
   void InteractionManager::doReciprocalSpaceSum(RealType &pot){

@@ -361,7 +361,8 @@ namespace OpenMD {
       interactionMan_->initialize();
 
       useSurfaceTerm_ = false;  // default, can be set by Ewald or directly
-
+      useSlabGeometry_ = false;
+      
       //! We want to delay the cutoffs until after the interaction
       //! manager has set up the atom-atom interactions so that we can
       //! query them for suggested cutoff values
@@ -377,6 +378,17 @@ namespace OpenMD {
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
       if (info_->getSimParams()->haveUseSurfaceTerm()) {
         useSurfaceTerm_ = info_->getSimParams()->getUseSurfaceTerm();
+        if (info_->getSimParams()->haveUseSlabGeometry()) {
+          useSlabGeometry_ = info_->getSimParams()->getUseSlabGeometry();
+          
+          string axis = toUpperCopy(info_->getSimParams()->getPrivilegedAxis());
+          if (axis.compare("X")==0)
+            axis_ = 0;
+          else if (axis.compare("Y")==0)
+            axis_ = 1;
+          else 
+            axis_ = 2;            
+        }        
       }
     }
 
@@ -983,10 +995,10 @@ namespace OpenMD {
     }
 
     if (useSurfaceTerm_) {
-       interactionMan_->doSurfaceTerm(surfacePotential);
-       curSnapshot->setSurfacePotential(surfacePotential);
+      interactionMan_->doSurfaceTerm(useSlabGeometry_, axis_, surfacePotential);
+      curSnapshot->setSurfacePotential(surfacePotential);
     }
-
+    
     if (info_->requiresSelfCorrection()) {
       for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
         if (doPotentialSelection_) {
@@ -1748,7 +1760,7 @@ namespace OpenMD {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
       curSnapshot->setReciprocalPotential(reciprocalPotential);
 
-      interactionMan_->doSurfaceTerm(surfacePotential);
+      interactionMan_->doSurfaceTerm(useSlabGeometry_, axis_, surfacePotential);
       curSnapshot->setSurfacePotential(surfacePotential);
     }
 

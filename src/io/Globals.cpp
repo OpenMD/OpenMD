@@ -143,6 +143,7 @@ namespace OpenMD {
                                             "electrostaticScreeningMethod",
                                             "DAMPED");
     DefineOptionalParameter(UseSurfaceTerm, "useSurfaceTerm");
+    DefineOptionalParameter(UseSurfaceTerm, "useSlabGeometry");
     DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
     DefineOptionalParameterWithDefaultValue(CompressDumpFile,
                                             "compressDumpFile", false);

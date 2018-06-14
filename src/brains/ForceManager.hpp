@@ -93,6 +93,8 @@ namespace OpenMD {
     bool doLongRangeCorrections_;
     bool usePeriodicBoundaryConditions_;
     bool useSurfaceTerm_;
+    bool useSlabGeometry_;
+    int axis_;
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
