@@ -333,7 +333,10 @@ int main(int argc, char *argv []) {
 
   int nMax = args_info.npoints_arg;
   RealType delta = args_info.delta_arg;
-  
+
+  //register forcefields, integrators and minimizers
+  registerAll();
+
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, true);
