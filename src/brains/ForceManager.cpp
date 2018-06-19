@@ -480,10 +480,12 @@ namespace OpenMD {
 
     potVec zeroPot(0.0);
     snap->setLongRangePotential(zeroPot);
+    
     snap->setExcludedPotentials(zeroPot);
     if (doPotentialSelection_)
       snap->setSelectionPotentials(zeroPot);
 
+    snap->setSelfPotential(0.0);
     snap->setRestraintPotential(0.0);
     snap->setRawPotential(0.0);
 
