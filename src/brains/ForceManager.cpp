@@ -377,17 +377,28 @@ namespace OpenMD {
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
       if (info_->getSimParams()->haveUseSurfaceTerm()) {
-        useSurfaceTerm_ = info_->getSimParams()->getUseSurfaceTerm();
-        if (info_->getSimParams()->haveUseSlabGeometry()) {
-          useSlabGeometry_ = info_->getSimParams()->getUseSlabGeometry();
-          
-          string axis = toUpperCopy(info_->getSimParams()->getPrivilegedAxis());
-          if (axis.compare("X")==0)
-            axis_ = 0;
-          else if (axis.compare("Y")==0)
-            axis_ = 1;
-          else 
-            axis_ = 2;            
+
+        if (info_->usesElectrostaticAtoms()) {
+          useSurfaceTerm_ = info_->getSimParams()->getUseSurfaceTerm();
+          if (info_->getSimParams()->haveUseSlabGeometry()) {
+            useSlabGeometry_ = info_->getSimParams()->getUseSlabGeometry();
+            
+            string axis = toUpperCopy(info_->getSimParams()->getPrivilegedAxis());
+            if (axis.compare("X")==0)
+              axis_ = 0;
+            else if (axis.compare("Y")==0)
+              axis_ = 1;
+            else 
+              axis_ = 2;            
+          }
+        } else {
+          sprintf( painCave.errMsg,
+                   "ForceManager::initialize : useSurfaceTerm was set true\n"
+                   "\tbut no electrostatic atoms are present. OpenMD will\n"
+                   "\tignore this setting.\n");
+          painCave.isFatal = 0;
+          painCave.severity = OPENMD_WARNING;
+          simError();
         }        
       }
     }
