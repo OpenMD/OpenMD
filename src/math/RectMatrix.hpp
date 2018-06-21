@@ -392,26 +392,37 @@ namespace OpenMD {
 
     template<class MatrixType>
     void setSubMatrix(unsigned int beginRow, unsigned int beginCol, const MatrixType& m) {
-        assert(beginRow + m.getNRow() -1 <= getNRow());
-        assert(beginCol + m.getNCol() -1 <= getNCol());
+      assert(beginRow + m.getNRow() -1 <= getNRow());
+      assert(beginCol + m.getNCol() -1 <= getNCol());
 
-        for (unsigned int i = 0; i < m.getNRow(); ++i)
-            for (unsigned int j = 0; j < m.getNCol(); ++j)
-                this->data_[beginRow+i][beginCol+j] = m(i, j);
+      for (unsigned int i = 0; i < m.getNRow(); ++i)
+        for (unsigned int j = 0; j < m.getNCol(); ++j)
+          this->data_[beginRow+i][beginCol+j] = m(i, j);
     }
 
     template<class MatrixType>
     void getSubMatrix(unsigned int beginRow, unsigned int beginCol, MatrixType& m) {
-        assert(beginRow + m.getNRow() -1 <= getNRow());
-        assert(beginCol + m.getNCol() - 1 <= getNCol());
+      assert(beginRow + m.getNRow() -1 <= getNRow());
+      assert(beginCol + m.getNCol() - 1 <= getNCol());
 
-        for (unsigned int i = 0; i < m.getNRow(); ++i)
-            for (unsigned int j = 0; j < m.getNCol(); ++j)
-                m(i, j) = this->data_[beginRow+i][beginCol+j];
+      for (unsigned int i = 0; i < m.getNRow(); ++i)
+        for (unsigned int j = 0; j < m.getNCol(); ++j)
+          m(i, j) = this->data_[beginRow+i][beginCol+j];
     }
     
     unsigned int getNRow() const {return Row;}
-    unsigned int getNCol() const {return Col;}        
+    unsigned int getNCol() const {return Col;}
+
+    Real frobeniusNorm() {
+      Real norm(0.0);
+      for (unsigned int i = 0; i < Row; i++) {
+	for (unsigned int j = 0; j < Col; j++) {
+	  norm += pow(abs(this->data_[i][j]),2);
+        }
+      }
+      return sqrt(norm);
+    }
+
 
   protected:
     Real data_[Row][Col];
@@ -555,16 +566,16 @@ namespace OpenMD {
   }    
 
     
-    /**
-     * Returns the tensor contraction (double dot product) of two rank 2
-     * tensors (or Matrices)
-     *
-     * \f[ \mathbf{A} \colon \! \mathbf{B} = \sum_\alpha \sum_\beta \mathbf{A}_{\alpha \beta} B_{\alpha \beta} \f] 
-     *
-     * @param t1 first tensor
-     * @param t2 second tensor
-     * @return the tensor contraction (double dot product) of t1 and t2
-     */
+  /**
+   * Returns the tensor contraction (double dot product) of two rank 2
+   * tensors (or Matrices)
+   *
+   * \f[ \mathbf{A} \colon \! \mathbf{B} = \sum_\alpha \sum_\beta \mathbf{A}_{\alpha \beta} B_{\alpha \beta} \f] 
+   *
+   * @param t1 first tensor
+   * @param t2 second tensor
+   * @return the tensor contraction (double dot product) of t1 and t2
+   */
   template<typename Real, unsigned int Row, unsigned int Col> 
   inline Real doubleDot( const RectMatrix<Real, Row, Col>& t1, 
                          const RectMatrix<Real, Row, Col>& t2 ) {
@@ -590,7 +601,7 @@ namespace OpenMD {
    * Equation 21 defines:
    * \f[
    * V_alpha = \sum_\beta \left[ A_{\alpha+1,\beta} * B_{\alpha+2,\beta} 
-                           -A_{\alpha+2,\beta} * B_{\alpha+2,\beta} \right]
+   -A_{\alpha+2,\beta} * B_{\alpha+2,\beta} \right]
    * \f]
 
    * where \f[\alpha+1\f] and \f[\alpha+2\f] are regarded as cyclic
@@ -603,7 +614,7 @@ namespace OpenMD {
    */
   template<typename Real, unsigned int Row, unsigned int Col>
   inline Vector<Real, Row> mCross( const RectMatrix<Real, Row, Col>& t1, 
-                                  const RectMatrix<Real, Row, Col>& t2 ) {
+                                   const RectMatrix<Real, Row, Col>& t2 ) {
     Vector<Real, Row> result;
     unsigned int i1;
     unsigned int i2;

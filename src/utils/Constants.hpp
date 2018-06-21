@@ -63,6 +63,7 @@ namespace OpenMD {
     
     const RealType pressureConvert = 1.63882576e8; //!< converts amu*fs^-2*Ang^-1 -> atm
     const RealType elasticConvert = 1.66053386e4; //!< converts amu*fs^-2*Ang^-1 -> GPa
+    const RealType energyElasticConvert = 6.947695345; //!< converts kcal*mol^-1*Ang^-3 -> GPa
 
     //! \name chargeFieldConvert Converts electron-volts to kcal/mol
     const RealType chargeFieldConvert = 23.0609; 

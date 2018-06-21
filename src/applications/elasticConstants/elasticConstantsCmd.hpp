@@ -42,6 +42,9 @@ struct gengetopt_args_info
   char * input_arg;	/**< @brief Input file name.  */
   char * input_orig;	/**< @brief Input file name original value given at command line.  */
   const char *input_help; /**< @brief Input file name help description.  */
+  char * method_arg;	/**< @brief Calculation Method.  */
+  char * method_orig;	/**< @brief Calculation Method original value given at command line.  */
+  const char *method_help; /**< @brief Calculation Method help description.  */
   int npoints_arg;	/**< @brief number of points for fitting
   stress-strain relationship (default='25').  */
   char * npoints_orig;	/**< @brief number of points for fitting
@@ -55,6 +58,7 @@ struct gengetopt_args_info
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
+  unsigned int method_given ;	/**< @brief Whether method was given.  */
   unsigned int npoints_given ;	/**< @brief Whether npoints was given.  */
   unsigned int delta_given ;	/**< @brief Whether delta was given.  */
 
@@ -182,6 +186,8 @@ void cmdline_parser_free (struct gengetopt_args_info *args_info);
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_method_values[];  /**< @brief Possible values for method. */
 
 
 #ifdef __cplusplus

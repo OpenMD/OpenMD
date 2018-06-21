@@ -26,18 +26,19 @@
 
 const char *gengetopt_args_info_purpose = "Computes the general elastic constants that relate stress and strain for a\ngiven input configuration";
 
-const char *gengetopt_args_info_usage = "Usage: elasticConstants [-h|--help] [-V|--version] [-iSTRING|--input=STRING]\n         [-nINT|--npoints=INT] [-dDOUBLE|--delta=DOUBLE] [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: elasticConstants [-h|--help] [-V|--version] [-iSTRING|--input=STRING]\n         [-mSTRING|--method=STRING] [-nINT|--npoints=INT]\n         [-dDOUBLE|--delta=DOUBLE] [FILES]...";
 
 const char *gengetopt_args_info_versiontext = "";
 
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help          Print help and exit",
-  "  -V, --version       Print version and exit",
-  "  -i, --input=STRING  Input file name",
-  "  -n, --npoints=INT   number of points for fitting\n                        stress-strain relationship  (default=`25')",
-  "  -d, --delta=DOUBLE  size of relative volume changes for strains\n                        (default=`0.01')",
+  "  -h, --help           Print help and exit",
+  "  -V, --version        Print version and exit",
+  "  -i, --input=STRING   Input file name",
+  "  -m, --method=STRING  Calculation Method  (possible values=\"energy\",\n                         \"stress\")",
+  "  -n, --npoints=INT    number of points for fitting\n                         stress-strain relationship  (default=`25')",
+  "  -d, --delta=DOUBLE   size of relative volume changes for strains\n                         (default=`0.01')",
     0
 };
 
@@ -57,6 +58,8 @@ cmdline_parser_internal (int argc, char **argv, struct gengetopt_args_info *args
                         struct cmdline_parser_params *params, const char *additional_error);
 
 
+const char *cmdline_parser_method_values[] = {"energy", "stress", 0}; /*< Possible values for method. */
+
 static char *
 gengetopt_strdup (const char *s);
 
@@ -66,6 +69,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->input_given = 0 ;
+  args_info->method_given = 0 ;
   args_info->npoints_given = 0 ;
   args_info->delta_given = 0 ;
 }
@@ -76,6 +80,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->input_arg = NULL;
   args_info->input_orig = NULL;
+  args_info->method_arg = NULL;
+  args_info->method_orig = NULL;
   args_info->npoints_arg = 25;
   args_info->npoints_orig = NULL;
   args_info->delta_arg = 0.01;
@@ -91,8 +97,9 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->input_help = gengetopt_args_info_help[2] ;
-  args_info->npoints_help = gengetopt_args_info_help[3] ;
-  args_info->delta_help = gengetopt_args_info_help[4] ;
+  args_info->method_help = gengetopt_args_info_help[3] ;
+  args_info->npoints_help = gengetopt_args_info_help[4] ;
+  args_info->delta_help = gengetopt_args_info_help[5] ;
   
 }
 
@@ -181,6 +188,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   unsigned int i;
   free_string_field (&(args_info->input_arg));
   free_string_field (&(args_info->input_orig));
+  free_string_field (&(args_info->method_arg));
+  free_string_field (&(args_info->method_orig));
   free_string_field (&(args_info->npoints_orig));
   free_string_field (&(args_info->delta_orig));
   
@@ -194,13 +203,54 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   clear_given (args_info);
 }
 
+/**
+ * @param val the value to check
+ * @param values the possible values
+ * @return the index of the matched value:
+ * -1 if no value matched,
+ * -2 if more than one value has matched
+ */
+static int
+check_possible_values(const char *val, const char *values[])
+{
+  int i, found, last;
+  size_t len;
+
+  if (!val)   /* otherwise strlen() crashes below */
+    return -1; /* -1 means no argument for the option */
+
+  found = last = 0;
+
+  for (i = 0, len = strlen(val); values[i]; ++i)
+    {
+      if (strncmp(val, values[i], len) == 0)
+        {
+          ++found;
+          last = i;
+          if (strlen(values[i]) == len)
+            return i; /* exact macth no need to check more */
+        }
+    }
+
+  if (found == 1) /* one match: OK */
+    return last;
+
+  return (found ? -2 : -1); /* return many values or none matched */
+}
+
 
 static void
 write_into_file(FILE *outfile, const char *opt, const char *arg, const char *values[])
 {
-  FIX_UNUSED (values);
+  int found = -1;
   if (arg) {
-    fprintf(outfile, "%s=\"%s\"\n", opt, arg);
+    if (values) {
+      found = check_possible_values(arg, values);      
+    }
+    if (found >= 0)
+      fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
+    else
+      fprintf(outfile, "%s=\"%s\"\n", opt, arg);
   } else {
     fprintf(outfile, "%s\n", opt);
   }
@@ -224,6 +274,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->input_given)
     write_into_file(outfile, "input", args_info->input_orig, 0);
+  if (args_info->method_given)
+    write_into_file(outfile, "method", args_info->method_orig, cmdline_parser_method_values);
   if (args_info->npoints_given)
     write_into_file(outfile, "npoints", args_info->npoints_orig, 0);
   if (args_info->delta_given)
@@ -974,7 +1026,18 @@ int update_arg(void *field, char **orig_field,
       return 1; /* failure */
     }
 
-  FIX_UNUSED (default_value);
+  if (possible_values && (found = check_possible_values((value ? value : default_value), possible_values)) < 0)
+    {
+      if (short_opt != '-')
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n", 
+          package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt, short_opt,
+          (additional_error ? additional_error : ""));
+      else
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n", 
+          package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt,
+          (additional_error ? additional_error : ""));
+      return 1; /* failure */
+    }
     
   if (field_given && *field_given && ! override)
     return 0;
@@ -1082,6 +1145,7 @@ cmdline_parser_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "input",	1, NULL, 'i' },
+        { "method",	1, NULL, 'm' },
         { "npoints",	1, NULL, 'n' },
         { "delta",	1, NULL, 'd' },
         { 0,  0, 0, 0 }
@@ -1092,7 +1156,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:n:d:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:m:n:d:", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1121,6 +1185,18 @@ cmdline_parser_internal (
               &(local_args_info.input_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "input", 'i',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'm':	/* Calculation Method.  */
+        
+        
+          if (update_arg( (void *)&(args_info->method_arg), 
+               &(args_info->method_orig), &(args_info->method_given),
+              &(local_args_info.method_given), optarg, cmdline_parser_method_values, 0, ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "method", 'm',
               additional_error))
             goto failure;
         
