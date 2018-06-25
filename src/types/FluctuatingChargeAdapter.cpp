@@ -220,6 +220,7 @@ namespace OpenMD {
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType nValence,
+                                                       int slaterN,
                                                        RealType slaterZeta,
                                                        RealType coupling,
                                                        vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
@@ -233,7 +234,8 @@ namespace OpenMD {
     fqParam->isMetallic = true;
     fqParam->usesSlaterElectrostatics = true;
     fqParam->nValence = nValence;
-    fqParam->slaterZeta;
+    fqParam->slaterZeta = slaterZeta;
+    fqParam->slaterN = slaterN;
     fqParam->coupling = coupling;
     fqParam->diabaticStates = diabaticStates;
     

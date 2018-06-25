@@ -226,11 +226,13 @@ namespace OpenMD {
     bool a_is_Dipole;
     bool a_is_Quadrupole;
     bool a_is_Fluctuating;
+    bool a_uses_Slater;
 
     bool b_is_Charge;
     bool b_is_Dipole;
     bool b_is_Quadrupole;
     bool b_is_Fluctuating;
+    bool b_uses_Slater;
 
 
     /*

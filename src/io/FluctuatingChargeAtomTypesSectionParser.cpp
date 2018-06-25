@@ -202,7 +202,7 @@ namespace OpenMD {
         
     case fqtEAMSlater:
 
-      if (nTokens < 6 || nTokens % 3 != 0) {
+      if (nTokens < 7 || nTokens % 3 != 1) {
         sprintf(painCave.errMsg,
                 "FluctuatingChargeAtomTypesSectionParser Error: "
                 "Not enough tokens at line %d\n",
@@ -212,12 +212,17 @@ namespace OpenMD {
       } else {
         RealType nValence = tokenizer.nextTokenAsDouble();
         nTokens -= 1;
-        RealType slaterZeta = tokenizer.nextTokenAsDouble() / dus_;
+        RealType re         = dus_ * tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+        RealType beta       = tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+        RealType slaterZeta = beta / (2.0 * re);
+        int slaterN = 1;
+        
+        RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
         nTokens -= 1;
 
         std::vector<tuple3<RealType, RealType, RealType> > diabaticStates;
-        RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
-        nTokens -= 1;
         int nStates = nTokens / 3;
         RealType charge;
         RealType ionizationEnergy;
@@ -231,12 +236,10 @@ namespace OpenMD {
         }
 
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-        fqa.makeFluctuatingCharge(chargeMass, nValence, slaterZeta, coupling,
-                                  diabaticStates);
+        fqa.makeFluctuatingCharge(chargeMass, nValence, slaterN, slaterZeta,
+                                  coupling, diabaticStates);
       }
       break;
-
-
 
     case fqtUnknown:
     default:

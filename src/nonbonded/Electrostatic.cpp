@@ -767,11 +767,15 @@ namespace OpenMD {
       a_is_Dipole = data1.is_Dipole;
       a_is_Quadrupole = data1.is_Quadrupole;
       a_is_Fluctuating = data1.is_Fluctuating;
+      a_uses_Slater = data1.uses_SlaterJ;
+
     } else {
       a_is_Charge = false;
       a_is_Dipole = false;
       a_is_Quadrupole = false;
       a_is_Fluctuating = false;
+      a_uses_Slater = false;
+
     }
     if (Etids[idat.atid2] != -1) { 
       data2 = ElectrostaticMap[Etids[idat.atid2]];
@@ -779,11 +783,14 @@ namespace OpenMD {
       b_is_Dipole = data2.is_Dipole;
       b_is_Quadrupole = data2.is_Quadrupole;
       b_is_Fluctuating = data2.is_Fluctuating;
+      b_uses_Slater = data2.uses_SlaterJ;
+
     } else {
       b_is_Charge = false;
       b_is_Dipole = false;
       b_is_Quadrupole = false;
       b_is_Fluctuating = false;
+      b_uses_Slater = false;
     }
 
     U = 0.0;  // Potential
@@ -813,10 +820,19 @@ namespace OpenMD {
       
     // Obtain all of the required radial function values from the
     // spline structures:
-    
+
+    if (((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) ||
+        (a_uses_Slater && b_uses_Slater)) {
+      J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
+    }    
+        
     // needed for fields (and forces):
     if (a_is_Charge || b_is_Charge) {
-      v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
+      if (a_uses_Slater && b_uses_Slater) {
+        J->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
+      } else {
+        v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
+      }
     }
     if (a_is_Dipole || b_is_Dipole) {
       v11s->getValueAndDerivativeAt( *(idat.rij), v11, dv11);
@@ -928,18 +944,14 @@ namespace OpenMD {
       }
     }
         
-
-    if ((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) {
-      J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
-    }    
-
     if (a_is_Charge) {     
       
       if (b_is_Charge) {
-        pref =  pre11_ * *(idat.electroMult);      
+        
+        pref =  pre11_ * *(idat.electroMult);        
         U  += C_a * C_b * pref * v01;
         F  += C_a * C_b * pref * dv01 * rhat;
-
+        
         // If this is an excluded pair, there are still indirect
         // interactions via the reaction field we must worry about:
 
