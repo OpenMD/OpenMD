@@ -60,6 +60,7 @@ namespace OpenMD {
     bool is_Quadrupole;
     bool is_Fluctuating;
     bool has_MultipleMinima;
+    bool uses_SlaterJ;
     RealType fixedCharge;
     RealType hardness;
     RealType electronegativity;

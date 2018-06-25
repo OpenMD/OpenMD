@@ -657,6 +657,7 @@ namespace OpenMD {
 
     if (fqa.isFluctuatingCharge()) {
       electrostaticAtomData.is_Fluctuating = true;
+      electrostaticAtomData.uses_SlaterJ = fqa.usesSlaterElectrostatics();
       electrostaticAtomData.electronegativity = fqa.getElectronegativity();
       electrostaticAtomData.hardness = fqa.getHardness();
       electrostaticAtomData.slaterN = fqa.getSlaterN();

@@ -56,6 +56,7 @@ namespace OpenMD {
     RealType chargeMass;
     bool hasMultipleMinima;
     bool isMetallic;
+    bool usesSlaterElectrostatics;
     RealType nValence;     /** number of "electrons" in valence shell */
     RealType electronegativity; /** (relative) electronegativity */
     RealType hardness;     /** diagonal "Coulomb" Jii */
@@ -80,10 +81,14 @@ namespace OpenMD {
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
                                RealType coupling,
                                vector<tuple3<RealType, RealType, RealType> > diabaticStates);
+    void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
+                               RealType slaterZeta, RealType coupling,
+                               vector<tuple3<RealType, RealType, RealType> > diabaticStates);
 
     bool isFluctuatingCharge();
     bool isMetallic();
     bool hasMultipleMinima();
+    bool usesSlaterElectrostatics();
     RealType getChargeMass();
     RealType getElectronegativity();
     RealType getHardness();

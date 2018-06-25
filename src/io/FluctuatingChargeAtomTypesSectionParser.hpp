@@ -58,6 +58,7 @@ namespace OpenMD {
       fqtHardness,
       fqtMultipleMinima,
       fqtEAM,
+      fqtEAMSlater,
       fqtUnknown
     };
 

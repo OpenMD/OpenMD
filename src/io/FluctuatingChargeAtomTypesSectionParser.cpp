@@ -58,6 +58,7 @@ namespace OpenMD {
     stringToEnumMap_["Hardness"] =  fqtHardness;
     stringToEnumMap_["MultipleMinima"] =  fqtMultipleMinima;
     stringToEnumMap_["EAM"] =  fqtEAM;
+    stringToEnumMap_["EAMSlater"] =  fqtEAMSlater;
   }
 
   void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
@@ -85,16 +86,16 @@ namespace OpenMD {
     string atomTypeName = tokenizer.nextToken();
     AtomType* atomType = ff.getAtomType(atomTypeName);
     if (atomType != NULL) {
-        FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+      FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 
-	// All fluctuating charges are charges, and if we haven't
-	// already set values for the charge, then start with zero.
-	if (! fca.isFixedCharge()) {
-	  RealType charge = 0.0;
-	  fca.makeFixedCharge(charge);
-	}
+      // All fluctuating charges are charges, and if we haven't
+      // already set values for the charge, then start with zero.
+      if (! fca.isFixedCharge()) {
+        RealType charge = 0.0;
+        fca.makeFixedCharge(charge);
+      }
 
-      } else {
+    } else {
       sprintf(painCave.errMsg,
               "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
               "has not been created yet\n", atomTypeName.c_str());
@@ -166,38 +167,75 @@ namespace OpenMD {
       }
       break;
 
-      case fqtEAM:
-        if (nTokens < 5 || nTokens % 3 != 2) {
-          sprintf(painCave.errMsg,
-                  "FluctuatingChargeAtomTypesSectionParser Error: "
-                  "Not enough tokens at line %d\n",
-                  lineNo);
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          RealType nValence = tokenizer.nextTokenAsDouble();
-          nTokens -= 1;
+    case fqtEAM:
+      if (nTokens < 5 || nTokens % 3 != 2) {
+        sprintf(painCave.errMsg,
+                "FluctuatingChargeAtomTypesSectionParser Error: "
+                "Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType nValence = tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
 
-          std::vector<tuple3<RealType, RealType, RealType> > diabaticStates;
-          RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
-          nTokens -= 1;
-          int nStates = nTokens / 3;
-          RealType charge;
-          RealType ionizationEnergy;
-          RealType curvature;
-          for (int i = 0; i < nStates; ++i) {
-            charge = cus_ * tokenizer.nextTokenAsDouble();
-            ionizationEnergy = eus_ * tokenizer.nextTokenAsDouble();
-            curvature = curvus * tokenizer.nextTokenAsDouble();
-            diabaticStates.push_back( make_tuple3( charge, ionizationEnergy,
-                                                   curvature ));
-          }
-
-          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-          fqa.makeFluctuatingCharge(chargeMass, nValence, coupling,
-                                    diabaticStates);
+        std::vector<tuple3<RealType, RealType, RealType> > diabaticStates;
+        RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+        int nStates = nTokens / 3;
+        RealType charge;
+        RealType ionizationEnergy;
+        RealType curvature;
+        for (int i = 0; i < nStates; ++i) {
+          charge = cus_ * tokenizer.nextTokenAsDouble();
+          ionizationEnergy = eus_ * tokenizer.nextTokenAsDouble();
+          curvature = curvus * tokenizer.nextTokenAsDouble();
+          diabaticStates.push_back( make_tuple3( charge, ionizationEnergy,
+                                                 curvature ));
         }
-        break;
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+        fqa.makeFluctuatingCharge(chargeMass, nValence, coupling,
+                                  diabaticStates);
+      }
+      break;
+        
+    case fqtEAMSlater:
+
+      if (nTokens < 6 || nTokens % 3 != 0) {
+        sprintf(painCave.errMsg,
+                "FluctuatingChargeAtomTypesSectionParser Error: "
+                "Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType nValence = tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+        RealType slaterZeta = tokenizer.nextTokenAsDouble() / dus_;
+        nTokens -= 1;
+
+        std::vector<tuple3<RealType, RealType, RealType> > diabaticStates;
+        RealType coupling = eus_ * tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+        int nStates = nTokens / 3;
+        RealType charge;
+        RealType ionizationEnergy;
+        RealType curvature;
+        for (int i = 0; i < nStates; ++i) {
+          charge = cus_ * tokenizer.nextTokenAsDouble();
+          ionizationEnergy = eus_ * tokenizer.nextTokenAsDouble();
+          curvature = curvus * tokenizer.nextTokenAsDouble();
+          diabaticStates.push_back( make_tuple3( charge, ionizationEnergy,
+                                                 curvature ));
+        }
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+        fqa.makeFluctuatingCharge(chargeMass, nValence, slaterZeta, coupling,
+                                  diabaticStates);
+      }
+      break;
+
 
 
     case fqtUnknown:
