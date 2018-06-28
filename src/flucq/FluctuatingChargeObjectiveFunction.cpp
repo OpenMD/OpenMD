@@ -65,8 +65,7 @@ namespace OpenMD{
   
   void FluctuatingChargeObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
     
-    setCoor(x);     
-    
+    setCoor(x);         
     forceMan_->calcForces(); 
     fqConstraints_->applyConstraints();
 
@@ -74,7 +73,7 @@ namespace OpenMD{
   }
   
   RealType FluctuatingChargeObjectiveFunction::valueAndGradient(DynamicVector<RealType>& grad,
-                                                              const DynamicVector<RealType>& x) {
+                                                                const DynamicVector<RealType>& x) {
 
     setCoor(x);     
     forceMan_->calcForces();

@@ -169,10 +169,10 @@ namespace OpenMD {
     // ForceManager computes the potential and stores it in the
     // Snapshot.  All we have to do is report it.
 
-    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();    
     return snap->getPotentialEnergy();
   }
-
+  
   potVec Thermo::getSelectionPotentials() {
 
     // ForceManager computes the selection potentials and stores them
@@ -310,7 +310,7 @@ namespace OpenMD {
   }
 
 
-    RealType Thermo::getChargeMomentum() {
+  RealType Thermo::getChargeMomentum() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (!snap->hasChargeMomentum) {
@@ -417,7 +417,6 @@ namespace OpenMD {
     }
     return snap->getPressureTensor();
   }
-
 
   Vector3d Thermo::getSystemDipole() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -621,29 +620,29 @@ namespace OpenMD {
       
       for (sd = mol->beginIntegrableObject(iiter); 
            sd != NULL; 
-	   sd = mol->nextIntegrableObject(iiter)) {
+           sd = mol->nextIntegrableObject(iiter)) {
         
-	mass = sd->getMass();
-	vel = sd->getVel();
+        mass = sd->getMass();
+        vel = sd->getVel();
 
-	kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
+        kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
         
-	if (sd->isDirectional()) {
-	  angMom = sd->getJ();
-	  I = sd->getI();
+        if (sd->isDirectional()) {
+          angMom = sd->getJ();
+          I = sd->getI();
 
-	  if (sd->isLinear()) {
-	    i = sd->linearAxis();
-	    j = (i + 1) % 3;
-	    k = (i + 2) % 3;
-	    kinetic += angMom[j] * angMom[j] / I(j, j) 
+          if (sd->isLinear()) {
+            i = sd->linearAxis();
+            j = (i + 1) % 3;
+            k = (i + 2) % 3;
+            kinetic += angMom[j] * angMom[j] / I(j, j) 
               + angMom[k] * angMom[k] / I(k, k);
-	  } else {                        
-	    kinetic += angMom[0]*angMom[0]/I(0, 0) 
+          } else {                        
+            kinetic += angMom[0]*angMom[0]/I(0, 0) 
               + angMom[1]*angMom[1]/I(1, 1) 
-	      + angMom[2]*angMom[2]/I(2, 2);
-	  }
-	}
+              + angMom[2]*angMom[2]/I(2, 2);
+          }
+        }
 
         potential = 0.0;
 
@@ -1047,13 +1046,13 @@ namespace OpenMD {
         Vector3d pos1, pos2, rab;
         
 #ifdef IS_MPI        
-	int mol1 = info_->getGlobalMolMembership(tap.first);
-	int mol2 = info_->getGlobalMolMembership(tap.second);
+        int mol1 = info_->getGlobalMolMembership(tap.first);
+        int mol2 = info_->getGlobalMolMembership(tap.second);
 
         int proc1 = info_->getMolToProc(mol1);
         int proc2 = info_->getMolToProc(mol2);
 
-	RealType data[3];
+        RealType data[3];
         if (proc1 == worldRank) {
           StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
           pos1 = sd1->getPos();

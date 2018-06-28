@@ -1512,7 +1512,7 @@ namespace OpenMD {
         
         // find single index of this cell:
         cellIndex = Vlinear(whichCell, nCells_);
-        
+
         // add this cutoff group to the list of groups in this cell;
         cellList_[cellIndex].push_back(i);
       }

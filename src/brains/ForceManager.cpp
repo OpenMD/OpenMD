@@ -752,6 +752,7 @@ namespace OpenMD {
     RealType dVdFQ1(0.0);
     RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
+    potVec selfPotential(0.0);
     RealType reciprocalPotential(0.0);
     RealType surfacePotential(0.0);
     potVec workPot(0.0);
@@ -1011,7 +1012,7 @@ namespace OpenMD {
       interactionMan_->doSurfaceTerm(useSlabGeometry_, axis_, surfacePotential);
       curSnapshot->setSurfacePotential(surfacePotential);
     }
-    
+
     if (info_->requiresSelfCorrection()) {
       for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
         if (doPotentialSelection_) {
@@ -1027,13 +1028,14 @@ namespace OpenMD {
     // collects single-atom information
     fDecomp_->collectSelfData();
 
-    longRangePotential = *(fDecomp_->getSelfPotential()) +
-      *(fDecomp_->getPairwisePotential());
-
+    longRangePotential = *(fDecomp_->getPairwisePotential());
     curSnapshot->setLongRangePotential(longRangePotential);
 
+    selfPotential =  *(fDecomp_->getSelfPotential());
+    curSnapshot->setSelfPotential(selfPotential);     
+
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
-                                       *(fDecomp_->getExcludedPotential()));
+                                       *(fDecomp_->getExcludedPotential()));   
 
     if (doPotentialSelection_) {
       selectionPotential  = curSnapshot->getSelectionPotentials();
@@ -1519,6 +1521,7 @@ namespace OpenMD {
     RealType dVdFQ1(0.0);
     RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
+    potVec selfPotential(0.0);
     RealType reciprocalPotential(0.0);
     RealType surfacePotential(0.0);
     potVec workPot(0.0);
@@ -1792,10 +1795,11 @@ namespace OpenMD {
     // collects single-atom information
     fDecomp_->collectSelfData();
 
-    longRangePotential = *(fDecomp_->getSelfPotential()) +
-      *(fDecomp_->getPairwisePotential());
-
+    longRangePotential = *(fDecomp_->getPairwisePotential());
     curSnapshot->setLongRangePotential(longRangePotential);
+
+    selfPotential = *(fDecomp_->getSelfPotential());
+    curSnapshot->setSelfPotential(selfPotential);
 
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
                                        *(fDecomp_->getExcludedPotential()));

@@ -1194,7 +1194,7 @@ namespace OpenMD {
     bool i_is_Quadrupole = data.is_Quadrupole;
     bool i_is_Fluctuating = data.is_Fluctuating;
     RealType C_a = data.fixedCharge;   
-    RealType self(0.0), preVal, DdD(0.0), trQ, trQQ;
+    RealType selfPot(0.0), fqf(0.0), preVal, DdD(0.0), trQ, trQQ;
 
     if (i_is_Dipole) {
       DdD = data.dipole.lengthSquare();
@@ -1203,9 +1203,8 @@ namespace OpenMD {
     if (i_is_Fluctuating) {
       C_a += *(sdat.flucQ);
 
-      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ),  
-                                 (*(sdat.selfPot))[ELECTROSTATIC_FAMILY], 
-                                 *(sdat.flucQfrc) );
+      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ), selfPot, fqf );
+      
     }
 
     switch (summationMethod_) {
@@ -1216,16 +1215,16 @@ namespace OpenMD {
         // Molecular Dynamics Simulation with Friedman’s Image Charge
         // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
         preVal = pre11_ * preRF_ * C_a * C_a;
-        (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= 0.5 * preVal / cutoffRadius_;
+        selfPot -= 0.5 * preVal / cutoffRadius_;
         if (i_is_Fluctuating) {
-          *(sdat.flucQfrc) += pre11_ * preRF_ * C_a / cutoffRadius_;
+          fqf += pre11_ * preRF_ * C_a / cutoffRadius_;
         }
         if (sdat.isSelected)
           (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_; 
       }
 
       if (i_is_Dipole) {
-        (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
+        selfPot -= pre22_ * preRF_ * DdD;
         if (sdat.isSelected)
           (*(sdat.selePot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
       }
@@ -1237,35 +1236,39 @@ namespace OpenMD {
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
       if (i_is_Charge) {
-        self += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));        
+        selfPot += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));        
         if (i_is_Fluctuating) {
-          *(sdat.flucQfrc) -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
+          // fqf -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
+          // If the surface of the cutoff sphere is only the net charge:
+          fqf -= selfMult1_ * pre11_ * (C_a + *(sdat.skippedCharge));
         }
       }
       if (i_is_Dipole) 
-        self += selfMult2_ * pre22_ * DdD;      
+        selfPot += selfMult2_ * pre22_ * DdD;      
       if (i_is_Quadrupole) {
         trQ = data.quadrupole.trace();
         trQQ = (data.quadrupole * data.quadrupole).trace();
-        self += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
+        selfPot += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
         if (i_is_Charge) {
-          self -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
+          selfPot -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
           if (i_is_Fluctuating) {
-            *(sdat.flucQfrc) += selfMult2_ * pre14_ * 2.0 * trQ;
+            fqf += selfMult2_ * pre14_ * 2.0 * trQ;
           }
         }
       }
-
-
-      
-      (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += self;
-      if (sdat.isSelected)
-        (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += self;
-
       break;
     default:
       break;
     }
+   
+    (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += selfPot;
+
+    if (sdat.isSelected)
+      (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += selfPot;
+    
+    if (i_is_Fluctuating)
+      *(sdat.flucQfrc) += fqf;
+
   }
 
 

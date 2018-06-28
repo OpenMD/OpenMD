@@ -222,7 +222,6 @@ namespace OpenMD {
     
     // Does this molecule stamp define a total constrained charge value?
     // If so, let the created molecule know about it.
-
     if (molStamp->haveConstrainTotalCharge() ) {
       mol->setConstrainTotalCharge( molStamp->getConstrainTotalCharge() );
     }

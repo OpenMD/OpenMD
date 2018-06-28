@@ -178,7 +178,6 @@ namespace OpenMD {
           if (fabs(frictionForce - oldFF) <= forceTolerance_)
             break; // iteration ends here
         }
-        //cerr << "rand = " << randomForce << " fric = " << frictionForce << "\n";
         atom->addFlucQFrc(frictionForce);
       }
     }        

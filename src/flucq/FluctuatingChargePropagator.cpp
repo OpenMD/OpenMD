@@ -110,7 +110,7 @@ namespace OpenMD {
     Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
                     initCoords);
 
-    EndCriteria endCriteria(1000, 100, 1e-5, 1e-5, 1e-5);       
+    EndCriteria endCriteria(1000, 100, 1e-8, 1e-8, 1e-8);       
 
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 

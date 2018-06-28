@@ -50,7 +50,9 @@
 using namespace std;
 namespace OpenMD {
 
-  ForceDecomposition::ForceDecomposition(SimInfo* info, InteractionManager* iMan) : info_(info), interactionMan_(iMan), needVelocities_(false) {
+  ForceDecomposition::ForceDecomposition(SimInfo* info,
+                                         InteractionManager* iMan) :
+    info_(info), interactionMan_(iMan), needVelocities_(false) {
 
     sman_ = info_->getSnapshotManager();
     storageLayout_ = sman_->getStorageLayout();
@@ -188,5 +190,4 @@ namespace OpenMD {
   void ForceDecomposition::setHeatFlux(Vector3d hf) {
     snap_->setConductiveHeatFlux(hf);
   }
-
 }

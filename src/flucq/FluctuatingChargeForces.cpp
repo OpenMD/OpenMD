@@ -148,7 +148,7 @@ namespace OpenMD {
       RealType Jii = data.hardness;
       RealType chi = data.electronegativity;
       force -=  charge * Jii + chi;
-      potential += charge * (charge * Jii * 0.5 + chi);
+      potential += charge * (0.5 * charge * Jii + chi);
     }
     return;
   }

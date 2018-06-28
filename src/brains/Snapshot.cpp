@@ -73,7 +73,7 @@ namespace OpenMD {
     frameData.lrPotentials = potVec(0.0);
     frameData.surfacePotential = 0.0;
     frameData.reciprocalPotential = 0.0;
-    frameData.selfPotential = 0.0;
+    frameData.selfPotentials = potVec(0.0);
     frameData.excludedPotentials = potVec(0.0); 
     frameData.restraintPotential = 0.0; 
     frameData.rawPotential = 0.0;   
@@ -112,7 +112,7 @@ namespace OpenMD {
     frameData.lrPotentials = potVec(0.0);
     frameData.surfacePotential = 0.0;    
     frameData.reciprocalPotential = 0.0;
-    frameData.selfPotential = 0.0;
+    frameData.selfPotentials = potVec(0.0);
     frameData.excludedPotentials = potVec(0.0); 
     frameData.restraintPotential = 0.0; 
     frameData.rawPotential = 0.0;       
@@ -137,7 +137,8 @@ namespace OpenMD {
     frameData.kineticEnergy = 0.0;   
     frameData.potentialEnergy = 0.0; 
     frameData.shortRangePotential = 0.0;
-    frameData.longRangePotential = 0.0; 
+    frameData.longRangePotential = 0.0;
+    frameData.selfPotential = 0.0; 
     frameData.pressure = 0.0;        
     frameData.temperature = 0.0;
     frameData.pressureTensor = Mat3x3d(0.0);   
@@ -158,6 +159,7 @@ namespace OpenMD {
     hasKineticEnergy = false;       
     hasShortRangePotential = false;
     hasLongRangePotential = false;
+    hasSelfPotential = false;
     hasPotentialEnergy = false;   
     hasXYarea = false;
     hasXZarea = false;
@@ -440,16 +442,18 @@ namespace OpenMD {
     frameData.inversionPotential = ip;
   }
 
-
   RealType Snapshot::getBondPotential() {
     return frameData.bondPotential;
   }
+  
   RealType Snapshot::getBendPotential() {
     return frameData.bendPotential;
   }
+  
   RealType Snapshot::getTorsionPotential() {
     return frameData.torsionPotential;
   }
+  
   RealType Snapshot::getInversionPotential() {
     return frameData.inversionPotential;
   }
@@ -481,14 +485,24 @@ namespace OpenMD {
     return frameData.reciprocalPotential;
   }
 
-  void Snapshot::setSelfPotential(RealType sp){
-    frameData.selfPotential = sp;
+  void Snapshot::setSelfPotential(potVec sp){
+    frameData.selfPotentials = sp;
   }
   
-  RealType Snapshot::getSelfPotential() {
-    return frameData.selfPotential;
+  potVec Snapshot::getSelfPotentials() {
+    return frameData.selfPotentials;
   }
 
+  RealType Snapshot::getSelfPotential() {
+    if (!hasSelfPotential) {
+      for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+        frameData.selfPotential += frameData.selfPotentials[i];
+      }
+      hasSelfPotential = true;
+    }   
+    return frameData.selfPotential;
+  }
+  
   void Snapshot::setLongRangePotential(potVec lrPot) {
     frameData.lrPotentials = lrPot;
   }
@@ -513,6 +527,7 @@ namespace OpenMD {
     if (!hasPotentialEnergy) {
       frameData.potentialEnergy = this->getLongRangePotential();
       frameData.potentialEnergy += this->getShortRangePotential();
+      frameData.potentialEnergy += this->getSelfPotential();
       frameData.potentialEnergy += this->getRestraintPotential();
       hasPotentialEnergy = true;
     }

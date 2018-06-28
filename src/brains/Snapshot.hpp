@@ -82,6 +82,7 @@ namespace OpenMD{
     RealType inversionPotential;  /**< inversion (planarity) contribution to the potential */
     potVec   lrPotentials;        /**< breakdown of long-range potentials by family */
     RealType selfPotential;       /**< potential energy of self interactions */
+    potVec   selfPotentials;      /**< breakdown of self interactions by family */
     potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
     RealType restraintPotential;  /**< potential energy of restraints */
     RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
@@ -203,8 +204,9 @@ namespace OpenMD{
     void     setSurfacePotential(const RealType sp);
     RealType getSurfacePotential();
 
-    void     setSelfPotential(const RealType sp);
+    void     setSelfPotential(const potVec sp);
     RealType getSelfPotential();
+    potVec   getSelfPotentials();
     
     void     setExcludedPotentials(const potVec exPot);
     potVec   getExcludedPotentials();
@@ -294,6 +296,7 @@ namespace OpenMD{
     bool hasKineticEnergy;    
     bool hasShortRangePotential;
     bool hasLongRangePotential;
+    bool hasSelfPotential;
     bool hasPotentialEnergy;    
     bool hasXYarea;
     bool hasXZarea;

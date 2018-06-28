@@ -575,7 +575,7 @@ namespace OpenMD {
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[VANDERWAALS_FAMILY]);
           break;
         case ELECTROSTATIC_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY] + snap->getSelfPotentials()[ELECTROSTATIC_FAMILY]);
           break;
         case METALLIC_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_FAMILY]);

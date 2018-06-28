@@ -179,7 +179,6 @@ namespace OpenMD {
       nrigidAtoms += rbStamp->getNMembers();
     }
     nintegrable_ = getNAtoms()+ getNRigidBodies() - nrigidAtoms;
-    
   }
   
   void MoleculeStamp::checkAtoms() {
