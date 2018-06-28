@@ -191,6 +191,8 @@ namespace OpenMD {
       } else {
         if (constrainRegions_) {
           int region = mol->getRegion();
+	  
+	  regionFrc = 0.0;
           if (region >= 0) 
             regionFrc = regionForce_[regionKeys_[region]];
           
