@@ -95,6 +95,8 @@ namespace OpenMD {
 
     ForceDecomposition(SimInfo* info, InteractionManager* iMan);
     virtual ~ForceDecomposition() {}
+
+    virtual void setSnapshot(Snapshot* snap) {snap_ = snap;}
     
     virtual void distributeInitialData() = 0;
     virtual void distributeData() = 0;

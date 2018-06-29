@@ -67,7 +67,7 @@ namespace OpenMD {
       setTrq(V3Zero);
     if (sl & DataStorage::dslParticlePot) 
       setParticlePot(0.0);
-    if (sl & DataStorage::dslFlucQForce) 
+    if (sl & DataStorage::dslFlucQForce)
       setFlucQFrc(0.0);
     if (sl & DataStorage::dslElectricField) 
       setElectricField(V3Zero);

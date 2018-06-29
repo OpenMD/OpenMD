@@ -83,6 +83,7 @@ namespace OpenMD{
     potVec   lrPotentials;        /**< breakdown of long-range potentials by family */
     RealType selfPotential;       /**< potential energy of self interactions */
     potVec   selfPotentials;      /**< breakdown of self interactions by family */
+    RealType excludedPotential;   /**< potential energy excluded from atomic forces */
     potVec   excludedPotentials;  /**< breakdown of excluded potentials by family */
     RealType restraintPotential;  /**< potential energy of restraints */
     RealType rawPotential;        /**< unrestrained potential energy (when restraints are applied) */
@@ -210,6 +211,7 @@ namespace OpenMD{
     
     void     setExcludedPotentials(const potVec exPot);
     potVec   getExcludedPotentials();
+    RealType getExcludedPotential();
    
     void     setRestraintPotential(const RealType rp);
     RealType getRestraintPotential();
@@ -296,6 +298,7 @@ namespace OpenMD{
     bool hasKineticEnergy;    
     bool hasShortRangePotential;
     bool hasLongRangePotential;
+    bool hasExcludedPotential;
     bool hasSelfPotential;
     bool hasPotentialEnergy;    
     bool hasXYarea;

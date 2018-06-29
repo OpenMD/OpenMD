@@ -483,7 +483,9 @@ namespace OpenMD {
     // accumulated.
 
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-
+    
+    fDecomp_->setSnapshot(snap);
+    
     snap->setBondPotential(0.0);
     snap->setBendPotential(0.0);
     snap->setTorsionPotential(0.0);
@@ -692,6 +694,7 @@ namespace OpenMD {
 #endif
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    fDecomp_->setSnapshot(curSnapshot);
 
     curSnapshot->setBondPotential(bondPotential);
     curSnapshot->setBendPotential(bendPotential);
@@ -708,6 +711,8 @@ namespace OpenMD {
   void ForceManager::longRangeInteractions() {
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    fDecomp_->setSnapshot(curSnapshot);
+
     DataStorage* config = &(curSnapshot->atomData);
     DataStorage* cgConfig = &(curSnapshot->cgData);
 
@@ -990,7 +995,6 @@ namespace OpenMD {
               gid1 = fDecomp_->getGlobalID(atom1);
               sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
             }
-
             fDecomp_->fillSelfData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
           }
@@ -1019,7 +1023,6 @@ namespace OpenMD {
           gid1 = fDecomp_->getGlobalID(atom1);
           sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
         }
-
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
       }

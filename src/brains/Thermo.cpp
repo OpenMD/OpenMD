@@ -157,7 +157,8 @@ namespace OpenMD {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (!snap->hasKineticEnergy) {
-      RealType ke = getTranslationalKinetic() + getRotationalKinetic();
+      RealType ke = getTranslationalKinetic() + getRotationalKinetic() +
+        getElectronicKinetic();
       
       snap->setKineticEnergy(ke);
     }
@@ -229,9 +230,7 @@ namespace OpenMD {
           
           cmass = atom->getChargeMass();
           cvel = atom->getFlucQVel();
-          
           kinetic += cmass * cvel * cvel;
-          
         }
       }
       
@@ -241,7 +240,6 @@ namespace OpenMD {
 #endif
       
       kinetic *= 0.5;
-      
       snap->setElectronicKineticEnergy(kinetic);
     }
     

@@ -811,7 +811,7 @@ namespace OpenMD {
     indirect_Tb.zero();   // Torque on site b
 
     // Excluded potential that is still computed for fluctuating charges
-    excluded_Pot= 0.0;
+    excluded_Pot = 0.0;
 
     // some variables we'll need independent of electrostatic type:
 
@@ -968,6 +968,8 @@ namespace OpenMD {
         if (idat.excluded) {
           if (a_is_Fluctuating || b_is_Fluctuating) {
             coulInt = J->getValueAt( *(idat.rij) );
+            excluded_Pot += C_a * C_b * coulInt;
+            
             if (a_is_Fluctuating) dUdCa += C_b * coulInt;
             if (b_is_Fluctuating) dUdCb += C_a * coulInt;          
           }

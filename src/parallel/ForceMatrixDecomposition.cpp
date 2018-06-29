@@ -1325,7 +1325,7 @@ namespace OpenMD {
       snap_->atomData.particlePot[atom2] += *(idat.vpair) * *(idat.sw);
     }
     
-    if (storageLayout_ & DataStorage::dslFlucQForce) {              
+    if (storageLayout_ & DataStorage::dslFlucQForce) {
       snap_->atomData.flucQFrc[atom1] -= *(idat.dVdFQ1);
       snap_->atomData.flucQFrc[atom2] -= *(idat.dVdFQ2);
     }

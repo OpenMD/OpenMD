@@ -276,6 +276,14 @@ namespace OpenMD {
     data_[RESTRAINT_POTENTIAL] = vrestraint;
     statsMap_["RESTRAINT_POTENTIAL"] =  RESTRAINT_POTENTIAL;
 
+    StatsData vexcluded;
+    vexcluded.units =  "kcal/mol";
+    vexcluded.title =  "Excluded Potential";
+    vexcluded.dataType = "RealType";
+    vexcluded.accumulator = new Accumulator();
+    data_[EXCLUDED_POTENTIAL] = vexcluded;
+    statsMap_["EXCLUDED_POTENTIAL"] =  EXCLUDED_POTENTIAL;
+
     StatsData pressure_tensor;
     pressure_tensor.units =  "amu/fs^2/A";
     pressure_tensor.title =  "Pressure Tensor";
@@ -609,6 +617,9 @@ namespace OpenMD {
           break;
         case RESTRAINT_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getRestraintPotential());
+          break;
+        case EXCLUDED_POTENTIAL:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getExcludedPotential());
           break;
         case TAGGED_PAIR_DISTANCE:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getTaggedAtomPairDistance());

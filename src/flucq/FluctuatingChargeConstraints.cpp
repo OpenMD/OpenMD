@@ -180,30 +180,32 @@ namespace OpenMD {
           molFrc += atom->getFlucQFrc();
         }
         molFrc /= mol->getNFluctuatingCharges();
-      
+
         for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
              atom = mol->nextFluctuatingCharge(j)) {
 
           frc = atom->getFlucQFrc() - molFrc;
-          atom->setFlucQFrc(frc);
-          
+          atom->setFlucQFrc(frc);          
         }
       } else {
-        if (constrainRegions_) {
-          int region = mol->getRegion();
-	  
-	  regionFrc = 0.0;
-          if (region >= 0) 
-            regionFrc = regionForce_[regionKeys_[region]];
+        int region = mol->getRegion();
+	
+        regionFrc = 0.0;
+        if (constrainRegions_ && region >= 0) {
+          regionFrc = regionForce_[regionKeys_[region]];
           
           for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
                atom = mol->nextFluctuatingCharge(j)) {
             frc = atom->getFlucQFrc() - regionFrc;
             atom->setFlucQFrc(frc);
           }
-        } else {        
-          frc = atom->getFlucQFrc() - systemFrc;
-          atom->setFlucQFrc(frc);
+        } else {
+          
+          for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+               atom = mol->nextFluctuatingCharge(j)) {            
+            frc = atom->getFlucQFrc() - systemFrc;
+            atom->setFlucQFrc(frc);
+          }
         }            
       }
     }

@@ -138,6 +138,7 @@ namespace OpenMD {
     frameData.potentialEnergy = 0.0; 
     frameData.shortRangePotential = 0.0;
     frameData.longRangePotential = 0.0;
+    frameData.excludedPotential = 0.0;
     frameData.selfPotential = 0.0; 
     frameData.pressure = 0.0;        
     frameData.temperature = 0.0;
@@ -159,6 +160,7 @@ namespace OpenMD {
     hasKineticEnergy = false;       
     hasShortRangePotential = false;
     hasLongRangePotential = false;
+    hasExcludedPotential = false;
     hasSelfPotential = false;
     hasPotentialEnergy = false;   
     hasXYarea = false;
@@ -529,6 +531,7 @@ namespace OpenMD {
       frameData.potentialEnergy += this->getShortRangePotential();
       frameData.potentialEnergy += this->getSelfPotential();
       frameData.potentialEnergy += this->getRestraintPotential();
+      frameData.potentialEnergy += this->getExcludedPotential();
       hasPotentialEnergy = true;
     }
     return frameData.potentialEnergy;
@@ -541,7 +544,17 @@ namespace OpenMD {
   potVec Snapshot::getExcludedPotentials() {
     return frameData.excludedPotentials;
   }
-      
+
+  RealType Snapshot::getExcludedPotential() {
+    if (!hasExcludedPotential) {
+      for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+        frameData.excludedPotential += frameData.excludedPotentials[i];
+      }
+      hasExcludedPotential = true;
+    }   
+    return frameData.excludedPotential;
+  }
+  
   void Snapshot::setRestraintPotential(RealType rp) {
     frameData.restraintPotential = rp;
   }

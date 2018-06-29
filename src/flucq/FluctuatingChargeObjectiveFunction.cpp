@@ -55,12 +55,7 @@ namespace OpenMD{
     fqConstraints_->applyConstraints();
 
     RealType pot = thermo.getPotential();
-    
-    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    // Excluded potential still is electrostatic only:
-    potVec exPot = curSnapshot->getExcludedPotentials();
-    
-    return pot + exPot[ELECTROSTATIC_FAMILY];
+    return pot;
   }
   
   void FluctuatingChargeObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
@@ -82,12 +77,7 @@ namespace OpenMD{
     getGrad(grad); 
 
     RealType pot = thermo.getPotential();
-
-    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    // Excluded potential still is electrostatic only:
-    potVec exPot = curSnapshot->getExcludedPotentials();
-
-    return pot + exPot[ELECTROSTATIC_FAMILY];
+    return pot;
   }
   
   void FluctuatingChargeObjectiveFunction::setCoor(const DynamicVector<RealType> &x) const {
