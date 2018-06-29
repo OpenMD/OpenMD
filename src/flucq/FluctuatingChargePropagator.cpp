@@ -110,7 +110,7 @@ namespace OpenMD {
     Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
                     initCoords);
 
-    EndCriteria endCriteria(1000, 100, 1e-8, 1e-8, 1e-8);       
+    EndCriteria endCriteria(100, 100, 1e-5, 1e-5, 1e-5);
 
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 
@@ -121,6 +121,7 @@ namespace OpenMD {
   void FluctuatingChargePropagator::applyConstraints() {
     if (!initialized_) initialize();
     if (!hasFlucQ_) return;
+    std::cerr << "doing constraints\n";
     fqConstraints_->applyConstraints();
   }
 }

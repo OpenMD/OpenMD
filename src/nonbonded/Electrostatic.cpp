@@ -717,14 +717,27 @@ namespace OpenMD {
         RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
         vector<RealType> rvals;
         vector<RealType> Jvals;
+        RealType j0, j0c, j1c;
         // don't start at i = 0, as rval = 0 is undefined for the
         // slater overlap integrals.
         for (int i = 1; i < np_+1; i++) {
           rval = RealType(i) * dr;
           rvals.push_back(rval);
-          Jvals.push_back(sSTOCoulInt( a, b, m, n, rval * 
-                                       Constants::angstromToBohr ) * 
-                          Constants::hartreeToKcal );
+
+
+          // j0 = sSTOCoulInt( a, b, m, n, rval * Constants::angstromToBohr ) * 
+          //   Constants::hartreeToKcal;
+          // j0c = sSTOCoulInt( a, b, m, n,
+          //                    cutoffRadius_ * Constants::angstromToBohr ) * 
+          //   Constants::hartreeToKcal;
+
+          // j1c = sSTOCoulIntGrad( a, b, m, n,
+          //                        cutoffRadius_ * Constants::angstromToBohr ) *
+          //   Constants::hartreeToKcal;
+                                 
+          Jvals.push_back( sSTOCoulInt( a, b, m, n,
+                                        rval * Constants::angstromToBohr ) *
+                           Constants::hartreeToKcal );
         }
         
         CubicSpline* J = new CubicSpline();
@@ -803,6 +816,7 @@ namespace OpenMD {
     Pb = 0.0;  // Site potential at site b
     dUdCa = 0.0; // fluctuating charge force at site a
     dUdCb = 0.0; // fluctuating charge force at site a
+    RealType coulDeriv;
     
     // Indirect interactions mediated by the reaction field.
     indirect_Pot = 0.0;   // Potential
@@ -828,11 +842,7 @@ namespace OpenMD {
         
     // needed for fields (and forces):
     if (a_is_Charge || b_is_Charge) {
-      if (a_uses_Slater && b_uses_Slater) {
-        J->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
-      } else {
-        v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
-      }
+      v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
     }
     if (a_is_Dipole || b_is_Dipole) {
       v11s->getValueAndDerivativeAt( *(idat.rij), v11, dv11);
@@ -947,10 +957,20 @@ namespace OpenMD {
     if (a_is_Charge) {     
       
       if (b_is_Charge) {
-        
-        pref =  pre11_ * *(idat.electroMult);        
-        U  += C_a * C_b * pref * v01;
-        F  += C_a * C_b * pref * dv01 * rhat;
+
+        if (a_uses_Slater && b_uses_Slater) {
+          J->getValueAndDerivativeAt( *(idat.rij), coulInt, coulDeriv );
+          U += C_a * C_b * coulInt *  *(idat.electroMult);
+          F += C_a * C_b * coulDeriv * rhat *  *(idat.electroMult);
+
+          if (a_is_Fluctuating) dUdCa += C_b * coulInt;
+          if (b_is_Fluctuating) dUdCb += C_a * coulInt;
+        } else {
+
+          pref =  pre11_ * *(idat.electroMult);        
+          U  += C_a * C_b * pref * v01;
+          F  += C_a * C_b * pref * dv01 * rhat;
+        }
         
         // If this is an excluded pair, there are still indirect
         // interactions via the reaction field we must worry about:

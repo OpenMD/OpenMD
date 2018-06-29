@@ -202,9 +202,10 @@ namespace OpenMD {
         } else {
           
           for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-               atom = mol->nextFluctuatingCharge(j)) {            
+               atom = mol->nextFluctuatingCharge(j)) {
             frc = atom->getFlucQFrc() - systemFrc;
             atom->setFlucQFrc(frc);
+
           }
         }            
       }
