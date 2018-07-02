@@ -32,8 +32,8 @@ namespace QuantLib {
         Constraint& constraint = P.constraint();
         succeed_=true;
         bool maxIter = false;
-        RealType t = t_ini;
-
+        RealType qtold, t = t_ini;
+        size_t loopNumber = 0;
         
         RealType q0 = P.functionValue();
         RealType qp0 = P.gradientNormValue();
@@ -51,8 +51,6 @@ namespace QuantLib {
         
         // Enter in the loop if the criterion is not satisfied
         if ((qt_-q0) > -alpha_*t*qpt_) {
-            RealType qtold;
-            size_t loopNumber = 0;
             do {
                 loopNumber++;
                 // Decrease step
@@ -80,8 +78,8 @@ namespace QuantLib {
         // Compute new gradient
         P.gradient(gradient_, xtd_);
         // and it squared norm
-        qpt_ = P.computeGradientNormValue(gradient_);
-        //qpt_ = P.DotProduct(gradient_, gradient_);
+        //qpt_ = P.computeGradientNormValue(gradient_);
+        qpt_ = P.DotProduct(gradient_, gradient_);
         
         // Return new step value
         return t;

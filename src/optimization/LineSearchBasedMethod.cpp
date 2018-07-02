@@ -58,6 +58,7 @@ namespace QuantLib {
         DynamicVector<RealType> prevGradient(sz), d(sz), sddiff(sz), direction(sz);
         // Initialize objective function, gradient prevGradient and
         // search direction
+
         P.setFunctionValue(P.valueAndGradient(prevGradient, x_));
         P.setGradientNormValue(P.DotProduct(prevGradient, prevGradient));
         lineSearch_->searchDirection() = -prevGradient;
@@ -65,10 +66,15 @@ namespace QuantLib {
         bool first_time = true;
         // Loop over iterations
         do {
+            fold = P.functionValue();
+            gold2 = P.gradientNormValue();
+
             // Linesearch
             if (!first_time)
                 prevGradient = lineSearch_->lastGradient();
+
             t = (*lineSearch_)(P, ecType, endCriteria, t);
+
             // don't throw: it can fail just because maxIterations exceeded
             //QL_REQUIRE(lineSearch_->succeed(), "line-search failed!");
             if (lineSearch_->succeed())
@@ -78,17 +84,17 @@ namespace QuantLib {
                 x_ = lineSearch_->lastX();
                 P.setCurrentValue(x_);
                 // New function value
-                fold = P.functionValue();
                 P.setFunctionValue(lineSearch_->lastFunctionValue());
                 // New gradient and search direction vectors
 
                 // orthogonalization coef
-                gold2 = P.gradientNormValue();
                 P.setGradientNormValue(lineSearch_->lastGradientNorm2());
 
                 // conjugate gradient search direction
                 direction = getUpdatedDirection(P, gold2, prevGradient);
+
                 sddiff = direction - lineSearch_->searchDirection();
+
                 lineSearch_->searchDirection() = direction;
                 // Now compute accuracy and check end criteria
                 // Numerical Recipes exit strategy on fx (see NR in C++, p.423)

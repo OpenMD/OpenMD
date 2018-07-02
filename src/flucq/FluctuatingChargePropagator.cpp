@@ -121,7 +121,7 @@ namespace OpenMD {
   void FluctuatingChargePropagator::applyConstraints() {
     if (!initialized_) initialize();
     if (!hasFlucQ_) return;
-    std::cerr << "doing constraints\n";
+
     fqConstraints_->applyConstraints();
   }
 }

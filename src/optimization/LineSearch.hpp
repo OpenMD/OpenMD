@@ -39,7 +39,7 @@ namespace QuantLib {
     class LineSearch {
     public:
         //! Default constructor
-        LineSearch(RealType = 0.0)
+        explicit LineSearch(RealType = 0.0)
             : qt_(0.0), qpt_(0.0), succeed_(true) {}
         //! Destructor
         virtual ~LineSearch() {}
