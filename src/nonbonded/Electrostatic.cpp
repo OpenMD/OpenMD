@@ -1223,10 +1223,10 @@ namespace OpenMD {
     }
         
     if (i_is_Fluctuating) {
-      C_a += *(sdat.flucQ);
-
-      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ), selfPot, fqf );
-      
+      // We're now doing all of the self pieces for fluctuating charges in
+      // explicit self interactions.=
+      // C_a += *(sdat.flucQ);
+      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ), selfPot, fqf );      
     }
 
     switch (summationMethod_) {
@@ -1238,9 +1238,9 @@ namespace OpenMD {
         // Method," J. Phys. Chem. 99, 12001-12007 (1995).]
         preVal = pre11_ * preRF_ * C_a * C_a;
         selfPot -= 0.5 * preVal / cutoffRadius_;
-        if (i_is_Fluctuating) {
-          fqf += pre11_ * preRF_ * C_a / cutoffRadius_;
-        }
+        //if (i_is_Fluctuating) {
+        //  fqf += pre11_ * preRF_ * C_a / cutoffRadius_;
+        //}
         if (sdat.isSelected)
           (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_; 
       }
@@ -1258,12 +1258,10 @@ namespace OpenMD {
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
       if (i_is_Charge) {
-        selfPot += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));        
-        if (i_is_Fluctuating) {
-          // fqf -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
-          // If the surface of the cutoff sphere is only the net charge:
-          fqf -= selfMult1_ * pre11_ * (C_a + *(sdat.skippedCharge));
-        }
+        selfPot += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));
+        // if (i_is_Fluctuating) {
+        //  fqf -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
+        // }
       }
       if (i_is_Dipole) 
         selfPot += selfMult2_ * pre22_ * DdD;      
@@ -1273,9 +1271,9 @@ namespace OpenMD {
         selfPot += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
         if (i_is_Charge) {
           selfPot -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
-          if (i_is_Fluctuating) {
-            fqf += selfMult2_ * pre14_ * 2.0 * trQ;
-          }
+          //if (i_is_Fluctuating) {
+          //  fqf += selfMult2_ * pre14_ * 2.0 * trQ;
+          //}
         }
       }
       break;
@@ -1708,11 +1706,11 @@ namespace OpenMD {
                 data = ElectrostaticMap[Etids[atid]];
 
                 RealType qfrc = AK[kk]*((cks[i]+dkc[i]-qks[i])*(ckcs-dkss-qkcs)
-                                     - (ckc[i]-dks[i]-qkc[i])*(ckss+dkcs-qkss));
+                                        - (ckc[i]-dks[i]-qkc[i])*(ckss+dkcs-qkss));
                 RealType qtrq1 = AK[kk]*(skr[i]*(ckcs-dkss-qkcs)
                                          -ckr[i]*(ckss+dkcs-qkss));
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)
-                                            +skr[i]*(ckss+dkcs-qkss));
+                                             +skr[i]*(ckss+dkcs-qkss));
                
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
 
