@@ -46,6 +46,7 @@
 #include "utils/GenericData.hpp"
 #include "utils/Tuple.hpp"
 #include "types/AtomType.hpp"
+#include "math/Polynomial.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -64,6 +65,7 @@ namespace OpenMD {
     RealType slaterZeta;   /** off-diagonal Slater exponent */
     RealType coupling;     /** multiple minima EVB coupling for charge states */
     vector<tuple3<RealType, RealType, RealType> > diabaticStates; /** multiple minima diabats */
+    DoublePolynomial vself; /** Polynomial representation of self potential */
   };
   typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;
 
@@ -78,6 +80,9 @@ namespace OpenMD {
                                RealType hardness, int slaterN);
     void makeFluctuatingCharge(RealType chargeMass, RealType coupling,
                                vector<tuple3<RealType, RealType, RealType> > diabaticStates);
+    void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
+                               DoublePolynomial vs);
+    
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
                                RealType coupling,
                                vector<tuple3<RealType, RealType, RealType> > diabaticStates);
@@ -98,6 +103,7 @@ namespace OpenMD {
     RealType getSlaterZeta();
     RealType getCoupling();
     vector<tuple3<RealType, RealType, RealType> > getDiabaticStates();
+    DoublePolynomial getSelfPolynomial();
 
   private:
     AtomType* at_;

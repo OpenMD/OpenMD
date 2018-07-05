@@ -132,6 +132,11 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->diabaticStates;
   }
+  DoublePolynomial FluctuatingChargeAdapter::getSelfPolynomial() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->vself;
+  }
+
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType electronegativity,
@@ -152,6 +157,9 @@ namespace OpenMD {
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
     fqParam->slaterZeta = slaterZeta;
+
+    fqParam->vself.setCoefficient(1, electronegativity);
+    fqParam->vself.setCoefficient(2, 0.5 * hardness);
 
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
@@ -175,9 +183,33 @@ namespace OpenMD {
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
     fqParam->slaterZeta = getSTOZeta(slaterN, hardness);
+    
+    fqParam->vself.setCoefficient(1, electronegativity);
+    fqParam->vself.setCoefficient(2, 0.5 * hardness);
 
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
+
+    void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                         RealType nValence,
+                                                         DoublePolynomial vs) {
+
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
+    fqParam->usesSlaterElectrostatics = false;
+    fqParam->nValence = nValence;
+
+    fqParam->vself = vs;
+
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType coupling,

@@ -145,10 +145,14 @@ namespace OpenMD {
         }
       }
     } else {
-      RealType Jii = data.hardness;
-      RealType chi = data.electronegativity;
-      force -=  charge * Jii + chi;
-      potential += charge * (0.5 * charge * Jii + chi);
+      DoublePolynomial vself = data.vself_;
+      potential += vself.evaluate(charge);
+      force -= vself.evaluateDerivative(charge);
+
+      // RealType Jii = data.hardness;
+      // RealType chi = data.electronegativity;
+      // force -=  charge * Jii + chi;
+      // potential += charge * (0.5 * charge * Jii + chi);
     }
     return;
   }
@@ -167,6 +171,7 @@ namespace OpenMD {
         data.hardness = fqa.getHardness();
         data.slaterN = fqa.getSlaterN();
         data.slaterZeta = fqa.getSlaterZeta();
+        data.vself_ = fqa.getSelfPolynomial();
       }
       int atid = atomType->getIdent();
       int fqtid = FQtypes.size();

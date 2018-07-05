@@ -44,10 +44,11 @@
 #define INTEGRATORS_FLUCTUATINGCHARGEFORCES_HPP
 
 #include "brains/SimInfo.hpp"
+#include "math/Polynomial.hpp"
 
 using namespace std;
 namespace OpenMD {
-
+            
   struct FluctuatingChargeAtomData {
     bool hasMultipleMinima;
     RealType hardness;
@@ -57,6 +58,7 @@ namespace OpenMD {
     RealType curvature;
     RealType coupling;
     vector<tuple3<RealType, RealType, RealType> > diabaticStates;
+    DoublePolynomial vself_;
   };
 
   class FluctuatingChargeForces {

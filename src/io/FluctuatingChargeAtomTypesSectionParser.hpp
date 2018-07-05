@@ -57,6 +57,7 @@ namespace OpenMD {
     enum FluctuatingTypeEnum{
       fqtHardness,
       fqtMultipleMinima,
+      fqtEAMPolynomial,
       fqtEAM,
       fqtEAMSlater,
       fqtUnknown

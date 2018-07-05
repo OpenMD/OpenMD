@@ -59,6 +59,7 @@ namespace OpenMD {
     stringToEnumMap_["MultipleMinima"] =  fqtMultipleMinima;
     stringToEnumMap_["EAM"] =  fqtEAM;
     stringToEnumMap_["EAMSlater"] =  fqtEAMSlater;
+    stringToEnumMap_["EAMPoly"] =  fqtEAMPolynomial;        
   }
 
   void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
@@ -238,6 +239,35 @@ namespace OpenMD {
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         fqa.makeFluctuatingCharge(chargeMass, nValence, slaterN, slaterZeta,
                                   coupling, diabaticStates);
+      }
+      break;
+      
+    case fqtEAMPolynomial:
+      if (nTokens < 3 || nTokens % 2 != 1) {
+        sprintf(painCave.errMsg,
+                "FluctuatingChargeAtomTypesSectionParser Error: "
+                "Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType nValence = tokenizer.nextTokenAsDouble();
+        nTokens -= 1;
+        
+        DoublePolynomial vself;
+        
+        int nPairs = nTokens / 2;
+        int power;
+        RealType coefficient;
+        
+        for (int i = 0; i < nPairs; ++i) {
+          power = tokenizer.nextTokenAsInt();
+          coefficient = tokenizer.nextTokenAsDouble() * eus_ / pow(cus_, power);
+          vself.setCoefficient(power, coefficient);
+        }
+       
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+        fqa.makeFluctuatingCharge(chargeMass, nValence, vself);
       }
       break;
 
