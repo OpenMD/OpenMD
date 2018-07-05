@@ -293,7 +293,7 @@ namespace OpenBabel
 	    }
 	    
 
-            if ((&*atom)->IsHydrogen()) {
+            if ((&*atom)->GetAtomicNum() == 1) {
                FOR_NBORS_OF_ATOM(nbr, *atom) {
                  str2 = r->GetAtomID(&*nbr);
                  size_t startpos = str2.find_first_not_of(" ");

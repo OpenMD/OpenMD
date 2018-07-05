@@ -633,6 +633,7 @@ namespace OpenMD {
     electrostaticAtomData.is_Dipole = false;
     electrostaticAtomData.is_Quadrupole = false;
     electrostaticAtomData.is_Fluctuating = false;
+    electrostaticAtomData.uses_SlaterJ = false;
 
     FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 
