@@ -354,7 +354,6 @@ src/optimization/EndCriteria.cpp
 src/optimization/LineSearch.cpp
 src/optimization/LineSearchBasedMethod.cpp
 src/optimization/SteepestDescent.cpp
-src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/optimization/MinimizerParameters.cpp
 src/optimization/Problem.cpp
 src/nonbonded/Buckingham.cpp
@@ -476,6 +475,7 @@ src/io/ZConsWriter.cpp
 src/io/ifstrstream.cpp
 src/math/ParallelRandNumGen.cpp
 src/nonbonded/Electrostatic.cpp
+src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/parallel/ForceDecomposition.cpp
 src/parallel/ForceMatrixDecomposition.cpp
 src/perturbations/UniformField.cpp

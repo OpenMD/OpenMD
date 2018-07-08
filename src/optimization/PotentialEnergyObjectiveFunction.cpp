@@ -41,6 +41,9 @@
  */
 
 #include "optimization/PotentialEnergyObjectiveFunction.hpp"
+#ifdef IS_MPI
+#include "mpi.h"
+#endif
 
 namespace OpenMD{
 
@@ -97,7 +100,15 @@ namespace OpenMD{
     Molecule* mol;
     StuntDouble* sd;
     Atom* atom;
-    int index = 0;
+    
+    info_->getSnapshotManager()->advance();
+
+    int index;
+#ifdef IS_MPI
+    index = displacements_[myrank_];
+#else
+    index = 0;
+#endif               
 
     info_->getSnapshotManager()->advance();
     
@@ -150,7 +161,12 @@ namespace OpenMD{
     Atom* atom;
     std::vector<RealType> myGrad;
     
-    int index = 0;
+    int index;
+#ifdef IS_MPI
+    index = displacements_[myrank_];
+#else
+    index = 0;
+#endif               
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
@@ -176,10 +192,24 @@ namespace OpenMD{
           grad[index++] = -atom->getFlucQFrc();
         }
       }
-    }        
+    }
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &grad[0], ndf_, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
+#endif
+    
   }
 
   DynamicVector<RealType> PotentialEnergyObjectiveFunction::setInitialCoords() {
+#ifdef IS_MPI        
+    MPI_Comm_size( MPI_COMM_WORLD, &nproc_);
+    MPI_Comm_rank( MPI_COMM_WORLD, &myrank_);
+    std::vector<int> onProc(nproc_, 0);
+
+    displacements_.clear();    
+    displacements_.resize(nproc_, 0);
+#endif
+
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule::AtomIterator ai;
@@ -190,18 +220,18 @@ namespace OpenMD{
     Vector3d pos;
     Vector3d eulerAngle;
 
-    int ndf(0);
-
+    ndf_ = 0;
+    
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
       
       for (sd = mol->beginIntegrableObject(j);  sd != NULL;
            sd = mol->nextIntegrableObject(j)) {
         
-        ndf += 3;
+        ndf_ += 3;
         
         if (sd->isDirectional())  {
-          ndf += 3;
+          ndf_ += 3;
         }
       }
     }
@@ -213,23 +243,41 @@ namespace OpenMD{
         for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
              atom = mol->nextFluctuatingCharge(ai)) {
           
-          ndf++;
+          ndf_++;
         }
       }
     }
-    
-    DynamicVector<RealType> xinit(ndf, 0.0);
 
-    int index = 0;
+#ifdef IS_MPI
+    MPI_Allgather(&ndf_, 1, MPI_INT, &onProc[0], 1, MPI_INT, MPI_COMM_WORLD);
+
+    ndf_ = 0;        
+    for (int iproc = 0; iproc < nproc_; iproc++){
+      ndf_ += onProc[iproc];
+    }
+    
+    displacements_[0] = 0;    
+    for (int iproc = 1; iproc < nproc_; iproc++){
+      displacements_[iproc] = displacements_[iproc-1] + onProc[iproc-1];
+    }
+#endif
+    
+    DynamicVector<RealType> xinit(ndf_, 0.0);
+
+    int index;
+#ifdef IS_MPI
+    index = displacements_[myrank_];
+#else
+    index = 0;
+#endif               
     
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {
-
+      
       for (sd = mol->beginIntegrableObject(j);  sd != NULL;
            sd = mol->nextIntegrableObject(j)) {        
-
+        
         pos = sd->getPos();
-
         xinit[index++] = pos[0];
         xinit[index++] = pos[1];
         xinit[index++] = pos[2];
@@ -240,10 +288,10 @@ namespace OpenMD{
           xinit[index++] = eulerAngle[1];
           xinit[index++] = eulerAngle[2];          
         }
-
+        
       }
     }
-
+    
     if (hasFlucQ_) {      
       
       for (mol = info_->beginMolecule(i); mol != NULL; 
@@ -256,7 +304,7 @@ namespace OpenMD{
         }
       }
     }
-      
+    
     return xinit;
   }
 }

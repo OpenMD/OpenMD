@@ -77,8 +77,6 @@ namespace OpenMD {
 #ifdef IS_MPI
     int nproc_;
     int myrank_;
-
-    std::vector<int> flucqOnProc_;
     std::vector<int> displacements_;
 #endif
   };

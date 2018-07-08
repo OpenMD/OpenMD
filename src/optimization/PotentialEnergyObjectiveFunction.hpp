@@ -80,6 +80,14 @@ namespace OpenMD {
     Thermo thermo;
     bool usingRattle_;
     bool hasFlucQ_;
+    int ndf_;
+
+#ifdef IS_MPI
+    int nproc_;
+    int myrank_;
+    std::vector<int> displacements_;
+#endif
+
   };
 }
 #endif
