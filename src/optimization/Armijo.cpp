@@ -48,9 +48,9 @@ namespace QuantLib {
         t = update(xtd_, searchDirection_, t, constraint);
         // Compute function value at the new point
         qt_ = P.value (xtd_);
-        
+
         // Enter in the loop if the criterion is not satisfied
-        if ((qt_-q0) > -alpha_*t*qpt_) {
+        if ((qt_-q0) > -alpha_*t*qpt_) {            
             do {
                 loopNumber++;
                 // Decrease step

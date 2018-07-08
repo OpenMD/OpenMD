@@ -1183,7 +1183,7 @@ namespace OpenMD {
 
       if (b_is_Dipole || b_is_Quadrupole) 
         *(idat.t2) += Tb * *(idat.sw);
-      
+
     } else {
 
       // only accumulate the forces and torques resulting from the
@@ -1225,9 +1225,9 @@ namespace OpenMD {
         
     if (i_is_Fluctuating) {
       // We're now doing all of the self pieces for fluctuating charges in
-      // explicit self interactions.=
+      // explicit self interactions.
       // C_a += *(sdat.flucQ);
-      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ), selfPot, fqf );      
+      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ), selfPot, fqf );
     }
 
     switch (summationMethod_) {
@@ -1242,14 +1242,10 @@ namespace OpenMD {
         //if (i_is_Fluctuating) {
         //  fqf += pre11_ * preRF_ * C_a / cutoffRadius_;
         //}
-        if (sdat.isSelected)
-          (*(sdat.selePot))[ELECTROSTATIC_FAMILY]-= 0.5 * preVal / cutoffRadius_; 
       }
 
       if (i_is_Dipole) {
         selfPot -= pre22_ * preRF_ * DdD;
-        if (sdat.isSelected)
-          (*(sdat.selePot))[ELECTROSTATIC_FAMILY] -= pre22_ * preRF_ * DdD;
       }
       
       break;

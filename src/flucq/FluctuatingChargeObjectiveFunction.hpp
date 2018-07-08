@@ -55,9 +55,9 @@ namespace OpenMD {
   public:
     FluctuatingChargeObjectiveFunction(SimInfo* info, ForceManager* forceMan, FluctuatingChargeConstraints* fqConstraints);
 
-    RealType value(const DynamicVector<RealType>& x);   
-    void gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
-    RealType valueAndGradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
+    virtual RealType value(const DynamicVector<RealType>& x);   
+    virtual void gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
+    virtual RealType valueAndGradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
 
     DynamicVector<RealType> setInitialCoords();
   private:
@@ -72,6 +72,15 @@ namespace OpenMD {
     ForceManager* forceMan_;
     FluctuatingChargeConstraints* fqConstraints_;
     Thermo thermo;
+    int nFlucQ_;
+    
+#ifdef IS_MPI
+    int nproc_;
+    int myrank_;
+
+    std::vector<int> flucqOnProc_;
+    std::vector<int> displacements_;
+#endif
   };
 }
 #endif

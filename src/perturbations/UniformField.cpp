@@ -47,6 +47,9 @@
 #include "primitives/Molecule.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "utils/Constants.hpp"
+#ifdef IS_MPI
+#include "mpi.h"
+#endif
 
 namespace OpenMD {
   

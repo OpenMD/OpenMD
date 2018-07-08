@@ -823,7 +823,7 @@ namespace OpenMD {
       RealType ploc2 = 0.0;
       MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       selfPot[ii] = ploc2;
-    }    
+    }
     for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
       RealType ploc1 = excludedSelfPot[ii];
       RealType ploc2 = 0.0;
@@ -835,7 +835,7 @@ namespace OpenMD {
       RealType ploc2 = 0.0;
       MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       selectedSelfPot[ii] = ploc2;
-    }    
+    }
 #endif
   }
 
