@@ -718,7 +718,7 @@ namespace OpenMD {
         RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
         vector<RealType> rvals;
         vector<RealType> Jvals;
-        RealType j0, j0c, j1c;
+        // RealType j0, j0c, j1c;
         // don't start at i = 0, as rval = 0 is undefined for the
         // slater overlap integrals.
         for (int i = 1; i < np_+1; i++) {
@@ -731,7 +731,6 @@ namespace OpenMD {
           // j0c = sSTOCoulInt( a, b, m, n,
           //                    cutoffRadius_ * Constants::angstromToBohr ) * 
           //   Constants::hartreeToKcal;
-
           // j1c = sSTOCoulIntGrad( a, b, m, n,
           //                        cutoffRadius_ * Constants::angstromToBohr ) *
           //   Constants::hartreeToKcal;

@@ -319,27 +319,27 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
     
   // Assume a cubic crystal, and use symmetries:
 
-  C11 = (C(0,0) + C(1,1) + C(2,2)) / 3.0;
-  C12 = (C(0,1) + C(0,2) + C(1,2)) / 3.0;
-  C44 = (C(3,3) + C(4,4) + C(5,5)) / 3.0;
-  S11 = (S(0,0) + S(1,1) + S(2,2)) / 3.0;
-  S12 = (S(0,1) + S(0,2) + S(1,2)) / 3.0;
-  S44 = (S(3,3) + S(4,4) + S(5,5)) / 3.0;
+  //C11 = (C(0,0) + C(1,1) + C(2,2)) / 3.0;
+  //C12 = (C(0,1) + C(0,2) + C(1,2)) / 3.0;
+  //C44 = (C(3,3) + C(4,4) + C(5,5)) / 3.0;
+  //S11 = (S(0,0) + S(1,1) + S(2,2)) / 3.0;
+  //S12 = (S(0,1) + S(0,2) + S(1,2)) / 3.0;
+  //S44 = (S(3,3) + S(4,4) + S(5,5)) / 3.0;
       
   // Anisotropy factor
-  RealType A1 = 2.0*C44 / (C11 - C12);
-  RealType A2 = 2.0*(S11 - S12) / S44;
+  //RealType A1 = 2.0*C44 / (C11 - C12);
+  //RealType A2 = 2.0*(S11 - S12) / S44;
   
   // std::cout << "Anisotropy factor = " << A1 << " " << A2 << "\n";
     
   // Effective Elastic constants for propagation in Cubic Crystals
-  RealType kL_100 = C11;
-  RealType kT_100 = C44;
-  RealType kL_110 = 0.5 * (C11 + C12 + 2.0*C44);
-  RealType kT1_110 = C44;
-  RealType kT2_110 = 0.5*(C11 - C12);
-  RealType kL_111 = (C11 + 2*C12 + 4*C44) / 3.0;
-  RealType kT_111 = (C11 - C12 + C44) / 3.0;
+  //RealType kL_100 = C11;
+  //RealType kT_100 = C44;
+  //RealType kL_110 = 0.5 * (C11 + C12 + 2.0*C44);
+  //RealType kT1_110 = C44;
+  //RealType kT2_110 = 0.5*(C11 - C12);
+  //RealType kL_111 = (C11 + 2*C12 + 4*C44) / 3.0;
+  //RealType kT_111 = (C11 - C12 + C44) / 3.0;
    
 }
 int main(int argc, char *argv []) {
@@ -443,7 +443,7 @@ int main(int argc, char *argv []) {
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, true);
-  Globals* simParams = info->getSimParams();
+  //Globals* simParams = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
   Velocitizer* veloSet = new Velocitizer(info);
 
@@ -452,12 +452,11 @@ int main(int argc, char *argv []) {
   
   Shake* shake = new Shake(info);
   bool hasFlucQ = false;
-  FluctuatingChargePropagator* flucQ;
+  FluctuatingChargePropagator* flucQ = new FluctuatingChargeDamped(info);
     
   if (info->usesFluctuatingCharges()) {
     if (info->getNFluctuatingCharges() > 0) {
       hasFlucQ = true;
-      flucQ = new FluctuatingChargeDamped(info);
       flucQ->setForceManager(forceMan);
       flucQ->initialize();
     }
@@ -507,7 +506,7 @@ int main(int argc, char *argv []) {
   RealType V0 = thermo.getVolume();
   ptRef.negate();
   ptRef *= Constants::elasticConvert;
-  Vector6d stressRef = ptRef.toVoigtTensor();
+  //Vector6d stressRef = ptRef.toVoigtTensor();
   
   Vector6d stress(0.0);
   Vector6d strain(0.0);
