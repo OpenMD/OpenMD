@@ -62,8 +62,9 @@
 #include "io/DumpReader.hpp"
 #include "utils/StringUtils.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "math/QR.hpp"
 #include "math/LU.hpp"
-#include "math/DynamicRectMatrix.hpp"
+
 // #include "optimization/OptimizationFactory.hpp"
 // #include "optimization/Method.hpp"
 // #include "optimization/Constraint.hpp"
@@ -71,6 +72,7 @@
 // #include "optimization/BoxObjectiveFunction.hpp"
 
 using namespace OpenMD;
+using namespace JAMA;
 #include <algorithm>
 #include <iostream>
 #include <numeric>
@@ -111,7 +113,13 @@ public:
   
 typedef Vector6<RealType> Vector6d;
 
-RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {  
+RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
+
+  // for (size_t i = 0; i < x.size(); i++) {
+  //   std::cerr << x[i] << "\t" << y[i] << "\n";
+  // }
+  // std::cerr << "&\n";
+
   const size_t n    = x.size();  
   const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
   const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
@@ -130,7 +138,7 @@ void quadraticFit(const std::vector<RealType>& x,
   RealType s01(0.0), s11(0.0), s21(0.0);
   
   for (size_t i = 0; i < x.size(); i++) {
-    // std::cerr << x[i] << "\t" << y[i] << "\n";
+    //std::cerr << x[i] << "\t" << y[i] << "\n";
     s10 += x[i];
     s20 += pow(x[i], 2);
     s30 += pow(x[i], 3);
@@ -139,7 +147,7 @@ void quadraticFit(const std::vector<RealType>& x,
     s11 += x[i]*y[i];
     s21 += pow(x[i],2) * y[i];
   }
-  // std::cerr << "&\n";
+  //std::cerr << "&\n";
 
   RealType D = (s40 * (s20 * s00 - s10 * s10) - 
                 s30 * (s30 * s00 - s10 * s20) + 
@@ -379,64 +387,113 @@ int main(int argc, char *argv []) {
 
   int nMax = args_info.npoints_arg;
 
-  RealType dmax = args_info.delta_arg;
-  
-  std::vector<Vector6d > Ls;
-  Ls.push_back(Vector6d( 1., 1., 1., 0., 0., 0.));
-  Ls.push_back(Vector6d( 1., 0., 0., 0., 0., 0.));
-  Ls.push_back(Vector6d( 0., 1., 0., 0., 0., 0.));
-  Ls.push_back(Vector6d( 0., 0., 1., 0., 0., 0.));
-  Ls.push_back(Vector6d( 0., 0., 0., 2., 0., 0.));
-  Ls.push_back(Vector6d( 0., 0., 0., 0., 2., 0.));
-  Ls.push_back(Vector6d( 0., 0., 0., 0., 0., 2.));
-  Ls.push_back(Vector6d( 1., 1., 0., 0., 0., 0.));
-  Ls.push_back(Vector6d( 1., 0., 1., 0., 0., 0.));
-  Ls.push_back(Vector6d( 1., 0., 0., 2., 0., 0.));
-  Ls.push_back(Vector6d( 1., 0., 0., 0., 2., 0.));
-  Ls.push_back(Vector6d( 1., 0., 0., 0., 0., 2.));
-  Ls.push_back(Vector6d( 0., 1., 1., 0., 0., 0.));
-  Ls.push_back(Vector6d( 0., 1., 0., 2., 0., 0.));
-  Ls.push_back(Vector6d( 0., 1., 0., 0., 2., 0.));
-  Ls.push_back(Vector6d( 0., 1., 0., 0., 0., 2.));
-  Ls.push_back(Vector6d( 0., 0., 1., 2., 0., 0.));
-  Ls.push_back(Vector6d( 0., 0., 1., 0., 2., 0.));
-  Ls.push_back(Vector6d( 0., 0., 1., 0., 0., 2.));
-  Ls.push_back(Vector6d( 0., 0., 0., 2., 2., 0.));
-  Ls.push_back(Vector6d( 0., 0., 0., 2., 0., 2.));
-  Ls.push_back(Vector6d( 0., 0., 0., 0., 2., 2.));
-  Ls.push_back(Vector6d( 0., 0., 0., 2., 2., 2.));
-  Ls.push_back(Vector6d(-1., .5, .5, 0., 0., 0.));
-  Ls.push_back(Vector6d( .5,-1., .5, 0., 0., 0.));
-  Ls.push_back(Vector6d( .5, .5,-1., 0., 0., 0.));
-  Ls.push_back(Vector6d( 1.,-1., 0., 0., 0., 0.));
-  Ls.push_back(Vector6d( 1.,-1., 0., 0., 0., 2.));
-  Ls.push_back(Vector6d( 0., 1.,-1., 0., 0., 2.));
-  Ls.push_back(Vector6d( .5, .5,-1., 0., 0., 2.));
-  Ls.push_back(Vector6d( 1., 0., 0., 2., 2., 0.));
-  Ls.push_back(Vector6d( 1., 1.,-1., 0., 0., 0.));
-  Ls.push_back(Vector6d( 1., 1., 1.,-2.,-2.,-2.));
-  Ls.push_back(Vector6d( .5, .5,-1., 2., 2., 2.));
-  Ls.push_back(Vector6d( 0., 0., 0., 2., 2., 4.));
-  Ls.push_back(Vector6d( 1., 2., 3., 4., 5., 6.));
-  Ls.push_back(Vector6d(-2., 1., 4.,-3., 6.,-5.));
-  Ls.push_back(Vector6d( 3.,-5.,-1., 6., 2.,-4.));
-  Ls.push_back(Vector6d(-4.,-6., 5., 1.,-3., 2.));
-  Ls.push_back(Vector6d( 5., 4., 6.,-2.,-1.,-3.));
-  Ls.push_back(Vector6d(-6., 3.,-2., 5.,-4., 1.));
-  
-  std::vector<int> Lag_strain_list;
-  
-  if (!method.compare("energy")) {
-    for (int i = 1; i < 22; i++) {
-      Lag_strain_list.push_back(i);   
-    }
+  RealType dmax;
+  if (args_info.delta_given) {
+    dmax = args_info.delta_arg;
   } else {
-    for (int i = 35; i < 42; i++) {
-      Lag_strain_list.push_back(i);
+    if (!method.compare("energy")) {
+      dmax = 0.09;
+    } else {
+      dmax = 0.003;
     }
   }
 
+  std::vector<Vector6d> eStrains;
+  // Only the strains for the "N" crystal are required (1-21)
+  // eStrains.push_back(Vector6d( 1., 1., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 1., 0., 0., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 1., 0., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 0., 2., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 0., 0., 2., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 0., 0., 0., 2.));
+  eStrains.push_back(Vector6d( 1., 1., 0., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 1., 0., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 1., 0., 0., 2., 0., 0.));
+  eStrains.push_back(Vector6d( 1., 0., 0., 0., 2., 0.));
+  eStrains.push_back(Vector6d( 1., 0., 0., 0., 0., 2.));
+  eStrains.push_back(Vector6d( 0., 1., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 1., 0., 2., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 1., 0., 0., 2., 0.));
+  eStrains.push_back(Vector6d( 0., 1., 0., 0., 0., 2.));
+  eStrains.push_back(Vector6d( 0., 0., 1., 2., 0., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 1., 0., 2., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 1., 0., 0., 2.));
+  eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 0.));
+  eStrains.push_back(Vector6d( 0., 0., 0., 2., 0., 2.));
+  eStrains.push_back(Vector6d( 0., 0., 0., 0., 2., 2.));
+  // The rest are unused in this code:
+  // eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 2.));
+  // eStrains.push_back(Vector6d(-1., .5, .5, 0., 0., 0.));
+  // eStrains.push_back(Vector6d( .5,-1., .5, 0., 0., 0.));
+  // eStrains.push_back(Vector6d( .5, .5,-1., 0., 0., 0.));
+  // eStrains.push_back(Vector6d( 1.,-1., 0., 0., 0., 0.));
+  // eStrains.push_back(Vector6d( 1.,-1., 0., 0., 0., 2.));
+  // eStrains.push_back(Vector6d( 0., 1.,-1., 0., 0., 2.));
+  // eStrains.push_back(Vector6d( .5, .5,-1., 0., 0., 2.));
+  // eStrains.push_back(Vector6d( 1., 0., 0., 2., 2., 0.));
+  // eStrains.push_back(Vector6d( 1., 1.,-1., 0., 0., 0.));
+  // eStrains.push_back(Vector6d( 1., 1., 1.,-2.,-2.,-2.));
+  // eStrains.push_back(Vector6d( .5, .5,-1., 2., 2., 2.));
+  // eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 4.));
 
+  std::vector<Vector6d> sStrains;
+  sStrains.push_back(Vector6d( 1., 2., 3., 4., 5., 6.));
+  sStrains.push_back(Vector6d(-2., 1., 4.,-3., 6.,-5.));
+  sStrains.push_back(Vector6d( 3.,-5.,-1., 6., 2.,-4.));
+  sStrains.push_back(Vector6d(-4.,-6., 5., 1.,-3., 2.));
+  sStrains.push_back(Vector6d( 5., 4., 6.,-2.,-1.,-3.));
+  sStrains.push_back(Vector6d(-6., 3.,-2., 5.,-4., 1.));
+
+  std::vector<Vector6d> strainBasis;
+  
+  if (!method.compare("energy")) {
+    strainBasis = eStrains;
+  } else {
+    strainBasis = sStrains;
+  }
+  
+  RealType mat[36][21] = {
+    { 1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 1, 0, 0, 0, 0, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 5, 6, 0, 0, 0},
+    { 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 5, 6, 0},
+    { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 5, 6},
+    {-2, 1, 4,-3, 6,-5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0,-2, 0, 0, 0, 0, 1, 4,-3, 6,-5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4,-3, 6,-5, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0,-3, 6,-5, 0, 0, 0},
+    { 0, 0, 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0,-3, 0, 6,-5, 0},
+    { 0, 0, 0, 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0,-3, 0, 6,-5},
+    { 3,-5,-1, 6, 2,-4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 3, 0, 0, 0, 0,-5,-1, 6, 2,-4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 6, 2,-4, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 0, 0, 6, 2,-4, 0, 0, 0},
+    { 0, 0, 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 0, 0, 6, 0, 2,-4, 0},
+    { 0, 0, 0, 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 0, 0, 6, 0, 2,-4},
+    {-4,-6, 5, 1,-3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0,-4, 0, 0, 0, 0,-6, 5, 1,-3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 1,-3, 2, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 0, 0, 1,-3, 2, 0, 0, 0},
+    { 0, 0, 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 0, 0, 1, 0,-3, 2, 0},
+    { 0, 0, 0, 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 0, 0, 1, 0,-3, 2},
+    { 5, 4, 6,-2,-1,-3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 5, 0, 0, 0, 0, 4, 6,-2,-1,-3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6,-2,-1,-3, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0,-2,-1,-3, 0, 0, 0},
+    { 0, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0,-2, 0,-1,-3, 0},
+    { 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0,-2, 0,-1,-3},
+    {-6, 3,-2, 5,-4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0,-6, 0, 0, 0, 0, 3,-2, 5,-4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 5,-4, 1, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 0, 0, 5,-4, 1, 0, 0, 0},
+    { 0, 0, 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 0, 0, 5, 0,-4, 1, 0},
+    { 0, 0, 0, 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 0, 0, 5, 0,-4, 1}
+  };
+
+  DynamicRectMatrix<RealType> drMat = DynamicRectMatrix<RealType>(36, 21, *mat);
+  
   //register forcefields, integrators and minimizers
   registerAll();
 
@@ -467,8 +524,6 @@ int main(int argc, char *argv []) {
 
   // Just in case we were passed a system that is on the move:
   veloSet->removeComDrift();
- 
-  // std::cerr << "Volume before = " << thermo.getVolume();
 
   // MinimizerParameters* miniPars = simParams->getMinimizerParameters();
   // OptimizationMethod* minim =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
@@ -506,10 +561,10 @@ int main(int argc, char *argv []) {
   RealType V0 = thermo.getVolume();
   ptRef.negate();
   ptRef *= Constants::elasticConvert;
-  //Vector6d stressRef = ptRef.toVoigtTensor();
   
   Vector6d stress(0.0);
   Vector6d strain(0.0);
+  Vector6d lstress(0.0);
   Mat3x3d epsilon(0.0);
 
   std::vector<std::vector<RealType> > stressStrain;
@@ -518,6 +573,8 @@ int main(int argc, char *argv []) {
   std::vector<RealType> energyValues;
   DynamicRectMatrix<RealType> C(6, 6, 0.0);
   DynamicRectMatrix<RealType> S(6, 6, 0.0);
+  DynamicVector<RealType> ci(21, 0.0);
+  DynamicVector<RealType> sigma(36, 0.0);
   
   Vector3d pos;
   SimInfo::MoleculeIterator miter;
@@ -525,7 +582,6 @@ int main(int argc, char *argv []) {
   RealType de;
   Vector3d delta;
 
-  Vector6d Ls_list;
   Vector6d L(0.0);
   Mat3x3d eta(0.0);
   Mat3x3d eps(0.0);
@@ -538,22 +594,22 @@ int main(int argc, char *argv []) {
   RealType energy;
   Mat3x3d pressureTensor;
   
-
-  for(std::vector<int>::iterator it = Lag_strain_list.begin();
-      it !=  Lag_strain_list.end(); ++it) {
+  for(std::vector<Vector6d>::iterator it = strainBasis.begin();
+      it != strainBasis.end(); ++it) {
     
-    Ls_list = Ls[*it];
+    strain = *it;
+    int ii = std::distance(strainBasis.begin(), it);
 
-    // std::cerr << "doing deformation " << Ls_list << "\n";
     strainValues.clear();
     energyValues.clear();
     
     for (int n = 0; n < nMax; n++) {
 
+      // First, set up the deformation of the box and coodinates:      
       de = -0.5*dmax + dmax * RealType(n) / RealType(nMax-1);
+      L = strain * de;
 
-      L = Ls_list;
-      L *= de;
+      
       eta.setupVoigtTensor(L[0], L[1], L[2], L[3]/2., L[4]/2., L[5]/2.);
       norm = 1.0;
       eps = eta;
@@ -568,53 +624,63 @@ int main(int argc, char *argv []) {
         eps = x;
       }
       deformation = SquareMatrix3<RealType>::identity() + eps;
-     
-      info->getSnapshotManager()->advance();      
-      
+
+      // Second, compute the energy or stress tensor for this deformation:
+      info->getSnapshotManager()->advance();            
       for (mol = info->beginMolecule(miter); mol != NULL; 
            mol = info->nextMolecule(miter)) {
         pos = mol->getCom();
         delta = deformation * pos;
         mol->moveCom(delta - pos);
       }
-
       Mat3x3d Hmat = deformation * refHmat;
-      snap->setHmat(Hmat);
-      
+      snap->setHmat(Hmat);      
       shake->constraintR();
       forceMan->calcForces();
       if (hasFlucQ) flucQ->applyConstraints();
       shake->constraintF();
 
+
+      // Third, record the energy or the stress:
       if (!method.compare("energy")) {
         energy = thermo.getPotential();
         energyValues.push_back(energy);
 
       } else {
-        pressureTensor = thermo.getPressureTensor();
+
+        Mat3x3d idm = deformation.inverse();
+        RealType ddm = deformation.determinant();
+
+        pressureTensor = thermo.getPressureTensor();        
         pressureTensor.negate();
         pressureTensor *= Constants::elasticConvert;
-        stress = pressureTensor.toVoigtTensor();
+
+        Mat3x3d tao = idm * (pressureTensor * idm);
+        tao *= ddm;                    
+        
+        lstress = tao.toVoigtTensor();
 
         for (int j = 0; j < 6; j++) {
-          stressStrain[j].push_back(stress[j]);
+          stressStrain[j].push_back(lstress[j]);
         }
 
       }
       
       strainValues.push_back(de);
       info->getSnapshotManager()->resetToPrevious();
-
     }
-
+    
+    // Fit the energy vs. strain (quadratic)  or stress vs. strain (linear)
     if (!method.compare("energy")) {
       quadraticFit(strainValues, energyValues, a, b, c);
       A2.push_back( a * Constants::energyElasticConvert / V0 );
     } else {
+      for (int j = 0; j < 6; j++) {
+        sigma(6*ii + j) = slope(strainValues, stressStrain[j]);
+      }       
     }
   }
-
-
+  
   if (!method.compare("energy")) {
     C(0,0) = 2.*A2[0];
     C(0,1) = 1.*(-A2[0]-A2[1]+A2[6]);
@@ -637,32 +703,39 @@ int main(int argc, char *argv []) {
     C(4,4) = .5*A2[4];
     C(4,5) = .25*(A2[20]-A2[4]-A2[5]);
     C(5,5) = .5*A2[5];
+  } else {
+    // std::cerr << "sigma = " << sigma << "\n";
+    QR<RealType> qr(drMat);
+    ci = qr.solve( sigma );
+    // std::cerr << "ci = " << ci << "\n";       
+    C(0,0)=ci(0);
+    C(0,1)=ci(1);
+    C(0,2)=ci(2);
+    C(0,3)=ci(3);
+    C(0,4)=ci(4);
+    C(0,5)=ci(5);
+    C(1,1)=ci(6);
+    C(1,2)=ci(7);
+    C(1,3)=ci(8);
+    C(1,4)=ci(9);
+    C(1,5)=ci(10);
+    C(2,2)=ci(11);
+    C(2,3)=ci(12);
+    C(2,4)=ci(13);
+    C(2,5)=ci(14);
+    C(3,3)=ci(15);
+    C(3,4)=ci(16);
+    C(3,5)=ci(17);
+    C(4,4)=ci(18);
+    C(4,5)=ci(19);
+    C(5,5)=ci(20);
   }
-    
-    
-  //     Mat3x3d pt = thermo.getPressureTensor();
-  //     pt.negate();
-  //     pt *= Constants::elasticConvert;
-  //     stress = pt.toVoigtTensor();
-
-  //     for (int j = 0; j < 6; j++) {
-  //       stressStrain[j].push_back(stress[j]);
-  //     }
-      
-  //     info->getSnapshotManager()->resetToPrevious();
-  //   }
-  //   for (int j = 0; j < 6; j++) {
-  //     C(i,j) = slope(strainValues, stressStrain[j]);
-  //   }
-  // }
 
   // Symmetrize C:
 
   for (int i = 0; i < 5; i++) {
     for (int j = i+1; j < 6; j++) {
-      RealType ctmp = 0.5 * (C(i,j) + C(j,i));
-      C(i,j) = ctmp;
-      C(j,i) = ctmp;      
+      C(j,i) = C(i,j);
     }
   }
 

@@ -92,7 +92,7 @@ namespace OpenMD {
       allocate(nrow, ncol);
       for (unsigned int i = 0; i < nrow_; i++)
 	for (unsigned int j = 0; j < ncol_; j++)
-	  this->data_[i][j] = array[i * nrow_ + j];
+          this->data_[i][j] = array[i * ncol_ + j];
     }
 
     /** copy constructor */
