@@ -214,7 +214,7 @@ namespace JAMA
     */
     DynamicVector<Real> solve(const DynamicVector<Real> &b) const
     {
-      if (b.size() != m)		/* arrays must be conformant */
+      if (b.size() != (unsigned int)m )		/* arrays must be conformant */
         return DynamicVector<Real>();
 
       if ( !isFullRank() )		/* matrix is rank deficient */
