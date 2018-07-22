@@ -79,7 +79,6 @@ using namespace JAMA;
 #include <vector>
 #include <iomanip>
 
-
 template<typename Real>
 class Vector6 : public Vector<Real, 6>{
 public:
@@ -119,7 +118,7 @@ RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
   //   std::cerr << x[i] << "\t" << y[i] << "\n";
   // }
   // std::cerr << "&\n";
-
+  
   const size_t n    = x.size();  
   const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
   const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
@@ -323,7 +322,6 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
             << setw(12) << muh << "\n";
   
   std::cout << "Universal elastic Anisotropy: " << setw(12) << Au << "\n";
-
     
   // Assume a cubic crystal, and use symmetries:
 
@@ -398,8 +396,27 @@ int main(int argc, char *argv []) {
     }
   }
 
+  // The strain basis sets are originally from:
+
+  // "Calculations of single-crystal elastic constants made simple,"
+  // R. Yu, J. Zhu, H.Q. Ye,
+  // Computer Physics Communications 181 (2010) 671–675,
+  // DOI: 10.1016/j.cpc.2009.11.017
+  //
+  // and
+  //
+  // "ElaStic: A tool for calculating second-order elastic
+  // constants from first principles," Rostam Golesorkhtabara,
+  // Pasquale Pavonea, Jürgen Spitalera, Peter Puschniga, Claudia Draxl,
+  // Computer Physics Communications 184 (2013) 1861–1873,
+  // DOI: 10.1016/j.cpc.2013.03.010
+  //
+  // Note that this our version assumes the worst about the crystal
+  // system present the box (e.g. a Triclinic box in the N Laue
+  // group).
+
   std::vector<Vector6d> eStrains;
-  // Only the strains for the "N" crystal are required (1-21)
+  // Only the strains for the "N" Laue group are used (1-21, skipping 0)
   // eStrains.push_back(Vector6d( 1., 1., 1., 0., 0., 0.));
   eStrains.push_back(Vector6d( 1., 0., 0., 0., 0., 0.));
   eStrains.push_back(Vector6d( 0., 1., 0., 0., 0., 0.));
@@ -422,7 +439,10 @@ int main(int argc, char *argv []) {
   eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 0.));
   eStrains.push_back(Vector6d( 0., 0., 0., 2., 0., 2.));
   eStrains.push_back(Vector6d( 0., 0., 0., 0., 2., 2.));
-  // The rest are unused in this code:
+  
+  // The rest (22-28) are only used for crystals of higher symmetry,
+  // and are not utilized in this code:
+  //
   // eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 2.));
   // eStrains.push_back(Vector6d(-1., .5, .5, 0., 0., 0.));
   // eStrains.push_back(Vector6d( .5,-1., .5, 0., 0., 0.));
@@ -436,6 +456,14 @@ int main(int argc, char *argv []) {
   // eStrains.push_back(Vector6d( 1., 1., 1.,-2.,-2.,-2.));
   // eStrains.push_back(Vector6d( .5, .5,-1., 2., 2., 2.));
   // eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 4.));
+
+
+  // The Universal Linear-Independent Coupling Strains (ULICS) are from:
+  //
+  // "Calculations of single-crystal elastic constants made simple,"
+  // R. Yu, J. Zhu, H.Q. Ye,
+  // Computer Physics Communications 181 (2010) 671–675,
+  // DOI: 10.1016/j.cpc.2009.11.017
 
   std::vector<Vector6d> sStrains;
   sStrains.push_back(Vector6d( 1., 2., 3., 4., 5., 6.));
@@ -452,6 +480,10 @@ int main(int argc, char *argv []) {
   } else {
     strainBasis = sStrains;
   }
+
+  // The matrix to perform the linear least squares fits from the
+  // ULICS to find the elastic constants were derived for the ElaStic
+  // code, Golesorkhtabara, et al. (cited above):
   
   RealType mat[36][21] = {
     { 1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -568,7 +600,6 @@ int main(int argc, char *argv []) {
   Mat3x3d epsilon(0.0);
 
   std::vector<std::vector<RealType> > stressStrain;
-  stressStrain.resize(6);
   std::vector<RealType> strainValues;
   std::vector<RealType> energyValues;
   DynamicRectMatrix<RealType> C(6, 6, 0.0);
@@ -602,13 +633,14 @@ int main(int argc, char *argv []) {
 
     strainValues.clear();
     energyValues.clear();
+    stressStrain.clear();
+    stressStrain.resize(6);
     
     for (int n = 0; n < nMax; n++) {
 
       // First, set up the deformation of the box and coodinates:      
       de = -0.5*dmax + dmax * RealType(n) / RealType(nMax-1);
       L = strain * de;
-
       
       eta.setupVoigtTensor(L[0], L[1], L[2], L[3]/2., L[4]/2., L[5]/2.);
       norm = 1.0;
@@ -676,7 +708,9 @@ int main(int argc, char *argv []) {
       A2.push_back( a * Constants::energyElasticConvert / V0 );
     } else {
       for (int j = 0; j < 6; j++) {
-        sigma(6*ii + j) = slope(strainValues, stressStrain[j]);
+        quadraticFit(strainValues, stressStrain[j], a, b, c);
+        sigma(6*ii + j) = b;       
+        // sigma(6*ii + j) = slope(strainValues, stressStrain[j]);
       }       
     }
   }
@@ -704,10 +738,10 @@ int main(int argc, char *argv []) {
     C(4,5) = .25*(A2[20]-A2[4]-A2[5]);
     C(5,5) = .5*A2[5];
   } else {
-    // std::cerr << "sigma = " << sigma << "\n";
+
     QR<RealType> qr(drMat);
     ci = qr.solve( sigma );
-    // std::cerr << "ci = " << ci << "\n";       
+    
     C(0,0)=ci(0);
     C(0,1)=ci(1);
     C(0,2)=ci(2);
@@ -739,7 +773,7 @@ int main(int argc, char *argv []) {
     }
   }
 
-  // matrix is destroyed during inversion:
+  // matrix is destroyed during inversion, so make a working copy:
   DynamicRectMatrix<RealType> tmpMat(C);
   invertMatrix(tmpMat, S);
 
