@@ -65,11 +65,11 @@
 #include "math/QR.hpp"
 #include "math/LU.hpp"
 
-// #include "optimization/OptimizationFactory.hpp"
-// #include "optimization/Method.hpp"
-// #include "optimization/Constraint.hpp"
-// #include "optimization/Problem.hpp"
-// #include "optimization/BoxObjectiveFunction.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/Constraint.hpp"
+#include "optimization/Problem.hpp"
+#include "optimization/BoxObjectiveFunction.hpp"
 
 using namespace OpenMD;
 using namespace JAMA;
@@ -137,7 +137,7 @@ void quadraticFit(const std::vector<RealType>& x,
   RealType s01(0.0), s11(0.0), s21(0.0);
   
   for (size_t i = 0; i < x.size(); i++) {
-    //std::cerr << x[i] << "\t" << y[i] << "\n";
+    // std::cerr << x[i] << "\t" << y[i] << "\n";
     s10 += x[i];
     s20 += pow(x[i], 2);
     s30 += pow(x[i], 3);
@@ -146,7 +146,7 @@ void quadraticFit(const std::vector<RealType>& x,
     s11 += x[i]*y[i];
     s21 += pow(x[i],2) * y[i];
   }
-  //std::cerr << "&\n";
+  // std::cerr << "&\n";
 
   RealType D = (s40 * (s20 * s00 - s10 * s10) - 
                 s30 * (s30 * s00 - s10 * s20) + 
@@ -227,6 +227,46 @@ void writeMatrix(DynamicRectMatrix<RealType> M, std::string title,
   std::cout << right << setw(12) << M(5,5);
   std::cout << std::endl;
   std::cout << std::endl;    
+}
+
+void writeBoxGeometries(Mat3x3d org, Mat3x3d opt, std::string title1, std::string title2, std::string units) {
+  
+  std::cout << left << title1 << " (" << units << "):" << std::endl;
+  std::cout << std::endl;  
+  std::cout << " ";
+  std::cout << right << setw(12) << org(0,0) << " ";
+  std::cout << right << setw(12) << org(0,1) << " ";
+  std::cout << right << setw(12) << org(0,2) << " ";
+  std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << org(1,0) << " ";
+  std::cout << right << setw(12) << org(1,1) << " ";
+  std::cout << right << setw(12) << org(1,2) << " ";
+  std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << org(2,0) << " ";
+  std::cout << right << setw(12) << org(2,1) << " ";
+  std::cout << right << setw(12) << org(2,2) << " ";
+  std::cout << std::endl;
+  std::cout << std::endl; 
+  std::cout << left << title2 << " (" << units << "):" << std::endl;
+  std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << opt(0,0) << " ";
+  std::cout << right << setw(12) << opt(0,1) << " ";
+  std::cout << right << setw(12) << opt(0,2) << " ";
+  std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << opt(1,0) << " ";
+  std::cout << right << setw(12) << opt(1,1) << " ";
+  std::cout << right << setw(12) << opt(1,2) << " ";
+  std::cout << std::endl;
+  std::cout << " ";
+  std::cout << right << setw(12) << opt(2,0) << " ";
+  std::cout << right << setw(12) << opt(2,1) << " ";
+  std::cout << right << setw(12) << opt(2,2) << " ";
+  std::cout << std::endl;
+  std::cout << std::endl; 
 }
 
 void writeMaterialProperties(DynamicRectMatrix<RealType> C,
@@ -532,7 +572,7 @@ int main(int argc, char *argv []) {
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, true);
-  //Globals* simParams = info->getSimParams();
+  Globals* simParams = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
   Velocitizer* veloSet = new Velocitizer(info);
 
@@ -557,34 +597,44 @@ int main(int argc, char *argv []) {
   // Just in case we were passed a system that is on the move:
   veloSet->removeComDrift();
 
-  // MinimizerParameters* miniPars = simParams->getMinimizerParameters();
-  // OptimizationMethod* minim =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
-  
-  // if (minim == NULL) {
-  //   sprintf(painCave.errMsg,
-  //           "Optimization Factory can not create %s OptimizationMethod\n",
-  //           miniPars->getMethod().c_str());
-  //   painCave.isFatal = 1;
-  //   simError();
-  // }
-  
-  // BoxObjectiveFunction boxObjf(info, forceMan); 
-  // DumpStatusFunction dsf(info);
-  // DynamicVector<RealType> initCoords = boxObjf.setInitialCoords();
-  // Problem problem(boxObjf, *(new NoConstraint()), dsf, initCoords);
+  if(args_info.box_flag){
+    std::cout << "Doing box optimization\n\n";
+    Mat3x3d oldHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    RealType oldVol = thermo.getVolume();
     
-  // int maxIter = miniPars->getMaxIterations();
-  // int mssIter = miniPars->getMaxStationaryStateIterations();
-  // RealType rEps = miniPars->getRootEpsilon();
-  // RealType fEps = miniPars->getFunctionEpsilon();
-  // RealType gnEps = miniPars->getGradientNormEpsilon();
+    MinimizerParameters* miniPars = simParams->getMinimizerParameters();
+    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
+    
+    if (minim == NULL) {
+      sprintf(painCave.errMsg,
+              "Optimization Factory can not create %s OptimizationMethod\n",
+              miniPars->getMethod().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    BoxObjectiveFunction boxObjf(info, forceMan); 
+    DumpStatusFunction dsf(info);
+    DynamicVector<RealType> initCoords = boxObjf.setInitialCoords();
+    Problem problem(boxObjf, *(new NoConstraint()), dsf, initCoords);
+    
+    int maxIter = miniPars->getMaxIterations();
+    int mssIter = miniPars->getMaxStationaryStateIterations();
+    RealType rEps = miniPars->getRootEpsilon();
+    RealType fEps = miniPars->getFunctionEpsilon();
+    RealType gnEps = miniPars->getGradientNormEpsilon();
+    
+    EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
+    
+    minim->minimize(problem, endCriteria);
+    delete minim;
+
+    Mat3x3d newHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    RealType newVol = thermo.getVolume();
+    writeBoxGeometries(oldHmat, newHmat, "Original Box Geometry",
+                       "Optimized Box Geometry", "Angstroms");
+  }
   
-  // EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
-
-  // minim->minimize(problem, endCriteria);
-  // delete minim;
-
-  // std::cerr << "Volume after = " << thermo.getVolume();
   Snapshot* snap = info->getSnapshotManager()->getCurrentSnapshot();
   Mat3x3d refHmat = snap->getHmat();
 

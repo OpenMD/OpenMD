@@ -42,6 +42,8 @@ struct gengetopt_args_info
   char * input_arg;	/**< @brief Input file name.  */
   char * input_orig;	/**< @brief Input file name original value given at command line.  */
   const char *input_help; /**< @brief Input file name help description.  */
+  int box_flag;	/**< @brief Optimize box geometry before performing calculation (default=off).  */
+  const char *box_help; /**< @brief Optimize box geometry before performing calculation help description.  */
   char * method_arg;	/**< @brief Calculation Method.  */
   char * method_orig;	/**< @brief Calculation Method original value given at command line.  */
   const char *method_help; /**< @brief Calculation Method help description.  */
@@ -51,13 +53,14 @@ struct gengetopt_args_info
   stress-strain relationship original value given at command line.  */
   const char *npoints_help; /**< @brief number of points for fitting
   stress-strain relationship help description.  */
-  double delta_arg;	/**< @brief size of relative volume changes for strains (default='0.01').  */
+  double delta_arg;	/**< @brief size of relative volume changes for strains.  */
   char * delta_orig;	/**< @brief size of relative volume changes for strains original value given at command line.  */
   const char *delta_help; /**< @brief size of relative volume changes for strains help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
+  unsigned int box_given ;	/**< @brief Whether box was given.  */
   unsigned int method_given ;	/**< @brief Whether method was given.  */
   unsigned int npoints_given ;	/**< @brief Whether npoints was given.  */
   unsigned int delta_given ;	/**< @brief Whether delta was given.  */

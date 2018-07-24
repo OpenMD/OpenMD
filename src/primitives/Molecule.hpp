@@ -397,7 +397,7 @@ namespace OpenMD{
     
     /** Moves the center of this molecule */
     void moveCom(const Vector3d& delta);
-    
+
     /** Returns the velocity of center of mass of this molecule */
     Vector3d getComVel();
 

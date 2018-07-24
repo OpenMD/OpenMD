@@ -26,7 +26,7 @@
 
 const char *gengetopt_args_info_purpose = "Computes the general elastic constants that relate stress and strain for a\ngiven input configuration";
 
-const char *gengetopt_args_info_usage = "Usage: elasticConstants [-h|--help] [-V|--version] [-iSTRING|--input=STRING]\n         [-mSTRING|--method=STRING] [-nINT|--npoints=INT]\n         [-dDOUBLE|--delta=DOUBLE] [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: elasticConstants [-h|--help] [-V|--version] [-iSTRING|--input=STRING]\n         [-b|--box] [-mSTRING|--method=STRING] [-nINT|--npoints=INT]\n         [-dDOUBLE|--delta=DOUBLE] [FILES]...";
 
 const char *gengetopt_args_info_versiontext = "";
 
@@ -36,13 +36,15 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help           Print help and exit",
   "  -V, --version        Print version and exit",
   "  -i, --input=STRING   Input file name",
+  "  -b, --box            Optimize box geometry before performing calculation\n                         (default=off)",
   "  -m, --method=STRING  Calculation Method  (possible values=\"energy\",\n                         \"stress\")",
   "  -n, --npoints=INT    number of points for fitting\n                         stress-strain relationship  (default=`25')",
-  "  -d, --delta=DOUBLE   size of relative volume changes for strains\n                         (default=`0.01')",
+  "  -d, --delta=DOUBLE   size of relative volume changes for strains",
     0
 };
 
 typedef enum {ARG_NO
+  , ARG_FLAG
   , ARG_STRING
   , ARG_INT
   , ARG_DOUBLE
@@ -69,6 +71,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->input_given = 0 ;
+  args_info->box_given = 0 ;
   args_info->method_given = 0 ;
   args_info->npoints_given = 0 ;
   args_info->delta_given = 0 ;
@@ -80,11 +83,11 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->input_arg = NULL;
   args_info->input_orig = NULL;
+  args_info->box_flag = 0;
   args_info->method_arg = NULL;
   args_info->method_orig = NULL;
   args_info->npoints_arg = 25;
   args_info->npoints_orig = NULL;
-  args_info->delta_arg = 0.01;
   args_info->delta_orig = NULL;
   
 }
@@ -97,9 +100,10 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->input_help = gengetopt_args_info_help[2] ;
-  args_info->method_help = gengetopt_args_info_help[3] ;
-  args_info->npoints_help = gengetopt_args_info_help[4] ;
-  args_info->delta_help = gengetopt_args_info_help[5] ;
+  args_info->box_help = gengetopt_args_info_help[3] ;
+  args_info->method_help = gengetopt_args_info_help[4] ;
+  args_info->npoints_help = gengetopt_args_info_help[5] ;
+  args_info->delta_help = gengetopt_args_info_help[6] ;
   
 }
 
@@ -274,6 +278,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->input_given)
     write_into_file(outfile, "input", args_info->input_orig, 0);
+  if (args_info->box_given)
+    write_into_file(outfile, "box", 0, 0 );
   if (args_info->method_given)
     write_into_file(outfile, "method", args_info->method_orig, cmdline_parser_method_values);
   if (args_info->npoints_given)
@@ -1049,6 +1055,9 @@ int update_arg(void *field, char **orig_field,
     val = possible_values[found];
 
   switch(arg_type) {
+  case ARG_FLAG:
+    *((int *)field) = !*((int *)field);
+    break;
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
@@ -1083,6 +1092,7 @@ int update_arg(void *field, char **orig_field,
   /* store the original value */
   switch(arg_type) {
   case ARG_NO:
+  case ARG_FLAG:
     break;
   default:
     if (value && orig_field) {
@@ -1145,6 +1155,7 @@ cmdline_parser_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "input",	1, NULL, 'i' },
+        { "box",	0, NULL, 'b' },
         { "method",	1, NULL, 'm' },
         { "npoints",	1, NULL, 'n' },
         { "delta",	1, NULL, 'd' },
@@ -1156,7 +1167,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:m:n:d:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:bm:n:d:", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1185,6 +1196,16 @@ cmdline_parser_internal (
               &(local_args_info.input_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "input", 'i',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'b':	/* Optimize box geometry before performing calculation.  */
+        
+        
+          if (update_arg((void *)&(args_info->box_flag), 0, &(args_info->box_given),
+              &(local_args_info.box_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "box", 'b',
               additional_error))
             goto failure;
         
@@ -1219,7 +1240,7 @@ cmdline_parser_internal (
         
           if (update_arg( (void *)&(args_info->delta_arg), 
                &(args_info->delta_orig), &(args_info->delta_given),
-              &(local_args_info.delta_given), optarg, 0, "0.01", ARG_DOUBLE,
+              &(local_args_info.delta_given), optarg, 0, 0, ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
               "delta", 'd',
               additional_error))

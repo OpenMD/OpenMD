@@ -331,7 +331,7 @@ namespace OpenMD {
       sd->setPos(sd->getPos() + delta);
     }    
   }
-
+  
   Vector3d Molecule::getComVel() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;

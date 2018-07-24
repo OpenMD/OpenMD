@@ -348,6 +348,7 @@ src/mdParser/FilenameObserver.cpp
 src/optimization/OptimizationFactory.cpp
 src/optimization/Armijo.cpp
 src/optimization/BFGS.cpp
+src/optimization/BoxObjectiveFunction.cpp
 src/optimization/ConjugateGradient.cpp
 src/optimization/Constraint.cpp
 src/optimization/EndCriteria.cpp
