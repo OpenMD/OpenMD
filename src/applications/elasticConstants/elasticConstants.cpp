@@ -600,7 +600,6 @@ int main(int argc, char *argv []) {
   if(args_info.box_flag){
     std::cout << "Doing box optimization\n\n";
     Mat3x3d oldHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    RealType oldVol = thermo.getVolume();
     
     MinimizerParameters* miniPars = simParams->getMinimizerParameters();
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
@@ -630,7 +629,6 @@ int main(int argc, char *argv []) {
     delete minim;
 
     Mat3x3d newHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    RealType newVol = thermo.getVolume();
     writeBoxGeometries(oldHmat, newHmat, "Original Box Geometry",
                        "Optimized Box Geometry", "Angstroms");
   }
