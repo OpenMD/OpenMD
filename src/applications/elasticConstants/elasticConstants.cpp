@@ -602,7 +602,8 @@ int main(int argc, char *argv []) {
     Mat3x3d oldHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     
     MinimizerParameters* miniPars = simParams->getMinimizerParameters();
-    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
+    // OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
+    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("CG", info);
     
     if (minim == NULL) {
       sprintf(painCave.errMsg,
@@ -689,14 +690,19 @@ int main(int argc, char *argv []) {
       // First, set up the deformation of the box and coodinates:      
       de = -0.5*dmax + dmax * RealType(n) / RealType(nMax-1);
       L = strain * de;
-      
+
+      // η is the Lagrangian strain tensor:
       eta.setupVoigtTensor(L[0], L[1], L[2], L[3]/2., L[4]/2., L[5]/2.);
+
+      // Make sure the deformation isn't too large:
+      if (eta.frobeniusNorm() > 0.7) {
+        std::cerr << "Deformation is too large!\n";
+      }
+      
+      // Find the physical strain tensor, ε, from the Lagrangian strain, η:
+      // η = ε + 0.5 * ε^2
       norm = 1.0;
       eps = eta;
-      if (eta.frobeniusNorm() > 0.7) {
-        std::cerr << "Too large deformation!\n";
-      }
-
       while (norm > 1.0e-10) {
         x = eta - eps*eps / 2.0;
         test = x - eps;
@@ -705,7 +711,8 @@ int main(int argc, char *argv []) {
       }
       deformation = SquareMatrix3<RealType>::identity() + eps;
 
-      // Second, compute the energy or stress tensor for this deformation:
+      // Second, do the deformation and compute the energy or stress
+      // tensor for this deformation:
       info->getSnapshotManager()->advance();            
       for (mol = info->beginMolecule(miter); mol != NULL; 
            mol = info->nextMolecule(miter)) {
@@ -714,12 +721,11 @@ int main(int argc, char *argv []) {
         mol->moveCom(delta - pos);
       }
       Mat3x3d Hmat = deformation * refHmat;
-      snap->setHmat(Hmat);      
+      snap->setHmat(Hmat);
       shake->constraintR();
       forceMan->calcForces();
       if (hasFlucQ) flucQ->applyConstraints();
       shake->constraintF();
-
 
       // Third, record the energy or the stress:
       if (!method.compare("energy")) {
@@ -727,6 +733,12 @@ int main(int argc, char *argv []) {
         energyValues.push_back(energy);
 
       } else {
+        
+        // Find the Lagragian stress tensor, τ, from the physical
+        // stress tensor, σ, that was computed from the pressureTensor
+        // in this code.       
+        // τ = det(1+ε) (1+ε)^−1 · σ · (1+ε)^−1
+        // (Note that 1+ε is the deformation tensor computed above.)
 
         Mat3x3d idm = deformation.inverse();
         RealType ddm = deformation.determinant();
@@ -734,7 +746,7 @@ int main(int argc, char *argv []) {
         pressureTensor = thermo.getPressureTensor();        
         pressureTensor.negate();
         pressureTensor *= Constants::elasticConvert;
-
+        
         Mat3x3d tao = idm * (pressureTensor * idm);
         tao *= ddm;                    
         
@@ -787,6 +799,9 @@ int main(int argc, char *argv []) {
     C(5,5) = .5*A2[5];
   } else {
 
+    // Least squares to map fits of stress-strain relationships onto
+    // elastic matrix:
+    
     QR<RealType> qr(drMat);
     ci = qr.solve( sigma );
     

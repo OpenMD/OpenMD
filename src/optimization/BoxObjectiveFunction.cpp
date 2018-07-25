@@ -70,6 +70,7 @@ namespace OpenMD{
       shake_->constraintF();
       return thermo.getPotential();
     } else {
+      // The deformation was too large, so return an infinite potential
       return std::numeric_limits<RealType>::infinity();
     }
   }
@@ -85,6 +86,7 @@ namespace OpenMD{
       shake_->constraintF();
       getGrad(grad);
     } else {
+      // The deformation was too large, so return an infinite gradient:
       for (int j = 0; j < 6; j++) 
         grad[j] = std::numeric_limits<RealType>::infinity();
     }
@@ -103,6 +105,8 @@ namespace OpenMD{
       getGrad(grad);
       return thermo.getPotential();;
     } else {
+      // The deformation was too large, so return infinite
+      // potential and gradient
       for (int j = 0; j < 6; j++) 
         grad[j] = std::numeric_limits<RealType>::infinity();      
       return std::numeric_limits<RealType>::infinity();
@@ -122,15 +126,19 @@ namespace OpenMD{
     Mat3x3d test(0.0);
     RealType norm;
 
+    // η is the Lagrangian strain tensor:
     eta.setupVoigtTensor(x[0], x[1], x[2], x[3]/2., x[4]/2., x[5]/2.);
     
-    norm = 1.0;
-    eps = eta;
+    // Make sure the deformation isn't too large:
     if (eta.frobeniusNorm() > 0.7) {
-      // std::cerr << "Too large deformation!\n";
+      // Deformation is too large, return an error condition:
       return -1;
     }
-    
+
+    // Find the physical strain tensor, ε, from the Lagrangian strain, η:
+    // η = ε + 0.5 * ε^2
+    norm = 1.0;
+    eps = eta;
     while (norm > 1.0e-10) {
       y = eta - eps*eps / 2.0;
       test = y - eps;
@@ -158,6 +166,12 @@ namespace OpenMD{
     Mat3x3d pressureTensor;
     Vector<RealType, 6> lstress(0.0);
 
+    // Find the Lagragian stress tensor, τ, from the physical
+    // stress tensor, σ, that was computed from the pressureTensor
+    // in this code.       
+    // τ = det(1+ε) (1+ε)^−1 · σ · (1+ε)^−1
+    // (Note that 1+ε is the deformation tensor computed above.)
+    
     Mat3x3d idm = deformation_.inverse();
     RealType ddm = deformation_.determinant();
     
@@ -169,9 +183,10 @@ namespace OpenMD{
     tao *= ddm;                    
     
     lstress = tao.toVoigtTensor();
+    RealType V = thermo.getVolume();
     
     for (int j = 0; j < 6; j++) {
-      grad[j] = lstress[j];
+      grad[j] = V * lstress[j];
     }
   }
 
