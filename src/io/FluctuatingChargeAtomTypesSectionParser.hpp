@@ -58,6 +58,7 @@ namespace OpenMD {
       fqtHardness,
       fqtMultipleMinima,
       fqtEAMPolynomial,
+      fqtEAMPolySlater,
       fqtEAM,
       fqtEAMSlater,
       fqtUnknown

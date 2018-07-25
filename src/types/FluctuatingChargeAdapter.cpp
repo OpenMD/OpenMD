@@ -212,6 +212,30 @@ namespace OpenMD {
 
 
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType nValence,
+                                                       int slaterN,
+                                                       RealType slaterZeta,
+                                                       DoublePolynomial vs) {
+
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+    
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
+    fqParam->usesSlaterElectrostatics = true;
+    fqParam->nValence = nValence;
+    fqParam->slaterZeta = slaterZeta;
+    fqParam->slaterN = slaterN;
+    
+    fqParam->vself = vs;
+    
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
                                                        RealType coupling,
                                                        vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
     if (isFluctuatingCharge()){

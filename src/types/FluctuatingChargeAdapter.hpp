@@ -82,7 +82,10 @@ namespace OpenMD {
                                vector<tuple3<RealType, RealType, RealType> > diabaticStates);
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
                                DoublePolynomial vs);
-    
+    void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
+                               int slaterN, RealType slaterZeta,
+                               DoublePolynomial vs);
+
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
                                RealType coupling,
                                vector<tuple3<RealType, RealType, RealType> > diabaticStates);
