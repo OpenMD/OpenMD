@@ -110,9 +110,7 @@ namespace OpenMD {
   }
 
   ZConsVisitor::~ZConsVisitor(){
-    if(!zconsReader_) 
-      delete zconsReader_;
-  
+    delete zconsReader_;    
   }
 
   void ZConsVisitor::visit(Atom* atom){

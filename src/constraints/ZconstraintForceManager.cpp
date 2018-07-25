@@ -182,9 +182,7 @@ namespace OpenMD {
   }
 
   ZconstraintForceManager::~ZconstraintForceManager(){
-    if (fzOut){
-      delete fzOut;
-    }
+    delete fzOut;
   }
 
   void ZconstraintForceManager::update(){

@@ -308,8 +308,7 @@ namespace OpenMD {
   }
 
   RestraintForceManager::~RestraintForceManager(){
-    if (restOut)
-      delete restOut;
+    delete restOut;
   }
 
   void RestraintForceManager::init() {
