@@ -48,7 +48,7 @@
 namespace OpenMD{
 
   PotentialEnergyObjectiveFunction::PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan)
-    : info_(info), forceMan_(forceMan), thermo(info) {   
+    : info_(info), forceMan_(forceMan), thermo(info), hasFlucQ_(false) {   
     shake_ = new Shake(info_);
     
     if (info_->usesFluctuatingCharges()) {
