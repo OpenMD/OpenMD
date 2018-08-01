@@ -376,7 +376,8 @@ namespace OpenMD {
 
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
-      if (info_->getSimParams()->haveUseSurfaceTerm()) {
+      if (info_->getSimParams()->haveUseSurfaceTerm() &&
+          info_->getSimParams()->getUseSurfaceTerm()) {
 
         if (info_->usesElectrostaticAtoms()) {
           useSurfaceTerm_ = info_->getSimParams()->getUseSurfaceTerm();
