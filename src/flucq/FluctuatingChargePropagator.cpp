@@ -102,8 +102,6 @@ namespace OpenMD {
     
     FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, 
                                                  fqConstraints_);
-    DumpStatusFunction dsf(info_);  // we want a dump file written
-                                    // every iteration
 
     DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
     
