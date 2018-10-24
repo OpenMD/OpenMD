@@ -82,8 +82,8 @@ namespace OpenMD {
         
       unsigned int count = seleMan_.getSelectionCount();
 
-      if (counts_.size() <= count)  {
-	counts_.resize(count, 0);
+      if (counts_.size() < count+1)  {
+	counts_.resize(count+1, 0);
       }
 
       counts_[count]++;
