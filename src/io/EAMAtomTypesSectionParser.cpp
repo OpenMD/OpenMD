@@ -252,6 +252,77 @@ namespace OpenMD {
             ea.makeZhou2005Oxygen(re, fe, alpha, beta, A, B, kappa, lambda,
                                   gamma, nu, OrhoLimits, OrhoE, OF);
           }
+        } else if(eamParameterType == "EVBOXYGEN") {
+          if (nTokens < 42) {
+              sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                      "Not enough tokens at line %d\n", lineNo);
+              painCave.isFatal = 1;
+            simError();
+          } else {
+
+            // The Morse (molecular) potential
+            RealType r0 = dus_ * tokenizer.nextTokenAsDouble();
+            RealType D0 = eus_ * tokenizer.nextTokenAsDouble();
+            RealType beta0 = tokenizer.nextTokenAsDouble() / dus_;
+
+            // The coupling potential
+            RealType rc = dus_ * tokenizer.nextTokenAsDouble();
+            RealType c = eus_ * tokenizer.nextTokenAsDouble();
+            RealType sigma = tokenizer.nextTokenAsDouble() / dus_;
+
+            // The ionic (EAM) potential
+            RealType re         = dus_ * tokenizer.nextTokenAsDouble();
+            RealType fe         = tokenizer.nextTokenAsDouble();
+            RealType alpha      = tokenizer.nextTokenAsDouble();
+            RealType beta       = tokenizer.nextTokenAsDouble();
+            RealType A          = eus_ * tokenizer.nextTokenAsDouble();
+            RealType B          = eus_ * tokenizer.nextTokenAsDouble();
+            RealType kappa      = tokenizer.nextTokenAsDouble();
+            RealType lambda     = tokenizer.nextTokenAsDouble();
+            RealType gamma      = tokenizer.nextTokenAsDouble();
+            RealType nu         = tokenizer.nextTokenAsDouble();
+
+            std::vector<RealType> OrhoLimits;
+            OrhoLimits.push_back(tokenizer.nextTokenAsDouble());
+            OrhoLimits.push_back(tokenizer.nextTokenAsDouble());
+            OrhoLimits.push_back(tokenizer.nextTokenAsDouble());
+            OrhoLimits.push_back(tokenizer.nextTokenAsDouble());
+            OrhoLimits.push_back(tokenizer.nextTokenAsDouble());
+
+            std::vector<RealType> OrhoE;
+            OrhoE.push_back(tokenizer.nextTokenAsDouble());
+            OrhoE.push_back(tokenizer.nextTokenAsDouble());
+            OrhoE.push_back(tokenizer.nextTokenAsDouble());
+            OrhoE.push_back(tokenizer.nextTokenAsDouble());
+            OrhoE.push_back(tokenizer.nextTokenAsDouble());
+
+            std::vector<std::vector<RealType> > OF;
+            OF.resize(5);
+            OF[0].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[0].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[0].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[0].push_back(eus_ * tokenizer.nextTokenAsDouble());
+
+            OF[1].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[1].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[1].push_back(eus_ * tokenizer.nextTokenAsDouble());
+
+            OF[2].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[2].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[2].push_back(eus_ * tokenizer.nextTokenAsDouble());
+
+            OF[3].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[3].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[3].push_back(eus_ * tokenizer.nextTokenAsDouble());
+
+            OF[4].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[4].push_back(eus_ * tokenizer.nextTokenAsDouble());
+            OF[4].push_back(eus_ * tokenizer.nextTokenAsDouble());
+
+            ea.makeEVBOxygen(r0, D0, beta0, rc, c, sigma,
+                             re, fe, alpha, beta, A, B, kappa, lambda,
+                             gamma, nu, OrhoLimits, OrhoE, OF);
+          }          
         } else {
           sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: %s "
                   "is not a recognized EAM type\n", eamParameterType.c_str());

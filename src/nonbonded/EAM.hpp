@@ -93,6 +93,14 @@ namespace OpenMD {
     RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
                      RealType alpha, RealType beta, RealType kappa,
                      RealType lambda);
+    RealType SMorse(RealType r, RealType r0, RealType d0, RealType beta0);
+    RealType Gauss(RealType r, RealType rc, RealType c, RealType sigma);
+    RealType EVBPhi(RealType r, RealType r0, RealType d0, RealType beta0,
+                    RealType rc, RealType c, RealType sigma,
+                    RealType re, RealType A, RealType B,
+                    RealType alpha, RealType beta, RealType kappa,
+                    RealType lambda);
+
     RealType ZhouRho(RealType r, RealType re, RealType fe,
                      RealType beta, RealType lambda);
     RealType Zhou2001Functional(RealType rho, RealType rhoe,

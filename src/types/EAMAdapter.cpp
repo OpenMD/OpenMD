@@ -160,6 +160,42 @@ namespace OpenMD {
     return zhouData->getData();
   }
 
+  EVBParameters* EAMAdapter::getEVBParam() {
+
+    if (!isEAM()) {
+      sprintf( painCave.errMsg,
+               "EAMAdapter::getEVBParam was passed an atomType (%s)\n"
+               "\tthat does not appear to be an EAM atom.\n",
+               at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    GenericData* data = at_->getPropertyByName(EVBTypeID);
+    if (data == NULL) {
+      sprintf( painCave.errMsg,
+               "EAMAdapter::getEVBParam could not find EVB\n"
+               "\tparameters for atomType %s.\n", at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    EVBData* evbData = dynamic_cast<EVBData*>(data);
+    if (evbData == NULL) {
+      sprintf( painCave.errMsg,
+               "EAMAdapter::getEVBParam could not convert\n"
+               "\tGenericData to EVBData for atom type %s\n",
+               at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    return evbData->getData();
+  }
+  
   EAMType EAMAdapter::getEAMType() {
     EAMParameters* eamParam = getEAMParam();
     return eamParam->eamType;
@@ -464,6 +500,66 @@ namespace OpenMD {
     at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
   }
 
+  void EAMAdapter::makeEVBOxygen(RealType r0,
+                                 RealType D0,
+                                 RealType beta0,
+                                 RealType rc,
+                                 RealType c,
+                                 RealType sigma,
+                                 RealType re,
+                                 RealType fe,
+                                 RealType alpha,
+                                 RealType beta,
+                                 RealType A,
+                                 RealType B,
+                                 RealType kappa,
+                                 RealType lambda,
+                                 RealType gamma,
+                                 RealType nu,
+                                 std::vector<RealType> OrhoLimits,
+                                 std::vector<RealType> OrhoE,
+                                 std::vector<std::vector<RealType> > OF) {
+    
+    if (isEAM()){
+      at_->removeProperty(EAMtypeID);
+      at_->removeProperty(ZhouTypeID);
+      at_->removeProperty(EVBTypeID);
+    }
+    
+    EAMParameters* eamParam = new EAMParameters();
+    ZhouParameters* zhouParam = new ZhouParameters();
+    EVBParameters* evbParam = new EVBParameters();
+
+    eamParam->eamType = eamEVBOxygen;
+
+    eamParam->latticeConstant = re;
+
+    evbParam->r0    = r0;
+    evbParam->D0    = D0;
+    evbParam->beta0 = beta0;
+    evbParam->rc    = rc;
+    evbParam->c     = c;
+    evbParam->sigma = sigma;
+    
+    zhouParam->re = re;
+    zhouParam->fe = fe;
+    zhouParam->alpha = alpha;
+    zhouParam->beta = beta;
+    zhouParam->A = A;
+    zhouParam->B = B;
+    zhouParam->kappa = kappa;
+    zhouParam->lambda = lambda;
+    zhouParam->gamma = gamma;
+    zhouParam->nu = nu;
+    zhouParam->OrhoLimits = OrhoLimits;
+    zhouParam->OrhoE = OrhoE;
+    zhouParam->OF = OF;
+
+    at_->addProperty(new EAMData(EAMtypeID, eamParam));
+    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(new EVBData(EAMtypeID, evbParam));
+  }
+
   int EAMAdapter::getNrho() {
     FuncflParameters* funcflParam = getFuncflParam();
     return funcflParam->nrho;
@@ -685,5 +781,30 @@ namespace OpenMD {
 
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->OF;
+  }
+
+  RealType EAMAdapter::getRMorse() {
+    EVBParameters* evbParam = getEVBParam();
+    return evbParam->r0;
+  }
+  RealType EAMAdapter::getDMorse() {
+    EVBParameters* evbParam = getEVBParam();
+    return evbParam->D0;
+  }
+  RealType EAMAdapter::getBetaMorse() {
+    EVBParameters* evbParam = getEVBParam();
+    return evbParam->beta0;
+  }
+  RealType EAMAdapter::getCoupling() {
+    EVBParameters* evbParam = getEVBParam();
+    return evbParam->c;
+  }
+  RealType EAMAdapter::getRcoupling() {
+    EVBParameters* evbParam = getEVBParam();
+    return evbParam->rc;
+  }
+  RealType EAMAdapter::getSigmaCoupling() {
+    EVBParameters* evbParam = getEVBParam();
+    return evbParam->sigma;
   }
 }
