@@ -78,7 +78,7 @@ namespace OpenMD {
     try {
       inversionType = itParser.parseLine(remainder);
     }
-    catch( OpenMDException e ) {
+    catch( OpenMDException& e ) {
       
       sprintf(painCave.errMsg, "InversionTypesSectionParser Error: %s "
               "at line %d\n",

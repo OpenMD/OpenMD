@@ -75,7 +75,7 @@ namespace OpenMD {
     try {
       bondType = btParser.parseLine(remainder, kScale);
     }
-    catch( OpenMDException e ) {
+    catch( OpenMDException& e ) {
       
       sprintf(painCave.errMsg, "BondTypesSectionParser Error: %s "
               "at line %d\n",

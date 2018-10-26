@@ -87,7 +87,7 @@ namespace OpenMD {
     try {
       torsionType = ttParser.parseLine(remainder);
     }
-    catch( OpenMDException e ) {
+    catch( OpenMDException& e ) {
       
       sprintf(painCave.errMsg, "TorsionTypesSectionParser Error: %s "
               "at line %d\n",

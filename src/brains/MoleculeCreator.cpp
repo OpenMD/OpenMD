@@ -322,7 +322,7 @@ namespace OpenMD {
         bondType = btParser.parseTypeAndPars(stamp->getOverrideType(),
                                              stamp->getOverridePars() );
       }
-      catch( OpenMDException e) {
+      catch( OpenMDException& e) {
         sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
                 "for molecule %s\n",
                 e.what(), mol->getType().c_str() );
@@ -380,7 +380,7 @@ namespace OpenMD {
           bendType = btParser.parseTypeAndPars(stamp->getOverrideType(),
                                                stamp->getOverridePars() );
         }
-        catch( OpenMDException e) {
+        catch( OpenMDException& e) {
           sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
                   "for molecule %s\n",
                   e.what(), mol->getType().c_str() );
@@ -425,7 +425,7 @@ namespace OpenMD {
           bendType = btParser.parseTypeAndPars(stamp->getOverrideType(),
                                                stamp->getOverridePars() );
         }
-        catch( OpenMDException e) {
+        catch( OpenMDException& e) {
           sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
                   "for molecule %s\n",
                   e.what(), mol->getType().c_str() );
@@ -495,7 +495,7 @@ namespace OpenMD {
           torsionType = ttParser.parseTypeAndPars(stamp->getOverrideType(),
                                                   stamp->getOverridePars() );
         }
-        catch( OpenMDException e) {
+        catch( OpenMDException& e) {
           sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
                   "for molecule %s\n",
                   e.what(), mol->getType().c_str() );
@@ -538,7 +538,7 @@ namespace OpenMD {
           torsionType = ttParser.parseTypeAndPars(stamp->getOverrideType(),
                                                   stamp->getOverridePars() );
         }
-        catch( OpenMDException e) {
+        catch( OpenMDException& e) {
           sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
                   "for molecule %s\n",
                   e.what(), mol->getType().c_str() );
@@ -607,7 +607,7 @@ namespace OpenMD {
         inversionType = itParser.parseTypeAndPars(stamp->getOverrideType(),
                                                   stamp->getOverridePars() );
       }
-      catch( OpenMDException e) {
+      catch( OpenMDException& e) {
         sprintf(painCave.errMsg, "MoleculeCreator Error: %s "
                 "for molecule %s\n",
                 e.what(), mol->getType().c_str() );

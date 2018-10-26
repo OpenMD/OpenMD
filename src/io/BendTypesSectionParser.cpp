@@ -76,7 +76,7 @@ namespace OpenMD {
     try {
       bendType = btParser.parseLine(remainder, kScale);
     }
-    catch( OpenMDException e ) {
+    catch( OpenMDException& e ) {
       
       sprintf(painCave.errMsg, "BendTypesSectionParser Error: %s "
               "at line %d\n",
