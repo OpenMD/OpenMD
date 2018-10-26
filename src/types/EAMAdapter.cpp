@@ -139,7 +139,7 @@ namespace OpenMD {
     GenericData* data = at_->getPropertyByName(ZhouTypeID);
     if (data == NULL) {
       sprintf( painCave.errMsg,
-               "EAMAdapter::getZhou2001Param could not find Zhou\n"
+               "EAMAdapter::getZhouParam could not find Zhou\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
@@ -557,7 +557,7 @@ namespace OpenMD {
 
     at_->addProperty(new EAMData(EAMtypeID, eamParam));
     at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
-    at_->addProperty(new EVBData(EAMtypeID, evbParam));
+    at_->addProperty(new EVBData(EVBtypeID, evbParam));
   }
 
   int EAMAdapter::getNrho() {
@@ -622,30 +622,10 @@ namespace OpenMD {
     return zhouParam->lambda;
   }
   RealType EAMAdapter::getGamma() {
-    if (getEAMType() != eamZhou2005Oxygen) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getGamma was called on atomType %s\n"
-               "\twhich is not a Zhou2005Oxygen type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->gamma;
   }
   RealType EAMAdapter::getNu() {
-    if (getEAMType() != eamZhou2005Oxygen) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getNu was called on atomType %s\n"
-               "\twhich is not a Zhou2005Oxygen type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->nu;
   }
@@ -658,30 +638,10 @@ namespace OpenMD {
     return zhouParam->F;
   }
   RealType EAMAdapter::getF3plus() {
-    if (getEAMType() != eamZhou2005) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getF3plus was called on atomType %s\n"
-               "\twhich is not a Zhou2005 type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->F3plus;
   }
   RealType EAMAdapter::getF3minus() {
-    if (getEAMType() != eamZhou2005) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getF3minus was called on atomType %s\n"
-               "\twhich is not a Zhou2005 type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->F3minus;
   }
@@ -697,88 +657,30 @@ namespace OpenMD {
   }
 
   RealType EAMAdapter::getRhos() {
-    EAMType et = getEAMType();
-    if (et != eamZhou2004 && et != eamZhou2005 ) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getRhos was called on atomType %s\n"
-               "\twhich is not a Zhou2004 or Zhou2005 type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->rhos;
   }
 
   RealType EAMAdapter::getRhol() {
-    if (getEAMType() != eamZhou2004) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getRhos was called on atomType %s\n"
-               "\twhich is not a Zhou2004 type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->rhol;
   }
 
   RealType EAMAdapter::getRhoh() {
-    if (getEAMType() != eamZhou2004) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getRhos was called on atomType %s\n"
-               "\twhich is not a Zhou2004 type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->rhoh;
   }
 
   std::vector<RealType> EAMAdapter::getOrhoLimits() {
-    if (getEAMType() != eamZhou2005Oxygen) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getOrhoLimits was called on atomType %s\n"
-               "\twhich is not a Zhou2005Oxygen type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    ZhouParameters* zhouParam = getZhouParam();
+    if (getEAMType() !    ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->OrhoLimits;
   }
   std::vector<RealType> EAMAdapter::getOrhoE() {
-    if (getEAMType() != eamZhou2005Oxygen) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getOrhoE was called on atomType %s\n"
-               "\twhich is not a Zhou2005Oxygen type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->OrhoE;
   }
 
   std::vector<std::vector<RealType> > EAMAdapter::getOF() {
-    if (getEAMType() != eamZhou2005Oxygen) {
-      sprintf( painCave.errMsg,
-               "EAMAdapter::getOF was called on atomType %s\n"
-               "\twhich is not a Zhou2005Oxygen type\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-
     ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->OF;
   }
