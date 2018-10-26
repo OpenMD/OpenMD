@@ -343,7 +343,7 @@ namespace OpenMD {
       kappa2 = ea2.getKappa();
       lambda2 = ea2.getLambda();
       
-      if (ea1.getEAMType()==eamEVBOxygen) {
+      if (ea2.getEAMType()==eamEVBOxygen) {
         r02 = ea2.getRMorse();
         d02 = ea2.getDMorse();
         beta02 = ea2.getBetaMorse();
