@@ -557,7 +557,7 @@ namespace OpenMD {
 
     at_->addProperty(new EAMData(EAMtypeID, eamParam));
     at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
-    at_->addProperty(new EVBData(EVBtypeID, evbParam));
+    at_->addProperty(new EVBData(EVBTypeID, evbParam));
   }
 
   int EAMAdapter::getNrho() {
@@ -672,7 +672,7 @@ namespace OpenMD {
   }
 
   std::vector<RealType> EAMAdapter::getOrhoLimits() {
-    if (getEAMType() !    ZhouParameters* zhouParam = getZhouParam();
+    ZhouParameters* zhouParam = getZhouParam();
     return zhouParam->OrhoLimits;
   }
   std::vector<RealType> EAMAdapter::getOrhoE() {
