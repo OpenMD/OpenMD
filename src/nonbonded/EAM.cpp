@@ -310,6 +310,7 @@ namespace OpenMD {
       }
       cs->addPoints(rvals, phivals);
     } else {
+
       EAMAtomData &data1 = EAMdata[EAMtids[ atomType1->getIdent() ]];
       EAMAtomData &data2 = EAMdata[EAMtids[ atomType2->getIdent() ]];
 
@@ -382,7 +383,7 @@ namespace OpenMD {
           rha = data1.rho->getValueAt(r);
           if (ea1.getEAMType()==eamEVBOxygen) {
             pha = EVBPhi(r, r01, d01, beta01, rc1, c1, sigma1,
-                         re1, A1, B1, alpha1, beta1, kappa1, lambda1);            
+                         re1, A1, B1, alpha1, beta1, kappa1, lambda1);
           } else {
             pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
           }
@@ -390,9 +391,10 @@ namespace OpenMD {
         if ( r < data2.rcut ) {
           rhb = data2.rho->getValueAt(r);
           if (ea2.getEAMType()==eamEVBOxygen) {
-          } else {            
             phb =  EVBPhi(r, r02, d02, beta02, rc2, c2, sigma2,
                           re2, A2, B2, alpha2, beta2, kappa2, lambda2);
+          } else {
+            phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
           }
         }
 
@@ -526,8 +528,9 @@ namespace OpenMD {
 
     EAMAdapter ea = EAMAdapter(atomType);
     EAMAtomData eamAtomData;
+    EAMType et = ea.getEAMType();
 
-    switch(ea.getEAMType()) {
+    switch(et) {
     case eamFuncfl: {
       eamAtomData.rho = ea.getRhoSpline();
       eamAtomData.F = ea.getFSpline();
@@ -538,7 +541,6 @@ namespace OpenMD {
     case eamZhou2001:
     case eamZhou2004:
     case eamZhou2005: {
-      EAMType et = ea.getEAMType();
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
       RealType rhoe = ea.getRhoe();
