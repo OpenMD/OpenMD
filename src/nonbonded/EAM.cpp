@@ -553,7 +553,8 @@ namespace OpenMD {
       RealType latticeConstant = ea.getLatticeConstant();
 
       int Nr = 2000;
-      eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
+      // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
+      eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + lambda);
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
@@ -623,7 +624,9 @@ namespace OpenMD {
       std::vector<std::vector<RealType> > OF = ea.getOF();
 
       int Nr = 2000;
-      eamAtomData.rcut = 6.0;
+      // eamAtomData.rcut = 6.0;
+      eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + nu );
+
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
