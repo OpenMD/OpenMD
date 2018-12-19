@@ -142,8 +142,8 @@ namespace OpenMD {
       this->data_[0][1] = cpsi * sphi + ctheta * cphi * spsi;
       this->data_[0][2] = spsi * stheta;
                 
-      this->data_[1][0] = -spsi * ctheta - ctheta * sphi * cpsi;
-      this->data_[1][1] = -spsi * stheta + ctheta * cphi * cpsi;
+      this->data_[1][0] = -spsi * cphi - ctheta * sphi * cpsi;
+      this->data_[1][1] = -spsi * sphi + ctheta * cphi * cpsi;
       this->data_[1][2] = cpsi * stheta;
 
       this->data_[2][0] = stheta * sphi;

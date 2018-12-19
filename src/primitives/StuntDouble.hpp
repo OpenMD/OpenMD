@@ -547,7 +547,7 @@ namespace OpenMD{
      * @note actual storage data is rotation matrix         
      */         
     void setPrevEuler(const Vector3d& euler) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = euler;
+      ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_].setupRotMat(euler);
     }
        
     /**
@@ -555,7 +555,7 @@ namespace OpenMD{
      * @param euler  new euler angles 
      */         
     void setEuler(const Vector3d& euler) {
-      ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = euler;
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_].setupRotMat(euler);
     }
 
     /**
@@ -566,7 +566,7 @@ namespace OpenMD{
      * @note actual storage data is rotation matrix                  
      */         
     void setEuler(const Vector3d& euler, int snapshotNo) {
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = euler;
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_].setupRotMat(euler);
     }
 
     /**
