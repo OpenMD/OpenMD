@@ -32,21 +32,21 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include "primitives/DirectionalAtom.hpp"
 #include "types/DirectionalAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
-  
-  DirectionalAtom::DirectionalAtom(AtomType* dAtomType) 
+
+  DirectionalAtom::DirectionalAtom(AtomType* dAtomType)
     : Atom(dAtomType) {
     objType_= otDAtom;
 
@@ -65,7 +65,7 @@ namespace OpenMD {
     // atom is zero:
     int nLinearAxis = 0;
     Mat3x3d inertiaTensor = getI();
-    for (int i = 0; i < 3; i++) {    
+    for (int i = 0; i < 3; i++) {
       if (fabs(inertiaTensor(i, i)) < OpenMD::epsilon) {
         linear_ = true;
         linearAxis_ = i;
@@ -80,19 +80,19 @@ namespace OpenMD {
                "\tmoment of inertia.");
       painCave.isFatal = 0;
       simError();
-    }    
+    }
   }
-  
+
   Mat3x3d DirectionalAtom::getI() {
-    return I_;     
-  }    
-  
+    return I_;
+  }
+
   void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
 
     if (atomType_->isMultipole()) {
       RotMat3x3d atrans = a.transpose();
-      
+
       if (atomType_->isDipole()) {
         ((snapshotMan_->getPrevSnapshot())->*storage_).dipole[localIndex_] = atrans * dipole_;
       }
@@ -102,8 +102,8 @@ namespace OpenMD {
       }
     }
   }
-  
-  
+
+
   void DirectionalAtom::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
@@ -118,15 +118,15 @@ namespace OpenMD {
         ((snapshotMan_->getCurrentSnapshot())->*storage_).quadrupole[localIndex_] = atrans * quadrupole_ * a;
       }
     }
-   
-  }    
-  
+
+  }
+
   void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
 
     if (atomType_->isMultipole()) {
       RotMat3x3d atrans = a.transpose();
-      
+
       if (atomType_->isDipole()) {
         ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).dipole[localIndex_] = atrans * dipole_;
       }
@@ -136,36 +136,66 @@ namespace OpenMD {
       }
     }
 
-  }    
-  
+  }
+
   void DirectionalAtom::rotateBy(const RotMat3x3d& m) {
     setA(m *getA());
   }
-  
-  std::vector<RealType> DirectionalAtom::getGrad() {
 
+  std::vector<RealType> DirectionalAtom::getGrad() {
     std::vector<RealType> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
-    Vector3d gradTrq(0.0);
-    
+    Vector3d myEuler;
+    RealType phi, theta;
+    RealType cphi, sphi, ctheta, stheta;
+    Vector3d ephi;
+    Vector3d etheta;
+    Vector3d epsi;
+
     force = getFrc();
     torque =getTrq();
-    gradTrq = getA().transpose() * torque;
-        
+
+    myEuler = getA().toEulerAngles();
+
+    phi = myEuler[0];
+    theta = myEuler[1];
+
+    cphi = cos(phi);
+    sphi = sin(phi);
+    ctheta = cos(theta);
+    stheta = sin(theta);
+
+    if (fabs(stheta) < 1.0E-9) {
+      stheta = 1.0E-9;
+    }
+
+    ephi[0] = -sphi * ctheta / stheta;
+    ephi[1] =  cphi * ctheta / stheta;
+    ephi[2] =  1.0;
+
+    etheta[0] = cphi;
+    etheta[1] = sphi;
+    etheta[2] = 0.0;
+
+    epsi[0] =  sphi / stheta;
+    epsi[1] = -cphi / stheta;
+    epsi[2] =  0.0;
+
     //gradient is equal to -force
     for (int j = 0 ; j<3; j++)
       grad[j] = -force[j];
-    
+
     for (int j = 0; j < 3; j++ ) {
-      grad[j+3] -= gradTrq[j];
+      grad[3] -= torque[j]*ephi[j];
+      grad[4] -= torque[j]*etheta[j];
+      grad[5] -= torque[j]*epsi[j];
     }
-    
+
     return grad;
-  }    
-  
+  }
+
   void DirectionalAtom::accept(BaseVisitor* v) {
     v->visit(this);
   }
 }
-

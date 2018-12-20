@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -45,23 +45,23 @@
 #include "utils/simError.h"
 #include "utils/Constants.hpp"
 namespace OpenMD {
-  
+
   RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData),
-                           inertiaTensor_(0.0){    
+                           inertiaTensor_(0.0){
   }
-  
+
   void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
-    
+
     for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setPrevA(refOrients_[i].transpose() * a);
       }
     }
-    
+
   }
-  
-  
+
+
   void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
@@ -70,47 +70,90 @@ namespace OpenMD {
 	atoms_[i]->setA(refOrients_[i].transpose() * a);
       }
     }
-  }    
-  
+  }
+
   void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
-        
+
     for (unsigned int i = 0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);
       }
     }
-    
-  }   
-  
+
+  }
+
   Mat3x3d RigidBody::getI() {
     return inertiaTensor_;
-  }    
-  
+  }
+
   std::vector<RealType> RigidBody::getGrad() {
     std::vector<RealType> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
     Vector3d gradTrq(0.0);
-    
+    Vector3d myEuler;
+    RealType phi, theta;
+    // RealType psi;
+    RealType cphi, sphi, ctheta, stheta;
+    Vector3d ephi;
+    Vector3d etheta;
+    Vector3d epsi;
+
     force = getFrc();
     torque =getTrq();
-    gradTrq = getA().transpose() * torque;
-        
+
+    myEuler = getA().toEulerAngles();
+
+    phi = myEuler[0];
+    theta = myEuler[1];
+    // psi = myEuler[2];
+
+    cphi = cos(phi);
+    sphi = sin(phi);
+    ctheta = cos(theta);
+    stheta = sin(theta);
+    if (fabs(stheta) < 1.0E-9) {
+      stheta = 1.0E-9;
+    }
+
+
+    ephi[0] = -sphi * ctheta / stheta;
+    ephi[1] =  cphi * ctheta / stheta;
+    ephi[2] =  1.0;
+
+    //etheta[0] = -sphi;
+    //etheta[1] =  cphi;
+    //etheta[2] =  0.0;
+
+    etheta[0] = cphi;
+    etheta[1] = sphi;
+    etheta[2] = 0.0;
+
+    epsi[0] =  sphi / stheta;
+    epsi[1] = -cphi / stheta;
+    epsi[2] =  0.0;
+
+    //gradTrq = getA().transpose() * torque;
+
     //gradient is equal to -force
     for (int j = 0 ; j<3; j++)
       grad[j] = -force[j];
-    
+
     for (int j = 0; j < 3; j++ ) {
-      grad[j+3] -= gradTrq[j];
+      grad[3] -= torque[j]*ephi[j];
+      grad[4] -= torque[j]*etheta[j];
+      grad[5] -= torque[j]*epsi[j];
+
+      //grad[j+3] -= gradTrq[j];
     }
-    
+
     return grad;
-  }    
-  
+  }
+
   void RigidBody::accept(BaseVisitor* v) {
     v->visit(this);
-  }    
+  }
 
   /**@todo need modification */
   void  RigidBody::calcRefCoords() {
@@ -123,16 +166,16 @@ namespace OpenMD {
       refCOM += refCoords_[i]*mtmp;
     }
     refCOM /= mass_;
-    
+
     // Next, move the origin of the reference coordinate system to the COM:
     for (std::size_t i = 0; i < atoms_.size(); ++i) {
       refCoords_[i] -= refCOM;
     }
 
     // Moment of Inertia calculation
-    Mat3x3d Itmp(0.0);    
+    Mat3x3d Itmp(0.0);
     for (std::size_t i = 0; i < atoms_.size(); i++) {
-      Mat3x3d IAtom(0.0);  
+      Mat3x3d IAtom(0.0);
       mtmp = atoms_[i]->getMass();
       IAtom -= outProduct(refCoords_[i], refCoords_[i]) * mtmp;
       RealType r2 = refCoords_[i].lengthSquare();
@@ -140,14 +183,14 @@ namespace OpenMD {
       IAtom(1, 1) += mtmp * r2;
       IAtom(2, 2) += mtmp * r2;
       Itmp += IAtom;
-      
+
       //project the inertial moment of directional atoms into this rigid body
       if (atoms_[i]->isDirectional()) {
         Itmp += refOrients_[i].transpose() * atoms_[i]->getI() * refOrients_[i];
-      } 
+      }
     }
 
-    //diagonalize 
+    //diagonalize
     Vector3d evals;
     Mat3x3d::diagonalize(Itmp, evals, sU_);
 
@@ -155,9 +198,9 @@ namespace OpenMD {
     inertiaTensor_(0, 0) = evals[0];
     inertiaTensor_(1, 1) = evals[1];
     inertiaTensor_(2, 2) = evals[2];
-        
+
     int nLinearAxis = 0;
-    for (int i = 0; i < 3; i++) {    
+    for (int i = 0; i < 3; i++) {
       if (fabs(evals[i]) < OpenMD::epsilon) {
 	linear_ = true;
 	linearAxis_ = i;
@@ -178,7 +221,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-  
+
   }
 
   void  RigidBody::calcForcesAndTorques() {
@@ -192,9 +235,9 @@ namespace OpenMD {
     Vector3d pos = this->getPos();
     AtomType* atype;
     int eCount = 0;
-    
+
     int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
-    
+
     for (unsigned int i = 0; i < atoms_.size(); i++) {
 
       atype = atoms_[i]->getAtomType();
@@ -202,14 +245,14 @@ namespace OpenMD {
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
       rpos = apos - pos;
-        
+
       frc += afrc;
 
       trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
       trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
       trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
 
-      // If the atom has a torque associated with it, then we also need to 
+      // If the atom has a torque associated with it, then we also need to
       // migrate the torques onto the center of mass:
 
       if (atoms_[i]->isDirectional()) {
@@ -221,9 +264,9 @@ namespace OpenMD {
         ef += atoms_[i]->getElectricField();
         eCount++;
       }
-    }         
+    }
     addFrc(frc);
-    addTrq(trq);    
+    addTrq(trq);
 
     if (sl & DataStorage::dslElectricField)  {
       ef /= eCount;
@@ -250,20 +293,20 @@ namespace OpenMD {
     int sl = ((snapshotMan_->getCurrentSnapshot())->*storage_).getStorageLayout();
 
     for (unsigned int i = 0; i < atoms_.size(); i++) {
-      
+
       atype = atoms_[i]->getAtomType();
 
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
       rpos = apos - pos;
-        
+
       frc += afrc;
 
       trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
       trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
       trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
 
-      // If the atom has a torque associated with it, then we also need to 
+      // If the atom has a torque associated with it, then we also need to
       // migrate the torques onto the center of mass:
 
       if (atoms_[i]->isDirectional()) {
@@ -275,7 +318,7 @@ namespace OpenMD {
         ef += atoms_[i]->getElectricField();
         eCount++;
       }
-      
+
       tau_(0,0) -= rpos[0]*afrc[0];
       tau_(0,1) -= rpos[0]*afrc[1];
       tau_(0,2) -= rpos[0]*afrc[2];
@@ -305,9 +348,9 @@ namespace OpenMD {
     DirectionalAtom* dAtom;
     Vector3d pos = getPos();
     RotMat3x3d a = getA();
-    
+
     for (i = 0; i < atoms_.size(); i++) {
-     
+
       ref = body2Lab(refCoords_[i]);
 
       apos = pos + ref;
@@ -315,13 +358,13 @@ namespace OpenMD {
       atoms_[i]->setPos(apos);
 
       if (atoms_[i]->isDirectional()) {
-          
+
 	dAtom = dynamic_cast<DirectionalAtom *>(atoms_[i]);
 	dAtom->setA(refOrients_[i].transpose() * a);
       }
 
     }
-  
+
   }
 
 
@@ -332,9 +375,9 @@ namespace OpenMD {
     DirectionalAtom* dAtom;
     Vector3d pos = getPos(frame);
     RotMat3x3d a = getA(frame);
-    
+
     for (i = 0; i < atoms_.size(); i++) {
-     
+
       ref = body2Lab(refCoords_[i], frame);
 
       apos = pos + ref;
@@ -342,13 +385,13 @@ namespace OpenMD {
       atoms_[i]->setPos(apos, frame);
 
       if (atoms_[i]->isDirectional()) {
-          
+
 	dAtom = dynamic_cast<DirectionalAtom *>(atoms_[i]);
 	dAtom->setA(refOrients_[i].transpose() * a, frame);
       }
 
     }
-  
+
   }
 
   void RigidBody::updateAtomVel() {
@@ -373,7 +416,7 @@ namespace OpenMD {
     Vector3d rbVel = getVel();
 
 
-    Vector3d velRot;        
+    Vector3d velRot;
     for (unsigned int i = 0 ; i < refCoords_.size(); ++i) {
       atoms_[i]->setVel(rbVel + mat * refCoords_[i]);
     }
@@ -402,14 +445,14 @@ namespace OpenMD {
     Vector3d rbVel = getVel(frame);
 
 
-    Vector3d velRot;        
+    Vector3d velRot;
     for (unsigned int i = 0 ; i < refCoords_.size(); ++i) {
       atoms_[i]->setVel(rbVel + mat * refCoords_[i], frame);
     }
 
   }
 
-        
+
 
   bool RigidBody::getAtomPos(Vector3d& pos, unsigned int index) {
     if (index < atoms_.size()) {
@@ -420,25 +463,25 @@ namespace OpenMD {
     } else {
       sprintf( painCave.errMsg,
                "%d is an invalid index. The current rigid body contans %lu atoms.\n",
-               index, atoms_.size() );      
+               index, atoms_.size() );
       painCave.isFatal = 0;
       simError();
       return false;
-    }    
+    }
   }
 
   bool RigidBody::getAtomPos(Vector3d& pos, Atom* atom) {
     std::vector<Atom*>::iterator i;
     i = std::find(atoms_.begin(), atoms_.end(), atom);
     if (i != atoms_.end()) {
-      //RigidBody class makes sure refCoords_ and atoms_ match each other 
+      //RigidBody class makes sure refCoords_ and atoms_ match each other
       Vector3d ref = body2Lab(refCoords_[i - atoms_.begin()]);
       pos = getPos() + ref;
       return true;
     } else {
       sprintf( painCave.errMsg,
                "Atom %d does not belong to rigid body %d.\n",
-               atom->getGlobalIndex(), getGlobalIndex()  );      
+               atom->getGlobalIndex(), getGlobalIndex()  );
       painCave.isFatal = 0;
       simError();
       return false;
@@ -472,11 +515,11 @@ namespace OpenMD {
 
       vel = getVel() + velRot;
       return true;
-        
+
     } else {
       sprintf( painCave.errMsg,
                "Index %d is an invalid index, the current rigid body contains %lu atoms.\n",
-               index, atoms_.size()  );      
+               index, atoms_.size()  );
       painCave.isFatal = 0;
       simError();
       return false;
@@ -492,11 +535,11 @@ namespace OpenMD {
     } else {
       sprintf( painCave.errMsg,
                "Atom %d does not belong to rigid body %d.\n",
-               atom->getGlobalIndex(), getGlobalIndex()  );      
+               atom->getGlobalIndex(), getGlobalIndex()  );
       painCave.isFatal = 0;
       simError();
       return false;
-    }    
+    }
   }
 
   bool RigidBody::getAtomRefCoor(Vector3d& coor, unsigned int index) {
@@ -507,7 +550,7 @@ namespace OpenMD {
     } else {
       sprintf( painCave.errMsg,
                "Index %d is an invalid index, the current rigid body contains %lu atoms.\n",
-               index, atoms_.size()  );      
+               index, atoms_.size()  );
       painCave.isFatal = 0;
       simError();
       return false;
@@ -519,13 +562,13 @@ namespace OpenMD {
     std::vector<Atom*>::iterator i;
     i = std::find(atoms_.begin(), atoms_.end(), atom);
     if (i != atoms_.end()) {
-      //RigidBody class makes sure refCoords_ and atoms_ match each other 
+      //RigidBody class makes sure refCoords_ and atoms_ match each other
       coor = refCoords_[i - atoms_.begin()];
       return true;
     } else {
       sprintf( painCave.errMsg,
                "Atom %d does not belong to rigid body %d.\n",
-               atom->getGlobalIndex(), getGlobalIndex()  );      
+               atom->getGlobalIndex(), getGlobalIndex()  );
       painCave.isFatal = 0;
       simError();
       return false;
@@ -538,10 +581,10 @@ namespace OpenMD {
 
     Vector3d coords;
     Vector3d euler;
-  
+
 
     atoms_.push_back(at);
- 
+
     if( !ats->havePosition() ){
       sprintf( painCave.errMsg,
 	       "RigidBody error.\n"
@@ -551,7 +594,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-  
+
     coords[0] = ats->getPosX();
     coords[1] = ats->getPosY();
     coords[2] = ats->getPosZ();
@@ -559,8 +602,8 @@ namespace OpenMD {
     refCoords_.push_back(coords);
 
     RotMat3x3d identMat = RotMat3x3d::identity();
-  
-    if (at->isDirectional()) {   
+
+    if (at->isDirectional()) {
 
       if( !ats->haveOrientation() ){
 	sprintf( painCave.errMsg,
@@ -570,21 +613,20 @@ namespace OpenMD {
 		 ats->getType().c_str() );
 	painCave.isFatal = 1;
 	simError();
-      }    
-    
+      }
+
       euler[0] = ats->getEulerPhi() * Constants::PI /180.0;
       euler[1] = ats->getEulerTheta() * Constants::PI /180.0;
       euler[2] = ats->getEulerPsi() * Constants::PI /180.0;
 
       RotMat3x3d Atmp(euler);
       refOrients_.push_back(Atmp);
-    
+
     }else {
       refOrients_.push_back(identMat);
     }
-  
-  
+
+
   }
 
 }
-
