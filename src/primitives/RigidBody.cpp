@@ -91,10 +91,8 @@ namespace OpenMD {
     std::vector<RealType> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
-    Vector3d gradTrq(0.0);
     Vector3d myEuler;
     RealType phi, theta;
-    // RealType psi;
     RealType cphi, sphi, ctheta, stheta;
     Vector3d ephi;
     Vector3d etheta;
@@ -107,24 +105,19 @@ namespace OpenMD {
 
     phi = myEuler[0];
     theta = myEuler[1];
-    // psi = myEuler[2];
 
     cphi = cos(phi);
     sphi = sin(phi);
     ctheta = cos(theta);
     stheta = sin(theta);
+
     if (fabs(stheta) < 1.0E-9) {
       stheta = 1.0E-9;
     }
 
-
     ephi[0] = -sphi * ctheta / stheta;
     ephi[1] =  cphi * ctheta / stheta;
     ephi[2] =  1.0;
-
-    //etheta[0] = -sphi;
-    //etheta[1] =  cphi;
-    //etheta[2] =  0.0;
 
     etheta[0] = cphi;
     etheta[1] = sphi;
@@ -134,8 +127,6 @@ namespace OpenMD {
     epsi[1] = -cphi / stheta;
     epsi[2] =  0.0;
 
-    //gradTrq = getA().transpose() * torque;
-
     //gradient is equal to -force
     for (int j = 0 ; j<3; j++)
       grad[j] = -force[j];
@@ -144,8 +135,6 @@ namespace OpenMD {
       grad[3] -= torque[j]*ephi[j];
       grad[4] -= torque[j]*etheta[j];
       grad[5] -= torque[j]*epsi[j];
-
-      //grad[j+3] -= gradTrq[j];
     }
 
     return grad;
