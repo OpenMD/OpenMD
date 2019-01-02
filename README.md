@@ -31,10 +31,10 @@ in the "doc" directory.  Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                     |
 |--------------------------------|:----:|-------------------------------------------|
-| macOS 10.13.5 (intel)          |  c++ | (Apple LLVM version 9.1, Open MPI 3.0.0)  |
-| macOS 10.13.5 (intel)          |  g++ | (GNU version 6.4.0)                       |
-| Linux (Ubuntu 18.04 - x86\_64) |  g++ | (GNU version 7.3.0, Open MPI 2.1.1)       |
-| Linux (RHEL 7.4 - x86\_64)     | icpc | (Intel version 18.0, Open MPI 3.0.0)    |
+| macOS 10.14.2 (intel)          |  c++ | (Apple LLVM version 10.0, Open MPI 3.0.0) |
+| macOS 10.14.2 (intel)          |  g++ | (GNU version 8.2.0)                       |
+| Linux (Ubuntu 18.10 - x86\_64) |  g++ | (GNU version 8.2.0, Open MPI 3.1.2)       |
+| Linux (RHEL 7.6 - x86\_64)     | icpc | (Intel version 18.0.3, Open MPI 3.0.0)    |
 
    OpenMD uses features in the standard template library (STL). Most (but 
    not all) C++ compilers support these features.
