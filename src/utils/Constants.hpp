@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifndef UTILS_CONSTANTS_HPP
 #define UTILS_CONSTANTS_HPP
 #include "config.h"
@@ -60,33 +60,36 @@ namespace OpenMD {
     const RealType kB = 8.31451e-7;   //!< boltzmann constant amu*Ang^2*fs^-2/K
     const RealType energyConvert = 4.184E-4; //!< convert kcal/mol -> (amu A^2)/fs^2
     const RealType rotationalEnergyConvert = energyConvert*TWO_PI;
-    
+
     const RealType pressureConvert = 1.63882576e8; //!< converts amu*fs^-2*Ang^-1 -> atm
     const RealType elasticConvert = 1.66053386e4; //!< converts amu*fs^-2*Ang^-1 -> GPa
     const RealType energyElasticConvert = 6.947695345; //!< converts kcal*mol^-1*Ang^-3 -> GPa
 
     //! \name chargeFieldConvert Converts electron-volts to kcal/mol
-    const RealType chargeFieldConvert = 23.0609; 
+    const RealType chargeFieldConvert = 23.0609;
     //! \name dipoleFieldConvert  Converts Debye*Volts/Angstroms to kcal/mol
-    const RealType dipoleFieldConvert = 4.8018969509; 
+    const RealType dipoleFieldConvert = 4.8018969509;
 
-    /** 
-     *  surfaceTensionConvert   
-     *    multiplies standard input file units of 
+    //!\name magneticFieldConvert Converts Tesla to Volts fs/Ang^2
+    const RealType magneticFieldConvert=23.06909e-5;
+
+    /**
+     *  surfaceTensionConvert
+     *    multiplies standard input file units of
      *      surfaceTension (Newton / meter)
      *    returns values of
      *      kcal mol^-1 Angstrom^-2
      */
     const RealType surfaceTensionConvert = 1.439326479; //!< converts N/m to kcal/mol*Ang^-2
-    
+
     /**
-     *  viscoConvert   
+     *  viscoConvert
      *    used for products of:
      *      viscosity (Poise) * distance (Angstroms) * velocity (Angstrom / fs)
      *    returns values of:
-     *      force in (kcal mol^-1 Angstrom^-1) 
+     *      force in (kcal mol^-1 Angstrom^-1)
      */
-    const RealType viscoConvert = 1.439326479e4; 
+    const RealType viscoConvert = 1.439326479e4;
 
     /**
      *  densityConvert
@@ -94,32 +97,32 @@ namespace OpenMD {
      */
     const RealType densityConvert = 1.66053886;
 
-    /** 
-     *  thermalConductivityConvert   
-     *    multiplies standard input file units of 
-     *      themalConductivity (watts meter^-1 Kelvin^-1)  
+    /**
+     *  thermalConductivityConvert
+     *    multiplies standard input file units of
+     *      themalConductivity (watts meter^-1 Kelvin^-1)
      *    returns values of:
      *      kcal mol^-1 Angstrom^-1 fs^-1 Kelvin^-1
      */
-    const RealType thermalConductivityConvert = 1.439326479e-5; 
+    const RealType thermalConductivityConvert = 1.439326479e-5;
 
     /**
      * currentConvert
-     *   multiplies standard input file units of 
+     *   multiplies standard input file units of
      *     electricalCurrent (Amperes)
      *   returns values of:
      *     electrons fs^-1
      */
     const RealType currentConvert = 1.60216021766208e-4;
-    
+
     /**
      * Atomic Units are used in the Slater overlap code, and we need
-     * to get distances back and forth to angstroms and energies back 
-     * and forth to kcal / mol 
+     * to get distances back and forth to angstroms and energies back
+     * and forth to kcal / mol
      */
     const RealType angstromToBohr = 1.88972612;
     const RealType bohrToAngstrom = 0.52917721092;
     const RealType hartreeToKcal   = 627.509469;
   }
 }
-#endif 
+#endif

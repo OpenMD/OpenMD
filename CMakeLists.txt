@@ -480,6 +480,7 @@ src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/parallel/ForceDecomposition.cpp
 src/parallel/ForceMatrixDecomposition.cpp
 src/perturbations/UniformField.cpp
+src/perturbations/MagneticField.cpp
 src/perturbations/UniformGradient.cpp
 src/restraints/RestraintForceManager.cpp
 src/restraints/ThermoIntegrationForceManager.cpp

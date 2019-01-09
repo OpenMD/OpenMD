@@ -93,6 +93,8 @@ namespace OpenMD {
     DefineOptionalParameter(PrintVirialTensor, "printVirialTensor");
     DefineOptionalParameter(ElectricField, "electricField");
     DefineOptionalParameter(UniformField, "uniformField");
+    //magnetic field optional parameter added
+    DefineOptionalParameter(MagneticField,"magneticField");
     DefineOptionalParameter(UniformGradientStrength, "uniformGradientStrength");
     DefineOptionalParameter(UniformGradientDirection1, "uniformGradientDirection1");
     DefineOptionalParameter(UniformGradientDirection2, "uniformGradientDirection2");

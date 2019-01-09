@@ -58,6 +58,7 @@
 #include "primitives/Inversion.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "perturbations/UniformField.hpp"
+#include "perturbations/MagneticField.hpp"
 #include "perturbations/UniformGradient.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
 
@@ -273,7 +274,7 @@ namespace OpenMD {
         }
       }
     }
-    
+
     // create the switching function object:
 
     switcher_ = new SwitchingFunction();
@@ -362,7 +363,7 @@ namespace OpenMD {
 
       useSurfaceTerm_ = false;  // default, can be set by Ewald or directly
       useSlabGeometry_ = false;
-      
+
       //! We want to delay the cutoffs until after the interaction
       //! manager has set up the atom-atom interactions so that we can
       //! query them for suggested cutoff values
@@ -383,14 +384,14 @@ namespace OpenMD {
           useSurfaceTerm_ = info_->getSimParams()->getUseSurfaceTerm();
           if (info_->getSimParams()->haveUseSlabGeometry()) {
             useSlabGeometry_ = info_->getSimParams()->getUseSlabGeometry();
-            
+
             string axis = toUpperCopy(info_->getSimParams()->getPrivilegedAxis());
             if (axis.compare("X")==0)
               axis_ = 0;
             else if (axis.compare("Y")==0)
               axis_ = 1;
-            else 
-              axis_ = 2;            
+            else
+              axis_ = 2;
           }
         } else {
           sprintf( painCave.errMsg,
@@ -400,7 +401,7 @@ namespace OpenMD {
           painCave.isFatal = 0;
           painCave.severity = OPENMD_WARNING;
           simError();
-        }        
+        }
       }
     }
 
@@ -434,6 +435,11 @@ namespace OpenMD {
     if (info_->getSimParams()->haveUniformField()) {
       UniformField* eField = new UniformField(info_);
       perturbations_.push_back(eField);
+    }
+
+    if(info_->getSimParams()->haveMagneticField()){
+      MagneticField* mField = new MagneticField(info_);
+      perturbations_.push_back(mField);
     }
     if (info_->getSimParams()->haveUniformGradientStrength() ||
         info_->getSimParams()->haveUniformGradientDirection1() ||
@@ -484,9 +490,9 @@ namespace OpenMD {
     // accumulated.
 
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-    
+
     fDecomp_->setSnapshot(snap);
-    
+
     snap->setBondPotential(0.0);
     snap->setBendPotential(0.0);
     snap->setTorsionPotential(0.0);
@@ -494,7 +500,7 @@ namespace OpenMD {
 
     potVec zeroPot(0.0);
     snap->setLongRangePotential(zeroPot);
-    
+
     snap->setExcludedPotentials(zeroPot);
     if (doPotentialSelection_)
       snap->setSelectionPotentials(zeroPot);
@@ -811,7 +817,7 @@ namespace OpenMD {
 
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList();
-        
+
         if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
@@ -1036,10 +1042,10 @@ namespace OpenMD {
     curSnapshot->setLongRangePotential(longRangePotential);
 
     selfPotential =  *(fDecomp_->getSelfPotential());
-    curSnapshot->setSelfPotential(selfPotential);     
+    curSnapshot->setSelfPotential(selfPotential);
 
     curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
-                                       *(fDecomp_->getExcludedPotential()));   
+                                       *(fDecomp_->getExcludedPotential()));
 
     if (doPotentialSelection_) {
       selectionPotential  = curSnapshot->getSelectionPotentials();
@@ -1125,7 +1131,7 @@ namespace OpenMD {
     selectedLongRangeInteractions(mol1, mol2);
     selectedPostCalculation(mol1, mol2);
   }
-  
+
   void ForceManager::selectedPreCalculation(Molecule* mol1, Molecule* mol2) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
@@ -1158,7 +1164,7 @@ namespace OpenMD {
     for(atom = mol1->beginAtom(ai); atom != NULL;
 	atom = mol1->nextAtom(ai)){
       atom->zeroForcesAndTorques();
-    } 
+    }
     //change the positions of atoms which belong to the rigidbodies
     for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
 	 rb = mol1->nextRigidBody(rbIter)) {
@@ -1189,13 +1195,13 @@ namespace OpenMD {
 	cg->updateCOM();
       }
     }
-      
+
     // Zero out the virial tensor
     virialTensor *= 0.0;
     // Zero out the heatFlux
     fDecomp_->setHeatFlux( Vector3d(0.0) );
   }
-  
+
   void ForceManager::selectedShortRangeInteractions(Molecule* mol1, Molecule* mol2) {
     RigidBody* rb;
     Bond* bond;
@@ -1214,7 +1220,7 @@ namespace OpenMD {
     RealType inversionPotential = 0.0;
     potVec selectionPotential(0.0);
 
-    
+
     //First compute for mol1
     for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
 	 rb = mol1->nextRigidBody(rbIter)) {
@@ -1295,9 +1301,9 @@ namespace OpenMD {
 	  selectionPotential[BONDED_FAMILY] += torsion->getPotential();
 	}
       }
-      
+
     }
-    
+
     for (inversion = mol1->beginInversion(inversionIter);
 	 inversion != NULL;
 	 inversion = mol1->nextInversion(inversionIter)) {
@@ -1411,9 +1417,9 @@ namespace OpenMD {
 	  selectionPotential[BONDED_FAMILY] += torsion->getPotential();
 	}
       }
-      
+
     }
-    
+
     for (inversion = mol2->beginInversion(inversionIter);
 	 inversion != NULL;
 	 inversion = mol2->nextInversion(inversionIter)) {
@@ -1447,7 +1453,7 @@ namespace OpenMD {
     }
 
 
-    
+
 #ifdef IS_MPI
     // Collect from all nodes.  This should eventually be moved into a
     // SystemDecomposition, but this is a better place than in
@@ -1466,7 +1472,7 @@ namespace OpenMD {
 #endif
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    
+
     curSnapshot->setBondPotential(bondPotential);
     curSnapshot->setBendPotential(bendPotential);
     curSnapshot->setTorsionPotential(torsionPotential);
@@ -1478,7 +1484,7 @@ namespace OpenMD {
 
     // curSnapshot->setShortRangePotential(shortRangePotential);
   }
-  
+
   void ForceManager::selectedLongRangeInteractions(Molecule* mol1, Molecule* mol2) {
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     DataStorage* config = &(curSnapshot->atomData);
@@ -1815,7 +1821,7 @@ namespace OpenMD {
       curSnapshot->setSelectionPotentials(selectionPotential);
     }
   }
-  
+
   void ForceManager::selectedPostCalculation(Molecule* mol1, Molecule* mol2) {
     vector<Perturbation*>::iterator pi;
     for (pi = perturbations_.begin(); pi != perturbations_.end(); ++pi) {
@@ -1828,7 +1834,7 @@ namespace OpenMD {
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
     // collect the atomic forces onto rigid bodies
-    
+
     for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
 	 rb = mol1->nextRigidBody(rbIter)) {
       Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
@@ -1884,5 +1890,5 @@ namespace OpenMD {
 
     }
   }
-  
+
 }
