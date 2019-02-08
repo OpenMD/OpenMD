@@ -43,8 +43,7 @@ flucQ {
   dragCoefficient = 0.1;
 }
 
-forceFieldFileName="DR_EAM.frc";
-forceField = "EAM";
+forceField = "DR-EAM";
 outputFluctuatingCharges = true;
 outputElectricField = true;
 outputDensity = true;
