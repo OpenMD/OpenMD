@@ -42,6 +42,7 @@ flucQ {
   targetTemp = 1;
   dragCoefficient = 0.1;
 }
+
 forceFieldFileName="DR_EAM.frc";
 forceField = "EAM";
 outputFluctuatingCharges = true;
@@ -66,16 +67,15 @@ uniformField = (0,0,0);
 tempSet = "false";
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
-</MetaData>
-
-<Snapshot>
-  <FrameData>
-    Time: 0
-    Hmat: {{ 27.4694, 0, 0 }, { 0, 27.4694, 0 }, { 0, 0, 27.4694 }}
-  	Thermostat: 0.0, 0.0
-    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
-	</FrameData>
-<StuntDoubles>
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+      Time: 0
+      Hmat: {{ 27.4694, 0, 0 }, { 0, 27.4694, 0 }, { 0, 0, 27.4694 }}
+      Thermostat: 0.0, 0.0
+      Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
+  <StuntDoubles>
          0      pv       -11.77552359       -11.77552359       -11.77552359  0.000000e+00  0.000000e+00  0.000000e+00
          1      pv       -11.77552359       -9.812936329       -9.812936329  0.000000e+00  0.000000e+00  0.000000e+00
          2      pv       -11.77552359       -11.77552359       -7.850349061  0.000000e+00  0.000000e+00  0.000000e+00

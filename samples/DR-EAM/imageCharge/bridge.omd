@@ -24,54 +24,53 @@ component{
 }
 
 component{
-	type = "NPC";
-	nMol = 1;
+  type = "NPC";
+  nMol = 1;
 }
 
 minimizer {
-useMinimizer = False;
-                method = CG;
-                  maxIterations = 5000;
-                  }
+  useMinimizer = False;
+  method = CG;
+  maxIterations = 5000;
+}
 
 
-      flucQ {
-                  propagator = "Langevin";
-                      targetTemp = 1;
-                          dragCoefficient = 1.5;
-                            }
-      forceFieldFileName="DR_EAM.frc";
-      forceField = "EAM";
-      outputFluctuatingCharges = true;
-      outputElectricField = true;
-      outputDensity = true;
-      ensemble = NVE;
-      dt = 0.1;
-      runTime = 1000;
-      sampleTime =10;
-      statusTime = 1;
+flucQ {
+  propagator = "Langevin";
+  targetTemp = 1;
+  dragCoefficient = 1.5;
+}
 
-      cutoffMethod = "shifted_force";
-      cutoffRadius = 12;
-      electrostaticScreeningMethod = "DAMPED";
-      statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|SYSTEM_DIPOLE|ELECTRONIC_TEMPERATURE";
-      dampingAlpha = 0.14;
-      useSurfaceTerm = "false";
-      targetTemp = 100;
-      tauThermostat = 1000;
-      tauBarostat = 1e6;
-      uniformField = (0,0,0);
-      tempSet = "false";
-      useInitialTime = "false";
-      useInitialExtendedSystemState = "false";
+forceField = "DR-EAM";
+outputFluctuatingCharges = true;
+outputElectricField = true;
+outputDensity = true;
+ensemble = NVE;
+dt = 0.1;
+runTime = 1000;
+sampleTime =10;
+statusTime = 1;
 
+cutoffMethod = "shifted_force";
+cutoffRadius = 12;
+electrostaticScreeningMethod = "DAMPED";
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|SYSTEM_DIPOLE|ELECTRONIC_TEMPERATURE";
+dampingAlpha = 0.14;
+useSurfaceTerm = "false";
+targetTemp = 100;
+tauThermostat = 1000;
+tauBarostat = 1e6;
+uniformField = (0,0,0);
+tempSet = "false";
+useInitialTime = "false";
+useInitialExtendedSystemState = "false";
   </MetaData>
   <Snapshot>
-  <FrameData>
-     Time: 0
-     Hmat: {{ 26.432444, 0.000000, 0.000000 }, { 0.000000, 25.434631, 0.000000 }, { 0.000000, 0.000000, 500 }}
-  Thermostat: 0.0, 0.0
-    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    <FrameData>
+      Time: 0
+      Hmat: {{ 26.432444, 0.000000, 0.000000 }, { 0.000000, 25.434631, 0.000000 }, { 0.000000, 0.000000, 500 }}
+      Thermostat: 0.0, 0.0
+      Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
     </FrameData>
     <StuntDoubles>
 	0	pv	-11.380636	-10.809718	-14.537102	0.0	0.0	0.0

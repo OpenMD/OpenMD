@@ -42,12 +42,11 @@ flucQ {
   targetTemp = 1;
   dragCoefficient = 0.1;
 }
-forceFieldFileName="DR_EAM.frc";
-forceField = "EAM";
+
+forceField = "DR-EAM";
 outputFluctuatingCharges = true;
 outputElectricField = true;
 outputDensity = true;
-//ensemble = NVE;
 dt = 0.1;
 runTime = 1e4;
 sampleTime =100;
@@ -66,15 +65,15 @@ uniformField = (0,0,0);
 tempSet = "false";
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
-</MetaData>
+  </MetaData>
 
-<Snapshot>
-  <FrameData>
-    Time: 0
-    Hmat: {{ 28.59, 0.000000, 0.000000 }, { 0.000000, 28.59, 0.000000 }, { 0.000000, 0.000000, 28.59 }}
-		Thermostat: 0.0, 0.0
-    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
-	</FrameData>
+  <Snapshot>
+    <FrameData>
+      Time: 0
+      Hmat: {{ 28.59, 0.000000, 0.000000 }, { 0.000000, 28.59, 0.000000 }, { 0.000000, 0.000000, 28.59 }}
+      Thermostat: 0.0, 0.0
+      Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
 <StuntDoubles>
 0	pv	-12.255900	-12.255900	-12.255900	0.000000	0.000000	0.000000
 1	pv	-12.255900	-12.255900	-8.170600	0.000000	0.000000	0.000000
@@ -1448,6 +1447,6 @@ useInitialExtendedSystemState = "false";
 1369	pv	14.298550	14.298550	12.255900	0.000000	0.000000	0.000000
 1370	pv	12.255900	14.298550	14.298550	0.000000	0.000000	0.000000
 1371	pv	14.298550	12.255900	14.298550	0.000000	0.000000	0.000000
-</StuntDoubles>
-</Snapshot>
+    </StuntDoubles>
+  </Snapshot>
 </OpenMD>

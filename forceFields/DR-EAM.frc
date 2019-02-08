@@ -1,26 +1,25 @@
-// This is the forcefield file for the Embedded Atom Method (EAM)
-// parameterized in:
+// This is the forcefield file for the Density-Readjusting Embedded Atom Method (DR-EAM)
+//
+// DR-EAM is based on a version of EAM that was parameterized in:
 //
 //      X. W. Zhou, R. A. Johnson, and H. N. G. Wadley,
 //      Phys. Rev. B, 69, 144113 (2004).
 //
-// Note that as of OpenMD version 2.5, precomputed funcfl or setfl DYNAMO files
-// are not required - the splines for the electron density,
-// functional, and pair potentials are computed upon initialization.
-begin Options
-      Name                  EAMZhou2004
-      // energies in metallic force fields are usually in eV. Convert to kcal/mol:
-      MetallicEnergyUnitScaling     23.0605423
-      // All of the other interactions (NonBonded, Fluctuating Charge)
-      // will also follow this eV convention
-      EnergyUnitScaling     23.0605423
-      // measure charges in electrons:
-      //ChargeUnitScaling     1.0
-      // measure distances in angstroms:
-      DistanceUnitScaling   1.0
-      EAMMixingMethod   Johnson
-end Options
+// However, the valence densities are dynamical fluctuating
+// quantities, and the FluctuatingChargeAtomTypes section at the
+// bottom introduces the parameters necessary for simulating
+// fluctuating densities
 
+begin Options
+   Name                       DR-EAM
+   // energies in metallic force fields are usually in eV. Convert to kcal/mol:
+   MetallicEnergyUnitScaling  23.0605423
+   // All of the other interactions will also follow this eV convention
+   EnergyUnitScaling          23.0605423
+   // measure distances in angstroms:
+   DistanceUnitScaling        1.0
+   EAMMixingMethod            Johnson
+end Options
 
 begin BaseAtomTypes
 Cu      63.546
@@ -39,9 +38,29 @@ Mg      24.3050
 Co      58.933195
 Ti      47.867
 Zr      91.224
-PC	 1000000000000 // massive point charge
+PC	 1000000000000   // massive point charge for some image charge experiments
 end BaseAtomTypes
 
+begin AtomTypes
+//name baseatomtype
+Pt_FQ   Pt
+Cu_FQ   Cu
+Ag_FQ   Ag
+Au_FQ   Au
+Pd_FQ   Pd
+Pb_FQ   Pb
+Al_FQ   Al
+Fe_FQ   Fe
+Mo_FQ   Mo
+Ta_FQ   Ta
+W_FQ    W
+Mg_FQ   Mg
+Co_FQ   Co
+Ti_FQ   Ti
+Zr_FQ   Zr
+Ni_FQ   Ni
+NPC	PC
+end AtomTypes
 
 begin EAMAtomTypes
 // Equlibrium distances (re) are in angstroms, density parameters (fe,rhoe) are
@@ -72,55 +91,27 @@ Ti Zhou2004 HCP 2.933872 1.8632   25.565138 25.565138 8.775431 4.68023  0.373601
 Zr Zhou2004 HCP 3.199978 2.230909 30.879991 30.879991 8.55919  4.564902 0.424667 0.640054 0.5      1        -4.485793 -0.293129 0.990148 -3.202516 -4.51 0  0.928602 -0.98187  0.597133 -4.509025 0.85 1.15
 end EAMAtomTypes
 
-
-
-
-begin AtomTypes
-//name baseatomtype
-Pt_FQ   Pt
-Cu_FQ   Cu
-Ag_FQ   Ag
-Au_FQ   Au
-Pd_FQ   Pd
-Pb_FQ   Pb
-Al_FQ   Al
-Fe_FQ   Fe
-Mo_FQ   Mo
-Ta_FQ   Ta
-W_FQ    W
-Mg_FQ   Mg
-Co_FQ   Co
-Ti_FQ   Ti
-Zr_FQ   Zr
-Ni_FQ   Ni
-NPC	PC
-end AtomTypes
-
-
-
-
 begin FluctuatingChargeAtomTypes
-// Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
-// this code and the Rick, Stuart, and Berne paper
-//Name  chargeMass (fs^2 kcal/e^2 mol) EAM  nValence coupling  q0 u0 k0 q1 u1 k1 q2 u2 k2
-//all the parameters are converted in to eV
-
-Cu_FQ 	400.0 EAMPoly  0.57  1 11.600000 2 7.630000 3 7.043849 4 69.384399 5 -72.367946 6 21.422710
-Ag_FQ 	400.0 EAMPoly  0.48  1 11.760000 2 7.580000 3 9.916135 4 73.828095 5 -82.504840 6 24.754679
-Au_FQ 	400.0 EAMPoly  0.59  1 15.840000 2 7.920000 3 3.819905 4 76.781024 5 -88.364326 6 27.803977
-Ni_FQ 	400.0 EAMPoly  0.45  1 11.630000 2 8.080000 3 1.639384 4 62.120130 5 -58.281871 6 16.327555
-Pd_FQ 	400.0 EAMPoly  0.48  1 13.600000 2 7.590000 3 -4.265055 4 90.514873 5 -90.166318 6 25.942341
-Pt_FQ 	400.0 EAMPoly  1.64  1 14.100000 2 6.150000 3 6.912295 4 73.899938 5 -87.010038 6 27.477568
-Al_FQ 	400.0 EAMPoly  1.22  1 9.620000 2 5.540000 3 17.795471 4 82.933474 5 -136.314207 6 57.019598
-Pb_FQ 	400.0 EAMPoly  1.83  1 14.440000 2 6.700000 3 -23.294447 4 88.209224 5 -63.798468 6 14.475027
-Fe_FQ 	400.0 EAMPoly  1.20  1 11.100000 2 9.490000 3 -2.169062 4 67.501884 5 -69.752761 6 21.787266
-Mo_FQ 	400.0 EAMPoly  0.31  1 13.300000 2 7.380000 3 -10.583517 4 75.399716 5 -69.164277 6 19.370865
-Ta_FQ 	400.0 EAMPoly  0.49  1 8.900000 2 7.120000 3 13.003752 4 68.118329 5 -92.823346 6 31.175669
-W_FQ 	400.0 EAMPoly  0.34  1 14.640000 2 7.790000 3 -12.226447 4 82.024963 5 -78.400969 6 22.634703
-Mg_FQ 	400.0 EAMPoly  0.67  1 7.620000 2 7.680000 3 59.405896 4 76.950474 5 -315.833222 6 203.048105
-Co_FQ 	400.0 EAMPoly  0.33  1 11.430000 2 8.310000 3 -2.864281 4 56.062836 5 -43.617468 6 10.231864
-Ti_FQ 	400.0 EAMPoly  0.46  1 9.160000 2 7.180000 3 -2.392933 4 59.341887 5 -56.731009 6 16.325683
-Zr_FQ 	400.0 EAMPoly  0.45  1 7.750000 2 6.420000 3 6.079969 4 41.135736 5 -43.590145 6 12.572236
+// Fictitious chargeMass has units of (fs / e)^2 kcal / mol
+// (note the ps->fs difference between this code and the Rick, Stuart, and Berne paper)
+// All coefficients produce energies in eV
+//Name chargeMass EAMPoly  nValence  <order, coefficient>  pairs
+Cu_FQ 	400.0 EAMPoly  0.57  1 11.600000 2 7.630000 3 7.043849   4 69.384399 5 -72.367946  6 21.422710
+Ag_FQ 	400.0 EAMPoly  0.48  1 11.760000 2 7.580000 3 9.916135   4 73.828095 5 -82.504840  6 24.754679
+Au_FQ 	400.0 EAMPoly  0.59  1 15.840000 2 7.920000 3 3.819905   4 76.781024 5 -88.364326  6 27.803977
+Ni_FQ 	400.0 EAMPoly  0.45  1 11.630000 2 8.080000 3 1.639384   4 62.120130 5 -58.281871  6 16.327555
+Pd_FQ 	400.0 EAMPoly  0.48  1 13.600000 2 7.590000 3 -4.265055  4 90.514873 5 -90.166318  6 25.942341
+Pt_FQ 	400.0 EAMPoly  1.64  1 14.100000 2 6.150000 3 6.912295   4 73.899938 5 -87.010038  6 27.477568
+Al_FQ 	400.0 EAMPoly  1.22  1 9.620000  2 5.540000 3 17.795471  4 82.933474 5 -136.314207 6 57.019598
+Pb_FQ 	400.0 EAMPoly  1.83  1 14.440000 2 6.700000 3 -23.294447 4 88.209224 5 -63.798468  6 14.475027
+Fe_FQ 	400.0 EAMPoly  1.20  1 11.100000 2 9.490000 3 -2.169062  4 67.501884 5 -69.752761  6 21.787266
+Mo_FQ 	400.0 EAMPoly  0.31  1 13.300000 2 7.380000 3 -10.583517 4 75.399716 5 -69.164277  6 19.370865
+Ta_FQ 	400.0 EAMPoly  0.49  1 8.900000  2 7.120000 3 13.003752  4 68.118329 5 -92.823346  6 31.175669
+W_FQ 	400.0 EAMPoly  0.34  1 14.640000 2 7.790000 3 -12.226447 4 82.024963 5 -78.400969  6 22.634703
+Mg_FQ 	400.0 EAMPoly  0.67  1 7.620000  2 7.680000 3 59.405896  4 76.950474 5 -315.833222 6 203.048105
+Co_FQ 	400.0 EAMPoly  0.33  1 11.430000 2 8.310000 3 -2.864281  4 56.062836 5 -43.617468  6 10.231864
+Ti_FQ 	400.0 EAMPoly  0.46  1 9.160000  2 7.180000 3 -2.392933  4 59.341887 5 -56.731009  6 16.325683
+Zr_FQ 	400.0 EAMPoly  0.45  1 7.750000  2 6.420000 3 6.079969   4 41.135736 5 -43.590145  6 12.572236
 end FluctuatingChargeAtomTypes
 
 begin ChargeAtomTypes

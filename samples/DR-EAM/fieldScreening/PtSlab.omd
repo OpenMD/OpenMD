@@ -16,12 +16,12 @@ component{
 }
 
 flucQ {
-	propagator = "Langevin";
+  propagator = "Langevin";
   targetTemp = 1;
   dragCoefficient = 0.1;
-	}
-forceFieldFileName="DR_EAM.frc";
-forceField = "EAM";
+}
+
+forceField="DR-EAM";
 outputFluctuatingCharges = true;
 outputElectricField = true;
 outputDensity = true;
@@ -45,17 +45,15 @@ tempSet = "false";
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
-
-</MetaData>
-
-<Snapshot>
-  <FrameData>
-    Time: 0 
-    Hmat: {{ 28.805999, 0.000000, 0.000000 }, { 0.000000, 27.718586, 0.000000 }, { 0.000000, 0.000000, 122.213505 }}
-		Thermostat: 0.0, 0.0 
-    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }} 
-	</FrameData>
-<StuntDoubles> 
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+      Time: 0 
+      Hmat: {{ 28.805999, 0.000000, 0.000000 }, { 0.000000, 27.718586, 0.000000 }, { 0.000000, 0.000000, 122.213505 }}
+      Thermostat: 0.0, 0.0 
+      Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }} 
+    </FrameData>
+    <StuntDoubles> 
 	0	pv	-12.402583	-11.780399	-19.237311	0.0	0.0	0.0
 	1	pv	-10.002083	-13.166328	-19.237311	0.0	0.0	0.0
 	2	pv	-13.202750	-13.166328	-16.974098	0.0	0.0	0.0
@@ -2215,7 +2213,6 @@ useInitialExtendedSystemState = "false";
 	2156	pv	12.402583	6.236682	19.237311	0.0	0.0	0.0
 	2157	pv	13.202750	13.166328	16.974098	0.0	0.0	0.0
 	2158	pv	10.002083	13.166328	19.237311	0.0	0.0	0.0
-	2159	pv	12.402583	11.780399	19.237311	0.0	0.0	0.0
-	</StuntDoubles> 
-</Snapshot>
+	2159	pv	12.402583	11.780399	19.237311	0.0	0.0	0.0    </StuntDoubles> 
+  </Snapshot>
 </OpenMD>
