@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,6 +39,7 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+
  
 #include <iostream>
 #include <cstdlib>
@@ -57,6 +58,7 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime", 100.0);
     DefineOptionalParameter(KineticFlux, "kineticFlux");
     DefineOptionalParameter(MomentumFlux, "momentumFlux");
+    DefineOptionalParameter(CurrentDensity, "currentDensity");
     DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
     DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
     DefineOptionalParameter(AngularMomentumFluxVector, 
@@ -98,14 +100,17 @@ namespace OpenMD {
                    isEqualIgnoreCase("Lx") ||
                    isEqualIgnoreCase("Ly") ||
                    isEqualIgnoreCase("Lz") ||
+                   isEqualIgnoreCase("Current") ||
                    isEqualIgnoreCase("Pvector") ||
                    isEqualIgnoreCase("Lvector") ||
                    isEqualIgnoreCase("KE+Px") || 
-                   isEqualIgnoreCase("KE+Py") || 
+                   isEqualIgnoreCase("KE+Py") ||
+                   isEqualIgnoreCase("KE+Current") ||
                    isEqualIgnoreCase("KE+Lx") || 
                    isEqualIgnoreCase("KE+Ly") || 
                    isEqualIgnoreCase("KE+Lz") || 
                    isEqualIgnoreCase("KE+Pvector") ||
+                   isEqualIgnoreCase("KE+Pvector+Curent") ||
                    isEqualIgnoreCase("KE+Lvector")
                    );
     CheckParameter(PrivilegedAxis, 

@@ -56,7 +56,7 @@ namespace OpenMD {
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
     : info(si), nameFinder(info), distanceFinder(info), hullFinder(info),
       alphaHullFinder(info), indexFinder(info), isLoaded_(false),
-      hasSurfaceArea_(false) {
+      hasSurfaceArea_(false), hasVolume_(false) {
     nObjects.push_back(info->getNGlobalAtoms() + info->getNGlobalRigidBodies());
     nObjects.push_back(info->getNGlobalBonds());
     nObjects.push_back(info->getNGlobalBends());
@@ -757,6 +757,9 @@ namespace OpenMD {
     bs = alphaHullFinder.findHull();
     surfaceArea_ = alphaHullFinder.getSurfaceArea();
     hasSurfaceArea_ = true;
+    volume_ = alphaHullFinder.getVolume();
+    hasVolume_ = true;
+
     return bs.parallelReduce();
   }
 
@@ -778,6 +781,9 @@ namespace OpenMD {
     bs = alphaHullFinder.findHull(frame);
     surfaceArea_ = alphaHullFinder.getSurfaceArea();
     hasSurfaceArea_ = true;
+    volume_ = alphaHullFinder.getVolume();
+    hasVolume_ = true;
+
     return bs.parallelReduce();
   }
 
@@ -976,6 +982,9 @@ namespace OpenMD {
     bs = hullFinder.findHull();
     surfaceArea_ = hullFinder.getSurfaceArea();
     hasSurfaceArea_ = true;
+    volume_ = hullFinder.getVolume();
+    hasVolume_ = true;
+
     return bs.parallelReduce();
   }
 

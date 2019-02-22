@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -60,6 +60,7 @@ namespace OpenMD {
     void doSwap(SelectionManager& smanA, SelectionManager& smanB);
     void doNIVS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSS(SelectionManager& smanA, SelectionManager& smanB);
+    void doVSSCurrent(SelectionManager& smanA, SelectionManager& smanB);
     RealType getDividingArea();
     void collectData();
     void getStarted();
@@ -84,7 +85,8 @@ namespace OpenMD {
       rnemdFullKE,   // full kinetic energy flux
       rnemdPx,       // flux of momentum along x axis 
       rnemdPy,       // flux of momentum along y axis 
-      rnemdPz,       // flux of momentum along z axis 
+      rnemdPz,       // flux of momentum along z axis
+      rnemdCurrent,  // current density along privileged axis
       rnemdPvector,  // flux of momentum vector
       rnemdLx,       // flux of angular momentum along x axis 
       rnemdLy,       // flux of angular momentum along y axis 
@@ -93,6 +95,8 @@ namespace OpenMD {
       rnemdKePx,     // flux of translational KE and x-momentum
       rnemdKePy,     // flux of translational KE and y-momentum
       rnemdKePvector, // full combo flying platter
+      rnemdKePvectorCurrent, // all possible fluxes in a PBC simulation
+      rnemdKeCurrent, //flux of translational KE and current density
       rnemdKeLx,     // flux of translational KE and x-angular momentum
       rnemdKeLy,     // flux of translational KE and y-angular momentum
       rnemdKeLz,     // flux of translational KE and z-angular momentum
@@ -108,6 +112,8 @@ namespace OpenMD {
       VELOCITY,
       ANGULARVELOCITY,
       DENSITY,
+      CHARGEDENSITY,
+      ELECTRICFIELD,
       ENDINDEX 
     };
 
@@ -163,6 +169,8 @@ namespace OpenMD {
     bool usePeriodicBoundaryConditions_;
     bool hasDividingArea_;
     RealType dividingArea_;
+    RealType volumeA_;
+    RealType volumeB_;
 
     int nBins_;
     RealType binWidth_;
@@ -180,16 +188,21 @@ namespace OpenMD {
     Vector3d coordinateOrigin_;
 
     RealType kineticFlux_;        // target or desired *flux*
+    RealType currentDensity_;     // target or desired current density
     Vector3d momentumFluxVector_; // target or desired *flux*
     Vector3d angularMomentumFluxVector_; // target or desired *flux*
 
     RealType kineticTarget_;     // target or desired one-time exchange energy
+    RealType qvTarget_;          // target or desired one-time
+                                 // exchange charge velocity
     Vector3d momentumTarget_;    // target or desired one-time exchange momentum
     Vector3d angularMomentumTarget_; // target or desired one-time
                                      // exchange angular momentum
 
     RealType kineticExchange_;    // actual exchange energy (running total)
-    Vector3d momentumExchange_;   // actual exchange momentum (running total)
+    RealType qvExchange_;         // actual exchange charge velocity
+                                  // (running total)
+    Vector3d momentumExchange_;   // actual exchange momentum (running total)   
     Vector3d angularMomentumExchange_; // actual exchange momentum
                                        // (running total)
     RealType exchangeTime_;

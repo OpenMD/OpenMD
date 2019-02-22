@@ -217,6 +217,7 @@ namespace OpenMD {
       }
     }
     surfaceArea_ = surfaceMesh_->getArea();
+    volume_ = surfaceMesh_->getVolume();
     return ssResult;
   }
 

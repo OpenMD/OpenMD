@@ -57,6 +57,7 @@ namespace OpenMD {
     SelectionSet findHull();
     SelectionSet findHull(int frame);
     RealType getSurfaceArea(){ return surfaceArea_; }
+    RealType getVolume(){ return volume_; }
     
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;
@@ -69,6 +70,7 @@ namespace OpenMD {
 
     Hull* surfaceMesh_;
     RealType surfaceArea_;
+    RealType volume_;
     std::vector<StuntDouble*> localSites_;
   };
 

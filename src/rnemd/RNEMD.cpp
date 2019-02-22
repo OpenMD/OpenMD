@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -36,8 +36,10 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
+ * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
@@ -56,7 +58,10 @@
 #include "utils/Constants.hpp"
 #include "utils/Tuple.hpp"
 #include "brains/Thermo.hpp"
+#include "brains/ForceManager.hpp"
 #include "math/ConvexHull.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 
 #ifdef _MSC_VER
 #define isnan(x) _isnan((x))
@@ -104,9 +109,12 @@ namespace OpenMD {
     stringToFluxType_["Ly"]  = rnemdLy;
     stringToFluxType_["Lz"]  = rnemdLz;
     stringToFluxType_["Lvector"]  = rnemdLvector;
+    stringToFluxType_["Current"]  = rnemdCurrent;
     stringToFluxType_["KE+Px"]  = rnemdKePx;
     stringToFluxType_["KE+Py"]  = rnemdKePy;
     stringToFluxType_["KE+Pvector"]  = rnemdKePvector;
+    stringToFluxType_["KE+Current"]  = rnemdKeCurrent;
+    stringToFluxType_["KE+Pvector+Current"]  = rnemdKePvectorCurrent;
     stringToFluxType_["KE+Lx"]  = rnemdKeLx;
     stringToFluxType_["KE+Ly"]  = rnemdKeLy;
     stringToFluxType_["KE+Lz"]  = rnemdKeLz;
@@ -133,9 +141,9 @@ namespace OpenMD {
       sprintf(painCave.errMsg, 
               "RNEMD: No fluxType was set in the md file.  This parameter,\n"
               "\twhich must be one of the following values:\n"
-              "\tKE, Px, Py, Pz, Pvector, Lx, Ly, Lz, Lvector,\n"
+              "\tKE, Px, Py, Pz, Pvector, Lx, Ly, Lz, Lvector, Current,\n"
               "\tKE+Px, KE+Py, KE+Pvector, KE+Lx, KE+Ly, KE+Lz, KE+Lvector\n"
-              "\tmust be set to use RNEMD\n");
+              "\tKE+Current, KE+Pvector+Current must be set to use RNEMD\n");
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -143,6 +151,7 @@ namespace OpenMD {
 
     bool hasKineticFlux = rnemdParams->haveKineticFlux();
     bool hasMomentumFlux = rnemdParams->haveMomentumFlux();
+    bool hasCurrentDensity = rnemdParams->haveCurrentDensity();
     bool hasMomentumFluxVector = rnemdParams->haveMomentumFluxVector();
     bool hasAngularMomentumFlux = rnemdParams->haveAngularMomentumFlux();
     bool hasAngularMomentumFluxVector = rnemdParams->haveAngularMomentumFluxVector();
@@ -289,6 +298,9 @@ namespace OpenMD {
       case rnemdLvector:
         hasCorrectFlux = hasAngularMomentumFluxVector;
         break;
+      case rnemdCurrent:
+        hasCorrectFlux = hasCurrentDensity;
+        break;
       case rnemdKePx:
       case rnemdKePy:
         hasCorrectFlux = hasMomentumFlux && hasKineticFlux;
@@ -298,8 +310,15 @@ namespace OpenMD {
       case rnemdKeLz:
         hasCorrectFlux = hasAngularMomentumFlux && hasKineticFlux;
         break;
+      case rnemdKeCurrent:
+        hasCorrectFlux = hasCurrentDensity && hasKineticFlux;
+        break;
       case rnemdKePvector:
         hasCorrectFlux = hasMomentumFluxVector && hasKineticFlux;
+        break;
+      case rnemdKePvectorCurrent:
+        hasCorrectFlux = hasMomentumFluxVector && hasKineticFlux &&
+          hasCurrentDensity;
         break;
       case rnemdKeLvector:
         hasCorrectFlux = hasAngularMomentumFluxVector && hasKineticFlux;
@@ -327,7 +346,8 @@ namespace OpenMD {
               "RNEMD: The current method, %s, and flux type, %s,\n"
               "\tdid not have the correct flux value specified. Options\n"
               "\tinclude: kineticFlux, momentumFlux, angularMomentumFlux,\n"
-              "\tmomentumFluxVector, and angularMomentumFluxVector.\n",
+              "\tmomentumFluxVector, angularMomentumFluxVector, and\n"
+              "\tcurrentDensity\n",
               methStr.c_str(), fluxStr.c_str());
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
@@ -420,6 +440,13 @@ namespace OpenMD {
           break;
         }
       }        
+    }
+    if (hasCurrentDensity) {
+      // convert the Amp m^-2 values in the md file into electrons fs^-1 A^-2:
+      currentDensity_ = rnemdParams->getCurrentDensity() 
+        * Constants::currentDensityConvert;
+    } else {
+      currentDensity_ = 0.0;
     }
 
     if (hasCoordinateOrigin) {
@@ -524,7 +551,27 @@ namespace OpenMD {
       density.accumulator.push_back( new Accumulator() );
     data_[DENSITY] = density;
     outputMap_["DENSITY"] =  DENSITY;
+
+    OutputData chargedensity;
+    chargedensity.units =  "e cm^-3";
+    chargedensity.title =  "Charge Density";
+    chargedensity.dataType = "RealType";
+    chargedensity.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      chargedensity.accumulator.push_back( new Accumulator() );
+    data_[CHARGEDENSITY] = chargedensity;
+    outputMap_["CHARGEDENSITY"] =  CHARGEDENSITY;
     
+    OutputData eField;
+    eField.units =  "e";
+    eField.title =  "Electrical Field";
+    eField.dataType = "Vector3d";
+    eField.accumulator.reserve(nBins_);
+    for (int i = 0; i < nBins_; i++) 
+      eField.accumulator.push_back( new VectorAccumulator() );
+    data_[ELECTRICFIELD] = eField;
+    outputMap_["ELECTRICFIELD"] =  ELECTRICFIELD;
+
     if (hasOutputFields) {
       parseOutputFileFormat(rnemdParams->getOutputFields());
     } else {
@@ -570,6 +617,14 @@ namespace OpenMD {
         outputMask_.set(VELOCITY);
         outputMask_.set(DENSITY);        
         break;
+      case rnemdCurrent:
+      case rnemdKeCurrent:
+      case rnemdKePvectorCurrent:
+        outputMask_.set(TEMPERATURE);
+        outputMask_.set(VELOCITY);
+        outputMask_.set(DENSITY);
+        outputMask_.set(CHARGEDENSITY);
+        outputMask_.set(ELECTRICFIELD);
       default:
         break;
       }
@@ -589,6 +644,7 @@ namespace OpenMD {
     kineticExchange_ = 0.0;
     momentumExchange_ = V3Zero;
     angularMomentumExchange_ = V3Zero;
+    qvExchange_ = 0.0;
     
     std::ostringstream selectionAstream;
     std::ostringstream selectionBstream;
@@ -1817,6 +1873,294 @@ namespace OpenMD {
     }
   }
 
+  void RNEMD::doVSSCurrent(SelectionManager& smanA, SelectionManager& smanB) {
+    if (!doRNEMD_) return;
+    int selei;
+    int selej;
+
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Mat3x3d hmat = currentSnap_->getHmat();
+
+    StuntDouble* sd;
+    AtomType* atype;
+
+    vector<StuntDouble*> hotBin, coldBin;
+
+    Vector3d Ph(V3Zero);
+    Vector3d Lh(V3Zero);
+    RealType Mh = 0.0;
+    RealType Kh = 0.0;
+    RealType Khz = 0.0;
+    RealType MQh = 0.0;
+    Vector3d MQvh(V3Zero);
+    RealType MQ2h = 0.0;
+    RealType Q2h = 0.0;
+    RealType Volh = 0.0;
+
+    Vector3d Pc(V3Zero);
+    Vector3d Lc(V3Zero);
+    RealType Mc = 0.0;
+    RealType Kc = 0.0;
+    RealType Kcz = 0.0;
+    RealType MQc = 0.0;
+    Vector3d MQvc(V3Zero);
+    RealType MQ2c = 0.0;
+    RealType Q2c = 0.0;
+    RealType Volc = 0.0;
+
+    // Constraints can be on only the linear or angular momentum, but
+    // not both.  Usually, the user will specify which they want, but
+    // in case they don't, the use of periodic boundaries should make
+    // the choice for us.
+    
+    bool doLinearPart = false;
+    bool doAngularPart = false;
+
+    switch (rnemdFluxType_) {
+    case rnemdCurrent:
+    case rnemdKeCurrent:
+    case rnemdKePvectorCurrent:
+      doLinearPart = true;
+      break;
+    default:
+      if (usePeriodicBoundaryConditions_) 
+        doLinearPart = true;
+      else
+        doAngularPart = true;
+      break;
+    }
+    
+    for (sd = smanA.beginSelected(selei); sd != NULL; 
+         sd = smanA.nextSelected(selei)) {
+
+      Vector3d pos = sd->getPos();
+
+      // wrap the stuntdouble's position back into the box:
+      
+      if (usePeriodicBoundaryConditions_)
+        currentSnap_->wrapVector(pos);
+      
+      RealType mass = sd->getMass();
+      Vector3d vel = sd->getVel();
+      
+      hotBin.push_back(sd);
+      Ph += mass * vel;
+      Mh += mass;
+      Kh += mass * vel.lengthSquare();
+      Khz += mass * vel.z() * vel.z();
+
+      RealType charge = 0.0;
+        
+      if (sd->isAtom()) {
+        atype = static_cast<Atom*>(sd)->getAtomType();
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if ( fca.isFixedCharge() ) charge = fca.getCharge();
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+        if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
+      }
+      MQh += mass * charge;
+      MQvh += mass * vel * charge;
+      MQ2h += mass * charge * charge;
+      Q2h += charge * charge;
+    }
+
+    Volh = volumeA_;
+      
+    for (sd = smanB.beginSelected(selej); sd != NULL; 
+         sd = smanB.nextSelected(selej)) {
+      
+      Vector3d pos = sd->getPos();
+      
+      // wrap the stuntdouble's position back into the box:
+      
+      if (usePeriodicBoundaryConditions_)
+        currentSnap_->wrapVector(pos);
+      
+      RealType mass = sd->getMass();
+      Vector3d vel = sd->getVel();
+      
+      coldBin.push_back(sd);
+      Pc += mass * vel;
+      Mc += mass;
+      Kc += mass * vel.lengthSquare();
+      Kcz += mass * vel.z() * vel.z();
+      
+      RealType charge = 0.0;
+      
+      if (sd->isAtom()) {
+        atype = static_cast<Atom*>(sd)->getAtomType();
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if ( fca.isFixedCharge() ) charge = fca.getCharge();
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+        if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
+      }
+      MQc += mass * charge;
+      MQvc += mass * vel * charge;
+      MQ2c += mass * charge * charge;
+      Q2c += charge * charge;
+    }
+
+    Volc = volumeB_;
+
+    Kh *= 0.5;
+    Kc *= 0.5;
+    Khz *= 0.5;
+    Kcz *= 0.5;
+    
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &Ph[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Pc[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    
+    MPI_Allreduce(MPI_IN_PLACE, &Mh, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kh, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Khz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Mc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Kcz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
+    MPI_Allreduce(MPI_IN_PLACE, &MQc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQvc[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQ2c, 1, MPI_REALTYPE, MPI_SUM,MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Q2c, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+
+    MPI_Allreduce(MPI_IN_PLACE, &MQh, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQvh[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQ2h, 1, MPI_REALTYPE, MPI_SUM,MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Q2h, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);      
+#endif
+    
+    Vector3d ac;
+    RealType alphac, alphacprime;
+    Vector3d ah;
+    RealType alphah, alphahprime;
+
+    bool successfulExchange = false;
+    if ((Mh > 0.0) && (Mc > 0.0)) {
+      Vector3d vc = Pc / Mc;
+      ac = -momentumTarget_ / Mc;
+      ac.z() = 0.0;
+      //std::cerr << "qVTarget_ " << qvTarget_ << "\n";
+      //std::cerr << "MQc = " << MQc << " Q2C = " << Q2c << " Volc = " << Volc << "\n";
+      //std::cerr << "Mc = " << Mc << " MQvc = " << MQvc << "\n";
+      //std::cerr << "MQh = " << MQh << " Q2h = " << Q2h << " Volh = " << Volh << "\n";
+      //std::cerr << "Mh = " << Mh << " MQvh = " << MQvh << "\n";
+
+      // units of volume (Angstrom^3):
+      alphac = qvTarget_ / ((Q2c/Volc) + (Q2h/Volh) * (MQc / MQh));
+      // units of velocity (Angstrom/fs):
+      alphacprime = alphac / (dividingArea_ * exchangeTime_);
+            
+      RealType cNumerator = Kc - kineticTarget_;
+      //std::cerr << "cN1 = " << cNumerator << "\n";
+      cNumerator -= 0.5 * Mc * pow(vc.x() + ac.x(), 2);
+      //std::cerr << "cN2 = " << cNumerator << "\n";
+      cNumerator -= 0.5 * Mc * pow(vc.y() + ac.y(), 2);
+      //std::cerr << "cN3 = " << cNumerator << "\n";
+      cNumerator -= Kcz;
+      //std::cerr << "cN4 = " << cNumerator << "\n";
+      cNumerator -= MQvc.z() * alphacprime;
+      //std::cerr << "cN5 = " << cNumerator << "\n";
+      cNumerator -= 0.5 * MQ2c * alphacprime * alphacprime;
+      //std::cerr << "cN6 = " << cNumerator << "\n";
+      //std::cerr << "alphac = " << alphac << " prime = " << alphacprime;
+      if (cNumerator > 0.0) {
+        
+        RealType cDenominator = Kc - Kcz;
+        if (doLinearPart)
+          cDenominator -= 0.5 * Mc * (vc.x()*vc.x() + vc.y()*vc.y());
+        
+	if (cDenominator > 0.0) {
+	  RealType c = sqrt(cNumerator / cDenominator);
+          //std::cerr << "c = " << c << "\n";
+	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
+            
+	    Vector3d vh = Ph / Mh;
+            ah = momentumTarget_ / Mh;
+            ah.z() = 0.0;
+            alphah = -alphac * MQc / MQh;
+            alphahprime = alphah / (dividingArea_ * exchangeTime_);
+            
+            RealType hNumerator = Kh + kineticTarget_;
+            hNumerator -= 0.5 * Mh * pow(vh.x() + ah.x(), 2);
+            hNumerator -= 0.5 * Mh * pow(vh.y() + ah.y(), 2);
+            hNumerator -= Khz;
+            hNumerator -= MQvh.z() * alphahprime;
+            hNumerator -= 0.5 * MQ2h * alphahprime * alphahprime;
+                                      
+            if (hNumerator > 0.0) {
+              
+              RealType hDenominator = Kh - Khz;
+              if (doLinearPart)
+                hDenominator -= 0.5 * Mh * (vh.x()*vh.x() + vh.y()*vh.y());
+              
+	      if (hDenominator > 0.0) {
+		RealType h = sqrt(hNumerator / hDenominator);
+                //std::cerr << "h = " << h << "\n";
+                          
+		if ((h > 0.9) && (h < 1.1)) {
+                  
+		  vector<StuntDouble*>::iterator sdi;
+		  Vector3d vel;
+                  Vector3d rPos;
+                  
+		  for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
+                    vel = (*sdi)->getVel();
+                    vel.x() = (vel.x() - vc.x()) * c + ac.x() + vc.x();
+                    vel.y() = (vel.y() - vc.y()) * c + ac.y() + vc.y();
+                    RealType q = 0.0;
+                    if ((*sdi)->isAtom()) {
+                      atype = static_cast<Atom*>(*sdi)->getAtomType();
+                      FixedChargeAdapter fca = FixedChargeAdapter(atype);
+                      if ( fca.isFixedCharge() ) q = fca.getCharge();
+                      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+                      if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+                      vel.z() += q * alphacprime;
+                    }                                        
+		    (*sdi)->setVel(vel);
+		  }
+		  for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
+                    vel = (*sdi)->getVel();
+                    vel.x() = (vel.x() - vh.x()) * h + ah.x() + vh.x();
+                    vel.y() = (vel.y() - vh.y()) * h + ah.y() + vh.y();
+                    RealType q = 0.0;
+                    if ((*sdi)->isAtom()) {
+                      atype = static_cast<Atom*>(*sdi)->getAtomType();
+                      FixedChargeAdapter fca = FixedChargeAdapter(atype);
+                      if ( fca.isFixedCharge() ) q = fca.getCharge();
+                      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+                      if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+                      vel.z() += q * alphahprime;
+                    }                    
+		    (*sdi)->setVel(vel);
+		  }
+		  successfulExchange = true;
+		  kineticExchange_ += kineticTarget_;
+                  momentumExchange_ += momentumTarget_;
+                  angularMomentumExchange_ += angularMomentumTarget_;
+                  qvExchange_ += qvTarget_;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    if (successfulExchange != true) {
+      sprintf(painCave.errMsg, 
+              "RNEMD::doVSSCurrent exchange NOT performed - roots that solve\n"
+              "\tthe constraint equations may not exist or there may be\n"
+              "\tno selected objects in one or both slabs.\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();        
+      failTrialCount_++;
+    }
+  }
+
   RealType RNEMD::getDividingArea() {
 
     if (hasDividingArea_) return dividingArea_;
@@ -1826,10 +2170,11 @@ namespace OpenMD {
 
     if (hasSelectionA_) {
 
-      if (evaluatorA_.hasSurfaceArea()) 
+      if (evaluatorA_.hasSurfaceArea()) {
         areaA = evaluatorA_.getSurfaceArea();
-      else {
-         
+        volumeA_ = evaluatorA_.getVolume();
+      } else {
+        
         int isd;
         StuntDouble* sd;
         vector<StuntDouble*> aSites;
@@ -1842,6 +2187,7 @@ namespace OpenMD {
         ConvexHull* surfaceMeshA = new ConvexHull();
         surfaceMeshA->computeHull(aSites);
         areaA = surfaceMeshA->getArea();
+        volumeA_ = surfaceMeshA->getVolume();
         delete surfaceMeshA;
 #else
         sprintf( painCave.errMsg,
@@ -1868,17 +2214,21 @@ namespace OpenMD {
 	default:
 	  areaA = 2.0 * snap->getXYarea();
 	}
+        volumeA_ = areaA * slabWidth_;
+
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, the sphere radius sets the surface area of the
         // dividing surface:
         areaA = 4.0 * Constants::PI * pow(sphereARadius_, 2);
+        volumeA_ = 4.0 * Constants::PI * pow(sphereARadius_, 3) / 3.0;
       }
     }
 
     if (hasSelectionB_) {
       if (evaluatorB_.hasSurfaceArea()) {
         areaB = evaluatorB_.getSurfaceArea();
+        volumeB_ = evaluatorB_.getVolume();
       } else {
 
         int isd;
@@ -1894,6 +2244,7 @@ namespace OpenMD {
         ConvexHull* surfaceMeshB = new ConvexHull();    
         surfaceMeshB->computeHull(bSites);
         areaB = surfaceMeshB->getArea();
+        volumeB_ = surfaceMeshB->getVolume();
         delete surfaceMeshB;
 #else
         sprintf( painCave.errMsg,
@@ -1920,10 +2271,14 @@ namespace OpenMD {
 	default:
 	  areaB = 2.0 * snap->getXYarea();
 	}
+        volumeB_ = areaB * slabWidth_;
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, but if a sphereBradius has been set, just use that:
         areaB = 4.0 * Constants::PI * pow(sphereBRadius_, 2);
+        Thermo thermo(info_);
+        RealType hVol = thermo.getHullVolume();
+        volumeB_ = hVol - 4.0 * Constants::PI * pow(sphereBRadius_, 3) / 3.0;
       }
     }
       
@@ -1966,8 +2321,10 @@ namespace OpenMD {
 
     kineticTarget_ = kineticFlux_ * exchangeTime_ * area;
     momentumTarget_ = momentumFluxVector_ * exchangeTime_ * area;
-    angularMomentumTarget_ = angularMomentumFluxVector_ * exchangeTime_ * area; 
-
+    angularMomentumTarget_ = angularMomentumFluxVector_ * exchangeTime_ * area;
+    // units of electrons:
+    qvTarget_ = currentDensity_ * exchangeTime_ * area;
+    
     switch(rnemdMethod_) {
     case rnemdSwap: 
       doSwap(commonA_, commonB_);
@@ -1976,7 +2333,16 @@ namespace OpenMD {
       doNIVS(commonA_, commonB_);
       break;
     case rnemdVSS:
-      doVSS(commonA_, commonB_);
+      switch (rnemdFluxType_) {
+      case rnemdCurrent:
+      case rnemdKeCurrent:
+      case rnemdKePvectorCurrent:
+        doVSSCurrent(commonA_, commonB_);
+        break;
+      default:
+        doVSS(commonA_, commonB_);
+        break;
+      }
       break;
     case rnemdUnkownMethod:
     default :
@@ -2000,6 +2366,8 @@ namespace OpenMD {
 
     int selei(0);
     StuntDouble* sd;
+    AtomType* atype;
+
     int binNo;
     RealType mass;
     Vector3d vel; 
@@ -2008,6 +2376,9 @@ namespace OpenMD {
     Vector3d L;
     Mat3x3d I;
     RealType r2;
+    RealType charge;
+    Vector3d eField;
+    RealType ePot;
 
     vector<RealType> binMass(nBins_, 0.0);
     vector<Vector3d> binP(nBins_, V3Zero);
@@ -2015,6 +2386,10 @@ namespace OpenMD {
     vector<Vector3d> binL(nBins_, V3Zero);
     vector<Mat3x3d>  binI(nBins_);
     vector<RealType> binKE(nBins_, 0.0);
+    vector<RealType> binCharge(nBins_, 0.0);
+    vector<Vector3d> binEField(nBins_, V3Zero);
+    vector<RealType> binEPot(nBins_, 0.0);
+    
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
 
@@ -2074,6 +2449,18 @@ namespace OpenMD {
       I(1, 1) += mass * r2;
       I(2, 2) += mass * r2;
 
+      eField = sd->getElectricField(); // kcal/mol/e/Angstrom
+      ePot = -dot(rPos,eField);        // kcal/mol/e
+      
+      charge = 0.0;
+      if (sd->isAtom()) {
+        atype = static_cast<Atom*>(sd)->getAtomType();
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if ( fca.isFixedCharge() ) charge = fca.getCharge();
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+        if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
+      }
+      
       // Project the relative position onto a plane perpendicular to
       // the angularMomentumFluxVector:
       // Vector3d rProj = rPos - dot(rPos, u) * u;
@@ -2092,6 +2479,10 @@ namespace OpenMD {
         binI[binNo] += I;
         binL[binNo] += L;
         binDOF[binNo] += 3;
+
+        binCharge[binNo] += charge;
+        binEField[binNo] += eField;
+        binEPot[binNo] += ePot;
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -2131,6 +2522,13 @@ namespace OpenMD {
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binDOF[i],
                     1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binCharge[i],
+                    1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
+                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binEPot[i],
+                    1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+
       //MPI_Allreduce(MPI_IN_PLACE, &binOmega[i],
       //                          1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     }
@@ -2138,21 +2536,23 @@ namespace OpenMD {
 #endif
 
     Vector3d omega;
-    RealType den;
-    RealType temp;
-    RealType z;
-    RealType r;
+    RealType den, cden, temp, z, r;
+
     for (int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_);
         den = binMass[i] * nBins_ * Constants::densityConvert 
           / currentSnap_->getVolume() ;
+        cden = binCharge[i] * nBins_  / currentSnap_->getVolume() ;
       } else {
         r = (((RealType)i + 0.5) * binWidth_);
         RealType rinner = (RealType)i * binWidth_;
         RealType router = (RealType)(i+1) * binWidth_;
         den = binMass[i] * 3.0 * Constants::densityConvert
           / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3)));
+        cden = binCharge[i] * 3.0 
+          / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3)));
+
       }
       vel = binP[i] / binMass[i];
 
@@ -2164,7 +2564,8 @@ namespace OpenMD {
         // only add values if there are things to add
         temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
                                  Constants::energyConvert);
-        
+
+        eField = binEField[i] / RealType(binCount[i]);
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
           if(outputMask_[j]) {
             switch(j) {
@@ -2186,6 +2587,13 @@ namespace OpenMD {
             case DENSITY:
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
               break;
+            case CHARGEDENSITY:
+              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(cden);
+              break;
+            case ELECTRICFIELD:
+              dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(eField);
+              break;
+
             }
           }
         }
@@ -2255,11 +2663,13 @@ namespace OpenMD {
       RealType Jz(0.0);
       Vector3d JzP(V3Zero);
       Vector3d JzL(V3Zero);
+      RealType Je(0.0);
       if (time >= info_->getSimParams()->getDt()) {
         Jz = kineticExchange_ / (time * avgArea)
           / Constants::energyConvert;
         JzP = momentumExchange_ / (time * avgArea);
         JzL = angularMomentumExchange_ / (time * avgArea);
+        Je = qvExchange_ / (time * avgArea);
       }
 
       rnemdFile_ << "#######################################################\n";
@@ -2296,6 +2706,8 @@ namespace OpenMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumFluxVector_ 
                  << " (amu/A^2/fs^2)\n";
+      rnemdFile_ << "#   current density = " << currentDensity_
+                 << " (electrons/A^2/fs)\n";
       rnemdFile_ << "# Target one-time exchanges:\n";
       rnemdFile_ << "#          kinetic = " 
                  << kineticTarget_ / Constants::energyConvert 
@@ -2304,6 +2716,8 @@ namespace OpenMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumTarget_ 
                  << " (amu*A^2/fs)\n";
+      rnemdFile_ << "# electron velocity = " << qvTarget_
+                 << " (electrons A/fs)\n";
       rnemdFile_ << "# Actual exchange totals:\n";
       rnemdFile_ << "#          kinetic = " 
                  << kineticExchange_ / Constants::energyConvert 
@@ -2311,7 +2725,9 @@ namespace OpenMD {
       rnemdFile_ << "#          momentum = " << momentumExchange_ 
                  << " (amu*A/fs)\n";      
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_ 
-                 << " (amu*A^2/fs)\n";      
+                 << " (amu*A^2/fs)\n";
+      rnemdFile_ << "# electron velocity = " << qvExchange_
+                 << " (electrons A/fs)\n";
       rnemdFile_ << "# Actual flux:\n";
       rnemdFile_ << "#          kinetic = " << Jz
                  << " (kcal/mol/A^2/fs)\n";
@@ -2319,6 +2735,8 @@ namespace OpenMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << JzL
                  << " (amu/A^2/fs^2)\n";
+      rnemdFile_ << "#   current density = " << Je
+                 << " (electrons/A^2/fs)\n";
       rnemdFile_ << "# Exchange statistics:\n";
       rnemdFile_ << "#               attempted = " << trialCount_ << "\n";
       rnemdFile_ << "#                  failed = " << failTrialCount_ << "\n";

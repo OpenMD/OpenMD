@@ -376,6 +376,7 @@ namespace OpenMD {
       if (doHeatFlux_) doParticlePot_ = true;
 
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
+      doElectricField_ |= info_->getSimParams()->getRNEMDParameters()->haveCurrentDensity();
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
       if (info_->getSimParams()->haveUseSurfaceTerm() &&
           info_->getSimParams()->getUseSurfaceTerm()) {

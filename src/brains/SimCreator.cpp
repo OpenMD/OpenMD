@@ -797,6 +797,14 @@ namespace OpenMD {
       storageLayout |= DataStorage::dslElectricField;
     }
 
+    if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
+      if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+        if (simParams->getRNEMDParameters()->haveCurrentDensity()) {
+            storageLayout |= DataStorage::dslElectricField;          
+        }
+      }
+    }        
+
     if (simParams->getOutputSitePotential() ) {
       storageLayout |= DataStorage::dslSitePotential;
     }

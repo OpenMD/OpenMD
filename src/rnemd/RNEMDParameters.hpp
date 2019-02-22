@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,6 +39,7 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+
  
 #ifndef RNEMD_RNEMDPARAMTERS_HPP
 #define RNEMD_RNEMDPARAMTERS_HPP
@@ -55,6 +56,7 @@ namespace OpenMD {
     DeclareParameter(ExchangeTime, RealType);
     DeclareParameter(KineticFlux, RealType);
     DeclareParameter(MomentumFlux, RealType);
+    DeclareParameter(CurrentDensity, RealType);
     DeclareParameter(MomentumFluxVector, std::vector<RealType> );
     DeclareParameter(AngularMomentumFlux, RealType);
     DeclareParameter(AngularMomentumFluxVector, std::vector<RealType> );

@@ -118,6 +118,19 @@ namespace OpenMD {
         return 0.0;
       }
     }
+    bool hasVolume() { return hasVolume_; }
+    RealType getVolume() { 
+      if (hasVolume_) {
+        return volume_;
+      } else {
+        sprintf( painCave.errMsg,
+                 "SelectionEvaluator Error: %s\n", "No Volume For You!");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+        return 0.0;
+      }
+    }
 
   
   private:
@@ -240,6 +253,8 @@ namespace OpenMD {
     bool isLoaded_;
     bool hasSurfaceArea_;
     RealType surfaceArea_;
+    bool hasVolume_;
+    RealType volume_;
         
   };
 

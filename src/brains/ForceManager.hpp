@@ -82,6 +82,7 @@ namespace OpenMD {
     virtual ~ForceManager();
     virtual void calcForces();
     virtual void calcSelectedForces(Molecule* mol1, Molecule* mol2);
+    void setDoElectricField(bool def) { doElectricField_ = def; }
     void initialize();
 
   protected: 
