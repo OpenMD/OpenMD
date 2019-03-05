@@ -68,8 +68,10 @@ namespace OpenMD {
     void writeOutputFile();
     void writeReal(int index, unsigned int bin);
     void writeVector(int index, unsigned int bin);
+    void writeArray(int index, unsigned int bin);
     void writeRealErrorBars(int index, unsigned int bin);
     void writeVectorErrorBars(int index, unsigned int bin);
+    void writeArrayErrorBars(int index, unsigned int bin);
 
   private:
 
@@ -112,7 +114,7 @@ namespace OpenMD {
       VELOCITY,
       ANGULARVELOCITY,
       DENSITY,
-      CHARGEDENSITY,
+      NUMBERDENSITY,
       ELECTRICFIELD,
       ENDINDEX 
     };
@@ -128,6 +130,7 @@ namespace OpenMD {
       string units;
       string dataType;
       vector<BaseAccumulator*> accumulator;
+      vector<vector<BaseAccumulator*> > accumulatorArray2d;
     };
 
     typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;
@@ -221,6 +224,8 @@ namespace OpenMD {
     vector<OutputData> data_;
     OutputBitSet outputMask_;
     OutputMapType outputMap_;
+    int outputTypeCount_;
+    std::vector<AtomType*> outputTypes_;
     Accumulator* areaAccumulator_;
     bool doRNEMD_;
     bool hasData_;

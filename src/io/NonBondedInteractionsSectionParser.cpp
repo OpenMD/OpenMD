@@ -49,6 +49,7 @@
 #include "types/MieInteractionType.hpp"
 #include "types/BuckinghamInteractionType.hpp"
 #include "types/EAMInteractionType.hpp"
+#include "types/InversePowerSeriesInteractionType.hpp"
 #include "brains/ForceField.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
@@ -65,6 +66,7 @@ namespace OpenMD {
     stringToEnumMap_["Buckingham"] = Buckingham;
     stringToEnumMap_["EAMTable"] = EAMTable;
     stringToEnumMap_["EAMZhou"] = EAMZhou;
+    stringToEnumMap_["InversePowerSeries"] = InversePowerSeries;
 
   }
 
@@ -235,6 +237,29 @@ namespace OpenMD {
 
         interactionType = new EAMInteractionType(re, alpha, beta, A, B,
                                                  kappa, lambda);
+      }
+      break;
+
+    case InversePowerSeries :
+      if (nTokens < 2 || nTokens % 2 != 0) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+
+        std::vector<std::pair<int,RealType> > series;
+        int nPairs = nTokens / 2;
+        int power;
+        RealType coefficient;
+        
+        for (int i = 0; i < nPairs; ++i) {
+          power = tokenizer.nextTokenAsInt();
+          coefficient = tokenizer.nextTokenAsDouble() * eus_ * pow(dus_, power);
+          series.push_back(std::make_pair( power, coefficient));          
+        }
+        interactionType = new InversePowerSeriesInteractionType(series);
+        
       }
       break;
 

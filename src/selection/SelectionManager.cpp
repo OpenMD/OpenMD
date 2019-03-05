@@ -42,6 +42,10 @@
 
 #include "selection/SelectionManager.hpp"
 #include "brains/SimInfo.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 namespace OpenMD {
   SelectionManager::SelectionManager(SimInfo* info) : info_(info){
     nObjects_.push_back(info_->getNGlobalAtoms()+
@@ -515,6 +519,91 @@ namespace OpenMD {
     return i == -1 ? NULL : molecules_[i];
 #endif
   }
+
+  /**
+   * getSelectedAtomTypes
+   *
+   * Returns an STL set of AtomType* that are actually selected.
+   * Must query all processors to assemble this information.
+   * 
+   */
+  std::set<AtomType*> SelectionManager::getSelectedAtomTypes() {
+
+    std::set<AtomType*> atomTypes;
+
+    for(int i = 0; i < ss_.bitsets_[STUNTDOUBLE].size(); ++i) {      
+      if (ss_.bitsets_[STUNTDOUBLE][i]) {
+        // check that this processor owns this stuntdouble
+        if (stuntdoubles_[i] != NULL) {          
+          if (stuntdoubles_[i]->isAtom()){
+            Atom* atom = static_cast<Atom*>(stuntdoubles_[i]);
+            atomTypes.insert(atom->getAtomType());
+          }          
+        }
+      }
+    }
+
+#ifdef IS_MPI
+    // loop over the found atom types on this processor, and add their
+    // numerical idents to a vector:
+    
+    std::vector<int> foundTypes;
+    set<AtomType*>::iterator i;
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) 
+      foundTypes.push_back( (*i)->getIdent() );
+    
+    // count_local holds the number of found types on this processor
+    int count_local = foundTypes.size();
+
+    int nproc;
+    MPI_Comm_size( MPI_COMM_WORLD, &nproc);
+    
+    // we need arrays to hold the counts and displacement vectors for
+    // all processors
+    std::vector<int> counts(nproc, 0);
+    std::vector<int> disps(nproc, 0);
+
+    // fill the counts array
+    MPI_Allgather(&count_local, 1, MPI_INT, &counts[0],
+                  1, MPI_INT, MPI_COMM_WORLD);
+    
+    // use the processor counts to compute the displacement array
+    disps[0] = 0;    
+    int totalCount = counts[0];
+    for (int iproc = 1; iproc < nproc; iproc++) {
+      disps[iproc] = disps[iproc-1] + counts[iproc-1];
+      totalCount += counts[iproc];
+    }
+
+    // we need a (possibly redundant) set of all found types:
+    std::vector<int> ftGlobal(totalCount);
+    
+    // now spray out the foundTypes to all the other processors:    
+    MPI_Allgatherv(&foundTypes[0], count_local, MPI_INT, 
+                   &ftGlobal[0], &counts[0], &disps[0], 
+                   MPI_INT, MPI_COMM_WORLD);
+
+    std::vector<int>::iterator j;
+    
+    // foundIdents is a stl set, so inserting an already found ident
+    // will have no effect.
+    std::set<int> foundIdents;
+
+    for (j = ftGlobal.begin(); j != ftGlobal.end(); ++j)
+      foundIdents.insert((*j));
+    
+    // now iterate over the foundIdents and get the actual atom types 
+    // that correspond to these:
+    ForceField* forceField_ = info_->getForceField();
+    std::set<int>::iterator it;    
+    for (it = foundIdents.begin(); it != foundIdents.end(); ++it) 
+      atomTypes.insert( forceField_->getAtomType((*it)) );
+#endif
+   
+    return atomTypes;
+  }
+
+
   
   SelectionManager operator| (const SelectionManager& sman1, 
                               const SelectionManager& sman2) {

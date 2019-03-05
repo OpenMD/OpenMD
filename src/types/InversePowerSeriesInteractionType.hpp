@@ -40,48 +40,43 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef TYPES_INVERSEPOWERSERIESINTERACTIONTYPE_HPP
+#define TYPES_INVERSEPOWERSERIESINTERACTIONTYPE_HPP
+
+#include "types/NonBondedInteractionType.hpp"
 
 namespace OpenMD {
-
-  class NonBondedInteractionsSectionParser : public SectionParser {
+  /**
+   * @class InversePowerSeriesInteractionType 
+   *
+   * InversePowerSeriesInteractionType is a sum of powers in the inverse of r:
+   * \f[ V = \sum_n  c_n / r^{n} \f]
+   */
+  class InversePowerSeriesInteractionType : public NonBondedInteractionType {
+    
   public:
-    NonBondedInteractionsSectionParser(ForceFieldOptions& options);
+    
+    InversePowerSeriesInteractionType(std::vector<std::pair<int, RealType> > series) {
+
+      powers.clear();
+      coefficients.clear();
+      
+      std::vector<std::pair<int, RealType> >::iterator it;
+
+      for (it = series.begin(); it != series.end(); ++it)  {
+        powers.push_back((*it).first);
+        coefficients.push_back((*it).second);
+      }
+      
+      setInversePowerSeries();
+    }
+
+    std::vector<int> getPowers() { return powers; }
+    std::vector<RealType> getCoefficients() { return coefficients; }
             
   private:
-
-    enum NonBondedInteractionTypeEnum{
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      RepulsivePower,
-      Mie,
-      MAW,
-      Buckingham,
-      EAMTable,
-      EAMZhou,
-      InversePowerSeries,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
-    
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
-    RealType meus_; //!< Metallic energy enit scaling
-    RealType eus_;  //!< Energy unit scaling
-    RealType dus_;  //!< Distance unit scaling
+    std::vector<int> powers;
+    std::vector<RealType> coefficients;
   };
-
-
-} //namespace OpenMD
-
+}
 #endif
-
-

@@ -64,6 +64,7 @@ namespace OpenMD {
     bool is_RepulsivePower;
     bool is_Mie;
     bool is_Buckingham;
+    bool is_InversePowerSeries;
   } NonBondedInteractionTypeProperties;
 
   /**
@@ -97,6 +98,9 @@ namespace OpenMD {
     bool isMie();
     void setBuckingham();
     bool isBuckingham();
+    void setInversePowerSeries();
+    bool isInversePowerSeries();
+
     
     void setAtomTypes(std::pair<AtomType*, AtomType*> ats);
     std::pair<AtomType*, AtomType*> getAtomTypes();

@@ -46,6 +46,7 @@
 #include "types/RepulsivePowerInteractionType.hpp"
 #include "types/MieInteractionType.hpp"
 #include "types/MAWInteractionType.hpp"
+#include "types/InversePowerSeriesInteractionType.hpp"
 
 namespace OpenMD {
 
@@ -62,7 +63,8 @@ namespace OpenMD {
     eam_ = new EAM();
     sc_ = new SC();
     electrostatic_ = new Electrostatic();
-    maw_ = new MAW();   
+    maw_ = new MAW();
+    inversePowerSeries_ = new InversePowerSeries();
   }
 
   InteractionManager::~InteractionManager() {
@@ -76,6 +78,7 @@ namespace OpenMD {
     delete sc_;
     delete electrostatic_;
     delete maw_;
+    delete inversePowerSeries_;
   }
 
   void InteractionManager::initialize() {
@@ -96,6 +99,7 @@ namespace OpenMD {
     maw_->setForceField(forceField_);
     repulsivePower_->setForceField(forceField_);
     mie_->setForceField(forceField_);
+    inversePowerSeries_->setForceField(forceField_);
     
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     int nTypes = atomTypes->size();
@@ -123,6 +127,7 @@ namespace OpenMD {
     maw_->setSimulatedAtomTypes(atypes);
     repulsivePower_->setSimulatedAtomTypes(atypes);
     mie_->setSimulatedAtomTypes(atypes);
+    inversePowerSeries_->setSimulatedAtomTypes(atypes);
 
     set<AtomType*>::iterator at;
     set<NonBondedInteraction*>::iterator it;
@@ -435,6 +440,40 @@ namespace OpenMD {
                                          mit->getCA1(), mit->getCB1());
             vdwExplicit = true;
           }
+
+          if (nbiType->isInversePowerSeries()) {
+            if (vdwExplicit) {
+              sprintf( painCave.errMsg,
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
+              painCave.severity = OPENMD_ERROR;
+              painCave.isFatal = 1;
+              simError();
+            }
+            // We found an explicit InversePowerSeries interaction.
+            // override all other vdw entries for this pair of atom types:
+            for(it = interactions_[atid1][atid2].begin();
+                it != interactions_[atid1][atid2].end(); ) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == VANDERWAALS_FAMILY) {
+                iHash_[atid1][atid2] ^= (*it)->getHash();
+                interactions_[atid1][atid2].erase(it++);
+              } else {
+                ++it;
+              }
+            }
+            interactions_[atid1][atid2].insert(inversePowerSeries_);
+            iHash_[atid1][atid2] |= INVERSEPOWERSERIES_INTERACTION;
+            InversePowerSeriesInteractionType* ipsit = dynamic_cast<InversePowerSeriesInteractionType*>(nbiType);
+            
+            inversePowerSeries_->addExplicitInteraction(atype1, atype2,
+                                                        ipsit->getPowers(),
+                                                        ipsit->getCoefficients()
+                                                        );
+            vdwExplicit = true;
+          }
         }
       }
     }
@@ -543,6 +582,7 @@ namespace OpenMD {
     if ((iHash & EAM_INTERACTION) != 0)            eam_->calcForce(idat);
     if ((iHash & SC_INTERACTION) != 0)             sc_->calcForce(idat);
     if ((iHash & MAW_INTERACTION) != 0)            maw_->calcForce(idat);
+    if ((iHash & INVERSEPOWERSERIES_INTERACTION) != 0) inversePowerSeries_->calcForce(idat);
 
     // set<NonBondedInteraction*>::iterator it;
     //

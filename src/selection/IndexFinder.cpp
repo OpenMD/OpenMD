@@ -73,10 +73,12 @@ namespace OpenMD {
     Torsion* torsion;
     Inversion* inversion;    
     
+
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
-           
+      
       SelectionSet ss(nObjects_);
+
       ss.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
 
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {

@@ -113,7 +113,7 @@ namespace OpenMD {
      *   returns values of:
      *     electrons fs^-1
      */
-    const RealType currentConvert = 1.60216021766208e-4;
+    const RealType currentConvert = 6241.573027317;
     
     /**
      * currentDensityConvert
@@ -122,7 +122,7 @@ namespace OpenMD {
      *   returns values of:
      *     electrons fs^-1 Angstrom^-2
      */
-    const RealType currentDensityConvert = 1.60216021766208e16;
+    const RealType currentDensityConvert = 6.241573027317e-17;
 
     /**
      * Atomic Units are used in the Slater overlap code, and we need

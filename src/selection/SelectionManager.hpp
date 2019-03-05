@@ -133,7 +133,7 @@ namespace OpenMD {
       }
       return counts;
     }
-     
+    
     int getSelectionCount() {
       return ss_.bitsets_[STUNTDOUBLE].countBits();
     }
@@ -151,8 +151,7 @@ namespace OpenMD {
     }
     int getMoleculeSelectionCount() {
       return ss_.bitsets_[MOLECULE].countBits();
-    }
-    
+    }    
     SelectionSet getSelectionSet() {
       return ss_;
     }
@@ -473,6 +472,8 @@ namespace OpenMD {
      * @param i iterator used to keep track of the selection
      */
     Molecule* nextUnselectedMolecule(int& i);
+
+    std::set<AtomType*> getSelectedAtomTypes();
 
     SelectionManager& operator&= (const SelectionManager &sman) {
       for (int i = 0; i < N_SELECTIONTYPES; i++) 

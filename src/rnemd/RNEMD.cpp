@@ -365,12 +365,12 @@ namespace OpenMD {
     if (hasMomentumFluxVector) {
       std::vector<RealType> mf = rnemdParams->getMomentumFluxVector();
       if (mf.size() != 3) {
-          sprintf(painCave.errMsg,
-                  "RNEMD: Incorrect number of parameters specified for momentumFluxVector.\n"
-                  "\tthere should be 3 parameters, but %lu were specified.\n", 
-                  mf.size());
-          painCave.isFatal = 1;
-          simError();      
+        sprintf(painCave.errMsg,
+                "RNEMD: Incorrect number of parameters specified for momentumFluxVector.\n"
+                "\tthere should be 3 parameters, but %lu were specified.\n", 
+                mf.size());
+        painCave.isFatal = 1;
+        simError();      
       }
       momentumFluxVector_.x() = mf[0];
       momentumFluxVector_.y() = mf[1];
@@ -486,6 +486,11 @@ namespace OpenMD {
       simError();
     }
     
+    outputEvaluator_.loadScriptString(outputSelection_);
+    outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
+    std::set<AtomType*> osTypes = outputSeleMan_.getSelectedAtomTypes();
+    std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
+    
     areaAccumulator_ = new Accumulator();
     
     nBins_ = rnemdParams->getOutputBins();
@@ -552,15 +557,20 @@ namespace OpenMD {
     data_[DENSITY] = density;
     outputMap_["DENSITY"] =  DENSITY;
 
-    OutputData chargedensity;
-    chargedensity.units =  "e cm^-3";
-    chargedensity.title =  "Charge Density";
-    chargedensity.dataType = "RealType";
-    chargedensity.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
-      chargedensity.accumulator.push_back( new Accumulator() );
-    data_[CHARGEDENSITY] = chargedensity;
-    outputMap_["CHARGEDENSITY"] =  CHARGEDENSITY;
+    OutputData numberDensity;
+    numberDensity.units = "angstrom^-3";
+    numberDensity.title =  "Number Density";  
+    numberDensity.dataType = "Array2d";
+    int nTypes = outputTypes_.size();
+    numberDensity.accumulatorArray2d.resize(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) {
+      numberDensity.accumulatorArray2d[i].resize(nTypes);
+      for (int j = 0 ; j < outputTypes_.size(); j++) {       
+        numberDensity.accumulatorArray2d[i][j] = new Accumulator();        
+      }
+    }
+    data_[NUMBERDENSITY] = (numberDensity);
+    outputMap_["NUMBERDENSITY"] =  NUMBERDENSITY;
     
     OutputData eField;
     eField.units =  "e";
@@ -623,7 +633,7 @@ namespace OpenMD {
         outputMask_.set(TEMPERATURE);
         outputMask_.set(VELOCITY);
         outputMask_.set(DENSITY);
-        outputMask_.set(CHARGEDENSITY);
+        outputMask_.set(NUMBERDENSITY);
         outputMask_.set(ELECTRICFIELD);
       default:
         break;
@@ -730,9 +740,6 @@ namespace OpenMD {
     seleManB_.setSelectionSet(evaluatorB_.evaluate());
     commonA_ = seleManA_ & seleMan_;
     commonB_ = seleManB_ & seleMan_;
-
-    outputEvaluator_.loadScriptString(outputSelection_);
-    outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
   }
   
     
@@ -2043,11 +2050,6 @@ namespace OpenMD {
       Vector3d vc = Pc / Mc;
       ac = -momentumTarget_ / Mc;
       ac.z() = 0.0;
-      //std::cerr << "qVTarget_ " << qvTarget_ << "\n";
-      //std::cerr << "MQc = " << MQc << " Q2C = " << Q2c << " Volc = " << Volc << "\n";
-      //std::cerr << "Mc = " << Mc << " MQvc = " << MQvc << "\n";
-      //std::cerr << "MQh = " << MQh << " Q2h = " << Q2h << " Volh = " << Volh << "\n";
-      //std::cerr << "Mh = " << Mh << " MQvh = " << MQvh << "\n";
 
       // units of volume (Angstrom^3):
       alphac = qvTarget_ / ((Q2c/Volc) + (Q2h/Volh) * (MQc / MQh));
@@ -2055,18 +2057,11 @@ namespace OpenMD {
       alphacprime = alphac / (dividingArea_ * exchangeTime_);
             
       RealType cNumerator = Kc - kineticTarget_;
-      //std::cerr << "cN1 = " << cNumerator << "\n";
       cNumerator -= 0.5 * Mc * pow(vc.x() + ac.x(), 2);
-      //std::cerr << "cN2 = " << cNumerator << "\n";
       cNumerator -= 0.5 * Mc * pow(vc.y() + ac.y(), 2);
-      //std::cerr << "cN3 = " << cNumerator << "\n";
       cNumerator -= Kcz;
-      //std::cerr << "cN4 = " << cNumerator << "\n";
       cNumerator -= MQvc.z() * alphacprime;
-      //std::cerr << "cN5 = " << cNumerator << "\n";
       cNumerator -= 0.5 * MQ2c * alphacprime * alphacprime;
-      //std::cerr << "cN6 = " << cNumerator << "\n";
-      //std::cerr << "alphac = " << alphac << " prime = " << alphacprime;
       if (cNumerator > 0.0) {
         
         RealType cDenominator = Kc - Kcz;
@@ -2075,7 +2070,7 @@ namespace OpenMD {
         
 	if (cDenominator > 0.0) {
 	  RealType c = sqrt(cNumerator / cDenominator);
-          //std::cerr << "c = " << c << "\n";
+          
 	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
             
 	    Vector3d vh = Ph / Mh;
@@ -2099,7 +2094,6 @@ namespace OpenMD {
               
 	      if (hDenominator > 0.0) {
 		RealType h = sqrt(hNumerator / hDenominator);
-                //std::cerr << "h = " << h << "\n";
                           
 		if ((h > 0.9) && (h < 1.1)) {
                   
@@ -2191,7 +2185,7 @@ namespace OpenMD {
         delete surfaceMeshA;
 #else
         sprintf( painCave.errMsg,
-               "RNEMD::getDividingArea : Hull calculation is not possible\n"
+                 "RNEMD::getDividingArea : Hull calculation is not possible\n"
                  "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
@@ -2362,13 +2356,16 @@ namespace OpenMD {
     Vector3d u = angularMomentumFluxVector_;
     u.normalize();
 
-    outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
-
+    if (outputEvaluator_.isDynamic()) {
+      outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
+    }
+      
     int selei(0);
     StuntDouble* sd;
     AtomType* atype;
 
     int binNo;
+    int typeIndex;
     RealType mass;
     Vector3d vel; 
     Vector3d rPos;
@@ -2378,7 +2375,6 @@ namespace OpenMD {
     RealType r2;
     RealType charge;
     Vector3d eField;
-    RealType ePot;
 
     vector<RealType> binMass(nBins_, 0.0);
     vector<Vector3d> binP(nBins_, V3Zero);
@@ -2387,12 +2383,17 @@ namespace OpenMD {
     vector<Mat3x3d>  binI(nBins_);
     vector<RealType> binKE(nBins_, 0.0);
     vector<RealType> binCharge(nBins_, 0.0);
-    vector<Vector3d> binEField(nBins_, V3Zero);
-    vector<RealType> binEPot(nBins_, 0.0);
-    
+    vector<Vector3d> binEField(nBins_, V3Zero);    
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
+    vector<vector<int> > binTypeCounts;
 
+    binTypeCounts.resize(nBins_);
+    for (int i = 0; i < nBins_; i++) {
+      binTypeCounts[i].resize( outputTypes_.size(), 0);
+    }
+    std::vector<AtomType*>::iterator at;
+    
     // alternative approach, track all molecules instead of only those
     // selected for scaling/swapping:
     /*
@@ -2450,15 +2451,20 @@ namespace OpenMD {
       I(2, 2) += mass * r2;
 
       eField = sd->getElectricField(); // kcal/mol/e/Angstrom
-      ePot = -dot(rPos,eField);        // kcal/mol/e
       
       charge = 0.0;
+      typeIndex = -1;
       if (sd->isAtom()) {
         atype = static_cast<Atom*>(sd)->getAtomType();
         FixedChargeAdapter fca = FixedChargeAdapter(atype);
         if ( fca.isFixedCharge() ) charge = fca.getCharge();
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
         if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
+
+        at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
+        if (at != outputTypes_.end()) {
+          typeIndex = std::distance(outputTypes_.begin(), at);
+        }
       }
       
       // Project the relative position onto a plane perpendicular to
@@ -2479,10 +2485,10 @@ namespace OpenMD {
         binI[binNo] += I;
         binL[binNo] += L;
         binDOF[binNo] += 3;
+        if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
 
         binCharge[binNo] += charge;
         binEField[binNo] += eField;
-        binEPot[binNo] += ePot;
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -2525,40 +2531,37 @@ namespace OpenMD {
       MPI_Allreduce(MPI_IN_PLACE, &binCharge[i],
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
-                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binEPot[i],
-                    1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);      
 
-      //MPI_Allreduce(MPI_IN_PLACE, &binOmega[i],
-      //                          1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &binTypeCounts[i][0],
+                    outputTypes_.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+      
     }
     
 #endif
 
     Vector3d omega;
-    RealType den, cden, temp, z, r;
+    RealType den, temp, z, r, binVolume;
+    std::vector<RealType> nden(outputTypes_.size(), 0.0);;
 
     for (int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_);
-        den = binMass[i] * nBins_ * Constants::densityConvert 
-          / currentSnap_->getVolume() ;
-        cden = binCharge[i] * nBins_  / currentSnap_->getVolume() ;
+        binVolume = currentSnap_->getVolume() / nBins_;        
       } else {
         r = (((RealType)i + 0.5) * binWidth_);
         RealType rinner = (RealType)i * binWidth_;
         RealType router = (RealType)(i+1) * binWidth_;
-        den = binMass[i] * 3.0 * Constants::densityConvert
-          / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3)));
-        cden = binCharge[i] * 3.0 
-          / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3)));
-
+        binVolume = (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3))) / 3.0;
       }
+
+      den = binMass[i] * Constants::densityConvert / binVolume;
+      for (int k = 0; k < outputTypes_.size(); k++) {
+        nden[k] = binTypeCounts[i][k]  / binVolume;
+      }
+
       vel = binP[i] / binMass[i];
-
       omega = binI[i].inverse() * binL[i];
-
-      // omega = binOmega[i] / binCount[i];
 
       if (binCount[i] > 0) {
         // only add values if there are things to add
@@ -2587,8 +2590,10 @@ namespace OpenMD {
             case DENSITY:
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
               break;
-            case CHARGEDENSITY:
-              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(cden);
+            case NUMBERDENSITY:
+              for (int k = 0; k < outputTypes_.size(); k++) {                
+                dynamic_cast<Accumulator *>(data_[j].accumulatorArray2d[i][k])->add(nden[k]);
+              }
               break;
             case ELECTRICFIELD:
               dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(eField);
@@ -2756,6 +2761,13 @@ namespace OpenMD {
             "(" << data_[i].units << ")";
           // add some extra tabs for column alignment
           if (data_[i].dataType == "Vector3d") rnemdFile_ << "\t\t";
+          if (data_[i].dataType == "Array2d") {
+            rnemdFile_ << "(";
+            for (int j = 0; j <  data_[i].accumulatorArray2d[0].size(); j++) {
+              rnemdFile_<< outputTypes_[j]->getName() << "\t";
+            }
+            rnemdFile_ << ")\t";
+          }     
         }
       }
       rnemdFile_ << std::endl;
@@ -2770,6 +2782,8 @@ namespace OpenMD {
               writeReal(i,j);
             else if (data_[i].dataType == "Vector3d") 
               writeVector(i,j);
+            else if (data_[i].dataType == "Array2d")
+              writeArray(i, j);
             else {
               sprintf( painCave.errMsg,
                        "RNEMD found an unknown data type for: %s ",
@@ -2796,6 +2810,8 @@ namespace OpenMD {
               writeRealErrorBars(i,j);
             else if (data_[i].dataType == "Vector3d")
               writeVectorErrorBars(i,j);
+            else if (data_[i].dataType == "Array2d")
+              writeArrayErrorBars(i,j);
             else {
               sprintf( painCave.errMsg,
                        "RNEMD found an unknown data type for: %s ",
@@ -2864,6 +2880,35 @@ namespace OpenMD {
     } else {
       rnemdFile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
     }
+  }
+  
+  void RNEMD::writeArray(int index, unsigned int bin) {
+    
+    if (!doRNEMD_) return;
+    assert(index >=0 && index < ENDINDEX);
+    assert(int(bin) < nBins_);
+    RealType s;
+    int columns = data_[index].accumulatorArray2d[0].size();
+    int count;
+    
+    count = data_[index].accumulatorArray2d[bin][0]->count();
+
+    if (count == 0) return;
+
+    for (int j = 0; j < columns; j++) {        
+    
+      dynamic_cast<Accumulator*>(data_[index].accumulatorArray2d[bin][j])->getAverage(s);
+      if (! isinf(s) && ! isnan(s)) {
+        rnemdFile_ << "\t" << s;
+      } else {
+        std::cerr << " problem s = " << s << "\n";
+        sprintf( painCave.errMsg,
+                 "RNEMD detected a numerical error writing: %s for bin %u, column %u",
+                 data_[index].title.c_str(), bin, j);
+        painCave.isFatal = 1;
+        simError();
+      }
+    }    
   }  
 
   void RNEMD::writeRealErrorBars(int index, unsigned int bin) {
@@ -2911,6 +2956,34 @@ namespace OpenMD {
     } else {
       rnemdFile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
     }
-  }  
+  }
+
+
+  void RNEMD::writeArrayErrorBars(int index, unsigned int bin) {
+    if (!doRNEMD_) return;
+    assert(index >=0 && index < ENDINDEX);
+    assert(int(bin) < nBins_);
+    RealType s;
+    int count;
+    int columns = data_[index].accumulatorArray2d[0].size();
+
+    count = data_[index].accumulatorArray2d[bin][0]->count();
+    if (count == 0) return;
+    
+    for (int j = 0; j < columns; j++) {        
+      
+      dynamic_cast<Accumulator *>(data_[index].accumulatorArray2d[bin][j])->get95percentConfidenceInterval(s);
+      
+      if (! isinf(s) && ! isnan(s)) {
+        rnemdFile_ << "\t" << s;
+      } else{
+        sprintf( painCave.errMsg,
+                 "RNEMD detected a numerical error writing: %s std. dev. for bin %u, column %u",
+                 data_[index].title.c_str(), bin, j);
+        painCave.isFatal = 1;
+        simError();
+      }    
+    }
+  }
 }
 

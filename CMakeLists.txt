@@ -361,6 +361,7 @@ src/nonbonded/Buckingham.cpp
 src/nonbonded/EAM.cpp
 src/nonbonded/GB.cpp
 src/nonbonded/InteractionManager.cpp
+src/nonbonded/InversePowerSeries.cpp
 src/nonbonded/LJ.cpp
 src/nonbonded/MAW.cpp
 src/nonbonded/Morse.cpp

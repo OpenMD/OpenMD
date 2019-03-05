@@ -60,6 +60,7 @@ namespace OpenMD {
     nbitp.is_RepulsivePower = false;
     nbitp.is_Mie = false;
     nbitp.is_Buckingham = false;
+    nbitp.is_InversePowerSeries = false;
     atomTypes_.first = NULL;
     atomTypes_.second = NULL;
   }
@@ -170,6 +171,14 @@ namespace OpenMD {
   
   void NonBondedInteractionType::setBuckingham() {
     nbitp.is_Buckingham = true;
+  }
+  
+  bool NonBondedInteractionType::isInversePowerSeries() {
+    return nbitp.is_InversePowerSeries;
+  }
+  
+  void NonBondedInteractionType::setInversePowerSeries() {
+    nbitp.is_InversePowerSeries = true;
   }
 
 }

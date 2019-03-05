@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,48 +40,53 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef NONBONDED_INVERSEPOWERSERIES_HPP
+#define NONBONDED_INVERSEPOWERSERIES_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "types/AtomType.hpp"
+#include "brains/ForceField.hpp"
+#include "math/Vector3.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  class NonBondedInteractionsSectionParser : public SectionParser {
-  public:
-    NonBondedInteractionsSectionParser(ForceFieldOptions& options);
-            
-  private:
-
-    enum NonBondedInteractionTypeEnum{
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      RepulsivePower,
-      Mie,
-      MAW,
-      Buckingham,
-      EAMTable,
-      EAMZhou,
-      InversePowerSeries,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
-    
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
-    RealType meus_; //!< Metallic energy enit scaling
-    RealType eus_;  //!< Energy unit scaling
-    RealType dus_;  //!< Distance unit scaling
+  struct InversePowerSeriesInteractionData {
+    std::vector<int> powers;
+    std::vector<RealType> coefficients;
   };
 
+  class InversePowerSeries : public VanDerWaalsInteraction {
+    
+  public:    
+    InversePowerSeries();
+    void setForceField(ForceField *ff) { forceField_ = ff; }
+    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();}
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, std::vector<int> powers, std::vector<RealType> coefficients );
+    virtual void calcForce(InteractionData &idat);
+    virtual string getName() { return name_; }
+    virtual int getHash() { return INVERSEPOWERSERIES_INTERACTION; }
+    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
+    
+  private:
+    void initialize();
+    void getInversePowerSeriesFunc(const RealType &r, RealType &pot, RealType &deriv);
 
-} //namespace OpenMD
+    bool initialized_;
 
+    set<int> InversePowerSeriesTypes;                  /**< The set of AtomType idents that are InversePowerSeries types */
+    vector<int> InversePowerSeriesTids;                /**< The mapping from AtomType ident -> InversePowerSeries type ident */
+    vector<vector<InversePowerSeriesInteractionData> > MixingMap;  /**< The mixing
+                                                       parameters
+                                                       between two InversePowerSeries
+                                                       types */
+
+    ForceField* forceField_;    
+    set<AtomType*> simTypes_;
+    string name_;
+    
+  };
+}
+
+                               
 #endif
-
-

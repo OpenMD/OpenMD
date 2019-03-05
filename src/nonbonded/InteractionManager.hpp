@@ -55,6 +55,7 @@
 #include "nonbonded/MAW.hpp"
 #include "nonbonded/RepulsivePower.hpp"
 #include "nonbonded/Mie.hpp"
+#include "nonbonded/InversePowerSeries.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 #include "flucq/FluctuatingChargeForces.hpp"
 
@@ -105,6 +106,7 @@ namespace OpenMD {
     Mie* mie_;
     MAW* maw_;
     FluctuatingChargeForces* flucq_;
+    InversePowerSeries* inversePowerSeries_;
     
     map<int, AtomType*> typeMap_;
     /**

@@ -71,17 +71,18 @@ namespace OpenMD {
    * are used to greatly increase the speed of looking up the
    * low-level interaction for any given pair:
    */
-  const static int ELECTROSTATIC_INTERACTION  = (1 << 0);  
-  const static int LJ_INTERACTION             = (1 << 1);
-  const static int EAM_INTERACTION            = (1 << 2);
-  const static int SC_INTERACTION             = (1 << 3);
-  const static int STICKY_INTERACTION         = (1 << 4);
-  const static int GB_INTERACTION             = (1 << 5);
-  const static int MORSE_INTERACTION          = (1 << 6);
-  const static int REPULSIVEPOWER_INTERACTION = (1 << 7);
-  const static int MAW_INTERACTION            = (1 << 8);
-  const static int MIE_INTERACTION            = (1 << 9);
-  const static int BUCKINGHAM_INTERACTION     = (1 << 10);
+  const static int ELECTROSTATIC_INTERACTION      = (1 << 0);  
+  const static int LJ_INTERACTION                 = (1 << 1);
+  const static int EAM_INTERACTION                = (1 << 2);
+  const static int SC_INTERACTION                 = (1 << 3);
+  const static int STICKY_INTERACTION             = (1 << 4);
+  const static int GB_INTERACTION                 = (1 << 5);
+  const static int MORSE_INTERACTION              = (1 << 6);
+  const static int REPULSIVEPOWER_INTERACTION     = (1 << 7);
+  const static int MAW_INTERACTION                = (1 << 8);
+  const static int MIE_INTERACTION                = (1 << 9);
+  const static int BUCKINGHAM_INTERACTION         = (1 << 10);
+  const static int INVERSEPOWERSERIES_INTERACTION = (1 << 11);
 
   typedef Vector<RealType, N_INTERACTION_FAMILIES> potVec;
 
