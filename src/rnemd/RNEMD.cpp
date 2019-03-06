@@ -502,7 +502,7 @@ namespace OpenMD {
     z.title =  rnemdAxisLabel_;
     z.dataType = "RealType";
     z.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       z.accumulator.push_back( new Accumulator() );
     data_[Z] = z;
     outputMap_["Z"] =  Z;
@@ -512,7 +512,7 @@ namespace OpenMD {
     r.title =  "R";
     r.dataType = "RealType";
     r.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       r.accumulator.push_back( new Accumulator() );
     data_[R] = r;
     outputMap_["R"] =  R;
@@ -522,7 +522,7 @@ namespace OpenMD {
     temperature.title =  "Temperature";
     temperature.dataType = "RealType";
     temperature.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       temperature.accumulator.push_back( new Accumulator() );
     data_[TEMPERATURE] = temperature;
     outputMap_["TEMPERATURE"] =  TEMPERATURE;
@@ -532,7 +532,7 @@ namespace OpenMD {
     velocity.title =  "Velocity";  
     velocity.dataType = "Vector3d";
     velocity.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       velocity.accumulator.push_back( new VectorAccumulator() );
     data_[VELOCITY] = velocity;
     outputMap_["VELOCITY"] = VELOCITY;
@@ -542,7 +542,7 @@ namespace OpenMD {
     angularVelocity.title =  "AngularVelocity";  
     angularVelocity.dataType = "Vector3d";
     angularVelocity.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       angularVelocity.accumulator.push_back( new VectorAccumulator() );
     data_[ANGULARVELOCITY] = angularVelocity;
     outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
@@ -552,7 +552,7 @@ namespace OpenMD {
     density.title =  "Density";
     density.dataType = "RealType";
     density.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       density.accumulator.push_back( new Accumulator() );
     data_[DENSITY] = density;
     outputMap_["DENSITY"] =  DENSITY;
@@ -561,11 +561,11 @@ namespace OpenMD {
     numberDensity.units = "angstrom^-3";
     numberDensity.title =  "Number Density";  
     numberDensity.dataType = "Array2d";
-    int nTypes = outputTypes_.size();
+    unsigned int nTypes = outputTypes_.size();
     numberDensity.accumulatorArray2d.resize(nBins_);
     for (unsigned int i = 0; i < nBins_; i++) {
       numberDensity.accumulatorArray2d[i].resize(nTypes);
-      for (int j = 0 ; j < outputTypes_.size(); j++) {       
+      for (unsigned int j = 0 ; j < nTypes; j++) {       
         numberDensity.accumulatorArray2d[i][j] = new Accumulator();        
       }
     }
@@ -577,7 +577,7 @@ namespace OpenMD {
     eField.title =  "Electrical Field";
     eField.dataType = "Vector3d";
     eField.accumulator.reserve(nBins_);
-    for (int i = 0; i < nBins_; i++) 
+    for (unsigned int i = 0; i < nBins_; i++) 
       eField.accumulator.push_back( new VectorAccumulator() );
     data_[ELECTRICFIELD] = eField;
     outputMap_["ELECTRICFIELD"] =  ELECTRICFIELD;
@@ -1915,26 +1915,13 @@ namespace OpenMD {
     RealType Q2c = 0.0;
     RealType Volc = 0.0;
 
-    // Constraints can be on only the linear or angular momentum, but
-    // not both.  Usually, the user will specify which they want, but
-    // in case they don't, the use of periodic boundaries should make
-    // the choice for us.
-    
-    bool doLinearPart = false;
-    bool doAngularPart = false;
-
-    switch (rnemdFluxType_) {
-    case rnemdCurrent:
-    case rnemdKeCurrent:
-    case rnemdKePvectorCurrent:
-      doLinearPart = true;
-      break;
-    default:
-      if (usePeriodicBoundaryConditions_) 
-        doLinearPart = true;
-      else
-        doAngularPart = true;
-      break;
+    if (!usePeriodicBoundaryConditions_) {
+      sprintf(painCave.errMsg,
+              "RNEMD::doVSSCurrent can't be used without periodic boundary\n"
+              "\tconditions enabled.\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
     }
     
     for (sd = smanA.beginSelected(selei); sd != NULL; 
@@ -2065,8 +2052,7 @@ namespace OpenMD {
       if (cNumerator > 0.0) {
         
         RealType cDenominator = Kc - Kcz;
-        if (doLinearPart)
-          cDenominator -= 0.5 * Mc * (vc.x()*vc.x() + vc.y()*vc.y());
+        cDenominator -= 0.5 * Mc * (vc.x()*vc.x() + vc.y()*vc.y());
         
 	if (cDenominator > 0.0) {
 	  RealType c = sqrt(cNumerator / cDenominator);
@@ -2089,8 +2075,7 @@ namespace OpenMD {
             if (hNumerator > 0.0) {
               
               RealType hDenominator = Kh - Khz;
-              if (doLinearPart)
-                hDenominator -= 0.5 * Mh * (vh.x()*vh.x() + vh.y()*vh.y());
+              hDenominator -= 0.5 * Mh * (vh.x()*vh.x() + vh.y()*vh.y());
               
 	      if (hDenominator > 0.0) {
 		RealType h = sqrt(hNumerator / hDenominator);
@@ -2389,7 +2374,7 @@ namespace OpenMD {
     vector<vector<int> > binTypeCounts;
 
     binTypeCounts.resize(nBins_);
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       binTypeCounts[i].resize( outputTypes_.size(), 0);
     }
     std::vector<AtomType*>::iterator at;
@@ -2477,7 +2462,7 @@ namespace OpenMD {
       // angularMomentumFluxVector
       // Vector3d aVel = cross(rProj, vProj);
 
-      if (binNo >= 0 && binNo < nBins_)  {
+      if (binNo >= 0 && binNo < int(nBins_))  {
         binCount[binNo]++;
         binMass[binNo] += mass;
         binP[binNo] += mass*vel;
@@ -2512,7 +2497,7 @@ namespace OpenMD {
 
 #ifdef IS_MPI
 
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       
       MPI_Allreduce(MPI_IN_PLACE, &binCount[i],
                     1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
@@ -2544,7 +2529,7 @@ namespace OpenMD {
     RealType den, temp, z, r, binVolume;
     std::vector<RealType> nden(outputTypes_.size(), 0.0);;
 
-    for (int i = 0; i < nBins_; i++) {
+    for (unsigned int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_);
         binVolume = currentSnap_->getVolume() / nBins_;        
@@ -2556,7 +2541,7 @@ namespace OpenMD {
       }
 
       den = binMass[i] * Constants::densityConvert / binVolume;
-      for (int k = 0; k < outputTypes_.size(); k++) {
+      for (unsigned int k = 0; k < outputTypes_.size(); k++) {
         nden[k] = binTypeCounts[i][k]  / binVolume;
       }
 
@@ -2591,7 +2576,7 @@ namespace OpenMD {
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
               break;
             case NUMBERDENSITY:
-              for (int k = 0; k < outputTypes_.size(); k++) {                
+              for (unsigned int k = 0; k < outputTypes_.size(); k++) { 
                 dynamic_cast<Accumulator *>(data_[j].accumulatorArray2d[i][k])->add(nden[k]);
               }
               break;
@@ -2763,7 +2748,8 @@ namespace OpenMD {
           if (data_[i].dataType == "Vector3d") rnemdFile_ << "\t\t";
           if (data_[i].dataType == "Array2d") {
             rnemdFile_ << "(";
-            for (int j = 0; j <  data_[i].accumulatorArray2d[0].size(); j++) {
+            for (unsigned int j = 0; 
+                 j <  data_[i].accumulatorArray2d[0].size(); j++) {
               rnemdFile_<< outputTypes_[j]->getName() << "\t";
             }
             rnemdFile_ << ")\t";
@@ -2774,8 +2760,7 @@ namespace OpenMD {
       
       rnemdFile_.precision(8);
       
-      for (int j = 0; j < nBins_; j++) {        
-        
+      for (unsigned int j = 0; j < nBins_; j++) {        
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
             if (data_[i].dataType == "RealType")
@@ -2802,7 +2787,7 @@ namespace OpenMD {
       rnemdFile_ << "#######################################################\n";
 
 
-      for (int j = 0; j < nBins_; j++) {        
+      for (unsigned int j = 0; j < nBins_; j++) {        
         rnemdFile_ << "#";
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
@@ -2822,7 +2807,6 @@ namespace OpenMD {
           }
         }
         rnemdFile_ << std::endl;
-        
       }        
       
       rnemdFile_.flush();

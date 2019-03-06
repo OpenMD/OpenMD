@@ -175,7 +175,7 @@ namespace OpenMD {
     RealType volumeA_;
     RealType volumeB_;
 
-    int nBins_;
+    unsigned int nBins_;
     RealType binWidth_;
     RealType slabWidth_;
     RealType slabACenter_;

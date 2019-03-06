@@ -550,7 +550,7 @@ namespace OpenMD {
       std::vector<RealType> F = ea.getF();
       RealType Fe = ea.getFe();
       RealType eta = ea.getEta();
-      RealType latticeConstant = ea.getLatticeConstant();
+      // RealType latticeConstant = ea.getLatticeConstant();
 
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;

@@ -171,7 +171,7 @@ namespace OpenMD {
 
     RealType fn, fnc;
     
-    for (int i = 0; i < powers.size(); i++) {
+    for (unsigned int i = 0; i < powers.size(); i++) {
       fn  = coefficients[i] * pow(ri,  powers[i]);
       fnc = coefficients[i] * pow(ric, powers[i]);
       myPot  += fn;

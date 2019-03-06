@@ -53,18 +53,15 @@
 
 namespace OpenMD {
 
-	MagneticField::MagneticField(SimInfo* info) : initialized(false),
-					      doMagneticField(false),
-                info_(info) {
+  MagneticField::MagneticField(SimInfo* info) : initialized(false),
+                                                doMagneticField(false),
+                                                info_(info) {
     simParams = info_->getSimParams();
   }
 
   void MagneticField::initialize() {
 
     std::vector<RealType> mf;
-
-
-
 
     if (simParams->haveMagneticField()) {
       doMagneticField = true;
@@ -73,15 +70,14 @@ namespace OpenMD {
     if (mf.size() != 3) {
       sprintf(painCave.errMsg,
               "MagneticField: Incorrect number of parameters specified.\n"
-              "\tthere should be 3 parameters, but %lu were specified.\n", mf.size());
+              "\tthere should be 3 parameters, but %lu were specified.\n", 
+	      mf.size());
       painCave.isFatal = 1;
       simError();
     }
     MF.x() = mf[0];
     MF.y() = mf[1];
     MF.z() = mf[2];
-
-    int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
 
     initialized = true;
   }
@@ -110,8 +106,6 @@ namespace OpenMD {
 
     if (doMagneticField) {
 
-
-
       for (mol = info_->beginMolecule(i); mol != NULL;
            mol = info_->nextMolecule(i)) {
 
@@ -119,16 +113,11 @@ namespace OpenMD {
 	     atom = mol->nextAtom(j)) {
 
           isCharge = false;
-	        C = 0.0;
+          C = 0.0;
 
           atype = atom->getAtomType();
-
-
-
           r = atom->getPos();
-
           v = atom->getVel();
-
 
 	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
 	  if ( fca.isFixedCharge() ) {
@@ -136,12 +125,9 @@ namespace OpenMD {
 	    C = fca.getCharge();
 	  }
 
-
 	  if (isCharge) {
 	    f = cross(v,MF) * C * Constants::magneticFieldConvert;
-
 	    atom->addFrc(f);
-
 	  }
 
     MultipoleAdapter ma = MultipoleAdapter(atype);
@@ -154,27 +140,21 @@ namespace OpenMD {
 
         AngMomentum=atom->getJ();
         I=atom->getI();
-        if(atom->isLinear())
-        {
+        if(atom->isLinear()) {
           l=atom->linearAxis();
-
           m = (l + 1) % 3;
-    	    n = (l + 2) % 3;
+    	  n = (l + 2) % 3;
           omega[l]=0;
           omega[m]=AngMomentum[m]/I(m,m);
           omega[n]=AngMomentum[n]/I(n,n);
-        }
-        else{
-        omega=I.inverse()*AngMomentum;
+        } else {
+          omega=I.inverse()*AngMomentum;
         }
 
         f=cross(cross(omega,D),MF);
         atom->addFrc(f);
-
-
-
     }
-	}
+  }
 }
 
 //#ifdef IS_MPI
