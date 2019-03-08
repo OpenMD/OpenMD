@@ -2350,7 +2350,7 @@ namespace OpenMD {
     AtomType* atype;
 
     int binNo;
-    int typeIndex;
+    int typeIndex(-1);
     RealType mass;
     Vector3d vel; 
     Vector3d rPos;
