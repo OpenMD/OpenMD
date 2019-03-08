@@ -2358,7 +2358,6 @@ namespace OpenMD {
     Vector3d L;
     Mat3x3d I;
     RealType r2;
-    RealType charge;
     Vector3d eField;
 
     vector<RealType> binMass(nBins_, 0.0);
@@ -2367,15 +2366,16 @@ namespace OpenMD {
     vector<Vector3d> binL(nBins_, V3Zero);
     vector<Mat3x3d>  binI(nBins_);
     vector<RealType> binKE(nBins_, 0.0);
-    vector<RealType> binCharge(nBins_, 0.0);
     vector<Vector3d> binEField(nBins_, V3Zero);    
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
     vector<vector<int> > binTypeCounts;
 
-    binTypeCounts.resize(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) {
-      binTypeCounts[i].resize( outputTypes_.size(), 0);
+    if (outputMask_[NUMBERDENSITY]) {
+      binTypeCounts.resize(nBins_);
+      for (unsigned int i = 0; i < nBins_; i++) {
+        binTypeCounts[i].resize( outputTypes_.size(), 0);
+      }
     }
     std::vector<AtomType*>::iterator at;
     
@@ -2435,20 +2435,17 @@ namespace OpenMD {
       I(1, 1) += mass * r2;
       I(2, 2) += mass * r2;
 
-      eField = sd->getElectricField(); // kcal/mol/e/Angstrom
-      
-      charge = 0.0;
-      typeIndex = -1;
-      if (sd->isAtom()) {
-        atype = static_cast<Atom*>(sd)->getAtomType();
-        FixedChargeAdapter fca = FixedChargeAdapter(atype);
-        if ( fca.isFixedCharge() ) charge = fca.getCharge();
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-        if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
+      if (outputMask_[ELECTRICFIELD]) 
+        eField = sd->getElectricField(); // kcal/mol/e/Angstrom
 
-        at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
-        if (at != outputTypes_.end()) {
-          typeIndex = std::distance(outputTypes_.begin(), at);
+      if (outputMask_[NUMBERDENSITY]) {
+        typeIndex = -1;
+        if (sd->isAtom()) {
+          atype = static_cast<Atom*>(sd)->getAtomType();
+          at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
+          if (at != outputTypes_.end()) {
+            typeIndex = std::distance(outputTypes_.begin(), at);
+          }
         }
       }
       
@@ -2470,10 +2467,13 @@ namespace OpenMD {
         binI[binNo] += I;
         binL[binNo] += L;
         binDOF[binNo] += 3;
-        if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
 
-        binCharge[binNo] += charge;
-        binEField[binNo] += eField;
+        if (outputMask_[NUMBERDENSITY]) {          
+          if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
+        }
+
+        if (outputMask_[ELECTRICFIELD]) 
+          binEField[binNo] += eField;
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -2513,14 +2513,15 @@ namespace OpenMD {
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binDOF[i],
                     1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binCharge[i],
-                    1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
-                    3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);      
-
-      MPI_Allreduce(MPI_IN_PLACE, &binTypeCounts[i][0],
-                    outputTypes_.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
       
+      if (outputMask_[ELECTRICFIELD]) {
+        MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
+                      3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+      }
+      if (outputMask_[NUMBERDENSITY]) {
+        MPI_Allreduce(MPI_IN_PLACE, &binTypeCounts[i][0],
+                      outputTypes_.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+      }      
     }
     
 #endif
@@ -2541,8 +2542,11 @@ namespace OpenMD {
       }
 
       den = binMass[i] * Constants::densityConvert / binVolume;
-      for (unsigned int k = 0; k < outputTypes_.size(); k++) {
-        nden[k] = binTypeCounts[i][k]  / binVolume;
+
+      if (outputMask_[NUMBERDENSITY]) {
+        for (unsigned int k = 0; k < outputTypes_.size(); k++) {
+          nden[k] = binTypeCounts[i][k]  / binVolume;
+        }
       }
 
       vel = binP[i] / binMass[i];
@@ -2553,7 +2557,9 @@ namespace OpenMD {
         temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
                                  Constants::energyConvert);
 
-        eField = binEField[i] / RealType(binCount[i]);
+        if (outputMask_[ELECTRICFIELD]) 
+          eField = binEField[i] / RealType(binCount[i]);
+        
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
           if(outputMask_[j]) {
             switch(j) {
