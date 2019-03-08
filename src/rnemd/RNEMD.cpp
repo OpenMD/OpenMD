@@ -2827,7 +2827,7 @@ namespace OpenMD {
   void RNEMD::writeReal(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     RealType s;
     int count;
     
@@ -2850,7 +2850,7 @@ namespace OpenMD {
   void RNEMD::writeVector(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     Vector3d s;
     int count;
     
@@ -2876,7 +2876,7 @@ namespace OpenMD {
     
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     RealType s;
     int columns = data_[index].accumulatorArray2d[0].size();
     int count;
@@ -2904,7 +2904,7 @@ namespace OpenMD {
   void RNEMD::writeRealErrorBars(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     RealType s;
     int count;
     
@@ -2927,7 +2927,7 @@ namespace OpenMD {
   void RNEMD::writeVectorErrorBars(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     Vector3d s;
     int count;
     
@@ -2952,7 +2952,7 @@ namespace OpenMD {
   void RNEMD::writeArrayErrorBars(int index, unsigned int bin) {
     if (!doRNEMD_) return;
     assert(index >=0 && index < ENDINDEX);
-    assert(int(bin) < nBins_);
+    assert(bin < nBins_);
     RealType s;
     int count;
     int columns = data_[index].accumulatorArray2d[0].size();
