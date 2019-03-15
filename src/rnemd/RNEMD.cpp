@@ -557,20 +557,20 @@ namespace OpenMD {
     data_[DENSITY] = density;
     outputMap_["DENSITY"] =  DENSITY;
 
-    OutputData numberDensity;
-    numberDensity.units = "angstrom^-3";
-    numberDensity.title =  "Number Density";  
-    numberDensity.dataType = "Array2d";
+    OutputData activity;
+    activity.units = "unitless";
+    activity.title =  "Activity";  
+    activity.dataType = "Array2d";
     unsigned int nTypes = outputTypes_.size();
-    numberDensity.accumulatorArray2d.resize(nBins_);
+    activity.accumulatorArray2d.resize(nBins_);
     for (unsigned int i = 0; i < nBins_; i++) {
-      numberDensity.accumulatorArray2d[i].resize(nTypes);
+      activity.accumulatorArray2d[i].resize(nTypes);
       for (unsigned int j = 0 ; j < nTypes; j++) {       
-        numberDensity.accumulatorArray2d[i][j] = new Accumulator();        
+        activity.accumulatorArray2d[i][j] = new Accumulator();        
       }
     }
-    data_[NUMBERDENSITY] = (numberDensity);
-    outputMap_["NUMBERDENSITY"] =  NUMBERDENSITY;
+    data_[ACTIVITY] = (activity);
+    outputMap_["ACTIVITY"] =  ACTIVITY;
     
     OutputData eField;
     eField.units =  "e";
@@ -633,7 +633,7 @@ namespace OpenMD {
         outputMask_.set(TEMPERATURE);
         outputMask_.set(VELOCITY);
         outputMask_.set(DENSITY);
-        outputMask_.set(NUMBERDENSITY);
+        outputMask_.set(ACTIVITY);
         outputMask_.set(ELECTRICFIELD);
       default:
         break;
@@ -2370,8 +2370,9 @@ namespace OpenMD {
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
     vector<vector<int> > binTypeCounts;
+    vector<int> typeCounts(outputTypes_.size(), 0);
 
-    if (outputMask_[NUMBERDENSITY]) {
+    if (outputMask_[ACTIVITY]) {
       binTypeCounts.resize(nBins_);
       for (unsigned int i = 0; i < nBins_; i++) {
         binTypeCounts[i].resize( outputTypes_.size(), 0);
@@ -2438,7 +2439,7 @@ namespace OpenMD {
       if (outputMask_[ELECTRICFIELD]) 
         eField = sd->getElectricField(); // kcal/mol/e/Angstrom
 
-      if (outputMask_[NUMBERDENSITY]) {
+      if (outputMask_[ACTIVITY]) {
         typeIndex = -1;
         if (sd->isAtom()) {
           atype = static_cast<Atom*>(sd)->getAtomType();
@@ -2468,7 +2469,7 @@ namespace OpenMD {
         binL[binNo] += L;
         binDOF[binNo] += 3;
 
-        if (outputMask_[NUMBERDENSITY]) {          
+        if (outputMask_[ACTIVITY]) {          
           if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
         }
 
@@ -2518,7 +2519,7 @@ namespace OpenMD {
         MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
                       3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       }
-      if (outputMask_[NUMBERDENSITY]) {
+      if (outputMask_[ACTIVITY]) {
         MPI_Allreduce(MPI_IN_PLACE, &binTypeCounts[i][0],
                       outputTypes_.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
       }      
@@ -2528,12 +2529,23 @@ namespace OpenMD {
 
     Vector3d omega;
     RealType den, temp, z, r, binVolume;
-    std::vector<RealType> nden(outputTypes_.size(), 0.0);;
+    std::vector<RealType> nden0(outputTypes_.size(), 0.0);
+    std::vector<RealType> nden(outputTypes_.size(), 0.0);
+    RealType boxVolume = currentSnap_->getVolume();
+
+    if (outputMask_[ACTIVITY]) {
+      for (unsigned int k = 0; k < outputTypes_.size(); k++) {
+        for (unsigned int i = 0; i < nBins_; i++) {
+          typeCounts[k] += binTypeCounts[i][k];
+        }
+        nden0[k] = typeCounts[k]  / boxVolume;
+      }
+    }
 
     for (unsigned int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_);
-        binVolume = currentSnap_->getVolume() / nBins_;        
+        binVolume = boxVolume / nBins_;        
       } else {
         r = (((RealType)i + 0.5) * binWidth_);
         RealType rinner = (RealType)i * binWidth_;
@@ -2543,11 +2555,11 @@ namespace OpenMD {
 
       den = binMass[i] * Constants::densityConvert / binVolume;
 
-      if (outputMask_[NUMBERDENSITY]) {
+      if (outputMask_[ACTIVITY]) {
         for (unsigned int k = 0; k < outputTypes_.size(); k++) {
-          nden[k] = binTypeCounts[i][k]  / binVolume;
+          nden[k] = (binTypeCounts[i][k]  / binVolume) / nden0[k];
         }
-      }
+      }     
 
       vel = binP[i] / binMass[i];
       omega = binI[i].inverse() * binL[i];
@@ -2581,7 +2593,7 @@ namespace OpenMD {
             case DENSITY:
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
               break;
-            case NUMBERDENSITY:
+            case ACTIVITY:
               for (unsigned int k = 0; k < outputTypes_.size(); k++) { 
                 dynamic_cast<Accumulator *>(data_[j].accumulatorArray2d[i][k])->add(nden[k]);
               }

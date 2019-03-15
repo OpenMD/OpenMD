@@ -114,7 +114,7 @@ namespace OpenMD {
       VELOCITY,
       ANGULARVELOCITY,
       DENSITY,
-      NUMBERDENSITY,
+      ACTIVITY,
       ELECTRICFIELD,
       ENDINDEX 
     };
