@@ -2370,7 +2370,6 @@ namespace OpenMD {
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
     vector<vector<int> > binTypeCounts;
-    vector<int> typeCounts(outputTypes_.size(), 0);
 
     if (outputMask_[ACTIVITY]) {
       binTypeCounts.resize(nBins_);
@@ -2529,18 +2528,8 @@ namespace OpenMD {
 
     Vector3d omega;
     RealType den, temp, z, r, binVolume;
-    std::vector<RealType> nden0(outputTypes_.size(), 0.0);
     std::vector<RealType> nden(outputTypes_.size(), 0.0);
     RealType boxVolume = currentSnap_->getVolume();
-
-    if (outputMask_[ACTIVITY]) {
-      for (unsigned int k = 0; k < outputTypes_.size(); k++) {
-        for (unsigned int i = 0; i < nBins_; i++) {
-          typeCounts[k] += binTypeCounts[i][k];
-        }
-        nden0[k] = typeCounts[k]  / boxVolume;
-      }
-    }
 
     for (unsigned int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
@@ -2557,7 +2546,8 @@ namespace OpenMD {
 
       if (outputMask_[ACTIVITY]) {
         for (unsigned int k = 0; k < outputTypes_.size(); k++) {
-          nden[k] = (binTypeCounts[i][k]  / binVolume) / nden0[k];
+          nden[k] = (binTypeCounts[i][k]  / binVolume)
+            * Constants::concentrationConvert;
         }
       }     
 

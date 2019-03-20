@@ -123,6 +123,13 @@ namespace OpenMD {
      *     electrons fs^-1 Angstrom^-2
      */
     const RealType currentDensityConvert = 6.241573027317e-17;
+    
+    /**
+     * concentrationConvert
+     *   multiplies standard number density units (Angstrom^-3)
+     *   returns values of molarity (1 M = 1 mole / Liter)
+     */
+    const RealType concentrationConvert = 1660.5390404272;
 
     /**
      * Atomic Units are used in the Slater overlap code, and we need
