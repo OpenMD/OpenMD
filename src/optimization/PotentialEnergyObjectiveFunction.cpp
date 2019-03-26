@@ -164,6 +164,7 @@ namespace OpenMD{
     int index;
 #ifdef IS_MPI
     index = displacements_[myrank_];
+    grad.setZero();
 #else
     index = 0;
 #endif               
