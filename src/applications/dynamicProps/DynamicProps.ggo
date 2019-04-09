@@ -48,6 +48,7 @@ groupoption "rcorrZ" 	   -  "mean squared displacement binned by Z" group="corre
 groupoption "vcorr" 	   v  "velocity correlation function" group="correlation function"
 groupoption "vcorrZ" 	   -  "velocity correlation function along z-axis" group="correlation function"
 groupoption "vcorrR" 	   -  "velocity correlation function projected radially" group="correlation function"
+groupoption  "wcorr"      w  "charge velocity correlation function" group="correlation function"
 groupoption "dcorr"	   d  "dipole correlation function" group="correlation function"
 groupoption "lcorr"        l  "Lengendre correlation function" group="correlation function"
 groupoption "lcorrZ"       -  "Lengendre correlation function binned by Z" group="correlation function"

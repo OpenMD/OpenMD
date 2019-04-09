@@ -584,8 +584,10 @@ src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
 src/applications/dynamicProps/ThetaCorrFunc.cpp
 src/applications/dynamicProps/TimeCorrFunc.cpp
 src/applications/dynamicProps/VCorrFunc.cpp
+src/applications/dynamicProps/WCorrFunc.cpp
 src/applications/dynamicProps/BondCorrFunc.cpp
 src/applications/dynamicProps/DynamicPropsCmd.cpp
+
 )
 
 set (HYDROSOURCE

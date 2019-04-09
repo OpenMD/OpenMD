@@ -74,6 +74,7 @@
 #include "applications/dynamicProps/HBondJump.hpp"
 #include "applications/dynamicProps/HBondPersistence.hpp"
 #include "applications/dynamicProps/Displacement.hpp"
+#include "applications/dynamicProps/WCorrFunc.hpp"
 
 using namespace OpenMD;
 
@@ -143,7 +144,7 @@ int main(int argc, char* argv[]){
     privilegedAxis = 2;
     break;
   }
-  
+
   // use the memory string to figure out how much memory we can use:
   char *end;
   long long int memSize = memparse(args_info.memory_arg, &end);
@@ -185,6 +186,8 @@ int main(int argc, char* argv[]){
     corrFunc = new VCorrFuncZ(info, dumpFileName, sele1, sele2);
   } else if (args_info.vcorrR_given) {
     corrFunc = new VCorrFuncR(info, dumpFileName, sele1, sele2);
+  } else if (args_info.wcorr_given){
+    corrFunc = new WCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.pjcorr_given){
     corrFunc = new MomAngMomCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.ftcorr_given){
@@ -269,7 +272,7 @@ int main(int argc, char* argv[]){
     corrFunc = new DisplacementZ(info, dumpFileName, sele1, sele2,
                                  args_info.nzbins_arg, privilegedAxis);
   }
-  
+
   if (args_info.output_given) {
     corrFunc->setOutputName(args_info.output_arg);
   }
