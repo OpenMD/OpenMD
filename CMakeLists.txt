@@ -775,6 +775,7 @@ src/applications/utilities/solLiqFricCalc
 src/applications/utilities/slipLength
 src/applications/utilities/hbtetAnalyzer
 src/applications/utilities/vcorr2spectrum
+src/applications/utilities/wcorr2spectrum
 src/applications/utilities/waterReplacer
 )
 
