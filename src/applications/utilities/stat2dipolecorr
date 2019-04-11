@@ -1,0 +1,129 @@
+#!@PYTHON_EXECUTABLE@
+"""A script that computes the system dipole correlation function
+
+Options:
+  -h, --help              show this help
+  -f, --stat-file =...     use specified stat file
+  -o, --output-file =...   use specified output (.spectrum) file
+  -p, --dipole_pos =...    column number of x-component of dipole in the stat. file. Note: the count starts from 0
+
+Example:
+    stat2dipolecorr -f stockmayer.stat -o stockmayer.spectrum -p 9
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu), Hemanta Bhattarai (hbhattar@nd.edu)"
+__copyright__ = "Copyright (c) 2014 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+
+def usage():
+    print __doc__
+
+def readStatFile(statFileName, dipole_pos):
+    global time
+    global boxDipole
+    time = []
+    boxDipole = []
+
+    statFile = open(statFileName, 'r')
+
+    print "reading File"
+    line = statFile.readline()
+    while ("#" in line):
+        line = statFile.readline()
+
+    while 1:
+        L = line.split()
+        time.append(float(L[0]))
+        dipX = float(L[dipole_pos])
+        dipY = float(L[dipole_pos + 1])
+        dipZ = float(L[dipole_pos + 2])
+        boxDipole.append([dipX, dipY, dipZ])
+
+        line = statFile.readline()
+        if not line: break
+
+    statFile.close()
+
+def dot(L1, L2):
+    dotprod = 0
+    for index in range(len(L1)):
+        dotprod += L1[index] * L2[index]
+    return(dotprod)
+
+def compute_auto_correlation(outFile):
+    outSpectrum = open(outFile, 'w')
+    outSpectrum.write("# System dipole correlation function\n")
+    outSpectrum.write("# time <P(0).P(t)>\n");
+    N = len(time)
+    t = []
+    auto_corr = []
+    for step in range(N):
+        count = 0
+        local_auto_corr = []
+        for start in range(N-step):
+            local_auto_corr.append(dot(boxDipole[start], boxDipole[start + step]))
+            count += 1
+        outSpectrum.write("%f\t%e\n"%(time[step], (sum(local_auto_corr)/count)))
+
+    outSpectrum.close()
+
+
+
+
+
+
+
+def main(argv):
+    global haveStatFileName
+    global haveOutputFileName
+    global haveDipoleColumn
+
+    haveStatFileName = False
+    haveOutputFileName = False
+    haveDipoleColumn = False
+
+    try:
+        opts, args = getopt.getopt(argv, "hp:f:o:", ["help", "=", "stat-file=", "output-file="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-p", "--dipole_pos="):
+            dipole_pos = int(arg)
+            haveDipoleColumn = True
+        elif opt in ("-f", "--stat-file"):
+            statFileName = arg
+            haveStatFileName = True
+        elif opt in ("-o", "--output-file"):
+            outputFileName = arg
+            haveOutputFileName = True
+    if (not haveStatFileName):
+        usage()
+        print "No stat file was specified"
+        sys.exit()
+    if (not haveOutputFileName):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+    if (not haveDipoleColumn):
+        usage()
+        print "Coulumn number of x-component of dipole not specified"
+        sys.exit()
+
+    readStatFile(statFileName, dipole_pos)
+    compute_auto_correlation(outputFileName)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])

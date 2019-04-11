@@ -765,6 +765,7 @@ src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
 src/applications/hydrodynamics/diffExplainer
 src/applications/utilities/waterRotator
+src/applications/utilities/stat2dipolecorr
 )
 
 set(PYNUMPY_FILES
