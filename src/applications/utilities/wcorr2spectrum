@@ -36,6 +36,7 @@ def readWcorrFile(wcorrFileName):
     time = []
     wcorr = []
 
+
     wcorrFile = open(wcorrFileName, 'r')
     line = wcorrFile.readline()
 
@@ -59,6 +60,8 @@ def computeSpectrum(outFileName, normalize):
     global vnew
     tnew = []
     vnew = []
+    # the speed of light in nm / fs
+    c = 299.792458
 
 
     # symmetrize arrays
@@ -84,16 +87,19 @@ def computeSpectrum(outFileName, normalize):
     dfreq = (freq[1]-freq[0])
     s = 0.0
 
-    for i in range(n/2):
-        s = s + np.abs(spect[i])*dfreq
+    epsilon = 1e-20 # smallest number to get rid of division by zero
 
-    outFile.write('## freqency in fs^-1\n')
-    outFile.write('#frequency\tspectrum\n')
-    for i in range(n/2):
-        if normalize:
-            outFile.write("%lf\t%e\n" % (freq[i], np.abs(spect[i])/s))
-        else:
-            outFile.write("%lf\t%e\n" % (freq[i], np.abs(spect[i])))
+
+    for i in range(n/2,0,-1):
+        s = s + np.abs(spect[i]) * dfreq * (c/freq[i]**2)                        # dlambda = c dfreq/f**2
+
+    outFile.write('## wavelength in nm \n')
+    outFile.write('#wavelength\tspectrum\n')
+    for i in range(n/2,0,-1):
+      if normalize:
+        outFile.write("%lf\t%e\n" % (c/freq[i], np.abs(spect[i])/s))
+      else:
+        outFile.write("%lf\t%e\n" % (c/freq[i], np.abs(spect[i])))
     outFile.close()
 
 def main(argv):
