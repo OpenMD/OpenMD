@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -92,28 +92,29 @@
 #include "applications/staticProps/Kirkwood.hpp"
 #include "applications/staticProps/Field.hpp"
 #include "applications/staticProps/VelocityZ.hpp"
+#include "applications/staticProps/DensityHistogram.hpp"
 
 using namespace OpenMD;
 
 int main(int argc, char* argv[]){
-  
-  
+
+
   gengetopt_args_info args_info;
-  
+
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
     exit(1) ;
   }
-  
+
   //get the dumpfile name
   std::string dumpFileName = args_info.input_arg;
   std::string sele1;
   std::string sele2;
   std::string sele3;
-  
+
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"
-  
+
   if (args_info.sele1_given) {
     sele1 = args_info.sele1_arg;
   } else {
@@ -124,17 +125,17 @@ int main(int argc, char* argv[]){
       sele1 = "select all";
     }
   }
-  
+
   // check the second selection argument, or set it to the environment
   // variable, or failing that, set it to the first selection
-  
+
   if (args_info.sele2_given) {
     sele2 = args_info.sele2_arg;
   } else {
     char* sele2Env = getenv("SELECTION2");
     if (sele2Env) {
-      sele2 = sele2Env;            
-    } else { 
+      sele2 = sele2Env;
+    } else {
       //If sele2 is not specified, then the default behavior
       //should be what is already intended for sele1
       sele2 = sele1;
@@ -148,21 +149,21 @@ int main(int argc, char* argv[]){
 
   bool batchMode(false);
   if (args_info.scd_given){
-    if (args_info.sele1_given && 
+    if (args_info.sele1_given &&
         args_info.sele2_given && args_info.sele3_given) {
       batchMode = false;
-    } else if (args_info.molname_given && 
+    } else if (args_info.molname_given &&
                args_info.begin_given && args_info.end_given) {
-      if (args_info.begin_arg < 0 || 
+      if (args_info.begin_arg < 0 ||
           args_info.end_arg < 0 || args_info.begin_arg > args_info.end_arg-2) {
         sprintf( painCave.errMsg,
                  "below conditions are not satisfied:\n"
                  "0 <= begin && 0<= end && begin <= end-2\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
-        simError();                    
+        simError();
       }
-      batchMode = true;        
+      batchMode = true;
     } else{
       sprintf( painCave.errMsg,
                "either --sele1, --sele2, --sele3 are specified,"
@@ -172,7 +173,7 @@ int main(int argc, char* argv[]){
       simError();
     }
   }
-  
+
   //parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName);
@@ -187,8 +188,8 @@ int main(int argc, char* argv[]){
   } else {
     Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
-    zmaxLen = hmat(2,2);    
-  }    
+    zmaxLen = hmat(2,2);
+  }
 
   int nanglebins, nrbins;
   // in case we override nbins with nrbins:
@@ -236,47 +237,47 @@ int main(int argc, char* argv[]){
     privilegedAxis2 = 2;
     break;
   }
-      
+
   StaticAnalyser* analyser;
-  
-                                       
+
+
   if (args_info.gofr_given){
-    analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, 
-		       nrbins);        
+    analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen,
+		       nrbins);
   } else if (args_info.gofz_given) {
     analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen,
 		       args_info.nbins_arg, privilegedAxis);
   } else if (args_info.r_z_given) {
-    analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen, 
+    analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
 			  nrbins, args_info.nbins_z_arg, privilegedAxis);
   } else if (args_info.r_theta_given) {
-    if (args_info.sele3_given) 
+    if (args_info.sele3_given)
       analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, sele3, maxLen,
                                 nrbins, nanglebins);
-    else 
-      analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
+    else
+      analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen,
                                 nrbins, nanglebins);
   } else if (args_info.r_omega_given) {
-    if (args_info.sele3_given) 
+    if (args_info.sele3_given)
       analyser  = new GofROmega(info, dumpFileName, sele1, sele2, sele3, maxLen,
                                 nrbins, nanglebins);
-    else 
+    else
       analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen,
                                 nrbins, nanglebins);
 
   } else if (args_info.theta_omega_given) {
-    if (args_info.sele3_given) 
+    if (args_info.sele3_given)
       analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, sele3,
                                 nanglebins);
     else
-      analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
+      analyser  = new GofAngle2(info, dumpFileName, sele1, sele2,
                                 nanglebins);
   } else if (args_info.r_theta_omega_given) {
-    if (args_info.sele3_given) 
+    if (args_info.sele3_given)
       analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2, sele3,
                                  maxLen, nrbins, nanglebins);
     else
-      analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2, 
+      analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2,
                                  maxLen, nrbins, nanglebins);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
@@ -287,28 +288,28 @@ int main(int argc, char* argv[]){
 	       "--refsele must set when --gxyz is used");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
-      simError();  
+      simError();
     }
   } else if (args_info.twodgofr_given){
     if (args_info.dz_given) {
-      analyser= new TwoDGofR(info, dumpFileName, sele1, sele2, maxLen, 
-			     args_info.dz_arg, nrbins);        
+      analyser= new TwoDGofR(info, dumpFileName, sele1, sele2, maxLen,
+			     args_info.dz_arg, nrbins);
     } else {
       sprintf( painCave.errMsg,
 	       "A slab width (dz) must be specified when calculating TwoDGofR");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-    }    
+    }
   } else if (args_info.p2_given) {
-    if (args_info.sele1_given) {     
-      if (args_info.sele2_given) 
+    if (args_info.sele1_given) {
+      if (args_info.sele2_given)
         analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
-      else 
-        if (args_info.seleoffset_given) 
-          analyser  = new P2OrderParameter(info, dumpFileName, sele1, 
+      else
+        if (args_info.seleoffset_given)
+          analyser  = new P2OrderParameter(info, dumpFileName, sele1,
                                            args_info.seleoffset_arg);
-        else 
+        else
           analyser  = new P2OrderParameter(info, dumpFileName, sele1);
     } else {
       sprintf( painCave.errMsg,
@@ -321,8 +322,8 @@ int main(int argc, char* argv[]){
     analyser = new RippleOP(info, dumpFileName, sele1, sele2);
   } else if (args_info.bo_given){
     if (args_info.rcut_given) {
-      analyser = new BondOrderParameter(info, dumpFileName, sele1, 
-					args_info.rcut_arg, 
+      analyser = new BondOrderParameter(info, dumpFileName, sele1,
+					args_info.rcut_arg,
 					args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
@@ -332,13 +333,13 @@ int main(int argc, char* argv[]){
       simError();
     }
   } else if (args_info.multipole_given){
-    analyser = new MultipoleSum(info, dumpFileName, sele1, 
+    analyser = new MultipoleSum(info, dumpFileName, sele1,
                                 maxLen, args_info.nbins_arg);
-    
+
   } else if (args_info.tet_param_given) {
-    if (args_info.rcut_given) {	  
-      analyser = new TetrahedralityParam(info, dumpFileName, sele1, 
-					 args_info.rcut_arg, 
+    if (args_info.rcut_given) {
+      analyser = new TetrahedralityParam(info, dumpFileName, sele1,
+					 args_info.rcut_arg,
 					 args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
@@ -347,11 +348,11 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-    
+
   } else if (args_info.tet_param_z_given) {
-    if (args_info.rcut_given) {	  
+    if (args_info.rcut_given) {
       analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
-                                          args_info.rcut_arg, 
+                                          args_info.rcut_arg,
                                           args_info.nbins_arg,
 					  privilegedAxis);
     } else {
@@ -361,7 +362,7 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
-    
+
   } else if (args_info.tet_param_dens_given) {
     if (args_info.rcut_given) {
       analyser = new TetrahedralityParamDens(info, dumpFileName, sele1, sele2,
@@ -375,7 +376,7 @@ int main(int argc, char* argv[]){
       simError();
     }
   } else if (args_info.tet_hb_given) {
-    if (args_info.rcut_given) {	  
+    if (args_info.rcut_given) {
       analyser = new TetrahedralityHBMatrix(info, dumpFileName, sele1,
                                             args_info.rcut_arg,
                                             args_info.OOcut_arg,
@@ -416,12 +417,12 @@ int main(int argc, char* argv[]){
       simError();
     }
     analyser = new TetrahedralityParamXYZ(info, dumpFileName, sele1, sele2,
-                                          args_info.rcut_arg, 
+                                          args_info.rcut_arg,
                                           args_info.voxelSize_arg,
                                           args_info.gaussWidth_arg);
   } else if (args_info.ior_given){
     if (args_info.rcut_given) {
-      analyser = new IcosahedralOfR(info, dumpFileName, sele1, 
+      analyser = new IcosahedralOfR(info, dumpFileName, sele1,
                                     args_info.rcut_arg,
                                     nrbins, maxLen);
     } else {
@@ -444,7 +445,7 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.bad_given){
     if (args_info.rcut_given) {
-      analyser = new BondAngleDistribution(info, dumpFileName, sele1, 
+      analyser = new BondAngleDistribution(info, dumpFileName, sele1,
                                            args_info.rcut_arg,
 					   args_info.nbins_arg);
     } else {
@@ -456,24 +457,26 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.scd_given) {
     if (batchMode) {
-      analyser  = new SCDOrderParameter(info, dumpFileName, 
-                                        args_info.molname_arg, 
+      analyser  = new SCDOrderParameter(info, dumpFileName,
+                                        args_info.molname_arg,
 					args_info.begin_arg, args_info.end_arg);
     } else{
-      analyser  = new SCDOrderParameter(info, dumpFileName, 
+      analyser  = new SCDOrderParameter(info, dumpFileName,
                                         sele1, sele2, sele3);
     }
   }else if (args_info.density_given) {
     analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen,
-			      args_info.nbins_arg);  
+			      args_info.nbins_arg);
   } else if (args_info.count_given) {
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+  }else if (args_info.eam_density_given) {
+    analyser = new DensityHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {
-    case 0:      
+    case 0:
       analyser = new PipeDensity(info, dumpFileName, sele1,
                                  args_info.nbins_y_arg, args_info.nbins_z_arg,
                                  privilegedAxis);
@@ -481,13 +484,13 @@ int main(int argc, char* argv[]){
     case 1:
       analyser = new PipeDensity(info, dumpFileName, sele1,
                                  args_info.nbins_z_arg, args_info.nbins_x_arg,
-                                 privilegedAxis);      
+                                 privilegedAxis);
       break;
     case 2:
     default:
       analyser = new PipeDensity(info, dumpFileName, sele1,
                                  args_info.nbins_x_arg, args_info.nbins_y_arg,
-                                 privilegedAxis);            
+                                 privilegedAxis);
       break;
     }
   } else if (args_info.rnemdz_given) {
@@ -500,24 +503,24 @@ int main(int argc, char* argv[]){
     analyser = new NitrileFrequencyMap(info, dumpFileName, sele1,
                                        args_info.nbins_arg);
   } else if (args_info.p_angle_given) {
-    if (args_info.sele1_given) {     
-      if (args_info.sele2_given) 
+    if (args_info.sele1_given) {
+      if (args_info.sele2_given)
         analyser  = new pAngle(info, dumpFileName, sele1, sele2,
                                args_info.nbins_arg);
-      else 
+      else
         if (args_info.seleoffset_given) {
           if (args_info.seleoffset2_given) {
-            analyser  = new pAngle(info, dumpFileName, sele1, 
-                                   args_info.seleoffset_arg, 
-                                   args_info.seleoffset2_arg, 
+            analyser  = new pAngle(info, dumpFileName, sele1,
+                                   args_info.seleoffset_arg,
+                                   args_info.seleoffset2_arg,
                                    args_info.nbins_arg);
           } else {
-            analyser  = new pAngle(info, dumpFileName, sele1, 
-                                   args_info.seleoffset_arg, 
+            analyser  = new pAngle(info, dumpFileName, sele1,
+                                   args_info.seleoffset_arg,
                                    args_info.nbins_arg);
           }
-        } else 
-          analyser  = new pAngle(info, dumpFileName, sele1, 
+        } else
+          analyser  = new pAngle(info, dumpFileName, sele1,
                                  args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
@@ -529,7 +532,7 @@ int main(int argc, char* argv[]){
     }
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
-    analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
+    analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg,
 		       args_info.nbins_y_arg, args_info.nbins_z_arg,
                        args_info.nbins_arg);
 #endif
@@ -577,7 +580,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.hbond_given){
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
-        
+
         analyser = new HBondGeometric(info, dumpFileName, sele1, sele2,
                                       args_info.rcut_arg,
                                       args_info.thetacut_arg,
@@ -599,10 +602,10 @@ int main(int argc, char* argv[]){
   } else if (args_info.potDiff_given) {
     analyser = new PotDiff(info, dumpFileName, sele1);
   } else if (args_info.kirkwood_given) {
-    analyser= new Kirkwood(info, dumpFileName, sele1, sele2, maxLen, 
+    analyser= new Kirkwood(info, dumpFileName, sele1, sele2, maxLen,
                            nrbins);
   } else if (args_info.kirkwoodQ_given) {
-    analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen, 
+    analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen,
                                       nrbins);
   } else if (args_info.densityfield_given) {
     analyser = new DensityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
@@ -646,7 +649,7 @@ int main(int argc, char* argv[]){
       }
       break;
     }
-  } 
+  }
 
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);
@@ -654,11 +657,11 @@ int main(int argc, char* argv[]){
   if (args_info.step_given) {
     analyser->setStep(args_info.step_arg);
   }
-  
+
   analyser->process();
-  
-  delete analyser;    
+
+  delete analyser;
   delete info;
-  
-  return 0;   
+
+  return 0;
 }
