@@ -76,14 +76,25 @@ namespace OpenMD {
         return (temp*temp)/x;
     }
   }
+  
+  RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
+                                RealType A, RealType alpha, RealType kappa) {
+    return
+      ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
+  }
+  
+  RealType EAM::ZhouPhiCoreValence(RealType r, RealType re,
+                                   RealType B, RealType beta, RealType lambda) {
+    return
+      - ( B*exp (-beta * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-lambda, 20));
+  }
 
   RealType EAM::ZhouPhi(RealType r, RealType re,
                         RealType A, RealType B,
                         RealType alpha, RealType beta,
                         RealType kappa, RealType lambda) {
-    return
-      ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20))
-      - ( B*exp (-beta * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-lambda, 20));
+    return ZhouPhiCoreCore(r,re,A,alpha,kappa) +
+      ZhouPhiCoreValence(r,re,B,beta,lambda);
   }
 
   RealType EAM::SMorse(RealType r, RealType r0, RealType d0, RealType beta0) {
@@ -276,6 +287,8 @@ namespace OpenMD {
 
         switch(mixMeth_) {
         case eamJohnson:
+        case eamDream1:
+        case eamDream2:
           phab = 0.0;
           if ( rha > 0.0 ) {
             pha = pre11_ * (za * za) / r;
@@ -425,6 +438,10 @@ namespace OpenMD {
 
     if (EAMMixMeth == "JOHNSON")
       mixMeth_ = eamJohnson;
+    else if (EAMMixMeth == "DREAM1")
+      mixMeth_ = eamDream1;
+    else if (EAMMixMeth == "DREAM2")
+      mixMeth_ = eamDream2;
     else if (EAMMixMeth == "DAW")
       mixMeth_ = eamDaw;
     else
@@ -544,7 +561,11 @@ namespace OpenMD {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
       RealType rhoe = ea.getRhoe();
+      RealType A = ea.getA();
+      RealType B = ea.getB();
+      RealType alpha = ea.getAlpha();
       RealType beta = ea.getBeta();
+      RealType kappa = ea.getKappa();
       RealType lambda = ea.getLambda();
       std::vector<RealType> Fn = ea.getFn();
       std::vector<RealType> F = ea.getF();
@@ -554,19 +575,23 @@ namespace OpenMD {
 
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
-      eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + lambda);
+      eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
       int Nrho = 3000;
-      RealType rhomax = max(800.0,
+      RealType rhomax = max(900.0,
                             max(2.0 * rhoe,
                                 ZhouRho(0.0, re, fe, beta, lambda)));
       RealType drho = rhomax/(RealType)(Nrho-1);
       RealType rho;
+      RealType phiCC, phiCV;
 
       std::vector<RealType> rvals;
       std::vector<RealType> zvals;
+      std::vector<RealType> ccvals;
+      std::vector<RealType> cvvals;
+      
       std::vector<RealType> rhovals;
       std::vector<RealType> funcvals;
 
@@ -574,10 +599,18 @@ namespace OpenMD {
         r = RealType(i)*dr;
         rvals.push_back(r);
         rhovals.push_back( ZhouRho(r, re,  fe, beta,  lambda) );
+        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        ccvals.push_back( phiCC );
+        cvvals.push_back( phiCV );
       }
       eamAtomData.rho = new CubicSpline();
       eamAtomData.rho->addPoints(rvals, rhovals);
-
+      eamAtomData.phiCC = new CubicSpline();
+      eamAtomData.phiCC->addPoints(rvals, ccvals);
+      eamAtomData.phiCV = new CubicSpline();
+      eamAtomData.phiCV->addPoints(rvals, cvvals);
+      
       rhovals.clear();
       if (et == eamZhou2001) {
         for (int i = 0; i < Nrho; i++) {
@@ -617,6 +650,13 @@ namespace OpenMD {
     case eamEVBOxygen : {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
+      RealType A = ea.getA();
+      RealType B = ea.getB();
+      RealType alpha = ea.getAlpha();
+      RealType beta = ea.getBeta();
+      RealType kappa = ea.getKappa();
+      RealType lambda = ea.getLambda();
+
       RealType gamma = ea.getGamma();
       RealType nu = ea.getNu();
       std::vector<RealType> OrhoLimits = ea.getOrhoLimits();
@@ -634,10 +674,13 @@ namespace OpenMD {
       RealType rhomax = max(800.0,
                             ZhouRho(0.0, re, fe, gamma, nu));
       RealType drho = rhomax/(RealType)(Nrho-1);
-      RealType rho;
+      RealType rho, phiCC, phiCV;
 
       std::vector<RealType> rvals;
       std::vector<RealType> zvals;
+      std::vector<RealType> ccvals;
+      std::vector<RealType> cvvals;
+      
       std::vector<RealType> rhovals;
       std::vector<RealType> funcvals;
 
@@ -645,9 +688,17 @@ namespace OpenMD {
         r = RealType(i)*dr;
         rvals.push_back(r);
         rhovals.push_back( ZhouRho(r, re,  fe, gamma,  nu) );
+        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        ccvals.push_back( phiCC );
+        cvvals.push_back( phiCV );
       }
       eamAtomData.rho = new CubicSpline();
       eamAtomData.rho->addPoints(rvals, rhovals);
+      eamAtomData.phiCC = new CubicSpline();
+      eamAtomData.phiCC->addPoints(rvals, ccvals);
+      eamAtomData.phiCV = new CubicSpline();
+      eamAtomData.phiCV->addPoints(rvals, cvvals);
 
       rhovals.clear();
       for (int i = 0; i < Nrho; i++) {
@@ -939,51 +990,107 @@ namespace OpenMD {
 
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
     bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
+    
+    if (hasFlucQ && !isExplicit) {
 
-    if (hasFlucQ && !isExplicit && mixMeth_ == eamJohnson) {
       RealType Na(0.0), Nb(0.0), qa(0.0), qb(0.0);
       RealType va(1.0), vb(1.0);
-      
-      if (data1.isFluctuatingCharge) {
-        Na = data1.nValence;
-        qa = *(idat.flucQ1);
-        va = (1.0 - qa / Na);
-      }
-      if (data2.isFluctuatingCharge) {
-        Nb = data2.nValence;
-        qb = *(idat.flucQ2);
-        vb = (1.0 - qb / Nb);
-      }
-      
-      if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
-        phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
-        dvpdr = dvpdr + 0.5 * (vb/va) * ((rhb/rha)*dpha +
-                                         pha*((drhb/rha) - (rhb*drha/rha/rha)));
-        
+            
+      if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
+                
         if (data1.isFluctuatingCharge) {
-          *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
+          Na = data1.nValence;
+          qa = *(idat.flucQ1);
+          va = (1.0 - qa / Na);
         }
         if (data2.isFluctuatingCharge) {
-          *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
-        }        
-      }
-      
-      if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
-        phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
-        dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
-                                         phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+          Nb = data2.nValence;
+          qb = *(idat.flucQ2);
+          vb = (1.0 - qb / Nb);
+        }
         
+        if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+          phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
+          dvpdr = dvpdr + 0.5 * (vb/va) * ((rhb/rha)*dpha +
+                                           pha*((drhb/rha) - (rhb*drha/rha/rha)));
+          
+          if (data1.isFluctuatingCharge) {
+            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
+          }
+          if (data2.isFluctuatingCharge) {
+            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
+          }        
+        }
+        
+        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+          phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
+          dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
+                                           phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+        
+          if (data1.isFluctuatingCharge) {
+            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
+          }
+          if (data2.isFluctuatingCharge) {
+            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
+          }
+        }
+      } else {
+        // Core-Core part first - no fluctuating charge, just Johnson mixing:
+        CubicSpline* phiACC = data1.phiCC;
+        CubicSpline* phiBCC = data2.phiCC;
+
+        phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+        phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+        
+        if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+          phab += 0.5 * (rhb / rha) * pha;
+          dvpdr += 0.5 * ((rhb/rha)*dpha +
+                          pha*((drhb/rha) - (rhb*drha/rha/rha)));
+        }
+        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+          phab += 0.5 * (rha / rhb) * phb;
+          dvpdr += 0.5 * ((rha/rhb)*dphb + 
+                          phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+        }
+
+        // Core-Valence next, this does include fluctuating charges:
+        CubicSpline* phiACV = data1.phiCV;
+        CubicSpline* phiBCV = data2.phiCV;
+
+        phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+        phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+
         if (data1.isFluctuatingCharge) {
-          *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
+          Na = data1.nValence;
+          qa = *(idat.flucQ1);
+          va = (1.0 - qa / Na);
         }
         if (data2.isFluctuatingCharge) {
-          *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
+          Nb = data2.nValence;
+          qb = *(idat.flucQ2);
+          vb = (1.0 - qb / Nb);
         }
-      }    
-      
+        if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+          phab += 0.5 * va * (rhb / rha) * pha;
+          dvpdr += 0.5 * va * ((rhb/rha)*dpha +
+                               pha*((drhb/rha) - (rhb*drha/rha/rha)));
+          
+          if (data1.isFluctuatingCharge) {
+            *(idat.dVdFQ1) -= 0.5 * (rhb * pha) / (rha * Na);
+          }
+        }
+        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+          phab += 0.5 * vb * (rha / rhb) * phb;
+          dvpdr += 0.5 * vb * ((rha/rhb)*dphb + 
+                               phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+          
+          if (data2.isFluctuatingCharge) {
+            *(idat.dVdFQ2) -= 0.5 * (rha * phb) / (rhb * Nb);
+          }
+        }
+      }      
     } else {
-      if ( *(idat.rij) < rcij ) {
-        
+      if ( *(idat.rij) < rcij ) {        
         CubicSpline* phi = MixingMap[eamtid1][eamtid2].phi;
         phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
       }

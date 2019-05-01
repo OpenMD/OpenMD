@@ -81,11 +81,25 @@ namespace OpenMD {
     
     void validateOptions() {
       CheckParameter(vdWtype, isEqualIgnoreCase(std::string("Lennard-Jones")));
-      CheckParameter(DistanceMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("cubic")));
-      CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
-      CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("hhg")));
-      CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180_is_trans")) || isEqualIgnoreCase(std::string("0_is_trans")));
-      CheckParameter(EAMMixingMethod, isEqualIgnoreCase(std::string("JOHNSON")) || isEqualIgnoreCase(std::string("DAW")));
+      CheckParameter(DistanceMixingRule,
+                     isEqualIgnoreCase(std::string("arithmetic")) ||
+                     isEqualIgnoreCase(std::string("geometric")) ||
+                     isEqualIgnoreCase(std::string("cubic")));
+      CheckParameter(DistanceType,
+                     isEqualIgnoreCase(std::string("sigma")) ||
+                     isEqualIgnoreCase(std::string("Rmin")));
+      CheckParameter(EnergyMixingRule,
+                     isEqualIgnoreCase(std::string("arithmetic")) ||
+                     isEqualIgnoreCase(std::string("geometric")) ||
+                     isEqualIgnoreCase(std::string("hhg")));
+      CheckParameter(TorsionAngleConvention,
+                     isEqualIgnoreCase(std::string("180_is_trans")) ||
+                     isEqualIgnoreCase(std::string("0_is_trans")));
+      CheckParameter(EAMMixingMethod,
+                     isEqualIgnoreCase(std::string("Johnson")) ||
+                     isEqualIgnoreCase(std::string("Daw")) ||
+                     isEqualIgnoreCase(std::string("DREAM1")) ||
+                     isEqualIgnoreCase(std::string("DREAM2")) );
    }
     
     bool setData(const std::string& keyword, const std::string& value) {
@@ -111,7 +125,8 @@ namespace OpenMD {
           simError();                  
         }
       } else {
-        sprintf(painCave.errMsg,  "%s is an unrecognized keyword\n", keyword.c_str() );
+        sprintf(painCave.errMsg,  "%s is an unrecognized keyword\n",
+                keyword.c_str() );
         painCave.isFatal = 0;
         simError();        
       }

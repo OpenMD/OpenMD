@@ -56,6 +56,8 @@ namespace OpenMD {
     CubicSpline* rho;
     CubicSpline* F;
     CubicSpline* Z;
+    CubicSpline* phiCC;
+    CubicSpline* phiCV;
     RealType rcut;
     RealType nValence;
     bool isFluctuatingCharge;
@@ -70,6 +72,8 @@ namespace OpenMD {
   enum EAMMixingMethod{
     eamJohnson,
     eamDaw,
+    eamDream1,
+    eamDream2,
     eamUnknownMix
   };
   
@@ -90,6 +94,11 @@ namespace OpenMD {
                                 RealType lambda);
 
     RealType fastPower(RealType x, int y);
+    RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
+                             RealType alpha, RealType kappa);
+    RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
+                                RealType beta, RealType lambda);
+    
     RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
                      RealType alpha, RealType beta, RealType kappa,
                      RealType lambda);
@@ -100,7 +109,7 @@ namespace OpenMD {
                     RealType re, RealType A, RealType B,
                     RealType alpha, RealType beta, RealType kappa,
                     RealType lambda);
-
+    
     RealType ZhouRho(RealType r, RealType re, RealType fe,
                      RealType beta, RealType lambda);
     RealType Zhou2001Functional(RealType rho, RealType rhoe,
