@@ -77,10 +77,12 @@ namespace OpenMD {
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
+
+
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
-    vector<vector<RealType>> density(seleMan_.getSelectionCount(),vector<RealType>(nFrames, 0.0 ));
+    vector<RealType> density;
 
 
     nProcessed_ = nFrames/step_;
@@ -91,54 +93,52 @@ namespace OpenMD {
 
 
 
-      int sele_index = 0;
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
 	       sd = seleMan_.nextSelected(ii)) {
-           density[sele_index][istep] = sd->getDensity();
-           sele_index += 1;
+           if(sd->getDensity())
+            density.push_back(sd->getDensity());
+      }
     }
 
 
 
+
+    if(density.empty()){
+      sprintf(painCave.errMsg, "Density for selected atom not found.\n");
+      painCave.isFatal = 1;
+      simError();
     }
-    //finding average density for each selected atom
-    vector<RealType> average_density;
-    for(int i = 0; i < seleMan_.getSelectionCount(); ++i )
-    {
-      average_density.push_back(std::accumulate(density[i].begin(),density[i].end(),0.0)/nFrames);
 
-    }
-    //sort the average_density
-    std::sort (average_density.begin(),average_density.end());
+    std::sort (density.begin(),density.end());
 
 
-    RealType min = average_density.front();
-    RealType max = average_density.back();
+    RealType min = density.front();
+    RealType max = density.back();
 
-
-    RealType delta_density = (max-min)/(nBins_ - 2 );
+    RealType delta_density = (max-min)/(nBins_);
     if(delta_density == 0){
       bincenter_.push_back(min);
-      histList_.push_back(average_density.size());
+      histList_.push_back(density.size());
     }
     else{
     //fill the center for histogram
     for(int j = 0; j<=nBins_; ++j )
     {
-      bincenter_.push_back(min + (j-1) * delta_density);
+      bincenter_.push_back(min + j * delta_density);
       histList_.push_back(0);
 
 
     }
-
     //filling up the histogram whith the densities
     int bin_center_pos = 0;
+    vector<RealType>::iterator index;
+    RealType density_length = static_cast<RealType>(density.size());
     bool hist_update;
-    for(int jj = 0; jj < seleMan_.getSelectionCount(); ++jj){
+    for(index = density.begin(); index < density.end(); ++index){
       hist_update = true;
       while(hist_update){
-        if(average_density[jj] >= bincenter_[bin_center_pos] && average_density[jj]< bincenter_[bin_center_pos + 1] ){
-          histList_[bin_center_pos] += 1;
+        if(*index >= bincenter_[bin_center_pos] && *index < bincenter_[bin_center_pos + 1] ){
+          histList_[bin_center_pos] += 1.0/density_length;
           hist_update = false;
         }
         else{
@@ -151,25 +151,7 @@ namespace OpenMD {
 
 
 
-/*
 
-    //filling the histogram with densities and count
-    int histList_position = 0;
-    RealType pre_density = min;
-    histList_.push_back(0);
-    bincenter_.push_back(min);
-    for(int jj = 0; jj < seleMan_.getSelectionCount(); ++jj){
-      if(average_density[jj] == pre_density)
-        histList_[histList_position] += 1;
-      else{
-        pre_density = average_density[jj];
-        bincenter_.push_back(pre_density);
-        histList_.push_back(1);
-        histList_position += 1;
-      }
-
-    }
-*/
 
 
     writeDensity();

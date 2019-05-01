@@ -80,7 +80,7 @@ namespace OpenMD {
     int nBins_;
 
     std::vector<RealType> bincenter_;
-    std::vector<int> histList_;
+    std::vector<RealType> histList_;
 
   };
 
