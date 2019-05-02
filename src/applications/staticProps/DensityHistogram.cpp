@@ -109,22 +109,24 @@ namespace OpenMD {
       simError();
     }
 
-    std::sort (density.begin(),density.end());
+    std::sort(density.begin(),density.end());
 
 
     RealType min = density.front();
     RealType max = density.back();
 
+
     RealType delta_density = (max-min)/(nBins_);
+
     if(delta_density == 0){
       bincenter_.push_back(min);
       histList_.push_back(density.size());
     }
     else{
     //fill the center for histogram
-    for(int j = 0; j<=nBins_; ++j )
+    for(int j = 0; j< nBins_+ 3; ++j )
     {
-      bincenter_.push_back(min + j * delta_density);
+      bincenter_.push_back(min + (j-1) * delta_density);
       histList_.push_back(0);
 
 
@@ -133,11 +135,12 @@ namespace OpenMD {
     int bin_center_pos = 0;
     vector<RealType>::iterator index;
     RealType density_length = static_cast<RealType>(density.size());
+
     bool hist_update;
-    for(index = density.begin(); index < density.end(); ++index){
+    for(index = density.begin(); index < density.end(); index++){
       hist_update = true;
       while(hist_update){
-        if(*index >= bincenter_[bin_center_pos] && *index < bincenter_[bin_center_pos + 1] ){
+        if(*index >= bincenter_[bin_center_pos] && *index < bincenter_[bin_center_pos + 1 ] ){
           histList_[bin_center_pos] += 1.0/density_length;
           hist_update = false;
         }
@@ -146,9 +149,9 @@ namespace OpenMD {
           hist_update = true;
         }
       }
+
     }
   }
-
 
 
 
@@ -174,6 +177,7 @@ namespace OpenMD {
         rdfStream << bincenter_[i] << "\t"
                   <<  histList_[i]
                   << "\n";
+
       }
 
     } else {
