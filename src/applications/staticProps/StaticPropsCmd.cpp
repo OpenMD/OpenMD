@@ -116,6 +116,7 @@ const char *gengetopt_args_info_help[] = {
   "      --velocityfield           computes an average velocity field",
   "      --velocityZ               computes an average two-dimensional velocity\n                                  map",
   "  -D, --eam_density             computes an average eam density profile of the\n                                  selected atom",
+  "  -q, --net_charge              computes an average charge profile of the\n                                  selected atom",
     0
 };
 
@@ -229,6 +230,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->velocityfield_given = 0 ;
   args_info->velocityZ_given = 0 ;
   args_info->eam_density_given = 0 ;
+  args_info->net_charge_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -379,6 +381,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->velocityfield_help = gengetopt_args_info_help[80] ;
   args_info->velocityZ_help = gengetopt_args_info_help[81] ;
   args_info->eam_density_help = gengetopt_args_info_help[82] ;
+  args_info->net_charge_help = gengetopt_args_info_help[83] ;
   
 }
 
@@ -745,6 +748,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "velocityZ", 0, 0 );
   if (args_info->eam_density_given)
     write_into_file(outfile, "eam_density", 0, 0 );
+  if (args_info->net_charge_given)
+    write_into_file(outfile, "net_charge", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -846,6 +851,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->velocityfield_given = 0 ;
   args_info->velocityZ_given = 0 ;
   args_info->eam_density_given = 0 ;
+  args_info->net_charge_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -1766,6 +1772,7 @@ cmdline_parser_internal (
         { "velocityfield",	0, NULL, 0 },
         { "velocityZ",	0, NULL, 0 },
         { "eam_density",	0, NULL, 'D' },
+        { "net_charge",	0, NULL, 'q' },
         { 0,  0, 0, 0 }
       };
 
@@ -1774,7 +1781,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:n:b:x:y:r:a:c:z:v:gpsdQmkD", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:n:b:x:y:r:a:c:z:v:gpsdQmkDq", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -2043,6 +2050,21 @@ cmdline_parser_internal (
               &(local_args_info.eam_density_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "eam_density", 'D',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'q':	/* computes an average charge profile of the selected atom.  */
+        
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->net_charge_given),
+              &(local_args_info.net_charge_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "net_charge", 'q',
               additional_error))
             goto failure;
         

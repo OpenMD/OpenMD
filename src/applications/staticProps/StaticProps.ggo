@@ -107,3 +107,4 @@ groupoption "densityfield" -   	"computes an average density field" group="stati
 groupoption "velocityfield" -   "computes an average velocity field" group="staticProps"
 groupoption "velocityZ" -   	"computes an average two-dimensional velocity map" group="staticProps"
 groupoption "eam_density" D  "computes an average eam density profile of the selected atom" group="staticProps"
+groupoption "net_charge" q "computes an average charge profile of the selected atom" group="staticProps"

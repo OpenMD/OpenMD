@@ -186,6 +186,7 @@ struct gengetopt_args_info
   const char *velocityfield_help; /**< @brief computes an average velocity field help description.  */
   const char *velocityZ_help; /**< @brief computes an average two-dimensional velocity map help description.  */
   const char *eam_density_help; /**< @brief computes an average eam density profile of the selected atom help description.  */
+  const char *net_charge_help; /**< @brief computes an average charge profile of the selected atom help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -269,6 +270,7 @@ struct gengetopt_args_info
   unsigned int velocityfield_given ;	/**< @brief Whether velocityfield was given.  */
   unsigned int velocityZ_given ;	/**< @brief Whether velocityZ was given.  */
   unsigned int eam_density_given ;	/**< @brief Whether eam_density was given.  */
+  unsigned int net_charge_given ;	/**< @brief Whether net_charge was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

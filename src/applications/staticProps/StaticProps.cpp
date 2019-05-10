@@ -93,6 +93,8 @@
 #include "applications/staticProps/Field.hpp"
 #include "applications/staticProps/VelocityZ.hpp"
 #include "applications/staticProps/DensityHistogram.hpp"
+#include "applications/staticProps/ChargeHistogram.hpp"
+
 
 using namespace OpenMD;
 
@@ -473,6 +475,8 @@ int main(int argc, char* argv[]){
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   }else if (args_info.eam_density_given) {
     analyser = new DensityHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
+  }else if (args_info.net_charge_given) {
+      analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {
