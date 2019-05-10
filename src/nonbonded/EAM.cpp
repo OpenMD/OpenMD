@@ -377,7 +377,7 @@ namespace OpenMD {
 
       int nr = int(rmax/dr + 1);
 
-      for (int i = 0; i < nr; i++) rvals.push_back(RealType(i*dr));
+      for (int i = 0; i <= nr; i++) rvals.push_back(RealType(i*dr));
 
       vector<RealType> phivals;
       RealType r;
@@ -1038,16 +1038,15 @@ namespace OpenMD {
         // Core-Core part first - no fluctuating charge, just Johnson mixing:
         CubicSpline* phiACC = data1.phiCC;
         CubicSpline* phiBCC = data2.phiCC;
-
-        phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
-        phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
         
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+          phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
           phab += 0.5 * (rhb / rha) * pha;
           dvpdr += 0.5 * ((rhb/rha)*dpha +
                           pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+          phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
           phab += 0.5 * (rha / rhb) * phb;
           dvpdr += 0.5 * ((rha/rhb)*dphb + 
                           phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
