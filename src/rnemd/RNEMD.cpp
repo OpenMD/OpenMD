@@ -2039,7 +2039,8 @@ namespace OpenMD {
       ac.z() = 0.0;
 
       // units of volume (Angstrom^3):
-      alphac = qvTarget_ / ((Q2c/Volc) + (Q2h/Volh) * (MQc / MQh));
+      // alphac = qvTarget_ / ((Q2c/Volc) + (Q2h/Volh) * (MQc / MQh));
+      alphac = qvTarget_ / (Q2c/Volc);
       // units of velocity (Angstrom/fs):
       alphacprime = alphac / (dividingArea_ * exchangeTime_);
             
