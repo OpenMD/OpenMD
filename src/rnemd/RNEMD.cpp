@@ -114,7 +114,6 @@ namespace OpenMD {
     stringToFluxType_["KE+Py"]  = rnemdKePy;
     stringToFluxType_["KE+Pvector"]  = rnemdKePvector;
     stringToFluxType_["KE+Current"]  = rnemdKeCurrent;
-    stringToFluxType_["KE+Pvector+Current"]  = rnemdKePvectorCurrent;
     stringToFluxType_["KE+Lx"]  = rnemdKeLx;
     stringToFluxType_["KE+Ly"]  = rnemdKeLy;
     stringToFluxType_["KE+Lz"]  = rnemdKeLz;
@@ -143,7 +142,7 @@ namespace OpenMD {
               "\twhich must be one of the following values:\n"
               "\tKE, Px, Py, Pz, Pvector, Lx, Ly, Lz, Lvector, Current,\n"
               "\tKE+Px, KE+Py, KE+Pvector, KE+Lx, KE+Ly, KE+Lz, KE+Lvector\n"
-              "\tKE+Current, KE+Pvector+Current must be set to use RNEMD\n");
+              "\tKE+Current must be set to use RNEMD\n");
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -315,10 +314,6 @@ namespace OpenMD {
         break;
       case rnemdKePvector:
         hasCorrectFlux = hasMomentumFluxVector && hasKineticFlux;
-        break;
-      case rnemdKePvectorCurrent:
-        hasCorrectFlux = hasMomentumFluxVector && hasKineticFlux &&
-          hasCurrentDensity;
         break;
       case rnemdKeLvector:
         hasCorrectFlux = hasAngularMomentumFluxVector && hasKineticFlux;
@@ -629,7 +624,6 @@ namespace OpenMD {
         break;
       case rnemdCurrent:
       case rnemdKeCurrent:
-      case rnemdKePvectorCurrent:
         outputMask_.set(TEMPERATURE);
         outputMask_.set(VELOCITY);
         outputMask_.set(DENSITY);
@@ -2168,13 +2162,13 @@ namespace OpenMD {
       }
     }
     if (successfulExchange != true) {
-      sprintf(painCave.errMsg, 
-              "RNEMD::doVSSCurrent exchange NOT performed - roots that solve\n"
-              "\tthe constraint equations may not exist or there may be\n"
-              "\tno selected objects in one or both slabs.\n");
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();        
+      // sprintf(painCave.errMsg, 
+      //         "RNEMD::doVSSCurrent exchange NOT performed - roots that solve\n"
+      //         "\tthe constraint equations may not exist or there may be\n"
+      //         "\tno selected objects in one or both slabs.\n");
+      // painCave.isFatal = 0;
+      // painCave.severity = OPENMD_INFO;
+      // simError();        
       failTrialCount_++;
     }
   }
@@ -2354,7 +2348,6 @@ namespace OpenMD {
       switch (rnemdFluxType_) {
       case rnemdCurrent:
       case rnemdKeCurrent:
-      case rnemdKePvectorCurrent:
         doVSSCurrent(commonA_, commonB_);
         break;
       default:

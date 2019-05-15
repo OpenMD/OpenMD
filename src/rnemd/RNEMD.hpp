@@ -97,7 +97,6 @@ namespace OpenMD {
       rnemdKePx,     // flux of translational KE and x-momentum
       rnemdKePy,     // flux of translational KE and y-momentum
       rnemdKePvector, // full combo flying platter
-      rnemdKePvectorCurrent, // all possible fluxes in a PBC simulation
       rnemdKeCurrent, //flux of translational KE and current density
       rnemdKeLx,     // flux of translational KE and x-angular momentum
       rnemdKeLy,     // flux of translational KE and y-angular momentum
