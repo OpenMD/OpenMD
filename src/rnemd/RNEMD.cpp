@@ -573,7 +573,7 @@ namespace OpenMD {
     outputMap_["ACTIVITY"] =  ACTIVITY;
     
     OutputData eField;
-    eField.units =  "e";
+    eField.units =  "kcal/mol/angstroms/e";
     eField.title =  "Electrical Field";
     eField.dataType = "Vector3d";
     eField.accumulator.reserve(nBins_);
@@ -1898,10 +1898,14 @@ namespace OpenMD {
     RealType Mh = 0.0;
     RealType Kh = 0.0;
     RealType Khz = 0.0;
-    RealType MQh = 0.0;
-    Vector3d MQvh(V3Zero);
-    RealType MQ2h = 0.0;
-    RealType Q2h = 0.0;
+    RealType MQhp = 0.0;
+    RealType MQhn = 0.0;
+    RealType MQvhp = 0.0;
+    RealType MQvhn = 0.0;
+    RealType MQ2hp = 0.0;
+    RealType MQ2hn = 0.0;
+    RealType Q2hp = 0.0;
+    RealType Q2hn = 0.0;
     RealType Volh = 0.0;
 
     Vector3d Pc(V3Zero);
@@ -1909,10 +1913,14 @@ namespace OpenMD {
     RealType Mc = 0.0;
     RealType Kc = 0.0;
     RealType Kcz = 0.0;
-    RealType MQc = 0.0;
-    Vector3d MQvc(V3Zero);
-    RealType MQ2c = 0.0;
-    RealType Q2c = 0.0;
+    RealType MQcp = 0.0;
+    RealType MQcn = 0.0;
+    RealType MQvcp = 0.0;
+    RealType MQvcn = 0.0;
+    RealType MQ2cp = 0.0;
+    RealType MQ2cn = 0.0;
+    RealType Q2cp = 0.0;
+    RealType Q2cn = 0.0;
     RealType Volc = 0.0;
 
     if (!usePeriodicBoundaryConditions_) {
@@ -1952,10 +1960,18 @@ namespace OpenMD {
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
         if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
       }
-      MQh += mass * charge;
-      MQvh += mass * vel * charge;
-      MQ2h += mass * charge * charge;
-      Q2h += charge * charge;
+
+      if (charge > 0) {
+        MQhp += mass * charge;
+        MQvhp += mass * vel.z() * charge;
+        MQ2hp += mass * charge * charge;
+        Q2hp += charge * charge;
+      } else {
+        MQhn += mass * charge;
+        MQvhn += mass * vel.z() * charge;
+        MQ2hn += mass * charge * charge;
+        Q2hn += charge * charge;
+      }
     }
 
     Volh = volumeA_;
@@ -1988,10 +2004,18 @@ namespace OpenMD {
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
         if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
       }
-      MQc += mass * charge;
-      MQvc += mass * vel * charge;
-      MQ2c += mass * charge * charge;
-      Q2c += charge * charge;
+
+      if (charge > 0) {
+        MQcp += mass * charge;
+        MQvcp += mass * vel.z() * charge;
+        MQ2cp += mass * charge * charge;
+        Q2cp += charge * charge;
+      } else {
+        MQcn += mass * charge;
+        MQvcn += mass * vel.z() * charge;
+        MQ2cn += mass * charge * charge;
+        Q2cn += charge * charge;
+      }
     }
 
     Volc = volumeB_;
@@ -2014,42 +2038,50 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, &Kc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &Kcz, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     
-    MPI_Allreduce(MPI_IN_PLACE, &MQc, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &MQvc[0], 3, MPI_REALTYPE, MPI_SUM, 
-                  MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &MQ2c, 1, MPI_REALTYPE, MPI_SUM,MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &Q2c, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQcp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQcn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQvcp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQvcn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);              
+    MPI_Allreduce(MPI_IN_PLACE, &MQ2cp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQ2cn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Q2cp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Q2cn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 
-    MPI_Allreduce(MPI_IN_PLACE, &MQh, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &MQvh[0], 3, MPI_REALTYPE, MPI_SUM, 
-                  MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &MQ2h, 1, MPI_REALTYPE, MPI_SUM,MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &Q2h, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);      
+    MPI_Allreduce(MPI_IN_PLACE, &MQhp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQhn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQvhp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQvhn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);              
+    MPI_Allreduce(MPI_IN_PLACE, &MQ2hp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &MQ2hn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Q2hp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD); 
+    MPI_Allreduce(MPI_IN_PLACE, &Q2hn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);      
 #endif
     
-    Vector3d ac;
-    RealType alphac, alphacprime;
-    Vector3d ah;
-    RealType alphah, alphahprime;
+    RealType alphacprime = 0.0;
+    RealType alphac = 0.0;
+    RealType betac = 0.0;
+    RealType alphah = 0.0;
+    RealType betah = 0.0;
 
     bool successfulExchange = false;
-    if ((Mh > 0.0) && (Mc > 0.0)) {
+    if ((MQcp > 0.0) && (MQcn < 0.0) && (MQhp > 0.0) && (MQhn < 0.0)) {
       Vector3d vc = Pc / Mc;
-      ac = -momentumTarget_ / Mc;
-      ac.z() = 0.0;
 
       // units of volume (Angstrom^3):
       // alphac = qvTarget_ / ((Q2c/Volc) + (Q2h/Volh) * (MQc / MQh));
-      alphac = qvTarget_ / (Q2c/Volc);
+      alphacprime = qvTarget_ * Volc / (Q2cp - Q2cn * (MQcp/MQcn));
       // units of velocity (Angstrom/fs):
-      alphacprime = alphac / (dividingArea_ * exchangeTime_);
+      alphac = alphacprime / (dividingArea_ * exchangeTime_);
+      betac = -alphac * MQcp / MQcn;
             
       RealType cNumerator = Kc - kineticTarget_;
-      cNumerator -= 0.5 * Mc * pow(vc.x() + ac.x(), 2);
-      cNumerator -= 0.5 * Mc * pow(vc.y() + ac.y(), 2);
+      cNumerator -= 0.5 * Mc * vc.x()*vc.x();
+      cNumerator -= 0.5 * Mc * vc.y()*vc.y();
       cNumerator -= Kcz;
-      cNumerator -= MQvc.z() * alphacprime;
-      cNumerator -= 0.5 * MQ2c * alphacprime * alphacprime;
+      cNumerator -= MQvcp * alphac;
+      cNumerator -= MQvcn * betac;
+      cNumerator -= 0.5 * MQ2cp * alphac * alphac;
+      cNumerator -= 0.5 * MQ2cn * betac * betac;
       if (cNumerator > 0.0) {
         
         RealType cDenominator = Kc - Kcz;
@@ -2061,17 +2093,17 @@ namespace OpenMD {
 	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
             
 	    Vector3d vh = Ph / Mh;
-            ah = momentumTarget_ / Mh;
-            ah.z() = 0.0;
-            alphah = -alphac * MQc / MQh;
-            alphahprime = alphah / (dividingArea_ * exchangeTime_);
+            alphah = -alphac * MQcp / MQhp;
+            betah = -betac * MQcn / MQhn;
             
             RealType hNumerator = Kh + kineticTarget_;
-            hNumerator -= 0.5 * Mh * pow(vh.x() + ah.x(), 2);
-            hNumerator -= 0.5 * Mh * pow(vh.y() + ah.y(), 2);
+            hNumerator -= 0.5 * Mh * vh.x()*vh.x();
+            hNumerator -= 0.5 * Mh * vh.y()*vh.y();
             hNumerator -= Khz;
-            hNumerator -= MQvh.z() * alphahprime;
-            hNumerator -= 0.5 * MQ2h * alphahprime * alphahprime;
+            hNumerator -= MQvhp * alphah;
+            hNumerator -= MQvhn * betah;
+            hNumerator -= 0.5 * MQ2hp * alphah * alphah;
+            hNumerator -= 0.5 * MQ2hn * betah * betah;
                                       
             if (hNumerator > 0.0) {
               
@@ -2089,8 +2121,8 @@ namespace OpenMD {
                   
 		  for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
                     vel = (*sdi)->getVel();
-                    vel.x() = (vel.x() - vc.x()) * c + ac.x() + vc.x();
-                    vel.y() = (vel.y() - vc.y()) * c + ac.y() + vc.y();
+                    vel.x() = (vel.x() - vc.x()) * c + vc.x();
+                    vel.y() = (vel.y() - vc.y()) * c + vc.y();
                     RealType q = 0.0;
                     if ((*sdi)->isAtom()) {
                       atype = static_cast<Atom*>(*sdi)->getAtomType();
@@ -2098,14 +2130,17 @@ namespace OpenMD {
                       if ( fca.isFixedCharge() ) q = fca.getCharge();
                       FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
                       if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-                      vel.z() += q * alphacprime;
+                      if (q > 0)
+                        vel.z() += q * alphac;
+                      else
+                        vel.z() += q * betac; 
                     }                                        
 		    (*sdi)->setVel(vel);
 		  }
 		  for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
                     vel = (*sdi)->getVel();
-                    vel.x() = (vel.x() - vh.x()) * h + ah.x() + vh.x();
-                    vel.y() = (vel.y() - vh.y()) * h + ah.y() + vh.y();
+                    vel.x() = (vel.x() - vh.x()) * h + vh.x();
+                    vel.y() = (vel.y() - vh.y()) * h + vh.y();
                     RealType q = 0.0;
                     if ((*sdi)->isAtom()) {
                       atype = static_cast<Atom*>(*sdi)->getAtomType();
@@ -2113,7 +2148,10 @@ namespace OpenMD {
                       if ( fca.isFixedCharge() ) q = fca.getCharge();
                       FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
                       if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-                      vel.z() += q * alphahprime;
+                      if (q > 0)
+                        vel.z() += q * alphah;
+                      else
+                        vel.z() += q * betah;
                     }                    
 		    (*sdi)->setVel(vel);
 		  }
