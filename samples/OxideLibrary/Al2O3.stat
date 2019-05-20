@@ -1,0 +1,3 @@
+## Last run using OpenMD version: 2.6, revision: 6bd3a254e3606fcb0e90721e2d6c530258469ec2
+#	Time(fs)	Total Energy(kcal/mol)	Potential Energy(kcal/mol)	Kinetic Energy(kcal/mol)	Temperature(K)	Pressure(atm)	Volume(A^3)	Conserved Quantity(kcal/mol)	System Dipole(C m)
+	0	-49991.543	-49991.543	0	0	2299134.6	37762.769	-49991.543	1.8846779e-28	-1.4463759e-26	-6.6567198e-31
