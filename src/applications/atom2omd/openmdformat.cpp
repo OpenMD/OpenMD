@@ -18,8 +18,11 @@ GNU General Public License for more details.
 #include <openbabel/obmolecformat.h>
 #include <openbabel/obiter.h>
 #include <openbabel/mol.h>
+#include <openbabel/atom.h>
+#include <openbabel/bond.h>
 #include <openbabel/chains.h>
 #include <openbabel/data.h>
+#include <openbabel/obutil.h>
 #include <fstream>
 
 #include "utils/StringUtils.hpp"
