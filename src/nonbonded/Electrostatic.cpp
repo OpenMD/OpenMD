@@ -708,44 +708,50 @@ namespace OpenMD {
         RealType b = eaData2.slaterZeta;
         int m = electrostaticAtomData.slaterN;
         int n = eaData2.slaterN;
-        
-        // Create the spline of the coulombic integral for s-type
-        // Slater orbitals.  Add a 2 angstrom safety window to deal
-        // with cutoffGroups that have charged atoms longer than the
-        // cutoffRadius away from each other.
-        
-        RealType rval;
-        RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
-        vector<RealType> rvals;
-        vector<RealType> Jvals;
-        // RealType j0, j0c, j1c;
-        // don't start at i = 0, as rval = 0 is undefined for the
-        // slater overlap integrals.
-        for (int i = 1; i < np_+1; i++) {
-          rval = RealType(i) * dr;
-          rvals.push_back(rval);
 
+        // do both types actually use Slater orbitals?
+        bool useSlater = electrostaticAtomData.uses_SlaterJ &&
+          eaData2.uses_SlaterJ;
 
-          // j0 = sSTOCoulInt( a, b, m, n, rval * Constants::angstromToBohr ) * 
-          //   Constants::hartreeToKcal;
-          // j0c = sSTOCoulInt( a, b, m, n,
-          //                    cutoffRadius_ * Constants::angstromToBohr ) * 
-          //   Constants::hartreeToKcal;
-          // j1c = sSTOCoulIntGrad( a, b, m, n,
-          //                        cutoffRadius_ * Constants::angstromToBohr ) *
-          //   Constants::hartreeToKcal;
-                                 
-          Jvals.push_back( sSTOCoulInt( a, b, m, n,
-                                        rval * Constants::angstromToBohr ) *
-                           Constants::hartreeToKcal );
+        if ( useSlater ) {
+          // Create the spline of the coulombic integral for s-type
+          // Slater orbitals.  Add a 2 angstrom safety window to deal
+          // with cutoffGroups that have charged atoms longer than the
+          // cutoffRadius away from each other.
+          
+          RealType rval;
+          RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
+          vector<RealType> rvals;
+          vector<RealType> Jvals;
+          // RealType j0, j0c, j1c;
+          // don't start at i = 0, as rval = 0 is undefined for the
+          // slater overlap integrals.
+          for (int i = 1; i < np_+1; i++) {
+            rval = RealType(i) * dr;
+            rvals.push_back(rval);
+            
+            
+            // j0 = sSTOCoulInt( a, b, m, n, rval * Constants::angstromToBohr ) * 
+            //   Constants::hartreeToKcal;
+            // j0c = sSTOCoulInt( a, b, m, n,
+            //                    cutoffRadius_ * Constants::angstromToBohr ) * 
+            //   Constants::hartreeToKcal;
+            // j1c = sSTOCoulIntGrad( a, b, m, n,
+            //                        cutoffRadius_ * Constants::angstromToBohr ) *
+            //   Constants::hartreeToKcal;
+            
+            Jvals.push_back( sSTOCoulInt( a, b, m, n,
+                                          rval * Constants::angstromToBohr ) *
+                             Constants::hartreeToKcal );
+          }
+        
+          CubicSpline* J = new CubicSpline();
+          J->addPoints(rvals, Jvals);
+          Jij[fqtid][fqtid2] = J;
+          Jij[fqtid2].resize( nFlucq_ );
+          Jij[fqtid2][fqtid] = J;
         }
-        
-        CubicSpline* J = new CubicSpline();
-        J->addPoints(rvals, Jvals);
-        Jij[fqtid][fqtid2] = J;
-        Jij[fqtid2].resize( nFlucq_ );
-        Jij[fqtid2][fqtid] = J;
-      }      
+      }
     }       
     return;
   }
