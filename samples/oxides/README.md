@@ -5,9 +5,9 @@ All .omd samples contained were obtained from CIF files.
 
 # References
 
-* TiO2rutile | Swope, R.J., Smyth J.R., Larson, A.C., "H in rutile-type compounds: I. Single-crystal neutron and X-ray diffraction study of H in rutile," *American Mineralogist*, **80**, 448-453 (1995).
-* Pb3O4 | Dinnebier, R.E., Carlson, S., Hanfland, M., Jansen, M., "Bulk modulus and high-pressure crystal structures of minum, Pb3O4, determined by X-ray powder diffraction," *American Mineralogist*, **88**, 996-1002 (2003).
-* TiO2 | Howard, C.J., Sabine, T.M., Dickson, F., "Structural and Thermal Parameters for Rutile and Anatase," *Acta Crystallographica, Section B*, **47**, 462-468 (1991).
+* TiO<sub>2</sub>Rutile | Swope, R.J., Smyth J.R., Larson, A.C., "H in rutile-type compounds: I. Single-crystal neutron and X-ray diffraction study of H in rutile," *American Mineralogist*, **80**, 448-453 (1995).
+* Pb<sub>3</sub>O<sub>4</sub> | Dinnebier, R.E., Carlson, S., Hanfland, M., Jansen, M., "Bulk modulus and high-pressure crystal structures of minum, Pb<sub>3</sub>O<sub>4</sub>, determined by X-ray powder diffraction," *American Mineralogist*, **88**, 996-1002 (2003).
+* TiO<sub>2</sub> | Howard, C.J., Sabine, T.M., Dickson, F., "Structural and Thermal Parameters for Rutile and Anatase," *Acta Crystallographica, Section B*, **47**, 462-468 (1991).
 * PbO | Boher, P., Garnier, P., Gavarri, J.R., Hewat, A.W., "Monoxyde Quadratique PbO alpha(I): Description de la Transition Structurale Ferroelastique," *Journal of Solid State Chemistry*, **57**, 343-350 (1985).
-* Cu2O | Hafner, S.S., Nagel, S., "The Electric Field Gradient at the Position of Copper in Cu2O and Electronic Charge Density Analysis by Means of K-Factors," *Physics and Chemistry of Minerals*, **9**, 19-22 (1983).
+* Cu<sub>2</sub>O | Hafner, S.S., Nagel, S., "The Electric Field Gradient at the Position of Copper in Cu<sub>2</sub>O and Electronic Charge Density Analysis by Means of K-Factors," *Physics and Chemistry of Minerals*, **9**, 19-22 (1983).
 * All other structures are from Computed CIF files found on [materialsproject.org](materialsproject.org). DOI: [10.1063/1.4812323](https://aip.scitation.org/doi/abs/10.1063/1.4812323)
