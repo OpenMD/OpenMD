@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -64,18 +64,18 @@
 #include "flucq/FluctuatingChargeForces.hpp"
 
 namespace OpenMD {
-  
+
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
                                   haveCutoffRadius_(false),
-                                  haveDampingAlpha_(false), 
+                                  haveDampingAlpha_(false),
                                   haveDielectric_(false),
                                   haveElectroSplines_(false),
                                   info_(NULL), forceField_(NULL)
-                                  
+
   {
     flucQ_ = new FluctuatingChargeForces(info_);
   }
-  
+
   void Electrostatic::setForceField(ForceField *ff) {
     forceField_ = ff;
     flucQ_->setForceField(forceField_);
@@ -86,20 +86,20 @@ namespace OpenMD {
     flucQ_->setSimulatedAtomTypes(simTypes_);
   }
 
-  void Electrostatic::initialize() { 
-    
+  void Electrostatic::initialize() {
+
     Globals* simParams_ = info_->getSimParams();
 
     summationMap_["HARD"]               = esm_HARD;
     summationMap_["NONE"]               = esm_HARD;
     summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;
-    summationMap_["SHIFTED_POTENTIAL"]  = esm_SHIFTED_POTENTIAL; 
-    summationMap_["SHIFTED_FORCE"]      = esm_SHIFTED_FORCE;     
-    summationMap_["TAYLOR_SHIFTED"]     = esm_TAYLOR_SHIFTED;     
-    summationMap_["REACTION_FIELD"]     = esm_REACTION_FIELD;    
-    summationMap_["EWALD_FULL"]         = esm_EWALD_FULL;        
-    summationMap_["EWALD_PME"]          = esm_EWALD_PME;         
-    summationMap_["EWALD_SPME"]         = esm_EWALD_SPME;        
+    summationMap_["SHIFTED_POTENTIAL"]  = esm_SHIFTED_POTENTIAL;
+    summationMap_["SHIFTED_FORCE"]      = esm_SHIFTED_FORCE;
+    summationMap_["TAYLOR_SHIFTED"]     = esm_TAYLOR_SHIFTED;
+    summationMap_["REACTION_FIELD"]     = esm_REACTION_FIELD;
+    summationMap_["EWALD_FULL"]         = esm_EWALD_FULL;
+    summationMap_["EWALD_PME"]          = esm_EWALD_PME;
+    summationMap_["EWALD_SPME"]         = esm_EWALD_SPME;
     screeningMap_["DAMPED"]             = DAMPED;
     screeningMap_["UNDAMPED"]           = UNDAMPED;
 
@@ -126,16 +126,16 @@ namespace OpenMD {
     chargeToC_ = 1.60217733e-19;
     angstromToM_ = 1.0e-10;
     debyeToCm_ = 3.33564095198e-30;
-    
+
     // Default number of points for electrostatic splines
     np_ = 100;
-    
-    // variables to handle different summation methods for long-range 
+
+    // variables to handle different summation methods for long-range
     // electrostatics:
-    summationMethod_ = esm_HARD;    
+    summationMethod_ = esm_HARD;
     screeningMethod_ = UNDAMPED;
     dielectric_ = 1.0;
-  
+
     // check the summation method:
     if (simParams_->haveElectrostaticSummationMethod()) {
       string myMethod = simParams_->getElectrostaticSummationMethod();
@@ -151,7 +151,7 @@ namespace OpenMD {
                  "\t(Input file specified %s .)\n"
                  "\telectrostaticSummationMethod must be one of: \"hard\",\n"
                  "\t\"shifted_potential\", \"shifted_force\",\n"
-                 "\t\"taylor_shifted\", or \"reaction_field\".\n", 
+                 "\t\"taylor_shifted\", or \"reaction_field\".\n",
                  myMethod.c_str() );
         painCave.isFatal = 1;
         simError();
@@ -168,8 +168,8 @@ namespace OpenMD {
         }
       }
     }
-    
-    if (summationMethod_ == esm_REACTION_FIELD) {        
+
+    if (summationMethod_ == esm_REACTION_FIELD) {
       if (!simParams_->haveDielectric()) {
         // throw warning
         sprintf( painCave.errMsg,
@@ -179,11 +179,11 @@ namespace OpenMD {
         painCave.severity = OPENMD_INFO;
         simError();
       } else {
-        dielectric_ = simParams_->getDielectric();       
+        dielectric_ = simParams_->getDielectric();
       }
       haveDielectric_ = true;
     }
-    
+
     if (simParams_->haveElectrostaticScreeningMethod()) {
       string myScreen = simParams_->getElectrostaticScreeningMethod();
       toUpper(myScreen);
@@ -210,18 +210,18 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-           
+
     if (screeningMethod_ == DAMPED || summationMethod_ == esm_EWALD_FULL) {
       if (!simParams_->haveDampingAlpha()) {
         // first set a cutoff dependent alpha value
         // we assume alpha depends linearly with rcut from 0 to 20.5 ang
         dampingAlpha_ = 0.425 - cutoffRadius_* 0.02;
-        if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;        
+        if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;
         // throw warning
         sprintf( painCave.errMsg,
                  "Electrostatic::initialize: dampingAlpha was not specified in the\n"
                  "\tinput file.  A default value of %f (1/ang) will be used for the\n"
-                 "\tcutoff of %f (ang).\n", 
+                 "\tcutoff of %f (ang).\n",
                  dampingAlpha_, cutoffRadius_);
         painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;
@@ -246,34 +246,34 @@ namespace OpenMD {
     FQtids.resize( forceField_->getNAtomType(), -1);
 
     set<AtomType*>::iterator at;
-    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {     
+    for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isElectrostatic()) nElectro_++;
       if ((*at)->isFluctuatingCharge()) nFlucq_++;
     }
-    
+
     Jij.resize(nFlucq_);
 
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isElectrostatic()) addType(*at);
-    }   
-    
+    }
+
     if (summationMethod_ == esm_REACTION_FIELD) {
-      preRF_ = (dielectric_ - 1.0) / 
+      preRF_ = (dielectric_ - 1.0) /
         ((2.0 * dielectric_ + 1.0) * pow(cutoffRadius_,3) );
     }
-    
+
     RealType b0c, b1c, b2c, b3c, b4c, b5c;
     RealType db0c_1, db0c_2, db0c_3, db0c_4, db0c_5;
     RealType a2, expTerm, invArootPi(0.0);
-    
+
     RealType r = cutoffRadius_;
     RealType r2 = r * r;
     RealType ric = 1.0 / r;
     RealType ric2 = ric * ric;
 
-    if (screeningMethod_ == DAMPED) {      
+    if (screeningMethod_ == DAMPED) {
       a2 = dampingAlpha_ * dampingAlpha_;
-      invArootPi = 1.0 / (dampingAlpha_ * sqrt(Constants::PI));    
+      invArootPi = 1.0 / (dampingAlpha_ * sqrt(Constants::PI));
       expTerm = exp(-a2 * r2);
       // values of Smith's B_l functions at the cutoff radius:
       b0c = erfc(dampingAlpha_ * r) / r;
@@ -304,7 +304,7 @@ namespace OpenMD {
     db0c_2 =     -b1c + r2 * b2c;
     db0c_3 =          3.0*r*b2c  - r2*r*b3c;
     db0c_4 =          3.0*b2c  - 6.0*r2*b3c     + r2*r2*b4c;
-    db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;   
+    db0c_5 =                    -15.0*r*b3c + 10.0*r2*r*b4c - r2*r2*r*b5c;
 
     if (summationMethod_ != esm_EWALD_FULL) {
       selfMult1_ -= b0c;
@@ -330,7 +330,7 @@ namespace OpenMD {
     // between points.
     int nptest = int((cutoffRadius_ + 2.0) / 0.1);
     np_ = (np_ > nptest) ? np_ : nptest;
-  
+
     // Add a 2 angstrom safety window to deal with cutoffGroups that
     // have charged atoms longer than the cutoffRadius away from each
     // other.  Splining is almost certainly the best choice here.
@@ -339,7 +339,7 @@ namespace OpenMD {
 
     RealType dx = (cutoffRadius_ + 2.0) / RealType(np_);
 
-    // Storage vectors for the computed functions    
+    // Storage vectors for the computed functions
     vector<RealType> rv;
     vector<RealType> v01v;
     vector<RealType> v11v;
@@ -364,7 +364,7 @@ namespace OpenMD {
       rmRc4 = rmRc3 * rmRc / 4.0;
 
       // values of Smith's B_l functions at r:
-      if (screeningMethod_ == DAMPED) {             
+      if (screeningMethod_ == DAMPED) {
         b0 = erfc(dampingAlpha_ * r) * ri;
         b1 = (      b0 +     2.0*a2     * expTerm * invArootPi) * ri2;
         b2 = (3.0 * b1 + pow(2.0*a2, 2) * expTerm * invArootPi) * ri2;
@@ -379,7 +379,7 @@ namespace OpenMD {
         b4 = (7.0 * b3) * ri2;
         b5 = (9.0 * b4) * ri2;
       }
-                
+
       // higher derivatives of B_0 at r:
       db0_1 = -r * b1;
       db0_2 =     -b1 + r2 * b2;
@@ -391,7 +391,7 @@ namespace OpenMD {
       fc = b0c;
       f0 = f - fc - rmRc*db0c_1;
 
-      g = db0_1;        
+      g = db0_1;
       gc = db0c_1;
       g0 = g - gc;
       g1 = g0 - rmRc *db0c_2;
@@ -399,25 +399,25 @@ namespace OpenMD {
       g3 = g2 - rmRc3*db0c_4;
       g4 = g3 - rmRc4*db0c_5;
 
-      h = db0_2;      
+      h = db0_2;
       hc = db0c_2;
       h1 = h - hc;
       h2 = h1 - rmRc *db0c_3;
       h3 = h2 - rmRc2*db0c_4;
       h4 = h3 - rmRc3*db0c_5;
 
-      s = db0_3;      
+      s = db0_3;
       sc = db0c_3;
       s2 = s - sc;
       s3 = s2 - rmRc *db0c_4;
       s4 = s3 - rmRc2*db0c_5;
 
-      t = db0_4;      
+      t = db0_4;
       tc = db0c_4;
       t3 = t - tc;
       t4 = t3 - rmRc *db0c_5;
-      
-      u = db0_5;         
+
+      u = db0_5;
       uc = db0c_5;
       u4 = u - uc;
 
@@ -427,40 +427,40 @@ namespace OpenMD {
 
       switch (summationMethod_) {
       case esm_SHIFTED_FORCE:
-                
+
         v01 = f - fc - rmRc*gc;
         v11 = g - gc - rmRc*hc;
         v21 = g*ri - gc*ric - rmRc*(hc - gc*ric)*ric;
         v22 = h - g*ri - (hc - gc*ric) - rmRc*(sc - (hc - gc*ric)*ric);
         v31 = (h-g*ri)*ri - (hc-gc*ric)*ric - rmRc*(sc-2.0*(hc-gc*ric)*ric)*ric;
-        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric) 
+        v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric)
           - rmRc*(tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
-        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2 
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2
           - rmRc*(sc - 3.0*(hc-gc*ric)*ric)*ric2;
-        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric 
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric
           - rmRc*(tc - (4.0*sc - 9.0*(hc - gc*ric)*ric)*ric)*ric;
-        
-        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri)
           - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric)
           - rmRc*(uc-3.0*(2.0*tc - (7.0*sc - 15.0*(hc - gc*ric)*ric)*ric)*ric);
 
         dv01 = g - gc;
         dv11 = h - hc;
         dv21 = (h - g*ri)*ri - (hc - gc*ric)*ric;
-        dv22 = (s - (h - g*ri)*ri) - (sc - (hc - gc*ric)*ric);        
+        dv22 = (s - (h - g*ri)*ri) - (sc - (hc - gc*ric)*ric);
         dv31 = (s - 2.0*(h-g*ri)*ri)*ri - (sc - 2.0*(hc-gc*ric)*ric)*ric;
-        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri) 
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri)
           - (tc - 3.0*(sc-2.0*(hc-gc*ric)*ric)*ric);
         dv41 = (s - 3.0*(h - g*ri)*ri)*ri2 - (sc - 3.0*(hc - gc*ric)*ric)*ric2;
-        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri 
-          - (tc - (4.0*sc - 9.0*(hc-gc*ric)*ric)*ric)*ric; 
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri
+          - (tc - (4.0*sc - 9.0*(hc-gc*ric)*ric)*ric)*ric;
         dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri)
           - (uc - 3.0*(2.0*tc - (7.0*sc - 15.0*(hc - gc*ric)*ric)*ric)*ric);
-        
+
         break;
 
       case esm_TAYLOR_SHIFTED:
-        
+
         v01 = f0;
         v11 = g1;
         v21 = g2 * ri;
@@ -476,9 +476,9 @@ namespace OpenMD {
         dv21 = (h2 - g2*ri)*ri;
         dv22 = (s2 - (h2 - g2*ri)*ri);
         dv31 = (s3 - 2.0*(h3-g3*ri)*ri)*ri;
-        dv32 = (t3 - 3.0*(s3-2.0*(h3-g3*ri)*ri)*ri); 
+        dv32 = (t3 - 3.0*(s3-2.0*(h3-g3*ri)*ri)*ri);
         dv41 = (s4 - 3.0*(h4 - g4*ri)*ri)*ri2;
-        dv42 = (t4 - (4.0*s4 - 9.0*(h4-g4*ri)*ri)*ri)*ri; 
+        dv42 = (t4 - (4.0*s4 - 9.0*(h4-g4*ri)*ri)*ri)*ri;
         dv43 = (u4 - 3.0*(2.0*t4 - (7.0*s4 - 15.0*(h4 - g4*ri)*ri)*ri)*ri);
 
         break;
@@ -491,9 +491,9 @@ namespace OpenMD {
         v22 = h - g*ri - (hc - gc*ric);
         v31 = (h-g*ri)*ri - (hc-gc*ric)*ric;
         v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
-        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
-        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
-        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2;
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri)
           - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric);
 
         dv01 = g;
@@ -501,9 +501,9 @@ namespace OpenMD {
         dv21 = (h - g*ri)*ri;
         dv22 = (s - (h - g*ri)*ri);
         dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
-        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri);
         dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
-        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri;
         dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
 
         break;
@@ -518,8 +518,8 @@ namespace OpenMD {
         v22 = h - g*ri;
         v31 = (h-g*ri)*ri;
         v32 = (s - 3.0*(h-g*ri)*ri);
-        v41 = (h - g*ri)*ri2; 
-        v42 = (s-3.0*(h-g*ri)*ri)*ri;        
+        v41 = (h - g*ri)*ri2;
+        v42 = (s-3.0*(h-g*ri)*ri)*ri;
         v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri);
 
         dv01 = g;
@@ -527,20 +527,20 @@ namespace OpenMD {
         dv21 = (h - g*ri)*ri;
         dv22 = (s - (h - g*ri)*ri);
         dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
-        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri);
         dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
-        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri;
         dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
 
         break;
 
       case esm_REACTION_FIELD:
-        
+
         // following DL_POLY's lead for shifting the image charge potential:
         f = b0 + preRF_ * r2;
         fc = b0c + preRF_ * cutoffRadius_ * cutoffRadius_;
 
-        g = db0_1 + preRF_ * 2.0 * r;        
+        g = db0_1 + preRF_ * 2.0 * r;
         gc = db0c_1 + preRF_ * 2.0 * cutoffRadius_;
 
         h = db0_2 + preRF_ * 2.0;
@@ -552,9 +552,9 @@ namespace OpenMD {
         v22 = h - g*ri - (hc - gc*ric);
         v31 = (h-g*ri)*ri - (hc-gc*ric)*ric;
         v32 = (s - 3.0*(h-g*ri)*ri) - (sc - 3.0*(hc-gc*ric)*ric);
-        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2; 
-        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;        
-        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri) 
+        v41 = (h - g*ri)*ri2 - (hc - gc*ric)*ric2;
+        v42 = (s-3.0*(h-g*ri)*ri)*ri - (sc-3.0*(hc-gc*ric)*ric)*ric;
+        v43 = (t - 3.0*(2.0*s - 5.0*(h - g*ri)*ri)*ri)
           - (tc - 3.0*(2.0*sc - 5.0*(hc - gc*ric)*ric)*ric);
 
         dv01 = g;
@@ -562,13 +562,13 @@ namespace OpenMD {
         dv21 = (h - g*ri)*ri;
         dv22 = (s - (h - g*ri)*ri);
         dv31 = (s - 2.0*(h-g*ri)*ri)*ri;
-        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri); 
+        dv32 = (t - 3.0*(s-2.0*(h-g*ri)*ri)*ri);
         dv41 = (s - 3.0*(h - g*ri)*ri)*ri2;
-        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri; 
+        dv42 = (t - (4.0*s - 9.0*(h-g*ri)*ri)*ri)*ri;
         dv43 = (u - 3.0*(2.0*t - (7.0*s - 15.0*(h - g*ri)*ri)*ri)*ri);
 
         break;
-                
+
       case esm_EWALD_PME:
       case esm_EWALD_SPME:
       default :
@@ -580,11 +580,11 @@ namespace OpenMD {
         sprintf( painCave.errMsg,
                  "Electrostatic::initialize: electrostaticSummationMethod %s \n"
                  "\thas not been implemented yet. Please select one of:\n"
-                 "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n", 
+                 "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n",
                  meth.c_str() );
         painCave.isFatal = 1;
         simError();
-        break;       
+        break;
       }
 
       // Add these computed values to the storage vectors for spline creation:
@@ -593,7 +593,7 @@ namespace OpenMD {
       v21v.push_back(v21);
       v22v.push_back(v22);
       v31v.push_back(v31);
-      v32v.push_back(v32);      
+      v32v.push_back(v32);
       v41v.push_back(v41);
       v42v.push_back(v42);
       v43v.push_back(v43);
@@ -625,9 +625,9 @@ namespace OpenMD {
 
     initialized_ = true;
   }
-      
+
   void Electrostatic::addType(AtomType* atomType){
-    
+
     ElectrostaticAtomData electrostaticAtomData;
     electrostaticAtomData.is_Charge = false;
     electrostaticAtomData.is_Dipole = false;
@@ -653,7 +653,7 @@ namespace OpenMD {
         electrostaticAtomData.quadrupole = ma.getQuadrupole();
       }
     }
-    
+
     FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 
     if (fqa.isFluctuatingCharge()) {
@@ -669,7 +669,7 @@ namespace OpenMD {
     int etid = Etypes.size();
     int fqtid = FQtypes.size();
 
-    pair<set<int>::iterator,bool> ret;    
+    pair<set<int>::iterator,bool> ret;
     ret = Etypes.insert( atid );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
@@ -677,9 +677,9 @@ namespace OpenMD {
                atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
-      simError();         
+      simError();
     }
-    
+
     Etids[ atid ] = etid;
     ElectrostaticMap.push_back(electrostaticAtomData);
 
@@ -691,16 +691,16 @@ namespace OpenMD {
                  atid );
         painCave.severity = OPENMD_INFO;
         painCave.isFatal = 0;
-        simError();         
+        simError();
       }
       FQtids[atid] = fqtid;
       Jij[fqtid].resize(nFlucq_);
 
       // Now, iterate over all known fluctuating and add to the
       // coulomb integral map:
-      
+
       std::set<int>::iterator it;
-      for( it = FQtypes.begin(); it != FQtypes.end(); ++it) {     
+      for( it = FQtypes.begin(); it != FQtypes.end(); ++it) {
         int etid2 = Etids[ (*it) ];
         int fqtid2 = FQtids[ (*it) ];
         ElectrostaticAtomData eaData2 = ElectrostaticMap[ etid2 ];
@@ -708,17 +708,17 @@ namespace OpenMD {
         RealType b = eaData2.slaterZeta;
         int m = electrostaticAtomData.slaterN;
         int n = eaData2.slaterN;
+        CubicSpline* J = new CubicSpline();
 
         // do both types actually use Slater orbitals?
-        bool useSlater = electrostaticAtomData.uses_SlaterJ &&
-          eaData2.uses_SlaterJ;
 
-        if ( useSlater ) {
+        if ( electrostaticAtomData.uses_SlaterJ && eaData2.uses_SlaterJ ) {
+
           // Create the spline of the coulombic integral for s-type
           // Slater orbitals.  Add a 2 angstrom safety window to deal
           // with cutoffGroups that have charged atoms longer than the
           // cutoffRadius away from each other.
-          
+
           RealType rval;
           RealType dr = (cutoffRadius_ + 2.0) / RealType(np_ - 1);
           vector<RealType> rvals;
@@ -729,33 +729,32 @@ namespace OpenMD {
           for (int i = 1; i < np_+1; i++) {
             rval = RealType(i) * dr;
             rvals.push_back(rval);
-            
-            
-            // j0 = sSTOCoulInt( a, b, m, n, rval * Constants::angstromToBohr ) * 
+
+
+            // j0 = sSTOCoulInt( a, b, m, n, rval * Constants::angstromToBohr ) *
             //   Constants::hartreeToKcal;
             // j0c = sSTOCoulInt( a, b, m, n,
-            //                    cutoffRadius_ * Constants::angstromToBohr ) * 
+            //                    cutoffRadius_ * Constants::angstromToBohr ) *
             //   Constants::hartreeToKcal;
             // j1c = sSTOCoulIntGrad( a, b, m, n,
             //                        cutoffRadius_ * Constants::angstromToBohr ) *
             //   Constants::hartreeToKcal;
-            
+
             Jvals.push_back( sSTOCoulInt( a, b, m, n,
                                           rval * Constants::angstromToBohr ) *
                              Constants::hartreeToKcal );
           }
-        
-          CubicSpline* J = new CubicSpline();
+
           J->addPoints(rvals, Jvals);
-          Jij[fqtid][fqtid2] = J;
-          Jij[fqtid2].resize( nFlucq_ );
-          Jij[fqtid2][fqtid] = J;
         }
+        Jij[fqtid][fqtid2] = J;
+        Jij[fqtid2].resize( nFlucq_ );
+        Jij[fqtid2][fqtid] = J;
       }
-    }       
+    }
     return;
   }
-  
+
   void Electrostatic::setCutoffRadius( RealType rCut ) {
     cutoffRadius_ = rCut;
     haveCutoffRadius_ = true;
@@ -780,7 +779,7 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
 
-    if (Etids[idat.atid1] != -1) { 
+    if (Etids[idat.atid1] != -1) {
       data1 = ElectrostaticMap[Etids[idat.atid1]];
       a_is_Charge = data1.is_Charge;
       a_is_Dipole = data1.is_Dipole;
@@ -796,7 +795,7 @@ namespace OpenMD {
       a_uses_Slater = false;
 
     }
-    if (Etids[idat.atid2] != -1) { 
+    if (Etids[idat.atid2] != -1) {
       data2 = ElectrostaticMap[Etids[idat.atid2]];
       b_is_Charge = data2.is_Charge;
       b_is_Dipole = data2.is_Dipole;
@@ -823,7 +822,7 @@ namespace OpenMD {
     dUdCa = 0.0; // fluctuating charge force at site a
     dUdCb = 0.0; // fluctuating charge force at site a
     RealType coulDeriv;
-    
+
     // Indirect interactions mediated by the reaction field.
     indirect_Pot = 0.0;   // Potential
     indirect_F.zero();    // Force
@@ -837,15 +836,15 @@ namespace OpenMD {
 
     ri = 1.0 /  *(idat.rij);
     rhat =  *(idat.d)  * ri;
-      
+
     // Obtain all of the required radial function values from the
     // spline structures:
 
     if (((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) ||
         (a_uses_Slater && b_uses_Slater)) {
       J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
-    }    
-        
+    }
+
     // needed for fields (and forces):
     if (a_is_Charge || b_is_Charge) {
       v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
@@ -858,10 +857,10 @@ namespace OpenMD {
       v21s->getValueAndDerivativeAt( *(idat.rij), v21, dv21);
       v22s->getValueAndDerivativeAt( *(idat.rij), v22, dv22);
       v22or = ri * v22;
-    }      
+    }
 
     // needed for potentials (and forces and torques):
-    if ((a_is_Dipole && b_is_Quadrupole) || 
+    if ((a_is_Dipole && b_is_Quadrupole) ||
         (b_is_Dipole && a_is_Quadrupole)) {
       v31s->getValueAndDerivativeAt( *(idat.rij), v31, dv31);
       v32s->getValueAndDerivativeAt( *(idat.rij), v32, dv32);
@@ -877,14 +876,14 @@ namespace OpenMD {
     }
 
     // calculate the single-site contributions (fields, etc).
-    
+
     if (a_is_Charge) {
       C_a = data1.fixedCharge;
-      
+
       if (a_is_Fluctuating) {
         C_a += *(idat.flucQ1);
       }
-      
+
       if (idat.excluded) {
         *(idat.skippedCharge2) += C_a;
       } else {
@@ -893,7 +892,7 @@ namespace OpenMD {
         Pb += C_a *  pre11_ * v01;
       }
     }
-    
+
     if (a_is_Dipole) {
       D_a = *(idat.dipole1);
       rdDa = dot(rhat, D_a);
@@ -904,7 +903,7 @@ namespace OpenMD {
       }
 
     }
-    
+
     if (a_is_Quadrupole) {
       Q_a = *(idat.quadrupole1);
       trQa =  Q_a.trace();
@@ -913,20 +912,20 @@ namespace OpenMD {
       rdQar = dot(rhat, Qar);
       rxQar = cross(rhat, Qar);
       if (!idat.excluded) {
-        Eb -= pre14_ * (trQa * rhat * dv21 + 2.0 * Qar * v22or 
+        Eb -= pre14_ * (trQa * rhat * dv21 + 2.0 * Qar * v22or
                         + rdQar * rhat * (dv22 - 2.0*v22or));
         Pb += pre14_ * (v21 * trQa + v22 * rdQar);
       }
     }
-    
+
     if (b_is_Charge) {
       C_b = data2.fixedCharge;
-      
+
       if (b_is_Fluctuating) {
-        C_b += *(idat.flucQ2);                
+        C_b += *(idat.flucQ2);
       }
-                
-      
+
+
       if (idat.excluded) {
         *(idat.skippedCharge1) += C_b;
       } else {
@@ -935,7 +934,7 @@ namespace OpenMD {
         Pa += C_b *  pre11_ * v01;
       }
     }
-    
+
     if (b_is_Dipole) {
       D_b = *(idat.dipole2);
       rdDb = dot(rhat, D_b);
@@ -945,7 +944,7 @@ namespace OpenMD {
         Pa += pre12_ * v11 * rdDb;
       }
     }
-    
+
     if (b_is_Quadrupole) {
       Q_b = *(idat.quadrupole2);
       trQb =  Q_b.trace();
@@ -954,14 +953,14 @@ namespace OpenMD {
       rdQbr = dot(rhat, Qbr);
       rxQbr = cross(rhat, Qbr);
       if (!idat.excluded) {
-        Ea += pre14_ * (trQb * rhat * dv21 + 2.0 * Qbr * v22or 
+        Ea += pre14_ * (trQb * rhat * dv21 + 2.0 * Qbr * v22or
                         + rdQbr * rhat * (dv22 - 2.0*v22or));
         Pa += pre14_ * (v21 * trQb + v22 * rdQbr);
       }
     }
-        
-    if (a_is_Charge) {     
-      
+
+    if (a_is_Charge) {
+
       if (b_is_Charge) {
 
         if (a_uses_Slater && b_uses_Slater) {
@@ -973,11 +972,11 @@ namespace OpenMD {
           if (b_is_Fluctuating) dUdCb += C_a * coulInt;
         } else {
 
-          pref =  pre11_ * *(idat.electroMult);        
+          pref =  pre11_ * *(idat.electroMult);
           U  += C_a * C_b * pref * v01;
           F  += C_a * C_b * pref * dv01 * rhat;
         }
-        
+
         // If this is an excluded pair, there are still indirect
         // interactions via the reaction field we must worry about:
 
@@ -995,18 +994,18 @@ namespace OpenMD {
           if (a_is_Fluctuating || b_is_Fluctuating) {
             coulInt = J->getValueAt( *(idat.rij) );
             excluded_Pot += C_a * C_b * coulInt;
-            
+
             if (a_is_Fluctuating) dUdCa += C_b * coulInt;
-            if (b_is_Fluctuating) dUdCb += C_a * coulInt;          
+            if (b_is_Fluctuating) dUdCb += C_a * coulInt;
           }
         } else {
           if (a_is_Fluctuating) dUdCa += C_b * pref * v01;
           if (b_is_Fluctuating) dUdCb += C_a * pref * v01;
-        }              
+        }
       }
 
       if (b_is_Dipole) {
-        pref =  pre12_ * *(idat.electroMult);        
+        pref =  pre12_ * *(idat.electroMult);
         U  += C_a * pref * v11 * rdDb;
         F  += C_a * pref * ((dv11 - v11or) * rdDb * rhat + v11or * D_b);
         Tb += C_a * pref * v11 * rxDb;
@@ -1091,7 +1090,7 @@ namespace OpenMD {
         F  -= pref * (D_a*rdQbr + 2.0*rdDa*rQb) * v32or;
         F  -= pref * (rdDa * rdQbr * rhat * (dv32-3.0*v32or));
         Ta += pref * ((-trQb*rxDa + 2.0 * DaxQbr)*v31 - rxDa*rdQbr*v32);
-        Tb += pref * ((2.0*cross(DadQb, rhat) - 2.0*DaxQbr)*v31 
+        Tb += pref * ((2.0*cross(DadQb, rhat) - 2.0*DaxQbr)*v31
                       - 2.0*rdDa*rxQbr*v32);
       }
     }
@@ -1117,7 +1116,7 @@ namespace OpenMD {
         F  += pref * (trQa*rdDb + 2.0*DbdQar) * (dv31-v31or) * rhat;
         F  += pref * (D_b*rdQar + 2.0*rdDb*rQa) * v32or;
         F  += pref * (rdDb * rdQar * rhat * (dv32-3.0*v32or));
-        Ta += pref * ((-2.0*cross(DbdQa, rhat) + 2.0*DbxQar)*v31 
+        Ta += pref * ((-2.0*cross(DbdQa, rhat) + 2.0*DbxQar)*v31
                       + 2.0*rdDb*rxQar*v32);
         Tb += pref * ((trQa*rxDb - 2.0 * DbxQar)*v31 + rxDb*rdQar*v32);
       }
@@ -1130,7 +1129,7 @@ namespace OpenMD {
         QaxQb = mCross(Q_a, Q_b);
         rQaQbr = dot(rQa, Qbr);
         rQaxQbr = cross(rQa, Qbr);
-        
+
         U  += pref * (trQa * trQb + 2.0 * trQaQb) * v41;
         U  += pref * (trQa * rdQbr + trQb * rdQar  + 4.0 * rQaQbr) * v42;
         U  += pref * (rdQar * rdQbr) * v43;
@@ -1144,18 +1143,18 @@ namespace OpenMD {
         F  += pref * 2.0 * (rQa*rdQbr + rdQar*rQb) * v43or;
 
         Ta += pref * (- 4.0 * QaxQb * v41);
-        Ta += pref * (- 2.0 * trQb * cross(rQa, rhat) 
-                      + 4.0 * cross(rhat, QaQbr) 
+        Ta += pref * (- 2.0 * trQb * cross(rQa, rhat)
+                      + 4.0 * cross(rhat, QaQbr)
                       - 4.0 * rQaxQbr) * v42;
         Ta += pref * 2.0 * cross(rhat,Qar) * rdQbr * v43;
 
 
         Tb += pref * (+ 4.0 * QaxQb * v41);
-        Tb += pref * (- 2.0 * trQa * cross(rQb, rhat) 
-                      - 4.0 * cross(rQaQb, rhat) 
+        Tb += pref * (- 2.0 * trQa * cross(rQb, rhat)
+                      - 4.0 * cross(rQaQb, rhat)
                       + 4.0 * rQaxQbr) * v42;
         // Possible replacement for line 2 above:
-        //             + 4.0 * cross(rhat, QbQar) 
+        //             + 4.0 * cross(rhat, QbQar)
 
         Tb += pref * 2.0 * cross(rhat,Qbr) * rdQar * v43;
       }
@@ -1180,13 +1179,13 @@ namespace OpenMD {
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
       if (idat.isSelected)
         (*(idat.selePot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
-         
+
       *(idat.f1) += F * *(idat.sw);
-      
-      if (a_is_Dipole || a_is_Quadrupole) 
+
+      if (a_is_Dipole || a_is_Quadrupole)
         *(idat.t1) += Ta * *(idat.sw);
 
-      if (b_is_Dipole || b_is_Quadrupole) 
+      if (b_is_Dipole || b_is_Quadrupole)
         *(idat.t2) += Tb * *(idat.sw);
 
     } else {
@@ -1194,40 +1193,40 @@ namespace OpenMD {
       // only accumulate the forces and torques resulting from the
       // indirect reaction field terms.
 
-      *(idat.vpair) += indirect_Pot;      
+      *(idat.vpair) += indirect_Pot;
       (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] +=  excluded_Pot;
       (*(idat.pot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
       if (idat.isSelected)
         (*(idat.selePot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
 
       *(idat.f1) += *(idat.sw) * indirect_F;
-      
-      if (a_is_Dipole || a_is_Quadrupole) 
+
+      if (a_is_Dipole || a_is_Quadrupole)
         *(idat.t1) += *(idat.sw) * indirect_Ta;
-            
-      if (b_is_Dipole || b_is_Quadrupole) 
+
+      if (b_is_Dipole || b_is_Quadrupole)
         *(idat.t2) += *(idat.sw) * indirect_Tb;
     }
     return;
   }
-    
-  void Electrostatic::calcSelfCorrection(SelfData &sdat) {    
+
+  void Electrostatic::calcSelfCorrection(SelfData &sdat) {
     if (!initialized_) initialize();
 
     ElectrostaticAtomData data = ElectrostaticMap[Etids[sdat.atid]];
-    
+
     // logicals
     bool i_is_Charge = data.is_Charge;
     bool i_is_Dipole = data.is_Dipole;
     bool i_is_Quadrupole = data.is_Quadrupole;
     bool i_is_Fluctuating = data.is_Fluctuating;
-    RealType C_a = data.fixedCharge;   
+    RealType C_a = data.fixedCharge;
     RealType selfPot(0.0), fqf(0.0), preVal, DdD(0.0), trQ, trQQ;
 
     if (i_is_Dipole) {
       DdD = data.dipole.lengthSquare();
     }
-        
+
     if (i_is_Fluctuating) {
       // We're now doing all of the self pieces for fluctuating charges in
       // explicit self interactions.
@@ -1237,7 +1236,7 @@ namespace OpenMD {
 
     switch (summationMethod_) {
     case esm_REACTION_FIELD:
-      
+
       if (i_is_Charge) {
         // Self potential [see Wang and Hermans, "Reaction Field
         // Molecular Dynamics Simulation with Friedman’s Image Charge
@@ -1252,9 +1251,9 @@ namespace OpenMD {
       if (i_is_Dipole) {
         selfPot -= pre22_ * preRF_ * DdD;
       }
-      
+
       break;
-      
+
     case esm_SHIFTED_FORCE:
     case esm_SHIFTED_POTENTIAL:
     case esm_TAYLOR_SHIFTED:
@@ -1265,8 +1264,8 @@ namespace OpenMD {
         //  fqf -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
         // }
       }
-      if (i_is_Dipole) 
-        selfPot += selfMult2_ * pre22_ * DdD;      
+      if (i_is_Dipole)
+        selfPot += selfMult2_ * pre22_ * DdD;
       if (i_is_Quadrupole) {
         trQ = data.quadrupole.trace();
         trQQ = (data.quadrupole * data.quadrupole).trace();
@@ -1282,12 +1281,12 @@ namespace OpenMD {
     default:
       break;
     }
-   
+
     (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += selfPot;
 
     if (sdat.isSelected)
       (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += selfPot;
-    
+
     if (i_is_Fluctuating)
       *(sdat.flucQfrc) += fqf;
 
@@ -1299,13 +1298,13 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
     RealType C;
-    Vector3d r;    
+    Vector3d r;
     Vector3d D;
     Vector3d t;
     Vector3d netDipole(0.0);
     int atid;
     ElectrostaticAtomData data;
-   
+
     const RealType mPoleConverter = 0.20819434; // converts from the
                                                 // internal units of
                                                 // Debye (for dipoles)
@@ -1313,7 +1312,7 @@ namespace OpenMD {
                                                 // (for quadrupoles) to
                                                 // electron angstroms or
                                                 // electron-angstroms^2
-    
+
     const RealType eConverter = 332.0637778; // convert the
                                              // Charge-Charge
                                              // electrostatic
@@ -1321,27 +1320,27 @@ namespace OpenMD {
                                              // mol assuming distances
                                              // are measured in
                                              // angstroms.
-    
+
     if (!initialized_) initialize();
 
-    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
-          atom = mol->nextAtom(ai)) {  
+      for(Atom* atom = mol->beginAtom(ai); atom != NULL;
+          atom = mol->nextAtom(ai)) {
 
         atid = atom->getAtomType()->getIdent();
         data = ElectrostaticMap[Etids[atid]];
-        
+
         if (data.is_Charge) {
-          C = data.fixedCharge;         
+          C = data.fixedCharge;
           if (data.is_Fluctuating) C += atom->getFlucQPos();
 
           r = atom->getPos();
           info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
-          
+
           netDipole += C * r;
         }
-        
+
         if (data.is_Dipole) {
           D = atom->getDipole() * mPoleConverter;
           netDipole += D;
@@ -1350,7 +1349,7 @@ namespace OpenMD {
     }
 
 #ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, netDipole.getArrayPointer(), 3, 
+    MPI_Allreduce(MPI_IN_PLACE, netDipole.getArrayPointer(), 3,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 
@@ -1369,18 +1368,18 @@ namespace OpenMD {
     }
 
     pot +=  eConverter * prefactor * netDipole.lengthSquare();
-  
-    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+
+    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
-          atom = mol->nextAtom(ai)) {  
+      for(Atom* atom = mol->beginAtom(ai); atom != NULL;
+          atom = mol->nextAtom(ai)) {
         atom->addElectricField( - eConverter * prefactor * 2.0 * netDipole );
 
         atid = atom->getAtomType()->getIdent();
         data = ElectrostaticMap[Etids[atid]];
-        
+
         if (data.is_Charge) {
-          C = data.fixedCharge;         
+          C = data.fixedCharge;
           if (data.is_Fluctuating) {
             r = atom->getPos();
             info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
@@ -1388,7 +1387,7 @@ namespace OpenMD {
           }
           atom->addFrc( - eConverter * prefactor * 2.0 * C * netDipole );
         }
-        
+
         if (data.is_Dipole) {
           D = atom->getDipole() * mPoleConverter;
           t = - eConverter * prefactor * 2.0 * cross(D, netDipole);
@@ -1396,8 +1395,8 @@ namespace OpenMD {
         }
       }
     }
-  }        
-  
+  }
+
   RealType Electrostatic::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     // This seems to work moderately well as a default.  There's no
     // inherent scale for 1/r interactions that we can standardize.
@@ -1408,10 +1407,10 @@ namespace OpenMD {
 
 
   void Electrostatic::ReciprocalSpaceSum(RealType& pot) {
-    
+
     RealType kPot = 0.0;
     RealType kVir = 0.0;
-    
+
     const RealType mPoleConverter = 0.20819434; // converts from the
                                                 // internal units of
                                                 // Debye (for dipoles)
@@ -1419,7 +1418,7 @@ namespace OpenMD {
                                                 // (for quadrupoles) to
                                                 // electron angstroms or
                                                 // electron-angstroms^2
-    
+
     const RealType eConverter = 332.0637778; // convert the
                                              // Charge-Charge
                                              // electrostatic
@@ -1431,37 +1430,37 @@ namespace OpenMD {
     Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     Vector3d box = hmat.diagonals();
     RealType boxMax = box.max();
-    
+
     //int kMax = int(2.0 * Constants::PI / (pow(dampingAlpha_,2)*cutoffRadius_ * boxMax) );
     int kMax = 7;
     int kSqMax = kMax*kMax + 2;
-    
+
     int kLimit = kMax+1;
     int kLim2 = 2*kMax+1;
     int kSqLim = kSqMax;
-    
+
     vector<RealType> AK(kSqLim+1, 0.0);
     RealType xcl = 2.0 * Constants::PI / box.x();
     RealType ycl = 2.0 * Constants::PI / box.y();
     RealType zcl = 2.0 * Constants::PI / box.z();
     RealType rcl = 2.0 * Constants::PI / boxMax;
     RealType rvol = 2.0 * Constants::PI /(box.x() * box.y() * box.z());
-    
+
     if(dampingAlpha_ < 1.0e-12) return;
-    
+
     RealType ralph = -0.25/pow(dampingAlpha_,2);
-    
-    // Calculate and store exponential factors  
-    
+
+    // Calculate and store exponential factors
+
     vector<vector<RealType> > elc;
     vector<vector<RealType> > emc;
     vector<vector<RealType> > enc;
     vector<vector<RealType> > els;
     vector<vector<RealType> > ems;
     vector<vector<RealType> > ens;
-    
+
     int nMax = info_->getNAtoms();
-    
+
     elc.resize(kLimit+1);
     emc.resize(kLimit+1);
     enc.resize(kLimit+1);
@@ -1477,7 +1476,7 @@ namespace OpenMD {
       ems[j].resize(nMax);
       ens[j].resize(nMax);
     }
-    
+
     Vector3d t( 2.0 * Constants::PI );
     t.Vdiv(t, box);
 
@@ -1486,16 +1485,16 @@ namespace OpenMD {
     int i;
     Vector3d r;
     Vector3d tt;
-    
-    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+
+    for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
-          atom = mol->nextAtom(ai)) {  
-        
+      for(Atom* atom = mol->beginAtom(ai); atom != NULL;
+          atom = mol->nextAtom(ai)) {
+
         i = atom->getLocalIndex();
         r = atom->getPos();
         info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
-        
+
         tt.Vmul(t, r);
 
         elc[1][i] = 1.0;
@@ -1511,7 +1510,7 @@ namespace OpenMD {
         els[2][i] = sin(tt.x());
         ems[2][i] = sin(tt.y());
         ens[2][i] = sin(tt.z());
-        
+
         for(int l = 3; l <= kLimit; l++) {
           elc[l][i]=elc[l-1][i]*elc[2][i]-els[l-1][i]*els[2][i];
           emc[l][i]=emc[l-1][i]*emc[2][i]-ems[l-1][i]*ems[2][i];
@@ -1522,9 +1521,9 @@ namespace OpenMD {
         }
       }
     }
-    
+
     // Calculate and store AK coefficients:
-    
+
     RealType eksq = 1.0;
     RealType expf = 0.0;
     if (ralph < 0.0) expf = exp(ralph*rcl*rcl);
@@ -1533,7 +1532,7 @@ namespace OpenMD {
       eksq = expf*eksq;
       AK[i] = eConverter * eksq/rksq;
     }
-    
+
     /*
      * Loop over all k vectors k = 2 pi (ll/Lx, mm/Ly, nn/Lz)
      * the values of ll, mm and nn are selected so that the symmetry of
@@ -1547,9 +1546,9 @@ namespace OpenMD {
      * nn ranges over 1 to kMax when ll=mm=0 and over
      *            -kMax to kMax otherwise.
      *
-     * Hence the result of the summation must be doubled at the end.     
+     * Hence the result of the summation must be doubled at the end.
      */
-    
+
     std::vector<RealType> clm(nMax, 0.0);
     std::vector<RealType> slm(nMax, 0.0);
     std::vector<RealType> ckr(nMax, 0.0);
@@ -1576,18 +1575,18 @@ namespace OpenMD {
     int mMin = kLimit;
     int nMin = kLimit + 1;
     for (int l = 1; l <= kLimit; l++) {
-      int ll = l - 1; 
+      int ll = l - 1;
       rl = xcl * float(ll);
       for (int mmm = mMin; mmm <= kLim2; mmm++) {
         int mm = mmm - kLimit;
         int m = abs(mm) + 1;
         rm = ycl * float(mm);
         // Set temporary products of exponential terms
-        for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+        for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
              mol = info_->nextMolecule(mi)) {
-          for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+          for(Atom* atom = mol->beginAtom(ai); atom != NULL;
               atom = mol->nextAtom(ai)) {
-            
+
             i = atom->getLocalIndex();
             if(mm < 0) {
               clm[i]=elc[l][i]*emc[m][i]+els[l][i]*ems[m][i];
@@ -1599,7 +1598,7 @@ namespace OpenMD {
           }
         }
         for (int nnn = nMin; nnn <= kLim2; nnn++) {
-          int nn = nnn - kLimit;          
+          int nn = nnn - kLimit;
           int n = abs(nn) + 1;
           rn = zcl * float(nn);
           // Test on magnitude of k vector:
@@ -1608,12 +1607,12 @@ namespace OpenMD {
             kVec = Vector3d(rl, rm, rn);
             k2 = outProduct(kVec, kVec);
             // Calculate exp(ikr) terms
-            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
                  mol = info_->nextMolecule(mi)) {
-              for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
-                  atom = mol->nextAtom(ai)) { 
+              for(Atom* atom = mol->beginAtom(ai); atom != NULL;
+                  atom = mol->nextAtom(ai)) {
                 i = atom->getLocalIndex();
-                
+
                 if (nn < 0) {
                   ckr[i]=clm[i]*enc[n][i]+slm[i]*ens[n][i];
                   skr[i]=slm[i]*enc[n][i]-clm[i]*ens[n][i];
@@ -1624,24 +1623,24 @@ namespace OpenMD {
                 }
               }
             }
-            
+
             // Calculate scalar and vector products for each site:
-            
-            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+
+            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
                  mol = info_->nextMolecule(mi)) {
-              for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+              for(Atom* atom = mol->beginAtom(ai); atom != NULL;
                   atom = mol->nextAtom(ai)) {
                 i = atom->getLocalIndex();
                 int atid = atom->getAtomType()->getIdent();
                 data = ElectrostaticMap[Etids[atid]];
-                               
+
                 if (data.is_Charge) {
                   C = data.fixedCharge;
                   if (data.is_Fluctuating) C += atom->getFlucQPos();
                   ckc[i] = C * ckr[i];
                   cks[i] = C * skr[i];
                 }
-                
+
                 if (data.is_Dipole) {
                   D = atom->getDipole() * mPoleConverter;
                   dk = dot(D, kVec);
@@ -1650,40 +1649,40 @@ namespace OpenMD {
                   dks[i] = dk * skr[i];
                 }
                 if (data.is_Quadrupole) {
-                  Q = atom->getQuadrupole() * mPoleConverter; 
-                  Qk = Q * kVec;                  
+                  Q = atom->getQuadrupole() * mPoleConverter;
+                  Qk = Q * kVec;
                   qk = dot(kVec, Qk);
                   qxk[i] = -cross(kVec, Qk);
                   qkc[i] = qk * ckr[i];
                   qks[i] = qk * skr[i];
-                }              
+                }
               }
             }
 
             // calculate vector sums
-            
+
             ckcs = std::accumulate(ckc.begin(),ckc.end(),0.0);
             ckss = std::accumulate(cks.begin(),cks.end(),0.0);
             dkcs = std::accumulate(dkc.begin(),dkc.end(),0.0);
             dkss = std::accumulate(dks.begin(),dks.end(),0.0);
             qkcs = std::accumulate(qkc.begin(),qkc.end(),0.0);
             qkss = std::accumulate(qks.begin(),qks.end(),0.0);
-            
+
 #ifdef IS_MPI
-            MPI_Allreduce(MPI_IN_PLACE, &ckcs, 1, MPI_REALTYPE, 
+            MPI_Allreduce(MPI_IN_PLACE, &ckcs, 1, MPI_REALTYPE,
                           MPI_SUM, MPI_COMM_WORLD);
-            MPI_Allreduce(MPI_IN_PLACE, &ckss, 1, MPI_REALTYPE, 
+            MPI_Allreduce(MPI_IN_PLACE, &ckss, 1, MPI_REALTYPE,
                           MPI_SUM, MPI_COMM_WORLD);
-            MPI_Allreduce(MPI_IN_PLACE, &dkcs, 1, MPI_REALTYPE, 
+            MPI_Allreduce(MPI_IN_PLACE, &dkcs, 1, MPI_REALTYPE,
                           MPI_SUM, MPI_COMM_WORLD);
-            MPI_Allreduce(MPI_IN_PLACE, &dkss, 1, MPI_REALTYPE, 
+            MPI_Allreduce(MPI_IN_PLACE, &dkss, 1, MPI_REALTYPE,
                           MPI_SUM, MPI_COMM_WORLD);
-            MPI_Allreduce(MPI_IN_PLACE, &qkcs, 1, MPI_REALTYPE, 
+            MPI_Allreduce(MPI_IN_PLACE, &qkcs, 1, MPI_REALTYPE,
                           MPI_SUM, MPI_COMM_WORLD);
-            MPI_Allreduce(MPI_IN_PLACE, &qkss, 1, MPI_REALTYPE, 
+            MPI_Allreduce(MPI_IN_PLACE, &qkss, 1, MPI_REALTYPE,
                           MPI_SUM, MPI_COMM_WORLD);
-#endif        
-            
+#endif
+
             // Accumulate potential energy and virial contribution:
 
             kPot += 2.0 * rvol * AK[kk]*((ckss+dkcs-qkss)*(ckss+dkcs-qkss)
@@ -1695,14 +1694,14 @@ namespace OpenMD {
                                           -6.0*(ckss*qkss+ckcs*qkcs)
                                           +8.0*(dkss*qkcs-dkcs*qkss)
                                           +5.0*(qkss*qkss+qkcs*qkcs));
-            
+
             // Calculate force and torque for each site:
-            
-            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL; 
+
+            for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
                  mol = info_->nextMolecule(mi)) {
-              for(Atom* atom = mol->beginAtom(ai); atom != NULL; 
+              for(Atom* atom = mol->beginAtom(ai); atom != NULL;
                   atom = mol->nextAtom(ai)) {
-                
+
                 i = atom->getLocalIndex();
                 atid = atom->getAtomType()->getIdent();
                 data = ElectrostaticMap[Etids[atid]];
@@ -1713,13 +1712,13 @@ namespace OpenMD {
                                          -ckr[i]*(ckss+dkcs-qkss));
                 RealType qtrq2 = 2.0*AK[kk]*(ckr[i]*(ckcs-dkss-qkcs)
                                              +skr[i]*(ckss+dkcs-qkss));
-               
+
                 atom->addFrc( 4.0 * rvol * qfrc * kVec );
 
-                if (data.is_Fluctuating) { 
+                if (data.is_Fluctuating) {
                   atom->addFlucQFrc( - 2.0 * rvol * qtrq2 );
                 }
-                  
+
                 if (data.is_Dipole) {
                   atom->addTrq( 4.0 * rvol * qtrq1 * dxk[i] );
                 }
@@ -1734,17 +1733,17 @@ namespace OpenMD {
       }
       mMin = 1;
     }
-    pot += kPot;  
+    pot += kPot;
   }
 
-  void Electrostatic::getSitePotentials(Atom* a1, Atom* a2, bool excluded, 
+  void Electrostatic::getSitePotentials(Atom* a1, Atom* a2, bool excluded,
                                         RealType &spot1, RealType &spot2) {
 
     if (!initialized_) {
       initialize();
     }
 
-    const RealType mPoleConverter = 0.20819434; 
+    const RealType mPoleConverter = 0.20819434;
 
     AtomType* atype1 = a1->getAtomType();
     AtomType* atype2 = a2->getAtomType();
@@ -1763,7 +1762,7 @@ namespace OpenMD {
 
     RealType ri = 1.0 /  rij;
     rhat = d  * ri;
-      
+
 
     if ((rij >= cutoffRadius_) || excluded) {
       spot1 = 0.0;
@@ -1785,7 +1784,7 @@ namespace OpenMD {
 
     // Obtain all of the required radial function values from the
     // spline structures:
-    
+
 
     if (a_is_Charge || b_is_Charge) {
       v01 = v01s->getValueAt(rij);
@@ -1798,53 +1797,53 @@ namespace OpenMD {
       v21 = v21s->getValueAt(rij);
       v22 = v22s->getValueAt(rij);
       v22or = ri * v22;
-    }      
+    }
 
     if (a_is_Charge) {
       C_a = data1.fixedCharge;
-      
+
       if (a_is_Fluctuating) {
         C_a += a1->getFlucQPos();
       }
-      
-      Pb += C_a *  pre11_ * v01;      
+
+      Pb += C_a *  pre11_ * v01;
     }
-    
+
     if (a_is_Dipole) {
       D_a = a1->getDipole() * mPoleConverter;
       rdDa = dot(rhat, D_a);
-      Pb +=  pre12_ * v11 * rdDa;      
+      Pb +=  pre12_ * v11 * rdDa;
     }
-    
+
     if (a_is_Quadrupole) {
       Q_a = a1->getQuadrupole() * mPoleConverter;
       trQa =  Q_a.trace();
       Qar =   Q_a * rhat;
       rdQar = dot(rhat, Qar);
-      Pb += pre14_ * (v21 * trQa + v22 * rdQar);      
+      Pb += pre14_ * (v21 * trQa + v22 * rdQar);
     }
-    
+
     if (b_is_Charge) {
       C_b = data2.fixedCharge;
-      
-      if (b_is_Fluctuating) 
+
+      if (b_is_Fluctuating)
         C_b += a2->getFlucQPos();
-      
+
       Pa += C_b *  pre11_ * v01;
     }
-    
+
     if (b_is_Dipole) {
       D_b = a2->getDipole() * mPoleConverter;
       rdDb = dot(rhat, D_b);
       Pa += pre12_ * v11 * rdDb;
     }
-    
+
     if (b_is_Quadrupole) {
       Q_a = a2->getQuadrupole() * mPoleConverter;
       trQb =  Q_b.trace();
       Qbr =   Q_b * rhat;
       rdQbr = dot(rhat, Qbr);
-      Pa += pre14_ * (v21 * trQb + v22 * rdQbr);      
+      Pa += pre14_ * (v21 * trQb + v22 * rdQbr);
     }
 
     spot1 = Pa;
@@ -1859,5 +1858,5 @@ namespace OpenMD {
     v01s->getValueAndDerivativeAt(r, v01, dv01);
     return dv01 * pre11_;
   }
-  
+
 }

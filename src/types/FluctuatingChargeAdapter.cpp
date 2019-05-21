@@ -151,7 +151,7 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
     fqParam->hasMultipleMinima = false;
-    fqParam->usesSlaterElectrostatics = false;
+    fqParam->usesSlaterElectrostatics = true;
 
     fqParam->electronegativity = electronegativity;
     fqParam->hardness = hardness;
@@ -177,13 +177,13 @@ namespace OpenMD {
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
     fqParam->hasMultipleMinima = false;
-    fqParam->usesSlaterElectrostatics = false;
+    fqParam->usesSlaterElectrostatics = true;
 
     fqParam->electronegativity = electronegativity;
     fqParam->hardness = hardness;
     fqParam->slaterN = slaterN;
     fqParam->slaterZeta = getSTOZeta(slaterN, hardness);
-    
+
     fqParam->vself.setCoefficient(1, electronegativity);
     fqParam->vself.setCoefficient(2, 0.5 * hardness);
 
@@ -220,7 +220,7 @@ namespace OpenMD {
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }
-    
+
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
@@ -229,9 +229,9 @@ namespace OpenMD {
     fqParam->nValence = nValence;
     fqParam->slaterZeta = slaterZeta;
     fqParam->slaterN = slaterN;
-    
+
     fqParam->vself = vs;
-    
+
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 
@@ -270,7 +270,7 @@ namespace OpenMD {
     fqParam->nValence = nValence;
     fqParam->coupling = coupling;
     fqParam->diabaticStates = diabaticStates;
-    
+
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 
@@ -294,7 +294,7 @@ namespace OpenMD {
     fqParam->slaterN = slaterN;
     fqParam->coupling = coupling;
     fqParam->diabaticStates = diabaticStates;
-    
+
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 }
