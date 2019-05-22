@@ -54,7 +54,7 @@ namespace OpenMD {
   EAM::EAM() : initialized_(false), haveCutoffRadius_(false),
 	       forceField_(NULL), electrostatic_(NULL), eamRcut_(0.0),
                mixMeth_(eamJohnson), name_("EAM") {
-    
+
     // This prefactor converts charge-charge interactions into kcal /
     // mol assuming distances are measured in angstroms and charges
     // are measured in electrons. Matches the value in
@@ -76,13 +76,13 @@ namespace OpenMD {
         return (temp*temp)/x;
     }
   }
-  
+
   RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
                                 RealType A, RealType alpha, RealType kappa) {
     return
       ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
   }
-  
+
   RealType EAM::ZhouPhiCoreValence(RealType r, RealType re,
                                    RealType B, RealType beta, RealType lambda) {
     return
@@ -107,7 +107,7 @@ namespace OpenMD {
     RealType a = (r - rc) / sigma;
     return c * exp( - a * a / 2 );
   }
-  
+
   RealType EAM::EVBPhi(RealType r, RealType r0, RealType d0, RealType beta0,
                        RealType rc, RealType c, RealType sigma,
                        RealType re, RealType A, RealType B,
@@ -127,9 +127,9 @@ namespace OpenMD {
 
     return std::min(ev1, ev2);
   }
-  
 
-  
+
+
   RealType EAM::ZhouRho(RealType r, RealType re, RealType fe,
                         RealType beta, RealType lambda) {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
@@ -356,7 +356,7 @@ namespace OpenMD {
       beta2 = ea2.getBeta();
       kappa2 = ea2.getKappa();
       lambda2 = ea2.getLambda();
-      
+
       if (ea2.getEAMType()==eamEVBOxygen) {
         r02 = ea2.getRMorse();
         d02 = ea2.getDMorse();
@@ -382,7 +382,7 @@ namespace OpenMD {
       vector<RealType> phivals;
       RealType r;
 
-      for (unsigned int i = 0; i <= rvals.size(); i++ ) {
+      for (unsigned int i = 0; i < rvals.size(); i++ ) {
         r = rvals[i];
         rha = 0.0;
         rhb = 0.0;
@@ -424,7 +424,7 @@ namespace OpenMD {
 
     return cs;
   }
-  
+
   void EAM::setCutoffRadius( RealType rCut ) {
     eamRcut_ = rCut;
     haveCutoffRadius_ = true;
@@ -448,7 +448,7 @@ namespace OpenMD {
       mixMeth_ = eamUnknownMix;
 
     oss_ = fopts.getOxidationStateScaling();
-    
+
     // find all of the EAM atom Types:
     EAMtypes.clear();
     EAMtids.clear();
@@ -593,7 +593,7 @@ namespace OpenMD {
       std::vector<RealType> zvals;
       std::vector<RealType> ccvals;
       std::vector<RealType> cvvals;
-      
+
       std::vector<RealType> rhovals;
       std::vector<RealType> funcvals;
 
@@ -612,7 +612,7 @@ namespace OpenMD {
       eamAtomData.phiCC->addPoints(rvals, ccvals);
       eamAtomData.phiCV = new CubicSpline();
       eamAtomData.phiCV->addPoints(rvals, cvvals);
-      
+
       rhovals.clear();
       if (et == eamZhou2001) {
         for (int i = 0; i < Nrho; i++) {
@@ -682,7 +682,7 @@ namespace OpenMD {
       std::vector<RealType> zvals;
       std::vector<RealType> ccvals;
       std::vector<RealType> cvvals;
-      
+
       std::vector<RealType> rhovals;
       std::vector<RealType> funcvals;
 
@@ -931,7 +931,7 @@ namespace OpenMD {
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
-    
+
     return;
   }
 
@@ -944,8 +944,8 @@ namespace OpenMD {
                                       *(sdat.dfrhodrho) );
 
     (*(sdat.selfPot))[METALLIC_EMBEDDING] += *(sdat.frho);
-    
-    if (sdat.isSelected) 
+
+    if (sdat.isSelected)
       (*(sdat.selePot))[METALLIC_EMBEDDING] += *(sdat.frho);
 
     if (sdat.doParticlePot) {
@@ -985,7 +985,7 @@ namespace OpenMD {
       CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
     }
-    
+
     if ( *(idat.rij) < rcj && *(idat.rij) < rcij ) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
       CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
@@ -994,15 +994,15 @@ namespace OpenMD {
 
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
     bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
-    
+
     if (hasFlucQ && !isExplicit) {
 
       RealType Na(0.0), Nb(0.0), Ma(0.0), Mb(0.0);
       RealType va(1.0), vb(1.0), qa(0.0), qb(0.0);
       RealType ga(1.0), gb(1.0);
-            
+
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
-                
+
         if (data1.isFluctuatingCharge) {
           Na = oss_ * data1.nValence;
           Ma = oss_ * data1.nMobile;
@@ -1015,25 +1015,25 @@ namespace OpenMD {
           qb = *(idat.flucQ2);
           vb = (Nb - qb) / Mb;
         }
-        
+
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           phab = phab + 0.5 * (vb/va) * (rhb / rha) * pha;
           dvpdr = dvpdr + 0.5 * (vb/va) * ((rhb/rha)*dpha +
                                            pha*((drhb/rha) - (rhb*drha/rha/rha)));
-          
+
           if (data1.isFluctuatingCharge) {
             *(idat.dVdFQ1) += 0.5 * 2.5 * (rhb * vb * pha) / (rha * Ma * va * va);
           }
           if (data2.isFluctuatingCharge) {
             *(idat.dVdFQ2) -= 0.5 * 2.5 * (rhb * pha) / (rha * Mb * va);
-          }        
+          }
         }
-        
+
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
           phab = phab + 0.5 * (va/vb) * (rha / rhb) * phb;
-          dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb + 
+          dvpdr = dvpdr + 0.5 * (va/vb) * ((rha/rhb)*dphb +
                                            phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
-        
+
           if (data1.isFluctuatingCharge) {
             *(idat.dVdFQ1) -= 0.5 * 2.5 * (rha * phb) / (rhb * Ma * vb);
           }
@@ -1043,7 +1043,7 @@ namespace OpenMD {
         }
       } else {
         // Core-Core part first - no fluctuating charge, just Johnson mixing:
-        
+
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           CubicSpline* phiACC = data1.phiCC;
           phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
@@ -1051,11 +1051,11 @@ namespace OpenMD {
           dvpdr += 0.5 * ((rhb/rha)*dpha +
                           pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
-        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {         
-          CubicSpline* phiBCC = data2.phiCC;          
-          phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);       
+        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+          CubicSpline* phiBCC = data2.phiCC;
+          phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
           phab += 0.5 * (rha / rhb) * phb;
-          dvpdr += 0.5 * ((rha/rhb)*dphb + 
+          dvpdr += 0.5 * ((rha/rhb)*dphb +
                           phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
         }
 
@@ -1078,36 +1078,36 @@ namespace OpenMD {
           phab += 0.5 * ga * (rhb / rha) * pha;
           dvpdr += 0.5 * ga * ((rhb/rha)*dpha +
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
-          
+
           if (data1.isFluctuatingCharge) {
             *(idat.dVdFQ1) -= (qa * rhb * pha) / (rha * Ma * Ma);
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
-          CubicSpline* phiBCV = data2.phiCV;          
+          CubicSpline* phiBCV = data2.phiCV;
           phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
 
           phab += 0.5 * gb * (rha / rhb) * phb;
-          dvpdr += 0.5 * gb * ((rha/rhb)*dphb + 
+          dvpdr += 0.5 * gb * ((rha/rhb)*dphb +
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
-          
+
           if (data2.isFluctuatingCharge) {
             *(idat.dVdFQ2) -= (qb * rha * phb) / (rhb * Mb * Mb);
           }
         }
-      }      
+      }
     } else {
-      if ( *(idat.rij) < rcij ) {        
+      if ( *(idat.rij) < rcij ) {
         CubicSpline* phi = MixingMap[eamtid1][eamtid2].phi;
         phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
       }
     }
-    
+
     drhoidr = drha;
     drhojdr = drhb;
 
     dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr;
-    
+
     *(idat.f1) += rhat * dudr;
 
     if (idat.doParticlePot) {
@@ -1128,9 +1128,9 @@ namespace OpenMD {
     }
 
     (*(idat.pot))[METALLIC_PAIR] += phab;
-    if (idat.isSelected) 
+    if (idat.isSelected)
       (*(idat.selePot))[METALLIC_PAIR] += phab;
-    
+
 
     *(idat.vpair) += phab;
 
