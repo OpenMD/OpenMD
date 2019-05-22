@@ -50,14 +50,11 @@ using namespace std;
 namespace OpenMD {
             
   struct FluctuatingChargeAtomData {
-    bool hasMultipleMinima;
     RealType hardness;
     RealType electronegativity;
     int slaterN;
     RealType slaterZeta;
     RealType curvature;
-    RealType coupling;
-    vector<tuple3<RealType, RealType, RealType> > diabaticStates;
     DoublePolynomial vself_;
   };
 

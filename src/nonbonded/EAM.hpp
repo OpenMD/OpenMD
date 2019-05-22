@@ -60,6 +60,7 @@ namespace OpenMD {
     CubicSpline* phiCV;
     RealType rcut;
     RealType nValence;
+    RealType nMobile;
     bool isFluctuatingCharge;
   };
 
@@ -156,6 +157,7 @@ namespace OpenMD {
     set<AtomType*> simTypes_;
     RealType pre11_;
     RealType eamRcut_;
+    RealType oss_;
     Vector3d rhat;
 
     EAMMixingMethod mixMeth_;

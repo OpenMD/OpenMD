@@ -88,6 +88,10 @@ namespace OpenMD {
     return fqData->getData();
   }
 
+  bool FluctuatingChargeAdapter::hasMultipleMinima() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->hasMultipleMinima;
+  }
   bool FluctuatingChargeAdapter::isMetallic() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->isMetallic;
@@ -95,10 +99,6 @@ namespace OpenMD {
   bool FluctuatingChargeAdapter::usesSlaterElectrostatics() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->usesSlaterElectrostatics;
-  }
-  bool FluctuatingChargeAdapter::usesSlaterIntramolecular() {
-    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
-    return fqParam->usesSlaterIntramolecular;
   }
   RealType FluctuatingChargeAdapter::getChargeMass() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
@@ -128,6 +128,14 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->slaterZeta;
   }
+  RealType FluctuatingChargeAdapter::getCoupling() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->coupling;
+  }
+  vector<tuple3<RealType, RealType, RealType> > FluctuatingChargeAdapter::getDiabaticStates() {
+    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
+    return fqParam->diabaticStates;
+  }
   DoublePolynomial FluctuatingChargeAdapter::getSelfPolynomial() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->vself;
@@ -146,8 +154,8 @@ namespace OpenMD {
 
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
     fqParam->usesSlaterElectrostatics = false;
-    fqParam->usesSlaterIntramolecular = true;
 
     fqParam->electronegativity = electronegativity;
     fqParam->hardness = hardness;
@@ -156,24 +164,49 @@ namespace OpenMD {
 
     fqParam->vself.setCoefficient(1, electronegativity);
     fqParam->vself.setCoefficient(2, 0.5 * hardness);
-    
+
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
-  
+
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
-                                                       RealType nValence,
-                                                       DoublePolynomial vs) {
-    
+                                                       RealType electronegativity,
+                                                       RealType hardness,
+                                                       int slaterN) {
+
     if (isFluctuatingCharge()){
       at_->removeProperty(FQtypeID);
     }
-    
+
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
-    fqParam->usesSlaterElectrostatics = false;    
-    fqParam->usesSlaterIntramolecular = false;
+    fqParam->hasMultipleMinima = false;
+    fqParam->usesSlaterElectrostatics = false;
 
+    fqParam->electronegativity = electronegativity;
+    fqParam->hardness = hardness;
+    fqParam->slaterN = slaterN;
+    fqParam->slaterZeta = getSTOZeta(slaterN, hardness);
+    
+    fqParam->vself.setCoefficient(1, electronegativity);
+    fqParam->vself.setCoefficient(2, 0.5 * hardness);
+
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+    void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                         RealType nValence,
+                                                         DoublePolynomial vs) {
+
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
+    fqParam->usesSlaterElectrostatics = false;
     // old-style EAMPoly has nV = nM
     fqParam->nValence = nValence;
     fqParam->nMobile = nValence;
@@ -195,14 +228,108 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
     fqParam->usesSlaterElectrostatics = false;
-    fqParam->usesSlaterIntramolecular = false;
-   
+    
     fqParam->nValence = nValence;
     fqParam->nMobile = nMobile;
 
     fqParam->vself = vs;
 
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType nValence,
+                                                       int slaterN,
+                                                       RealType slaterZeta,
+                                                       DoublePolynomial vs) {
+
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+    
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = false;
+    fqParam->usesSlaterElectrostatics = true;
+    // old-style has nM = nV
+    fqParam->nValence = nValence;
+    fqParam->nMobile = nValence;
+    fqParam->slaterZeta = slaterZeta;
+    fqParam->slaterN = slaterN;
+    
+    fqParam->vself = vs;
+    
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType coupling,
+                                                       vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = true;
+    fqParam->usesSlaterElectrostatics = false;
+
+    fqParam->coupling = coupling;
+    fqParam->diabaticStates = diabaticStates;
+
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType nValence,
+                                                       RealType coupling,
+                                                       vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = true;
+    fqParam->isMetallic = true;
+    fqParam->usesSlaterElectrostatics = false;
+
+    // old-style has nM = nV
+    fqParam->nValence = nValence;
+    fqParam->nMobile = nValence;
+    fqParam->coupling = coupling;
+    fqParam->diabaticStates = diabaticStates;
+    
+    at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
+  }
+
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType nValence,
+                                                       int slaterN,
+                                                       RealType slaterZeta,
+                                                       RealType coupling,
+                                                       vector<tuple3<RealType, RealType, RealType> > diabaticStates) {
+    if (isFluctuatingCharge()){
+      at_->removeProperty(FQtypeID);
+    }
+
+    FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
+    fqParam->chargeMass = chargeMass;
+    fqParam->hasMultipleMinima = true;
+    fqParam->isMetallic = true;
+    fqParam->usesSlaterElectrostatics = true;
+    // old-style has nM = nV
+    fqParam->nValence = nValence;
+    fqParam->nMobile = nValence;
+    fqParam->slaterZeta = slaterZeta;
+    fqParam->slaterN = slaterN;
+    fqParam->coupling = coupling;
+    fqParam->diabaticStates = diabaticStates;
+    
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
   }
 }

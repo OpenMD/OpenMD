@@ -377,12 +377,12 @@ namespace OpenMD {
 
       int nr = int(rmax/dr + 1);
 
-      for (int i = 0; i <= nr; i++) rvals.push_back(RealType(i*dr));
+      for (int i = 0; i < nr; i++) rvals.push_back(RealType(i*dr));
 
       vector<RealType> phivals;
       RealType r;
 
-      for (unsigned int i = 0; i < rvals.size(); i++ ) {
+      for (unsigned int i = 0; i <= rvals.size(); i++ ) {
         r = rvals[i];
         rha = 0.0;
         rhb = 0.0;
@@ -447,6 +447,8 @@ namespace OpenMD {
     else
       mixMeth_ = eamUnknownMix;
 
+    oss_ = fopts.getOxidationStateScaling();
+    
     // find all of the EAM atom Types:
     EAMtypes.clear();
     EAMtids.clear();
@@ -729,6 +731,7 @@ namespace OpenMD {
       if (fqa.isMetallic()) {
         eamAtomData.isFluctuatingCharge = true;
         eamAtomData.nValence = fqa.getNValence();
+        eamAtomData.nMobile = fqa.getNMobile();
       } else {
         eamAtomData.isFluctuatingCharge = false;
       }
@@ -916,7 +919,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m -= *(idat.flucQ1) / data1.nValence;
+        m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nMobile);
       }
       *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij) );
     }
@@ -924,11 +927,11 @@ namespace OpenMD {
     if ( *(idat.rij) < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m -= *(idat.flucQ2) / data2.nValence;
+        m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nMobile);
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
-
+    
     return;
   }
 
@@ -940,9 +943,10 @@ namespace OpenMD {
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
                                       *(sdat.dfrhodrho) );
 
-    (*(sdat.selfPot))[METALLIC_FAMILY] += *(sdat.frho);
-    if (sdat.isSelected)
-      (*(sdat.selePot))[METALLIC_FAMILY] += *(sdat.frho);
+    (*(sdat.selfPot))[METALLIC_EMBEDDING] += *(sdat.frho);
+    
+    if (sdat.isSelected) 
+      (*(sdat.selePot))[METALLIC_EMBEDDING] += *(sdat.frho);
 
     if (sdat.doParticlePot) {
       *(sdat.particlePot) += *(sdat.frho);
@@ -993,20 +997,23 @@ namespace OpenMD {
     
     if (hasFlucQ && !isExplicit) {
 
-      RealType Na(0.0), Nb(0.0), qa(0.0), qb(0.0);
-      RealType va(1.0), vb(1.0);
+      RealType Na(0.0), Nb(0.0), Ma(0.0), Mb(0.0);
+      RealType va(1.0), vb(1.0), qa(0.0), qb(0.0);
+      RealType ga(1.0), gb(1.0);
             
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
                 
         if (data1.isFluctuatingCharge) {
-          Na = data1.nValence;
+          Na = oss_ * data1.nValence;
+          Ma = oss_ * data1.nMobile;
           qa = *(idat.flucQ1);
-          va = (1.0 - qa / Na);
+          va = (Na -  qa) / Ma;
         }
         if (data2.isFluctuatingCharge) {
-          Nb = data2.nValence;
+          Nb = oss_ * data2.nValence;
+          Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
-          vb = (1.0 - qb / Nb);
+          vb = (Nb - qb) / Mb;
         }
         
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
@@ -1015,10 +1022,10 @@ namespace OpenMD {
                                            pha*((drhb/rha) - (rhb*drha/rha/rha)));
           
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Na * va * va);
+            *(idat.dVdFQ1) += 0.5 * 2.5 * (rhb * vb * pha) / (rha * Ma * va * va);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Nb * va);
+            *(idat.dVdFQ2) -= 0.5 * 2.5 * (rhb * pha) / (rha * Mb * va);
           }        
         }
         
@@ -1028,63 +1035,64 @@ namespace OpenMD {
                                            phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
         
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Na * vb);
+            *(idat.dVdFQ1) -= 0.5 * 2.5 * (rha * phb) / (rhb * Ma * vb);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Nb * vb * vb);
+            *(idat.dVdFQ2) += 0.5 * 2.5 * (rha * va * phb) / (rhb * Mb * vb * vb);
           }
         }
       } else {
         // Core-Core part first - no fluctuating charge, just Johnson mixing:
-        CubicSpline* phiACC = data1.phiCC;
-        CubicSpline* phiBCC = data2.phiCC;
         
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+          CubicSpline* phiACC = data1.phiCC;
           phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
           phab += 0.5 * (rhb / rha) * pha;
           dvpdr += 0.5 * ((rhb/rha)*dpha +
                           pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
-        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
-          phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {         
+          CubicSpline* phiBCC = data2.phiCC;          
+          phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);       
           phab += 0.5 * (rha / rhb) * phb;
           dvpdr += 0.5 * ((rha/rhb)*dphb + 
                           phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
         }
 
         // Core-Valence next, this does include fluctuating charges:
-        CubicSpline* phiACV = data1.phiCV;
-        CubicSpline* phiBCV = data2.phiCV;
-
-        phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
-        phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
 
         if (data1.isFluctuatingCharge) {
-          Na = data1.nValence;
+          Ma = oss_ * data1.nMobile;
           qa = *(idat.flucQ1);
-          va = (1.0 - qa / Na);
+          ga = 1.0 - qa*qa / (Ma*Ma);
         }
         if (data2.isFluctuatingCharge) {
-          Nb = data2.nValence;
+          Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
-          vb = (1.0 - qb / Nb);
+          gb = 1.0 - qb*qb / (Ma*Ma);
         }
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
-          phab += 0.5 * va * (rhb / rha) * pha;
-          dvpdr += 0.5 * va * ((rhb/rha)*dpha +
+          CubicSpline* phiACV = data1.phiCV;
+          phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+
+          phab += 0.5 * ga * (rhb / rha) * pha;
+          dvpdr += 0.5 * ga * ((rhb/rha)*dpha +
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
           
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * (rhb * pha) / (rha * Na);
+            *(idat.dVdFQ1) -= (qa * rhb * pha) / (rha * Ma * Ma);
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
-          phab += 0.5 * vb * (rha / rhb) * phb;
-          dvpdr += 0.5 * vb * ((rha/rhb)*dphb + 
+          CubicSpline* phiBCV = data2.phiCV;          
+          phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+
+          phab += 0.5 * gb * (rha / rhb) * phb;
+          dvpdr += 0.5 * gb * ((rha/rhb)*dphb + 
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
           
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * (rha * phb) / (rhb * Nb);
+            *(idat.dVdFQ2) -= (qb * rha * phb) / (rhb * Mb * Mb);
           }
         }
       }      
@@ -1119,19 +1127,20 @@ namespace OpenMD {
         - *(idat.frho1);
     }
 
-    (*(idat.pot))[METALLIC_FAMILY] += phab;
-    if (idat.isSelected)
-      (*(idat.selePot))[METALLIC_FAMILY] += phab;
+    (*(idat.pot))[METALLIC_PAIR] += phab;
+    if (idat.isSelected) 
+      (*(idat.selePot))[METALLIC_PAIR] += phab;
+    
 
     *(idat.vpair) += phab;
 
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / data1.nValence;
+      *(idat.dVdFQ1) -= 2.5 * *(idat.dfrho2) * rha / data1.nMobile;
     }
     if (data2.isFluctuatingCharge) {
-      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / data2.nValence;
+      *(idat.dVdFQ2) -= 2.5 * *(idat.dfrho1) * rhb / data2.nMobile;
     }
 
     return;

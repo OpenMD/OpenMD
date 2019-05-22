@@ -297,9 +297,11 @@ namespace OpenMD {
     *(sdat.frho) = u;
     *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
 
-    (*(sdat.selfPot))[METALLIC_FAMILY] += u;
-    if (sdat.isSelected)
-      (*(sdat.selePot))[METALLIC_FAMILY] += u;
+    (*(sdat.selfPot))[METALLIC_EMBEDDING] += u;
+    
+    if (sdat.isSelected) 
+      (*(sdat.selePot))[METALLIC_EMBEDDING] += u;
+   
 
     if (sdat.doParticlePot) {
       *(sdat.particlePot) += u;
@@ -354,9 +356,11 @@ namespace OpenMD {
           sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
       }
       
-      (*(idat.pot))[METALLIC_FAMILY] += pot_temp;
-      if (idat.isSelected)
-        (*(idat.selePot))[METALLIC_FAMILY] += pot_temp;
+      (*(idat.pot))[METALLIC_PAIR] += pot_temp;
+      
+      if (idat.isSelected) 
+        (*(idat.selePot))[METALLIC_PAIR] += pot_temp;
+      
 
     }
       

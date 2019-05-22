@@ -55,16 +55,15 @@ namespace OpenMD {
 
   struct FluctuatingAtypeParameters {
     RealType chargeMass;
-    bool hasMultipleMinima;
     bool isMetallic;
     bool usesSlaterElectrostatics;
-    RealType nValence;     /** number of "electrons" in valence shell */
+    bool usesSlaterIntramolecular;
+    RealType nValence;     /** number of valence electrons in neutral atom */
+    RealType nMobile;      /** number of "mobile" electrons */
     RealType electronegativity; /** (relative) electronegativity */
     RealType hardness;     /** diagonal "Coulomb" Jii */
     int slaterN;           /** principal quantum number for Slater orbitals */
     RealType slaterZeta;   /** off-diagonal Slater exponent */
-    RealType coupling;     /** multiple minima EVB coupling for charge states */
-    vector<tuple3<RealType, RealType, RealType> > diabaticStates; /** multiple minima diabats */
     DoublePolynomial vself; /** Polynomial representation of self potential */
   };
   typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;
@@ -73,39 +72,31 @@ namespace OpenMD {
   public:
     FluctuatingChargeAdapter(AtomType* AT) { at_ = AT; };
 
+    // to support fluc-q (Hardness)
     void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity,
                                RealType hardness, int slaterN,
                                RealType slaterZeta);
-    void makeFluctuatingCharge(RealType chargeMass, RealType electronegativity,
-                               RealType hardness, int slaterN);
-    void makeFluctuatingCharge(RealType chargeMass, RealType coupling,
-                               vector<tuple3<RealType, RealType, RealType> > diabaticStates);
+    // old style to support EAMPoly
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
-                               DoublePolynomial vs);
-    void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
-                               int slaterN, RealType slaterZeta,
                                DoublePolynomial vs);
 
+    // new style to support Dream2
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
-                               RealType coupling,
-                               vector<tuple3<RealType, RealType, RealType> > diabaticStates);
-    void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
-                               int slaterN, RealType slaterZeta,
-                               RealType coupling,
-                               vector<tuple3<RealType, RealType, RealType> > diabaticStates);
+                               RealType nMobile, DoublePolynomial vs);
+    
 
     bool isFluctuatingCharge();
     bool isMetallic();
     bool hasMultipleMinima();
     bool usesSlaterElectrostatics();
+    bool usesSlaterIntramolecular();
     RealType getChargeMass();
     RealType getElectronegativity();
     RealType getHardness();
     int getSlaterN();
     RealType getNValence();
+    RealType getNMobile();
     RealType getSlaterZeta();
-    RealType getCoupling();
-    vector<tuple3<RealType, RealType, RealType> > getDiabaticStates();
     DoublePolynomial getSelfPolynomial();
 
   private:

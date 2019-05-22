@@ -59,16 +59,13 @@ namespace OpenMD {
     bool is_Dipole;
     bool is_Quadrupole;
     bool is_Fluctuating;
-    bool has_MultipleMinima;
-    bool uses_SlaterJ;
+    bool uses_SlaterElectrostatics;
+    bool uses_SlaterIntramolecular;
     RealType fixedCharge;
     RealType hardness;
     RealType electronegativity;
     int slaterN;
     RealType slaterZeta;
-    RealType curvature;
-    RealType coupling;
-    vector<pair<int, RealType> > diabats;
     Vector3d dipole;
     Mat3x3d  quadrupole;
   };
@@ -227,25 +224,14 @@ namespace OpenMD {
     bool a_is_Quadrupole;
     bool a_is_Fluctuating;
     bool a_uses_Slater;
+    bool a_uses_SlaterIntra;
 
     bool b_is_Charge;
     bool b_is_Dipole;
     bool b_is_Quadrupole;
     bool b_is_Fluctuating;
     bool b_uses_Slater;
-
-
-    /*
-    CubicSpline* dv01s;
-    CubicSpline* dv11s;
-    CubicSpline* dv21s;
-    CubicSpline* dv22s;
-    CubicSpline* dv31s;
-    CubicSpline* dv32s;
-    CubicSpline* dv41s;
-    CubicSpline* dv42s;
-    CubicSpline* dv43s;
-    */
+    bool b_uses_SlaterIntra;
   };
 }
 

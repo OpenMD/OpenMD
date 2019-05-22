@@ -196,6 +196,22 @@ namespace OpenMD {
     data_[METALLIC_POTENTIAL] = metallic_potential;
     statsMap_["METALLIC_POTENTIAL"] =  METALLIC_POTENTIAL;
 
+    StatsData metallic_embedding;
+    metallic_embedding.units =  "kcal/mol";
+    metallic_embedding.title =  "Metallic Embedding";
+    metallic_embedding.dataType = "RealType";
+    metallic_embedding.accumulator = new Accumulator();
+    data_[METALLIC_EMBEDDING] = metallic_embedding;
+    statsMap_["METALLIC_EMBEDDING"] =  METALLIC_EMBEDDING;
+
+    StatsData metallic_pair;
+    metallic_pair.units =  "kcal/mol";
+    metallic_pair.title =  "Metallic Pair";
+    metallic_pair.dataType = "RealType";
+    metallic_pair.accumulator = new Accumulator();
+    data_[METALLIC_PAIR] = metallic_pair;
+    statsMap_["METALLIC_PAIR"] =  METALLIC_PAIR;
+
     StatsData hydrogenbonding_potential;
     hydrogenbonding_potential.units =  "kcal/mol";
     hydrogenbonding_potential.title =  "Hydrogen Bonding Pot.";
@@ -583,10 +599,18 @@ namespace OpenMD {
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[VANDERWAALS_FAMILY]);
           break;
         case ELECTROSTATIC_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY] + snap->getSelfPotentials()[ELECTROSTATIC_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY] +
+                                                                 snap->getSelfPotentials()[ELECTROSTATIC_FAMILY]);
           break;
         case METALLIC_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_EMBEDDING] +
+                                                                 snap->getLongRangePotentials()[METALLIC_PAIR]);
+          break;
+        case METALLIC_EMBEDDING:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_EMBEDDING]);
+          break;
+        case METALLIC_PAIR:
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_PAIR]);
           break;
         case HYDROGENBONDING_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[HYDROGENBONDING_FAMILY]);
@@ -844,8 +868,11 @@ namespace OpenMD {
             case ELECTROSTATIC_FAMILY:
               report << "# " << right << setw(22) << "Electrostatic:";
               break;
-            case METALLIC_FAMILY:
-              report << "# " << right << setw(22) << "Metallic:";
+            case METALLIC_EMBEDDING:
+              report << "# " << right << setw(22) << "Metallic Embedding:";
+              break;
+            case METALLIC_PAIR:
+              report << "# " << right << setw(22) << "Metallic Pair:";
               break;
             case HYDROGENBONDING_FAMILY:
               report << "# " << right << setw(22) << "Hydrogen Bonding:";

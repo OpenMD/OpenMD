@@ -633,7 +633,8 @@ namespace OpenMD {
     electrostaticAtomData.is_Dipole = false;
     electrostaticAtomData.is_Quadrupole = false;
     electrostaticAtomData.is_Fluctuating = false;
-    electrostaticAtomData.uses_SlaterJ = false;
+    electrostaticAtomData.uses_SlaterElectrostatics = false;
+    electrostaticAtomData.uses_SlaterIntramolecular = false;
 
     FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 
@@ -658,7 +659,8 @@ namespace OpenMD {
 
     if (fqa.isFluctuatingCharge()) {
       electrostaticAtomData.is_Fluctuating = true;
-      electrostaticAtomData.uses_SlaterJ = fqa.usesSlaterElectrostatics();
+      electrostaticAtomData.uses_SlaterElectrostatics = fqa.usesSlaterElectrostatics();
+      electrostaticAtomData.uses_SlaterIntramolecular = fqa.usesSlaterIntramolecular();
       electrostaticAtomData.electronegativity = fqa.getElectronegativity();
       electrostaticAtomData.hardness = fqa.getHardness();
       electrostaticAtomData.slaterN = fqa.getSlaterN();
@@ -712,7 +714,10 @@ namespace OpenMD {
 
         // do both types actually use Slater orbitals?
 
-        if ( electrostaticAtomData.uses_SlaterJ && eaData2.uses_SlaterJ ) {
+        if (( electrostaticAtomData.uses_SlaterElectrostatics &&
+              eaData2.uses_SlaterElectrostatics ) ||
+            (electrostaticAtomData.uses_SlaterIntramolecular &&
+             eaData2.uses_SlaterIntramolecular ) ) {
 
           // Create the spline of the coulombic integral for s-type
           // Slater orbitals.  Add a 2 angstrom safety window to deal
@@ -729,16 +734,6 @@ namespace OpenMD {
           for (int i = 1; i < np_+1; i++) {
             rval = RealType(i) * dr;
             rvals.push_back(rval);
-
-
-            // j0 = sSTOCoulInt( a, b, m, n, rval * Constants::angstromToBohr ) *
-            //   Constants::hartreeToKcal;
-            // j0c = sSTOCoulInt( a, b, m, n,
-            //                    cutoffRadius_ * Constants::angstromToBohr ) *
-            //   Constants::hartreeToKcal;
-            // j1c = sSTOCoulIntGrad( a, b, m, n,
-            //                        cutoffRadius_ * Constants::angstromToBohr ) *
-            //   Constants::hartreeToKcal;
 
             Jvals.push_back( sSTOCoulInt( a, b, m, n,
                                           rval * Constants::angstromToBohr ) *
@@ -785,7 +780,9 @@ namespace OpenMD {
       a_is_Dipole = data1.is_Dipole;
       a_is_Quadrupole = data1.is_Quadrupole;
       a_is_Fluctuating = data1.is_Fluctuating;
-      a_uses_Slater = data1.uses_SlaterJ;
+      a_uses_Slater = data1.uses_SlaterElectrostatics;
+      a_uses_SlaterIntra = data1.uses_SlaterIntramolecular;
+
 
     } else {
       a_is_Charge = false;
@@ -793,6 +790,7 @@ namespace OpenMD {
       a_is_Quadrupole = false;
       a_is_Fluctuating = false;
       a_uses_Slater = false;
+      a_uses_SlaterIntra = false;
 
     }
     if (Etids[idat.atid2] != -1) {
@@ -801,7 +799,8 @@ namespace OpenMD {
       b_is_Dipole = data2.is_Dipole;
       b_is_Quadrupole = data2.is_Quadrupole;
       b_is_Fluctuating = data2.is_Fluctuating;
-      b_uses_Slater = data2.uses_SlaterJ;
+      b_uses_Slater = data2.uses_SlaterElectrostatics;
+      b_uses_SlaterIntra = data2.uses_SlaterIntramolecular;
 
     } else {
       b_is_Charge = false;
@@ -809,6 +808,7 @@ namespace OpenMD {
       b_is_Quadrupole = false;
       b_is_Fluctuating = false;
       b_uses_Slater = false;
+      b_uses_SlaterIntra = false;
     }
 
     U = 0.0;  // Potential
@@ -840,11 +840,11 @@ namespace OpenMD {
     // Obtain all of the required radial function values from the
     // spline structures:
 
-    if (((a_is_Fluctuating || b_is_Fluctuating) && idat.excluded) ||
+    if (((a_uses_SlaterIntra || b_uses_SlaterIntra) && idat.excluded) ||
         (a_uses_Slater && b_uses_Slater)) {
       J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
     }
-
+    
     // needed for fields (and forces):
     if (a_is_Charge || b_is_Charge) {
       v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
@@ -991,13 +991,12 @@ namespace OpenMD {
         // with the standard charge-charge interaction otherwise.
 
         if (idat.excluded) {
-          if (a_is_Fluctuating || b_is_Fluctuating) {
+          if (a_uses_SlaterIntra || b_uses_SlaterIntra) {
             coulInt = J->getValueAt( *(idat.rij) );
             excluded_Pot += C_a * C_b * coulInt;
-
             if (a_is_Fluctuating) dUdCa += C_b * coulInt;
             if (b_is_Fluctuating) dUdCb += C_a * coulInt;
-          }
+          } 
         } else {
           if (a_is_Fluctuating) dUdCa += C_b * pref * v01;
           if (b_is_Fluctuating) dUdCb += C_a * pref * v01;

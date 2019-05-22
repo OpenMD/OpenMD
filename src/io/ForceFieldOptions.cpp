@@ -55,6 +55,7 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(ChargeUnitScaling, "ChargeUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(OxidationStateScaling, "OxidationStateScaling", 0.4);
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
       DefineOptionalParameter(vdw12scale, "vdW-12-scale");
       DefineOptionalParameter(vdw13scale, "vdW-13-scale");

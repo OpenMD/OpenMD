@@ -73,87 +73,10 @@ namespace OpenMD {
 
     data = FQMap[FQtids[atid]];
 
-    if (data.hasMultipleMinima) {
-      int nDiabats = data.diabaticStates.size();
-      RealType c = data.coupling;
-
-      if (nDiabats == 1) {
-        RealType q1 = data.diabaticStates[0].first;
-        RealType e1 = data.diabaticStates[0].second;
-        RealType k1 = data.diabaticStates[0].third;
-        RealType v1 = e1 + 0.5 * k1 * (charge-q1)*(charge-q1);
-        RealType v1p = k1*(charge-q1);
-        potential +=  v1;
-        force -= v1p;
-      } else {
-        if (nDiabats == 2){
-          RealType q1 = data.diabaticStates[0].first;
-          RealType e1 = data.diabaticStates[0].second;
-          RealType k1 = data.diabaticStates[0].third;
-
-          RealType q2 = data.diabaticStates[1].first;
-          RealType e2 = data.diabaticStates[1].second;
-          RealType k2 = data.diabaticStates[1].third;
-
-          RealType v1 = e1 + 0.5 * k1 * (charge-q1)*(charge-q1);
-          RealType v1p = k1*(charge-q1);
-          RealType v2 = e2 + 0.5 * k2 * (charge-q2)*(charge-q2);
-          RealType v2p = k2*(charge-q2);
-
-          RealType ev1 = (v1 + v2 - sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
-          RealType ev2 = (v1 + v2 + sqrt(4*c*c+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
-
-          if (ev1 < ev2) {
-            potential += ev1;
-            force -= (v1p + v2p - ((v1 - v2) * (v1p - v2p)) /
-                      sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
-          } else {
-            potential += ev2;
-            force -= (v1p + v2p + ((v1 - v2) * (v1p - v2p)) /
-                      sqrt(4*c*c + v1*v1 - 2*v1*v2 + v2*v2))/2.0;
-          }
-
-        } else {
-          DynamicVector<RealType> diagonals(nDiabats);
-          DynamicVector<RealType> subdiagonals(nDiabats, c);
-          DynamicVector<RealType> vp(nDiabats);
-          DynamicVector<RealType> eigenvalues(nDiabats);
-          DynamicRectMatrix<RealType> eigenvectors(nDiabats, nDiabats);
-          RealType q;
-          RealType e;
-          RealType k;
-
-          for (int i = 0; i < nDiabats; i++) {
-            q = data.diabaticStates[i].first;
-            e = data.diabaticStates[i].second;
-            k = data.diabaticStates[i].third;
-            diagonals(i) = e + 0.5 * k * (charge-q)*(charge-q);
-            vp(i) = k*(charge-q);
-          }
-
-          RealSymmetricTridiagonal<RealType> eig(diagonals, subdiagonals);
-          eig.getEigenvalues( eigenvalues );
-          eig.getEigenvectors( eigenvectors );
-
-          potential += eigenvalues(0);
-          for (int i = 0; i < nDiabats; i++) {
-            // all of the couplings are constant, so the condon
-            // approximation and Hellmann-Feynman let us obtain the
-            // forces easily:
-            force -= pow(eigenvectors(0, i), 2) * vp(i);
-          }
-        }
-      }
-    } else {
-      DoublePolynomial vself = data.vself_;
-      potential += vself.evaluate(charge);
-      force -= vself.evaluateDerivative(charge);
-
-      // RealType Jii = data.hardness;
-      // RealType chi = data.electronegativity;
-      // force -=  charge * Jii + chi;
-      // potential += charge * (0.5 * charge * Jii + chi);
-    }
+    DoublePolynomial vself = data.vself_;
+    potential += vself.evaluate(charge);
+    force -= vself.evaluateDerivative(charge);
+    
     return;
   }
 
@@ -161,34 +84,27 @@ namespace OpenMD {
     FluctuatingChargeAtomData data;
     FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
     if (fqa.isFluctuatingCharge()) {
-      if (fqa.hasMultipleMinima()) {
-        data.hasMultipleMinima = true;
-        data.coupling = fqa.getCoupling();
-        data.diabaticStates = fqa.getDiabaticStates();
-      } else {
-        data.hasMultipleMinima = false;
-        data.electronegativity = fqa.getElectronegativity();
-        data.hardness = fqa.getHardness();
-        data.slaterN = fqa.getSlaterN();
-        data.slaterZeta = fqa.getSlaterZeta();
-        data.vself_ = fqa.getSelfPolynomial();
-      }
-      int atid = atomType->getIdent();
-      int fqtid = FQtypes.size();
-
-      pair<set<int>::iterator,bool> ret;
-      ret = FQtypes.insert( atid );
-      if (ret.second == false) {
-        sprintf( painCave.errMsg,
-                 "FluctuatingChargeForces already had a previous fluctuating "
-                 "charge entry with ident %d\n",
-                 atid );
-        painCave.severity = OPENMD_INFO;
-        painCave.isFatal = 0;
-        simError();
-      }
-      FQtids[atid] = fqtid;
-      FQMap.push_back(data);
+      data.electronegativity = fqa.getElectronegativity();
+      data.hardness = fqa.getHardness();
+      data.slaterN = fqa.getSlaterN();
+      data.slaterZeta = fqa.getSlaterZeta();
+      data.vself_ = fqa.getSelfPolynomial();
     }
+    int atid = atomType->getIdent();
+    int fqtid = FQtypes.size();
+    
+    pair<set<int>::iterator,bool> ret;
+    ret = FQtypes.insert( atid );
+    if (ret.second == false) {
+      sprintf( painCave.errMsg,
+               "FluctuatingChargeForces already had a previous fluctuating "
+               "charge entry with ident %d\n",
+               atid );
+      painCave.severity = OPENMD_INFO;
+      painCave.isFatal = 0;
+      simError();
+    }
+    FQtids[atid] = fqtid;
+    FQMap.push_back(data);
   }
 }

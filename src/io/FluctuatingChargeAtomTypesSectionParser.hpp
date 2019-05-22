@@ -56,11 +56,9 @@ namespace OpenMD {
 
     enum FluctuatingTypeEnum{
       fqtHardness,
-      fqtMultipleMinima,
       fqtEAMPolynomial,
-      fqtEAMPolySlater,
+      fqtDREAM2,
       fqtEAM,
-      fqtEAMSlater,
       fqtUnknown
     };
 
@@ -73,6 +71,7 @@ namespace OpenMD {
     RealType eus_;  //!< Energy unit scaling
     RealType cus_;  //!< Charge unit scaling
     RealType dus_;  //!< Distance unit scaling
+    RealType oss_;  //!< Oxidation state scaling
   };
 }
 
