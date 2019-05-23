@@ -59,8 +59,8 @@ namespace OpenMD {
     NO_FAMILY = 0,             /**< No family defined */
     VANDERWAALS_FAMILY = 1,    /**< Long-range dispersion and short-range pauli repulsion */
     ELECTROSTATIC_FAMILY = 2,  /**< Coulombic and point-multipole interactions */
-    METALLIC_EMBEDDING = 3,    /**< Transition metal interactions involving electron density */
-    METALLIC_PAIR = 4,         /**< Transition metal interactions involving pair potentials */
+    METALLIC_EMBEDDING_FAMILY = 3,    /**< Transition metal interactions involving electron density */
+    METALLIC_PAIR_FAMILY = 4,         /**< Transition metal interactions involving pair potentials */
     HYDROGENBONDING_FAMILY = 5,/**< Short-range directional interactions */
     BONDED_FAMILY = 6,         /**< directly bonded 1-2, 1-3, or 1-4 interactions */
     N_INTERACTION_FAMILIES = 7
@@ -226,7 +226,7 @@ namespace OpenMD {
     virtual ~MetallicInteraction() {}
     virtual void calcDensity(InteractionData &idat) = 0;
     virtual void calcFunctional(SelfData &sdat) = 0;
-    virtual InteractionFamily getFamily() {return METALLIC_EMBEDDING;}
+    virtual InteractionFamily getFamily() {return METALLIC_EMBEDDING_FAMILY;}
   };
           
   /**

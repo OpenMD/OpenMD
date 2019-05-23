@@ -596,24 +596,24 @@ namespace OpenMD {
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotential());
           break;
         case VANDERWAALS_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[InteractionFamily::VANDERWAALS_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[VANDERWAALS_FAMILY]);
           break;
         case ELECTROSTATIC_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[InteractionFamily::ELECTROSTATIC_FAMILY] +
-                                                                 snap->getSelfPotentials()[InteractionFamily::ELECTROSTATIC_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[ELECTROSTATIC_FAMILY] +
+                                                                 snap->getSelfPotentials()[ELECTROSTATIC_FAMILY]);
           break;
         case METALLIC_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[InteractionFamily::METALLIC_EMBEDDING] +
-                                                                 snap->getLongRangePotentials()[InteractionFamily::METALLIC_PAIR]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_EMBEDDING_FAMILY] +
+                                                                 snap->getLongRangePotentials()[METALLIC_PAIR_FAMILY]);
           break;
         case METALLIC_EMBEDDING:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[InteractionFamily::METALLIC_EMBEDDING]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_EMBEDDING_FAMILY]);
           break;
         case METALLIC_PAIR:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[InteractionFamily::METALLIC_PAIR]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[METALLIC_PAIR_FAMILY]);
           break;
         case HYDROGENBONDING_POTENTIAL:
-          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[InteractionFamily::HYDROGENBONDING_FAMILY]);
+          dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getLongRangePotentials()[HYDROGENBONDING_FAMILY]);
           break;
         case RECIPROCAL_POTENTIAL:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(snap->getReciprocalPotential());

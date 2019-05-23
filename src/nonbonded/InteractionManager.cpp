@@ -369,7 +369,7 @@ namespace OpenMD {
             for(it = interactions_[atid1][atid2].begin();
                 it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
-              if (ifam == METALLIC_EMBEDDING) {
+              if (ifam == METALLIC_EMBEDDING_FAMILY) {
                 iHash_[atid1][atid2] ^= (*it)->getHash();
                 interactions_[atid1][atid2].erase(it++);
               } else {
@@ -397,7 +397,7 @@ namespace OpenMD {
             for(it = interactions_[atid1][atid2].begin();
                 it != interactions_[atid1][atid2].end(); ) {
               InteractionFamily ifam = (*it)->getFamily();
-              if (ifam == METALLIC_EMBEDDING) {
+              if (ifam == METALLIC_EMBEDDING_FAMILY) {
                 iHash_[atid1][atid2] ^= (*it)->getHash();
                 interactions_[atid1][atid2].erase(it++);
               } else {
@@ -530,7 +530,7 @@ namespace OpenMD {
     //
     // for (it = interactions_[ idat.atypes ].begin();
     //      it != interactions_[ idat.atypes ].end(); ++it){
-    //   if ((*it)->getFamily() == METALLIC_EMBEDDING) {
+    //   if ((*it)->getFamily() == METALLIC_EMBEDDING_FAMILY) {
     //     dynamic_cast<MetallicInteraction*>(*it)->calcDensity(idat);
     //   }
     // }
@@ -551,7 +551,7 @@ namespace OpenMD {
     //
     // for (it = interactions_[atid1][atid2].begin();
     //      it != interactions_[atid1][atid2].end(); ++it){
-    //   if ((*it)->getFamily() == METALLIC_EMBEDDING) {
+    //   if ((*it)->getFamily() == METALLIC_EMBEDDING_FAMILY) {
     //     dynamic_cast<MetallicInteraction*>(*it)->calcFunctional(sdat);
     //   }
     // }

@@ -943,10 +943,10 @@ namespace OpenMD {
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
                                       *(sdat.dfrhodrho) );
 
-    (*(sdat.selfPot))[METALLIC_EMBEDDING] += *(sdat.frho);
+    (*(sdat.selfPot))[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
 
     if (sdat.isSelected)
-      (*(sdat.selePot))[METALLIC_EMBEDDING] += *(sdat.frho);
+      (*(sdat.selePot))[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
 
     if (sdat.doParticlePot) {
       *(sdat.particlePot) += *(sdat.frho);
@@ -1127,9 +1127,9 @@ namespace OpenMD {
         - *(idat.frho1);
     }
 
-    (*(idat.pot))[METALLIC_PAIR] += phab;
+    (*(idat.pot))[METALLIC_PAIR_FAMILY] += phab;
     if (idat.isSelected)
-      (*(idat.selePot))[METALLIC_PAIR] += phab;
+      (*(idat.selePot))[METALLIC_PAIR_FAMILY] += phab;
 
 
     *(idat.vpair) += phab;
