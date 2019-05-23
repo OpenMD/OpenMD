@@ -1900,7 +1900,6 @@ namespace OpenMD {
     RealType MQ2hn = 0.0;
     RealType Q2hp = 0.0;
     RealType Q2hn = 0.0;
-    RealType Volh = 0.0;
 
     Vector3d Pc(V3Zero);
     Vector3d Lc(V3Zero);
@@ -1968,7 +1967,7 @@ namespace OpenMD {
       }
     }
 
-    Volh = volumeA_;
+    //Volh = volumeA_;
       
     for (sd = smanB.beginSelected(selej); sd != NULL; 
          sd = smanB.nextSelected(selej)) {

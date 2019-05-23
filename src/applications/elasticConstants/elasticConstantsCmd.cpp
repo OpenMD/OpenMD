@@ -1135,6 +1135,7 @@ cmdline_parser_internal (
   override = params->override;
   initialize = params->initialize;
   check_required = params->check_required;
+  FIX_UNUSED(check_required);
   check_ambiguity = params->check_ambiguity;
 
   if (initialize)

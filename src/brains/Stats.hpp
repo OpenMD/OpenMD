@@ -107,14 +107,14 @@ namespace OpenMD {
     };
 
     struct StatsData {
-      string title;
-      string units;
-      string dataType;
+      std::string title;
+      std::string units;
+      std::string dataType;
       BaseAccumulator* accumulator;
     };
 
     typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;
-    typedef map<string, StatsIndex> StatsMapType;
+    typedef map<std::string, StatsIndex> StatsMapType;
 
     Stats(SimInfo* info);
     virtual ~Stats();
@@ -153,7 +153,7 @@ namespace OpenMD {
     SimInfo* info_;
     void init();
     bool isInit_;
-    vector<StatsData> data_;
+    std::vector<StatsData> data_;
     StatsBitSet statsMask_;
     StatsMapType statsMap_;
   };

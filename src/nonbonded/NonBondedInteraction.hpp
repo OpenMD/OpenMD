@@ -48,7 +48,6 @@
 
 using namespace std;
 namespace OpenMD {
-
   /** 
    * The InteractionFamily enum.
    *
