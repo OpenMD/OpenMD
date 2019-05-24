@@ -1,3 +1,5 @@
+#!@Python3_EXECUTABLE@
+
 '''
 This python script will (hopefully) generate proton disordered configurations of ice-Ih, given an input of the (.xyz) coordinates of the oxygen positions in the lattice.
 '''
@@ -27,7 +29,7 @@ oxygenList = []
 
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 class oxygenAtom:
     def __init__(self):
@@ -83,7 +85,7 @@ def dot(L1, L2):
 def addVectors(v1, v2):
     newV = []
     if (len(v1) != len(v2)):
-        print "Can't add vectors of different sizes!"
+        print("Can't add vectors of different sizes!")
     else:
         for i in range(0, len(v1)):
             newV.append(v1[i] + v2[i])
@@ -92,7 +94,7 @@ def addVectors(v1, v2):
 def subtractVectors(v1, v2):
     newV = []
     if (len(v1) != len(v2)):
-        print "Can't subtract vectors of different sizes!"
+        print("Can't subtract vectors of different sizes!")
     else:
         for i in range(0, len(v1)):
             newV.append(v1[i] - v2[i])
@@ -105,11 +107,11 @@ def subtractVectors(v1, v2):
 
 
 def readInputFile(inputFileName):
-    inputFile = open(inputFileName,"r")
+    inputFile = open(inputFileName, "r")
     
     line = inputFile.readline()
     totOxygens = int(line.split()[0])
-    print "total number of oxygens to read in = ", totOxygens
+    print("total number of oxygens to read in = ", totOxygens)
 
     line = inputFile.readline()
     Hxx = float(line.split()[1].strip(';'))
@@ -124,9 +126,9 @@ def readInputFile(inputFileName):
     Hmat.append([Hxx, Hxy, Hxz])
     Hmat.append([Hyx, Hyy, Hyz])
     Hmat.append([Hzx, Hzy, Hzz])
-    print Hmat
+    print(Hmat)
     
-    while 1:
+    while True:
         line = inputFile.readline()
         if not line:
             break
@@ -141,32 +143,32 @@ def readInputFile(inputFileName):
 
         oxygenList.append(newOxygen)
 
-    print "total number of oxygens read in = ", len(oxygenList)
+    print("total number of oxygens read in = ", len(oxygenList))
     return (oxygenList, Hmat)
 
 
                 
     
 def findNeighbors(oxygenList):
-    print "finding neighbors now"
+    print("finding neighbors now")
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
         for j in range(i+1, len(oxygenList)):
             oxygenB = oxygenList[j]
 
             if (oxygenA == oxygenB):
-                print "Querying same oxygen!"
+                print("Querying same oxygen!")
 
             # Want to wrap x & y displacements, but leave z as is
             # since z exposes to a surface
             xDisp = oxygenA.getPos()[0][0] - oxygenB.getPos()[0][0]
-            xDisp = wrapMe(xDisp,Hmat[0][0])
+            xDisp = wrapMe(xDisp, Hmat[0][0])
             yDisp = oxygenA.getPos()[0][1] - oxygenB.getPos()[0][1]
-            yDisp = wrapMe(yDisp,Hmat[1][1])
+            yDisp = wrapMe(yDisp, Hmat[1][1])
             zDisp = oxygenA.getPos()[0][2] - oxygenB.getPos()[0][2]
             #zDisp = wrapMe(zDisp,Hmat[2][2])
             
-            dist = np.sqrt( pow(xDisp,2) + pow(yDisp,2) + pow(zDisp,2) )
+            dist = np.sqrt( pow(xDisp, 2) + pow(yDisp, 2) + pow(zDisp, 2) )
 
             if (dist < 3.0):
                 oxygenA.neighbors_.append(j)
@@ -179,24 +181,24 @@ def findNeighbors(oxygenList):
             nSurfaceAtoms = nSurfaceAtoms + 1
             oxygenA.isSurface_ = 'true'
             oxygenA.neighbors_.append(-1)
-    print "nSurfaceAtoms =", nSurfaceAtoms
+    print("nSurfaceAtoms =", nSurfaceAtoms)
 
     #sanity check to make sure no-one is a self-neighbor
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
         if i in oxygenA.neighbors_ :
-            print i, oxygenA.neighbors_
+            print(i, oxygenA.neighbors_)
       
 
 def randomizeProtons(oxygenList):
 
-    print "Randomizing protons, begin bucket brigades"
+    print("Randomizing protons, begin bucket brigades")
     # select random oxygen to start with and perform protonBucketBrigades.
     for i in range(0, 1000):
-        startingOxygenIndex = random.randint(0,len(oxygenList)-1)
-        protonBucketBrigade(oxygenList,startingOxygenIndex)
+        startingOxygenIndex = random.randint(0, len(oxygenList)-1)
+        protonBucketBrigade(oxygenList, startingOxygenIndex)
         if (i%100 == 0):
-            print "attempted", i, "brigades"
+            print("attempted", i, "brigades")
    
     
     # check to see if any molecules have to many or still need protons
@@ -221,23 +223,23 @@ def randomizeProtons(oxygenList):
             if (numProtons < 4):
                 bulkUnderCoord.append(i)
 
-    print "There are", len(bulkUnderCoord), "bulk oxygens needing protons"
-    print "There are", len(surfUnderCoord), "surf. oxygens needing protons"
+    print("There are", len(bulkUnderCoord), "bulk oxygens needing protons")
+    print("There are", len(surfUnderCoord), "surf. oxygens needing protons")
 
-    print "Attempting more protonBucketBridages starting with the deficient oxygens"
-    print "starting with bulk undercoordinated oxygens"
+    print("Attempting more protonBucketBridages starting with the deficient oxygens")
+    print("starting with bulk undercoordinated oxygens")
     for j in range(0, 10):
         for i in range(0, len(bulkUnderCoord)):
             protonBucketBrigade(oxygenList, bulkUnderCoord[i])
         if (j%10 == 0):
-            print "attempted", j, "brigades"
+            print("attempted", j, "brigades")
             
-    print "moving onto surface undercoordinated oxygens"
+    print("moving onto surface undercoordinated oxygens")
     for j in range(0, 10):        
         for i in range(0, len(surfUnderCoord)):
             protonBucketBrigade(oxygenList, surfUnderCoord[i])
         if (j%10 == 0):
-            print "attempted", j, "brigades"
+            print("attempted", j, "brigades")
 
 
     # re-check to see if any molecules have to many or still need protons
@@ -250,16 +252,16 @@ def randomizeProtons(oxygenList):
             numProtons = len(oxygen.donors_) + len(oxygen.acceptors_)
             if (numProtons < 3):
                 surfUnderCoord.append(i)
-                print 'surfUC', i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
+                print('surfUC', i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_)
         elif (oxygen.isSurface_ == 'false'):
             numProtons = len(oxygen.donors_) + len(oxygen.acceptors_)
             if (numProtons < 4):
                 bulkUnderCoord.append(i)
-                print 'bulkUC', i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
+                print('bulkUC', i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_)
                 
 
-    print "There are", len(bulkUnderCoord), "bulk oxygens needing protons"
-    print "There are", len(surfUnderCoord), "surf. oxygens needing protons"
+    print("There are", len(bulkUnderCoord), "bulk oxygens needing protons")
+    print("There are", len(surfUnderCoord), "surf. oxygens needing protons")
 
 
     #Let's check to see the total number of donors_ and acceptors_ cites on the surfaces.
@@ -271,8 +273,8 @@ def randomizeProtons(oxygenList):
         if (oxygen.isSurface_ == 'true'):
             numDonors = numDonors + len(oxygen.donors_)
             numAcceptors = numAcceptors + len(oxygen.acceptors_)
-    print "numDonors =", numDonors
-    print "numAcceptors =", numAcceptors
+    print("numDonors =", numDonors)
+    print("numAcceptors =", numAcceptors)
 
     for i in range(0, len(oxygenList)):
         oxygen = oxygenList[i]
@@ -280,29 +282,29 @@ def randomizeProtons(oxygenList):
         if (oxygen.isSurface == 'true'):
             numBonds = len(oxygen.donors_) + len(oxygen.acceptors_)
             if (numBonds < 3):
-                print '\nSurfDeficient'
-                print 'UCoxygen',i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
+                print('\nSurfDeficient')
+                print('UCoxygen', i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_)
                 for i in range(0, len(oxygen.neighbors_)):
                     nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
+                    print("neighbor", oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_)
                     
         elif (oxygen.isSurface_ == 'false'):
             if (len(oxygen.donors_) < 2):
-                print '\nDonorDeficient'
-                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
+                print('\nDonorDeficient')
+                print("UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_)
                 for i in range(0, len(oxygen.neighbors_)):
                     nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
+                    print("neighbor", oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_)
             if (len(oxygen.acceptors_) < 2):
-                print '\nAcceptorDeficient'
-                print "UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_
+                print('\nAcceptorDeficient')
+                print("UCoxygen", i, oxygen.neighbors_, oxygen.donors_, oxygen.acceptors_)
                 for i in range(0, len(oxygen.neighbors_)):
                     nborOx = oxygenList[oxygen.neighbors_[i]]
-                    print "neighbor",oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_
+                    print("neighbor", oxygen.neighbors_[i], nborOx.neighbors_, nborOx.donors_, nborOx.acceptors_)
 
                     
     
-def protonBucketBrigade(oxygenList,startOxygenIndex):
+def protonBucketBrigade(oxygenList, startOxygenIndex):
     # First we need to loop through and create a dummy set of the oxygen. These will be tested and incremented for Hbonds
     dummyList = []
     for i in range(0, len(oxygenList)):
@@ -328,7 +330,7 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
         numBonds = len(dummyStart.donors_) + len(dummyStart.acceptors_)
         if (numBonds < 3):
             if ( len(dummyStart.donors_) < 2):
-                    dummyNextIndex = random.sample(goodNbors,1)[0]
+                    dummyNextIndex = random.sample(goodNbors, 1)[0]
                     dummyNext = dummyList[dummyNextIndex]
                     
                     if (dummyNext.isSurface_ == 'true'):
@@ -342,8 +344,8 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                             elif (nOnumBonds == 3):
                                     return #nextOxygen has total saturation of bonds
                             elif (nOnumBonds > 3):
-                                print "Code is broken, nextOxygen is surface and has > 3 bonds."
-                                print dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_
+                                print("Code is broken, nextOxygen is surface and has > 3 bonds.")
+                                print(dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_)
                                     
                     elif (dummyNext.isSurface_ == 'false'):
                         if (len(dummyNext.acceptors_) < 2):
@@ -352,28 +354,28 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                         elif (len(dummyNext.acceptors_) == 2):
                             return 
                         elif (len(dummyNext.acceptors_) > 2):
-                            print "Code is broken, nextOxygen is bulk and has > 2 acceptors."
-                            print dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_
+                            print("Code is broken, nextOxygen is bulk and has > 2 acceptors.")
+                            print(dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_)
                             
             # we are a surface oxygen, but we have 2 donors already.   
             elif ( len(dummyStart.donors_) == 2):
                     return
                 
             elif ( len(dummyStart.donors_) > 2):
-                print "Code is broken, startOxygen is surface and has > 2 donors"
-                print dummyStartIndex, dummyStart.neighbors_. dummyStart.donors_, dummyStart.acceptors_
+                print("Code is broken, startOxygen is surface and has > 2 donors")
+                print(dummyStartIndex, dummyStart.neighbors_. dummyStart.donors_, dummyStart.acceptors_)
                 
         # we are a surface oxygen, but have saturation of bonds.        
         elif (numBonds == 3):
             return
         
         elif (numBonds > 3):
-            print "Code is broken, startOxygen has numBonds > 3 "
-            print dummyStartIndex, dummyStart.neighbors_. dummyStart.donors_, dummyStart.acceptors_
+            print("Code is broken, startOxygen has numBonds > 3 ")
+            print(dummyStartIndex, dummyStart.neighbors_. dummyStart.donors_, dummyStart.acceptors_)
         
     elif (dummyStart.isSurface_ == 'false'):
             if (len(dummyStart.donors_) < 2): #startOxygen < 2 donors, therefore can make a bond
-                dummyNextIndex = random.sample(goodNbors,1)[0]
+                dummyNextIndex = random.sample(goodNbors, 1)[0]
                 dummyNext = dummyList[dummyNextIndex]
 
                 if (dummyNext.isSurface_ == 'true'):
@@ -387,8 +389,8 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                         elif (nOnumBonds == 3):
                             return #nextOxygen has 3 bonds, no room for one more.
                         elif (nOnumBonds > 3):
-                            print "Code is broken, nextOxygen is surface and has > 3 bonds."
-                            print dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_
+                            print("Code is broken, nextOxygen is surface and has > 3 bonds.")
+                            print(dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_)
                                     
                 elif (dummyNext.isSurface_ == 'false'):
                     if (len(dummyNext.acceptors_) < 2): #requirement met, make a bond
@@ -397,8 +399,8 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                     elif (len(dummyNext.acceptors_) == 2):
                         return # nextOxygen has 2 acceptors, no room for one more.
                     elif (len(dummyNext.acceptors_) > 2):
-                        print "Code is broken, nextOxygen is bulk and has > 2 acceptors."
-                        print dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_
+                        print("Code is broken, nextOxygen is bulk and has > 2 acceptors.")
+                        print(dummyNextIndex, dummyNext.neighbors_. dummyNext.donors_, dummyNext.acceptors_)
 
                 
             #startOxygen is not surface and has 2 donors, no more room for additional donors.    
@@ -406,8 +408,8 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                 return
 
             elif (len(dummyStart.donors_) > 2):
-                print "Code broke, startOxygen is not surface and has > 2 donors."
-                print dummyStartIndex, dummyStart.neighbors_. dummyStart.donors_, dummyStart.acceptors_
+                print("Code broke, startOxygen is not surface and has > 2 donors.")
+                print(dummyStartIndex, dummyStart.neighbors_. dummyStart.donors_, dummyStart.acceptors_)
 
 
     # update nextOxygen to currentOxygen, begin looping.
@@ -429,7 +431,7 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
             #can't test the raw number of donors_ could have a (DAA) set of bonds and donors < 2 would give false positive.
             numBonds = len(dummyCurrent.donors_) + len(dummyCurrent.acceptors_)
             if (numBonds < 3): # with < 3 bonds, currentOxygen has room to donate to another oxygen.
-                dummyNextIndex = random.sample(goodNbors,1)[0]
+                dummyNextIndex = random.sample(goodNbors, 1)[0]
                 dummyNext = dummyList[dummyNextIndex]
                 
                 # if previous and current both surface, nextOxygen must be a bulk.
@@ -443,7 +445,7 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                         elif (len(dummyNext.acceptors_) == 2):
                             return # nextOxygen has 2 acceptors, no room for one more.
                         elif (len(dummyNext.acceptors_) > 2):
-                            print "Code is broken (while), nextOxygen is bulk and has > 2 acceptors."
+                            print("Code is broken (while), nextOxygen is bulk and has > 2 acceptors.")
 
                             
                 # if previousOxygen is not surface, then nextOxygen can be a surface or bulk oxygen
@@ -458,11 +460,11 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                             elif (len(dummyNext.acceptors_) == 2):
                                 return # nextOxygen has 2 acceptors, no room for one more.
                             elif (len(dummyNext.acceptors_) > 2):
-                                print "Code broken (while), nextOxygen has > 2 acceptors"
+                                print("Code broken (while), nextOxygen has > 2 acceptors")
                         elif (nOnumBonds == 3):
                             return #nextOxygen has 3 bonds, no room for one more.
                         elif (nOnumBonds > 3):
-                            print "Code is broken (while), nextOxygen is surface and has > 3 bonds."
+                            print("Code is broken (while), nextOxygen is surface and has > 3 bonds.")
                             
                     elif (dummyNext.isSurface_ == 'false'):
                         if (len(dummyNext.acceptors_) < 2):
@@ -471,16 +473,16 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                         elif (len(dummyNext.acceptors_) == 2):
                             return # nextOxygen has 2 acceptors, no room for one more.
                         elif (len(dummyNext.acceptors_) > 2):
-                            print "Code is broken (while), nextOxygen is bulk and has > 2 acceptors."
+                            print("Code is broken (while), nextOxygen is bulk and has > 2 acceptors.")
                             
             elif (numBonds == 3):
                 return #currentOxygen has a saturation of bonds.
             elif (numBonds > 3):
-                print "Code is broken (while), currentOxygen is surface and has > 3 bonds."
+                print("Code is broken (while), currentOxygen is surface and has > 3 bonds.")
 
         #if currentOxygen is not surface, nextOxygen can be bulk or surface.        
         elif (dummyCurrent.isSurface_ == 'false'):
-            dummyNextIndex = random.sample(goodNbors,1)[0]
+            dummyNextIndex = random.sample(goodNbors, 1)[0]
             dummyNext = dummyList[dummyNextIndex]
                 
 
@@ -493,11 +495,11 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                     elif (len(dummyNext.acceptors_) == 2):
                         return # nextOxygen has 2 acceptors, no room for one more.
                     elif (len(dummyNext.acceptors_) > 2):
-                        print "Code broken (while), nextOxygen has > 2 acceptors"
+                        print("Code broken (while), nextOxygen has > 2 acceptors")
                 elif (nOnumBonds == 3):
                     return #nextOxygen has 3 bonds, no room for one more.
                 elif (nOnumBonds > 3):
-                    print "Code is broken (while), nextOxygen is surface and has > 3 bonds."
+                    print("Code is broken (while), nextOxygen is surface and has > 3 bonds.")
                 
             elif (dummyNext.isSurface_ == 'false'):
                 if (len(dummyNext.acceptors_) < 2):
@@ -506,7 +508,7 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
                 elif (len(dummyNext.acceptors_) == 2):
                     return # nextOxygen has 2 acceptors, no room for one more.
                 elif (len(dummyNext.acceptors_) > 2):
-                    print "Code is broken (while), nextOxygen is bulk and has > 2 acceptors."
+                    print("Code is broken (while), nextOxygen is bulk and has > 2 acceptors.")
 
 
         # update nextOxygen to currentOxygen, begin looping.
@@ -517,12 +519,12 @@ def protonBucketBrigade(oxygenList,startOxygenIndex):
       
     #post while loop: test for length of protonLoop, will be set to zero upon break above.
     if (len(dummyList) > 0):
-        assignBonds(oxygenList,dummyList)
+        assignBonds(oxygenList, dummyList)
 
 
 
         
-def assignBonds(oxygenList,dummyList):
+def assignBonds(oxygenList, dummyList):
     # If we are here, we have successfully made a chain of hydrogen-bonds.
     # We will save this by overwriting the oxygenList with the dummyList
     for i in range(0, len(dummyList)):
@@ -534,17 +536,17 @@ def assignBonds(oxygenList,dummyList):
 
 def monteCarloMethod(oxygenList):
     
-    print "Assigning all oxygens a random set of bonds now"
+    print("Assigning all oxygens a random set of bonds now")
     #First we will assign all of the oxygens a random donor/acceptor set. We can end up with > 2 donors or acceptors here.
     numProtons = 0
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
 
-        for j in range(0,len(oxygenA.neighbors_)):
+        for j in range(0, len(oxygenA.neighbors_)):
             oxygenBIndex = oxygenA.neighbors_[j]
 
             if (oxygenBIndex not in oxygenA.donors_ and oxygenBIndex not in oxygenA.acceptors_):
-                rand = random.uniform(0,1)
+                rand = random.uniform(0, 1)
                 if (rand < 0.5):
                     oxygenA.donors_.append(oxygenA.neighbors_[j])
                     if (oxygenBIndex != -1):
@@ -554,18 +556,18 @@ def monteCarloMethod(oxygenList):
                     if (oxygenBIndex != -1):    
                         oxygenList[oxygenA.neighbors_[j]].donors_.append(i)
         numProtons = numProtons + len(oxygenA.donors_)
-    print "numProtons =", numProtons
+    print("numProtons =", numProtons)
                         
     numUnOr = 0
     for i in range(0, len(oxygenList)):
         oxygen = oxygenList[i]
         if (len(oxygen.donors_) < 2):
             numUnOr = numUnOr + 1
-    print "Pre MC:", numUnOr, "oxygens with < 2 donors_"
+    print("Pre MC:", numUnOr, "oxygens with < 2 donors_")
 
 
                         
-    print "Calculating net dipole of the system"
+    print("Calculating net dipole of the system")
     netDipole = [0.0, 0.0, 0.0]
     #Next we need to calculate the dipole moment of the system
     for i in range(0, len(oxygenList)):
@@ -578,7 +580,7 @@ def monteCarloMethod(oxygenList):
             rVec = subtractVectors(oxygenA.getPos()[0], oxygenB.getPos()[0])
             rUnit = normalize(rVec)
 
-            netDipole = addVectors(netDipole,rUnit)
+            netDipole = addVectors(netDipole, rUnit)
 
         #acceptor configuration has dipole moment (-1) * rUnit vec between two oxygens
         for j in range(0, len(oxygenA.acceptors_)):
@@ -587,12 +589,12 @@ def monteCarloMethod(oxygenList):
             rVec = subtractVectors(oxygenA.getPos()[0], oxygenB.getPos()[0])
             rUnit = normalize(rVec)
 
-            netDipole = subtractVectors(netDipole,rUnit)
+            netDipole = subtractVectors(netDipole, rUnit)
 
     #Now we divide by 2.0 since we visited each pair twice
     for i in range(0, len(netDipole)):
         netDipole[i] = netDipole[i] / 2.0
-    print "net dipole pre MC moves =", netDipole
+    print("net dipole pre MC moves =", netDipole)
 
     totalCycles = 100000
     nBarCycles = totalCycles / 5.0
@@ -607,7 +609,7 @@ def monteCarloMethod(oxygenList):
             oxygenAIndex = i
             oxygenA = oxygenList[oxygenAIndex]
         
-            oxygenBIndex = random.sample(oxygenA.neighbors_,1)[0]
+            oxygenBIndex = random.sample(oxygenA.neighbors_, 1)[0]
             if (oxygenBIndex != -1):
                 oxygenB = oxygenList[oxygenBIndex]
 
@@ -627,9 +629,9 @@ def monteCarloMethod(oxygenList):
                         oldDipole.append(-1.0 * rUnit[i])
                     
                     
-                EpreFlip = calcPairEnergy(oxygenA,oxygenB,netDipole,kT)
+                EpreFlip = calcPairEnergy(oxygenA, oxygenB, netDipole, kT)
             
-                swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex)
+                swapDonorAcceptor(oxygenA, oxygenAIndex, oxygenB, oxygenBIndex)
 
                 #compute post-flip dipole moment of Hbond
                 newDipole = []
@@ -651,21 +653,21 @@ def monteCarloMethod(oxygenList):
                 for i in range(0, len(netDipole)):
                     newNetDipole.append(netDipole[i] - oldDipole[i] + newDipole[i])
 
-                EpostFlip = calcPairEnergy(oxygenA,oxygenB,newNetDipole,kT)
+                EpostFlip = calcPairEnergy(oxygenA, oxygenB, newNetDipole, kT)
 
 
                 #accept or reject move
                 deltaE = EpostFlip - EpreFlip
-                randNum = random.uniform(0,1)
+                randNum = random.uniform(0, 1)
 
                 if (randNum <= np.exp(-deltaE / kT) ):
                     netDipole = newNetDipole
                     continue
                 else:
-                    swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex)
+                    swapDonorAcceptor(oxygenA, oxygenAIndex, oxygenB, oxygenBIndex)
             
         if (nCycles%100 == 0):    
-            print nCycles, kT, netDipole
+            print(nCycles, kT, netDipole)
 
 
     #after MC cycles, let's check to see how many oxygens have the right number of donors/acceptors
@@ -674,25 +676,25 @@ def monteCarloMethod(oxygenList):
         oxygen = oxygenList[i]
         if (len(oxygen.donors_) < 2 and len(oxygen.acceptors_) < 2):
             numUnOr = numUnOr + 1
-    print "Post MC:", numUnOr, "oxygens with < 2 donors and < 2 acceptors"
+    print("Post MC:", numUnOr, "oxygens with < 2 donors and < 2 acceptors")
 
         
         
-def calcPairEnergy(oxygenA, oxygenB, netDipole,kT):
+def calcPairEnergy(oxygenA, oxygenB, netDipole, kT):
     #f = weighting for having 2 donors & 2 acceptors
     #g = weighting for zero-net dipole to the system
     f = 2.0/kT
     g = 1.0/kT
 
-    oxAda = pow(len(oxygenA.donors_) - len(oxygenA.acceptors_),2.0)
-    oxBda = pow(len(oxygenB.donors_) - len(oxygenB.acceptors_),2.0)
+    oxAda = pow(len(oxygenA.donors_) - len(oxygenA.acceptors_), 2.0)
+    oxBda = pow(len(oxygenB.donors_) - len(oxygenB.acceptors_), 2.0)
     
-    E = f*( oxAda + oxBda ) + g*(np.sqrt(dot(netDipole,netDipole)))
+    E = f*( oxAda + oxBda ) + g*(np.sqrt(dot(netDipole, netDipole)))
 
     return E
 
 
-def swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex):
+def swapDonorAcceptor(oxygenA, oxygenAIndex, oxygenB, oxygenBIndex):
     if (oxygenBIndex in oxygenA.donors_):
         
         listAIndex = oxygenA.donors_.index(oxygenBIndex)
@@ -719,7 +721,7 @@ def swapDonorAcceptor(oxygenA,oxygenAIndex,oxygenB,oxygenBIndex):
         
         
 def addProtonsToDonors(oxygenList):
-    print "Adding protons to the lattice"
+    print("Adding protons to the lattice")
 
     numProtons = 0
     protonList = []
@@ -739,7 +741,7 @@ def addProtonsToDonors(oxygenList):
                 yDisp = oxygenA.getPos()[0][1] - oxygenB.getPos()[0][1]
                 zDisp = oxygenA.getPos()[0][2] - oxygenB.getPos()[0][2]
                 
-                rVec = [xDisp,yDisp,zDisp]
+                rVec = [xDisp, yDisp, zDisp]
                 rUnit = normalize(rVec)
             
                 xPos = oxygenA.getPos()[0][0] + rUnit[0]
@@ -765,8 +767,8 @@ def addProtonsToDonors(oxygenList):
                         yDisp = oxygenA.getPos()[0][1] - oxygenB.getPos()[0][1]
                         zDisp = oxygenA.getPos()[0][2] - oxygenB.getPos()[0][2]
                     
-                        rVec = [xDisp,yDisp,zDisp]
-                        aveVec = addVectors(aveVec,rVec)
+                        rVec = [xDisp, yDisp, zDisp]
+                        aveVec = addVectors(aveVec, rVec)
 
                 #normalize aveVec, and multiply by (-1)
                 aveVec = normalize(aveVec)
@@ -783,9 +785,9 @@ def addProtonsToDonors(oxygenList):
 
                 protonList.append(newProton)
 
-    print "numProtons = ", numProtons
-    print "len(oxygenList) =",len(oxygenList)
-    print "len(protonList) =",len(protonList)
+    print("numProtons = ", numProtons)
+    print("len(oxygenList) =", len(oxygenList))
+    print("len(protonList) =", len(protonList))
     return protonList
 
 
@@ -960,15 +962,15 @@ def computeQuats(oxygenList):
 
         
 
-def writeXYZfile(oxygenList, protonList,Hmat):
-    outFile = open("test.xyz","w")
+def writeXYZfile(oxygenList, protonList, Hmat):
+    outFile = open("test.xyz", "w")
 
     numObjects = len(oxygenList) + len(protonList)
     outFile.write(str(numObjects) + "\n")
     outFile.write("\t%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f%s\t%f\t%f\t%f\n" % 
-                     (0.00000,";",
-                      Hmat[0][0], Hmat[0][1], Hmat[0][2],";", 
-                      Hmat[1][0], Hmat[1][1], Hmat[1][2],";", 
+                     (0.00000, ";",
+                      Hmat[0][0], Hmat[0][1], Hmat[0][2], ";", 
+                      Hmat[1][0], Hmat[1][1], Hmat[1][2], ";", 
                       Hmat[2][0], Hmat[2][1], Hmat[2][2]))
     for i in range(0, len(oxygenList)):
         oxygenA = oxygenList[i]
@@ -993,9 +995,9 @@ def main(argv):
         description='OpenMD module that generates proton disordered ice-Ih lattices given an (.xyz) coordinate file for the Oxygen lattice.',
         formatter_class=RawDescriptionHelpFormatter,
         epilog="Example: protonSampler -i oxygenLattice.xyz -o protonDisorderedIce.omd")
-    parser.add_argument("-i","--inputFile=", action="store",
+    parser.add_argument("-i", "--inputFile=", action="store",
                             dest="inputFileName", help="use specified input file")
-    parser.add_argument("-o","--outputfile=", action="store", dest="outputFileName",help="use specified output (.omd) file")
+    parser.add_argument("-o", "--outputfile=", action="store", dest="outputFileName", help="use specified output (.omd) file")
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -1018,13 +1020,13 @@ def main(argv):
     monteCarloMethod(oxygenList)
 
     protonList = addProtonsToDonors(oxygenList)
-    writeXYZfile(oxygenList,protonList,Hmat)
+    writeXYZfile(oxygenList, protonList, Hmat)
     writeOxygenfile(oxygenList)
     
     computeQuats(oxygenList)
     
     
-    writeXYZfile(oxygenList,protonList,Hmat)
+    writeXYZfile(oxygenList, protonList, Hmat)
     
 
 if __name__ == "__main__":

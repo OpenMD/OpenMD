@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """A script that processes a velocity autocorrelation function into a
 amplitude spectrum
 
@@ -28,7 +28,7 @@ import math
 import numpy as np
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readVcorrFile(vcorrFileName):
     global time
@@ -39,9 +39,9 @@ def readVcorrFile(vcorrFileName):
     vcorrFile = open(vcorrFileName, 'r')
     line = vcorrFile.readline()
 
-    print "reading File"
+    print("reading File")
     line = vcorrFile.readline()
-    while 1:
+    while True:
 
         if not line.startswith("#"):
             L = line.split()
@@ -66,7 +66,7 @@ def computeSpectrum(outFileName, normalize):
     # symmetrize arrays
 
     tlen = len(time)
-    for i in range(1,len(time)):
+    for i in range(1, len(time)):
         tnew.append( -time[tlen-i] )
         vnew.append( vcorr[tlen-i] )
     for i in range(len(time)):
@@ -125,11 +125,11 @@ def main(argv):
              normalize = True
     if (not haveVcorrFileName):
         usage() 
-        print "No vcorr file was specified"
+        print("No vcorr file was specified")
         sys.exit()
     if (not haveOutputFileName):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
     
     

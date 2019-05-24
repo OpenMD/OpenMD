@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Funcfl Extractor
 
 Opens an DYNAMO86 EAM funcfl file, parses the data and writes out
@@ -29,7 +29,7 @@ rho = []
 fRho = []
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readFuncflFile(funcflFileName):
 
@@ -108,11 +108,11 @@ def main(argv):
             haveOutputBaseName = True
     if (not haveFuncflFileName):
         usage() 
-        print "No funcfl file was specified"
+        print("No funcfl file was specified")
         sys.exit()
     if (not haveOutputBaseName):
         usage()
-        print "No output base name was specified"
+        print("No output base name was specified")
         sys.exit()
 
     (nrho, drho, nR, dR, rcut) = readFuncflFile(funcflFileName)

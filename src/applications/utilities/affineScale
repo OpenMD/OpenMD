@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """OpenMD affine scaling transform
 
 Takes an OpenMD file and scales both the periodic box and the
@@ -32,7 +32,6 @@ import getopt
 import string
 import math
 import random
-from sets import *
 
 metaData = []
 frameData = []
@@ -47,13 +46,13 @@ Hmat = []
 BoxInv = []
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readFile(mdFileName):
     mdFile = open(mdFileName, 'r')        
     # Find OpenMD version info first
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<OOPSE version=' in line or '<OpenMD version=' in line:
             OpenMDversion = line
             break
@@ -63,8 +62,8 @@ def readFile(mdFileName):
         
     mdFile.seek(0)
     line = mdFile.readline()
-    print "reading MetaData"
-    while 1:
+    print("reading MetaData")
+    while True:
         if '<MetaData>' in line:
             while 2:
                 metaData.append(line)
@@ -76,13 +75,13 @@ def readFile(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-    print "reading Snapshot"
+    print("reading Snapshot")
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<Snapshot>' in line:
             line = mdFile.readline()
-            while 1:
-                print "reading FrameData"
+            while True:
+                print("reading FrameData")
                 if '<FrameData>' in line:
                     while 2:
                         frameData.append(line)
@@ -110,7 +109,7 @@ def readFile(mdFileName):
                     break
 
             line = mdFile.readline()
-            while 1:
+            while True:
                 if '<StuntDoubles>' in line:
                     line = mdFile.readline()
                     while 2:
@@ -152,7 +151,7 @@ def readFile(mdFileName):
                             i = i+3
                         else:
                             j.append([0.0, 0.0, 0.0])
-                        wrap.append([0,0,0])
+                        wrap.append([0, 0, 0])
                                                
                         line = mdFile.readline()
                         if '</StuntDoubles>' in line:
@@ -163,12 +162,12 @@ def readFile(mdFileName):
     
     mdFile.close()
 
-def writeFile(outputFileName,repeatX,repeatY,repeatZ):
+def writeFile(outputFileName, repeatX, repeatY, repeatZ):
     outputFile = open(outputFileName, 'w')
 
     outputFile.write("<OpenMD version=2>\n");
 
-    print "writing MetaData"
+    print("writing MetaData")
     for metaline in metaData:
         if 'nMol' in metaline:
             metasplit = metaline.split()
@@ -178,10 +177,10 @@ def writeFile(outputFileName,repeatX,repeatY,repeatZ):
         else:
             outputFile.write(metaline)
 
-    print "writing Snapshot"
+    print("writing Snapshot")
     outputFile.write("  <Snapshot>\n")
 
-    print "writing FrameData"
+    print("writing FrameData")
     for frameline in frameData:
         if 'Hmat:' in frameline:
             myH = []
@@ -192,17 +191,16 @@ def writeFile(outputFileName,repeatX,repeatY,repeatZ):
         else:
             outputFile.write(frameline)
 
-    print "writing StuntDoubles"
+    print("writing StuntDoubles")
     outputFile.write("    <StuntDoubles>\n")
 
-    print repeatX, repeatY, repeatZ
+    print(repeatX, repeatY, repeatZ)
 
-    deco = [ (index, i) for i, index in enumerate(indices) ]
-    deco.sort()
+    deco = sorted([ (index, i) for i, index in enumerate(indices) ])
     whichSD = 0
     for index in range(len(deco)):
-        (index,i) = deco[index]
-        print i
+        (index, i) = deco[index]
+        print(i)
         for ii in range(repeatX):
             for jj in range(repeatY):
                 for kk in range(repeatZ):                    
@@ -233,10 +231,10 @@ def roundMe(x):
 
 def wrapVector(myVect):
     scaled = [0.0, 0.0, 0.0]
-    wrappingNumber = [0,0,0]
+    wrappingNumber = [0, 0, 0]
     for i in range(3):
         scaled[i] = myVect[i] * BoxInv[i]
-	wrappingNumber[i] = roundMe(scaled[i])
+        wrappingNumber[i] = roundMe(scaled[i])
         scaled[i] = scaled[i] - wrappingNumber[i]
         myVect[i] = scaled[i] * Hmat[i][i]
     return myVect, wrappingNumber
@@ -291,7 +289,7 @@ def main(argv):
     _haveMDFileName = 0
     _haveOutputFileName = 0
     try:                                
-        opts, args = getopt.getopt(argv, "hm:o:x:y:z:v:", ["help", "meta-data=", "output-file=", "newX=", "newY=", "newZ=","newV="]) 
+        opts, args = getopt.getopt(argv, "hm:o:x:y:z:v:", ["help", "meta-data=", "output-file=", "newX=", "newY=", "newZ=", "newV="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -324,21 +322,21 @@ def main(argv):
 
     if (_haveMDFileName != 1):
         usage() 
-        print "No meta-data file was specified"
+        print("No meta-data file was specified")
         sys.exit()
     if (_haveOutputFileName != 1):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
 
     if not (doV or doX or doY or doZ):
         usage()
-        print "no scaling options given.  Nothing to do!"
+        print("no scaling options given.  Nothing to do!")
         sys.exit()
 
     if doV and (doX or doY or doZ):
         usage()
-        print "-v is mutually exclusive with any of the -x, -y, and -z options"
+        print("-v is mutually exclusive with any of the -x, -y, and -z options")
         sys.exit()
 
     readFile(mdFileName)

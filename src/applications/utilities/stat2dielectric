@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """A script that computes the static dielectric constant
 
 Accumulates the static dielectric constant from an OpenMD stat file
@@ -61,7 +61,7 @@ import string
 import math
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readStatFile(statFileName):
     global time
@@ -75,12 +75,12 @@ def readStatFile(statFileName):
 
     statFile = open(statFileName, 'r')
 
-    print "reading File"    
+    print("reading File")    
     line = statFile.readline()
     while ("#" in line):
         line = statFile.readline()
 
-    while 1:
+    while True:
         L = line.split()
 
         time.append(float(L[0]))
@@ -113,7 +113,7 @@ def computeAverages(outFileName, Q):
     Temp = 0.0
     Vol = 0.0
     
-    print "computing Dielectrics"
+    print("computing Dielectrics")
     outFile = open(outFileName, 'w')
 
     for i in range(len(time)):
@@ -200,11 +200,11 @@ def main(argv):
             haveOutputFileName = True
     if (not haveStatFileName):
         usage() 
-        print "No stat file was specified"
+        print("No stat file was specified")
         sys.exit()
     if (not haveOutputFileName):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
     
     

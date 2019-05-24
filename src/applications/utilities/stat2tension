@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
 __copyright__ = "Copyright (c) 2017 by the University of Notre Dame"
@@ -24,11 +24,11 @@ def readStatFile(statFileName):
 
     statFile = open(statFileName, 'r')
     
-    print "reading File"
+    print("reading File")
     line = statFile.readline()
     while ("#" in line):
         line = statFile.readline()
-    while 1:
+    while True:
         L = line.split()
         if (len(L) > 16):
             #
@@ -39,15 +39,15 @@ def readStatFile(statFileName):
             Pyy.append(float(L[12]))
             Pzz.append(float(L[16]))
         else:
-            print "Not enough columns are present in the .stat file"
-            print "to calculate the shear viscosity..."
-            print 
-            print "stat2tension expects to find all 9 elements of the"
-            print "pressure tensor in columns 9-17 of the .stat file"
-            print
-            print "You may need to set the statFileFormat string"
-            print "explicitly in your .omd file when running OpenMD."
-            print "Consult the OpenMD documentation for more details."
+            print("Not enough columns are present in the .stat file")
+            print("to calculate the shear viscosity...")
+            print() 
+            print("stat2tension expects to find all 9 elements of the")
+            print("pressure tensor in columns 9-17 of the .stat file")
+            print()
+            print("You may need to set the statFileFormat string")
+            print("explicitly in your .omd file when running OpenMD.")
+            print("Consult the OpenMD documentation for more details.")
             sys.exit()
                 
         line = statFile.readline()
@@ -55,9 +55,9 @@ def readStatFile(statFileName):
         
     statFile.close()
     
-def computeAverages(Lz,outFileName):
+def computeAverages(Lz, outFileName):
     
-    print "computing Averages"
+    print("computing Averages")
 
     outFile = open(outFileName, 'w')
     outFile.write("# Time \t Surface Tension \n")
@@ -78,10 +78,10 @@ def computeAverages(Lz,outFileName):
 
 
     gammaAve = gammaSum / float(len(Pzz))
-    gammaSdev = math.sqrt(gamma2Sum / float(len(Pzz)) - math.pow(gammaAve,2))
+    gammaSdev = math.sqrt(gamma2Sum / float(len(Pzz)) - math.pow(gammaAve, 2))
     gammaErr  = gammaSdev * 1.96 / math.sqrt(len(Pzz))
 
-    print "Average surface tension = %f +/- %f (mN/m)" % (gammaAve, gammaErr)
+    print("Average surface tension = %f +/- %f (mN/m)" % (gammaAve, gammaErr))
 
 
 def main(argv):
@@ -129,7 +129,7 @@ J Math Chem (2009) 45: 161. doi:10.1007/s10910-008-9374-7
                         help="use specified stat (.stat) file")
 
     parser.add_argument("-z", "--box-length=",
-                        action="store", required=True, dest="Lz",type=float,
+                        action="store", required=True, dest="Lz", type=float,
                         help="dimension of the box in the normal (z) direction")
     parser.add_argument("-o", "--output-file=", 
                         action="store", required=True, dest="outFileName",

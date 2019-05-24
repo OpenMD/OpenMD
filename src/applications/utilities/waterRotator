@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Water Quaternion Sampler
 
 Samples water orientations from a list of known good
@@ -50,19 +50,19 @@ H2vects = []
 DipoleVects = []
 allAcceptors = []
 availableneighbs = []
-surfaceSet = set([-1])
+surfaceSet = {-1}
 
 
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 
 def readFile(mdFileName):
     mdFile = open(mdFileName, 'r')        
     # Find OpenMD version info first
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<OOPSE version=' in line or '<OpenMD version=' in line:
             OpenMDversion = line
             break
@@ -72,8 +72,8 @@ def readFile(mdFileName):
         
     mdFile.seek(0)
     line = mdFile.readline()
-    print "reading MetaData"
-    while 1:
+    print("reading MetaData")
+    while True:
         if '<MetaData>' in line:
             while 2:
                 metaData.append(line)
@@ -85,13 +85,13 @@ def readFile(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-    print "reading Snapshot"
+    print("reading Snapshot")
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<Snapshot>' in line:
             line = mdFile.readline()
-            while 1:
-                print "reading FrameData"
+            while True:
+                print("reading FrameData")
                 if '<FrameData>' in line:
                     while 2:
                         frameData.append(line)
@@ -109,11 +109,11 @@ def readFile(mdFileName):
                             Hmat.append([Hxx, Hxy, Hxz])
                             Hmat.append([Hyx, Hyy, Hyz])
                             Hmat.append([Hzx, Hzy, Hzz])
-                            print Hmat
+                            print(Hmat)
                             BoxInv.append(1.0/Hxx)
                             BoxInv.append(1.0/Hyy)
                             BoxInv.append(1.0/Hzz)
-                            print BoxInv
+                            print(BoxInv)
                         line = mdFile.readline()
                         if '</FrameData>' in line:
                             frameData.append(line)
@@ -121,7 +121,7 @@ def readFile(mdFileName):
                     break
 
             line = mdFile.readline()
-            while 1:
+            while True:
                 if '<StuntDoubles>' in line:
                     line = mdFile.readline()
                     while 2:
@@ -232,7 +232,7 @@ def findNeighbors():
 
             dpos = [jPos[0] - iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
             dpos = wrapVector(dpos)
-            dist2 = dot(dpos,dpos)
+            dist2 = dot(dpos, dpos)
             
             if (dist2 < 9.0):
                 neighbors[i].append(j)
@@ -247,13 +247,13 @@ def findNeighbors():
             neighbors[i].append(-1)
             surfaceCount = surfaceCount + 1
 
-    print "surfaceCount = %d" % surfaceCount
+    print("surfaceCount = %d" % surfaceCount)
 
 def randomizeProtons():
 
     # do 10 proton bucket brigades:
     for i in range(10):
-        origPoint = random.randint(0,len(indices))
+        origPoint = random.randint(0, len(indices))
         protonBucketBrigade(origPoint)
 
     # check to make sure everyone has a happy proton set:
@@ -267,12 +267,12 @@ def randomizeProtons():
 
     for j in range(len(indices)):
         if (len(DonatingTo[j]) != 2):
-            print "second round to fix molecule %d" % j
+            print("second round to fix molecule %d" % j)
             protonBucketBrigade(j)
 
     for j in range(len(indices)):
         if (len(DonatingTo[j]) != 2):
-            print "unfilled proton donor list for molecule %d" % j
+            print("unfilled proton donor list for molecule %d" % j)
 
 
 
@@ -318,7 +318,7 @@ def protonBucketBrigade(origPoint):
         elif (nDonors == 2):
             acceptor = random.choice(DonatingTo[donor])
         else:
-            print "Whoah!  How'd we get here?"
+            print("Whoah!  How'd we get here?")
 
         donor = acceptor
         if (acceptor == -1):
@@ -469,11 +469,11 @@ def computeQuats():
         quaternions[i] = q
         totalDipole = [totalDipole[0] + uz[0], totalDipole[1] + uz[1], totalDipole[2] + uz[2]]
     totalDipole = [-totalDipole[0], -totalDipole[1], -totalDipole[2]]
-    print totalDipole
+    print(totalDipole)
     Dipole = math.sqrt(dot(totalDipole, totalDipole))
-    print 'Total Dipole Moment = %d' % Dipole
+    print('Total Dipole Moment = %d' % Dipole)
     if (Dipole > 40 or Dipole < -40):
-        print "Bad Dipole, starting over"
+        print("Bad Dipole, starting over")
         for i in range(len(indices)):
             del OldDonor[:]
             del AcceptingFrom[:]
@@ -482,7 +482,7 @@ def computeQuats():
         randomizeProtons()
         computeQuats()
     else:
-        print "All Done!"
+        print("All Done!")
         
 
 
@@ -506,11 +506,11 @@ def main(argv):
             _haveOutputFileName = 1
     if (_haveMDFileName != 1):
         usage() 
-        print "No meta-data file was specified"
+        print("No meta-data file was specified")
         sys.exit()
     if (_haveOutputFileName != 1):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
     readFile(mdFileName)
     # analyzeQuats()

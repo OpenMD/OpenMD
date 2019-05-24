@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Heat Flux Correlation function
 
 Computes the correlation function of the heat flux vector
@@ -32,7 +32,7 @@ import string
 import math
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readStatFile(statFileName):
 
@@ -53,7 +53,7 @@ def readStatFile(statFileName):
 
     statFile = open(statFileName, 'r')
 
-    print "reading File"
+    print("reading File")
     pressSum = 0.0
     volSum = 0.0
     tempSum = 0.0
@@ -62,7 +62,7 @@ def readStatFile(statFileName):
     while ("#" in line):
         line = statFile.readline()
 
-    while 1:
+    while True:
         L = line.split()
         time.append(float(L[0]))
         temperature.append(float(L[4]))
@@ -90,7 +90,7 @@ def computeAverages():
     global volAve
     global pvAve
 
-    print "computing Averages"
+    print("computing Averages")
 
     tempSum = 0.0
     pressSum = 0.0
@@ -112,28 +112,28 @@ def computeAverages():
         # in units of amu Ang^2 fs^-1
         pvTerm = pressure[i]*volume[i] / pressureConvert
         pvSum = pvSum + pvTerm
-        temp2Sum = temp2Sum + math.pow(temperature[i],2)
-        press2Sum = press2Sum + math.pow(pressure[i],2)
-        vol2Sum = vol2Sum + math.pow(volume[i],2)
-        pv2Sum = pv2Sum + math.pow(pvTerm,2)
+        temp2Sum = temp2Sum + math.pow(temperature[i], 2)
+        press2Sum = press2Sum + math.pow(pressure[i], 2)
+        vol2Sum = vol2Sum + math.pow(volume[i], 2)
+        pv2Sum = pv2Sum + math.pow(pvTerm, 2)
 
     tempAve = tempSum / float(len(time))
     pressAve = pressSum / float(len(time))
     volAve = volSum / float(len(time))
     pvAve = pvSum / float(len(time))
 
-    tempSdev = math.sqrt(temp2Sum / float(len(time)) - math.pow(tempAve,2))
-    pressSdev = math.sqrt(press2Sum / float(len(time)) - math.pow(pressAve,2))
-    if (vol2Sum / float(len(time)) < math.pow(volAve,2)):
+    tempSdev = math.sqrt(temp2Sum / float(len(time)) - math.pow(tempAve, 2))
+    pressSdev = math.sqrt(press2Sum / float(len(time)) - math.pow(pressAve, 2))
+    if (vol2Sum / float(len(time)) < math.pow(volAve, 2)):
         volSdev = 0.0
     else:
-        volSdev = math.sqrt(vol2Sum / float(len(time)) - math.pow(volAve,2))
-    pvSdev = math.sqrt(pv2Sum / float(len(time)) - math.pow(pvAve,2))
+        volSdev = math.sqrt(vol2Sum / float(len(time)) - math.pow(volAve, 2))
+    pvSdev = math.sqrt(pv2Sum / float(len(time)) - math.pow(pvAve, 2))
 
-    print "   Average pressure = %f +/- %f (atm)" % (pressAve, pressSdev)
-    print "     Average volume = %f +/- %f (Angst^3)" % (volAve, volSdev)
-    print "Average temperature = %f +/- %f (K)" % (tempAve, tempSdev)
-    print " Average PV product = %f +/- %f (amu Angst^2 fs^-1)" % (pvAve, pvSdev)
+    print("   Average pressure = %f +/- %f (atm)" % (pressAve, pressSdev))
+    print("     Average volume = %f +/- %f (Angst^3)" % (volAve, volSdev))
+    print("Average temperature = %f +/- %f (K)" % (tempAve, tempSdev))
+    print(" Average PV product = %f +/- %f (amu Angst^2 fs^-1)" % (pvAve, pvSdev))
 
 def computeCorrelations(outputFileName):
 
@@ -156,7 +156,7 @@ def computeCorrelations(outputFileName):
 
 
     if doEinstein:
-        print "computing Einstein-style Correlation Function"
+        print("computing Einstein-style Correlation Function")
 
         # Precompute sum variables to aid integration.
         # The integral from t0 -> t0 + t  can be easily obtained
@@ -239,11 +239,11 @@ def main(argv):
             haveOutputFileName = True
     if (not haveStatFileName):
         usage()
-        print "No stat file was specified"
+        print("No stat file was specified")
         sys.exit()
     if (not haveOutputFileName):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
 
     readStatFile(statFileName);

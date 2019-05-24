@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """A script that computes the system dipole correlation function
 
 Options:
@@ -22,7 +22,7 @@ import string
 import math
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readStatFile(statFileName, dipole_pos):
     global time
@@ -32,12 +32,12 @@ def readStatFile(statFileName, dipole_pos):
 
     statFile = open(statFileName, 'r')
 
-    print "reading File"
+    print("reading File")
     line = statFile.readline()
     while ("#" in line):
         line = statFile.readline()
 
-    while 1:
+    while True:
         L = line.split()
         time.append(float(L[0]))
         dipX = float(L[dipole_pos])
@@ -108,15 +108,15 @@ def main(argv):
             haveOutputFileName = True
     if (not haveStatFileName):
         usage()
-        print "No stat file was specified"
+        print("No stat file was specified")
         sys.exit()
     if (not haveOutputFileName):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
     if (not haveDipoleColumn):
         usage()
-        print "Coulumn number of x-component of dipole not specified"
+        print("Coulumn number of x-component of dipole not specified")
         sys.exit()
 
     readStatFile(statFileName, dipole_pos)

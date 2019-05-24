@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """OMD Solvator
 
 Opens two omd files, one with a solute structure and one with a
@@ -36,8 +36,6 @@ import getopt
 import string
 import math
 import random
-from sets import *
-#from Numeric import *
 
 _haveMDFileName1 = 0
 _haveMDFileName2 = 0
@@ -76,13 +74,13 @@ soluteMolLine = str()
 nSolvents = 0
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readFile1(mdFileName):
     mdFile = open(mdFileName, 'r')        
     # Find OpenMD version info first
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<OpenMD version=' in line or '<OOPSE version=' in line:
             OpenMDversion = line
             break
@@ -93,8 +91,8 @@ def readFile1(mdFileName):
     mdFile.seek(0)
     line = mdFile.readline()
 
-    print "reading solute MetaData"
-    while 1:
+    print("reading solute MetaData")
+    while True:
         if '<MetaData>' in line:
             while 2:
                 metaData1.append(line)
@@ -112,13 +110,13 @@ def readFile1(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-    print "reading solute Snapshot"
+    print("reading solute Snapshot")
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<Snapshot>' in line:
             line = mdFile.readline()
-            while 1:
-                print "reading solute FrameData"
+            while True:
+                print("reading solute FrameData")
                 if '<FrameData>' in line:
                     while 2:
                         frameData1.append(line)
@@ -146,7 +144,7 @@ def readFile1(mdFileName):
                     break
 
             line = mdFile.readline()
-            while 1:
+            while True:
                 if '<StuntDoubles>' in line:
                     line = mdFile.readline()
                     while 2:
@@ -189,7 +187,7 @@ def readFile2(mdFileName):
     mdFile = open(mdFileName, 'r')        
     # Find OpenMD version info first
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<OpenMD version=' in line or '<OOPSE version=':
             OpenMDversion = line
             break
@@ -199,8 +197,8 @@ def readFile2(mdFileName):
         
     mdFile.seek(0)
     line = mdFile.readline()
-    print "reading solvent MetaData"
-    while 1:
+    print("reading solvent MetaData")
+    while True:
         if '<MetaData>' in line:                            
             while 2:
                 if 'type' in line:
@@ -215,13 +213,13 @@ def readFile2(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-    print "reading solvent Snapshot"
+    print("reading solvent Snapshot")
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<Snapshot>' in line:
             line = mdFile.readline()
-            while 1:
-                print "reading solvent FrameData"
+            while True:
+                print("reading solvent FrameData")
                 if '<FrameData>' in line:
                     while 2:
                         frameData2.append(line)
@@ -249,7 +247,7 @@ def readFile2(mdFileName):
                     break
 
             line = mdFile.readline()
-            while 1:
+            while True:
                 if '<StuntDoubles>' in line:
                     line = mdFile.readline()
                     while 2:
@@ -339,13 +337,13 @@ def checkBoxes():
             if (diff > maxDiff):
                maxDiff = diff
     if (maxDiff > boxTolerance):
-       print "The solute and solvent boxes have different geometries:"
-       print "                     Solute           |                   Solvent"
-       print " -------------------------------------|------------------------------------"
+       print("The solute and solvent boxes have different geometries:")
+       print("                     Solute           |                   Solvent")
+       print(" -------------------------------------|------------------------------------")
        for i in range(3):
-           print( "|  %10.4g %10.4g %10.4g   |  %10.4g %10.4g %10.4g  |" % (Hmat1[i][0], Hmat1[i][1], Hmat1[i][2], Hmat2[i][0], Hmat2[i][1], Hmat2[i][2]))
+           print(( "|  %10.4g %10.4g %10.4g   |  %10.4g %10.4g %10.4g  |" % (Hmat1[i][0], Hmat1[i][1], Hmat1[i][2], Hmat2[i][0], Hmat2[i][1], Hmat2[i][2])))
 
-       print " -------------------------------------|------------------------------------"
+       print(" -------------------------------------|------------------------------------")
        sys.exit()
 
     
@@ -391,21 +389,21 @@ def cross(L1, L2):
     L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
     return L3
 
-def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
+def removeOverlaps(rcut, nSolventAtoms, nSoluteAtoms):
 
     rcut2 = rcut*rcut
     nextMol = 0
-    for i in range(0,len(indices2),nSolventAtoms):
+    for i in range(0, len(indices2), nSolventAtoms):
         keepThisMolecule = 1
         for atom1 in range (i, (i+nSolventAtoms)):
            
             iPos = positions2[atom1]
-            for j in range(0,len(indices1)):
+            for j in range(0, len(indices1)):
                 for atom2 in range (j, (j+nSoluteAtoms), nSoluteAtoms):
                     jPos = positions1[atom2]
                     dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
                     dpos = wrapVector(dpos)
-                    dist2 = dot(dpos,dpos)
+                    dist2 = dot(dpos, dpos)
                     
 
                     if (dist2 < rcut2):
@@ -419,7 +417,7 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
        
     global nSolvents
     myIndex = len(indices2) - 1
-    for i in range(0,len(keepers)):
+    for i in range(0, len(keepers)):
         
         if (keepers[i] == 1):
             nSolvents = nSolvents + 1
@@ -442,7 +440,7 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
     
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hu:v:n:p:r:o:", ["help", "solute=","solvent=","nSoluteAtoms=","nSolventAtoms=", "rcut=" "output-file="]) 
+        opts, args = getopt.getopt(argv, "hu:v:n:p:r:o:", ["help", "solute=", "solvent=", "nSoluteAtoms=", "nSolventAtoms=", "rcut=" "output-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -477,35 +475,35 @@ def main(argv):
 
     if (_haveMDFileName1 != 1):
         usage() 
-        print "No OpenMD (omd) file was specified for the solute"
+        print("No OpenMD (omd) file was specified for the solute")
         sys.exit()
 
     if (_haveMDFileName2 != 1):
         usage() 
-        print "No OpenMD (omd) file was specified for the solvent"
+        print("No OpenMD (omd) file was specified for the solvent")
         sys.exit()
 
     if (_haveOutputFileName != 1):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
 
     if (_haveRcut != 1):
-        print "No cutoff radius was specified, using 4 angstroms"
+        print("No cutoff radius was specified, using 4 angstroms")
         rcut =4.0
 
     if (_haveNSoluteAtoms != 1):
-        print "Number of solute atoms was not specified. Using 1 atom."
+        print("Number of solute atoms was not specified. Using 1 atom.")
         nSoluteAtoms = 1
 
     if (_haveNSolventAtoms != 1):
-        print "Number of solute atoms was not specified. Using 1 atom."
+        print("Number of solute atoms was not specified. Using 1 atom.")
         nSolventAtoms = 1
 
     readFile1(mdFileName1)
     readFile2(mdFileName2)
     checkBoxes()
-    removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms)
+    removeOverlaps(rcut, nSolventAtoms, nSoluteAtoms)
     writeFile(outputFileName)
 
 if __name__ == "__main__":

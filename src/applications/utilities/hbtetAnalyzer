@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@Python3_EXECUTABLE@
 
 __author__ = "Patrick Louden (plouden@nd.edu)"
 __copyright__ = "Copyright (c) 2016 by the University of Notre Dame"
@@ -14,9 +14,9 @@ from argparse import RawDescriptionHelpFormatter
 
 
 def usage():
-    print __doc__
+    print(__doc__)
 
-def HBcount(hbqFileName,hbqPSAFileName,qS,qL,boxl_x,boxl_y,boxl_z,nSnapshots):
+def HBcount(hbqFileName, hbqPSAFileName, qS, qL, boxl_x, boxl_y, boxl_z, nSnapshots):
     hbCount = 0.0
     nbins = 0.0
     deltaQ = 0.0
@@ -26,7 +26,7 @@ def HBcount(hbqFileName,hbqPSAFileName,qS,qL,boxl_x,boxl_y,boxl_z,nSnapshots):
     totSum = 0.0
 
     # first let's extract the Hydrogen Bond count from the .hbq file
-    hbqFile = open(hbqFileName,"r")
+    hbqFile = open(hbqFileName, "r")
     for line in hbqFile:
         if "#" in line:
             if "parameters:" in line:
@@ -39,7 +39,7 @@ def HBcount(hbqFileName,hbqPSAFileName,qS,qL,boxl_x,boxl_y,boxl_z,nSnapshots):
             hbqList.append(line.split())
 
 
-    for i in range(0,len(hbqList[0])):
+    for i in range(0, len(hbqList[0])):
         for j in range(0, len(hbqList[0])):
             if ( (i*deltaQ) >= qS ) and ( (j*deltaQ) <= qL ):
                 htlSum = htlSum + float(hbqList[i][j])
@@ -49,7 +49,7 @@ def HBcount(hbqFileName,hbqPSAFileName,qS,qL,boxl_x,boxl_y,boxl_z,nSnapshots):
     totSum = htlSum + lthSum
     normHBCount = (totSum * hbCount) / (boxl_x * boxl_y * boxl_z) / nSnapshots
 
-    hbqPSAFile = open(hbqPSAFileName,"w")
+    hbqPSAFile = open(hbqPSAFileName, "w")
     hbqPSAFile.write("qS = " + str(qS) + "\n")
     hbqPSAFile.write("qL = " +str(qL) +"\n")
     hbqPSAFile.write("boxl(x) = " + str(boxl_x) + "\n")
@@ -70,14 +70,14 @@ def main(argv):
         description='OpenMD tetrahedral hydrogen-bond matrix analyzer.',
         #formatter_class=RawDescriptionHelpFormatter,
         epilog="Example: hbtetAnalyzer.py -i sim.hbq -o sim.hbqPSA -qS 0.91 -qL 0.75 -x 56.5 -y 43.3")
-    parser.add_argument("-i","--hbq-file=", action="store", dest="hbqFileName", help="use specified input (.hbq) file")
-    parser.add_argument("-o","--hbqPAS-file=", action="store", dest="hbqPSAFileName", help="use specified output (.hbqPSA) file")
-    parser.add_argument("-qS","--q(solid)=", action="store", type=float, dest="qS", help="the tetrahedral order parameter value at the solid surface")
-    parser.add_argument("-qL","--q(liquid)=", action="store", type=float, dest="qL", help="the tetrahedral order parameter value at the liquid surface")
-    parser.add_argument("-x","--boxl(x)=", action="store", type=float, dest="boxl_x", help="the x-dimension of the simulation box (Angstroms)")
-    parser.add_argument("-y","--boxl(y)=", action="store", type=float, dest="boxl_y", help="the y-dimension of the simulation box (Angstroms)")
-    parser.add_argument("-z","--boxl(z)=", action="store", type=float, dest="boxl_z", help="the z-dimension of the simulation box (Angstroms)")
-    parser.add_argument("-t","--nSnapshots=", action="store", type=float, dest="nSnapshots", help="the number of snapshots used to accumulate the (.hbq) file")
+    parser.add_argument("-i", "--hbq-file=", action="store", dest="hbqFileName", help="use specified input (.hbq) file")
+    parser.add_argument("-o", "--hbqPAS-file=", action="store", dest="hbqPSAFileName", help="use specified output (.hbqPSA) file")
+    parser.add_argument("-qS", "--q(solid)=", action="store", type=float, dest="qS", help="the tetrahedral order parameter value at the solid surface")
+    parser.add_argument("-qL", "--q(liquid)=", action="store", type=float, dest="qL", help="the tetrahedral order parameter value at the liquid surface")
+    parser.add_argument("-x", "--boxl(x)=", action="store", type=float, dest="boxl_x", help="the x-dimension of the simulation box (Angstroms)")
+    parser.add_argument("-y", "--boxl(y)=", action="store", type=float, dest="boxl_y", help="the y-dimension of the simulation box (Angstroms)")
+    parser.add_argument("-z", "--boxl(z)=", action="store", type=float, dest="boxl_z", help="the z-dimension of the simulation box (Angstroms)")
+    parser.add_argument("-t", "--nSnapshots=", action="store", type=float, dest="nSnapshots", help="the number of snapshots used to accumulate the (.hbq) file")
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -116,7 +116,7 @@ def main(argv):
 
 
     #Call functions here, pass appropriate variables.
-    HBcount(args.hbqFileName,args.hbqPSAFileName,args.qS,args.qL,args.boxl_x,args.boxl_y,args.boxl_z,args.nSnapshots)
+    HBcount(args.hbqFileName, args.hbqPSAFileName, args.qS, args.qL, args.boxl_x, args.boxl_y, args.boxl_z, args.nSnapshots)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

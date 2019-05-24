@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Packmol RigidBody Replacer
 
 Finds atomistic rigid bodies in a packmol-generated xyz file and
@@ -111,10 +111,10 @@ mass_table = {
 #BoxInv = zeros([3],Float)
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readFile(XYZFileName):
-    print "reading XYZ file"
+    print("reading XYZ file")
 
     XYZFile = open(XYZFileName, 'r')        
     # Find number of atoms first
@@ -137,7 +137,7 @@ def readFile(XYZFileName):
     XYZFile.close()
 
 def readRBFile(RBFileName):
-    print "reading Rigid Body file"
+    print("reading Rigid Body file")
 
     RBFile = open(RBFileName, 'r')        
     # Find number of atoms first
@@ -166,7 +166,7 @@ def findCOM():
     Zcom = 0.0
     totalMass = 0.0
 
-    for i in range(0,len(RBindices)):
+    for i in range(0, len(RBindices)):
         myMass = mass_table[RBatypes[i]]
         
         Xcom = Xcom + myMass * RBpositions[i][0]
@@ -188,9 +188,9 @@ def calcMoments():
     
     #find inertia tensor matrix elements
 
-    I = numpy.zeros((3,3), numpy.float)
+    I = numpy.zeros((3, 3), numpy.float)
     
-    for i in range(0,len(RBindices)):
+    for i in range(0, len(RBindices)):
         myMass = mass_table[RBatypes[i]]
 
         # move the origin of the reference coordinate system to the COM
@@ -202,30 +202,30 @@ def calcMoments():
         dy = RBpositions[i][1]
         dz = RBpositions[i][2]
 
-        I[0,0] = I[0,0] + myMass * ( dy * dy + dz * dz )
-        I[1,1] = I[1,1] + myMass * ( dx * dx + dz * dz )
-        I[2,2] = I[2,2] + myMass * ( dx * dx + dy * dy )
+        I[0, 0] = I[0, 0] + myMass * ( dy * dy + dz * dz )
+        I[1, 1] = I[1, 1] + myMass * ( dx * dx + dz * dz )
+        I[2, 2] = I[2, 2] + myMass * ( dx * dx + dy * dy )
 
-        I[0,1] = I[0,1] - myMass * ( dx * dy )
-        I[0,2] = I[0,2] - myMass * ( dx * dz )
+        I[0, 1] = I[0, 1] - myMass * ( dx * dy )
+        I[0, 2] = I[0, 2] - myMass * ( dx * dz )
 
-        I[1,2] = I[1,2] - myMass * ( dy * dz )
+        I[1, 2] = I[1, 2] - myMass * ( dy * dz )
 
-        I[1,0] = I[0,1]
-        I[2,0] = I[0,2]
-        I[2,1] = I[1,2]
+        I[1, 0] = I[0, 1]
+        I[2, 0] = I[0, 2]
+        I[2, 1] = I[1, 2]
 
-    print "Inertia Tensor:"
-    print I
-    print
+    print("Inertia Tensor:")
+    print(I)
+    print()
 
     (evals, evects) = numpy.linalg.eig(I)
-    print "evals:"
-    print evals
-    print 
-    print "evects:"
-    print evects
-    print
+    print("evals:")
+    print(evals)
+    print() 
+    print("evects:")
+    print(evects)
+    print()
 
     return (COM, evals, evects)
 
@@ -235,12 +235,12 @@ def findRBs():
 
     for i in range(len(RBindices)):
         ref_.append(numpy.array([RBpositions[i][0], RBpositions[i][1], RBpositions[i][2]], numpy.float))
-        mov.append(numpy.array([0,0,0], numpy.float))
+        mov.append(numpy.array([0, 0, 0], numpy.float))
 
-    print "finding rigid bodies (assuming strict packmol ordering)"
+    print("finding rigid bodies (assuming strict packmol ordering)")
 
     nBodies =  int( len(indices) / len(RBindices))
-    print nBodies
+    print(nBodies)
     xyzIndex =  0    
 
     for j in range(nBodies):
@@ -262,7 +262,7 @@ def findRBs():
         for i in range(len(RBindices)):
             mov[i] = mov[i] - mov_com
 
-        R = numpy.zeros((3,3), numpy.float)
+        R = numpy.zeros((3, 3), numpy.float)
         E0 = 0.0
 
         for n in range(len(RBindices)):
@@ -283,7 +283,7 @@ def findRBs():
         if (is_reflection):
             s[2] = -s[2]
 
-        RotMat = numpy.zeros((3,3), numpy.float)
+        RotMat = numpy.zeros((3, 3), numpy.float)
         RotMat = v * w
     
         q = numpy.array([0.0, 0.0, 0.0, 0.0], numpy.float)
@@ -381,15 +381,15 @@ def main(argv):
             _haveOutputFileName = 1
     if (_haveXYZFileName != 1):
         usage() 
-        print "No input packmol (xyz) file was specified"
+        print("No input packmol (xyz) file was specified")
         sys.exit()
     if (_haveRBFileName != 1):
         usage() 
-        print "No Rigid Body file (xyz) was specified"
+        print("No Rigid Body file (xyz) was specified")
         sys.exit()
     if (_haveOutputFileName != 1):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
 
     readRBFile(rbFileName)

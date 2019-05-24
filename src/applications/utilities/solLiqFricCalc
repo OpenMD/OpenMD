@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!@Python3_EXECUTABLE@
 
 __author__ = "Patrick Louden (plouden@nd.edu)"
 __copyright__ = "Copyright (c) 2016 by the University of Notre Dame"
@@ -11,21 +11,21 @@ import argparse
 import textwrap
 import numpy as np
 import math
-from scipy.optimize import curve_fit,least_squares
+from scipy.optimize import curve_fit, least_squares
 from argparse import RawDescriptionHelpFormatter
 from scipy import stats
 
 
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 
 
 
 
 # Trapezoidal sum for integrals
-def trapSum(A,B,fA,fB):
+def trapSum(A, B, fA, fB):
     return 0.5*(B-A)*(fA+fB)
 
 
@@ -105,13 +105,13 @@ def secondDeriv(x, Vs, Z1, Z2, ml, w, Vl):
 #This function reads in the .rnemd file and extracts the actual momentum flux, as well as the zPositions and the average velocities therein.
 def rnemdExtractor(rnemdFileName):
     if os.path.exists(rnemdFileName):
-        rnemdFile = open(rnemdFileName,'r')
+        rnemdFile = open(rnemdFileName, 'r')
     else:
         #print 'Error: cannot open ' + rnemdFileName
         sys.exit(2)
 
     rnemdZPos = np.array([])
-    rnemdV = np.array([]).reshape(0,3)
+    rnemdV = np.array([]).reshape(0, 3)
 
     while True:
         line = rnemdFile.readline()
@@ -119,24 +119,24 @@ def rnemdExtractor(rnemdFileName):
         if "Actual flux:" in line or "actual flux:" in line:
             rnemdFile.readline()
             line = rnemdFile.readline()
-            rnemdJzP = np.array([[float(line.split()[4][:-1])],[float(line.split()[5][:-1])],[float(line.split()[6])]])
+            rnemdJzP = np.array([[float(line.split()[4][:-1])], [float(line.split()[5][:-1])], [float(line.split()[6])]])
         elif "#" not in line:
             if len(line.split()) > 6:
-                print "Error in the .rnemd file, found more than 6 expected columns."
+                print("Error in the .rnemd file, found more than 6 expected columns.")
             else:
-                rnemdZPos = np.append(rnemdZPos,np.array([float(line.split()[0])]))
-                rnemdV = np.vstack( [rnemdV, [ float(line.split()[2]),float(line.split()[3]),float(line.split()[4]) ] ] )
+                rnemdZPos = np.append(rnemdZPos, np.array([float(line.split()[0])]))
+                rnemdV = np.vstack( [rnemdV, [ float(line.split()[2]), float(line.split()[3]), float(line.split()[4]) ] ] )
 
     #Now let's determine what kind of shearing simulation was performed 
     # ie, JzPx, JzPy, or JzPxy                                                                                                          
     if (rnemdJzP[2] != 0.0):
-        print "Error: JzPz Actual Exchange total was found to be >0.0 in (.rnemd) file."
+        print("Error: JzPz Actual Exchange total was found to be >0.0 in (.rnemd) file.")
         sys.exit(2)
     if (rnemdJzP[0] == 0.0 and rnemdJzP[1] == 0.0):
-        print "Error: both JzPx and JzPy Actual Exchange totals were found to be 0.0 in (.rnemd) file. "
+        print("Error: both JzPx and JzPy Actual Exchange totals were found to be 0.0 in (.rnemd) file. ")
         sys.exit(2)
     elif (rnemdJzP[0] != 0.0 and rnemdJzP[1] != 0.0):
-        print "Error: both JzPx and JzPy Actual Exchange totals were found to be >0.0 in (.rnemd) file.\n This script only calculates friction coefficients for single dimensional momentum fluxes."
+        print("Error: both JzPx and JzPy Actual Exchange totals were found to be >0.0 in (.rnemd) file.\n This script only calculates friction coefficients for single dimensional momentum fluxes.")
         sys.exit(2)
     #After sanity checking, we now set a variable jzType to store if the imposed momentum flux is in the x- (0) or y-direction (1).                               #jzType will be used when we iterate through rnemdV                                                                                             
     # jzType = 0 -> flux was in x-dimension                                                                                                         
@@ -158,51 +158,51 @@ def rnemdExtractor(rnemdFileName):
 
 
 def velFitter(rnemdJzP, jzType, rnemdZPos, rnemdV, Vs, Z1, Z2, m, w, Vl, numDel, outputFileName, useZLocations):    
-    rnemdVx = np.array([]).reshape(0,1)
-    rnemdVy = np.array([]).reshape(0,1)
+    rnemdVx = np.array([]).reshape(0, 1)
+    rnemdVy = np.array([]).reshape(0, 1)
     
     for i in range(0, len(rnemdV)):
         rnemdVx = np.append(rnemdVx, rnemdV[i][0]) 
         rnemdVy = np.append(rnemdVy, rnemdV[i][1])
 
     #Remove the first two and last two values of rnemdVx and rnemdVy to smooth fits
-    for i in range(0,numDel):
-        rnemdVx = np.delete(rnemdVx,0)
-        rnemdVy = np.delete(rnemdVy,0)
-        rnemdZPos = np.delete(rnemdZPos,0)
-    for i in range(0,numDel+1):
-        rnemdVx = np.delete(rnemdVx,len(rnemdVx)-1)
-        rnemdVy = np.delete(rnemdVy,len(rnemdVy)-1)
+    for i in range(0, numDel):
+        rnemdVx = np.delete(rnemdVx, 0)
+        rnemdVy = np.delete(rnemdVy, 0)
+        rnemdZPos = np.delete(rnemdZPos, 0)
+    for i in range(0, numDel+1):
+        rnemdVx = np.delete(rnemdVx, len(rnemdVx)-1)
+        rnemdVy = np.delete(rnemdVy, len(rnemdVy)-1)
         rnemdZPos = np.delete(rnemdZPos, len(rnemdZPos)-1)
 
     #Tanh fitting function...
     #curve_fit(function to fit to, x-data, y-data, [initial guess of param 1, initial guess of param 2,...] 
     if (jzType == 0):
-        popt, pcov = least_squares(func, rnemdZPos, rnemdVx, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
+        popt, pcov = least_squares(func, rnemdZPos, rnemdVx, [Vs, Z1, Z2, m, w, Vl], ftol=0.01)
     elif (jzType == 1):
-         popt, pcov = curve_fit(func, rnemdZPos, rnemdVy, [Vs,Z1,Z2,m,w,Vl],ftol=0.01)
+         popt, pcov = curve_fit(func, rnemdZPos, rnemdVy, [Vs, Z1, Z2, m, w, Vl], ftol=0.01)
     
 
     #write out the raw data and the fit for visual inspection of quality of fit
     #print "Writing out fit file"
     fitFileName = outputFileName + "FIT"
-    fitFile = open(fitFileName,"w")
+    fitFile = open(fitFileName, "w")
     fitFile.write("# zPosition     <V_{i}>     fit value" + "\n")
     for i in range(0, len(rnemdZPos)):
           y = func(rnemdZPos[i], popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
-	  if (jzType == 0):
+          if (jzType == 0):
              fitFile.write(str(rnemdZPos[i]) + "\t" +  str(rnemdVx[i]) + "\t" + str(y) + "\n")
-	  elif (jzType == 1):
-	     fitFile.write(str(rnemdZPos[i]) + "\t" +  str(rnemdVy[i]) + "\t" + str(y) + "\n") 
+          elif (jzType == 1):
+             fitFile.write(str(rnemdZPos[i]) + "\t" +  str(rnemdVy[i]) + "\t" + str(y) + "\n") 
 
     # Parabola fitting function...
     #curve_fit(function to fit to, x-data, y-data, [initial guess of param 1, initial guess of param 2,...]
     # funcParab(x, Vs, Z1, Z2, ml, w, Vl)
-    param_bounds = ([-np.inf,0.0,0.0,-np.inf,0.0,-np.inf], [np.inf,np.inf,np.inf,np.inf,np.inf,np.inf])
+    param_bounds = ([-np.inf, 0.0, 0.0, -np.inf, 0.0, -np.inf], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
     if (jzType == 0):
-        poptParab, pcovParab = curve_fit(funcParab, rnemdZPos, rnemdVx, [Vs,Z1,Z2,m,w,Vl],bounds=param_bounds,ftol=0.01)
+       poptParab, pcovParab = curve_fit(funcParab, rnemdZPos, rnemdVx, [Vs, Z1, Z2, m, w, Vl], bounds=param_bounds, ftol=0.01)
     elif (jzType == 1):
-         poptParab, pcovParab = curve_fit(funcParab, rnemdZPos, rnemdVy, [Vs,Z1,Z2,m,w,Vl],bounds=param_bounds,ftol=0.01)
+       poptParab, pcovParab = curve_fit(funcParab, rnemdZPos, rnemdVy, [Vs, Z1, Z2, m, w, Vl], bounds=param_bounds, ftol=0.01)
 
 
 
@@ -264,7 +264,7 @@ def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, us
     #print "useZLocations = " , useZLocations
 
     if (useZLocations):
-        print "Using supplied locations of the interface for kappa"
+        print("Using supplied locations of the interface for kappa")
         if (useWidth):
             zLiq1 = z1 - 0.5*w
             zSol1 = z1 + 0.5*w
@@ -276,7 +276,7 @@ def kappaCalc(rnemdJzP, jzType, z1, z2, w, popt, sigma, convFactor, useWidth, us
             zLiq2 = z2 + 1.5*sigma
             zSol2 = z2 - 1.5*sigma
     elif (not useZLocations):
-        print "Using the fit values for the locations of the interface for kappa"
+        print("Using the fit values for the locations of the interface for kappa")
         if (useWidth):
             zLiq1 = popt[1] - 0.5*w
             zSol1 = popt[1] + 0.5*w
@@ -369,7 +369,7 @@ def secondDerivVelApprox(rnemdJzP, jzType, z1, z2, w, popt, useZLocations):
 
 
 def writeOutputFile(outputFileName, rnemdFileName, popt):
-       outFile = open(outputFileName,"w")
+       outFile = open(outputFileName, "w")
        
        outFile.write("##################################################### \n")
        outFile.write("## This output file was generated by velocityFitter.py on " + str(datetime.datetime.now()) + " ## \n#\n")
@@ -390,7 +390,7 @@ def writeOutputFile(outputFileName, rnemdFileName, popt):
        outFile.write("# \t w = " + str(popt[4]) + "\n#\n")
 
        if (float(popt[0]) < float(popt[5])):
-           print "Bad fit detected, Vs < Vl"
+           print("Bad fit detected, Vs < Vl")
            outFile.write("# WARNING Vs < Vl \n#\n")
 
 
@@ -398,7 +398,7 @@ def writeOutputFile(outputFileName, rnemdFileName, popt):
 
 
 def writeOutputLambda(outputFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambda1, shearRate):
-    outFile = open(outputFileName,"a")
+    outFile = open(outputFileName, "a")
     outFile.write("#   The interfacial friction coefficient, lambda, was calculated by \n")
     outFile.write("#   \tlambda = Jz(p) / (dV/dz)_{liquid} / delta \n")
     outFile.write("#   where Jz(p) is the imposed momentum flux, (dV/dz)_{liquid} is the slope of the velocity profile in the liquid \n")
@@ -422,7 +422,7 @@ def writeOutputLambda(outputFileName, rnemdJzP, jzType, zLiq, zSol, delta, lambd
 
 
 def writeOutputKappa(outputFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zLiq2, zSol2, deltaV2, kappa1, kappa2, popt, shearRate):
-    outFile = open(outputFileName,"a")
+    outFile = open(outputFileName, "a")
     outFile.write("#   The interfacial friction coefficient, kappa, was calculated by \n")
     outFile.write("#   \tkappa = Jz(p) / deltaV_{interface} \n")
     outFile.write("#   where Jz(p) is the imposed momentum flux, and deltaV_{interface} is the difference between the solid and \n")
@@ -451,7 +451,7 @@ def writeOutputKappa(outputFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zL
 
 
 def writeOutputSecondDeriv(outputFileName, popt):
-    outFile = open(outputFileName,"a")
+    outFile = open(outputFileName, "a")
 
     outFile.write("#\n#\n#")
     outFile.write("# second derivative of fit at Z1 \n")
@@ -557,7 +557,7 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
     xPos = lowerBound
     while (xPos < upperBound):
         lowerTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
-        upperTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+        upperTerm = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]) / firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
         dArea = trapSum(xPos, xPos + deltaX, lowerTerm, upperTerm)
         integral = integral + dArea
         xPos = xPos + deltaX
@@ -578,9 +578,9 @@ def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth, 
     minUpp = 1e6
     minUppXPos = 0.0
     while (xPos < (boxlZ/2.0)):
-        if (secondDeriv(xPos,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+        if (secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
             < minUpp):
-            minUpp = secondDeriv(xPos,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+            minUpp = secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
             minUppXPos = xPos
         xPos = xPos + deltaX
 
@@ -592,9 +592,9 @@ def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth, 
     outFile.write("#\n# Parameters in calculation \n")
     outFile.write("#  w = " + str(popt[4]) + "\n")
     outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
-    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
-    Cf = -2.0*popt[4]*secondDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    Cf = -2.0*popt[4]*secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
     
     outFile.write("#\n# Cf_{SimpleMethod_FitWidth} = " + str(Cf) + "\n")
 
@@ -620,10 +620,10 @@ def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth, 
     outFile.write("#  w = " + str(givenWidth) + "\n")
     outFile.write("#  minUppxPos = " + str(minUppXPos) + "\n")
     outFile.write("#  (d^2u\dz^2)|z_{min(U'')} = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
-    outFile.write("#  (du\dz)|z_{min(U'')} = " + str(firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
-    outFile.write("#  (d^2u/dz^2)/(du/dz) = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du\dz)|z_{min(U'')} = " + str(firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
+    outFile.write("#  (d^2u/dz^2)/(du/dz) = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
-    Cf = -2.0*givenWidth*secondDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos,popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
+    Cf = -2.0*givenWidth*secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
 
     outFile.write("#\n# Cf_{SimpleMethod_GivenWidth} = " + str(Cf) + "\n")
 
@@ -670,20 +670,20 @@ def main(argv):
         description='OpenMD solid/liquid kinetic friction coefficient calculator for orthorhombic systems.',
         #formatter_class=RawDescriptionHelpFormatter,
         epilog="Example: solLiqFricCalc -i shearSim.rnemd -o shearSim.vfit -z1 30.4 -z2 75.6 -w 4.5 -Vs 1.2e-5 -Vl 1.0e-6 -m 2.2e-6 -d 2")
-    parser.add_argument("-i","--rnemd-file=", action="store", dest="rnemdFileName", help="use specified input (.rnemd) file")
-    parser.add_argument("-o","--vfit-file=", action="store", dest="vfitFileName", help="use specified output (.vfit) file")
-    parser.add_argument("-z1","--lowerGibbsZ=", action="store", type=float, dest="z1", help="the location of the lower Gibbs dividing surface")
-    parser.add_argument("-z2","--upperGibbsZ=", action="store", type=float, dest="z2", help="the location of the upper Gibbs dividing surface")
-    parser.add_argument("-l","--lowerZVal=", action="store", nargs='?', type=float, dest="l", help="the initial estimate of the lower interface location (default=z1)")
-    parser.add_argument("-u","--upperZVal=", action="store", nargs='?', type=float, dest="u", help="the initial estimate of the upper interface location (default=z2)")
-    parser.add_argument("-w","--intWidth=", action="store", type=float, dest="w", help="the width of the interface") 	  
-    parser.add_argument("-Vs","--solidVel=", action="store", type=float, dest="Vs", help="the initial estimate of the velocity of the solid")
-    parser.add_argument("-Vl","--liquidVel=", action="store", type=float, dest="Vl", help="the initial estimate of the velocity of the liquid")
+    parser.add_argument("-i", "--rnemd-file=", action="store", dest="rnemdFileName", help="use specified input (.rnemd) file")
+    parser.add_argument("-o", "--vfit-file=", action="store", dest="vfitFileName", help="use specified output (.vfit) file")
+    parser.add_argument("-z1", "--lowerGibbsZ=", action="store", type=float, dest="z1", help="the location of the lower Gibbs dividing surface")
+    parser.add_argument("-z2", "--upperGibbsZ=", action="store", type=float, dest="z2", help="the location of the upper Gibbs dividing surface")
+    parser.add_argument("-l", "--lowerZVal=", action="store", nargs='?', type=float, dest="l", help="the initial estimate of the lower interface location (default=z1)")
+    parser.add_argument("-u", "--upperZVal=", action="store", nargs='?', type=float, dest="u", help="the initial estimate of the upper interface location (default=z2)")
+    parser.add_argument("-w", "--intWidth=", action="store", type=float, dest="w", help="the width of the interface") 	  
+    parser.add_argument("-Vs", "--solidVel=", action="store", type=float, dest="Vs", help="the initial estimate of the velocity of the solid")
+    parser.add_argument("-Vl", "--liquidVel=", action="store", type=float, dest="Vl", help="the initial estimate of the velocity of the liquid")
     parser.add_argument("-m", "--liquidSlope=", action="store", type=float, dest="m", help="the initial estimate of the slope in the liquid")
-    parser.add_argument("-d","--toDelete=", action="store", default=0,type=int, dest="toDel", help="the number of data points to be deleted from the beginning and end of the velocity profile. (default=0)")
-    parser.add_argument("-s","--sigma=", action="store", default=3.16549, type=float, dest="sigma", help="the molecular diameter of the liquid (default=3.16549)")
-    parser.add_argument("-f","--convFactor=", action="store", default=2.19723, type=float, dest="convFactor", help="the conversion factor between widths obtained by fits and broader widths (default=2.19723 gives 90%-10% width)")
-    parser.add_argument("-t","--useWidth=", action="store", default=False, type=bool, dest="useWidth", help="use provided width for deltaV calculation? (default=false)")
+    parser.add_argument("-d", "--toDelete=", action="store", default=0, type=int, dest="toDel", help="the number of data points to be deleted from the beginning and end of the velocity profile. (default=0)")
+    parser.add_argument("-s", "--sigma=", action="store", default=3.16549, type=float, dest="sigma", help="the molecular diameter of the liquid (default=3.16549)")
+    parser.add_argument("-f", "--convFactor=", action="store", default=2.19723, type=float, dest="convFactor", help="the conversion factor between widths obtained by fits and broader widths (default=2.19723 gives 90%-10% width)")
+    parser.add_argument("-t", "--useWidth=", action="store", default=False, type=bool, dest="useWidth", help="use provided width for deltaV calculation? (default=false)")
     #parser.add_argument("-z","--useZLocations=", action="store", default=False, type=bool, dest="useZLocations", help="use provided z1 and z2 locations for calculations? (default=false)")
     
     parser.add_argument("--useZLocations", action="store_true", dest="useZLocations", help="use the supplied z-locations z1 and z2 to calculate kappa")
@@ -691,9 +691,9 @@ def main(argv):
     parser.set_defaults(useZLocations=True)
 
     parser.add_argument("--lowerBound", action="store", type=float, dest="lowerBound", help="lower bound of the integral for Cf calculation")
-    parser.add_argument("--upperBound",action="store", type=float,dest="upperBound", help="upper bound of the integral for Cf calculation")
+    parser.add_argument("--upperBound", action="store", type=float, dest="upperBound", help="upper bound of the integral for Cf calculation")
     #parser.add_argument("--ms", action="store", type=float, dest="ms", help="slope of the velocity profile in the solid, should be close to zero.")
-    parser.add_argument("--boxlZ",action="store", dest="boxlZ", type=float, help="the box Z-dimension")
+    parser.add_argument("--boxlZ", action="store", dest="boxlZ", type=float, help="the box Z-dimension")
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(2)
@@ -775,7 +775,7 @@ def main(argv):
     writeOutputIntegralMethod(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound, args.boxlZ, poptParab)
     writeOutputSimpleCfCalc(args.vfitFileName, rnemdJzP, jzType, popt, args.w, args.boxlZ, poptParab)
 
-    ParabolaCf(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound,args.boxlZ, poptParab)
+    ParabolaCf(args.vfitFileName, rnemdJzP, jzType, popt, args.lowerBound, args.upperBound, args.boxlZ, poptParab)
 
 
 

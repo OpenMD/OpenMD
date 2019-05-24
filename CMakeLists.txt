@@ -13,8 +13,46 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if (NOT NO_PARALLEL)
-   find_package(MPI)
-   if (NOT MPI_CXX_FOUND)
+    if(WIN32)
+        #This is for finding MS-MPI.
+        set(MSMPI_BIN $ENV{MSMPI_BIN})
+        set(MSMPI_INC $ENV{MSMPI_INC})
+        set(MSMPI_LIB32 $ENV{MSMPI_LIB32})
+        set(MSMPI_LIB64 $ENV{MSMPI_LIB64})
+        message(STATUS "MSMPI_BIN=${MSMPI_BIN}")
+        message(STATUS "MSMPI_INC=${MSMPI_INC}")
+        message(STATUS "MSMPI_LIB32=${MSMPI_LIB32}")
+        message(STATUS "MSMPI_LIB64=${MSMPI_LIB64}")
+        IF( "${MSMPI_BIN}" STREQUAL "" OR 
+                "${MSMPI_INC}" STREQUAL "" OR 
+                "${MSMPI_LIB32}" STREQUAL "" OR 
+                "${MSMPI_LIB64}" STREQUAL "") 
+            message(FATAL_ERROR "Can not find MSMPI install. Please install MSMPI or check the ENV variable: 
+            MSMPI_INC, MSMPI_LIB32, MSMPI_LIB64, MSMPI_BIN")
+        endif()
+        set(MPIEXEC "${MSMPI_BIN}/mpiexec.exe")
+        # For building MPI programs the selected Visual Studio compiler is used, namely cl.exe.
+        # So there is no need to set a specific MPI compiler.
+        #set(MPI_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
+        set(MPI_CXX_INCLUDE_PATH "${MSMPI_INC}")
+        # Make sure the correct libraries (64-bit or 32-bit) are selected.
+        # Decide between 32-bit and 64-bit libraries for Microsoft's MPI
+        if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+            set(MS_MPI_ARCH_LIB ${MSMPI_LIB64})
+        else()
+            set(MS_MPI_ARCH_LIB ${MSMPI_LIB32})
+        endif()
+        set(MPI_CXX_LIBRARIES "${MS_MPI_ARCH_LIB}/msmpi.lib")
+        set(MPI_C_INCLUDE_PATH "${MPI_CXX_INCLUDE_PATH}")
+        set(MPI_C_LIBRARIES "{${MPI_CXX_LIBRARIES}")
+        set(MPIEXEC_NUMPROC_FLAG "-np" CACHE STRING "Flag used by MPI to specify the number of processes for MPIEXEC; 
+        the next option will be the number of processes.")
+        set(MPI_CXX_FOUND ON)
+        set(MPI_FOUND ON)
+    else()
+        find_package(MPI)
+    endif()
+    if (NOT MPI_CXX_FOUND)
       message(STATUS "========== OpenMD Parallel Information ==========")
       message(STATUS )
       message(STATUS "No MPI compiler found. Perhaps you want to set one explicitly?")
@@ -25,14 +63,16 @@ if (NOT NO_PARALLEL)
       message(STATUS "before running the cmake command.")
       message(STATUS )
       message(STATUS "=================================================")
-   endif()
+   endif()   
    IF ( MPI_CXX_FOUND )
       INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_EXE_LINKER_FLAGS}")
       if(DEFINED $ENV{CXX})
         message(STATUS "Found MPI compiler, but using the CXX compiler set in the CXX environment variable, $ENV{CXX}")
       else()
         set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
         set(ENV{CXX} ${MPI_CXX_COMPILER})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
       endif()
    ENDIF()
 endif()
@@ -192,17 +232,15 @@ ENDIF(PERL_FOUND)
 SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation
 locations")
 
-FIND_PACKAGE(PythonInterp)
-IF(PYTHON_EXECUTABLE)
-  SET(PYTHON ${PYTHON_EXECUTABLE})
-ELSE(PYTHON_EXECUTABLE)
-  MESSAGE(STATUS "Failed to find python - some scripts will not be made")
-ENDIF(PYTHON_EXECUTABLE)
-
-FIND_PACKAGE(NumPy)
-IF(NOT NUMPY_FOUND)
-  MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
-ENDIF(NOT NUMPY_FOUND)
+find_package (Python3 COMPONENTS Interpreter NumPy)
+IF(Python3_Interpreter_FOUND)
+  SET(PYTHON ${Python3_EXECUTABLE})
+  if (NOT Python3_NumPy_FOUND)
+     MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
+  endif(NOT Python3_NumPy_FOUND)
+ELSE(Python3_Interpreter_FOUND)
+  MESSAGE(STATUS "Failed to find python3 - some scripts will not be made")
+ENDIF(Python3_Interpreter_FOUND)
 
 
 configure_file (
@@ -774,6 +812,7 @@ src/applications/utilities/stat2dipolecorr
 set(PYNUMPY_FILES
 src/applications/utilities/pack2omd
 src/applications/utilities/principalAxisCalculator
+src/applications/utilities/protonSampler
 src/applications/utilities/slabBuilder
 src/applications/utilities/solLiqFricCalc
 src/applications/utilities/slipLength
@@ -783,13 +822,13 @@ src/applications/utilities/wcorr2spectrum
 src/applications/utilities/waterReplacer
 )
 
-IF(NUMPY_FOUND)
+IF(Python3_NumPy_FOUND)
   set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES})
-ELSE(NUMPY_FOUND)
+ELSE(Python3_NumPy_FOUND)
   set(PY_FILES ${PYNONUMPY_FILES})
-ENDIF(NUMPY_FOUND)
+ENDIF(Python3_NumPy_FOUND)
 
-IF(PYTHON_EXECUTABLE)
+IF(Python3_EXECUTABLE)
   IF(WIN32)
     SET(PYEXT ".py")
   ELSE(WIN32)
@@ -804,7 +843,7 @@ IF(PYTHON_EXECUTABLE)
             DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   endforeach(PY_FILE)
-ENDIF(PYTHON_EXECUTABLE)
+ENDIF(Python3_EXECUTABLE)
 
 set(PERL_FILES
 src/applications/utilities/solvator
@@ -865,6 +904,7 @@ install(DIRECTORY samples/
         DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         PATTERN ".svn" EXCLUDE
 	PATTERN "*.dump" EXCLUDE
+	PATTERN "*.report" EXCLUDE
 	PATTERN "*.stat" EXCLUDE
 	PATTERN "*.eor" EXCLUDE
 	PATTERN "*.rnemd" EXCLUDE
@@ -908,7 +948,7 @@ message( STATUS "FFTW3_ROOT ................. = ${FFTW3_ROOT}")
 message( STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
 message( STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
 message( STATUS "PERL_EXECUTABLE ............ = ${PERL_EXECUTABLE}")
-message( STATUS "PYTHON_EXECUTABLE .......... = ${PYTHON_EXECUTABLE}")
+message( STATUS "Python3_EXECUTABLE ......... = ${Python3_EXECUTABLE}")
 message( STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
 message( STATUS )
 message( STATUS "To override these options, add -D{OPTION_NAME}=... to the cmake command" )

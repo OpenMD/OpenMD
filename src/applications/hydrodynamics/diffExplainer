@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Computes predicted diffusion constants and rotational relaxation
 times from a diff file.  Explains the values in the diff file in
 terms of properties that can be calculated from a molecular dynamics
@@ -30,7 +30,7 @@ _haveDiffFileName = 0
 _haveTemperature = 0
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def readDiffFile(diffFileName):
     diffFile = open(diffFileName, 'r')
@@ -53,9 +53,9 @@ def readDiffFile(diffFileName):
         XiRRxx = float(L[31])
         XiRRyy = float(L[35])
         XiRRzz = float(L[39])
-	DTTxx = float(L[115])
-	DTTyy = float(L[119])
-	DTTzz = float(L[123])
+        DTTxx = float(L[115])
+        DTTyy = float(L[119])
+        DTTzz = float(L[123])
         DRRxx = float(L[142])
         DRRyy = float(L[146])
         DRRzz = float(L[150])              
@@ -69,8 +69,8 @@ def computeProperties(temperature):
     kb = 1.9872156E-3    
     kt = kb * temperature
 
-    print
-    print "Translational Diffusion Constant (angstroms^2 fs^-1): %.3e" % ((DTTxx + DTTyy + DTTzz)/3.0)
+    print()
+    print("Translational Diffusion Constant (angstroms^2 fs^-1): %.3e" % ((DTTxx + DTTyy + DTTzz)/3.0))
 
     Delta = math.sqrt(math.pow((DRRxx-DRRyy),2) +(DRRzz-DRRxx)*(DRRzz-DRRyy))
     a = math.sqrt(3.0)*(DRRxx-DRRyy) 
@@ -85,26 +85,26 @@ def computeProperties(temperature):
 
     f0 = (f1 + f2 + f3 + f4 + f5)/5.0
 
-    print
-    print "l=2 Orientational correlation functions:"
-    print
-    print "In general only the C^2(0,0) correlation function relates to the lcorr"
-    print "computed via the DynamicProps correlation function routine."
-    print 
-    print "To get any of the specific correlation functions, multiply each amplitude"
-    print "by exp(-t/t_i) where t_i is the relevant decay time printed in the first row:"
-    print
-    print "decay times (fs):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (1.0/f1, 1.0/f2, 1.0/f3, 1.0/f4, 1.0/f5 )
-    print
-    print "       C^2(0, 0):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (pow(a/N,2), pow(b/N,2), 0, 0, 0 )
-    print "       C^2(1, 1):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0,0,0.5,0.5,0)
-    print "       C^2(1,-1):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0,0,-0.5,0.5,0)
-    print "       C^2(2, 2):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0.5*pow(b/N,2), 0.5*pow(a/N,2), 0, 0, 0.5)
-    print "       C^2(2,-2):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0.5*pow(b/N,2), 0.5*pow(a/N,2), 0, 0,-0.5)
-    print "       C^2(2, 0):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (math.sqrt(2.0)*a*b/pow(N,2),-math.sqrt(2.0)*a*b/pow(N,2),0,0,0)
-    print
-    print 
-    print "average (or characteristic) relaxation time:\t%.3e" % (1.0/f0)
+    print()
+    print("l=2 Orientational correlation functions:")
+    print()
+    print("In general only the C^2(0,0) correlation function relates to the lcorr")
+    print("computed via the DynamicProps correlation function routine.")
+    print() 
+    print("To get any of the specific correlation functions, multiply each amplitude")
+    print("by exp(-t/t_i) where t_i is the relevant decay time printed in the first row:")
+    print()
+    print("decay times (fs):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (1.0/f1, 1.0/f2, 1.0/f3, 1.0/f4, 1.0/f5 ))
+    print()
+    print("       C^2(0, 0):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (pow(a/N,2), pow(b/N,2), 0, 0, 0 ))
+    print("       C^2(1, 1):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0,0,0.5,0.5,0))
+    print("       C^2(1,-1):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0,0,-0.5,0.5,0))
+    print("       C^2(2, 2):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0.5*pow(b/N,2), 0.5*pow(a/N,2), 0, 0, 0.5))
+    print("       C^2(2,-2):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0.5*pow(b/N,2), 0.5*pow(a/N,2), 0, 0,-0.5))
+    print("       C^2(2, 0):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (math.sqrt(2.0)*a*b/pow(N,2),-math.sqrt(2.0)*a*b/pow(N,2),0,0,0))
+    print()
+    print() 
+    print("average (or characteristic) relaxation time:\t%.3e" % (1.0/f0))
 
 def main(argv):                         
     try:                                
@@ -126,11 +126,11 @@ def main(argv):
             _haveTemperature = 1
     if (_haveDiffFileName != 1):
         usage() 
-        print "No diff file was specified"
+        print("No diff file was specified")
         sys.exit()
     if (_haveTemperature != 1):
         usage() 
-        print "No temperature was specified"
+        print("No temperature was specified")
         sys.exit()
         
     readDiffFile(diffFileName);

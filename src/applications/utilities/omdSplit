@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """OpenMD File Splitter
 
 Splits OpenMD dump file frames into seperate omd files
@@ -31,15 +31,15 @@ _haveSplitFrame = 0
 
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 
-def splitFile(mdFileName,skipFrameNumber):
+def splitFile(mdFileName, skipFrameNumber):
     mdFile = open(mdFileName, 'r')
 
     (filepath, filename) = os.path.split(mdFileName)
    
-    (outfilePrefix,ext)  = os.path.splitext(filename)
+    (outfilePrefix, ext)  = os.path.splitext(filename)
 
     
     
@@ -48,7 +48,7 @@ def splitFile(mdFileName,skipFrameNumber):
     haveMetaDataEnd = 0
 # Find OpenMD version info first
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<OOPSE version=' in line or '<OpenMD version=' in line:
             OpenMDversion = line
             break
@@ -60,7 +60,7 @@ def splitFile(mdFileName,skipFrameNumber):
     breakLoop = False
     line = mdFile.readline()
 
-    while 1:
+    while True:
         if '<MetaData>' in line:
             while 2:
                 metaDataFrame.append(line)
@@ -78,13 +78,13 @@ def splitFile(mdFileName,skipFrameNumber):
     framePos = 0
     foundFrames = 0;
     line = mdFile.readline()
-    while 1:
+    while True:
         if '<Snapshot>' in line:
             foundFrames += 1
-            division,remainder=divmod(foundFrames,int(skipFrameNumber))
+            division, remainder=divmod(foundFrames, int(skipFrameNumber))
             if (remainder == 0):
-		outfilename = outfilePrefix + "_" + "%04d" % foundFrames + ext
-                outFile = open(outfilename,'w')
+                outfilename = outfilePrefix + "_" + "%04d" % foundFrames + ext
+                outFile = open(outfilename, 'w')
                 outFile.write(OpenMDversion)
                 for metaline in metaDataFrame:
                     outFile.write(metaline)
@@ -102,7 +102,7 @@ def splitFile(mdFileName,skipFrameNumber):
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hm:s:", ["help", "meta-data=","split-frame", ""]) 
+        opts, args = getopt.getopt(argv, "hm:s:", ["help", "meta-data=", "split-frame", ""]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -120,13 +120,13 @@ def main(argv):
             _haveSplitFrame = 1
     if (_haveMDFileName != 1):
         usage() 
-        print "No OpenMD file was specified"
+        print("No OpenMD file was specified")
         sys.exit()
     if (_haveSplitFrame != 1):
         usage() 
-        print "Frames to split was not specified"
+        print("Frames to split was not specified")
         sys.exit()
-    splitFile(mdFileName,skipFrameNumber);
+    splitFile(mdFileName, skipFrameNumber);
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

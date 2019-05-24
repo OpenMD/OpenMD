@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """principalAxisCalculator
 
 Opens an XYZ file and computes the moments of inertia and principal
@@ -28,8 +28,8 @@ import getopt
 import string
 import math
 import random
-from sets import *
 import numpy
+from functools import reduce
 
 
 _haveXYZFileName = 0
@@ -99,16 +99,16 @@ mass_table = {
 
 
 def usage():
-    print __doc__
+    print(__doc__)
 
-def add(x,y):
+def add(x, y):
     return x+y
 
 def sum(seq):
     return reduce(add, seq)
 
 def readFile(XYZFileName):
-    print "reading XYZ file"
+    print("reading XYZ file")
 
     XYZFile = open(XYZFileName, 'r')        
     # Find number of atoms first
@@ -138,7 +138,7 @@ def findCOM():
     Zcom = 0.0
     totalMass = 0.0
 
-    for i in range(0,len(indices)):
+    for i in range(0, len(indices)):
         myMass = mass_table[atypes[i]]
 
         Xcom = Xcom + myMass * positions[i][0]
@@ -160,39 +160,39 @@ def findMoments():
     
     #find inertia tensor matrix elements
 
-    I = numpy.zeros((3,3), numpy.float)
+    I = numpy.zeros((3, 3), numpy.float)
     
-    for i in range(0,len(indices)):
+    for i in range(0, len(indices)):
         myMass = mass_table[atypes[i]]
 
         dx = positions[i][0] - COM[0]
         dy = positions[i][1] - COM[1]
         dz = positions[i][2] - COM[2]
 
-        I[0,0] = I[0,0] + myMass * ( dy * dy + dz * dz )
-        I[1,1] = I[1,1] + myMass * ( dx * dx + dz * dz )
-        I[2,2] = I[2,2] + myMass * ( dx * dx + dy * dy )
+        I[0, 0] = I[0, 0] + myMass * ( dy * dy + dz * dz )
+        I[1, 1] = I[1, 1] + myMass * ( dx * dx + dz * dz )
+        I[2, 2] = I[2, 2] + myMass * ( dx * dx + dy * dy )
 
-        I[0,1] = I[0,1] - myMass * ( dx * dy )
-        I[0,2] = I[0,2] - myMass * ( dx * dz )
+        I[0, 1] = I[0, 1] - myMass * ( dx * dy )
+        I[0, 2] = I[0, 2] - myMass * ( dx * dz )
 
-        I[1,2] = I[1,2] - myMass * ( dy * dz )
+        I[1, 2] = I[1, 2] - myMass * ( dy * dz )
 
-        I[1,0] = I[0,1]
-        I[2,0] = I[0,2]
-        I[2,1] = I[1,2]
+        I[1, 0] = I[0, 1]
+        I[2, 0] = I[0, 2]
+        I[2, 1] = I[1, 2]
 
-    print "Inertia Tensor:"
-    print I
-    print
+    print("Inertia Tensor:")
+    print(I)
+    print()
 
     (evals, evects) = numpy.linalg.eig(I)
-    print "evals:"
-    print evals
-    print 
-    print "evects:"
-    print evects
-    print
+    print("evals:")
+    print(evals)
+    print() 
+    print("evects:")
+    print(evects)
+    print()
 
     return (COM, evals, evects)
 
@@ -205,7 +205,7 @@ def writeFile(OutFileName):
     # we'll just reverse the order of the three axes:
     
     axOrder = numpy.argsort(evals)    
-    RotMat = numpy.zeros((3,3), numpy.float)
+    RotMat = numpy.zeros((3, 3), numpy.float)
     RotMat[0] = evects[axOrder[2]]
     RotMat[1] = evects[axOrder[1]]
     RotMat[2] = evects[axOrder[0]]
@@ -246,8 +246,8 @@ def writeFile(OutFileName):
             q[1] = (RotMat[0][2] + RotMat[2][0]) * s
             q[2] = (RotMat[1][2] + RotMat[2][1]) * s        
 
-    print "Quaternions:"
-    print q
+    print("Quaternions:")
+    print(q)
 
     theta = math.acos(RotMat[2][2])
     ctheta = RotMat[2][2]
@@ -270,12 +270,12 @@ def writeFile(OutFileName):
     myEuler[1] = theta * 180.0 / math.pi;
     myEuler[2] = psi * 180.0 / math.pi;
 
-    print "Euler Angles:"
-    print myEuler
+    print("Euler Angles:")
+    print(myEuler)
 
     nAtoms = len(indices)
     
-    print "writing output XYZ file"
+    print("writing output XYZ file")
 
     OutFile = open(OutFileName, 'w')        
 
@@ -288,7 +288,7 @@ def writeFile(OutFileName):
         dy = positions[i][1] - COM[1]
         dz = positions[i][2] - COM[2]
 
-        r = numpy.array([dx,dy,dz])
+        r = numpy.array([dx, dy, dz])
         rnew = numpy.dot(RotMat, r)
            
         OutFile.write('%s\t%f\t%f\t%f\t%d\n' % (atypes[i], rnew[0], rnew[1], rnew[2], i))
@@ -316,7 +316,7 @@ def main(argv):
 
     if (_haveXYZFileName != 1):
         usage() 
-        print "No xyz file was specified"
+        print("No xyz file was specified")
         sys.exit()
 
     readFile(XYZFileName)

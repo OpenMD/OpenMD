@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Dump File Converter
 
 Converts old-style OOPSE md and dump files into new OpenMD style
@@ -33,7 +33,7 @@ _haveConfFileName = 0
 _haveOutputFileName = 0
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 
 def convertFiles(mdFileName, configFileName, outputFileName):
@@ -62,7 +62,7 @@ def convertFiles(mdFileName, configFileName, outputFileName):
             outputFile.write("  <Snapshot>\n")
             continue
         elif (framePos == 2):
-            L = line.replace(';',' ').split()
+            L = line.replace(';', ' ').split()
             time = float(L[0])
             outputFile.write("    <FrameData>\n");
             outputFile.write("        Time: %.10g\n" % (time))
@@ -175,15 +175,15 @@ def main(argv):
             _haveOutputFileName = 1
     if (_haveMDFileName != 1):
         usage() 
-        print "No meta-data file was specified"
+        print("No meta-data file was specified")
         sys.exit()
     if (_haveConfFileName != 1):
         usage()
-        print "No configuration file was specified"
+        print("No configuration file was specified")
         sys.exit()
     if (_haveOutputFileName != 1):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
     convertFiles(mdFileName, configFileName, outputFileName);
 
