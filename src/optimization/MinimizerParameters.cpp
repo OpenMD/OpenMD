@@ -48,13 +48,21 @@
 
 namespace OpenMD {
   MinimizerParameters::MinimizerParameters() { 
-    DefineOptionalParameterWithDefaultValue(UseMinimizer, "useMinimizer", false);
+    DefineOptionalParameterWithDefaultValue(UseMinimizer, "useMinimizer",
+                                            false);
     DefineOptionalParameterWithDefaultValue(Method, "method", "SD");
-    DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations", 1000);
-    DefineOptionalParameterWithDefaultValue(MaxStationaryStateIterations, "maxStationaryStateIterations", 100);
+    DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations",
+                                            1000);
+    DefineOptionalParameterWithDefaultValue(MaxStationaryStateIterations,
+                                            "maxStationaryStateIterations",
+                                            100);
     DefineOptionalParameterWithDefaultValue(RootEpsilon, "rootEpsilon", 1e-5);
-    DefineOptionalParameterWithDefaultValue(FunctionEpsilon, "functionEpsilon", 1e-5);
-    DefineOptionalParameterWithDefaultValue(GradientNormEpsilon, "gradientNormEpsilon", 1e-5);
+    DefineOptionalParameterWithDefaultValue(FunctionEpsilon, "functionEpsilon",
+                                            1e-5);
+    DefineOptionalParameterWithDefaultValue(GradientNormEpsilon,
+                                            "gradientNormEpsilon", 1e-5);
+    DefineOptionalParameterWithDefaultValue(InitialStepSize, "initialStepSize",
+                                            0.1);
   }
   
   MinimizerParameters::~MinimizerParameters() {    
@@ -66,9 +74,13 @@ namespace OpenMD {
     CheckParameter(MaxIterations, isPositive());
     int one = 1;
     int mi = this->getMaxIterations();
+    RealType zero = 0.0;
+    RealType oneR = 1.0;
     CheckParameter(MaxStationaryStateIterations, 
                    isGreaterThanOrEqualTo(one) && isLessThanOrEqualTo(mi));
     CheckParameter(RootEpsilon, isPositive());
     CheckParameter(GradientNormEpsilon, isPositive());
+    CheckParameter(InitialStepSize,
+                   isGreaterThan(zero) && isLessThanOrEqualTo(oneR));
   }  
 }

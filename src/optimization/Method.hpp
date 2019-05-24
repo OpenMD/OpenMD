@@ -39,7 +39,8 @@ namespace QuantLib {
 
         //! minimize the optimization problem P
         virtual EndCriteria::Type minimize(Problem& P,
-                                           const EndCriteria& endCriteria) = 0;
+                                           const EndCriteria& endCriteria,
+                                           RealType initialStepSize) = 0;
     };
 
 }

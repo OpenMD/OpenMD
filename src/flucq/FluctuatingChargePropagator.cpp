@@ -108,11 +108,16 @@ namespace OpenMD {
     Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
                     initCoords);
 
-    EndCriteria endCriteria(100, 100, 1e-5, 1e-5, 1e-5);
+
+    int maxIter = fqParams_->getMaxIterations();
+    RealType tolerance = fqParams_->getTolerance();
+    RealType initialStepSize = fqParams_->getInitialStepSize();
+
+    EndCriteria endCriteria(maxIter, maxIter, tolerance, tolerance, tolerance);
 
     OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
 
-    minim->minimize(problem, endCriteria);
+    minim->minimize(problem, endCriteria, initialStepSize);
     initialized_ = true;
   }
 

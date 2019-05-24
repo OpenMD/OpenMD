@@ -54,6 +54,7 @@ namespace OpenMD {
     DeclareParameter(RootEpsilon, RealType);
     DeclareParameter(FunctionEpsilon, RealType);
     DeclareParameter(GradientNormEpsilon, RealType);
+    DeclareParameter(InitialStepSize, RealType);
   public:
     MinimizerParameters();
     virtual ~MinimizerParameters();

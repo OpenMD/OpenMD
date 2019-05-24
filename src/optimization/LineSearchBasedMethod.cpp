@@ -34,7 +34,8 @@ namespace QuantLib {
 
     EndCriteria::Type
     LineSearchBasedMethod::minimize(Problem& P,
-                                    const EndCriteria& endCriteria) {
+                                    const EndCriteria& endCriteria,
+                                    RealType initialStepSize = 1.0) {
         // Initializations
         RealType ftol = endCriteria.functionEpsilon();
         size_t maxStationaryStateIterations_
@@ -51,7 +52,9 @@ namespace QuantLib {
         RealType fnew, fold, gold2;
         RealType fdiff;
         // classical initial value for line-search step
-        RealType t = 1.0;
+        // RealType t = 1.0;
+        // new initial value for line-search step
+        RealType t = initialStepSize;
         // Set gradient g at the size of the optimization problem
         // search direction
         size_t sz = lineSearch_->searchDirection().size();

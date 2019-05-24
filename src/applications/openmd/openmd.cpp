@@ -169,10 +169,10 @@ int main(int argc, char* argv[]){
     RealType rEps = miniPars->getRootEpsilon();
     RealType fEps = miniPars->getFunctionEpsilon();
     RealType gnEps = miniPars->getGradientNormEpsilon();
+    RealType initialStepSize = miniPars->getInitialStepSize();
 
     EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
-
-    myMinimizer->minimize(problem, endCriteria);
+    myMinimizer->minimize(problem, endCriteria, initialStepSize);
 
     delete myMinimizer;
   } else if (simParams->haveEnsemble()) {

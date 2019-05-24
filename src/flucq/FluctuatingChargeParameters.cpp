@@ -50,7 +50,7 @@ namespace OpenMD {
   FluctuatingChargeParameters::FluctuatingChargeParameters() { 
     DefineOptionalParameterWithDefaultValue(Propagator, "propagator", "Damped");
     DefineOptionalParameterWithDefaultValue(Friction, "friction", 1600.0);    
-    DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-6);    
+    DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-5);    
     DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations",
                                             100);    
     DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
@@ -60,6 +60,8 @@ namespace OpenMD {
                                             0.01);
     DefineOptionalParameterWithDefaultValue(ConstrainRegions,
                                             "constrainRegions", false);
+    DefineOptionalParameterWithDefaultValue(InitialStepSize, "initialStepSize",
+                                            0.1);
   }
   
   FluctuatingChargeParameters::~FluctuatingChargeParameters() {    
@@ -80,6 +82,10 @@ namespace OpenMD {
     CheckParameter(TargetTemp,  isNonNegative());
     CheckParameter(TauThermostat, isPositive()); 
     CheckParameter(DragCoefficient, isPositive()); 
+    RealType zero = 0.0;
+    RealType one = 1.0;
+    CheckParameter(InitialStepSize,
+                   isGreaterThan(zero) && isLessThanOrEqualTo(one));
   }
   
 }

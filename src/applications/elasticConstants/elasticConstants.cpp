@@ -623,10 +623,11 @@ int main(int argc, char *argv []) {
     RealType rEps = miniPars->getRootEpsilon();
     RealType fEps = miniPars->getFunctionEpsilon();
     RealType gnEps = miniPars->getGradientNormEpsilon();
+    RealType initialStepSize = miniPars->getInitialStepSize();
     
     EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
     
-    minim->minimize(problem, endCriteria);
+    minim->minimize(problem, endCriteria, initialStepSize);
     delete minim;
 
     Mat3x3d newHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();

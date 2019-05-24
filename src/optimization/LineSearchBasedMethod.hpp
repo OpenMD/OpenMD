@@ -39,7 +39,8 @@ namespace QuantLib {
         virtual ~LineSearchBasedMethod() {}
 
         virtual EndCriteria::Type minimize(Problem& P,
-                                           const EndCriteria& endCriteria);
+                                           const EndCriteria& endCriteria,
+                                           RealType initialStepSize);
       protected:
         //! computes the new search direction
         virtual DynamicVector<RealType>

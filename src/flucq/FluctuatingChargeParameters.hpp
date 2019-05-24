@@ -55,6 +55,7 @@ namespace OpenMD {
     DeclareParameter(TauThermostat, RealType);
     DeclareParameter(DragCoefficient, RealType);
     DeclareParameter(ConstrainRegions, bool);
+    DeclareParameter(InitialStepSize, RealType);
     
   public:
     FluctuatingChargeParameters();
