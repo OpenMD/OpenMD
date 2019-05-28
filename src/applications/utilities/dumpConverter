@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """Dump File Converter
 
 Converts old-style OOPSE md and dump files into new OpenMD style

@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """OMD Solvator
 
 Opens two omd files, one with a solute structure and one with a

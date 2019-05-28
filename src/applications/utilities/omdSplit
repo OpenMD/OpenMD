@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """OpenMD File Splitter
 
 Splits OpenMD dump file frames into seperate omd files

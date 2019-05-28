@@ -232,15 +232,22 @@ ENDIF(PERL_FOUND)
 SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation
 locations")
 
-find_package (Python3 COMPONENTS Interpreter NumPy)
-IF(Python3_Interpreter_FOUND)
-  SET(PYTHON ${Python3_EXECUTABLE})
-  if (NOT Python3_NumPy_FOUND)
-     MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
-  endif(NOT Python3_NumPy_FOUND)
-ELSE(Python3_Interpreter_FOUND)
-  MESSAGE(STATUS "Failed to find python3 - some scripts will not be made")
-ENDIF(Python3_Interpreter_FOUND)
+FIND_PACKAGE(PythonInterp)
+IF(PYTHON_EXECUTABLE)
+  SET(PYTHON ${PYTHON_EXECUTABLE})
+ELSE(PYTHON_EXECUTABLE)
+  MESSAGE(STATUS "Failed to find python - some scripts will not be made")
+ENDIF(PYTHON_EXECUTABLE)
+
+FIND_PACKAGE(NumPy)
+IF(NOT NUMPY_FOUND)
+  MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
+ENDIF(NOT NUMPY_FOUND)
+
+FIND_PACKAGE(SciPy)
+IF(NOT SCIPY_FOUND)
+  MESSAGE(STATUS "Failed to find SciPy - some scripts will not be made")
+ENDIF(NOT SCIPY_FOUND)
 
 
 configure_file (
@@ -810,25 +817,33 @@ src/applications/utilities/stat2dipolecorr
 )
 
 set(PYNUMPY_FILES
+src/applications/utilities/hbtetAnalyzer
 src/applications/utilities/pack2omd
 src/applications/utilities/principalAxisCalculator
 src/applications/utilities/protonSampler
 src/applications/utilities/slabBuilder
-src/applications/utilities/solLiqFricCalc
-src/applications/utilities/slipLength
-src/applications/utilities/hbtetAnalyzer
 src/applications/utilities/vcorr2spectrum
-src/applications/utilities/wcorr2spectrum
 src/applications/utilities/waterReplacer
+src/applications/utilities/wcorr2spectrum
 )
 
-IF(Python3_NumPy_FOUND)
-  set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES})
-ELSE(Python3_NumPy_FOUND)
-  set(PY_FILES ${PYNONUMPY_FILES})
-ENDIF(Python3_NumPy_FOUND)
+set(PYSCIPY_FILES
+src/applications/utilities/lcorrzFit
+src/applications/utilities/slipLength
+src/applications/utilities/solLiqFricCalc
+)
 
-IF(Python3_EXECUTABLE)
+IF(SCIPY_FOUND)
+  set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES} ${PYSCIPY_FILES})
+ELSE(SCIPY_FOUND)
+  IF(NUMPY_FOUND)
+    set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES})
+  ELSE(NUMPY_FOUND)
+    set(PY_FILES ${PYNONUMPY_FILES})
+  ENDIF(NUMPY_FOUND)
+ENDIF(SCIPY_FOUND)
+
+IF(PYTHON_EXECUTABLE)
   IF(WIN32)
     SET(PYEXT ".py")
   ELSE(WIN32)
@@ -843,7 +858,7 @@ IF(Python3_EXECUTABLE)
             DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   endforeach(PY_FILE)
-ENDIF(Python3_EXECUTABLE)
+ENDIF(PYTHON_EXECUTABLE)
 
 set(PERL_FILES
 src/applications/utilities/solvator
@@ -948,7 +963,7 @@ message( STATUS "FFTW3_ROOT ................. = ${FFTW3_ROOT}")
 message( STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
 message( STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
 message( STATUS "PERL_EXECUTABLE ............ = ${PERL_EXECUTABLE}")
-message( STATUS "Python3_EXECUTABLE ......... = ${Python3_EXECUTABLE}")
+message( STATUS "PYTHON_EXECUTABLE .......... = ${PYTHON_EXECUTABLE}")
 message( STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
 message( STATUS )
 message( STATUS "To override these options, add -D{OPTION_NAME}=... to the cmake command" )

@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """A script that computes the static dielectric constant
 
 Accumulates the static dielectric constant from an OpenMD stat file

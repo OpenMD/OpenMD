@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """OpenMD affine scaling transform
 
 Takes an OpenMD file and scales both the periodic box and the

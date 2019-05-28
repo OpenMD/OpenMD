@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """OpenMD File Trimmer
 
 Skips every n frames of an OpenMD dump file and loads it into new dump file

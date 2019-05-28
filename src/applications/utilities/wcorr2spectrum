@@ -1,4 +1,4 @@
-#!@Python3_EXECUTABLE@
+#!@PYTHON_EXECUTABLE@
 """A script that processes a charge velocity autocorrelation function into a
 amplitude spectrum
 
