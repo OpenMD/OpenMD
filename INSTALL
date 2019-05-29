@@ -27,7 +27,8 @@ Requirements
      if you want to run the multi-processor version of OpenMD
 
    * perl and python - interpreted scripting languages that some of
-     the OpenMD utilities use to parse and process data files.
+     the OpenMD utilities use to parse and process data files. The python
+     scripts now depend on NumPy and SciPy.
 
    * qhull – A computational geometry toolbox for computing convex
      hulls and Delaunay triangulations.  qhull is required for the
@@ -52,6 +53,7 @@ Requirements
    * xmgr
    * grace
    * NumPy
+   * SciPy
    * vmd
 
   If you are going to be extending or developing OpenMD, you’ll need

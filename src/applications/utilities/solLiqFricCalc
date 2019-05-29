@@ -15,20 +15,12 @@ from scipy.optimize import curve_fit, least_squares
 from argparse import RawDescriptionHelpFormatter
 from scipy import stats
 
-
-
 def usage():
     print(__doc__)
-
-
-
-
 
 # Trapezoidal sum for integrals
 def trapSum(A, B, fA, fB):
     return 0.5*(B-A)*(fA+fB)
-
-
 
 # Fit function we are optimizing data to
 def func(x, Vs, Z1, Z2, ml, w, Vl):
@@ -682,7 +674,7 @@ def main(argv):
     parser.add_argument("-m", "--liquidSlope=", action="store", type=float, dest="m", help="the initial estimate of the slope in the liquid")
     parser.add_argument("-d", "--toDelete=", action="store", default=0, type=int, dest="toDel", help="the number of data points to be deleted from the beginning and end of the velocity profile. (default=0)")
     parser.add_argument("-s", "--sigma=", action="store", default=3.16549, type=float, dest="sigma", help="the molecular diameter of the liquid (default=3.16549)")
-    parser.add_argument("-f", "--convFactor=", action="store", default=2.19723, type=float, dest="convFactor", help="the conversion factor between widths obtained by fits and broader widths (default=2.19723 gives 90%-10% width)")
+    parser.add_argument("-f", "--convFactor=", action="store", default=2.19723, type=float, dest="convFactor", help="the conversion factor between widths obtained by fits and broader widths (default=2.19723 gives 90%%-10%% width)")
     parser.add_argument("-t", "--useWidth=", action="store", default=False, type=bool, dest="useWidth", help="use provided width for deltaV calculation? (default=false)")
     #parser.add_argument("-z","--useZLocations=", action="store", default=False, type=bool, dest="useZLocations", help="use provided z1 and z2 locations for calculations? (default=false)")
     
@@ -722,8 +714,8 @@ def main(argv):
         args.u = args.z2
 
     if (not args.w):
-	parser.print_help()
-	parser.error("No width of interface specified") 
+        parser.print_help()
+        parser.error("No width of interface specified") 
 
     if (not args.Vs):
         parser.print_help()
