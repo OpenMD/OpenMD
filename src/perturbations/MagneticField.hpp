@@ -60,17 +60,21 @@ namespace OpenMD {
     magneticField = (a, b, c);
   \endcode
 
-    in the .omd file where the values of a, b, and c are in units of
-    \f$ columb / \AA\time \f$
+    in the .omd file where the values of a, b, and c are in units of Tesla
 
-    when charge moves in magnetic field there is no work done so there is no change in potential
+    When a charge moves in a magnetic field, there is no work done, so
+    there is no change in potential.
 
     The field itself is
 
-    \f$ \mathbf{E} = \left( \begin{array}{c} a \\ b \\ c \end{array} \right) \f$
+    \f$ \mathbf{B} = \left( \begin{array}{c} a \\ b \\ c \end{array}
+    \right) \f$
 
-   The external field applies a force on charged atoms, \f$ \mathbf{F}
-   = C v\cross\mathbf{B} \f$.
+   The external magnetic field applies a force on moving charged
+   atoms, \f$ \mathbf{F} = C \mathbf{v} \times \mathbf{B} \f$ and a
+   torque on moving (and rotating) dipoles, \f$ \mathbf{\tau} =
+   \mathbf{D} \times ( \mathbf{v} \times \mathbf{B} ) +
+   (\mathbf{\omega} \times \mathbf{D} ) \times \mathbf{B} \f$
 
   */
   class MagneticField : public Perturbation {

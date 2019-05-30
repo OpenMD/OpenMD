@@ -177,7 +177,7 @@ namespace JAMA
 
     /** 
    	Generate and return the (economy-sized) orthogonal factor
-        @param     Q the (ecnomy-sized) orthogonal factor (Q*R=A).
+        @return     Q the (economy-sized) orthogonal factor (Q*R=A).
     */
     DynamicRectMatrix<Real> getQ() const
     {
@@ -207,7 +207,7 @@ namespace JAMA
 
 
     /** Least squares solution of A*x = b
-        @param B     m-length array (vector).
+        @param b     m-length array (vector).
         @return x    n-length array (vector) that minimizes the two norm of Q*R*X-B.
         If B is non-conformant, or if QR.isFullRank() is false,
         the routine returns a null (0-length) vector.

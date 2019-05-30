@@ -71,7 +71,7 @@ namespace OpenMD {
     const RealType dipoleFieldConvert = 4.8018969509;
 
     //!\name magneticFieldConvert Converts Tesla to Volts fs/Ang^2
-    const RealType magneticFieldConvert=23.06909e-5;
+    const RealType magneticFieldConvert = 1.0e-5;
 
     /**
      *  surfaceTensionConvert

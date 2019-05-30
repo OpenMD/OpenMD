@@ -47,10 +47,6 @@
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "utils/Constants.hpp"
 
-//#ifdef IS_MPI
-//#include "mpi.h"
-//#endif
-
 namespace OpenMD {
 
   MagneticField::MagneticField(SimInfo* info) : initialized(false),
@@ -125,47 +121,38 @@ namespace OpenMD {
 	    C = fca.getCharge();
 	  }
 
+          C *= Constants::chargeFieldConvert;
+
 	  if (isCharge) {
-	    f = cross(v,MF) * C * Constants::magneticFieldConvert;
+	    f = cross(v, MF) * C * Constants::magneticFieldConvert;
 	    atom->addFrc(f);
 	  }
 
-    MultipoleAdapter ma = MultipoleAdapter(atype);
-    if (ma.isDipole() ) {
-        D = atom->getDipole() * Constants::dipoleFieldConvert;
+          MultipoleAdapter ma = MultipoleAdapter(atype);
+          if (ma.isDipole() ) {
+            D = atom->getDipole() * Constants::dipoleFieldConvert;
 
+            t = cross(D, cross(v, MF));
+            atom->addTrq(t);
 
-        t = cross(D,cross(v, MF));
-        atom->addTrq(t);
+            AngMomentum = atom->getJ();
+            I = atom->getI();
+            if(atom->isLinear()) {
+              l = atom->linearAxis();
+              m = (l + 1) % 3;
+              n = (l + 2) % 3;
+              omega[l] = 0;
+              omega[m] = AngMomentum[m] / I(m,m);
+              omega[n] = AngMomentum[n] / I(n,n);
+            } else {
+              omega = I.inverse() * AngMomentum;
+            }
 
-        AngMomentum=atom->getJ();
-        I=atom->getI();
-        if(atom->isLinear()) {
-          l=atom->linearAxis();
-          m = (l + 1) % 3;
-    	  n = (l + 2) % 3;
-          omega[l]=0;
-          omega[m]=AngMomentum[m]/I(m,m);
-          omega[n]=AngMomentum[n]/I(n,n);
-        } else {
-          omega=I.inverse()*AngMomentum;
+            f=cross(cross(omega, D), MF);
+            atom->addFrc(f);
+          }
         }
-
-        f=cross(cross(omega,D),MF);
-        atom->addFrc(f);
-    }
-  }
-}
-
-//#ifdef IS_MPI
-//      MPI_Allreduce(MPI_IN_PLACE, &fPot, 1, MPI_REALTYPE,
-//                    MPI_SUM, MPI_COMM_WORLD);
-//#endif
-
-      //Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-      //longRangePotential = snap->getLongRangePotentials();
-      //longRangePotential[ELECTROSTATIC_FAMILY] += fPot;
-      //snap->setLongRangePotential(longRangePotential);
+      }
     }
   }
 }
