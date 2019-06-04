@@ -49,6 +49,8 @@
 namespace OpenMD {
   FluctuatingChargeParameters::FluctuatingChargeParameters() { 
     DefineOptionalParameterWithDefaultValue(Propagator, "propagator", "Damped");
+    DefineOptionalParameterWithDefaultValue(DoInitialOptimization,
+                                            "doInitialOptimization", true);
     DefineOptionalParameterWithDefaultValue(Friction, "friction", 1600.0);    
     DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-5);    
     DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations",

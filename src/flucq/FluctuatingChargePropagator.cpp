@@ -99,25 +99,31 @@ namespace OpenMD {
     //     atom->setFlucQVel(0.0);
     //   }
     // }
+
+
+    if (fqParams_->getDoInitialOptimization()) {
     
-    FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, 
-                                                 fqConstraints_);
-
-    DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
+      FluctuatingChargeObjectiveFunction flucQobjf(info_, forceMan_, 
+                                                   fqConstraints_);
+      
+      DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
+      
+      Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
+                      initCoords);
+      
+      
+      int maxIter = fqParams_->getMaxIterations();
+      RealType tolerance = fqParams_->getTolerance();
+      RealType initialStepSize = fqParams_->getInitialStepSize();
+      
+      EndCriteria endCriteria(maxIter, maxIter, tolerance, tolerance,
+                              tolerance);
+      
+      OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
+      
+      minim->minimize(problem, endCriteria, initialStepSize);
+    }
     
-    Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
-                    initCoords);
-
-
-    int maxIter = fqParams_->getMaxIterations();
-    RealType tolerance = fqParams_->getTolerance();
-    RealType initialStepSize = fqParams_->getInitialStepSize();
-
-    EndCriteria endCriteria(maxIter, maxIter, tolerance, tolerance, tolerance);
-
-    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("SD", info_);
-
-    minim->minimize(problem, endCriteria, initialStepSize);
     initialized_ = true;
   }
 

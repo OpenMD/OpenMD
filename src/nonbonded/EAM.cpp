@@ -97,39 +97,6 @@ namespace OpenMD {
       ZhouPhiCoreValence(r,re,B,beta,lambda);
   }
 
-  RealType EAM::SMorse(RealType r, RealType r0, RealType d0, RealType beta0) {
-    RealType expfnc   = exp( -beta0 * (r - r0) );
-    RealType expfnc2  = expfnc*expfnc;
-    return d0 * (expfnc2  - 2.0 * expfnc);
-  }
-
-  RealType EAM::Gauss(RealType r, RealType rc, RealType c, RealType sigma) {
-    RealType a = (r - rc) / sigma;
-    return c * exp( - a * a / 2 );
-  }
-
-  RealType EAM::EVBPhi(RealType r, RealType r0, RealType d0, RealType beta0,
-                       RealType rc, RealType c, RealType sigma,
-                       RealType re, RealType A, RealType B,
-                       RealType alpha, RealType beta, RealType kappa,
-                       RealType lambda) {
-
-    // The molecular diabatic state:
-    RealType v1 = SMorse(r, r0, d0, beta0);
-    // The coupling:
-    RealType v12 = Gauss(r, rc, c, sigma);
-    // The ionic diabatic state:
-    RealType v2 = ZhouPhi(r, re, A, B, alpha, beta, kappa, lambda);
-
-    // Eigenvalues of the 2x2 matrix:
-    RealType ev1 = (v1 + v2 - sqrt(4*v12*v12+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
-    RealType ev2 = (v1 + v2 + sqrt(4*v12*v12+ v1*v1 - 2.0*v1*v2 + v2*v2))/2.0;
-
-    return std::min(ev1, ev2);
-  }
-
-
-
   RealType EAM::ZhouRho(RealType r, RealType re, RealType fe,
                         RealType beta, RealType lambda) {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
@@ -228,6 +195,16 @@ namespace OpenMD {
     }
     return functional;
   }
+  
+  RealType EAM::RoseFunctional(RealType rho, RealType rhoe,  RealType F0) {
+    RealType t = rho / rhoe;
+    RealType functional(0.0);
+    if (t > 0.0) {
+      functional = - F0 * log( t ) * t;
+    }
+    return functional;
+  }
+
 
   CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {
     EAMAdapter ea1 = EAMAdapter(atomType1);
@@ -340,15 +317,6 @@ namespace OpenMD {
       kappa1 = ea1.getKappa();
       lambda1 = ea1.getLambda();
 
-      if (ea1.getEAMType()==eamEVBOxygen) {
-        r01 = ea1.getRMorse();
-        d01 = ea1.getDMorse();
-        beta01 = ea1.getBetaMorse();
-        c1 = ea1.getCoupling();
-        rc1 = ea1.getRcoupling();
-        sigma1 = ea1.getSigmaCoupling();
-      }
-
       re2 = ea2.getRe();
       A2 = ea2.getA();
       B2 = ea2.getB();
@@ -356,15 +324,6 @@ namespace OpenMD {
       beta2 = ea2.getBeta();
       kappa2 = ea2.getKappa();
       lambda2 = ea2.getLambda();
-
-      if (ea2.getEAMType()==eamEVBOxygen) {
-        r02 = ea2.getRMorse();
-        d02 = ea2.getDMorse();
-        beta02 = ea2.getBetaMorse();
-        c2 = ea2.getCoupling();
-        rc2 = ea2.getRcoupling();
-        sigma2 = ea2.getSigmaCoupling();
-      }
 
       RealType rmax = 0.0;
       rmax = max(rmax, data1.rcut);
@@ -394,21 +353,11 @@ namespace OpenMD {
 
         if ( r < data1.rcut ) {
           rha = data1.rho->getValueAt(r);
-          if (ea1.getEAMType()==eamEVBOxygen) {
-            pha = EVBPhi(r, r01, d01, beta01, rc1, c1, sigma1,
-                         re1, A1, B1, alpha1, beta1, kappa1, lambda1);
-          } else {
-            pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
-          }
+          pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
         }
         if ( r < data2.rcut ) {
           rhb = data2.rho->getValueAt(r);
-          if (ea2.getEAMType()==eamEVBOxygen) {
-            phb =  EVBPhi(r, r02, d02, beta02, rc2, c2, sigma2,
-                          re2, A2, B2, alpha2, beta2, kappa2, lambda2);
-          } else {
-            phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
-          }
+          phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
         }
 
         if ( r < data1.rcut )
@@ -559,7 +508,8 @@ namespace OpenMD {
     }
     case eamZhou2001:
     case eamZhou2004:
-    case eamZhou2005: {
+    case eamZhou2005:
+    case eamZhouRose: {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
       RealType rhoe = ea.getRhoe();
@@ -571,8 +521,9 @@ namespace OpenMD {
       RealType lambda = ea.getLambda();
       std::vector<RealType> Fn = ea.getFn();
       std::vector<RealType> F = ea.getF();
-      RealType Fe = ea.getFe();
+      RealType Fe = ea.getFe();      
       RealType eta = ea.getEta();
+      RealType F0 = ea.getF0();
       // RealType latticeConstant = ea.getLatticeConstant();
 
       int Nr = 2000;
@@ -642,14 +593,19 @@ namespace OpenMD {
                                                  F3plus,  F3minus, Fe, eta) );
 
         }
+      } else if (et == eamZhouRose) {
+        for (int i = 0; i < Nrho; i++) {
+          rho = RealType(i)*drho;
+          rhovals.push_back(rho);
+          funcvals.push_back( RoseFunctional(rho, rhoe, F0) );
+        }
       }
 
       eamAtomData.F = new CubicSpline();
       eamAtomData.F->addPoints(rhovals, funcvals);
       break;
     }
-    case eamZhou2005Oxygen :
-    case eamEVBOxygen : {
+    case eamZhou2005Oxygen : {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
       RealType A = ea.getA();

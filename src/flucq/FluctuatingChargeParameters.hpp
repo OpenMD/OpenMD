@@ -48,6 +48,7 @@
 namespace OpenMD {
   class FluctuatingChargeParameters : public DataHolder {
     DeclareParameter(Propagator, std::string);
+    DeclareParameter(DoInitialOptimization, bool);
     DeclareParameter(Friction, RealType);    
     DeclareParameter(Tolerance, RealType);    
     DeclareParameter(MaxIterations, int);    

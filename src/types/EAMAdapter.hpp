@@ -52,7 +52,7 @@ namespace OpenMD {
   string const EAMtypeID = "EAM";
   string const FuncflTypeID = "FUNCFL";
   string const ZhouTypeID = "ZHOU";
-  string const EVBTypeID = "EVB";
+  string const ZhouRoseTypeID = "ZHOUROSE";
 
   enum EAMType{
     eamFuncfl,
@@ -60,7 +60,7 @@ namespace OpenMD {
     eamZhou2004,
     eamZhou2005,
     eamZhou2005Oxygen,
-    eamEVBOxygen,
+    eamZhouRose,
     eamUnknown
   };
   
@@ -116,23 +116,14 @@ namespace OpenMD {
     std::vector<RealType> OrhoLimits;
     std::vector<RealType> OrhoE;
     std::vector<std::vector<RealType> > OF;
+    // For a Rose-type functional
+    RealType F0;
   };
-
-  struct EVBParameters{
-    // This set is for Morse molecular parameters and a gaussian
-    // coupling to be used along with the standard pair potential
-    RealType r0;
-    RealType D0;
-    RealType beta0;
-    RealType rc;
-    RealType c;
-    RealType sigma;
-  };
-
+  
+  
   typedef SimpleTypeData<EAMParameters*> EAMData;
   typedef SimpleTypeData<FuncflParameters*> FuncflData;
   typedef SimpleTypeData<ZhouParameters*> ZhouData;
-  typedef SimpleTypeData<EVBParameters*> EVBData;
 
   class EAMAdapter {
   public:
@@ -213,26 +204,18 @@ namespace OpenMD {
                             std::vector<RealType> OrhoLimits,
                             std::vector<RealType> OrhoE,
                             std::vector<std::vector<RealType> > OF);
+    
+    void makeZhouRose(RealType re,
+                      RealType fe,
+                      RealType rhoe,
+                      RealType alpha,
+                      RealType beta,
+                      RealType A,
+                      RealType B,
+                      RealType kappa,
+                      RealType lambda,
+                      RealType F0);
 
-    void makeEVBOxygen(RealType r0,
-                       RealType D0,
-                       RealType beta0,
-                       RealType rc,
-                       RealType c,
-                       RealType sigma,
-                       RealType re,
-                       RealType fe,
-                       RealType alpha,
-                       RealType beta,
-                       RealType A,
-                       RealType B,
-                       RealType kappa,
-                       RealType lambda,
-                       RealType gamma,
-                       RealType nu,
-                       std::vector<RealType> OrhoLimits,
-                       std::vector<RealType> OrhoE,
-                       std::vector<std::vector<RealType> > OF);
     
     bool isEAM();
     bool hasSplines();
@@ -268,24 +251,16 @@ namespace OpenMD {
     std::vector<RealType> getOrhoLimits();
     std::vector<RealType> getOrhoE();
     std::vector<std::vector<RealType> > getOF();
-
-    RealType getRMorse();
-    RealType getDMorse();
-    RealType getBetaMorse();
-    RealType getCoupling();
-    RealType getRcoupling();
-    RealType getSigmaCoupling();
-    
+    RealType getF0();
     CubicSpline* getZSpline();
     CubicSpline* getRhoSpline();
     CubicSpline* getFSpline();
 
   private:
     AtomType* at_;
-    EAMParameters*    getEAMParam();
-    FuncflParameters* getFuncflParam();
-    ZhouParameters*   getZhouParam();
-    EVBParameters*    getEVBParam();
+    EAMParameters*      getEAMParam();
+    FuncflParameters*   getFuncflParam();
+    ZhouParameters*     getZhouParam();
     
   };
 }
