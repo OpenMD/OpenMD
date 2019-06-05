@@ -306,8 +306,6 @@ namespace OpenMD {
 
       RealType re1, A1, B1, alpha1, beta1, kappa1, lambda1;
       RealType re2, A2, B2, alpha2, beta2, kappa2, lambda2;
-      RealType r01(0.0), d01(0.0), beta01(0.0), rc1(0.0), c1(0.0), sigma1(0.0);
-      RealType r02(0.0), d02(0.0), beta02(0.0), rc2(0.0), c2(0.0), sigma2(0.0);
 
       re1 = ea1.getRe();
       A1 = ea1.getA();
