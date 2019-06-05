@@ -16,13 +16,13 @@ Simulations are started in OpenMD using a single Molecular Dynamics (.omd)
 file.  These files must start with the <OpenMD> tag and must have two
 sections:
 
-  1) a C-based <MetaData> section, and 
+  1) a C-based `<MetaData>` section, and 
 
-  2) a <Snapshot> block for initial coordinate and velocity information.
+  2) a `<Snapshot>` block for initial coordinate and velocity information.
 
 Detailed descriptions of the structures of these files are available
-in the "doc" directory.  Sample simulations are available in the
-"samples" directory.
+in the `doc` directory.  Sample simulations are available in the
+`samples` directory.
 
 ## What you need to compile and use OpenMD:
 
@@ -40,7 +40,7 @@ in the "doc" directory.  Sample simulations are available in the
    not all) C++ compilers support these features.
 
  2) CMake, a cross-platform build system which is available at
-    http://www.cmake.org    Most Linux and some Unix distributions
+    [cmake.org](http://www.cmake.org)  Most Linux and some Unix distributions
     provide CMake as a standard package. If not, please download it,
     and make sure you get a recent version. Mac OS X users can either
     download the CMake installer or install it from the command line
@@ -50,7 +50,7 @@ in the "doc" directory.  Sample simulations are available in the
     version of OpenMD, but is required if you want OpenMD to run in
     parallel. We like OpenMPI. Other implementations of MPI-2 might
     work, but we haven't tried.  You can get Open MPI here:
-    http://www.open-mpi.org/
+    [open-mpi.org](http://www.open-mpi.org/)
 
  4) Other optional (but quite useful) libraries that will unlock some
     features of OpenMD:
@@ -60,8 +60,8 @@ in the "doc" directory.  Sample simulations are available in the
       + FFTW:        [www.fftw.org](http://www.fftw.org)
       + Doxygen:     [www.doxygen.org](http://www.doxygen.org)
 
- 5) Some of the utility scripts depend on Python and Perl.  These
-    interpreters are common installations on most flavors of Unix and
+ 5) Some of the utility scripts depend on Python, NumPy, SciPy, and Perl.  
+    These interpreters are common installations on most flavors of Unix and
     Mac OS X.
 
 ## Instructions
