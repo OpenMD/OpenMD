@@ -8,11 +8,24 @@ import sys
 import argparse
 import textwrap
 import numpy as np
-from fractions import Fraction, gcd
+from fractions import Fraction 
+from math import gcd
 from argparse import RawDescriptionHelpFormatter
 
 def usage():
     print(__doc__)
+
+def lcm(a, b):
+    """Return lowest common multiple."""
+    return a * b // gcd(a, b)
+
+def fraction_gcd(x, y):
+    a = x.numerator
+    b = x.denominator
+    c = y.numerator
+    d = y.denominator
+    return Fraction(gcd(a, c), lcm(b, d))
+
 
 def find_perpendiculars(hkl):
     h = hkl[0]
@@ -41,7 +54,7 @@ def find_perpendiculars(hkl):
     u2Frac = [Fraction(u2[0]).limit_denominator(),
               Fraction(u2[1]).limit_denominator(),
               Fraction(u2[2]).limit_denominator()]
-    u2gcd = gcd(gcd(u2Frac[0], u2Frac[1]), u2Frac[2])
+    u2gcd = fraction_gcd(fraction_gcd(u2Frac[0], u2Frac[1]), u2Frac[2])
     u2min = np.array([int(u2Frac[0]/u2gcd),
                       int(u2Frac[1]/u2gcd),
                       int(u2Frac[2]/u2gcd)])
@@ -49,7 +62,7 @@ def find_perpendiculars(hkl):
     u3Frac = [Fraction(u3[0]).limit_denominator(),
               Fraction(u3[1]).limit_denominator(),
               Fraction(u3[2]).limit_denominator()]
-    u3gcd = gcd(gcd(u3Frac[0], u3Frac[1]), u3Frac[2])
+    u3gcd = fraction_gcd(fraction_gcd(u3Frac[0], u3Frac[1]), u3Frac[2])
     u3min = np.array([int(u3Frac[0]/u3gcd),
                       int(u3Frac[1]/u3gcd),
                       int(u3Frac[2]/u3gcd)])
