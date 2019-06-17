@@ -178,7 +178,7 @@ namespace OpenMD {
 
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-      rdfStream << "#Current Density = " << overallCurrentDensity_ << " e / Ang^2 / fs.\n";
+      rdfStream << "#Current Density = " << overallCurrentDensity_ / (nBins_ * nProcessed_) << " e / Ang^2 / fs.\n";
       rdfStream << "#J_c(" << axisLabel_ << ")\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";

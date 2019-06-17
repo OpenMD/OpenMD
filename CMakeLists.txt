@@ -705,7 +705,7 @@ src/applications/staticProps/StaticPropsCmd.cpp
 src/applications/staticProps/VelocityZ.cpp
 src/applications/staticProps/DensityHistogram.cpp
 src/applications/staticProps/ChargeHistogram.cpp
-
+src/applications/staticProps/CurrentDensity.cpp
 )
 
 set (NANOPARTICLEBUILDERSOURCE
