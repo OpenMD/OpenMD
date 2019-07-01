@@ -94,7 +94,7 @@
 #include "applications/staticProps/VelocityZ.hpp"
 #include "applications/staticProps/DensityHistogram.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
-
+#include "applications/staticProps/CurrentDensity.hpp"
 
 using namespace OpenMD;
 
@@ -473,10 +473,12 @@ int main(int argc, char* argv[]){
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
-  }else if (args_info.eam_density_given) {
+  } else if (args_info.eam_density_given) {
     analyser = new DensityHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
-  }else if (args_info.net_charge_given) {
+  } else if (args_info.net_charge_given) {
       analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.current_density_given) {
+    analyser = new CurrentDensity(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {

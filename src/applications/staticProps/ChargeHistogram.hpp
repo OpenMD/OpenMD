@@ -38,8 +38,8 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by Charles F. Vardeman II on 11/26/05.
- *  @author  Charles F. Vardeman II
+ *  Created by Hemanta Bhattarai on 05/10/19.
+ *  @author  Hemanta Bhattarai
  *  @version $Id$
  *
  */
