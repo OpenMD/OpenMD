@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  */
 
@@ -47,11 +47,11 @@
 #include "applications/staticProps/SpatialStatistics.hpp"
 
 namespace OpenMD {
-  
+
   class RNEMDZ : public SlabStatistics {
-    
+
   public:
-    RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins, int axis=2);    
+    RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins, int axis=2);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
 
@@ -59,14 +59,16 @@ namespace OpenMD {
     OutputData* temperature;
     OutputData* velocity;
     OutputData* density;
+    OutputData* charge;
+    OutputData* chargeVelocity;
     int axis_;
- 
+
   };
 
   class RNEMDR : public ShellStatistics {
-    
+
   public:
-    RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins);    
+    RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
 
@@ -77,14 +79,14 @@ namespace OpenMD {
   };
 
   class RNEMDRTheta : public ShellStatistics {
-    
+
   public:
-    RNEMDRTheta(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins, int nanglebins);    
+    RNEMDRTheta(SimInfo* info, const std::string& filename, const std::string& sele, int nrbins, int nanglebins);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin);
     std::pair<int,int> getBins(Vector3d pos);
     void writeOutput();
-    
+
   protected:
     OutputData* temperature;
     OutputData* angularVelocity;
@@ -92,9 +94,6 @@ namespace OpenMD {
     int nAngleBins_;
     Vector3d fluxVector_;
   };
-  
+
 }
 #endif
-
-
-
