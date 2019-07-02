@@ -198,7 +198,7 @@ namespace OpenMD {
     if (idat.isSelected)
       (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
 
-    *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
+    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
     
     return;
   }
