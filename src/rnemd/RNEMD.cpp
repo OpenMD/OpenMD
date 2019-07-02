@@ -2061,10 +2061,8 @@ namespace OpenMD {
       Vector3d vc = Pc / Mc;
 
       // units of volume (Angstrom^3):
-      // alphac = qvTarget_ / ((Q2c/Volc) + (Q2h/Volh) * (MQc / MQh));
-      alphacprime = qvTarget_ * Volc / (Q2cp - Q2cn * (MQcp/MQcn));
+      alphac = qvTarget_ * (2*Volc / (dividingArea_ * exchangeTime_)) / (Q2cp - Q2cn * (MQcp/MQcn));
       // units of velocity (Angstrom/fs):
-      alphac = alphacprime / (dividingArea_ * exchangeTime_);
       betac = -alphac * MQcp / MQcn;
             
       RealType cNumerator = Kc - kineticTarget_;
