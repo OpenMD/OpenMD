@@ -131,17 +131,15 @@ namespace OpenMD {
 
   AlphaHullFinder::AlphaHullFinder(SimInfo* info)
     : HullFinder(info) {
-    delete surfaceMesh_;
-    
 #ifdef HAVE_QHULL
+    delete surfaceMesh_;
     surfaceMesh_ = new AlphaHull(0.0);
 #endif
   }
 
   void AlphaHullFinder::setAlpha(RealType alpha) {
-    delete surfaceMesh_;
-    
 #ifdef HAVE_QHULL
+    delete surfaceMesh_;
     surfaceMesh_ = new AlphaHull(alpha);
 #endif
   }
@@ -156,22 +154,14 @@ namespace OpenMD {
     SelectionSet ssResult(nObjects_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
-#else
-    sprintf( painCave.errMsg,
-             "HullFinder : Hull calculation is not possible without libqhull.\n"
-             "\tPlease rebuild OpenMD with qhull enabled.");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
-#endif
     
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
     // Loop over the mesh faces
     std::vector<Triangle>::iterator face;
     std::vector<StuntDouble*>::iterator vertex;
-
+    
     // This will work in parallel because the triangles returned by the mesh
-    // have a NULL stuntDouble if this processor doesn't own the 
+    // have a NULL stuntDouble if this processor doesn't own 
     
     for (face = sMesh.begin(); face != sMesh.end(); ++face) {
       Triangle thisTriangle = *face;
@@ -182,7 +172,16 @@ namespace OpenMD {
         }
       }
     }
-    surfaceArea_ = surfaceMesh_->getArea();
+    surfaceArea_ = surfaceMesh_->getArea();    
+#else
+    sprintf( painCave.errMsg,
+             "HullFinder : Hull calculation is not possible without libqhull.\n"
+             "\tPlease rebuild OpenMD with qhull enabled.");
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+#endif
+    
     return ssResult;
   }
 
@@ -190,20 +189,11 @@ namespace OpenMD {
     SelectionSet ssResult(nObjects_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
-#else
-    sprintf( painCave.errMsg,
-             "HullFinder : Hull calculation is not possible without libqhull.\n"
-             "\tPlease rebuild OpenMD with qhull enabled.");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-#endif
-    
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
     // Loop over the mesh faces
     std::vector<Triangle>::iterator face;
     std::vector<StuntDouble*>::iterator vertex;
-
+    
     // This will work in parallel because the triangles returned by the mesh
     // have a NULL stuntDouble if this processor doesn't own the 
     
@@ -218,6 +208,16 @@ namespace OpenMD {
     }
     surfaceArea_ = surfaceMesh_->getArea();
     volume_ = surfaceMesh_->getVolume();
+    
+#else
+    sprintf( painCave.errMsg,
+             "HullFinder : Hull calculation is not possible without libqhull.\n"
+             "\tPlease rebuild OpenMD with qhull enabled.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+#endif
+      
     return ssResult;
   }
 

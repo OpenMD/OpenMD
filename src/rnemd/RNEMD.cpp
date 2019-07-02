@@ -2073,89 +2073,83 @@ namespace OpenMD {
       cNumerator -= MQvcn * betac;
       cNumerator -= 0.5 * MQ2cp * alphac * alphac;
       cNumerator -= 0.5 * MQ2cn * betac * betac;
-      if (cNumerator > 0.0) {
         
-        RealType cDenominator = Kc - Kcz;
-        cDenominator -= 0.5 * Mc * (vc.x()*vc.x() + vc.y()*vc.y());
+      RealType cDenominator = Kc - Kcz;
+      cDenominator -= 0.5 * Mc * (vc.x()*vc.x() + vc.y()*vc.y());
         
-	if (cDenominator > 0.0) {
-	  RealType c = sqrt(cNumerator / cDenominator);
+      if (cDenominator/cDenominator > 0.0) {
+        RealType c = sqrt(cNumerator / cDenominator);
+        
+        if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
           
-	  if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
+          Vector3d vh = Ph / Mh;
+          alphah = -alphac * MQcp / MQhp;
+          betah = -betac * MQcn / MQhn;
+          
+          RealType hNumerator = Kh + kineticTarget_;
+          hNumerator -= 0.5 * Mh * vh.x()*vh.x();
+          hNumerator -= 0.5 * Mh * vh.y()*vh.y();
+          hNumerator -= Khz;
+          hNumerator -= MQvhp * alphah;
+          hNumerator -= MQvhn * betah;
+          hNumerator -= 0.5 * MQ2hp * alphah * alphah;
+          hNumerator -= 0.5 * MQ2hn * betah * betah;          
+          RealType hDenominator = Kh - Khz;
+          hDenominator -= 0.5 * Mh * (vh.x()*vh.x() + vh.y()*vh.y());
+          
+          if (hNumerator/hDenominator > 0.0) {
+            RealType h = sqrt(hNumerator / hDenominator);
             
-	    Vector3d vh = Ph / Mh;
-            alphah = -alphac * MQcp / MQhp;
-            betah = -betac * MQcn / MQhn;
-            
-            RealType hNumerator = Kh + kineticTarget_;
-            hNumerator -= 0.5 * Mh * vh.x()*vh.x();
-            hNumerator -= 0.5 * Mh * vh.y()*vh.y();
-            hNumerator -= Khz;
-            hNumerator -= MQvhp * alphah;
-            hNumerator -= MQvhn * betah;
-            hNumerator -= 0.5 * MQ2hp * alphah * alphah;
-            hNumerator -= 0.5 * MQ2hn * betah * betah;
-                                      
-            if (hNumerator > 0.0) {
+            if ((h > 0.9) && (h < 1.1)) {
               
-              RealType hDenominator = Kh - Khz;
-              hDenominator -= 0.5 * Mh * (vh.x()*vh.x() + vh.y()*vh.y());
+              vector<StuntDouble*>::iterator sdi;
+              Vector3d vel;
+              Vector3d rPos;
               
-	      if (hDenominator > 0.0) {
-		RealType h = sqrt(hNumerator / hDenominator);
-                          
-		if ((h > 0.9) && (h < 1.1)) {
-                  
-		  vector<StuntDouble*>::iterator sdi;
-		  Vector3d vel;
-                  Vector3d rPos;
-                  
-		  for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
-                    vel = (*sdi)->getVel();
-                    vel.x() = (vel.x() - vc.x()) * c + vc.x();
-                    vel.y() = (vel.y() - vc.y()) * c + vc.y();
-                    RealType q = 0.0;
-                    if ((*sdi)->isAtom()) {
-                      atype = static_cast<Atom*>(*sdi)->getAtomType();
-                      FixedChargeAdapter fca = FixedChargeAdapter(atype);
-                      if ( fca.isFixedCharge() ) q = fca.getCharge();
-                      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-                      if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-                      if (q > 0)
-                        vel.z() += q * alphac;
-                      else
-                        vel.z() += q * betac; 
-                    }                                        
-		    (*sdi)->setVel(vel);
-		  }
-		  for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
-                    vel = (*sdi)->getVel();
-                    vel.x() = (vel.x() - vh.x()) * h + vh.x();
-                    vel.y() = (vel.y() - vh.y()) * h + vh.y();
-                    RealType q = 0.0;
-                    if ((*sdi)->isAtom()) {
-                      atype = static_cast<Atom*>(*sdi)->getAtomType();
-                      FixedChargeAdapter fca = FixedChargeAdapter(atype);
-                      if ( fca.isFixedCharge() ) q = fca.getCharge();
-                      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-                      if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-                      if (q > 0)
-                        vel.z() += q * alphah;
-                      else
-                        vel.z() += q * betah;
-                    }                    
-		    (*sdi)->setVel(vel);
-		  }
-		  successfulExchange = true;
-		  kineticExchange_ += kineticTarget_;
-                  momentumExchange_ += momentumTarget_;
-                  angularMomentumExchange_ += angularMomentumTarget_;
-                  qvExchange_ += qvTarget_;
-		}
-	      }
-	    }
-	  }
-	}
+              for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
+                vel = (*sdi)->getVel();
+                vel.x() = (vel.x() - vc.x()) * c + vc.x();
+                vel.y() = (vel.y() - vc.y()) * c + vc.y();
+                RealType q = 0.0;
+                if ((*sdi)->isAtom()) {
+                  atype = static_cast<Atom*>(*sdi)->getAtomType();
+                  FixedChargeAdapter fca = FixedChargeAdapter(atype);
+                  if ( fca.isFixedCharge() ) q = fca.getCharge();
+                  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+                  if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+                  if (q > 0)
+                    vel.z() += q * alphac;
+                  else
+                    vel.z() += q * betac; 
+                }                                        
+                (*sdi)->setVel(vel);
+              }
+              for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
+                vel = (*sdi)->getVel();
+                vel.x() = (vel.x() - vh.x()) * h + vh.x();
+                vel.y() = (vel.y() - vh.y()) * h + vh.y();
+                RealType q = 0.0;
+                if ((*sdi)->isAtom()) {
+                  atype = static_cast<Atom*>(*sdi)->getAtomType();
+                  FixedChargeAdapter fca = FixedChargeAdapter(atype);
+                  if ( fca.isFixedCharge() ) q = fca.getCharge();
+                  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+                  if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+                  if (q > 0)
+                    vel.z() += q * alphah;
+                  else
+                    vel.z() += q * betah;
+                }                    
+                (*sdi)->setVel(vel);
+              }
+              successfulExchange = true;
+              kineticExchange_ += kineticTarget_;
+              momentumExchange_ += momentumTarget_;
+              angularMomentumExchange_ += angularMomentumTarget_;
+              qvExchange_ += qvTarget_;
+            }
+          }
+        }
       }
     }
     if (successfulExchange != true) {
@@ -2743,8 +2737,8 @@ namespace OpenMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumTarget_ 
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "# electron velocity = " << qvTarget_
-                 << " (electrons A/fs)\n";
+      rnemdFile_ << "#         electrons = " << qvTarget_
+                 << " (electrons)\n";
       rnemdFile_ << "# Actual exchange totals:\n";
       rnemdFile_ << "#          kinetic = " 
                  << kineticExchange_ / Constants::energyConvert 
@@ -2753,8 +2747,8 @@ namespace OpenMD {
                  << " (amu*A/fs)\n";      
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_ 
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "# electron velocity = " << qvExchange_
-                 << " (electrons A/fs)\n";
+      rnemdFile_ << "#         electrons = " << qvExchange_
+                 << " (electrons)\n";
       rnemdFile_ << "# Actual flux:\n";
       rnemdFile_ << "#          kinetic = " << Jz
                  << " (kcal/mol/A^2/fs)\n";
