@@ -172,10 +172,18 @@ namespace OpenMD {
               if (lja.isLennardJones()){
                 currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
               } else {
-                int aNum = etab.GetAtomicNum((atom->getType()).c_str());
-                if (aNum != 0) {
-                  currShape = new Sphere(atom->getPos(), etab.GetVdwRad(aNum));
-                } else {
+
+                int aNum(0);
+                std::vector<AtomType*> atChain = atomType->allYourBase();
+                std::vector<AtomType*>::iterator i;
+                for (i = atChain.begin(); i != atChain.end(); ++i) {
+                  aNum = etab.GetAtomicNum((*i)->getName().c_str());
+                  if (aNum != 0) {
+                    currShape = new Sphere(atom->getPos(), etab.GetVdwRad(aNum));
+                    break;
+                  }
+                }
+                if (aNum == 0) {
                   sprintf( painCave.errMsg,
                            "Could not find atom type in default element.txt\n");
                   painCave.severity = OPENMD_ERROR;
