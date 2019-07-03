@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -45,20 +45,20 @@
 
 namespace OpenMD {
   bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
-    
+
     if (sd_->isAtom()) {
       if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
         sprintf( painCave.errMsg,
                  "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
-        simError();    
+        simError();
         return false;
       }
     }
     else if (sd_->isRigidBody()) {
       RigidBody* rb = static_cast<RigidBody*>(sd_);
-      std::vector<Atom*>::iterator ai; 
+      std::vector<Atom*>::iterator ai;
       Atom* atom;
       for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
         if (!createSingleBead(atom, beads)) {
@@ -66,14 +66,14 @@ namespace OpenMD {
                    "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
-          simError();    
+          simError();
           return false;
         }
       }
-    }    
+    }
     return true;
   }
-  
+
   bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
     AtomType* atomType = atom->getAtomType();
     LennardJonesAdapter lja = LennardJonesAdapter(atomType);
@@ -87,14 +87,14 @@ namespace OpenMD {
       beads.push_back(currBead);
     } else {
       int obanum(0);
-      std::vector<AtomType*> atChain = atom->getAtomType()->allYourBase();
+      std::vector<AtomType*> atChain = atomType->allYourBase();
       std::vector<AtomType*>::iterator i;
       for (i = atChain.begin(); i != atChain.end(); ++i) {
         obanum = etab.GetAtomicNum((*i)->getName().c_str());
-        if (obanum != 0) {          
-          BeadParam currBead;      
+        if (obanum != 0) {
+          BeadParam currBead;
           currBead.atomName = atom->getType();
-          currBead.pos = atom->getPos();        
+          currBead.pos = atom->getPos();
           currBead.radius = etab.GetVdwRad(obanum);
           std::cout << "using rvdw = " << currBead.radius << " for atomic number " << obanum << "\n";
           beads.push_back(currBead);
@@ -106,7 +106,7 @@ namespace OpenMD {
                  "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
-        simError();          
+        simError();
       }
     }
     return true;

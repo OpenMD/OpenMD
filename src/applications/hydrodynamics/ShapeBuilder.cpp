@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -47,7 +47,7 @@
 #include "types/GayBerneAdapter.hpp"
 
 namespace OpenMD {
-  
+
   Shape* ShapeBuilder::createShape(StuntDouble* sd) {
     Shape* currShape = NULL;
     if (sd->isDirectionalAtom()) {
@@ -56,38 +56,45 @@ namespace OpenMD {
       currShape = internalCreateShape(static_cast<Atom*>(sd));
     } else if (sd->isRigidBody()) {
       currShape = internalCreateShape(static_cast<RigidBody*>(sd));
-    }       
-    return currShape;   
+    }
+    return currShape;
   }
-  
+
   Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
     AtomType* atomType = atom->getAtomType();
     Shape* currShape = NULL;
     LennardJonesAdapter lja = LennardJonesAdapter(atomType);
-    if (lja.isLennardJones()){      
+    if (lja.isLennardJones()){
       currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
     } else {
-      int obanum = etab.GetAtomicNum((atom->getType()).c_str());
-      if (obanum != 0) {
-        currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
-      } else {
+      int obanum(0);
+      std::vector<AtomType*> atChain = atomType->allYourBase();
+      std::vector<AtomType*>::iterator i;
+      for (i = atChain.begin(); i != atChain.end(); ++i) {
+        obanum = etab.GetAtomicNum((*i)->getName().c_str());
+        if (obanum != 0) {
+          currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
+          break;
+        }
+      }
+      if (obanum == 0) {
         sprintf( painCave.errMsg,
                  "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
-        simError();          
+        simError();
       }
     }
     return currShape;
   }
-  
+
   Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
     AtomType* atomType = datom->getAtomType();
     Shape* currShape = NULL;
     LennardJonesAdapter lja = LennardJonesAdapter(atomType);
     GayBerneAdapter gba = GayBerneAdapter(atomType);
     if (gba.isGayBerne()) {
-      currShape = new Ellipsoid(datom->getPos(), gba.getL()/2.0, 
+      currShape = new Ellipsoid(datom->getPos(), gba.getL()/2.0,
                                 gba.getD()/2.0, datom->getA());
     } else if (lja.isLennardJones()) {
       currShape = new Sphere(datom->getPos(), lja.getSigma()/2.0);
@@ -100,15 +107,15 @@ namespace OpenMD {
                  "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
-        simError();          
+        simError();
       }
-    }        
+    }
     return currShape;
   }
 
   Shape* ShapeBuilder::internalCreateShape(RigidBody* rb) {
-    
-    std::vector<Atom*>::iterator ai; 
+
+    std::vector<Atom*>::iterator ai;
     CompositeShape* compositeShape = new CompositeShape;
     Atom* atom;
     for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
@@ -121,7 +128,7 @@ namespace OpenMD {
       if (currShape != NULL)
         compositeShape->addShape(currShape);
     }
-    
+
     return compositeShape;
-  }  
+  }
 }

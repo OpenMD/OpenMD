@@ -184,7 +184,7 @@ int main(int argc, char* argv[]){
     if (!args_info.beads_flag) {
       model->calcHydroProps(shape, viscosity, temperature);
       std::ofstream outputDiff;
-      outputDiff.open(outputFilename.c_str());
+      outputDiff.open(outputFilename.c_str(),std::fstream::app);
       model->writeHydroProps(outputDiff);
       outputDiff.close();
     }
