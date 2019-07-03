@@ -48,16 +48,16 @@
 
 namespace OpenMD {
 
-class ShapeBuilder {
-    public:
+  class ShapeBuilder {
+  public:    
+    static Shape* createShape(StuntDouble* sd);
     
-        static Shape* createShape(StuntDouble* sd);
-    private:
-        static Shape* internalCreateShape(Atom* atom);        
-        static Shape* internalCreateShape(DirectionalAtom* datom);
-        static Shape* internalCreateShape(RigidBody* rb);
+  private:
+    static Shape* internalCreateShape(Atom* atom);        
+    static Shape* internalCreateShape(DirectionalAtom* datom);
+    static Shape* internalCreateShape(RigidBody* rb);
         
-};
+  };
 
 }
 #endif

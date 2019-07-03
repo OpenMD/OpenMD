@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -48,13 +47,14 @@
 
 namespace OpenMD {
 
-class BeadModel : public ApproximationModel {
-    public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
-};
+  class BeadModel : public ApproximationModel {
+  public:
+    BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
+
+  private:
+    virtual bool createBeads(std::vector<BeadParam>& beads);
+    bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
+  };
 
 }
 

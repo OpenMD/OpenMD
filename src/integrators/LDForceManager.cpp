@@ -116,7 +116,6 @@ namespace OpenMD {
       }
     }
 
-
     if (needHydroPropFile) {
       if (simParams->haveHydroPropFile()) {
         hydroPropMap = parseFrictionFile(simParams->getHydroPropFile());
@@ -141,7 +140,8 @@ namespace OpenMD {
             hydroProps_.push_back(iter->second);
           } else {
             sprintf( painCave.errMsg,
-                     "Can not find resistance tensor for atom [%s]\n", sd->getType().c_str());
+                     "Can not find resistance tensor for atom [%s]\n",
+                     sd->getType().c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();
@@ -179,7 +179,8 @@ namespace OpenMD {
                 for (i = atChain.begin(); i != atChain.end(); ++i) {
                   aNum = etab.GetAtomicNum((*i)->getName().c_str());
                   if (aNum != 0) {
-                    currShape = new Sphere(atom->getPos(), etab.GetVdwRad(aNum));
+                    currShape = new Sphere(atom->getPos(),
+                                           etab.GetVdwRad(aNum));
                     break;
                   }
                 }
@@ -195,14 +196,16 @@ namespace OpenMD {
           }
 
 	  if (!simParams->haveTargetTemp()) {
-	    sprintf(painCave.errMsg, "You can't use LangevinDynamics without a targetTemp!\n");
+	    sprintf(painCave.errMsg,
+                    "You can't use LangevinDynamics without a targetTemp!\n");
 	    painCave.isFatal = 1;
 	    painCave.severity = OPENMD_ERROR;
 	    simError();
 	  }
 
 	  if (!simParams->haveViscosity()) {
-	    sprintf(painCave.errMsg, "You can't use LangevinDynamics without a viscosity!\n");
+	    sprintf(painCave.errMsg,
+                    "You can't use LangevinDynamics without a viscosity!\n");
 	    painCave.isFatal = 1;
 	    painCave.severity = OPENMD_ERROR;
 	    simError();
@@ -261,7 +264,8 @@ namespace OpenMD {
 
     fdf = 0;
 
-    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
 
       doLangevinForces = true;
       freezeMolecule = false;
@@ -303,7 +307,8 @@ namespace OpenMD {
 
             Vector3d randomForceBody;
             Vector3d randomTorqueBody;
-            genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
+            genRandomForceAndTorque(randomForceBody, randomTorqueBody,
+                                    index, variance_);
             Vector3d randomForceLab = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
             sd->addFrc(randomForceLab);
@@ -312,17 +317,19 @@ namespace OpenMD {
             Mat3x3d I = sd->getI();
             Vector3d omegaBody;
 
-            // What remains contains velocity explicitly, but the velocity required
-            // is at the full step: v(t + h), while we have initially the velocity
-            // at the half step: v(t + h/2).  We need to iterate to converge the
-            // friction force and friction torque vectors.
+            // What remains contains velocity explicitly, but the
+            // velocity required is at the full step: v(t + h), while
+            // we have initially the velocity at the half step: v(t + h/2).
+            // We need to iterate to converge the friction
+            // force and friction torque vectors.
 
             // this is the velocity at the half-step:
 
             Vector3d vel =sd->getVel();
             Vector3d angMom = sd->getJ();
 
-            //estimate velocity at full-step using everything but friction forces:
+            // estimate velocity at full-step using everything but
+            // friction forces:
 
             frc = sd->getFrc();
             Vector3d velStep = vel + (dt2_ /mass * Constants::energyConvert) * frc;
@@ -365,11 +372,13 @@ namespace OpenMD {
 
               vcdLab = velStep + cross(omegaLab, rcrLab);
               vcdBody = A * vcdLab;
-              frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omegaBody);
+              frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody +
+                                    hydroProps_[index]->getXirt() * omegaBody);
               oldFFL = frictionForceLab;
               frictionForceLab = Atrans * frictionForceBody;
               oldFTB = frictionTorqueBody;
-              frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omegaBody);
+              frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody +
+                                     hydroProps_[index]->getXirr() * omegaBody);
               frictionTorqueLab = Atrans * frictionTorqueBody;
 
               // re-estimate velocities at full-step using friction forces:
@@ -382,7 +391,8 @@ namespace OpenMD {
               fdot = dot(frictionForceLab, oldFFL) / frictionForceLab.lengthSquare();
               tdot = dot(frictionTorqueBody, oldFTB) / frictionTorqueBody.lengthSquare();
 
-              if (fabs(1.0 - fdot) <= forceTolerance_ && fabs(1.0 - tdot) <= forceTolerance_)
+              if (fabs(1.0 - fdot) <= forceTolerance_ &&
+                  fabs(1.0 - tdot) <= forceTolerance_)
                 break; // iteration ends here
             }
 
@@ -395,19 +405,22 @@ namespace OpenMD {
 
             Vector3d randomForce;
             Vector3d randomTorque;
-            genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
+            genRandomForceAndTorque(randomForce, randomTorque,
+                                    index, variance_);
             sd->addFrc(randomForce);
 
-            // What remains contains velocity explicitly, but the velocity required
-            // is at the full step: v(t + h), while we have initially the velocity
-            // at the half step: v(t + h/2).  We need to iterate to converge the
-            // friction force vector.
+            // What remains contains velocity explicitly, but the
+            // velocity required is at the full step: v(t + h), while
+            // we have initially the velocity at the half step: v(t + h/2).
+            // We need to iterate to converge the friction
+            // force vector.
 
             // this is the velocity at the half-step:
 
             Vector3d vel =sd->getVel();
 
-            //estimate velocity at full-step using everything but friction forces:
+            // estimate velocity at full-step using everything but
+            // friction forces:
 
             frc = sd->getFrc();
             Vector3d velStep = vel + (dt2_ / mass * Constants::energyConvert) * frc;
@@ -427,7 +440,8 @@ namespace OpenMD {
 
               velStep = vel + (dt2_ / mass * Constants::energyConvert) * (frc + frictionForce);
 
-              // check for convergence (if the vector has converged, fdot will be 1.0):
+              // check for convergence (if the vector has converged,
+              // fdot will be 1.0):
 
               fdot = dot(frictionForce, oldFF) / frictionForce.lengthSquare();
 
@@ -454,9 +468,10 @@ namespace OpenMD {
     ForceManager::postCalculation();
   }
 
-void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {
-
-
+  void LDForceManager::genRandomForceAndTorque(Vector3d& force,
+                                               Vector3d& torque,
+                                               unsigned int index,
+                                               RealType variance) {
     Vector<RealType, 6> Z;
     Vector<RealType, 6> generalForce;
 
@@ -475,7 +490,5 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
     torque[0] = generalForce[3];
     torque[1] = generalForce[4];
     torque[2] = generalForce[5];
-
-}
-
+  }
 }

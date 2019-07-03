@@ -49,7 +49,8 @@ namespace OpenMD {
     if (sd_->isAtom()) {
       if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
         sprintf( painCave.errMsg,
-                 "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
+                 "BeadModel::createBeads Error: GayBerne and other "
+                 "non-spherical atoms should use the RoughShell model\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();
@@ -63,7 +64,8 @@ namespace OpenMD {
       for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
         if (!createSingleBead(atom, beads)) {
           sprintf( painCave.errMsg,
-                   "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
+                   "BeadModel::createBeads Error: GayBerne and other "
+                   "non-spherical atoms should use the RoughShell model\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();
@@ -96,7 +98,8 @@ namespace OpenMD {
           currBead.atomName = atom->getType();
           currBead.pos = atom->getPos();
           currBead.radius = etab.GetVdwRad(obanum);
-          std::cout << "using rvdw = " << currBead.radius << " for atomic number " << obanum << "\n";
+          std::cout << "using rvdw = " << currBead.radius
+                    << " for atomic number " << obanum << "\n";
           beads.push_back(currBead);
           break;
         }

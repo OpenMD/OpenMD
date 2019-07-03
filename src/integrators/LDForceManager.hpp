@@ -96,7 +96,8 @@ namespace OpenMD {
     
   private:
     std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    
-    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance);
+    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque,
+                                 unsigned int index, RealType variance);
     std::vector<HydroProp*> hydroProps_;
     SeqRandNumGen randNumGen_;    
     RealType variance_;
