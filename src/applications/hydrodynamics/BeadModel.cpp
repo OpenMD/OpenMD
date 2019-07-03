@@ -86,15 +86,22 @@ namespace OpenMD {
       currBead.radius = lja.getSigma()/2.0;
       beads.push_back(currBead);
     } else {
-      int obanum = etab.GetAtomicNum((atom->getType()).c_str());
-      if (obanum != 0) {
-        BeadParam currBead;      
-        currBead.atomName = atom->getType();
-        currBead.pos = atom->getPos();        
-        currBead.radius = etab.GetVdwRad(obanum);
-        std::cout << "using rvdw = " << currBead.radius << " for atomic number " << obanum << "\n";
-        beads.push_back(currBead);
-      } else {
+      int obanum(0);
+      std::vector<AtomType*> atChain = atom->getAtomType()->allYourBase();
+      std::vector<AtomType*>::iterator i;
+      for (i = atChain.begin(); i != atChain.end(); ++i) {
+        obanum = etab.GetAtomicNum((*i)->getName().c_str());
+        if (obanum != 0) {          
+          BeadParam currBead;      
+          currBead.atomName = atom->getType();
+          currBead.pos = atom->getPos();        
+          currBead.radius = etab.GetVdwRad(obanum);
+          std::cout << "using rvdw = " << currBead.radius << " for atomic number " << obanum << "\n";
+          beads.push_back(currBead);
+          break;
+        }
+      }
+      if (obanum == 0) {
         sprintf( painCave.errMsg,
                  "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
@@ -102,6 +109,6 @@ namespace OpenMD {
         simError();          
       }
     }
-    return true;    
+    return true;
   }
 }
