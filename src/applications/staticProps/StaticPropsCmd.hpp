@@ -36,6 +36,8 @@ extern "C" {
 
 enum enum_privilegedAxis { privilegedAxis__NULL = -1, privilegedAxis_arg_x = 0, privilegedAxis_arg_y, privilegedAxis_arg_z };
 enum enum_privilegedAxis2 { privilegedAxis2__NULL = -1, privilegedAxis2_arg_x = 0, privilegedAxis2_arg_y, privilegedAxis2_arg_z };
+enum enum_momentum { momentum__NULL = -1, momentum_arg_P = 0, momentum_arg_J };
+enum enum_component { component__NULL = -1, component_arg_x = 0, component_arg_y, component_arg_z };
 
 /** @brief Where the command line options are stored */
 struct gengetopt_args_info
@@ -138,6 +140,12 @@ struct gengetopt_args_info
   enum enum_privilegedAxis2 privilegedAxis2_arg;	/**< @brief which axis is special for spatial analysis (default = x axis) (default='x').  */
   char * privilegedAxis2_orig;	/**< @brief which axis is special for spatial analysis (default = x axis) original value given at command line.  */
   const char *privilegedAxis2_help; /**< @brief which axis is special for spatial analysis (default = x axis) help description.  */
+  enum enum_momentum momentum_arg;	/**< @brief Type of momentum whose distribtution is required (default = Liner Momentum) (default='P').  */
+  char * momentum_orig;	/**< @brief Type of momentum whose distribtution is required (default = Liner Momentum) original value given at command line.  */
+  const char *momentum_help; /**< @brief Type of momentum whose distribtution is required (default = Liner Momentum) help description.  */
+  enum enum_component component_arg;	/**< @brief component of momentum for the momemtum distribution (default = z axis) (default='z').  */
+  char * component_orig;	/**< @brief component of momentum for the momemtum distribution (default = z axis) original value given at command line.  */
+  const char *component_help; /**< @brief component of momentum for the momemtum distribution (default = z axis) help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -188,6 +196,7 @@ struct gengetopt_args_info
   const char *eam_density_help; /**< @brief computes an average eam density profile of the selected atom help description.  */
   const char *net_charge_help; /**< @brief computes an average charge profile of the selected atom help description.  */
   const char *current_density_help; /**< @brief computes the current density for the selected atom help description.  */
+  const char *momentum_distribution_help; /**< @brief computes the momentum distribution for the selected atom help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -223,6 +232,8 @@ struct gengetopt_args_info
   unsigned int gaussWidth_given ;	/**< @brief Whether gaussWidth was given.  */
   unsigned int privilegedAxis_given ;	/**< @brief Whether privilegedAxis was given.  */
   unsigned int privilegedAxis2_given ;	/**< @brief Whether privilegedAxis2 was given.  */
+  unsigned int momentum_given ;	/**< @brief Whether momentum was given.  */
+  unsigned int component_given ;	/**< @brief Whether component was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */
@@ -273,6 +284,7 @@ struct gengetopt_args_info
   unsigned int eam_density_given ;	/**< @brief Whether eam_density was given.  */
   unsigned int net_charge_given ;	/**< @brief Whether net_charge was given.  */
   unsigned int current_density_given ;	/**< @brief Whether current_density was given.  */
+  unsigned int momentum_distribution_given ;	/**< @brief Whether momentum_distribution was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
@@ -402,6 +414,8 @@ int cmdline_parser_required (struct gengetopt_args_info *args_info,
 
 extern const char *cmdline_parser_privilegedAxis_values[];  /**< @brief Possible values for privilegedAxis. */
 extern const char *cmdline_parser_privilegedAxis2_values[];  /**< @brief Possible values for privilegedAxis2. */
+extern const char *cmdline_parser_momentum_values[];  /**< @brief Possible values for momentum. */
+extern const char *cmdline_parser_component_values[];  /**< @brief Possible values for component. */
 
 
 #ifdef __cplusplus

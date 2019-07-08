@@ -93,6 +93,7 @@
 #include "applications/staticProps/Field.hpp"
 #include "applications/staticProps/VelocityZ.hpp"
 #include "applications/staticProps/DensityHistogram.hpp"
+#include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
 #include "applications/staticProps/CurrentDensity.hpp"
 
@@ -238,6 +239,33 @@ int main(int argc, char* argv[]){
   default:
     privilegedAxis2 = 2;
     break;
+  }
+
+  int momentum_type;
+  switch (args_info.momentum_arg) {
+  case momentum_arg_P:
+    momentum_type = 0;
+    break;
+  case momentum_arg_J:
+  default:
+    momentum_type = 1;
+    break;
+
+  }
+
+  int momentum_comp;
+  switch (args_info.component_arg) {
+  case component_arg_x:
+    momentum_comp = 0;
+    break;
+  case component_arg_y:
+    momentum_comp = 1;
+    break;
+  case component_arg_z:
+  default:
+    momentum_comp = 2;
+    break;
+
   }
 
   StaticAnalyser* analyser;
@@ -475,7 +503,9 @@ int main(int argc, char* argv[]){
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.eam_density_given) {
     analyser = new DensityHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
-  } else if (args_info.net_charge_given) {
+  } else if (args_info.momentum_distribution_given) {
+    analyser = new MomentumHistogram(info, dumpFileName, sele1, args_info.nbins_arg, momentum_type, momentum_comp);
+  }else if (args_info.net_charge_given) {
       analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.current_density_given) {
     analyser = new CurrentDensity(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);

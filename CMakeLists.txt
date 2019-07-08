@@ -23,11 +23,11 @@ if (NOT NO_PARALLEL)
         message(STATUS "MSMPI_INC=${MSMPI_INC}")
         message(STATUS "MSMPI_LIB32=${MSMPI_LIB32}")
         message(STATUS "MSMPI_LIB64=${MSMPI_LIB64}")
-        IF( "${MSMPI_BIN}" STREQUAL "" OR 
-                "${MSMPI_INC}" STREQUAL "" OR 
-                "${MSMPI_LIB32}" STREQUAL "" OR 
-                "${MSMPI_LIB64}" STREQUAL "") 
-            message(FATAL_ERROR "Can not find MSMPI install. Please install MSMPI or check the ENV variable: 
+        IF( "${MSMPI_BIN}" STREQUAL "" OR
+                "${MSMPI_INC}" STREQUAL "" OR
+                "${MSMPI_LIB32}" STREQUAL "" OR
+                "${MSMPI_LIB64}" STREQUAL "")
+            message(FATAL_ERROR "Can not find MSMPI install. Please install MSMPI or check the ENV variable:
             MSMPI_INC, MSMPI_LIB32, MSMPI_LIB64, MSMPI_BIN")
         endif()
         set(MPIEXEC "${MSMPI_BIN}/mpiexec.exe")
@@ -45,7 +45,7 @@ if (NOT NO_PARALLEL)
         set(MPI_CXX_LIBRARIES "${MS_MPI_ARCH_LIB}/msmpi.lib")
         set(MPI_C_INCLUDE_PATH "${MPI_CXX_INCLUDE_PATH}")
         set(MPI_C_LIBRARIES "{${MPI_CXX_LIBRARIES}")
-        set(MPIEXEC_NUMPROC_FLAG "-np" CACHE STRING "Flag used by MPI to specify the number of processes for MPIEXEC; 
+        set(MPIEXEC_NUMPROC_FLAG "-np" CACHE STRING "Flag used by MPI to specify the number of processes for MPIEXEC;
         the next option will be the number of processes.")
         set(MPI_CXX_FOUND ON)
         set(MPI_FOUND ON)
@@ -63,7 +63,7 @@ if (NOT NO_PARALLEL)
       message(STATUS "before running the cmake command.")
       message(STATUS )
       message(STATUS "=================================================")
-   endif()   
+   endif()
    IF ( MPI_CXX_FOUND )
       INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_EXE_LINKER_FLAGS}")
@@ -704,6 +704,7 @@ src/applications/staticProps/TwoDGofR.cpp
 src/applications/staticProps/StaticPropsCmd.cpp
 src/applications/staticProps/VelocityZ.cpp
 src/applications/staticProps/DensityHistogram.cpp
+src/applications/staticProps/MomentumHistogram.cpp
 src/applications/staticProps/ChargeHistogram.cpp
 src/applications/staticProps/CurrentDensity.cpp
 )

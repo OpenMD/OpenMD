@@ -67,6 +67,8 @@ const char *gengetopt_args_info_help[] = {
   "      --gaussWidth=DOUBLE       Gaussian width (angstroms)",
   "      --privilegedAxis=ENUM     which axis is special for spatial analysis\n                                  (default = z axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`z')",
   "      --privilegedAxis2=ENUM    which axis is special for spatial analysis\n                                  (default = x axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`x')",
+  "      --momentum=ENUM           Type of momentum whose distribtution is\n                                  required (default = Liner Momentum)\n                                  (possible values=\"P\", \"J\" default=`P')",
+  "      --component=ENUM          component of momentum for the momemtum\n                                  distribution (default = z axis)  (possible\n                                  values=\"x\", \"y\", \"z\" default=`z')",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --ior                     icosahedral bond order parameter as a function\n                                  of radius (--rcut must be specified)",
@@ -118,6 +120,7 @@ const char *gengetopt_args_info_help[] = {
   "  -D, --eam_density             computes an average eam density profile of the\n                                  selected atom",
   "  -q, --net_charge              computes an average charge profile of the\n                                  selected atom",
   "  -J, --current_density         computes the current density for the selected\n                                  atom",
+  "  -M, --momentum_distribution   computes the momentum distribution for the\n                                  selected atom",
     0
 };
 
@@ -142,6 +145,8 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
 
 const char *cmdline_parser_privilegedAxis_values[] = {"x", "y", "z", 0}; /*< Possible values for privilegedAxis. */
 const char *cmdline_parser_privilegedAxis2_values[] = {"x", "y", "z", 0}; /*< Possible values for privilegedAxis2. */
+const char *cmdline_parser_momentum_values[] = {"P", "J", 0}; /*< Possible values for momentum. */
+const char *cmdline_parser_component_values[] = {"x", "y", "z", 0}; /*< Possible values for component. */
 
 static char *
 gengetopt_strdup (const char *s);
@@ -183,6 +188,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->gaussWidth_given = 0 ;
   args_info->privilegedAxis_given = 0 ;
   args_info->privilegedAxis2_given = 0 ;
+  args_info->momentum_given = 0 ;
+  args_info->component_given = 0 ;
   args_info->bo_given = 0 ;
   args_info->ior_given = 0 ;
   args_info->for_given = 0 ;
@@ -233,6 +240,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->eam_density_given = 0 ;
   args_info->net_charge_given = 0 ;
   args_info->current_density_given = 0 ;
+  args_info->momentum_distribution_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -293,6 +301,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->privilegedAxis_orig = NULL;
   args_info->privilegedAxis2_arg = privilegedAxis2_arg_x;
   args_info->privilegedAxis2_orig = NULL;
+  args_info->momentum_arg = momentum_arg_P;
+  args_info->momentum_orig = NULL;
+  args_info->component_arg = component_arg_z;
+  args_info->component_orig = NULL;
   
 }
 
@@ -335,56 +347,59 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->gaussWidth_help = gengetopt_args_info_help[31] ;
   args_info->privilegedAxis_help = gengetopt_args_info_help[32] ;
   args_info->privilegedAxis2_help = gengetopt_args_info_help[33] ;
-  args_info->bo_help = gengetopt_args_info_help[35] ;
-  args_info->ior_help = gengetopt_args_info_help[36] ;
-  args_info->for_help = gengetopt_args_info_help[37] ;
-  args_info->bad_help = gengetopt_args_info_help[38] ;
-  args_info->count_help = gengetopt_args_info_help[39] ;
-  args_info->gofr_help = gengetopt_args_info_help[40] ;
-  args_info->gofz_help = gengetopt_args_info_help[41] ;
-  args_info->r_theta_help = gengetopt_args_info_help[42] ;
-  args_info->r_omega_help = gengetopt_args_info_help[43] ;
-  args_info->r_z_help = gengetopt_args_info_help[44] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[45] ;
-  args_info->r_theta_omega_help = gengetopt_args_info_help[46] ;
-  args_info->gxyz_help = gengetopt_args_info_help[47] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[48] ;
-  args_info->p2_help = gengetopt_args_info_help[49] ;
-  args_info->rp2_help = gengetopt_args_info_help[50] ;
-  args_info->scd_help = gengetopt_args_info_help[51] ;
-  args_info->density_help = gengetopt_args_info_help[52] ;
-  args_info->slab_density_help = gengetopt_args_info_help[53] ;
-  args_info->pipe_density_help = gengetopt_args_info_help[54] ;
-  args_info->p_angle_help = gengetopt_args_info_help[55] ;
-  args_info->hxy_help = gengetopt_args_info_help[56] ;
-  args_info->rho_r_help = gengetopt_args_info_help[57] ;
-  args_info->angle_r_help = gengetopt_args_info_help[58] ;
-  args_info->hullvol_help = gengetopt_args_info_help[59] ;
-  args_info->rodlength_help = gengetopt_args_info_help[60] ;
-  args_info->tet_param_help = gengetopt_args_info_help[61] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[62] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[63] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[64] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[65] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[66] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[67] ;
-  args_info->nitrile_help = gengetopt_args_info_help[68] ;
-  args_info->multipole_help = gengetopt_args_info_help[69] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[70] ;
-  args_info->cn_help = gengetopt_args_info_help[71] ;
-  args_info->scn_help = gengetopt_args_info_help[72] ;
-  args_info->gcn_help = gengetopt_args_info_help[73] ;
-  args_info->hbond_help = gengetopt_args_info_help[74] ;
-  args_info->potDiff_help = gengetopt_args_info_help[75] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[76] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[77] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[78] ;
-  args_info->densityfield_help = gengetopt_args_info_help[79] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[80] ;
-  args_info->velocityZ_help = gengetopt_args_info_help[81] ;
-  args_info->eam_density_help = gengetopt_args_info_help[82] ;
-  args_info->net_charge_help = gengetopt_args_info_help[83] ;
-  args_info->current_density_help = gengetopt_args_info_help[84] ;
+  args_info->momentum_help = gengetopt_args_info_help[34] ;
+  args_info->component_help = gengetopt_args_info_help[35] ;
+  args_info->bo_help = gengetopt_args_info_help[37] ;
+  args_info->ior_help = gengetopt_args_info_help[38] ;
+  args_info->for_help = gengetopt_args_info_help[39] ;
+  args_info->bad_help = gengetopt_args_info_help[40] ;
+  args_info->count_help = gengetopt_args_info_help[41] ;
+  args_info->gofr_help = gengetopt_args_info_help[42] ;
+  args_info->gofz_help = gengetopt_args_info_help[43] ;
+  args_info->r_theta_help = gengetopt_args_info_help[44] ;
+  args_info->r_omega_help = gengetopt_args_info_help[45] ;
+  args_info->r_z_help = gengetopt_args_info_help[46] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[47] ;
+  args_info->r_theta_omega_help = gengetopt_args_info_help[48] ;
+  args_info->gxyz_help = gengetopt_args_info_help[49] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[50] ;
+  args_info->p2_help = gengetopt_args_info_help[51] ;
+  args_info->rp2_help = gengetopt_args_info_help[52] ;
+  args_info->scd_help = gengetopt_args_info_help[53] ;
+  args_info->density_help = gengetopt_args_info_help[54] ;
+  args_info->slab_density_help = gengetopt_args_info_help[55] ;
+  args_info->pipe_density_help = gengetopt_args_info_help[56] ;
+  args_info->p_angle_help = gengetopt_args_info_help[57] ;
+  args_info->hxy_help = gengetopt_args_info_help[58] ;
+  args_info->rho_r_help = gengetopt_args_info_help[59] ;
+  args_info->angle_r_help = gengetopt_args_info_help[60] ;
+  args_info->hullvol_help = gengetopt_args_info_help[61] ;
+  args_info->rodlength_help = gengetopt_args_info_help[62] ;
+  args_info->tet_param_help = gengetopt_args_info_help[63] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[64] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[65] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[66] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[67] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[68] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[69] ;
+  args_info->nitrile_help = gengetopt_args_info_help[70] ;
+  args_info->multipole_help = gengetopt_args_info_help[71] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[72] ;
+  args_info->cn_help = gengetopt_args_info_help[73] ;
+  args_info->scn_help = gengetopt_args_info_help[74] ;
+  args_info->gcn_help = gengetopt_args_info_help[75] ;
+  args_info->hbond_help = gengetopt_args_info_help[76] ;
+  args_info->potDiff_help = gengetopt_args_info_help[77] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[78] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[79] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[80] ;
+  args_info->densityfield_help = gengetopt_args_info_help[81] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[82] ;
+  args_info->velocityZ_help = gengetopt_args_info_help[83] ;
+  args_info->eam_density_help = gengetopt_args_info_help[84] ;
+  args_info->net_charge_help = gengetopt_args_info_help[85] ;
+  args_info->current_density_help = gengetopt_args_info_help[86] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[87] ;
   
 }
 
@@ -511,6 +526,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->gaussWidth_orig));
   free_string_field (&(args_info->privilegedAxis_orig));
   free_string_field (&(args_info->privilegedAxis2_orig));
+  free_string_field (&(args_info->momentum_orig));
+  free_string_field (&(args_info->component_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -655,6 +672,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "privilegedAxis", args_info->privilegedAxis_orig, cmdline_parser_privilegedAxis_values);
   if (args_info->privilegedAxis2_given)
     write_into_file(outfile, "privilegedAxis2", args_info->privilegedAxis2_orig, cmdline_parser_privilegedAxis2_values);
+  if (args_info->momentum_given)
+    write_into_file(outfile, "momentum", args_info->momentum_orig, cmdline_parser_momentum_values);
+  if (args_info->component_given)
+    write_into_file(outfile, "component", args_info->component_orig, cmdline_parser_component_values);
   if (args_info->bo_given)
     write_into_file(outfile, "bo", 0, 0 );
   if (args_info->ior_given)
@@ -755,6 +776,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "net_charge", 0, 0 );
   if (args_info->current_density_given)
     write_into_file(outfile, "current_density", 0, 0 );
+  if (args_info->momentum_distribution_given)
+    write_into_file(outfile, "momentum_distribution", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -858,6 +881,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->eam_density_given = 0 ;
   args_info->net_charge_given = 0 ;
   args_info->current_density_given = 0 ;
+  args_info->momentum_distribution_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -1730,6 +1754,8 @@ cmdline_parser_internal (
         { "gaussWidth",	1, NULL, 0 },
         { "privilegedAxis",	1, NULL, 0 },
         { "privilegedAxis2",	1, NULL, 0 },
+        { "momentum",	1, NULL, 0 },
+        { "component",	1, NULL, 0 },
         { "bo",	0, NULL, 0 },
         { "ior",	0, NULL, 0 },
         { "for",	0, NULL, 0 },
@@ -1780,6 +1806,7 @@ cmdline_parser_internal (
         { "eam_density",	0, NULL, 'D' },
         { "net_charge",	0, NULL, 'q' },
         { "current_density",	0, NULL, 'J' },
+        { "momentum_distribution",	0, NULL, 'M' },
         { 0,  0, 0, 0 }
       };
 
@@ -1788,7 +1815,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:n:b:x:y:r:a:c:z:v:gpsdQmkDqJ", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:n:b:x:y:r:a:c:z:v:gpsdQmkDqJM", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -2091,6 +2118,21 @@ cmdline_parser_internal (
             goto failure;
         
           break;
+        case 'M':	/* computes the momentum distribution for the selected atom.  */
+        
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->momentum_distribution_given),
+              &(local_args_info.momentum_distribution_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "momentum_distribution", 'M',
+              additional_error))
+            goto failure;
+        
+          break;
 
         case 0:	/* Long option with no short option */
           /* number of bins in z axis.  */
@@ -2383,6 +2425,34 @@ cmdline_parser_internal (
                 &(local_args_info.privilegedAxis2_given), optarg, cmdline_parser_privilegedAxis2_values, "x", ARG_ENUM,
                 check_ambiguity, override, 0, 0,
                 "privilegedAxis2", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Type of momentum whose distribtution is required (default = Liner Momentum).  */
+          else if (strcmp (long_options[option_index].name, "momentum") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->momentum_arg), 
+                 &(args_info->momentum_orig), &(args_info->momentum_given),
+                &(local_args_info.momentum_given), optarg, cmdline_parser_momentum_values, "P", ARG_ENUM,
+                check_ambiguity, override, 0, 0,
+                "momentum", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* component of momentum for the momemtum distribution (default = z axis).  */
+          else if (strcmp (long_options[option_index].name, "component") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->component_arg), 
+                 &(args_info->component_orig), &(args_info->component_given),
+                &(local_args_info.component_given), optarg, cmdline_parser_component_values, "z", ARG_ENUM,
+                check_ambiguity, override, 0, 0,
+                "component", '-',
                 additional_error))
               goto failure;
           
