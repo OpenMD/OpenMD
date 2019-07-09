@@ -2049,8 +2049,7 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, &Q2hp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD); 
     MPI_Allreduce(MPI_IN_PLACE, &Q2hn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);      
 #endif
-    
-    RealType alphacprime = 0.0;
+
     RealType alphac = 0.0;
     RealType betac = 0.0;
     RealType alphah = 0.0;

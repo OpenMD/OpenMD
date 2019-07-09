@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -33,16 +33,22 @@
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
  *
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [4] , Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
- *  Created by Charles F. Vardeman II on 11/26/05.
- *  @author  Charles F. Vardeman II
- *  @version $Id$
- *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
+ /* 
+  * Calculates the momentum  profile for selected atom.
+  * Created by Hemanta Bhattarai on 04/30/19.
+  * @author  Hemanta Bhattarai
+  */
+
 #ifndef APPLICATIONS_STATICPROPS_MOMENTUMHISTOGRAM_HPP
 #define APPLICATIONS_STATICPROPS_MOMENTUMHISTOGRAM_HPP
 
@@ -57,7 +63,9 @@ namespace OpenMD {
   class MomentumHistogram : public StaticAnalyser {
 
   public:
-    MomentumHistogram(SimInfo* info, const std::string& filename, const std::string& sele, int nbins, int momentum_type, int momentum_component);
+    MomentumHistogram(SimInfo* info, const std::string& filename,
+                      const std::string& sele, int nbins,
+                      int momentum_type, int momentum_component);
 
     int getNBins() {
       return nBins_;
@@ -79,9 +87,10 @@ namespace OpenMD {
 
     int nBins_;
     int mom_type_;
+    std::string momentumLabel_;
     int mom_comp_;
-    string momentum_name_[2] = {"Linear Momentum: P", "Angular Momentum: J"};
-    string component_name_[3] = {"x", "y", "z"};
+    std::string componentLabel_;
+    
     std::vector<RealType> bincenter_;
     std::vector<RealType> histList_;
 
