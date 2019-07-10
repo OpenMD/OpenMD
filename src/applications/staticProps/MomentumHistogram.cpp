@@ -43,7 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
- /* 
+ /*
   * Calculates the momentum  profile for selected atom.
   * Created by Hemanta Bhattarai on 04/30/19.
   * @author  Hemanta Bhattarai
@@ -66,7 +66,7 @@ namespace OpenMD {
     : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), nBins_(nbins),
       mom_type_(momentum_type), mom_comp_(momentum_component) {
-    
+
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -95,7 +95,7 @@ namespace OpenMD {
       componentLabel_ = "z";
       break;
     }
-   
+
     setOutputName(getPrefix(filename) + ".MomentumHistogram");
   }
 
@@ -124,7 +124,7 @@ namespace OpenMD {
            sd = seleMan_.nextSelected(ii)) {
 
         switch(mom_type_){
-        case 0: {          
+        case 0: {
           Vector3d linMom = sd->getVel() * sd->getMass();
           momentum.push_back(linMom[mom_comp_]);
           break;
@@ -165,7 +165,7 @@ namespace OpenMD {
         bincenter_.push_back(min + (j-1) * delta_momentum);
         histList_.push_back(0);
       }
-      
+
       //filling up the histogram whith the densities
       int bin_center_pos = 0;
       vector<RealType>::iterator index;
@@ -177,17 +177,17 @@ namespace OpenMD {
         while(hist_update) {
           if(*index >= bincenter_[bin_center_pos] &&
              *index < bincenter_[bin_center_pos + 1 ] ) {
-            histList_[bin_center_pos] += 1.0/momentum_length;
+            histList_[bin_center_pos] += 1.0/(momentum_length * delta_momentum);
             hist_update = false;
           }
           else{
             bin_center_pos++;
             hist_update = true;
           }
-        }      
+        }
       }
     }
-    write();    
+    write();
   }
 
   void MomentumHistogram::write() {
