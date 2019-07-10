@@ -808,6 +808,7 @@ src/applications/utilities/funcflExtractor
 src/applications/utilities/omd-solvator
 src/applications/utilities/omdSplit
 src/applications/utilities/omdShrink
+src/applications/utilities/omdLast
 src/applications/utilities/stat2dielectric
 src/applications/utilities/stat2tension
 src/applications/utilities/stat2thcond

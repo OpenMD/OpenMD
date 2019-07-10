@@ -1,0 +1,147 @@
+#!@PYTHON_EXECUTABLE@
+"""OpenMD File Extractor
+
+Makes omd file from the last good frame of OpenMD dump file.
+
+Usage: omdLast
+
+Options:
+  -h, --help              show this help
+  -m, --meta-data=...     use specified OpenMD (.omd) file
+
+Example:
+   omdLast -m Ar.dump
+
+"""
+
+__author__ = "Hemanta Bhattarai (hbhattar@nd.edu), Charles Vardeman (cvardema@nd.edu)"
+__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import os
+
+
+_haveMDFileName = 0
+
+
+def usage():
+    print(__doc__)
+
+
+def getLastFrame(mdFileName):
+    mdFile = open(mdFileName, 'r')
+
+    (filepath, filename) = os.path.split(mdFileName)
+
+    (outfilePrefix, ext)  = os.path.splitext(filename)
+
+
+
+    metaDataFrame = []
+    haveMetaData = 0
+    haveMetaDataEnd = 0
+# Find OpenMD version info first
+    line = mdFile.readline()
+    while True:
+        if '<OOPSE version=' in line or '<OpenMD version=' in line:
+            OpenMDversion = line
+            break
+        line = mdFile.readline()
+
+# Rewind file and find start of MetaData block
+
+    mdFile.seek(0)
+    breakLoop = False
+    line = mdFile.readline()
+
+    while True:
+        if '<MetaData>' in line:
+            while 2:
+                metaDataFrame.append(line)
+                line = mdFile.readline()
+                if '</MetaData>' in line:
+                    metaDataFrame.append(line)
+                    breakLoop = True
+                    break
+        if breakLoop:
+            break
+        line = mdFile.readline()
+
+
+
+
+    # reading last valid frame from dump file
+    mdFile.seek(0)
+    framePos = 0
+    foundFrames = 0;
+    lineReversed = reversed(mdFile.readlines())
+    SnapshotFrameReversed = []
+    writeSnapshotFrameReversed = False
+    for line in lineReversed:
+        splittedLine = line.split()
+        if '</Snapshot>' in splittedLine or writeSnapshotFrameReversed == True:
+            writeSnapshotFrameReversed = True
+            SnapshotFrameReversed.append(line)
+
+        if '<Snapshot>' in splittedLine and writeSnapshotFrameReversed:
+            break
+
+    mdFile.close()
+
+    # checking if there exist valid frame
+    try:
+        SnapshotFrameReversed[0]
+    except IndexError:
+        print("\t\tError: %s doesn't have any valid frames." %filename)
+        return None
+
+    # writing out the valid frame
+
+    outfilename = outfilePrefix + "_lastframe" + ext
+    outFile = open(outfilename, 'w')
+    outFile.write(OpenMDversion)
+    for metaline in metaDataFrame:
+        outFile.write(metaline)
+
+    for lineNumber in range(1,len(SnapshotFrameReversed)+1):
+        outFile.write(SnapshotFrameReversed[-lineNumber])
+
+    outFile.write("</OpenMD>")
+    outFile.close()
+
+
+
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "hm:", ["help", "meta-data=", ""])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-m", "--meta-data"):
+            mdFileName = arg
+            global _haveMDFileName
+            _haveMDFileName = 1
+
+
+
+    if (_haveMDFileName != 1):
+        usage()
+        print("No OpenMD file was specified")
+        sys.exit()
+
+    getLastFrame(mdFileName)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
