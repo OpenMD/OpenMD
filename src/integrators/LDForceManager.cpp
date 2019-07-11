@@ -41,6 +41,7 @@
  */
 #include <fstream>
 #include <iostream>
+#include "math/SquareMatrix3.hpp"
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "utils/Constants.hpp"
@@ -301,7 +302,9 @@ namespace OpenMD {
 
             A = sd->getA();
             Atrans = A.transpose();
-            Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();
+            Vector3d rcrBody = hydroProps_[index]->getCOR();
+            Vector3d rcrLab = Atrans * rcrBody;
+
 
             //apply random force and torque at center of resistance
 
@@ -314,7 +317,23 @@ namespace OpenMD {
             sd->addFrc(randomForceLab);
             sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));
 
-            Mat3x3d I = sd->getI();
+            // moment of inertia around the center of mass
+            Mat3x3d Icm = sd->getI();
+            // Use parallel axis formula to get moment of inertia around
+            // center of resistance
+            Mat3x3d Icr = Icm;
+            Icr += mass*(dot(rcrBody,rcrBody)*Mat3x3d::identity() +
+                         outProduct(rcrBody, rcrBody));
+            Mat3x3d Icrinv = Icr.inverse();
+            //std::cerr << "refCOM: " << dynamic_cast<RigidBody*>(sd)->getRefCOM() << "\n";
+            //std::cerr << "rcrBody: " << rcrBody << "\n";
+            //std::cerr << "rcrLab: " << rcrLab << "\n";
+            //std::cerr << " rdr: " << dot(rcrBody,rcrBody) << "\n";
+            //std::cerr << " rxr:\n" << outProduct(rcrBody,rcrBody) << "\n";
+            //std::cerr << "   Icm:\n" << Icm << "\n";
+            //std::cerr << "   Icr:\n" << Icr << "\n";
+            //std::cerr << "Icr^-1:\n" << Icrinv << "\n";
+
             Vector3d omegaBody;
 
             // What remains contains velocity explicitly, but the
@@ -357,13 +376,14 @@ namespace OpenMD {
                 int linearAxis = sd->linearAxis();
                 int l = (linearAxis +1 )%3;
                 int m = (linearAxis +2 )%3;
-                omegaBody[l] = angMomStep[l] /I(l, l);
-                omegaBody[m] = angMomStep[m] /I(m, m);
+                omegaBody[l] = angMomStep[l] /Icr(l, l);
+                omegaBody[m] = angMomStep[m] /Icr(m, m);
 
               } else {
-                omegaBody[0] = angMomStep[0] /I(0, 0);
-                omegaBody[1] = angMomStep[1] /I(1, 1);
-                omegaBody[2] = angMomStep[2] /I(2, 2);
+                omegaBody = Icrinv * angMomStep;
+                //omegaBody[0] = angMomStep[0] /I(0, 0);
+                //omegaBody[1] = angMomStep[1] /I(1, 1);
+                //omegaBody[2] = angMomStep[2] /I(2, 2);
               }
 
               omegaLab = Atrans * omegaBody;

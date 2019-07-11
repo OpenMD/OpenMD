@@ -212,14 +212,18 @@ namespace OpenMD{
      */ 
     bool getAtomRefCoor(Vector3d& coor, Atom* atom);
 
+    Vector3d getRefCOM() { return refCOM_; }
+
   private:
     std::string name_;        
     Mat3x3d inertiaTensor_;     
     RotMat3x3d sU_;               /**< body fixed standard unit vector */
         
     std::vector<Atom*> atoms_;
+    Vector3d refCOM_;  /**< center of mass relative to original coordinates */
     std::vector<Vector3d> refCoords_;
     std::vector<RotMat3x3d> refOrients_;
+     
   };
 
 }//namespace OpenMD

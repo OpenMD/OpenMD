@@ -154,11 +154,11 @@ namespace OpenMD {
       mass_ += mtmp;
       refCOM += refCoords_[i]*mtmp;
     }
-    refCOM /= mass_;
+    refCOM_ = refCOM / mass_;
 
     // Next, move the origin of the reference coordinate system to the COM:
     for (std::size_t i = 0; i < atoms_.size(); ++i) {
-      refCoords_[i] -= refCOM;
+      refCoords_[i] -= refCOM_;
     }
 
     // Moment of Inertia calculation

@@ -86,6 +86,8 @@ namespace OpenMD {
       currBead.atomName = atom->getType();
       currBead.pos = atom->getPos();
       currBead.radius = lja.getSigma()/2.0;
+      std::cout << "using rLJ = " << currBead.radius
+                << " for atom " << currBead.atomName << "\n";
       beads.push_back(currBead);
     } else {
       int obanum(0);
