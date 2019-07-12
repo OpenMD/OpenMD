@@ -309,12 +309,13 @@ namespace OpenMD {
       iso = 0;
 
     if(identifier[0]!='*') {
-      sprintf( painCave.errMsg,
-               "ElementsTable warning.\n"
-               "\tCannot understand the element label %s\n", identifier);
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_WARNING;
-      simError();            
+      // Quiet down the error messages for now:
+      //sprintf( painCave.errMsg,
+      //         "ElementsTable warning.\n"
+      //         "\tCannot understand the element label %s\n", identifier);
+      //painCave.isFatal = 0;
+      //painCave.severity = OPENMD_WARNING;
+      //simError();            
     }
     return(0);
   }

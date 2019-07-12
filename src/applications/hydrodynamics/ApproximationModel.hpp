@@ -41,33 +41,37 @@
  */
 #ifndef APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
 #define APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
-#include <vector>
 
+#include <vector>
 #include "math/Vector3.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/any.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+
 namespace OpenMD {
 
   class Shape;
   class ApproximationModel :  public HydrodynamicsModel {
+
   public:
     ApproximationModel(StuntDouble* sd, SimInfo* info);
     
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
+                                RealType temperature);
     virtual void init();
     virtual void writeBeads(std::ostream& os);
+
   private:
     virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
     
-    bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr);
-    bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cd);
+    bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity,
+                            RealType temperature, HydroProp* cr);
+    bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity,
+                            RealType temperature, HydroProp* cd);
     std::vector<BeadParam> beads_;
-};
-  
-
+  };
 }
 
 #endif

@@ -26,7 +26,8 @@ model the beadSize (the diameter of the small beads used to
 approximate the surface of the body) must also be specified."
 
 # Options
-option	"input"		i	"input MetaData (omd) file"					string	typestr="filename" 	yes
-option	"output"	o	"output file prefix"					string	default="hydro"	        no
-option  "model"         -       "hydrodynamics model (supports RoughShell and BeadModel)" string			        yes
-option  "beads"	        b       "generate the beads only, hydrodynamics will be performed" flag    	                off 
+option	"input"    i  "input MetaData (omd) file"                                    string	typestr="filename" 	required
+option	"output"   o  "output file prefix"                                           string	default="hydro"	        optional
+option  "model"    -  "hydrodynamics model"         values="BeadModel","RoughShell"  enum default="RoughShell"          required
+option  "beadSize" s  "bead size for RoughShell model (in angstroms)"                double     default="0.2"           optional
+option  "beads"	   b  "generate the beads only, hydrodynamics will not be performed" flag    	off

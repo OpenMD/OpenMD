@@ -164,13 +164,32 @@ int main(int argc, char* argv[]){
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
     HydrodynamicsModel* model;
     Shape* shape = si->second.shape;
-    StuntDouble* sd = si->second.sd;;
-    if (args_info.model_given) {  
-      model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(args_info.model_arg, sd, info);
-    } else if (shape->hasAnalyticalSolution()) {
+    StuntDouble* sd = si->second.sd;
+
+    if (shape->hasAnalyticalSolution()) {
       model = new AnalyticalModel(sd, info);
     } else {
-      model = new BeadModel(sd, info);
+    
+      if (args_info.model_given) {
+
+        std::string modelName;
+        switch (args_info.model_arg) {
+        case model_arg_RoughShell:
+          modelName = "RoughShell";
+          break;
+        case model_arg_BeadModel:
+        default:
+          modelName = "BeadModel";
+          break;          
+        }
+        
+        model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName, sd, info);
+        
+        if (args_info.model_arg == model_arg_RoughShell) {
+          RealType bs = args_info.beadSize_arg;        
+          dynamic_cast<RoughShell*>(model)->setSigma(bs);          
+        }
+      }
     }
     
     model->init();

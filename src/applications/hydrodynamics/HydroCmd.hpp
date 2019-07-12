@@ -34,6 +34,8 @@ extern "C" {
 #define CMDLINE_PARSER_VERSION ""
 #endif
 
+enum enum_model { model__NULL = -1, model_arg_BeadModel = 0, model_arg_RoughShell };
+
 /** @brief Where the command line options are stored */
 struct gengetopt_args_info
 {
@@ -45,17 +47,21 @@ struct gengetopt_args_info
   char * output_arg;	/**< @brief output file prefix (default='hydro').  */
   char * output_orig;	/**< @brief output file prefix original value given at command line.  */
   const char *output_help; /**< @brief output file prefix help description.  */
-  char * model_arg;	/**< @brief hydrodynamics model (supports RoughShell and BeadModel).  */
-  char * model_orig;	/**< @brief hydrodynamics model (supports RoughShell and BeadModel) original value given at command line.  */
-  const char *model_help; /**< @brief hydrodynamics model (supports RoughShell and BeadModel) help description.  */
-  int beads_flag;	/**< @brief generate the beads only, hydrodynamics will be performed (default=off).  */
-  const char *beads_help; /**< @brief generate the beads only, hydrodynamics will be performed help description.  */
+  enum enum_model model_arg;	/**< @brief hydrodynamics model (default='RoughShell').  */
+  char * model_orig;	/**< @brief hydrodynamics model original value given at command line.  */
+  const char *model_help; /**< @brief hydrodynamics model help description.  */
+  double beadSize_arg;	/**< @brief bead size for RoughShell model (in angstroms) (default='0.2').  */
+  char * beadSize_orig;	/**< @brief bead size for RoughShell model (in angstroms) original value given at command line.  */
+  const char *beadSize_help; /**< @brief bead size for RoughShell model (in angstroms) help description.  */
+  int beads_flag;	/**< @brief generate the beads only, hydrodynamics will not be performed (default=off).  */
+  const char *beads_help; /**< @brief generate the beads only, hydrodynamics will not be performed help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
   unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int model_given ;	/**< @brief Whether model was given.  */
+  unsigned int beadSize_given ;	/**< @brief Whether beadSize was given.  */
   unsigned int beads_given ;	/**< @brief Whether beads was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
@@ -174,31 +180,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
 
 /**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
-
-/**
  * Checks that all the required options were specified
  * @param args_info the structure to check
  * @param prog_name the name of the program that will be used to print
@@ -207,6 +188,8 @@ int cmdline_parser_config_file (const char *filename,
  */
 int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
+
+extern const char *cmdline_parser_model_values[];  /**< @brief Possible values for model. */
 
 
 #ifdef __cplusplus

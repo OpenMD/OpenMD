@@ -46,14 +46,15 @@
 
 namespace OpenMD {
   
-  RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info){
-    shape_=ShapeBuilder::createShape(sd);
+  RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) :
+    ApproximationModel(sd, info) {
+    
+    shape_ = ShapeBuilder::createShape(sd);
+    
     Globals* simParams = info->getSimParams();
     if (simParams->haveBeadSize()) {
       sigma_ = simParams->getBeadSize();
-    }else {
-      
-    }
+    }    
   }
   
   struct BeadLattice {
@@ -77,10 +78,15 @@ namespace OpenMD {
     }
     
   };
+  
   bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
     std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBoundingBox();
-    RealType firstMin = std::min(std::min(boxBoundary.first[0], boxBoundary.first[1]), boxBoundary.first[2]);
-    RealType secondMax = std::max(std::max(boxBoundary.second[0], boxBoundary.second[1]), boxBoundary.second[2]);
+    RealType firstMin = std::min(std::min(boxBoundary.first[0],
+                                          boxBoundary.first[1]),
+                                 boxBoundary.first[2]);
+    RealType secondMax = std::max(std::max(boxBoundary.second[0],
+                                           boxBoundary.second[1]),
+                                  boxBoundary.second[2]);
     RealType len = secondMax - firstMin;
     int numLattices = static_cast<int>(len/sigma_) + 2;
     Grid3D<BeadLattice>  grid(numLattices, numLattices, numLattices);
@@ -90,9 +96,11 @@ namespace OpenMD {
       for (int j = 0; j < numLattices; ++j) {
         for (int k = 0; k < numLattices; ++k) {
           BeadLattice& currentBead = grid(i, j, k);
-          currentBead.origin = Vector3d((i-1)*sigma_ + boxBoundary.first[0], (j-1) *sigma_ + boxBoundary.first[1], (k-1)*sigma_+ boxBoundary.first[2]);
+          currentBead.origin = Vector3d((i-1)*sigma_ + boxBoundary.first[0],
+                                        (j-1)*sigma_ + boxBoundary.first[1],
+                                        (k-1)*sigma_ + boxBoundary.first[2]);
           currentBead.radius = sigma_ / 2.0;
-          currentBead.interior = shape_->isInterior(grid(i, j, k).origin);                
+          currentBead.interior = shape_->isInterior(grid(i, j, k).origin);
         }
       }
     }
@@ -102,12 +110,14 @@ namespace OpenMD {
       for (int j = 0; j < numLattices; ++j) {
         for (int k = 0; k < numLattices; ++k) {
           std::vector<BeadLattice> neighborCells = grid.getAllNeighbors(i, j, k);
-          //if one of its neighbor cells is exterior, current cell is on the surface
+          //if one of its neighbor cells is exterior, current cell is
+          //on the surface
           
           if (grid(i, j, k).interior){
             
             bool allNeighBorIsInterior = true;
-            for (std::vector<BeadLattice>::iterator l = neighborCells.begin(); l != neighborCells.end(); ++l) {
+            for (std::vector<BeadLattice>::iterator l = neighborCells.begin();
+                 l != neighborCells.end(); ++l) {
               if (!l->interior) {
                 allNeighBorIsInterior = false;
                 break;
@@ -121,14 +131,12 @@ namespace OpenMD {
             surfaceBead.atomName = "H";
             surfaceBead.pos = grid(i, j, k).origin;
             surfaceBead.radius = grid(i, j, k).radius;
-            beads.push_back(surfaceBead);                    
+            beads.push_back(surfaceBead);
             
           }
         }
       }
-    }
-    
+    }    
     return true;
   }
-  
 }

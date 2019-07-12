@@ -205,6 +205,7 @@ namespace OpenMD {
     deprecatedKeywords_.insert("minimizerLSMaxIter");
     deprecatedKeywords_.insert("electricField");
     deprecatedKeywords_.insert("cutoffPolicy");
+    deprecatedKeywords_.insert("beadSize");
   }
 
   Globals::~Globals() {
