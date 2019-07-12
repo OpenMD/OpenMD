@@ -51,6 +51,7 @@
 #include "types/LennardJonesAdapter.hpp"
 #include "types/GayBerneAdapter.hpp"
 
+using namespace std;
 namespace OpenMD {
 
   LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info),
@@ -94,8 +95,7 @@ namespace OpenMD {
       }
     }
 
-    // Build the hydroProp map:
-    std::map<std::string, HydroProp*> hydroPropMap;
+    // Build the hydroProp_ map:
 
     Molecule* mol;
     StuntDouble* sd;
@@ -119,7 +119,7 @@ namespace OpenMD {
 
     if (needHydroPropFile) {
       if (simParams->haveHydroPropFile()) {
-        hydroPropMap = parseFrictionFile(simParams->getHydroPropFile());
+        hydroPropMap_ = parseFrictionFile(simParams->getHydroPropFile());
       } else {
         sprintf( painCave.errMsg,
                  "HydroPropFile must be set to a file name if Langevin Dynamics\n"
@@ -129,16 +129,19 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-
+       
       for (mol = info->beginMolecule(i); mol != NULL;
            mol = info->nextMolecule(i)) {
 
         for (sd = mol->beginIntegrableObject(j);  sd != NULL;
              sd = mol->nextIntegrableObject(j)) {
 
-          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(sd->getType());
-          if (iter != hydroPropMap.end()) {
+          map<string, HydroProp*>::iterator iter = hydroPropMap_.find(sd->getType());
+          if (iter != hydroPropMap_.end()) {
+
             hydroProps_.push_back(iter->second);
+            moments_.push_back(getMomentData(sd));
+
           } else {
             sprintf( painCave.errMsg,
                      "Can not find resistance tensor for atom [%s]\n",
@@ -149,9 +152,9 @@ namespace OpenMD {
           }
         }
       }
+      
     } else {
 
-      std::map<std::string, HydroProp*> hydroPropMap;
       for (mol = info->beginMolecule(i); mol != NULL;
            mol = info->nextMolecule(i)) {
 
@@ -175,8 +178,8 @@ namespace OpenMD {
               } else {
 
                 int aNum(0);
-                std::vector<AtomType*> atChain = atomType->allYourBase();
-                std::vector<AtomType*>::iterator i;
+                vector<AtomType*> atChain = atomType->allYourBase();
+                vector<AtomType*>::iterator i;
                 for (i = atChain.begin(); i != atChain.end(); ++i) {
                   aNum = etab.GetAtomicNum((*i)->getName().c_str());
                   if (aNum != 0) {
@@ -214,13 +217,17 @@ namespace OpenMD {
 
 
           HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
-          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(sd->getType());
-          if (iter != hydroPropMap.end())
+          map<string, HydroProp*>::iterator iter = hydroPropMap_.find(sd->getType());
+          if (iter != hydroPropMap_.end()) {
+            
             hydroProps_.push_back(iter->second);
-          else {
+            moments_.push_back(getMomentData(sd));
+            
+          } else {
             currHydroProp->complete();
-            hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(sd->getType(), currHydroProp));
+            hydroPropMap_.insert(map<string, HydroProp*>::value_type(sd->getType(), currHydroProp));
             hydroProps_.push_back(currHydroProp);
+            moments_.push_back(getMomentData(sd));
           }
           delete currShape;
         }
@@ -229,9 +236,9 @@ namespace OpenMD {
     variance_ = 2.0 * Constants::kb*simParams->getTargetTemp()/simParams->getDt();
   }
 
-  std::map<std::string, HydroProp*> LDForceManager::parseFrictionFile(const std::string& filename) {
-    std::map<std::string, HydroProp*> props;
-    std::ifstream ifs(filename.c_str());
+  map<string, HydroProp*> LDForceManager::parseFrictionFile(const string& filename) {
+    map<string, HydroProp*> props;
+    ifstream ifs(filename.c_str());
     if (ifs.is_open()) {
 
     }
@@ -240,12 +247,52 @@ namespace OpenMD {
     char buffer[BufferSize];
     while (ifs.getline(buffer, BufferSize)) {
       HydroProp* currProp = new HydroProp(buffer);
-      props.insert(std::map<std::string, HydroProp*>::value_type(currProp->getName(), currProp));
+      props.insert(map<string, HydroProp*>::value_type(currProp->getName(),
+                                                       currProp));
     }
 
     return props;
   }
 
+  MomentData* LDForceManager::getMomentData(StuntDouble* sd) {
+
+    map<string, MomentData*>::iterator j = momentsMap_.find(sd->getType());
+    if (j != momentsMap_.end()) {
+      return j->second;
+    } else {
+    
+      MomentData* moment = new MomentData;
+      map<string, HydroProp*>::iterator i = hydroPropMap_.find(sd->getType());
+      
+      if (i != hydroPropMap_.end()) {            
+        // Center of Resistance:
+        moment->rcr = i->second->getCOR();
+      } else {
+        sprintf(painCave.errMsg,
+                "LDForceManager createMomentData: Couldn't find HydroProp for\n"
+                "object type %s!\n", sd->getType().c_str());
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
+
+      if (sd->isRigidBody())
+        moment->rcr -= dynamic_cast<RigidBody*>(sd)->getRefCOM();
+      
+      // Parallel axis formula to get the moment of inertia around
+      // the center of resistance:
+      RealType mass = sd->getMass();
+      moment->Icr = sd->getI();
+      moment->Icr += mass*(dot(moment->rcr, moment->rcr) * Mat3x3d::identity() +
+                           outProduct(moment->rcr, moment->rcr));
+      moment->IcrInv = moment->Icr.inverse();
+      
+      momentsMap_.insert(map<string, MomentData*>::value_type(sd->getType(),
+                                                              moment));
+      return moment;
+    }
+  }
+  
   void LDForceManager::postCalculation(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
@@ -302,9 +349,8 @@ namespace OpenMD {
 
             A = sd->getA();
             Atrans = A.transpose();
-            Vector3d rcrBody = hydroProps_[index]->getCOR();
-            Vector3d rcrLab = Atrans * rcrBody;
-
+            
+            Vector3d rcrLab = Atrans * moments_[index]->rcr;
 
             //apply random force and torque at center of resistance
 
@@ -316,24 +362,7 @@ namespace OpenMD {
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
             sd->addFrc(randomForceLab);
             sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));
-
-            // moment of inertia around the center of mass
-            Mat3x3d Icm = sd->getI();
-            // Use parallel axis formula to get moment of inertia around
-            // center of resistance
-            Mat3x3d Icr = Icm;
-            Icr += mass*(dot(rcrBody,rcrBody)*Mat3x3d::identity() +
-                         outProduct(rcrBody, rcrBody));
-            Mat3x3d Icrinv = Icr.inverse();
-            //std::cerr << "refCOM: " << dynamic_cast<RigidBody*>(sd)->getRefCOM() << "\n";
-            //std::cerr << "rcrBody: " << rcrBody << "\n";
-            //std::cerr << "rcrLab: " << rcrLab << "\n";
-            //std::cerr << " rdr: " << dot(rcrBody,rcrBody) << "\n";
-            //std::cerr << " rxr:\n" << outProduct(rcrBody,rcrBody) << "\n";
-            //std::cerr << "   Icm:\n" << Icm << "\n";
-            //std::cerr << "   Icr:\n" << Icr << "\n";
-            //std::cerr << "Icr^-1:\n" << Icrinv << "\n";
-
+           
             Vector3d omegaBody;
 
             // What remains contains velocity explicitly, but the
@@ -376,11 +405,11 @@ namespace OpenMD {
                 int linearAxis = sd->linearAxis();
                 int l = (linearAxis +1 )%3;
                 int m = (linearAxis +2 )%3;
-                omegaBody[l] = angMomStep[l] /Icr(l, l);
-                omegaBody[m] = angMomStep[m] /Icr(m, m);
+                omegaBody[l] = angMomStep[l] /moments_[index]->Icr(l, l);
+                omegaBody[m] = angMomStep[m] /moments_[index]->Icr(m, m);
 
               } else {
-                omegaBody = Icrinv * angMomStep;
+                omegaBody = moments_[index]->IcrInv * angMomStep;
                 //omegaBody[0] = angMomStep[0] /I(0, 0);
                 //omegaBody[1] = angMomStep[1] /I(1, 1);
                 //omegaBody[2] = angMomStep[2] /I(2, 2);

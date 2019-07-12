@@ -51,9 +51,15 @@
 
 namespace OpenMD {
    
-  struct SDShape{
+  struct SDShape {
     StuntDouble* sd;
     Shape* shape;
+  };
+
+  struct MomentData {
+    Vector3d rcr;   /**< Distance between CoM and Center of Resistance */
+    Mat3x3d Icr;    /**< Moment of Inertia at Center of Resistance */
+    Mat3x3d IcrInv; /**< Icr^{-1}  */
   };
     
   /**
@@ -95,10 +101,18 @@ namespace OpenMD {
     virtual void postCalculation();
     
   private:
-    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    
+    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);
+    MomentData* getMomentData(StuntDouble* sd);
+    
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque,
                                  unsigned int index, RealType variance);
+
+    std::map<std::string, HydroProp*> hydroPropMap_;
     std::vector<HydroProp*> hydroProps_;
+
+    std::map<std::string, MomentData*> momentsMap_; 
+    std::vector<MomentData*> moments_;
+    
     SeqRandNumGen randNumGen_;    
     RealType variance_;
     RealType langevinBufferRadius_;
