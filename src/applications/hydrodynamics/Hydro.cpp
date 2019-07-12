@@ -95,7 +95,7 @@ int main(int argc, char* argv[]){
   } else {
     prefix = getPrefix(dumpFileName);    
   }
-  std::string outputFilename = prefix + ".diff";
+  std::string outputFilename = prefix + ".hydro";
     
   //parse md file and set up the system
   SimCreator creator;
@@ -157,8 +157,8 @@ int main(int argc, char* argv[]){
   }
   
 
-  std::ofstream outputDiff;
-  outputDiff.open(outputFilename.c_str());
+  std::ofstream outputHydro;
+  outputHydro.open(outputFilename.c_str());
     
   std::map<std::string, SDShape>::iterator si;
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
@@ -204,13 +204,13 @@ int main(int argc, char* argv[]){
     //if beads option is turned on, skip the calculation
     if (!args_info.beads_flag) {
       model->calcHydroProps(shape, viscosity, temperature);
-      model->writeHydroProps(outputDiff);
+      model->writeHydroProps(outputHydro);
     }
         
     delete model;
   }
   
-  outputDiff.close();
+  outputHydro.close();
 
 
   //MemoryUtils::deletePointers(shapes);

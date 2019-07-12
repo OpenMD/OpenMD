@@ -24,7 +24,7 @@
 
 #include "HydroCmd.hpp"
 
-const char *gengetopt_args_info_purpose = "Generates resistance tensor (.diff) files which are required when\nusing the Langevin integrator using complex rigid bodies. Hydro\nsupports two approximate models: the BeadModel and\nRoughShell. Additionally, Hydro can generate resistance tensor files\nusing analytic solutions for simple shapes. To generate a .diff file,\na metadata file is needed as the input file. Since the resistance\ntensor depends on these quantities, the viscosity of the solvent and\nthe temperature (targetTemp) of the system must be defined in\nmeta-data file. If the approximate model in use is the RoughShell\nmodel the beadSize (the diameter of the small beads used to\napproximate the surface of the body) must also be specified.";
+const char *gengetopt_args_info_purpose = "Generates resistance tensor (.hydro) files which are required when\nusing the Langevin integrator using complex rigid bodies. Hydro\nsupports two approximate models: the BeadModel and\nRoughShell. Additionally, Hydro can generate resistance tensor files\nusing analytic solutions for simple shapes. To generate a .hydro file,\na metadata file is needed as the input file. Since the resistance\ntensor depends on these quantities, the viscosity of the solvent and\nthe temperature (targetTemp) of the system must be defined in\nmeta-data file. If the approximate model in use is the RoughShell\nmodel the beadSize (the diameter of the small beads used to\napproximate the surface of the body) must also be specified.";
 
 const char *gengetopt_args_info_usage = "Usage: Hydro [OPTIONS]... [FILES]...";
 

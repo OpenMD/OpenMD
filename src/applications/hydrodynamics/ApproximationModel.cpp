@@ -396,7 +396,7 @@ namespace OpenMD {
     
     Mat3x3d Ddtt; //translational diffusion tensor at diffusion center
     Mat3x3d Ddtr; //rotational diffusion tensor at diffusion center
-    Mat3x3d Ddrr; //translation-rotation couplingl diffusion tensor at diffusion tensor
+    Mat3x3d Ddrr; //translation-rotation coupling diffusion tensor at diffusion tensor
     
     Ddtt = Dott - Uod * Dorr * Uod + Dotr.transpose() * Uod - Uod * Dotr;
     Ddrr = Dorr;

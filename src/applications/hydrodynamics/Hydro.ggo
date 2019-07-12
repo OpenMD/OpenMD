@@ -13,11 +13,11 @@ package "Hydro"
 version "" 
 
 purpose
-"Generates resistance tensor (.diff) files which are required when
+"Generates resistance tensor (.hydro) files which are required when
 using the Langevin integrator using complex rigid bodies. Hydro
 supports two approximate models: the BeadModel and
 RoughShell. Additionally, Hydro can generate resistance tensor files
-using analytic solutions for simple shapes. To generate a .diff file,
+using analytic solutions for simple shapes. To generate a .hydro file,
 a metadata file is needed as the input file. Since the resistance
 tensor depends on these quantities, the viscosity of the solvent and
 the temperature (targetTemp) of the system must be defined in

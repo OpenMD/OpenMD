@@ -813,7 +813,7 @@ src/applications/utilities/stat2dielectric
 src/applications/utilities/stat2tension
 src/applications/utilities/stat2thcond
 src/applications/utilities/stat2visco
-src/applications/hydrodynamics/diffExplainer
+src/applications/hydrodynamics/hydroExplainer
 src/applications/utilities/waterRotator
 src/applications/utilities/stat2dipolecorr
 )
