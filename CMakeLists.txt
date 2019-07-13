@@ -650,6 +650,7 @@ src/applications/hydrodynamics/HydroCmd.cpp
 
 set (SEQUENTIALPROPSSOURCE
 src/applications/sequentialProps/CenterOfMass.cpp
+src/applications/sequentialProps/COMVel.cpp
 src/applications/sequentialProps/ContactAngle1.cpp
 src/applications/sequentialProps/ContactAngle2.cpp
 src/applications/sequentialProps/GCNSeq.cpp
