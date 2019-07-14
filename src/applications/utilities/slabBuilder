@@ -207,7 +207,7 @@ def write_xyz_file(outputFileName, coords, elementType, Hmat, plates):
     outputFile.close()
     print("Generated XYZ file: " + outputFileName)
 
-def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
+def write_omd_file(outputFileName, coords, elementType, Hmat, plates, directional):
     outputFile = open(outputFileName, 'w')
     outputFile.write("<OpenMD version=2>\n")
     outputFile.write("  <MetaData> \n\n")
@@ -256,10 +256,17 @@ def write_omd_file(outputFileName, coords, elementType, Hmat, plates):
     outputFile.write("    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }} \n")
     outputFile.write("    </FrameData>\n")
     outputFile.write("    <StuntDoubles> \n")
-    for i in range(len(coords)):
-        outputFile.write("\t" + str(i) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
-                         ("pv", coords[i][0], coords[i][1], coords[i][2],
-                          "0.0", "0.0", "0.0"))
+    if (directional):
+        for i in range(len(coords)):
+            outputFile.write("\t" + str(i) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" %
+                            ("pvqj", coords[i][0], coords[i][1], coords[i][2],
+                             "0.0", "0.0", "0.0","1.0","0.0","0.0","0.0","0.0","0.0","0.0"))
+    else:
+            for i in range(len(coords)):
+                outputFile.write("\t" + str(i) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
+                       ("pv", coords[i][0], coords[i][1], coords[i][2],
+                        "0.0", "0.0", "0.0"))
+
     #for i in range(len(plates)):
         #outputFile.write("\t" + str(i+len(coords)) + "\t%s\t%f\t%f\t%f\t%s\t%s\t%s\n" %
         #                 ("pv", plates[i][0], plates[i][1], plates[i][2],
@@ -326,6 +333,8 @@ def main(argv):
                         dest="elementType", help=" the element composing the lattice")
     parser.add_argument("-v", "--vacuum=", action="store",
                         choices=('true', 'false'), dest="vacuum", default='true', help="true/false (Should the output file have vacuum in the z-dimension?)")
+    parser.add_argument("-d", action="store_true",
+                                            dest="directional", default = False, help="Flag for directional atom")
     parser.add_argument("-q", "--chargedPlates", action="store", 
                         dest="chargedPlates", choices=('true', 'false'), default='false', help="true/false (Should the output file include charged plates?)")
     parser.add_argument("-k", "--kPoints", action="store", dest="kPoints", type=float, default=20, help="number of points to use in the charged plates")
@@ -373,7 +382,7 @@ def main(argv):
     if (args.xyzFileName):
         write_xyz_file(args.xyzFileName, coords, args.elementType, Hmat, plates)
     if (args.omdFileName):
-        write_omd_file(args.omdFileName, coords, args.elementType, Hmat, plates)
+        write_omd_file(args.omdFileName, coords, args.elementType, Hmat, plates, args.directional)
 
 
 
