@@ -52,6 +52,7 @@
 #include "SequentialPropsCmd.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 #include "applications/sequentialProps/CenterOfMass.hpp"
+#include "applications/sequentialProps/COMVel.hpp"
 #include "applications/sequentialProps/ContactAngle1.hpp"
 #include "applications/sequentialProps/ContactAngle2.hpp"
 #include "applications/sequentialProps/GCNSeq.hpp"
@@ -110,6 +111,8 @@ int main(int argc, char* argv[]){
   SequentialAnalyzer* analyzer = NULL;
   if(args_info.com_given){
     analyzer = new CenterOfMass(info, dumpFileName, sele1, sele2);
+  } else if(args_info.comvel_given){
+    analyzer = new COMVel(info, dumpFileName, sele1, sele2);
   } else if(args_info.gcn_given){
     if (args_info.rcut_given) {      
       analyzer = new GCNSeq(info, dumpFileName, sele1, sele2,

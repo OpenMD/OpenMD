@@ -79,6 +79,7 @@ struct gengetopt_args_info
   char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
   const char *com_help; /**< @brief selection center of mass help description.  */
+  const char *comvel_help; /**< @brief selection center of mass velocity help description.  */
   const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
   const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
@@ -99,6 +100,7 @@ struct gengetopt_args_info
   unsigned int bufferLength_given ;	/**< @brief Whether bufferLength was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int com_given ;	/**< @brief Whether com was given.  */
+  unsigned int comvel_given ;	/**< @brief Whether comvel was given.  */
   unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
@@ -218,31 +220,6 @@ void cmdline_parser_init (struct gengetopt_args_info *args_info);
  * @param args_info the structure to deallocate
  */
 void cmdline_parser_free (struct gengetopt_args_info *args_info);
-
-/**
- * The config file parser (deprecated version)
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param override whether to override possibly already present options
- * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
- * @return 0 if everything went fine, NON 0 if an error took place
- * @deprecated use cmdline_parser_config_file() instead
- */
-int cmdline_parser_configfile (const char *filename,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
-
-/**
- * The config file parser
- * @param filename the name of the config file
- * @param args_info the structure where option information will be stored
- * @param params additional parameters for the parser
- * @return 0 if everything went fine, NON 0 if an error took place
- */
-int cmdline_parser_config_file (const char *filename,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
 
 /**
  * Checks that all the required options were specified

@@ -42,7 +42,7 @@
 
 #include <algorithm>
 #include <functional>
-#include "applications/sequentialProps/CenterOfMass.hpp"
+#include "applications/sequentialProps/COMVel.hpp"
 #include "utils/simError.h"
 #include "utils/Revision.hpp"
 #include "io/DumpReader.hpp"
@@ -50,14 +50,14 @@
 
 namespace OpenMD {
   
-  CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, const std::string& sele2)
+  COMVel::COMVel(SimInfo* info, const std::string& filename, 
+		 const std::string& sele1, const std::string& sele2)
     : SequentialAnalyzer(info, filename, sele1, sele2) {
     
-    setOutputName(getPrefix(filename) + ".com");    
+    setOutputName(getPrefix(filename) + ".comVel");    
   }
   
-  void CenterOfMass::doFrame(int frame) {
+  void COMVel::doFrame(int frame) {
     StuntDouble* sd;
     int i;
     
@@ -66,22 +66,22 @@ namespace OpenMD {
     }
         
     RealType mtot = 0.0;
-    Vector3d com(V3Zero);
+    Vector3d comVel(V3Zero);
     RealType mass;
     
     for (sd = seleMan1_.beginSelected(i); sd != NULL;
          sd = seleMan1_.nextSelected(i)) {      
       mass = sd->getMass();
       mtot += mass;
-      com += sd->getPos() * mass;
+      comVel += sd->getVel() * mass;
     }
     
-    com /= mtot;
+    comVel /= mtot;
     
-    values_.push_back( com );
+    values_.push_back( comVel );
   }
   
-  void CenterOfMass::writeSequence() {
+  void COMVel::writeSequence() {
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     
     if (ofs.is_open()) {
@@ -108,7 +108,7 @@ namespace OpenMD {
       
     } else {
       sprintf(painCave.errMsg,
-              "CenterOfMass::writeSequence Error: failed to open %s\n", 
+              "COMVel::writeSequence Error: failed to open %s\n", 
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();        

@@ -39,81 +39,27 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+#ifndef APPLICATIONS_SEQUENTIALPROPS_COMVEL_HPP
+#define APPLICATIONS_SEQUENTIALPROPS_COMVEL_HPP
+#include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
-#include <algorithm>
-#include <functional>
-#include "applications/sequentialProps/CenterOfMass.hpp"
-#include "utils/simError.h"
-#include "utils/Revision.hpp"
-#include "io/DumpReader.hpp"
-#include "primitives/Molecule.hpp"
-
+using namespace std;
 namespace OpenMD {
   
-  CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, const std::string& sele2)
-    : SequentialAnalyzer(info, filename, sele1, sele2) {
+  class COMVel : public SequentialAnalyzer{
+  public:
+    COMVel(SimInfo* info, const std::string& filename, 
+	   const std::string& sele1, const std::string& sele2);
     
-    setOutputName(getPrefix(filename) + ".com");    
-  }
-  
-  void CenterOfMass::doFrame(int frame) {
-    StuntDouble* sd;
-    int i;
+    virtual void doFrame(int frame);
+    virtual void writeSequence();
     
-    if (evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }
-        
-    RealType mtot = 0.0;
-    Vector3d com(V3Zero);
-    RealType mass;
-    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {      
-      mass = sd->getMass();
-      mtot += mass;
-      com += sd->getPos() * mass;
-    }
-    
-    com /= mtot;
-    
-    values_.push_back( com );
-  }
-  
-  void CenterOfMass::writeSequence() {
-    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
-    
-    if (ofs.is_open()) {
-      
-      Revision r;
-      
-      ofs << "# " << getSequenceType() << "\n";
-      ofs << "# OpenMD " << r.getFullRevision() << "\n";
-      ofs << "# " << r.getBuildDate() << "\n";
-      ofs << "# selection script1: \"" << selectionScript1_ ;
-      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      if (!paramString_.empty())
-        ofs << "# parameters: " << paramString_ << "\n";
-      
-      ofs << "#time\tvalue\n";
-      
-      for (unsigned int i = 0; i < times_.size(); ++i) {
-        ofs << times_[i]
-            << "\t" << values_[i].x()
-            << "\t" << values_[i].y()
-            << "\t" << values_[i].z()
-            << "\n";
-      }
-      
-    } else {
-      sprintf(painCave.errMsg,
-              "CenterOfMass::writeSequence Error: failed to open %s\n", 
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();        
-    }
-    
-    ofs.close();    
-  }
+  private:
+    std::vector<Vector3d> values_;
+  };
 }
+
+#endif
+
+
+
