@@ -56,6 +56,8 @@
 #include <vector>
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 	
 namespace OpenMD {
@@ -76,6 +78,7 @@ namespace OpenMD {
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
+    Thermo thermo_;
     
     std::vector<std::vector<StuntDouble*> > sliceSDLists_;
     std::vector<RealType> zBox_;
