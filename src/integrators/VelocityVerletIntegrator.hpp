@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,70 +32,35 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
- */
- 
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @version 1.0
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
 #define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
 
 #include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
 
 namespace OpenMD {
 
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
   class VelocityVerletIntegrator : public Integrator {
-  public:
-    virtual ~VelocityVerletIntegrator();
-        
+
   protected:
 
     VelocityVerletIntegrator(SimInfo* info);
-    virtual void doIntegrate();
-    virtual void initialize();
-    virtual void preStep();
-    virtual void integrateStep();        
-    virtual void postStep();
-    virtual void finalize();
-    virtual void resetIntegrator() {}
-    
-    RealType dt2;
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
+    virtual void step();
         
   private:
         
-    virtual void calcForce();    
     virtual void moveA() = 0;
     virtual void moveB() = 0;
-    virtual RealType calcConservedQuantity() = 0;
-    virtual DumpWriter* createDumpWriter();
-    virtual StatWriter* createStatWriter();
-
-    ProgressBar* progressBar;
-
   };
 
 } //end namespace OpenMD

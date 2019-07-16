@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,13 +32,17 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
  
 #include "brains/Snapshot.hpp"
 #include "integrators/Integrator.hpp"
@@ -62,6 +66,7 @@ namespace OpenMD {
     
     if (simParams->haveDt()) {
       dt = simParams->getDt();
+      dt2 = 0.5 * dt;
     } else {
       sprintf(painCave.errMsg,
               "Integrator Error: dt is not set\n");
@@ -150,13 +155,13 @@ namespace OpenMD {
     if (simParams->getFluctuatingChargeParameters()->havePropagator()) {
       std::string prop = toUpperCopy(simParams->getFluctuatingChargeParameters()->getPropagator());
       if (prop.compare("NVT")==0){
-         flucQ_ = new FluctuatingChargeNVT(info);
+        flucQ_ = new FluctuatingChargeNVT(info);
       } else if (prop.compare("NVE")==0) {
-         flucQ_ = new FluctuatingChargeNVE(info);
+        flucQ_ = new FluctuatingChargeNVE(info);
       } else if (prop.compare("LANGEVIN")==0) {
-         flucQ_ = new FluctuatingChargeLangevin(info);
+        flucQ_ = new FluctuatingChargeLangevin(info);
       } else if (prop.compare("DAMPED")==0){
-         flucQ_ = new FluctuatingChargeDamped(info);         
+        flucQ_ = new FluctuatingChargeDamped(info);         
       } else {
         sprintf(painCave.errMsg,
                 "Integrator Error: Unknown Fluctuating Charge propagator (%s) requested\n",
@@ -167,16 +172,232 @@ namespace OpenMD {
     flucQ_->setForceManager(forceMan_);
   }
   
-    Integrator::~Integrator(){
+  Integrator::~Integrator(){
     delete forceMan_;
     delete velocitizer_;
     delete rnemd_;
     delete flucQ_;
     delete rotAlgo_;
-    delete rattle_;
-    
+    delete rattle_;    
     delete dumpWriter;
     delete statWriter;
   }
+
+  void Integrator::updateSizes() {
+    doUpdateSizes();
+    flucQ_->updateSizes();
+  }
+
+  void Integrator::setForceManager(ForceManager* forceMan) {
+
+    if (forceMan_ != forceMan && forceMan_  != NULL) {
+      delete forceMan_;
+    }
+    forceMan_ = forceMan;
+    // forward this on:
+    if (flucQ_ != NULL) {
+      flucQ_->setForceManager(forceMan_);
+    }
+  }
+
+  void Integrator::setVelocitizer(Velocitizer* velocitizer) {
+    if (velocitizer_ != velocitizer && velocitizer_ != NULL) {
+      delete velocitizer_;
+    }
+    velocitizer_ = velocitizer;
+  }
+
+  void Integrator::setFluctuatingChargePropagator(FluctuatingChargePropagator* prop) {
+    if (prop != flucQ_ && flucQ_ != NULL){            
+      delete flucQ_;
+    }            
+    flucQ_ = prop;
+    if (forceMan_ != NULL) {
+      flucQ_->setForceManager(forceMan_);
+    }
+  }
+
+  void Integrator::setRotationAlgorithm(RotationAlgorithm* algo) {
+    if (algo != rotAlgo_ && rotAlgo_ != NULL){            
+      delete rotAlgo_;
+    }
+            
+    rotAlgo_ = algo;
+  }
+
+  void Integrator::setRNEMD(RNEMD* rnemd) {
+    if (rnemd_ != rnemd && rnemd_  != NULL) {
+      delete rnemd_;
+    }
+    rnemd_ = rnemd;
+  }
+
+  void Integrator::integrate() {
+  
+    initialize();
+  
+    while (snap->getTime() <= runTime) {
+      preStep();
+      step();
+      postStep();
+    }
+    
+    finalize();
+    
+  }
+  
+  void Integrator::initialize(){
+    
+    forceMan_->initialize();
+    
+    // remove center of mass drift velocity (in case we passed in a
+    // configuration that was drifting)
+    velocitizer_->removeComDrift();
+
+    // find the initial fluctuating charges.
+    flucQ_->initialize();
+    
+    // initialize the forces before the first step
+    calcForce();
+    
+    // execute the constraint algorithm to make sure that the system is
+    // constrained at the very beginning  
+    if (info_->getNGlobalConstraints() > 0) {
+      rattle_->constraintA();
+      calcForce();
+      rattle_->constraintB();      
+      //copy the current snapshot to previous snapshot
+      info_->getSnapshotManager()->advance();
+    }
+    
+    if (needVelocityScaling) {
+      velocitizer_->randomize(targetScalingTemp);
+    }
+    
+    dumpWriter = createDumpWriter();    
+    statWriter = createStatWriter(); 
+    dumpWriter->writeDumpAndEor();
+
+    progressBar = new ProgressBar();
+
+    //save statistics, before writeStat,  we must save statistics
+    stats->collectStats();
+
+    if (simParams->getRNEMDParameters()->getUseRNEMD())
+      rnemd_->getStarted();
+
+    statWriter->writeStat();
+    
+    currSample = sampleTime + snap->getTime();
+    currStatus =  statusTime + snap->getTime();
+    currThermal = thermalTime + snap->getTime();
+    if (needReset) {
+      currReset = resetTime + snap->getTime();
+    }
+    if (simParams->getRNEMDParameters()->getUseRNEMD()){
+      currRNEMD = RNEMD_exchangeTime + snap->getTime();
+    }
+    needPotential = false;
+    needVirial = false;       
+    
+  }
+
+  void Integrator::preStep() {
+    
+    RealType difference = snap->getTime() + dt - currStatus;
+  
+    if (difference > 0 || fabs(difference) < OpenMD::epsilon) {
+      needPotential = true;
+      needVirial = true;   
+    }
+  }
+
+  void Integrator::calcForce() { 
+    forceMan_->calcForces();
+    flucQ_->applyConstraints();
+  }
+  
+  void Integrator::postStep() {
+
+    if (needVelocityScaling) {
+      if (snap->getTime() >= currThermal) {
+	velocitizer_->randomize(targetScalingTemp);
+	currThermal += thermalTime;
+      }
+    }
+    
+    if (useRNEMD) {
+      if (snap->getTime() >= currRNEMD) {
+	rnemd_->doRNEMD();
+	currRNEMD += RNEMD_exchangeTime;
+      }
+      rnemd_->collectData();
+    }
+    
+    if (snap->getTime() >= currSample) {
+      dumpWriter->writeDumpAndEor();      
+      currSample += sampleTime;
+    }
+    
+    if (snap->getTime() >= currStatus) {
+      stats->collectStats();
+
+      if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+	rnemd_->writeOutputFile();
+      }
+
+      statWriter->writeStat();
+
+      progressBar->setStatus(snap->getTime(), runTime);
+      progressBar->update();
+
+      needPotential = false;
+      needVirial = false;
+      currStatus += statusTime;
+    }
+    
+    if (needReset && snap->getTime() >= currReset) {    
+      resetIntegrator();
+      currReset += resetTime;
+    }        
+    //save snapshot
+    info_->getSnapshotManager()->advance();
+  
+    //increase time
+    snap->increaseTime(dt);        
+
+  }
+
+  void Integrator::finalize() {
+    dumpWriter->writeEor();
+    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+      rnemd_->writeOutputFile();
+    }
+    progressBar->setStatus(runTime, runTime);
+    progressBar->update();
+
+    statWriter->writeStatReport();
+ 
+    delete dumpWriter;
+    delete statWriter;
+  
+    dumpWriter = NULL;
+    statWriter = NULL;
+  }
+
+
+  DumpWriter* Integrator::createDumpWriter() {
+    return new DumpWriter(info_);
+  }
+  
+  StatWriter* Integrator::createStatWriter() {
+    
+    stats = new Stats(info_);
+    statWriter = new StatWriter(info_->getStatFileName(), stats);
+    statWriter->setReportFileName(info_->getReportFileName());
+    
+    return statWriter;
+  }
+
 }
 
