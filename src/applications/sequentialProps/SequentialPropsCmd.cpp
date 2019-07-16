@@ -54,6 +54,7 @@ const char *gengetopt_args_info_help[] = {
   "      --ca1                     contact angle of selection (using center of\n                                  mass)",
   "      --ca2                     contact angle of selection (using density\n                                  profile)",
   "      --gcn                     Generalized Coordinate Number",
+  "  -t, --testequi                Temperature using all componets of linear and\n                                  angular momentum",
     0
 };
 
@@ -101,6 +102,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->ca1_given = 0 ;
   args_info->ca2_given = 0 ;
   args_info->gcn_given = 0 ;
+  args_info->testequi_given = 0 ;
   args_info->sequentialProps_group_counter = 0 ;
 }
 
@@ -155,6 +157,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->ca1_help = gengetopt_args_info_help[18] ;
   args_info->ca2_help = gengetopt_args_info_help[19] ;
   args_info->gcn_help = gengetopt_args_info_help[20] ;
+  args_info->testequi_help = gengetopt_args_info_help[21] ;
   
 }
 
@@ -333,6 +336,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "ca2", 0, 0 );
   if (args_info->gcn_given)
     write_into_file(outfile, "gcn", 0, 0 );
+  if (args_info->testequi_given)
+    write_into_file(outfile, "testequi", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -391,6 +396,7 @@ reset_group_sequentialProps(struct gengetopt_args_info *args_info)
   args_info->ca1_given = 0 ;
   args_info->ca2_given = 0 ;
   args_info->gcn_given = 0 ;
+  args_info->testequi_given = 0 ;
 
   args_info->sequentialProps_group_counter = 0;
 }
@@ -1235,6 +1241,7 @@ cmdline_parser_internal (
         { "ca1",	0, NULL, 0 },
         { "ca2",	0, NULL, 0 },
         { "gcn",	0, NULL, 0 },
+        { "testequi",	0, NULL, 't' },
         { 0,  0, 0, 0 }
       };
 
@@ -1243,7 +1250,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:b:x:y:z:r:cv", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:b:x:y:z:r:cvt", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1374,6 +1381,21 @@ cmdline_parser_internal (
               &(local_args_info.comvel_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "comvel", 'v',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 't':	/* Temperature using all componets of linear and angular momentum.  */
+        
+          if (args_info->sequentialProps_group_counter && override)
+            reset_group_sequentialProps (args_info);
+          args_info->sequentialProps_group_counter += 1;
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->testequi_given),
+              &(local_args_info.testequi_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "testequi", 't',
               additional_error))
             goto failure;
         

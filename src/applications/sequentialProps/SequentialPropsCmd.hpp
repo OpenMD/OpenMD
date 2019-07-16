@@ -83,6 +83,7 @@ struct gengetopt_args_info
   const char *ca1_help; /**< @brief contact angle of selection (using center of mass) help description.  */
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
   const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
+  const char *testequi_help; /**< @brief Temperature using all componets of linear and angular momentum help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -104,6 +105,7 @@ struct gengetopt_args_info
   unsigned int ca1_given ;	/**< @brief Whether ca1 was given.  */
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
+  unsigned int testequi_given ;	/**< @brief Whether testequi was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

@@ -1,4 +1,4 @@
-# Input file for gengetopt. This file generates SequentialPropsCmd.cpp and 
+# Input file for gengetopt. This file generates SequentialPropsCmd.cpp and
 # SequentialPropsCmd.hpp for parsing command line arguments using getopt and
 # getoptlong.  gengetopt is available from:
 #
@@ -10,7 +10,7 @@
 args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=SequentialPropsCmd --c-extension=cpp --header-extension=hpp"
 
 package "SequentialProps"
-version "" 
+version ""
 
 purpose
 "Computes a time history of static properties from a dump file."
@@ -35,4 +35,4 @@ groupoption "comvel"    v       "selection center of mass velocity" group="seque
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
 groupoption "ca2"       -       "contact angle of selection (using density profile)" group="sequentialProps"
 groupoption "gcn"       -       "Generalized Coordinate Number" group="sequentialProps"
-
+groupoption "testequi"  t "Temperature using all componets of linear and angular momentum" group="sequentialProps"
