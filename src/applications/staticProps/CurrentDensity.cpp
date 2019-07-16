@@ -57,13 +57,14 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "brains/Thermo.hpp"
 
 namespace OpenMD {
   
   CurrentDensity::CurrentDensity(SimInfo* info, const std::string& filename, 
                                  const std::string& sele, int nzbins, int axis)
     : StaticAnalyser(info, filename, nzbins), selectionScript_(sele), 
-      evaluator_(info), seleMan_(info), axis_(axis) {
+      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -105,6 +106,7 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      Vector3d COMvel = thermo_.getComVel();
 
       for (unsigned int i = 0; i < nBins_; i++) {
         sliceSDLists_[i].clear();
@@ -121,8 +123,7 @@ namespace OpenMD {
       }
       
       //wrap the stuntdoubles into a cell      
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	   sd = seleMan_.nextSelected(ii)) {
+      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         if (usePeriodicBoundaryConditions_)
           currentSnapshot_->wrapVector(pos);
@@ -130,8 +131,7 @@ namespace OpenMD {
       }
       
       //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; 
-	   sd = seleMan_.nextSelected(ii)) {
+      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
         Vector3d pos = sd->getPos();
         // shift molecules by half a box to have bins start at 0
         int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
@@ -158,7 +158,7 @@ namespace OpenMD {
             q += atom->getFlucQPos();
           }
           Vector3d vel = sliceSDLists_[i][k]->getVel();
-          binJc += q * vel[axis_];
+          binJc += q * vel[axis_] - COMvel[axis_];
         }
         currentDensity_[i] += binJc / sliceVolume;
         // Units of (e / Ang^2 / fs)
