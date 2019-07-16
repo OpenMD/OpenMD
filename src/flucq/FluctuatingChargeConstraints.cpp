@@ -74,16 +74,43 @@ namespace OpenMD {
     regionCharges_.clear();
 
     if (constrainRegions_) {
-      SimInfo::MoleculeIterator i;
-      Molecule* mol;
-      int reg;
-      std::set<int> regions;      
 
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {
-        reg = mol->getRegion();
-        if (reg >= 0) regions.insert(reg);
+      std::vector<int> localRegions = info_->getRegions();
+
+#ifdef IS_MPI
+      int size;
+      MPI_Comm_size(MPI_COMM_WORLD, &size);
+      int mylen = localRegions.size();
+
+      std::vector<int> counts;
+      std::vector<int> displs;
+
+      counts.resize(size,0);
+      displs.resize(size,0);        
+
+      MPI_Allgather(&mylen, 1, MPI_INT, &counts[0], 1, MPI_INT, MPI_COMM_WORLD);
+
+      int total = counts[0];
+
+      for (int i = 1; i < size; i++) {
+        total += counts[i];
+        displs[i] = displs[i-1] + counts[i-1];      
       }
+
+      std::vector<int> globalRegions(total, 0);
+      
+      MPI_Allgatherv(&localRegions[0], mylen, MPI_INT, &globalRegions[0],
+                     &counts[0], &displs[0], MPI_INT, MPI_COMM_WORLD);
+      
+      localRegions = globalRegions;
+#endif
+      
+      std::set<int> regions;
+      std::vector<int>::iterator iter;
+      for (iter = localRegions.begin(); iter != localRegions.end(); ++iter) {
+        if (*iter >=0 ) regions.insert( *iter );
+      }
+            
       // resize the keys vector to the largest found value for regions.
       regionKeys_.resize( *(regions.end()) );
       int which = 0;

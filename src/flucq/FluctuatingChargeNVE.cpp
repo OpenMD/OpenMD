@@ -126,4 +126,53 @@ namespace OpenMD {
       }
     }
   }
+  void FluctuatingChargeNVE::VelocityStep(RealType dt) {
+
+    if (!hasFlucQ_) return;
+
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator  j;
+    Molecule* mol;
+    Atom* atom;
+    RealType cvel, cfrc, cmass;
+
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        
+        cvel = atom->getFlucQVel();
+        cfrc = atom->getFlucQFrc();
+        cmass = atom->getChargeMass();       
+
+	// velocity half step
+        cvel += dt * cfrc / cmass;        
+        atom->setFlucQVel(cvel);
+      }
+    }
+  }
+  
+  void FluctuatingChargeNVE::PositionStep(RealType dt) {
+    
+    if (!hasFlucQ_) return;
+    
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator  j;
+    Molecule* mol;
+    Atom* atom;
+    RealType cvel, cpos;
+    
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        
+        cvel = atom->getFlucQVel();
+        cpos = atom->getFlucQPos();
+
+        cpos += dt * cvel;	
+        atom->setFlucQPos(cpos);
+      }
+    }
+  }
 }

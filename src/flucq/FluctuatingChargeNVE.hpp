@@ -56,6 +56,8 @@ namespace OpenMD {
     virtual void initialize();
     virtual void moveA();
     virtual void moveB();
+    virtual void PositionStep(RealType dt);
+    virtual void VelocityStep(RealType dt);
     virtual void updateSizes(){}; 
 
 
