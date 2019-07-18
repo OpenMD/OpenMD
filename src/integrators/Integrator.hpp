@@ -125,11 +125,12 @@ namespace OpenMD {
     Velocitizer* velocitizer_;
     RNEMD* rnemd_;
 
-    bool useRNEMD;
     bool needPotential;
     bool needVirial;
     bool needReset;    
     bool needVelocityScaling;
+    bool useRNEMD;
+
     RealType targetScalingTemp;
     
     Stats* stats;

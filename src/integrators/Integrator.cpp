@@ -287,6 +287,7 @@ namespace OpenMD {
     progressBar = new ProgressBar();
 
     //save statistics, before writeStat,  we must save statistics
+    saveConservedQuantity();
     stats->collectStats();
 
     if (simParams->getRNEMDParameters()->getUseRNEMD())
