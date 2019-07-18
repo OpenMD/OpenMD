@@ -76,8 +76,9 @@ namespace OpenMD {
     * @brief Default Destructor
     */
     virtual ~Integrator();
-    virtual void integrate();
     
+    void integrate();
+    void updateSizes();
     void setForceManager(ForceManager* forceMan);
     void setVelocitizer(Velocitizer* velocitizer);
     void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop);
@@ -99,8 +100,8 @@ namespace OpenMD {
     virtual void postStep();
     virtual void finalize();
     virtual void resetIntegrator() {}
-    virtual void updateSizes();
     virtual void doUpdateSizes() {}
+    void saveConservedQuantity();
 
     RealType dt, dt2;
     RealType runTime;

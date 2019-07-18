@@ -1,9 +1,7 @@
-// This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF)
-//
-// The sections are divided into AtomTypes
-//
-// many parameters (but not all) are derived from the TRAPPE force field
-// of Siepmann's group.
+begin Options
+  EnergyUnitScaling 1.0
+  DistanceUnitScaling 1.0
+end Options
 
 begin BaseAtomTypes
 //Name 		mass (amu)
@@ -23,14 +21,6 @@ begin LennardJonesAtomTypes
 //Name		epsilon		    sigma	
 O_TIP4P_FQ	0.2862		3.159
 end LennardJonesAtomTypes
-
-begin ChargeAtomTypes
-// Name 	charge
-//O_TIP4P_FQ	0.0
-//H_TIP4P_FQ	0.0
-//M_TIP4P_FQ	0.0
-end ChargeAtomTypes
-
 
 begin FluctuatingChargeAtomTypes
 //Values obtained from Rick, Stuart, and Berne J Chem Phys, 1994, 101

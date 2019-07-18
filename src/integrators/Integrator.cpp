@@ -183,6 +183,7 @@ namespace OpenMD {
     delete statWriter;
   }
 
+
   void Integrator::updateSizes() {
     doUpdateSizes();
     flucQ_->updateSizes();
@@ -245,6 +246,11 @@ namespace OpenMD {
     finalize();
     
   }
+
+  void Integrator::saveConservedQuantity() {
+    snap->setConservedQuantity( calcConservedQuantity() );
+  }
+  
   
   void Integrator::initialize(){
     

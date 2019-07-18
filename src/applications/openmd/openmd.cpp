@@ -89,7 +89,7 @@ int main(int argc, char* argv[]){
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
       "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
       "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2017 by the     |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2019 by the     |\n"<<
       "  |     /_/                                   University of Notre Dame.      |\n"<<
       "  |           http://openmd.org                                              |\n"<<
       "  |                                                                          |\n"<<
@@ -110,6 +110,7 @@ int main(int argc, char* argv[]){
       "  | [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).                   |\n"<<
       "  | [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).    |\n"<<
       "  | [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).    |\n"<<
+      "  | [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).        |\n"<<
       "  +--------------------------------------------------------------------------+\n"<<
       "\n";
     
