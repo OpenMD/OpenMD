@@ -7,7 +7,7 @@ Usage: omdLast
 
 Options:
   -h, --help              show this help
-  -m, --meta-data=...     use specified OpenMD (.omd) file
+  -m, --meta-data=...     use specified OpenMD (.dump) file
 
 Example:
    omdLast -m Ar.dump
@@ -100,7 +100,7 @@ def getLastFrame(mdFileName):
 
     # writing out the valid frame
 
-    outfilename = outfilePrefix + "_lastframe" + ext
+    outfilename = outfilePrefix + "_lastframe" + ".omd"
     outFile = open(outfilename, 'w')
     outFile.write(OpenMDversion)
     for metaline in metaDataFrame:
@@ -125,7 +125,7 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        elif opt in ("-m", "--meta-data"):
+        else opt in ("-m", "--meta-data"):
             mdFileName = arg
             global _haveMDFileName
             _haveMDFileName = 1
