@@ -42,7 +42,7 @@ if ($opt_h){
     print "  -d real    : density in g/cm^3\n";
     print "                 (default: 1)\n";
     print "  -l integer : 0 - face centered cubic, 1 - simple cubic\n";
-    print "                 (default: 0)\n";use List::Util qw[min max];
+    print "                 (default: 0)\n";
 
 
     print "  -c real    : default overlap cutoff in angstroms\n";
