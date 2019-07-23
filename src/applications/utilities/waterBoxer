@@ -7,28 +7,30 @@
 # license   = "OpenMD"
 
 use Getopt::Std;
+use List::Util qw[min max];
+
 
 $tolerance = 1.0E-8;
 $mass = 2.99151E-23; # mass of H2O in grams
 $cm3ToAng3 = 1E24;   # convert cm^3 to angstroms^3
 $densityConvert = $mass*$cm3ToAng3;
 $lattice = 0;
-$nMol = 500;
 $density = 1.0;
 $doRandomize = 0;
 $cutoff = 9;
+$rcut = 3.2;
 $alpha = 0.18;
 $invalidWater = 0;
 $waterCase = -1;
 $nothingSelected = 1;
 
 # get our options
-getopts('hmrvd:l:n:o:w:x:y:z:');
+getopts('hmrvd:l:c:o:w:x:y:z:');
 
 # just to test opt_h
 $opt_h = "true" if $#ARGV >= 0;
 
-# our option output 
+# our option output
 if ($opt_h){
     print "waterBoxer: builds water boxes\n\n";
     print "usage: waterBoxer [-hmrv] [-d density] [-l lattice] [-n # waters]\n";
@@ -40,9 +42,11 @@ if ($opt_h){
     print "  -d real    : density in g/cm^3\n";
     print "                 (default: 1)\n";
     print "  -l integer : 0 - face centered cubic, 1 - simple cubic\n";
-    print "                 (default: 0)\n";
-    print "  -n integer : # of water molecules\n";
-    print "                 (default: 500)\n";
+    print "                 (default: 0)\n";use List::Util qw[min max];
+
+
+    print "  -c real    : default overlap cutoff in angstroms\n";
+    print "                 (default: 3.3)\n";
     print "  -o char    : output file name\n";
     print "                 (default: freshWater.omd)\n";
     print "  -w char    : name of the water stunt double\n";
@@ -54,7 +58,7 @@ if ($opt_h){
     print "      than the derived box length for a given density and\n";
     print "      number of molecules.\n\n";
     print "Example:\n";
-    die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF -o ssdrfWater.omd\n";
+    die   "   waterBoxer -d 0.997 -w SSD_RF -o ssdrfWater.omd\n";
 }
 
 # set some variables to be used in the code
@@ -84,6 +88,15 @@ if (defined($opt_d)){
     die "Error: the value for '-d' ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
   }
 }
+if (defined($opt_c)){
+  $nothingSelected = 0;
+  if ($opt_c =~ /^[0-9]/) {
+    $rcut = $opt_c;
+  } else {
+    die "Error: the value for '-c' ($opt_c) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+
 if (defined($opt_w)){
   $waterName = $opt_w;
   $nothingSelected = 0;
@@ -94,7 +107,7 @@ validateWater();
 if ($invalidWater == 1){
   print "Warning: \'$waterName\' is not a recognized water model name.\n";
   print "         Use the \'-m\' option to generate a \'water.inc\' with the\n";
-  print "         recognized water model geometries.\n\n"; 
+  print "         recognized water model geometries.\n\n";
 }
 if ($waterName eq 'DPD') {
   # DPD waters are stand-ins for 4 water molecules
@@ -114,14 +127,6 @@ if (defined($opt_l)){
     }
   } else {
     die "Error: the '-l' value ($opt_l) is not a valid number\n       Please choose 0 or 1\n";
-  }
-}
-if (defined($opt_n)){
-  $nothingSelected = 0;
-  if ($opt_n =~ /^[0-9]/) {
-    $nMol = $opt_n;
-  } else { 
-    die "Error: the '-n' value ($opt_n) is not a valid number\n       Please choose a non-negative integer\n";
   }
 }
 if (defined($opt_x)){
@@ -149,73 +154,46 @@ if (defined($opt_z)){
   }
 }
 
-
 # open the file writer
 open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
 
 # check to set magic lattice numbers
 if ($lattice == 0){
-  $crystalNumReal = ($nMol/4.0)**(1.0/3.0);
-  $crystalNum = int($crystalNumReal + $tolerance);
-  $remainder = $crystalNumReal - $crystalNum;
-  
-  # if crystalNumReal wasn't an integer, we bump the crystal to the next
-  # magic number
-  if ($remainder > $tolerance){
-    $crystalNum = $crystalNum + 1;
-    $newMol = 4 * $crystalNum**3;
-    print "Warning: The number chosen ($nMol) failed to build a clean fcc lattice.\n";
-    print "         The number of molecules has been increased to the next magic number ($newMol).\n\n";
-    $nMol = $newMol;
+  $a = (4*18.01/(0.602*$density))**(1.0/3.0);
+  $acut = $rcut * sqrt(2.0);
+  if ($acut > $a) {
+     $a = $acut;
+     $newDensity = 4.0*18.01/(0.602*$a**3);
+     print "using density of $newDensity to match cutoff value ($rcut)\n";
   }
 } elsif ($lattice == 1){
-  $crystalNumReal = ($nMol/1.0)**(1.0/3.0);
-  $crystalNum = int($crystalNumReal + $tolerance);
-  $remainder = $crystalNumReal - $crystalNum;
-  
-  # again, if crystalNumReal wasn't an integer, we bump the crystal to the next
-  # magic number
-  if ($remainder > $tolerance){
-    $crystalNum = $crystalNum + 1;
-    $newMol = $crystalNum**3;
-    print "Warning: The number chosen ($nMol) failed to build a clean simple cubic lattice.\n";
-    print "         The number of molecules has been increased to the next magic number ($newMol).\n\n";
-    $nMol = $newMol;
+  $a = (18.01/(0.602*$density))**(1.0/3.0);
+  $acut = $rcut;
+  if ($acut > $a) {
+     $a = $acut;
+     $newDensity = 18.01/(0.602*$a**3);
+     print "using density of $newDensity to match cutoff value ($rcut)\n";
   }
+}
+$nxFloat = $boxx/$a;
+$nx = int($nxFloat + $nxFloat/abs($nxFloat*2));
+$nyFloat = $boxy/$a;
+$ny = int($nyFloat + $nyFloat/abs($nyFloat*2));
+$nzFloat = $boxz/$a;
+$nz = int($nzFloat + $nzFloat/abs($nzFloat*2));
+
+$anew = min($boxx/$nx, $boxy/$ny, $boxz/$nz);
+
+if ($anew < $acut) {
+ $anew = $acut;
 }
 
-# now we can start building the crystals
-$boxLength = ($nMol*$densityConvert/$density)**(1.0/3.0);
-$cellLength = $boxLength / $crystalNum;
-
-if ($boxx != 0) {
-  if ($boxLength < $boxx) {
-    print "Computed box length is smaller than requested x axis.  Use more\n";
-    die "molecules.";    
-  }
-} else {
-  $boxx = $boxLength;
-}
-if ($boxy != 0) {
-  if ($boxLength < $boxy) {
-    print "Computed box length is smaller than requested y axis.  Use more\n";
-    die "molecules.";    
-  }
-} else {
-  $boxy = $boxLength;
-}
-if ($boxz != 0) {
-  if ($boxLength < $boxz) {
-    print "Computed box length is smaller than requested z axis.  Use more\n";
-    die "molecules.";    
-  }
-} else {
-  $boxz = $boxLength;
-}
-
-$nx = int($boxx / $cellLength);
-$ny = int($boxy / $cellLength);
-$nz = int($boxz / $cellLength);
+$nxFloat = $boxx/$anew;
+$nx = int($nxFloat + $nxFloat/abs($nxFloat*2));
+$nyFloat = $boxy/$anew;
+$ny = int($nyFloat + $nyFloat/abs($nyFloat*2));
+$nzFloat = $boxz/$anew;
+$nz = int($nzFloat + $nzFloat/abs($nzFloat*2));
 
 if ($lattice == 0) {
   $nMol = 4 * $nx * $ny * $nz;
@@ -268,7 +246,7 @@ if ($lattice == 0) {
       }
     }
   }
-  
+
 } elsif ($lattice == 1) {
   # build the unit cell
   # molecule 0
@@ -283,7 +261,7 @@ if ($lattice == 0) {
 	$xCorr[$counter] = $xCorr[0] + $cellLengthX*$x;
 	$yCorr[$counter] = $yCorr[0] + $cellLengthY*$y;
 	$zCorr[$counter] = $zCorr[0] + $cellLengthZ*$z;
-	
+
 	$counter++;
       }
     }
@@ -318,30 +296,30 @@ sub writeOutFile {
   printMetaData();
   printFrameData();
   print OUTFILE "    <StuntDoubles>\n";
-  
+
   # shift the box center to the origin and write out the coordinates
   for ($i = 0; $i < $nMol; $i++) {
     $xCorr[$i] -= 0.5*$boxx;
     $yCorr[$i] -= 0.5*$boxy;
     $zCorr[$i] -= 0.5*$boxz;
-    
+
     $q0 = 1.0;
     $q1 = 0.0;
     $q2 = 0.0;
     $q3 = 0.0;
-    
+
     if ($doRandomize == 1){
       $cosTheta = 2.0*rand() - 1.0;
       $theta = acos($cosTheta);
       $phi = 2.0*3.14159265359*rand();
       $psi = 2.0*3.14159265359*rand();
-      
+
       $q0 = cos(0.5*$theta)*cos(0.5*($phi + $psi));
       $q1 = sin(0.5*$theta)*cos(0.5*($phi - $psi));
       $q2 = sin(0.5*$theta)*sin(0.5*($phi - $psi));
       $q3 = cos(0.5*$theta)*sin(0.5*($phi + $psi));
     }
-    
+
     print OUTFILE "$i\tpq\t$xCorr[$i] $yCorr[$i] $zCorr[$i] ";
     print OUTFILE "$q0 $q1 $q2 $q3\n";
   }
@@ -395,7 +373,7 @@ sub findCutoff {
     $bm = $boxy;
   } else {
     $bm = $boxx;
-  } 
+  }
   if ($boxz < $bm) {
     $bm = $boxz;
   }
@@ -408,7 +386,7 @@ sub findCutoff {
 }
 
 sub printFrameData {
-print OUTFILE 
+print OUTFILE
 "  <Snapshot>
     <FrameData>
         Time: 0
@@ -449,7 +427,7 @@ sub printWaterMD {
 sub printCl {
   print $waterFileHandle "\n\nmolecule{
   name = \"Cl-\";
-  
+
   atom[0]{
     type = \"Cl-\";
     position(0.0, 0.0, 0.0);
@@ -460,7 +438,7 @@ sub printCl {
 sub printNa {
   print $waterFileHandle "\n\nmolecule{
   name = \"Na+\";
-  
+
   atom[0]{
     type = \"Na+\";
     position(0.0, 0.0, 0.0);
@@ -471,7 +449,7 @@ sub printNa {
 sub printSSD_E {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD_E\";
-  
+
   atom[0]{
     type = \"SSD_E\";
     position( 0.0, 0.0, 0.0 );
@@ -483,7 +461,7 @@ sub printSSD_E {
 sub printSSD_RF {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD_RF\";
-  
+
   atom[0]{
     type = \"SSD_RF\";
     position( 0.0, 0.0, 0.0 );
@@ -495,7 +473,7 @@ sub printSSD_RF {
 sub printSSD {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD\";
-  
+
   atom[0]{
     type = \"SSD\";
     position( 0.0, 0.0, 0.0 );
@@ -507,7 +485,7 @@ sub printSSD {
 sub printSSDQ {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSDQ\";
-  
+
   atom[0]{
     type = \"SSDQ\";
     position( 0.0, 0.0, 0.0 );
@@ -519,7 +497,7 @@ sub printSSDQ {
 sub printSSDQO {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSDQO\";
-  
+
   atom[0]{
     type = \"SSDQO\";
     position( 0.0, 0.0, 0.0 );
@@ -531,7 +509,7 @@ sub printSSDQO {
 sub printSSD1 {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD1\";
-  
+
   atom[0]{
     type = \"SSD1\";
     position( 0.0, 0.0, 0.0 );
@@ -543,7 +521,7 @@ sub printSSD1 {
 sub printTRED {
   print $waterFileHandle "\n\nmolecule{
   name = \"TRED\";
-  
+
   atom[0]{
     type = \"TRED\";
     position( 0.0, 0.0, 0.0 );
@@ -564,7 +542,7 @@ sub printTRED {
 sub printTIP3P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP3P\";
-  
+
   atom[0]{
     type = \"O_TIP3P\";
     position( 0.0, 0.0, -0.06556 );
@@ -588,7 +566,7 @@ sub printTIP3P {
 sub printTIP4P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P\";
-  
+
   atom[0]{
     type = \"O_TIP4P\";
     position( 0.0, 0.0, -0.06556 );
@@ -616,7 +594,7 @@ sub printTIP4P {
 sub printTIP4PIce {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P-Ice\";
-  
+
   atom[0]{
     type = \"O_TIP4P-Ice\";
     position( 0.0, 0.0, -0.06556 );
@@ -644,7 +622,7 @@ sub printTIP4PIce {
 sub printTIP4PEw {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P-Ew\";
-  
+
   atom[0]{
     type = \"O_TIP4P-Ew\";
     position( 0.0, 0.0, -0.06556 );
@@ -661,7 +639,7 @@ sub printTIP4PEw {
     type = \"EP_TIP4P-Ew\";
     position( 0.0, 0.0, 0.05944 );
   }
-  
+
   rigidBody[0]{
     members(0, 1, 2, 3);
   }
@@ -672,7 +650,7 @@ sub printTIP4PEw {
 sub printTIP4P2005 {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P-2005\";
-  
+
   atom[0]{
     type = \"O_TIP4P-2005\";
     position( 0.0, 0.0, -0.06556 );
@@ -700,7 +678,7 @@ sub printTIP4P2005 {
 sub printTIP5P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP5P\";
-  
+
   atom[0]{
     type = \"O_TIP5P\";
     position( 0.0, 0.0, -0.06556 );
@@ -721,7 +699,7 @@ sub printTIP5P {
     type = \"EP_TIP5P\";
     position( -0.57154, 0.0, -0.46971 );
   }
-  
+
   rigidBody[0]{
     members(0, 1, 2, 3, 4);
   }
@@ -732,7 +710,7 @@ sub printTIP5P {
 sub printTIP5PE {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP5P-E\";
-  
+
   atom[0]{
     type = \"O_TIP5P-E\";
     position( 0.0, 0.0, -0.06556 );
@@ -753,7 +731,7 @@ sub printTIP5PE {
     type = \"EP_TIP5P\";
     position( -0.57154, 0.0, -0.46971 );
   }
-  
+
   rigidBody[0]{
     members(0, 1, 2, 3, 4);
   }
@@ -764,7 +742,7 @@ sub printTIP5PE {
 sub printNE6 {
     print $waterFileHandle "\n\nmolecule{
   name = \"NE6\";
-  
+
   atom[0]{
     type = \"O_NE6\";
     position( 0.0, 0.0, 0.0 );
@@ -789,8 +767,8 @@ sub printNE6 {
     type = \"LP_NE6\";
     position( -0.732813007, -0.50364843, 0.0  );
   }
- 
-  rigidBody[0]{    
+
+  rigidBody[0]{
     members(0, 1, 2, 3, 4, 5);
   }
 }"
@@ -799,7 +777,7 @@ sub printNE6 {
 sub printSPCE {
 print $waterFileHandle "\n\nmolecule{
   name = \"SPCE\";
-  
+
   atom[0]{
     type = \"O_SPCE\";
     position( 0.0, 0.0, -0.06461 );
@@ -812,7 +790,7 @@ print $waterFileHandle "\n\nmolecule{
     type = \"H_SPCE\";
     position( 0.0, -0.81649, 0.51275 );
   }
-  
+
   rigidBody[0]{
     members(0, 1, 2);
   }
@@ -823,7 +801,7 @@ print $waterFileHandle "\n\nmolecule{
 sub printSPC {
 print $waterFileHandle "\n\nmolecule{
   name = \"SPC\";
-  
+
   atom[0]{
     type = \"O_SPC\";
     position( 0.0, 0.0, -0.06461 );
@@ -836,7 +814,7 @@ print $waterFileHandle "\n\nmolecule{
     type = \"H_SPC\";
     position( 0.0, -0.81649, 0.51275 );
   }
-  
+
   rigidBody[0]{
     members(0, 1, 2);
   }
@@ -848,7 +826,7 @@ print $waterFileHandle "\n\nmolecule{
 sub printSPCHW {
 print $waterFileHandle "\n\nmolecule{
   name = \"SPC-HW\";
-  
+
   atom[0]{
     type = \"O_SPC-HW\";
     position( 0.0, 0.0, -0.06461 );
@@ -861,7 +839,7 @@ print $waterFileHandle "\n\nmolecule{
     type = \"D_SPC-HW\";
     position( 0.0, -0.81649, 0.51275 );
   }
-  
+
   rigidBody[0]{
     members(0, 1, 2);
   }
@@ -872,7 +850,7 @@ print $waterFileHandle "\n\nmolecule{
 sub printDPD {
   print $waterFileHandle "\n\nmolecule{
   name = \"DPD\";
-  
+
   atom[0]{
     type = \"DPD\";
     position(0.0, 0.0, 0.0);
@@ -883,7 +861,7 @@ sub printDPD {
 sub printCG2 {
   print $waterFileHandle "\n\nmolecule{
   name = \"CG2\";
-  
+
   atom[0]{
     type = \"CG2\";
     position(0.0, 0.0, 0.0);
@@ -894,7 +872,7 @@ sub printCG2 {
 sub printFakeWater {
   print $waterFileHandle "\n\nmolecule{
   name = \"$waterName\";
-  
+
   atom[0]{
     type = \"$waterName\";
     position(0.0, 0.0, 0.0);
