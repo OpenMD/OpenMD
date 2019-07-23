@@ -50,6 +50,7 @@
 #define MATH_SQUAREMATRIX_HPP 
 
 #include "math/RectMatrix.hpp"
+#include "math/LU.hpp"
 
 namespace OpenMD {
 
@@ -91,7 +92,7 @@ namespace OpenMD {
       return *this;
     }
                                    
-    /** Retunrs  an identity matrix*/
+    /** Returns  an identity matrix*/
 
     static SquareMatrix<Real, Dim> identity() {
       SquareMatrix<Real, Dim> m;
@@ -107,22 +108,65 @@ namespace OpenMD {
     }
 
     /** 
-     * Retunrs  the inversion of this matrix. 
-     * @todo need implementation
+     * Returns  the inverse of this matrix. 
      */
-    SquareMatrix<Real, Dim>  inverse() {
-      SquareMatrix<Real, Dim> result;
+    SquareMatrix<Real, Dim> inverse() {
+      // LU sacrifices the original matrix, so create a copy:
+      SquareMatrix<Real, Dim> tmp(this);
+      SquareMatrix<Real, Dim> m;
 
-      return result;
+      // Use LU-factorization to invert the matrix:      
+      invertMatrix(tmp, m);
+      delete tmp;
+      return m;
     }        
 
     /**
      * Returns the determinant of this matrix.
-     * @todo need implementation
      */
     Real determinant() const {
       Real det;
+      //  Base case : if matrix contains single element 
+      if (Dim == 1) 
+        return this->data_[0][0];             
+      
+      int sign = 1;  // To store sign multiplier 
+      
+      // Iterate for each element of first row 
+      for (int f = 0; f < Dim; f++) {
+        // Getting Cofactor of A[0][f] 
+        SquareMatrix<Real, Dim-1> temp = cofactor(this, 0, f); 
+        det += sign * this->data_[0][f] * temp.determinant(); 
+          
+        // terms are to be added with alternate sign 
+        sign = -sign; 
+      } 
       return det;
+    }
+    
+    SquareMatrix<Real, Dim-1> cofactor(int p, int q) {
+
+      SquareMatrix<Real, Dim-1> m;
+      
+      int i = 0, j = 0;       
+      // Looping for each element of the matrix 
+      for (unsigned int row = 0; row < Dim; row++) {
+        for (unsigned int col = 0; col < Dim; col++)  {
+          //  Copying into temporary matrix only those element 
+          //  which are not in given row and column 
+          if (row != p && col != q)  {
+            m(i, j++) = this->data_[row][col]; 
+            
+            // Row is filled, so increase row index and 
+            // reset col index 
+            if (j == Dim - 1) {
+              j = 0; 
+              i++; 
+            } 
+          } 
+        } 
+      }
+      return m;
     }
     
     /** Returns the trace of this matrix. */
@@ -224,21 +268,21 @@ namespace OpenMD {
 
   /*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    $RCSfile: SquareMatrix.hpp,v $
+    Program:   Visualization Toolkit
+    Module:    $RCSfile: SquareMatrix.hpp,v $
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+    Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+    All rights reserved.
+    See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 
-  This software is distributed WITHOUT ANY WARRANTY; without even
-  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-  PURPOSE.  See the above copyright notice for more information.
+    This software is distributed WITHOUT ANY WARRANTY; without even
+    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE.  See the above copyright notice for more information.
 
-  =========================================================================*/
+    =========================================================================*/
 
 #define VTK_ROTATE(a,i,j,k,l) g=a(i, j);h=a(k, l);a(i, j)=g-s*(h+g*tau); \
-    a(k, l)=h+s*(g-h*tau)
+  a(k, l)=h+s*(g-h*tau)
 
 #define VTK_MAX_ROTATIONS 20
 
