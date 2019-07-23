@@ -162,7 +162,7 @@ int main(int argc, char* argv[]){
     
   std::map<std::string, SDShape>::iterator si;
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
-    HydrodynamicsModel* model;
+    HydrodynamicsModel* model = NULL;
     Shape* shape = si->second.shape;
     StuntDouble* sd = si->second.sd;
 
@@ -182,7 +182,7 @@ int main(int argc, char* argv[]){
           modelName = "BeadModel";
           break;          
         }
-        
+
         model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName, sd, info);
         
         if (args_info.model_arg == model_arg_RoughShell) {
@@ -192,22 +192,30 @@ int main(int argc, char* argv[]){
       }
     }
     
-    model->init();
+    if (model != NULL) {
+
+      model->init();
     
-    std::ofstream ofs;
-    std::stringstream outputBeads;
-    outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
-    ofs.open(outputBeads.str().c_str());        
-    model->writeBeads(ofs);
-    ofs.close();
-    
-    //if beads option is turned on, skip the calculation
-    if (!args_info.beads_flag) {
-      model->calcHydroProps(shape, viscosity, temperature);
-      model->writeHydroProps(outputHydro);
+      std::ofstream ofs;
+      std::stringstream outputBeads;
+      outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
+      ofs.open(outputBeads.str().c_str());        
+      model->writeBeads(ofs);
+      ofs.close();
+      
+      //if beads option is turned on, skip the calculation
+      if (!args_info.beads_flag) {
+        model->calcHydroProps(shape, viscosity, temperature);
+        model->writeHydroProps(outputHydro);
+      }
+      
+      delete model;
+      
+    } else {
+      sprintf(painCave.errMsg, "Could not create HydrodynamicsModel\n");
+      painCave.isFatal = 1;
+      simError();      
     }
-        
-    delete model;
   }
   
   outputHydro.close();

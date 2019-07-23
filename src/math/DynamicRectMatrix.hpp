@@ -51,6 +51,7 @@
 #define MATH_DYNAMICRECTMATRIX_HPP
 #include <cmath>
 #include "math/DynamicVector.hpp"
+#include "math/RectMatrix.hpp"
 
 namespace OpenMD {
 
@@ -101,7 +102,7 @@ namespace OpenMD {
       
       for (unsigned int i = 0; i < nrow_; i++)
         for (unsigned int j = 0; j < ncol_; j++)
-	    this->data_[i][j] = m.data_[i][j];
+          this->data_[i][j] = m.data_[i][j];
     }
             
     /** destructor*/
@@ -110,7 +111,7 @@ namespace OpenMD {
     /** copy assignment operator */
     DynamicRectMatrix<Real> operator =(const DynamicRectMatrix<Real> &m) {
       if (this == &m)
-	  return *this;
+        return *this;
       if (nrow_ != m.getNRow() || ncol_ != m.getNCol()) {
         deallocate();
         allocate(m.getNRow(), m.getNCol());
@@ -123,7 +124,7 @@ namespace OpenMD {
     }
             
     /**
-     * Return the reference of a single element of this matrix.
+     * Returns the reference of a single element of this matrix.
      * @return the reference of a single element of this matrix 
      * @param i row index
      * @param j Column index
@@ -133,7 +134,7 @@ namespace OpenMD {
     }
 
     /**
-     * Return the value of a single element of this matrix.
+     * Returns the value of a single element of this matrix.
      * @return the value of a single element of this matrix 
      * @param i row index
      * @param j Column index
@@ -144,7 +145,7 @@ namespace OpenMD {
     }
 
     /** 
-     * Copy the internal data to an array
+     * Copies the internal data to an array
      * @param array the pointer of destination array
      */
     void getArray(Real* array) {
@@ -156,8 +157,8 @@ namespace OpenMD {
     }
 
     /**
-     * Returns a row of  this matrix as a vector.
-     * @return a row of  this matrix as a vector 
+     * Returns a row of this matrix as a vector.
+     * @return a row of this matrix as a vector 
      * @param row the row index
      */                
     DynamicVector<Real> getRow(unsigned int row) {
@@ -170,7 +171,7 @@ namespace OpenMD {
     }
 
     /**
-     * Sets a row of  this matrix
+     * Sets a row of this matrix
      * @param row the row index
      * @param v the vector to be set
      */                
@@ -181,8 +182,8 @@ namespace OpenMD {
     }
 
     /**
-     * Returns a column of  this matrix as a vector.
-     * @return a column of  this matrix as a vector 
+     * Returns a column of this matrix as a vector.
+     * @return a column of this matrix as a vector 
      * @param col the column index
      */                
     DynamicVector<Real> getColumn(unsigned int col) {
@@ -195,7 +196,7 @@ namespace OpenMD {
     }
 
     /**
-     * Sets a column of  this matrix
+     * Sets a column of this matrix
      * @param col the column index
      * @param v the vector to be set
      */                
@@ -296,7 +297,7 @@ namespace OpenMD {
     }
             
     /**
-     * Sets the value of this matrix to the difference  of itself and m (*this -= m).
+     * Sets the value of this matrix to the difference of itself and m (*this -= m).
      * @param m the other matrix
      */
     inline void sub( const DynamicRectMatrix<Real> &m ) {
@@ -363,7 +364,7 @@ namespace OpenMD {
     }
 
     /**
-     *  Multiples a scalar into every element of this matrix.
+     * Multiples a scalar onto every element of this matrix.
      * @param s the scalar value
      */
     DynamicRectMatrix<Real> operator *=(const Real s) {
@@ -372,7 +373,7 @@ namespace OpenMD {
     }
 
     /**
-     *  Divides every element of this matrix by a scalar.
+     * Divides every element of this matrix by a scalar.
      * @param s the scalar value
      */
     DynamicRectMatrix<Real> operator /=(const Real s) {
@@ -416,22 +417,22 @@ namespace OpenMD {
 
     template<class MatrixType>
     void setSubMatrix(unsigned int beginRow, unsigned int beginCol, const MatrixType& m) {
-        assert(beginRow + m.getNRow() -1 <= nrow_);
-        assert(beginCol + m.getNCol() -1 <= ncol_);
+      assert(beginRow + m.getNRow() -1 <= nrow_);
+      assert(beginCol + m.getNCol() -1 <= ncol_);
 
-        for (unsigned int i = 0; i < m.getNRow(); ++i)
-            for (unsigned int j = 0; j < m.getNCol(); ++j)
-                this->data_[beginRow+i][beginCol+j] = m(i, j);
+      for (unsigned int i = 0; i < m.getNRow(); ++i)
+        for (unsigned int j = 0; j < m.getNCol(); ++j)
+          this->data_[beginRow+i][beginCol+j] = m(i, j);
     }
 
     template<class MatrixType>
     void getSubMatrix(unsigned int beginRow, unsigned int beginCol, MatrixType& m) {
-        assert(beginRow + m.getNRow() -1 <= nrow_);
-        assert(beginCol + m.getNCol() - 1 <= ncol_);
+      assert(beginRow + m.getNRow() -1 <= nrow_);
+      assert(beginCol + m.getNCol() - 1 <= ncol_);
 
-        for (unsigned int i = 0; i < m.getNRow(); ++i)
-            for (unsigned int j = 0; j < m.getNCol(); ++j)
-                m(i, j) = this->data_[beginRow+i][beginCol+j];
+      for (unsigned int i = 0; i < m.getNRow(); ++i)
+        for (unsigned int j = 0; j < m.getNCol(); ++j)
+          m(i, j) = this->data_[beginRow+i][beginCol+j];
     }
     
   protected:
@@ -501,8 +502,8 @@ namespace OpenMD {
   }
 
   /**
-   * Return the multiplication of scalra and  matrix  (m * s). 
-   * @return the multiplication of a scalra and  a matrix 
+   * Return the multiplication of scalar and  matrix  (m * s). 
+   * @return the multiplication of a scalar and  a matrix 
    * @param m the matrix
    * @param s the scalar
    */
@@ -516,8 +517,8 @@ namespace OpenMD {
   }
 
   /**
-   * Return the multiplication of a scalra and  a matrix  (s * m). 
-   * @return the multiplication of a scalra and  a matrix 
+   * Return the multiplication of a scalar and  a matrix  (s * m). 
+   * @return the multiplication of a scalar and  a matrix 
    * @param s the scalar
    * @param m the matrix
    */

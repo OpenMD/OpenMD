@@ -31,8 +31,8 @@ in the `doc` directory.  Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                     |
 |--------------------------------|:----:|-------------------------------------------|
-| macOS 10.14.5 (intel)          |  c++ | (Apple LLVM version 10.0, Open MPI 4.0.1) |
-| macOS 10.14.5 (intel)          |  g++ | (GNU version 8.3.0)                       |
+| macOS 10.14.6 (intel)          |  c++ | (Apple LLVM version 10.0, Open MPI 4.0.1) |
+| macOS 10.14.6 (intel)          |  g++ | (GNU version 8.3.0)                       |
 | Linux (Ubuntu 19.04 - x86\_64) |  g++ | (GNU version 8.3.0, Open MPI 3.1.3)       |
 | Linux (RHEL 7.6 - x86\_64)     | icpc | (Intel version 18.0.5, Open MPI 3.0.0)    |
 

@@ -116,9 +116,9 @@ namespace OpenMD {
 
   protected:
 
-    virtual void integrateStep() {
+    virtual void step() {
       needVirial = true;
-      VelocityVerletIntegrator::integrateStep();
+      VelocityVerletIntegrator::step();
     }
 
     virtual void doUpdateSizes();

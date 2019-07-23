@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,21 +32,17 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
  
-/**
- * @file Integrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @version 1.0
- */
-
 #ifndef INTEGRATORS_INTEGRATOR_HPP
 #define INTEGRATORS_INTEGRATOR_HPP
 
@@ -60,86 +56,66 @@
 #include "brains/Velocitizer.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "constraints/Rattle.hpp"
+#include "integrators/DLM.hpp"
+#include "utils/ProgressBar.hpp"
 
 namespace OpenMD {
-
-
   /**
-   * @class Integrator Integrator.hpp "integrators/Integrator.hpp"
-   * @brief Base class of Integrator
-   * @todo document
+   * @brief Declaration of the Integrator base class, which
+   * all other integrators inherit from.
+   *
+   * It provides an abstract integrate() function which will be called
+   * by the host application to integrate the system forward in time.
+   *
+   * Several convenience functions are also provided that are commonly
+   * needed by subclasses.
    */
   class Integrator {
   public:
-
+    /**
+    * @brief Default Destructor
+    */
     virtual ~Integrator();
-
-    //avoid public virtual function        
-    void integrate() {
-      doIntegrate();
-    }
-
-    void updateSizes() {
-      doUpdateSizes();
-      flucQ_->updateSizes();
-    }
-
-    void setForceManager(ForceManager* forceMan) {
-
-      if (forceMan_ != forceMan && forceMan_  != NULL) {
-	delete forceMan_;
-      }
-      forceMan_ = forceMan;
-      // forward this on:
-      if (flucQ_ != NULL) {
-        flucQ_->setForceManager(forceMan_);
-      }
-    }
-
-    void setVelocitizer(Velocitizer* velocitizer) {
-      if (velocitizer_ != velocitizer && velocitizer_ != NULL) {
-	delete velocitizer_;
-      }
-      velocitizer_ = velocitizer;
-    }
-
-    void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop) {
-      if (prop != flucQ_ && flucQ_ != NULL){            
-        delete flucQ_;
-      }            
-      flucQ_ = prop;
-      if (forceMan_ != NULL) {
-        flucQ_->setForceManager(forceMan_);
-      }
-    }
-
-    void setRotationAlgorithm(RotationAlgorithm* algo) {
-      if (algo != rotAlgo_ && rotAlgo_ != NULL){            
-        delete rotAlgo_;
-      }
-            
-      rotAlgo_ = algo;
-    }
-
-    void setRNEMD(RNEMD* rnemd) {
-      if (rnemd_ != rnemd && rnemd_  != NULL) {
-	delete rnemd_;
-      }
-      rnemd_ = rnemd;
-    }
     
-  protected:
+    void integrate();
+    void updateSizes();
+    void setForceManager(ForceManager* forceMan);
+    void setVelocitizer(Velocitizer* velocitizer);
+    void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop);
+    void setRotationAlgorithm(RotationAlgorithm* algo);
+    void setRNEMD(RNEMD* rnemd);
 
+  protected:
     Integrator(SimInfo* info);
 
-    virtual void doIntegrate() = 0;
-
+    virtual void initialize();
+    virtual void preStep();
+    /** @brief Computes an integration step from t to t+dt
+     *
+     * This function must be implemented by any subclasses, and computes a
+     * single integration step from the current time (t) to (t+dt).
+     */
+    virtual void step() = 0;
+    virtual void calcForce();
+    virtual void postStep();
+    virtual void finalize();
+    virtual void resetIntegrator() {}
     virtual void doUpdateSizes() {}
-        
-    void saveConservedQuantity() {
-      snap->setConservedQuantity( calcConservedQuantity() );
-    }
-        
+    void saveConservedQuantity();
+
+    RealType dt, dt2;
+    RealType runTime;
+    RealType sampleTime;
+    RealType statusTime;
+    RealType thermalTime;
+    RealType resetTime;
+    RealType RNEMD_exchangeTime;
+    RealType currSample;
+    RealType currStatus;
+    RealType currThermal;
+    RealType currReset;
+    RealType currRNEMD;
+    
     SimInfo* info_;
     Globals* simParams;
     ForceManager* forceMan_;
@@ -153,33 +129,24 @@ namespace OpenMD {
     bool needVirial;
     bool needReset;    
     bool needVelocityScaling;
-    RealType targetScalingTemp;
+    bool useRNEMD;
 
-    bool useRNEMD;    
+    RealType targetScalingTemp;
     
     Stats* stats;
     DumpWriter* dumpWriter;
     StatWriter* statWriter;
     Thermo thermo;
 
-    RealType runTime;
-    RealType sampleTime;
-    RealType statusTime;
-    RealType thermalTime;
-    RealType resetTime;
-    RealType RNEMD_exchangeTime;
-    RealType dt;
-
-    Snapshot* snap; // During the integration, the address of snap Will not change
-
-        
-  private:
-        
+    Snapshot* snap;
+    
+  private:        
     virtual RealType calcConservedQuantity() = 0;
-        
-    virtual DumpWriter* createDumpWriter() = 0;
+    virtual DumpWriter* createDumpWriter();
+    virtual StatWriter* createStatWriter();
 
-    virtual StatWriter* createStatWriter() = 0;
+    ProgressBar* progressBar;
+    
   };
 
     
