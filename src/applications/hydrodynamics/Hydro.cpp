@@ -162,7 +162,7 @@ int main(int argc, char* argv[]){
     
   std::map<std::string, SDShape>::iterator si;
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
-    HydrodynamicsModel* model;
+    HydrodynamicsModel* model = NULL;
     Shape* shape = si->second.shape;
     StuntDouble* sd = si->second.sd;
 

@@ -79,6 +79,7 @@
   =========================================================================*/ 
 #ifndef MATH_LU_HPP
 #define MATH_LU_HPP
+#include <limits>
 
 namespace OpenMD {
 
