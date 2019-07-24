@@ -125,7 +125,7 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        else opt in ("-m", "--meta-data"):
+        elif opt in ("-m", "--meta-data"):
             mdFileName = arg
             global _haveMDFileName
             _haveMDFileName = 1
