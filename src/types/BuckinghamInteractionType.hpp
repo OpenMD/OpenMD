@@ -62,7 +62,7 @@ namespace OpenMD {
    *
    * Modified:
    *
-   * \f[ V = A \exp( -B r) - \frac{C}{r^6} + 4 \epsilon \left( \left( \frac{\sigma}{r} \right)^30 - \left( \frac{\sigma}{r} \right)^6 \right)  \f]
+   * \f[ V = A \exp( -B r) - \frac{C}{r^6} + 4 \epsilon \left( \left( \frac{\sigma}{r} \right)^{30} - \left( \frac{\sigma}{r} \right)^6 \right)  \f]
    */
 
   enum BuckinghamType{
