@@ -27,7 +27,11 @@ component{
   type = "O";
   nMol = 2160;
 }
-
+flucQ {
+  propagator = "Damped";
+  targetTemp = 1;
+  dragCoefficient = 1;
+}
 forceField = "DR-EAM";
 forceFieldFileName = "DR-EAM.v2.frc";
 

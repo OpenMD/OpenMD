@@ -3,7 +3,7 @@
 
 molecule{
   name = "Co";
-  
+
   atom[0]{
     type="Co_FQ";
     position( 0.0, 0.0, 0.0 );
@@ -12,7 +12,7 @@ molecule{
 
 molecule{
   name = "O";
-  
+
   atom[0]{
     type="O_FQ";
     position( 0.0, 0.0, 0.0 );
@@ -27,7 +27,11 @@ component{
   type = "O";
   nMol = 500;
 }
-
+flucQ {
+  propagator = "Damped";
+  targetTemp = 1;
+  dragCoefficient = 1;
+}
 forceField = "DR-EAM";
 forceFieldFileName = "DR-EAM.v2.frc";
 
