@@ -27,13 +27,17 @@ component{
   type = "O";
 	nMol = 2592;
 }
-
+flucQ {
+  propagator = "Damped";
+  targetTemp = 1;
+  dragCoefficient = 1;
+}
 forceField = "DR-EAM";
 forceFieldFileName = "DR-EAM.v2.frc";
 
-outputFluctuatingCharges = true; 
-outputElectricField = true; 
-outputDensity = true; 
+outputFluctuatingCharges = true;
+outputElectricField = true;
+outputDensity = true;
 
 ensemble = NVT;
 dt = 0.1;
@@ -44,7 +48,7 @@ targetTemp = 10;
 tauThermostat = 100;
 
 cutoffMethod = "shifted_force";
-cutoffRadius = 12; 
+cutoffRadius = 12;
 electrostaticScreeningMethod = "DAMPED";
 dampingAlpha = 0.105;
 

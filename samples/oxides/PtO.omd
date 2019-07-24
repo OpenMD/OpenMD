@@ -1,9 +1,9 @@
 <OpenMD version=1>
   <MetaData>
-  
+
 molecule{
   name = "Pt";
-  
+
   atom[0]{
      type="Pt_FQ";
      position( 0.0, 0.0, 0.0 );
@@ -11,7 +11,7 @@ molecule{
 }
 molecule{
   name = "O";
-  
+
   atom[0]{
      type="O_FQ";
      position( 0.0, 0.0, 0.0 );
@@ -26,7 +26,11 @@ component{
   type = "Pt";
   nMol = 1536;
 }
-
+flucQ {
+  propagator = "Damped";
+  targetTemp = 1;
+  dragCoefficient = 1;
+}
 forceField = "DR-EAM";
 forceFieldFileName = "DR-EAM.v2.frc";
 
