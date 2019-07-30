@@ -1,0 +1,78 @@
+#------------------------------------------------------------------------------
+#$Date: 2018-09-27 07:13:35 +0300 (Thu, 27 Sep 2018) $
+#$Revision: 211196 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/52/13/1521320.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1521320
+loop_
+_publ_author_name
+'Migliori, A.'
+'Gemmi, M.'
+'Calestani, G.'
+'Dionigi, C.'
+'Belletti, D.'
+'Nozar, P.'
+'Matacotta, F.C.'
+_publ_section_title
+;
+ Structure determination by electron diffraction and HREM of the
+ incommensurate modulated phase Bax Cu O2 (0.67 < x < 0.70)
+;
+_journal_name_full               'Physica C (Amsterdam)'
+_journal_page_first              89
+_journal_page_last               103
+_journal_volume                  328
+_journal_year                    1999
+_chemical_formula_sum            'Cu O2'
+_space_group_IT_number           22
+_symmetry_space_group_name_Hall  'F 2 2'
+_symmetry_space_group_name_H-M   'F 2 2 2'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_formula_units_Z            4
+_cell_length_a                   11.4
+_cell_length_b                   7.3
+_cell_length_c                   2.73
+_cell_volume                     227.191
+_citation_journal_id_ASTM        PHYCE6
+_cod_data_source_file            Migliori_PHYCE6_1999_659.cif
+_cod_data_source_block           Cu1O2
+_cod_original_cell_volume        227.1906
+_cod_original_formula_sum        'Cu1 O2'
+_cod_database_code               1521320
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+-x,-y,z
+x,-y,-z
+-x,y,-z
+x,y+1/2,z+1/2
+-x,-y+1/2,z+1/2
+x,-y+1/2,-z+1/2
+-x,y+1/2,-z+1/2
+x+1/2,y,z+1/2
+-x+1/2,-y,z+1/2
+x+1/2,-y,-z+1/2
+-x+1/2,y,-z+1/2
+x+1/2,y+1/2,z
+-x+1/2,-y+1/2,z
+x+1/2,-y+1/2,-z
+-x+1/2,y+1/2,-z
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+Cu1 Cu 0.25 0.25 0.25 1 0.0
+O1 O 0.15 0.25 0.75 1 0.0

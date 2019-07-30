@@ -1,0 +1,90 @@
+#------------------------------------------------------------------------------
+#$Date: 2017-10-06 19:24:22 +0300 (Fri, 06 Oct 2017) $
+#$Revision: 201816 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/9/01/41/9014175.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/. The original data for this entry
+# were provided the American Mineralogist Crystal Structure Database,
+# http://rruff.geo.arizona.edu/AMS/amcsd.php
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_9014175
+loop_
+_publ_author_name
+'Bolzan, A. A.'
+'Fong, C.'
+'Kennedy, B. J.'
+'Howard, C. J.'
+_publ_section_title
+;
+ Structural studies of rutile-type metal dioxides
+;
+_journal_issue                   3
+_journal_name_full               'Acta Crystallographica, Section B'
+_journal_page_first              373
+_journal_page_last               380
+_journal_paper_doi               10.1107/S0108768197001468
+_journal_volume                  53
+_journal_year                    1997
+_chemical_compound_source        Synthetic
+_chemical_formula_sum            'O2 Pb'
+_chemical_name_mineral           Plattnerite
+_space_group_IT_number           136
+_symmetry_space_group_name_Hall  '-P 4n 2n'
+_symmetry_space_group_name_H-M   'P 42/m n m'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_length_a                   4.9577
+_cell_length_b                   4.9577
+_cell_length_c                   3.3879
+_cell_volume                     83.270
+_database_code_amcsd             0019244
+_exptl_crystal_density_diffrn    9.540
+_cod_original_formula_sum        'Pb O2'
+_cod_database_code               9014175
+loop_
+_space_group_symop_operation_xyz
+x,y,z
+-y,-x,z
+y,x,-z
+1/2+y,1/2-x,1/2-z
+1/2-y,1/2+x,1/2+z
+1/2+x,1/2-y,1/2+z
+1/2-x,1/2+y,1/2-z
+x,y,-z
+-x,-y,z
+y,x,z
+-y,-x,-z
+1/2-y,1/2+x,1/2-z
+1/2+y,1/2-x,1/2+z
+1/2-x,1/2+y,1/2+z
+1/2+x,1/2-y,1/2-z
+-x,-y,-z
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_U_11
+_atom_site_aniso_U_22
+_atom_site_aniso_U_33
+_atom_site_aniso_U_12
+_atom_site_aniso_U_13
+_atom_site_aniso_U_23
+Pb 0.00860 0.00860 0.00500 0.00100 0.00000 0.00000
+O 0.01400 0.01400 0.00720 0.00700 0.00000 0.00000
+loop_
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+Pb 0.00000 0.00000 0.00000
+O 0.30720 0.30720 0.00000
+loop_
+_cod_related_entry_id
+_cod_related_entry_database
+_cod_related_entry_code
+1 AMCSD 0019244
