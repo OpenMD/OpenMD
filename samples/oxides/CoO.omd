@@ -5,7 +5,7 @@ molecule{
   name = "Co";
   
   atom[0]{
-     type="Pt_FQ";
+     type="Co_FQ";
      position( 0.0, 0.0, 0.0 );
   }
 }
