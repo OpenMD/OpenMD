@@ -2430,17 +2430,17 @@ namespace OpenMD {
         // Shift molecules by half a box to have bins start at 0
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
-	switch(rnemdPrivilegedAxis_) {
+	      switch(rnemdPrivilegedAxis_) {
         case rnemdX:
-	  binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
-	  break;
+	        binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
+	        break;
         case rnemdY:
-	  binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
-	  break;
+	        binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
+	        break;
         case rnemdZ:
-	default:
-	  binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
-	}
+	      default:
+	        binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
+	      }
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
         binNo = int(rPos.length() / binWidth_);
@@ -3000,4 +3000,3 @@ namespace OpenMD {
     }
   }
 }
-
