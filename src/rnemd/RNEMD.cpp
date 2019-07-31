@@ -552,16 +552,6 @@ namespace OpenMD {
     data_[DENSITY] = density;
     outputMap_["DENSITY"] =  DENSITY;
 
-    OutputData ccDensity;           // Charge-carrier density
-    ccDensity.units =  "angstroms^-3";
-    ccDensity.title =  "Charge Carrier Density";
-    ccDensity.dataType = "RealType";
-    ccDensity.accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
-      ccDensity.accumulator.push_back( new Accumulator() );
-    data_[CCDENSITY] = ccDensity;
-    outputMap_["CCDENSITY"] =  CCDENSITY;
-
     OutputData activity;
     activity.units = "unitless";
     activity.title =  "Activity";  
@@ -636,7 +626,7 @@ namespace OpenMD {
       case rnemdKeCurrent:
         outputMask_.set(TEMPERATURE);
         outputMask_.set(VELOCITY);
-        outputMask_.set(CCDENSITY);
+        outputMask_.set(DENSITY);
         outputMask_.set(ACTIVITY);
         outputMask_.set(ELECTRICFIELD);
       default:
@@ -2384,7 +2374,6 @@ namespace OpenMD {
     int binNo;
     int typeIndex(-1);
     RealType mass;
-    RealType charge;
     Vector3d vel; 
     Vector3d rPos;
     RealType KE;
@@ -2394,8 +2383,6 @@ namespace OpenMD {
     Vector3d eField;
 
     vector<RealType> binMass(nBins_, 0.0);
-    vector<RealType> binPosCharge(nBins_, 0.0);
-    vector<RealType> binNegCharge(nBins_, 0.0);
     vector<Vector3d> binP(nBins_, V3Zero);
     vector<RealType> binOmega(nBins_, 0.0);
     vector<Vector3d> binL(nBins_, V3Zero);
@@ -2444,15 +2431,15 @@ namespace OpenMD {
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
 	      switch(rnemdPrivilegedAxis_) {
-          case rnemdX:
-	          binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
-	          break;
-          case rnemdY:
-	          binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
-	          break;
-          case rnemdZ:
-	        default:
-	          binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
+        case rnemdX:
+	        binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
+	        break;
+        case rnemdY:
+	        binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
+	        break;
+        case rnemdZ:
+	      default:
+	        binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
 	      }
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
@@ -2469,13 +2456,6 @@ namespace OpenMD {
       I(0, 0) += mass * r2;
       I(1, 1) += mass * r2;
       I(2, 2) += mass * r2;
-
-      if (sd->isAtom()) {
-        FixedChargeAdapter fca = FixedChargeAdapter(atype);
-        if ( fca.isFixedCharge() ) charge = fca.getCharge();
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-        if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
-      } else charge = 0.0;
 
       if (outputMask_[ELECTRICFIELD]) 
         eField = sd->getElectricField(); // kcal/mol/e/Angstrom
@@ -2504,11 +2484,6 @@ namespace OpenMD {
       if (binNo >= 0 && binNo < int(nBins_))  {
         binCount[binNo]++;
         binMass[binNo] += mass;
-        if (charge > 0) {
-          binPosCharge[binNo] += charge;
-        } else {
-          binNegCharge[binNo] += charge;
-        }
         binP[binNo] += mass*vel;
         binKE[binNo] += KE;
         binI[binNo] += I;
@@ -2574,7 +2549,7 @@ namespace OpenMD {
 #endif
 
     Vector3d omega;
-    RealType den, ccden, temp, z, r, binVolume;
+    RealType den, temp, z, r, binVolume;
     std::vector<RealType> nden(outputTypes_.size(), 0.0);
     RealType boxVolume = currentSnap_->getVolume();
 
@@ -2590,12 +2565,6 @@ namespace OpenMD {
       }
 
       den = binMass[i] * Constants::densityConvert / binVolume;
-
-      if (charge > 0) {
-        ccden = binPosCharge[i] / binVolume;
-      } else {
-        ccden = std::abs(binNegCharge[i]) / binVolume;
-      }
 
       if (outputMask_[ACTIVITY]) {
         for (unsigned int k = 0; k < outputTypes_.size(); k++) {
@@ -2635,9 +2604,6 @@ namespace OpenMD {
               break;
             case DENSITY:
               dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(den);
-              break;
-            case CCDENSITY:
-              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(ccden);
               break;
             case ACTIVITY:
               for (unsigned int k = 0; k < outputTypes_.size(); k++) { 
@@ -3034,4 +3000,3 @@ namespace OpenMD {
     }
   }
 }
-
