@@ -147,16 +147,19 @@ namespace OpenMD {
           Atom* atom = static_cast<Atom*>(sliceSDLists_[i][k]);
 	
           AtomType* atomType = atom->getAtomType();
-	
-          FixedChargeAdapter fca = FixedChargeAdapter(atomType);
-          if ( fca.isFixedCharge() ) {
-            q += fca.getCharge();
+
+          if (sd->isAtom()) {
+            FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+            if ( fca.isFixedCharge() ) {
+              q += fca.getCharge();
+            }
+            
+            FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+            if ( fqa.isFluctuatingCharge() ) {
+              q += atom->getFlucQPos();
+            }
           }
-	
-          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-          if ( fqa.isFluctuatingCharge() ) {
-            q += atom->getFlucQPos();
-          }
+          
           Vector3d vel = sliceSDLists_[i][k]->getVel();
           binJc += q * vel[axis_] - COMvel[axis_];
         }
