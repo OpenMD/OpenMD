@@ -116,7 +116,9 @@ Mat3x3d Triangle::computeHydrodynamicTensor(RealType viscosity) {
     hydro_tensor(centroid_,centroid_,vertices_[1],vertices_[2],s1,viscosity)+
     hydro_tensor(centroid_,centroid_,vertices_[2],vertices_[0],s2,viscosity);
 
-  return H.inverse();
+  RealType area = computeArea();
+
+  return H.inverse() * area;
 }
 
 Mat3x3d Triangle::hydro_tensor(
