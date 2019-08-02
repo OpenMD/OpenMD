@@ -148,7 +148,7 @@ namespace OpenMD {
 	
           AtomType* atomType = atom->getAtomType();
 
-          if (sd->isAtom()) {
+          if (sliceSDLists_[i][k]->isAtom()) {
             FixedChargeAdapter fca = FixedChargeAdapter(atomType);
             if ( fca.isFixedCharge() ) {
               q += fca.getCharge();
