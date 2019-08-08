@@ -664,15 +664,20 @@ namespace OpenMD {
         else
           slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
         
-        if (hasSlabACenter) 
+        if (hasSlabACenter) {
           slabACenter_ = rnemdParams->getSlabACenter();
-        else 
+          selectionAstream << "select wrappedz > " 
+                           << slabACenter_ - 0.5*slabWidth_ 
+                           <<  " && wrappedz < "
+                           << slabACenter_ + 0.5*slabWidth_;
+        } else {
           slabACenter_ = 0.0;
-        
-        selectionAstream << "select wrappedz > " 
-                         << slabACenter_ - 0.5*slabWidth_ 
-                         <<  " && wrappedz < "
-                         << slabACenter_ + 0.5*slabWidth_;
+          RealType leftEdge = slabACenter_ - 0.5*slabWidth_;
+          selectionAstream << "select wrappedz > " 
+                           << leftEdge
+                           <<  " && wrappedz < "
+                           << -leftEdge;
+        }
         selectionA_ = selectionAstream.str();
       } else {
         if (hasSphereARadius) 
@@ -701,15 +706,20 @@ namespace OpenMD {
         else
           slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
         
-        if (hasSlabBCenter) 
+        if (hasSlabBCenter) {
           slabBCenter_ = rnemdParams->getSlabBCenter();
-        else 
+          selectionBstream << "select wrappedz > " 
+                           << slabBCenter_ - 0.5*slabWidth_ 
+                           <<  " && wrappedz < "
+                           << slabBCenter_ + 0.5*slabWidth_;
+        } else {
           slabBCenter_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
-        
-        selectionBstream << "select wrappedz > " 
-                         << slabBCenter_ - 0.5*slabWidth_ 
-                         <<  " && wrappedz < "
-                         << slabBCenter_ + 0.5*slabWidth_;
+          RealType leftEdge = slabBCenter_ - 0.5*slabWidth_;
+          selectionBstream << "select wrappedz > " 
+                           << leftEdge
+                           <<  " || wrappedz < "
+                           << -leftEdge;
+        }
         selectionB_ = selectionBstream.str();
       } else {
         if (hasSphereBRadius_) {
