@@ -150,9 +150,7 @@ namespace OpenMD {
     }
     return snap->getRotationalKineticEnergy();
   }
-
-      
-
+     
   RealType Thermo::getKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -194,13 +192,19 @@ namespace OpenMD {
     return snap->getTotalEnergy();
   }
 
+  /* 
+   * Returns only the nuclear portion of the temperature - see
+   * getElectronicTemperature for the electronic portion */  
   RealType Thermo::getTemperature() {
 
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (!snap->hasTemperature) {
+      
+      RealType nuclearKE =  this->getTranslationalKinetic() +
+        this->getRotationalKinetic(); 
 
-      RealType temperature = ( 2.0 * this->getKinetic() ) 
+      RealType temperature = ( 2.0 * nuclearKE ) 
         / (info_->getNdf()* Constants::kb );
 
       snap->setTemperature(temperature);
