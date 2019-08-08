@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifndef BRAINS_VELOCITIZER_HPP
 #define BRAINS_VELOCITIZER_HPP
 #include "brains/SimInfo.hpp"
@@ -61,11 +61,18 @@ namespace OpenMD {
     virtual ~Velocitizer();
 
     /** @brief Resamples velocities and angular momenta
-     * Resamples velocities and angular momenta from a Maxwell-Boltzmann 
+     * Resamples velocities and angular momenta from a Maxwell-Boltzmann
      * distribution.
      * @param t : Temperature of the new distribution.
-     */    
-    void randomize(RealType t);
+     */
+    void randomize(RealType ct);
+
+    /** @brief Resamples charge velocities
+     * Resamples charge velocities from a Maxwell-Boltzmann
+     * distribution.
+     * @param ct : Charge temperature of the new distribution.
+     */
+    void randomizeChargeVelocity(RealType t);
 
     /** @brief Scales velocities and angular momenta by a scaling factor
      * Rescales velocity (and angular momenta) by a scaling factor.
@@ -74,18 +81,18 @@ namespace OpenMD {
     void scale(RealType lambda);
 
     /** @brief Removes Center of Mass Drift Velocity
-     * Removes the center of mass drift velocity (required for accurate 
+     * Removes the center of mass drift velocity (required for accurate
      * calculations of diffusion).
      */
     void removeComDrift();
-    
+
     /** @brief Removes Center of Mass Angular momentum
-     * Removes the center of mass angular momentum (particularly useful in 
+     * Removes the center of mass angular momentum (particularly useful in
      * non-periodic simulations).
      */
     void removeAngularDrift();
-        
-  private:        
+
+  private:
     SimInfo* info_;
     Globals* globals_;
     Thermo thermo_;

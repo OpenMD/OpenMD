@@ -51,6 +51,9 @@ struct gengetopt_args_info
   double energy_arg;	/**< @brief energy (kcal/mol).  */
   char * energy_orig;	/**< @brief energy (kcal/mol) original value given at command line.  */
   const char *energy_help; /**< @brief energy (kcal/mol) help description.  */
+  double chargetemperature_arg;	/**< @brief charge temperature (K).  */
+  char * chargetemperature_orig;	/**< @brief charge temperature (K) original value given at command line.  */
+  const char *chargetemperature_help; /**< @brief charge temperature (K) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -58,6 +61,7 @@ struct gengetopt_args_info
   unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int temperature_given ;	/**< @brief Whether temperature was given.  */
   unsigned int energy_given ;	/**< @brief Whether energy was given.  */
+  unsigned int chargetemperature_given ;	/**< @brief Whether chargetemperature was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -63,7 +63,7 @@
 using namespace OpenMD;
 
 int main(int argc, char *argv []) {
-    
+
   gengetopt_args_info args_info;
   std::string inputFileName;
   std::string outputFileName;
@@ -92,7 +92,7 @@ int main(int argc, char *argv []) {
 
   // get output file name
   outputFileName = args_info.output_arg;
-  
+
   if (!outputFileName.compare(inputFileName)) {
     sprintf(painCave.errMsg,
             "Input and Output File names should be different!");
@@ -100,7 +100,7 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 1;
     simError();
   }
-  
+
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, true);
@@ -109,20 +109,23 @@ int main(int argc, char *argv []) {
 
   // Important utility classes for computing system properties:
   Thermo thermo(info);
+  //std::cout<<thermo.getElectronicTemperature()<<std::endl;
+  //std::cout<<thermo.getTemperature()<<std::endl;
+  //std::cout<<info->getNdf()<<std::endl;
   Velocitizer* veloSet = new Velocitizer(info);
   ForceManager* forceMan = new ForceManager(info);
 
   // Just in case we were passed a system that is on the move:
   veloSet->removeComDrift();
   forceMan->calcForces();
-  
+
   RealType instPE = thermo.getPotential();
   RealType instKE = thermo.getKinetic();
 
   // Now that we have the information from the current frame, advance
   // the snapshot to make a modified frame:
   info->getSnapshotManager()->advance();
-  
+
   // Create DumpWriter to hold the modified frame:
   DumpWriter* writer = new DumpWriter(info, outputFileName);
   if (writer == NULL) {
@@ -135,20 +138,34 @@ int main(int argc, char *argv []) {
   // If resampling temperature, we call the randomizer method:
   if (args_info.temperature_given) {
     RealType temperature = args_info.temperature_arg;
-    
+
     if (temperature < 0.0) {
       sprintf(painCave.errMsg, "Temperatures must be positive numbers.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
-    
+
     veloSet->randomize(temperature);
+  }
+
+  // If resampling charge temperature, we call the randomizeChargeVelocity method
+  if (args_info.chargetemperature_given) {
+    RealType charge_temperature = args_info.chargetemperature_arg;
+
+    if (charge_temperature < 0.0) {
+      sprintf(painCave.errMsg, "Temperatures must be positive numbers.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    veloSet->randomizeChargeVelocity(charge_temperature);
   }
 
   // If scaling total energy, scale only the kinetic:
   if (args_info.energy_given) {
-    RealType energy = args_info.energy_arg;       
+    RealType energy = args_info.energy_arg;
     RealType epsilon = 1e-6;
     RealType lambda = 0.0;
 
@@ -170,13 +187,13 @@ int main(int argc, char *argv []) {
       else {
         veloSet->randomize(10.0);
         instKE = thermo.getKinetic();
-	lambda = sqrt( (energy - instPE) / instKE );		
+	lambda = sqrt( (energy - instPE) / instKE );
         veloSet->scale(lambda);
-      }      
+      }
     }
   }
-  
-  writer->writeDump();    
+
+  writer->writeDump();
   // deleting the writer will put the closing at the end of the dump file.
   delete writer;
 

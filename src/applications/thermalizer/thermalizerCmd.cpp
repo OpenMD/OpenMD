@@ -26,20 +26,21 @@
 
 const char *gengetopt_args_info_purpose = "Two functionalities: 1. (-t) Resamples the velocities for all the integrable\nobjects in an OpenMD file from a Maxwell-Boltzmann distribution. 2. (-e) Scales\nthe total energy of all integrable objects in an OpenMD file to a desired total\nenergy.";
 
-const char *gengetopt_args_info_usage = "Usage: thermalizer -oSTRING|--output=STRING [-h|--help] [-V|--version]\n         [-iSTRING|--input=STRING] [-tDOUBLE|--temperature=DOUBLE]\n         [-eDOUBLE|--energy=DOUBLE] [FILES]...";
+const char *gengetopt_args_info_usage = "Usage: thermalizer -oSTRING|--output=STRING [-h|--help] [-V|--version]\n         [-iSTRING|--input=STRING] [-tDOUBLE|--temperature=DOUBLE]\n         [-eDOUBLE|--energy=DOUBLE] [-cDOUBLE|--chargetemperature=DOUBLE]\n         [FILES]...";
 
 const char *gengetopt_args_info_versiontext = "";
 
 const char *gengetopt_args_info_description = "";
 
 const char *gengetopt_args_info_help[] = {
-  "  -h, --help                Print help and exit",
-  "  -V, --version             Print version and exit",
-  "  -i, --input=STRING        Input file name",
-  "  -o, --output=STRING       Output file name (mandatory)",
+  "  -h, --help                    Print help and exit",
+  "  -V, --version                 Print version and exit",
+  "  -i, --input=STRING            Input file name",
+  "  -o, --output=STRING           Output file name (mandatory)",
   "\n Group: thermalizer\n  One of these is required",
-  "  -t, --temperature=DOUBLE  temperature (K)",
-  "  -e, --energy=DOUBLE       energy (kcal/mol)",
+  "  -t, --temperature=DOUBLE      temperature (K)",
+  "  -e, --energy=DOUBLE           energy (kcal/mol)",
+  "  -c, --chargetemperature=DOUBLE\n                                charge temperature (K)",
     0
 };
 
@@ -72,6 +73,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->output_given = 0 ;
   args_info->temperature_given = 0 ;
   args_info->energy_given = 0 ;
+  args_info->chargetemperature_given = 0 ;
   args_info->thermalizer_group_counter = 0 ;
 }
 
@@ -85,6 +87,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->output_orig = NULL;
   args_info->temperature_orig = NULL;
   args_info->energy_orig = NULL;
+  args_info->chargetemperature_orig = NULL;
   
 }
 
@@ -99,6 +102,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->output_help = gengetopt_args_info_help[3] ;
   args_info->temperature_help = gengetopt_args_info_help[5] ;
   args_info->energy_help = gengetopt_args_info_help[6] ;
+  args_info->chargetemperature_help = gengetopt_args_info_help[7] ;
   
 }
 
@@ -191,6 +195,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->output_orig));
   free_string_field (&(args_info->temperature_orig));
   free_string_field (&(args_info->energy_orig));
+  free_string_field (&(args_info->chargetemperature_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -238,6 +243,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "temperature", args_info->temperature_orig, 0);
   if (args_info->energy_given)
     write_into_file(outfile, "energy", args_info->energy_orig, 0);
+  if (args_info->chargetemperature_given)
+    write_into_file(outfile, "chargetemperature", args_info->chargetemperature_orig, 0);
   
 
   i = EXIT_SUCCESS;
@@ -295,6 +302,8 @@ reset_group_thermalizer(struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->temperature_orig));
   args_info->energy_given = 0 ;
   free_string_field (&(args_info->energy_orig));
+  args_info->chargetemperature_given = 0 ;
+  free_string_field (&(args_info->chargetemperature_orig));
 
   args_info->thermalizer_group_counter = 0;
 }
@@ -1139,6 +1148,7 @@ cmdline_parser_internal (
         { "output",	1, NULL, 'o' },
         { "temperature",	1, NULL, 't' },
         { "energy",	1, NULL, 'e' },
+        { "chargetemperature",	1, NULL, 'c' },
         { 0,  0, 0, 0 }
       };
 
@@ -1147,7 +1157,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:t:e:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:t:e:c:", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1218,6 +1228,21 @@ cmdline_parser_internal (
               &(local_args_info.energy_given), optarg, 0, 0, ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
               "energy", 'e',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'c':	/* charge temperature (K).  */
+        
+          if (args_info->thermalizer_group_counter && override)
+            reset_group_thermalizer (args_info);
+          args_info->thermalizer_group_counter += 1;
+        
+          if (update_arg( (void *)&(args_info->chargetemperature_arg), 
+               &(args_info->chargetemperature_orig), &(args_info->chargetemperature_given),
+              &(local_args_info.chargetemperature_given), optarg, 0, 0, ARG_DOUBLE,
+              check_ambiguity, override, 0, 0,
+              "chargetemperature", 'c',
               additional_error))
             goto failure;
         

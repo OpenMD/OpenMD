@@ -1,4 +1,4 @@
-# Input file for gengetopt. This file generates thermalizerCmd.cpp and 
+# Input file for gengetopt. This file generates thermalizerCmd.cpp and
 # thermalizerCmd.hpp for parsing command line arguments using getopt and
 # getoptlong.  gengetopt is available from:
 #
@@ -10,7 +10,7 @@
 args "--include-getopt --long-help --show-required --unamed-opts --file-name=thermalizerCmd --c-extension=cpp --header-extension=hpp"
 
 package "thermalizer"
-version "" 
+version ""
 
 purpose "Two functionalities: 1. (-t) Resamples the velocities for all the integrable objects in an OpenMD file from a Maxwell-Boltzmann distribution. 2. (-e) Scales the total energy of all integrable objects in an OpenMD file to a desired total energy."
 
@@ -21,3 +21,4 @@ option      "output"      o "Output file name" required string
 defgroup    "thermalizer" groupdesc="One of these is required" required
 groupoption "temperature" t "temperature (K)"   double group="thermalizer"
 groupoption "energy"	  e "energy (kcal/mol)" double group="thermalizer"
+groupoption "chargetemperature" c "charge temperature (K)" double group="thermalizer"
