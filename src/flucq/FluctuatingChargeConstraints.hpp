@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #ifndef INTEGRATORS_FLUCTUATINGCHARGECONSTRAINTS_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGECONSTRAINTS_HPP
 
@@ -52,6 +52,7 @@ namespace OpenMD {
     FluctuatingChargeConstraints(SimInfo* info);
     void setConstrainRegions(bool cr);
     void applyConstraints();
+    void applyConstraintsOnChargeVelocities();
 
   protected:
     void initialize();
@@ -61,6 +62,7 @@ namespace OpenMD {
     bool constrainRegions_;
     std::vector<int> regionKeys_;
     std::vector<RealType> regionForce_;
+    std::vector<RealType> regionCMom_;
     std::vector<int> regionCharges_;
   };
 }

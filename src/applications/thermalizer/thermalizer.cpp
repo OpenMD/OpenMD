@@ -109,9 +109,6 @@ int main(int argc, char *argv []) {
 
   // Important utility classes for computing system properties:
   Thermo thermo(info);
-  //std::cout<<thermo.getElectronicTemperature()<<std::endl;
-  //std::cout<<thermo.getTemperature()<<std::endl;
-  //std::cout<<info->getNdf()<<std::endl;
   Velocitizer* veloSet = new Velocitizer(info);
   ForceManager* forceMan = new ForceManager(info);
 

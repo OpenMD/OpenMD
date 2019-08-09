@@ -47,6 +47,7 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "flucq/FluctuatingChargeConstraints.hpp"
 
 
 #ifndef IS_MPI
@@ -215,7 +216,7 @@ namespace OpenMD {
 
          aw2 = 2.0 * kebar / atom->getChargeMass();
          wbar = sqrt(aw2);
-      
+
          // picks random velocities from a gaussian distribution
          // centered on vbar
          atom-> setFlucQVel(wbar * randNumGen_->randNorm(0.0, 1.0));
@@ -245,6 +246,18 @@ namespace OpenMD {
      }
    }
  }
+ FluctuatingChargeParameters* fqParams;
+ FluctuatingChargeConstraints* fqConstraints;
+
+ Globals* simParams = info_->getSimParams();
+ fqParams = simParams->getFluctuatingChargeParameters();
+
+ fqConstraints = new FluctuatingChargeConstraints(info_);
+ fqConstraints->setConstrainRegions(fqParams->getConstrainRegions());
+ fqConstraints->applyConstraintsOnChargeVelocities();
+
+
+
 }
 
 
