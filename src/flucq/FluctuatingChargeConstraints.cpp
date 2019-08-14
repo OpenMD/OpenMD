@@ -251,14 +251,14 @@ namespace OpenMD {
     Atom* atom;
 
     RealType flucqP, systemCMom, regionCMom, molCMom, molFlucQMass, flucqW;
-    int systemChargeMass;
+    RealType systemChargeMass;
 
     // accumulate the system fluctuating charge velocities, but we have
     // separate constraints for any charges in defined regions and for
     // molecules with constrained charges:
 
-    systemCMom = 0;
-    systemChargeMass = 0;
+    systemCMom = 0.0;
+    systemChargeMass = 0.0;
     if (constrainRegions_) {
       std::fill(regionCMom_.begin(), regionCMom_.end(), 0.0);
       std::fill(regionChargeMass_.begin(), regionChargeMass_.end(), 0);
@@ -370,7 +370,7 @@ namespace OpenMD {
         nConstraints++;
       } else {
         int region = mol->getRegion();
-        if(!constrainRegions_ or region < 0){
+        if (!constrainRegions_ || region < 0){
           systemConstrain = 1;
         }
       }
