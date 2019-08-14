@@ -135,7 +135,9 @@ if (defined($opt_x)){
     $boxx = $opt_x;
   } else {
     die "Error: the value for '-x' ($opt_x) is not a valid number\n       Please choose a positive real # value\n";
-  }
+  } 
+} else {
+   die "Error: the size of the box '-x' must be set\n";
 }
 if (defined($opt_y)){
   $nothingSelected = 0;
@@ -144,6 +146,8 @@ if (defined($opt_y)){
   } else {
     die "Error: the value for '-y' ($opt_y) is not a valid number\n       Please choose a positive real # value\n";
   }
+} else {
+  die "Error: the size of the box '-y' must be set\n";
 }
 if (defined($opt_z)){
   $nothingSelected = 0;
@@ -152,6 +156,12 @@ if (defined($opt_z)){
   } else {
     die "Error: the value for '-z' ($opt_z) is not a valid number\n       Please choose a positive real # value\n";
   }
+} else {
+  die "Error: the size of the box '-z' must be set\n";
+}
+
+if ($nothingSelected == 1) {
+    die "(For help, use the \'-h\' option.)\n";
 }
 
 # open the file writer
@@ -276,9 +286,6 @@ if ($opt_m){
   print "The file \"water.inc\" was generated for inclusion in \"$fileName\"\n";
 }
 
-if ($nothingSelected == 1) {
-    print "(For help, use the \'-h\' option.)\n";
-}
 
 
 # this marks the end of the main program, below is subroutines
