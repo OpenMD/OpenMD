@@ -72,11 +72,11 @@ namespace OpenMD {
      * distribution.
      * @param ct : Charge temperature of the new distribution.
      */
-    void randomizeChargeVelocity(RealType t);
+    void randomizeChargeVelocity(RealType ct);
 
     /** @brief Scales velocities and angular momenta by a scaling factor
      * Rescales velocity (and angular momenta) by a scaling factor.
-     * @param s : Scaling factor (must be >= 0)
+     * @param lambda : Scaling factor (must be >= 0)
      */
     void scale(RealType lambda);
 

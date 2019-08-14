@@ -113,6 +113,7 @@ namespace OpenMD {
      * @return the atomic number matching the element symbol passed
      * or 0 if not defined. 
      * @param name the element name
+     * @param iso the isotope index for Deuterium or Tritium
      */
     int GetAtomicNum(std::string name, int &iso);
     /**
