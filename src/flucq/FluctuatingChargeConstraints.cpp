@@ -122,6 +122,7 @@ namespace OpenMD {
       regionForce_.resize( regionKeys_.size() );
       regionCMom_.resize(regionKeys_.size());
       regionCharges_.resize( regionKeys_.size() );
+      regionChargeMass_.resize(regionKeys_.size());
     }
   }
 
@@ -252,18 +253,18 @@ namespace OpenMD {
     Molecule* mol;
     Atom* atom;
 
-    RealType flucqP, systemCMom, regionCMom, molCMom;
-    int systemCharges;
+    RealType flucqP, systemCMom, regionCMom, molCMom, molFlucQMass, flucqW;
+    int systemChargeMass;
 
     // accumulate the system fluctuating charge velocities, but we have
     // separate constraints for any charges in defined regions and for
     // molecules with constrained charges:
 
     systemCMom=0;
-    systemCharges = 0;
+    systemChargeMass = 0;
     if (constrainRegions_) {
       std::fill(regionCMom_.begin(), regionCMom_.end(), 0.0);
-      std::fill(regionCharges_.begin(), regionCharges_.end(), 0);
+      std::fill(regionChargeMass_.begin(), regionChargeMass_.end(), 0);
     }
 
     for (mol = info_->beginMolecule(i); mol != NULL;
@@ -279,10 +280,10 @@ namespace OpenMD {
           flucqP = atom->getFlucQVel() * atom->getChargeMass();
           if (constrainRegions_ && region >= 0) {
             regionCMom_[regionKeys_[region]] += flucqP;
-            regionCharges_[regionKeys_[region]] += 1;
+            regionChargeMass_[regionKeys_[region]] += atom->getChargeMass();
           } else {
             systemCMom += flucqP;
-            systemCharges += 1;
+            systemChargeMass += atom->getChargeMass();
           }
         }
       }
@@ -290,12 +291,12 @@ namespace OpenMD {
 
 
     // divide by the total number of fluctuating charges:
-    systemCMom /= systemCharges;
+    systemCMom /= systemChargeMass;
 
     // do the same in the regions:
     if (constrainRegions_) {
       for (unsigned int i = 0; i < regionCMom_.size(); ++i)  {
-        regionCMom_[ i ] /= regionCharges_[ i ];
+        regionCMom_[ i ] /= regionChargeMass_[ i ];
       }
     }
 
@@ -303,42 +304,101 @@ namespace OpenMD {
          mol = info_->nextMolecule(i)) {
 
       molCMom = 0.0;
+      molFlucQMass = 0.0;
 
       if (mol->constrainTotalCharge()) {
         for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
              atom = mol->nextFluctuatingCharge(j)) {
           molCMom += atom->getFlucQVel() * atom->getChargeMass();
+          molFlucQMass += atom->getChargeMass();
         }
-        molCMom /= mol->getNFluctuatingCharges();
+        molCMom /= molFlucQMass;
 
         for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
              atom = mol->nextFluctuatingCharge(j)) {
 
-          flucqP = atom->getFlucQVel() * atom->getChargeMass() - molCMom;
-          atom->setFlucQVel(flucqP/atom->getChargeMass());
+          flucqW = atom->getFlucQVel() - molCMom;
+          atom->setFlucQVel(flucqW);
         }
       } else {
         int region = mol->getRegion();
 
         regionCMom = 0.0;
         if (constrainRegions_ && region >= 0) {
-          regionCMom = regionForce_[regionKeys_[region]];
+          regionCMom = regionCMom_[regionKeys_[region]];
 
           for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
                atom = mol->nextFluctuatingCharge(j)) {
-            flucqP = atom->getFlucQVel() * atom->getChargeMass() - regionCMom;
-            atom->setFlucQVel(flucqP / atom->getChargeMass());
+            flucqW = atom->getFlucQVel() - regionCMom;
+            atom->setFlucQVel(flucqW);
           }
         } else {
 
           for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
                atom = mol->nextFluctuatingCharge(j)) {
-            flucqP = atom->getFlucQVel() * atom->getChargeMass() - systemCMom;
-            atom->setFlucQVel(flucqP / atom->getChargeMass());
+            flucqW = atom->getFlucQVel() - systemCMom;
+            atom->setFlucQVel(flucqW);
 
           }
         }
       }
     }
   }
+
+
+
+  int FluctuatingChargeConstraints::getNumberOfFlucQConstraints(){
+    int nConstraints = 0;
+    if (!initialized_) initialize();
+    if (!hasFlucQ_) return 0;
+    SimInfo::MoleculeIterator i;
+    Molecule* mol;
+    Atom* atom;
+    int systemConstrain = 0;
+    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
+      if (mol->constrainTotalCharge())nConstraints++;
+      else{
+        int region = mol->getRegion();
+        if(!constrainRegions_ or region < 0){
+          systemConstrain = 1;
+        }
+
+      }
+    }
+      return nConstraints + regionCMom_.size() + systemConstrain;
+
+  }
+
+  int FluctuatingChargeConstraints::getNumberOfFlucQAtoms(){
+    int nFlucq = 0;
+    if (!initialized_) initialize();
+    if (!hasFlucQ_) return 0;
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator  j;
+    Molecule* mol;
+    Atom* atom;
+    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
+      if (mol->constrainTotalCharge()){
+        nFlucq += mol->getNFluctuatingCharges();
+      }
+      else {
+        int region = mol->getRegion();
+        if (constrainRegions_ && region >= 0) {
+          for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+               atom = mol->nextFluctuatingCharge(j)) {
+            nFlucq++;
+          }
+        } else {
+            for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+               atom = mol->nextFluctuatingCharge(j)) {
+              nFlucq++;
+
+            }
+         }
+      }
+
+   }
+  return nFlucq;
+  }
+
 }
