@@ -271,8 +271,10 @@ namespace OpenMD {
     version.append(",");
 
     std::string rev(revision, strnlen(revision, 40));
+    rev.append(40 - rev.length(), ' ');
+
     version.append(" revision: ");
-    // If there's no SVN revision, just call this the RELEASE revision.
+    // If there's no GIT revision, just call this the RELEASE revision.
     if (!rev.empty()) {
       version.append(rev);
     } else {

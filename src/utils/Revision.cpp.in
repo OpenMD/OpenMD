@@ -24,6 +24,7 @@ namespace OpenMD {
   std::string Revision::getRevision() {
     std::string r;
     std::string rev(revision, strnlen(revision, 40));
+    rev.append(40 - rev.length(), ' ');
     r.append("Revision: ");
     // If there's no GIT SHA1 revision, just call this the RELEASE revision.
     if (!rev.empty()) {
