@@ -134,7 +134,6 @@ namespace OpenMD {
 
     kebar = Constants::kB * temperature * info_->getNdfRaw() /
       (2.0 * info_->getNdf());
-
     for( mol = info_->beginMolecule(mi); mol != NULL;
 	 mol = info_->nextMolecule(mi) ) {
 
@@ -197,8 +196,19 @@ namespace OpenMD {
     Molecule::IntegrableObjectIterator ioi;
     Molecule * mol;
     StuntDouble * sd;
+    FluctuatingChargeParameters* fqParams;
+    FluctuatingChargeConstraints* fqConstraints;
 
-    kebar = Constants::kb * temperature / 2;
+    Globals* simParams = info_->getSimParams();
+    fqParams = simParams->getFluctuatingChargeParameters();
+
+    fqConstraints = new FluctuatingChargeConstraints(info_);
+    fqConstraints->setConstrainRegions(fqParams->getConstrainRegions());
+
+    int nConstrain =  fqConstraints->getNumberOfFlucQConstraints(); // no of constraints in charge
+    int dfRaw =  fqConstraints->getNumberOfFlucQAtoms(); // no of FlucQ freedom
+    int dfActual = dfRaw - nConstrain;
+    kebar = dfRaw * Constants::kb * temperature / (2 * dfActual);
 
     for( mol = info_->beginMolecule(mi); mol != NULL;
    mol = info_->nextMolecule(mi) ) {
@@ -246,18 +256,7 @@ namespace OpenMD {
      }
    }
  }
- FluctuatingChargeParameters* fqParams;
- FluctuatingChargeConstraints* fqConstraints;
-
- Globals* simParams = info_->getSimParams();
- fqParams = simParams->getFluctuatingChargeParameters();
-
- fqConstraints = new FluctuatingChargeConstraints(info_);
- fqConstraints->setConstrainRegions(fqParams->getConstrainRegions());
- fqConstraints->applyConstraintsOnChargeVelocities();
-
-
-
+fqConstraints->applyConstraintsOnChargeVelocities();
 }
 
 

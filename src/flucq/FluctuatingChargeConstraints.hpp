@@ -53,6 +53,8 @@ namespace OpenMD {
     void setConstrainRegions(bool cr);
     void applyConstraints();
     void applyConstraintsOnChargeVelocities();
+    int getNumberOfFlucQConstraints();
+    int getNumberOfFlucQAtoms();
 
   protected:
     void initialize();
@@ -64,6 +66,7 @@ namespace OpenMD {
     std::vector<RealType> regionForce_;
     std::vector<RealType> regionCMom_;
     std::vector<int> regionCharges_;
+    std::vector<RealType> regionChargeMass_;
   };
 }
 #endif
