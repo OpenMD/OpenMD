@@ -363,7 +363,6 @@ namespace OpenMD {
     if (!hasFlucQ_) return 0;
     SimInfo::MoleculeIterator i;
     Molecule* mol;
-    Atom* atom;
     int systemConstrain = 0;
     for (mol = info_->beginMolecule(i); mol != NULL;
          mol = info_->nextMolecule(i)) {
