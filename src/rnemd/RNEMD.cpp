@@ -487,6 +487,8 @@ namespace OpenMD {
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
     
     areaAccumulator_ = new Accumulator();
+    Jc_cationAccumulator_ = new Accumulator();
+    Jc_anionAccumulator_ = new Accumulator();
     
     nBins_ = rnemdParams->getOutputBins();
     binWidth_ = rnemdParams->getOutputBinWidth();
@@ -762,7 +764,9 @@ namespace OpenMD {
 #endif
 
     // delete all of the objects we created:
-    delete areaAccumulator_;    
+    delete areaAccumulator_; 
+    delete Jc_cationAccumulator_; 
+    delete Jc_anionAccumulator_;   
     data_.clear();
   }
   
@@ -1977,7 +1981,6 @@ namespace OpenMD {
       }
     }
 
-    //Volh = volumeA_;
       
     for (sd = smanB.beginSelected(selej); sd != NULL; 
          sd = smanB.nextSelected(selej)) {
@@ -2069,10 +2072,12 @@ namespace OpenMD {
     if ((MQcp > 0.0) && (MQcn < 0.0) && (MQhp > 0.0) && (MQhn < 0.0)) {
       Vector3d vc = Pc / Mc;
 
-      // units of volume (Angstrom^3):
-      alphac = qvTarget_ * (2*Volc / (dividingArea_ * exchangeTime_)) / (Q2cp - Q2cn * (MQcp/MQcn));
       // units of velocity (Angstrom/fs):
+      alphac = qvTarget_ * (2*Volc / (dividingArea_ * exchangeTime_)) / (Q2cp - Q2cn * (MQcp/MQcn));
       betac = -alphac * MQcp / MQcn;
+
+      Jc_cationAccumulator_->add((Q2cp * alphac) / Volc);
+      Jc_anionAccumulator_->add((Q2cn * betac) / Volc);
             
       RealType cNumerator = Kc - kineticTarget_;
       cNumerator -= 0.5 * Mc * vc.x()*vc.x();
@@ -2690,16 +2695,21 @@ namespace OpenMD {
       RealType avgArea;
       areaAccumulator_->getAverage(avgArea);
 
+      RealType avgJc_cation;
+      Jc_cationAccumulator_->getAverage(avgJc_cation);
+      RealType avgJc_anion;
+      Jc_anionAccumulator_->getAverage(avgJc_anion);
+
       RealType Jz(0.0);
       Vector3d JzP(V3Zero);
       Vector3d JzL(V3Zero);
-      RealType Je(0.0);
+      RealType Jc(0.0);
       if (time >= info_->getSimParams()->getDt()) {
         Jz = kineticExchange_ / (time * avgArea)
           / Constants::energyConvert;
         JzP = momentumExchange_ / (time * avgArea);
         JzL = angularMomentumExchange_ / (time * avgArea);
-        Je = qvExchange_ / (time * avgArea);
+        Jc = qvExchange_ / (time * avgArea);
       }
 
       rnemdFile_ << "#######################################################\n";
@@ -2765,8 +2775,15 @@ namespace OpenMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << JzL
                  << " (amu/A^2/fs^2)\n";
-      rnemdFile_ << "#   current density = " << Je
+      rnemdFile_ << "#   current density = " << Jc
                  << " (electrons/A^2/fs)\n";
+      if ((rnemdFluxType_ == rnemdCurrent) || 
+          (rnemdFluxType_ == rnemdKeCurrent)) {
+        rnemdFile_ << "#   cation current density = " << avgJc_cation
+                 << " (electrons/A^2/fs)\n";
+        rnemdFile_ << "#   anion current density = " << avgJc_anion
+                 << " (electrons/A^2/fs)\n";
+      }             
       rnemdFile_ << "# Exchange statistics:\n";
       rnemdFile_ << "#               attempted = " << trialCount_ << "\n";
       rnemdFile_ << "#                  failed = " << failTrialCount_ << "\n";

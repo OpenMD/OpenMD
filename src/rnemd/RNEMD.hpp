@@ -226,6 +226,8 @@ namespace OpenMD {
     int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
     Accumulator* areaAccumulator_;
+    Accumulator* Jc_cationAccumulator_;
+    Accumulator* Jc_anionAccumulator_;
     bool doRNEMD_;
     bool hasData_;
 
