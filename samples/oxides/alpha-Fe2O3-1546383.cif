@@ -1,0 +1,99 @@
+#------------------------------------------------------------------------------
+#$Date: 2018-09-27 07:13:35 +0300 (Thu, 27 Sep 2018) $
+#$Revision: 211196 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/54/63/1546383.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1546383
+loop_
+_publ_author_name
+'El Mendili, Yassine'
+'Bardeau, Jean-Fran\,cois'
+'Randrianantoandro, Nirina'
+'Grasset, Fabien'
+'Greneche, Jean-Marc'
+_publ_section_title
+;
+ Insights into the Mechanism Related to the Phase Transition from
+ \a-Fe2O3 to \g-Fe2O3 Nanoparticles Induced by Thermal Treatment and
+ Laser Irradiation
+;
+_journal_issue                   44
+_journal_name_full               'The Journal of Physical Chemistry C'
+_journal_page_first              23785
+_journal_page_last               23792
+_journal_paper_doi               10.1021/jp308418x
+_journal_volume                  116
+_journal_year                    2012
+_chemical_formula_sum            'Fe2 O3'
+_space_group_crystal_system      trigonal
+_space_group_IT_number           167
+_space_group_name_Hall           '-R 3 2"c'
+_space_group_name_H-M_alt        'R -3 c :H'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                120
+_cell_formula_units_Z            6
+_cell_length_a                   5.03
+_cell_length_b                   5.03
+_cell_length_c                   13.75
+_cell_volume                     301.279
+_cod_data_source_file            0000001.cif
+_cod_data_source_block           0000001
+_cod_original_cell_volume        260.6214
+_cod_database_code               1546383
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 y,x,-z+1/2
+5 -x,-x+y,-z+1/2
+6 x-y,-y,-z+1/2
+7 -x,-y,-z
+8 y,-x+y,-z
+9 x-y,x,-z
+10 -y,-x,z-1/2
+11 x,x-y,z-1/2
+12 -x+y,y,z-1/2
+13 x+2/3,y+1/3,z+1/3
+14 -y+2/3,x-y+1/3,z+1/3
+15 -x+y+2/3,-x+1/3,z+1/3
+16 y+2/3,x+1/3,-z+5/6
+17 -x+2/3,-x+y+1/3,-z+5/6
+18 x-y+2/3,-y+1/3,-z+5/6
+19 -x+2/3,-y+1/3,-z+1/3
+20 y+2/3,-x+y+1/3,-z+1/3
+21 x-y+2/3,x+1/3,-z+1/3
+22 -y+2/3,-x+1/3,z-1/6
+23 x+2/3,x-y+1/3,z-1/6
+24 -x+y+2/3,y+1/3,z-1/6
+25 x+1/3,y+2/3,z+2/3
+26 -y+1/3,x-y+2/3,z+2/3
+27 -x+y+1/3,-x+2/3,z+2/3
+28 y+1/3,x+2/3,-z+7/6
+29 -x+1/3,-x+y+2/3,-z+7/6
+30 x-y+1/3,-y+2/3,-z+7/6
+31 -x+1/3,-y+2/3,-z+2/3
+32 y+1/3,-x+y+2/3,-z+2/3
+33 x-y+1/3,x+2/3,-z+2/3
+34 -y+1/3,-x+2/3,z+1/6
+35 x+1/3,x-y+2/3,z+1/6
+36 -x+y+1/3,y+2/3,z+1/6
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+O1 O-2 0 0.356 0.25 1 0.0
+Fe1 Fe+3 0 0 0.3527 1 0.0

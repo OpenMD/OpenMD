@@ -1,0 +1,127 @@
+#------------------------------------------------------------------------------
+#$Date: 2017-10-15 03:23:08 +0300 (Sun, 15 Oct 2017) $
+#$Revision: 202022 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/00/00/1000032.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1000032
+loop_
+_publ_author_name
+'Lutterotti, L'
+'Scardi, P'
+_publ_section_title
+;
+Simultaneous structure and size-strain refinement by the Rietveld method
+;
+_journal_coden_ASTM              JACGAR
+_journal_name_full               'Journal of Applied Crystallography'
+_journal_page_first              246
+_journal_page_last               252
+_journal_paper_doi               10.1107/S0021889890002382
+_journal_volume                  23
+_journal_year                    1990
+_chemical_formula_structural     'Al2 O3'
+_chemical_formula_sum            'Al2 O3'
+_chemical_name_mineral           Corundum
+_chemical_name_systematic        'Aluminium oxide - $-alpha'
+_space_group_IT_number           167
+_symmetry_cell_setting           trigonal
+_symmetry_space_group_name_Hall  '-R 3 2"c'
+_symmetry_space_group_name_H-M   'R -3 c :H'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                120
+_cell_formula_units_Z            6
+_cell_length_a                   4.76050(5)
+_cell_length_b                   4.76050(5)
+_cell_length_c                   12.9956(2)
+_cell_volume                     255.1
+_refine_ls_R_factor_all          0.038
+_cod_original_sg_symbol_H-M      'R -3 c H'
+_cod_database_code               1000032
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+-y,x-y,z
+y-x,-x,z
+-y,-x,1/2+z
+x,x-y,1/2+z
+y-x,y,1/2+z
+-x,-y,-z
+y,y-x,-z
+x-y,x,-z
+y,x,1/2-z
+-x,y-x,1/2-z
+x-y,-y,1/2-z
+1/3+x,2/3+y,2/3+z
+2/3+x,1/3+y,1/3+z
+1/3-y,2/3+x-y,2/3+z
+2/3-y,1/3+x-y,1/3+z
+1/3-x+y,2/3-x,2/3+z
+2/3-x+y,1/3-x,1/3+z
+1/3-y,2/3-x,1/6+z
+2/3-y,1/3-x,5/6+z
+1/3+x,2/3+x-y,1/6+z
+2/3+x,1/3+x-y,5/6+z
+1/3-x+y,2/3+y,1/6+z
+2/3-x+y,1/3+y,5/6+z
+1/3-x,2/3-y,2/3-z
+2/3-x,1/3-y,1/3-z
+1/3+y,2/3-x+y,2/3-z
+2/3+y,1/3-x+y,1/3-z
+1/3+x-y,2/3+x,2/3-z
+2/3+x-y,1/3+x,1/3-z
+1/3+y,2/3+x,1/6-z
+2/3+y,1/3+x,5/6-z
+1/3-x,2/3-x+y,1/6-z
+2/3-x,1/3-x+y,5/6-z
+1/3+x-y,2/3-y,1/6-z
+2/3+x-y,1/3-y,5/6-z
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_U_11
+_atom_site_aniso_U_12
+_atom_site_aniso_U_13
+_atom_site_aniso_U_22
+_atom_site_aniso_U_23
+_atom_site_aniso_U_33
+Al1 0.0022(2) 0.0011 0. 0.0022(2) 0. 0.0012(3)
+O1 0.0021(71) 0.0017 0.00035 0.0034(149) 0.0007(54) 0.0019(3)
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+_atom_site_calc_flag
+Al1 Al3+ 12 c 0. 0. 0.35216(3) 1. 0 d
+O1 O2- 18 e 0.30668(16) 0. 0.25 1. 0 d
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+Al3+ 3.000
+O2- -2.000
+loop_
+_cod_related_entry_id
+_cod_related_entry_database
+_cod_related_entry_code
+1 ChemSpider 8164808
+2 MPOD 1000286
+3 MPOD 1000287
+4 MPOD 1000288
+5 MPOD 1000289
+6 MPOD 1000290
+7 MPOD 1000291
+8 MPOD 1000292
+9 MPOD 1000293
+10 MPOD 1000295
