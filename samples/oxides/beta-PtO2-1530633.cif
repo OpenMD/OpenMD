@@ -1,0 +1,68 @@
+#------------------------------------------------------------------------------
+#$Date: 2016-02-13 21:28:24 +0200 (Sat, 13 Feb 2016) $
+#$Revision: 176429 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/53/06/1530633.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1530633
+loop_
+_publ_author_name
+'Range, K.J.'
+'Klement, U.'
+'Rau, F.'
+'Heyns, A.M.'
+_publ_section_title
+;
+ beta-Pt O2: High pressure synthesis of single crystals and structure
+ refinement
+;
+_journal_name_full               'Materials Research Bulletin'
+_journal_page_first              1541
+_journal_page_last               1547
+_journal_volume                  22
+_journal_year                    1987
+_chemical_formula_sum            'O2 Pt'
+_chemical_name_systematic        'Pt O2'
+_space_group_IT_number           58
+_symmetry_space_group_name_Hall  '-P 2 2n'
+_symmetry_space_group_name_H-M   'P n n m'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_formula_units_Z            2
+_cell_length_a                   4.4839
+_cell_length_b                   4.5385
+_cell_length_c                   3.136
+_cell_volume                     63.818
+_citation_journal_id_ASTM        MRBUAC
+_cod_data_source_file            Range_MRBUAC_1987_1501.cif
+_cod_data_source_block           O2Pt1
+_cod_original_cell_volume        63.81816
+_cod_original_formula_sum        'O2 Pt1'
+_cod_database_code               1530633
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+-x,-y,z
+x+1/2,-y+1/2,-z+1/2
+-x+1/2,y+1/2,-z+1/2
+-x,-y,-z
+x,y,-z
+-x-1/2,y-1/2,z-1/2
+x-1/2,-y-1/2,z-1/2
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+Pt1 Pt+4 0 0 0 1 0.0
+O1 O-2 0.267 0.35 0 1 0.0

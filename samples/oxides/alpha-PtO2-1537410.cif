@@ -1,0 +1,70 @@
+#------------------------------------------------------------------------------
+#$Date: 2016-02-13 21:28:24 +0200 (Sat, 13 Feb 2016) $
+#$Revision: 176429 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/53/74/1537410.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1537410
+loop_
+_publ_author_name
+'Hoekstra, H.R.'
+'Gallagher, F.X.'
+'Siegel, S.'
+_publ_section_title
+;
+ Reaction of platinum dioxide with some metal oxides
+;
+_journal_name_full               'Advances in Chemistry Series'
+_journal_page_first              39
+_journal_page_last               53
+_journal_volume                  98
+_journal_year                    1971
+_chemical_formula_sum            'O2 Pt'
+_chemical_name_systematic        'Pt O2'
+_space_group_IT_number           164
+_symmetry_space_group_name_Hall  '-P 3 2"'
+_symmetry_space_group_name_H-M   'P -3 m 1'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                120
+_cell_formula_units_Z            1
+_cell_length_a                   3.1
+_cell_length_b                   3.1
+_cell_length_c                   4.161
+_cell_volume                     34.630
+_citation_journal_id_ASTM        ADCSAJ
+_cod_data_source_file            Hoekstra_ADCSAJ_1971_371.cif
+_cod_data_source_block           O2Pt1
+_cod_original_cell_volume        34.62994
+_cod_original_formula_sum        'O2 Pt1'
+_cod_database_code               1537410
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+-y,x-y,z
+-x+y,-x,z
+y,x,-z
+-x,-x+y,-z
+x-y,-y,-z
+-x,-y,-z
+y,-x+y,-z
+x-y,x,-z
+-y,-x,z
+x,x-y,z
+-x+y,y,z
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+O1 O-2 0.3333 0.6667 0.25 1 0.0
+Pt1 Pt+4 0 0 0 1 0.0
