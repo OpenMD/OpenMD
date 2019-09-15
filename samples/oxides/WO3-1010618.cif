@@ -1,0 +1,77 @@
+#------------------------------------------------------------------------------
+#$Date: 2015-01-27 21:58:39 +0200 (Tue, 27 Jan 2015) $
+#$Revision: 130149 $
+#$URL: file:///home/coder/svn-repositories/cod/cif/1/01/06/1010618.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1010618
+loop_
+_publ_author_name
+'Braekken, H'
+_publ_section_title
+;
+Die Kristallstrukturen der Trioxide von Chrom, Molybdaen und Wolfram
+;
+_journal_coden_ASTM              ZEKGAX
+_journal_name_full
+;
+Zeitschrift fuer Kristallographie, Kristallgeometrie, Kristallphysik,
+Kristallchemie (-144,1977)
+;
+_journal_page_first              484
+_journal_page_last               489
+_journal_volume                  78
+_journal_year                    1931
+_chemical_formula_structural     'W O3'
+_chemical_formula_sum            'O3 W'
+_chemical_name_systematic        'Tungsten trioxide'
+_space_group_IT_number           2
+_symmetry_cell_setting           triclinic
+_symmetry_Int_Tables_number      2
+_symmetry_space_group_name_Hall  '-P 1'
+_symmetry_space_group_name_H-M   'P -1'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_formula_units_Z            4
+_cell_length_a                   7.28(5)
+_cell_length_b                   7.48(5)
+_cell_length_c                   3.82(5)
+_cell_volume                     208.0
+_cod_database_code               1010618
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+-x,-y,-z
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_attached_hydrogens
+_atom_site_calc_flag
+W1 W6+ 2 i 0.25 0.031 0.0625 1. 0 d
+W2 W6+ 2 i 0.25 0.531 0.0625 1. 0 d
+O1 O2- 1 a 0. 0. 0. 1. 0 d
+O2 O2- 1 d 0.5 0. 0. 1. 0 d
+O3 O2- 1 c 0. 0.5 0. 1. 0 d
+O4 O2- 1 e 0.5 0.5 0. 1. 0 d
+O5 O2- 2 i 0.25 0.281 0. 1. 0 d
+O6 O2- 2 i 0.25 0.219 0. 1. 0 d
+O7 O2- 2 i 0.25 0.031 0.5625 1. 0 d
+O8 O2- 2 i 0.25 0.531 0.4375 1. 0 d
+loop_
+_atom_type_symbol
+_atom_type_oxidation_number
+W6+ 6.000
+O2- -2.000
