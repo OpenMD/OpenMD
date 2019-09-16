@@ -195,7 +195,7 @@ namespace OpenMD {
     }
     return functional;
   }
-  
+
   RealType EAM::RoseFunctional(RealType rho, RealType rhoe,  RealType F0) {
     RealType t = rho / rhoe;
     RealType functional(0.0);
@@ -519,7 +519,7 @@ namespace OpenMD {
       RealType lambda = ea.getLambda();
       std::vector<RealType> Fn = ea.getFn();
       std::vector<RealType> F = ea.getF();
-      RealType Fe = ea.getFe();      
+      RealType Fe = ea.getFe();
       RealType eta = ea.getEta();
       RealType F0 = ea.getF0();
       // RealType latticeConstant = ea.getLatticeConstant();
@@ -1023,7 +1023,7 @@ namespace OpenMD {
         if (data2.isFluctuatingCharge) {
           Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
-          gb = 1.0 - qb*qb / (Ma*Ma);
+          gb = 1.0 - qb*qb / (Mb*Mb);
         }
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           CubicSpline* phiACV = data1.phiCV;
