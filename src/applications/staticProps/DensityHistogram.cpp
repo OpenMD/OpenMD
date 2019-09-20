@@ -43,7 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-/* 
+/*
  * Calculates average EAM density profile for selected atom.
  * Created by Hemanta Bhattarai on 04/30/19.
  * @author  Hemanta Bhattarai
@@ -63,7 +63,7 @@ namespace OpenMD {
                                      const std::string& sele, int nbins)
     : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
       evaluator_(info), seleMan_(info), nBins_(nbins) {
-    
+
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -110,12 +110,13 @@ namespace OpenMD {
     RealType max = density.back();
 
     RealType delta_density = (max-min)/(nBins_);
-
+    averageDensity_ = 0;
     if(delta_density == 0) {
       bincenter_.push_back(min);
       histList_.push_back(density.size());
+      averageDensity_ = min;
     } else {
-      
+
       //fill the center for histogram
       for(int j = 0; j< nBins_+ 3; ++j ) {
         bincenter_.push_back(min + (j-1) * delta_density);
@@ -135,22 +136,25 @@ namespace OpenMD {
             histList_[bin_center_pos] += 1.0/density_length;
             hist_update = false;
           } else {
+            averageDensity_ += histList_[bin_center_pos] * bincenter_[bin_center_pos];
             bin_center_pos++;
             hist_update = true;
           }
         }
       }
+      averageDensity_ += histList_[bin_center_pos] * bincenter_[bin_center_pos];
     }
     writeDensity();
   }
 
   void DensityHistogram::writeDensity() {
-    
+
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#EAMDensity\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
+      rdfStream << "#Average EAM density: " << averageDensity_ << "\n";
       rdfStream << "#" << "Bin_center" << "\tcount\n";
       for (unsigned int i = 0; i < histList_.size(); ++i) {
         rdfStream << bincenter_[i] << "\t"
