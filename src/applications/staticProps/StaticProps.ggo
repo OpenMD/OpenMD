@@ -116,4 +116,4 @@ groupoption "eam_density" D  "computes an average eam density profile of the sel
 groupoption "net_charge" q "computes an average charge profile of the selected atom" group="staticProps"
 groupoption "current_density" J "computes the current density for the selected atom" group="staticProps"
 groupoption "momentum_distribution" M "computes the momentum distribution for the selected atom" group ="staticProps"
-groupoption "dipole_orientation" S "spatially-resolved dipole order parameter S(z), S = (3 Cos\\theta - 1)/2" group = "staticProps"
+groupoption "dipole_orientation" S "spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2" group = "staticProps"

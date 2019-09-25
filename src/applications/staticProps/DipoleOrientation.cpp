@@ -125,7 +125,7 @@ namespace OpenMD {
         rotatedDipoleVector.normalize();
         ctheta = dot(rotatedDipoleVector, refAxis_);
 
-        orderParameter = (3 * ctheta - 1) / 2;
+        orderParameter = (3 * (ctheta * ctheta) - 1) / 2;
 
         binS[bin] += orderParameter;
         count[bin] += 1;
@@ -135,12 +135,14 @@ namespace OpenMD {
 
       }
 
-      }
+   }
 
 
     for (unsigned int i = 0; i < nBins_; i++) {
-          dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]);
+        count[i] !=0 ? dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]/count[i]) : dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]);
+        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
     }
+
   }
 
   void DipoleOrientation::processStuntDouble(StuntDouble* sd, int bin) {

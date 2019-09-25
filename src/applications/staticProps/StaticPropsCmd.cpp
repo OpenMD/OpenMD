@@ -124,7 +124,7 @@ const char *gengetopt_args_info_help[] = {
   "  -q, --net_charge              computes an average charge profile of the\n                                  selected atom",
   "  -J, --current_density         computes the current density for the selected\n                                  atom",
   "  -M, --momentum_distribution   computes the momentum distribution for the\n                                  selected atom",
-  "  -S, --dipole_orientation      spatially-resolved dipole order parameter S(z),\n                                  S = (3 Cos\\theta - 1)/2",
+  "  -S, --dipole_orientation      spatially-resolved dipole order parameter S(z),\n                                  S = (3 Cos^2\\theta - 1)/2",
     0
 };
 
@@ -2164,7 +2164,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'S':	/* spatially-resolved dipole order parameter S(z), S = (3 Cos\\theta - 1)/2.  */
+        case 'S':	/* spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2.  */
         
           if (args_info->staticProps_group_counter && override)
             reset_group_staticProps (args_info);

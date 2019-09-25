@@ -206,7 +206,7 @@ struct gengetopt_args_info
   const char *net_charge_help; /**< @brief computes an average charge profile of the selected atom help description.  */
   const char *current_density_help; /**< @brief computes the current density for the selected atom help description.  */
   const char *momentum_distribution_help; /**< @brief computes the momentum distribution for the selected atom help description.  */
-  const char *dipole_orientation_help; /**< @brief spatially-resolved dipole order parameter S(z), S = (3 Cos\\theta - 1)/2 help description.  */
+  const char *dipole_orientation_help; /**< @brief spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2 help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */

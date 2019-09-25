@@ -45,12 +45,15 @@
 #include <string>
 #include <vector>
 #include "math/Vector3.hpp"
-#include "math/Vector.hpp"
 #include "applications/staticProps/SpatialStatistics.hpp"
 
 namespace OpenMD {
 
   class DipoleOrientation : public SlabStatistics {
+
+  private:
+    Vector3d refAxis_, dipoleVector_;
+    std::string axisLabel_;
 
   public:
     DipoleOrientation(SimInfo* info, const std::string& filename, const std::string& sele,
@@ -63,9 +66,7 @@ namespace OpenMD {
     OutputData* orderS_;
     int axis_;
 
-  private:
-    Vector3d refAxis_, dipoleVector_;
-    std::string axisLabel_;
+
 
   };
 }
