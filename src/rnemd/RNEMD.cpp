@@ -2408,6 +2408,7 @@ namespace OpenMD {
     vector<Vector3d> binEField(nBins_, V3Zero);    
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
+	vector<int> binAtomCount(nBins_, 0);
     vector<vector<int> > binTypeCounts;
 
     if (outputMask_[ACTIVITY]) {
@@ -2474,10 +2475,8 @@ namespace OpenMD {
       I(1, 1) += mass * r2;
       I(2, 2) += mass * r2;
 
-	  if (sd->isAtom()) {
-	  	if (outputMask_[ELECTRICFIELD]) 
-	  	  eField = sd->getElectricField(); // kcal/mol/e/Angstrom
-	  }
+	  if (outputMask_[ELECTRICFIELD]) 
+	  	eField = sd->getElectricField(); // kcal/mol/e/Angstrom
 
       if (outputMask_[ACTIVITY]) {
         typeIndex = -1;
@@ -2513,8 +2512,11 @@ namespace OpenMD {
           if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
         }
 
-        if (outputMask_[ELECTRICFIELD]) 
-          binEField[binNo] += eField;
+		if (sd->isAtom()) {
+		  binAtomCount[binNo]++;
+          if (outputMask_[ELECTRICFIELD]) 
+            binEField[binNo] += eField;
+		}
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -2554,7 +2556,9 @@ namespace OpenMD {
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binDOF[i],
                     1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-      
+      MPI_Allreduce(MPI_IN_PLACE, &binAtomCount[i],
+                    1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
       if (outputMask_[ELECTRICFIELD]) {
         MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
                       3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
@@ -2600,8 +2604,14 @@ namespace OpenMD {
         temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
                                  Constants::energyConvert);
 
-        if (outputMask_[ELECTRICFIELD]) 
-          eField = binEField[i] / RealType(binCount[i]);
+        if (outputMask_[ELECTRICFIELD]) {
+		  if (binAtomCount[i] > 0 ) {
+	          eField = binEField[i] / RealType(binAtomCount[i]);
+		  } else {
+			  eField = V3Zero;
+		  }
+		}
+		  
         
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
           if(outputMask_[j]) {
