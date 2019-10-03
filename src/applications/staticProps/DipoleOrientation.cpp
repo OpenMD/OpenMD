@@ -83,6 +83,17 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nBins_; i++)
       orderS_->accumulator.push_back( new Accumulator() );
     data_.push_back(orderS_);
+
+
+    orderSCos_ = new OutputData;
+    orderSCos_->units =  "";
+    orderSCos_->title =  "Orientational Order parameter cosine Theta";
+    orderSCos_->dataType = odtReal;
+    orderSCos_->dataHandling = odhAverage;
+    orderSCos_->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      orderSCos_->accumulator.push_back( new Accumulator() );
+    data_.push_back(orderSCos_);
   }
 
   void DipoleOrientation::processFrame(int istep) {
@@ -99,6 +110,8 @@ namespace OpenMD {
     int i;
 
     vector<RealType> binS(nBins_, 0.0);
+    vector<RealType> binSCos(nBins_, 0.0);
+
     vector<int> count(nBins_,0.0);
 
     if (evaluator_.isDynamic()) {
@@ -128,6 +141,8 @@ namespace OpenMD {
         orderParameter = (3 * (ctheta * ctheta) - 1) / 2;
 
         binS[bin] += orderParameter;
+        binSCos[bin] += ctheta;
+
         count[bin] += 1;
 
 
@@ -140,6 +155,8 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < nBins_; i++) {
         count[i] !=0 ? dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]/count[i]) : dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]);
+        count[i] !=0 ? dynamic_cast<Accumulator *>(orderSCos_->accumulator[i])->add(binSCos[i]/count[i]) : dynamic_cast<Accumulator *>(orderSCos_->accumulator[i])->add(binSCos[i]);
+
         dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
     }
 

@@ -64,6 +64,7 @@ namespace OpenMD {
 
   protected:
     OutputData* orderS_;
+    OutputData* orderSCos_;
     int axis_;
 
 
