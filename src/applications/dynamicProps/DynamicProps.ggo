@@ -41,6 +41,9 @@ option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   doub
 option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              optional
 option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            optional
 option  "privilegedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
+option "dipoleX"       -       "X-component of the dipole with respect to body frame" default="0.0" double optional
+option "dipoleY"       -       "Y-component of the dipole with respect to body frame" default="0.0" double optional
+option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" default="-1.0" double optional
 defgroup "correlation function" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"     s  "selection correlation function" group="correlation function"
 groupoption "rcorr"        r  "mean squared displacement" group="correlation function"
@@ -67,6 +70,8 @@ groupoption "jumptimeZ"    -  "Hydrogen bond jump time correlation function binn
 groupoption "persistence"  -  "Hydrogen bond persistence correlation function" group = "correlation function"
 groupoption "pjcorr"       -  "Momentum - Angular Momentum cross correlation function" group = "correlation function"
 groupoption "ftcorr"       -  "Force - Torque cross correlation function" group = "correlation function"
+groupoption "ckcorr"       -  "Charge - Kinetic energy cross correlation function" group = "correlation function"
+groupoption "cscorr"       -  "Charge - Orientation order parameter (Cos\theta) cross correlation function" group = "correlation function"
 groupoption "facorr"       -  "Force - Force auto correlation function" group = "correlation function"
 groupoption "tfcorr"       -  "Torque - Force Cross correlation function" group = "correlation function"
 groupoption "tacorr"       -  "Torque auto correlation function" group = "correlation function"
