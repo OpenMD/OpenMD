@@ -90,12 +90,12 @@ def computeSpectrum(outFileName, normalize):
     epsilon = 1e-20 # smallest number to get rid of division by zero
 
 
-    for i in range(n/2, 0, -1):
+    for i in range(int(n/2), 0, -1):
         s = s + np.abs(spect[i]) * dfreq * (c/freq[i]**2)                        # dlambda = c dfreq/f**2
 
     outFile.write('## wavelength in nm \n')
     outFile.write('#wavelength\tspectrum\n')
-    for i in range(n/2, 0, -1):
+    for i in range(int(n/2), 0, -1):
       if normalize:
         outFile.write("%lf\t%e\n" % (c/freq[i], np.abs(spect[i])/s))
       else:

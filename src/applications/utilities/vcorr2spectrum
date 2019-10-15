@@ -4,7 +4,7 @@ amplitude spectrum
 
 Post-processes a vcorr file and creates a normalized spectrum.
 
-Usage: vcorr2spectrum 
+Usage: vcorr2spectrum
 
 Options:
   -h, --help              show this help
@@ -45,15 +45,15 @@ def readVcorrFile(vcorrFileName):
 
         if not line.startswith("#"):
             L = line.split()
-        
+
             time.append(float(L[0]))
             vcorr.append(float(L[1]))
-            
+
         line = vcorrFile.readline()
         if not line: break
-        
+
     vcorrFile.close()
-    
+
 def computeSpectrum(outFileName, normalize):
     global tnew
     global vnew
@@ -62,7 +62,7 @@ def computeSpectrum(outFileName, normalize):
 
     # the speed of light in cm / fs
     c = 2.99792458e-5
-    
+
     # symmetrize arrays
 
     tlen = len(time)
@@ -72,11 +72,11 @@ def computeSpectrum(outFileName, normalize):
     for i in range(len(time)):
         tnew.append( time[i] )
         vnew.append( vcorr[i] )
-   
-    spect = np.fft.fft( vnew )  
+
+    spect = np.fft.fft( vnew )
     n = len(vnew)
     timestep = tnew[1] - tnew[0]
-    freq = np.fft.fftfreq(n, d=timestep)  
+    freq = np.fft.fftfreq(n, d=timestep)
 
     # freq = np.fft.fftshift(freq)
     # y = np.fft.fftshift(spect)
@@ -86,53 +86,53 @@ def computeSpectrum(outFileName, normalize):
     freqScale = 1.0 / c
     dfreq = (freq[1]-freq[0]) * freqScale
     s = 0.0
-    
-    for i in range(n/2):
+
+    for i in range(int(n/2)):
         s = s + np.abs(spect[i])*dfreq
-    
-    for i in range(n/2):
+
+    for i in range(int(n/2)):
         if normalize:
             outFile.write("%lf\t%lf\n" % (freq[i] * freqScale, np.abs(spect[i])/s))
         else:
             outFile.write("%lf\t%lf\n" % (freq[i] * freqScale, np.abs(spect[i])))
     outFile.close()
-    
+
 def main(argv):
     global haveVcorrFileName
     global haveOutputFileName
-    
+
     haveVcorrFileName = False
     haveOutputFileName = False
     haveQValue = False
     normalize = False
- 
-    try:                                
-        opts, args = getopt.getopt(argv, "hnf:o:", ["help", "normalize", "vcorr-file=", "output-file="]) 
-    except getopt.GetoptError:           
-        usage()                          
-        sys.exit(2)                     
-    for opt, arg in opts:                
-        if opt in ("-h", "--help"):      
-            usage()                     
+
+    try:
+        opts, args = getopt.getopt(argv, "hnf:o:", ["help", "normalize", "vcorr-file=", "output-file="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
             sys.exit()
-        elif opt in ("-f", "--vcorr-file"): 
+        elif opt in ("-f", "--vcorr-file"):
             vcorrFileName = arg
             haveVcorrFileName = True
-        elif opt in ("-o", "--output-file"): 
+        elif opt in ("-o", "--output-file"):
             outputFileName = arg
             haveOutputFileName = True
         elif opt in ("-n", "--normalize"):
              normalize = True
     if (not haveVcorrFileName):
-        usage() 
+        usage()
         print("No vcorr file was specified")
         sys.exit()
     if (not haveOutputFileName):
         usage()
         print("No output file was specified")
         sys.exit()
-    
-    
+
+
     readVcorrFile(vcorrFileName)
     computeSpectrum(outputFileName, normalize)
 
