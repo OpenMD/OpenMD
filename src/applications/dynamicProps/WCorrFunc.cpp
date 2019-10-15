@@ -41,6 +41,8 @@
  */
 
 #include "applications/dynamicProps/WCorrFunc.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 
 namespace OpenMD {
   WCorrFunc::WCorrFunc(SimInfo* info, const std::string& filename,
@@ -63,6 +65,29 @@ namespace OpenMD {
   RealType WCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType v2 = charge_velocities_[frame1][id1] * charge_velocities_[frame2][id2];
     return v2;
+  }
+
+  void WCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+
+      Atom* atom = static_cast<Atom*>(sd);
+      AtomType* atomType = atom->getAtomType();
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+
+      if (!fqa.isFluctuatingCharge()) {
+        sprintf(painCave.errMsg,
+                "WCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a fluq object\n", sd->getGlobalIndex(),
+                sd->getType().c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
   }
 
 }

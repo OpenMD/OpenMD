@@ -52,6 +52,9 @@ namespace OpenMD {
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void validateSelection(SelectionManager& seleMan);
+
+
     std::vector<std::vector<RealType> > charge_velocities_;
   };
 
