@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -57,7 +57,7 @@ namespace OpenMD {
 
   public:
     ApproximationModel(StuntDouble* sd, SimInfo* info);
-    
+
     virtual bool calcHydroProps(Shape* shape, RealType viscosity,
                                 RealType temperature);
     virtual void init();
@@ -65,14 +65,11 @@ namespace OpenMD {
 
   private:
     virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-    
-    bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity,
-                            RealType temperature, HydroProp* cr);
-    bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity,
-                            RealType temperature, HydroProp* cd);
+
+    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads, RealType viscosity,
+                            RealType temperature, HydroProp* cr, HydroProp* cd, HydroProp* coM);
     std::vector<BeadParam> beads_;
   };
 }
 
 #endif
-

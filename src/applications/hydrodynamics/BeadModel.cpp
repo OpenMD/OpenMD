@@ -72,28 +72,6 @@ namespace OpenMD {
           return false;
         }
       }
-      bool beadCollision = false;
-      unsigned int nbeads = beads.size();
-      for (std::size_t i = 0; i < nbeads-1; ++i) {
-        for (std::size_t j = i+1; j < nbeads; ++j) {
-          Vector3d Rij = beads[i].pos - beads[j].pos;
-          if (Rij.length() < 0.5 * (beads[i].radius + beads[j].radius)) {
-            beadCollision = true;
-          }
-        }
-      }
-      if (beadCollision) {
-        sprintf( painCave.errMsg,
-                 "BeadModel::createBeads Error:\n"
-                 "\tSome of the atoms are closer than the sum of their radii.\n"
-                 "\tOverlapping beads causes bad estimates of the center\n"
-                 "\tof resistance. The RoughShell should be used instead\n"
-                 "\tof the BeadModel.\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-        return false;
-      }
     }
     return true;
   }
@@ -107,6 +85,7 @@ namespace OpenMD {
       BeadParam currBead;
       currBead.atomName = atom->getType();
       currBead.pos = atom->getPos();
+      currBead.mass = atom->getMass();  //to compute center of mass in ApproximationModel.cpp
       currBead.radius = lja.getSigma()/2.0;
       std::cout << "using rLJ = " << currBead.radius
                 << " for atom " << currBead.atomName << "\n";
@@ -123,6 +102,7 @@ namespace OpenMD {
           BeadParam currBead;
           currBead.atomName = atom->getType();
           currBead.pos = atom->getPos();
+          currBead.mass = atom->getMass();  //to compute center of mass in ApproximationModel.cpp
           currBead.radius = etab.GetVdwRad(obanum);
           std::cout << "using rVdW = " << currBead.radius << "\n";
           beads.push_back(currBead);

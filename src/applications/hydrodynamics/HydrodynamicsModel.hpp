@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -50,33 +50,36 @@
 #include "hydrodynamics/HydroProp.hpp"
 
 namespace OpenMD {
-  
+
   struct BeadParam {
     std::string atomName;
     Vector3d pos;
+    RealType mass;  //to compute center of mass in ApproximationModel.cpp
     RealType radius;
   };
-  
+
   class Shape;
   class Sphere;
   class Ellipsoid;
   class CompositeShape;
-  
+
   class HydrodynamicsModel {
   public:
     HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
     virtual ~HydrodynamicsModel() {}
 
     virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
-    
+
     virtual void init() {};
     virtual void writeBeads(std::ostream& os) = 0;
     void writeHydroProps(std::ostream& os);
-    HydroProp* getHydroPropsAtCR() {return cr_;}
-    HydroProp* getHydroPropsAtCD() {return cd_;}
-    
+    //HydroProp* getHydroPropsAtCR() {return cr_;}  //function not called in any other file
+    //HydroProp* getHydroPropsAtCD() {return cd_;}  //function not called in any other file
+    //HydroProp* getHydroPropsAtCOM() {return com_;}  //function not called in any other file
+
     void setCR(HydroProp* cr) {cr_ = cr;}
     void setCD(HydroProp* cd) {cd_ = cd;}
+    void setCOM(HydroProp* com) {com_ = com;}
     std::string getStuntDoubleName() { return sd_->getType();}
   protected:
     StuntDouble* sd_;
@@ -84,9 +87,10 @@ namespace OpenMD {
   private:
     HydroProp* cr_;
     HydroProp* cd_;
+    HydroProp* com_;
     std::vector<BeadParam> beads_;
   };
-  
+
 }
 
 #endif
