@@ -47,6 +47,9 @@ const char *gengetopt_args_info_help[] = {
   "      --thetacut=DOUBLE         HOO cutoff angle (degrees)  (default=`30')",
   "      --OHcut=DOUBLE            Oxygen-Hydrogen cutoff radius (angstroms)\n                                  (default=`2.45')",
   "      --privilegedAxis=ENUM     which axis is special for spatial analysis\n                                  (default = z axis)  (possible values=\"x\",\n                                  \"y\", \"z\" default=`z')",
+  "      --dipoleX=DOUBLE          X-component of the dipole with respect to body\n                                  frame  (default=`0.0')",
+  "      --dipoleY=DOUBLE          Y-component of the dipole with respect to body\n                                  frame  (default=`0.0')",
+  "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame  (default=`-1.0')",
   "\n Group: correlation function\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   mean squared displacement",
@@ -73,6 +76,8 @@ const char *gengetopt_args_info_help[] = {
   "      --persistence             Hydrogen bond persistence correlation function",
   "      --pjcorr                  Momentum - Angular Momentum cross correlation\n                                  function",
   "      --ftcorr                  Force - Torque cross correlation function",
+  "      --ckcorr                  Charge - Kinetic energy cross correlation\n                                  function",
+  "      --cscorr                  Charge - Orientation order parameter\n                                  (Cos\theta) cross correlation function",
   "      --facorr                  Force - Force auto correlation function",
   "      --tfcorr                  Torque - Force Cross correlation function",
   "      --tacorr                  Torque auto correlation function",
@@ -122,6 +127,9 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->thetacut_given = 0 ;
   args_info->OHcut_given = 0 ;
   args_info->privilegedAxis_given = 0 ;
+  args_info->dipoleX_given = 0 ;
+  args_info->dipoleY_given = 0 ;
+  args_info->dipoleZ_given = 0 ;
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->rcorrZ_given = 0 ;
@@ -147,6 +155,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->persistence_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
+  args_info->ckcorr_given = 0 ;
+  args_info->cscorr_given = 0 ;
   args_info->facorr_given = 0 ;
   args_info->tfcorr_given = 0 ;
   args_info->tacorr_given = 0 ;
@@ -181,6 +191,12 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->OHcut_orig = NULL;
   args_info->privilegedAxis_arg = privilegedAxis_arg_z;
   args_info->privilegedAxis_orig = NULL;
+  args_info->dipoleX_arg = 0.0;
+  args_info->dipoleX_orig = NULL;
+  args_info->dipoleY_arg = 0.0;
+  args_info->dipoleY_orig = NULL;
+  args_info->dipoleZ_arg = -1.0;
+  args_info->dipoleZ_orig = NULL;
   
 }
 
@@ -203,36 +219,41 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->thetacut_help = gengetopt_args_info_help[11] ;
   args_info->OHcut_help = gengetopt_args_info_help[12] ;
   args_info->privilegedAxis_help = gengetopt_args_info_help[13] ;
-  args_info->selecorr_help = gengetopt_args_info_help[15] ;
-  args_info->rcorr_help = gengetopt_args_info_help[16] ;
-  args_info->rcorrZ_help = gengetopt_args_info_help[17] ;
-  args_info->vcorr_help = gengetopt_args_info_help[18] ;
-  args_info->vcorrZ_help = gengetopt_args_info_help[19] ;
-  args_info->vcorrR_help = gengetopt_args_info_help[20] ;
-  args_info->wcorr_help = gengetopt_args_info_help[21] ;
-  args_info->dcorr_help = gengetopt_args_info_help[22] ;
-  args_info->lcorr_help = gengetopt_args_info_help[23] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[24] ;
-  args_info->cohZ_help = gengetopt_args_info_help[25] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[26] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[27] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[28] ;
-  args_info->drcorr_help = gengetopt_args_info_help[29] ;
-  args_info->helfandEcorr_help = gengetopt_args_info_help[30] ;
-  args_info->momentum_help = gengetopt_args_info_help[31] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[32] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[33] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[34] ;
-  args_info->jumptime_help = gengetopt_args_info_help[35] ;
-  args_info->jumptimeZ_help = gengetopt_args_info_help[36] ;
-  args_info->persistence_help = gengetopt_args_info_help[37] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[38] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[39] ;
-  args_info->facorr_help = gengetopt_args_info_help[40] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[41] ;
-  args_info->tacorr_help = gengetopt_args_info_help[42] ;
-  args_info->disp_help = gengetopt_args_info_help[43] ;
-  args_info->dispZ_help = gengetopt_args_info_help[44] ;
+  args_info->dipoleX_help = gengetopt_args_info_help[14] ;
+  args_info->dipoleY_help = gengetopt_args_info_help[15] ;
+  args_info->dipoleZ_help = gengetopt_args_info_help[16] ;
+  args_info->selecorr_help = gengetopt_args_info_help[18] ;
+  args_info->rcorr_help = gengetopt_args_info_help[19] ;
+  args_info->rcorrZ_help = gengetopt_args_info_help[20] ;
+  args_info->vcorr_help = gengetopt_args_info_help[21] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[22] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[23] ;
+  args_info->wcorr_help = gengetopt_args_info_help[24] ;
+  args_info->dcorr_help = gengetopt_args_info_help[25] ;
+  args_info->lcorr_help = gengetopt_args_info_help[26] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[27] ;
+  args_info->cohZ_help = gengetopt_args_info_help[28] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[29] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[30] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[31] ;
+  args_info->drcorr_help = gengetopt_args_info_help[32] ;
+  args_info->helfandEcorr_help = gengetopt_args_info_help[33] ;
+  args_info->momentum_help = gengetopt_args_info_help[34] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[35] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[36] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[37] ;
+  args_info->jumptime_help = gengetopt_args_info_help[38] ;
+  args_info->jumptimeZ_help = gengetopt_args_info_help[39] ;
+  args_info->persistence_help = gengetopt_args_info_help[40] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[41] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[42] ;
+  args_info->ckcorr_help = gengetopt_args_info_help[43] ;
+  args_info->cscorr_help = gengetopt_args_info_help[44] ;
+  args_info->facorr_help = gengetopt_args_info_help[45] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[46] ;
+  args_info->tacorr_help = gengetopt_args_info_help[47] ;
+  args_info->disp_help = gengetopt_args_info_help[48] ;
+  args_info->dispZ_help = gengetopt_args_info_help[49] ;
   
 }
 
@@ -336,6 +357,9 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->thetacut_orig));
   free_string_field (&(args_info->OHcut_orig));
   free_string_field (&(args_info->privilegedAxis_orig));
+  free_string_field (&(args_info->dipoleX_orig));
+  free_string_field (&(args_info->dipoleY_orig));
+  free_string_field (&(args_info->dipoleZ_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -440,6 +464,12 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "OHcut", args_info->OHcut_orig, 0);
   if (args_info->privilegedAxis_given)
     write_into_file(outfile, "privilegedAxis", args_info->privilegedAxis_orig, cmdline_parser_privilegedAxis_values);
+  if (args_info->dipoleX_given)
+    write_into_file(outfile, "dipoleX", args_info->dipoleX_orig, 0);
+  if (args_info->dipoleY_given)
+    write_into_file(outfile, "dipoleY", args_info->dipoleY_orig, 0);
+  if (args_info->dipoleZ_given)
+    write_into_file(outfile, "dipoleZ", args_info->dipoleZ_orig, 0);
   if (args_info->selecorr_given)
     write_into_file(outfile, "selecorr", 0, 0 );
   if (args_info->rcorr_given)
@@ -490,6 +520,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "pjcorr", 0, 0 );
   if (args_info->ftcorr_given)
     write_into_file(outfile, "ftcorr", 0, 0 );
+  if (args_info->ckcorr_given)
+    write_into_file(outfile, "ckcorr", 0, 0 );
+  if (args_info->cscorr_given)
+    write_into_file(outfile, "cscorr", 0, 0 );
   if (args_info->facorr_given)
     write_into_file(outfile, "facorr", 0, 0 );
   if (args_info->tfcorr_given)
@@ -578,6 +612,8 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->persistence_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
+  args_info->ckcorr_given = 0 ;
+  args_info->cscorr_given = 0 ;
   args_info->facorr_given = 0 ;
   args_info->tfcorr_given = 0 ;
   args_info->tacorr_given = 0 ;
@@ -1435,6 +1471,9 @@ cmdline_parser_internal (
         { "thetacut",	1, NULL, 0 },
         { "OHcut",	1, NULL, 0 },
         { "privilegedAxis",	1, NULL, 0 },
+        { "dipoleX",	1, NULL, 0 },
+        { "dipoleY",	1, NULL, 0 },
+        { "dipoleZ",	1, NULL, 0 },
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "rcorrZ",	0, NULL, 0 },
@@ -1460,6 +1499,8 @@ cmdline_parser_internal (
         { "persistence",	0, NULL, 0 },
         { "pjcorr",	0, NULL, 0 },
         { "ftcorr",	0, NULL, 0 },
+        { "ckcorr",	0, NULL, 0 },
+        { "cscorr",	0, NULL, 0 },
         { "facorr",	0, NULL, 0 },
         { "tfcorr",	0, NULL, 0 },
         { "tacorr",	0, NULL, 0 },
@@ -1819,6 +1860,48 @@ cmdline_parser_internal (
               goto failure;
           
           }
+          /* X-component of the dipole with respect to body frame.  */
+          else if (strcmp (long_options[option_index].name, "dipoleX") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->dipoleX_arg), 
+                 &(args_info->dipoleX_orig), &(args_info->dipoleX_given),
+                &(local_args_info.dipoleX_given), optarg, 0, "0.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "dipoleX", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Y-component of the dipole with respect to body frame.  */
+          else if (strcmp (long_options[option_index].name, "dipoleY") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->dipoleY_arg), 
+                 &(args_info->dipoleY_orig), &(args_info->dipoleY_given),
+                &(local_args_info.dipoleY_given), optarg, 0, "0.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "dipoleY", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Z-component of the dipole with respect to body frame.  */
+          else if (strcmp (long_options[option_index].name, "dipoleZ") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->dipoleZ_arg), 
+                 &(args_info->dipoleZ_orig), &(args_info->dipoleZ_given),
+                &(local_args_info.dipoleZ_given), optarg, 0, "-1.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "dipoleZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* mean squared displacement binned by Z.  */
           else if (strcmp (long_options[option_index].name, "rcorrZ") == 0)
           {
@@ -2053,6 +2136,40 @@ cmdline_parser_internal (
                 &(local_args_info.ftcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "ftcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Charge - Kinetic energy cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "ckcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ckcorr_given),
+                &(local_args_info.ckcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ckcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Charge - Orientation order parameter (Cos\theta) cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "cscorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->cscorr_given),
+                &(local_args_info.cscorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "cscorr", '-',
                 additional_error))
               goto failure;
           

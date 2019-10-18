@@ -75,6 +75,9 @@
 #include "applications/dynamicProps/HBondPersistence.hpp"
 #include "applications/dynamicProps/Displacement.hpp"
 #include "applications/dynamicProps/WCorrFunc.hpp"
+#include "applications/dynamicProps/ChargeKineticCorrFunc.hpp"
+#include "applications/dynamicProps/ChargeOrientationCorrFunc.hpp"
+
 
 using namespace OpenMD;
 
@@ -192,6 +195,12 @@ int main(int argc, char* argv[]){
     corrFunc = new MomAngMomCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.ftcorr_given){
     corrFunc = new ForTorCorrFunc(info, dumpFileName, sele1, sele2);
+  }else if (args_info.ckcorr_given){
+    corrFunc = new ChargeKineticCorrFunc(info, dumpFileName, sele1, sele2, args_info.rcut_arg);
+  }else if (args_info.cscorr_given){
+      if(args_info.dipoleX_given && args_info.dipoleY_given && args_info.dipoleZ_given){
+        corrFunc = new ChargeOrientationCorrFunc(info, dumpFileName, sele1, sele2, args_info.dipoleX_arg, args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.rcut_arg);
+      }
   } else if (args_info.facorr_given){
     corrFunc = new ForceAutoCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.tfcorr_given){

@@ -146,6 +146,15 @@ struct gengetopt_args_info
   enum enum_component component_arg;	/**< @brief component of momentum for the momemtum distribution (default = z axis) (default='z').  */
   char * component_orig;	/**< @brief component of momentum for the momemtum distribution (default = z axis) original value given at command line.  */
   const char *component_help; /**< @brief component of momentum for the momemtum distribution (default = z axis) help description.  */
+  double dipoleX_arg;	/**< @brief X-component of the dipole with respect to body frame.  */
+  char * dipoleX_orig;	/**< @brief X-component of the dipole with respect to body frame original value given at command line.  */
+  const char *dipoleX_help; /**< @brief X-component of the dipole with respect to body frame help description.  */
+  double dipoleY_arg;	/**< @brief Y-component of the dipole with respect to body frame.  */
+  char * dipoleY_orig;	/**< @brief Y-component of the dipole with respect to body frame original value given at command line.  */
+  const char *dipoleY_help; /**< @brief Y-component of the dipole with respect to body frame help description.  */
+  double dipoleZ_arg;	/**< @brief Z-component of the dipole with respect to body frame.  */
+  char * dipoleZ_orig;	/**< @brief Z-component of the dipole with respect to body frame original value given at command line.  */
+  const char *dipoleZ_help; /**< @brief Z-component of the dipole with respect to body frame help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -197,6 +206,7 @@ struct gengetopt_args_info
   const char *net_charge_help; /**< @brief computes an average charge profile of the selected atom help description.  */
   const char *current_density_help; /**< @brief computes the current density for the selected atom help description.  */
   const char *momentum_distribution_help; /**< @brief computes the momentum distribution for the selected atom help description.  */
+  const char *dipole_orientation_help; /**< @brief spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2 help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -234,6 +244,9 @@ struct gengetopt_args_info
   unsigned int privilegedAxis2_given ;	/**< @brief Whether privilegedAxis2 was given.  */
   unsigned int momentum_given ;	/**< @brief Whether momentum was given.  */
   unsigned int component_given ;	/**< @brief Whether component was given.  */
+  unsigned int dipoleX_given ;	/**< @brief Whether dipoleX was given.  */
+  unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
+  unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */
@@ -285,6 +298,7 @@ struct gengetopt_args_info
   unsigned int net_charge_given ;	/**< @brief Whether net_charge was given.  */
   unsigned int current_density_given ;	/**< @brief Whether current_density was given.  */
   unsigned int momentum_distribution_given ;	/**< @brief Whether momentum_distribution was given.  */
+  unsigned int dipole_orientation_given ;	/**< @brief Whether dipole_orientation was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

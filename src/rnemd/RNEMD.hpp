@@ -195,15 +195,11 @@ namespace OpenMD {
     Vector3d angularMomentumFluxVector_; // target or desired *flux*
 
     RealType kineticTarget_;     // target or desired one-time exchange energy
-    RealType qvTarget_;          // target or desired one-time
-                                 // exchange charge velocity
     Vector3d momentumTarget_;    // target or desired one-time exchange momentum
     Vector3d angularMomentumTarget_; // target or desired one-time
                                      // exchange angular momentum
 
     RealType kineticExchange_;    // actual exchange energy (running total)
-    RealType qvExchange_;         // actual exchange charge velocity
-                                  // (running total)
     Vector3d momentumExchange_;   // actual exchange momentum (running total)   
     Vector3d angularMomentumExchange_; // actual exchange momentum
                                        // (running total)
@@ -226,6 +222,7 @@ namespace OpenMD {
     int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
     Accumulator* areaAccumulator_;
+	Accumulator* Jc_totalAccumulator_;
     Accumulator* Jc_cationAccumulator_;
     Accumulator* Jc_anionAccumulator_;
     bool doRNEMD_;

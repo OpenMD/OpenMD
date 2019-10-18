@@ -619,6 +619,8 @@ src/applications/dynamicProps/cOHz.cpp
 src/applications/dynamicProps/MomentumCorrFunc.cpp
 src/applications/dynamicProps/MomAngMomCorrFunc.cpp
 src/applications/dynamicProps/ForTorCorrFunc.cpp
+src/applications/dynamicProps/ChargeKineticCorrFunc.cpp
+src/applications/dynamicProps/ChargeOrientationCorrFunc.cpp
 src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
 src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
@@ -712,6 +714,7 @@ src/applications/staticProps/DensityHistogram.cpp
 src/applications/staticProps/MomentumHistogram.cpp
 src/applications/staticProps/ChargeHistogram.cpp
 src/applications/staticProps/CurrentDensity.cpp
+src/applications/staticProps/DipoleOrientation.cpp
 )
 
 set (NANOPARTICLEBUILDERSOURCE

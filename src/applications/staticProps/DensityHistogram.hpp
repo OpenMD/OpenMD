@@ -43,7 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-/* 
+/*
  * Calculates average EAM density profile for selected atom.
  * Created by Hemanta Bhattarai on 04/30/19.
  * @author  Hemanta Bhattarai
@@ -82,6 +82,7 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     int nBins_;
+    RealType averageDensity_;
     std::vector<RealType> bincenter_;
     std::vector<RealType> histList_;
 

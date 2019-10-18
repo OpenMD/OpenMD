@@ -487,6 +487,7 @@ namespace OpenMD {
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
     
     areaAccumulator_ = new Accumulator();
+	Jc_totalAccumulator_ = new Accumulator();
     Jc_cationAccumulator_ = new Accumulator();
     Jc_anionAccumulator_ = new Accumulator();
     
@@ -650,7 +651,6 @@ namespace OpenMD {
     kineticExchange_ = 0.0;
     momentumExchange_ = V3Zero;
     angularMomentumExchange_ = V3Zero;
-    qvExchange_ = 0.0;
     
     std::ostringstream selectionAstream;
     std::ostringstream selectionBstream;
@@ -765,6 +765,7 @@ namespace OpenMD {
 
     // delete all of the objects we created:
     delete areaAccumulator_; 
+	delete Jc_totalAccumulator_;
     delete Jc_cationAccumulator_; 
     delete Jc_anionAccumulator_;   
     data_.clear();
@@ -2073,11 +2074,12 @@ namespace OpenMD {
       Vector3d vc = Pc / Mc;
 
       // units of velocity (Angstrom/fs):
-      alphac = qvTarget_ * (2*Volc / (dividingArea_ * exchangeTime_)) / (Q2cp - Q2cn * (MQcp/MQcn));
+      alphac = (currentDensity_ * Volc) / (Q2cp - Q2cn * (MQcp/MQcn));
       betac = -alphac * MQcp / MQcn;
 
-      Jc_cationAccumulator_->add((Q2cp * alphac) / Volc);
-      Jc_anionAccumulator_->add((Q2cn * betac) / Volc);
+	  Jc_totalAccumulator_->add((Q2cp * alphac + Q2cn * betac) / Volc);
+      Jc_cationAccumulator_->add(Q2cp * alphac / Volc);
+      Jc_anionAccumulator_->add(Q2cn * betac / Volc);
             
       RealType cNumerator = Kc - kineticTarget_;
       cNumerator -= 0.5 * Mc * vc.x()*vc.x();
@@ -2160,7 +2162,6 @@ namespace OpenMD {
               kineticExchange_ += kineticTarget_;
               momentumExchange_ += momentumTarget_;
               angularMomentumExchange_ += angularMomentumTarget_;
-              qvExchange_ += qvTarget_;
             }
           }
         }
@@ -2175,7 +2176,10 @@ namespace OpenMD {
       // painCave.severity = OPENMD_INFO;
       // simError();        
       failTrialCount_++;
-    }
+	  Jc_totalAccumulator_->add(0.0);
+      Jc_cationAccumulator_->add(0.0);
+      Jc_anionAccumulator_->add(0.0);
+	}
   }
 
   RealType RNEMD::getDividingArea() {
@@ -2339,8 +2343,6 @@ namespace OpenMD {
     kineticTarget_ = kineticFlux_ * exchangeTime_ * area;
     momentumTarget_ = momentumFluxVector_ * exchangeTime_ * area;
     angularMomentumTarget_ = angularMomentumFluxVector_ * exchangeTime_ * area;
-    // units of electrons:
-    qvTarget_ = currentDensity_ * exchangeTime_ * area;
     
     switch(rnemdMethod_) {
     case rnemdSwap: 
@@ -2381,7 +2383,7 @@ namespace OpenMD {
     if (outputEvaluator_.isDynamic()) {
       outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
     }
-      
+
     int selei(0);
     StuntDouble* sd;
     AtomType* atype;
@@ -2406,6 +2408,7 @@ namespace OpenMD {
     vector<Vector3d> binEField(nBins_, V3Zero);    
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
+	vector<int> binAtomCount(nBins_, 0);
     vector<vector<int> > binTypeCounts;
 
     if (outputMask_[ACTIVITY]) {
@@ -2445,17 +2448,17 @@ namespace OpenMD {
         // Shift molecules by half a box to have bins start at 0
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
-	      switch(rnemdPrivilegedAxis_) {
+	    switch(rnemdPrivilegedAxis_) {
         case rnemdX:
-	        binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
-	        break;
+	      binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
+	      break;
         case rnemdY:
-	        binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
-	        break;
+	      binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
+	      break;
         case rnemdZ:
-	      default:
-	        binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
-	      }
+	    default:
+	      binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
+	    }
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
         binNo = int(rPos.length() / binWidth_);
@@ -2472,8 +2475,8 @@ namespace OpenMD {
       I(1, 1) += mass * r2;
       I(2, 2) += mass * r2;
 
-      if (outputMask_[ELECTRICFIELD]) 
-        eField = sd->getElectricField(); // kcal/mol/e/Angstrom
+	  if (outputMask_[ELECTRICFIELD]) 
+	  	eField = sd->getElectricField(); // kcal/mol/e/Angstrom
 
       if (outputMask_[ACTIVITY]) {
         typeIndex = -1;
@@ -2509,8 +2512,11 @@ namespace OpenMD {
           if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
         }
 
-        if (outputMask_[ELECTRICFIELD]) 
-          binEField[binNo] += eField;
+		if (sd->isAtom()) {
+		  binAtomCount[binNo]++;
+          if (outputMask_[ELECTRICFIELD]) 
+            binEField[binNo] += eField;
+		}
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -2550,7 +2556,9 @@ namespace OpenMD {
                     1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binDOF[i],
                     1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-      
+      MPI_Allreduce(MPI_IN_PLACE, &binAtomCount[i],
+                    1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
       if (outputMask_[ELECTRICFIELD]) {
         MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(),
                       3, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
@@ -2596,8 +2604,14 @@ namespace OpenMD {
         temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
                                  Constants::energyConvert);
 
-        if (outputMask_[ELECTRICFIELD]) 
-          eField = binEField[i] / RealType(binCount[i]);
+        if (outputMask_[ELECTRICFIELD]) {
+		  if (binAtomCount[i] > 0 ) {
+	          eField = binEField[i] / RealType(binAtomCount[i]);
+		  } else {
+			  eField = V3Zero;
+		  }
+		}
+		  
         
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
           if(outputMask_[j]) {
@@ -2695,6 +2709,8 @@ namespace OpenMD {
       RealType avgArea;
       areaAccumulator_->getAverage(avgArea);
 
+	  RealType avgJc_total;
+	  Jc_totalAccumulator_->getAverage(avgJc_total);
       RealType avgJc_cation;
       Jc_cationAccumulator_->getAverage(avgJc_cation);
       RealType avgJc_anion;
@@ -2703,13 +2719,11 @@ namespace OpenMD {
       RealType Jz(0.0);
       Vector3d JzP(V3Zero);
       Vector3d JzL(V3Zero);
-      RealType Jc(0.0);
       if (time >= info_->getSimParams()->getDt()) {
         Jz = kineticExchange_ / (time * avgArea)
           / Constants::energyConvert;
         JzP = momentumExchange_ / (time * avgArea);
         JzL = angularMomentumExchange_ / (time * avgArea);
-        Jc = qvExchange_ / (time * avgArea);
       }
 
       rnemdFile_ << "#######################################################\n";
@@ -2756,8 +2770,6 @@ namespace OpenMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumTarget_ 
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "#         electrons = " << qvTarget_
-                 << " (electrons)\n";
       rnemdFile_ << "# Actual exchange totals:\n";
       rnemdFile_ << "#          kinetic = " 
                  << kineticExchange_ / Constants::energyConvert 
@@ -2766,8 +2778,6 @@ namespace OpenMD {
                  << " (amu*A/fs)\n";      
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_ 
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "#         electrons = " << qvExchange_
-                 << " (electrons)\n";
       rnemdFile_ << "# Actual flux:\n";
       rnemdFile_ << "#          kinetic = " << Jz
                  << " (kcal/mol/A^2/fs)\n";
@@ -2775,10 +2785,10 @@ namespace OpenMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << JzL
                  << " (amu/A^2/fs^2)\n";
-      rnemdFile_ << "#   current density = " << Jc
-                 << " (electrons/A^2/fs)\n";
       if ((rnemdFluxType_ == rnemdCurrent) || 
           (rnemdFluxType_ == rnemdKeCurrent)) {
+		rnemdFile_ << "#   Total current density = " << avgJc_total
+                 << " (electrons/A^2/fs)\n";
         rnemdFile_ << "#   cation current density = " << avgJc_cation
                  << " (electrons/A^2/fs)\n";
         rnemdFile_ << "#   anion current density = " << avgJc_anion

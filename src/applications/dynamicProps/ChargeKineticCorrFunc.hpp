@@ -39,55 +39,35 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+#ifndef APPLICATIONS_DYNAMICPROPS_CHARGEKINETICCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_CHARGEKINETICCORRFUNC_HPP
 
-#include "applications/dynamicProps/WCorrFunc.hpp"
-#include "types/FixedChargeAdapter.hpp"
-#include "types/FluctuatingChargeAdapter.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 namespace OpenMD {
-  WCorrFunc::WCorrFunc(SimInfo* info, const std::string& filename,
-                       const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslFlucQVelocity){
 
-    setCorrFuncType(" Charge Velocity Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".wcorr");
-    setLabelString( "<w(0)w(t)>" );
-    charge_velocities_.resize(nFrames_);
-  }
+  class ChargeKineticCorrFunc : public CrossCorrFunc<RealType> {
+  public:
+    ChargeKineticCorrFunc(SimInfo* info, const std::string& filename,
+                   const std::string& sele1, const std::string& sele2, const RealType cutOff = 10.0);
 
+  private:
+    virtual void validateSelection(SelectionManager& seleMan);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual int computeProperty2(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void postCorrelate();
 
-  int WCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    charge_velocities_[frame].push_back( sd->getFlucQVel() );
-    return charge_velocities_[frame].size() - 1;
-  }
+    std::vector< std::vector<RealType> > charges_;
+    std::vector< std::vector<RealType> > kinetic_;
+    Vector3d pos1_, pos2_;
 
-  RealType WCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
-    RealType v2 = charge_velocities_[frame1][id1] * charge_velocities_[frame2][id2];
-    return v2;
-  }
+    RealType sumCharge_;
+    RealType sumKinetic_;
+    RealType rcut_;
 
-  void WCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
-
-    for (sd = seleMan.beginSelected(i); sd != NULL;
-         sd = seleMan.nextSelected(i)) {
-
-      Atom* atom = static_cast<Atom*>(sd);
-      AtomType* atomType = atom->getAtomType();
-      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-
-      if (!fqa.isFluctuatingCharge()) {
-        sprintf(painCave.errMsg,
-                "WCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a fluq object\n", sd->getGlobalIndex(),
-                sd->getType().c_str() );
-        painCave.isFatal = 1;
-        simError();
-      }
-    }
-  }
-
+    int chargeCount_, kineticCount_;
+    RealType propertyTemp;
+  };
 }
+#endif

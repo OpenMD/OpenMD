@@ -133,7 +133,7 @@ namespace OpenMD {
 	    if (i == 0 && j == 0 && k == 0) {
 	      continue; 
 	    } else {
-	      dir.push_back(Vector3i(i, j, k));
+	      dir.push_back(Vector3d((RealType)i, (RealType)j, (RealType)k));
 	    }
 	  }
         }
@@ -178,22 +178,20 @@ namespace OpenMD {
     replicate(atomInfoList, atomData, box);
   }
 
-  void ReplicateVisitor::replicate(std::vector<AtomInfo *>&infoList, AtomData *data, const Mat3x3d& box) {
+  void ReplicateVisitor::replicate(std::vector<AtomInfo *>&infoList,
+                                   AtomData *data, const Mat3x3d& box) {
     AtomInfo* newAtomInfo;
-    std::vector<Vector3i>::iterator dirIter;
+    std::vector<Vector3d>::iterator dirIter;
     std::vector<AtomInfo *>::iterator i;
 
     for( dirIter = dir.begin(); dirIter != dir.end(); ++dirIter ) {
       for( i = infoList.begin(); i != infoList.end(); ++i ) {
 	newAtomInfo = new AtomInfo();
 	*newAtomInfo = *(*i);
-
-	for( int j = 0; j < 3; j++ )
-	  newAtomInfo->pos[j] += (*dirIter)[0]*box(j, 0) + (*dirIter)[1]*box(j, 1) + (*dirIter)[2]*box(j, 2);
-
+        newAtomInfo->pos += box * (*dirIter);
 	data->addAtomInfo(newAtomInfo);
       }
-    } // end for(dirIter)  
+    }
   }
 
   const std::string ReplicateVisitor::toString() {

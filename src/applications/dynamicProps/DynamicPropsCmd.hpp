@@ -77,6 +77,15 @@ struct gengetopt_args_info
   enum enum_privilegedAxis privilegedAxis_arg;	/**< @brief which axis is special for spatial analysis (default = z axis) (default='z').  */
   char * privilegedAxis_orig;	/**< @brief which axis is special for spatial analysis (default = z axis) original value given at command line.  */
   const char *privilegedAxis_help; /**< @brief which axis is special for spatial analysis (default = z axis) help description.  */
+  double dipoleX_arg;	/**< @brief X-component of the dipole with respect to body frame (default='0.0').  */
+  char * dipoleX_orig;	/**< @brief X-component of the dipole with respect to body frame original value given at command line.  */
+  const char *dipoleX_help; /**< @brief X-component of the dipole with respect to body frame help description.  */
+  double dipoleY_arg;	/**< @brief Y-component of the dipole with respect to body frame (default='0.0').  */
+  char * dipoleY_orig;	/**< @brief Y-component of the dipole with respect to body frame original value given at command line.  */
+  const char *dipoleY_help; /**< @brief Y-component of the dipole with respect to body frame help description.  */
+  double dipoleZ_arg;	/**< @brief Z-component of the dipole with respect to body frame (default='-1.0').  */
+  char * dipoleZ_orig;	/**< @brief Z-component of the dipole with respect to body frame original value given at command line.  */
+  const char *dipoleZ_help; /**< @brief Z-component of the dipole with respect to body frame help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief mean squared displacement help description.  */
   const char *rcorrZ_help; /**< @brief mean squared displacement binned by Z help description.  */
@@ -102,6 +111,8 @@ struct gengetopt_args_info
   const char *persistence_help; /**< @brief Hydrogen bond persistence correlation function help description.  */
   const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
   const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
+  const char *ckcorr_help; /**< @brief Charge - Kinetic energy cross correlation function help description.  */
+  const char *cscorr_help; /**< @brief Charge - Orientation order parameter (Cos\theta) cross correlation function help description.  */
   const char *facorr_help; /**< @brief Force - Force auto correlation function help description.  */
   const char *tfcorr_help; /**< @brief Torque - Force Cross correlation function help description.  */
   const char *tacorr_help; /**< @brief Torque auto correlation function help description.  */
@@ -122,6 +133,9 @@ struct gengetopt_args_info
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
   unsigned int OHcut_given ;	/**< @brief Whether OHcut was given.  */
   unsigned int privilegedAxis_given ;	/**< @brief Whether privilegedAxis was given.  */
+  unsigned int dipoleX_given ;	/**< @brief Whether dipoleX was given.  */
+  unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
+  unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
@@ -147,6 +161,8 @@ struct gengetopt_args_info
   unsigned int persistence_given ;	/**< @brief Whether persistence was given.  */
   unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
   unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
+  unsigned int ckcorr_given ;	/**< @brief Whether ckcorr was given.  */
+  unsigned int cscorr_given ;	/**< @brief Whether cscorr was given.  */
   unsigned int facorr_given ;	/**< @brief Whether facorr was given.  */
   unsigned int tfcorr_given ;	/**< @brief Whether tfcorr was given.  */
   unsigned int tacorr_given ;	/**< @brief Whether tacorr was given.  */

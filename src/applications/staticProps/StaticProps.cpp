@@ -96,6 +96,7 @@
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
 #include "applications/staticProps/CurrentDensity.hpp"
+#include "applications/staticProps/DipoleOrientation.hpp"
 
 using namespace OpenMD;
 
@@ -685,6 +686,12 @@ int main(int argc, char* argv[]){
       }
       break;
     }
+  }else if (args_info.dipole_orientation_given){
+    if(args_info.dipoleX_given && args_info.dipoleY_given && args_info.dipoleZ_given)
+        analyser = new DipoleOrientation(info, dumpFileName, sele1,
+                          args_info.dipoleX_arg, args_info.dipoleY_arg, args_info.dipoleZ_arg,
+                          args_info.nbins_arg, privilegedAxis);
+
   }
 
   if (args_info.output_given) {
