@@ -101,6 +101,7 @@ namespace OpenMD {
                    isEqualIgnoreCase("Ly") ||
                    isEqualIgnoreCase("Lz") ||
                    isEqualIgnoreCase("Current") ||
+				   isEqualIgnoreCase("Single") ||
                    isEqualIgnoreCase("Pvector") ||
                    isEqualIgnoreCase("Lvector") ||
                    isEqualIgnoreCase("KE+Px") || 

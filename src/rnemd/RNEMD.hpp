@@ -61,6 +61,7 @@ namespace OpenMD {
     void doNIVS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSSCurrent(SelectionManager& smanA, SelectionManager& smanB);
+	void doVSSSingle(SelectionManager& smanA);
     RealType getDividingArea();
     void collectData();
     void getStarted();
@@ -89,6 +90,7 @@ namespace OpenMD {
       rnemdPy,       // flux of momentum along y axis 
       rnemdPz,       // flux of momentum along z axis
       rnemdCurrent,  // current density along privileged axis
+	  rnemdSingle,   // current density in a single region 
       rnemdPvector,  // flux of momentum vector
       rnemdLx,       // flux of angular momentum along x axis 
       rnemdLy,       // flux of angular momentum along y axis 

@@ -110,6 +110,7 @@ namespace OpenMD {
     stringToFluxType_["Lz"]  = rnemdLz;
     stringToFluxType_["Lvector"]  = rnemdLvector;
     stringToFluxType_["Current"]  = rnemdCurrent;
+	stringToFluxType_["Single"]   = rnemdSingle;
     stringToFluxType_["KE+Px"]  = rnemdKePx;
     stringToFluxType_["KE+Py"]  = rnemdKePy;
     stringToFluxType_["KE+Pvector"]  = rnemdKePvector;
@@ -298,6 +299,7 @@ namespace OpenMD {
         hasCorrectFlux = hasAngularMomentumFluxVector;
         break;
       case rnemdCurrent:
+	  case rnemdSingle:
         hasCorrectFlux = hasCurrentDensity;
         break;
       case rnemdKePx:
@@ -437,7 +439,7 @@ namespace OpenMD {
       }        
     }
     if (hasCurrentDensity) {
-      // convert the Amp m^-2 values in the md file into electrons fs^-1 A^-2:
+      // convert the Amp m^-2 values in the omd file into electrons fs^-1 A^-2:
       currentDensity_ = rnemdParams->getCurrentDensity() 
         * Constants::currentDensityConvert;
     } else {
@@ -626,6 +628,7 @@ namespace OpenMD {
         outputMask_.set(DENSITY);        
         break;
       case rnemdCurrent:
+	  case rnemdSingle:
       case rnemdKeCurrent:
         outputMask_.set(TEMPERATURE);
         outputMask_.set(VELOCITY);
@@ -654,89 +657,107 @@ namespace OpenMD {
     
     std::ostringstream selectionAstream;
     std::ostringstream selectionBstream;
-    
-    if (hasSelectionA_) {
-      selectionA_ = rnemdParams->getSelectionA();
-    } else {
-      if (usePeriodicBoundaryConditions_) {     
-        Mat3x3d hmat = currentSnap_->getHmat();
+
+	if (rnemdFluxType_ == rnemdSingle) {
+	  if (hasSelectionA_) {
+        selectionA_ = rnemdParams->getSelectionA();
+      } else {
+        if (usePeriodicBoundaryConditions_) {     
+          Mat3x3d hmat = currentSnap_->getHmat();
         
-        if (hasSlabWidth) 
-          slabWidth_ = rnemdParams->getSlabWidth();
-        else
-          slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
+          if (hasSlabWidth) 
+            slabWidth_ = rnemdParams->getSlabWidth();
+          else
+            slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2;
         
-        if (hasSlabACenter) {
-          slabACenter_ = rnemdParams->getSlabACenter();
-          selectionAstream << "select wrappedz > " 
+          if (hasSlabACenter) {
+            slabACenter_ = rnemdParams->getSlabACenter();     
+          } else {
+            slabACenter_ = 0.0;
+          }
+		  selectionAstream << "select wrappedz > " 
                            << slabACenter_ - 0.5*slabWidth_ 
                            <<  " && wrappedz < "
                            << slabACenter_ + 0.5*slabWidth_;
-        } else {
-          slabACenter_ = 0.0;
-          RealType leftEdge = slabACenter_ - 0.5*slabWidth_;
-          selectionAstream << "select wrappedz > " 
-                           << leftEdge
-                           <<  " && wrappedz < "
-                           << -leftEdge;
+          selectionA_ = selectionAstream.str();
         }
-        selectionA_ = selectionAstream.str();
-      } else {
-        if (hasSphereARadius) 
-          sphereARadius_ = rnemdParams->getSphereARadius();
-        else {
-          // use an initial guess to the size of the inner slab to be 1/10 the
-          // radius of an approximately spherical hull:
-          Thermo thermo(info);
-          RealType hVol = thermo.getHullVolume();
-          sphereARadius_ = 0.1 * pow((3.0 * hVol / (4.0 * Constants::PI)), 1.0/3.0);
-        }
-        selectionAstream << "select r < " << sphereARadius_;
-        selectionA_ = selectionAstream.str();
-      }
-    }
-    
-    if (hasSelectionB_) {
-      selectionB_ = rnemdParams->getSelectionB();
-      
+	  }
+
+      if (hasSelectionB_) {
+        sprintf(painCave.errMsg, 
+              "RNEMD: The rnemdSingle flux type only allows for a selectionA to be specified.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_WARNING;
+        simError();
+	  } else selectionB_ = std::string("select none");
     } else {
-      if (usePeriodicBoundaryConditions_) {     
-        Mat3x3d hmat = currentSnap_->getHmat();
-        
-        if (hasSlabWidth) 
-          slabWidth_ = rnemdParams->getSlabWidth();
-        else
-          slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
-        
-        if (hasSlabBCenter) {
-          slabBCenter_ = rnemdParams->getSlabBCenter();
-          selectionBstream << "select wrappedz > " 
-                           << slabBCenter_ - 0.5*slabWidth_ 
-                           <<  " && wrappedz < "
-                           << slabBCenter_ + 0.5*slabWidth_;
-        } else {
-          slabBCenter_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
-          RealType leftEdge = slabBCenter_ - 0.5*slabWidth_;
-          selectionBstream << "select wrappedz > " 
-                           << leftEdge
-                           <<  " || wrappedz < "
-                           << -leftEdge;
-        }
-        selectionB_ = selectionBstream.str();
+	  if (hasSelectionA_) {
+        selectionA_ = rnemdParams->getSelectionA();
       } else {
-        if (hasSphereBRadius_) {
-          sphereBRadius_ = rnemdParams->getSphereBRadius();
-          selectionBstream << "select r > " << sphereBRadius_;
+        if (usePeriodicBoundaryConditions_) {     
+          Mat3x3d hmat = currentSnap_->getHmat();
+        
+          if (hasSlabWidth) 
+            slabWidth_ = rnemdParams->getSlabWidth();
+          else
+            slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
+        
+          if (hasSlabACenter) slabACenter_ = rnemdParams->getSlabACenter();
+          else slabACenter_ = 0.0;
+
+		  selectionAstream << "select wrappedz > " 
+                           << slabACenter_ - 0.5*slabWidth_ 
+                           <<  " && wrappedz < "
+                           << slabACenter_ + 0.5*slabWidth_;
+          selectionA_ = selectionAstream.str();
+        } else {
+          if (hasSphereARadius) 
+            sphereARadius_ = rnemdParams->getSphereARadius();
+          else {
+            // use an initial guess to the size of the inner slab to be 1/10 the
+            // radius of an approximately spherical hull:
+            Thermo thermo(info);
+            RealType hVol = thermo.getHullVolume();
+            sphereARadius_ = 0.1 * pow((3.0 * hVol / (4.0 * Constants::PI)), 1.0/3.0);
+          }
+          selectionAstream << "select r < " << sphereARadius_;
+          selectionA_ = selectionAstream.str();
+        }
+      }
+    
+	  if (hasSelectionB_) {
+        selectionB_ = rnemdParams->getSelectionB();
+      } else {
+        if (usePeriodicBoundaryConditions_) {     
+          Mat3x3d hmat = currentSnap_->getHmat();
+        
+          if (hasSlabWidth) 
+            slabWidth_ = rnemdParams->getSlabWidth();
+          else
+            slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 10.0;
+        
+          if (hasSlabBCenter) slabBCenter_ = rnemdParams->getSlabBCenter();
+          else slabBCenter_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
+        
+		  selectionBstream << "select wrappedz > " 
+                           << slabBCenter_ - 0.5*slabWidth_ 
+                           <<  " || wrappedz < "
+                           << slabBCenter_ + 0.5*slabWidth_;
           selectionB_ = selectionBstream.str();
         } else {
-          selectionB_ = "select hull";
-          BisHull_ = true;
-          hasSelectionB_ = true;
+          if (hasSphereBRadius_) {
+            sphereBRadius_ = rnemdParams->getSphereBRadius();
+            selectionBstream << "select r > " << sphereBRadius_;
+            selectionB_ = selectionBstream.str();
+          } else {
+            selectionB_ = "select hull";
+            BisHull_ = true;
+            hasSelectionB_ = true;
+          }
         }
       }
-    }
-  
-  
+	}
+
     // object evaluator:
     evaluator_.loadScriptString(rnemdObjectSelection_);
     seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -1903,7 +1924,6 @@ namespace OpenMD {
     vector<StuntDouble*> hotBin, coldBin;
 
     Vector3d Ph(V3Zero);
-    Vector3d Lh(V3Zero);
     RealType Mh = 0.0;
     RealType Kh = 0.0;
     RealType Khz = 0.0;
@@ -1917,7 +1937,6 @@ namespace OpenMD {
     RealType Q2hn = 0.0;
 
     Vector3d Pc(V3Zero);
-    Vector3d Lc(V3Zero);
     RealType Mc = 0.0;
     RealType Kc = 0.0;
     RealType Kcz = 0.0;
@@ -1930,6 +1949,10 @@ namespace OpenMD {
     RealType Q2cp = 0.0;
     RealType Q2cn = 0.0;
     RealType Volc = 0.0;
+
+	RealType Jc_total = 0.0;
+	RealType Jc_cation = 0.0;
+	RealType Jc_anion = 0.0; 
 
     if (!usePeriodicBoundaryConditions_) {
       sprintf(painCave.errMsg,
@@ -2070,16 +2093,30 @@ namespace OpenMD {
     RealType betah = 0.0;
 
     bool successfulExchange = false;
-    if ((MQcp > 0.0) && (MQcn < 0.0) && (MQhp > 0.0) && (MQhn < 0.0)) {
+    if ( ( (MQcp > 0.0) && (MQcn < 0.0) && (MQhp > 0.0) && (MQhn < 0.0) ) || ( (MQcp > 0.0) && (MQhp > 0.0) ) || ( (MQcn < 0.0) && (MQhn < 0.0) ) ) {
       Vector3d vc = Pc / Mc;
 
       // units of velocity (Angstrom/fs):
-      alphac = (currentDensity_ * Volc) / (Q2cp - Q2cn * (MQcp/MQcn));
-      betac = -alphac * MQcp / MQcn;
+	  if (MQcn == 0.0) {
+        alphac = currentDensity_ * Volc / Q2cp;
+		alphah = -alphac * MQcp / MQhp;
+        betac = 0.0;
+		betah = 0.0;
+	  } else if (MQcp == 0.0) {
+		alphac = 0.0;
+		alphah = 0;
+        betac = currentDensity_ * Volc / Q2cn;
+		betah = -betac * MQcn / MQhn;
+	  } else {
+		alphac = (currentDensity_ * Volc) / (Q2cp - Q2cn * (MQcp/MQcn));
+		alphah = -alphac * MQcp / MQhp;
+        betac = -alphac * MQcp / MQcn;
+        betah = -betac * MQcn / MQhn;
+	  }
 
-	  Jc_totalAccumulator_->add((Q2cp * alphac + Q2cn * betac) / Volc);
-      Jc_cationAccumulator_->add(Q2cp * alphac / Volc);
-      Jc_anionAccumulator_->add(Q2cn * betac / Volc);
+	  Jc_total = (Q2cp * alphac + Q2cn * betac) / Volc;
+	  Jc_cation = Q2cp * alphac / Volc;
+	  Jc_anion = Q2cn * betac / Volc;
             
       RealType cNumerator = Kc - kineticTarget_;
       cNumerator -= 0.5 * Mc * vc.x()*vc.x();
@@ -2096,11 +2133,8 @@ namespace OpenMD {
       if (cDenominator/cDenominator > 0.0) {
         RealType c = sqrt(cNumerator / cDenominator);
         
-        if ((c > 0.9) && (c < 1.1)) {//restrict scaling coefficients
-          
+        if ((c > 0.9) && (c < 1.1)) { //restrict scaling coefficients
           Vector3d vh = Ph / Mh;
-          alphah = -alphac * MQcp / MQhp;
-          betah = -betac * MQcn / MQhn;
           
           RealType hNumerator = Kh + kineticTarget_;
           hNumerator -= 0.5 * Mh * vh.x()*vh.x();
@@ -2160,8 +2194,6 @@ namespace OpenMD {
               }
               successfulExchange = true;
               kineticExchange_ += kineticTarget_;
-              momentumExchange_ += momentumTarget_;
-              angularMomentumExchange_ += angularMomentumTarget_;
             }
           }
         }
@@ -2174,12 +2206,198 @@ namespace OpenMD {
       //         "\tno selected objects in one or both slabs.\n");
       // painCave.isFatal = 0;
       // painCave.severity = OPENMD_INFO;
-      // simError();        
+      // simError();    
+	  Jc_total = 0.0;
+	  Jc_cation = 0.0;
+	  Jc_anion = 0.0;    
       failTrialCount_++;
-	  Jc_totalAccumulator_->add(0.0);
-      Jc_cationAccumulator_->add(0.0);
-      Jc_anionAccumulator_->add(0.0);
 	}
+	Jc_totalAccumulator_->add(Jc_total);
+    Jc_cationAccumulator_->add(Jc_cation);
+    Jc_anionAccumulator_->add(Jc_anion);
+  }
+
+  void RNEMD::doVSSSingle(SelectionManager& smanA) {
+    if (!doRNEMD_) return;
+    int selei;
+
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Mat3x3d hmat = currentSnap_->getHmat();
+
+    StuntDouble* sd;
+    AtomType* atype;
+
+    vector<StuntDouble*> hotBin;
+
+    Vector3d P(V3Zero);
+    RealType M = 0.0;
+	RealType K = 0.0;
+	RealType Mp = 0.0;
+	RealType Mn = 0.0;
+	RealType Qp = 0.0;
+	RealType Qn = 0.0;
+    RealType Pp = 0.0;
+    RealType Pn = 0.0;
+	RealType Vol = 0.0;
+
+	RealType Jc_total = 0.0;
+	RealType Jc_cation = 0.0;
+	RealType Jc_anion = 0.0; 
+
+    if (!usePeriodicBoundaryConditions_) {
+      sprintf(painCave.errMsg,
+              "RNEMD::doVSSSingle can't be used without periodic boundary\n"
+              "\tconditions enabled.\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+    }
+    
+    for (sd = smanA.beginSelected(selei); sd != NULL; 
+         sd = smanA.nextSelected(selei)) {
+
+      Vector3d pos = sd->getPos();
+
+      // wrap the stuntdouble's position back into the box:
+      
+      if (usePeriodicBoundaryConditions_)
+        currentSnap_->wrapVector(pos);
+      
+      RealType mass = sd->getMass();
+      Vector3d vel = sd->getVel();
+      
+      hotBin.push_back(sd);
+      P += mass * vel;
+      M += mass;
+      K += mass * vel.lengthSquare();
+
+      RealType charge = 0.0;
+        
+      if (sd->isAtom()) {
+        atype = static_cast<Atom*>(sd)->getAtomType();
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if ( fca.isFixedCharge() ) charge = fca.getCharge();
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+        if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
+      }
+
+      if (charge > 0) {
+        Mp += mass;
+		Qp += charge;
+        Pp += mass * vel.z();
+      } else {
+        Mn += mass;
+		Qn += charge;
+        Pn += mass * vel.z();
+      }
+    }
+
+	Vol = volumeA_;
+
+    K *= 0.5;
+    
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &P[0], 3, MPI_REALTYPE, MPI_SUM, 
+                  MPI_COMM_WORLD);
+    
+    MPI_Allreduce(MPI_IN_PLACE, &M, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &K, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+
+    MPI_Allreduce(MPI_IN_PLACE, &Mp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Mn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &Qp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD); 
+    MPI_Allreduce(MPI_IN_PLACE, &Qn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);  
+    MPI_Allreduce(MPI_IN_PLACE, &Pp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &Pn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);              
+#endif
+
+    RealType alpha = 0.0;
+    RealType beta = 0.0;
+
+    bool successfulExchange = false;
+    if ( (Mp > 0.0) && (Mn > 0.0) ) {
+      Vector3d va = P / M;
+
+      // units of velocity (Angstrom/fs):
+	  alpha = (currentDensity_ * Vol) / (Qp - Qn * (Mp/Mn));
+      beta = -alpha * Mp / Mn;
+
+	  Jc_total = (Qp * alpha + Qn * beta) / Vol;
+	  Jc_cation = Qp * alpha / Vol;
+	  Jc_anion = Qn * beta / Vol;   
+            
+	  // Quadratic in a: A a^2 + B a + C = 0 
+	  RealType A = K;
+	  A -= 0.5 * M * va.lengthSquare();
+
+	  RealType B = Pp * alpha;
+	  //B -= Mp * va.z() * alpha;
+	  B += Pn * beta;
+	  //B -= Mn * va.z() * beta;
+
+	  RealType C = 0.5 * M * va.lengthSquare();
+	  //C += Mp * va.z() * alpha;
+	  C += 0.5 * Mp * alpha * alpha;
+	  //C += Mn * va.z() * beta;
+	  C += 0.5 * Mn * beta * beta;
+	  C -= K;
+
+	  RealType insideSqrt = B * B - 4 * A * C;
+	  RealType a = 1.0;
+
+	  if (insideSqrt >= 0.0) {
+		if (fabs(A) > std::numeric_limits<RealType>::epsilon()) {
+		  RealType root1 = (-B + sqrt(insideSqrt)) / (2 * A);
+		  RealType root2 = (-B - sqrt(insideSqrt)) / (2 * A);
+          
+		  if (fabs(root1 - 1.0) > fabs(root2 - 1.0)) 
+		  	a = root2;
+		  else
+		  	a = root1;
+
+		} else if (fabs(B) > std::numeric_limits<RealType>::epsilon())
+		  a = - C / B;
+		else a = 0.0;
+        
+        if ((a > 0.9) && (a < 1.1)) { //restrict scaling coefficients
+          vector<StuntDouble*>::iterator sdi;
+          Vector3d vel;
+          Vector3d rPos;
+              
+          for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
+		    vel = ((*sdi)->getVel() - va) * a + va;
+            RealType q = 0.0;
+            if ((*sdi)->isAtom()) {
+              atype = static_cast<Atom*>(*sdi)->getAtomType();
+              FixedChargeAdapter fca = FixedChargeAdapter(atype);
+              if ( fca.isFixedCharge() ) q = fca.getCharge();
+              FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+			  if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+              if (q > 0.0) vel.z() += alpha;
+              else if (q < 0.0) vel.z() += beta; 
+            }                                        
+            (*sdi)->setVel(vel);
+          }
+          successfulExchange = true;
+        }
+      }
+	}
+    if (successfulExchange != true) {
+      // sprintf(painCave.errMsg, 
+      //         "RNEMD::doVSSCurrent exchange NOT performed - roots that solve\n"
+      //         "\tthe constraint equations may not exist or there may be\n"
+      //         "\tno selected objects in one or both slabs.\n");
+      // painCave.isFatal = 0;
+      // painCave.severity = OPENMD_INFO;
+      // simError();    
+	  Jc_total = 0.0;
+	  Jc_cation = 0.0;
+	  Jc_anion = 0.0;    
+      failTrialCount_++;
+	}
+	Jc_totalAccumulator_->add(Jc_total);
+    Jc_cationAccumulator_->add(Jc_cation);
+    Jc_anionAccumulator_->add(Jc_anion);
   }
 
   RealType RNEMD::getDividingArea() {
@@ -2357,6 +2575,9 @@ namespace OpenMD {
       case rnemdKeCurrent:
         doVSSCurrent(commonA_, commonB_);
         break;
+	  case rnemdSingle:
+	    doVSSSingle(commonA_);
+		break;
       default:
         doVSS(commonA_, commonB_);
         break;
@@ -2740,7 +2961,7 @@ namespace OpenMD {
           rnemdFile_ << "#    fluxType  = \"" << (*fi).first << "\";\n";
       }
       if (usePeriodicBoundaryConditions_)
-	rnemdFile_ << "#    privilegedAxis = " << rnemdAxisLabel_ << ";\n";
+	    rnemdFile_ << "#    privilegedAxis = " << rnemdAxisLabel_ << ";\n";
       rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << ";\n";
 
       rnemdFile_ << "#    objectSelection = \"" 
@@ -2785,8 +3006,9 @@ namespace OpenMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << JzL
                  << " (amu/A^2/fs^2)\n";
-      if ((rnemdFluxType_ == rnemdCurrent) || 
-          (rnemdFluxType_ == rnemdKeCurrent)) {
+      if ( (rnemdFluxType_ == rnemdCurrent)   || 
+           (rnemdFluxType_ == rnemdKeCurrent) ||
+		   (rnemdFluxType_ == rnemdSingle) ) {
 		rnemdFile_ << "#   Total current density = " << avgJc_total
                  << " (electrons/A^2/fs)\n";
         rnemdFile_ << "#   cation current density = " << avgJc_cation
