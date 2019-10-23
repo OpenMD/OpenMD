@@ -63,7 +63,7 @@ namespace OpenMD{
       red_(red), green_(green), blue_(blue),
       maxbonds_(maxbo)
     {
-      strncpy(symbol_, sym, 3);
+      symbol_.assign(sym, 3);
     }
         
     /**
@@ -78,8 +78,8 @@ namespace OpenMD{
      * Returns the atomic symbol for this element
      * @return the atomic symbol for this element
      */
-    char *GetSymbol() {
-      return(symbol_); 
+    const char *GetSymbol() {
+      return(symbol_.c_str()); 
     }
  
     /**
@@ -180,7 +180,7 @@ namespace OpenMD{
     
   protected: 
     int num_;
-    char symbol_[3];
+    std::string symbol_;
     std::string name_;
     RealType Rcov_, Rvdw_, mass_, elNeg_, ARENeg_, ionize_, elAffinity_;
     RealType red_, green_, blue_;

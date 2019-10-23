@@ -99,12 +99,14 @@ int simError( void ) {
   if (worldRank == 0) {
     if ( painCave.isEventLoop ) {
       sprintf( nodeMsg, " (reported by MPI node %d)", worldRank);
-      strncat(errorMsg, nodeMsg, strlen(nodeMsg));
+      strncat(errorMsg, nodeMsg, MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
+      errorMsg[MAX_SIM_ERROR_MSG_LENGTH-1] = '\0';
     }
 #endif
     
     strcat(errorMsg, ":\n\t");    
-    strncat(errorMsg, painCave.errMsg, strlen(painCave.errMsg));    
+    strncat(errorMsg, painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
+    errorMsg[MAX_SIM_ERROR_MSG_LENGTH-1] = '\0';
     strcat(errorMsg, "\n");
     
     switch( painCave.severity ) {

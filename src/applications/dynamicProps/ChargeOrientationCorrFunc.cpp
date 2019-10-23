@@ -59,7 +59,8 @@ namespace OpenMD {
                                  const RealType cutOff,
                                  const int axis)
     : CrossCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslFlucQPosition | DataStorage::dslVelocity),dX_(dipoleX), dY_(dipoleY), dZ_(dipoleZ), rcut_(cutOff), axis_(axis) {
+                             DataStorage::dslFlucQPosition | DataStorage::dslVelocity),
+      dX_(dipoleX), dY_(dipoleY), dZ_(dipoleZ), rcut_(cutOff), axis_(axis) {
 
     setCorrFuncType("Charge - Orientation Order Parameter Cross Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".QScorr");

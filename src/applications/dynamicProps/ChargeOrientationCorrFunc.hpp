@@ -61,14 +61,14 @@ namespace OpenMD {
     std::vector< std::vector<RealType> > CosTheta_;
 
 
-    int axis_;
     std::string axisLabel_;
-
 
     RealType sumCharge_;
     RealType sumCosTheta_;
     RealType dX_, dY_, dZ_;
     RealType rcut_;
+
+    int axis_;
 
     Vector3d pos1_, pos2_;
     Vector3d refAxis_, dipoleVector_;
