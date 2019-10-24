@@ -615,22 +615,25 @@ namespace OpenMD {
       case 'c' : {
         
         RealType flucQPos;
-        flucQPos = tokenizer.nextTokenAsDouble(); 
-        sd->setFlucQPos(flucQPos);
+        flucQPos = tokenizer.nextTokenAsDouble();
+	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+	  sd->setFlucQPos(flucQPos);
         break;
       }
       case 'w' : {
         
         RealType flucQVel;
-        flucQVel = tokenizer.nextTokenAsDouble(); 
-        sd->setFlucQVel(flucQVel);
+	flucQVel = tokenizer.nextTokenAsDouble(); 
+	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+	  sd->setFlucQVel(flucQVel);
         break;
       }
       case 'g' : {
-        
+	
         RealType flucQFrc;
-        flucQFrc = tokenizer.nextTokenAsDouble(); 
-        sd->setFlucQFrc(flucQFrc);
+	flucQFrc = tokenizer.nextTokenAsDouble();
+	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+	  sd->setFlucQFrc(flucQFrc);
         break;
       }
       case 'e' : {
