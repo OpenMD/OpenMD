@@ -173,19 +173,19 @@ namespace OpenMD {
     }
 
     void setupSkewMat(Vector3<Real> v) {
-        setupSkewMat(v[0], v[1], v[2]);
+      setupSkewMat(v[0], v[1], v[2]);
     }
 
     void setupSkewMat(Real v1, Real v2, Real v3) {
-        this->data_[0][0] = 0;
-        this->data_[0][1] = -v3;
-        this->data_[0][2] = v2;
-        this->data_[1][0] = v3;
-        this->data_[1][1] = 0;
-        this->data_[1][2] = -v1;
-        this->data_[2][0] = -v2;
-        this->data_[2][1] = v1;
-        this->data_[2][2] = 0;               
+      this->data_[0][0] = 0;
+      this->data_[0][1] = -v3;
+      this->data_[0][2] = v2;
+      this->data_[1][0] = v3;
+      this->data_[1][1] = 0;
+      this->data_[1][2] = -v1;
+      this->data_[2][0] = -v2;
+      this->data_[2][1] = v1;
+      this->data_[2][2] = 0;               
     }
 
     /**
@@ -242,9 +242,7 @@ namespace OpenMD {
       *this += st * SquareMatrix3<Real>::setupSkewMat(axis);
       *this += (1-ct) * SquareMatrix3<Real>::outProduct(axis, axis);      
     }
-
     
-
     /**
      * Returns the quaternion from this rotation matrix
      * @return the quaternion from this rotation matrix
@@ -271,20 +269,23 @@ namespace OpenMD {
 
 	if( ad1 >= ad2 && ad1 >= ad3 ){
 
-	  s = 0.5 / sqrt( 1.0 + this->data_[0][0] - this->data_[1][1] - this->data_[2][2] );
+	  s = 0.5 / sqrt( 1.0 + this->data_[0][0] - this->data_[1][1] -
+                          this->data_[2][2] );
 	  q[0] = (this->data_[1][2] - this->data_[2][1]) * s;
 	  q[1] = 0.25 / s;
 	  q[2] = (this->data_[0][1] + this->data_[1][0]) * s;
 	  q[3] = (this->data_[0][2] + this->data_[2][0]) * s;
 	} else if ( ad2 >= ad1 && ad2 >= ad3 ) {
-	  s = 0.5 / sqrt( 1.0 + this->data_[1][1] - this->data_[0][0] - this->data_[2][2] );
+	  s = 0.5 / sqrt( 1.0 + this->data_[1][1] - this->data_[0][0] -
+                          this->data_[2][2] );
 	  q[0] = (this->data_[2][0] - this->data_[0][2] ) * s;
 	  q[1] = (this->data_[0][1] + this->data_[1][0]) * s;
 	  q[2] = 0.25 / s;
 	  q[3] = (this->data_[1][2] + this->data_[2][1]) * s;
 	} else {
 
-	  s = 0.5 / sqrt( 1.0 + this->data_[2][2] - this->data_[0][0] - this->data_[1][1] );
+	  s = 0.5 / sqrt( 1.0 + this->data_[2][2] - this->data_[0][0] -
+                          this->data_[1][1] );
 	  q[0] = (this->data_[0][1] - this->data_[1][0]) * s;
 	  q[1] = (this->data_[0][2] + this->data_[2][0]) * s;
 	  q[2] = (this->data_[1][2] + this->data_[2][1]) * s;
@@ -316,7 +317,8 @@ namespace OpenMD {
                 
       // set the tolerance for Euler angles and rotation elements
 
-      theta = acos(std::min((RealType)1.0, std::max((RealType)-1.0,this->data_[2][2])));
+      theta = acos(std::min((RealType)1.0,
+                            std::max((RealType)-1.0, this->data_[2][2])));
       ctheta = this->data_[2][2]; 
       stheta = sqrt(1.0 - ctheta * ctheta);
 
@@ -370,10 +372,12 @@ namespace OpenMD {
     Real determinant() const {
       Real x,y,z;
 
-      x = this->data_[0][0] * (this->data_[1][1] * this->data_[2][2] - this->data_[1][2] * this->data_[2][1]);
-      y = this->data_[0][1] * (this->data_[1][2] * this->data_[2][0] - this->data_[1][0] * this->data_[2][2]);
-      z = this->data_[0][2] * (this->data_[1][0] * this->data_[2][1] - this->data_[1][1] * this->data_[2][0]);
-
+      x = this->data_[0][0] * (this->data_[1][1] * this->data_[2][2] -
+                               this->data_[1][2] * this->data_[2][1]);
+      y = this->data_[0][1] * (this->data_[1][2] * this->data_[2][0] -
+                               this->data_[1][0] * this->data_[2][2]);
+      z = this->data_[0][2] * (this->data_[1][0] * this->data_[2][1] -
+                               this->data_[1][1] * this->data_[2][0]);
       return(x + y + z);
     }            
 
@@ -383,61 +387,33 @@ namespace OpenMD {
     }
             
     /**
-     * Sets the value of this matrix to  the inversion of itself. 
-     * @note since simple algorithm can be applied to inverse the 3 by 3 matrix, we hide the  
-     * implementation of inverse in SquareMatrix class
+     * Sets the value of this matrix to the inverse of itself.
+     * @note since this simple algorithm can be applied to invert a 3 by 3
+     * matrix, we hide the implementation of inverse in SquareMatrix
+     * class
      */
     SquareMatrix3<Real>  inverse() const {
       SquareMatrix3<Real> m;
       RealType det = determinant();
-      if (fabs(det) <= OpenMD::epsilon) {
-	//"The method was called on a matrix with |determinant| <= 1e-6.",
-	//"This is a runtime or a programming error in your application.");
-        std::vector<int> zeroDiagElementIndex;
-        for (int i =0; i < 3; ++i) {
-            if (fabs(this->data_[i][i]) <= OpenMD::epsilon) {
-                zeroDiagElementIndex.push_back(i);
-            }
-        }
-
-        if (zeroDiagElementIndex.size() == 2) {
-            int index = zeroDiagElementIndex[0];
-            m(index, index) = 1.0 / this->data_[index][index];
-        }else if (zeroDiagElementIndex.size() == 1) {
-
-            int a = (zeroDiagElementIndex[0] + 1) % 3;
-            int b = (zeroDiagElementIndex[0] + 2) %3;
-            RealType denom = this->data_[a][a] * this->data_[b][b] - this->data_[b][a]*this->data_[a][b];
-            m(a, a) = this->data_[b][b] /denom;
-            m(b, a) = -this->data_[b][a]/denom;
-
-            m(a,b) = -this->data_[a][b]/denom;
-            m(b, b) = this->data_[a][a]/denom;
-                
-        }
-      
-/*
-        for(std::vector<int>::iterator iter = zeroDiagElementIndex.begin(); iter != zeroDiagElementIndex.end() ++iter) {
-            if (this->data_[*iter][0] > OpenMD::epsilon || this->data_[*iter][1] ||this->data_[*iter][2] ||
-                this->data_[0][*iter] > OpenMD::epsilon || this->data_[1][*iter] ||this->data_[2][*iter] ) {
-                std::cout << "can not inverse matrix" << std::endl;
-            }
-        }
-*/
-      } else {
-
-          m(0, 0) = this->data_[1][1]*this->data_[2][2] - this->data_[1][2]*this->data_[2][1];
-          m(1, 0) = this->data_[1][2]*this->data_[2][0] - this->data_[1][0]*this->data_[2][2];
-          m(2, 0) = this->data_[1][0]*this->data_[2][1] - this->data_[1][1]*this->data_[2][0];
-          m(0, 1) = this->data_[2][1]*this->data_[0][2] - this->data_[2][2]*this->data_[0][1];
-          m(1, 1) = this->data_[2][2]*this->data_[0][0] - this->data_[2][0]*this->data_[0][2];
-          m(2, 1) = this->data_[2][0]*this->data_[0][1] - this->data_[2][1]*this->data_[0][0];
-          m(0, 2) = this->data_[0][1]*this->data_[1][2] - this->data_[0][2]*this->data_[1][1];
-          m(1, 2) = this->data_[0][2]*this->data_[1][0] - this->data_[0][0]*this->data_[1][2];
-          m(2, 2) = this->data_[0][0]*this->data_[1][1] - this->data_[0][1]*this->data_[1][0];
-
-          m /= det;
-	}
+      m(0, 0) = this->data_[1][1]*this->data_[2][2]
+        - this->data_[1][2]*this->data_[2][1];
+      m(1, 0) = this->data_[1][2]*this->data_[2][0]
+        - this->data_[1][0]*this->data_[2][2];
+      m(2, 0) = this->data_[1][0]*this->data_[2][1]
+        - this->data_[1][1]*this->data_[2][0];
+      m(0, 1) = this->data_[2][1]*this->data_[0][2]
+        - this->data_[2][2]*this->data_[0][1];
+      m(1, 1) = this->data_[2][2]*this->data_[0][0]
+        - this->data_[2][0]*this->data_[0][2];
+      m(2, 1) = this->data_[2][0]*this->data_[0][1]
+        - this->data_[2][1]*this->data_[0][0];
+      m(0, 2) = this->data_[0][1]*this->data_[1][2]
+        - this->data_[0][2]*this->data_[1][1];
+      m(1, 2) = this->data_[0][2]*this->data_[1][0]
+        - this->data_[0][0]*this->data_[1][2];
+      m(2, 2) = this->data_[0][0]*this->data_[1][1]
+        - this->data_[0][1]*this->data_[1][0];
+      m /= det;
       return m;
     }
 
@@ -455,31 +431,31 @@ namespace OpenMD {
      * The eigenvectors (the columns of V) will be normalized. 
      * The eigenvectors are aligned optimally with the x, y, and z
      * axes respectively.
-     * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is
-     *     overwritten             
+     * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is overwritten             
      * @param w will contain the eigenvalues of the matrix On return of this function
-     * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are 
-     *    normalized and mutually orthogonal.              
+     * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are normalized and mutually orthogonal.              
      * @warning a will be overwritten
      */
-    static void diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w, SquareMatrix3<Real>& v); 
+    static void diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w,
+                            SquareMatrix3<Real>& v); 
   };
   /*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    $RCSfile: SquareMatrix3.hpp,v $
+    Program:   Visualization Toolkit
+    Module:    $RCSfile: SquareMatrix3.hpp,v $
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+    Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+    All rights reserved.
+    See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 
-  This software is distributed WITHOUT ANY WARRANTY; without even
-  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-  PURPOSE.  See the above copyright notice for more information.
+    This software is distributed WITHOUT ANY WARRANTY; without even
+    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+    PURPOSE.  See the above copyright notice for more information.
 
-  =========================================================================*/
+    =========================================================================*/
   template<typename Real>
-  void SquareMatrix3<Real>::diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w, 
+  void SquareMatrix3<Real>::diagonalize(SquareMatrix3<Real>& a,
+                                        Vector3<Real>& w, 
 					SquareMatrix3<Real>& v) {
     int i,j,k,maxI;
     Real tmp, maxVal;
@@ -607,7 +583,8 @@ namespace OpenMD {
    * @param m2 the second matrix
    */
   template<typename Real> 
-  inline SquareMatrix3<Real> operator *(const SquareMatrix3<Real>& m1, const SquareMatrix3<Real>& m2) {
+  inline SquareMatrix3<Real> operator *(const SquareMatrix3<Real>& m1,
+                                        const SquareMatrix3<Real>& m2) {
     SquareMatrix3<Real> result;
 
     for (unsigned int i = 0; i < 3; i++)
@@ -619,7 +596,8 @@ namespace OpenMD {
   }
 
   template<typename Real> 
-  inline SquareMatrix3<Real> outProduct(const Vector3<Real>& v1, const Vector3<Real>& v2) {
+  inline SquareMatrix3<Real> outProduct(const Vector3<Real>& v1,
+                                        const Vector3<Real>& v2) {
     SquareMatrix3<Real> result;
 
     for (unsigned int i = 0; i < 3; i++) {
@@ -639,5 +617,5 @@ namespace OpenMD {
 
 
 } //namespace OpenMD
-#endif // MATH_SQUAREMATRIX_HPP
+#endif // MATH_SQUAREMATRIX3_HPP
 
