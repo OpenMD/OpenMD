@@ -485,24 +485,27 @@ namespace OpenMD {
       case 'c' : {
         RealType flucQPos;
         flucQPos = tokenizer.nextTokenAsDouble();
-	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-	  sd->setFlucQPos(flucQPos);
+	if (sd->isAtom())
+          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+            sd->setFlucQPos(flucQPos);
         break;
       }
       case 'w' : {
 
         RealType flucQVel;
         flucQVel = tokenizer.nextTokenAsDouble();
-	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-	  sd->setFlucQVel(flucQVel);          
+        if (sd->isAtom())          
+          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+            sd->setFlucQVel(flucQVel);          
         break;
       }
       case 'g' : {
 
         RealType flucQFrc;
-        flucQFrc = tokenizer.nextTokenAsDouble();	
-	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-	  sd->setFlucQFrc(flucQFrc);
+        flucQFrc = tokenizer.nextTokenAsDouble();
+        if (sd->isAtom())
+          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+            sd->setFlucQFrc(flucQFrc);
         break;
       }
       case 'e' : {
@@ -589,9 +592,17 @@ namespace OpenMD {
     if (i >> siteIndex) {
       // chew up this token and parse as an int:
       siteIndex = tokenizer.nextTokenAsInt();
-
       if (sd->isRigidBody()) {
+        
         RigidBody* rb = static_cast<RigidBody*>(sd);
+
+        // Sometimes site lines are inherited from other models, so
+        // just ignore a site line that exceeds the number of atoms in
+        // our RB:        
+        if (siteIndex >= rb->getNumAtoms()) {
+          return;
+        }
+
         sd = rb->getAtoms()[siteIndex];
       }
     }
@@ -616,24 +627,27 @@ namespace OpenMD {
         
         RealType flucQPos;
         flucQPos = tokenizer.nextTokenAsDouble();
-	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-	  sd->setFlucQPos(flucQPos);
+        if (sd->isAtom())
+          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+            sd->setFlucQPos(flucQPos);
         break;
       }
       case 'w' : {
         
         RealType flucQVel;
-	flucQVel = tokenizer.nextTokenAsDouble(); 
-	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-	  sd->setFlucQVel(flucQVel);
+	flucQVel = tokenizer.nextTokenAsDouble();
+        if (sd->isAtom())
+          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+            sd->setFlucQVel(flucQVel);
         break;
       }
       case 'g' : {
 	
         RealType flucQFrc;
 	flucQFrc = tokenizer.nextTokenAsDouble();
-	if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-	  sd->setFlucQFrc(flucQFrc);
+        if (sd->isAtom())
+          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+            sd->setFlucQFrc(flucQFrc);
         break;
       }
       case 'e' : {
