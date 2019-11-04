@@ -2372,13 +2372,15 @@ namespace OpenMD {
           if ((*sdi)->isAtom()) {
             atype = static_cast<Atom*>(*sdi)->getAtomType();
             FixedChargeAdapter fca = FixedChargeAdapter(atype);
-            if ( fca.isFixedCharge() ) q = fca.getCharge();
+            if ( fca.isFixedCharge() )
+              q = fca.getCharge();
             FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-            if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-            if (q > 0.0) vel.z() += alpha;
-            else if (q < 0.0) vel.z() += beta; 
-            else if (q < 0.0) vel.z() += beta; 
-            else if (q < 0.0) vel.z() += beta; 
+            if ( fqa.isFluctuatingCharge() )
+              q += (*sdi)->getFlucQPos();
+            if (q > 0.0)
+              vel.z() += alpha;
+            else if (q < 0.0)
+              vel.z() += beta; 
           }
           (*sdi)->setVel(vel);
         }
