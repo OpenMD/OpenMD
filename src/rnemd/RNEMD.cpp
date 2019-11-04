@@ -110,7 +110,7 @@ namespace OpenMD {
     stringToFluxType_["Lz"]  = rnemdLz;
     stringToFluxType_["Lvector"]  = rnemdLvector;
     stringToFluxType_["Current"]  = rnemdCurrent;
-	stringToFluxType_["Single"]   = rnemdSingle;
+    stringToFluxType_["Single"]   = rnemdSingle;
     stringToFluxType_["KE+Px"]  = rnemdKePx;
     stringToFluxType_["KE+Py"]  = rnemdKePy;
     stringToFluxType_["KE+Pvector"]  = rnemdKePvector;
@@ -299,7 +299,7 @@ namespace OpenMD {
         hasCorrectFlux = hasAngularMomentumFluxVector;
         break;
       case rnemdCurrent:
-	  case rnemdSingle:
+      case rnemdSingle:
         hasCorrectFlux = hasCurrentDensity;
         break;
       case rnemdKePx:
@@ -489,7 +489,7 @@ namespace OpenMD {
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
     
     areaAccumulator_ = new Accumulator();
-	Jc_totalAccumulator_ = new Accumulator();
+    Jc_totalAccumulator_ = new Accumulator();
     Jc_cationAccumulator_ = new Accumulator();
     Jc_anionAccumulator_ = new Accumulator();
     
@@ -628,7 +628,7 @@ namespace OpenMD {
         outputMask_.set(DENSITY);        
         break;
       case rnemdCurrent:
-	  case rnemdSingle:
+      case rnemdSingle:
       case rnemdKeCurrent:
         outputMask_.set(TEMPERATURE);
         outputMask_.set(VELOCITY);
@@ -658,8 +658,8 @@ namespace OpenMD {
     std::ostringstream selectionAstream;
     std::ostringstream selectionBstream;
 
-	if (rnemdFluxType_ == rnemdSingle) {
-	  if (hasSelectionA_) {
+    if (rnemdFluxType_ == rnemdSingle) {
+      if (hasSelectionA_) {
         selectionA_ = rnemdParams->getSelectionA();
       } else {
         if (usePeriodicBoundaryConditions_) {     
@@ -675,23 +675,23 @@ namespace OpenMD {
           } else {
             slabACenter_ = 0.0;
           }
-		  selectionAstream << "select wrappedz > " 
+          selectionAstream << "select wrappedz > " 
                            << slabACenter_ - 0.5*slabWidth_ 
                            <<  " && wrappedz < "
                            << slabACenter_ + 0.5*slabWidth_;
           selectionA_ = selectionAstream.str();
         }
-	  }
+      }
 
       if (hasSelectionB_) {
         sprintf(painCave.errMsg, 
-              "RNEMD: The rnemdSingle flux type only allows for a selectionA to be specified.\n");
+                "RNEMD: The rnemdSingle flux type only allows for a selectionA to be specified.\n");
         painCave.isFatal = 0;
         painCave.severity = OPENMD_WARNING;
         simError();
-	  } else selectionB_ = std::string("select none");
+      } else selectionB_ = std::string("select none");
     } else {
-	  if (hasSelectionA_) {
+      if (hasSelectionA_) {
         selectionA_ = rnemdParams->getSelectionA();
       } else {
         if (usePeriodicBoundaryConditions_) {     
@@ -705,7 +705,7 @@ namespace OpenMD {
           if (hasSlabACenter) slabACenter_ = rnemdParams->getSlabACenter();
           else slabACenter_ = 0.0;
 
-		  selectionAstream << "select wrappedz > " 
+          selectionAstream << "select wrappedz > " 
                            << slabACenter_ - 0.5*slabWidth_ 
                            <<  " && wrappedz < "
                            << slabACenter_ + 0.5*slabWidth_;
@@ -725,7 +725,7 @@ namespace OpenMD {
         }
       }
     
-	  if (hasSelectionB_) {
+      if (hasSelectionB_) {
         selectionB_ = rnemdParams->getSelectionB();
       } else {
         if (usePeriodicBoundaryConditions_) {     
@@ -739,7 +739,7 @@ namespace OpenMD {
           if (hasSlabBCenter) slabBCenter_ = rnemdParams->getSlabBCenter();
           else slabBCenter_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
         
-		  selectionBstream << "select wrappedz > " 
+          selectionBstream << "select wrappedz > " 
                            << slabBCenter_ - 0.5*slabWidth_ 
                            <<  " || wrappedz < "
                            << slabBCenter_ + 0.5*slabWidth_;
@@ -756,7 +756,7 @@ namespace OpenMD {
           }
         }
       }
-	}
+    }
 
     // object evaluator:
     evaluator_.loadScriptString(rnemdObjectSelection_);
@@ -786,7 +786,7 @@ namespace OpenMD {
 
     // delete all of the objects we created:
     delete areaAccumulator_; 
-	delete Jc_totalAccumulator_;
+    delete Jc_totalAccumulator_;
     delete Jc_cationAccumulator_; 
     delete Jc_anionAccumulator_;   
     data_.clear();
@@ -1950,9 +1950,9 @@ namespace OpenMD {
     RealType Q2cn = 0.0;
     RealType Volc = 0.0;
 
-	RealType Jc_total = 0.0;
-	RealType Jc_cation = 0.0;
-	RealType Jc_anion = 0.0; 
+    RealType Jc_total = 0.0;
+    RealType Jc_cation = 0.0;
+    RealType Jc_anion = 0.0; 
 
     if (!usePeriodicBoundaryConditions_) {
       sprintf(painCave.errMsg,
@@ -2097,26 +2097,26 @@ namespace OpenMD {
       Vector3d vc = Pc / Mc;
 
       // units of velocity (Angstrom/fs):
-	  if (MQcn == 0.0) {
+      if (MQcn == 0.0) {
         alphac = currentDensity_ * Volc / Q2cp;
-		alphah = -alphac * MQcp / MQhp;
+        alphah = -alphac * MQcp / MQhp;
         betac = 0.0;
-		betah = 0.0;
-	  } else if (MQcp == 0.0) {
-		alphac = 0.0;
-		alphah = 0.0;
+        betah = 0.0;
+      } else if (MQcp == 0.0) {
+        alphac = 0.0;
+        alphah = 0.0;
         betac = currentDensity_ * Volc / Q2cn;
-		betah = -betac * MQcn / MQhn;
-	  } else {
-		alphac = (currentDensity_ * Volc) / (Q2cp - Q2cn * (MQcp/MQcn));
-		alphah = -alphac * MQcp / MQhp;
+        betah = -betac * MQcn / MQhn;
+      } else {
+        alphac = (currentDensity_ * Volc) / (Q2cp - Q2cn * (MQcp/MQcn));
+        alphah = -alphac * MQcp / MQhp;
         betac = -alphac * MQcp / MQcn;
         betah = -betac * MQcn / MQhn;
-	  }
+      }
 
-	  Jc_total = (Q2cp * alphac + Q2cn * betac) / Volc;
-	  Jc_cation = Q2cp * alphac / Volc;
-	  Jc_anion = Q2cn * betac / Volc;
+      Jc_total = (Q2cp * alphac + Q2cn * betac) / Volc;
+      Jc_cation = Q2cp * alphac / Volc;
+      Jc_anion = Q2cn * betac / Volc;
             
       RealType cNumerator = Kc - kineticTarget_;
       cNumerator -= 0.5 * Mc * vc.x()*vc.x();
@@ -2207,12 +2207,12 @@ namespace OpenMD {
       // painCave.isFatal = 0;
       // painCave.severity = OPENMD_INFO;
       // simError();    
-	  Jc_total = 0.0;
-	  Jc_cation = 0.0;
-	  Jc_anion = 0.0;    
+      Jc_total = 0.0;
+      Jc_cation = 0.0;
+      Jc_anion = 0.0;    
       failTrialCount_++;
-	}
-	Jc_totalAccumulator_->add(Jc_total);
+    }
+    Jc_totalAccumulator_->add(Jc_total);
     Jc_cationAccumulator_->add(Jc_cation);
     Jc_anionAccumulator_->add(Jc_anion);
   }
@@ -2231,18 +2231,18 @@ namespace OpenMD {
 
     Vector3d P(V3Zero);
     RealType M = 0.0;
-	RealType K = 0.0;
-	RealType Mp = 0.0;
-	RealType Mn = 0.0;
-	RealType Qp = 0.0;
-	RealType Qn = 0.0;
+    RealType K = 0.0;
+    RealType Mp = 0.0;
+    RealType Mn = 0.0;
+    RealType Qp = 0.0;
+    RealType Qn = 0.0;
     RealType Pp = 0.0;
     RealType Pn = 0.0;
-	RealType Vol = 0.0;
+    RealType Vol = 0.0;
 
-	RealType Jc_total = 0.0;
-	RealType Jc_cation = 0.0;
-	RealType Jc_anion = 0.0; 
+    RealType Jc_total = 0.0;
+    RealType Jc_cation = 0.0;
+    RealType Jc_anion = 0.0; 
 
     if (!usePeriodicBoundaryConditions_) {
       sprintf(painCave.errMsg,
@@ -2282,17 +2282,17 @@ namespace OpenMD {
 
         if (charge > 0.0) {
           Mp += mass;
-		  Qp += charge;
+          Qp += charge;
           Pp += mass * vel.z();
         } else if (charge < 0.0) {
           Mn += mass;
-		  Qn += charge;
+          Qn += charge;
           Pn += mass * vel.z();
-		}
+        }
       }
     }
 
-	Vol = volumeA_;
+    Vol = volumeA_;
 
     K *= 0.5;
     
@@ -2305,7 +2305,7 @@ namespace OpenMD {
 
     MPI_Allreduce(MPI_IN_PLACE, &Mp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &Mn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &Qp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD); 
+    MPI_Allreduce(MPI_IN_PLACE, &Qp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD); 
     MPI_Allreduce(MPI_IN_PLACE, &Qn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);  
     MPI_Allreduce(MPI_IN_PLACE, &Pp, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &Pn, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);              
@@ -2319,74 +2319,72 @@ namespace OpenMD {
       Vector3d va = P / M;
 
       // units of velocity (Angstrom/fs):
-	  alpha = (currentDensity_ * Vol) / (Qp - Qn * (Mp/Mn));
+      alpha = (currentDensity_ * Vol) / (Qp - Qn * (Mp/Mn));
       beta = -alpha * Mp / Mn;
 
-	  Jc_total = (Qp * alpha + Qn * beta) / Vol;
-	  Jc_cation = Qp * alpha / Vol;
-	  Jc_anion = Qn * beta / Vol;   
+      Jc_total = (Qp * alpha + Qn * beta) / Vol;
+      Jc_cation = Qp * alpha / Vol;
+      Jc_anion = Qn * beta / Vol;   
             
-	  // Quadratic in a: A a^2 + B a + C = 0 
-	  RealType A = K;
-	  A -= 0.5 * M * va.lengthSquare();
+      // Quadratic in a: A a^2 + B a + C = 0 
+      RealType A = K;
+      A -= 0.5 * M * va.lengthSquare();
 
-	  RealType B = Pp * alpha;
-	  B += Pn * beta;
+      RealType B = Pp * alpha;
+      B += Pn * beta;
 
-	  RealType C = 0.5 * M * va.lengthSquare();
-	  C += 0.5 * Mp * alpha * alpha;
-	  C += 0.5 * Mn * beta * beta;
-	  C -= K;
+      RealType C = 0.5 * M * va.lengthSquare();
+      C += 0.5 * Mp * alpha * alpha;
+      C += 0.5 * Mn * beta * beta;
+      C -= K;
 
-	  RealType insideSqrt = B * B - 4 * A * C;
-	  RealType a = 1.0;
+      RealType insideSqrt = B * B - 4 * A * C;
+      RealType a = 1.0;
 
-	  if (fabs(A) > std::numeric_limits<RealType>::epsilon()) {
-	    if (insideSqrt >= 0.0) {
-		  RealType root1 = (-B + sqrt(insideSqrt)) / (2 * A);
-		  RealType root2 = (-B - sqrt(insideSqrt)) / (2 * A);
+      if (fabs(A) > std::numeric_limits<RealType>::epsilon()) {
+        if (insideSqrt >= 0.0) {
+          RealType root1 = (-B + sqrt(insideSqrt)) / (2 * A);
+          RealType root2 = (-B - sqrt(insideSqrt)) / (2 * A);
           
-		  if ( (1.0 - root1) >= 0 ) {
-			if ( ((1.0 - root2) >= 0) && ((1.0 - root1) > (1.0 - root2)) ) {
-			  a = root2;
-			} else {
-			  a = root1;
-			}
-		  } else if ( (1.0 - root2) >= 0 ) {
-		  	a = root2;
-		  }
-		} else 
-		  a = 0.0;
-	  } else if (fabs(B) > std::numeric_limits<RealType>::epsilon()) {
-		  a = - C / B;
-	  } else a = 0.0;
+          if ( (1.0 - root1) >= 0 ) {
+            if ( ((1.0 - root2) >= 0) && ((1.0 - root1) > (1.0 - root2)) ) {
+              a = root2;
+            } else {
+              a = root1;
+            }
+          } else if ( (1.0 - root2) >= 0 ) {
+            a = root2;
+          }
+        } else 
+          a = 0.0;
+      } else if (fabs(B) > std::numeric_limits<RealType>::epsilon()) {
+        a = - C / B;
+      } else a = 0.0;
 
       if ( (a > 0.9) && (a <= 1.0) ) { //restrict scaling coefficients
         vector<StuntDouble*>::iterator sdi;
         Vector3d vel;
         Vector3d rPos;
               
-		for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
-		  vel = ((*sdi)->getVel() - va) * a + va;
-		  RealType q = 0.0;
-		  if ((*sdi)->isAtom()) {
-			atype = static_cast<Atom*>(*sdi)->getAtomType();
-			FixedChargeAdapter fca = FixedChargeAdapter(atype);
-			if ( fca.isFixedCharge() ) q = fca.getCharge();
-			FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-			if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-			if (q > 0.0) vel.z() += alpha;
-			else if (q < 0.0) vel.z() += beta; 
-              else if (q < 0.0) vel.z() += beta; 
-			else if (q < 0.0) vel.z() += beta; 
-		  }                                        
-            }                                        
-		  }                                        
-		  (*sdi)->setVel(vel);
-		}
+        for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
+          vel = ((*sdi)->getVel() - va) * a + va;
+          RealType q = 0.0;
+          if ((*sdi)->isAtom()) {
+            atype = static_cast<Atom*>(*sdi)->getAtomType();
+            FixedChargeAdapter fca = FixedChargeAdapter(atype);
+            if ( fca.isFixedCharge() ) q = fca.getCharge();
+            FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+            if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+            if (q > 0.0) vel.z() += alpha;
+            else if (q < 0.0) vel.z() += beta; 
+            else if (q < 0.0) vel.z() += beta; 
+            else if (q < 0.0) vel.z() += beta; 
+          }
+          (*sdi)->setVel(vel);
+        }
         successfulExchange = true;
-      }
-	}
+      }                                        
+    }
     if (successfulExchange != true) {
       // sprintf(painCave.errMsg, 
       //         "RNEMD::doVSSCurrent exchange NOT performed - roots that solve\n"
@@ -2395,12 +2393,12 @@ namespace OpenMD {
       // painCave.isFatal = 0;
       // painCave.severity = OPENMD_INFO;
       // simError();    
-	  Jc_total = 0.0;
-	  Jc_cation = 0.0;
-	  Jc_anion = 0.0;    
+      Jc_total = 0.0;
+      Jc_cation = 0.0;
+      Jc_anion = 0.0;    
       failTrialCount_++;
-	}
-	Jc_totalAccumulator_->add(Jc_total);
+    }
+    Jc_totalAccumulator_->add(Jc_total);
     Jc_cationAccumulator_->add(Jc_cation);
     Jc_anionAccumulator_->add(Jc_anion);
   }
@@ -2447,17 +2445,17 @@ namespace OpenMD {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the 
         // area of the current box, normal to the privileged axis:
-	switch(rnemdPrivilegedAxis_) {
+        switch(rnemdPrivilegedAxis_) {
         case rnemdX:
           areaA = 2.0 * snap->getYZarea();
-	  break;
+          break;
         case rnemdY:
-	  areaA = 2.0 * snap->getXZarea();
-	  break;
+          areaA = 2.0 * snap->getXZarea();
+          break;
         case rnemdZ:
-	default:
-	  areaA = 2.0 * snap->getXYarea();
-	}
+        default:
+          areaA = 2.0 * snap->getXYarea();
+        }
         volumeA_ = areaA * slabWidth_;
 
       } else {
@@ -2504,17 +2502,17 @@ namespace OpenMD {
       if (usePeriodicBoundaryConditions_) {
         // in periodic boundaries, the surface area is twice the 
         // area of the current box, normal to the privileged axis:
-	switch(rnemdPrivilegedAxis_) {
+        switch(rnemdPrivilegedAxis_) {
         case rnemdX:
           areaB = 2.0 * snap->getYZarea();
-	  break;
+          break;
         case rnemdY:
-	  areaB = 2.0 * snap->getXZarea();
-	  break;
+          areaB = 2.0 * snap->getXZarea();
+          break;
         case rnemdZ:
-	default:
-	  areaB = 2.0 * snap->getXYarea();
-	}
+        default:
+          areaB = 2.0 * snap->getXYarea();
+        }
         volumeB_ = areaB * slabWidth_;
       } else {
         // in non-periodic simulations, without explicitly setting
@@ -2580,9 +2578,9 @@ namespace OpenMD {
       case rnemdKeCurrent:
         doVSSCurrent(commonA_, commonB_);
         break;
-	  case rnemdSingle:
-	    doVSSSingle(commonA_);
-		break;
+      case rnemdSingle:
+        doVSSSingle(commonA_);
+        break;
       default:
         doVSS(commonA_, commonB_);
         break;
@@ -2634,7 +2632,7 @@ namespace OpenMD {
     vector<Vector3d> binEField(nBins_, V3Zero);    
     vector<int> binDOF(nBins_, 0);
     vector<int> binCount(nBins_, 0);
-	vector<int> binAtomCount(nBins_, 0);
+    vector<int> binAtomCount(nBins_, 0);
     vector<vector<int> > binTypeCounts;
 
     if (outputMask_[ACTIVITY]) {
@@ -2674,17 +2672,17 @@ namespace OpenMD {
         // Shift molecules by half a box to have bins start at 0
         // The modulo operator is used to wrap the case when we are 
         // beyond the end of the bins back to the beginning.
-	    switch(rnemdPrivilegedAxis_) {
+        switch(rnemdPrivilegedAxis_) {
         case rnemdX:
-	      binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
-	      break;
+          binNo = int(nBins_ * (pos.x() / hmat(rnemdX,rnemdX) + 0.5)) % nBins_;
+          break;
         case rnemdY:
-	      binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
-	      break;
+          binNo = int(nBins_ * (pos.y() / hmat(rnemdY,rnemdY) + 0.5)) % nBins_;
+          break;
         case rnemdZ:
-	    default:
-	      binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
-	    }
+        default:
+          binNo = int(nBins_ * (pos.z() / hmat(rnemdZ,rnemdZ) + 0.5)) % nBins_;
+        }
       } else {
         Vector3d rPos = pos - coordinateOrigin_;
         binNo = int(rPos.length() / binWidth_);
@@ -2701,8 +2699,8 @@ namespace OpenMD {
       I(1, 1) += mass * r2;
       I(2, 2) += mass * r2;
 
-	  if (outputMask_[ELECTRICFIELD]) 
-	  	eField = sd->getElectricField(); // kcal/mol/e/Angstrom
+      if (outputMask_[ELECTRICFIELD]) 
+        eField = sd->getElectricField(); // kcal/mol/e/Angstrom
 
       if (outputMask_[ACTIVITY]) {
         typeIndex = -1;
@@ -2738,11 +2736,11 @@ namespace OpenMD {
           if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
         }
 
-		if (sd->isAtom()) {
-		  binAtomCount[binNo]++;
+        if (sd->isAtom()) {
+          binAtomCount[binNo]++;
           if (outputMask_[ELECTRICFIELD]) 
             binEField[binNo] += eField;
-		}
+        }
         
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -2831,12 +2829,12 @@ namespace OpenMD {
                                  Constants::energyConvert);
 
         if (outputMask_[ELECTRICFIELD]) {
-		  if (binAtomCount[i] > 0 ) {
-	          eField = binEField[i] / RealType(binAtomCount[i]);
-		  } else {
-			  eField = V3Zero;
-		  }
-		}
+          if (binAtomCount[i] > 0 ) {
+            eField = binEField[i] / RealType(binAtomCount[i]);
+          } else {
+            eField = V3Zero;
+          }
+        }
 		  
         
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
@@ -2935,8 +2933,8 @@ namespace OpenMD {
       RealType avgArea;
       areaAccumulator_->getAverage(avgArea);
 
-	  RealType avgJc_total;
-	  Jc_totalAccumulator_->getAverage(avgJc_total);
+      RealType avgJc_total;
+      Jc_totalAccumulator_->getAverage(avgJc_total);
       RealType avgJc_cation;
       Jc_cationAccumulator_->getAverage(avgJc_cation);
       RealType avgJc_anion;
@@ -2966,7 +2964,7 @@ namespace OpenMD {
           rnemdFile_ << "#    fluxType  = \"" << (*fi).first << "\";\n";
       }
       if (usePeriodicBoundaryConditions_)
-	    rnemdFile_ << "#    privilegedAxis = " << rnemdAxisLabel_ << ";\n";
+        rnemdFile_ << "#    privilegedAxis = " << rnemdAxisLabel_ << ";\n";
       rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << ";\n";
 
       rnemdFile_ << "#    objectSelection = \"" 
@@ -3013,13 +3011,13 @@ namespace OpenMD {
                  << " (amu/A^2/fs^2)\n";
       if ( (rnemdFluxType_ == rnemdCurrent)   || 
            (rnemdFluxType_ == rnemdKeCurrent) ||
-		   (rnemdFluxType_ == rnemdSingle) ) {
-		rnemdFile_ << "#   Total current density = " << avgJc_total
-                 << " (electrons/A^2/fs)\n";
+           (rnemdFluxType_ == rnemdSingle) ) {
+        rnemdFile_ << "#   Total current density = " << avgJc_total
+                   << " (electrons/A^2/fs)\n";
         rnemdFile_ << "#   cation current density = " << avgJc_cation
-                 << " (electrons/A^2/fs)\n";
+                   << " (electrons/A^2/fs)\n";
         rnemdFile_ << "#   anion current density = " << avgJc_anion
-                 << " (electrons/A^2/fs)\n";
+                   << " (electrons/A^2/fs)\n";
       }             
       rnemdFile_ << "# Exchange statistics:\n";
       rnemdFile_ << "#               attempted = " << trialCount_ << "\n";
