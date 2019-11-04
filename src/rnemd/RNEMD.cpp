@@ -2104,7 +2104,7 @@ namespace OpenMD {
 		betah = 0.0;
 	  } else if (MQcp == 0.0) {
 		alphac = 0.0;
-		alphah = 0;
+		alphah = 0.0;
         betac = currentDensity_ * Volc / Q2cn;
 		betah = -betac * MQcn / MQhn;
 	  } else {
@@ -2279,16 +2279,16 @@ namespace OpenMD {
         if ( fca.isFixedCharge() ) charge = fca.getCharge();
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
         if ( fqa.isFluctuatingCharge() ) charge += sd->getFlucQPos();
-      }
 
-      if (charge > 0) {
-        Mp += mass;
-		Qp += charge;
-        Pp += mass * vel.z();
-      } else {
-        Mn += mass;
-		Qn += charge;
-        Pn += mass * vel.z();
+        if (charge > 0.0) {
+          Mp += mass;
+		  Qp += charge;
+          Pp += mass * vel.z();
+        } else if (charge < 0.0) {
+          Mn += mass;
+		  Qn += charge;
+          Pn += mass * vel.z();
+		}
       }
     }
 
@@ -2331,55 +2331,60 @@ namespace OpenMD {
 	  A -= 0.5 * M * va.lengthSquare();
 
 	  RealType B = Pp * alpha;
-	  //B -= Mp * va.z() * alpha;
 	  B += Pn * beta;
-	  //B -= Mn * va.z() * beta;
 
 	  RealType C = 0.5 * M * va.lengthSquare();
-	  //C += Mp * va.z() * alpha;
 	  C += 0.5 * Mp * alpha * alpha;
-	  //C += Mn * va.z() * beta;
 	  C += 0.5 * Mn * beta * beta;
 	  C -= K;
 
 	  RealType insideSqrt = B * B - 4 * A * C;
 	  RealType a = 1.0;
 
-	  if (insideSqrt >= 0.0) {
-		if (fabs(A) > std::numeric_limits<RealType>::epsilon()) {
+	  if (fabs(A) > std::numeric_limits<RealType>::epsilon()) {
+	    if (insideSqrt >= 0.0) {
 		  RealType root1 = (-B + sqrt(insideSqrt)) / (2 * A);
 		  RealType root2 = (-B - sqrt(insideSqrt)) / (2 * A);
           
-		  if (fabs(root1 - 1.0) > fabs(root2 - 1.0)) 
+		  if ( (1.0 - root1) >= 0 ) {
+			if ( ((1.0 - root2) >= 0) && ((1.0 - root1) > (1.0 - root2)) ) {
+			  a = root2;
+			} else {
+			  a = root1;
+			}
+		  } else if ( (1.0 - root2) >= 0 ) {
 		  	a = root2;
-		  else
-		  	a = root1;
-
-		} else if (fabs(B) > std::numeric_limits<RealType>::epsilon())
+		  }
+		} else 
+		  a = 0.0;
+	  } else if (fabs(B) > std::numeric_limits<RealType>::epsilon()) {
 		  a = - C / B;
-		else a = 0.0;
-        
-        if ((a > 0.9) && (a < 1.1)) { //restrict scaling coefficients
-          vector<StuntDouble*>::iterator sdi;
-          Vector3d vel;
-          Vector3d rPos;
+	  } else a = 0.0;
+
+      if ( (a > 0.9) && (a <= 1.0) ) { //restrict scaling coefficients
+        vector<StuntDouble*>::iterator sdi;
+        Vector3d vel;
+        Vector3d rPos;
               
-          for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
-		    vel = ((*sdi)->getVel() - va) * a + va;
-            RealType q = 0.0;
-            if ((*sdi)->isAtom()) {
-              atype = static_cast<Atom*>(*sdi)->getAtomType();
-              FixedChargeAdapter fca = FixedChargeAdapter(atype);
-              if ( fca.isFixedCharge() ) q = fca.getCharge();
-              FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-			  if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
-              if (q > 0.0) vel.z() += alpha;
+		for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
+		  vel = ((*sdi)->getVel() - va) * a + va;
+		  RealType q = 0.0;
+		  if ((*sdi)->isAtom()) {
+			atype = static_cast<Atom*>(*sdi)->getAtomType();
+			FixedChargeAdapter fca = FixedChargeAdapter(atype);
+			if ( fca.isFixedCharge() ) q = fca.getCharge();
+			FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+			if ( fqa.isFluctuatingCharge() ) q += (*sdi)->getFlucQPos();
+			if (q > 0.0) vel.z() += alpha;
+			else if (q < 0.0) vel.z() += beta; 
               else if (q < 0.0) vel.z() += beta; 
+			else if (q < 0.0) vel.z() += beta; 
+		  }                                        
             }                                        
-            (*sdi)->setVel(vel);
-          }
-          successfulExchange = true;
-        }
+		  }                                        
+		  (*sdi)->setVel(vel);
+		}
+        successfulExchange = true;
       }
 	}
     if (successfulExchange != true) {
