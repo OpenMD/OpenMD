@@ -668,7 +668,7 @@ namespace OpenMD {
           if (hasSlabWidth) 
             slabWidth_ = rnemdParams->getSlabWidth();
           else
-            slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2;
+            slabWidth_ = hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
         
           if (hasSlabACenter) {
             slabACenter_ = rnemdParams->getSlabACenter();     
@@ -678,7 +678,7 @@ namespace OpenMD {
           selectionAstream << "select wrappedz > " 
                            << slabACenter_ - 0.5*slabWidth_ 
                            <<  " && wrappedz < "
-                           << slabACenter_ + 0.5*slabWidth_;
+                           << -slabACenter_ + 0.5*slabWidth_;
           selectionA_ = selectionAstream.str();
         }
       }
@@ -708,7 +708,7 @@ namespace OpenMD {
           selectionAstream << "select wrappedz > " 
                            << slabACenter_ - 0.5*slabWidth_ 
                            <<  " && wrappedz < "
-                           << slabACenter_ + 0.5*slabWidth_;
+                           << -slabACenter_ + 0.5*slabWidth_;
           selectionA_ = selectionAstream.str();
         } else {
           if (hasSphereARadius) 
@@ -742,7 +742,7 @@ namespace OpenMD {
           selectionBstream << "select wrappedz > " 
                            << slabBCenter_ - 0.5*slabWidth_ 
                            <<  " || wrappedz < "
-                           << slabBCenter_ + 0.5*slabWidth_;
+                           << -slabBCenter_ + 0.5*slabWidth_;
           selectionB_ = selectionBstream.str();
         } else {
           if (hasSphereBRadius_) {
