@@ -118,6 +118,7 @@ struct gengetopt_args_info
   const char *tacorr_help; /**< @brief Torque auto correlation function help description.  */
   const char *disp_help; /**< @brief Displacement correlation function help description.  */
   const char *dispZ_help; /**< @brief Displacement correlation function binned by Z help description.  */
+  const char *current_help; /**< @brief Current density auto correlation function help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -168,6 +169,7 @@ struct gengetopt_args_info
   unsigned int tacorr_given ;	/**< @brief Whether tacorr was given.  */
   unsigned int disp_given ;	/**< @brief Whether disp was given.  */
   unsigned int dispZ_given ;	/**< @brief Whether dispZ was given.  */
+  unsigned int current_given ;	/**< @brief Whether current was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

@@ -604,6 +604,7 @@ src/applications/omd2omd/omd2omdCmd.cpp
 
 set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
+src/applications/dynamicProps/CurrentDensityAutoCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/Displacement.cpp
@@ -625,6 +626,7 @@ src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
 src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
 src/applications/dynamicProps/MultipassCorrFunc.cpp
+src/applications/dynamicProps/MPFrameTimeCorrFunc.cpp
 src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
 src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp

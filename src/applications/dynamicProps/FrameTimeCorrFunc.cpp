@@ -43,14 +43,14 @@
 #include "applications/dynamicProps/FrameTimeCorrFunc.hpp"
 
 namespace OpenMD {
-
+  
   FrameTimeCorrFunc::FrameTimeCorrFunc(SimInfo * info, 
                                        const std::string & filename, 
                                        const std :: string & sele1, 
                                        const std :: string & sele2, 
                                        int storageLayout, long long int memSize)
     : TimeCorrFunc(info, filename, sele1, sele2, storageLayout, memSize){
-    }
+  }
 
   void FrameTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
@@ -65,6 +65,5 @@ namespace OpenMD {
     RealType corrVal = calcCorrVal(frame1, frame2);
     histogram_[timeBin] += corrVal;    
   }
-
 }
 

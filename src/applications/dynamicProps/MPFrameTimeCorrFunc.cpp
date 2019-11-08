@@ -39,21 +39,52 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_FRAMETIMECORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_FRAMETIMECORRFUNC_HPP
 
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "applications/dynamicProps/MPFrameTimeCorrFunc.hpp"
+#include "math/DynamicVector.hpp"
 
 namespace OpenMD {
+ 
+  template<typename T>
+  MPFrameTimeCorrFunc<T>::MPFrameTimeCorrFunc(SimInfo* info, 
+                                              const std::string & filename, 
+                                              const std::string & sele1, 
+                                              const std::string & sele2, 
+                                              int storageLayout)
+    : MultipassCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+    this->autoCorrFunc_ = true;
+  }
+  
+  template<typename T>
+  void MPFrameTimeCorrFunc<T>::computeFrame(int istep) {
+    
+    if (this->evaluator1_.isDynamic()) {
+      this->seleMan1_.setSelectionSet(this->evaluator1_.evaluate());
+      this->validateSelection(this->seleMan1_);
+    }
 
-  class FrameTimeCorrFunc : public TimeCorrFunc {
-  public:
-    FrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
-		      const std::string& sele1, const std::string& sele2, 
-                      int storageLayout, long long int memSize);
-  private:        
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2) = 0;
-  };
-}
-#endif
+    if (this->uniqueSelections_ && this->evaluator2_.isDynamic()) {
+      this->seleMan2_.setSelectionSet(this->evaluator2_.evaluate());
+      this->validateSelection(this->seleMan2_);
+    }
+
+    computeProperty(istep);
+  }
+
+  template<typename T>
+  void MPFrameTimeCorrFunc<T>::correlateFrames(int frame1, int frame2,
+                                               int timeBin) {
+
+    T corrVal(0.0);
+
+    corrVal = calcCorrVal(frame1, frame2);
+    this->histogram_[timeBin] += corrVal;
+    this->count_[timeBin]++;
+  }
+
+  template class MPFrameTimeCorrFunc<RealType>;
+  template class MPFrameTimeCorrFunc<Vector3d>;  
+  template class MPFrameTimeCorrFunc<Mat3x3d>;
+  template class MPFrameTimeCorrFunc<DynamicVector<RealType> >;
+}   
+

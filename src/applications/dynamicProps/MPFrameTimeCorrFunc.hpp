@@ -39,21 +39,28 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_FRAMETIMECORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_FRAMETIMECORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_MPFRAMETIMECORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_MPFRAMETIMECORRFUNC_HPP
 
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class FrameTimeCorrFunc : public TimeCorrFunc {
+  template<typename T>  
+  class MPFrameTimeCorrFunc : public MultipassCorrFunc<T> {
   public:
-    FrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
-		      const std::string& sele1, const std::string& sele2, 
-                      int storageLayout, long long int memSize);
-  private:        
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2) = 0;
+    MPFrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
+                        const std::string& sele1, const std::string& sele2, 
+                        int storageLayout);
+
+  protected:   
+    virtual void computeProperty(int frame) = 0;
+    virtual T calcCorrVal(int frame1, int frame2) = 0;
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
+    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
+    virtual void computeFrame(int frame);
   };
+
 }
 #endif

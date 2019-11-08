@@ -44,6 +44,7 @@
 #include "utils/simError.h"
 #include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
+#include "math/DynamicVector.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -461,4 +462,7 @@ namespace OpenMD {
   template class AutoCorrFunc<Mat3x3d>; 
   template class MultipassCorrFunc<Mat3x3d>;
   template class CrossCorrFunc<Mat3x3d>;
+
+  template class MultipassCorrFunc<DynamicVector<RealType> >;
+
 }

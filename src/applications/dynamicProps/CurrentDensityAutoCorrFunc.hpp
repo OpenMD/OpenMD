@@ -32,28 +32,48 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_FRAMETIMECORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_FRAMETIMECORRFUNC_HPP
 
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#ifndef APPLICATIONS_DYNAMICPROPS_CURRENTDENSITYAUTOCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_CURRENTDENSITYAUTOCORRFUNC_HPP
+
+#include "applications/dynamicProps/MPFrameTimeCorrFunc.hpp"
+#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  class FrameTimeCorrFunc : public TimeCorrFunc {
+  class CurrentDensityAutoCorrFunc : public MPFrameTimeCorrFunc<RealType> {
   public:
-    FrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
-		      const std::string& sele1, const std::string& sele2, 
-                      int storageLayout, long long int memSize);
-  private:        
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2) = 0;
+    CurrentDensityAutoCorrFunc(SimInfo* info, const std::string& filename,
+                               const std::string& sele1,
+                               const std::string& sele2);
+
+  private:
+    virtual void computeProperty(int frame);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual void postCorrelate();
+    virtual void writeCorrelate();
+
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return -1;}
+    virtual RealType calcCorrVal(int frame1, int frame2) {return -1;}
+
+    Thermo* thermo_;
+    
+    std::vector<Vector3d> Jc_;
+    std::vector<int> JcCount_;
+
+    std::vector<std::vector<Vector3d> > typeJc_;
+    std::vector<std::vector<int> > typeCounts_;
+
+    std::vector<std::vector<RealType> > myHistogram_;
+
+    std::vector<AtomType*> outputTypes_;
   };
 }
 #endif

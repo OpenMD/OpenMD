@@ -77,3 +77,4 @@ groupoption "tfcorr"       -  "Torque - Force Cross correlation function" group 
 groupoption "tacorr"       -  "Torque auto correlation function" group = "correlation function"
 groupoption "disp"         -  "Displacement correlation function" group = "correlation function"
 groupoption "dispZ"        -  "Displacement correlation function binned by Z" group = "correlation function"
+groupoption "current"      -  "Current density auto correlation function" group = "correlation function"

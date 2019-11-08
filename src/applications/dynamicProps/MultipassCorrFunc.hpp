@@ -55,6 +55,8 @@
 
 namespace OpenMD {
 
+  
+
   //! Computes a correlation function by scanning a trajectory once to precompute quantities to be correlated
 
   template<typename T>
@@ -85,7 +87,6 @@ namespace OpenMD {
 
     
   protected:
-
     virtual void preCorrelate();
     virtual void correlation();
     virtual void postCorrelate();

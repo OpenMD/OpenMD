@@ -42,25 +42,32 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 
-#include "applications/dynamicProps/FrameTimeCorrFunc.hpp"
+#include "applications/dynamicProps/MPFrameTimeCorrFunc.hpp"
+#include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  class ActionCorrFunc : public FrameTimeCorrFunc {
+  class ActionCorrFunc : public MPFrameTimeCorrFunc<Mat3x3d> {
   public:
-    ActionCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
-  private:
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
-    virtual void writeCorrelate();
-
+    ActionCorrFunc(SimInfo* info, const std::string& filename,
+                   const std::string& sele1, const std::string& sele2);   
+    
   protected:
+    virtual void computeProperty(int frame1);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual void preCorrelate();
-    virtual void postCorrelate();
-    std::vector<Mat3x3d > histogram_;
+    
+    ForceManager* forceMan_;
+    Thermo* thermo_;
+
+    std::vector<Mat3x3d> actionTensor_;
+
+    RealType pSum_;
+    RealType vSum_;
     RealType avePress_;
     RealType aveVol_;
+    int nsamp_;
   };
 
 }
