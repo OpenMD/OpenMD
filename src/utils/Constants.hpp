@@ -123,7 +123,16 @@ namespace OpenMD {
      *     electrons fs^-1 Angstrom^-2
      */
     const RealType currentDensityConvert = 6.241573027317e-17;
-    
+
+    /**
+     * chargeDensityConvert
+     *   multiplies standard input file units of
+     *     chargeDensity (Coulombs m^-2)
+     *   returns values of:
+     *     electrons Angstrom^-2
+     */
+    const RealType chargeDensityConvert = 6.241573027317e-2;
+
     /**
      * concentrationConvert
      *   multiplies standard number density units (Angstrom^-3)
