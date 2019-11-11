@@ -78,6 +78,7 @@
 #include "applications/dynamicProps/ChargeKineticCorrFunc.hpp"
 #include "applications/dynamicProps/ChargeOrientationCorrFunc.hpp"
 #include "applications/dynamicProps/CurrentDensityAutoCorrFunc.hpp"
+#include "applications/dynamicProps/ChargeDensityCorrFunc.hpp"
 
 
 using namespace OpenMD;
@@ -283,6 +284,8 @@ int main(int argc, char* argv[]){
                                  args_info.nzbins_arg, privilegedAxis);
   } else if (args_info.current_given) {
     corrFunc = new CurrentDensityAutoCorrFunc(info, dumpFileName, sele1, sele2);
+  } else if (args_info.charge_given) {
+    corrFunc = new ChargeDensityCorrFunc(info, dumpFileName, sele1, sele2);
   }
 
   if (args_info.output_given) {

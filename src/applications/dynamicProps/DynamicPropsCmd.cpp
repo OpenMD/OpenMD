@@ -84,6 +84,7 @@ const char *gengetopt_args_info_help[] = {
   "      --disp                    Displacement correlation function",
   "      --dispZ                   Displacement correlation function binned by Z",
   "      --current                 Current density auto correlation function",
+  "      --charge                  Charge density correlation function",
     0
 };
 
@@ -164,6 +165,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->disp_given = 0 ;
   args_info->dispZ_given = 0 ;
   args_info->current_given = 0 ;
+  args_info->charge_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
 }
 
@@ -257,6 +259,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->disp_help = gengetopt_args_info_help[48] ;
   args_info->dispZ_help = gengetopt_args_info_help[49] ;
   args_info->current_help = gengetopt_args_info_help[50] ;
+  args_info->charge_help = gengetopt_args_info_help[51] ;
   
 }
 
@@ -539,6 +542,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dispZ", 0, 0 );
   if (args_info->current_given)
     write_into_file(outfile, "current", 0, 0 );
+  if (args_info->charge_given)
+    write_into_file(outfile, "charge", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -625,6 +630,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->disp_given = 0 ;
   args_info->dispZ_given = 0 ;
   args_info->current_given = 0 ;
+  args_info->charge_given = 0 ;
 
   args_info->correlation_function_group_counter = 0;
 }
@@ -1513,6 +1519,7 @@ cmdline_parser_internal (
         { "disp",	0, NULL, 0 },
         { "dispZ",	0, NULL, 0 },
         { "current",	0, NULL, 0 },
+        { "charge",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -2279,6 +2286,23 @@ cmdline_parser_internal (
                 &(local_args_info.current_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "current", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Charge density correlation function.  */
+          else if (strcmp (long_options[option_index].name, "charge") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->charge_given),
+                &(local_args_info.charge_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "charge", '-',
                 additional_error))
               goto failure;
           
