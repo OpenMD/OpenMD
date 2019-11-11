@@ -73,7 +73,7 @@ namespace OpenMD {
       typeJc_[i].resize(outputTypes_.size(), V3Zero);
       typeCounts_[i].resize(outputTypes_.size(), 0);
     }
-    for (int i = 0; i < nTimeBins_; ++i) {
+    for (unsigned int i = 0; i < nTimeBins_; ++i) {
       myHistogram_[i].resize(outputTypes_.size() + 1, 0.0);
     }
     // We'll need thermo to compute the volume:
@@ -178,7 +178,7 @@ namespace OpenMD {
 
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0] << "\t";
-        for (int j = 0; j < outputTypes_.size() + 1; j++) {
+        for (unsigned int j = 0; j < outputTypes_.size() + 1; j++) {
           ofs << myHistogram_[i][j] << '\t';        
         }
         ofs << '\n';
