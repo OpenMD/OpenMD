@@ -78,4 +78,4 @@ groupoption "tacorr"       -  "Torque auto correlation function" group = "correl
 groupoption "disp"         -  "Displacement correlation function" group = "correlation function"
 groupoption "dispZ"        -  "Displacement correlation function binned by Z" group = "correlation function"
 groupoption "current"      -  "Current density auto correlation function" group = "correlation function"
-groupoption "charge"       -  "Charge density correlation function" group = "correlation function"
+groupoption "ddisp"        -  "Collective Dipole displacement function (Helfand moment of Current Density)" group = "correlation function"

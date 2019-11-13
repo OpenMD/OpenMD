@@ -40,29 +40,64 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#ifndef APPLICATIONS_DYNAMICPROPS_CHARGEDENSITYCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_CHARGEDENSITYCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_COLLECTIVEDIPOLEDISPLACEMENT_HPP
+#define APPLICATIONS_DYNAMICPROPS_COLLECTIVEDIPOLEDISPLACEMENT_HPP
 
 #include "applications/dynamicProps/MPFrameTimeCorrFunc.hpp"
 #include "brains/Thermo.hpp"
 
 namespace OpenMD {
+  //! Calculates the collective dipole displacement function
+  /*! This time correlation function is the Helfand moment conjugate
+      to the current density. Helfand moments are used to calculate
+      the Einstein-Helfand relations for transport that are formally
+      equivalent to Green-Kubo expressions using a related flux.  In
+      this case, the flux,
 
-  class ChargeDensityCorrFunc : public MPFrameTimeCorrFunc<RealType> {
+      \f[ \mathbf{J}(t) = \sum_{i=1}^{N} q_i \mathbf{v}_{\mathrm{cm},i}(t) \f] 
+
+      is normally used to calculate an ionic conductivity, 
+
+      \f[ \sigma = \frac{1}{3V k_b T} \int_0^\infty \left< \mathbf{J}(0) \cdot \mathbf{J}(t) \right> dt \f]
+
+      The cm subscript denotes center of mass locations for all molecules.
+
+      This class computes the collective translational dipole moment,
+
+      \f[ \mathbf{M}_\mathrm{trans}(t) = \sum_{i=1}^{N} q_i \mathbf{r}_{\mathrm{cm},i}(t) \f]
+
+      as well as total contributions to the system's net dipole moment
+
+      \f[ \mathbf{M}_\mathrm{tot}(t) =  \sum_{i=1}^{N} \sum_{a} q_{ia} \mathbf{r}_{ia}(t) = \sum_{i=1}^{N} q_i \mathbf{r}_{\mathrm{cq},i}(t) \f]
+
+      where cq denotes the molecular center of charge.  It also
+      calculates the rotational contribution,
+
+      \f[ \mathbf{M}_\mathrm{rot}(t) = \sum_{i=1}^{N} q_i \left[ \mathbf{r}_{\mathrm{cq},i}(t) - \mathbf{r}_{\mathrm{cm},i}(t) \right] \f]
+
+      The correlation functions are the displacements of these terms
+      from their values at an earlier time,
+
+      \f[ \left< \left| \mathbf{M}_\mathrm{trans}(t) - \mathbf{M}_\mathrm{trans}(0) \right|^2 \right> \f]
+
+      and identical quantities for the total and rotational contributions.
+  */ 
+  class CollectiveDipoleDisplacement : public MPFrameTimeCorrFunc<Vector3d> {
   public:
-    ChargeDensityCorrFunc(SimInfo* info, const std::string& filename,
-                          const std::string& sele1,
-                          const std::string& sele2);
+    CollectiveDipoleDisplacement(SimInfo* info, const std::string& filename,
+                                 const std::string& sele1,
+                                 const std::string& sele2);
     
   private:
     virtual void computeProperty(int frame);
-    virtual RealType calcCorrVal(int frame1, int frame2);
-    
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return -1;}
+    virtual Vector3d calcCorrVal(int frame1, int frame2);    
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) {return Vector3d(-1,-1,-1);}
 
     Thermo* thermo_;
     
-    std::vector<Vector3d> CR_;
+    std::vector<Vector3d> CRcm_;
+    std::vector<Vector3d> CRtot_;
+    std::vector<Vector3d> CRrot_;
   };
 }
 #endif

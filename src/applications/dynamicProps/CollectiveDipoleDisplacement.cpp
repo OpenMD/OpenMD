@@ -40,62 +40,113 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
 
-#include "applications/dynamicProps/ChargeDensityCorrFunc.hpp"
+#include "applications/dynamicProps/CollectiveDipoleDisplacement.hpp"
 #include "utils/Revision.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 
 using namespace std;
 namespace OpenMD {
-  ChargeDensityCorrFunc::ChargeDensityCorrFunc(SimInfo* info,
-                                               const string& filename,
-                                               const string& sele1,
-                                               const string& sele2)
-    : MPFrameTimeCorrFunc<RealType>(info, filename,
+  CollectiveDipoleDisplacement::CollectiveDipoleDisplacement(SimInfo* info,
+                                                             const string& filename,
+                                                             const string& sele1,
+                                                             const string& sele2)
+    : MPFrameTimeCorrFunc<Vector3d>(info, filename,
                                     sele1, sele2,
                                     DataStorage::dslPosition |
                                     DataStorage::dslFlucQPosition) {
     
-    setCorrFuncType("Charge Density Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".chargeDensityCorr");
+    setCorrFuncType("Collective Dipole Displacement Function");
+    setOutputName(getPrefix(dumpFilename_) + ".ddisp");
 
-    CR_.resize(nFrames_, V3Zero);
+    std::stringstream label;
+    label << "<|Mtrans(t)-Mtrans(0)|^2>\t" 
+          << "<|Mtot(t)-Mtot(0)|^2>\t" 
+          << "<|Mrot(t)-Mrot(0)|^2>";
+    const std::string labelString = label.str();
+    setLabelString(labelString);
+    
+    CRcm_.resize(nFrames_, V3Zero);
+    CRtot_.resize(nFrames_, V3Zero);
+    CRrot_.resize(nFrames_, V3Zero);
 
     // We'll need thermo to compute the volume:
     thermo_ =  new Thermo(info_);
   }
   
-  void ChargeDensityCorrFunc::computeProperty(int frame) {
-    StuntDouble* sd1;
+  void CollectiveDipoleDisplacement::computeProperty(int frame) {
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
     AtomType* atype;
-    int i;
-    
-    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
-         sd1 = seleMan1_.nextSelected(i)) {
-        
-      Vector3d r = sd1->getPos();
-      RealType q = 0.0;
+
+    RealType q, qtot;
+    RealType m, mtot;
+    Vector3d r(0.0), rcm(0.0), rcq(0.0);
+
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+         mol = info_->nextMolecule(mi)) {
+
+      qtot = 0.0;
+      mtot = 0.0;
+      rcm *= 0.0;
+      rcq *= 0.0;
       
-      if (sd1->isAtom()) {
-        atype = static_cast<Atom*>(sd1)->getAtomType();
+      for(atom = mol->beginAtom(ai); atom != NULL; 
+          atom = mol->nextAtom(ai)) {    
+
+        q = 0.0;
+        atype = atom->getAtomType();
         FixedChargeAdapter fca = FixedChargeAdapter(atype);
         if ( fca.isFixedCharge() )
           q = fca.getCharge();
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
         if ( fqa.isFluctuatingCharge() )
-          q += sd1->getFlucQPos();        
+          q += atom->getFlucQPos();
+
+        r = atom->getPos();
+        m = atom->getMass();
+
+        qtot += q;
+        mtot += m;
+        
+        rcm += r * m;
+        rcq += r * q;
+
       }
+
+      rcm /= mtot;
+
+      if (qtot <= std::numeric_limits<RealType>::min()) {
+        rcq = rcm;
+      } else {
+        rcq /= qtot;
+      }
+
+      CRcm_[frame]  += qtot * rcm;
+      CRtot_[frame] += qtot * rcq;
+      CRrot_[frame] += qtot * (rcq - rcm);
       count_[frame]++;
-      CR_[frame] += q*r;
     }
 
     RealType vol = thermo_->getVolume();
 
-    CR_[frame] /= (vol * Constants::chargeDensityConvert);
+    CRcm_[frame]  /= (vol * Constants::chargeDensityConvert);
+    CRtot_[frame] /= (vol * Constants::chargeDensityConvert);
+    CRrot_[frame] /= (vol * Constants::chargeDensityConvert);
   }
 
-  RealType ChargeDensityCorrFunc::calcCorrVal(int frame1, int frame2) {
-    Vector3d diff = CR_[frame2] - CR_[frame1];
-    return diff.lengthSquare();
+  Vector3d CollectiveDipoleDisplacement::calcCorrVal(int frame1, int frame2) {
+    Vector3d diff;
+    RealType dcm, dtot, drot;
+    diff = CRcm_[frame2] - CRcm_[frame1];
+    dcm = diff.lengthSquare();
+    diff = CRtot_[frame2] - CRtot_[frame1];
+    dtot = diff.lengthSquare();
+    diff = CRrot_[frame2] - CRrot_[frame1];
+    drot = diff.lengthSquare();
+    
+    return Vector3d(dcm, dtot, drot);
   }
 }

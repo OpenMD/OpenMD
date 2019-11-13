@@ -604,7 +604,7 @@ src/applications/omd2omd/omd2omdCmd.cpp
 
 set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
-src/applications/dynamicProps/ChargeDensityCorrFunc.cpp
+src/applications/dynamicProps/CollectiveDipoleDisplacement.cpp
 src/applications/dynamicProps/CurrentDensityAutoCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp

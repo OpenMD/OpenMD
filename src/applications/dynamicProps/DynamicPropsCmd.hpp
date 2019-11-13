@@ -119,7 +119,7 @@ struct gengetopt_args_info
   const char *disp_help; /**< @brief Displacement correlation function help description.  */
   const char *dispZ_help; /**< @brief Displacement correlation function binned by Z help description.  */
   const char *current_help; /**< @brief Current density auto correlation function help description.  */
-  const char *charge_help; /**< @brief Charge density correlation function help description.  */
+  const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -171,7 +171,7 @@ struct gengetopt_args_info
   unsigned int disp_given ;	/**< @brief Whether disp was given.  */
   unsigned int dispZ_given ;	/**< @brief Whether dispZ was given.  */
   unsigned int current_given ;	/**< @brief Whether current was given.  */
-  unsigned int charge_given ;	/**< @brief Whether charge was given.  */
+  unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */
