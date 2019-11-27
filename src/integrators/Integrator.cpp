@@ -313,7 +313,7 @@ namespace OpenMD {
     
     RealType difference = snap->getTime() + dt - currStatus;
   
-    if (difference > 0 || fabs(difference) < OpenMD::epsilon) {
+    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
       needPotential = true;
       needVirial = true;   
     }
@@ -326,27 +326,37 @@ namespace OpenMD {
   
   void Integrator::postStep() {
 
+    RealType difference;
+      
     if (needVelocityScaling) {
-      if (snap->getTime() >= currThermal) {
+      difference = snap->getTime() - currThermal;
+
+      if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
 	velocitizer_->randomize(targetScalingTemp);
 	currThermal += thermalTime;
       }
     }
     
     if (useRNEMD) {
-      if (snap->getTime() >= currRNEMD) {
+      difference = snap->getTime() - currRNEMD;
+
+      if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
 	rnemd_->doRNEMD();
 	currRNEMD += RNEMD_exchangeTime;
       }
       rnemd_->collectData();
     }
-    
-    if (snap->getTime() >= currSample) {
+
+    difference = snap->getTime() - currSample;
+  
+    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
       dumpWriter->writeDumpAndEor();      
       currSample += sampleTime;
     }
-    
-    if (snap->getTime() >= currStatus) {
+
+    difference = snap->getTime() - currStatus;
+
+    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
       stats->collectStats();
 
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
@@ -362,8 +372,11 @@ namespace OpenMD {
       needVirial = false;
       currStatus += statusTime;
     }
-    
-    if (needReset && snap->getTime() >= currReset) {    
+
+    difference = snap->getTime() - currReset;
+
+    if (needReset &&
+        (difference > 0 || fabs(difference) <= OpenMD::epsilon)) {    
       resetIntegrator();
       currReset += resetTime;
     }        
