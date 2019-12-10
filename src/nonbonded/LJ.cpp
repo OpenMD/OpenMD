@@ -171,6 +171,18 @@ namespace OpenMD {
       simError();         
     }
 
+    // Check to make sure the 1/sigma won't cause problems later:
+    RealType s = getSigma(atomType, atomType);
+    if (fabs(s) < std::numeric_limits<RealType>::epsilon()) {
+      sprintf( painCave.errMsg,
+               "Lennard-Jones atom %s was defined with a sigma value (%f)\n"
+               "\tthat was too close to zero.",
+               atomType->getName().c_str(), s) ;
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
     LJtids[atid] = ljtid;
     MixingMap[ljtid].resize( nLJ_ );
 

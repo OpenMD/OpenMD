@@ -167,14 +167,25 @@ check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 
 # Optional libraries: If we can find these, we will build with them
 # Look for OpenBabel libraries
-find_package(OpenBabel2)
-IF(OPENBABEL2_FOUND)
-  SET(USE_OPENBABEL)
-  include_directories(${OPENBABEL2_INCLUDE_DIR})
-  # link libraries are added only for targets that need them.
-ELSE(OPENBABEL2_FOUND)
-  MESSAGE(STATUS "No OpenBabel found - will not build atom2omd")
-ENDIF(OPENBABEL2_FOUND)
+find_package(OpenBabel3)
+IF(OPENBABEL3_FOUND)
+  SET(USE_OPENBABEL true)
+  set(OPENBABEL_INCLUDE_DIR ${OPENBABEL3_INCLUDE_DIR})
+  set(OPENBABEL_LIBRARIES ${OPENBABEL3_LIBRARIES})
+  include_directories(${OPENBABEL_INCLUDE_DIR})
+ELSE(OPENBABEL3_FOUND)
+  find_package(OpenBabel2)
+  IF(OPENBABEL2_FOUND)
+     SET(USE_OPENBABEL true)
+     set(OPENBABEL_INCLUDE_DIR ${OPENBABEL2_INCLUDE_DIR})
+     set(OPENBABEL_LIBRARIES ${OPENBABEL2_LIBRARIES})
+     include_directories(${OPENBABEL_INCLUDE_DIR})
+  ELSE(OPENBABEL2_FOUND)
+     SET(USE_OPENBABEL false)
+     MESSAGE(STATUS "No OpenBabel found - will not build atom2omd")
+  ENDIF(OPENBABEL2_FOUND)
+ENDIF(OPENBABEL3_FOUND)
+
 
 #Look for QHULL Libraries
 find_package(Qhull)
@@ -800,16 +811,16 @@ target_link_libraries(recenter openmd_single openmd_core openmd_single openmd_co
 add_executable(elasticConstants ${ELASTICCONSTANTSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(elasticConstants openmd_single openmd_core openmd_single openmd_core openmd_single)
 
-if (OPENBABEL2_FOUND)
+if (USE_OPENBABEL)
 set (ATOM2OMDSOURCE
 src/applications/atom2omd/atom2omd.cpp
 src/applications/atom2omd/openmdformat.cpp
 )
   add_executable(atom2omd ${ATOM2OMDSOURCE} ${GETOPT_SOURCE})
-  target_link_libraries(atom2omd openmd_single openmd_core openmd_single openmd_core ${OPENBABEL2_LIBRARIES})
+  target_link_libraries(atom2omd openmd_single openmd_core openmd_single openmd_core ${OPENBABEL_LIBRARIES})
   INSTALL(TARGETS atom2omd RUNTIME DESTINATION bin
           PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-ENDIF (OPENBABEL2_FOUND)
+ENDIF (USE_OPENBABEL)
 
 
 set(PYNONUMPY_FILES
@@ -963,9 +974,9 @@ message( STATUS "CMAKE_CXX_COMPILER ......... = ${CMAKE_CXX_COMPILER}")
 message( STATUS "MPI_CXX_COMPILER ........... = ${MPI_CXX_COMPILER}")
 message( STATUS "MPI_CXX_INCLUDE_PATH ....... = ${MPI_CXX_INCLUDE_PATH}")
 message( STATUS "MPI_CXX_LIBRARIES .......... = ${MPI_CXX_LIBRARIES}")
-message( STATUS "OPENBABEL2_ROOT ............ = ${OPENBABEL2_ROOT}")
-message( STATUS "OPENBABEL2_INCLUDE_DIR ..... = ${OPENBABEL2_INCLUDE_DIR}")
-message( STATUS "OPENBABEL2_LIBRARIES ....... = ${OPENBABEL2_LIBRARIES}")
+message( STATUS "OPENBABEL_DIR .............. = ${OPENBABEL_DIR}")
+message( STATUS "OPENBABEL_INCLUDE_DIR ...... = ${OPENBABEL_INCLUDE_DIR}")
+message( STATUS "OPENBABEL_LIBRARIES ........ = ${OPENBABEL_LIBRARIES}")
 message( STATUS "QHULL_ROOT ................. = ${QHULL_ROOT}")
 message( STATUS "QHULL_INCLUDE_DIR .......... = ${QHULL_INCLUDE_DIR}")
 message( STATUS "QHULL_LIBRARIES ............ = ${QHULL_LIBRARIES}")
@@ -983,7 +994,7 @@ message( STATUS "To override these options, add -D{OPTION_NAME}=... to the cmake
 message( STATUS "Particularly useful defines are for:")
 message( STATUS )
 message( STATUS "  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} (where OpenMD will be installed)")
-message( STATUS "       -DOPENBABEL2_ROOT=/path/to/openbabel")
+message( STATUS "         -DOPENBABEL_DIR=/path/to/openbabel")
 message( STATUS "            -DQHULL_ROOT=/path/to/qhull")
 message( STATUS "            -DFFTW3_ROOT=/path/to/fftw3")
 message( STATUS )
