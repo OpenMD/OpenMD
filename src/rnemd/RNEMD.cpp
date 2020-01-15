@@ -2130,7 +2130,7 @@ namespace OpenMD {
       RealType cDenominator = Kc - Kcz;
       cDenominator -= 0.5 * Mc * (vc.x()*vc.x() + vc.y()*vc.y());
         
-      if (cDenominator/cDenominator > 0.0) {
+      if (cNumerator/cDenominator > 0.0) {
         RealType c = sqrt(cNumerator / cDenominator);
         
         if ((c > 0.9) && (c < 1.1)) { //restrict scaling coefficients
@@ -2144,6 +2144,7 @@ namespace OpenMD {
           hNumerator -= MQvhn * betah;
           hNumerator -= 0.5 * MQ2hp * alphah * alphah;
           hNumerator -= 0.5 * MQ2hn * betah * betah;          
+
           RealType hDenominator = Kh - Khz;
           hDenominator -= 0.5 * Mh * (vh.x()*vh.x() + vh.y()*vh.y());
           
