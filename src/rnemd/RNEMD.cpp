@@ -2823,7 +2823,7 @@ namespace OpenMD {
 #endif
 
     Vector3d omega;
-    RealType den, temp, z, r, binVolume, dz;
+    RealType den, temp, z, r, binVolume, dz(0.0);
     std::vector<RealType> nden(outputTypes_.size(), 0.0);
     RealType boxVolume = currentSnap_->getVolume();
     RealType ePot(0.0);
