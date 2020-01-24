@@ -574,13 +574,23 @@ namespace OpenMD {
     
     OutputData eField;
     eField.units =  "kcal/mol/angstroms/e";
-    eField.title =  "Electrical Field";
+    eField.title =  "Electric Field";
     eField.dataType = "Vector3d";
     eField.accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++) 
       eField.accumulator.push_back( new VectorAccumulator() );
     data_[ELECTRICFIELD] = eField;
     outputMap_["ELECTRICFIELD"] =  ELECTRICFIELD;
+
+    OutputData ePot;
+    ePot.units =  "kcal/mol/e";
+    ePot.title =  "Electrostatic Potential";
+    ePot.dataType = "RealType";
+    ePot.accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) 
+      ePot.accumulator.push_back( new Accumulator() );
+    data_[ELECTROSTATICPOTENTIAL] = ePot;
+    outputMap_["ELECTROSTATICPOTENTIAL"] =  ELECTROSTATICPOTENTIAL;
 
     if (hasOutputFields) {
       parseOutputFileFormat(rnemdParams->getOutputFields());
@@ -635,6 +645,7 @@ namespace OpenMD {
         outputMask_.set(DENSITY);
         outputMask_.set(ACTIVITY);
         outputMask_.set(ELECTRICFIELD);
+        outputMask_.set(ELECTROSTATICPOTENTIAL);
       default:
         break;
       }
@@ -2798,14 +2809,16 @@ namespace OpenMD {
 #endif
 
     Vector3d omega;
-    RealType den, temp, z, r, binVolume;
+    RealType den, temp, z, r, binVolume, dz;
     std::vector<RealType> nden(outputTypes_.size(), 0.0);
     RealType boxVolume = currentSnap_->getVolume();
+    RealType ePot(0.0);
 
     for (unsigned int i = 0; i < nBins_; i++) {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_);
-        binVolume = boxVolume / nBins_;        
+        binVolume = boxVolume / nBins_;
+        dz = hmat(rnemdPrivilegedAxis_, rnemdPrivilegedAxis_) / (RealType)nBins_;    
       } else {
         r = (((RealType)i + 0.5) * binWidth_);
         RealType rinner = (RealType)i * binWidth_;
@@ -2837,7 +2850,12 @@ namespace OpenMD {
             eField = V3Zero;
           }
         }
-		  
+
+        if (outputMask_[ELECTROSTATICPOTENTIAL]) {
+          if (usePeriodicBoundaryConditions_) {
+            ePot += eField[rnemdPrivilegedAxis_] * dz;
+          }
+        }
         
         for (unsigned int j = 0; j < outputMask_.size(); ++j) {
           if(outputMask_[j]) {
@@ -2868,7 +2886,9 @@ namespace OpenMD {
             case ELECTRICFIELD:
               dynamic_cast<VectorAccumulator *>(data_[j].accumulator[i])->add(eField);
               break;
-
+            case ELECTROSTATICPOTENTIAL:
+              dynamic_cast<Accumulator *>(data_[j].accumulator[i])->add(ePot);
+              break;
             }
           }
         }

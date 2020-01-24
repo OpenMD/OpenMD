@@ -61,7 +61,7 @@ namespace OpenMD {
     void doNIVS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSSCurrent(SelectionManager& smanA, SelectionManager& smanB);
-	void doVSSSingle(SelectionManager& smanA);
+    void doVSSSingle(SelectionManager& smanA);
     RealType getDividingArea();
     void collectData();
     void getStarted();
@@ -82,6 +82,7 @@ namespace OpenMD {
       rnemdVSS,
       rnemdUnkownMethod
     };
+    
     enum RNEMDFluxType {
       rnemdKE,       // translational kinetic energy flux
       rnemdRotKE,    // rotational kinetic energy flux
@@ -90,7 +91,7 @@ namespace OpenMD {
       rnemdPy,       // flux of momentum along y axis 
       rnemdPz,       // flux of momentum along z axis
       rnemdCurrent,  // current density along privileged axis
-	  rnemdSingle,   // current density in a single region 
+      rnemdSingle,   // current density in a single region 
       rnemdPvector,  // flux of momentum vector
       rnemdLx,       // flux of angular momentum along x axis 
       rnemdLy,       // flux of angular momentum along y axis 
@@ -117,6 +118,7 @@ namespace OpenMD {
       DENSITY,
       ACTIVITY,
       ELECTRICFIELD,
+      ELECTROSTATICPOTENTIAL,
       ENDINDEX 
     };
 
@@ -224,7 +226,7 @@ namespace OpenMD {
     int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
     Accumulator* areaAccumulator_;
-	Accumulator* Jc_totalAccumulator_;
+    Accumulator* Jc_totalAccumulator_;
     Accumulator* Jc_cationAccumulator_;
     Accumulator* Jc_anionAccumulator_;
     bool doRNEMD_;
