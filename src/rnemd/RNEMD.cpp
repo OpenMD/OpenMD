@@ -647,6 +647,19 @@ namespace OpenMD {
     }          
     
     exchangeTime_ = rnemdParams->getExchangeTime();
+    RealType dt = info->getSimParams()->getDt();
+    RealType newET = ceil(exchangeTime_ / dt) * dt;
+
+    if (fabs( newET - exchangeTime_) > 1e-6) {
+      sprintf(painCave.errMsg, 
+	      "RNEMD: The exchangeTime was reset to %lf,\n"
+	      "\t\twhich is a multiple of dt, %lf.\n",
+	      newET, dt); 
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+      exchangeTime_ = newET;
+    }
     
     Snapshot* currentSnap_ = info->getSnapshotManager()->getCurrentSnapshot();
     // total exchange sums are zeroed out at the beginning:
