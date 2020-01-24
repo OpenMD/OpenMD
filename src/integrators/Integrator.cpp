@@ -145,6 +145,11 @@ namespace OpenMD {
         useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
         if (simParams->getRNEMDParameters()->haveExchangeTime()) {
           RNEMD_exchangeTime = simParams->getRNEMDParameters()->getExchangeTime();
+	  // check to make sure exchange time is a multiple of dt;
+	  RealType newET = ceil(RNEMD_exchangeTime / dt) * dt;
+	  if (fabs( newET - RNEMD_exchangeTime ) > 1e-6) {
+	    RNEMD_exchangeTime = newET;
+	  }
         } 
       }
     }
