@@ -31,10 +31,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [4]  Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). *
  *
@@ -55,7 +55,7 @@
 
 using namespace std;
 namespace OpenMD{
-  shapedLattice::shapedLattice(RealType latticeConstant, string latticeType) 
+  shapedLattice::shapedLattice(RealType latticeConstant, string latticeType)
   : latticeConstant_(latticeConstant), latticeType_(latticeType) {
 
     registerLattice();
@@ -64,47 +64,47 @@ namespace OpenMD{
       std::cerr << "shapedLattice:: Error creating lattice" << std::endl;
       exit(1);
     }
-		
+
     //Set the lattice constant
     std::vector<RealType> lc;
     lc.push_back(latticeConstant_);
     simpleLattice_->setLatticeConstant(lc);
     sitesComputed_ = false;
   }
-    
+
   void shapedLattice::setGridDimension(Vector3d dimension){
     dimension_ = dimension;
     // Find	number of unit cells in each direction
     beginNx_ = -(int) ceil(0.5*dimension_[0]/latticeConstant_) ;
     beginNy_ = -(int) ceil(0.5*dimension_[1]/latticeConstant_) ;
-    beginNz_ = -(int) ceil(0.5*dimension_[2]/latticeConstant_) ;    
+    beginNz_ = -(int) ceil(0.5*dimension_[2]/latticeConstant_) ;
     endNx_ = (int) ceil(0.5*dimension_[0]/latticeConstant_);
     endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
-    endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);  
-    sitesComputed_ = false;  
+    endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);
+    sitesComputed_ = false;
   }
 
   void shapedLattice::setOrigin(Vector3d origin){
     origin_ = origin;
     simpleLattice_->setOrigin(origin_);
-    sitesComputed_ = false;  
+    sitesComputed_ = false;
   }
-  
+
   void shapedLattice::findSites(){
 
     sites_.clear();
     orientations_.clear();
 
-    std::vector<Vector3d> latticePos;			      
+    std::vector<Vector3d> latticePos;
     std::vector<Vector3d> pointsOrt =  simpleLattice_->getLatticePointsOrt();
-    int numMolPerCell = simpleLattice_->getNumSitesPerCell();	
+    int numMolPerCell = simpleLattice_->getNumSitesPerCell();
 
-    for(int i = beginNx_; i < endNx_; i++) {     
-      for(int j = beginNy_; j < endNy_; j++) {       
-        for(int k = beginNz_; k < endNz_; k++) {
+    for(int i = beginNx_; i <= endNx_; i++) {
+      for(int j = beginNy_; j <= endNy_; j++) {
+        for(int k = beginNz_; k <= endNz_; k++) {
           //get the position of the cell sites
-          simpleLattice_->getLatticePointsPos(latticePos, i, j, k);            
-          for(int l = 0; l < numMolPerCell; l++) {              
+          simpleLattice_->getLatticePointsPos(latticePos, i, j, k);
+          for(int l = 0; l < numMolPerCell; l++) {
             if (isInterior(latticePos[l])){
               Vector3d myPoint = latticePos[l];
               Vector3d myOrt = pointsOrt[l];
@@ -118,17 +118,17 @@ namespace OpenMD{
     sitesComputed_ = true;
   }
 
-  std::vector<Vector3d> shapedLattice::getSites() { 
+  std::vector<Vector3d> shapedLattice::getSites() {
     if (!sitesComputed_) {
       findSites();
-    } 
+    }
     return sites_;
   }
 
-  std::vector<Vector3d> shapedLattice::getOrientations() { 
+  std::vector<Vector3d> shapedLattice::getOrientations() {
     if (!sitesComputed_) {
       findSites();
-    } 
+    }
     return orientations_;
   }
 }

@@ -38,7 +38,7 @@ const char *gengetopt_args_info_help[] = {
   "  -i, --input=filename   input MetaData (omd) file (mandatory)",
   "  -o, --output=STRING    output file prefix  (default=`hydro')",
   "      --model=ENUM       hydrodynamics model  (possible values=\"BeadModel\",\n                           \"RoughShell\" default=`RoughShell') (mandatory)",
-  "  -s, --beadSize=DOUBLE  bead size for RoughShell model (in angstroms)\n                           (default=`0.2')",
+  "  -s, --beadSize=DOUBLE  bead size (diameter) for RoughShell model (in angstroms)\n                           (default=`0.2')",
   "  -b, --beads            generate the beads only, hydrodynamics will not be\n                           performed  (default=off)",
     0
 };
@@ -92,7 +92,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->beadSize_arg = 0.2;
   args_info->beadSize_orig = NULL;
   args_info->beads_flag = 0;
-  
+
 }
 
 static
@@ -107,7 +107,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->model_help = gengetopt_args_info_help[4] ;
   args_info->beadSize_help = gengetopt_args_info_help[5] ;
   args_info->beads_help = gengetopt_args_info_help[6] ;
-  
+
 }
 
 void
@@ -160,7 +160,7 @@ void
 cmdline_parser_params_init(struct cmdline_parser_params *params)
 {
   if (params)
-    { 
+    {
       params->override = 0;
       params->initialize = 1;
       params->check_required = 1;
@@ -172,9 +172,9 @@ cmdline_parser_params_init(struct cmdline_parser_params *params)
 struct cmdline_parser_params *
 cmdline_parser_params_create(void)
 {
-  struct cmdline_parser_params *params = 
+  struct cmdline_parser_params *params =
     (struct cmdline_parser_params *)malloc(sizeof(struct cmdline_parser_params));
-  cmdline_parser_params_init(params);  
+  cmdline_parser_params_init(params);
   return params;
 }
 
@@ -199,8 +199,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->output_orig));
   free_string_field (&(args_info->model_orig));
   free_string_field (&(args_info->beadSize_orig));
-  
-  
+
+
   for (i = 0; i < args_info->inputs_num; ++i)
     free (args_info->inputs [i]);
 
@@ -252,7 +252,7 @@ write_into_file(FILE *outfile, const char *opt, const char *arg, const char *val
   int found = -1;
   if (arg) {
     if (values) {
-      found = check_possible_values(arg, values);      
+      found = check_possible_values(arg, values);
     }
     if (found >= 0)
       fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
@@ -289,7 +289,7 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "beadSize", args_info->beadSize_orig, 0);
   if (args_info->beads_given)
     write_into_file(outfile, "beads", 0, 0 );
-  
+
 
   i = EXIT_SUCCESS;
   return i;
@@ -357,7 +357,7 @@ cmdline_parser2 (int argc, char **argv, struct gengetopt_args_info *args_info, i
 {
   int result;
   struct cmdline_parser_params params;
-  
+
   params.override = override;
   params.initialize = initialize;
   params.check_required = check_required;
@@ -392,14 +392,14 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
       fprintf (stderr, "%s: '--input' ('-i') option required%s\n", prog_name, (additional_error ? additional_error : ""));
       error_occurred = 1;
     }
-  
+
   if (! args_info->model_given)
     {
       fprintf (stderr, "%s: '--model' option required%s\n", prog_name, (additional_error ? additional_error : ""));
       error_occurred = 1;
     }
-  
-  
+
+
   /* checks for dependences among options */
 
   return error_occurred;
@@ -418,7 +418,7 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
  *
  */
 
-/* 
+/*
  * we must include anything we need since this file is not thought to be
  * inserted in a file already using getopt.h
  *
@@ -953,7 +953,7 @@ static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
 		return -1;
 	d->custom_optarg = NULL;
 
-	/* 
+	/*
 	 * This is a big difference with GNU getopt, since optind == 0
 	 * means initialization while here 1 means first call.
 	 */
@@ -1020,7 +1020,7 @@ static char *package_name = 0;
  */
 static
 int update_arg(void *field, char **orig_field,
-               unsigned int *field_given, unsigned int *prev_given, 
+               unsigned int *field_given, unsigned int *prev_given,
                char *value, const char *possible_values[],
                const char *default_value,
                cmdline_parser_arg_type arg_type,
@@ -1041,11 +1041,11 @@ int update_arg(void *field, char **orig_field,
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n", 
+        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n",
                package_name, long_opt, short_opt,
                (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: `--%s' option given more than once%s\n", 
+        fprintf (stderr, "%s: `--%s' option given more than once%s\n",
                package_name, long_opt,
                (additional_error ? additional_error : ""));
       return 1; /* failure */
@@ -1054,16 +1054,16 @@ int update_arg(void *field, char **orig_field,
   if (possible_values && (found = check_possible_values((value ? value : default_value), possible_values)) < 0)
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n", 
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n",
           package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt, short_opt,
           (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n", 
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n",
           package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt,
           (additional_error ? additional_error : ""));
       return 1; /* failure */
     }
-    
+
   if (field_given && *field_given && ! override)
     return 0;
   if (prev_given)
@@ -1137,7 +1137,7 @@ cmdline_parser_internal (
 
   int error_occurred = 0;
   struct gengetopt_args_info local_args_info;
-  
+
   int override;
   int initialize;
   int check_required;
@@ -1147,9 +1147,9 @@ cmdline_parser_internal (
   int optind;
   int opterr;
   int optopt;
-  
+
   package_name = argv[0];
-  
+
   override = params->override;
   initialize = params->initialize;
   check_required = params->check_required;
@@ -1207,68 +1207,68 @@ cmdline_parser_internal (
           exit (EXIT_SUCCESS);
 
         case 'i':	/* input MetaData (omd) file.  */
-        
-        
-          if (update_arg( (void *)&(args_info->input_arg), 
+
+
+          if (update_arg( (void *)&(args_info->input_arg),
                &(args_info->input_orig), &(args_info->input_given),
               &(local_args_info.input_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "input", 'i',
               additional_error))
             goto failure;
-        
+
           break;
         case 'o':	/* output file prefix.  */
-        
-        
-          if (update_arg( (void *)&(args_info->output_arg), 
+
+
+          if (update_arg( (void *)&(args_info->output_arg),
                &(args_info->output_orig), &(args_info->output_given),
               &(local_args_info.output_given), optarg, 0, "hydro", ARG_STRING,
               check_ambiguity, override, 0, 0,
               "output", 'o',
               additional_error))
             goto failure;
-        
+
           break;
         case 's':	/* bead size for RoughShell model (in angstroms).  */
-        
-        
-          if (update_arg( (void *)&(args_info->beadSize_arg), 
+
+
+          if (update_arg( (void *)&(args_info->beadSize_arg),
                &(args_info->beadSize_orig), &(args_info->beadSize_given),
               &(local_args_info.beadSize_given), optarg, 0, "0.2", ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
               "beadSize", 's',
               additional_error))
             goto failure;
-        
+
           break;
         case 'b':	/* generate the beads only, hydrodynamics will not be performed.  */
-        
-        
+
+
           if (update_arg((void *)&(args_info->beads_flag), 0, &(args_info->beads_given),
               &(local_args_info.beads_given), optarg, 0, 0, ARG_FLAG,
               check_ambiguity, override, 1, 0, "beads", 'b',
               additional_error))
             goto failure;
-        
+
           break;
 
         case 0:	/* Long option with no short option */
           /* hydrodynamics model.  */
           if (strcmp (long_options[option_index].name, "model") == 0)
           {
-          
-          
-            if (update_arg( (void *)&(args_info->model_arg), 
+
+
+            if (update_arg( (void *)&(args_info->model_arg),
                  &(args_info->model_orig), &(args_info->model_given),
                 &(local_args_info.model_given), optarg, cmdline_parser_model_values, "RoughShell", ARG_ENUM,
                 check_ambiguity, override, 0, 0,
                 "model", '-',
                 additional_error))
               goto failure;
-          
+
           }
-          
+
           break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
@@ -1311,7 +1311,7 @@ cmdline_parser_internal (
   return 0;
 
 failure:
-  
+
   cmdline_parser_release (&local_args_info);
   return (EXIT_FAILURE);
 }

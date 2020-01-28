@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -64,14 +64,14 @@
 using namespace std;
 using namespace OpenMD;
 
-void createMdFile(const std::string&oldMdFileName, 
+void createMdFile(const std::string&oldMdFileName,
                   const std::string&newMdFileName,
                   int nMol);
 
 int main(int argc, char *argv []) {
 
   registerLattice();
-    
+
   gengetopt_args_info args_info;
   std::string latticeType;
   std::string inputFileName;
@@ -79,7 +79,7 @@ int main(int argc, char *argv []) {
   Lattice *simpleLat;
   RealType latticeConstant;
   std::vector<RealType> lc;
-  const RealType rhoConvertConst = 1.661;
+  const RealType rhoConvertConst = 1.66053886;
   RealType density;
   int nx, ny, nz;
   Mat3x3d hmat;
@@ -97,12 +97,12 @@ int main(int argc, char *argv []) {
 
   //get lattice type
   latticeType = "FCC";
-  if (args_info.lattice_given) {    
+  if (args_info.lattice_given) {
     latticeType = args_info.lattice_arg;
   }
 
   simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
-    
+
   if (simpleLat == NULL) {
     sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
 	    latticeType.c_str());
@@ -164,9 +164,9 @@ int main(int argc, char *argv []) {
 
   latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
 			(RealType)(1.0 / 3.0));
-  
+
   // Set the lattice constant
-  
+
   lc.push_back(latticeConstant);
   simpleLat->setLatticeConstant(lc);
 
@@ -178,15 +178,15 @@ int main(int argc, char *argv []) {
 
   vector<Vector3d> sites;
   vector<Vector3d> orientations;
-  
+
   for(int i = 0; i < nx; i++) {
     for(int j = 0; j < ny; j++) {
       for(int k = 0; k < nz; k++) {
 
 	// Get the position of the cell sites
-        
+
 	simpleLat->getLatticePointsPos(latticePos, i, j, k);
-        
+
 	for(int l = 0; l < nMolPerCell; l++) {
 	  sites.push_back(latticePos[l]);
           orientations.push_back(latticeOrt[l]);
@@ -194,16 +194,16 @@ int main(int argc, char *argv []) {
       }
     }
   }
-  
+
   outputFileName = args_info.output_arg;
-  
+
   // create a new .omd file on the fly which corrects the number of molecules
 
   createMdFile(inputFileName, outputFileName, nSites);
 
   delete oldInfo;
 
-  // We need to read in the new SimInfo object, then Parse the 
+  // We need to read in the new SimInfo object, then Parse the
   // md file and set up the system
 
   SimCreator newCreator;
@@ -228,19 +228,19 @@ int main(int argc, char *argv []) {
   newInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
 
   // place the molecules
-  
+
   Molecule* mol;
-  locator = new MoLocator(newInfo->getMoleculeStamp(0), 
+  locator = new MoLocator(newInfo->getMoleculeStamp(0),
                           newInfo->getForceField());
   for (int n = 0; n < nSites; n++) {
     mol = newInfo->getMoleculeByGlobalIndex(n);
     locator->placeMol(sites[n], orientations[n], mol);
   }
-   
+
   // Create DumpWriter and write out the coordinates
 
   writer = new DumpWriter(newInfo, outputFileName);
-  
+
   if (writer == NULL) {
     sprintf(painCave.errMsg, "error in creating DumpWriter");
     painCave.isFatal = 1;
@@ -262,7 +262,7 @@ int main(int argc, char *argv []) {
   return 0;
 }
 
-void createMdFile(const std::string&oldMdFileName, 
+void createMdFile(const std::string&oldMdFileName,
                   const std::string&newMdFileName,
                   int nMol) {
   ifstream oldMdFile;
@@ -291,4 +291,3 @@ void createMdFile(const std::string&oldMdFileName,
   oldMdFile.close();
   newMdFile.close();
 }
-

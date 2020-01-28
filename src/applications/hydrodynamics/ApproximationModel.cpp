@@ -57,19 +57,29 @@ namespace OpenMD {
 
   /**
    * Reference:
-   * Beatriz Carrasco and Jose Gracia de la Torre, Hydrodynamic Properties of
+   * Beatriz Carrasco and Jose Gracia de la Torre; "Hydrodynamic Properties of
    * Rigid Particles: Comparison of Different Modeling and Computational
-   * Procedures, Biophysical Journal, 75(6), 3044, 1999   //(non-overlapping and overlapping beads)
+   * Procedures", Biophysical Journal, 75(6), 3044, 1999   //(Hydro framework)
    *
-   * Jens Rotne and Stephen Prager, Variational Treatment of Hydrodynamic
-   * Interaction in Polymers, J. Chem. Phys. 50, 4831 (1969)  // (overlapping beads)
+   * Xiuquan Sun, Teng Lin, and J. Daniel Gezelter; "Langevin dynamics for rigid
+   * bodies of arbitrary shape", J. Chem. Phys. 128, 234107 (2008)   //(Hydro framework)
    *
-   * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper, Calculation
+   * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper; "Calculation
    * of hydrodynamic properties of macromolecular bead models with overlapping
-   * spheres, Eur Biophys J (1999) 28: 510-515  // (overlapping beads)
+   * spheres", Eur Biophys J (1999) 28: 510-515   //(overlapping beads and overlapping volume)
    *
-   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html  //  (overlapping volume between two beads (spheres))
-   */
+   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html   //(overlapping volume between two beads (spheres))
+   *
+   * Zuk, P. J., E. Wajnryb, K. A. Mizerski, and P. Szymczak; “Rotne–Prager–Yamakawa
+   * Approximation for Different-Sized Particles in Application to Macromolecular
+   * Bead Models.”, Journal of Fluid Mechanics, 741 (2014)   //(non-overlapping and overlapping translational-translational mobility tensors)
+   *
+   * Steven Harvey and Jose Garcia de la Torre; "Coordinate Systems for Modeling
+   * the Hydrodynamic Resistance and Diffusion Coefficients of Irregularly Shaped
+   * Rigid Macromolecules", Macromolecules 1980 13 (4), 960-964   //(center of resistance and
+   * center of diffusion)
+   *
+   **/
   ApproximationModel::ApproximationModel(StuntDouble* sd, SimInfo* info) :
     HydrodynamicsModel(sd, info){
   }
@@ -116,25 +126,11 @@ namespace OpenMD {
     for (std::size_t i = 0; i < nbeads; ++i) {
       for (std::size_t j = 0; j < nbeads; ++j) {
         Mat3x3d Tij;
-        if (i != j ) {   //non-self interaction: divided in overlapping and non-overlapping beads
+        if (i != j ) {   //non-self interaction: divided in overlapping and non-overlapping beads; the transitions among them are continuous
           Vector3d Rij = beads[i].pos - beads[j].pos;
           RealType rij = Rij.length();
           RealType rij2 = rij * rij;
-          if (rij < (beads[i].radius + beads[j].radius)) {      //overlapping beads
-            std::cout << "There is overlapping between beads: (" << i << ") and (" << j << ")" << std::endl;
-            overlap_beads +=1;  //counting overlapping beads
-            RealType avgsigma = 0.5 * (beads[i].radius + beads[j].radius);
-            //RealType avgsigma = pow(0.5 * (pow(beads[i].radius,3.0) + pow(beads[j].radius,3.0)),1.0/3.0);
-            RealType constant = 6.0 * Constants::PI * viscosity * avgsigma;
-            Mat3x3d tmpMatoverlap;
-            tmpMatoverlap = outProduct(Rij, Rij) / (rij * avgsigma);
-            RealType tmp1overlap = 1.0 - (9.0 * rij)/(32.0 * avgsigma);
-            Tij = (tmp1overlap * I + (3.0/32.0) * tmpMatoverlap) / constant;
-            RealType volumetmp1 = (-rij + beads[i].radius + beads[j].radius) * (-rij + beads[i].radius + beads[j].radius);
-            RealType volumetmp2 = (rij2 + 2 * (rij * beads[i].radius) - 3 * (beads[i].radius * beads[i].radius) +
-               2 * (rij * beads[j].radius) + 6 * (beads[i].radius * beads[j].radius) - 3 * (beads[j].radius*beads[j].radius));
-            volume_overlap += (Constants::PI/(12.0 * rij)) * volumetmp1 * volumetmp2;
-          }else{                                                //non-overlapping beads
+          if (rij >= (beads[i].radius + beads[j].radius)) {      //non-overlapping beads
             RealType sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) +
                                                (beads[j].radius*beads[j].radius)) / rij2;
             Mat3x3d tmpMat;
@@ -143,8 +139,61 @@ namespace OpenMD {
             RealType tmp1 = 1.0 + sumSigma2OverRij2/3.0;
             RealType tmp2 = 1.0 - sumSigma2OverRij2;
             Tij = (tmp1 * I + tmp2 * tmpMat ) / constant;
+        }      //overlapping beads, part I
+          else if ( rij > fabs(beads[i].radius - beads[j].radius) && rij < (beads[i].radius + beads[j].radius) ) {
+            std::cout << "There is overlapping between beads: (" << i << ") and (" << j << ")" << std::endl;
+            overlap_beads +=1;  //counting overlapping beads
+            RealType sum_sigma = (beads[i].radius + beads[j].radius);
+            RealType subtr_sigma = (beads[i].radius - beads[j].radius);
+            RealType subtr_sigma_sqr = subtr_sigma * subtr_sigma;
+
+            RealType constant = 6.0 * Constants::PI * viscosity * (beads[i].radius * beads[j].radius);
+
+            RealType rij3 = rij2 * rij;
+
+            Mat3x3d tmpMat;
+            tmpMat = outProduct(Rij, Rij) / rij2;
+
+            RealType tmp_var1 = subtr_sigma_sqr + 3.0 * rij2;
+            RealType tmp1overlap = ( 16.0 * rij3 * sum_sigma - tmp_var1 * tmp_var1 )/( 32.0 * rij3 );
+
+            RealType tmp_var2 = subtr_sigma_sqr - rij2;
+            RealType tmp2overlap = ( 3.0 * tmp_var2 * tmp_var2 )/( 32.0 * rij3 );
+
+            Tij = (tmp1overlap * I + tmp2overlap * tmpMat) / constant;
+
+            RealType volumetmp1 = (-rij + sum_sigma) * (-rij + sum_sigma);
+            RealType volumetmp2 = (rij2 + 2.0 * (rij * beads[i].radius) - 3.0 * (beads[i].radius * beads[i].radius) +
+               2 * (rij * beads[j].radius) + 6 * (beads[i].radius * beads[j].radius) - 3 * (beads[j].radius * beads[j].radius));
+            volume_overlap += (Constants::PI/(12.0 * rij)) * volumetmp1 * volumetmp2;
+        }
+          else{      //overlapping beads, part II: one bead inside the other
+            if ( (beads[i].radius >= beads[j].radius) ) {
+              std::cout << "Bead: (" << j << ") is inside bead (" << i << ")" << std::endl;
+              overlap_beads +=1;  //counting overlapping beads
+              RealType constant = 1.0 / (6.0 * Constants::PI * viscosity * beads[i].radius);
+              Tij(0, 0) = constant;
+              Tij(1, 1) = constant;
+              Tij(2, 2) = constant;
+
+              RealType bead_rad_cub = beads[j].radius * beads[j].radius * beads[j].radius;
+
+              volume_overlap += (4.0/3.0) * Constants::PI * bead_rad_cub;
+
+            } else{
+              std::cout << "Bead: (" << i << ") is inside bead (" << j << ")" << std::endl;
+              overlap_beads +=1;  //counting overlapping beads
+              RealType constant = 1.0 / (6.0 * Constants::PI * viscosity * beads[j].radius);
+              Tij(0, 0) = constant;
+              Tij(1, 1) = constant;
+              Tij(2, 2) = constant;
+
+              RealType bead_rad_cub = beads[i].radius * beads[i].radius * beads[i].radius;
+
+              volume_overlap += (4.0/3.0) * Constants::PI * bead_rad_cub;
+            }
           }
-        }else {   //self interaction
+        }else {   //self interaction, there is no overlapping volume (volume_overlap)
           RealType constant = 1.0 / (6.0 * Constants::PI * viscosity * beads[i].radius);
           Tij(0, 0) = constant;
           Tij(1, 1) = constant;
@@ -218,9 +267,14 @@ namespace OpenMD {
     tmpVec[0] = Xiotr(2, 1) - Xiotr(1, 2);
     tmpVec[1] = Xiotr(0, 2) - Xiotr(2, 0);
     tmpVec[2] = Xiotr(1, 0) - Xiotr(0, 1);
-    tmpInv = tmp.inverse();
 
-    Vector3d ror = tmpInv * tmpVec; // center of resistance
+    //invert tmp Matrix
+    invertMatrix(tmp, tmpInv);
+
+    // center of resistance
+    Vector3d ror = tmpInv * tmpVec;
+
+    //calculate Resistance Tensor at center of resistance
     Mat3x3d Uor;
     Uor.setupSkewMat(ror);
 
@@ -288,21 +342,21 @@ namespace OpenMD {
     std::cout << "Resistance tensor at center of resistance\n" << std::endl;
     std::cout << "translation [kcal.fs/(mol.A^2)]:" << std::endl;
     std::cout << Xirtt << std::endl;
-    std::cout << "rotation-translation [kcal.fs/(mol.A)]:" << std::endl;
+    std::cout << "rotation-translation [kcal.fs/(mol.A.radian)]:" << std::endl;
     std::cout << Xirtr.transpose() << std::endl;
-    std::cout << "translation-rotation [kcal.fs/(mol.A)]:" << std::endl;
+    std::cout << "translation-rotation [kcal.fs/(mol.A.radian)]:" << std::endl;
     std::cout << Xirtr << std::endl;
-    std::cout << "rotation [kcal.fs/(mol)]:" << std::endl;
+    std::cout << "rotation [kcal.fs/(mol.radian^2)]:" << std::endl;
     std::cout << Xirrr << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Diffusion tensor at center of resistance\n" << std::endl;
     std::cout << "translation (A^2 / fs):" << std::endl;
     std::cout << Drtt << std::endl;
-    std::cout << "rotation-translation (A / fs):" << std::endl;
+    std::cout << "rotation-translation (A.radian / fs):" << std::endl;
     std::cout << Drrt << std::endl;
-    std::cout << "translation-rotation (A / fs):" << std::endl;
+    std::cout << "translation-rotation (A.radian / fs):" << std::endl;
     std::cout << Drtr << std::endl;
-    std::cout << "rotation (1 / fs):" << std::endl;
+    std::cout << "rotation (radian^2 / fs):" << std::endl;
     std::cout << Drrr << std::endl;
     std::cout << "-----------------------------------------\n\n";
 
@@ -406,21 +460,21 @@ namespace OpenMD {
     std::cout << "Diffusion tensor at center of diffusion \n " << std::endl;
     std::cout << "translation (A^2 / fs) :" << std::endl;
     std::cout << Ddtt << std::endl;
-    std::cout << "rotation-translation (A / fs):" << std::endl;
+    std::cout << "rotation-translation (A.radian / fs):" << std::endl;
     std::cout << Ddtr.transpose() << std::endl;
-    std::cout << "translation-rotation (A / fs):" << std::endl;
+    std::cout << "translation-rotation (A.radian / fs):" << std::endl;
     std::cout << Ddtr << std::endl;
-    std::cout << "rotation (1 / fs):" << std::endl;
+    std::cout << "rotation (radian^2 / fs):" << std::endl;
     std::cout << Ddrr << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Resistance tensor at center of diffusion \n " << std::endl;
     std::cout << "translation [kcal.fs/(mol.A^2)]:" << std::endl;
     std::cout << Xidtt << std::endl;
-    std::cout << "rotation-translation [kcal.fs/(mol.A)]:" << std::endl;
+    std::cout << "rotation-translation [kcal.fs/(mol.A.radian)]:" << std::endl;
     std::cout << Xidrt << std::endl;
-    std::cout << "translation-rotation [kcal.fs/(mol.A)]:" << std::endl;
+    std::cout << "translation-rotation [kcal.fs/(mol.A.radian)]:" << std::endl;
     std::cout << Xidtr << std::endl;
-    std::cout << "rotation [kcal.fs/(mol)]:" << std::endl;
+    std::cout << "rotation [kcal.fs/(mol.radian^2)]:" << std::endl;
     std::cout << Xidrr << std::endl;
     std::cout << "-----------------------------------------\n\n";
 
@@ -486,21 +540,21 @@ namespace OpenMD {
     std::cout << "Resistance tensor at center of mass\n" << std::endl;
     std::cout << "translation [kcal.fs/(mol.A^2)]:" << std::endl;
     std::cout << Xicomtt << std::endl;
-    std::cout << "rotation-translation [kcal.fs/(mol.A)]:" << std::endl;
+    std::cout << "rotation-translation [kcal.fs/(mol.A.radian)]:" << std::endl;
     std::cout << Xicomtr.transpose() << std::endl;
-    std::cout << "translation-rotation [kcal.fs/(mol.A)]:" << std::endl;
+    std::cout << "translation-rotation [kcal.fs/(mol.A.radian)]:" << std::endl;
     std::cout << Xicomtr << std::endl;
-    std::cout << "rotation [kcal.fs/(mol)]:" << std::endl;
+    std::cout << "rotation [kcal.fs/(mol.radian^2)]:" << std::endl;
     std::cout << Xicomrr << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Diffusion tensor at center of mass\n" << std::endl;
     std::cout << "translation (A^2 / fs):" << std::endl;
     std::cout << Dcomtt << std::endl;
-    std::cout << "rotation-translation (A / fs):" << std::endl;
+    std::cout << "rotation-translation (A.radian / fs):" << std::endl;
     std::cout << Dcomtr.transpose() << std::endl;
-    std::cout << "translation-rotation (A / fs):" << std::endl;
+    std::cout << "translation-rotation (A.radian / fs):" << std::endl;
     std::cout << Dcomtr << std::endl;
-    std::cout << "rotation (1 / fs):" << std::endl;
+    std::cout << "rotation (radian^2 / fs):" << std::endl;
     std::cout << Dcomrr << std::endl;
 
 

@@ -52,19 +52,24 @@ namespace OpenMD {
     : AutoCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
                             DataStorage::dslForce | DataStorage::dslAmat |
                             DataStorage::dslTorque){
-    
+
     setCorrFuncType("Force - Force Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".facorr");
-    
+
     forces_.resize(nFrames_);
     sumForces_ = V3Zero;
     forcesCount_ = 0;
   }
-  
+
   int ForceAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    Mat3x3d A = sd->getA();
-    Vector3d f = sd->getFrc();
-    propertyTemp = A * f;
+    if (sd->isRigidBody()) {
+      Mat3x3d A = sd->getA();
+      Vector3d f = sd->getFrc();
+      propertyTemp = A * f;
+    }else{
+      Vector3d f = sd->getFrc();
+      propertyTemp = f;
+    }
     forces_[frame].push_back( propertyTemp );
     sumForces_ += propertyTemp;
     forcesCount_++;
@@ -75,22 +80,22 @@ namespace OpenMD {
                                          int id1, int id2) {
     return outProduct( forces_[frame1][id1] , forces_[frame2][id2] );
   }
-  
+
   void ForceAutoCorrFunc::postCorrelate() {
     // Gets the average of the forces_
     sumForces_ /= RealType(forcesCount_);
-    
+
     Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumForces_);
     for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
         histogram_[i] /= RealType(count_[i]);
-        
+
         // The outerProduct correlation of the averages is subtracted
         // from the correlation value
-        histogram_[i] -= correlationOfAverages_; 
+        histogram_[i] -= correlationOfAverages_;
       } else {
         histogram_[i] = M3Zero;
       }
-    }    
+    }
   }
 }

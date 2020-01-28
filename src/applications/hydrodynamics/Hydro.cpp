@@ -32,14 +32,14 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
- 
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -69,17 +69,17 @@ void writeHydroProps(std::ostream& os);
 
 int main(int argc, char* argv[]){
   registerHydrodynamicsModels();
-  
+
   gengetopt_args_info args_info;
   std::string dumpFileName;
   std::string mdFileName;
   std::string prefix;
-  
+
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
     exit(1) ;
   }
-  
+
   //get the dumpfile name and meta-data file name
   if (args_info.input_given){
     dumpFileName = args_info.input_arg;
@@ -89,18 +89,18 @@ int main(int argc, char* argv[]){
     painCave.isFatal = 1;
     simError();
   }
-  
+
   if (args_info.output_given){
     prefix = args_info.output_arg;
   } else {
-    prefix = getPrefix(dumpFileName);    
+    prefix = getPrefix(dumpFileName);
   }
   std::string outputFilename = prefix + ".hydro";
-    
+
   //parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, true);
-    
+
   SimInfo::MoleculeIterator mi;
   Molecule* mol;
   Molecule::IntegrableObjectIterator  ii;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]){
   } else {
     sprintf(painCave.errMsg, "viscosity must be set\n");
     painCave.isFatal = 1;
-    simError();  
+    simError();
   }
 
   if (simParams->haveTargetTemp()) {
@@ -127,39 +127,39 @@ int main(int argc, char* argv[]){
   } else {
     sprintf(painCave.errMsg, "target temperature must be set\n");
     painCave.isFatal = 1;
-    simError();  
+    simError();
   }
- 
+
   std::map<std::string, SDShape> uniqueStuntDoubles;
-  
-  for (mol = info->beginMolecule(mi); mol != NULL; 
+
+  for (mol = info->beginMolecule(mi); mol != NULL;
        mol = info->nextMolecule(mi)) {
-    
+
     for (sd = mol->beginIntegrableObject(ii); sd != NULL;
          sd = mol->nextIntegrableObject(ii)) {
-      
+
       if (uniqueStuntDoubles.find(sd->getType()) ==  uniqueStuntDoubles.end()) {
-        
+
         sd->setPos(V3Zero);
         sd->setA(identMat);
         if (sd->isRigidBody()) {
           RigidBody* rb = static_cast<RigidBody*>(sd);
           rb->updateAtoms();
         }
-        
+
         SDShape tmp;
         tmp.shape = ShapeBuilder::createShape(sd);
-        tmp.sd = sd;    
+        tmp.sd = sd;
         uniqueStuntDoubles.insert(std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
-        
+
       }
     }
   }
-  
+
 
   std::ofstream outputHydro;
   outputHydro.open(outputFilename.c_str());
-    
+
   std::map<std::string, SDShape>::iterator si;
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
     HydrodynamicsModel* model = NULL;
@@ -169,7 +169,7 @@ int main(int argc, char* argv[]){
     if (shape->hasAnalyticalSolution()) {
       model = new AnalyticalModel(sd, info);
     } else {
-    
+
       if (args_info.model_given) {
 
         std::string modelName;
@@ -180,50 +180,50 @@ int main(int argc, char* argv[]){
         case model_arg_BeadModel:
         default:
           modelName = "BeadModel";
-          break;          
+          break;
         }
 
         model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName, sd, info);
-        
+
         if (args_info.model_arg == model_arg_RoughShell) {
-          RealType bs = args_info.beadSize_arg;        
-          dynamic_cast<RoughShell*>(model)->setSigma(bs);          
+          RealType bs = args_info.beadSize_arg;
+          dynamic_cast<RoughShell*>(model)->setSigma(bs);
         }
       }
     }
-    
+
     if (model != NULL) {
 
       model->init();
-    
+
       std::ofstream ofs;
       std::stringstream outputBeads;
       outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
-      ofs.open(outputBeads.str().c_str());        
+      ofs.open(outputBeads.str().c_str());
       model->writeBeads(ofs);
       ofs.close();
-      
+
       //if beads option is turned on, skip the calculation
       if (!args_info.beads_flag) {
         model->calcHydroProps(shape, viscosity, temperature);
         model->writeHydroProps(outputHydro);
       }
-      
+
       delete model;
-      
+
     } else {
       sprintf(painCave.errMsg, "Could not create HydrodynamicsModel\n");
       painCave.isFatal = 1;
-      simError();      
+      simError();
     }
   }
-  
+
   outputHydro.close();
 
 
   //MemoryUtils::deletePointers(shapes);
   delete info;
-   
+
 }
 
 void registerHydrodynamicsModels() {

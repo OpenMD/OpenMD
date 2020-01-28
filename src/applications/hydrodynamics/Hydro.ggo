@@ -1,4 +1,4 @@
-# Input file for gengetopt. This file generates HydroCmd.cpp and 
+# Input file for gengetopt. This file generates HydroCmd.cpp and
 # HydroCmd.hpp for parsing command line arguments using getopt and
 # getoptlong.  gengetopt is available from:
 #
@@ -10,7 +10,7 @@
 args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=HydroCmd --c-extension=cpp --header-extension=hpp"
 
 package "Hydro"
-version "" 
+version ""
 
 purpose
 "Generates resistance tensor (.hydro) files which are required when
@@ -29,5 +29,5 @@ approximate the surface of the body) must also be specified."
 option	"input"    i  "input MetaData (omd) file"                                    string	typestr="filename" 	required
 option	"output"   o  "output file prefix"                                           string	default="hydro"	        optional
 option  "model"    -  "hydrodynamics model"         values="BeadModel","RoughShell"  enum default="RoughShell"          required
-option  "beadSize" s  "bead size for RoughShell model (in angstroms)"                double     default="0.2"           optional
+option  "beadSize" s  "bead size (diameter) for RoughShell model (in angstroms)"                double     default="0.2"           optional
 option  "beads"	   b  "generate the beads only, hydrodynamics will not be performed" flag    	off

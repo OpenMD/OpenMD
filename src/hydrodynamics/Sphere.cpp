@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -45,23 +45,23 @@
 #include "math/LU.hpp"
 
 namespace OpenMD {
-  
+
   Sphere::Sphere(Vector3d origin, RealType radius) : origin_(origin), radius_(radius){
-    
+
   }
-  
+
   bool Sphere::isInterior(Vector3d pos) {
     Vector3d r = pos - origin_;
-    
+
     bool result;
     if (r.length() < radius_)
       result = true;
     else
       result = false;
-    
+
     return result;
   }
-  
+
   std::pair<Vector3d, Vector3d> Sphere::getBoundingBox() {
     std::pair<Vector3d, Vector3d>  boundary;
     Vector3d r(radius_, radius_, radius_);
@@ -69,9 +69,9 @@ namespace OpenMD {
     boundary.second = origin_ + r;
     return boundary;
   }
-  
+
   HydroProp* Sphere::getHydroProp(RealType viscosity, RealType temperature) {
-    
+
     RealType Xitt  = 6.0 * Constants::PI * viscosity * radius_;
     RealType Xirr = 8.0 * Constants::PI * viscosity * radius_ * radius_ * radius_;
 
@@ -83,7 +83,7 @@ namespace OpenMD {
     Xi(3, 3) = Xirr;
     Xi(4, 4) = Xirr;
     Xi(5, 5) = Xirr;
-    
+
     Xi *= Constants::viscoConvert;
     XiCopy = Xi;
 
@@ -92,8 +92,8 @@ namespace OpenMD {
     D *= kt;  // now in angstroms^2 fs^-1  (at least for Trans-trans)
 
     HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
-    
+
     return hprop;
   }
-  
+
 }

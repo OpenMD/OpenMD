@@ -118,6 +118,8 @@ namespace OpenMD {
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
     volume_ = currentSnapshot_->getVolume();
+    //RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
+
 
     StuntDouble* sd;
     int i;
@@ -202,6 +204,7 @@ namespace OpenMD {
                                           Constants::energyConvert);
         RealType den = binMass[i] * nBins_ * Constants::densityConvert
           / volume_;
+        //RealType den = binMass[i] * Constants::densityConvert / sliceVolume;
         Vector3d vel = binP[i] / binMass[i];
 
         dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
