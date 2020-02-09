@@ -41,7 +41,7 @@
  */
 
 #include "applications/dynamicProps/ForTorCorrFunc.hpp"
-#include "math/SquareMatrix3.hpp"
+#include "math/SquareMatrix3.hpp"//may not be necessary
 
 namespace OpenMD {
   ForTorCorrFunc::ForTorCorrFunc(SimInfo* info,
@@ -51,10 +51,10 @@ namespace OpenMD {
     : CrossCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
                              DataStorage::dslForce | DataStorage::dslAmat |
                              DataStorage::dslTorque){
-
+    
     setCorrFuncType("Force - Torque Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ftcorr");
-
+    
     forces_.resize(nFrames_);
     torques_.resize(nFrames_);
 
@@ -66,14 +66,14 @@ namespace OpenMD {
 
     propertyTemp = V3Zero;
   }
-
+  
   void ForTorCorrFunc::validateSelection(SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;
 
     for (sd = seleMan.beginSelected(i); sd != NULL;
          sd = seleMan.nextSelected(i)) {
-
+      
       if (!sd->isDirectional()) {
         sprintf(painCave.errMsg,
                 "ForTorCorrFunc::validateSelection Error: selection "
@@ -89,7 +89,7 @@ namespace OpenMD {
   int ForTorCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
     Mat3x3d A = sd->getA();
     Vector3d f = sd->getFrc();
-    propertyTemp = A.transpose() * f;
+    propertyTemp = A * f;
     forces_[frame].push_back( propertyTemp );
     sumForces_ += propertyTemp;
     forcesCount_++;
@@ -99,7 +99,7 @@ namespace OpenMD {
   int ForTorCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
     Mat3x3d A = sd->getA();
     Vector3d t = sd->getTrq();
-    propertyTemp = A.transpose() * t;
+    propertyTemp = A * t;
     torques_[frame].push_back( propertyTemp );
     sumTorques_ += propertyTemp;
     torquesCount_++;
@@ -114,10 +114,10 @@ namespace OpenMD {
   void ForTorCorrFunc::postCorrelate() {
     // Gets the average of the forces
     sumForces_ /= RealType(forcesCount_);
-
+    
     // Gets the average of the torques
     sumTorques_ /= RealType(torquesCount_);
-
+    
     Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumTorques_);
 
     for (unsigned int i =0 ; i < nTimeBins_; ++i) {

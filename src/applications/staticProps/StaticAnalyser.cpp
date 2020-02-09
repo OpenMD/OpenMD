@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -47,7 +47,7 @@
 namespace OpenMD {
   StaticAnalyser::StaticAnalyser(SimInfo* info, const std::string& filename, unsigned int nbins) :
     info_(info), dumpFilename_(filename), step_(1), nBins_(nbins) {
-    
+
     // Pre-load an OutputData for the count of objects:
     counts_ = new OutputData;
     counts_->units =  "objects";
@@ -55,18 +55,18 @@ namespace OpenMD {
     counts_->dataType = odtReal;
     counts_->dataHandling = odhTotal;
     counts_->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) 
-      counts_->accumulator.push_back( new Accumulator() );     
+    for (unsigned int i = 0; i < nBins_; i++)
+      counts_->accumulator.push_back( new Accumulator() );
   }
-  
+
   void StaticAnalyser::writeOutput() {
     vector<OutputData*>::iterator i;
     OutputData* outputData;
-        
+
     ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
-      
+
       Revision r;
       ofs << "# " << getAnalysisType() << "\n";
       ofs << "# OpenMD " << r.getFullRevision() << "\n";
@@ -76,26 +76,26 @@ namespace OpenMD {
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#";
-      for(outputData = beginOutputData(i); outputData; 
+      for(outputData = beginOutputData(i); outputData;
           outputData = nextOutputData(i)) {
-        ofs << "\t" << outputData->title << 
+        ofs << "\t" << outputData->title <<
           "(" << outputData->units << ")";
         // add some extra tabs for column alignment
         if (outputData->dataType == odtVector3) ofs << "\t\t";
       }
-      
+
       ofs << std::endl;
-      
+
       ofs.precision(8);
-      
-      for (unsigned int j = 0; j < nBins_; j++) {        
-        
+
+      for (unsigned int j = 0; j < nBins_; j++) {
+
         int counts = counts_->accumulator[j]->count();
 
         if (counts > 0) {
-          for(outputData = beginOutputData(i); outputData; 
+          for(outputData = beginOutputData(i); outputData;
               outputData = nextOutputData(i)) {
-            
+
             int n = outputData->accumulator[j]->count();
             if (n != 0) {
               writeData( ofs, outputData, j );
@@ -104,19 +104,19 @@ namespace OpenMD {
           ofs << std::endl;
         }
       }
-        
+
       ofs << "#######################################################\n";
       ofs << "# 95% confidence intervals in those quantities follow:\n";
       ofs << "#######################################################\n";
-      
+
       for (unsigned int j = 0; j < nBins_; j++) {
         int counts = counts_->accumulator[j]->count();
         if (counts > 0) {
-          
+
           ofs << "#";
-          for(outputData = beginOutputData(i); outputData; 
+          for(outputData = beginOutputData(i); outputData;
               outputData = nextOutputData(i)) {
-            
+
             int n = outputData->accumulator[j]->count();
             if (n != 0) {
               writeErrorBars( ofs, outputData, j );
@@ -125,19 +125,19 @@ namespace OpenMD {
           ofs << std::endl;
         }
       }
-      
+
       ofs.flush();
-      ofs.close();      
-      
-    } else {      
-      sprintf(painCave.errMsg, "StaticAnalyser: unable to open %s\n", 
+      ofs.close();
+
+    } else {
+      sprintf(painCave.errMsg, "StaticAnalyser: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
-      simError();  
-    }   
+      simError();
+    }
   }
-    
-  void StaticAnalyser::writeData(ostream& os, OutputData* dat, 
+
+  void StaticAnalyser::writeData(ostream& os, OutputData* dat,
                                     unsigned int bin) {
     assert(bin < nBins_);
     int n = dat->accumulator[bin]->count();
@@ -146,11 +146,11 @@ namespace OpenMD {
     if( dat->dataType == odtReal ) {
       RealType r;
       if (dat->dataHandling == odhMax) {
-	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);      
+	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);
       } else {
-	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);      
+	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);
       }
-      if (std::isinf(r) || std::isnan(r) ) {      
+      if (std::isinf(r) || std::isnan(r) ) {
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\t%s for bin %u",
@@ -158,15 +158,15 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-      if (dat->dataHandling == odhTotal) r *= dat->accumulator[bin]->count();
-      os << "\t" << r;      
+      if (dat->dataHandling == odhTotal) dynamic_cast<Accumulator*>(dat->accumulator[bin])->getSumAccumulated(r);
+      os << "\t" << r;
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);     
-      if (std::isinf(v[0]) || std::isnan(v[0]) || 
-          std::isinf(v[1]) || std::isnan(v[1]) || 
-          std::isinf(v[2]) || std::isnan(v[2]) ) {      
+      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
+      if (std::isinf(v[0]) || std::isnan(v[0]) ||
+          std::isinf(v[1]) || std::isnan(v[1]) ||
+          std::isinf(v[2]) || std::isnan(v[2]) ) {
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\t%s for bin %u",
@@ -179,7 +179,7 @@ namespace OpenMD {
     }
   }
 
-  void StaticAnalyser::writeErrorBars(ostream& os, OutputData* dat, 
+  void StaticAnalyser::writeErrorBars(ostream& os, OutputData* dat,
                                     unsigned int bin) {
     assert(bin < nBins_);
     int n = dat->accumulator[bin]->count();
@@ -187,8 +187,8 @@ namespace OpenMD {
 
     if( dat->dataType == odtReal ) {
       RealType r;
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(r);      
-      if (std::isinf(r) || std::isnan(r) ) {      
+      dynamic_cast<Accumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(r);
+      if (std::isinf(r) || std::isnan(r) ) {
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\tstandard deviation of %s for bin %u",
@@ -197,14 +197,14 @@ namespace OpenMD {
         simError();
       }
       if (dat->dataHandling == odhTotal) r *= dat->accumulator[bin]->count();
-      os << "\t" << r;      
+      os << "\t" << r;
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
       dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->get95percentConfidenceInterval(v);
-      if (std::isinf(v[0]) || std::isnan(v[0]) || 
-          std::isinf(v[1]) || std::isnan(v[1]) || 
-          std::isinf(v[2]) || std::isnan(v[2]) ) {      
+      if (std::isinf(v[0]) || std::isnan(v[0]) ||
+          std::isinf(v[1]) || std::isnan(v[1]) ||
+          std::isinf(v[2]) || std::isnan(v[2]) ) {
         sprintf( painCave.errMsg,
                  "StaticAnalyser detected a numerical error writing:\n"
                  "\tstandard deviation of %s for bin %u",
@@ -216,8 +216,8 @@ namespace OpenMD {
       os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
     }
   }
-  
-  
+
+
   OutputData* StaticAnalyser::beginOutputData(vector<OutputData*>::iterator& i) {
     i = data_.begin();
     return i != data_.end()? *i : NULL;

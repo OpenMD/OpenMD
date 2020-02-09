@@ -47,6 +47,8 @@
 #include "utils/Constants.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "io/DumpReader.hpp"
+
 
 namespace OpenMD {
 
@@ -57,11 +59,12 @@ namespace OpenMD {
 
     setOutputName(getPrefix(filename) + ".rnemdZ");
 
+
     temperature = new OutputData;
     temperature->units =  "K";
     temperature->title =  "Temperature";
     temperature->dataType = odtReal;
-    temperature->dataHandling = odhAverage;
+    temperature->dataHandling = odhTotal;
     temperature->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       temperature->accumulator.push_back( new Accumulator() );
@@ -71,7 +74,7 @@ namespace OpenMD {
     velocity->units = "angstroms/fs";
     velocity->title =  "Velocity";
     velocity->dataType = odtVector3;
-    velocity->dataHandling = odhAverage;
+    velocity->dataHandling = odhTotal;
     velocity->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       velocity->accumulator.push_back( new VectorAccumulator() );
@@ -81,7 +84,7 @@ namespace OpenMD {
     density->units =  "g cm^-3";
     density->title =  "Density";
     density->dataType = odtReal;
-    density->dataHandling = odhAverage;
+    density->dataHandling = odhTotal;
     density->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       density->accumulator.push_back( new Accumulator() );
@@ -91,7 +94,7 @@ namespace OpenMD {
     charge->units =  "e";
     charge->title =  "Charge";
     charge->dataType = odtReal;
-    charge->dataHandling = odhAverage;
+    charge->dataHandling = odhTotal;
     charge->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       charge->accumulator.push_back( new Accumulator() );
@@ -102,7 +105,7 @@ namespace OpenMD {
     chargeVelocity->units =  "e/fs";
     chargeVelocity->title =  "Charge_Velocity";
     chargeVelocity->dataType = odtReal;
-    chargeVelocity->dataHandling = odhAverage;
+    chargeVelocity->dataHandling = odhTotal;
     chargeVelocity->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       chargeVelocity->accumulator.push_back( new Accumulator() );
@@ -118,8 +121,6 @@ namespace OpenMD {
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
     volume_ = currentSnapshot_->getVolume();
-    //RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
-
 
     StuntDouble* sd;
     int i;
@@ -130,6 +131,7 @@ namespace OpenMD {
     vector<RealType> binChargeVelocity(nBins_, 0.0);
     vector<RealType> binKE(nBins_, 0.0);
     vector<unsigned int> binDof(nBins_, 0);
+
 
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -188,12 +190,21 @@ namespace OpenMD {
           q += atom->getFlucQPos();
           w += sd->getFlucQVel();
         }
-
-        binCharge[bin] += q;
-        binChargeVelocity[bin] += w;
-
-
       }
+      else if (sd->isRigidBody()) {
+        RigidBody* rb = static_cast<RigidBody*>(sd);
+        std::vector<Atom*>::iterator ai;
+        Atom* atom;
+        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)){
+          AtomType* atomType = atom->getAtomType();
+          FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+          if ( fca.isFixedCharge() ) {
+            q += fca.getCharge();
+          }
+        }
+      }
+      binCharge[bin] += q / nProcessed_;
+      binChargeVelocity[bin] += w / nProcessed_ ;
     }
 
 
@@ -201,18 +212,17 @@ namespace OpenMD {
 
       if (binDof[i] > 0) {
         RealType temp = 2.0 * binKE[i] / (binDof[i] * Constants::kb *
-                                          Constants::energyConvert);
+                                          Constants::energyConvert * nProcessed_);
         RealType den = binMass[i] * nBins_ * Constants::densityConvert
-          / volume_;
-        //RealType den = binMass[i] * Constants::densityConvert / sliceVolume;
-        Vector3d vel = binP[i] / binMass[i];
+          / (volume_ * nProcessed_);
+        Vector3d vel = binP[i] / (binMass[i] * nProcessed_);
 
         dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
         dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
         dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
         dynamic_cast<Accumulator *>(charge->accumulator[i])->add(binCharge[i]);
         dynamic_cast<Accumulator *>(chargeVelocity->accumulator[i])->add(binChargeVelocity[i]);
-        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);   //used to print result when counts_ > 0 (code below: "if (counts > 0) {...}")
       }
     }
   }

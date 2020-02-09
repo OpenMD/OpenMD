@@ -125,6 +125,22 @@ namespace OpenMD {
 
     for (std::size_t i = 0; i < nbeads; ++i) {
       for (std::size_t j = 0; j < nbeads; ++j) {
+         //checking if the beads' radii are non-negative values.
+        if (beads[i].radius < 0 || beads[j].radius < 0){
+          sprintf(painCave.errMsg, "There are beads with negative radius. Starting from index 0,\
+ check bead (%lu) and/or bead (%lu).\n", i, j);
+          painCave.isFatal = 1;
+          simError();
+        }
+        //if the bead's radius is below 1.0e-14, substitute by 1.0e-14;
+        //to avoid problem in the self-interaction part (i.e., to not divide by zero)
+        if (beads[i].radius < 1.0e-14){
+          beads[i].radius = 1.0e-14;
+        }
+        else if (beads[j].radius < 1.0e-14){
+          beads[j].radius = 1.0e-14;
+        }
+
         Mat3x3d Tij;
         if (i != j ) {   //non-self interaction: divided in overlapping and non-overlapping beads; the transitions among them are continuous
           Vector3d Rij = beads[i].pos - beads[j].pos;
