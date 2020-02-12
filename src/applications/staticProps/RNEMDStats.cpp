@@ -47,7 +47,7 @@
 #include "utils/Constants.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
-#include "io/DumpReader.hpp"
+//#include "io/DumpReader.hpp"
 
 
 namespace OpenMD {

@@ -89,7 +89,7 @@ namespace OpenMD {
      */
     virtual void add(ElementType const& val) {
       Count_++;
-      Avg_  += (val       - Avg_ ) / Count_;
+      Avg_  += (val - Avg_ ) / Count_;
       Sum_accum_ += val;
       Avg2_ += (val * val - Avg2_) / Count_;
       Val_   = val;
@@ -223,10 +223,10 @@ namespace OpenMD {
       Count_++;
       RealType len(0.0);
       for (unsigned int i =0; i < 3; i++) {
-        Avg_[i]  += (val[i]       - Avg_[i] ) / Count_;
+        Avg_[i]  += (val[i] - Avg_[i] ) / Count_;
         Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
         Val_[i]   = val[i];
-        Sum_accum_ += val[i];
+        Sum_accum_[i] += val[i];
         len += val[i]*val[i];
       }
       len = sqrt(len);

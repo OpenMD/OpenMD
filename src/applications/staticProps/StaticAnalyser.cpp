@@ -163,7 +163,7 @@ namespace OpenMD {
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
+      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);  //getAverage is a void function, i.e., it does not return a value
       if (std::isinf(v[0]) || std::isnan(v[0]) ||
           std::isinf(v[1]) || std::isnan(v[1]) ||
           std::isinf(v[2]) || std::isnan(v[2]) ) {
@@ -174,7 +174,7 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-      if (dat->dataHandling == odhTotal) v *= dat->accumulator[bin]->count();
+      if (dat->dataHandling == odhTotal) dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getSumAccumulated(v);  
       os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
     }
   }
