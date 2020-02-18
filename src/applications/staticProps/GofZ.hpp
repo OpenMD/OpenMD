@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -46,38 +46,27 @@
 namespace OpenMD {
 
   class GofZ : public RadialDistrFunc {
-    
+
   public:
-    GofZ(SimInfo* info, const std::string& filename, const std::string& sele1, 
-	 const std::string& sele2, RealType len, int nrbins, int axis=2);
+    GofZ(SimInfo* info, const std::string& filename, const std::string& sele1,
+	       const std::string& sele2, RealType len, RealType maxz, int nrbins,
+         int axis=2);
 
-    int getNRBins() {
-      return nRBins_; 
-    }
-
-    RealType getLength() {
-      return len_;
-    }
-        
   private:
 
     virtual void preProcess();
     virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void processHistogram();
-
     virtual void writeRdf();
 
-    RealType len_;
-    int nRBins_;
     RealType deltaZ_;
     RealType rC_;
-        
+
     std::vector<int> histogram_;
     std::vector<RealType> avgGofz_;
     int axis_;
     std::string axisLabel_;
-
   };
 
 }

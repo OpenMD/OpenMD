@@ -32,10 +32,10 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
+ *
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
@@ -58,27 +58,27 @@ namespace OpenMD {
    */
   class RadialDistrFunc : public StaticAnalyser {
   public:
-    RadialDistrFunc(SimInfo* info, const std::string& filename, 
+    RadialDistrFunc(SimInfo* info, const std::string& filename,
                     const std::string& sele1, const std::string& sele2, unsigned int nbins);
 
     virtual ~RadialDistrFunc() {}
-        
-    void process();        
+
+    void process();
 
 
-        
+
   protected:
 
-    virtual void preProcess() {}
+    virtual void preProcess(){}
     virtual void postProcess() {}
-    virtual void processNonOverlapping(SelectionManager& sman1, 
+    virtual void processNonOverlapping(SelectionManager& sman1,
                                        SelectionManager& sman2);
     virtual void processOverlapping(SelectionManager& sman);
 
     int getNPairs() { return nPairs_;}
     int getNSelected1() { return nSelected1_;}
     int getNSelected2() { return nSelected2_;}
-        
+
     Snapshot* currentSnapshot_;
 
     std::string selectionScript1_;
@@ -91,18 +91,18 @@ namespace OpenMD {
     SelectionManager seleMan2_;
     SelectionManager sele1_minus_common_;
     SelectionManager sele2_minus_common_;
-    SelectionManager common_;        
-        
+    SelectionManager common_;
+
   private:
 
     virtual void initializeHistogram() {}
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2){};
     virtual void processHistogram() {}
 
     virtual void validateSelection1(SelectionManager& sman) {}
     virtual void validateSelection2(SelectionManager& sman) {}
-    virtual void writeRdf() = 0;
-        
+    virtual void writeRdf(){};
+
     int nPairs_;
     int nSelected1_;
     int nSelected2_;

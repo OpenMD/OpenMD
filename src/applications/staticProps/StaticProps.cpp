@@ -182,33 +182,6 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName);
 
-  RealType maxLen;
-  RealType zmaxLen(0.0);
-  if (args_info.length_given) {
-    maxLen = args_info.length_arg;
-    if (args_info.zlength_given){
-      zmaxLen = args_info.zlength_arg;
-    }
-  } else {
-    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
-    zmaxLen = hmat(2,2);
-  }
-
-  int nanglebins, nrbins;
-  // in case we override nbins with nrbins:
-  if (args_info.nrbins_given) {
-    nrbins = args_info.nrbins_arg;
-  } else {
-    nrbins = args_info.nbins_arg;
-  }
-  // in case we override nbins with nrbins:
-  if (args_info.nanglebins_given) {
-    nanglebins = args_info.nanglebins_arg;
-  } else {
-    nanglebins = args_info.nbins_arg;
-  }
-
   // convert privilegedAxis to corresponding integer
   // x axis -> 0
   // y axis -> 1
@@ -240,6 +213,36 @@ int main(int argc, char* argv[]){
   default:
     privilegedAxis2 = 2;
     break;
+  }
+
+  RealType maxLen;
+  RealType zmaxLen(0.0);
+  if (args_info.length_given) {
+    maxLen = args_info.length_arg;
+    if (args_info.zlength_given){
+      zmaxLen = args_info.zlength_arg;
+    }
+  } else {
+    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    // The maximum length for radial distribution functions is actually half
+    // the smallest box length
+    maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) / 2.0;
+    // This should be the extent of the privileged axis:
+    zmaxLen = hmat(privilegedAxis, privilegedAxis);
+  }
+
+  int nanglebins, nrbins;
+  // in case we override nbins with nrbins:
+  if (args_info.nrbins_given) {
+    nrbins = args_info.nrbins_arg;
+  } else {
+    nrbins = args_info.nbins_arg;
+  }
+  // in case we override nbins with nanglebins:
+  if (args_info.nanglebins_given) {
+    nanglebins = args_info.nanglebins_arg;
+  } else {
+    nanglebins = args_info.nbins_arg;
   }
 
   int momentum_type;
@@ -276,7 +279,7 @@ int main(int argc, char* argv[]){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen,
 		       nrbins);
   } else if (args_info.gofz_given) {
-    analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen,
+    analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
 		       args_info.nbins_arg, privilegedAxis);
   } else if (args_info.r_z_given) {
     analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
