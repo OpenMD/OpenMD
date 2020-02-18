@@ -274,7 +274,6 @@ int main(int argc, char* argv[]){
 
   StaticAnalyser* analyser;
 
-
   if (args_info.gofr_given){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen,
 		       nrbins);
@@ -498,21 +497,27 @@ int main(int argc, char* argv[]){
       analyser  = new SCDOrderParameter(info, dumpFileName,
                                         sele1, sele2, sele3);
     }
-  }else if (args_info.density_given) {
+  } else if (args_info.density_given) {
     analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen,
 			      args_info.nbins_arg);
   } else if (args_info.count_given) {
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
-    analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg,
+                        privilegedAxis);
   } else if (args_info.eam_density_given) {
-    analyser = new DensityHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
+    analyser = new DensityHistogram(info, dumpFileName, sele1,
+                                    args_info.nbins_arg);
   } else if (args_info.momentum_distribution_given) {
-    analyser = new MomentumHistogram(info, dumpFileName, sele1, args_info.nbins_arg, momentum_type, momentum_comp);
+    analyser = new MomentumHistogram(info, dumpFileName, sele1,
+                                     args_info.nbins_arg, momentum_type,
+                                     momentum_comp);
   }else if (args_info.net_charge_given) {
-      analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
+    analyser = new ChargeHistogram(info, dumpFileName, sele1,
+                                   args_info.nbins_arg);
   } else if (args_info.current_density_given) {
-    analyser = new CurrentDensity(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = new CurrentDensity(info, dumpFileName, sele1,
+                                  args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {
@@ -534,7 +539,8 @@ int main(int argc, char* argv[]){
       break;
     }
   } else if (args_info.rnemdz_given) {
-    analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg,
+                          privilegedAxis);
   } else if (args_info.rnemdr_given) {
     analyser = new RNEMDR(info, dumpFileName, sele1, nrbins);
   } else if (args_info.rnemdrt_given) {
@@ -648,9 +654,11 @@ int main(int argc, char* argv[]){
     analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen,
                                       nrbins);
   } else if (args_info.densityfield_given) {
-    analyser = new DensityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
+    analyser = new DensityField(info, dumpFileName, sele1,
+                                args_info.voxelSize_arg);
   } else if (args_info.velocityfield_given) {
-    analyser = new VelocityField(info, dumpFileName, sele1, args_info.voxelSize_arg);
+    analyser = new VelocityField(info, dumpFileName, sele1,
+                                 args_info.voxelSize_arg);
   } else if (args_info.velocityZ_given) {
 
     switch (privilegedAxis) {
@@ -668,32 +676,35 @@ int main(int argc, char* argv[]){
     case 1:
       if (privilegedAxis2 == 0) {
 	analyser = new VelocityZ(info, dumpFileName, sele1,
-				   args_info.nbins_y_arg, args_info.nbins_x_arg,
-				   privilegedAxis, privilegedAxis2);
+                                 args_info.nbins_y_arg, args_info.nbins_x_arg,
+                                 privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 2) {
 	analyser = new VelocityZ(info, dumpFileName, sele1,
-				   args_info.nbins_y_arg, args_info.nbins_z_arg,
-				   privilegedAxis, privilegedAxis2);
+                                 args_info.nbins_y_arg, args_info.nbins_z_arg,
+                                 privilegedAxis, privilegedAxis2);
       }
       break;
     case 2:
     default:
       if (privilegedAxis2 == 0) {
 	analyser = new VelocityZ(info, dumpFileName, sele1,
-				   args_info.nbins_z_arg, args_info.nbins_x_arg,
-				   privilegedAxis, privilegedAxis2);
+                                 args_info.nbins_z_arg, args_info.nbins_x_arg,
+                                 privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 1) {
 	analyser = new VelocityZ(info, dumpFileName, sele1,
-				   args_info.nbins_z_arg, args_info.nbins_y_arg,
-				   privilegedAxis, privilegedAxis2);
+                                 args_info.nbins_z_arg, args_info.nbins_y_arg,
+                                 privilegedAxis, privilegedAxis2);
       }
       break;
     }
-  }else if (args_info.dipole_orientation_given){
-    if(args_info.dipoleX_given && args_info.dipoleY_given && args_info.dipoleZ_given)
-        analyser = new DipoleOrientation(info, dumpFileName, sele1,
-                          args_info.dipoleX_arg, args_info.dipoleY_arg, args_info.dipoleZ_arg,
-                          args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.dipole_orientation_given){
+    if(args_info.dipoleX_given && args_info.dipoleY_given
+       && args_info.dipoleZ_given)
+      analyser = new DipoleOrientation(info, dumpFileName, sele1,
+                                       args_info.dipoleX_arg,
+                                       args_info.dipoleY_arg,
+                                       args_info.dipoleZ_arg,
+                                       args_info.nbins_arg, privilegedAxis);
 
   }
 

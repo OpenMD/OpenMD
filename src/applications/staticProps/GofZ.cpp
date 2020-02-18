@@ -52,27 +52,27 @@ namespace OpenMD {
              RealType maxz, int nrbins, int axis)
     : RadialDistrFunc(info, filename, sele1, sele2, nrbins), axis_(axis) {
 
-      deltaZ_ = maxz / nBins_;
-      rC_ = len;
+    deltaZ_ = maxz / nBins_;
+    rC_ = len;
 
-      histogram_.resize(nBins_);
-      avgGofz_.resize(nBins_);
+    histogram_.resize(nBins_);
+    avgGofz_.resize(nBins_);
 
-      setOutputName(getPrefix(filename) + ".gofz");
+    setOutputName(getPrefix(filename) + ".gofz");
 
-      // Set the axis label for the privileged axis
-      switch(axis_) {
-      case 0:
-	axisLabel_ = "x";
-	break;
-      case 1:
-	axisLabel_ = "y";
-	break;
-      case 2:
-      default:
-	axisLabel_ = "z";
-	break;
-      }
+    // Set the axis label for the privileged axis
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
 
   }
 
@@ -135,13 +135,12 @@ namespace OpenMD {
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#r\tcorrValue\n";
       for (unsigned int i = 0; i < avgGofz_.size(); ++i) {
-	      RealType z = deltaZ_ * (i + 0.5);
-	      rdfStream << z << "\t" << avgGofz_[i]/nProcessed_ << "\n";
+        RealType z = deltaZ_ * (i + 0.5);
+        rdfStream << z << "\t" << avgGofz_[i]/nProcessed_ << "\n";
       }
-
     } else {
-
-      sprintf(painCave.errMsg, "GofZ: unable to open %s\n", outputFilename_.c_str());
+      sprintf(painCave.errMsg, "GofZ: unable to open %s\n",
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
