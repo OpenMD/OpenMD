@@ -96,6 +96,8 @@
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
 #include "applications/staticProps/CurrentDensity.hpp"
+#include "applications/staticProps/ChargeZ.hpp"
+#include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/DipoleOrientation.hpp"
 
 using namespace OpenMD;
@@ -509,6 +511,18 @@ int main(int argc, char* argv[]){
     analyser = new DensityHistogram(info, dumpFileName, sele1,
                                     args_info.nbins_arg);
   } else if (args_info.momentum_distribution_given) {
+<<<<<<< HEAD
+    analyser = new MomentumHistogram(info, dumpFileName, sele1, args_info.nbins_arg, momentum_type, momentum_comp);
+  } else if (args_info.net_charge_given) {
+      analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.current_density_given) {
+    analyser = new CurrentDensity(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.chargez_given) {
+    analyser = new ChargeZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.countz_given) {
+    analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+  }else if (args_info.pipe_density_given) {
+=======
     analyser = new MomentumHistogram(info, dumpFileName, sele1,
                                      args_info.nbins_arg, momentum_type,
                                      momentum_comp);
@@ -519,6 +533,7 @@ int main(int argc, char* argv[]){
     analyser = new CurrentDensity(info, dumpFileName, sele1,
                                   args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
+>>>>>>> 3c53ff3329d30a91cd8f130017d18fcc2816f044
 
     switch (privilegedAxis) {
     case 0:
