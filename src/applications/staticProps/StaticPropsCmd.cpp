@@ -123,6 +123,8 @@ const char *gengetopt_args_info_help[] = {
   "  -D, --eam_density             computes an average eam density profile of the\n                                  selected atom",
   "  -q, --net_charge              computes an average charge profile of the\n                                  selected atom",
   "  -J, --current_density         computes the current density for the selected\n                                  atom",
+  "      --chargez                 computes the charge distribution along selected\n                                  axis and selected atom",
+  "      --countz                  computes the number of selected atoms  along\n                                  selected axis",
   "  -M, --momentum_distribution   computes the momentum distribution for the\n                                  selected atom",
   "  -S, --dipole_orientation      spatially-resolved dipole order parameter S(z),\n                                  S = (3 Cos^2\\theta - 1)/2",
     0
@@ -247,6 +249,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->eam_density_given = 0 ;
   args_info->net_charge_given = 0 ;
   args_info->current_density_given = 0 ;
+  args_info->chargez_given = 0 ;
+  args_info->countz_given = 0 ;
   args_info->momentum_distribution_given = 0 ;
   args_info->dipole_orientation_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
@@ -413,8 +417,10 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->eam_density_help = gengetopt_args_info_help[87] ;
   args_info->net_charge_help = gengetopt_args_info_help[88] ;
   args_info->current_density_help = gengetopt_args_info_help[89] ;
-  args_info->momentum_distribution_help = gengetopt_args_info_help[90] ;
-  args_info->dipole_orientation_help = gengetopt_args_info_help[91] ;
+  args_info->chargez_help = gengetopt_args_info_help[90] ;
+  args_info->countz_help = gengetopt_args_info_help[91] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[92] ;
+  args_info->dipole_orientation_help = gengetopt_args_info_help[93] ;
   
 }
 
@@ -800,6 +806,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "net_charge", 0, 0 );
   if (args_info->current_density_given)
     write_into_file(outfile, "current_density", 0, 0 );
+  if (args_info->chargez_given)
+    write_into_file(outfile, "chargez", 0, 0 );
+  if (args_info->countz_given)
+    write_into_file(outfile, "countz", 0, 0 );
   if (args_info->momentum_distribution_given)
     write_into_file(outfile, "momentum_distribution", 0, 0 );
   if (args_info->dipole_orientation_given)
@@ -907,6 +917,8 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->eam_density_given = 0 ;
   args_info->net_charge_given = 0 ;
   args_info->current_density_given = 0 ;
+  args_info->chargez_given = 0 ;
+  args_info->countz_given = 0 ;
   args_info->momentum_distribution_given = 0 ;
   args_info->dipole_orientation_given = 0 ;
 
@@ -1836,6 +1848,8 @@ cmdline_parser_internal (
         { "eam_density",	0, NULL, 'D' },
         { "net_charge",	0, NULL, 'q' },
         { "current_density",	0, NULL, 'J' },
+        { "chargez",	0, NULL, 0 },
+        { "countz",	0, NULL, 0 },
         { "momentum_distribution",	0, NULL, 'M' },
         { "dipole_orientation",	0, NULL, 'S' },
         { 0,  0, 0, 0 }
@@ -3221,6 +3235,40 @@ cmdline_parser_internal (
                 &(local_args_info.velocityZ_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "velocityZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes the charge distribution along selected axis and selected atom.  */
+          else if (strcmp (long_options[option_index].name, "chargez") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->chargez_given),
+                &(local_args_info.chargez_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "chargez", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes the number of selected atoms  along selected axis.  */
+          else if (strcmp (long_options[option_index].name, "countz") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->countz_given),
+                &(local_args_info.countz_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "countz", '-',
                 additional_error))
               goto failure;
           
