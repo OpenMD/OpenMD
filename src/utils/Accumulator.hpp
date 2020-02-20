@@ -61,11 +61,10 @@ namespace OpenMD {
       return Count_;
     }
     virtual ~BaseAccumulator() {};
+    
   protected:
     size_t Count_;
-
   };
-
 
 
   /**
@@ -89,10 +88,10 @@ namespace OpenMD {
      */
     virtual void add(ElementType const& val) {
       Count_++;
-      Avg_  += (val - Avg_ ) / Count_;
-      Sum_accum_ += val;
-      Avg2_ += (val * val - Avg2_) / Count_;
-      Val_   = val;
+      Avg_   += (val       - Avg_ ) / Count_;
+      Avg2_  += (val * val - Avg2_) / Count_;
+      Val_    = val;
+      Total_ += val;
       if (Count_ <= 1) {
         Max_ = val;
         Min_ = val;
@@ -109,7 +108,7 @@ namespace OpenMD {
       Count_ = 0;
       Avg_   = 0;
       Avg2_  = 0;
-      Sum_accum_ = 0 ;
+      Total_ = 0;
       Val_   = 0;
     }
 
@@ -132,12 +131,11 @@ namespace OpenMD {
     }
 
     /**
-     * compute the Accumulated Sum
+     * return the Total accumulated sum
      */
-
-    void getSumAccumulated(ResultType &ret)  {
+    void getTotal(ResultType &ret)  {
       assert(Count_ != 0);
-      ret = Sum_accum_;
+      ret = Total_;
       return;
     }
 
@@ -146,8 +144,8 @@ namespace OpenMD {
      */
     void getVariance(ResultType &ret)  {
       assert(Count_ != 0);
-      ret = (Avg2_ - Avg_  * Avg_);
-      if (ret < 0.0) ret = 0.0;
+      ret = (Avg2_ - Avg_ * Avg_);
+      if (ret < 0) ret = 0;
       return;
     }
 
@@ -201,7 +199,7 @@ namespace OpenMD {
     ElementType Val_;
     ResultType Avg_;
     ResultType Avg2_;
-    ResultType Sum_accum_;
+    ResultType Total_;
     ElementType Min_;
     ElementType Max_;
   };
@@ -223,11 +221,11 @@ namespace OpenMD {
       Count_++;
       RealType len(0.0);
       for (unsigned int i =0; i < 3; i++) {
-        Avg_[i]  += (val[i] - Avg_[i] ) / Count_;
-        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
-        Val_[i]   = val[i];
-        Sum_accum_[i] += val[i];
-        len += val[i]*val[i];
+        Avg_[i]   += (val[i]          - Avg_[i] ) / Count_;
+        Avg2_[i]  += (val[i] * val[i] - Avg2_[i]) / Count_;
+        Val_[i]    = val[i];
+        Total_[i] += val[i];
+        len       += val[i] * val[i];
       }
       len = sqrt(len);
       AvgLen_  += (len       - AvgLen_ ) / Count_;
@@ -246,13 +244,13 @@ namespace OpenMD {
      * reset the Accumulator to the empty state
      */
     void clear() {
-      Count_ = 0;
-      Avg_ = V3Zero;
-      Avg2_ = V3Zero;
-      Sum_accum_ = V3Zero;
-      Val_ = V3Zero;
-      AvgLen_   = 0;
-      AvgLen2_  = 0;
+      Count_   = 0;
+      Avg_     = V3Zero;
+      Avg2_    = V3Zero;
+      Total_   = V3Zero;
+      Val_     = V3Zero;
+      AvgLen_  = 0;
+      AvgLen2_ = 0;
     }
 
     /**
@@ -273,11 +271,11 @@ namespace OpenMD {
     }
 
     /**
-     * compute the Accumulated Sum
+     * return the Total accumulated sum
      */
-    void getSumAccumulated(ResultType &ret)  {
+    void getTotal(ResultType &ret)  {
       assert(Count_ != 0);
-      ret = Sum_accum_;
+      ret = Total_;
       return;
     }
 
@@ -286,9 +284,9 @@ namespace OpenMD {
      */
     void getVariance(ResultType &ret) {
       assert(Count_ != 0);
-      for (unsigned int i =0; i < 3; i++) {
+      for (unsigned int i = 0; i < 3; i++) {
         ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
-        if (ret[i] < 0.0) ret[i] = 0.0;
+        if (ret[i] < 0) ret[i] = 0;
       }
       return;
     }
@@ -358,7 +356,7 @@ namespace OpenMD {
     void getLengthVariance(RealType &ret) {
       assert(Count_ != 0);
       ret= (AvgLen2_ - AvgLen_ * AvgLen_);
-      if (ret < 0.0) ret = 0.0;
+      if (ret < 0) ret = 0;
       return;
     }
 
@@ -395,7 +393,7 @@ namespace OpenMD {
     ResultType Val_;
     ResultType Avg_;
     ResultType Avg2_;
-    ResultType Sum_accum_;
+    ResultType Total_;
     RealType AvgLen_;
     RealType AvgLen2_;
     RealType Min_;
@@ -420,11 +418,11 @@ namespace OpenMD {
       Count_++;
       RealType len(0.0);
       for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
-        Avg_[i]  += (val[i]       - Avg_[i] ) / Count_;
-        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
-        Val_[i]   = val[i];
-        Sum_accum_[i] += val[i];
-        len += val[i]*val[i];
+        Avg_[i]   += (val[i]          - Avg_[i] ) / Count_;
+        Avg2_[i]  += (val[i] * val[i] - Avg2_[i]) / Count_;
+        Val_[i]    = val[i];
+        Total_[i] += val[i];
+        len       += val[i] * val[i];
       }
       len = sqrt(len);
       AvgLen_  += (len       - AvgLen_ ) / Count_;
@@ -445,10 +443,10 @@ namespace OpenMD {
     void clear() {
       Count_ = 0;
       const Vector<RealType,N_INTERACTION_FAMILIES> potVecZero(0.0);
-      Avg_ = potVecZero;
-      Avg2_ = potVecZero;
-      Val_ = potVecZero;
-      Sum_accum_ = potVecZero;
+      Avg_      = potVecZero;
+      Avg2_     = potVecZero;
+      Val_      = potVecZero;
+      Total_    = potVecZero;
       AvgLen_   = 0;
       AvgLen2_  = 0;
     }
@@ -471,11 +469,11 @@ namespace OpenMD {
     }
 
     /**
-     * compute the Accumulated Sum
+     * return the Total accumulated sum
      */
-    void getSumAccumulated(ResultType &ret)  {
+    void getTotal(ResultType &ret)  {
       assert(Count_ != 0);
-      ret = Sum_accum_;
+      ret = Total_;
       return;
     }
     /**
@@ -485,7 +483,7 @@ namespace OpenMD {
       assert(Count_ != 0);
       for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
         ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
-        if (ret[i] < 0.0) ret[i] = 0.0;
+        if (ret[i] < 0) ret[i] = 0;
       }
       return;
     }
@@ -555,7 +553,7 @@ namespace OpenMD {
     void getLengthVariance(RealType &ret) {
       assert(Count_ != 0);
       ret= (AvgLen2_ - AvgLen_ * AvgLen_);
-      if (ret < 0.0) ret = 0.0;
+      if (ret < 0) ret = 0;
       return;
     }
 
@@ -592,7 +590,7 @@ namespace OpenMD {
     ResultType Val_;
     ResultType Avg_;
     ResultType Avg2_;
-    ResultType Sum_accum_;
+    ResultType Total_;
     RealType AvgLen_;
     RealType AvgLen2_;
     RealType Min_;
@@ -618,10 +616,10 @@ namespace OpenMD {
       Count_++;
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          Avg_(i,j)  += (val(i,j)       - Avg_(i,j) ) / Count_;
-          Avg2_(i,j) += (val(i,j) * val(i,j) - Avg2_(i,j)) / Count_;
-          Val_(i,j)   = val(i,j);
-          Sum_accum_(i,j) += val(i,j);
+          Avg_(i,j)   += (val(i,j)       -      Avg_(i,j) ) / Count_;
+          Avg2_(i,j)  += (val(i,j) * val(i,j) - Avg2_(i,j)) / Count_;
+          Val_(i,j)    = val(i,j);
+          Total_(i,j) += val(i,j);
         }
       }
     }
@@ -630,11 +628,11 @@ namespace OpenMD {
      * reset the Accumulator to the empty state
      */
     void clear() {
-      Count_ = 0;
-      Avg_ *= 0.0;
-      Avg2_ *= 0.0;
-      Val_ *= 0.0;
-      Sum_accum_ *= 0.0;
+      Count_  = 0;
+      Avg_   *= 0.0;
+      Avg2_  *= 0.0;
+      Val_   *= 0.0;
+      Total_ *= 0.0;
     }
 
     /**
@@ -655,11 +653,11 @@ namespace OpenMD {
     }
 
     /**
-     * compute the Accumulated Sum
+     * return the Total accumulated sum
      */
-    void getSumAccumulated(ResultType &ret)  {
+    void getTotal(ResultType &ret)  {
       assert(Count_ != 0);
-      ret = Sum_accum_;
+      ret = Total_;
       return;
     }
 
@@ -671,7 +669,7 @@ namespace OpenMD {
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
           ret(i,j) = (Avg2_(i,j) - Avg_(i,j)  * Avg_(i,j));
-          if ( ret(i,j) < 0.0 ) ret(i,j) = 0.0;
+          if ( ret(i,j) < 0 ) ret(i,j) = 0;
         }
       }
       return;
@@ -717,7 +715,7 @@ namespace OpenMD {
     ElementType Val_;
     ResultType Avg_;
     ResultType Avg2_;
-    ResultType Sum_accum_;
+    ResultType Total_;
   };
 
 
