@@ -69,7 +69,7 @@ namespace OpenMD {
 
   protected:
 
-    virtual void preProcess(){}
+    virtual void preProcess() {}
     virtual void postProcess() {}
     virtual void processNonOverlapping(SelectionManager& sman1,
                                        SelectionManager& sman2);
@@ -96,12 +96,12 @@ namespace OpenMD {
   private:
 
     virtual void initializeHistogram() {}
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2){};
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) = 0;
     virtual void processHistogram() {}
 
     virtual void validateSelection1(SelectionManager& sman) {}
     virtual void validateSelection2(SelectionManager& sman) {}
-    virtual void writeRdf(){};
+    virtual void writeRdf() = 0;
 
     int nPairs_;
     int nSelected1_;
