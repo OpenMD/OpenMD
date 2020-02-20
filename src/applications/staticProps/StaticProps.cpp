@@ -511,7 +511,7 @@ int main(int argc, char* argv[]){
     analyser = new DensityHistogram(info, dumpFileName, sele1,
                                     args_info.nbins_arg);
   } else if (args_info.momentum_distribution_given) {
-<<<<<<< HEAD
+
     analyser = new MomentumHistogram(info, dumpFileName, sele1, args_info.nbins_arg, momentum_type, momentum_comp);
   } else if (args_info.net_charge_given) {
       analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
@@ -522,18 +522,6 @@ int main(int argc, char* argv[]){
   } else if (args_info.countz_given) {
     analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   }else if (args_info.pipe_density_given) {
-=======
-    analyser = new MomentumHistogram(info, dumpFileName, sele1,
-                                     args_info.nbins_arg, momentum_type,
-                                     momentum_comp);
-  }else if (args_info.net_charge_given) {
-    analyser = new ChargeHistogram(info, dumpFileName, sele1,
-                                   args_info.nbins_arg);
-  } else if (args_info.current_density_given) {
-    analyser = new CurrentDensity(info, dumpFileName, sele1,
-                                  args_info.nbins_arg, privilegedAxis);
-  } else if (args_info.pipe_density_given) {
->>>>>>> 3c53ff3329d30a91cd8f130017d18fcc2816f044
 
     switch (privilegedAxis) {
     case 0:
