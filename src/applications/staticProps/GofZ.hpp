@@ -49,7 +49,7 @@ namespace OpenMD {
 
   public:
     GofZ(SimInfo* info, const std::string& filename, const std::string& sele1,
-	       const std::string& sele2, RealType len, RealType maxz, int nrbins,
+         const std::string& sele2, RealType len, RealType maxz, int nrbins,
          int axis=2);
 
   private:

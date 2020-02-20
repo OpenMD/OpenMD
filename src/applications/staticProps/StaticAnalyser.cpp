@@ -147,6 +147,8 @@ namespace OpenMD {
       RealType r;
       if (dat->dataHandling == odhMax) {
 	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);
+      } else if (dat->dataHandling == odhTotal) {
+        dynamic_cast<Accumulator*>(dat->accumulator[bin])->getTotal(r);
       } else {
 	dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);
       }
@@ -158,12 +160,17 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-      if (dat->dataHandling == odhTotal) dynamic_cast<Accumulator*>(dat->accumulator[bin])->getSumAccumulated(r);
       os << "\t" << r;
 
     } else if ( dat->dataType == odtVector3 ) {
       Vector3d v;
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);  //getAverage is a void function, i.e., it does not return a value
+      
+      if (dat->dataHandling == odhTotal) {
+        dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getTotal(v);
+      } else {
+	dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
+      }
+      
       if (std::isinf(v[0]) || std::isnan(v[0]) ||
           std::isinf(v[1]) || std::isnan(v[1]) ||
           std::isinf(v[2]) || std::isnan(v[2]) ) {
@@ -174,7 +181,6 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-      if (dat->dataHandling == odhTotal) dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getSumAccumulated(v);  
       os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
     }
   }
@@ -196,7 +202,6 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-      if (dat->dataHandling == odhTotal) r *= dat->accumulator[bin]->count();
       os << "\t" << r;
 
     } else if ( dat->dataType == odtVector3 ) {
@@ -212,7 +217,6 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-      if (dat->dataHandling == odhTotal) v *= dat->accumulator[bin]->count();
       os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
     }
   }

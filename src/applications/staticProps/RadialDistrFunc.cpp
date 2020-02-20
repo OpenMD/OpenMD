@@ -58,33 +58,33 @@ namespace OpenMD {
       seleMan1_(info), seleMan2_(info), sele1_minus_common_(info),
       sele2_minus_common_(info), common_(info) {
 
-      evaluator1_.loadScriptString(sele1);
-      evaluator2_.loadScriptString(sele2);
+    evaluator1_.loadScriptString(sele1);
+    evaluator2_.loadScriptString(sele2);
 
-      if (!evaluator1_.isDynamic()) {
-        seleMan1_.setSelectionSet(evaluator1_.evaluate());
-        validateSelection1(seleMan1_);
-      }
-      if (!evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
-        validateSelection2(seleMan2_);
-      }
-
-      if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
-        // If all selections are static, we can precompute the number
-        // of real pairs.
-        common_ = seleMan1_ & seleMan2_;
-        sele1_minus_common_ = seleMan1_ - common_;
-        sele2_minus_common_ = seleMan2_ - common_;
-
-	nSelected1_ = seleMan1_.getSelectionCount();
-	nSelected2_ = seleMan2_.getSelectionCount();
-        int nIntersect = common_.getSelectionCount();
-
-        nPairs_ = nSelected1_ * nSelected2_ - (nIntersect +1) * nIntersect/2;
-      }
-
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      validateSelection1(seleMan1_);
     }
+    if (!evaluator2_.isDynamic()) {
+      seleMan2_.setSelectionSet(evaluator2_.evaluate());
+      validateSelection2(seleMan2_);
+    }
+
+    if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
+      // If all selections are static, we can precompute the number
+      // of real pairs.
+      common_ = seleMan1_ & seleMan2_;
+      sele1_minus_common_ = seleMan1_ - common_;
+      sele2_minus_common_ = seleMan2_ - common_;
+
+      nSelected1_ = seleMan1_.getSelectionCount();
+      nSelected2_ = seleMan2_.getSelectionCount();
+      int nIntersect = common_.getSelectionCount();
+
+      nPairs_ = nSelected1_ * nSelected2_ - (nIntersect +1) * nIntersect/2;
+    }
+
+  }
 
   void RadialDistrFunc::process() {
 
