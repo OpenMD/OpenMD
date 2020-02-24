@@ -731,6 +731,8 @@ src/applications/staticProps/CurrentDensity.cpp
 src/applications/staticProps/ChargeZ.cpp
 src/applications/staticProps/PositionZ.cpp
 src/applications/staticProps/DipoleOrientation.cpp
+src/applications/staticProps/ChargeDensityZ.cpp
+
 )
 
 set (NANOPARTICLEBUILDERSOURCE

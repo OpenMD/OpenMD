@@ -99,6 +99,7 @@
 #include "applications/staticProps/ChargeZ.hpp"
 #include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/DipoleOrientation.hpp"
+#include "applications/staticProps/ChargeDensityZ.hpp"
 
 using namespace OpenMD;
 
@@ -519,6 +520,8 @@ int main(int argc, char* argv[]){
     analyser = new CurrentDensity(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.chargez_given) {
     analyser = new ChargeZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.charge_density_z_given) {
+    analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.countz_given) {
     analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   }else if (args_info.pipe_density_given) {
