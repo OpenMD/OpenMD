@@ -159,7 +159,7 @@ namespace OpenMD {
         }
         else{
         int obanum(0);
-        RealType sigma;
+        RealType sigma(0);
         std::vector<AtomType*> atChain = atomType->allYourBase();
         std::vector<AtomType*>::iterator i;
         for (i = atChain.begin(); i != atChain.end(); ++i) {
@@ -219,7 +219,6 @@ namespace OpenMD {
       rdfStream << "#ChargeDensityZ "<<"\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#" << axisLabel_ << "\tchargeDensity\tAbsolute chargeDensity\n";
-      RealType binCharge;
       for (unsigned int i = 0; i < densityZ_.size(); ++i) {
         RealType z = zAve * (i+0.5)/densityZ_.size();
         rdfStream << z << "\t"
