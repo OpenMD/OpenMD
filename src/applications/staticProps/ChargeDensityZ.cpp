@@ -92,18 +92,120 @@ namespace OpenMD {
   void ChargeDensityZ::process() {
     StuntDouble* sd;
     int ii;
-    averageCharge_ = 0;
-    int countSD(0);
-
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
 
-    bool findAverage = true;
-    for (int i = 1; i < nFrames; i += step_) {
+    //reading first frame to find average charge and types of StuntDouble and their vander waals radius
+    reader.readFrame(1);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
+    if (evaluator_.isDynamic()) {
+       seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    int k;
+    for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL;
+    sd = seleMan_.nextSelected(k)) {
+
+      if (!sd->isAtom()) {
+        sprintf( painCave.errMsg,
+        "Can not calculate electron density if it is not atom\n");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      int obanum(0);
+      RealType sigma(0);
+      std::string atomName;
+      Atom* atom = static_cast<Atom*>(sd);
+      AtomType* atomType = atom->getAtomType();
+      std::vector<AtomType*> atChain = atomType->allYourBase();
+      std::vector<AtomType*>::iterator i;
+      for (i = atChain.begin(); i != atChain.end(); ++i) {
+        atomName = (*i)->getName().c_str();
+        obanum = etab.GetAtomicNum((*i)->getName().c_str());
+        if (obanum != 0) {
+          sigma = etab.GetVdwRad(obanum);
+          break;
+        }
+      }
+      if (obanum == 0) {
+        sprintf( painCave.errMsg,
+                 "Could not find atom type in default element.txt\n");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      selected_sd_types_.insert(atomName);
+      vander_waals_r.insert(make_pair(atomName, sigma));
+
+
+    }
+      set<std::string>:: iterator it;
+      for( it = selected_sd_types_.begin(); it!=selected_sd_types_.end(); ++it){
+        averageChargeForEachType_.insert(make_pair(*it,0.0));
+        SDCount_.insert(make_pair(*it,0.0));
+      }
+
+
+      reader.readFrame(1);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+      if (evaluator_.isDynamic()) {
+         seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      int jj;
+      for (StuntDouble* sd = seleMan_.beginSelected(jj); sd != NULL;
+      sd = seleMan_.nextSelected(jj)) {
+        int obanum(0);
+        std::string atomName;
+        Atom* atom = static_cast<Atom*>(sd);
+        AtomType* atomType = atom->getAtomType();
+        std::vector<AtomType*> atChain = atomType->allYourBase();
+        std::vector<AtomType*>::iterator i;
+        for (i = atChain.begin(); i != atChain.end(); ++i) {
+          atomName = (*i)->getName().c_str();
+          obanum = etab.GetAtomicNum((*i)->getName().c_str());
+          if (obanum != 0) {
+            break;
+          }
+        }
+
+      RealType q = 0.0;
+
+      if (sd->isAtom()) {
+        FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+        if ( fca.isFixedCharge() ) {
+          q += fca.getCharge();
+        }
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+        if ( fqa.isFluctuatingCharge() ) {
+          q += atom->getFlucQPos();
+        }
+      }
+
+      averageChargeForEachType_[atomName] += q;
+      SDCount_[atomName]++;
+
+      }
+
+      set<std::string>:: iterator it1;
+      for( it1 = selected_sd_types_.begin(); it1!=selected_sd_types_.end(); ++it1){
+        averageChargeForEachType_[*it1] /= SDCount_[*it1];
+      }
+
+
+
+
+
+    for (int i = 1; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -122,20 +224,10 @@ namespace OpenMD {
       zBox_.push_back(hmat(axis_,axis_));
 
       RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
+      int kk;
+      for (StuntDouble* sd = seleMan_.beginSelected(kk); sd != NULL;
+      sd = seleMan_.nextSelected(kk)) {
 
-      int k;
-      for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL;
-      sd = seleMan_.nextSelected(k)) {
-
-
-
-        if (!sd->isAtom()) {
-          sprintf( painCave.errMsg,
-		   "Can not calculate electron density if it is not atom\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        }
         RealType q = 0.0;
         Atom* atom = static_cast<Atom*>(sd);
 
@@ -152,50 +244,33 @@ namespace OpenMD {
             q += atom->getFlucQPos();
           }
         }
-
-        if(findAverage == true){
-          averageCharge_ += q;
-          countSD++;
-        }
-        else{
         int obanum(0);
         RealType sigma(0);
+        std::string atomName;
         std::vector<AtomType*> atChain = atomType->allYourBase();
         std::vector<AtomType*>::iterator i;
         for (i = atChain.begin(); i != atChain.end(); ++i) {
+          atomName = (*i)->getName().c_str();
           obanum = etab.GetAtomicNum((*i)->getName().c_str());
           if (obanum != 0) {
-            sigma = etab.GetVdwRad(obanum);
             break;
           }
         }
-        if (obanum == 0) {
-          sprintf( painCave.errMsg,
-                   "Could not find atom type in default element.txt\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        }
-
-
-
+        RealType averageCharge = averageChargeForEachType_.at(atomName);
+        sigma = vander_waals_r.at(atomName);
         RealType sigma2 = sigma * sigma;
         Vector3d pos = sd->getPos();
 
         // shift molecules by half a box to have bins start at 0
         int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
-        RealType zdist = pos[axis_] - binNo * (hmat(axis_,axis_)/nBins_) ;
-        densityZ_[binNo] += (q - (averageCharge_/countSD)) * exp(-zdist*zdist/(sigma2*2.0)) / sqrt(2*Constants::PI*sigma*sigma);
-        absDensityZ_[binNo] += abs(q - (averageCharge_/countSD)) * exp(-zdist*zdist/(sigma2*2.0)) / sqrt(2*Constants::PI*sigma*sigma);
-        }
-      }
-
-        if(findAverage == true){
-          i--;
-          findAverage = false;
+        RealType zdist = pos[axis_] - binNo * (hmat(axis_,axis_)/nBins_);
+        densityZ_[binNo] += (q - averageCharge) * exp(-zdist*zdist/(sigma2*2.0)) / sqrt(2*Constants::PI*sigma*sigma);
+        absDensityZ_[binNo] += abs(q - averageCharge) * exp(-zdist*zdist/(sigma2*2.0)) / sqrt(2*Constants::PI*sigma*sigma);
 
       }
-    }
+
+
+  }
 
     writeDensity();
 

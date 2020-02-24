@@ -46,7 +46,8 @@
 #include "utils/ElementsTable.hpp"
 #include "brains/Thermo.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
-
+#include<set>
+#include<map>
 namespace OpenMD {
 
     class ChargeDensityZ : public StaticAnalyser{
@@ -71,8 +72,11 @@ namespace OpenMD {
             std::vector<RealType> zBox_;
             std::vector<RealType> densityZ_;
             std::vector<RealType> absDensityZ_;
-            RealType averageCharge_;
             int axis_;
+            std::set<std::string> selected_sd_types_;
+            std::map<std::string,RealType> vander_waals_r;
+            std::map<std::string, RealType> averageChargeForEachType_;
+            std::map<std::string, int> SDCount_;
             std::string axisLabel_;
           };
 
