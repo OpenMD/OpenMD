@@ -63,6 +63,7 @@ option "component"     -       "component of momentum for the momemtum distribut
 option "dipoleX"       -       "X-component of the dipole with respect to body frame" double optional
 option "dipoleY"       -       "Y-component of the dipole with respect to body frame" double optional
 option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" double optional
+option "v_radius"        -        "VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model" double optional
 
 defgroup "staticProps" groupdesc=" an option of this group is required" required
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"

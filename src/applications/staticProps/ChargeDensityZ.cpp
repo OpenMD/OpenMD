@@ -56,9 +56,9 @@ namespace OpenMD {
 
 
   ChargeDensityZ::ChargeDensityZ(SimInfo* info, const std::string& filename,
-                                 const std::string& sele, int nzbins, int axis)
+                                 const std::string& sele, int nzbins, RealType vRadius, int axis)
     : StaticAnalyser(info, filename, nzbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis) {
+      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis), vRadius_(vRadius) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -68,11 +68,12 @@ namespace OpenMD {
     // fixed number of bins
 
 
-
     densityZ_.resize(nBins_);
-    absDensityZ_.resize(nBins_);
+    densityFlucZ_.resize(nBins_);
+    absDensityFlucZ_.resize(nBins_);
+    std::fill(densityFlucZ_.begin(), densityFlucZ_.end(), 0);
     std::fill(densityZ_.begin(), densityZ_.end(), 0);
-    std::fill(absDensityZ_.begin(), absDensityZ_.end(), 0);
+    std::fill(absDensityFlucZ_.begin(), absDensityFlucZ_.end(), 0);
 
     switch(axis_) {
     case 0:
@@ -90,8 +91,6 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".ChargeDensityZ");
   }
   void ChargeDensityZ::process() {
-    StuntDouble* sd;
-    int ii;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);
@@ -112,7 +111,7 @@ namespace OpenMD {
 
       if (!sd->isAtom()) {
         sprintf( painCave.errMsg,
-        "Can not calculate electron density if it is not atom\n");
+        "Can not calculate charge density distribution if it is not atom\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();
@@ -134,11 +133,7 @@ namespace OpenMD {
         }
       }
       if (obanum == 0) {
-        sprintf( painCave.errMsg,
-                 "Could not find atom type in default element.txt\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
+        sigma = vRadius_;
       }
 
       selected_sd_types_.insert(atomName);
@@ -201,8 +196,27 @@ namespace OpenMD {
         averageChargeForEachType_[*it1] /= SDCount_[*it1];
       }
 
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      zBox_.push_back(hmat(axis_,axis_));
+
+      std::vector<RealType>::iterator j;
+      RealType zSum = 0.0;
+      for (j = zBox_.begin(); j != zBox_.end(); ++j) {
+        zSum += *j;
+      }
+      RealType zAve = zSum / zBox_.size();
+      set<int> axisValues {0,1,2};
+      axisValues.erase(axis_);
+      set<int>:: iterator axis_it;
+      RealType area = 1.0;
+      for( axis_it = axisValues.begin(); axis_it!=axisValues.end(); ++axis_it){
+        area *= hmat(*axis_it,*axis_it);
+ }
 
 
+
+
+      RealType sliceVolume = zAve/densityZ_.size() * area;
 
 
     for (int i = 1; i < nFrames; i += step_) {
@@ -213,17 +227,6 @@ namespace OpenMD {
 	       seleMan_.setSelectionSet(evaluator_.evaluate());
       }
 
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-        sd->setPos(pos);
-      }
-
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(axis_,axis_));
-
-      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
       int kk;
       for (StuntDouble* sd = seleMan_.beginSelected(kk); sd != NULL;
       sd = seleMan_.nextSelected(kk)) {
@@ -259,13 +262,26 @@ namespace OpenMD {
         RealType averageCharge = averageChargeForEachType_.at(atomName);
         sigma = vander_waals_r.at(atomName);
         RealType sigma2 = sigma * sigma;
+
+
         Vector3d pos = sd->getPos();
+        if (usePeriodicBoundaryConditions_)
+          currentSnapshot_->wrapVector(pos);
+        sd->setPos(pos);
+
+        pos = sd->getPos();
 
         // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
-        RealType zdist = pos[axis_] - binNo * (hmat(axis_,axis_)/nBins_);
-        densityZ_[binNo] += (q - averageCharge) * exp(-zdist*zdist/(sigma2*2.0)) / sqrt(2*Constants::PI*sigma*sigma);
-        absDensityZ_[binNo] += abs(q - averageCharge) * exp(-zdist*zdist/(sigma2*2.0)) / sqrt(2*Constants::PI*sigma*sigma);
+        for (unsigned int i = 0; i < densityFlucZ_.size(); ++i) {
+
+        RealType z = -zAve/2 + i * zAve/densityZ_.size();
+        RealType zdist = pos[axis_] - z;
+        densityZ_[i] += q * exp(-zdist*zdist/(sigma2*2.0)) / (sliceVolume *(sqrt(2*Constants::PI*sigma*sigma)));
+        densityFlucZ_[i] += (q - averageCharge) * exp(-zdist*zdist/(sigma2*2.0)) / (sliceVolume *(sqrt(2*Constants::PI*sigma*sigma)));
+        absDensityFlucZ_[i] += abs(q - averageCharge) * exp(-zdist*zdist/(sigma2*2.0)) / (sliceVolume *(sqrt(2*Constants::PI*sigma*sigma)));
+      }
+
+
 
       }
 
@@ -293,12 +309,13 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#ChargeDensityZ "<<"\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << axisLabel_ << "\tchargeDensity\tAbsolute chargeDensity\n";
-      for (unsigned int i = 0; i < densityZ_.size(); ++i) {
-        RealType z = zAve * (i+0.5)/densityZ_.size();
+      rdfStream << "#" << axisLabel_ << "\tchargeDensity\tchargeDensityFluctuations\tAbsolute chargeDensityFluctuations\n";
+      for (unsigned int i = 0; i < densityFlucZ_.size(); ++i) {
+        RealType z = zAve * (i+0.5)/densityFlucZ_.size();
         rdfStream << z << "\t"
-                  << densityZ_[i] / (nProcessed_)<<"\t"
-                  << absDensityZ_[i] / (nProcessed_)<<"\n";
+                  <<densityZ_[i]/nProcessed_<<"\t"
+                  << densityFlucZ_[i] / (nProcessed_)<<"\t"
+                  << absDensityFlucZ_[i] / (nProcessed_)<<"\n";
       }
 
     } else {

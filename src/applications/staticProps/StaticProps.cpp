@@ -248,6 +248,15 @@ int main(int argc, char* argv[]){
     nanglebins = args_info.nbins_arg;
   }
 
+//override default vander waals radius for fictious atoms in a model
+RealType vRadius;
+  if (args_info.v_radius_given) {
+    vRadius = args_info.v_radius_arg;
+  } else {
+    vRadius = 1.52;
+  }
+
+
   int momentum_type;
   switch (args_info.momentum_arg) {
   case momentum_arg_P:
@@ -521,7 +530,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.chargez_given) {
     analyser = new ChargeZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.charge_density_z_given) {
-    analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, vRadius, privilegedAxis);
   } else if (args_info.countz_given) {
     analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   }else if (args_info.pipe_density_given) {

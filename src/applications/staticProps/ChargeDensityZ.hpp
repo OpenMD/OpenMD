@@ -53,7 +53,7 @@ namespace OpenMD {
     class ChargeDensityZ : public StaticAnalyser{
         public:
             ChargeDensityZ(SimInfo* info, const std::string& filename,
-                           const std::string& sele, int nzbins, int axis=2);
+                           const std::string& sele, int nzbins, RealType vRadius, int axis=2);
             virtual void process();
 
 
@@ -71,13 +71,15 @@ namespace OpenMD {
 
             std::vector<RealType> zBox_;
             std::vector<RealType> densityZ_;
-            std::vector<RealType> absDensityZ_;
+            std::vector<RealType> densityFlucZ_;
+            std::vector<RealType> absDensityFlucZ_;
             int axis_;
             std::set<std::string> selected_sd_types_;
             std::map<std::string,RealType> vander_waals_r;
             std::map<std::string, RealType> averageChargeForEachType_;
             std::map<std::string, int> SDCount_;
             std::string axisLabel_;
+            RealType vRadius_;
           };
 
 }
