@@ -70,16 +70,29 @@ namespace OpenMD {
             Thermo thermo_;
 
             std::vector<RealType> zBox_;
-            std::vector<RealType> densityZ_;
-            std::vector<RealType> densityFlucZ_;
-            std::vector<RealType> absDensityFlucZ_;
+            std::vector<RealType> densityZAverageAllFrame_;
+            std::vector<RealType> densityFlucZAverageAllFrame_;
+            std::vector<RealType> absDensityFlucZAverageAllFrame_;
+
+            std::vector<RealType> densityFlucZAverageFirstFrame_;
+            std::vector<RealType> absDensityFlucZAverageFirstFrame_;
             int axis_;
-            std::set<std::string> selected_sd_types_;
+
             std::map<std::string,RealType> vander_waals_r;
             std::map<std::string, RealType> averageChargeForEachType_;
             std::map<std::string, int> SDCount_;
             std::string axisLabel_;
             RealType vRadius_;
+
+
+            std::map<int,RealType> averageChargeUsingGlobalIndex_;
+            std::map<int,std::vector<RealType> > totalChargeUsingGlobalIndex_;
+            std::map<int,std::vector<RealType> > zPosUsingGlobalIndex_;
+            std::map<int,int> countUsingGlobalIndex_;
+            std::map<int,RealType> vanderRUsingGlobalIndex_;
+            std::map<int, std::string> atomNameGlobalIndex_;
+
+
           };
 
 }
