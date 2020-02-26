@@ -61,6 +61,7 @@ namespace OpenMD {
         private:
 
             virtual void writeDensity();
+            virtual void generateXYZForLastFrame();
 
             Snapshot* currentSnapshot_;
             int nProcessed_;
@@ -73,16 +74,19 @@ namespace OpenMD {
             std::vector<RealType> densityZAverageAllFrame_;
             std::vector<RealType> densityFlucZAverageAllFrame_;
             std::vector<RealType> absDensityFlucZAverageAllFrame_;
-
             std::vector<RealType> densityFlucZAverageFirstFrame_;
             std::vector<RealType> absDensityFlucZAverageFirstFrame_;
+
             int axis_;
+            RealType vRadius_;
 
             std::map<std::string,RealType> vander_waals_r;
             std::map<std::string, RealType> averageChargeForEachType_;
             std::map<std::string, int> SDCount_;
             std::string axisLabel_;
-            RealType vRadius_;
+            std::string atomFlucCharge_;
+            std::string fileName_;
+
 
 
             std::map<int,RealType> averageChargeUsingGlobalIndex_;

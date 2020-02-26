@@ -58,7 +58,7 @@ namespace OpenMD {
   ChargeDensityZ::ChargeDensityZ(SimInfo* info, const std::string& filename,
                                  const std::string& sele, int nzbins, RealType vRadius, int axis)
     : StaticAnalyser(info, filename, nzbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis), vRadius_(vRadius) {
+      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis), vRadius_(vRadius),fileName_(filename) {
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -124,7 +124,10 @@ for (j = zBox_.begin(); j != zBox_.end(); ++j) {
 }
 
 RealType zAve = zSum / zBox_.size();
-set<int> axisValues {0,1,2};
+set<int> axisValues;
+axisValues.insert(0);
+axisValues.insert(1);
+axisValues.insert(2);
 axisValues.erase(axis_);
 set<int>:: iterator axis_it;
 RealType area = 1.0;
@@ -212,9 +215,9 @@ for (int i = 1; i < nFrames; i += step_) {
   }
 
 
-  for (auto const element: atomNameGlobalIndex_ ){
-    int g_Index = element.first;
-    std::string a_name = element.second;
+  for (std::map<int,std::string>::iterator it = atomNameGlobalIndex_.begin(); it != atomNameGlobalIndex_.end(); ++it){
+    int g_Index = it->first;
+    std::string a_name = it->second;
     averageChargeForEachType_[a_name] = ( SDCount_[a_name] * averageChargeForEachType_[a_name] +
                                         totalChargeUsingGlobalIndex_[g_Index].front() ) / ( SDCount_[a_name] + 1 );
    SDCount_[a_name]++;
@@ -225,9 +228,9 @@ for (int i = 1; i < nFrames; i += step_) {
 
   }
   RealType epsilon = 1e-10;
-  for (auto const element: atomNameGlobalIndex_ ){
-    int key = element.first;
-    std::string a_name = element.second;
+  for (std::map<int,std::string>::iterator it = atomNameGlobalIndex_.begin(); it != atomNameGlobalIndex_.end(); ++it){
+    int key = it->first;
+    std::string a_name = it->second;
 
     RealType averageCharge = averageChargeUsingGlobalIndex_[key];
     RealType averageChargeUsingFirstFrame = averageChargeForEachType_[a_name];
@@ -301,5 +304,28 @@ for (int i = 1; i < nFrames; i += step_) {
 
     rdfStream.close();
   }
+
+
+  void ChargeDensityZ::generateXYZForLastFrame()
+  {
+
+    std::string XYZFile(getPrefix(fileName_) + ".xyz");
+    std::ofstream rdfStream(XYZFile.c_str());
+    if (rdfStream.is_open()) {
+
+    }else {
+
+      sprintf(painCave.errMsg, "XYZ file: unable to open %s\n",
+	      outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    rdfStream.close();
+
+
+
+  }
+
 
 }
