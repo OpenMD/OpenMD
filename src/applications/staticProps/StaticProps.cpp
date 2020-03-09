@@ -530,7 +530,7 @@ RealType vRadius;
   } else if (args_info.chargez_given) {
     analyser = new ChargeZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.charge_density_z_given) {
-    analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, vRadius, privilegedAxis);
+    analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, vRadius,args_info.atom_name_arg, args_info.gen_xyz_flag, privilegedAxis);
   } else if (args_info.countz_given) {
     analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   }else if (args_info.pipe_density_given) {

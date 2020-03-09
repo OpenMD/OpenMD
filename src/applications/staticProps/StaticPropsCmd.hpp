@@ -155,9 +155,14 @@ struct gengetopt_args_info
   double dipoleZ_arg;	/**< @brief Z-component of the dipole with respect to body frame.  */
   char * dipoleZ_orig;	/**< @brief Z-component of the dipole with respect to body frame original value given at command line.  */
   const char *dipoleZ_help; /**< @brief Z-component of the dipole with respect to body frame help description.  */
-  double v_radius_arg;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P water model.  */
-  char * v_radius_orig;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P water model original value given at command line.  */
-  const char *v_radius_help; /**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P water model help description.  */
+  double v_radius_arg;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model.  */
+  char * v_radius_orig;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model original value given at command line.  */
+  const char *v_radius_help; /**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model help description.  */
+  int gen_xyz_flag;	/**< @brief generats xyz file (default=off).  */
+  const char *gen_xyz_help; /**< @brief generats xyz file help description.  */
+  char * atom_name_arg;	/**< @brief name of atom for with average charge to be generated.  */
+  char * atom_name_orig;	/**< @brief name of atom for with average charge to be generated original value given at command line.  */
+  const char *atom_name_help; /**< @brief name of atom for with average charge to be generated help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -254,6 +259,8 @@ struct gengetopt_args_info
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
   unsigned int v_radius_given ;	/**< @brief Whether v_radius was given.  */
+  unsigned int gen_xyz_given ;	/**< @brief Whether gen_xyz was given.  */
+  unsigned int atom_name_given ;	/**< @brief Whether atom_name was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */

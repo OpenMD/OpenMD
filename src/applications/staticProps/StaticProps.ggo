@@ -64,6 +64,8 @@ option "dipoleX"       -       "X-component of the dipole with respect to body f
 option "dipoleY"       -       "Y-component of the dipole with respect to body frame" double optional
 option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" double optional
 option "v_radius"        -        "VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model" double optional
+option "gen_xyz"  - "generats xyz file" flag				off
+option "atom_name" - "name of atom for with average charge to be generated" string	typestr="selection script"	optional
 
 defgroup "staticProps" groupdesc=" an option of this group is required" required
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"

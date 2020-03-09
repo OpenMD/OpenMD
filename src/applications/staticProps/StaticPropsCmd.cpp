@@ -72,7 +72,9 @@ const char *gengetopt_args_info_help[] = {
   "      --dipoleX=DOUBLE          X-component of the dipole with respect to body\n                                  frame",
   "      --dipoleY=DOUBLE          Y-component of the dipole with respect to body\n                                  frame",
   "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame",
-  "      --v_radius=DOUBLE         VanderWaals radiius for fictious atoms used in\n                                  model eg. M site in TIP4P water model",
+  "      --v_radius=DOUBLE         VanderWaals radiius for fictious atoms used in\n                                  model eg. M site in TIP4P-FQ water model",
+  "      --gen_xyz                 generats xyz file  (default=off)",
+  "      --atom_name=selection script\n                                name of atom for with average charge to be\n                                  generated",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --ior                     icosahedral bond order parameter as a function\n                                  of radius (--rcut must be specified)",
@@ -133,6 +135,7 @@ const char *gengetopt_args_info_help[] = {
 };
 
 typedef enum {ARG_NO
+  , ARG_FLAG
   , ARG_STRING
   , ARG_INT
   , ARG_DOUBLE
@@ -202,6 +205,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->dipoleY_given = 0 ;
   args_info->dipoleZ_given = 0 ;
   args_info->v_radius_given = 0 ;
+  args_info->gen_xyz_given = 0 ;
+  args_info->atom_name_given = 0 ;
   args_info->bo_given = 0 ;
   args_info->ior_given = 0 ;
   args_info->for_given = 0 ;
@@ -325,6 +330,9 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->dipoleY_orig = NULL;
   args_info->dipoleZ_orig = NULL;
   args_info->v_radius_orig = NULL;
+  args_info->gen_xyz_flag = 0;
+  args_info->atom_name_arg = NULL;
+  args_info->atom_name_orig = NULL;
   
 }
 
@@ -373,61 +381,63 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->dipoleY_help = gengetopt_args_info_help[37] ;
   args_info->dipoleZ_help = gengetopt_args_info_help[38] ;
   args_info->v_radius_help = gengetopt_args_info_help[39] ;
-  args_info->bo_help = gengetopt_args_info_help[41] ;
-  args_info->ior_help = gengetopt_args_info_help[42] ;
-  args_info->for_help = gengetopt_args_info_help[43] ;
-  args_info->bad_help = gengetopt_args_info_help[44] ;
-  args_info->count_help = gengetopt_args_info_help[45] ;
-  args_info->gofr_help = gengetopt_args_info_help[46] ;
-  args_info->gofz_help = gengetopt_args_info_help[47] ;
-  args_info->r_theta_help = gengetopt_args_info_help[48] ;
-  args_info->r_omega_help = gengetopt_args_info_help[49] ;
-  args_info->r_z_help = gengetopt_args_info_help[50] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[51] ;
-  args_info->r_theta_omega_help = gengetopt_args_info_help[52] ;
-  args_info->gxyz_help = gengetopt_args_info_help[53] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[54] ;
-  args_info->p2_help = gengetopt_args_info_help[55] ;
-  args_info->rp2_help = gengetopt_args_info_help[56] ;
-  args_info->scd_help = gengetopt_args_info_help[57] ;
-  args_info->density_help = gengetopt_args_info_help[58] ;
-  args_info->slab_density_help = gengetopt_args_info_help[59] ;
-  args_info->pipe_density_help = gengetopt_args_info_help[60] ;
-  args_info->p_angle_help = gengetopt_args_info_help[61] ;
-  args_info->hxy_help = gengetopt_args_info_help[62] ;
-  args_info->rho_r_help = gengetopt_args_info_help[63] ;
-  args_info->angle_r_help = gengetopt_args_info_help[64] ;
-  args_info->hullvol_help = gengetopt_args_info_help[65] ;
-  args_info->rodlength_help = gengetopt_args_info_help[66] ;
-  args_info->tet_param_help = gengetopt_args_info_help[67] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[68] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[69] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[70] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[71] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[72] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[73] ;
-  args_info->nitrile_help = gengetopt_args_info_help[74] ;
-  args_info->multipole_help = gengetopt_args_info_help[75] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[76] ;
-  args_info->cn_help = gengetopt_args_info_help[77] ;
-  args_info->scn_help = gengetopt_args_info_help[78] ;
-  args_info->gcn_help = gengetopt_args_info_help[79] ;
-  args_info->hbond_help = gengetopt_args_info_help[80] ;
-  args_info->potDiff_help = gengetopt_args_info_help[81] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[82] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[83] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[84] ;
-  args_info->densityfield_help = gengetopt_args_info_help[85] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[86] ;
-  args_info->velocityZ_help = gengetopt_args_info_help[87] ;
-  args_info->eam_density_help = gengetopt_args_info_help[88] ;
-  args_info->net_charge_help = gengetopt_args_info_help[89] ;
-  args_info->current_density_help = gengetopt_args_info_help[90] ;
-  args_info->chargez_help = gengetopt_args_info_help[91] ;
-  args_info->charge_density_z_help = gengetopt_args_info_help[92] ;
-  args_info->countz_help = gengetopt_args_info_help[93] ;
-  args_info->momentum_distribution_help = gengetopt_args_info_help[94] ;
-  args_info->dipole_orientation_help = gengetopt_args_info_help[95] ;
+  args_info->gen_xyz_help = gengetopt_args_info_help[40] ;
+  args_info->atom_name_help = gengetopt_args_info_help[41] ;
+  args_info->bo_help = gengetopt_args_info_help[43] ;
+  args_info->ior_help = gengetopt_args_info_help[44] ;
+  args_info->for_help = gengetopt_args_info_help[45] ;
+  args_info->bad_help = gengetopt_args_info_help[46] ;
+  args_info->count_help = gengetopt_args_info_help[47] ;
+  args_info->gofr_help = gengetopt_args_info_help[48] ;
+  args_info->gofz_help = gengetopt_args_info_help[49] ;
+  args_info->r_theta_help = gengetopt_args_info_help[50] ;
+  args_info->r_omega_help = gengetopt_args_info_help[51] ;
+  args_info->r_z_help = gengetopt_args_info_help[52] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[53] ;
+  args_info->r_theta_omega_help = gengetopt_args_info_help[54] ;
+  args_info->gxyz_help = gengetopt_args_info_help[55] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[56] ;
+  args_info->p2_help = gengetopt_args_info_help[57] ;
+  args_info->rp2_help = gengetopt_args_info_help[58] ;
+  args_info->scd_help = gengetopt_args_info_help[59] ;
+  args_info->density_help = gengetopt_args_info_help[60] ;
+  args_info->slab_density_help = gengetopt_args_info_help[61] ;
+  args_info->pipe_density_help = gengetopt_args_info_help[62] ;
+  args_info->p_angle_help = gengetopt_args_info_help[63] ;
+  args_info->hxy_help = gengetopt_args_info_help[64] ;
+  args_info->rho_r_help = gengetopt_args_info_help[65] ;
+  args_info->angle_r_help = gengetopt_args_info_help[66] ;
+  args_info->hullvol_help = gengetopt_args_info_help[67] ;
+  args_info->rodlength_help = gengetopt_args_info_help[68] ;
+  args_info->tet_param_help = gengetopt_args_info_help[69] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[70] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[71] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[72] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[73] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[74] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[75] ;
+  args_info->nitrile_help = gengetopt_args_info_help[76] ;
+  args_info->multipole_help = gengetopt_args_info_help[77] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[78] ;
+  args_info->cn_help = gengetopt_args_info_help[79] ;
+  args_info->scn_help = gengetopt_args_info_help[80] ;
+  args_info->gcn_help = gengetopt_args_info_help[81] ;
+  args_info->hbond_help = gengetopt_args_info_help[82] ;
+  args_info->potDiff_help = gengetopt_args_info_help[83] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[84] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[85] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[86] ;
+  args_info->densityfield_help = gengetopt_args_info_help[87] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[88] ;
+  args_info->velocityZ_help = gengetopt_args_info_help[89] ;
+  args_info->eam_density_help = gengetopt_args_info_help[90] ;
+  args_info->net_charge_help = gengetopt_args_info_help[91] ;
+  args_info->current_density_help = gengetopt_args_info_help[92] ;
+  args_info->chargez_help = gengetopt_args_info_help[93] ;
+  args_info->charge_density_z_help = gengetopt_args_info_help[94] ;
+  args_info->countz_help = gengetopt_args_info_help[95] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[96] ;
+  args_info->dipole_orientation_help = gengetopt_args_info_help[97] ;
   
 }
 
@@ -560,6 +570,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->dipoleY_orig));
   free_string_field (&(args_info->dipoleZ_orig));
   free_string_field (&(args_info->v_radius_orig));
+  free_string_field (&(args_info->atom_name_arg));
+  free_string_field (&(args_info->atom_name_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -716,6 +728,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dipoleZ", args_info->dipoleZ_orig, 0);
   if (args_info->v_radius_given)
     write_into_file(outfile, "v_radius", args_info->v_radius_orig, 0);
+  if (args_info->gen_xyz_given)
+    write_into_file(outfile, "gen_xyz", 0, 0 );
+  if (args_info->atom_name_given)
+    write_into_file(outfile, "atom_name", args_info->atom_name_orig, 0);
   if (args_info->bo_given)
     write_into_file(outfile, "bo", 0, 0 );
   if (args_info->ior_given)
@@ -1676,6 +1692,9 @@ int update_arg(void *field, char **orig_field,
     val = possible_values[found];
 
   switch(arg_type) {
+  case ARG_FLAG:
+    *((int *)field) = !*((int *)field);
+    break;
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
@@ -1713,6 +1732,7 @@ int update_arg(void *field, char **orig_field,
   /* store the original value */
   switch(arg_type) {
   case ARG_NO:
+  case ARG_FLAG:
     break;
   default:
     if (value && orig_field) {
@@ -1812,6 +1832,8 @@ cmdline_parser_internal (
         { "dipoleY",	1, NULL, 0 },
         { "dipoleZ",	1, NULL, 0 },
         { "v_radius",	1, NULL, 0 },
+        { "gen_xyz",	0, NULL, 0 },
+        { "atom_name",	1, NULL, 0 },
         { "bo",	0, NULL, 0 },
         { "ior",	0, NULL, 0 },
         { "for",	0, NULL, 0 },
@@ -2574,7 +2596,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P water model.  */
+          /* VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model.  */
           else if (strcmp (long_options[option_index].name, "v_radius") == 0)
           {
           
@@ -2584,6 +2606,32 @@ cmdline_parser_internal (
                 &(local_args_info.v_radius_given), optarg, 0, 0, ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "v_radius", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* generats xyz file.  */
+          else if (strcmp (long_options[option_index].name, "gen_xyz") == 0)
+          {
+          
+          
+            if (update_arg((void *)&(args_info->gen_xyz_flag), 0, &(args_info->gen_xyz_given),
+                &(local_args_info.gen_xyz_given), optarg, 0, 0, ARG_FLAG,
+                check_ambiguity, override, 1, 0, "gen_xyz", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* name of atom for with average charge to be generated.  */
+          else if (strcmp (long_options[option_index].name, "atom_name") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->atom_name_arg), 
+                 &(args_info->atom_name_orig), &(args_info->atom_name_given),
+                &(local_args_info.atom_name_given), optarg, 0, 0, ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "atom_name", '-',
                 additional_error))
               goto failure;
           
