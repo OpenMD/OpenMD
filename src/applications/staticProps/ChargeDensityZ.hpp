@@ -80,8 +80,12 @@ namespace OpenMD {
             std::vector<RealType> absDensityFlucZAverageFirstFrame_;
 
             int axis_,x_,y_;
-            int nFrames_;
             RealType vRadius_;
+            std::string fileName_;
+            std::string atomFlucCharge_;
+            bool genXYZ_;
+            int nFrames_;
+
             Mat3x3d hmat_;
 
 
@@ -89,9 +93,7 @@ namespace OpenMD {
             std::map<std::string, RealType> averageChargeForEachType_;
             std::map<std::string, int> SDCount_;
             std::string axisLabel_;
-            std::string atomFlucCharge_;
-            std::string fileName_;
-            bool genXYZ_;
+
 
 
 
