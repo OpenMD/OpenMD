@@ -74,7 +74,10 @@ namespace OpenMD {
     // fixed number of bins
 
     sliceSDCount_.resize(nBins_);
+    flucSliceSDCount_.resize(nBins_);
     std::fill(sliceSDCount_.begin(), sliceSDCount_.end(), 0);
+    std::fill(flucSliceSDCount_.begin(), flucSliceSDCount_.end(), 0);
+
 
     positionZ_.resize(nBins_);
 
@@ -140,6 +143,38 @@ namespace OpenMD {
       //loop over the slices to calculate the charge
     }
 
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      std::map<int,RealType> countInBin;
+      
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
+
+      //determine which atom belongs to which slice
+      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
+        Vector3d pos = sd->getPos();
+        // shift molecules by half a box to have bins start at 0
+        int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
+        countInBin[binNo]++;
+
+      }
+
+      //loop over the slices to calculate the charge
+
+
+    for(unsigned int index = 0; index < flucSliceSDCount_.size(); ++index)
+    {
+        RealType flucCount = (countInBin[index] - (sliceSDCount_[index]/nProcessed_));
+        flucSliceSDCount_[index] += flucCount * flucCount;
+
+    }
+
+
+
+  }
+
+
     writePositionZ();
 
   }
@@ -158,11 +193,12 @@ namespace OpenMD {
     if (rdfStream.is_open()) {
       rdfStream << "#position count "<<"\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << axisLabel_ << "\tAverage Number\n";
+      rdfStream << "#" << axisLabel_ << "\tAverage Number\tFluctations_in_count\n";
       for (unsigned int i = 0; i < positionZ_.size(); ++i) {
         RealType z = zAve * (i+0.5)/positionZ_.size();
         rdfStream << z << "\t"
-                  << sliceSDCount_[i]/nProcessed_
+                  << sliceSDCount_[i]/nProcessed_<<"\t"
+                  << sqrt(flucSliceSDCount_[i])/nProcessed_
                   << "\n";
       }
 
@@ -175,5 +211,6 @@ namespace OpenMD {
     }
 
     rdfStream.close();
+
   }
 }

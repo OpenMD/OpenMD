@@ -81,6 +81,8 @@ namespace OpenMD {
     Thermo thermo_;
 
 		std::vector<RealType> sliceSDCount_;
+    std::vector<RealType> flucSliceSDCount_;
+
     std::vector<RealType> zBox_;
     std::vector<RealType> positionZ_;
     int axis_;
