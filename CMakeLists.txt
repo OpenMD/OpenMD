@@ -732,6 +732,7 @@ src/applications/staticProps/ChargeZ.cpp
 src/applications/staticProps/PositionZ.cpp
 src/applications/staticProps/DipoleOrientation.cpp
 src/applications/staticProps/ChargeDensityZ.cpp
+src/applications/staticProps/OrderParameterProbZ.cpp
 
 )
 

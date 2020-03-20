@@ -100,6 +100,7 @@
 #include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/DipoleOrientation.hpp"
 #include "applications/staticProps/ChargeDensityZ.hpp"
+#include "applications/staticProps/OrderParameterProbZ.hpp"
 
 using namespace OpenMD;
 
@@ -533,7 +534,7 @@ RealType vRadius;
     analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, vRadius,args_info.atom_name_arg, args_info.gen_xyz_flag, privilegedAxis);
   } else if (args_info.countz_given) {
     analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
-  }else if (args_info.pipe_density_given) {
+  } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {
     case 0:
@@ -720,8 +721,32 @@ RealType vRadius;
                                        args_info.dipoleY_arg,
                                        args_info.dipoleZ_arg,
                                        args_info.nbins_arg, privilegedAxis);
+    else{
+      sprintf( painCave.errMsg,
+      "Dipole components must be provided.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+
+  } else if (args_info.order_prob_given){
+    if(args_info.dipoleX_given && args_info.dipoleY_given
+       && args_info.dipoleZ_given)
+      analyser = new OrderParameterProbZ(info, dumpFileName, sele1,
+                                       args_info.dipoleX_arg,
+                                       args_info.dipoleY_arg,
+                                       args_info.dipoleZ_arg,
+                                       args_info.nbins_arg, privilegedAxis);
+    else{
+      sprintf( painCave.errMsg,
+      "Dipole components must be provided.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+   }
 
   }
+
 
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);

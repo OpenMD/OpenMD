@@ -124,3 +124,4 @@ groupoption "charge_density_z" - "computes the continuous charge distribution al
 groupoption "countz" - "computes the number of selected atoms  along selected axis" group="staticProps"
 groupoption "momentum_distribution" M "computes the momentum distribution for the selected atom" group ="staticProps"
 groupoption "dipole_orientation" S "spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2" group = "staticProps"
+groupoption "order_prob" - "probability of order parameter for given selection" group = "staticProps"
