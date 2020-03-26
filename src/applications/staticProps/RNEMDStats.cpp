@@ -178,7 +178,6 @@ namespace OpenMD {
     
     int i;
     
-    int binNo;
     int typeIndex(-1);
     RealType mass;
     Vector3d vel; 
@@ -186,7 +185,6 @@ namespace OpenMD {
     RealType KE;
     Vector3d L;
     Mat3x3d I;
-    RealType r2;
     Vector3d eField;
 
     vector<RealType> binMass(nBins_, 0.0);
@@ -398,7 +396,6 @@ namespace OpenMD {
     StuntDouble* sd;
     int i;
 
-    int binNo;
     RealType mass;
     Vector3d vel; 
     Vector3d rPos;
