@@ -47,196 +47,22 @@
 #include "utils/Constants.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
-//#include "io/DumpReader.hpp"
-
 
 namespace OpenMD {
 
   RNEMDZ::RNEMDZ(SimInfo* info, const std::string& filename,
                  const std::string& sele, int nzbins, int axis)
-    : SlabStatistics(info, filename, sele, nzbins, axis), axis_(axis) {
-
+    : SlabStatistics(info, filename, sele, nzbins, axis) {
 
     setOutputName(getPrefix(filename) + ".rnemdZ");
-
-
-    temperature = new OutputData;
-    temperature->units =  "K";
-    temperature->title =  "Temperature";
-    temperature->dataType = odtReal;
-    temperature->dataHandling = odhTotal;
-    temperature->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      temperature->accumulator.push_back( new Accumulator() );
-    data_.push_back(temperature);
-
-    velocity = new OutputData;
-    velocity->units = "angstroms/fs";
-    velocity->title =  "Velocity";
-    velocity->dataType = odtVector3;
-    velocity->dataHandling = odhTotal;
-    velocity->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      velocity->accumulator.push_back( new VectorAccumulator() );
-    data_.push_back(velocity);
-
-    density = new OutputData;
-    density->units =  "g cm^-3";
-    density->title =  "Density";
-    density->dataType = odtReal;
-    density->dataHandling = odhTotal;
-    density->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      density->accumulator.push_back( new Accumulator() );
-    data_.push_back(density);
-
-    charge = new OutputData;
-    charge->units =  "e";
-    charge->title =  "Charge";
-    charge->dataType = odtReal;
-    charge->dataHandling = odhTotal;
-    charge->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      charge->accumulator.push_back( new Accumulator() );
-    data_.push_back(charge);
-
-
-    chargeVelocity = new OutputData;
-    chargeVelocity->units =  "e/fs";
-    chargeVelocity->title =  "Charge_Velocity";
-    chargeVelocity->dataType = odtReal;
-    chargeVelocity->dataHandling = odhTotal;
-    chargeVelocity->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      chargeVelocity->accumulator.push_back( new Accumulator() );
-    data_.push_back(chargeVelocity);
-  }
-
-  void RNEMDZ::processFrame(int istep) {
-    RealType z;
-
-    hmat_ = currentSnapshot_->getHmat();
-    for (unsigned int i = 0; i < nBins_; i++) {
-      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
-      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
-    }
-    volume_ = currentSnapshot_->getVolume();
-
-    StuntDouble* sd;
-    int i;
-
-    vector<RealType> binMass(nBins_, 0.0);
-    vector<Vector3d> binP(nBins_, V3Zero);
-    vector<RealType> binCharge(nBins_, 0.0);
-    vector<RealType> binChargeVelocity(nBins_, 0.0);
-    vector<RealType> binKE(nBins_, 0.0);
-    vector<unsigned int> binDof(nBins_, 0);
-
-
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-
-    // loop over the selected atoms:
-
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-
-      // figure out where that object is:
-      Vector3d pos = sd->getPos();
-      Vector3d vel = sd->getVel();
-      RealType m = sd->getMass();
-
-      int bin = getBin(pos);
-
-      binMass[bin] += m;
-      binP[bin] += m * vel;
-      binKE[bin] += 0.5 * (m * vel.lengthSquare());
-      binDof[bin] += 3;
-
-      if (sd->isDirectional()) {
-        Vector3d angMom = sd->getJ();
-        Mat3x3d I = sd->getI();
-        if (sd->isLinear()) {
-          int i = sd->linearAxis();
-          int j = (i + 1) % 3;
-          int k = (i + 2) % 3;
-          binKE[bin] += 0.5 * (angMom[j] * angMom[j] / I(j, j) +
-                               angMom[k] * angMom[k] / I(k, k));
-          binDof[bin] += 2;
-        } else {
-          binKE[bin] += 0.5 * (angMom[0] * angMom[0] / I(0, 0) +
-                               angMom[1] * angMom[1] / I(1, 1) +
-                               angMom[2] * angMom[2] / I(2, 2));
-          binDof[bin] += 3;
-        }
-      }
-
-      RealType q = 0.0;
-      RealType w = 0.0;
-      if(sd->isAtom()){
-
-        Atom* atom = static_cast<Atom*>(sd);
-
-        AtomType* atomType = atom->getAtomType();
-
-        FixedChargeAdapter fca = FixedChargeAdapter(atomType);
-        if ( fca.isFixedCharge() ) {
-          q += fca.getCharge();
-        }
-
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-        if ( fqa.isFluctuatingCharge() ) {
-          q += atom->getFlucQPos();
-          w += sd->getFlucQVel();
-        }
-      }
-      else if (sd->isRigidBody()) {
-        RigidBody* rb = static_cast<RigidBody*>(sd);
-        std::vector<Atom*>::iterator ai;
-        Atom* atom;
-        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)){
-          AtomType* atomType = atom->getAtomType();
-          FixedChargeAdapter fca = FixedChargeAdapter(atomType);
-          if ( fca.isFixedCharge() ) {
-            q += fca.getCharge();
-          }
-        }
-      }
-      binCharge[bin] += q / nProcessed_;
-      binChargeVelocity[bin] += w / nProcessed_ ;
-    }
-
-
-    for (unsigned int i = 0; i < nBins_; i++) {
-
-      if (binDof[i] > 0) {
-        RealType temp = 2.0 * binKE[i] / (binDof[i] * Constants::kb *
-                                          Constants::energyConvert * nProcessed_);
-        RealType den = binMass[i] * nBins_ * Constants::densityConvert
-          / (volume_ * nProcessed_);
-        Vector3d vel = binP[i] / (binMass[i] * nProcessed_);
-
-        dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
-        dynamic_cast<VectorAccumulator *>(velocity->accumulator[i])->add(vel);
-        dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
-        dynamic_cast<Accumulator *>(charge->accumulator[i])->add(binCharge[i]);
-        dynamic_cast<Accumulator *>(chargeVelocity->accumulator[i])->add(binChargeVelocity[i]);
-        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);   //used to print result when counts_ > 0 (code below: "if (counts > 0) {...}")
-      }
-    }
-  }
-
-  void RNEMDZ::processStuntDouble(StuntDouble* sd, int bin) {
-  }
-
-  RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
-                 const std::string& sele, int nrbins)
-    : ShellStatistics(info, filename, sele, nrbins) {
-
-
-    setOutputName(getPrefix(filename) + ".rnemdR");
-
+    
+    evaluator_.loadScriptString(sele);
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+    std::set<AtomType*> osTypes = seleMan_.getSelectedAtomTypes();
+    std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
+    
+    data_.resize(RNEMDZ::ENDINDEX);
+    
     temperature = new OutputData;
     temperature->units =  "K";
     temperature->title =  "Temperature";
@@ -245,17 +71,17 @@ namespace OpenMD {
     temperature->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       temperature->accumulator.push_back( new Accumulator() );
-    data_.push_back(temperature);
-
-    angularVelocity = new OutputData;
-    angularVelocity->units = "angstroms^2/fs";
-    angularVelocity->title =  "Angular Velocity";
-    angularVelocity->dataType = odtVector3;
-    angularVelocity->dataHandling = odhAverage;
-    angularVelocity->accumulator.reserve(nBins_);
+    addOutputData(temperature);
+    
+    velocity = new OutputData;
+    velocity->units = "angstroms/fs";
+    velocity->title =  "Velocity"; 
+    velocity->dataType = odtVector3;
+    velocity->dataHandling = odhAverage;
+    velocity->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
-      angularVelocity->accumulator.push_back( new VectorAccumulator() );
-    data_.push_back(angularVelocity);
+      velocity->accumulator.push_back( new VectorAccumulator() );
+    addOutputData(velocity);
 
     density = new OutputData;
     density->units =  "g cm^-3";
@@ -265,7 +91,305 @@ namespace OpenMD {
     density->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       density->accumulator.push_back( new Accumulator() );
-    data_.push_back(density);
+    addOutputData(density);
+
+    activity = new OutputData;;
+    activity->units = "unitless";
+    activity->title =  "Activity";
+    activity->dataType = odtArray2d;
+    activity->dataHandling = odhAverage;
+    unsigned int nTypes = outputTypes_.size();
+    activity->accumulatorArray2d.resize(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++) {
+      activity->accumulatorArray2d[i].resize(nTypes);
+      for (unsigned int j = 0 ; j < nTypes; j++) {
+        activity->accumulatorArray2d[i][j] = new Accumulator();
+      }
+    }
+    addOutputData(activity);
+
+    eField = new OutputData;
+    eField->units =  "kcal/mol/angstroms/e";
+    eField->title =  "Electric Field";
+    eField->dataType = odtVector3;
+    eField->dataHandling = odhAverage;
+    eField->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      eField->accumulator.push_back( new VectorAccumulator() );
+
+    ePot = new OutputData;
+    ePot->units =  "kcal/mol/e";
+    ePot->title =  "Electrostatic Potential";
+    ePot->dataType = odtReal;
+    ePot->dataHandling = odhAverage;
+    ePot->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      ePot->accumulator.push_back( new Accumulator() );
+    
+    charge = new OutputData;
+    charge->units =  "e";
+    charge->title =  "Charge";
+    charge->dataType = odtReal;
+    charge->dataHandling = odhAverage;
+    charge->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      charge->accumulator.push_back( new Accumulator() );
+
+    chargeVelocity = new OutputData;
+    chargeVelocity->units =  "e/fs";
+    chargeVelocity->title =  "Charge_Velocity";
+    chargeVelocity->dataType = odtReal;
+    chargeVelocity->dataHandling = odhAverage;
+    chargeVelocity->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      chargeVelocity->accumulator.push_back( new Accumulator() );
+    
+    outputMask_.set(TEMPERATURE);
+    outputMask_.set(VELOCITY);
+    outputMask_.set(DENSITY);
+    outputMask_.set(ACTIVITY);
+
+    int storageLayout = info_->getStorageLayout();
+    
+    if (storageLayout & DataStorage::dslElectricField) {
+      outputMask_.set(ELECTRICFIELD);
+      outputMask_.set(ELECTROSTATICPOTENTIAL);
+      addOutputData(eField);
+      addOutputData(ePot);
+    }
+    
+    if (info_->usesElectrostaticAtoms() ||
+        storageLayout & DataStorage::dslFlucQPosition) {
+      outputMask_.set(CHARGE);
+      addOutputData(charge);
+    }
+    
+    if (storageLayout & DataStorage::dslFlucQVelocity) {
+      outputMask_.set(CHARGEVELOCITY);
+      addOutputData(chargeVelocity);
+    }
+    
+  }
+
+  void RNEMDZ::processFrame(int istep) {
+    
+    StuntDouble* sd;
+    AtomType* atype;
+    
+    int i;
+    
+    int binNo;
+    int typeIndex(-1);
+    RealType mass;
+    Vector3d vel; 
+    Vector3d rPos;
+    RealType KE;
+    Vector3d L;
+    Mat3x3d I;
+    RealType r2;
+    Vector3d eField;
+
+    vector<RealType> binMass(nBins_, 0.0);
+    vector<Vector3d> binP(nBins_, V3Zero);
+    vector<RealType> binCharge(nBins_, 0.0);
+    vector<RealType> binChargeVelocity(nBins_, 0.0);
+    vector<RealType> binKE(nBins_, 0.0);
+    vector<Vector3d> binEField(nBins_, V3Zero);    
+    vector<int> binDOF(nBins_, 0);
+    vector<int> binCount(nBins_, 0);
+    vector<int> binAtomCount(nBins_, 0);
+    vector<vector<int> > binTypeCounts;
+    
+    if (outputMask_[ACTIVITY]) {
+      binTypeCounts.resize(nBins_);
+      for (unsigned int i = 0; i < nBins_; i++) {
+        binTypeCounts[i].resize( outputTypes_.size(), 0);
+      }
+    }
+    std::vector<AtomType*>::iterator at;
+
+
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    // loop over the selected atoms:
+
+    for (sd = seleMan_.beginSelected(i); sd != NULL;
+         sd = seleMan_.nextSelected(i)) {
+
+      Vector3d pos = sd->getPos();
+
+      mass = sd->getMass();
+      vel = sd->getVel();
+      KE = 0.5 * mass * vel.lengthSquare();
+
+      if (outputMask_[ELECTRICFIELD]) 
+        eField = sd->getElectricField(); // kcal/mol/e/Angstrom
+
+      if (outputMask_[ACTIVITY]) {
+        typeIndex = -1;
+        if (sd->isAtom()) {
+          atype = static_cast<Atom*>(sd)->getAtomType();
+          at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
+          if (at != outputTypes_.end()) {
+            typeIndex = std::distance(outputTypes_.begin(), at);
+          }
+        }
+      }
+
+      int binNo = getBin(pos);
+
+      if (binNo >= 0 && binNo < int(nBins_))  {
+        binCount[binNo]++;
+        binMass[binNo] += mass;
+        binP[binNo] += mass*vel;
+        binKE[binNo] += KE;
+        binDOF[binNo] += 3;
+
+        if (outputMask_[ACTIVITY]) {          
+          if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
+        }
+
+        RealType q = 0.0;
+        RealType w = 0.0;
+
+        if (sd->isAtom()) {
+          binAtomCount[binNo]++;
+          if (outputMask_[ELECTRICFIELD]) 
+            binEField[binNo] += eField;
+          
+          Atom* atom = static_cast<Atom*>(sd);
+          AtomType* atomType = atom->getAtomType();
+
+          FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+          if ( fca.isFixedCharge() ) {
+            q += fca.getCharge();
+          }
+          
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+          if ( fqa.isFluctuatingCharge() ) {
+            q += atom->getFlucQPos();
+            w += sd->getFlucQVel();
+          }
+        } else if (sd->isRigidBody()) {
+          RigidBody* rb = static_cast<RigidBody*>(sd);
+          std::vector<Atom*>::iterator ai;
+          Atom* atom;
+          for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)){
+            AtomType* atomType = atom->getAtomType();
+            FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+            if ( fca.isFixedCharge() ) {
+              q += fca.getCharge();
+            }
+          }
+        }
+      
+        if (outputMask_[CHARGE])
+          binCharge[binNo] += q;
+        if (outputMask_[CHARGEVELOCITY])
+          binChargeVelocity[binNo] += w;
+        
+      }
+    }
+     
+    RealType den, z, binVolume(0.0), dz(0.0);
+    std::vector<RealType> nden(outputTypes_.size(), 0.0);
+
+    for (unsigned int i = 0; i < nBins_; i++) {
+      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
+      binVolume = volume_ / nBins_;
+      dz = hmat_(axis_, axis_) / (RealType)nBins_;    
+
+      den = binMass[i] * Constants::densityConvert / binVolume;
+
+      if (outputMask_[ACTIVITY]) {
+        for (unsigned int k = 0; k < outputTypes_.size(); k++) {
+          nden[k] = (binTypeCounts[i][k]  / binVolume)
+            * Constants::concentrationConvert;
+        }
+      }
+
+      RealType temp(0.0), ePot(0.0);
+      Vector3d vel(0.0), eField(0.0);
+      
+      if (binDOF[i] > 0) {
+        vel = binP[i] / binMass[i];
+        // only add values if there are things to add
+        temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
+                                 Constants::energyConvert);
+      }
+      
+      if (outputMask_[ELECTRICFIELD]) {
+        if (binAtomCount[i] > 0 ) {
+          eField = binEField[i] / RealType(binAtomCount[i]);
+        } else {
+          eField = V3Zero;
+        }        
+      }
+      
+      if (outputMask_[ELECTROSTATICPOTENTIAL])
+        ePot += eField[axis_] * dz;
+
+      dynamic_cast<Accumulator *>(data_[Z]->accumulator[i])->add(z);
+      dynamic_cast<Accumulator *>(data_[TEMPERATURE]->accumulator[i])->add(temp);
+      dynamic_cast<VectorAccumulator *>(data_[VELOCITY]->accumulator[i])->add(vel);
+      dynamic_cast<Accumulator *>(data_[DENSITY]->accumulator[i])->add(den);
+
+      for (unsigned int k = 0; k < outputTypes_.size(); k++) {        
+        dynamic_cast<Accumulator *>(data_[ACTIVITY]->accumulatorArray2d[i][k])->add(nden[k]);
+      }
+      
+      if (outputMask_[ELECTRICFIELD]) 
+        dynamic_cast<VectorAccumulator *>(data_[ELECTRICFIELD]->accumulator[i])->add(eField);
+      if (outputMask_[ELECTROSTATICPOTENTIAL]) 
+        dynamic_cast<Accumulator *>(data_[ELECTROSTATICPOTENTIAL]->accumulator[i])->add(ePot);
+      if (outputMask_[CHARGE]) 
+        dynamic_cast<Accumulator *>(data_[CHARGE]->accumulator[i])->add(binCharge[i]);
+      if (outputMask_[CHARGEVELOCITY]) 
+        dynamic_cast<Accumulator *>(data_[CHARGEVELOCITY]->accumulator[i])->add(binChargeVelocity[i]);
+      
+    }
+  }
+  
+  void RNEMDZ::processStuntDouble(StuntDouble* sd, int bin) {
+  }
+
+  RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
+                 const std::string& sele, int nrbins)
+    : ShellStatistics(info, filename, sele, nrbins) {
+
+    setOutputName(getPrefix(filename) + ".rnemdR");
+    
+    temperature = new OutputData;
+    temperature->units =  "K";
+    temperature->title =  "Temperature";
+    temperature->dataType = odtReal;
+    temperature->dataHandling = odhAverage;
+    temperature->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      temperature->accumulator.push_back( new Accumulator() );
+    addOutputData(temperature);
+
+    angularVelocity = new OutputData;
+    angularVelocity->units = "angstroms/fs";
+    angularVelocity->title =  "Velocity"; 
+    angularVelocity->dataType = odtVector3;
+    angularVelocity->dataHandling = odhAverage;
+    angularVelocity->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      angularVelocity->accumulator.push_back( new VectorAccumulator() );
+    addOutputData(angularVelocity);
+
+    density = new OutputData;
+    density->units =  "g cm^-3";
+    density->title =  "Density";
+    density->dataType = odtReal;
+    density->dataHandling = odhAverage;
+    density->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      density->accumulator.push_back( new Accumulator() );
+    addOutputData(density);
   }
 
 
@@ -274,11 +398,23 @@ namespace OpenMD {
     StuntDouble* sd;
     int i;
 
+    int binNo;
+    RealType mass;
+    Vector3d vel; 
+    Vector3d rPos;
+    RealType KE;
+    Vector3d L;
+    Mat3x3d I;
+    RealType r2;
+
     vector<RealType> binMass(nBins_, 0.0);
-    vector<Mat3x3d>  binI(nBins_);
+    vector<Vector3d> binP(nBins_, V3Zero);
+    vector<RealType> binOmega(nBins_, 0.0);
     vector<Vector3d> binL(nBins_, V3Zero);
+    vector<Mat3x3d>  binI(nBins_);
     vector<RealType> binKE(nBins_, 0.0);
-    vector<int> binDof(nBins_, 0);
+    vector<int> binDOF(nBins_, 0);
+    vector<int> binCount(nBins_, 0);
 
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -290,26 +426,28 @@ namespace OpenMD {
          sd = seleMan_.nextSelected(i)) {
 
       // figure out where that object is:
-      int bin = getBin( sd->getPos() );
+      int binNo = getBin( sd->getPos() );
 
-      if (bin >= 0 && bin < int(nBins_))  {
+      if (binNo >= 0 && binNo < int(nBins_))  {
 
-        Vector3d rPos = sd->getPos() - coordinateOrigin_;
-        Vector3d vel = sd->getVel();
-        RealType m = sd->getMass();
-        Vector3d L = m * cross(rPos, vel);
-        Mat3x3d I(0.0);
-        I = outProduct(rPos, rPos) * m;
-        RealType r2 = rPos.lengthSquare();
-        I(0, 0) += m * r2;
-        I(1, 1) += m * r2;
-        I(2, 2) += m * r2;
-
-        binMass[bin] += m;
-        binI[bin] += I;
-        binL[bin] += L;
-        binKE[bin] += 0.5 * (m * vel.lengthSquare());
-        binDof[bin] += 3;
+        mass = sd->getMass();
+        vel = sd->getVel();
+        rPos = sd->getPos() - coordinateOrigin_;
+        KE = 0.5 * mass * vel.lengthSquare();
+        L = mass * cross(rPos, vel);
+        I = outProduct(rPos, rPos) * mass;
+        r2 = rPos.lengthSquare();
+        I(0, 0) += mass * r2;
+        I(1, 1) += mass * r2;
+        I(2, 2) += mass * r2;
+        
+        binCount[binNo]++;
+        binMass[binNo] += mass;
+        binP[binNo] += mass*vel;
+        binKE[binNo] += KE;
+        binI[binNo] += I;
+        binL[binNo] += L;
+        binDOF[binNo] += 3;
 
         if (sd->isDirectional()) {
           Vector3d angMom = sd->getJ();
@@ -318,38 +456,44 @@ namespace OpenMD {
             int i = sd->linearAxis();
             int j = (i + 1) % 3;
             int k = (i + 2) % 3;
-            binKE[bin] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
-                                 angMom[k] * angMom[k] / Ia(k, k));
-            binDof[bin] += 2;
+            binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) + 
+                                   angMom[k] * angMom[k] / Ia(k, k));
+            binDOF[binNo] += 2;
           } else {
-            binKE[bin] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
-                                 angMom[1] * angMom[1] / Ia(1, 1) +
-                                 angMom[2] * angMom[2] / Ia(2, 2));
-            binDof[bin] += 3;
+            binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                                   angMom[1] * angMom[1] / Ia(1, 1) +
+                                   angMom[2] * angMom[2] / Ia(2, 2));
+            binDOF[binNo] += 3;
           }
         }
       }
     }
 
+    RealType r, rinner, router, binVolume, den;
+    
     for (unsigned int i = 0; i < nBins_; i++) {
-      RealType rinner = (RealType)i * binWidth_;
-      RealType router = (RealType)(i+1) * binWidth_;
-      if (binDof[i] > 0) {
-        RealType temp = 2.0 * binKE[i] / (binDof[i] * Constants::kb *
-                                          Constants::energyConvert);
-        RealType den = binMass[i] * 3.0 * Constants::densityConvert
-          / (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3)));
+      r = (((RealType)i + 0.5) * binWidth_);
+      rinner = (RealType)i * binWidth_;
+      router = (RealType)(i+1) * binWidth_;
+      binVolume = (4.0 * Constants::PI * (pow(router,3) - pow(rinner,3))) / 3.0;
 
-        Vector3d omega = binI[i].inverse() * binL[i];
+      den = binMass[i] * Constants::densityConvert / binVolume;
 
-        dynamic_cast<Accumulator *>(temperature->accumulator[i])->add(temp);
-        dynamic_cast<VectorAccumulator *>(angularVelocity->accumulator[i])->add(omega);
-        dynamic_cast<Accumulator *>(density->accumulator[i])->add(den);
-        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
+      RealType temp(0.0);
+      Vector3d omega(0.0);
+      
+      if (binDOF[i] > 0) {
+        omega = binI[i].inverse() * binL[i];          
+        temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
+                                 Constants::energyConvert);
       }
+        
+      dynamic_cast<Accumulator *>(data_[R]->accumulator[i])->add(r);
+      dynamic_cast<Accumulator *>(data_[TEMPERATURE]->accumulator[i])->add(temp);
+      dynamic_cast<VectorAccumulator *>(data_[ANGULARVELOCITY]->accumulator[i])->add(omega);
+      dynamic_cast<Accumulator *>(data_[DENSITY]->accumulator[i])->add(den);
     }
   }
-
 
   void RNEMDR::processStuntDouble(StuntDouble* sd, int bin) {
   }
@@ -392,9 +536,9 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".rnemdRTheta");
 
     angularVelocity = new OutputData;
-    angularVelocity->units = "angstroms^2/fs";
-    angularVelocity->title =  "Angular Velocity";
-    angularVelocity->dataType = odtArray2d;
+    angularVelocity->units = "angstroms/fs";
+    angularVelocity->title =  "Velocity"; 
+    angularVelocity->dataType = odtVector3;
     angularVelocity->dataHandling = odhAverage;
     angularVelocity->accumulatorArray2d.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++) {
@@ -403,8 +547,7 @@ namespace OpenMD {
         angularVelocity->accumulatorArray2d[i][j] = new Accumulator();
       }
     }
-    data_.push_back(angularVelocity);
-
+    addOutputData(angularVelocity);
   }
 
 
@@ -464,19 +607,24 @@ namespace OpenMD {
       }
     }
 
-
     for (unsigned int i = 0; i < nBins_; i++) {
+      RealType r = (((RealType)i + 0.5) * binWidth_);
+      
       for (int j = 0; j < nAngleBins_; j++) {
 
+        Vector3d omega(0.0);
         if (binCount[i][j] > 0) {
-          Vector3d omega = binI[i][j].inverse() * binL[i][j];
-          RealType omegaProj = dot(omega, fluxVector_);
-
-          dynamic_cast<Accumulator *>(angularVelocity->accumulatorArray2d[i][j])->add(omegaProj);
+          omega = binI[i][j].inverse() * binL[i][j];
         }
+
+        RealType omegaProj = dot(omega, fluxVector_);        
+
+        dynamic_cast<Accumulator *>(data_[R]->accumulator[i])->add(r);
+        dynamic_cast<Accumulator *>(data_[ANGULARVELOCITY]->accumulatorArray2d[i][j])->add(omegaProj);
       }
     }
   }
+
 
   void RNEMDRTheta::writeOutput() {
 

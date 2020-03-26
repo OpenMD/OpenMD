@@ -58,7 +58,6 @@ namespace OpenMD {
   enum OutputDataHandling {
     odhAverage,
     odhTotal,
-    odhLastValue,
     odhMax,
     odhUnknownDataHandling
   };
@@ -74,7 +73,8 @@ namespace OpenMD {
 
   class StaticAnalyser{
   public:
-    StaticAnalyser(SimInfo* info, const std::string& filename, unsigned int nbins);
+    StaticAnalyser(SimInfo* info, const std::string& filename,
+                   unsigned int nbins);
     
     virtual ~StaticAnalyser() {}
     virtual void process()=0;

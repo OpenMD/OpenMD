@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2019 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,12 +32,15 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4] Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011). 
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #include "applications/staticProps/SpatialStatistics.hpp"
@@ -91,7 +94,6 @@ namespace OpenMD {
     writeOutput();
   }
 
-
   void SpatialStatistics::processFrame(int istep) {
     StuntDouble* sd;
     int i;
@@ -119,10 +121,6 @@ namespace OpenMD {
     }
   }
   
-
-  
-
-
   SlabStatistics::SlabStatistics(SimInfo* info, const string& filename, 
                                  const string& sele, int nbins, int axis) : 
     SpatialStatistics(info, filename, sele, nbins), axis_(axis) {
@@ -154,7 +152,6 @@ namespace OpenMD {
 
   SlabStatistics::~SlabStatistics() {
   }
-
 
   void SlabStatistics::processFrame(int istep) {
     RealType z;
@@ -190,18 +187,18 @@ namespace OpenMD {
     bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
     
     if (hasCoordinateOrigin) {
-        std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
-        if (co.size() != 3) {
-          sprintf(painCave.errMsg,
-                  "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
-                  "\tthere should be 3 parameters, but %lu were specified.\n", 
-                  co.size());
-          painCave.isFatal = 1;
-          simError();      
-        }
-        coordinateOrigin_.x() = co[0];
-        coordinateOrigin_.y() = co[1];
-        coordinateOrigin_.z() = co[2];
+      std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
+      if (co.size() != 3) {
+        sprintf(painCave.errMsg,
+                "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
+                "\tthere should be 3 parameters, but %lu were specified.\n", 
+                co.size());
+        painCave.isFatal = 1;
+        simError();      
+      }
+      coordinateOrigin_.x() = co[0];
+      coordinateOrigin_.y() = co[1];
+      coordinateOrigin_.z() = co[2];
     } else {
       coordinateOrigin_ = V3Zero;
     }
