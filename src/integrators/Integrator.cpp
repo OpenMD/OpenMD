@@ -332,7 +332,9 @@ namespace OpenMD {
   void Integrator::postStep() {
 
     RealType difference;
-      
+
+    saveConservedQuantity();
+
     if (needVelocityScaling) {
       difference = snap->getTime() - currThermal;
 
