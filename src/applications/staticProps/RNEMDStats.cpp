@@ -71,7 +71,7 @@ namespace OpenMD {
     temperature->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       temperature->accumulator.push_back( new Accumulator() );
-    addOutputData(temperature);
+    addOutputDataAt(temperature, TEMPERATURE);
     
     velocity = new OutputData;
     velocity->units = "angstroms/fs";
@@ -81,7 +81,7 @@ namespace OpenMD {
     velocity->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       velocity->accumulator.push_back( new VectorAccumulator() );
-    addOutputData(velocity);
+    addOutputDataAt(velocity, VELOCITY);
 
     density = new OutputData;
     density->units =  "g cm^-3";
@@ -91,7 +91,7 @@ namespace OpenMD {
     density->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       density->accumulator.push_back( new Accumulator() );
-    addOutputData(density);
+    addOutputDataAt(density, DENSITY);
 
     activity = new OutputData;;
     activity->units = "unitless";
@@ -106,8 +106,10 @@ namespace OpenMD {
         activity->accumulatorArray2d[i][j] = new Accumulator();
       }
     }
-    addOutputData(activity);
-
+    for (unsigned int j = 0 ; j < nTypes; j++)
+      activity->columnNames.push_back( outputTypes_[j]->getName() );
+    addOutputDataAt(activity, ACTIVITY);
+    
     eField = new OutputData;
     eField->units =  "kcal/mol/angstroms/e";
     eField->title =  "Electric Field";
@@ -154,24 +156,26 @@ namespace OpenMD {
     if (storageLayout & DataStorage::dslElectricField) {
       outputMask_.set(ELECTRICFIELD);
       outputMask_.set(ELECTROSTATICPOTENTIAL);
-      addOutputData(eField);
-      addOutputData(ePot);
+      addOutputDataAt(eField, ELECTRICFIELD);
+      addOutputDataAt(ePot, ELECTROSTATICPOTENTIAL);
     }
     
     if (info_->usesElectrostaticAtoms() ||
         storageLayout & DataStorage::dslFlucQPosition) {
       outputMask_.set(CHARGE);
-      addOutputData(charge);
+      addOutputDataAt(charge, CHARGE);
     }
     
     if (storageLayout & DataStorage::dslFlucQVelocity) {
       outputMask_.set(CHARGEVELOCITY);
-      addOutputData(chargeVelocity);
+      addOutputDataAt(chargeVelocity, CHARGEVELOCITY);
     }
     
   }
 
   void RNEMDZ::processFrame(int istep) {
+
+    SlabStatistics::processFrame(istep);
     
     StuntDouble* sd;
     AtomType* atype;
@@ -205,7 +209,6 @@ namespace OpenMD {
       }
     }
     std::vector<AtomType*>::iterator at;
-
 
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -329,6 +332,7 @@ namespace OpenMD {
       if (outputMask_[ELECTROSTATICPOTENTIAL])
         ePot += eField[axis_] * dz;
 
+      dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
       dynamic_cast<Accumulator *>(data_[Z]->accumulator[i])->add(z);
       dynamic_cast<Accumulator *>(data_[TEMPERATURE]->accumulator[i])->add(temp);
       dynamic_cast<VectorAccumulator *>(data_[VELOCITY]->accumulator[i])->add(vel);
@@ -358,7 +362,9 @@ namespace OpenMD {
     : ShellStatistics(info, filename, sele, nrbins) {
 
     setOutputName(getPrefix(filename) + ".rnemdR");
-    
+
+    data_.resize(RNEMDR::ENDINDEX);
+
     temperature = new OutputData;
     temperature->units =  "K";
     temperature->title =  "Temperature";
@@ -367,7 +373,7 @@ namespace OpenMD {
     temperature->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       temperature->accumulator.push_back( new Accumulator() );
-    addOutputData(temperature);
+    addOutputDataAt(temperature, TEMPERATURE);
 
     angularVelocity = new OutputData;
     angularVelocity->units = "angstroms/fs";
@@ -377,7 +383,7 @@ namespace OpenMD {
     angularVelocity->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       angularVelocity->accumulator.push_back( new VectorAccumulator() );
-    addOutputData(angularVelocity);
+    addOutputDataAt(angularVelocity, ANGULARVELOCITY);
 
     density = new OutputData;
     density->units =  "g cm^-3";
@@ -387,12 +393,13 @@ namespace OpenMD {
     density->accumulator.reserve(nBins_);
     for (unsigned int i = 0; i < nBins_; i++)
       density->accumulator.push_back( new Accumulator() );
-    addOutputData(density);
+    addOutputDataAt(density, DENSITY);
   }
 
 
   void RNEMDR::processFrame(int istep) {
 
+    ShellStatistics::processFrame(istep);
     StuntDouble* sd;
     int i;
 
@@ -484,7 +491,8 @@ namespace OpenMD {
         temp = 2.0 * binKE[i] / (binDOF[i] * Constants::kb *
                                  Constants::energyConvert);
       }
-        
+
+      dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
       dynamic_cast<Accumulator *>(data_[R]->accumulator[i])->add(r);
       dynamic_cast<Accumulator *>(data_[TEMPERATURE]->accumulator[i])->add(temp);
       dynamic_cast<VectorAccumulator *>(data_[ANGULARVELOCITY]->accumulator[i])->add(omega);
@@ -532,6 +540,8 @@ namespace OpenMD {
 
     setOutputName(getPrefix(filename) + ".rnemdRTheta");
 
+    data_.resize(RNEMDRTheta::ENDINDEX);
+
     angularVelocity = new OutputData;
     angularVelocity->units = "angstroms/fs";
     angularVelocity->title =  "Velocity"; 
@@ -544,7 +554,7 @@ namespace OpenMD {
         angularVelocity->accumulatorArray2d[i][j] = new Accumulator();
       }
     }
-    addOutputData(angularVelocity);
+    addOutputDataAt(angularVelocity, ANGULARVELOCITY);
   }
 
 
@@ -564,6 +574,8 @@ namespace OpenMD {
 
   void RNEMDRTheta::processFrame(int istep) {
 
+    ShellStatistics::processFrame(istep);
+    
     StuntDouble* sd;
     int i;
 
@@ -616,6 +628,7 @@ namespace OpenMD {
 
         RealType omegaProj = dot(omega, fluxVector_);        
 
+        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
         dynamic_cast<Accumulator *>(data_[R]->accumulator[i])->add(r);
         dynamic_cast<Accumulator *>(data_[ANGULARVELOCITY]->accumulatorArray2d[i][j])->add(omegaProj);
       }

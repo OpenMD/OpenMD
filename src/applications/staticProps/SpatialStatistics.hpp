@@ -66,6 +66,7 @@ namespace OpenMD {
     ~SpatialStatistics();
 
     void addOutputData(OutputData* dat) {data_.push_back(dat);}
+    void addOutputDataAt(OutputData* dat, unsigned int loc) {data_[loc] = dat;}
     virtual void process();
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos)=0;

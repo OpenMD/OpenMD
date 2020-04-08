@@ -68,6 +68,7 @@ namespace OpenMD {
     OutputDataType dataType;
     OutputDataHandling dataHandling;
     vector<BaseAccumulator*> accumulator;
+    vector<string> columnNames;
     vector<vector<BaseAccumulator*> > accumulatorArray2d;
   };
 
@@ -110,6 +111,13 @@ namespace OpenMD {
     virtual void writeOutput();
     virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
     virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeReal(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeVector(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeArray(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeRealErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeVectorErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeArrayErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+
     OutputData* beginOutputData(vector<OutputData*>::iterator& i);
     OutputData* nextOutputData(vector<OutputData*>::iterator& i);
 
