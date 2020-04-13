@@ -145,11 +145,9 @@ namespace OpenMD {
     // Vector3d v1x = sd1->getA(frame1).getRow(0);
     // Vector3d v2x = sd2->getA(frame2).getRow(0);
 
-    Vector3d v1x = rotMats_[frame1][id1].getRow(xaxis_);
     Vector3d v1y = rotMats_[frame1][id1].getRow(yaxis_);    
     Vector3d v1z = rotMats_[frame1][id1].getRow(axis_);
 
-    Vector3d v2x = rotMats_[frame2][id2].getRow(xaxis_);
     Vector3d v2y = rotMats_[frame2][id2].getRow(yaxis_);    
     Vector3d v2z = rotMats_[frame2][id2].getRow(axis_);
 
