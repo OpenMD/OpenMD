@@ -44,56 +44,39 @@
 
 #include "math/Polynomial.hpp"
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include "applications/dynamicProps/MultipassCorrFunc.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class COHZ : public ParticleTimeCorrFunc {
+  class COHZ : public AutoCorrFunc<Vector<RealType, 4> > {
   public:
-    COHZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order, int nZbins, long long int memSize, int axis=2);   
+    COHZ(SimInfo* info, const std::string& filename, const std::string& sele1,
+         const std::string& sele2, int order, int nZbins, int axis=2);   
 
   private:
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) { return 0.0; }
-    virtual Vector3d calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
+    virtual void validateSelection(SelectionManager& seleMan);
+    virtual void computeFrame(int frame);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual Vector<RealType, 4> calcCorrVal(int frame1, int frame2,
+                                            int id1, int id2);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual void postCorrelate();
     virtual void writeCorrelate();
-
-    virtual void validateSelection(const SelectionManager& seleMan);
-
-
-    void setOutputName1(const std::string& filename) {
-      outputFilename1_ = filename;
-    }
-    const std::string& getOutputFileName1() const {
-      return outputFilename1_;
-    }
-
-    void setOutputName2(const std::string& filename) {
-      outputFilename2_ = filename;
-    }
-    const std::string& getOutputFileName2() const {
-      return outputFilename2_;
-    }
-
 
     int order_;
     DoublePolynomial legendre_;
-
-  protected:
-    virtual void preCorrelate();
-    virtual void postCorrelate();
-    vector<vector<Vector3d> > histogram_;
-    vector<vector<int> > counts_;
     unsigned int nZBins_;
+    RealType boxZ_, halfBoxZ_;
     int axis_;
     int xaxis_;
     int yaxis_; 
     std::string axisLabel_;
-
-    std::string outputFilename1_;
-    std::string outputFilename2_;
-
+    
+    std::vector<std::vector<RotMat3x3d> > rotMats_;
+    std::vector<std::vector<Vector<RealType, 4> > > histogram_;
+    std::vector<std::vector<int> > counts_;
+    std::vector<std::vector<int> > zbin_;
   };
 
 }

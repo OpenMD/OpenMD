@@ -66,7 +66,7 @@ namespace OpenMD {
       Mat3x3d A = sd->getA();
       Vector3d f = sd->getFrc();
       propertyTemp = A * f;
-    }else{
+    } else {
       Vector3d f = sd->getFrc();
       propertyTemp = f;
     }

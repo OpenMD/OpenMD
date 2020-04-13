@@ -260,7 +260,7 @@ int main(int argc, char* argv[]){
     }
 
     corrFunc = new COHZ(info, dumpFileName, sele1, sele2, order,
-			args_info.nzbins_arg, memSize, privilegedAxis);
+			args_info.nzbins_arg, privilegedAxis);
 
   } else if (args_info.jumptime_given) {
     corrFunc = new HBondJump(info, dumpFileName, sele1, sele2,

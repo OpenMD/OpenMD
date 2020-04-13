@@ -464,5 +464,9 @@ namespace OpenMD {
   template class CrossCorrFunc<Mat3x3d>;
 
   template class MultipassCorrFunc<DynamicVector<RealType> >;
+  
+  template class AutoCorrFunc<Vector<RealType, 4> >; 
+  template class MultipassCorrFunc<Vector<RealType, 4> >;
+  template class CrossCorrFunc<Vector<RealType, 4> >;
 
 }
