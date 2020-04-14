@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,12 +32,15 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
@@ -47,112 +50,39 @@ namespace OpenMD {
   DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, 
                                              const std::string& filename,
                                              const std::string& sele1,
-                                             const std::string& sele2,
-                                             long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2,
-                           DataStorage::dslPosition, memSize){
-
-      setCorrFuncType("DirectionalRCorrFunc");
-      setOutputName(getPrefix(dumpFilename_) + ".drcorr");
-      histogram_.resize(nTimeBins_); 
-      count_.resize(nTimeBins_);
-      nSelected_ =   seleMan1_.getSelectionCount();  
-      assert(  nSelected_ == seleMan2_.getSelectionCount());
-    }
-
-  void DirectionalRCorrFunc::correlateFrames(int frame1, int frame2) {
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
-
-    RealType time1 = snapshot1->getTime();
-    RealType time2 = snapshot2->getTime();
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-    count_[timeBin] += nSelected_;    
-
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-	 sd1 != NULL && sd2 != NULL;
-	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
-
-      Vector3d corrVals = calcCorrVals(frame1, frame2, sd1, sd2);
-      histogram_[timeBin] += corrVals; 
-    }
+                                             const std::string& sele2)
+    : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2,
+                             DataStorage::dslPosition | DataStorage::dslAmat){
     
+    setCorrFuncType("DirectionalRCorrFunc");
+    setOutputName(getPrefix(dumpFilename_) + ".drcorr");
+    setLabelString( "r2\trparallel\trperpendicular" );
+    positions_.resize(nFrames_);
+    rotMats_.resize(nFrames_);
   }
 
-  void DirectionalRCorrFunc::postCorrelate() {
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      if (count_[i] > 0) {
-        histogram_[i] /= count_[i];
-      }
-    }
+  int DirectionalRCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    positions_[frame].push_back( sd->getPos() );
+    rotMats_[frame].push_back( sd->getA() );
+    return positions_[frame].size() - 1;
   }
-
-  void DirectionalRCorrFunc::preCorrelate() {
-    // Fill the histogram with empty Vector3d:
-    std::fill(histogram_.begin(), histogram_.end(), Vector3d(0.0));
-    // count array set to zero
-    std::fill(count_.begin(), count_.end(), 0);
-  }
-
-
-  Vector3d DirectionalRCorrFunc::calcCorrVals(int frame1, int frame2,
-                                              StuntDouble* sd1,
-                                              StuntDouble* sd2) {
-    Vector3d r1 = sd1->getPos(frame1);
-    Vector3d r2 = sd2->getPos(frame2);
-
+  
+  Vector3d DirectionalRCorrFunc::calcCorrVal(int frame1, int frame2,
+                                             int id1, int id2) {
+    Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
+    
     // The lab frame vector corresponding to the body-fixed 
     // z-axis is simply the second column of A.transpose()
     // or, identically, the second row of A itself.
   
-    Vector3d u1 = sd1->getA(frame1).getRow(2);
+    Vector3d u1 = rotMats_[frame1][id1].getRow(2);
     RealType u1l = u1.length();
 
-    RealType rsq = (r2-r1).lengthSquare();
-    RealType rpar = dot( (r2-r1), u1)/u1l;
+    RealType rsq = diff.lengthSquare();
+    RealType rpar = dot( diff, u1) / u1l;
     RealType rpar2 = rpar*rpar;
     RealType rperp2 = rsq - rpar2;
 
     return Vector3d(rsq, rpar2, rperp2);
-  }
-
-  void DirectionalRCorrFunc::writeCorrelate() {
-    std::ofstream ofs(getOutputFileName().c_str());
-
-    if (ofs.is_open()) {
-      Revision r;
-      
-      ofs << "# " << getCorrFuncType() << "\n";
-      ofs << "# OpenMD " << r.getFullRevision() << "\n";
-      ofs << "# " << r.getBuildDate() << "\n";
-      ofs << "# selection script1: \"" << selectionScript1_ ;
-      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      if (!paramString_.empty())
-        ofs << "# parameters: " << paramString_ << "\n";
-      ofs << "#time\tr2\trparallel\trperpendicular\n";
-
-      for (unsigned int i = 0; i < nTimeBins_; ++i) {
-        ofs << time_[i] << "\t" << 
-          histogram_[i](0) << "\t" <<
-          histogram_[i](1) << "\t" <<
-          histogram_[i](2) << "\t" << "\n";
-      }
-            
-    } else {
-      sprintf(painCave.errMsg,
-              "DirectionalRCorrFunc::writeCorrelate Error: fail to open %s\n",
-              getOutputFileName().c_str());
-      painCave.isFatal = 1;
-      simError();        
-    }
-    
-    ofs.close();    
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,42 +32,50 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
 #include "primitives/Atom.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
+#include "utils/Revision.hpp"
+#include <sstream>
 
 namespace OpenMD {
   DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
                                  const std::string& sele1,
-                                 const std::string& sele2,
-                                 long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2,
-                           DataStorage::dslAmat | DataStorage::dslDipole,
-                           memSize) {
-      setCorrFuncType("Dipole Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".dcorr");
+                                 const std::string& sele2)
+    : AutoCorrFunc<RealType>(info, filename, sele1, sele2,
+                             DataStorage::dslAmat | DataStorage::dslDipole) {
+    
+    setCorrFuncType("Dipole Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".dcorr");
+    setLabelString( "<D(0).D(t)>" );
+    dipoles_.resize(nFrames_);
+  }
+
+  int DipoleCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    dipoles_[frame].push_back( sd->getDipole() );
+    return dipoles_[frame].size() - 1;
   }
   
   RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2,
-                                       StuntDouble* sd1,  StuntDouble* sd2) {
-    
-    Vector3d v1 = sd1->getDipole(frame1);
-    Vector3d v2 = sd2->getDipole(frame2);
-
+                                       int id1, int id2) {
+    Vector3d v1 = dipoles_[frame1][id1];
+    Vector3d v2 = dipoles_[frame2][id2];
     return dot(v1, v2)/(v1.length()*v2.length());
   }
-
-
-  void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
+  
+  void DipoleCorrFunc::validateSelection(SelectionManager& seleMan) {
     StuntDouble* sd;
     int i;    
     for (sd = seleMan1_.beginSelected(i); sd != NULL; 

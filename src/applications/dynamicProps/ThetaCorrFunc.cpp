@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,12 +32,15 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
@@ -46,38 +49,30 @@
 namespace OpenMD {
   ThetaCorrFunc::ThetaCorrFunc(SimInfo* info, const std::string& filename,
                                const std::string& sele1,
-                               const std::string& sele2, long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2,
-                           DataStorage::dslPosition, memSize){
-
+                               const std::string& sele2)
+    : AutoCorrFunc<RealType>(info, filename, sele1, sele2,
+                             DataStorage::dslPosition){
+    
       setCorrFuncType("ThetaCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".tcorr");
+      setLabelString( "Cos(theta)" );
+      coords_.resize(nFrames_);
 
-      // Turn on COM calculation in block snapshot
+      // Turn on COM calculation in reader:
       bool ncp = true;
-      bsMan_->needCOMprops(ncp);
-    }
+      reader_->setNeedCOMprops(ncp);    
+  }
+
+  int ThetaCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    coords_[frame].push_back( sd->getPos() - sd->getCOM() );
+    return coords_[frame].size() - 1;
+  }
 
   RealType ThetaCorrFunc::calcCorrVal(int frame1, int frame2,
-                                      StuntDouble* sd1, StuntDouble* sd2) {
-    RealType r0;
-    RealType rt;
-    RealType csth;
-    Vector3d coord_t0;
-    Vector3d coord_t;
-
-    Vector3d r1 = sd1->getPos(frame1);
-    Vector3d r2 = sd2->getPos(frame2);
-    Vector3d com1 = sd1->getCOM(frame1);
-    Vector3d com2 = sd2->getCOM(frame2);
-
-    coord_t0 = r1 - com1;
-    coord_t  = r2 - com2;
-    
-    r0 = sqrt(dot(coord_t0, coord_t0));
-    rt = sqrt(dot(coord_t,coord_t));
-
-    csth = dot(coord_t0,coord_t)/(r0*rt);
-    return csth;
+                                      int id1, int id2) {
+    Vector3d a = coords_[frame1][id1];
+    Vector3d b = coords_[frame2][id2];
+    return dot(a, b)/(a.length() * b.length());
   }
+
 }

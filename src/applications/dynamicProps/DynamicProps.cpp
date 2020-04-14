@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -33,11 +33,14 @@
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
  *
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #include <iostream>
@@ -167,21 +170,19 @@ int main(int argc, char* argv[]){
 
   DynamicProperty* corrFunc = NULL;
   if(args_info.sdcorr_given){
-    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2,
-					memSize);
+    corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.selecorr_given){
     corrFunc = new SelectionCorrFunc(info, dumpFileName, sele1, sele2, memSize);
   } else if (args_info.dcorr_given){
-    corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorr_given) {
     corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.r_rcorr_given) {
     corrFunc = new RCorrFuncR(info, dumpFileName, sele1, sele2);
   } else if (args_info.thetacorr_given) {
-    corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.drcorr_given) {
-    corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2,
-					memSize);
+    corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorrZ_given) {
     corrFunc = new RCorrFuncZ(info, dumpFileName, sele1, sele2,
                               args_info.nzbins_arg, privilegedAxis);
