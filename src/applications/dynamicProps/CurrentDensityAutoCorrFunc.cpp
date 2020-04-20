@@ -140,7 +140,7 @@ namespace OpenMD {
 
   void CurrentDensityAutoCorrFunc::postCorrelate() {
     for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      for (unsigned int j = 0 ; j < outputTypes_.size(); j++) {
+      for (unsigned int j = 0 ; j < outputTypes_.size() + 1; j++) {
         if (count_[i] > 0) {
           myHistogram_[i][j] /= count_[i];
         } else {
