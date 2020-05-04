@@ -130,7 +130,8 @@ namespace OpenMD {
 
           // we know the maximum, so draw a progress bar
           
-          RealType percent = value_ * 100.0 / maximum_;
+          RealType percent = std::min(std::max(value_ * 100.0 / maximum_, 1e-6), 100.0);
+
           int hashes = int(percent * avail / 100.0);
           
           // compute the best estimate of the ending time:
