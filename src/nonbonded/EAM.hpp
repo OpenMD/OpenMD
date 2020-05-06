@@ -124,6 +124,7 @@ namespace OpenMD {
                                       std::vector<RealType> OrhoE,
                                       std::vector<std::vector<RealType> > OF);
     RealType RoseFunctional(RealType rho, RealType rhoe, RealType F0);
+    
                                       
     void calcDensity(InteractionData &idat);
     void calcFunctional(SelfData &sdat);

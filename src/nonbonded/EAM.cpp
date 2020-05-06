@@ -603,6 +603,58 @@ namespace OpenMD {
       eamAtomData.F->addPoints(rhovals, funcvals);
       break;
     }
+    case eamOxygenFuncfl: {
+      RealType re = ea.getRe();
+      RealType fe = ea.get_fe();
+      
+      RealType A = ea.getA();
+      RealType B = ea.getB();
+      RealType alpha = ea.getAlpha();
+      RealType beta = ea.getBeta();
+      RealType kappa = ea.getKappa();
+      RealType lambda = ea.getLambda();
+      
+      // RealType latticeConstant = ea.getLatticeConstant();
+
+      int Nr = 2000;
+      // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
+      eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
+      RealType r;
+
+      
+      
+      
+      
+      RealType phiCC, phiCV;
+
+      std::vector<RealType> rvals;
+      std::vector<RealType> zvals;
+      std::vector<RealType> ccvals;
+      std::vector<RealType> cvvals;
+
+      std::vector<RealType> rhovals;
+
+      for (int i = 0; i < Nr; i++) {
+        r = RealType(i)*dr;
+        rvals.push_back(r);
+        rhovals.push_back( ZhouRho(r, re,  fe, beta,  lambda) );
+        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        ccvals.push_back( phiCC );
+        cvvals.push_back( phiCV );
+      }
+      eamAtomData.rho = new CubicSpline();
+      eamAtomData.rho->addPoints(rvals, rhovals);
+      eamAtomData.phiCC = new CubicSpline();
+      eamAtomData.phiCC->addPoints(rvals, ccvals);
+      eamAtomData.phiCV = new CubicSpline();
+      eamAtomData.phiCV->addPoints(rvals, cvvals);
+
+      
+      eamAtomData.F = ea.getFSpline();
+      break;
+    }
     case eamZhou2005Oxygen : {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();

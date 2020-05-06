@@ -501,6 +501,51 @@ namespace OpenMD {
     at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
   }
 
+  void EAMAdapter::makeOxygenFuncfl(RealType re,
+                                RealType fe,
+                                RealType alpha,
+                                RealType beta,
+                                RealType A,
+                                RealType B,
+                                RealType kappa,
+                                RealType lambda,
+                                RealType drho,
+                                RealType nrho,
+                                std::vector<RealType> F) {
+    
+    if (isEAM()){
+      at_->removeProperty(EAMtypeID);
+      at_->removeProperty(ZhouTypeID);
+      at_->removeProperty(FuncflTypeID);
+    }
+
+    EAMParameters* eamParam = new EAMParameters();
+    FuncflParameters* funcflParam = new FuncflParameters();
+    ZhouParameters* zhouParam = new ZhouParameters();
+
+    eamParam->eamType = eamOxygenFuncfl;
+    eamParam->latticeConstant = re;
+    zhouParam->re = re;
+    zhouParam->fe = fe;
+    zhouParam->alpha = alpha;
+    zhouParam->beta = beta;
+    zhouParam->A = A;
+    zhouParam->B = B;
+    zhouParam->kappa = kappa;
+    zhouParam->lambda = lambda;
+
+    funcflParam->F = F;
+    funcflParam->drho = drho;
+    funcflParam->nrho = nrho;
+    
+
+    at_->addProperty(new EAMData(EAMtypeID, eamParam));
+    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(new FuncflData(FuncflTypeID, funcflParam));
+
+  }
+
+
   int EAMAdapter::getNrho() {
     FuncflParameters* funcflParam = getFuncflParam();
     return funcflParam->nrho;
