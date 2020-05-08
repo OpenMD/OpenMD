@@ -53,6 +53,7 @@ namespace OpenMD {
   string const FuncflTypeID = "FUNCFL";
   string const ZhouTypeID = "ZHOU";
   string const ZhouRoseTypeID = "ZHOUROSE";
+  
 
   enum EAMType{
     eamFuncfl,
@@ -61,6 +62,7 @@ namespace OpenMD {
     eamZhou2005,
     eamZhou2005Oxygen,
     eamZhouRose,
+    eamOxygenFuncfl,
     eamUnknown
   };
   
@@ -215,6 +217,17 @@ namespace OpenMD {
                       RealType kappa,
                       RealType lambda,
                       RealType F0);
+    void makeOxygenFuncfl(RealType re,
+                      RealType fe,
+                      RealType alpha,
+                      RealType beta,
+                      RealType A,
+                      RealType B,
+                      RealType kappa,
+                      RealType lambda,
+                      RealType drho,
+                      RealType nrho,
+                      std::vector<RealType> F);
 
     
     bool isEAM();

@@ -274,7 +274,62 @@ namespace OpenMD {
             ea.makeZhouRose(re, fe, rhoe, alpha, beta, A, B, kappa, lambda, F0);
             
           }          
-        } else {
+        }else if(eamParameterType == "OXYFUNCFL") {
+          if (nTokens < 9) {
+              sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                      "Not enough tokens at line %d\n", lineNo);
+              painCave.isFatal = 1;
+            simError();
+          } else {
+            std::string funcflFile = tokenizer.nextToken();
+
+            RealType re         = dus_ * tokenizer.nextTokenAsDouble();
+            RealType fe         = tokenizer.nextTokenAsDouble();
+            RealType alpha      = tokenizer.nextTokenAsDouble();
+            RealType beta       = tokenizer.nextTokenAsDouble();
+            RealType A          = eus_ * tokenizer.nextTokenAsDouble();
+            RealType B          = eus_ * tokenizer.nextTokenAsDouble();
+            RealType kappa      = tokenizer.nextTokenAsDouble();
+            RealType lambda     = tokenizer.nextTokenAsDouble();
+            
+            ifstrstream* ppfStream = ff.openForceFieldFile(funcflFile);
+            const int bufferSize = 65535;
+            char buffer[bufferSize];
+
+          // skip first line
+            ppfStream->getline(buffer, bufferSize);
+
+            std::vector<RealType> F;
+    
+            int nrho = 0;
+            RealType drho = 0.0;
+            if (ppfStream->getline(buffer, bufferSize)) {
+              StringTokenizer tokenizer1(buffer);
+
+              if (tokenizer1.countTokens() == 2) {
+                nrho = tokenizer1.nextTokenAsInt();
+                drho = tokenizer1.nextTokenAsDouble();
+              }else {
+                  sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
+                  "Not enough tokens\n");
+                  painCave.isFatal = 1;
+                  simError();
+                  }
+            }
+    
+            parseEAMArray(*ppfStream, F, nrho);
+            delete ppfStream;
+
+            // Convert to eV using energy unit scaling in force field:
+            std::transform(F.begin(), F.end(), F.begin(),
+                   std::bind1st(std::multiplies<RealType>(), eus_));
+
+            ea.makeOxygenFuncfl(re, fe, alpha, beta, A, B, kappa, lambda, drho, nrho, F);
+                              
+    
+            
+    }         
+    }else {
           sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: %s "
                   "is not a recognized EAM type\n", eamParameterType.c_str());
           painCave.isFatal = 1;
