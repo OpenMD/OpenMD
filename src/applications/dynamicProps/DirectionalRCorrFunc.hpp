@@ -47,10 +47,10 @@
 #define APPLICATIONS_DYNAMICPROPS_DIRECTIONALRCORRFUNC_HPP
 
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class DirectionalRCorrFunc : public AutoCorrFunc<Vector3d> {
+  class DirectionalRCorrFunc : public ObjectACF<Vector3d> {
   public:
     DirectionalRCorrFunc(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2);   
@@ -58,6 +58,7 @@ namespace OpenMD {
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void validateSelection(SelectionManager& seleMan);
 
     std::vector<std::vector<Vector3d> > positions_;
     std::vector<std::vector<RotMat3x3d> > rotMats_;

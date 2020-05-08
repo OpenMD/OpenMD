@@ -42,10 +42,10 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class VCorrFunc : public AutoCorrFunc<RealType> {
+  class VCorrFunc : public ObjectACF<RealType> {
   public:
     VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         
@@ -55,7 +55,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > velocities_;
   };
 
-  class VCorrFuncZ : public AutoCorrFunc<RealType> {
+  class VCorrFuncZ : public ObjectACF<RealType> {
   public:
     VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         
@@ -66,7 +66,7 @@ namespace OpenMD {
          
   };
 
-  class VCorrFuncR : public AutoCorrFunc<RealType> {
+  class VCorrFuncR : public ObjectACF<RealType> {
   public:
     VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         

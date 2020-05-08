@@ -243,6 +243,7 @@ namespace OpenMD{
     void     setNetCharge(const RealType nChg);
     RealType getChargeMomentum();
     void     setChargeMomentum(const RealType cMom);
+    
     RealType getPressure();
     void     setPressure(const RealType pressure);
 

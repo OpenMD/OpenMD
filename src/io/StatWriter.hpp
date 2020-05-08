@@ -69,6 +69,7 @@ namespace OpenMD {
     void writeVector(int i);
     void writePotVec(int i);
     void writeMatrix(int i);
+    void writeArray(int i);
         
     std::ofstream statfile_;
     std::ofstream reportfile_;

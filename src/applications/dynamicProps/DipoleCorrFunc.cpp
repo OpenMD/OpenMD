@@ -54,8 +54,9 @@ namespace OpenMD {
   DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2)
-    : AutoCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslAmat | DataStorage::dslDipole) {
+    : ObjectACF<RealType>(info, filename, sele1, sele2,
+                          DataStorage::dslAmat |
+                          DataStorage::dslDipole) {
     
     setCorrFuncType("Dipole Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".dcorr");

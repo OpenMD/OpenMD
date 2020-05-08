@@ -48,55 +48,47 @@
 namespace OpenMD {
   FreqFlucCorrFunc::FreqFlucCorrFunc(SimInfo* info, const std::string& filename,
                                      const std::string& sele1, 
-                                     const std::string& sele2, 
-                                     long long int memSize)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2,  
-                           DataStorage::dslElectricField | 
-                           DataStorage::dslAmat | DataStorage::dslDipole, 
-                           memSize){
+                                     const std::string& sele2)
+    : ObjectACF<RealType>(info, filename, sele1, sele2,  
+                          DataStorage::dslElectricField | 
+                          DataStorage::dslAmat |
+                          DataStorage::dslDipole) {
     
     setCorrFuncType("FreqFluc Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ffcorr");
+    ueStats_ = new Accumulator();
     
   }
-
-  RealType FreqFlucCorrFunc::calcCorrVal(int frame1, int frame2, 
-                                         StuntDouble* sd1,  StuntDouble* sd2) {
-
-    Vector3d e1;    
-    Vector3d u1;
-    Vector3d e2;    
-    Vector3d u2;
-
-    e1 = sd1->getElectricField(frame1);
-    
-    if (sd1->isRigidBody()) {
-      u1 = sd1->getA(frame1).getRow(2);
+  
+  int FreqFlucCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    Vector3d e = sd->getElectricField();
+    Vector3d u;
+    if (sd->isRigidBody()) {
+      u = sd->getA().getRow(2);
     } else {
-      AtomType* at = static_cast<Atom*>(sd1)->getAtomType();
+      AtomType* at = static_cast<Atom*>(sd)->getAtomType();
       MultipoleAdapter ma = MultipoleAdapter(at);
       
       if (ma.isDipole()) {
-        u1 = sd1->getDipole(frame1);
+        u = sd->getDipole();
       }
     }
 
-    e2 = sd2->getElectricField(frame2);
+    RealType uedot = dot(u,e);
+    ueStats_->add(uedot);
     
-    if (sd2->isRigidBody()) {
-      u2 = sd2->getA(frame2).getRow(2);
-    } else {
-      AtomType* at = static_cast<Atom*>(sd2)->getAtomType();
-      MultipoleAdapter ma = MultipoleAdapter(at);
-      
-      if (ma.isDipole()) {
-        u2 = sd2->getDipole(frame2);
-      }
-    }
-    
-    return (dot(u1, e1) - mean_) * (dot(u2, e2) - mean_);
+    ue_[frame].push_back( uedot );
+    return ue_[frame].size() - 1;
   }
 
+  RealType FreqFlucCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+    RealType mean;
+
+    ueStats_->getAverage(mean);
+    
+    return ( ue_[frame1][id1] - mean ) * ( ue_[frame2][id2] - mean );
+  }
+  
 
   void FreqFlucCorrFunc::validateSelection(const SelectionManager& seleMan) {
     StuntDouble* sd;
@@ -118,53 +110,6 @@ namespace OpenMD {
         }
       }
     }    
-  }
-
-  void FreqFlucCorrFunc::preCorrelate() {
-    mean_ = 0.0;
-    RealType sum(0.0);
-    int count(0);
-    StuntDouble* sd1;
-    Vector3d e1;
-    Vector3d u1;
-    int ii;
-    std::cerr << "preCorrelating to compute mean values\n";
-    // dump files can be enormous, so read them in block-by-block:
-    int nblocks = bsMan_->getNBlocks();
-
-    for (int i = 0; i < nblocks; ++i) {
-      bsMan_->loadBlock(i);
-      assert(bsMan_->isBlockActive(i));      
-      SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
-      for (int j = block1.first; j < block1.second; ++j) {
-
-        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL; 
-	     sd1 = seleMan1_.nextSelected(ii)) {
-
-          e1 = sd1->getElectricField(j);
-          
-          if (sd1->isRigidBody()) {
-            u1 = sd1->getA(j).getRow(2);
-          } else {
-            AtomType* at = static_cast<Atom*>(sd1)->getAtomType();
-            MultipoleAdapter ma = MultipoleAdapter(at);
-            
-            if (ma.isDipole()) {
-              u1 = sd1->getDipole(j);
-            }
-          }
-
-          RealType value = dot(u1, e1);
-
-          sum += value;                         
-          count++;
-        }
-      }
-      bsMan_->unloadBlock(i);
-    }
-
-    mean_ = sum / RealType(count);
-    std::cerr << "done with preCorrelation\n";
   }
 }
 

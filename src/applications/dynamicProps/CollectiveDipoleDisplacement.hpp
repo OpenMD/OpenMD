@@ -43,7 +43,7 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_COLLECTIVEDIPOLEDISPLACEMENT_HPP
 #define APPLICATIONS_DYNAMICPROPS_COLLECTIVEDIPOLEDISPLACEMENT_HPP
 
-#include "applications/dynamicProps/MPFrameTimeCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "brains/Thermo.hpp"
 
 namespace OpenMD {
@@ -82,17 +82,16 @@ namespace OpenMD {
 
       and identical quantities for the total and rotational contributions.
   */ 
-  class CollectiveDipoleDisplacement : public MPFrameTimeCorrFunc<Vector3d> {
+  class CollectiveDipoleDisplacement : public SystemACF<Vector3d> {
   public:
     CollectiveDipoleDisplacement(SimInfo* info, const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2);
     
   private:
-    virtual void computeProperty(int frame);
-    virtual Vector3d calcCorrVal(int frame1, int frame2);    
-    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) {return Vector3d(-1,-1,-1);}
-
+    virtual void computeProperty1(int frame);
+    virtual Vector3d calcCorrVal(int frame1, int frame2);
+    
     Thermo* thermo_;
     
     std::vector<Vector3d> CRcm_;

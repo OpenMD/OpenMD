@@ -62,10 +62,8 @@
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
-#include "applications/dynamicProps/EnergyCorrFunc.hpp"
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
-#include "applications/dynamicProps/MomentumCorrFunc.hpp"
 #include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
 #include "applications/dynamicProps/ForTorCorrFunc.hpp"
 #include "applications/dynamicProps/ForceAutoCorrFunc.hpp"
@@ -172,7 +170,7 @@ int main(int argc, char* argv[]){
   if(args_info.sdcorr_given){
     corrFunc = new SystemDipoleCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.selecorr_given){
-    corrFunc = new SelectionCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new SelectionCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.dcorr_given){
     corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorr_given) {
@@ -211,15 +209,11 @@ int main(int argc, char* argv[]){
   } else if (args_info.tacorr_given){
     corrFunc = new TorqueAutoCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.bondcorr_given) {
-    corrFunc = new BondCorrFunc(info, dumpFileName, sele1, memSize);
-  } else if (args_info.helfandEcorr_given){
-    corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new BondCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.stresscorr_given){
-    corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2, memSize);
-  } else if (args_info.momentum_given){
-    corrFunc = new MomentumCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.freqfluccorr_given){
-    corrFunc = new FreqFlucCorrFunc(info, dumpFileName, sele1, sele2, memSize);
+    corrFunc = new FreqFlucCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.lcorr_given) {
     int order(0);
     if (args_info.order_given)

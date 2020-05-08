@@ -736,6 +736,10 @@ namespace OpenMD {
   void DumpReader::readFrameProperties(std::istream& inputStream) {
 
     Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
+    // We're about to overwrite all frame properties, so clear out any
+    // derived properties from previous use:
+    s->clearDerivedProperties();
+    
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
 

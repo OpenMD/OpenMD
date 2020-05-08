@@ -50,9 +50,9 @@ namespace OpenMD {
                                      const std::string& sele2,
                                      double OOcut, double thetaCut,
                                      double OHcut)
-    : MultipassCorrFunc<RealType>(info, filename, sele1, sele2,
-                                  DataStorage::dslPosition |
-                                  DataStorage::dslAmat ),
+    : TimeCorrFunc<RealType>(info, filename, sele1, sele2,
+                             DataStorage::dslPosition |
+                             DataStorage::dslAmat ),
     OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut) {
     
     setCorrFuncType("HBondPersistence");

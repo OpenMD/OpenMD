@@ -350,6 +350,84 @@ namespace OpenMD {
     return snap->getChargeMomentum();
   }
 
+  std::vector<Vector3d> Thermo::getCurrentDensity() {
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    std::set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
+
+    SimInfo::MoleculeIterator miter;
+    std::vector<Atom*>::iterator iiter;
+    std::vector<RigidBody*>::iterator ri;
+    Molecule* mol;
+    RigidBody* rb;
+    Atom* atom;
+    AtomType* atype;
+    std::set<AtomType*>::iterator at;
+    Vector3d Jc(0.0);
+    std::vector<Vector3d> typeJc(simTypes.size(), V3Zero);
+    
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter)) {
+
+      // change the velocities of atoms which belong to the rigidbodies
+      for (rb = mol->beginRigidBody(ri); rb != NULL;
+           rb = mol->nextRigidBody(ri)) {
+        rb->updateAtomVel();
+      }
+      
+      for (atom = mol->beginAtom(iiter); atom != NULL;
+           atom = mol->nextAtom(iiter)) {
+        
+        Vector3d v = atom->getVel();
+        RealType q = 0.0;
+        int typeIndex(-1);
+
+        atype = atom->getAtomType();
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if ( fca.isFixedCharge() )
+          q = fca.getCharge();
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+        if ( fqa.isFluctuatingCharge() )
+          q += atom->getFlucQPos();
+        
+        typeIndex = -1;
+        at = std::find(simTypes.begin(), simTypes.end(), atype);
+        if (at != simTypes.end()) {
+          typeIndex = std::distance(simTypes.begin(), at);
+        }
+
+        if (typeIndex != -1) {
+          typeJc[typeIndex] += q * v;
+        } 
+        Jc += q*v;       
+      }
+    }
+        
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &Jc[0], 3, MPI_REALTYPE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    for (unsigned int j = 0 ; j < simTypes.size(); j++) {             
+      MPI_Allreduce(MPI_IN_PLACE, &typeJc[j][0], 3, MPI_REALTYPE,
+                    MPI_SUM, MPI_COMM_WORLD);
+    }
+#endif
+
+    RealType vol = snap->getVolume();
+
+    Jc /= (vol * Constants::currentDensityConvert);
+    for (unsigned int j = 0 ; j < simTypes.size(); j++) {
+      typeJc[j] /= (vol * Constants::currentDensityConvert);
+    }
+    
+    std::vector<Vector3d> result;
+    result.clear();
+
+    result.push_back( Jc );
+    for (unsigned int j = 0 ; j < simTypes.size(); j++)
+      result.push_back( typeJc[j] );
+       
+    return result;
+  }
+  
   RealType Thermo::getVolume() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     return snap->getVolume();

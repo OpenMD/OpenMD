@@ -163,6 +163,8 @@ namespace OpenMD {
             writePotVec(i);
           else if (stats_->getDataType(i) == "Mat3x3d")
             writeMatrix(i);
+          else if (stats_->getDataType(i) == "Array2d")
+            writeArray(i);
           else {
             sprintf( painCave.errMsg,
                      "StatWriter found an unknown data type for: %s ",
@@ -241,21 +243,38 @@ namespace OpenMD {
 
     Mat3x3d s = stats_->getMatrixData(i);
 
-    for (unsigned int i = 0; i < 3; i++) {
-      for (unsigned int j = 0; j < 3; j++) {
-        if (std::isinf(s(i,j)) || std::isnan(s(i,j))) {
+    for (unsigned int i1 = 0; i1 < 3; i1++) {
+      for (unsigned int j1 = 0; j1 < 3; j1++) {
+        if (std::isinf(s(i1,j1)) || std::isnan(s(i1,j1))) {
           sprintf( painCave.errMsg,
                    "StatWriter detected a numerical error writing: %s",
                    stats_->getTitle(i).c_str());
           painCave.isFatal = 1;
           simError();
         } else {
-          statfile_ << "\t" << s(i,j);
+          statfile_ << "\t" << s(i1,j1);
         }
       }
     }
   }
-  
+
+  void StatWriter::writeArray(int i) {
+    
+    std::vector<RealType> s = stats_->getArrayData(i);
+
+    for (unsigned int j = 0; j < s.size(); ++j) {
+      if (std::isinf(s[j]) || std::isnan(s[j])) {
+        sprintf( painCave.errMsg,
+                 "StatWriter detected a numerical error writing: %s",
+                 stats_->getTitle(i).c_str());
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        statfile_ << "\t" << s[j];
+      }
+    }    
+  }
+
   void StatWriter::writeStatReport() {
 #ifdef IS_MPI
     if(worldRank == 0 ){

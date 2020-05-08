@@ -44,17 +44,17 @@
 
 #include "math/Polynomial.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class LegendreCorrFunc : public AutoCorrFunc<Vector3d> {
+  class LegendreCorrFunc : public ObjectACF<Vector3d> {
   public:
     LegendreCorrFunc(SimInfo* info, const std::string& filename,
                      const std::string& sele1, const std::string& sele2,
                      int order);
     
-  private:
+  protected:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void validateSelection(SelectionManager& seleMan);

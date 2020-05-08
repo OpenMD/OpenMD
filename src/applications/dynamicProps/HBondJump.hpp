@@ -42,10 +42,10 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_HBONDJUMP_HPP
 #define APPLICATIONS_DYNAMICPROPS_HBONDJUMP_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class HBondJump : public MultipassCorrFunc<RealType> {
+  class HBondJump : public TimeCorrFunc<RealType> {
   public:
     HBondJump(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2, double OOCut,
@@ -54,10 +54,19 @@ namespace OpenMD {
   protected:
     virtual void correlation();
     virtual void computeFrame(int istep);
-    virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
-    virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
     
+    virtual void computeProperty1(int frame) {return;}
+    virtual void computeProperty2(int frame) {return;}
+    virtual int computeProperty1(int frame, Molecule* mol) {return -1;}
+    virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
+    virtual int computeProperty1(int frame, Bond* bond) {return -1;}
+    virtual int computeProperty2(int frame, Molecule* mol) {return -1;}
+    virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
+    virtual int computeProperty2(int frame, Bond* bond) {return -1;}
+
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
+    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
+       
     virtual void postCorrelate();
 
     virtual int  registerHydrogen(int frame, int hIndex);

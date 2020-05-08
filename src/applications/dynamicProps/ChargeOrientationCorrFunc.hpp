@@ -41,15 +41,20 @@
  */
 #ifndef APPLICATIONS_DYNAMICPROPS_CHARGEORIENTATIONCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_CHARGEORIENTATIONCORRFUNC_HPP
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ChargeOrientationCorrFunc : public CrossCorrFunc<RealType> {
+  class ChargeOrientationCorrFunc : public ObjectCCF<RealType> {
   public:
     ChargeOrientationCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2, const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ, const RealType cutOff = 10.0, const int axis=2);
-
+                              const std::string& sele1,
+                              const std::string& sele2,
+                              const RealType dipoleX,
+                              const RealType dipoleY,
+                              const RealType dipoleZ,
+                              const RealType cutOff = 10.0, const int axis=2);
+    
   private:
     virtual void validateSelection(SelectionManager& seleMan);
     virtual int computeProperty1(int frame, StuntDouble* sd);

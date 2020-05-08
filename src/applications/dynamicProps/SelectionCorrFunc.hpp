@@ -45,17 +45,21 @@
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
-
-  class SelectionCorrFunc : public TimeCorrFunc {
+  
+  class SelectionCorrFunc : public ObjectCCF<int> {
   public:
     SelectionCorrFunc(SimInfo* info, const std::string& filename, 
-                      const std::string& sele1, const std::string& sele2, 
-                      long long int memSize);   
-        
+                      const std::string& sele1, const std::string& sele2);   
+    
   private:
-    virtual void correlateFrames(int frame1, int frame2);    
-  };
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual int computeProperty2(int frame, StuntDouble* sd);
+    virtual int calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void postCorrelate() {}; // don't renormalize the histogram for this correlation function
 
+    std::vector<std::vector<bool> > selected1_;
+    std::vector<std::vector<bool> > selected2_;
+  };
 }
 #endif
 

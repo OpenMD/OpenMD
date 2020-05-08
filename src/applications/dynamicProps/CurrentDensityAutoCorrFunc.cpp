@@ -51,10 +51,9 @@ namespace OpenMD {
                                                          const string& filename,
                                                          const string& sele1,
                                                          const string& sele2)
-    : MPFrameTimeCorrFunc<RealType>(info, filename,
-                                    sele1, sele2,
-                                    DataStorage::dslVelocity |
-                                    DataStorage::dslFlucQPosition) {
+    : SystemACF<RealType>(info, filename, sele1, sele2,
+                          DataStorage::dslVelocity |
+                          DataStorage::dslFlucQPosition) {
     
     setCorrFuncType("Current Density Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".currentDensityCorr");
@@ -80,7 +79,7 @@ namespace OpenMD {
     thermo_ =  new Thermo(info_);
   }
   
-  void CurrentDensityAutoCorrFunc::computeProperty(int frame) {
+  void CurrentDensityAutoCorrFunc::computeProperty1(int frame) {
     StuntDouble* sd1;
     AtomType* atype;
     std::vector<AtomType*>::iterator at;

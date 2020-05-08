@@ -51,8 +51,9 @@ namespace OpenMD {
                                              const std::string& filename,
                                              const std::string& sele1,
                                              const std::string& sele2)
-    : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2,
-                             DataStorage::dslPosition | DataStorage::dslAmat){
+    : ObjectACF<Vector3d>(info, filename, sele1, sele2,
+                          DataStorage::dslPosition |
+                          DataStorage::dslAmat){
     
     setCorrFuncType("DirectionalRCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".drcorr");
@@ -84,5 +85,20 @@ namespace OpenMD {
     RealType rperp2 = rsq - rpar2;
 
     return Vector3d(rsq, rpar2, rperp2);
+  }
+
+  void DirectionalRCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      if (!sd->isDirectional()) {
+        sprintf(painCave.errMsg,
+                "DirectionalRCorrFunc::validateSelection Error: "
+                "at least one of the selected objects is not Directional\n");
+        painCave.isFatal = 1;
+        simError();        
+      }
+    }        
   }
 }

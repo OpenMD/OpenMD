@@ -42,25 +42,28 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 
-#include "applications/dynamicProps/FrameTimeCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
+#include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 
-  class StressCorrFunc : public FrameTimeCorrFunc {
+  class StressCorrFunc : public SystemACF<Mat3x3d> {
   public:
-    StressCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, long long int memSize);   
-        
+    StressCorrFunc(SimInfo* info, const std::string& filename,
+                   const std::string& sele1, const std::string& sele2);   
+    
   private:
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
-    virtual void writeCorrelate();
+    virtual void computeProperty1(int frame);
+    virtual Mat3x3d calcCorrVal(int frame1, int frame2);
 
-  protected:
-    virtual void preCorrelate();
-    virtual void postCorrelate();
-    std::vector<Mat3x3d > histogram_;
-    RealType avePress_;
-    RealType aveVol_;
+    std::vector<Mat3x3d> action_;
+    std::vector<RealType> time_;
+    
+    ForceManager* forceMan_;
+    Thermo* thermo_;
+    Accumulator* pressure_;
   };
 
 }

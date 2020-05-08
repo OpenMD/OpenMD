@@ -46,11 +46,11 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_THETACORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_THETACORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
   
-  class ThetaCorrFunc : public AutoCorrFunc<RealType> {
+  class ThetaCorrFunc : public ObjectACF<RealType> {
   public:
     ThetaCorrFunc(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2);   

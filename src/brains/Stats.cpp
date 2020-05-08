@@ -421,6 +421,18 @@ namespace OpenMD {
     data_[CHARGE_MOMENTUM] = chargeMomentum;
     statsMap_["CHARGE_MOMENTUM"] = CHARGE_MOMENTUM;
 
+    StatsData currentDensity;
+    currentDensity.units = "amps / m^2";
+    currentDensity.title = "Current Density: total, then by AtomType";
+    currentDensity.dataType = "Array2d";
+    int nCols = 3 * (info_->getSimulatedAtomTypes().size()) + 3;
+    currentDensity.accumulatorArray2d.resize(nCols);
+    for (unsigned int j = 0 ; j < nCols; j++) {
+      currentDensity.accumulatorArray2d[j] = new Accumulator();
+    }
+    data_[CURRENT_DENSITY] = currentDensity;
+    statsMap_["CURRENT_DENSITY"] = CURRENT_DENSITY;
+
     // Now, set some defaults in the mask:
 
     Globals* simParams = info_->getSimParams();
@@ -669,6 +681,15 @@ namespace OpenMD {
         case CHARGE_MOMENTUM:
           dynamic_cast<Accumulator *>(data_[i].accumulator)->add(thermo.getChargeMomentum());
           break;
+        case CURRENT_DENSITY:
+          unsigned int k = 0;
+          std::vector<Vector3d> Jc = thermo.getCurrentDensity();
+          for (unsigned int j = 0; j < Jc.size(); ++j) {
+            dynamic_cast<Accumulator *>(data_[i].accumulatorArray2d[k++])->add(Jc[j][0]);
+            dynamic_cast<Accumulator *>(data_[i].accumulatorArray2d[k++])->add(Jc[j][1]);
+            dynamic_cast<Accumulator *>(data_[i].accumulatorArray2d[k++])->add(Jc[j][2]);
+          }
+          break;
 
           /*
             case SHADOWH:
@@ -713,6 +734,18 @@ namespace OpenMD {
     dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getLastValue(value);
     return value;
   }
+  std::vector<RealType> Stats::getArrayData(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    int columns = data_[index].accumulatorArray2d.size();
+    
+    std::vector<RealType> value;
+    RealType v;
+    for (unsigned int i = 0; i < data_[index].accumulatorArray2d.size(); ++i) {
+      dynamic_cast<Accumulator*>(data_[index].accumulatorArray2d[i])->getLastValue(v);
+      value.push_back(v);
+    }
+    return value;
+  }
 
   int Stats::getIntAverage(int index) {
     assert(index >=0 && index < ENDINDEX);
@@ -744,6 +777,19 @@ namespace OpenMD {
     dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getAverage(value);
     return value;
   }
+    std::vector<RealType> Stats::getArrayAverage(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    int columns = data_[index].accumulatorArray2d.size();
+
+    std::vector<RealType> value;
+    RealType v;
+    for (unsigned int i = 0; i < data_[index].accumulatorArray2d.size(); ++i) {
+      dynamic_cast<Accumulator*>(data_[index].accumulatorArray2d[i])->getAverage(v);
+      value.push_back(v);
+    }
+    return value;
+  }
+
 
   int Stats::getIntError(int index) {
     assert(index >=0 && index < ENDINDEX);
@@ -775,6 +821,19 @@ namespace OpenMD {
     dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->get95percentConfidenceInterval(value);
     return value;
   }
+  std::vector<RealType> Stats::getArrayError(int index) {
+    assert(index >=0 && index < ENDINDEX);
+    int columns = data_[index].accumulatorArray2d.size();
+
+    std::vector<RealType> value;
+    RealType v;
+    for (unsigned int i = 0; i < data_[index].accumulatorArray2d.size(); ++i) {
+      dynamic_cast<Accumulator*>(data_[index].accumulatorArray2d[i])->get95percentConfidenceInterval(v);
+      value.push_back(v);
+    }
+    return value;
+  }
+
 
   Stats::StatsBitSet Stats::getStatsMask() {
     return statsMask_;

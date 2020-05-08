@@ -42,24 +42,30 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_BONDCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_BONDCORRFUNC_HPP
 
-#include "applications/dynamicProps/InteractionTimeCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class BondCorrFunc : public InteractionTimeCorrFunc {
+  class BondCorrFunc : public AutoCorrFunc<RealType> {
   public:
-    BondCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, long long int memSize);   
-        
-    virtual void correlateFrames(int frame1, int frame2);
-
+    BondCorrFunc(SimInfo* info, const std::string& filename,
+                 const std::string& sele1, const std::string& sele2);
+    
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, ShortRangeInteraction* sri);
-    int nSelectedBonds_;
-    Bond* bond;
-    RealType re;
-    RealType val1;
-    RealType val2;
-    Snapshot* snapshot1;
-    Snapshot* snapshot2;
+    virtual int computeProperty1(int frame, Bond* bond);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
+    
+    virtual void computeProperty1(int frame) { return; }
+    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
+    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
+    
+    virtual void computeProperty2(int frame) { return; }
+    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
+    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
+    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    
+    virtual RealType calcCorrVal(int frame1, int frame2) {return 0.0;}
+    
+    std::vector<std::vector<RealType> > delta_;
   };
 }
 #endif

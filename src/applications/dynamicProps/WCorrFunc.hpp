@@ -42,12 +42,13 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_WCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_WCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class WCorrFunc : public AutoCorrFunc<RealType> {
+  class WCorrFunc : public ObjectACF<RealType> {
   public:
-    WCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+    WCorrFunc(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2);
 
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);

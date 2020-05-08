@@ -50,11 +50,10 @@ namespace OpenMD {
   CollectiveDipoleDisplacement::CollectiveDipoleDisplacement(SimInfo* info,
                                                              const string& filename,
                                                              const string& sele1,
-                                                             const string& sele2)
-    : MPFrameTimeCorrFunc<Vector3d>(info, filename,
-                                    sele1, sele2,
-                                    DataStorage::dslPosition |
-                                    DataStorage::dslFlucQPosition) {
+                                                             const std::string& sele2)
+    : SystemACF<Vector3d>(info, filename, sele1, sele2,
+                          DataStorage::dslPosition |
+                          DataStorage::dslFlucQPosition) {
     
     setCorrFuncType("Collective Dipole Displacement Function");
     setOutputName(getPrefix(dumpFilename_) + ".ddisp");
@@ -74,7 +73,7 @@ namespace OpenMD {
     thermo_ =  new Thermo(info_);
   }
   
-  void CollectiveDipoleDisplacement::computeProperty(int frame) {
+  void CollectiveDipoleDisplacement::computeProperty1(int frame) {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::AtomIterator ai;

@@ -48,11 +48,13 @@
 
 namespace OpenMD {
   ChargeKineticCorrFunc::ChargeKineticCorrFunc(SimInfo* info,
-                                 const std::string& filename,
-                                 const std::string& sele1,
-                                 const std::string& sele2, const RealType cutoff)
-    : CrossCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslFlucQPosition | DataStorage::dslVelocity),rcut_(cutoff){
+                                               const std::string& filename,
+                                               const std::string& sele1,
+                                               const std::string& sele2,
+                                               const RealType cutoff)
+    : ObjectCCF<RealType>(info, filename, sele1, sele2,
+                          DataStorage::dslFlucQPosition |
+                          DataStorage::dslVelocity), rcut_(cutoff) {
 
     setCorrFuncType("Charge - Kinetic Cross Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".QKcorr");
@@ -151,7 +153,7 @@ namespace OpenMD {
   }
 
   RealType ChargeKineticCorrFunc::calcCorrVal(int frame1, int frame2,
-                                      int id1, int id2) {
+                                              int id1, int id2) {
     Vector3d sep = pos1_ - pos2_;
     RealType distance = sep.length();
     if (distance <= rcut_) return 0;

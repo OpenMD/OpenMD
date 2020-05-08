@@ -52,9 +52,9 @@ namespace OpenMD {
              const std::string& sele1, 
              const std::string& sele2, 
              int order, int nZbins, int axis)
-    : AutoCorrFunc<Vector<RealType, 4> >(info, filename, sele1, sele2,
-                                         DataStorage::dslPosition |
-                                         DataStorage::dslAmat),
+    : MoleculeACF<Vector<RealType, 4> >(info, filename, sele1, sele2,
+                                        DataStorage::dslPosition |
+                                        DataStorage::dslAmat),
     nZBins_(nZbins), axis_(axis) {
 
     setCorrFuncType("Legendre Correlation Function");
@@ -107,15 +107,15 @@ namespace OpenMD {
     boxZ_ = hmat(axis_,axis_);
     halfBoxZ_ = boxZ_ / 2.0;      
 
-    AutoCorrFunc<Vector<RealType, 4> >::computeFrame(frame);
+    MoleculeACF<Vector<RealType, 4> >::computeFrame(frame);
   }
 
-  int COHZ::computeProperty1(int frame, StuntDouble* sd) {
+  int COHZ::computeProperty1(int frame, Molecule* mol) {
     
-    RotMat3x3d A = sd->getA();
+    RotMat3x3d A = mol->getRigidBodyAt(0)->getA();
     rotMats_[frame].push_back( A );
     
-    Vector3d pos = sd->getPos();
+    Vector3d pos = mol->getCom();
     if (info_->getSimParams()->getUsePeriodicBoundaryConditions())
       currentSnapshot_->wrapVector(pos);
     int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / boxZ_);
@@ -223,19 +223,18 @@ namespace OpenMD {
   }
 
   void COHZ::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
+    Molecule* mol;
     int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {
-      if ( !sd->isDirectional() ) {
+    for (mol = seleMan1_.beginSelectedMolecule(i); mol != NULL;
+         mol = seleMan1_.nextSelectedMolecule(i)) {
+      if (mol->getNRigidBodies() < 1) {
         sprintf(painCave.errMsg,
                 "COHZ::validateSelection Error: "
-                "at least one selected object is not Directional\n");
+                "at least one selected molecule does not have a rigid body\n");
         painCave.isFatal = 1;
         simError();        
       }
-    }
-    
+    }    
   }
 
   void COHZ::writeCorrelate() {

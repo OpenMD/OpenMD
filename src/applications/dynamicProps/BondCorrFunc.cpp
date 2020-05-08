@@ -44,45 +44,33 @@
 
 namespace OpenMD {
   BondCorrFunc::BondCorrFunc(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, long long int memSize)
-    : InteractionTimeCorrFunc(info, filename, sele1, 
-                              DataStorage::dslPosition, memSize){
+                             const std::string& sele1, const std::string& sele2)
+    : AutoCorrFunc<RealType>(info, filename, sele1, sele2,
+                             DataStorage::dslPosition){
     
-      setCorrFuncType("Bond Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
-      nSelectedBonds_ =   seleMan1_.getBondSelectionCount();  
+    setCorrFuncType("Bond Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
+
+    this->autoCorrFunc_ = true;
+    this->doSystemProperties_ = false;
+    this->doMolecularProperties_ = false;
+    this->doObjectProperties_ = false;
+    this->doBondProperties_ = true;
+
   }
   
-
-  void BondCorrFunc::correlateFrames(int frame1, int frame2) {
-    snapshot1 = bsMan_->getSnapshot(frame1);
-    snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
-
-    RealType time1 = snapshot1->getTime();
-    RealType time2 = snapshot2->getTime();
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-    count_[timeBin] += nSelectedBonds_;    
-
-    int i;
-
-    for (bond = seleMan1_.beginSelectedBond(i);
-         bond != NULL ;
-         bond = seleMan1_.nextSelectedBond(i)) {
-
-      RealType corrVal = calcCorrVal(frame1, frame2, bond);
-      histogram_[timeBin] += corrVal;    
-    }    
+  int BondCorrFunc::computeProperty1(int frame, Bond* bond) {
+    
+    RealType re = bond->getBondType()->getEquilibriumBondLength();
+    RealType r = bond->getValue();
+    
+    delta_[frame].push_back( r - re );
+    return delta_[frame].size() - 1;
   }
 
   RealType BondCorrFunc::calcCorrVal(int frame1, int frame2,
-                                     ShortRangeInteraction* sri) {
-    bond = dynamic_cast<Bond*>(sri);
-    re = bond->getBondType()->getEquilibriumBondLength();
-    val1 = bond->getValue(frame1) - re;
-    val2 = bond->getValue(frame2) - re;
-    return val1 * val2;
+                                      int id1, int id2) {
+    return delta_[frame1][id1] * delta_[frame2][id2];
   }
 }
 

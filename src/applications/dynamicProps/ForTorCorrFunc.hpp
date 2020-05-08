@@ -42,15 +42,15 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_FORTORCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_FORTORCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ForTorCorrFunc : public CrossCorrFunc<Mat3x3d> {
+  class ForTorCorrFunc : public ObjectCCF<Mat3x3d> {
   public:
     ForTorCorrFunc(SimInfo* info, const std::string& filename,
                    const std::string& sele1, const std::string& sele2);
-
+    
   private:
     virtual void validateSelection(SelectionManager& seleMan);
     virtual int computeProperty1(int frame, StuntDouble* sd);

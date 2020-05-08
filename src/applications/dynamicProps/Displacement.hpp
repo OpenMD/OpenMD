@@ -42,10 +42,10 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_DISPLACEMENT_HPP
 #define APPLICATIONS_DYNAMICPROPS_DISPLACEMENT_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class Displacement : public AutoCorrFunc<Vector3d> {
+  class Displacement : public ObjectACF<Vector3d> {
   public:
     Displacement(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2);
@@ -55,7 +55,7 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d> > positions_;
   };
 
-  class DisplacementZ : public AutoCorrFunc<Vector3d> {
+  class DisplacementZ : public ObjectACF<Vector3d> {
   public:
     DisplacementZ(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,
@@ -65,7 +65,8 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2, int timeBin);
-    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) { return Vector3d(-1.0); }
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) { return Vector3d(0.0);}
+
     virtual void postCorrelate();
     virtual void writeCorrelate();
 

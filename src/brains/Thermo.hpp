@@ -69,7 +69,8 @@ namespace OpenMD {
     RealType getElectronicTemperature(); // gives the instant electronic temperature in K
     RealType getNetCharge(); // gives the total net charge on the system
     RealType getChargeMomentum(); // gives the instantaneous charge momentum in kcal fs / e / mol
-
+    std::vector<Vector3d> getCurrentDensity();
+    
     RealType getPressure(); // gives the instant pressure in atm;
 
     /** \brief gives the pressure tensor in amu*fs^-2*Ang^-1 */

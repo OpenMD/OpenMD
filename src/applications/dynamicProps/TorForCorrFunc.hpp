@@ -42,11 +42,11 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_TORFORCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_TORFORCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class TorForCorrFunc : public CrossCorrFunc<Mat3x3d> {
+  class TorForCorrFunc : public ObjectCCF<Mat3x3d> {
   public:
     TorForCorrFunc(SimInfo* info, const std::string& filename,
                    const std::string& sele1, const std::string& sele2);

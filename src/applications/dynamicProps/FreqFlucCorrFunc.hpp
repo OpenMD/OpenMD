@@ -47,7 +47,9 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_FREQFLUCCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_FREQFLUCCORRFUNC_HPP
 
-#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "utils/Accumulator.hpp"
+
 namespace OpenMD {
 
   //! Frequency Fluctuation Correlation Function
@@ -61,17 +63,18 @@ namespace OpenMD {
     \f$ = \langle \mathbf{E} \cdot \mathbf{u} \rangle \f$
 
   */
-  class FreqFlucCorrFunc : public ParticleTimeCorrFunc {
+  class FreqFlucCorrFunc : public ObjectACF<RealType> {
   public:
     FreqFlucCorrFunc(SimInfo* info, const std::string& filename, 
-                     const std::string& sele1, const std::string& sele2,
-                     long long int memSize);   
+                     const std::string& sele1, const std::string& sele2);   
     
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
+    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void validateSelection(const SelectionManager& seleMan);
-    virtual void preCorrelate();
-    RealType mean_;
+    
+    std::vector<std::vector<RealType> > ue_;
+    Accumulator* ueStats_;
   };  
 }
 #endif

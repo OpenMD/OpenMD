@@ -43,24 +43,22 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_CURRENTDENSITYAUTOCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_CURRENTDENSITYAUTOCORRFUNC_HPP
 
-#include "applications/dynamicProps/MPFrameTimeCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  class CurrentDensityAutoCorrFunc : public MPFrameTimeCorrFunc<RealType> {
+  class CurrentDensityAutoCorrFunc : public SystemACF<RealType> {
   public:
     CurrentDensityAutoCorrFunc(SimInfo* info, const std::string& filename,
                                const std::string& sele1,
                                const std::string& sele2);
 
   private:
-    virtual void computeProperty(int frame);
+    virtual void computeProperty1(int frame);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual void postCorrelate();
     virtual void writeCorrelate();
-
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return -1;}
     virtual RealType calcCorrVal(int frame1, int frame2) {return -1;}
 
     Thermo* thermo_;

@@ -42,10 +42,10 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_MOMANGMOMCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_MOMANGMOMCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 namespace OpenMD {
 
-  class MomAngMomCorrFunc : public CrossCorrFunc<RealType> {
+  class MomAngMomCorrFunc : public ObjectCCF<RealType> {
   public:
     MomAngMomCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2);   

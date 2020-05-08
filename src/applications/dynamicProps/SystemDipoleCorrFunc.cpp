@@ -45,21 +45,19 @@
 
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
 #include "utils/Revision.hpp"
-#include "brains/ForceManager.hpp"
-#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
   // Just need the dipole of the system for each frame
   SystemDipoleCorrFunc::SystemDipoleCorrFunc(SimInfo* info,
                                              const std::string& filename, 
-                                             const std::string& sele1, 
+                                             const std::string& sele1,
                                              const std::string& sele2)
-    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
-                             DataStorage::dslPosition | 
-                             DataStorage::dslAmat |
-                             DataStorage::dslDipole |
-                             DataStorage::dslFlucQPosition) {
+    : SystemACF<RealType>(info, filename, sele1, sele2,
+                          DataStorage::dslPosition | 
+                          DataStorage::dslAmat |
+                          DataStorage::dslDipole |
+                          DataStorage::dslFlucQPosition) {
     
     setCorrFuncType("SystemDipoleCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".sysdipcorr");
@@ -68,16 +66,13 @@ namespace OpenMD {
     thermo_ = new Thermo(info_);
   }
   
-  void SystemDipoleCorrFunc::computeFrame(int frame) {
+  void SystemDipoleCorrFunc::computeProperty1(int frame) {
     sysDipoles_[frame] = thermo_->getSystemDipole();
     return;    
   }
   
-  void SystemDipoleCorrFunc::correlateFrames(int frame1, int frame2,
-                                             int timeBin) {    
-    RealType corrVal = dot(sysDipoles_[frame1], sysDipoles_[frame2]);
-    histogram_[timeBin] += corrVal;
-    count_[timeBin]++;
+  RealType SystemDipoleCorrFunc::calcCorrVal(int frame1, int frame2) {    
+    return dot(sysDipoles_[frame1], sysDipoles_[frame2]);
   }
 }
 

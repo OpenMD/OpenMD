@@ -49,81 +49,70 @@ namespace OpenMD {
   // We need all of the positions, velocities, etc. so that we can
   // recalculate pressures and actions on the fly:
   ActionCorrFunc::ActionCorrFunc(SimInfo* info, const std::string& filename, 
-				 const std::string& sele1, 
-				 const std::string& sele2)
-    : MPFrameTimeCorrFunc<Mat3x3d>(info, filename, sele1, sele2, 
-                                   DataStorage::dslPosition | 
-                                   DataStorage::dslVelocity |
-                                   DataStorage::dslForce ){
+				 const std::string& sele1,
+                                 const std::string& sele2)
+    : SystemACF<Mat3x3d>(info, filename, sele1, sele2,
+                         DataStorage::dslPosition | 
+                         DataStorage::dslVelocity |
+                         DataStorage::dslForce ){
     
-      setCorrFuncType("ActionCorrFunc");      
-      setOutputName(getPrefix(dumpFilename_) + ".action");
+    setCorrFuncType("ActionCorrFunc");      
+    setOutputName(getPrefix(dumpFilename_) + ".action");
+    setLabelString( "Txx\tTxy\tTxz\tTyx\tTyy\tTyz\tTzx\tTzy\tTzz" );
 
-      // We'll need the force manager to compute forces for the average pressure
-      forceMan_ = new ForceManager(info);
-      
-      // We'll need thermo to compute the pressures from the virial
-      thermo_ =  new Thermo(info);
-
-      pSum_ = 0.0;
-      vSum_ = 0.0;
-      nsamp_ = 0;
-    }
-
-
-  void ActionCorrFunc::computeProperty(int frame1) {
-
-    StuntDouble* sd1;
-    int i;
+    // We'll need the force manager to compute forces for the average pressure
+    forceMan_ = new ForceManager(info);
     
-    // do the forces:
-    forceMan_->calcForces();
-    // call thermo to get the pressure and volume.
-    pSum_ += thermo_->getPressure();
-    RealType vol1 =  thermo_->getVolume();
-    vSum_ += vol1;
-    nsamp_++;
+    // We'll need thermo to compute the pressures from the virial
+    thermo_ =  new Thermo(info);
 
-    Mat3x3d actionTensor1(0.0);
-    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
-         sd1 = seleMan1_.nextSelected(i)) {
-
-      Vector3d r1 = sd1->getPos(frame1);
-      Vector3d v1 = sd1->getVel(frame1);
-      RealType m = sd1->getMass();
-
-      actionTensor1 += m*outProduct(r1, v1);
-    }
-    actionTensor_[frame1] = actionTensor1 / vol1;
-    
+    action_.resize(nTimeBins_);
+    time_.resize(nTimeBins_);
+    pressure_ = new Accumulator();
   }
-  
-  void ActionCorrFunc::correlateFrames(int frame1, int frame2, int timeBin) {
 
+
+  void ActionCorrFunc::computeProperty1(int frame) {
+
+    forceMan_->calcForces();
+    RealType vol = thermo_->getVolume();
+    RealType pressure = thermo_->getPressure() / Constants::pressureConvert;
+
+    int i;
+    StuntDouble* sd;
+
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+
+      Vector3d r = sd->getPos(frame);
+      Vector3d v = sd->getVel(frame);
+      RealType m = sd->getMass();
+
+      action_[frame] += m*outProduct(r, v);
+    }
+    action_[frame] /= vol;
+    time_[frame] = info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+    pressure_->add(pressure);
+  }
+
+  Mat3x3d ActionCorrFunc::calcCorrVal(int frame1, int frame2){
     Mat3x3d corrTensor(0.0);
     RealType thisTerm;
 
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-
-        thisTerm = actionTensor_[frame2](i, j) - actionTensor_[frame1](i, j);
-        
-        if (i == j)
-          thisTerm -= avePress_ * (times_[frame2] - times_[frame1]);
- 
+    RealType pAve;
+    pressure_->getAverage(pAve);
+    
+    for (unsigned int i = 0; i < 3; i++) {
+      for (unsigned int j = 0; j < 3; j++) {      
+        if (i == j) {
+          thisTerm = (action_[frame2](i, j) - action_[frame1](i, j)
+                      - pAve * (time_[frame2] - time_[frame1]));
+        } else {
+          thisTerm = (action_[frame2](i, j) - action_[frame1](i, j));
+        }        
         corrTensor(i, j) += thisTerm * thisTerm;
       }
     }
-
-    histogram_[timeBin] += corrTensor;    
-    count_[timeBin]++;    
+    return corrTensor;
   }
-
-  void ActionCorrFunc::preCorrelate() {
-
-    this->preCorrelate();
-
-    avePress_ = pSum_ / ( Constants::pressureConvert * (RealType)nsamp_);
-    aveVol_ = vSum_ / (RealType)nsamp_;
-  } 
 }

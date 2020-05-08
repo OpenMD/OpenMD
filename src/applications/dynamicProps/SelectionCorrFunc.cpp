@@ -46,45 +46,30 @@ namespace OpenMD {
   SelectionCorrFunc::SelectionCorrFunc(SimInfo* info, 
                                        const std::string& filename, 
                                        const std::string& sele1, 
-                                       const std::string& sele2,
-                                       long long int memSize)
-    : TimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition, 
-                   memSize){
+                                       const std::string& sele2)
+    : ObjectCCF<int>(info, filename, sele1, sele2, DataStorage::dslPosition){
     
     setCorrFuncType("SelectionCorrFunc");
-    setOutputName(getPrefix(dumpFilename_) + ".selecorr");    
+    setOutputName(getPrefix(dumpFilename_) + ".selecorr");
+    
+    selected1_.resize(nFrames_);
+    selected2_.resize(nFrames_);
+  }
+  
+  int SelectionCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    selected1_[frame].push_back( sd->getGlobalIndex() );
+    return selected1_[frame].size() - 1;
+  }
+  
+  int SelectionCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+    selected2_[frame].push_back( sd->getGlobalIndex() );
+    return selected2_[frame].size() - 1;
   }
 
-  void SelectionCorrFunc::correlateFrames(int frame1, int frame2) {
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
-    
-    RealType time1 = snapshot1->getTime();
-    RealType time2 = snapshot2->getTime();
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-
-    int i;
-    int j;
-    int coincident = 0;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-
-    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; 
-         sd1 = seleMan1_.nextSelected(i)) {
-
-      for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL;
-           sd2 = seleMan2_.nextSelected(j)) {
-        
-        if (sd1->getGlobalIndex() == sd2->getGlobalIndex()) {
-          coincident++;
-        }
-      }
-    }
-
-    histogram_[timeBin] += coincident;
-    count_[timeBin] += seleMan1_.getSelectionCount();
+  int SelectionCorrFunc::calcCorrVal(int frame1, int frame2,
+                                     int id1, int id2) {
+    if (selected1_[frame1][id1] == selected2_[frame2][id2]) return 1;
+    return 0;
   }
 
 }

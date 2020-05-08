@@ -66,8 +66,6 @@ const char *gengetopt_args_info_help[] = {
   "      --r_rcorr                 Radial msd",
   "      --thetacorr               Angular msd",
   "      --drcorr                  Directional msd for particles with unit vectors",
-  "      --helfandEcorr            Helfand moment for thermal conductvity",
-  "  -p, --momentum                Helfand momentum for viscosity",
   "      --stresscorr              Stress tensor correlation function",
   "  -b, --bondcorr                Bond extension correlation function",
   "  -f, --freqfluccorr            Frequency Fluctuation correlation function",
@@ -147,8 +145,6 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->r_rcorr_given = 0 ;
   args_info->thetacorr_given = 0 ;
   args_info->drcorr_given = 0 ;
-  args_info->helfandEcorr_given = 0 ;
-  args_info->momentum_given = 0 ;
   args_info->stresscorr_given = 0 ;
   args_info->bondcorr_given = 0 ;
   args_info->freqfluccorr_given = 0 ;
@@ -241,25 +237,23 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->r_rcorr_help = gengetopt_args_info_help[30] ;
   args_info->thetacorr_help = gengetopt_args_info_help[31] ;
   args_info->drcorr_help = gengetopt_args_info_help[32] ;
-  args_info->helfandEcorr_help = gengetopt_args_info_help[33] ;
-  args_info->momentum_help = gengetopt_args_info_help[34] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[35] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[36] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[37] ;
-  args_info->jumptime_help = gengetopt_args_info_help[38] ;
-  args_info->jumptimeZ_help = gengetopt_args_info_help[39] ;
-  args_info->persistence_help = gengetopt_args_info_help[40] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[41] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[42] ;
-  args_info->ckcorr_help = gengetopt_args_info_help[43] ;
-  args_info->cscorr_help = gengetopt_args_info_help[44] ;
-  args_info->facorr_help = gengetopt_args_info_help[45] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[46] ;
-  args_info->tacorr_help = gengetopt_args_info_help[47] ;
-  args_info->disp_help = gengetopt_args_info_help[48] ;
-  args_info->dispZ_help = gengetopt_args_info_help[49] ;
-  args_info->current_help = gengetopt_args_info_help[50] ;
-  args_info->ddisp_help = gengetopt_args_info_help[51] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[33] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[34] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[35] ;
+  args_info->jumptime_help = gengetopt_args_info_help[36] ;
+  args_info->jumptimeZ_help = gengetopt_args_info_help[37] ;
+  args_info->persistence_help = gengetopt_args_info_help[38] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[39] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[40] ;
+  args_info->ckcorr_help = gengetopt_args_info_help[41] ;
+  args_info->cscorr_help = gengetopt_args_info_help[42] ;
+  args_info->facorr_help = gengetopt_args_info_help[43] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[44] ;
+  args_info->tacorr_help = gengetopt_args_info_help[45] ;
+  args_info->disp_help = gengetopt_args_info_help[46] ;
+  args_info->dispZ_help = gengetopt_args_info_help[47] ;
+  args_info->current_help = gengetopt_args_info_help[48] ;
+  args_info->ddisp_help = gengetopt_args_info_help[49] ;
   
 }
 
@@ -506,10 +500,6 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "thetacorr", 0, 0 );
   if (args_info->drcorr_given)
     write_into_file(outfile, "drcorr", 0, 0 );
-  if (args_info->helfandEcorr_given)
-    write_into_file(outfile, "helfandEcorr", 0, 0 );
-  if (args_info->momentum_given)
-    write_into_file(outfile, "momentum", 0, 0 );
   if (args_info->stresscorr_given)
     write_into_file(outfile, "stresscorr", 0, 0 );
   if (args_info->bondcorr_given)
@@ -612,8 +602,6 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->r_rcorr_given = 0 ;
   args_info->thetacorr_given = 0 ;
   args_info->drcorr_given = 0 ;
-  args_info->helfandEcorr_given = 0 ;
-  args_info->momentum_given = 0 ;
   args_info->stresscorr_given = 0 ;
   args_info->bondcorr_given = 0 ;
   args_info->freqfluccorr_given = 0 ;
@@ -1501,8 +1489,6 @@ cmdline_parser_internal (
         { "r_rcorr",	0, NULL, 0 },
         { "thetacorr",	0, NULL, 0 },
         { "drcorr",	0, NULL, 0 },
-        { "helfandEcorr",	0, NULL, 0 },
-        { "momentum",	0, NULL, 'p' },
         { "stresscorr",	0, NULL, 0 },
         { "bondcorr",	0, NULL, 'b' },
         { "freqfluccorr",	0, NULL, 'f' },
@@ -1528,7 +1514,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:z:m:c:srvwdlMpbfj", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:z:m:c:srvwdlMbfj", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1710,21 +1696,6 @@ cmdline_parser_internal (
               &(local_args_info.sdcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "sdcorr", 'M',
-              additional_error))
-            goto failure;
-        
-          break;
-        case 'p':	/* Helfand momentum for viscosity.  */
-        
-          if (args_info->correlation_function_group_counter && override)
-            reset_group_correlation_function (args_info);
-          args_info->correlation_function_group_counter += 1;
-        
-          if (update_arg( 0 , 
-               0 , &(args_info->momentum_given),
-              &(local_args_info.momentum_given), optarg, 0, 0, ARG_NO,
-              check_ambiguity, override, 0, 0,
-              "momentum", 'p',
               additional_error))
             goto failure;
         
@@ -2048,23 +2019,6 @@ cmdline_parser_internal (
                 &(local_args_info.drcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "drcorr", '-',
-                additional_error))
-              goto failure;
-          
-          }
-          /* Helfand moment for thermal conductvity.  */
-          else if (strcmp (long_options[option_index].name, "helfandEcorr") == 0)
-          {
-          
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-          
-            if (update_arg( 0 , 
-                 0 , &(args_info->helfandEcorr_given),
-                &(local_args_info.helfandEcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "helfandEcorr", '-',
                 additional_error))
               goto failure;
           

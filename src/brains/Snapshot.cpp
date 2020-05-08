@@ -86,7 +86,6 @@ namespace OpenMD {
     frameData.barostat = Mat3x3d(0.0);              
     frameData.virialTensor = Mat3x3d(0.0);              
     frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
-
     clearDerivedProperties();
   }
   

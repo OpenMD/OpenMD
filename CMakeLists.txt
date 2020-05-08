@@ -621,15 +621,12 @@ src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/Displacement.cpp
 src/applications/dynamicProps/DynamicProps.cpp
-src/applications/dynamicProps/EnergyCorrFunc.cpp
-src/applications/dynamicProps/FrameTimeCorrFunc.cpp
 src/applications/dynamicProps/FreqFlucCorrFunc.cpp
 src/applications/dynamicProps/HBondJump.cpp
 src/applications/dynamicProps/HBondPersistence.cpp
 src/applications/dynamicProps/LegendreCorrFunc.cpp
 src/applications/dynamicProps/LegendreCorrFuncZ.cpp
 src/applications/dynamicProps/cOHz.cpp
-src/applications/dynamicProps/MomentumCorrFunc.cpp
 src/applications/dynamicProps/MomAngMomCorrFunc.cpp
 src/applications/dynamicProps/ForTorCorrFunc.cpp
 src/applications/dynamicProps/ChargeKineticCorrFunc.cpp
@@ -637,10 +634,6 @@ src/applications/dynamicProps/ChargeOrientationCorrFunc.cpp
 src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
 src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
-src/applications/dynamicProps/MultipassCorrFunc.cpp
-src/applications/dynamicProps/MPFrameTimeCorrFunc.cpp
-src/applications/dynamicProps/ParticleTimeCorrFunc.cpp
-src/applications/dynamicProps/InteractionTimeCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
 src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp

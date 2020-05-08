@@ -42,14 +42,15 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_CHARGEKINETICCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_CHARGEKINETICCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ChargeKineticCorrFunc : public CrossCorrFunc<RealType> {
+  class ChargeKineticCorrFunc : public ObjectCCF<RealType> {
   public:
     ChargeKineticCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2, const RealType cutOff = 10.0);
+                          const std::string& sele1, const std::string& sele2,
+                          const RealType cutOff = 10.0);
 
   private:
     virtual void validateSelection(SelectionManager& seleMan);

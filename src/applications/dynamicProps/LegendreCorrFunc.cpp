@@ -51,8 +51,8 @@ namespace OpenMD {
                                      const std::string& filename,
                                      const std::string& sele1,
                                      const std::string& sele2, int order)
-    : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2,
-                             DataStorage::dslAmat), order_(order) {
+    : ObjectACF<Vector3d>(info, filename, sele1, sele2,
+                          DataStorage::dslAmat), order_(order) {
 
     setCorrFuncType("Legendre Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".lcorr");
@@ -99,16 +99,15 @@ namespace OpenMD {
     return Vector3d(ux, uy, uz);
   }
 
-
   void LegendreCorrFunc::validateSelection(SelectionManager& seleMan) {
     StuntDouble* sd;
-    int i;    
+    int i;
     for (sd = seleMan1_.beginSelected(i); sd != NULL;
          sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectionalAtom()) {
+      if (!sd->isDirectional()) {
 	sprintf(painCave.errMsg,
                 "LegendreCorrFunc::validateSelection Error: "
-                "selected atoms are not Directional\n");
+                "at least one of the selected objects is not Directional\n");
 	painCave.isFatal = 1;
 	simError();        
       }

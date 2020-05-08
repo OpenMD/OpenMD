@@ -103,6 +103,7 @@ namespace OpenMD {
       POTENTIAL_SELECTION,
       NET_CHARGE,
       CHARGE_MOMENTUM,
+      CURRENT_DENSITY,
       ENDINDEX  //internal use
     };
 
@@ -111,6 +112,7 @@ namespace OpenMD {
       std::string units;
       std::string dataType;
       BaseAccumulator* accumulator;
+      std::vector<BaseAccumulator*> accumulatorArray2d;
     };
 
     typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;
@@ -136,18 +138,21 @@ namespace OpenMD {
     Vector3d  getVectorData(int index);
     potVec    getPotVecData(int index);
     Mat3x3d   getMatrixData(int index);
+    std::vector<RealType> getArrayData(int index);
 
     int       getIntAverage(int index);
     RealType  getRealAverage(int index);
     Vector3d  getVectorAverage(int index);
     potVec    getPotVecAverage(int index);
     Mat3x3d   getMatrixAverage(int index);
+    std::vector<RealType> getArrayAverage(int index);
 
     int       getIntError(int index);
     RealType  getRealError(int index);
     Vector3d  getVectorError(int index);
     potVec    getPotVecError(int index);
     Mat3x3d   getMatrixError(int index);
+    std::vector<RealType> getArrayError(int index);
 
   private:
     SimInfo* info_;

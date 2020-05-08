@@ -42,11 +42,11 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_FORCEAUTOCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_FORCEAUTOCORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ForceAutoCorrFunc : public AutoCorrFunc<Mat3x3d> {
+  class ForceAutoCorrFunc : public ObjectACF<Mat3x3d> {
   public:
     ForceAutoCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2);

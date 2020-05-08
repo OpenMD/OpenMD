@@ -44,12 +44,12 @@
 
 #include "math/Polynomial.hpp"
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class LegendreCorrFuncZ : public AutoCorrFunc<Vector3d> {
+  class LegendreCorrFuncZ : public ObjectACF<Vector3d> {
   public:
     LegendreCorrFuncZ(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2,

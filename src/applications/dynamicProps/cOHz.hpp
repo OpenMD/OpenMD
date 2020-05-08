@@ -44,12 +44,12 @@
 
 #include "math/Polynomial.hpp"
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class COHZ : public AutoCorrFunc<Vector<RealType, 4> > {
+  class COHZ : public MoleculeACF<Vector<RealType, 4> > {
   public:
     COHZ(SimInfo* info, const std::string& filename, const std::string& sele1,
          const std::string& sele2, int order, int nZbins, int axis=2);   
@@ -57,7 +57,7 @@ namespace OpenMD {
   private:
     virtual void validateSelection(SelectionManager& seleMan);
     virtual void computeFrame(int frame);
-    virtual int computeProperty1(int frame, StuntDouble* sd);
+    virtual int computeProperty1(int frame, Molecule* mol);
     virtual Vector<RealType, 4> calcCorrVal(int frame1, int frame2,
                                             int id1, int id2);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);

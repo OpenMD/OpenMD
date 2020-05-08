@@ -101,8 +101,6 @@ struct gengetopt_args_info
   const char *r_rcorr_help; /**< @brief Radial msd help description.  */
   const char *thetacorr_help; /**< @brief Angular msd help description.  */
   const char *drcorr_help; /**< @brief Directional msd for particles with unit vectors help description.  */
-  const char *helfandEcorr_help; /**< @brief Helfand moment for thermal conductvity help description.  */
-  const char *momentum_help; /**< @brief Helfand momentum for viscosity help description.  */
   const char *stresscorr_help; /**< @brief Stress tensor correlation function help description.  */
   const char *bondcorr_help; /**< @brief Bond extension correlation function help description.  */
   const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
@@ -153,8 +151,6 @@ struct gengetopt_args_info
   unsigned int r_rcorr_given ;	/**< @brief Whether r_rcorr was given.  */
   unsigned int thetacorr_given ;	/**< @brief Whether thetacorr was given.  */
   unsigned int drcorr_given ;	/**< @brief Whether drcorr was given.  */
-  unsigned int helfandEcorr_given ;	/**< @brief Whether helfandEcorr was given.  */
-  unsigned int momentum_given ;	/**< @brief Whether momentum was given.  */
   unsigned int stresscorr_given ;	/**< @brief Whether stresscorr was given.  */
   unsigned int bondcorr_given ;	/**< @brief Whether bondcorr was given.  */
   unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */

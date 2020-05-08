@@ -46,22 +46,20 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_SYSTEMDIPOLECORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_SYSTEMDIPOLECORRFUNC_HPP
 
-#include "applications/dynamicProps/MultipassCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  class SystemDipoleCorrFunc : public AutoCorrFunc<RealType> {
+  class SystemDipoleCorrFunc : public SystemACF<RealType> {
   public:
     SystemDipoleCorrFunc(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2);   
     
   private:
-    virtual void computeFrame(int frame);
-    virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2){return 0.0;}
-
+    virtual void computeProperty1(int frame);
+    virtual RealType calcCorrVal(int frame1, int frame2);
+    
     std::vector<Vector3d> sysDipoles_;
     Thermo* thermo_;
   };

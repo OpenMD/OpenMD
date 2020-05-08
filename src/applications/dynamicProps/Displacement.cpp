@@ -47,8 +47,8 @@
 namespace OpenMD {
   Displacement::Displacement(SimInfo* info, const std::string& filename, 
                              const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2, 
-                             DataStorage::dslPosition | DataStorage::dslAmat){
+    : ObjectACF<Vector3d>(info, filename, sele1, sele2, 
+                          DataStorage::dslPosition | DataStorage::dslAmat){
     
     setCorrFuncType("Displacement");
     setOutputName(getPrefix(dumpFilename_) + ".disp");
@@ -60,8 +60,8 @@ namespace OpenMD {
                                const std::string& sele1,
                                const std::string& sele2,
                                int nZbins, int axis)
-    : AutoCorrFunc<Vector3d>(info, filename, sele1, sele2, 
-                             DataStorage::dslPosition | DataStorage::dslAmat){
+    : ObjectACF<Vector3d>(info, filename, sele1, sele2, 
+                          DataStorage::dslPosition | DataStorage::dslAmat){
     
     setCorrFuncType("Displacement binned by Z");
     setOutputName(getPrefix(dumpFilename_) + ".dispZ");
@@ -204,10 +204,9 @@ namespace OpenMD {
                   timeBin);
     }
   }
-  
-  Vector3d DisplacementZ::calcCorrVal(int frame1, int frame2, int id1, int id2,
-                                      int timeBin) {
 
+  Vector3d DisplacementZ::calcCorrVal(int frame1, int frame2, int id1, int id2, int timeBin)
+  {
     int zBin1 = zBins_[frame1][id1];
     int zBin2 = zBins_[frame2][id2];    
     

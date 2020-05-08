@@ -45,9 +45,9 @@
 namespace OpenMD {
   VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, 
                        const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
-                             DataStorage::dslVelocity | DataStorage::dslAmat | 
-                             DataStorage::dslAngularMomentum){
+    : ObjectACF<RealType>(info, filename, sele1, sele2, 
+                          DataStorage::dslVelocity | DataStorage::dslAmat | 
+                          DataStorage::dslAngularMomentum){
     
     setCorrFuncType("Velocity Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".vcorr");
@@ -57,11 +57,11 @@ namespace OpenMD {
 
   VCorrFuncZ::VCorrFuncZ(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
-                             DataStorage::dslPosition |
-                             DataStorage::dslVelocity |
-                             DataStorage::dslAmat |
-                             DataStorage::dslAngularMomentum){
+    : ObjectACF<RealType>(info, filename, sele1, sele2, 
+                          DataStorage::dslPosition |
+                          DataStorage::dslVelocity |
+                          DataStorage::dslAmat |
+                          DataStorage::dslAngularMomentum){
     
     setCorrFuncType("Velocity Correlation Function projected along z axis");
     setOutputName(getPrefix(dumpFilename_) + ".vcorrz");
@@ -70,11 +70,11 @@ namespace OpenMD {
   }
   VCorrFuncR::VCorrFuncR(SimInfo* info, const std::string& filename, 
                          const std::string& sele1, const std::string& sele2)
-    : AutoCorrFunc<RealType>(info, filename, sele1, sele2, 
-                             DataStorage::dslPosition |
-                             DataStorage::dslVelocity |
-                             DataStorage::dslAmat |
-                             DataStorage::dslAngularMomentum){
+    : ObjectACF<RealType>(info, filename, sele1, sele2, 
+                          DataStorage::dslPosition |
+                          DataStorage::dslVelocity |
+                          DataStorage::dslAmat |
+                          DataStorage::dslAngularMomentum){
     
     // Turn on COM calculation in reader:
     bool ncp = true;

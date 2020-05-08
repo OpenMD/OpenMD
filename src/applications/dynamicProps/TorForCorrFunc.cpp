@@ -47,9 +47,9 @@ namespace OpenMD {
                                  const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2)
-    : CrossCorrFunc<Mat3x3d>(info, filename, sele1, sele2,
-                             DataStorage::dslForce | DataStorage::dslAmat |
-                             DataStorage::dslTorque){
+    : ObjectCCF<Mat3x3d>(info, filename, sele1, sele2,
+                         DataStorage::dslForce | DataStorage::dslAmat |
+                         DataStorage::dslTorque){
       
     setCorrFuncType("Torque - Force Cross Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".tfcorr");
