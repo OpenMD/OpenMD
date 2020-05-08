@@ -120,15 +120,7 @@ namespace OpenMD {
     std::vector<T> histogram_;
     std::vector<int> count_;
     std::vector<RealType> times_;
-    
-    bool uniqueSelections_;
-    bool autoCorrFunc_;
-    bool doSystemProperties_;
-    bool doMolecularProperties_;
-    bool doObjectProperties_;
-    bool doAtomicProperties_;
-    bool doBondProperties_;
-
+   
     SimInfo* info_;
     DumpReader* reader_;
     std::string dumpFilename_;
@@ -142,6 +134,14 @@ namespace OpenMD {
 
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
+
+    bool uniqueSelections_;
+    bool autoCorrFunc_;
+    bool doSystemProperties_;
+    bool doMolecularProperties_;
+    bool doObjectProperties_;
+    bool doAtomicProperties_;
+    bool doBondProperties_;
 
     std::string corrFuncType_;
     std::string paramString_;

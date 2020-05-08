@@ -425,7 +425,7 @@ namespace OpenMD {
     currentDensity.units = "amps / m^2";
     currentDensity.title = "Current Density: total, then by AtomType";
     currentDensity.dataType = "Array2d";
-    int nCols = 3 * (info_->getSimulatedAtomTypes().size()) + 3;
+    unsigned int nCols = 3 * (info_->getSimulatedAtomTypes().size()) + 3;
     currentDensity.accumulatorArray2d.resize(nCols);
     for (unsigned int j = 0 ; j < nCols; j++) {
       currentDensity.accumulatorArray2d[j] = new Accumulator();
@@ -736,8 +736,6 @@ namespace OpenMD {
   }
   std::vector<RealType> Stats::getArrayData(int index) {
     assert(index >=0 && index < ENDINDEX);
-    int columns = data_[index].accumulatorArray2d.size();
-    
     std::vector<RealType> value;
     RealType v;
     for (unsigned int i = 0; i < data_[index].accumulatorArray2d.size(); ++i) {
@@ -777,10 +775,8 @@ namespace OpenMD {
     dynamic_cast<MatrixAccumulator*>(data_[index].accumulator)->getAverage(value);
     return value;
   }
-    std::vector<RealType> Stats::getArrayAverage(int index) {
+  std::vector<RealType> Stats::getArrayAverage(int index) {
     assert(index >=0 && index < ENDINDEX);
-    int columns = data_[index].accumulatorArray2d.size();
-
     std::vector<RealType> value;
     RealType v;
     for (unsigned int i = 0; i < data_[index].accumulatorArray2d.size(); ++i) {
@@ -823,8 +819,6 @@ namespace OpenMD {
   }
   std::vector<RealType> Stats::getArrayError(int index) {
     assert(index >=0 && index < ENDINDEX);
-    int columns = data_[index].accumulatorArray2d.size();
-
     std::vector<RealType> value;
     RealType v;
     for (unsigned int i = 0; i < data_[index].accumulatorArray2d.size(); ++i) {

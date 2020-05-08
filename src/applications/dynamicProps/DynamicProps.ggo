@@ -35,7 +35,7 @@ option	"sele1"		-	"select first stuntdouble set"	            string typestr="sel
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string typestr="selection script"      optional
 option  "order"         -       "Lengendre Polynomial Order"                int                               optional
 option  "nzbins"        z       "Number of Z bins"                          int     default="100"             optional
-option  "memory"        m       "Available memory (defaults to 2G)"         string  typestr="memory specification" default="2G" optional
+# option  "memory"        m       "Available memory (defaults to 2G)"         string  typestr="memory specification" default="2G" optional
 option  "rcut"          c       "cutoff radius (angstroms)"                 double                            optional
 option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             optional
 option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              optional

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
+ * copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -152,8 +152,8 @@ int main(int argc, char* argv[]){
   }
 
   // use the memory string to figure out how much memory we can use:
-  char *end;
-  long long int memSize = memparse(args_info.memory_arg, &end);
+  //char *end;
+  //long long int memSize = memparse(args_info.memory_arg, &end);
 
   // We don't really need to print this out anymore:
   // sprintf( painCave.errMsg,
