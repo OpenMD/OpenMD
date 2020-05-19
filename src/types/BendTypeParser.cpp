@@ -49,6 +49,7 @@
 #include "types/PolynomialBendType.hpp"
 #include "types/CosineBendType.hpp"
 #include "types/SDKBendType.hpp"
+#include "types/CosineSeriesBendType.hpp"
 #include "utils/OpenMDException.hpp"
 #include "utils/StringUtils.hpp"
 
@@ -63,6 +64,7 @@ namespace OpenMD {
     stringToEnumMap_["Polynomial"] = btPolynomial;    
     stringToEnumMap_["Cosine"] = btCosine;
     stringToEnumMap_["SDK"] = btSDK;
+    stringToEnumMap_["CosineSeries"] = btCosineSeries;
   }
   
   BendType* BendTypeParser::parseTypeAndPars(const std::string& type,
@@ -91,7 +93,7 @@ namespace OpenMD {
     }
 
     BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-    RealType theta0 = tokenizer.nextTokenAsDouble() / 180.0 * Constants::PI; //convert to rad
+    RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0; //convert to rad
     nTokens -= 2;
 
     //switch is a nightmare to maintain
@@ -199,6 +201,17 @@ namespace OpenMD {
 	bendType = new SDKBendType(theta0, ktheta, sigma, epsilon, nRep, mAtt);
       }
       break; 
+
+    case btCosineSeries :
+      
+      if (nTokens < 1) {
+        throw OpenMDException("BendTypeParser: Not enough tokens");
+      } else {
+        
+	RealType ktheta = tokenizer.nextTokenAsDouble();
+	bendType = new CosineSeriesBendType(theta0, ktheta);
+      }
+      break;
       
     case btUnknown :
     default:
