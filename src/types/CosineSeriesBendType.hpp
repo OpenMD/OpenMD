@@ -74,7 +74,6 @@ namespace OpenMD {
 
       RealType ct = cos(theta);
       RealType st = sin(theta);    
-      RealType delta = ct - c0_;
 
       // use cos 2t = (2 cos^2 - 1)
       V =  k_ * (c0_ + c1_ * ct + c2_ * (2.0 * ct * ct - 1.0)); 
