@@ -71,6 +71,7 @@
 #include "io/StickyAtomTypesSectionParser.hpp"
 #include "io/StickyPowerAtomTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
+#include "io/UFFAtomTypesSectionParser.hpp"
 
 #include "types/LennardJonesAdapter.hpp"
 #include "types/EAMAdapter.hpp"
@@ -129,6 +130,7 @@ namespace OpenMD {
     spMan_.push_back(new GayBerneAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new UFFAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new ShapeAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new StickyAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new StickyPowerAtomTypesSectionParser(forceFieldOptions_));

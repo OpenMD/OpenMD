@@ -386,6 +386,7 @@ src/io/ShapeAtomTypesSectionParser.cpp
 src/io/StickyAtomTypesSectionParser.cpp
 src/io/StickyPowerAtomTypesSectionParser.cpp
 src/io/TorsionTypesSectionParser.cpp
+src/io/UFFAtomTypesSectionParser.cpp
 src/io/ZConsReader.cpp
 src/lattice/CubicLattice.cpp
 src/lattice/FCCLattice.cpp
@@ -481,6 +482,7 @@ src/types/StickyAdapter.cpp
 src/types/SuttonChenAdapter.cpp
 src/types/TorsionStamp.cpp
 src/types/TorsionTypeParser.cpp
+src/types/UFFAdapter.cpp
 src/types/ZconsStamp.cpp
 src/utils/ElementsTable.cpp
 src/utils/MoLocator.cpp

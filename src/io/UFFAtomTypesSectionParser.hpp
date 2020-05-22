@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -32,30 +32,40 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                      
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstring>
 
-#include "types/BondStamp.hpp"
+
+#ifndef IO_UFFATOMTYPESSECTIONPARSER_HPP
+#define IO_UFFATOMTYPESSECTIONPARSER_HPP
+
+#include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
+
 namespace OpenMD {
   
-  BondStamp::BondStamp(): hasOverride_(false) {
-    DefineOptionalParameterWithDefaultValue(BondOrder, "bondOrder", 1);
-  }
-  
-  BondStamp::~BondStamp() {    
-  }
-  
-  void BondStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(BondOrder, isPositive());
-  }
+  class UFFAtomTypesSectionParser : public SectionParser {
+  public:
+    UFFAtomTypesSectionParser(ForceFieldOptions& options);
+    
+  private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+    virtual void validateSection(ForceField& ff);
 
-}
+    ForceFieldOptions& options_;
+  };
+  
+  
+} //namespace OpenMD
+
+#endif //IO_UFFATOMTYPESSECTIONPARSER_HPP
+
+

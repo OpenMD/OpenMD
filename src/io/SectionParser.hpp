@@ -64,7 +64,8 @@ namespace OpenMD {
     const std::string& getSectionName() const {
       return sectionName_;
     }
-    virtual void validateSection() {}
+    virtual void validateSection(ForceField& ff) {}
+    
   protected:
     void setSectionName(const std::string& sectionName) {
       sectionName_ = sectionName;
