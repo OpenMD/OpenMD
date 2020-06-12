@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Funcfl Extractor
 
 Opens an DYNAMO86 EAM funcfl file, parses the data and writes out

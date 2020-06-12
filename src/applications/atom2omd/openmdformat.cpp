@@ -232,6 +232,7 @@ namespace OpenBabel
         int ai = 0;
         FOR_ATOMS_OF_MOL(atom, *pmol ) {
           str = atom->GetType();
+          
           r = atom->GetResidue();
           
           if (r == NULL) 
@@ -361,17 +362,38 @@ namespace OpenBabel
         
         //bond
         
-        int b1, b2;
+        int bi;
+        double bo;
+        OBAtom *a, *b;
+        
         FOR_BONDS_OF_MOL(bond, *pmol ) {
-          b1 = atomMap[bond->GetBeginAtom()];
-          b2 = atomMap[bond->GetEndAtom()];
+          a = bond->GetBeginAtom();
+          b = bond->GetEndAtom();
+          
+          ai = atomMap[a];
+          bi = atomMap[b];
+          bo = bond->GetBondOrder();
+          if (bond->IsAromatic())
+            bo = 1.5;
+          // e.g., in Cp rings, may not be "aromatic" by OB but check
+          // for explicit hydrogen counts (e.g., biphenyl inter-ring
+          // is not aromatic)
+          if ((a->GetType()[2] == 'R' && b->GetType()[2] == 'R')
+              && (a->ExplicitHydrogenCount() == 1
+                  && b->ExplicitHydrogenCount() == 1))
+            bo = 1.5;
+          if (bond->IsAmide())
+            bo = 1.41;
           
           os << "  bond { ";
           
-          if (b1 < b2) 
-            os << "members(" << b1 <<  ", " << b2 << "); ";
+          if (ai < bi) 
+            os << "members(" << ai <<  ", " << bi << "); ";
           else
-            os << "members(" << b2 <<  ", " << b1 << "); ";
+            os << "members(" << bi <<  ", " << ai << "); ";
+
+          if (bo != 1)
+            os << "bondOrder = " << bo << "; ";
           
           os << "}" << endl;
         } 

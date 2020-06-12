@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 
 __author__ = "Dan Gezelter (gezelter@nd.edu), Patrick Louden (plouden@nd.edu)"
 __copyright__ = "Copyright (c) 2016 by the University of Notre Dame"

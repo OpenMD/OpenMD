@@ -197,11 +197,16 @@ int main(int argc, char* argv[]){
   } else if (args_info.ftcorr_given){
     corrFunc = new ForTorCorrFunc(info, dumpFileName, sele1, sele2);
   }else if (args_info.ckcorr_given){
-    corrFunc = new ChargeKineticCorrFunc(info, dumpFileName, sele1, sele2, args_info.rcut_arg);
+    corrFunc = new ChargeKineticCorrFunc(info, dumpFileName, sele1, sele2,
+                                         args_info.rcut_arg);
   }else if (args_info.cscorr_given){
-      if(args_info.dipoleX_given && args_info.dipoleY_given && args_info.dipoleZ_given){
-        corrFunc = new ChargeOrientationCorrFunc(info, dumpFileName, sele1, sele2, args_info.dipoleX_arg, args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.rcut_arg);
-      }
+    if(args_info.dipoleX_given && args_info.dipoleY_given && args_info.dipoleZ_given){
+      corrFunc = new ChargeOrientationCorrFunc(info, dumpFileName, sele1,
+                                               sele2, args_info.dipoleX_arg,
+                                               args_info.dipoleY_arg,
+                                               args_info.dipoleZ_arg,
+                                               args_info.rcut_arg);
+    }
   } else if (args_info.facorr_given){
     corrFunc = new ForceAutoCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.tfcorr_given){
@@ -217,7 +222,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.lcorr_given) {
     int order(0);
     if (args_info.order_given)
-        order = args_info.order_arg;
+      order = args_info.order_arg;
     else {
       sprintf( painCave.errMsg,
                "--order must be set if --lcorr is set\n");
@@ -230,7 +235,7 @@ int main(int argc, char* argv[]){
   } else if (args_info.lcorrZ_given) {
     int order(0);
     if (args_info.order_given)
-        order = args_info.order_arg;
+      order = args_info.order_arg;
     else {
       sprintf( painCave.errMsg,
                "--order must be set if --lcorrZ is set\n");

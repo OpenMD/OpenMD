@@ -50,6 +50,7 @@
 #include "types/CosineBendType.hpp"
 #include "types/SDKBendType.hpp"
 #include "types/CosineSeriesBendType.hpp"
+#include "types/HarmonicSineBendType.hpp"
 #include "utils/OpenMDException.hpp"
 #include "utils/StringUtils.hpp"
 
@@ -65,6 +66,7 @@ namespace OpenMD {
     stringToEnumMap_["Cosine"] = btCosine;
     stringToEnumMap_["SDK"] = btSDK;
     stringToEnumMap_["CosineSeries"] = btCosineSeries;
+    stringToEnumMap_["HarmonicSine"] = btHarmonicSine;
   }
   
   BendType* BendTypeParser::parseTypeAndPars(const std::string& type,
@@ -93,7 +95,6 @@ namespace OpenMD {
     }
 
     BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-    RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0; //convert to rad
     nTokens -= 2;
 
     //switch is a nightmare to maintain
@@ -101,29 +102,29 @@ namespace OpenMD {
             
     case btHarmonic :
             
-      if (nTokens < 1) {
+      if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-        ktheta *= kScale;
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
 	bendType = new HarmonicBendType(theta0, ktheta);
       }
       break;
     case btGhostBend :
-      if (nTokens < 1) {
+      if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-        ktheta *= kScale;
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
 	bendType = new HarmonicBendType(theta0, ktheta);                
       }
       break;            
 
     case btUreyBradley :
-      if (nTokens < 3) {
+      if (nTokens < 4) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
 	RealType ktheta = tokenizer.nextTokenAsDouble();
 	RealType s0 =  tokenizer.nextTokenAsDouble();
 	RealType kub = tokenizer.nextTokenAsDouble();
@@ -132,10 +133,10 @@ namespace OpenMD {
       break; 
             
     case btCubic :
-      if (nTokens < 4) {
+      if (nTokens < 5) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();
 	RealType k1 = tokenizer.nextTokenAsDouble();
@@ -146,10 +147,10 @@ namespace OpenMD {
       break;
             
     case btQuartic :
-      if (nTokens < 5) {
+      if (nTokens < 6) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
 	RealType k4 = tokenizer.nextTokenAsDouble();
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();
@@ -159,40 +160,44 @@ namespace OpenMD {
 	bendType = new QuarticBendType(theta0, k4, k3, k2, k1, k0);
       }
       break;
-
+      
     case btPolynomial :
-      if (nTokens < 2 || nTokens % 2 != 0) {
-        throw OpenMDException("BendTypeParser: Not enough tokens");
-      } else {
-	int nPairs = nTokens / 2;
-	int power;
-	RealType coefficient;
-	PolynomialBendType* pbt = new PolynomialBendType(theta0);
-                
-	for (int i = 0; i < nPairs; ++i) {
-	  power = tokenizer.nextTokenAsInt();
-	  coefficient = tokenizer.nextTokenAsDouble();
-	  pbt->setCoefficient(power, coefficient);
-	}
+      {
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+        nTokens -= 1;
+        if (nTokens < 2 || nTokens % 2 != 0) {
+          throw OpenMDException("BendTypeParser: Not enough tokens");
+        } else {
+          int nPairs = nTokens / 2;
+          int power;
+          RealType coefficient;
+          PolynomialBendType* pbt = new PolynomialBendType(theta0);
+          
+          for (int i = 0; i < nPairs; ++i) {
+            power = tokenizer.nextTokenAsInt();
+            coefficient = tokenizer.nextTokenAsDouble();
+            pbt->setCoefficient(power, coefficient);
+          }
+        }
       }
-            
       break;
-
+      
     case btCosine :
-            
-      if (nTokens < 1) {
+      
+      if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
 	RealType ktheta = tokenizer.nextTokenAsDouble();
 	bendType = new CosineBendType(theta0, ktheta);
       }
       break;
       
     case btSDK :
-      if (nTokens < 5) {
+      if (nTokens < 6) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
 	RealType ktheta = tokenizer.nextTokenAsDouble();
 	RealType sigma =  tokenizer.nextTokenAsDouble();
 	RealType epsilon = tokenizer.nextTokenAsDouble();
@@ -201,15 +206,25 @@ namespace OpenMD {
 	bendType = new SDKBendType(theta0, ktheta, sigma, epsilon, nRep, mAtt);
       }
       break; 
-
+      
     case btCosineSeries :
+      
+      if (nTokens < 2) {
+        throw OpenMDException("BendTypeParser: Not enough tokens");
+      } else {
+        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
+	bendType = new CosineSeriesBendType(theta0, ktheta);
+      }
+      break;
+      
+    case btHarmonicSine :
       
       if (nTokens < 1) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
-      } else {
-        
-	RealType ktheta = tokenizer.nextTokenAsDouble();
-	bendType = new CosineSeriesBendType(theta0, ktheta);
+      } else {        
+	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
+	bendType = new HarmonicSineBendType(ktheta);
       }
       break;
       

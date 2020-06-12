@@ -99,7 +99,7 @@ namespace OpenMD {
   private:
     int a;
     int b;
-    unsigned int bo;
+    RealType bondOrder_;
     bool hasOverride_;
     std::string orType_;
     std::vector<RealType> orPars_;

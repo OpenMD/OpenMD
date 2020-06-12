@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,63 +40,44 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#ifndef TYPES_HARMONICINVERSIONTYPE_HPP
-#define TYPES_HARMONICINVERSIONTYPE_HPP
+/**
+ * @file HarmonicsineBendType.hpp
+ * @author    gezelter
+ * @date  06/18/2010
+ * @version 1.1
+ */ 
+ 
+#ifndef TYPES_HARMONICSINEBENDTYPE_HPP
+#define TYPES_HARMONICSINEBENDTYPE_HPP
 
-#if defined(_MSC_VER)
-#define copysign _copysign
-#endif
+#include "types/BendType.hpp"
 
 namespace OpenMD {
-
   /**
-   * @class HarmonicInversionType
-   * This inversion potential has the form:
-   * 
-   *  \f[ 
-         V_{inv} = \frac{d_0}{2} \left(\phi - \phi_0\right)^2
-       \f]
+   * @class HarmonicSineBendType 
    *
+   * A bend using the square of the sine of the angle instead of
+   * the angle itself: 
+   * \f[ Vbend = \frac{1}{8} k_\theta \sin^2( 2 \theta) \f]
    */
-  class HarmonicInversionType : public InversionType {
+  class HarmonicSineBendType : public BendType {
     
   public:
-        
-    HarmonicInversionType(RealType d0, RealType phi0) :  
-      InversionType(), d0_(d0), phi0_(phi0) {}
-
-
-    virtual void calcForce(RealType phi, RealType& V, RealType& dVdPhi) {
-
-      RealType dp = phi - phi0_;
-      /* dp cannot be outside (-pi,pi) */
-      if (dp >=Constants::PI)       
-        dp -= 2*Constants::PI;      
-      else if (dp < -Constants::PI)
-        dp += 2*Constants::PI;
-
-      V = 0.5 * d0_ * dp * dp;
-      dVdPhi = -d0_ * dp;      
+    
+    HarmonicSineBendType(RealType k) : BendType(0.0), k_(k) {}
+    
+    void setForceConstant(RealType k) {k_ = k; }    
+    RealType getForceConstant() {return k_;}
+    
+    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
+      V = 0.125 * k_ * sin(2.0 * theta);
+      dVdtheta = 0.25 * k_ * sin(4.0 * theta);
     }
     
-    virtual InversionKey getKey() { return itAngle; }
-    friend std::ostream& operator <<(std::ostream& os, HarmonicInversionType& ttt);
-    
   private:
-    
-    RealType d0_;
-    RealType phi0_;
-    
+    RealType k_;    
   };
   
-  std::ostream& operator <<(std::ostream& os, HarmonicInversionType& hit) {
-    
-    os << "This HarmonicInversionType has below form:" << std::endl;
-    os << hit.d0_ << "*(phi - " << hit.phi0_ << ")/2" << std::endl; 
-    return os;
-  }
-  
-} //end namespace OpenMD
-#endif //TYPES_HARMONICINVERSIONTYPE_HPP
-
+}//end namespace OpenMD
+#endif //TYPES_HARMONICSINEBENDTYPE_HPP
 

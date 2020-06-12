@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """principalAxisCalculator
 
 Opens an XYZ file and computes the moments of inertia and principal

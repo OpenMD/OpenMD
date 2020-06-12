@@ -71,6 +71,7 @@ namespace OpenMD {
       btCosine,
       btSDK,
       btCosineSeries,
+      btHarmonicSine,
       btUnknown
     };
             

@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Water Quaternion Sampler
 
 Samples water orientations from a list of known good

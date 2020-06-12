@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Computes predicted diffusion constants and rotational relaxation
 times from a hydro file.  Explains the values in the hydro file in
 terms of properties that can be calculated from a molecular dynamics
