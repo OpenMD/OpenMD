@@ -109,11 +109,11 @@ namespace OpenMD {
   }
 
   void UFFAtomTypesSectionParser::validateSection(ForceField& ff) {
-    ForceField::AtomTypeContainer* atomTypes = ff.getAtomTypes();
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
+    // ForceField::AtomTypeContainer* atomTypes = ff.getAtomTypes();
+    // ForceField::AtomTypeContainer::MapTypeIterator i;
+    // AtomType* at;
 
-    std::vector<AtomType*> uffTypes;
+    // std::vector<AtomType*> uffTypes;
     
     // for (at = atomTypes->beginType(i); at != NULL; at = atomTypes->nextType(i)) {      
 
@@ -149,11 +149,6 @@ namespace OpenMD {
     //     // ka now represents the xij in equation 20 -- the expected vdw distance
     //     kaSquared = (Ra * Rb);
     //     ka = sqrt(kaSquared);
-
-        
-             
-
-
       
   }
 } //end namespace OpenMD
