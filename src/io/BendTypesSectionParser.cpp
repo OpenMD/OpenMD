@@ -71,7 +71,6 @@ namespace OpenMD {
     std::string at3 = tokenizer.nextToken();
     std::string remainder = tokenizer.getRemainingString();
     RealType kScale = options_.getBendForceConstantScaling();
-        
 
     try {
       bendType = btParser.parseLine(remainder, kScale);

@@ -89,13 +89,15 @@ namespace OpenMD {
     StringTokenizer tokenizer(line);
     BendType* bendType = NULL;
     int nTokens = tokenizer.countTokens();
+    RealType theta0, ktheta;
+    RealType deg2rad = Constants::PI / 180.0;
 
-    if (nTokens < 3) {
+    if (nTokens < 2) {
       throw OpenMDException("BendTypeParser: Not enough tokens");
     }
 
     BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-    nTokens -= 2;
+    nTokens -= 1;
 
     //switch is a nightmare to maintain
     switch(bt) {
@@ -105,8 +107,8 @@ namespace OpenMD {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+	ktheta = tokenizer.nextTokenAsDouble() * kScale;
 	bendType = new HarmonicBendType(theta0, ktheta);
       }
       break;
@@ -114,8 +116,8 @@ namespace OpenMD {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+	ktheta = tokenizer.nextTokenAsDouble() * kScale;
 	bendType = new HarmonicBendType(theta0, ktheta);                
       }
       break;            
@@ -124,8 +126,8 @@ namespace OpenMD {
       if (nTokens < 4) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-	RealType ktheta = tokenizer.nextTokenAsDouble();
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+	ktheta = tokenizer.nextTokenAsDouble();
 	RealType s0 =  tokenizer.nextTokenAsDouble();
 	RealType kub = tokenizer.nextTokenAsDouble();
 	bendType = new UreyBradleyBendType(theta0, ktheta, s0, kub);                
@@ -136,7 +138,7 @@ namespace OpenMD {
       if (nTokens < 5) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();
 	RealType k1 = tokenizer.nextTokenAsDouble();
@@ -150,7 +152,7 @@ namespace OpenMD {
       if (nTokens < 6) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
 	RealType k4 = tokenizer.nextTokenAsDouble();
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();
@@ -163,7 +165,7 @@ namespace OpenMD {
       
     case btPolynomial :
       {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
         nTokens -= 1;
         if (nTokens < 2 || nTokens % 2 != 0) {
           throw OpenMDException("BendTypeParser: Not enough tokens");
@@ -187,8 +189,8 @@ namespace OpenMD {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-	RealType ktheta = tokenizer.nextTokenAsDouble();
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+	ktheta = tokenizer.nextTokenAsDouble();
 	bendType = new CosineBendType(theta0, ktheta);
       }
       break;
@@ -197,8 +199,8 @@ namespace OpenMD {
       if (nTokens < 6) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-	RealType ktheta = tokenizer.nextTokenAsDouble();
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+	ktheta = tokenizer.nextTokenAsDouble();
 	RealType sigma =  tokenizer.nextTokenAsDouble();
 	RealType epsilon = tokenizer.nextTokenAsDouble();
         int nRep = tokenizer.nextTokenAsInt();
@@ -212,8 +214,8 @@ namespace OpenMD {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        RealType theta0 = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+	ktheta = tokenizer.nextTokenAsDouble() * kScale;
 	bendType = new CosineSeriesBendType(theta0, ktheta);
       }
       break;
@@ -223,7 +225,7 @@ namespace OpenMD {
       if (nTokens < 1) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {        
-	RealType ktheta = tokenizer.nextTokenAsDouble() * kScale;
+	ktheta = tokenizer.nextTokenAsDouble() * kScale;
 	bendType = new HarmonicSineBendType(ktheta);
       }
       break;
