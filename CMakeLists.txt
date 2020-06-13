@@ -246,15 +246,17 @@ ENDIF(PERL_FOUND)
 SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation
 locations")
 
-FIND_PACKAGE(Python3 COMPONENTS Interpreter NumPy)
+FIND_PACKAGE(Python3 COMPONENTS Interpreter)
 IF(Python3_Interpreter_FOUND)
   SET(PYTHON ${Python3_EXECUTABLE})
-  IF(NOT Python3_NumPy_FOUND)
-    MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
-  ENDIF(NOT Python3_NumPy_FOUND)
 ELSE(Python3_Interpreter_FOUND)
   MESSAGE(STATUS "Failed to find python - some scripts will not be made")
 ENDIF(Python3_Interpreter_FOUND)
+
+FIND_PACKAGE(NumPy)
+IF(NOT NUMPY_FOUND)
+  MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
+ENDIF(NOT NUMPY_FOUND)
 
 FIND_PACKAGE(SciPy)
 IF(NOT SCIPY_FOUND)
