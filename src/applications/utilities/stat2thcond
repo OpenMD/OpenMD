@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Heat Flux Correlation function
 
 Computes the correlation function of the heat flux vector

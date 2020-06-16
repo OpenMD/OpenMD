@@ -74,6 +74,7 @@ namespace OpenMD {
     DeclareParameter(GayBerneMu, RealType);
     DeclareParameter(GayBerneNu, RealType);
     DeclareParameter(EAMMixingMethod, std::string);
+    DeclareParameter(DelayedParameterCalculation, bool);
     
   public:
     ForceFieldOptions();

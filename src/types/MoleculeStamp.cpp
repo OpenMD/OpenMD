@@ -671,7 +671,7 @@ namespace OpenMD {
     
     for (std::size_t i = 0; i < getNAtoms(); ++i) {
       AtomStamp* ai = getAtomStamp(i);
-      if (ai->getBondCount() == 3) {
+      if (ai->getCoordination() == 3) {
         AtomStamp::AtomIter ai2;
         std::vector<int> satellites;
         for(int a = ai->getFirstBondedAtom(ai2);a != -1;

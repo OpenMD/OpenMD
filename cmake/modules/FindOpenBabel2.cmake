@@ -36,6 +36,12 @@ else()
         /usr/local/openbabel/include
         /usr/local/openbabel-2.0/include/openbabel-2.0
         /usr/local/openbabel-2.0/include
+        /opt/local/include/openbabel-2.0
+        /opt/local/include
+        /opt/local/openbabel/include/openbabel-2.0
+        /opt/local/openbabel/include
+        /opt/local/openbabel-2.0/include/openbabel-2.0
+        /opt/local/openbabel-2.0/include
         ~/include/openbabel-2.0
         ~/include
       )

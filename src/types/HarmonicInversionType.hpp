@@ -68,9 +68,15 @@ namespace OpenMD {
 
     virtual void calcForce(RealType phi, RealType& V, RealType& dVdPhi) {
 
-      V = 0.5 * d0_ * pow((phi - phi0_), 2);
-      dVdPhi = -d0_ * (phi - phi0_);
+      RealType dp = phi - phi0_;
+      /* dp cannot be outside (-pi,pi) */
+      if (dp >=Constants::PI)       
+        dp -= 2*Constants::PI;      
+      else if (dp < -Constants::PI)
+        dp += 2*Constants::PI;
 
+      V = 0.5 * d0_ * dp * dp;
+      dVdPhi = -d0_ * dp;      
     }
     
     virtual InversionKey getKey() { return itAngle; }

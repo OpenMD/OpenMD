@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """OpenMD File Extractor
 
 Makes omd file from the last good frame of OpenMD dump file.

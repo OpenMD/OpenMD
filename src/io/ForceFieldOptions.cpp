@@ -75,6 +75,10 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
       DefineOptionalParameterWithDefaultValue(EAMMixingMethod, "EAMMixingMethod", "Johnson");
+      DefineOptionalParameterWithDefaultValue(DelayedParameterCalculation,
+                                              "delayedParameterCalculation",
+                                              false);
+      
 
       deprecatedKeywords_.insert("cutoffPolicy");
     }

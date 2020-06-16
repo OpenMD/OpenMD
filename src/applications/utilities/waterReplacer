@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Water Replacer
 
 Finds atomistic waters in an xyz file and generates an OpenMD (omd)

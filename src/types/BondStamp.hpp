@@ -47,7 +47,8 @@
 
 namespace OpenMD {
   class BondStamp : public DataHolder {
-    
+    DeclareParameter(BondOrder, RealType);
+
   public:
     BondStamp();
     virtual ~BondStamp();
@@ -58,12 +59,14 @@ namespace OpenMD {
         b = members[1];
         if (a < 0 || b < 0) {
           std::ostringstream oss;
-          oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
+          oss << "BondStamp Error: members" << containerToString(members)
+              << " is invalid" << std::endl;
           throw OpenMDException(oss.str());
         }
       } else {
         std::ostringstream oss;
-        oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
+        oss << "BondStamp Error: members" << containerToString(members)
+            << " is invalid" << std::endl;
         throw OpenMDException(oss.str());
       }           
     }
@@ -96,6 +99,7 @@ namespace OpenMD {
   private:
     int a;
     int b;
+    RealType bondOrder_;
     bool hasOverride_;
     std::string orType_;
     std::vector<RealType> orPars_;

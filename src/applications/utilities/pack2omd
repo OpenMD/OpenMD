@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 """Packmol RigidBody Replacer
 
 Finds atomistic rigid bodies in a packmol-generated xyz file and

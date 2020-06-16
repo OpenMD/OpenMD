@@ -145,7 +145,7 @@ namespace OpenMD {
         input.clear();            
         input.seekg(i->offset);
         (i->sectionParser)->parse(input, ff, i->lineNo);
-        (i->sectionParser)->validateSection();
+        (i->sectionParser)->validateSection(ff);
       }
     }
   }

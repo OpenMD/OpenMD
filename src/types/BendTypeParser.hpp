@@ -70,6 +70,8 @@ namespace OpenMD {
       btPolynomial,
       btCosine,
       btSDK,
+      btCosineSeries,
+      btHarmonicSine,
       btUnknown
     };
             

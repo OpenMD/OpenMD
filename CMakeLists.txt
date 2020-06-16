@@ -246,12 +246,12 @@ ENDIF(PERL_FOUND)
 SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation
 locations")
 
-FIND_PACKAGE(PythonInterp)
-IF(PYTHON_EXECUTABLE)
-  SET(PYTHON ${PYTHON_EXECUTABLE})
-ELSE(PYTHON_EXECUTABLE)
+FIND_PACKAGE(Python3 COMPONENTS Interpreter)
+IF(Python3_Interpreter_FOUND)
+  SET(PYTHON ${Python3_EXECUTABLE})
+ELSE(Python3_Interpreter_FOUND)
   MESSAGE(STATUS "Failed to find python - some scripts will not be made")
-ENDIF(PYTHON_EXECUTABLE)
+ENDIF(Python3_Interpreter_FOUND)
 
 FIND_PACKAGE(NumPy)
 IF(NOT NUMPY_FOUND)
@@ -386,6 +386,7 @@ src/io/ShapeAtomTypesSectionParser.cpp
 src/io/StickyAtomTypesSectionParser.cpp
 src/io/StickyPowerAtomTypesSectionParser.cpp
 src/io/TorsionTypesSectionParser.cpp
+src/io/UFFAtomTypesSectionParser.cpp
 src/io/ZConsReader.cpp
 src/lattice/CubicLattice.cpp
 src/lattice/FCCLattice.cpp
@@ -481,6 +482,7 @@ src/types/StickyAdapter.cpp
 src/types/SuttonChenAdapter.cpp
 src/types/TorsionStamp.cpp
 src/types/TorsionTypeParser.cpp
+src/types/UFFAdapter.cpp
 src/types/ZconsStamp.cpp
 src/utils/ElementsTable.cpp
 src/utils/MoLocator.cpp
@@ -858,14 +860,14 @@ src/applications/utilities/solLiqFricCalc
 IF(SCIPY_FOUND)
   set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES} ${PYSCIPY_FILES})
 ELSE(SCIPY_FOUND)
-  IF(NUMPY_FOUND)
+  IF(Python3_NumPy_FOUND)
     set(PY_FILES ${PYNONUMPY_FILES} ${PYNUMPY_FILES})
-  ELSE(NUMPY_FOUND)
+  ELSE(Python3_NumPy_FOUND)
     set(PY_FILES ${PYNONUMPY_FILES})
-  ENDIF(NUMPY_FOUND)
+  ENDIF(Python3_NumPy_FOUND)
 ENDIF(SCIPY_FOUND)
 
-IF(PYTHON_EXECUTABLE)
+IF(Python3_Interpreter_FOUND)
   IF(WIN32)
     SET(PYEXT ".py")
   ELSE(WIN32)
@@ -880,7 +882,7 @@ IF(PYTHON_EXECUTABLE)
             DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   endforeach(PY_FILE)
-ENDIF(PYTHON_EXECUTABLE)
+ENDIF(Python3_Interpreter_FOUND)
 
 set(PERL_FILES
 src/applications/utilities/solvator
@@ -985,7 +987,7 @@ message( STATUS "FFTW3_ROOT ................. = ${FFTW3_ROOT}")
 message( STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
 message( STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
 message( STATUS "PERL_EXECUTABLE ............ = ${PERL_EXECUTABLE}")
-message( STATUS "PYTHON_EXECUTABLE .......... = ${PYTHON_EXECUTABLE}")
+message( STATUS "Python3_EXECUTABLE ......... = ${Python3_EXECUTABLE}")
 message( STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
 message( STATUS )
 message( STATUS "To override these options, add -D{OPTION_NAME}=... to the cmake command" )

@@ -99,16 +99,19 @@ namespace OpenMD {
     activity->dataType = odtArray2d;
     activity->dataHandling = odhAverage;
     unsigned int nTypes = outputTypes_.size();
-    activity->accumulatorArray2d.resize(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) {
-      activity->accumulatorArray2d[i].resize(nTypes);
-      for (unsigned int j = 0 ; j < nTypes; j++) {
-        activity->accumulatorArray2d[i][j] = new Accumulator();
+    // don't do activities if we don't have any atoms in the selection
+    if (nTypes > 0) {
+      activity->accumulatorArray2d.resize(nBins_);
+      for (unsigned int i = 0; i < nBins_; i++) {
+        activity->accumulatorArray2d[i].resize(nTypes);
+        for (unsigned int j = 0 ; j < nTypes; j++) {
+          activity->accumulatorArray2d[i][j] = new Accumulator();
+        }
       }
+      for (unsigned int j = 0 ; j < nTypes; j++)
+        activity->columnNames.push_back( outputTypes_[j]->getName() );
+      addOutputDataAt(activity, ACTIVITY);
     }
-    for (unsigned int j = 0 ; j < nTypes; j++)
-      activity->columnNames.push_back( outputTypes_[j]->getName() );
-    addOutputDataAt(activity, ACTIVITY);
     
     eField = new OutputData;
     eField->units =  "kcal/mol/angstroms/e";
@@ -180,7 +183,7 @@ namespace OpenMD {
     StuntDouble* sd;
     AtomType* atype;
     
-    int i;
+    int selei;
     
     int typeIndex(-1);
     RealType mass;
@@ -216,10 +219,11 @@ namespace OpenMD {
 
     // loop over the selected atoms:
 
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
+    for (sd = seleMan_.beginSelected(selei); sd != NULL;
+         sd = seleMan_.nextSelected(selei)) {
 
       Vector3d pos = sd->getPos();
+      currentSnapshot_->wrapVector(pos);
 
       mass = sd->getMass();
       vel = sd->getVel();
@@ -248,6 +252,24 @@ namespace OpenMD {
         binKE[binNo] += KE;
         binDOF[binNo] += 3;
 
+        if (sd->isDirectional()) {
+          Vector3d angMom = sd->getJ();
+          Mat3x3d Ia = sd->getI();
+          if (sd->isLinear()) {
+            int i = sd->linearAxis();
+            int j = (i + 1) % 3;
+            int k = (i + 2) % 3;
+            binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) + 
+                                   angMom[k] * angMom[k] / Ia(k, k));
+            binDOF[binNo] += 2;
+          } else {
+            binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                                   angMom[1] * angMom[1] / Ia(1, 1) +
+                                   angMom[2] * angMom[2] / Ia(2, 2));
+            binDOF[binNo] += 3;
+          }
+        }
+               
         if (outputMask_[ACTIVITY]) {          
           if (typeIndex != -1) binTypeCounts[binNo][typeIndex]++;
         }

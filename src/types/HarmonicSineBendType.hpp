@@ -40,22 +40,44 @@
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
  
-#include <cstdlib>
-#include <cstring>
+/**
+ * @file HarmonicsineBendType.hpp
+ * @author    gezelter
+ * @date  06/18/2010
+ * @version 1.1
+ */ 
+ 
+#ifndef TYPES_HARMONICSINEBENDTYPE_HPP
+#define TYPES_HARMONICSINEBENDTYPE_HPP
 
-#include "types/BondStamp.hpp"
+#include "types/BendType.hpp"
+
 namespace OpenMD {
+  /**
+   * @class HarmonicSineBendType 
+   *
+   * A bend using the square of the sine of the angle instead of
+   * the angle itself: 
+   * \f[ Vbend = \frac{1}{8} k_\theta \sin^2( 2 \theta) \f]
+   */
+  class HarmonicSineBendType : public BendType {
+    
+  public:
+    
+    HarmonicSineBendType(RealType k) : BendType(0.0), k_(k) {}
+    
+    void setForceConstant(RealType k) {k_ = k; }    
+    RealType getForceConstant() {return k_;}
+    
+    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
+      V = 0.125 * k_ * sin(2.0 * theta);
+      dVdtheta = 0.25 * k_ * sin(4.0 * theta);
+    }
+    
+  private:
+    RealType k_;    
+  };
   
-  BondStamp::BondStamp(): hasOverride_(false) {
-    DefineOptionalParameterWithDefaultValue(BondOrder, "bondOrder", 1);
-  }
-  
-  BondStamp::~BondStamp() {    
-  }
-  
-  void BondStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(BondOrder, isPositive());
-  }
+}//end namespace OpenMD
+#endif //TYPES_HARMONICSINEBENDTYPE_HPP
 
-}
