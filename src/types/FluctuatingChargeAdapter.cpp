@@ -175,6 +175,7 @@ namespace OpenMD {
     fqParam->usesSlaterIntramolecular = false;
 
     // old-style EAMPoly has nV = nM
+    fqParam->isMetallic = true;   
     fqParam->nValence = nValence;
     fqParam->nMobile = nValence;
 
@@ -197,7 +198,7 @@ namespace OpenMD {
     fqParam->chargeMass = chargeMass;
     fqParam->usesSlaterElectrostatics = false;
     fqParam->usesSlaterIntramolecular = false;
-   
+    fqParam->isMetallic = true;   
     fqParam->nValence = nValence;
     fqParam->nMobile = nMobile;
 
