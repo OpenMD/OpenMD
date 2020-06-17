@@ -54,7 +54,8 @@
 namespace OpenMD {
   ZConsWriter::ZConsWriter(SimInfo* info, const std::string& filename) : 
     info_(info) {
-    // use master - slave mode, only master node writes to disk
+    // use a primary - secondary model, only the primary node writes
+    // to disk
 #ifdef IS_MPI
     if(worldRank == 0){
 #endif
@@ -102,7 +103,7 @@ namespace OpenMD {
     }
 #else
     
-    const int masterNode = 0;
+    const int primaryNode = 0;
     int nproc;
     int myNode;      
     MPI_Comm_size( MPI_COMM_WORLD, &nproc);
@@ -121,12 +122,12 @@ namespace OpenMD {
     int zmolIndex;
     RealType data[3];
     
-    if (myNode == masterNode) {
+    if (myNode == primaryNode) {
       
       std::vector<ZconsData> zconsData;
       ZconsData tmpData;       
       for(int i =0 ; i < nproc; ++i) {
-	if (i == masterNode) {
+	if (i == primaryNode) {
 	  std::list<ZconstraintMol>::const_iterator j;
 	  for ( j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
 	    tmpData.zmolIndex = j->mol->getGlobalIndex() ;
@@ -167,8 +168,8 @@ namespace OpenMD {
 	data[0] = j->fz;
 	data[1] = j->zpos;
 	data[2] = j->param.zTargetPos;
-        MPI_Send(&zmolIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-        MPI_Send(data, 3, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
+        MPI_Send(&zmolIndex, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
+        MPI_Send(data, 3, MPI_REALTYPE, primaryNode, 0, MPI_COMM_WORLD);
       }
     }
 #endif

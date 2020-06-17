@@ -62,8 +62,8 @@ namespace OpenMD {
    * @brief ifstrstream class provides a stream interface to read data
    * from files.
    * <p>In single mode, it falls back to ifstream, as we don't need to
-   * read the whole file into memory.  In parallel mode, the master
-   * node will read the whole file and broadcast it to other slave
+   * read the whole file into memory.  In parallel mode, the primary
+   * node will read the whole file and broadcast it to other secondary
    * nodes.  After broadcasting, every node will fall back to
    * stringstream.</p>
    *
@@ -118,8 +118,8 @@ namespace OpenMD {
 
     /**
      * Opens a file and associates a buffer with the specified file to
-     * perform the i/o operations (single mode). The master node reads
-     * a file and broadcasts its content to the other slave
+     * perform the i/o operations (single mode). The primary node reads
+     * a file and broadcasts its content to the other secondary
      * nodes. After broadcasting, all nodes fall back to stringstream
      * (parallel mode).
      * @param filename String containing the name of the file to be opened

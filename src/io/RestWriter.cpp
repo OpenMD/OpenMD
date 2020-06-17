@@ -155,9 +155,9 @@ namespace OpenMD {
       }
     }
     
-    const int masterNode = 0;
+    const int primaryNode = 0;
     
-    if (worldRank == masterNode) {
+    if (worldRank == primaryNode) {
       if (createRestFile_) (*output_) << "#time\t";
       if (createRestFile_) (*output_) << buffer;
       
@@ -183,9 +183,9 @@ namespace OpenMD {
        if (createRestFile_) (*output_).flush();
     } else {
       int sendBufferLength = buffer.size() + 1;
-      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+      MPI_Send(&sendBufferLength, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
       MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR,
-               masterNode, 0, MPI_COMM_WORLD);
+               primaryNode, 0, MPI_COMM_WORLD);
     }
     
 #endif // is_mpi    
@@ -238,10 +238,10 @@ namespace OpenMD {
       }
     }
     
-    const int masterNode = 0;
+    const int primaryNode = 0;
     
     if (createRestFile_) {
-      if (worldRank == masterNode) {
+      if (worldRank == primaryNode) {
         
         (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
         (*output_) << buffer;
@@ -268,9 +268,9 @@ namespace OpenMD {
         (*output_).flush();
       } else {
         int sendBufferLength = buffer.size() + 1;
-        MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+        MPI_Send(&sendBufferLength, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
         MPI_Send((void *)buffer.c_str(), sendBufferLength, 
-                 MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+                 MPI_CHAR, primaryNode, 0, MPI_COMM_WORLD);
       }
     }
 #endif // is_mpi

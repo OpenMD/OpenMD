@@ -54,8 +54,8 @@ namespace OpenMD {
     unsigned long seed = oneSeed;
 
 #ifdef IS_MPI
-    const int masterNode = 0;
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+    const int primaryNode = 0;
+    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, primaryNode, MPI_COMM_WORLD); 
 #endif
 
     if (seed != oneSeed) {
@@ -105,8 +105,8 @@ namespace OpenMD {
 
     unsigned long seed = oneSeed;
 #ifdef IS_MPI
-    const int masterNode = 0;
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+    const int primaryNode = 0;
+    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, primaryNode, MPI_COMM_WORLD); 
 #endif
     if (seed != oneSeed) {
       sprintf(painCave.errMsg,
@@ -127,21 +127,21 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     int size;
-    const int masterNode = 0;
-    if (worldRank == masterNode) {
+    const int primaryNode = 0;
+    if (worldRank == primaryNode) {
 #endif
 
       bigSeed = mtRand_->generateSeeds();
 
 #ifdef IS_MPI
       size = bigSeed.size();
-      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
-      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, 
+      MPI_Bcast(&size, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, primaryNode, 
                 MPI_COMM_WORLD);
     }else {
-      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+      MPI_Bcast(&size, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
       bigSeed.resize(size);
-      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, 
+      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, primaryNode, 
                 MPI_COMM_WORLD);
     }
 #endif

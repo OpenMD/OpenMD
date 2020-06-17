@@ -1,0 +1,1954 @@
+// This is the OpenMD-adapted version of the MOMEC force field found in:
+//
+// "Molecular modeling of inorganic compounds. 3nd Edition with a
+// Tutorial," by Comba, P., Hambley, T., Martin, B.;  VCH, Weinheim,
+// 2009. ISBN 3527317996.
+//
+// "Molecular Mechanics Calculations of Transition Metal Complexes," by
+// Paul V. Bernhardt and Peter Comba, Inorganic Chemistry, Vol.31, No.12,
+// 1992, pp. 2638-2644. https://pubs.acs.org/doi/pdf/10.1021/ic00038a060
+//
+// "The Directionality of d-Orbitals and Molecular-Mechanics Calculations
+// of Octahedral Transition-Metal Compounds," by Peter Comba, Marc
+// Ströhle, and Trevor W. Hambley, HELVETICA CHIMICA ACTA, Vol. 78
+// (1995), pp. 2042-2047. https://doi.org/10.1002/hlca.19950780812
+//
+// "Molecular mechanics modeling of organic backbone of meta-free and
+// coordinated ligands," by Johan E. Bol, Christian Buning, Peter Comba,
+// Jan Reedijk, and Marc Ströhle, J Comput Chem 19: 512–523, 1998
+// https://doi.org/10.1002/(SICI)1096-987X(19980415)19:5<512::AID-JCC4>3.0.CO;2-P
+//
+// "Molecular Mechanics and the Jahn-Teller Effect," by Peter Comba
+// and Marc Zimmer, Inorg. Chem. 1994, 33, pp. 5368-5369.
+// https://doi.org/10.1021/ic00102a001
+//
+// Note that the Jahn-Teller terms appear to be handled in this paper
+// via Urey-Bradley bends, although it is not clear how this should
+// interact with the HarmonicSine bend functions. The paper is
+// sparse on the details.  (We're also unclear on mixed ligands.)
+//
+// NT  CU2  NT   UreyBradley  90.0   ktheta?   2.16  36.000239006
+// NP  CU2  NP   UreyBradley  90.0   ktheta?   2.14  36.000239006
+// ND  CU2  ND   UreyBradley  90.0   ktheta?   2.12  43.200286807
+//
+//                                        NT---NT
+//                                        | \ / |
+// Also missing harmonic twist angles for | CU2 |  planar geometries.
+//                                        | / \ |
+//                                        NT---NT
+//
+// Bodo Martin's website has also been very helpful: http://momec.aci.uni-heidelberg.de/
+
+
+begin Options
+      Name		MOMEC
+      vdW-13-scale	1.0         
+      vdW-14-scale	1.0         
+end Options
+
+begin BaseAtomTypes
+H       1.01  
+LP      3.00  
+C       12.01 
+N       14.01 
+O       16.00 
+P       30.97 
+S       32.06 
+Ti      47.88 
+V       50.94 
+Cr      52.00 
+Mn      54.94 
+Fe      55.85 
+Ni      58.70 
+Co      58.93 
+Cu      63.55 
+Zn      65.38 
+Y       88.91 
+Rh      102.91
+La      138.91
+Ce      140.12
+Pr      140.91
+Nd      144.24
+Pm      146.92
+Sm      150.36
+Eu      151.97
+Gd      157.25
+Tb      158.93
+Dy      162.50
+Ho      164.93
+Er      167.26
+Tm      168.93
+Yb      173.04
+Lu      174.97
+Pt      195.08
+U       238.03
+end BaseAtomTypes
+
+begin AtomTypes
+C3      C    // cyanide
+CA      C    // aromatic carbon, e.g. benzene or guanine
+CAH     C    // pyrrole, imidazole
+CB      C    // guanine
+CCC     C    // acetylacetone
+CCO     C    // carboxylate
+CFC     C    // biphenyl (single bond between aromatic subunits)
+CI      C    // imine
+CK      C    // guanine
+CMC     C    
+COC     C    // acetylacetone
+CON     C    // amide
+CT      C    // tetrahedral carbon
+N*      N
+N3      N    // cyanide
+NA      N    // guanine
+NAH     N    // pyrrole with CH
+NAX     N    // pyrrole-like axially bonded to Cu (octahedral)
+NB      N    // guanine
+ND      N    // amide
+NI      N    // imine
+NOO     N    // nitro
+NP      N    // pyridine
+NT      N    // amine
+NTP     N
+O2      O    // CO2, P=0
+OC      O    // carboxylate
+OCC     O    // acetylacetone cis
+OCCT    O    // acetylacetone trans
+OCO     O    // carboxylate, amide
+OH      O    // O-P single bond
+ONO     O    // nitro
+OP      O    // oxygen bonded to penta-cooordinate copper
+OR      O    // ether
+OS      O    
+OW      O    // oxygen bonded to hexacoordinate copper
+OXCO    O    // peroxo Co (III)
+OXCU    O    // peroxo Cu (II)
+SW      S    // sulfur
+TI3     Ti   // titanium (III)
+TI4     Ti   // titanium (IV)
+V3      V    // vanadium (III)
+CR3     Cr   // chromium (III)
+MN3     Mn   // manganese (III)
+FE      Fe
+FE2H    Fe   // iron (II) high spin
+FE2L    Fe   // iron (II) low spin
+FE3H    Fe   // iron (III) high spin
+FE3L    Fe   // iron (III) low spin
+FECP    Fe   // iron (II) in ferrocene
+NI2     Ni   // nickel (II)
+NI2C    Ni
+NI2P    Ni
+NI2T    Ni   // nickel (II) with four ligands
+CO2     Co   // cobalt (II)
+CO2T    Co   // cobalt (II) with four ligands
+CO3     Co   // cobalt (III)
+CO3C    Co   // cobalt (III) carboxylate
+CU1     Cu   // copper (I)
+CU2     Cu   // copper (II)
+CU2C    Cu   // copper (II) carboxylate
+CU2P    Cu   // copper (II) pyridine
+CU2T    Cu   // copper (II) with four ligands
+ZN2     Zn   // zinc (II)
+ZN2T    Zn   // zinc (II) with four ligands)
+Y3      Y   
+RH3     Rh
+LA3     La   // lanthanum (III)
+CE3     Ce
+PR3     Pr
+ND3     Nd
+PM3     Pm
+SM3     Sm
+EU3     Eu
+GD3     Gd
+TB3     Tb
+DY3     Dy
+HO3     Ho
+ER3     Er
+TM3     Tm
+YB3     Yb
+LU3     Lu  // lutetium (III)
+PT2     Pt  // platinum (II)
+PT4     Pt  // platinum (IV)
+U6      U
+end AtomTypes
+
+begin BondTypes
+  C3	  N3	Harmonic	        1.107	      1152.01
+   C	  CB	Harmonic	        1.419	      894.246
+   C	  NA	Harmonic	        1.388	      836.646
+   C	   O	Harmonic	        1.229	      1140.49
+  CA	  CA	Harmonic	        1.377	      1065.61
+  CA	 CFC	Harmonic	        1.377	      1065.61
+  CA	 CON	Harmonic	        1.377	      1065.61
+  CA	  CT	Harmonic	          1.5	      720.005
+  CA	   H	Harmonic	         0.97	      720.005
+  CA	  NA	Harmonic	        1.381	      855.366
+  CA	  NP	Harmonic	        1.335	      936.006
+  CA	  NT	Harmonic	         1.34	      963.366
+ CAH	  CA	Harmonic	         1.38	      216.001
+ CAH	 CAH	Harmonic	         1.37	      216.001
+ CAH	  CI	Harmonic	         1.45	      648.004
+ CAH	  CT	Harmonic	         1.49	      432.003
+ CAH	   H	Harmonic	         0.97	      720.005
+ CAH	 NAH	Harmonic	         1.34	      216.001
+ CAH	 NAX	Harmonic	         1.34	      360.002
+ CAH	  NI	Harmonic	         1.44	      648.004
+  CB	  CB	Harmonic	         1.37	      1039.69
+  CB	  N*	Harmonic	        1.374	      872.646
+  CB	  NA	Harmonic	        1.354	      923.046
+  CB	  NB	Harmonic	        1.391	      828.005
+ CCC	 COC	Harmonic	        1.377	      1065.61
+ CCC	   H	Harmonic	         0.97	      720.005
+ CCO	 CCO	Harmonic	        1.525	      720.005
+ CCO	  CT	Harmonic	          1.5	      720.005
+ CCO	  OC	Harmonic	         1.29	      1152.01
+ CCO	 OCO	Harmonic	         1.22	      1296.01
+ CE3	  O2	Harmonic	         2.37	      7.63205
+ CE3	  OH	Harmonic	         2.37	      7.63205
+ CFC	 CFC	Harmonic	         1.47	      720.005
+ CFC	 COC	Harmonic	         1.47	      720.005
+ CFC	  NP	Harmonic	        1.335	      936.006
+  CI	  CA	Harmonic	         1.46	      720.005
+  CI	   H	Harmonic	         0.95	      561.604
+  CI	  NI	Harmonic	         1.27	      1036.81
+  CK	   H	Harmonic	         0.97	      720.005
+  CK	  N*	Harmonic	        1.371	      881.286
+  CK	  NB	Harmonic	        1.304	      1058.41
+ CO2	  NP	Harmonic	          2.1	      118.081
+ CO2	  NT	Harmonic	         2.12	      118.081
+CO2T	  ND	Harmonic	         1.78	      118.081
+CO2T	  NP	Harmonic	         1.96	      118.081
+ CO3	  NP	Harmonic	        1.865	      252.002
+ CO3	  NT	Harmonic	        1.905	      252.002
+CO3C	  NP	Harmonic	        1.865	      252.002
+CO3C	  NT	Harmonic	        1.915	      252.002
+CO3C	  OC	Harmonic	         1.86	      201.601
+CO3C	 OCC	Harmonic	         1.88	      201.601
+CO3P	OXCO	Harmonic	         1.84	      252.002
+ COC	  CT	Harmonic	          1.5	      720.005
+ COC	 OCC	Harmonic	        1.275	      1065.61
+ COC	OCCT	Harmonic	        1.275	      1065.61
+ CON	  CT	Harmonic	          1.5	      720.005
+ CON	  ND	Harmonic	         1.31	      936.006
+ CON	 OCO	Harmonic	         1.26	      1296.01
+ CR3	  NP	Harmonic	        1.985	      144.001
+ CR3	  NT	Harmonic	        2.045	      158.401
+ CR3	  OC	Harmonic	        1.935	      108.001
+  CT	  CT	Harmonic	          1.5	      720.005
+  CT	 CTO	Harmonic	          1.5	      720.005
+  CT	CTOC	Harmonic	          1.5	      720.005
+  CT	   H	Harmonic	         0.97	      720.005
+  CT	  N*	Harmonic	        1.475	      675.364
+  CT	 NAH	Harmonic	         1.45	      432.003
+  CT	  ND	Harmonic	         1.49	      864.006
+  CT	 NOO	Harmonic	         1.53	      720.005
+  CT	  NT	Harmonic	         1.49	      864.006
+  CT	  OP	Harmonic	         1.41	      504.003
+  CT	  OR	Harmonic	          1.4	      720.005
+  CT	  OW	Harmonic	         1.34	      72.0005
+  CT	  SW	Harmonic	         1.82	      380.163
+ CTO	 CTO	Harmonic	        1.505	      720.005
+ CTO	CTOC	Harmonic	         1.51	      720.005
+CTOC	CTOC	Harmonic	         1.49	      720.005
+CTOC	 NOO	Harmonic	        1.528	      720.005
+CTOC	 NTO	Harmonic	         1.48	      864.006
+ CU1	  NI	Harmonic	            2	      100.801
+ CU1	  NT	Harmonic	         2.22	      14.4001
+ CU2	  ND	Harmonic	         1.92	      86.4006
+ CU2	  NP	Harmonic	         1.94	      86.4006
+ CU2	  NT	Harmonic	         1.97	      86.4006
+ CU2	  OC	Harmonic	          1.9	      115.201
+ CU2	 ONO	Harmonic	          2.5	      14.4001
+ CU2	  OP	Harmonic	         2.15	      14.4001
+ CU2	  OW	Harmonic	          2.5	      14.4001
+ CU2	  SW	Harmonic	         2.29	      86.4006
+CU2C	  ND	Harmonic	         1.92	      86.4006
+CU2C	  NP	Harmonic	         1.94	      86.4006
+CU2C	  NT	Harmonic	         1.97	      86.4006
+CU2C	  OC	Harmonic	          1.9	      115.201
+CU2C	  OW	Harmonic	          2.5	      14.4001
+CU2C	  SW	Harmonic	         2.29	      86.4006
+CU2P	 NAH	Harmonic	         1.98	      129.601
+CU2P	 NAX	Harmonic	          2.3	      43.2003
+CU2P	  ND	Harmonic	         1.92	      86.4006
+CU2P	  NP	Harmonic	         1.94	      86.4006
+CU2P	  NT	Harmonic	         1.94	      86.4006
+CU2P	  OC	Harmonic	          1.9	      115.201
+CU2P	 ONO	Harmonic	          2.5	      14.4001
+CU2P	  OP	Harmonic	         2.15	      14.4001
+CU2P	  OW	Harmonic	          2.5	      14.4001
+CU2P	OXCU	Harmonic	         1.83	      86.4006
+CU2T	  ND	Harmonic	         1.89	      86.4006
+CU2T	  NP	Harmonic	         1.99	      86.4006
+ DY3	  O2	Harmonic	        2.195	      10.3681
+ DY3	  OH	Harmonic	        2.195	      10.3681
+ DY3	  OW	Harmonic	        2.195	      10.3681
+ ER3	  O2	Harmonic	         2.15	      10.6561
+ ER3	  OH	Harmonic	         2.15	      10.6561
+ EU3	  O2	Harmonic	        2.245	      9.64806
+ EU3	  OH	Harmonic	        2.245	      9.64806
+FE3H	  OC	Harmonic	         1.99	      144.001
+FE3H	  OW	Harmonic	          1.9	      72.0005
+FE3L	  NP	Harmonic	        1.925	      244.802
+FE3L	  NT	Harmonic	         1.95	      244.802
+FE3L	  C3	Harmonic	        1.923	      244.802
+ GD3	  O2	Harmonic	        2.226	      9.93607
+ GD3	  OH	Harmonic	        2.226	      9.93607
+ GD3	  OW	Harmonic	        2.226	      9.93607
+   H	  NA	Harmonic	         0.91	      868.326
+   H	  NT	Harmonic	         0.91	      812.165
+   H	  OP	Harmonic	         0.91	      720.005
+   H	  OW	Harmonic	         0.91	      720.005
+ HO3	  O2	Harmonic	        2.178	      10.5121
+ HO3	  OH	Harmonic	        2.178	      10.5121
+ HO3	  OW	Harmonic	        2.178	      10.5121
+ LA3	  O2	Harmonic	        2.409	      7.05605
+ LA3	  OH	Harmonic	        2.409	      7.05605
+ LA3	  OW	Harmonic	        2.409	      7.05605
+ LU3	  O2	Harmonic	        2.038	      10.9441
+ LU3	  OH	Harmonic	        2.038	      10.9441
+ LU3	  OW	Harmonic	        2.038	      10.9441
+ MN3	  OC	Harmonic	         1.95	      43.2003
+ NAH	   H	Harmonic	         0.91	      720.005
+ NAH	 NAH	Harmonic	         1.36	      216.001
+ NAH	 NAX	Harmonic	         1.36	      216.001
+ ND3	  O2	Harmonic	         2.32	      8.35206
+ ND3	  OH	Harmonic	         2.32	      8.35206
+ ND3	  OW	Harmonic	         2.32	      8.35206
+ NI2	  NT	Harmonic	         2.09	      86.4006
+NI2C	  NP	Harmonic	        2.025	      86.4006
+NI2C	  NT	Harmonic	        2.035	      86.4006
+NI2C	  OC	Harmonic	         2.04	      93.6006
+NI2P	  NP	Harmonic	        2.025	      86.4006
+NI2P	  NT	Harmonic	         2.05	      86.4006
+NI2T	  ND	Harmonic	         1.76	      86.4006
+NI2T	  NP	Harmonic	        1.855	      86.4006
+ NOO	 ONO	Harmonic	        1.213	      936.006
+OXCO	OXCO	Harmonic	         1.47	      468.003
+OXCU	OXCU	Harmonic	         1.43	      468.003
+   P	  O2	Harmonic	        1.448	      1050.77
+   P	  OH	Harmonic	        1.665	      460.371
+   P	  OS	Harmonic	        1.686	      460.371
+ PM3	  O2	Harmonic	        2.285	      8.92806
+ PM3	  OH	Harmonic	        2.285	      8.92806
+ PR3	  O2	Harmonic	        2.345	      8.06405
+ PR3	  OH	Harmonic	        2.345	      8.06405
+ PR3	  OW	Harmonic	        2.345	      8.06405
+ PT2	  NB	Harmonic	         2.01	      365.762
+ PT2	  NT	Harmonic	         2.03	      365.762
+ RH3	  NT	Harmonic	         2.05	      252.002
+ SM3	  O2	Harmonic	        2.258	      9.21606
+ SM3	  OH	Harmonic	        2.258	      9.21606
+ SM3	  OW	Harmonic	        2.258	      9.21606
+ TB3	  O2	Harmonic	        2.213	      10.2241
+ TB3	  OH	Harmonic	        2.213	      10.2241
+ TI3	  OC	Harmonic	         2.08	      115.201
+ TI3	  OW	Harmonic	        2.035	      72.0005
+ TI4	 OCC	Harmonic	         1.98	      216.001
+ TI4	OCCT	Harmonic	         2.04	      216.001
+ TI4	  OW	Harmonic	        1.722	      72.0005
+ TM3	  O2	Harmonic	        2.215	      10.8001
+ TM3	  OH	Harmonic	        2.215	      10.8001
+  V3	  OC	Harmonic	         1.92	      72.0005
+  V3	  OW	Harmonic	         1.98	      72.0005
+  Y3	  O2	Harmonic	         2.16	      10.6561
+  Y3	  OH	Harmonic	         2.16	      10.6561
+ YB3	  O2	Harmonic	        2.095	      10.9441
+ YB3	  OH	Harmonic	        2.095	      10.9441
+ YB3	  OW	Harmonic	        2.095	      10.9441
+ ZN2	  ND	Harmonic	            2	      50.4003
+ ZN2	  NP	Harmonic	          2.1	      50.4003
+ZN2T	  NP	Harmonic	          2.1	      50.4003
+ZN2T	  ND	Harmonic	            2	      50.4003
+ ZN2	  NT	Harmonic	         2.22	      50.4003
+end BondTypes
+
+begin BendTypes
+  CB	   C	  NA	Harmonic	      111.326	      139.681
+  CB	   C	   O	Harmonic	      128.801	      159.841
+  NA	   C	   O	Harmonic	      120.608	      159.841
+  CA	  CA	  CA	Harmonic	      119.977	      139.681
+  CA	  CA	 CFC	Harmonic	      119.977	      139.681
+  CA	  CA	 CON	Harmonic	      119.977	      139.681
+  CA	  CA	  CT	Harmonic	      119.977	      64.8004
+  CA	  CA	   H	Harmonic	      119.977	      64.8004
+  CA	  CA	  NP	Harmonic	      119.977	      139.681
+  CA	  CA	  NT	Harmonic	      119.977	      64.8004
+ CAH	  CA	  CA	Harmonic	      115.967	      64.8004
+ CAH	  CA	   H	Harmonic	      121.582	      64.8004
+ CFC	  CA	   H	Harmonic	      119.977	      64.8004
+ CFC	  CA	  NP	Harmonic	      119.977	      139.681
+  CI	  CA	  CA	Harmonic	      119.977	      36.0002
+ CON	  CA	  NP	Harmonic	      119.977	      139.681
+  CT	  CA	  NP	Harmonic	      119.977	      64.8004
+   H	  CA	  NP	Harmonic	      119.977	      64.8004
+  NA	  CA	  NA	Harmonic	      123.301	      139.681
+  NA	  CA	  NT	Harmonic	      116.024	      139.681
+  NA	  CA	  NT	Harmonic	      119.805	      139.681
+ CAH	 CAH	  CA	Harmonic	      121.582	      21.6001
+ CAH	 CAH	 CAH	Harmonic	      105.997	      14.4001
+ CAH	 CAH	  CI	Harmonic	      132.009	      93.6006
+ CAH	 CAH	  CT	Harmonic	      130.291	      93.6006
+ CAH	 CAH	   H	Harmonic	       126.91	      64.8004
+ CAH	 CAH	 NAH	Harmonic	      112.013	      21.6001
+ CAH	 CAH	 NAX	Harmonic	      112.013	      21.6001
+  CI	 CAH	 NAH	Harmonic	      121.009	      93.6006
+  CT	 CAH	 NAH	Harmonic	      121.009	      93.6006
+  CT	 CAH	 NAX	Harmonic	      121.009	      93.6006
+ NAH	 CAH	  CA	Harmonic	      131.322	      21.6001
+ NAH	 CAH	   H	Harmonic	      119.977	      50.4003
+ NAH	 CAH	 NAH	Harmonic	      112.013	      21.6001
+   C	  CB	  CB	Harmonic	      119.175	      169.921
+   C	  CB	  NB	Harmonic	      130.004	      139.681
+  CB	  CB	  N*	Harmonic	      106.226	      139.681
+  CB	  CB	  NA	Harmonic	      127.712	      139.681
+  CB	  CB	  NB	Harmonic	      109.492	      139.681
+  NA	  CB	  N*	Harmonic	      125.993	      139.681
+ COC	 CCC	 COC	Harmonic	      119.977	      139.681
+ COC	 CCC	   H	Harmonic	      119.977	      139.681
+  CT	 CCO	  OC	Harmonic	       118.43	      36.0002
+  CT	 CCO	 OCO	Harmonic	       118.43	      36.0002
+  OC	 CCO	 CCO	Harmonic	       114.19	      115.201
+  OC	 CCO	  OC	Harmonic	      119.977	      36.0002
+  OC	 CCO	 OCO	Harmonic	      123.129	      36.0002
+ OCO	 CCO	 CCO	Harmonic	      121.181	      136.801
+  CA	 CFC	  CA	Harmonic	      119.977	      139.681
+  CA	 CFC	 CFC	Harmonic	      119.977	      64.8004
+  CA	 CFC	 COC	Harmonic	      119.977	      50.4003
+  CA	 CFC	  NP	Harmonic	      119.977	      139.681
+ CFC	 CFC	  NP	Harmonic	      119.977	      64.8004
+  CA	  CI	   H	Harmonic	      119.977	      64.8004
+ CAH	  CI	   H	Harmonic	      119.977	      64.8004
+ CAH	  CI	  NI	Harmonic	      119.977	      21.6001
+  NI	  CI	  CA	Harmonic	      119.977	      21.6001
+  NI	  CI	   H	Harmonic	      119.977	      64.8004
+   H	  CK	  N*	Harmonic	      123.071	      70.5605
+   H	  CK	  NB	Harmonic	      123.071	      70.5605
+  NB	  CK	  N*	Harmonic	        112.3	      139.681
+  NP	 CO2	  NP	HarmonicSine	      3.31202
+  NT	 CO2	  NT	HarmonicSine	      2.44802
+  ND	CO2T	  ND	HarmonicSine	      2.44802
+  NP	CO2T	  ND	HarmonicSine	      2.44802
+  NP	CO2T	  NP	HarmonicSine	      2.44802
+  NP	 CO3	  NP	HarmonicSine	      7.20005
+  NP	 CO3	  NT	HarmonicSine	      7.20005
+  NT	 CO3	  NT	HarmonicSine	      7.20005
+  NP	CO3C	  NP	HarmonicSine	      7.20005
+  NP	CO3C	  NT	HarmonicSine	      7.20005
+  NT	CO3C	  NT	HarmonicSine	      7.20005
+  NT	CO3C	  OC	HarmonicSine	      6.48004
+  NT	CO3C	 OCC	HarmonicSine	      6.48004
+  OC	CO3C	  OC	HarmonicSine	      5.76004
+ OCC	CO3C	 OCC	HarmonicSine	      5.76004
+ CCC	 COC	 CFC	Harmonic	      119.977	      50.4003
+ CCC	 COC	  CT	Harmonic	      119.977	      50.4003
+ CCC	 COC	 OCC	Harmonic	      119.977	      139.681
+ CCC	 COC	OCCT	Harmonic	      119.977	      139.681
+ CFC	 COC	 OCC	Harmonic	      119.977	      50.4003
+ CFC	 COC	OCCT	Harmonic	      119.977	      50.4003
+  CT	 COC	 OCC	Harmonic	      119.977	      50.4003
+  CT	 COC	OCCT	Harmonic	      119.977	      50.4003
+  CA	 CON	  ND	Harmonic	       118.43	      36.0002
+  CA	 CON	 OCO	Harmonic	       118.43	      36.0002
+  CT	 CON	  ND	Harmonic	       118.43	      36.0002
+  CT	 CON	 OCO	Harmonic	       118.43	      36.0002
+  ND	 CON	 OCO	Harmonic	      119.977	      36.0002
+  NP	  CR	  NP	HarmonicSine	      3.60002
+  NP	 CR3	  NT	HarmonicSine	      3.60002
+  NT	 CR3	  NT	HarmonicSine	      3.60002
+  CA	  CT	  CA	Harmonic	      109.492	      64.8004
+  CA	  CT	  CT	Harmonic	      109.492	      64.8004
+  CA	  CT	   H	Harmonic	      109.378	      51.8403
+  CA	  CT	  ND	Harmonic	      109.492	      64.8004
+  CA	  CT	  NT	Harmonic	      109.492	      64.8004
+  CA	  CT	  OP	Harmonic	      109.492	      64.8004
+  CA	  CT	  OW	Harmonic	      109.492	      64.8004
+ CAH	  CT	  CA	Harmonic	      109.492	      64.8004
+ CAH	  CT	 CAH	Harmonic	        112.3	      64.8004
+ CAH	  CT	  CT	Harmonic	        112.3	      64.8004
+ CAH	  CT	   H	Harmonic	      109.378	      51.8403
+ CAH	  CT	  NT	Harmonic	      109.492	      64.8004
+ CAH	  CT	  OP	Harmonic	      109.492	      64.8004
+ CAH	  CT	  OW	Harmonic	      109.492	      64.8004
+ CCO	  CT	 CCO	Harmonic	      109.492	      64.8004
+ CCO	  CT	  CT	Harmonic	      109.492	      64.8004
+ CCO	  CT	   H	Harmonic	      109.378	      51.8403
+ CCO	  CT	  ND	Harmonic	      109.492	      64.8004
+ CCO	  CT	  NT	Harmonic	      109.492	      64.8004
+ COC	  CT	   H	Harmonic	      109.378	      50.4003
+ CON	  CT	 CON	Harmonic	      109.492	      64.8004
+ CON	  CT	  CT	Harmonic	      109.492	      64.8004
+ CON	  CT	   H	Harmonic	      109.378	      51.8403
+ CON	  CT	  NT	Harmonic	      109.492	      64.8004
+  CT	  CT	  CT	Harmonic	      109.492	      64.8004
+  CT	  CT	   H	Harmonic	      109.378	      51.8403
+  CT	  CT	  N*	Harmonic	      109.378	      72.0005
+  CT	  CT	 NAH	Harmonic	      109.492	      64.8004
+  CT	  CT	  ND	Harmonic	      109.492	      64.8004
+  CT	  CT	 NOO	Harmonic	      109.492	      64.8004
+  CT	  CT	  NT	Harmonic	      109.492	      64.8004
+  CT	  CT	  OW	Harmonic	      109.492	      64.8004
+  CT	  CT	  SW	Harmonic	      109.492	      99.3607
+   H	  CT	   H	Harmonic	      108.977	      46.0803
+   H	  CT	  N*	Harmonic	      109.378	      51.8403
+   H	  CT	  ND	Harmonic	      109.378	      51.8403
+   H	  CT	  NT	Harmonic	      109.378	      51.8403
+   H	  CT	  OW	Harmonic	      109.378	      51.8403
+   H	  CT	  SW	Harmonic	      109.492	      64.8004
+ NAH	  CT	   H	Harmonic	      109.378	      51.8403
+ NAH	  CT	  OP	Harmonic	      108.003	      64.8004
+ NAH	  CT	  OW	Harmonic	      108.003	      64.8004
+  NI	  CT	  CT	Harmonic	      109.492	      64.8004
+  NI	  CT	   H	Harmonic	      109.492	      64.8004
+  NT	  CT	  NT	Harmonic	      109.492	      64.8004
+  OS	  CT	   H	Harmonic	      109.492	      69.8405
+  CT	 CTO	 CTO	Harmonic	      110.008	      64.8004
+   H	 CTO	   H	Harmonic	      109.492	      46.0803
+  ND	 CU2	  ND	HarmonicSine	      1.87201
+  ND	 CU2	  NP	HarmonicSine	      1.87201
+  ND	 CU2	  NT	HarmonicSine	      1.87201
+  ND	 CU2	  OW	HarmonicSine	      1.00801
+  NP	 CU2	  NP	HarmonicSine	      1.87201
+  NP	 CU2	  NT	HarmonicSine	      1.87201
+  NP	 CU2	 ONO	HarmonicSine	      1.00801
+  NP	 CU2	  OW	HarmonicSine	      1.00801
+  NP	 CU2	  SW	HarmonicSine	      1.87201
+  NT	 CU2	  NT	HarmonicSine	      1.87201
+  NT	 CU2	 ONO	HarmonicSine	      1.00801
+  NT	 CU2	  OW	HarmonicSine	      1.00801
+  NT	 CU2	  SW	HarmonicSine	      1.87201
+ ONO	 CU2	 ONO	HarmonicSine	     0.288002
+ ONO	 CU2	  OW	HarmonicSine	     0.288002
+ ONO	 CU2	  SW	HarmonicSine	      1.00801
+  OW	 CU2	  OW	HarmonicSine	     0.288002
+  OW	 CU2	  SW	HarmonicSine	      1.00801
+  SW	 CU2	  SW	HarmonicSine	      1.87201
+  ND	CU2C	  ND	HarmonicSine	      1.87201
+  ND	CU2C	  NP	HarmonicSine	      1.87201
+  ND	CU2C	  NT	HarmonicSine	      1.87201
+  ND	CU2C	  OC	HarmonicSine	      2.16001
+  ND	CU2C	  OW	HarmonicSine	      1.00801
+  NP	CU2C	  NP	HarmonicSine	      1.87201
+  NP	CU2C	  NT	HarmonicSine	      1.87201
+  NP	CU2C	 ONO	HarmonicSine	      1.00801
+  NP	CU2C	  OW	HarmonicSine	      1.00801
+  NP	CU2C	  SW	HarmonicSine	      1.87201
+  NT	CU2C	  NT	HarmonicSine	      1.87201
+  NT	CU2C	  OC	HarmonicSine	      2.16001
+  NT	CU2C	 ONO	HarmonicSine	      1.00801
+  NT	CU2C	  OW	HarmonicSine	      1.00801
+  NT	CU2C	  SW	HarmonicSine	      1.87201
+  OC	CU2C	  OC	HarmonicSine	      2.44802
+  OC	CU2C	  OW	HarmonicSine	      1.29601
+ ONO	CU2C	 ONO	HarmonicSine	     0.288002
+ ONO	CU2C	  OW	HarmonicSine	     0.288002
+ ONO	CU2C	  SW	HarmonicSine	      1.00801
+  OW	CU2C	  OW	HarmonicSine	     0.288002
+  OW	CU2C	  SW	HarmonicSine	      1.00801
+  SW	CU2C	  SW	HarmonicSine	      1.87201
+  ND	CU2P	  ND	HarmonicSine	      1.87201
+  ND	CU2P	  NP	HarmonicSine	      1.87201
+  ND	CU2P	  NT	HarmonicSine	      1.87201
+  ND	CU2P	  OW	HarmonicSine	      1.00801
+  NP	CU2P	  NP	HarmonicSine	      1.87201
+  NP	CU2P	  NT	HarmonicSine	      1.87201
+  NP	CU2P	 ONO	HarmonicSine	      1.00801
+  NP	CU2P	  OW	HarmonicSine	      1.00801
+  NP	CU2P	  SW	HarmonicSine	      1.87201
+  NT	CU2P	  NT	HarmonicSine	      1.87201
+  NT	CU2P	  OC	HarmonicSine	      2.16001
+  NT	CU2P	 ONO	HarmonicSine	      1.00801
+  NT	CU2P	  OW	HarmonicSine	      1.00801
+  NT	CU2P	  SW	HarmonicSine	      1.87201
+  OC	CU2P	  OC	HarmonicSine	      2.44802
+  OC	CU2P	  OW	HarmonicSine	      1.29601
+ ONO	CU2P	 ONO	HarmonicSine	     0.288002
+ ONO	CU2P	  OW	HarmonicSine	     0.288002
+ ONO	CU2P	  SW	HarmonicSine	      1.00801
+  OW	CU2P	  OW	HarmonicSine	     0.288002
+  OW	CU2P	  SW	HarmonicSine	      1.00801
+  SW	CU2P	  SW	HarmonicSine	      1.87201
+  NP	CU2T	  NP	HarmonicSine	      1.87201
+  ND	CU2T	  NP	HarmonicSine	      1.87201
+  ND	CU2T	  ND	HarmonicSine	      1.87201
+  C3	FE3L	  C3	HarmonicSine	      11.8081
+  NP	FE3L	  NP	HarmonicSine	      6.04804
+  NP	FE3L	  NT	HarmonicSine	      6.04804
+  NT	FE3L	  NT	HarmonicSine	      6.04804
+  CB	  N*	  CK	Harmonic	      106.513	      139.681
+  CB	  N*	  CT	Harmonic	      125.822	      139.681
+  CK	  N*	  CT	Harmonic	      128.801	      139.681
+   C	  NA	  CA	Harmonic	      126.394	      139.681
+   C	  NA	   H	Harmonic	      116.826	      70.5605
+  CA	  NA	  CB	Harmonic	      112.185	      139.681
+  CA	  NA	   H	Harmonic	      117.972	      70.5605
+ CAH	 NAH	 CAH	Harmonic	      105.539	      21.6001
+ CAH	 NAH	  CT	Harmonic	      128.514	      93.6006
+ CAH	 NAH	CU2P	Harmonic	      123.014	      28.8002
+ CAH	 NAH	   H	Harmonic	      119.977	      50.4003
+ CAH	 NAH	 NAH	Harmonic	      108.003	      28.8002
+CU2P	 NAH	 NAH	Harmonic	      130.004	      28.8002
+ NAH	 NAH	  CT	Harmonic	      119.977	      93.6006
+ NAH	 NAH	   H	Harmonic	      119.977	      50.4003
+ NAX	 NAH	 CAH	Harmonic	      108.003	      28.8002
+ NAX	 NAH	  CT	Harmonic	      119.977	      93.6006
+ CAH	 NAX	CU2P	Harmonic	      123.014	      14.4001
+ CAH	 NAX	 NAH	Harmonic	       104.45	      28.8002
+CU2P	 NAX	 NAH	Harmonic	      132.009	      14.4001
+  CB	  NB	  CK	Harmonic	      105.482	      139.681
+ PT2	  NB	  CB	Harmonic	      127.254	      43.2003
+ PT2	  NB	  CK	Harmonic	      127.254	      43.2003
+  CT	  ND	 CON	Harmonic	       118.43	      36.0002
+ CU2	  ND	 CON	Harmonic	      119.977	      28.8002
+ CU2	  ND	  CT	Harmonic	      119.977	      28.8002
+CU2C	  ND	 CON	Harmonic	      119.977	      28.8002
+CU2C	  ND	  CT	Harmonic	      119.977	      28.8002
+CU2P	  ND	 CON	Harmonic	      119.977	      28.8002
+CU2P	  ND	  CT	Harmonic	      119.977	      28.8002
+  CI	  NI	  CT	Harmonic	      119.977	      64.8004
+  CI	  NI	CU2P	Harmonic	      134.989	      14.4001
+  CT	  NI	  CI	Harmonic	      114.993	      64.8004
+  CT	  NI	CU2P	Harmonic	      110.008	      28.8002
+ CU1	  NI	  CI	Harmonic	      134.989	      14.4001
+ CU1	  NI	  CT	Harmonic	       109.55	      14.4001
+  NP	 NI2	  NT	HarmonicSine	      3.60002
+  NT	 NI2	  NT	HarmonicSine	      3.60002
+  NP	NI2C	  NP	HarmonicSine	      3.60002
+  NP	NI2C	  NT	HarmonicSine	      3.60002
+  NP	NI2C	  OC	HarmonicSine	      3.74402
+  NT	NI2C	  NT	HarmonicSine	      3.60002
+  NT	NI2C	  OC	HarmonicSine	      3.74402
+  OC	NI2C	  OC	HarmonicSine	      3.88803
+  NP	NI2P	  NP	HarmonicSine	      3.60002
+  NP	NI2P	  NT	HarmonicSine	      3.60002
+  NT	NI2P	  NT	HarmonicSine	      3.60002
+  ND	NI2T	  NP	HarmonicSine	      3.60002
+  NP	NI2T	  NP	HarmonicSine	      3.60002
+  ND	NI2T	  ND	HarmonicSine	      3.60002
+  CT	 NOO	 ONO	Harmonic	      117.972	      64.8004
+ ONO	 NOO	 ONO	Harmonic	      123.988	      93.6006
+  CA	  NP	  CA	Harmonic	      119.977	      139.681
+  CA	  NP	 CFC	Harmonic	      119.977	      139.681
+ CFC	  NP	 CFC	Harmonic	      119.977	      139.681
+ CO2	  NP	  CA	Harmonic	      119.977	      28.8002
+ CO2	  NP	 CFC	Harmonic	      119.977	      28.8002
+ CO3	  NP	  CA	Harmonic	      119.977	      28.8002
+ CO3	  NP	 CFC	Harmonic	      119.977	      28.8002
+ CO3	  NP	  CT	Harmonic	      119.977	      28.8002
+CO3C	  NP	  CA	Harmonic	      119.977	      28.8002
+CO3C	  NP	 CFC	Harmonic	      119.977	      28.8002
+CO3C	  NP	  CT	Harmonic	      119.977	      28.8002
+ CR3	  NP	  CA	Harmonic	      119.977	      28.8002
+ CR3	  NP	 CFC	Harmonic	      119.977	      28.8002
+ CU2	  NP	  CA	Harmonic	      119.977	      28.8002
+ CU2	  NP	 CFC	Harmonic	      119.977	      28.8002
+CU2C	  NP	  CA	Harmonic	      119.977	      28.8002
+CU2C	  NP	 CFC	Harmonic	      119.977	      28.8002
+CU2P	  NP	  CA	Harmonic	      119.977	      28.8002
+CU2P	  NP	 CFC	Harmonic	      119.977	      28.8002
+FE3L	  NP	  CA	Harmonic	      119.977	      28.8002
+FE3L	  NP	 CFC	Harmonic	      119.977	      28.8002
+NI2C	  NP	  CA	Harmonic	      119.977	      28.8002
+NI2C	  NP	 CFC	Harmonic	      119.977	      28.8002
+NI2P	  NP	  CA	Harmonic	      119.977	      28.8002
+NI2P	  NP	 CFC	Harmonic	      119.977	      28.8002
+  CA	  NT	  CT	Harmonic	      109.492	      64.8004
+  CA	  NT	   H	Harmonic	      109.378	      64.8004
+ CO2	  NT	  CT	Harmonic	      110.008	      28.8002
+ CO2	  NT	   H	Harmonic	      109.721	      14.4001
+ CO3	  NT	  CA	Harmonic	      110.008	      28.8002
+ CO3	  NT	  CT	Harmonic	      110.008	      28.8002
+ CO3	  NT	   H	Harmonic	      109.721	      14.4001
+CO3C	  NT	  CA	Harmonic	      110.008	      28.8002
+CO3C	  NT	  CT	Harmonic	      110.008	      28.8002
+CO3C	  NT	   H	Harmonic	      109.721	      14.4001
+ CR3	  NT	  CT	Harmonic	      110.008	      28.8002
+ CR3	  NT	   H	Harmonic	      109.721	      14.4001
+  CT	  NT	  CT	Harmonic	      109.492	      64.8004
+  CT	  NT	   H	Harmonic	      109.378	      64.8004
+ CU1	  NT	  CT	Harmonic	      110.008	      28.8002
+ CU1	  NT	   H	Harmonic	      109.721	      14.4001
+ CU2	  NT	  CA	Harmonic	      110.008	      28.8002
+ CU2	  NT	  CT	Harmonic	      110.008	      28.8002
+ CU2	  NT	   H	Harmonic	      109.721	      14.4001
+CO2T	  NP	  CA	Harmonic	      119.977	      28.8002
+CO2T	  ND	 CON	Harmonic	      119.977	      28.8002
+CO2T	  ND	  CT	Harmonic	      119.977	      28.8002
+CU2C	  NT	  CA	Harmonic	      110.008	      28.8002
+CU2C	  NT	  CT	Harmonic	      110.008	      28.8002
+CU2C	  NT	   H	Harmonic	      109.721	      14.4001
+CU2P	  NT	  CA	Harmonic	      110.008	      28.8002
+CU2P	  NT	  CT	Harmonic	      110.008	      28.8002
+CU2P	  NT	   H	Harmonic	      109.721	      14.4001
+CU2T	  NP	  CA	Harmonic	      119.977	      28.8002
+CU2T	  ND	 CON	Harmonic	      119.977	      28.8002
+CU2T	  ND	  CT	Harmonic	      119.977	      28.8002
+FE3L	  C3	  N3	HarmonicSine	      2.88002
+FE3L	  NT	  CT	Harmonic	      110.008	      28.8002
+FE3L	  NT	   H	Harmonic	      109.721	      14.4001
+   H	  NT	   H	Harmonic	      108.977	      47.5203
+ NI2	  NT	  CT	Harmonic	      110.008	      28.8002
+ NI2	  NT	   H	Harmonic	      109.721	      14.4001
+NI2C	  NT	  CT	Harmonic	      110.008	      28.8002
+NI2C	  NT	   H	Harmonic	      109.721	      14.4001
+NI2P	  NT	  CT	Harmonic	      110.008	      28.8002
+NI2P	  NT	   H	Harmonic	      109.721	      14.4001
+NI2T	  ND	 CON	Harmonic	      119.977	      28.8002
+NI2T	  NP	  CA	Harmonic	      119.977	      28.8002
+NI2T	  ND	  CT	Harmonic	      119.977	      28.8002
+ PT2	  NT	  CT	Harmonic	      110.008	      28.8002
+ PT2	  NT	   H	Harmonic	      109.721	      14.4001
+ RH3	  NT	  CT	Harmonic	      110.008	      28.8002
+ RH3	  NT	   H	Harmonic	      109.721	      14.4001
+ ZN2	  NT	  CT	Harmonic	      110.008	      28.8002
+ ZN2	  NT	   H	Harmonic	      109.721	      14.4001
+ZN2T	  NP	  CA	Harmonic	      119.977	      28.8002
+ZN2T	  ND	 CON	Harmonic	      119.977	      28.8002
+ZN2T	  ND	  CT	Harmonic	      119.977	      28.8002
+ CO3	  OC	 CCO	Harmonic	      119.977	      7.20005
+CO3C	  OC	 CCO	Harmonic	      119.977	      7.20005
+ CR3	  OC	 CCO	Harmonic	      114.477	      57.6004
+CU2C	  OC	 CCO	Harmonic	      119.977	      7.20005
+CU2P	  OC	 CCO	Harmonic	      119.977	      7.20005
+CU2P	  OC	CU2P	Harmonic	      104.851	      14.4001
+FE3H	  OC	 CCO	Harmonic	       116.31	      108.001
+ MN3	  OC	 CCO	Harmonic	      116.196	      43.2003
+NI2C	  OC	 CCO	Harmonic	      119.977	      7.20005
+ TI3	  OC	 CCO	Harmonic	      118.144	      64.8004
+  V3	  OC	 CCO	Harmonic	       116.31	      72.0005
+CO3C	 OCC	 COC	Harmonic	      119.977	      86.4006
+ TI4	 OCC	 COC	Harmonic	      119.977	      86.4006
+ TI4	OCCT	 COC	Harmonic	      119.977	      86.4006
+   P	  OH	   H	Harmonic	      116.826	      89.8566
+ CU2	 ONO	 NOO	Harmonic	      119.977	      46.0803
+CU2C	 ONO	 NOO	Harmonic	      119.977	      46.0803
+CU2P	 ONO	 NOO	Harmonic	      119.977	      46.0803
+  CT	  OP	CU2P	Harmonic	      119.977	      28.8002
+ CU2	  OP	   H	Harmonic	      109.721	      14.4001
+CU2C	  OP	   H	Harmonic	      109.721	      14.4001
+CU2P	  OP	CU2P	Harmonic	      99.9811	      14.4001
+CU2P	  OP	   H	Harmonic	      109.721	      14.4001
+   H	  OP	   H	Harmonic	      108.977	      46.0803
+  CT	  OR	  CT	Harmonic	      109.492	      108.001
+   P	  OS	  CT	Harmonic	      118.316	      199.585
+ CU2	  OW	   H	Harmonic	      109.721	      14.4001
+CU2C	  OW	   H	Harmonic	      109.721	      14.4001
+CU2P	  OW	CU2P	Harmonic	      99.9811	      14.4001
+CU2P	  OW	   H	Harmonic	      109.721	      14.4001
+   H	  OW	   H	Harmonic	      108.977	      46.0803
+ TI4	  OW	  CT	Harmonic	      109.721	      7.20005
+ CO3	  OX	  OX	Harmonic	      109.492	      72.0005
+CU2P	  OX	  OX	Harmonic	      109.492	      72.0005
+  O2	   P	  OS	Harmonic	      114.763	      199.585
+  OH	   P	  O2	Harmonic	      115.222	      89.8566
+  OH	   P	  OS	Harmonic	       101.07	      89.8566
+  OS	   P	  OS	Harmonic	      98.3196	      89.8566
+  CT	  SW	  CT	Harmonic	      99.6947	      72.0005
+ CU2	  SW	  CT	Harmonic	      110.008	      14.4001
+CU2C	  SW	  CT	Harmonic	      110.008	      14.4001
+CU2P	  SW	  CT	Harmonic	      110.008	      14.4001
+CU2P	  SW	  CT	Harmonic	      110.008	      14.4001
+end BendTypes
+
+begin TorsionTypes
+X	   C	  CB	X	Charmm	     0.532804	            2	      180
+X	   C	  NA	X	Charmm	     0.662404	            2	      180
+X	  CA	  CA	X	Charmm	      3.60002	            2	      180
+X	  CA	 CFC	X	Charmm	      3.60002	            2	      180
+X	  CA	 CON	X	Charmm	     0.216001	            2	      180
+X	  CA	  CT	X	Charmm	     0.360002	            6	      180
+X	  CA	  NA	X	Charmm	     0.734405	            2	      180
+X	  CA	  NP	X	Charmm	      3.60002	            2	      180
+X	  CA	  NT	X	Charmm	    0.0360002	            6	      180
+X	  CA	  OW	X	Charmm	      10.8001	            3	      84.433
+X	 CAH	  CA	X	Charmm	      4.68003	            2	      180
+X	 CAH	 CAH	X	Charmm	      1.08001	            2	      180
+X	 CAH	  CI	X	Charmm	      1.80001	            2	      180
+X	 CAH	  CT	X	Charmm	    0.0360002	            6	      180
+X	 CAH	 NAH	X	Charmm	     0.648004	            2	      180
+X	 CAH	 NAX	X	Charmm	     0.180001	            2	      180
+X	 CAH	  NI	X	Charmm	     0.216001	            2	      180
+X	  CB	  CB	X	Charmm	      2.01601	            2	      180
+X	  CB	  N*	X	Charmm	     0.806405	            2	      180
+X	  CB	  NA	X	Charmm	      1.02241	            2	      180
+X	  CB	  NB	X	Charmm	     0.619204	            2	      180
+X	 CCC	 COC	X	Charmm	      2.16001	            2	      180
+X	 CCO	 CCO	X	Charmm	            0	            2           0
+X	 CCO	  CT	X	Charmm	    0.0720005	            6	      180
+X	 CCO	  OC	X	Charmm	     0.324002	            2	      180
+X	 CFC	 CFC	X	Charmm	      2.16001	            2	      180
+X	 CFC	 COC	X	Charmm	      2.16001	            2	      180
+X	 CFC	  NP	X	Charmm	     0.216001	            2	      180
+X	  CI	  CA	X	Charmm	     0.720005	            6	      180
+X	  CK	  N*	X	Charmm	     0.820805	            2	      180
+X	  CK	  N*	X	Charmm	     0.820805	            2	      180
+X	  CK	  NB	X	Charmm	      2.44802	            2	      180
+X	  CK	  NB	X	Charmm	      2.44802	            2	      180
+X	 COC	  CT	X	Charmm	     0.360002	            6	      180
+X	 COC	 OCC	X	Charmm	      2.16001	            2	      180
+X	 COC	OCCT	X	Charmm	      2.16001	            2	      180
+X	 CON	  CT	X	Charmm	    0.0720005	            6	      180
+X	 CON	  ND	X	Charmm	     0.324002	            2	      180
+X	  CT	  CT	X	Charmm	     0.122401	            3	        0
+X	  CT	 NAH	X	Charmm	    0.0360002	            6	      180
+X	  CT	  ND	X	Charmm	    0.0720005	            6	      180
+X	  CT	 NOO	X	Charmm	     0.180001	            6	      180
+X	  CT	  NT	X	Charmm	    0.0720005	            3	            0
+X	  CT	  OP	X	Charmm	    0.0720005	            3	            0
+X	  CT	  OW	X	Charmm	     0.576004	            3	            0
+X	  CT	  SW	X	Charmm	    0.0576004	            3	            0
+X	 CTO	 CTO	X	Charmm	     0.792005	            3	            0
+X	 CTO	CTOC	X	Charmm	     0.792005	            3	            0
+X	CTOC	CTOC	X	Charmm	     0.792005	            3	            0
+X	 NAH	 NAH	X	Charmm	      1.44001	            2	      180
+X	 NAH	 NAX	X	Charmm	      4.68003	            2	      180
+X	  NI	  CI	X	Charmm	      1.80001	            2	      180
+X	  NI	  CT	X	Charmm	    0.0360002	            2	       60.046
+X	  O2	   P	X	Charmm	      3.74402	            3	      67.0361
+X	  OH	   P	X	Charmm	      3.74402	            3	      109.148
+X	  OS	  CT	X	Charmm	      5.76004	            3	      8.59437
+X	  OS	   P	X	Charmm	      3.74402	            3	      67.0361
+X	OXCO	OXCO	X	Charmm	      64.8004	            2	            0
+X	OXCU	OXCU	X	Charmm	      64.8004	            2	            0
+X	 PT2	  NB	X	Charmm	            0	            2	      240
+X	 PT2	  NT	X	Charmm	            0	            2	      240
+end TorsionTypes
+
+begin InversionTypes
+  CA	 CAH	  CA	   H	HarmonicInversion	    0.0877304	0
+  CA	  NP	  CA	   H	HarmonicInversion	    0.0877304	0
+  CA	  NP	  CT	   H	HarmonicInversion	    0.0877304	0
+ CAH	 CAH	  CA	 NAH	HarmonicInversion	    0.0877304	0
+ CAH	 CAH	 CAH	   H	HarmonicInversion	    0.0877304	0
+ CAH	 CAH	 NAH	  CT	HarmonicInversion	    0.0877304	0
+ CAH	 CAH	 NAH	  CI	HarmonicInversion	    0.0877304	0
+ CAH	 CAH	 NAH	   H	HarmonicInversion	    0.0877304	0
+ CAH	 CAH	 NAX	  CT	HarmonicInversion	    0.0877304	0
+ CAH	 NAH	 NAH	  CI	HarmonicInversion	    0.0877304	0
+ CAH	 NAH	 NAH	   H	HarmonicInversion	    0.0877304	0
+ CAH	 NAH	 NAH	  CT	HarmonicInversion	    0.0877304	0
+ CCC	 COC	 COC	   H	HarmonicInversion	    0.0219326	0
+ CCO	  CT	 OCO	  OC	HarmonicInversion	   0.00526382	0
+ CCO	  OC	  OC	  OC	HarmonicInversion	    0.0219326	0
+  CI	  NI	 CAH	   H	HarmonicInversion	    0.0657978	0
+CO2T	  NP	  ND	  NP	HarmonicInversion	   0.00307056	0
+CO2T	  NP	  NP	  ND	HarmonicInversion	   0.00307056	0
+CO2T	  ND	  ND	  NP	HarmonicInversion	   0.00307056	0
+CO2T	  ND	  NP	  ND	HarmonicInversion	   0.00307056	0
+ COC	 CCC	 OCC	 CFC	HarmonicInversion	    0.0219326	0
+ COC	 CCC	 OCC	  CT	HarmonicInversion	    0.0219326	0
+ COC	 CCC	OCCT	 CFC	HarmonicInversion	    0.0219326	0
+ COC	 CCC	OCCT	  CT	HarmonicInversion	    0.0219326	0
+ CON	  CT	 OCO	  ND	HarmonicInversion	   0.00526382	0
+CU2T	  NP	  ND	  ND	HarmonicInversion	   0.00219326	0
+CU2T	  NP	  NP	  ND	HarmonicInversion	   0.00219326	0
+CU2T	  ND	  ND	  NP	HarmonicInversion	   0.00219326	0
+CU2T	  ND	  NP	  ND	HarmonicInversion	   0.00219326	0
+NI2T	  NP	  ND	  ND	HarmonicInversion	   0.00307056	0
+NI2T	  NP	  NP	  ND	HarmonicInversion	   0.00307056	0
+NI2T	  ND	  ND	  NP	HarmonicInversion	   0.00307056	0
+NI2T	  ND	  NP	  ND	HarmonicInversion	   0.00307056	0
+ NOO	  CT	 ONO	 ONO	HarmonicInversion	   0.00526382	0
+  OW	  CT	CU2P	CU2P	HarmonicInversion	    0.0219326	0
+ PT2	  NB	  NB	  NT	HarmonicInversion	    0.0438652	0
+ PT2	  NB	  NT	  NB	HarmonicInversion	    0.0438652	0
+ PT2	  NB	  NT	  NT	HarmonicInversion	    0.0438652	0
+ PT2	  NT	  NB	  NB	HarmonicInversion	    0.0438652	0
+ PT2	  NT	  NT	  NB	HarmonicInversion	    0.0438652	0
+end InversionTypes
+
+begin LennardJonesAtomTypes
+// Most will be overridden by the explicit Buckingham
+// NonBondedInteractionTypes below. These are only here in case we
+// need to interact with other non-MOMEC atom types
+  SW	        0.185	      3.56359
+   C	        0.044	      3.38542
+  C3	        0.044	      3.38542
+  CA	        0.044	      3.38542
+  CB	        0.044	      3.38542
+ CCC	        0.044	      3.38542
+ CCO	        0.044	      3.38542
+ CFC	        0.044	      3.38542
+  CK	        0.044	      3.38542
+ COC	        0.044	      3.38542
+ CON	        0.044	      3.38542
+  CT	        0.044	      3.38542
+  N3	        0.052	      3.20724
+  NA	        0.052	      3.20724
+  NB	        0.052	      3.20724
+  ND	         0.05	      3.20724
+ NOO	         0.05	      3.20724
+  NP	         0.05	      3.20724
+  NT	         0.05	      3.20724
+  N*	        0.052	      3.20724
+   O	        0.055	      3.02906
+  OC	        0.055	      3.02906
+ OCC	        0.055	      3.02906
+OCCT	        0.055	      3.02906
+ OCO	        0.055	      3.02906
+ ONO	        0.055	      3.02906
+  OP	        0.055	      3.02906
+  OW	        0.055	      3.02906
+ PT2	          0.3	      2.93997
+   H	        0.024	      2.56579
+// Atoms with r(VDW) = 0 and epsilon = 0 in the MOMEC data, but to
+// prevent division by zero in LJ interactions, we make sigma values
+// something small:
+TI4	            0	            1e-5
+ CR3	            0	            1e-5
+FE3L	            0	            1e-5
+ CO2	            0	            1e-5
+CO2T	            0	            1e-5
+ CO3	            0	            1e-5
+CO3C	            0	            1e-5
+ NI2	            0	            1e-5
+NI2C	            0	            1e-5
+NI2P	            0	            1e-5
+NI2T	            0	            1e-5
+ CU2	            0	            1e-5
+CU2C	            0	            1e-5
+CU2P	            0	            1e-5
+CU2T	            0	            1e-5
+ ZN2	            0	            1e-5
+ZN2T	            0	            1e-5
+ RH3	            0	            1e-5
+ PT4	            0	            1e-5
+end LennardJonesAtomTypes
+
+begin NonBondedInteractionTypes
+  SW	  SW	Buckingham Traditional	        53650	        3.125	      1704.96
+  SW	   C	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	  C3	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	  CA	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	  CB	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	 CCC	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	 CCO	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	 CFC	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	  CK	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	 COC	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	 CON	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	  CT	Buckingham Traditional	      26164.4	      3.20513	      714.303
+  SW	  N3	Buckingham Traditional	      28443.7	      3.28947	      664.464
+  SW	  NA	Buckingham Traditional	      28443.7	      3.28947	      664.464
+  SW	  NB	Buckingham Traditional	      28443.7	      3.28947	      664.464
+  SW	  ND	Buckingham Traditional	      27891.3	      3.28947	      651.561
+  SW	 NOO	Buckingham Traditional	      27891.3	      3.28947	      651.561
+  SW	  NP	Buckingham Traditional	      27891.3	      3.28947	      651.561
+  SW	  NT	Buckingham Traditional	      27891.3	      3.28947	      651.561
+  SW	  N*	Buckingham Traditional	      28443.7	      3.28947	      664.464
+  SW	   O	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	  OC	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	 OCC	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	OCCT	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	 OCO	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	 ONO	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	  OP	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	  OW	Buckingham Traditional	      29252.6	      3.37838	      582.318
+  SW	 PT2	Buckingham Traditional	      68319.5	      3.42466	      1253.39
+  SW	   H	Buckingham Traditional	      19323.7	      3.63372	      248.442
+  SW	 TI4	Buckingham Traditional	            0	         6.25	            0
+  SW	 CR3	Buckingham Traditional	            0	         6.25	            0
+  SW	FE3L	Buckingham Traditional	            0	         6.25	            0
+  SW	 CO2	Buckingham Traditional	            0	         6.25	            0
+  SW	CO2T	Buckingham Traditional	            0	         6.25	            0
+  SW	 CO3	Buckingham Traditional	            0	         6.25	            0
+  SW	CO3C	Buckingham Traditional	            0	         6.25	            0
+  SW	 NI2	Buckingham Traditional	            0	         6.25	            0
+  SW	NI2C	Buckingham Traditional	            0	         6.25	            0
+  SW	NI2P	Buckingham Traditional	            0	         6.25	            0
+  SW	NI2T	Buckingham Traditional	            0	         6.25	            0
+  SW	 CU2	Buckingham Traditional	            0	         6.25	            0
+  SW	CU2C	Buckingham Traditional	            0	         6.25	            0
+  SW	CU2P	Buckingham Traditional	            0	         6.25	            0
+  SW	CU2T	Buckingham Traditional	            0	         6.25	            0
+  SW	 ZN2	Buckingham Traditional	            0	         6.25	            0
+  SW	ZN2T	Buckingham Traditional	            0	         6.25	            0
+  SW	 RH3	Buckingham Traditional	            0	         6.25	            0
+  SW	 PT4	Buckingham Traditional	            0	         6.25	            0
+   C	   C	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	  C3	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	  CA	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	  CB	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	 CCC	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	 CCO	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+   C	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+   C	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+   C	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+   C	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+   C	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+   C	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+   C	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+   C	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+   C	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+   C	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+   C	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+   C	 TI4	Buckingham Traditional	            0	      6.57895	            0
+   C	 CR3	Buckingham Traditional	            0	      6.57895	            0
+   C	FE3L	Buckingham Traditional	            0	      6.57895	            0
+   C	 CO2	Buckingham Traditional	            0	      6.57895	            0
+   C	CO2T	Buckingham Traditional	            0	      6.57895	            0
+   C	 CO3	Buckingham Traditional	            0	      6.57895	            0
+   C	CO3C	Buckingham Traditional	            0	      6.57895	            0
+   C	 NI2	Buckingham Traditional	            0	      6.57895	            0
+   C	NI2C	Buckingham Traditional	            0	      6.57895	            0
+   C	NI2P	Buckingham Traditional	            0	      6.57895	            0
+   C	NI2T	Buckingham Traditional	            0	      6.57895	            0
+   C	 CU2	Buckingham Traditional	            0	      6.57895	            0
+   C	CU2C	Buckingham Traditional	            0	      6.57895	            0
+   C	CU2P	Buckingham Traditional	            0	      6.57895	            0
+   C	CU2T	Buckingham Traditional	            0	      6.57895	            0
+   C	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+   C	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+   C	 RH3	Buckingham Traditional	            0	      6.57895	            0
+   C	 PT4	Buckingham Traditional	            0	      6.57895	            0
+  C3	  C3	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	  CA	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	  CB	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	 CCC	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	 CCO	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+  C3	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  C3	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  C3	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  C3	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  C3	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  C3	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  C3	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  C3	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  C3	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  C3	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+  C3	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+  C3	 TI4	Buckingham Traditional	            0	      6.57895	            0
+  C3	 CR3	Buckingham Traditional	            0	      6.57895	            0
+  C3	FE3L	Buckingham Traditional	            0	      6.57895	            0
+  C3	 CO2	Buckingham Traditional	            0	      6.57895	            0
+  C3	CO2T	Buckingham Traditional	            0	      6.57895	            0
+  C3	 CO3	Buckingham Traditional	            0	      6.57895	            0
+  C3	CO3C	Buckingham Traditional	            0	      6.57895	            0
+  C3	 NI2	Buckingham Traditional	            0	      6.57895	            0
+  C3	NI2C	Buckingham Traditional	            0	      6.57895	            0
+  C3	NI2P	Buckingham Traditional	            0	      6.57895	            0
+  C3	NI2T	Buckingham Traditional	            0	      6.57895	            0
+  C3	 CU2	Buckingham Traditional	            0	      6.57895	            0
+  C3	CU2C	Buckingham Traditional	            0	      6.57895	            0
+  C3	CU2P	Buckingham Traditional	            0	      6.57895	            0
+  C3	CU2T	Buckingham Traditional	            0	      6.57895	            0
+  C3	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+  C3	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+  C3	 RH3	Buckingham Traditional	            0	      6.57895	            0
+  C3	 PT4	Buckingham Traditional	            0	      6.57895	            0
+  CA	  CA	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	  CB	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	 CCC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	 CCO	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+  CA	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CA	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CA	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CA	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CA	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CA	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CA	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CA	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CA	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CA	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+  CA	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+  CA	 TI4	Buckingham Traditional	            0	      6.57895	            0
+  CA	 CR3	Buckingham Traditional	            0	      6.57895	            0
+  CA	FE3L	Buckingham Traditional	            0	      6.57895	            0
+  CA	 CO2	Buckingham Traditional	            0	      6.57895	            0
+  CA	CO2T	Buckingham Traditional	            0	      6.57895	            0
+  CA	 CO3	Buckingham Traditional	            0	      6.57895	            0
+  CA	CO3C	Buckingham Traditional	            0	      6.57895	            0
+  CA	 NI2	Buckingham Traditional	            0	      6.57895	            0
+  CA	NI2C	Buckingham Traditional	            0	      6.57895	            0
+  CA	NI2P	Buckingham Traditional	            0	      6.57895	            0
+  CA	NI2T	Buckingham Traditional	            0	      6.57895	            0
+  CA	 CU2	Buckingham Traditional	            0	      6.57895	            0
+  CA	CU2C	Buckingham Traditional	            0	      6.57895	            0
+  CA	CU2P	Buckingham Traditional	            0	      6.57895	            0
+  CA	CU2T	Buckingham Traditional	            0	      6.57895	            0
+  CA	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+  CA	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+  CA	 RH3	Buckingham Traditional	            0	      6.57895	            0
+  CA	 PT4	Buckingham Traditional	            0	      6.57895	            0
+  CB	  CB	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	 CCC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	 CCO	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+  CB	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CB	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CB	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CB	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CB	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CB	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CB	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CB	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CB	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CB	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+  CB	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+  CB	 TI4	Buckingham Traditional	            0	      6.57895	            0
+  CB	 CR3	Buckingham Traditional	            0	      6.57895	            0
+  CB	FE3L	Buckingham Traditional	            0	      6.57895	            0
+  CB	 CO2	Buckingham Traditional	            0	      6.57895	            0
+  CB	CO2T	Buckingham Traditional	            0	      6.57895	            0
+  CB	 CO3	Buckingham Traditional	            0	      6.57895	            0
+  CB	CO3C	Buckingham Traditional	            0	      6.57895	            0
+  CB	 NI2	Buckingham Traditional	            0	      6.57895	            0
+  CB	NI2C	Buckingham Traditional	            0	      6.57895	            0
+  CB	NI2P	Buckingham Traditional	            0	      6.57895	            0
+  CB	NI2T	Buckingham Traditional	            0	      6.57895	            0
+  CB	 CU2	Buckingham Traditional	            0	      6.57895	            0
+  CB	CU2C	Buckingham Traditional	            0	      6.57895	            0
+  CB	CU2P	Buckingham Traditional	            0	      6.57895	            0
+  CB	CU2T	Buckingham Traditional	            0	      6.57895	            0
+  CB	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+  CB	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+  CB	 RH3	Buckingham Traditional	            0	      6.57895	            0
+  CB	 PT4	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 CCC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	 CCO	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCC	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCC	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCC	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCC	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCC	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCC	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCC	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCC	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCC	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCC	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+ CCC	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+ CCC	 TI4	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 CR3	Buckingham Traditional	            0	      6.57895	            0
+ CCC	FE3L	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 CO2	Buckingham Traditional	            0	      6.57895	            0
+ CCC	CO2T	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 CO3	Buckingham Traditional	            0	      6.57895	            0
+ CCC	CO3C	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 NI2	Buckingham Traditional	            0	      6.57895	            0
+ CCC	NI2C	Buckingham Traditional	            0	      6.57895	            0
+ CCC	NI2P	Buckingham Traditional	            0	      6.57895	            0
+ CCC	NI2T	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 CU2	Buckingham Traditional	            0	      6.57895	            0
+ CCC	CU2C	Buckingham Traditional	            0	      6.57895	            0
+ CCC	CU2P	Buckingham Traditional	            0	      6.57895	            0
+ CCC	CU2T	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+ CCC	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 RH3	Buckingham Traditional	            0	      6.57895	            0
+ CCC	 PT4	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 CCO	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCO	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCO	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCO	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCO	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCO	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+ CCO	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCO	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCO	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCO	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCO	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCO	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCO	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CCO	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CCO	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CCO	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+ CCO	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+ CCO	 TI4	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 CR3	Buckingham Traditional	            0	      6.57895	            0
+ CCO	FE3L	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 CO2	Buckingham Traditional	            0	      6.57895	            0
+ CCO	CO2T	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 CO3	Buckingham Traditional	            0	      6.57895	            0
+ CCO	CO3C	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 NI2	Buckingham Traditional	            0	      6.57895	            0
+ CCO	NI2C	Buckingham Traditional	            0	      6.57895	            0
+ CCO	NI2P	Buckingham Traditional	            0	      6.57895	            0
+ CCO	NI2T	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 CU2	Buckingham Traditional	            0	      6.57895	            0
+ CCO	CU2C	Buckingham Traditional	            0	      6.57895	            0
+ CCO	CU2P	Buckingham Traditional	            0	      6.57895	            0
+ CCO	CU2T	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+ CCO	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 RH3	Buckingham Traditional	            0	      6.57895	            0
+ CCO	 PT4	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 CFC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CFC	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+ CFC	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+ CFC	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+ CFC	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+ CFC	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CFC	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CFC	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CFC	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CFC	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CFC	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CFC	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CFC	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CFC	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CFC	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+ CFC	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+ CFC	 TI4	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 CR3	Buckingham Traditional	            0	      6.57895	            0
+ CFC	FE3L	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 CO2	Buckingham Traditional	            0	      6.57895	            0
+ CFC	CO2T	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 CO3	Buckingham Traditional	            0	      6.57895	            0
+ CFC	CO3C	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 NI2	Buckingham Traditional	            0	      6.57895	            0
+ CFC	NI2C	Buckingham Traditional	            0	      6.57895	            0
+ CFC	NI2P	Buckingham Traditional	            0	      6.57895	            0
+ CFC	NI2T	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 CU2	Buckingham Traditional	            0	      6.57895	            0
+ CFC	CU2C	Buckingham Traditional	            0	      6.57895	            0
+ CFC	CU2P	Buckingham Traditional	            0	      6.57895	            0
+ CFC	CU2T	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+ CFC	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 RH3	Buckingham Traditional	            0	      6.57895	            0
+ CFC	 PT4	Buckingham Traditional	            0	      6.57895	            0
+  CK	  CK	Buckingham Traditional	        12760	      3.28947	      298.083
+  CK	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+  CK	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+  CK	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+  CK	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CK	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CK	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CK	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CK	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CK	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CK	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CK	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CK	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CK	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+  CK	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+  CK	 TI4	Buckingham Traditional	            0	      6.57895	            0
+  CK	 CR3	Buckingham Traditional	            0	      6.57895	            0
+  CK	FE3L	Buckingham Traditional	            0	      6.57895	            0
+  CK	 CO2	Buckingham Traditional	            0	      6.57895	            0
+  CK	CO2T	Buckingham Traditional	            0	      6.57895	            0
+  CK	 CO3	Buckingham Traditional	            0	      6.57895	            0
+  CK	CO3C	Buckingham Traditional	            0	      6.57895	            0
+  CK	 NI2	Buckingham Traditional	            0	      6.57895	            0
+  CK	NI2C	Buckingham Traditional	            0	      6.57895	            0
+  CK	NI2P	Buckingham Traditional	            0	      6.57895	            0
+  CK	NI2T	Buckingham Traditional	            0	      6.57895	            0
+  CK	 CU2	Buckingham Traditional	            0	      6.57895	            0
+  CK	CU2C	Buckingham Traditional	            0	      6.57895	            0
+  CK	CU2P	Buckingham Traditional	            0	      6.57895	            0
+  CK	CU2T	Buckingham Traditional	            0	      6.57895	            0
+  CK	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+  CK	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+  CK	 RH3	Buckingham Traditional	            0	      6.57895	            0
+  CK	 PT4	Buckingham Traditional	            0	      6.57895	            0
+ COC	 COC	Buckingham Traditional	        12760	      3.28947	      298.083
+ COC	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+ COC	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+ COC	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ COC	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ COC	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ COC	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ COC	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ COC	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ COC	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ COC	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ COC	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ COC	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+ COC	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+ COC	 TI4	Buckingham Traditional	            0	      6.57895	            0
+ COC	 CR3	Buckingham Traditional	            0	      6.57895	            0
+ COC	FE3L	Buckingham Traditional	            0	      6.57895	            0
+ COC	 CO2	Buckingham Traditional	            0	      6.57895	            0
+ COC	CO2T	Buckingham Traditional	            0	      6.57895	            0
+ COC	 CO3	Buckingham Traditional	            0	      6.57895	            0
+ COC	CO3C	Buckingham Traditional	            0	      6.57895	            0
+ COC	 NI2	Buckingham Traditional	            0	      6.57895	            0
+ COC	NI2C	Buckingham Traditional	            0	      6.57895	            0
+ COC	NI2P	Buckingham Traditional	            0	      6.57895	            0
+ COC	NI2T	Buckingham Traditional	            0	      6.57895	            0
+ COC	 CU2	Buckingham Traditional	            0	      6.57895	            0
+ COC	CU2C	Buckingham Traditional	            0	      6.57895	            0
+ COC	CU2P	Buckingham Traditional	            0	      6.57895	            0
+ COC	CU2T	Buckingham Traditional	            0	      6.57895	            0
+ COC	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+ COC	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+ COC	 RH3	Buckingham Traditional	            0	      6.57895	            0
+ COC	 PT4	Buckingham Traditional	            0	      6.57895	            0
+ CON	 CON	Buckingham Traditional	        12760	      3.28947	      298.083
+ CON	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+ CON	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CON	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CON	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CON	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CON	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CON	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CON	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+ CON	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+ CON	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+ CON	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+ CON	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+ CON	 TI4	Buckingham Traditional	            0	      6.57895	            0
+ CON	 CR3	Buckingham Traditional	            0	      6.57895	            0
+ CON	FE3L	Buckingham Traditional	            0	      6.57895	            0
+ CON	 CO2	Buckingham Traditional	            0	      6.57895	            0
+ CON	CO2T	Buckingham Traditional	            0	      6.57895	            0
+ CON	 CO3	Buckingham Traditional	            0	      6.57895	            0
+ CON	CO3C	Buckingham Traditional	            0	      6.57895	            0
+ CON	 NI2	Buckingham Traditional	            0	      6.57895	            0
+ CON	NI2C	Buckingham Traditional	            0	      6.57895	            0
+ CON	NI2P	Buckingham Traditional	            0	      6.57895	            0
+ CON	NI2T	Buckingham Traditional	            0	      6.57895	            0
+ CON	 CU2	Buckingham Traditional	            0	      6.57895	            0
+ CON	CU2C	Buckingham Traditional	            0	      6.57895	            0
+ CON	CU2P	Buckingham Traditional	            0	      6.57895	            0
+ CON	CU2T	Buckingham Traditional	            0	      6.57895	            0
+ CON	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+ CON	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+ CON	 RH3	Buckingham Traditional	            0	      6.57895	            0
+ CON	 PT4	Buckingham Traditional	            0	      6.57895	            0
+  CT	  CT	Buckingham Traditional	        12760	      3.28947	      298.083
+  CT	  N3	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CT	  NA	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CT	  NB	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CT	  ND	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CT	 NOO	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CT	  NP	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CT	  NT	Buckingham Traditional	      13602.2	      3.37838	      270.772
+  CT	  N*	Buckingham Traditional	      13871.6	      3.37838	      276.135
+  CT	   O	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	  OC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	 OCC	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	OCCT	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	 OCO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	 ONO	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	  OP	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	  OW	Buckingham Traditional	      14266.1	      3.47222	      240.938
+  CT	 PT2	Buckingham Traditional	      33318.5	      3.52113	      517.416
+  CT	   H	Buckingham Traditional	      9423.88	      3.74251	      101.506
+  CT	 TI4	Buckingham Traditional	            0	      6.57895	            0
+  CT	 CR3	Buckingham Traditional	            0	      6.57895	            0
+  CT	FE3L	Buckingham Traditional	            0	      6.57895	            0
+  CT	 CO2	Buckingham Traditional	            0	      6.57895	            0
+  CT	CO2T	Buckingham Traditional	            0	      6.57895	            0
+  CT	 CO3	Buckingham Traditional	            0	      6.57895	            0
+  CT	CO3C	Buckingham Traditional	            0	      6.57895	            0
+  CT	 NI2	Buckingham Traditional	            0	      6.57895	            0
+  CT	NI2C	Buckingham Traditional	            0	      6.57895	            0
+  CT	NI2P	Buckingham Traditional	            0	      6.57895	            0
+  CT	NI2T	Buckingham Traditional	            0	      6.57895	            0
+  CT	 CU2	Buckingham Traditional	            0	      6.57895	            0
+  CT	CU2C	Buckingham Traditional	            0	      6.57895	            0
+  CT	CU2P	Buckingham Traditional	            0	      6.57895	            0
+  CT	CU2T	Buckingham Traditional	            0	      6.57895	            0
+  CT	 ZN2	Buckingham Traditional	            0	      6.57895	            0
+  CT	ZN2T	Buckingham Traditional	            0	      6.57895	            0
+  CT	 RH3	Buckingham Traditional	            0	      6.57895	            0
+  CT	 PT4	Buckingham Traditional	            0	      6.57895	            0
+  N3	  N3	Buckingham Traditional	        15080	      3.47222	      254.684
+  N3	  NA	Buckingham Traditional	        15080	      3.47222	      254.684
+  N3	  NB	Buckingham Traditional	        15080	      3.47222	      254.684
+  N3	  ND	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  N3	 NOO	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  N3	  NP	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  N3	  NT	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  N3	  N*	Buckingham Traditional	        15080	      3.47222	      254.684
+  N3	   O	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	  OC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	 OCC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	OCCT	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	 OCO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	 ONO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	  OP	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	  OW	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N3	 PT2	Buckingham Traditional	        36221	      3.62319	       473.87
+  N3	   H	Buckingham Traditional	      10244.8	      3.85802	      91.9517
+  N3	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  N3	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  N3	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  N3	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  N3	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  N3	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  N3	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  N3	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  N3	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  N3	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  N3	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  N3	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  N3	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  N3	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  N3	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  N3	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  N3	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  N3	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  N3	 PT4	Buckingham Traditional	            0	      6.94444	            0
+  NA	  NA	Buckingham Traditional	        15080	      3.47222	      254.684
+  NA	  NB	Buckingham Traditional	        15080	      3.47222	      254.684
+  NA	  ND	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NA	 NOO	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NA	  NP	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NA	  NT	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NA	  N*	Buckingham Traditional	        15080	      3.47222	      254.684
+  NA	   O	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	  OC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	 OCC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	OCCT	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	 OCO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	 ONO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	  OP	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	  OW	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NA	 PT2	Buckingham Traditional	        36221	      3.62319	       473.87
+  NA	   H	Buckingham Traditional	      10244.8	      3.85802	      91.9517
+  NA	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  NA	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  NA	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  NA	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  NA	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  NA	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  NA	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  NA	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  NA	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  NA	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  NA	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  NA	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  NA	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  NA	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  NA	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  NA	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  NA	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  NA	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  NA	 PT4	Buckingham Traditional	            0	      6.94444	            0
+  NB	  NB	Buckingham Traditional	        15080	      3.47222	      254.684
+  NB	  ND	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NB	 NOO	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NB	  NP	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NB	  NT	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NB	  N*	Buckingham Traditional	        15080	      3.47222	      254.684
+  NB	   O	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	  OC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	 OCC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	OCCT	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	 OCO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	 ONO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	  OP	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	  OW	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  NB	 PT2	Buckingham Traditional	        36221	      3.62319	       473.87
+  NB	   H	Buckingham Traditional	      10244.8	      3.85802	      91.9517
+  NB	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  NB	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  NB	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  NB	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  NB	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  NB	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  NB	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  NB	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  NB	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  NB	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  NB	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  NB	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  NB	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  NB	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  NB	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  NB	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  NB	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  NB	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  NB	 PT4	Buckingham Traditional	            0	      6.94444	            0
+  ND	  ND	Buckingham Traditional	        14500	      3.47222	      244.888
+  ND	 NOO	Buckingham Traditional	        14500	      3.47222	      244.888
+  ND	  NP	Buckingham Traditional	        14500	      3.47222	      244.888
+  ND	  NT	Buckingham Traditional	        14500	      3.47222	      244.888
+  ND	  N*	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  ND	   O	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	  OC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	 OCC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	OCCT	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	 OCO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	 ONO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	  OP	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	  OW	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  ND	 PT2	Buckingham Traditional	      35517.6	      3.62319	      464.668
+  ND	   H	Buckingham Traditional	      10045.9	      3.85802	      90.1661
+  ND	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  ND	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  ND	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  ND	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  ND	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  ND	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  ND	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  ND	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  ND	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  ND	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  ND	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  ND	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  ND	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  ND	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  ND	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  ND	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  ND	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  ND	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  ND	 PT4	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 NOO	Buckingham Traditional	        14500	      3.47222	      244.888
+ NOO	  NP	Buckingham Traditional	        14500	      3.47222	      244.888
+ NOO	  NT	Buckingham Traditional	        14500	      3.47222	      244.888
+ NOO	  N*	Buckingham Traditional	      14787.2	      3.47222	      249.738
+ NOO	   O	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	  OC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	 OCC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	OCCT	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	 OCO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	 ONO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	  OP	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	  OW	Buckingham Traditional	      15207.7	      3.57143	      216.899
+ NOO	 PT2	Buckingham Traditional	      35517.6	      3.62319	      464.668
+ NOO	   H	Buckingham Traditional	      10045.9	      3.85802	      90.1661
+ NOO	 TI4	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 CR3	Buckingham Traditional	            0	      6.94444	            0
+ NOO	FE3L	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 CO2	Buckingham Traditional	            0	      6.94444	            0
+ NOO	CO2T	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 CO3	Buckingham Traditional	            0	      6.94444	            0
+ NOO	CO3C	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 NI2	Buckingham Traditional	            0	      6.94444	            0
+ NOO	NI2C	Buckingham Traditional	            0	      6.94444	            0
+ NOO	NI2P	Buckingham Traditional	            0	      6.94444	            0
+ NOO	NI2T	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 CU2	Buckingham Traditional	            0	      6.94444	            0
+ NOO	CU2C	Buckingham Traditional	            0	      6.94444	            0
+ NOO	CU2P	Buckingham Traditional	            0	      6.94444	            0
+ NOO	CU2T	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+ NOO	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 RH3	Buckingham Traditional	            0	      6.94444	            0
+ NOO	 PT4	Buckingham Traditional	            0	      6.94444	            0
+  NP	  NP	Buckingham Traditional	        14500	      3.47222	      244.888
+  NP	  NT	Buckingham Traditional	        14500	      3.47222	      244.888
+  NP	  N*	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NP	   O	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	  OC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	 OCC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	OCCT	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	 OCO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	 ONO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	  OP	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	  OW	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NP	 PT2	Buckingham Traditional	      35517.6	      3.62319	      464.668
+  NP	   H	Buckingham Traditional	      10045.9	      3.85802	      90.1661
+  NP	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  NP	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  NP	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  NP	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  NP	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  NP	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  NP	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  NP	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  NP	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  NP	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  NP	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  NP	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  NP	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  NP	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  NP	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  NP	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  NP	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  NP	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  NP	 PT4	Buckingham Traditional	            0	      6.94444	            0
+  NT	  NT	Buckingham Traditional	        14500	      3.47222	      244.888
+  NT	  N*	Buckingham Traditional	      14787.2	      3.47222	      249.738
+  NT	   O	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	  OC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	 OCC	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	OCCT	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	 OCO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	 ONO	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	  OP	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	  OW	Buckingham Traditional	      15207.7	      3.57143	      216.899
+  NT	 PT2	Buckingham Traditional	      35517.6	      3.62319	      464.668
+  NT	   H	Buckingham Traditional	      10045.9	      3.85802	      90.1661
+  NT	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  NT	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  NT	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  NT	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  NT	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  NT	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  NT	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  NT	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  NT	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  NT	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  NT	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  NT	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  NT	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  NT	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  NT	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  NT	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  NT	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  NT	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  NT	 PT4	Buckingham Traditional	            0	      6.94444	            0
+  N*	  N*	Buckingham Traditional	        15080	      3.47222	      254.684
+  N*	   O	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	  OC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	 OCC	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	OCCT	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	 OCO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	 ONO	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	  OP	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	  OW	Buckingham Traditional	      15508.9	      3.57143	      221.194
+  N*	 PT2	Buckingham Traditional	        36221	      3.62319	       473.87
+  N*	   H	Buckingham Traditional	      10244.8	      3.85802	      91.9517
+  N*	 TI4	Buckingham Traditional	            0	      6.94444	            0
+  N*	 CR3	Buckingham Traditional	            0	      6.94444	            0
+  N*	FE3L	Buckingham Traditional	            0	      6.94444	            0
+  N*	 CO2	Buckingham Traditional	            0	      6.94444	            0
+  N*	CO2T	Buckingham Traditional	            0	      6.94444	            0
+  N*	 CO3	Buckingham Traditional	            0	      6.94444	            0
+  N*	CO3C	Buckingham Traditional	            0	      6.94444	            0
+  N*	 NI2	Buckingham Traditional	            0	      6.94444	            0
+  N*	NI2C	Buckingham Traditional	            0	      6.94444	            0
+  N*	NI2P	Buckingham Traditional	            0	      6.94444	            0
+  N*	NI2T	Buckingham Traditional	            0	      6.94444	            0
+  N*	 CU2	Buckingham Traditional	            0	      6.94444	            0
+  N*	CU2C	Buckingham Traditional	            0	      6.94444	            0
+  N*	CU2P	Buckingham Traditional	            0	      6.94444	            0
+  N*	CU2T	Buckingham Traditional	            0	      6.94444	            0
+  N*	 ZN2	Buckingham Traditional	            0	      6.94444	            0
+  N*	ZN2T	Buckingham Traditional	            0	      6.94444	            0
+  N*	 RH3	Buckingham Traditional	            0	      6.94444	            0
+  N*	 PT4	Buckingham Traditional	            0	      6.94444	            0
+   O	   O	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	  OC	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	 OCC	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	OCCT	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	 OCO	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	 ONO	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+   O	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+   O	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+   O	 TI4	Buckingham Traditional	            0	      7.35294	            0
+   O	 CR3	Buckingham Traditional	            0	      7.35294	            0
+   O	FE3L	Buckingham Traditional	            0	      7.35294	            0
+   O	 CO2	Buckingham Traditional	            0	      7.35294	            0
+   O	CO2T	Buckingham Traditional	            0	      7.35294	            0
+   O	 CO3	Buckingham Traditional	            0	      7.35294	            0
+   O	CO3C	Buckingham Traditional	            0	      7.35294	            0
+   O	 NI2	Buckingham Traditional	            0	      7.35294	            0
+   O	NI2C	Buckingham Traditional	            0	      7.35294	            0
+   O	NI2P	Buckingham Traditional	            0	      7.35294	            0
+   O	NI2T	Buckingham Traditional	            0	      7.35294	            0
+   O	 CU2	Buckingham Traditional	            0	      7.35294	            0
+   O	CU2C	Buckingham Traditional	            0	      7.35294	            0
+   O	CU2P	Buckingham Traditional	            0	      7.35294	            0
+   O	CU2T	Buckingham Traditional	            0	      7.35294	            0
+   O	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+   O	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+   O	 RH3	Buckingham Traditional	            0	      7.35294	            0
+   O	 PT4	Buckingham Traditional	            0	      7.35294	            0
+  OC	  OC	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	 OCC	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	OCCT	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	 OCO	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	 ONO	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+  OC	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+  OC	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+  OC	 TI4	Buckingham Traditional	            0	      7.35294	            0
+  OC	 CR3	Buckingham Traditional	            0	      7.35294	            0
+  OC	FE3L	Buckingham Traditional	            0	      7.35294	            0
+  OC	 CO2	Buckingham Traditional	            0	      7.35294	            0
+  OC	CO2T	Buckingham Traditional	            0	      7.35294	            0
+  OC	 CO3	Buckingham Traditional	            0	      7.35294	            0
+  OC	CO3C	Buckingham Traditional	            0	      7.35294	            0
+  OC	 NI2	Buckingham Traditional	            0	      7.35294	            0
+  OC	NI2C	Buckingham Traditional	            0	      7.35294	            0
+  OC	NI2P	Buckingham Traditional	            0	      7.35294	            0
+  OC	NI2T	Buckingham Traditional	            0	      7.35294	            0
+  OC	 CU2	Buckingham Traditional	            0	      7.35294	            0
+  OC	CU2C	Buckingham Traditional	            0	      7.35294	            0
+  OC	CU2P	Buckingham Traditional	            0	      7.35294	            0
+  OC	CU2T	Buckingham Traditional	            0	      7.35294	            0
+  OC	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+  OC	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+  OC	 RH3	Buckingham Traditional	            0	      7.35294	            0
+  OC	 PT4	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 OCC	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCC	OCCT	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCC	 OCO	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCC	 ONO	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCC	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCC	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCC	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+ OCC	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+ OCC	 TI4	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 CR3	Buckingham Traditional	            0	      7.35294	            0
+ OCC	FE3L	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 CO2	Buckingham Traditional	            0	      7.35294	            0
+ OCC	CO2T	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 CO3	Buckingham Traditional	            0	      7.35294	            0
+ OCC	CO3C	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 NI2	Buckingham Traditional	            0	      7.35294	            0
+ OCC	NI2C	Buckingham Traditional	            0	      7.35294	            0
+ OCC	NI2P	Buckingham Traditional	            0	      7.35294	            0
+ OCC	NI2T	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 CU2	Buckingham Traditional	            0	      7.35294	            0
+ OCC	CU2C	Buckingham Traditional	            0	      7.35294	            0
+ OCC	CU2P	Buckingham Traditional	            0	      7.35294	            0
+ OCC	CU2T	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+ OCC	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 RH3	Buckingham Traditional	            0	      7.35294	            0
+ OCC	 PT4	Buckingham Traditional	            0	      7.35294	            0
+OCCT	OCCT	Buckingham Traditional	        15950	      3.67647	       191.17
+OCCT	 OCO	Buckingham Traditional	        15950	      3.67647	       191.17
+OCCT	 ONO	Buckingham Traditional	        15950	      3.67647	       191.17
+OCCT	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+OCCT	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+OCCT	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+OCCT	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+OCCT	 TI4	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 CR3	Buckingham Traditional	            0	      7.35294	            0
+OCCT	FE3L	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 CO2	Buckingham Traditional	            0	      7.35294	            0
+OCCT	CO2T	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 CO3	Buckingham Traditional	            0	      7.35294	            0
+OCCT	CO3C	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 NI2	Buckingham Traditional	            0	      7.35294	            0
+OCCT	NI2C	Buckingham Traditional	            0	      7.35294	            0
+OCCT	NI2P	Buckingham Traditional	            0	      7.35294	            0
+OCCT	NI2T	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 CU2	Buckingham Traditional	            0	      7.35294	            0
+OCCT	CU2C	Buckingham Traditional	            0	      7.35294	            0
+OCCT	CU2P	Buckingham Traditional	            0	      7.35294	            0
+OCCT	CU2T	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+OCCT	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 RH3	Buckingham Traditional	            0	      7.35294	            0
+OCCT	 PT4	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 OCO	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCO	 ONO	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCO	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCO	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+ OCO	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+ OCO	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+ OCO	 TI4	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 CR3	Buckingham Traditional	            0	      7.35294	            0
+ OCO	FE3L	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 CO2	Buckingham Traditional	            0	      7.35294	            0
+ OCO	CO2T	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 CO3	Buckingham Traditional	            0	      7.35294	            0
+ OCO	CO3C	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 NI2	Buckingham Traditional	            0	      7.35294	            0
+ OCO	NI2C	Buckingham Traditional	            0	      7.35294	            0
+ OCO	NI2P	Buckingham Traditional	            0	      7.35294	            0
+ OCO	NI2T	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 CU2	Buckingham Traditional	            0	      7.35294	            0
+ OCO	CU2C	Buckingham Traditional	            0	      7.35294	            0
+ OCO	CU2P	Buckingham Traditional	            0	      7.35294	            0
+ OCO	CU2T	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+ OCO	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 RH3	Buckingham Traditional	            0	      7.35294	            0
+ OCO	 PT4	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 ONO	Buckingham Traditional	        15950	      3.67647	       191.17
+ ONO	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+ ONO	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+ ONO	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+ ONO	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+ ONO	 TI4	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 CR3	Buckingham Traditional	            0	      7.35294	            0
+ ONO	FE3L	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 CO2	Buckingham Traditional	            0	      7.35294	            0
+ ONO	CO2T	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 CO3	Buckingham Traditional	            0	      7.35294	            0
+ ONO	CO3C	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 NI2	Buckingham Traditional	            0	      7.35294	            0
+ ONO	NI2C	Buckingham Traditional	            0	      7.35294	            0
+ ONO	NI2P	Buckingham Traditional	            0	      7.35294	            0
+ ONO	NI2T	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 CU2	Buckingham Traditional	            0	      7.35294	            0
+ ONO	CU2C	Buckingham Traditional	            0	      7.35294	            0
+ ONO	CU2P	Buckingham Traditional	            0	      7.35294	            0
+ ONO	CU2T	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+ ONO	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 RH3	Buckingham Traditional	            0	      7.35294	            0
+ ONO	 PT4	Buckingham Traditional	            0	      7.35294	            0
+  OP	  OP	Buckingham Traditional	        15950	      3.67647	       191.17
+  OP	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+  OP	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+  OP	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+  OP	 TI4	Buckingham Traditional	            0	      7.35294	            0
+  OP	 CR3	Buckingham Traditional	            0	      7.35294	            0
+  OP	FE3L	Buckingham Traditional	            0	      7.35294	            0
+  OP	 CO2	Buckingham Traditional	            0	      7.35294	            0
+  OP	CO2T	Buckingham Traditional	            0	      7.35294	            0
+  OP	 CO3	Buckingham Traditional	            0	      7.35294	            0
+  OP	CO3C	Buckingham Traditional	            0	      7.35294	            0
+  OP	 NI2	Buckingham Traditional	            0	      7.35294	            0
+  OP	NI2C	Buckingham Traditional	            0	      7.35294	            0
+  OP	NI2P	Buckingham Traditional	            0	      7.35294	            0
+  OP	NI2T	Buckingham Traditional	            0	      7.35294	            0
+  OP	 CU2	Buckingham Traditional	            0	      7.35294	            0
+  OP	CU2C	Buckingham Traditional	            0	      7.35294	            0
+  OP	CU2P	Buckingham Traditional	            0	      7.35294	            0
+  OP	CU2T	Buckingham Traditional	            0	      7.35294	            0
+  OP	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+  OP	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+  OP	 RH3	Buckingham Traditional	            0	      7.35294	            0
+  OP	 PT4	Buckingham Traditional	            0	      7.35294	            0
+  OW	  OW	Buckingham Traditional	        15950	      3.67647	       191.17
+  OW	 PT2	Buckingham Traditional	      37251.2	      3.73134	      408.501
+  OW	   H	Buckingham Traditional	      10536.2	      3.98089	      78.3515
+  OW	 TI4	Buckingham Traditional	            0	      7.35294	            0
+  OW	 CR3	Buckingham Traditional	            0	      7.35294	            0
+  OW	FE3L	Buckingham Traditional	            0	      7.35294	            0
+  OW	 CO2	Buckingham Traditional	            0	      7.35294	            0
+  OW	CO2T	Buckingham Traditional	            0	      7.35294	            0
+  OW	 CO3	Buckingham Traditional	            0	      7.35294	            0
+  OW	CO3C	Buckingham Traditional	            0	      7.35294	            0
+  OW	 NI2	Buckingham Traditional	            0	      7.35294	            0
+  OW	NI2C	Buckingham Traditional	            0	      7.35294	            0
+  OW	NI2P	Buckingham Traditional	            0	      7.35294	            0
+  OW	NI2T	Buckingham Traditional	            0	      7.35294	            0
+  OW	 CU2	Buckingham Traditional	            0	      7.35294	            0
+  OW	CU2C	Buckingham Traditional	            0	      7.35294	            0
+  OW	CU2P	Buckingham Traditional	            0	      7.35294	            0
+  OW	CU2T	Buckingham Traditional	            0	      7.35294	            0
+  OW	 ZN2	Buckingham Traditional	            0	      7.35294	            0
+  OW	ZN2T	Buckingham Traditional	            0	      7.35294	            0
+  OW	 RH3	Buckingham Traditional	            0	      7.35294	            0
+  OW	 PT4	Buckingham Traditional	            0	      7.35294	            0
+ PT2	 PT2	Buckingham Traditional	        87000	      3.78788	      871.741
+ PT2	   H	Buckingham Traditional	      24607.3	      4.04531	      166.188
+ PT2	 TI4	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 CR3	Buckingham Traditional	            0	      7.57576	            0
+ PT2	FE3L	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 CO2	Buckingham Traditional	            0	      7.57576	            0
+ PT2	CO2T	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 CO3	Buckingham Traditional	            0	      7.57576	            0
+ PT2	CO3C	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 NI2	Buckingham Traditional	            0	      7.57576	            0
+ PT2	NI2C	Buckingham Traditional	            0	      7.57576	            0
+ PT2	NI2P	Buckingham Traditional	            0	      7.57576	            0
+ PT2	NI2T	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 CU2	Buckingham Traditional	            0	      7.57576	            0
+ PT2	CU2C	Buckingham Traditional	            0	      7.57576	            0
+ PT2	CU2P	Buckingham Traditional	            0	      7.57576	            0
+ PT2	CU2T	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 ZN2	Buckingham Traditional	            0	      7.57576	            0
+ PT2	ZN2T	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 RH3	Buckingham Traditional	            0	      7.57576	            0
+ PT2	 PT4	Buckingham Traditional	            0	      7.57576	            0
+   H	   H	Buckingham Traditional	         6960	      4.34028	       30.814
+   H	 TI4	Buckingham Traditional	            0	      8.68056	            0
+   H	 CR3	Buckingham Traditional	            0	      8.68056	            0
+   H	FE3L	Buckingham Traditional	            0	      8.68056	            0
+   H	 CO2	Buckingham Traditional	            0	      8.68056	            0
+   H	CO2T	Buckingham Traditional	            0	      8.68056	            0
+   H	 CO3	Buckingham Traditional	            0	      8.68056	            0
+   H	CO3C	Buckingham Traditional	            0	      8.68056	            0
+   H	 NI2	Buckingham Traditional	            0	      8.68056	            0
+   H	NI2C	Buckingham Traditional	            0	      8.68056	            0
+   H	NI2P	Buckingham Traditional	            0	      8.68056	            0
+   H	NI2T	Buckingham Traditional	            0	      8.68056	            0
+   H	 CU2	Buckingham Traditional	            0	      8.68056	            0
+   H	CU2C	Buckingham Traditional	            0	      8.68056	            0
+   H	CU2P	Buckingham Traditional	            0	      8.68056	            0
+   H	CU2T	Buckingham Traditional	            0	      8.68056	            0
+   H	 ZN2	Buckingham Traditional	            0	      8.68056	            0
+   H	ZN2T	Buckingham Traditional	            0	      8.68056	            0
+   H	 RH3	Buckingham Traditional	            0	      8.68056	            0
+   H	 PT4	Buckingham Traditional	            0	      8.68056	            0
+end NonBondedInteractionTypes

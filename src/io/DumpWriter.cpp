@@ -376,7 +376,7 @@ namespace OpenMD {
     os.rdbuf()->pubsync();
 #else
 
-    const int masterNode = 0;
+    const int primaryNode = 0;
     int worldRank;
     int nProc;
 
@@ -384,7 +384,7 @@ namespace OpenMD {
     MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
 
 
-    if (worldRank == masterNode) {
+    if (worldRank == primaryNode) {
       os << "  <Snapshot>\n";
       writeFrameProperties(os,
                            info_->getSnapshotManager()->getCurrentSnapshot());
@@ -401,13 +401,13 @@ namespace OpenMD {
       }
     }
 
-    if (worldRank == masterNode) {
+    if (worldRank == primaryNode) {
       os << buffer;
 
       for (int i = 1; i < nProc; ++i) {
         // tell processor i to start sending us data:
 
-        MPI_Bcast(&i, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(&i, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
 
         // receive the length of the string buffer that was
         // prepared by processor i:
@@ -432,27 +432,27 @@ namespace OpenMD {
       int sendBufferLength = buffer.size() + 1;
       int myturn = 0;
       for (int i = 1; i < nProc; ++i){
-        // wait for the master node to call our number:
-        MPI_Bcast(&myturn, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        // wait for the primary node to call our number:
+        MPI_Bcast(&myturn, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
         if (myturn == worldRank){
           // send the length of our buffer:
 
-          MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+          MPI_Send(&sendBufferLength, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
 
           // send our buffer:
           MPI_Send((void *)buffer.c_str(), sendBufferLength,
-                   MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+                   MPI_CHAR, primaryNode, 0, MPI_COMM_WORLD);
 
         }
       }
     }
 
-    if (worldRank == masterNode) {
+    if (worldRank == primaryNode) {
       os << "    </StuntDoubles>\n";
     }
 
     if (doSiteData_) {
-      if (worldRank == masterNode) {
+      if (worldRank == primaryNode) {
         os << "    <SiteData>\n";
       }
       buffer.clear();
@@ -479,13 +479,13 @@ namespace OpenMD {
         }
       }
 
-      if (worldRank == masterNode) {
+      if (worldRank == primaryNode) {
         os << buffer;
 
         for (int i = 1; i < nProc; ++i) {
 
           // tell processor i to start sending us data:
-          MPI_Bcast(&i, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+          MPI_Bcast(&i, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
 
           // receive the length of the string buffer that was
           // prepared by processor i:
@@ -510,24 +510,24 @@ namespace OpenMD {
         int sendBufferLength = buffer.size() + 1;
         int myturn = 0;
         for (int i = 1; i < nProc; ++i){
-          // wait for the master node to call our number:
-          MPI_Bcast(&myturn, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+          // wait for the primary node to call our number:
+          MPI_Bcast(&myturn, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
           if (myturn == worldRank){
             // send the length of our buffer:
-            MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+            MPI_Send(&sendBufferLength, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
             // send our buffer:
             MPI_Send((void *)buffer.c_str(), sendBufferLength,
-                     MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+                     MPI_CHAR, primaryNode, 0, MPI_COMM_WORLD);
           }
         }
       }
 
-      if (worldRank == masterNode) {
+      if (worldRank == primaryNode) {
         os << "    </SiteData>\n";
       }
     }
 
-    if (worldRank == masterNode) {
+    if (worldRank == primaryNode) {
       os << "  </Snapshot>\n";
       os.flush();
       os.rdbuf()->pubsync();

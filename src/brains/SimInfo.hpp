@@ -78,7 +78,7 @@ namespace OpenMD{
    *
    * @brief One of the heavy-weight classes of OpenMD, SimInfo
    * maintains objects and variables relating to the current
-   * simulation.  This includes the master list of Molecules.  The
+   * simulation.  This includes the primary list of Molecules. The
    * Molecule class maintains all of the concrete objects (Atoms,
    * Bond, Bend, Torsions, Inversions, RigidBodies, CutoffGroups,
    * Constraints). In both the single and parallel versions, Atoms and

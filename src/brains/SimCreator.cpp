@@ -101,10 +101,10 @@ namespace OpenMD {
       std::stringstream ppStream;
 #ifdef IS_MPI            
       int streamSize;
-      const int masterNode = 0;
+      const int primaryNode = 0;
 
-      if (worldRank == masterNode) {
-        MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+      if (worldRank == primaryNode) {
+        MPI_Bcast(&mdFileVersion, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
 #endif                 
         SimplePreprocessor preprocessor;
         preprocessor.preprocess(rawMetaDataStream, filename, 
@@ -113,20 +113,20 @@ namespace OpenMD {
 #ifdef IS_MPI            
         //broadcasting the stream size
         streamSize = ppStream.str().size() +1;
-        MPI_Bcast(&streamSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(&streamSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
         MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())),
-                  streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+                  streamSize, MPI_CHAR, primaryNode, MPI_COMM_WORLD);
       } else {
 
-        MPI_Bcast(&mdFileVersion, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(&mdFileVersion, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
 
         //get stream size
-        MPI_Bcast(&streamSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(&streamSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
         char* buf = new char[streamSize];
         assert(buf);
                 
         //receive file content
-        MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+        MPI_Bcast(buf, streamSize, MPI_CHAR, primaryNode, MPI_COMM_WORLD);
 
         ppStream.str(buf);
         delete [] buf;
@@ -282,8 +282,8 @@ namespace OpenMD {
     }
    
 #ifdef IS_MPI            
-    const int masterNode = 0;
-    if (worldRank == masterNode) {
+    const int primaryNode = 0;
+    if (worldRank == primaryNode) {
 #endif 
 
       std::ifstream mdFile_;

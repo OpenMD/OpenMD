@@ -111,9 +111,9 @@ namespace OpenMD {
     std::istream& inputStream = *inFile_;
 #else
     
-    int masterNode = 0;
+    int primaryNode = 0;
     std::stringstream sstream;
-    if (worldRank == masterNode) {
+    if (worldRank == primaryNode) {
       std::string sendBuffer;
       
       inFile_->clear();  
@@ -130,18 +130,18 @@ namespace OpenMD {
       }
       
       int sendBufferSize = sendBuffer.size();
-      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
       MPI_Bcast((void *)sendBuffer.c_str(), sendBufferSize, 
-                MPI_CHAR, masterNode, MPI_COMM_WORLD);
+                MPI_CHAR, primaryNode, MPI_COMM_WORLD);
       
       sstream.str(sendBuffer);
     } else {
       int sendBufferSize;
-      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
       char * recvBuffer = new char[sendBufferSize+1];
       assert(recvBuffer);
       recvBuffer[sendBufferSize] = '\0';
-      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode,
+      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, primaryNode,
                 MPI_COMM_WORLD);
       sstream.str(recvBuffer);
       delete [] recvBuffer;

@@ -54,7 +54,8 @@
 namespace OpenMD {
   ConstraintWriter::ConstraintWriter(SimInfo* info, 
                                      const std::string& filename): info_(info) {
-    //use master - slave mode, only master node writes to disk
+    // use a primary - secondary model, only the primary node writes
+    // to disk
 #ifdef IS_MPI
     if(worldRank == 0){
 #endif
@@ -101,7 +102,7 @@ namespace OpenMD {
     }
 #else
     
-    const int masterNode = 0;
+    const int primaryNode = 0;
     int nproc;
     int myNode;      
     MPI_Comm_size( MPI_COMM_WORLD, &nproc);
@@ -118,11 +119,11 @@ namespace OpenMD {
     int atom1, atom2, doPrint;
     RealType force;
     
-    if (myNode == masterNode) {
+    if (myNode == primaryNode) {
       std::vector<ConstraintData> constraintData;
       ConstraintData tmpData;       
       for(int i = 0 ; i < nproc; ++i) {
-        if (i == masterNode) {
+        if (i == primaryNode) {
           std::list<ConstraintPair*>::const_iterator j;
           for ( j = constraints.begin(); j != constraints.end(); ++j) {
             tmpData.atom1 = (*j)->getConsElem1()->getGlobalIndex();
@@ -166,11 +167,11 @@ namespace OpenMD {
         RealType constraintForce= (*j)->getConstraintForce();
         int printForce = (int) (*j)->getPrintForce();
         
-        MPI_Send(&atom1, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-        MPI_Send(&atom2, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-        MPI_Send(&constraintForce, 1, MPI_REALTYPE, masterNode, 0, 
+        MPI_Send(&atom1, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
+        MPI_Send(&atom2, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);
+        MPI_Send(&constraintForce, 1, MPI_REALTYPE, primaryNode, 0, 
                  MPI_COMM_WORLD);
-        MPI_Send(&printForce, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);            
+        MPI_Send(&printForce, 1, MPI_INT, primaryNode, 0, MPI_COMM_WORLD);            
       }
     }
 #endif
