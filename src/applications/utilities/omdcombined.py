@@ -1,3 +1,5 @@
+#!/usr/local/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+
 #!@Python3_EXECUTABLE@
 """OMD Solvator Slab
 
@@ -59,6 +61,7 @@ indices2 = []
 Hmat2 = []
 BoxInv2 = []
 pvqj2 = []
+componentLines = []
 
 def usage():
     print(__doc__)
@@ -74,6 +77,31 @@ def readFile1(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
+    
+    line = mdFile.readline()
+
+    print("reading solute MetaData")
+    while True:
+        if '<MetaData>' in line:
+            while 2:
+                line = mdFile.readline()
+                
+                if 'component' in line:
+                    while not '}' in line:
+                        componentLines.append(line)
+                        line = mdFile.readline()
+                    componentLines.append("}\n")
+
+                metaData1.append(line)
+
+                if '</MetaData>' in line:
+                    metaData1.append(line)
+                    break
+            break
+        line = mdFile.readline()
+
+    mdFile.seek(0)
+    
     print("reading solute Snapshot")
     line = mdFile.readline()
     while True:
@@ -158,6 +186,19 @@ def readFile2(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
+
+    line = mdFile.readline()
+    while True:
+        if 'component' in line:
+            while not '}' in line:
+                componentLines.append(line)
+                line = mdFile.readline()
+            componentLines.append("}\n")
+        line = mdFile.readline()
+        if not line: break
+
+    mdFile.seek(0)
+    
     print("reading solvent Snapshot")
     line = mdFile.readline()
     while True:
@@ -236,9 +277,14 @@ def writeFile(outputFileName):
 
     outputFile.write("<OpenMD version=1>\n")
     
-#    for metaline in metaData1:
-#        outputFile.write(metaline)
     outputFile.write("   <MetaData>\n")
+
+    for componentLine in componentLines: 
+        outputFile.write(componentLine)
+        
+    for metaline in metaData1:
+        outputFile.write(metaline)
+  
     outputFile.write("#add molecule definitions and components of solute here")
     outputFile.write("\n\n")
     outputFile.write("add molecule definitions and components of solvent here")

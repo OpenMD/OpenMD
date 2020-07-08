@@ -74,7 +74,7 @@ namespace OpenMD {
   private:
     bool isEndSection(const std::string& line);
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo) = 0;
-
+    std::string stripComments(const std::string& line);
     
     std::string sectionName_;
   };

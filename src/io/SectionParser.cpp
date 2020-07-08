@@ -47,7 +47,7 @@ namespace OpenMD {
   void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
     const int bufferSize = 65535;
     char buffer[bufferSize];
-    std::string line;
+    std::string line, filteredLine;
     while(input.getline(buffer, bufferSize)) {
       ++lineNo;
       line = trimLeftCopy(buffer);
@@ -61,9 +61,46 @@ namespace OpenMD {
                   (line.size() >= 1 && line[0] == '!') ) {
         continue;
       } else {
-        parseLine(ff, line, lineNo);
+        filteredLine = stripComments(line);
+        parseLine(ff, filteredLine, lineNo);
       }
     }
+  }
+
+  std::string SectionParser::stripComments(const std::string& line) {
+
+    unsigned int n = line.length(); 
+    std::string res; 
+  
+    // Flags to indicate that single line and multpile line comments 
+    // have started or not. 
+    bool s_cmt = false; 
+    bool m_cmt = false; 
+    
+    // Traverse the line 
+    for (unsigned int i = 0; i < n; i++)  {      
+      // If single line comment flag is on, then check for end of it 
+      if (s_cmt == true && line[i] == '\n') 
+        s_cmt = false; 
+      
+      // If multiple line comment is on, then check for end of it 
+      else if  (m_cmt == true && line[i] == '*' && line[i+1] == '/') 
+        m_cmt = false,  i++; 
+      
+      // If this character is in a comment, ignore it 
+      else if (s_cmt || m_cmt) 
+        continue; 
+      
+      // Check for beginning of comments and set the approproate flags 
+      else if (line[i] == '/' && line[i+1] == '/') 
+        s_cmt = true, i++; 
+      else if (line[i] == '/' && line[i+1] == '*') 
+        m_cmt = true,  i++; 
+      
+      // If current character is a non-comment character, append it to res 
+      else  res += line[i]; 
+    } 
+    return res;
   }
   
   bool SectionParser::isEndSection(const std::string& line) {
