@@ -62,6 +62,7 @@ Hmat2 = []
 BoxInv2 = []
 pvqj2 = []
 componentLines = []
+ensembleLines = []
 
 def usage():
     print(__doc__)
@@ -78,6 +79,7 @@ def readFile1(mdFileName):
 
     mdFile.seek(0)
     
+
     line = mdFile.readline()
 
     print("reading solute MetaData")
@@ -85,13 +87,20 @@ def readFile1(mdFileName):
         if '<MetaData>' in line:
             while 2:
                 line = mdFile.readline()
-                
+                if 'molecule' in line:
+                    while not 'component' in line:
+                        componentLines.append(line)
+                        line = mdFile.readline()
+                    componentLines.append("\n")
                 if 'component' in line:
                     while not '}' in line:
                         componentLines.append(line)
                         line = mdFile.readline()
-                    componentLines.append("}\n")
-
+                    componentLines.append("}\n\n")
+                if 'ensemble' in line:
+                    while not '</MetaData>' in line:
+                        ensembleLines.append(line)
+                        line = mdFile.readline()
                 metaData1.append(line)
 
                 if '</MetaData>' in line:
@@ -186,16 +195,30 @@ def readFile2(mdFileName):
         line = mdFile.readline()
 
     mdFile.seek(0)
-
+    
     line = mdFile.readline()
+
+    print("reading solvent MetaData")
     while True:
-        if 'component' in line:
-            while not '}' in line:
-                componentLines.append(line)
+        if '<MetaData>' in line:
+            while 2:
                 line = mdFile.readline()
-            componentLines.append("}\n")
+                if 'molecule' in line:
+                    while not 'component' in line:
+                        componentLines.append(line)
+                        line = mdFile.readline()
+                    componentLines.append("\n")
+                if 'component' in line:
+                    while not '}' in line:
+                        componentLines.append(line)
+                        line = mdFile.readline()
+                    componentLines.append("}\n\n")
+                metaData2.append(line)
+                if '</MetaData>' in line:
+                    metaData2.append(line)
+                    break
+            break
         line = mdFile.readline()
-        if not line: break
 
     mdFile.seek(0)
     
@@ -276,27 +299,16 @@ def writeFile(outputFileName):
     outputFile = open(outputFileName, 'w')
 
     outputFile.write("<OpenMD version=1>\n")
-    
     outputFile.write("   <MetaData>\n")
-
     for componentLine in componentLines: 
         outputFile.write(componentLine)
-        
-    for metaline in metaData1:
-        outputFile.write(metaline)
-  
-    outputFile.write("#add molecule definitions and components of solute here")
-    outputFile.write("\n\n")
-    outputFile.write("add molecule definitions and components of solvent here")
-    outputFile.write("\n\n")
-    outputFile.write("add force field definition here")
-    outputFile.write("\n\n")
+    for ensembleLine in ensembleLines:
+        outputFile.write(ensembleLine)
+    outputFile.write("\n")
     outputFile.write("    </MetaData>\n")
     outputFile.write("  <Snapshot>\n")
-
     for frameline in frameData1:
         outputFile.write(frameline)
-        
     outputFile.write("    <StuntDoubles>\n")
 
 
