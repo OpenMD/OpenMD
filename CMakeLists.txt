@@ -828,6 +828,7 @@ src/applications/utilities/affineScale
 src/applications/utilities/dumpConverter
 src/applications/utilities/funcflExtractor
 src/applications/utilities/omd-solvator
+src/applications/utilities/omdCombined
 src/applications/utilities/omdSplit
 src/applications/utilities/omdShrink
 src/applications/utilities/omdLast
