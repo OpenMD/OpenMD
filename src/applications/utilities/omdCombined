@@ -24,10 +24,10 @@ Example:
 
 """
 
-__author__ = "Charles Vardeman (cvardema@nd.edu) - original omd-solvator file. Changes here made by Sydney Shavalier (sshavali@nd.edu)"
+__author__ = "Sydney Shavalier (sshavali@nd.edu)"
 __version__ = "$Revision$"
 __date__ = "$Date$"
-__copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
+__copyright__ = "Copyright (c) 2020 by the University of Notre Dame"
 __license__ = "OpenMD"
 
 import sys
@@ -319,7 +319,7 @@ def writeFile(outputFileName):
         elif(pvqj1[i] == 'pvqj'):
             outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2], quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3], angVels1[i][0], angVels1[i][1], angVels1[i][2]))
 
-        newIndex = newIndex + 1
+        newIndex+=1
 
     newIndexAlt = newIndex
     for j in range(len(indices2)):
@@ -328,12 +328,13 @@ def writeFile(outputFileName):
         elif(pvqj2[j] == 'pvqj'):
             outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndexAlt, pvqj2[j], positions2[j][0], positions2[j][1], positions2[j][2], velocities2[j][0], velocities2[j][1], velocities2[j][2], quaternions2[j][0], quaternions2[j][1], quaternions2[j][2], quaternions2[j][3], angVels2[j][0], angVels2[j][1], angVels2[j][2]))
         
-        newIndexAlt = newIndexAlt +1
+        newIndexAlt+=1
 
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")
     outputFile.write("</OpenMD>\n")
     outputFile.close()
+
 
 def checkBoxes():
     boxTolerance = 1.0e-3
@@ -352,6 +353,16 @@ def checkBoxes():
 
        print(" -------------------------------------|------------------------------------")
        sys.exit()
+
+def checkOverlap(sd1_index,sd2_index):
+    overlapTolerance = 0.5
+    diff = 0.0
+    for i in range(3):
+        diff += (math.fabs(positions1[sd1_index][i]-positions2[sd2_index][i]))**2
+    diff = math.sqrt(diff)
+    if (diff < overlapTolerance):
+        print("Warning: Solute and solvent atoms overlap! No output file was created.")
+        sys.exit()
 
     
 def roundMe(x):
@@ -439,6 +450,9 @@ def main(argv):
     readFile1(mdFileName1)
     readFile2(mdFileName2)
     checkBoxes()
+    for sd1 in range(len(indices1)):
+        for sd2 in range(len(indices2)):
+            checkOverlap(sd1,sd2)
     writeFile(outputFileName)
 
 if __name__ == "__main__":
