@@ -154,7 +154,7 @@ def readFile1(mdFileName):
                         x = float(L[2])
                         y = float(L[3])
                         z = float(L[4])
-                        positions1.append([x, y, z])
+                        positions1.append(wrapVector([x, y, z])) #wraps positions back into periodic box
                         vx = float(L[5])
                         vy = float(L[6])
                         vz = float(L[7])
@@ -265,7 +265,7 @@ def readFile2(mdFileName):
                         x = float(L[2])
                         y = float(L[3])
                         z = float(L[4])
-                        positions2.append([x, y, z])
+                        positions2.append(wrapVector([x, y, z])) #wraps positions back into periodic box
                         vx = float(L[5])
                         vy = float(L[6])
                         vz = float(L[7])
@@ -352,8 +352,8 @@ def checkBoxes():
        print(" -------------------------------------|------------------------------------")
        sys.exit()
 
-def checkOverlap(sd1_index,sd2_index):
-    overlapTolerance = 0.5
+def checkOverlap(sd1_index,sd2_index): #checks to see if solute and solvent atoms overlap (within 1 Angstrom of each other)
+    overlapTolerance = 1.0
     diff = 0.0
     for i in range(3):
         diff += (math.fabs(positions1[sd1_index][i]-positions2[sd2_index][i]))**2
@@ -382,29 +382,6 @@ def wrapVector(myVect):
         scaled[i] = scaled[i] - roundMe(scaled[i])
         myVect[i] = scaled[i] * Hmat1[i][i]
     return myVect
-
-def dot(L1, L2):
-    myDot = 0.0
-    for i in range(len(L1)):
-        myDot = myDot + L1[i]*L2[i]
-    return myDot
-
-def normalize(L1):
-    L2 = []
-    myLength = math.sqrt(dot(L1, L1))
-    for i in range(len(L1)):
-        L2.append(L1[i] / myLength)
-    return L2
-
-def cross(L1, L2):
-    # don't call this with anything other than length 3 lists please
-    # or you'll be sorry
-    L3 = [0.0, 0.0, 0.0]
-    L3[0] = L1[1]*L2[2] - L1[2]*L2[1]
-    L3[1] = L1[2]*L2[0] - L1[0]*L2[2]
-    L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
-    return L3
-
 
     
 def main(argv):                         
