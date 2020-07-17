@@ -39,13 +39,18 @@
  * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
  * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
  */
+
 #include <algorithm>
+#include <functional>
+
 #include "brains/BlockSnapshotManager.hpp"
 //#include "utils/residentMem.h"
 //#include "utils/physmem.h"
 #include "utils/Algorithm.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
+
+using namespace std;
 
 namespace OpenMD {
   BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, 
@@ -158,11 +163,11 @@ namespace OpenMD {
 #ifdef __RWSTD   
     int count = 0;
     std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
-                  std::bind2nd(std::not_equal_to<int>(), -1), count);
+				  std::bind(std::not_equal_to<int>(), placeholders::_1, -1), count);
     return count;
 #else
     return std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
-                         std::bind2nd(std::not_equal_to<int>(), -1));
+						 std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
 #endif
   }
 
@@ -259,7 +264,7 @@ namespace OpenMD {
     std::vector<int> result;
     OpenMD::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
                     std::back_inserter(result), 
-                    std::bind2nd(std::not_equal_to<int>(), -1));
+                    std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
     return result;    
   }
 

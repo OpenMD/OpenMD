@@ -45,7 +45,7 @@ void testGaussian(){
         ++histogram[index];        
     }
 
-    std::transform(histogram.begin(), histogram.end(), normalizedHistogram.begin(), std::bind2nd(std::divides<double>(), num));
+    std::transform(histogram.begin(), histogram.end(), normalizedHistogram.begin(), std::bind(std::divides<double>(), placeholders::_1, num));
     std::ofstream gaussian("gaussian.dat");
     for (int i = 0; i < size; ++i) {
         gaussian << i*interval << "\t" << normalizedHistogram[i] << std::endl;
@@ -57,10 +57,10 @@ void testParallelRandNumGen(){
     const unsigned long int nloops = 1000000;
     MPI_Status istatus;
     ParallelRandNumGen mpiRandNumGen(seed);
-    const int masterNode = 0;
+    const int primaryNode = 0;
     int myRank;
     MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
-    if (myRank == masterNode) {
+    if (myRank == primaryNode) {
 
         SeqRandNumGen singleRandNumGen(seed);
         std::ofstream singleOs("single.dat");
@@ -71,10 +71,10 @@ void testParallelRandNumGen(){
         std::vector<unsigned long int> singleRandNums(nProcessors);
 
         for (unsigned long int i = 0; i < nloops; ++i) {
-            mpiRandNums[masterNode] = mpiRandNumGen.randInt();
+            mpiRandNums[primaryNode] = mpiRandNumGen.randInt();
         
             for (int j = 0; j < nProcessors; ++j) {
-                if (j != masterNode) {
+                if (j != primaryNode) {
                     MPI_Recv(&mpiRandNums[j], 1, MPI_UNSIGNED_LONG, j, i, MPI_COMM_WORLD, &istatus);
                 }
 
@@ -94,7 +94,7 @@ void testParallelRandNumGen(){
         unsigned long int randNum;
         for (unsigned long int i = 0; i < nloops; ++i) {
             randNum = mpiRandNumGen.randInt();
-            MPI_Send(&randNum, 1, MPI_INT, masterNode, i, MPI_COMM_WORLD);
+            MPI_Send(&randNum, 1, MPI_INT, primaryNode, i, MPI_COMM_WORLD);
         }
 
     }

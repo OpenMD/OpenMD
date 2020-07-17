@@ -55,6 +55,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <random>
 
 #include "randomBuilderCmd.hpp"
 #include "lattice/LatticeFactory.hpp"
@@ -318,7 +319,12 @@ int main(int argc, char *argv []) {
 
   vector<int> ids;
   for (std::size_t i = 0; i < sites.size(); i++) ids.push_back(i);
-  std::random_shuffle(ids.begin(), ids.end());
+
+  /* Set up the random number generator engine */
+  std::random_device rd;		// Non-deterministic, uniformly-distributed integer random number generator
+  std::mt19937 gen(rd());		// 32-bit Mersenne Twister random number engine
+
+  std::shuffle(ids.begin(), ids.end(), gen);
 
   Molecule* mol;
   int l = 0;

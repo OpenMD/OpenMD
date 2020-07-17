@@ -46,6 +46,9 @@
 #include "types/MoleculeStamp.hpp"
 #include "utils/Tuple.hpp"
 #include "utils/MemoryUtils.hpp"
+
+using namespace std;
+
 namespace OpenMD {
   
   template<class ContainerType>
@@ -253,12 +256,11 @@ namespace OpenMD {
       std::vector<int> bendAtoms =  bendStamp->getMembers();
       std::vector<int>::iterator j =std::find_if(bendAtoms.begin(), 
                                                  bendAtoms.end(), 
-                                                 std::bind2nd(std::greater<int>(), 
+                                                 std::bind(std::greater<int>(), placeholders::_1,
                                                               getNAtoms()-1));
       std::vector<int>::iterator k =std::find_if(bendAtoms.begin(), 
                                                  bendAtoms.end(), 
-                                                 std::bind2nd(std::less<int>(),
-                                                              0));
+                                                 std::bind(std::less<int>(), placeholders::_1, 0));
       
       if (j != bendAtoms.end() || k != bendAtoms.end()) {
         
@@ -427,11 +429,11 @@ namespace OpenMD {
       std::vector<int> torsionAtoms =  torsionStamp ->getMembers();
       std::vector<int>::iterator j =std::find_if(torsionAtoms.begin(), 
                                                  torsionAtoms.end(), 
-                                                 std::bind2nd(std::greater<int>(), 
+                                                 std::bind(std::greater<int>(), placeholders::_1,
                                                               getNAtoms()-1));
       std::vector<int>::iterator k =std::find_if(torsionAtoms.begin(), 
                                                  torsionAtoms.end(), 
-                                                 std::bind2nd(std::less<int>(), 0));
+                                                 std::bind(std::less<int>(), placeholders::_1, 0));
       
       if (j != torsionAtoms.end() || k != torsionAtoms.end()) {
         oss << "Error in Molecule " << getName() << ": atoms of torsion" << 
@@ -584,11 +586,11 @@ namespace OpenMD {
 
       std::vector<int>::iterator j =std::find_if(inversionAtoms.begin(), 
                                                  inversionAtoms.end(), 
-                                                 std::bind2nd(std::greater<int>(), 
+                                                 std::bind(std::greater<int>(), placeholders::_1,
                                                               getNAtoms()-1));
       std::vector<int>::iterator k =std::find_if(inversionAtoms.begin(), 
                                                  inversionAtoms.end(), 
-                                                 std::bind2nd(std::less<int>(), 0));
+                                                 std::bind(std::less<int>(), placeholders::_1, 0));
       
       if (j != inversionAtoms.end() || k != inversionAtoms.end()) {
         oss << "Error in Molecule " << getName() << ": atoms of inversion" << 
@@ -726,7 +728,7 @@ namespace OpenMD {
       std::vector<int> rigidAtoms =  rbStamp ->getMembers();
       std::vector<int>::iterator j =std::find_if(rigidAtoms.begin(), 
                                                  rigidAtoms.end(), 
-                                                 std::bind2nd(std::greater<int>(), 
+                                                 std::bind(std::greater<int>(), placeholders::_1,
                                                               getNAtoms()-1));
       if (j != rigidAtoms.end()) {
         oss << "Error in Molecule " << getName();
@@ -749,7 +751,7 @@ namespace OpenMD {
       std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
       std::vector<int>::iterator j =std::find_if(cutoffGroupAtoms.begin(), 
                                                  cutoffGroupAtoms.end(), 
-                                                 std::bind2nd(std::greater<int>(), 
+                                                 std::bind(std::greater<int>(), placeholders::_1,
                                                               getNAtoms()-1));
       if (j != cutoffGroupAtoms.end()) {
         std::ostringstream oss;

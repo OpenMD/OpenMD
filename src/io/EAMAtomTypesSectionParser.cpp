@@ -322,7 +322,7 @@ namespace OpenMD {
 
             // Convert to eV using energy unit scaling in force field:
             std::transform(F.begin(), F.end(), F.begin(),
-                   std::bind1st(std::multiplies<RealType>(), eus_));
+                   std::bind(std::multiplies<RealType>(), eus_, placeholders::_1));
 
             ea.makeOxygenFuncfl(re, fe, alpha, beta, A, B, kappa, lambda, drho, nrho, F);
                               
@@ -424,7 +424,7 @@ namespace OpenMD {
 
     // Convert to kcal/mol using energy unit scaling in force field:
     std::transform(F.begin(), F.end(), F.begin(),
-                   std::bind1st(std::multiplies<RealType>(), eus_));
+                   std::bind(std::multiplies<RealType>(), eus_, placeholders::_1));
 
     ea.makeFuncfl(latticeConstant, lattice, nrho, drho, nr, dr, rcut, Z, rho,
                   F);

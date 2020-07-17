@@ -68,7 +68,7 @@ void IfstrstreamTestCase::tearDown() {
 
 }
 
-void IfstrstreamTestCase::testMasterConstructor() {
+void IfstrstreamTestCase::testPrimaryConstructor() {
     const int MAXLEN = 1024;
     char buffer[MAXLEN];
 
@@ -83,32 +83,32 @@ void IfstrstreamTestCase::testMasterConstructor() {
     
 }    
 
-void IfstrstreamTestCase::testMasterOpen() {
+void IfstrstreamTestCase::testPrimaryOpen() {
 
 }
 
-void IfstrstreamTestCase::testMasterIs_open() {
+void IfstrstreamTestCase::testPrimaryIs_open() {
 
 }
 
-void IfstrstreamTestCase::testMasterClose() {
+void IfstrstreamTestCase::testPrimaryClose() {
 
 
 }
 
-void IfstrstreamTestCase::testSlaveConstructor() {
+void IfstrstreamTestCase::testSecondaryConstructor() {
 
 }    
 
-void IfstrstreamTestCase::testSlaveOpen() {
+void IfstrstreamTestCase::testSecondaryOpen() {
 
 }
 
-void IfstrstreamTestCase::testSlaveIs_open() {
+void IfstrstreamTestCase::testSecondaryIs_open() {
 
 }
 
-void IfstrstreamTestCase::testSlaveClose() {
+void IfstrstreamTestCase::testSecondaryClose() {
 
 
 }

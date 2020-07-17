@@ -49,6 +49,7 @@
 #include <map>
 #include <fstream>
 #include <algorithm>
+#include <random>
 
 #include "config.h"
 #include "shapedLatticeSpherical.hpp"
@@ -119,6 +120,9 @@ int main(int argc, char *argv []) {
   vector<Vector3d> sites = nanoParticle.getSites();
   vector<Vector3d> orientations = nanoParticle.getOrientations();
 
+  /* Set up the random number generator engine */
+  std::random_device rd;		// Non-deterministic, uniformly-distributed integer random number generator
+  std::mt19937 gen(rd());		// 32-bit Mersenne Twister random number engine
 
   std::vector<std::size_t> vacancyTargets;
   vector<bool> isVacancy;
@@ -158,7 +162,7 @@ int main(int argc, char *argv []) {
             vacancyTargets.push_back(i);
           }          
         }
-        std::random_shuffle(vacancyTargets.begin(), vacancyTargets.end());
+        std::shuffle(vacancyTargets.begin(), vacancyTargets.end(), gen);
         
         int nTargets = vacancyTargets.size();
         vacancyTargets.resize((int)(vF * nTargets));
@@ -328,7 +332,7 @@ int main(int argc, char *argv []) {
     for (unsigned int i = 0; i < sites.size(); i++) 
       if (!isVacancy[i]) ids.push_back(i);
     
-    std::random_shuffle(ids.begin(), ids.end());
+    std::shuffle(ids.begin(), ids.end(), gen);
     
   } else{ 
     sprintf(painCave.errMsg, "Creating a core-shell spherical nanoparticle.");

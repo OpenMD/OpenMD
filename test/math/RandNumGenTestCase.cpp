@@ -45,8 +45,8 @@ void RandNumGenTestCase::testMPIRNG(){
     const int nloops = 1000000;
     MPI_Status istatus;
     ParallelRandNumGen mpiRandNumGen(seed);
-    const int masterNode = 0;
-    if (worldRank = masterNode) {
+    const int primaryNode = 0;
+    if (worldRank = primaryNode) {
 
         MTRand singleRandNumGen(seed);
 
@@ -56,10 +56,10 @@ void RandNumGenTestCase::testMPIRNG(){
         std::vector<unsigned long int> singleRandNums(nProcessors);
 
         for (int i = 0; i < nloops; ++i) {
-            mpiRandNums[masterNode] = mpiRandNumGen.randInt();
+            mpiRandNums[primaryNode] = mpiRandNumGen.randInt();
         
             for (int j = 0; j < nProcessors; ++j) {
-                if (j != masterNode) {
+                if (j != primaryNode) {
                     MPI_Recv(&mpiRandNums[j], 1, MPI_UNSIGNED_LONG, j, i, MPI_COMM_WORLD, &istatus);
                 }
 
@@ -79,7 +79,7 @@ void RandNumGenTestCase::testMPIRNG(){
         unsigned long int randNum;
         for (int i = 0; i < nloops; ++i) {
             randNum = mpiRandNumGen.randInt();
-            MPI_Send(&randNum, 1, MPI_INT, masterNode, i, MPI_COMM_WORLD);
+            MPI_Send(&randNum, 1, MPI_INT, primaryNode, i, MPI_COMM_WORLD);
         }
 
     }

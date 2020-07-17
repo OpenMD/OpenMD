@@ -52,6 +52,7 @@
 #include <map>
 #include <fstream>
 #include <algorithm>
+#include <random>
 
 #include "config.h"
 #include "shapedLatticeRod.hpp"
@@ -135,6 +136,10 @@ int main(int argc, char *argv []) {
     orientations = nanoRod.getOrientations();
   }
 
+  /* Set up the random number generator engine */
+  std::random_device rd;		// Non-deterministic, uniformly-distributed integer random number generator
+  std::mt19937 gen(rd());		// 32-bit Mersenne Twister random number engine
+
   std::vector<std::size_t> vacancyTargets;
   vector<bool> isVacancy;
   
@@ -176,7 +181,7 @@ int main(int argc, char *argv []) {
             vacancyTargets.push_back(i);
           }          
         }
-        std::random_shuffle(vacancyTargets.begin(), vacancyTargets.end());
+        std::shuffle(vacancyTargets.begin(), vacancyTargets.end(), gen);
         
 	std::size_t nTargets = vacancyTargets.size();
         vacancyTargets.resize((int)(vF * nTargets));
@@ -352,7 +357,7 @@ int main(int argc, char *argv []) {
     for (std::size_t i = 0; i < sites.size(); i++) 
       if (!isVacancy[i]) ids.push_back(i);
     
-    std::random_shuffle(ids.begin(), ids.end());
+    std::shuffle(ids.begin(), ids.end(), gen);
     
   } else{ 
     sprintf(painCave.errMsg, "Creating an fcc nanorod.");

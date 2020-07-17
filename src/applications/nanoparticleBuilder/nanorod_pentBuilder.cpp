@@ -43,8 +43,6 @@
  *
  */
 
-
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -54,6 +52,7 @@
 #include <map>
 #include <fstream>
 #include <algorithm>
+#include <random>
 
 #include "config.h"
 #include "shapedLatticePentRod.hpp"
@@ -122,6 +121,10 @@ int main(int argc, char *argv []) {
   /* Create nanorod */
   shapedLatticePentRod nanoRod(latticeConstant, latticeType,
 			   rodRadius, rodLength);
+
+  /* Set up the random number generator engine */
+  std::random_device rd;		// Non-deterministic, uniformly-distributed integer random number generator
+  std::mt19937 gen(rd());		// 32-bit Mersenne Twister random number engine
   
   /* Build a lattice and get lattice points for this lattice constant */
 
@@ -257,7 +260,7 @@ int main(int argc, char *argv []) {
             vacancyTargets.push_back(i);
           }          
         }
-        std::random_shuffle(vacancyTargets.begin(), vacancyTargets.end());
+        std::shuffle(vacancyTargets.begin(), vacancyTargets.end(), gen);
         
         int nTargets = vacancyTargets.size();
         vacancyTargets.resize((int)(vF * nTargets));
@@ -428,7 +431,7 @@ int main(int argc, char *argv []) {
     for (unsigned int i = 0; i < sites.size(); i++) 
       if (!isVacancy[i]) ids.push_back(i);
     
-    std::random_shuffle(ids.begin(), ids.end());
+    std::shuffle(ids.begin(), ids.end(), gen);
     
   } else{ 
     sprintf(painCave.errMsg, "Creating an fcc nanorod.");

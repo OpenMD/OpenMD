@@ -15,14 +15,14 @@ class IfstrstreamTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(testIs_open);
     CPPUNIT_TEST(testClose);
 #else
-    CPPUNIT_TEST(testMasterConstructor);
-    CPPUNIT_TEST(testMasterOpen);
-    CPPUNIT_TEST(testMasterIs_open);
-    CPPUNIT_TEST(testMasterClose);
-    CPPUNIT_TEST(testSlaveConstructor);
-    CPPUNIT_TEST(testSlaveOpen);
-    CPPUNIT_TEST(testSlaveIs_open);
-    CPPUNIT_TEST(testSlaveClose);
+    CPPUNIT_TEST(testPrimaryConstructor);
+    CPPUNIT_TEST(testPrimaryOpen);
+    CPPUNIT_TEST(testPrimaryIs_open);
+    CPPUNIT_TEST(testPrimaryClose);
+    CPPUNIT_TEST(testSecondaryConstructor);
+    CPPUNIT_TEST(testSecondaryOpen);
+    CPPUNIT_TEST(testSecondaryIs_open);
+    CPPUNIT_TEST(testSecondaryClose);
 #endif
 
     CPPUNIT_TEST_SUITE_END();
@@ -38,14 +38,14 @@ class IfstrstreamTestCase : public CPPUNIT_NS::TestFixture {
         void testClose();
         
 #else
-        void testMasterConstructor();
-        void testMasterOpen();
-        void testMasterIs_open();
-        void testMasterClose();
-        void testSlaveConstructor();
-        void testSlaveOpen();
-        void testSlaveIs_open();
-        void testSlaveClose();                
+        void testPrimaryConstructor();
+        void testPrimaryOpen();
+        void testPrimaryIs_open();
+        void testPrimaryClose();
+        void testSecondaryConstructor();
+        void testSecondaryOpen();
+        void testSecondaryIs_open();
+        void testSecondaryClose();                
 #endif
 };
 

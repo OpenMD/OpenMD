@@ -49,6 +49,8 @@
 #include "utils/Constants.hpp"
 #include "types/LennardJonesAdapter.hpp"
 
+using namespace std;
+
 namespace OpenMD {
 
   
@@ -160,11 +162,8 @@ namespace OpenMD {
   
     int nProcessed = nFrames /step_;
     std::transform(density_.begin(), density_.end(), density_.begin(), 
-		   std::bind2nd(std::divides<RealType>(), nProcessed));  
+		   std::bind(std::divides<RealType>(), placeholders::_1, nProcessed)); 
     writeDensity();
-        
-
-  
   }
 
   Vector3d DensityPlot::calcNewOrigin() {
