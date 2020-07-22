@@ -3,7 +3,7 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# copyright = "Copyright (c) 2006 by the University of Notre Dame"
+# copyright = "Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved."
 # license   = "OpenMD"
 
 use Getopt::Std;

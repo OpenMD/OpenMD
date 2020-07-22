@@ -24,7 +24,7 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__copyright__ = "Copyright (c) 2009 by the University of Notre Dame"
+__copyright__ = "Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved."
 __license__ = "OpenMD"
 
 import sys

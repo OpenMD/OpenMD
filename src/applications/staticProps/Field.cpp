@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -14,7 +14,7 @@
  *    documentation and/or other materials provided with the
  *    distribution.
  *
- * this software is provided "AS IS," without a warranty of any
+ * This software is provided "AS IS," without a warranty of any
  * kind. All express or implied conditions, representations and
  * warranties, including any implied warranty of merchantability,
  * fitness for a particular purpose or non-infringement, are hereby
@@ -32,13 +32,15 @@
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
  * work.  Good starting points are:
- *                                                                   
- * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
- * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
- * [4]  Kuang & Gezelter,  J. Chem. Phys. 133, 164101 (2010).
- * [5]  Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
- * [6]  Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ *
+ * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
+ * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
 #include <vector>
@@ -354,7 +356,7 @@ namespace OpenMD {
     if (pss.is_open()) {
       pss << "#!/opt/local/bin/python\n\n";
       pss << "__author__ = \"Patrick Louden (plouden@nd.edu)\" \n";
-      pss << "__copyright__ = \"Copyright (c) 2017 by the University of Notre Dame\" \n";
+      pss << "__copyright__ = \"Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.\" \n";
       pss << "__license__ = \"OpenMD\"\n\n";
       pss << "import numpy as np\n";
       pss << "from mayavi.mlab import * \n\n";
