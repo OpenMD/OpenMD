@@ -49,6 +49,7 @@
  * @date 10/24/2004
  * @version 1.0
  */
+
 #ifndef LATTICE_LATTICEFACTORY_HPP
 #define LATTICE_LATTICEFACTORY_HPP
 #include <cassert>

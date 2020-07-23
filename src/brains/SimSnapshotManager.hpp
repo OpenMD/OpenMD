@@ -49,6 +49,7 @@
  * @date 10/20/2004
  * @version 1.0
  */
+
 #ifndef BRAINS_SIMSNAPSHOTMANAGER_HPP
 #define BRAINS_SIMSNAPSHOTMANAGER_HPP
 

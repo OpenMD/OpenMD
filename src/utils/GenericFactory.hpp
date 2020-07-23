@@ -49,6 +49,7 @@
  * @date 10/24/2004
  * @version 1.0
  */
+
 #ifndef UTIL_GENERICFACTORY_HPP
 #define UTIL_GENERICFACTORY_HPP
 #include <cassert>

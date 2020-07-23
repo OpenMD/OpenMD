@@ -44,9 +44,9 @@
  */
 
 /*
-* Computes the position distribution along preferred axis for the selected atom
-* Created by Cody R. Drisko on 06/14/14.
-*/
+ * Computes the position distribution along preferred axis for the selected atom
+ * Created by Hemanta Bhattarai on 02/20/20.
+ */
 
 #include <algorithm>
 #include <fstream>

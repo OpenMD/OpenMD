@@ -42,6 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
 #ifndef APPLICATIONS_STATICPROPS_CHARGEDENSITYZ_HPP
 #define APPLICATIONS_STATICPROPS_CHARGEDENSITYZ_HPP
 #include "selection/SelectionEvaluator.hpp"
@@ -51,6 +52,7 @@
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include<set>
 #include<map>
+
 namespace OpenMD {
 
     class ChargeDensityZ : public StaticAnalyser{

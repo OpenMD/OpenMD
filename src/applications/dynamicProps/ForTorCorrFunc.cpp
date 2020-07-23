@@ -44,7 +44,7 @@
  */
 
 #include "applications/dynamicProps/ForTorCorrFunc.hpp"
-#include "math/SquareMatrix3.hpp"//may not be necessary
+#include "math/SquareMatrix3.hpp"
 
 namespace OpenMD {
   ForTorCorrFunc::ForTorCorrFunc(SimInfo* info,

@@ -42,6 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
 #ifndef APPLICATIONS_DYNAMICPROPS_CHARGEORIENTATIONCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_CHARGEORIENTATIONCORRFUNC_HPP
 #include "applications/dynamicProps/TimeCorrFunc.hpp"

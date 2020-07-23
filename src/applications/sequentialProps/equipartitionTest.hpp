@@ -42,8 +42,10 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
 #ifndef APPLICATIONS_SEQUENTIALPROPS_EQUIPARTITIONTEST__HPP
 #define APPLICATIONS_SEQUENTIALPROPS_EQUIPARTITIONTEST__HPP
+
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 using namespace std;

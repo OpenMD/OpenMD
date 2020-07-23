@@ -49,6 +49,7 @@
  * @date 10/11/2004
  * @version 1.0
  */
+
 #ifndef MATH_SQUAREMATRIX3_HPP
 #define  MATH_SQUAREMATRIX3_HPP
 #include "config.h"

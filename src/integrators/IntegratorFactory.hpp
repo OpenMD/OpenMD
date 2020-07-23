@@ -49,6 +49,7 @@
  * @date 10/24/2004
  * @version 1.0
  */
+
 #ifndef INTEGRATORS_INTEGRATORFACTORY_HPP
 #define INTEGRATORS_INTEGRATORFACTORY_HPP
 #include <cassert>

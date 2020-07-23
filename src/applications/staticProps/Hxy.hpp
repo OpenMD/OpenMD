@@ -42,6 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
 #ifndef APPLICATIONS_STATICPROPS_HXY_HPP
 #define APPLICATIONS_STATICPROPS_HXY_HPP
 
@@ -64,38 +65,43 @@
 #endif
 #endif
 
-#include "applications/staticProps/RadialDistrFunc.hpp"
-#include "utils/Accumulator.hpp"
+#include <string>
+#include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
+#include "brains/Snapshot.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+
 
 namespace OpenMD {
-  
+
   class Hxy : public StaticAnalyser {
-    
+
   public:
     Hxy(SimInfo* info, const std::string& filename, const std::string& sele,
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
-    virtual ~Hxy();        
+    virtual ~Hxy();
     virtual void process();
-    
+
   private:
-    
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
 
     Snapshot* currentSnapshot_;
-    
+
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
-    
+
     unsigned int nBinsX_;
     unsigned int nBinsY_;
     unsigned int nBinsZ_;
     RealType dfreq_;
 
-    std::vector<std::vector<std::vector<RealType> > > dens_;
-    std::vector<std::vector<RealType> > minHeight_;
-    std::vector<std::vector<RealType> > maxHeight_;    
+    std::vector< std::vector< std::vector<RealType> > > dens_;
+    std::vector< std::vector<RealType> > minHeight_;
+    std::vector< std::vector<RealType> > maxHeight_;
     std::vector<RealType> mag1, newmag1;
     std::vector<RealType> mag2, newmag2;
 
@@ -103,9 +109,6 @@ namespace OpenMD {
     OutputData* top_;
     OutputData* bottom_;
   };
-  
 }
+
 #endif
-
-
-
