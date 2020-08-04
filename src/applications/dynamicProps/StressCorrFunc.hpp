@@ -42,13 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
+
+#ifndef APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
+
+#include <string>
+#include <vector>
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
-#include "utils/Accumulator.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "utils/StaticAccumulator.hpp"
 
 namespace OpenMD {
 
@@ -66,9 +72,8 @@ namespace OpenMD {
     
     ForceManager* forceMan_;
     Thermo* thermo_;
-    Accumulator* pressure_;
+    StaticAccumulator<RealType> pressure_ {};
   };
-
 }
-#endif
 
+#endif

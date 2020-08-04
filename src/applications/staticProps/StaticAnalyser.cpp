@@ -211,7 +211,7 @@ namespace OpenMD {
         dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][j])->getAverage(s);
       }
 
-      if (! isinf(s) && ! isnan(s)) {
+      if (! std::isinf(s) && ! std::isnan(s)) {
         os << "\t" << s;
       } else {
         sprintf( painCave.errMsg,
@@ -288,7 +288,7 @@ namespace OpenMD {
       
       dynamic_cast<Accumulator *>(dat->accumulatorArray2d[bin][j])->get95percentConfidenceInterval(s);
       
-      if (! isinf(s) && ! isnan(s)) {
+      if (! std::isinf(s) && ! std::isnan(s)) {
         os << "\t" << s;
       } else{
         sprintf( painCave.errMsg,
@@ -302,7 +302,7 @@ namespace OpenMD {
   }
 
   void StaticAnalyser::writeErrorBars(ostream& os, OutputData* dat,
-                                    unsigned int bin) {
+				      unsigned int bin) {
     assert(bin < nBins_);
 
     if( dat->dataType == odtReal ) {

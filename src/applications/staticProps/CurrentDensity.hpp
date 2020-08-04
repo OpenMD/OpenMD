@@ -44,48 +44,48 @@
  */
 
 /*
-* Computes the current density for the selected atom
-* Created by Cody R. Drisko on 06/14/14.
-*/
+ * Computes the current density for the selected atom
+ * Created by Cody R. Drisko on 06/14/19.
+ */
 
 #ifndef APPLICATIONS_STATICPROPS_CURRENTDENSITY_HPP
 #define APPLICATIONS_STATICPROPS_CURRENTDENSITY_HPP
-	
+
 #include <string>
 #include <vector>
+
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
-	
+
 namespace OpenMD {
-  
+
   class CurrentDensity : public StaticAnalyser {
-    
+
   public:
     CurrentDensity(SimInfo* info, const std::string& filename,
-                   const std::string& sele, int nzbins, int axis=2);
-    
+                   const std::string& sele, int nbins, int axis=2);
+
     virtual void process();
-    
-  private:    
-    virtual void writeCurrentDensity();    
-    
+
+  private:
+    void writeCurrentDensity();
+
     Snapshot* currentSnapshot_;
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     Thermo thermo_;
-    
-    std::vector<std::vector<StuntDouble*> > sliceSDLists_;
+
+    std::vector< std::vector<StuntDouble*> > sliceSDLists_;
     std::vector<RealType> zBox_;
     std::vector<RealType> currentDensity_;
     RealType overallCurrentDensity_;
     int axis_;
     std::string axisLabel_;
   };
-  
 }
 #endif

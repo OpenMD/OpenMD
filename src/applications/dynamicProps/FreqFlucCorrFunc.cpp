@@ -43,27 +43,35 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <string>
+
 #include "applications/dynamicProps/FreqFlucCorrFunc.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "brains/DataStorage.hpp"
+#include "brains/SimInfo.hpp"
+#include "math/Vector3.hpp"
 #include "primitives/Atom.hpp"
+#include "primitives/StuntDouble.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
+#include "utils/StringUtils.hpp"
 
 namespace OpenMD {
+
   FreqFlucCorrFunc::FreqFlucCorrFunc(SimInfo* info, const std::string& filename,
-                                     const std::string& sele1, 
+                                     const std::string& sele1,
                                      const std::string& sele2)
-    : ObjectACF<RealType>(info, filename, sele1, sele2,  
-                          DataStorage::dslElectricField | 
-                          DataStorage::dslAmat |
-                          DataStorage::dslDipole) {
-    
+    : ObjectACF<RealType>( info, filename, sele1, sele2,
+                           DataStorage::dslElectricField |
+                           DataStorage::dslAmat |
+                           DataStorage::dslDipole ) {
+
     setCorrFuncType("FreqFluc Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ffcorr");
-    ueStats_ = new Accumulator();
-    
   }
-  
+
   int FreqFlucCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+
     Vector3d e = sd->getElectricField();
     Vector3d u;
     if (sd->isRigidBody()) {
@@ -71,49 +79,45 @@ namespace OpenMD {
     } else {
       AtomType* at = static_cast<Atom*>(sd)->getAtomType();
       MultipoleAdapter ma = MultipoleAdapter(at);
-      
+
       if (ma.isDipole()) {
         u = sd->getDipole();
       }
     }
 
     RealType uedot = dot(u,e);
-    ueStats_->add(uedot);
-    
+    ueStats_.add(uedot);
+
     ue_[frame].push_back( uedot );
     return ue_[frame].size() - 1;
   }
 
   RealType FreqFlucCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
-    RealType mean;
 
-    ueStats_->getAverage(mean);
-    
+    RealType mean = ueStats_.getAverage();
+
     return ( ue_[frame1][id1] - mean ) * ( ue_[frame2][id2] - mean );
   }
-  
 
   void FreqFlucCorrFunc::validateSelection(const SelectionManager& seleMan) {
+
     StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; 
+    int i;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
          sd = seleMan1_.nextSelected(i)) {
 
       if (!sd->isRigidBody()) {
-
         AtomType* at = static_cast<Atom*>(sd)->getAtomType();
         MultipoleAdapter ma = MultipoleAdapter(at);
-        
+
         if (!ma.isDipole()) {
           sprintf(painCave.errMsg,
                   "FreqFlucCorrFunc::validateSelection Error: selection is not a RigidBody or does\n"
                   "\tnot have a dipole\n");
           painCave.isFatal = 1;
-          simError();        
+          simError();
         }
       }
-    }    
+    }
   }
 }
-
-

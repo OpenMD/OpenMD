@@ -44,40 +44,47 @@
  */
 
 /*! \file FreqFlucCorrFunc.hpp
-    \brief Frequency Fluctuation Correlation Function
+  \brief Frequency Fluctuation Correlation Function
 */
 
 #ifndef APPLICATIONS_DYNAMICPROPS_FREQFLUCCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_FREQFLUCCORRFUNC_HPP
 
+#include <string>
+#include <vector>
+
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "utils/Accumulator.hpp"
+#include "brains/SimInfo.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "selection/SelectionManager.hpp"
+#include "utils/StaticAccumulator.hpp"
 
 namespace OpenMD {
 
   //! Frequency Fluctuation Correlation Function
-  /*! See <http://dx.doi.org/10.1021/jp010798o> 
-    
+  /*! See <http://dx.doi.org/10.1021/jp010798o>
+
     Williams, Loring, and Fayer, J. Phys. Chem. B 2001, 105, 4068-4071 for details
-    
+
     Makes an assumption that the frequency depends on the
     orientation of the dipole relative to the local Electric
-    Field.  Requires a preCorrelate to compute the mean of 
+    Field.  Requires a preCorrelate to compute the mean of
     \f$ = \langle \mathbf{E} \cdot \mathbf{u} \rangle \f$
-
   */
+
   class FreqFlucCorrFunc : public ObjectACF<RealType> {
   public:
-    FreqFlucCorrFunc(SimInfo* info, const std::string& filename, 
-                     const std::string& sele1, const std::string& sele2);   
-    
+    FreqFlucCorrFunc(SimInfo* info, const std::string& filename,
+                     const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void validateSelection(const SelectionManager& seleMan);
-    
-    std::vector<std::vector<RealType> > ue_;
-    Accumulator* ueStats_;
-  };  
+
+    std::vector< std::vector<RealType> > ue_;
+    StaticAccumulator<RealType> ueStats_ {};
+  };
 }
+
 #endif

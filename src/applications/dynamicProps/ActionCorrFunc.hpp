@@ -42,33 +42,38 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
 #ifndef APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 
+#include <string>
+#include <vector>
+
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "utils/StaticAccumulator.hpp"
 
 namespace OpenMD {
 
   class ActionCorrFunc : public SystemACF<Mat3x3d> {
   public:
     ActionCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2);   
-    
+                   const std::string& sele1, const std::string& sele2);
+
   protected:
     virtual void computeProperty1(int frame1);
     Mat3x3d calcCorrVal(int frame1, int frame2);
-    
+
     ForceManager* forceMan_;
     Thermo* thermo_;
 
     std::vector<Mat3x3d> action_;
     std::vector<RealType> time_;
-    Accumulator* pressure_;
-    Accumulator* volume_;
+    StaticAccumulator<RealType> pressure_ {};
   };
-
 }
-#endif
 
+#endif

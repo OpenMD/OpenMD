@@ -43,7 +43,6 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-
 #ifndef APPLICATIONS_STATICPROPS_RNEMDSTATS_HPP
 #define APPLICATIONS_STATICPROPS_RNEMDSTATS_HPP
 
@@ -93,6 +92,7 @@ namespace OpenMD {
     std::vector<AtomType*> outputTypes_;
   };
 
+
   class RNEMDR : public ShellStatistics {
 
   public:
@@ -120,6 +120,7 @@ namespace OpenMD {
     OutputBitSet outputMask_;
   };
 
+
   class RNEMDRTheta : public ShellStatistics {
 
   public:
@@ -146,6 +147,6 @@ namespace OpenMD {
     int nAngleBins_;
     Vector3d fluxVector_;
   };
-
 }
+
 #endif
