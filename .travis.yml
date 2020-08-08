@@ -24,6 +24,7 @@ addons:
       - python3-numpy
       - python3-scipy
       - qhull-bin
+      - libqhull-dev
       - minizip
       - zlib1g-dev
     update: true
