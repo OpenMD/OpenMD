@@ -1,0 +1,48 @@
+### OpenMD Build Matrix ###
+language: cpp
+os:
+  - linux
+  - osx
+compiler:
+  - clang
+  - gcc
+osx_image: xcode12
+dist: focal
+
+### OpenMD Prerequisites ###
+addons:
+  apt:
+    packages:
+      - cmake
+      - libfftw3-3
+      - libfftw3-dev
+      - openbabel
+      - libopenbabel-dev
+      - openmpi-bin
+      - libopenmpi-dev
+      - perl
+      - python3-numpy
+      - python3-scipy
+      - qhull-bin
+      - minizip
+      - zlib1g-dev
+    update: true
+  homebrew:
+    packages:
+      - cmake
+      - fftw
+      - open-babel
+      - open-mpi
+      - qhull
+      - numpy
+      - scipy
+      - zlib
+    update: true
+notifications:
+  email: false
+
+### OpenMD Installation Procedure ###
+script:
+  - mkdir build && cd build
+  - cmake ../.
+  - make -j 4 && sudo make install
