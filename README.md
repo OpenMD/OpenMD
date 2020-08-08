@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/OpenMD/OpenMD.svg?branch=master)](https://travis-ci.com/OpenMD/OpenMD)
+
 # What is OpenMD?
 
 OpenMD is an open source molecular dynamics engine which is capable of
@@ -31,9 +33,10 @@ in the `doc` directory.  Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                     |
 |--------------------------------|:----:|-------------------------------------------|
-| macOS 10.14.6 (intel)          |  c++ | (Apple LLVM version 10.0, Open MPI 4.0.1) |
-| macOS 10.14.6 (intel)          |  g++ | (GNU version 8.3.0)                       |
-| Linux (Ubuntu 19.04 - x86\_64) |  g++ | (GNU version 8.3.0, Open MPI 3.1.3)       |
+| macOS 10.15 (intel)            | clang| (Xcode 12, Open MPI 3.1)                  |
+| macOS 10.15 (intel)            | g++  | (Xcode 12, OpenMPI 3.1)                   |
+| Linux (Ubuntu 20.04 - x86\_64) | clang| (clang version 7.0.0 Open MPI 3.1)        |
+| Linux (Ubuntu 20.04 - x86\_64) | g++  | (GNU version 9.3.0, Open MPI 3.1)         |
 | Linux (RHEL 7.6 - x86\_64)     | icpc | (Intel version 18.0.5, Open MPI 3.0.0)    |
 
    OpenMD uses features in the standard template library (STL). Most (but 
