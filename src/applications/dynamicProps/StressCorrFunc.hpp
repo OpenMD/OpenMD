@@ -72,7 +72,7 @@ namespace OpenMD {
     
     ForceManager* forceMan_;
     Thermo* thermo_;
-    StaticAccumulator<RealType> pressure_ {};
+    RealAccumulator pressure_ {};
   };
 }
 

@@ -48,47 +48,50 @@
 
 #include <string>
 #include <vector>
-#include <fstream>
 
 #include "applications/staticProps/StaticAnalyser.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Snapshot.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/Accumulator.hpp"
 
-using namespace std;
 namespace OpenMD {
- 
+
   class SpatialStatistics : public StaticAnalyser {
-    
   public:
-    SpatialStatistics(SimInfo* info, const string& filename,
-                      const string& sele, int nbins);    
+    SpatialStatistics(SimInfo* info, const std::string& filename,
+                      const std::string& sele, int nbins);
     ~SpatialStatistics();
 
-    void addOutputData(OutputData* dat) {data_.push_back(dat);}
-    void addOutputDataAt(OutputData* dat, unsigned int loc) {data_[loc] = dat;}
+    void addOutputData(OutputData* dat) { data_.push_back(dat); }
+    void addOutputDataAt(OutputData* dat, unsigned int loc) { data_[loc] = dat; }
     virtual void process();
     virtual void processFrame(int frame);
-    virtual int getBin(Vector3d pos)=0;
-    virtual void processStuntDouble(StuntDouble* sd, int bin)=0;
-    
-  protected:
+    virtual int getBin(Vector3d pos) = 0;
+    virtual void processStuntDouble(StuntDouble* sd, int bin) = 0;
 
-    Snapshot* currentSnapshot_;    
+  protected:
+    Snapshot* currentSnapshot_;
     int nProcessed_;
-    string selectionScript_;
+    std::string selectionScript_;
     SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;    
+    SelectionManager seleMan_;
   };
-  
+
+
   class SlabStatistics : public SpatialStatistics {
-  public: 
-    SlabStatistics(SimInfo* info, const string& filename,
-                   const string& sele, int nbins, int axis);
+  public:
+    SlabStatistics(SimInfo* info, const std::string& filename,
+                   const std::string& sele, int nbins, int axis);
     virtual ~SlabStatistics();
 
     virtual int getBin(Vector3d pos);
     virtual void processFrame(int frame);
+
   protected:
     OutputData* z_;
     Mat3x3d hmat_;
@@ -97,13 +100,14 @@ namespace OpenMD {
     std::string axisLabel_;
   };
 
+
   class ShellStatistics : public SpatialStatistics {
-  public: 
-    ShellStatistics(SimInfo* info, const string& filename, const string& sele,
+  public:
+    ShellStatistics(SimInfo* info, const std::string& filename, const std::string& sele,
                     int nbins);
     virtual ~ShellStatistics();
-    virtual int getBin(Vector3d pos);
 
+    virtual int getBin(Vector3d pos);
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
     void setBinWidth(RealType bw) { binWidth_ = bw; }
 
@@ -112,9 +116,6 @@ namespace OpenMD {
     Vector3d coordinateOrigin_;
     RealType binWidth_;
   };
-  
 }
+
 #endif
-
-
-

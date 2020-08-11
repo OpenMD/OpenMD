@@ -43,36 +43,40 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <string>
+#include <vector>
 
-#include <algorithm>
-#include <fstream>
-#include <cmath>
-#include "math/SquareMatrix3.hpp"
 #include "applications/staticProps/DipoleOrientation.hpp"
-#include "primitives/Molecule.hpp"
+#include "applications/staticProps/SpatialStatistics.hpp"
+#include "brains/SimInfo.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "utils/Accumulator.hpp"
+#include "utils/StringUtils.hpp"
 
 namespace OpenMD {
 
   DipoleOrientation::DipoleOrientation(SimInfo* info, const std::string& filename, const std::string& sele,
-                    const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
-                    int nzbins, int axis): SlabStatistics(info, filename, sele, nzbins, axis), axis_(axis) {
+				       const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
+				       int nzbins, int axis)
+    : SlabStatistics(info, filename, sele, nzbins, axis), axis_(axis) {
 
-
-      switch(axis_) {
-      case 0:
-        axisLabel_ = "x";
-        refAxis_ = Vector3d(1,0,0);
-        break;
-      case 1:
-        axisLabel_ = "y";
-        refAxis_ = Vector3d(0,1,0);
-        break;
-      case 2:
-      default:
-        axisLabel_ = "z";
-        refAxis_ = Vector3d(0,0,1);
-        break;
-      }
+    switch(axis_) {
+    case 0:
+      axisLabel_ = "x";
+      refAxis_ = Vector3d(1,0,0);
+      break;
+    case 1:
+      axisLabel_ = "y";
+      refAxis_ = Vector3d(0,1,0);
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      refAxis_ = Vector3d(0,0,1);
+      break;
+    }
     setOutputName(getPrefix(filename) + ".Sz");
 
     dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
@@ -101,22 +105,25 @@ namespace OpenMD {
   }
 
   void DipoleOrientation::processFrame(int istep) {
+
     RealType z;
 
     hmat_ = currentSnapshot_->getHmat();
+
     for (unsigned int i = 0; i < nBins_; i++) {
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
       dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
     }
+
     volume_ = currentSnapshot_->getVolume();
 
     StuntDouble* sd;
     int i;
 
-    vector<RealType> binS(nBins_, 0.0);
-    vector<RealType> binSCos(nBins_, 0.0);
+    std::vector<RealType> binS(nBins_, 0.0);
+    std::vector<RealType> binSCos(nBins_, 0.0);
 
-    vector<int> count(nBins_,0.0);
+    std::vector<int> count(nBins_,0.0);
 
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -148,26 +155,12 @@ namespace OpenMD {
         binSCos[bin] += ctheta;
 
         count[bin] += 1;
-
-
-
-
       }
-
-   }
-
-
-    for (unsigned int i = 0; i < nBins_; i++) {
-        count[i] !=0 ? dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]/count[i]) : dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]);
-        count[i] !=0 ? dynamic_cast<Accumulator *>(orderSCos_->accumulator[i])->add(binSCos[i]/count[i]) : dynamic_cast<Accumulator *>(orderSCos_->accumulator[i])->add(binSCos[i]);
-
-        dynamic_cast<Accumulator *>(counts_->accumulator[i])->add(1);
     }
 
+    for (unsigned int i = 0; i < nBins_; i++) {
+      count[i] !=0 ? dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]/count[i]) : dynamic_cast<Accumulator *>(orderS_->accumulator[i])->add(binS[i]);
+      count[i] !=0 ? dynamic_cast<Accumulator *>(orderSCos_->accumulator[i])->add(binSCos[i]/count[i]) : dynamic_cast<Accumulator *>(orderSCos_->accumulator[i])->add(binSCos[i]);
+    }
   }
-
-  void DipoleOrientation::processStuntDouble(StuntDouble* sd, int bin) {
-  }
-
-
 }

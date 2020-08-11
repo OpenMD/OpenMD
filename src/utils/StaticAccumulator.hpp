@@ -54,7 +54,10 @@
 #include <vector>
 
 #include "math/SquareMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "math/Vector.hpp"
+#include "math/Vector3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -140,6 +143,7 @@ namespace OpenMD {
   };
 
 
+  // Specializations for commonly used Accumulator types
   template<>
   class StaticAccumulator< std::vector<RealType> > {
   public:
@@ -306,7 +310,7 @@ namespace OpenMD {
     Vector<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
-	
+
   template<unsigned int Dim>
   class StaticAccumulator< SquareMatrix<RealType, Dim> > {
   public:
@@ -392,6 +396,20 @@ namespace OpenMD {
     std::size_t Count_ {};
     SquareMatrix<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
+
+	
+  // Type aliases for the most commonly used StaticAccumulators
+  using RealAccumulator 		 = StaticAccumulator<RealType>;
+  using StdVectorAccumulator = StaticAccumulator< std::vector<RealType> >;
+  // using Vector3dAccumulator  = StaticAccumulator<Vector3d>;
+  // using PotVecAccumulator    = StaticAccumulator<potVec>;
+  // using Mat3x3dAccumulator   = StaticAccumulator<Mat3x3d>;
+
+  // template<unsigned int Dim>
+  // using VectorAccumulator = StaticAccumulator< Vector<RealType, Dim> >;
+
+  // template<unsigned int Dim>
+  // using SquareMatrixAccumulator = StaticAccumulator< SquareMatrix<RealType, Dim> >;
 }
 
 #endif

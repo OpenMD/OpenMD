@@ -72,7 +72,7 @@ namespace OpenMD {
 
     std::vector<Mat3x3d> action_;
     std::vector<RealType> time_;
-    StaticAccumulator<RealType> pressure_ {};
+    RealAccumulator pressure_ {};
   };
 }
 

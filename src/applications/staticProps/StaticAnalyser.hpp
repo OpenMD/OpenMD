@@ -46,59 +46,63 @@
 #ifndef APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 #define APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 
+#include <cassert>
+#include <iostream>
 #include <string>
+#include <vector>
+
 #include "brains/SimInfo.hpp"
-#include "brains/Snapshot.hpp"
 #include "utils/Accumulator.hpp"
 
 namespace OpenMD {
+
   enum OutputDataType {
     odtReal,
     odtVector3,
     odtArray2d,
     odtUnknownDataType
   };
-  
+
   enum OutputDataHandling {
     odhAverage,
     odhTotal,
     odhMax,
     odhUnknownDataHandling
   };
-  
+
   struct OutputData {
-    string title;
-    string units;
+    std::string title;
+    std::string units;
     OutputDataType dataType;
     OutputDataHandling dataHandling;
-    vector<BaseAccumulator*> accumulator;
-    vector<string> columnNames;
-    vector<vector<BaseAccumulator*> > accumulatorArray2d;
+    std::vector<BaseAccumulator*> accumulator;
+    std::vector<std::string> columnNames;
+    std::vector< std::vector<BaseAccumulator*> > accumulatorArray2d;
   };
 
-  class StaticAnalyser{
+  class StaticAnalyser {
   public:
     StaticAnalyser(SimInfo* info, const std::string& filename,
                    unsigned int nbins);
-    
+
     virtual ~StaticAnalyser() {}
-    virtual void process()=0;
+    virtual void process() = 0;
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
     }
-    
+
     const std::string& getOutputFileName() const {
       return outputFilename_;
     }
-        
+
     void setStep(int step) {
       assert(step > 0);
-      step_ =step;    
+      step_ = step;
     }
 
-    int getStep() { return step_;}
-    
+    int getStep() const { return step_; }
+
     const std::string& getAnalysisType() const {
       return analysisType_;
     }
@@ -106,36 +110,35 @@ namespace OpenMD {
     void setAnalysisType(const std::string& type) {
       analysisType_ = type;
     }
-    
+
     void setParameterString(const std::string& params) {
       paramString_ = params;
     }
 
   protected:
     virtual void writeOutput();
-    virtual void writeData(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeErrorBars(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeReal(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeVector(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeArray(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeRealErrorBars(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeVectorErrorBars(ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeArrayErrorBars(ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeData(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeReal(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeVector(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeArray(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeRealErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeVectorErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeArrayErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
 
-    OutputData* beginOutputData(vector<OutputData*>::iterator& i);
-    OutputData* nextOutputData(vector<OutputData*>::iterator& i);
+    OutputData* beginOutputData(std::vector<OutputData*>::iterator& i);
+    OutputData* nextOutputData(std::vector<OutputData*>::iterator& i);
 
     SimInfo* info_;
-    std::string dumpFilename_;        
+    std::string dumpFilename_;
     std::string outputFilename_;
     int step_;
     std::string analysisType_;
     std::string paramString_;
-    
-    unsigned int nBins_;
-    OutputData* counts_;
-    vector<OutputData*> data_;
 
+    unsigned int nBins_;
+    std::vector<OutputData*> data_;
   };
 }
+
 #endif

@@ -46,22 +46,27 @@
 #ifndef APPLICATIONS_STATICPROPS_RNEMDSTATS_HPP
 #define APPLICATIONS_STATICPROPS_RNEMDSTATS_HPP
 
+#include <bitset>
 #include <string>
+#include <utility>
 #include <vector>
+
 #include "applications/staticProps/SpatialStatistics.hpp"
+#include "brains/SimInfo.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "types/AtomType.hpp"
 
 namespace OpenMD {
 
   class RNEMDZ : public SlabStatistics {
-
   public:
     RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele,
            int nzbins, int axis=2);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin);
+    void processStuntDouble(StuntDouble* sd, int bin) {}
 
   protected:
-
     enum OutputFields {
       BEGININDEX = 0,
       Z = BEGININDEX,
@@ -73,12 +78,14 @@ namespace OpenMD {
       ELECTROSTATICPOTENTIAL,
       CHARGE,
       CHARGEVELOCITY,
-      ENDINDEX 
+      ENDINDEX
     };
 
-    typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;
+    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
 
-    OutputBitSet outputMask_;
+    int outputTypeCount_;
+    std::vector<AtomType*> outputTypes_;
+
     OutputData* temperature;
     OutputData* velocity;
     OutputData* density;
@@ -87,19 +94,17 @@ namespace OpenMD {
     OutputData* ePot;
     OutputData* charge;
     OutputData* chargeVelocity;
-    
-    int outputTypeCount_;
-    std::vector<AtomType*> outputTypes_;
+
+    OutputBitSet outputMask_;
   };
 
 
   class RNEMDR : public ShellStatistics {
-
   public:
     RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele,
            int nrbins);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin);
+    void processStuntDouble(StuntDouble* sd, int bin) {}
 
   protected:
     enum OutputFields {
@@ -108,44 +113,44 @@ namespace OpenMD {
       TEMPERATURE,
       ANGULARVELOCITY,
       DENSITY,
-      ENDINDEX 
+      ENDINDEX
     };
 
-    typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;
-    typedef map<string, OutputFields> OutputMapType;
+    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
 
     OutputData* temperature;
     OutputData* angularVelocity;
     OutputData* density;
+
     OutputBitSet outputMask_;
   };
 
 
   class RNEMDRTheta : public ShellStatistics {
-
   public:
     RNEMDRTheta(SimInfo* info, const std::string& filename,
                 const std::string& sele, int nrbins, int nanglebins);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin);
+    void processStuntDouble(StuntDouble* sd, int bin) {}
     std::pair<int,int> getBins(Vector3d pos);
     void writeOutput();
-    
+
   protected:
     enum OutputFields {
       BEGININDEX = 0,
       R = BEGININDEX,
       ANGULARVELOCITY,
-      ENDINDEX 
+      ENDINDEX
     };
 
-    typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;
-    typedef map<string, OutputFields> OutputMapType;
+    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
 
-    OutputData* angularVelocity;
-    OutputBitSet outputMask_;
     int nAngleBins_;
     Vector3d fluxVector_;
+
+    OutputData* angularVelocity;
+
+    OutputBitSet outputMask_;
   };
 }
 

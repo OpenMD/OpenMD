@@ -171,9 +171,9 @@ namespace OpenMD {
 
 #ifdef HAVE_FFTW3_H
       p1 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in1, out1, 
-                           FFTW_FORWARD, FFTW_ESTIMATE); 
+			    FFTW_FORWARD, FFTW_ESTIMATE); 
       p2 = fftw_plan_dft_2d(nBinsX_, nBinsY_, in2, out2, 
-                           FFTW_FORWARD, FFTW_ESTIMATE); 
+			    FFTW_FORWARD, FFTW_ESTIMATE); 
 #else
       p1 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
       p2 = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -443,13 +443,13 @@ namespace OpenMD {
       } 
 
       /*
-      for (unsigned int i=0; i< nBinsX_; i++) {
+	for (unsigned int i=0; i< nBinsX_; i++) {
         for(unsigned int j=0; j< nBinsY_; j++) {
-          newindex = i*nBinsY_ + j;
-	  std::cout << newmag1[newindex] << "\t";
+	newindex = i*nBinsY_ + j;
+	std::cout << newmag1[newindex] << "\t";
         }
 	std::cout << "\n";
-      }
+	}
       */
 
       RealType maxfreqx = RealType(nBinsX_) / lenX_;
@@ -472,7 +472,6 @@ namespace OpenMD {
           
 	  newindex = i*nBinsY_ + j;
 
-          dynamic_cast<Accumulator*>(counts_->accumulator[whichbin])->add(1);
           dynamic_cast<Accumulator*>(freq_->accumulator[whichbin])->add(freq);
           dynamic_cast<Accumulator *>(top_->accumulator[whichbin])->add(newmag1[newindex]);
           dynamic_cast<Accumulator *>(bottom_->accumulator[whichbin])->add(newmag2[newindex]);
@@ -491,7 +490,6 @@ namespace OpenMD {
 #endif
   }
     
-   
   RealType Hxy::getDensity(RealType r, RealType sigma, RealType rcut) {
     RealType sigma2 = sigma*sigma;
     RealType dens = exp(-r*r/(sigma2*2.0)) /

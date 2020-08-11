@@ -47,32 +47,31 @@
 #define APPLICATIONS_STATICPROPS_DIPOLEORIENTATION_HPP
 
 #include <string>
-#include <vector>
-#include "math/Vector3.hpp"
+
 #include "applications/staticProps/SpatialStatistics.hpp"
+#include "brains/SimInfo.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
 
 namespace OpenMD {
 
   class DipoleOrientation : public SlabStatistics {
-
-  private:
-    Vector3d refAxis_, dipoleVector_;
-    std::string axisLabel_;
-
   public:
     DipoleOrientation(SimInfo* info, const std::string& filename, const std::string& sele,
                       const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
                       int nzbins, int axis=2);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin);
+    void processStuntDouble(StuntDouble* sd, int bin) {};
 
   protected:
     OutputData* orderS_;
     OutputData* orderSCos_;
     int axis_;
 
-
-
+  private:
+    Vector3d refAxis_, dipoleVector_;
+    std::string axisLabel_;
   };
 }
+
 #endif
