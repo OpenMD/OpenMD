@@ -207,7 +207,7 @@ namespace OpenMD {
     RealType s;
     std::size_t columns = dat->accumulatorArray2d[0].size();
 
-    for (int i = 0; i < columns; i++) {
+    for (std::size_t i = 0; i < columns; i++) {
       std::size_t count = dat->accumulatorArray2d[bin][i]->count();
 
       if (count == 0) {
@@ -223,7 +223,7 @@ namespace OpenMD {
 	  sprintf( painCave.errMsg,
 		   "StaticAnalyser detected a numerical error writing:\n"
 		   "\t%s for bin %u, column %u",
-		   dat->title.c_str(), bin, i);
+		   dat->title.c_str(), bin, static_cast<unsigned int>(i));
 	  painCave.isFatal = 1;
 	  simError();
       	} else {
@@ -305,8 +305,8 @@ namespace OpenMD {
     RealType s;
     std::size_t columns = dat->accumulatorArray2d[0].size();
 
-    for (int i = 0; i < columns; i++) {
-      int count = dat->accumulatorArray2d[bin][i]->count();
+    for (std::size_t i = 0; i < columns; i++) {
+      std::size_t count = dat->accumulatorArray2d[bin][i]->count();
 
       if (count == 0) {
 	os << "\t";
@@ -317,7 +317,7 @@ namespace OpenMD {
 	  sprintf( painCave.errMsg,
 		   "StaticAnalyser detected a numerical error writing:\n"
 		   "\t%s std. dev. for bin %u, column %u",
-		   dat->title.c_str(), bin, i);
+		   dat->title.c_str(), bin, static_cast<unsigned int>(i));
 	  painCave.isFatal = 1;
 	  simError();
       	} else {

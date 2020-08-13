@@ -277,12 +277,12 @@ namespace OpenMD {
 
 	    if ( outputMask_[CHARGE] || outputMask_[CHARGEVELOCITY] ) {
 	      if (sd->isAtom()) {
-		atype = static_cast<Atom*>(sd)->getAtomType();
-		FixedChargeAdapter fca = FixedChargeAdapter(atype);
+		AtomType* atomType = static_cast<Atom*>(sd)->getAtomType();
+		FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 		if ( fca.isFixedCharge() ) {
 		  q = fca.getCharge();
 		}
-		FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+		FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 		if ( fqa.isFluctuatingCharge() ) {
 		  q += sd->getFlucQPos();
 		  w += sd->getFlucQVel();
@@ -306,7 +306,7 @@ namespace OpenMD {
 		    q = fca.getCharge();
 		  }
 
-		  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+		  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 		  if ( fqa.isFluctuatingCharge() ) {
 		    q += sd->getFlucQPos();
 		    w += sd->getFlucQVel();
@@ -356,6 +356,7 @@ namespace OpenMD {
 	    }
 	  } else {
 	    eField = sd->getElectricField();
+	    binNo = getBin(sd->getPos());
 
 	    binEFieldCount[binNo]++;
 	    binEField[binNo] += eField;
