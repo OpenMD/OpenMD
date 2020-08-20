@@ -43,14 +43,19 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
- 
-#ifndef RNEMD_RNEMDPARAMTERS_HPP
-#define RNEMD_RNEMDPARAMTERS_HPP
+#ifndef RNEMD_RNEMDPARAMETERS_HPP
+#define RNEMD_RNEMDPARAMETERS_HPP
+
+#include <string>
+#include <vector>
 
 #include "types/DataHolder.hpp"
+#include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
+
   class RNEMDParameters : public DataHolder {
+
     DeclareParameter(UseRNEMD, bool);
     DeclareParameter(ObjectSelection, std::string);
     DeclareParameter(OutputSelection, std::string);
@@ -77,11 +82,12 @@ namespace OpenMD {
     DeclareParameter(OutputBinWidth, RealType);
     DeclareParameter(OutputFields, std::string);
     DeclareParameter(PrivilegedAxis, std::string);
+
   public:
     RNEMDParameters();
     virtual ~RNEMDParameters();
     virtual void validate();
-    
   };
 }
+
 #endif

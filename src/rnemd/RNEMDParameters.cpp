@@ -43,7 +43,6 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
- 
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -51,7 +50,9 @@
 #include "rnemd/RNEMDParameters.hpp"
 
 namespace OpenMD {
-  RNEMDParameters::RNEMDParameters() { 
+
+  RNEMDParameters::RNEMDParameters() {
+
     DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
     DefineOptionalParameterWithDefaultValue(ObjectSelection, "objectSelection", "select all");
 
@@ -64,13 +65,13 @@ namespace OpenMD {
     DefineOptionalParameter(CurrentDensity, "currentDensity");
     DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
     DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
-    DefineOptionalParameter(AngularMomentumFluxVector, 
-                            "angularMomentumFluxVector");    
+    DefineOptionalParameter(AngularMomentumFluxVector,
+                            "angularMomentumFluxVector");
     DefineOptionalParameter(SlabWidth, "slabWidth");
     DefineOptionalParameter(SlabACenter, "slabAcenter");
     DefineOptionalParameter(SlabBCenter, "slabBcenter");
     DefineOptionalParameter(SphereARadius, "sphereAradius");
-    DefineOptionalParameter(SphereBRadius, "sphereBradius");    
+    DefineOptionalParameter(SphereBRadius, "sphereBradius");
     DefineOptionalParameter(SelectionA, "selectionA");
     DefineOptionalParameter(SelectionB, "selectionB");
     DefineOptionalParameter(CoordinateOrigin, "coordinateOrigin");
@@ -83,19 +84,19 @@ namespace OpenMD {
 
     DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis", "z");
   }
-  
-  RNEMDParameters::~RNEMDParameters() {    
+
+  RNEMDParameters::~RNEMDParameters() {
   }
-  
+
   void RNEMDParameters::validate() {
     CheckParameter(ExchangeTime, isPositive());
     CheckParameter(OutputBins, isPositive());
     CheckParameter(OutputBinWidth, isPositive());
-    CheckParameter(Method, 
-                   isEqualIgnoreCase("swap") ||  
+    CheckParameter(Method,
+                   isEqualIgnoreCase("swap") ||
                    isEqualIgnoreCase("NIVS")  ||
                    isEqualIgnoreCase("VSS"));
-    CheckParameter(FluxType, 
+    CheckParameter(FluxType,
                    isEqualIgnoreCase("KE") ||
                    isEqualIgnoreCase("Px") ||
                    isEqualIgnoreCase("Py") ||
@@ -104,23 +105,22 @@ namespace OpenMD {
                    isEqualIgnoreCase("Ly") ||
                    isEqualIgnoreCase("Lz") ||
                    isEqualIgnoreCase("Current") ||
-				   isEqualIgnoreCase("Single") ||
+		   isEqualIgnoreCase("Single") ||
                    isEqualIgnoreCase("Pvector") ||
                    isEqualIgnoreCase("Lvector") ||
-                   isEqualIgnoreCase("KE+Px") || 
+                   isEqualIgnoreCase("KE+Px") ||
                    isEqualIgnoreCase("KE+Py") ||
                    isEqualIgnoreCase("KE+Current") ||
-                   isEqualIgnoreCase("KE+Lx") || 
-                   isEqualIgnoreCase("KE+Ly") || 
-                   isEqualIgnoreCase("KE+Lz") || 
+                   isEqualIgnoreCase("KE+Lx") ||
+                   isEqualIgnoreCase("KE+Ly") ||
+                   isEqualIgnoreCase("KE+Lz") ||
                    isEqualIgnoreCase("KE+Pvector") ||
                    isEqualIgnoreCase("KE+Pvector+Curent") ||
                    isEqualIgnoreCase("KE+Lvector")
                    );
-    CheckParameter(PrivilegedAxis, 
-                   isEqualIgnoreCase("x") ||  
+    CheckParameter(PrivilegedAxis,
+                   isEqualIgnoreCase("x") ||
                    isEqualIgnoreCase("y")  ||
                    isEqualIgnoreCase("z"));
   }
-  
 }

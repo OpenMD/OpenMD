@@ -42,29 +42,40 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_RNEMD_HPP
 #define INTEGRATORS_RNEMD_HPP
+
+#include <bitset>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
 #include "brains/SimInfo.hpp"
+#include "brains/Snapshot.hpp"
 #include "math/RandNumGen.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include <iostream>
+#include "utils/Accumulator.hpp"
+#include "utils/StaticAccumulator.hpp"
 
-using namespace std;
 namespace OpenMD {
 
   class RNEMD {
   public:
     RNEMD(SimInfo* info);
     ~RNEMD();
-    
+
     void doRNEMD();
     void doSwap(SelectionManager& smanA, SelectionManager& smanB);
     void doNIVS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSS(SelectionManager& smanA, SelectionManager& smanB);
     void doVSSCurrent(SelectionManager& smanA, SelectionManager& smanB);
     void doVSSSingle(SelectionManager& smanA);
+    int getBin(Vector3d pos);
     RealType getDividingArea();
     void collectData();
     void getStarted();
@@ -78,35 +89,34 @@ namespace OpenMD {
     void writeArrayErrorBars(int index, unsigned int bin);
 
   private:
-
     enum RNEMDMethod {
       rnemdSwap,
       rnemdNIVS,
       rnemdVSS,
       rnemdUnkownMethod
     };
-    
+
     enum RNEMDFluxType {
-      rnemdKE,       // translational kinetic energy flux
-      rnemdRotKE,    // rotational kinetic energy flux
-      rnemdFullKE,   // full kinetic energy flux
-      rnemdPx,       // flux of momentum along x axis 
-      rnemdPy,       // flux of momentum along y axis 
-      rnemdPz,       // flux of momentum along z axis
-      rnemdCurrent,  // current density along privileged axis
-      rnemdSingle,   // current density in a single region 
-      rnemdPvector,  // flux of momentum vector
-      rnemdLx,       // flux of angular momentum along x axis 
-      rnemdLy,       // flux of angular momentum along y axis 
-      rnemdLz,       // flux of angular momentum along z axis 
-      rnemdLvector,  // flux of angular momentum vector
-      rnemdKePx,     // flux of translational KE and x-momentum
-      rnemdKePy,     // flux of translational KE and y-momentum
+      rnemdKE,       	// translational kinetic energy flux
+      rnemdRotKE,    	// rotational kinetic energy flux
+      rnemdFullKE,   	// full kinetic energy flux
+      rnemdPx,       	// flux of momentum along x axis
+      rnemdPy,       	// flux of momentum along y axis
+      rnemdPz,       	// flux of momentum along z axis
+      rnemdCurrent,  	// current density along privileged axis
+      rnemdSingle,   	// current density in a single region
+      rnemdPvector,  	// flux of momentum vector
+      rnemdLx,       	// flux of angular momentum along x axis
+      rnemdLy,       	// flux of angular momentum along y axis
+      rnemdLz,       	// flux of angular momentum along z axis
+      rnemdLvector,  	// flux of angular momentum vector
+      rnemdKePx,     	// flux of translational KE and x-momentum
+      rnemdKePy,     	// flux of translational KE and y-momentum
       rnemdKePvector, // full combo flying platter
-      rnemdKeCurrent, //flux of translational KE and current density
-      rnemdKeLx,     // flux of translational KE and x-angular momentum
-      rnemdKeLy,     // flux of translational KE and y-angular momentum
-      rnemdKeLz,     // flux of translational KE and z-angular momentum
+      rnemdKeCurrent, // flux of translational KE and current density
+      rnemdKeLx,     	// flux of translational KE and x-angular momentum
+      rnemdKeLy,     	// flux of translational KE and y-angular momentum
+      rnemdKeLz,     	// flux of translational KE and z-angular momentum
       rnemdKeLvector, // full combo spinning platter
       rnemdUnknownFluxType
     };
@@ -122,7 +132,8 @@ namespace OpenMD {
       ACTIVITY,
       ELECTRICFIELD,
       ELECTROSTATICPOTENTIAL,
-      ENDINDEX 
+      CURRENTDENSITY,
+      ENDINDEX
     };
 
     enum RNEMDPrivilegedAxis {
@@ -132,45 +143,47 @@ namespace OpenMD {
     };
 
     struct OutputData {
-      string title;
-      string units;
-      string dataType;
-      vector<BaseAccumulator*> accumulator;
-      vector<vector<BaseAccumulator*> > accumulatorArray2d;
+      std::string title;
+      std::string units;
+      std::string dataType;
+      std::vector<BaseAccumulator*> accumulator;
+      std::vector< std::vector<BaseAccumulator*> > accumulatorArray2d;
     };
 
-    typedef bitset<ENDINDEX-BEGININDEX> OutputBitSet;
-    typedef map<string, OutputFields> OutputMapType;
-    
-    SimInfo* info_;
+    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
+    typedef std::map<std::string, OutputFields> OutputMapType;
 
-    map<string, RNEMDMethod> stringToMethod_;
-    map<string, RNEMDFluxType> stringToFluxType_;
-    map<string, RNEMDPrivilegedAxis> stringToPrivilegedAxis_;
+    SimInfo* info_;
+    Snapshot* currentSnap_;
+    Mat3x3d hmat_;
+
+    std::map<std::string, RNEMDMethod> stringToMethod_;
+    std::map<std::string, RNEMDFluxType> stringToFluxType_;
+    std::map<std::string, RNEMDPrivilegedAxis> stringToPrivilegedAxis_;
     RNEMDMethod rnemdMethod_;
     RNEMDFluxType rnemdFluxType_;
     RNEMDPrivilegedAxis rnemdPrivilegedAxis_;
 
     // object selection for specifying a particular species:
-    string rnemdObjectSelection_;
+    std::string rnemdObjectSelection_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
 
     // Geometric selections for the two regions for the exchange:
-    string selectionA_;
+    std::string selectionA_;
     SelectionEvaluator evaluatorA_;
     SelectionManager seleManA_;
-    string selectionB_;
+    std::string selectionB_;
     SelectionEvaluator evaluatorB_;
     SelectionManager seleManB_;
     SelectionManager commonA_;
     SelectionManager commonB_;
     bool hasSelectionA_;
-    bool hasSelectionB_;                      
+    bool hasSelectionB_;
     bool hasSphereBRadius_;
 
     // output selection for collecting data about a particular species:
-    string outputSelection_;
+    std::string outputSelection_;
     SelectionEvaluator outputEvaluator_;
     SelectionManager outputSeleMan_;
     bool hasOutputSelection_;
@@ -192,49 +205,45 @@ namespace OpenMD {
     bool AisHull_;
     RealType areaB_;
     bool BisHull_;
-    string rnemdAxisLabel_;
+    std::string rnemdAxisLabel_;
 
     Vector3d coordinateOrigin_;
 
-    RealType kineticFlux_;        // target or desired *flux*
-    RealType currentDensity_;     // target or desired current density
-    Vector3d momentumFluxVector_; // target or desired *flux*
-    Vector3d angularMomentumFluxVector_; // target or desired *flux*
+    RealType kineticFlux_;        				// target or desired *flux*
+    RealType currentDensity_;     				// target or desired current density
+    Vector3d momentumFluxVector_; 				// target or desired *flux*
+    Vector3d angularMomentumFluxVector_; 	// target or desired *flux*
 
-    RealType kineticTarget_;     // target or desired one-time exchange energy
-    Vector3d momentumTarget_;    // target or desired one-time exchange momentum
-    Vector3d angularMomentumTarget_; // target or desired one-time
-                                     // exchange angular momentum
+    RealType kineticTarget_;     					// target or desired one-time exchange energy
+    Vector3d momentumTarget_;    					// target or desired one-time exchange momentum
+    Vector3d angularMomentumTarget_; 			// target or desired one-time exchange angular momentum
 
-    RealType kineticExchange_;    // actual exchange energy (running total)
-    Vector3d momentumExchange_;   // actual exchange momentum (running total)   
-    Vector3d angularMomentumExchange_; // actual exchange momentum
-                                       // (running total)
+    RealType kineticExchange_;    				// actual exchange energy (running total)
+    Vector3d momentumExchange_;   				// actual exchange momentum (running total)
+    Vector3d angularMomentumExchange_; 		// actual exchange momentum (running total)
+
     RealType exchangeTime_;
-
-    RealType targetJzpz2_;
 
     unsigned int trialCount_;
     unsigned int failTrialCount_;
     unsigned int failRootCount_;
 
-    string rnemdFileName_;
-    ofstream rnemdFile_;
+    std::string rnemdFileName_;
+    std::ofstream rnemdFile_;
 
     RealType runTime_, statusTime_;
 
-    vector<OutputData> data_;
+    std::vector<OutputData> data_;
     OutputBitSet outputMask_;
     OutputMapType outputMap_;
     int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
-    Accumulator* areaAccumulator_;
-    Accumulator* Jc_totalAccumulator_;
-    Accumulator* Jc_cationAccumulator_;
-    Accumulator* Jc_anionAccumulator_;
+    RealAccumulator areaAccumulator_ {};
+    RealAccumulator Jc_totalAccumulator_ {};
+    RealAccumulator Jc_cationAccumulator_ {};
+    RealAccumulator Jc_anionAccumulator_ {};
     bool doRNEMD_;
     bool hasData_;
-
   };
 }
-#endif //INTEGRATORS_RNEMD_HPP
+#endif // INTEGRATORS_RNEMD_HPP

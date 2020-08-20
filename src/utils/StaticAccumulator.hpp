@@ -147,6 +147,10 @@ namespace OpenMD {
   template<>
   class StaticAccumulator< std::vector<RealType> > {
   public:
+    /* A flag specifying that a given bin is empty and should be ignored
+       during calls to add() */
+    constexpr static RealType BinEmptyFlag = std::numeric_limits<RealType>::max();
+
     void add(const std::vector<RealType>& val) {
       if ( val.empty() || (val.size() != Avg_.size() && !Avg_.empty()) ) {
 	sprintf( painCave.errMsg,
@@ -164,9 +168,9 @@ namespace OpenMD {
       }
 
       for (std::size_t i = 0; i < val.size(); i++) {
-	/* If our placeholder flag, std::numeric_limits<RealType>::max(), is passed
-	   to add(), we should not record data at the current index */
-	if ( val[i] == std::numeric_limits<RealType>::max() )
+	/* If our placeholder, BinEmptyFlag, is passed to add(), we should
+	   not record data at the current index */
+	if (val[i] == BinEmptyFlag)
 	  continue;
 
 	Count_[i]++;
@@ -231,7 +235,7 @@ namespace OpenMD {
     std::vector<RealType> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
-  
+
   template<unsigned int Dim>
   class StaticAccumulator< Vector<RealType, Dim> > {
   public:
@@ -397,7 +401,7 @@ namespace OpenMD {
     SquareMatrix<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
-	
+
   // Type aliases for the most commonly used StaticAccumulators
   using RealAccumulator 		 = StaticAccumulator<RealType>;
   using StdVectorAccumulator = StaticAccumulator< std::vector<RealType> >;
