@@ -76,8 +76,6 @@
 
 #define HONKING_LARGE_VALUE 1.0e10
 
-using RealType = double;
-
 using namespace std;
 
 namespace OpenMD {
@@ -2718,11 +2716,12 @@ namespace OpenMD {
 
 	    if (outputMask_[CURRENTDENSITY] && typeIndex != -1) {
 	      if (sd->isAtom()) {
-		FixedChargeAdapter fca = FixedChargeAdapter(atype);
+		AtomType* atomType = static_cast<Atom*>(sd)->getAtomType();
+		FixedChargeAdapter fca = FixedChargeAdapter(atomType);
 		if (fca.isFixedCharge())
 		  charge = fca.getCharge();
 
-		FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+		FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 		if (fqa.isFluctuatingCharge())
 		  charge += sd->getFlucQPos();
 	      }
@@ -2768,6 +2767,7 @@ namespace OpenMD {
 	    }
 	  } else {
 	    eField = sd->getElectricField();
+	    binNo = getBin(sd->getPos());
 
 	    binEFieldCount[binNo]++;
 	    binEField[binNo] += eField;
