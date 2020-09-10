@@ -1146,10 +1146,10 @@ namespace OpenMD {
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      *(idat.dVdFQ1) -= 2.5 * *(idat.dfrho2) * rha / data1.nMobile;
+      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / (oss_ * data1.nMobile);
     }
     if (data2.isFluctuatingCharge) {
-      *(idat.dVdFQ2) -= 2.5 * *(idat.dfrho1) * rhb / data2.nMobile;
+      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / (oss_ * data2.nMobile);
     }
 
     return;
