@@ -125,6 +125,7 @@ namespace OpenMD {
     I(2, 2) = 1.0;
     RealType volume_overlap = 0.0;
     RealType overlap_beads = 0.0;
+    RealType overlap_percent = 0.0;
 
     for (std::size_t i = 0; i < nbeads; ++i) {
       for (std::size_t j = 0; j < nbeads; ++j) {
@@ -225,7 +226,9 @@ namespace OpenMD {
 
     //overlapping beads percentage
     //#overlap_beads counts (i,j) and (j,i) beads; and N*(N-1) counts (Tij) and (Tji) elements  (i!=j)
-    RealType overlap_percent = (overlap_beads * 1.0/(nbeads * (nbeads-1)))*100;  //(overlap_beads/(N*(N-1)))*100
+    if (overlap_beads > 0){
+      overlap_percent = (overlap_beads * 1.0/(nbeads * (nbeads-1)))*100;  //(overlap_beads/(N*(N-1)))*100
+    }
 
     //invert B Matrix
     invertMatrix(B, C);  //B is modified during the inversion

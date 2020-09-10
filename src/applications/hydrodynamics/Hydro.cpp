@@ -144,8 +144,9 @@ int main(int argc, char* argv[]){
       if (uniqueStuntDoubles.find(sd->getType()) ==  uniqueStuntDoubles.end()) {
 
         sd->setPos(V3Zero);
-        sd->setA(identMat);
+        //sd->setA(identMat);
         if (sd->isRigidBody()) {
+          sd->setA(identMat);
           RigidBody* rb = static_cast<RigidBody*>(sd);
           rb->updateAtoms();
         }
@@ -169,10 +170,9 @@ int main(int argc, char* argv[]){
     Shape* shape = si->second.shape;
     StuntDouble* sd = si->second.sd;
 
-    if (shape->hasAnalyticalSolution()) {
-      model = new AnalyticalModel(sd, info);
-    } else {
-
+    //if (shape->hasAnalyticalSolution()) {
+    //  model = new AnalyticalModel(sd, info);
+    //} else {
       if (args_info.model_given) {
 
         std::string modelName;
@@ -193,7 +193,7 @@ int main(int argc, char* argv[]){
           dynamic_cast<RoughShell*>(model)->setSigma(bs);
         }
       }
-    }
+    //}
 
     if (model != NULL) {
 
