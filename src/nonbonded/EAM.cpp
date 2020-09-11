@@ -1008,7 +1008,7 @@ namespace OpenMD {
 
       RealType Na(0.0), Nb(0.0), Ma(0.0), Mb(0.0);
       RealType va(1.0), vb(1.0), qa(0.0), qb(0.0);
-      RealType ga(1.0), gb(1.0);
+      RealType ga(1.0), gb(1.0), gaprime(0.0), gbprime(0.0);
 
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
 
@@ -1031,10 +1031,10 @@ namespace OpenMD {
                                            pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) += 0.5 * 2.5 * (rhb * vb * pha) / (rha * Ma * va * va);
+            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (oss_ * rha * Ma * va * va);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * 2.5 * (rhb * pha) / (rha * Mb * va);
+            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (oss_ * rha * Mb * va);
           }
         }
 
@@ -1044,10 +1044,10 @@ namespace OpenMD {
                                            phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * 2.5 * (rha * phb) / (rhb * Ma * vb);
+            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (oss_ * rhb * Ma * vb);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) += 0.5 * 2.5 * (rha * va * phb) / (rhb * Mb * vb * vb);
+            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (oss_ * rhb * Mb * vb * vb);
           }
         }
       } else {
@@ -1072,36 +1072,38 @@ namespace OpenMD {
 
         if (data1.isFluctuatingCharge) {
           Ma = oss_ * data1.nMobile;
-          qa = *(idat.flucQ1);
-          ga = 1.0 - qa*qa / (Ma*Ma);
+          qa = *(idat.flucQ1);        
+          ga = (pow(qa - Na,2) * (Ma + qa + Na))/(pow(Na,2) * (Ma + Na));
+          gaprime = ((qa - Na)*(2*Ma + 3*qa + Na))/(pow(Na,2)*(Ma + Na));
         }
         if (data2.isFluctuatingCharge) {
           Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
-          gb = 1.0 - qb*qb / (Mb*Mb);
+          gb = (pow(qb - Nb,2) * (Mb + qb + Nb))/(pow(Nb,2) * (Mb + Nb));
+          gbprime = ((qb - Nb)*(2*Mb + 3*qb + Nb))/(pow(Nb,2)*(Mb + Nb));
         }
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           CubicSpline* phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
 
-          phab += 0.5 * ga * (rhb / rha) * pha;
-          dvpdr += 0.5 * ga * ((rhb/rha)*dpha +
+          phab += 0.5 * gb * (rhb / rha) * pha;
+          dvpdr += 0.5 * gb * ((rhb/rha)*dpha +
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= (qa * rhb * pha) / (rha * Ma * Ma);
+            *(idat.dVdFQ1) +=  0.5 * gbprime * (rhb / rha) * pha;
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
           CubicSpline* phiBCV = data2.phiCV;
           phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
 
-          phab += 0.5 * gb * (rha / rhb) * phb;
-          dvpdr += 0.5 * gb * ((rha/rhb)*dphb +
+          phab += 0.5 * ga * (rha / rhb) * phb;
+          dvpdr += 0.5 * ga * ((rha/rhb)*dphb +
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= (qb * rha * phb) / (rhb * Mb * Mb);
+            *(idat.dVdFQ2) +=  0.5 * gaprime * (rha / rhb) * phb;
           }
         }
       }
