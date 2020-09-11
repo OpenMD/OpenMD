@@ -105,6 +105,23 @@ namespace OpenMD {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
   }
 
+  std::pair<RealType,RealType> EAM::gFunc(RealType q, RealType nV,
+                                          RealType nM) {
+    RealType g, gp;
+
+    if (q >= nV) {
+      return std::make_pair(0.0, 0.0);
+    }
+    if (q <= -nM) {
+      return std::make_pair( (nM + nV)/nV, 0.0);
+    } 
+                            
+    g = ((q-nV)*(q-nV) * (nM + q + nV)) / (nV * nV * (nM + nV));
+    gp = ((q - nV)*(2*nM + 3*q + nV)) / (nV * nV * (nM + nV));
+
+    return std::make_pair(g, gp);
+  }
+  
   RealType EAM::Zhou2001Functional(RealType rho, RealType rhoe,
                                    std::vector<RealType> Fn,
                                    std::vector<RealType> F,
@@ -1008,8 +1025,10 @@ namespace OpenMD {
 
       RealType Na(0.0), Nb(0.0), Ma(0.0), Mb(0.0);
       RealType va(1.0), vb(1.0), qa(0.0), qb(0.0);
-      RealType ga(1.0), gb(1.0), gaprime(0.0), gbprime(0.0);
 
+      std::pair<RealType, RealType> ga = std::make_pair(1.0, 0.0);
+      std::pair<RealType, RealType> gb = std::make_pair(1.0, 0.0);
+      
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
 
         if (data1.isFluctuatingCharge) {
@@ -1072,38 +1091,36 @@ namespace OpenMD {
 
         if (data1.isFluctuatingCharge) {
           Ma = oss_ * data1.nMobile;
-          qa = *(idat.flucQ1);        
-          ga = (pow(qa - Na,2) * (Ma + qa + Na))/(pow(Na,2) * (Ma + Na));
-          gaprime = ((qa - Na)*(2*Ma + 3*qa + Na))/(pow(Na,2)*(Ma + Na));
+          qa = *(idat.flucQ1);
+          ga = gFunc(qa, Na, Ma);
         }
         if (data2.isFluctuatingCharge) {
           Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
-          gb = (pow(qb - Nb,2) * (Mb + qb + Nb))/(pow(Nb,2) * (Mb + Nb));
-          gbprime = ((qb - Nb)*(2*Mb + 3*qb + Nb))/(pow(Nb,2)*(Mb + Nb));
+          gb = gFunc(qb, Nb, Mb);
         }
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           CubicSpline* phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
 
-          phab += 0.5 * gb * (rhb / rha) * pha;
-          dvpdr += 0.5 * gb * ((rhb/rha)*dpha +
+          phab += 0.5 * gb.first * (rhb / rha) * pha;
+          dvpdr += 0.5 * gb.first * ((rhb/rha)*dpha +
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) +=  0.5 * gbprime * (rhb / rha) * pha;
+            *(idat.dVdFQ1) +=  0.5 * gb.second * (rhb / rha) * pha;
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
           CubicSpline* phiBCV = data2.phiCV;
           phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
 
-          phab += 0.5 * ga * (rha / rhb) * phb;
-          dvpdr += 0.5 * ga * ((rha/rhb)*dphb +
+          phab += 0.5 * ga.first * (rha / rhb) * phb;
+          dvpdr += 0.5 * ga.first * ((rha/rhb)*dphb +
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) +=  0.5 * gaprime * (rha / rhb) * phb;
+            *(idat.dVdFQ2) +=  0.5 * ga.second * (rha / rhb) * phb;
           }
         }
       }
