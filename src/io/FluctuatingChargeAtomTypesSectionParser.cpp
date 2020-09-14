@@ -196,6 +196,8 @@ namespace OpenMD {
         for (int i = 0; i < nPairs; ++i) {          
           power = tokenizer.nextTokenAsInt();
           coefficient = tokenizer.nextTokenAsDouble() * eus_ / pow(cus_, power);
+          // Equalize the electrostatic and self energy 
+          coefficient *= oss_ * oss_;
           vself.setCoefficient(power, coefficient);
         }
 
