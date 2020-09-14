@@ -114,7 +114,8 @@ namespace OpenMD {
     }
     if (q <= -nM) {
       return std::make_pair( (nM + nV)/nV, 0.0);
-    } 
+    }
+
                             
     g = ((q-nV)*(q-nV) * (nM + q + nV)) / (nV * nV * (nM + nV));
     gp = ((q - nV)*(2*nM + 3*q + nV)) / (nV * nV * (nM + nV));
@@ -1088,17 +1089,20 @@ namespace OpenMD {
         }
 
         // Core-Valence next, this does include fluctuating charges:
-
+        
         if (data1.isFluctuatingCharge) {
+          Na = oss_ * data1.nValence;
           Ma = oss_ * data1.nMobile;
           qa = *(idat.flucQ1);
           ga = gFunc(qa, Na, Ma);
         }
         if (data2.isFluctuatingCharge) {
+          Nb = oss_ * data2.nValence;
           Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
           gb = gFunc(qb, Nb, Mb);
         }
+        
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           CubicSpline* phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
