@@ -188,6 +188,9 @@ namespace OpenMD {
         if (stamp[i]->haveSwingYSpringConstant()) {
           rest->setSwingYForceConstant(stamp[i]->getSwingYSpringConstant());
         }
+	if (stamp[i]->haveRestrainedPositionZ()) {
+	  rest->setRestrainedPositionZ(stamp[i]->getRestrainedPositionZ());
+	}
         if (stamp[i]->haveRestrainedTwistAngle()) {
           rest->setRestrainedTwistAngle(stamp[i]->getRestrainedTwistAngle() * Constants::PI/180.0);
         }
@@ -264,6 +267,9 @@ namespace OpenMD {
           if (stamp[i]->haveSwingYSpringConstant()) {
             rest->setSwingYForceConstant(stamp[i]->getSwingYSpringConstant());
           }
+	  if (stamp[i]->haveRestrainedPositionZ()) {
+	    rest->setRestrainedPositionZ(stamp[i]->getRestrainedPositionZ());
+	  }	  
           if (stamp[i]->haveRestrainedTwistAngle()) {
             rest->setRestrainedTwistAngle(stamp[i]->getRestrainedTwistAngle());
           }

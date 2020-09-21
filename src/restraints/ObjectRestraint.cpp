@@ -51,7 +51,7 @@ namespace OpenMD {
 
     pot_ = 0.0;
     if (restType_ & rtDisplacement) {
-      Vector3d del = struc - refPos_;
+      Vector3d del = struc - refPos_ - Vector3d(0.0, 0.0, posZ0_);
       RealType r = del.length();
       Vector3d frc = -kDisp_ * del;
       RealType p = 0.5 * kDisp_ * del.lengthSquare();
