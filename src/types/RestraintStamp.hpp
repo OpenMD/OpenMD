@@ -56,6 +56,7 @@ namespace OpenMD {
     DeclareParameter(TwistSpringConstant, RealType);
     DeclareParameter(SwingXSpringConstant, RealType);
     DeclareParameter(SwingYSpringConstant, RealType);
+    DeclareParameter(RestrainedPositionZ, RealType);
     DeclareParameter(RestrainedTwistAngle, RealType);
     DeclareParameter(RestrainedSwingXAngle, RealType);
     DeclareParameter(RestrainedSwingYAngle, RealType);

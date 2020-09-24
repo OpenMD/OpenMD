@@ -119,7 +119,13 @@ namespace OpenMD {
       restType_ |= rtSwingY; 
       if (printRest_) restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
     }
-    
+
+    void setRestrainedPositionZ(RealType z0) {
+      posZ0_ = z0;
+      restType_ |= rtDisplacement;
+      if (printRest_) restInfo_[rtDisplacement] = std::make_pair(0.0, 0.0);
+    }
+      
     /* restraint angles are measured relative to the ideal structure, 
        and are measured in radians.  If you want to restrain to the 
        same structure as the ideal structure, these do not need to be set.
@@ -147,6 +153,7 @@ namespace OpenMD {
     }
 
     RealType getDisplacementForceConstant() { return kDisp_; }
+    RealType getRestrainedPositionZ() { return posZ0_; }
     RealType getTwistForceConstant() { return kTwist_; }
     RealType getSwingXForceConstant() { return kSwingX_; }
     RealType getSwingYForceConstant() { return kSwingY_; }
@@ -167,6 +174,7 @@ namespace OpenMD {
     RealType twist0_;
     RealType swingX0_;
     RealType swingY0_;
+    RealType posZ0_;
     bool printRest_;
     
     int restType_;
