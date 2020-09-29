@@ -55,12 +55,13 @@ namespace OpenMD {
     DefineOptionalParameter(MolIndex, "molIndex");
     DefineOptionalParameter(ObjectSelection, "objectSelection");
     DefineOptionalParameter(DisplacementSpringConstant, "displacementSpringConstant");
+    DefineOptionalParameter(DisplacementSpringConstant, "absoluteSpringConstant");
     DefineOptionalParameter(TwistSpringConstant, "twistSpringConstant");
     DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
     DefineOptionalParameter(SwingYSpringConstant, "swingYSpringConstant");
 
-    DefineOptionalParameterWithDefaultValue(RestrainedPositionZ,
-					    "restrainedPositionZ", 0.0);
+    DefineOptionalParameterWithDefaultValue(AbsolutePositionZ,
+					    "absolutePositionZ", 0.0);
     DefineOptionalParameter(RestrainedTwistAngle, "restrainedTwistAngle");
     DefineOptionalParameter(RestrainedSwingXAngle, "restrainedSwingXAngle");
     DefineOptionalParameter(RestrainedSwingYAngle, "restrainedSwingYAngle");
@@ -74,6 +75,7 @@ namespace OpenMD {
     DataHolder::validate();
     CheckParameter(Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Molecular"));
     CheckParameter(DisplacementSpringConstant, isNonNegative());
+    CheckParameter(AbsoluteSpringConstant, isNonNegative());    
     CheckParameter(TwistSpringConstant, isNonNegative());
     CheckParameter(SwingXSpringConstant, isNonNegative());
     CheckParameter(SwingYSpringConstant, isNonNegative());    

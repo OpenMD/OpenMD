@@ -178,7 +178,10 @@ namespace OpenMD {
         
         if (stamp[i]->haveDisplacementSpringConstant()) {
           rest->setDisplacementForceConstant(stamp[i]->getDisplacementSpringConstant());
-        }                  
+        }
+        if (stamp[i]->haveAbsoluteSpringConstant()) {
+          rest->setAbsoluteForceConstant(stamp[i]->getAbsoluteSpringConstant());
+        }
         if (stamp[i]->haveTwistSpringConstant()) {
           rest->setTwistForceConstant(stamp[i]->getTwistSpringConstant());
         }        
@@ -188,8 +191,8 @@ namespace OpenMD {
         if (stamp[i]->haveSwingYSpringConstant()) {
           rest->setSwingYForceConstant(stamp[i]->getSwingYSpringConstant());
         }
-	if (stamp[i]->haveRestrainedPositionZ()) {
-	  rest->setRestrainedPositionZ(stamp[i]->getRestrainedPositionZ());
+	if (stamp[i]->haveAbsolutePositionZ()) {
+	  rest->setAbsolutePositionZ(stamp[i]->getAbsolutePositionZ());
 	}
         if (stamp[i]->haveRestrainedTwistAngle()) {
           rest->setRestrainedTwistAngle(stamp[i]->getRestrainedTwistAngle() * Constants::PI/180.0);
@@ -257,7 +260,10 @@ namespace OpenMD {
           
           if (stamp[i]->haveDisplacementSpringConstant()) {
             rest->setDisplacementForceConstant(stamp[i]->getDisplacementSpringConstant());
-          }                  
+          }
+          if (stamp[i]->haveAbsoluteSpringConstant()) {
+            rest->setAbsoluteForceConstant(stamp[i]->getAbsoluteSpringConstant());
+          }
           if (stamp[i]->haveTwistSpringConstant()) {
             rest->setTwistForceConstant(stamp[i]->getTwistSpringConstant());
           }        
@@ -267,8 +273,8 @@ namespace OpenMD {
           if (stamp[i]->haveSwingYSpringConstant()) {
             rest->setSwingYForceConstant(stamp[i]->getSwingYSpringConstant());
           }
-	  if (stamp[i]->haveRestrainedPositionZ()) {
-	    rest->setRestrainedPositionZ(stamp[i]->getRestrainedPositionZ());
+	  if (stamp[i]->haveAbsolutePositionZ()) {
+	    rest->setAbsolutePositionZ(stamp[i]->getAbsolutePositionZ());
 	  }	  
           if (stamp[i]->haveRestrainedTwistAngle()) {
             rest->setRestrainedTwistAngle(stamp[i]->getRestrainedTwistAngle());
