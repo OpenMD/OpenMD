@@ -55,7 +55,7 @@ namespace OpenMD {
     DefineOptionalParameter(MolIndex, "molIndex");
     DefineOptionalParameter(ObjectSelection, "objectSelection");
     DefineOptionalParameter(DisplacementSpringConstant, "displacementSpringConstant");
-    DefineOptionalParameter(DisplacementSpringConstant, "absoluteSpringConstant");
+    DefineOptionalParameter(AbsoluteSpringConstant, "absoluteSpringConstant");
     DefineOptionalParameter(TwistSpringConstant, "twistSpringConstant");
     DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
     DefineOptionalParameter(SwingYSpringConstant, "swingYSpringConstant");
