@@ -58,6 +58,7 @@
 #include "utils/simError.h"
 #include "utils/Constants.hpp"
 #include "math/Quaternion.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 
 using namespace OpenMD;
 
@@ -163,6 +164,7 @@ int main(int argc, char* argv[]){
   Vector3d newPos;
   Vector3d COM;
   Thermo thermo(oldInfo);
+  AtomType* atype;
 
   
   for (int i = 0; i < nframes; i++){
@@ -209,6 +211,17 @@ int main(int argc, char* argv[]){
 		sdNew->setA( bodyRotMat );
 		
 		sdNew->setJ( rotMatrix * sd->getJ() );
+              }
+
+              if (sd->isAtom()) {
+                atype = static_cast<Atom*>(sd)->getAtomType();
+                FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+                if ( fqa.isFluctuatingCharge() ) {
+                  RealType charge = sd->getFlucQPos();
+                  sdNew->setFlucQPos(charge);
+                  RealType cv = sd->getFlucQVel();
+                  sdNew->setFlucQVel(cv);                 
+                }
               }
 	      
               newIndex++;
