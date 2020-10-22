@@ -50,15 +50,27 @@ namespace OpenMD {
   void ObjectRestraint::calcForce(Vector3d struc) {
 
     pot_ = 0.0;
+    force_ = V3Zero;
+    
     if (restType_ & rtDisplacement) {
       Vector3d del = struc - refPos_;
       RealType r = del.length();
       Vector3d frc = -kDisp_ * del;
       RealType p = 0.5 * kDisp_ * del.lengthSquare();
-
+      
       pot_ = p;
-      force_ = frc * scaleFactor_;
+      force_ += frc * scaleFactor_;
       if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r,p);
+    }
+
+    if (restType_ & rtAbsoluteZ) {
+      RealType r = struc(2) - posZ0_;
+      Vector3d frc = Vector3d(0.0, 0.0, -kAbs_ * r);
+      RealType p = 0.5 * kAbs_ * r * r;
+      
+      pot_ += p;
+      force_ += frc * scaleFactor_;
+      if (printRest_) restInfo_[rtAbsoluteZ] = std::make_pair(r,p);
     }
   }
     
@@ -66,8 +78,9 @@ namespace OpenMD {
 
     calcForce(struc);
 
-    // rtDisplacement is 1, so anything higher than that requires orientations:
-    if (restType_ > 1) {
+    // rtDisplacement is 1, rtAbsolute is 2, so anything higher than 3
+    // that requires orientations:
+    if (restType_ > 3) {
       
       Vector3d tBody(0.0);
       
@@ -79,7 +92,6 @@ namespace OpenMD {
       RealType swingX, swingY;
       
       quat.toSwingTwist(swingX, swingY, twistAngle);
-
 
       RealType p;
       Vector3d tTwist, tSwing;

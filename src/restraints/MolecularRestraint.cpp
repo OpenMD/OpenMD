@@ -66,25 +66,36 @@ namespace OpenMD {
       (*it) = 0.0;
 
    
-    if (restType_ & rtDisplacement) {
+    if (restType_ & rtDisplacement) {      
       Vector3d del = molCom - refCom_;     
       
       RealType r = del.length();
       RealType p = 0.5 * kDisp_ * r * r;
 
       pot_ += p;
-
-      if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r, p);
+      
+      if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r,p);
 
       for(it = forces_.begin(); it != forces_.end(); ++it)
-        (*it) = -kDisp_ * del * scaleFactor_;
+        (*it) += -kDisp_ * del * scaleFactor_;
     }
+    
+    if (restType_ & rtAbsoluteZ) {
+      RealType r = molCom(2) - posZ0_;
+      RealType p = 0.5 * kAbs_ * r * r;
+      Vector3d frc = Vector3d(0.0, 0.0, -kAbs_ * r);
 
-    for(it = struc.begin(); it != struc.end(); ++it)
-      (*it) -= molCom;
+      pot_ += p;
 
-    // rtDisplacement = 1, so anything higher than that requires orientations:
-    if (restType_ > 1) {
+      if (printRest_) restInfo_[rtAbsoluteZ] = std::make_pair(r,p);
+
+      for(it = forces_.begin(); it != forces_.end(); ++it)
+        (*it) += frc * scaleFactor_;
+    }
+      
+    // rtDisplacement is 1, rtAbsolute is 2, so anything higher than 3
+    // that requires orientations:
+    if (restType_ > 3) {
       Vector3d tBody(0.0);
       
       Mat3x3d R(0.0);

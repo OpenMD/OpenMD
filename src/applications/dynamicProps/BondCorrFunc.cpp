@@ -60,6 +60,8 @@ namespace OpenMD {
     this->doObjectProperties_ = false;
     this->doBondProperties_ = true;
 
+    delta_.resize(nFrames_);
+
   }
   
   int BondCorrFunc::computeProperty1(int frame, Bond* bond) {

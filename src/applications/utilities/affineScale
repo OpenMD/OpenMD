@@ -42,9 +42,10 @@ wrap = []
 v = []
 q = []
 j = []
+siteData = []
 Hmat = []
 BoxInv = []
-
+siteFlag = [False]
 def usage():
     print(__doc__)
 
@@ -62,7 +63,7 @@ def readFile(mdFileName):
         
     mdFile.seek(0)
     line = mdFile.readline()
-    print("reading MetaData")
+    print("Reading MetaData")
     while True:
         if '<MetaData>' in line:
             while 2:
@@ -74,28 +75,28 @@ def readFile(mdFileName):
             break
         line = mdFile.readline()
 
-    mdFile.seek(0)
-    print("reading Snapshot")
     line = mdFile.readline()
+    print("Reading Snapshot")
     while True:
         if '<Snapshot>' in line:
             line = mdFile.readline()
             while True:
-                print("reading FrameData")
+                print("Reading FrameData")
                 if '<FrameData>' in line:
                     while 2:
                         frameData.append(line)
                         if 'Hmat:' in line:
-                            L = line.split()
-                            Hxx = float(L[2].strip(','))
-                            Hxy = float(L[3].strip(','))
-                            Hxz = float(L[4].strip(','))
-                            Hyx = float(L[7].strip(','))
-                            Hyy = float(L[8].strip(','))
-                            Hyz = float(L[9].strip(','))
-                            Hzx = float(L[12].strip(','))
-                            Hzy = float(L[13].strip(','))
-                            Hzz = float(L[14].strip(','))
+                            line = line.replace("{","").replace("}","").replace("Hmat:","")
+                            L = line.split(",")
+                            Hxx = float(L[0])
+                            Hxy = float(L[1])
+                            Hxz = float(L[2])
+                            Hyx = float(L[3])
+                            Hyy = float(L[4])
+                            Hyz = float(L[5])
+                            Hzx = float(L[6])
+                            Hzy = float(L[7])
+                            Hzz = float(L[8])
                             Hmat.append([Hxx, Hxy, Hxz])
                             Hmat.append([Hyx, Hyy, Hyz])
                             Hmat.append([Hzx, Hzy, Hzz])
@@ -157,9 +158,21 @@ def readFile(mdFileName):
                         if '</StuntDoubles>' in line:
                             break
                     break
+            line = mdFile.readline()
+            while True:
+                if '<SiteData>' in line:
+                    print("Reading SiteData")
+                    siteFlag[0] = True
+                    while True:
+                        line = mdFile.readline()
+                        siteData.append(line)
+                        if '</SiteData>' in line:
+                            break
+                    break
+                break
+                
         line = mdFile.readline()
         if not line: break
-    
     mdFile.close()
 
 def writeFile(outputFileName, repeatX, repeatY, repeatZ):
@@ -167,7 +180,7 @@ def writeFile(outputFileName, repeatX, repeatY, repeatZ):
 
     outputFile.write("<OpenMD version=2>\n");
 
-    print("writing MetaData")
+    print("Writing MetaData")
     for metaline in metaData:
         if 'nMol' in metaline:
             metasplit = metaline.split()
@@ -177,10 +190,10 @@ def writeFile(outputFileName, repeatX, repeatY, repeatZ):
         else:
             outputFile.write(metaline)
 
-    print("writing Snapshot")
+    print("Writing Snapshot")
     outputFile.write("  <Snapshot>\n")
 
-    print("writing FrameData")
+    print("Writing FrameData")
     for frameline in frameData:
         if 'Hmat:' in frameline:
             myH = []
@@ -191,16 +204,15 @@ def writeFile(outputFileName, repeatX, repeatY, repeatZ):
         else:
             outputFile.write(frameline)
 
-    print("writing StuntDoubles")
+    print("Writing StuntDoubles")
     outputFile.write("    <StuntDoubles>\n")
 
-    print(repeatX, repeatY, repeatZ)
+    #print(repeatX, repeatY, repeatZ)
 
     deco = sorted([ (index, i) for i, index in enumerate(indices) ])
     whichSD = 0
     for index in range(len(deco)):
         (index, i) = deco[index]
-        print(i)
         for ii in range(repeatX):
             for jj in range(repeatY):
                 for kk in range(repeatZ):                    
@@ -219,6 +231,14 @@ def writeFile(outputFileName, repeatX, repeatY, repeatZ):
                         outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
                     whichSD = whichSD + 1
     outputFile.write("    </StuntDoubles>\n")
+    if (siteFlag[0]):
+        print("Writing SiteData")
+        outputFile.write("       <SiteData>\n")
+        for line in siteData:
+            outputFile.write(line)
+        outputFile.write("      </SiteData>\n")
+
+    print("Writing finished")
     outputFile.write("  </Snapshot>\n")
     outputFile.write("</OpenMD>\n")
     outputFile.close()

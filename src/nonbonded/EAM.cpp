@@ -105,6 +105,24 @@ namespace OpenMD {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
   }
 
+  std::pair<RealType,RealType> EAM::gFunc(RealType q, RealType nV,
+                                          RealType nM) {
+    RealType g, gp;
+
+    if (q >= nV) {
+      return std::make_pair(0.0, 0.0);
+    }
+    if (q <= -nM) {
+      return std::make_pair( (nM + nV)/nV, 0.0);
+    }
+
+                            
+    g = ((q-nV)*(q-nV) * (nM + q + nV)) / (nV * nV * (nM + nV));
+    gp = ((q - nV)*(2*nM + 3*q + nV)) / (nV * nV * (nM + nV));
+
+    return std::make_pair(g, gp);
+  }
+  
   RealType EAM::Zhou2001Functional(RealType rho, RealType rhoe,
                                    std::vector<RealType> Fn,
                                    std::vector<RealType> F,
@@ -928,7 +946,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nMobile);
+        m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nValence);
       }
       *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij) );
     }
@@ -936,7 +954,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nMobile);
+        m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nValence);
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
@@ -1008,8 +1026,10 @@ namespace OpenMD {
 
       RealType Na(0.0), Nb(0.0), Ma(0.0), Mb(0.0);
       RealType va(1.0), vb(1.0), qa(0.0), qb(0.0);
-      RealType ga(1.0), gb(1.0);
 
+      std::pair<RealType, RealType> ga = std::make_pair(1.0, 0.0);
+      std::pair<RealType, RealType> gb = std::make_pair(1.0, 0.0);
+      
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
 
         if (data1.isFluctuatingCharge) {
@@ -1031,10 +1051,10 @@ namespace OpenMD {
                                            pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) += 0.5 * 2.5 * (rhb * vb * pha) / (rha * Ma * va * va);
+            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (oss_ * rha * Ma * va * va);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * 2.5 * (rhb * pha) / (rha * Mb * va);
+            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (oss_ * rha * Mb * va);
           }
         }
 
@@ -1044,10 +1064,10 @@ namespace OpenMD {
                                            phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * 2.5 * (rha * phb) / (rhb * Ma * vb);
+            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (oss_ * rhb * Ma * vb);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) += 0.5 * 2.5 * (rha * va * phb) / (rhb * Mb * vb * vb);
+            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (oss_ * rhb * Mb * vb * vb);
           }
         }
       } else {
@@ -1069,39 +1089,42 @@ namespace OpenMD {
         }
 
         // Core-Valence next, this does include fluctuating charges:
-
+        
         if (data1.isFluctuatingCharge) {
+          Na = oss_ * data1.nValence;
           Ma = oss_ * data1.nMobile;
           qa = *(idat.flucQ1);
-          ga = 1.0 - qa*qa / (Ma*Ma);
+          ga = gFunc(qa, Na, Ma);
         }
         if (data2.isFluctuatingCharge) {
+          Nb = oss_ * data2.nValence;
           Mb = oss_ * data2.nMobile;
           qb = *(idat.flucQ2);
-          gb = 1.0 - qb*qb / (Mb*Mb);
+          gb = gFunc(qb, Nb, Mb);
         }
+        
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
           CubicSpline* phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
 
-          phab += 0.5 * ga * (rhb / rha) * pha;
-          dvpdr += 0.5 * ga * ((rhb/rha)*dpha +
+          phab += 0.5 * gb.first * (rhb / rha) * pha;
+          dvpdr += 0.5 * gb.first * ((rhb/rha)*dpha +
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= (qa * rhb * pha) / (rha * Ma * Ma);
+            *(idat.dVdFQ1) +=  0.5 * gb.second * (rhb / rha) * pha;
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
           CubicSpline* phiBCV = data2.phiCV;
           phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
 
-          phab += 0.5 * gb * (rha / rhb) * phb;
-          dvpdr += 0.5 * gb * ((rha/rhb)*dphb +
+          phab += 0.5 * ga.first * (rha / rhb) * phb;
+          dvpdr += 0.5 * ga.first * ((rha/rhb)*dphb +
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= (qb * rha * phb) / (rhb * Mb * Mb);
+            *(idat.dVdFQ2) +=  0.5 * ga.second * (rha / rhb) * phb;
           }
         }
       }
@@ -1146,10 +1169,10 @@ namespace OpenMD {
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      *(idat.dVdFQ1) -= 2.5 * *(idat.dfrho2) * rha / data1.nMobile;
+      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / (oss_ * data1.nMobile);
     }
     if (data2.isFluctuatingCharge) {
-      *(idat.dVdFQ2) -= 2.5 * *(idat.dfrho1) * rhb / data2.nMobile;
+      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / (oss_ * data2.nMobile);
     }
 
     return;

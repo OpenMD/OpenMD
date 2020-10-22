@@ -65,14 +65,15 @@ namespace OpenMD {
 
     enum {
       rtDisplacement = 1,
-      rtTwist = 2,
-      rtSwingX = 4,
-      rtSwingY = 8
+      rtAbsoluteZ = 2,
+      rtTwist = 4,
+      rtSwingX = 8,
+      rtSwingY = 16
     };
 
     typedef std::pair<RealType, RealType> RealPair;
 
-    Restraint() : twist0_(0.0), swingX0_(0.0), swingY0_(0.0), 
+    Restraint() : twist0_(0.0), swingX0_(0.0), swingY0_(0.0), posZ0_(0.0),
                   printRest_(false), restType_(0) {
     }
     
@@ -102,6 +103,12 @@ namespace OpenMD {
       if (printRest_) restInfo_[rtDisplacement] = std::make_pair(0.0, 0.0);
     }
     
+    void setAbsoluteForceConstant(RealType kAbs) { 
+      kAbs_ = kAbs; 
+      restType_ |= rtAbsoluteZ;
+      if (printRest_) restInfo_[rtAbsoluteZ] = std::make_pair(0.0, 0.0);
+    }
+    
     void setTwistForceConstant(RealType kTwist) { 
       kTwist_ = kTwist/4;
       restType_ |= rtTwist; 
@@ -119,7 +126,13 @@ namespace OpenMD {
       restType_ |= rtSwingY; 
       if (printRest_) restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
     }
-    
+
+    void setAbsolutePositionZ(RealType z0) {
+      posZ0_ = z0;
+      restType_ |= rtAbsoluteZ;
+      if (printRest_) restInfo_[rtAbsoluteZ] = std::make_pair(0.0, 0.0);
+    }
+      
     /* restraint angles are measured relative to the ideal structure, 
        and are measured in radians.  If you want to restrain to the 
        same structure as the ideal structure, these do not need to be set.
@@ -147,6 +160,8 @@ namespace OpenMD {
     }
 
     RealType getDisplacementForceConstant() { return kDisp_; }
+    RealType getAbsoluteForceConstant() { return kAbs_; }
+    RealType getAbsolutePositionZ() { return posZ0_; }
     RealType getTwistForceConstant() { return kTwist_; }
     RealType getSwingXForceConstant() { return kSwingX_; }
     RealType getSwingYForceConstant() { return kSwingY_; }
@@ -160,6 +175,7 @@ namespace OpenMD {
 
     RealType scaleFactor_;
     RealType kDisp_;
+    RealType kAbs_;
     RealType kTwist_;
     RealType kSwingX_;
     RealType kSwingY_;
@@ -167,6 +183,7 @@ namespace OpenMD {
     RealType twist0_;
     RealType swingX0_;
     RealType swingY0_;
+    RealType posZ0_;
     bool printRest_;
     
     int restType_;
