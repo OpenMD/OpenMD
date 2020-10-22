@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "DLM.hpp"
 
 namespace OpenMD {
 
   void DLM::doRotate(StuntDouble* sd, Vector3d& ji, RealType dt) {
-    RealType dt2 = 0.5 * dt;    
+    RealType dt2 = 0.5 * dt;
     RealType angle;
 
     RotMat3x3d A = sd->getA();
@@ -126,19 +126,19 @@ namespace OpenMD {
     rot(axes1, axes1) = cosAngle;
     rot(axes2, axes2) = cosAngle;
 
-    rot(axes1, axes2) = sinAngle;
-    rot(axes2, axes1) = -sinAngle;
+    rot(axes1, axes2) = -sinAngle;
+    rot(axes2, axes1) = sinAngle;
 
     // rotate the momentum acoording to: ji[] = rot[][] * ji[]
     ji = rot * ji;
 
-    // This code comes from converting an algorithm detailed in 
-    // J. Chem. Phys. 107 (15), pp. 5840-5851 by Dullweber, 
+    // This code comes from converting an algorithm detailed in
+    // J. Chem. Phys. 107 (15), pp. 5840-5851 by Dullweber,
     // Leimkuhler and McLachlan (DLM) for use in our code.
-    // In Appendix A, the DLM paper has the change to the rotation 
-    // matrix as: Q = Q * rot.transpose(), but our rotation matrix 
-    // A is actually equivalent to Q.transpose(). This fact can be 
-    // seen on page 5849 of the DLM paper where a lab frame 
+    // In Appendix A, the DLM paper has the change to the rotation
+    // matrix as: Q = Q * rot.transpose(), but our rotation matrix
+    // A is actually equivalent to Q.transpose(). This fact can be
+    // seen on page 5849 of the DLM paper where a lab frame
     // dipole \mu_i(t) is expressed in terms of a body-fixed
     // reference orientation, \bar{\mu_i} and the rotation matrix, Q:
     //  \mu_i(t) = Q * \bar{\mu_i}
@@ -152,7 +152,7 @@ namespace OpenMD {
     // get the equivalent of Q = Q * rot.transpose() for our code to be:
 
     A = rot * A;
-  
+
   }
 
 
