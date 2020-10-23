@@ -101,9 +101,9 @@ namespace OpenMD {
 
     RealType sinAngle;
     RealType cosAngle;
-    RealType angleSqr;
-    RealType angleSqrOver4;
-    RealType top, bottom;
+    //RealType angleSqr;
+    //RealType angleSqrOver4;
+    //RealType top, bottom;
 
     RotMat3x3d tempA(A);  // initialize the tempA
     Vector3d tempJ(0.0);
@@ -112,22 +112,22 @@ namespace OpenMD {
 
     // use a small angle aproximation for sin and cosine
 
-    angleSqr = angle * angle;
-    angleSqrOver4 = angleSqr / 4.0;
-    top = 1.0 - angleSqrOver4;
-    bottom = 1.0 + angleSqrOver4;
+    //angleSqr = angle * angle;
+    //angleSqrOver4 = angleSqr / 4.0;
+    //top = 1.0 - angleSqrOver4;
+    //bottom = 1.0 + angleSqrOver4;
 
-    cosAngle = top / bottom;
-    sinAngle = angle / bottom;
+    //cosAngle = top / bottom;
+    //sinAngle = angle / bottom;
 
     // or don't use the small angle approximation:
-    //cosAngle = cos(angle);
-    //sinAngle = sin(angle);
+    cosAngle = cos(angle);
+    sinAngle = sin(angle);
     rot(axes1, axes1) = cosAngle;
     rot(axes2, axes2) = cosAngle;
 
-    rot(axes1, axes2) = -sinAngle;
-    rot(axes2, axes1) = sinAngle;
+    rot(axes1, axes2) = sinAngle;
+    rot(axes2, axes1) = -sinAngle;
 
     // rotate the momentum acoording to: ji[] = rot[][] * ji[]
     ji = rot * ji;
