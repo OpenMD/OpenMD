@@ -60,8 +60,7 @@ namespace OpenMD {
     DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
     DefineOptionalParameter(SwingYSpringConstant, "swingYSpringConstant");
 
-    DefineOptionalParameterWithDefaultValue(AbsolutePositionZ,
-					    "absolutePositionZ", 0.0);
+    DefineOptionalParameter(AbsolutePositionZ, "absolutePositionZ");
     DefineOptionalParameter(RestrainedTwistAngle, "restrainedTwistAngle");
     DefineOptionalParameter(RestrainedSwingXAngle, "restrainedSwingXAngle");
     DefineOptionalParameter(RestrainedSwingYAngle, "restrainedSwingYAngle");

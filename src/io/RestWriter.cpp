@@ -116,6 +116,9 @@ namespace OpenMD {
         
         if (myType & Restraint::rtDisplacement)
           (*output_) << "\tPosition(angstroms)\tEnergy(kcal/mol)";
+
+        if (myType & Restraint::rtAbsoluteZ)
+          (*output_) << "\tPosition(angstroms)\tEnergy(kcal/mol)";
         
         if (myType & Restraint::rtTwist)
           (*output_) << "\tTwistAngle(radians)\tEnergy(kcal/mol)";
@@ -143,6 +146,9 @@ namespace OpenMD {
         buffer += (myName + ":");
         
         if (myType & Restraint::rtDisplacement)
+          buffer += "\tPosition(angstroms)\tEnergy(kcal/mol)";
+
+        if (myType & Restraint::rtAbsoluteZ)
           buffer += "\tPosition(angstroms)\tEnergy(kcal/mol)";
         
         if (myType & Restraint::rtTwist)
