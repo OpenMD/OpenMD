@@ -64,9 +64,9 @@ namespace OpenMD {
   public:
 
 
-    int tok;
-    boost::any value;
-    int intValue;
+    int tok {};
+    boost::any value {};
+    int intValue {};
 
     Token() { tok = unknown;}
 

@@ -430,7 +430,7 @@ namespace OpenMD {
 
     unsigned int size() {return Dim;}
   protected:
-    Real data_[Dim];
+    Real data_[Dim] {};
         
   };
 
