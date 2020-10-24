@@ -35,7 +35,7 @@ def usage():
 def shrinkFile(mdFileName, outputFileName, skipFrameNumber):
     mdFile = open(mdFileName, 'r')
     outFile = open(outputFileName, 'w')
-    
+
     metaDataFrame = []
     haveMetaData = 0
     haveMetaDataEnd = 0
@@ -82,8 +82,8 @@ def shrinkFile(mdFileName, outputFileName, skipFrameNumber):
     line = mdFile.readline()
     while True:
         if '<Snapshot>' in line:
-            foundFrames += 1
             division, remainder=divmod(foundFrames, int(skipFrameNumber))
+            foundFrames += 1
             if (remainder == 0):
                 while not '</Snapshot>' in line:
                     outFile.write(line)
@@ -91,44 +91,44 @@ def shrinkFile(mdFileName, outputFileName, skipFrameNumber):
                 outFile.write(line)
         line = mdFile.readline()
         if not line: break
-        
+
     outFile.write("</OpenMD>")
     outFile.close()
     mdFile.close()
 
 
-def main(argv):                         
-    try:                                
-        opts, args = getopt.getopt(argv, "hm:o:s:", ["help", "meta-data=", "output-file=", "split-frame", ""]) 
-    except getopt.GetoptError:           
-        usage()                          
-        sys.exit(2)                     
-    for opt, arg in opts:                
-        if opt in ("-h", "--help"):      
-            usage()                     
-            sys.exit()                  
-        elif opt in ("-m", "--meta-data"): 
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "hm:o:s:", ["help", "meta-data=", "output-file=", "split-frame", ""])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-m", "--meta-data"):
             mdFileName = arg
             global _haveMDFileName
             _haveMDFileName = 1
-        elif opt in ("-o", "--output-file"): 
+        elif opt in ("-o", "--output-file"):
             outputFileName = arg
             global _haveOutFileName
             _haveOutFileName = 1
-        elif opt in ("-s", "--split-frame"): 
+        elif opt in ("-s", "--split-frame"):
             skipFrameNumber = arg
             global _haveSplitFrame
             _haveSplitFrame = 1
     if (_haveMDFileName != 1):
-        usage() 
+        usage()
         print("No OpenMD input file was specified")
         sys.exit()
     if (_haveOutFileName != 1):
-        usage() 
+        usage()
         print("No output file was specified")
         sys.exit()
     if (_haveSplitFrame != 1):
-        usage() 
+        usage()
         print("Frames to split was not specified")
         sys.exit()
     shrinkFile(mdFileName, outputFileName, skipFrameNumber);
@@ -138,4 +138,3 @@ if __name__ == "__main__":
         usage()
         sys.exit()
     main(sys.argv[1:])
-
