@@ -43,85 +43,80 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/dynamicProps/ForTorCorrFunc.hpp"
+#include "applications/dynamicProps/AngularVelVelOutProdCorrFunc.hpp"
 #include "math/SquareMatrix3.hpp"
 
 namespace OpenMD {
-  ForTorCorrFunc::ForTorCorrFunc(SimInfo* info,
+  AngularVelVelOutProdCorrFunc::AngularVelVelOutProdCorrFunc(SimInfo* info,
                                  const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2)
     : ObjectCCF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslForce | DataStorage::dslAmat |
-                         DataStorage::dslTorque){
+                         DataStorage::dslVelocity | DataStorage::dslAngularMomentum){
 
-    setCorrFuncType("Force - Torque Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".ftcorr");
+    setCorrFuncType("Angular Velocity - Velocity Outer Product Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".wvOutProdcorr");
 
-    forces_.resize(nFrames_);
-    torques_.resize(nFrames_);
+    velocity_.resize(nFrames_);
+    angularVelocity_.resize(nFrames_);
 
-    sumForces_ = V3Zero;
-    sumTorques_ = V3Zero;
+    sumVelocity_ = V3Zero;
+    sumAngularVelocity_ = V3Zero;
 
-    forcesCount_ = 0;
-    torquesCount_ = 0;
+    velocityCount_ = 0;
+    angularVelocityCount_ = 0;
 
     propertyTemp = V3Zero;
   }
 
-  void ForTorCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
-
-    for (sd = seleMan.beginSelected(i); sd != NULL;
-         sd = seleMan.nextSelected(i)) {
-
-      if (!sd->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "ForTorCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n", sd->getGlobalIndex(),
-                sd->getType().c_str() );
-        painCave.isFatal = 1;
-        simError();
-      }
+  int AngularVelVelOutProdCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    if (sd->isDirectional()) {
+      Mat3x3d momentInertia = sd->getI();
+      Vector3d angMom = sd->getJ();
+      Vector3d omega = momentInertia.inverse() * angMom;
+      propertyTemp = omega;
+    } else {
+      sprintf(painCave.errMsg, "The selection contains non-directional entities. Your selection should include\
+ Directional atoms and/or Rigid Bodies.\n");
+      painCave.isFatal = 1;
+      simError();
     }
+
+    angularVelocity_[frame].push_back( propertyTemp );
+    sumAngularVelocity_ += propertyTemp;
+    angularVelocityCount_++;
+    return angularVelocity_[frame].size() - 1;
   }
 
-  int ForTorCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    Mat3x3d A = sd->getA();
-    Vector3d f = sd->getFrc();
-    propertyTemp = A * f;
-    forces_[frame].push_back( propertyTemp );
-    sumForces_ += propertyTemp;
-    forcesCount_++;
-    return forces_[frame].size() - 1;
+  int AngularVelVelOutProdCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+    Vector3d vel = sd->getVel();
+    propertyTemp = vel;
+
+    velocity_[frame].push_back( propertyTemp );
+    sumVelocity_ += propertyTemp;
+    velocityCount_++;
+    return velocity_[frame].size() - 1;
   }
 
-  int ForTorCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    Mat3x3d A = sd->getA();
-    Vector3d t = sd->getTrq();
-    propertyTemp = A * t;
-    torques_[frame].push_back( propertyTemp );
-    sumTorques_ += propertyTemp;
-    torquesCount_++;
-    return torques_[frame].size() - 1;
-  }
-
-  Mat3x3d ForTorCorrFunc::calcCorrVal(int frame1, int frame2,
+  Mat3x3d AngularVelVelOutProdCorrFunc::calcCorrVal(int frame1, int frame2,
                                       int id1, int id2) {
-    return outProduct( forces_[frame1][id1] , torques_[frame2][id2] );
+    Mat3x3d tmpMat_1;
+    tmpMat_1 = outProduct(angularVelocity_[frame1][id1], velocity_[frame2][id2]);
+    Mat3x3d tmpMat_2;
+    tmpMat_2 = outProduct(angularVelocity_[frame2][id2], velocity_[frame1][id1]);
+    Mat3x3d tmpMat_3;
+    tmpMat_3 = 0.5*(tmpMat_1 + tmpMat_2);
+    return tmpMat_3;
   }
 
-  void ForTorCorrFunc::postCorrelate() {
-    // Gets the average of the forces
-    sumForces_ /= RealType(forcesCount_);
+  void AngularVelVelOutProdCorrFunc::postCorrelate() {
+    // Gets the average of the angular velocities
+    sumAngularVelocity_ /= RealType(angularVelocityCount_);
 
-    // Gets the average of the torques
-    sumTorques_ /= RealType(torquesCount_);
+    // Gets the average of the velocities
+    sumVelocity_ /= RealType(velocityCount_);
 
-    Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumTorques_);
+    Mat3x3d correlationOfAverages_ = outProduct(sumAngularVelocity_, sumVelocity_);
 
     for (unsigned int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {

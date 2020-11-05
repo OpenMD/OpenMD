@@ -115,7 +115,12 @@ struct gengetopt_args_info
   const char *dispZ_help; /**< @brief Displacement correlation function binned by Z help description.  */
   const char *current_help; /**< @brief Current density auto correlation function help description.  */
   const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
-  
+  const char *vaOutProdcorr_help; /**< @brief Velocity - Velocity auto outer product correlation function help description.  */
+  const char *waOutProdcorr_help; /**< @brief Angular Velocity - Angular Velocity auto outer product correlation function help description.  */
+  const char *vwOutProdcorr_help; /**< @brief Velocity - Angular Velocity outer product correlation function help description.  */
+  const char *wvOutProdcorr_help; /**< @brief Angular Velocity - Velocity outer product correlation function help description.  */
+
+
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
@@ -164,6 +169,11 @@ struct gengetopt_args_info
   unsigned int dispZ_given ;	/**< @brief Whether dispZ was given.  */
   unsigned int current_given ;	/**< @brief Whether current was given.  */
   unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
+  unsigned int vaOutProdcorr_given ;	/**< @brief Whether vaOutProdcorr was given.  */
+  unsigned int waOutProdcorr_given ;	/**< @brief Whether waOutProdcorr was given.  */
+  unsigned int vwOutProdcorr_given ;	/**< @brief Whether vwOutProdcorr was given.  */
+  unsigned int wvOutProdcorr_given ;	/**< @brief Whether wvOutProdcorr was given.  */
+
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */
@@ -255,7 +265,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

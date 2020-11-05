@@ -80,6 +80,10 @@
 #include "applications/dynamicProps/ChargeOrientationCorrFunc.hpp"
 #include "applications/dynamicProps/CurrentDensityAutoCorrFunc.hpp"
 #include "applications/dynamicProps/CollectiveDipoleDisplacement.hpp"
+#include "applications/dynamicProps/VelocityAutoOutProductCorrFunc.hpp"
+#include "applications/dynamicProps/AngularVelocityAutoOutProductCorrFunc.hpp"
+#include "applications/dynamicProps/VelAngularVelOutProdCorrFunc.hpp"
+#include "applications/dynamicProps/AngularVelVelOutProdCorrFunc.hpp"
 
 
 using namespace OpenMD;
@@ -286,6 +290,18 @@ int main(int argc, char* argv[]){
     corrFunc = new CurrentDensityAutoCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.ddisp_given) {
     corrFunc = new CollectiveDipoleDisplacement(info, dumpFileName, sele1, sele2);
+  }
+    else if (args_info.vaOutProdcorr_given){
+    corrFunc = new VelocityAutoOutProductCorrFunc(info, dumpFileName, sele1, sele2);
+  }
+    else if (args_info.waOutProdcorr_given){
+    corrFunc = new AngularVelocityAutoOutProductCorrFunc(info, dumpFileName, sele1, sele2);
+  }
+    else if (args_info.vwOutProdcorr_given){
+    corrFunc = new VelAngularVelOutProdCorrFunc(info, dumpFileName, sele1, sele2);
+  }
+  else if (args_info.wvOutProdcorr_given){
+  corrFunc = new AngularVelVelOutProdCorrFunc(info, dumpFileName, sele1, sele2);
   }
 
   if (args_info.output_given) {

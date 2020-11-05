@@ -646,6 +646,10 @@ src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
 src/applications/dynamicProps/ThetaCorrFunc.cpp
 src/applications/dynamicProps/TimeCorrFunc.cpp
 src/applications/dynamicProps/VCorrFunc.cpp
+src/applications/dynamicProps/VelocityAutoOutProductCorrFunc.cpp
+src/applications/dynamicProps/AngularVelocityAutoOutProductCorrFunc.cpp
+src/applications/dynamicProps/VelAngularVelOutProdCorrFunc.cpp
+src/applications/dynamicProps/AngularVelVelOutProdCorrFunc.cpp
 src/applications/dynamicProps/WCorrFunc.cpp
 src/applications/dynamicProps/BondCorrFunc.cpp
 src/applications/dynamicProps/DynamicPropsCmd.cpp

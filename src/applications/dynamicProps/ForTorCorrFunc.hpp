@@ -54,7 +54,7 @@ namespace OpenMD {
   public:
     ForTorCorrFunc(SimInfo* info, const std::string& filename,
                    const std::string& sele1, const std::string& sele2);
-    
+
   private:
     virtual void validateSelection(SelectionManager& seleMan);
     virtual int computeProperty1(int frame, StuntDouble* sd);
@@ -70,7 +70,7 @@ namespace OpenMD {
 
     int forcesCount_, torquesCount_;
 
-    Vector3d propertyTemp; 
+    Vector3d propertyTemp;
   };
 }
 #endif

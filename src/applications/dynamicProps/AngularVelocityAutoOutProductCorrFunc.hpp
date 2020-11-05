@@ -43,16 +43,16 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATIONS_DYNAMICPROPS_FORCEAUTOCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_FORCEAUTOCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_ANGULARVELOCITYAUTOOUTPRODUCTCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_ANGULARVELOCITYAUTOOUTPRODUCTCORRFUNC_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
 
-  class ForceAutoCorrFunc : public ObjectACF<Mat3x3d> {
+  class AngularVelocityAutoOutProductCorrFunc : public ObjectACF<Mat3x3d> {
   public:
-    ForceAutoCorrFunc(SimInfo* info, const std::string& filename,
+    AngularVelocityAutoOutProductCorrFunc(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2);
 
   private:
@@ -60,9 +60,11 @@ namespace OpenMD {
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void postCorrelate();
 
-    std::vector<std::vector<Vector3d> > forces_;
-    Vector3d sumForces_;
-    int forcesCount_;
+    std::vector<std::vector<Vector3d> > angularVelocity_;
+
+    Vector3d sumAngularVelocity_;
+    int angularVelocityCount_;
+
     Vector3d propertyTemp;
   };
 }

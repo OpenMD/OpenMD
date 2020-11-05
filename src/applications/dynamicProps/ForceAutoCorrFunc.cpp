@@ -55,7 +55,7 @@ namespace OpenMD {
     : ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
                          DataStorage::dslForce | DataStorage::dslAmat |
                          DataStorage::dslTorque){
-    
+
     setCorrFuncType("Force - Force Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".facorr");
 
@@ -65,7 +65,7 @@ namespace OpenMD {
   }
 
   int ForceAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    if (sd->isRigidBody()) {
+    if (sd->isDirectional()) {
       Mat3x3d A = sd->getA();
       Vector3d f = sd->getFrc();
       propertyTemp = A * f;

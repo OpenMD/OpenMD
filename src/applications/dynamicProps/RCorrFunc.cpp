@@ -48,21 +48,21 @@
 #include <sstream>
 
 namespace OpenMD {
-  RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, 
+  RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2)
-    : ObjectACF<RealType>(info, filename, sele1, sele2, 
+    : ObjectACF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslPosition | DataStorage::dslAmat){
-    
+
     setCorrFuncType("Mean Square Displacement");
     setOutputName(getPrefix(dumpFilename_) + ".rcorr");
 
     positions_.resize(nFrames_);
   }
 
-  RCorrFuncZ::RCorrFuncZ(SimInfo* info, const std::string& filename, 
+  RCorrFuncZ::RCorrFuncZ(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2,
                          int nZbins, int axis)
-    : ObjectACF<RealType>(info, filename, sele1, sele2, 
+    : ObjectACF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslPosition | DataStorage::dslAmat),
     axis_(axis){
 
@@ -72,7 +72,7 @@ namespace OpenMD {
     positions_.resize(nFrames_);
     zBins_.resize(nFrames_);
     nZBins_ = nZbins;
-    
+
     switch(axis_) {
     case 0:
       axisLabel_ = "x";
@@ -85,7 +85,7 @@ namespace OpenMD {
       axisLabel_ = "z";
       break;
     }
-    
+
     std::stringstream params;
     params << " nzbins = " << nZBins_;
     const std::string paramString = params.str();
@@ -93,7 +93,7 @@ namespace OpenMD {
 
     histograms_.resize(nTimeBins_);
     counts_.resize(nTimeBins_);
-    
+
     idimHistograms_.resize(3);
     for (unsigned i = 0; i < idimHistograms_.size(); i++) {
       idimHistograms_[i].resize(nTimeBins_);
@@ -101,7 +101,7 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nTimeBins_; i++) {
       histograms_[i].resize(nZBins_);
       counts_[i].resize(nZBins_);
-      
+
       std::fill(histograms_[i].begin(), histograms_[i].end(), 0.0);
       std::fill(counts_[i].begin(), counts_[i].end(), 0);
 
@@ -109,18 +109,18 @@ namespace OpenMD {
 	idimHistograms_[j][i].resize(nZBins_);
 	std::fill(idimHistograms_[j][i].begin(), idimHistograms_[j][i].end(), 0.0);
       }
-      
+
     }
   }
-  
-  RCorrFuncR::RCorrFuncR(SimInfo* info, const std::string& filename, 
+
+  RCorrFuncR::RCorrFuncR(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2)
-    : ObjectACF<RealType>(info, filename, sele1, sele2, 
+    : ObjectACF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslPosition | DataStorage::dslAmat){
-    
+
     // Turn on COM calculation in reader:
     bool ncp = true;
-    reader_->setNeedCOMprops(ncp);    
+    reader_->setNeedCOMprops(ncp);
     setCorrFuncType("MSD (radial projection)");
     setOutputName(getPrefix(dumpFilename_) + ".r_rcorr");
     positions_.resize(nFrames_);
@@ -130,7 +130,7 @@ namespace OpenMD {
     positions_[frame].push_back( sd->getPos() );
     return positions_[frame].size() - 1;
   }
-  
+
   RealType RCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
     return diff.lengthSquare();
@@ -138,7 +138,7 @@ namespace OpenMD {
 
   void RCorrFuncZ::computeFrame(int istep) {
     hmat_ = currentSnapshot_->getHmat();
-    halfBoxZ_ = hmat_(axis_,axis_) / 2.0;      
+    halfBoxZ_ = hmat_(axis_,axis_) / 2.0;
 
     StuntDouble* sd;
 
@@ -148,15 +148,15 @@ namespace OpenMD {
     if (evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    
+
     if (uniqueSelections_ && evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    }      
-    
+    }
+
     for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
          sd = seleMan1_.nextSelected(isd1)) {
 
-      index = computeProperty1(istep, sd);        
+      index = computeProperty1(istep, sd);
       if (index == sele1ToIndex_[istep].size()) {
         sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
       } else {
@@ -164,10 +164,10 @@ namespace OpenMD {
         sele1ToIndex_[istep][index] = sd->getGlobalIndex();
       }
     }
-   
-    if (uniqueSelections_) { 
+
+    if (uniqueSelections_) {
       for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
-           sd = seleMan2_.nextSelected(isd2)) {        
+           sd = seleMan2_.nextSelected(isd2)) {
 
         index = computeProperty1(istep, sd);
 
@@ -188,30 +188,30 @@ namespace OpenMD {
 
     if (info_->getSimParams()->getUsePeriodicBoundaryConditions()) {
       currentSnapshot_->wrapVector(pos);
-    }    
+    }
     int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat_(axis_,axis_));
     zBins_[frame].push_back(zBin);
-    
+
     return positions_[frame].size() - 1;
   }
 
   void RCorrFuncZ::correlateFrames(int frame1, int frame2, int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
-    
+
     std::vector<int>::iterator i1;
     std::vector<int>::iterator i2;
 
     s1 = sele1ToIndex_[frame1];
 
-    if (uniqueSelections_) 
+    if (uniqueSelections_)
        s2 = sele2ToIndex_[frame2];
     else
        s2 = sele1ToIndex_[frame2];
 
     for (i1 = s1.begin(), i2 = s2.begin();
          i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
-      
+
       // If the selections are dynamic, they might not have the
       // same objects in both frames, so we need to roll either of
       // the selections until we have the same object to
@@ -220,24 +220,24 @@ namespace OpenMD {
       while ( i1 != s1.end() && *i1 < *i2 ) {
         ++i1;
       }
-      
+
       while ( i2 != s2.end() && *i2 < *i1 ) {
         ++i2;
       }
-          
+
       if ( i1 == s1.end() || i2 == s2.end() ) break;
 
       calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(),
                   timeBin);
     }
   }
-  
+
   RealType RCorrFuncZ::calcCorrVal(int frame1, int frame2, int id1, int id2,
                                    int timeBin) {
 
     int zBin1 = zBins_[frame1][id1];
-    int zBin2 = zBins_[frame2][id2];    
-    
+    int zBin2 = zBins_[frame2][id2];
+
     if (zBin1 == zBin2) {
       Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
       histograms_[timeBin][zBin1] += diff.lengthSquare();
@@ -246,15 +246,15 @@ namespace OpenMD {
 	RealType iDiff = positions_[frame2][id2][i] - positions_[frame1][id1][i];
 	idimHistograms_[i][timeBin][zBin1] += (iDiff * iDiff);
       }
-      
+
       counts_[timeBin][zBin1]++;
     }
     return 0.0;
   }
-  
+
   void RCorrFuncZ::postCorrelate() {
     for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      for (unsigned int j = 0; j < nZBins_; ++j) {        
+      for (unsigned int j = 0; j < nZBins_; ++j) {
         if (counts_[i][j] > 0) {
           histograms_[i][j] /= counts_[i][j];
 	  for (unsigned int k = 0; k < 3; k++){
@@ -274,7 +274,7 @@ namespace OpenMD {
 
     if (ofs.is_open()) {
       Revision r;
-      
+
       ofs << "# " << getCorrFuncType() << "\n";
       ofs << "# OpenMD " << r.getFullRevision() << "\n";
       ofs << "# " << r.getBuildDate() << "\n";
@@ -290,70 +290,69 @@ namespace OpenMD {
 
         ofs << times_[i] - times_[0];
 
-        for (unsigned int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {
           ofs << "\t" << histograms_[i][j];
         }
         ofs << "\n";
       }
 
       ofs << "&\n#time\tcorrValXZ\n";
-      
+
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs << times_[i] - times_[0];
 
-        for (unsigned int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {
           ofs << "\t" << idimHistograms_[0][i][j];
         }
         ofs << "\n";
       }
 
       ofs << "&\n#time\tcorrValYZ\n";
-      
+
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs << times_[i] - times_[0];
 
-        for (unsigned int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {
           ofs << "\t" << idimHistograms_[1][i][j];
         }
         ofs << "\n";
       }
 
       ofs << "&\n#time\tcorrValZZ\n";
-      
+
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
 
         ofs << times_[i] - times_[0];
 
-        for (unsigned int j = 0; j < nZBins_; ++j) {          
+        for (unsigned int j = 0; j < nZBins_; ++j) {
           ofs << "\t" << idimHistograms_[2][i][j];
         }
         ofs << "\n";
       }
-            
+
     } else {
       sprintf(painCave.errMsg,
               "RCorrFuncZ::writeCorrelate Error: fail to open %s\n",
               getOutputFileName().c_str());
       painCave.isFatal = 1;
-      simError();        
+      simError();
     }
-    ofs.close();    
+    ofs.close();
   }
-  
+
   int RCorrFuncR::computeProperty1(int frame, StuntDouble* sd) {
     // get the radial vector from the frame's center of mass:
     Vector3d coord_t = sd->getPos() - sd->getCOM();
-    
+
     positions_[frame].push_back( coord_t.length() );
     return positions_[frame].size() - 1;
   }
-  
+
   RealType RCorrFuncR::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType dr;
     dr  = positions_[frame2][id2] - positions_[frame1][id1];
     return dr * dr;
   }
 }
-

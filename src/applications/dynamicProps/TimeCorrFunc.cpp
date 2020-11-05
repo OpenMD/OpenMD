@@ -65,7 +65,7 @@ namespace OpenMD {
       doSystemProperties_(false), doMolecularProperties_(false),
       doObjectProperties_(false),
       doBondProperties_(false) {
-    
+
     // Request maximum needed storage for the simulation (including of
     // whatever was passed down by the individual correlation
     // function).
@@ -75,7 +75,7 @@ namespace OpenMD {
     reader_ = new DumpReader(info_, dumpFilename_);
 
     uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
-    
+
     Globals* simParams = info_->getSimParams();
     if (simParams->haveSampleTime()){
       deltaTime_ = simParams->getSampleTime();
@@ -106,7 +106,7 @@ namespace OpenMD {
 
     progressBar_ = new ProgressBar();
   }
-  
+
   template<typename T>
   void TimeCorrFunc<T>::preCorrelate() {
 
@@ -124,21 +124,21 @@ namespace OpenMD {
         validateSelection(seleMan2_);
       }
     }
-    
+
     progressBar_->clear();
-    
+
     for (int istep = 0; istep < nFrames_; istep++) {
       reader_->readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       times_[istep] = currentSnapshot_->getTime();
-      
+
       progressBar_->setStatus(istep+1, nFrames_);
       progressBar_->update();
-      
+
       computeFrame(istep);
     }
   }
-  
+
   template<typename T>
   void TimeCorrFunc<T>::computeFrame(int istep) {
     Molecule* mol;
@@ -166,25 +166,25 @@ namespace OpenMD {
     if (doMolecularProperties_) {
       for (mol = seleMan1_.beginSelectedMolecule(imol1); mol != NULL;
            mol = seleMan1_.nextSelectedMolecule(imol1)) {
-        
+
         index = computeProperty1(istep, mol);
-        
+
         if (index == sele1ToIndex_[istep].size()) {
           sele1ToIndex_[istep].push_back(mol->getGlobalIndex());
         } else {
           sele1ToIndex_[istep].resize(index+1);
           sele1ToIndex_[istep][index] = mol->getGlobalIndex();
         }
-        
+
         if (!uniqueSelections_) {
           index = computeProperty2(istep, mol);
         }
       }
-      
+
       if (uniqueSelections_) {
         for (mol = seleMan2_.beginSelectedMolecule(imol2); mol != NULL;
              mol = seleMan2_.nextSelectedMolecule(imol2)) {
-          
+
           if (autoCorrFunc_) {
             index = computeProperty1(istep, mol);
           } else {
@@ -203,25 +203,25 @@ namespace OpenMD {
     if (doObjectProperties_) {
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
-        
+
         index = computeProperty1(istep, sd);
-        
+
         if (index == sele1ToIndex_[istep].size()) {
           sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
         } else {
           sele1ToIndex_[istep].resize(index+1);
           sele1ToIndex_[istep][index] = sd->getGlobalIndex();
         }
-        
+
         if (!uniqueSelections_) {
           index = computeProperty2(istep, sd);
         }
       }
-      
+
       if (uniqueSelections_) {
         for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
              sd = seleMan2_.nextSelected(isd2)) {
-          
+
           if (autoCorrFunc_) {
             index = computeProperty1(istep, sd);
           } else {
@@ -236,29 +236,29 @@ namespace OpenMD {
         }
       }
     }
-    
+
     if (doBondProperties_) {
       for (bond = seleMan1_.beginSelectedBond(ibond1); bond != NULL;
            bond = seleMan1_.nextSelectedBond(ibond1)) {
-        
+
         index = computeProperty1(istep, bond);
-        
+
         if (index == sele1ToIndex_[istep].size()) {
           sele1ToIndex_[istep].push_back(bond->getGlobalIndex());
         } else {
           sele1ToIndex_[istep].resize(index+1);
           sele1ToIndex_[istep][index] = bond->getGlobalIndex();
         }
-        
+
         if (!uniqueSelections_) {
           index = computeProperty2(istep, bond);
         }
       }
-      
+
       if (uniqueSelections_) {
         for (bond = seleMan2_.beginSelectedBond(ibond2); bond != NULL;
              bond = seleMan2_.nextSelectedBond(ibond2)) {
-          
+
           if (autoCorrFunc_) {
             index = computeProperty1(istep, bond);
           } else {
@@ -273,7 +273,7 @@ namespace OpenMD {
         }
       }
     }
-    
+
   }
 
   template<typename T>
@@ -343,10 +343,10 @@ namespace OpenMD {
 
   /*
   template<typename T>
-  void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {   
+  void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   }
   */
-  
+
   template<typename T>
   void TimeCorrFunc<T>::correlateFrames(int frame1, int frame2,
                                         int timeBin) {
@@ -357,47 +357,47 @@ namespace OpenMD {
     std::vector<int>::iterator i2;
 
     T corrVal(0.0);
-    
+
     if (doSystemProperties_) {
-      
+
       corrVal = calcCorrVal(frame1, frame2);
       histogram_[timeBin] += corrVal;
       count_[timeBin]++;
-      
+
     } else {
-      
+
       s1 = sele1ToIndex_[frame1];
-      
+
       if (uniqueSelections_)
         s2 = sele2ToIndex_[frame2];
       else
         s2 = sele1ToIndex_[frame2];
-      
+
       for (i1 = s1.begin(), i2 = s2.begin();
            i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
-        
+
         // If the selections are dynamic, they might not have the
         // same objects in both frames, so we need to roll either of
         // the selections until we have the same object to
         // correlate.
-        
+
         while ( i1 != s1.end() && *i1 < *i2 ) {
           ++i1;
         }
-        
+
         while ( i2 != s2.end() && *i2 < *i1 ) {
           ++i2;
         }
-        
+
         if ( i1 == s1.end() || i2 == s2.end() ) break;
-        
+
         corrVal = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
         histogram_[timeBin] += corrVal;
         count_[timeBin]++;
       }
     }
   }
-  
+
   template<typename T>
   void TimeCorrFunc<T>::postCorrelate() {
     T zeroType(0.0);
@@ -410,7 +410,7 @@ namespace OpenMD {
     }
   }
 
-  
+
   template<typename T>
   void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan){ }
 
@@ -429,7 +429,7 @@ namespace OpenMD {
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-      if (!labelString_.empty())        
+      if (!labelString_.empty())
         ofs << "#time\t" << labelString_ << "\n";
       else
         ofs << "#time\tcorrVal\n";
@@ -465,7 +465,7 @@ namespace OpenMD {
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-      if (!labelString_.empty())        
+      if (!labelString_.empty())
         ofs << "#time\t" << labelString_ << "\n";
       else
         ofs << "#time\tcorrVal\n";
@@ -473,11 +473,11 @@ namespace OpenMD {
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs << times_[i]-times_[0] << "\t";
         for (int j = 0; j < 3; j++) {
-          ofs << histogram_[i](j) << '\t';        
+          ofs << histogram_[i](j) << '\t';
         }
         ofs << '\n';
       }
-      
+
     } else {
       sprintf(painCave.errMsg,
               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
@@ -485,7 +485,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
+
     ofs.close();
   }
 
@@ -506,7 +506,7 @@ namespace OpenMD {
       ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
-      if (!labelString_.empty())        
+      if (!labelString_.empty())
         ofs << "#time\t" << labelString_ << "\n";
       else
         ofs << "#time\tcorrVal\n";
@@ -543,7 +543,7 @@ namespace OpenMD {
     TimeCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
     this->autoCorrFunc_ = false;
   }
-  
+
   template<typename T>
   AutoCorrFunc<T>::AutoCorrFunc(SimInfo* info, const std::string& filename,
                                 const std::string& sele1,
@@ -576,7 +576,7 @@ namespace OpenMD {
     this->doObjectProperties_ = false;
     this->doBondProperties_ = false;
   }
-  
+
   template<typename T>
   ObjectACF<T>::ObjectACF(SimInfo* info, const std::string& filename,
                           const std::string& sele1, const std::string& sele2,
@@ -624,25 +624,25 @@ namespace OpenMD {
     this->doObjectProperties_ = false;
     this->doBondProperties_ = false;
   }
-  
-  template class AutoCorrFunc<RealType>; 
+
+  template class AutoCorrFunc<RealType>;
   template class TimeCorrFunc<RealType>;
   template class CrossCorrFunc<RealType>;
 
-  template class AutoCorrFunc<Vector3d>; 
+  template class AutoCorrFunc<Vector3d>;
   template class TimeCorrFunc<Vector3d>;
   template class CrossCorrFunc<Vector3d>;
 
-  template class AutoCorrFunc<Mat3x3d>; 
+  template class AutoCorrFunc<Mat3x3d>;
   template class TimeCorrFunc<Mat3x3d>;
   template class CrossCorrFunc<Mat3x3d>;
 
   template class TimeCorrFunc<DynamicVector<RealType> >;
-  
-  template class AutoCorrFunc<Vector<RealType, 4> >; 
+
+  template class AutoCorrFunc<Vector<RealType, 4> >;
   template class TimeCorrFunc<Vector<RealType, 4> >;
   template class CrossCorrFunc<Vector<RealType, 4> >;
-  
+
   template class SystemACF<RealType>;
   template class SystemACF<Vector3d>;
   template class SystemACF<Mat3x3d>;
@@ -663,10 +663,10 @@ namespace OpenMD {
   template class MoleculeACF<RealType>;
   template class MoleculeACF<Vector3d>;
   template class MoleculeACF<Mat3x3d>;
-  template class MoleculeACF<Vector<RealType, 4> >; 
+  template class MoleculeACF<Vector<RealType, 4> >;
 
   template class MoleculeCCF<RealType>;
   template class MoleculeCCF<Vector3d>;
   template class MoleculeCCF<Mat3x3d>;
- 
+
 }
