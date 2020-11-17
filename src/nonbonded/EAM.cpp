@@ -1111,8 +1111,8 @@ namespace OpenMD {
           dvpdr += 0.5 * gb.first * ((rhb/rha)*dpha +
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
-          if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) +=  0.5 * gb.second * (rhb / rha) * pha;
+          if (data2.isFluctuatingCharge) {
+            *(idat.dVdFQ2) +=  0.5 * gb.second * (rhb / rha) * pha;
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
@@ -1123,8 +1123,8 @@ namespace OpenMD {
           dvpdr += 0.5 * ga.first * ((rha/rhb)*dphb +
                                phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
-          if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) +=  0.5 * ga.second * (rha / rhb) * phb;
+          if (data1.isFluctuatingCharge) {
+            *(idat.dVdFQ1) +=  0.5 * ga.second * (rha / rhb) * phb;
           }
         }
       }
