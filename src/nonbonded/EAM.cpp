@@ -1051,10 +1051,10 @@ namespace OpenMD {
                                            pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (oss_ * rha * Ma * va * va);
+            *(idat.dVdFQ1) += 0.5 * (rhb * vb * pha) / (rha * Ma * va * va);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (oss_ * rha * Mb * va);
+            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Mb * va);
           }
         }
 
@@ -1064,10 +1064,10 @@ namespace OpenMD {
                                            phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (oss_ * rhb * Ma * vb);
+            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Ma * vb);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (oss_ * rhb * Mb * vb * vb);
+            *(idat.dVdFQ2) += 0.5 * (rha * va * phb) / (rhb * Mb * vb * vb);
           }
         }
       } else {
