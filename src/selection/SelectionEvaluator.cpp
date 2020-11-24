@@ -397,6 +397,12 @@ namespace OpenMD {
     Vector3d pos;
 
     switch (property) {
+    case Token::atomno:
+      if (sd->isAtom()) {
+	Atom* atom = static_cast<Atom*>(sd);
+	propertyValue = atom->getGlobalIndex();
+      }
+      break;
     case Token::mass:
       propertyValue = sd->getMass();
       break;
@@ -459,7 +465,7 @@ namespace OpenMD {
       match = propertyValue > comparisonValue;
       break;
     case Token::opEQ:
-      match = propertyValue == comparisonValue;
+      match = fabs(propertyValue - comparisonValue) <= OpenMD::epsilon;
       break;
     case Token::opNE:
       match = propertyValue != comparisonValue;
@@ -538,7 +544,7 @@ namespace OpenMD {
       match = propertyValue > comparisonValue;
       break;
     case Token::opEQ:
-      match = propertyValue == comparisonValue;
+      match = fabs(propertyValue - comparisonValue) <= OpenMD::epsilon;
       break;
     case Token::opNE:
       match = propertyValue != comparisonValue;
@@ -615,7 +621,7 @@ namespace OpenMD {
       match = propertyValue > comparisonValue;
       break;
     case Token::opEQ:
-      match = propertyValue == comparisonValue;
+      match = fabs(propertyValue - comparisonValue) <= OpenMD::epsilon;
       break;
     case Token::opNE:
       match = propertyValue != comparisonValue;
@@ -632,6 +638,12 @@ namespace OpenMD {
     RealType propertyValue = 0.0;
     Vector3d pos;
     switch (property) {
+    case Token::atomno:
+      if (sd->isAtom()) {
+	Atom* atom = static_cast<Atom*>(sd);
+	propertyValue = atom->getGlobalIndex();
+      }
+      break;      
     case Token::mass:
       propertyValue = sd->getMass();
       break;
@@ -695,7 +707,7 @@ namespace OpenMD {
       match = propertyValue > comparisonValue;
       break;
     case Token::opEQ:
-      match = propertyValue == comparisonValue;
+      match = fabs(propertyValue - comparisonValue) <= OpenMD::epsilon;
       break;
     case Token::opNE:
       match = propertyValue != comparisonValue;

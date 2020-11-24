@@ -177,7 +177,7 @@ namespace OpenMD {
             } else {
               LennardJonesAdapter lja = LennardJonesAdapter(atomType);
               if (lja.isLennardJones()){
-                currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
+                currShape = new Sphere(V3Zero, lja.getSigma()/2.0);
               } else {
 
                 int aNum(0);
@@ -186,7 +186,7 @@ namespace OpenMD {
                 for (i = atChain.begin(); i != atChain.end(); ++i) {
                   aNum = etab.GetAtomicNum((*i)->getName().c_str());
                   if (aNum != 0) {
-                    currShape = new Sphere(atom->getPos(),
+                    currShape = new Sphere(V3Zero,
                                            etab.GetVdwRad(aNum));
                     break;
                   }
@@ -455,10 +455,12 @@ namespace OpenMD {
           } else {
             //spherical atom
 
+	    Vector3d systemForce;
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque,
                                     index, variance_);
+	    systemForce = sd->getFrc();
             sd->addFrc(randomForce);
 
             // What remains contains velocity explicitly, but the
@@ -510,13 +512,11 @@ namespace OpenMD {
 
       }
     }
-
     info_->setFdf(fdf);
     veloMunge->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
     if(!simParams->getUsePeriodicBoundaryConditions())
       veloMunge->removeAngularDrift();
-
     ForceManager::postCalculation();
   }
 

@@ -887,6 +887,8 @@ namespace OpenMD {
                                 Vector3d &angularMomentum){
 
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    Molecule::IntegrableObjectIterator  j;
+    StuntDouble* sd;
 
     if (!(snap->hasInertiaTensor && snap->hasCOMw)) {
 
@@ -900,32 +902,37 @@ namespace OpenMD {
       Vector3d comVel(0.0);
 
       getComAll(com, comVel);
-
+      
       SimInfo::MoleculeIterator i;
       Molecule* mol;
 
-      Vector3d thisq(0.0);
-      Vector3d thisv(0.0);
+      Vector3d r(0.0);
+      Vector3d v(0.0);
 
-      RealType thisMass = 0.0;
+      RealType m = 0.0;
 
       for (mol = info_->beginMolecule(i); mol != NULL;
            mol = info_->nextMolecule(i)) {
-
-        thisq = mol->getCom()-com;
-        thisv = mol->getComVel()-comVel;
-        thisMass = mol->getMass();
-        // Compute moment of intertia coefficients.
-        xx += thisq[0]*thisq[0]*thisMass;
-        yy += thisq[1]*thisq[1]*thisMass;
-        zz += thisq[2]*thisq[2]*thisMass;
-
-        // compute products of intertia
-        xy += thisq[0]*thisq[1]*thisMass;
-        xz += thisq[0]*thisq[2]*thisMass;
-        yz += thisq[1]*thisq[2]*thisMass;
-
-        angularMomentum += cross( thisq, thisv ) * thisMass;
+	for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	     sd = mol->nextIntegrableObject(j)) {
+	  
+	  r = sd->getPos() - com;
+	  v = sd->getVel() - comVel;
+	  
+	  m = sd->getMass();
+	  
+	  // Compute moment of intertia coefficients.
+	  xx += r[0]*r[0]*m;
+	  yy += r[1]*r[1]*m;
+	  zz += r[2]*r[2]*m;
+	  
+	  // compute products of intertia
+	  xy += r[0]*r[1]*m;
+	  xz += r[0]*r[2]*m;
+	  yz += r[1]*r[2]*m;
+	  
+	  angularMomentum += cross( r, v ) * m;
+	}
       }
 
       inertiaTensor(0,0) = yy + zz;

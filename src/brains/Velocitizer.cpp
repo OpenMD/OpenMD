@@ -303,7 +303,7 @@ fqConstraints->applyConstraintsOnChargeVelocities();
     // We now need the inverse of the inertia tensor.
     inertiaTensor = inertiaTensor.inverse();
     omega = inertiaTensor * angularMomentum;
-
+    
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ioi;
     Molecule* mol;

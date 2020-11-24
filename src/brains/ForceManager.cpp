@@ -474,6 +474,7 @@ namespace OpenMD {
   void ForceManager::calcForces() {
 
     if (!initialized_) initialize();
+
     preCalculation();
     shortRangeInteractions();
     longRangeInteractions();

@@ -88,6 +88,7 @@ namespace OpenMD {
     tokenMap_.insert(TokenMapType::value_type("wrappedx", Token(Token::wrappedX, std::string("wrappedx"))));
     tokenMap_.insert(TokenMapType::value_type("wrappedy", Token(Token::wrappedY, std::string("wrappedy"))));
     tokenMap_.insert(TokenMapType::value_type("wrappedz", Token(Token::wrappedZ, std::string("wrappedz"))));
+    tokenMap_.insert(TokenMapType::value_type("atomno", Token(Token::atomno, std::string("atomno"))));    
     tokenMap_.insert(TokenMapType::value_type("r", Token(Token::r, std::string("r"))));
     tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     

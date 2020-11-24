@@ -260,17 +260,15 @@ namespace OpenMD {
   void Integrator::initialize(){
     
     forceMan_->initialize();
-    
+
     // remove center of mass drift velocity (in case we passed in a
     // configuration that was drifting)
     velocitizer_->removeComDrift();
 
     // find the initial fluctuating charges.
-    flucQ_->initialize();
-    
+    flucQ_->initialize();																						       
     // initialize the forces before the first step
-    calcForce();
-    
+    calcForce();																						       
     // execute the constraint algorithm to make sure that the system is
     // constrained at the very beginning  
     if (info_->getNGlobalConstraints() > 0) {
@@ -281,10 +279,10 @@ namespace OpenMD {
       info_->getSnapshotManager()->advance();
     }
     
-    if (needVelocityScaling) {
+    if (needVelocityScaling) {      
       velocitizer_->randomize(targetScalingTemp);
     }
-    
+
     dumpWriter = createDumpWriter();    
     statWriter = createStatWriter(); 
     dumpWriter->writeDumpAndEor();
