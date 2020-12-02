@@ -946,7 +946,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nValence);
+        m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nMobile);
       }
       *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij) );
     }
@@ -954,7 +954,7 @@ namespace OpenMD {
     if ( *(idat.rij) < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nValence);
+        m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nMobile);
       }
       *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
     }
