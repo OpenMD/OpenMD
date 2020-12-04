@@ -1,6 +1,6 @@
 # What is OpenMD?
 
-[![Build Status](https://travis-ci.com/OpenMD/OpenMD.svg?branch=master)](https://travis-ci.com/OpenMD/OpenMD)
+<!-- [![Build Status](https://travis-ci.com/OpenMD/OpenMD.svg?branch=master)](https://travis-ci.com/OpenMD/OpenMD) -->
 
 OpenMD is an open source molecular dynamics engine which is capable of
 efficiently simulating liquids, proteins, nanoparticles, interfaces,

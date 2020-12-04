@@ -1,0 +1,73 @@
+name: build
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # windows-builds:
+  #   runs-on: windows-latest
+  #   if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
+
+  #   steps:
+  #   - uses: actions/checkout@v2
+
+  #   - name: Configure
+  #     run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+  #   - name: Build
+  #     run: cmake --build .
+
+  #   - name: Install
+  #     run: cmake --build . --target install
+
+  ubuntu-builds:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Dependencies
+      run: |
+        sudo apt-get install libfftw3-3 libfftw3-dev
+        sudo apt-get install openbabel libopenbabel-dev
+        sudo apt-get install openmpi-bin libopenmpi-dev
+        sudo apt-get install python3-numpy python3-scipy
+        sudo apt-get install qhull-bin libqhull-dev
+        sudo apt-get install minizip zlib1g-dev
+
+    - name: Configure
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      run: make -j 4
+
+    - name: Install
+      run: sudo make install
+
+  macos-builds:
+    runs-on: macos-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Dependencies
+      run: |
+        sudo brew install fftw
+        sudo brew install open-babel
+        sudo brew install open-mpi
+        sudo brew install numpy scipy
+        sudo brew install qhull
+        sudo brew install zlib
+
+    - name: Configure
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      run: make -j 4
+
+    - name: Install
+      run: sudo make install
