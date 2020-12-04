@@ -56,12 +56,12 @@ jobs:
 
     - name: Dependencies
       run: |
-        sudo brew install fftw
-        sudo brew install open-babel
-        sudo brew install open-mpi
-        sudo brew install numpy scipy
-        sudo brew install qhull
-        sudo brew install zlib
+        brew install fftw
+        brew install open-babel
+        brew install open-mpi
+        brew install numpy scipy
+        brew install qhull
+        brew install zlib
 
     - name: Configure
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
