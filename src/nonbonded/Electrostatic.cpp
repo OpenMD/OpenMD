@@ -636,7 +636,6 @@ namespace OpenMD {
     electrostaticAtomData.is_Dipole = false;
     electrostaticAtomData.is_Quadrupole = false;
     electrostaticAtomData.is_Fluctuating = false;
-    electrostaticAtomData.uses_SlaterElectrostatics = false;
     electrostaticAtomData.uses_SlaterIntramolecular = false;
 
     FixedChargeAdapter fca = FixedChargeAdapter(atomType);
@@ -662,7 +661,6 @@ namespace OpenMD {
 
     if (fqa.isFluctuatingCharge()) {
       electrostaticAtomData.is_Fluctuating = true;
-      electrostaticAtomData.uses_SlaterElectrostatics = fqa.usesSlaterElectrostatics();
       electrostaticAtomData.uses_SlaterIntramolecular = fqa.usesSlaterIntramolecular();
       electrostaticAtomData.electronegativity = fqa.getElectronegativity();
       electrostaticAtomData.hardness = fqa.getHardness();
@@ -717,10 +715,8 @@ namespace OpenMD {
 
         // do both types actually use Slater orbitals?
 
-        if (( electrostaticAtomData.uses_SlaterElectrostatics &&
-              eaData2.uses_SlaterElectrostatics ) ||
-            (electrostaticAtomData.uses_SlaterIntramolecular &&
-             eaData2.uses_SlaterIntramolecular ) ) {
+        if (( electrostaticAtomData.uses_SlaterIntramolecular &&
+	      eaData2.uses_SlaterIntramolecular ) ) {
 
           // Create the spline of the coulombic integral for s-type
           // Slater orbitals.  Add a 2 angstrom safety window to deal
@@ -783,7 +779,6 @@ namespace OpenMD {
       a_is_Dipole = data1.is_Dipole;
       a_is_Quadrupole = data1.is_Quadrupole;
       a_is_Fluctuating = data1.is_Fluctuating;
-      a_uses_Slater = data1.uses_SlaterElectrostatics;
       a_uses_SlaterIntra = data1.uses_SlaterIntramolecular;
 
 
@@ -792,7 +787,6 @@ namespace OpenMD {
       a_is_Dipole = false;
       a_is_Quadrupole = false;
       a_is_Fluctuating = false;
-      a_uses_Slater = false;
       a_uses_SlaterIntra = false;
 
     }
@@ -802,7 +796,6 @@ namespace OpenMD {
       b_is_Dipole = data2.is_Dipole;
       b_is_Quadrupole = data2.is_Quadrupole;
       b_is_Fluctuating = data2.is_Fluctuating;
-      b_uses_Slater = data2.uses_SlaterElectrostatics;
       b_uses_SlaterIntra = data2.uses_SlaterIntramolecular;
 
     } else {
@@ -810,7 +803,6 @@ namespace OpenMD {
       b_is_Dipole = false;
       b_is_Quadrupole = false;
       b_is_Fluctuating = false;
-      b_uses_Slater = false;
       b_uses_SlaterIntra = false;
     }
 
@@ -843,8 +835,7 @@ namespace OpenMD {
     // Obtain all of the required radial function values from the
     // spline structures:
 
-    if (((a_uses_SlaterIntra || b_uses_SlaterIntra) && idat.excluded) ||
-        (a_uses_Slater && b_uses_Slater)) {
+    if (((a_uses_SlaterIntra || b_uses_SlaterIntra) && idat.excluded)) {
       J = Jij[FQtids[idat.atid1]][FQtids[idat.atid2]];
     }
     
@@ -966,20 +957,10 @@ namespace OpenMD {
 
       if (b_is_Charge) {
 
-        if (a_uses_Slater && b_uses_Slater) {
-          J->getValueAndDerivativeAt( *(idat.rij), coulInt, coulDeriv );
-          U += C_a * C_b * coulInt *  *(idat.electroMult);
-          F += C_a * C_b * coulDeriv * rhat *  *(idat.electroMult);
-
-          if (a_is_Fluctuating) dUdCa += C_b * coulInt;
-          if (b_is_Fluctuating) dUdCb += C_a * coulInt;
-        } else {
-
-          pref =  pre11_ * *(idat.electroMult);
-          U  += C_a * C_b * pref * v01;
-          F  += C_a * C_b * pref * dv01 * rhat;
-        }
-
+	pref =  pre11_ * *(idat.electroMult);
+	U  += C_a * C_b * pref * v01;
+	F  += C_a * C_b * pref * dv01 * rhat;
+       
         // If this is an excluded pair, there are still indirect
         // interactions via the reaction field we must worry about:
 

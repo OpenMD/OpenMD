@@ -95,10 +95,6 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->isMetallic;
   }
-  bool FluctuatingChargeAdapter::usesSlaterElectrostatics() {
-    FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
-    return fqParam->usesSlaterElectrostatics;
-  }
   bool FluctuatingChargeAdapter::usesSlaterIntramolecular() {
     FluctuatingAtypeParameters* fqParam = getFluctuatingChargeParam();
     return fqParam->usesSlaterIntramolecular;
@@ -149,7 +145,6 @@ namespace OpenMD {
 
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     fqParam->chargeMass = chargeMass;
-    fqParam->usesSlaterElectrostatics = false;
     fqParam->usesSlaterIntramolecular = true;
 
     fqParam->electronegativity = electronegativity;
@@ -174,7 +169,6 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
-    fqParam->usesSlaterElectrostatics = false;    
     fqParam->usesSlaterIntramolecular = false;
 
     // old-style EAMPoly has nV = nM
@@ -199,7 +193,6 @@ namespace OpenMD {
     FluctuatingAtypeParameters* fqParam = new FluctuatingAtypeParameters();
     at_->addProperty(new FluctuatingAtypeData(FQtypeID, fqParam));
     fqParam->chargeMass = chargeMass;
-    fqParam->usesSlaterElectrostatics = false;
     fqParam->usesSlaterIntramolecular = false;
     fqParam->isMetallic = true;   
     fqParam->nValence = nValence;

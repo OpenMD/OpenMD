@@ -59,7 +59,6 @@ namespace OpenMD {
   struct FluctuatingAtypeParameters {
     RealType chargeMass;
     bool isMetallic;
-    bool usesSlaterElectrostatics;
     bool usesSlaterIntramolecular;
     RealType nValence;     /** number of valence electrons in neutral atom */
     RealType nMobile;      /** number of "mobile" electrons */
@@ -91,7 +90,6 @@ namespace OpenMD {
     bool isFluctuatingCharge();
     bool isMetallic();
     bool hasMultipleMinima();
-    bool usesSlaterElectrostatics();
     bool usesSlaterIntramolecular();
     RealType getChargeMass();
     RealType getElectronegativity();
