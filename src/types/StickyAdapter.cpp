@@ -46,6 +46,7 @@
 #include "types/StickyAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
   
@@ -151,6 +152,6 @@ namespace OpenMD {
     stickyParam.rup = rup;
     stickyParam.isPower = isPower;
     
-    at_->addProperty(make_shared<StickyAtypeData>(StickyTypeID, stickyParam));
+    at_->addProperty(std::make_shared<StickyAtypeData>(StickyTypeID, stickyParam));
   }
 }

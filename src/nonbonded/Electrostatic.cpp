@@ -50,6 +50,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cmath>
+#include <memory>
 #include <numeric>
 
 #include "nonbonded/Electrostatic.hpp"
@@ -77,6 +78,10 @@ namespace OpenMD {
 
   {
     flucQ_ = new FluctuatingChargeForces(info_);
+  }
+
+  Electrostatic::~Electrostatic() {
+    delete flucQ_;
   }
 
   void Electrostatic::setForceField(ForceField *ff) {
@@ -605,23 +610,23 @@ namespace OpenMD {
     // construct the spline structures and fill them with the values we've
     // computed:
 
-    v01s = new CubicSpline();
+    v01s = std::make_shared<CubicSpline>();
     v01s->addPoints(rv, v01v);
-    v11s = new CubicSpline();
+    v11s = std::make_shared<CubicSpline>();
     v11s->addPoints(rv, v11v);
-    v21s = new CubicSpline();
+    v21s = std::make_shared<CubicSpline>();
     v21s->addPoints(rv, v21v);
-    v22s = new CubicSpline();
+    v22s = std::make_shared<CubicSpline>();
     v22s->addPoints(rv, v22v);
-    v31s = new CubicSpline();
+    v31s = std::make_shared<CubicSpline>();
     v31s->addPoints(rv, v31v);
-    v32s = new CubicSpline();
+    v32s = std::make_shared<CubicSpline>();
     v32s->addPoints(rv, v32v);
-    v41s = new CubicSpline();
+    v41s = std::make_shared<CubicSpline>();
     v41s->addPoints(rv, v41v);
-    v42s = new CubicSpline();
+    v42s = std::make_shared<CubicSpline>();
     v42s->addPoints(rv, v42v);
-    v43s = new CubicSpline();
+    v43s = std::make_shared<CubicSpline>();
     v43s->addPoints(rv, v43v);
 
     haveElectroSplines_ = true;
@@ -711,7 +716,7 @@ namespace OpenMD {
         RealType b = eaData2.slaterZeta;
         int m = electrostaticAtomData.slaterN;
         int n = eaData2.slaterN;
-        CubicSpline* J = new CubicSpline();
+        CubicSplinePtr J {std::make_shared<CubicSpline>()};
 
         // do both types actually use Slater orbitals?
 

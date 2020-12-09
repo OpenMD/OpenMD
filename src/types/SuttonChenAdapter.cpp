@@ -46,6 +46,7 @@
 #include "types/SuttonChenAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
 
@@ -129,6 +130,6 @@ namespace OpenMD {
     scParam.alpha = alpha;
     scParam.epsilon = epsilon;
     
-    at_->addProperty(make_shared<SCAtypeData>(SCtypeID, scParam));
+    at_->addProperty(std::make_shared<SCAtypeData>(SCtypeID, scParam));
   }
 }

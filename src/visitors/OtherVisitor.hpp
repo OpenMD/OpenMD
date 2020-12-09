@@ -45,6 +45,8 @@
  
 #ifndef VISITORS_OTHERVISITOR_HPP
 #define VISITORS_OTHERVISITOR_HPP
+
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>

@@ -46,10 +46,13 @@
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
 #include <fstream> 
 #include <iostream>
+
 #include "integrators/LangevinHullForceManager.hpp"
 #include "utils/Constants.hpp"
+#include "utils/MemoryUtils.hpp"
 #include "math/ConvexHull.hpp"
 #include "math/AlphaHull.hpp"
 #include "math/Triangle.hpp"
@@ -62,7 +65,9 @@ namespace OpenMD {
     ForceManager(info) {
    
     simParams = info->getSimParams();
-    veloMunge = new Velocitizer(info);
+
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    veloMunge = Memory::make_unique<Velocitizer>(info);
     
     // Create Hull, Convex Hull for now, other options later.
     
@@ -182,7 +187,6 @@ namespace OpenMD {
 
   LangevinHullForceManager::~LangevinHullForceManager() { 
     delete surfaceMesh_;
-    delete veloMunge;
   }
   
   void LangevinHullForceManager::postCalculation(){

@@ -46,6 +46,7 @@
 #include "types/GayBerneAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
 
@@ -134,6 +135,6 @@ namespace OpenMD {
     gbParam.GB_eps_E = eps_E;
     gbParam.GB_dw = dw;
     
-    at_->addProperty(make_shared<GBAtypeData>(GBtypeID, gbParam));
+    at_->addProperty(std::make_shared<GBAtypeData>(GBtypeID, gbParam));
   }
 }

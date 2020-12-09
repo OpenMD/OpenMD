@@ -47,6 +47,8 @@
 #define MATH_CUBICSPLINE_HPP
 
 #include "config.h"
+
+#include <memory>
 #include <vector>
 
 using namespace std;
@@ -90,6 +92,8 @@ namespace OpenMD {
       return _v[i] < _v[j];
     }
   };
+
+  using CubicSplinePtr = std::shared_ptr<CubicSpline>;
 }
 
 #endif

@@ -48,6 +48,7 @@
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "utils/Constants.hpp"
+#include "utils/MemoryUtils.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "utils/ElementsTable.hpp"
@@ -61,7 +62,9 @@ namespace OpenMD {
 						  maxIterNum_(4),
 						  forceTolerance_(1e-6) {
     simParams = info->getSimParams();
-    veloMunge = new Velocitizer(info);
+
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    veloMunge = Memory::make_unique<Velocitizer>(info);
 
     sphericalBoundaryConditions_ = false;
     if (simParams->getUseSphericalBoundaryConditions()) {

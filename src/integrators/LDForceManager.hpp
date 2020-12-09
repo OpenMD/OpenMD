@@ -122,7 +122,7 @@ namespace OpenMD {
     RealType frozenBufferRadius_;
     bool sphericalBoundaryConditions_;
     Globals* simParams;
-    Velocitizer* veloMunge;
+    VelocitizerPtr veloMunge {nullptr};
     // convergence parameters:
     int maxIterNum_;
     RealType forceTolerance_;

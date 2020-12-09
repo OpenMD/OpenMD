@@ -93,6 +93,7 @@ namespace OpenMD {
     
   public:    
     Electrostatic();
+    ~Electrostatic();
     void setForceField(ForceField *ff);
     void setSimulatedAtomTypes(set<AtomType*> &simtypes);
     void setSimInfo(SimInfo* info) {info_ = info;};
@@ -132,7 +133,7 @@ namespace OpenMD {
     set<int> FQtypes;            /**< The set of AtomType idents that are fluctuating types */
     vector<int> FQtids;          /**< The mapping from AtomType ident -> fluctuating ident */
     vector<ElectrostaticAtomData> ElectrostaticMap; /**< data about Electrostatic types */
-    vector<vector<CubicSpline*> > Jij;              /**< Coulomb integral for two fq types */
+    vector<vector<CubicSplinePtr> > Jij;              /**< Coulomb integral for two fq types */
     
 
     SimInfo* info_;
@@ -164,15 +165,15 @@ namespace OpenMD {
     RealType selfMult2_;
     RealType selfMult4_;
     
-    CubicSpline* v01s;
-    CubicSpline* v11s;
-    CubicSpline* v21s;
-    CubicSpline* v22s;
-    CubicSpline* v31s;
-    CubicSpline* v32s;
-    CubicSpline* v41s;
-    CubicSpline* v42s;
-    CubicSpline* v43s;
+    CubicSplinePtr v01s;
+    CubicSplinePtr v11s;
+    CubicSplinePtr v21s;
+    CubicSplinePtr v22s;
+    CubicSplinePtr v31s;
+    CubicSplinePtr v32s;
+    CubicSplinePtr v41s;
+    CubicSplinePtr v42s;
+    CubicSplinePtr v43s;
 
     ElectrostaticAtomData data1;
     ElectrostaticAtomData data2;
@@ -216,7 +217,7 @@ namespace OpenMD {
     RealType rfContrib, coulInt, dJdr;
     
     // spline for coulomb integral
-    CubicSpline* J;
+    CubicSplinePtr J;
     Vector3d rhat;
       
     // logicals

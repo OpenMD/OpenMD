@@ -44,7 +44,9 @@
  */
  
 #include "utils/PropertyMap.hpp"
+
 #include <cassert>
+#include <memory>
 #include <utility>
 
 namespace OpenMD {

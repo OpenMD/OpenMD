@@ -79,7 +79,7 @@ namespace OpenMD {
     
     Globals* simParams;
     SeqRandNumGen randNumGen_;    
-    Velocitizer* veloMunge;
+    VelocitizerPtr veloMunge {nullptr};
     
     RealType dt_;
     RealType targetTemp_;

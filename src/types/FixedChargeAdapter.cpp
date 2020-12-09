@@ -46,6 +46,7 @@
 #include "types/FixedChargeAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
 
@@ -75,7 +76,7 @@ namespace OpenMD {
       simError(); 
     }
     
-    std::shared_ptr<FixedChargeAtypeData> fcData = dynamic_pointer_cast<FixedChargeAtypeData>(data);
+    std::shared_ptr<FixedChargeAtypeData> fcData = std::dynamic_pointer_cast<FixedChargeAtypeData>(data);
     if (fcData == nullptr) {
       sprintf( painCave.errMsg,
                "FixedChargeAdapter::getFixedChargeParam could not convert\n"
@@ -103,6 +104,6 @@ namespace OpenMD {
     FixedChargeAtypeParameters fcParam {};
     fcParam.charge = charge;
     
-    at_->addProperty(make_shared<FixedChargeAtypeData>(FCtypeID, fcParam));
+    at_->addProperty(std::make_shared<FixedChargeAtypeData>(FCtypeID, fcParam));
   }
 }

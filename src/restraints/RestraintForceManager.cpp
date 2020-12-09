@@ -49,6 +49,7 @@
 
 #include "config.h"
 #include <cmath>
+#include <memory>
 
 #include "restraints/RestraintForceManager.hpp"
 #include "restraints/MolecularRestraint.hpp"
@@ -208,7 +209,7 @@ namespace OpenMD {
         }
 
         restraints_.push_back(rest);
-        mol->addProperty(make_shared<RestraintData>("Restraint", rest));
+        mol->addProperty(std::make_shared<RestraintData>("Restraint", rest));
         restrainedMols_.push_back(mol);
 #ifdef IS_MPI
         }
@@ -290,7 +291,7 @@ namespace OpenMD {
           }
     
           restraints_.push_back(rest);
-          sd->addProperty(make_shared<RestraintData>("Restraint", rest));
+          sd->addProperty(std::make_shared<RestraintData>("Restraint", rest));
           restrainedObjs_.push_back(sd);                    
         }
 

@@ -46,6 +46,8 @@
 #ifndef NONBONDED_EAM_HPP
 #define NONBONDED_EAM_HPP
 
+#include <memory>
+
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "nonbonded/Electrostatic.hpp"
 #include "types/EAMAdapter.hpp"
@@ -56,11 +58,11 @@
 namespace OpenMD {
 
   struct EAMAtomData {
-    CubicSpline* rho;
-    CubicSpline* F;
-    CubicSpline* Z;
-    CubicSpline* phiCC;
-    CubicSpline* phiCV;
+    CubicSplinePtr rho;
+    CubicSplinePtr F;
+    CubicSplinePtr Z;
+    CubicSplinePtr phiCC;
+    CubicSplinePtr phiCV;
     RealType rcut;
     RealType nValence;
     RealType nMobile;
@@ -68,7 +70,7 @@ namespace OpenMD {
   };
 
   struct EAMInteractionData {
-    CubicSpline* phi;
+    CubicSplinePtr phi;
     RealType rcut;
     bool explicitlySet;
   };
@@ -141,7 +143,7 @@ namespace OpenMD {
 
   private:
     void initialize();
-    CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
+    CubicSplinePtr getPhi(AtomType* atomType1, AtomType* atomType2);
     
     bool initialized_;
     bool haveCutoffRadius_;

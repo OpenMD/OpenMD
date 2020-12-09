@@ -46,6 +46,8 @@
 #ifndef NONBONDED_NONBONDEDINTERACTION_HPP
 #define NONBONDED_NONBONDEDINTERACTION_HPP
 
+#include <memory>
+
 #include "types/AtomType.hpp"
 #include "math/SquareMatrix3.hpp"
 
@@ -104,21 +106,21 @@ namespace OpenMD {
     RealType* rij;            /**< interatomic separation */
     RealType* r2;             /**< square of rij */
     RealType* rcut;           /**< cutoff radius for this interaction */
-    bool shiftedPot;          /**< shift the potential up inside the cutoff? */
-    bool shiftedForce;        /**< shifted forces smoothly inside the cutoff? */
+    bool shiftedPot {false};          /**< shift the potential up inside the cutoff? */
+    bool shiftedForce {false};        /**< shifted forces smoothly inside the cutoff? */
     RealType* sw;             /**< switching function value at rij */
     int* topoDist;            /**< topological distance between atoms */
-    bool excluded;            /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
-    bool sameRegion;          /**< are these atoms specified to be in the same region? */ 
+    bool excluded {false};            /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
+    bool sameRegion {false};          /**< are these atoms specified to be in the same region? */ 
     RealType* vdwMult;        /**< multiplier for van der Waals interactions */
     RealType* electroMult;    /**< multiplier for electrostatic interactions */
     potVec* pot;              /**< total potential */
     potVec* excludedPot;      /**< potential energy excluded from the overall calculation */
     RealType* vpair;          /**< pair potential */
-    bool doParticlePot;       /**< should we bother with the particle pot? */
-    bool doElectricField;     /**< should we bother with the electric field? */
-    bool doSitePotential;     /**< should we bother with electrostatic site potential */
-    bool isSelected;          /**< one of the particles has been selected for selection potential */
+    bool doParticlePot {false};       /**< should we bother with the particle pot? */
+    bool doElectricField {false};     /**< should we bother with the electric field? */
+    bool doSitePotential {false};     /**< should we bother with electrostatic site potential */
+    bool isSelected {false};          /**< one of the particles has been selected for selection potential */
     potVec* selePot;          /**< potential energies of the selected sites */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
@@ -170,7 +172,7 @@ namespace OpenMD {
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
     potVec* selfPot;        /**< total potential (including embedding energy) */
     potVec* excludedPot;    /**< potential energy excluded from the overall calculation */
-    bool doParticlePot;     /**< should we bother with the particle pot? */
+    bool doParticlePot {false};     /**< should we bother with the particle pot? */
     RealType* particlePot;  /**< contribution to potential from this particle */
     Vector3d* t;            /**< pointer to resultant torque on atom */
     RealType* rho;          /**< electron density */
@@ -178,7 +180,7 @@ namespace OpenMD {
     RealType* dfrhodrho;    /**< derivative of density functional for atom */
     RealType* flucQ;	    /**< current value of atom's fluctuating charge */
     RealType* flucQfrc;	    /**< fluctuating charge derivative */
-    bool isSelected;        /**< this site has been selected for selection potential */
+    bool isSelected {false};        /**< this site has been selected for selection potential */
     potVec* selePot;       /**< potential energy of the selected site */
     /*@}*/
   };
@@ -196,7 +198,9 @@ namespace OpenMD {
     virtual int getHash() = 0;
     virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) = 0;
     virtual string getName() =  0;
-  };    
+  };  
+
+  using NonBondedInteractionPtr = std::shared_ptr<NonBondedInteraction>;  
 
   /**
    * The basic interface for van der Waals interactions.

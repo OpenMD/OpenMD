@@ -62,6 +62,7 @@
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/StringUtils.hpp"
+#include "utils/MemoryUtils.hpp"
 
 using namespace OpenMD;
 
@@ -112,7 +113,10 @@ int main(int argc, char *argv []) {
 
   // Important utility classes for computing system properties:
   Thermo thermo(info);
-  Velocitizer* veloSet = new Velocitizer(info);
+
+  // Remove in favor of std::make_unique<> when we switch to C++14 and above
+  VelocitizerPtr veloSet {Memory::make_unique<Velocitizer>(info)};
+  
   ForceManager* forceMan = new ForceManager(info);
 
   // Just in case we were passed a system that is on the move:

@@ -45,26 +45,30 @@
 
 #ifndef SELECTION_NAMEFINDER_HPP
 #define SELECTION_NAMEFINDER_HPP
+
+#include <map>
+#include <memory>
 #include <set>
 #include <string>
-#include <map>
+
 #include "brains/SimInfo.hpp"
 #include "selection/SelectionSet.hpp"
+
 namespace OpenMD {
 
   class TreeNode{
   public:
-    ~TreeNode();
     std::string name;
     SelectionSet bs;
-    std::map<std::string, TreeNode*> children;
+    std::map<std::string, std::shared_ptr<TreeNode>> children;
   };
 
-  class NameFinder{
+  using TreeNodePtr = std::shared_ptr<TreeNode>;
+
+  class NameFinder {
   public:
     NameFinder(SimInfo* info);
-    ~NameFinder();
-    SelectionSet  match(const std::string &name);
+    SelectionSet match(const std::string &name);
 
   private:
     void loadNames();
@@ -78,16 +82,16 @@ namespace OpenMD {
 
     void matchInternalIndex(const std::string &name, int internalIndex, SelectionSet &bs);
 
-    TreeNode* createNode(TreeNode* parent, const std::string &name);
-    std::vector<TreeNode*> getAllChildren(TreeNode* node);
-    std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string &name);
+    TreeNodePtr createNode(TreeNodePtr parent, const std::string &name);
+    std::vector<TreeNodePtr> getAllChildren(TreeNodePtr node);
+    std::vector<TreeNodePtr> getMatchedChildren(TreeNodePtr node, const std::string &name);
     bool isMatched(const std::string &str, const std::string &wildcard);
 
     bool isInteger(const std::string &str);
 
     SimInfo* info_;
     vector<int> nObjects_;
-    TreeNode* root_;
+    TreeNodePtr root_ {nullptr};
   };
 }
 #endif

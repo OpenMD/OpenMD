@@ -42,6 +42,8 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
+
+#include <memory>
  
 #include "brains/ForceField.hpp"
 #include "io/ShapeAtomTypesSectionParser.hpp"

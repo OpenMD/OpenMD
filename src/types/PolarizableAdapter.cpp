@@ -46,6 +46,7 @@
 #include "types/PolarizableAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
 
@@ -103,6 +104,6 @@ namespace OpenMD {
     PolarizableAtypeParameters polParam {};
     polParam.polarizability = polarizability;
     
-    at_->addProperty(make_shared<PolarizableAtypeData>(PolTypeID, polParam));
+    at_->addProperty(std::make_shared<PolarizableAtypeData>(PolTypeID, polParam));
   }
 }

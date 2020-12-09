@@ -55,6 +55,7 @@
 #include "primitives/Molecule.hpp"
 #define __OPENMD_C
 #include "utils/simError.h"
+#include "utils/MemoryUtils.hpp"
 #include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
@@ -83,7 +84,7 @@ namespace OpenMD {
   }
 
   ForceManager::~ForceManager() {
-    perturbations_.clear();
+    MemoryUtils::deletePointers(perturbations_);
 
     delete switcher_;
     delete interactionMan_;

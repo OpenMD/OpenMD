@@ -169,6 +169,8 @@ namespace OpenMD {
       delete i->second;
     }
     molecules_.clear();
+
+    MemoryUtils::deletePointers(moleculeStamps_);
        
     delete sman_;
     delete simParams_;

@@ -46,6 +46,8 @@
 #ifndef CONSTRAINTS_CONTRAINTELEM_HPP
 #define CONSTRAINTS_CONTRAINTELEM_HPP
 
+#include <memory>
+
 #include "primitives/StuntDouble.hpp"
 #include "utils/GenericData.hpp"
 #include "utils/simError.h"
@@ -61,7 +63,7 @@ namespace OpenMD {
     ConstraintElem(StuntDouble* sd) : sd_(sd) {
       std::shared_ptr<GenericData> movedData = sd_->getPropertyByName("Moved");
       if (movedData != nullptr) { //if generic data with keyword "moved" exists, assign it to moved_
-	moved_ = dynamic_pointer_cast<BoolGenericData>(movedData);
+	moved_ = std::dynamic_pointer_cast<BoolGenericData>(movedData);
 	if (moved_ == nullptr) {
 	  sprintf(painCave.errMsg,
 		  "Generic Data with keyword Moved exists, however, it can not be casted to a BoolGenericData.\n");
@@ -69,13 +71,13 @@ namespace OpenMD {
 	  simError();
 	}
       }else { //if generic data with keyword "moved" does not exist, create it
-	moved_ = make_shared<BoolGenericData>("Moved");
+	moved_ = std::make_shared<BoolGenericData>("Moved");
 	sd_->addProperty(moved_);
       }
       
       std::shared_ptr<GenericData> movingData = sd_->getPropertyByName("Moving");
       if (movingData != nullptr) {
-	moving_ = dynamic_pointer_cast<BoolGenericData>(movingData);
+	moving_ = std::dynamic_pointer_cast<BoolGenericData>(movingData);
 	if (moving_ == nullptr) {
 	  sprintf(painCave.errMsg,
 		  "Generic Data with keyword Moving exists, however, it can not be casted to a BoolGenericData.\n");
@@ -83,7 +85,7 @@ namespace OpenMD {
 	  simError();
 	}
       }else {
-	moving_ = make_shared<BoolGenericData>("Moving");
+	moving_ = std::make_shared<BoolGenericData>("Moving");
 	sd_->addProperty(moving_);                
       }
       

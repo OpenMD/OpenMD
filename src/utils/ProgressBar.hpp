@@ -45,8 +45,11 @@
 
 #ifndef UTILS_PROGRESSBAR_HPP
 #define UTILS_PROGRESSBAR_HPP
+
 #include "config.h"
+
 #include <ctime>
+#include <memory>
 
 namespace OpenMD {
 
@@ -63,8 +66,9 @@ namespace OpenMD {
     RealType maximum_;
     int iteration_;
     time_t start_, current_;
-
   };
+
+  using ProgressBarPtr = std::unique_ptr<ProgressBar>;
 }
 
 #endif

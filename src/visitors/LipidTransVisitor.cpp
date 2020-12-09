@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <memory>
+
 #include "visitors/LipidTransVisitor.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"

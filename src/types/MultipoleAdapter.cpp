@@ -46,6 +46,7 @@
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
   
@@ -131,6 +132,6 @@ namespace OpenMD {
     multipoleParam.isDipole = isDipole;
     multipoleParam.isQuadrupole = isQuadrupole;   
 
-    at_->addProperty(make_shared<MultipoleAtypeData>(MultipoleTypeID, multipoleParam));
+    at_->addProperty(std::make_shared<MultipoleAtypeData>(MultipoleTypeID, multipoleParam));
   }
 }

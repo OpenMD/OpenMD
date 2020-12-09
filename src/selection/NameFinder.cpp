@@ -51,15 +51,7 @@
 
 namespace OpenMD {
 
-  TreeNode::~TreeNode(){
-    std::map<std::string, TreeNode*>::iterator i;
-    for ( i = children.begin(); i != children.end(); ++i) {
-      i->second->~TreeNode();
-    }
-    children.clear();
-  }
-
-  NameFinder::NameFinder(SimInfo* info) : info_(info), root_(NULL){
+  NameFinder::NameFinder(SimInfo* info) : info_(info) {
     nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
     nObjects_.push_back(info_->getNGlobalBonds());
     nObjects_.push_back(info_->getNGlobalBends());
@@ -68,10 +60,6 @@ namespace OpenMD {
     nObjects_.push_back(info_->getNGlobalMolecules());
     
     loadNames();
-  }
-
-  NameFinder::~NameFinder(){
-    delete root_;
   }
 
   void NameFinder::loadNames() {
@@ -91,7 +79,7 @@ namespace OpenMD {
     Torsion* torsion;
     Inversion* inversion;    
 
-    root_ = new TreeNode;
+    root_ = std::make_shared<TreeNode>();
     root_->bs.resize(nObjects_);
     root_->bs.setAll(); //
     
@@ -99,12 +87,12 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
            
       std::string molName = mol->getMoleculeName();
-      TreeNode* molNode = createNode(root_, molName);
+      TreeNodePtr molNode = createNode(root_, molName);
       molNode->bs.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
         
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	std::string atomName = atom->getType();
-	TreeNode* atomNode = createNode(molNode, atomName);
+	TreeNodePtr atomNode = createNode(molNode, atomName);
             
 	molNode->bs.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
 	atomNode->bs.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
@@ -113,7 +101,7 @@ namespace OpenMD {
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
 	std::string rbName = rb->getType();
-	TreeNode* rbNode = createNode(molNode, rbName);
+	TreeNodePtr rbNode = createNode(molNode, rbName);
             
 	molNode->bs.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
 	rbNode->bs.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
@@ -126,7 +114,7 @@ namespace OpenMD {
 	// //create nodes for atoms belong to this rigidbody
 	// for(atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
 	//   std::string rbAtomName = atom->getType();
-	//   TreeNode* rbAtomNode = createNode(rbNode, rbAtomName);
+	//   TreeNodePtr rbAtomNode = createNode(rbNode, rbAtomName);
 
 	//   rbAtomNode->bs.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
 	// }
@@ -136,7 +124,7 @@ namespace OpenMD {
            bond = mol->nextBond(bondIter)) {
 
 	std::string bondName = bond->getName();
-	TreeNode* bondNode = createNode(molNode, bondName);
+	TreeNodePtr bondNode = createNode(molNode, bondName);
 
 	molNode->bs.bitsets_[BOND].setBitOn(bond->getGlobalIndex());
         bondNode->bs.bitsets_[BOND].setBitOn(bond->getGlobalIndex());
@@ -146,7 +134,7 @@ namespace OpenMD {
         
         for (ai = atoms.begin(); ai != atoms.end(); ++ai) {
           std::string atomName = (*ai)->getType();
-          TreeNode* atomNode = createNode(bondNode, atomName);
+          TreeNodePtr atomNode = createNode(bondNode, atomName);
           atomNode->bs.bitsets_[STUNTDOUBLE].setBitOn((*ai)->getGlobalIndex());
         }
       }
@@ -154,7 +142,7 @@ namespace OpenMD {
            bend = mol->nextBend(bendIter)) {
 
 	std::string bendName = bend->getName();
-	TreeNode* bendNode = createNode(molNode, bendName);
+	TreeNodePtr bendNode = createNode(molNode, bendName);
 
 	molNode->bs.bitsets_[BEND].setBitOn(bend->getGlobalIndex());
         bendNode->bs.bitsets_[BEND].setBitOn(bend->getGlobalIndex());
@@ -164,7 +152,7 @@ namespace OpenMD {
         
         for (ai = atoms.begin(); ai != atoms.end(); ++ai) {
           std::string atomName = (*ai)->getType();
-          TreeNode* atomNode = createNode(bendNode, atomName);
+          TreeNodePtr atomNode = createNode(bendNode, atomName);
           atomNode->bs.bitsets_[STUNTDOUBLE].setBitOn((*ai)->getGlobalIndex());
         }
 
@@ -173,7 +161,7 @@ namespace OpenMD {
            torsion = mol->nextTorsion(torsionIter)) {
 
 	std::string torsionName = torsion->getName();
-	TreeNode* torsionNode = createNode(molNode, torsionName);
+	TreeNodePtr torsionNode = createNode(molNode, torsionName);
 
 	molNode->bs.bitsets_[TORSION].setBitOn(torsion->getGlobalIndex());
         torsionNode->bs.bitsets_[TORSION].setBitOn(torsion->getGlobalIndex());
@@ -183,7 +171,7 @@ namespace OpenMD {
         
         for (ai = atoms.begin(); ai != atoms.end(); ++ai) {
           std::string atomName = (*ai)->getType();
-          TreeNode* atomNode = createNode(torsionNode, atomName);
+          TreeNodePtr atomNode = createNode(torsionNode, atomName);
           atomNode->bs.bitsets_[STUNTDOUBLE].setBitOn((*ai)->getGlobalIndex());
         }
 
@@ -192,7 +180,7 @@ namespace OpenMD {
            inversion = mol->nextInversion(inversionIter)) {
 
 	std::string inversionName = inversion->getName();
-	TreeNode* inversionNode = createNode(molNode, inversionName);
+	TreeNodePtr inversionNode = createNode(molNode, inversionName);
 
 	molNode->bs.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
         inversionNode->bs.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
@@ -201,23 +189,23 @@ namespace OpenMD {
         
         for (ai = atoms.begin(); ai != atoms.end(); ++ai) {
           std::string atomName = (*ai)->getType();
-          TreeNode* atomNode = createNode(inversionNode, atomName);
+          TreeNodePtr atomNode = createNode(inversionNode, atomName);
           atomNode->bs.bitsets_[STUNTDOUBLE].setBitOn((*ai)->getGlobalIndex());
         }
       }
     }
   }
 
-  TreeNode* NameFinder::createNode(TreeNode* parent, const std::string& name) {
-    TreeNode* node;    
-    std::map<std::string, TreeNode*>::iterator foundIter;
+  TreeNodePtr NameFinder::createNode(TreeNodePtr parent, const std::string& name) {
+    TreeNodePtr node;    
+    std::map<std::string, TreeNodePtr>::iterator foundIter;
     foundIter = parent->children.find(name);
     if ( foundIter  == parent->children.end()) {
-      node = new TreeNode;
+      node = std::make_shared<TreeNode>();
       node->name = name;
       node->bs.resize(nObjects_);
       parent->children.insert(std::make_pair(name, node));
-    }else {
+    } else {
       node = foundIter->second;
     }
     return node;
@@ -284,19 +272,19 @@ namespace OpenMD {
   }
 
   void NameFinder::matchMolecule(const std::string& molName, SelectionSet& bs) {
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
       bs |= (*i)->bs;
     }    
   }
 
   void NameFinder::matchStuntDouble(const std::string& molName, const std::string& sdName, SelectionSet& bs){
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-      std::vector<TreeNode*> sdNodes = getMatchedChildren(*i, sdName);   
-      std::vector<TreeNode*>::iterator j;
+      std::vector<TreeNodePtr> sdNodes = getMatchedChildren(*i, sdName);   
+      std::vector<TreeNodePtr>::iterator j;
       for (j = sdNodes.begin(); j != sdNodes.end(); ++j) {
 	bs |= (*j)->bs;
       }
@@ -306,15 +294,15 @@ namespace OpenMD {
 
   void NameFinder::matchBond(const std::string& molName, 
                              const std::string& bondName, SelectionSet& bs){
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-      std::vector<TreeNode*> bondNodes = getMatchedChildren(*i, bondName);   
-      std::vector<TreeNode*>::iterator j;
+      std::vector<TreeNodePtr> bondNodes = getMatchedChildren(*i, bondName);   
+      std::vector<TreeNodePtr>::iterator j;
       for (j = bondNodes.begin(); j != bondNodes.end(); ++j) {
         bs |= (*j)->bs;
-	std::vector<TreeNode*> bondAtomNodes = getAllChildren(*j);
-	std::vector<TreeNode*>::iterator k;
+	std::vector<TreeNodePtr> bondAtomNodes = getAllChildren(*j);
+	std::vector<TreeNodePtr>::iterator k;
 	for(k = bondAtomNodes.begin(); k != bondAtomNodes.end(); ++k){
 	  bs |= (*k)->bs;
 	}
@@ -323,14 +311,14 @@ namespace OpenMD {
   }
 
   void NameFinder::matchBend(const std::string& molName, const std::string& bendName,  SelectionSet& bs){
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-      std::vector<TreeNode*> bendNodes = getMatchedChildren(*i, bendName);   
-      std::vector<TreeNode*>::iterator j;
+      std::vector<TreeNodePtr> bendNodes = getMatchedChildren(*i, bendName);   
+      std::vector<TreeNodePtr>::iterator j;
       for (j = bendNodes.begin(); j != bendNodes.end(); ++j) {
-	std::vector<TreeNode*> bendAtomNodes = getAllChildren(*j);
-	std::vector<TreeNode*>::iterator k;
+	std::vector<TreeNodePtr> bendAtomNodes = getAllChildren(*j);
+	std::vector<TreeNodePtr>::iterator k;
 	for(k = bendAtomNodes.begin(); k != bendAtomNodes.end(); ++k){
 	  bs |= (*k)->bs;
 	}
@@ -338,14 +326,14 @@ namespace OpenMD {
     }
   }
   void NameFinder::matchTorsion(const std::string& molName, const std::string& torsionName, SelectionSet& bs){
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-      std::vector<TreeNode*> torsionNodes = getMatchedChildren(*i, torsionName);   
-      std::vector<TreeNode*>::iterator j;
+      std::vector<TreeNodePtr> torsionNodes = getMatchedChildren(*i, torsionName);   
+      std::vector<TreeNodePtr>::iterator j;
       for (j = torsionNodes.begin(); j != torsionNodes.end(); ++j) {
-	std::vector<TreeNode*> torsionAtomNodes = getAllChildren(*j);
-	std::vector<TreeNode*>::iterator k;
+	std::vector<TreeNodePtr> torsionAtomNodes = getAllChildren(*j);
+	std::vector<TreeNodePtr>::iterator k;
 	for(k = torsionAtomNodes.begin(); k != torsionAtomNodes.end(); ++k){
 	  bs |= (*k)->bs;
 	}
@@ -353,14 +341,14 @@ namespace OpenMD {
     }
   }
   void NameFinder::matchInversion(const std::string& molName, const std::string& inversionName, SelectionSet& bs){
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-      std::vector<TreeNode*> inversionNodes = getMatchedChildren(*i, inversionName);   
-      std::vector<TreeNode*>::iterator j;
+      std::vector<TreeNodePtr> inversionNodes = getMatchedChildren(*i, inversionName);   
+      std::vector<TreeNodePtr>::iterator j;
       for (j = inversionNodes.begin(); j != inversionNodes.end(); ++j) {
-	std::vector<TreeNode*> inversionAtomNodes = getAllChildren(*j);
-	std::vector<TreeNode*>::iterator k;
+	std::vector<TreeNodePtr> inversionAtomNodes = getAllChildren(*j);
+	std::vector<TreeNodePtr>::iterator k;
 	for(k = inversionAtomNodes.begin(); k != inversionAtomNodes.end(); ++k){
 	  bs |= (*k)->bs;
 	}
@@ -369,14 +357,14 @@ namespace OpenMD {
   }
 
   void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, SelectionSet& bs){
-    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
-    std::vector<TreeNode*>::iterator i;
+    std::vector<TreeNodePtr> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNodePtr>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-      std::vector<TreeNode*> rbNodes = getMatchedChildren(*i, rbName);   
-      std::vector<TreeNode*>::iterator j;
+      std::vector<TreeNodePtr> rbNodes = getMatchedChildren(*i, rbName);   
+      std::vector<TreeNodePtr>::iterator j;
       for (j = rbNodes.begin(); j != rbNodes.end(); ++j) {
-	std::vector<TreeNode*> rbAtomNodes = getMatchedChildren(*j, rbAtomName);
-	std::vector<TreeNode*>::iterator k;
+	std::vector<TreeNodePtr> rbAtomNodes = getMatchedChildren(*j, rbAtomName);
+	std::vector<TreeNodePtr>::iterator k;
 	for(k = rbAtomNodes.begin(); k != rbAtomNodes.end(); ++k){
 	  bs |= (*k)->bs;
 	}
@@ -385,18 +373,18 @@ namespace OpenMD {
 
   }
 
-  std::vector<TreeNode*> NameFinder::getAllChildren(TreeNode* node)  {
-    std::vector<TreeNode*> childNodes;
-    std::map<std::string, TreeNode*>::iterator i;
+  std::vector<TreeNodePtr> NameFinder::getAllChildren(TreeNodePtr node)  {
+    std::vector<TreeNodePtr> childNodes;
+    std::map<std::string, TreeNodePtr>::iterator i;
     for (i = node->children.begin(); i != node->children.end(); ++i) {
       childNodes.push_back(i->second);
     }
     return childNodes;
   }
 
-  std::vector<TreeNode*> NameFinder::getMatchedChildren(TreeNode* node, const std::string& name) {
-    std::vector<TreeNode*> matchedNodes;
-    std::map<std::string, TreeNode*>::iterator i;
+  std::vector<TreeNodePtr> NameFinder::getMatchedChildren(TreeNodePtr node, const std::string& name) {
+    std::vector<TreeNodePtr> matchedNodes;
+    std::map<std::string, TreeNodePtr>::iterator i;
     for (i = node->children.begin(); i != node->children.end(); ++i) {
       if (isMatched( i->first, name)) {
 	matchedNodes.push_back(i->second);

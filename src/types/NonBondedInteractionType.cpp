@@ -47,6 +47,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <memory>
 
 #include "types/NonBondedInteractionType.hpp"
 #include "utils/simError.h"

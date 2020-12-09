@@ -45,6 +45,9 @@
 
 #ifndef BRAINS_VELOCITIZER_HPP
 #define BRAINS_VELOCITIZER_HPP
+
+#include <memory>
+
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "math/RandNumGen.hpp"
@@ -102,5 +105,7 @@ namespace OpenMD {
     RandNumGen* randNumGen_;
   };
 
+  using VelocitizerPtr = std::unique_ptr<Velocitizer>;
 }
-#endif //BRAINS_VELOCITIZER_HPP
+
+#endif // BRAINS_VELOCITIZER_HPP

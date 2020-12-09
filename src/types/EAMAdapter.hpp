@@ -46,6 +46,8 @@
 #ifndef TYPES_EAMADAPTER_HPP
 #define TYPES_EAMADAPTER_HPP
 
+#include <memory>
+
 #include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
 #include "math/CubicSpline.hpp"
@@ -268,16 +270,16 @@ namespace OpenMD {
     std::vector<RealType> getOrhoE();
     std::vector<std::vector<RealType> > getOF();
     RealType getF0();
-    CubicSpline* getZSpline();
-    CubicSpline* getRhoSpline();
-    CubicSpline* getFSpline();
+    CubicSplinePtr getZSpline();
+    CubicSplinePtr getRhoSpline();
+    CubicSplinePtr getFSpline();
 
   private:
     AtomType* at_;
     EAMParameters      getEAMParam();
     FuncflParameters   getFuncflParam();
     ZhouParameters     getZhouParam();
-    
   };
+  
 }
 #endif

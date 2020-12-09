@@ -36,7 +36,7 @@ namespace QuantLib {
     class LineSearchBasedMethod : public OptimizationMethod {
       public:
         LineSearchBasedMethod(LineSearch* lSearch = NULL);
-        virtual ~LineSearchBasedMethod() {}
+        virtual ~LineSearchBasedMethod();
 
         virtual EndCriteria::Type minimize(Problem& P,
                                            const EndCriteria& endCriteria,

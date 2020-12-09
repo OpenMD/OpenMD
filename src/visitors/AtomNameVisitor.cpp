@@ -44,6 +44,8 @@
  */
 #include <sstream> 
 #include <fstream>
+#include <memory>
+
 #include "visitors/AtomNameVisitor.hpp"
 #include "utils/Trim.hpp"
 #include "utils/StringTokenizer.hpp"
@@ -67,11 +69,11 @@ namespace OpenMD {
       if(atomData == nullptr){
 	std::cerr << "can not get Atom Data from " << atom->getType() 
                   << std::endl;
-	atomData = make_shared<AtomData>(); 
+	atomData = std::make_shared<AtomData>(); 
       } else {
       }
     } else {
-      atomData = make_shared<AtomData>(); 
+      atomData = std::make_shared<AtomData>(); 
     }
     
     std::vector<AtomInfo*>::iterator i;

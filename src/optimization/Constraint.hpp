@@ -47,6 +47,7 @@ namespace QuantLib {
                         const DynamicVector<RealType>& direction,
                         RealType beta);
         Constraint(Impl* impl = NULL);
+        virtual ~Constraint() { delete impl_; }
     };
 
     //! No constraint

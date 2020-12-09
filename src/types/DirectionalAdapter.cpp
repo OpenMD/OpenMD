@@ -46,6 +46,7 @@
 #include "types/DirectionalAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
   
@@ -75,7 +76,7 @@ namespace OpenMD {
       simError(); 
     }
     
-    std::shared_ptr<DirectionalAtypeData> directionalData = dynamic_pointer_cast<DirectionalAtypeData>(data);
+    std::shared_ptr<DirectionalAtypeData> directionalData = std::dynamic_pointer_cast<DirectionalAtypeData>(data);
     if (directionalData == nullptr) {
       sprintf( painCave.errMsg,
                "DirectionalAdapter::getDirectionalParam could not convert\n"
@@ -107,6 +108,6 @@ namespace OpenMD {
 
     directionalParam.I = I;
     
-    at_->addProperty(make_shared<DirectionalAtypeData>(DirectionalTypeID, directionalParam));
+    at_->addProperty(std::make_shared<DirectionalAtypeData>(DirectionalTypeID, directionalParam));
   }
 }

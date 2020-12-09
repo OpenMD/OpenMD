@@ -79,7 +79,7 @@ namespace OpenMD {
     ForceManager* forceMan_;
     bool hasFlucQ_;
     bool initialized_;
-    
   };
 }
+
 #endif

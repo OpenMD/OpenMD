@@ -73,7 +73,7 @@ namespace OpenMD {
     bool haveSpline_;
     bool isCubic_;
     int np_;
-    CubicSpline* switchSpline_;   
+    CubicSplinePtr switchSpline_;   
   };
 }                  
 #endif

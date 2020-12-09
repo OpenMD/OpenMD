@@ -45,6 +45,8 @@
 
 #include "config.h"
 #include <cstdio>
+#include <memory>
+
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
 #include "nonbonded/SlaterIntegrals.hpp"
@@ -155,7 +157,7 @@ namespace OpenMD {
     fqParam.vself.setCoefficient(1, electronegativity);
     fqParam.vself.setCoefficient(2, 0.5 * hardness);
     
-    at_->addProperty(make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
+    at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
   }
   
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
@@ -178,7 +180,7 @@ namespace OpenMD {
 
     fqParam.vself = vs;
 
-    at_->addProperty(make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
+    at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
   }
   
   void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
@@ -200,6 +202,6 @@ namespace OpenMD {
 
     fqParam.vself = vs;
 
-    at_->addProperty(make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
+    at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
   }
 }

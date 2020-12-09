@@ -44,6 +44,8 @@
  */
  
 #include <cstring>
+#include <memory>
+
 #include "visitors/AtomVisitor.hpp"
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
@@ -74,7 +76,7 @@ namespace OpenMD {
 
     //if visited property is not existed, add it as new property
     if (data == nullptr) {
-      data = make_shared<GenericData>();
+      data = std::make_shared<GenericData>();
       data->setID("VISITED");
       atom->addProperty(data);
     }
@@ -126,7 +128,7 @@ namespace OpenMD {
       atomInfo->eField = atom->getElectricField();
     }
 
-    atomData = make_shared<AtomData>();
+    atomData = std::make_shared<AtomData>();
     atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
     
@@ -186,7 +188,7 @@ namespace OpenMD {
       atomInfo->vec = datom->getA().transpose()*V3Z;
     }
 
-    atomData = make_shared<AtomData>();
+    atomData = std::make_shared<AtomData>();
     atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
 

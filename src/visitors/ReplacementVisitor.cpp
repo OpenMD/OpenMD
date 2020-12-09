@@ -44,6 +44,8 @@
  */
  
 #include <cstring>
+#include <memory>
+
 #include "visitors/ReplacementVisitor.hpp"
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
@@ -112,12 +114,12 @@ namespace OpenMD {
       
       if (atomData == nullptr) {
         std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
-        atomData = make_shared<AtomData>();
+        atomData = std::make_shared<AtomData>();
         haveAtomData = false;
       } else
         haveAtomData = true;
     } else {
-      atomData = make_shared<AtomData>();
+      atomData = std::make_shared<AtomData>();
       haveAtomData = false;
     }
         

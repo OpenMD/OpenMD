@@ -50,6 +50,8 @@
  * @version 1.0
  */ 
 
+#include <memory>
+
 #include "primitives/StuntDouble.hpp"
 
 namespace OpenMD {

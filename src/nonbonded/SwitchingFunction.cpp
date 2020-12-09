@@ -56,14 +56,13 @@ namespace OpenMD {
   SwitchingFunction::SwitchingFunction() : functionType_(cubic), 
 					   haveSpline_(false), isCubic_(true), 
 					   np_(150) {
-    switchSpline_ = new CubicSpline();
+    switchSpline_ = std::make_shared<CubicSpline>();
   }
 
   void SwitchingFunction::setSwitchType(SwitchingFunctionType sft) {
     if ((sft == fifth_order_poly) || (sft == cubic)) {
       if (haveSpline_) {
-        delete switchSpline_;
-        switchSpline_ = new CubicSpline();
+        switchSpline_ = std::make_shared<CubicSpline>();
         setSwitch(rin_, rout_);
       } 
     } else {

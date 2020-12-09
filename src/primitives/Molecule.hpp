@@ -52,8 +52,10 @@
 
 #ifndef PRIMITIVES_MOLECULE_HPP
 #define PRIMITIVES_MOLECULE_HPP
+
 #include <vector>
 #include <iostream>
+#include <memory>
 
 #include "constraints/ConstraintPair.hpp"
 #include "math/Vector3.hpp"

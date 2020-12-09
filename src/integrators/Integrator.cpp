@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <memory>
+#include <utility>
  
 #include "brains/Snapshot.hpp"
 #include "integrators/Integrator.hpp"
@@ -52,11 +54,12 @@
 #include "flucq/FluctuatingChargeNVE.hpp"
 #include "flucq/FluctuatingChargeNVT.hpp"
 #include "utils/simError.h"
+#include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
   Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL), rotAlgo_(NULL), flucQ_(NULL), 
-      rattle_(NULL), velocitizer_(NULL), rnemd_(NULL), 
+      rattle_(NULL), velocitizer_(nullptr), rnemd_(NULL), 
       needPotential(false), needVirial(false), 
       needReset(false),  needVelocityScaling(false), 
       useRNEMD(false), dumpWriter(NULL), statWriter(NULL), thermo(info_),
@@ -136,7 +139,8 @@ namespace OpenMD {
     
     // Create a default a velocitizer: If the subclass wants to use 
     // a different velocitizer, use setVelocitizer
-    velocitizer_ = new Velocitizer(info);
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    velocitizer_ = Memory::make_unique<Velocitizer>(info);
     
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
@@ -179,12 +183,12 @@ namespace OpenMD {
   
   Integrator::~Integrator(){
     delete forceMan_;
-    delete velocitizer_;
     delete rnemd_;
     delete flucQ_;
     delete rotAlgo_;
     delete rattle_;    
     delete dumpWriter;
+    delete stats;
     delete statWriter;
   }
 
@@ -206,11 +210,8 @@ namespace OpenMD {
     }
   }
 
-  void Integrator::setVelocitizer(Velocitizer* velocitizer) {
-    if (velocitizer_ != velocitizer && velocitizer_ != NULL) {
-      delete velocitizer_;
-    }
-    velocitizer_ = velocitizer;
+  void Integrator::setVelocitizer(VelocitizerPtr velocitizer) {
+    velocitizer_ = std::move(velocitizer);
   }
 
   void Integrator::setFluctuatingChargePropagator(FluctuatingChargePropagator* prop) {
@@ -256,7 +257,6 @@ namespace OpenMD {
     snap->setConservedQuantity( calcConservedQuantity() );
   }
   
-  
   void Integrator::initialize(){
     
     forceMan_->initialize();
@@ -287,7 +287,8 @@ namespace OpenMD {
     statWriter = createStatWriter(); 
     dumpWriter->writeDumpAndEor();
 
-    progressBar = new ProgressBar();
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    progressBar = Memory::make_unique<ProgressBar>();
 
     //save statistics, before writeStat,  we must save statistics
     saveConservedQuantity();
@@ -309,7 +310,6 @@ namespace OpenMD {
     }
     needPotential = false;
     needVirial = false;       
-    
   }
 
   void Integrator::preStep() {
@@ -403,13 +403,12 @@ namespace OpenMD {
 
     statWriter->writeStatReport();
  
-    delete dumpWriter;
-    delete statWriter;
+    // delete dumpWriter;
+    // delete statWriter;
   
-    dumpWriter = NULL;
-    statWriter = NULL;
+    // dumpWriter = NULL;
+    // statWriter = NULL;
   }
-
 
   DumpWriter* Integrator::createDumpWriter() {
     return new DumpWriter(info_);
@@ -423,6 +422,4 @@ namespace OpenMD {
     
     return statWriter;
   }
-
 }
-

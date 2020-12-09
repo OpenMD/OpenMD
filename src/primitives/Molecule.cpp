@@ -51,6 +51,7 @@
  */ 
 
 #include <algorithm>
+#include <memory>
 #include <set>
 
 #include "primitives/Molecule.hpp"
@@ -79,11 +80,11 @@ namespace OpenMD {
     MemoryUtils::deletePointers(cutoffGroups_);
     MemoryUtils::deletePointers(constraintPairs_);
     MemoryUtils::deletePointers(constraintElems_);
+    MemoryUtils::deletePointers(hBondDonors_);
 
     // integrableObjects_ don't own the objects
     integrableObjects_.clear();
     fluctuatingCharges_.clear();
-    
   }
   
   void Molecule::addAtom(Atom* atom) {

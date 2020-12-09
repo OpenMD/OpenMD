@@ -46,6 +46,7 @@
 #include "types/LennardJonesAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
 
@@ -115,6 +116,6 @@ namespace OpenMD {
     ljParam.sigma = sigma;
     ljParam.isSoft = isSoft;
     
-    at_->addProperty(make_shared<LJAtypeData>(LJtypeID, ljParam));
+    at_->addProperty(std::make_shared<LJAtypeData>(LJtypeID, ljParam));
   }
 }

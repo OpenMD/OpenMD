@@ -53,6 +53,8 @@
 #ifndef TYPES_NONBONDEDINTERACTIONTYPE_HPP
 #define TYPES_NONBONDEDINTERACTIONTYPE_HPP
 
+#include <memory>
+
 #include "types/AtomType.hpp"
 
 namespace OpenMD {

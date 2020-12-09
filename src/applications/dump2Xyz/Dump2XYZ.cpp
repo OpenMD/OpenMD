@@ -324,7 +324,11 @@ int main(int argc, char* argv[]){
   }//end for (int i = 0; i < nframes; i += args_info.frame_arg)
  
   xyzStream.close();
-  delete prepareVisitor; 
+
+  delete forceMan;
   delete compositeVisitor;
+  delete prepareVisitor; 
+  delete dumpReader;
+
   delete info;
 }

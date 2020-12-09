@@ -53,20 +53,32 @@
 #ifndef UTILS_MEMORYUTILS_HPP
 #define UTILS_MEMORYUTILS_HPP
 
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 namespace OpenMD {
+
+  // Remove in favor of std::make_unique<> when we switch to C++14 and above
+  namespace Memory {
+    template<typename T, typename... TArgs, 
+             typename = typename std::enable_if<!std::is_array<T>::value>::type>
+    std::unique_ptr<T> make_unique(TArgs&&... args) {
+      return std::unique_ptr<T> {new T(std::forward<TArgs>(args)...)};
+    }
+  }
+
   class MemoryUtils{
   public:
-
     template<typename ContainterType>
     static void deletePointers(ContainterType& container) {
-      for (typename ContainterType::iterator i = container.begin(); 
-           i != container.end(); ++i) {
-	delete *i;
+      for (typename ContainterType::iterator i = container.begin(); i != container.end(); ++i) {
+	      delete *i;
       }
       
       container.clear();
     }
   };
 }
-#endif //UTILS_MEMORYUTILS_HPP
+
+#endif // UTILS_MEMORYUTILS_HPP

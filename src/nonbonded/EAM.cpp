@@ -227,10 +227,11 @@ namespace OpenMD {
   }
 
 
-  CubicSpline* EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {
+  CubicSplinePtr EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {
     EAMAdapter ea1 = EAMAdapter(atomType1);
     EAMAdapter ea2 = EAMAdapter(atomType2);
-    CubicSpline* cs = new CubicSpline();
+    
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     RealType rha(0.0), rhb(0.0), pha(0.0), phb(0.0), phab(0.0);
     vector<RealType> rvals;
@@ -240,10 +241,10 @@ namespace OpenMD {
 
     if (ea1.getEAMType()==eamFuncfl && ea2.getEAMType()==eamFuncfl) {
 
-      CubicSpline* z1 = ea1.getZSpline();
-      CubicSpline* z2 = ea2.getZSpline();
-      CubicSpline* rho1 = ea1.getRhoSpline();
-      CubicSpline* rho2 = ea2.getRhoSpline();
+      CubicSplinePtr z1 = ea1.getZSpline();
+      CubicSplinePtr z2 = ea2.getZSpline();
+      CubicSplinePtr rho1 = ea1.getRhoSpline();
+      CubicSplinePtr rho2 = ea2.getRhoSpline();
 
       // make the r grid:
 
@@ -576,11 +577,11 @@ namespace OpenMD {
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
-      eamAtomData.rho = new CubicSpline();
+      eamAtomData.rho = std::make_shared<CubicSpline>();
       eamAtomData.rho->addPoints(rvals, rhovals);
-      eamAtomData.phiCC = new CubicSpline();
+      eamAtomData.phiCC = std::make_shared<CubicSpline>();
       eamAtomData.phiCC->addPoints(rvals, ccvals);
-      eamAtomData.phiCV = new CubicSpline();
+      eamAtomData.phiCV = std::make_shared<CubicSpline>();
       eamAtomData.phiCV->addPoints(rvals, cvvals);
 
       rhovals.clear();
@@ -620,7 +621,7 @@ namespace OpenMD {
         }
       }
 
-      eamAtomData.F = new CubicSpline();
+      eamAtomData.F = std::make_shared<CubicSpline>();
       eamAtomData.F->addPoints(rhovals, funcvals);
       break;
     }
@@ -665,11 +666,11 @@ namespace OpenMD {
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
-      eamAtomData.rho = new CubicSpline();
+      eamAtomData.rho = std::make_shared<CubicSpline>();
       eamAtomData.rho->addPoints(rvals, rhovals);
-      eamAtomData.phiCC = new CubicSpline();
+      eamAtomData.phiCC = std::make_shared<CubicSpline>();
       eamAtomData.phiCC->addPoints(rvals, ccvals);
-      eamAtomData.phiCV = new CubicSpline();
+      eamAtomData.phiCV = std::make_shared<CubicSpline>();
       eamAtomData.phiCV->addPoints(rvals, cvvals);
 
       
@@ -722,11 +723,11 @@ namespace OpenMD {
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
-      eamAtomData.rho = new CubicSpline();
+      eamAtomData.rho = std::make_shared<CubicSpline>();
       eamAtomData.rho->addPoints(rvals, rhovals);
-      eamAtomData.phiCC = new CubicSpline();
+      eamAtomData.phiCC = std::make_shared<CubicSpline>();
       eamAtomData.phiCC->addPoints(rvals, ccvals);
-      eamAtomData.phiCV = new CubicSpline();
+      eamAtomData.phiCV = std::make_shared<CubicSpline>();
       eamAtomData.phiCV->addPoints(rvals, cvvals);
 
       rhovals.clear();
@@ -737,7 +738,7 @@ namespace OpenMD {
                                                      OF) );
       }
 
-      eamAtomData.F = new CubicSpline();
+      eamAtomData.F = std::make_shared<CubicSpline>();
       eamAtomData.F->addPoints(rhovals, funcvals);
       break;
     }
@@ -813,7 +814,7 @@ namespace OpenMD {
                                    vector<RealType> phiVals) {
 
     EAMInteractionData mixer;
-    CubicSpline* cs = new CubicSpline();
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
     vector<RealType> rVals;
 
     for (int i = 0; i < nr; i++) rVals.push_back(i * dr);
@@ -867,8 +868,9 @@ namespace OpenMD {
                                    RealType A, RealType B, RealType kappa,
                                    RealType lambda) {
 
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};       
+
     EAMInteractionData mixer;
-    CubicSpline* cs = new CubicSpline();
     std::vector<RealType> rVals;
     std::vector<RealType> phiVals;
     std::vector<RealType> jVals;
@@ -1009,13 +1011,13 @@ namespace OpenMD {
     rhat =  *(idat.d) / *(idat.rij);
     if ( *(idat.rij) < rci && *(idat.rij) < rcij ) {
       data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
-      CubicSpline* phi = MixingMap[eamtid1][eamtid1].phi;
+      CubicSplinePtr phi = MixingMap[eamtid1][eamtid1].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
     }
 
     if ( *(idat.rij) < rcj && *(idat.rij) < rcij ) {
       data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
-      CubicSpline* phi = MixingMap[eamtid2][eamtid2].phi;
+      CubicSplinePtr phi = MixingMap[eamtid2][eamtid2].phi;
       phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
     }
 
@@ -1074,14 +1076,14 @@ namespace OpenMD {
         // Core-Core part first - no fluctuating charge, just Johnson mixing:
 
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
-          CubicSpline* phiACC = data1.phiCC;
+          CubicSplinePtr phiACC = data1.phiCC;
           phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
           phab += 0.5 * (rhb / rha) * pha;
           dvpdr += 0.5 * ((rhb/rha)*dpha +
                           pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
-          CubicSpline* phiBCC = data2.phiCC;
+          CubicSplinePtr phiBCC = data2.phiCC;
           phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
           phab += 0.5 * (rha / rhb) * phb;
           dvpdr += 0.5 * ((rha/rhb)*dphb +
@@ -1104,7 +1106,7 @@ namespace OpenMD {
         }
         
         if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
-          CubicSpline* phiACV = data1.phiCV;
+          CubicSplinePtr phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
 
           phab += 0.5 * gb.first * (rhb / rha) * pha;
@@ -1116,7 +1118,7 @@ namespace OpenMD {
           }
         }
         if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
-          CubicSpline* phiBCV = data2.phiCV;
+          CubicSplinePtr phiBCV = data2.phiCV;
           phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
 
           phab += 0.5 * ga.first * (rha / rhb) * phb;
@@ -1130,7 +1132,7 @@ namespace OpenMD {
       }
     } else {
       if ( *(idat.rij) < rcij ) {
-        CubicSpline* phi = MixingMap[eamtid1][eamtid2].phi;
+        CubicSplinePtr phi = MixingMap[eamtid1][eamtid2].phi;
         phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
       }
     }

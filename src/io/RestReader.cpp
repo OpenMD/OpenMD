@@ -57,6 +57,7 @@
 #include <cstdio> 
 #include <cstdlib> 
 #include <cstring> 
+#include <memory>
  
 #include "io/RestReader.hpp" 
 #include "primitives/Molecule.hpp" 

@@ -65,6 +65,7 @@
 #include "io/DumpReader.hpp"
 #include "utils/StringUtils.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "utils/MemoryUtils.hpp"
 #include "math/QR.hpp"
 #include "math/LU.hpp"
 
@@ -577,7 +578,9 @@ int main(int argc, char *argv []) {
   SimInfo* info = creator.createSim(inputFileName, true);
   Globals* simParams = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
-  Velocitizer* veloSet = new Velocitizer(info);
+
+  // Remove in favor of std::make_unique<> when we switch to C++14 and above
+  VelocitizerPtr veloSet {Memory::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
   info->update();

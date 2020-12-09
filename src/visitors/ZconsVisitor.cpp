@@ -44,6 +44,8 @@
  */
  
 #include <cmath>
+#include <memory>
+
 #include "visitors/ZconsVisitor.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/StringUtils.hpp"

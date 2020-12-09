@@ -46,6 +46,7 @@
 #ifndef PRIMITIVES_SHORTRANGEINTERACTION_HPP
 #define PRIMITIVES_SHORTRANGEINTERACTION_HPP
 
+#include <memory>
 #include <vector>
 
 #include "visitors/BaseVisitor.hpp"

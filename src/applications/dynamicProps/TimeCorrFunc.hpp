@@ -154,7 +154,7 @@ namespace OpenMD {
     std::vector<std::vector<int> > sele1ToIndex_;
     std::vector<std::vector<int> > sele2ToIndex_;
 
-    ProgressBar* progressBar_;
+    ProgressBarPtr progressBar_;
 
   };
 

@@ -32,6 +32,11 @@ namespace QuantLib {
             lineSearch_ = new ArmijoLineSearch();
     }
 
+    LineSearchBasedMethod::~LineSearchBasedMethod() { 
+        delete lineSearch_; 
+    }
+
+
     EndCriteria::Type
     LineSearchBasedMethod::minimize(Problem& P,
                                     const EndCriteria& endCriteria,

@@ -46,6 +46,8 @@
 #ifndef NONBONDED_INTERACTIONMANAGER_HPP
 #define NONBONDED_INTERACTIONMANAGER_HPP
 
+#include <memory>
+
 #include "brains/SimInfo.hpp"
 #include "types/AtomType.hpp"
 #include "nonbonded/LJ.hpp"
@@ -60,7 +62,7 @@
 #include "nonbonded/Mie.hpp"
 #include "nonbonded/InversePowerSeries.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
-#include "flucq/FluctuatingChargeForces.hpp"
+// #include "flucq/FluctuatingChargeForces.hpp"
 
 using namespace std;
 
@@ -75,7 +77,7 @@ namespace OpenMD {
 
   public:
     InteractionManager();
-    virtual ~InteractionManager();
+    virtual ~InteractionManager() = default;
     void setSimInfo(SimInfo* info) {info_ = info;} 
     void initialize();
 
@@ -98,18 +100,20 @@ namespace OpenMD {
     void setupElectrostatics();
 
     SimInfo* info_;
-    LJ* lj_;
-    GB* gb_;
-    Sticky* sticky_;
-    EAM* eam_;
-    SC* sc_;
-    Morse* morse_;
-    Electrostatic* electrostatic_;
-    RepulsivePower* repulsivePower_;
-    Mie* mie_;
-    MAW* maw_;
-    FluctuatingChargeForces* flucq_;
-    InversePowerSeries* inversePowerSeries_;
+
+    // std::shared_ptr<FluctuatingChargeForces> flucq_;
+
+    std::shared_ptr<LJ> lj_;
+    std::shared_ptr<GB> gb_;
+    std::shared_ptr<Sticky> sticky_;
+    std::shared_ptr<EAM> eam_;
+    std::shared_ptr<SC> sc_;
+    std::shared_ptr<Morse> morse_;
+    std::shared_ptr<Electrostatic> electrostatic_;
+    std::shared_ptr<RepulsivePower> repulsivePower_;
+    std::shared_ptr<Mie> mie_;
+    std::shared_ptr<MAW> maw_;
+    std::shared_ptr<InversePowerSeries> inversePowerSeries_;
     
     map<int, AtomType*> typeMap_;
     /**
@@ -126,7 +130,7 @@ namespace OpenMD {
      * interactions_, but in a way that doesn't require a set iterator
      * inside the main pair loop.
      */
-    vector<vector<set<NonBondedInteraction*> > > interactions_;
+    vector<vector<set<NonBondedInteractionPtr> > > interactions_;
     vector<vector<int> > iHash_;
 
     /* sHash_ contains the self-interaction version of iHash_ */

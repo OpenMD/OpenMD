@@ -66,6 +66,8 @@ namespace OpenMD {
   }
 
   FluctuatingChargePropagator::~FluctuatingChargePropagator() {
+    if (info_->usesFluctuatingCharges() && info_->getNFluctuatingCharges() > 0)
+      delete fqConstraints_;
   }
 
   void FluctuatingChargePropagator::setForceManager(ForceManager* forceMan) {
@@ -76,8 +78,8 @@ namespace OpenMD {
     if (info_->usesFluctuatingCharges()) {
       if (info_->getNFluctuatingCharges() > 0) {
         hasFlucQ_ = true;
-	fqConstraints_ = new FluctuatingChargeConstraints(info_);
-	fqConstraints_->setConstrainRegions(fqParams_->getConstrainRegions());
+	      fqConstraints_ = new FluctuatingChargeConstraints(info_);
+	      fqConstraints_->setConstrainRegions(fqParams_->getConstrainRegions());
       }
     }
     
@@ -110,9 +112,11 @@ namespace OpenMD {
                                                    fqConstraints_);
       
       DynamicVector<RealType> initCoords = flucQobjf.setInitialCoords();
+
+      NoConstraint noConstraint {};
+      NoStatus noStatus {};
       
-      Problem problem(flucQobjf, *(new NoConstraint()), *(new NoStatus()), 
-                      initCoords);
+      Problem problem(flucQobjf, noConstraint, noStatus, initCoords);
       
       
       int maxIter = fqParams_->getMaxIterations();
@@ -125,6 +129,8 @@ namespace OpenMD {
       OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(chargeOptMethod, info_);
       
       minim->minimize(problem, endCriteria, initialStepSize);
+
+      delete minim;
     }
     
     initialized_ = true;

@@ -45,6 +45,7 @@
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "utils/simError.h"
+#include "utils/MemoryUtils.hpp"
 #include "utils/Revision.hpp"
 #include "primitives/Molecule.hpp"
 #include "math/DynamicVector.hpp"
@@ -104,7 +105,8 @@ namespace OpenMD {
       sele2ToIndex_.resize(nFrames_);
     }
 
-    progressBar_ = new ProgressBar();
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    progressBar_ = Memory::make_unique<ProgressBar>();
   }
 
   template<typename T>

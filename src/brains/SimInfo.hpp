@@ -54,6 +54,7 @@
 #define BRAINS_SIMMODEL_HPP
 
 #include <iostream>
+#include <memory>
 #include <set>
 #include <utility>
 #include <vector>

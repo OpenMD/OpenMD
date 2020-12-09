@@ -54,6 +54,7 @@
 #define UTIL_PROPERTYMAP_HPP
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 

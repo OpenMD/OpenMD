@@ -45,6 +45,8 @@
 
 #include <algorithm>
 #include <functional>
+#include <memory>
+
 #include "applications/staticProps/DensityPlot.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"

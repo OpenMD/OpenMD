@@ -46,6 +46,7 @@
 #include "types/UFFAdapter.hpp"
 #include "utils/simError.h"
 #include <cstdio>
+#include <memory>
 
 namespace OpenMD {
 
@@ -165,7 +166,7 @@ namespace OpenMD {
     uffParam.Xi =     Xi;    
     uffParam.Hard =   Hard;  
     uffParam.Radius = Radius;
-    at_->addProperty(make_shared<UFFAtypeData>(UFFtypeID, uffParam));
+    at_->addProperty(std::make_shared<UFFAtypeData>(UFFtypeID, uffParam));
   }
 }
 

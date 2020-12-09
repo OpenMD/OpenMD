@@ -57,31 +57,17 @@ namespace OpenMD {
 
     initialized_ = false;
 
-    lj_ = new LJ();
-    gb_ = new GB();
-    sticky_ = new Sticky();
-    morse_ = new Morse();
-    repulsivePower_ = new RepulsivePower();
-    mie_ = new Mie();
-    eam_ = new EAM();
-    sc_ = new SC();
-    electrostatic_ = new Electrostatic();
-    maw_ = new MAW();
-    inversePowerSeries_ = new InversePowerSeries();
-  }
-
-  InteractionManager::~InteractionManager() {
-    delete lj_;
-    delete gb_;
-    delete sticky_;
-    delete morse_;
-    delete repulsivePower_;
-    delete mie_;
-    delete eam_;
-    delete sc_;
-    delete electrostatic_;
-    delete maw_;
-    delete inversePowerSeries_;
+    lj_ = std::make_shared<LJ>();
+    gb_ = std::make_shared<GB>();
+    sticky_ = std::make_shared<Sticky>();
+    morse_ = std::make_shared<Morse>();
+    repulsivePower_ = std::make_shared<RepulsivePower>();
+    mie_ = std::make_shared<Mie>();
+    eam_ = std::make_shared<EAM>();
+    sc_ = std::make_shared<SC>();
+    electrostatic_ = std::make_shared<Electrostatic>();
+    maw_ = std::make_shared<MAW>();
+    inversePowerSeries_ = std::make_shared<InversePowerSeries>();
   }
 
   void InteractionManager::initialize() {
@@ -94,7 +80,7 @@ namespace OpenMD {
     gb_->setForceField(forceField_);
     sticky_->setForceField(forceField_);
     eam_->setForceField(forceField_);
-    eam_->setElectrostatic(electrostatic_);
+    eam_->setElectrostatic(electrostatic_.get());
     sc_->setForceField(forceField_);
     morse_->setForceField(forceField_);
     electrostatic_->setSimInfo(info_);
@@ -133,7 +119,7 @@ namespace OpenMD {
     inversePowerSeries_->setSimulatedAtomTypes(atypes);
 
     set<AtomType*>::iterator at;
-    set<NonBondedInteraction*>::iterator it;
+    set<NonBondedInteractionPtr>::iterator it;
 
     for (at = atypes.begin(); at != atypes.end(); ++at) {
 
@@ -637,7 +623,7 @@ namespace OpenMD {
 
     AtomType* atype = typeMap_[*atid];
 
-    set<NonBondedInteraction*>::iterator it;
+    set<NonBondedInteractionPtr>::iterator it;
     RealType cutoff = 0.0;
 
     for (it = interactions_[*atid][*atid].begin();
@@ -654,7 +640,7 @@ namespace OpenMD {
 
     int atid = atype->getIdent();
 
-    set<NonBondedInteraction*>::iterator it;
+    set<NonBondedInteractionPtr>::iterator it;
     RealType cutoff = 0.0;
 
     for (it = interactions_[atid][atid].begin();

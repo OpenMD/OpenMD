@@ -43,11 +43,13 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <cstdio>
+#include <cmath>
+#include <memory>
+
 #include "types/EAMAdapter.hpp"
 #include "utils/simError.h"
 #include "utils/CaseConversion.hpp"
-#include <cstdio>
-#include <cmath>
 
 namespace OpenMD {
 
@@ -179,7 +181,7 @@ namespace OpenMD {
   }
 
 
-  CubicSpline* EAMAdapter::getZSpline() {
+  CubicSplinePtr EAMAdapter::getZSpline() {
     FuncflParameters funcflParam = getFuncflParam();
     int nr = funcflParam.nr;
     RealType dr = funcflParam.dr;
@@ -187,12 +189,12 @@ namespace OpenMD {
 
     for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
 
-    CubicSpline* cs = new CubicSpline();
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
     cs->addPoints(rvals, funcflParam.Z);
     return cs;
   }
 
-  CubicSpline* EAMAdapter::getRhoSpline() {
+  CubicSplinePtr EAMAdapter::getRhoSpline() {
     FuncflParameters funcflParam = getFuncflParam();
     int nr = funcflParam.nr;
     RealType dr = funcflParam.dr;
@@ -200,12 +202,12 @@ namespace OpenMD {
 
     for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
 
-    CubicSpline* cs = new CubicSpline();
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
     cs->addPoints(rvals, funcflParam.rho);
     return cs;
   }
 
-  CubicSpline* EAMAdapter::getFSpline() {
+  CubicSplinePtr EAMAdapter::getFSpline() {
     FuncflParameters funcflParam = getFuncflParam();
     int nrho = funcflParam.nrho;
     RealType drho = funcflParam.drho;
@@ -215,7 +217,7 @@ namespace OpenMD {
       rhovals.push_back(RealType(i) * drho);
     }
 
-    CubicSpline* cs = new CubicSpline();
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
     cs->addPoints(rhovals, funcflParam.F);
     return cs;
   }
@@ -247,8 +249,8 @@ namespace OpenMD {
     funcflParam.rho = rho;
     funcflParam.F = F;
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<FuncflData>(FuncflTypeID, funcflParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<FuncflData>(FuncflTypeID, funcflParam));
   }
 
   void EAMAdapter::makeZhou2001(std::string latticeType,
@@ -300,8 +302,8 @@ namespace OpenMD {
     zhouParam.eta = eta;
     zhouParam.Fe = Fe;
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<ZhouData>(ZhouTypeID, zhouParam));
 
   }
 
@@ -360,8 +362,8 @@ namespace OpenMD {
     zhouParam.rhol = rhol;
     zhouParam.rhoh = rhoh;
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
   void EAMAdapter::makeZhou2005(std::string latticeType,
@@ -419,8 +421,8 @@ namespace OpenMD {
     zhouParam.Fe = Fe;
     zhouParam.rhos = rhos;
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
   void EAMAdapter::makeZhou2005Oxygen(RealType re,
@@ -463,8 +465,8 @@ namespace OpenMD {
     zhouParam.OrhoE = OrhoE;
     zhouParam.OF = OF;
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
 
@@ -500,8 +502,8 @@ namespace OpenMD {
     zhouParam.lambda = lambda;
     zhouParam.F0 = F0;
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
   void EAMAdapter::makeOxygenFuncfl(RealType re,
@@ -542,9 +544,9 @@ namespace OpenMD {
     funcflParam.nrho = nrho;
     
 
-    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
-    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
-    at_->addProperty(make_shared<FuncflData>(FuncflTypeID, funcflParam));
+    at_->addProperty(std::make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(std::make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(std::make_shared<FuncflData>(FuncflTypeID, funcflParam));
 
   }
 

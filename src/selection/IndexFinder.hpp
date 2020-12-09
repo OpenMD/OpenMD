@@ -45,9 +45,11 @@
 
 #ifndef SELECTION_INDEXFINDER_HPP
 #define SELECTION_INDEXFINDER_HPP
+
 #include "brains/SimInfo.hpp"
-#include "selection/SelectionSet.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "selection/SelectionSet.hpp"
+
 namespace OpenMD {
 
   class IndexFinder {
@@ -58,15 +60,12 @@ namespace OpenMD {
     SelectionSet find(int begMolIndex, int endMolIndex);
 
   private:
-
     void init();
         
     SimInfo* info_;
     vector<SelectionSet> selectionSets_;
-    vector<int> nObjects_;
-        
+    vector<int> nObjects_;      
   };
-
 }
-#endif 
 
+#endif 

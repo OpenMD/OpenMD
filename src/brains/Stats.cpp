@@ -45,6 +45,8 @@
 
 #include "brains/Stats.hpp"
 #include "brains/Thermo.hpp"
+#include "utils/MemoryUtils.hpp"
+
 #include <sstream>
 #include <iomanip>
 
@@ -56,6 +58,18 @@ namespace OpenMD {
       init();
       isInit_ = true;
     }
+  }
+
+  Stats::~Stats() {
+    for (auto& data : data_) {
+      if (!data.accumulatorArray2d.empty())
+        MemoryUtils::deletePointers(data.accumulatorArray2d);
+      else
+        delete data.accumulator;
+    }
+
+    data_.clear();
+    statsMap_.clear();
   }
 
   void Stats::init() {
@@ -522,11 +536,6 @@ namespace OpenMD {
         simError();
       }
     }
-  }
-
-  Stats::~Stats() {
-    data_.clear();
-    statsMap_.clear();
   }
 
   std::string Stats::getTitle(int index) {

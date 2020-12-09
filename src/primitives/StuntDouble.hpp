@@ -53,6 +53,7 @@
 #ifndef PRIMITIVES_STUNTDOUBLE_HPP
 #define PRIMITIVES_STUNTDOUBLE_HPP
 
+#include <memory>
 #include <vector>
 
 #include "visitors/BaseVisitor.hpp"

@@ -46,6 +46,8 @@
 #ifndef INTEGRATORS_INTEGRATOR_HPP
 #define INTEGRATORS_INTEGRATOR_HPP
 
+#include <memory>
+
 #include "brains/ForceManager.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
 #include "brains/Stats.hpp"
@@ -80,7 +82,7 @@ namespace OpenMD {
     void integrate();
     void updateSizes();
     void setForceManager(ForceManager* forceMan);
-    void setVelocitizer(Velocitizer* velocitizer);
+    void setVelocitizer(VelocitizerPtr velocitizer);
     void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop);
     void setRotationAlgorithm(RotationAlgorithm* algo);
     void setRNEMD(RNEMD* rnemd);
@@ -122,7 +124,7 @@ namespace OpenMD {
     RotationAlgorithm* rotAlgo_;
     FluctuatingChargePropagator* flucQ_;
     Rattle* rattle_;
-    Velocitizer* velocitizer_;
+    VelocitizerPtr velocitizer_ {nullptr};
     RNEMD* rnemd_;
 
     bool needPotential;
@@ -145,10 +147,8 @@ namespace OpenMD {
     virtual DumpWriter* createDumpWriter();
     virtual StatWriter* createStatWriter();
 
-    ProgressBar* progressBar;
-    
+    ProgressBarPtr progressBar {nullptr};
   };
-
-    
 }
-#endif //INTEGRATORS_INTEGRATOR_HPP
+
+#endif // INTEGRATORS_INTEGRATOR_HPP

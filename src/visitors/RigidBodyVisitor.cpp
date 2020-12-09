@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
  
+#include <memory>
+
 #include "visitors/RigidBodyVisitor.hpp"
 #include "primitives/RigidBody.hpp"
 
@@ -77,14 +79,14 @@ namespace OpenMD {
       if(atomData == nullptr){
 	std::cerr << "can not get Atom Data from " << rb->getType() << std::endl;
 	
-	atomData = make_shared<AtomData>(); 
+	atomData = std::make_shared<AtomData>(); 
 	haveAtomData = false;      
 	
       } else
 	haveAtomData = true;
       
     } else {
-      atomData = make_shared<AtomData>(); 
+      atomData = std::make_shared<AtomData>(); 
       haveAtomData = false;
       
     }
@@ -166,7 +168,7 @@ namespace OpenMD {
     atomInfo->vec[1] = 0;
     atomInfo->vec[2] = 0;
 
-    atomData = make_shared<AtomData>();
+    atomData = std::make_shared<AtomData>();
     atomData->setID("ATOMDATA");
     atomData->addAtomInfo(atomInfo);
 
