@@ -821,7 +821,6 @@ namespace OpenMD {
     Pb = 0.0;  // Site potential at site b
     dUdCa = 0.0; // fluctuating charge force at site a
     dUdCb = 0.0; // fluctuating charge force at site a
-    RealType coulDeriv;
 
     // Indirect interactions mediated by the reaction field.
     indirect_Pot = 0.0;   // Potential
