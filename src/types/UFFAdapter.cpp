@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(UFFtypeID);
   }
   
-  UFFAtypeParameters* UFFAdapter::getUFFParam() {
+  UFFAtypeParameters UFFAdapter::getUFFParam() {
     
     if (!isUFF()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(UFFtypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(UFFtypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "UFFAdapter::getUFFParam could not find UFF\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,7 +75,7 @@ namespace OpenMD {
       simError(); 
     }
     
-    UFFAtypeData* uffData = dynamic_cast<UFFAtypeData*>(data);
+    std::shared_ptr<UFFAtypeData> uffData = std::dynamic_pointer_cast<UFFAtypeData>(data);
     if (uffData == NULL) {
       sprintf( painCave.errMsg,
                "UFFAdapter::getUFFParam could not convert\n"
@@ -90,58 +90,58 @@ namespace OpenMD {
   }
 
   RealType UFFAdapter::getR1() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->r1;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.r1;
   }
 
   RealType UFFAdapter::getTheta0() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->theta0;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.theta0;
   }
 
   RealType UFFAdapter::getX1() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->x1;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.x1;
   }
   
   RealType UFFAdapter::getD1() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->D1;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.D1;
   }
 
   RealType UFFAdapter::getZeta() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->zeta;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.zeta;
   }
 
   RealType UFFAdapter::getZ1() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->Z1;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.Z1;
   }
 
   RealType UFFAdapter::getVi() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->Vi;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.Vi;
   }
 
   RealType UFFAdapter::getUj() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->Uj;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.Uj;
   }
   
   RealType UFFAdapter::getXi() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->Xi;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.Xi;
   }
 
   RealType UFFAdapter::getHard() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->Hard;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.Hard;
   }
 
   RealType UFFAdapter::getRadius() {    
-    UFFAtypeParameters* uffParam = getUFFParam();
-    return uffParam->Radius;
+    UFFAtypeParameters uffParam = getUFFParam();
+    return uffParam.Radius;
   }
       
   void UFFAdapter::makeUFF(RealType r1, RealType theta0, RealType x1, RealType D1,
@@ -152,20 +152,20 @@ namespace OpenMD {
       at_->removeProperty(UFFtypeID);
     }
     
-    UFFAtypeParameters* uffParam = new UFFAtypeParameters();
+    UFFAtypeParameters uffParam {};
 
-    uffParam->r1 =     r1;    
-    uffParam->theta0 = theta0;
-    uffParam->x1 =     x1;    
-    uffParam->D1 =     D1;    
-    uffParam->zeta =   zeta;  
-    uffParam->Z1 =     Z1;    
-    uffParam->Vi =     Vi;    
-    uffParam->Uj =     Uj;    
-    uffParam->Xi =     Xi;    
-    uffParam->Hard =   Hard;  
-    uffParam->Radius = Radius;
-    at_->addProperty(new UFFAtypeData(UFFtypeID, uffParam));
+    uffParam.r1 =     r1;    
+    uffParam.theta0 = theta0;
+    uffParam.x1 =     x1;    
+    uffParam.D1 =     D1;    
+    uffParam.zeta =   zeta;  
+    uffParam.Z1 =     Z1;    
+    uffParam.Vi =     Vi;    
+    uffParam.Uj =     Uj;    
+    uffParam.Xi =     Xi;    
+    uffParam.Hard =   Hard;  
+    uffParam.Radius = Radius;
+    at_->addProperty(make_shared<UFFAtypeData>(UFFtypeID, uffParam));
   }
 }
 

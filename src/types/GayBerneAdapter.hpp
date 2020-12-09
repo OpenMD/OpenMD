@@ -62,7 +62,7 @@ namespace OpenMD {
     RealType GB_eps_E;
     RealType GB_dw;
   };
-  typedef SimpleTypeData<GBAtypeParameters*> GBAtypeData; 
+  typedef SimpleTypeData<GBAtypeParameters> GBAtypeData; 
   
   class GayBerneAdapter {
   public:
@@ -80,7 +80,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    GBAtypeParameters*  getGayBerneParam();
+    GBAtypeParameters  getGayBerneParam();
   };
 }
 #endif

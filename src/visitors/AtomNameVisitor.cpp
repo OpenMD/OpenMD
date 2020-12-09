@@ -59,20 +59,19 @@ namespace OpenMD {
   
   
   void AtomNameVisitor::visitAtom(Atom* atom) {
-    AtomData* atomData;
-    GenericData* data;    
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<GenericData> data = atom->getPropertyByName("ATOMDATA");
     
-    data = atom->getPropertyByName("ATOMDATA");
-    if(data != NULL){
-      atomData = dynamic_cast<AtomData*>(data);  
-      if(atomData == NULL){
+    if(data != nullptr){
+      atomData = std::dynamic_pointer_cast<AtomData>(data);  
+      if(atomData == nullptr){
 	std::cerr << "can not get Atom Data from " << atom->getType() 
                   << std::endl;
-	atomData = new AtomData; 
+	atomData = make_shared<AtomData>(); 
       } else {
       }
     } else {
-      atomData = new AtomData;
+      atomData = make_shared<AtomData>(); 
     }
     
     std::vector<AtomInfo*>::iterator i;

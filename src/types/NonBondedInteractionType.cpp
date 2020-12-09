@@ -75,7 +75,7 @@ namespace OpenMD {
     return atomTypes_;
   }
    
-  void NonBondedInteractionType::addProperty(GenericData* genData) {
+  void NonBondedInteractionType::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);  
   }
   
@@ -83,19 +83,15 @@ namespace OpenMD {
     properties_.removeProperty(propName);  
   }
   
-  void NonBondedInteractionType::clearProperties() {
-    properties_.clearProperties();
-  }
-  
   std::vector<std::string> NonBondedInteractionType::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
   
-  std::vector<GenericData*> NonBondedInteractionType::getProperties() { 
+  std::vector<std::shared_ptr<GenericData> > NonBondedInteractionType::getProperties() { 
     return properties_.getProperties(); 
   }
   
-  GenericData* NonBondedInteractionType::getPropertyByName(const std::string& propName) {
+  std::shared_ptr<GenericData> NonBondedInteractionType::getPropertyByName(const std::string& propName) {
       return properties_.getPropertyByName(propName); 
   }  
   

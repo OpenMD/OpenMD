@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(LJtypeID);
   }
   
-  LJAtypeParameters* LennardJonesAdapter::getLJParam() {
+  LJAtypeParameters LennardJonesAdapter::getLJParam() {
     
     if (!isLennardJones()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(LJtypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(LJtypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "LennardJonesAdapter::getLJParam could not find Lennard-Jones\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,8 +75,8 @@ namespace OpenMD {
       simError(); 
     }
     
-    LJAtypeData* ljData = dynamic_cast<LJAtypeData*>(data);
-    if (ljData == NULL) {
+    std::shared_ptr<LJAtypeData> ljData = std::dynamic_pointer_cast<LJAtypeData>(data);
+    if (ljData == nullptr) {
       sprintf( painCave.errMsg,
                "LennardJonesAdapter::getLJParam could not convert\n"
                "\tGenericData to LJAtypeData for atom type %s\n", 
@@ -90,18 +90,18 @@ namespace OpenMD {
   }
   
   RealType LennardJonesAdapter::getSigma() {    
-    LJAtypeParameters* ljParam = getLJParam();
-    return ljParam->sigma;
+    LJAtypeParameters ljParam = getLJParam();
+    return ljParam.sigma;
   }
   
   RealType LennardJonesAdapter::getEpsilon() {    
-    LJAtypeParameters* ljParam = getLJParam();
-    return ljParam->epsilon;
+    LJAtypeParameters ljParam = getLJParam();
+    return ljParam.epsilon;
   }
   
   bool LennardJonesAdapter::isSoft() {    
-    LJAtypeParameters* ljParam = getLJParam();
-    return ljParam->isSoft;
+    LJAtypeParameters ljParam = getLJParam();
+    return ljParam.isSoft;
   }
   
   void LennardJonesAdapter::makeLennardJones(RealType sigma, 
@@ -110,11 +110,11 @@ namespace OpenMD {
       at_->removeProperty(LJtypeID);
     }
 
-    LJAtypeParameters* ljParam = new LJAtypeParameters();
-    ljParam->epsilon = epsilon;
-    ljParam->sigma = sigma;
-    ljParam->isSoft = isSoft;
+    LJAtypeParameters ljParam {};
+    ljParam.epsilon = epsilon;
+    ljParam.sigma = sigma;
+    ljParam.isSoft = isSoft;
     
-    at_->addProperty(new LJAtypeData(LJtypeID, ljParam));
+    at_->addProperty(make_shared<LJAtypeData>(LJtypeID, ljParam));
   }
 }

@@ -74,7 +74,7 @@ namespace OpenMD{
     /**
      * Virtual Destructor responsible for deleting all of the generc data in PropertyMap
      */
-    virtual ~PropertyMap();
+    virtual ~PropertyMap() = default;
 
     /**
      * Adds property into property map
@@ -84,7 +84,7 @@ namespace OpenMD{
      * @see #removeProperty
      * @see #clearProperties
      */
-    void addProperty(GenericData* genData);
+    void addProperty(std::shared_ptr<GenericData> genData);
 
     /**
      * Removes property from PropertyMap by name
@@ -95,14 +95,6 @@ namespace OpenMD{
      * @see #clearProperties
      */
     bool removeProperty(const std::string& propName);
-
-    /**
-     * clear all of the properties
-     *
-     * @see #addProperty
-     * @see #removeProperty
-     */
-    void clearProperties();
 
     /**
      * Returns all names of properties
@@ -118,7 +110,7 @@ namespace OpenMD{
      *
      * @see #getPropertyByName
      */      
-    std::vector<GenericData*> getProperties();
+    std::vector<std::shared_ptr<GenericData> > getProperties();
 
     /**
      * Checks if property is in this PropertyMap
@@ -141,11 +133,11 @@ namespace OpenMD{
      *
      * @see #getProperties
      */      
-    GenericData* getPropertyByName(const std::string& propName);
+    std::shared_ptr<GenericData> getPropertyByName(const std::string& propName);
     //template<typename T = GenericData*> T getPropertyByName(std:std::string& propName);
 
   protected:
-    std::map<std::string, GenericData*> propMap_;
+    std::map<std::string, std::shared_ptr<GenericData> > propMap_;
 
   private:
 

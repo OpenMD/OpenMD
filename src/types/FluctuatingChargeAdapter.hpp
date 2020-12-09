@@ -68,7 +68,7 @@ namespace OpenMD {
     RealType slaterZeta;   /** off-diagonal Slater exponent */
     DoublePolynomial vself; /** Polynomial representation of self potential */
   };
-  typedef SimpleTypeData<FluctuatingAtypeParameters*> FluctuatingAtypeData;
+  typedef SimpleTypeData<FluctuatingAtypeParameters> FluctuatingAtypeData;
 
   class FluctuatingChargeAdapter {
   public:
@@ -102,7 +102,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    FluctuatingAtypeParameters* getFluctuatingChargeParam();
+    FluctuatingAtypeParameters getFluctuatingChargeParam();
   };
 }
 #endif

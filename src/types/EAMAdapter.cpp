@@ -55,7 +55,7 @@ namespace OpenMD {
     return at_->hasProperty(EAMtypeID);
   }
 
-  EAMParameters* EAMAdapter::getEAMParam() {
+  EAMParameters EAMAdapter::getEAMParam() {
 
     if (!isEAM()) {
       sprintf( painCave.errMsg,
@@ -67,8 +67,8 @@ namespace OpenMD {
       simError();
     }
 
-    GenericData* data = at_->getPropertyByName(EAMtypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(EAMtypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg,
                "EAMAdapter::getEAMParam could not find EAM\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -77,8 +77,8 @@ namespace OpenMD {
       simError();
     }
 
-    EAMData* eamData = dynamic_cast<EAMData*>(data);
-    if (eamData == NULL) {
+    std::shared_ptr<EAMData> eamData = std::dynamic_pointer_cast<EAMData>(data);
+    if (eamData == nullptr) {
       sprintf( painCave.errMsg,
                "EAMAdapter::getEAMParam could not convert\n"
                "\tGenericData to EAMData for atom type %s\n",
@@ -91,7 +91,7 @@ namespace OpenMD {
     return eamData->getData();
   }
 
-  FuncflParameters* EAMAdapter::getFuncflParam() {
+  FuncflParameters EAMAdapter::getFuncflParam() {
 
     if (!isEAM()) {
       sprintf( painCave.errMsg,
@@ -103,8 +103,8 @@ namespace OpenMD {
       simError();
     }
 
-    GenericData* data = at_->getPropertyByName(FuncflTypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(FuncflTypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg,
                "EAMAdapter::getFuncflParam could not find Funcfl\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -113,8 +113,8 @@ namespace OpenMD {
       simError();
     }
 
-    FuncflData* funcflData = dynamic_cast<FuncflData*>(data);
-    if (funcflData == NULL) {
+    std::shared_ptr<FuncflData> funcflData = std::dynamic_pointer_cast<FuncflData>(data);
+    if (funcflData == nullptr) {
       sprintf( painCave.errMsg,
                "EAMAdapter::getFuncflParam could not convert\n"
                "\tGenericData to FuncflData for atom type %s\n",
@@ -127,7 +127,7 @@ namespace OpenMD {
     return funcflData->getData();
   }
 
-  ZhouParameters* EAMAdapter::getZhouParam() {
+  ZhouParameters EAMAdapter::getZhouParam() {
 
     if (!isEAM()) {
       sprintf( painCave.errMsg,
@@ -139,8 +139,8 @@ namespace OpenMD {
       simError();
     }
 
-    GenericData* data = at_->getPropertyByName(ZhouTypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(ZhouTypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg,
                "EAMAdapter::getZhouParam could not find Zhou\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -149,8 +149,8 @@ namespace OpenMD {
       simError();
     }
 
-    ZhouData* zhouData = dynamic_cast<ZhouData*>(data);
-    if (zhouData == NULL) {
+    std::shared_ptr<ZhouData> zhouData = std::dynamic_pointer_cast<ZhouData>(data);
+    if (zhouData == nullptr) {
       sprintf( painCave.errMsg,
                "EAMAdapter::getZhouParam could not convert\n"
                "\tGenericData to ZhouData for atom type %s\n",
@@ -164,51 +164,51 @@ namespace OpenMD {
   }
   
   EAMType EAMAdapter::getEAMType() {
-    EAMParameters* eamParam = getEAMParam();
-    return eamParam->eamType;
+    EAMParameters eamParam = getEAMParam();
+    return eamParam.eamType;
   }
 
   std::string EAMAdapter::getLatticeType() {
-    EAMParameters* eamParam = getEAMParam();
-    return eamParam->latticeType;
+    EAMParameters eamParam = getEAMParam();
+    return eamParam.latticeType;
   }
 
   RealType EAMAdapter::getLatticeConstant() {
-    EAMParameters* eamParam = getEAMParam();
-    return eamParam->latticeConstant;
+    EAMParameters eamParam = getEAMParam();
+    return eamParam.latticeConstant;
   }
 
 
   CubicSpline* EAMAdapter::getZSpline() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    int nr = funcflParam->nr;
-    RealType dr = funcflParam->dr;
+    FuncflParameters funcflParam = getFuncflParam();
+    int nr = funcflParam.nr;
+    RealType dr = funcflParam.dr;
     std::vector<RealType> rvals;
 
     for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
 
     CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rvals, funcflParam->Z);
+    cs->addPoints(rvals, funcflParam.Z);
     return cs;
   }
 
   CubicSpline* EAMAdapter::getRhoSpline() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    int nr = funcflParam->nr;
-    RealType dr = funcflParam->dr;
+    FuncflParameters funcflParam = getFuncflParam();
+    int nr = funcflParam.nr;
+    RealType dr = funcflParam.dr;
     std::vector<RealType> rvals;
 
     for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
 
     CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rvals, funcflParam->rho);
+    cs->addPoints(rvals, funcflParam.rho);
     return cs;
   }
 
   CubicSpline* EAMAdapter::getFSpline() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    int nrho = funcflParam->nrho;
-    RealType drho = funcflParam->drho;
+    FuncflParameters funcflParam = getFuncflParam();
+    int nrho = funcflParam.nrho;
+    RealType drho = funcflParam.drho;
     std::vector<RealType> rhovals;
 
     for (int i = 0; i < nrho; i++) {
@@ -216,7 +216,7 @@ namespace OpenMD {
     }
 
     CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rhovals, funcflParam->F);
+    cs->addPoints(rhovals, funcflParam.F);
     return cs;
   }
 
@@ -231,24 +231,24 @@ namespace OpenMD {
       at_->removeProperty(FuncflTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    FuncflParameters* funcflParam = new FuncflParameters();
+    EAMParameters eamParam {};
+    FuncflParameters funcflParam {};
 
-    eamParam->eamType = eamFuncfl;
-    eamParam->latticeConstant = latticeConstant;
-    eamParam->latticeType = latticeType;
+    eamParam.eamType = eamFuncfl;
+    eamParam.latticeConstant = latticeConstant;
+    eamParam.latticeType = latticeType;
 
-    funcflParam->nrho = nrho;
-    funcflParam->drho = drho;
-    funcflParam->nr = nr;
-    funcflParam->dr = dr;
-    funcflParam->rcut = rcut;
-    funcflParam->Z = Z;
-    funcflParam->rho = rho;
-    funcflParam->F = F;
+    funcflParam.nrho = nrho;
+    funcflParam.drho = drho;
+    funcflParam.nr = nr;
+    funcflParam.dr = dr;
+    funcflParam.rcut = rcut;
+    funcflParam.Z = Z;
+    funcflParam.rho = rho;
+    funcflParam.F = F;
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new FuncflData(FuncflTypeID, funcflParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<FuncflData>(FuncflTypeID, funcflParam));
   }
 
   void EAMAdapter::makeZhou2001(std::string latticeType,
@@ -271,37 +271,37 @@ namespace OpenMD {
       at_->removeProperty(ZhouTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    ZhouParameters* zhouParam = new ZhouParameters();
+    EAMParameters eamParam {};
+    ZhouParameters zhouParam {};
 
-    eamParam->eamType = eamZhou2001;
+    eamParam.eamType = eamZhou2001;
 
     toUpper(latticeType);
-    eamParam->latticeType = latticeType;
+    eamParam.latticeType = latticeType;
     // default to FCC if we don't specify HCP or BCC:
     if (latticeType == "HCP")
-      eamParam->latticeConstant = re;
+      eamParam.latticeConstant = re;
     else if (latticeType == "BCC")
-      eamParam->latticeConstant = 2.0 * re / sqrt(3.0);
+      eamParam.latticeConstant = 2.0 * re / sqrt(3.0);
     else
-      eamParam->latticeConstant = 2.0 * re / sqrt(2.0);
+      eamParam.latticeConstant = 2.0 * re / sqrt(2.0);
 
-    zhouParam->re = re;
-    zhouParam->fe = fe;
-    zhouParam->rhoe = rhoe;
-    zhouParam->alpha = alpha;
-    zhouParam->beta = beta;
-    zhouParam->A = A;
-    zhouParam->B = B;
-    zhouParam->kappa = kappa;
-    zhouParam->lambda = lambda;
-    zhouParam->Fn = Fn;
-    zhouParam->F = F;
-    zhouParam->eta = eta;
-    zhouParam->Fe = Fe;
+    zhouParam.re = re;
+    zhouParam.fe = fe;
+    zhouParam.rhoe = rhoe;
+    zhouParam.alpha = alpha;
+    zhouParam.beta = beta;
+    zhouParam.A = A;
+    zhouParam.B = B;
+    zhouParam.kappa = kappa;
+    zhouParam.lambda = lambda;
+    zhouParam.Fn = Fn;
+    zhouParam.F = F;
+    zhouParam.eta = eta;
+    zhouParam.Fe = Fe;
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
 
   }
 
@@ -328,40 +328,40 @@ namespace OpenMD {
       at_->removeProperty(ZhouTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    ZhouParameters* zhouParam = new ZhouParameters();
+    EAMParameters eamParam {};
+    ZhouParameters zhouParam {};
 
-    eamParam->eamType = eamZhou2004;
+    eamParam.eamType = eamZhou2004;
 
     toUpper(latticeType);
-    eamParam->latticeType = latticeType;
+    eamParam.latticeType = latticeType;
     // default to FCC if we don't specify HCP or BCC:
     if (latticeType == "HCP")
-      eamParam->latticeConstant = re;
+      eamParam.latticeConstant = re;
     else if (latticeType == "BCC")
-      eamParam->latticeConstant = 2.0 * re / sqrt(3.0);
+      eamParam.latticeConstant = 2.0 * re / sqrt(3.0);
     else
-      eamParam->latticeConstant = 2.0 * re / sqrt(2.0);
+      eamParam.latticeConstant = 2.0 * re / sqrt(2.0);
 
-    zhouParam->re = re;
-    zhouParam->fe = fe;
-    zhouParam->rhoe = rhoe;
-    zhouParam->alpha = alpha;
-    zhouParam->beta = beta;
-    zhouParam->A = A;
-    zhouParam->B = B;
-    zhouParam->kappa = kappa;
-    zhouParam->lambda = lambda;
-    zhouParam->Fn = Fn;
-    zhouParam->F = F;
-    zhouParam->eta = eta;
-    zhouParam->Fe = Fe;
-    zhouParam->rhos = rhos;
-    zhouParam->rhol = rhol;
-    zhouParam->rhoh = rhoh;
+    zhouParam.re = re;
+    zhouParam.fe = fe;
+    zhouParam.rhoe = rhoe;
+    zhouParam.alpha = alpha;
+    zhouParam.beta = beta;
+    zhouParam.A = A;
+    zhouParam.B = B;
+    zhouParam.kappa = kappa;
+    zhouParam.lambda = lambda;
+    zhouParam.Fn = Fn;
+    zhouParam.F = F;
+    zhouParam.eta = eta;
+    zhouParam.Fe = Fe;
+    zhouParam.rhos = rhos;
+    zhouParam.rhol = rhol;
+    zhouParam.rhoh = rhoh;
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
   void EAMAdapter::makeZhou2005(std::string latticeType,
@@ -387,40 +387,40 @@ namespace OpenMD {
       at_->removeProperty(ZhouTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    ZhouParameters* zhouParam = new ZhouParameters();
+    EAMParameters eamParam {};
+    ZhouParameters zhouParam {};
 
-    eamParam->eamType = eamZhou2005;
+    eamParam.eamType = eamZhou2005;
 
     toUpper(latticeType);
-    eamParam->latticeType = latticeType;
+    eamParam.latticeType = latticeType;
     // default to FCC if we don't specify HCP or BCC:
     if (latticeType == "HCP")
-      eamParam->latticeConstant = re;
+      eamParam.latticeConstant = re;
     else if (latticeType == "BCC")
-      eamParam->latticeConstant = 2.0 * re / sqrt(3.0);
+      eamParam.latticeConstant = 2.0 * re / sqrt(3.0);
     else
-      eamParam->latticeConstant = 2.0 * re / sqrt(2.0);
+      eamParam.latticeConstant = 2.0 * re / sqrt(2.0);
 
-    zhouParam->re = re;
-    zhouParam->fe = fe;
-    zhouParam->rhoe = rhoe;
-    zhouParam->alpha = alpha;
-    zhouParam->beta = beta;
-    zhouParam->A = A;
-    zhouParam->B = B;
-    zhouParam->kappa = kappa;
-    zhouParam->lambda = lambda;
-    zhouParam->Fn = Fn;
-    zhouParam->F = F;
-    zhouParam->F3plus = F3plus;
-    zhouParam->F3minus = F3minus;
-    zhouParam->eta = eta;
-    zhouParam->Fe = Fe;
-    zhouParam->rhos = rhos;
+    zhouParam.re = re;
+    zhouParam.fe = fe;
+    zhouParam.rhoe = rhoe;
+    zhouParam.alpha = alpha;
+    zhouParam.beta = beta;
+    zhouParam.A = A;
+    zhouParam.B = B;
+    zhouParam.kappa = kappa;
+    zhouParam.lambda = lambda;
+    zhouParam.Fn = Fn;
+    zhouParam.F = F;
+    zhouParam.F3plus = F3plus;
+    zhouParam.F3minus = F3minus;
+    zhouParam.eta = eta;
+    zhouParam.Fe = Fe;
+    zhouParam.rhos = rhos;
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
   void EAMAdapter::makeZhou2005Oxygen(RealType re,
@@ -442,29 +442,29 @@ namespace OpenMD {
       at_->removeProperty(ZhouTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    ZhouParameters* zhouParam = new ZhouParameters();
+    EAMParameters eamParam {};
+    ZhouParameters zhouParam {};
 
-    eamParam->eamType = eamZhou2005Oxygen;
+    eamParam.eamType = eamZhou2005Oxygen;
 
-    eamParam->latticeConstant = re;
+    eamParam.latticeConstant = re;
 
-    zhouParam->re = re;
-    zhouParam->fe = fe;
-    zhouParam->alpha = alpha;
-    zhouParam->beta = beta;
-    zhouParam->A = A;
-    zhouParam->B = B;
-    zhouParam->kappa = kappa;
-    zhouParam->lambda = lambda;
-    zhouParam->gamma = gamma;
-    zhouParam->nu = nu;
-    zhouParam->OrhoLimits = OrhoLimits;
-    zhouParam->OrhoE = OrhoE;
-    zhouParam->OF = OF;
+    zhouParam.re = re;
+    zhouParam.fe = fe;
+    zhouParam.alpha = alpha;
+    zhouParam.beta = beta;
+    zhouParam.A = A;
+    zhouParam.B = B;
+    zhouParam.kappa = kappa;
+    zhouParam.lambda = lambda;
+    zhouParam.gamma = gamma;
+    zhouParam.nu = nu;
+    zhouParam.OrhoLimits = OrhoLimits;
+    zhouParam.OrhoE = OrhoE;
+    zhouParam.OF = OF;
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
 
@@ -484,24 +484,24 @@ namespace OpenMD {
       at_->removeProperty(ZhouTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    ZhouParameters* zhouParam = new ZhouParameters();
+    EAMParameters eamParam {};
+    ZhouParameters zhouParam {};
 
-    eamParam->eamType = eamZhouRose;
-    eamParam->latticeConstant = re;
-    zhouParam->re = re;
-    zhouParam->fe = fe;
-    zhouParam->rhoe = rhoe;
-    zhouParam->alpha = alpha;
-    zhouParam->beta = beta;
-    zhouParam->A = A;
-    zhouParam->B = B;
-    zhouParam->kappa = kappa;
-    zhouParam->lambda = lambda;
-    zhouParam->F0 = F0;
+    eamParam.eamType = eamZhouRose;
+    eamParam.latticeConstant = re;
+    zhouParam.re = re;
+    zhouParam.fe = fe;
+    zhouParam.rhoe = rhoe;
+    zhouParam.alpha = alpha;
+    zhouParam.beta = beta;
+    zhouParam.A = A;
+    zhouParam.B = B;
+    zhouParam.kappa = kappa;
+    zhouParam.lambda = lambda;
+    zhouParam.F0 = F0;
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
   }
 
   void EAMAdapter::makeOxygenFuncfl(RealType re,
@@ -522,159 +522,159 @@ namespace OpenMD {
       at_->removeProperty(FuncflTypeID);
     }
 
-    EAMParameters* eamParam = new EAMParameters();
-    FuncflParameters* funcflParam = new FuncflParameters();
-    ZhouParameters* zhouParam = new ZhouParameters();
+    EAMParameters eamParam {};
+    FuncflParameters funcflParam {};
+    ZhouParameters zhouParam {};
 
-    eamParam->eamType = eamOxygenFuncfl;
-    eamParam->latticeConstant = re;
-    zhouParam->re = re;
-    zhouParam->fe = fe;
-    zhouParam->alpha = alpha;
-    zhouParam->beta = beta;
-    zhouParam->A = A;
-    zhouParam->B = B;
-    zhouParam->kappa = kappa;
-    zhouParam->lambda = lambda;
+    eamParam.eamType = eamOxygenFuncfl;
+    eamParam.latticeConstant = re;
+    zhouParam.re = re;
+    zhouParam.fe = fe;
+    zhouParam.alpha = alpha;
+    zhouParam.beta = beta;
+    zhouParam.A = A;
+    zhouParam.B = B;
+    zhouParam.kappa = kappa;
+    zhouParam.lambda = lambda;
 
-    funcflParam->F = F;
-    funcflParam->drho = drho;
-    funcflParam->nrho = nrho;
+    funcflParam.F = F;
+    funcflParam.drho = drho;
+    funcflParam.nrho = nrho;
     
 
-    at_->addProperty(new EAMData(EAMtypeID, eamParam));
-    at_->addProperty(new ZhouData(ZhouTypeID, zhouParam));
-    at_->addProperty(new FuncflData(FuncflTypeID, funcflParam));
+    at_->addProperty(make_shared<EAMData>(EAMtypeID, eamParam));
+    at_->addProperty(make_shared<ZhouData>(ZhouTypeID, zhouParam));
+    at_->addProperty(make_shared<FuncflData>(FuncflTypeID, funcflParam));
 
   }
 
 
   int EAMAdapter::getNrho() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    return funcflParam->nrho;
+    FuncflParameters funcflParam = getFuncflParam();
+    return funcflParam.nrho;
   }
 
   RealType EAMAdapter::getDrho() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    return funcflParam->drho;
+    FuncflParameters funcflParam = getFuncflParam();
+    return funcflParam.drho;
   }
 
   int EAMAdapter::getNr() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    return funcflParam->nr;
+    FuncflParameters funcflParam = getFuncflParam();
+    return funcflParam.nr;
   }
 
   RealType EAMAdapter::getDr() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    return funcflParam->dr;
+    FuncflParameters funcflParam = getFuncflParam();
+    return funcflParam.dr;
   }
 
   RealType EAMAdapter::getRcut() {
-    FuncflParameters* funcflParam = getFuncflParam();
-    return funcflParam->rcut;
+    FuncflParameters funcflParam = getFuncflParam();
+    return funcflParam.rcut;
   }
 
   RealType EAMAdapter::getRe() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->re;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.re;
   }
   RealType EAMAdapter::get_fe() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->fe;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.fe;
   }
   RealType EAMAdapter::getRhoe() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->rhoe;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.rhoe;
   }
   RealType EAMAdapter::getAlpha() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->alpha;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.alpha;
   }
   RealType EAMAdapter::getBeta() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->beta;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.beta;
   }
   RealType EAMAdapter::getA() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->A;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.A;
   }
   RealType EAMAdapter::getB() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->B;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.B;
   }
   RealType EAMAdapter::getKappa() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->kappa;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.kappa;
   }
   RealType EAMAdapter::getLambda() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->lambda;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.lambda;
   }
   RealType EAMAdapter::getGamma() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->gamma;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.gamma;
   }
   RealType EAMAdapter::getNu() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->nu;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.nu;
   }
   std::vector<RealType> EAMAdapter::getFn() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->Fn;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.Fn;
   }
   std::vector<RealType> EAMAdapter::getF() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->F;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.F;
   }
   RealType EAMAdapter::getF3plus() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->F3plus;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.F3plus;
   }
   RealType EAMAdapter::getF3minus() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->F3minus;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.F3minus;
   }
 
   RealType EAMAdapter::getEta() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->eta;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.eta;
   }
 
   RealType EAMAdapter::getFe() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->Fe;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.Fe;
   }
 
   RealType EAMAdapter::getRhos() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->rhos;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.rhos;
   }
 
   RealType EAMAdapter::getRhol() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->rhol;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.rhol;
   }
 
   RealType EAMAdapter::getRhoh() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->rhoh;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.rhoh;
   }
 
   std::vector<RealType> EAMAdapter::getOrhoLimits() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->OrhoLimits;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.OrhoLimits;
   }
   std::vector<RealType> EAMAdapter::getOrhoE() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->OrhoE;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.OrhoE;
   }
 
   std::vector<std::vector<RealType> > EAMAdapter::getOF() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->OF;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.OF;
   }
   RealType EAMAdapter::getF0() {
-    ZhouParameters* zhouParam = getZhouParam();
-    return zhouParam->F0;
+    ZhouParameters zhouParam = getZhouParam();
+    return zhouParam.F0;
   }
 }

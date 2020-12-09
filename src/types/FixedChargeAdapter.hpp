@@ -57,7 +57,7 @@ namespace OpenMD {
   struct FixedChargeAtypeParameters {
     RealType charge;
   };
-  typedef SimpleTypeData<FixedChargeAtypeParameters*> FixedChargeAtypeData;   
+  typedef SimpleTypeData<FixedChargeAtypeParameters> FixedChargeAtypeData;   
 
   class FixedChargeAdapter {
   public:
@@ -70,7 +70,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    FixedChargeAtypeParameters* getFixedChargeParam();    
+    FixedChargeAtypeParameters getFixedChargeParam();    
   };
 }
 #endif

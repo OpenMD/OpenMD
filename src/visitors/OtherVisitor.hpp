@@ -94,7 +94,8 @@ namespace OpenMD {
     virtual const std::string toString();
   protected:
     void internalVisit(StuntDouble* sd);
-    void replicate(std::vector<AtomInfo*>& infoList, AtomData* data,
+    void replicate(std::vector<AtomInfo*>& infoList,
+		   std::shared_ptr<AtomData> data,
                    const Mat3x3d& box);
     
   private:

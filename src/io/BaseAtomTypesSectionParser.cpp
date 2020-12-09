@@ -89,7 +89,7 @@ namespace OpenMD {
       baseAtomType->setMass(mass);
       if (tokenizer.hasMoreTokens()) {
           RealType nelectron = tokenizer.nextTokenAsDouble();
-          baseAtomType->addProperty(new DoubleGenericData("nelectron", nelectron));
+          baseAtomType->addProperty(std::shared_ptr<GenericData>(new DoubleGenericData("nelectron", nelectron)));
       }               
     }    
 

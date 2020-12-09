@@ -312,7 +312,7 @@ namespace OpenMD {
     
     // pass strength functions to ShapeType
     st->setStrengthFuncs(functionVector);
-    at->addProperty(new ShapeAtypeData("Shape", st));     
+    at->addProperty(std::shared_ptr<GenericData>(new ShapeAtypeData("Shape", st)));     
   //  delete shapeStream;
   }
 } //end namespace OpenMD

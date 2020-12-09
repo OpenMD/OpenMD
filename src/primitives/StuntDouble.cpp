@@ -75,7 +75,7 @@ namespace OpenMD {
     if (sl & DataStorage::dslElectricField) 
       setElectricField(V3Zero);
   }
-  void StuntDouble::addProperty(GenericData* genData) {
+  void StuntDouble::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);  
   }
 
@@ -83,19 +83,15 @@ namespace OpenMD {
     properties_.removeProperty(propName);  
   }
 
-  void StuntDouble::clearProperties() {
-    properties_.clearProperties(); 
-  }
-
   std::vector<std::string> StuntDouble::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
       
-  std::vector<GenericData*> StuntDouble::getProperties() { 
+  std::vector<std::shared_ptr<GenericData> > StuntDouble::getProperties() { 
     return properties_.getProperties(); 
   }
 
-  GenericData* StuntDouble::getPropertyByName(const std::string& propName) {
+  std::shared_ptr<GenericData> StuntDouble::getPropertyByName(const std::string& propName) {
     return properties_.getPropertyByName(propName); 
   }
 

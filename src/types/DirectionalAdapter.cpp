@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(DirectionalTypeID);
   }
   
-  DirectionalAtypeParameters* DirectionalAdapter::getDirectionalParam() {
+  DirectionalAtypeParameters DirectionalAdapter::getDirectionalParam() {
     
     if (!isDirectional()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(DirectionalTypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(DirectionalTypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "DirectionalAdapter::getDirectionalParam could not find Directional\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,8 +75,8 @@ namespace OpenMD {
       simError(); 
     }
     
-    DirectionalAtypeData* directionalData = dynamic_cast<DirectionalAtypeData*>(data);
-    if (directionalData == NULL) {
+    std::shared_ptr<DirectionalAtypeData> directionalData = dynamic_pointer_cast<DirectionalAtypeData>(data);
+    if (directionalData == nullptr) {
       sprintf( painCave.errMsg,
                "DirectionalAdapter::getDirectionalParam could not convert\n"
                "\tGenericData to DirectionalAtypeData for atom type %s\n", 
@@ -91,8 +91,8 @@ namespace OpenMD {
   
 
   Mat3x3d DirectionalAdapter::getI() {    
-    DirectionalAtypeParameters* directionalParam = getDirectionalParam();
-    return directionalParam->I;
+    DirectionalAtypeParameters directionalParam = getDirectionalParam();
+    return directionalParam.I;
   }
 
 
@@ -103,9 +103,10 @@ namespace OpenMD {
       at_->removeProperty(DirectionalTypeID);
     }
 
-    DirectionalAtypeParameters* directionalParam = new DirectionalAtypeParameters();
-    directionalParam->I = I;
+    DirectionalAtypeParameters directionalParam{};
+
+    directionalParam.I = I;
     
-    at_->addProperty(new DirectionalAtypeData(DirectionalTypeID, directionalParam));
+    at_->addProperty(make_shared<DirectionalAtypeData>(DirectionalTypeID, directionalParam));
   }
 }

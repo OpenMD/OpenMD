@@ -59,31 +59,31 @@ namespace OpenMD {
   class ConstraintElem{
   public:
     ConstraintElem(StuntDouble* sd) : sd_(sd) {
-      GenericData* movedData = sd_->getPropertyByName("Moved");
-      if (movedData !=NULL) { //if generic data with keyword "moved" exists, assign it to moved_
-	moved_ = dynamic_cast<BoolGenericData*>(movedData);
-	if (moved_ == NULL) {
+      std::shared_ptr<GenericData> movedData = sd_->getPropertyByName("Moved");
+      if (movedData != nullptr) { //if generic data with keyword "moved" exists, assign it to moved_
+	moved_ = dynamic_pointer_cast<BoolGenericData>(movedData);
+	if (moved_ == nullptr) {
 	  sprintf(painCave.errMsg,
 		  "Generic Data with keyword Moved exists, however, it can not be casted to a BoolGenericData.\n");
 	  painCave.isFatal = 1;;
 	  simError();
 	}
       }else { //if generic data with keyword "moved" does not exist, create it
-	moved_ = new BoolGenericData("Moved");
+	moved_ = make_shared<BoolGenericData>("Moved");
 	sd_->addProperty(moved_);
       }
       
-      GenericData* movingData = sd_->getPropertyByName("Moving");
-      if (movingData !=NULL) {
-	moving_ = dynamic_cast<BoolGenericData*>(movingData);
-	if (moving_ == NULL) {
+      std::shared_ptr<GenericData> movingData = sd_->getPropertyByName("Moving");
+      if (movingData != nullptr) {
+	moving_ = dynamic_pointer_cast<BoolGenericData>(movingData);
+	if (moving_ == nullptr) {
 	  sprintf(painCave.errMsg,
 		  "Generic Data with keyword Moving exists, however, it can not be casted to a BoolGenericData.\n");
 	  painCave.isFatal = 1;;
 	  simError();
 	}
       }else {
-	moving_ = new BoolGenericData("Moving");
+	moving_ = make_shared<BoolGenericData>("Moving");
 	sd_->addProperty(moving_);                
       }
       
@@ -809,7 +809,7 @@ namespace OpenMD {
      * Adds property into property map
      * @param genData GenericData to be added into PropertyMap
      */
-    void addProperty(GenericData* genData){
+    void addProperty(std::shared_ptr<GenericData> genData){
       sd_->addProperty(genData);
     }
     
@@ -820,14 +820,7 @@ namespace OpenMD {
     void removeProperty(const std::string& propName) {
       sd_->removeProperty(propName);
     }
-    
-    /**
-     * clear all of the properties
-     */
-    void clearProperties() {
-      sd_->clearProperties();
-    }
-    
+
     /**
      * Returns all names of properties
      * @return all names of properties
@@ -840,7 +833,7 @@ namespace OpenMD {
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
      */      
-    std::vector<GenericData*> getProperties() {
+    std::vector<std::shared_ptr<GenericData> > getProperties() {
       return sd_->getProperties();
     }
     
@@ -850,14 +843,14 @@ namespace OpenMD {
      * @return a pointer point to property with propName. If no property named propName
      * exists, return NULL
      */      
-    GenericData* getPropertyByName(const std::string& propName) {
+    std::shared_ptr<GenericData> getPropertyByName(const std::string& propName) {
       return sd_->getPropertyByName(propName);
     }
     
   private:
     StuntDouble* sd_;
-    BoolGenericData* moved_;
-    BoolGenericData* moving_;
+    std::shared_ptr<BoolGenericData> moved_;
+    std::shared_ptr<BoolGenericData> moving_;
   };
   
 }

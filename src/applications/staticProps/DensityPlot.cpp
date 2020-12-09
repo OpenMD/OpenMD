@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -121,16 +121,16 @@ namespace OpenMD {
         }
             
         Atom* atom = static_cast<Atom*>(sd);
-        GenericData* data = atom->getAtomType()->getPropertyByName("nelectron");
-        if (data == NULL) {
+	std::shared_ptr<GenericData> data = atom->getAtomType()->getPropertyByName("nelectron");
+        if (data == nullptr) {
           sprintf( painCave.errMsg, "Can not find Parameters for nelectron\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError(); 
         }
             
-        DoubleGenericData* doubleData = dynamic_cast<DoubleGenericData*>(data);
-        if (doubleData == NULL) {
+	std::shared_ptr<DoubleGenericData> doubleData = std::dynamic_pointer_cast<DoubleGenericData>(data);
+        if (doubleData == nullptr) {
           sprintf( painCave.errMsg,
                    "Can not cast GenericData to DoubleGenericData\n");
           painCave.severity = OPENMD_ERROR;

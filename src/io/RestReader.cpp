@@ -214,22 +214,22 @@ namespace OpenMD {
          mol = info_->nextMolecule(i)) {          
       
       // is this molecule restrained?    
-      GenericData* data = mol->getPropertyByName("Restraint");
+      std::shared_ptr<GenericData> data = mol->getPropertyByName("Restraint");
       
-      if (data != NULL) {
+      if (data != nullptr) {
         
         // make sure we can reinterpret the generic data as restraint data:
         
-        RestraintData* restData= dynamic_cast<RestraintData*>(data);        
+	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
         
-        if (restData != NULL) {
+        if (restData != nullptr) {
           
           // make sure we can reinterpet the restraint data as a
           // pointer to a MolecularRestraint:
           
-          MolecularRestraint* mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
+	  std::shared_ptr<MolecularRestraint> mRest = std::dynamic_pointer_cast<MolecularRestraint>(restData);
           
-          if (mRest != NULL) {          
+          if (mRest != nullptr) {          
             
             // now we need to pack the stunt doubles for the reference
             // structure:
@@ -369,15 +369,15 @@ namespace OpenMD {
       all_pos_[index] = pos;      
         
       // is this io restrained?
-      GenericData* data = sd->getPropertyByName("Restraint");
+      std::shared_ptr<GenericData> data = sd->getPropertyByName("Restraint");
       
-      if (data != NULL) {
+      if (data != nullptr) {
         // make sure we can reinterpret the generic data as restraint data:
-        RestraintData* restData= dynamic_cast<RestraintData*>(data);        
-        if (restData != NULL) {
+	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
+        if (restData != nullptr) {
           // make sure we can reinterpet the restraint data as a pointer to
             // an ObjectRestraint:
-          ObjectRestraint* oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
+	  std::shared_ptr<ObjectRestraint> oRest = std::dynamic_pointer_cast<ObjectRestraint>(restData);
           if (oRest != NULL) {          
             if (sd->isDirectional()) {
               oRest->setReferenceStructure(pos, q.toRotationMatrix3());

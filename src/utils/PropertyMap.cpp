@@ -49,31 +49,24 @@
 
 namespace OpenMD {
 
-  PropertyMap::~PropertyMap(){
-    clearProperties();
-  }
-
-
-  void PropertyMap::addProperty(GenericData* genData){
-    std::map<std::string, GenericData*>::iterator iter;
+  void PropertyMap::addProperty(std::shared_ptr<GenericData> genData){
+    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
 
     iter = propMap_.find(genData->getID());
 
     if (iter == propMap_.end()){
       propMap_.insert(std::make_pair(genData->getID(), genData));
     } else {
-      delete iter->second;
       iter->second = genData;
     }
   }
 
   bool PropertyMap::removeProperty(const std::string& propName){
-    std::map<std::string, GenericData*>::iterator iter;
+    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
 
     iter = propMap_.find(propName);
 
     if (iter != propMap_.end()){
-      delete iter->second;
       propMap_.erase(iter);    
       return true;
     } else {
@@ -82,18 +75,9 @@ namespace OpenMD {
     }
   }
 
-  void PropertyMap::clearProperties(){
-    std::map<std::string, GenericData*>::iterator iter;
-
-    for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
-      delete iter->second;
-
-    propMap_.clear();
-  }
-
   std::vector<std::string> PropertyMap::getPropertyNames(){
     std::vector<std::string> propNames;
-    std::map<std::string, GenericData*>::iterator iter;
+    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
 
     for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
       propNames.push_back(iter->first);
@@ -101,9 +85,9 @@ namespace OpenMD {
     return propNames;
   }
 
-  std::vector<GenericData*> PropertyMap::getProperties(){
-    std::vector<GenericData*> properties;
-    std::map<std::string, GenericData*>::iterator iter;
+  std::vector<std::shared_ptr<GenericData> > PropertyMap::getProperties(){
+    std::vector<std::shared_ptr<GenericData> > properties;
+    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
 
     for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
       properties.push_back(iter->second);
@@ -112,7 +96,7 @@ namespace OpenMD {
   }
 
   bool PropertyMap::hasProperty(const std::string& propName){
-    std::map<std::string, GenericData*>::iterator iter;
+    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
 
     iter = propMap_.find(propName);
 
@@ -122,8 +106,8 @@ namespace OpenMD {
       return false;
   }
 
-  GenericData* PropertyMap::getPropertyByName(const std::string& propName){
-    std::map<std::string, GenericData*>::iterator iter;
+  std::shared_ptr<GenericData> PropertyMap::getPropertyByName(const std::string& propName){
+    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
 
     iter = propMap_.find(propName);
 

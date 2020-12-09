@@ -977,7 +977,7 @@ namespace OpenMD {
     topologyDone_ = true;
   }
 
-  void SimInfo::addProperty(GenericData* genData) {
+  void SimInfo::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);  
   }
 
@@ -985,19 +985,15 @@ namespace OpenMD {
     properties_.removeProperty(propName);  
   }
 
-  void SimInfo::clearProperties() {
-    properties_.clearProperties(); 
-  }
-
-  vector<string> SimInfo::getPropertyNames() {
+  std::vector<string> SimInfo::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
       
-  vector<GenericData*> SimInfo::getProperties() { 
+  std::vector<std::shared_ptr<GenericData> > SimInfo::getProperties() { 
     return properties_.getProperties(); 
   }
 
-  GenericData* SimInfo::getPropertyByName(const string& propName) {
+  std::shared_ptr<GenericData> SimInfo::getPropertyByName(const string& propName) {
     return properties_.getPropertyByName(propName); 
   }
 

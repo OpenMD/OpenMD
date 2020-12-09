@@ -99,15 +99,15 @@ namespace OpenMD {
       myValues_[(*j).first] = orig->myValues_[(*j).first];
     }
     
-    vector< GenericData*> oprops = orig->getProperties();
-    vector< GenericData*>::iterator it;
+    std::vector< std::shared_ptr<GenericData> > oprops = orig->getProperties();
+    std::vector< std::shared_ptr<GenericData> >::iterator it;
 
     for (it = oprops.begin(); it != oprops.end(); ++it) {      
       addProperty(*it);
     }
   }
   
-  void AtomType::addProperty(GenericData* genData) {
+  void AtomType::addProperty(std::shared_ptr<GenericData> genData) {
     myResponsibilities_[genData->getID()] = true;
     properties_.addProperty(genData);  
   }
@@ -116,18 +116,12 @@ namespace OpenMD {
     properties_.removeProperty(propName);  
     myResponsibilities_[propName] = false;
   }
-  
-  void AtomType::clearProperties() {
-    properties_.clearProperties();
-    // should loop through them to get rid of my responsibilities, but
-    // we'll punt for now.
-  }
-  
-  vector<string> AtomType::getPropertyNames() {
+    
+  std::vector<string> AtomType::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
   
-  vector<GenericData*> AtomType::getProperties() { 
+  std::vector<std::shared_ptr<GenericData> > AtomType::getProperties() { 
     return properties_.getProperties(); 
   }
 
@@ -138,7 +132,7 @@ namespace OpenMD {
       return properties_.hasProperty(propName); 
   }  
   
-  GenericData* AtomType::getPropertyByName(const string& propName) {
+  std::shared_ptr<GenericData> AtomType::getPropertyByName(const string& propName) {
     if (hasBase_ && !myResponsibilities_[propName]){
       return base_->getPropertyByName(propName);}
     else
@@ -246,8 +240,8 @@ namespace OpenMD {
     return isSC() || isEAM();
   }
 
-  vector<AtomType* > AtomType::allYourBase() {   
-    vector<AtomType* > myChain;   
+  std::vector<AtomType* > AtomType::allYourBase() {   
+    std::vector<AtomType* > myChain;   
 
     if(hasBase_){
       myChain = base_->allYourBase();

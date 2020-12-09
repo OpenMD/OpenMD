@@ -389,7 +389,7 @@ namespace OpenMD {
     
   }
   
-  void Molecule::addProperty(GenericData* genData) {
+  void Molecule::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);  
   }
 
@@ -397,19 +397,15 @@ namespace OpenMD {
     properties_.removeProperty(propName);  
   }
 
-  void Molecule::clearProperties() {
-    properties_.clearProperties(); 
-  }
-
   std::vector<std::string> Molecule::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
       
-  std::vector<GenericData*> Molecule::getProperties() { 
+  std::vector<std::shared_ptr<GenericData> > Molecule::getProperties() { 
     return properties_.getProperties(); 
   }
 
-  GenericData* Molecule::getPropertyByName(const std::string& propName) {
+  std::shared_ptr<GenericData> Molecule::getPropertyByName(const std::string& propName) {
     return properties_.getPropertyByName(propName); 
   }
 

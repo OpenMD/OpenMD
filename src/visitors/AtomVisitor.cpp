@@ -69,34 +69,34 @@ namespace OpenMD {
   }
 
   void BaseAtomVisitor::setVisited(Atom *atom) {
-    GenericData *data;
+    std::shared_ptr<GenericData> data;
     data = atom->getPropertyByName("VISITED");
 
     //if visited property is not existed, add it as new property
-    if (data == NULL) {
-      data = new GenericData();
+    if (data == nullptr) {
+      data = make_shared<GenericData>();
       data->setID("VISITED");
       atom->addProperty(data);
     }
   }
 
   bool BaseAtomVisitor::isVisited(Atom *atom) {
-    GenericData *data;
+    std::shared_ptr<GenericData> data;
     data = atom->getPropertyByName("VISITED");
-    return data == NULL ? false : true;
+    return data == nullptr ? false : true;
   }
 
   //------------------------------------------------------------------------//
 	
   void DefaultAtomVisitor::visit(Atom *atom) {
-    AtomData *atomData;
-    AtomInfo *atomInfo;
+    std::shared_ptr<AtomData> atomData;
+    AtomInfo* atomInfo;
     AtomType* atype = atom->getAtomType();
               
     if (isVisited(atom))
       return;
     
-    atomInfo = new AtomInfo;
+    atomInfo = new AtomInfo();
     atomInfo->atomTypeName = atom->getType();
     atomInfo->globalID = atom->getGlobalIndex();
     atomInfo->pos = atom->getPos();
@@ -126,7 +126,7 @@ namespace OpenMD {
       atomInfo->eField = atom->getElectricField();
     }
 
-    atomData = new AtomData;
+    atomData = make_shared<AtomData>();
     atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
     
@@ -136,7 +136,7 @@ namespace OpenMD {
   }
   
   void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
-    AtomData *atomData;
+    std::shared_ptr<AtomData> atomData;
     AtomInfo *atomInfo;
     AtomType* atype = datom->getAtomType();
 
@@ -186,7 +186,7 @@ namespace OpenMD {
       atomInfo->vec = datom->getA().transpose()*V3Z;
     }
 
-    atomData = new AtomData;
+    atomData = make_shared<AtomData>();
     atomData->setID("ATOMDATA");   
     atomData->addAtomInfo(atomInfo);
 

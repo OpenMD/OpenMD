@@ -57,7 +57,7 @@ namespace OpenMD {
   struct PolarizableAtypeParameters{
     RealType polarizability;
   };
-  typedef SimpleTypeData<PolarizableAtypeParameters*> PolarizableAtypeData;   
+  typedef SimpleTypeData<PolarizableAtypeParameters> PolarizableAtypeData;   
 
   class PolarizableAdapter {
   public:
@@ -70,7 +70,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    PolarizableAtypeParameters* getPolarizableParam();    
+    PolarizableAtypeParameters getPolarizableParam();    
   };
 }
 #endif

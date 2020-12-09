@@ -208,7 +208,7 @@ namespace OpenMD {
         }
 
         restraints_.push_back(rest);
-        mol->addProperty(new RestraintData("Restraint", rest));
+        mol->addProperty(make_shared<RestraintData>("Restraint", rest));
         restrainedMols_.push_back(mol);
 #ifdef IS_MPI
         }
@@ -290,7 +290,7 @@ namespace OpenMD {
           }
     
           restraints_.push_back(rest);
-          sd->addProperty(new RestraintData("Restraint", rest));
+          sd->addProperty(make_shared<RestraintData>("Restraint", rest));
           restrainedObjs_.push_back(sd);                    
         }
 
@@ -354,7 +354,7 @@ namespace OpenMD {
 
   RealType RestraintForceManager::doRestraints(RealType scalingFactor){
     std::vector<Molecule*>::const_iterator rm;
-    GenericData* data;
+    std::shared_ptr<GenericData> data;
     Molecule::IntegrableObjectIterator ioi;
     MolecularRestraint* mRest = NULL;
     StuntDouble* sd;
@@ -372,10 +372,10 @@ namespace OpenMD {
 
       // make sure this molecule (*rm) has a generic data for restraints:
       data = (*rm)->getPropertyByName("Restraint");
-      if (data != NULL) {
+      if (data != nullptr) {
         // make sure we can reinterpret the generic data as restraint data:
-        RestraintData* restData= dynamic_cast<RestraintData*>(data);        
-        if (restData != NULL) {
+	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
+        if (restData != nullptr) {
           // make sure we can reinterpet the restraint data as a pointer to
           // an MolecularRestraint:
           mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
@@ -440,8 +440,8 @@ namespace OpenMD {
       data = (*ro)->getPropertyByName("Restraint");
       if (data != NULL) {
         // make sure we can reinterpret the generic data as restraint data:
-        RestraintData* restData= dynamic_cast<RestraintData*>(data);        
-        if (restData != NULL) {
+	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
+        if (restData != nullptr) {
           // make sure we can reinterpet the restraint data as a pointer to
           // an ObjectRestraint:
           oRest = dynamic_cast<ObjectRestraint*>(restData->getData());

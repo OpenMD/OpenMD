@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(FCtypeID);
   }
   
-  FixedChargeAtypeParameters* FixedChargeAdapter::getFixedChargeParam() {
+  FixedChargeAtypeParameters FixedChargeAdapter::getFixedChargeParam() {
     
     if (!isFixedCharge()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(FCtypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(FCtypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "FixedChargeAdapter::getFixedChargeParam could not find fixed charge\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,8 +75,8 @@ namespace OpenMD {
       simError(); 
     }
     
-    FixedChargeAtypeData* fcData = dynamic_cast<FixedChargeAtypeData*>(data);
-    if (fcData == NULL) {
+    std::shared_ptr<FixedChargeAtypeData> fcData = dynamic_pointer_cast<FixedChargeAtypeData>(data);
+    if (fcData == nullptr) {
       sprintf( painCave.errMsg,
                "FixedChargeAdapter::getFixedChargeParam could not convert\n"
                "\tGenericData to FixedChargeAtypeData for atom type %s\n", 
@@ -90,8 +90,8 @@ namespace OpenMD {
   }
   
   RealType FixedChargeAdapter::getCharge() {    
-    FixedChargeAtypeParameters* fcParam = getFixedChargeParam();
-    return fcParam->charge;
+    FixedChargeAtypeParameters fcParam = getFixedChargeParam();
+    return fcParam.charge;
   }
   
   void FixedChargeAdapter::makeFixedCharge(RealType charge) {
@@ -100,9 +100,9 @@ namespace OpenMD {
       at_->removeProperty(FCtypeID);
     }
 
-    FixedChargeAtypeParameters* fcParam = new FixedChargeAtypeParameters();
-    fcParam->charge = charge;
+    FixedChargeAtypeParameters fcParam {};
+    fcParam.charge = charge;
     
-    at_->addProperty(new FixedChargeAtypeData(FCtypeID, fcParam));
+    at_->addProperty(make_shared<FixedChargeAtypeData>(FCtypeID, fcParam));
   }
 }

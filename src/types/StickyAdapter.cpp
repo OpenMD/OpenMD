@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(StickyTypeID);
   }
   
-  StickyAtypeParameters* StickyAdapter::getStickyParam() {
+  StickyAtypeParameters StickyAdapter::getStickyParam() {
     
     if (!isSticky()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(StickyTypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(StickyTypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "StickyAdapter::getStickyParam could not find Sticky\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,8 +75,8 @@ namespace OpenMD {
       simError(); 
     }
     
-    StickyAtypeData* stickyData = dynamic_cast<StickyAtypeData*>(data);
-    if (stickyData == NULL) {
+    std::shared_ptr<StickyAtypeData> stickyData = std::dynamic_pointer_cast<StickyAtypeData>(data);
+    if (stickyData == nullptr) {
       sprintf( painCave.errMsg,
                "StickyAdapter::getStickyParam could not convert\n"
                "\tGenericData to StickyAtypeData for atom type %s\n", 
@@ -91,45 +91,45 @@ namespace OpenMD {
 
   bool StickyAdapter::isStickyPower() {
     if (isSticky()) {
-      StickyAtypeParameters* stickyParam = getStickyParam();
-      return stickyParam->isPower;
+      StickyAtypeParameters stickyParam = getStickyParam();
+      return stickyParam.isPower;
     } else 
       return false;
   }
 
   RealType StickyAdapter::getW0() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->w0;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.w0;
   }
 
   RealType StickyAdapter::getV0() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->v0;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.v0;
   }
 
   RealType StickyAdapter::getV0p() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->v0p;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.v0p;
   }
 
   RealType StickyAdapter::getRl() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->rl;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.rl;
   }
 
   RealType StickyAdapter::getRu() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->ru;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.ru;
   }
 
   RealType StickyAdapter::getRlp() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->rlp;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.rlp;
   }
 
   RealType StickyAdapter::getRup() {    
-    StickyAtypeParameters* stickyParam = getStickyParam();
-    return stickyParam->rup;
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.rup;
   }
 
     
@@ -141,16 +141,16 @@ namespace OpenMD {
       at_->removeProperty(StickyTypeID);
     }
 
-    StickyAtypeParameters* stickyParam = new StickyAtypeParameters();
-    stickyParam->w0 = w0;
-    stickyParam->v0 = v0;
-    stickyParam->v0p = v0p;
-    stickyParam->rl = rl;
-    stickyParam->ru = ru;
-    stickyParam->rlp = rlp;
-    stickyParam->rup = rup;
-    stickyParam->isPower = isPower;
+    StickyAtypeParameters stickyParam {};
+    stickyParam.w0 = w0;
+    stickyParam.v0 = v0;
+    stickyParam.v0p = v0p;
+    stickyParam.rl = rl;
+    stickyParam.ru = ru;
+    stickyParam.rlp = rlp;
+    stickyParam.rup = rup;
+    stickyParam.isPower = isPower;
     
-    at_->addProperty(new StickyAtypeData(StickyTypeID, stickyParam));
+    at_->addProperty(make_shared<StickyAtypeData>(StickyTypeID, stickyParam));
   }
 }

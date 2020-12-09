@@ -68,7 +68,7 @@ namespace OpenMD {
     RealType Hard;  
     RealType Radius;
   };
-  typedef SimpleTypeData<UFFAtypeParameters*> UFFAtypeData;   
+  typedef SimpleTypeData<UFFAtypeParameters> UFFAtypeData;   
   
   class UFFAdapter {
   public:
@@ -93,7 +93,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    UFFAtypeParameters*  getUFFParam();
+    UFFAtypeParameters  getUFFParam();
   };
 }
 #endif

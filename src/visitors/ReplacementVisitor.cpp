@@ -96,9 +96,9 @@ namespace OpenMD {
     Mat3x3d      skewMat;
 
     Vector3d     newVec;
-    AtomInfo *   atomInfo;
-    AtomData *   atomData;
-    GenericData *data;
+    AtomInfo*    atomInfo;
+    std::shared_ptr<AtomData>    atomData;
+    std::shared_ptr<GenericData> data;
     bool         haveAtomData;
     
     //if atom is not one of our recognized atom types, just skip it
@@ -107,17 +107,17 @@ namespace OpenMD {
     
     data = datom->getPropertyByName("ATOMDATA");
     
-    if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
       
-      if (atomData == NULL) {
+      if (atomData == nullptr) {
         std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
-        atomData = new AtomData;
+        atomData = make_shared<AtomData>();
         haveAtomData = false;
       } else
         haveAtomData = true;
     } else {
-      atomData = new AtomData;
+      atomData = make_shared<AtomData>();
       haveAtomData = false;
     }
         
@@ -150,7 +150,7 @@ namespace OpenMD {
 
       newVec = Atrans * siteInfo->pos;    
       
-      atomInfo = new AtomInfo;
+      atomInfo = new AtomInfo();
       atomInfo->atomTypeName = siteInfo->atomTypeName;
       atomInfo->pos = pos + newVec;
       

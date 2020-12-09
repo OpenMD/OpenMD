@@ -61,7 +61,7 @@ namespace OpenMD {
     Vector3d dipole;
     Mat3x3d quadrupole;
   };
-  typedef SimpleTypeData<MultipoleAtypeParameters*> MultipoleAtypeData;   
+  typedef SimpleTypeData<MultipoleAtypeParameters> MultipoleAtypeData;   
   
   class MultipoleAdapter {
   public:
@@ -78,7 +78,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    MultipoleAtypeParameters*  getMultipoleParam();
+    MultipoleAtypeParameters  getMultipoleParam();
   };
 }
 #endif

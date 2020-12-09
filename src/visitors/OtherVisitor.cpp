@@ -65,17 +65,17 @@ namespace OpenMD {
   }
 
   void WrappingVisitor::internalVisit(StuntDouble *sd) {
-    GenericData *                     data;
-    AtomData *                        atomData;
+    std::shared_ptr<GenericData>      data;
+    std::shared_ptr<AtomData>         atomData;
     AtomInfo *                        atomInfo;
     std::vector<AtomInfo *>::iterator i;
 
     data = sd->getPropertyByName("ATOMDATA");
 
-    if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
 
-      if (atomData == NULL)
+      if (atomData == nullptr)
 	return;
     } else
       return;
@@ -157,16 +157,16 @@ namespace OpenMD {
   }
 
   void ReplicateVisitor::internalVisit(StuntDouble *sd) {
-    GenericData *          data;
-    AtomData *             atomData;
+    std::shared_ptr<GenericData> data;
+    std::shared_ptr<AtomData>    atomData;
 
     //if there is not atom data, just skip it
     data = sd->getPropertyByName("ATOMDATA");
 
-    if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
 
-      if (atomData == NULL) {
+      if (atomData == nullptr) {
 	return;
       }
     } else {
@@ -182,7 +182,8 @@ namespace OpenMD {
   }
 
   void ReplicateVisitor::replicate(std::vector<AtomInfo *>&infoList,
-                                   AtomData *data, const Mat3x3d& box) {
+                                   std::shared_ptr<AtomData> data,
+				   const Mat3x3d& box) {
     AtomInfo* newAtomInfo;
     std::vector<Vector3d>::iterator dirIter;
     std::vector<AtomInfo *>::iterator i;
@@ -286,8 +287,8 @@ namespace OpenMD {
   }
   
   void XYZVisitor::internalVisit(StuntDouble *sd) {
-    GenericData *                     data;
-    AtomData *                        atomData;
+    std::shared_ptr<GenericData>      data;
+    std::shared_ptr<AtomData>         atomData;
     AtomInfo *                        atomInfo;
     std::vector<AtomInfo *>::iterator i;
     char                              buffer[1024];
@@ -295,10 +296,10 @@ namespace OpenMD {
     //if there is not atom data, just skip it
     data = sd->getPropertyByName("ATOMDATA");
     
-    if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
       
-      if (atomData == NULL)
+      if (atomData == nullptr)
 	return;
     } else
       return;
@@ -408,20 +409,20 @@ namespace OpenMD {
   //----------------------------------------------------------------------------//
   
   void PrepareVisitor::internalVisit(Atom *atom) {
-    GenericData *data;
+    std::shared_ptr<GenericData> data;
     
     //if visited property is  existed, remove it
     data = atom->getPropertyByName("VISITED");
     
-    if (data != NULL) {
+    if (data != nullptr) {
       atom->removeProperty("VISITED");
     }
     
     //remove atomdata
     data = atom->getPropertyByName("ATOMDATA");
 
-    if (data != NULL) {
-      AtomData* atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      std::shared_ptr<AtomData> atomData = std::dynamic_pointer_cast<AtomData>(data);
 
       if (atomData != NULL)
 	atom->removeProperty("ATOMDATA");
@@ -429,23 +430,23 @@ namespace OpenMD {
   }
 
   void PrepareVisitor::internalVisit(RigidBody *rb) {
-    GenericData* data;
-    AtomData* atomData;
+    std::shared_ptr<GenericData> data;
+    std::shared_ptr<AtomData>    atomData;
     std::vector<Atom *> myAtoms;
     std::vector<Atom *>::iterator atomIter;
 
     //if visited property is  existed, remove it
     data = rb->getPropertyByName("VISITED");
 
-    if (data != NULL) {
+    if (data != nullptr) {
       rb->removeProperty("VISITED");
     }
 
     //remove atomdata
     data = rb->getPropertyByName("ATOMDATA");
 
-    if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
 
       if (atomData != NULL)
 	rb->removeProperty("ATOMDATA");
@@ -501,7 +502,7 @@ namespace OpenMD {
     std::vector<Atom *> myAtoms;
     std::vector<Atom *>::iterator atomIter;
     std::vector<AtomInfo *>::iterator i;
-    AtomData* atomData;
+    std::shared_ptr<AtomData> atomData;
 
     rbName = rb->getType();
     
@@ -510,12 +511,12 @@ namespace OpenMD {
       
       for( atomIter = myAtoms.begin(); atomIter != myAtoms.end();
 	   ++atomIter ) {
-	GenericData* data = (*atomIter)->getPropertyByName("ATOMDATA");
+	std::shared_ptr<GenericData> data = (*atomIter)->getPropertyByName("ATOMDATA");
         
-	if (data != NULL) {
-	  atomData = dynamic_cast<AtomData *>(data);
+	if (data != nullptr) {
+	  atomData = std::dynamic_pointer_cast<AtomData>(data);
           
-	  if (atomData == NULL)
+	  if (atomData == nullptr)
 	    continue;
 	} else
 	  continue;

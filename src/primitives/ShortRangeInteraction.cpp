@@ -64,7 +64,7 @@ namespace OpenMD {
     return getValue(id);
   }
 
-  void ShortRangeInteraction::addProperty(GenericData* genData) {
+  void ShortRangeInteraction::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);  
   }
   
@@ -72,19 +72,15 @@ namespace OpenMD {
     properties_.removeProperty(propName);  
   }
   
-  void ShortRangeInteraction::clearProperties() {
-    properties_.clearProperties(); 
-  }
-  
   std::vector<std::string> ShortRangeInteraction::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
   
-  std::vector<GenericData*> ShortRangeInteraction::getProperties() { 
+  std::vector<std::shared_ptr<GenericData> > ShortRangeInteraction::getProperties() { 
     return properties_.getProperties(); 
   }
   
-  GenericData* ShortRangeInteraction::getPropertyByName(const std::string& propName) {
+  std::shared_ptr<GenericData> ShortRangeInteraction::getPropertyByName(const std::string& propName) {
     return properties_.getPropertyByName(propName); 
   }   
 }

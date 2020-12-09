@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(MultipoleTypeID);
   }
   
-  MultipoleAtypeParameters* MultipoleAdapter::getMultipoleParam() {
+  MultipoleAtypeParameters MultipoleAdapter::getMultipoleParam() {
     
     if (!isMultipole()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(MultipoleTypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(MultipoleTypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "MultipoleAdapter::getMultipoleParam could not find Multipole\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,8 +75,8 @@ namespace OpenMD {
       simError(); 
     }
     
-    MultipoleAtypeData* multipoleData = dynamic_cast<MultipoleAtypeData*>(data);
-    if (multipoleData == NULL) {
+    std::shared_ptr<MultipoleAtypeData> multipoleData = std::dynamic_pointer_cast<MultipoleAtypeData>(data);
+    if (multipoleData == nullptr) {
       sprintf( painCave.errMsg,
                "MultipoleAdapter::getMultipoleParam could not convert\n"
                "\tGenericData to MultipoleAtypeData for atom type %s\n", 
@@ -91,27 +91,27 @@ namespace OpenMD {
 
   bool MultipoleAdapter::isDipole() {
     if (isMultipole()) {
-      MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-      return multipoleParam->isDipole;
+      MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+      return multipoleParam.isDipole;
     } else 
       return false;
   }
   bool MultipoleAdapter::isQuadrupole() {
     if (isMultipole()) {
-      MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-      return multipoleParam->isQuadrupole;
+      MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+      return multipoleParam.isQuadrupole;
     } else 
       return false;
   }
 
   Vector3d MultipoleAdapter::getDipole() {    
-    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-    return multipoleParam->dipole;
+    MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+    return multipoleParam.dipole;
   }
 
   Mat3x3d MultipoleAdapter::getQuadrupole() {    
-    MultipoleAtypeParameters* multipoleParam = getMultipoleParam();
-    return multipoleParam->quadrupole;
+    MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+    return multipoleParam.quadrupole;
   }
     
   void MultipoleAdapter::makeMultipole(Vector3d dipole, 
@@ -123,14 +123,14 @@ namespace OpenMD {
       at_->removeProperty(MultipoleTypeID);
     }
 
-    MultipoleAtypeParameters* multipoleParam = new MultipoleAtypeParameters();
+    MultipoleAtypeParameters multipoleParam {};
 
-    multipoleParam->dipole = dipole;
-    multipoleParam->quadrupole = quadrupole;
+    multipoleParam.dipole = dipole;
+    multipoleParam.quadrupole = quadrupole;
 
-    multipoleParam->isDipole = isDipole;
-    multipoleParam->isQuadrupole = isQuadrupole;   
+    multipoleParam.isDipole = isDipole;
+    multipoleParam.isQuadrupole = isQuadrupole;   
 
-    at_->addProperty(new MultipoleAtypeData(MultipoleTypeID, multipoleParam));
+    at_->addProperty(make_shared<MultipoleAtypeData>(MultipoleTypeID, multipoleParam));
   }
 }

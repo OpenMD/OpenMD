@@ -53,7 +53,7 @@ namespace OpenMD {
     return at_->hasProperty(PolTypeID);
   }
   
-  PolarizableAtypeParameters* PolarizableAdapter::getPolarizableParam() {
+  PolarizableAtypeParameters PolarizableAdapter::getPolarizableParam() {
     
     if (!isPolarizable()) {
       sprintf( painCave.errMsg,               
@@ -65,8 +65,8 @@ namespace OpenMD {
       simError();
     }
     
-    GenericData* data = at_->getPropertyByName(PolTypeID);
-    if (data == NULL) {
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(PolTypeID);
+    if (data == nullptr) {
       sprintf( painCave.errMsg, 
                "PolarizableAdapter::getPolarizableParam could not find polarizable\n"
                "\tparameters for atomType %s.\n", at_->getName().c_str());
@@ -75,8 +75,8 @@ namespace OpenMD {
       simError(); 
     }
     
-    PolarizableAtypeData* polData = dynamic_cast<PolarizableAtypeData*>(data);
-    if (polData == NULL) {
+    std::shared_ptr<PolarizableAtypeData> polData = std::dynamic_pointer_cast<PolarizableAtypeData>(data);
+    if (polData == nullptr) {
       sprintf( painCave.errMsg,
                "PolarizableAdapter::getPolarizableParam could not convert\n"
                "\tGenericData to PolarizableAtypeData for atom type %s\n", 
@@ -90,8 +90,8 @@ namespace OpenMD {
   }
   
   RealType PolarizableAdapter::getPolarizability() {    
-    PolarizableAtypeParameters* polParam = getPolarizableParam();
-    return polParam->polarizability;
+    PolarizableAtypeParameters polParam = getPolarizableParam();
+    return polParam.polarizability;
   }
   
   void PolarizableAdapter::makePolarizable(RealType polarizability) {
@@ -100,9 +100,9 @@ namespace OpenMD {
       at_->removeProperty(PolTypeID);
     }
 
-    PolarizableAtypeParameters* polParam = new PolarizableAtypeParameters();
-    polParam->polarizability = polarizability;
+    PolarizableAtypeParameters polParam {};
+    polParam.polarizability = polarizability;
     
-    at_->addProperty(new PolarizableAtypeData(PolTypeID, polParam));
+    at_->addProperty(make_shared<PolarizableAtypeData>(PolTypeID, polParam));
   }
 }

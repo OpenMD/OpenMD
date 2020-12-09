@@ -54,8 +54,8 @@ namespace OpenMD {
     Vector3d pos;
     Vector3d u(0, 0, 1);
     Vector3d newVec;
-    GenericData* data;
-    AtomData* atomData;
+    std::shared_ptr<GenericData> data;
+    std::shared_ptr<AtomData> atomData;
     AtomInfo* atomInfo;
     bool haveAtomData;
     RotMat3x3d rotMatrix;
@@ -71,20 +71,20 @@ namespace OpenMD {
 
     data = rb->getPropertyByName("ATOMDATA");
 
-    if(data != NULL){
-      atomData = dynamic_cast<AtomData*>(data);  
+    if(data != nullptr){
+      atomData = std::dynamic_pointer_cast<AtomData>(data);  
       
-      if(atomData == NULL){
+      if(atomData == nullptr){
 	std::cerr << "can not get Atom Data from " << rb->getType() << std::endl;
 	
-	atomData = new AtomData; 
+	atomData = make_shared<AtomData>(); 
 	haveAtomData = false;      
 	
       } else
 	haveAtomData = true;
       
     } else {
-      atomData = new AtomData;
+      atomData = make_shared<AtomData>(); 
       haveAtomData = false;
       
     }
@@ -152,7 +152,7 @@ namespace OpenMD {
 
 
   void RBCOMVisitor::visit(RigidBody* rb){
-    AtomData* atomData;
+    std::shared_ptr<AtomData> atomData;
     AtomInfo* atomInfo;
     Vector3d pos;
     pos = rb->getPos();
@@ -166,7 +166,7 @@ namespace OpenMD {
     atomInfo->vec[1] = 0;
     atomInfo->vec[2] = 0;
 
-    atomData = new AtomData; 
+    atomData = make_shared<AtomData>();
     atomData->setID("ATOMDATA");
     atomData->addAtomInfo(atomInfo);
 

@@ -79,16 +79,6 @@ namespace OpenMD {
   public:
 
     AtomData(const std::string& id = "ATOMDATA") : GenericData(id) {}
-
-    ~AtomData() {
-      std::vector<AtomInfo*>::iterator i;
-      AtomInfo* atomInfo;
-
-      for(atomInfo = beginAtomInfo(i); atomInfo; atomInfo  = nextAtomInfo(i)) {
-	delete atomInfo;
-      }
-      data.clear();
-    }
         
     void addAtomInfo(AtomInfo* info) {data.push_back(info);}
 

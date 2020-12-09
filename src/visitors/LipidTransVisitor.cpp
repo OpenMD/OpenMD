@@ -118,24 +118,25 @@ namespace OpenMD {
   }
 
   void LipidTransVisitor::internalVisit(StuntDouble *sd) {
-    GenericData *                     data;
-    AtomData *                        atomData;
+    std::shared_ptr<GenericData>      data;
+    std::shared_ptr<AtomData>         atomData;
     AtomInfo *                        atomInfo;
     std::vector<AtomInfo *>::iterator i;
 
     data = sd->getPropertyByName("ATOMDATA");
 
-    if (data != NULL) {
-      atomData = dynamic_cast<AtomData *>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
 
-      if (atomData == NULL)
+      if (atomData == nullptr)
 	return;
     } else
       return;
 
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     
-    for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
+    for( atomInfo = atomData->beginAtomInfo(i);
+	 atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
 
       Vector3d tmp= atomInfo->pos - origin_;
       currSnapshot->wrapVector(tmp);

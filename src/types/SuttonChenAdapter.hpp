@@ -61,7 +61,7 @@ namespace OpenMD {
     RealType alpha;
     RealType epsilon;
   };
-  typedef SimpleTypeData<SCAtypeParameters*> SCAtypeData;   
+  typedef SimpleTypeData<SCAtypeParameters> SCAtypeData;   
   
   class SuttonChenAdapter {
   public:
@@ -78,7 +78,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    SCAtypeParameters*  getSuttonChenParam();
+    SCAtypeParameters  getSuttonChenParam();
   };
 }
 #endif

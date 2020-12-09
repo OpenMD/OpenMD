@@ -171,22 +171,23 @@ namespace OpenMD {
   }
 
   void ZConsVisitor::internalVisit(StuntDouble* sd, const std::string& prefix){
-    GenericData* data;
-    AtomData* atomData;
+    std::shared_ptr<GenericData> data;
+    std::shared_ptr<AtomData> atomData;
     AtomInfo* atomInfo;
     std::vector<AtomInfo*>::iterator iter;
 
     //if there is not atom data, just skip it
     data = sd->getPropertyByName("ATOMDATA");
-    if(data != NULL){
-      atomData = dynamic_cast<AtomData*>(data);  
-      if(atomData == NULL)
+    if(data != nullptr){
+      atomData = std::dynamic_pointer_cast<AtomData>(data);  
+      if(atomData == nullptr)
 	return;
     }
     else
       return;
 
-    for(atomInfo  = atomData->beginAtomInfo(iter); atomInfo; atomInfo = atomData->nextAtomInfo(iter))
+    for(atomInfo  = atomData->beginAtomInfo(iter);
+	atomInfo; atomInfo = atomData->nextAtomInfo(iter))
       (atomInfo->atomTypeName).insert(0, prefix);
   }
 

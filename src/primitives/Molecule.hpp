@@ -415,18 +415,13 @@ namespace OpenMD{
      * Adds property into property map
      * @param genData GenericData to be added into PropertyMap
      */
-    void addProperty(GenericData* genData);
+    void addProperty(std::shared_ptr<GenericData> genData);
 
     /**
      * Removes property from PropertyMap by name
      * @param propName the name of property to be removed
      */
     void removeProperty(const std::string& propName);
-
-    /**
-     * clear all of the properties
-     */
-    void clearProperties();
 
     /**
      * Returns all names of properties
@@ -438,7 +433,7 @@ namespace OpenMD{
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
      */      
-    std::vector<GenericData*> getProperties();
+    std::vector<std::shared_ptr<GenericData> > getProperties();
 
     /**
      * Returns property 
@@ -446,7 +441,7 @@ namespace OpenMD{
      * @return a pointer point to property with propName. If no property named propName
      * exists, return NULL
      */      
-    GenericData* getPropertyByName(const std::string& propName);
+    std::shared_ptr<GenericData> getPropertyByName(const std::string& propName);
     
   private:
     
