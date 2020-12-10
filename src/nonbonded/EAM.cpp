@@ -1140,7 +1140,17 @@ namespace OpenMD {
     drhoidr = drha;
     drhojdr = drhb;
 
-    dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr;
+    RealType scalei = 1;
+    RealType scalej = 1;
+    
+    if (data1.isFluctuatingCharge){
+        scalei = (oss_ * data1.nValence - *(idat.flucQ1))/(oss_ * data1.nMobile); 
+    }
+    if (data2.isFluctuatingCharge){
+        scalej = (oss_ * data2.nValence - *(idat.flucQ2))/(oss_ * data2.nMobile); 
+    }
+
+    dudr = drhojdr * scalej * *(idat.dfrho1) + drhoidr* scalei * *(idat.dfrho2) + dvpdr;
 
     *(idat.f1) += rhat * dudr;
 
