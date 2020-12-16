@@ -191,8 +191,6 @@ namespace OpenMD {
     std::map<int, RealPair> restInfo_;
   };    
  
-  typedef SimpleTypeData<Restraint*> RestraintData;   
-
-  
+  typedef SimpleTypeData<Restraint*> RestraintData;  
 }
 #endif

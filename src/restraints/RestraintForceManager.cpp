@@ -171,7 +171,7 @@ namespace OpenMD {
 #endif
 
         MolecularRestraint* rest = new MolecularRestraint();
-
+	
         std::string restPre("mol_");
         std::stringstream restName;
         restName << restPre << molIndex;
@@ -258,7 +258,7 @@ namespace OpenMD {
           stuntDoubleIndex.push_back(sd->getGlobalIntegrableObjectIndex());
 
           ObjectRestraint* rest = new ObjectRestraint();
-          
+	  
           if (stamp[i]->haveDisplacementSpringConstant()) {
             rest->setDisplacementForceConstant(stamp[i]->getDisplacementSpringConstant());
           }
@@ -294,7 +294,6 @@ namespace OpenMD {
           sd->addProperty(std::make_shared<RestraintData>("Restraint", rest));
           restrainedObjs_.push_back(sd);                    
         }
-
       }
     }
 
@@ -325,6 +324,11 @@ namespace OpenMD {
 
   RestraintForceManager::~RestraintForceManager(){
     delete restOut;
+    std::vector<Restraint*>::const_iterator resti;
+    for(resti=restraints_.begin(); resti != restraints_.end(); ++resti){
+      delete (*resti);
+    }
+    restraints_.clear();
   }
 
   void RestraintForceManager::init() {
@@ -358,10 +362,10 @@ namespace OpenMD {
     std::shared_ptr<GenericData> data;
     Molecule::IntegrableObjectIterator ioi;
     MolecularRestraint* mRest = NULL;
+    ObjectRestraint* oRest = NULL;
     StuntDouble* sd;
 
     std::vector<StuntDouble*>::const_iterator ro;
-    ObjectRestraint* oRest = NULL;
 
     std::map<int, Restraint::RealPair> restInfo;
 
@@ -377,10 +381,9 @@ namespace OpenMD {
         // make sure we can reinterpret the generic data as restraint data:
 	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
         if (restData != nullptr) {
-          // make sure we can reinterpet the restraint data as a pointer to
-          // an MolecularRestraint:
+          // make sure we can reinterpet the restraint data as a MolecularRestraint
           mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
-          if (mRest == NULL) {
+	  if (mRest == NULL) {
             sprintf( painCave.errMsg,
                      "Can not cast RestraintData to MolecularRestraint\n");
             painCave.severity = OPENMD_ERROR;

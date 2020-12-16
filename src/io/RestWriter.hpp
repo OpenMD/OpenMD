@@ -65,7 +65,8 @@ namespace OpenMD {
   class RestWriter{
     
   public:
-    RestWriter(SimInfo* info, const std::string& filename, std::vector<Restraint*> restraints);
+    RestWriter(SimInfo* info, const std::string& filename,
+	       std::vector<Restraint*> restraints);
     ~RestWriter();
 
     void writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo);

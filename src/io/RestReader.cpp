@@ -221,52 +221,54 @@ namespace OpenMD {
         
         // make sure we can reinterpret the generic data as restraint data:
         
-	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
-        
+	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);
+
         if (restData != nullptr) {
-          
-          // make sure we can reinterpet the restraint data as a
+	  // make sure we can reinterpet the restraint data as a
           // pointer to a MolecularRestraint:
           
-	  std::shared_ptr<MolecularRestraint> mRest = std::dynamic_pointer_cast<MolecularRestraint>(restData);
+          MolecularRestraint* mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
+
+	  if (mRest == NULL) {
+            sprintf( painCave.errMsg,
+                     "Can not cast RestraintData to MolecularRestraint\n");
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal = 1;
+            simError();                      
+	  } else {
+
+	    // now we need to pack the stunt doubles for the reference
+	    // structure:
           
-          if (mRest != nullptr) {          
-            
-            // now we need to pack the stunt doubles for the reference
-            // structure:
-            
-            std::vector<Vector3d> ref;
-            int count = 0;
-            RealType mass, mTot;
-            Vector3d COM(0.0);
-            
-            mTot = 0.0;
-            
-            // loop over the stunt doubles in this molecule in the order we
-            // will be looping them in the restraint code:
-            
-            for (sd = mol->beginIntegrableObject(j); sd != NULL; 
-                 sd = mol->nextIntegrableObject(j)) {
-              
-              // push back the reference positions of the stunt
-              // doubles from the *globally* sorted array of
-              // positions:
-              
-              ref.push_back( all_pos_[sd->getGlobalIntegrableObjectIndex()] );
-              mass = sd->getMass();              
-              COM = COM + mass * ref[count];
-              mTot = mTot + mass;
-              count = count + 1;
-            }
-            COM /= mTot;
-            mRest->setReferenceStructure(ref, COM);         
-          }
-        }
+	    std::vector<Vector3d> ref;
+	    int count = 0;
+	    RealType mass, mTot;
+	    Vector3d COM(0.0);
+	    
+	    mTot = 0.0;
+	    // loop over the stunt doubles in this molecule in the order we
+	    // will be looping them in the restraint code:
+	    
+	    for (sd = mol->beginIntegrableObject(j); sd != NULL; 
+		 sd = mol->nextIntegrableObject(j)) {
+	      
+	      // push back the reference positions of the stunt
+	      // doubles from the *globally* sorted array of
+	      // positions:
+	      
+	      ref.push_back( all_pos_[sd->getGlobalIntegrableObjectIndex()] );
+	      mass = sd->getMass();              
+	      COM = COM + mass * ref[count];
+	      mTot = mTot + mass;
+	      count = count + 1;
+	    }
+	    COM /= mTot;
+	    mRest->setReferenceStructure(ref, COM);
+	  }
+	}
       }
     }
-  }
-
-   
+  }   
    
   void RestReader::parseDumpLine(const std::string& line) {        
 
@@ -377,16 +379,22 @@ namespace OpenMD {
 	std::shared_ptr<RestraintData> restData= std::dynamic_pointer_cast<RestraintData>(data);        
         if (restData != nullptr) {
           // make sure we can reinterpet the restraint data as a pointer to
-            // an ObjectRestraint:
-	  std::shared_ptr<ObjectRestraint> oRest = std::dynamic_pointer_cast<ObjectRestraint>(restData);
-          if (oRest != NULL) {          
-            if (sd->isDirectional()) {
-              oRest->setReferenceStructure(pos, q.toRotationMatrix3());
-            } else {                           
-              oRest->setReferenceStructure(pos);
-            }
-          }
-        }
+	  // an ObjectRestraint:
+	  ObjectRestraint* oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
+	  if (oRest == NULL) {
+            sprintf( painCave.errMsg,
+                     "Can not cast RestraintData to ObjectRestraint\n");
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal = 1;
+            simError();                      
+	  } else {
+	    if (sd->isDirectional()) {
+	      oRest->setReferenceStructure(pos, q.toRotationMatrix3());
+	    } else {                           
+	      oRest->setReferenceStructure(pos);
+	    }
+	  }
+	}
       }
     }
   }
