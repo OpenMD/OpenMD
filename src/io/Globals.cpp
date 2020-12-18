@@ -212,9 +212,16 @@ namespace OpenMD {
   }
 
   Globals::~Globals() {
+    std::map<std::string, MoleculeStamp*>::iterator i;
+    for (i = moleculeStamps_.begin(); i != moleculeStamps_.end(); ++i) {
+      delete i->second;
+    }
+    moleculeStamps_.clear();
+    
     MemoryUtils::deletePointers(components_);
     MemoryUtils::deletePointers(zconstraints_);
     MemoryUtils::deletePointers(restraints_);
+    
     delete flucQpars_;
     delete rnemdPars_;
     delete minimizerPars_;
