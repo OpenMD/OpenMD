@@ -116,7 +116,6 @@ namespace OpenMD {
       return std::make_pair( (nM + nV)/nV, 0.0);
     }
 
-                            
     g = ((q-nV)*(q-nV) * (nM + q + nV)) / (nV * nV * (nM + nV));
     gp = ((q - nV)*(2*nM + 3*q + nV)) / (nV * nV * (nM + nV));
 
@@ -643,11 +642,6 @@ namespace OpenMD {
       eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
-
-      
-      
-      
-      
       RealType phiCC, phiCV;
 
       std::vector<RealType> rvals;
@@ -943,22 +937,22 @@ namespace OpenMD {
     RealType m;
 
     if (haveCutoffRadius_)
-      if ( *(idat.rij) > eamRcut_) return;
+      if ( idat.rij > eamRcut_) return;
 
-    if ( *(idat.rij) < data1.rcut) {
+    if ( idat.rij < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
         m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nMobile);
       }
-      *(idat.rho2) += m * data1.rho->getValueAt( *(idat.rij) );
+      *(idat.rho2) += m * data1.rho->getValueAt( idat.rij );
     }
 
-    if ( *(idat.rij) < data2.rcut) {
+    if ( idat.rij < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
         m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nMobile);
       }
-      *(idat.rho1) += m * data2.rho->getValueAt( *(idat.rij));
+      *(idat.rho1) += m * data2.rho->getValueAt( idat.rij );
     }
 
     return;
@@ -972,11 +966,11 @@ namespace OpenMD {
     data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
                                       *(sdat.dfrhodrho) );
 
-    (*(sdat.selfPot))[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
+    sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
 
     if (sdat.isSelected)
-      (*(sdat.selePot))[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
-
+      sdat.selePot[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
+    
     if (sdat.doParticlePot) {
       *(sdat.particlePot) += *(sdat.frho);
     }
@@ -989,7 +983,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
 
     if (haveCutoffRadius_)
-      if ( *(idat.rij) > eamRcut_) return;
+      if ( idat.rij > eamRcut_) return;
 
     int eamtid1 = EAMtids[idat.atid1];
     int eamtid2 = EAMtids[idat.atid2];
@@ -1015,17 +1009,17 @@ namespace OpenMD {
     RealType qi(0.0), qj(0.0);    
     RealType si(1.0), sj(1.0);
 
-    rhat =  *(idat.d) / *(idat.rij);
-    if ( *(idat.rij) < rci && *(idat.rij) < rcij ) {
-      data1.rho->getValueAndDerivativeAt( *(idat.rij), rha, drha);
+    rhat =  idat.d / idat.rij;
+    if ( idat.rij < rci && idat.rij < rcij ) {
+      data1.rho->getValueAndDerivativeAt( idat.rij, rha, drha);
       CubicSplinePtr phi = MixingMap[eamtid1][eamtid1].phi;
-      phi->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+      phi->getValueAndDerivativeAt( idat.rij, pha, dpha);
     }
 
-    if ( *(idat.rij) < rcj && *(idat.rij) < rcij ) {
-      data2.rho->getValueAndDerivativeAt( *(idat.rij), rhb, drhb );
+    if ( idat.rij < rcj && idat.rij < rcij ) {
+      data2.rho->getValueAndDerivativeAt( idat.rij, rhb, drhb );
       CubicSplinePtr phi = MixingMap[eamtid2][eamtid2].phi;
-      phi->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+      phi->getValueAndDerivativeAt( idat.rij, phb, dphb);
     }
 
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
@@ -1048,44 +1042,44 @@ namespace OpenMD {
       
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
 
-        if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+        if ( idat.rij < rci  && idat.rij < rcij ) {
           phab = phab + 0.5 * (sj/si) * (rhb / rha) * pha;
           dvpdr = dvpdr + 0.5 * (sj/si) * ((rhb/rha)*dpha +
                                            pha*((drhb/rha) - (rhb*drha/rha/rha)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) += 0.5 * (rhb * sj * pha) / (rha * Ma * si * si);
+            idat.dVdFQ1 += 0.5 * (rhb * sj * pha) / (rha * Ma * si * si);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) -= 0.5 * (rhb * pha) / (rha * Mb * si);
+            idat.dVdFQ2 -= 0.5 * (rhb * pha) / (rha * Mb * si);
           }
         }
 
-        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+        if ( idat.rij < rcj  && idat.rij < rcij ) {
           phab = phab + 0.5 * (si/sj) * (rha / rhb) * phb;
           dvpdr = dvpdr + 0.5 * (si/sj) * ((rha/rhb)*dphb +
                                            phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) -= 0.5 * (rha * phb) / (rhb * Ma * sj);
+            idat.dVdFQ1 -= 0.5 * (rha * phb) / (rhb * Ma * sj);
           }
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) += 0.5 * (rha * si * phb) / (rhb * Mb * sj * sj);
+            idat.dVdFQ2 += 0.5 * (rha * si * phb) / (rhb * Mb * sj * sj);
           }
         }
       } else {
         // Core-Core part first - no fluctuating charge, just Johnson mixing:
 
-        if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+        if ( idat.rij < rci  && idat.rij < rcij ) {
           CubicSplinePtr phiACC = data1.phiCC;
-          phiACC->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+          phiACC->getValueAndDerivativeAt( idat.rij, pha, dpha);
           phab += 0.5 * (rhb / rha) * pha;
           dvpdr += 0.5 * ((rhb/rha)*dpha +
                           pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
-        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+        if ( idat.rij < rcj  && idat.rij < rcij ) {
           CubicSplinePtr phiBCC = data2.phiCC;
-          phiBCC->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+          phiBCC->getValueAndDerivativeAt( idat.rij, phb, dphb);
           phab += 0.5 * (rha / rhb) * phb;
           dvpdr += 0.5 * ((rha/rhb)*dphb +
                           phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
@@ -1102,35 +1096,35 @@ namespace OpenMD {
           gj = gFunc(qj, Vb, Mb);
         }
         
-        if ( *(idat.rij) < rci  && *(idat.rij) < rcij ) {
+        if ( idat.rij < rci  && idat.rij < rcij ) {
           CubicSplinePtr phiACV = data1.phiCV;
-          phiACV->getValueAndDerivativeAt( *(idat.rij), pha, dpha);
+          phiACV->getValueAndDerivativeAt( idat.rij, pha, dpha);
 	  
           phab += 0.5 * gj.first * (rhb / rha) * pha;
           dvpdr += 0.5 * gj.first * ((rhb/rha)*dpha +
 				     pha * ((drhb/rha) - (rhb*drha/rha/rha)));
 	  
           if (data2.isFluctuatingCharge) {
-            *(idat.dVdFQ2) +=  0.5 * gj.second * (rhb / rha) * pha;
+            idat.dVdFQ2 +=  0.5 * gj.second * (rhb / rha) * pha;
           }
         }
-        if ( *(idat.rij) < rcj  && *(idat.rij) < rcij ) {
+        if ( idat.rij < rcj  && idat.rij < rcij ) {
           CubicSplinePtr phiBCV = data2.phiCV;
-          phiBCV->getValueAndDerivativeAt( *(idat.rij), phb, dphb);
+          phiBCV->getValueAndDerivativeAt( idat.rij, phb, dphb);
 
           phab += 0.5 * gi.first * (rha / rhb) * phb;
           dvpdr += 0.5 * gi.first * ((rha/rhb)*dphb +
 				     phb * ((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data1.isFluctuatingCharge) {
-            *(idat.dVdFQ1) +=  0.5 * gi.second * (rha / rhb) * phb;
+            idat.dVdFQ1 +=  0.5 * gi.second * (rha / rhb) * phb;
           }
         }
       }
     } else {
-      if ( *(idat.rij) < rcij ) {
+      if ( idat.rij < rcij ) {
         CubicSplinePtr phi = MixingMap[eamtid1][eamtid2].phi;
-        phi->getValueAndDerivativeAt( *(idat.rij), phab, dvpdr);
+        phi->getValueAndDerivativeAt( idat.rij, phab, dvpdr);
       }
     }
 
@@ -1139,7 +1133,7 @@ namespace OpenMD {
 
     dudr = drhojdr * *(idat.dfrho1) + drhoidr * *(idat.dfrho2) + dvpdr;
 
-    *(idat.f1) += rhat * dudr;
+    idat.f1 += rhat * dudr;
 
     if (idat.doParticlePot) {
       // particlePot is the difference between the full potential and
@@ -1158,19 +1152,19 @@ namespace OpenMD {
         - *(idat.frho1);
     }
 
-    (*(idat.pot))[METALLIC_PAIR_FAMILY] += phab;
+    idat.pot[METALLIC_PAIR_FAMILY] += phab;
     if (idat.isSelected)
-      (*(idat.selePot))[METALLIC_PAIR_FAMILY] += phab;
+      idat.selePot[METALLIC_PAIR_FAMILY] += phab;
 
-    *(idat.vpair) += phab;
+    idat.vpair += phab;
 
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      *(idat.dVdFQ1) -= *(idat.dfrho2) * rha / Ma;
+      idat.dVdFQ1 -= *(idat.dfrho2) * rha / Ma;
     }
     if (data2.isFluctuatingCharge) {
-      *(idat.dVdFQ2) -= *(idat.dfrho1) * rhb / Mb;
+      idat.dVdFQ2 -= *(idat.dfrho1) * rhb / Mb;
     }
 
     return;

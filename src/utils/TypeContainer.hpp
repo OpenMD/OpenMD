@@ -108,7 +108,6 @@ namespace OpenMD {
     ElemPtr find(KeyType& keys) {
       assert(keys.size() == SIZE);
       MapTypeIterator i;
-      ValueType foundType;
                 
       i = data_.find(keys);
       if (i != data_.end()) {

@@ -381,7 +381,7 @@ namespace OpenMD {
       potential += torsion->getPotential();
     }
     
-    for (inversion = beginInversion(inversionIter); torsion != NULL; 
+    for (inversion = beginInversion(inversionIter); inversion != NULL; 
          inversion =  nextInversion(inversionIter)) {
       potential += inversion->getPotential();
     }

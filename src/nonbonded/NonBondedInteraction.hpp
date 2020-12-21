@@ -100,31 +100,31 @@ namespace OpenMD {
    */
   struct InteractionData {
     /*@{*/
-    int atid1;                /**< atomType ident for atom 1 */
-    int atid2;                /**< atomType ident for atom 2 */
-    Vector3d* d;              /**< interatomic vector (already wrapped into box) */
-    RealType* rij;            /**< interatomic separation */
-    RealType* r2;             /**< square of rij */
-    RealType* rcut;           /**< cutoff radius for this interaction */
-    bool shiftedPot {false};          /**< shift the potential up inside the cutoff? */
-    bool shiftedForce {false};        /**< shifted forces smoothly inside the cutoff? */
-    RealType* sw;             /**< switching function value at rij */
-    int* topoDist;            /**< topological distance between atoms */
-    bool excluded {false};            /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
-    bool sameRegion {false};          /**< are these atoms specified to be in the same region? */ 
-    RealType* vdwMult;        /**< multiplier for van der Waals interactions */
-    RealType* electroMult;    /**< multiplier for electrostatic interactions */
-    potVec* pot;              /**< total potential */
-    potVec* excludedPot;      /**< potential energy excluded from the overall calculation */
-    RealType* vpair;          /**< pair potential */
+    int atid1 = -1;           /**< atomType ident for atom 1 */
+    int atid2 = -1;           /**< atomType ident for atom 2 */
+    Vector3d d{};             /**< interatomic vector (already wrapped into box) */
+    RealType rij{};           /**< interatomic separation */
+    RealType r2{};            /**< square of rij */
+    RealType rcut{};          /**< cutoff radius for this interaction */
+    bool shiftedPot {false};  /**< shift the potential up inside the cutoff? */
+    bool shiftedForce {false};/**< shifted forces smoothly inside the cutoff? */
+    RealType sw{};            /**< switching function value at rij */
+    int topoDist;             /**< topological distance between atoms */
+    bool excluded {false};    /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
+    bool sameRegion {false};  /**< are these atoms specified to be in the same region? */ 
+    RealType vdwMult{};       /**< multiplier for van der Waals interactions */
+    RealType electroMult{};   /**< multiplier for electrostatic interactions */
+    potVec pot{};             /**< total potential */
+    potVec excludedPot{};     /**< potential energy excluded from the overall calculation */
+    RealType vpair{};         /**< pair potential */
     bool doParticlePot {false};       /**< should we bother with the particle pot? */
     bool doElectricField {false};     /**< should we bother with the electric field? */
     bool doSitePotential {false};     /**< should we bother with electrostatic site potential */
-    bool isSelected {false};          /**< one of the particles has been selected for selection potential */
-    potVec* selePot;          /**< potential energies of the selected sites */
+    bool isSelected {false};  /**< one of the particles has been selected for selection potential */
+    potVec selePot{};         /**< potential energies of the selected sites */
     RealType* particlePot1;   /**< pointer to particle potential for atom1 */
     RealType* particlePot2;   /**< pointer to particle potential for atom2 */
-    Vector3d* f1;             /**< force between the two atoms */
+    Vector3d f1;              /**< force between the two atoms */
     RotMat3x3d* A1;           /**< pointer to rotation matrix of first atom */
     RotMat3x3d* A2;           /**< pointer to rotation matrix of second atom */
     Vector3d* dipole1;        /**< pointer to dipole vector of first atom */
@@ -141,14 +141,14 @@ namespace OpenMD {
     RealType* dfrho2;         /**< derivative of functional for atom 2 */
     RealType* flucQ1;         /**< fluctuating charge on atom1 */
     RealType* flucQ2;         /**< fluctuating charge on atom2 */
-    RealType* dVdFQ1;         /**< fluctuating charge force on atom1 */
-    RealType* dVdFQ2;         /**< fluctuating charge force on atom2 */
-    Vector3d* eField1;        /**< pointer to electric field on first atom */
-    Vector3d* eField2;        /**< pointer to electric field on second atom */
+    RealType dVdFQ1{};        /**< fluctuating charge force on atom1 */
+    RealType dVdFQ2{};        /**< fluctuating charge force on atom2 */
+    Vector3d eField1{};       /**< pointer to electric field on first atom */
+    Vector3d eField2{};       /**< pointer to electric field on second atom */
     RealType* skippedCharge1; /**< charge skipped on atom1 in pairwise interaction loop with atom2 */
     RealType* skippedCharge2; /**< charge skipped on atom2 in pairwise interaction loop with atom1 */
-    RealType* sPot1;           /**< site potential on first atom */
-    RealType* sPot2;           /**< site potential on second atom */
+    RealType sPot1{};         /**< site potential on first atom */
+    RealType sPot2{};         /**< site potential on second atom */
     /*@}*/
   };
   
@@ -170,8 +170,8 @@ namespace OpenMD {
     Vector3d* dipole;       /**< pointer to dipole vector of the atom */
     Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */
     RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
-    potVec* selfPot;        /**< total potential (including embedding energy) */
-    potVec* excludedPot;    /**< potential energy excluded from the overall calculation */
+    potVec selfPot{};       /**< total potential (including embedding energy) */
+    potVec excludedPot{};   /**< potential energy excluded from the overall calculation */
     bool doParticlePot {false};     /**< should we bother with the particle pot? */
     RealType* particlePot;  /**< contribution to potential from this particle */
     Vector3d* t;            /**< pointer to resultant torque on atom */
@@ -181,7 +181,7 @@ namespace OpenMD {
     RealType* flucQ;	    /**< current value of atom's fluctuating charge */
     RealType* flucQfrc;	    /**< fluctuating charge derivative */
     bool isSelected {false};        /**< this site has been selected for selection potential */
-    potVec* selePot;       /**< potential energy of the selected site */
+    potVec selePot{};       /**< potential energy of the selected site */
     /*@}*/
   };
   

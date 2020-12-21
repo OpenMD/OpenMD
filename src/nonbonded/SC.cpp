@@ -54,8 +54,7 @@
 namespace OpenMD {
 
 
-  SC::SC() : name_("SC"), initialized_(false), forceField_(NULL), 
-             scRcut_(0.0), np_(3000) {}
+  SC::SC() : name_("SC"), initialized_(false), forceField_(NULL),  np_(3000) {}
   
   SC::~SC() {
     initialized_ = false;
@@ -281,8 +280,8 @@ namespace OpenMD {
 
     RealType rcij = mixer.rCut;
 
-    if ( *(idat.rij)  < rcij) {
-      RealType rho = mixer.phi->getValueAt( *(idat.rij) );
+    if ( idat.rij  < rcij) {
+      RealType rho = mixer.phi->getValueAt( idat.rij );
       *(idat.rho1) += rho;
       *(idat.rho2) += rho;
     } 
@@ -300,12 +299,11 @@ namespace OpenMD {
     *(sdat.frho) = u;
     *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
 
-    (*(sdat.selfPot))[METALLIC_EMBEDDING_FAMILY] += u;
+    sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += u;
     
     if (sdat.isSelected) 
-      (*(sdat.selePot))[METALLIC_EMBEDDING_FAMILY] += u;
+      sdat.selePot[METALLIC_EMBEDDING_FAMILY] += u;
    
-
     if (sdat.doParticlePot) {
       *(sdat.particlePot) += u;
     }
@@ -328,19 +326,19 @@ namespace OpenMD {
 
     RealType rcij = mixer.rCut;
 
-    if ( *(idat.rij)  < rcij) {
+    if ( idat.rij  < rcij) {
       RealType vcij = mixer.vCut; 
       RealType rhtmp, drhodr, vptmp, dvpdr;
       
-      mixer.phi->getValueAndDerivativeAt( *(idat.rij), rhtmp, drhodr );      
-      mixer.V->getValueAndDerivativeAt( *(idat.rij), vptmp, dvpdr);
+      mixer.phi->getValueAndDerivativeAt( idat.rij, rhtmp, drhodr );      
+      mixer.V->getValueAndDerivativeAt( idat.rij, vptmp, dvpdr);
       
       RealType pot_temp = vptmp - vcij;
-      *(idat.vpair) += pot_temp;
+      idat.vpair += pot_temp;
       
       RealType dudr = drhodr * ( *(idat.dfrho1) + *(idat.dfrho2) ) + dvpdr;
       
-      *(idat.f1) += *(idat.d) * dudr / *(idat.rij) ;
+      idat.f1 += idat.d * dudr / idat.rij ;
         
       if (idat.doParticlePot) {
         // particlePot is the difference between the full potential and
@@ -359,12 +357,11 @@ namespace OpenMD {
           sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
       }
       
-      (*(idat.pot))[METALLIC_PAIR_FAMILY] += pot_temp;
+      idat.pot[METALLIC_PAIR_FAMILY] += pot_temp;
       
       if (idat.isSelected) 
-        (*(idat.selePot))[METALLIC_PAIR_FAMILY] += pot_temp;
+        idat.selePot[METALLIC_PAIR_FAMILY] += pot_temp;
       
-
     }
       
     return;    

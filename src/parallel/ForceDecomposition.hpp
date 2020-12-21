@@ -107,13 +107,13 @@ namespace OpenMD {
     virtual void collectIntermediateData() = 0;
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
-    virtual void collectSelfData() = 0;
-    virtual potVec* getSelfPotential() { return &selfPot; }
-    virtual potVec* getPairwisePotential() { return &pairwisePot; }
-    virtual potVec* getExcludedPotential() { return &excludedPot; }
-    virtual potVec* getSelectedPotential() { return &selectedPot; }
-    virtual potVec* getExcludedSelfPotential() { return &excludedSelfPot; }
-    virtual potVec* getSelectedSelfPotential() { return &selectedSelfPot; }
+    virtual void collectSelfData(SelfData &sdat) = 0;
+    virtual potVec getSelfPotential() { return selfPot; }
+    virtual potVec getPairwisePotential() { return pairwisePot; }
+    virtual potVec getExcludedPotential() { return excludedPot; }
+    virtual potVec getSelectedPotential() { return selectedPot; }
+    virtual potVec getExcludedSelfPotential() { return excludedSelfPot; }
+    virtual potVec getSelectedSelfPotential() { return selectedSelfPot; }
 
     // neighbor list routines
     virtual bool checkNeighborList();
@@ -156,7 +156,7 @@ namespace OpenMD {
     virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
 
     virtual void fillSelfData(SelfData &sdat, int atom1);
-
+    
     virtual void addToHeatFlux(Vector3d hf);
     virtual void setHeatFlux(Vector3d hf);
     
@@ -183,7 +183,6 @@ namespace OpenMD {
     potVec excludedSelfPot;
     potVec selectedPot;
     potVec selectedSelfPot;
-
 
     /** 
      * The topological distance between two atomic sites is handled

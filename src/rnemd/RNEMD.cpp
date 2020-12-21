@@ -2468,13 +2468,12 @@ namespace OpenMD {
 
     if (hasDividingArea_) return dividingArea_;
 
-    RealType areaA (0.0), areaB (0.0);
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (hasSelectionA_) {
 
       if (evaluatorA_.hasSurfaceArea()) {
-        areaA = evaluatorA_.getSurfaceArea();
+        areaA_ = evaluatorA_.getSurfaceArea();
         volumeA_ = evaluatorA_.getVolume();
       } else {
 
@@ -2489,7 +2488,7 @@ namespace OpenMD {
 #if defined(HAVE_QHULL)
         ConvexHull* surfaceMeshA = new ConvexHull();
         surfaceMeshA->computeHull(aSites);
-        areaA = surfaceMeshA->getArea();
+        areaA_ = surfaceMeshA->getArea();
         volumeA_ = surfaceMeshA->getVolume();
         delete surfaceMeshA;
 #else
@@ -2508,29 +2507,29 @@ namespace OpenMD {
         // area of the current box, normal to the privileged axis:
         switch(rnemdPrivilegedAxis_) {
         case rnemdX:
-          areaA = 2.0 * snap->getYZarea();
+          areaA_ = 2.0 * snap->getYZarea();
           break;
         case rnemdY:
-          areaA = 2.0 * snap->getXZarea();
+          areaA_ = 2.0 * snap->getXZarea();
           break;
         case rnemdZ:
         default:
-          areaA = 2.0 * snap->getXYarea();
+          areaA_ = 2.0 * snap->getXYarea();
         }
-        volumeA_ = areaA * slabWidth_;
+        volumeA_ = areaA_ * slabWidth_;
 
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, the sphere radius sets the surface area of the
         // dividing surface:
-        areaA = 4.0 * Constants::PI * std::pow(sphereARadius_, 2);
+        areaA_ = 4.0 * Constants::PI * std::pow(sphereARadius_, 2);
         volumeA_ = 4.0 * Constants::PI * std::pow(sphereARadius_, 3) / 3.0;
       }
     }
 
     if (hasSelectionB_) {
       if (evaluatorB_.hasSurfaceArea()) {
-        areaB = evaluatorB_.getSurfaceArea();
+        areaB_ = evaluatorB_.getSurfaceArea();
         volumeB_ = evaluatorB_.getVolume();
       } else {
 
@@ -2546,7 +2545,7 @@ namespace OpenMD {
 #if defined(HAVE_QHULL)
         ConvexHull* surfaceMeshB = new ConvexHull();
         surfaceMeshB->computeHull(bSites);
-        areaB = surfaceMeshB->getArea();
+        areaB_ = surfaceMeshB->getArea();
         volumeB_ = surfaceMeshB->getVolume();
         delete surfaceMeshB;
 #else
@@ -2565,27 +2564,27 @@ namespace OpenMD {
         // area of the current box, normal to the privileged axis:
         switch(rnemdPrivilegedAxis_) {
         case rnemdX:
-          areaB = 2.0 * snap->getYZarea();
+          areaB_ = 2.0 * snap->getYZarea();
           break;
         case rnemdY:
-          areaB = 2.0 * snap->getXZarea();
+          areaB_ = 2.0 * snap->getXZarea();
           break;
         case rnemdZ:
         default:
-          areaB = 2.0 * snap->getXYarea();
+          areaB_ = 2.0 * snap->getXYarea();
         }
-        volumeB_ = areaB * slabWidth_;
+        volumeB_ = areaB_ * slabWidth_;
       } else {
         // in non-periodic simulations, without explicitly setting
         // selections, but if a sphereBradius has been set, just use that:
-        areaB = 4.0 * Constants::PI * pow(sphereBRadius_, 2);
+        areaB_ = 4.0 * Constants::PI * pow(sphereBRadius_, 2);
         Thermo thermo(info_);
         RealType hVol = thermo.getHullVolume();
         volumeB_ = hVol - 4.0 * Constants::PI * pow(sphereBRadius_, 3) / 3.0;
       }
     }
 
-    dividingArea_ = min(areaA, areaB);
+    dividingArea_ = min(areaA_, areaB_);
     hasDividingArea_ = true;
     return dividingArea_;
   }

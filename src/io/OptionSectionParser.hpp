@@ -59,7 +59,7 @@ namespace OpenMD {
   class OptionSectionParser : public SectionParser {
 public:
     OptionSectionParser(ForceFieldOptions& options);    
-     virtual void validateSection();
+    virtual void validateSection(ForceField& ff);
 
 private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);

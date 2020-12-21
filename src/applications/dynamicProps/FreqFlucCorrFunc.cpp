@@ -99,7 +99,7 @@ namespace OpenMD {
     return ( ue_[frame1][id1] - mean ) * ( ue_[frame2][id2] - mean );
   }
 
-  void FreqFlucCorrFunc::validateSelection(const SelectionManager& seleMan) {
+  void FreqFlucCorrFunc::validateSelection(SelectionManager& seleMan) {
 
     StuntDouble* sd;
     int i;

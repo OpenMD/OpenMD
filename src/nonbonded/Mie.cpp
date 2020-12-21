@@ -56,7 +56,7 @@ using namespace std;
 namespace OpenMD {
 
   Mie::Mie() : initialized_(false), forceField_(NULL), 
-				     name_("Mie") {}
+	       name_("Mie") {}
   
   void Mie::initialize() {    
 
@@ -184,34 +184,34 @@ namespace OpenMD {
     RealType myDeriv = 0.0;
     RealType myDerivC = 0.0;
     
-    ros = *(idat.rij) * sigmai;     
+    ros = idat.rij * sigmai;     
     
     getMieFunc(ros, nRep, mAtt, myPot, myDeriv);
     
     if (idat.shiftedPot) {
-      rcos = *(idat.rcut) * sigmai;
+      rcos = idat.rcut * sigmai;
       getMieFunc(rcos, nRep, mAtt, myPotC, myDerivC);
       myDerivC = 0.0;
     } else if (idat.shiftedForce) {
-      rcos = *(idat.rcut) * sigmai;
+      rcos = idat.rcut * sigmai;
       getMieFunc(rcos, nRep, mAtt, myPotC, myDerivC);
-      myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
+      myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
     } else {
       myPotC = 0.0;
       myDerivC = 0.0;        
     }
     
-    RealType pot_temp = *(idat.vdwMult) * nmScale * epsilon * (myPot - myPotC);
-    *(idat.vpair) += pot_temp;
+    RealType pot_temp = idat.vdwMult * nmScale * epsilon * (myPot - myPotC);
+    idat.vpair += pot_temp;
     
-    RealType dudr = *(idat.sw) * *(idat.vdwMult) * nmScale * epsilon * (myDeriv - 
-                                                                        myDerivC)*sigmai;
+    RealType dudr = idat.sw * idat.vdwMult * nmScale * epsilon * (myDeriv - 
+								  myDerivC)*sigmai;
     
-    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
     if (idat.isSelected)
-      (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+      idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
 
-    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+    idat.f1 += idat.d * dudr / idat.rij;
     
     return;
   }

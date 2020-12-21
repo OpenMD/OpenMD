@@ -108,7 +108,6 @@ namespace OpenMD {
     ForceField* forceField_;
     set<AtomType*> simTypes_;
 
-    RealType scRcut_;
     int np_;
     
   };

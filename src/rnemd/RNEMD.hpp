@@ -203,7 +203,6 @@ namespace OpenMD {
     RealType sphereARadius_;
     RealType sphereBRadius_;
     RealType areaA_;
-    bool AisHull_ {false};
     RealType areaB_;
     bool BisHull_ {false};
     std::string rnemdAxisLabel_;
@@ -239,7 +238,6 @@ namespace OpenMD {
     std::vector<OutputData> data_;
     OutputBitSet outputMask_;
     OutputMapType outputMap_;
-    int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
     RealAccumulator areaAccumulator_ {};
     RealAccumulator Jc_totalAccumulator_ {};

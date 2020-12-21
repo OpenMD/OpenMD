@@ -81,7 +81,6 @@ namespace OpenMD {
     Shake* shake_;
     FluctuatingChargeConstraints* fqConstraints_;
     Thermo thermo;
-    bool usingRattle_;
     bool hasFlucQ_;
     int ndf_;
 

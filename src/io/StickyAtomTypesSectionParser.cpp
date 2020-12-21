@@ -59,7 +59,9 @@ namespace OpenMD {
                                                int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
-    
+    RealType dus = options_.getDistanceUnitScaling();
+    RealType eus = options_.getEnergyUnitScaling();
+
     //in AtomTypeSection, a line at least contains 8 tokens
     //atomTypeName and 7 different sticky parameters
     if (nTokens < 8)  {
@@ -78,12 +80,12 @@ namespace OpenMD {
         StickyAdapter sa = StickyAdapter(atomType);
 
         RealType w0 = tokenizer.nextTokenAsDouble();
-        RealType v0 = tokenizer.nextTokenAsDouble();
-        RealType v0p = tokenizer.nextTokenAsDouble();
-        RealType rl = tokenizer.nextTokenAsDouble();
-        RealType ru = tokenizer.nextTokenAsDouble();
-        RealType rlp = tokenizer.nextTokenAsDouble();
-        RealType rup = tokenizer.nextTokenAsDouble();   
+        RealType v0 = eus * tokenizer.nextTokenAsDouble();
+        RealType v0p = eus * tokenizer.nextTokenAsDouble();
+        RealType rl = dus * tokenizer.nextTokenAsDouble();
+        RealType ru = dus * tokenizer.nextTokenAsDouble();
+        RealType rlp = dus * tokenizer.nextTokenAsDouble();
+        RealType rup = dus * tokenizer.nextTokenAsDouble();   
         bool isPower = false;
 
         sa.makeSticky(w0, v0, v0p, rl, ru, rlp, rup, isPower);

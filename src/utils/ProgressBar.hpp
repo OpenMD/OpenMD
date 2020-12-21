@@ -65,7 +65,7 @@ namespace OpenMD {
     RealType value_;
     RealType maximum_;
     int iteration_;
-    time_t start_, current_;
+    time_t start_;
   };
 
   using ProgressBarPtr = std::unique_ptr<ProgressBar>;

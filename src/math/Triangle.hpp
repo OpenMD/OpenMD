@@ -204,7 +204,6 @@ namespace OpenMD {
     Vector3d facetVelocity_;
     //Length of triangle sides
     Vector3d a_,b_,c_;
-    RealType alpha_,beta_,gamma_;
     bool HaveArea_;
     bool HaveNormal_;
     bool HaveUnitNormal_;

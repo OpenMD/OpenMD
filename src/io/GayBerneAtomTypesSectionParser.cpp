@@ -56,7 +56,9 @@ namespace OpenMD {
     setSectionName("GayBerneAtomTypes");
   }
   
-  void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,
+						 const std::string& line,
+						 int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
     //in GayBerneAtomTypesSection, a line at least contains 7 tokens
@@ -70,16 +72,18 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();            
     } else {
-      
+
+      RealType eus_ = options_.getEnergyUnitScaling();
+      RealType dus_ = options_.getDistanceUnitScaling();
       std::string atomTypeName = tokenizer.nextToken();    
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType != NULL) {
 
-        RealType GB_d = tokenizer.nextTokenAsDouble();
-        RealType GB_l = tokenizer.nextTokenAsDouble();  
-        RealType GB_eps_X = tokenizer.nextTokenAsDouble();
-        RealType GB_eps_S = tokenizer.nextTokenAsDouble();
-        RealType GB_eps_E = tokenizer.nextTokenAsDouble();
+        RealType GB_d = dus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_l = dus_ * tokenizer.nextTokenAsDouble();  
+        RealType GB_eps_X = eus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_eps_S = eus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_eps_E = eus_ * tokenizer.nextTokenAsDouble();
         RealType GB_dw = tokenizer.nextTokenAsDouble();
 
         GayBerneAdapter gba = GayBerneAdapter(atomType);

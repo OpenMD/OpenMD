@@ -146,7 +146,7 @@ namespace OpenMD {
 
 
   void LegendreCorrFuncZ::correlateFrames(int frame1, int frame2,
-                                         int timeBin) {
+					  int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
 

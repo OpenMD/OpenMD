@@ -74,8 +74,6 @@ namespace OpenMD {
 
     RealType sumCharge_;
     RealType sumCosTheta_;
-    RealType dX_, dY_, dZ_;
-    RealType rcut_;
 
     int axis_;
 

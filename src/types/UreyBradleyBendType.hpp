@@ -91,8 +91,6 @@ namespace OpenMD {
     }
                 
   private:
-    
-    RealType k_;
     HarmonicBondType hbt_;
   };
   

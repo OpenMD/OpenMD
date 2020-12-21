@@ -55,68 +55,58 @@
 
 namespace OpenMD {
 
-    class ChargeDensityZ : public StaticAnalyser{
-        public:
-            ChargeDensityZ(SimInfo* info, const std::string& filename,
-                           const std::string& sele, int nzbins, RealType vRadius,std::string atomName = "Au", bool xyzGen=false, int axis=2);
-            virtual void process();
+  class ChargeDensityZ : public StaticAnalyser{
+  public:
+    ChargeDensityZ(SimInfo* info, const std::string& filename,
+		   const std::string& sele, int nzbins, RealType vRadius,std::string atomName = "Au", bool xyzGen=false, int axis=2);
+    virtual void process();
 
 
 
-        private:
+  private:
 
-            virtual void writeDensity();
-            virtual void generateXYZForLastFrame();
+    virtual void writeDensity();
+    virtual void generateXYZForLastFrame();
 
-            Snapshot* currentSnapshot_;
-            int nProcessed_;
-            std::string selectionScript_;
-            SelectionEvaluator evaluator_;
-            SelectionManager seleMan_;
-            Thermo thermo_;
+    Snapshot* currentSnapshot_;
+    int nProcessed_;
+    std::string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+    Thermo thermo_;
 
-            std::vector<RealType> zBox_;
-            std::vector<RealType> densityZAverageAllFrame_;
-            std::vector<RealType> averageDensityZ_;
-            std::vector<RealType> flucDensityZAverageAllFrame_;
-            std::vector<RealType> densityFlucZAverageAllFrame_;
-            std::vector<RealType> absDensityFlucZAverageAllFrame_;
-            std::vector<RealType> densityFlucZAverageFirstFrame_;
-            std::vector<RealType> absDensityFlucZAverageFirstFrame_;
+    std::vector<RealType> zBox_;
+    std::vector<RealType> densityZAverageAllFrame_;
+    std::vector<RealType> averageDensityZ_;
+    std::vector<RealType> flucDensityZAverageAllFrame_;
+    std::vector<RealType> densityFlucZAverageAllFrame_;
+    std::vector<RealType> absDensityFlucZAverageAllFrame_;
+    std::vector<RealType> densityFlucZAverageFirstFrame_;
+    std::vector<RealType> absDensityFlucZAverageFirstFrame_;
 
-            int axis_,x_,y_;
-            RealType vRadius_;
-            std::string fileName_;
-            std::string atomFlucCharge_;
-            bool genXYZ_;
-            int nFrames_;
+    int axis_,x_,y_;
+    RealType vRadius_;
+    std::string fileName_;
+    std::string atomFlucCharge_;
+    bool genXYZ_;
 
-            Mat3x3d hmat_;
+    Mat3x3d hmat_;
 
+    std::map<std::string,RealType> vander_waals_r;
+    std::map<std::string, RealType> averageChargeForEachType_;
+    std::map<std::string, int> SDCount_;
+    std::string axisLabel_;
 
-            std::map<std::string,RealType> vander_waals_r;
-            std::map<std::string, RealType> averageChargeForEachType_;
-            std::map<std::string, int> SDCount_;
-            std::string axisLabel_;
-
-
-
-
-
-
-
-            std::map<int,RealType> averageChargeUsingGlobalIndex_;
-            std::map<int,std::vector<RealType> > totalChargeUsingGlobalIndex_;
-            std::map<int,RealType > totalChargeFluctationsUsingGlobalIndex_;
-            std::map<int,std::vector<RealType> > zPosUsingGlobalIndex_;
-            std::map<int,std::vector<RealType> > xPosUsingGlobalIndex_;
-            std::map<int,std::vector<RealType> > yPosUsingGlobalIndex_;
-            std::map<int,int> countUsingGlobalIndex_;
-            std::map<int,RealType> vanderRUsingGlobalIndex_;
-            std::map<int, std::string> atomNameGlobalIndex_;
-
-
-          };
+    std::map<int,RealType> averageChargeUsingGlobalIndex_;
+    std::map<int,std::vector<RealType> > totalChargeUsingGlobalIndex_;
+    std::map<int,RealType > totalChargeFluctationsUsingGlobalIndex_;
+    std::map<int,std::vector<RealType> > zPosUsingGlobalIndex_;
+    std::map<int,std::vector<RealType> > xPosUsingGlobalIndex_;
+    std::map<int,std::vector<RealType> > yPosUsingGlobalIndex_;
+    std::map<int,int> countUsingGlobalIndex_;
+    std::map<int,RealType> vanderRUsingGlobalIndex_;
+    std::map<int, std::string> atomNameGlobalIndex_;
+  };
 
 }
 

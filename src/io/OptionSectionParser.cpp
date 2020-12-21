@@ -73,7 +73,7 @@ namespace OpenMD {
     
   }
 
-  void OptionSectionParser::validateSection() {
+  void OptionSectionParser::validateSection(ForceField& ff) {
     options_.validateOptions();
   }
 
