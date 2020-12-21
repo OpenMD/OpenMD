@@ -754,32 +754,22 @@ namespace OpenMD {
     fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
 
-    int cg1, cg2, atom1, atom2, topoDist;
-    Vector3d d_grp, dag, d, gvel2, vel2;
-    RealType rgrpsq, rgrp, r2, r;
-    RealType electroMult, vdwMult;
+    int cg1, cg2, atom1, atom2;
+    Vector3d d_grp, dag, gvel2, vel2;
+    RealType rgrpsq, rgrp;
     RealType vij(0.0);
     Vector3d fij, fg, f1;
     bool in_switching_region;
-    RealType sw, dswdr, swderiv;
+    RealType dswdr, swderiv;
     vector<int> atomListColumn, atomListRow;
     InteractionData idat;
     SelfData sdat;
     RealType mf;
-    RealType vpair;
-    RealType dVdFQ1(0.0);
-    RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
     potVec selfPotential(0.0);
     RealType reciprocalPotential(0.0);
     RealType surfacePotential(0.0);
-    potVec workPot(0.0);
-    potVec exPot(0.0);
     potVec selectionPotential(0.0);
-    Vector3d eField1(0.0);
-    Vector3d eField2(0.0);
-    RealType sPot1(0.0);
-    RealType sPot2(0.0);
     bool newAtom1;
     int gid1, gid2;
 
@@ -787,24 +777,7 @@ namespace OpenMD {
 
     int loopStart, loopEnd;
 
-    idat.rcut = &rCut_;
-    idat.vdwMult = &vdwMult;
-    idat.electroMult = &electroMult;
-    idat.pot = &workPot;
-    idat.excludedPot = &exPot;
-    idat.selePot = &selectionPotential;
-    sdat.selfPot = fDecomp_->getSelfPotential();
-    sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
-    sdat.selePot = fDecomp_->getSelectedSelfPotential();
-    idat.vpair = &vpair;
-    idat.dVdFQ1 = &dVdFQ1;
-    idat.dVdFQ2 = &dVdFQ2;
-    idat.eField1 = &eField1;
-    idat.eField2 = &eField2;
-    idat.sPot1 = &sPot1;
-    idat.sPot2 = &sPot2;
-    idat.f1 = &f1;
-    idat.sw = &sw;
+    idat.rcut = rCut_;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
     idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE ||
                          cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
@@ -850,13 +823,13 @@ namespace OpenMD {
             if (iLoop == PAIR_LOOP) {
               vij = 0.0;
               fij.zero();
-              eField1.zero();
-              eField2.zero();
-              sPot1 = 0.0;
-              sPot2 = 0.0;
+              idat.eField1.zero();
+              idat.eField2.zero();
+              idat.sPot1 = 0.0;
+              idat.sPot2 = 0.0;
             }
 
-            in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr,
+            in_switching_region = switcher_->getSwitch(rgrpsq, idat.sw, dswdr,
                                                        rgrp);
 
             atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
@@ -884,48 +857,45 @@ namespace OpenMD {
 
                 if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
 
-                  vpair = 0.0;
-                  workPot = 0.0;
-                  exPot = 0.0;
-                  selectionPotential = 0.0;
-                  f1.zero();
-                  dVdFQ1 = 0.0;
-                  dVdFQ2 = 0.0;
+                  idat.vpair = 0.0;
+                  idat.pot = 0.0;
+                  idat.excludedPot = 0.0;
+                  idat.selePot = 0.0;
+                  idat.f1.zero();
+                  idat.dVdFQ1 = 0.0;
+                  idat.dVdFQ2 = 0.0;
 
                   fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
 
-                  topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
-                  vdwMult = vdwScale_[topoDist];
-                  electroMult = electrostaticScale_[topoDist];
+                  idat.topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
+                  idat.vdwMult = vdwScale_[idat.topoDist];
+                  idat.electroMult = electrostaticScale_[idat.topoDist];
 
                   if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                    idat.d = &d_grp;
-                    idat.r2 = &rgrpsq;
+                    idat.d = d_grp;
+                    idat.r2 = rgrpsq;
                     if (doHeatFlux_)
                       vel2 = gvel2;
                   } else {
-                    d = fDecomp_->getInteratomicVector(atom1, atom2);
-                    curSnapshot->wrapVector( d );
-                    r2 = d.lengthSquare();
-                    idat.d = &d;
-                    idat.r2 = &r2;
+                    idat.d = fDecomp_->getInteratomicVector(atom1, atom2);
+                    curSnapshot->wrapVector( idat.d );
+                    idat.r2 = idat.d.lengthSquare();
                     if (doHeatFlux_)
                       vel2 = fDecomp_->getAtomVelocityColumn(atom2);
                   }
 
-                  r = sqrt( *(idat.r2) );
-                  idat.rij = &r;
+                  idat.rij = sqrt( idat.r2 );
 
                   if (iLoop == PREPAIR_LOOP) {
                     interactionMan_->doPrePair(idat);
                   } else {
                     interactionMan_->doPair(idat);
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
-                    vij += vpair;
-                    fij += f1;
-                    virialTensor -= outProduct( *(idat.d), f1);
+                    vij += idat.vpair;
+                    fij += idat.f1;
+                    virialTensor -= outProduct( idat.d, idat.f1);
                     if (doHeatFlux_)
-                      fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
+                      fDecomp_->addToHeatFlux(idat.d * dot(idat.f1, vel2));
                   }
                 }
               }
@@ -941,9 +911,9 @@ namespace OpenMD {
                   if (!fDecomp_->skipAtomPair(atomListRow[0],
                                               atomListColumn[0],
                                               cg1, cg2)) {
-                    virialTensor -= outProduct( *(idat.d), fg);
+                    virialTensor -= outProduct( idat.d, fg);
                     if (doHeatFlux_)
-                      fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                      fDecomp_->addToHeatFlux(idat.d * dot(fg, vel2));
                   }
                 }
 
@@ -1042,21 +1012,21 @@ namespace OpenMD {
     }
 
     // collects single-atom information
-    fDecomp_->collectSelfData();
+    fDecomp_->collectSelfData(sdat);
 
-    longRangePotential = *(fDecomp_->getPairwisePotential());
+    longRangePotential = fDecomp_->getPairwisePotential();
     curSnapshot->setLongRangePotential(longRangePotential);
 
-    selfPotential =  *(fDecomp_->getSelfPotential());
+    selfPotential =  fDecomp_->getSelfPotential();
     curSnapshot->setSelfPotential(selfPotential);
 
-    curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
-                                       *(fDecomp_->getExcludedPotential()));
+    curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
+                                       fDecomp_->getExcludedPotential());
 
     if (doPotentialSelection_) {
       selectionPotential  = curSnapshot->getSelectionPotentials();
-      selectionPotential += *(fDecomp_->getSelectedSelfPotential());
-      selectionPotential += *(fDecomp_->getSelectedPotential());
+      selectionPotential += fDecomp_->getSelectedSelfPotential();
+      selectionPotential += fDecomp_->getSelectedPotential();
       curSnapshot->setSelectionPotentials(selectionPotential);
     }
   }
@@ -1521,32 +1491,22 @@ namespace OpenMD {
     fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
 
-    int cg1, cg2, atom1, atom2, topoDist;
-    Vector3d d_grp, dag, d, gvel2, vel2;
-    RealType rgrpsq, rgrp, r2, r;
-    RealType electroMult, vdwMult;
+    int cg1, cg2, atom1, atom2;
+    Vector3d d_grp, dag, gvel2, vel2;
+    RealType rgrpsq, rgrp;
     RealType vij(0.0);
-    Vector3d fij, fg, f1;
+    Vector3d fij, fg;
     bool in_switching_region;
-    RealType sw, dswdr, swderiv;
+    RealType dswdr, swderiv;
     vector<int> atomListColumn, atomListRow;
     InteractionData idat;
     SelfData sdat;
     RealType mf;
-    RealType vpair;
-    RealType dVdFQ1(0.0);
-    RealType dVdFQ2(0.0);
     potVec longRangePotential(0.0);
     potVec selfPotential(0.0);
     RealType reciprocalPotential(0.0);
     RealType surfacePotential(0.0);
-    potVec workPot(0.0);
-    potVec exPot(0.0);
     potVec selectionPotential(0.0);
-    Vector3d eField1(0.0);
-    Vector3d eField2(0.0);
-    RealType sPot1(0.0);
-    RealType sPot2(0.0);
     bool newAtom1;
     int gid1, gid2;
 
@@ -1554,24 +1514,7 @@ namespace OpenMD {
 
     int loopStart, loopEnd;
 
-    idat.rcut = &rCut_;
-    idat.vdwMult = &vdwMult;
-    idat.electroMult = &electroMult;
-    idat.pot = &workPot;
-    idat.excludedPot = &exPot;
-    idat.selePot = &selectionPotential;
-    sdat.selfPot = fDecomp_->getSelfPotential();
-    sdat.excludedPot = fDecomp_->getExcludedSelfPotential();
-    sdat.selePot = fDecomp_->getSelectedSelfPotential();
-    idat.vpair = &vpair;
-    idat.dVdFQ1 = &dVdFQ1;
-    idat.dVdFQ2 = &dVdFQ2;
-    idat.eField1 = &eField1;
-    idat.eField2 = &eField2;
-    idat.sPot1 = &sPot1;
-    idat.sPot2 = &sPot2;
-    idat.f1 = &f1;
-    idat.sw = &sw;
+    idat.rcut = rCut_;
     idat.shiftedPot = (cutoffMethod_ == SHIFTED_POTENTIAL) ? true : false;
     idat.shiftedForce = (cutoffMethod_ == SHIFTED_FORCE ||
                          cutoffMethod_ == TAYLOR_SHIFTED) ? true : false;
@@ -1617,13 +1560,13 @@ namespace OpenMD {
             if (iLoop == PAIR_LOOP) {
               vij = 0.0;
               fij.zero();
-              eField1.zero();
-              eField2.zero();
-              sPot1 = 0.0;
-              sPot2 = 0.0;
+              idat.eField1.zero();
+              idat.eField2.zero();
+              idat.sPot1 = 0.0;
+              idat.sPot2 = 0.0;
             }
 
-            in_switching_region = switcher_->getSwitch(rgrpsq, sw, dswdr,
+            in_switching_region = switcher_->getSwitch(rgrpsq, idat.sw, dswdr,
                                                        rgrp);
 
             atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
@@ -1651,48 +1594,45 @@ namespace OpenMD {
 
                 if (!fDecomp_->skipAtomPair(atom1, atom2, cg1, cg2)) {
 
-                  vpair = 0.0;
-                  workPot = 0.0;
-                  exPot = 0.0;
-                  selectionPotential = 0.0;
-                  f1.zero();
-                  dVdFQ1 = 0.0;
-                  dVdFQ2 = 0.0;
+                  idat.vpair = 0.0;
+                  idat.pot = 0.0;
+                  idat.excludedPot = 0.0;
+                  idat.selePot = 0.0;
+                  idat.f1.zero();
+                  idat.dVdFQ1 = 0.0;
+                  idat.dVdFQ2 = 0.0;
 
                   fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
 
-                  topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
-                  vdwMult = vdwScale_[topoDist];
-                  electroMult = electrostaticScale_[topoDist];
+                  idat.topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
+                  idat.vdwMult = vdwScale_[idat.topoDist];
+                  idat.electroMult = electrostaticScale_[idat.topoDist];
 
                   if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                    idat.d = &d_grp;
-                    idat.r2 = &rgrpsq;
+                    idat.d = d_grp;
+                    idat.r2 = rgrpsq;
                     if (doHeatFlux_)
                       vel2 = gvel2;
                   } else {
-                    d = fDecomp_->getInteratomicVector(atom1, atom2);
-                    curSnapshot->wrapVector( d );
-                    r2 = d.lengthSquare();
-                    idat.d = &d;
-                    idat.r2 = &r2;
+                    idat.d = fDecomp_->getInteratomicVector(atom1, atom2);
+                    curSnapshot->wrapVector( idat.d );
+                    idat.r2 = idat.d.lengthSquare();
                     if (doHeatFlux_)
                       vel2 = fDecomp_->getAtomVelocityColumn(atom2);
                   }
 
-                  r = sqrt( *(idat.r2) );
-                  idat.rij = &r;
+                  idat.rij = sqrt(idat.r2);
 
                   if (iLoop == PREPAIR_LOOP) {
                     interactionMan_->doPrePair(idat);
                   } else {
                     interactionMan_->doPair(idat);
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
-                    vij += vpair;
-                    fij += f1;
-                    virialTensor -= outProduct( *(idat.d), f1);
+                    vij += idat.vpair;
+                    fij += idat.f1;
+                    virialTensor -= outProduct( idat.d, idat.f1);
                     if (doHeatFlux_)
-                      fDecomp_->addToHeatFlux(*(idat.d) * dot(f1, vel2));
+                      fDecomp_->addToHeatFlux(idat.d * dot(idat.f1, vel2));
                   }
                 }
               }
@@ -1708,9 +1648,9 @@ namespace OpenMD {
                   if (!fDecomp_->skipAtomPair(atomListRow[0],
                                               atomListColumn[0],
                                               cg1, cg2)) {
-                    virialTensor -= outProduct( *(idat.d), fg);
+                    virialTensor -= outProduct( idat.d, fg);
                     if (doHeatFlux_)
-                      fDecomp_->addToHeatFlux(*(idat.d) * dot(fg, vel2));
+                      fDecomp_->addToHeatFlux(idat.d * dot(fg, vel2));
                   }
                 }
 
@@ -1809,21 +1749,21 @@ namespace OpenMD {
     }
 
     // collects single-atom information
-    fDecomp_->collectSelfData();
+    fDecomp_->collectSelfData(sdat);
 
-    longRangePotential = *(fDecomp_->getPairwisePotential());
+    longRangePotential = fDecomp_->getPairwisePotential();
     curSnapshot->setLongRangePotential(longRangePotential);
 
-    selfPotential = *(fDecomp_->getSelfPotential());
+    selfPotential = fDecomp_->getSelfPotential();
     curSnapshot->setSelfPotential(selfPotential);
 
-    curSnapshot->setExcludedPotentials(*(fDecomp_->getExcludedSelfPotential()) +
-                                       *(fDecomp_->getExcludedPotential()));
+    curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
+                                       fDecomp_->getExcludedPotential());
 
     if (doPotentialSelection_) {
       selectionPotential  = curSnapshot->getSelectionPotentials();
-      selectionPotential += *(fDecomp_->getSelectedSelfPotential());
-      selectionPotential += *(fDecomp_->getSelectedPotential());
+      selectionPotential += fDecomp_->getSelectedSelfPotential();
+      selectionPotential += fDecomp_->getSelectedPotential();
       curSnapshot->setSelectionPotentials(selectionPotential);
     }
   }

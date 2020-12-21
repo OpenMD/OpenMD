@@ -149,7 +149,7 @@ namespace OpenMD {
     RealType pre44_;
     RealType v01, v11, v21, v22, v31, v32, v41, v42, v43;
     RealType dv01, dv11, dv21, dv22, dv31, dv32, dv41, dv42, dv43;
-    RealType v01or, v11or, v21or, v22or, v31or, v32or, v41or, v42or, v43or;
+    RealType v11or, v22or, v31or, v32or, v42or, v43or;
     RealType chargeToC_;
     RealType angstromToM_;
     RealType debyeToCm_;
@@ -214,7 +214,7 @@ namespace OpenMD {
     // Excluded potential that is still computed for fluctuating charges
     RealType excluded_Pot;
 
-    RealType rfContrib, coulInt, dJdr;
+    RealType rfContrib, coulInt;
     
     // spline for coulomb integral
     CubicSplinePtr J;

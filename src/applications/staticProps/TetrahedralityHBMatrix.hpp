@@ -100,7 +100,6 @@ namespace OpenMD {
     RealType OHCut_;
     unsigned int count_;
     
-    int frameCounter_;
     RealType MinQ_;
     RealType MaxQ_;
     RealType deltaQ_;

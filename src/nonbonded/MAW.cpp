@@ -184,17 +184,17 @@ namespace OpenMD {
     if (mixer.j_is_Metal) {
       // rotate the inter-particle separation into the two different 
       // body-fixed coordinate systems:
-      r = *(idat.A1) * *(idat.d);
+      r = *(idat.A1) * idat.d;
       Atrans = idat.A1->transpose();
     } else {
       // negative sign because this is the vector from j to i:       
-      r = -*(idat.A2) * *(idat.d);
+      r = -*(idat.A2) * idat.d;
       Atrans = idat.A2->transpose();
     }
     
     // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
     
-    RealType expt     = -beta*( *(idat.rij) - R_e);
+    RealType expt     = -beta*( idat.rij - R_e);
     RealType expfnc   = exp(expt);
     RealType expfnc2  = expfnc*expfnc;
     
@@ -206,7 +206,7 @@ namespace OpenMD {
     myDeriv   = 2.0 * D_e * beta * (expfnc - expfnc2);
     
     if (idat.shiftedPot || idat.shiftedForce) {
-      exptC     = -beta*( *(idat.rcut)  - R_e);
+      exptC     = -beta*( idat.rcut  - R_e);
       expfncC   = exp(exptC);
       expfnc2C  = expfncC*expfncC;
     }
@@ -217,7 +217,7 @@ namespace OpenMD {
     } else if (idat.shiftedForce) {
       myPotC = D_e * (expfnc2C - 2.0 * expfncC);
       myDerivC  = 2.0 * D_e * beta * (expfncC - expfnc2C);
-      myPotC += myDerivC * ( *(idat.rij)  -  *(idat.rcut) );
+      myPotC += myDerivC * ( idat.rij  -  idat.rcut );
     } else {
       myPotC = 0.0;
       myDerivC = 0.0;
@@ -229,8 +229,8 @@ namespace OpenMD {
     RealType x2 = x * x;
     RealType z2 = z * z;
     
-    RealType r3 = *(idat.r2) *  *(idat.rij) ;
-    RealType r4 = *(idat.r2) *  *(idat.r2);
+    RealType r3 = idat.r2 *  idat.rij ;
+    RealType r4 = idat.r2 *  idat.r2;
     
     // angular modulation of morse part of potential to approximate 
     // the squares of the two HOMO lone pair orbitals in water:
@@ -248,19 +248,19 @@ namespace OpenMD {
     // Vmorse(r)*[a*x2/r2 + b*z/r + (1-a-b)]
     
     RealType Vmorse = (myPot - myPotC);
-    RealType Vang = ca1 * x2 / *(idat.r2) + 
-      cb1 * z /  *(idat.rij)  + (0.8 - ca1 / 3.0);
+    RealType Vang = ca1 * x2 / idat.r2 + 
+      cb1 * z /  idat.rij  + (0.8 - ca1 / 3.0);
     
-    RealType pot_temp = *(idat.vdwMult) * Vmorse * Vang;
-    *(idat.vpair) += pot_temp;
-    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    RealType pot_temp = idat.vdwMult * Vmorse * Vang;
+    idat.vpair += pot_temp;
+    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
     if (idat.isSelected)
-      (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
-    Vector3d dVmorsedr = (myDeriv - myDerivC) * Vector3d(x, y, z) /  *(idat.rij) ;
+      idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
+    Vector3d dVmorsedr = (myDeriv - myDerivC) * Vector3d(x, y, z) /  idat.rij ;
     
-    Vector3d dVangdr = Vector3d(-2.0 * ca1 * x2 * x / r4 + 2.0 * ca1 * x / *(idat.r2) - cb1 * x * z / r3,
+    Vector3d dVangdr = Vector3d(-2.0 * ca1 * x2 * x / r4 + 2.0 * ca1 * x / idat.r2 - cb1 * x * z / r3,
                                 -2.0 * ca1 * x2 * y / r4 - cb1 * z * y / r3,
-                                -2.0 * ca1 * x2 * z / r4 + cb1 /  *(idat.rij)           - cb1 * z2  / r3);
+                                -2.0 * ca1 * x2 * z / r4 + cb1 /  idat.rij           - cb1 * z2  / r3);
     
     // chain rule to put these back on x, y, z
     
@@ -269,14 +269,14 @@ namespace OpenMD {
     // Torques for Vang using method of Price:
     // S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
     
-    Vector3d dVangdu = Vector3d(cb1 * y /  *(idat.rij) ,
-                                2.0 * ca1 * x * z / *(idat.r2) - cb1 * x /  *(idat.rij),
-                                -2.0 * ca1 * y * x / *(idat.r2));
+    Vector3d dVangdu = Vector3d(cb1 * y /  idat.rij ,
+                                2.0 * ca1 * x * z / idat.r2 - cb1 * x /  idat.rij,
+                                -2.0 * ca1 * y * x / idat.r2);
     
     // do the torques first since they are easy:
     // remember that these are still in the body fixed axes    
     
-    Vector3d trq = *(idat.vdwMult) * Vmorse * dVangdu * *(idat.sw);
+    Vector3d trq = idat.vdwMult * Vmorse * dVangdu * idat.sw;
     
     // go back to lab frame using transpose of rotation matrix:
     
@@ -288,7 +288,7 @@ namespace OpenMD {
     
     // Now, on to the forces (still in body frame of water)
     
-    Vector3d ftmp = *(idat.vdwMult) * *(idat.sw) * dvdr;
+    Vector3d ftmp = idat.vdwMult * idat.sw * dvdr;
     
     // rotate the terms back into the lab frame:
     Vector3d flab;
@@ -298,7 +298,7 @@ namespace OpenMD {
       flab = - Atrans * ftmp;
     }
     
-    *(idat.f1) += flab;
+    idat.f1 += flab;
     
     return;    
   }

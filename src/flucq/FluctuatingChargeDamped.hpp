@@ -89,7 +89,6 @@ namespace OpenMD {
 
     int maxIterNum_;
     RealType forceTolerance_;
-    RealType targetTemp_;
     RealType drag_;
     RealType dt2_;
     RealType dt_;

@@ -203,10 +203,10 @@ namespace OpenMD {
     RealType epsilon = mixer.epsilon;
     BuckinghamType variant = mixer.variant;
     
-    RealType expt     = -B * (*(idat.rij));
+    RealType expt     = -B * idat.rij;
     RealType expfnc   = exp(expt);
-    RealType fnc6  = 1.0 / pow(*(idat.rij), 6);
-    RealType fnc7  = fnc6 / ((*idat.rij));
+    RealType fnc6  = 1.0 / pow(idat.rij, 6);
+    RealType fnc7  = fnc6 / idat.rij;
     
     RealType exptC = 0.0;
     RealType expfncC = 0.0;
@@ -214,10 +214,10 @@ namespace OpenMD {
     RealType fnc7C = 0.0;
     
     if (idat.shiftedPot || idat.shiftedForce) {
-      exptC     = -B * (*(idat.rcut));
+      exptC     = -B * idat.rcut;
       expfncC   =  exp(exptC);
-      fnc6C     =  1.0 / pow( (*idat.rcut), 6);
-      fnc7C     =  fnc6C / (*idat.rcut);
+      fnc6C     =  1.0 / pow( idat.rcut, 6);
+      fnc7C     =  fnc6C / idat.rcut;
     }
     
     switch(variant) {
@@ -233,7 +233,7 @@ namespace OpenMD {
       } else if (idat.shiftedForce) {
         myPotC = A * expfncC - C * fnc6C;
         myDerivC =  -A * B * expfncC + C * fnc7C;
-        myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut) );
+        myPotC += myDerivC * ( idat.rij - idat.rcut );
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;
@@ -243,14 +243,14 @@ namespace OpenMD {
     case btModified: {
       RealType s6 = pow(sigma, 6);
       RealType s7 = pow(sigma, 7);
-      RealType fnc30 = pow(sigma / (*idat.rij), 30);
-      RealType fnc31 = fnc30 * sigma / (*idat.rij);
+      RealType fnc30 = pow(sigma / idat.rij, 30);
+      RealType fnc31 = fnc30 * sigma / idat.rij;
       RealType fnc30C = 0.0;
       RealType fnc31C = 0.0;
       
       if (idat.shiftedPot || idat.shiftedForce) {
-        fnc30C     =  pow( sigma / (*idat.rcut), 30);
-        fnc31C     =  fnc30C * sigma / (*idat.rcut);
+        fnc30C     =  pow( sigma / idat.rcut, 30);
+        fnc31C     =  fnc30C * sigma / idat.rcut;
       }
       
       // V(r) = A exp(-B*r) - C/r^6 + 4 epsilon ((sigma/r)^30 - (sigma/r)^6)
@@ -263,7 +263,7 @@ namespace OpenMD {
       } else if (idat.shiftedForce) {
         myPotC  = A*expfncC - C * fnc6C + 4.0 * epsilon * ( fnc30C - s6*fnc6C );
         myDeriv = - A * B * expfncC + C * fnc7C + 4.0 * epsilon * (-30.0*fnc31C + 6.0*s7*fnc7C) / sigma;
-        myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut) );
+        myPotC += myDerivC * ( idat.rij - idat.rcut );
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;
@@ -277,16 +277,16 @@ namespace OpenMD {
     }
     }
       
-    RealType pot_temp = *(idat.vdwMult) * (myPot - myPotC);
-    *(idat.vpair) += pot_temp;
+    RealType pot_temp = idat.vdwMult * (myPot - myPotC);
+    idat.vpair += pot_temp;
     
-    RealType dudr = *(idat.sw) * *(idat.vdwMult) * (myDeriv - myDerivC);
+    RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
     
-    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
     if (idat.isSelected)
-      (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+      idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
 
-    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+    idat.f1 += idat.d * dudr / idat.rij;
 
     return;    
   }

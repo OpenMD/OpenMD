@@ -71,7 +71,7 @@ namespace OpenMD {
     typedef std::list<std::pair<int, int> >::iterator IndexListContainerIterator;
 
     IndexListContainer(int minIndex = 0, int maxIndex = MAX_INTEGER) 
-      :minIndex_(minIndex), maxIndex_(maxIndex) {
+      : maxIndex_(maxIndex) {
       indexContainer_.push_back(std::make_pair(minIndex, maxIndex));
     }
         
@@ -233,7 +233,6 @@ namespace OpenMD {
       }
 
     }
-    int minIndex_;
     int maxIndex_;        
     std::list<std::pair<int, int> > indexContainer_;
   };

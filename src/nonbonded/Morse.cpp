@@ -186,7 +186,7 @@ namespace OpenMD {
     
     // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
     
-    RealType expt     = -beta*( *(idat.rij) - Re);
+    RealType expt     = -beta*( idat.rij - Re);
     RealType expfnc   = exp(expt);
     RealType expfnc2  = expfnc*expfnc;
     
@@ -195,7 +195,7 @@ namespace OpenMD {
     RealType expfnc2C = 0.0;
     
     if (idat.shiftedPot || idat.shiftedForce) {
-      exptC     = -beta*( *(idat.rcut) - Re);
+      exptC     = -beta*( idat.rcut - Re);
       expfncC   = exp(exptC);
       expfnc2C  = expfncC*expfncC;
     }
@@ -212,7 +212,7 @@ namespace OpenMD {
       } else if (idat.shiftedForce) {
         myPotC = De * (expfnc2C - 2.0 * expfncC);
         myDerivC  = 2.0 * De * beta * (expfncC - expfnc2C);
-        myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut) );
+        myPotC += myDerivC * ( idat.rij - idat.rcut );
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;
@@ -230,7 +230,7 @@ namespace OpenMD {
       } else if (idat.shiftedForce) {
         myPotC = De * expfnc2C;
         myDerivC = -2.0 * De * beta * expfnc2C;
-        myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut));
+        myPotC += myDerivC * ( idat.rij - idat.rcut);
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;
@@ -244,16 +244,16 @@ namespace OpenMD {
     }
     }
     
-    RealType pot_temp = *(idat.vdwMult) * (myPot - myPotC);
-    *(idat.vpair) += pot_temp;
+    RealType pot_temp = idat.vdwMult * (myPot - myPotC);
+    idat.vpair += pot_temp;
     
-    RealType dudr = *(idat.sw) * *(idat.vdwMult) * (myDeriv - myDerivC);
+    RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
     
-    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
     if (idat.isSelected)
-      (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
-
-    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+      idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
+    
+    idat.f1 += idat.d * dudr / idat.rij;
 
     return;    
   }

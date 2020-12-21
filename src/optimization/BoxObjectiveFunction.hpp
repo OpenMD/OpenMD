@@ -81,7 +81,6 @@ namespace OpenMD {
     Shake* shake_;
     FluctuatingChargeConstraints* fqConstraints_;
     Thermo thermo;
-    bool usingRattle_;
     bool hasFlucQ_;
     Mat3x3d deformation_;
     RealType V0_;

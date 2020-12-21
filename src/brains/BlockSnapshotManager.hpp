@@ -114,7 +114,6 @@ namespace OpenMD {
     void internalUnload(int block);
     Snapshot* loadFrame(int frame);
         
-    SimInfo* info_;
     int blockCapacity_;
     long long int memSize_;
 

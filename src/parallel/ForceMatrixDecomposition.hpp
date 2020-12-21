@@ -66,7 +66,7 @@ namespace OpenMD {
     void distributeData();
     void collectIntermediateData();
     void distributeIntermediateData();
-    void collectSelfData();
+    void collectSelfData(SelfData &sdat);
     void collectData();
 
     // neighbor list routines

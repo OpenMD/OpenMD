@@ -169,8 +169,8 @@ namespace OpenMD {
     RealType myDeriv = 0.0;
     RealType myDerivC = 0.0;
 
-    RealType ri  = 1.0 / *(idat.rij);
-    RealType ric = 1.0 / *(idat.rcut);
+    RealType ri  = 1.0 / idat.rij;
+    RealType ric = 1.0 / idat.rcut;
 
     RealType fn, fnc;
     
@@ -186,22 +186,22 @@ namespace OpenMD {
     if (idat.shiftedPot) {
       myDerivC = 0.0;
     } else if (idat.shiftedForce) {      
-      myPotC = myPotC + myDerivC * ( *(idat.rij) - *(idat.rcut) );
+      myPotC = myPotC + myDerivC * ( idat.rij - idat.rcut );
     } else {
       myPotC = 0.0;
       myDerivC = 0.0;        
     }
     
-    RealType pot_temp = *(idat.vdwMult) * (myPot - myPotC);
-    *(idat.vpair) += pot_temp;
+    RealType pot_temp = idat.vdwMult * (myPot - myPotC);
+    idat.vpair += pot_temp;
     
-    RealType dudr = *(idat.sw) * *(idat.vdwMult) * (myDeriv -  myDerivC);
+    RealType dudr = idat.sw * idat.vdwMult * (myDeriv -  myDerivC);
     
-    (*(idat.pot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
     if (idat.isSelected)
-      (*(idat.selePot))[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+      idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
 
-    *(idat.f1) += *(idat.d) * dudr / *(idat.rij);
+    idat.f1 += idat.d * dudr / idat.rij;
     
     return;
   }

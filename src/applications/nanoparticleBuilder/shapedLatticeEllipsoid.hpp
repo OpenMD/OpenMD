@@ -56,13 +56,13 @@ namespace OpenMD{
    */
   class shapedLatticeEllipsoid: public shapedLattice{
   public:
-    shapedLatticeEllipsoid(RealType latticeConstant, std::string latticeType, RealType rAxial, RealType rEquatorial);
+    shapedLatticeEllipsoid(RealType latticeConstant,
+			   std::string latticeType, RealType rAxial,
+			   RealType rEquatorial);
     virtual bool isInterior(Vector3d point);
   private:
     RealType rAxial_;
     RealType rEquatorial_;
-    RealType rMajor_;
-    RealType rMinor_;
   };
 }
 

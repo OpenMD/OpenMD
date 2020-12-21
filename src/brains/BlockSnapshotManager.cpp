@@ -61,7 +61,7 @@ namespace OpenMD {
 					     int storageLayout,
                                              long long int memSize,
                                              int blockCapacity) 
-    : SnapshotManager(storageLayout), info_(info), 
+    : SnapshotManager(storageLayout),
       blockCapacity_(blockCapacity), memSize_(memSize), 
       activeBlocks_(blockCapacity_, -1), 
       activeRefCount_(blockCapacity_, 0) {

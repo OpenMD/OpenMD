@@ -68,7 +68,6 @@ namespace OpenMD {
     virtual void postCorrelate();
     virtual void writeCorrelate();
 
-    int order_;
     DoublePolynomial legendre_;
     unsigned int nZBins_;
     RealType boxZ_, halfBoxZ_;

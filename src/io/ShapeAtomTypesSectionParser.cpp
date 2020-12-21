@@ -70,7 +70,7 @@ namespace OpenMD {
     if (tokenizer.countTokens() >= 2) {
       std::string shapeTypeName = tokenizer.nextToken();
       std::string shapeFile = tokenizer.nextToken();
-       
+
       AtomType* atomType = ff.getAtomType(shapeTypeName);
       if (atomType == NULL) {
         atomType = new AtomType();

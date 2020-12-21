@@ -833,8 +833,8 @@ namespace OpenMD {
 
     // some variables we'll need independent of electrostatic type:
 
-    ri = 1.0 /  *(idat.rij);
-    rhat =  *(idat.d)  * ri;
+    ri = 1.0 /  idat.rij;
+    rhat =  idat.d  * ri;
 
     // Obtain all of the required radial function values from the
     // spline structures:
@@ -845,30 +845,30 @@ namespace OpenMD {
     
     // needed for fields (and forces):
     if (a_is_Charge || b_is_Charge) {
-      v01s->getValueAndDerivativeAt( *(idat.rij), v01, dv01);
+      v01s->getValueAndDerivativeAt( idat.rij, v01, dv01);
     }
     if (a_is_Dipole || b_is_Dipole) {
-      v11s->getValueAndDerivativeAt( *(idat.rij), v11, dv11);
+      v11s->getValueAndDerivativeAt( idat.rij, v11, dv11);
       v11or = ri * v11;
     }
     if (a_is_Quadrupole || b_is_Quadrupole ||  (a_is_Dipole && b_is_Dipole)) {
-      v21s->getValueAndDerivativeAt( *(idat.rij), v21, dv21);
-      v22s->getValueAndDerivativeAt( *(idat.rij), v22, dv22);
+      v21s->getValueAndDerivativeAt( idat.rij, v21, dv21);
+      v22s->getValueAndDerivativeAt( idat.rij, v22, dv22);
       v22or = ri * v22;
     }
 
     // needed for potentials (and forces and torques):
     if ((a_is_Dipole && b_is_Quadrupole) ||
         (b_is_Dipole && a_is_Quadrupole)) {
-      v31s->getValueAndDerivativeAt( *(idat.rij), v31, dv31);
-      v32s->getValueAndDerivativeAt( *(idat.rij), v32, dv32);
+      v31s->getValueAndDerivativeAt( idat.rij, v31, dv31);
+      v32s->getValueAndDerivativeAt( idat.rij, v32, dv32);
       v31or = v31 * ri;
       v32or = v32 * ri;
     }
     if (a_is_Quadrupole && b_is_Quadrupole) {
-      v41s->getValueAndDerivativeAt( *(idat.rij), v41, dv41);
-      v42s->getValueAndDerivativeAt( *(idat.rij), v42, dv42);
-      v43s->getValueAndDerivativeAt( *(idat.rij), v43, dv43);
+      v41s->getValueAndDerivativeAt( idat.rij, v41, dv41);
+      v42s->getValueAndDerivativeAt( idat.rij, v42, dv42);
+      v43s->getValueAndDerivativeAt( idat.rij, v43, dv43);
       v42or = v42 * ri;
       v43or = v43 * ri;
     }
@@ -961,7 +961,7 @@ namespace OpenMD {
 
       if (b_is_Charge) {
 
-	pref =  pre11_ * *(idat.electroMult);
+	pref =  pre11_ * idat.electroMult;
 	U  += C_a * C_b * pref * v01;
 	F  += C_a * C_b * pref * dv01 * rhat;
        
@@ -969,7 +969,7 @@ namespace OpenMD {
         // interactions via the reaction field we must worry about:
 
         if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
-          rfContrib = preRF_ * pref * C_a * C_b * *(idat.r2);
+          rfContrib = preRF_ * pref * C_a * C_b * idat.r2;
           indirect_Pot += rfContrib;
           indirect_F   += rfContrib * 2.0 * ri * rhat;
         }
@@ -980,7 +980,7 @@ namespace OpenMD {
 
         if (idat.excluded) {
           if (a_uses_SlaterIntra || b_uses_SlaterIntra) {
-            coulInt = J->getValueAt( *(idat.rij) );
+            coulInt = J->getValueAt( idat.rij );
             excluded_Pot += C_a * C_b * coulInt;
             if (a_is_Fluctuating) dUdCa += C_b * coulInt;
             if (b_is_Fluctuating) dUdCb += C_a * coulInt;
@@ -992,7 +992,7 @@ namespace OpenMD {
       }
 
       if (b_is_Dipole) {
-        pref =  pre12_ * *(idat.electroMult);
+        pref =  pre12_ * idat.electroMult;
         U  += C_a * pref * v11 * rdDb;
         F  += C_a * pref * ((dv11 - v11or) * rdDb * rhat + v11or * D_b);
         Tb += C_a * pref * v11 * rxDb;
@@ -1004,15 +1004,15 @@ namespace OpenMD {
         // interaction:
 
         if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
-          rfContrib = C_a * pref * preRF_ * 2.0 * *(idat.rij);
+          rfContrib = C_a * pref * preRF_ * 2.0 * idat.rij;
           indirect_Pot += rfContrib * rdDb;
-          indirect_F   += rfContrib * D_b / (*idat.rij);
+          indirect_F   += rfContrib * D_b / idat.rij;
           indirect_Tb  += C_a * pref * preRF_ * rxDb;
         }
       }
 
       if (b_is_Quadrupole) {
-        pref = pre14_ * *(idat.electroMult);
+        pref = pre14_ * idat.electroMult;
         U  +=  C_a * pref * (v21 * trQb + v22 * rdQbr);
         F  +=  C_a * pref * (trQb * dv21 * rhat + 2.0 * Qbr * v22or);
         F  +=  C_a * pref * rdQbr * rhat * (dv22 - 2.0*v22or);
@@ -1025,7 +1025,7 @@ namespace OpenMD {
     if (a_is_Dipole) {
 
       if (b_is_Charge) {
-        pref = pre12_ * *(idat.electroMult);
+        pref = pre12_ * idat.electroMult;
 
         U  -= C_b * pref * v11 * rdDa;
         F  -= C_b * pref * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
@@ -1037,15 +1037,15 @@ namespace OpenMD {
         // we still have the reaction-field-mediated charge-dipole
         // interaction:
         if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
-          rfContrib = C_b * pref * preRF_ * 2.0 * *(idat.rij);
+          rfContrib = C_b * pref * preRF_ * 2.0 * idat.rij;
           indirect_Pot -= rfContrib * rdDa;
-          indirect_F   -= rfContrib * D_a / (*idat.rij);
+          indirect_F   -= rfContrib * D_a / idat.rij;
           indirect_Ta  -= C_b * pref * preRF_ * rxDa;
         }
       }
 
       if (b_is_Dipole) {
-        pref = pre22_ * *(idat.electroMult);
+        pref = pre22_ * idat.electroMult;
         DadDb = dot(D_a, D_b);
         DaxDb = cross(D_a, D_b);
 
@@ -1066,7 +1066,7 @@ namespace OpenMD {
       }
 
       if (b_is_Quadrupole) {
-        pref = pre24_ * *(idat.electroMult);
+        pref = pre24_ * idat.electroMult;
         DadQb = D_a * Q_b;
         DadQbr = dot(D_a, Qbr);
         DaxQbr = cross(D_a, Qbr);
@@ -1084,7 +1084,7 @@ namespace OpenMD {
 
     if (a_is_Quadrupole) {
       if (b_is_Charge) {
-        pref = pre14_ * *(idat.electroMult);
+        pref = pre14_ * idat.electroMult;
         U  += C_b * pref * (v21 * trQa + v22 * rdQar);
         F  += C_b * pref * (trQa * rhat * dv21 + 2.0 * Qar * v22or);
         F  += C_b * pref * rdQar * rhat * (dv22 - 2.0*v22or);
@@ -1093,7 +1093,7 @@ namespace OpenMD {
         if (b_is_Fluctuating) dUdCb += pref * (v21 * trQa + v22 * rdQar);
       }
       if (b_is_Dipole) {
-        pref = pre24_ * *(idat.electroMult);
+        pref = pre24_ * idat.electroMult;
         DbdQa = D_b * Q_a;
         DbdQar = dot(D_b, Qar);
         DbxQar = cross(D_b, Qar);
@@ -1108,7 +1108,7 @@ namespace OpenMD {
         Tb += pref * ((trQa*rxDb - 2.0 * DbxQar)*v31 + rxDb*rdQar*v32);
       }
       if (b_is_Quadrupole) {
-        pref = pre44_ * *(idat.electroMult);  // yes
+        pref = pre44_ * idat.electroMult;  // yes
         QaQb = Q_a * Q_b;
         trQaQb = QaQb.trace();
         rQaQb = rhat * QaQb;
@@ -1148,51 +1148,51 @@ namespace OpenMD {
     }
 
     if (idat.doElectricField) {
-      *(idat.eField1) += Ea * *(idat.electroMult);
-      *(idat.eField2) += Eb * *(idat.electroMult);
+      idat.eField1 += Ea * idat.electroMult;
+      idat.eField2 += Eb * idat.electroMult;
     }
 
     if (idat.doSitePotential) {
-      *(idat.sPot1) += Pa * *(idat.electroMult);
-      *(idat.sPot2) += Pb * *(idat.electroMult);
+      idat.sPot1 += Pa * idat.electroMult;
+      idat.sPot2 += Pb * idat.electroMult;
     }
 
-    if (a_is_Fluctuating) *(idat.dVdFQ1) += dUdCa * *(idat.sw);
-    if (b_is_Fluctuating) *(idat.dVdFQ2) += dUdCb * *(idat.sw);
+    if (a_is_Fluctuating) idat.dVdFQ1 += dUdCa * idat.sw;
+    if (b_is_Fluctuating) idat.dVdFQ2 += dUdCb * idat.sw;
 
     if (!idat.excluded) {
 
-      *(idat.vpair) += U;
-      (*(idat.pot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
+      idat.vpair += U;
+      idat.pot[ELECTROSTATIC_FAMILY] += U * idat.sw;
       if (idat.isSelected)
-        (*(idat.selePot))[ELECTROSTATIC_FAMILY] += U * *(idat.sw);
+        idat.selePot[ELECTROSTATIC_FAMILY] += U * idat.sw;
 
-      *(idat.f1) += F * *(idat.sw);
+      idat.f1 += F * idat.sw;
 
       if (a_is_Dipole || a_is_Quadrupole)
-        *(idat.t1) += Ta * *(idat.sw);
+        *(idat.t1) += Ta * idat.sw;
 
       if (b_is_Dipole || b_is_Quadrupole)
-        *(idat.t2) += Tb * *(idat.sw);
+        *(idat.t2) += Tb * idat.sw;
 
     } else {
 
       // only accumulate the forces and torques resulting from the
       // indirect reaction field terms.
 
-      *(idat.vpair) += indirect_Pot;
-      (*(idat.excludedPot))[ELECTROSTATIC_FAMILY] +=  excluded_Pot;
-      (*(idat.pot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
+      idat.vpair += indirect_Pot;
+      idat.excludedPot[ELECTROSTATIC_FAMILY] +=  excluded_Pot;
+      idat.pot[ELECTROSTATIC_FAMILY] += idat.sw * indirect_Pot;
       if (idat.isSelected)
-        (*(idat.selePot))[ELECTROSTATIC_FAMILY] += *(idat.sw) * indirect_Pot;
+        idat.selePot[ELECTROSTATIC_FAMILY] += idat.sw * indirect_Pot;
 
-      *(idat.f1) += *(idat.sw) * indirect_F;
-
+      idat.f1 += idat.sw * indirect_F;
+      
       if (a_is_Dipole || a_is_Quadrupole)
-        *(idat.t1) += *(idat.sw) * indirect_Ta;
-
+        *(idat.t1) += idat.sw * indirect_Ta;
+      
       if (b_is_Dipole || b_is_Quadrupole)
-        *(idat.t2) += *(idat.sw) * indirect_Tb;
+        *(idat.t2) += idat.sw * indirect_Tb;
     }
     return;
   }
@@ -1269,14 +1269,13 @@ namespace OpenMD {
       break;
     }
 
-    (*(sdat.selfPot))[ELECTROSTATIC_FAMILY] += selfPot;
-
+    sdat.selfPot[ELECTROSTATIC_FAMILY] += selfPot;
+    
     if (sdat.isSelected)
-      (*(sdat.selePot))[ELECTROSTATIC_FAMILY] += selfPot;
+      sdat.selePot[ELECTROSTATIC_FAMILY] += selfPot;
 
     if (i_is_Fluctuating)
       *(sdat.flucQfrc) += fqf;
-
   }
 
 

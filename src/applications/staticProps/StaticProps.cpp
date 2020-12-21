@@ -288,7 +288,7 @@ RealType vRadius;
 
   }
 
-  StaticAnalyser* analyser;
+  StaticAnalyser* analyser = nullptr;
 
   if (args_info.gofr_given){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen,

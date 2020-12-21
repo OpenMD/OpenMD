@@ -815,7 +815,11 @@ namespace OpenMD {
    * Collects information obtained during the post-pair (and embedding
    * functional) loops onto local data structures.
    */
-  void ForceMatrixDecomposition::collectSelfData() {
+  void ForceMatrixDecomposition::collectSelfData(SelfData &sdat) {
+    
+    selfPot += sdat.selfPot;
+    excludedSelfPot += sdat.excludedPot;
+    selectedSelfPot += sdat.selePot;    
 
 #ifdef IS_MPI
     snap_ = sman_->getCurrentSnapshot();
@@ -1286,61 +1290,61 @@ namespace OpenMD {
   void ForceMatrixDecomposition::unpackInteractionData(InteractionData &idat,
                                                        int atom1, int atom2) {  
 #ifdef IS_MPI
-    pot_row[atom1] += RealType(0.5) *  *(idat.pot);
-    pot_col[atom2] += RealType(0.5) *  *(idat.pot);
-    expot_row[atom1] += RealType(0.5) *  *(idat.excludedPot);
-    expot_col[atom2] += RealType(0.5) *  *(idat.excludedPot);
-    selepot_row[atom1] += RealType(0.5) *  *(idat.selePot);
-    selepot_col[atom2] += RealType(0.5) *  *(idat.selePot);
+    pot_row[atom1] += 0.5 * idat.pot;
+    pot_col[atom2] += 0.5 * idat.pot;
+    expot_row[atom1] += 0.5 * idat.excludedPot;
+    expot_col[atom2] += 0.5 * idat.excludedPot;
+    selepot_row[atom1] += 0.5 * idat.selePot;
+    selepot_col[atom2] += 0.5 * idat.selePot;
 
-    atomRowData.force[atom1] += *(idat.f1);
-    atomColData.force[atom2] -= *(idat.f1);
+    atomRowData.force[atom1] += idat.f1;
+    atomColData.force[atom2] -= idat.f1;
 
     if (storageLayout_ & DataStorage::dslFlucQForce) {              
-      atomRowData.flucQFrc[atom1] -= *(idat.dVdFQ1);
-      atomColData.flucQFrc[atom2] -= *(idat.dVdFQ2);
+      atomRowData.flucQFrc[atom1] -= idat.dVdFQ1;
+      atomColData.flucQFrc[atom2] -= idat.dVdFQ2;
     }
 
     if (storageLayout_ & DataStorage::dslElectricField) {              
-      atomRowData.electricField[atom1] += *(idat.eField1);
-      atomColData.electricField[atom2] += *(idat.eField2);
+      atomRowData.electricField[atom1] += idat.eField1;
+      atomColData.electricField[atom2] += idat.eField2;
     }
 
     if (storageLayout_ & DataStorage::dslSitePotential) {              
-      atomRowData.sitePotential[atom1] += *(idat.sPot1);
-      atomColData.sitePotential[atom2] += *(idat.sPot2);
+      atomRowData.sitePotential[atom1] += idat.sPot1;
+      atomColData.sitePotential[atom2] += idat.sPot2;
     }
 
 #else
-    pairwisePot += *(idat.pot);
-    excludedPot += *(idat.excludedPot);
-    selectedPot += *(idat.selePot);
+    pairwisePot += idat.pot;
+    excludedPot += idat.excludedPot;
+    selectedPot += idat.selePot;
 
-    snap_->atomData.force[atom1] += *(idat.f1);
-    snap_->atomData.force[atom2] -= *(idat.f1);
+    snap_->atomData.force[atom1] += idat.f1;
+    snap_->atomData.force[atom2] -= idat.f1;
 
     if (idat.doParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
       // self and embedding contribution is added in each of the low
       // level non-bonded routines.  In parallel, this calculation is
       // done in collectData, not in unpackInteractionData.
-      snap_->atomData.particlePot[atom1] += *(idat.vpair) * *(idat.sw);
-      snap_->atomData.particlePot[atom2] += *(idat.vpair) * *(idat.sw);
+      snap_->atomData.particlePot[atom1] += idat.vpair * idat.sw;
+      snap_->atomData.particlePot[atom2] += idat.vpair * idat.sw;
     }
     
     if (storageLayout_ & DataStorage::dslFlucQForce) {
-      snap_->atomData.flucQFrc[atom1] -= *(idat.dVdFQ1);
-      snap_->atomData.flucQFrc[atom2] -= *(idat.dVdFQ2);
+      snap_->atomData.flucQFrc[atom1] -= idat.dVdFQ1;
+      snap_->atomData.flucQFrc[atom2] -= idat.dVdFQ2;
     }
 
     if (storageLayout_ & DataStorage::dslElectricField) {              
-      snap_->atomData.electricField[atom1] += *(idat.eField1);
-      snap_->atomData.electricField[atom2] += *(idat.eField2);
+      snap_->atomData.electricField[atom1] += idat.eField1;
+      snap_->atomData.electricField[atom2] += idat.eField2;
     }
 
     if (storageLayout_ & DataStorage::dslSitePotential) {              
-      snap_->atomData.sitePotential[atom1] += *(idat.sPot1);
-      snap_->atomData.sitePotential[atom2] += *(idat.sPot2);
+      snap_->atomData.sitePotential[atom1] += idat.sPot1;
+      snap_->atomData.sitePotential[atom2] += idat.sPot2;
     }
 
 #endif
