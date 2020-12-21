@@ -99,7 +99,7 @@ namespace OpenMD {
     void removeAngularDrift();
 
   private:
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Globals* globals_;
     Thermo thermo_;
     RandNumGen* randNumGen_;

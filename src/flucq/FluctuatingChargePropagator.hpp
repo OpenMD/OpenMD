@@ -75,7 +75,7 @@ namespace OpenMD {
   protected:
     FluctuatingChargeParameters* fqParams_;
     FluctuatingChargeConstraints* fqConstraints_;
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     ForceManager* forceMan_;
     bool hasFlucQ_;
     bool initialized_;

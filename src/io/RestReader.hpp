@@ -118,7 +118,7 @@ namespace OpenMD {
     void readSet(void);
   private: 
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
 
     std::vector<Vector3d> all_pos_;
     std::vector<int> stuntDoubleIndex_;

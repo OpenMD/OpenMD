@@ -52,10 +52,12 @@
 
 #ifndef UTILS_TYPECONTAINER_HPP
 #define UTILS_TYPECONTAINER_HPP
+
 #include <algorithm>
 #include <map>
 #include <vector>
 
+#include "utils/MemoryUtils.hpp"
 #include "utils/Utility.hpp"
 
 namespace OpenMD {
@@ -79,11 +81,7 @@ namespace OpenMD {
     TypeContainer() : index_(0) {}
             
     ~TypeContainer() {
-      MapTypeIterator i;
-      for (i = data_.begin(); i != data_.end(); ++i) {
-	delete (i->second).second;
-      }
-      data_.clear();
+      MemoryUtils::deletePointers(data_);
     }
             
     bool add(KeyType& keys, ElemPtr elem) {

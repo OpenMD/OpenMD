@@ -70,7 +70,7 @@ namespace OpenMD {
         
   protected:
     void internalVisit(StuntDouble* sd);
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     SelectionEvaluator originEvaluator_;
     SelectionManager originSeleMan_;
     DirectionalAtom* originDatom_;

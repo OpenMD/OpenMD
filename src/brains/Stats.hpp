@@ -158,7 +158,7 @@ namespace OpenMD {
     std::vector<RealType> getArrayError(int index);
 
   private:
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     void init();
     bool isInit_;
     std::vector<StatsData> data_;

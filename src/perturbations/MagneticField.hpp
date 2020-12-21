@@ -93,7 +93,7 @@ namespace OpenMD {
     bool initialized;
     bool doMagneticField;
     Globals* simParams;
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Vector3d MF;
   };
 

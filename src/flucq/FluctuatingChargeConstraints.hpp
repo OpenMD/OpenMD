@@ -61,7 +61,7 @@ namespace OpenMD {
 
   protected:
     void initialize();
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     bool initialized_;
     bool hasFlucQ_;
     bool constrainRegions_;

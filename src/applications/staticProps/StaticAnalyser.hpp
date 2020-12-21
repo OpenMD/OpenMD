@@ -129,7 +129,7 @@ namespace OpenMD {
     OutputData* beginOutputData(std::vector<OutputData*>::iterator& i);
     OutputData* nextOutputData(std::vector<OutputData*>::iterator& i);
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::string dumpFilename_;
     std::string outputFilename_;
     int step_;

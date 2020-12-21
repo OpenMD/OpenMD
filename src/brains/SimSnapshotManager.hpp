@@ -80,7 +80,7 @@ namespace OpenMD{
     virtual void setCapacity(int capacity);
 
   private:
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
   };
 
 }

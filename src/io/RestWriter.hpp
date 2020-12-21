@@ -74,7 +74,7 @@ namespace OpenMD {
     void writeClosing(std::ostream& os);
     
   private:    
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::ostream *output_;
     bool createRestFile_;
   };

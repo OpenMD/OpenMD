@@ -87,7 +87,7 @@ namespace OpenMD {
     std::string getStuntDoubleName() { return sd_->getType();}
   protected:
     StuntDouble* sd_;
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
   private:
     HydroProp* cr_;
     HydroProp* cd_;

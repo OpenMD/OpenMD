@@ -552,21 +552,21 @@ namespace OpenMD {
     }
     
     Globals * simParams = info->getSimParams();
-    SeqRandNumGen* myRandom; //divide labor does not need Parallel
-                             //random number generator
-    if (simParams->haveSeed()) {
-      int seedValue = simParams->getSeed();
-      myRandom = new SeqRandNumGen(seedValue);
-    }else {
-      myRandom = new SeqRandNumGen();
-    }   
     
     a = 3.0 * nGlobalMols / info->getNGlobalAtoms();
     
-    //initialize atomsPerProc
+    // initialize atomsPerProc
     atomsPerProc.insert(atomsPerProc.end(), nProcessors, 0);
     
     if (worldRank == 0) {
+      SeqRandNumGen* myRandom;  // divide labor does not need Parallel
+                                // random number generator
+      if (simParams->haveSeed()) {
+        int seedValue = simParams->getSeed();
+        myRandom = new SeqRandNumGen(seedValue);
+      } else {
+        myRandom = new SeqRandNumGen();
+      }   
       RealType numerator = info->getNGlobalAtoms();
       RealType denominator = nProcessors;
       RealType precast = numerator / denominator;

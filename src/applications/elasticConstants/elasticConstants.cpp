@@ -392,6 +392,7 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
   //RealType kT_111 = (C11 - C12 + C44) / 3.0;
    
 }
+
 int main(int argc, char *argv []) {
   std::string method;
   std::string inputFileName;
@@ -579,8 +580,8 @@ int main(int argc, char *argv []) {
   Globals* simParams = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
 
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  VelocitizerPtr veloSet {Memory::make_unique<Velocitizer>(info)};
+  // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
+  VelocitizerPtr veloSet {MemoryUtils::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
   info->update();
@@ -608,8 +609,8 @@ int main(int argc, char *argv []) {
     Mat3x3d oldHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     
     MinimizerParameters* miniPars = simParams->getMinimizerParameters();
-    // OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
-    OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization("CG", info);
+    // OptimizationMethod* minim = OptimizationFactory::getInstance().createOptimization(toUpperCopy(miniPars->getMethod()), info);
+    OptimizationMethod* minim = OptimizationFactory::getInstance().createOptimization("CG", info);
     
     if (minim == NULL) {
       sprintf(painCave.errMsg,
@@ -620,9 +621,10 @@ int main(int argc, char *argv []) {
     }
     
     BoxObjectiveFunction boxObjf(info, forceMan); 
+    NoConstraint noConstraint {};
     DumpStatusFunction dsf(info);
     DynamicVector<RealType> initCoords = boxObjf.setInitialCoords();
-    Problem problem(boxObjf, *(new NoConstraint()), dsf, initCoords);
+    Problem problem(boxObjf, noConstraint, dsf, initCoords);
     
     int maxIter = miniPars->getMaxIterations();
     int mssIter = miniPars->getMaxStationaryStateIterations();

@@ -45,18 +45,12 @@
  
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
+#include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
 
-  //initialize instance of LatticeFactory
-  LatticeFactory* LatticeFactory::instance_ = NULL;
-
   LatticeFactory::~LatticeFactory() {
-    CreatorMapType::iterator i;
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      delete i->second;
-    }
-    creatorMap_.clear();
+    MemoryUtils::deletePointers(creatorMap_);
   }
 
   bool LatticeFactory::registerLattice(LatticeCreator* creator) {

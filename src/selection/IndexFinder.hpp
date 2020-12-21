@@ -62,7 +62,7 @@ namespace OpenMD {
   private:
     void init();
         
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     vector<SelectionSet> selectionSets_;
     vector<int> nObjects_;      
   };

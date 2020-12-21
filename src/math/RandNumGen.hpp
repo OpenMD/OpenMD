@@ -46,11 +46,12 @@
 #ifndef MATH_RANDNUMGEN_HPP
 #define MATH_RANDNUMGEN_HPP
 
+#include <memory>
 #include <vector>
+
 #include "config.h"
 #include "MersenneTwister.hpp"
 #include "utils/simError.h"
-
 
 namespace OpenMD {
 
@@ -58,13 +59,11 @@ namespace OpenMD {
    * @class RandNumGen 
    * @brief a random number generator class
    */
-  class RandNumGen{
+  class RandNumGen {
   public:
     typedef unsigned long uint32; 
         
-    virtual ~RandNumGen() {
-      delete mtRand_;
-    }
+    virtual ~RandNumGen() = default;
         
     /** Returns a real number in [0,1] */
     RealType rand() {
@@ -122,12 +121,8 @@ namespace OpenMD {
     virtual void seed()= 0;
 
   protected:
-    MTRand* mtRand_;
-
-
+    std::unique_ptr<MTRand> mtRand_;
   };
-
 }
 
 #endif 
-

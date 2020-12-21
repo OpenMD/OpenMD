@@ -96,7 +96,7 @@ namespace OpenMD {
     bool doUniformField;
     bool doParticlePot;
     Globals* simParams;
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Vector3d EF;
   };
   

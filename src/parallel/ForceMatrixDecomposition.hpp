@@ -60,6 +60,7 @@ namespace OpenMD {
   class ForceMatrixDecomposition : public ForceDecomposition {
   public:
     ForceMatrixDecomposition(SimInfo* info, InteractionManager* iMan);
+    ~ForceMatrixDecomposition();
 
     void distributeInitialData();
     void zeroWorkArrays();
@@ -126,22 +127,22 @@ namespace OpenMD {
     Communicator<Row> rowComm;
     Communicator<Column> colComm;
 
-    Plan<int>* AtomPlanIntRow;
-    Plan<RealType>* AtomPlanRealRow; 
-    Plan<Vector3d>* AtomPlanVectorRow; 
-    Plan<Mat3x3d>*  AtomPlanMatrixRow; 
-    Plan<potVec>* AtomPlanPotRow;
+    Plan<int>* AtomPlanIntRow {nullptr};
+    Plan<RealType>* AtomPlanRealRow {nullptr}; 
+    Plan<Vector3d>* AtomPlanVectorRow {nullptr}; 
+    Plan<Mat3x3d>*  AtomPlanMatrixRow {nullptr}; 
+    Plan<potVec>* AtomPlanPotRow {nullptr};
 
-    Plan<int>* AtomPlanIntColumn;
-    Plan<RealType>* AtomPlanRealColumn; 
-    Plan<Vector3d>* AtomPlanVectorColumn; 
-    Plan<Mat3x3d>*  AtomPlanMatrixColumn;
-    Plan<potVec>* AtomPlanPotColumn; 
+    Plan<int>* AtomPlanIntColumn {nullptr};
+    Plan<RealType>* AtomPlanRealColumn {nullptr}; 
+    Plan<Vector3d>* AtomPlanVectorColumn {nullptr}; 
+    Plan<Mat3x3d>*  AtomPlanMatrixColumn {nullptr};
+    Plan<potVec>* AtomPlanPotColumn {nullptr}; 
 
-    Plan<int>* cgPlanIntRow;
-    Plan<Vector3d>* cgPlanVectorRow; 
-    Plan<int>* cgPlanIntColumn;
-    Plan<Vector3d>* cgPlanVectorColumn; 
+    Plan<int>* cgPlanIntRow {nullptr};
+    Plan<Vector3d>* cgPlanVectorRow {nullptr}; 
+    Plan<int>* cgPlanIntColumn {nullptr};
+    Plan<Vector3d>* cgPlanVectorColumn {nullptr}; 
 
     // work arrays for assembling potential energy
     vector<potVec> pot_row;

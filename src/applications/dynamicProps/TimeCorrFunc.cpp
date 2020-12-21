@@ -105,8 +105,8 @@ namespace OpenMD {
       sele2ToIndex_.resize(nFrames_);
     }
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    progressBar_ = Memory::make_unique<ProgressBar>();
+    // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
+    progressBar_ = MemoryUtils::make_unique<ProgressBar>();
   }
 
   template<typename T>

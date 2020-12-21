@@ -50,7 +50,7 @@ namespace OpenMD {
     }
     
   private:
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Stats* stats;
     DumpWriter* dumpWriter;
     StatWriter* statWriter;    

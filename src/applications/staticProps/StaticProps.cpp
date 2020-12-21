@@ -45,12 +45,14 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
+#include "utils/MemoryUtils.hpp"
 
 #include "StaticPropsCmd.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
@@ -288,49 +290,49 @@ RealType vRadius;
 
   }
 
-  StaticAnalyser* analyser;
+  std::unique_ptr<StaticAnalyser> analyser {nullptr};
 
   if (args_info.gofr_given){
-    analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen,
+    analyser= MemoryUtils::make_unique<GofR>(info, dumpFileName, sele1, sele2, maxLen,
 		       nrbins);
   } else if (args_info.gofz_given) {
-    analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
+    analyser= MemoryUtils::make_unique<GofZ>(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
 		       args_info.nbins_arg, privilegedAxis);
   } else if (args_info.r_z_given) {
-    analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
+    analyser  = MemoryUtils::make_unique<GofRZ>(info, dumpFileName, sele1, sele2, maxLen, zmaxLen,
 			  nrbins, args_info.nbins_z_arg, privilegedAxis);
   } else if (args_info.r_theta_given) {
     if (args_info.sele3_given)
-      analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, sele3, maxLen,
+      analyser  = MemoryUtils::make_unique<GofRTheta>(info, dumpFileName, sele1, sele2, sele3, maxLen,
                                 nrbins, nanglebins);
     else
-      analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen,
+      analyser  = MemoryUtils::make_unique<GofRTheta>(info, dumpFileName, sele1, sele2, maxLen,
                                 nrbins, nanglebins);
   } else if (args_info.r_omega_given) {
     if (args_info.sele3_given)
-      analyser  = new GofROmega(info, dumpFileName, sele1, sele2, sele3, maxLen,
+      analyser  = MemoryUtils::make_unique<GofROmega>(info, dumpFileName, sele1, sele2, sele3, maxLen,
                                 nrbins, nanglebins);
     else
-      analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen,
+      analyser  = MemoryUtils::make_unique<GofROmega>(info, dumpFileName, sele1, sele2, maxLen,
                                 nrbins, nanglebins);
 
   } else if (args_info.theta_omega_given) {
     if (args_info.sele3_given)
-      analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, sele3,
+      analyser  = MemoryUtils::make_unique<GofAngle2>(info, dumpFileName, sele1, sele2, sele3,
                                 nanglebins);
     else
-      analyser  = new GofAngle2(info, dumpFileName, sele1, sele2,
+      analyser  = MemoryUtils::make_unique<GofAngle2>(info, dumpFileName, sele1, sele2,
                                 nanglebins);
   } else if (args_info.r_theta_omega_given) {
     if (args_info.sele3_given)
-      analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2, sele3,
+      analyser  = MemoryUtils::make_unique<GofRAngle2>(info, dumpFileName, sele1, sele2, sele3,
                                  maxLen, nrbins, nanglebins);
     else
-      analyser  = new GofRAngle2(info, dumpFileName, sele1, sele2,
+      analyser  = MemoryUtils::make_unique<GofRAngle2>(info, dumpFileName, sele1, sele2,
                                  maxLen, nrbins, nanglebins);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
-      analyser= new GofXyz(info, dumpFileName, sele1, sele2,
+      analyser= MemoryUtils::make_unique<GofXyz>(info, dumpFileName, sele1, sele2,
                            args_info.refsele_arg, maxLen, args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
@@ -341,7 +343,7 @@ RealType vRadius;
     }
   } else if (args_info.twodgofr_given){
     if (args_info.dz_given) {
-      analyser= new TwoDGofR(info, dumpFileName, sele1, sele2, maxLen,
+      analyser= MemoryUtils::make_unique<TwoDGofR>(info, dumpFileName, sele1, sele2, maxLen,
 			     args_info.dz_arg, nrbins);
     } else {
       sprintf( painCave.errMsg,
@@ -353,13 +355,13 @@ RealType vRadius;
   } else if (args_info.p2_given) {
     if (args_info.sele1_given) {
       if (args_info.sele2_given)
-        analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
+        analyser  = MemoryUtils::make_unique<P2OrderParameter>(info, dumpFileName, sele1, sele2);
       else
         if (args_info.seleoffset_given)
-          analyser  = new P2OrderParameter(info, dumpFileName, sele1,
+          analyser  = MemoryUtils::make_unique<P2OrderParameter>(info, dumpFileName, sele1,
                                            args_info.seleoffset_arg);
         else
-          analyser  = new P2OrderParameter(info, dumpFileName, sele1);
+          analyser  = MemoryUtils::make_unique<P2OrderParameter>(info, dumpFileName, sele1);
     } else {
       sprintf( painCave.errMsg,
 	       "At least one selection script (--sele1) must be specified when calculating P2 order parameters");
@@ -368,10 +370,10 @@ RealType vRadius;
       simError();
     }
   } else if (args_info.rp2_given){
-    analyser = new RippleOP(info, dumpFileName, sele1, sele2);
+    analyser = MemoryUtils::make_unique<RippleOP>(info, dumpFileName, sele1, sele2);
   } else if (args_info.bo_given){
     if (args_info.rcut_given) {
-      analyser = new BondOrderParameter(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<BondOrderParameter>(info, dumpFileName, sele1,
 					args_info.rcut_arg,
 					args_info.nbins_arg);
     } else {
@@ -382,12 +384,12 @@ RealType vRadius;
       simError();
     }
   } else if (args_info.multipole_given){
-    analyser = new MultipoleSum(info, dumpFileName, sele1,
+    analyser = MemoryUtils::make_unique<MultipoleSum>(info, dumpFileName, sele1,
                                 maxLen, args_info.nbins_arg);
 
   } else if (args_info.tet_param_given) {
     if (args_info.rcut_given) {
-      analyser = new TetrahedralityParam(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<TetrahedralityParam>(info, dumpFileName, sele1,
 					 args_info.rcut_arg,
 					 args_info.nbins_arg);
     } else {
@@ -400,7 +402,7 @@ RealType vRadius;
 
   } else if (args_info.tet_param_z_given) {
     if (args_info.rcut_given) {
-      analyser = new TetrahedralityParamZ(info, dumpFileName, sele1, sele2,
+      analyser = MemoryUtils::make_unique<TetrahedralityParamZ>(info, dumpFileName, sele1, sele2,
                                           args_info.rcut_arg,
                                           args_info.nbins_arg,
 					  privilegedAxis);
@@ -414,7 +416,7 @@ RealType vRadius;
 
   } else if (args_info.tet_param_dens_given) {
     if (args_info.rcut_given) {
-      analyser = new TetrahedralityParamDens(info, dumpFileName, sele1, sele2,
+      analyser = MemoryUtils::make_unique<TetrahedralityParamDens>(info, dumpFileName, sele1, sele2,
 					     args_info.rcut_arg,
 					     args_info.nbins_arg);
     } else {
@@ -426,7 +428,7 @@ RealType vRadius;
     }
   } else if (args_info.tet_hb_given) {
     if (args_info.rcut_given) {
-      analyser = new TetrahedralityHBMatrix(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<TetrahedralityHBMatrix>(info, dumpFileName, sele1,
                                             args_info.rcut_arg,
                                             args_info.OOcut_arg,
                                             args_info.thetacut_arg,
@@ -465,13 +467,13 @@ RealType vRadius;
       painCave.isFatal = 1;
       simError();
     }
-    analyser = new TetrahedralityParamXYZ(info, dumpFileName, sele1, sele2,
+    analyser = MemoryUtils::make_unique<TetrahedralityParamXYZ>(info, dumpFileName, sele1, sele2,
                                           args_info.rcut_arg,
                                           args_info.voxelSize_arg,
                                           args_info.gaussWidth_arg);
   } else if (args_info.ior_given){
     if (args_info.rcut_given) {
-      analyser = new IcosahedralOfR(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<IcosahedralOfR>(info, dumpFileName, sele1,
                                     args_info.rcut_arg,
                                     nrbins, maxLen);
     } else {
@@ -483,7 +485,7 @@ RealType vRadius;
     }
   } else if (args_info.for_given){
     if (args_info.rcut_given) {
-      analyser = new FCCOfR(info, dumpFileName, sele1, args_info.rcut_arg,
+      analyser = MemoryUtils::make_unique<FCCOfR>(info, dumpFileName, sele1, args_info.rcut_arg,
 			    nrbins, maxLen);
     } else {
       sprintf( painCave.errMsg,
@@ -494,7 +496,7 @@ RealType vRadius;
     }
   } else if (args_info.bad_given){
     if (args_info.rcut_given) {
-      analyser = new BondAngleDistribution(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<BondAngleDistribution>(info, dumpFileName, sele1,
                                            args_info.rcut_arg,
 					   args_info.nbins_arg);
     } else {
@@ -506,86 +508,86 @@ RealType vRadius;
     }
   } else if (args_info.scd_given) {
     if (batchMode) {
-      analyser  = new SCDOrderParameter(info, dumpFileName,
+      analyser  = MemoryUtils::make_unique<SCDOrderParameter>(info, dumpFileName,
                                         args_info.molname_arg,
 					args_info.begin_arg, args_info.end_arg);
     } else{
-      analyser  = new SCDOrderParameter(info, dumpFileName,
+      analyser  = MemoryUtils::make_unique<SCDOrderParameter>(info, dumpFileName,
                                         sele1, sele2, sele3);
     }
   } else if (args_info.density_given) {
-    analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen,
+    analyser= MemoryUtils::make_unique<DensityPlot>(info, dumpFileName, sele1, sele2, maxLen,
 			      args_info.nbins_arg);
   } else if (args_info.count_given) {
-    analyser = new ObjectCount(info, dumpFileName, sele1 );
+    analyser = MemoryUtils::make_unique<ObjectCount>(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
-    analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg,
+    analyser = MemoryUtils::make_unique<RhoZ>(info, dumpFileName, sele1, args_info.nbins_arg,
                         privilegedAxis);
   } else if (args_info.eam_density_given) {
-    analyser = new DensityHistogram(info, dumpFileName, sele1,
+    analyser = MemoryUtils::make_unique<DensityHistogram>(info, dumpFileName, sele1,
                                     args_info.nbins_arg);
   } else if (args_info.momentum_distribution_given) {
 
-    analyser = new MomentumHistogram(info, dumpFileName, sele1, args_info.nbins_arg, momentum_type, momentum_comp);
+    analyser = MemoryUtils::make_unique<MomentumHistogram>(info, dumpFileName, sele1, args_info.nbins_arg, momentum_type, momentum_comp);
   } else if (args_info.net_charge_given) {
-      analyser = new ChargeHistogram(info, dumpFileName, sele1, args_info.nbins_arg);
+      analyser = MemoryUtils::make_unique<ChargeHistogram>(info, dumpFileName, sele1, args_info.nbins_arg);
   } else if (args_info.current_density_given) {
-    analyser = new CurrentDensity(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = MemoryUtils::make_unique<CurrentDensity>(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.chargez_given) {
-    analyser = new ChargeZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = MemoryUtils::make_unique<ChargeZ>(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.charge_density_z_given) {
-    analyser = new ChargeDensityZ(info, dumpFileName, sele1, args_info.nbins_arg, vRadius,args_info.atom_name_arg, args_info.gen_xyz_flag, privilegedAxis);
+    analyser = MemoryUtils::make_unique<ChargeDensityZ>(info, dumpFileName, sele1, args_info.nbins_arg, vRadius,args_info.atom_name_arg, args_info.gen_xyz_flag, privilegedAxis);
   } else if (args_info.countz_given) {
-    analyser = new PositionZ(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = MemoryUtils::make_unique<PositionZ>(info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
 
     switch (privilegedAxis) {
     case 0:
-      analyser = new PipeDensity(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<PipeDensity>(info, dumpFileName, sele1,
                                  args_info.nbins_y_arg, args_info.nbins_z_arg,
                                  privilegedAxis);
       break;
     case 1:
-      analyser = new PipeDensity(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<PipeDensity>(info, dumpFileName, sele1,
                                  args_info.nbins_z_arg, args_info.nbins_x_arg,
                                  privilegedAxis);
       break;
     case 2:
     default:
-      analyser = new PipeDensity(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<PipeDensity>(info, dumpFileName, sele1,
                                  args_info.nbins_x_arg, args_info.nbins_y_arg,
                                  privilegedAxis);
       break;
     }
   } else if (args_info.rnemdz_given) {
-    analyser = new RNEMDZ(info, dumpFileName, sele1, args_info.nbins_arg,
+    analyser = MemoryUtils::make_unique<RNEMDZ>(info, dumpFileName, sele1, args_info.nbins_arg,
                           privilegedAxis);
   } else if (args_info.rnemdr_given) {
-    analyser = new RNEMDR(info, dumpFileName, sele1, nrbins);
+    analyser = MemoryUtils::make_unique<RNEMDR>(info, dumpFileName, sele1, nrbins);
   } else if (args_info.rnemdrt_given) {
-    analyser = new RNEMDRTheta(info, dumpFileName, sele1, nrbins, nanglebins);
+    analyser = MemoryUtils::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, nrbins, nanglebins);
   } else if (args_info.nitrile_given) {
-    analyser = new NitrileFrequencyMap(info, dumpFileName, sele1,
+    analyser = MemoryUtils::make_unique<NitrileFrequencyMap>(info, dumpFileName, sele1,
                                        args_info.nbins_arg);
   } else if (args_info.p_angle_given) {
     if (args_info.sele1_given) {
       if (args_info.sele2_given)
-        analyser  = new pAngle(info, dumpFileName, sele1, sele2,
+        analyser  = MemoryUtils::make_unique<pAngle>(info, dumpFileName, sele1, sele2,
                                args_info.nbins_arg);
       else
         if (args_info.seleoffset_given) {
           if (args_info.seleoffset2_given) {
-            analyser  = new pAngle(info, dumpFileName, sele1,
+            analyser  = MemoryUtils::make_unique<pAngle>(info, dumpFileName, sele1,
                                    args_info.seleoffset_arg,
                                    args_info.seleoffset2_arg,
                                    args_info.nbins_arg);
           } else {
-            analyser  = new pAngle(info, dumpFileName, sele1,
+            analyser  = MemoryUtils::make_unique<pAngle>(info, dumpFileName, sele1,
                                    args_info.seleoffset_arg,
                                    args_info.nbins_arg);
           }
         } else
-          analyser  = new pAngle(info, dumpFileName, sele1,
+          analyser  = MemoryUtils::make_unique<pAngle>(info, dumpFileName, sele1,
                                  args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
@@ -597,21 +599,21 @@ RealType vRadius;
     }
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
-    analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg,
+    analyser = MemoryUtils::make_unique<Hxy>(info, dumpFileName, sele1, args_info.nbins_x_arg,
 		       args_info.nbins_y_arg, args_info.nbins_z_arg,
                        args_info.nbins_arg);
 #endif
   }else if(args_info.cn_given || args_info.scn_given || args_info.gcn_given){
     if (args_info.rcut_given) {
       if (args_info.cn_given) {
-        analyser = new CoordinationNumber(info, dumpFileName, sele1, sele2,
+        analyser = MemoryUtils::make_unique<CoordinationNumber>(info, dumpFileName, sele1, sele2,
                                           args_info.rcut_arg,
                                           args_info.nbins_arg);
       } else if (args_info.scn_given) {
-        analyser = new SCN(info, dumpFileName, sele1, sele2,
+        analyser = MemoryUtils::make_unique<SCN>(info, dumpFileName, sele1, sele2,
                            args_info.rcut_arg, args_info.nbins_arg);
       } else if (args_info.gcn_given) {
-        analyser = new GCN(info, dumpFileName, sele1, sele2,
+        analyser = MemoryUtils::make_unique<GCN>(info, dumpFileName, sele1, sele2,
                            args_info.rcut_arg, args_info.nbins_arg);
       }
     } else {
@@ -624,10 +626,10 @@ RealType vRadius;
     }
   }
   else if (args_info.surfDiffusion_given){
-    analyser = new SurfaceDiffusion(info, dumpFileName, sele1, maxLen);
+    analyser = MemoryUtils::make_unique<SurfaceDiffusion>(info, dumpFileName, sele1, maxLen);
   }else if (args_info.rho_r_given) {
     if (args_info.radius_given){
-      analyser = new RhoR(info, dumpFileName, sele1, maxLen, nrbins,
+      analyser = MemoryUtils::make_unique<RhoR>(info, dumpFileName, sele1, maxLen, nrbins,
                           args_info.radius_arg);
     }else{
       sprintf( painCave.errMsg,
@@ -637,16 +639,16 @@ RealType vRadius;
       simError();
     }
   } else if (args_info.hullvol_given) {
-    analyser = new NanoVolume(info, dumpFileName, sele1);
+    analyser = MemoryUtils::make_unique<NanoVolume>(info, dumpFileName, sele1);
   } else if (args_info.rodlength_given) {
-    analyser = new NanoLength(info, dumpFileName, sele1);
+    analyser = MemoryUtils::make_unique<NanoLength>(info, dumpFileName, sele1);
   } else if (args_info.angle_r_given) {
-    analyser = new AngleR(info, dumpFileName, sele1, maxLen, nrbins);
+    analyser = MemoryUtils::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
   } else if (args_info.hbond_given){
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
 
-        analyser = new HBondGeometric(info, dumpFileName, sele1, sele2,
+        analyser = MemoryUtils::make_unique<HBondGeometric>(info, dumpFileName, sele1, sele2,
                                       args_info.rcut_arg,
                                       args_info.thetacut_arg,
                                       args_info.nbins_arg);
@@ -665,40 +667,40 @@ RealType vRadius;
       simError();
     }
   } else if (args_info.potDiff_given) {
-    analyser = new PotDiff(info, dumpFileName, sele1);
+    analyser = MemoryUtils::make_unique<PotDiff>(info, dumpFileName, sele1);
   } else if (args_info.kirkwood_given) {
-    analyser= new Kirkwood(info, dumpFileName, sele1, sele2, maxLen,
+    analyser= MemoryUtils::make_unique<Kirkwood>(info, dumpFileName, sele1, sele2, maxLen,
                            nrbins);
   } else if (args_info.kirkwoodQ_given) {
-    analyser= new KirkwoodQuadrupoles(info, dumpFileName, sele1, sele2, maxLen,
+    analyser= MemoryUtils::make_unique<KirkwoodQuadrupoles>(info, dumpFileName, sele1, sele2, maxLen,
                                       nrbins);
   } else if (args_info.densityfield_given) {
-    analyser = new DensityField(info, dumpFileName, sele1,
+    analyser = MemoryUtils::make_unique<DensityField>(info, dumpFileName, sele1,
                                 args_info.voxelSize_arg);
   } else if (args_info.velocityfield_given) {
-    analyser = new VelocityField(info, dumpFileName, sele1,
+    analyser = MemoryUtils::make_unique<VelocityField>(info, dumpFileName, sele1,
                                  args_info.voxelSize_arg);
   } else if (args_info.velocityZ_given) {
 
     switch (privilegedAxis) {
     case 0:
       if (privilegedAxis2 == 1) {
-	analyser = new VelocityZ(info, dumpFileName, sele1,
+	analyser = MemoryUtils::make_unique<VelocityZ>(info, dumpFileName, sele1,
                                  args_info.nbins_x_arg, args_info.nbins_y_arg,
                                  privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 2) {
-	analyser = new VelocityZ(info, dumpFileName, sele1,
+	analyser = MemoryUtils::make_unique<VelocityZ>(info, dumpFileName, sele1,
                                  args_info.nbins_x_arg, args_info.nbins_z_arg,
                                  privilegedAxis, privilegedAxis2);
       }
       break;
     case 1:
       if (privilegedAxis2 == 0) {
-	analyser = new VelocityZ(info, dumpFileName, sele1,
+	analyser = MemoryUtils::make_unique<VelocityZ>(info, dumpFileName, sele1,
                                  args_info.nbins_y_arg, args_info.nbins_x_arg,
                                  privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 2) {
-	analyser = new VelocityZ(info, dumpFileName, sele1,
+	analyser = MemoryUtils::make_unique<VelocityZ>(info, dumpFileName, sele1,
                                  args_info.nbins_y_arg, args_info.nbins_z_arg,
                                  privilegedAxis, privilegedAxis2);
       }
@@ -706,11 +708,11 @@ RealType vRadius;
     case 2:
     default:
       if (privilegedAxis2 == 0) {
-	analyser = new VelocityZ(info, dumpFileName, sele1,
+	analyser = MemoryUtils::make_unique<VelocityZ>(info, dumpFileName, sele1,
                                  args_info.nbins_z_arg, args_info.nbins_x_arg,
                                  privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 1) {
-	analyser = new VelocityZ(info, dumpFileName, sele1,
+	analyser = MemoryUtils::make_unique<VelocityZ>(info, dumpFileName, sele1,
                                  args_info.nbins_z_arg, args_info.nbins_y_arg,
                                  privilegedAxis, privilegedAxis2);
       }
@@ -719,7 +721,7 @@ RealType vRadius;
   } else if (args_info.dipole_orientation_given){
     if(args_info.dipoleX_given && args_info.dipoleY_given
        && args_info.dipoleZ_given)
-      analyser = new DipoleOrientation(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<DipoleOrientation>(info, dumpFileName, sele1,
                                        args_info.dipoleX_arg,
                                        args_info.dipoleY_arg,
                                        args_info.dipoleZ_arg,
@@ -735,7 +737,7 @@ RealType vRadius;
   } else if (args_info.order_prob_given){
     if(args_info.dipoleX_given && args_info.dipoleY_given
        && args_info.dipoleZ_given)
-      analyser = new OrderParameterProbZ(info, dumpFileName, sele1,
+      analyser = MemoryUtils::make_unique<OrderParameterProbZ>(info, dumpFileName, sele1,
                                        args_info.dipoleX_arg,
                                        args_info.dipoleY_arg,
                                        args_info.dipoleZ_arg,
@@ -760,7 +762,6 @@ RealType vRadius;
 
   analyser->process();
 
-  delete analyser;
   delete info;
 
   return 0;

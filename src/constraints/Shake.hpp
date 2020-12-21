@@ -75,7 +75,7 @@ namespace OpenMD {
     int constraintPairR(ConstraintPair* consPair);
     int constraintPairF(ConstraintPair* consPair);
     
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     int maxConsIteration_;        
     RealType consTolerance_;
     Snapshot* currentSnapshot_;   

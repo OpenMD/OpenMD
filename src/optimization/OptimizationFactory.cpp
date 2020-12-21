@@ -45,18 +45,12 @@
  
 #include "optimization/OptimizationFactory.hpp"
 #include "optimization/OptimizationCreator.hpp"
+#include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
-
-  //initialize instance of OptimizationFactory
-  OptimizationFactory* OptimizationFactory::instance_ = NULL;
-
+  
   OptimizationFactory::~OptimizationFactory() {
-    CreatorMapType::iterator i;
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      delete i->second;
-    }
-    creatorMap_.clear();
+    MemoryUtils::deletePointers(creatorMap_);
   }
 
   bool OptimizationFactory::registerOptimization(OptimizationCreator* creator) {

@@ -118,29 +118,29 @@ namespace OpenMD {
     RealType currReset;
     RealType currRNEMD;
     
-    SimInfo* info_;
-    Globals* simParams;
-    ForceManager* forceMan_;
-    RotationAlgorithm* rotAlgo_;
-    FluctuatingChargePropagator* flucQ_;
-    Rattle* rattle_;
+    SimInfo* info_ {nullptr};
+    Globals* simParams {nullptr};
+    ForceManager* forceMan_ {nullptr};
+    RotationAlgorithm* rotAlgo_ {nullptr};
+    FluctuatingChargePropagator* flucQ_ {nullptr};
+    Rattle* rattle_ {nullptr};
     VelocitizerPtr velocitizer_ {nullptr};
-    RNEMD* rnemd_;
+    RNEMD* rnemd_ {nullptr};
 
-    bool needPotential;
-    bool needVirial;
-    bool needReset;    
-    bool needVelocityScaling;
-    bool useRNEMD;
+    bool needPotential {false};
+    bool needVirial {false};
+    bool needReset {false};    
+    bool needVelocityScaling {false};
+    bool useRNEMD {false};
 
     RealType targetScalingTemp;
     
-    Stats* stats;
-    DumpWriter* dumpWriter;
-    StatWriter* statWriter;
+    Stats* stats {nullptr};
+    DumpWriter* dumpWriter {nullptr};
+    StatWriter* statWriter {nullptr};
     Thermo thermo;
 
-    Snapshot* snap;
+    Snapshot* snap {nullptr};
     
   private:        
     virtual RealType calcConservedQuantity() = 0;

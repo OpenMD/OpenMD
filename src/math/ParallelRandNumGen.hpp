@@ -59,7 +59,7 @@ namespace OpenMD {
    * @note use SeqRandNumGen if you want a non-parallel random number
    * generator.
    */
-  class ParallelRandNumGen : public RandNumGen{
+  class ParallelRandNumGen : public RandNumGen {
   public:
     typedef unsigned long uint32; 
     
@@ -80,6 +80,6 @@ namespace OpenMD {
                                 generators created */
     int myRank_;
   };
-  
 }
+
 #endif 

@@ -94,7 +94,7 @@ namespace OpenMD {
     RealType dt2_;
     RealType dt_;
     
-    Snapshot* snap;
+    Snapshot* snap {nullptr};
   };
 
 }

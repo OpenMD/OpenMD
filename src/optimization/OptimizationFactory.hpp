@@ -75,13 +75,10 @@ namespace OpenMD {
      * Returns an instance of Optimization factory
      * @return an instance of Optimization factory
      */        
-    static OptimizationFactory* getInstance() {
+    static OptimizationFactory& getInstance() {
 
-      if (instance_ == NULL) {
-	instance_ = new OptimizationFactory();
-      }
-      return instance_;
-            
+      static OptimizationFactory instance {};
+      return instance;
     }
 
     /**
@@ -116,9 +113,8 @@ namespace OpenMD {
     IdentVectorType getIdents();
         
   private:
-    OptimizationFactory() {}
-        
-    static OptimizationFactory* instance_;
+    OptimizationFactory() = default;
+
     CreatorMapType creatorMap_;
   };
 

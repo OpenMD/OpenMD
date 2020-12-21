@@ -71,7 +71,7 @@ namespace OpenMD {
   private:
     void writeZPos();
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::ofstream output_;
 
   };

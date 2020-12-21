@@ -95,25 +95,25 @@ namespace OpenMD {
     RealType getSuggestedCutoffRadius(AtomType *atype);
     
   private:
-    bool initialized_;
+    bool initialized_ {false};
 
     void setupElectrostatics();
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
 
     // std::shared_ptr<FluctuatingChargeForces> flucq_;
 
-    std::shared_ptr<LJ> lj_;
-    std::shared_ptr<GB> gb_;
-    std::shared_ptr<Sticky> sticky_;
-    std::shared_ptr<EAM> eam_;
-    std::shared_ptr<SC> sc_;
-    std::shared_ptr<Morse> morse_;
-    std::shared_ptr<Electrostatic> electrostatic_;
-    std::shared_ptr<RepulsivePower> repulsivePower_;
-    std::shared_ptr<Mie> mie_;
-    std::shared_ptr<MAW> maw_;
-    std::shared_ptr<InversePowerSeries> inversePowerSeries_;
+    std::shared_ptr<LJ> lj_ {nullptr};
+    std::shared_ptr<GB> gb_ {nullptr};
+    std::shared_ptr<Sticky> sticky_ {nullptr};
+    std::shared_ptr<EAM> eam_ {nullptr};
+    std::shared_ptr<SC> sc_ {nullptr};
+    std::shared_ptr<Morse> morse_ {nullptr};
+    std::shared_ptr<Electrostatic> electrostatic_ {nullptr};
+    std::shared_ptr<RepulsivePower> repulsivePower_ {nullptr};
+    std::shared_ptr<Mie> mie_ {nullptr};
+    std::shared_ptr<MAW> maw_ {nullptr};
+    std::shared_ptr<InversePowerSeries> inversePowerSeries_ {nullptr};
     
     map<int, AtomType*> typeMap_;
     /**

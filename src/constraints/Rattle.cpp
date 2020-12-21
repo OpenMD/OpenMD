@@ -95,6 +95,10 @@ namespace OpenMD {
     }
   }
 
+  Rattle::~Rattle() {
+    delete constraintWriter_;
+  }
+
   void Rattle::constraintA() {
     if (!doRattle_) return;
     doConstraint(&Rattle::constraintPairA);

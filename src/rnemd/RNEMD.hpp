@@ -76,6 +76,7 @@ namespace OpenMD {
     void doVSSCurrent(SelectionManager& smanA, SelectionManager& smanB);
     void doVSSSingle(SelectionManager& smanA);
     int getBin(Vector3d pos);
+    std::string setSelection(RealType& slabCenter);
     RealType getDividingArea();
     void collectData();
     void getStarted();
@@ -150,11 +151,11 @@ namespace OpenMD {
       std::vector< std::vector<BaseAccumulator*> > accumulatorArray2d;
     };
 
-    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
-    typedef std::map<std::string, OutputFields> OutputMapType;
+    using OutputBitSet  = std::bitset<ENDINDEX-BEGININDEX>;
+    using OutputMapType = std::map<std::string, OutputFields>;
 
-    SimInfo* info_;
-    Snapshot* currentSnap_;
+    SimInfo* info_ {nullptr};
+    Snapshot* currentSnap_ {nullptr};
     Mat3x3d hmat_;
 
     std::map<std::string, RNEMDMethod> stringToMethod_;
@@ -178,18 +179,18 @@ namespace OpenMD {
     SelectionManager seleManB_;
     SelectionManager commonA_;
     SelectionManager commonB_;
-    bool hasSelectionA_;
-    bool hasSelectionB_;
-    bool hasSphereBRadius_;
+    bool hasSelectionA_ {false};
+    bool hasSelectionB_ {false};
+    bool hasSphereBRadius_ {false};
 
     // output selection for collecting data about a particular species:
     std::string outputSelection_;
     SelectionEvaluator outputEvaluator_;
     SelectionManager outputSeleMan_;
-    bool hasOutputSelection_;
+    bool hasOutputSelection_ {false};
 
-    bool usePeriodicBoundaryConditions_;
-    bool hasDividingArea_;
+    bool usePeriodicBoundaryConditions_ {false};
+    bool hasDividingArea_ {false};
     RealType dividingArea_;
     RealType volumeA_;
     RealType volumeB_;
@@ -202,9 +203,9 @@ namespace OpenMD {
     RealType sphereARadius_;
     RealType sphereBRadius_;
     RealType areaA_;
-    bool AisHull_;
+    bool AisHull_ {false};
     RealType areaB_;
-    bool BisHull_;
+    bool BisHull_ {false};
     std::string rnemdAxisLabel_;
 
     Vector3d coordinateOrigin_;
@@ -220,6 +221,8 @@ namespace OpenMD {
 
     RealType kineticExchange_;    				// actual exchange energy (running total)
     Vector3d momentumExchange_;   				// actual exchange momentum (running total)
+    Vector3d particleFlux_h_;
+    Vector3d particleFlux_c_;
     Vector3d angularMomentumExchange_; 		// actual exchange momentum (running total)
 
     RealType exchangeTime_;
@@ -229,7 +232,7 @@ namespace OpenMD {
     unsigned int failRootCount_;
 
     std::string rnemdFileName_;
-    std::ofstream rnemdFile_;
+    std::ofstream rnemdFile_ {};
 
     RealType runTime_, statusTime_;
 
@@ -242,8 +245,8 @@ namespace OpenMD {
     RealAccumulator Jc_totalAccumulator_ {};
     RealAccumulator Jc_cationAccumulator_ {};
     RealAccumulator Jc_anionAccumulator_ {};
-    bool doRNEMD_;
-    bool hasData_;
+    bool doRNEMD_ {false};
+    bool hasData_ {false};
   };
 }
 #endif // INTEGRATORS_RNEMD_HPP

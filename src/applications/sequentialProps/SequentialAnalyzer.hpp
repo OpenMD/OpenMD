@@ -103,7 +103,7 @@ namespace OpenMD {
     virtual void writeSequence();
     virtual void doFrame(int frame) = 0;
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Snapshot* currentSnapshot_;
     std::string dumpFilename_;
 

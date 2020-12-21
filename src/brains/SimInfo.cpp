@@ -164,11 +164,7 @@ namespace OpenMD {
   }
   
   SimInfo::~SimInfo() {
-    map<int, Molecule*>::iterator i;
-    for (i = molecules_.begin(); i != molecules_.end(); ++i) {
-      delete i->second;
-    }
-    molecules_.clear();
+    MemoryUtils::deletePointers(molecules_);
     
     delete sman_;
     delete simParams_;

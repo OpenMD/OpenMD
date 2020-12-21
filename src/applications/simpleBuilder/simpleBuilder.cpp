@@ -104,7 +104,7 @@ int main(int argc, char *argv []) {
     latticeType = args_info.lattice_arg;
   }
 
-  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
+  simpleLat = LatticeFactory::getInstance().createLattice(latticeType);
 
   if (simpleLat == NULL) {
     sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",

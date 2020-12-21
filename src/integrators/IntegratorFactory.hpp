@@ -80,13 +80,11 @@ namespace OpenMD {
      * Returns an instance of Integrator factory
      * @return an instance of Integrator factory
      */        
-    static IntegratorFactory* getInstance() {
 
-      if (instance_ == NULL) {
-	instance_ = new IntegratorFactory();
-      }
-      return instance_;
-            
+    static IntegratorFactory& getInstance() {
+
+      static IntegratorFactory instance {};
+      return instance;
     }
 
     /**
@@ -121,8 +119,8 @@ namespace OpenMD {
     IdentVectorType getIdents();
         
   private:
-    IntegratorFactory() {}
-    static IntegratorFactory* instance_;
+    IntegratorFactory() = default;
+
     CreatorMapType creatorMap_;
   };
 

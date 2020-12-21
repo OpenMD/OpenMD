@@ -84,6 +84,25 @@ namespace OpenMD {
     cellOffsets_.push_back( Vector3i( 1, 1, 1) );
   }
 
+  ForceMatrixDecomposition::~ForceMatrixDecomposition() {
+  
+#ifdef IS_MPI
+    delete AtomPlanIntRow;
+    delete AtomPlanRealRow;
+    delete AtomPlanVectorRow;
+    delete AtomPlanMatrixRow;
+    delete AtomPlanPotRow;
+    delete AtomPlanIntColumn;
+    delete AtomPlanRealColumn;
+    delete AtomPlanVectorColumn;
+    delete AtomPlanMatrixColumn;
+    delete AtomPlanPotColumn;
+    delete cgPlanIntRow;
+    delete cgPlanVectorRow;
+    delete cgPlanIntColumn;
+    delete cgPlanVectorColumn;
+#endif
+  }
 
   /**
    * distributeInitialData is essentially a copy of the older fortran 

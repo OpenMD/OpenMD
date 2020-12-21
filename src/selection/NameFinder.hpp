@@ -89,7 +89,7 @@ namespace OpenMD {
 
     bool isInteger(const std::string &str);
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     vector<int> nObjects_;
     TreeNodePtr root_ {nullptr};
   };

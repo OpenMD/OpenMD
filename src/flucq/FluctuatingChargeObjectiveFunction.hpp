@@ -71,7 +71,7 @@ namespace OpenMD {
     // coordinates 
     void getGrad(DynamicVector<RealType> &grad);
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     ForceManager* forceMan_;
     FluctuatingChargeConstraints* fqConstraints_;
     Thermo thermo;

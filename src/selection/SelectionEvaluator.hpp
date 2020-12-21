@@ -235,13 +235,13 @@ namespace OpenMD {
     std::vector<std::vector<Token> > aatoken;
     unsigned int pc; // program counter
 
-    bool error;
+    bool error {false};
     std::string errorMessage;
 
     std::vector<Token> statement;
     int statementLength;
 
-    SimInfo* info;
+    SimInfo* info {nullptr};
     NameFinder nameFinder;
     DistanceFinder distanceFinder;
     HullFinder hullFinder;
@@ -252,14 +252,13 @@ namespace OpenMD {
     typedef std::map<std::string, boost::any > VariablesType;
     VariablesType variables;
 
-    bool isDynamic_;
-    bool isLoaded_;
-    bool hasSurfaceArea_;
+    bool isDynamic_ {false};
+    bool isLoaded_ {false};
+    bool hasSurfaceArea_ {false};
     RealType surfaceArea_;
-    bool hasVolume_;
-    RealType volume_;
-        
+    bool hasVolume_ {false};
+    RealType volume_;        
   };
-
 }
+
 #endif

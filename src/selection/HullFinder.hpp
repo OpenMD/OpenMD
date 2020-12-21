@@ -63,7 +63,7 @@ namespace OpenMD {
     RealType getSurfaceArea() { return surfaceArea_; }
     RealType getVolume() { return volume_; }
     
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::vector<StuntDouble*> stuntdoubles_;
     std::vector<Bond*> bonds_;
     std::vector<Bend*> bends_;

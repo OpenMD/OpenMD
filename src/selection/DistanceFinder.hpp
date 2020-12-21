@@ -61,7 +61,7 @@ namespace OpenMD {
     SelectionSet find(const SelectionSet& bs, RealType distance);
     SelectionSet find(const SelectionSet& bs, RealType distance, int frame);
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::vector<StuntDouble*> stuntdoubles_;
     std::vector<Bond*> bonds_;
     std::vector<Bend*> bends_;

@@ -90,7 +90,7 @@ namespace OpenMD {
     int readStuntDoubles(std::istream& inputStream);
     void readSiteData(std::istream& inputStream);
          
-    SimInfo* info_; 
+    SimInfo* info_ {nullptr}; 
  
     std::string filename_; 
     bool isScanned_; 

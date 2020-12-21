@@ -74,7 +74,7 @@ namespace OpenMD {
   private:
     
     std::ifstream istream_;    
-    SimInfo* info_;    
+    SimInfo* info_ {nullptr};    
     std::vector<int> allZmols_;
     RealType curTime_;    
     std::vector<ZconsData> fixedZmolData_;

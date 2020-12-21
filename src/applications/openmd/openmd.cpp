@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
 
   if (miniPars->getUseMinimizer()) {
     //create minimizer
-    OptimizationMethod* myMinimizer =OptimizationFactory::getInstance()->createOptimization(toUpperCopy(miniPars->getMethod()), info);
+    OptimizationMethod* myMinimizer =OptimizationFactory::getInstance().createOptimization(toUpperCopy(miniPars->getMethod()), info);
 
     if (myMinimizer == NULL) {
       sprintf(painCave.errMsg,
@@ -162,9 +162,10 @@ int main(int argc, char* argv[]){
     fman->initialize();
 
     PotentialEnergyObjectiveFunction potObjf(info, fman); 
+    NoConstraint noConstraint {};
     DumpStatusFunction dsf(info);
     DynamicVector<RealType> initCoords = potObjf.setInitialCoords();
-    Problem problem(potObjf, *(new NoConstraint()), dsf, initCoords);
+    Problem problem(potObjf, noConstraint, dsf, initCoords);
 
 
     int maxIter = miniPars->getMaxIterations();
@@ -181,7 +182,7 @@ int main(int argc, char* argv[]){
   } else if (simParams->haveEnsemble()) {
     //create Integrator
 
-    Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(toUpperCopy(simParams->getEnsemble()), info);
+    Integrator* myIntegrator = IntegratorFactory::getInstance().createIntegrator(toUpperCopy(simParams->getEnsemble()), info);
  
     if (myIntegrator == NULL) {
       sprintf(painCave.errMsg,

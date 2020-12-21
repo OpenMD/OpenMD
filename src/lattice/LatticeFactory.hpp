@@ -79,13 +79,10 @@ namespace OpenMD {
      * Returns an instance of Lattice factory
      * @return an instance of Lattice factory
      */        
-    static LatticeFactory* getInstance() {
+    static LatticeFactory& getInstance() {
 
-      if (instance_ == NULL) {
-	instance_ = new LatticeFactory();
-      }
-      return instance_;
-            
+	    static LatticeFactory instance {};
+      return instance;
     }
 
     /**
@@ -119,9 +116,8 @@ namespace OpenMD {
     IdentVectorType getIdents();
         
   private:
-    LatticeFactory() {}
+    LatticeFactory() = default;
         
-    static LatticeFactory* instance_;
     CreatorMapType creatorMap_;
   };
 

@@ -68,7 +68,7 @@ namespace OpenMD {
     
   protected:
     BaseAtomVisitor(SimInfo* info);
-    SimInfo* info;
+    SimInfo* info {nullptr};
     int storageLayout_;
   };
 

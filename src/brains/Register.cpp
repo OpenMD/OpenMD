@@ -80,36 +80,36 @@ using namespace QuantLib;
 namespace OpenMD {
 
   void registerIntegrators() {
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTI"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPA>("NPA"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPGT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NgammaT>("NGT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NgammaT>("NGAMMAT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LD"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPTi>("NPTI"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPA>("NPA"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPrT>("NPGT"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NgammaT>("NGT"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NgammaT>("NGAMMAT"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LD"));
 #if defined(HAVE_QHULL)
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
 #endif
   }
 
   void registerOptimizers() {
-    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::SteepestDescent>("SD"));
-    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::ConjugateGradient>("CG"));
-    OptimizationFactory::getInstance()->registerOptimization(new OptimizationBuilder<QuantLib::BFGS>("BFGS"));
+    OptimizationFactory::getInstance().registerOptimization(new OptimizationBuilder<QuantLib::SteepestDescent>("SD"));
+    OptimizationFactory::getInstance().registerOptimization(new OptimizationBuilder<QuantLib::ConjugateGradient>("CG"));
+    OptimizationFactory::getInstance().registerOptimization(new OptimizationBuilder<QuantLib::BFGS>("BFGS"));
   }
 
   void registerLattice(){
-    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
-    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<SCLattice>("SC"));
-    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<BCCLattice>("BCC"));
+    LatticeFactory::getInstance().registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
+    LatticeFactory::getInstance().registerLattice(new LatticeBuilder<SCLattice>("SC"));
+    LatticeFactory::getInstance().registerLattice(new LatticeBuilder<BCCLattice>("BCC"));
   }
 
   void registerAll() {

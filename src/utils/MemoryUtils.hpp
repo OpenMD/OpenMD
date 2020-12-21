@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file MemoryUtils.hpp
  * @author    tlin
  * @date  10/25/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef UTILS_MEMORYUTILS_HPP
 #define UTILS_MEMORYUTILS_HPP
@@ -59,27 +59,69 @@
 
 namespace OpenMD {
 
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  namespace Memory {
-    template<typename T, typename... TArgs, 
+  namespace MemoryUtils {
+
+    // Remove in favor of std::make_unique<> when we switch to C++14
+    template<typename T, typename... TArgs,
              typename = typename std::enable_if<!std::is_array<T>::value>::type>
     std::unique_ptr<T> make_unique(TArgs&&... args) {
       return std::unique_ptr<T> {new T(std::forward<TArgs>(args)...)};
     }
-  }
 
-  class MemoryUtils{
-  public:
-    template<typename ContainterType>
-    static void deletePointers(ContainterType& container) {
+    namespace details {
 
-      for (auto i : container) {
-	delete i;
-      } 
-      
-      container.clear();
+      // Remove in favor of std::void_t<> when we switch to C++17
+      template<typename...>
+      using void_t = void;
+
+      template<typename, typename = void_t<>>
+      struct is_container : std::integral_constant<bool, false> {};
+
+      template<typename T>
+      struct is_container<T, void_t<typename T::value_type,
+                                    typename T::reference,
+                                    typename T::const_reference,
+                                    typename T::iterator,
+                                    typename T::const_iterator,
+                                    typename T::difference_type,
+                                    typename T::size_type,
+                                    decltype(std::declval<T>().begin()),
+                                    decltype(std::declval<T>().end()),
+                                    decltype(std::declval<T>().cbegin()),
+                                    decltype(std::declval<T>().cend()),
+                                    decltype(std::declval<T>().max_size()),
+                                    decltype(std::declval<T>().empty())>> : std::integral_constant<bool, true> {};
+
+      template<typename T>
+      void lifted_deleter(T val) {
+        delete val;
+      }
+
+      template<typename T1, typename T2>
+      void lifted_deleter(std::pair<T1, T2>& val) {
+        lifted_deleter(val.second);
+      }
     }
-  };
+
+    // Base case - Combine using constexpr-if when we switch to C++17
+    template<typename Container,
+             typename = typename std::enable_if<!details::is_container<typename Container::value_type>::value>::type>
+    void deletePointers(Container& container) {
+
+      for (auto& elem : container)
+        details::lifted_deleter(elem);
+    }
+
+    // Recursively deallocate the previously allocated memory from each container
+    template<typename Container,
+             typename = typename std::enable_if<details::is_container<typename Container::value_type>::value>::type,
+             typename = int /* Dummy parameter to allow multiple default template parameters in overloads */>
+    void deletePointers(Container& containerOfContainers) {
+
+      for (auto& container : containerOfContainers)
+        deletePointers(container);
+    }
+  }
 }
 
 #endif // UTILS_MEMORYUTILS_HPP

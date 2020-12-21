@@ -88,7 +88,7 @@ namespace OpenMD {
     RealType zconsTime_;
     std::string zconsFilename_;
     ZConsReader* zconsReader_;
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Snapshot* currSnapshot_;
     std::map<int, int> zatomToZmol_;
   };

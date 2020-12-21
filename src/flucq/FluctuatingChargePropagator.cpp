@@ -126,7 +126,7 @@ namespace OpenMD {
       EndCriteria endCriteria(maxIter, maxIter, tolerance, tolerance,
                               tolerance);
       std:: string chargeOptMethod = fqParams_->getChargeOptimizationMethod();      
-      OptimizationMethod* minim = OptimizationFactory::getInstance()->createOptimization(chargeOptMethod, info_);
+      OptimizationMethod* minim = OptimizationFactory::getInstance().createOptimization(chargeOptMethod, info_);
       
       minim->minimize(problem, endCriteria, initialStepSize);
 

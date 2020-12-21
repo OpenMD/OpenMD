@@ -161,7 +161,7 @@ namespace OpenMD {
     virtual void setHeatFlux(Vector3d hf);
     
   protected:
-    SimInfo* info_;   
+    SimInfo* info_ {nullptr};   
     SnapshotManager* sman_;    
     Snapshot* snap_;
     ForceField* ff_;

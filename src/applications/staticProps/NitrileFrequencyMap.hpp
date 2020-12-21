@@ -69,7 +69,7 @@ namespace OpenMD {
     void processHistogram();
     void writeProbs();
         
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Snapshot* currentSnapshot_;
 
     string selectionScript1_;

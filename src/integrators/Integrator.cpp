@@ -139,8 +139,8 @@ namespace OpenMD {
     
     // Create a default a velocitizer: If the subclass wants to use 
     // a different velocitizer, use setVelocitizer
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    velocitizer_ = Memory::make_unique<Velocitizer>(info);
+    // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
+    velocitizer_ = MemoryUtils::make_unique<Velocitizer>(info);
     
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
@@ -287,8 +287,8 @@ namespace OpenMD {
     statWriter = createStatWriter(); 
     dumpWriter->writeDumpAndEor();
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    progressBar = Memory::make_unique<ProgressBar>();
+    // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
+    progressBar = MemoryUtils::make_unique<ProgressBar>();
 
     //save statistics, before writeStat,  we must save statistics
     saveConservedQuantity();

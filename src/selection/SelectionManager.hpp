@@ -508,7 +508,7 @@ namespace OpenMD {
     friend SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2);
         
   private:
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     SelectionSet ss_;
     std::vector<int> nObjects_;
     std::vector<StuntDouble*> stuntdoubles_;

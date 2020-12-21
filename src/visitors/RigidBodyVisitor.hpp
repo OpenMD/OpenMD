@@ -62,7 +62,7 @@ namespace OpenMD {
   protected:
     BaseRigidBodyVisitor(SimInfo* info) : BaseVisitor(){ this->info = info;}
 
-    SimInfo* info;
+    SimInfo* info {nullptr};
   };
 
 
@@ -100,4 +100,5 @@ namespace OpenMD {
   };
 
 }//namespace OpenMD
+
 #endif

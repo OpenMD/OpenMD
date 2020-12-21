@@ -61,7 +61,6 @@ namespace OpenMD {
 
   class SimInfo;
 
-
   class WrappingVisitor : public BaseVisitor{
   public:
     using BaseVisitor::visit; 
@@ -79,11 +78,10 @@ namespace OpenMD {
     
   private:
     void internalVisit(StuntDouble* sd);
-    SimInfo* info;    
+    SimInfo* info {nullptr};    
     Vector3d origin_;
-    bool useCom_;
+    bool useCom_ {false};
   };
-
 
   class ReplicateVisitor : public BaseVisitor{
   public:
@@ -102,7 +100,7 @@ namespace OpenMD {
     
   private:
     std::vector<Vector3d> dir;
-    SimInfo* info;
+    SimInfo* info {nullptr};
     Vector3i replicateOpt;
   };
 
@@ -139,19 +137,18 @@ namespace OpenMD {
   private:  
     std::string trimmedName(const std::string& atomType);
 
-    SimInfo* info;
+    SimInfo* info {nullptr};
     SelectionManager seleMan;
     SelectionEvaluator evaluator; 
     std::vector<std::string> frame;
-    bool doPositions_;
-    bool doVelocities_;
-    bool doForces_;
-    bool doVectors_;
-    bool doCharges_;
-    bool doElectricFields_;
-    bool doGlobalIDs_;
+    bool doPositions_ {false};
+    bool doVelocities_ {false};
+    bool doForces_ {false};
+    bool doVectors_ {false};
+    bool doCharges_ {false};
+    bool doElectricFields_ {false};
+    bool doGlobalIDs_ {false};
   };
-
 
   class PrepareVisitor : public BaseVisitor{
   public:
@@ -184,7 +181,6 @@ namespace OpenMD {
     
     std::set<std::string> waterTypeList;
   };
+} // namespace OpenMD
 
-
-}//namespace OpenMD
-#endif //_OTHERVISITOR_H_
+#endif // _OTHERVISITOR_H_

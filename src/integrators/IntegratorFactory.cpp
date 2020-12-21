@@ -45,18 +45,12 @@
  
 #include "integrators/IntegratorFactory.hpp"
 #include "integrators/IntegratorCreator.hpp"
+#include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
 
-  //initialize instance of IntegratorFactory
-  IntegratorFactory* IntegratorFactory::instance_ = NULL;
-
   IntegratorFactory::~IntegratorFactory() {
-    CreatorMapType::iterator i;
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      delete i->second;
-    }
-    creatorMap_.clear();
+    MemoryUtils::deletePointers(creatorMap_);
   }
 
   bool IntegratorFactory::registerIntegrator(IntegratorCreator* creator) {

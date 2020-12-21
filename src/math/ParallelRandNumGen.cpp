@@ -48,6 +48,7 @@
 #endif
 
 #include "math/ParallelRandNumGen.hpp"
+#include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
 
@@ -83,7 +84,7 @@ namespace OpenMD {
     //to the constructor plus the number of random number generators
     //which are already created.
     unsigned long newSeed = oneSeed + nCreatedRNG_;
-    mtRand_ = new MTRand(newSeed, nProcessors, myRank_);
+    mtRand_ = MemoryUtils::make_unique<MTRand>(newSeed, nProcessors, myRank_);
     
     ++nCreatedRNG_;
   }
@@ -98,7 +99,7 @@ namespace OpenMD {
     nProcessors = 1;
     myRank_ = 0;
 #endif
-    mtRand_ = new MTRand(nProcessors, myRank_);
+    mtRand_ = MemoryUtils::make_unique<MTRand>(nProcessors, myRank_);
 
     seed();       /** @todo calling virtual function in constructor is
                       not a good design */

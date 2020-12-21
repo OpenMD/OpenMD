@@ -136,7 +136,7 @@ namespace OpenMD {
     bool doUniformGradient;
     bool doParticlePot;
     Globals* simParams;
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     Mat3x3d Grad_;
     Vector3d a_, b_;
     RealType g_, cpsi_;    

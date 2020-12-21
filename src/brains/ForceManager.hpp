@@ -89,16 +89,16 @@ namespace OpenMD {
     void initialize();
 
   protected: 
-    bool initialized_; 
-    bool doParticlePot_;
-    bool doElectricField_;
-    bool doSitePotential_;
-    bool doHeatFlux_;
-    bool doLongRangeCorrections_;
-    bool usePeriodicBoundaryConditions_;
-    bool useSurfaceTerm_;
-    bool useSlabGeometry_;
-    int axis_;
+    bool initialized_ {false}; 
+    bool doParticlePot_ {false};
+    bool doElectricField_ {false};
+    bool doSitePotential_ {false};
+    bool doHeatFlux_ {false};
+    bool doLongRangeCorrections_ {false};
+    bool usePeriodicBoundaryConditions_ {false};
+    bool useSurfaceTerm_ {false};
+    bool useSlabGeometry_ {false};
+    int axis_ {false};
 
     virtual void setupCutoffs();
     virtual void preCalculation();        
@@ -111,12 +111,12 @@ namespace OpenMD {
     virtual void selectedLongRangeInteractions(Molecule* mol1, Molecule* mol2);
     virtual void selectedPostCalculation(Molecule* mol1, Molecule* mol2);
     
-    SimInfo* info_;        
-    ForceField* forceField_;
-    InteractionManager* interactionMan_;
-    ForceDecomposition* fDecomp_;
-    SwitchingFunction* switcher_;
-    Thermo* thermo;
+    SimInfo* info_ {nullptr};        
+    ForceField* forceField_ {nullptr};
+    InteractionManager* interactionMan_ {nullptr};
+    ForceDecomposition* fDecomp_ {nullptr};
+    SwitchingFunction* switcher_ {nullptr};
+    Thermo* thermo {nullptr};
 
     SwitchingFunctionType sft_;/**< Type of switching function in use */
     RealType rCut_;            /**< cutoff radius for non-bonded interactions */
@@ -140,7 +140,7 @@ namespace OpenMD {
 
     vector<Perturbation*> perturbations_;
 
-    bool doPotentialSelection_;
+    bool doPotentialSelection_ {false};
     string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;

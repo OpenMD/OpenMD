@@ -91,7 +91,7 @@ namespace OpenMD {
     std::ostream* createOStream(const std::string& filename);
     void writeClosing(std::ostream& os);
     
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::string filename_;
     std::ostream* dumpFile_;
     std::string eorFilename_;

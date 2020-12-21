@@ -75,7 +75,7 @@ namespace OpenMD {
     void writeConstraintForces(const std::list<ConstraintPair*>& constraints);
           
   private:
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     std::ofstream output_;
   };
 }

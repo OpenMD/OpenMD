@@ -57,7 +57,7 @@ namespace OpenMD {
    * @class SeqRandNumGen 
    * @brief a sequential random number generator
    */
-  class SeqRandNumGen : public RandNumGen{
+  class SeqRandNumGen : public RandNumGen {
   public:
     typedef unsigned long uint32; 
         
@@ -74,11 +74,7 @@ namespace OpenMD {
     SeqRandNumGen& operator =(const SeqRandNumGen&);
          
     static int nCreatedRNG_; /**< number of created random number of generator*/
-
   };
-
 }
 
-
 #endif 
-

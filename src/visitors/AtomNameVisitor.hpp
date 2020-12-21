@@ -69,7 +69,7 @@ namespace OpenMD {
     virtual const std::string toString();    
   private:
     void visitAtom(Atom* atom);
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     ForceField* ff_;
   };
 }

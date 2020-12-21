@@ -71,7 +71,7 @@ namespace OpenMD {
 
   protected:
     void initialize();
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     ForceField* forceField_;
     set<AtomType*> simTypes_;
 

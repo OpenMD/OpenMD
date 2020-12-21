@@ -136,7 +136,7 @@ namespace OpenMD {
     vector<vector<CubicSplinePtr> > Jij;              /**< Coulomb integral for two fq types */
     
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     ForceField* forceField_;
     FluctuatingChargeForces* flucQ_;
     set<AtomType*> simTypes_;

@@ -648,6 +648,8 @@ namespace OpenMD {
     // total exchange sums are zeroed out at the beginning:
     kineticExchange_ = 0.0;
     momentumExchange_ = V3Zero;
+    particleFlux_h_ = V3Zero;
+    particleFlux_c_ = V3Zero;
     angularMomentumExchange_ = V3Zero;
 
     std::ostringstream selectionAstream;
@@ -696,11 +698,7 @@ namespace OpenMD {
           if (hasSlabACenter) slabACenter_ = rnemdParams->getSlabACenter();
           else slabACenter_ = 0.0;
 
-          selectionAstream << "select wrappedz > "
-                           << slabACenter_ - 0.5*slabWidth_
-                           <<  " && wrappedz < "
-                           << -slabACenter_ + 0.5*slabWidth_;
-          selectionA_ = selectionAstream.str();
+          selectionA_ = this->setSelection(slabACenter_);
         } else {
           if (hasSphereARadius)
             sphereARadius_ = rnemdParams->getSphereARadius();
@@ -728,11 +726,8 @@ namespace OpenMD {
           if (hasSlabBCenter) slabBCenter_ = rnemdParams->getSlabBCenter();
           else slabBCenter_ = hmat_(rnemdPrivilegedAxis_,rnemdPrivilegedAxis_) / 2.0;
 
-          selectionBstream << "select wrappedz > "
-                           << slabBCenter_ - 0.5*slabWidth_
-                           <<  " || wrappedz < "
-                           << -slabBCenter_ + 0.5*slabWidth_;
-          selectionB_ = selectionBstream.str();
+          selectionB_ = this->setSelection(slabBCenter_);
+
         } else {
           if (hasSphereBRadius_) {
             sphereBRadius_ = rnemdParams->getSphereBRadius();
@@ -781,6 +776,50 @@ namespace OpenMD {
     }
   }
 
+  std::string RNEMD::setSelection(RealType& slabCenter) {
+
+    bool printSlabCenterWarning {false};
+
+    Vector3d tempSlabCenter {V3Zero};
+    tempSlabCenter[rnemdPrivilegedAxis_] = slabCenter;
+
+    RealType hmat_2 = hmat_(rnemdPrivilegedAxis_, rnemdPrivilegedAxis_) / 2.0;
+
+    if (slabCenter > hmat_2) {
+      currentSnap_->wrapVector(tempSlabCenter);
+      printSlabCenterWarning = true;
+    } else if (slabCenter < -hmat_2) {
+      currentSnap_->wrapVector(tempSlabCenter);
+      printSlabCenterWarning = true;
+    }
+
+    if (printSlabCenterWarning) {          
+      sprintf(painCave.errMsg,
+              "slabAcenter was set to %0.2f. In the wrapped coordinates\n"
+              "\t[-Hmat/2, +Hmat/2], this has been remapped to %0.2f.\n",
+              slabCenter, tempSlabCenter[rnemdPrivilegedAxis_]);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+
+      slabCenter = tempSlabCenter[rnemdPrivilegedAxis_];
+    }
+
+    RealType leftSlabBoundary = slabCenter - 0.5*slabWidth_;
+    RealType rightSlabBoundary = slabCenter + 0.5*slabWidth_;
+
+    std::ostringstream selectionStream;
+
+    selectionStream << "select wrappedz > " << leftSlabBoundary;
+
+    if ( (leftSlabBoundary < -hmat_2) || (rightSlabBoundary > hmat_2) )
+      selectionStream <<  " || wrappedz < " << -leftSlabBoundary;
+    else
+      selectionStream <<  " && wrappedz < " << rightSlabBoundary;
+
+    return selectionStream.str();
+  }
+
   RNEMD::~RNEMD() {
 
     if (!doRNEMD_) return;
@@ -795,7 +834,13 @@ namespace OpenMD {
 #ifdef IS_MPI
     }
 #endif
-    data_.clear();
+
+    for (auto& data : data_) {
+      if ( !data.accumulatorArray2d.empty() )
+        MemoryUtils::deletePointers(data.accumulatorArray2d);
+      else
+        MemoryUtils::deletePointers(data.accumulator);
+    }
   }
 
   void RNEMD::doSwap(SelectionManager& smanA, SelectionManager& smanB) {
@@ -1628,11 +1673,13 @@ namespace OpenMD {
     RealType Mh = 0.0;
     Mat3x3d Ih(0.0);
     RealType Kh = 0.0;
+    std::size_t count_h = 0;
     Vector3d Pc(V3Zero);
     Vector3d Lc(V3Zero);
     RealType Mc = 0.0;
     Mat3x3d Ic(0.0);
     RealType Kc = 0.0;
+    std::size_t count_c = 0;
 
     // Constraints can be on only the linear or angular momentum, but
     // not both.  Usually, the user will specify which they want, but
@@ -1697,6 +1744,7 @@ namespace OpenMD {
       Ih(0, 0) += mass * r2;
       Ih(1, 1) += mass * r2;
       Ih(2, 2) += mass * r2;
+      ++count_h;
 
       if (rnemdFluxType_ == rnemdFullKE) {
         if (sd->isDirectional()) {
@@ -1741,6 +1789,7 @@ namespace OpenMD {
       Ic(0, 0) += mass * r2;
       Ic(1, 1) += mass * r2;
       Ic(2, 2) += mass * r2;
+      ++count_c;
 
       if (rnemdFluxType_ == rnemdFullKE) {
         if (sd->isDirectional()) {
@@ -1781,6 +1830,9 @@ namespace OpenMD {
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, Ic.getArrayPointer(), 9,
                   MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &count_h, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &count_c, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
 #endif
 
 
@@ -1890,6 +1942,8 @@ namespace OpenMD {
 		  successfulExchange = true;
 		  kineticExchange_ += kineticTarget_;
                   momentumExchange_ += momentumTarget_;
+                  particleFlux_h_ += smanA.getSelectionCount() / volumeA_ * momentumTarget_ / Mh;
+                  particleFlux_c_ += smanB.getSelectionCount() / volumeB_ * momentumTarget_ / Mc;
                   angularMomentumExchange_ += angularMomentumTarget_;
 		}
 	      }
@@ -3023,6 +3077,12 @@ namespace OpenMD {
                  << " (kcal/mol)\n";
       rnemdFile_ << "#          momentum = " << momentumExchange_
                  << " (amu*A/fs)\n";
+      if (rnemdFluxType_ == rnemdPvector && rnemdAxisLabel_ == "z") {
+        rnemdFile_ << "#        part (hot) = " << particleFlux_h_
+                 << " (particles/A^2/fs)\n";
+        rnemdFile_ << "#        part (cold) = " << particleFlux_c_
+                 << " (particles/A^2/fs)\n";
+      }
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_
                  << " (amu*A^2/fs)\n";
       rnemdFile_ << "# Actual flux:\n";

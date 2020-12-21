@@ -125,7 +125,7 @@ namespace OpenMD {
     std::vector<int> count_;
     std::vector<RealType> times_;
    
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     DumpReader* reader_;
     std::string dumpFilename_;
     SelectionManager seleMan1_;

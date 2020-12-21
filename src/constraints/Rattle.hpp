@@ -65,6 +65,7 @@ namespace OpenMD {
     }; 
   
     Rattle(SimInfo* info);
+    ~Rattle();
     void constraintA();
     void constraintB();
         
@@ -80,14 +81,14 @@ namespace OpenMD {
     int constraintPairA(ConstraintPair* consPair);
     int constraintPairB(ConstraintPair* consPair);
 
-    SimInfo* info_;
+    SimInfo* info_ {nullptr};
     int maxConsIteration_;        
     RealType consTolerance_;
     RealType dt_;
-    Snapshot* currentSnapshot_;   
-    bool doRattle_;
+    Snapshot* currentSnapshot_ {nullptr};   
+    bool doRattle_ {false};
     std::string constraintOutputFile_;
-    ConstraintWriter* constraintWriter_;
+    ConstraintWriter* constraintWriter_ {nullptr};
     RealType constraintTime_;
     RealType currConstraintTime_;
   };

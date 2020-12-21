@@ -55,7 +55,7 @@ namespace OpenMD{
   : latticeConstant_(latticeConstant), latticeType_(latticeType) {
 
     registerLattice();
-    simpleLattice_ = LatticeFactory::getInstance()->createLattice(latticeType);
+    simpleLattice_ = LatticeFactory::getInstance().createLattice(latticeType);
     if (simpleLattice_ == NULL){
       std::cerr << "shapedLattice:: Error creating lattice" << std::endl;
       exit(1);

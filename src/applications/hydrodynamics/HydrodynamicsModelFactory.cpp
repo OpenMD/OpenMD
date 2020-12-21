@@ -47,17 +47,15 @@
 #include "applications/hydrodynamics/HydrodynamicsModelCreator.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 #include "brains/SimInfo.hpp"
+#include "utils/MemoryUtils.hpp"
+
 namespace OpenMD {
 
   //initialize instance of HydrodynamicsModelFactory
   HydrodynamicsModelFactory* HydrodynamicsModelFactory::instance_ = NULL;
 
   HydrodynamicsModelFactory::~HydrodynamicsModelFactory() {
-    CreatorMapType::iterator i;
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      delete i->second;
-    }
-    creatorMap_.clear();
+    MemoryUtils::deletePointers(creatorMap_);
   }
 
   bool HydrodynamicsModelFactory::registerHydrodynamicsModel(HydrodynamicsModelCreator* creator) {
