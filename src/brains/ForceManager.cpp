@@ -762,14 +762,14 @@ namespace OpenMD {
     bool in_switching_region;
     RealType dswdr, swderiv;
     vector<int> atomListColumn, atomListRow;
-    InteractionData idat;
-    SelfData sdat;
-    RealType mf;
+
     potVec longRangePotential(0.0);
     potVec selfPotential(0.0);
     RealType reciprocalPotential(0.0);
     RealType surfacePotential(0.0);
     potVec selectionPotential(0.0);
+
+    RealType mf;
     bool newAtom1;
     int gid1, gid2;
 
@@ -840,6 +840,7 @@ namespace OpenMD {
             for (ia = atomListRow.begin();
                  ia != atomListRow.end(); ++ia) {
               atom1 = (*ia);
+	      if (atomListRow.size() > 1) newAtom1 = true;
 
               if (doPotentialSelection_) {
                 gid1 = fDecomp_->getGlobalIDRow(atom1);
@@ -866,6 +867,7 @@ namespace OpenMD {
                   idat.dVdFQ2 = 0.0;
 
                   fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
+		  newAtom1 = false;
 
                   idat.topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
                   idat.vdwMult = vdwScale_[idat.topoDist];
@@ -888,6 +890,7 @@ namespace OpenMD {
 
                   if (iLoop == PREPAIR_LOOP) {
                     interactionMan_->doPrePair(idat);
+		    fDecomp_->unpackPrePairData(idat, atom1, atom2);
                   } else {
                     interactionMan_->doPair(idat);
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
@@ -965,12 +968,11 @@ namespace OpenMD {
             }
           }
         }
-        newAtom1 = false;
       }
 
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {
-
+	  
           fDecomp_->collectIntermediateData();
 
           for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
@@ -978,10 +980,11 @@ namespace OpenMD {
               gid1 = fDecomp_->getGlobalID(atom1);
               sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
             }
-            fDecomp_->fillSelfData(sdat, atom1);
+            fDecomp_->fillPreForceData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
+	    fDecomp_->unpackPreForceData(sdat, atom1);
           }
-
+	  
           fDecomp_->distributeIntermediateData();
 
         }
@@ -1008,11 +1011,12 @@ namespace OpenMD {
         }
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
+	fDecomp_->unpackSelfData(sdat, atom1);
       }
     }
 
     // collects single-atom information
-    fDecomp_->collectSelfData(sdat);
+    fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
     curSnapshot->setLongRangePotential(longRangePotential);
@@ -1028,7 +1032,7 @@ namespace OpenMD {
       selectionPotential += fDecomp_->getSelectedSelfPotential();
       selectionPotential += fDecomp_->getSelectedPotential();
       curSnapshot->setSelectionPotentials(selectionPotential);
-    }
+    }    
   }
 
   void ForceManager::postCalculation() {
@@ -1499,14 +1503,14 @@ namespace OpenMD {
     bool in_switching_region;
     RealType dswdr, swderiv;
     vector<int> atomListColumn, atomListRow;
-    InteractionData idat;
-    SelfData sdat;
-    RealType mf;
+    
     potVec longRangePotential(0.0);
     potVec selfPotential(0.0);
-    RealType reciprocalPotential(0.0);
-    RealType surfacePotential(0.0);
     potVec selectionPotential(0.0);
+    RealType reciprocalPotential(0.0);
+    RealType surfacePotential(0.0);    
+    
+    RealType mf;
     bool newAtom1;
     int gid1, gid2;
 
@@ -1576,6 +1580,7 @@ namespace OpenMD {
 
             for (ia = atomListRow.begin();
                  ia != atomListRow.end(); ++ia) {
+	      if (atomListRow.size() > 1) newAtom1 = true;
               atom1 = (*ia);
 
               if (doPotentialSelection_) {
@@ -1603,7 +1608,8 @@ namespace OpenMD {
                   idat.dVdFQ2 = 0.0;
 
                   fDecomp_->fillInteractionData(idat, atom1, atom2, newAtom1);
-
+		  newAtom1 = false;
+		  
                   idat.topoDist = fDecomp_->getTopologicalDistance(atom1, atom2);
                   idat.vdwMult = vdwScale_[idat.topoDist];
                   idat.electroMult = electrostaticScale_[idat.topoDist];
@@ -1625,6 +1631,7 @@ namespace OpenMD {
 
                   if (iLoop == PREPAIR_LOOP) {
                     interactionMan_->doPrePair(idat);
+		    fDecomp_->unpackPrePairData(idat, atom1, atom2);
                   } else {
                     interactionMan_->doPair(idat);
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
@@ -1702,12 +1709,10 @@ namespace OpenMD {
             }
           }
         }
-        newAtom1 = false;
       }
 
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {
-
           fDecomp_->collectIntermediateData();
 
           for (unsigned int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
@@ -1716,8 +1721,9 @@ namespace OpenMD {
               sdat.isSelected = seleMan_.isGlobalIDSelected(gid1);
             }
 
-            fDecomp_->fillSelfData(sdat, atom1);
+            fDecomp_->fillPreForceData(sdat, atom1);
             interactionMan_->doPreForce(sdat);
+	    fDecomp_->unpackPreForceData(sdat, atom1);
           }
 
           fDecomp_->distributeIntermediateData();
@@ -1731,7 +1737,9 @@ namespace OpenMD {
     if (cutoffMethod_ == EWALD_FULL) {
       interactionMan_->doReciprocalSpaceSum(reciprocalPotential);
       curSnapshot->setReciprocalPotential(reciprocalPotential);
+    }
 
+    if (useSurfaceTerm_) {
       interactionMan_->doSurfaceTerm(useSlabGeometry_, axis_, surfacePotential);
       curSnapshot->setSurfacePotential(surfacePotential);
     }
@@ -1745,11 +1753,12 @@ namespace OpenMD {
 
         fDecomp_->fillSelfData(sdat, atom1);
         interactionMan_->doSelfCorrection(sdat);
+	fDecomp_->unpackSelfData(sdat, atom1);
       }
     }
 
     // collects single-atom information
-    fDecomp_->collectSelfData(sdat);
+    fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
     curSnapshot->setLongRangePotential(longRangePotential);

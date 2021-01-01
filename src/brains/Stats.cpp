@@ -876,23 +876,23 @@ namespace OpenMD {
     std::string head(79, '#');
     report << head << std::endl;
     report << "# Status Report:" << std::string(62, ' ') << "#" << std::endl;
-    report << "# " << setw(22) << "Total Time:";
+    report << "# " << right << setw(24) << "Total Time:";
     report << setw(12) << getRealData(TIME);
     report << " " << setw(17) << left << getUnits(TIME)
-           << "                        #" << std::endl;
-    report << "# " << right << setw(22) << "Number of Samples:";
+           << "                      #" << std::endl;
+    report << "# " << right << setw(24) << "Number of Samples:";
     report << setw(12) << nSamp;
-    report << "                                          #" << std::endl;
+    report << "                                        #" << std::endl;
 
     for (unsigned int i = 0; i < statsMask_.size(); ++i) {
       if (statsMask_[i] && i != TIME) {
 
         if (getDataType(i) == "RealType") {
-          report << "# " << right << setw(21) << getTitle(i) << ":";
+          report << "# " << right << setw(23) << getTitle(i) << ":";
           report << right << setw(12) << getRealAverage(i);
           report << pm << left << setw(12) << getRealError(i);
           report << " " << left << setw(17) << getUnits(i);
-          report << "       #" << std::endl;
+          report << "     #" << std::endl;
 
         }
         else if (getDataType(i) == "Vector3d") {
@@ -902,13 +902,13 @@ namespace OpenMD {
           report << "#                       ";
           report << luc << right << setw(12) << s(0) << ruc << "     ";
           report << luc << right <<  setw(12) << e(0);
-          report << ruc << "                     #" << std::endl;
+          report << ruc << "                    #" << std::endl;
 
-          report << "# " << right << setw(21) << getTitle(i) << ":";
+          report << "# " << right << setw(23) << getTitle(i) << ":";
 
           report << lex << right << setw(12) << s(1) << rex << pm;
           report << lex << right << setw(12) << e(1) << rex << " ";
-          report << left << setw(17) << getUnits(i) << "   #";
+          report << left << setw(17) << getUnits(i) << "  #";
           report << std::endl;
 
           report << "#                       ";
@@ -921,37 +921,37 @@ namespace OpenMD {
           potVec s = getPotVecAverage(i);
           potVec e = getPotVecError(i);
 
-          report << "# " << right << setw(21) << getTitle(i);
-          report << ":                                                      #";
+          report << "# " << right << setw(23) << getTitle(i);
+          report << ":                                                    #";
           report << std::endl;
 
           for (unsigned int j = 1; j < N_INTERACTION_FAMILIES; j++) {
             switch (j) {
             case VANDERWAALS_FAMILY:
-              report << "# " << right << setw(22) << "van der Waals:";
+              report << "# " << right << setw(24) << "van der Waals:";
               break;
             case ELECTROSTATIC_FAMILY:
-              report << "# " << right << setw(22) << "Electrostatic:";
+              report << "# " << right << setw(24) << "Electrostatic:";
               break;
             case METALLIC_EMBEDDING:
-              report << "# " << right << setw(22) << "Metallic Embedding:";
+              report << "# " << right << setw(24) << "Metallic Embedding:";
               break;
             case METALLIC_PAIR:
-              report << "# " << right << setw(22) << "Metallic Pair:";
+              report << "# " << right << setw(24) << "Metallic Pair:";
               break;
             case HYDROGENBONDING_FAMILY:
-              report << "# " << right << setw(22) << "Hydrogen Bonding:";
+              report << "# " << right << setw(24) << "Hydrogen Bonding:";
               break;
             case BONDED_FAMILY:
-              report << "# " << right << setw(22) << "Bonded (1-2,1-3,1-4):";
+              report << "# " << right << setw(24) << "Bonded (1-2,1-3,1-4):";
               break;
             default:
-              report << "# " << right << setw(22) << "Unknown:";
+              report << "# " << right << setw(24) << "Unknown:";
               break;
             }
             report << right << setw(12) << s[j];
             report << pm << left << setw(12) << e[j];
-            report << " " << left << setw(17) << getUnits(i) << "       #";
+            report << " " << left << setw(17) << getUnits(i) << "     #";
             report << std::endl;
           }
 
@@ -960,23 +960,23 @@ namespace OpenMD {
           Mat3x3d s = getMatrixAverage(i);
           Mat3x3d e = getMatrixError(i);
 
-          report << "#                       ";
+          report << "#                         ";
           report << luc << right << setw(12) << s(0,0) << " ";
           report << right << setw(12) << s(0,1) << " ";
-          report << right << setw(12) << s(0,2) << ruc << "              #";
+          report << right << setw(12) << s(0,2) << ruc << "            #";
           report << std::endl;
 
-          report << "# " << right << setw(21) << getTitle(i) << ":";
+          report << "# " << right << setw(23) << getTitle(i) << ":";
 
           report << lex << right << setw(12) << s(1,0) << " ";
           report << right << setw(12) << s(1,1) << " ";
           report << right << setw(12) << s(1,2) << rex << " ";
-          report << left <<  setw(13) << getUnits(i) << "#" << std::endl;
+          report << left <<  setw(11) << getUnits(i) << "#" << std::endl;
 
-          report << "#                       ";
+          report << "#                         ";
           report << llc << right << setw(12) << s(2,0) << " ";
           report << right << setw(12) << s(2,1) << " ";
-          report << right << setw(12) << s(2,2) << rlc << "              #";
+          report << right << setw(12) << s(2,2) << rlc << "            #";
           report << std::endl;
 
           report << "#                                 ";

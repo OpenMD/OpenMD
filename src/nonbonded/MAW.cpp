@@ -184,12 +184,12 @@ namespace OpenMD {
     if (mixer.j_is_Metal) {
       // rotate the inter-particle separation into the two different 
       // body-fixed coordinate systems:
-      r = *(idat.A1) * idat.d;
-      Atrans = idat.A1->transpose();
+      r = idat.A1 * idat.d;
+      Atrans = idat.A1.transpose();
     } else {
       // negative sign because this is the vector from j to i:       
-      r = -*(idat.A2) * idat.d;
-      Atrans = idat.A2->transpose();
+      r = - idat.A2 * idat.d;
+      Atrans = idat.A2.transpose();
     }
     
     // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
@@ -229,7 +229,7 @@ namespace OpenMD {
     RealType x2 = x * x;
     RealType z2 = z * z;
     
-    RealType r3 = idat.r2 *  idat.rij ;
+    RealType r3 = idat.r2 *  idat.rij;
     RealType r4 = idat.r2 *  idat.r2;
     
     // angular modulation of morse part of potential to approximate 
@@ -269,7 +269,7 @@ namespace OpenMD {
     // Torques for Vang using method of Price:
     // S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
     
-    Vector3d dVangdu = Vector3d(cb1 * y /  idat.rij ,
+    Vector3d dVangdu = Vector3d(cb1 * y /  idat.rij,
                                 2.0 * ca1 * x * z / idat.r2 - cb1 * x /  idat.rij,
                                 -2.0 * ca1 * y * x / idat.r2);
     
@@ -281,9 +281,9 @@ namespace OpenMD {
     // go back to lab frame using transpose of rotation matrix:
     
     if (mixer.j_is_Metal) {
-      *(idat.t1) += Atrans * trq;
+      idat.t1 += Atrans * trq;
     } else {
-      *(idat.t2) += Atrans * trq;
+      idat.t2 += Atrans * trq;
     }
     
     // Now, on to the forces (still in body frame of water)

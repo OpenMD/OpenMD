@@ -108,49 +108,72 @@ namespace OpenMD {
     rListSq_ = rList_ * rList_;
   }
 
-  void ForceDecomposition::fillSelfData(SelfData &sdat, int atom1) {
+  void ForceDecomposition::fillPreForceData(SelfData &sdat, int atom) {
 
-    sdat.atid = idents[atom1];
-
-    if (storageLayout_ & DataStorage::dslDipole) {
-      sdat.dipole = &(snap_->atomData.dipole[atom1]);
-    }
-
-    if (storageLayout_ & DataStorage::dslQuadrupole) {
-      sdat.quadrupole = &(snap_->atomData.quadrupole[atom1]);
-    }
-
-    if (storageLayout_ & DataStorage::dslTorque) {
-      sdat.t = &(snap_->atomData.torque[atom1]);
-    }
+    sdat.atid = idents[atom];
+    sdat.selfPot = selfPot;
+    sdat.selePot = selectedSelfPot;
     
     if (storageLayout_ & DataStorage::dslDensity) {
-      sdat.rho = &(snap_->atomData.density[atom1]);
+      sdat.rho = snap_->atomData.density[atom];
     }
     
-    if (storageLayout_ & DataStorage::dslFunctional) {
-      sdat.frho = &(snap_->atomData.functional[atom1]);
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      sdat.particlePot = snap_->atomData.particlePot[atom];
     }
     
-    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      sdat.dfrhodrho = &(snap_->atomData.functionalDerivative[atom1]);
-    }
+  }
 
+  void ForceDecomposition::fillSelfData(SelfData &sdat, int atom) {
+
+    sdat.atid = idents[atom];
+    sdat.selfPot = selfPot;
+    sdat.selePot = selectedSelfPot;
+    
     if (storageLayout_ & DataStorage::dslSkippedCharge) {
-      sdat.skippedCharge = &(snap_->atomData.skippedCharge[atom1]);
+      sdat.skippedCharge = snap_->atomData.skippedCharge[atom];
     }
 
     if (storageLayout_ & DataStorage::dslParticlePot) {
-      sdat.particlePot = &(snap_->atomData.particlePot[atom1]);
+      sdat.particlePot = snap_->atomData.particlePot[atom];
     }
     
     if (storageLayout_ & DataStorage::dslFlucQPosition) {
-      sdat.flucQ = &(snap_->atomData.flucQPos[atom1]);
+      sdat.flucQ = snap_->atomData.flucQPos[atom];
     }
     
     if (storageLayout_ & DataStorage::dslFlucQForce) {
-      sdat.flucQfrc = &(snap_->atomData.flucQFrc[atom1]);
+      sdat.flucQfrc = snap_->atomData.flucQFrc[atom];
     }
+  }
+  
+  void ForceDecomposition::unpackPreForceData(SelfData &sdat, int atom) {
+
+    selfPot = sdat.selfPot;
+    selectedSelfPot = sdat.selePot;
+    
+    if (storageLayout_ & DataStorage::dslFunctional) {
+      snap_->atomData.functional[atom] += sdat.frho;
+    }
+    
+    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      snap_->atomData.functionalDerivative[atom] += sdat.dfrhodrho;
+    }
+
+    if (sdat.doParticlePot && (storageLayout_ & DataStorage::dslParticlePot)) {
+      snap_->atomData.particlePot[atom] = sdat.particlePot;
+    }
+    
+  }
+
+  void ForceDecomposition::unpackSelfData(SelfData &sdat, int atom) {
+
+    selfPot = sdat.selfPot;
+    selectedSelfPot = sdat.selePot;
+    
+    if (storageLayout_ & DataStorage::dslFlucQForce) {
+      snap_->atomData.flucQFrc[atom] = sdat.flucQfrc;
+    }    
   }
 
   bool ForceDecomposition::checkNeighborList() {

@@ -282,8 +282,8 @@ namespace OpenMD {
 
     if ( idat.rij  < rcij) {
       RealType rho = mixer.phi->getValueAt( idat.rij );
-      *(idat.rho1) += rho;
-      *(idat.rho2) += rho;
+      idat.rho1 += rho;
+      idat.rho2 += rho;
     } 
     
     return;
@@ -295,9 +295,9 @@ namespace OpenMD {
 
     SCAtomData &data1 = SCdata[SCtids[sdat.atid]];
    
-    RealType u = - data1.c * data1.epsilon * sqrt( *(sdat.rho) );
-    *(sdat.frho) = u;
-    *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
+    RealType u = - data1.c * data1.epsilon * sqrt( sdat.rho );
+    sdat.frho = u;
+    sdat.dfrhodrho = 0.5 * sdat.frho / sdat.rho;
 
     sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += u;
     
@@ -305,7 +305,7 @@ namespace OpenMD {
       sdat.selePot[METALLIC_EMBEDDING_FAMILY] += u;
    
     if (sdat.doParticlePot) {
-      *(sdat.particlePot) += u;
+      sdat.particlePot += u;
     }
 
     return;
@@ -336,7 +336,7 @@ namespace OpenMD {
       RealType pot_temp = vptmp - vcij;
       idat.vpair += pot_temp;
       
-      RealType dudr = drhodr * ( *(idat.dfrho1) + *(idat.dfrho2) ) + dvpdr;
+      RealType dudr = drhodr * ( idat.dfrho1 + idat.dfrho2 ) + dvpdr;
       
       idat.f1 += idat.d * dudr / idat.rij ;
         
@@ -350,11 +350,11 @@ namespace OpenMD {
         // contribute.  This then requires recomputing the density
         // functional for atom2 as well.
         
-        *(idat.particlePot1) -= data2.c * data2.epsilon * 
-          sqrt( *(idat.rho2) - rhtmp) + *(idat.frho2);
+        idat.particlePot1 -= data2.c * data2.epsilon * 
+          sqrt( idat.rho2 - rhtmp) + idat.frho2;
 
-        *(idat.particlePot2) -= data1.c * data1.epsilon * 
-          sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
+        idat.particlePot2 -= data1.c * data1.epsilon * 
+          sqrt( idat.rho1 - rhtmp) + idat.frho1;
       }
       
       idat.pot[METALLIC_PAIR_FAMILY] += pot_temp;

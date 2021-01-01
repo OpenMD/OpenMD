@@ -144,6 +144,10 @@ namespace OpenMD {
     string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
+    // And all of the variables and structures for long range interactions:
+    
+    InteractionData idat;
+    SelfData sdat;
 
   };
 } 

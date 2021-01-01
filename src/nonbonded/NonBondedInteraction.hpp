@@ -94,12 +94,11 @@ namespace OpenMD {
   /**
    * The InteractionData struct.  
    *
-   * This is used to pass pointers to data to specific non-bonded
-   * interactions for force calculations.  Not all of the struct
+   * This is used to pass data and references to data to specific non-bonded
+   * interactions for force calculations. Not all of the struct
    * members are utilized by any given interaction.
    */
   struct InteractionData {
-    /*@{*/
     int atid1 = -1;           /**< atomType ident for atom 1 */
     int atid2 = -1;           /**< atomType ident for atom 2 */
     Vector3d d{};             /**< interatomic vector (already wrapped into box) */
@@ -109,80 +108,72 @@ namespace OpenMD {
     bool shiftedPot {false};  /**< shift the potential up inside the cutoff? */
     bool shiftedForce {false};/**< shifted forces smoothly inside the cutoff? */
     RealType sw{};            /**< switching function value at rij */
-    int topoDist;             /**< topological distance between atoms */
-    bool excluded {false};    /**< is this excluded from *direct* pairwise interactions? (some indirect interactions may still apply) */
+    int topoDist{};           /**< topological distance between atoms */
+    bool excluded {false};    /**< is this excluded from direct pairwise interactions? (some indirect interactions may still apply) */
     bool sameRegion {false};  /**< are these atoms specified to be in the same region? */ 
     RealType vdwMult{};       /**< multiplier for van der Waals interactions */
     RealType electroMult{};   /**< multiplier for electrostatic interactions */
     potVec pot{};             /**< total potential */
     potVec excludedPot{};     /**< potential energy excluded from the overall calculation */
     RealType vpair{};         /**< pair potential */
-    bool doParticlePot {false};       /**< should we bother with the particle pot? */
-    bool doElectricField {false};     /**< should we bother with the electric field? */
-    bool doSitePotential {false};     /**< should we bother with electrostatic site potential */
+    bool doParticlePot {false};   /**< should we bother with the particle pot? */
+    bool doElectricField {false}; /**< should we bother with the electric field? */
+    bool doSitePotential {false}; /**< should we bother with electrostatic site potential */
     bool isSelected {false};  /**< one of the particles has been selected for selection potential */
     potVec selePot{};         /**< potential energies of the selected sites */
-    RealType* particlePot1;   /**< pointer to particle potential for atom1 */
-    RealType* particlePot2;   /**< pointer to particle potential for atom2 */
-    Vector3d f1;              /**< force between the two atoms */
-    RotMat3x3d* A1;           /**< pointer to rotation matrix of first atom */
-    RotMat3x3d* A2;           /**< pointer to rotation matrix of second atom */
-    Vector3d* dipole1;        /**< pointer to dipole vector of first atom */
-    Vector3d* dipole2;        /**< pointer to dipole vector of first atom */
-    Mat3x3d* quadrupole1;     /**< pointer to quadrupole tensor of first atom */
-    Mat3x3d* quadrupole2;     /**< pointer to quadrupole tensor of first atom */
-    Vector3d* t1;             /**< pointer to torque on first atom */
-    Vector3d* t2;             /**< pointer to torque on second atom */
-    RealType* rho1;           /**< total electron density at first atom */
-    RealType* rho2;           /**< total electron density at second atom */
-    RealType* frho1;          /**< density functional at first atom */
-    RealType* frho2;          /**< density functional at second atom */
-    RealType* dfrho1;         /**< derivative of functional for atom 1 */
-    RealType* dfrho2;         /**< derivative of functional for atom 2 */
-    RealType* flucQ1;         /**< fluctuating charge on atom1 */
-    RealType* flucQ2;         /**< fluctuating charge on atom2 */
+    RealType particlePot1{};  /**< particle potential for atom1 */
+    RealType particlePot2{};  /**< particle potential for atom2 */
+    Vector3d f1{};            /**< force between the two atoms */
+    RotMat3x3d A1{};          /**< rotation matrix of first atom */
+    RotMat3x3d A2{};          /**< rotation matrix of second atom */
+    Vector3d D_1{};           /**< dipole vector of first atom */
+    Vector3d D_2{};           /**< dipole vector of first atom */
+    Mat3x3d Q_1{};            /**< quadrupole tensor of first atom */
+    Mat3x3d Q_2{};            /**< quadrupole tensor of first atom */
+    Vector3d t1{};            /**< torque on first atom */
+    Vector3d t2{};            /**< torque on second atom */
+    RealType rho1{};          /**< total electron density at first atom */
+    RealType rho2{};          /**< total electron density at second atom */
+    RealType frho1{};         /**< density functional at first atom */
+    RealType frho2{};         /**< density functional at second atom */
+    RealType dfrho1{};        /**< derivative of functional for atom 1 */
+    RealType dfrho2{};        /**< derivative of functional for atom 2 */
+    RealType flucQ1{};        /**< fluctuating charge on atom1 */
+    RealType flucQ2{};        /**< fluctuating charge on atom2 */
     RealType dVdFQ1{};        /**< fluctuating charge force on atom1 */
     RealType dVdFQ2{};        /**< fluctuating charge force on atom2 */
-    Vector3d eField1{};       /**< pointer to electric field on first atom */
-    Vector3d eField2{};       /**< pointer to electric field on second atom */
-    RealType* skippedCharge1; /**< charge skipped on atom1 in pairwise interaction loop with atom2 */
-    RealType* skippedCharge2; /**< charge skipped on atom2 in pairwise interaction loop with atom1 */
+    Vector3d eField1{};       /**< electric field on first atom */
+    Vector3d eField2{};       /**< electric field on second atom */
+    RealType skippedCharge1{};/**< charge skipped on atom1 in pairwise interaction loop with atom2 */
+    RealType skippedCharge2{};/**< charge skipped on atom2 in pairwise interaction loop with atom1 */
     RealType sPot1{};         /**< site potential on first atom */
     RealType sPot2{};         /**< site potential on second atom */
-    /*@}*/
   };
   
   /** 
    * The SelfData struct.
    * 
-   * This is used to pass pointers to data for the self-interaction or
+   * This is used to pass data for the self-interaction or
    * derived information on a single atom after a pass through all
-   * other interactions.  This is used by electrostatic methods that
+   * other interactions. This is used by electrostatic methods that
    * have long-range corrections involving interactions with a medium
    * or a boundary and also by specific metal interactions for
-   * electron density functional calculations.  Not all of the struct
+   * electron density functional calculations. Not all of the struct
    * members are utilized by any given self interaction.
    */
   struct SelfData {
-    //AtomType* atype;        /**< pointer to AtomType of the atom */
-    /*@{*/
-    int atid;               /**< atomType ident for the atom */
-    Vector3d* dipole;       /**< pointer to dipole vector of the atom */
-    Mat3x3d* quadrupole;    /**< pointer to quadrupole tensor of the atom */
-    RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
-    potVec selfPot{};       /**< total potential (including embedding energy) */
-    potVec excludedPot{};   /**< potential energy excluded from the overall calculation */
-    bool doParticlePot {false};     /**< should we bother with the particle pot? */
-    RealType* particlePot;  /**< contribution to potential from this particle */
-    Vector3d* t;            /**< pointer to resultant torque on atom */
-    RealType* rho;          /**< electron density */
-    RealType* frho;         /**< value of density functional for atom */
-    RealType* dfrhodrho;    /**< derivative of density functional for atom */
-    RealType* flucQ;	    /**< current value of atom's fluctuating charge */
-    RealType* flucQfrc;	    /**< fluctuating charge derivative */
-    bool isSelected {false};        /**< this site has been selected for selection potential */
-    potVec selePot{};       /**< potential energy of the selected site */
-    /*@}*/
+    int atid{};              /**< atomType ident for the atom */
+    RealType skippedCharge{};/**< charge skipped in pairwise interaction loop */
+    potVec selfPot{};        /**< total potential (including embedding energy) */
+    bool doParticlePot {false};/**< should we bother with the particle pot? */
+    RealType particlePot{};  /**< contribution to potential from this particle */
+    RealType rho{};          /**< electron density */
+    RealType frho{};         /**< value of density functional for atom */
+    RealType dfrhodrho{};    /**< derivative of density functional for atom */
+    RealType flucQ{};	     /**< current value of atom's fluctuating charge */
+    RealType flucQfrc{};     /**< fluctuating charge derivative */
+    bool isSelected {false}; /**< this site has been selected for selection potential */
+    potVec selePot{};        /**< potential energy of the selected site */
   };
   
     

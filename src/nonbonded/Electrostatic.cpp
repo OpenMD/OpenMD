@@ -879,11 +879,11 @@ namespace OpenMD {
       C_a = data1.fixedCharge;
 
       if (a_is_Fluctuating) {
-        C_a += *(idat.flucQ1);
+        C_a += idat.flucQ1;
       }
 
       if (idat.excluded) {
-        *(idat.skippedCharge2) += C_a;
+        idat.skippedCharge2 += C_a;
       } else {
         // only do the field and site potentials if we're not excluded:
         Eb -= C_a *  pre11_ * dv01 * rhat;
@@ -892,21 +892,19 @@ namespace OpenMD {
     }
 
     if (a_is_Dipole) {
-      D_a = *(idat.dipole1);
-      rdDa = dot(rhat, D_a);
-      rxDa = cross(rhat, D_a);
+      rdDa = dot(rhat, idat.D_1);
+      rxDa = cross(rhat, idat.D_1);
       if (!idat.excluded) {
-        Eb -=  pre12_ * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
+        Eb -=  pre12_ * ((dv11-v11or) * rdDa * rhat + v11or * idat.D_1);
         Pb +=  pre12_ * v11 * rdDa;
       }
 
     }
 
     if (a_is_Quadrupole) {
-      Q_a = *(idat.quadrupole1);
-      trQa =  Q_a.trace();
-      Qar =   Q_a * rhat;
-      rQa = rhat * Q_a;
+      trQa =  idat.Q_1.trace();
+      Qar =   idat.Q_1 * rhat;
+      rQa = rhat * idat.Q_1;
       rdQar = dot(rhat, Qar);
       rxQar = cross(rhat, Qar);
       if (!idat.excluded) {
@@ -920,12 +918,12 @@ namespace OpenMD {
       C_b = data2.fixedCharge;
 
       if (b_is_Fluctuating) {
-        C_b += *(idat.flucQ2);
+        C_b += idat.flucQ2;
       }
 
 
       if (idat.excluded) {
-        *(idat.skippedCharge1) += C_b;
+        idat.skippedCharge1 += C_b;
       } else {
         // only do the field if we're not excluded:
         Ea += C_b *  pre11_ * dv01 * rhat;
@@ -934,20 +932,18 @@ namespace OpenMD {
     }
 
     if (b_is_Dipole) {
-      D_b = *(idat.dipole2);
-      rdDb = dot(rhat, D_b);
-      rxDb = cross(rhat, D_b);
+      rdDb = dot(rhat, idat.D_2);
+      rxDb = cross(rhat, idat.D_2);
       if (!idat.excluded) {
-        Ea += pre12_ * ((dv11-v11or) * rdDb * rhat + v11or * D_b);
+        Ea += pre12_ * ((dv11-v11or) * rdDb * rhat + v11or * idat.D_2);
         Pa += pre12_ * v11 * rdDb;
       }
     }
 
     if (b_is_Quadrupole) {
-      Q_b = *(idat.quadrupole2);
-      trQb =  Q_b.trace();
-      Qbr =   Q_b * rhat;
-      rQb = rhat * Q_b;
+      trQb =  idat.Q_2.trace();
+      Qbr =   idat.Q_2 * rhat;
+      rQb = rhat * idat.Q_2;
       rdQbr = dot(rhat, Qbr);
       rxQbr = cross(rhat, Qbr);
       if (!idat.excluded) {
@@ -994,7 +990,7 @@ namespace OpenMD {
       if (b_is_Dipole) {
         pref =  pre12_ * idat.electroMult;
         U  += C_a * pref * v11 * rdDb;
-        F  += C_a * pref * ((dv11 - v11or) * rdDb * rhat + v11or * D_b);
+        F  += C_a * pref * ((dv11 - v11or) * rdDb * rhat + v11or * idat.D_2);
         Tb += C_a * pref * v11 * rxDb;
 
         if (a_is_Fluctuating) dUdCa += pref * v11 * rdDb;
@@ -1006,7 +1002,7 @@ namespace OpenMD {
         if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
           rfContrib = C_a * pref * preRF_ * 2.0 * idat.rij;
           indirect_Pot += rfContrib * rdDb;
-          indirect_F   += rfContrib * D_b / idat.rij;
+          indirect_F   += rfContrib * idat.D_2 / idat.rij;
           indirect_Tb  += C_a * pref * preRF_ * rxDb;
         }
       }
@@ -1028,7 +1024,7 @@ namespace OpenMD {
         pref = pre12_ * idat.electroMult;
 
         U  -= C_b * pref * v11 * rdDa;
-        F  -= C_b * pref * ((dv11-v11or) * rdDa * rhat + v11or * D_a);
+        F  -= C_b * pref * ((dv11-v11or) * rdDa * rhat + v11or * idat.D_1);
         Ta -= C_b * pref * v11 * rxDa;
 
         if (b_is_Fluctuating) dUdCb -= pref * v11 * rdDa;
@@ -1039,18 +1035,18 @@ namespace OpenMD {
         if (summationMethod_ == esm_REACTION_FIELD && idat.excluded) {
           rfContrib = C_b * pref * preRF_ * 2.0 * idat.rij;
           indirect_Pot -= rfContrib * rdDa;
-          indirect_F   -= rfContrib * D_a / idat.rij;
+          indirect_F   -= rfContrib * idat.D_1 / idat.rij;
           indirect_Ta  -= C_b * pref * preRF_ * rxDa;
         }
       }
 
       if (b_is_Dipole) {
         pref = pre22_ * idat.electroMult;
-        DadDb = dot(D_a, D_b);
-        DaxDb = cross(D_a, D_b);
+        DadDb = dot(idat.D_1, idat.D_2);
+        DaxDb = cross(idat.D_1, idat.D_2);
 
         U  -= pref * (DadDb * v21 + rdDa * rdDb * v22);
-        F  -= pref * (dv21 * DadDb * rhat + v22or * (rdDb * D_a + rdDa * D_b));
+        F  -= pref * (dv21 * DadDb * rhat + v22or * (rdDb * idat.D_1 + rdDa * idat.D_2));
         F  -= pref * (rdDa * rdDb) * (dv22 - 2.0*v22or) * rhat;
         Ta += pref * ( v21 * DaxDb - v22 * rdDb * rxDa);
         Tb += pref * (-v21 * DaxDb - v22 * rdDa * rxDb);
@@ -1067,14 +1063,14 @@ namespace OpenMD {
 
       if (b_is_Quadrupole) {
         pref = pre24_ * idat.electroMult;
-        DadQb = D_a * Q_b;
-        DadQbr = dot(D_a, Qbr);
-        DaxQbr = cross(D_a, Qbr);
+        DadQb = idat.D_1 * idat.Q_2;
+        DadQbr = dot(idat.D_1, Qbr);
+        DaxQbr = cross(idat.D_1, Qbr);
 
         U  -= pref * ((trQb*rdDa + 2.0*DadQbr)*v31 + rdDa*rdQbr*v32);
-        F  -= pref * (trQb*D_a + 2.0*DadQb) * v31or;
+        F  -= pref * (trQb*idat.D_1 + 2.0*DadQb) * v31or;
         F  -= pref * (trQb*rdDa + 2.0*DadQbr) * (dv31-v31or) * rhat;
-        F  -= pref * (D_a*rdQbr + 2.0*rdDa*rQb) * v32or;
+        F  -= pref * (idat.D_1*rdQbr + 2.0*rdDa*rQb) * v32or;
         F  -= pref * (rdDa * rdQbr * rhat * (dv32-3.0*v32or));
         Ta += pref * ((-trQb*rxDa + 2.0 * DaxQbr)*v31 - rxDa*rdQbr*v32);
         Tb += pref * ((2.0*cross(DadQb, rhat) - 2.0*DaxQbr)*v31
@@ -1094,14 +1090,14 @@ namespace OpenMD {
       }
       if (b_is_Dipole) {
         pref = pre24_ * idat.electroMult;
-        DbdQa = D_b * Q_a;
-        DbdQar = dot(D_b, Qar);
-        DbxQar = cross(D_b, Qar);
+        DbdQa = idat.D_2 * idat.Q_1;
+        DbdQar = dot(idat.D_2, Qar);
+        DbxQar = cross(idat.D_2, Qar);
 
         U  += pref * ((trQa*rdDb + 2.0*DbdQar)*v31 + rdDb*rdQar*v32);
-        F  += pref * (trQa*D_b + 2.0*DbdQa) * v31or;
+        F  += pref * (trQa*idat.D_2 + 2.0*DbdQa) * v31or;
         F  += pref * (trQa*rdDb + 2.0*DbdQar) * (dv31-v31or) * rhat;
-        F  += pref * (D_b*rdQar + 2.0*rdDb*rQa) * v32or;
+        F  += pref * (idat.D_2*rdQar + 2.0*rdDb*rQa) * v32or;
         F  += pref * (rdDb * rdQar * rhat * (dv32-3.0*v32or));
         Ta += pref * ((-2.0*cross(DbdQa, rhat) + 2.0*DbxQar)*v31
                       + 2.0*rdDb*rxQar*v32);
@@ -1109,11 +1105,11 @@ namespace OpenMD {
       }
       if (b_is_Quadrupole) {
         pref = pre44_ * idat.electroMult;  // yes
-        QaQb = Q_a * Q_b;
+        QaQb = idat.Q_1 * idat.Q_2;
         trQaQb = QaQb.trace();
         rQaQb = rhat * QaQb;
         QaQbr = QaQb * rhat;
-        QaxQb = mCross(Q_a, Q_b);
+        QaxQb = mCross(idat.Q_1, idat.Q_2);
         rQaQbr = dot(rQa, Qbr);
         rQaxQbr = cross(rQa, Qbr);
 
@@ -1170,10 +1166,10 @@ namespace OpenMD {
       idat.f1 += F * idat.sw;
 
       if (a_is_Dipole || a_is_Quadrupole)
-        *(idat.t1) += Ta * idat.sw;
+        idat.t1 += Ta * idat.sw;
 
       if (b_is_Dipole || b_is_Quadrupole)
-        *(idat.t2) += Tb * idat.sw;
+        idat.t2 += Tb * idat.sw;
 
     } else {
 
@@ -1189,10 +1185,10 @@ namespace OpenMD {
       idat.f1 += idat.sw * indirect_F;
       
       if (a_is_Dipole || a_is_Quadrupole)
-        *(idat.t1) += idat.sw * indirect_Ta;
+        idat.t1 += idat.sw * indirect_Ta;
       
       if (b_is_Dipole || b_is_Quadrupole)
-        *(idat.t2) += idat.sw * indirect_Tb;
+        idat.t2 += idat.sw * indirect_Tb;
     }
     return;
   }
@@ -1217,8 +1213,8 @@ namespace OpenMD {
     if (i_is_Fluctuating) {
       // We're now doing all of the self pieces for fluctuating charges in
       // explicit self interactions.
-      // C_a += *(sdat.flucQ);
-      flucQ_->getSelfInteraction(sdat.atid, *(sdat.flucQ), selfPot, fqf );
+      // C_a += sdat.flucQ;
+      flucQ_->getSelfInteraction(sdat.atid, sdat.flucQ, selfPot, fqf );
     }
 
     switch (summationMethod_) {
@@ -1246,9 +1242,9 @@ namespace OpenMD {
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
       if (i_is_Charge) {
-        selfPot += selfMult1_ * pre11_ * C_a * (C_a + *(sdat.skippedCharge));
+        selfPot += selfMult1_ * pre11_ * C_a * (C_a + sdat.skippedCharge);
         // if (i_is_Fluctuating) {
-        //  fqf -= selfMult1_*pre11_*(2.0*C_a + *(sdat.skippedCharge));
+        //  fqf -= selfMult1_*pre11_*(2.0*C_a + sdat.skippedCharge);
         // }
       }
       if (i_is_Dipole)
@@ -1274,8 +1270,12 @@ namespace OpenMD {
     if (sdat.isSelected)
       sdat.selePot[ELECTROSTATIC_FAMILY] += selfPot;
 
+    if (sdat.doParticlePot) {
+      sdat.particlePot += selfPot;
+    }
+
     if (i_is_Fluctuating)
-      *(sdat.flucQfrc) += fqf;
+      sdat.flucQfrc += fqf;
   }
 
 

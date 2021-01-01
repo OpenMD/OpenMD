@@ -942,17 +942,17 @@ namespace OpenMD {
     if ( idat.rij < data1.rcut) {
       m = 1.0;
       if (data1.isFluctuatingCharge) {
-        m = (oss_ * data1.nValence - *(idat.flucQ1)) / (oss_ * data1.nMobile);
+        m = (oss_ * data1.nValence - idat.flucQ1) / (oss_ * data1.nMobile);
       }
-      *(idat.rho2) += m * data1.rho->getValueAt( idat.rij );
+      idat.rho2 += m * data1.rho->getValueAt( idat.rij );
     }
 
     if ( idat.rij < data2.rcut) {
       m = 1.0;
       if (data2.isFluctuatingCharge) {
-        m = (oss_ * data2.nValence - *(idat.flucQ2)) / (oss_ * data2.nMobile);
+        m = (oss_ * data2.nValence - idat.flucQ2) / (oss_ * data2.nMobile);
       }
-      *(idat.rho1) += m * data2.rho->getValueAt( idat.rij );
+      idat.rho1 += m * data2.rho->getValueAt( idat.rij );
     }
 
     return;
@@ -963,18 +963,17 @@ namespace OpenMD {
     if (!initialized_) initialize();
     EAMAtomData &data1 = EAMdata[ EAMtids[sdat.atid] ];
 
-    data1.F->getValueAndDerivativeAt( *(sdat.rho), *(sdat.frho),
-                                      *(sdat.dfrhodrho) );
+    data1.F->getValueAndDerivativeAt( sdat.rho, sdat.frho,
+                                      sdat.dfrhodrho );
 
-    sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
-
-    if (sdat.isSelected)
-      sdat.selePot[METALLIC_EMBEDDING_FAMILY] += *(sdat.frho);
+    sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += sdat.frho;
     
-    if (sdat.doParticlePot) {
-      *(sdat.particlePot) += *(sdat.frho);
-    }
-
+    if (sdat.isSelected)
+      sdat.selePot[METALLIC_EMBEDDING_FAMILY] += sdat.frho;
+    
+    if (sdat.doParticlePot)
+      sdat.particlePot += sdat.frho;
+   
     return;
   }
 
@@ -1002,11 +1001,9 @@ namespace OpenMD {
     RealType phab(0.0), dvpdr(0.0);
     RealType drhoidr(0.0), drhojdr(0.0), dudr(0.0);
     // For DREAM, we need nValence (Va, Vb), nMobile (Ma, Mb), for
-    // each type, fluctuating charge values (qi, qj), and density
-    // scaling variables (si, sj) for each atom:
+    // each type, and density scaling variables (si, sj) for each atom:
     RealType Va(0.0), Vb(0.0);
     RealType Ma(0.0), Mb(0.0);
-    RealType qi(0.0), qj(0.0);    
     RealType si(1.0), sj(1.0);
 
     rhat =  idat.d / idat.rij;
@@ -1030,14 +1027,12 @@ namespace OpenMD {
       if (data1.isFluctuatingCharge) {
 	Va = oss_ * data1.nValence;
 	Ma = oss_ * data1.nMobile;
-	qi = *(idat.flucQ1);
-	si = (Va -  qi) / Ma;
+	si = (Va -  idat.flucQ1) / Ma;
       }
       if (data2.isFluctuatingCharge) {
 	Vb = oss_ * data2.nValence;
 	Mb = oss_ * data2.nMobile;
-	qj = *(idat.flucQ2);
-	sj = (Vb - qj) / Mb;
+	sj = (Vb - idat.flucQ2) / Mb;
       }
       
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
@@ -1090,10 +1085,10 @@ namespace OpenMD {
 	std::pair<RealType, RealType> gj = std::make_pair(1.0, 0.0);
 
 	if (data1.isFluctuatingCharge) {
-          gi = gFunc(qi, Va, Ma);
+          gi = gFunc(idat.flucQ1, Va, Ma);
         }
         if (data2.isFluctuatingCharge) {
-          gj = gFunc(qj, Vb, Mb);
+          gj = gFunc(idat.flucQ2, Vb, Mb);
         }
         
         if ( idat.rij < rci  && idat.rij < rcij ) {
@@ -1131,7 +1126,7 @@ namespace OpenMD {
     drhoidr = si * drha;
     drhojdr = sj * drhb;
 
-    dudr = drhojdr * *(idat.dfrho1) + drhoidr * *(idat.dfrho2) + dvpdr;
+    dudr = drhojdr * idat.dfrho1 + drhoidr * idat.dfrho2 + dvpdr;
 
     idat.f1 += rhat * dudr;
 
@@ -1145,11 +1140,11 @@ namespace OpenMD {
       // contribute.  This then requires recomputing the density
       // functional for atom2 as well.
 
-      *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha )
-        - *(idat.frho2);
+      idat.particlePot1 += data2.F->getValueAt( idat.rho2 - rha )
+        - idat.frho2;
 
-      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb )
-        - *(idat.frho1);
+      idat.particlePot2 += data1.F->getValueAt( idat.rho1 - rhb )
+        - idat.frho1;
     }
 
     idat.pot[METALLIC_PAIR_FAMILY] += phab;
@@ -1161,10 +1156,10 @@ namespace OpenMD {
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      idat.dVdFQ1 -= *(idat.dfrho2) * rha / Ma;
+      idat.dVdFQ1 -= idat.dfrho2 * rha / Ma;
     }
     if (data2.isFluctuatingCharge) {
-      idat.dVdFQ2 -= *(idat.dfrho1) * rhb / Mb;
+      idat.dVdFQ2 -= idat.dfrho1 * rhb / Mb;
     }
 
     return;

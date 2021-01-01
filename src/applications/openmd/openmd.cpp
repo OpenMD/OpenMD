@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics    |\n"<<
       "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).       |\n"<<
       "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                                  |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2019 by the     |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2021 by the     |\n"<<
       "  |     /_/                                   University of Notre Dame.      |\n"<<
       "  |           http://openmd.org                                              |\n"<<
       "  |                                                                          |\n"<<

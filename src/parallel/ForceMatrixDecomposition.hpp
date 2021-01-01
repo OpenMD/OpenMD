@@ -67,7 +67,7 @@ namespace OpenMD {
     void distributeData();
     void collectIntermediateData();
     void distributeIntermediateData();
-    void collectSelfData(SelfData &sdat);
+    void collectSelfData();
     void collectData();
 
     // neighbor list routines
@@ -104,6 +104,7 @@ namespace OpenMD {
     // filling interaction blocks with pointers
     void fillInteractionData(InteractionData &idat, int atom1, int atom2, bool newAtom1 = true);
     void unpackInteractionData(InteractionData &idat, int atom1, int atom2);
+    void unpackPrePairData(InteractionData &idat, int atom1, int atom2);
 
   private:     
     int nLocal_;

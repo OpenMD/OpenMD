@@ -799,27 +799,15 @@ namespace OpenMD {
       }
     }
 
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = pairwisePot[ii];
-      RealType ploc2 = 0.0;
-      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      pairwisePot[ii] = ploc2;
-    }
-
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = excludedPot[ii];
-      RealType ploc2 = 0.0;
-      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      excludedPot[ii] = ploc2;
-    }
-
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = selectedPot[ii];
-      RealType ploc2 = 0.0;
-      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      selectedPot[ii] = ploc2;
-    }
-
+    MPI_Allreduce(MPI_IN_PLACE, &pairwisePot[0], N_INTERACTION_FAMILIES,
+		  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
+    MPI_Allreduce(MPI_IN_PLACE, &excludedPot[0], N_INTERACTION_FAMILIES,
+		  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
+    MPI_Allreduce(MPI_IN_PLACE, &selectedPot[0], N_INTERACTION_FAMILIES,
+		  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
     // Here be dragons.
     MPI_Comm col = colComm.getComm();
 
@@ -834,35 +822,19 @@ namespace OpenMD {
    * Collects information obtained during the post-pair (and embedding
    * functional) loops onto local data structures.
    */
-  void ForceMatrixDecomposition::collectSelfData(SelfData &sdat) {
+  void ForceMatrixDecomposition::collectSelfData() {
     
-    selfPot += sdat.selfPot;
-    excludedSelfPot += sdat.excludedPot;
-    selectedSelfPot += sdat.selePot;    
-
 #ifdef IS_MPI
-    snap_ = sman_->getCurrentSnapshot();
-    storageLayout_ = sman_->getStorageLayout();
+    MPI_Allreduce(MPI_IN_PLACE, &selfPot[0], N_INTERACTION_FAMILIES,
+		  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = selfPot[ii];
-      RealType ploc2 = 0.0;
-      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      selfPot[ii] = ploc2;
-    }
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = excludedSelfPot[ii];
-      RealType ploc2 = 0.0;
-      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      excludedSelfPot[ii] = ploc2;
-    }
-    for (int ii = 0; ii < N_INTERACTION_FAMILIES; ii++) {
-      RealType ploc1 = selectedSelfPot[ii];
-      RealType ploc2 = 0.0;
-      MPI_Allreduce(&ploc1, &ploc2, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-      selectedSelfPot[ii] = ploc2;
-    }
+    MPI_Allreduce(MPI_IN_PLACE, &excludedSelfPot[0], N_INTERACTION_FAMILIES,
+		  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    
+    MPI_Allreduce(MPI_IN_PLACE, &selectedSelfPot[0], N_INTERACTION_FAMILIES,
+		  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
+
   }
 
   int& ForceMatrixDecomposition::getNAtomsInRow() {   
@@ -1053,7 +1025,7 @@ namespace OpenMD {
 
     return false;
   }
-
+  
 
   void ForceMatrixDecomposition::addForceToAtomRow(int atom1, Vector3d fg){
 #ifdef IS_MPI
@@ -1091,53 +1063,53 @@ namespace OpenMD {
       }
       
       if (storageLayout_ & DataStorage::dslAmat) {
-        idat.A1 = &(atomRowData.aMat[atom1]);
-        idat.A2 = &(atomColData.aMat[atom2]);
+        idat.A1 = atomRowData.aMat[atom1];
+        idat.A2 = atomColData.aMat[atom2];
       }
-      
+
       if (storageLayout_ & DataStorage::dslTorque) {
-        idat.t1 = &(atomRowData.torque[atom1]);
-        idat.t2 = &(atomColData.torque[atom2]);
+        idat.t1 = atomRowData.torque[atom1];
+        idat.t2 = atomColData.torque[atom2];
       }
-      
+
       if (storageLayout_ & DataStorage::dslDipole) {
-        idat.dipole1 = &(atomRowData.dipole[atom1]);
-        idat.dipole2 = &(atomColData.dipole[atom2]);
+        idat.D_1 = atomRowData.dipole[atom1];
+        idat.D_2 = atomColData.dipole[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslQuadrupole) {
-        idat.quadrupole1 = &(atomRowData.quadrupole[atom1]);
-        idat.quadrupole2 = &(atomColData.quadrupole[atom2]);
+        idat.Q_1 = atomRowData.quadrupole[atom1];
+        idat.Q_2 = atomColData.quadrupole[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslDensity) {
-        idat.rho1 = &(atomRowData.density[atom1]);
-        idat.rho2 = &(atomColData.density[atom2]);
+        idat.rho1 = atomRowData.density[atom1];
+        idat.rho2 = atomColData.density[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslFunctional) {
-        idat.frho1 = &(atomRowData.functional[atom1]);
-        idat.frho2 = &(atomColData.functional[atom2]);
+        idat.frho1 = atomRowData.functional[atom1];
+        idat.frho2 = atomColData.functional[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-        idat.dfrho1 = &(atomRowData.functionalDerivative[atom1]);
-        idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
+        idat.dfrho1 = atomRowData.functionalDerivative[atom1];
+        idat.dfrho2 = atomColData.functionalDerivative[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslParticlePot) {
-        idat.particlePot1 = &(atomRowData.particlePot[atom1]);
-        idat.particlePot2 = &(atomColData.particlePot[atom2]);
+        idat.particlePot1 = atomRowData.particlePot[atom1];
+        idat.particlePot2 = atomColData.particlePot[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslSkippedCharge) {              
-        idat.skippedCharge1 = &(atomRowData.skippedCharge[atom1]);
-        idat.skippedCharge2 = &(atomColData.skippedCharge[atom2]);
+        idat.skippedCharge1 = atomRowData.skippedCharge[atom1];
+        idat.skippedCharge2 = atomColData.skippedCharge[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslFlucQPosition) {              
-        idat.flucQ1 = &(atomRowData.flucQPos[atom1]);
-        idat.flucQ2 = &(atomColData.flucQPos[atom2]);
+        idat.flucQ1 = atomRowData.flucQPos[atom1];
+        idat.flucQ2 = atomColData.flucQPos[atom2];
       }
       
 #else
@@ -1152,53 +1124,53 @@ namespace OpenMD {
       }
       
       if (storageLayout_ & DataStorage::dslAmat) {
-        idat.A1 = &(snap_->atomData.aMat[atom1]);
-        idat.A2 = &(snap_->atomData.aMat[atom2]);
+        idat.A1 = snap_->atomData.aMat[atom1];
+        idat.A2 = snap_->atomData.aMat[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslTorque) {
-        idat.t1 = &(snap_->atomData.torque[atom1]);
-        idat.t2 = &(snap_->atomData.torque[atom2]);
+        idat.t1 = snap_->atomData.torque[atom1];
+        idat.t2 = snap_->atomData.torque[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslDipole) {
-        idat.dipole1 = &(snap_->atomData.dipole[atom1]);
-        idat.dipole2 = &(snap_->atomData.dipole[atom2]);
+        idat.D_1 = snap_->atomData.dipole[atom1];
+        idat.D_2 = snap_->atomData.dipole[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslQuadrupole) {
-        idat.quadrupole1 = &(snap_->atomData.quadrupole[atom1]);
-        idat.quadrupole2 = &(snap_->atomData.quadrupole[atom2]);
+        idat.Q_1 = snap_->atomData.quadrupole[atom1];
+        idat.Q_2 = snap_->atomData.quadrupole[atom2];
       }
       
-      if (storageLayout_ & DataStorage::dslDensity) {     
-        idat.rho1 = &(snap_->atomData.density[atom1]);
-        idat.rho2 = &(snap_->atomData.density[atom2]);
+      if (storageLayout_ & DataStorage::dslDensity) {
+        idat.rho1 = snap_->atomData.density[atom1];       
+        idat.rho2 = snap_->atomData.density[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslFunctional) {
-        idat.frho1 = &(snap_->atomData.functional[atom1]);
-        idat.frho2 = &(snap_->atomData.functional[atom2]);
+        idat.frho1 = snap_->atomData.functional[atom1];
+        idat.frho2 = snap_->atomData.functional[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-        idat.dfrho1 = &(snap_->atomData.functionalDerivative[atom1]);
-        idat.dfrho2 = &(snap_->atomData.functionalDerivative[atom2]);
+        idat.dfrho1 = snap_->atomData.functionalDerivative[atom1];
+        idat.dfrho2 = snap_->atomData.functionalDerivative[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslParticlePot) {
-        idat.particlePot1 = &(snap_->atomData.particlePot[atom1]);
-        idat.particlePot2 = &(snap_->atomData.particlePot[atom2]);
+        idat.particlePot1 = snap_->atomData.particlePot[atom1];
+        idat.particlePot2 = snap_->atomData.particlePot[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslSkippedCharge) {
-        idat.skippedCharge1 = &(snap_->atomData.skippedCharge[atom1]);
-        idat.skippedCharge2 = &(snap_->atomData.skippedCharge[atom2]);
+        idat.skippedCharge1 = snap_->atomData.skippedCharge[atom1];
+        idat.skippedCharge2 = snap_->atomData.skippedCharge[atom2];
       }
       
       if (storageLayout_ & DataStorage::dslFlucQPosition) {              
-        idat.flucQ1 = &(snap_->atomData.flucQPos[atom1]);
-        idat.flucQ2 = &(snap_->atomData.flucQPos[atom2]);
+        idat.flucQ1 = snap_->atomData.flucQPos[atom1];
+        idat.flucQ2 = snap_->atomData.flucQPos[atom2];
       }
 #endif
       
@@ -1214,43 +1186,43 @@ namespace OpenMD {
     }
 
     if (storageLayout_ & DataStorage::dslAmat) {
-      idat.A2 = &(atomColData.aMat[atom2]);
+      idat.A2 = atomColData.aMat[atom2];
     }
     
     if (storageLayout_ & DataStorage::dslTorque) {
-      idat.t2 = &(atomColData.torque[atom2]);
+      idat.t2 = atomColData.torque[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslDipole) {
-      idat.dipole2 = &(atomColData.dipole[atom2]);
+      idat.D_2 = atomColData.dipole[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslQuadrupole) {
-      idat.quadrupole2 = &(atomColData.quadrupole[atom2]);
+      idat.Q_2 = atomColData.quadrupole[atom2];
     }
 
-    if (storageLayout_ & DataStorage::dslDensity) {
-      idat.rho2 = &(atomColData.density[atom2]);
+    if (storageLayout_ & DataStorage::dslDensity) {      
+      idat.rho2 = atomColData.density[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslFunctional) {
-      idat.frho2 = &(atomColData.functional[atom2]);
+      idat.frho2 = atomColData.functional[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
+      idat.dfrho2 = atomColData.functionalDerivative[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslParticlePot) {
-      idat.particlePot2 = &(atomColData.particlePot[atom2]);
+      idat.particlePot2 = atomColData.particlePot[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslSkippedCharge) {              
-      idat.skippedCharge2 = &(atomColData.skippedCharge[atom2]);
+      idat.skippedCharge2 = atomColData.skippedCharge[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslFlucQPosition) {
-      idat.flucQ2 = &(atomColData.flucQPos[atom2]);
+      idat.flucQ2 = atomColData.flucQPos[atom2];
     }
 
 #else   
@@ -1263,43 +1235,43 @@ namespace OpenMD {
     }
 
     if (storageLayout_ & DataStorage::dslAmat) {
-      idat.A2 = &(snap_->atomData.aMat[atom2]);
+      idat.A2 = snap_->atomData.aMat[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslTorque) {
-      idat.t2 = &(snap_->atomData.torque[atom2]);
+      idat.t2 = snap_->atomData.torque[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslDipole) {
-      idat.dipole2 = &(snap_->atomData.dipole[atom2]);
+      idat.D_2 = snap_->atomData.dipole[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslQuadrupole) {
-      idat.quadrupole2 = &(snap_->atomData.quadrupole[atom2]);
+      idat.Q_2 = snap_->atomData.quadrupole[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {     
-      idat.rho2 = &(snap_->atomData.density[atom2]);
+      idat.rho2 = snap_->atomData.density[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslFunctional) {
-      idat.frho2 = &(snap_->atomData.functional[atom2]);
+      idat.frho2 = snap_->atomData.functional[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      idat.dfrho2 = &(snap_->atomData.functionalDerivative[atom2]);
+      idat.dfrho2 = snap_->atomData.functionalDerivative[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslParticlePot) {
-      idat.particlePot2 = &(snap_->atomData.particlePot[atom2]);
+      idat.particlePot2 = snap_->atomData.particlePot[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslSkippedCharge) {
-      idat.skippedCharge2 = &(snap_->atomData.skippedCharge[atom2]);
+      idat.skippedCharge2 = snap_->atomData.skippedCharge[atom2];
     }
 
     if (storageLayout_ & DataStorage::dslFlucQPosition) {              
-      idat.flucQ2 = &(snap_->atomData.flucQPos[atom2]);
+      idat.flucQ2 = snap_->atomData.flucQPos[atom2];
     }
 
 #endif
@@ -1307,7 +1279,7 @@ namespace OpenMD {
   }
   
   void ForceMatrixDecomposition::unpackInteractionData(InteractionData &idat,
-                                                       int atom1, int atom2) {  
+                                                       int atom1, int atom2) {
 #ifdef IS_MPI
     pot_row[atom1] += 0.5 * idat.pot;
     pot_col[atom2] += 0.5 * idat.pot;
@@ -1332,6 +1304,16 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslSitePotential) {              
       atomRowData.sitePotential[atom1] += idat.sPot1;
       atomColData.sitePotential[atom2] += idat.sPot2;
+    }
+
+    if (storageLayout_ & DataStorage::dslTorque) {
+      atomRowData.torque[atom1] = idat.t1;
+      atomColData.torque[atom2] = idat.t2;
+    }
+    
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      atomRowData.skippedCharge[atom1] = idat.skippedCharge1;
+      atomColData.skippedCharge[atom2] = idat.skippedCharge2;
     }
 
 #else
@@ -1364,6 +1346,35 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslSitePotential) {              
       snap_->atomData.sitePotential[atom1] += idat.sPot1;
       snap_->atomData.sitePotential[atom2] += idat.sPot2;
+    }
+
+    if (storageLayout_ & DataStorage::dslTorque) {
+      snap_->atomData.torque[atom1] = idat.t1;
+      snap_->atomData.torque[atom2] = idat.t2;
+    }
+
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      snap_->atomData.skippedCharge[atom1] = idat.skippedCharge1;
+      snap_->atomData.skippedCharge[atom2] = idat.skippedCharge2;
+    }
+
+#endif
+    
+  }
+  void ForceMatrixDecomposition::unpackPrePairData(InteractionData &idat,
+						   int atom1, int atom2) {
+#ifdef IS_MPI
+    
+    if (storageLayout_ & DataStorage::dslDensity) {
+      atomRowData.density[atom1] = idat.rho1;
+      atomColData.density[atom2] = idat.rho2;
+    }
+
+#else
+
+    if (storageLayout_ & DataStorage::dslDensity) {
+      snap_->atomData.density[atom1] = idat.rho1;
+      snap_->atomData.density[atom2] = idat.rho2;
     }
 
 #endif

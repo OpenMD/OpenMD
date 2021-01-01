@@ -289,8 +289,8 @@ namespace OpenMD {
     RealType xpap2  = mixer.xpap2; 
     RealType xpapi2 = mixer.xpapi2;
 
-    Vector3d ul1 = idat.A1->getRow(2);
-    Vector3d ul2 = idat.A2->getRow(2);
+    Vector3d ul1 = idat.A1.getRow(2);
+    Vector3d ul2 = idat.A2.getRow(2);
 
     RealType a, b, g;
     
@@ -370,8 +370,8 @@ namespace OpenMD {
       idat.selePot[VANDERWAALS_FAMILY] += U * idat.sw;
 
     idat.f1 += (dUdr * rhat + dUda * ul1 + dUdb * ul2) * idat.sw;
-    *(idat.t1) += (dUda * rxu1 - dUdg * uxu) * idat.sw;
-    *(idat.t2) += (dUdb * rxu2 + dUdg * uxu) * idat.sw;
+    idat.t1 += (dUda * rxu1 - dUdg * uxu) * idat.sw;
+    idat.t2 += (dUdb * rxu2 + dUdg * uxu) * idat.sw;
     idat.vpair += U;
     return;
 

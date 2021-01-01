@@ -107,7 +107,7 @@ namespace OpenMD {
     virtual void collectIntermediateData() = 0;
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
-    virtual void collectSelfData(SelfData &sdat) = 0;
+    virtual void collectSelfData() = 0;
     virtual potVec getSelfPotential() { return selfPot; }
     virtual potVec getPairwisePotential() { return pairwisePot; }
     virtual potVec getExcludedPotential() { return excludedPot; }
@@ -151,11 +151,20 @@ namespace OpenMD {
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
     virtual Vector3d& getAtomVelocityColumn(int atom2) = 0;
 
-    // filling interaction blocks with pointers
-    virtual void fillInteractionData(InteractionData &idat, int atom1, int atom2, bool newAtom1 = true) = 0;
-    virtual void unpackInteractionData(InteractionData &idat, int atom1, int atom2) = 0;
+    // filling & unpacking interaction data from Snapshot or Row/Col data
+    virtual void fillInteractionData(InteractionData &idat, int atom1,
+				     int atom2, bool newAtom1 = true) = 0;
+    virtual void unpackPrePairData(InteractionData &idat, int atom1,
+				   int atom2) = 0;
+    virtual void unpackInteractionData(InteractionData &idat, int atom1,
+				       int atom2) = 0;
 
-    virtual void fillSelfData(SelfData &sdat, int atom1);
+    // filling & unpacking self data from Snapshot data
+    virtual void fillSelfData(SelfData &sdat, int atom);
+    virtual void unpackSelfData(SelfData &sdat, int atom);
+
+    virtual void fillPreForceData(SelfData &sdat, int atom);
+    virtual void unpackPreForceData(SelfData &sdat, int atom);
     
     virtual void addToHeatFlux(Vector3d hf);
     virtual void setHeatFlux(Vector3d hf);

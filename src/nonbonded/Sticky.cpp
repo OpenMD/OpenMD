@@ -180,17 +180,17 @@ namespace OpenMD {
       RealType r3 = idat.r2 * idat.rij;
       RealType r5 = r3 * idat.r2;
       
-      RotMat3x3d A1trans = idat.A1->transpose();
-      RotMat3x3d A2trans = idat.A2->transpose();
+      RotMat3x3d A1trans = idat.A1.transpose();
+      RotMat3x3d A2trans = idat.A2.transpose();
       
       // rotate the inter-particle separation into the two different
       // body-fixed coordinate systems:
       
-      Vector3d ri = *(idat.A1) * idat.d;
+      Vector3d ri = idat.A1 * idat.d;
       
       // negative sign because this is the vector from j to i:
       
-      Vector3d rj = - *(idat.A2) * idat.d;
+      Vector3d rj = - idat.A2 * idat.d;
       
       RealType xi = ri.x();
       RealType yi = ri.y();
@@ -307,25 +307,22 @@ namespace OpenMD {
         dspdr = 0.0;
       }
       
-      
-      
-      idat.vpair += RealType(0.5)*(v0*s*w + v0p*sp*wp);
-      idat.pot[HYDROGENBONDING_FAMILY] += RealType(0.5)*(v0*s*w + v0p*sp*wp)* idat.sw ;
+      idat.vpair += 0.5 * (v0*s*w + v0p*sp*wp);
+      idat.pot[HYDROGENBONDING_FAMILY] += 0.5 * (v0*s*w + v0p*sp*wp)* idat.sw;
       if (idat.isSelected)
         idat.selePot[HYDROGENBONDING_FAMILY] += 0.5 * (v0*s*w +
 						       v0p*sp*wp)* idat.sw;
-
       
       // do the torques first since they are easy:
       // remember that these are still in the body-fixed axes
       
-      Vector3d ti = RealType(0.5)* idat.sw *(v0*s*dwidu + v0p*sp*dwipdu);
-      Vector3d tj = RealType(0.5)* idat.sw *(v0*s*dwjdu + v0p*sp*dwjpdu);
+      Vector3d ti = 0.5 * idat.sw *(v0*s*dwidu + v0p*sp*dwipdu);
+      Vector3d tj = 0.5 * idat.sw *(v0*s*dwjdu + v0p*sp*dwjpdu);
       
       // go back to lab frame using transpose of rotation matrix:
       
-      *(idat.t1) += A1trans * ti;
-      *(idat.t2) += A2trans * tj;
+      idat.t1 += A1trans * ti;
+      idat.t2 += A2trans * tj;
       
       // Now, on to the forces:
       
@@ -339,8 +336,8 @@ namespace OpenMD {
       
       // now assemble these with the radial-only terms:
       
-      idat.f1 += RealType(0.5) * ((v0*dsdr*w + v0p*dspdr*wp) * idat.d / 
-				  idat.rij  + fii - fjj);
+      idat.f1 += 0.5 * ((v0*dsdr*w + v0p*dspdr*wp) * idat.d /
+			idat.rij  + fii - fjj);
       
     }
     
