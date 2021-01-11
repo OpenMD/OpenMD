@@ -111,7 +111,8 @@ namespace OpenMD {
     
     RealType ZhouRho(RealType r, RealType re, RealType fe,
                      RealType beta, RealType lambda);
-    std::pair<RealType, RealType> gFunc(RealType q, RealType nV, RealType nM);
+    RealType gFunc(RealType q, RealType nV, RealType nM);
+    RealType gPrime(RealType q, RealType nV, RealType nM);
     RealType Zhou2001Functional(RealType rho, RealType rhoe,
                                 std::vector<RealType> Fn,
                                 std::vector<RealType> F, RealType Fe,
