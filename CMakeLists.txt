@@ -298,6 +298,7 @@ nanoparticleBuilder
 nanorodBuilder
 nanorod_pentBuilder
 omd2omd
+equationofstate
 thermalizer
 recenter
 elasticConstants
@@ -618,6 +619,10 @@ src/applications/omd2omd/omd2omd.cpp
 src/applications/omd2omd/omd2omdCmd.cpp
 )
 
+set (EOSSOURCE
+src/applications/eos/equationofstate.cpp
+src/applications/eos/equationofstateCmd.cpp
+)
 set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CollectiveDipoleDisplacement.cpp
@@ -795,6 +800,8 @@ add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Hydro openmd_single openmd_core openmd_single openmd_core)
 add_executable(omd2omd ${OMD2OMDSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(omd2omd openmd_single openmd_core openmd_single openmd_core)
+add_executable(equationofstate ${EOSSOURCE} ${GETOPT_SOURCE})
+target_link_libraries(equationofstate openmd_single openmd_core openmd_single openmd_core)
 add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(StaticProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
@@ -932,6 +939,7 @@ INSTALL(TARGETS
         nanorodBuilder
         nanorod_pentBuilder
         omd2omd
+        equationofstate
         thermalizer
         recenter
         elasticConstants
