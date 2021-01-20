@@ -32,4 +32,4 @@ option  "translateZ"    v       "translate all z coordinates by some amount"    
 option	"rotatePhi"	p	"rotate all coordinates Euler angle Phi"	        double default="0.0"		no
 option	"rotateTheta"	q	"rotate all coordinates Euler angle Theta"              double default="0.0"		no
 option	"rotatePsi"	r	"rotate all coordinates Euler angle Psi"                double default="0.0"		no
-
+option  "repairMolecules" m     "rewrap molecules around the molecular center of mass"  int    default="1"              no

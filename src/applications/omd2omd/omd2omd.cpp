@@ -162,7 +162,9 @@ int main(int argc, char* argv[]){
   Snapshot* newSnap;
   Vector3d oldPos;
   Vector3d newPos;
+  Vector3d relPos;
   Vector3d COM;
+  Vector3d molCOM;
   Thermo thermo(oldInfo);
   AtomType* atype;
 
@@ -189,6 +191,12 @@ int main(int argc, char* argv[]){
     int newIndex = 0;
     for (mol = oldInfo->beginMolecule(miter); mol != NULL; 
          mol = oldInfo->nextMolecule(miter)) {
+
+      
+      if (args_info.repairMolecules_arg == 1) {
+	molCOM = mol->getCom();
+      }
+
       
       for (int ii = 0; ii < repeat.x(); ii++) {
         for (int jj = 0; jj < repeat.y(); jj++) {
@@ -197,8 +205,17 @@ int main(int argc, char* argv[]){
             Vector3d trans = Vector3d(ii, jj, kk);
             for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
                  sd = mol->nextIntegrableObject(iiter)) {
-	      oldPos = sd->getPos() - COM + translate;
-	      oldSnap->wrapVector(oldPos);
+	      if (args_info.repairMolecules_arg == 1) {
+		relPos = sd->getPos() - molCOM;
+		oldPos = molCOM - COM + translate;
+		oldSnap->wrapVector(relPos);
+		oldSnap->wrapVector(oldPos);
+		oldPos += relPos;
+	      } else {
+		oldPos = sd->getPos() - COM + translate;
+		oldSnap->wrapVector(oldPos);			      
+	      }
+
 	      newPos = rotMatrix*oldPos + trans * oldHmat;
 	      sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos( newPos );
