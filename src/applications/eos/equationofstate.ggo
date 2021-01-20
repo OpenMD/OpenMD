@@ -1,0 +1,26 @@
+# Input file for gengetopt. This file generates equationofstateCmd.cpp and 
+# equationofstateCmd.hpp for parsing command line arguments using getopt and
+# getoptlong.  gengetopt is available from:
+#
+#     http://www.gnu.org/software/gengetopt/gengetopt.html
+#
+# Note that the OpenMD build process automatically sets the version string
+# below.
+
+args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=equationofstateCmd --c-extension=cpp --header-extension=hpp"
+
+package "equationofstate"
+version "" 
+
+purpose
+"This takes omd file and generates equation of state of crystal.
+Example:
+  equationofstate -i Al2O3.omd -o Al2O3.eos -s 0.5 -f 1.5 -n 50"
+
+# Options
+option	"input"         i	"use specified input (.omd) file"          string	typestr="filename" 	yes
+option	"output"	o	"use specified output file"				string	typestr="filename"	yes
+option	"initial"	s	"initial affine scale"		double	default="0.5"		no
+option	"final"	e	"final affine scale"		double	default="1.5"		no
+option	"number"	n	"number of data points"		int	default="50"		no
+
