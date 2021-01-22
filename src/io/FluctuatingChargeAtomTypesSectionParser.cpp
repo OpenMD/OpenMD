@@ -80,11 +80,18 @@ namespace OpenMD {
       simError();
     }
 
+    // conversion to kcal / mol
     eus_  = options_.getEnergyUnitScaling();
+    // conversion to electrons
     cus_  = options_.getChargeUnitScaling();
+    // conversion to angstroms
     dus_  = options_.getDistanceUnitScaling();
-    oss_  = options_.getOxidationStateScaling();
+    // oxidation state scaling
+    oss_ = options_.getOxidationStateScaling();
+
+    // electronegativity conversion
     RealType chius = eus_ / cus_;
+    // curvature (hardness) conversion
     RealType curvus = eus_ / (cus_ * cus_);
 
     string atomTypeName = tokenizer.nextToken();
@@ -106,8 +113,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-
-
+    
     RealType chargeMass = tokenizer.nextTokenAsDouble();
     FluctuatingTypeEnum fqt = getFluctuatingTypeEnum(tokenizer.nextToken());
 
@@ -143,6 +149,10 @@ namespace OpenMD {
       break;
         
     case fqtEAMPolynomial:
+
+      // For DR-EAM v1, oxidation state scaling is built in to
+      // fluctuating charge parameters and nValence.
+      
       if (nTokens < 3 || nTokens % 2 != 1) {
         sprintf(painCave.errMsg,
                 "FluctuatingChargeAtomTypesSectionParser Error: "
@@ -151,7 +161,7 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType nValence = tokenizer.nextTokenAsDouble() / oss_;
+        RealType nValence = tokenizer.nextTokenAsDouble();
         nTokens -= 1;
         
         DoublePolynomial vself;
@@ -172,6 +182,13 @@ namespace OpenMD {
       break;
 
     case fqtDREAM2:
+
+      // For DR-EAM v2, oxidation state scaling (oss_) is a force
+      // field parameter, fluctuating charge parameters, nValence, and
+      // nMobile in the force field file should assume unit charge
+      // oxidation state fits to ionization states and electron
+      // affinities.
+      
       if (nTokens < 3 || nTokens % 2 != 0) {
         sprintf(painCave.errMsg,
                 "FluctuatingChargeAtomTypesSectionParser Error: "
@@ -181,10 +198,10 @@ namespace OpenMD {
         simError();
       } else {
         // Neutral atom valence count
-        RealType nValence = tokenizer.nextTokenAsDouble();
+        RealType nValence = tokenizer.nextTokenAsDouble() * oss_;
         nTokens -= 1;
         // Mobile electron count
-        RealType nMobile = tokenizer.nextTokenAsDouble();
+        RealType nMobile = tokenizer.nextTokenAsDouble() * oss_;
         nTokens -= 1;                
         
         DoublePolynomial vself;
@@ -195,9 +212,8 @@ namespace OpenMD {
 
         for (int i = 0; i < nPairs; ++i) {          
           power = tokenizer.nextTokenAsInt();
-          coefficient = tokenizer.nextTokenAsDouble() * eus_ / pow(cus_, power);
-          // Equalize the electrostatic and self energy 
-          coefficient *= oss_ * oss_;
+          coefficient = tokenizer.nextTokenAsDouble() * eus_ / pow(oss_ * cus_, power);
+	  
           vself.setCoefficient(power, coefficient);
         }
 

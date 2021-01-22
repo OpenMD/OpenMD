@@ -422,8 +422,6 @@ namespace OpenMD {
     else
       mixMeth_ = eamUnknownMix;
 
-    oss_ = fopts.getOxidationStateScaling();
-
     // find all of the EAM atom Types:
     EAMtypes.clear();
     EAMtids.clear();
@@ -950,9 +948,9 @@ namespace OpenMD {
       s = 1.0;
       if (data1.isFluctuatingCharge) {
 	if (mixMeth_ == eamDream2) 
-	  s = gFunc(idat.flucQ1, oss_ * data1.nValence, oss_ * data1.nMobile);
+	  s = gFunc(idat.flucQ1, data1.nValence, data1.nMobile);
 	else 
-	  s = (oss_ * data1.nValence - idat.flucQ1) / (oss_ * data1.nValence);	
+	  s = (data1.nValence - idat.flucQ1) / (data1.nValence);	
       }
       idat.rho2 += s * data1.rho->getValueAt( idat.rij );
     }
@@ -961,9 +959,9 @@ namespace OpenMD {
       s = 1.0;
       if (data2.isFluctuatingCharge) {
 	if (mixMeth_ == eamDream2) 
-	  s = gFunc(idat.flucQ2, oss_ * data2.nValence, oss_ * data2.nMobile);
+	  s = gFunc(idat.flucQ2, data2.nValence, data2.nMobile);
 	else
-	  s = (oss_ * data2.nValence - idat.flucQ2) / (oss_ * data2.nValence);	
+	  s = (data2.nValence - idat.flucQ2) / (data2.nValence);	
       }
       idat.rho1 += s * data2.rho->getValueAt( idat.rij );
     }
@@ -1039,16 +1037,16 @@ namespace OpenMD {
     if (hasFlucQ && !isExplicit) {
       
       if (data1.isFluctuatingCharge) {
-	Va = oss_ * data1.nValence;
-	Ma = oss_ * data1.nMobile;
+	Va = data1.nValence;
+	Ma = data1.nMobile;
 	if (mixMeth_ == eamDream2)
 	  si = gFunc(idat.flucQ1, Va, Ma);
 	else 
 	  si = (Va -  idat.flucQ1) / Va;
       }
       if (data2.isFluctuatingCharge) {
-	Vb = oss_ * data2.nValence;
-	Mb = oss_ * data2.nMobile;
+	Vb = data2.nValence;
+	Mb = data2.nMobile;
 	if (mixMeth_ == eamDream2)
 	  sj = gFunc(idat.flucQ2, Vb, Mb);
 	else

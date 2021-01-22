@@ -49,25 +49,40 @@ namespace OpenMD {
 
     ForceFieldOptions::ForceFieldOptions() {
       DefineOptionalParameter(Name, "Name");
-      DefineOptionalParameterWithDefaultValue(vdWtype, "vdWtype", "Lennard-Jones");
-      DefineOptionalParameterWithDefaultValue(DistanceMixingRule, "DistanceMixingRule", "arithmetic");
-      DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType", "sigma");
-      DefineOptionalParameterWithDefaultValue(EnergyMixingRule, "EnergyMixingRule", "geometric");
-      DefineOptionalParameterWithDefaultValue(EnergyUnitScaling, "EnergyUnitScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(MetallicEnergyUnitScaling, "MetallicEnergyUnitScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(ChargeUnitScaling, "ChargeUnitScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(OxidationStateScaling, "OxidationStateScaling", 0.4);
-      DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
+      DefineOptionalParameterWithDefaultValue(vdWtype, "vdWtype",
+					      "Lennard-Jones");
+      DefineOptionalParameterWithDefaultValue(DistanceMixingRule,
+					      "DistanceMixingRule",
+					      "arithmetic");
+      DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType",
+					      "sigma");
+      DefineOptionalParameterWithDefaultValue(EnergyMixingRule,
+					      "EnergyMixingRule", "geometric");
+      DefineOptionalParameterWithDefaultValue(EnergyUnitScaling,
+					      "EnergyUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(MetallicEnergyUnitScaling,
+					      "MetallicEnergyUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(DistanceUnitScaling,
+					      "DistanceUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(AngleUnitScaling,
+					      "AngleUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(ChargeUnitScaling,
+					      "ChargeUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(OxidationStateScaling,
+					      "OxidationStateScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(TorsionAngleConvention,
+					      "TorsionAngleConvention",
+					      "180_is_trans");
       DefineOptionalParameter(vdw12scale, "vdW-12-scale");
       DefineOptionalParameter(vdw13scale, "vdW-13-scale");
       DefineOptionalParameter(vdw14scale, "vdW-14-scale");
       DefineOptionalParameter(electrostatic12scale, "electrostatic-12-scale");
       DefineOptionalParameter(electrostatic13scale, "electrostatic-13-scale");
       DefineOptionalParameter(electrostatic14scale, "electrostatic-14-scale");
-      DefineOptionalParameterWithDefaultValue(BondForceConstantScaling, "BondForceConstantScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(BendForceConstantScaling, "BendForceConstantScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(BondForceConstantScaling,
+					      "BondForceConstantScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(BendForceConstantScaling,
+					      "BendForceConstantScaling", 1.0);
 
       // DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
       // DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);
@@ -77,12 +92,12 @@ namespace OpenMD {
       // DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
-      DefineOptionalParameterWithDefaultValue(EAMMixingMethod, "EAMMixingMethod", "Johnson");
+      DefineOptionalParameterWithDefaultValue(EAMMixingMethod,
+					      "EAMMixingMethod", "Johnson");
       DefineOptionalParameterWithDefaultValue(DelayedParameterCalculation,
                                               "delayedParameterCalculation",
                                               false);
       
-
       deprecatedKeywords_.insert("cutoffPolicy");
     }
 }
