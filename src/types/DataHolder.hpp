@@ -62,7 +62,7 @@ namespace OpenMD {
   class DataHolder {
   public:
     DataHolder() {}
-    virtual ~DataHolder() {}
+    virtual ~DataHolder() = default;
     
     template<class T>
     void assign(const std::string& keyword, T val) {

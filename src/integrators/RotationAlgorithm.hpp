@@ -57,14 +57,13 @@ namespace OpenMD {
    */
   class RotationAlgorithm {
   public:
-    virtual ~RotationAlgorithm(){ }
+    virtual ~RotationAlgorithm() = default;
     void rotate(StuntDouble* sd, Vector3d& ji,  RealType dt) {
       doRotate(sd, ji, dt);
     }
   private:
     virtual void doRotate(StuntDouble* sd, Vector3d& ji,  RealType dt) = 0;
-
   };
-
 }
+
 #endif

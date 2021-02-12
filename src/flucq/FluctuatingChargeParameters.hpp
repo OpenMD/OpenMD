@@ -64,9 +64,8 @@ namespace OpenMD {
     
   public:
     FluctuatingChargeParameters();
-    virtual ~FluctuatingChargeParameters();
     virtual void validate();
-    
   };
 }
+
 #endif

@@ -61,7 +61,7 @@ namespace OpenMD {
   public:
 
     //virtual destructor of Lattice
-    virtual ~Lattice() {}
+    virtual ~Lattice() = default;
     
     int getNumSitesPerCell() {return nCellSites;}
 

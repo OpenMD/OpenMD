@@ -45,6 +45,8 @@
  
 #ifndef VISITOR_ATOMDATA_HPP
 #define VISITOR_ATOMDATA_HPP
+
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -80,27 +82,27 @@ namespace OpenMD {
 
     AtomData(const std::string& id = "ATOMDATA") : GenericData(id) {}
         
-    void addAtomInfo(AtomInfo* info) {data.push_back(info);}
+    void addAtomInfo(std::shared_ptr<AtomInfo> info) {data.push_back(info);}
 
     void clearAllAtomInfo();
 
-    AtomInfo* beginAtomInfo(std::vector<AtomInfo*>::iterator& i){
+    std::shared_ptr<AtomInfo> beginAtomInfo(std::vector<std::shared_ptr<AtomInfo>>::iterator& i){
       i = data.begin();
-      return i != data.end()? *i : NULL;
+      return i != data.end() ? *i : nullptr;
     }
 
-    AtomInfo* nextAtomInfo(std::vector<AtomInfo*>::iterator& i){
+    std::shared_ptr<AtomInfo> nextAtomInfo(std::vector<std::shared_ptr<AtomInfo>>::iterator& i){
       ++i;
-      return i != data.end()? *i: NULL;
+      return i != data.end() ? *i : nullptr;
     }
 
-    std::vector<AtomInfo*> getData() {return data;}
+    std::vector<std::shared_ptr<AtomInfo>> getData() {return data;}
 
     int getSize() {return data.size();}
 
   protected:
 
-    std::vector<AtomInfo*> data;
+    std::vector<std::shared_ptr<AtomInfo>> data;
   };
 }
 #endif //VISITOR_ATOMDATA_HPP

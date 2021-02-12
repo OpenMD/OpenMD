@@ -59,7 +59,6 @@ namespace OpenMD {
     
   public:
     SurfaceDiffusion(SimInfo* info, const std::string& filename, const std::string& sele, RealType len);
-    virtual ~SurfaceDiffusion();
     
     virtual void process();
     

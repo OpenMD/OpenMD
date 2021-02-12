@@ -74,10 +74,6 @@ namespace OpenMD {
     setParameterString( paramString );
   }
 
-  GCNSeq::~GCNSeq() {
-    histogram_.clear();
-  }
-
   void GCNSeq::doFrame(int istep) {
     SelectionManager common(info_);
     

@@ -124,9 +124,6 @@ namespace OpenMD {
       updateSizes();
     }
 
-  NPT::~NPT() {
-  }
-
   void NPT::doUpdateSizes() {
 
     oldPos.resize(info_->getNIntegrableObjects());

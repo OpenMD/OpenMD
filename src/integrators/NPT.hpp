@@ -60,8 +60,6 @@ namespace OpenMD {
   public:
 
     NPT(SimInfo * info);
-    virtual ~NPT();
-
 
     int getMaxIterationNumber() {
       return maxIterNum_;

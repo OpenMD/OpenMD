@@ -175,8 +175,8 @@ namespace OpenMD {
   void ZConsVisitor::internalVisit(StuntDouble* sd, const std::string& prefix){
     std::shared_ptr<GenericData> data;
     std::shared_ptr<AtomData> atomData;
-    AtomInfo* atomInfo;
-    std::vector<AtomInfo*>::iterator iter;
+    std::shared_ptr<AtomInfo> atomInfo;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator iter;
 
     //if there is not atom data, just skip it
     data = sd->getPropertyByName("ATOMDATA");

@@ -88,7 +88,6 @@ namespace OpenMD {
     BondOrderParameter(SimInfo* info, const std::string& filename, 
                        const std::string& sele, double rCut, int nbins);
     
-    virtual ~BondOrderParameter();
     virtual void process();
     
   private:

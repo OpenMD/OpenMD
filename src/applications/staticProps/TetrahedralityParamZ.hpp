@@ -88,8 +88,7 @@ namespace OpenMD {
     int getNZBins(){
       return nZBins_;
     }
-
-    virtual ~TetrahedralityParamZ();
+    
     virtual void process();
     
   private:

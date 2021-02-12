@@ -51,6 +51,7 @@ namespace OpenMD {
   CompositeShape::~CompositeShape() {
     MemoryUtils::deletePointers(shapes_);
   }
+  
   bool CompositeShape::isInterior(Vector3d pos) {
     bool result = false;
     std::vector<Shape*>::iterator iter;

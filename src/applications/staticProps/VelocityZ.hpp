@@ -62,7 +62,6 @@ namespace OpenMD {
 	      int axis1 = 2, int axis2 = 0);
     
     virtual void process();
-    virtual ~VelocityZ();
     
   private:
     virtual void writeVelocity();
@@ -82,11 +81,7 @@ namespace OpenMD {
     std::vector<RealType> zBox_;
     std::vector<std::vector<RealType> > velocity_;
     std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
-    
   };
-  
 }
+
 #endif
-
-
-

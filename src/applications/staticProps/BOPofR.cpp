@@ -130,31 +130,6 @@ namespace OpenMD {
 	
   }
   
-  BOPofR::~BOPofR() {
-  /*
-    std::cerr << "Freeing stuff" << std::endl;
-    for (int l = 0; l <= lMax_; l++) {
-      for (int m = -l; m <= l; m++) {
-        w3j[std::make_pair(l,m)].clear();
-      }
-    }
-	std::cerr << "w3j made free...." << std::endl;
-   for (int bin = 0; bin < nBins_; bin++) {
-		QofR_[bin].clear();
-		WofR_[bin].clear();
-		RCount_[bin].clear();
-    }
-	std::cout << "R arrays made free...." << std::endl;
-   w3j.clear();
-    m2Min.clear();
-    m2Max.clear();
-    RCount_.clear();
-    WofR_.clear();
-    QofR_.clear();
- */
-  }
-
-  
   void BOPofR::initializeHistogram() {
     for (unsigned int i = 0; i < nBins_; i++){
       RCount_[i] = 0;

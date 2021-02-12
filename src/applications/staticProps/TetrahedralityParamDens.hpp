@@ -90,7 +90,6 @@ namespace OpenMD {
       return nDensBins_;
     }
 
-    virtual ~TetrahedralityParamDens();
     virtual void process();
     
   private:

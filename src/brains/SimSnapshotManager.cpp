@@ -69,6 +69,7 @@ namespace OpenMD {
     previousSnapshot_ = NULL;
     currentSnapshot_ = NULL;
   }
+  
   bool SimSnapshotManager::advance() {
 
     *previousSnapshot_ = *currentSnapshot_;

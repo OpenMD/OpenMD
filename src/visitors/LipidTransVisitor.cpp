@@ -122,8 +122,8 @@ namespace OpenMD {
   void LipidTransVisitor::internalVisit(StuntDouble *sd) {
     std::shared_ptr<GenericData>      data;
     std::shared_ptr<AtomData>         atomData;
-    AtomInfo *                        atomInfo;
-    std::vector<AtomInfo *>::iterator i;
+    std::shared_ptr<AtomInfo>         atomInfo;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
 
     data = sd->getPropertyByName("ATOMDATA");
 

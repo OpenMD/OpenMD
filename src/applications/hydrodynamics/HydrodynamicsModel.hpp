@@ -70,7 +70,7 @@ namespace OpenMD {
   class HydrodynamicsModel {
   public:
     HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
-    virtual ~HydrodynamicsModel() {}
+    virtual ~HydrodynamicsModel() = default;
 
     virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
 

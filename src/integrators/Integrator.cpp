@@ -192,7 +192,6 @@ namespace OpenMD {
     delete statWriter;
   }
 
-
   void Integrator::updateSizes() {
     doUpdateSizes();
     flucQ_->updateSizes();

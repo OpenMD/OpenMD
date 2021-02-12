@@ -74,6 +74,15 @@ namespace OpenMD {
 
   SpatialStatistics::~SpatialStatistics() {
 
+    // Here we need to delete the accumulators...
+    for (auto& data : data_) {
+      if ( !data->accumulatorArray2d.empty() )
+        MemoryUtils::deletePointers(data->accumulatorArray2d);
+      else
+        MemoryUtils::deletePointers(data->accumulator);
+    }
+
+    // ...and the output data
     std::vector<OutputData*>::iterator i;
     OutputData* outputData;
 
@@ -81,7 +90,6 @@ namespace OpenMD {
         outputData = nextOutputData(i)) {
       delete outputData;
     }
-    data_.clear();
   }
 
   void SpatialStatistics::process() {
@@ -152,9 +160,6 @@ namespace OpenMD {
     data_.push_back(z_);
   }
 
-  SlabStatistics::~SlabStatistics() {
-  }
-
   void SlabStatistics::processFrame(int istep) {
 
     RealType z;
@@ -223,9 +228,6 @@ namespace OpenMD {
       RealType r = (((RealType)i + 0.5) * binWidth_);
       dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
     }
-  }
-
-  ShellStatistics::~ShellStatistics() {
   }
 
   int ShellStatistics::getBin(Vector3d pos) {

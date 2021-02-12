@@ -127,9 +127,6 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".Hxy");
   }
 
-  Hxy::~Hxy(){
-  }
-
   void Hxy::process() {
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
     StuntDouble* sd;

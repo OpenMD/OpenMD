@@ -70,8 +70,8 @@ namespace OpenMD {
   void WrappingVisitor::internalVisit(StuntDouble *sd) {
     std::shared_ptr<GenericData>      data;
     std::shared_ptr<AtomData>         atomData;
-    AtomInfo *                        atomInfo;
-    std::vector<AtomInfo *>::iterator i;
+    std::shared_ptr<AtomInfo>         atomInfo;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
 
     data = sd->getPropertyByName("ATOMDATA");
 
@@ -179,21 +179,21 @@ namespace OpenMD {
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d box = currSnapshot->getHmat();
 
-    std::vector<AtomInfo *> atomInfoList = atomData->getData();
+    std::vector<std::shared_ptr<AtomInfo>> atomInfoList = atomData->getData();
 
     replicate(atomInfoList, atomData, box);
   }
 
-  void ReplicateVisitor::replicate(std::vector<AtomInfo *>&infoList,
+  void ReplicateVisitor::replicate(std::vector<std::shared_ptr<AtomInfo>>&infoList,
                                    std::shared_ptr<AtomData> data,
 				   const Mat3x3d& box) {
-    AtomInfo* newAtomInfo;
+    std::shared_ptr<AtomInfo> newAtomInfo;
     std::vector<Vector3d>::iterator dirIter;
-    std::vector<AtomInfo *>::iterator i;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
 
     for( dirIter = dir.begin(); dirIter != dir.end(); ++dirIter ) {
       for( i = infoList.begin(); i != infoList.end(); ++i ) {
-	newAtomInfo = new AtomInfo();
+	newAtomInfo = std::make_shared<AtomInfo>();
 	*newAtomInfo = *(*i);
         newAtomInfo->pos += box * (*dirIter);
 	data->addAtomInfo(newAtomInfo);
@@ -292,8 +292,8 @@ namespace OpenMD {
   void XYZVisitor::internalVisit(StuntDouble *sd) {
     std::shared_ptr<GenericData>      data;
     std::shared_ptr<AtomData>         atomData;
-    AtomInfo *                        atomInfo;
-    std::vector<AtomInfo *>::iterator i;
+    std::shared_ptr<AtomInfo>         atomInfo;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
     char                              buffer[1024];
     
     //if there is not atom data, just skip it
@@ -502,9 +502,9 @@ namespace OpenMD {
 
   void WaterTypeVisitor::visit(RigidBody *rb) {
     std::string rbName;
-    std::vector<Atom *> myAtoms;
-    std::vector<Atom *>::iterator atomIter;
-    std::vector<AtomInfo *>::iterator i;
+    std::vector<Atom*> myAtoms;
+    std::vector<Atom*>::iterator atomIter;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
     std::shared_ptr<AtomData> atomData;
 
     rbName = rb->getType();
@@ -524,7 +524,7 @@ namespace OpenMD {
 	} else
 	  continue;
         
-	for( AtomInfo* atomInfo = atomData->beginAtomInfo(i); atomInfo;
+	for( std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	     atomInfo = atomData->nextAtomInfo(i) ) {
 	  atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
 	} 

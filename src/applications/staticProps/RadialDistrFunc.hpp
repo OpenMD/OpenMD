@@ -66,8 +66,6 @@ namespace OpenMD {
                     const std::string& sele1, const std::string& sele2,
                     unsigned int nbins);
 
-    virtual ~RadialDistrFunc() {}
-
     void process();
     
   protected:

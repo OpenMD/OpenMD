@@ -46,6 +46,7 @@
 #ifndef VISITORS_REPLACEMENTVISITOR_HPP
 #define VISITORS_REPLACEMENTVISITOR_HPP
 
+#include <memory>
 #include <set>
 
 #include "visitors/AtomVisitor.hpp"
@@ -64,9 +65,8 @@ namespace OpenMD {
     using BaseVisitor::visit;
     ReplacementVisitor(SimInfo* info) : BaseAtomVisitor(info) {
       visitorName = "ReplacementVisitor";   
-      sites_ = new AtomData; 
+      sites_ = std::make_shared<AtomData>(); 
     }
-    ~ReplacementVisitor();
     
     void visit(Atom* atom) {}
     void visit(DirectionalAtom* datom);       
@@ -80,7 +80,7 @@ namespace OpenMD {
   private:
     inline bool isReplacedAtom(const std::string& atomType);
     std::set<std::string> myTypes_;
-    AtomData* sites_;
+    std::shared_ptr<AtomData> sites_;
   };
   
   class SSDAtomVisitor : public ReplacementVisitor{

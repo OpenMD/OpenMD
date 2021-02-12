@@ -66,10 +66,6 @@ namespace OpenMD {
     } 
   }
 
-  ZConsReader::~ZConsReader(){
-    istream_.close();
-  }
-
   void ZConsReader::readNextFrame(){
     char line[MAXBUFFERSIZE];  
     int nFixedZmol;

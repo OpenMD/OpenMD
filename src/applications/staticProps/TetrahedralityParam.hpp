@@ -84,7 +84,6 @@ namespace OpenMD {
     TetrahedralityParam(SimInfo* info, const std::string& filename, 
 			const std::string& sele, double rCut, int nbins);
     
-    virtual ~TetrahedralityParam();
     virtual void process();
     
   private:

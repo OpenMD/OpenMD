@@ -55,11 +55,6 @@ namespace OpenMD {
   void ReplacementVisitor::addReplacedAtomName(const std::string& repName) {
     myTypes_.insert(repName);
   }
-
-  ReplacementVisitor::~ReplacementVisitor(){
-    delete sites_;
-    myTypes_.clear();
-  }
    
   bool ReplacementVisitor::isReplacedAtom(const std::string &atomType) {
     std::set<std::string>::iterator strIter;
@@ -69,7 +64,7 @@ namespace OpenMD {
 
   void ReplacementVisitor::addSite(const std::string &name, 
                                    const Vector3d &refPos) {
-    AtomInfo* atomInfo = new AtomInfo();
+    std::shared_ptr<AtomInfo> atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = name;
     atomInfo->pos = refPos;
     sites_->addAtomInfo(atomInfo);
@@ -77,7 +72,7 @@ namespace OpenMD {
   void ReplacementVisitor::addSite(const std::string &name, 
                                    const Vector3d &refPos, 
                                    const Vector3d &refVec) {
-    AtomInfo* atomInfo = new AtomInfo();
+    std::shared_ptr<AtomInfo> atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = name;
     atomInfo->pos = refPos;
     atomInfo->vec = refVec;
@@ -98,7 +93,7 @@ namespace OpenMD {
     Mat3x3d      skewMat;
 
     Vector3d     newVec;
-    AtomInfo*    atomInfo;
+    std::shared_ptr<AtomInfo>    atomInfo;
     std::shared_ptr<AtomData>    atomData;
     std::shared_ptr<GenericData> data;
     bool         haveAtomData;
@@ -144,15 +139,15 @@ namespace OpenMD {
     // We need A^T to convert from body-fixed to space-fixed:
     Atrans = A.transpose();
     
-    AtomInfo* siteInfo;
-    std::vector<AtomInfo*>::iterator iter;
+    std::shared_ptr<AtomInfo> siteInfo;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator iter;
     
     for( siteInfo = sites_->beginAtomInfo(iter); siteInfo; 
          siteInfo = sites_->nextAtomInfo(iter) ) {
 
       newVec = Atrans * siteInfo->pos;    
       
-      atomInfo = new AtomInfo();
+      atomInfo = std::make_shared<AtomInfo>();
       atomInfo->atomTypeName = siteInfo->atomTypeName;
       atomInfo->pos = pos + newVec;
       

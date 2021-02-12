@@ -62,7 +62,6 @@ namespace OpenMD {
   public:
     
     ZConsReader(SimInfo* info);
-    ~ZConsReader();
     
     void readNextFrame();
     bool hasNextFrame();

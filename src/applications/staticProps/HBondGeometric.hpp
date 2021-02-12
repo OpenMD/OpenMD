@@ -70,7 +70,6 @@ namespace OpenMD {
                    double rCut, double thetaCut,
                    int nbins);
     
-    virtual ~HBondGeometric();
     virtual void process();
    
   private:

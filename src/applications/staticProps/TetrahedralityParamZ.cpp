@@ -96,12 +96,6 @@ namespace OpenMD {
     
     setOutputName(getPrefix(filename) + ".Qz");
   }
-  
-  TetrahedralityParamZ::~TetrahedralityParamZ() {
-    sliceQ_.clear();
-    sliceCount_.clear();
-    zBox_.clear();
-  }
     
   void TetrahedralityParamZ::process() {
     StuntDouble* sd;

@@ -59,7 +59,7 @@ namespace OpenMD {
   class LatticeCreator {
   public:
     LatticeCreator(const std::string& ident) : ident_(ident) {}
-    virtual ~LatticeCreator() {}
+    virtual ~LatticeCreator() = default;
         
     const std::string& getIdent() const { return ident_; }
 

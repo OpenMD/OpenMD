@@ -143,10 +143,6 @@ namespace OpenMD {
   }
 
   template<class T>
-  Field<T>::~Field() {
-  }
-
-  template<class T>
   void Field<T>::process() {
 
     DumpReader reader(info_, dumpFilename_);    
@@ -427,9 +423,6 @@ namespace OpenMD {
                              const std::string& sele1, RealType voxelSize) :
     Field<RealType>(info, filename, sele1, voxelSize) {
     setOutputName(getPrefix(filename) + ".densityField");    
-  }
-  
-  DensityField::~DensityField() {
   }
 
   RealType DensityField::getValue(StuntDouble* sd) {

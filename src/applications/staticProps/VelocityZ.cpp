@@ -109,12 +109,6 @@ namespace OpenMD {
     
     setOutputName(getPrefix(filename) + ".VelocityZ");
   }
-
-  VelocityZ::~VelocityZ() {
-    sliceSDLists_.clear();
-    velocity_.clear();
-    zBox_.clear();
-  }
   
   void VelocityZ::process() {
     StuntDouble* sd;

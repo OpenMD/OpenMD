@@ -84,7 +84,7 @@ namespace OpenMD {
     
     ForceField(std::string ffName);
     
-    virtual ~ForceField() {};
+    virtual ~ForceField() = default;
 
     std::string getForceFieldFileName() {
       return forceFieldFileName_;

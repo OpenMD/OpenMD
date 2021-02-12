@@ -81,7 +81,6 @@ namespace OpenMD {
   public:
     Hxy(SimInfo* info, const std::string& filename, const std::string& sele,
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
-    virtual ~Hxy();
     virtual void process();
 
   private:

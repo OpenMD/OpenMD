@@ -70,15 +70,14 @@ namespace OpenMD {
 	std::cerr << "can not get Atom Data from " << atom->getType() 
                   << std::endl;
 	atomData = std::make_shared<AtomData>(); 
-      } else {
       }
     } else {
       atomData = std::make_shared<AtomData>(); 
     }
     
-    std::vector<AtomInfo*>::iterator i;
-    for (AtomInfo* atomInfo = atomData->beginAtomInfo(i); 
-         atomInfo != NULL; 
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+    for (std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i); 
+         atomInfo != nullptr; 
          atomInfo = atomData->nextAtomInfo(i)) {
       
       // query the force field for the AtomType associated with this

@@ -54,7 +54,7 @@ namespace OpenMD {
   /** @class Shape*/
   class Shape {
   public:
-    virtual ~Shape() {}
+    virtual ~Shape() = default;
     virtual bool isInterior(Vector3d pos) = 0;
     virtual std::pair<Vector3d, Vector3d> getBoundingBox() = 0;
     virtual bool hasAnalyticalSolution() = 0;

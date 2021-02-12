@@ -88,10 +88,6 @@ namespace OpenMD {
     }
   }
 
-  CoordinationNumber::~CoordinationNumber() {
-    histogram_.clear();
-  }
-
   void CoordinationNumber::process() {
     SelectionManager common(info_);
     
@@ -251,9 +247,6 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".scn");
     setAnalysisType("Secondary Coordination Number");
   }
-  
-  SCN::~SCN() {
-  }
  
   RealType SCN::computeCoordination(int a, vector<vector<int> > nl) {
     RealType scn = 0.0;
@@ -280,9 +273,6 @@ namespace OpenMD {
     CoordinationNumber(info, filename, sele1, sele2, rCut, bins) {
     setOutputName(getPrefix(filename) + ".gcn");
     setAnalysisType("Generalized Coordination Number");
-  }
-
-  GCN::~GCN() {
   }
 
   RealType GCN::computeCoordination(int a, vector<vector<int> > nl) {

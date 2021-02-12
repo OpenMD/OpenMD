@@ -98,8 +98,8 @@ namespace OpenMD{
   public:
     //! Default constructor
     Cuboctahedron(std::string lattice, int cells, int planes);
-    virtual ~Cuboctahedron();
-    
+    virtual ~Cuboctahedron() = default;
+
     //! Get the generated points in the cluster.
     virtual vector<Vector3d> getPoints();
     
