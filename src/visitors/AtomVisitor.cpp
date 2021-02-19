@@ -98,7 +98,7 @@ namespace OpenMD {
     if (isVisited(atom))
       return;
     
-    atomInfo = std::shared_ptr<AtomInfo>();
+    atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = atom->getType();
     atomInfo->globalID = atom->getGlobalIndex();
     atomInfo->pos = atom->getPos();
