@@ -236,7 +236,6 @@ def writeFile(outputFileName, repeatX, repeatY, repeatZ):
         outputFile.write("       <SiteData>\n")
         for line in siteData:
             outputFile.write(line)
-        outputFile.write("      </SiteData>\n")
 
     print("Writing finished")
     outputFile.write("  </Snapshot>\n")
