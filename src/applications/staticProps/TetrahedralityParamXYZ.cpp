@@ -97,9 +97,6 @@ namespace OpenMD {
     
     setOutputName(getPrefix(filename) + ".Qxyz");
   }
-  
-  TetrahedralityParamXYZ::~TetrahedralityParamXYZ() {
-  }
     
   void TetrahedralityParamXYZ::process() {
     StuntDouble* sd;

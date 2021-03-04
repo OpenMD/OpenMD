@@ -7,6 +7,13 @@
 //  Jian-Jie Liang, and Andrey G. Kalinichev, J. Phys. Chem. B 108,
 //  pp. 1255-1266 (2004).
 //
+// This file also now includes the CO2 model from:
+//
+// "Molecular Dynamics Simulations of Carbon Dioxide Intercalation in
+// Hydrated Na-Montmorillonite" by Evgeniy M. Myshakin, Wissam A.  Saidi,
+// Vyacheslav N. Romanov, Randall T. Cygan, and Kenneth D.  Jordan,
+// J. Phys. Chem. C 117, pp. 11028-11039 (2013).
+//
 // This file defines the following atom types:
 //
 // h*   water hydrogen          
@@ -33,6 +40,8 @@
 // Ca   aqueous calcium ion
 // Ba   aqueous barium ion 	
 // Cl   aqueous chloride ion
+// O_CO2 oxygen in CO2 molecule
+// C_CO2 carbon in CO2 molecule
 
 begin Options
       Name                    "CLAYFF"
@@ -58,6 +67,7 @@ Cs	132.90545
 Ca	40.078
 Ba	137.327
 Cl	35.453
+C       12.011
 end BaseAtomTypes
 
 begin AtomTypes    
@@ -80,6 +90,8 @@ cao	Ca
 cah	Ca
 feo	Fe
 lio	Li
+O_CO2   O
+C_CO2   C
 end AtomTypes
 
 begin LennardJonesAtomTypes
@@ -106,6 +118,8 @@ Cs	0.1000          4.3002
 Ca	0.1000          3.2237
 Ba	0.0470          4.2840
 Cl	0.1001          4.9388
+O_CO2   0.1597275       3.028
+C_CO2   0.055927        2.800
 end LennardJonesAtomTypes
 
 begin ChargeAtomTypes
@@ -133,7 +147,9 @@ K	1.0
 Cs	1.0    
 Ca	2.0    
 Ba	2.0    
-Cl	-1.0   
+Cl	-1.0
+O_CO2   -0.3256
+C_CO2    0.6512
 end ChargeAtomTypes
 
 begin BondTypes
@@ -144,6 +160,7 @@ begin BondTypes
 o*      h*      Harmonic                1.0000          277.06745
 oh      ho      Harmonic                1.0000          277.06745
 ohs     ho      Harmonic                1.0000          277.06745
+O_CO2   C_CO2   Harmonic                1.162          2017.925
 
 end BondTypes
 
@@ -168,5 +185,6 @@ feo     oh      ho      Harmonic        109.47  15.0
 feo     ohs     ho      Harmonic        109.47  15.0
 lio     oh      ho      Harmonic        109.47  15.0
 lio     ohs     ho      Harmonic        109.47  15.0
+O_CO2   C_CO2   O_CO2   Harmonic        180.0  108.007
 
 end BendTypes

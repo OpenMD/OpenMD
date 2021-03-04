@@ -99,7 +99,7 @@ namespace OpenMD{
   public:
     //! Default constructor
     Decahedron(int columnAtoms, int shells, int twinAtoms);
-    virtual ~Decahedron();
+    virtual ~Decahedron() = default;
     
     //! Get the generated points in the cluster.
     virtual vector<Vector3d> getPoints();

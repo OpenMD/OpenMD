@@ -148,13 +148,6 @@ namespace OpenMD {
     Facets.push_back(make_tuple3(11, 6, 9));
   }
   
-  Icosahedron::~Icosahedron() {
-    Facets.clear();
-    Edges.clear();
-    Basis.clear();
-    Points.clear();
-  }
-  
   int Icosahedron::getNpoints( int n ) {
     int count=0;
     for( int i = 0; i <= n; i++ ) count += np( i );

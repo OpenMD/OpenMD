@@ -59,7 +59,7 @@ namespace OpenMD {
   class DynamicProperty {
   public:
     DynamicProperty(){ }
-    virtual ~DynamicProperty(){ }
+    virtual ~DynamicProperty() = default;
     virtual void doCorrelate() = 0;
 
     void setOutputName(const std::string& filename) {

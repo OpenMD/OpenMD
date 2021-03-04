@@ -85,7 +85,7 @@ namespace OpenMD {
     StaticAnalyser(SimInfo* info, const std::string& filename,
                    unsigned int nbins);
 
-    virtual ~StaticAnalyser() {}
+    virtual ~StaticAnalyser() = default;
     virtual void process() = 0;
 
     void setOutputName(const std::string& filename) {

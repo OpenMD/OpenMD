@@ -61,7 +61,7 @@ namespace OpenMD {
     Field(SimInfo* info, const std::string& filename, 
 	  const std::string& sele, RealType voxelSize);
     
-    ~Field(); // default deconstructor
+    virtual ~Field() = default;
     
     virtual void process();
     virtual void processFrame(int frame);
@@ -94,7 +94,6 @@ namespace OpenMD {
   public:
     DensityField(SimInfo* info, const std::string& filename,
                  const std::string& sele1, RealType voxelSize);
-    ~DensityField();
     
     virtual RealType getValue(StuntDouble* sd);
   };

@@ -70,9 +70,6 @@ namespace OpenMD {
                                             0.1);
   }
   
-  FluctuatingChargeParameters::~FluctuatingChargeParameters() {    
-  }
-  
   void FluctuatingChargeParameters::validate() {
     CheckParameter(Propagator,
                    isEqualIgnoreCase("Damped") ||

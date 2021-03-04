@@ -132,19 +132,6 @@ namespace OpenMD {
     THRCOF = NULL;
   }
   
-  BondOrderParameter::~BondOrderParameter() {
-    Q_histogram_.clear();
-    W_histogram_.clear();
-    for (int l = 0; l <= lMax_; l++) {
-      for (int m = -l; m <= l; m++) {
-        w3j[std::make_pair(l,m)].clear();
-      }
-    }
-    w3j.clear();
-    m2Min.clear();
-    m2Max.clear();
-  }
-  
   void BondOrderParameter::initializeHistogram() {
     for (int bin = 0; bin < nBins_; bin++) {
       for (int l = 0; l <= lMax_; l++) {

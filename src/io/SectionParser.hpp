@@ -61,7 +61,7 @@ namespace OpenMD {
    */
   class SectionParser {
   public:
-    virtual ~SectionParser() {}
+    virtual ~SectionParser() = default;
     void parse(std::istream& input, ForceField& ff, int lineNo);
     
     const std::string& getSectionName() const {

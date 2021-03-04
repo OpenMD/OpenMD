@@ -67,9 +67,6 @@ namespace OpenMD {
       else
         delete data.accumulator;
     }
-
-    data_.clear();
-    statsMap_.clear();
   }
 
   void Stats::init() {

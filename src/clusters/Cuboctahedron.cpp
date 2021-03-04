@@ -82,11 +82,6 @@ namespace OpenMD {
     }
 
   }
-  
-  Cuboctahedron::~Cuboctahedron() {
-    Basis.clear();
-    Points.clear();
-  }
 
   vector<Vector3d> Cuboctahedron::getPoints() {
 

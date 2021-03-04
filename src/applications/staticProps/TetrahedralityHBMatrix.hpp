@@ -81,7 +81,6 @@ namespace OpenMD {
                            const std::string& sele, double rCut, double OOCut,
                            double thetaCut, double OHCut, int nbins);
     
-    virtual ~TetrahedralityHBMatrix();
     virtual void process();
     
   private:

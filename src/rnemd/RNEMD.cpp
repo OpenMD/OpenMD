@@ -776,6 +776,29 @@ namespace OpenMD {
     }
   }
 
+  RNEMD::~RNEMD() {
+
+    if (!doRNEMD_) return;
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif
+
+      writeOutputFile();
+
+      rnemdFile_.close();
+
+#ifdef IS_MPI
+    }
+#endif
+
+    for (auto& data : data_) {
+      if ( !data.accumulatorArray2d.empty() )
+        MemoryUtils::deletePointers(data.accumulatorArray2d);
+      else
+        MemoryUtils::deletePointers(data.accumulator);
+    }
+  }
+
   std::string RNEMD::setSelection(RealType& slabCenter) {
 
     bool printSlabCenterWarning {false};
@@ -805,44 +828,28 @@ namespace OpenMD {
       slabCenter = tempSlabCenter[rnemdPrivilegedAxis_];
     }
 
-    RealType leftSlabBoundary = slabCenter - 0.5*slabWidth_;
-    RealType rightSlabBoundary = slabCenter + 0.5*slabWidth_;
+    Vector3d leftSlab {V3Zero};
+    const RealType& leftSlabBoundary = leftSlab[rnemdPrivilegedAxis_];
+    leftSlab[rnemdPrivilegedAxis_] = slabCenter - 0.5*slabWidth_;
+    currentSnap_->wrapVector(leftSlab);
+
+    Vector3d rightSlab {V3Zero};
+    const RealType& rightSlabBoundary = rightSlab[rnemdPrivilegedAxis_];
+    rightSlab[rnemdPrivilegedAxis_] = slabCenter + 0.5*slabWidth_;
+    currentSnap_->wrapVector(rightSlab);
 
     std::ostringstream selectionStream;
 
-    selectionStream << "select wrappedz > " << leftSlabBoundary;
+    selectionStream << "select wrapped" << rnemdAxisLabel_ << " >= " << leftSlabBoundary;
 
-    if ( (leftSlabBoundary < -hmat_2) || (rightSlabBoundary > hmat_2) )
-      selectionStream <<  " || wrappedz < " << -leftSlabBoundary;
+    if (leftSlabBoundary > rightSlabBoundary)
+      selectionStream <<  " || wrapped" << rnemdAxisLabel_ << " <= " << rightSlabBoundary;
     else
-      selectionStream <<  " && wrappedz < " << rightSlabBoundary;
+      selectionStream <<  " && wrapped" << rnemdAxisLabel_ << " <= " << rightSlabBoundary;
 
     return selectionStream.str();
   }
-
-  RNEMD::~RNEMD() {
-
-    if (!doRNEMD_) return;
-#ifdef IS_MPI
-    if (worldRank == 0) {
-#endif
-
-      writeOutputFile();
-
-      rnemdFile_.close();
-
-#ifdef IS_MPI
-    }
-#endif
-
-    for (auto& data : data_) {
-      if ( !data.accumulatorArray2d.empty() )
-        MemoryUtils::deletePointers(data.accumulatorArray2d);
-      else
-        MemoryUtils::deletePointers(data.accumulator);
-    }
-  }
-
+  
   void RNEMD::doSwap(SelectionManager& smanA, SelectionManager& smanB) {
 
     if (!doRNEMD_) return;
@@ -1725,7 +1732,6 @@ namespace OpenMD {
       Vector3d pos = sd->getPos();
 
       // wrap the stuntdouble's position back into the box:
-
       if (usePeriodicBoundaryConditions_)
         currentSnap_->wrapVector(pos);
 
@@ -1764,13 +1770,13 @@ namespace OpenMD {
         }
       }
     }
+
     for (sd = smanB.beginSelected(selej); sd != NULL;
          sd = smanB.nextSelected(selej)) {
 
       Vector3d pos = sd->getPos();
 
       // wrap the stuntdouble's position back into the box:
-
       if (usePeriodicBoundaryConditions_)
         currentSnap_->wrapVector(pos);
 
@@ -1859,94 +1865,95 @@ namespace OpenMD {
       if (doAngularPart)
         cNumerator -= 0.5 * ( dot(bc, Ic * bc));
 
-      if (cNumerator > 0.0) {
+      RealType cDenominator = Kc;
 
-        RealType cDenominator = Kc;
+      if (doLinearPart)
+        cDenominator -= 0.5 * Mc * vc.lengthSquare();
 
-        if (doLinearPart)
-          cDenominator -= 0.5 * Mc * vc.lengthSquare();
+      if (doAngularPart)
+        cDenominator -= 0.5*(dot(omegac, Ic * omegac));
 
-        if (doAngularPart)
-          cDenominator -= 0.5*(dot(omegac, Ic * omegac));
+      if (cNumerator/cDenominator > 0.0) {
+	    RealType c = sqrt(cNumerator / cDenominator);
 
-	if (cDenominator > 0.0) {
-	  RealType c = sqrt(cNumerator / cDenominator);
-	  if ((c > 0.9) && (c < 1.1)) {// restrict scaling coefficients
+	    if ((c > 0.9) && (c < 1.1)) {// restrict scaling coefficients
 
-	    Vector3d vh = Ph / Mh;
-            ah = momentumTarget_ / Mh + vh;
-            ahrec = momentumTarget_ / Mh;
+	  Vector3d vh = Ph / Mh;
+	  ah = momentumTarget_ / Mh + vh;
+	  ahrec = momentumTarget_ / Mh;
 
-            // We now need the inverse of the inertia tensor to
-            // calculate the angular velocity of the hot slab;
-            Mat3x3d Ihi = Ih.inverse();
-            Vector3d omegah = Ihi * Lh;
-            bh  = (Ihi * angularMomentumTarget_) + omegah;
-            bhrec = bh - omegah;
+	  // We now need the inverse of the inertia tensor to
+	  // calculate the angular velocity of the hot slab;
+	  Mat3x3d Ihi = Ih.inverse();
+	  Vector3d omegah = Ihi * Lh;
+	  bh  = (Ihi * angularMomentumTarget_) + omegah;
+	  bhrec = bh - omegah;
 
-            RealType hNumerator = Kh + kineticTarget_;
+	  RealType hNumerator = Kh + kineticTarget_;
+	  if (doLinearPart)
+	    hNumerator -= 0.5 * Mh * ah.lengthSquare();
+
+	  if (doAngularPart)
+	    hNumerator -= 0.5 * ( dot(bh, Ih * bh));
+
+	  RealType hDenominator = Kh;
+	  if (doLinearPart)
+	    hDenominator -= 0.5 * Mh * vh.lengthSquare();
+	  if (doAngularPart)
+	    hDenominator -= 0.5*(dot(omegah, Ih * omegah));
+
+	  if (hNumerator/hDenominator > 0.0) {
+	    RealType h = sqrt(hNumerator / hDenominator);
+
+	    if ((h > 0.9) && (h < 1.1)) {
+
+	      vector<StuntDouble*>::iterator sdi;
+	      Vector3d vel;
+	      Vector3d rPos;
+
+	      for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
             if (doLinearPart)
-              hNumerator -= 0.5 * Mh * ah.lengthSquare();
-
-            if (doAngularPart)
-              hNumerator -= 0.5 * ( dot(bh, Ih * bh));
-
-            if (hNumerator > 0.0) {
-
-              RealType hDenominator = Kh;
-              if (doLinearPart)
-                hDenominator -= 0.5 * Mh * vh.lengthSquare();
-              if (doAngularPart)
-                hDenominator -= 0.5*(dot(omegah, Ih * omegah));
-
-	      if (hDenominator > 0.0) {
-		RealType h = sqrt(hNumerator / hDenominator);
-		if ((h > 0.9) && (h < 1.1)) {
-
-		  vector<StuntDouble*>::iterator sdi;
-		  Vector3d vel;
-                  Vector3d rPos;
-
-		  for (sdi = coldBin.begin(); sdi != coldBin.end(); ++sdi) {
-		    // vel = (*sdi)->getVel();
-                    rPos = (*sdi)->getPos() - coordinateOrigin_;
-                    if (doLinearPart)
-                      vel = ((*sdi)->getVel() - vc) * c + ac;
-                    if (doAngularPart)
-                      vel = ((*sdi)->getVel() - cross(omegac, rPos)) * c + cross(bc, rPos);
+              vel = ((*sdi)->getVel() - vc) * c + ac;
+            if (doAngularPart) {
+              rPos = (*sdi)->getPos() - coordinateOrigin_;
+              vel = ((*sdi)->getVel() - cross(omegac, rPos)) * c + cross(bc, rPos);
+            }
 
 		    (*sdi)->setVel(vel);
-		    if (rnemdFluxType_ == rnemdFullKE) {
-		      if ((*sdi)->isDirectional()) {
-			Vector3d angMom = (*sdi)->getJ() * c;
-			(*sdi)->setJ(angMom);
-		      }
-		    }
-		  }
-		  for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
-		    // vel = (*sdi)->getVel();
-                    rPos = (*sdi)->getPos() - coordinateOrigin_;
-                    if (doLinearPart)
-                      vel = ((*sdi)->getVel() - vh) * h + ah;
-                    if (doAngularPart)
-                      vel = ((*sdi)->getVel() - cross(omegah, rPos)) * h + cross(bh, rPos);
 
-		    (*sdi)->setVel(vel);
 		    if (rnemdFluxType_ == rnemdFullKE) {
 		      if ((*sdi)->isDirectional()) {
-			Vector3d angMom = (*sdi)->getJ() * h;
-			(*sdi)->setJ(angMom);
+		        Vector3d angMom = (*sdi)->getJ() * c;
+		        (*sdi)->setJ(angMom);
 		      }
 		    }
-		  }
-		  successfulExchange = true;
-		  kineticExchange_ += kineticTarget_;
-                  momentumExchange_ += momentumTarget_;
-                  particleFlux_h_ += smanA.getSelectionCount() / volumeA_ * momentumTarget_ / Mh;
-                  particleFlux_c_ += smanB.getSelectionCount() / volumeB_ * momentumTarget_ / Mc;
-                  angularMomentumExchange_ += angularMomentumTarget_;
-		}
 	      }
+
+	      for (sdi = hotBin.begin(); sdi != hotBin.end(); ++sdi) {
+                
+            if (doLinearPart)
+              vel = ((*sdi)->getVel() - vh) * h + ah;
+            if (doAngularPart) {
+              rPos = (*sdi)->getPos() - coordinateOrigin_;
+              vel = ((*sdi)->getVel() - cross(omegah, rPos)) * h + cross(bh, rPos);
+            }
+		    
+            (*sdi)->setVel(vel);
+		
+            if (rnemdFluxType_ == rnemdFullKE) {
+		      if ((*sdi)->isDirectional()) {
+		        Vector3d angMom = (*sdi)->getJ() * h;
+		        (*sdi)->setJ(angMom);
+		      }
+		    }
+	      }
+
+	      successfulExchange = true;
+          kineticExchange_ += kineticTarget_;
+	      momentumExchange_ += momentumTarget_;
+	      particleFlux_h_ += smanA.getSelectionCount() / volumeA_ * momentumTarget_ / Mh;
+	      particleFlux_c_ += smanB.getSelectionCount() / volumeB_ * momentumTarget_ / Mc;
+	      angularMomentumExchange_ += angularMomentumTarget_;
 	    }
 	  }
 	}
@@ -2455,6 +2462,7 @@ namespace OpenMD {
 
     if (usePeriodicBoundaryConditions_) {
       currentSnap_->wrapVector(pos);
+
       return int(nBins_ * (pos[rnemdPrivilegedAxis_] /
 			   hmat_(rnemdPrivilegedAxis_, rnemdPrivilegedAxis_)
 			   + 0.5)) % nBins_;
@@ -3078,9 +3086,9 @@ namespace OpenMD {
                  << " (amu*A/fs)\n";
       if (rnemdFluxType_ == rnemdPvector && rnemdAxisLabel_ == "z") {
         rnemdFile_ << "#        part (hot) = " << particleFlux_h_
-                 << " (particles/A^2/fs)\n";
+		   << " (particles/A^2/fs)\n";
         rnemdFile_ << "#        part (cold) = " << particleFlux_c_
-                 << " (particles/A^2/fs)\n";
+		   << " (particles/A^2/fs)\n";
       }
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_
                  << " (amu*A^2/fs)\n";

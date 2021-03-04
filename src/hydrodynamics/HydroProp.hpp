@@ -76,7 +76,7 @@ namespace OpenMD {
     HydroProp();
     HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D);
     HydroProp(const std::string &frictionLine);
-    ~HydroProp() { } ;
+    
     void complete();
     void setCOR(Vector3d cor) {cor_ = cor; hasCOR = true;}
     void setXi(Mat6x6d Xi) {Xi_ = Xi; hasXi = true;}

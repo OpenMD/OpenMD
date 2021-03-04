@@ -64,7 +64,6 @@ namespace OpenMD {
     BondAngleDistribution(SimInfo* info, const std::string& filename, 
                        const std::string& sele, double rCut, int nbins);
     
-    virtual ~BondAngleDistribution();
     virtual void process();
     
   private:
@@ -81,13 +80,10 @@ namespace OpenMD {
     int frameCounter_;
     int nBins_;
     
-
     RealType deltaTheta_;
     std::vector<int> ThetaCount_;
     std::vector<int> histogram_;
     int nTotBonds_;
-   
-
   };
 }
 

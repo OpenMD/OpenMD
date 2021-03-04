@@ -78,10 +78,6 @@ namespace OpenMD {
     deltaQ_ = (MaxQ_ - MinQ_) / nBins_;
 
   }
-
-  TetrahedralityParam::~TetrahedralityParam() {
-    Q_histogram_.clear(); 
-  }
   
   void TetrahedralityParam::initializeHistogram() {
     std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);

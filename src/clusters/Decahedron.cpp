@@ -71,11 +71,6 @@ namespace OpenMD {
     Basis.push_back( Vector3d(  r3o2*cos(4.0*phi), r3o2*sin(4.0*phi),  0.0 ));
   }
 
-  Decahedron::~Decahedron() {
-    Basis.clear();
-    Points.clear();
-  }
-
   vector<Vector3d> Decahedron::getPoints() {
     // Generate central column of Decahedron
 

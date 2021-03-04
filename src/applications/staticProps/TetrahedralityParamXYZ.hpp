@@ -86,7 +86,6 @@ namespace OpenMD {
                            const std::string& sele1, const std::string& sele2, 
                            RealType rCut, RealType voxelSize, RealType gaussWidth);
 
-    virtual ~TetrahedralityParamXYZ();
     virtual void process();
     
   private:

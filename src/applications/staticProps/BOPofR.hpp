@@ -59,7 +59,6 @@ namespace OpenMD {
            const std::string& sele, double rCut, unsigned int nbins,
            RealType len);
     
-    virtual ~BOPofR();
     virtual void process();
     
   protected:

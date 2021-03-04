@@ -92,13 +92,13 @@ namespace OpenMD {
 	
   void DefaultAtomVisitor::visit(Atom *atom) {
     std::shared_ptr<AtomData> atomData;
-    AtomInfo* atomInfo;
+    std::shared_ptr<AtomInfo> atomInfo;
     AtomType* atype = atom->getAtomType();
               
     if (isVisited(atom))
       return;
     
-    atomInfo = new AtomInfo();
+    atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = atom->getType();
     atomInfo->globalID = atom->getGlobalIndex();
     atomInfo->pos = atom->getPos();
@@ -139,13 +139,13 @@ namespace OpenMD {
   
   void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
     std::shared_ptr<AtomData> atomData;
-    AtomInfo *atomInfo;
+    std::shared_ptr<AtomInfo> atomInfo;
     AtomType* atype = datom->getAtomType();
 
     if (isVisited(datom))
       return;
     
-    atomInfo = new AtomInfo;
+    atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = datom->getType();
     atomInfo->globalID = datom->getGlobalIndex();
     atomInfo->pos = datom->getPos();

@@ -87,12 +87,6 @@ namespace OpenMD {
 
     initializeHistogram();
   }
-
-  HBondGeometric::~HBondGeometric() {
-    nHBonds_.clear();
-    nDonor_.clear();
-    nAcceptor_.clear(); 
-  }
   
   void HBondGeometric::initializeHistogram() {
     std::fill(nHBonds_.begin(),   nHBonds_.end(),   0);

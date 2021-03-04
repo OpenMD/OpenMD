@@ -93,13 +93,6 @@ namespace OpenMD {
     const std::string paramString = params.str();
     setParameterString( paramString );        
   }
-
-  TetrahedralityHBMatrix::~TetrahedralityHBMatrix() {
-    for (unsigned int i = 0; i < nBins_; i++) {
-      Q_histogram_[i].clear();
-    }    
-    Q_histogram_.clear(); 
-  }
   
   void TetrahedralityHBMatrix::initializeHistogram() {
     for (unsigned int i = 0; i < nBins_; i++) {

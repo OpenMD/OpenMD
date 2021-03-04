@@ -58,7 +58,7 @@ namespace OpenMD {
     Vector3d newVec;
     std::shared_ptr<GenericData> data;
     std::shared_ptr<AtomData> atomData;
-    AtomInfo* atomInfo;
+    std::shared_ptr<AtomInfo> atomInfo;
     bool haveAtomData;
     RotMat3x3d rotMatrix;
 
@@ -91,7 +91,7 @@ namespace OpenMD {
       
     }
 
-    atomInfo = new AtomInfo;
+    atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = "X";
     atomInfo->globalID = globalID;
     atomInfo->pos[0] = pos[0];
@@ -155,11 +155,11 @@ namespace OpenMD {
 
   void RBCOMVisitor::visit(RigidBody* rb){
     std::shared_ptr<AtomData> atomData;
-    AtomInfo* atomInfo;
+    std::shared_ptr<AtomInfo> atomInfo;
     Vector3d pos;
     pos = rb->getPos();
 
-    atomInfo = new AtomInfo;
+    atomInfo = std::make_shared<AtomInfo>();
     atomInfo->atomTypeName = "X";
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];

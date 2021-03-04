@@ -75,7 +75,7 @@ namespace OpenMD {
                        const std::string& sele1, const std::string& sele2,
                        RealType rCut, int bins);
 
-    virtual ~CoordinationNumber();
+    virtual ~CoordinationNumber() = default;
     virtual void process();
     virtual void writeOutput();
 
@@ -114,7 +114,6 @@ namespace OpenMD {
     SCN(SimInfo* info, const std::string& filename, const std::string& sele1,
         const std::string& sele2, RealType rCut, int bins);
 
-    virtual ~SCN();
     virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
   };
     
@@ -136,7 +135,6 @@ namespace OpenMD {
     GCN(SimInfo* info, const std::string& filename, const std::string& sele1,
         const std::string& sele2, RealType rCut, int bins);
 
-    virtual ~GCN();
     virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
   };
 

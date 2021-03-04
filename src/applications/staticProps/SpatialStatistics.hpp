@@ -65,7 +65,7 @@ namespace OpenMD {
   public:
     SpatialStatistics(SimInfo* info, const std::string& filename,
                       const std::string& sele, int nbins);
-    ~SpatialStatistics();
+    virtual ~SpatialStatistics();
 
     void addOutputData(OutputData* dat) { data_.push_back(dat); }
     void addOutputDataAt(OutputData* dat, unsigned int loc) { data_[loc] = dat; }
@@ -87,7 +87,6 @@ namespace OpenMD {
   public:
     SlabStatistics(SimInfo* info, const std::string& filename,
                    const std::string& sele, int nbins, int axis);
-    virtual ~SlabStatistics();
 
     virtual int getBin(Vector3d pos);
     virtual void processFrame(int frame);
@@ -105,7 +104,6 @@ namespace OpenMD {
   public:
     ShellStatistics(SimInfo* info, const std::string& filename, const std::string& sele,
                     int nbins);
-    virtual ~ShellStatistics();
 
     virtual int getBin(Vector3d pos);
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }

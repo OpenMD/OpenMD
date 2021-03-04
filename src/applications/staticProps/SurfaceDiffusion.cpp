@@ -79,10 +79,6 @@ namespace OpenMD {
     singleMoveDistance_ = 2.0;
   }
 
-  SurfaceDiffusion::~SurfaceDiffusion(){
-  
-  }
-
   void SurfaceDiffusion::process() {
     StuntDouble* sd;
     bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();

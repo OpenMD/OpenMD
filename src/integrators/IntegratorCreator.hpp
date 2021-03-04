@@ -59,7 +59,7 @@ namespace OpenMD {
   class IntegratorCreator {
   public:
     IntegratorCreator(const std::string& ident) : ident_(ident) {}
-    virtual ~IntegratorCreator() {}
+    virtual ~IntegratorCreator() = default;
     const std::string& getIdent() const { return ident_; }
 
     virtual Integrator* create(SimInfo* info) const = 0;

@@ -69,7 +69,7 @@ namespace OpenMD {
                  const std::string& sele1, const std::string& sele2,
                  int storageLayout);
     
-    virtual ~TimeCorrFunc(){ }
+    virtual ~TimeCorrFunc() = default;
     virtual void doCorrelate();
     
     const std::string& getCorrFuncType() const {

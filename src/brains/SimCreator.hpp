@@ -71,7 +71,7 @@ namespace OpenMD {
   class SimCreator {
   public:
 
-    virtual ~SimCreator() {}
+    virtual ~SimCreator() = default;
 
     /**
      * Setup Simulation

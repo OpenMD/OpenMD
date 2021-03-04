@@ -86,10 +86,6 @@ namespace OpenMD {
     
     setOutputName(getPrefix(filename) + ".Qdens");
   }
-  
-  TetrahedralityParamDens::~TetrahedralityParamDens() {
-    sliceCount_.clear();
-  }
     
   void TetrahedralityParamDens::process() {
     StuntDouble* sd;

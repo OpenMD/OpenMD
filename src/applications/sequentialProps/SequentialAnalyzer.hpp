@@ -67,7 +67,7 @@ namespace OpenMD {
     SequentialAnalyzer(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2);
     
-    virtual ~SequentialAnalyzer(){ }
+    virtual ~SequentialAnalyzer() = default;
     virtual void doSequence();
 
     void setOutputName(const std::string& filename) {

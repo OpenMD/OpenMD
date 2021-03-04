@@ -76,12 +76,10 @@ namespace OpenMD {
     GCNSeq(SimInfo* info, const std::string& filename, const std::string& sele1,
            const std::string& sele2, RealType rCut, int bins);
 
-    virtual ~GCNSeq();
     virtual void doFrame(int istep);
     virtual void writeSequence();
     
   private:
-
     RealType rCut_;    
     int bins_;
     

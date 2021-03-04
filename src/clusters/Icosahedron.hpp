@@ -67,7 +67,7 @@ namespace OpenMD{
   public:
     //! Default constructor
     Icosahedron();
-    virtual ~Icosahedron();
+    virtual ~Icosahedron() = default;
     
     //! Calculate number of particles in an icosahedron with nShells shells.
     int getNpoints(int nShells);
