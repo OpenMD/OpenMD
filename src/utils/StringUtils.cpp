@@ -258,7 +258,9 @@ namespace OpenMD {
   }
   
   size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
-    std::string::const_iterator pos = std::search(str1.begin(), str1.end(), str2.begin(), str2.end(), CaseInsensitiveEquals);
+    std::string::const_iterator pos = std::search(str1.begin(), str1.end(),
+						  str2.begin(), str2.end(),
+						  CaseInsensitiveEquals);
     if (pos == str1.end())
       return std::string::npos;
     else

@@ -77,6 +77,7 @@ namespace OpenMD {
     DefineOptionalParameter(TargetPressure, "targetPressure");
     DefineOptionalParameter(TauThermostat, "tauThermostat");
     DefineOptionalParameter(TauBarostat, "tauBarostat");
+    DefineOptionalParameter(LangevinPistonDrag, "langevinPistonDrag");
     DefineOptionalParameter(ZconsTime, "zconsTime");
     DefineOptionalParameter(ZconsTol, "zconsTol");
     DefineOptionalParameter(ZconsForcePolicy, "zconsForcePolicy");
@@ -238,7 +239,8 @@ namespace OpenMD {
                    isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") ||
                    isEqualIgnoreCase("NGT") ||
                    isEqualIgnoreCase("LANGEVINHULL") ||
-                   isEqualIgnoreCase("LHULL") || isEqualIgnoreCase("SMIPD"));
+                   isEqualIgnoreCase("LHULL") || isEqualIgnoreCase("SMIPD") ||
+		   isEqualIgnoreCase("LANGEVINPISTON"));
     CheckParameter(Dt, isPositive());
     CheckParameter(RunTime, isPositive());
     CheckParameter(FinalConfig, isNotEmpty());
