@@ -89,6 +89,7 @@ namespace OpenMD {
     DeclareParameter(UseLongRangeCorrections, bool);
     DeclareParameter(TauThermostat, RealType);
     DeclareParameter(TauBarostat, RealType);
+    DeclareParameter(LangevinPistonDrag, RealType);
     DeclareParameter(ZconsTime, RealType);
     DeclareParameter(ZconsTol, RealType);
     DeclareParameter(ZconsForcePolicy, std::string);

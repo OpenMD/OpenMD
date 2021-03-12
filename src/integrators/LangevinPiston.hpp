@@ -42,38 +42,40 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-/**
- * @file NPA.hpp
- * @author tlin
- * @date 11/19/2004
- * @version 1.0
- */
 
-#ifndef INTEGRATORS_NPA_HPP
-#define INTEGRATORS_NPA_HPP
+#ifndef INTEGRATORS_LAGNEVINPISTON_HPP
+#define INTEGRATORS_LAGNEVINPISTON_HPP
 
 #include "integrators/NPT.hpp"
+#include "math/SeqRandNumGen.hpp"
+
 namespace OpenMD {
 
   /**
-   * @class NPA
-   * Constant normal pressure and lateral surface area integrator
-   * No thermostat!
-   * @note Ikeguchi M.,J. Comput Chem, 25:529-542, 2004
+   * @class LangevinPiston
+   * Constant pressure and temperature integrator  
+   *
+   * The Langevin Piston Nosé-Hoover method in OpenMD combines the
+   * Nosé-Hoover constant pressure method as described in
+   * G.J. Martyna, D.J. Tobias and M.L. Klein, "Constant pressure
+   * molecular dynamics algorithms", J. Chem. Phys. 101, 4177 (1994);
+   * https://doi.org/10.1063/1.467468 , with piston fluctuation
+   * control implemented using Langevin dynamics as in S.E. Feller,
+   * Y. Zhang, R.W. Pastor and B.R. Brooks, "Constant pressure
+   * molecular dynamics simulation: The Langevin piston method",
+   * J. Chem. Phys. 103, 4613 (1995); https://doi.org/10.1063/1.47064
    */
-  class NPA : public NPT{
+  
+  class LangevinPiston : public NPT{
   public:
-
-    NPA ( SimInfo* info) : NPT(info) {}
-  protected:
-
-    Mat3x3d eta;
+    LangevinPiston(SimInfo* info);
 
   private:
 
-    /* we need to implement moveA and moveB separately to leave out the 
-     * thermostatting
+    /* We need to implement moveA and moveB separately to leave out
+     * the extended system thermostatting. Temperature control is
+     * supplied in Langevin methods by connecting friction and random
+     * forces via the second fluctuation dissipation theorem.
      */
 
     virtual void moveA();
@@ -96,14 +98,20 @@ namespace OpenMD {
 
     virtual void loadEta();
     virtual void saveEta();
-            
-    Mat3x3d oldEta;
-    Mat3x3d prevEta;
-    Mat3x3d vScale;
+    void genRandomForce(RealType& randomForce, RealType variance);
+
+    RealType eta;
+    RealType oldEta;
+    RealType prevEta;
+    RealType vScale;
+    
+    SeqRandNumGen randNumGen_;
+    RealType W_;
+    RealType gamma_;
+    RealType variance_;
+    RealType randomForce_;
 
   };
-
-
 }//end namespace OpenMD
 
-#endif //INTEGRATORS_NPTF_HPP
+#endif //INTEGRATORS_LANGEVINPISTON_HPP
