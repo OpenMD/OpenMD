@@ -167,8 +167,8 @@ namespace OpenMD {
   std::string getSuffix(const std::string& str);
   
 
-template<class ContainerType>
-std::string containerToString(const ContainerType& cont) {
+  template<class ContainerType>
+  std::string containerToString(const ContainerType& cont) {
     std::ostringstream oss;
     oss << "(";
     typename ContainerType::const_iterator i = cont.begin();
@@ -182,7 +182,8 @@ std::string containerToString(const ContainerType& cont) {
     }
     oss << ")";
     return oss.str();
-}  
+  }  
+  
   unsigned long long memparse (char *ptr,  char **retptr); 
 }  
 #endif

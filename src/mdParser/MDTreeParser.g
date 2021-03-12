@@ -87,7 +87,7 @@ flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new Fluctuating
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addFluctuatingChargeParameters(flucQpars);}
     ;
 
-rnemdblock  : #(RNEMD  {RNEMDParameters* rnemdPars = new RNEMDParameters(); blockStack.push(rnemdPars);}
+rnemdblock  : #(RNEMD  {RNEMD::RNEMDParameters* rnemdPars = new RNEMD::RNEMDParameters(); blockStack.push(rnemdPars);}
             (assignment)* 
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRNEMDParameters(rnemdPars);}
     ;

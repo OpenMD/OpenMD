@@ -130,7 +130,7 @@ int main(int argc, char* argv[]){
   oldHmat = oldSnap->getHmat();
 
   //ProgressBarPtr progressBar {nullptr};
-  //progressBar = MemoryUtils::make_unique<ProgressBar>();
+  //progressBar = Utils::make_unique<ProgressBar>();
 
 
   ofstream eos;

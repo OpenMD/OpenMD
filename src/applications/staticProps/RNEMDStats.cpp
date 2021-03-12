@@ -579,7 +579,7 @@ namespace OpenMD {
     : ShellStatistics(info, filename, sele, nrbins), nAngleBins_(nangleBins) {
 
     Globals* simParams = info->getSimParams();
-    RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
+    RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
     bool hasAngularMomentumFluxVector = rnemdParams->haveAngularMomentumFluxVector();
 
     if (hasAngularMomentumFluxVector) {

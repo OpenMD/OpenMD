@@ -531,7 +531,10 @@ src/flucq/FluctuatingChargeObjectiveFunction.cpp
 src/flucq/FluctuatingChargeForces.cpp
 src/flucq/FluctuatingChargePropagator.cpp
 src/integrators/LangevinHullForceManager.cpp
+src/rnemd/NIVS.cpp
 src/rnemd/RNEMD.cpp
+src/rnemd/Swap.cpp
+src/rnemd/VSS.cpp
 src/io/ConstraintWriter.cpp
 src/io/DumpReader.cpp
 src/io/DumpWriter.cpp

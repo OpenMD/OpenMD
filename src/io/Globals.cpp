@@ -57,7 +57,7 @@ namespace OpenMD {
   Globals::Globals() {
 
     flucQpars_ = new FluctuatingChargeParameters();
-    rnemdPars_ = new RNEMDParameters();
+    rnemdPars_ = new RNEMD::RNEMDParameters();
     minimizerPars_ = new MinimizerParameters();
 
     DefineParameter(ForceField, "forceField");
@@ -212,11 +212,11 @@ namespace OpenMD {
   }
 
   Globals::~Globals() {
-    MemoryUtils::deletePointers(moleculeStamps_);
+    Utils::deletePointers(moleculeStamps_);
     
-    MemoryUtils::deletePointers(components_);
-    MemoryUtils::deletePointers(zconstraints_);
-    MemoryUtils::deletePointers(restraints_);
+    Utils::deletePointers(components_);
+    Utils::deletePointers(zconstraints_);
+    Utils::deletePointers(restraints_);
     
     delete flucQpars_;
     delete rnemdPars_;
@@ -328,7 +328,7 @@ namespace OpenMD {
     return true;
   }
 
-  bool Globals::addRNEMDParameters(RNEMDParameters* rnemdPars) {
+  bool Globals::addRNEMDParameters(RNEMD::RNEMDParameters* rnemdPars) {
     if (rnemdPars_ != NULL)
       delete rnemdPars_;
 

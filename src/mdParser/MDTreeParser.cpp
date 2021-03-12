@@ -361,7 +361,7 @@ void MDTreeParser::rnemdblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 		match(_t,RNEMD);
 		_t = _t->getFirstChild();
 #line 90 "MDTreeParser.g"
-		RNEMDParameters* rnemdPars = new RNEMDParameters(); blockStack.push(rnemdPars);
+		RNEMD::RNEMDParameters* rnemdPars = new RNEMD::RNEMDParameters(); blockStack.push(rnemdPars);
 #line 366 "MDTreeParser.cpp"
 		{ // ( ... )*
 		for (;;) {

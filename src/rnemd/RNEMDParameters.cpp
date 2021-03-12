@@ -50,77 +50,93 @@
 #include "rnemd/RNEMDParameters.hpp"
 
 namespace OpenMD {
+  namespace RNEMD {
 
-  RNEMDParameters::RNEMDParameters() {
+    RNEMDParameters::RNEMDParameters() {
 
-    DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
-    DefineOptionalParameterWithDefaultValue(ObjectSelection, "objectSelection", "select all");
+      DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
+      DefineOptionalParameterWithDefaultValue(ObjectSelection, "objectSelection", "select all");
 
-    DefineOptionalParameterWithDefaultValue(Method, "method", "VSS");
-    DefineOptionalParameter(FluxType, "fluxType");
+      DefineOptionalParameterWithDefaultValue(Method, "method", "VSS");
+      DefineOptionalParameter(FluxType, "fluxType");
 
-    DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime", 100.0);
-    DefineOptionalParameter(KineticFlux, "kineticFlux");
-    DefineOptionalParameter(MomentumFlux, "momentumFlux");
-    DefineOptionalParameter(CurrentDensity, "currentDensity");
-    DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
-    DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
-    DefineOptionalParameter(AngularMomentumFluxVector,
-                            "angularMomentumFluxVector");
-    DefineOptionalParameter(SlabWidth, "slabWidth");
-    DefineOptionalParameter(SlabACenter, "slabAcenter");
-    DefineOptionalParameter(SlabBCenter, "slabBcenter");
-    DefineOptionalParameter(SphereARadius, "sphereAradius");
-    DefineOptionalParameter(SphereBRadius, "sphereBradius");
-    DefineOptionalParameter(SelectionA, "selectionA");
-    DefineOptionalParameter(SelectionB, "selectionB");
-    DefineOptionalParameter(CoordinateOrigin, "coordinateOrigin");
-    DefineOptionalParameter(OutputFileName, "outputFileName");
-    DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
-    DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth", 2.0);
-    DefineOptionalParameter(OutputSelection, "outputSelection");
-    DefineOptionalParameter(OutputFields, "outputFields");
-    DefineOptionalParameter(DividingArea, "dividingArea");
+      DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime", 100.0);
+      DefineOptionalParameter(KineticFlux, "kineticFlux");
+      DefineOptionalParameter(MomentumFlux, "momentumFlux");
+      DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
+      DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
+      DefineOptionalParameter(AngularMomentumFluxVector, "angularMomentumFluxVector");
+      DefineOptionalParameter(SlabWidth, "slabWidth");
+      DefineOptionalParameter(SlabACenter, "slabAcenter");
+      DefineOptionalParameter(SlabBCenter, "slabBcenter");
+      DefineOptionalParameter(SphereARadius, "sphereAradius");
+      DefineOptionalParameter(SphereBRadius, "sphereBradius");
+      DefineOptionalParameter(SelectionA, "selectionA");
+      DefineOptionalParameter(SelectionB, "selectionB");
+      DefineOptionalParameter(CoordinateOrigin, "coordinateOrigin");
+      DefineOptionalParameter(OutputFileName, "outputFileName");
+      DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
+      DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth", 2.0);
+      DefineOptionalParameter(OutputSelection, "outputSelection");
+      DefineOptionalParameter(OutputFields, "outputFields");
+      DefineOptionalParameter(DividingArea, "dividingArea");
 
-    DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis", "z");
-  }
+      DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis", "z");
+    }
+    
+    void RNEMDParameters::validate() {
+      CheckParameter(ExchangeTime, isPositive());
+      CheckParameter(OutputBins, isPositive());
+      CheckParameter(OutputBinWidth, isPositive());
+      CheckParameter(Method,
+                    isEqualIgnoreCase("Swap") ||
+                    isEqualIgnoreCase("NIVS")  ||
+                    isEqualIgnoreCase("VSS"));
+      CheckParameter(FluxType,
+                    isEqualIgnoreCase("KE") ||
+                    isEqualIgnoreCase("Px") ||
+                    isEqualIgnoreCase("Py") ||
+                    isEqualIgnoreCase("Pz") ||
+                    isEqualIgnoreCase("Lx") ||
+                    isEqualIgnoreCase("Ly") ||
+                    isEqualIgnoreCase("Lz") ||
+                    isEqualIgnoreCase("Pvector") ||
+                    isEqualIgnoreCase("Lvector") ||
+                    isEqualIgnoreCase("KE+Px") ||
+                    isEqualIgnoreCase("KE+Py") ||
+                    isEqualIgnoreCase("KE+Lx") ||
+                    isEqualIgnoreCase("KE+Ly") ||
+                    isEqualIgnoreCase("KE+Lz") ||
+                    isEqualIgnoreCase("KE+Pvector") ||
+                    isEqualIgnoreCase("KE+Lvector")
+                    );
+      CheckParameter(PrivilegedAxis,
+                    isEqualIgnoreCase("x") ||
+                    isEqualIgnoreCase("y")  ||
+                    isEqualIgnoreCase("z"));
+    }
+  
+    bool RNEMDParameters::requiresElectricField() {
 
-  RNEMDParameters::~RNEMDParameters() {
-  }
+      static bool wasParsed {false};
+      
+      if (!wasParsed) {
+        StringTokenizer tokenizer(getOutputFields(), " ,;|\t\n\r");
 
-  void RNEMDParameters::validate() {
-    CheckParameter(ExchangeTime, isPositive());
-    CheckParameter(OutputBins, isPositive());
-    CheckParameter(OutputBinWidth, isPositive());
-    CheckParameter(Method,
-                   isEqualIgnoreCase("swap") ||
-                   isEqualIgnoreCase("NIVS")  ||
-                   isEqualIgnoreCase("VSS"));
-    CheckParameter(FluxType,
-                   isEqualIgnoreCase("KE") ||
-                   isEqualIgnoreCase("Px") ||
-                   isEqualIgnoreCase("Py") ||
-                   isEqualIgnoreCase("Pz") ||
-                   isEqualIgnoreCase("Lx") ||
-                   isEqualIgnoreCase("Ly") ||
-                   isEqualIgnoreCase("Lz") ||
-                   isEqualIgnoreCase("Current") ||
-		   isEqualIgnoreCase("Single") ||
-                   isEqualIgnoreCase("Pvector") ||
-                   isEqualIgnoreCase("Lvector") ||
-                   isEqualIgnoreCase("KE+Px") ||
-                   isEqualIgnoreCase("KE+Py") ||
-                   isEqualIgnoreCase("KE+Current") ||
-                   isEqualIgnoreCase("KE+Lx") ||
-                   isEqualIgnoreCase("KE+Ly") ||
-                   isEqualIgnoreCase("KE+Lz") ||
-                   isEqualIgnoreCase("KE+Pvector") ||
-                   isEqualIgnoreCase("KE+Pvector+Curent") ||
-                   isEqualIgnoreCase("KE+Lvector")
-                   );
-    CheckParameter(PrivilegedAxis,
-                   isEqualIgnoreCase("x") ||
-                   isEqualIgnoreCase("y")  ||
-                   isEqualIgnoreCase("z"));
+        while(tokenizer.hasMoreTokens()) {
+          std::string token(tokenizer.nextToken());
+          toUpper(token);
+
+          if (token == "ELECTRICFIELD" || token == "ELECTROSTATICPOTENTIAL") {
+            calculateElectricField_ = true;
+            break;
+          }
+        }
+
+        wasParsed = true;
+      }
+
+      return calculateElectricField_;
+    }
   }
 }

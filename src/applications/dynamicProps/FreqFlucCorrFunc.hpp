@@ -83,7 +83,7 @@ namespace OpenMD {
     virtual void validateSelection(SelectionManager& seleMan);
 
     std::vector< std::vector<RealType> > ue_;
-    RealAccumulator ueStats_ {};
+    Utils::RealAccumulator ueStats_ {};
   };
 }
 

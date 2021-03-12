@@ -172,61 +172,60 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-//   DynamicProperty* corrFunc = NULL;
   std::unique_ptr<DynamicProperty> corrFunc {nullptr};
 
   if(args_info.sdcorr_given){
-    corrFunc = MemoryUtils::make_unique<SystemDipoleCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<SystemDipoleCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.selecorr_given){
-    corrFunc = MemoryUtils::make_unique<SelectionCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<SelectionCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.dcorr_given){
-    corrFunc = MemoryUtils::make_unique<DipoleCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<DipoleCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorr_given) {
-    corrFunc = MemoryUtils::make_unique<RCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<RCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.r_rcorr_given) {
-    corrFunc = MemoryUtils::make_unique<RCorrFuncR>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<RCorrFuncR>(info, dumpFileName, sele1, sele2);
   } else if (args_info.thetacorr_given) {
-    corrFunc = MemoryUtils::make_unique<ThetaCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<ThetaCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.drcorr_given) {
-    corrFunc = MemoryUtils::make_unique<DirectionalRCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<DirectionalRCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorrZ_given) {
-    corrFunc = MemoryUtils::make_unique<RCorrFuncZ>(info, dumpFileName, sele1, sele2,
-                              args_info.nzbins_arg, privilegedAxis);
+    corrFunc = Utils::make_unique<RCorrFuncZ>(info, dumpFileName, sele1, sele2,
+                                              args_info.nzbins_arg, privilegedAxis);
   } else if (args_info.vcorr_given) {
-    corrFunc = MemoryUtils::make_unique<VCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<VCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.vcorrZ_given) {
-    corrFunc = MemoryUtils::make_unique<VCorrFuncZ>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<VCorrFuncZ>(info, dumpFileName, sele1, sele2);
   } else if (args_info.vcorrR_given) {
-    corrFunc = MemoryUtils::make_unique<VCorrFuncR>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<VCorrFuncR>(info, dumpFileName, sele1, sele2);
   } else if (args_info.wcorr_given){
-    corrFunc = MemoryUtils::make_unique<WCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<WCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.pjcorr_given){
-    corrFunc = MemoryUtils::make_unique<MomAngMomCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<MomAngMomCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.ftcorr_given){
-    corrFunc = MemoryUtils::make_unique<ForTorCorrFunc>(info, dumpFileName, sele1, sele2);
-  }else if (args_info.ckcorr_given){
-    corrFunc = MemoryUtils::make_unique<ChargeKineticCorrFunc>(info, dumpFileName, sele1, sele2,
-                                         args_info.rcut_arg);
-  }else if (args_info.cscorr_given){
+    corrFunc = Utils::make_unique<ForTorCorrFunc>(info, dumpFileName, sele1, sele2);
+  } else if (args_info.ckcorr_given){
+    corrFunc = Utils::make_unique<ChargeKineticCorrFunc>(info, dumpFileName, sele1, sele2,
+                                                         args_info.rcut_arg);
+  } else if (args_info.cscorr_given){
     if(args_info.dipoleX_given && args_info.dipoleY_given && args_info.dipoleZ_given){
-      corrFunc = MemoryUtils::make_unique<ChargeOrientationCorrFunc>(info, dumpFileName, sele1,
-                                               sele2, args_info.dipoleX_arg,
-                                               args_info.dipoleY_arg,
-                                               args_info.dipoleZ_arg,
-                                               args_info.rcut_arg);
+      corrFunc = Utils::make_unique<ChargeOrientationCorrFunc>(info, dumpFileName, sele1,
+                                                               sele2, args_info.dipoleX_arg,
+                                                               args_info.dipoleY_arg,
+                                                               args_info.dipoleZ_arg,
+                                                               args_info.rcut_arg);
     }
   } else if (args_info.facorr_given){
-    corrFunc = MemoryUtils::make_unique<ForceAutoCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<ForceAutoCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.tfcorr_given){
-    corrFunc = MemoryUtils::make_unique<TorForCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<TorForCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.tacorr_given){
-    corrFunc = MemoryUtils::make_unique<TorqueAutoCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<TorqueAutoCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.bondcorr_given) {
-    corrFunc = MemoryUtils::make_unique<BondCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<BondCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.stresscorr_given){
-    corrFunc = MemoryUtils::make_unique<StressCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<StressCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.freqfluccorr_given){
-    corrFunc = MemoryUtils::make_unique<FreqFlucCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<FreqFlucCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.lcorr_given) {
     int order(0);
     if (args_info.order_given)
@@ -239,7 +238,7 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    corrFunc = MemoryUtils::make_unique<LegendreCorrFunc>(info, dumpFileName, sele1, sele2, order);
+    corrFunc = Utils::make_unique<LegendreCorrFunc>(info, dumpFileName, sele1, sele2, order);
   } else if (args_info.lcorrZ_given) {
     int order(0);
     if (args_info.order_given)
@@ -252,7 +251,7 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    corrFunc = MemoryUtils::make_unique<LegendreCorrFuncZ>(info, dumpFileName, sele1, sele2, order,
+    corrFunc = Utils::make_unique<LegendreCorrFuncZ>(info, dumpFileName, sele1, sele2, order,
 				     args_info.nzbins_arg, privilegedAxis);
 
   } else if (args_info.cohZ_given) {
@@ -267,45 +266,41 @@ int main(int argc, char* argv[]){
       simError();
     }
 
-    corrFunc = MemoryUtils::make_unique<COHZ>(info, dumpFileName, sele1, sele2, order,
-			args_info.nzbins_arg, privilegedAxis);
+    corrFunc = Utils::make_unique<COHZ>(info, dumpFileName, sele1, sele2, order,
+			                                  args_info.nzbins_arg, privilegedAxis);
 
   } else if (args_info.jumptime_given) {
-    corrFunc = MemoryUtils::make_unique<HBondJump>(info, dumpFileName, sele1, sele2,
-                             args_info.OOcut_arg,
-                             args_info.thetacut_arg,
-                             args_info.OHcut_arg);
+    corrFunc = Utils::make_unique<HBondJump>(info, dumpFileName, sele1, sele2,
+                                             args_info.OOcut_arg,
+                                             args_info.thetacut_arg,
+                                             args_info.OHcut_arg);
   } else if (args_info.jumptimeZ_given) {
-    corrFunc = MemoryUtils::make_unique<HBondJumpZ>(info, dumpFileName, sele1, sele2,
-                              args_info.OOcut_arg,
-                              args_info.thetacut_arg,
-                              args_info.OHcut_arg, args_info.nzbins_arg, privilegedAxis);
+    corrFunc = Utils::make_unique<HBondJumpZ>(info, dumpFileName, sele1, sele2,
+                                              args_info.OOcut_arg,
+                                              args_info.thetacut_arg,
+                                              args_info.OHcut_arg, args_info.nzbins_arg, privilegedAxis);
   } else if (args_info.persistence_given) {
-    corrFunc = MemoryUtils::make_unique<HBondPersistence>(info, dumpFileName, sele1, sele2,
-                                    args_info.OOcut_arg,
-                                    args_info.thetacut_arg,
-                                    args_info.OHcut_arg);
+    corrFunc = Utils::make_unique<HBondPersistence>(info, dumpFileName, sele1, sele2,
+                                                    args_info.OOcut_arg,
+                                                    args_info.thetacut_arg,
+                                                    args_info.OHcut_arg);
   } else if (args_info.disp_given) {
-    corrFunc = MemoryUtils::make_unique<Displacement>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<Displacement>(info, dumpFileName, sele1, sele2);
   } else if (args_info.dispZ_given) {
-    corrFunc = MemoryUtils::make_unique<DisplacementZ>(info, dumpFileName, sele1, sele2,
-                                 args_info.nzbins_arg, privilegedAxis);
+    corrFunc = Utils::make_unique<DisplacementZ>(info, dumpFileName, sele1, sele2,
+                                                 args_info.nzbins_arg, privilegedAxis);
   } else if (args_info.current_given) {
-    corrFunc = MemoryUtils::make_unique<CurrentDensityAutoCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<CurrentDensityAutoCorrFunc>(info, dumpFileName, sele1, sele2);
   } else if (args_info.ddisp_given) {
-    corrFunc = MemoryUtils::make_unique<CollectiveDipoleDisplacement>(info, dumpFileName, sele1, sele2);
-  }
-    else if (args_info.vaOutProdcorr_given){
-    corrFunc = MemoryUtils::make_unique<VelocityAutoOutProductCorrFunc>(info, dumpFileName, sele1, sele2);
-  }
-    else if (args_info.waOutProdcorr_given){
-    corrFunc = MemoryUtils::make_unique<AngularVelocityAutoOutProductCorrFunc>(info, dumpFileName, sele1, sele2);
-  }
-    else if (args_info.vwOutProdcorr_given){
-    corrFunc = MemoryUtils::make_unique<VelAngularVelOutProdCorrFunc>(info, dumpFileName, sele1, sele2);
-  }
-  else if (args_info.wvOutProdcorr_given){
-  corrFunc = MemoryUtils::make_unique<AngularVelVelOutProdCorrFunc>(info, dumpFileName, sele1, sele2);
+    corrFunc = Utils::make_unique<CollectiveDipoleDisplacement>(info, dumpFileName, sele1, sele2);
+  } else if (args_info.vaOutProdcorr_given){
+    corrFunc = Utils::make_unique<VelocityAutoOutProductCorrFunc>(info, dumpFileName, sele1, sele2);
+  } else if (args_info.waOutProdcorr_given){
+    corrFunc = Utils::make_unique<AngularVelocityAutoOutProductCorrFunc>(info, dumpFileName, sele1, sele2);
+  } else if (args_info.vwOutProdcorr_given){
+    corrFunc = Utils::make_unique<VelAngularVelOutProdCorrFunc>(info, dumpFileName, sele1, sele2);
+  } else if (args_info.wvOutProdcorr_given){
+    corrFunc = Utils::make_unique<AngularVelVelOutProdCorrFunc>(info, dumpFileName, sele1, sele2);
   }
 
   if (args_info.output_given) {

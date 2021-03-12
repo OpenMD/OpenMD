@@ -77,15 +77,15 @@ namespace OpenMD {
   }
   
   MoleculeStamp::~MoleculeStamp() {
-    MemoryUtils::deletePointers(atomStamps_);
-    MemoryUtils::deletePointers(bondStamps_);
-    MemoryUtils::deletePointers(bendStamps_);
-    MemoryUtils::deletePointers(torsionStamps_);
-    MemoryUtils::deletePointers(inversionStamps_);
-    MemoryUtils::deletePointers(rigidBodyStamps_);
-    MemoryUtils::deletePointers(cutoffGroupStamps_);
-    MemoryUtils::deletePointers(fragmentStamps_);    
-    MemoryUtils::deletePointers(constraintStamps_);    
+    Utils::deletePointers(atomStamps_);
+    Utils::deletePointers(bondStamps_);
+    Utils::deletePointers(bendStamps_);
+    Utils::deletePointers(torsionStamps_);
+    Utils::deletePointers(inversionStamps_);
+    Utils::deletePointers(rigidBodyStamps_);
+    Utils::deletePointers(cutoffGroupStamps_);
+    Utils::deletePointers(fragmentStamps_);    
+    Utils::deletePointers(constraintStamps_);    
   }
   
   bool MoleculeStamp::addAtomStamp( AtomStamp* atom) {

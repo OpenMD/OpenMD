@@ -49,7 +49,7 @@
 namespace OpenMD {
   
   CompositeShape::~CompositeShape() {
-    MemoryUtils::deletePointers(shapes_);
+    Utils::deletePointers(shapes_);
   }
   
   bool CompositeShape::isInterior(Vector3d pos) {

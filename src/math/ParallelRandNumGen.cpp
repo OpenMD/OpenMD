@@ -84,7 +84,7 @@ namespace OpenMD {
     //to the constructor plus the number of random number generators
     //which are already created.
     unsigned long newSeed = oneSeed + nCreatedRNG_;
-    mtRand_ = MemoryUtils::make_unique<MTRand>(newSeed, nProcessors, myRank_);
+    mtRand_ = Utils::make_unique<MTRand>(newSeed, nProcessors, myRank_);
     
     ++nCreatedRNG_;
   }
@@ -99,7 +99,7 @@ namespace OpenMD {
     nProcessors = 1;
     myRank_ = 0;
 #endif
-    mtRand_ = MemoryUtils::make_unique<MTRand>(nProcessors, myRank_);
+    mtRand_ = Utils::make_unique<MTRand>(nProcessors, myRank_);
 
     seed();       /** @todo calling virtual function in constructor is
                       not a good design */

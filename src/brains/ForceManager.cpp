@@ -84,7 +84,7 @@ namespace OpenMD {
   }
 
   ForceManager::~ForceManager() {
-    MemoryUtils::deletePointers(perturbations_);
+    Utils::deletePointers(perturbations_);
 
     delete switcher_;
     delete interactionMan_;
@@ -380,7 +380,7 @@ namespace OpenMD {
       if (doHeatFlux_) doParticlePot_ = true;
 
       doElectricField_ = info_->getSimParams()->getOutputElectricField();
-      doElectricField_ |= info_->getSimParams()->getRNEMDParameters()->haveCurrentDensity();
+      doElectricField_ |= info_->getSimParams()->getRNEMDParameters()->requiresElectricField();
       doSitePotential_ = info_->getSimParams()->getOutputSitePotential();
       if (info_->getSimParams()->haveUseSurfaceTerm() &&
           info_->getSimParams()->getUseSurfaceTerm()) {

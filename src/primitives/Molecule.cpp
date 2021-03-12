@@ -71,16 +71,16 @@ namespace OpenMD {
   
   Molecule::~Molecule() {
     
-    MemoryUtils::deletePointers(atoms_);
-    MemoryUtils::deletePointers(bonds_);
-    MemoryUtils::deletePointers(bends_);
-    MemoryUtils::deletePointers(torsions_);
-    MemoryUtils::deletePointers(inversions_);
-    MemoryUtils::deletePointers(rigidBodies_);
-    MemoryUtils::deletePointers(cutoffGroups_);
-    MemoryUtils::deletePointers(constraintPairs_);
-    MemoryUtils::deletePointers(constraintElems_);
-    MemoryUtils::deletePointers(hBondDonors_);
+    Utils::deletePointers(atoms_);
+    Utils::deletePointers(bonds_);
+    Utils::deletePointers(bends_);
+    Utils::deletePointers(torsions_);
+    Utils::deletePointers(inversions_);
+    Utils::deletePointers(rigidBodies_);
+    Utils::deletePointers(cutoffGroups_);
+    Utils::deletePointers(constraintPairs_);
+    Utils::deletePointers(constraintElems_);
+    Utils::deletePointers(hBondDonors_);
 
     // integrableObjects_ don't own the objects
     integrableObjects_.clear();

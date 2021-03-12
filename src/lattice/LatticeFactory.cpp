@@ -50,7 +50,7 @@
 namespace OpenMD {
 
   LatticeFactory::~LatticeFactory() {
-    MemoryUtils::deletePointers(creatorMap_);
+    Utils::deletePointers(creatorMap_);
   }
 
   bool LatticeFactory::registerLattice(LatticeCreator* creator) {

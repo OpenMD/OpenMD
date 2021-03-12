@@ -82,10 +82,10 @@ namespace OpenMD {
     void integrate();
     void updateSizes();
     void setForceManager(ForceManager* forceMan);
-    void setVelocitizer(VelocitizerPtr velocitizer);
+    void setVelocitizer(std::unique_ptr<Velocitizer> velocitizer);
     void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop);
     void setRotationAlgorithm(RotationAlgorithm* algo);
-    void setRNEMD(RNEMD* rnemd);
+    void setRNEMD(std::unique_ptr<RNEMD::RNEMD> rnemd);
 
   protected:
     Integrator(SimInfo* info);
@@ -124,8 +124,8 @@ namespace OpenMD {
     RotationAlgorithm* rotAlgo_ {nullptr};
     FluctuatingChargePropagator* flucQ_ {nullptr};
     Rattle* rattle_ {nullptr};
-    VelocitizerPtr velocitizer_ {nullptr};
-    RNEMD* rnemd_ {nullptr};
+    std::unique_ptr<Velocitizer> velocitizer_ {nullptr};
+    std::unique_ptr<RNEMD::RNEMD> rnemd_ {nullptr};
 
     bool needPotential {false};
     bool needVirial {false};

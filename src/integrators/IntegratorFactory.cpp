@@ -50,7 +50,7 @@
 namespace OpenMD {
 
   IntegratorFactory::~IntegratorFactory() {
-    MemoryUtils::deletePointers(creatorMap_);
+    Utils::deletePointers(creatorMap_);
   }
 
   bool IntegratorFactory::registerIntegrator(IntegratorCreator* creator) {

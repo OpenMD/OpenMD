@@ -43,8 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef RNEMD_RNEMDPARAMETERS_HPP
-#define RNEMD_RNEMDPARAMETERS_HPP
+#ifndef OPENMD_RNEMD_RNEMDPARAMETERS_HPP
+#define OPENMD_RNEMD_RNEMDPARAMETERS_HPP
 
 #include <string>
 #include <vector>
@@ -53,41 +53,47 @@
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
+  namespace RNEMD {
 
-  class RNEMDParameters : public DataHolder {
+    class RNEMDParameters : public DataHolder {
 
-    DeclareParameter(UseRNEMD, bool);
-    DeclareParameter(ObjectSelection, std::string);
-    DeclareParameter(OutputSelection, std::string);
-    DeclareParameter(Method, std::string);
-    DeclareParameter(FluxType, std::string);
-    DeclareParameter(ExchangeTime, RealType);
-    DeclareParameter(KineticFlux, RealType);
-    DeclareParameter(MomentumFlux, RealType);
-    DeclareParameter(CurrentDensity, RealType);
-    DeclareParameter(MomentumFluxVector, std::vector<RealType> );
-    DeclareParameter(AngularMomentumFlux, RealType);
-    DeclareParameter(AngularMomentumFluxVector, std::vector<RealType> );
-    DeclareParameter(SlabWidth, RealType);
-    DeclareParameter(SlabACenter, RealType);
-    DeclareParameter(SlabBCenter, RealType);
-    DeclareParameter(SphereARadius, RealType);
-    DeclareParameter(SphereBRadius, RealType);
-    DeclareParameter(SelectionA, std::string);
-    DeclareParameter(SelectionB, std::string);
-    DeclareParameter(DividingArea, RealType);
-    DeclareParameter(CoordinateOrigin, std::vector<RealType> );
-    DeclareParameter(OutputFileName, std::string);
-    DeclareParameter(OutputBins, int);
-    DeclareParameter(OutputBinWidth, RealType);
-    DeclareParameter(OutputFields, std::string);
-    DeclareParameter(PrivilegedAxis, std::string);
+      DeclareParameter(UseRNEMD, bool);
+      DeclareParameter(ObjectSelection, std::string);
+      DeclareParameter(OutputSelection, std::string);
+      DeclareParameter(Method, std::string);
+      DeclareParameter(FluxType, std::string);
+      DeclareParameter(ExchangeTime, RealType);
+      DeclareParameter(KineticFlux, RealType);
+      DeclareParameter(MomentumFlux, RealType);
+      DeclareParameter(MomentumFluxVector, std::vector<RealType> );
+      DeclareParameter(AngularMomentumFlux, RealType);
+      DeclareParameter(AngularMomentumFluxVector, std::vector<RealType> );
+      DeclareParameter(SlabWidth, RealType);
+      DeclareParameter(SlabACenter, RealType);
+      DeclareParameter(SlabBCenter, RealType);
+      DeclareParameter(SphereARadius, RealType);
+      DeclareParameter(SphereBRadius, RealType);
+      DeclareParameter(SelectionA, std::string);
+      DeclareParameter(SelectionB, std::string);
+      DeclareParameter(DividingArea, RealType);
+      DeclareParameter(CoordinateOrigin, std::vector<RealType> );
+      DeclareParameter(OutputFileName, std::string);
+      DeclareParameter(OutputBins, int);
+      DeclareParameter(OutputBinWidth, RealType);
+      DeclareParameter(OutputFields, std::string);
+      DeclareParameter(PrivilegedAxis, std::string);
 
-  public:
-    RNEMDParameters();
-    virtual ~RNEMDParameters();
-    virtual void validate();
-  };
+    public:
+      RNEMDParameters();
+      virtual ~RNEMDParameters() = default;
+
+      virtual void validate();
+      bool requiresElectricField();
+
+    private:
+      bool calculateElectricField_ {false};
+    };
+  }
 }
 
-#endif
+#endif // OPENMD_RNEMD_RNEMDPARAMETERS_HPP
