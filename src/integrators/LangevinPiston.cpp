@@ -72,7 +72,7 @@ namespace OpenMD {
       gamma_ = simParams->getLangevinPistonDrag();
     }
 
-    variance_ = 2.0 * W_ * gamma_ * Constants::kB * targetTemp / (W_ * dt);
+    variance_ = 2.0 * W_ * gamma_ * Constants::kB * targetTemp / dt;
     genRandomForce(randomForce_, variance_);
   }
   
