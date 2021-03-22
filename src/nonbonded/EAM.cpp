@@ -80,10 +80,16 @@ namespace OpenMD {
     }
   }
 
+  // RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
+  //                               RealType A, RealType alpha, RealType kappa) {
+  //   return
+  //     ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
+  // }
+
   RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
                                 RealType A, RealType alpha, RealType kappa) {
     return
-      ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
+      ( A*exp (-alpha * (r/re-1.0) ) );
   }
 
   RealType EAM::ZhouPhiCoreValence(RealType r, RealType re,
@@ -508,6 +514,16 @@ namespace OpenMD {
 
           addExplicitInteraction(at1, at2, re, alpha, beta, A, B,
                                  kappa, lambda);
+
+        } else if (nbt->isEAMOxides()) {
+
+          RealType re = eamit->getRe();
+          RealType alpha = eamit->getAlpha();
+          RealType A = eamit->getA();
+          RealType Ci = eamit->getCi();
+          RealType Cj = eamit->getCj();
+
+          addExplicitInteraction(at1, at2, re, alpha, A, Ci, Cj);
         }
       }
     }
@@ -933,6 +949,80 @@ namespace OpenMD {
     return;
   }
 
+  void EAM::addExplicitInteraction(AtomType* atype1, AtomType* atype2,
+                                   RealType re, RealType alpha,
+				   RealType A, RealType Ci, RealType Cj) {
+
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};       
+
+    EAMInteractionData mixer;
+    std::vector<RealType> rVals;
+    std::vector<RealType> phiVals;
+
+    int Nr = 2000;
+    RealType r;
+    RealType phiCC;
+
+    // default to FCC if we don't specify HCP or BCC:
+    RealType rcut = sqrt(5.0) * re;
+
+    RealType dr = rcut/(RealType)(Nr-1);
+
+    for (int i = 0; i < Nr; i++) {
+      r = RealType(i)*dr;
+      rVals.push_back(r);
+      phiCC = ZhouPhiCoreCore(r, re, A, 0.0, 0.0);
+      phiVals.push_back( phiCC );
+    }
+   
+    cs->addPoints(rVals, phiVals);
+    mixer.phiCC = cs;
+    mixer.rcut = mixer.phi->getLimits().second;
+
+    mixer.Ci = Ci;
+    mixer.Cj = Cj;
+      
+    mixer.explicitlySet = true;
+
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+
+    int eamtid1, eamtid2;
+
+    pair<set<int>::iterator,bool> ret;
+    ret = EAMtypes.insert( atid1 );
+    if (ret.second == false) {
+      // already had this type in the EAMMap, just get the eamtid:
+      eamtid1 = EAMtids[ atid1 ];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      eamtid1 = nEAM_;
+      EAMtids[atid1] = nEAM_;
+      nEAM_++;
+    }
+
+    ret = EAMtypes.insert( atid2 );
+    if (ret.second == false) {
+      // already had this type in the EAMMap, just get the eamtid:
+      eamtid2 = EAMtids[ atid2 ];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      eamtid2 = nEAM_;
+      EAMtids[atid2] = nEAM_;
+      nEAM_++;
+    }
+
+    MixingMap.resize(nEAM_);
+    MixingMap[eamtid1].resize(nEAM_);
+    MixingMap[eamtid1][eamtid2] = mixer;
+
+    if (eamtid2 != eamtid1) {
+      MixingMap[eamtid2].resize(nEAM_);
+      MixingMap[eamtid2][eamtid1] = mixer;
+    }
+    return;
+  }
+  
   void EAM::calcDensity(InteractionData &idat) {
 
     if (!initialized_) initialize();
@@ -1017,6 +1107,7 @@ namespace OpenMD {
     RealType Ma(0.0), Mb(0.0);
     RealType si(1.0), sj(1.0);
     RealType sip(0.0), sjp(0.0);
+    RealType Ci(1.0), Cj(1.0);
 
     rhat =  idat.d / idat.rij;
     if ( idat.rij < rci && idat.rij < rcij ) {
@@ -1034,7 +1125,7 @@ namespace OpenMD {
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
     bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
 
-    if (hasFlucQ && !isExplicit) {
+    if (hasFlucQ) {
       
       if (data1.isFluctuatingCharge) {
 	Va = data1.nValence;
@@ -1081,23 +1172,34 @@ namespace OpenMD {
           }
         }
       } else {
-        // Core-Core part first - no fluctuating charge, just Johnson mixing:
 
-        if ( idat.rij < rci  && idat.rij < rcij ) {
-          CubicSplinePtr phiACC = data1.phiCC;
-          phiACC->getValueAndDerivativeAt( idat.rij, pha, dpha);
-          phab += 0.5 * (rhb / rha) * pha;
-          dvpdr += 0.5 * ((rhb/rha)*dpha +
-                          pha*((drhb/rha) - (rhb*drha/rha/rha)));
-        }
-        if ( idat.rij < rcj  && idat.rij < rcij ) {
-          CubicSplinePtr phiBCC = data2.phiCC;
-          phiBCC->getValueAndDerivativeAt( idat.rij, phb, dphb);
-          phab += 0.5 * (rha / rhb) * phb;
-          dvpdr += 0.5 * ((rha/rhb)*dphb +
-                          phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
-        }
+	if (isExplicit) {
+	  CubicSplinePtr phiCC = MixingMap[eamtid1][eamtid2].phiCC;
+	  phiCC->getValueAndDerivativeAt( idat.rij, phab, dvpdr);	  
+	} else {
+	
+	  // Core-Core part first - no fluctuating charge, just Johnson mixing:
+	  
+	  if ( idat.rij < rci  && idat.rij < rcij ) {
+	    CubicSplinePtr phiACC = data1.phiCC;
+	    phiACC->getValueAndDerivativeAt( idat.rij, pha, dpha);
+	    phab += 0.5 * (rhb / rha) * pha;
+	    dvpdr += 0.5 * ((rhb/rha)*dpha +
+			    pha*((drhb/rha) - (rhb*drha/rha/rha)));
+	  }
+	  if ( idat.rij < rcj  && idat.rij < rcij ) {
+	    CubicSplinePtr phiBCC = data2.phiCC;
+	    phiBCC->getValueAndDerivativeAt( idat.rij, phb, dphb);
+	    phab += 0.5 * (rha / rhb) * phb;
+	    dvpdr += 0.5 * ((rha/rhb)*dphb +
+			    phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
+	  }
+	}
 
+	if (isExplicit) {
+	  Ci = MixingMap[eamtid1][eamtid2].Ci;
+	  Cj = MixingMap[eamtid1][eamtid2].Cj;
+	}
         // Core-Valence next, this does include fluctuating charges:
 
 	if (data1.isFluctuatingCharge) {
@@ -1111,24 +1213,24 @@ namespace OpenMD {
           CubicSplinePtr phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( idat.rij, pha, dpha);
 	  
-          phab += 0.5 * sj * (rhb / rha) * pha;
-          dvpdr += 0.5 * sj * ((rhb/rha)*dpha +
-			       pha * ((drhb/rha) - (rhb*drha/rha/rha)));
+          phab += 0.5 * sj * Ci * (rhb / rha) * pha;
+          dvpdr += 0.5 * sj * Ci * ((rhb/rha)*dpha +
+				    pha * ((drhb/rha) - (rhb*drha/rha/rha)));
 	  
           if (data2.isFluctuatingCharge) {
-            idat.dVdFQ2 +=  0.5 * sjp * (rhb / rha) * pha;
+            idat.dVdFQ2 +=  0.5 * sjp * Ci * (rhb / rha) * pha;
           }
         }
         if ( idat.rij < rcj  && idat.rij < rcij ) {
           CubicSplinePtr phiBCV = data2.phiCV;
           phiBCV->getValueAndDerivativeAt( idat.rij, phb, dphb);
 
-          phab += 0.5 * si * (rha / rhb) * phb;
-          dvpdr += 0.5 * si * ((rha/rhb)*dphb +
-			       phb * ((drha/rhb) - (rha*drhb/rhb/rhb)));
+          phab += 0.5 * si * Cj * (rha / rhb) * phb;
+          dvpdr += 0.5 * si * Cj * ((rha/rhb)*dphb +
+				    phb * ((drha/rhb) - (rha*drhb/rhb/rhb)));
 
           if (data1.isFluctuatingCharge) {
-            idat.dVdFQ1 +=  0.5 * sip * (rha / rhb) * phb;
+            idat.dVdFQ1 +=  0.5 * sip * Cj * (rha / rhb) * phb;
           }
         }
       }

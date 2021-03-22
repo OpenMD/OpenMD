@@ -67,6 +67,7 @@ namespace OpenMD {
       Buckingham,
       EAMTable,
       EAMZhou,
+      EAMOxides,
       InversePowerSeries,
       Unknown
     };

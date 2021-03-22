@@ -65,6 +65,7 @@ namespace OpenMD {
     bool is_MAW;
     bool is_EAMTable;
     bool is_EAMZhou;
+    bool is_EAMOxides;
     bool is_SC;
     bool is_RepulsivePower;
     bool is_Mie;
@@ -94,6 +95,8 @@ namespace OpenMD {
     bool isEAMTable();
     void setEAMZhou();
     bool isEAMZhou();
+    void setEAMOxides();
+    bool isEAMOxides();
     bool isSC();
     void setSC();
     bool isMetal();

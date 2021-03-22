@@ -69,6 +69,7 @@ namespace OpenMD {
     stringToEnumMap_["Buckingham"] = Buckingham;
     stringToEnumMap_["EAMTable"] = EAMTable;
     stringToEnumMap_["EAMZhou"] = EAMZhou;
+    stringToEnumMap_["EAMOxides"] = EAMOxides;
     stringToEnumMap_["InversePowerSeries"] = InversePowerSeries;
 
   }
@@ -243,6 +244,26 @@ namespace OpenMD {
       }
       break;
 
+    case EAMOxides :
+      if (nTokens < 6) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+
+        RealType re = dus_ * tokenizer.nextTokenAsDouble();
+        RealType alpha = tokenizer.nextTokenAsDouble();
+        // Because EAM is a metallic potential, we'll use the metallic
+        // unit scaling for these two parameters
+        RealType A = meus_ * tokenizer.nextTokenAsDouble();
+        RealType Ci = tokenizer.nextTokenAsDouble();
+        RealType Cj = tokenizer.nextTokenAsDouble();
+
+        interactionType = new EAMInteractionType(re, alpha, A, Ci, Cj);
+      }
+      break;
+      
     case InversePowerSeries :
       if (nTokens < 2 || nTokens % 2 != 0) {
         sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",

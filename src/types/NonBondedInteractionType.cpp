@@ -60,6 +60,7 @@ namespace OpenMD {
     nbitp.is_MAW = false;
     nbitp.is_EAMTable = false;
     nbitp.is_EAMZhou = false;
+    nbitp.is_EAMOxides = false;
     nbitp.is_SC = false;
     nbitp.is_RepulsivePower = false;
     nbitp.is_Mie = false;
@@ -127,7 +128,15 @@ namespace OpenMD {
   bool NonBondedInteractionType::isEAMZhou() {
     return nbitp.is_EAMZhou;
   }
+
+  void NonBondedInteractionType::setEAMOxides() {
+    nbitp.is_EAMOxides = true;
+  }
   
+  bool NonBondedInteractionType::isEAMOxides() {
+    return nbitp.is_EAMOxides;
+  }
+
   bool NonBondedInteractionType::isSC() {
     return nbitp.is_SC;
   }
