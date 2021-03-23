@@ -107,7 +107,7 @@ namespace OpenMD {
                                 RealType A, RealType Ci, RealType Cj);
     
     RealType fastPower(RealType x, int y);
-/*
+
     RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
                              RealType alpha, RealType kappa);
     RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
@@ -119,7 +119,7 @@ namespace OpenMD {
     
     RealType ZhouRho(RealType r, RealType re, RealType fe,
                      RealType beta, RealType lambda);
-*/ 
+ 
    RealType PhiCoreCore(RealType r, RealType re, RealType A,
                              RealType alpha);
     RealType PhiCoreValence(RealType r, RealType re, RealType B,
