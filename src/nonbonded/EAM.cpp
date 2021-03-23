@@ -81,7 +81,7 @@ namespace OpenMD {
   }
 
  //Zhou functional form with switching functions
-/*
+
   RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
                                 RealType A, RealType alpha, RealType kappa) {
     return ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
@@ -105,7 +105,7 @@ namespace OpenMD {
                         RealType beta, RealType lambda) {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
   }
-*/
+
 //Zhou functional form without switching functions
 
   RealType EAM::PhiCoreCore(RealType r, RealType re,
@@ -985,9 +985,7 @@ namespace OpenMD {
     RealType r;
     RealType phiCC;
 
-    // default to FCC if we don't specify HCP or BCC:
-    RealType rcut = sqrt(5.0) * re;
-
+    RealType rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
     RealType dr = rcut/(RealType)(Nr-1);
 
     for (int i = 0; i < Nr; i++) {
