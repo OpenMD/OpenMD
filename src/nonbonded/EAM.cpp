@@ -82,14 +82,22 @@ namespace OpenMD {
 
   RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
                                 RealType A, RealType alpha, RealType kappa) {
-    return
-      ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
+    return ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
+  }
+
+  RealType EAM::PhiCoreCore(RealType r, RealType re,
+                                RealType A) {
+    return ( A*exp (-alpha * (r/re-1.0) ) ) ;
   }
 
   RealType EAM::ZhouPhiCoreValence(RealType r, RealType re,
                                    RealType B, RealType beta, RealType lambda) {
-    return
-      - ( B*exp (-beta * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-lambda, 20));
+    return - ( B*exp (-beta * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-lambda, 20));
+  }
+
+  RealType EAM::PhiCoreValence(RealType r, RealType re,
+                                   RealType B) {
+    return - ( B*exp (-beta * (r/re-1.0) ) ) ;
   }
 
   RealType EAM::ZhouPhi(RealType r, RealType re,
@@ -100,9 +108,23 @@ namespace OpenMD {
       ZhouPhiCoreValence(r,re,B,beta,lambda);
   }
 
+
+  RealType EAM::Phi(RealType r, RealType re,
+                        RealType A, RealType B,
+                        RealType alpha, RealType beta,
+                        ) {
+    return PhiCoreCore(r,re,A,alpha) +
+      PhiCoreValence(r,re,B,beta);
+  }
+
   RealType EAM::ZhouRho(RealType r, RealType re, RealType fe,
                         RealType beta, RealType lambda) {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
+  }
+
+  RealType EAM::Rho(RealType r, RealType re, RealType fe,
+                        RealType beta) {
+    return (fe * exp(-beta * (r/re-1.0))) ;
   }
 
   RealType EAM::gFunc(RealType q, RealType nV, RealType nM) {
@@ -379,11 +401,13 @@ namespace OpenMD {
 
         if ( r < data1.rcut ) {
           rha = data1.rho->getValueAt(r);
-          pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
+          //pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
+          pha = Phi(r, re1, A1, B1, alpha1, beta1);
         }
         if ( r < data2.rcut ) {
           rhb = data2.rho->getValueAt(r);
-          phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
+          //phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
+          phb =  Phi(r, re2, A2, B2, alpha2, beta2);
         }
 
         if ( r < data1.rcut )
@@ -506,8 +530,8 @@ namespace OpenMD {
           RealType kappa = eamit->getKappa();
           RealType lambda = eamit->getLambda();
 
-          addExplicitInteraction(at1, at2, re, alpha, beta, A, B,
-                                 kappa, lambda);
+         addExplicitInteraction(at1, at2, re, alpha, beta, A, B,
+                               kappa, lambda);
         }
       }
     }
@@ -552,7 +576,8 @@ namespace OpenMD {
 
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
-      eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      //eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
@@ -575,9 +600,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i)*dr;
         rvals.push_back(r);
-        rhovals.push_back( ZhouRho(r, re,  fe, beta,  lambda) );
-        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
-        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        rhovals.push_back( Rho(r, re,  fe, beta) );
+        phiCC = PhiCoreCore(r, re, A, alpha);
+        phiCV = PhiCoreValence(r, re, B, beta);
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
@@ -644,7 +669,8 @@ namespace OpenMD {
 
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
-      eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      //eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
       RealType phiCC, phiCV;
@@ -659,9 +685,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i)*dr;
         rvals.push_back(r);
-        rhovals.push_back( ZhouRho(r, re,  fe, beta,  lambda) );
-        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
-        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        rhovals.push_back( Rho(r, re,  fe, beta,  lambda) );
+        phiCC = PhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = PhiCoreValence(r, re, B, beta, lambda);
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
@@ -694,8 +720,9 @@ namespace OpenMD {
 
       int Nr = 2000;
       // eamAtomData.rcut = 6.0;
-      eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + nu );
+      //eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + nu );
 
+      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
@@ -716,9 +743,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i)*dr;
         rvals.push_back(r);
-        rhovals.push_back( ZhouRho(r, re,  fe, gamma,  nu) );
-        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
-        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        rhovals.push_back( Rho(r, re,  fe, gamma,  nu) );
+        phiCC = PhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = PhiCoreValence(r, re, B, beta, lambda);
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
@@ -878,8 +905,8 @@ namespace OpenMD {
     RealType r;
 
     // default to FCC if we don't specify HCP or BCC:
-    RealType rcut = sqrt(5.0) * re;
-
+    //RealType rcut = sqrt(5.0) * re;
+    RealType rcut = std::min(12.0, std::max(9.0, 4.0 * re));
     RealType dr = rcut/(RealType)(Nr-1);
 
     for (int i = 0; i < Nr; i++) {
@@ -888,7 +915,6 @@ namespace OpenMD {
       phiVals.push_back( ZhouPhi(r, re, A, B, alpha, beta,
                                  kappa, lambda) );
     }
-
     cs->addPoints(rVals, phiVals);
     mixer.phi = cs;
     mixer.rcut = mixer.phi->getLimits().second;
@@ -921,11 +947,10 @@ namespace OpenMD {
       EAMtids[atid2] = nEAM_;
       nEAM_++;
     }
-
+    
     MixingMap.resize(nEAM_);
     MixingMap[eamtid1].resize(nEAM_);
     MixingMap[eamtid1][eamtid2] = mixer;
-
     if (eamtid2 != eamtid1) {
       MixingMap[eamtid2].resize(nEAM_);
       MixingMap[eamtid2][eamtid1] = mixer;
@@ -1033,7 +1058,6 @@ namespace OpenMD {
 
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
     bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
-
     if (hasFlucQ && !isExplicit) {
       
       if (data1.isFluctuatingCharge) {
