@@ -1213,7 +1213,7 @@ namespace OpenMD {
     if (i_is_Fluctuating) {
       // We're now doing all of the self pieces for fluctuating charges in
       // explicit self interactions.
-      // C_a += sdat.flucQ;
+       C_a += sdat.flucQ;
       flucQ_->getSelfInteraction(sdat.atid, sdat.flucQ, selfPot, fqf );
     }
 
@@ -1243,9 +1243,9 @@ namespace OpenMD {
     case esm_EWALD_FULL:
       if (i_is_Charge) {
         selfPot += selfMult1_ * pre11_ * C_a * (C_a + sdat.skippedCharge);
-        // if (i_is_Fluctuating) {
-        //  fqf -= selfMult1_*pre11_*(2.0*C_a + sdat.skippedCharge);
-        // }
+         if (i_is_Fluctuating) {
+          fqf -= selfMult1_*pre11_*(2.0*C_a + sdat.skippedCharge);
+         }
       }
       if (i_is_Dipole)
         selfPot += selfMult2_ * pre22_ * DdD;
@@ -1255,9 +1255,9 @@ namespace OpenMD {
         selfPot += selfMult4_ * pre44_ * (2.0*trQQ + trQ*trQ);
         if (i_is_Charge) {
           selfPot -= selfMult2_ * pre14_ * 2.0 * C_a * trQ;
-          //if (i_is_Fluctuating) {
-          //  fqf += selfMult2_ * pre14_ * 2.0 * trQ;
-          //}
+          if (i_is_Fluctuating) {
+            fqf += selfMult2_ * pre14_ * 2.0 * trQ;
+          }
         }
       }
       break;
