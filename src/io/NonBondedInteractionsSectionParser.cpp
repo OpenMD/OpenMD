@@ -77,7 +77,6 @@ namespace OpenMD {
   void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();
-
     if (nTokens < 3) {
       sprintf(painCave.errMsg,
               "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
@@ -101,12 +100,12 @@ namespace OpenMD {
     //switch is a nightmare to maintain
     switch(nbit) {
     case MAW :
-      if (nTokens < 5) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 5) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 8 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
-      } else {
+      } else { 
         RealType r_e = dus_ * tokenizer.nextTokenAsDouble();
         RealType D_e = eus_ * tokenizer.nextTokenAsDouble();
         RealType beta = tokenizer.nextTokenAsDouble() / dus_ ;
@@ -117,8 +116,8 @@ namespace OpenMD {
       break;
 
     case ShiftedMorse :
-      if (nTokens < 3) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 3) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 6 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -131,8 +130,8 @@ namespace OpenMD {
       break;
 
     case RepulsiveMorse :
-      if (nTokens < 3) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 3) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 6 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -145,8 +144,8 @@ namespace OpenMD {
       break;
 
     case LennardJones :
-      if (nTokens < 2) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 2) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 5 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -159,7 +158,7 @@ namespace OpenMD {
 
     case RepulsivePower :
       if (nTokens < 3) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 6 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -173,8 +172,8 @@ namespace OpenMD {
       break;
 
     case Mie :
-      if (nTokens < 4) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 4) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 7 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -222,8 +221,8 @@ namespace OpenMD {
       break;
 
     case EAMZhou :
-      if (nTokens < 7) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 7) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 10 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -245,8 +244,8 @@ namespace OpenMD {
       break;
 
     case EAMOxides :
-      if (nTokens < 6) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      if (nTokens != 5) {
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 8 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();

@@ -72,8 +72,8 @@ namespace OpenMD {
   struct EAMInteractionData {
     CubicSplinePtr phi;
     CubicSplinePtr phiCC;
-    RealType Ci = 1.0;
-    RealType Cj = 1.0;
+    RealType Ci = 0.0; // to zero out the CV interaction in the eam-explict interaction for EAMTable and EAMZhou
+    RealType Cj = 0.0; // to zero out the CV interaction in the eam-explict interaction for EAMTable and EAMZhou
     RealType rcut;
     bool explicitlySet;
   };
@@ -107,6 +107,7 @@ namespace OpenMD {
                                 RealType A, RealType Ci, RealType Cj);
     
     RealType fastPower(RealType x, int y);
+/*
     RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
                              RealType alpha, RealType kappa);
     RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
@@ -118,6 +119,17 @@ namespace OpenMD {
     
     RealType ZhouRho(RealType r, RealType re, RealType fe,
                      RealType beta, RealType lambda);
+*/ 
+   RealType PhiCoreCore(RealType r, RealType re, RealType A,
+                             RealType alpha);
+    RealType PhiCoreValence(RealType r, RealType re, RealType B,
+                                RealType beta);
+    
+    RealType Phi(RealType r, RealType re, RealType A, RealType B,
+                     RealType alpha, RealType beta);
+    
+    RealType Rho(RealType r, RealType re, RealType fe,
+                     RealType beta);
     RealType gFunc(RealType q, RealType nV, RealType nM);
     RealType gPrime(RealType q, RealType nV, RealType nM);
     RealType Zhou2001Functional(RealType rho, RealType rhoe,
