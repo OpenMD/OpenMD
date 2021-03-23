@@ -50,7 +50,7 @@
 namespace OpenMD {
   
   OptimizationFactory::~OptimizationFactory() {
-    MemoryUtils::deletePointers(creatorMap_);
+    Utils::deletePointers(creatorMap_);
   }
 
   bool OptimizationFactory::registerOptimization(OptimizationCreator* creator) {

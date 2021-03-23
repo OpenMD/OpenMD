@@ -63,7 +63,7 @@ namespace OpenMD {
   Stats::~Stats() {
     for (auto& data : data_) {
       if ( !data.accumulatorArray2d.empty() )
-        MemoryUtils::deletePointers(data.accumulatorArray2d);
+        Utils::deletePointers(data.accumulatorArray2d);
       else
         delete data.accumulator;
     }

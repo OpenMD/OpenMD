@@ -77,9 +77,9 @@ namespace OpenMD {
     // Here we need to delete the accumulators...
     for (auto& data : data_) {
       if ( !data->accumulatorArray2d.empty() )
-        MemoryUtils::deletePointers(data->accumulatorArray2d);
+        Utils::deletePointers(data->accumulatorArray2d);
       else
-        MemoryUtils::deletePointers(data->accumulator);
+        Utils::deletePointers(data->accumulator);
     }
 
     // ...and the output data
@@ -194,7 +194,7 @@ namespace OpenMD {
     binWidth_ = 1.0;
 
     Globals* simParams = info->getSimParams();
-    RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
+    RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
     bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
 
     if (hasCoordinateOrigin) {

@@ -164,7 +164,7 @@ namespace OpenMD {
   }
   
   SimInfo::~SimInfo() {
-    MemoryUtils::deletePointers(molecules_);
+    Utils::deletePointers(molecules_);
     
     delete sman_;
     delete simParams_;

@@ -804,7 +804,7 @@ namespace OpenMD {
 
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
-        if (simParams->getRNEMDParameters()->haveCurrentDensity()) {
+        if (simParams->getRNEMDParameters()->requiresElectricField()) {
             storageLayout |= DataStorage::dslElectricField;          
         }
       }

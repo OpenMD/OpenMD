@@ -66,8 +66,8 @@ namespace OpenMD {
    
     simParams = info->getSimParams();
 
-    // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
-    veloMunge = MemoryUtils::make_unique<Velocitizer>(info);
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    veloMunge = Utils::make_unique<Velocitizer>(info);
     
     // Create Hull, Convex Hull for now, other options later.
     

@@ -89,6 +89,7 @@ namespace OpenMD {
     DeclareParameter(UseLongRangeCorrections, bool);
     DeclareParameter(TauThermostat, RealType);
     DeclareParameter(TauBarostat, RealType);
+    DeclareParameter(LangevinPistonDrag, RealType);
     DeclareParameter(ZconsTime, RealType);
     DeclareParameter(ZconsTol, RealType);
     DeclareParameter(ZconsForcePolicy, std::string);
@@ -181,8 +182,8 @@ namespace OpenMD {
     bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
     FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
 
-    bool addRNEMDParameters(RNEMDParameters* rnemdPars);
-    RNEMDParameters* getRNEMDParameters() {return rnemdPars_;}
+    bool addRNEMDParameters(RNEMD::RNEMDParameters* rnemdPars);
+    RNEMD::RNEMDParameters* getRNEMDParameters() {return rnemdPars_;}
 
     bool addMinimizerParameters(MinimizerParameters* miniPars);
     MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
@@ -196,7 +197,7 @@ namespace OpenMD {
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;
-    RNEMDParameters* rnemdPars_;
+    RNEMD::RNEMDParameters* rnemdPars_;
     MinimizerParameters* minimizerPars_;
 };
 }

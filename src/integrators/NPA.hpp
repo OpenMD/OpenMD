@@ -86,7 +86,8 @@ namespace OpenMD {
 
     virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
     virtual void getVelScaleB(Vector3d& sc, int index );
-    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,  int index, Vector3d& sc);
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,
+			     int index, Vector3d& sc);
 
     virtual void calcVelScale();
         

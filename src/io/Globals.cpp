@@ -57,7 +57,7 @@ namespace OpenMD {
   Globals::Globals() {
 
     flucQpars_ = new FluctuatingChargeParameters();
-    rnemdPars_ = new RNEMDParameters();
+    rnemdPars_ = new RNEMD::RNEMDParameters();
     minimizerPars_ = new MinimizerParameters();
 
     DefineParameter(ForceField, "forceField");
@@ -77,6 +77,7 @@ namespace OpenMD {
     DefineOptionalParameter(TargetPressure, "targetPressure");
     DefineOptionalParameter(TauThermostat, "tauThermostat");
     DefineOptionalParameter(TauBarostat, "tauBarostat");
+    DefineOptionalParameter(LangevinPistonDrag, "langevinPistonDrag");
     DefineOptionalParameter(ZconsTime, "zconsTime");
     DefineOptionalParameter(ZconsTol, "zconsTol");
     DefineOptionalParameter(ZconsForcePolicy, "zconsForcePolicy");
@@ -212,11 +213,11 @@ namespace OpenMD {
   }
 
   Globals::~Globals() {
-    MemoryUtils::deletePointers(moleculeStamps_);
+    Utils::deletePointers(moleculeStamps_);
     
-    MemoryUtils::deletePointers(components_);
-    MemoryUtils::deletePointers(zconstraints_);
-    MemoryUtils::deletePointers(restraints_);
+    Utils::deletePointers(components_);
+    Utils::deletePointers(zconstraints_);
+    Utils::deletePointers(restraints_);
     
     delete flucQpars_;
     delete rnemdPars_;
@@ -238,7 +239,8 @@ namespace OpenMD {
                    isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") ||
                    isEqualIgnoreCase("NGT") ||
                    isEqualIgnoreCase("LANGEVINHULL") ||
-                   isEqualIgnoreCase("LHULL") || isEqualIgnoreCase("SMIPD"));
+                   isEqualIgnoreCase("LHULL") || isEqualIgnoreCase("SMIPD") ||
+		   isEqualIgnoreCase("LANGEVINPISTON"));
     CheckParameter(Dt, isPositive());
     CheckParameter(RunTime, isPositive());
     CheckParameter(FinalConfig, isNotEmpty());
@@ -328,7 +330,7 @@ namespace OpenMD {
     return true;
   }
 
-  bool Globals::addRNEMDParameters(RNEMDParameters* rnemdPars) {
+  bool Globals::addRNEMDParameters(RNEMD::RNEMDParameters* rnemdPars) {
     if (rnemdPars_ != NULL)
       delete rnemdPars_;
 

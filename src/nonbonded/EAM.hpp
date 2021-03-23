@@ -71,6 +71,9 @@ namespace OpenMD {
 
   struct EAMInteractionData {
     CubicSplinePtr phi;
+    CubicSplinePtr phiCC;
+    RealType Ci = 1.0;
+    RealType Cj = 1.0;
     RealType rcut;
     bool explicitlySet;
   };
@@ -98,7 +101,11 @@ namespace OpenMD {
                                 RealType re, RealType alpha, RealType beta,
                                 RealType A, RealType B, RealType kappa,
                                 RealType lambda);
-
+    
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
+                                RealType re, RealType alpha,
+                                RealType A, RealType Ci, RealType Cj);
+    
     RealType fastPower(RealType x, int y);
     RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
                              RealType alpha, RealType kappa);

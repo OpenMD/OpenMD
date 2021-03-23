@@ -55,7 +55,7 @@ namespace OpenMD {
   HydrodynamicsModelFactory* HydrodynamicsModelFactory::instance_ = NULL;
 
   HydrodynamicsModelFactory::~HydrodynamicsModelFactory() {
-    MemoryUtils::deletePointers(creatorMap_);
+    Utils::deletePointers(creatorMap_);
   }
 
   bool HydrodynamicsModelFactory::registerHydrodynamicsModel(HydrodynamicsModelCreator* creator) {

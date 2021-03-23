@@ -144,7 +144,7 @@ namespace OpenMD {
     std::istringstream iss(str);        
     bool ret = true;
     if (!(iss >> result)) {
-        ret = false;
+      ret = false;
     }
     return ret;
   }
@@ -167,22 +167,22 @@ namespace OpenMD {
   std::string getSuffix(const std::string& str);
   
 
-template<class ContainerType>
-std::string containerToString(const ContainerType& cont) {
+  template<class ContainerType>
+  std::string containerToString(const ContainerType& cont) {
     std::ostringstream oss;
     oss << "(";
     typename ContainerType::const_iterator i = cont.begin();
     if (i != cont.end()) {
-        oss << *i;
-        ++i;
+      oss << *i;
+      ++i;
     }
     for (; i != cont.end();++i) {
-        oss << ", ";
-        oss << *i;
+      oss << ", ";
+      oss << *i;
     }
     oss << ")";
     return oss.str();
-}  
+  }  
   unsigned long long memparse (char *ptr,  char **retptr); 
 }  
 #endif

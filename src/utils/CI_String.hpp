@@ -43,37 +43,67 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
+#ifndef OPENMD_UTILS_CI_STRING_HPP
+#define OPENMD_UTILS_CI_STRING_HPP
 
+#include <cctype>
+#include <cstddef>
+#include <iostream>
 #include <string>
-#include <vector>
-
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/ForceManager.hpp"
-#include "brains/SimInfo.hpp"
-#include "brains/Thermo.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "utils/StaticAccumulator.hpp"
 
 namespace OpenMD {
+  namespace Utils {
 
-  class StressCorrFunc : public SystemACF<Mat3x3d> {
-  public:
-    StressCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2);   
-    
-  private:
-    virtual void computeProperty1(int frame);
-    virtual Mat3x3d calcCorrVal(int frame1, int frame2);
+    struct ci_char_traits : public std::char_traits<char> {
 
-    std::vector<Mat3x3d> action_;
-    std::vector<RealType> time_;
-    
-    ForceManager* forceMan_;
-    Thermo* thermo_;
-    Utils::RealAccumulator pressure_ {};
-  };
+      static int compare(const char* s1_, const char* s2_, std::size_t count_) noexcept {
+
+        while (count_-- != 0) {
+          if (std::toupper(*s1_) < std::toupper(*s2_))
+            return -1;
+
+          if (std::toupper(*s1_) > std::toupper(*s2_))
+            return 1;
+
+          ++s1_;
+          ++s2_;
+        }
+
+        return 0;
+      }
+
+      static const char* find(const char* p_, std::size_t count_, const char& ch_) noexcept {
+
+        const auto CH {std::toupper(ch_)};
+
+        while (count_-- != 0) {
+          if (std::toupper(*p_) == CH)
+            return p_;
+
+          ++p_;
+        }
+
+        return nullptr;
+      }
+
+      static bool eq(char a, char b) noexcept { return std::toupper(a) == std::toupper(b); }
+      static bool lt(char a, char b) noexcept { return std::toupper(a) < std::toupper(b); }
+    };
+
+    template<class OutputTraits, class InputTraits>
+    inline std::basic_string<char, OutputTraits> traits_cast(const std::basic_string<char, InputTraits>& input) noexcept {
+      std::basic_string<char, OutputTraits> ouput {input.data(), input.size()};
+      return ouput;
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
+      os << str.c_str();
+      return os;
+    }
+
+    // Type alias for case-insensitive strings
+    using ci_string = std::basic_string<char, ci_char_traits>;
+  }
 }
 
 #endif

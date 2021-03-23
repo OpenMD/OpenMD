@@ -16,7 +16,7 @@
  *
  * This software is provided "AS IS," without a warranty of any
  * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
+ * warranties, including any implied warranty of merhantability,
  * fitness for a particular purpose or non-infringement, are hereby
  * excluded.  The University of Notre Dame and its licensors shall not
  * be liable for any damages suffered by licensee as a result of
@@ -46,14 +46,37 @@
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "integrators/IntegratorCreator.hpp"
-#include "integrators/NPA.hpp"
+#include "integrators/LangevinPiston.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
+
+  LangevinPiston::LangevinPiston(SimInfo* info) : NPT(info) {
+
+    // NkBT has units of amu Ang^2 fs^-2
+    NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
+
+    // W_ has units of amu Ang^2
+    W_ = 3.0 * NkBT * tb2;
+
+    // gamma_ has units of fs^-1
+    if (!simParams->haveLangevinPistonDrag()) {
+      sprintf(painCave.errMsg,
+	      "To use the LangevinPiston integrator, you must set langevinPistonDrag (fs^-1).\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      gamma_ = simParams->getLangevinPistonDrag();
+    }
+
+    variance_ = 2.0 * W_ * gamma_ * Constants::kB * targetTemp / dt;
+    genRandomForce(randomForce_, variance_);
+  }
   
-  void NPA::moveA() {
+  void LangevinPiston::moveA() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -68,12 +91,12 @@ namespace OpenMD {
 
     loadEta();
     
-    instaTemp =thermo.getTemperature();
+    instaTemp = thermo.getTemperature();
     press = thermo.getPressureTensor();
     instaPress = Constants::pressureConvert* (press(0, 0) + 
-                                                      press(1, 1) + 
-                                                      press(2, 2)) / 3.0;
-    instaVol =thermo.getVolume();
+					      press(1, 1) + 
+					      press(2, 2)) / 3.0;
+    instaVol = thermo.getVolume();
 
     Vector3d  COM = thermo.getCom();
 
@@ -94,7 +117,7 @@ namespace OpenMD {
         
 	getVelScaleA(sc, vel);
         
-	// velocity half step  (use chi from previous step here):
+	// velocity half step
         
 	vel += dt2*Constants::energyConvert/mass* frc - dt2*sc;
 	sd->setVel(vel);
@@ -129,7 +152,8 @@ namespace OpenMD {
       for (sd = mol->beginIntegrableObject(j); sd != NULL;
 	   sd = mol->nextIntegrableObject(j)) {
 
-	oldPos[index++] = sd->getPos();
+	oldPos[index++] = sd->getPos();            
+
       }
     }
     
@@ -165,7 +189,7 @@ namespace OpenMD {
     saveEta();
   }
 
-  void NPA::moveB(void) {
+  void LangevinPiston::moveB(void) {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -198,22 +222,22 @@ namespace OpenMD {
     }
     
     instaVol = thermo.getVolume();
+
     for(int k = 0; k < maxIterNum_; k++) {
-      
       instaTemp = thermo.getTemperature();
       instaPress = thermo.getPressure();
-      
+    
       //evolve eta
       this->evolveEtaB();
       this->calcVelScale();
-      
+
       index = 0;
       for (mol = info_->beginMolecule(i); mol != NULL; 
 	   mol = info_->nextMolecule(i)) {
-      
+	
 	for (sd = mol->beginIntegrableObject(j); sd != NULL;
 	     sd = mol->nextIntegrableObject(j)) {            
-        
+	  
 	  frc = sd->getFrc();
 	  mass = sd->getMass();
 	  
@@ -241,7 +265,6 @@ namespace OpenMD {
       }
       
       rattle_->constraintB();
-
       if (this->etaConverged()) break;
     }
       
@@ -249,113 +272,91 @@ namespace OpenMD {
     saveEta();
   }
 
-  void NPA::evolveEtaA() {
+  void LangevinPiston::evolveEtaA() {
 
-    eta(2,2) += dt2 * instaVol * (press(2, 2) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
-    oldEta = eta;  
+    eta += dt2 * ( 3.0 * instaVol * (instaPress - targetPressure) /
+		   (Constants::pressureConvert * W_)
+		   - gamma_ * eta + randomForce_ / W_);    
+    oldEta = eta;
   }
 
-  void NPA::evolveEtaB() {
+  void LangevinPiston::evolveEtaB() {
 
     prevEta = eta;
-    eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
-	    (press(2, 2) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
+
+    genRandomForce(randomForce_, variance_);
+
+    eta = oldEta + dt2 * ( 3.0 * instaVol * (instaPress - targetPressure) /
+			   (Constants::pressureConvert * W_)
+			   - gamma_ * eta + randomForce_ / W_);    
   }
 
-  void NPA::calcVelScale(){
-
-    for (int i = 0; i < 3; i++ ) {
-      for (int j = 0; j < 3; j++ ) {
-	vScale(i, j) = eta(i, j);
-      }
-    }
+  void LangevinPiston::calcVelScale(){
+    vScale = eta;
   }
 
-  void NPA::getVelScaleA(Vector3d& sc, const Vector3d& vel){
+  void LangevinPiston::getVelScaleA(Vector3d& sc, const Vector3d& vel){
     sc = vScale * vel;
   }
 
-  void NPA::getVelScaleB(Vector3d& sc, int index ) {
+  void LangevinPiston::getVelScaleB(Vector3d& sc, int index ) {
     sc = vScale * oldVel[index];
   }
 
-  void NPA::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, 
-                        Vector3d& sc) {
+  void LangevinPiston::getPosScale(const Vector3d& pos, const Vector3d& COM,
+				   int index, Vector3d& sc) {
 
     Vector3d rj = (oldPos[index] + pos)/(RealType)2.0 -COM;
     sc = eta * rj;
   }
 
-  void NPA::scaleSimBox(){
-    Mat3x3d scaleMat;
+  void LangevinPiston::scaleSimBox(){
+    RealType scaleFactor;
+
+    // This is from solving the first order equation that defines eta
     
-    for(int i=0; i<3; i++){
-      for(int j=0; j<3; j++){
-        scaleMat(i, j) = 0.0;
-        if(i==j) {
-          scaleMat(i, j) = 1.0;
-        }
-      }
+    scaleFactor = exp(dt*eta);
+
+    if ((scaleFactor > 1.1) || (scaleFactor < 0.9)) {
+      sprintf( painCave.errMsg,
+               "LangevinPiston error: Attempting a Box scaling of more than 10 percent\n"
+               " check your tauBarostat, as it is probably too small!\n"
+               " eta = %lf, scaleFactor = %lf\n", eta, scaleFactor
+               );
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      Mat3x3d hmat = snap->getHmat();
+      hmat *= scaleFactor;
+      snap->setHmat(hmat);
     }
-    
-    scaleMat(2, 2) = exp(dt*eta(2, 2));
-    Mat3x3d hmat = snap->getHmat();
-    hmat = hmat *scaleMat;
-    snap->setHmat(hmat);
   }
 
-  bool NPA::etaConverged() {
-    int i;
-    RealType diffEta, sumEta;
-
-    sumEta = 0;
-    for(i = 0; i < 3; i++) {
-      sumEta += pow(prevEta(i, i) - eta(i, i), 2);
-    }
-    
-    diffEta = sqrt( sumEta / 3.0 );
-
-    return ( diffEta <= etaTolerance );
+  bool LangevinPiston::etaConverged() {
+    return ( fabs(prevEta - eta) <= etaTolerance );
   }
 
-  RealType NPA::calcConservedQuantity(){
-    
-    loadEta();
-    
-    // We need NkBT a lot, so just set it here: This is the RAW number
-    // of integrableObjects, so no subtraction or addition of constraints or
-    // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*Constants::kB *targetTemp;
-    
-    RealType conservedQuantity;
-    RealType totalEnergy;
-    RealType barostat_kinetic;
-    RealType barostat_potential;
-    RealType trEta;
-
-    totalEnergy = thermo.getTotalEnergy();
-
-    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
-    trEta = tmp.trace();
-  
-    barostat_kinetic = NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
-
-    barostat_potential = (targetPressure * thermo.getVolume() /
-			  Constants::pressureConvert ) /
-      Constants::energyConvert;
-
-    conservedQuantity = totalEnergy + barostat_kinetic + barostat_potential;
-
-    return conservedQuantity;
-
+  RealType LangevinPiston::calcConservedQuantity(){
+    return 0.0;
   }
 
-  void NPA::loadEta() {
-    eta= snap->getBarostat();
+  void LangevinPiston::loadEta() {
+    Mat3x3d etaMat = snap->getBarostat();
+    eta = etaMat(0,0);
   }
 
-  void NPA::saveEta() {
-    snap->setBarostat(eta);
+  void LangevinPiston::saveEta() {
+    Mat3x3d etaMat(0.0);
+    etaMat(0, 0) = eta;
+    etaMat(1, 1) = eta;
+    etaMat(2, 2) = eta;
+    snap->setBarostat(etaMat);
   }
+
+  void LangevinPiston::genRandomForce(RealType& randomForce, RealType variance){
+    randomForce = randNumGen_.randNorm(0, variance);
+    return;
+  }
+				      
 }
 

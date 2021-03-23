@@ -65,7 +65,8 @@ namespace OpenMD {
 
   enum EAMiType {
     eamitTabulated,
-    eamitZhou
+    eamitZhou,
+    eamitOxides
   };
 
   class EAMInteractionType : public NonBondedInteractionType {
@@ -88,6 +89,18 @@ namespace OpenMD {
       lambda_ = lambda;
     }
 
+    EAMInteractionType(RealType re, RealType alpha,
+                       RealType A, RealType Ci, RealType Cj) {
+
+      interactionType_ = eamitOxides;
+      setEAMOxides();
+      re_ = re;
+      alpha_ = alpha;
+      A_ = A;
+      Ci_ = Ci;
+      Cj_ = Cj;
+    }
+
     int getNr() { return nr_; }
     RealType getDr() { return dr_; }
     RealType getRcut() { return rcut_; }
@@ -100,6 +113,8 @@ namespace OpenMD {
     RealType getKappa() { return kappa_; }
     RealType getLambda() { return lambda_; }
     EAMiType getInteractionType() { return interactionType_; }
+    RealType getCi() { return Ci_; }
+    RealType getCj() { return Cj_; }
 
   private:
     // This first set is for parameters read from DYNAMO 86 setfl files:
@@ -117,6 +132,9 @@ namespace OpenMD {
     RealType B_;
     RealType kappa_;
     RealType lambda_;
+    // Extra parameters to support oxide potentials:
+    RealType Ci_;
+    RealType Cj_;
     EAMiType interactionType_;
   };
 }

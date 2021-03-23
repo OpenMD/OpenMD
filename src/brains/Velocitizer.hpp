@@ -104,8 +104,6 @@ namespace OpenMD {
     Thermo thermo_;
     RandNumGen* randNumGen_;
   };
-
-  using VelocitizerPtr = std::unique_ptr<Velocitizer>;
 }
 
 #endif // BRAINS_VELOCITIZER_HPP

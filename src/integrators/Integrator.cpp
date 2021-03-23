@@ -53,15 +53,17 @@
 #include "flucq/FluctuatingChargeLangevin.hpp"
 #include "flucq/FluctuatingChargeNVE.hpp"
 #include "flucq/FluctuatingChargeNVT.hpp"
+#include "rnemd/MethodFactory.hpp"
+#include "rnemd/RNEMD.hpp"
 #include "utils/simError.h"
 #include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
+
   Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL), rotAlgo_(NULL), flucQ_(NULL), 
-      rattle_(NULL), velocitizer_(nullptr), rnemd_(NULL), 
-      needPotential(false), needVirial(false), 
-      needReset(false),  needVelocityScaling(false), 
+      rattle_(NULL), velocitizer_(nullptr), needPotential(false), 
+      needVirial(false), needReset(false), needVelocityScaling(false), 
       useRNEMD(false), dumpWriter(NULL), statWriter(NULL), thermo(info_),
       snap(info_->getSnapshotManager()->getCurrentSnapshot()) {
     
@@ -139,21 +141,24 @@ namespace OpenMD {
     
     // Create a default a velocitizer: If the subclass wants to use 
     // a different velocitizer, use setVelocitizer
-    // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
-    velocitizer_ = MemoryUtils::make_unique<Velocitizer>(info);
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    velocitizer_ = Utils::make_unique<Velocitizer>(info);
     
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
-      if (simParams->getRNEMDParameters()->getUseRNEMD()) {
-        // Create a default a RNEMD.
-        rnemd_ = new RNEMD(info);
-        useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
+      useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
+
+      if (useRNEMD) {
+        RNEMD::MethodFactory rnemdMethod {simParams->getRNEMDParameters()->getMethod()};
+        rnemd_ = rnemdMethod.create(info);
+
         if (simParams->getRNEMDParameters()->haveExchangeTime()) {
           RNEMD_exchangeTime = simParams->getRNEMDParameters()->getExchangeTime();
-	  // check to make sure exchange time is a multiple of dt;
-	  RealType newET = ceil(RNEMD_exchangeTime / dt) * dt;
-	  if (fabs( newET - RNEMD_exchangeTime ) > 1e-6) {
-	    RNEMD_exchangeTime = newET;
-	  }
+	        
+          // check to make sure exchange time is a multiple of dt;
+	        RealType newET = ceil(RNEMD_exchangeTime / dt) * dt;
+	        if (fabs( newET - RNEMD_exchangeTime ) > 1e-6) {
+	          RNEMD_exchangeTime = newET;
+	        }
         } 
       }
     }
@@ -183,7 +188,6 @@ namespace OpenMD {
   
   Integrator::~Integrator(){
     delete forceMan_;
-    delete rnemd_;
     delete flucQ_;
     delete rotAlgo_;
     delete rattle_;    
@@ -209,11 +213,12 @@ namespace OpenMD {
     }
   }
 
-  void Integrator::setVelocitizer(VelocitizerPtr velocitizer) {
+  void Integrator::setVelocitizer(std::unique_ptr<Velocitizer> velocitizer) {
     velocitizer_ = std::move(velocitizer);
   }
 
   void Integrator::setFluctuatingChargePropagator(FluctuatingChargePropagator* prop) {
+    
     if (prop != flucQ_ && flucQ_ != NULL){            
       delete flucQ_;
     }            
@@ -224,6 +229,7 @@ namespace OpenMD {
   }
 
   void Integrator::setRotationAlgorithm(RotationAlgorithm* algo) {
+    
     if (algo != rotAlgo_ && rotAlgo_ != NULL){            
       delete rotAlgo_;
     }
@@ -231,11 +237,8 @@ namespace OpenMD {
     rotAlgo_ = algo;
   }
 
-  void Integrator::setRNEMD(RNEMD* rnemd) {
-    if (rnemd_ != rnemd && rnemd_  != NULL) {
-      delete rnemd_;
-    }
-    rnemd_ = rnemd;
+  void Integrator::setRNEMD(std::unique_ptr<RNEMD::RNEMD> rnemd) {
+    rnemd_ = std::move(rnemd);
   }
 
   void Integrator::integrate() {
@@ -249,14 +252,13 @@ namespace OpenMD {
     }
     
     finalize();
-    
   }
 
   void Integrator::saveConservedQuantity() {
     snap->setConservedQuantity( calcConservedQuantity() );
   }
   
-  void Integrator::initialize(){
+  void Integrator::initialize() {
     
     forceMan_->initialize();
 
@@ -286,14 +288,14 @@ namespace OpenMD {
     statWriter = createStatWriter(); 
     dumpWriter->writeDumpAndEor();
 
-    // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
-    progressBar = MemoryUtils::make_unique<ProgressBar>();
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    progressBar = Utils::make_unique<ProgressBar>();
 
     //save statistics, before writeStat,  we must save statistics
     saveConservedQuantity();
     stats->collectStats();
 
-    if (simParams->getRNEMDParameters()->getUseRNEMD())
+    if (useRNEMD)
       rnemd_->getStarted();
 
     statWriter->writeStat();
@@ -304,7 +306,7 @@ namespace OpenMD {
     if (needReset) {
       currReset = resetTime + snap->getTime();
     }
-    if (simParams->getRNEMDParameters()->getUseRNEMD()){
+    if (useRNEMD){
       currRNEMD = RNEMD_exchangeTime + snap->getTime();
     }
     needPotential = false;
@@ -363,7 +365,7 @@ namespace OpenMD {
     if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
       stats->collectStats();
 
-      if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+      if (useRNEMD) {
 	rnemd_->writeOutputFile();
       }
 
@@ -394,19 +396,13 @@ namespace OpenMD {
 
   void Integrator::finalize() {
     dumpWriter->writeEor();
-    if (simParams->getRNEMDParameters()->getUseRNEMD()) {
+    if (useRNEMD) {
       rnemd_->writeOutputFile();
     }
     progressBar->setStatus(runTime, runTime);
     progressBar->update();
 
     statWriter->writeStatReport();
- 
-    // delete dumpWriter;
-    // delete statWriter;
-  
-    // dumpWriter = NULL;
-    // statWriter = NULL;
   }
 
   DumpWriter* Integrator::createDumpWriter() {

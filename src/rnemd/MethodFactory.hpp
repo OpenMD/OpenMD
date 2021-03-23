@@ -43,37 +43,43 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
+#ifndef RNEMDMETHODS_METHODFACTORY_HPP
+#define RNEMDMETHODS_METHODFACTORY_HPP
 
+#include <memory>
 #include <string>
-#include <vector>
 
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
-#include "brains/Thermo.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "utils/StaticAccumulator.hpp"
+#include "rnemd/RNEMD.hpp"
+#include "rnemd/NIVS.hpp"
+#include "rnemd/Swap.hpp"
+#include "rnemd/VSS.hpp"
+#include "utils/CI_String.hpp"
+#include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
+  namespace RNEMD {
 
-  class StressCorrFunc : public SystemACF<Mat3x3d> {
-  public:
-    StressCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2);   
-    
-  private:
-    virtual void computeProperty1(int frame);
-    virtual Mat3x3d calcCorrVal(int frame1, int frame2);
+    class MethodFactory {
+    public:
+      explicit MethodFactory(const std::string& methodStr) : methodStr_ {Utils::traits_cast<Utils::ci_char_traits>(methodStr)} {}
 
-    std::vector<Mat3x3d> action_;
-    std::vector<RealType> time_;
-    
-    ForceManager* forceMan_;
-    Thermo* thermo_;
-    Utils::RealAccumulator pressure_ {};
-  };
+      std::unique_ptr<RNEMD> create(SimInfo* info) {
+
+        if (methodStr_ == "Swap")
+          return Utils::make_unique<SwapMethod>(info);
+
+        else if (methodStr_ == "NIVS")
+          return Utils::make_unique<NIVSMethod>(info);
+
+        else
+          return Utils::make_unique<VSSMethod>(info);
+      }
+
+    private:
+      const Utils::ci_string methodStr_;
+    };
+  }
 }
 
-#endif
+#endif // RNEMDMETHODS_METHODFACTORY_HPP

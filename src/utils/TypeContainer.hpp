@@ -81,7 +81,7 @@ namespace OpenMD {
     TypeContainer() : index_(0) {}
             
     ~TypeContainer() {
-      MemoryUtils::deletePointers(data_);
+      Utils::deletePointers(data_);
     }
             
     bool add(KeyType& keys, ElemPtr elem) {

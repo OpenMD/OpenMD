@@ -114,8 +114,8 @@ int main(int argc, char *argv []) {
   // Important utility classes for computing system properties:
   Thermo thermo(info);
 
-  // Remove in favor of std::MemoryUtils::make_unique<> when we switch to C++14 and above
-  VelocitizerPtr veloSet {MemoryUtils::make_unique<Velocitizer>(info)};
+  // Remove in favor of std::make_unique<> when we switch to C++14 and above
+  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
   
   ForceManager* forceMan = new ForceManager(info);
 

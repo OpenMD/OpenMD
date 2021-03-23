@@ -43,37 +43,75 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_STRESSCORRFUNC_HPP
+#ifndef INTEGRATORS_LAGNEVINPISTON_HPP
+#define INTEGRATORS_LAGNEVINPISTON_HPP
 
-#include <string>
-#include <vector>
-
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/ForceManager.hpp"
-#include "brains/SimInfo.hpp"
-#include "brains/Thermo.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "utils/StaticAccumulator.hpp"
+#include "integrators/NPT.hpp"
+#include "math/SeqRandNumGen.hpp"
 
 namespace OpenMD {
 
-  class StressCorrFunc : public SystemACF<Mat3x3d> {
+  /**
+   * @class LangevinPiston
+   * Constant pressure and temperature integrator  
+   *
+   * The Langevin Piston Nosé-Hoover method in OpenMD combines the
+   * Nosé-Hoover constant pressure method as described in
+   * G.J. Martyna, D.J. Tobias and M.L. Klein, "Constant pressure
+   * molecular dynamics algorithms", J. Chem. Phys. 101, 4177 (1994);
+   * https://doi.org/10.1063/1.467468 , with piston fluctuation
+   * control implemented using Langevin dynamics as in S.E. Feller,
+   * Y. Zhang, R.W. Pastor and B.R. Brooks, "Constant pressure
+   * molecular dynamics simulation: The Langevin piston method",
+   * J. Chem. Phys. 103, 4613 (1995); https://doi.org/10.1063/1.47064
+   */
+  
+  class LangevinPiston : public NPT{
   public:
-    StressCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2);   
-    
+    LangevinPiston(SimInfo* info);
+
   private:
-    virtual void computeProperty1(int frame);
-    virtual Mat3x3d calcCorrVal(int frame1, int frame2);
 
-    std::vector<Mat3x3d> action_;
-    std::vector<RealType> time_;
+    /* We need to implement moveA and moveB separately to leave out
+     * the extended system thermostatting. Temperature control is
+     * supplied in Langevin methods by connecting friction and random
+     * forces via the second fluctuation dissipation theorem.
+     */
+
+    virtual void moveA();
+    virtual void moveB();
+
+    virtual void evolveEtaA();
+    virtual void evolveEtaB();
+
+    virtual bool etaConverged();
+
+    virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
+    virtual void getVelScaleB(Vector3d& sc, int index );
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,
+			     int index, Vector3d& sc);
+
+    virtual void calcVelScale();
+        
+    virtual void scaleSimBox();
+    virtual RealType calcConservedQuantity();
+
+    virtual void loadEta();
+    virtual void saveEta();
+    void genRandomForce(RealType& randomForce, RealType variance);
+
+    RealType eta;
+    RealType oldEta;
+    RealType prevEta;
+    RealType vScale;
     
-    ForceManager* forceMan_;
-    Thermo* thermo_;
-    Utils::RealAccumulator pressure_ {};
-  };
-}
+    SeqRandNumGen randNumGen_;
+    RealType W_;
+    RealType gamma_;
+    RealType variance_;
+    RealType randomForce_;
 
-#endif
+  };
+}//end namespace OpenMD
+
+#endif //INTEGRATORS_LANGEVINPISTON_HPP

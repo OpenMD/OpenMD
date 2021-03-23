@@ -59,6 +59,7 @@
 #include "integrators/NPA.hpp"
 #include "integrators/NgammaT.hpp"
 #include "integrators/LangevinDynamics.hpp"
+#include "integrators/LangevinPiston.hpp"
 #if defined(HAVE_QHULL)
 #include "integrators/LangevinHullDynamics.hpp"
 #endif
@@ -97,6 +98,7 @@ namespace OpenMD {
     IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
     IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
     IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
+    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
 #endif
   }
 

@@ -50,16 +50,15 @@
  * @version 1.0
  */
 
-#ifndef UTILS_MEMORYUTILS_HPP
-#define UTILS_MEMORYUTILS_HPP
+#ifndef OPENMD_UTILS_MEMORYUTILS_HPP
+#define OPENMD_UTILS_MEMORYUTILS_HPP
 
 #include <memory>
 #include <type_traits>
 #include <utility>
 
 namespace OpenMD {
-
-  namespace MemoryUtils {
+  namespace Utils {
 
     // Remove in favor of std::make_unique<> when we switch to C++14
     template<typename T, typename... TArgs,
@@ -124,4 +123,4 @@ namespace OpenMD {
   }
 }
 
-#endif // UTILS_MEMORYUTILS_HPP
+#endif // OPENMD_UTILS_MEMORYUTILS_HPP
