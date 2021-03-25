@@ -139,10 +139,10 @@ namespace OpenMD {
     if (q <= -nM) {
       return  (nM + nV) / nV ;
     }
-    
+
     return ((q-nV)*(q-nV) * (nM + q + nV)) / (nV * nV * (nM + nV));
   }
-  
+
   RealType EAM::gPrime(RealType q, RealType nV, RealType nM) {
 
     if (q >= nV) {
@@ -154,7 +154,7 @@ namespace OpenMD {
 
     return ((q - nV)*(2*nM + 3*q + nV)) / (nV * nV * (nM + nV));
   }
-  
+
   RealType EAM::Zhou2001Functional(RealType rho, RealType rhoe,
                                    std::vector<RealType> Fn,
                                    std::vector<RealType> F,
@@ -262,7 +262,7 @@ namespace OpenMD {
   CubicSplinePtr EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {
     EAMAdapter ea1 = EAMAdapter(atomType1);
     EAMAdapter ea2 = EAMAdapter(atomType2);
-    
+
     CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     RealType rha(0.0), rhb(0.0), pha(0.0), phb(0.0), phab(0.0);
@@ -479,7 +479,7 @@ namespace OpenMD {
     for (nbt = nbiTypes->beginType(j); nbt != NULL;
          nbt = nbiTypes->nextType(j)) {
 
-      if (nbt->isEAMTable() || nbt->isEAMZhou() ) {
+      if (nbt->isEAMTable() || nbt->isEAMZhou() || nbt->isEAMOxides() ) {
 
         keys = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
@@ -516,7 +516,6 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();
         }
-
         if (nbt->isEAMTable()) {
           vector<RealType> phiAB = eamit->getPhi();
           RealType dr = eamit->getDr();
@@ -671,14 +670,14 @@ namespace OpenMD {
     case eamOxygenFuncfl: {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
-      
+
       RealType A = ea.getA();
       RealType B = ea.getB();
       RealType alpha = ea.getAlpha();
       RealType beta = ea.getBeta();
       RealType kappa = ea.getKappa();
       RealType lambda = ea.getLambda();
-      
+
       // RealType latticeConstant = ea.getLatticeConstant();
 
       int Nr = 2000;
@@ -712,7 +711,7 @@ namespace OpenMD {
       eamAtomData.phiCV = std::make_shared<CubicSpline>();
       eamAtomData.phiCV->addPoints(rvals, cvvals);
 
-      
+
       eamAtomData.F = ea.getFSpline();
       break;
     }
@@ -908,7 +907,7 @@ namespace OpenMD {
                                    RealType A, RealType B, RealType kappa,
                                    RealType lambda) {
 
-    CubicSplinePtr cs {std::make_shared<CubicSpline>()};       
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     EAMInteractionData mixer;
     std::vector<RealType> rVals;
@@ -960,7 +959,7 @@ namespace OpenMD {
       EAMtids[atid2] = nEAM_;
       nEAM_++;
     }
-    
+
     MixingMap.resize(nEAM_);
     MixingMap[eamtid1].resize(nEAM_);
     MixingMap[eamtid1][eamtid2] = mixer;
@@ -975,7 +974,7 @@ namespace OpenMD {
                                    RealType re, RealType alpha,
 				   RealType A, RealType Ci, RealType Cj) {
 
-    CubicSplinePtr cs {std::make_shared<CubicSpline>()};       
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     EAMInteractionData mixer;
     std::vector<RealType> rVals;
@@ -994,7 +993,7 @@ namespace OpenMD {
       phiCC = PhiCoreCore(r, re, A, alpha);
       phiVals.push_back( phiCC );
     }
-   
+
     cs->addPoints(rVals, phiVals);
     //this is the repulsive piece in explicit EAM Oxide potential
     // this is phiCC for the explicit EAM oxide potential for convinence, it
@@ -1004,7 +1003,7 @@ namespace OpenMD {
 
     mixer.Ci = Ci;
     mixer.Cj = Cj;
-      
+
     mixer.explicitlySet = true;
 
     int atid1 = atype1->getIdent();
@@ -1038,14 +1037,13 @@ namespace OpenMD {
     MixingMap.resize(nEAM_);
     MixingMap[eamtid1].resize(nEAM_);
     MixingMap[eamtid1][eamtid2] = mixer;
-
     if (eamtid2 != eamtid1) {
       MixingMap[eamtid2].resize(nEAM_);
       MixingMap[eamtid2][eamtid1] = mixer;
     }
     return;
   }
-  
+
   void EAM::calcDensity(InteractionData &idat) {
 
     if (!initialized_) initialize();
@@ -1060,10 +1058,10 @@ namespace OpenMD {
     if ( idat.rij < data1.rcut) {
       s = 1.0;
       if (data1.isFluctuatingCharge) {
-	if (mixMeth_ == eamDream2) 
+	if (mixMeth_ == eamDream2)
 	  s = gFunc(idat.flucQ1, data1.nValence, data1.nMobile);
-	else 
-	  s = (data1.nValence - idat.flucQ1) / (data1.nValence);	
+	else
+	  s = (data1.nValence - idat.flucQ1) / (data1.nValence);
       }
       idat.rho2 += s * data1.rho->getValueAt( idat.rij );
     }
@@ -1071,10 +1069,10 @@ namespace OpenMD {
     if ( idat.rij < data2.rcut) {
       s = 1.0;
       if (data2.isFluctuatingCharge) {
-	if (mixMeth_ == eamDream2) 
+	if (mixMeth_ == eamDream2)
 	  s = gFunc(idat.flucQ2, data2.nValence, data2.nMobile);
 	else
-	  s = (data2.nValence - idat.flucQ2) / (data2.nValence);	
+	  s = (data2.nValence - idat.flucQ2) / (data2.nValence);
       }
       idat.rho1 += s * data2.rho->getValueAt( idat.rij );
     }
@@ -1091,13 +1089,13 @@ namespace OpenMD {
                                       sdat.dfrhodrho );
 
     sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += sdat.frho;
-    
+
     if (sdat.isSelected)
       sdat.selePot[METALLIC_EMBEDDING_FAMILY] += sdat.frho;
-    
+
     if (sdat.doParticlePot)
       sdat.particlePot += sdat.frho;
-   
+
     return;
   }
 
@@ -1147,15 +1145,14 @@ namespace OpenMD {
 
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
     bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
-
     if (hasFlucQ) {
-      
+
       if (data1.isFluctuatingCharge) {
 	Va = data1.nValence;
 	Ma = data1.nMobile;
 	if (mixMeth_ == eamDream2)
 	  si = gFunc(idat.flucQ1, Va, Ma);
-	else 
+	else
 	  si = (Va -  idat.flucQ1) / Va;
       }
       if (data2.isFluctuatingCharge) {
@@ -1166,7 +1163,7 @@ namespace OpenMD {
 	else
 	  sj = (Vb - idat.flucQ2) / Vb;
       }
-      
+
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
 
         if ( idat.rij < rci  && idat.rij < rcij ) {
@@ -1199,11 +1196,11 @@ namespace OpenMD {
 	if (isExplicit) {
     //phi is total potential for EAMTable and EAMZhou but CC interaction for EAMOxide potential
 	  CubicSplinePtr phi = MixingMap[eamtid1][eamtid2].phi;
-	  phi->getValueAndDerivativeAt( idat.rij, phab, dvpdr);	  
+	  phi->getValueAndDerivativeAt( idat.rij, phab, dvpdr);
 	} else {
-	
+
 	  // Core-Core part first - no fluctuating charge, just Johnson mixing:
-	  
+
 	  if ( idat.rij < rci  && idat.rij < rcij ) {
 	    CubicSplinePtr phiACC = data1.phiCC;
 	    phiACC->getValueAndDerivativeAt( idat.rij, pha, dpha);
@@ -1233,15 +1230,15 @@ namespace OpenMD {
         if (data2.isFluctuatingCharge) {
 	  sjp = gPrime(idat.flucQ2, Vb, Mb);
         }
-        
+
         if ( idat.rij < rci  && idat.rij < rcij ) {
           CubicSplinePtr phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( idat.rij, pha, dpha);
-	  
+
           phab += 0.5 * sj * Ci * (rhb / rha) * pha;
           dvpdr += 0.5 * sj * Ci * ((rhb/rha)*dpha +
 				    pha * ((drhb/rha) - (rhb*drha/rha/rha)));
-	  
+
           if (data2.isFluctuatingCharge) {
             idat.dVdFQ2 +=  0.5 * sjp * Ci * (rhb / rha) * pha;
           }
@@ -1299,10 +1296,10 @@ namespace OpenMD {
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      if (mixMeth_ == eamDream2) 
+      if (mixMeth_ == eamDream2)
 	idat.dVdFQ1 += idat.dfrho2 * rha * sip;
       else
-	idat.dVdFQ1 -= idat.dfrho2 * rha / Va;    
+	idat.dVdFQ1 -= idat.dfrho2 * rha / Va;
     }
     if (data2.isFluctuatingCharge) {
       if (mixMeth_ == eamDream2)
