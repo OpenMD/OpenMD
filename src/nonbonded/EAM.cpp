@@ -80,22 +80,17 @@ namespace OpenMD {
     }
   }
 
-  // RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
-  //                               RealType A, RealType alpha, RealType kappa) {
-  //   return
-  //     ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
-  // }
+ //Zhou functional form with switching functions
 
   RealType EAM::ZhouPhiCoreCore(RealType r, RealType re,
                                 RealType A, RealType alpha, RealType kappa) {
-    return
-      ( A*exp (-alpha * (r/re-1.0) ) );
+    return ( A*exp (-alpha * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-kappa, 20));
   }
+
 
   RealType EAM::ZhouPhiCoreValence(RealType r, RealType re,
                                    RealType B, RealType beta, RealType lambda) {
-    return
-      - ( B*exp (-beta * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-lambda, 20));
+    return - ( B*exp (-beta * (r/re-1.0) ) )  /  (1.0 + fastPower(r/re-lambda, 20));
   }
 
   RealType EAM::ZhouPhi(RealType r, RealType re,
@@ -111,6 +106,31 @@ namespace OpenMD {
     return (fe * exp(-beta * (r/re-1.0))) / (1.0 + fastPower(r/re-lambda, 20));
   }
 
+//Zhou functional form without switching functions
+
+  RealType EAM::PhiCoreCore(RealType r, RealType re,
+                                RealType A, RealType alpha) {
+    return ( A*exp (-alpha * (r/re-1.0) ) ) ;
+  }
+
+  RealType EAM::PhiCoreValence(RealType r, RealType re,
+                                   RealType B, RealType beta) {
+    return - ( B*exp (-beta * (r/re-1.0) ) ) ;
+  }
+
+  RealType EAM::Phi(RealType r, RealType re,
+                        RealType A, RealType B,
+                        RealType alpha, RealType beta) {
+    return PhiCoreCore(r,re,A,alpha) +
+           PhiCoreValence(r,re,B,beta);
+  }
+
+
+  RealType EAM::Rho(RealType r, RealType re, RealType fe,
+                        RealType beta) {
+    return (fe * exp(-beta * (r/re-1.0))) ;
+  }
+
   RealType EAM::gFunc(RealType q, RealType nV, RealType nM) {
 
     if (q >= nV) {
@@ -119,10 +139,10 @@ namespace OpenMD {
     if (q <= -nM) {
       return  (nM + nV) / nV ;
     }
-    
+
     return ((q-nV)*(q-nV) * (nM + q + nV)) / (nV * nV * (nM + nV));
   }
-  
+
   RealType EAM::gPrime(RealType q, RealType nV, RealType nM) {
 
     if (q >= nV) {
@@ -134,7 +154,7 @@ namespace OpenMD {
 
     return ((q - nV)*(2*nM + 3*q + nV)) / (nV * nV * (nM + nV));
   }
-  
+
   RealType EAM::Zhou2001Functional(RealType rho, RealType rhoe,
                                    std::vector<RealType> Fn,
                                    std::vector<RealType> F,
@@ -242,7 +262,7 @@ namespace OpenMD {
   CubicSplinePtr EAM::getPhi(AtomType* atomType1, AtomType* atomType2) {
     EAMAdapter ea1 = EAMAdapter(atomType1);
     EAMAdapter ea2 = EAMAdapter(atomType2);
-    
+
     CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     RealType rha(0.0), rhb(0.0), pha(0.0), phb(0.0), phab(0.0);
@@ -385,11 +405,13 @@ namespace OpenMD {
 
         if ( r < data1.rcut ) {
           rha = data1.rho->getValueAt(r);
-          pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
+          //pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
+          pha = Phi(r, re1, A1, B1, alpha1, beta1);
         }
         if ( r < data2.rcut ) {
           rhb = data2.rho->getValueAt(r);
-          phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
+          //phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
+          phb =  Phi(r, re2, A2, B2, alpha2, beta2);
         }
 
         if ( r < data1.rcut )
@@ -457,7 +479,7 @@ namespace OpenMD {
     for (nbt = nbiTypes->beginType(j); nbt != NULL;
          nbt = nbiTypes->nextType(j)) {
 
-      if (nbt->isEAMTable() || nbt->isEAMZhou() ) {
+      if (nbt->isEAMTable() || nbt->isEAMZhou() || nbt->isEAMOxides() ) {
 
         keys = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
@@ -494,7 +516,6 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();
         }
-
         if (nbt->isEAMTable()) {
           vector<RealType> phiAB = eamit->getPhi();
           RealType dr = eamit->getDr();
@@ -568,14 +589,15 @@ namespace OpenMD {
 
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
-      eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      //eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
       int Nrho = 3000;
       RealType rhomax = max(900.0,
                             max(2.0 * rhoe,
-                                ZhouRho(0.0, re, fe, beta, lambda)));
+                                Rho(0.0, re, fe, beta)));
       RealType drho = rhomax/(RealType)(Nrho-1);
       RealType rho;
       RealType phiCC, phiCV;
@@ -591,9 +613,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i)*dr;
         rvals.push_back(r);
-        rhovals.push_back( ZhouRho(r, re,  fe, beta,  lambda) );
-        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
-        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        rhovals.push_back( Rho(r, re,  fe, beta) );
+        phiCC = PhiCoreCore(r, re, A, alpha);
+        phiCV = PhiCoreValence(r, re, B, beta);
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
@@ -648,19 +670,20 @@ namespace OpenMD {
     case eamOxygenFuncfl: {
       RealType re = ea.getRe();
       RealType fe = ea.get_fe();
-      
+
       RealType A = ea.getA();
       RealType B = ea.getB();
       RealType alpha = ea.getAlpha();
       RealType beta = ea.getBeta();
       RealType kappa = ea.getKappa();
       RealType lambda = ea.getLambda();
-      
+
       // RealType latticeConstant = ea.getLatticeConstant();
 
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
-      eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      //eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
+      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
       RealType phiCC, phiCV;
@@ -675,9 +698,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i)*dr;
         rvals.push_back(r);
-        rhovals.push_back( ZhouRho(r, re,  fe, beta,  lambda) );
-        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
-        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        rhovals.push_back( Rho(r, re,  fe, beta) );
+        phiCC = PhiCoreCore(r, re, A, alpha);
+        phiCV = PhiCoreValence(r, re, B, beta);
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
@@ -688,7 +711,7 @@ namespace OpenMD {
       eamAtomData.phiCV = std::make_shared<CubicSpline>();
       eamAtomData.phiCV->addPoints(rvals, cvvals);
 
-      
+
       eamAtomData.F = ea.getFSpline();
       break;
     }
@@ -710,14 +733,15 @@ namespace OpenMD {
 
       int Nr = 2000;
       // eamAtomData.rcut = 6.0;
-      eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + nu );
+      //eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + nu );
 
+      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
       RealType dr = eamAtomData.rcut/(RealType)(Nr-1);
       RealType r;
 
       int Nrho = 3000;
-      RealType rhomax = max(800.0,
-                            ZhouRho(0.0, re, fe, gamma, nu));
+      //RealType rhomax = max(800.0, ZhouRho(0.0, re, fe, gamma, nu));
+      RealType rhomax = max(800.0, Rho(0.0, re, fe, gamma));
       RealType drho = rhomax/(RealType)(Nrho-1);
       RealType rho, phiCC, phiCV;
 
@@ -732,9 +756,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i)*dr;
         rvals.push_back(r);
-        rhovals.push_back( ZhouRho(r, re,  fe, gamma,  nu) );
-        phiCC = ZhouPhiCoreCore(r, re, A, alpha, kappa);
-        phiCV = ZhouPhiCoreValence(r, re, B, beta, lambda);
+        rhovals.push_back( Rho(r, re,  fe, gamma) );
+        phiCC = PhiCoreCore(r, re, A, alpha);
+        phiCV = PhiCoreValence(r, re, B, beta);
         ccvals.push_back( phiCC );
         cvvals.push_back( phiCV );
       }
@@ -883,7 +907,7 @@ namespace OpenMD {
                                    RealType A, RealType B, RealType kappa,
                                    RealType lambda) {
 
-    CubicSplinePtr cs {std::make_shared<CubicSpline>()};       
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     EAMInteractionData mixer;
     std::vector<RealType> rVals;
@@ -894,17 +918,15 @@ namespace OpenMD {
     RealType r;
 
     // default to FCC if we don't specify HCP or BCC:
-    RealType rcut = sqrt(5.0) * re;
-
+    //RealType rcut = sqrt(5.0) * re;
+    RealType rcut = std::min(12.0, std::max(9.0, 4.0 * re));
     RealType dr = rcut/(RealType)(Nr-1);
 
     for (int i = 0; i < Nr; i++) {
       r = RealType(i)*dr;
       rVals.push_back(r);
-      phiVals.push_back( ZhouPhi(r, re, A, B, alpha, beta,
-                                 kappa, lambda) );
+      phiVals.push_back( Phi(r, re, A, B, alpha, beta) );
     }
-
     cs->addPoints(rVals, phiVals);
     mixer.phi = cs;
     mixer.rcut = mixer.phi->getLimits().second;
@@ -941,7 +963,6 @@ namespace OpenMD {
     MixingMap.resize(nEAM_);
     MixingMap[eamtid1].resize(nEAM_);
     MixingMap[eamtid1][eamtid2] = mixer;
-
     if (eamtid2 != eamtid1) {
       MixingMap[eamtid2].resize(nEAM_);
       MixingMap[eamtid2][eamtid1] = mixer;
@@ -953,7 +974,7 @@ namespace OpenMD {
                                    RealType re, RealType alpha,
 				   RealType A, RealType Ci, RealType Cj) {
 
-    CubicSplinePtr cs {std::make_shared<CubicSpline>()};       
+    CubicSplinePtr cs {std::make_shared<CubicSpline>()};
 
     EAMInteractionData mixer;
     std::vector<RealType> rVals;
@@ -963,25 +984,26 @@ namespace OpenMD {
     RealType r;
     RealType phiCC;
 
-    // default to FCC if we don't specify HCP or BCC:
-    RealType rcut = sqrt(5.0) * re;
-
+    RealType rcut = std::min(12.0, std::max(9.0, 4.0 * re)) ;
     RealType dr = rcut/(RealType)(Nr-1);
 
     for (int i = 0; i < Nr; i++) {
       r = RealType(i)*dr;
       rVals.push_back(r);
-      phiCC = ZhouPhiCoreCore(r, re, A, 0.0, 0.0);
+      phiCC = PhiCoreCore(r, re, A, alpha);
       phiVals.push_back( phiCC );
     }
-   
+
     cs->addPoints(rVals, phiVals);
-    mixer.phiCC = cs;
+    //this is the repulsive piece in explicit EAM Oxide potential
+    // this is phiCC for the explicit EAM oxide potential for convinence, it
+    // is represented as phi
+    mixer.phi = cs;
     mixer.rcut = mixer.phi->getLimits().second;
 
     mixer.Ci = Ci;
     mixer.Cj = Cj;
-      
+
     mixer.explicitlySet = true;
 
     int atid1 = atype1->getIdent();
@@ -1015,14 +1037,13 @@ namespace OpenMD {
     MixingMap.resize(nEAM_);
     MixingMap[eamtid1].resize(nEAM_);
     MixingMap[eamtid1][eamtid2] = mixer;
-
     if (eamtid2 != eamtid1) {
       MixingMap[eamtid2].resize(nEAM_);
       MixingMap[eamtid2][eamtid1] = mixer;
     }
     return;
   }
-  
+
   void EAM::calcDensity(InteractionData &idat) {
 
     if (!initialized_) initialize();
@@ -1037,10 +1058,10 @@ namespace OpenMD {
     if ( idat.rij < data1.rcut) {
       s = 1.0;
       if (data1.isFluctuatingCharge) {
-	if (mixMeth_ == eamDream2) 
+	if (mixMeth_ == eamDream2)
 	  s = gFunc(idat.flucQ1, data1.nValence, data1.nMobile);
-	else 
-	  s = (data1.nValence - idat.flucQ1) / (data1.nValence);	
+	else
+	  s = (data1.nValence - idat.flucQ1) / (data1.nValence);
       }
       idat.rho2 += s * data1.rho->getValueAt( idat.rij );
     }
@@ -1048,10 +1069,10 @@ namespace OpenMD {
     if ( idat.rij < data2.rcut) {
       s = 1.0;
       if (data2.isFluctuatingCharge) {
-	if (mixMeth_ == eamDream2) 
+	if (mixMeth_ == eamDream2)
 	  s = gFunc(idat.flucQ2, data2.nValence, data2.nMobile);
 	else
-	  s = (data2.nValence - idat.flucQ2) / (data2.nValence);	
+	  s = (data2.nValence - idat.flucQ2) / (data2.nValence);
       }
       idat.rho1 += s * data2.rho->getValueAt( idat.rij );
     }
@@ -1068,13 +1089,13 @@ namespace OpenMD {
                                       sdat.dfrhodrho );
 
     sdat.selfPot[METALLIC_EMBEDDING_FAMILY] += sdat.frho;
-    
+
     if (sdat.isSelected)
       sdat.selePot[METALLIC_EMBEDDING_FAMILY] += sdat.frho;
-    
+
     if (sdat.doParticlePot)
       sdat.particlePot += sdat.frho;
-   
+
     return;
   }
 
@@ -1124,15 +1145,14 @@ namespace OpenMD {
 
     bool hasFlucQ = data1.isFluctuatingCharge || data2.isFluctuatingCharge;
     bool isExplicit = MixingMap[eamtid1][eamtid2].explicitlySet;
-
     if (hasFlucQ) {
-      
+
       if (data1.isFluctuatingCharge) {
 	Va = data1.nValence;
 	Ma = data1.nMobile;
 	if (mixMeth_ == eamDream2)
 	  si = gFunc(idat.flucQ1, Va, Ma);
-	else 
+	else
 	  si = (Va -  idat.flucQ1) / Va;
       }
       if (data2.isFluctuatingCharge) {
@@ -1143,7 +1163,7 @@ namespace OpenMD {
 	else
 	  sj = (Vb - idat.flucQ2) / Vb;
       }
-      
+
       if (mixMeth_ == eamJohnson || mixMeth_ == eamDream1) {
 
         if ( idat.rij < rci  && idat.rij < rcij ) {
@@ -1174,12 +1194,13 @@ namespace OpenMD {
       } else {
 
 	if (isExplicit) {
-	  CubicSplinePtr phiCC = MixingMap[eamtid1][eamtid2].phiCC;
-	  phiCC->getValueAndDerivativeAt( idat.rij, phab, dvpdr);	  
+    //phi is total potential for EAMTable and EAMZhou but CC interaction for EAMOxide potential
+	  CubicSplinePtr phi = MixingMap[eamtid1][eamtid2].phi;
+	  phi->getValueAndDerivativeAt( idat.rij, phab, dvpdr);
 	} else {
-	
+
 	  // Core-Core part first - no fluctuating charge, just Johnson mixing:
-	  
+
 	  if ( idat.rij < rci  && idat.rij < rcij ) {
 	    CubicSplinePtr phiACC = data1.phiCC;
 	    phiACC->getValueAndDerivativeAt( idat.rij, pha, dpha);
@@ -1197,6 +1218,7 @@ namespace OpenMD {
 	}
 
 	if (isExplicit) {
+    //Ci, Cj are 0 for EAMTable and EAMZhou. So, there is no CV interaction
 	  Ci = MixingMap[eamtid1][eamtid2].Ci;
 	  Cj = MixingMap[eamtid1][eamtid2].Cj;
 	}
@@ -1208,15 +1230,15 @@ namespace OpenMD {
         if (data2.isFluctuatingCharge) {
 	  sjp = gPrime(idat.flucQ2, Vb, Mb);
         }
-        
+
         if ( idat.rij < rci  && idat.rij < rcij ) {
           CubicSplinePtr phiACV = data1.phiCV;
           phiACV->getValueAndDerivativeAt( idat.rij, pha, dpha);
-	  
+
           phab += 0.5 * sj * Ci * (rhb / rha) * pha;
           dvpdr += 0.5 * sj * Ci * ((rhb/rha)*dpha +
 				    pha * ((drhb/rha) - (rhb*drha/rha/rha)));
-	  
+
           if (data2.isFluctuatingCharge) {
             idat.dVdFQ2 +=  0.5 * sjp * Ci * (rhb / rha) * pha;
           }
@@ -1274,10 +1296,10 @@ namespace OpenMD {
     // When densities are fluctuating, the functional depends on the
     // fluctuating densities from other sites:
     if (data1.isFluctuatingCharge) {
-      if (mixMeth_ == eamDream2) 
+      if (mixMeth_ == eamDream2)
 	idat.dVdFQ1 += idat.dfrho2 * rha * sip;
       else
-	idat.dVdFQ1 -= idat.dfrho2 * rha / Va;    
+	idat.dVdFQ1 -= idat.dfrho2 * rha / Va;
     }
     if (data2.isFluctuatingCharge) {
       if (mixMeth_ == eamDream2)

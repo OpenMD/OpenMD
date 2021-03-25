@@ -212,7 +212,7 @@ namespace OpenMD {
 
         for (int i = 0; i < nPairs; ++i) {          
           power = tokenizer.nextTokenAsInt();
-          coefficient = tokenizer.nextTokenAsDouble() * eus_ / pow(oss_ * cus_, power);
+          coefficient =oss_* oss_ * tokenizer.nextTokenAsDouble() * eus_ / pow(oss_ * cus_, power);
 	  
           vself.setCoefficient(power, coefficient);
         }
