@@ -55,11 +55,12 @@ namespace OpenMD {
 
   LangevinPiston::LangevinPiston(SimInfo* info) : NPT(info) {
 
-    // NkBT has units of amu Ang^2 fs^-2
+    // NkBT has units of amu Ang^2 fs^-2 :
     NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
 
     // W_ has units of amu Ang^2
-    W_ = 3.0 * NkBT * tb2;
+    // W_ = 3.0 * NkBT * tb2;
+    W_ = NkBT * tb2;  // our eta scales all three box directions 
 
     // gamma_ has units of fs^-1
     if (!simParams->haveLangevinPistonDrag()) {
@@ -72,7 +73,10 @@ namespace OpenMD {
       gamma_ = simParams->getLangevinPistonDrag();
     }
 
+    // variance units: amu^2 Angs^4 fs^-4
     variance_ = 2.0 * W_ * gamma_ * Constants::kB * targetTemp / dt;
+
+    // randomForce will have units amu Ang^2 fs^-2  (because sqrt(variance)):
     genRandomForce(randomForce_, variance_);
   }
   
@@ -274,7 +278,10 @@ namespace OpenMD {
 
   void LangevinPiston::evolveEtaA() {
 
-    eta += dt2 * ( 3.0 * instaVol * (instaPress - targetPressure) /
+    // volume is Angs^3
+    // pressures are in atm
+    // pressureConvert takes amu*fs^-2*Ang^-1 -> atm
+    eta += dt2 * ( instaVol * (instaPress - targetPressure) /
 		   (Constants::pressureConvert * W_)
 		   - gamma_ * eta + randomForce_ / W_);    
     oldEta = eta;
@@ -286,7 +293,7 @@ namespace OpenMD {
 
     genRandomForce(randomForce_, variance_);
 
-    eta = oldEta + dt2 * ( 3.0 * instaVol * (instaPress - targetPressure) /
+    eta = oldEta + dt2 * ( instaVol * (instaPress - targetPressure) /
 			   (Constants::pressureConvert * W_)
 			   - gamma_ * eta + randomForce_ / W_);    
   }
